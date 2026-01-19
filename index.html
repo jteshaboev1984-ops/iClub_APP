@@ -80,14 +80,18 @@
 
             <div class="grid-2">
               <label class="field">
-                <span class="label">Регион</span>
-                <input id="reg-region" class="input" type="text" placeholder="Например: Tashkent" required />
-              </label>
+               <span class="label">Регион</span>
+                <select id="reg-region" class="input" required>
+                <option value="" selected disabled>Выберите регион…</option>
+               </select>
+            </label>
 
-              <label class="field">
-                <span class="label">Район</span>
-                <input id="reg-district" class="input" type="text" placeholder="Например: Chilonzor" required />
-              </label>
+             <label class="field">
+              <span class="label">Район</span>
+               <select id="reg-district" class="input" required disabled>
+               <option value="" selected disabled>Сначала выберите регион…</option>
+              </select>
+             </label>
             </div>
 
             <!-- School fields: shown/hidden by app.js depending on reg-is-school -->
