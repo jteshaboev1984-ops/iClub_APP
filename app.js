@@ -121,6 +121,27 @@
     localStorage.setItem(LS.profile, JSON.stringify(profile));
   }
 
+   function togglePinnedSubject(profile, subjectKey) {
+  if (!profile) return null;
+  const p = structuredClone(profile);
+  p.subjects = Array.isArray(p.subjects) ? p.subjects : [];
+
+  const idx = p.subjects.findIndex(s => s.key === subjectKey);
+
+  if (idx === -1) {
+    // если предмет не был добавлен — добавляем как study+pinned
+    p.subjects.push({ key: subjectKey, mode: "study", pinned: true });
+    return p;
+  }
+
+  // уже есть — переключаем pinned
+  p.subjects[idx].pinned = !p.subjects[idx].pinned;
+
+  // Если выключили pinned и предмет был чисто учебным и "ничем не нужен" —
+  // в v1 оставляем его (чтобы не терять режим/историю). Удаление сделаем позже, если потребуется.
+  return p;
+}
+
   // ---------------------------
   // Demo subjects (keys match index.html selects)
   // ---------------------------
@@ -595,23 +616,155 @@
   // Courses: All Subjects rendering
   // ---------------------------
   function renderAllSubjects() {
-    const grid = $("#subjects-grid");
-    if (!grid) return;
+  const grid = $("#subjects-grid");
+  if (!grid) return;
 
-    grid.innerHTML = "";
-    SUBJECTS.forEach(s => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "card-btn";
-      btn.dataset.subject = s.key;
-      btn.innerHTML = `
-        <div class="card-title">${s.title}</div>
-        <div class="muted small">${s.type === "main" ? "Main (Cambridge)" : "Additional"}</div>
-      `;
-      btn.addEventListener("click", () => openSubjectHub(s.key));
-      grid.appendChild(btn);
-    });
+  const profile = loadProfile();
+
+  // Если нет профиля — каталогу нечего делать (но это не должно случаться)
+  grid.innerHTML = "";
+  if (!profile) {
+    grid.innerHTML = `<div class="empty muted">Сначала регистрация.</div>`;
+    return;
   }
+
+  const userSubjects = Array.isArray(profile.subjects) ? profile.subjects : [];
+  const competitiveCount = userSubjects.filter(s => s.mode === "competitive").length;
+
+  SUBJECTS.forEach(s => {
+    const us = userSubjects.find(x => x.key === s.key) || null;
+    const isPinned = !!us?.pinned;
+    const mode = us?.mode || "study"; // default display
+    const isComp = mode === "competitive";
+
+    const card = document.createElement("div");
+    card.className = "catalog-card";
+
+    // Top clickable area: open hub (but does NOT change profile)
+    const head = document.createElement("button");
+    head.type = "button";
+    head.className = "catalog-head";
+    head.innerHTML = `
+      <div class="catalog-row">
+        <div>
+          <div class="card-title" style="margin:0">${escapeHTML(s.title)}</div>
+          <div class="muted small">${s.type === "main" ? "Main (Cambridge)" : "Additional"}</div>
+        </div>
+        <div class="catalog-badges">
+          ${isPinned ? `<span class="badge badge-pin">Pinned</span>` : ``}
+          <span class="badge ${isComp ? "badge-comp" : "badge-study"}">${isComp ? "Competitive" : "Study"}</span>
+        </div>
+      </div>
+
+      <div class="muted small catalog-hint">
+        ${us
+          ? (isComp
+              ? `Competitive управляется в Profile Settings (лимит 2).`
+              : `Учебный режим. Можно закрепить или открыть разово.`)
+          : `Не добавлен. Можно закрепить или открыть разово.`}
+      </div>
+    `;
+
+    head.addEventListener("click", () => {
+      // "Открыть" — без изменения профиля, как в контракте
+      state.courses.subjectKey = s.key;
+      saveState();
+      pushCourses("subject-hub");
+      renderSubjectHub();
+    });
+
+    // Actions row
+    const actions = document.createElement("div");
+    actions.className = "catalog-actions";
+
+    // 1) Pin/Unpin
+    const btnPin = document.createElement("button");
+    btnPin.type = "button";
+    btnPin.className = "mini-btn ghost";
+    btnPin.textContent = isPinned ? "Убрать из закреплённых" : "Закрепить";
+
+    btnPin.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      const updated = togglePinnedSubject(profile, s.key);
+      if (!updated) {
+        showToast(t("error_try_again"));
+        return;
+      }
+
+      saveProfile(updated);
+      renderHome();       // Home должен сразу обновляться
+      renderAllSubjects(); // и каталог тоже
+      showToast(isPinned ? "Убрано из закреплённых" : "Закреплено");
+    });
+
+    // 2) Open once (explicit action)
+    const btnOnce = document.createElement("button");
+    btnOnce.type = "button";
+    btnOnce.className = "mini-btn";
+    btnOnce.textContent = "Открыть один раз";
+    btnOnce.addEventListener("click", (e) => {
+      e.stopPropagation();
+      state.courses.subjectKey = s.key;
+      saveState();
+      pushCourses("subject-hub");
+      renderSubjectHub();
+    });
+
+    actions.appendChild(btnPin);
+    actions.appendChild(btnOnce);
+
+    // 3) Competitive manage (disabled-ish action pointing to Profile Settings)
+    const compRow = document.createElement("div");
+    compRow.className = "catalog-competitive-row";
+
+    const btnComp = document.createElement("button");
+    btnComp.type = "button";
+    btnComp.className = "mini-btn ghost";
+    btnComp.textContent = isComp ? "Убрать из Competitive" : "Сделать Competitive";
+
+    // Rules from contract:
+    // - only for school students
+    // - limit 2
+    const isSchool = !!profile.is_school_student;
+    const canMakeComp = isSchool && !isComp && competitiveCount < 2;
+
+    if (!isSchool) {
+      btnComp.disabled = true;
+      btnComp.textContent = "Туры недоступны (не школьник)";
+    } else if (!isComp && competitiveCount >= 2) {
+      btnComp.disabled = true;
+      btnComp.textContent = "Лимит 2 Competitive";
+    }
+
+    btnComp.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      // В v1 мы управляем competitive через Profile Settings (как в документах),
+      // поэтому здесь делаем "умный роут" и тост.
+      if (!isSchool) {
+        showToast("Вы не школьник — competitive/туры недоступны");
+        return;
+      }
+      if (!isComp && competitiveCount >= 2) {
+        showToast("Превышен лимит 2 competitive");
+        return;
+      }
+
+      // Переходим в профиль (Settings пока заглушка, но логика пути верная)
+      setTab("profile");
+      showToast("Управление Competitive — в Profile Settings");
+    });
+
+    compRow.appendChild(btnComp);
+
+    card.appendChild(head);
+    card.appendChild(actions);
+    card.appendChild(compRow);
+
+    grid.appendChild(card);
+  });
+}
 
   function openSubjectHub(subjectKey) {
     state.courses.subjectKey = subjectKey;
@@ -1090,6 +1243,15 @@
       if (action === "open-about") { openGlobal("about"); return; }
       if (action === "open-certificates") { openGlobal("certificates"); return; }
       if (action === "open-archive") { openGlobal("archive"); return; }
+
+         // All Subjects from anywhere (Home tile, etc.)
+if (action === "open-all-subjects") {
+  if (state.quizLock) return;
+  setTab("courses");
+  replaceCourses("all-subjects");
+  renderAllSubjects();
+  return;
+}
 
       // Community links
       if (action === "open-channel") {
