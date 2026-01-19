@@ -581,31 +581,76 @@
       <!-- ============ Profile (Tab) ============ -->
       <section id="view-profile" class="view" data-view="profile" aria-label="Profile">
         <div class="content">
-          <h1 class="h1">Profile</h1>
-          <p class="muted">Академический дашборд и взрослая геймификация.</p>
 
-          <div class="cards-grid">
-            <button class="card-btn" type="button" data-action="profile-settings">
-              <div class="card-title">Настройки</div>
-              <div class="muted small">Язык, уведомления, competitive ≤ 2</div>
-            </button>
+  <!-- Profile MAIN -->
+  <div id="profile-main" class="profile-screen is-active">
+    <h1 class="h1">Profile</h1>
+    <p class="muted">Академический дашборд и взрослая геймификация.</p>
 
-            <button class="card-btn" type="button" data-action="profile-certificates">
-              <div class="card-title">Сертификаты</div>
-              <div class="muted small">По турам и итоговый</div>
-            </button>
+    <div class="cards-grid">
+      <button class="card-btn" type="button" data-action="profile-settings">
+        <div class="card-title">Настройки</div>
+        <div class="muted small">Язык, уведомления, competitive ≤ 2</div>
+      </button>
 
-            <button class="card-btn" type="button" data-action="profile-community">
-              <div class="card-title">Комьюнити</div>
-              <div class="muted small">Канал и чат обсуждений</div>
-            </button>
+      <button class="card-btn" type="button" data-action="profile-certificates">
+        <div class="card-title">Сертификаты</div>
+        <div class="muted small">По турам и итоговый</div>
+      </button>
 
-            <button class="card-btn" type="button" data-action="profile-about">
-              <div class="card-title">О проекте</div>
-              <div class="muted small">Правила и организаторы</div>
-            </button>
+      <button class="card-btn" type="button" data-action="profile-community">
+        <div class="card-title">Комьюнити</div>
+        <div class="muted small">Канал и чат обсуждений</div>
+      </button>
+
+      <button class="card-btn" type="button" data-action="profile-about">
+        <div class="card-title">О проекте</div>
+        <div class="muted small">Правила и организаторы</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Profile SETTINGS -->
+  <div id="profile-settings" class="profile-screen">
+    <div class="settings-head">
+      <button class="icon-btn" type="button" data-action="profile-settings-back" aria-label="Back">
+        <span class="icon">←</span>
+      </button>
+      <div>
+        <div class="h1" style="margin:0">Настройки</div>
+        <div class="muted small">Competitive ≤ 2. Настраивается только здесь.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Соревновательный режим (Competitive)</div>
+      <p class="muted small" id="settings-competitive-note">
+        Для школьников: можно выбрать максимум 2 предмета в Competitive. Остальные остаются Study.
+      </p>
+
+      <div id="profile-settings-competitive-list" class="settings-list">
+        <!-- filled by app.js -->
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Уведомления</div>
+      <p class="muted small">Сейчас заглушка v1. Подключим позже без боли.</p>
+      <div class="settings-list">
+        <div class="settings-row">
+          <div>
+            <div style="font-weight:800">Новости и анонсы</div>
+            <div class="muted small">Обновления олимпиад</div>
           </div>
+          <label class="switch">
+            <input type="checkbox" disabled>
+            <span class="slider"></span>
+          </label>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
       </section>
 
       <!-- ============ Resources Hub (Global) ============ -->
