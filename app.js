@@ -1,5 +1,5 @@
 /* =========================================================
-   iClub WebApp — app.js (v1 skeleton)
+   iClub WebApp — app.js (v1 skeleton, aligned to new index.html)
    Plain HTML/CSS/JS, no build tools
    ========================================================= */
 
@@ -50,11 +50,27 @@
     return window.i18n?.normalizeLang ? window.i18n.normalizeLang(code) : "ru";
   }
 
+  function openExternal(url) {
+    // Prefer Telegram openTelegramLink/openLink if available
+    try {
+      if (tg?.openTelegramLink && /^(https?:\/\/)?t\.me\//i.test(url)) {
+        tg.openTelegramLink(url.replace(/^https?:\/\//i, ""));
+        return;
+      }
+      if (tg?.openLink) {
+        tg.openLink(url);
+        return;
+      }
+    } catch {}
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
   // ---------------------------
-  // App state (minimal)
+  // App state
   // ---------------------------
   const defaultState = {
     tab: "home", // home | courses | ratings | profile
+    viewStack: ["home"], // for global screens (resources/news/etc)
     courses: {
       stack: ["all-subjects"], // stack of screens in Courses tab
       subjectKey: null,        // current selected subject
@@ -69,12 +85,15 @@
     const saved = safeJsonParse(localStorage.getItem(LS.state), null);
     if (!saved) return structuredClone(defaultState);
 
-    // soft-merge
-    return {
+    // soft merge
+    const merged = {
       ...structuredClone(defaultState),
       ...saved,
       courses: { ...structuredClone(defaultState.courses), ...(saved.courses || {}) }
     };
+    // Ensure viewStack sane
+    if (!Array.isArray(merged.viewStack) || merged.viewStack.length === 0) merged.viewStack = ["home"];
+    return merged;
   }
 
   function saveState() {
@@ -172,7 +191,22 @@
   // ---------------------------
   // UI: Views & Tabs
   // ---------------------------
-  const VIEWS = ["splash", "registration", "home", "courses", "ratings", "profile"];
+  const VIEWS = [
+    "splash",
+    "registration",
+    "home",
+    "courses",
+    "ratings",
+    "profile",
+    // Global screens
+    "resources",
+    "news",
+    "notifications",
+    "community",
+    "about",
+    "certificates",
+    "archive"
+  ];
 
   function showView(viewName) {
     VIEWS.forEach(v => {
@@ -187,17 +221,67 @@
     state.tab = tabName;
     saveState();
 
-    // Splash/Registration are not in tabbar
-    showView(tabName);
-
     // Tabbar active
     $$(".tabbar .tab").forEach(btn => {
       btn.classList.toggle("is-active", btn.dataset.tab === tabName);
     });
 
+    // Maintain global view stack: tab screen becomes "base"
+    setGlobalBaseView(tabName);
+
     if (tabName === "courses") {
       renderCoursesStack();
     }
+  }
+
+  function setGlobalBaseView(tabName) {
+    // base view should be one of: home/courses/ratings/profile
+    if (!["home", "courses", "ratings", "profile"].includes(tabName)) tabName = "home";
+    state.viewStack = [tabName];
+    saveState();
+    showView(tabName);
+  }
+
+  function openGlobal(viewName) {
+    // push to stack and show
+    if (!VIEWS.includes(viewName)) return;
+
+    // If user is in quiz lock, do not allow leaving
+    if (state.quizLock === "tour") {
+      showToast("Tour is in progress");
+      return;
+    }
+    if (state.quizLock === "practice") {
+      showToast("Pause practice to leave");
+      return;
+    }
+
+    // base should exist
+    if (!Array.isArray(state.viewStack) || state.viewStack.length === 0) {
+      state.viewStack = [state.tab || "home"];
+    }
+
+    const top = state.viewStack[state.viewStack.length - 1];
+    if (top === viewName) {
+      showView(viewName);
+      return;
+    }
+
+    state.viewStack.push(viewName);
+    saveState();
+    showView(viewName);
+  }
+
+  function canGlobalBack() {
+    return Array.isArray(state.viewStack) && state.viewStack.length > 1;
+  }
+
+  function globalBack() {
+    if (!canGlobalBack()) return;
+    state.viewStack.pop();
+    saveState();
+    const top = state.viewStack[state.viewStack.length - 1];
+    showView(top);
   }
 
   // ---------------------------
@@ -207,6 +291,8 @@
     const backBtn = $("#topbar-back");
     const titleEl = $("#topbar-title");
     const subEl = $("#topbar-subtitle");
+
+    if (!backBtn || !titleEl || !subEl) return;
 
     // Default
     titleEl.textContent = t("app_name");
@@ -221,6 +307,20 @@
     if (viewName === "registration") {
       titleEl.textContent = t("reg_title");
       backBtn.style.visibility = "hidden";
+      return;
+    }
+
+    // Global screens (resources/news/...)
+    if (["resources", "news", "notifications", "community", "about", "certificates", "archive"].includes(viewName)) {
+      backBtn.style.visibility = canGlobalBack() ? "visible" : "hidden";
+
+      if (viewName === "resources") titleEl.textContent = "Ресурсы";
+      if (viewName === "news") titleEl.textContent = "Новости";
+      if (viewName === "notifications") titleEl.textContent = "Уведомления";
+      if (viewName === "community") titleEl.textContent = "Комьюнити";
+      if (viewName === "about") titleEl.textContent = "О проекте";
+      if (viewName === "certificates") titleEl.textContent = "Сертификаты";
+      if (viewName === "archive") titleEl.textContent = "Архив";
       return;
     }
 
@@ -254,10 +354,13 @@
       if (top === "practice-start") titleEl.textContent = t("practice");
       if (top === "practice-quiz") titleEl.textContent = t("practice");
       if (top === "practice-result") titleEl.textContent = "Practice Result";
+      if (top === "practice-review") titleEl.textContent = "Разбор ошибок";
+      if (top === "practice-recs") titleEl.textContent = "Рекомендации";
       if (top === "tours") titleEl.textContent = "Tours";
       if (top === "tour-rules") titleEl.textContent = t("tour_rules_title");
       if (top === "tour-quiz") titleEl.textContent = "Tour";
       if (top === "tour-result") titleEl.textContent = "Tour Result";
+      if (top === "tour-review") titleEl.textContent = "Разбор тура";
       if (top === "books") titleEl.textContent = "Books";
       if (top === "my-recs") titleEl.textContent = "My Recommendations";
 
@@ -279,10 +382,13 @@
     "practice-start",
     "practice-quiz",
     "practice-result",
+    "practice-review",
+    "practice-recs",
     "tours",
     "tour-rules",
     "tour-quiz",
     "tour-result",
+    "tour-review",
     "books",
     "my-recs"
   ];
@@ -485,8 +591,10 @@
   }
 
   function renderVideo(lesson) {
-    $("#video-title").textContent = lesson?.title || "Video";
-    $("#video-meta").textContent = lesson?.topic || "";
+    const tEl = $("#video-title");
+    const mEl = $("#video-meta");
+    if (tEl) tEl.textContent = lesson?.title || "Video";
+    if (mEl) mEl.textContent = lesson?.topic || "";
     updateTopbarForView("courses");
   }
 
@@ -558,10 +666,13 @@
 
   function renderPracticeQuestion(draft) {
     const q = draft.questions[draft.qIndex];
-    $("#practice-qno").textContent = `${draft.qIndex + 1}/10`;
-    $("#practice-question").textContent = q.text;
-
+    const qno = $("#practice-qno");
+    const qtext = $("#practice-question");
     const wrap = $("#practice-options");
+    if (qno) qno.textContent = `${draft.qIndex + 1}/10`;
+    if (qtext) qtext.textContent = q.text;
+    if (!wrap) return;
+
     wrap.innerHTML = "";
     q.options.forEach(opt => {
       const row = document.createElement("label");
@@ -577,7 +688,8 @@
   function startPracticeTick() {
     stopPracticeTick();
     let remaining = 30;
-    $("#practice-timer").textContent = `00:${String(remaining).padStart(2, "0")}`;
+    const timerEl = $("#practice-timer");
+    if (timerEl) timerEl.textContent = `00:${String(remaining).padStart(2, "0")}`;
 
     practiceTimer = setInterval(() => {
       remaining -= 1;
@@ -586,7 +698,7 @@
         handlePracticeSubmit(true);
         return;
       }
-      $("#practice-timer").textContent = `00:${String(remaining).padStart(2, "0")}`;
+      if (timerEl) timerEl.textContent = `00:${String(remaining).padStart(2, "0")}`;
     }, 1000);
   }
 
@@ -648,7 +760,8 @@
     savePracticeDraft(draft);
 
     const score = draft.answers.filter(a => a.is_correct).length;
-    $("#practice-result-meta").textContent = `Score: ${score}/10`;
+    const meta = $("#practice-result-meta");
+    if (meta) meta.textContent = `Score: ${score}/10`;
 
     state.quizLock = null;
     saveState();
@@ -663,11 +776,13 @@
 
   function openTourRules() {
     pushCourses("tour-rules");
-    $("#tour-rules-accept").checked = false;
+    const cb = $("#tour-rules-accept");
+    if (cb) cb.checked = false;
   }
 
   function openTourQuiz() {
-    if (!$("#tour-rules-accept").checked) {
+    const accept = $("#tour-rules-accept");
+    if (!accept || !accept.checked) {
       showToast(t("tour_rules_accept_required"));
       return;
     }
@@ -697,7 +812,8 @@
   function renderTourTimer(totalSec) {
     const mm = Math.floor(totalSec / 60);
     const ss = totalSec % 60;
-    $("#tour-timer").textContent = `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+    const el = $("#tour-timer");
+    if (el) el.textContent = `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
   }
 
   function stopTourTick() {
@@ -707,7 +823,8 @@
 
   function finishTour() {
     stopTourTick();
-    $("#tour-result-meta").textContent = "Score: 0/20";
+    const meta = $("#tour-result-meta");
+    if (meta) meta.textContent = "Score: 0/20";
     state.quizLock = null;
     saveState();
     pushCourses("tour-result");
@@ -738,9 +855,24 @@
 
   function bindTopbar() {
     const backBtn = $("#topbar-back");
+    if (!backBtn) return;
+
     backBtn.addEventListener("click", () => {
       if (state.quizLock) return;
-      if (state.tab === "courses") popCourses();
+
+      const topView = state.viewStack?.[state.viewStack.length - 1];
+
+      // If we are on global screen -> go back in global stack
+      if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
+        globalBack();
+        return;
+      }
+
+      // If in courses -> pop courses stack
+      if (state.tab === "courses") {
+        popCourses();
+        return;
+      }
     });
   }
 
@@ -749,7 +881,6 @@
     if (isSchool) isSchool.addEventListener("change", updateSchoolFieldsVisibility);
     updateSchoolFieldsVisibility();
 
-    // NEW: region/district dropdowns
     initRegionDistrictUI();
 
     const form = $("#reg-form");
@@ -758,20 +889,19 @@
     form.addEventListener("submit", (e) => {
       e.preventDefault();
 
-      const fullName = $("#reg-fullname").value.trim();
-      const lang = $("#reg-language").value;
+      const fullName = $("#reg-fullname")?.value?.trim() || "";
+      const lang = $("#reg-language")?.value || "ru";
 
-      // NEW: select values (no trim)
-      const region = $("#reg-region").value;
-      const district = $("#reg-district").value;
+      const region = $("#reg-region")?.value || "";
+      const district = $("#reg-district")?.value || "";
 
-      const isSchoolStudent = ($("#reg-is-school").value === "yes");
-      const school = $("#reg-school").value.trim();
-      const klass = $("#reg-class").value.trim();
+      const isSchoolStudent = ($("#reg-is-school")?.value === "yes");
+      const school = $("#reg-school")?.value?.trim() || "";
+      const klass = $("#reg-class")?.value?.trim() || "";
 
-      const main1 = $("#reg-main-subject-1").value;
-      const main2 = $("#reg-main-subject-2").value;
-      const add1 = $("#reg-additional-subject").value;
+      const main1 = $("#reg-main-subject-1")?.value || "";
+      const main2 = $("#reg-main-subject-2")?.value || "";
+      const add1 = $("#reg-additional-subject")?.value || "";
 
       if (!fullName || !region || !district || !main1) {
         showToast(t("error_try_again"));
@@ -833,6 +963,7 @@
       window.i18n?.setLang(lang);
 
       state.tab = "home";
+      state.viewStack = ["home"];
       state.courses.stack = ["all-subjects"];
       state.courses.subjectKey = null;
       state.courses.lessonId = null;
@@ -845,21 +976,76 @@
     });
   }
 
-  function bindCoursesActions() {
+  function bindActions() {
     document.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-action]");
       if (!btn) return;
+
       const action = btn.dataset.action;
 
-      if (action === "open-news") { showToast("News: soon"); return; }
-      if (action === "open-notifications") { showToast("Notifications: soon"); return; }
-      if (action === "open-community") { showToast("Community: soon"); return; }
+      // ---------- Global navigation actions (available everywhere) ----------
+      if (action === "back") { // generic back
+        if (state.quizLock) return;
+        const topView = state.viewStack?.[state.viewStack.length - 1];
+        if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
+          globalBack();
+          return;
+        }
+        if (state.tab === "courses") {
+          popCourses();
+          return;
+        }
+        return;
+      }
 
-      if (state.tab !== "courses") return;
+      if (action === "go-home") { setTab("home"); return; }
+      if (action === "go-profile") { setTab("profile"); return; }
+      if (action === "open-ratings") { setTab("ratings"); return; }
 
+      if (action === "open-resources") { openGlobal("resources"); return; }
+      if (action === "open-news") { openGlobal("news"); return; }
+      if (action === "open-notifications") { openGlobal("notifications"); return; }
+      if (action === "open-community") { openGlobal("community"); return; }
+      if (action === "open-about") { openGlobal("about"); return; }
+      if (action === "open-certificates") { openGlobal("certificates"); return; }
+      if (action === "open-archive") { openGlobal("archive"); return; }
+
+      // Community links
+      if (action === "open-channel") {
+        openExternal("https://t.me/iClubuzofficial");
+        return;
+      }
+      if (action === "open-chat") {
+        openExternal("https://t.me/+yp3GKhnohKQxOTdi");
+        return;
+      }
+
+      // Resources hub: global books button (still placeholder)
+      if (action === "open-books-global") {
+        showToast("Books list: подключим через базу");
+        return;
+      }
+
+      // ---------- Tab-specific / Courses actions ----------
+      if (state.tab !== "courses") {
+        // Profile quick buttons -> route to global screens
+        if (action === "profile-settings") { showToast("Settings: soon"); return; }
+        if (action === "profile-certificates") { openGlobal("certificates"); return; }
+        if (action === "profile-community") { openGlobal("community"); return; }
+        if (action === "profile-about") { openGlobal("about"); return; }
+        return;
+      }
+
+      // Courses actions
       if (action === "to-subject-hub") {
         replaceCourses("subject-hub");
         renderSubjectHub();
+        return;
+      }
+
+      if (action === "open-all-subjects") {
+        replaceCourses("all-subjects");
+        renderAllSubjects();
         return;
       }
 
@@ -890,12 +1076,24 @@
       }
 
       if (action === "practice-review") {
-        showToast("Review screen: next step");
+        pushCourses("practice-review");
         return;
       }
 
       if (action === "practice-recommendations") {
-        showToast("Recommendations: next step");
+        pushCourses("practice-recs");
+        return;
+      }
+
+      if (action === "practice-back-to-result") {
+        // go to result without destroying stack
+        // simplest: pop until practice-result
+        while (state.courses.stack.length > 0 && getCoursesTopScreen() !== "practice-result") {
+          state.courses.stack.pop();
+        }
+        if (state.courses.stack.length === 0) state.courses.stack = ["practice-result"];
+        saveState();
+        showCoursesScreen(getCoursesTopScreen());
         return;
       }
 
@@ -920,8 +1118,23 @@
         return;
       }
 
+      if (action === "tour-review") {
+        pushCourses("tour-review");
+        return;
+      }
+
+      if (action === "tour-back-to-result") {
+        while (state.courses.stack.length > 0 && getCoursesTopScreen() !== "tour-result") {
+          state.courses.stack.pop();
+        }
+        if (state.courses.stack.length === 0) state.courses.stack = ["tour-result"];
+        saveState();
+        showCoursesScreen(getCoursesTopScreen());
+        return;
+      }
+
       if (action === "tour-certificate") {
-        showToast("Certificate: soon");
+        openGlobal("certificates");
         return;
       }
 
@@ -948,25 +1161,13 @@
       }
     });
 
+    // Tours list click (demo)
     const toursList = $("#tours-list");
     if (toursList) {
       toursList.addEventListener("click", () => {
         openTourRules();
       });
     }
-  }
-
-  function bindProfileActions() {
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-action]");
-      if (!btn) return;
-      const a = btn.dataset.action;
-
-      if (a === "profile-settings") { showToast("Settings: soon"); return; }
-      if (a === "profile-certificates") { showToast("Certificates: soon"); return; }
-      if (a === "profile-community") { showToast("Community: soon"); return; }
-      if (a === "profile-about") { showToast("About: soon"); return; }
-    });
   }
 
   // ---------------------------
@@ -995,20 +1196,22 @@
         saveState();
       }
 
+      // Start at base tab view
       setTab(state.tab);
 
+      // Restore Courses stack if needed
       if (state.tab === "courses") {
         renderCoursesStack();
         if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
+        if (getCoursesTopScreen() === "all-subjects") renderAllSubjects();
       }
-    }, 450);
+    }, 250);
   }
 
   function bindUI() {
     bindTabbar();
     bindTopbar();
-    bindCoursesActions();
-    bindProfileActions();
+    bindActions();
   }
 
   // Init
