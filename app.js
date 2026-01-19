@@ -716,47 +716,36 @@
 
     // 3) Competitive manage (disabled-ish action pointing to Profile Settings)
     const compRow = document.createElement("div");
-    compRow.className = "catalog-competitive-row";
+compRow.className = "catalog-competitive-row";
 
-    const btnComp = document.createElement("button");
-    btnComp.type = "button";
-    btnComp.className = "mini-btn ghost";
-    btnComp.textContent = isComp ? "Убрать из Competitive" : "Сделать Competitive";
+const compInfo = document.createElement("div");
+compInfo.className = "catalog-competitive-info";
 
-    // Rules from contract:
-    // - only for school students
-    // - limit 2
-    const isSchool = !!profile.is_school_student;
-    const canMakeComp = isSchool && !isComp && competitiveCount < 2;
+const infoText = document.createElement("div");
+infoText.className = "muted small";
+if (!profile.is_school_student) {
+  infoText.textContent = "Competitive/туры недоступны (не школьник).";
+} else if (isComp) {
+  infoText.textContent = "Competitive включён. Управление — в Profile Settings.";
+} else if (competitiveCount >= 2) {
+  infoText.textContent = "Лимит 2 Competitive. Управление — в Profile Settings.";
+} else {
+  infoText.textContent = "Competitive настраивается в Profile Settings (лимит 2).";
+}
 
-    if (!isSchool) {
-      btnComp.disabled = true;
-      btnComp.textContent = "Туры недоступны (не школьник)";
-    } else if (!isComp && competitiveCount >= 2) {
-      btnComp.disabled = true;
-      btnComp.textContent = "Лимит 2 Competitive";
-    }
+const btnManage = document.createElement("button");
+btnManage.type = "button";
+btnManage.className = "link-btn";
+btnManage.textContent = "В настройки";
+btnManage.addEventListener("click", (e) => {
+  e.stopPropagation();
+  setTab("profile");
+  showToast("Управление Competitive — в Profile Settings");
+});
 
-    btnComp.addEventListener("click", (e) => {
-      e.stopPropagation();
-
-      // В v1 мы управляем competitive через Profile Settings (как в документах),
-      // поэтому здесь делаем "умный роут" и тост.
-      if (!isSchool) {
-        showToast("Вы не школьник — competitive/туры недоступны");
-        return;
-      }
-      if (!isComp && competitiveCount >= 2) {
-        showToast("Превышен лимит 2 competitive");
-        return;
-      }
-
-      // Переходим в профиль (Settings пока заглушка, но логика пути верная)
-      setTab("profile");
-      showToast("Управление Competitive — в Profile Settings");
-    });
-
-    compRow.appendChild(btnComp);
+compInfo.appendChild(infoText);
+compInfo.appendChild(btnManage);
+compRow.appendChild(compInfo);
 
     card.appendChild(head);
     card.appendChild(actions);
