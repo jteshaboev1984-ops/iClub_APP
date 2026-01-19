@@ -78,15 +78,18 @@
   // App state
   // ---------------------------
   const defaultState = {
-    tab: "home", // home | courses | ratings | profile
-    viewStack: ["home"], // for global screens (resources/news/etc)
-    courses: {
-      stack: ["all-subjects"], // stack of screens in Courses tab
-      subjectKey: null,        // current selected subject
-      lessonId: null
-    },
-    quizLock: null // "practice" | "tour" | null
-  };
+  tab: "home", // home | courses | ratings | profile
+  viewStack: ["home"], // global screens stack
+  courses: {
+    stack: ["all-subjects"],
+    subjectKey: null,
+    lessonId: null
+  },
+  profile: {
+    stack: ["main"] // main | settings
+  },
+  quizLock: null
+};
 
   let state = loadState();
 
@@ -262,7 +265,10 @@
     if (tabName === "courses") {
       renderCoursesStack();
     }
-  }
+     if (tabName === "profile") {
+  renderProfileStack();
+ }
+}
 
   function setGlobalBaseView(tabName) {
     // base view should be one of: home/courses/ratings/profile
@@ -367,10 +373,11 @@
     }
 
     if (viewName === "profile") {
-      titleEl.textContent = "Profile";
-      backBtn.style.visibility = "hidden";
-      return;
-    }
+  const top = getProfileTopScreen();
+  titleEl.textContent = (top === "settings") ? "Настройки" : "Profile";
+  backBtn.style.visibility = (top === "settings") ? "visible" : "hidden";
+  return;
+}
 
     if (viewName === "courses") {
       const canGoBack = canCoursesBack();
@@ -466,6 +473,60 @@
     showCoursesScreen(top);
   }
 
+   // ---------------------------
+// Profile stack
+// ---------------------------
+const PROFILE_SCREENS = ["main", "settings"];
+
+function getProfileTopScreen() {
+  const s = state.profile?.stack;
+  return (s && s.length) ? s[s.length - 1] : "main";
+}
+
+function showProfileScreen(screenName) {
+  PROFILE_SCREENS.forEach(sc => {
+    const el = document.getElementById(`profile-${sc}`);
+    if (!el) return;
+    el.classList.toggle("is-active", sc === screenName);
+  });
+  updateTopbarForView("profile");
+}
+
+function pushProfile(screenName) {
+  state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
+  state.profile.stack.push(screenName);
+  saveState();
+  showProfileScreen(screenName);
+}
+
+function replaceProfile(screenName) {
+  state.profile.stack = [screenName];
+  saveState();
+  showProfileScreen(screenName);
+}
+
+function popProfile() {
+  if (!state.profile?.stack || state.profile.stack.length <= 1) return;
+  state.profile.stack.pop();
+  saveState();
+  showProfileScreen(getProfileTopScreen());
+}
+
+function openProfileSettings() {
+  replaceProfile("settings");
+  renderProfileSettings();
+}
+
+function openProfileMain() {
+  replaceProfile("main");
+}
+
+function renderProfileStack() {
+  const top = getProfileTopScreen();
+  showProfileScreen(top);
+  if (top === "settings") renderProfileSettings();
+}
+   
   // ---------------------------
   // Toast
   // ---------------------------
