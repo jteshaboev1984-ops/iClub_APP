@@ -461,3 +461,57 @@ body {
 
 /* ----- Utilities ----- */
 .hidden { display: none !important; }
+
+/* ===== Home quick tiles (top-app look) ===== */
+.quick-tiles{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 560px){
+  .quick-tiles{ grid-template-columns: 1fr 1fr 1fr; }
+}
+
+.tile{
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 12px 12px;
+  text-align: left;
+  cursor: pointer;
+  min-height: 86px;
+  display:flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.tile:active{ transform: translateY(1px); }
+
+.tile-top{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.tile-ico{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: linear-gradient(180deg, rgba(47,111,214,0.14), rgba(47,111,214,0.03));
+  border: 1px solid rgba(47,111,214,0.18);
+  font-size: 18px;
+}
+
+.tile-title{
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.tile-sub{
+  font-size: 12px;
+}
