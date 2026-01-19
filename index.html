@@ -1,1 +1,474 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>iClub</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <!-- App Shell -->
+  <div id="app">
+
+    <!-- Topbar (динамический заголовок + back внутри таба Courses) -->
+    <header class="topbar" id="topbar">
+      <button class="icon-btn hidden" id="btn-back" aria-label="Back">
+        ←
+      </button>
+
+      <div class="topbar-title">
+        <div class="topbar-title-main" id="topbar-title">iClub</div>
+        <div class="topbar-title-sub" id="topbar-subtitle"></div>
+      </div>
+
+      <button class="icon-btn" id="btn-info" aria-label="Info">i</button>
+    </header>
+
+    <!-- Main Views -->
+    <main class="views" id="views">
+
+      <!-- Splash -->
+      <section class="view is-active" data-view="splash">
+        <div class="center">
+          <img class="logo" src="./assets/logo.png" alt="iClub logo" />
+          <div class="muted mt-12" data-i18n="loading">Загрузка…</div>
+        </div>
+      </section>
+
+      <!-- Registration -->
+      <section class="view" data-view="registration">
+        <div class="container">
+          <h1 class="h1" data-i18n="registration">Регистрация</h1>
+
+          <div class="card">
+            <label class="field">
+              <span class="label" data-i18n="full_name">ФИО</span>
+              <input id="reg-fullname" class="input" type="text" placeholder="Например: Ali Valiyev" />
+            </label>
+
+            <div class="grid-2">
+              <label class="field">
+                <span class="label" data-i18n="region">Регион</span>
+                <input id="reg-region" class="input" type="text" placeholder="Tashkent" />
+              </label>
+
+              <label class="field">
+                <span class="label" data-i18n="district">Район</span>
+                <input id="reg-district" class="input" type="text" placeholder="Yunusabad" />
+              </label>
+            </div>
+
+            <label class="field">
+              <span class="label" data-i18n="language">Язык</span>
+              <select id="reg-language" class="input">
+                <option value="ru">Русский</option>
+                <option value="uz">O‘zbek</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+
+            <label class="field inline">
+              <input id="reg-school" type="checkbox" />
+              <span data-i18n="are_you_school">Вы ученик школы?</span>
+            </label>
+
+            <div class="grid-2 hidden" id="reg-school-fields">
+              <label class="field">
+                <span class="label" data-i18n="school">Школа</span>
+                <input id="reg-school-name" class="input" type="text" placeholder="№12" />
+              </label>
+              <label class="field">
+                <span class="label" data-i18n="class">Класс</span>
+                <input id="reg-class" class="input" type="text" placeholder="10" />
+              </label>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="muted" data-i18n="choose_main_subject">
+              Выберите 1 основной предмет (он станет соревновательным #1, если вы школьник).
+            </div>
+
+            <div class="chips" id="reg-main-subjects"></div>
+
+            <div class="mt-12 muted" data-i18n="choose_optional_subject">
+              Опционально: выберите 1 дополнительный предмет (он будет учебным).
+            </div>
+
+            <div class="chips" id="reg-additional-subjects"></div>
+
+            <div class="divider"></div>
+
+            <label class="field inline">
+              <input id="reg-consent" type="checkbox" />
+              <span data-i18n="consent_text">Я согласен(а) на обработку данных</span>
+            </label>
+
+            <button class="btn primary w-full mt-12" id="btn-register" data-i18n="continue">
+              Продолжить
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tabs Root: Home -->
+      <section class="view" data-view="tab-home">
+        <div class="container">
+          <div class="home-hero card">
+            <div class="row space-between">
+              <div>
+                <div class="h2" data-i18n="home_title">Главная</div>
+                <div class="muted" id="home-subtitle"></div>
+              </div>
+              <img class="logo-sm" src="./assets/logo.png" alt="iClub" />
+            </div>
+          </div>
+
+          <div class="section-title" data-i18n="competitive_subjects">Соревновательные предметы</div>
+          <div id="home-competitive" class="cards"></div>
+
+          <div class="section-title" data-i18n="study_subjects">Учебные предметы</div>
+          <div id="home-study" class="cards"></div>
+
+          <div class="section-title" data-i18n="quick_actions">Быстрые действия</div>
+          <div class="grid-2">
+            <button class="btn" id="btn-go-courses" data-i18n="open_courses">Открыть Courses</button>
+            <button class="btn" id="btn-go-profile" data-i18n="open_profile">Открыть Profile</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tabs Root: Courses -->
+      <section class="view" data-view="tab-courses">
+        <div class="container">
+          <div class="h1" data-i18n="courses">Courses</div>
+
+          <div class="card">
+            <div class="row space-between">
+              <div>
+                <div class="h2" data-i18n="all_subjects">Все предметы</div>
+                <div class="muted" data-i18n="pin_or_open_once">Закрепить или открыть один раз</div>
+              </div>
+              <button class="btn" id="btn-open-resources" data-i18n="resources">Ресурсы</button>
+            </div>
+          </div>
+
+          <div id="courses-subjects" class="cards mt-12"></div>
+        </div>
+      </section>
+
+      <!-- Subject Hub (внутри Courses stack) -->
+      <section class="view" data-view="subject-hub">
+        <div class="container">
+          <div class="h1" id="subject-title">Subject</div>
+          <div class="muted" id="subject-mode-hint"></div>
+
+          <div class="grid-2 mt-12">
+            <button class="btn primary" id="btn-open-lessons" data-i18n="lessons">Видео-уроки</button>
+            <button class="btn" id="btn-open-practice" data-i18n="practice">Практика</button>
+            <button class="btn" id="btn-open-tours" data-i18n="tours">Туры</button>
+            <button class="btn" id="btn-open-recs" data-i18n="recommendations">Рекомендации</button>
+          </div>
+
+          <div class="card mt-12">
+            <div class="row space-between">
+              <div>
+                <div class="h2" data-i18n="books">Книги</div>
+                <div class="muted" data-i18n="books_hint">Чтение и скачивание</div>
+              </div>
+              <button class="btn" id="btn-open-books" data-i18n="open">Открыть</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lessons List -->
+      <section class="view" data-view="lessons-list">
+        <div class="container">
+          <div class="h1" data-i18n="lessons">Видео-уроки</div>
+          <div class="muted" data-i18n="lessons_hint">Открой урок → смотри или пропусти → затем практика</div>
+          <div id="lessons-list-wrap" class="cards mt-12"></div>
+        </div>
+      </section>
+
+      <!-- Video Player -->
+      <section class="view" data-view="video-player">
+        <div class="container">
+          <div class="h1" id="video-title">Lesson</div>
+          <div class="card">
+            <div class="muted" data-i18n="video_placeholder">
+              Здесь будет плеер (в v1 можно открыть ссылку).
+            </div>
+
+            <div class="grid-2 mt-12">
+              <button class="btn primary" id="btn-video-start" data-i18n="start_video">Начать</button>
+              <button class="btn" id="btn-video-skip" data-i18n="skip_video">Пропустить (знаю тему)</button>
+            </div>
+
+            <button class="btn w-full mt-12" id="btn-video-complete" data-i18n="finish_video">Завершить</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Practice Start -->
+      <section class="view" data-view="practice-start">
+        <div class="container">
+          <div class="h1" data-i18n="practice">Практика</div>
+          <div class="card">
+            <div class="muted" data-i18n="practice_rules">
+              10 вопросов (3 лёгких, 5 средних, 2 сложных). Античит не применяется.
+            </div>
+
+            <button class="btn primary w-full mt-12" id="btn-practice-begin" data-i18n="start_practice">Начать практику</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Practice Quiz -->
+      <section class="view" data-view="practice-quiz">
+        <div class="container">
+          <div class="row space-between">
+            <div class="h2" data-i18n="practice">Практика</div>
+            <button class="btn" id="btn-practice-pause" data-i18n="pause">Пауза</button>
+          </div>
+
+          <div class="card mt-12">
+            <div class="row space-between">
+              <div class="muted" id="practice-progress">1 / 10</div>
+              <div class="badge" id="practice-timer">--:--</div>
+            </div>
+
+            <div class="question mt-12" id="practice-question">...</div>
+
+            <div class="answers mt-12" id="practice-answers"></div>
+
+            <button class="btn primary w-full mt-12" id="btn-practice-next" data-i18n="next">Далее</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Practice Result -->
+      <section class="view" data-view="practice-result">
+        <div class="container">
+          <div class="h1" data-i18n="result">Результат</div>
+          <div class="card">
+            <div class="h2" id="practice-score">0 / 10</div>
+            <div class="muted" id="practice-meta"></div>
+
+            <div class="grid-2 mt-12">
+              <button class="btn" id="btn-practice-review" data-i18n="review_errors">Разбор ошибок</button>
+              <button class="btn primary" id="btn-practice-recs" data-i18n="go_recommendations">Рекомендации</button>
+            </div>
+
+            <button class="btn w-full mt-12" id="btn-practice-done" data-i18n="back_to_subject">Назад к предмету</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Practice Review -->
+      <section class="view" data-view="practice-review">
+        <div class="container">
+          <div class="h1" data-i18n="review_errors">Разбор ошибок</div>
+          <div id="practice-review-list" class="cards"></div>
+        </div>
+      </section>
+
+      <!-- Practice Recommendations -->
+      <section class="view" data-view="practice-recs">
+        <div class="container">
+          <div class="h1" data-i18n="recommendations">Рекомендации</div>
+          <div class="muted" data-i18n="read_recommended">Рекомендуем прочитать по темам ошибок</div>
+          <div id="practice-recs-list" class="cards mt-12"></div>
+        </div>
+      </section>
+
+      <!-- Tours List -->
+      <section class="view" data-view="tours-list">
+        <div class="container">
+          <div class="h1" data-i18n="tours">Туры</div>
+          <div id="tours-list-wrap" class="cards"></div>
+        </div>
+      </section>
+
+      <!-- Tour Rules -->
+      <section class="view" data-view="tour-rules">
+        <div class="container">
+          <div class="h1" data-i18n="tour_rules">Правила тура</div>
+          <div class="card">
+            <ul class="list">
+              <li data-i18n="tour_rule_one_attempt">Проходится один раз, без паузы</li>
+              <li data-i18n="tour_rule_no_back">Нельзя возвращаться к предыдущим вопросам</li>
+              <li data-i18n="tour_rule_autosave">Ответы сохраняются автоматически при истечении времени</li>
+              <li data-i18n="tour_rule_anticheat">Античит: 2 нарушения → завершение тура</li>
+            </ul>
+
+            <label class="field inline mt-12">
+              <input id="tour-rules-accept" type="checkbox" />
+              <span data-i18n="i_accept_rules">Я согласен(на) с правилами</span>
+            </label>
+
+            <button class="btn primary w-full mt-12" id="btn-tour-start" data-i18n="start_tour">Начать тур</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tour Quiz -->
+      <section class="view" data-view="tour-quiz">
+        <div class="container">
+          <div class="row space-between">
+            <div class="h2" data-i18n="tour">Тур</div>
+            <div class="badge" id="tour-anticheat">0/2</div>
+          </div>
+
+          <div class="card mt-12">
+            <div class="row space-between">
+              <div class="muted" id="tour-progress">1 / 20</div>
+              <div class="badge" id="tour-timer">--:--</div>
+            </div>
+
+            <div class="question mt-12" id="tour-question">...</div>
+            <div class="answers mt-12" id="tour-answers"></div>
+
+            <button class="btn primary w-full mt-12" id="btn-tour-next" data-i18n="next">Далее</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tour Result -->
+      <section class="view" data-view="tour-result">
+        <div class="container">
+          <div class="h1" data-i18n="result">Результат</div>
+          <div class="card">
+            <div class="h2" id="tour-score">0 / 20</div>
+            <div class="muted" id="tour-meta"></div>
+
+            <button class="btn primary w-full mt-12" id="btn-tour-certificate" data-i18n="certificate">Сертификат</button>
+            <button class="btn w-full mt-12" id="btn-tour-done" data-i18n="back_to_subject">Назад к предмету</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tabs Root: Ratings -->
+      <section class="view" data-view="tab-ratings">
+        <div class="container">
+          <div class="h1" data-i18n="ratings">Ratings</div>
+          <div class="card">
+            <div class="muted" data-i18n="ratings_hint">Рейтинги доступны только для соревновательных предметов и активных туров.</div>
+          </div>
+          <div id="ratings-wrap" class="cards mt-12"></div>
+        </div>
+      </section>
+
+      <!-- Tabs Root: Profile -->
+      <section class="view" data-view="tab-profile">
+        <div class="container">
+          <div class="h1" data-i18n="profile">Profile</div>
+
+          <div class="card">
+            <div class="row space-between">
+              <div>
+                <div class="h2" id="profile-name">—</div>
+                <div class="muted" id="profile-meta">—</div>
+              </div>
+              <button class="btn" id="btn-profile-settings" data-i18n="settings">Настройки</button>
+            </div>
+          </div>
+
+          <div class="section-title" data-i18n="my_recommendations">Мои рекомендации</div>
+          <div id="profile-recs" class="cards"></div>
+
+          <div class="section-title" data-i18n="certificates">Сертификаты</div>
+          <div id="profile-certs" class="cards"></div>
+        </div>
+      </section>
+
+      <!-- Profile Settings -->
+      <section class="view" data-view="profile-settings">
+        <div class="container">
+          <div class="h1" data-i18n="settings">Настройки</div>
+
+          <div class="card">
+            <label class="field">
+              <span class="label" data-i18n="language">Язык</span>
+              <select id="settings-language" class="input">
+                <option value="ru">Русский</option>
+                <option value="uz">O‘zbek</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+
+            <label class="field inline">
+              <input id="settings-notifications" type="checkbox" checked />
+              <span data-i18n="notifications">Уведомления</span>
+            </label>
+
+            <div class="divider"></div>
+
+            <div class="h2" data-i18n="competitive_manage">Управление соревновательными (≤2)</div>
+            <div id="settings-competitive" class="cards mt-12"></div>
+
+            <div class="divider"></div>
+
+            <div class="h2" data-i18n="pinned_manage">Закреплённые учебные</div>
+            <div id="settings-pinned" class="cards mt-12"></div>
+
+            <button class="btn primary w-full mt-12" id="btn-settings-save" data-i18n="save">Сохранить</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resources / Books (simple v1) -->
+      <section class="view" data-view="resources">
+        <div class="container">
+          <div class="h1" data-i18n="resources">Ресурсы</div>
+          <div class="card">
+            <div class="h2" data-i18n="books">Книги</div>
+            <div class="muted" data-i18n="books_hint">Чтение и скачивание</div>
+          </div>
+          <div id="books-wrap" class="cards mt-12"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Tabbar -->
+    <nav class="tabbar" id="tabbar" aria-label="Bottom navigation">
+      <button class="tab is-active" data-tab="home">
+        <div class="tab-ico">⌂</div>
+        <div class="tab-txt">Home</div>
+      </button>
+      <button class="tab" data-tab="courses">
+        <div class="tab-ico">▦</div>
+        <div class="tab-txt">Courses</div>
+      </button>
+      <button class="tab" data-tab="ratings">
+        <div class="tab-ico">▤</div>
+        <div class="tab-txt">Ratings</div>
+      </button>
+      <button class="tab" data-tab="profile">
+        <div class="tab-ico">☺</div>
+        <div class="tab-txt">Profile</div>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- Modal -->
+  <div class="modal hidden" id="modal">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-sheet" role="dialog" aria-modal="true">
+      <div class="modal-title" id="modal-title">—</div>
+      <div class="modal-body" id="modal-body">—</div>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="./i18n.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
 
