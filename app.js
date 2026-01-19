@@ -12,6 +12,15 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+  function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
   function safeJsonParse(s, fallback) {
     try { return JSON.parse(s); } catch { return fallback; }
   }
@@ -491,24 +500,96 @@
     study.forEach(s => studyWrap.appendChild(subjectCardEl(s)));
   }
 
-  function subjectCardEl(userSubject) {
-    const subj = subjectByKey(userSubject.key);
-    const el = document.createElement("button");
-    el.type = "button";
-    el.className = "card-btn";
-    el.innerHTML = `
-      <div class="card-title">${subj ? subj.title : userSubject.key}</div>
-      <div class="muted small">${userSubject.mode === "competitive" ? "Competitive" : "Study"} • ${userSubject.pinned ? "Pinned" : "Not pinned"}</div>
-    `;
-    el.addEventListener("click", () => {
+   function subjectCardEl(userSubject) {
+  const subj = subjectByKey(userSubject.key);
+  const title = subj ? subj.title : userSubject.key;
+
+  const isComp = userSubject.mode === "competitive";
+  const modeLabel = isComp ? "Competitive" : "Study";
+
+  // v1: демо-прогресс (позже заменим на реальные данные из базы)
+  // Чтобы карточка не была "пустой", даём 2 строки статуса:
+  const demoBest = isComp ? "Best practice: 7/10" : "Best practice: 6/10";
+  const demoNext = isComp ? "Tours: 0/7 • Next: Tour 1" : "Next: Practice";
+
+  const el = document.createElement("div");
+  el.className = "home-subject-card";
+
+  // Верх кликабельный: открывает Subject Hub
+  const header = document.createElement("button");
+  header.type = "button";
+  header.className = "home-subject-head";
+  header.innerHTML = `
+    <div class="home-subject-row">
+      <div class="card-title" style="margin:0">${escapeHTML(title)}</div>
+      <span class="badge ${isComp ? "badge-comp" : "badge-study"}">${modeLabel}</span>
+    </div>
+    <div class="muted small">${demoBest}</div>
+    <div class="muted small">${demoNext}</div>
+  `;
+
+  header.addEventListener("click", () => {
+    state.courses.subjectKey = userSubject.key;
+    saveState();
+    setTab("courses");
+    replaceCourses("subject-hub");
+    renderSubjectHub();
+  });
+
+  // CTA ряд (кнопки не должны открывать hub по клику)
+  const actions = document.createElement("div");
+  actions.className = "home-subject-actions";
+
+  // Практика (всегда)
+  const btnPractice = document.createElement("button");
+  btnPractice.type = "button";
+  btnPractice.className = "mini-btn";
+  btnPractice.textContent = "Практика";
+  btnPractice.addEventListener("click", (e) => {
+    e.stopPropagation();
+    state.courses.subjectKey = userSubject.key;
+    saveState();
+    setTab("courses");
+    // Открываем сразу practice start
+    replaceCourses("subject-hub");
+    renderSubjectHub();
+    // имитация перехода как будто нажали "Практика" в hub
+    openPracticeStart();
+  });
+
+  // Ресурсы (study) или Туры (competitive)
+  const btnSecond = document.createElement("button");
+  btnSecond.type = "button";
+  btnSecond.className = "mini-btn ghost";
+
+  if (isComp) {
+    btnSecond.textContent = "Туры";
+    btnSecond.addEventListener("click", (e) => {
+      e.stopPropagation();
       state.courses.subjectKey = userSubject.key;
       saveState();
       setTab("courses");
       replaceCourses("subject-hub");
       renderSubjectHub();
+      // Открываем список туров
+      pushCourses("tours");
     });
-    return el;
+  } else {
+    btnSecond.textContent = "Материалы";
+    btnSecond.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openGlobal("resources");
+    });
   }
+
+  actions.appendChild(btnPractice);
+  actions.appendChild(btnSecond);
+
+  el.appendChild(header);
+  el.appendChild(actions);
+
+  return el;
+}
 
   // ---------------------------
   // Courses: All Subjects rendering
