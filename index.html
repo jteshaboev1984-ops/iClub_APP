@@ -80,18 +80,18 @@
 
             <div class="grid-2">
               <label class="field">
-               <span class="label">Регион</span>
+                <span class="label">Регион</span>
                 <select id="reg-region" class="input" required>
-                <option value="" selected disabled>Выберите регион…</option>
-               </select>
-            </label>
+                  <option value="" selected disabled>Выберите регион…</option>
+                </select>
+              </label>
 
-             <label class="field">
-              <span class="label">Район</span>
-               <select id="reg-district" class="input" required disabled>
-               <option value="" selected disabled>Сначала выберите регион…</option>
-              </select>
-             </label>
+              <label class="field">
+                <span class="label">Район</span>
+                <select id="reg-district" class="input" required disabled>
+                  <option value="" selected disabled>Сначала выберите регион…</option>
+                </select>
+              </label>
             </div>
 
             <!-- School fields: shown/hidden by app.js depending on reg-is-school -->
@@ -177,7 +177,6 @@
           <div class="section">
             <div class="section-title">Соревновательные предметы</div>
             <div id="home-competitive-list" class="cards-grid">
-              <!-- filled by app.js -->
               <div class="empty muted">Пока нет. Это нормально только первую минуту после регистрации.</div>
             </div>
           </div>
@@ -185,7 +184,6 @@
           <div class="section">
             <div class="section-title">Учебные предметы</div>
             <div id="home-study-list" class="cards-grid">
-              <!-- filled by app.js -->
               <div class="empty muted">Закрепите предметы в Courses.</div>
             </div>
           </div>
@@ -193,6 +191,7 @@
           <div class="section">
             <div class="section-title">Быстрые действия</div>
             <div class="quick-actions">
+              <button class="btn" type="button" data-action="open-resources">Ресурсы</button>
               <button class="btn" type="button" data-action="open-news">Новости</button>
               <button class="btn" type="button" data-action="open-notifications">Уведомления</button>
               <button class="btn" type="button" data-action="open-community">Комьюнити</button>
@@ -215,6 +214,14 @@
               </div>
               <div id="subjects-grid" class="cards-grid">
                 <!-- filled by app.js -->
+              </div>
+
+              <div class="section" style="margin-top:14px">
+                <div class="section-title">Навигация</div>
+                <div class="quick-actions">
+                  <button class="btn" type="button" data-action="open-all-subjects">Все предметы</button>
+                  <button class="btn" type="button" data-action="open-resources">Ресурсы</button>
+                </div>
               </div>
             </section>
 
@@ -250,6 +257,14 @@
                   <div class="card-title">Мои рекомендации</div>
                   <div class="muted small">Повторный доступ к чтению</div>
                 </button>
+              </div>
+
+              <div class="section" style="margin-top:14px">
+                <div class="section-title">Системные</div>
+                <div class="quick-actions">
+                  <button class="btn" type="button" data-action="open-certificates">Сертификаты</button>
+                  <button class="btn" type="button" data-action="open-archive">Архив</button>
+                </div>
               </div>
             </section>
 
@@ -350,6 +365,40 @@
               </div>
             </section>
 
+            <!-- Practice Review -->
+            <section id="courses-practice-review" class="stack-screen" data-stack="courses" data-screen="practice-review">
+              <div class="section">
+                <div class="h1">Разбор ошибок</div>
+                <div class="muted">Правильные ответы и объяснения</div>
+              </div>
+
+              <div id="practice-review-list" class="list">
+                <div class="empty muted">Пока нечего разбирать. Но вы держитесь — это уже прогресс.</div>
+              </div>
+
+              <div class="actions-row">
+                <button class="btn" type="button" data-action="practice-back-to-result">Назад к результату</button>
+                <button class="btn primary" type="button" data-action="to-subject-hub">К предмету</button>
+              </div>
+            </section>
+
+            <!-- Practice Recommendations -->
+            <section id="courses-practice-recs" class="stack-screen" data-stack="courses" data-screen="practice-recs">
+              <div class="section">
+                <div class="h1">Рекомендации</div>
+                <div class="muted">Что прочитать по вашим ошибкам</div>
+              </div>
+
+              <div id="practice-recs-list" class="list">
+                <div class="empty muted">Рекомендации появятся после связи с книгами/главами.</div>
+              </div>
+
+              <div class="actions-row">
+                <button class="btn" type="button" data-action="practice-back-to-result">Назад к результату</button>
+                <button class="btn primary" type="button" data-action="to-subject-hub">К предмету</button>
+              </div>
+            </section>
+
             <!-- Tours List -->
             <section id="courses-tours" class="stack-screen" data-stack="courses" data-screen="tours">
               <div class="section">
@@ -357,8 +406,12 @@
                 <div class="muted">Активные и прошедшие</div>
               </div>
               <div id="tours-list" class="list">
-                <!-- filled by app.js -->
                 <div class="empty muted">Туры появятся при подключении базы.</div>
+              </div>
+
+              <div class="actions-row">
+                <button class="btn" type="button" data-action="open-archive">Архив туров</button>
+                <button class="btn primary" type="button" data-action="to-subject-hub">К предмету</button>
               </div>
             </section>
 
@@ -416,8 +469,37 @@
                 <div id="tour-result-meta" class="muted">Score: 0/20</div>
               </div>
 
+              <div class="cards-grid">
+                <button class="card-btn" type="button" data-action="tour-review">
+                  <div class="card-title">Разбор тура</div>
+                  <div class="muted small">Ответы, объяснения, ошибки</div>
+                </button>
+
+                <button class="card-btn" type="button" data-action="tour-certificate">
+                  <div class="card-title">Сертификат</div>
+                  <div class="muted small">Если доступен по правилам</div>
+                </button>
+              </div>
+
               <div class="actions-row">
-                <button class="btn" type="button" data-action="tour-certificate">Сертификат</button>
+                <button class="btn" type="button" data-action="open-ratings">Рейтинг</button>
+                <button class="btn primary" type="button" data-action="to-subject-hub">К предмету</button>
+              </div>
+            </section>
+
+            <!-- Tour Review (active) -->
+            <section id="courses-tour-review" class="stack-screen" data-stack="courses" data-screen="tour-review">
+              <div class="section">
+                <div class="h1">Разбор тура</div>
+                <div class="muted">Ответы, объяснения и работа над ошибками</div>
+              </div>
+
+              <div id="tour-review-list" class="list">
+                <div class="empty muted">Разбор появится после подключения данных тура.</div>
+              </div>
+
+              <div class="actions-row">
+                <button class="btn" type="button" data-action="tour-back-to-result">Назад к результату</button>
                 <button class="btn primary" type="button" data-action="to-subject-hub">К предмету</button>
               </div>
             </section>
@@ -453,6 +535,7 @@
         <div class="content">
           <h1 class="h1">Ratings</h1>
           <p class="muted">Только по соревновательным предметам и активным турам.</p>
+
           <div class="card">
             <div class="muted small">Экран будет заполнен после подключения базы (district/region/country).</div>
           </div>
@@ -485,6 +568,154 @@
               <div class="card-title">О проекте</div>
               <div class="muted small">Правила и организаторы</div>
             </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Resources Hub (Global) ============ -->
+      <section id="view-resources" class="view" data-view="resources" aria-label="Resources">
+        <div class="content">
+          <h1 class="h1">Ресурсы</h1>
+          <p class="muted">Материалы, ссылки и полезное. Мы не обещаем лёгкость, мы обещаем результат.</p>
+
+          <div class="cards-grid">
+            <button class="card-btn" type="button" data-action="open-books-global">
+              <div class="card-title">Книги</div>
+              <div class="muted small">Список книг и PDF/ссылки</div>
+            </button>
+
+            <button class="card-btn" type="button" data-action="open-news">
+              <div class="card-title">Новости</div>
+              <div class="muted small">Анонсы и обновления</div>
+            </button>
+
+            <button class="card-btn" type="button" data-action="open-community">
+              <div class="card-title">Комьюнити</div>
+              <div class="muted small">Канал + чат обсуждений</div>
+            </button>
+
+            <button class="card-btn" type="button" data-action="open-about">
+              <div class="card-title">О проекте</div>
+              <div class="muted small">Правила, формат, цели</div>
+            </button>
+          </div>
+
+          <div class="actions-row">
+            <button class="btn" type="button" data-action="back">Назад</button>
+            <button class="btn primary" type="button" data-action="go-home">На главную</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ News (Global) ============ -->
+      <section id="view-news" class="view" data-view="news" aria-label="News">
+        <div class="content">
+          <h1 class="h1">Новости</h1>
+          <p class="muted">Официальные обновления и анонсы.</p>
+
+          <div id="news-list" class="list">
+            <div class="empty muted">Пока новостей нет. Значит, вы успели раньше всех.</div>
+          </div>
+
+          <div class="actions-row">
+            <button class="btn" type="button" data-action="back">Назад</button>
+            <button class="btn primary" type="button" data-action="open-community">Комьюнити</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Notifications (Global) ============ -->
+      <section id="view-notifications" class="view" data-view="notifications" aria-label="Notifications">
+        <div class="content">
+          <h1 class="h1">Уведомления</h1>
+          <p class="muted">Системные сообщения и важные события.</p>
+
+          <div id="notifications-list" class="list">
+            <div class="empty muted">Пока тихо. Это подозрительно приятно.</div>
+          </div>
+
+          <div class="actions-row">
+            <button class="btn" type="button" data-action="back">Назад</button>
+            <button class="btn primary" type="button" data-action="go-home">На главную</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Community (Global) ============ -->
+      <section id="view-community" class="view" data-view="community" aria-label="Community">
+        <div class="content">
+          <h1 class="h1">Комьюнити</h1>
+          <p class="muted">Официальный канал и чат обсуждений.</p>
+
+          <div class="cards-grid">
+            <button class="card-btn" type="button" data-action="open-channel">
+              <div class="card-title">Канал</div>
+              <div class="muted small">@iClubuzofficial</div>
+            </button>
+
+            <button class="card-btn" type="button" data-action="open-chat">
+              <div class="card-title">Чат обсуждений</div>
+              <div class="muted small">Присоединиться</div>
+            </button>
+          </div>
+
+          <div class="actions-row">
+            <button class="btn" type="button" data-action="back">Назад</button>
+            <button class="btn primary" type="button" data-action="go-home">На главную</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ About (Global) ============ -->
+      <section id="view-about" class="view" data-view="about" aria-label="About">
+        <div class="content">
+          <h1 class="h1">О проекте</h1>
+          <p class="muted">Кратко, по делу, без “воды” (её у нас достаточно в задачах по физике).</p>
+
+          <div class="card">
+            <div class="card-title">iClub</div>
+            <div class="muted small">
+              Здесь будет официальный текст из документа проекта: цели, правила участия, форматы туров, условия сертификатов и рейтингов.
+            </div>
+          </div>
+
+          <div class="actions-row">
+            <button class="btn" type="button" data-action="back">Назад</button>
+            <button class="btn primary" type="button" data-action="open-community">Комьюнити</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Certificates (Global) ============ -->
+      <section id="view-certificates" class="view" data-view="certificates" aria-label="Certificates">
+        <div class="content">
+          <h1 class="h1">Сертификаты</h1>
+          <p class="muted">По турам и итоговые — в зависимости от правил доступа.</p>
+
+          <div id="certificates-list" class="list">
+            <div class="empty muted">Пока нет сертификатов. Это не проблема — это мотивация.</div>
+          </div>
+
+          <div class="actions-row">
+            <button class="btn" type="button" data-action="back">Назад</button>
+            <button class="btn primary" type="button" data-action="go-profile">В профиль</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Archive (Global) ============ -->
+      <section id="view-archive" class="view" data-view="archive" aria-label="Archive">
+        <div class="content">
+          <h1 class="h1">Архив</h1>
+          <p class="muted">Прошедшие туры (только после завершения активного тура).</p>
+
+          <div id="archive-list" class="list">
+            <div class="empty muted">Архив пуст. Значит, туры ещё свежие — как ваша тревога перед дедлайном.</div>
+          </div>
+
+          <div class="actions-row">
+            <button class="btn" type="button" data-action="back">Назад</button>
+            <button class="btn primary" type="button" data-action="open-ratings">Рейтинги</button>
           </div>
         </div>
       </section>
@@ -526,4 +757,4 @@
   <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
-</html> 
+</html>
