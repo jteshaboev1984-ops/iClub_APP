@@ -115,6 +115,61 @@
   }
 
   // ---------------------------
+  // Regions / Districts (v1 demo)
+  // Later: load from DB
+  // ---------------------------
+  const REGIONS = {
+    "Tashkent": ["Chilonzor", "Yunusobod", "Mirzo Ulug‘bek", "Shaykhontohur", "Yakkasaroy"],
+    "Samarkand": ["Samarkand city", "Urgut", "Kattakurgan", "Payariq"],
+    "Fergana": ["Fergana city", "Margilan", "Kokand", "Quva"],
+    "Andijan": ["Andijan city", "Asaka", "Shahrixon", "Xo‘jaobod"],
+    "Bukhara": ["Bukhara city", "G‘ijduvon", "Kogon", "Vobkent"]
+  };
+
+  function fillSelectOptions(selectEl, options, placeholder) {
+    if (!selectEl) return;
+
+    selectEl.innerHTML = "";
+
+    const ph = document.createElement("option");
+    ph.value = "";
+    ph.disabled = true;
+    ph.selected = true;
+    ph.textContent = placeholder;
+    selectEl.appendChild(ph);
+
+    options.forEach(v => {
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = v;
+      selectEl.appendChild(o);
+    });
+  }
+
+  function initRegionDistrictUI() {
+    const regionEl = $("#reg-region");
+    const districtEl = $("#reg-district");
+    if (!regionEl || !districtEl) return;
+
+    const regionList = Object.keys(REGIONS);
+    fillSelectOptions(regionEl, regionList, "Выберите регион…");
+
+    districtEl.disabled = true;
+    fillSelectOptions(districtEl, [], "Сначала выберите регион…");
+
+    regionEl.addEventListener("change", () => {
+      const r = regionEl.value;
+      const districts = REGIONS[r] || [];
+      districtEl.disabled = districts.length === 0;
+      fillSelectOptions(
+        districtEl,
+        districts,
+        districts.length ? "Выберите район…" : "Нет районов"
+      );
+    });
+  }
+
+  // ---------------------------
   // UI: Views & Tabs
   // ---------------------------
   const VIEWS = ["splash", "registration", "home", "courses", "ratings", "profile"];
@@ -141,7 +196,7 @@
     });
 
     if (tabName === "courses") {
-      renderCoursesStack(); // ensure stack screen rendered
+      renderCoursesStack();
     }
   }
 
@@ -158,7 +213,6 @@
     subEl.textContent = "";
     backBtn.style.visibility = "hidden";
 
-    // Splash: hide back
     if (viewName === "splash") {
       titleEl.textContent = t("app_name");
       return;
@@ -189,11 +243,9 @@
     }
 
     if (viewName === "courses") {
-      // Courses stack decides back visibility
       const canGoBack = canCoursesBack();
       backBtn.style.visibility = (state.quizLock ? "hidden" : (canGoBack ? "visible" : "hidden"));
 
-      // Title based on stack screen
       const top = getCoursesTopScreen();
       if (top === "all-subjects") titleEl.textContent = "Courses";
       if (top === "subject-hub") titleEl.textContent = "Subject";
@@ -209,7 +261,6 @@
       if (top === "books") titleEl.textContent = "Books";
       if (top === "my-recs") titleEl.textContent = "My Recommendations";
 
-      // Subtitle: subject name when available
       const subj = subjectByKey(state.courses.subjectKey);
       if (subj && top !== "all-subjects") subEl.textContent = subj.title;
 
@@ -251,7 +302,6 @@
   }
 
   function pushCourses(screenName) {
-    // quiz lock: do not allow navigation away by stack push/pop
     state.courses.stack.push(screenName);
     saveState();
     showCoursesScreen(screenName);
@@ -264,7 +314,7 @@
   }
 
   function popCourses() {
-    if (state.quizLock) return; // quiz-lock
+    if (state.quizLock) return;
     if (state.courses.stack.length <= 1) return;
     state.courses.stack.pop();
     saveState();
@@ -398,7 +448,6 @@
       metaEl.textContent = us ? `${us.mode.toUpperCase()} • ${us.pinned ? "PINNED" : "NOT PINNED"}` : "NOT ADDED";
     }
 
-    // Ensure topbar updates
     updateTopbarForView("courses");
   }
 
@@ -412,7 +461,6 @@
 
     list.innerHTML = "";
 
-    // Demo lessons
     const demoLessons = [
       { id: "l1", title: "Lesson 1 — Intro", topic: "Basics" },
       { id: "l2", title: "Lesson 2 — Core", topic: "Core" },
@@ -482,15 +530,12 @@
   }
 
   function openPracticeStart() {
-    // If there is an in-progress draft for current subject -> offer resume
     const draft = loadPracticeDraft();
     if (draft && draft.status === "in_progress" && draft.subjectKey === state.courses.subjectKey) {
-      // show a simple confirm using native confirm (modal system later)
       const ok = confirm(t("practice_resume_prompt"));
       if (ok) {
         openPracticeQuiz(draft);
       } else {
-        // start over
         startPracticeNew();
       }
       return;
@@ -501,12 +546,9 @@
   let practiceTimer = null;
 
   function openPracticeQuiz(draft) {
-    // quiz-lock ON for practice (but we allow pause via button)
     state.quizLock = "practice";
     saveState();
 
-    // ensure we are on quiz screen
-    // if current top isn't practice-quiz, push it
     if (getCoursesTopScreen() !== "practice-quiz") pushCourses("practice-quiz");
 
     renderPracticeQuestion(draft);
@@ -533,7 +575,6 @@
   }
 
   function startPracticeTick() {
-    // demo: 30s per question
     stopPracticeTick();
     let remaining = 30;
     $("#practice-timer").textContent = `00:${String(remaining).padStart(2, "0")}`;
@@ -542,7 +583,6 @@
       remaining -= 1;
       if (remaining <= 0) {
         stopPracticeTick();
-        // auto-save empty answer and move next
         handlePracticeSubmit(true);
         return;
       }
@@ -560,12 +600,10 @@
     if (!draft || draft.status !== "in_progress") return;
 
     stopPracticeTick();
-    state.quizLock = null; // unlock so back works after pausing
+    state.quizLock = null;
     saveState();
 
     showToast(t("practice_paused"));
-    // return to subject hub
-    // keep draft for resume
     replaceCourses("subject-hub");
     renderSubjectHub();
   }
@@ -588,13 +626,9 @@
       reason: isAutoTimeout ? "time_expired" : "manual_submit"
     });
 
-    // next
     draft.qIndex += 1;
-
-    // save draft
     savePracticeDraft(draft);
 
-    // toast for timeout
     if (isAutoTimeout) {
       showToast(selected ? t("toast_time_expired_answer_saved") : t("toast_time_expired_no_answer"));
     }
@@ -613,7 +647,6 @@
     draft.finished_at = nowISO();
     savePracticeDraft(draft);
 
-    // compute score
     const score = draft.answers.filter(a => a.is_correct).length;
     $("#practice-result-meta").textContent = `Score: ${score}/10`;
 
@@ -634,7 +667,6 @@
   }
 
   function openTourQuiz() {
-    // require accept
     if (!$("#tour-rules-accept").checked) {
       showToast(t("tour_rules_accept_required"));
       return;
@@ -648,7 +680,6 @@
   }
 
   function startTourTick() {
-    // demo: 10 minutes total
     stopTourTick();
     let total = 10 * 60;
     renderTourTimer(total);
@@ -691,12 +722,10 @@
         const tab = btn.dataset.tab;
         if (!tab) return;
 
-        // quiz lock: prevent switching away during quiz
         if (state.quizLock === "tour") {
           showToast("Tour is in progress");
           return;
         }
-        // practice: allow switching only if paused; while in quiz we keep lock
         if (state.quizLock === "practice") {
           showToast("Pause practice to leave");
           return;
@@ -711,9 +740,7 @@
     const backBtn = $("#topbar-back");
     backBtn.addEventListener("click", () => {
       if (state.quizLock) return;
-      if (state.tab === "courses") {
-        popCourses();
-      }
+      if (state.tab === "courses") popCourses();
     });
   }
 
@@ -721,6 +748,9 @@
     const isSchool = $("#reg-is-school");
     if (isSchool) isSchool.addEventListener("change", updateSchoolFieldsVisibility);
     updateSchoolFieldsVisibility();
+
+    // NEW: region/district dropdowns
+    initRegionDistrictUI();
 
     const form = $("#reg-form");
     if (!form) return;
@@ -730,8 +760,11 @@
 
       const fullName = $("#reg-fullname").value.trim();
       const lang = $("#reg-language").value;
-      const region = $("#reg-region").value.trim();
-      const district = $("#reg-district").value.trim();
+
+      // NEW: select values (no trim)
+      const region = $("#reg-region").value;
+      const district = $("#reg-district").value;
+
       const isSchoolStudent = ($("#reg-is-school").value === "yes");
       const school = $("#reg-school").value.trim();
       const klass = $("#reg-class").value.trim();
@@ -745,8 +778,6 @@
         return;
       }
 
-      // Build initial user subjects
-      // Rule: main1 becomes competitive #1 ONLY if school student; else treat as main but study mode.
       const subjects = [];
 
       subjects.push({
@@ -755,7 +786,6 @@
         pinned: true
       });
 
-      // optional second main subject: if school student -> competitive #2; else study
       if (main2) {
         subjects.push({
           key: main2,
@@ -764,7 +794,6 @@
         });
       }
 
-      // optional additional: always study
       if (add1) {
         subjects.push({
           key: add1,
@@ -773,14 +802,11 @@
         });
       }
 
-      // Enforce max 2 competitive
       if (subjects.filter(s => s.mode === "competitive").length > 2) {
-        // Should not happen via UI, but safe
         showToast("Competitive subjects limit is 2");
         return;
       }
 
-      // Telegram info (optional)
       const tgUser = tg?.initDataUnsafe?.user || {};
       const avatar = tgUser?.photo_url || "";
 
@@ -806,7 +832,6 @@
       saveProfile(profile);
       window.i18n?.setLang(lang);
 
-      // After registration -> Home tab
       state.tab = "home";
       state.courses.stack = ["all-subjects"];
       state.courses.subjectKey = null;
@@ -821,22 +846,18 @@
   }
 
   function bindCoursesActions() {
-    // Subject Hub actions
     document.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-action]");
       if (!btn) return;
       const action = btn.dataset.action;
 
-      // Global actions
       if (action === "open-news") { showToast("News: soon"); return; }
       if (action === "open-notifications") { showToast("Notifications: soon"); return; }
       if (action === "open-community") { showToast("Community: soon"); return; }
 
-      // Courses-specific
       if (state.tab !== "courses") return;
 
       if (action === "to-subject-hub") {
-        // Return to subject hub (no stack spam)
         replaceCourses("subject-hub");
         renderSubjectHub();
         return;
@@ -854,7 +875,6 @@
       }
 
       if (action === "practice-start") {
-        // start new or resume prompt is handled in openPracticeStart before reaching start screen
         startPracticeNew();
         return;
       }
@@ -896,7 +916,6 @@
       }
 
       if (action === "tour-submit") {
-        // demo: finish immediately
         finishTour();
         return;
       }
@@ -918,7 +937,6 @@
 
       if (action === "video-skip") {
         showToast("video_skipped logged (demo)");
-        // practice available after skip
         openPracticeStart();
         return;
       }
@@ -930,11 +948,9 @@
       }
     });
 
-    // Tours list click -> rules
     const toursList = $("#tours-list");
     if (toursList) {
       toursList.addEventListener("click", () => {
-        // For now open rules directly
         openTourRules();
       });
     }
@@ -957,16 +973,13 @@
   // Boot
   // ---------------------------
   function boot() {
-    // Set language early
     const profile = loadProfile();
     const lang = profile?.language || getTelegramLang() || "ru";
     window.i18n?.setLang(lang);
 
-    // Splash -> decide registration vs home
     const statusEl = $("#splash-status");
     if (statusEl) statusEl.textContent = t("loading");
 
-    // Minimal delay for nicer feel
     setTimeout(() => {
       if (!isRegistered()) {
         showView("registration");
@@ -974,11 +987,9 @@
         return;
       }
 
-      // Registered: show last tab or home
       renderAllSubjects();
       renderHome();
 
-      // If state tab somehow is splash/registration -> normalize
       if (!["home", "courses", "ratings", "profile"].includes(state.tab)) {
         state.tab = "home";
         saveState();
@@ -986,10 +997,8 @@
 
       setTab(state.tab);
 
-      // If courses tab restored, render stack
       if (state.tab === "courses") {
         renderCoursesStack();
-        // If top is subject-hub etc. ensure hub renders
         if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
       }
     }, 450);
@@ -1007,4 +1016,3 @@
   boot();
 
 })();
-
