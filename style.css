@@ -692,3 +692,42 @@ body {
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* Catalog CTA priority fix */
+.catalog-actions .mini-btn{
+  background: var(--card);
+  color: var(--text);
+  box-shadow: none;
+}
+
+.catalog-actions .mini-btn.primary,
+.catalog-actions .mini-btn:not(.ghost):last-child{
+  background: linear-gradient(180deg, var(--primary), var(--primary-2));
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Make catalog cards more compact */
+.catalog-head{
+  padding-bottom: 6px;
+}
+
+.catalog-hint{
+  margin-top: 6px;
+}
+
+.catalog-competitive-row{
+  padding-top: 8px;
+  padding-bottom: 10px;
+  background: transparent;
+  border-top: none;
+}
+
+.link-btn{
+  font-weight: 800;
+  opacity: 0.85;
+}
+
+.link-btn:hover{
+  opacity: 1;
+}
