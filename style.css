@@ -594,7 +594,7 @@ body {
   color: var(--text);
 }
 
-/* ===== All Subjects (Catalog) ===== */
+/* ===== All Subjects (Catalog) — premium look ===== */
 .catalog-card{
   background: var(--card);
   border: 1px solid var(--border);
@@ -608,7 +608,7 @@ body {
   text-align: left;
   border: 0;
   background: transparent;
-  padding: 14px;
+  padding: 14px 14px 8px;
   cursor: pointer;
 }
 
@@ -643,13 +643,51 @@ body {
   display:grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  padding: 0 14px 12px;
+  padding: 0 14px 10px;
 }
 
+/* ✅ CTA smaller and cleaner inside catalog */
+.catalog-actions .mini-btn{
+  height: 40px;
+  border-radius: 14px;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+/* Make ghost button look like secondary */
+.catalog-actions .mini-btn.ghost{
+  background: rgba(15,23,42,0.03);
+  box-shadow: none;
+}
+
+/* Competitive row becomes subtle info strip */
 .catalog-competitive-row{
-  padding: 0 14px 14px;
+  padding: 10px 14px 14px;
+  border-top: 1px solid rgba(15,23,42,0.06);
+  background: rgba(246,248,252,0.55);
 }
 
+.catalog-competitive-info{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.link-btn{
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 900;
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.link-btn:active{ transform: translateY(1px); }
+
+/* Disabled */
 .mini-btn:disabled{
   opacity: 0.55;
   cursor: not-allowed;
