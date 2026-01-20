@@ -250,6 +250,254 @@
     return !hasAnyActiveTourNow();
   }
 
+     // ---------------------------
+  // Practice v1 (10Q: 3/5/2 + MCQ+INPUT + per-question timer + attempts history)
+  // ---------------------------
+
+  const PRACTICE_CONFIG = {
+    total: 10,
+    dist: { easy: 3, medium: 5, hard: 2 },
+    // таймер по сложности (сек)
+    timeByDifficulty: { easy: 45, medium: 60, hard: 90 },
+    // максимум сохраняемых попыток
+    keepLastAttempts: 5
+  };
+
+  // Мини-банк вопросов для практики (позже заменим на базу).
+  // ВАЖНО: добавляй/расширяй — но структура должна быть стабильной.
+  // type: "mcq" | "input"
+  // inputKind: "numeric" | "letter"
+  const PRACTICE_BANK = {
+    economics: [
+      {
+        id: "eco_p_001",
+        topic: "Basics",
+        difficulty: "easy",
+        type: "mcq",
+        question: "Что такое альтернативная стоимость?",
+        options: ["Стоимость производства", "Стоимость упущенной лучшей альтернативы", "Цена товара", "Налог на товар"],
+        correctIndex: 1,
+        explanation: "Альтернативная стоимость — ценность лучшей упущенной альтернативы при выборе."
+      },
+      {
+        id: "eco_p_002",
+        topic: "Elasticity",
+        difficulty: "medium",
+        type: "input",
+        inputKind: "numeric",
+        inputHint: "Введите число (например 1.5)",
+        question: "Если %ΔQ = 10% и %ΔP = 5%, чему равна эластичность спроса по цене (по модулю)?",
+        correctAnswer: "2",
+        explanation: "Ed = |%ΔQ / %ΔP| = 10/5 = 2."
+      },
+      {
+        id: "eco_p_003",
+        topic: "Demand & Supply",
+        difficulty: "hard",
+        type: "input",
+        inputKind: "letter",
+        inputHint: "Введите 1 букву (не a/b/c/d)",
+        question: "Какая буква обычно обозначает равновесную цену? (одна буква)",
+        correctAnswer: "P",
+        explanation: "Чаще всего цену обозначают P (price), равновесную — Pe."
+      }
+    ],
+    mathematics: [
+      {
+        id: "math_p_001",
+        topic: "Algebra",
+        difficulty: "easy",
+        type: "mcq",
+        question: "Чему равно (x^2) * (x^3)?",
+        options: ["x^5", "x^6", "x^9", "x^1"],
+        correctIndex: 0,
+        explanation: "При умножении степеней с одинаковым основанием показатели складываются: 2+3=5."
+      },
+      {
+        id: "math_p_002",
+        topic: "Functions",
+        difficulty: "medium",
+        type: "input",
+        inputKind: "numeric",
+        inputHint: "Введите число",
+        question: "Если f(x)=2x+3, чему равно f(4)?",
+        correctAnswer: "11",
+        explanation: "2*4+3=11."
+      }
+    ],
+    chemistry: [
+      {
+        id: "chem_p_001",
+        topic: "Basics",
+        difficulty: "easy",
+        type: "mcq",
+        question: "Какой заряд у протона?",
+        options: ["-1", "0", "+1", "+2"],
+        correctIndex: 2,
+        explanation: "Протон имеет заряд +1."
+      }
+    ],
+    biology: [
+      {
+        id: "bio_p_001",
+        topic: "Cells",
+        difficulty: "easy",
+        type: "mcq",
+        question: "Основная функция митохондрий?",
+        options: ["Фотосинтез", "Синтез белка", "Производство АТФ", "Хранение ДНК"],
+        correctIndex: 2,
+        explanation: "Митохондрии — основной источник АТФ."
+      }
+    ],
+    informatics: [
+      {
+        id: "inf_p_001",
+        topic: "Algorithms",
+        difficulty: "easy",
+        type: "mcq",
+        question: "Какой алгоритм обычно имеет сложность O(n log n)?",
+        options: ["Binary search", "Merge sort", "Linear search", "Bubble sort (worst)"],
+        correctIndex: 1,
+        explanation: "Merge sort обычно O(n log n)."
+      }
+    ]
+  };
+
+  function getPracticeBankForSubject(subjectKey) {
+    return PRACTICE_BANK[subjectKey] || [];
+  }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function normalizeDifficulty(d) {
+    const x = String(d || "").toLowerCase();
+    if (x === "easy" || x === "medium" || x === "hard") return x;
+    return "medium";
+  }
+
+  function pickN(pool, n) {
+    const s = shuffle(pool);
+    return s.slice(0, Math.max(0, n));
+  }
+
+  function buildPracticeSet(subjectKey) {
+    const bank = getPracticeBankForSubject(subjectKey).map(q => ({ ...q, difficulty: normalizeDifficulty(q.difficulty) }));
+
+    // группируем по сложности
+    const by = {
+      easy: bank.filter(q => q.difficulty === "easy"),
+      medium: bank.filter(q => q.difficulty === "medium"),
+      hard: bank.filter(q => q.difficulty === "hard")
+    };
+
+    // если банк пустой — делаем fallback (чтобы практика не падала)
+    if (bank.length === 0) {
+      return Array.from({ length: PRACTICE_CONFIG.total }).map((_, i) => ({
+        id: `fallback_${subjectKey}_${i + 1}`,
+        topic: "General",
+        difficulty: i < 3 ? "easy" : (i < 8 ? "medium" : "hard"),
+        type: "mcq",
+        question: `Вопрос ${i + 1} (demo)`,
+        options: ["A", "B", "C", "D"],
+        correctIndex: 0,
+        explanation: "Демо-вопрос. Позже заменим на банк/базу."
+      }));
+    }
+
+    const set = [
+      ...pickN(by.easy.length ? by.easy : bank, PRACTICE_CONFIG.dist.easy),
+      ...pickN(by.medium.length ? by.medium : bank, PRACTICE_CONFIG.dist.medium),
+      ...pickN(by.hard.length ? by.hard : bank, PRACTICE_CONFIG.dist.hard)
+    ];
+
+    // если вдруг не набрали 10 — добиваем из общего банка
+    const need = PRACTICE_CONFIG.total - set.length;
+    if (need > 0) {
+      const used = new Set(set.map(x => x.id));
+      const rest = bank.filter(x => !used.has(x.id));
+      set.push(...pickN(rest.length ? rest : bank, need));
+    }
+
+    // “лесенка” сложности: easy -> medium -> hard
+    const order = { easy: 1, medium: 2, hard: 3 };
+    set.sort((a, b) => (order[a.difficulty] - order[b.difficulty]));
+
+    return set.slice(0, PRACTICE_CONFIG.total);
+  }
+
+  function practiceStorageKey(subjectKey) {
+    return `practice_history_v1:${subjectKey}`;
+  }
+
+  function loadPracticeHistory(subjectKey) {
+    try {
+      const raw = localStorage.getItem(practiceStorageKey(subjectKey));
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (!parsed) return { best: null, last: [] };
+      return {
+        best: parsed.best || null,
+        last: Array.isArray(parsed.last) ? parsed.last : []
+      };
+    } catch {
+      return { best: null, last: [] };
+    }
+  }
+
+  function savePracticeHistory(subjectKey, data) {
+    try {
+      localStorage.setItem(practiceStorageKey(subjectKey), JSON.stringify(data));
+    } catch {}
+  }
+
+  function updatePracticeHistory(subjectKey, attempt) {
+    const h = loadPracticeHistory(subjectKey);
+    const last = [attempt, ...(h.last || [])].slice(0, PRACTICE_CONFIG.keepLastAttempts);
+
+    let best = h.best;
+    if (!best || (attempt.percent > best.percent) || (attempt.percent === best.percent && attempt.durationSec < best.durationSec)) {
+      best = attempt;
+    }
+
+    savePracticeHistory(subjectKey, { best, last });
+    return { best, last };
+  }
+
+  function formatDateTime(ts) {
+    try {
+      const d = new Date(ts);
+      return d.toLocaleString();
+    } catch {
+      return "";
+    }
+  }
+
+  function isValidInputAnswer(q, value) {
+    const v = String(value ?? "").trim();
+    if (!v) return false;
+
+    if (q.inputKind === "numeric") {
+      // допускаем число с точкой/запятой
+      return /^-?\d+([.,]\d+)?$/.test(v);
+    }
+
+    if (q.inputKind === "letter") {
+      // ровно 1 буква, запрещаем a/b/c/d (чтобы не путали с MCQ)
+      if (!/^[A-Za-zА-Яа-я]$/.test(v)) return false;
+      const low = v.toLowerCase();
+      if (low === "a" || low === "b" || low === "c" || low === "d") return false;
+      return true;
+    }
+
+    return true;
+  }
+
   // ---------------------------
   // Regions / Districts (v1 demo)
   // Later: load from DB
@@ -1130,7 +1378,7 @@ compRow.appendChild(compInfo);
       questions: buildDemoPracticeQuestions()
     };
     savePracticeDraft(draft);
-    openPracticeQuiz(draft);
+    openPracticeQuiz();
   }
 
   function openPracticeStart() {
@@ -1138,7 +1386,7 @@ compRow.appendChild(compInfo);
     if (draft && draft.status === "in_progress" && draft.subjectKey === state.courses.subjectKey) {
       const ok = confirm(t("practice_resume_prompt"));
       if (ok) {
-        openPracticeQuiz(draft);
+        openPracticeQuiz();
       } else {
         startPracticeNew();
       }
@@ -1149,16 +1397,38 @@ compRow.appendChild(compInfo);
 
   let practiceTimer = null;
 
-  function openPracticeQuiz(draft) {
-    state.quizLock = "practice";
-    saveState();
+  function openPracticeQuiz() {
+  const profile = loadProfile();
+  const subjectKey = state.courses.subjectKey;
 
-    if (getCoursesTopScreen() !== "practice-quiz") pushCourses("practice-quiz");
+  // практика доступна всем (и школьникам, и не школьникам) — по документу это ок
+  // (позже можно ограничить, но сейчас оставляем)
+  const questions = buildPracticeSet(subjectKey);
 
-    renderPracticeQuestion(draft);
-    updateTopbarForView("courses");
-    startPracticeTick();
-  }
+  state.quizLock = "practice";
+  state.quiz = {
+    mode: "practice",
+    subjectKey,
+    startedAt: Date.now(),
+    paused: false,
+    pauseStartedAt: null,
+    pausedTotalMs: 0,
+
+    index: 0,
+    questions,
+    answers: Array.from({ length: questions.length }).map(() => null), // для mcq: number, для input: string
+    correct: Array.from({ length: questions.length }).map(() => false),
+
+    // таймер на текущий вопрос
+    qTimeLeft: PRACTICE_CONFIG.timeByDifficulty[questions[0].difficulty] || 60,
+    qTimerId: null
+  };
+
+  saveState();
+
+  replaceCourses("practice-quiz");
+  renderPracticeQuiz();
+}
 
   function renderPracticeQuestion(draft) {
     const q = draft.questions[draft.qIndex];
