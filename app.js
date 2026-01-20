@@ -2020,8 +2020,9 @@ item.innerHTML = `
 const btn = item.querySelector('button[data-open-books="1"]');
 btn?.addEventListener("click", (e) => {
   e.stopPropagation();
-  // пока библиотека будет заполняться позже — открываем ресурс/плейсхолдер
-  showToast("Раздел «Книги» подключим вместе с источниками по предмету.");
+
+  // Открываем Books внутри текущего предмета (как в спецификации)
+  pushCourses("books");
 });
       wrap.appendChild(item);
     });
