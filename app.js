@@ -858,10 +858,21 @@ function pushProfile(screenName) {
   showProfileScreen(screenName);
 }
 
-function replaceProfile(screenName) {
-  state.profile.stack = [screenName];
+function replaceProfile(screen) {
+  state.profile = screen;
   saveState();
-  showProfileScreen(screenName);
+
+  // скрыть все экраны профиля
+  document.querySelectorAll('#view-profile .profile-screen')
+    .forEach(el => el.classList.remove('is-active'));
+
+  // показать нужный
+  const next = document.getElementById(`profile-${screen}`);
+  if (next) next.classList.add('is-active');
+
+  // перерендер
+  if (screen === 'main') renderProfileMain();
+  if (screen === 'settings') renderProfileSettings();
 }
 
 function popProfile() {
