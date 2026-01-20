@@ -679,11 +679,13 @@ function getReadingRefs(subjectKey, topic) {
   // Topbar behavior
   // ---------------------------
   function updateTopbarForView(viewName) {
-    const backBtn = $("#topbar-back");
-    const titleEl = $("#topbar-title");
-    const subEl = $("#topbar-subtitle");
+const backBtn = $("#topbar-back");
+const titleEl = $("#topbar-title");
+const subEl = $("#topbar-subtitle");
+const logoEl = $("#topbar-logo");
 
-    if (!backBtn || !titleEl || !subEl) return;
+if (!backBtn || !titleEl || !subEl) return;
+if (logoEl) logoEl.style.display = "none";
 
     // Default
     titleEl.textContent = t("app_name");
@@ -716,10 +718,12 @@ function getReadingRefs(subjectKey, topic) {
     }
 
     if (viewName === "home") {
-      titleEl.textContent = t("app_name");
-      backBtn.style.visibility = "hidden";
-      return;
-    }
+  titleEl.textContent = t("app_name");
+  subEl.textContent = "Smarter together";
+  backBtn.style.visibility = "hidden";
+  if (logoEl) logoEl.style.display = "block";
+  return;
+}
 
     if (viewName === "ratings") {
       titleEl.textContent = "Ratings";
