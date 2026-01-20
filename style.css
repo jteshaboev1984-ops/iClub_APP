@@ -787,3 +787,127 @@ body {
 .profile-screen.is-active{
   display: block;
 }
+
+/* =========================
+   Profile dashboard (v1)
+   ========================= */
+.profile-dash{
+  display: grid;
+  gap: 12px;
+}
+
+.profile-dash-top{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-name{
+  font-weight: 900;
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.profile-metrics{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.metric{
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 10px;
+  text-align: center;
+}
+
+.metric-val{
+  font-weight: 950;
+  font-size: 18px;
+  margin-bottom: 2px;
+}
+
+.profile-actions{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.profile-hint{
+  opacity: 0.85;
+}
+
+/* Settings helpers */
+.settings-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.settings-list{
+  display: grid;
+  gap: 10px;
+}
+
+.settings-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.select{
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+/* Simple switch (если вы захотите включать реальные тумблеры дальше) */
+.switch{
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+}
+.switch input{ display:none; }
+.slider{
+  position:absolute;
+  cursor:pointer;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 999px;
+  transition: .2s;
+}
+.slider:before{
+  position:absolute;
+  content:"";
+  height: 20px; width: 20px;
+  left: 3px; top: 2px;
+  background: #fff;
+  border-radius: 50%;
+  transition: .2s;
+}
+.switch input:checked + .slider{
+  background: rgba(77, 138, 255, 0.55);
+}
+.switch input:checked + .slider:before{
+  transform: translateX(20px);
+}
+
+/* Small screens */
+@media (max-width: 380px){
+  .profile-metrics{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .profile-actions{ grid-template-columns: 1fr; }
+}
