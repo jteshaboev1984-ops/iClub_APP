@@ -573,133 +573,155 @@
         </div>
       </section>
 
-     <!-- ============ Profile (Tab) ============ -->
-<section id="view-profile" class="view" data-view="profile" aria-label="Profile">
-  <div class="content">
+      <!-- ============ Profile (Tab) ============ -->
+      <section id="view-profile" class="view" data-view="profile" aria-label="Profile">
+        <div class="content">
 
-    <!-- Profile MAIN -->
-    <div id="profile-main" class="profile-screen is-active">
-      <h1 class="h1">Profile</h1>
-      <p class="muted">Ваш прогресс без детсада: предметы, практика, туры, рекомендации.</p>
+  <!-- Profile MAIN -->
+  <div id="profile-main" class="profile-screen is-active">
+  <h1 class="h1">Profile</h1>
+  <p class="muted">Ваш прогресс без детсада: предметы, практика, туры, рекомендации.</p>
 
-      <!-- DASHBOARD -->
-      <div class="card profile-dash">
-        <div class="profile-dash-top">
-          <div>
-            <div class="profile-name" id="profile-dash-name">—</div>
-            <div class="muted small" id="profile-dash-meta">—</div>
-          </div>
-          <button class="btn" type="button" data-action="profile-settings">Настройки</button>
-        </div>
-
-        <div class="profile-metrics">
-          <div class="metric">
-            <div class="metric-val" id="profile-metric-competitive">0</div>
-            <div class="muted small">Competitive</div>
-          </div>
-          <div class="metric">
-            <div class="metric-val" id="profile-metric-study">0</div>
-            <div class="muted small">Study</div>
-          </div>
-          <div class="metric">
-            <div class="metric-val" id="profile-metric-pinned">0</div>
-            <div class="muted small">Pinned</div>
-          </div>
-          <div class="metric">
-            <div class="metric-val" id="profile-metric-best">—</div>
-            <div class="muted small">Best practice</div>
-          </div>
-        </div>
-
-        <div class="profile-actions">
-          <button class="btn primary" type="button" data-action="profile-open-my-recs">Мои рекомендации</button>
-          <button class="btn" type="button" data-action="profile-open-courses">Предметы</button>
-          <button class="btn" type="button" data-action="profile-open-ratings">Рейтинг</button>
-        </div>
-
-        <div class="profile-hint muted small" id="profile-dash-hint">
-          Подсказка: закрепляйте предметы — так навигация быстрее, чем мысли перед дедлайном.
-        </div>
+  <!-- DASHBOARD -->
+  <div class="card profile-dash">
+    <div class="profile-dash-top">
+      <div>
+        <div class="profile-name" id="profile-dash-name">—</div>
+        <div class="muted small" id="profile-dash-meta">—</div>
       </div>
+      <button class="btn" type="button" data-action="profile-settings">Настройки</button>
+    </div>
 
-      <!-- Quick links -->
-      <div class="cards-grid">
-        <button class="card-btn" type="button" data-action="profile-certificates">
-          <div class="card-title">Сертификаты</div>
-          <div class="muted small">По турам и итоговый</div>
-        </button>
-
-        <button class="card-btn" type="button" data-action="profile-community">
-          <div class="card-title">Комьюнити</div>
-          <div class="muted small">Канал и чат обсуждений</div>
-        </button>
-
-        <button class="card-btn" type="button" data-action="profile-about">
-          <div class="card-title">О проекте</div>
-          <div class="muted small">Правила и организаторы</div>
-        </button>
+    <div class="profile-metrics" id="profile-dash-metrics">
+      <div class="metric">
+        <div class="metric-val" id="profile-metric-competitive">0</div>
+        <div class="muted small">Competitive</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" id="profile-metric-study">0</div>
+        <div class="muted small">Study</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" id="profile-metric-pinned">0</div>
+        <div class="muted small">Pinned</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" id="profile-metric-best">—</div>
+        <div class="muted small">Best practice</div>
       </div>
     </div>
 
-    <!-- Profile SETTINGS -->
-    <div id="profile-settings" class="profile-screen">
-      <div class="settings-head">
-        <button class="btn" type="button" data-action="profile-settings-back">← Назад</button>
-        <div class="muted small">Competitive ≤ 2 • Язык • Закреплённые предметы</div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Соревновательный режим (Competitive)</div>
-        <p class="muted small">Можно выбрать максимум 2 предмета в Competitive. Настраивается только здесь.</p>
-        <div id="profile-competitive-list" class="settings-list"><!-- filled by app.js --></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Уведомления</div>
-        <p class="muted small">Сейчас заглушка v1. Подключим позже без боли.</p>
-
-        <div class="settings-list">
-          <div class="settings-row">
-            <div>
-              <div style="font-weight:800">Новости и анонсы</div>
-              <div class="muted small">Обновления олимпиад</div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" disabled>
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Язык</div>
-        <p class="muted small">Можно менять в любое время.</p>
-
-        <div class="settings-list">
-          <div class="settings-row">
-            <div>
-              <div style="font-weight:800">Язык интерфейса</div>
-              <div class="muted small">RU / UZ</div>
-            </div>
-            <select id="profile-settings-language" class="select">
-              <option value="ru">Русский</option>
-              <option value="uz">O‘zbek</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Закреплённые предметы (Pinned)</div>
-        <p class="muted small">Закреплённые предметы быстрее доступны на главной.</p>
-        <div id="profile-settings-pinned-list" class="settings-list"><!-- filled by app.js --></div>
-      </div>
+    <div class="profile-actions">
+      <button class="btn primary" type="button" data-action="profile-open-my-recs">Мои рекомендации</button>
+      <button class="btn" type="button" data-action="profile-open-courses">Предметы</button>
+      <button class="btn" type="button" data-action="profile-open-ratings">Рейтинг</button>
     </div>
 
+    <div class="profile-hint muted small" id="profile-dash-hint">
+      Подсказка: закрепляйте предметы — так навигация быстрее, чем мысли перед дедлайном.
+    </div>
   </div>
-</section>
- 
+
+  <!-- QUICK LINKS (вторично) -->
+  <div class="cards-grid">
+    <button class="card-btn" type="button" data-action="profile-certificates">
+      <div class="card-title">Сертификаты</div>
+      <div class="muted small">По турам и итоговый</div>
+    </button>
+
+    <button class="card-btn" type="button" data-action="profile-community">
+      <div class="card-title">Комьюнити</div>
+      <div class="muted small">Канал и чат обсуждений</div>
+    </button>
+
+    <button class="card-btn" type="button" data-action="profile-about">
+      <div class="card-title">О проекте</div>
+      <div class="muted small">Правила и организаторы</div>
+    </button>
+  </div>
+</div>
+
+  <!-- Profile SETTINGS -->
+<div id="profile-settings" class="profile-screen">
+
+  <!-- Header -->
+  <div class="settings-head">
+    <button class="btn" type="button" data-action="profile-settings-back">← Назад</button>
+    <div class="muted small">
+      Competitive ≤ 2 • Язык • Закреплённые предметы
+    </div>
+  </div>
+
+  <!-- Competitive mode -->
+  <div class="card">
+    <div class="card-title">Соревновательный режим (Competitive)</div>
+    <p class="muted small">
+      Можно выбрать максимум 2 предмета в Competitive.
+      Настраивается только здесь.
+    </p>
+
+    <div id="profile-competitive-list" class="settings-list">
+      <!-- filled by app.js -->
+    </div>
+  </div>
+
+  <!-- Notifications -->
+  <div class="card">
+    <div class="card-title">Уведомления</div>
+    <p class="muted small">
+      Сейчас заглушка v1. Подключим позже без боли.
+    </p>
+
+    <div class="settings-list">
+      <div class="settings-row">
+        <div>
+          <div style="font-weight:800">Новости и анонсы</div>
+          <div class="muted small">Обновления олимпиад</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" disabled>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Language -->
+  <div class="card">
+    <div class="card-title">Язык</div>
+    <p class="muted small">
+      Можно менять в любое время.
+    </p>
+
+    <div class="settings-list">
+      <div class="settings-row">
+        <div>
+          <div style="font-weight:800">Язык интерфейса</div>
+          <div class="muted small">RU / UZ</div>
+        </div>
+        <select id="profile-settings-language" class="select">
+          <option value="ru">Русский</option>
+          <option value="uz">O‘zbek</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pinned subjects -->
+  <div class="card">
+    <div class="card-title">Закреплённые предметы (Pinned)</div>
+    <p class="muted small">
+      Закреплённые предметы быстрее доступны на главной.
+    </p>
+
+    <div id="profile-settings-pinned-list" class="settings-list">
+      <!-- filled by app.js -->
+    </div>
+  </div>
+
+</div>
+<!-- /Profile SETTINGS -->
+
       <!-- ============ Notifications (Global) ============ -->
       <section id="view-notifications" class="view" data-view="notifications" aria-label="Notifications">
         <div class="content">
