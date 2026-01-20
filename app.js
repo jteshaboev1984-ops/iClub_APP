@@ -22,8 +22,9 @@
 }
 
   function safeJsonParse(s, fallback) {
-    try { return JSON.parse(s); } catch { return fallback; }
-  }
+  if (s === null || s === undefined || s === "") return fallback;
+  try { return JSON.parse(s); } catch { return fallback; }
+}
 
   function nowISO() {
     return new Date().toISOString();
@@ -1831,8 +1832,8 @@ if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
 const recsCountEl = $("#practice-recs-count");
 if (recsCountEl) recsCountEl.textContent = String(topics.length);
 
-// Show result screen
-pushCourses("practice-result");
+// Show result screen (replace quiz screen to avoid "dead" back navigation)
+replaceCourses("practice-result");
 
     // Optional: toast best update
     if (hx.best && hx.best.ts === attempt.ts) {
@@ -2020,8 +2021,6 @@ item.innerHTML = `
 const btn = item.querySelector('button[data-open-books="1"]');
 btn?.addEventListener("click", (e) => {
   e.stopPropagation();
-
-  // Открываем Books внутри текущего предмета (как в спецификации)
   pushCourses("books");
 });
       wrap.appendChild(item);
