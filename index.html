@@ -642,126 +642,85 @@
 </div>
 
   <!-- Profile SETTINGS -->
-  <div id="profile-settings" class="profile-screen">
-    <div class="settings-head">
-  <button class="btn" type="button" data-action="profile-settings-back">Назад</button>
-  <div class="muted small">Competitive ≤ 2 • Язык • Закреплённые предметы</div>
-</div>
+<div id="profile-settings" class="profile-screen">
 
-    <div class="card">
-      <div class="card-title">Соревновательный режим (Competitive)</div>
-      <p class="muted small" id="settings-competitive-note">
-        Для школьников: можно выбрать максимум 2 предмета в Competitive. Остальные остаются Study.
-      </p>
-
-      <div id="profile-settings-competitive-list" class="settings-list">
-        <!-- filled by app.js -->
-      </div>
+  <!-- Header -->
+  <div class="settings-head">
+    <button class="btn" type="button" data-action="profile-settings-back">← Назад</button>
+    <div class="muted small">
+      Competitive ≤ 2 • Язык • Закреплённые предметы
     </div>
+  </div>
 
-    <div class="card">
-      <div class="card-title">Уведомления</div>
-      <p class="muted small">Сейчас заглушка v1. Подключим позже без боли.</p>
-      <div class="settings-list">
-        <div class="settings-row">
-          <div>
-            <div style="font-weight:800">Новости и анонсы</div>
-            <div class="muted small">Обновления олимпиад</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" disabled>
-            <span class="slider"></span>
-          </label>
+  <!-- Competitive mode -->
+  <div class="card">
+    <div class="card-title">Соревновательный режим (Competitive)</div>
+    <p class="muted small">
+      Можно выбрать максимум 2 предмета в Competitive.
+      Настраивается только здесь.
+    </p>
+
+    <div id="profile-competitive-list" class="settings-list">
+      <!-- filled by app.js -->
+    </div>
+  </div>
+
+  <!-- Notifications -->
+  <div class="card">
+    <div class="card-title">Уведомления</div>
+    <p class="muted small">
+      Сейчас заглушка v1. Подключим позже без боли.
+    </p>
+
+    <div class="settings-list">
+      <div class="settings-row">
+        <div>
+          <div style="font-weight:800">Новости и анонсы</div>
+          <div class="muted small">Обновления олимпиад</div>
         </div>
+        <label class="switch">
+          <input type="checkbox" disabled>
+          <span class="slider"></span>
+        </label>
       </div>
     </div>
   </div>
-</div>
-      </section>
 
-<div class="card">
-  <div class="card-title">Язык</div>
-  <p class="muted small">Можно менять в любое время.</p>
+  <!-- Language -->
+  <div class="card">
+    <div class="card-title">Язык</div>
+    <p class="muted small">
+      Можно менять в любое время.
+    </p>
 
-  <div class="settings-list">
-    <div class="settings-row">
-      <div>
-        <div style="font-weight:800">Язык интерфейса</div>
-        <div class="muted small">RU / UZ</div>
+    <div class="settings-list">
+      <div class="settings-row">
+        <div>
+          <div style="font-weight:800">Язык интерфейса</div>
+          <div class="muted small">RU / UZ</div>
+        </div>
+        <select id="profile-settings-language" class="select">
+          <option value="ru">Русский</option>
+          <option value="uz">O‘zbek</option>
+        </select>
       </div>
-      <select id="profile-settings-language" class="select">
-        <option value="ru">Русский</option>
-        <option value="uz">O‘zbek</option>
-      </select>
     </div>
   </div>
-</div>
 
-<div class="card">
-  <div class="card-title">Закреплённые предметы (Pinned)</div>
-  <p class="muted small">Закреплённые предметы быстрее доступны на главной.</p>
+  <!-- Pinned subjects -->
+  <div class="card">
+    <div class="card-title">Закреплённые предметы (Pinned)</div>
+    <p class="muted small">
+      Закреплённые предметы быстрее доступны на главной.
+    </p>
 
-  <div id="profile-settings-pinned-list" class="settings-list">
-    <!-- filled by app.js -->
+    <div id="profile-settings-pinned-list" class="settings-list">
+      <!-- filled by app.js -->
+    </div>
   </div>
+
 </div>
-      
-      <!-- ============ Resources Hub (Global) ============ -->
-      <section id="view-resources" class="view" data-view="resources" aria-label="Resources">
-        <div class="content">
-          <h1 class="h1">Ресурсы</h1>
-          <p class="muted">Материалы, ссылки и полезное. Мы не обещаем лёгкость, мы обещаем результат.</p>
-
-          <div class="cards-grid">
-            <button class="card-btn" type="button" data-action="open-books-global">
-              <div class="card-title">Книги</div>
-              <div class="muted small">Список книг и PDF/ссылки</div>
-            </button>
-
-            <button class="card-btn" type="button" data-action="open-my-recs-global">
-             <div class="card-title">Мои рекомендации</div>
-             <div class="muted small">Список тем из ошибок практики</div>
-            </button>
-            
-            <button class="card-btn" type="button" data-action="open-news">
-              <div class="card-title">Новости</div>
-              <div class="muted small">Анонсы и обновления</div>
-            </button>
-
-            <button class="card-btn" type="button" data-action="open-community">
-              <div class="card-title">Комьюнити</div>
-              <div class="muted small">Канал + чат обсуждений</div>
-            </button>
-
-            <button class="card-btn" type="button" data-action="open-about">
-              <div class="card-title">О проекте</div>
-              <div class="muted small">Правила, формат, цели</div>
-            </button>
-          </div>
-
-          <div class="actions-row">
-            <button class="btn" type="button" data-action="back">Назад</button>
-            <button class="btn primary" type="button" data-action="go-home">На главную</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============ News (Global) ============ -->
-      <section id="view-news" class="view" data-view="news" aria-label="News">
-        <div class="content">
-          <h1 class="h1">Новости</h1>
-          <p class="muted">Официальные обновления и анонсы.</p>
-
-          <div id="news-list" class="list">
-            <div class="empty muted">Пока новостей нет. Значит, вы успели раньше всех.</div>
-          </div>
-
-          <div class="actions-row">
-            <button class="btn" type="button" data-action="back">Назад</button>
-            <button class="btn primary" type="button" data-action="open-community">Комьюнити</button>
-          </div>
-        </div>
-      </section>
+<!-- /Profile SETTINGS -->
 
       <!-- ============ Notifications (Global) ============ -->
       <section id="view-notifications" class="view" data-view="notifications" aria-label="Notifications">
