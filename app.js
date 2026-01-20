@@ -953,7 +953,7 @@ function renderProfileStack() {
 
     const input = row.querySelector('input[type="checkbox"]');
 
-    input.addEventListener("change", () => {
+      input.addEventListener("change", async () => {
       const fresh = loadProfile();
       if (!fresh) return;
 
@@ -966,15 +966,21 @@ function renderProfileStack() {
       const next = subjects.map(s => ({ ...s }));
 
       // toggle
-            const was = next.find(s => s.key === subj.key);
+            // toggle
+      const was = next.find(s => s.key === subj.key);
       const turningOn = !isCompetitiveForUser(fresh, subj.key);
 
-      // --- Confirmations (обязательное требование по контракту) ---
-      const confirmText = turningOn
-        ? "Сделать предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\n(Учебный режим останется доступен.)"
-        : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по этому предмету станут недоступны.\n(Учебный режим останется.)";
+      // ✅ Confirmations (через модалку, чтобы Telegram точно показывал)
+      const ok = await uiConfirm({
+        title: turningOn ? "Competitive режим" : "Выключить Competitive",
+        message: turningOn
+          ? "Сделать этот предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\nУчебный режим останется доступен."
+          : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по предмету станут недоступны.\nУчебный режим останется.",
+        okText: turningOn ? "Включить" : "Выключить",
+        cancelText: "Отмена"
+      });
 
-      if (!window.confirm(confirmText)) {
+      if (!ok) {
         // revert UI to previous state
         input.checked = !turningOn;
         return;
@@ -983,9 +989,13 @@ function renderProfileStack() {
       if (turningOn) {
         const compNow = next.filter(s => s.mode === "competitive").length;
         if (compNow >= 2) {
-          // revert UI + modal about limit
+          // revert UI + alert
           input.checked = false;
-          window.alert("Лимит: максимум 2 Competitive. Сначала выключите другой предмет.");
+          await uiAlert({
+            title: "Лимит Competitive",
+            message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
+            okText: "Понял"
+          });
           return;
         }
         was.mode = "competitive";
@@ -1197,7 +1207,93 @@ function renderProfileStack() {
       : "Закрепите 1–3 предмета — и вы будете открывать нужное быстрее, чем Telegram.";
   }
  }
-   
+
+     // ---------------------------
+  // Modal (for confirmations in Telegram WebApp)
+  // ---------------------------
+  let modalResolve = null;
+
+  function closeModal(result = null) {
+    const root = document.getElementById("modal-root");
+    if (!root) return;
+    root.innerHTML = "";
+    root.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    if (typeof modalResolve === "function") {
+      const r = modalResolve;
+      modalResolve = null;
+      r(result);
+    }
+  }
+
+  function openModal(html) {
+    const root = document.getElementById("modal-root");
+    if (!root) return;
+    root.innerHTML = html;
+    root.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+
+    // backdrop close (only if data-close="backdrop")
+    const backdrop = root.querySelector("[data-modal-backdrop]");
+    if (backdrop) {
+      backdrop.addEventListener("click", (e) => {
+        if (e.target === backdrop && backdrop.dataset.close === "backdrop") {
+          closeModal(false);
+        }
+      });
+    }
+
+    // buttons
+    root.querySelectorAll("[data-modal-action]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const act = btn.getAttribute("data-modal-action");
+        if (act === "ok") closeModal(true);
+        if (act === "cancel") closeModal(false);
+      });
+    });
+  }
+
+  function uiConfirm({ title, message, okText = "OK", cancelText = "Cancel" }) {
+    return new Promise((resolve) => {
+      modalResolve = resolve;
+
+      const html = `
+        <div class="modal-backdrop" data-modal-backdrop data-close="none">
+          <div class="modal">
+            <div class="modal-title">${escapeHTML(title || "")}</div>
+            <div class="modal-text">${escapeHTML(message || "")}</div>
+            <div class="modal-actions">
+              <button type="button" class="btn" data-modal-action="cancel">${escapeHTML(cancelText)}</button>
+              <button type="button" class="btn primary" data-modal-action="ok">${escapeHTML(okText)}</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      openModal(html);
+    });
+  }
+
+  function uiAlert({ title, message, okText = "OK" }) {
+    return new Promise((resolve) => {
+      modalResolve = resolve;
+
+      const html = `
+        <div class="modal-backdrop" data-modal-backdrop data-close="none">
+          <div class="modal">
+            <div class="modal-title">${escapeHTML(title || "")}</div>
+            <div class="modal-text">${escapeHTML(message || "")}</div>
+            <div class="modal-actions modal-actions-single">
+              <button type="button" class="btn primary" data-modal-action="ok">${escapeHTML(okText)}</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      openModal(html);
+    });
+  }
+
   // ---------------------------
   // Toast
   // ---------------------------
@@ -2345,6 +2441,14 @@ saveState();
       btn.addEventListener("click", () => {
         const tab = btn.dataset.tab;
         if (!tab) return;
+                 // ✅ Ratings доступен только школьникам
+        if (tab === "ratings") {
+          const p = loadProfile();
+          if (!p || !p.is_school_student) {
+            showToast(t("disabled_not_school"));
+            return;
+          }
+        }
 
         if (state.quizLock === "tour") {
           showToast("Tour is in progress");
