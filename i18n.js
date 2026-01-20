@@ -43,9 +43,9 @@
       practice_errors: "Ошибок",
       practice_topics: "Темы",
       practice_saved_to_my_recs: "Рекомендации сохранены в «Мои рекомендации»",
-      practice_nothing_to_save: "Нет ошибок — сохранять нечего. Красиво."
+      practice_nothing_to_save: "Нет ошибок — сохранять нечего. Красиво.",
 
-      tour_rules_title: "Правила тура"
+      tour_rules_title: "Правила тура",
       tour_rules_accept_required: "Подтвердите согласие с правилами, чтобы начать тур."
     },
 
@@ -85,7 +85,7 @@
       practice_errors: "Xatolar",
       practice_topics: "Mavzular",
       practice_saved_to_my_recs: "Tavsiyalar «Mening tavsiyalarim»ga saqlandi",
-      practice_nothing_to_save: "Xato yo‘q — saqlash shart emas. Zo‘r."
+      practice_nothing_to_save: "Xato yo‘q — saqlash shart emas. Zo‘r.",
 
       tour_rules_title: "Tur qoidalari",
       tour_rules_accept_required: "Tur boshlash uchun qoidalarga rozilikni tasdiqlang."
@@ -127,7 +127,7 @@
       practice_errors: "Errors",
       practice_topics: "Topics",
       practice_saved_to_my_recs: "Saved to “My recommendations”",
-      practice_nothing_to_save: "No mistakes — nothing to save. Nice."
+      practice_nothing_to_save: "No mistakes — nothing to save. Nice.",
 
       tour_rules_title: "Tour rules",
       tour_rules_accept_required: "Please accept the rules to start the tour."
