@@ -205,6 +205,51 @@
     showToast(t("not_available"));
   }
 
+     // ---------------------------
+  // Tour schedule (v1: local stub, later from Supabase)
+  // ---------------------------
+  // Формат: YYYY-MM-DD (локальное время пользователя)
+  const TOUR_SCHEDULE = [
+    // Пример (позже заменим на реальные даты из базы/админки):
+    // { subjectKey: "economics", tourNo: 1, start: "2026-02-01", end: "2026-02-07" },
+  ];
+
+  function parseLocalDateStart(yyyy_mm_dd) {
+    const [y, m, d] = String(yyyy_mm_dd).split("-").map(Number);
+    return new Date(y, (m - 1), d, 0, 0, 0, 0).getTime();
+  }
+
+  function parseLocalDateEnd(yyyy_mm_dd) {
+    const [y, m, d] = String(yyyy_mm_dd).split("-").map(Number);
+    return new Date(y, (m - 1), d, 23, 59, 59, 999).getTime();
+  }
+
+  function getActiveTourEntry(subjectKey) {
+    const now = Date.now();
+    const list = TOUR_SCHEDULE.filter(x => x.subjectKey === subjectKey);
+    for (const e of list) {
+      const s = parseLocalDateStart(e.start);
+      const t = parseLocalDateEnd(e.end);
+      if (now >= s && now <= t) return e;
+    }
+    return null;
+  }
+
+  function hasAnyActiveTourNow() {
+    const now = Date.now();
+    for (const e of TOUR_SCHEDULE) {
+      const s = parseLocalDateStart(e.start);
+      const t = parseLocalDateEnd(e.end);
+      if (now >= s && now <= t) return true;
+    }
+    return false;
+  }
+
+  function canOpenArchiveNow() {
+    // По правилам: архив открывается только когда активный тур завершён (то есть активных сейчас нет)
+    return !hasAnyActiveTourNow();
+  }
+
   // ---------------------------
   // Regions / Districts (v1 demo)
   // Later: load from DB
@@ -1638,6 +1683,15 @@ if (action === "open-all-subjects") {
       if (action === "video-complete") {
         showToast("video_completed logged (demo)");
         openPracticeStart();
+        return;
+      }
+
+      if (action === "resources-archive") {
+        if (!canOpenArchiveNow()) {
+          showToast("Архив откроется после завершения активного тура.");
+          return;
+        }
+        showGlobal("archive");
         return;
       }
     });
