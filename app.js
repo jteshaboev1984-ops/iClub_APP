@@ -966,15 +966,26 @@ function renderProfileStack() {
       const next = subjects.map(s => ({ ...s }));
 
       // toggle
-      const was = next.find(s => s.key === subj.key);
+            const was = next.find(s => s.key === subj.key);
       const turningOn = !isCompetitiveForUser(fresh, subj.key);
+
+      // --- Confirmations (обязательное требование по контракту) ---
+      const confirmText = turningOn
+        ? "Сделать предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\n(Учебный режим останется доступен.)"
+        : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по этому предмету станут недоступны.\n(Учебный режим останется.)";
+
+      if (!window.confirm(confirmText)) {
+        // revert UI to previous state
+        input.checked = !turningOn;
+        return;
+      }
 
       if (turningOn) {
         const compNow = next.filter(s => s.mode === "competitive").length;
         if (compNow >= 2) {
-          // revert UI
+          // revert UI + modal about limit
           input.checked = false;
-          showToast("Лимит 2 Competitive. Сначала выключите другой предмет.");
+          window.alert("Лимит: максимум 2 Competitive. Сначала выключите другой предмет.");
           return;
         }
         was.mode = "competitive";
@@ -1073,24 +1084,38 @@ function renderProfileStack() {
 
   const nameEl = document.getElementById("profile-dash-name");
   const metaEl = document.getElementById("profile-dash-meta");
+
   const compEl = document.getElementById("profile-metric-competitive");
   const studyEl = document.getElementById("profile-metric-study");
-  const pinnedEl = document.getElementById("profile-metric-pinned");
+
   const bestEl = document.getElementById("profile-metric-best");
+  const trendEl = document.getElementById("profile-metric-trend");
+  const stabilityEl = document.getElementById("profile-metric-stability");
+  const toursEl = document.getElementById("profile-metric-tours");
+
   const hintEl = document.getElementById("profile-dash-hint");
+  const ratingsBtn = document.querySelector('[data-action="profile-open-ratings"]');
 
-  if (!nameEl || !metaEl || !compEl || !studyEl || !pinnedEl || !bestEl) return;
+  if (!nameEl || !metaEl || !compEl || !studyEl || !bestEl || !trendEl || !stabilityEl || !toursEl) return;
 
-  if (!profile) {
+    if (!profile) {
     nameEl.textContent = "Сначала регистрация";
     metaEl.textContent = "—";
+
     compEl.textContent = "0";
     studyEl.textContent = "0";
-    pinnedEl.textContent = "0";
+
     bestEl.textContent = "—";
+    trendEl.textContent = "—";
+    stabilityEl.textContent = "—";
+    toursEl.textContent = "—";
+
+    if (ratingsBtn) ratingsBtn.disabled = true;
+
     if (hintEl) hintEl.textContent = "После регистрации профиль станет вашим дашбордом.";
     return;
   }
+
 
   const fullName = String(profile.full_name || "").trim();
   nameEl.textContent = fullName || "Профиль";
@@ -1102,22 +1127,73 @@ function renderProfileStack() {
   if (profile.class) metaParts.push(`${profile.class} класс`);
   metaEl.textContent = metaParts.join(" • ") || "—";
 
-  const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
+    const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
   const comp = subjects.filter(s => s.mode === "competitive");
   const study = subjects.filter(s => s.mode === "study");
   const pinned = subjects.filter(s => !!s.pinned);
 
   compEl.textContent = String(comp.length);
   studyEl.textContent = String(study.length);
-  pinnedEl.textContent = String(pinned.length);
 
-  // v1: демо-best (позже заменим реальными попытками практики)
-  // Чтобы дашборд не был "пустым", делаем мягкий вывод:
-  bestEl.textContent = comp.length ? "7/10" : (subjects.length ? "6/10" : "—");
+  // --- Best / Trend / Stability (реальные данные из practice_history_v1:*) ---
+  const keys = subjects.map(s => s.key).filter(Boolean);
+
+  // Best (max percent)
+  let best = null;
+  const allAttempts = [];
+
+  keys.forEach(k => {
+    const h = loadPracticeHistory(k);
+    if (h?.best) {
+      if (!best || (Number(h.best.percent) > Number(best.percent))) best = h.best;
+    }
+    if (Array.isArray(h?.last)) allAttempts.push(...h.last.map(a => ({ ...a, _subjectKey: k })));
+  });
+
+  bestEl.textContent = best ? `${Math.round(Number(best.percent) || 0)}%` : "—";
+
+  // Trend: avg(last 3) - avg(prev 3)
+  allAttempts.sort((a, b) => (Number(b.ts) || 0) - (Number(a.ts) || 0));
+  const last6 = allAttempts.slice(0, 6);
+  if (last6.length >= 4) {
+    const a3 = last6.slice(0, 3);
+    const b3 = last6.slice(3, 6);
+
+    const avg = arr => arr.reduce((s, x) => s + (Number(x.percent) || 0), 0) / Math.max(1, arr.length);
+    const diff = Math.round(avg(a3) - avg(b3));
+
+    trendEl.textContent = (diff === 0) ? "0pp" : `${diff > 0 ? "+" : ""}${diff}pp`;
+  } else {
+    trendEl.textContent = "—";
+  }
+
+  // Stability: уникальные дни с практикой за последние 7 дней
+  const now = Date.now();
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  const days = new Set();
+  allAttempts.forEach(a => {
+    const ts = Number(a.ts) || 0;
+    if (!ts) return;
+    if (now - ts > weekMs) return;
+    const d = new Date(ts);
+    const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+    days.add(key);
+  });
+  stabilityEl.textContent = `${days.size}/7`;
+
+  // Tours: пока нет локальной истории туров в этом фронте — держим “—”
+  toursEl.textContent = "—";
+
+  // Disabled state: рейтинг/туры только школьникам
+  if (ratingsBtn) {
+    const isSchool = !!profile.is_school_student;
+    ratingsBtn.disabled = !isSchool;
+    if (!isSchool) ratingsBtn.title = t("disabled_not_school");
+  }
 
   if (hintEl) {
     hintEl.textContent = pinned.length
-      ? "Pinned предметы уже ускоряют доступ. Хороший выбор."
+      ? "Закреплённые предметы уже ускоряют доступ. Дальше — стабильность."
       : "Закрепите 1–3 предмета — и вы будете открывать нужное быстрее, чем Telegram.";
   }
  }
