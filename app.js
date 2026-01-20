@@ -846,8 +846,14 @@ function showProfileScreen(screenName) {
   PROFILE_SCREENS.forEach(sc => {
     const el = document.getElementById(`profile-${sc}`);
     if (!el) return;
-    el.classList.toggle("is-active", sc === screenName);
+
+    const isActive = (sc === screenName);
+
+    // ✅ жёстко управляем видимостью, чтобы экраны не “слипались”
+    el.style.display = isActive ? "block" : "none";
+    el.classList.toggle("is-active", isActive);
   });
+
   updateTopbarForView("profile");
 }
 
@@ -2419,7 +2425,7 @@ saveState();
         replaceProfile("settings");
         return;
       }
-
+    
       if (action === "profile-settings-back") {
         setTab("profile");
         replaceProfile("main");
