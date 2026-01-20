@@ -900,7 +900,7 @@ function renderProfileStack() {
 
    function renderProfileSettings() {
   const profile = loadProfile();
-  const list = document.getElementById("profile-settings-competitive-list");
+  const list = document.getElementById("profile-competitive-list");
   const note = document.getElementById("settings-competitive-note");
   if (!list) return;
 
