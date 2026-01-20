@@ -1536,6 +1536,7 @@ compRow.appendChild(compInfo);
         input?.addEventListener("change", () => {
           quiz.answers[quiz.index] = idx;
           saveState();
+          updatePracticeSubmitEnabled();
         });
 
         wrap.appendChild(row);
@@ -1562,9 +1563,30 @@ compRow.appendChild(compInfo);
     inputEl?.addEventListener("input", () => {
       quiz.answers[quiz.index] = inputEl.value;
       saveState();
+      updatePracticeSubmitEnabled();
       if (errEl) errEl.style.display = "none";
     });
+     updatePracticeSubmitEnabled();
   }
+
+   function updatePracticeSubmitEnabled() {
+  const quiz = state.quiz;
+  const btn = $("#practice-submit-btn");
+  if (!btn || !quiz || quiz.mode !== "practice") return;
+
+  const q = quiz.questions[quiz.index];
+  const ua = quiz.answers[quiz.index];
+
+  let ok = false;
+
+  if (q.type === "mcq") {
+    ok = (ua !== null && ua !== undefined);
+  } else {
+    ok = isValidInputAnswer(q, String(ua ?? "").trim());
+  }
+
+  btn.disabled = !ok;
+}
 
   // ---- Pause / Submit / Finish ----
   function handlePracticePause() {
