@@ -1284,7 +1284,8 @@ compRow.appendChild(compInfo);
     }
 
     state.quizLock = "tour";
-    saveState();
+state.tourContext = { isArchive: false }; // задел на будущее
+saveState();
 
     pushCourses("tour-quiz");
     startTourTick();
@@ -1321,6 +1322,10 @@ compRow.appendChild(compInfo);
     stopTourTick();
     const meta = $("#tour-result-meta");
     if (meta) meta.textContent = "Score: 0/20";
+    if (state.tourContext?.isArchive) {
+    showToast("Архивный тур: вне рейтинга");
+ }
+    state.tourContext = null;
     state.quizLock = null;
     saveState();
     pushCourses("tour-result");
@@ -1510,7 +1515,14 @@ compRow.appendChild(compInfo);
       if (action === "open-community") { openGlobal("community"); return; }
       if (action === "open-about") { openGlobal("about"); return; }
       if (action === "open-certificates") { openGlobal("certificates"); return; }
-      if (action === "open-archive") { openGlobal("archive"); return; }
+      if (action === "open-archive") {
+  if (!canOpenArchiveNow()) {
+    showToast("Архив откроется после завершения активного тура.");
+    return;
+  }
+  openGlobal("archive");
+  return;
+}
 
          // All Subjects from anywhere (Home tile, etc.)
 if (action === "open-all-subjects") {
@@ -1633,6 +1645,15 @@ if (action === "open-all-subjects") {
         return;
       }
 
+       if (action === "open-archive-tours") {
+  if (!canOpenArchiveNow()) {
+    showToast("Архив откроется после завершения активного тура.");
+    return;
+  }
+  // пока архив — глобальный экран
+  openGlobal("archive");
+  return;
+}
 
       if (action === "tour-start") {
         openTourQuiz();
@@ -1687,13 +1708,13 @@ if (action === "open-all-subjects") {
       }
 
       if (action === "resources-archive") {
-        if (!canOpenArchiveNow()) {
-          showToast("Архив откроется после завершения активного тура.");
-          return;
-        }
-        showGlobal("archive");
-        return;
-      }
+  if (!canOpenArchiveNow()) {
+    showToast("Архив откроется после завершения активного тура.");
+    return;
+  }
+  openGlobal("archive");
+  return;
+}
     });
 
     // Tours list click (demo)
