@@ -858,21 +858,20 @@ function pushProfile(screenName) {
   showProfileScreen(screenName);
 }
 
-function replaceProfile(screen) {
-  state.profile = screen;
+function replaceProfile(screenName) {
+  // ✅ ДЕРЖИМ СТРУКТУРУ: profile.stack
+  state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
+  state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
+
+  // ✅ replace = один экран в стеке
+  state.profile.stack = [screenName];
+
   saveState();
+  showProfileScreen(screenName);
 
-  // скрыть все экраны профиля
-  document.querySelectorAll('#view-profile .profile-screen')
-    .forEach(el => el.classList.remove('is-active'));
-
-  // показать нужный
-  const next = document.getElementById(`profile-${screen}`);
-  if (next) next.classList.add('is-active');
-
-  // перерендер
-  if (screen === 'main') renderProfileMain();
-  if (screen === 'settings') renderProfileSettings();
+  // ✅ перерендер нужного экрана
+  if (screenName === "main") renderProfileMain();
+  if (screenName === "settings") renderProfileSettings();
 }
 
 function popProfile() {
@@ -2414,6 +2413,19 @@ saveState();
 
       const action = btn.dataset.action;
 
+            // ===== Profile local navigation (must work from anywhere) =====
+      if (action === "profile-settings") {
+        setTab("profile");
+        replaceProfile("settings");
+        return;
+      }
+
+      if (action === "profile-settings-back") {
+        setTab("profile");
+        replaceProfile("main");
+        return;
+      }
+
       // ---------- Global navigation actions (available everywhere) ----------
       if (action === "back") { // generic back
         if (state.quizLock) return;
@@ -2497,17 +2509,6 @@ if (action === "open-all-subjects") {
 }
 
       // ---------- Tab-specific / Courses actions ----------
-        if (state.tab !== "courses") {
-        // Profile quick buttons -> route to global screens
-        if (action === "profile-settings") {
-          setTab("profile");
-          openProfileSettings();
-          return;
-        }
-        if (action === "profile-settings-back") {
-          popProfile();
-          return;
-        }
         if (action === "profile-certificates") { openGlobal("certificates"); return; }
         if (action === "profile-community") { openGlobal("community"); return; }
         if (action === "profile-about") { openGlobal("about"); return; }
