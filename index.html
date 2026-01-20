@@ -592,22 +592,35 @@
       <button class="btn" type="button" data-action="profile-settings">Настройки</button>
     </div>
 
-    <div class="profile-metrics" id="profile-dash-metrics">
+       <div class="profile-metrics" id="profile-dash-metrics">
       <div class="metric">
         <div class="metric-val" id="profile-metric-competitive">0</div>
         <div class="muted small">Competitive</div>
       </div>
+
       <div class="metric">
         <div class="metric-val" id="profile-metric-study">0</div>
         <div class="muted small">Study</div>
       </div>
-      <div class="metric">
-        <div class="metric-val" id="profile-metric-pinned">0</div>
-        <div class="muted small">Pinned</div>
-      </div>
+
       <div class="metric">
         <div class="metric-val" id="profile-metric-best">—</div>
         <div class="muted small">Best practice</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-val" id="profile-metric-trend">—</div>
+        <div class="muted small">Trend</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-val" id="profile-metric-stability">—</div>
+        <div class="muted small">Stability</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-val" id="profile-metric-tours">—</div>
+        <div class="muted small">Tours</div>
       </div>
     </div>
 
@@ -655,7 +668,7 @@
   <!-- Competitive mode -->
   <div class="card">
     <div class="card-title">Соревновательный режим (Competitive)</div>
-    <p class="muted small">
+     <p class="muted small" id="settings-competitive-note">
       Можно выбрать максимум 2 предмета в Competitive.
       Настраивается только здесь.
     </p>
@@ -699,9 +712,10 @@
           <div style="font-weight:800">Язык интерфейса</div>
           <div class="muted small">RU / UZ</div>
         </div>
-        <select id="profile-settings-language" class="select">
+                <select id="profile-settings-language" class="select">
           <option value="ru">Русский</option>
           <option value="uz">O‘zbek</option>
+          <option value="en">English</option>
         </select>
       </div>
     </div>
