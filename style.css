@@ -780,11 +780,11 @@ body {
 }
 
 /* ----- Profile screens: show only active ----- */
-.profile-screen{ 
+#view-profile .profile-screen{
   display: none;
 }
 
-.profile-screen.is-active{
+#view-profile .profile-screen.is-active{
   display: block;
 }
 
