@@ -1441,33 +1441,26 @@ compRow.appendChild(compInfo);
 
   // ---- Entry point from Subject Hub ----
   function openPracticeStart() {
-    const subjectKey = state.courses.subjectKey;
+  const subjectKey = state.courses.subjectKey;
 
-    // If we have paused draft for this subject -> allow resume
-    const draft = loadPracticeDraft();
-    if (draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz) {
-      const ok = confirm("Есть пауза по практике. Продолжить?");
-      if (ok) {
-        // resume
-        state.quizLock = "practice";
-        state.quiz = draft.quiz;
-        state.quiz.paused = false;
-        state.quiz.pauseStartedAt = null;
-        clearPracticeDraft();
+  // Always open Practice Start screen first (premium UX)
+  pushCourses("practice-start");
+  renderPracticeStart();
 
-        saveState();
-        replaceCourses("practice-quiz");
-        renderPracticeQuiz();
-        startPracticeQuestionTimer();
-        return;
-      } else {
-        clearPracticeDraft();
-      }
-    }
+  // If paused draft exists — show Resume button
+  const draft = loadPracticeDraft();
+  const resumeBtn = $("#practice-resume-btn");
+  const restartBtn = $("#practice-restart-btn");
 
-    pushCourses("practice-start");
-    renderPracticeStart();
+  const canResume = !!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz);
+
+  if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
+  if (restartBtn) restartBtn.textContent = canResume ? "Начать заново" : "Начать";
+
+  if (canResume) {
+    showToast(t("practice_resume_prompt"));
   }
+}
 
   function startPracticeNew() {
     const subjectKey = state.courses.subjectKey;
@@ -2151,6 +2144,27 @@ if (action === "open-all-subjects") {
         startPracticeNew();
         return;
       }
+
+       if (action === "practice-resume") {
+  const subjectKey = state.courses.subjectKey;
+  const draft = loadPracticeDraft();
+  if (!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz)) {
+    showToast(t("not_available"));
+    return;
+  }
+
+  state.quizLock = "practice";
+  state.quiz = draft.quiz;
+  state.quiz.paused = false;
+  state.quiz.pauseStartedAt = null;
+  clearPracticeDraft();
+
+  saveState();
+  replaceCourses("practice-quiz");
+  renderPracticeQuiz();
+  startPracticeQuestionTimer();
+  return;
+}
 
       if (action === "practice-pause") {
         handlePracticePause();
