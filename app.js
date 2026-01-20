@@ -166,6 +166,45 @@
     return SUBJECTS.find(s => s.key === key) || null;
   }
 
+     // ---------------------------
+  // Availability rules (v1: local profile-based)
+  // ---------------------------
+  function isSchoolUser(profile) {
+    return !!profile?.is_school_student;
+  }
+
+  function getUserSubject(profile, subjectKey) {
+    return profile?.subjects?.find(s => s.key === subjectKey) || null;
+  }
+
+  function isMainSubjectKey(subjectKey) {
+    return subjectByKey(subjectKey)?.type === "main";
+  }
+
+  function isAdditionalSubjectKey(subjectKey) {
+    return subjectByKey(subjectKey)?.type === "additional";
+  }
+
+  function isCompetitiveForUser(profile, subjectKey) {
+    return getUserSubject(profile, subjectKey)?.mode === "competitive";
+  }
+
+  // Tours eligibility (ACTIVE tours): school + main + competitive
+  function canOpenActiveTours(profile, subjectKey) {
+    if (!profile) return { ok: false, reason: "no_profile" };
+    if (!isSchoolUser(profile)) return { ok: false, reason: "not_school" };
+    if (!isMainSubjectKey(subjectKey)) return { ok: false, reason: "not_main" };
+    if (!isCompetitiveForUser(profile, subjectKey)) return { ok: false, reason: "not_competitive" };
+    return { ok: true, reason: "ok" };
+  }
+
+  function toastToursDenied(reason) {
+    if (reason === "not_school") { showToast(t("disabled_not_school")); return; }
+    if (reason === "not_competitive") { showToast(t("disabled_not_competitive")); return; }
+    if (reason === "not_main") { showToast("Туры доступны только по основным предметам."); return; }
+    showToast(t("not_available"));
+  }
+
   // ---------------------------
   // Regions / Districts (v1 demo)
   // Later: load from DB
@@ -526,7 +565,104 @@ function renderProfileStack() {
   showProfileScreen(top);
   if (top === "settings") renderProfileSettings();
 }
-   
+
+   function renderProfileSettings() {
+  const profile = loadProfile();
+  const list = document.getElementById("profile-settings-competitive-list");
+  const note = document.getElementById("settings-competitive-note");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  if (!profile) {
+    list.innerHTML = `<div class="empty muted">Сначала регистрация.</div>`;
+    return;
+  }
+
+  // Non-school users: competitive is disabled by product rules
+  if (!profile.is_school_student) {
+    if (note) note.textContent = t("disabled_not_school");
+    list.innerHTML = `<div class="empty muted">${t("disabled_not_school")}</div>`;
+    return;
+  }
+
+  const current = Array.isArray(profile.subjects) ? profile.subjects : [];
+  const currentComp = current.filter(s => s.mode === "competitive").map(s => s.key);
+  const compCount = currentComp.length;
+
+  if (note) note.textContent = `Можно выбрать максимум 2 предмета в Competitive. Сейчас выбрано: ${compCount}/2.`;
+
+  // Only MAIN subjects can be competitive (per spec)
+  const mainSubjects = SUBJECTS.filter(s => s.type === "main");
+
+  mainSubjects.forEach(subj => {
+    const isOn = currentComp.includes(subj.key);
+
+    const row = document.createElement("div");
+    row.className = "settings-row";
+
+    row.innerHTML = `
+      <div>
+        <div style="font-weight:800">${escapeHTML(subj.title)}</div>
+        <div class="muted small">${isOn ? "Competitive" : "Study"}</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" ${isOn ? "checked" : ""}>
+        <span class="slider"></span>
+      </label>
+    `;
+
+    const input = row.querySelector('input[type="checkbox"]');
+
+    input.addEventListener("change", () => {
+      const fresh = loadProfile();
+      if (!fresh) return;
+
+      const subjects = Array.isArray(fresh.subjects) ? structuredClone(fresh.subjects) : [];
+      const idx = subjects.findIndex(s => s.key === subj.key);
+
+      // ensure exists
+      if (idx === -1) subjects.push({ key: subj.key, mode: "study", pinned: false });
+
+      const next = subjects.map(s => ({ ...s }));
+
+      // toggle
+      const was = next.find(s => s.key === subj.key);
+      const turningOn = !isCompetitiveForUser(fresh, subj.key);
+
+      if (turningOn) {
+        const compNow = next.filter(s => s.mode === "competitive").length;
+        if (compNow >= 2) {
+          // revert UI
+          input.checked = false;
+          showToast("Лимит 2 Competitive. Сначала выключите другой предмет.");
+          return;
+        }
+        was.mode = "competitive";
+        showToast("Предмет переведён в Competitive");
+      } else {
+        was.mode = "study";
+        showToast("Предмет переведён в Study");
+      }
+
+      fresh.subjects = next;
+      saveProfile(fresh);
+
+      // refresh dependent UI
+      renderHome();
+      if (state.tab === "courses") {
+        renderAllSubjects();
+        if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
+      }
+
+      // re-render settings to update counters
+      renderProfileSettings();
+    });
+
+    list.appendChild(row);
+  });
+}
+
   // ---------------------------
   // Toast
   // ---------------------------
@@ -644,16 +780,23 @@ function renderProfileStack() {
   btnSecond.type = "button";
   btnSecond.className = "mini-btn ghost";
 
-  if (isComp) {
+    if (isComp) {
     btnSecond.textContent = "Туры";
     btnSecond.addEventListener("click", (e) => {
       e.stopPropagation();
+
+      const profile = loadProfile();
+      const eligibility = canOpenActiveTours(profile, userSubject.key);
+      if (!eligibility.ok) {
+        toastToursDenied(eligibility.reason);
+        return;
+      }
+
       state.courses.subjectKey = userSubject.key;
       saveState();
       setTab("courses");
       replaceCourses("subject-hub");
       renderSubjectHub();
-      // Открываем список туров
       pushCourses("tours");
     });
   } else {
@@ -801,7 +944,7 @@ btnManage.textContent = "В настройки";
 btnManage.addEventListener("click", (e) => {
   e.stopPropagation();
   setTab("profile");
-  showToast("Управление Competitive — в Profile Settings");
+  openProfileSettings();
 });
 
 compInfo.appendChild(infoText);
@@ -836,6 +979,30 @@ compRow.appendChild(compInfo);
     if (metaEl) {
       const us = profile?.subjects?.find(x => x.key === state.courses.subjectKey);
       metaEl.textContent = us ? `${us.mode.toUpperCase()} • ${us.pinned ? "PINNED" : "NOT PINNED"}` : "NOT ADDED";
+    }
+
+         // ---- Availability toggles in Subject Hub (Tours only when allowed) ----
+    const toursBtn = document.querySelector('#courses-subject-hub [data-action="open-tours"]');
+    const toursSub = toursBtn?.querySelector(".muted.small");
+
+    if (toursBtn) {
+      const eligibility = canOpenActiveTours(profile, state.courses.subjectKey);
+
+      // Additional subjects: tours do not exist by spec
+      if (isAdditionalSubjectKey(state.courses.subjectKey)) {
+        toursBtn.disabled = true;
+        if (toursSub) toursSub.textContent = "Для дополнительных предметов туры не проводятся.";
+      } else if (!eligibility.ok) {
+        toursBtn.disabled = true;
+        if (toursSub) {
+          if (eligibility.reason === "not_school") toursSub.textContent = t("disabled_not_school");
+          else if (eligibility.reason === "not_competitive") toursSub.textContent = t("disabled_not_competitive");
+          else toursSub.textContent = t("not_available");
+        }
+      } else {
+        toursBtn.disabled = false;
+        if (toursSub) toursSub.textContent = "Активные и прошедшие";
+      }
     }
 
     updateTopbarForView("courses");
@@ -1152,6 +1319,12 @@ compRow.appendChild(compInfo);
         return;
       }
 
+      // If in profile -> pop profile stack
+      if (state.tab === "profile") {
+        popProfile();
+        return;
+      }
+
       // If in courses -> pop courses stack
       if (state.tab === "courses") {
         popCourses();
@@ -1320,9 +1493,17 @@ if (action === "open-all-subjects") {
       }
 
       // ---------- Tab-specific / Courses actions ----------
-      if (state.tab !== "courses") {
+        if (state.tab !== "courses") {
         // Profile quick buttons -> route to global screens
-        if (action === "profile-settings") { showToast("Settings: soon"); return; }
+        if (action === "profile-settings") {
+          setTab("profile");
+          openProfileSettings();
+          return;
+        }
+        if (action === "profile-settings-back") {
+          popProfile();
+          return;
+        }
         if (action === "profile-certificates") { openGlobal("certificates"); return; }
         if (action === "profile-community") { openGlobal("community"); return; }
         if (action === "profile-about") { openGlobal("about"); return; }
@@ -1397,9 +1578,16 @@ if (action === "open-all-subjects") {
       }
 
       if (action === "open-tours") {
+        const profile = loadProfile();
+        const eligibility = canOpenActiveTours(profile, state.courses.subjectKey);
+        if (!eligibility.ok) {
+          toastToursDenied(eligibility.reason);
+          return;
+        }
         pushCourses("tours");
         return;
       }
+
 
       if (action === "tour-start") {
         openTourQuiz();
