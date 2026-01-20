@@ -578,7 +578,7 @@
         <div class="content">
 
   <!-- Profile MAIN -->
-  <div id="profile-main" class="profile-screen is-active">
+<div id="profile-main" class="profile-screen is-active">
   <h1 class="h1">Profile</h1>
   <p class="muted">Ваш прогресс без детсада: предметы, практика, туры, рекомендации.</p>
 
@@ -622,7 +622,7 @@
     </div>
   </div>
 
-  <!-- QUICK LINKS (вторично) -->
+  <!-- QUICK LINKS -->
   <div class="cards-grid">
     <button class="card-btn" type="button" data-action="profile-certificates">
       <div class="card-title">Сертификаты</div>
@@ -641,7 +641,76 @@
   </div>
 </div>
 
-  <!-- Profile SETTINGS -->
+<!-- Profile SETTINGS -->
+<div id="profile-settings" class="profile-screen">
+  <!-- Header -->
+  <div class="settings-head">
+    <button class="btn" type="button" data-action="profile-settings-back">← Назад</button>
+    <div class="muted small">Competitive ≤ 2 • Язык • Закреплённые предметы</div>
+  </div>
+
+  <!-- Competitive mode -->
+  <div class="card">
+    <div class="card-title">Соревновательный режим (Competitive)</div>
+    <p class="muted small">
+      Можно выбрать максимум 2 предмета в Competitive.
+      Настраивается только здесь.
+    </p>
+
+    <div id="profile-competitive-list" class="settings-list">
+      <!-- filled by app.js -->
+    </div>
+  </div>
+
+  <!-- Notifications -->
+  <div class="card">
+    <div class="card-title">Уведомления</div>
+    <p class="muted small">Сейчас заглушка v1. Подключим позже без боли.</p>
+
+    <div class="settings-list">
+      <div class="settings-row">
+        <div>
+          <div style="font-weight:800">Новости и анонсы</div>
+          <div class="muted small">Обновления олимпиад</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" disabled>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Language -->
+  <div class="card">
+    <div class="card-title">Язык</div>
+    <p class="muted small">Можно менять в любое время.</p>
+
+    <div class="settings-list">
+      <div class="settings-row">
+        <div>
+          <div style="font-weight:800">Язык интерфейса</div>
+          <div class="muted small">RU / UZ</div>
+        </div>
+        <select id="profile-settings-language" class="select">
+          <option value="ru">Русский</option>
+          <option value="uz">O‘zbek</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pinned subjects -->
+  <div class="card">
+    <div class="card-title">Закреплённые предметы (Pinned)</div>
+    <p class="muted small">Закреплённые предметы быстрее доступны на главной.</p>
+
+    <div id="profile-settings-pinned-list" class="settings-list">
+      <!-- filled by app.js -->
+    </div>
+  </div>
+</div>
+<!-- /Profile SETTINGS -->
 <div id="profile-settings" class="profile-screen">
 
   <!-- Header -->
