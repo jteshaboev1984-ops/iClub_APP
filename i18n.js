@@ -45,7 +45,7 @@
       practice_saved_to_my_recs: "Рекомендации сохранены в «Мои рекомендации»",
       practice_nothing_to_save: "Нет ошибок — сохранять нечего. Красиво."
 
-      tour_rules_title: "Правила тура",
+      tour_rules_title: "Правила тура"
       tour_rules_accept_required: "Подтвердите согласие с правилами, чтобы начать тур."
     },
 
