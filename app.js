@@ -33,10 +33,12 @@
   // Storage keys
   // ---------------------------
   const LS = {
-    state: "iclub_state_v1",
-    profile: "iclub_profile_v1",
-    practiceDraft: "iclub_practice_draft_v1"
-  };
+  state: "iclub_state_v1",
+  profile: "iclub_profile_v1",
+  practiceDraft: "iclub_practice_draft_v1",
+  myRecs: "iclub_my_recs_v1"
+};
+
 
   // ---------------------------
   // i18n
@@ -722,7 +724,7 @@
       if (top === "video") titleEl.textContent = "Video";
       if (top === "practice-start") titleEl.textContent = t("practice");
       if (top === "practice-quiz") titleEl.textContent = t("practice");
-      if (top === "practice-result") titleEl.textContent = "Practice Result";
+      if (top === "practice-result") titleEl.textContent = t("practice_result_title");
       if (top === "practice-review") titleEl.textContent = "Разбор ошибок";
       if (top === "practice-recs") titleEl.textContent = "Рекомендации";
       if (top === "tours") titleEl.textContent = "Tours";
@@ -731,7 +733,7 @@
       if (top === "tour-result") titleEl.textContent = "Tour Result";
       if (top === "tour-review") titleEl.textContent = "Разбор тура";
       if (top === "books") titleEl.textContent = "Books";
-      if (top === "my-recs") titleEl.textContent = "My Recommendations";
+      if (top === "my-recs") titleEl.textContent = t("practice_my_recs_title");
 
       const subj = subjectByKey(state.courses.subjectKey);
       if (subj && top !== "all-subjects") subEl.textContent = subj.title;
@@ -1358,6 +1360,36 @@ compRow.appendChild(compInfo);
     localStorage.removeItem(LS.practiceDraft);
   }
 
+   function loadMyRecs() {
+  return safeJsonParse(localStorage.getItem(LS.myRecs), { bySubject: {} });
+}
+
+function saveMyRecs(data) {
+  localStorage.setItem(LS.myRecs, JSON.stringify(data));
+}
+
+function addMyRecsFromAttempt(attempt) {
+  const wrong = (attempt?.details || []).filter(d => !d.isCorrect);
+  const topics = Array.from(new Set(wrong.map(d => d.topic || "General")));
+  if (!topics.length) return { added: 0, topics: [] };
+
+  const store = loadMyRecs();
+  store.bySubject = store.bySubject || {};
+  const subjKey = attempt.subjectKey || "unknown";
+
+  const existing = new Set((store.bySubject[subjKey] || []).map(x => x.topic));
+  const nowTs = Date.now();
+
+  const add = topics
+    .filter(tp => !existing.has(tp))
+    .map(tp => ({ topic: tp, ts: nowTs }));
+
+  store.bySubject[subjKey] = [...add, ...(store.bySubject[subjKey] || [])].slice(0, 50);
+  saveMyRecs(store);
+
+  return { added: add.length, topics };
+}
+
   function formatMMSS(sec) {
     const s = Math.max(0, Number(sec) || 0);
     const mm = Math.floor(s / 60);
@@ -1761,10 +1793,26 @@ compRow.appendChild(compInfo);
 
     // Render result
     const meta = $("#practice-result-meta");
-    if (meta) meta.textContent = `Score: ${attempt.score}/${attempt.total} (${attempt.percent}%) • ${attempt.durationSec}s`;
 
-    // Show result screen
-    pushCourses("practice-result");
+const wrong = attempt.details.filter(d => !d.isCorrect);
+const topics = Array.from(new Set(wrong.map(d => d.topic || "General")));
+
+if (meta) {
+  meta.textContent =
+    `Score: ${attempt.score}/${attempt.total} (${attempt.percent}%) • ${attempt.durationSec}s` +
+    ` • ${t("practice_errors")}: ${wrong.length}` +
+    ` • ${t("practice_topics")}: ${topics.length}`;
+}
+
+// Counters on buttons
+const reviewCountEl = $("#practice-review-count");
+if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
+
+const recsCountEl = $("#practice-recs-count");
+if (recsCountEl) recsCountEl.textContent = String(topics.length);
+
+// Show result screen
+pushCourses("practice-result");
 
     // Optional: toast best update
     if (hx.best && hx.best.ts === attempt.ts) {
@@ -1818,6 +1866,14 @@ compRow.appendChild(compInfo);
 
     const uniq = Array.from(new Set(topics));
 
+    // Save to "My recommendations" (v1: topics-only)
+const res = addMyRecsFromAttempt(attempt);
+if (!res.added) {
+  // if there are no mistakes -> nothing to save
+} else {
+  showToast(t("practice_saved_to_my_recs"));
+}
+     
     if (!uniq.length) {
       wrap.innerHTML = `<div class="empty muted">Ошибок нет — рекомендации не требуются. Неприлично красиво.</div>`;
       return;
@@ -1836,6 +1892,31 @@ compRow.appendChild(compInfo);
     });
   }
 
+function renderMyRecs() {
+  const wrap = $("#my-recs-list");
+  if (!wrap) return;
+
+  const subjectKey = state.courses.subjectKey;
+  const store = loadMyRecs();
+  const list = store?.bySubject?.[subjectKey] || [];
+
+  if (!list.length) {
+    wrap.innerHTML = `<div class="empty muted">Пока пусто.</div>`;
+    return;
+  }
+
+  wrap.innerHTML = "";
+  list.forEach(item => {
+    const el = document.createElement("div");
+    el.className = "list-item";
+    el.innerHTML = `
+      <div style="font-weight:800">${escapeHTML(item.topic)}</div>
+      <div class="muted small">Сохранено: ${escapeHTML(formatDateTime(item.ts))}</div>
+    `;
+    wrap.appendChild(el);
+  });
+}
+   
   // ---------------------------
   // Tour (demo) — strict: no pause, no back
   // ---------------------------
@@ -2285,8 +2366,9 @@ if (action === "practice-recommendations") {
       }
 
       if (action === "open-my-recommendations") {
-        pushCourses("my-recs");
-        return;
+       pushCourses("my-recs");
+       renderMyRecs();
+       return;
       }
 
       if (action === "video-skip") {
