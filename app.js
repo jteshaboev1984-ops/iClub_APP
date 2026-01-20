@@ -983,61 +983,7 @@ function renderProfileStack() {
 
     list.appendChild(row);
   });
-}
-
-   function renderProfileMain() {
-  const profile = loadProfile();
-
-  const nameEl = document.getElementById("profile-dash-name");
-  const metaEl = document.getElementById("profile-dash-meta");
-  const compEl = document.getElementById("profile-metric-competitive");
-  const studyEl = document.getElementById("profile-metric-study");
-  const pinnedEl = document.getElementById("profile-metric-pinned");
-  const bestEl = document.getElementById("profile-metric-best");
-  const hintEl = document.getElementById("profile-dash-hint");
-
-  if (!nameEl || !metaEl || !compEl || !studyEl || !pinnedEl || !bestEl) return;
-
-  if (!profile) {
-    nameEl.textContent = "Сначала регистрация";
-    metaEl.textContent = "—";
-    compEl.textContent = "0";
-    studyEl.textContent = "0";
-    pinnedEl.textContent = "0";
-    bestEl.textContent = "—";
-    if (hintEl) hintEl.textContent = "После регистрации профиль станет вашим дашбордом.";
-    return;
-  }
-
-  const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(" ").trim();
-  nameEl.textContent = fullName || "Профиль";
-
-  const metaParts = [];
-  if (profile.region) metaParts.push(profile.region);
-  if (profile.district) metaParts.push(profile.district);
-  if (profile.school) metaParts.push(`№${String(profile.school).replace(/^№/,"")}`);
-  if (profile.class) metaParts.push(`${profile.class} класс`);
-  metaEl.textContent = metaParts.join(" • ") || "—";
-
-  const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
-  const comp = subjects.filter(s => s.mode === "competitive");
-  const study = subjects.filter(s => s.mode === "study");
-  const pinned = subjects.filter(s => !!s.pinned);
-
-  compEl.textContent = String(comp.length);
-  studyEl.textContent = String(study.length);
-  pinnedEl.textContent = String(pinned.length);
-
-  // v1: демо-best (позже заменим реальными попытками практики)
-  // Чтобы дашборд не был "пустым", делаем мягкий вывод:
-  bestEl.textContent = comp.length ? "7/10" : (subjects.length ? "6/10" : "—");
-
-  if (hintEl) {
-    hintEl.textContent = pinned.length
-      ? "Pinned предметы уже ускоряют доступ. Хороший выбор."
-      : "Закрепите 1–3 предмета — и вы будете открывать нужное быстрее, чем Telegram.";
-  }
-     // --- Language selector ---
+      // --- Language selector ---
   const langSel = document.getElementById("profile-settings-language");
   if (langSel) {
     langSel.value = profile.language || "ru";
@@ -1104,6 +1050,60 @@ function renderProfileStack() {
     }
   } 
 }
+
+   function renderProfileMain() {
+  const profile = loadProfile();
+
+  const nameEl = document.getElementById("profile-dash-name");
+  const metaEl = document.getElementById("profile-dash-meta");
+  const compEl = document.getElementById("profile-metric-competitive");
+  const studyEl = document.getElementById("profile-metric-study");
+  const pinnedEl = document.getElementById("profile-metric-pinned");
+  const bestEl = document.getElementById("profile-metric-best");
+  const hintEl = document.getElementById("profile-dash-hint");
+
+  if (!nameEl || !metaEl || !compEl || !studyEl || !pinnedEl || !bestEl) return;
+
+  if (!profile) {
+    nameEl.textContent = "Сначала регистрация";
+    metaEl.textContent = "—";
+    compEl.textContent = "0";
+    studyEl.textContent = "0";
+    pinnedEl.textContent = "0";
+    bestEl.textContent = "—";
+    if (hintEl) hintEl.textContent = "После регистрации профиль станет вашим дашбордом.";
+    return;
+  }
+
+  const fullName = String(profile.full_name || "").trim();
+  nameEl.textContent = fullName || "Профиль";
+
+  const metaParts = [];
+  if (profile.region) metaParts.push(profile.region);
+  if (profile.district) metaParts.push(profile.district);
+  if (profile.school) metaParts.push(`№${String(profile.school).replace(/^№/,"")}`);
+  if (profile.class) metaParts.push(`${profile.class} класс`);
+  metaEl.textContent = metaParts.join(" • ") || "—";
+
+  const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
+  const comp = subjects.filter(s => s.mode === "competitive");
+  const study = subjects.filter(s => s.mode === "study");
+  const pinned = subjects.filter(s => !!s.pinned);
+
+  compEl.textContent = String(comp.length);
+  studyEl.textContent = String(study.length);
+  pinnedEl.textContent = String(pinned.length);
+
+  // v1: демо-best (позже заменим реальными попытками практики)
+  // Чтобы дашборд не был "пустым", делаем мягкий вывод:
+  bestEl.textContent = comp.length ? "7/10" : (subjects.length ? "6/10" : "—");
+
+  if (hintEl) {
+    hintEl.textContent = pinned.length
+      ? "Pinned предметы уже ускоряют доступ. Хороший выбор."
+      : "Закрепите 1–3 предмета — и вы будете открывать нужное быстрее, чем Telegram.";
+  }
+ }
    
   // ---------------------------
   // Toast
