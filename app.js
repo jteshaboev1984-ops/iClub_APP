@@ -850,6 +850,7 @@ function showProfileScreen(screenName) {
     const isActive = (sc === screenName);
 
     // ✅ жёстко управляем видимостью, чтобы экраны не “слипались”
+    el.hidden = !isActive;
     el.style.display = isActive ? "block" : "none";
     el.classList.toggle("is-active", isActive);
   });
