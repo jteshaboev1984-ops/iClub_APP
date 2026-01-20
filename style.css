@@ -778,3 +778,12 @@ body {
 .link-btn:hover{
   opacity: 1;
 }
+
+/* ----- Profile screens: show only active ----- */
+.profile-screen{ 
+  display: none;
+}
+
+.profile-screen.is-active{
+  display: block;
+}
