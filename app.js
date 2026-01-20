@@ -878,12 +878,14 @@ function openProfileSettings() {
 
 function openProfileMain() {
   replaceProfile("main");
+  renderProfileMain();
 }
 
 function renderProfileStack() {
   const top = getProfileTopScreen();
   showProfileScreen(top);
   if (top === "settings") renderProfileSettings();
+  if (top === "main") renderProfileMain();
 }
 
    function renderProfileSettings() {
@@ -983,6 +985,126 @@ function renderProfileStack() {
   });
 }
 
+   function renderProfileMain() {
+  const profile = loadProfile();
+
+  const nameEl = document.getElementById("profile-dash-name");
+  const metaEl = document.getElementById("profile-dash-meta");
+  const compEl = document.getElementById("profile-metric-competitive");
+  const studyEl = document.getElementById("profile-metric-study");
+  const pinnedEl = document.getElementById("profile-metric-pinned");
+  const bestEl = document.getElementById("profile-metric-best");
+  const hintEl = document.getElementById("profile-dash-hint");
+
+  if (!nameEl || !metaEl || !compEl || !studyEl || !pinnedEl || !bestEl) return;
+
+  if (!profile) {
+    nameEl.textContent = "Сначала регистрация";
+    metaEl.textContent = "—";
+    compEl.textContent = "0";
+    studyEl.textContent = "0";
+    pinnedEl.textContent = "0";
+    bestEl.textContent = "—";
+    if (hintEl) hintEl.textContent = "После регистрации профиль станет вашим дашбордом.";
+    return;
+  }
+
+  const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(" ").trim();
+  nameEl.textContent = fullName || "Профиль";
+
+  const metaParts = [];
+  if (profile.region) metaParts.push(profile.region);
+  if (profile.district) metaParts.push(profile.district);
+  if (profile.school) metaParts.push(`№${String(profile.school).replace(/^№/,"")}`);
+  if (profile.class) metaParts.push(`${profile.class} класс`);
+  metaEl.textContent = metaParts.join(" • ") || "—";
+
+  const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
+  const comp = subjects.filter(s => s.mode === "competitive");
+  const study = subjects.filter(s => s.mode === "study");
+  const pinned = subjects.filter(s => !!s.pinned);
+
+  compEl.textContent = String(comp.length);
+  studyEl.textContent = String(study.length);
+  pinnedEl.textContent = String(pinned.length);
+
+  // v1: демо-best (позже заменим реальными попытками практики)
+  // Чтобы дашборд не был "пустым", делаем мягкий вывод:
+  bestEl.textContent = comp.length ? "7/10" : (subjects.length ? "6/10" : "—");
+
+  if (hintEl) {
+    hintEl.textContent = pinned.length
+      ? "Pinned предметы уже ускоряют доступ. Хороший выбор."
+      : "Закрепите 1–3 предмета — и вы будете открывать нужное быстрее, чем Telegram.";
+  }
+     // --- Language selector ---
+  const langSel = document.getElementById("profile-settings-language");
+  if (langSel) {
+    langSel.value = profile.language || "ru";
+    langSel.onchange = () => {
+      const fresh = loadProfile();
+      if (!fresh) return;
+      const nextLang = String(langSel.value || "ru");
+      fresh.language = nextLang;
+      saveProfile(fresh);
+
+      window.i18n?.setLang(nextLang);
+
+      // Перерисуем ключевые места
+      renderHome();
+      if (state.tab === "courses") {
+        renderAllSubjects();
+        if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
+      }
+      renderProfileMain();
+      showToast("Язык обновлён");
+    };
+  }
+
+  // --- Pinned list ---
+  const pinnedWrap = document.getElementById("profile-settings-pinned-list");
+  if (pinnedWrap) {
+    pinnedWrap.innerHTML = "";
+    const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
+    const pinnedKeys = subjects.filter(s => !!s.pinned).map(s => s.key);
+
+    if (!pinnedKeys.length) {
+      pinnedWrap.innerHTML = `<div class="empty muted">Пока нет закреплённых предметов.</div>`;
+    } else {
+      pinnedKeys.forEach(key => {
+        const subj = subjectByKey(key);
+        const title = subj ? subj.title : key;
+
+        const row = document.createElement("div");
+        row.className = "settings-row";
+        row.innerHTML = `
+          <div>
+            <div style="font-weight:800">${escapeHTML(title)}</div>
+            <div class="muted small">Pinned</div>
+          </div>
+          <button type="button" class="btn">Убрать</button>
+        `;
+
+        row.querySelector("button")?.addEventListener("click", () => {
+          const fresh = loadProfile();
+          if (!fresh) return;
+          const updated = togglePinnedSubject(fresh, key);
+          saveProfile(updated);
+
+          renderHome();
+          if (state.tab === "courses") renderAllSubjects();
+          renderProfileMain();
+          renderProfileSettings();
+
+          showToast("Убрано из закреплённых");
+        });
+
+        pinnedWrap.appendChild(row);
+      });
+    }
+  } 
+}
+   
   // ---------------------------
   // Toast
   // ---------------------------
@@ -2340,6 +2462,29 @@ if (action === "open-all-subjects") {
         return;
       }
 
+       if (action === "open-my-recs-global") {
+  // логика как из профиля
+  const profile = loadProfile();
+  const subjects = Array.isArray(profile?.subjects) ? profile.subjects : [];
+  const pick =
+    subjects.find(s => s.mode === "competitive")?.key ||
+    subjects.find(s => s.pinned)?.key ||
+    subjects[0]?.key ||
+    null;
+
+  if (!pick) {
+    showToast("Сначала выберите предметы в Courses.");
+    return;
+  }
+
+  state.courses.subjectKey = pick;
+  saveState();
+  setTab("courses");
+  replaceCourses("my-recs");
+  renderMyRecs();
+  return;
+}
+
       // ---------- Tab-specific / Courses actions ----------
         if (state.tab !== "courses") {
         // Profile quick buttons -> route to global screens
@@ -2355,8 +2500,42 @@ if (action === "open-all-subjects") {
         if (action === "profile-certificates") { openGlobal("certificates"); return; }
         if (action === "profile-community") { openGlobal("community"); return; }
         if (action === "profile-about") { openGlobal("about"); return; }
-        return;
-      }
+        if (action === "profile-open-my-recs") {
+  // открыть "Мои рекомендации" по первому разумному предмету
+  const profile = loadProfile();
+  const subjects = Array.isArray(profile?.subjects) ? profile.subjects : [];
+  const pick =
+    subjects.find(s => s.mode === "competitive")?.key ||
+    subjects.find(s => s.pinned)?.key ||
+    subjects[0]?.key ||
+    null;
+
+  if (!pick) {
+    showToast("Сначала выберите предметы в Courses.");
+    return;
+  }
+
+  state.courses.subjectKey = pick;
+  saveState();
+  setTab("courses");
+  replaceCourses("my-recs");
+  renderMyRecs();
+  return;
+}
+
+if (action === "profile-open-courses") {
+  setTab("courses");
+  replaceCourses("all-subjects");
+  renderAllSubjects();
+  return;
+}
+
+if (action === "profile-open-ratings") {
+  setTab("ratings");
+  return;
+}
+return;
+}
 
       // Courses actions
       if (action === "to-subject-hub") {
