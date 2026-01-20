@@ -410,7 +410,7 @@ body {
 
 .input-error{
   color: var(--danger);
-  font-weight: 700;
+  font-weight: 800;
 }
 
 /* Video placeholder */
