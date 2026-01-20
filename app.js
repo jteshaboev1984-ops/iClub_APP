@@ -365,6 +365,26 @@
     ]
   };
 
+// ---------------------------
+// Reading map (v1 skeleton)
+// Later we will fill from конкретных книг по предметам.
+// Key idea: topic -> list of reading refs
+// ---------------------------
+const READING_MAP = {
+  // economics: {
+  //   "Unemployment": [
+  //     { title: "AS Level Economics Coursebook", ref: "Ch 19", pages: "p. 210–225" }
+  //   ]
+  // }
+};
+
+function getReadingRefs(subjectKey, topic) {
+  const s = READING_MAP?.[subjectKey] || null;
+  if (!s) return [];
+  const refs = s?.[topic] || [];
+  return Array.isArray(refs) ? refs : [];
+}
+   
   function getPracticeBankForSubject(subjectKey) {
     return PRACTICE_BANK[subjectKey] || [];
   }
@@ -1818,37 +1838,128 @@ pushCourses("practice-result");
     if (hx.best && hx.best.ts === attempt.ts) {
       showToast("Новый лучший результат");
     }
+    syncPracticeResultBadges();
   }
 
   function renderPracticeReview() {
-    const wrap = $("#practice-review-list");
-    if (!wrap) return;
+  const wrap = $("#practice-review-list");
+  if (!wrap) return;
 
-    const attempt = state.practiceLastAttempt;
-    if (!attempt || !Array.isArray(attempt.details)) {
-      wrap.innerHTML = `<div class="empty muted">Нет данных для разбора. Сначала пройдите практику.</div>`;
-      return;
-    }
-
-    wrap.innerHTML = "";
-
-    attempt.details.forEach((d, idx) => {
-      const item = document.createElement("div");
-      item.className = "list-item";
-      const status = d.isCorrect ? "✅" : "❌";
-
-      item.innerHTML = `
-        <div style="font-weight:800">${status} ${idx + 1}. ${escapeHTML(d.topic)} • ${escapeHTML(d.difficulty)}</div>
-        <div class="muted small" style="margin-top:6px">${escapeHTML(d.question || "")}</div>
-        <div class="muted small" style="margin-top:6px">Ваш ответ: <b>${escapeHTML(d.userAnswer || "—")}</b></div>
-        <div class="muted small">Правильно: <b>${escapeHTML(d.correctAnswer || "—")}</b></div>
-        ${d.explanation ? `<div class="muted small" style="margin-top:6px">${escapeHTML(d.explanation)}</div>` : ``}
-      `;
-
-      wrap.appendChild(item);
-    });
+  const attempt = state.practiceLastAttempt;
+  if (!attempt || !Array.isArray(attempt.details)) {
+    wrap.innerHTML = `<div class="empty muted">Нет данных для разбора. Сначала пройдите практику.</div>`;
+    return;
   }
 
+  // Group by topic
+  const byTopic = new Map();
+  attempt.details.forEach((d, idx) => {
+    const topic = d.topic || "General";
+    if (!byTopic.has(topic)) byTopic.set(topic, []);
+    byTopic.get(topic).push({ ...d, _idx: idx });
+  });
+
+  // Sort topics: topics with more wrong first, then alphabetically
+  const topics = Array.from(byTopic.keys()).sort((a, b) => {
+    const wa = byTopic.get(a).filter(x => !x.isCorrect).length;
+    const wb = byTopic.get(b).filter(x => !x.isCorrect).length;
+    if (wb !== wa) return wb - wa;
+    return String(a).localeCompare(String(b));
+  });
+
+  wrap.innerHTML = "";
+
+  topics.forEach((topic, tIndex) => {
+    const items = byTopic.get(topic);
+    const wrongCount = items.filter(x => !x.isCorrect).length;
+    const totalCount = items.length;
+
+    const block = document.createElement("div");
+    block.className = "card";
+    block.style.marginBottom = "10px";
+
+    const head = document.createElement("button");
+    head.type = "button";
+    head.className = "btn";
+    head.style.width = "100%";
+    head.style.display = "flex";
+    head.style.justifyContent = "space-between";
+    head.style.alignItems = "center";
+    head.style.gap = "10px";
+    head.style.padding = "12px 12px";
+    head.style.borderRadius = "16px";
+
+    const left = document.createElement("div");
+    left.style.textAlign = "left";
+    left.innerHTML = `
+      <div style="font-weight:900">${escapeHTML(topic)}</div>
+      <div class="muted small">Вопросов: ${totalCount} • Ошибок: ${wrongCount}</div>
+    `;
+
+    const right = document.createElement("div");
+    right.className = "badge badge-pin";
+    right.textContent = wrongCount ? `❌ ${wrongCount}` : `✅ 0`;
+
+    head.appendChild(left);
+    head.appendChild(right);
+
+    const body = document.createElement("div");
+    body.style.marginTop = "10px";
+    body.style.display = (tIndex === 0) ? "block" : "none"; // первая тема раскрыта
+    body.dataset.open = (tIndex === 0) ? "1" : "0";
+
+    head.addEventListener("click", () => {
+      const open = body.dataset.open === "1";
+      body.dataset.open = open ? "0" : "1";
+      body.style.display = open ? "none" : "block";
+    });
+
+    // Render questions inside topic
+    items.forEach(d => {
+      const row = document.createElement("div");
+      row.className = "list-item";
+      row.style.marginBottom = "10px";
+
+      const status = d.isCorrect ? "✅" : "❌";
+      const n = d._idx + 1;
+
+      row.innerHTML = `
+        <div style="font-weight:900">${status} ${n}. ${escapeHTML(d.difficulty)} • ${escapeHTML(d.type)}</div>
+        <div class="muted small" style="margin-top:6px">${escapeHTML(d.question || "")}</div>
+
+        <div class="muted small" style="margin-top:8px">
+          Ваш ответ: <b>${escapeHTML(d.userAnswer || "—")}</b>
+        </div>
+        <div class="muted small">
+          Правильно: <b>${escapeHTML(d.correctAnswer || "—")}</b>
+        </div>
+
+        ${d.explanation ? `<div class="muted small" style="margin-top:8px">${escapeHTML(d.explanation)}</div>` : ``}
+      `;
+
+      body.appendChild(row);
+    });
+
+    block.appendChild(head);
+    block.appendChild(body);
+    wrap.appendChild(block);
+  });
+}
+
+  function syncPracticeResultBadges() {
+  const attempt = state.practiceLastAttempt;
+  if (!attempt || !Array.isArray(attempt.details)) return;
+
+  const wrong = attempt.details.filter(d => !d.isCorrect);
+  const topics = Array.from(new Set(wrong.map(d => d.topic || "General")));
+
+  const reviewCountEl = $("#practice-review-count");
+  if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
+
+  const recsCountEl = $("#practice-recs-count");
+  if (recsCountEl) recsCountEl.textContent = String(topics.length);
+}
+ 
   function renderPracticeRecs() {
     const wrap = $("#practice-recs-list");
     if (!wrap) return;
@@ -1884,10 +1995,34 @@ if (!res.added) {
     uniq.forEach(tp => {
       const item = document.createElement("div");
       item.className = "list-item";
-      item.innerHTML = `
-        <div style="font-weight:800">${escapeHTML(tp)}</div>
-        <div class="muted small">Рекомендуем повторить теорию и примеры по теме “${escapeHTML(tp)}”.</div>
-      `;
+      const refs = getReadingRefs(attempt.subjectKey, tp);
+
+let refsHtml = "";
+if (refs.length) {
+  refsHtml = `
+    <div class="muted small" style="margin-top:6px">
+      ${refs.slice(0, 3).map(r =>
+        `• ${escapeHTML(r.title || "")}${r.ref ? ` — ${escapeHTML(r.ref)}` : ""}${r.pages ? ` (${escapeHTML(r.pages)})` : ""}`
+      ).join("<br>")}
+    </div>
+  `;
+}
+
+item.innerHTML = `
+  <div style="font-weight:900">${escapeHTML(tp)}</div>
+  <div class="muted small">Рекомендуем повторить теорию и примеры по теме “${escapeHTML(tp)}”.</div>
+  ${refsHtml || `<div class="muted small" style="margin-top:6px">Источник: будет добавлен из книги по предмету.</div>`}
+  <div style="margin-top:10px">
+    <button type="button" class="btn" data-open-books="1">Открыть «Книги»</button>
+  </div>
+`;
+
+const btn = item.querySelector('button[data-open-books="1"]');
+btn?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  // пока библиотека будет заполняться позже — открываем ресурс/плейсхолдер
+  showToast("Раздел «Книги» подключим вместе с источниками по предмету.");
+});
       wrap.appendChild(item);
     });
   }
