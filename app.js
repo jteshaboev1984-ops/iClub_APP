@@ -733,7 +733,7 @@ if (logoEl) logoEl.style.display = "none";
 
     if (viewName === "profile") {
   const top = getProfileTopScreen();
-  titleEl.textContent = (top === "settings") ? "Настройки" : "Profile";
+  titleEl.textContent = (top === "settings") ? "Настройки" : "Профиль";
   backBtn.style.visibility = (top === "settings") ? "visible" : "hidden";
   return;
 }
