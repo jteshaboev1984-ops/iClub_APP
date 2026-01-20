@@ -36,6 +36,15 @@
       practice_restart: "Начать заново",
       practice_resume_prompt: "Есть незавершённая попытка. Продолжить или начать заново?",
 
+      practice_result_title: "Результат практики",
+      practice_review_title: "Разбор ошибок",
+      practice_recs_title: "Рекомендации",
+      practice_my_recs_title: "Мои рекомендации",
+      practice_errors: "Ошибок",
+      practice_topics: "Темы",
+      practice_saved_to_my_recs: "Рекомендации сохранены в «Мои рекомендации»",
+      practice_nothing_to_save: "Нет ошибок — сохранять нечего. Красиво."
+
       tour_rules_title: "Правила тура",
       tour_rules_accept_required: "Подтвердите согласие с правилами, чтобы начать тур."
     },
@@ -69,6 +78,15 @@
       practice_restart: "Qayta boshlash",
       practice_resume_prompt: "Tugallanmagan urinish bor. Davom ettirasizmi yoki qayta boshlaysizmi?",
 
+      practice_result_title: "Amaliyot natijasi",
+      practice_review_title: "Xatolar tahlili",
+      practice_recs_title: "Tavsiyalar",
+      practice_my_recs_title: "Mening tavsiyalarim",
+      practice_errors: "Xatolar",
+      practice_topics: "Mavzular",
+      practice_saved_to_my_recs: "Tavsiyalar «Mening tavsiyalarim»ga saqlandi",
+      practice_nothing_to_save: "Xato yo‘q — saqlash shart emas. Zo‘r."
+
       tour_rules_title: "Tur qoidalari",
       tour_rules_accept_required: "Tur boshlash uchun qoidalarga rozilikni tasdiqlang."
     },
@@ -101,6 +119,15 @@
       practice_resume: "Resume",
       practice_restart: "Start over",
       practice_resume_prompt: "You have an unfinished attempt. Resume or start over?",
+
+      practice_result_title: "Practice result",
+      practice_review_title: "Review mistakes",
+      practice_recs_title: "Recommendations",
+      practice_my_recs_title: "My recommendations",
+      practice_errors: "Errors",
+      practice_topics: "Topics",
+      practice_saved_to_my_recs: "Saved to “My recommendations”",
+      practice_nothing_to_save: "No mistakes — nothing to save. Nice."
 
       tour_rules_title: "Tour rules",
       tour_rules_accept_required: "Please accept the rules to start the tour."
