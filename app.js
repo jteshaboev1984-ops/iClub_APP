@@ -1342,143 +1342,259 @@ compRow.appendChild(compInfo);
     updateTopbarForView("courses");
   }
 
+    // ---------------------------
+  // Practice v1 — per spec:
+  // 10 questions (3/5/2), MCQ + INPUT, per-question timer, pause/resume,
+  // best + last 5 attempts, review + recommendations
   // ---------------------------
-  // Practice (pause/resume) — demo logic
-  // ---------------------------
+
   function loadPracticeDraft() {
     return safeJsonParse(localStorage.getItem(LS.practiceDraft), null);
   }
-
   function savePracticeDraft(draft) {
     localStorage.setItem(LS.practiceDraft, JSON.stringify(draft));
   }
-
   function clearPracticeDraft() {
     localStorage.removeItem(LS.practiceDraft);
   }
 
-  function buildDemoPracticeQuestions() {
-    return Array.from({ length: 10 }).map((_, i) => ({
-      id: `pq${i + 1}`,
-      text: `Вопрос практики #${i + 1}`,
-      options: ["A", "B", "C", "D"].map(o => ({ id: o, label: `Вариант ${o}` })),
-      correct: "A"
-    }));
+  function formatMMSS(sec) {
+    const s = Math.max(0, Number(sec) || 0);
+    const mm = Math.floor(s / 60);
+    const ss = s % 60;
+    return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
   }
 
-  function startPracticeNew() {
-    const draft = {
-      attempt_id: `p_${Date.now()}`,
-      subjectKey: state.courses.subjectKey,
-      started_at: nowISO(),
-      status: "in_progress",
-      qIndex: 0,
-      elapsed: 0,
-      answers: [],
-      questions: buildDemoPracticeQuestions()
-    };
-    savePracticeDraft(draft);
-    openPracticeQuiz();
+  function normalizeNumericInput(v) {
+    return String(v ?? "").trim().replace(",", ".");
   }
 
-  function openPracticeStart() {
-    const draft = loadPracticeDraft();
-    if (draft && draft.status === "in_progress" && draft.subjectKey === state.courses.subjectKey) {
-      const ok = confirm(t("practice_resume_prompt"));
-      if (ok) {
-        openPracticeQuiz();
-      } else {
-        startPracticeNew();
-      }
-      return;
+  // ---- Practice history render (inject into practice-start) ----
+  function renderPracticeStart() {
+    const subjectKey = state.courses.subjectKey;
+    const subj = subjectByKey(subjectKey);
+    const section = $("#courses-practice-start");
+    if (!section) return;
+
+    // Remove old injected block if exists
+    const old = $("#practice-history-card");
+    if (old) old.remove();
+
+    const h = loadPracticeHistory(subjectKey);
+    const best = h.best;
+    const last = h.last || [];
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.id = "practice-history-card";
+
+    const bestLine = best
+      ? `Лучший результат: ${best.score}/${best.total} (${best.percent}%) • ${best.durationSec}s • ${formatDateTime(best.ts)}`
+      : "Лучший результат: пока нет попыток";
+
+    const lastLines = last.length
+      ? last.map(a => `• ${a.score}/${a.total} (${a.percent}%) • ${a.durationSec}s • ${formatDateTime(a.ts)}`).join("<br>")
+      : "Пока нет попыток";
+
+    card.innerHTML = `
+      <div class="card-title">Статистика практики</div>
+      <div class="muted small">${escapeHTML(subj?.title || subjectKey || "")}</div>
+      <div class="muted" style="margin-top:8px">${bestLine}</div>
+      <div class="muted small" style="margin-top:8px">Последние попытки (до 5):<br>${lastLines}</div>
+    `;
+
+    // Insert after rules card (second card in section)
+    const cards = section.querySelectorAll(".card");
+    if (cards && cards.length >= 1) {
+      cards[cards.length - 1].after(card);
+    } else {
+      section.appendChild(card);
     }
-    pushCourses("practice-start");
   }
 
-  let practiceTimer = null;
-
-  function openPracticeQuiz() {
-  const profile = loadProfile();
-  const subjectKey = state.courses.subjectKey;
-
-  // практика доступна всем (и школьникам, и не школьникам) — по документу это ок
-  // (позже можно ограничить, но сейчас оставляем)
-  const questions = buildPracticeSet(subjectKey);
-
-  state.quizLock = "practice";
-  state.quiz = {
-    mode: "practice",
-    subjectKey,
-    startedAt: Date.now(),
-    paused: false,
-    pauseStartedAt: null,
-    pausedTotalMs: 0,
-
-    index: 0,
-    questions,
-    answers: Array.from({ length: questions.length }).map(() => null), // для mcq: number, для input: string
-    correct: Array.from({ length: questions.length }).map(() => false),
-
-    // таймер на текущий вопрос
-    qTimeLeft: PRACTICE_CONFIG.timeByDifficulty[questions[0].difficulty] || 60,
-    qTimerId: null
-  };
-
-  saveState();
-
-  replaceCourses("practice-quiz");
-  renderPracticeQuiz();
-}
-
-  function renderPracticeQuestion(draft) {
-    const q = draft.questions[draft.qIndex];
-    const qno = $("#practice-qno");
-    const qtext = $("#practice-question");
-    const wrap = $("#practice-options");
-    if (qno) qno.textContent = `${draft.qIndex + 1}/10`;
-    if (qtext) qtext.textContent = q.text;
-    if (!wrap) return;
-
-    wrap.innerHTML = "";
-    q.options.forEach(opt => {
-      const row = document.createElement("label");
-      row.className = "option";
-      row.innerHTML = `
-        <input type="radio" name="practice-opt" value="${opt.id}">
-        <span>${opt.label}</span>
-      `;
-      wrap.appendChild(row);
-    });
+  // ---- Practice timer (per-question) ----
+  function stopPracticeQuestionTimer() {
+    if (state.quiz?.qTimerId) {
+      clearInterval(state.quiz.qTimerId);
+      state.quiz.qTimerId = null;
+    }
   }
 
-  function startPracticeTick() {
-    stopPracticeTick();
-    let remaining = 30;
+  function startPracticeQuestionTimer() {
+    stopPracticeQuestionTimer();
+
     const timerEl = $("#practice-timer");
-    if (timerEl) timerEl.textContent = `00:${String(remaining).padStart(2, "0")}`;
+    if (timerEl) timerEl.textContent = formatMMSS(state.quiz.qTimeLeft);
 
-    practiceTimer = setInterval(() => {
-      remaining -= 1;
-      if (remaining <= 0) {
-        stopPracticeTick();
+    state.quiz.qTimerId = setInterval(() => {
+      if (!state.quiz || state.quiz.paused) return;
+
+      state.quiz.qTimeLeft -= 1;
+      if (timerEl) timerEl.textContent = formatMMSS(state.quiz.qTimeLeft);
+
+      if (state.quiz.qTimeLeft <= 0) {
+        stopPracticeQuestionTimer();
         handlePracticeSubmit(true);
-        return;
       }
-      if (timerEl) timerEl.textContent = `00:${String(remaining).padStart(2, "0")}`;
     }, 1000);
   }
 
-  function stopPracticeTick() {
-    if (practiceTimer) clearInterval(practiceTimer);
-    practiceTimer = null;
+  // ---- Entry point from Subject Hub ----
+  function openPracticeStart() {
+    const subjectKey = state.courses.subjectKey;
+
+    // If we have paused draft for this subject -> allow resume
+    const draft = loadPracticeDraft();
+    if (draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz) {
+      const ok = confirm("Есть пауза по практике. Продолжить?");
+      if (ok) {
+        // resume
+        state.quizLock = "practice";
+        state.quiz = draft.quiz;
+        state.quiz.paused = false;
+        state.quiz.pauseStartedAt = null;
+        clearPracticeDraft();
+
+        saveState();
+        replaceCourses("practice-quiz");
+        renderPracticeQuiz();
+        startPracticeQuestionTimer();
+        return;
+      } else {
+        clearPracticeDraft();
+      }
+    }
+
+    pushCourses("practice-start");
+    renderPracticeStart();
   }
 
-  function handlePracticePause() {
-    const draft = loadPracticeDraft();
-    if (!draft || draft.status !== "in_progress") return;
+  function startPracticeNew() {
+    const subjectKey = state.courses.subjectKey;
+    const questions = buildPracticeSet(subjectKey);
 
-    stopPracticeTick();
+    state.quizLock = "practice";
+    state.quiz = {
+      mode: "practice",
+      subjectKey,
+      startedAt: Date.now(),
+      paused: false,
+      pauseStartedAt: null,
+      pausedTotalMs: 0,
+
+      index: 0,
+      questions,
+      // user answers:
+      // mcq -> number (selected index), input -> string
+      answers: Array.from({ length: questions.length }).map(() => null),
+      correct: Array.from({ length: questions.length }).map(() => false),
+
+      // time per question
+      qTimeLeft: PRACTICE_CONFIG.timeByDifficulty[questions[0].difficulty] || 60,
+      qTimerId: null
+    };
+
+    saveState();
+    replaceCourses("practice-quiz");
+    renderPracticeQuiz();
+    startPracticeQuestionTimer();
+  }
+
+  // ---- Rendering question (MCQ or INPUT) ----
+  function renderPracticeQuiz() {
+    const quiz = state.quiz;
+    if (!quiz || quiz.mode !== "practice") return;
+
+    const q = quiz.questions[quiz.index];
+    if (!q) return;
+
+    const qno = $("#practice-qno");
+    const qtext = $("#practice-question");
+    const wrap = $("#practice-options");
+    const timerEl = $("#practice-timer");
+
+    if (qno) qno.textContent = `${quiz.index + 1}/${PRACTICE_CONFIG.total}`;
+    if (timerEl) timerEl.textContent = formatMMSS(quiz.qTimeLeft);
+    if (qtext) qtext.textContent = q.question || "Вопрос…";
+    if (!wrap) return;
+
+    wrap.innerHTML = "";
+
+    // Difficulty hint (small)
+    const diff = document.createElement("div");
+    diff.className = "muted small";
+    diff.style.marginBottom = "8px";
+    diff.textContent = `Сложность: ${q.difficulty}`;
+    wrap.appendChild(diff);
+
+    if (q.type === "mcq") {
+      const selectedIndex = quiz.answers[quiz.index];
+
+      (q.options || []).forEach((optText, idx) => {
+        const row = document.createElement("label");
+        row.className = "option";
+        row.innerHTML = `
+          <input type="radio" name="practice-opt" value="${idx}">
+          <span>${escapeHTML(optText)}</span>
+        `;
+        const input = row.querySelector('input[type="radio"]');
+        if (input && selectedIndex === idx) input.checked = true;
+
+        input?.addEventListener("change", () => {
+          quiz.answers[quiz.index] = idx;
+          saveState();
+        });
+
+        wrap.appendChild(row);
+      });
+
+      return;
+    }
+
+    // INPUT
+    const box = document.createElement("div");
+    box.className = "input-wrap";
+    box.innerHTML = `
+      <div class="muted small">${escapeHTML(q.inputHint || "")}</div>
+      <input id="practice-input" class="text-input" type="text" placeholder="${escapeHTML(q.inputHint || "")}">
+      <div id="practice-input-error" class="muted small" style="margin-top:6px; display:none;"></div>
+    `;
+    wrap.appendChild(box);
+
+    const inputEl = $("#practice-input");
+    const errEl = $("#practice-input-error");
+    const prev = quiz.answers[quiz.index];
+    if (inputEl && typeof prev === "string") inputEl.value = prev;
+
+    inputEl?.addEventListener("input", () => {
+      quiz.answers[quiz.index] = inputEl.value;
+      saveState();
+      if (errEl) errEl.style.display = "none";
+    });
+  }
+
+  // ---- Pause / Submit / Finish ----
+  function handlePracticePause() {
+    const quiz = state.quiz;
+    if (!quiz || quiz.mode !== "practice") return;
+
+    stopPracticeQuestionTimer();
+
+    // mark paused time
+    quiz.paused = true;
+    quiz.pauseStartedAt = Date.now();
+
+    // store snapshot to draft (so even refresh won't kill it)
+    savePracticeDraft({
+      status: "paused",
+      subjectKey: quiz.subjectKey,
+      pausedAt: Date.now(),
+      quiz
+    });
+
+    // unlock UI navigation
     state.quizLock = null;
+    state.quiz = null;
     saveState();
 
     showToast(t("practice_paused"));
@@ -1487,52 +1603,222 @@ compRow.appendChild(compInfo);
   }
 
   function handlePracticeSubmit(isAutoTimeout = false) {
-    const draft = loadPracticeDraft();
-    if (!draft || draft.status !== "in_progress") return;
+    const quiz = state.quiz;
+    if (!quiz || quiz.mode !== "practice") return;
 
-    const q = draft.questions[draft.qIndex];
+    const q = quiz.questions[quiz.index];
+    const userAns = quiz.answers[quiz.index];
 
-    let selected = null;
-    const checked = $('input[name="practice-opt"]:checked');
-    if (checked) selected = checked.value;
-
-    draft.answers.push({
-      question_id: q.id,
-      answer: selected,
-      answered: !!selected,
-      is_correct: selected ? (selected === q.correct) : false,
-      reason: isAutoTimeout ? "time_expired" : "manual_submit"
-    });
-
-    draft.qIndex += 1;
-    savePracticeDraft(draft);
-
-    if (isAutoTimeout) {
-      showToast(selected ? t("toast_time_expired_answer_saved") : t("toast_time_expired_no_answer"));
+    // Validate: must have answer if manual submit
+    if (!isAutoTimeout) {
+      if (q.type === "mcq") {
+        if (userAns === null || userAns === undefined) {
+          showToast("Выберите вариант ответа");
+          return;
+        }
+      } else {
+        const val = String(userAns ?? "").trim();
+        if (!isValidInputAnswer(q, val)) {
+          const errEl = $("#practice-input-error");
+          if (errEl) {
+            errEl.textContent = "Проверьте формат ответа";
+            errEl.style.display = "block";
+          } else {
+            showToast("Проверьте формат ответа");
+          }
+          return;
+        }
+      }
     }
 
-    if (draft.qIndex >= draft.questions.length) {
-      finishPractice(draft);
+    // Evaluate correctness
+    let isCorrect = false;
+
+    if (q.type === "mcq") {
+      const idx = (userAns === null || userAns === undefined) ? null : Number(userAns);
+      if (idx !== null && idx === Number(q.correctIndex)) isCorrect = true;
     } else {
-      renderPracticeQuestion(draft);
-      startPracticeTick();
+      const raw = String(userAns ?? "").trim();
+      if (raw) {
+        if (q.inputKind === "numeric") {
+          const u = normalizeNumericInput(raw);
+          const c = normalizeNumericInput(q.correctAnswer);
+          isCorrect = (u === c);
+        } else {
+          isCorrect = (raw.toLowerCase() === String(q.correctAnswer || "").trim().toLowerCase());
+        }
+      }
+    }
+
+    quiz.correct[quiz.index] = isCorrect;
+
+    if (isAutoTimeout) {
+      showToast(userAns ? t("toast_time_expired_answer_saved") : t("toast_time_expired_no_answer"));
+    }
+
+    // Next question or finish
+    stopPracticeQuestionTimer();
+
+    const nextIndex = quiz.index + 1;
+
+    if (nextIndex >= quiz.questions.length) {
+      finishPractice();
+      return;
+    }
+
+    quiz.index = nextIndex;
+    const nextQ = quiz.questions[quiz.index];
+    quiz.qTimeLeft = PRACTICE_CONFIG.timeByDifficulty[nextQ.difficulty] || 60;
+
+    saveState();
+    renderPracticeQuiz();
+    startPracticeQuestionTimer();
+  }
+
+  function finishPractice() {
+    const quiz = state.quiz;
+    if (!quiz || quiz.mode !== "practice") return;
+
+    stopPracticeQuestionTimer();
+
+    // duration excluding pauses
+    const finishedAt = Date.now();
+    const startedAt = quiz.startedAt || finishedAt;
+    const durationMs = Math.max(0, finishedAt - startedAt - (quiz.pausedTotalMs || 0));
+    const durationSec = Math.round(durationMs / 1000);
+
+    const total = quiz.questions.length;
+    const score = quiz.correct.filter(Boolean).length;
+    const percent = Math.round((score / total) * 100);
+
+    // Build details for review/recs
+    const details = quiz.questions.map((q, i) => {
+      const ua = quiz.answers[i];
+      let correctDisplay = "";
+      let userDisplay = "";
+
+      if (q.type === "mcq") {
+        correctDisplay = (q.options && q.options[q.correctIndex] != null) ? q.options[q.correctIndex] : String(q.correctIndex);
+        userDisplay = (ua === null || ua === undefined)
+          ? ""
+          : ((q.options && q.options[Number(ua)] != null) ? q.options[Number(ua)] : String(ua));
+      } else {
+        correctDisplay = String(q.correctAnswer ?? "");
+        userDisplay = String(ua ?? "").trim();
+      }
+
+      return {
+        id: q.id,
+        topic: q.topic || "General",
+        difficulty: q.difficulty,
+        type: q.type,
+        question: q.question,
+        userAnswer: userDisplay,
+        correctAnswer: correctDisplay,
+        isCorrect: !!quiz.correct[i],
+        explanation: q.explanation || ""
+      };
+    });
+
+    const attempt = {
+      ts: finishedAt,
+      subjectKey: quiz.subjectKey,
+      score,
+      total,
+      percent,
+      durationSec,
+      details
+    };
+
+    // Save best + last 5
+    const hx = updatePracticeHistory(quiz.subjectKey, attempt);
+
+    // Keep last attempt in state for result/review/recs screens
+    state.practiceLastAttempt = attempt;
+
+    // Clear paused draft if any
+    clearPracticeDraft();
+
+    // Unlock
+    state.quizLock = null;
+    state.quiz = null;
+    saveState();
+
+    // Render result
+    const meta = $("#practice-result-meta");
+    if (meta) meta.textContent = `Score: ${attempt.score}/${attempt.total} (${attempt.percent}%) • ${attempt.durationSec}s`;
+
+    // Show result screen
+    pushCourses("practice-result");
+
+    // Optional: toast best update
+    if (hx.best && hx.best.ts === attempt.ts) {
+      showToast("Новый лучший результат");
     }
   }
 
-  function finishPractice(draft) {
-    stopPracticeTick();
-    draft.status = "finished";
-    draft.finished_at = nowISO();
-    savePracticeDraft(draft);
+  function renderPracticeReview() {
+    const wrap = $("#practice-review-list");
+    if (!wrap) return;
 
-    const score = draft.answers.filter(a => a.is_correct).length;
-    const meta = $("#practice-result-meta");
-    if (meta) meta.textContent = `Score: ${score}/10`;
+    const attempt = state.practiceLastAttempt;
+    if (!attempt || !Array.isArray(attempt.details)) {
+      wrap.innerHTML = `<div class="empty muted">Нет данных для разбора. Сначала пройдите практику.</div>`;
+      return;
+    }
 
-    state.quizLock = null;
-    saveState();
+    wrap.innerHTML = "";
 
-    pushCourses("practice-result");
+    attempt.details.forEach((d, idx) => {
+      const item = document.createElement("div");
+      item.className = "list-item";
+      const status = d.isCorrect ? "✅" : "❌";
+
+      item.innerHTML = `
+        <div style="font-weight:800">${status} ${idx + 1}. ${escapeHTML(d.topic)} • ${escapeHTML(d.difficulty)}</div>
+        <div class="muted small" style="margin-top:6px">${escapeHTML(d.question || "")}</div>
+        <div class="muted small" style="margin-top:6px">Ваш ответ: <b>${escapeHTML(d.userAnswer || "—")}</b></div>
+        <div class="muted small">Правильно: <b>${escapeHTML(d.correctAnswer || "—")}</b></div>
+        ${d.explanation ? `<div class="muted small" style="margin-top:6px">${escapeHTML(d.explanation)}</div>` : ``}
+      `;
+
+      wrap.appendChild(item);
+    });
+  }
+
+  function renderPracticeRecs() {
+    const wrap = $("#practice-recs-list");
+    if (!wrap) return;
+
+    const attempt = state.practiceLastAttempt;
+    if (!attempt || !Array.isArray(attempt.details)) {
+      wrap.innerHTML = `<div class="empty muted">Нет данных для рекомендаций. Сначала пройдите практику.</div>`;
+      return;
+    }
+
+    // Topics from wrong answers
+    const topics = attempt.details
+      .filter(d => !d.isCorrect)
+      .map(d => d.topic || "General");
+
+    const uniq = Array.from(new Set(topics));
+
+    if (!uniq.length) {
+      wrap.innerHTML = `<div class="empty muted">Ошибок нет — рекомендации не требуются. Неприлично красиво.</div>`;
+      return;
+    }
+
+    // v1: пока без привязки к книге/страницам — даём структурные “что читать”
+    wrap.innerHTML = "";
+    uniq.forEach(tp => {
+      const item = document.createElement("div");
+      item.className = "list-item";
+      item.innerHTML = `
+        <div style="font-weight:800">${escapeHTML(tp)}</div>
+        <div class="muted small">Рекомендуем повторить теорию и примеры по теме “${escapeHTML(tp)}”.</div>
+      `;
+      wrap.appendChild(item);
+    });
   }
 
   // ---------------------------
@@ -1877,14 +2163,16 @@ if (action === "open-all-subjects") {
       }
 
       if (action === "practice-review") {
-        pushCourses("practice-review");
-        return;
-      }
+  pushCourses("practice-review");
+  renderPracticeReview();
+  return;
+}
 
-      if (action === "practice-recommendations") {
-        pushCourses("practice-recs");
-        return;
-      }
+if (action === "practice-recommendations") {
+  pushCourses("practice-recs");
+  renderPracticeRecs();
+  return;
+}
 
       if (action === "practice-back-to-result") {
         // go to result without destroying stack
