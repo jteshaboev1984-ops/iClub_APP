@@ -475,23 +475,66 @@
 
             <!-- Tour Quiz -->
             <section id="courses-tour-quiz" class="stack-screen" data-stack="courses" data-screen="tour-quiz">
-              <div class="quiz-top">
-                <div class="quiz-progress">
-                  <span id="tour-qno">1/20</span>
-                  <span id="tour-timer" class="pill">10:00</span>
-                </div>
-                <span id="tour-anti-cheat" class="pill danger" style="display:none">Warning</span>
-              </div>
 
-              <div class="card">
-                <div id="tour-question" class="question-text">Вопрос тура…</div>
-                <div id="tour-options" class="options"></div>
-              </div>
+  <!-- Top line: Question X of 20 + Warning -->
+  <div class="tour-head">
+    <div class="tour-head-left">
+      <div id="tour-qof" class="tour-qof">Question 1 of 20</div>
 
-              <div class="actions-row">
-                <button class="btn primary" type="button" data-action="tour-submit">Ответить</button>
-              </div>
-            </section>
+      <div class="tour-progress-row">
+        <div class="tour-progress-label">Tour Progress</div>
+        <div id="tour-progress-pct" class="tour-progress-pct">0%</div>
+      </div>
+
+      <div class="tour-progress-bar">
+        <div id="tour-progress-fill" class="tour-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <button id="tour-warn-btn" class="tour-warn" type="button" aria-label="Warning" style="display:none">
+      ⚠️
+    </button>
+  </div>
+
+  <!-- Badge -->
+  <div class="tour-badges">
+    <span id="tour-badge" class="tour-badge">CAMBRIDGE • TOUR #1</span>
+  </div>
+
+  <!-- Timers cards -->
+  <div class="tour-timers">
+    <div class="tour-timer-card">
+      <div class="tour-timer-cap">OVERALL TOUR</div>
+      <div id="tour-overall-time" class="tour-timer-val">0:00</div>
+      <div id="tour-overall-delta" class="tour-timer-delta"></div>
+    </div>
+
+    <div class="tour-timer-card danger">
+      <div class="tour-timer-cap">QUESTION TIME</div>
+      <div id="tour-question-time" class="tour-timer-val">0:00</div>
+      <div id="tour-question-delta" class="tour-timer-delta"></div>
+    </div>
+  </div>
+
+  <!-- Question -->
+  <div class="card">
+    <div id="tour-question" class="question-text">Вопрос тура…</div>
+    <div id="tour-options" class="options"></div>
+  </div>
+
+  <!-- Footer hint -->
+  <div class="tour-monitor muted small">
+    SESSION MONITORING ACTIVE
+  </div>
+
+  <!-- Actions -->
+  <div class="actions-row">
+    <button id="tour-next-btn" class="btn primary" type="button" data-action="tour-next" disabled>
+      Next Question →
+    </button>
+  </div>
+
+</section>
 
             <!-- Tour Result -->
             <section id="courses-tour-result" class="stack-screen" data-stack="courses" data-screen="tour-result">
