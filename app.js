@@ -101,9 +101,11 @@ function applyStaticI18n() {
     lessonId: null,
     entryTab: "home" 
   },
-  profile: {
-    stack: ["main"] // main | settings
+    profile: {
+    stack: ["main"], // main | settings
+    pinnedExpanded: false
   },
+
   quizLock: null
 };
 
@@ -759,12 +761,29 @@ if (logoEl) logoEl.style.display = "none";
       return;
     }
 
-    if (viewName === "profile") {
-  const top = getProfileTopScreen();
-  titleEl.textContent = (top === "settings") ? "Настройки" : "Профиль";
-  backBtn.style.visibility = (top === "settings") ? "visible" : "hidden";
-  return;
-}
+        if (viewName === "profile") {
+      const top = getProfileTopScreen();
+
+      // Title in ONE place (topbar)
+      titleEl.textContent = (top === "settings") ? "Настройки" : t("profile_title");
+      subEl.textContent = "";
+
+      // В settings используем внутренний back (внутри экрана), чтобы не было двух стрелок
+      backBtn.style.visibility = "hidden";
+
+      // Action справа: ⚙️ показываем только на главном профиле
+      const actionBtn = $("#topbar-action");
+      if (actionBtn) {
+        if (top === "main") {
+          actionBtn.style.visibility = "visible";
+          actionBtn.innerHTML = `<span class="icon">⚙️</span>`;
+        } else {
+          actionBtn.style.visibility = "hidden";
+        }
+      }
+
+      return;
+    }
 
     if (viewName === "courses") {
       const canGoBack = canCoursesBack();
@@ -1124,7 +1143,7 @@ function renderProfileStack() {
     const isOn = currentComp.includes(subj.key);
 
     const row = document.createElement("div");
-    row.className = "settings-row";
+    row.className = `settings-row ${isOn ? "is-on" : ""}`;
 
     row.innerHTML = `
       <div>
@@ -1233,32 +1252,59 @@ function renderProfileStack() {
   }
 
   // --- Pinned list ---
+    const pinnedToggleBtn = document.getElementById("profile-settings-pinned-toggle");
+  if (pinnedToggleBtn) {
+    const expanded = !!state.profile?.pinnedExpanded;
+    pinnedToggleBtn.textContent = expanded ? "Скрыть" : "Показать все";
+    pinnedToggleBtn.onclick = () => {
+      state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
+      state.profile.pinnedExpanded = !state.profile.pinnedExpanded;
+      saveState();
+      renderProfileSettings();
+    };
+  }
+
   const pinnedWrap = document.getElementById("profile-settings-pinned-list");
   if (pinnedWrap) {
     pinnedWrap.innerHTML = "";
-    const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
-    const pinnedKeys = subjects.filter(s => !!s.pinned).map(s => s.key);
 
-    if (!pinnedKeys.length) {
-      pinnedWrap.innerHTML = `<div class="empty muted">Пока нет закреплённых предметов.</div>`;
+    const expanded = !!state.profile?.pinnedExpanded;
+
+    const userSubjects = Array.isArray(profile.subjects) ? profile.subjects : [];
+    const pinnedSet = new Set(userSubjects.filter(s => !!s.pinned).map(s => s.key));
+
+    const listKeys = expanded
+      ? SUBJECTS.map(s => s.key)
+      : Array.from(pinnedSet);
+
+    if (!listKeys.length) {
+      pinnedWrap.innerHTML = `<div class="empty muted">Пока нет закреплённых. Нажмите “Показать все” и выберите.</div>`;
     } else {
-      pinnedKeys.forEach(key => {
+      listKeys.forEach(key => {
         const subj = subjectByKey(key);
         const title = subj ? subj.title : key;
 
+        const isPinned = pinnedSet.has(key);
+
         const row = document.createElement("div");
-        row.className = "settings-row";
+        row.className = `settings-row ${isPinned ? "is-on" : ""}`;
+
         row.innerHTML = `
           <div>
-            <div style="font-weight:800">${escapeHTML(title)}</div>
-            <div class="muted small">Pinned</div>
+            <div style="font-weight:900">${escapeHTML(title)}</div>
+            <div class="muted small">${isPinned ? "Pinned" : "Not pinned"}</div>
           </div>
-          <button type="button" class="btn">Убрать</button>
+          <label class="switch">
+            <input type="checkbox" ${isPinned ? "checked" : ""}>
+            <span class="slider"></span>
+          </label>
         `;
 
-        row.querySelector("button")?.addEventListener("click", () => {
+        const input = row.querySelector('input[type="checkbox"]');
+        input.addEventListener("change", () => {
           const fresh = loadProfile();
           if (!fresh) return;
+
           const updated = togglePinnedSubject(fresh, key);
           saveProfile(updated);
 
@@ -1266,15 +1312,12 @@ function renderProfileStack() {
           if (state.tab === "courses") renderAllSubjects();
           renderProfileMain();
           renderProfileSettings();
-
-          showToast("Убрано из закреплённых");
         });
 
         pinnedWrap.appendChild(row);
       });
     }
-  } 
-}
+  }
 
   function renderProfileMain() {
   const profile = loadProfile();
@@ -3204,6 +3247,12 @@ function renderMyRecs() {
       if (action === "go-profile") { setTab("profile"); return; }
       if (action === "open-ratings") { setTab("ratings"); return; }
       if (action === "ratings-info") { showToast(t("ratings_info")); return; }
+      if (action === "topbar-action") {
+         if (state.tab === "profile" && getProfileTopScreen() === "main") {
+           replaceProfile("settings");
+         }
+         return;
+       }
 
       if (action === "open-resources") { openGlobal("resources"); return; }
       if (action === "open-news") { openGlobal("news"); return; }
