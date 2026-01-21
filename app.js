@@ -2524,15 +2524,93 @@ function renderMyRecs() {
   });
 }
    
+    // ---------------------------
+  // Tour (strict) — T1+T2+T3 (mock now, DB later)
   // ---------------------------
-  // Tour (demo) — strict: no pause, no back
-  // ---------------------------
-  let tourTimer = null;
+  const TOUR_CONFIG = {
+    total: 20,
+    dist: { easy: 6, medium: 9, hard: 5 },
+    questionTimeSec: 45,           // per question
+    maxViolations: 3,              // anti-cheat threshold
+    autoSubmitOnMaxViolations: true
+  };
+
+  let tourTick = null;
 
   function openTourRules() {
     pushCourses("tour-rules");
     const cb = $("#tour-rules-accept");
     if (cb) cb.checked = false;
+  }
+
+  // ---------- T3: Data contract ----------
+  // UI expects rows in this shape:
+  // { id, subject_key, tour_no, difficulty, question_text, options[], correct_index, explanation?, source? }
+  function getTourQuestionsMock(subjectKey, tourNo) {
+    // 20 вопросов: 6 easy / 9 medium / 5 hard (mock)
+    const mk = (i, diff) => ({
+      id: `mock_${subjectKey || "subject"}_${tourNo}_${i}`,
+      subject_key: subjectKey || "subject",
+      tour_no: tourNo || 1,
+      difficulty: diff,
+      question_text: `Which process occurs during the light-dependent stage of photosynthesis? (Q${i})`,
+      options: [
+        "Photolysis of water molecules",
+        "Fixation of carbon dioxide",
+        "Production of glucose",
+        "Reduction of NADP to NADPH"
+      ],
+      correct_index: 0,
+      explanation: "Light-dependent reactions include photolysis and formation of ATP/NADPH.",
+      source: "Uzbekistan Academic Standards"
+    });
+
+    const items = [];
+    let i = 1;
+
+    for (let k = 0; k < TOUR_CONFIG.dist.easy; k++) items.push(mk(i++, "easy"));
+    for (let k = 0; k < TOUR_CONFIG.dist.medium; k++) items.push(mk(i++, "medium"));
+    for (let k = 0; k < TOUR_CONFIG.dist.hard; k++) items.push(mk(i++, "hard"));
+
+    // маленькая перемешка (стабильная)
+    return shuffleArrayStable(items, `${subjectKey || "s"}_${tourNo || 1}`);
+  }
+
+  function shuffleArrayStable(arr, seedStr) {
+    const a = [...arr];
+    let seed = 0;
+    for (let i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) >>> 0;
+    function rnd() {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 0xFFFFFFFF;
+    }
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rnd() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function initTourSession({ subjectKey = null, tourNo = 1, isArchive = false } = {}) {
+    const questions = getTourQuestionsMock(subjectKey, tourNo);
+
+    state.tourContext = {
+      isArchive,
+      subjectKey,
+      tourNo,
+      startedAt: Date.now(),
+      qStartedAt: Date.now(),
+      index: 0,
+      correct: 0,
+      answers: [],              // {qid, pickedIndex, isCorrect, spentSec}
+      violations: 0,
+      lastViolationAt: null,
+      questionTimeLimit: TOUR_CONFIG.questionTimeSec
+    };
+
+    // strict lock only for ACTIVE tour
+    state.quizLock = isArchive ? null : "tour";
+    saveState();
   }
 
   function openTourQuiz() {
@@ -2542,52 +2620,232 @@ function renderMyRecs() {
       return;
     }
 
-    state.quizLock = "tour";
-state.tourContext = { isArchive: false }; // задел на будущее
-saveState();
+    // subjectKey/tourNo можно позже брать из active предмета/тура
+    initTourSession({ subjectKey: "biology", tourNo: 4, isArchive: false });
 
     pushCourses("tour-quiz");
+    bindTourAntiCheatOnce();
     startTourTick();
+    renderTourQuestion();
   }
 
   function startTourTick() {
     stopTourTick();
-    let total = 10 * 60;
-    renderTourTimer(total);
+    tourTick = setInterval(() => {
+      renderTourHUD();
 
-    tourTimer = setInterval(() => {
-      total -= 1;
-      renderTourTimer(total);
-      if (total <= 0) {
+      // auto-finish if violations too many
+      if (!state.tourContext?.isArchive && state.tourContext?.violations >= TOUR_CONFIG.maxViolations) {
         stopTourTick();
-        finishTour();
+        finishTour({ reason: "violations" });
       }
-    }, 1000);
-  }
 
-  function renderTourTimer(totalSec) {
-    const mm = Math.floor(totalSec / 60);
-    const ss = totalSec % 60;
-    const el = $("#tour-timer");
-    if (el) el.textContent = `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+      // auto-finish if question time exceeded and no answer chosen (optional behavior)
+      const ctx = state.tourContext;
+      if (ctx && !ctx.isArchive) {
+        const qElapsed = Math.floor((Date.now() - ctx.qStartedAt) / 1000);
+        if (qElapsed >= ctx.questionTimeLimit) {
+          // if no selection yet, we keep button disabled; auto mark as wrong and go next
+          if (!ctx.answers.some(a => a.index === ctx.index)) {
+            submitTourAnswer({ pickedIndex: null, auto: true });
+          }
+        }
+      }
+    }, 250);
   }
 
   function stopTourTick() {
-    if (tourTimer) clearInterval(tourTimer);
-    tourTimer = null;
+    if (tourTick) clearInterval(tourTick);
+    tourTick = null;
   }
 
-  function finishTour() {
-    stopTourTick();
-    const meta = $("#tour-result-meta");
-    if (meta) meta.textContent = "Score: 0/20";
-    if (state.tourContext?.isArchive) {
-    showToast("Архивный тур: вне рейтинга");
- }
-    state.tourContext = null;
-    state.quizLock = null;
+  // ---------- T2: Anti-cheat ----------
+  let antiCheatBound = false;
+
+  function bindTourAntiCheatOnce() {
+    if (antiCheatBound) return;
+    antiCheatBound = true;
+
+    document.addEventListener("visibilitychange", () => {
+      if (!state.tourContext || state.tourContext.isArchive) return;
+      if (document.visibilityState !== "visible") registerTourViolation("visibility");
+    });
+
+    window.addEventListener("blur", () => {
+      if (!state.tourContext || state.tourContext.isArchive) return;
+      registerTourViolation("blur");
+    });
+  }
+
+  function registerTourViolation(type) {
+    const ctx = state.tourContext;
+    if (!ctx || ctx.isArchive) return;
+
+    // simple debounce: 1 violation per 2s
+    const now = Date.now();
+    if (ctx.lastViolationAt && (now - ctx.lastViolationAt) < 2000) return;
+
+    ctx.violations += 1;
+    ctx.lastViolationAt = now;
     saveState();
+
+    const warnBtn = $("#tour-warn-btn");
+    if (warnBtn) warnBtn.style.display = "inline-flex";
+
+    const warnPill = $("#tour-anti-cheat"); // legacy id might exist elsewhere
+    if (warnPill) warnPill.style.display = "inline-flex";
+
+    showToast(`Warning: session monitoring (${ctx.violations}/${TOUR_CONFIG.maxViolations})`);
+  }
+
+  // ---------- Render ----------
+  function renderTourHUD() {
+    const ctx = state.tourContext;
+    if (!ctx) return;
+
+    const total = TOUR_CONFIG.total;
+    const qNo = Math.min(total, ctx.index + 1);
+
+    const qof = $("#tour-qof");
+    if (qof) qof.textContent = `Question ${qNo} of ${total}`;
+
+    const pct = Math.round((qNo / total) * 100);
+    const pctEl = $("#tour-progress-pct");
+    if (pctEl) pctEl.textContent = `${pct}%`;
+
+    const fill = $("#tour-progress-fill");
+    if (fill) fill.style.width = `${pct}%`;
+
+    const badge = $("#tour-badge");
+    if (badge) {
+      const subjLabel = String(ctx.subjectKey || "SUBJECT").toUpperCase();
+      badge.textContent = `CAMBRIDGE ${subjLabel} • TOUR #${ctx.tourNo}`;
+    }
+
+    const overall = formatMsToMMSS(Date.now() - ctx.startedAt);
+    const overallEl = $("#tour-overall-time");
+    if (overallEl) overallEl.textContent = overall;
+
+    const qElapsed = formatMsToMMSS(Date.now() - ctx.qStartedAt);
+    const qEl = $("#tour-question-time");
+    if (qEl) qEl.textContent = qElapsed;
+
+    // warning visibility
+    const warnBtn = $("#tour-warn-btn");
+    if (warnBtn) warnBtn.style.display = (!ctx.isArchive && ctx.violations > 0) ? "inline-flex" : "none";
+  }
+
+  function renderTourQuestion() {
+    const ctx = state.tourContext;
+    if (!ctx) return;
+
+    const q = ctx.questions?.[ctx.index];
+    if (!q) {
+      finishTour({ reason: "done" });
+      return;
+    }
+
+    ctx.qStartedAt = Date.now();
+    saveState();
+
+    const qEl = $("#tour-question");
+    if (qEl) qEl.textContent = q.question_text;
+
+    const wrap = $("#tour-options");
+    if (wrap) {
+      wrap.innerHTML = "";
+
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "option";
+        btn.dataset.action = "tour-pick";
+        btn.dataset.index = String(i);
+
+        btn.innerHTML = `
+          <span class="dot" aria-hidden="true"></span>
+          <span class="opt-text">${escapeHTML(opt)}</span>
+        `;
+
+        wrap.appendChild(btn);
+      });
+    }
+
+    // disable next until choose
+    const next = $("#tour-next-btn");
+    if (next) {
+      next.disabled = true;
+      next.textContent = (ctx.index >= TOUR_CONFIG.total - 1) ? "Finish Tour →" : "Next Question →";
+    }
+
+    // clear active option styles
+    $$("#tour-options .option").forEach(o => o.classList.remove("is-selected"));
+    renderTourHUD();
+  }
+
+  function submitTourAnswer({ pickedIndex, auto = false } = {}) {
+    const ctx = state.tourContext;
+    if (!ctx) return;
+
+    const q = ctx.questions?.[ctx.index];
+    if (!q) return;
+
+    const spentSec = Math.max(0, Math.floor((Date.now() - ctx.qStartedAt) / 1000));
+    const isCorrect = (pickedIndex !== null && pickedIndex !== undefined) ? (Number(pickedIndex) === Number(q.correct_index)) : false;
+
+    ctx.answers = ctx.answers || [];
+    ctx.answers.push({
+      qid: q.id,
+      pickedIndex: (pickedIndex === null || pickedIndex === undefined) ? null : Number(pickedIndex),
+      isCorrect,
+      spentSec,
+      index: ctx.index
+    });
+
+    if (isCorrect) ctx.correct += 1;
+
+    // next index
+    ctx.index += 1;
+    saveState();
+
+    if (ctx.index >= TOUR_CONFIG.total) {
+      finishTour({ reason: auto ? "auto_done" : "done" });
+      return;
+    }
+
+    renderTourQuestion();
+  }
+
+  function finishTour({ reason = "done" } = {}) {
+    stopTourTick();
+
+    const ctx = state.tourContext;
+
+    // result meta
+    const meta = $("#tour-result-meta");
+    if (meta && ctx) {
+      meta.textContent = `Score: ${ctx.correct}/${TOUR_CONFIG.total} • Violations: ${ctx.violations || 0}`;
+    }
+
+    if (ctx?.isArchive) {
+      showToast("Архивный тур: вне рейтинга");
+    } else if (reason === "violations") {
+      showToast("Tour finished: session violations");
+    }
+
+    // unlock
+    state.quizLock = null;
+    state.tourContext = null;
+    saveState();
+
     pushCourses("tour-result");
+  }
+
+  function formatMsToMMSS(ms) {
+    const sec = Math.max(0, Math.floor(ms / 1000));
+    const mm = Math.floor(sec / 60);
+    const ss = sec % 60;
+    return `${mm}:${String(ss).padStart(2, "0")}`;
   }
 
   // ---------------------------
@@ -3005,14 +3263,42 @@ if (action === "practice-recommendations") {
 }
 
       if (action === "tour-start") {
-        openTourQuiz();
-        return;
-      }
+  openTourQuiz();
+  return;
+}
 
-      if (action === "tour-submit") {
-        finishTour();
-        return;
-      }
+// pick option
+if (action === "tour-pick") {
+  const ctx = state.tourContext;
+  if (!ctx) return;
+
+  const picked = Number(btn.dataset.index);
+  // highlight
+  $$("#tour-options .option").forEach(o => o.classList.remove("is-selected"));
+  btn.classList.add("is-selected");
+
+  // enable next
+  const next = $("#tour-next-btn");
+  if (next) next.disabled = false;
+
+  // store temporarily (not final submit yet)
+  ctx._pickedIndex = picked;
+  saveState();
+  return;
+}
+
+// next / finish
+if (action === "tour-next" || action === "tour-submit") {
+  const ctx = state.tourContext;
+  if (!ctx) return;
+
+  const picked = (ctx._pickedIndex === null || ctx._pickedIndex === undefined) ? null : Number(ctx._pickedIndex);
+  ctx._pickedIndex = null;
+  saveState();
+
+  submitTourAnswer({ pickedIndex: picked, auto: false });
+  return;
+}
 
       if (action === "tour-review") {
         pushCourses("tour-review");
