@@ -101,10 +101,11 @@ function applyStaticI18n() {
     lessonId: null,
     entryTab: "home" 
   },
-  profile: {
-  stack: ["main"], // main | settings
-  pinnedExpanded: false
-},
+    profile: {
+    stack: ["main"], // main | settings
+    pinnedExpanded: false
+  },
+
   quizLock: null
 };
 
@@ -1141,7 +1142,7 @@ function renderProfileStack() {
   mainSubjects.forEach(subj => {
     const isOn = currentComp.includes(subj.key);
 
-        const row = document.createElement("div");
+    const row = document.createElement("div");
     row.className = `settings-row ${isOn ? "is-on" : ""}`;
 
     row.innerHTML = `
@@ -2651,23 +2652,19 @@ if (!res.added) {
 
 let refsHtml = "";
 if (refs.length) {
-   const refsList = refs.slice(0, 3).map((r) => {
-    const title = escapeHTML(r.title || "");
-    const ref = r.ref ? ` — ${escapeHTML(r.ref)}` : "";
-    const pages = r.pages ? ` (${escapeHTML(r.pages)})` : "";
-    return `• ${title}${ref}${pages}`;
-  }).join("<br>");
   refsHtml = `
     <div class="muted small" style="margin-top:6px">
-    ${refsList}
-   </div>
+      ${refs.slice(0, 3).map(r =>
+        `• ${escapeHTML(r.title || "")}${r.ref ? ` — ${escapeHTML(r.ref)}` : ""}${r.pages ? ` (${escapeHTML(r.pages)})` : ""}`
+      ).join("<br>")}
+    </div>
   `;
 }
 
 item.innerHTML = `
   <div style="font-weight:900">${escapeHTML(tp)}</div>
   <div class="muted small">Рекомендуем повторить теорию и примеры по теме “${escapeHTML(tp)}”.</div>
-  ${refsHtml || '<div class="muted small" style="margin-top:6px">Источник: будет добавлен из книги по предмету.</div>'}
+  ${refsHtml || `<div class="muted small" style="margin-top:6px">Источник: будет добавлен из книги по предмету.</div>`}
   <div style="margin-top:10px">
     <button type="button" class="btn" data-open-books="1">Открыть «Книги»</button>
   </div>
@@ -3251,7 +3248,7 @@ function renderMyRecs() {
       if (action === "open-ratings") { setTab("ratings"); return; }
       if (action === "ratings-info") { showToast(t("ratings_info")); return; }
       if (action === "topbar-action") {
-       if (state.tab === "profile" && getProfileTopScreen() === "main") {
+         if (state.tab === "profile" && getProfileTopScreen() === "main") {
            replaceProfile("settings");
          }
          return;
@@ -3608,21 +3605,16 @@ if (action === "tour-next" || action === "tour-submit") {
       }
     }, 250);
   }
-}
 
   function bindUI() {
-  // Tabbar может отсутствовать из-за неправильного скоупа/переименования — защитим запуск,
-  // чтобы приложение хотя бы грузилось и ты видел следующий баг, а не белый экран.
-  if (typeof bindTabbar === "function") bindTabbar();
-  else if (typeof bindTabBar === "function") bindTabBar(); // на случай другого регистра/имени
-
-  if (typeof bindTopbar === "function") bindTopbar();
-  if (typeof bindActions === "function") bindActions();
-  if (typeof bindRatingsUI === "function") bindRatingsUI(); // ✅ Leaderboard controls
+  bindTabbar();
+  bindTopbar();
+  bindActions();
+  bindRatingsUI(); // ✅ Leaderboard controls
 }
 
-// Init
-bindUI();
-boot();
+  // Init
+  bindUI();
+  boot();
 
 })();
