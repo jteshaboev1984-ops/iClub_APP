@@ -3607,14 +3607,15 @@ if (action === "tour-next" || action === "tour-submit") {
   }
 
   function bindUI() {
-  bindTabbar();
-  bindTopbar();
-  bindActions();
-  bindRatingsUI(); // ✅ Leaderboard controls
-}
+    bindTabbar();
+    bindTopbar();
+    bindActions();
+    bindRatingsUI(); // ✅ Leaderboard controls
+  }
 
   // Init
   bindUI();
   boot();
 
 })();
+
