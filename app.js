@@ -3616,8 +3616,6 @@ if (action === "tour-next" || action === "tour-submit") {
   bindRatingsUI(); // ✅ Leaderboard controls
 }
 
-  }
-
   // Init
   bindUI();
   boot();
