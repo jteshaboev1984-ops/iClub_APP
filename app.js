@@ -410,7 +410,7 @@ function getReadingRefs(subjectKey, topic) {
     return s.slice(0, Math.max(0, n));
   }
 
-  function buildPracticeSet(subjectKey) {
+    function buildPracticeSet(subjectKey) {
     const bank = getPracticeBankForSubject(subjectKey).map(q => ({ ...q, difficulty: normalizeDifficulty(q.difficulty) }));
 
     // группируем по сложности
