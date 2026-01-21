@@ -102,8 +102,9 @@ function applyStaticI18n() {
     entryTab: "home" 
   },
   profile: {
-    stack: ["main"] // main | settings
-  },
+  stack: ["main"], // main | settings
+  pinnedExpanded: false
+},
   quizLock: null
 };
 
