@@ -101,11 +101,9 @@ function applyStaticI18n() {
     lessonId: null,
     entryTab: "home" 
   },
-    profile: {
-    stack: ["main"], // main | settings
-    pinnedExpanded: false
+  profile: {
+    stack: ["main"] // main | settings
   },
-
   quizLock: null
 };
 
@@ -1142,7 +1140,7 @@ function renderProfileStack() {
   mainSubjects.forEach(subj => {
     const isOn = currentComp.includes(subj.key);
 
-    const row = document.createElement("div");
+        const row = document.createElement("div");
     row.className = `settings-row ${isOn ? "is-on" : ""}`;
 
     row.innerHTML = `
@@ -3248,7 +3246,7 @@ function renderMyRecs() {
       if (action === "open-ratings") { setTab("ratings"); return; }
       if (action === "ratings-info") { showToast(t("ratings_info")); return; }
       if (action === "topbar-action") {
-         if (state.tab === "profile" && getProfileTopScreen() === "main") {
+       if (state.tab === "profile" && getProfileTopScreen() === "main") {
            replaceProfile("settings");
          }
          return;
@@ -3607,15 +3605,14 @@ if (action === "tour-next" || action === "tour-submit") {
   }
 
   function bindUI() {
-    bindTabbar();
-    bindTopbar();
-    bindActions();
-    bindRatingsUI(); // ✅ Leaderboard controls
-  }
+  bindTabbar();
+  bindTopbar();
+  bindActions();
+  bindRatingsUI(); // ✅ Leaderboard controls
+}
 
   // Init
   bindUI();
   boot();
 
 })();
-
