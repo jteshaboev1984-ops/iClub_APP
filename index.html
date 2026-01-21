@@ -562,16 +562,62 @@
       </section>
 
       <!-- ============ Ratings (Tab) ============ -->
-      <section id="view-ratings" class="view" data-view="ratings" aria-label="Ratings">
-        <div class="content">
-          <h1 class="h1">Ratings</h1>
-          <p class="muted">Только по соревновательным предметам и активным турам.</p>
+<section id="view-ratings" class="view" data-view="ratings" aria-label="Ratings">
+  <div class="content leaderboard">
 
-          <div class="card">
-            <div class="muted small">Экран будет заполнен после подключения базы (district/region/country).</div>
-          </div>
-        </div>
-      </section>
+    <!-- Header inside Ratings (как в примере) -->
+    <div class="lb-header">
+      <div class="lb-title">Leaderboard</div>
+      <button class="lb-info" type="button" data-action="ratings-info" aria-label="Info">i</button>
+    </div>
+
+    <!-- Segmented: District / Region / Republic -->
+    <div class="lb-segment" role="tablist" aria-label="Leaderboard scope">
+      <button class="seg-btn is-active" type="button" data-scope="district" role="tab" aria-selected="true">District</button>
+      <button class="seg-btn" type="button" data-scope="region" role="tab" aria-selected="false">Region</button>
+      <button class="seg-btn" type="button" data-scope="republic" role="tab" aria-selected="false">Republic</button>
+    </div>
+
+    <!-- Search -->
+    <div class="lb-search">
+      <span class="lb-search-ico">🔍</span>
+      <input id="ratings-search" class="lb-search-input" type="search" placeholder="Search students by name..." autocomplete="off" />
+      <button id="ratings-search-clear" class="lb-search-clear" type="button" aria-label="Clear">✕</button>
+    </div>
+
+    <!-- Table header -->
+    <div class="lb-head">
+      <div>RANK</div>
+      <div>STUDENT</div>
+      <div class="lb-head-right">SCORE</div>
+      <div class="lb-head-right">TIME</div>
+    </div>
+
+    <!-- List -->
+    <div id="ratings-list" class="lb-list" aria-label="Leaderboard list">
+      <div class="empty muted">Подключим базу — здесь появятся реальные участники.</div>
+    </div>
+
+    <!-- Bottom “My rank” bar -->
+    <div id="ratings-mybar" class="lb-mybar" aria-label="My rank" style="display:none">
+      <div class="lb-mybar-left">
+        <div class="lb-mybar-label">MY RANK</div>
+        <div id="ratings-mybar-rank" class="lb-mybar-rank">—</div>
+      </div>
+
+      <div class="lb-mybar-mid">
+        <div id="ratings-mybar-name" class="lb-mybar-name">—</div>
+        <div id="ratings-mybar-meta" class="lb-mybar-meta">—</div>
+      </div>
+
+      <div class="lb-mybar-right">
+        <div id="ratings-mybar-score" class="lb-mybar-score">— pts</div>
+        <div id="ratings-mybar-time" class="lb-mybar-time">—</div>
+      </div>
+    </div>
+
+  </div>
+</section>
 
       <!-- ============ Profile (Tab) ============ -->
       <section id="view-profile" class="view" data-view="profile" aria-label="Profile">
