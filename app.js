@@ -2651,19 +2651,23 @@ if (!res.added) {
 
 let refsHtml = "";
 if (refs.length) {
+   const refsList = refs.slice(0, 3).map((r) => {
+    const title = escapeHTML(r.title || "");
+    const ref = r.ref ? ` — ${escapeHTML(r.ref)}` : "";
+    const pages = r.pages ? ` (${escapeHTML(r.pages)})` : "";
+    return `• ${title}${ref}${pages}`;
+  }).join("<br>");
   refsHtml = `
     <div class="muted small" style="margin-top:6px">
-      ${refs.slice(0, 3).map(r =>
-        `• ${escapeHTML(r.title || "")}${r.ref ? ` — ${escapeHTML(r.ref)}` : ""}${r.pages ? ` (${escapeHTML(r.pages)})` : ""}`
-      ).join("<br>")}
-    </div>
+    ${refsList}
+   </div>
   `;
 }
 
 item.innerHTML = `
   <div style="font-weight:900">${escapeHTML(tp)}</div>
   <div class="muted small">Рекомендуем повторить теорию и примеры по теме “${escapeHTML(tp)}”.</div>
-  ${refsHtml || `<div class="muted small" style="margin-top:6px">Источник: будет добавлен из книги по предмету.</div>`}
+  ${refsHtml || '<div class="muted small" style="margin-top:6px">Источник: будет добавлен из книги по предмету.</div>'}
   <div style="margin-top:10px">
     <button type="button" class="btn" data-open-books="1">Открыть «Книги»</button>
   </div>
@@ -3611,6 +3615,8 @@ if (action === "tour-next" || action === "tour-submit") {
   bindActions();
   bindRatingsUI(); // ✅ Leaderboard controls
 }
+
+  }
 
   // Init
   bindUI();
