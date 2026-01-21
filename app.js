@@ -1375,7 +1375,7 @@ function renderProfileStack() {
     const avg = arr => arr.reduce((s, x) => s + (Number(x.percent) || 0), 0) / Math.max(1, arr.length);
     const diff = Math.round(avg(a3) - avg(b3));
 
-    trendEl.textContent = (diff === 0) ? "0pp" : `${diff > 0 ? "+" : ""}${diff}pp`;
+    trendEl.textContent = (diff === 0) ? "0%" : `${diff > 0 ? "+" : ""}${diff}%`;
   } else {
     trendEl.textContent = "—";
   }
@@ -1392,7 +1392,14 @@ function renderProfileStack() {
     const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
     days.add(key);
   });
-  stabilityEl.textContent = `${days.size}/7`;
+    const activeDays = days.size;
+
+  if (!allAttempts.length) {
+    stabilityEl.textContent = t("profile_stability_no_data");
+  } else {
+    const pct = Math.round((activeDays / 7) * 100);
+    stabilityEl.textContent = (pct > 0) ? `${pct}%` : t("profile_stability_no_activity");
+  }
 
   // Tours: пока нет локальной истории туров в этом фронте — держим “—”
   toursEl.textContent = "—";
@@ -1403,32 +1410,53 @@ function renderProfileStack() {
     currentLevelEl.textContent = level;
   }
 
-  if (slotsCountEl) slotsCountEl.textContent = `${comp.length}/2`;
+    if (slotsCountEl) slotsCountEl.textContent = `${comp.length}/2`;
   if (slotsListEl) {
     slotsListEl.innerHTML = "";
-    if (!comp.length) {
-      slotsListEl.innerHTML = `<div class="empty muted">${t("profile_slots_empty")}</div>`;
-    } else {
-      comp.forEach(us => {
-        const subj = subjectByKey(us.key);
-        const row = document.createElement("div");
-        row.className = "slot-card";
-        row.innerHTML = `
-          <div>
-            <div class="slot-title">${escapeHTML(subj?.title || us.key)}</div>
-            <div class="muted small">${t("profile_slot_hint")}</div>
-          </div>
-          <button type="button" class="btn mini" data-subject="${escapeHTML(us.key)}">${t("profile_view_btn")}</button>
-        `;
-        row.querySelector("button")?.addEventListener("click", () => {
-          state.courses.subjectKey = us.key;
-          saveState();
-          setTab("courses");
-          replaceCourses("subject-hub");
-          renderSubjectHub();
-        });
-        slotsListEl.appendChild(row);
+
+    // 1) Активные competitive слоты (0..2)
+    comp.forEach(us => {
+      const subj = subjectByKey(us.key);
+      const row = document.createElement("div");
+      row.className = "slot-card";
+      row.innerHTML = `
+        <div>
+          <div class="slot-title">${escapeHTML(subj?.title || us.key)}</div>
+          <div class="muted small">${t("profile_slot_hint")}</div>
+        </div>
+        <button type="button" class="btn mini" data-subject="${escapeHTML(us.key)}">${t("profile_view_btn")}</button>
+      `;
+
+      row.querySelector("button")?.addEventListener("click", () => {
+        state.courses.subjectKey = us.key;
+        saveState();
+        setTab("courses");
+        replaceCourses("subject-hub");
+        renderSubjectHub();
       });
+
+      slotsListEl.appendChild(row);
+    });
+
+    // 2) Пустые слоты до 2 (Empty slot + JOIN)
+    const emptyCount = Math.max(0, 2 - comp.length);
+    for (let i = 0; i < emptyCount; i++) {
+      const row = document.createElement("div");
+      row.className = "slot-card is-empty";
+      row.innerHTML = `
+        <div>
+          <div class="slot-empty-title">${t("profile_empty_slot")}</div>
+          <div class="muted small">${t("reg_competitive_subject_hint")}</div>
+        </div>
+        <button type="button" class="btn join" data-action="profile-settings">${t("profile_join_btn")}</button>
+      `;
+
+      row.querySelector("button")?.addEventListener("click", () => {
+        setTab("profile");
+        replaceProfile("settings");
+      });
+
+      slotsListEl.appendChild(row);
     }
   }
    
