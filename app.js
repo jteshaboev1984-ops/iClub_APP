@@ -618,11 +618,14 @@ function getReadingRefs(subjectKey, topic) {
     setGlobalBaseView(tabName);
 
     if (tabName === "courses") {
-      renderCoursesStack();
-    }
-     if (tabName === "profile") {
+  renderCoursesStack();
+}
+if (tabName === "profile") {
   renderProfileStack();
- }
+}
+if (tabName === "ratings") {
+  renderRatings(); // ✅ Leaderboard UI skeleton (mock now, DB later)
+}
 }
 
   function setGlobalBaseView(tabName) {
@@ -767,6 +770,160 @@ if (logoEl) logoEl.style.display = "none";
     }
   }
 
+// ---------------------------
+// Ratings (Leaderboard) — UI skeleton now, DB later
+// ---------------------------
+const ratingsState = {
+  scope: "district", // district | region | republic
+  q: ""
+};
+
+function getLeaderboardDataMock(scope) {
+  // Позже заменим на Supabase: district/region/republic + subject/tour + competitive only
+  const base = [
+    { rank: 1, name: "Shakhzod Alimov", meta: "Tashkent International School", score: 980, time: "12:45", avatar: null },
+    { rank: 2, name: "Nilufar Karimova", meta: "Presidential School", score: 975, time: "13:10", avatar: null },
+    { rank: 3, name: "Jasur Akhmedov", meta: "Samarkand Lyceum #1", score: 962, time: "14:05", avatar: null },
+    { rank: 4, name: "Bekzod Saitov", meta: "School 142, Tashkent", score: 958, time: "14:22", avatar: null },
+    { rank: 5, name: "Madina Kenjayeva", meta: "Westminster Academy", score: 944, time: "15:10", avatar: null },
+    { rank: 6, name: "Aziz Umarov", meta: "Bukhara State Lyceum", score: 940, time: "15:45", avatar: null },
+    { rank: 7, name: "Lola Mansurova", meta: "School 50, Fergana", score: 938, time: "16:02", avatar: null }
+  ];
+
+  // Для ощущения “разных” вкладок — слегка двигаем очки
+  const delta = (scope === "district") ? 0 : (scope === "region" ? -6 : -12);
+  return base.map(x => ({ ...x, score: x.score + delta }));
+}
+
+function getMyRankMock(scope) {
+  const p = loadProfile();
+  const displayName = (p?.full_name || p?.name || "You").trim();
+  const district = p?.district || "—";
+  const region = p?.region || "—";
+  const meta = [district, region].filter(Boolean).join(" • ");
+
+  // Мок “моего” места и очков
+  const rank = (scope === "district") ? 12 : (scope === "region" ? 28 : 64);
+  const score = (scope === "district") ? 892 : (scope === "region" ? 861 : 820);
+  const time = "18:30";
+
+  return { rank, name: displayName, meta, score, time };
+}
+
+function renderRatings() {
+  const listEl = $("#ratings-list");
+  const mybar = $("#ratings-mybar");
+  const myRankEl = $("#ratings-mybar-rank");
+  const myNameEl = $("#ratings-mybar-name");
+  const myMetaEl = $("#ratings-mybar-meta");
+  const myScoreEl = $("#ratings-mybar-score");
+  const myTimeEl = $("#ratings-mybar-time");
+
+  if (!listEl) return;
+
+  // 1) buttons state
+  $$(".lb-segment .seg-btn").forEach(btn => {
+    const active = btn.dataset.scope === ratingsState.scope;
+    btn.classList.toggle("is-active", active);
+    btn.setAttribute("aria-selected", active ? "true" : "false");
+  });
+
+  // 2) data (mock now)
+  const data = getLeaderboardDataMock(ratingsState.scope);
+
+  // 3) filter by query
+  const q = String(ratingsState.q || "").trim().toLowerCase();
+  const filtered = q
+    ? data.filter(x => String(x.name || "").toLowerCase().includes(q))
+    : data;
+
+  // 4) render list
+  if (filtered.length === 0) {
+    listEl.innerHTML = `<div class="empty muted">Ничего не найдено.</div>`;
+  } else {
+    listEl.innerHTML = filtered.map(row => {
+      const topClass = row.rank === 1 ? "is-top1" : (row.rank === 2 ? "is-top2" : (row.rank === 3 ? "is-top3" : ""));
+      const safeName = escapeHTML(row.name);
+      const safeMeta = escapeHTML(row.meta || "");
+      const safeTime = escapeHTML(row.time || "");
+      const score = Number(row.score || 0);
+
+      return `
+        <div class="lb-row">
+          <div class="lb-rank">
+            <div class="lb-rank-badge ${topClass}">${row.rank}</div>
+          </div>
+
+          <div class="lb-student">
+            <div class="lb-avatar">${row.avatar ? `<img src="${escapeHTML(row.avatar)}" alt="">` : ""}</div>
+            <div class="lb-student-txt">
+              <div class="lb-name">${safeName}</div>
+              <div class="lb-meta">${safeMeta}</div>
+            </div>
+          </div>
+
+          <div class="lb-score">${score}</div>
+          <div class="lb-time">${safeTime}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // 5) my rank bar (mock)
+  const my = getMyRankMock(ratingsState.scope);
+  if (mybar && myRankEl && myNameEl && myMetaEl && myScoreEl && myTimeEl) {
+    myRankEl.textContent = String(my.rank ?? "—");
+    myNameEl.textContent = String(my.name ?? "—");
+    myMetaEl.textContent = String(my.meta ?? "—");
+    myScoreEl.textContent = `${String(my.score ?? "—")} pts`;
+    myTimeEl.textContent = String(my.time ?? "—");
+    mybar.style.display = "flex";
+  }
+}
+
+function bindRatingsUI() {
+  const search = $("#ratings-search");
+  const clear = $("#ratings-search-clear");
+  const listEl = $("#ratings-list");
+
+  // segmented tabs
+  $$(".lb-segment .seg-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const scope = btn.dataset.scope;
+      if (!scope) return;
+      ratingsState.scope = scope;
+      renderRatings();
+    });
+  });
+
+  // search
+  if (search) {
+    search.addEventListener("input", () => {
+      ratingsState.q = search.value || "";
+      renderRatings();
+    });
+  }
+
+  // clear
+  if (clear && search) {
+    clear.addEventListener("click", () => {
+      search.value = "";
+      ratingsState.q = "";
+      renderRatings();
+      search.focus();
+    });
+  }
+
+  // optional: click on list rows later (open student profile) — пока пусто
+  if (listEl) {
+    listEl.addEventListener("click", (e) => {
+      const row = e.target.closest(".lb-row");
+      if (!row) return;
+      // future: open profile modal
+    });
+  }
+}
+   
   // ---------------------------
   // Courses stack
   // ---------------------------
@@ -2958,10 +3115,11 @@ if (action === "practice-recommendations") {
   }
 
   function bindUI() {
-    bindTabbar();
-    bindTopbar();
-    bindActions();
-  }
+  bindTabbar();
+  bindTopbar();
+  bindActions();
+  bindRatingsUI(); // ✅ Leaderboard controls
+}
 
   // Init
   bindUI();
