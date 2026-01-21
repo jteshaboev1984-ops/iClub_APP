@@ -585,26 +585,81 @@ body {
 
 .profile-hero-row{
   display:flex;
-  gap: 12px;
+  flex-direction: column;
   align-items:center;
+  text-align: center;
+  gap: 10px;
 }
 
-.profile-avatar{
-  width: 68px;
-  height: 68px;
-  border-radius: 50%;
-  background: rgba(47,111,214,0.16);
+.profile-row-list{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.profile-row{
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.profile-row-left{
+  flex: 0 0 auto;
+}
+
+.profile-row-ico{
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-weight: 900;
+  background: rgba(47,111,214,0.12);
   color: var(--primary);
-  background-size: cover;
-  background-position: center;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.profile-row-mid{
+  min-width: 0;
+  flex: 1;
+}
+
+.profile-row-title{
+  font-weight: 900;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-row-right{
+  flex: 0 0 auto;
+  color: rgba(15,23,42,0.45);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.profile-avatar{
+  margin: 0 auto;
 }
 
 .profile-hero-info{
   min-width: 0;
+  text-align: center;
+}
+
+.profile-name{
+  text-align: center;
 }
 
 .profile-badge{
@@ -704,6 +759,24 @@ body {
   justify-content:space-between;
   gap: 10px;
   box-shadow: var(--shadow-sm);
+}
+
+.slot-card.is-empty{
+  border-style: dashed;
+  background: rgba(15,23,42,0.02);
+}
+
+.slot-empty-title{
+  font-weight: 900;
+  color: rgba(15,23,42,0.55);
+}
+
+.btn.join{
+  height: 30px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 900;
+  border-radius: 12px;
 }
 
 .slot-title{
@@ -1395,6 +1468,25 @@ body.modal-open { overflow: hidden; }
   border-radius: 14px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
+}
+
+.settings-row-btn{
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-row-title{
+  font-weight: 900;
+}
+
+.settings-row-arrow{
+  font-size: 20px;
+  font-weight: 900;
+  color: rgba(15,23,42,0.45);
 }
 
 .select{
