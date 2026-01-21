@@ -3148,8 +3148,6 @@ if (action === "profile-open-ratings") {
   setTab("ratings");
   return;
 }
-return;
-}
 
       // Courses actions
       if (action === "to-subject-hub") {
