@@ -713,14 +713,11 @@
       <section id="view-profile" class="view" data-view="profile" aria-label="Profile">
         <div class="content">
 
-  <!-- Profile MAIN -->
+    <!-- Profile MAIN -->
   <div id="profile-main" class="profile-screen is-active">
- <div class="profile-header">
-    <div class="profile-header-title" data-i18n="profile_title">Academic Profile</div>
-    <button class="icon-btn profile-settings-btn" type="button" aria-label="Settings" data-action="profile-settings">⚙️</button>
-  </div>
 
   <div class="card profile-hero">
+
     <div class="profile-hero-row">
       <div class="profile-avatar" id="profile-avatar">
         <span id="profile-avatar-initials">IC</span>
@@ -835,13 +832,37 @@
   <!-- Profile SETTINGS -->
 <div id="profile-settings" class="profile-screen">
 
-  <!-- Header -->
+    <!-- Header -->
   <div class="settings-head">
-    <button class="btn" type="button" data-action="profile-settings-back">← Назад</button>
-    <div class="muted small">
-      Competitive ≤ 2 • Язык • Закреплённые предметы
+    <button class="icon-btn settings-back" type="button" aria-label="Back" data-action="profile-settings-back">
+      <span class="icon">←</span>
+    </button>
+    <div class="settings-head-title">Настройки</div>
+    <div class="settings-head-sub muted small">Competitive ≤ 2 • Режимы • Интерфейс</div>
+  </div>
+    
+  <!-- Language (move to top) -->
+  <div class="card">
+    <div class="card-title">Язык интерфейса</div>
+    <p class="muted small">
+      Меняется только интерфейс приложения. Язык туров и практики — фиксированный.
+    </p>
+
+    <div class="settings-list">
+      <div class="settings-row">
+        <div>
+          <div style="font-weight:900">Текущий язык</div>
+          <div class="muted small">RU / UZ / EN</div>
+        </div>
+        <select id="profile-settings-language" class="select">
+          <option value="ru">Русский</option>
+          <option value="uz">O‘zbek</option>
+          <option value="en">English</option>
+        </select>
+      </div>
     </div>
   </div>
+
 
   <!-- Competitive mode -->
   <div class="card">
@@ -856,59 +877,65 @@
     </div>
   </div>
 
-  <!-- Notifications -->
+    <!-- More -->
   <div class="card">
-    <div class="card-title">Уведомления</div>
-    <p class="muted small">
-      Сейчас заглушка v1. Подключим позже без боли.
-    </p>
+    <div class="card-title">More</div>
 
     <div class="settings-list">
-      <div class="settings-row">
-        <div>
-          <div style="font-weight:800">Новости и анонсы</div>
-          <div class="muted small">Обновления олимпиад</div>
-        </div>
-        <label class="switch">
-          <input type="checkbox" disabled>
-          <span class="slider"></span>
-        </label>
-      </div>
+      <button class="settings-nav" type="button" data-action="open-news">
+        <span class="settings-nav-ico">📰</span>
+        <span class="settings-nav-text">
+          <span class="settings-nav-title">Новости</span>
+          <span class="settings-nav-sub muted small">Анонсы и обновления</span>
+        </span>
+        <span class="settings-nav-arrow">›</span>
+      </button>
+
+      <button class="settings-nav" type="button" data-action="open-notifications">
+        <span class="settings-nav-ico">🔔</span>
+        <span class="settings-nav-text">
+          <span class="settings-nav-title">Уведомления</span>
+          <span class="settings-nav-sub muted small">Системные события</span>
+        </span>
+        <span class="settings-nav-arrow">›</span>
+      </button>
+
+      <button class="settings-nav" type="button" data-action="open-community">
+        <span class="settings-nav-ico">💬</span>
+        <span class="settings-nav-text">
+          <span class="settings-nav-title">Комьюнити</span>
+          <span class="settings-nav-sub muted small">@iClubuzofficial</span>
+        </span>
+        <span class="settings-nav-arrow">›</span>
+      </button>
+
+      <button class="settings-nav" type="button" data-action="open-about">
+        <span class="settings-nav-ico">ℹ️</span>
+        <span class="settings-nav-text">
+          <span class="settings-nav-title">О проекте</span>
+          <span class="settings-nav-sub muted small">Правила и организаторы</span>
+        </span>
+        <span class="settings-nav-arrow">›</span>
+      </button>
     </div>
   </div>
 
-  <!-- Language -->
+     <!-- Study mode / Pinned -->
   <div class="card">
-    <div class="card-title">Язык</div>
-    <p class="muted small">
-      Можно менять в любое время.
-    </p>
-
-    <div class="settings-list">
-      <div class="settings-row">
-        <div>
-          <div style="font-weight:800">Язык интерфейса</div>
-          <div class="muted small">RU / UZ</div>
-        </div>
-                <select id="profile-settings-language" class="select">
-          <option value="ru">Русский</option>
-          <option value="uz">O‘zbek</option>
-          <option value="en">English</option>
-        </select>
-      </div>
+    <div class="settings-card-head">
+      <div class="card-title">Учебный режим (Pinned)</div>
+      <button id="profile-settings-pinned-toggle" class="btn mini ghost" type="button">
+        Показать все
+      </button>
     </div>
-  </div>
-
-  <!-- Pinned subjects -->
-  <div class="card">
-    <div class="card-title">Закреплённые предметы (Pinned)</div>
     <p class="muted small">
-      Закреплённые предметы быстрее доступны на главной.
+      Здесь — быстрый доступ к предметам в учебном режиме. Можно закрепить и снять закрепление.
     </p>
 
     <div id="profile-settings-pinned-list" class="settings-list">
       <!-- filled by app.js -->
     </div>
+
     <!-- More -->
 <div class="card">
   <div class="card-title" data-i18n="profile_settings_more">More</div>
