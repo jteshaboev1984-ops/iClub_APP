@@ -46,6 +46,17 @@
   // ---------------------------
   const t = (key, vars) => (window.i18n?.t ? window.i18n.t(key, vars) : key);
 
+function applyStaticI18n() {
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.dataset.i18n;
+      if (key) el.textContent = t(key);
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+      const key = el.dataset.i18nPlaceholder;
+      if (key) el.setAttribute("placeholder", t(key));
+    });
+  }
+   
   // ---------------------------
   // Telegram WebApp integration (safe)
   // ---------------------------
@@ -82,11 +93,13 @@
   // ---------------------------
   const defaultState = {
   tab: "home", // home | courses | ratings | profile
+  prevTab: "home",
   viewStack: ["home"], // global screens stack
   courses: {
     stack: ["all-subjects"],
     subjectKey: null,
-    lessonId: null
+    lessonId: null,
+    entryTab: "home" 
   },
   profile: {
     stack: ["main"] // main | settings
@@ -104,11 +117,17 @@
     const merged = {
       ...structuredClone(defaultState),
       ...saved,
-      courses: { ...structuredClone(defaultState.courses), ...(saved.courses || {}) }
+      courses: { ...structuredClone(defaultState.courses), ...(saved.courses || {}) },
+      profile: { ...structuredClone(defaultState.profile), ...(saved.profile || {}) }
     };
     // Ensure viewStack sane
     if (!Array.isArray(merged.viewStack) || merged.viewStack.length === 0) merged.viewStack = ["home"];
-    return merged;
+    if (!["home", "courses", "ratings", "profile"].includes(merged.tab)) merged.tab = "home";
+    if (!["home", "courses", "ratings", "profile"].includes(merged.prevTab)) merged.prevTab = merged.tab || "home";
+    if (!["home", "courses", "ratings", "profile"].includes(merged.courses.entryTab)) {
+      merged.courses.entryTab = merged.prevTab || "home";
+    }
+     return merged;
   }
 
   function saveState() {
@@ -606,7 +625,13 @@ function getReadingRefs(subjectKey, topic) {
   }
 
   function setTab(tabName) {
-    state.tab = tabName;
+    if (!["home", "courses", "ratings", "profile"].includes(tabName)) tabName = "home";
+    const prevTab = state.tab;
+    if (prevTab && prevTab !== tabName) {
+      state.prevTab = prevTab;
+      if (tabName === "courses") state.courses.entryTab = prevTab;
+    }
+     state.tab = tabName;
     saveState();
 
     // Tabbar active
@@ -974,10 +999,14 @@ function bindRatingsUI() {
 
   function popCourses() {
     if (state.quizLock) return;
-    if (state.courses.stack.length <= 1) return;
-    state.courses.stack.pop();
-    saveState();
-    showCoursesScreen(getCoursesTopScreen());
+    if (state.courses.stack.length > 1) {
+      state.courses.stack.pop();
+      saveState();
+      showCoursesScreen(getCoursesTopScreen());
+      return;
+    }
+    const targetTab = state.courses.entryTab || state.prevTab || "home";
+    setTab(targetTab);
   }
 
   function canCoursesBack() {
@@ -1190,6 +1219,7 @@ function renderProfileStack() {
       saveProfile(fresh);
 
       window.i18n?.setLang(nextLang);
+      applyStaticI18n(); 
 
       // Перерисуем ключевые места
       renderHome();
@@ -1246,12 +1276,17 @@ function renderProfileStack() {
   } 
 }
 
-   function renderProfileMain() {
+  function renderProfileMain() {
   const profile = loadProfile();
 
   const nameEl = document.getElementById("profile-dash-name");
   const metaEl = document.getElementById("profile-dash-meta");
-
+  const avatarEl = document.getElementById("profile-avatar");
+  const avatarInitials = document.getElementById("profile-avatar-initials");
+  const currentLevelEl = document.getElementById("profile-current-level");
+  const slotsCountEl = document.getElementById("profile-competitive-slots-count");
+  const slotsListEl = document.getElementById("profile-competitive-slots-list");
+     
   const compEl = document.getElementById("profile-metric-competitive");
   const studyEl = document.getElementById("profile-metric-study");
 
@@ -1268,7 +1303,12 @@ function renderProfileStack() {
     if (!profile) {
     nameEl.textContent = "Сначала регистрация";
     metaEl.textContent = "—";
-
+    if (avatarEl) avatarEl.style.backgroundImage = "";
+    if (avatarInitials) avatarInitials.textContent = "";
+    if (currentLevelEl) currentLevelEl.textContent = "—";
+    if (slotsCountEl) slotsCountEl.textContent = "0/2";
+    if (slotsListEl) slotsListEl.innerHTML = `<div class="empty muted">${t("home_need_registration")}</div>`;
+       
     compEl.textContent = "0";
     studyEl.textContent = "0";
 
@@ -1286,6 +1326,12 @@ function renderProfileStack() {
 
   const fullName = String(profile.full_name || "").trim();
   nameEl.textContent = fullName || "Профиль";
+
+  if (avatarEl) {
+    const photo = profile?.telegram?.photo_url || "";
+    avatarEl.style.backgroundImage = photo ? `url("${photo}")` : "";
+    if (avatarInitials) avatarInitials.textContent = photo ? "" : (fullName.split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase() || "IC");
+  }
 
   const metaParts = [];
   if (profile.region) metaParts.push(profile.region);
@@ -1350,7 +1396,42 @@ function renderProfileStack() {
 
   // Tours: пока нет локальной истории туров в этом фронте — держим “—”
   toursEl.textContent = "—";
+  
+  if (currentLevelEl) {
+    const bestPct = Number(best?.percent || 0);
+    const level = bestPct >= 85 ? t("profile_level_advanced") : (bestPct >= 70 ? t("profile_level_intermediate") : (bestPct > 0 ? t("profile_level_beginner") : "—"));
+    currentLevelEl.textContent = level;
+  }
 
+  if (slotsCountEl) slotsCountEl.textContent = `${comp.length}/2`;
+  if (slotsListEl) {
+    slotsListEl.innerHTML = "";
+    if (!comp.length) {
+      slotsListEl.innerHTML = `<div class="empty muted">${t("profile_slots_empty")}</div>`;
+    } else {
+      comp.forEach(us => {
+        const subj = subjectByKey(us.key);
+        const row = document.createElement("div");
+        row.className = "slot-card";
+        row.innerHTML = `
+          <div>
+            <div class="slot-title">${escapeHTML(subj?.title || us.key)}</div>
+            <div class="muted small">${t("profile_slot_hint")}</div>
+          </div>
+          <button type="button" class="btn mini" data-subject="${escapeHTML(us.key)}">${t("profile_view_btn")}</button>
+        `;
+        row.querySelector("button")?.addEventListener("click", () => {
+          state.courses.subjectKey = us.key;
+          saveState();
+          setTab("courses");
+          replaceCourses("subject-hub");
+          renderSubjectHub();
+        });
+        slotsListEl.appendChild(row);
+      });
+    }
+  }
+   
   // Disabled state: рейтинг/туры только школьникам
   if (ratingsBtn) {
     const isSchool = !!profile.is_school_student;
@@ -1468,12 +1549,63 @@ function renderProfileStack() {
   // Registration UI
   // ---------------------------
   function updateSchoolFieldsVisibility() {
-    const isSchool = ($("#reg-is-school")?.value === "yes");
+    const select = $("#reg-is-school");
+    const toggle = $("#reg-is-school-toggle");
+    const isSchool = toggle ? !!toggle.checked : (select?.value === "yes");
+    if (select && toggle) {
+      select.value = isSchool ? "yes" : "no";
+    }
     const block = $("#reg-school-block");
     if (!block) return;
     block.style.display = isSchool ? "grid" : "none";
   }
+  
+  function initRegSubjectChips() {
+    const wrap = $("#reg-subject-chips");
+    const main1 = $("#reg-main-subject-1");
+    const main2 = $("#reg-main-subject-2");
+    if (!wrap || !main1 || !main2) return;
 
+    const buttons = () => $$("#reg-subject-chips .chip-btn");
+
+    const syncChipsFromSelects = () => {
+      const selected = [main1.value, main2.value].filter(Boolean);
+      buttons().forEach(btn => {
+        btn.classList.toggle("is-active", selected.includes(btn.dataset.subjectKey));
+      });
+    };
+
+    const syncSelectsFromChips = () => {
+      const selected = buttons().filter(b => b.classList.contains("is-active")).map(b => b.dataset.subjectKey);
+      main1.value = selected[0] || "";
+      main2.value = selected[1] || "";
+    };
+
+    wrap.addEventListener("click", (e) => {
+      const btn = e.target.closest(".chip-btn");
+      if (!btn) return;
+      const current = buttons().filter(b => b.classList.contains("is-active"));
+
+      if (btn.classList.contains("is-active")) {
+        btn.classList.remove("is-active");
+        syncSelectsFromChips();
+        return;
+      }
+
+      if (current.length >= 2) {
+        showToast(t("reg_subjects_limit"));
+        return;
+      }
+
+      btn.classList.add("is-active");
+      syncSelectsFromChips();
+    });
+
+    main1.addEventListener("change", syncChipsFromSelects);
+    main2.addEventListener("change", syncChipsFromSelects);
+    syncChipsFromSelects();
+  } 
+   
   function isRegistered() {
     return !!loadProfile();
   }
@@ -1484,122 +1616,99 @@ function renderProfileStack() {
   function renderHome() {
     const profile = loadProfile();
     const compWrap = $("#home-competitive-list");
-    const studyWrap = $("#home-study-list");
-    if (!compWrap || !studyWrap) return;
+    const pinnedWrap = $("#home-study-list");
+    if (!compWrap || !pinnedWrap) return;
 
     compWrap.innerHTML = "";
-    studyWrap.innerHTML = "";
+    pinnedWrap.innerHTML = "";
 
     if (!profile) {
-      compWrap.innerHTML = `<div class="empty muted">Сначала регистрация.</div>`;
-      studyWrap.innerHTML = `<div class="empty muted">Сначала регистрация.</div>`;
+      compWrap.innerHTML = `<div class="empty muted">${t("home_need_registration")}</div>`;
+      pinnedWrap.innerHTML = `<div class="empty muted">${t("home_need_registration")}</div>`;
       return;
     }
 
     const comp = profile.subjects?.filter(s => s.mode === "competitive") || [];
-    const study = profile.subjects?.filter(s => s.mode === "study") || [];
+    const pinned = profile.subjects?.filter(s => !!s.pinned) || [];
 
-    if (!comp.length) compWrap.innerHTML = `<div class="empty muted">Пока нет соревновательных предметов.</div>`;
-    if (!study.length) studyWrap.innerHTML = `<div class="empty muted">Закрепите учебные предметы в Courses.</div>`;
+    if (!comp.length) compWrap.innerHTML = `<div class="empty muted">${t("home_competitive_empty")}</div>`;
+    if (!pinned.length) pinnedWrap.innerHTML = `<div class="empty muted">${t("home_pinned_empty")}</div>`;
 
-    comp.forEach(s => compWrap.appendChild(subjectCardEl(s)));
-    study.forEach(s => studyWrap.appendChild(subjectCardEl(s)));
+    comp.forEach(s => compWrap.appendChild(homeCompetitiveCardEl(s)));
+    pinned.slice(0, 4).forEach((s, idx) => pinnedWrap.appendChild(homePinnedTileEl(s, idx)));
   }
 
-   function subjectCardEl(userSubject) {
+   function homeCompetitiveCardEl(userSubject) {
   const subj = subjectByKey(userSubject.key);
   const title = subj ? subj.title : userSubject.key;
 
-  const isComp = userSubject.mode === "competitive";
-  const modeLabel = isComp ? "Competitive" : "Study";
+    const el = document.createElement("div");
+  el.className = "home-competitive-card";
 
-  // v1: демо-прогресс (позже заменим на реальные данные из базы)
-  // Чтобы карточка не была "пустой", даём 2 строки статуса:
-  const demoBest = isComp ? "Best practice: 7/10" : "Best practice: 6/10";
-  const demoNext = isComp ? "Tours: 0/7 • Next: Tour 1" : "Next: Practice";
-
-  const el = document.createElement("div");
-  el.className = "home-subject-card";
-
-  // Верх кликабельный: открывает Subject Hub
-  const header = document.createElement("button");
-  header.type = "button";
-  header.className = "home-subject-head";
-  header.innerHTML = `
-    <div class="home-subject-row">
-      <div class="card-title" style="margin:0">${escapeHTML(title)}</div>
-      <span class="badge ${isComp ? "badge-comp" : "badge-study"}">${modeLabel}</span>
+  el.innerHTML = `
+    <div class="home-competitive-badge">ACTIVE</div>
+    <div class="home-competitive-hero">
+      <div class="home-competitive-graph"></div>
     </div>
-    <div class="muted small">${demoBest}</div>
-    <div class="muted small">${demoNext}</div>
+    <div class="home-competitive-body">
+      <div class="home-competitive-module">MODULE 3</div>
+      <div class="home-competitive-title">${escapeHTML(title)}</div>
+      <div class="home-competitive-meta">
+        <span>${t("home_course_completion")}</span>
+        <span class="home-competitive-rank">${t("home_rank_label")}: 12th</span>
+      </div>
+      <div class="home-progress">
+        <div class="home-progress-fill" style="width:65%"></div>
+      </div>
+    </div>
+   `;
+
+    const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn primary home-competitive-btn";
+  btn.textContent = t("home_active_tour");
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const profile = loadProfile();
+    const eligibility = canOpenActiveTours(profile, userSubject.key);
+    if (!eligibility.ok) {
+      toastToursDenied(eligibility.reason);
+      return;
+    }
+    state.courses.subjectKey = userSubject.key;
+    saveState();
+    setTab("courses");
+    replaceCourses("subject-hub");
+    renderSubjectHub();
+    pushCourses("tours"); 
+  });
+
+  el.appendChild(btn);
+  return el;
+}
+
+  function homePinnedTileEl(userSubject, index = 0) {
+  const subj = subjectByKey(userSubject.key);
+  const title = subj ? subj.title : userSubject.key;
+  const lessonCounts = ["8/12", "15/20", "4/10", "2/15"];
+  const lessons = lessonCounts[index % lessonCounts.length];
+
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = "home-pinned-tile";
+  el.innerHTML = `
+    <div class="home-pinned-ico">📘</div>
+    <div class="home-pinned-title">${escapeHTML(title)}</div>
+    <div class="home-pinned-meta">${lessons} ${t("home_lessons_label")}</div>
   `;
 
-  header.addEventListener("click", () => {
+  el.addEventListener("click", () => {
     state.courses.subjectKey = userSubject.key;
     saveState();
     setTab("courses");
     replaceCourses("subject-hub");
     renderSubjectHub();
-  });
-
-  // CTA ряд (кнопки не должны открывать hub по клику)
-  const actions = document.createElement("div");
-  actions.className = "home-subject-actions";
-
-  // Практика (всегда)
-  const btnPractice = document.createElement("button");
-  btnPractice.type = "button";
-  btnPractice.className = "mini-btn";
-  btnPractice.textContent = "Практика";
-  btnPractice.addEventListener("click", (e) => {
-    e.stopPropagation();
-    state.courses.subjectKey = userSubject.key;
-    saveState();
-    setTab("courses");
-    // Открываем сразу practice start
-    replaceCourses("subject-hub");
-    renderSubjectHub();
-    // имитация перехода как будто нажали "Практика" в hub
-    openPracticeStart();
-  });
-
-  // Ресурсы (study) или Туры (competitive)
-  const btnSecond = document.createElement("button");
-  btnSecond.type = "button";
-  btnSecond.className = "mini-btn ghost";
-
-    if (isComp) {
-    btnSecond.textContent = "Туры";
-    btnSecond.addEventListener("click", (e) => {
-      e.stopPropagation();
-
-      const profile = loadProfile();
-      const eligibility = canOpenActiveTours(profile, userSubject.key);
-      if (!eligibility.ok) {
-        toastToursDenied(eligibility.reason);
-        return;
-      }
-
-      state.courses.subjectKey = userSubject.key;
-      saveState();
-      setTab("courses");
-      replaceCourses("subject-hub");
-      renderSubjectHub();
-      pushCourses("tours");
-    });
-  } else {
-    btnSecond.textContent = "Материалы";
-    btnSecond.addEventListener("click", (e) => {
-      e.stopPropagation();
-      openGlobal("resources");
-    });
-  }
-
-  actions.appendChild(btnPractice);
-  actions.appendChild(btnSecond);
-
-  el.appendChild(header);
-  el.appendChild(actions);
+});
 
   return el;
 }
@@ -2910,10 +3019,15 @@ function renderMyRecs() {
 
   function bindRegistration() {
     const isSchool = $("#reg-is-school");
+    const isSchoolToggle = $("#reg-is-school-toggle");
     if (isSchool) isSchool.addEventListener("change", updateSchoolFieldsVisibility);
-    updateSchoolFieldsVisibility();
+    if (isSchoolToggle) {
+      isSchoolToggle.addEventListener("change", updateSchoolFieldsVisibility);
+    }
+     updateSchoolFieldsVisibility();
 
     initRegionDistrictUI();
+    initRegSubjectChips(); 
 
     const form = $("#reg-form");
     if (!form) return;
@@ -2927,7 +3041,7 @@ function renderMyRecs() {
       const region = $("#reg-region")?.value || "";
       const district = $("#reg-district")?.value || "";
 
-      const isSchoolStudent = ($("#reg-is-school")?.value === "yes");
+      const isSchoolStudent = ($("#reg-is-school-toggle")?.checked || $("#reg-is-school")?.value === "yes");
       const school = $("#reg-school")?.value?.trim() || "";
       const klass = $("#reg-class")?.value?.trim() || "";
 
@@ -2993,12 +3107,15 @@ function renderMyRecs() {
 
       saveProfile(profile);
       window.i18n?.setLang(lang);
+      applyStaticI18n();
 
       state.tab = "home";
+      state.prevTab = "home";
       state.viewStack = ["home"];
       state.courses.stack = ["all-subjects"];
       state.courses.subjectKey = null;
       state.courses.lessonId = null;
+      state.courses.entryTab = "home";
       state.quizLock = null;
       saveState();
 
@@ -3040,12 +3157,25 @@ function renderMyRecs() {
           popCourses();
           return;
         }
+        if (state.tab === "profile") {
+          if (getProfileTopScreen() !== "main") {
+            popProfile();
+            return;
+          }
+          setTab(state.prevTab || "home");
+          return;
+        }
+        if (state.tab === "ratings") {
+          setTab(state.prevTab || "home");
+          return;
+        }
         return;
       }
 
       if (action === "go-home") { setTab("home"); return; }
       if (action === "go-profile") { setTab("profile"); return; }
       if (action === "open-ratings") { setTab("ratings"); return; }
+      if (action === "ratings-info") { showToast(t("ratings_info")); return; }
 
       if (action === "open-resources") { openGlobal("resources"); return; }
       if (action === "open-news") { openGlobal("news"); return; }
@@ -3367,6 +3497,7 @@ if (action === "tour-next" || action === "tour-submit") {
     const profile = loadProfile();
     const lang = profile?.language || getTelegramLang() || "ru";
     window.i18n?.setLang(lang);
+    applyStaticI18n(); 
 
     const statusEl = $("#splash-status");
     if (statusEl) statusEl.textContent = t("loading");
