@@ -3611,14 +3611,18 @@ if (action === "tour-next" || action === "tour-submit") {
 }
 
   function bindUI() {
-  bindTabbar();
-  bindTopbar();
-  bindActions();
-  bindRatingsUI(); // ✅ Leaderboard controls
+  // Tabbar может отсутствовать из-за неправильного скоупа/переименования — защитим запуск,
+  // чтобы приложение хотя бы грузилось и ты видел следующий баг, а не белый экран.
+  if (typeof bindTabbar === "function") bindTabbar();
+  else if (typeof bindTabBar === "function") bindTabBar(); // на случай другого регистра/имени
+
+  if (typeof bindTopbar === "function") bindTopbar();
+  if (typeof bindActions === "function") bindActions();
+  if (typeof bindRatingsUI === "function") bindRatingsUI(); // ✅ Leaderboard controls
 }
 
-  // Init
-  bindUI();
-  boot();
+// Init
+bindUI();
+boot();
 
 })();
