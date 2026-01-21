@@ -54,72 +54,89 @@
 
       <!-- ============ Registration ============ -->
       <section id="view-registration" class="view" data-view="registration" aria-label="Registration">
-        <div class="content">
-          <h1 class="h1">Регистрация</h1>
-          <p class="muted">Заполните данные профиля. Это займёт меньше времени, чем объяснять учителю, почему вы не готовы.</p>
+       <div class="content reg">
+          <div class="reg-header">
+            <button class="icon-btn reg-back" type="button" aria-label="Back" data-action="back">←</button>
+            <div class="reg-header-title" data-i18n="reg_header_title">Registration</div>
+          </div>
 
-          <form id="reg-form" class="form">
+          <div class="reg-progress">
+            <div class="reg-progress-head">
+              <div class="reg-progress-label" data-i18n="reg_progress_label">Setup Profile</div>
+              <div class="reg-progress-step" data-i18n="reg_progress_step">Step 1 of 2</div>
+            </div>
+            <div class="reg-progress-bar"><span></span></div>
+          </div>
+
+          <h1 class="h1" data-i18n="reg_create_title">Create your account</h1>
+          <p class="muted" data-i18n="reg_create_subtitle">Enter your details to join the Cambridge curriculum study in Uzbekistan.</p>
+
+          <form id="reg-form" class="form reg-form">
             <label class="field">
-              <span class="label">ФИО</span>
-              <input id="reg-fullname" class="input" type="text" autocomplete="name" placeholder="Например: Ali Valiyev" required />
+              <span class="label" data-i18n="reg_full_name_label">Full Name</span>
+              <input id="reg-fullname" class="input" type="text" autocomplete="name" data-i18n-placeholder="reg_full_name_placeholder" placeholder="e.g. Alisher Navoiy" required />
             </label>
 
-            <div class="grid-2">
-              <label class="field">
-                <span class="label">Язык</span>
-                <select id="reg-language" class="input">
-                  <option value="ru">Русский</option>
-                  <option value="uz">O‘zbek</option>
-                  <option value="en">English</option>
-                </select>
-              </label>
+             <label class="field">
+              <span class="label" data-i18n="reg_region_label">Region</span>
+              <select id="reg-region" class="input" required>
+                <option value="" selected disabled>Выберите регион…</option>
+              </select>
+            </label>
 
-              <label class="field">
-                <span class="label">Вы ученик школы?</span>
-                <select id="reg-is-school" class="input">
-                  <option value="yes">Да</option>
-                  <option value="no">Нет</option>
-                </select>
-              </label>
-            </div>
+            <label class="field">
+              <span class="label" data-i18n="reg_district_label">District</span>
+              <select id="reg-district" class="input" required disabled>
+                <option value="" selected disabled>Сначала выберите регион…</option>
+              </select>
+            </label>
 
-            <div class="grid-2">
-              <label class="field">
-                <span class="label">Регион</span>
-                <select id="reg-region" class="input" required>
-                  <option value="" selected disabled>Выберите регион…</option>
-                </select>
+            <div class="reg-toggle">
+              <div>
+                <div class="label" data-i18n="reg_school_toggle_label">Are you a school student?</div>
+                <div class="muted small" data-i18n="reg_school_toggle_hint">Enable to provide school details</div>
+              </div>
+              <label class="switch">
+                <input id="reg-is-school-toggle" type="checkbox" checked>
+                <span class="slider"></span>
               </label>
-
-              <label class="field">
-                <span class="label">Район</span>
-                <select id="reg-district" class="input" required disabled>
-                  <option value="" selected disabled>Сначала выберите регион…</option>
-                </select>
-              </label>
+              <select id="reg-is-school" class="input visually-hidden">
+                <option value="yes" selected>Да</option>
+                <option value="no">Нет</option>
+              </select>  
             </div>
 
             <!-- School fields: shown/hidden by app.js depending on reg-is-school -->
             <div id="reg-school-block" class="grid-2">
               <label class="field">
-                <span class="label">Школа</span>
-                <input id="reg-school" class="input" type="text" placeholder="№123" />
+                <span class="label" data-i18n="reg_school_no_label">School No.</span>
+                <input id="reg-school" class="input" type="text" data-i18n-placeholder="reg_school_no_placeholder" placeholder="e.g. 154" />
               </label>
 
               <label class="field">
-                <span class="label">Класс</span>
-                <input id="reg-class" class="input" type="text" placeholder="10" />
+                 <span class="label" data-i18n="reg_grade_label">Grade</span>
+                <select id="reg-class" class="input">
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                  <option value="9">9</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                </select>
               </label>
             </div>
 
-            <div class="card">
-              <div class="card-title">Выбор предметов</div>
-              <p class="muted small">
-                Выберите 1 основной предмет (он станет соревновательным №1, если вы ученик).
-                Второй основной — опционально. Дополнительный — только учебный.
-              </p>
+             <div class="card reg-subject-card">
+              <div class="card-title" data-i18n="reg_competitive_subject_label">Competitive Subject</div>
+              <p class="muted small" data-i18n="reg_competitive_subject_hint">Choose your primary focus for the leaderboard</p>
+              <div id="reg-subject-chips" class="chip-group">
+                <button class="chip-btn" type="button" data-subject-key="informatics">Информатика</button>
+                <button class="chip-btn" type="button" data-subject-key="economics">Экономика</button>
+                <button class="chip-btn" type="button" data-subject-key="biology">Биология</button>
+                <button class="chip-btn" type="button" data-subject-key="chemistry">Химия</button>
+                <button class="chip-btn" type="button" data-subject-key="mathematics">Математика</button>
+              </div>
 
-              <label class="field">
+               <label class="field visually-hidden">
                 <span class="label">Основной предмет (обязательно)</span>
                 <select id="reg-main-subject-1" class="input" required>
                   <option value="" selected disabled>Выберите…</option>
@@ -143,7 +160,7 @@
                 </select>
               </label>
 
-              <label class="field">
+               <label class="field visually-hidden">
                 <span class="label">Дополнительный предмет (опционально)</span>
                 <select id="reg-additional-subject" class="input">
                   <option value="" selected>Не выбирать</option>
@@ -156,9 +173,18 @@
               </label>
             </div>
 
-            <label class="checkbox">
+             <label class="field visually-hidden">
+              <span class="label">Язык</span>
+              <select id="reg-language" class="input">
+                <option value="ru">Русский</option>
+                <option value="uz">O‘zbek</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+
+            <label class="checkbox reg-consent">
               <input id="reg-consent" type="checkbox" required />
-              <span>Я согласен(на) на обработку данных</span>
+              <span data-i18n="reg_terms_text">I agree to the Terms of Service and consent to processing of my education data.</span>
             </label>
 
             <button id="reg-submit" class="btn primary" type="submit">Завершить регистрацию</button>
@@ -169,66 +195,84 @@
       <!-- ============ Home (Tab) ============ -->
       <section id="view-home" class="view" data-view="home" aria-label="Home">
         <div class="content">
-          
-          <div class="section">
-            <div class="section-title">Соревновательные предметы</div>
-            <div id="home-competitive-list" class="cards-grid">
+          <div class="home-appbar">
+            <div class="home-brand-mini">
+              <span class="home-brand-ico">ic</span>
+              <span class="home-brand-title">iClub</span>
+            </div>
+            <div class="home-appbar-actions">
+              <button class="icon-btn ghost" type="button" aria-label="Search" disabled>🔍</button>
+              <button class="icon-btn ghost" type="button" aria-label="Notifications" data-action="open-notifications">🔔</button>
+            </div>
+          </div>
+
+          <div class="home-block">
+            <div class="home-block-head">
+              <div class="home-block-title" data-i18n="home_competitive_mode">Competitive Mode</div>
+              <div class="home-block-sub" data-i18n="home_competitive_mode_subtitle">Track your Cambridge curriculum progress</div>
+            </div>
+            <div id="home-competitive-list" class="home-competitive-list">
               <div class="empty muted">Пока нет. Это нормально только первую минуту после регистрации.</div>
             </div>
           </div>
 
-          <div class="section">
-            <div class="section-title">Учебные предметы</div>
-            <div id="home-study-list" class="cards-grid">
+          <div class="home-block">
+            <div class="home-block-head">
+              <div class="home-block-title" data-i18n="home_pinned_subjects">Pinned Subjects</div>
+            </div>
+            <div id="home-study-list" class="home-pinned-grid">
               <div class="empty muted">Закрепите предметы в Courses.</div>
             </div>
+            <button class="btn show-all-btn" type="button" data-action="open-all-subjects" data-i18n="home_show_all_subjects">Show All Subjects</button>
           </div>
 
-          <div class="section">
-  <div class="section-title">Быстрые действия</div>
+           <div class="home-legacy">
+            <div class="section">
+              <div class="section-title">Быстрые действия</div>
 
-  <div class="quick-tiles">
-    <button class="tile" type="button" data-action="open-resources">
-      <div class="tile-top">
-        <div class="tile-ico">📚</div>
-        <div class="tile-title">Ресурсы</div>
-      </div>
-      <div class="tile-sub muted">Книги, материалы</div>
-    </button>
+              <div class="quick-tiles">
+                <button class="tile" type="button" data-action="open-resources">
+                  <div class="tile-top">
+                    <div class="tile-ico">📚</div>
+                    <div class="tile-title">Ресурсы</div>
+                  </div>
+                  <div class="tile-sub muted">Книги, материалы</div>
+                </button>
 
-    <button class="tile" type="button" data-action="open-news">
-      <div class="tile-top">
-        <div class="tile-ico">📰</div>
-        <div class="tile-title">Новости</div>
-      </div>
-      <div class="tile-sub muted">Анонсы и обновления</div>
-    </button>
+                <button class="tile" type="button" data-action="open-news">
+                  <div class="tile-top">
+                    <div class="tile-ico">📰</div>
+                    <div class="tile-title">Новости</div>
+                  </div>
+                  <div class="tile-sub muted">Анонсы и обновления</div>
+                </button>
 
-    <button class="tile" type="button" data-action="open-notifications">
-      <div class="tile-top">
-        <div class="tile-ico">🔔</div>
-        <div class="tile-title">Уведомления</div>
-      </div>
-      <div class="tile-sub muted">Системные события</div>
-    </button>
+               <button class="tile" type="button" data-action="open-notifications">
+                  <div class="tile-top">
+                    <div class="tile-ico">🔔</div>
+                    <div class="tile-title">Уведомления</div>
+                  </div>
+                  <div class="tile-sub muted">Системные события</div>
+                </button>
 
-    <button class="tile" type="button" data-action="open-community">
-      <div class="tile-top">
-        <div class="tile-ico">💬</div>
-        <div class="tile-title">Комьюнити</div>
-      </div>
-      <div class="tile-sub muted">@iClubuzofficial</div>
-    </button>
+                <button class="tile" type="button" data-action="open-community">
+                  <div class="tile-top">
+                    <div class="tile-ico">💬</div>
+                    <div class="tile-title">Комьюнити</div>
+                  </div>
+                  <div class="tile-sub muted">@iClubuzofficial</div>
+                </button>
 
-    <button class="tile" type="button" data-action="open-all-subjects">
-      <div class="tile-top">
-        <div class="tile-ico">🧭</div>
-        <div class="tile-title">Все предметы</div>
-      </div>
-      <div class="tile-sub muted">Закрепить / открыть</div>
-    </button>
-  </div>
-</div>
+                <button class="tile" type="button" data-action="open-all-subjects">
+                  <div class="tile-top">
+                    <div class="tile-ico">🧭</div>
+                    <div class="tile-title">Все предметы</div>
+                  </div>
+                  <div class="tile-sub muted">Закрепить / открыть</div>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -612,6 +656,7 @@
 
     <!-- Header inside Ratings (как в примере) -->
     <div class="lb-header">
+      <button class="lb-back" type="button" data-action="back" aria-label="Back">←</button>
       <div class="lb-title">Leaderboard</div>
       <button class="lb-info" type="button" data-action="ratings-info" aria-label="Info">i</button>
     </div>
@@ -670,64 +715,104 @@
 
   <!-- Profile MAIN -->
   <div id="profile-main" class="profile-screen is-active">
-  <h1 class="h1">Profile</h1>
-  <p class="muted">Ваш прогресс без детсада: предметы, практика, туры, рекомендации.</p>
+ <div class="profile-header">
+    <div class="profile-header-title" data-i18n="profile_title">Academic Profile</div>
+    <button class="icon-btn profile-settings-btn" type="button" aria-label="Settings" data-action="profile-settings">⚙️</button>
+  </div>
 
-  <!-- DASHBOARD -->
-  <div class="card profile-dash">
-    <div class="profile-dash-top">
-      <div>
+  <div class="card profile-hero">
+    <div class="profile-hero-row">
+      <div class="profile-avatar" id="profile-avatar">
+        <span id="profile-avatar-initials">IC</span>
+      </div>
+      <div class="profile-hero-info">
         <div class="profile-name" id="profile-dash-name">—</div>
+        <div class="profile-badge" data-i18n="profile_status_badge">ADVANCED STATUS</div>
         <div class="muted small" id="profile-dash-meta">—</div>
       </div>
-      <button class="btn" type="button" data-action="profile-settings">Настройки</button>
-    </div>
+     </div>
 
-       <div class="profile-metrics" id="profile-dash-metrics">
-      <div class="metric">
-        <div class="metric-val" id="profile-metric-competitive">0</div>
+       <div class="profile-stats">
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="profile-metric-competitive">0</div>
         <div class="muted small">Competitive</div>
       </div>
-
-      <div class="metric">
-        <div class="metric-val" id="profile-metric-study">0</div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="profile-metric-study">0</div>
         <div class="muted small">Study</div>
       </div>
-
-      <div class="metric">
-        <div class="metric-val" id="profile-metric-best">—</div>
-        <div class="muted small">Best practice</div>
-      </div>
-
-      <div class="metric">
-        <div class="metric-val" id="profile-metric-trend">—</div>
-        <div class="muted small">Trend</div>
-      </div>
-
-      <div class="metric">
-        <div class="metric-val" id="profile-metric-stability">—</div>
-        <div class="muted small">Stability</div>
-      </div>
-
-      <div class="metric">
-        <div class="metric-val" id="profile-metric-tours">—</div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="profile-metric-tours">—</div>
         <div class="muted small">Tours</div>
       </div>
     </div>
+  </div>
 
-    <div class="profile-actions">
-      <button class="btn primary" type="button" data-action="profile-open-my-recs">Мои рекомендации</button>
-      <button class="btn" type="button" data-action="profile-open-courses">Предметы</button>
-      <button class="btn" type="button" data-action="profile-open-ratings">Рейтинг</button>
-    </div>
-
-    <div class="profile-hint muted small" id="profile-dash-hint">
-      Подсказка: закрепляйте предметы — так навигация быстрее, чем мысли перед дедлайном.
+       <div class="profile-section">
+    <div class="profile-section-title" data-i18n="profile_performance_overview">Performance Overview</div>
+    <div class="profile-overview-grid">
+      <div class="overview-card">
+        <div class="overview-label" data-i18n="profile_stability_score">Stability Score</div>
+        <div class="overview-value" id="profile-metric-stability">—</div>
+        <div class="overview-sub" id="profile-metric-trend">—</div>
+      </div>
+      <div class="overview-card">
+        <div class="overview-label" data-i18n="profile_current_level">Current Level</div>
+        <div class="overview-value" id="profile-current-level">—</div>
+        <div class="overview-sub" id="profile-metric-best">—</div>
+      </div>
     </div>
   </div>
 
-  <!-- QUICK LINKS (вторично) -->
-  <div class="cards-grid">
+<div class="profile-section">
+    <div class="profile-section-head">
+      <div class="profile-section-title" data-i18n="profile_competitive_slots">Competitive Slots</div>
+      <div class="profile-section-meta"><span id="profile-competitive-slots-count">0/2</span> <span data-i18n="profile_active_slots_label">Active</span></div>
+    </div>
+    <div id="profile-competitive-slots-list" class="slot-list"></div>
+  </div>
+
+    <div class="profile-section">
+    <div class="profile-section-title" data-i18n="profile_earned_credentials">Earned Credentials</div>
+    <div class="profile-credentials-grid">
+      <div class="credential-card">
+        <div class="credential-ico">🏆</div>
+        <div class="credential-title">C1 Advanced Prep</div>
+        <div class="muted small">Verified: Oct 2023</div>
+      </div>
+      <div class="credential-card">
+        <div class="credential-ico">🎖️</div>
+        <div class="credential-title">Grammar Mastery II</div>
+        <div class="muted small">Verified: Aug 2023</div>
+      </div>
+    </div>
+  </div>
+
+    <div class="profile-section">
+    <div class="profile-section-title" data-i18n="profile_recommendations_archive">My Recommendations Archive</div>
+    <div class="profile-recs-list">
+      <button class="card-btn" type="button" data-action="profile-open-my-recs">
+        <div class="card-title">Advanced Lexicon Guide</div>
+        <div class="muted small">Academic Vocabulary Pack</div>
+      </button>
+      <button class="card-btn" type="button" data-action="profile-open-my-recs">
+        <div class="card-title">Cambridge Writing Seminar</div>
+        <div class="muted small">Archived live stream</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="profile-actions">
+    <button class="btn primary" type="button" data-action="profile-open-my-recs">Мои рекомендации</button>
+    <button class="btn" type="button" data-action="profile-open-courses">Предметы</button>
+    <button class="btn" type="button" data-action="profile-open-ratings">Рейтинг</button>
+  </div>
+
+  <div class="profile-hint muted small" id="profile-dash-hint">
+    Подсказка: закрепляйте предметы — так навигация быстрее, чем мысли перед дедлайном.
+  </div>
+
+  <div class="cards-grid profile-legacy">
     <button class="card-btn" type="button" data-action="profile-certificates">
       <div class="card-title">Сертификаты</div>
       <div class="muted small">По турам и итоговый</div>
