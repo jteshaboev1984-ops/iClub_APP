@@ -3608,6 +3608,7 @@ if (action === "tour-next" || action === "tour-submit") {
       }
     }, 250);
   }
+}
 
   function bindUI() {
   bindTabbar();
