@@ -1235,3 +1235,131 @@ body.modal-open { overflow: hidden; }
   font-weight: 800;
   opacity: .92;
 }
+
+/* =========================================================
+   TOUR QUIZ (strict) — UI like reference
+   ========================================================= */
+
+.tour-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+  margin: 6px 0 10px;
+}
+
+.tour-qof{
+  font-weight: 1000;
+  font-size: 14px;
+}
+
+.tour-progress-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.tour-progress-label{
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(15,23,42,0.55);
+}
+
+.tour-progress-pct{
+  font-size: 12px;
+  font-weight: 1000;
+  color: rgba(15,23,42,0.65);
+}
+
+.tour-progress-bar{
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.10);
+  overflow:hidden;
+  margin-top: 6px;
+}
+
+.tour-progress-fill{
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(47,111,214,0.95), rgba(47,111,214,0.75));
+}
+
+.tour-warn{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(239,68,68,0.25);
+  background: rgba(239,68,68,0.08);
+  cursor:pointer;
+}
+
+.tour-badges{
+  margin: 8px 0 10px;
+}
+
+.tour-badge{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 1000;
+  letter-spacing: .03em;
+  border: 1px solid rgba(47,111,214,0.20);
+  background: rgba(47,111,214,0.08);
+  color: rgba(15,23,42,0.78);
+}
+
+.tour-timers{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tour-timer-card{
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+  padding: 10px 12px;
+}
+
+.tour-timer-card.danger{
+  border-color: rgba(239,68,68,0.28);
+  background: rgba(239,68,68,0.05);
+}
+
+.tour-timer-cap{
+  font-size: 11px;
+  font-weight: 1000;
+  color: rgba(15,23,42,0.55);
+  letter-spacing: .05em;
+}
+
+.tour-timer-val{
+  font-size: 20px;
+  font-weight: 1100;
+  margin-top: 4px;
+}
+
+.tour-timer-delta{
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 900;
+  color: rgba(239,68,68,0.85);
+  min-height: 14px;
+}
+
+.tour-monitor{
+  margin: 10px 2px 0;
+  text-align:center;
+  letter-spacing: .10em;
+  font-weight: 900;
+  font-size: 10px;
+  opacity: .8;
+}
