@@ -771,6 +771,7 @@
     </div>
     <div id="profile-competitive-slots-list" class="slot-list"></div>
   </div>
+ </div>
 
     <div class="profile-section">
     <div class="profile-section-title" data-i18n="profile_earned_credentials">Earned Credentials</div>
@@ -786,46 +787,47 @@
         <div class="muted small">Verified: Aug 2023</div>
       </div>
     </div>
-  </div>
-
     <div class="profile-section">
-    <div class="profile-section-title" data-i18n="profile_recommendations_archive">My Recommendations Archive</div>
-    <div class="profile-recs-list">
-      <button class="card-btn" type="button" data-action="profile-open-my-recs">
-        <div class="card-title">Advanced Lexicon Guide</div>
+  <div class="profile-section-title" data-i18n="profile_certificates_title">Certificates</div>
+
+  <div class="profile-row-list">
+    <button class="profile-row" type="button" data-action="profile-certificates">
+      <div class="profile-row-left">
+        <div class="profile-row-ico">🎓</div>
+      </div>
+      <div class="profile-row-mid">
+        <div class="profile-row-title" data-i18n="profile_certificates_row_title">My certificates</div>
+        <div class="muted small" data-i18n="profile_certificates_row_sub">Tours & final results</div>
+      </div>
+      <div class="profile-row-right">›</div>
+    </button>
+  </div>
+</div>
+  
+     <div class="profile-section">
+  <div class="profile-section-title" data-i18n="profile_recommendations_archive">My Recommendations Archive</div>
+
+  <div class="profile-row-list">
+    <button class="profile-row" type="button" data-action="profile-open-my-recs">
+      <div class="profile-row-left">
+        <div class="profile-row-ico">📄</div>
+      </div>
+      <div class="profile-row-mid">
+        <div class="profile-row-title">Advanced Lexicon Guide</div>
         <div class="muted small">Academic Vocabulary Pack</div>
-      </button>
-      <button class="card-btn" type="button" data-action="profile-open-my-recs">
-        <div class="card-title">Cambridge Writing Seminar</div>
+      </div>
+      <div class="profile-row-right">›</div>
+    </button>
+
+    <button class="profile-row" type="button" data-action="profile-open-my-recs">
+      <div class="profile-row-left">
+        <div class="profile-row-ico">🎬</div>
+      </div>
+      <div class="profile-row-mid">
+        <div class="profile-row-title">Cambridge Writing Seminar</div>
         <div class="muted small">Archived live stream</div>
-      </button>
-    </div>
-  </div>
-
-  <div class="profile-actions">
-    <button class="btn primary" type="button" data-action="profile-open-my-recs">Мои рекомендации</button>
-    <button class="btn" type="button" data-action="profile-open-courses">Предметы</button>
-    <button class="btn" type="button" data-action="profile-open-ratings">Рейтинг</button>
-  </div>
-
-  <div class="profile-hint muted small" id="profile-dash-hint">
-    Подсказка: закрепляйте предметы — так навигация быстрее, чем мысли перед дедлайном.
-  </div>
-
-  <div class="cards-grid profile-legacy">
-    <button class="card-btn" type="button" data-action="profile-certificates">
-      <div class="card-title">Сертификаты</div>
-      <div class="muted small">По турам и итоговый</div>
-    </button>
-
-    <button class="card-btn" type="button" data-action="profile-community">
-      <div class="card-title">Комьюнити</div>
-      <div class="muted small">Канал и чат обсуждений</div>
-    </button>
-
-    <button class="card-btn" type="button" data-action="profile-about">
-      <div class="card-title">О проекте</div>
-      <div class="muted small">Правила и организаторы</div>
+      </div>
+      <div class="profile-row-right">›</div>
     </button>
   </div>
 </div>
@@ -907,7 +909,29 @@
     <div id="profile-settings-pinned-list" class="settings-list">
       <!-- filled by app.js -->
     </div>
+    <!-- More -->
+<div class="card">
+  <div class="card-title" data-i18n="profile_settings_more">More</div>
+
+  <div class="settings-list">
+    <button class="settings-row settings-row-btn" type="button" data-action="profile-community">
+      <div>
+        <div class="settings-row-title" data-i18n="profile_settings_community">Community</div>
+        <div class="muted small">@iClubuzofficial</div>
+      </div>
+      <div class="settings-row-arrow">›</div>
+    </button>
+
+    <button class="settings-row settings-row-btn" type="button" data-action="profile-about">
+      <div>
+        <div class="settings-row-title" data-i18n="profile_settings_about">About project</div>
+        <div class="muted small">Rules & organizers</div>
+      </div>
+      <div class="settings-row-arrow">›</div>
+    </button>
   </div>
+</div>
+</div>
 
 </div>
 <!-- /Profile SETTINGS -->
