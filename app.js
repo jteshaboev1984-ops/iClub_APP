@@ -1267,7 +1267,7 @@ function renderProfileStack() {
   const pinnedToggleBtn = document.getElementById("profile-settings-pinned-toggle");
   if (pinnedToggleBtn) {
     const expanded = !!profile?.pinnedExpanded;
-    pinnedToggleBtn.textContent = expanded ? "Скрыть лишнее" : "Показать все предметы";
+    pinnedToggleBtn.textContent = expanded ? "Скрыть" : "Показать все";
     pinnedToggleBtn.onclick = () => {
       const fresh = loadProfile();
       if (!fresh) return;
