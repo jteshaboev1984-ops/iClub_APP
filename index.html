@@ -847,18 +847,19 @@
 
     <div class="settings-list">
       <div class="settings-row">
-        <div>
-          <div style="font-weight:900">Текущий язык</div>
-          <div class="muted small">RU / UZ / EN</div>
-        </div>
-        <select id="profile-settings-language" class="select">
-          <option value="ru">Русский</option>
-          <option value="uz">O‘zbek</option>
-          <option value="en">English</option>
-        </select>
-      </div>
-    </div>
+  <div>
+    <div style="font-weight:900">Язык интерфейса</div>
+    <div class="muted small">Меняется только интерфейс приложения</div>
   </div>
+
+  <div id="profile-settings-language" class="lang-seg" role="tablist" aria-label="Language">
+    <button type="button" class="lang-btn" data-lang="ru">Рус</button>
+    <button type="button" class="lang-btn" data-lang="uz">Uzb</button>
+    <button type="button" class="lang-btn" data-lang="en">Eng</button>
+   </div>
+  </div>
+ </div>
+</div>
 
 
     <!-- Competitive mode -->
