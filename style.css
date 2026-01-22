@@ -1394,6 +1394,47 @@ body.modal-open { overflow: hidden; }
   display: block;
 }
 
+/* ----- Profile topbar ----- */
+.profile-topbar{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: 0 0 12px 0;
+  background: var(--bg);
+}
+
+.profile-topbar-title{
+  font-weight: 900;
+  letter-spacing: -0.2px;
+}
+
+/* ----- Settings spacing (fix gaps like in the rest of the app) ----- */
+#profile-settings > .card{
+  margin-bottom: 12px;
+}
+#profile-settings > .card:last-of-type{
+  margin-bottom: 0;
+}
+
+/* ----- Settings rows: highlight enabled states ----- */
+.settings-row.is-on{
+  background: rgba(77, 138, 255, 0.10);
+  border: 1px solid rgba(77, 138, 255, 0.25);
+}
+
+/* Make the switch more “obvious” when ON */
+.switch input:checked + .slider{
+  background: rgba(77, 138, 255, 0.95);
+}
+.switch input:checked + .slider:before{
+  box-shadow: 0 6px 18px rgba(77, 138, 255, 0.35);
+}
+
 /* =========================
    Profile dashboard (v1)
    ========================= */
@@ -1446,14 +1487,6 @@ body.modal-open { overflow: hidden; }
 }
 
 /* Settings helpers */
-.settings-head{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
 .settings-list{
   display: grid;
   gap: 10px;
