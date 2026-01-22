@@ -1227,14 +1227,17 @@ function renderProfileStack() {
       if (turningOn) {
         const compNow = next.filter(s => s.mode === "competitive").length;
         if (compNow >= 2) {
-          input.checked = false;
-          await uiAlert({
-            title: "Лимит Competitive",
-            message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
-            okText: "Понял"
-          });
-          return;
-        }
+  input.checked = false;
+
+  // ⚠️ без await — иначе при любой потере async этот await роняет весь app
+  uiAlert({
+    title: "Лимит Competitive",
+    message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
+    okText: "Понял"
+  });
+
+  return;
+}
         was.mode = "competitive";
         showToast("Предмет переведён в Competitive");
       } else {
@@ -1382,7 +1385,7 @@ const listToRender = expanded ? [...pinnedList, ...otherList] : pinnedList;
 
 const input = row.querySelector('input[type="checkbox"]');
 
-input?.addEventListener("change", () => {
+input?.addEventListener("change", async () => {
   const fresh = loadProfile();
   if (!fresh) return;
 
