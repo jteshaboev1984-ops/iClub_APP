@@ -1243,30 +1243,37 @@ input.addEventListener("change", async () => {
 
     list.appendChild(row);
   });
-      // --- Language selector ---
-  const langSel = document.getElementById("profile-settings-language");
-  if (langSel) {
-    langSel.value = profile.language || "ru";
-    langSel.onchange = () => {
+      // --- Language segmented buttons ---
+const langWrap = document.getElementById("profile-settings-language");
+if (langWrap) {
+  const currentLang = profile.language || "ru";
+
+  langWrap.querySelectorAll(".lang-btn").forEach(btn => {
+    const lang = btn.dataset.lang;
+    btn.classList.toggle("is-active", lang === currentLang);
+
+    btn.onclick = () => {
       const fresh = loadProfile();
       if (!fresh) return;
-      const nextLang = String(langSel.value || "ru");
+
+      const nextLang = String(btn.dataset.lang || "ru");
+      if (nextLang === (fresh.language || "ru")) return;
+
       fresh.language = nextLang;
       saveProfile(fresh);
 
       window.i18n?.setLang(nextLang);
-      applyStaticI18n(); 
+      applyStaticI18n?.();
 
-      // Перерисуем ключевые места
       renderHome();
-      if (state.tab === "courses") {
-        renderAllSubjects();
-        if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
-      }
+      if (state.tab === "courses") renderAllSubjects();
       renderProfileMain();
-      showToast("Язык обновлён");
+      renderProfileSettings();
+
+      showToast("Язык интерфейса обновлён");
     };
-  }
+  });
+}
 
     // --- Pinned list ---
   const pinnedToggleBtn = document.getElementById("profile-settings-pinned-toggle");
