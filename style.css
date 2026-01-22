@@ -69,11 +69,11 @@ body {
 }
 
 .topbar-logo{
-  width: 28px;
-  height: 28px;
-  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
   box-shadow: var(--shadow-sm);
-  display: none; /* включаем на Home через JS */
+  display: block; /* лого всегда видно, управление через JS больше не нужно */
 }
 
 .icon-btn {
@@ -1530,6 +1530,30 @@ body.modal-open { overflow: hidden; }
   padding: 10px 12px;
   outline: none;
 }
+.lang-seg{
+  display: grid;
+  grid-auto-flow: column;
+  gap: 8px;
+}
+
+.lang-btn{
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.06);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.lang-btn.is-active{
+  background: rgba(77,138,255,0.22);
+  border: 1px solid rgba(77,138,255,0.40);
+  color: rgba(77,138,255,1);
+}
+
+.lang-btn:not(.is-active){
+  opacity: 0.55;
+}
 
 /* Simple switch (если вы захотите включать реальные тумблеры дальше) */
 .switch{
@@ -2048,10 +2072,14 @@ body.modal-open { overflow: hidden; }
   background: rgba(47,111,214,0.10);
   border: 1px solid rgba(47,111,214,0.35);
 }
-
-
 .settings-row.is-on .muted.small{
   color: rgba(47,111,214,0.95);
+}
+.settings-row.is-disabled{
+  opacity: 0.55;
+}
+.settings-row.is-disabled .switch{
+  pointer-events: none;
 }
 
 /* More nav rows */
