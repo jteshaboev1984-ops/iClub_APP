@@ -2087,6 +2087,10 @@ body.modal-open { overflow: hidden; }
 .settings-row.is-disabled .switch{
   pointer-events: none;
 }
+.settings-row.is-disabled .switch{
+  opacity: 1;
+  display: inline-flex;
+}
 
 /* More nav rows */
 .settings-nav{
