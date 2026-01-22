@@ -3122,12 +3122,26 @@ function renderMyRecs() {
         return;
       }
 
-      // If in profile -> pop profile stack
-      if (state.tab === "profile") {
-       popProfile();
-       renderProfileStack(); // ✅ чтобы после back корректно перерисовалось
-       return;
-      }
+      // ✅ Profile back MUST work even if state.tab accidentally isn't "profile"
+const ps = document.getElementById("profile-settings");
+const psActive = !!(ps && ps.classList.contains("is-active") && ps.hidden !== true);
+
+// 1) Если реально открыт экран настроек профиля — возвращаем на main напрямую
+if (psActive) {
+  state.tab = "profile";
+  replaceProfile("main");     // stack=["main"] + showProfileScreen("main")
+  renderProfileMain();        // чтобы сразу перерисовать
+  updateTopbarForView("profile");
+  return;
+}
+
+// 2) Обычный сценарий профиля
+if (state.tab === "profile") {
+  popProfile();
+  renderProfileStack();
+  return;
+}
+
 
 
       // If in courses -> pop courses stack
