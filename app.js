@@ -1167,74 +1167,95 @@ function renderProfileStack() {
 
   if (note) note.textContent = `Можно выбрать максимум 2 предмета в Competitive. Сейчас выбрано: ${compCount}/2.`;
 
- // Show ALL subjects in Competitive settings.
-// Only MAIN subjects can be toggled into Competitive (limit 2).
-const allSubjects = Array.isArray(SUBJECTS) ? SUBJECTS.slice() : [];
-const mainKeys = new Set(SUBJECTS.filter(s => s.type === "main").map(s => s.key));
+   // Show ONLY MAIN subjects in Competitive settings (no Study-only subjects here).
+  const mainSubjects = SUBJECTS.filter(s => s.type === "main");
 
-allSubjects.forEach(subj => {
-  const isMain = mainKeys.has(subj.key);
-  const isOn = currentComp.includes(subj.key);
-  const limitReached = isMain && (compCount >= 2 && !isOn);
-  const locked = !isMain; // non-main: visible, but can't be toggled
+  mainSubjects.forEach(subj => {
+    const isOn = currentComp.includes(subj.key);
+    const limitReached = (compCount >= 2 && !isOn);
 
-  const row = document.createElement("div");
-  row.className =
-    "settings-row" +
-    (isOn ? " is-on" : "") +
-    (limitReached ? " is-disabled" : "") +
-    (locked ? " is-locked" : "");
+    const row = document.createElement("div");
+    row.className =
+      "settings-row" +
+      (isOn ? " is-on" : "") +
+      (limitReached ? " is-disabled" : "");
 
-  // IMPORTANT: switch is ALWAYS present (even for locked),
-  // so user sees consistent UI.
-  row.innerHTML = `
-  <div class="settings-row-left">
-    <div style="font-weight:800">${escapeHTML(subj.title)}</div>
-    <div class="muted small">${
-      isOn ? "Competitive" : (locked ? "Недоступно" : "Выключено")
-    }</div>
-  </div>
-  <label class="switch">
-    <input type="checkbox"
-      ${isOn ? "checked" : ""}
-      ${limitReached || locked ? "disabled" : ""}>
-    <span class="slider"></span>
-  </label>
-`;
+    row.innerHTML = `
+      <div class="settings-row-left">
+        <div style="font-weight:800">${escapeHTML(subj.title)}</div>
+        <div class="muted small">${isOn ? "Competitive" : "Выключено"}</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox"
+          ${isOn ? "checked" : ""}
+          ${limitReached ? "disabled" : ""}>
+        <span class="slider"></span>
+      </label>
+    `;
 
-  const input = row.querySelector('input[type="checkbox"]');
+    const input = row.querySelector('input[type="checkbox"]');
 
-  // Locked subjects: keep disabled switch, no toggling.
-  if (locked) {
-    // force OFF visually (they are study-only)
-    if (input) input.checked = false;
-    list.appendChild(row);
-    return;
-  }
+    input?.addEventListener("change", async () => {
+      if (input.disabled) return;
 
-  input?.addEventListener("change", async () => {
-    if (input.disabled) return;
+      const fresh = loadProfile();
+      if (!fresh) return;
 
-    const fresh = loadProfile();
-    if (!fresh) return;
+      const subjects = Array.isArray(fresh.subjects) ? structuredClone(fresh.subjects) : [];
+      const idx = subjects.findIndex(s => s.key === subj.key);
 
-    const subjects = Array.isArray(fresh.subjects) ? structuredClone(fresh.subjects) : [];
-    const idx = subjects.findIndex(s => s.key === subj.key);
+      if (idx === -1) subjects.push({ key: subj.key, mode: "study", pinned: false });
 
-    if (idx === -1) subjects.push({ key: subj.key, mode: "study", pinned: false });
+      const next = subjects.map(s => ({ ...s }));
+      const was = next.find(s => s.key === subj.key);
+      const turningOn = !isCompetitiveForUser(fresh, subj.key);
 
-    const next = subjects.map(s => ({ ...s }));
-    const was = next.find(s => s.key === subj.key);
-    const turningOn = !isCompetitiveForUser(fresh, subj.key);
+      const ok = await uiConfirm({
+        title: turningOn ? "Competitive режим" : "Выключить Competitive",
+        message: turningOn
+          ? "Сделать этот предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\nУчебный режим останется доступен."
+          : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по предмету станут недоступны.\nУчебный режим останется.",
+        okText: turningOn ? "Включить" : "Выключить",
+        cancelText: "Отмена"
+      });
 
-    const ok = await uiConfirm({
-      title: turningOn ? "Competitive режим" : "Выключить Competitive",
-      message: turningOn
-        ? "Сделать этот предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\nУчебный режим останется доступен."
-        : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по предмету станут недоступны.\nУчебный режим останется.",
-      okText: turningOn ? "Включить" : "Выключить",
-      cancelText: "Отмена"
+      if (!ok) {
+        input.checked = !turningOn;
+        return;
+      }
+
+      if (turningOn) {
+        const compNow = next.filter(s => s.mode === "competitive").length;
+        if (compNow >= 2) {
+          input.checked = false;
+          await uiAlert({
+            title: "Лимит Competitive",
+            message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
+            okText: "Понял"
+          });
+          return;
+        }
+        was.mode = "competitive";
+        showToast("Предмет переведён в Competitive");
+      } else {
+        was.mode = "study";
+        showToast("Предмет переведён в Study");
+      }
+
+      fresh.subjects = next;
+      saveProfile(fresh);
+
+      renderHome();
+      if (state.tab === "courses") {
+        renderAllSubjects();
+        if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
+      }
+
+      renderProfileSettings();
     });
+
+    list.appendChild(row);
+  });
 
     if (!ok) {
       input.checked = !turningOn;
