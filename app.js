@@ -1167,101 +1167,110 @@ function renderProfileStack() {
 
   if (note) note.textContent = `Можно выбрать максимум 2 предмета в Competitive. Сейчас выбрано: ${compCount}/2.`;
 
-  // Only MAIN subjects can be competitive (per spec)
-  const mainSubjects = SUBJECTS.filter(s => s.type === "main");
+ // Show ALL subjects here.
+// MAIN subjects can be toggled into Competitive (limit 2). Others are visible but locked to Study.
+const allSubjects = Array.isArray(SUBJECTS) ? SUBJECTS.slice() : [];
+const mainKeys = new Set(SUBJECTS.filter(s => s.type === "main").map(s => s.key));
 
-  mainSubjects.forEach(subj => {
-   const isOn = currentComp.includes(subj.key);
-const limitReached = (compCount >= 2 && !isOn);
+allSubjects.forEach(subj => {
+  const isMain = mainKeys.has(subj.key);
+  const isOn = currentComp.includes(subj.key);
+  const limitReached = isMain && (compCount >= 2 && !isOn);
+  const locked = !isMain; // additional subjects: only Study
 
-const row = document.createElement("div");
-row.className =
-  "settings-row" +
-  (isOn ? " is-on" : "") +
-  (limitReached ? " is-disabled" : "");
+  const row = document.createElement("div");
+  row.className =
+    "settings-row" +
+    (isOn ? " is-on" : "") +
+    (limitReached ? " is-disabled" : "") +
+    (locked ? " is-locked" : "");
 
-row.innerHTML = `
-  <div>
-    <div style="font-weight:800">${escapeHTML(subj.title)}</div>
-    <div class="muted small">${isOn ? "Competitive" : "Study"}</div>
-  </div>
-  <label class="switch">
-    <input type="checkbox" ${isOn ? "checked" : ""} ${limitReached ? "disabled" : ""}>
-    <span class="slider"></span>
-  </label>
-`;
+  row.innerHTML = `
+    <div>
+      <div style="font-weight:800">${escapeHTML(subj.title)}</div>
+      <div class="muted small">${
+        locked ? "Study" : (isOn ? "Competitive" : "Study")
+      }</div>
+    </div>
+    <label class="switch">
+      <input type="checkbox"
+        ${isOn ? "checked" : ""}
+        ${limitReached || locked ? "disabled" : ""}>
+      <span class="slider"></span>
+    </label>
+  `;
 
-const input = row.querySelector('input[type="checkbox"]');
+  const input = row.querySelector('input[type="checkbox"]');
 
-input.addEventListener("change", async () => {
-  if (input.disabled) return;
-      const fresh = loadProfile();
-      if (!fresh) return;
+  // Locked subjects: show switch disabled only (no toggle behavior)
+  if (locked) {
+    list.appendChild(row);
+    return;
+  }
 
-      const subjects = Array.isArray(fresh.subjects) ? structuredClone(fresh.subjects) : [];
-      const idx = subjects.findIndex(s => s.key === subj.key);
+  input.addEventListener("change", async () => {
+    if (input.disabled) return;
 
-      // ensure exists
-      if (idx === -1) subjects.push({ key: subj.key, mode: "study", pinned: false });
+    const fresh = loadProfile();
+    if (!fresh) return;
 
-      const next = subjects.map(s => ({ ...s }));
+    const subjects = Array.isArray(fresh.subjects) ? structuredClone(fresh.subjects) : [];
+    const idx = subjects.findIndex(s => s.key === subj.key);
 
-      // toggle
-            // toggle
-      const was = next.find(s => s.key === subj.key);
-      const turningOn = !isCompetitiveForUser(fresh, subj.key);
+    // ensure exists
+    if (idx === -1) subjects.push({ key: subj.key, mode: "study", pinned: false });
 
-      // ✅ Confirmations (через модалку, чтобы Telegram точно показывал)
-      const ok = await uiConfirm({
-        title: turningOn ? "Competitive режим" : "Выключить Competitive",
-        message: turningOn
-          ? "Сделать этот предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\nУчебный режим останется доступен."
-          : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по предмету станут недоступны.\nУчебный режим останется.",
-        okText: turningOn ? "Включить" : "Выключить",
-        cancelText: "Отмена"
-      });
+    const next = subjects.map(s => ({ ...s }));
+    const was = next.find(s => s.key === subj.key);
+    const turningOn = !isCompetitiveForUser(fresh, subj.key);
 
-      if (!ok) {
-        // revert UI to previous state
-        input.checked = !turningOn;
-        return;
-      }
-
-      if (turningOn) {
-        const compNow = next.filter(s => s.mode === "competitive").length;
-        if (compNow >= 2) {
-          // revert UI + alert
-          input.checked = false;
-          await uiAlert({
-            title: "Лимит Competitive",
-            message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
-            okText: "Понял"
-          });
-          return;
-        }
-        was.mode = "competitive";
-        showToast("Предмет переведён в Competitive");
-      } else {
-        was.mode = "study";
-        showToast("Предмет переведён в Study");
-      }
-
-      fresh.subjects = next;
-      saveProfile(fresh);
-
-      // refresh dependent UI
-      renderHome();
-      if (state.tab === "courses") {
-        renderAllSubjects();
-        if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
-      }
-
-      // re-render settings to update counters
-      renderProfileSettings();
+    const ok = await uiConfirm({
+      title: turningOn ? "Competitive режим" : "Выключить Competitive",
+      message: turningOn
+        ? "Сделать этот предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\nУчебный режим останется доступен."
+        : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по предмету станут недоступны.\nУчебный режим останется.",
+      okText: turningOn ? "Включить" : "Выключить",
+      cancelText: "Отмена"
     });
 
-    list.appendChild(row);
+    if (!ok) {
+      input.checked = !turningOn;
+      return;
+    }
+
+    if (turningOn) {
+      const compNow = next.filter(s => s.mode === "competitive").length;
+      if (compNow >= 2) {
+        input.checked = false;
+        await uiAlert({
+          title: "Лимит Competitive",
+          message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
+          okText: "Понятно"
+        });
+        return;
+      }
+      was.mode = "competitive";
+      showToast("Предмет переведён в Competitive");
+    } else {
+      was.mode = "study";
+      showToast("Предмет переведён в Study");
+    }
+
+    fresh.subjects = next;
+    saveProfile(fresh);
+
+    renderHome();
+    if (state.tab === "courses") {
+      renderAllSubjects();
+      if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
+    }
+
+    renderProfileSettings();
   });
+
+  list.appendChild(row);
+});
+
       // --- Language segmented buttons ---
 const langWrap = document.getElementById("profile-settings-language");
 if (langWrap) {
