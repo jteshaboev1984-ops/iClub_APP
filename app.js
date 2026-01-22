@@ -711,9 +711,20 @@ const backBtn = $("#topbar-back");
 const titleEl = $("#topbar-title");
 const subEl = $("#topbar-subtitle");
 const logoEl = $("#topbar-logo");
+const actionBtn = $("#topbar-action");
 
 if (!backBtn || !titleEl || !subEl) return;
-if (logoEl) logoEl.style.display = "none";
+
+// лого теперь не прячем
+if (logoEl) logoEl.style.display = "block";
+
+// action по умолчанию скрыт
+if (actionBtn) {
+  actionBtn.style.visibility = "hidden";
+  actionBtn.dataset.action = "topbar-action";
+  const icon = actionBtn.querySelector(".icon");
+  if (icon) icon.textContent = "⋯";
+}
 
     // Default
     titleEl.textContent = t("app_name");
@@ -761,8 +772,28 @@ if (logoEl) logoEl.style.display = "none";
 
     if (viewName === "profile") {
   const top = getProfileTopScreen();
-  titleEl.textContent = (top === "settings") ? "Настройки" : "Профиль";
+
+  // В topbar всегда бренд
+  titleEl.textContent = t("app_name");
+
+  // Подзаголовок: пусто на профиле, "Настройки" в settings
+  subEl.textContent = (top === "settings") ? "Настройки" : "";
+
+  // Back показываем только в settings (и он будет работать через action="back")
   backBtn.style.visibility = (top === "settings") ? "visible" : "hidden";
+
+  // Шестерёнка в topbar справа — только на главном экране профиля
+  if (actionBtn) {
+    if (top === "main") {
+      actionBtn.style.visibility = "visible";
+      actionBtn.dataset.action = "profile-settings";
+      const icon = actionBtn.querySelector(".icon");
+      if (icon) icon.textContent = "⚙";
+    } else {
+      actionBtn.style.visibility = "hidden";
+    }
+  }
+
   return;
 }
 
