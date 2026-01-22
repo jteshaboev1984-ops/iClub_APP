@@ -1153,24 +1153,29 @@ function renderProfileStack() {
 
   mainSubjects.forEach(subj => {
    const isOn = currentComp.includes(subj.key);
+const limitReached = (compCount >= 2 && !isOn);
 
-   const row = document.createElement("div");
-   row.className = "settings-row" + (isOn ? " is-on" : "");
+const row = document.createElement("div");
+row.className =
+  "settings-row" +
+  (isOn ? " is-on" : "") +
+  (limitReached ? " is-disabled" : "");
 
-    row.innerHTML = `
-      <div>
-        <div style="font-weight:800">${escapeHTML(subj.title)}</div>
-        <div class="muted small">${isOn ? "Competitive" : "Study"}</div>
-      </div>
-      <label class="switch">
-        <input type="checkbox" ${isOn ? "checked" : ""}>
-        <span class="slider"></span>
-      </label>
-    `;
+row.innerHTML = `
+  <div>
+    <div style="font-weight:800">${escapeHTML(subj.title)}</div>
+    <div class="muted small">${isOn ? "Competitive" : "Study"}</div>
+  </div>
+  <label class="switch">
+    <input type="checkbox" ${isOn ? "checked" : ""} ${limitReached ? "disabled" : ""}>
+    <span class="slider"></span>
+  </label>
+`;
 
-    const input = row.querySelector('input[type="checkbox"]');
+const input = row.querySelector('input[type="checkbox"]');
 
-      input.addEventListener("change", async () => {
+input.addEventListener("change", async () => {
+  if (input.disabled) return;
       const fresh = loadProfile();
       if (!fresh) return;
 
@@ -3232,7 +3237,15 @@ function renderMyRecs() {
 
       // ---------- Global navigation actions (available everywhere) ----------
       if (action === "back") { // generic back
-        if (state.quizLock) return;
+        // ✅ 1) Back внутри профиля: settings -> main
+       if (getActiveView && getActiveView() === "profile") {
+        const top = getProfileTopScreen();
+        if (top === "settings") {
+        replaceProfile("main");
+        return;
+        }
+       }
+         if (state.quizLock) return;
         const topView = state.viewStack?.[state.viewStack.length - 1];
         if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
           globalBack();
