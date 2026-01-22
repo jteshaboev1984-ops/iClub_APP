@@ -1167,50 +1167,33 @@ function renderProfileStack() {
 
   if (note) note.textContent = `Можно выбрать максимум 2 предмета в Competitive. Сейчас выбрано: ${compCount}/2.`;
 
- // Show ALL subjects in Competitive settings.
-// Only MAIN subjects can be toggled into Competitive (limit 2).
-const allSubjects = Array.isArray(SUBJECTS) ? SUBJECTS.slice() : [];
-const mainKeys = new Set(SUBJECTS.filter(s => s.type === "main").map(s => s.key));
+ // ✅ Competitive settings: показываем ТОЛЬКО main-предметы (study/non-main скрываем полностью)
+const mainSubjects = Array.isArray(SUBJECTS) ? SUBJECTS.filter(s => s.type === "main") : [];
 
-allSubjects.forEach(subj => {
-  const isMain = mainKeys.has(subj.key);
+mainSubjects.forEach(subj => {
   const isOn = currentComp.includes(subj.key);
-  const limitReached = isMain && (compCount >= 2 && !isOn);
-  const locked = !isMain; // non-main: visible, but can't be toggled
+  const limitReached = (compCount >= 2 && !isOn);
 
   const row = document.createElement("div");
   row.className =
     "settings-row" +
     (isOn ? " is-on" : "") +
-    (limitReached ? " is-disabled" : "") +
-    (locked ? " is-locked" : "");
+    (limitReached ? " is-disabled" : "");
 
-  // IMPORTANT: switch is ALWAYS present (even for locked),
-  // so user sees consistent UI.
   row.innerHTML = `
   <div class="settings-row-left">
     <div style="font-weight:800">${escapeHTML(subj.title)}</div>
-    <div class="muted small">${
-      isOn ? "Competitive" : (locked ? "Недоступно" : "Выключено")
-    }</div>
+    <div class="muted small">${isOn ? "Competitive" : "Выключено"}</div>
   </div>
   <label class="switch">
     <input type="checkbox"
       ${isOn ? "checked" : ""}
-      ${limitReached || locked ? "disabled" : ""}>
+      ${limitReached ? "disabled" : ""}>
     <span class="slider"></span>
   </label>
 `;
 
   const input = row.querySelector('input[type="checkbox"]');
-
-  // Locked subjects: keep disabled switch, no toggling.
-  if (locked) {
-    // force OFF visually (they are study-only)
-    if (input) input.checked = false;
-    list.appendChild(row);
-    return;
-  }
 
   input?.addEventListener("change", async () => {
     if (input.disabled) return;
