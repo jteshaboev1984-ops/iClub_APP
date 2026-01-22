@@ -2081,29 +2081,37 @@ body.modal-open { overflow: hidden; }
 .settings-row.is-on .muted.small{
   color: rgba(47,111,214,0.95);
 }
+
+/* disabled because limit reached */
 .settings-row.is-disabled{
   opacity: 0.55;
 }
-/* Locked rows (non-competitive subjects) — show like top apps: muted + no border */
+.settings-row.is-disabled .switch{
+  pointer-events: none;
+  opacity: 1;
+  display: inline-flex;
+}
+
+/* locked rows (non-competitive subjects): muted + no border + visible disabled switch */
 .settings-row.is-locked{
-  background: transparent;
   border: 0;
-  opacity: 0.55;
+  background: transparent;
+  opacity: 0.60;
   padding-left: 6px;
   padding-right: 6px;
 }
-
-/* keep switch visible but clearly disabled */
-.settings-row.is-locked .slider{
-  opacity: 0.65;
-}
-
-.settings-row.is-disabled .switch{
-  pointer-events: none;
-}
-.settings-row.is-disabled .switch{
-  opacity: 1;
+.settings-row.is-locked .switch{
   display: inline-flex;
+  opacity: 1;
+}
+.settings-row.is-locked .slider{
+  cursor: default;
+  opacity: 0.65;
+  background: rgba(15,23,42,0.06);
+  border: 1px solid rgba(15,23,42,0.10);
+}
+.settings-row.is-locked .slider:before{
+  background: rgba(255,255,255,0.95);
 }
 
 /* More nav rows */
