@@ -2045,10 +2045,10 @@ body.modal-open { overflow: hidden; }
 
 /* highlight chosen rows */
 .settings-row.is-on{
-  background: rgba(47,111,214,0.08);
-  border-radius: 14px;
-  padding: 8px 10px;
+  background: rgba(47,111,214,0.10);
+  border: 1px solid rgba(47,111,214,0.35);
 }
+
 
 .settings-row.is-on .muted.small{
   color: rgba(47,111,214,0.95);
