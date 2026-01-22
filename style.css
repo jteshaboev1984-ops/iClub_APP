@@ -2084,6 +2084,20 @@ body.modal-open { overflow: hidden; }
 .settings-row.is-disabled{
   opacity: 0.55;
 }
+/* Locked rows (non-competitive subjects) — show like top apps: muted + no border */
+.settings-row.is-locked{
+  background: transparent;
+  border: 0;
+  opacity: 0.55;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+/* keep switch visible but clearly disabled */
+.settings-row.is-locked .slider{
+  opacity: 0.65;
+}
+
 .settings-row.is-disabled .switch{
   pointer-events: none;
 }
