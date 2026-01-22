@@ -1109,20 +1109,15 @@ function popProfile() {
 }
 
 function openProfileSettings() {
-  // ❗ ЖЁСТКО скрываем MAIN
-  const main = document.getElementById("profile-main");
-  if (main) {
-    main.hidden = true;
-    main.style.display = "none";
-    main.classList.remove("is-active");
-  }
+  // ✅ фиксируем экран в stack, чтобы generic "back" делал popProfile()
+  state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
+  state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
 
-  // ❗ Показываем SETTINGS
-  const settings = document.getElementById("profile-settings");
-  if (settings) {
-    settings.hidden = false;
-    settings.style.display = "block";
-    settings.classList.add("is-active");
+  // если уже в settings — просто обновим контент
+  if (getProfileTopScreen() !== "settings") {
+    pushProfile("settings"); // ✅ showProfileScreen внутри
+  } else {
+    showProfileScreen("settings"); // на всякий случай
   }
 
   renderProfileSettings();
@@ -1130,20 +1125,8 @@ function openProfileSettings() {
 }
 
 function openProfileMain() {
-  const settings = document.getElementById("profile-settings");
-  if (settings) {
-    settings.hidden = true;
-    settings.style.display = "none";
-    settings.classList.remove("is-active");
-  }
-
-  const main = document.getElementById("profile-main");
-  if (main) {
-    main.hidden = false;
-    main.style.display = "block";
-    main.classList.add("is-active");
-  }
-
+  // ✅ гарантированно возвращаемся на main согласованно с renderProfileStack()/back
+  replaceProfile("main"); // внутри: stack=["main"] + showProfileScreen("main") + renderProfileMain()
   updateTopbarForView("profile");
 }
 
