@@ -1165,9 +1165,11 @@ function renderProfileStack() {
   const currentComp = current.filter(s => s.mode === "competitive").map(s => s.key);
   const compCount = currentComp.length;
 
-  if (note) note.textContent = `Можно выбрать максимум 2 предмета в Competitive. Сейчас выбрано: ${compCount}/2.`;
+  if (note) {
+    note.textContent = `Можно выбрать максимум 2 предмета в Competitive. Сейчас выбрано: ${compCount}/2.`;
+  }
 
-   // Show ONLY MAIN subjects in Competitive settings (no Study-only subjects here).
+  // Show ONLY MAIN subjects in Competitive settings (no Study-only subjects here).
   const mainSubjects = SUBJECTS.filter(s => s.type === "main");
 
   mainSubjects.forEach(subj => {
@@ -1186,113 +1188,80 @@ function renderProfileStack() {
         <div class="muted small">${isOn ? "Competitive" : "Выключено"}</div>
       </div>
       <label class="switch">
-        <input type="checkbox"
-          ${isOn ? "checked" : ""}
-          ${limitReached ? "disabled" : ""}>
+        <input type="checkbox" ${isOn ? "checked" : ""} ${limitReached ? "disabled" : ""}>
         <span class="slider"></span>
       </label>
     `;
 
     const input = row.querySelector('input[type="checkbox"]');
+    if (!input) {
+      list.appendChild(row);
+      return;
+    }
 
-if (input) {
-  input.addEventListener("change", async () => {
-    if (input.disabled) return;
+    input.addEventListener("change", async () => {
+      if (input.disabled) return;
 
-    const fresh = loadProfile();
-    if (!fresh) return;
+      const fresh = loadProfile();
+      if (!fresh) return;
 
-    const subjects = Array.isArray(fresh.subjects) ? structuredClone(fresh.subjects) : [];
-    const idx = subjects.findIndex(s => s.key === subj.key);
+      const subjects = Array.isArray(fresh.subjects) ? structuredClone(fresh.subjects) : [];
+      const idx = subjects.findIndex(s => s.key === subj.key);
 
-    if (idx === -1) subjects.push({ key: subj.key, mode: "study", pinned: false });
+      // ensure exists
+      if (idx === -1) subjects.push({ key: subj.key, mode: "study", pinned: false });
 
-    const next = subjects.map(s => ({ ...s }));
-    const was = next.find(s => s.key === subj.key);
-    const turningOn = !isCompetitiveForUser(fresh, subj.key);
+      const next = subjects.map(s => ({ ...s }));
+      const was = next.find(s => s.key === subj.key);
+      const turningOn = !isCompetitiveForUser(fresh, subj.key);
 
-    const ok = await uiConfirm({
-      title: turningOn ? "Competitive режим" : "Выключить Competitive",
-      message: turningOn
-        ? "Сделать этот предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\nУчебный режим останется доступен."
-        : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по предмету станут недоступны.\nУчебный режим останется.",
-      okText: turningOn ? "Включить" : "Выключить",
-      cancelText: "Отмена"
+      const ok = await uiConfirm({
+        title: turningOn ? "Competitive режим" : "Выключить Competitive",
+        message: turningOn
+          ? "Сделать этот предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\nУчебный режим останется доступен."
+          : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по предмету станут недоступны.\nУчебный режим останется.",
+        okText: turningOn ? "Включить" : "Выключить",
+        cancelText: "Отмена"
+      });
+
+      if (!ok) {
+        input.checked = !turningOn;
+        return;
+      }
+
+      if (turningOn) {
+        const compNow = next.filter(s => s.mode === "competitive").length;
+        if (compNow >= 2) {
+          input.checked = false;
+          uiAlert({
+            title: "Лимит Competitive",
+            message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
+            okText: "Понял"
+          });
+          return;
+        }
+        was.mode = "competitive";
+        showToast("Предмет переведён в Competitive");
+      } else {
+        was.mode = "study";
+        showToast("Предмет переведён в Study");
+      }
+
+      fresh.subjects = next;
+      saveProfile(fresh);
+
+      renderHome();
+      if (state.tab === "courses") {
+        renderAllSubjects();
+        if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
+      }
+
+      renderProfileSettings();
     });
 
-    if (!ok) {
-      input.checked = !turningOn;
-      return;
-    }
-
-    if (turningOn) {
-      const compNow = next.filter(s => s.mode === "competitive").length;
-      if (compNow >= 2) {
-        input.checked = false;
-        uiAlert({
-          title: "Лимит Competitive",
-          message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
-          okText: "Понял"
-        });
-        return;
-      }
-      was.mode = "competitive";
-      showToast("Предмет переведён в Competitive");
-    } else {
-      was.mode = "study";
-      showToast("Предмет переведён в Study");
-    }
-
-    fresh.subjects = next;
-    saveProfile(fresh);
-
-    renderHome();
-    if (state.tab === "courses") {
-      renderAllSubjects();
-      if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
-    }
-
-    renderProfileSettings();
+    list.appendChild(row);
   });
 }
-
-    if (!ok) {
-      input.checked = !turningOn;
-      return;
-    }
-
-    if (turningOn) {
-      const compNow = next.filter(s => s.mode === "competitive").length;
-      if (compNow >= 2) {
-        input.checked = false;
-        uiAlert({
-          title: "Лимит Competitive",
-          message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
-          okText: "Понятно"
-        });
-        return;
-      }
-      was.mode = "competitive";
-      showToast("Предмет переведён в Competitive");
-    } else {
-      was.mode = "study";
-      showToast("Предмет переведён в Study");
-    }
-
-    fresh.subjects = next;
-    saveProfile(fresh);
-
-    renderHome();
-    if (state.tab === "courses") {
-      renderAllSubjects();
-      if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
-    }
-
-    renderProfileSettings();
-  });
-
-  list.appendChild(row);
-});
 
       // --- Language segmented buttons ---
 const langWrap = document.getElementById("profile-settings-language");
