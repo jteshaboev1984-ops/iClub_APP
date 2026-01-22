@@ -1106,7 +1106,13 @@ function popProfile() {
 }
 
 function openProfileSettings() {
-  replaceProfile("settings");
+  // ✅ открываем settings как push, чтобы back работал
+  state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
+  state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
+
+  const top = getProfileTopScreen();
+  if (top !== "settings") pushProfile("settings");
+
   renderProfileSettings();
 }
 
@@ -3102,9 +3108,11 @@ function renderMyRecs() {
 
       // If in profile -> pop profile stack
       if (state.tab === "profile") {
-        popProfile();
-        return;
+       popProfile();
+       renderProfileStack(); // ✅ чтобы после back корректно перерисовалось
+       return;
       }
+
 
       // If in courses -> pop courses stack
       if (state.tab === "courses") {
@@ -3244,15 +3252,7 @@ function renderMyRecs() {
 
       // ---------- Global navigation actions (available everywhere) ----------
       if (action === "back") { // generic back
-        // ✅ 1) Back внутри профиля: settings -> main
-       if (getActiveView && getActiveView() === "profile") {
-        const top = getProfileTopScreen();
-        if (top === "settings") {
-        replaceProfile("main");
-        return;
-        }
-       }
-         if (state.quizLock) return;
+        if (state.quizLock) return;
         const topView = state.viewStack?.[state.viewStack.length - 1];
         if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
           globalBack();
