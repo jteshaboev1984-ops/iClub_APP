@@ -711,12 +711,19 @@ const backBtn = $("#topbar-back");
 const titleEl = $("#topbar-title");
 const subEl = $("#topbar-subtitle");
 const logoEl = $("#topbar-logo");
+const notifBtn = $("#topbar-notifications");
 const actionBtn = $("#topbar-action");
 
 if (!backBtn || !titleEl || !subEl) return;
 
 // лого теперь не прячем
 if (logoEl) logoEl.style.display = "block";
+
+// notif по умолчанию скрыт
+if (notifBtn) {
+  notifBtn.style.visibility = "hidden";
+  notifBtn.dataset.action = "open-notifications";
+}
 
 // action по умолчанию скрыт
 if (actionBtn) {
@@ -761,6 +768,9 @@ if (actionBtn) {
   subEl.textContent = "Smarter together";
   backBtn.style.visibility = "hidden";
   if (logoEl) logoEl.style.display = "block";
+
+  if (notifBtn) notifBtn.style.visibility = "visible";
+
   return;
 }
 
