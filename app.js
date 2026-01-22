@@ -1121,10 +1121,10 @@ function renderProfileStack() {
   const mainSubjects = SUBJECTS.filter(s => s.type === "main");
 
   mainSubjects.forEach(subj => {
-    const isOn = currentComp.includes(subj.key);
+   const isOn = currentComp.includes(subj.key);
 
-    const row = document.createElement("div");
-    row.className = "settings-row";
+   const row = document.createElement("div");
+   row.className = "settings-row" + (isOn ? " is-on" : "");
 
     row.innerHTML = `
       <div>
@@ -1232,48 +1232,74 @@ function renderProfileStack() {
     };
   }
 
-  // --- Pinned list ---
+    // --- Pinned list ---
+  const pinnedToggleBtn = document.getElementById("profile-settings-pinned-toggle");
+  if (pinnedToggleBtn) {
+    const expanded = !!profile?.pinnedExpanded;
+    pinnedToggleBtn.textContent = expanded ? "Скрыть лишнее" : "Показать все предметы";
+    pinnedToggleBtn.onclick = () => {
+      const fresh = loadProfile();
+      if (!fresh) return;
+      fresh.pinnedExpanded = !fresh.pinnedExpanded;
+      saveProfile(fresh);
+      renderProfileSettings();
+    };
+  }
+
   const pinnedWrap = document.getElementById("profile-settings-pinned-list");
   if (pinnedWrap) {
     pinnedWrap.innerHTML = "";
-    const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
-    const pinnedKeys = subjects.filter(s => !!s.pinned).map(s => s.key);
 
-    if (!pinnedKeys.length) {
-      pinnedWrap.innerHTML = `<div class="empty muted">Пока нет закреплённых предметов.</div>`;
-    } else {
-      pinnedKeys.forEach(key => {
-        const subj = subjectByKey(key);
-        const title = subj ? subj.title : key;
+    const expanded = !!profile?.pinnedExpanded;
 
-        const row = document.createElement("div");
-        row.className = "settings-row";
-        row.innerHTML = `
-          <div>
-            <div style="font-weight:800">${escapeHTML(title)}</div>
-            <div class="muted small">Pinned</div>
-          </div>
-          <button type="button" class="btn">Убрать</button>
-        `;
+    const userSubjects = Array.isArray(profile.subjects) ? profile.subjects : [];
+    const pinnedSet = new Set(userSubjects.filter(s => !!s.pinned).map(s => s.key));
 
-        row.querySelector("button")?.addEventListener("click", () => {
-          const fresh = loadProfile();
-          if (!fresh) return;
-          const updated = togglePinnedSubject(fresh, key);
-          saveProfile(updated);
+    const mainSubjects = SUBJECTS.filter(s => s.type === "main");
 
-          renderHome();
-          if (state.tab === "courses") renderAllSubjects();
-          renderProfileMain();
-          renderProfileSettings();
+    const pinnedList = mainSubjects.filter(s => pinnedSet.has(s.key));
+    const otherList  = mainSubjects.filter(s => !pinnedSet.has(s.key));
 
-          showToast("Убрано из закреплённых");
-        });
+    const listToRender = expanded ? [...pinnedList, ...otherList] : pinnedList;
 
-        pinnedWrap.appendChild(row);
-      });
+    if (!listToRender.length) {
+      pinnedWrap.innerHTML = `<div class="empty muted">Закреплённых предметов пока нет</div>`;
+      return;
     }
-  } 
+
+    listToRender.forEach(subj => {
+      const isPinned = pinnedSet.has(subj.key);
+
+      const row = document.createElement("div");
+      row.className = "settings-row" + (isPinned ? " is-on" : "");
+
+      row.innerHTML = `
+        <div>
+          <div style="font-weight:800">${escapeHTML(subj.title)}</div>
+          <div class="muted small">${isPinned ? "Закреплён" : "Не закреплён"}</div>
+        </div>
+        <button type="button" class="btn ${isPinned ? "" : "ghost"}">
+          ${isPinned ? "Убрать" : "Закрепить"}
+        </button>
+      `;
+
+      row.querySelector("button")?.addEventListener("click", () => {
+        const fresh = loadProfile();
+        if (!fresh) return;
+        const updated = togglePinnedSubject(fresh, subj.key);
+        saveProfile(updated);
+
+        renderHome();
+        if (state.tab === "courses") renderAllSubjects();
+        renderProfileMain();
+        renderProfileSettings();
+
+        showToast(isPinned ? "Убрано из закреплённых" : "Добавлено в закреплённые");
+      });
+
+      pinnedWrap.appendChild(row);
+    });
+  }
 }
 
   function renderProfileMain() {
