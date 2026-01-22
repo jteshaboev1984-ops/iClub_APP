@@ -715,6 +715,12 @@
 
     <!-- Profile MAIN -->
   <div id="profile-main" class="profile-screen is-active">
+      <div class="profile-topbar">
+    <div class="profile-topbar-title">Академик профиль</div>
+    <button class="icon-btn" type="button" aria-label="Settings" data-action="profile-settings">
+      <span class="icon">⚙</span>
+    </button>
+  </div>
 
   <div class="card profile-hero">
 
@@ -833,13 +839,13 @@
 <div id="profile-settings" class="profile-screen">
 
     <!-- Header -->
-  <div class="settings-head">
-    <button class="icon-btn settings-back" type="button" aria-label="Back" data-action="profile-settings-back">
-      <span class="icon">←</span>
-    </button>
-    <div class="settings-head-title">Настройки</div>
-    <div class="settings-head-sub muted small">Competitive ≤ 2 • Режимы • Интерфейс</div>
-  </div>
+ <div class="settings-head">
+  <button class="btn mini ghost settings-back" type="button" data-action="profile-settings-back">
+    ← Назад
+  </button>
+  <div class="settings-head-title">Настройки</div>
+  <div class="settings-head-sub muted small">Competitive ≤ 2 • Режимы • Интерфейс</div>
+</div>
     
   <!-- Language (move to top) -->
   <div class="card">
@@ -864,10 +870,10 @@
   </div>
 
 
-  <!-- Competitive mode -->
+    <!-- Competitive mode -->
   <div class="card">
     <div class="card-title">Соревновательный режим (Competitive)</div>
-     <p class="muted small" id="settings-competitive-note">
+    <p class="muted small" id="settings-competitive-note">
       Можно выбрать максимум 2 предмета в Competitive.
       Настраивается только здесь.
     </p>
@@ -877,7 +883,25 @@
     </div>
   </div>
 
-    <!-- More -->
+  <!-- Study mode / Pinned (after Competitive) -->
+  <div class="card">
+    <div class="settings-card-head">
+      <div class="card-title">Учебный режим — закреплённые предметы</div>
+      <button id="profile-settings-pinned-toggle" class="btn mini ghost" type="button">
+        Показать все предметы
+      </button>
+    </div>
+
+    <p class="muted small">
+      Закреплённые — для быстрого доступа в учебном режиме. Competitive настраивается выше.
+    </p>
+
+    <div id="profile-settings-pinned-list" class="settings-list">
+      <!-- filled by app.js -->
+    </div>
+  </div>
+
+  <!-- More -->
   <div class="card">
     <div class="card-title">More</div>
 
@@ -919,46 +943,6 @@
       </button>
     </div>
   </div>
-
-     <!-- Study mode / Pinned -->
-  <div class="card">
-    <div class="settings-card-head">
-      <div class="card-title">Учебный режим (Pinned)</div>
-      <button id="profile-settings-pinned-toggle" class="btn mini ghost" type="button">
-        Показать все
-      </button>
-    </div>
-    <p class="muted small">
-      Здесь — быстрый доступ к предметам в учебном режиме. Можно закрепить и снять закрепление.
-    </p>
-
-    <div id="profile-settings-pinned-list" class="settings-list">
-      <!-- filled by app.js -->
-    </div>
-
-    <!-- More -->
-<div class="card">
-  <div class="card-title" data-i18n="profile_settings_more">More</div>
-
-  <div class="settings-list">
-    <button class="settings-row settings-row-btn" type="button" data-action="profile-community">
-      <div>
-        <div class="settings-row-title" data-i18n="profile_settings_community">Community</div>
-        <div class="muted small">@iClubuzofficial</div>
-      </div>
-      <div class="settings-row-arrow">›</div>
-    </button>
-
-    <button class="settings-row settings-row-btn" type="button" data-action="profile-about">
-      <div>
-        <div class="settings-row-title" data-i18n="profile_settings_about">About project</div>
-        <div class="muted small">Rules & organizers</div>
-      </div>
-      <div class="settings-row-arrow">›</div>
-    </button>
-  </div>
-</div>
-</div>
 
 </div>
 <!-- /Profile SETTINGS -->
