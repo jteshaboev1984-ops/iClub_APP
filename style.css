@@ -2084,9 +2084,25 @@ body.modal-open { overflow: hidden; }
 }
 
 /* disabled because limit reached */
+/* Было: гасили всю строку */
 .settings-row.is-disabled{
-  opacity: 0.55;
+  opacity: 1;                 /* <-- важно */
 }
+
+/* Новое: приглушаем только текст/мету */
+.settings-row.is-disabled .settings-row-title{
+  opacity: 0.78;
+}
+.settings-row.is-disabled .muted,
+.settings-row.is-disabled .small{
+  opacity: 0.70;
+}
+
+/* Switch при disabled оставляем визуально нормальным */
+.settings-row.is-disabled .switch{
+  opacity: 1;
+}
+
 .settings-row.is-disabled .switch{
   pointer-events: none;
   opacity: 1;
