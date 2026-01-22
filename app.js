@@ -1195,70 +1195,66 @@ function renderProfileStack() {
 
     const input = row.querySelector('input[type="checkbox"]');
 
-    input?.addEventListener("change", async () => {
-      if (input.disabled) return;
+if (input) {
+  input.addEventListener("change", async () => {
+    if (input.disabled) return;
 
-      const fresh = loadProfile();
-      if (!fresh) return;
+    const fresh = loadProfile();
+    if (!fresh) return;
 
-      const subjects = Array.isArray(fresh.subjects) ? structuredClone(fresh.subjects) : [];
-      const idx = subjects.findIndex(s => s.key === subj.key);
+    const subjects = Array.isArray(fresh.subjects) ? structuredClone(fresh.subjects) : [];
+    const idx = subjects.findIndex(s => s.key === subj.key);
 
-      if (idx === -1) subjects.push({ key: subj.key, mode: "study", pinned: false });
+    if (idx === -1) subjects.push({ key: subj.key, mode: "study", pinned: false });
 
-      const next = subjects.map(s => ({ ...s }));
-      const was = next.find(s => s.key === subj.key);
-      const turningOn = !isCompetitiveForUser(fresh, subj.key);
+    const next = subjects.map(s => ({ ...s }));
+    const was = next.find(s => s.key === subj.key);
+    const turningOn = !isCompetitiveForUser(fresh, subj.key);
 
-      const ok = await uiConfirm({
-        title: turningOn ? "Competitive режим" : "Выключить Competitive",
-        message: turningOn
-          ? "Сделать этот предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\nУчебный режим останется доступен."
-          : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по предмету станут недоступны.\nУчебный режим останется.",
-        okText: turningOn ? "Включить" : "Выключить",
-        cancelText: "Отмена"
-      });
-
-      if (!ok) {
-        input.checked = !turningOn;
-        return;
-      }
-
-      if (turningOn) {
-        const compNow = next.filter(s => s.mode === "competitive").length;
-        if (compNow >= 2) {
-  input.checked = false;
-
-  // ⚠️ без await — иначе при любой потере async этот await роняет весь app
-  uiAlert({
-    title: "Лимит Competitive",
-    message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
-    okText: "Понял"
-  });
-
-  return;
-}
-        was.mode = "competitive";
-        showToast("Предмет переведён в Competitive");
-      } else {
-        was.mode = "study";
-        showToast("Предмет переведён в Study");
-      }
-
-      fresh.subjects = next;
-      saveProfile(fresh);
-
-      renderHome();
-      if (state.tab === "courses") {
-        renderAllSubjects();
-        if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
-      }
-
-      renderProfileSettings();
+    const ok = await uiConfirm({
+      title: turningOn ? "Competitive режим" : "Выключить Competitive",
+      message: turningOn
+        ? "Сделать этот предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\nУчебный режим останется доступен."
+        : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по предмету станут недоступны.\nУчебный режим останется.",
+      okText: turningOn ? "Включить" : "Выключить",
+      cancelText: "Отмена"
     });
 
-    list.appendChild(row);
+    if (!ok) {
+      input.checked = !turningOn;
+      return;
+    }
+
+    if (turningOn) {
+      const compNow = next.filter(s => s.mode === "competitive").length;
+      if (compNow >= 2) {
+        input.checked = false;
+        uiAlert({
+          title: "Лимит Competitive",
+          message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
+          okText: "Понял"
+        });
+        return;
+      }
+      was.mode = "competitive";
+      showToast("Предмет переведён в Competitive");
+    } else {
+      was.mode = "study";
+      showToast("Предмет переведён в Study");
+    }
+
+    fresh.subjects = next;
+    saveProfile(fresh);
+
+    renderHome();
+    if (state.tab === "courses") {
+      renderAllSubjects();
+      if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
+    }
+
+    renderProfileSettings();
   });
+}
 
     if (!ok) {
       input.checked = !turningOn;
