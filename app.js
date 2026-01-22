@@ -1269,10 +1269,10 @@ function renderProfileStack() {
       const compNow = next.filter(s => s.mode === "competitive").length;
       if (compNow >= 2) {
         input.checked = false;
-        await uiAlert({
+        uiAlert({
           title: "Лимит Competitive",
           message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
-          okText: "Понял"
+          okText: "Понятно"
         });
         return;
       }
