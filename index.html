@@ -20,22 +20,28 @@
 
     <!-- ===== Top Bar (contextual) ===== -->
     <header id="topbar" class="topbar" aria-label="Top bar">
-      <button id="topbar-back" class="icon-btn" type="button" aria-label="Back" data-action="back">
-        <span class="icon">←</span>
-      </button>
+  <button id="topbar-back" class="icon-btn" type="button" aria-label="Back" data-action="back">
+    <span class="icon">←</span>
+  </button>
 
- <div class="topbar-brand">
-  <img id="topbar-logo" class="topbar-logo" src="logo.png" alt="iClub" />
-  <div class="topbar-title">
-    <div id="topbar-title" class="title">iClub</div>
-    <div id="topbar-subtitle" class="subtitle"></div>
+  <div class="topbar-brand">
+    <img id="topbar-logo" class="topbar-logo" src="logo.png" alt="iClub" />
+    <div class="topbar-title">
+      <div id="topbar-title" class="title">iClub</div>
+      <div id="topbar-subtitle" class="subtitle"></div>
+    </div>
   </div>
-</div>
 
-      <button id="topbar-action" class="icon-btn" type="button" aria-label="Action" data-action="topbar-action" style="visibility:hidden">
-        <span class="icon">⋯</span>
-      </button>
-    </header>
+  <div class="topbar-right">
+    <button id="topbar-notifications" class="icon-btn" type="button" aria-label="Notifications" data-action="open-notifications" style="visibility:hidden">
+      <span class="icon">🔔</span>
+    </button>
+
+    <button id="topbar-action" class="icon-btn" type="button" aria-label="Action" data-action="topbar-action" style="visibility:hidden">
+      <span class="icon">⋯</span>
+    </button>
+  </div>
+</header>
 
     <!-- ===== Main Views ===== -->
     <main id="main" class="main" role="main">
@@ -195,17 +201,6 @@
       <!-- ============ Home (Tab) ============ -->
       <section id="view-home" class="view" data-view="home" aria-label="Home">
         <div class="content">
-          <div class="home-appbar">
-            <div class="home-brand-mini">
-              <span class="home-brand-ico">ic</span>
-              <span class="home-brand-title">iClub</span>
-            </div>
-            <div class="home-appbar-actions">
-              <button class="icon-btn ghost" type="button" aria-label="Search" disabled>🔍</button>
-              <button class="icon-btn ghost" type="button" aria-label="Notifications" data-action="open-notifications">🔔</button>
-            </div>
-          </div>
-
           <div class="home-block">
             <div class="home-block-head">
               <div class="home-block-title" data-i18n="home_competitive_mode">Competitive Mode</div>
@@ -245,14 +240,6 @@
                     <div class="tile-title">Новости</div>
                   </div>
                   <div class="tile-sub muted">Анонсы и обновления</div>
-                </button>
-
-               <button class="tile" type="button" data-action="open-notifications">
-                  <div class="tile-top">
-                    <div class="tile-ico">🔔</div>
-                    <div class="tile-title">Уведомления</div>
-                  </div>
-                  <div class="tile-sub muted">Системные события</div>
                 </button>
 
                 <button class="tile" type="button" data-action="open-community">
