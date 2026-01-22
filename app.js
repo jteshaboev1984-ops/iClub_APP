@@ -1060,17 +1060,20 @@ function getProfileTopScreen() {
 }
 
 function showProfileScreen(screenName) {
-  PROFILE_SCREENS.forEach(sc => {
-    const el = document.getElementById(`profile-${sc}`);
-    if (!el) return;
-
-    const isActive = (sc === screenName);
-
-    // ✅ жёстко управляем видимостью, чтобы экраны не “слипались”
-    el.hidden = !isActive;
-    el.style.display = isActive ? "block" : "none";
-    el.classList.toggle("is-active", isActive);
+  // ✅ Сначала скрываем ВСЕ проф-экраны (на всякий случай, даже если классы “сломались”)
+  document.querySelectorAll("#view-profile .profile-screen").forEach(el => {
+    el.hidden = true;
+    el.style.display = "none";
+    el.classList.remove("is-active");
   });
+
+  // ✅ Затем показываем только нужный
+  const target = document.getElementById(`profile-${screenName}`);
+  if (target) {
+    target.hidden = false;
+    target.style.display = "block";
+    target.classList.add("is-active");
+  }
 
   updateTopbarForView("profile");
 }
