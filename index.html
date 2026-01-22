@@ -16,9 +16,12 @@
 
 <body>
   <!-- ===== App Shell ===== -->
- <header id="topbar" class="topbar" aria-label="Top bar">
-      <button id="topbar-profile-home" class="icon-btn" type="button" aria-label="Profile" data-action="profile-settings-back" style="visibility:hidden">
-        <span class="icon">👤</span>
+  <div id="app" class="app">
+
+    <!-- ===== Top Bar (contextual) ===== -->
+    <header id="topbar" class="topbar" aria-label="Top bar">
+      <button id="topbar-back" class="icon-btn" type="button" aria-label="Back" data-action="back">
+        <span class="icon">←</span>
       </button>
 
  <div class="topbar-brand">
@@ -33,7 +36,6 @@
         <span class="icon">⋯</span>
       </button>
     </header>
-
 
     <!-- ===== Main Views ===== -->
     <main id="main" class="main" role="main">
