@@ -1109,15 +1109,18 @@ function popProfile() {
 }
 
 function openProfileSettings() {
-  // ✅ фиксируем экран в stack, чтобы generic "back" делал popProfile()
+  // ✅ гарантируем, что мы именно в вкладке Profile (иначе generic back не отработает)
+  state.tab = "profile";
+
+  // ✅ гарантируем структуру стека
   state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
   state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
 
-  // если уже в settings — просто обновим контент
+  // ✅ фиксируем settings в stack, чтобы "back" делал popProfile()
   if (getProfileTopScreen() !== "settings") {
-    pushProfile("settings"); // ✅ showProfileScreen внутри
+    pushProfile("settings");
   } else {
-    showProfileScreen("settings"); // на всякий случай
+    showProfileScreen("settings");
   }
 
   renderProfileSettings();
@@ -1125,8 +1128,11 @@ function openProfileSettings() {
 }
 
 function openProfileMain() {
-  // ✅ гарантированно возвращаемся на main согласованно с renderProfileStack()/back
-  replaceProfile("main"); // внутри: stack=["main"] + showProfileScreen("main") + renderProfileMain()
+  // ✅ гарантируем, что мы в вкладке Profile
+  state.tab = "profile";
+
+  // ✅ единый источник истины: stack + showProfileScreen()
+  replaceProfile("main");
   updateTopbarForView("profile");
 }
 
@@ -3262,30 +3268,41 @@ function renderMyRecs() {
 
       // ---------- Global navigation actions (available everywhere) ----------
       if (action === "back") { // generic back
-        if (state.quizLock) return;
-        const topView = state.viewStack?.[state.viewStack.length - 1];
-        if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
-          globalBack();
-          return;
-        }
-        if (state.tab === "courses") {
-          popCourses();
-          return;
-        }
-        if (state.tab === "profile") {
-          if (getProfileTopScreen() !== "main") {
-            popProfile();
-            return;
-          }
-          setTab(state.prevTab || "home");
-          return;
-        }
-        if (state.tab === "ratings") {
-          setTab(state.prevTab || "home");
-          return;
-        }
-        return;
-      }
+  if (state.quizLock) return;
+
+  // ✅ FALLBACK: если видим settings профиля, но state.tab почему-то не "profile"
+  const ps = document.getElementById("profile-settings");
+  const psActive = ps && ps.classList.contains("is-active") && ps.hidden !== true;
+  if (psActive) {
+    // возвращаемся на main профиля предсказуемо
+    state.tab = "profile";
+    openProfileMain();
+    return;
+  }
+
+  const topView = state.viewStack?.[state.viewStack.length - 1];
+  if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
+    globalBack();
+    return;
+  }
+  if (state.tab === "courses") {
+    popCourses();
+    return;
+  }
+  if (state.tab === "profile") {
+    if (getProfileTopScreen() !== "main") {
+      popProfile();
+      return;
+    }
+    setTab(state.prevTab || "home");
+    return;
+  }
+  if (state.tab === "ratings") {
+    setTab(state.prevTab || "home");
+    return;
+  }
+  return;
+}
 
       if (action === "go-home") { setTab("home"); return; }
       if (action === "go-profile") { setTab("profile"); return; }
