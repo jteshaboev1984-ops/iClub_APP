@@ -728,7 +728,7 @@ if (actionBtn) {
 
     // Default
     titleEl.textContent = t("app_name");
-    subEl.textContent = "";
+    subEl.textContent = "Smarter together";
     backBtn.style.visibility = "hidden";
 
     if (viewName === "splash") {
@@ -775,9 +775,7 @@ if (actionBtn) {
 
   // В topbar всегда бренд
   titleEl.textContent = t("app_name");
-
-  // Подзаголовок: пусто на профиле, "Настройки" в settings
-  subEl.textContent = (top === "settings") ? "Настройки" : "";
+  subEl.textContent = (top === "settings") ? "Smarter together" : "";
 
   // Back показываем только в settings (и он будет работать через action="back")
   backBtn.style.visibility = (top === "settings") ? "visible" : "hidden";
