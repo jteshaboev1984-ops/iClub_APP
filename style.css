@@ -1421,6 +1421,12 @@ body.modal-open { overflow: hidden; }
   margin-bottom: 0;
 }
 
+#profile-settings-pinned-toggle{
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
 /* ----- Settings rows: highlight enabled states ----- */
 .settings-row.is-on{
   background: rgba(77, 138, 255, 0.10);
