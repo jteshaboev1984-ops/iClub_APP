@@ -3239,15 +3239,15 @@ function renderMyRecs() {
 
             // ===== Profile local navigation (must work from anywhere) =====
       if (action === "profile-settings") {
-        setTab("profile");
-        replaceProfile("settings");
-        return;
+       setTab("profile");
+       openProfileSettings();   // ✅ push в стек + правильный рендер
+       return;
       }
     
       if (action === "profile-settings-back") {
-        setTab("profile");
-        replaceProfile("main");
-        return;
+       setTab("profile");
+       openProfileMain();       // ✅ единый способ вернуться
+       return;
       }
 
       // ---------- Global navigation actions (available everywhere) ----------
