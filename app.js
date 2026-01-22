@@ -1188,17 +1188,19 @@ allSubjects.forEach(subj => {
   // IMPORTANT: switch is ALWAYS present (even for locked),
   // so user sees consistent UI.
   row.innerHTML = `
-    <div>
-      <div style="font-weight:800">${escapeHTML(subj.title)}</div>
-      <div class="muted small">${isOn ? "Competitive" : "Study"}</div>
-    </div>
-    <label class="switch">
-      <input type="checkbox"
-        ${isOn ? "checked" : ""}
-        ${limitReached || locked ? "disabled" : ""}>
-      <span class="slider"></span>
-    </label>
-  `;
+  <div class="settings-row-left">
+    <div style="font-weight:800">${escapeHTML(subj.title)}</div>
+    <div class="muted small">${
+      isOn ? "Competitive" : (locked ? "Недоступно" : "Выключено")
+    }</div>
+  </div>
+  <label class="switch">
+    <input type="checkbox"
+      ${isOn ? "checked" : ""}
+      ${limitReached || locked ? "disabled" : ""}>
+    <span class="slider"></span>
+  </label>
+`;
 
   const input = row.querySelector('input[type="checkbox"]');
 
