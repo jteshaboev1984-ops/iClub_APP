@@ -1561,16 +1561,16 @@ input?.addEventListener("change", async () => {
     if (!isSchool) ratingsBtn.title = t("disabled_not_school");
   }
 
-  if (hintEl) {
+    if (hintEl) {
     hintEl.textContent = pinned.length
       ? "Закреплённые предметы уже ускоряют доступ. Дальше — стабильность."
       : "Закрепите 1–3 предмета — и вы будете открывать нужное быстрее, чем Telegram.";
   }
- }
+}  // ← ВАЖНО: закрываем renderProfileSettings()
 
-     // ---------------------------
-  // Modal (for confirmations in Telegram WebApp)
-  // ---------------------------
+// ---------------------------
+// Modal (for confirmations in Telegram WebApp)
+// ---------------------------
   let modalResolve = null;
 
   function closeModal(result = null) {
