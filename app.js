@@ -1109,19 +1109,42 @@ function popProfile() {
 }
 
 function openProfileSettings() {
-  // ✅ открываем settings как push, чтобы back работал
-  state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
-  state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
+  // ❗ ЖЁСТКО скрываем MAIN
+  const main = document.getElementById("profile-main");
+  if (main) {
+    main.hidden = true;
+    main.style.display = "none";
+    main.classList.remove("is-active");
+  }
 
-  const top = getProfileTopScreen();
-  if (top !== "settings") pushProfile("settings");
+  // ❗ Показываем SETTINGS
+  const settings = document.getElementById("profile-settings");
+  if (settings) {
+    settings.hidden = false;
+    settings.style.display = "block";
+    settings.classList.add("is-active");
+  }
 
   renderProfileSettings();
+  updateTopbarForView("profile");
 }
 
 function openProfileMain() {
-  replaceProfile("main");
-  renderProfileMain();
+  const settings = document.getElementById("profile-settings");
+  if (settings) {
+    settings.hidden = true;
+    settings.style.display = "none";
+    settings.classList.remove("is-active");
+  }
+
+  const main = document.getElementById("profile-main");
+  if (main) {
+    main.hidden = false;
+    main.style.display = "block";
+    main.classList.add("is-active");
+  }
+
+  updateTopbarForView("profile");
 }
 
 function renderProfileStack() {
@@ -3098,7 +3121,8 @@ function renderMyRecs() {
     const backBtn = $("#topbar-back");
     if (!backBtn) return;
 
-    backBtn.addEventListener("click", () => {
+    backBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
       if (state.quizLock) return;
 
       const topView = state.viewStack?.[state.viewStack.length - 1];
