@@ -1573,11 +1573,12 @@ body.modal-open { overflow: hidden; }
   position:absolute;
   cursor:pointer;
   top:0; left:0; right:0; bottom:0;
-  background: rgba(255,255,255,0.18);
-  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(15,23,42,0.06);
+  border: 1px solid rgba(15,23,42,0.10);
   border-radius: 999px;
   transition: .2s;
 }
+
 .slider:before{
   position:absolute;
   content:"";
@@ -2096,20 +2097,32 @@ body.modal-open { overflow: hidden; }
 .settings-row.is-locked{
   border: 0;
   background: transparent;
-  opacity: 0.60;
   padding-left: 6px;
   padding-right: 6px;
 }
+
+/* гасим только текстовую часть */
+.settings-row.is-locked .settings-row-left{
+  opacity: 0.55;
+}
+
+/* тумблер оставляем читаемым */
 .settings-row.is-locked .switch{
   display: inline-flex;
   opacity: 1;
 }
+
 .settings-row.is-locked .slider{
   cursor: default;
-  opacity: 0.65;
+  opacity: 1;
   background: rgba(15,23,42,0.06);
-  border: 1px solid rgba(15,23,42,0.10);
+  border: 1px solid rgba(15,23,42,0.12);
 }
+
+.settings-row.is-locked .slider:before{
+  background: rgba(255,255,255,0.95);
+}
+
 .settings-row.is-locked .slider:before{
   background: rgba(255,255,255,0.95);
 }
