@@ -1329,12 +1329,13 @@ if (langWrap) {
     const userSubjects = Array.isArray(profile.subjects) ? profile.subjects : [];
     const pinnedSet = new Set(userSubjects.filter(s => !!s.pinned).map(s => s.key));
 
-    const mainSubjects = SUBJECTS.filter(s => s.type === "main");
+    // Study (Pinned) can show all subjects when expanded, otherwise only pinned
+const allSubjects = Array.isArray(SUBJECTS) ? SUBJECTS.slice() : [];
 
-    const pinnedList = mainSubjects.filter(s => pinnedSet.has(s.key));
-    const otherList  = mainSubjects.filter(s => !pinnedSet.has(s.key));
+const pinnedList = allSubjects.filter(s => pinnedSet.has(s.key));
+const otherList  = allSubjects.filter(s => !pinnedSet.has(s.key));
 
-    const listToRender = expanded ? [...pinnedList, ...otherList] : pinnedList;
+const listToRender = expanded ? [...pinnedList, ...otherList] : pinnedList;
 
     if (!listToRender.length) {
       pinnedWrap.innerHTML = `<div class="empty muted">Закреплённых предметов пока нет</div>`;
@@ -1348,28 +1349,32 @@ if (langWrap) {
       row.className = "settings-row" + (isPinned ? " is-on" : "");
 
       row.innerHTML = `
-        <div>
-          <div style="font-weight:800">${escapeHTML(subj.title)}</div>
-          <div class="muted small">${isPinned ? "Закреплён" : "Не закреплён"}</div>
-        </div>
-        <button type="button" class="btn ${isPinned ? "" : "ghost"}">
-          ${isPinned ? "Убрать" : "Закрепить"}
-        </button>
-      `;
+  <div>
+    <div style="font-weight:800">${escapeHTML(subj.title)}</div>
+    <div class="muted small">${isPinned ? "Закреплён" : "Не закреплён"}</div>
+  </div>
+  <label class="switch">
+    <input type="checkbox" ${isPinned ? "checked" : ""}>
+    <span class="slider"></span>
+  </label>
+`;
 
-      row.querySelector("button")?.addEventListener("click", () => {
-        const fresh = loadProfile();
-        if (!fresh) return;
-        const updated = togglePinnedSubject(fresh, subj.key);
-        saveProfile(updated);
+const input = row.querySelector('input[type="checkbox"]');
 
-        renderHome();
-        if (state.tab === "courses") renderAllSubjects();
-        renderProfileMain();
-        renderProfileSettings();
+input?.addEventListener("change", () => {
+  const fresh = loadProfile();
+  if (!fresh) return;
 
-        showToast(isPinned ? "Убрано из закреплённых" : "Добавлено в закреплённые");
-      });
+  const updated = togglePinnedSubject(fresh, subj.key);
+  saveProfile(updated);
+
+  renderHome();
+  if (state.tab === "courses") renderAllSubjects();
+  renderProfileMain();
+  renderProfileSettings();
+
+  showToast(isPinned ? "Убрано из закреплённых" : "Добавлено в закреплённые");
+});
 
       pinnedWrap.appendChild(row);
     });
