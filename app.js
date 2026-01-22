@@ -1167,8 +1167,8 @@ function renderProfileStack() {
 
   if (note) note.textContent = `Можно выбрать максимум 2 предмета в Competitive. Сейчас выбрано: ${compCount}/2.`;
 
- // Show ALL subjects here.
-// MAIN subjects can be toggled into Competitive (limit 2). Others are visible but locked to Study.
+ // Show ALL subjects in Competitive settings.
+// Only MAIN subjects can be toggled into Competitive (limit 2).
 const allSubjects = Array.isArray(SUBJECTS) ? SUBJECTS.slice() : [];
 const mainKeys = new Set(SUBJECTS.filter(s => s.type === "main").map(s => s.key));
 
@@ -1176,7 +1176,7 @@ allSubjects.forEach(subj => {
   const isMain = mainKeys.has(subj.key);
   const isOn = currentComp.includes(subj.key);
   const limitReached = isMain && (compCount >= 2 && !isOn);
-  const locked = !isMain; // additional subjects: only Study
+  const locked = !isMain; // non-main: visible, but can't be toggled
 
   const row = document.createElement("div");
   row.className =
@@ -1185,12 +1185,12 @@ allSubjects.forEach(subj => {
     (limitReached ? " is-disabled" : "") +
     (locked ? " is-locked" : "");
 
+  // IMPORTANT: switch is ALWAYS present (even for locked),
+  // so user sees consistent UI.
   row.innerHTML = `
     <div>
       <div style="font-weight:800">${escapeHTML(subj.title)}</div>
-      <div class="muted small">${
-        locked ? "Study" : (isOn ? "Competitive" : "Study")
-      }</div>
+      <div class="muted small">${isOn ? "Competitive" : "Study"}</div>
     </div>
     <label class="switch">
       <input type="checkbox"
@@ -1202,13 +1202,15 @@ allSubjects.forEach(subj => {
 
   const input = row.querySelector('input[type="checkbox"]');
 
-  // Locked subjects: show switch disabled only (no toggle behavior)
+  // Locked subjects: keep disabled switch, no toggling.
   if (locked) {
+    // force OFF visually (they are study-only)
+    if (input) input.checked = false;
     list.appendChild(row);
     return;
   }
 
-  input.addEventListener("change", async () => {
+  input?.addEventListener("change", async () => {
     if (input.disabled) return;
 
     const fresh = loadProfile();
@@ -1217,7 +1219,6 @@ allSubjects.forEach(subj => {
     const subjects = Array.isArray(fresh.subjects) ? structuredClone(fresh.subjects) : [];
     const idx = subjects.findIndex(s => s.key === subj.key);
 
-    // ensure exists
     if (idx === -1) subjects.push({ key: subj.key, mode: "study", pinned: false });
 
     const next = subjects.map(s => ({ ...s }));
@@ -1245,7 +1246,7 @@ allSubjects.forEach(subj => {
         await uiAlert({
           title: "Лимит Competitive",
           message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
-          okText: "Понятно"
+          okText: "Понял"
         });
         return;
       }
