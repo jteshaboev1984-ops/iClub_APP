@@ -1058,8 +1058,14 @@ function bindRatingsUI() {
   }
 
   function canCoursesBack() {
-    return state.courses.stack.length > 1;
-  }
+  const top = getCoursesTopScreen();
+
+  // ✅ special-case: "my-recs" может быть открыт из Profile (stack=1),
+  // но back должен вести обратно в entryTab через popCourses()
+  if (top === "my-recs") return true;
+
+  return state.courses.stack.length > 1;
+}
 
   function renderCoursesStack() {
     const top = getCoursesTopScreen();
@@ -3100,32 +3106,48 @@ function renderMyRecs() {
   // Global UI bindings
   // ---------------------------
   function bindTabbar() {
-    $$(".tabbar .tab").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const tab = btn.dataset.tab;
-        if (!tab) return;
-                 // ✅ Ratings доступен только школьникам
-        if (tab === "ratings") {
-          const p = loadProfile();
-          if (!p || !p.is_school_student) {
-            showToast(t("disabled_not_school"));
-            return;
-          }
-        }
+  let lastTapTs = 0;
 
-        if (state.quizLock === "tour") {
-          showToast("Tour is in progress");
-          return;
-        }
-        if (state.quizLock === "practice") {
-          showToast("Pause practice to leave");
-          return;
-        }
+  const handle = (btn) => {
+    const tab = btn.dataset.tab;
+    if (!tab) return;
 
-        setTab(tab);
-      });
+    // ✅ Ratings доступен только школьникам
+    if (tab === "ratings") {
+      const p = loadProfile();
+      if (!p || !p.is_school_student) {
+        showToast(t("disabled_not_school"));
+        return;
+      }
+    }
+
+    if (state.quizLock === "tour") {
+      showToast("Tour is in progress");
+      return;
+    }
+    if (state.quizLock === "practice") {
+      showToast("Pause practice to leave");
+      return;
+    }
+
+    setTab(tab);
+  };
+
+  $$(".tabbar .tab").forEach(btn => {
+    // ✅ Mobile-friendly: pointerup работает стабильнее, чем click в WebView
+    btn.addEventListener("pointerup", (e) => {
+      const now = Date.now();
+      if (now - lastTapTs < 250) return; // антидубль
+      lastTapTs = now;
+
+      e.preventDefault();
+      handle(btn);
     });
-  }
+
+    // ✅ Desktop fallback
+    btn.addEventListener("click", () => handle(btn));
+  });
+}
 
   function bindTopbar() {
     const backBtn = $("#topbar-back");
