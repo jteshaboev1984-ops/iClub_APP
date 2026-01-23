@@ -3177,7 +3177,6 @@ function renderMyRecs() {
     btn.addEventListener("click", () => handle(btn));
      });
    }
-};
 
   $$(".tabbar .tab").forEach(btn => {
     // ✅ Mobile-friendly: pointerup работает стабильнее, чем click в WebView
