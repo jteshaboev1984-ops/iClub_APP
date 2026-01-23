@@ -1126,8 +1126,8 @@ function popProfile() {
 }
 
 function openProfileSettings() {
-  // ✅ гарантируем, что мы именно в вкладке Profile (иначе generic back не отработает)
-  state.tab = "profile";
+  // ✅ заходим в Profile через setTab, чтобы корректно обновлялся prevTab
+  if (state.tab !== "profile") setTab("profile");
 
   // ✅ гарантируем структуру стека
   state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
@@ -1145,8 +1145,8 @@ function openProfileSettings() {
 }
 
 function openProfileMain() {
-  // ✅ гарантируем, что мы в вкладке Profile
-  state.tab = "profile";
+  // ✅ заходим в Profile через setTab, чтобы корректно обновлялся prevTab
+  if (state.tab !== "profile") setTab("profile");
 
   // ✅ единый источник истины: stack + showProfileScreen()
   replaceProfile("main");
@@ -3296,10 +3296,12 @@ if (state.tab === "profile") {
       }
     
       if (action === "profile-settings-back") {
-       setTab("profile");
-       openProfileMain();       // ✅ единый способ вернуться
-       return;
-      }
+     // ✅ ведём себя как обычный back: из settings -> main профиля
+     if (state.tab !== "profile") setTab("profile");
+     openProfileMain();
+     return;
+   }
+
 
       // ---------- Global navigation actions (available everywhere) ----------
       if (action === "back") { // generic back
