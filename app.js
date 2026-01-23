@@ -1159,8 +1159,8 @@ function renderProfileStack() {
 
   list.innerHTML = "";
 
-  if (!profile) {
-    list.innerHTML = `<div class="empty muted">Сначала регистрация.</div>`;
+    if (!profile) {
+    list.innerHTML = `<div class="empty muted">${t("home_need_registration")}</div>`;
     return;
   }
 
@@ -1175,7 +1175,7 @@ function renderProfileStack() {
   const currentComp = current.filter(s => s.mode === "competitive").map(s => s.key);
   const compCount = currentComp.length;
 
-  if (note) note.textContent = `Можно выбрать максимум 2 предмета в Competitive. Сейчас выбрано: ${compCount}/2.`;
+  if (note) note.textContent = t("settings_competitive_note", { count: compCount });
 
  // ✅ Competitive settings: показываем ТОЛЬКО main-предметы (study/non-main скрываем полностью)
 const mainSubjects = Array.isArray(SUBJECTS) ? SUBJECTS.filter(s => s.type === "main") : [];
@@ -1294,7 +1294,7 @@ if (langWrap) {
       renderProfileMain();
       renderProfileSettings();
 
-      showToast("Язык интерфейса обновлён");
+      showToast(t("toast_lang_updated"));
     };
   });
 }
@@ -1303,7 +1303,8 @@ if (langWrap) {
   const pinnedToggleBtn = document.getElementById("profile-settings-pinned-toggle");
   if (pinnedToggleBtn) {
     const expanded = !!profile?.pinnedExpanded;
-    pinnedToggleBtn.textContent = expanded ? "Скрыть" : "Показать все";
+    pinnedToggleBtn.textContent = expanded ? t("settings_hide") : t("settings_show_all");
+
     pinnedToggleBtn.onclick = () => {
       const fresh = loadProfile();
       if (!fresh) return;
@@ -1331,7 +1332,7 @@ const otherList  = allSubjects.filter(s => !pinnedSet.has(s.key));
 const listToRender = expanded ? [...pinnedList, ...otherList] : pinnedList;
 
     if (!listToRender.length) {
-      pinnedWrap.innerHTML = `<div class="empty muted">Закреплённых предметов пока нет</div>`;
+      pinnedWrap.innerHTML = `<div class="empty muted">${t("settings_no_pinned")}</div>`;
       return;
     }
 
@@ -1344,7 +1345,7 @@ const listToRender = expanded ? [...pinnedList, ...otherList] : pinnedList;
       row.innerHTML = `
   <div>
     <div style="font-weight:800">${escapeHTML(subj.title)}</div>
-    <div class="muted small">${isPinned ? "Закреплён" : "Не закреплён"}</div>
+    <div class="muted small">${isPinned ? t("settings_pinned") : t("settings_not_pinned")}</div>
   </div>
   <label class="switch">
     <input type="checkbox" ${isPinned ? "checked" : ""}>
@@ -1366,7 +1367,7 @@ input?.addEventListener("change", () => {
   renderProfileMain();
   renderProfileSettings();
 
-  showToast(isPinned ? "Убрано из закреплённых" : "Добавлено в закреплённые");
+  showToast(isPinned ? t("toast_removed_pinned") : t("toast_added_pinned"));
 });
 
       pinnedWrap.appendChild(row);
