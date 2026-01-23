@@ -758,14 +758,6 @@ if (actionBtn) {
      syncTopbarLeftState();
      return;
    }
-
-       // ✅ Сдвиг бренда влево, если слева нет кнопки (back скрыт)
-     const syncTopbarLeftState = () => {
-     if (!topbarEl) return;
-     const noLeft = backBtn.style.visibility !== "visible";
-     topbarEl.classList.toggle("is-no-left", noLeft);
-     };
-
      // применяем для default-состояния
      syncTopbarLeftState();
 
