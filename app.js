@@ -3129,7 +3129,7 @@ function renderMyRecs() {
   function bindTabbar() {
   let lastTapTs = 0;
 
-  const handle = (btn) => {
+    const handle = (btn) => {
     const tab = btn.dataset.tab;
     if (!tab) return;
 
@@ -3151,32 +3151,16 @@ function renderMyRecs() {
       return;
     }
 
-        // ✅ Требование: кнопка "Courses" ВСЕГДА открывает All Subjects
+    // ✅ Требование: tab "Courses" всегда открывает All Subjects
     if (tab === "courses") {
       setTab("courses");
-      replaceCourses("all-subjects"); // stack=["all-subjects"] + showCoursesScreen("all-subjects")
+      replaceCourses("all-subjects"); // сбросит stack и покажет All Subjects
       updateTopbarForView("courses");
-      return;
+      return; // ⚠️ важно: дальше НЕ выполняем setTab(tab)
     }
 
     setTab(tab);
   };
-
-  $$(".tabbar .tab").forEach(btn => {
-    // ✅ Mobile-friendly: pointerup работает стабильнее, чем click в WebView
-    btn.addEventListener("pointerup", (e) => {
-      const now = Date.now();
-      if (now - lastTapTs < 250) return; // антидубль
-      lastTapTs = now;
-
-      e.preventDefault();
-      handle(btn);
-    });
-
-    // ✅ Desktop fallback
-    btn.addEventListener("click", () => handle(btn));
-     });
-   }
 
   $$(".tabbar .tab").forEach(btn => {
     // ✅ Mobile-friendly: pointerup работает стабильнее, чем click в WebView
