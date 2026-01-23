@@ -263,29 +263,15 @@
       </section>
 
       <!-- ============ Courses (Tab) ============ -->
-      <section id="view-courses" class="view" data-view="courses" aria-label="Courses">
-        <div class="content">
-          <!-- Courses Stack root -->
-          <div id="courses-stack">
+      <section id="courses-all-subjects" class="stack-screen is-active" data-stack="courses" data-screen="all-subjects">
+  <div class="section">
+    <div class="section-title">Courses</div>
+  </div>
 
-            <!-- Courses: All Subjects -->
-            <section id="courses-all-subjects" class="stack-screen is-active" data-stack="courses" data-screen="all-subjects">
-              <div class="section">
-                <div class="section-title">Courses</div>
-                <p class="muted">Все предметы. Закрепление ≠ соревновательный режим.</p>
-              </div>
-              <div id="subjects-grid" class="cards-grid">
-                <!-- filled by app.js -->
-              </div>
-
-              <div class="section" style="margin-top:14px">
-                <div class="section-title">Навигация</div>
-                <div class="quick-actions">
-                  <button class="btn" type="button" data-action="open-all-subjects">Все предметы</button>
-                  <button class="btn" type="button" data-action="open-resources">Ресурсы</button>
-                </div>
-              </div>
-            </section>
+  <div id="subjects-grid" class="cards-grid">
+    <!-- filled by app.js -->
+  </div>
+</section>
 
             <!-- Subject Hub -->
             <section id="courses-subject-hub" class="stack-screen" data-stack="courses" data-screen="subject-hub">
