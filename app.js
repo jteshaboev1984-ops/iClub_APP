@@ -723,12 +723,14 @@ if (logoEl) logoEl.style.display = "block";
 // notif по умолчанию скрыт (ВАЖНО: display, чтобы не резервировать место справа)
 if (notifBtn) {
   notifBtn.style.display = "none";
+  notifBtn.style.visibility = "hidden"; // ✅ важно: index.html имеет inline visibility:hidden
   notifBtn.dataset.action = "open-notifications";
 }
 
 // action по умолчанию скрыт (ВАЖНО: display, чтобы не резервировать место справа)
 if (actionBtn) {
   actionBtn.style.display = "none";
+  actionBtn.style.visibility = "hidden"; // ✅ index.html тоже имеет inline visibility:hidden
   actionBtn.dataset.action = "topbar-action";
   const icon = actionBtn.querySelector(".icon");
   if (icon) icon.textContent = "⋯";
@@ -743,10 +745,14 @@ if (actionBtn) {
    function syncTopbarLeftState() {
   if (!topbarEl || !backBtn) return;
 
-  const cs = window.getComputedStyle(backBtn);
-  const isHidden = (cs.visibility === "hidden") || (cs.display === "none");
+  // ✅ 1) сначала снимаем "липкий" класс, чтобы back мог вернуться из display:none!important
+  topbarEl.classList.remove("is-no-left");
+  backBtn.style.display = ""; // вернём дефолтный display кнопки (inline-flex из CSS)
 
-  topbarEl.classList.toggle("is-no-left", isHidden);
+  // ✅ 2) решаем по ЯВНО установленному visibility (а не computedStyle, которое ломается из-за is-no-left)
+  const shouldNoLeft = (backBtn.style.visibility === "hidden");
+
+  topbarEl.classList.toggle("is-no-left", shouldNoLeft);
 }
 
        if (viewName === "splash") {
@@ -781,7 +787,10 @@ if (actionBtn) {
   backBtn.style.visibility = "hidden";
   if (logoEl) logoEl.style.display = "block";
 
-  if (notifBtn) notifBtn.style.display = "inline-flex";
+  if (notifBtn) {
+  notifBtn.style.display = "inline-flex";
+  notifBtn.style.visibility = "visible"; // ✅ иначе остаётся hidden из index.html
+}
 
   syncTopbarLeftState();
   return;
@@ -808,11 +817,13 @@ if (actionBtn) {
   // Шестерёнка в topbar справа — только на главном экране профиля
   if (actionBtn) {
     if (top === "main") {
+      actionBtn.style.display = "inline-flex";
       actionBtn.style.visibility = "visible";
       actionBtn.dataset.action = "profile-settings";
       const icon = actionBtn.querySelector(".icon");
       if (icon) icon.textContent = "⚙";
     } else {
+      actionBtn.style.display = "none";
       actionBtn.style.visibility = "hidden";
     }
   }
