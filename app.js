@@ -717,6 +717,15 @@ const actionBtn = $("#topbar-action");
 
 if (!backBtn || !titleEl || !subEl) return;
 
+// ✅ Splash/Loading: topbar не показываем вообще
+if (topbarEl) {
+  if (viewName === "splash") {
+    topbarEl.style.display = "none";
+    return;
+  }
+  topbarEl.style.display = ""; // вернуть дефолт (grid из CSS)
+}
+
 // лого теперь не прячем
 if (logoEl) logoEl.style.display = "block";
 
@@ -3183,16 +3192,23 @@ function bindTabbar() {
     if (!backBtn) return;
 
     backBtn.addEventListener("click", (event) => {
-      event.stopPropagation();
-      if (state.quizLock) return;
+  event.stopPropagation();
+  if (state.quizLock) return;
 
-      const topView = state.viewStack?.[state.viewStack.length - 1];
+  // ✅ Registration: назад = закрыть апп (возвращаться некуда)
+  const regView = document.getElementById("view-registration");
+  if (regView && regView.classList.contains("is-active")) {
+    if (window.Telegram?.WebApp?.close) window.Telegram.WebApp.close();
+    return;
+  }
 
-      // If we are on global screen -> go back in global stack
-      if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
-        globalBack();
-        return;
-      }
+  const topView = state.viewStack?.[state.viewStack.length - 1];
+
+  // If we are on global screen -> go back in global stack
+  if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
+    globalBack();
+    return;
+  }
 
       // ✅ Profile back MUST work even if state.tab accidentally isn't "profile"
 const ps = document.getElementById("profile-settings");
@@ -3753,6 +3769,9 @@ if (action === "tour-next" || action === "tour-submit") {
   }
 
      function boot() {
+    // ✅ показать splash и скрыть topbar (updateTopbarForView("splash") сработает внутри showView)
+    showView("splash");
+
     const profile = loadProfile();
     const lang = profile?.language || getTelegramLang() || "ru";
     window.i18n?.setLang(lang);
@@ -3779,14 +3798,19 @@ if (action === "tour-next" || action === "tour-submit") {
         saveState();
       }
 
+      // ✅ ВАЖНО: если таб courses был активен до reload — НЕ восстанавливаем subject-hub
+      if (state.tab === "courses") {
+        state.courses = state.courses || {};
+        state.courses.stack = ["all-subjects"];
+        saveState();
+      }
+
       // Start at base tab view
       setTab(state.tab);
 
-      // Restore Courses stack if needed
+      // ✅ Safety: на старте courses всегда показывает All Subjects
       if (state.tab === "courses") {
-        renderCoursesStack();
-        if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
-        if (getCoursesTopScreen() === "all-subjects") renderAllSubjects();
+        replaceCourses("all-subjects");
       }
     });
   }
