@@ -3151,8 +3151,33 @@ function renderMyRecs() {
       return;
     }
 
+        // ✅ Требование: кнопка "Courses" ВСЕГДА открывает All Subjects
+    if (tab === "courses") {
+      setTab("courses");
+      replaceCourses("all-subjects"); // stack=["all-subjects"] + showCoursesScreen("all-subjects")
+      updateTopbarForView("courses");
+      return;
+    }
+
     setTab(tab);
   };
+
+  $$(".tabbar .tab").forEach(btn => {
+    // ✅ Mobile-friendly: pointerup работает стабильнее, чем click в WebView
+    btn.addEventListener("pointerup", (e) => {
+      const now = Date.now();
+      if (now - lastTapTs < 250) return; // антидубль
+      lastTapTs = now;
+
+      e.preventDefault();
+      handle(btn);
+    });
+
+    // ✅ Desktop fallback
+    btn.addEventListener("click", () => handle(btn));
+     });
+   }
+};
 
   $$(".tabbar .tab").forEach(btn => {
     // ✅ Mobile-friendly: pointerup работает стабильнее, чем click в WebView
