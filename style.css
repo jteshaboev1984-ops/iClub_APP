@@ -54,7 +54,7 @@ body {
   grid-template-columns: 44px 1fr auto; /* справа теперь группа кнопок */
   align-items: center;
   gap: 8px;
-  padding: calc(10px + var(--safe-top)) 12px 10px;
+  padding: calc(10px + var(--safe-top)) 8px 10px;
   background: rgba(246, 248, 252, 0.75);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
@@ -107,14 +107,18 @@ body {
   color: var(--text);
 }
 
-.topbar-title .title {
+.topbar-title .title{
   font-weight: 700;
   font-size: 16px;
+  line-height: 1.1;
+  white-space: nowrap;
 }
-.topbar-title .subtitle {
+.topbar-title .subtitle{
   font-size: 12px;
   color: var(--muted);
   margin-top: 2px;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 /* ----- Main / Views ----- */
