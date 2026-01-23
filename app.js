@@ -707,6 +707,7 @@ if (tabName === "ratings") {
   // Topbar behavior
   // ---------------------------
   function updateTopbarForView(viewName) {
+const topbarEl = $("#topbar");
 const backBtn = $("#topbar-back");
 const titleEl = $("#topbar-title");
 const subEl = $("#topbar-subtitle");
@@ -832,6 +833,11 @@ if (actionBtn) {
 
       return;
     }
+      // ✅ Правило: если слева нет кнопки (back скрыт) — лого+текст занимают место кнопки
+      if (topbarEl && backBtn) {
+      const noLeft = (backBtn.style.visibility === "hidden");
+      topbarEl.classList.toggle("is-no-left", noLeft);
+   }
   }
 
 // ---------------------------
