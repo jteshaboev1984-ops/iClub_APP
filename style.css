@@ -54,7 +54,7 @@ body {
   grid-template-columns: 44px 1fr auto; /* справа теперь группа кнопок */
   align-items: center;
   gap: 8px;
-  padding: calc(10px + var(--safe-top)) 8px 10px;
+  padding:calc(6px + var(--safe-top)) 12px 6px;
   background: rgba(246, 248, 252, 0.75);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
