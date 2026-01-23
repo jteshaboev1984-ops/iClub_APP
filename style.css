@@ -2341,18 +2341,21 @@ body.modal-open { overflow: hidden; }
 
 .subject-hub-tabs{
   display:flex;
-  gap: 18px;
   align-items:center;
+  justify-content:space-between; /* ✅ равномерно */
+  gap: 0;                        /* ✅ убираем “зажатость” */
   border-bottom: 1px solid rgba(0,0,0,0.08);
   padding: 4px 0 0;
   margin-bottom: 10px;
 }
 
 .hub-tab{
+  flex: 1 1 0;                   /* ✅ каждый таб занимает одинаковую долю */
+  text-align: center;            /* ✅ по центру */
   appearance:none;
   border: 0;
   background: transparent;
-  padding: 10px 0;
+  padding: 12px 0;               /* чуть комфортнее */
   font-weight: 800;
   color: rgba(0,0,0,0.55);
   cursor: pointer;
