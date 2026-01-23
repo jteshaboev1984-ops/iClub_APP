@@ -1046,23 +1046,41 @@ function bindRatingsUI() {
   }
 
   function popCourses() {
-    if (state.quizLock) return;
-    if (state.courses.stack.length > 1) {
-      state.courses.stack.pop();
-      saveState();
-      showCoursesScreen(getCoursesTopScreen());
-      return;
-    }
-    const targetTab = state.courses.entryTab || state.prevTab || "home";
-    setTab(targetTab);
+  if (state.quizLock) return;
+
+  const top = getCoursesTopScreen();
+
+  // ✅ Safety: если тур-экран оказался первым в стеке (stack=1),
+  // то back должен вести в subject-hub, а не выкидывать в Home.
+  const isTourFlowScreen = ["tours", "tour-rules", "tour-quiz", "tour-result", "tour-review"].includes(top);
+  if (isTourFlowScreen && state.courses.stack.length <= 1) {
+    state.courses.stack = ["subject-hub"];
+    saveState();
+    showCoursesScreen("subject-hub");
+    renderSubjectHub();
+    return;
   }
 
-  function canCoursesBack() {
+  if (state.courses.stack.length > 1) {
+    state.courses.stack.pop();
+    saveState();
+    showCoursesScreen(getCoursesTopScreen());
+    return;
+  }
+
+  const targetTab = state.courses.entryTab || state.prevTab || "home";
+  setTab(targetTab);
+}
+
+function canCoursesBack() {
   const top = getCoursesTopScreen();
 
   // ✅ special-case: "my-recs" может быть открыт из Profile (stack=1),
   // но back должен вести обратно в entryTab через popCourses()
   if (top === "my-recs") return true;
+
+  // ✅ туры/экраны тура: даже если stack=1 — back показываем (уйдём в subject-hub)
+  if (["tours", "tour-rules", "tour-quiz", "tour-result", "tour-review"].includes(top)) return true;
 
   return state.courses.stack.length > 1;
 }
