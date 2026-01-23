@@ -2394,3 +2394,16 @@ body.modal-open { overflow: hidden; }
 .cards-grid.subject-hub-bottom .card-btn{
   width: 100%;
 }
+/* Subject Hub lists should behave like Profile nav rows (single column) */
+.subject-hub-list{
+  display:block;
+}
+
+.subject-hub-actions{
+  margin-top: 6px;
+}
+
+.subject-hub-bottom{
+  margin-top: 14px;
+}
+
