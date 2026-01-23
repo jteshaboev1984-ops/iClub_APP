@@ -2251,3 +2251,129 @@ body.modal-open { overflow: hidden; }
   font-weight: 900;
   color: rgba(15,23,42,0.35);
 }
+
+/* ===========================
+   Subject Hub (v2 layout)
+   =========================== */
+.subject-hub-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.subject-hub-title{
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.subject-hub-meta{
+  margin-top: 4px;
+  letter-spacing: 0.2px;
+}
+
+.subject-hub-all-btn{
+  padding: 10px 12px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.subject-hub-panels{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 560px) {
+  .subject-hub-panels{ grid-template-columns: 1fr 1fr; }
+}
+
+.panel-card{
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+.panel-row{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.panel-ico{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(47,111,214,0.12);
+  flex: 0 0 auto;
+}
+
+.mentor-avatar{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(47,111,214,0.12);
+  border: 1px solid rgba(0,0,0,0.06);
+  flex: 0 0 auto;
+}
+
+.panel-col{ min-width: 0; }
+
+.panel-kicker{
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: rgba(47,111,214,0.85);
+  margin-bottom: 2px;
+}
+
+.panel-title{
+  font-weight: 800;
+}
+
+.subject-hub-tabs{
+  display:flex;
+  gap: 18px;
+  align-items:center;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  padding: 4px 0 0;
+  margin-bottom: 10px;
+}
+
+.hub-tab{
+  appearance:none;
+  border: 0;
+  background: transparent;
+  padding: 10px 0;
+  font-weight: 800;
+  color: rgba(0,0,0,0.55);
+  cursor: pointer;
+  position: relative;
+}
+
+.hub-tab.is-active{
+  color: var(--primary);
+}
+
+.hub-tab.is-active::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-1px;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 999px;
+}
+
+.subject-hub-actions{
+  margin-top: 6px;
+}
