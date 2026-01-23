@@ -3684,16 +3684,58 @@ if (action === "tour-next" || action === "tour-submit") {
   // ---------------------------
   // Boot
   // ---------------------------
-  function boot() {
+    // ---------------------------
+  // Splash: wait for critical images
+  // ---------------------------
+  function preloadImages(urls, { timeoutMs = 6000 } = {}) {
+    const unique = Array.from(new Set((urls || []).filter(Boolean)));
+
+    const tasks = unique.map((url) => new Promise((resolve) => {
+      const img = new Image();
+      const done = () => resolve({ url, ok: true });
+
+      img.onload = done;
+      img.onerror = () => resolve({ url, ok: false });
+
+      // ⚠️ чтобы не зависнуть навсегда на плохом файле
+      const timer = setTimeout(() => resolve({ url, ok: false, timeout: true }), timeoutMs);
+
+      img.onload = () => { clearTimeout(timer); done(); };
+      img.onerror = () => { clearTimeout(timer); resolve({ url, ok: false }); };
+
+      img.src = url;
+    }));
+
+    return Promise.all(tasks);
+  }
+
+  function preloadAppImages() {
+    // ✅ критичные картинки, которые видны сразу
+    const urls = [
+      "logo.png",
+      "asset/informatics.png.png",
+      "asset/economics.png.png",
+      "asset/biology.png.png",
+      "asset/chemistry.png.png",
+      "asset/mathematics.png.png",
+    ];
+
+    return preloadImages(urls, { timeoutMs: 6000 });
+  }
+
+     function boot() {
     const profile = loadProfile();
     const lang = profile?.language || getTelegramLang() || "ru";
     window.i18n?.setLang(lang);
-    applyStaticI18n(); 
+    applyStaticI18n();
 
     const statusEl = $("#splash-status");
     if (statusEl) statusEl.textContent = t("loading");
 
-    setTimeout(() => {
+    // ✅ минимум показываем splash чуть-чуть, чтобы не “мигало”
+    const minDelay = new Promise((r) => setTimeout(r, 250));
+
+    Promise.all([preloadAppImages(), minDelay]).then(() => {
       if (!isRegistered()) {
         showView("registration");
         bindRegistration();
@@ -3717,7 +3759,7 @@ if (action === "tour-next" || action === "tour-submit") {
         if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
         if (getCoursesTopScreen() === "all-subjects") renderAllSubjects();
       }
-    }, 250);
+    });
   }
 
   function bindUI() {
