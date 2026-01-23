@@ -2377,3 +2377,8 @@ body.modal-open { overflow: hidden; }
 .subject-hub-actions{
   margin-top: 6px;
 }
+.subject-hub-bottom{
+  margin-top: 14px;
+  display:flex;
+  justify-content:flex-start;
+}
