@@ -741,10 +741,13 @@ if (actionBtn) {
 
      // ✅ sync: если back скрыт — двигаем бренд на место кнопки (CSS .topbar.is-no-left уже есть)
    function syncTopbarLeftState() {
-     if (!topbarEl || !backBtn) return;
-     const vis = window.getComputedStyle(backBtn).visibility;
-     topbarEl.classList.toggle("is-no-left", vis === "hidden");
-   }
+  if (!topbarEl || !backBtn) return;
+
+  const cs = window.getComputedStyle(backBtn);
+  const isHidden = (cs.visibility === "hidden") || (cs.display === "none");
+
+  topbarEl.classList.toggle("is-no-left", isHidden);
+}
 
        if (viewName === "splash") {
      titleEl.textContent = t("app_name");
