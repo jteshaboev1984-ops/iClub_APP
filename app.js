@@ -720,15 +720,15 @@ if (!backBtn || !titleEl || !subEl) return;
 // лого теперь не прячем
 if (logoEl) logoEl.style.display = "block";
 
-// notif по умолчанию скрыт
+// notif по умолчанию скрыт (ВАЖНО: display, чтобы не резервировать место справа)
 if (notifBtn) {
-  notifBtn.style.visibility = "hidden";
+  notifBtn.style.display = "none";
   notifBtn.dataset.action = "open-notifications";
 }
 
-// action по умолчанию скрыт
+// action по умолчанию скрыт (ВАЖНО: display, чтобы не резервировать место справа)
 if (actionBtn) {
-  actionBtn.style.visibility = "hidden";
+  actionBtn.style.display = "none";
   actionBtn.dataset.action = "topbar-action";
   const icon = actionBtn.querySelector(".icon");
   if (icon) icon.textContent = "⋯";
@@ -778,7 +778,7 @@ if (actionBtn) {
   backBtn.style.visibility = "hidden";
   if (logoEl) logoEl.style.display = "block";
 
-  if (notifBtn) notifBtn.style.visibility = "visible";
+  if (notifBtn) notifBtn.style.display = "inline-flex";
 
   syncTopbarLeftState();
   return;
