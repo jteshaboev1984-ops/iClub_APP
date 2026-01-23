@@ -1839,24 +1839,19 @@ input?.addEventListener("change", () => {
    `;
 
     const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "btn primary home-competitive-btn";
-  btn.textContent = t("home_active_tour");
-  btn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const profile = loadProfile();
-    const eligibility = canOpenActiveTours(profile, userSubject.key);
-    if (!eligibility.ok) {
-      toastToursDenied(eligibility.reason);
-      return;
-    }
-    state.courses.subjectKey = userSubject.key;
-    saveState();
-    setTab("courses");
-    replaceCourses("subject-hub");
-    renderSubjectHub();
-    pushCourses("tours"); 
-  });
+btn.type = "button";
+btn.className = "btn primary home-competitive-btn";
+btn.textContent = "Открыть предмет";
+btn.addEventListener("click", (e) => {
+  e.stopPropagation();
+
+  // ✅ Home: сразу открываем Subject Hub (без промежуточных туров)
+  state.courses.subjectKey = userSubject.key;
+  saveState();
+  setTab("courses");
+  replaceCourses("subject-hub");
+  renderSubjectHub();
+});
 
   el.appendChild(btn);
   return el;
