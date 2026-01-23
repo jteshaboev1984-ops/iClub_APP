@@ -67,6 +67,10 @@ body {
   gap: 10px;
   min-width: 0;
 }
+/* ✅ Topbar: если слева нет кнопки (back скрыт), бренд (лого+текст) занимает место кнопки */
+.topbar.is-no-left .topbar-brand{
+  grid-column: 1 / 3; /* занимает 44px + 1fr, т.е. уезжает на левый край */
+}
 .topbar-right{
   display:flex;
   align-items:center;
