@@ -510,23 +510,23 @@ body {
 
 /* ✅ Home Active Subject images (5 main subjects) */
 .home-competitive-card[data-subject="informatics"] .home-competitive-hero-img{
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='500'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%235aa7ff'/><stop offset='1' stop-color='%232a5bd7'/></linearGradient></defs><rect width='1200' height='500' rx='48' fill='url(%23g)'/><g fill='white' opacity='0.9'><path d='M370 160h460v200H370z' fill='none' stroke='white' stroke-width='14' opacity='0.8'/><circle cx='420' cy='390' r='12'/><circle cx='780' cy='390' r='12'/><path d='M520 260h160' stroke='white' stroke-width='14' opacity='0.8'/></g></svg>");
+  background-image:url("asset/informatics.png.png");
 }
 
 .home-competitive-card[data-subject="economics"] .home-competitive-hero-img{
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='500'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%2328d3c7'/><stop offset='1' stop-color='%230b6bd6'/></linearGradient></defs><rect width='1200' height='500' rx='48' fill='url(%23g)'/><g fill='white' opacity='0.9'><path d='M380 360V220h90v140zm140 0V190h90v170zm140 0V250h90v110zm140 0V170h90v190z'/><path d='M380 380h440' stroke='white' stroke-width='14' opacity='0.8'/></g></svg>");
+  background-image:url("asset/economics.png.png");
 }
 
 .home-competitive-card[data-subject="biology"] .home-competitive-hero-img{
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='500'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%2357d38c'/><stop offset='1' stop-color='%231a7bd6'/></linearGradient></defs><rect width='1200' height='500' rx='48' fill='url(%23g)'/><g fill='none' stroke='white' stroke-width='14' opacity='0.85'><path d='M520 150c120 60-120 140 0 200s-120 140 0 200'/><path d='M680 150c-120 60 120 140 0 200s120 140 0 200'/><path d='M560 190h280M560 270h280M560 350h280M560 430h280' opacity='0.35'/></g></svg>");
+  background-image:url("asset/biology.png.png");
 }
 
 .home-competitive-card[data-subject="chemistry"] .home-competitive-hero-img{
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='500'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23ff7aa2'/><stop offset='1' stop-color='%235a78ff'/></linearGradient></defs><rect width='1200' height='500' rx='48' fill='url(%23g)'/><g fill='white' opacity='0.9'><path d='M560 140h80v90l110 190c18 32-5 70-42 70H492c-37 0-60-38-42-70l110-190z'/><path d='M520 360h160' opacity='0.6'/><circle cx='520' cy='320' r='14'/><circle cx='680' cy='300' r='10'/></g></svg>");
+  background-image:url("asset/chemistry.png.png");
 }
 
 .home-competitive-card[data-subject="mathematics"] .home-competitive-hero-img{
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='500'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23ffc14d'/><stop offset='1' stop-color='%233a63ff'/></linearGradient></defs><rect width='1200' height='500' rx='48' fill='url(%23g)'/><g fill='none' stroke='white' stroke-width='14' opacity='0.85'><path d='M430 360c60-160 140-160 200 0s140 160 200 0'/><path d='M420 180h360'/><path d='M600 140v240'/></g></svg>");
+  background-image:url("asset/mathematics.png.png");
 }
 
 .home-competitive-body{
