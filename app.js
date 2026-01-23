@@ -1760,17 +1760,20 @@ input?.addEventListener("change", () => {
     pinned.slice(0, 4).forEach((s, idx) => pinnedWrap.appendChild(homePinnedTileEl(s, idx)));
   }
 
-   function homeCompetitiveCardEl(userSubject) {
+    function homeCompetitiveCardEl(userSubject) {
   const subj = subjectByKey(userSubject.key);
   const title = subj ? subj.title : userSubject.key;
 
-    const el = document.createElement("div");
+  const el = document.createElement("div");
   el.className = "home-competitive-card";
+
+  // ✅ нужно для CSS-картинок по предмету
+  el.dataset.subject = String(userSubject.key || "").toLowerCase();
 
   el.innerHTML = `
     <div class="home-competitive-badge">ACTIVE</div>
     <div class="home-competitive-hero">
-      <div class="home-competitive-graph"></div>
+      <div class="home-competitive-hero-img" aria-hidden="true"></div>
     </div>
     <div class="home-competitive-body">
       <div class="home-competitive-module">MODULE 3</div>
