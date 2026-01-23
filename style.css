@@ -2377,8 +2377,20 @@ body.modal-open { overflow: hidden; }
 .subject-hub-actions{
   margin-top: 6px;
 }
-.subject-hub-bottom{
+
+/* Bottom "All Subjects" button must be full-width like other cards */
+.cards-grid.subject-hub-bottom{
   margin-top: 14px;
-  display:flex;
-  justify-content:flex-start;
+  grid-template-columns: 1fr; /* force single column */
+}
+
+/* keep single column even on desktop where .cards-grid becomes 2 columns */
+@media (min-width: 560px) {
+  .cards-grid.subject-hub-bottom{
+    grid-template-columns: 1fr;
+  }
+}
+
+.cards-grid.subject-hub-bottom .card-btn{
+  width: 100%;
 }
