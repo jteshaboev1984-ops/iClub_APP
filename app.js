@@ -1082,6 +1082,9 @@ function canCoursesBack() {
   // ✅ туры/экраны тура: даже если stack=1 — back показываем (уйдём в subject-hub)
   if (["tours", "tour-rules", "tour-quiz", "tour-result", "tour-review"].includes(top)) return true;
 
+  // ✅ Subject Hub: даже если stack=1 — back должен быть доступен (уйдём в entryTab/prevTab/home)
+  if (top === "subject-hub") return true; 
+
   return state.courses.stack.length > 1;
 }
 
