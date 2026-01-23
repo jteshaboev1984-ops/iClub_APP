@@ -754,14 +754,10 @@ if (actionBtn) {
     if (["resources", "news", "notifications", "community", "about", "certificates", "archive"].includes(viewName)) {
       backBtn.style.visibility = canGlobalBack() ? "visible" : "hidden";
 
-      if (viewName === "resources") titleEl.textContent = "Ресурсы";
-      if (viewName === "news") titleEl.textContent = "Новости";
-      if (viewName === "notifications") titleEl.textContent = "Уведомления";
-      if (viewName === "community") titleEl.textContent = "Комьюнити";
-      if (viewName === "about") titleEl.textContent = "О проекте";
-      if (viewName === "certificates") titleEl.textContent = "Сертификаты";
-      if (viewName === "archive") titleEl.textContent = "Архив";
-      return;
+        // ✅ Рядом с лого всегда бренд как на Home/Profile
+     titleEl.textContent = t("app_name");
+     subEl.textContent = "Smarter together";
+     return;
     }
 
     if (viewName === "home") {
@@ -776,10 +772,12 @@ if (actionBtn) {
 }
 
     if (viewName === "ratings") {
-      titleEl.textContent = "Ratings";
-      backBtn.style.visibility = "hidden";
-      return;
-    }
+  titleEl.textContent = t("app_name");
+  subEl.textContent = "Smarter together";
+  backBtn.style.visibility = "hidden";
+  return;
+}
+
 
     if (viewName === "profile") {
   const top = getProfileTopScreen();
@@ -810,34 +808,16 @@ if (actionBtn) {
       const canGoBack = canCoursesBack();
       backBtn.style.visibility = (state.quizLock ? "hidden" : (canGoBack ? "visible" : "hidden"));
 
-      const top = getCoursesTopScreen();
-      if (top === "all-subjects") titleEl.textContent = "Courses";
-      if (top === "subject-hub") titleEl.textContent = "Subject";
-      if (top === "lessons") titleEl.textContent = "Lessons";
-      if (top === "video") titleEl.textContent = "Video";
-      if (top === "practice-start") titleEl.textContent = t("practice");
-      if (top === "practice-quiz") titleEl.textContent = t("practice");
-      if (top === "practice-result") titleEl.textContent = t("practice_result_title");
-      if (top === "practice-review") titleEl.textContent = "Разбор ошибок";
-      if (top === "practice-recs") titleEl.textContent = "Рекомендации";
-      if (top === "tours") titleEl.textContent = "Tours";
-      if (top === "tour-rules") titleEl.textContent = t("tour_rules_title");
-      if (top === "tour-quiz") titleEl.textContent = "Tour";
-      if (top === "tour-result") titleEl.textContent = "Tour Result";
-      if (top === "tour-review") titleEl.textContent = "Разбор тура";
-      if (top === "books") titleEl.textContent = "Books";
-      if (top === "my-recs") titleEl.textContent = t("practice_my_recs_title");
-
-      const subj = subjectByKey(state.courses.subjectKey);
-      if (subj && top !== "all-subjects") subEl.textContent = subj.title;
-
+            // ✅ Рядом с лого всегда бренд как на Home/Profile
+      titleEl.textContent = t("app_name");
+      subEl.textContent = "Smarter together";
       return;
     }
-      // ✅ Правило: если слева нет кнопки (back скрыт) — лого+текст занимают место кнопки
+      // ✅ Правило: если back реально скрыт — бренд занимает его место
       if (topbarEl && backBtn) {
-      const noLeft = (backBtn.style.visibility === "hidden");
-      topbarEl.classList.toggle("is-no-left", noLeft);
-   }
+      const vis = window.getComputedStyle(backBtn).visibility;
+      topbarEl.classList.toggle("is-no-left", vis === "hidden");
+    }
   }
 
 // ---------------------------
