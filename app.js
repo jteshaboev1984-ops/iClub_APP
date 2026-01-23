@@ -739,26 +739,46 @@ if (actionBtn) {
     subEl.textContent = "Smarter together";
     backBtn.style.visibility = "hidden";
 
-    if (viewName === "splash") {
-      titleEl.textContent = t("app_name");
-      return;
-    }
+     // ✅ sync: если back скрыт — двигаем бренд на место кнопки (CSS .topbar.is-no-left уже есть)
+   function syncTopbarLeftState() {
+     if (!topbarEl || !backBtn) return;
+     const vis = window.getComputedStyle(backBtn).visibility;
+     topbarEl.classList.toggle("is-no-left", vis === "hidden");
+   }
 
-    if (viewName === "registration") {
-      titleEl.textContent = t("reg_title");
-      backBtn.style.visibility = "hidden";
-      return;
-    }
+       if (viewName === "splash") {
+     titleEl.textContent = t("app_name");
+     syncTopbarLeftState();
+     return;
+   }
+
+       if (viewName === "registration") {
+     titleEl.textContent = t("reg_title");
+     backBtn.style.visibility = "hidden";
+     syncTopbarLeftState();
+     return;
+   }
+
+       // ✅ Сдвиг бренда влево, если слева нет кнопки (back скрыт)
+     const syncTopbarLeftState = () => {
+     if (!topbarEl) return;
+     const noLeft = backBtn.style.visibility !== "visible";
+     topbarEl.classList.toggle("is-no-left", noLeft);
+     };
+
+     // применяем для default-состояния
+     syncTopbarLeftState();
 
     // Global screens (resources/news/...)
     if (["resources", "news", "notifications", "community", "about", "certificates", "archive"].includes(viewName)) {
-      backBtn.style.visibility = canGlobalBack() ? "visible" : "hidden";
+  backBtn.style.visibility = canGlobalBack() ? "visible" : "hidden";
 
-        // ✅ Рядом с лого всегда бренд как на Home/Profile
-     titleEl.textContent = t("app_name");
-     subEl.textContent = "Smarter together";
-     return;
-    }
+  // ✅ Рядом с лого всегда бренд как на Home/Profile
+  titleEl.textContent = t("app_name");
+  subEl.textContent = "Smarter together";
+  syncTopbarLeftState();
+  return;
+}
 
     if (viewName === "home") {
   titleEl.textContent = t("app_name");
@@ -768,6 +788,7 @@ if (actionBtn) {
 
   if (notifBtn) notifBtn.style.visibility = "visible";
 
+  syncTopbarLeftState();
   return;
 }
 
@@ -775,16 +796,16 @@ if (actionBtn) {
   titleEl.textContent = t("app_name");
   subEl.textContent = "Smarter together";
   backBtn.style.visibility = "hidden";
+  syncTopbarLeftState();
   return;
 }
-
 
     if (viewName === "profile") {
   const top = getProfileTopScreen();
 
   // В topbar всегда бренд
   titleEl.textContent = t("app_name");
-  subEl.textContent = (top === "settings") ? "Smarter together" : "";
+  subEl.textContent = "Smarter together";
 
   // Back показываем только в settings (и он будет работать через action="back")
   backBtn.style.visibility = (top === "settings") ? "visible" : "hidden";
@@ -800,25 +821,21 @@ if (actionBtn) {
       actionBtn.style.visibility = "hidden";
     }
   }
+   syncTopbarLeftState();
+   return;
+ }
 
-  return;
+       if (viewName === "courses") {
+     const canGoBack = canCoursesBack();
+     backBtn.style.visibility = (state.quizLock ? "hidden" : (canGoBack ? "visible" : "hidden"));
+
+     // ✅ Рядом с лого всегда бренд как на Home/Profile
+     titleEl.textContent = t("app_name");
+     subEl.textContent = "Smarter together";
+     syncTopbarLeftState();
+     return;
+   }
 }
-
-    if (viewName === "courses") {
-      const canGoBack = canCoursesBack();
-      backBtn.style.visibility = (state.quizLock ? "hidden" : (canGoBack ? "visible" : "hidden"));
-
-            // ✅ Рядом с лого всегда бренд как на Home/Profile
-      titleEl.textContent = t("app_name");
-      subEl.textContent = "Smarter together";
-      return;
-    }
-      // ✅ Правило: если back реально скрыт — бренд занимает его место
-      if (topbarEl && backBtn) {
-      const vis = window.getComputedStyle(backBtn).visibility;
-      topbarEl.classList.toggle("is-no-left", vis === "hidden");
-    }
-  }
 
 // ---------------------------
 // Ratings (Leaderboard) — UI skeleton now, DB later
