@@ -3124,12 +3124,12 @@ function renderMyRecs() {
   }
 
   // ---------------------------
-  // Global UI bindings
-  // ---------------------------
-  function bindTabbar() {
+// Global UI bindings
+// ---------------------------
+function bindTabbar() {
   let lastTapTs = 0;
 
-    const handle = (btn) => {
+  const handle = (btn) => {
     const tab = btn.dataset.tab;
     if (!tab) return;
 
@@ -3151,12 +3151,12 @@ function renderMyRecs() {
       return;
     }
 
-    // ✅ Требование: tab "Courses" всегда открывает All Subjects
+    // ✅ Требование: кнопка нижнего таба “Courses” всегда открывает All Subjects
     if (tab === "courses") {
       setTab("courses");
-      replaceCourses("all-subjects"); // сбросит stack и покажет All Subjects
+      replaceCourses("all-subjects"); // сбрасывает stack + показывает all-subjects
       updateTopbarForView("courses");
-      return; // ⚠️ важно: дальше НЕ выполняем setTab(tab)
+      return;
     }
 
     setTab(tab);
