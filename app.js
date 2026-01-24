@@ -616,13 +616,27 @@ function getReadingRefs(subjectKey, topic) {
   ];
 
   function showView(viewName) {
-    VIEWS.forEach(v => {
-      const el = $(`#view-${v}`);
-      if (!el) return;
-      el.classList.toggle("is-active", v === viewName);
-    });
-    updateTopbarForView(viewName);
-  }
+  VIEWS.forEach(v => {
+    const el = $(`#view-${v}`);
+    if (!el) return;
+    el.classList.toggle("is-active", v === viewName);
+  });
+
+  // ✅ FIX: Telegram/Chrome may restore scroll AFTER we change DOM.
+  // Do a deferred reset to beat scroll restoration/anchoring.
+  const resetScroll = () => {
+    try {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    } catch (e) {}
+  };
+  resetScroll();
+  requestAnimationFrame(resetScroll);
+  setTimeout(resetScroll, 0);
+
+  updateTopbarForView(viewName);
+}
 
   function setTab(tabName) {
     if (!["home", "courses", "ratings", "profile"].includes(tabName)) tabName = "home";
@@ -1134,6 +1148,17 @@ function showProfileScreen(screenName) {
   }
 
   updateTopbarForView("profile");
+     // ✅ FIX: same scroll-restoration issue when switching inside profile stack
+  const resetScroll = () => {
+    try {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    } catch (e) {}
+  };
+  resetScroll();
+  requestAnimationFrame(resetScroll);
+  setTimeout(resetScroll, 0);
 }
 
 function pushProfile(screenName) {
