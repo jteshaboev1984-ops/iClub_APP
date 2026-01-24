@@ -40,11 +40,15 @@ body {
 /* ----- App Shell ----- */
 .app {
   min-height: 100vh;
+  height: 100dvh;              /* ✅ фикс “пустого скролла” на коротких экранах */
   display: flex;
   flex-direction: column;
-  padding-bottom: 0; /* ✅ иначе app всегда выше экрана и появляется пустой скролл */
+  padding-bottom: 0;
 }
 
+.main{
+  min-height: 0;               /* ✅ чтобы flex-ребёнок не раздувал высоту */
+}
 /* ----- Topbar ----- */
 .topbar {
   position: sticky;
@@ -1697,7 +1701,7 @@ body.modal-open { overflow: hidden; }
    ========================================================= */
 
 .leaderboard{
-  padding-bottom: 92px; /* ✅ только под My Rank bar; tabbar уже учтён в .main */
+  padding-bottom: 64px; /* ✅ меньше пустоты; остаётся запас под My Rank bar */
 }
 
 .lb-header{
