@@ -2043,15 +2043,6 @@ head.innerHTML = `
 const imgEl = head.querySelector(".catalog-ico-img");
 setImgWithFallback(imgEl, subjectIconCandidates(s.key));
 
-// fallback: если нет .png.png — пробуем .png
-const imgEl = head.querySelector(".catalog-thumb-img");
-if (imgEl) {
-  imgEl.onerror = () => {
-    imgEl.onerror = null;
-    imgEl.src = imgPng;
-  };
-}
-
   head.addEventListener("click", () => {
     // "Открыть" — без изменения профиля, как в контракте
     state.courses.subjectKey = s.key;
