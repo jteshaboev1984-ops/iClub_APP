@@ -1905,6 +1905,51 @@ btn.addEventListener("click", (e) => {
   const mainSubjects = SUBJECTS.filter(s => s.type === "main");
 const additionalSubjects = SUBJECTS.filter(s => s.type !== "main");
 
+       // ---- Main catalog filter (All / Competitive / Study)
+  state.courses = state.courses || {};
+  state.courses.mainFilter = state.courses.mainFilter || "all"; // all | competitive | study
+
+  const renderMainFilterRow = () => {
+    const row = document.createElement("div");
+    row.className = "grid-section-filters";
+    row.innerHTML = `
+      <button type="button" class="chip ${state.courses.mainFilter === "all" ? "is-active" : ""}" data-main-filter="all">All</button>
+      <button type="button" class="chip ${state.courses.mainFilter === "competitive" ? "is-active" : ""}" data-main-filter="competitive">Competitive</button>
+      <button type="button" class="chip ${state.courses.mainFilter === "study" ? "is-active" : ""}" data-main-filter="study">Study</button>
+    `;
+
+    row.querySelectorAll("[data-main-filter]").forEach(btn => {
+      const v = btn.getAttribute("data-main-filter");
+      btn.addEventListener("pointerup", (e) => {
+        e.preventDefault();
+        state.courses.mainFilter = v;
+        saveState();
+        renderAllSubjects();
+      });
+      btn.addEventListener("click", () => {
+        state.courses.mainFilter = v;
+        saveState();
+        renderAllSubjects();
+      });
+    });
+
+    grid.appendChild(row);
+  };
+
+  const isPinnedKey = (key) => {
+    const us = userSubjects.find(x => x.key === key) || null;
+    return !!us?.pinned;
+  };
+
+  const isCompetitiveKey = (key) => {
+    const us = userSubjects.find(x => x.key === key) || null;
+    return (us?.mode || "study") === "competitive";
+  };
+
+  const sortPinnedFirst = (list) => {
+    return list.slice().sort((a, b) => Number(isPinnedKey(b.key)) - Number(isPinnedKey(a.key)));
+  };
+
 const appendSectionTitle = (text) => {
   const el = document.createElement("div");
   el.className = "grid-section-title";
@@ -1929,13 +1974,12 @@ const appendSubjectCard = (s) => {
     <div class="catalog-row">
       <div>
         <div class="card-title" style="margin:0">${escapeHTML(s.title)}</div>
-        <div class="muted small">${s.type === "main" ? "Main (Cambridge)" : "Additional"}</div>
       </div>
       <div class="catalog-badges">
-        ${isPinned ? `<span class="badge badge-pin">Pinned</span>` : ``}
-        <span class="badge ${isComp ? "badge-comp" : "badge-study"}">${isComp ? "Competitive" : "Study"}</span>
-      </div>
-    </div>
+     ${isPinned ? `<span class="badge badge-pin">Pinned</span>` : ``}
+     ${s.type === "main" && isComp ? `<span class="badge badge-comp">Competitive</span>` : ``}
+   </div>
+ </div>
   `;
 
   head.addEventListener("click", () => {
@@ -1992,15 +2036,28 @@ const appendSubjectCard = (s) => {
   grid.appendChild(card);
 };
 
-if (mainSubjects.length) {
-  appendSectionTitle("Main (Cambridge)");
-  mainSubjects.forEach(appendSubjectCard);
-}
+  // ---- MAIN section + filter row + pinned-first + filter mode
+  if (mainSubjects.length) {
+    appendSectionTitle("Main (Cambridge)");
+    renderMainFilterRow();
 
-   if (additionalSubjects.length) {
-     appendSectionTitle("Additional");
-     additionalSubjects.forEach(appendSubjectCard);
+    let mainOut = mainSubjects.slice();
+    if (state.courses.mainFilter === "competitive") {
+      mainOut = mainOut.filter(s => isCompetitiveKey(s.key));
+    } else if (state.courses.mainFilter === "study") {
+      mainOut = mainOut.filter(s => !isCompetitiveKey(s.key));
     }
+    mainOut = sortPinnedFirst(mainOut);
+
+    mainOut.forEach(appendSubjectCard);
+  }
+
+  // ---- ADDITIONAL section (always Study by spec), pinned-first
+  if (additionalSubjects.length) {
+    appendSectionTitle("Additional");
+    const addOut = sortPinnedFirst(additionalSubjects);
+    addOut.forEach(appendSubjectCard);
+  }
 }
 
   function openSubjectHub(subjectKey) {
