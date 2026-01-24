@@ -1902,85 +1902,105 @@ btn.addEventListener("click", (e) => {
   const userSubjects = Array.isArray(profile.subjects) ? profile.subjects : [];
   const competitiveCount = userSubjects.filter(s => s.mode === "competitive").length;
 
-  SUBJECTS.forEach(s => {
-    const us = userSubjects.find(x => x.key === s.key) || null;
-    const isPinned = !!us?.pinned;
-    const mode = us?.mode || "study"; // default display
-    const isComp = mode === "competitive";
+  const mainSubjects = SUBJECTS.filter(s => s.type === "main");
+const additionalSubjects = SUBJECTS.filter(s => s.type !== "main");
 
-    const card = document.createElement("div");
-    card.className = "catalog-card";
+const appendSectionTitle = (text) => {
+  const el = document.createElement("div");
+  el.className = "grid-section-title";
+  el.textContent = text;
+  grid.appendChild(el);
+};
 
-    // Top clickable area: open hub (but does NOT change profile)
-    const head = document.createElement("button");
-    head.type = "button";
-    head.className = "catalog-head";
-    head.innerHTML = `
-      <div class="catalog-row">
-        <div>
-          <div class="card-title" style="margin:0">${escapeHTML(s.title)}</div>
-          <div class="muted small">${s.type === "main" ? "Main (Cambridge)" : "Additional"}</div>
-        </div>
-        <div class="catalog-badges">
-          ${isPinned ? `<span class="badge badge-pin">Pinned</span>` : ``}
-          <span class="badge ${isComp ? "badge-comp" : "badge-study"}">${isComp ? "Competitive" : "Study"}</span>
-        </div>
+const appendSubjectCard = (s) => {
+  const us = userSubjects.find(x => x.key === s.key) || null;
+  const isPinned = !!us?.pinned;
+  const mode = us?.mode || "study"; // default display
+  const isComp = mode === "competitive";
+
+  const card = document.createElement("div");
+  card.className = "catalog-card";
+
+  // Top clickable area: open hub (but does NOT change profile)
+  const head = document.createElement("button");
+  head.type = "button";
+  head.className = "catalog-head";
+  head.innerHTML = `
+    <div class="catalog-row">
+      <div>
+        <div class="card-title" style="margin:0">${escapeHTML(s.title)}</div>
+        <div class="muted small">${s.type === "main" ? "Main (Cambridge)" : "Additional"}</div>
       </div>
-    `;
+      <div class="catalog-badges">
+        ${isPinned ? `<span class="badge badge-pin">Pinned</span>` : ``}
+        <span class="badge ${isComp ? "badge-comp" : "badge-study"}">${isComp ? "Competitive" : "Study"}</span>
+      </div>
+    </div>
+  `;
 
-    head.addEventListener("click", () => {
-      // "Открыть" — без изменения профиля, как в контракте
-      state.courses.subjectKey = s.key;
-      saveState();
-      pushCourses("subject-hub");
-      renderSubjectHub();
-    });
-
-        // Actions row
-    const actions = document.createElement("div");
-    actions.className = "catalog-actions";
-
-    // 1) Open (primary)
-    const btnOpen = document.createElement("button");
-    btnOpen.type = "button";
-    btnOpen.className = "mini-btn";
-    btnOpen.textContent = "Открыть";
-    btnOpen.addEventListener("click", (e) => {
-      e.stopPropagation();
-      state.courses.subjectKey = s.key;
-      saveState();
-      pushCourses("subject-hub");
-      renderSubjectHub();
-    });
-
-    // 2) Pin/Unpin (secondary)
-    const btnPin = document.createElement("button");
-    btnPin.type = "button";
-    btnPin.className = "mini-btn ghost";
-    btnPin.textContent = isPinned ? "Открепить" : "Закрепить";
-    btnPin.addEventListener("click", (e) => {
-      e.stopPropagation();
-
-      const updated = togglePinnedSubject(profile, s.key);
-      if (!updated) {
-        showToast(t("error_try_again"));
-        return;
-      }
-
-      saveProfile(updated);
-      renderHome();
-      renderAllSubjects();
-      showToast(isPinned ? "Откреплено" : "Закреплено");
-    });
-
-    actions.appendChild(btnOpen);
-    actions.appendChild(btnPin);
-
-    card.appendChild(head);
-    card.appendChild(actions);
-
-    grid.appendChild(card);
+  head.addEventListener("click", () => {
+    // "Открыть" — без изменения профиля, как в контракте
+    state.courses.subjectKey = s.key;
+    saveState();
+    pushCourses("subject-hub");
+    renderSubjectHub();
   });
+
+  // Actions row
+  const actions = document.createElement("div");
+  actions.className = "catalog-actions";
+
+  // 1) Open (primary)
+  const btnOpen = document.createElement("button");
+  btnOpen.type = "button";
+  btnOpen.className = "mini-btn";
+  btnOpen.textContent = "Открыть";
+  btnOpen.addEventListener("click", (e) => {
+    e.stopPropagation();
+    state.courses.subjectKey = s.key;
+    saveState();
+    pushCourses("subject-hub");
+    renderSubjectHub();
+  });
+
+  // 2) Pin/Unpin (secondary)
+  const btnPin = document.createElement("button");
+  btnPin.type = "button";
+  btnPin.className = "mini-btn ghost";
+  btnPin.textContent = isPinned ? "Открепить" : "Закрепить";
+  btnPin.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    const updated = togglePinnedSubject(profile, s.key);
+    if (!updated) {
+      showToast(t("error_try_again"));
+      return;
+    }
+
+    saveProfile(updated);
+    renderHome();
+    renderAllSubjects();
+    showToast(isPinned ? "Откреплено" : "Закреплено");
+  });
+
+  actions.appendChild(btnOpen);
+  actions.appendChild(btnPin);
+
+  card.appendChild(head);
+  card.appendChild(actions);
+
+  grid.appendChild(card);
+};
+
+if (mainSubjects.length) {
+  appendSectionTitle("Main (Cambridge)");
+  mainSubjects.forEach(appendSubjectCard);
+}
+
+   if (additionalSubjects.length) {
+     appendSectionTitle("Additional");
+     additionalSubjects.forEach(appendSubjectCard);
+    }
 }
 
   function openSubjectHub(subjectKey) {
