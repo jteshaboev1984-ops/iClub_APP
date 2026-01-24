@@ -1339,9 +1339,9 @@ body.modal-open { overflow: hidden; }
 }
 
 .badge-pin{
-  background: rgba(15, 23, 42, 0.04);
-  border-color: rgba(15, 23, 42, 0.10);
-  color: rgba(15, 23, 42, 0.70);
+  background: rgba(47, 111, 214, 0.10);
+  border-color: rgba(47, 111, 214, 0.28);
+  color: var(--primary);
 }
 
 .catalog-hint{
