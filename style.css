@@ -1329,6 +1329,41 @@ body.modal-open { overflow: hidden; }
   justify-content: space-between;
   gap: 12px;
 }
+/* Catalog card: icon + title layout */
+.catalog-left{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.catalog-text{
+  min-width: 0;
+}
+
+.catalog-thumb{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(47, 111, 214, 0.10);
+  border: 1px solid rgba(47, 111, 214, 0.14);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex: 0 0 auto;
+}
+
+.catalog-thumb-img{
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  display:block;
+}
+
+/* Chips container under "Courses" */
+.courses-filter-row{
+  margin-top: 10px;
+}
 
 .catalog-badges{
   display:flex;
