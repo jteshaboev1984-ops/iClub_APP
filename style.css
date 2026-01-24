@@ -2410,3 +2410,16 @@ body.modal-open { overflow: hidden; }
   margin-top: 14px;
 }
 
+/* Courses: section headers inside grid (Main / Additional) */
+.grid-section-title{
+  grid-column: 1 / -1;
+  margin-top: 6px;
+  padding: 10px 2px 6px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  color: rgba(0,0,0,0.75);
+}
+
+.grid-section-title:first-child{
+  margin-top: 0;
+}
