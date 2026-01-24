@@ -717,14 +717,19 @@ const actionBtn = $("#topbar-action");
 
 if (!backBtn || !titleEl || !subEl) return;
 
-// ✅ Splash/Loading: topbar не показываем вообще
+// ✅ Splash/Loading: topbar и tabbar не показываем вообще
+const tabbarEl = $("#tabbar");
+
 if (topbarEl) {
   if (viewName === "splash") {
     topbarEl.style.display = "none";
+    if (tabbarEl) tabbarEl.style.display = "none";
     return;
   }
   topbarEl.style.display = ""; // вернуть дефолт (grid из CSS)
 }
+
+if (tabbarEl) tabbarEl.style.display = ""; // вернуть таббар после splash
 
 // лого теперь не прячем
 if (logoEl) logoEl.style.display = "block";
@@ -1905,15 +1910,19 @@ btn.addEventListener("click", (e) => {
   const mainSubjects = SUBJECTS.filter(s => s.type === "main");
 const additionalSubjects = SUBJECTS.filter(s => s.type !== "main");
 
-       // ---- Main catalog filter (All / Competitive / Study)
+       // ---- Main catalog filter (Competitive / Study)
   state.courses = state.courses || {};
-  state.courses.mainFilter = state.courses.mainFilter || "all"; // all | competitive | study
+
+  // ✅ миграция: если в старом стейте осталось "all" — считаем это "study"
+  if (!state.courses.mainFilter || state.courses.mainFilter === "all") {
+    state.courses.mainFilter = "study"; // competitive | study
+    saveState();
+  }
 
   const renderMainFilterRow = () => {
     const row = document.createElement("div");
     row.className = "grid-section-filters";
     row.innerHTML = `
-      <button type="button" class="chip ${state.courses.mainFilter === "all" ? "is-active" : ""}" data-main-filter="all">All</button>
       <button type="button" class="chip ${state.courses.mainFilter === "competitive" ? "is-active" : ""}" data-main-filter="competitive">Competitive</button>
       <button type="button" class="chip ${state.courses.mainFilter === "study" ? "is-active" : ""}" data-main-filter="study">Study</button>
     `;
@@ -2052,8 +2061,9 @@ const appendSubjectCard = (s) => {
     mainOut.forEach(appendSubjectCard);
   }
 
-  // ---- ADDITIONAL section (always Study by spec), pinned-first
-  if (additionalSubjects.length) {
+    // ---- ADDITIONAL section (always Study by spec), pinned-first
+  // ✅ По UX: при фильтре Competitive доп. предметы не показываем
+  if (state.courses.mainFilter !== "competitive" && additionalSubjects.length) {
     appendSectionTitle("Additional");
     const addOut = sortPinnedFirst(additionalSubjects);
     addOut.forEach(appendSubjectCard);
