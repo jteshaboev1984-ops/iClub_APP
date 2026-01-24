@@ -1891,7 +1891,40 @@ btn.addEventListener("click", (e) => {
   // ---------------------------
   // Courses: All Subjects rendering
   // ---------------------------
-  function renderAllSubjects() {
+  function setImgWithFallback(imgEl, candidates) {
+  if (!imgEl) return;
+  const list = (candidates || []).filter(Boolean);
+  if (!list.length) return;
+
+  let i = 0;
+  const next = () => {
+    i += 1;
+    if (i < list.length) imgEl.src = list[i];
+  };
+
+  imgEl.onerror = () => next();
+  imgEl.src = list[0];
+}
+
+function subjectIconCandidates(subjectKey) {
+  const k = String(subjectKey || "").trim();
+
+  // ✅ основной формат (у тебя main уже так загружены)
+  const a = [
+    `asset/${k}.png.png`,
+    `asset/${k}.png`,
+    `asset/${k}.PNG`,
+  ];
+
+  // ✅ спец-кейс: у тебя файл IELTS.png (с заглавными)
+  if (k.toLowerCase() === "ielts") {
+    a.push("asset/IELTS.png");
+  }
+
+  return a;
+}
+
+   function renderAllSubjects() {
   const grid = $("#subjects-grid");
   if (!grid) return;
 
@@ -1991,9 +2024,10 @@ const imgPng = `asset/${imgKey}.png`;
 head.innerHTML = `
   <div class="catalog-row">
     <div class="catalog-left">
-      <div class="catalog-thumb" aria-hidden="true">
-        <img class="catalog-thumb-img" src="${imgPng2}" alt="">
+      <div class="catalog-ico" aria-hidden="true">
+        <img class="catalog-ico-img" alt="" loading="lazy">
       </div>
+
       <div class="catalog-text">
         <div class="card-title" style="margin:0">${escapeHTML(s.title)}</div>
       </div>
@@ -2005,6 +2039,9 @@ head.innerHTML = `
     </div>
   </div>
 `;
+// ✅ icon image with robust fallback (.png.png -> .png -> .PNG + IELTS special)
+const imgEl = head.querySelector(".catalog-ico-img");
+setImgWithFallback(imgEl, subjectIconCandidates(s.key));
 
 // fallback: если нет .png.png — пробуем .png
 const imgEl = head.querySelector(".catalog-thumb-img");
