@@ -45,8 +45,15 @@ body {
   padding-bottom: calc(64px + var(--safe-bottom)); /* ✅ резерв под фикс-tabbar */
 }
 
+/* ✅ Ключевой фикс: скроллим не body, а main */
 .main{
+  flex: 1 1 auto;              /* ✅ занимает всё доступное место */
   min-height: 0;               /* ✅ чтобы flex-ребёнок не раздувал высоту */
+  overflow-y: auto;            /* ✅ включаем скролл */
+  -webkit-overflow-scrolling: touch;
+
+  /* базовые отступы контента (как было раньше “нормально”) */
+  padding: 10px 12px 18px;
 }
 /* ----- Topbar ----- */
 .topbar {
