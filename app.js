@@ -616,18 +616,13 @@ function getReadingRefs(subjectKey, topic) {
   ];
 
   function showView(viewName) {
-  VIEWS.forEach(v => {
-    const el = $(`#view-${v}`);
-    if (!el) return;
-    el.classList.toggle("is-active", v === viewName);
-  });
-
-  // ✅ ВАЖНО: теперь скролл не у body, а у #main — сбрасываем при смене экрана
-  const mainEl = document.getElementById("main");
-  if (mainEl) mainEl.scrollTop = 0;
-
-  updateTopbarForView(viewName);
-}
+    VIEWS.forEach(v => {
+      const el = $(`#view-${v}`);
+      if (!el) return;
+      el.classList.toggle("is-active", v === viewName);
+    });
+    updateTopbarForView(viewName);
+  }
 
   function setTab(tabName) {
     if (!["home", "courses", "ratings", "profile"].includes(tabName)) tabName = "home";
