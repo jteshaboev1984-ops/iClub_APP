@@ -6,15 +6,15 @@
 /* ----- CSS Reset (lightweight) ----- */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-
 body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   line-height: 1.35;
   color: var(--text);
   background: var(--bg);
-  overflow: hidden; /* ✅ ключевое: больше не скроллим body */
+  overflow-x: hidden;
 }
+
 /* ----- Theme ----- */
 :root {
   --primary: #2F6FD6;
@@ -39,22 +39,12 @@ body {
 
 /* ----- App Shell ----- */
 .app {
-  height: 100dvh; /* ✅ одна высота, без конфликтов */
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-bottom: calc(64px + var(--safe-bottom)); /* ✅ резерв под фикс-tabbar */
+  padding-bottom: calc(72px + var(--safe-bottom));
 }
 
-/* ✅ Ключевой фикс: скроллим не body, а main */
-.main{
-  flex: 1 1 auto;              /* ✅ занимает всё доступное место */
-  min-height: 0;               /* ✅ чтобы flex-ребёнок не раздувал высоту */
-  overflow-y: auto;            /* ✅ включаем скролл */
-  -webkit-overflow-scrolling: touch;
-
-  /* базовые отступы контента (как было раньше “нормально”) */
-  padding: 10px 12px 18px;
-}
 /* ----- Topbar ----- */
 .topbar {
   position: sticky;
@@ -152,10 +142,7 @@ body {
 /* ----- Main / Views ----- */
 .main {
   flex: 1;
-  min-height: 0;          /* ✅ важно для flex-scroll */
-  overflow-y: auto;       /* ✅ скролл теперь здесь */
-  -webkit-overflow-scrolling: touch;
-  padding: 10px 12px 18px; /* ✅ обычный нижний отступ, без “таббар-подушки” */
+  padding: 10px 12px 18px;
 }
 
 .view { display: none; }
@@ -186,7 +173,7 @@ body {
 
 /* ----- Splash ----- */
 .center {
-  min-height: calc(100dvh - 120px); /* ✅ */
+  min-height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1710,7 +1697,7 @@ body.modal-open { overflow: hidden; }
    ========================================================= */
 
 .leaderboard{
-  padding-bottom: 64px; /* ✅ меньше пустоты; остаётся запас под My Rank bar */
+  padding-bottom: calc(86px + var(--safe-bottom)); /* место под My Rank + tabbar */
 }
 
 .lb-header{
@@ -2538,20 +2525,4 @@ body.modal-open { overflow: hidden; }
   height: 30px;
   object-fit: contain;
   display:block;
-}
-/* ===== Courses: remove subject icons in catalog cards ===== */
-#view-courses .catalog-ico{
-  display: none !important;
-}
-#view-courses .catalog-left{
-  gap: 0 !important;
-}
-/* ===== Tabbar: SVG alignment + prevent sticky tap highlight ===== */
-.tab .tab-ico svg { display: block; }
-
-.tabbar .tab{
-  -webkit-tap-highlight-color: transparent;
-}
-.tabbar .tab:focus{
-  outline: none;
 }
