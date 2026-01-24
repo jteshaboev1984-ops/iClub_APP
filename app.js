@@ -1,3922 +1,2544 @@
 /* =========================================================
-   iClub WebApp — app.js (v1 skeleton, aligned to new index.html)
-   Plain HTML/CSS/JS, no build tools
+   iClub WebApp — base styles (v1)
+   Plain HTML/CSS/JS, mobile-first, "adult top-app" feel
    ========================================================= */
 
-(() => {
-  "use strict";
-
-  // ---------------------------
-  // Helpers
-  // ---------------------------
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
-  function escapeHTML(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-  function safeJsonParse(s, fallback) {
-  if (s === null || s === undefined || s === "") return fallback;
-  try { return JSON.parse(s); } catch { return fallback; }
-}
-
-  function nowISO() {
-    return new Date().toISOString();
-  }
-
-  // ---------------------------
-  // Storage keys
-  // ---------------------------
-  const LS = {
-  state: "iclub_state_v1",
-  profile: "iclub_profile_v1",
-  practiceDraft: "iclub_practice_draft_v1",
-  myRecs: "iclub_my_recs_v1"
-};
-
-
-  // ---------------------------
-  // i18n
-  // ---------------------------
-  const t = (key, vars) => (window.i18n?.t ? window.i18n.t(key, vars) : key);
-
-function applyStaticI18n() {
-    document.querySelectorAll("[data-i18n]").forEach(el => {
-      const key = el.dataset.i18n;
-      if (key) el.textContent = t(key);
-    });
-    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
-      const key = el.dataset.i18nPlaceholder;
-      if (key) el.setAttribute("placeholder", t(key));
-    });
-  }
-   
-  // ---------------------------
-  // Telegram WebApp integration (safe)
-  // ---------------------------
-  const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
-  if (tg) {
-    try {
-      tg.ready();
-      tg.expand();
-    } catch {}
-  }
-
-  function getTelegramLang() {
-    const code = tg?.initDataUnsafe?.user?.language_code;
-    return window.i18n?.normalizeLang ? window.i18n.normalizeLang(code) : "ru";
-  }
+/* ----- CSS Reset (lightweight) ----- */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  line-height: 1.35;
+  color: var(--text);
+  background: var(--bg);
+  overflow-x: hidden;
+}
+
+/* ----- Theme ----- */
+:root {
+  --primary: #2F6FD6;
+  --primary-2: #1E56B3;
+  --bg: #F6F8FC;
+  --card: #FFFFFF;
+  --text: #0F172A;
+  --muted: #64748B;
+  --border: rgba(15, 23, 42, 0.10);
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --shadow-sm: 0 6px 18px rgba(15, 23, 42, 0.08);
 
-  function openExternal(url) {
-    // Prefer Telegram openTelegramLink/openLink if available
-    try {
-      if (tg?.openTelegramLink && /^(https?:\/\/)?t\.me\//i.test(url)) {
-        tg.openTelegramLink(url.replace(/^https?:\/\//i, ""));
-        return;
-      }
-      if (tg?.openLink) {
-        tg.openLink(url);
-        return;
-      }
-    } catch {}
-    window.open(url, "_blank", "noopener,noreferrer");
-  }
+  --danger: #DC2626;
+  --ok: #16A34A;
+
+  --radius: 16px;
+  --radius-sm: 12px;
+
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+/* ----- App Shell ----- */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0; /* ✅ иначе app всегда выше экрана и появляется пустой скролл */
+}
+
+/* ----- Topbar ----- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 44px 1fr auto; /* слева back, центр бренд, справа кнопки */
+  align-items: center;
+  gap: 6px;
 
-  // ---------------------------
-  // App state
-  // ---------------------------
-  const defaultState = {
-  tab: "home", // home | courses | ratings | profile
-  prevTab: "home",
-  viewStack: ["home"], // global screens stack
-  courses: {
-    stack: ["all-subjects"],
-    subjectKey: null,
-    lessonId: null,
-    entryTab: "home" 
-  },
-  profile: {
-    stack: ["main"] // main | settings
-  },
-  quizLock: null
-};
-
-  let state = loadState();
-
-  function loadState() {
-    const saved = safeJsonParse(localStorage.getItem(LS.state), null);
-    if (!saved) return structuredClone(defaultState);
-
-    // soft merge
-    const merged = {
-      ...structuredClone(defaultState),
-      ...saved,
-      courses: { ...structuredClone(defaultState.courses), ...(saved.courses || {}) },
-      profile: { ...structuredClone(defaultState.profile), ...(saved.profile || {}) }
-    };
-    // Ensure viewStack sane
-    if (!Array.isArray(merged.viewStack) || merged.viewStack.length === 0) merged.viewStack = ["home"];
-    if (!["home", "courses", "ratings", "profile"].includes(merged.tab)) merged.tab = "home";
-    if (!["home", "courses", "ratings", "profile"].includes(merged.prevTab)) merged.prevTab = merged.tab || "home";
-    if (!["home", "courses", "ratings", "profile"].includes(merged.courses.entryTab)) {
-      merged.courses.entryTab = merged.prevTab || "home";
-    }
-     return merged;
-  }
+  /* ⬇️ было слишком “толсто” + справа лишний отступ */
+  padding: calc(6px + var(--safe-top)) 2px 6px;
 
-  function saveState() {
-    localStorage.setItem(LS.state, JSON.stringify(state));
-  }
+  background: rgba(246, 248, 252, 0.75);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
 
-  // ---------------------------
-  // Profile (local demo)
-  // later replace with Supabase
-  // ---------------------------
-  function loadProfile() {
-    return safeJsonParse(localStorage.getItem(LS.profile), null);
-  }
+/* Topbar brand */
+.topbar-brand{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  min-width: 0;
+}
 
-  function saveProfile(profile) {
-    localStorage.setItem(LS.profile, JSON.stringify(profile));
-  }
+/* ✅ Ключевой фикс: когда back скрыт — убираем колонку 44px полностью */
+.topbar.is-no-left{
+  grid-template-columns: 0px 1fr auto;
+}
 
-   function togglePinnedSubject(profile, subjectKey) {
-  if (!profile) return null;
-  const p = structuredClone(profile);
-  p.subjects = Array.isArray(p.subjects) ? p.subjects : [];
+/* ✅ и сам back реально убираем из layout, чтобы не резервировал место */
+.topbar.is-no-left #topbar-back{
+  display: none !important;
+}
+
+/* ✅ бренд занимает место слева */
+.topbar.is-no-left .topbar-brand{
+  grid-column: 1 / 3;
+}
+
+.topbar-right{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+
+  /* чуть плотнее, чтобы колокольчик ближе к краю */
+  gap: 4px;
+}
+
+.topbar-logo{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  display: block; /* лого всегда видно, управление через JS больше не нужно */
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.icon-btn:active { transform: translateY(1px); }
+
+.icon {
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.topbar-title .title{
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.topbar-title .subtitle{
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* ----- Main / Views ----- */
+.main {
+  flex: 1;
+  padding: 10px 12px calc(18px + 64px + var(--safe-bottom)); /* ✅ место под tabbar */
+}
+
+.view { display: none; }
+.view.is-active { display: block; }
+
+.content { max-width: 860px; margin: 0 auto; }
 
-  const idx = p.subjects.findIndex(s => s.key === subjectKey);
+/* ----- Typography ----- */
+.h1 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
 
-  if (idx === -1) {
-    // если предмет не был добавлен — добавляем как study+pinned
-    p.subjects.push({ key: subjectKey, mode: "study", pinned: true });
-    return p;
-  }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
 
-  // уже есть — переключаем pinned
-  p.subjects[idx].pinned = !p.subjects[idx].pinned;
-
-  // Если выключили pinned и предмет был чисто учебным и "ничем не нужен" —
-  // в v1 оставляем его (чтобы не терять режим/историю). Удаление сделаем позже, если потребуется.
-  return p;
-}
-
-  // ---------------------------
-  // Demo subjects (keys match index.html selects)
-  // ---------------------------
-  const SUBJECTS = [
-    { key: "informatics", title: "Информатика", type: "main" },
-    { key: "economics", title: "Экономика", type: "main" },
-    { key: "biology", title: "Биология", type: "main" },
-    { key: "chemistry", title: "Химия", type: "main" },
-    { key: "mathematics", title: "Математика", type: "main" },
-
-    { key: "english_a1", title: "English (A1)", type: "additional" },
-    { key: "english_a2", title: "English (A2)", type: "additional" },
-    { key: "english_b1", title: "English (B1)", type: "additional" },
-    { key: "sat", title: "SAT", type: "additional" },
-    { key: "ielts", title: "IELTS", type: "additional" }
-  ];
-
-  function subjectByKey(key) {
-    return SUBJECTS.find(s => s.key === key) || null;
-  }
+.section { margin: 18px 0; }
+.section-title {
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  margin: 0 0 10px;
+  color: var(--text);
+}
+
+/* ----- Splash ----- */
+.center {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 12px;
+  text-align: center;
+}
 
-     // ---------------------------
-  // Availability rules (v1: local profile-based)
-  // ---------------------------
-  function isSchoolUser(profile) {
-    return !!profile?.is_school_student;
-  }
+.logo-wrap {
+  width: 126px;
+  height: 126px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(47,111,214,0.12), rgba(47,111,214,0.02));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.logo {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+
+.splash-title {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+/* ----- Home header ----- */
+.home-header { margin: 6px 0 14px; }
+.home-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.home-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  object-fit: contain;
+}
 
-  function getUserSubject(profile, subjectKey) {
-    return profile?.subjects?.find(s => s.key === subjectKey) || null;
-  }
+/* ----- Cards / Grids ----- */
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
 
-  function isMainSubjectKey(subjectKey) {
-    return subjectByKey(subjectKey)?.type === "main";
-  }
+@media (min-width: 560px) {
+  .cards-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.card, .card-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.card { padding: 14px; }
+
+.card-title {
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.card-btn {
+  padding: 14px;
+  text-align: left;
+  cursor: pointer;
+  display: block;
+}
 
-  function isAdditionalSubjectKey(subjectKey) {
-    return subjectByKey(subjectKey)?.type === "additional";
-  }
+.card-btn:active { transform: translateY(1px); }
+
+/* ----- Lists ----- */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.list-item {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+.list-item:active { transform: translateY(1px); }
+
+.empty {
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px dashed rgba(15, 23, 42, 0.20);
+  background: rgba(255,255,255,0.7);
+}
+
+/* ----- Forms ----- */
+.form { display: flex; flex-direction: column; gap: 12px; }
 
-  function isCompetitiveForUser(profile, subjectKey) {
-    return getUserSubject(profile, subjectKey)?.mode === "competitive";
-  }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: 12px; font-weight: 700; color: var(--text); }
 
-  // Tours eligibility (ACTIVE tours): school + main + competitive
-  function canOpenActiveTours(profile, subjectKey) {
-    if (!profile) return { ok: false, reason: "no_profile" };
-    if (!isSchoolUser(profile)) return { ok: false, reason: "not_school" };
-    if (!isMainSubjectKey(subjectKey)) return { ok: false, reason: "not_main" };
-    if (!isCompetitiveForUser(profile, subjectKey)) return { ok: false, reason: "not_competitive" };
-    return { ok: true, reason: "ok" };
-  }
+.input {
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.visually-hidden{
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
-  function toastToursDenied(reason) {
-    if (reason === "not_school") { showToast(t("disabled_not_school")); return; }
-    if (reason === "not_competitive") { showToast(t("disabled_not_competitive")); return; }
-    if (reason === "not_main") { showToast("Туры доступны только по основным предметам."); return; }
-    showToast(t("not_available"));
-  }
+/* ----- Registration (new layout) ----- */
+.reg-header{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
 
-     // ---------------------------
-  // Tour schedule (v1: local stub, later from Supabase)
-  // ---------------------------
-  // Формат: YYYY-MM-DD (локальное время пользователя)
-  const TOUR_SCHEDULE = [
-    // Пример (позже заменим на реальные даты из базы/админки):
-    // { subjectKey: "economics", tourNo: 1, start: "2026-02-01", end: "2026-02-07" },
-  ];
-
-  function parseLocalDateStart(yyyy_mm_dd) {
-    const [y, m, d] = String(yyyy_mm_dd).split("-").map(Number);
-    return new Date(y, (m - 1), d, 0, 0, 0, 0).getTime();
-  }
+.reg-header-title{
+  font-weight: 900;
+  font-size: 18px;
+}
 
-  function parseLocalDateEnd(yyyy_mm_dd) {
-    const [y, m, d] = String(yyyy_mm_dd).split("-").map(Number);
-    return new Date(y, (m - 1), d, 23, 59, 59, 999).getTime();
-  }
+.reg-back{
+  width: 36px;
+  height: 36px;
+}
 
-  function getActiveTourEntry(subjectKey) {
-    const now = Date.now();
-    const list = TOUR_SCHEDULE.filter(x => x.subjectKey === subjectKey);
-    for (const e of list) {
-      const s = parseLocalDateStart(e.start);
-      const t = parseLocalDateEnd(e.end);
-      if (now >= s && now <= t) return e;
-    }
-    return null;
-  }
+.reg-progress{
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 12px;
+}
 
-  function hasAnyActiveTourNow() {
-    const now = Date.now();
-    for (const e of TOUR_SCHEDULE) {
-      const s = parseLocalDateStart(e.start);
-      const t = parseLocalDateEnd(e.end);
-      if (now >= s && now <= t) return true;
-    }
-    return false;
-  }
+.reg-progress-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+}
 
-  function canOpenArchiveNow() {
-    // По правилам: архив открывается только когда активный тур завершён (то есть активных сейчас нет)
-    return !hasAnyActiveTourNow();
-  }
+.reg-progress-bar{
+  margin-top: 8px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(47,111,214,0.12);
+  overflow: hidden;
+}
 
-     // ---------------------------
-  // Practice v1 (10Q: 3/5/2 + MCQ+INPUT + per-question timer + attempts history)
-  // ---------------------------
-
-  const PRACTICE_CONFIG = {
-    total: 10,
-    dist: { easy: 3, medium: 5, hard: 2 },
-    // таймер по сложности (сек)
-    timeByDifficulty: { easy: 45, medium: 60, hard: 90 },
-    // максимум сохраняемых попыток
-    keepLastAttempts: 5
-  };
-
-  // Мини-банк вопросов для практики (позже заменим на базу).
-  // ВАЖНО: добавляй/расширяй — но структура должна быть стабильной.
-  // type: "mcq" | "input"
-  // inputKind: "numeric" | "letter"
-  const PRACTICE_BANK = {
-    economics: [
-      {
-        id: "eco_p_001",
-        topic: "Basics",
-        difficulty: "easy",
-        type: "mcq",
-        question: "Что такое альтернативная стоимость?",
-        options: ["Стоимость производства", "Стоимость упущенной лучшей альтернативы", "Цена товара", "Налог на товар"],
-        correctIndex: 1,
-        explanation: "Альтернативная стоимость — ценность лучшей упущенной альтернативы при выборе."
-      },
-      {
-        id: "eco_p_002",
-        topic: "Elasticity",
-        difficulty: "medium",
-        type: "input",
-        inputKind: "numeric",
-        inputHint: "Введите число (например 1.5)",
-        question: "Если %ΔQ = 10% и %ΔP = 5%, чему равна эластичность спроса по цене (по модулю)?",
-        correctAnswer: "2",
-        explanation: "Ed = |%ΔQ / %ΔP| = 10/5 = 2."
-      },
-      {
-        id: "eco_p_003",
-        topic: "Demand & Supply",
-        difficulty: "hard",
-        type: "input",
-        inputKind: "letter",
-        inputHint: "Введите 1 букву (не a/b/c/d)",
-        question: "Какая буква обычно обозначает равновесную цену? (одна буква)",
-        correctAnswer: "P",
-        explanation: "Чаще всего цену обозначают P (price), равновесную — Pe."
-      }
-    ],
-    mathematics: [
-      {
-        id: "math_p_001",
-        topic: "Algebra",
-        difficulty: "easy",
-        type: "mcq",
-        question: "Чему равно (x^2) * (x^3)?",
-        options: ["x^5", "x^6", "x^9", "x^1"],
-        correctIndex: 0,
-        explanation: "При умножении степеней с одинаковым основанием показатели складываются: 2+3=5."
-      },
-      {
-        id: "math_p_002",
-        topic: "Functions",
-        difficulty: "medium",
-        type: "input",
-        inputKind: "numeric",
-        inputHint: "Введите число",
-        question: "Если f(x)=2x+3, чему равно f(4)?",
-        correctAnswer: "11",
-        explanation: "2*4+3=11."
-      }
-    ],
-    chemistry: [
-      {
-        id: "chem_p_001",
-        topic: "Basics",
-        difficulty: "easy",
-        type: "mcq",
-        question: "Какой заряд у протона?",
-        options: ["-1", "0", "+1", "+2"],
-        correctIndex: 2,
-        explanation: "Протон имеет заряд +1."
-      }
-    ],
-    biology: [
-      {
-        id: "bio_p_001",
-        topic: "Cells",
-        difficulty: "easy",
-        type: "mcq",
-        question: "Основная функция митохондрий?",
-        options: ["Фотосинтез", "Синтез белка", "Производство АТФ", "Хранение ДНК"],
-        correctIndex: 2,
-        explanation: "Митохондрии — основной источник АТФ."
-      }
-    ],
-    informatics: [
-      {
-        id: "inf_p_001",
-        topic: "Algorithms",
-        difficulty: "easy",
-        type: "mcq",
-        question: "Какой алгоритм обычно имеет сложность O(n log n)?",
-        options: ["Binary search", "Merge sort", "Linear search", "Bubble sort (worst)"],
-        correctIndex: 1,
-        explanation: "Merge sort обычно O(n log n)."
-      }
-    ]
-  };
-
-// ---------------------------
-// Reading map (v1 skeleton)
-// Later we will fill from конкретных книг по предметам.
-// Key idea: topic -> list of reading refs
-// ---------------------------
-const READING_MAP = {
-  // economics: {
-  //   "Unemployment": [
-  //     { title: "AS Level Economics Coursebook", ref: "Ch 19", pages: "p. 210–225" }
-  //   ]
-  // }
-};
-
-function getReadingRefs(subjectKey, topic) {
-  const s = READING_MAP?.[subjectKey] || null;
-  if (!s) return [];
-  const refs = s?.[topic] || [];
-  return Array.isArray(refs) ? refs : [];
-}
-   
-  function getPracticeBankForSubject(subjectKey) {
-    return PRACTICE_BANK[subjectKey] || [];
-  }
+.reg-progress-bar span{
+  display:block;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #6AA0FF);
+}
 
-  function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
+.reg-toggle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
 
-  function normalizeDifficulty(d) {
-    const x = String(d || "").toLowerCase();
-    if (x === "easy" || x === "medium" || x === "hard") return x;
-    return "medium";
-  }
+.reg-subject-card{
+  padding: 14px;
+}
 
-  function pickN(pool, n) {
-    const s = shuffle(pool);
-    return s.slice(0, Math.max(0, n));
-  }
+.chip-group{
+  display:flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
 
-    function buildPracticeSet(subjectKey) {
-    const bank = getPracticeBankForSubject(subjectKey).map(q => ({ ...q, difficulty: normalizeDifficulty(q.difficulty) }));
-
-    // группируем по сложности
-    const by = {
-      easy: bank.filter(q => q.difficulty === "easy"),
-      medium: bank.filter(q => q.difficulty === "medium"),
-      hard: bank.filter(q => q.difficulty === "hard")
-    };
-
-    // если банк пустой — делаем fallback (чтобы практика не падала)
-    if (bank.length === 0) {
-      return Array.from({ length: PRACTICE_CONFIG.total }).map((_, i) => ({
-        id: `fallback_${subjectKey}_${i + 1}`,
-        topic: "General",
-        difficulty: i < 3 ? "easy" : (i < 8 ? "medium" : "hard"),
-        type: "mcq",
-        question: `Вопрос ${i + 1} (demo)`,
-        options: ["A", "B", "C", "D"],
-        correctIndex: 0,
-        explanation: "Демо-вопрос. Позже заменим на банк/базу."
-      }));
-    }
-
-    const set = [
-      ...pickN(by.easy.length ? by.easy : bank, PRACTICE_CONFIG.dist.easy),
-      ...pickN(by.medium.length ? by.medium : bank, PRACTICE_CONFIG.dist.medium),
-      ...pickN(by.hard.length ? by.hard : bank, PRACTICE_CONFIG.dist.hard)
-    ];
-
-    // если вдруг не набрали 10 — добиваем из общего банка
-    const need = PRACTICE_CONFIG.total - set.length;
-    if (need > 0) {
-      const used = new Set(set.map(x => x.id));
-      const rest = bank.filter(x => !used.has(x.id));
-      set.push(...pickN(rest.length ? rest : bank, need));
-    }
-
-    // “лесенка” сложности: easy -> medium -> hard
-    const order = { easy: 1, medium: 2, hard: 3 };
-    set.sort((a, b) => (order[a.difficulty] - order[b.difficulty]));
-
-    return set.slice(0, PRACTICE_CONFIG.total);
-  }
+.chip-btn{
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
 
-  function practiceStorageKey(subjectKey) {
-    return `practice_history_v1:${subjectKey}`;
-  }
+.chip-btn.is-active{
+  border-color: rgba(47,111,214,0.45);
+  background: rgba(47,111,214,0.12);
+  color: var(--primary);
+}
 
-  function loadPracticeHistory(subjectKey) {
-    try {
-      const raw = localStorage.getItem(practiceStorageKey(subjectKey));
-      const parsed = raw ? JSON.parse(raw) : null;
-      if (!parsed) return { best: null, last: [] };
-      return {
-        best: parsed.best || null,
-        last: Array.isArray(parsed.last) ? parsed.last : []
-      };
-    } catch {
-      return { best: null, last: [] };
-    }
-  }
+.reg-consent{
+  margin-top: 6px;
+}
 
-  function savePracticeHistory(subjectKey, data) {
-    try {
-      localStorage.setItem(practiceStorageKey(subjectKey), JSON.stringify(data));
-    } catch {}
-  }
+.reg-submit{
+  height: 48px;
+  font-size: 15px;
+  font-weight: 900;
+}
 
-  function updatePracticeHistory(subjectKey, attempt) {
-    const h = loadPracticeHistory(subjectKey);
-    const last = [attempt, ...(h.last || [])].slice(0, PRACTICE_CONFIG.keepLastAttempts);
+/* ----- Home (new layout) ----- */
+.home-appbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin: 4px 0 14px;
+}
 
-    let best = h.best;
-    if (!best || (attempt.percent > best.percent) || (attempt.percent === best.percent && attempt.durationSec < best.durationSec)) {
-      best = attempt;
-    }
+.home-brand-mini{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  font-weight: 900;
+}
 
-    savePracticeHistory(subjectKey, { best, last });
-    return { best, last };
-  }
+.home-brand-ico{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+}
 
-  function formatDateTime(ts) {
-    try {
-      const d = new Date(ts);
-      return d.toLocaleString();
-    } catch {
-      return "";
-    }
-  }
+.home-appbar-actions{
+  display:flex;
+  gap: 8px;
+}
 
-  function isValidInputAnswer(q, value) {
-    const v = String(value ?? "").trim();
-    if (!v) return false;
-
-    if (q.inputKind === "numeric") {
-      // допускаем число с точкой/запятой
-      return /^-?\d+([.,]\d+)?$/.test(v);
-    }
-
-    if (q.inputKind === "letter") {
-      // ровно 1 буква, запрещаем a/b/c/d (чтобы не путали с MCQ)
-      if (!/^[A-Za-zА-Яа-я]$/.test(v)) return false;
-      const low = v.toLowerCase();
-      if (low === "a" || low === "b" || low === "c" || low === "d") return false;
-      return true;
-    }
-
-    return true;
-  }
+.icon-btn.ghost{
+  background: #fff;
+  border-color: var(--border);
+}
 
-  // ---------------------------
-  // Regions / Districts (v1 demo)
-  // Later: load from DB
-  // ---------------------------
-  const REGIONS = {
-    "Tashkent": ["Chilonzor", "Yunusobod", "Mirzo Ulug‘bek", "Shaykhontohur", "Yakkasaroy"],
-    "Samarkand": ["Samarkand city", "Urgut", "Kattakurgan", "Payariq"],
-    "Fergana": ["Fergana city", "Margilan", "Kokand", "Quva"],
-    "Andijan": ["Andijan city", "Asaka", "Shahrixon", "Xo‘jaobod"],
-    "Bukhara": ["Bukhara city", "G‘ijduvon", "Kogon", "Vobkent"]
-  };
-
-  function fillSelectOptions(selectEl, options, placeholder) {
-    if (!selectEl) return;
-
-    selectEl.innerHTML = "";
-
-    const ph = document.createElement("option");
-    ph.value = "";
-    ph.disabled = true;
-    ph.selected = true;
-    ph.textContent = placeholder;
-    selectEl.appendChild(ph);
-
-    options.forEach(v => {
-      const o = document.createElement("option");
-      o.value = v;
-      o.textContent = v;
-      selectEl.appendChild(o);
-    });
-  }
+.home-block{
+  margin-bottom: 16px;
+}
 
-  function initRegionDistrictUI() {
-    const regionEl = $("#reg-region");
-    const districtEl = $("#reg-district");
-    if (!regionEl || !districtEl) return;
-
-    const regionList = Object.keys(REGIONS);
-    fillSelectOptions(regionEl, regionList, "Выберите регион…");
-
-    districtEl.disabled = true;
-    fillSelectOptions(districtEl, [], "Сначала выберите регион…");
-
-    regionEl.addEventListener("change", () => {
-      const r = regionEl.value;
-      const districts = REGIONS[r] || [];
-      districtEl.disabled = districts.length === 0;
-      fillSelectOptions(
-        districtEl,
-        districts,
-        districts.length ? "Выберите район…" : "Нет районов"
-      );
-    });
-  }
+.home-block-title{
+  font-weight: 900;
+  font-size: 16px;
+}
 
-  // ---------------------------
-  // UI: Views & Tabs
-  // ---------------------------
-  const VIEWS = [
-    "splash",
-    "registration",
-    "home",
-    "courses",
-    "ratings",
-    "profile",
-    // Global screens
-    "resources",
-    "news",
-    "notifications",
-    "community",
-    "about",
-    "certificates",
-    "archive"
-  ];
-
-  function showView(viewName) {
-    VIEWS.forEach(v => {
-      const el = $(`#view-${v}`);
-      if (!el) return;
-      el.classList.toggle("is-active", v === viewName);
-    });
-    updateTopbarForView(viewName);
-  }
+.home-block-sub{
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
 
-  function setTab(tabName) {
-    if (!["home", "courses", "ratings", "profile"].includes(tabName)) tabName = "home";
-    const prevTab = state.tab;
-    if (prevTab && prevTab !== tabName) {
-      state.prevTab = prevTab;
-      if (tabName === "courses") state.courses.entryTab = prevTab;
-    }
-     state.tab = tabName;
-    saveState();
+.home-competitive-list{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 12px;
+}
 
-    // Tabbar active
-    $$(".tabbar .tab").forEach(btn => {
-      btn.classList.toggle("is-active", btn.dataset.tab === tabName);
-    });
+.home-competitive-card{
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-    // Maintain global view stack: tab screen becomes "base"
-    setGlobalBaseView(tabName);
+.home-competitive-badge{
+  align-self:flex-start;
+  background: rgba(47,111,214,0.12);
+  color: var(--primary);
+  font-weight: 900;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
 
-    if (tabName === "courses") {
-  renderCoursesStack();
+.home-competitive-hero{
+  height: 90px;
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(8, 23, 52, 0.95), rgba(47,111,214,0.85)); /* fallback */
 }
-if (tabName === "profile") {
-  renderProfileStack();
+
+/* ✅ вместо синего граф-блока — изображение */
+.home-competitive-hero-img{
+  position:absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
-if (tabName === "ratings") {
-  renderRatings(); // ✅ Leaderboard UI skeleton (mock now, DB later)
+
+/* старый .home-competitive-graph больше не используется */
+
+/* ✅ Home Active Subject images (5 main subjects) */
+.home-competitive-card[data-subject="informatics"] .home-competitive-hero-img{
+  background-image:url("asset/informatics.png.png");
 }
+
+.home-competitive-card[data-subject="economics"] .home-competitive-hero-img{
+  background-image:url("asset/economics.png.png");
 }
 
-  function setGlobalBaseView(tabName) {
-    // base view should be one of: home/courses/ratings/profile
-    if (!["home", "courses", "ratings", "profile"].includes(tabName)) tabName = "home";
-    state.viewStack = [tabName];
-    saveState();
-    showView(tabName);
-  }
+.home-competitive-card[data-subject="biology"] .home-competitive-hero-img{
+  background-image:url("asset/biology.png.png");
+}
 
-  function openGlobal(viewName) {
-    // push to stack and show
-    if (!VIEWS.includes(viewName)) return;
-
-    // If user is in quiz lock, do not allow leaving
-    if (state.quizLock === "tour") {
-      showToast("Tour is in progress");
-      return;
-    }
-    if (state.quizLock === "practice") {
-      showToast("Pause practice to leave");
-      return;
-    }
-
-    // base should exist
-    if (!Array.isArray(state.viewStack) || state.viewStack.length === 0) {
-      state.viewStack = [state.tab || "home"];
-    }
-
-    const top = state.viewStack[state.viewStack.length - 1];
-    if (top === viewName) {
-      showView(viewName);
-      return;
-    }
-
-    state.viewStack.push(viewName);
-    saveState();
-    showView(viewName);
-  }
+.home-competitive-card[data-subject="chemistry"] .home-competitive-hero-img{
+  background-image:url("asset/chemistry.png.png");
+}
 
-  function canGlobalBack() {
-    return Array.isArray(state.viewStack) && state.viewStack.length > 1;
-  }
+.home-competitive-card[data-subject="mathematics"] .home-competitive-hero-img{
+  background-image:url("asset/mathematics.png.png");
+}
 
-  function globalBack() {
-    if (!canGlobalBack()) return;
-    state.viewStack.pop();
-    saveState();
-    const top = state.viewStack[state.viewStack.length - 1];
-    showView(top);
-  }
+.home-competitive-body{
+  display:flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
-  // ---------------------------
-  // Topbar behavior
-  // ---------------------------
-  function updateTopbarForView(viewName) {
-const topbarEl = $("#topbar");
-const backBtn = $("#topbar-back");
-const titleEl = $("#topbar-title");
-const subEl = $("#topbar-subtitle");
-const logoEl = $("#topbar-logo");
-const notifBtn = $("#topbar-notifications");
-const actionBtn = $("#topbar-action");
-
-if (!backBtn || !titleEl || !subEl) return;
-
-// ✅ Splash/Loading: topbar и tabbar не показываем вообще
-const tabbarEl = $("#tabbar");
-
-if (topbarEl) {
-  if (viewName === "splash") {
-    topbarEl.style.display = "none";
-    if (tabbarEl) tabbarEl.style.display = "none";
-    return;
-  }
-  topbarEl.style.display = ""; // вернуть дефолт (grid из CSS)
+.home-competitive-module{
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: rgba(15,23,42,0.55);
+  font-weight: 800;
 }
 
-if (tabbarEl) tabbarEl.style.display = ""; // вернуть таббар после splash
+.home-competitive-title{
+  font-weight: 900;
+  font-size: 16px;
+}
 
-// лого теперь не прячем
-if (logoEl) logoEl.style.display = "block";
+.home-competitive-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size: 12px;
+  color: rgba(15,23,42,0.6);
+}
 
-// notif по умолчанию скрыт (ВАЖНО: display, чтобы не резервировать место справа)
-if (notifBtn) {
-  notifBtn.style.display = "none";
-  notifBtn.style.visibility = "hidden"; // ✅ важно: index.html имеет inline visibility:hidden
-  notifBtn.dataset.action = "open-notifications";
+.home-progress{
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.08);
+  overflow: hidden;
 }
 
-// action по умолчанию скрыт (ВАЖНО: display, чтобы не резервировать место справа)
-if (actionBtn) {
-  actionBtn.style.display = "none";
-  actionBtn.style.visibility = "hidden"; // ✅ index.html тоже имеет inline visibility:hidden
-  actionBtn.dataset.action = "topbar-action";
-  const icon = actionBtn.querySelector(".icon");
-  if (icon) icon.textContent = "⋯";
+.home-progress-fill{
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #6AA0FF);
 }
 
-    // Default
-    titleEl.textContent = t("app_name");
-    subEl.textContent = "Smarter together";
-    backBtn.style.visibility = "hidden";
+.home-competitive-btn{
+  width: 100%;
+}
 
-     // ✅ sync: если back скрыт — двигаем бренд на место кнопки (CSS .topbar.is-no-left уже есть)
-   function syncTopbarLeftState() {
-  if (!topbarEl || !backBtn) return;
+.home-pinned-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
 
-  // ✅ 1) сначала снимаем "липкий" класс, чтобы back мог вернуться из display:none!important
-  topbarEl.classList.remove("is-no-left");
-  backBtn.style.display = ""; // вернём дефолтный display кнопки (inline-flex из CSS)
+.home-pinned-tile{
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px;
+  text-align: left;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
 
-  // ✅ 2) решаем по ЯВНО установленному visibility (а не computedStyle, которое ломается из-за is-no-left)
-  const shouldNoLeft = (backBtn.style.visibility === "hidden");
+.home-pinned-ico{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(47,111,214,0.12);
+  color: var(--primary);
+  margin-bottom: 10px;
+}
 
-  topbarEl.classList.toggle("is-no-left", shouldNoLeft);
+.home-pinned-title{
+  font-weight: 900;
+  font-size: 13px;
 }
 
-       if (viewName === "splash") {
-     titleEl.textContent = t("app_name");
-     syncTopbarLeftState();
-     return;
-   }
+.home-pinned-meta{
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
 
-       if (viewName === "registration") {
-     titleEl.textContent = t("reg_title");
-     backBtn.style.visibility = "hidden";
-     syncTopbarLeftState();
-     return;
-   }
-     // применяем для default-состояния
-     syncTopbarLeftState();
+.show-all-btn{
+  margin-top: 12px;
+  width: 100%;
+}
 
-    // Global screens (resources/news/...)
-    if (["resources", "news", "notifications", "community", "about", "certificates", "archive"].includes(viewName)) {
-  backBtn.style.visibility = canGlobalBack() ? "visible" : "hidden";
+.home-legacy{
+  display: none;
+}
 
-  // ✅ Рядом с лого всегда бренд как на Home/Profile
-  titleEl.textContent = t("app_name");
-  subEl.textContent = "Smarter together";
-  syncTopbarLeftState();
-  return;
+/* ----- Profile (new layout) ----- */
+.profile-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 12px;
 }
 
-    if (viewName === "home") {
-  titleEl.textContent = t("app_name");
-  subEl.textContent = "Smarter together";
-  backBtn.style.visibility = "hidden";
-  if (logoEl) logoEl.style.display = "block";
+.profile-header-title{
+  font-size: 18px;
+  font-weight: 900;
+}
 
-  if (notifBtn) {
-  notifBtn.style.display = "inline-flex";
-  notifBtn.style.visibility = "visible"; // ✅ иначе остаётся hidden из index.html
+.profile-hero{
+  display:flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-  syncTopbarLeftState();
-  return;
+.profile-hero-row{
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  text-align: center;
+  gap: 10px;
 }
 
-    if (viewName === "ratings") {
-  titleEl.textContent = t("app_name");
-  subEl.textContent = "Smarter together";
-  backBtn.style.visibility = "hidden";
-  syncTopbarLeftState();
-  return;
+.profile-row-list{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
 }
 
-    if (viewName === "profile") {
-  const top = getProfileTopScreen();
+.profile-row{
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  cursor: pointer;
+  text-align: left;
+}
 
-  // В topbar всегда бренд
-  titleEl.textContent = t("app_name");
-  subEl.textContent = "Smarter together";
+.profile-row-left{
+  flex: 0 0 auto;
+}
 
-  // Back показываем только в settings (и он будет работать через action="back")
-  backBtn.style.visibility = (top === "settings") ? "visible" : "hidden";
+.profile-row-ico{
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(47,111,214,0.12);
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 900;
+}
 
-  // Шестерёнка в topbar справа — только на главном экране профиля
-  if (actionBtn) {
-    if (top === "main") {
-      actionBtn.style.display = "inline-flex";
-      actionBtn.style.visibility = "visible";
-      actionBtn.dataset.action = "profile-settings";
-      const icon = actionBtn.querySelector(".icon");
-      if (icon) icon.textContent = "⚙";
-    } else {
-      actionBtn.style.display = "none";
-      actionBtn.style.visibility = "hidden";
-    }
-  }
-   syncTopbarLeftState();
-   return;
- }
-
-       if (viewName === "courses") {
-     const canGoBack = canCoursesBack();
-     backBtn.style.visibility = (state.quizLock ? "hidden" : (canGoBack ? "visible" : "hidden"));
-
-     // ✅ Рядом с лого всегда бренд как на Home/Profile
-     titleEl.textContent = t("app_name");
-     subEl.textContent = "Smarter together";
-     syncTopbarLeftState();
-     return;
-   }
-}
-
-// ---------------------------
-// Ratings (Leaderboard) — UI skeleton now, DB later
-// ---------------------------
-const ratingsState = {
-  scope: "district", // district | region | republic
-  q: ""
-};
-
-function getLeaderboardDataMock(scope) {
-  // Позже заменим на Supabase: district/region/republic + subject/tour + competitive only
-  const base = [
-    { rank: 1, name: "Shakhzod Alimov", meta: "Tashkent International School", score: 980, time: "12:45", avatar: null },
-    { rank: 2, name: "Nilufar Karimova", meta: "Presidential School", score: 975, time: "13:10", avatar: null },
-    { rank: 3, name: "Jasur Akhmedov", meta: "Samarkand Lyceum #1", score: 962, time: "14:05", avatar: null },
-    { rank: 4, name: "Bekzod Saitov", meta: "School 142, Tashkent", score: 958, time: "14:22", avatar: null },
-    { rank: 5, name: "Madina Kenjayeva", meta: "Westminster Academy", score: 944, time: "15:10", avatar: null },
-    { rank: 6, name: "Aziz Umarov", meta: "Bukhara State Lyceum", score: 940, time: "15:45", avatar: null },
-    { rank: 7, name: "Lola Mansurova", meta: "School 50, Fergana", score: 938, time: "16:02", avatar: null }
-  ];
-
-  // Для ощущения “разных” вкладок — слегка двигаем очки
-  const delta = (scope === "district") ? 0 : (scope === "region" ? -6 : -12);
-  return base.map(x => ({ ...x, score: x.score + delta }));
-}
-
-function getMyRankMock(scope) {
-  const p = loadProfile();
-  const displayName = (p?.full_name || p?.name || "You").trim();
-  const district = p?.district || "—";
-  const region = p?.region || "—";
-  const meta = [district, region].filter(Boolean).join(" • ");
-
-  // Мок “моего” места и очков
-  const rank = (scope === "district") ? 12 : (scope === "region" ? 28 : 64);
-  const score = (scope === "district") ? 892 : (scope === "region" ? 861 : 820);
-  const time = "18:30";
-
-  return { rank, name: displayName, meta, score, time };
-}
-
-function renderRatings() {
-  const listEl = $("#ratings-list");
-  const mybar = $("#ratings-mybar");
-  const myRankEl = $("#ratings-mybar-rank");
-  const myNameEl = $("#ratings-mybar-name");
-  const myMetaEl = $("#ratings-mybar-meta");
-  const myScoreEl = $("#ratings-mybar-score");
-  const myTimeEl = $("#ratings-mybar-time");
-
-  if (!listEl) return;
-
-  // 1) buttons state
-  $$(".lb-segment .seg-btn").forEach(btn => {
-    const active = btn.dataset.scope === ratingsState.scope;
-    btn.classList.toggle("is-active", active);
-    btn.setAttribute("aria-selected", active ? "true" : "false");
-  });
-
-  // 2) data (mock now)
-  const data = getLeaderboardDataMock(ratingsState.scope);
-
-  // 3) filter by query
-  const q = String(ratingsState.q || "").trim().toLowerCase();
-  const filtered = q
-    ? data.filter(x => String(x.name || "").toLowerCase().includes(q))
-    : data;
-
-  // 4) render list
-  if (filtered.length === 0) {
-    listEl.innerHTML = `<div class="empty muted">Ничего не найдено.</div>`;
-  } else {
-    listEl.innerHTML = filtered.map(row => {
-      const topClass = row.rank === 1 ? "is-top1" : (row.rank === 2 ? "is-top2" : (row.rank === 3 ? "is-top3" : ""));
-      const safeName = escapeHTML(row.name);
-      const safeMeta = escapeHTML(row.meta || "");
-      const safeTime = escapeHTML(row.time || "");
-      const score = Number(row.score || 0);
-
-      return `
-        <div class="lb-row">
-          <div class="lb-rank">
-            <div class="lb-rank-badge ${topClass}">${row.rank}</div>
-          </div>
-
-          <div class="lb-student">
-            <div class="lb-avatar">${row.avatar ? `<img src="${escapeHTML(row.avatar)}" alt="">` : ""}</div>
-            <div class="lb-student-txt">
-              <div class="lb-name">${safeName}</div>
-              <div class="lb-meta">${safeMeta}</div>
-            </div>
-          </div>
-
-          <div class="lb-score">${score}</div>
-          <div class="lb-time">${safeTime}</div>
-        </div>
-      `;
-    }).join("");
-  }
+.profile-row-mid{
+  min-width: 0;
+  flex: 1;
+}
 
-  // 5) my rank bar (mock)
-  const my = getMyRankMock(ratingsState.scope);
-  if (mybar && myRankEl && myNameEl && myMetaEl && myScoreEl && myTimeEl) {
-    myRankEl.textContent = String(my.rank ?? "—");
-    myNameEl.textContent = String(my.name ?? "—");
-    myMetaEl.textContent = String(my.meta ?? "—");
-    myScoreEl.textContent = `${String(my.score ?? "—")} pts`;
-    myTimeEl.textContent = String(my.time ?? "—");
-    mybar.style.display = "flex";
-  }
+.profile-row-title{
+  font-weight: 900;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-function bindRatingsUI() {
-  const search = $("#ratings-search");
-  const clear = $("#ratings-search-clear");
-  const listEl = $("#ratings-list");
-
-  // segmented tabs
-  $$(".lb-segment .seg-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const scope = btn.dataset.scope;
-      if (!scope) return;
-      ratingsState.scope = scope;
-      renderRatings();
-    });
-  });
-
-  // search
-  if (search) {
-    search.addEventListener("input", () => {
-      ratingsState.q = search.value || "";
-      renderRatings();
-    });
-  }
+.profile-row-right{
+  flex: 0 0 auto;
+  color: rgba(15,23,42,0.45);
+  font-size: 20px;
+  font-weight: 900;
+}
 
-  // clear
-  if (clear && search) {
-    clear.addEventListener("click", () => {
-      search.value = "";
-      ratingsState.q = "";
-      renderRatings();
-      search.focus();
-    });
-  }
+.profile-avatar{
+  margin: 0 auto;
+}
 
-  // optional: click on list rows later (open student profile) — пока пусто
-  if (listEl) {
-    listEl.addEventListener("click", (e) => {
-      const row = e.target.closest(".lb-row");
-      if (!row) return;
-      // future: open profile modal
-    });
-  }
+.profile-hero-info{
+  min-width: 0;
+  text-align: center;
 }
-   
-  // ---------------------------
-  // Courses stack
-  // ---------------------------
-  const COURSES_SCREENS = [
-    "all-subjects",
-    "subject-hub",
-    "lessons",
-    "video",
-    "practice-start",
-    "practice-quiz",
-    "practice-result",
-    "practice-review",
-    "practice-recs",
-    "tours",
-    "tour-rules",
-    "tour-quiz",
-    "tour-result",
-    "tour-review",
-    "books",
-    "my-recs"
-  ];
-
-  function getCoursesTopScreen() {
-    const s = state.courses.stack;
-    return s && s.length ? s[s.length - 1] : "all-subjects";
-  }
 
-  function showCoursesScreen(screenName) {
-    COURSES_SCREENS.forEach(sc => {
-      const el = $(`#courses-${sc}`);
-      if (!el) return;
-      el.classList.toggle("is-active", sc === screenName);
-    });
-    updateTopbarForView("courses");
-  }
+.profile-name{
+  text-align: center;
+}
 
-  function pushCourses(screenName) {
-    state.courses.stack.push(screenName);
-    saveState();
-    showCoursesScreen(screenName);
-  }
+.profile-badge{
+  display:inline-flex;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 900;
+  background: rgba(47,111,214,0.12);
+  color: var(--primary);
+  margin-top: 4px;
+}
 
-  function replaceCourses(screenName) {
-    state.courses.stack = [screenName];
-    saveState();
-    showCoursesScreen(screenName);
-  }
+.profile-stats{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
 
-  function popCourses() {
-  if (state.quizLock) return;
-
-  const top = getCoursesTopScreen();
-
-  // ✅ Safety: если тур-экран оказался первым в стеке (stack=1),
-  // то back должен вести в subject-hub, а не выкидывать в Home.
-  const isTourFlowScreen = ["tours", "tour-rules", "tour-quiz", "tour-result", "tour-review"].includes(top);
-  if (isTourFlowScreen && state.courses.stack.length <= 1) {
-    state.courses.stack = ["subject-hub"];
-    saveState();
-    showCoursesScreen("subject-hub");
-    renderSubjectHub();
-    return;
-  }
+.profile-stat{
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(15,23,42,0.04);
+}
 
-  if (state.courses.stack.length > 1) {
-    state.courses.stack.pop();
-    saveState();
-    showCoursesScreen(getCoursesTopScreen());
-    return;
-  }
+.profile-stat-value{
+  font-weight: 900;
+  font-size: 16px;
+}
 
-  const targetTab = state.courses.entryTab || state.prevTab || "home";
-  setTab(targetTab);
+.profile-section{
+  margin-top: 16px;
 }
 
-function canCoursesBack() {
-  const top = getCoursesTopScreen();
+.profile-section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 10px;
+}
 
-  // ✅ special-case: "my-recs" может быть открыт из Profile (stack=1),
-  // но back должен вести обратно в entryTab через popCourses()
-  if (top === "my-recs") return true;
+.profile-section-title{
+  font-weight: 900;
+  font-size: 15px;
+}
 
-  // ✅ туры/экраны тура: даже если stack=1 — back показываем (уйдём в subject-hub)
-  if (["tours", "tour-rules", "tour-quiz", "tour-result", "tour-review"].includes(top)) return true;
+.profile-section-meta{
+  font-size: 12px;
+  color: var(--muted);
+}
 
-  // ✅ Subject Hub: даже если stack=1 — back должен быть доступен (уйдём в entryTab/prevTab/home)
-  if (top === "subject-hub") return true; 
+.profile-overview-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
 
-  return state.courses.stack.length > 1;
+.overview-card{
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
 }
 
-  function renderCoursesStack() {
-    const top = getCoursesTopScreen();
-    showCoursesScreen(top);
-  }
+.overview-label{
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 800;
+}
 
-   // ---------------------------
-// Profile stack
-// ---------------------------
-const PROFILE_SCREENS = ["main", "settings"];
-
-function getProfileTopScreen() {
-  const s = state.profile?.stack;
-  return (s && s.length) ? s[s.length - 1] : "main";
-}
-
-function showProfileScreen(screenName) {
-  // ✅ Сначала скрываем ВСЕ проф-экраны (на всякий случай, даже если классы “сломались”)
-  document.querySelectorAll("#view-profile .profile-screen").forEach(el => {
-    el.hidden = true;
-    el.style.display = "none";
-    el.classList.remove("is-active");
-  });
-
-  // ✅ Затем показываем только нужный
-  const target = document.getElementById(`profile-${screenName}`);
-  if (target) {
-    target.hidden = false;
-    target.style.display = "block";
-    target.classList.add("is-active");
-  }
+.overview-value{
+  font-size: 18px;
+  font-weight: 900;
+  margin-top: 6px;
+}
 
-  updateTopbarForView("profile");
+.overview-sub{
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
 }
 
-function pushProfile(screenName) {
-  state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
-  state.profile.stack.push(screenName);
-  saveState();
-  showProfileScreen(screenName);
+.slot-list{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-function replaceProfile(screenName) {
-  // ✅ ДЕРЖИМ СТРУКТУРУ: profile.stack
-  state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
-  state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
+.slot-card{
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  box-shadow: var(--shadow-sm);
+}
 
-  // ✅ replace = один экран в стеке
-  state.profile.stack = [screenName];
+.slot-card.is-empty{
+  border-style: dashed;
+  background: rgba(15,23,42,0.02);
+}
 
-  saveState();
-  showProfileScreen(screenName);
+.slot-empty-title{
+  font-weight: 900;
+  color: rgba(15,23,42,0.55);
+}
 
-  // ✅ перерендер нужного экрана
-  if (screenName === "main") renderProfileMain();
-  if (screenName === "settings") renderProfileSettings();
+.btn.join{
+  height: 30px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 900;
+  border-radius: 12px;
 }
 
-function popProfile() {
-  if (!state.profile?.stack || state.profile.stack.length <= 1) return;
-  state.profile.stack.pop();
-  saveState();
-  showProfileScreen(getProfileTopScreen());
+.slot-title{
+  font-weight: 900;
 }
 
-function openProfileSettings() {
-  // ✅ заходим в Profile через setTab, чтобы корректно обновлялся prevTab
-  if (state.tab !== "profile") setTab("profile");
+.btn.mini{
+  height: 30px;
+  padding: 0 12px;
+  font-size: 12px;
+}
 
-  // ✅ гарантируем структуру стека
-  state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
-  state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
+.profile-credentials-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
 
-  // ✅ фиксируем settings в stack, чтобы "back" делал popProfile()
-  if (getProfileTopScreen() !== "settings") {
-    pushProfile("settings");
-  } else {
-    showProfileScreen("settings");
-  }
+.credential-card{
+  border-radius: 14px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
 
-  renderProfileSettings();
-  updateTopbarForView("profile");
+.credential-ico{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(15,23,42,0.06);
+  margin-bottom: 10px;
 }
 
-function openProfileMain() {
-  // ✅ заходим в Profile через setTab, чтобы корректно обновлялся prevTab
-  if (state.tab !== "profile") setTab("profile");
+.profile-recs-list{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-  // ✅ единый источник истины: stack + showProfileScreen()
-  replaceProfile("main");
-  updateTopbarForView("profile");
+.profile-legacy{
+  margin-top: 14px;
 }
 
-function renderProfileStack() {
-  const top = getProfileTopScreen();
-  showProfileScreen(top);
-  if (top === "settings") renderProfileSettings();
-  if (top === "main") renderProfileMain();
+.input:focus {
+  border-color: rgba(47,111,214,0.55);
+  box-shadow: 0 0 0 4px rgba(47,111,214,0.12);
 }
 
-   function renderProfileSettings() {
-  const profile = loadProfile();
-  const list = document.getElementById("profile-competitive-list");
-  const note = document.getElementById("settings-competitive-note");
-  if (!list) return;
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
 
-  list.innerHTML = "";
+@media (min-width: 560px) {
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+}
 
-    if (!profile) {
-    list.innerHTML = `<div class="empty muted">${t("home_need_registration")}</div>`;
-    return;
-  }
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text);
+}
+.checkbox input { margin-top: 3px; }
 
-  // Non-school users: competitive is disabled by product rules
-  if (!profile.is_school_student) {
-    if (note) note.textContent = t("disabled_not_school");
-    list.innerHTML = `<div class="empty muted">${t("disabled_not_school")}</div>`;
-    return;
-  }
+/* ----- Buttons ----- */
+.btn {
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 0 14px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
 
-  const current = Array.isArray(profile.subjects) ? profile.subjects : [];
-  const currentComp = current.filter(s => s.mode === "competitive").map(s => s.key);
-  const compCount = currentComp.length;
-
-  if (note) note.textContent = t("settings_competitive_note", { count: compCount });
-
- // ✅ Competitive settings: показываем ТОЛЬКО main-предметы (study/non-main скрываем полностью)
-const mainSubjects = Array.isArray(SUBJECTS) ? SUBJECTS.filter(s => s.type === "main") : [];
-
-mainSubjects.forEach(subj => {
-  const isOn = currentComp.includes(subj.key);
-  const limitReached = (compCount >= 2 && !isOn);
-
-  const row = document.createElement("div");
-  row.className =
-    "settings-row" +
-    (isOn ? " is-on" : "") +
-    (limitReached ? " is-disabled" : "");
-
-  row.innerHTML = `
-  <div class="settings-row-left">
-    <div style="font-weight:800">${escapeHTML(subj.title)}</div>
-    <div class="muted small">${isOn ? "Competitive" : "Выключено"}</div>
-  </div>
-  <label class="switch">
-    <input type="checkbox"
-      ${isOn ? "checked" : ""}
-      ${limitReached ? "disabled" : ""}>
-    <span class="slider"></span>
-  </label>
-`;
-
-  const input = row.querySelector('input[type="checkbox"]');
-
-  input?.addEventListener("change", async () => {
-    if (input.disabled) return;
-
-    const fresh = loadProfile();
-    if (!fresh) return;
-
-    const subjects = Array.isArray(fresh.subjects) ? structuredClone(fresh.subjects) : [];
-    const idx = subjects.findIndex(s => s.key === subj.key);
-
-    if (idx === -1) subjects.push({ key: subj.key, mode: "study", pinned: false });
-
-    const next = subjects.map(s => ({ ...s }));
-    const was = next.find(s => s.key === subj.key);
-    const turningOn = !isCompetitiveForUser(fresh, subj.key);
-
-    const ok = await uiConfirm({
-      title: turningOn ? "Competitive режим" : "Выключить Competitive",
-      message: turningOn
-        ? "Сделать этот предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\nУчебный режим останется доступен."
-        : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по предмету станут недоступны.\nУчебный режим останется.",
-      okText: turningOn ? "Включить" : "Выключить",
-      cancelText: "Отмена"
-    });
-
-    if (!ok) {
-      input.checked = !turningOn;
-      return;
-    }
-
-    if (turningOn) {
-      const compNow = next.filter(s => s.mode === "competitive").length;
-      if (compNow >= 2) {
-        input.checked = false;
-        await uiAlert({
-          title: "Лимит Competitive",
-          message: "Максимум 2 предмета в Competitive.\nСначала выключите другой предмет.",
-          okText: "Понял"
-        });
-        return;
-      }
-      was.mode = "competitive";
-      showToast("Предмет переведён в Competitive");
-    } else {
-      was.mode = "study";
-      showToast("Предмет переведён в Study");
-    }
-
-    fresh.subjects = next;
-    saveProfile(fresh);
-
-    renderHome();
-    if (state.tab === "courses") {
-      renderAllSubjects();
-      if (getCoursesTopScreen() === "subject-hub") renderSubjectHub();
-    }
-
-    renderProfileSettings();
-  });
-
-  list.appendChild(row);
-});
-
-      // --- Language segmented buttons ---
-const langWrap = document.getElementById("profile-settings-language");
-if (langWrap) {
-  const currentLang = profile.language || "ru";
-
-  langWrap.querySelectorAll(".lang-btn").forEach(btn => {
-    const lang = btn.dataset.lang;
-    btn.classList.toggle("is-active", lang === currentLang);
-
-    btn.onclick = () => {
-      const fresh = loadProfile();
-      if (!fresh) return;
-
-      const nextLang = String(btn.dataset.lang || "ru");
-      if (nextLang === (fresh.language || "ru")) return;
-
-      fresh.language = nextLang;
-      saveProfile(fresh);
-
-      window.i18n?.setLang(nextLang);
-      applyStaticI18n?.();
-
-      renderHome();
-      if (state.tab === "courses") renderAllSubjects();
-      renderProfileMain();
-      renderProfileSettings();
-
-      showToast(t("toast_lang_updated"));
-    };
-  });
-}
-
-    // --- Pinned list ---
-  const pinnedToggleBtn = document.getElementById("profile-settings-pinned-toggle");
-  if (pinnedToggleBtn) {
-    const expanded = !!profile?.pinnedExpanded;
-    pinnedToggleBtn.textContent = expanded ? t("settings_hide") : t("settings_show_all");
-
-    pinnedToggleBtn.onclick = () => {
-      const fresh = loadProfile();
-      if (!fresh) return;
-      fresh.pinnedExpanded = !fresh.pinnedExpanded;
-      saveProfile(fresh);
-      renderProfileSettings();
-    };
-  }
+.btn:active { transform: translateY(1px); }
 
-  const pinnedWrap = document.getElementById("profile-settings-pinned-list");
-  if (pinnedWrap) {
-    pinnedWrap.innerHTML = "";
+.btn.primary {
+  background: linear-gradient(180deg, var(--primary), var(--primary-2));
+  border-color: rgba(47,111,214,0.30);
+  color: white;
+}
 
-    const expanded = !!profile?.pinnedExpanded;
+.btn.ghost {
+  background: transparent;
+  box-shadow: none;
+}
 
-    const userSubjects = Array.isArray(profile.subjects) ? profile.subjects : [];
-    const pinnedSet = new Set(userSubjects.filter(s => !!s.pinned).map(s => s.key));
+.actions-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
 
-    // Study (Pinned) can show all subjects when expanded, otherwise only pinned
-const allSubjects = Array.isArray(SUBJECTS) ? SUBJECTS.slice() : [];
+@media (min-width: 560px) {
+  .actions-row { grid-template-columns: 1fr 1fr; }
+}
 
-const pinnedList = allSubjects.filter(s => pinnedSet.has(s.key));
-const otherList  = allSubjects.filter(s => !pinnedSet.has(s.key));
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
 
-const listToRender = expanded ? [...pinnedList, ...otherList] : pinnedList;
+@media (min-width: 560px) {
+  .quick-actions { grid-template-columns: 1fr 1fr 1fr; }
+}
 
-    if (!listToRender.length) {
-      pinnedWrap.innerHTML = `<div class="empty muted">${t("settings_no_pinned")}</div>`;
-      return;
-    }
+/* ----- Courses stack screens ----- */
+.stack-screen { display: none; }
+.stack-screen.is-active { display: block; }
 
-    listToRender.forEach(subj => {
-      const isPinned = pinnedSet.has(subj.key);
+/* ----- Quiz UI ----- */
+.quiz-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 8px 0 12px;
+}
 
-      const row = document.createElement("div");
-      row.className = "settings-row" + (isPinned ? " is-on" : "");
+.quiz-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+}
 
-      row.innerHTML = `
-  <div>
-    <div style="font-weight:800">${escapeHTML(subj.title)}</div>
-    <div class="muted small">${isPinned ? t("settings_pinned") : t("settings_not_pinned")}</div>
-  </div>
-  <label class="switch">
-    <input type="checkbox" ${isPinned ? "checked" : ""}>
-    <span class="slider"></span>
-  </label>
-`;
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  font-size: 12px;
+}
 
-const input = row.querySelector('input[type="checkbox"]');
+.pill.danger {
+  color: white;
+  background: linear-gradient(180deg, #EF4444, #B91C1C);
+  border-color: rgba(220,38,38,0.35);
+}
 
-input?.addEventListener("change", () => {
-  const fresh = loadProfile();
-  if (!fresh) return;
+.question-text {
+  font-weight: 800;
+  font-size: 15px;
+  margin-bottom: 10px;
+}
 
-  const updated = togglePinnedSubject(fresh, subj.key);
-  saveProfile(updated);
+.options { display: flex; flex-direction: column; gap: 10px; }
 
-  renderHome();
-  if (state.tab === "courses") renderAllSubjects();
-  renderProfileMain();
-  renderProfileSettings();
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(246,248,252,0.6);
+  cursor: pointer;
+  user-select: none;
+}
 
-  showToast(isPinned ? t("toast_removed_pinned") : t("toast_added_pinned"));
-});
+.option input { margin: 0; }
+.option:active { transform: translateY(1px); }
 
-      pinnedWrap.appendChild(row);
-    });
-  }
+/* ----- Practice INPUT (v1) ----- */
+.input-wrap{
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(246,248,252,0.6);
 }
-
-  function renderProfileMain() {
-  const profile = loadProfile();
-
-  const nameEl = document.getElementById("profile-dash-name");
-  const metaEl = document.getElementById("profile-dash-meta");
-  const avatarEl = document.getElementById("profile-avatar");
-  const avatarInitials = document.getElementById("profile-avatar-initials");
-  const currentLevelEl = document.getElementById("profile-current-level");
-  const slotsCountEl = document.getElementById("profile-competitive-slots-count");
-  const slotsListEl = document.getElementById("profile-competitive-slots-list");
-     
-  const compEl = document.getElementById("profile-metric-competitive");
-  const studyEl = document.getElementById("profile-metric-study");
-
-  const bestEl = document.getElementById("profile-metric-best");
-  const trendEl = document.getElementById("profile-metric-trend");
-  const stabilityEl = document.getElementById("profile-metric-stability");
-  const toursEl = document.getElementById("profile-metric-tours");
-
-  const hintEl = document.getElementById("profile-dash-hint");
-  const ratingsBtn = document.querySelector('[data-action="profile-open-ratings"]');
-
-  if (!nameEl || !metaEl || !compEl || !studyEl || !bestEl || !trendEl || !stabilityEl || !toursEl) return;
-
-    if (!profile) {
-    nameEl.textContent = "Сначала регистрация";
-    metaEl.textContent = "—";
-    if (avatarEl) avatarEl.style.backgroundImage = "";
-    if (avatarInitials) avatarInitials.textContent = "";
-    if (currentLevelEl) currentLevelEl.textContent = "—";
-    if (slotsCountEl) slotsCountEl.textContent = "0/2";
-    if (slotsListEl) slotsListEl.innerHTML = `<div class="empty muted">${t("home_need_registration")}</div>`;
-       
-    compEl.textContent = "0";
-    studyEl.textContent = "0";
-
-    bestEl.textContent = "—";
-    trendEl.textContent = "—";
-    stabilityEl.textContent = "—";
-    toursEl.textContent = "—";
-
-    if (ratingsBtn) ratingsBtn.disabled = true;
-
-    if (hintEl) hintEl.textContent = "После регистрации профиль станет вашим дашбордом.";
-    return;
-  }
 
+.text-input{
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+}
 
-  const fullName = String(profile.full_name || "").trim();
-  nameEl.textContent = fullName || "Профиль";
+.text-input:focus{
+  border-color: rgba(47,111,214,0.55);
+  box-shadow: 0 0 0 4px rgba(47,111,214,0.12);
+}
 
-  if (avatarEl) {
-    const photo = profile?.telegram?.photo_url || "";
-    avatarEl.style.backgroundImage = photo ? `url("${photo}")` : "";
-    if (avatarInitials) avatarInitials.textContent = photo ? "" : (fullName.split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase() || "IC");
-  }
+.input-error{
+  color: var(--danger);
+  font-weight: 800;
+}
 
-  const metaParts = [];
-  if (profile.region) metaParts.push(profile.region);
-  if (profile.district) metaParts.push(profile.district);
-  if (profile.school) metaParts.push(`№${String(profile.school).replace(/^№/,"")}`);
-  if (profile.class) metaParts.push(`${profile.class} класс`);
-  metaEl.textContent = metaParts.join(" • ") || "—";
-
-    const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
-  const comp = subjects.filter(s => s.mode === "competitive");
-  const study = subjects.filter(s => s.mode === "study");
-  const pinned = subjects.filter(s => !!s.pinned);
-
-  compEl.textContent = String(comp.length);
-  studyEl.textContent = String(study.length);
-
-  // --- Best / Trend / Stability (реальные данные из practice_history_v1:*) ---
-  const keys = subjects.map(s => s.key).filter(Boolean);
-
-  // Best (max percent)
-  let best = null;
-  const allAttempts = [];
-
-  keys.forEach(k => {
-    const h = loadPracticeHistory(k);
-    if (h?.best) {
-      if (!best || (Number(h.best.percent) > Number(best.percent))) best = h.best;
-    }
-    if (Array.isArray(h?.last)) allAttempts.push(...h.last.map(a => ({ ...a, _subjectKey: k })));
-  });
-
-  bestEl.textContent = best ? `${Math.round(Number(best.percent) || 0)}%` : "—";
-
-  // Trend: avg(last 3) - avg(prev 3)
-  allAttempts.sort((a, b) => (Number(b.ts) || 0) - (Number(a.ts) || 0));
-  const last6 = allAttempts.slice(0, 6);
-  if (last6.length >= 4) {
-    const a3 = last6.slice(0, 3);
-    const b3 = last6.slice(3, 6);
-
-    const avg = arr => arr.reduce((s, x) => s + (Number(x.percent) || 0), 0) / Math.max(1, arr.length);
-    const diff = Math.round(avg(a3) - avg(b3));
-
-    trendEl.textContent = (diff === 0) ? "0%" : `${diff > 0 ? "+" : ""}${diff}%`;
-  } else {
-    trendEl.textContent = "—";
-  }
+/* Video placeholder */
+.video-placeholder {
+  height: 200px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(47,111,214,0.14), rgba(47,111,214,0.03));
+  border: 1px solid rgba(47,111,214,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(15,23,42,0.55);
+  font-weight: 800;
+  margin-top: 10px;
+}
 
-  // Stability: уникальные дни с практикой за последние 7 дней
-  const now = Date.now();
-  const weekMs = 7 * 24 * 60 * 60 * 1000;
-  const days = new Set();
-  allAttempts.forEach(a => {
-    const ts = Number(a.ts) || 0;
-    if (!ts) return;
-    if (now - ts > weekMs) return;
-    const d = new Date(ts);
-    const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-    days.add(key);
-  });
-    const activeDays = days.size;
-
-  if (!allAttempts.length) {
-    stabilityEl.textContent = t("profile_stability_no_data");
-  } else {
-    const pct = Math.round((activeDays / 7) * 100);
-    stabilityEl.textContent = (pct > 0) ? `${pct}%` : t("profile_stability_no_activity");
-  }
+/* ----- Tabbar ----- */
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  height: calc(64px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
 
-  // Tours: пока нет локальной истории туров в этом фронте — держим “—”
-  toursEl.textContent = "—";
-  
-  if (currentLevelEl) {
-    const bestPct = Number(best?.percent || 0);
-    const level = bestPct >= 85 ? t("profile_level_advanced") : (bestPct >= 70 ? t("profile_level_intermediate") : (bestPct > 0 ? t("profile_level_beginner") : "—"));
-    currentLevelEl.textContent = level;
-  }
+.tab {
+  border: 0;
+  background: transparent;
+  padding: 8px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  color: rgba(15,23,42,0.60);
+  font-weight: 800;
+}
 
-    if (slotsCountEl) slotsCountEl.textContent = `${comp.length}/2`;
-  if (slotsListEl) {
-    slotsListEl.innerHTML = "";
-
-    // 1) Активные competitive слоты (0..2)
-    comp.forEach(us => {
-      const subj = subjectByKey(us.key);
-      const row = document.createElement("div");
-      row.className = "slot-card";
-      row.innerHTML = `
-        <div>
-          <div class="slot-title">${escapeHTML(subj?.title || us.key)}</div>
-          <div class="muted small">${t("profile_slot_hint")}</div>
-        </div>
-        <button type="button" class="btn mini" data-subject="${escapeHTML(us.key)}">${t("profile_view_btn")}</button>
-      `;
-
-      row.querySelector("button")?.addEventListener("click", () => {
-        state.courses.subjectKey = us.key;
-        saveState();
-        setTab("courses");
-        replaceCourses("subject-hub");
-        renderSubjectHub();
-      });
-
-      slotsListEl.appendChild(row);
-    });
-
-    // 2) Пустые слоты до 2 (Empty slot + JOIN)
-    const emptyCount = Math.max(0, 2 - comp.length);
-    for (let i = 0; i < emptyCount; i++) {
-      const row = document.createElement("div");
-      row.className = "slot-card is-empty";
-      row.innerHTML = `
-        <div>
-          <div class="slot-empty-title">${t("profile_empty_slot")}</div>
-          <div class="muted small">${t("reg_competitive_subject_hint")}</div>
-        </div>
-        <button type="button" class="btn join" data-action="profile-settings">${t("profile_join_btn")}</button>
-      `;
-
-      row.querySelector("button")?.addEventListener("click", () => {
-        setTab("profile");
-        replaceProfile("settings");
-      });
-
-      slotsListEl.appendChild(row);
-    }
-  }
-   
-  // Disabled state: рейтинг/туры только школьникам
-  if (ratingsBtn) {
-    const isSchool = !!profile.is_school_student;
-    ratingsBtn.disabled = !isSchool;
-    if (!isSchool) ratingsBtn.title = t("disabled_not_school");
-  }
+.tab .tab-ico { font-size: 18px; line-height: 1; }
+.tab .tab-txt { font-size: 11px; }
 
-  if (hintEl) {
-    hintEl.textContent = pinned.length
-      ? "Закреплённые предметы уже ускоряют доступ. Дальше — стабильность."
-      : "Закрепите 1–3 предмета — и вы будете открывать нужное быстрее, чем Telegram.";
-  }
- }
-
-     // ---------------------------
-  // Modal (for confirmations in Telegram WebApp)
-  // ---------------------------
-  let modalResolve = null;
-
-  function closeModal(result = null) {
-    const root = document.getElementById("modal-root");
-    if (!root) return;
-    root.innerHTML = "";
-    root.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("modal-open");
-    if (typeof modalResolve === "function") {
-      const r = modalResolve;
-      modalResolve = null;
-      r(result);
-    }
-  }
+.tab.is-active {
+  color: var(--primary);
+}
 
-  function openModal(html) {
-    const root = document.getElementById("modal-root");
-    if (!root) return;
-    root.innerHTML = html;
-    root.setAttribute("aria-hidden", "false");
-    document.body.classList.add("modal-open");
-
-    // backdrop close (only if data-close="backdrop")
-    const backdrop = root.querySelector("[data-modal-backdrop]");
-    if (backdrop) {
-      backdrop.addEventListener("click", (e) => {
-        if (e.target === backdrop && backdrop.dataset.close === "backdrop") {
-          closeModal(false);
-        }
-      });
-    }
-
-    // buttons
-    root.querySelectorAll("[data-modal-action]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const act = btn.getAttribute("data-modal-action");
-        if (act === "ok") closeModal(true);
-        if (act === "cancel") closeModal(false);
-      });
-    });
-  }
+.tab.is-active .tab-ico {
+  transform: translateY(-1px);
+}
 
-  function uiConfirm({ title, message, okText = "OK", cancelText = "Cancel" }) {
-    return new Promise((resolve) => {
-      modalResolve = resolve;
-
-      const html = `
-        <div class="modal-backdrop" data-modal-backdrop data-close="none">
-          <div class="modal">
-            <div class="modal-title">${escapeHTML(title || "")}</div>
-            <div class="modal-text">${escapeHTML(message || "")}</div>
-            <div class="modal-actions">
-              <button type="button" class="btn" data-modal-action="cancel">${escapeHTML(cancelText)}</button>
-              <button type="button" class="btn primary" data-modal-action="ok">${escapeHTML(okText)}</button>
-            </div>
-          </div>
-        </div>
-      `;
-
-      openModal(html);
-    });
-  }
+/* ----- Toast ----- */
+.toast {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(78px + var(--safe-bottom));
+  z-index: 50;
+  display: none;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.92);
+  color: white;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
 
-  function uiAlert({ title, message, okText = "OK" }) {
-    return new Promise((resolve) => {
-      modalResolve = resolve;
-
-      const html = `
-        <div class="modal-backdrop" data-modal-backdrop data-close="none">
-          <div class="modal">
-            <div class="modal-title">${escapeHTML(title || "")}</div>
-            <div class="modal-text">${escapeHTML(message || "")}</div>
-            <div class="modal-actions modal-actions-single">
-              <button type="button" class="btn primary" data-modal-action="ok">${escapeHTML(okText)}</button>
-            </div>
-          </div>
-        </div>
-      `;
-
-      openModal(html);
-    });
-  }
+.toast.is-show { display: block; }
 
-  // ---------------------------
-  // Toast
-  // ---------------------------
-  let toastTimer = null;
-  function showToast(message, ms = 2500) {
-    const el = $("#toast");
-    if (!el) return;
-    el.textContent = message;
-    el.classList.add("is-show");
-    if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove("is-show"), ms);
-  }
+/* ----- Modal Root (reserved) ----- */
+/* ----- Modal Root ----- */
+.modal-root[aria-hidden="true"] { display: none; }
+.modal-root[aria-hidden="false"] { display: block; }
 
-  // ---------------------------
-  // Registration UI
-  // ---------------------------
-  function updateSchoolFieldsVisibility() {
-    const select = $("#reg-is-school");
-    const toggle = $("#reg-is-school-toggle");
-    const isSchool = toggle ? !!toggle.checked : (select?.value === "yes");
-    if (select && toggle) {
-      select.value = isSchool ? "yes" : "no";
-    }
-    const block = $("#reg-school-block");
-    if (!block) return;
-    block.style.display = isSchool ? "grid" : "none";
-  }
-  
-  function initRegSubjectChips() {
-    const wrap = $("#reg-subject-chips");
-    const main1 = $("#reg-main-subject-1");
-    const main2 = $("#reg-main-subject-2");
-    if (!wrap || !main1 || !main2) return;
-
-    const buttons = () => $$("#reg-subject-chips .chip-btn");
-
-    const syncChipsFromSelects = () => {
-      const selected = [main1.value, main2.value].filter(Boolean);
-      buttons().forEach(btn => {
-        btn.classList.toggle("is-active", selected.includes(btn.dataset.subjectKey));
-      });
-    };
-
-    const syncSelectsFromChips = () => {
-      const selected = buttons().filter(b => b.classList.contains("is-active")).map(b => b.dataset.subjectKey);
-      main1.value = selected[0] || "";
-      main2.value = selected[1] || "";
-    };
-
-    wrap.addEventListener("click", (e) => {
-      const btn = e.target.closest(".chip-btn");
-      if (!btn) return;
-      const current = buttons().filter(b => b.classList.contains("is-active"));
-
-      if (btn.classList.contains("is-active")) {
-        btn.classList.remove("is-active");
-        syncSelectsFromChips();
-        return;
-      }
-
-      if (current.length >= 2) {
-        showToast(t("reg_subjects_limit"));
-        return;
-      }
-
-      btn.classList.add("is-active");
-      syncSelectsFromChips();
-    });
-
-    main1.addEventListener("change", syncChipsFromSelects);
-    main2.addEventListener("change", syncChipsFromSelects);
-    syncChipsFromSelects();
-  } 
-   
-  function isRegistered() {
-    return !!loadProfile();
-  }
+body.modal-open { overflow: hidden; }
 
-  // ---------------------------
-  // Home rendering (demo)
-  // ---------------------------
-  function renderHome() {
-    const profile = loadProfile();
-    const compWrap = $("#home-competitive-list");
-    const pinnedWrap = $("#home-study-list");
-    if (!compWrap || !pinnedWrap) return;
-
-    compWrap.innerHTML = "";
-    pinnedWrap.innerHTML = "";
-
-    if (!profile) {
-      compWrap.innerHTML = `<div class="empty muted">${t("home_need_registration")}</div>`;
-      pinnedWrap.innerHTML = `<div class="empty muted">${t("home_need_registration")}</div>`;
-      return;
-    }
-
-    const comp = profile.subjects?.filter(s => s.mode === "competitive") || [];
-    const pinned = profile.subjects?.filter(s => !!s.pinned) || [];
-
-    if (!comp.length) compWrap.innerHTML = `<div class="empty muted">${t("home_competitive_empty")}</div>`;
-    if (!pinned.length) pinnedWrap.innerHTML = `<div class="empty muted">${t("home_pinned_empty")}</div>`;
-
-    comp.forEach(s => compWrap.appendChild(homeCompetitiveCardEl(s)));
-    pinned.slice(0, 4).forEach((s, idx) => pinnedWrap.appendChild(homePinnedTileEl(s, idx)));
-  }
+.modal-backdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.55);
+}
 
-    function homeCompetitiveCardEl(userSubject) {
-  const subj = subjectByKey(userSubject.key);
-  const title = subj ? subj.title : userSubject.key;
-
-  const el = document.createElement("div");
-  el.className = "home-competitive-card";
-
-  // ✅ нужно для CSS-картинок по предмету
-  el.dataset.subject = String(userSubject.key || "").toLowerCase();
-
-  el.innerHTML = `
-    <div class="home-competitive-badge">ACTIVE</div>
-    <div class="home-competitive-hero">
-      <div class="home-competitive-hero-img" aria-hidden="true"></div>
-    </div>
-    <div class="home-competitive-body">
-      <div class="home-competitive-module">MODULE 3</div>
-      <div class="home-competitive-title">${escapeHTML(title)}</div>
-      <div class="home-competitive-meta">
-        <span>${t("home_course_completion")}</span>
-        <span class="home-competitive-rank">${t("home_rank_label")}: 12th</span>
-      </div>
-      <div class="home-progress">
-        <div class="home-progress-fill" style="width:65%"></div>
-      </div>
-    </div>
-   `;
-
-    const btn = document.createElement("button");
-btn.type = "button";
-btn.className = "btn primary home-competitive-btn";
-btn.textContent = "Открыть предмет";
-btn.addEventListener("click", (e) => {
-  e.stopPropagation();
-
-  // ✅ Home: сразу открываем Subject Hub (без промежуточных туров)
-  state.courses.subjectKey = userSubject.key;
-  saveState();
-  setTab("courses");
-  replaceCourses("subject-hub");
-  renderSubjectHub();
-});
-
-  el.appendChild(btn);
-  return el;
-}
-
-  function homePinnedTileEl(userSubject, index = 0) {
-  const subj = subjectByKey(userSubject.key);
-  const title = subj ? subj.title : userSubject.key;
-  const lessonCounts = ["8/12", "15/20", "4/10", "2/15"];
-  const lessons = lessonCounts[index % lessonCounts.length];
-
-  const el = document.createElement("button");
-  el.type = "button";
-  el.className = "home-pinned-tile";
-  el.innerHTML = `
-    <div class="home-pinned-ico">📘</div>
-    <div class="home-pinned-title">${escapeHTML(title)}</div>
-    <div class="home-pinned-meta">${lessons} ${t("home_lessons_label")}</div>
-  `;
-
-  el.addEventListener("click", () => {
-    state.courses.subjectKey = userSubject.key;
-    saveState();
-    setTab("courses");
-    replaceCourses("subject-hub");
-    renderSubjectHub();
-});
-
-  return el;
-}
-
-  // ---------------------------
-  // Courses: All Subjects rendering
-  // ---------------------------
-  function setImgWithFallback(imgEl, candidates) {
-  if (!imgEl) return;
-  const list = (candidates || []).filter(Boolean);
-  if (!list.length) return;
-
-  let i = 0;
-  const next = () => {
-    i += 1;
-    if (i < list.length) imgEl.src = list[i];
-  };
-
-  imgEl.onerror = () => next();
-  imgEl.src = list[0];
-}
-
-function subjectIconCandidates(subjectKey) {
-  const k = String(subjectKey || "").trim();
-
-  // ✅ основной формат (у тебя main уже так загружены)
-  const a = [
-    `asset/${k}.png.png`,
-    `asset/${k}.png`,
-    `asset/${k}.PNG`,
-  ];
-
-  // ✅ спец-кейс: у тебя файл IELTS.png (с заглавными)
-  if (k.toLowerCase() === "ielts") {
-    a.push("asset/IELTS.png");
-  }
+.modal{
+  width: min(420px, 100%);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 14px 14px 12px;
+}
 
-  return a;
+.modal-title{
+  font-weight: 900;
+  font-size: 16px;
+  margin-bottom: 8px;
 }
 
-   function renderAllSubjects() {
-  const grid = $("#subjects-grid");
-  if (!grid) return;
+.modal-text{
+  white-space: pre-line;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.92;
+}
 
-  const profile = loadProfile();
+.modal-actions{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
 
-  // Если нет профиля — каталогу нечего делать (но это не должно случаться)
-  grid.innerHTML = "";
-  if (!profile) {
-    grid.innerHTML = `<div class="empty muted">Сначала регистрация.</div>`;
-    return;
-  }
+.modal-actions-single{
+  grid-template-columns: 1fr;
+}
 
-  const userSubjects = Array.isArray(profile.subjects) ? profile.subjects : [];
-  const competitiveCount = userSubjects.filter(s => s.mode === "competitive").length;
-
-  const mainSubjects = SUBJECTS.filter(s => s.type === "main");
-const additionalSubjects = SUBJECTS.filter(s => s.type !== "main");
-
-       // ---- Main catalog filter (Competitive / Study) — chips under Courses title
-state.courses = state.courses || {};
-
-// миграция: если осталось "all" — считаем "study"
-if (!state.courses.mainFilter || state.courses.mainFilter === "all") {
-  state.courses.mainFilter = "study"; // competitive | study
-  saveState();
-}
-
-const filtersWrap = $("#courses-filter-row");
-if (filtersWrap) filtersWrap.innerHTML = "";
-
-const renderMainFilterRow = () => {
-  if (!filtersWrap) return;
-
-  const row = document.createElement("div");
-  row.className = "grid-section-filters";
-  row.innerHTML = `
-    <button type="button" class="chip ${state.courses.mainFilter === "competitive" ? "is-active" : ""}" data-main-filter="competitive">Competitive</button>
-    <button type="button" class="chip ${state.courses.mainFilter === "study" ? "is-active" : ""}" data-main-filter="study">Study</button>
-  `;
-
-  row.querySelectorAll("[data-main-filter]").forEach(btn => {
-    const v = btn.getAttribute("data-main-filter");
-    btn.addEventListener("pointerup", (e) => {
-      e.preventDefault();
-      state.courses.mainFilter = v;
-      saveState();
-      renderAllSubjects();
-    });
-    btn.addEventListener("click", () => {
-      state.courses.mainFilter = v;
-      saveState();
-      renderAllSubjects();
-    });
-  });
-
-  filtersWrap.appendChild(row);
-};
-
-  const isPinnedKey = (key) => {
-    const us = userSubjects.find(x => x.key === key) || null;
-    return !!us?.pinned;
-  };
-
-  const isCompetitiveKey = (key) => {
-    const us = userSubjects.find(x => x.key === key) || null;
-    return (us?.mode || "study") === "competitive";
-  };
-
-  const sortPinnedFirst = (list) => {
-    return list.slice().sort((a, b) => Number(isPinnedKey(b.key)) - Number(isPinnedKey(a.key)));
-  };
-
-const appendSectionTitle = (text) => {
-  const el = document.createElement("div");
-  el.className = "grid-section-title";
-  el.textContent = text;
-  grid.appendChild(el);
-};
-
-const appendSubjectCard = (s) => {
-  const us = userSubjects.find(x => x.key === s.key) || null;
-  const isPinned = !!us?.pinned;
-  const mode = us?.mode || "study"; // default display
-  const isComp = mode === "competitive";
-
-  const card = document.createElement("div");
-  card.className = "catalog-card";
-
-  // Top clickable area: open hub (but does NOT change profile)
-  const head = document.createElement("button");
-  head.type = "button";
-  head.className = "catalog-head";
-  const imgKey = String(s.key || "").trim();
-const imgPng2 = `asset/${imgKey}.png.png`;
-const imgPng = `asset/${imgKey}.png`;
-
-head.innerHTML = `
-  <div class="catalog-row">
-    <div class="catalog-left">
-      <div class="catalog-ico" aria-hidden="true">
-        <img class="catalog-ico-img" alt="" loading="lazy">
-      </div>
-
-      <div class="catalog-text">
-        <div class="card-title" style="margin:0">${escapeHTML(s.title)}</div>
-      </div>
-    </div>
-
-    <div class="catalog-badges">
-      ${isPinned ? `<span class="badge badge-pin">Pinned</span>` : ``}
-      ${s.type === "main" && isComp ? `<span class="badge badge-comp">Competitive</span>` : ``}
-    </div>
-  </div>
-`;
-// ✅ icon image with robust fallback (.png.png -> .png -> .PNG + IELTS special)
-const imgEl = head.querySelector(".catalog-ico-img");
-setImgWithFallback(imgEl, subjectIconCandidates(s.key));
-
-  head.addEventListener("click", () => {
-    // "Открыть" — без изменения профиля, как в контракте
-    state.courses.subjectKey = s.key;
-    saveState();
-    pushCourses("subject-hub");
-    renderSubjectHub();
-  });
-
-  // Actions row
-  const actions = document.createElement("div");
-  actions.className = "catalog-actions";
-
-  // 1) Open (primary)
-  const btnOpen = document.createElement("button");
-  btnOpen.type = "button";
-  btnOpen.className = "mini-btn";
-  btnOpen.textContent = "Открыть";
-  btnOpen.addEventListener("click", (e) => {
-    e.stopPropagation();
-    state.courses.subjectKey = s.key;
-    saveState();
-    pushCourses("subject-hub");
-    renderSubjectHub();
-  });
-
-  // 2) Pin/Unpin (secondary)
-  const btnPin = document.createElement("button");
-  btnPin.type = "button";
-  btnPin.className = "mini-btn ghost";
-  btnPin.textContent = isPinned ? "Открепить" : "Закрепить";
-  btnPin.addEventListener("click", (e) => {
-    e.stopPropagation();
-
-    const updated = togglePinnedSubject(profile, s.key);
-    if (!updated) {
-      showToast(t("error_try_again"));
-      return;
-    }
-
-    saveProfile(updated);
-    renderHome();
-    renderAllSubjects();
-    showToast(isPinned ? "Откреплено" : "Закреплено");
-  });
-
-  actions.appendChild(btnOpen);
-  actions.appendChild(btnPin);
-
-  card.appendChild(head);
-  card.appendChild(actions);
-
-  grid.appendChild(card);
-};
-
-  // ---- MAIN section + filter row + pinned-first + filter mode
-  // ✅ chips render once under "Courses"
-renderMainFilterRow();
-
-if (mainSubjects.length) {
-  appendSectionTitle("Main (Cambridge)");
-
-  let mainOut = mainSubjects.slice();
-  if (state.courses.mainFilter === "competitive") {
-    mainOut = mainOut.filter(s => isCompetitiveKey(s.key));
-  } else if (state.courses.mainFilter === "study") {
-    mainOut = mainOut.filter(s => !isCompetitiveKey(s.key));
-  }
-  mainOut = sortPinnedFirst(mainOut);
+/* ----- Utilities ----- */
+.hidden { display: none !important; }
 
-  mainOut.forEach(appendSubjectCard);
+/* ===== Home quick tiles (top-app look) ===== */
+.quick-tiles{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
+@media (min-width: 560px){
+  .quick-tiles{ grid-template-columns: 1fr 1fr 1fr; }
+}
 
-    // ---- ADDITIONAL section (always Study by spec), pinned-first
-  // ✅ при Competitive additional не показываем
-   if (state.courses.mainFilter !== "competitive" && additionalSubjects.length) {
-     appendSectionTitle("Additional");
-     const addOut = sortPinnedFirst(additionalSubjects);
-     addOut.forEach(appendSubjectCard);
-   }
+.tile{
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 12px 12px;
+  text-align: left;
+  cursor: pointer;
+  min-height: 86px;
+  display:flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-  function openSubjectHub(subjectKey) {
-    state.courses.subjectKey = subjectKey;
-    saveState();
-    pushCourses("subject-hub");
-    renderSubjectHub();
-  }
+.tile:active{ transform: translateY(1px); }
 
-  // ---------------------------
-  // Subject Hub rendering
-  // ---------------------------
-  function renderSubjectHub() {
-    const profile = loadProfile();
-    const subj = subjectByKey(state.courses.subjectKey);
-
-    const titleEl = $("#subject-hub-title");
-    const metaEl = $("#subject-hub-meta");
-    if (titleEl) titleEl.textContent = subj ? subj.title : "Subject";
-    if (metaEl) {
-      const us = profile?.subjects?.find(x => x.key === state.courses.subjectKey);
-      metaEl.textContent = us ? `${us.mode.toUpperCase()} • ${us.pinned ? "PINNED" : "NOT PINNED"}` : "NOT ADDED";
-    }
-
-         // ---- Availability toggles in Subject Hub (Tours only when allowed) ----
-    const toursBtn = document.querySelector('#courses-subject-hub [data-action="open-tours"]');
-    const toursSub = toursBtn?.querySelector(".muted.small");
-
-    if (toursBtn) {
-      const eligibility = canOpenActiveTours(profile, state.courses.subjectKey);
-
-      // Additional subjects: tours do not exist by spec
-      if (isAdditionalSubjectKey(state.courses.subjectKey)) {
-        toursBtn.disabled = true;
-        if (toursSub) toursSub.textContent = "Для дополнительных предметов туры не проводятся.";
-      } else if (!eligibility.ok) {
-        toursBtn.disabled = true;
-        if (toursSub) {
-          if (eligibility.reason === "not_school") toursSub.textContent = t("disabled_not_school");
-          else if (eligibility.reason === "not_competitive") toursSub.textContent = t("disabled_not_competitive");
-          else toursSub.textContent = t("not_available");
-        }
-      } else {
-        toursBtn.disabled = false;
-        if (toursSub) toursSub.textContent = "Активные и прошедшие";
-      }
-    }
-
-    updateTopbarForView("courses");
-  }
+.tile-top{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
 
-  // ---------------------------
-  // Lessons (demo)
-  // ---------------------------
-  function renderLessons() {
-    const list = $("#lessons-list");
-    const subj = subjectByKey(state.courses.subjectKey);
-    if (!list) return;
-
-    list.innerHTML = "";
-
-    const demoLessons = [
-      { id: "l1", title: "Lesson 1 — Intro", topic: "Basics" },
-      { id: "l2", title: "Lesson 2 — Core", topic: "Core" },
-      { id: "l3", title: "Lesson 3 — Practice", topic: "Application" }
-    ];
-
-    demoLessons.forEach(lesson => {
-      const item = document.createElement("div");
-      item.className = "list-item";
-      item.innerHTML = `
-        <div style="font-weight:800">${lesson.title}</div>
-        <div class="muted small">${subj ? subj.title : ""} • ${lesson.topic}</div>
-      `;
-      item.addEventListener("click", () => {
-        state.courses.lessonId = lesson.id;
-        saveState();
-        pushCourses("video");
-        renderVideo(lesson);
-      });
-      list.appendChild(item);
-    });
-  }
+.tile-ico{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: linear-gradient(180deg, rgba(47,111,214,0.14), rgba(47,111,214,0.03));
+  border: 1px solid rgba(47,111,214,0.18);
+  font-size: 18px;
+}
 
-  function renderVideo(lesson) {
-    const tEl = $("#video-title");
-    const mEl = $("#video-meta");
-    if (tEl) tEl.textContent = lesson?.title || "Video";
-    if (mEl) mEl.textContent = lesson?.topic || "";
-    updateTopbarForView("courses");
-  }
+.tile-title{
+  font-weight: 900;
+  font-size: 14px;
+}
 
-    // ---------------------------
-  // Practice v1 — per spec:
-  // 10 questions (3/5/2), MCQ + INPUT, per-question timer, pause/resume,
-  // best + last 5 attempts, review + recommendations
-  // ---------------------------
-
-  function loadPracticeDraft() {
-    return safeJsonParse(localStorage.getItem(LS.practiceDraft), null);
-  }
-  function savePracticeDraft(draft) {
-    localStorage.setItem(LS.practiceDraft, JSON.stringify(draft));
-  }
-  function clearPracticeDraft() {
-    localStorage.removeItem(LS.practiceDraft);
-  }
+.tile-sub{
+  font-size: 12px;
+}
 
-   function loadMyRecs() {
-  return safeJsonParse(localStorage.getItem(LS.myRecs), { bySubject: {} });
+/* ===== Home subject cards (dashboard feel) ===== */
+.home-subject-card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
-function saveMyRecs(data) {
-  localStorage.setItem(LS.myRecs, JSON.stringify(data));
+.home-subject-head{
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 14px 14px 12px;
+  cursor: pointer;
 }
 
-function addMyRecsFromAttempt(attempt) {
-  const wrong = (attempt?.details || []).filter(d => !d.isCorrect);
-  const topics = Array.from(new Set(wrong.map(d => d.topic || "General")));
-  if (!topics.length) return { added: 0, topics: [] };
+.home-subject-head:active{ transform: translateY(1px); }
 
-  const store = loadMyRecs();
-  store.bySubject = store.bySubject || {};
-  const subjKey = attempt.subjectKey || "unknown";
+.home-subject-row{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
 
-  const existing = new Set((store.bySubject[subjKey] || []).map(x => x.topic));
-  const nowTs = Date.now();
+.badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.8);
+}
 
-  const add = topics
-    .filter(tp => !existing.has(tp))
-    .map(tp => ({ topic: tp, ts: nowTs }));
+.badge-comp{
+  background: linear-gradient(180deg, rgba(47,111,214,0.18), rgba(47,111,214,0.06));
+  border-color: rgba(47,111,214,0.25);
+  color: var(--primary-2);
+}
 
-  store.bySubject[subjKey] = [...add, ...(store.bySubject[subjKey] || [])].slice(0, 50);
-  saveMyRecs(store);
+.badge-study{
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(15, 23, 42, 0.10);
+  color: rgba(15, 23, 42, 0.70);
+}
 
-  return { added: add.length, topics };
+.home-subject-actions{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 14px 14px;
 }
 
-  function formatMMSS(sec) {
-    const s = Math.max(0, Number(sec) || 0);
-    const mm = Math.floor(s / 60);
-    const ss = s % 60;
-    return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
-  }
+.mini-btn{
+  height: 40px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--primary), var(--primary-2));
+  color: #fff;
+  font-weight: 900;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
 
-  function normalizeNumericInput(v) {
-    return String(v ?? "").trim().replace(",", ".");
-  }
+.mini-btn:active{ transform: translateY(1px); }
 
-  // ---- Practice history render (inject into practice-start) ----
-  function renderPracticeStart() {
-    const subjectKey = state.courses.subjectKey;
-    const subj = subjectByKey(subjectKey);
-    const section = $("#courses-practice-start");
-    if (!section) return;
-
-    // Remove old injected block if exists
-    const old = $("#practice-history-card");
-    if (old) old.remove();
-
-    const h = loadPracticeHistory(subjectKey);
-    const best = h.best;
-    const last = h.last || [];
-
-    const card = document.createElement("div");
-    card.className = "card";
-    card.id = "practice-history-card";
-
-    const bestLine = best
-      ? `Лучший результат: ${best.score}/${best.total} (${best.percent}%) • ${best.durationSec}s • ${formatDateTime(best.ts)}`
-      : "Лучший результат: пока нет попыток";
-
-    const lastLines = last.length
-      ? last.map(a => `• ${a.score}/${a.total} (${a.percent}%) • ${a.durationSec}s • ${formatDateTime(a.ts)}`).join("<br>")
-      : "Пока нет попыток";
-
-    card.innerHTML = `
-      <div class="card-title">Статистика практики</div>
-      <div class="muted small">${escapeHTML(subj?.title || subjectKey || "")}</div>
-      <div class="muted" style="margin-top:8px">${bestLine}</div>
-      <div class="muted small" style="margin-top:8px">Последние попытки (до 5):<br>${lastLines}</div>
-    `;
-
-    // Insert after rules card (second card in section)
-    const cards = section.querySelectorAll(".card");
-    if (cards && cards.length >= 1) {
-      cards[cards.length - 1].after(card);
-    } else {
-      section.appendChild(card);
-    }
-  }
+.mini-btn.ghost{
+  background: var(--card);
+  color: var(--text);
+}
 
-  // ---- Practice timer (per-question) ----
-  function stopPracticeQuestionTimer() {
-    if (state.quiz?.qTimerId) {
-      clearInterval(state.quiz.qTimerId);
-      state.quiz.qTimerId = null;
-    }
-  }
+/* ===== All Subjects (Catalog) — premium look ===== */
+.catalog-card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
 
-  function startPracticeQuestionTimer() {
-    stopPracticeQuestionTimer();
+.catalog-head{
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 14px 14px 8px;
+  cursor: pointer;
+}
 
-    const timerEl = $("#practice-timer");
-    if (timerEl) timerEl.textContent = formatMMSS(state.quiz.qTimeLeft);
+.catalog-head:active{ transform: translateY(1px); }
 
-    state.quiz.qTimerId = setInterval(() => {
-      if (!state.quiz || state.quiz.paused) return;
+.catalog-row{
+  display:flex;
+  align-items:flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+/* Catalog card: icon + title layout */
+.catalog-left{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  min-width: 0;
+}
 
-      state.quiz.qTimeLeft -= 1;
-      if (timerEl) timerEl.textContent = formatMMSS(state.quiz.qTimeLeft);
+.catalog-text{
+  min-width: 0;
+}
 
-      if (state.quiz.qTimeLeft <= 0) {
-        stopPracticeQuestionTimer();
-        handlePracticeSubmit(true);
-      }
-    }, 1000);
-  }
+.catalog-thumb{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(47, 111, 214, 0.10);
+  border: 1px solid rgba(47, 111, 214, 0.14);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex: 0 0 auto;
+}
 
-  // ---- Entry point from Subject Hub ----
-  function openPracticeStart() {
-  const subjectKey = state.courses.subjectKey;
+.catalog-thumb-img{
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  display:block;
+}
 
-  // Always open Practice Start screen first (premium UX)
-  pushCourses("practice-start");
-  renderPracticeStart();
+/* Chips container under "Courses" */
+.courses-filter-row{
+  margin-top: 10px;
+}
 
-  // If paused draft exists — show Resume button
-  const draft = loadPracticeDraft();
-  const resumeBtn = $("#practice-resume-btn");
-  const restartBtn = $("#practice-restart-btn");
+.catalog-badges{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
 
-  const canResume = !!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz);
+.badge-pin{
+  background: rgba(47, 111, 214, 0.10);
+  border-color: rgba(47, 111, 214, 0.28);
+  color: var(--primary);
+}
 
-  if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
-  if (restartBtn) restartBtn.textContent = canResume ? "Начать заново" : "Начать";
+.catalog-hint{
+  margin-top: 8px;
+}
 
-  if (canResume) {
-    showToast(t("practice_resume_prompt"));
-  }
+.catalog-actions{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 14px 10px;
 }
 
-  function startPracticeNew() {
-    const subjectKey = state.courses.subjectKey;
-    const questions = buildPracticeSet(subjectKey);
-
-    state.quizLock = "practice";
-    state.quiz = {
-      mode: "practice",
-      subjectKey,
-      startedAt: Date.now(),
-      paused: false,
-      pauseStartedAt: null,
-      pausedTotalMs: 0,
-
-      index: 0,
-      questions,
-      // user answers:
-      // mcq -> number (selected index), input -> string
-      answers: Array.from({ length: questions.length }).map(() => null),
-      correct: Array.from({ length: questions.length }).map(() => false),
-
-      // time per question
-      qTimeLeft: PRACTICE_CONFIG.timeByDifficulty[questions[0].difficulty] || 60,
-      qTimerId: null
-    };
-
-    saveState();
-    replaceCourses("practice-quiz");
-    renderPracticeQuiz();
-    startPracticeQuestionTimer();
-  }
+/* ✅ CTA smaller and cleaner inside catalog */
+.catalog-actions .mini-btn{
+  height: 40px;
+  border-radius: 14px;
+  font-weight: 900;
+  font-size: 13px;
+}
 
-  // ---- Rendering question (MCQ or INPUT) ----
-  function renderPracticeQuiz() {
-    const quiz = state.quiz;
-    if (!quiz || quiz.mode !== "practice") return;
-
-    const q = quiz.questions[quiz.index];
-    if (!q) return;
-
-    const qno = $("#practice-qno");
-    const qtext = $("#practice-question");
-    const wrap = $("#practice-options");
-    const timerEl = $("#practice-timer");
-
-    if (qno) qno.textContent = `${quiz.index + 1}/${PRACTICE_CONFIG.total}`;
-    if (timerEl) timerEl.textContent = formatMMSS(quiz.qTimeLeft);
-    if (qtext) qtext.textContent = q.question || "Вопрос…";
-    if (!wrap) return;
-
-    wrap.innerHTML = "";
-
-    // Difficulty hint (small)
-    const diff = document.createElement("div");
-    diff.className = "muted small";
-    diff.style.marginBottom = "8px";
-    diff.textContent = `Сложность: ${q.difficulty}`;
-    wrap.appendChild(diff);
-
-    if (q.type === "mcq") {
-      const selectedIndex = quiz.answers[quiz.index];
-
-      (q.options || []).forEach((optText, idx) => {
-        const row = document.createElement("label");
-        row.className = "option";
-        row.innerHTML = `
-          <input type="radio" name="practice-opt" value="${idx}">
-          <span>${escapeHTML(optText)}</span>
-        `;
-        const input = row.querySelector('input[type="radio"]');
-        if (input && selectedIndex === idx) input.checked = true;
-
-        input?.addEventListener("change", () => {
-          quiz.answers[quiz.index] = idx;
-          saveState();
-          updatePracticeSubmitEnabled();
-        });
-
-        wrap.appendChild(row);
-      });
-
-      return;
-    }
-
-    // INPUT
-    const box = document.createElement("div");
-    box.className = "input-wrap";
-    box.innerHTML = `
-      <div class="muted small">${escapeHTML(q.inputHint || "")}</div>
-      <input id="practice-input" class="text-input" type="text" placeholder="${escapeHTML(q.inputHint || "")}">
-      <div id="practice-input-error" class="muted small" style="margin-top:6px; display:none;"></div>
-    `;
-    wrap.appendChild(box);
-
-    const inputEl = $("#practice-input");
-    const errEl = $("#practice-input-error");
-    const prev = quiz.answers[quiz.index];
-    if (inputEl && typeof prev === "string") inputEl.value = prev;
-
-    inputEl?.addEventListener("input", () => {
-      quiz.answers[quiz.index] = inputEl.value;
-      saveState();
-      updatePracticeSubmitEnabled();
-      if (errEl) errEl.style.display = "none";
-    });
-     updatePracticeSubmitEnabled();
-  }
+/* Make ghost button look like secondary */
+.catalog-actions .mini-btn.ghost{
+  background: rgba(15,23,42,0.03);
+  box-shadow: none;
+}
 
-   function updatePracticeSubmitEnabled() {
-  const quiz = state.quiz;
-  const btn = $("#practice-submit-btn");
-  if (!btn || !quiz || quiz.mode !== "practice") return;
+/* Competitive row becomes subtle info strip */
+.catalog-competitive-row{
+  padding: 10px 14px 14px;
+  border-top: 1px solid rgba(15,23,42,0.06);
+  background: rgba(246,248,252,0.55);
+}
 
-  const q = quiz.questions[quiz.index];
-  const ua = quiz.answers[quiz.index];
+.catalog-competitive-info{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+}
 
-  let ok = false;
+.link-btn{
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 900;
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+}
 
-  if (q.type === "mcq") {
-    ok = (ua !== null && ua !== undefined);
-  } else {
-    ok = isValidInputAnswer(q, String(ua ?? "").trim());
-  }
+.link-btn:active{ transform: translateY(1px); }
 
-  btn.disabled = !ok;
+/* Disabled */
+.mini-btn:disabled{
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
-  // ---- Pause / Submit / Finish ----
-  function handlePracticePause() {
-    const quiz = state.quiz;
-    if (!quiz || quiz.mode !== "practice") return;
+/* Catalog CTA priority fix */
+.catalog-actions .mini-btn{
+  background: var(--card);
+  color: var(--text);
+  box-shadow: none;
+}
 
-    stopPracticeQuestionTimer();
+.catalog-actions .mini-btn.primary,
+.catalog-actions .mini-btn:not(.ghost):last-child{
+  background: linear-gradient(180deg, var(--primary), var(--primary-2));
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
 
-    // mark paused time
-    quiz.paused = true;
-    quiz.pauseStartedAt = Date.now();
+/* Make catalog cards more compact */
+.catalog-head{
+  padding-bottom: 6px;
+}
 
-    // store snapshot to draft (so even refresh won't kill it)
-    savePracticeDraft({
-      status: "paused",
-      subjectKey: quiz.subjectKey,
-      pausedAt: Date.now(),
-      quiz
-    });
+.catalog-hint{
+  margin-top: 6px;
+}
 
-    // unlock UI navigation
-    state.quizLock = null;
-    state.quiz = null;
-    saveState();
+.catalog-competitive-row{
+  padding-top: 8px;
+  padding-bottom: 10px;
+  background: transparent;
+  border-top: none;
+}
 
-    showToast(t("practice_paused"));
-    replaceCourses("subject-hub");
-    renderSubjectHub();
-  }
+.link-btn{
+  font-weight: 800;
+  opacity: 0.85;
+}
 
-  function handlePracticeSubmit(isAutoTimeout = false) {
-    const quiz = state.quiz;
-    if (!quiz || quiz.mode !== "practice") return;
-
-    const q = quiz.questions[quiz.index];
-    const userAns = quiz.answers[quiz.index];
-
-    // Validate: must have answer if manual submit
-    if (!isAutoTimeout) {
-      if (q.type === "mcq") {
-        if (userAns === null || userAns === undefined) {
-          showToast("Выберите вариант ответа");
-          return;
-        }
-      } else {
-        const val = String(userAns ?? "").trim();
-        if (!isValidInputAnswer(q, val)) {
-          const errEl = $("#practice-input-error");
-          if (errEl) {
-            errEl.textContent = "Проверьте формат ответа";
-            errEl.style.display = "block";
-          } else {
-            showToast("Проверьте формат ответа");
-          }
-          return;
-        }
-      }
-    }
-
-    // Evaluate correctness
-    let isCorrect = false;
-
-    if (q.type === "mcq") {
-      const idx = (userAns === null || userAns === undefined) ? null : Number(userAns);
-      if (idx !== null && idx === Number(q.correctIndex)) isCorrect = true;
-    } else {
-      const raw = String(userAns ?? "").trim();
-      if (raw) {
-        if (q.inputKind === "numeric") {
-          const u = normalizeNumericInput(raw);
-          const c = normalizeNumericInput(q.correctAnswer);
-          isCorrect = (u === c);
-        } else {
-          isCorrect = (raw.toLowerCase() === String(q.correctAnswer || "").trim().toLowerCase());
-        }
-      }
-    }
-
-    quiz.correct[quiz.index] = isCorrect;
-
-    if (isAutoTimeout) {
-      showToast(userAns ? t("toast_time_expired_answer_saved") : t("toast_time_expired_no_answer"));
-    }
-
-    // Next question or finish
-    stopPracticeQuestionTimer();
-
-    const nextIndex = quiz.index + 1;
-
-    if (nextIndex >= quiz.questions.length) {
-      finishPractice();
-      return;
-    }
-
-    quiz.index = nextIndex;
-    const nextQ = quiz.questions[quiz.index];
-    quiz.qTimeLeft = PRACTICE_CONFIG.timeByDifficulty[nextQ.difficulty] || 60;
-
-    saveState();
-    renderPracticeQuiz();
-    startPracticeQuestionTimer();
-  }
+.link-btn:hover{
+  opacity: 1;
+}
 
-  function finishPractice() {
-    const quiz = state.quiz;
-    if (!quiz || quiz.mode !== "practice") return;
-
-    stopPracticeQuestionTimer();
-
-    // duration excluding pauses
-    const finishedAt = Date.now();
-    const startedAt = quiz.startedAt || finishedAt;
-    const durationMs = Math.max(0, finishedAt - startedAt - (quiz.pausedTotalMs || 0));
-    const durationSec = Math.round(durationMs / 1000);
-
-    const total = quiz.questions.length;
-    const score = quiz.correct.filter(Boolean).length;
-    const percent = Math.round((score / total) * 100);
-
-    // Build details for review/recs
-    const details = quiz.questions.map((q, i) => {
-      const ua = quiz.answers[i];
-      let correctDisplay = "";
-      let userDisplay = "";
-
-      if (q.type === "mcq") {
-        correctDisplay = (q.options && q.options[q.correctIndex] != null) ? q.options[q.correctIndex] : String(q.correctIndex);
-        userDisplay = (ua === null || ua === undefined)
-          ? ""
-          : ((q.options && q.options[Number(ua)] != null) ? q.options[Number(ua)] : String(ua));
-      } else {
-        correctDisplay = String(q.correctAnswer ?? "");
-        userDisplay = String(ua ?? "").trim();
-      }
-
-      return {
-        id: q.id,
-        topic: q.topic || "General",
-        difficulty: q.difficulty,
-        type: q.type,
-        question: q.question,
-        userAnswer: userDisplay,
-        correctAnswer: correctDisplay,
-        isCorrect: !!quiz.correct[i],
-        explanation: q.explanation || ""
-      };
-    });
-
-    const attempt = {
-      ts: finishedAt,
-      subjectKey: quiz.subjectKey,
-      score,
-      total,
-      percent,
-      durationSec,
-      details
-    };
-
-    // Save best + last 5
-    const hx = updatePracticeHistory(quiz.subjectKey, attempt);
-
-    // Keep last attempt in state for result/review/recs screens
-    state.practiceLastAttempt = attempt;
-
-    // Clear paused draft if any
-    clearPracticeDraft();
-
-    // Unlock
-    state.quizLock = null;
-    state.quiz = null;
-    saveState();
-
-    // Render result
-    const meta = $("#practice-result-meta");
-
-const wrong = attempt.details.filter(d => !d.isCorrect);
-const topics = Array.from(new Set(wrong.map(d => d.topic || "General")));
-
-if (meta) {
-  meta.textContent =
-    `Score: ${attempt.score}/${attempt.total} (${attempt.percent}%) • ${attempt.durationSec}s` +
-    ` • ${t("practice_errors")}: ${wrong.length}` +
-    ` • ${t("practice_topics")}: ${topics.length}`;
-}
-
-// Counters on buttons
-const reviewCountEl = $("#practice-review-count");
-if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
-
-const recsCountEl = $("#practice-recs-count");
-if (recsCountEl) recsCountEl.textContent = String(topics.length);
-
-// Show result screen (replace quiz screen to avoid "dead" back navigation)
-replaceCourses("practice-result");
-
-    // Optional: toast best update
-    if (hx.best && hx.best.ts === attempt.ts) {
-      showToast("Новый лучший результат");
-    }
-    syncPracticeResultBadges();
-  }
+/* ----- Profile screens: show only active ----- */
+#view-profile .profile-screen{
+  display: none;
+}
 
-  function renderPracticeReview() {
-  const wrap = $("#practice-review-list");
-  if (!wrap) return;
-
-  const attempt = state.practiceLastAttempt;
-  if (!attempt || !Array.isArray(attempt.details)) {
-    wrap.innerHTML = `<div class="empty muted">Нет данных для разбора. Сначала пройдите практику.</div>`;
-    return;
-  }
+#view-profile .profile-screen.is-active{
+  display: block;
+}
 
-  // Group by topic
-  const byTopic = new Map();
-  attempt.details.forEach((d, idx) => {
-    const topic = d.topic || "General";
-    if (!byTopic.has(topic)) byTopic.set(topic, []);
-    byTopic.get(topic).push({ ...d, _idx: idx });
-  });
-
-  // Sort topics: topics with more wrong first, then alphabetically
-  const topics = Array.from(byTopic.keys()).sort((a, b) => {
-    const wa = byTopic.get(a).filter(x => !x.isCorrect).length;
-    const wb = byTopic.get(b).filter(x => !x.isCorrect).length;
-    if (wb !== wa) return wb - wa;
-    return String(a).localeCompare(String(b));
-  });
-
-  wrap.innerHTML = "";
-
-  topics.forEach((topic, tIndex) => {
-    const items = byTopic.get(topic);
-    const wrongCount = items.filter(x => !x.isCorrect).length;
-    const totalCount = items.length;
-
-    const block = document.createElement("div");
-    block.className = "card";
-    block.style.marginBottom = "10px";
-
-    const head = document.createElement("button");
-    head.type = "button";
-    head.className = "btn";
-    head.style.width = "100%";
-    head.style.display = "flex";
-    head.style.justifyContent = "space-between";
-    head.style.alignItems = "center";
-    head.style.gap = "10px";
-    head.style.padding = "12px 12px";
-    head.style.borderRadius = "16px";
-
-    const left = document.createElement("div");
-    left.style.textAlign = "left";
-    left.innerHTML = `
-      <div style="font-weight:900">${escapeHTML(topic)}</div>
-      <div class="muted small">Вопросов: ${totalCount} • Ошибок: ${wrongCount}</div>
-    `;
-
-    const right = document.createElement("div");
-    right.className = "badge badge-pin";
-    right.textContent = wrongCount ? `❌ ${wrongCount}` : `✅ 0`;
-
-    head.appendChild(left);
-    head.appendChild(right);
-
-    const body = document.createElement("div");
-    body.style.marginTop = "10px";
-    body.style.display = (tIndex === 0) ? "block" : "none"; // первая тема раскрыта
-    body.dataset.open = (tIndex === 0) ? "1" : "0";
-
-    head.addEventListener("click", () => {
-      const open = body.dataset.open === "1";
-      body.dataset.open = open ? "0" : "1";
-      body.style.display = open ? "none" : "block";
-    });
-
-    // Render questions inside topic
-    items.forEach(d => {
-      const row = document.createElement("div");
-      row.className = "list-item";
-      row.style.marginBottom = "10px";
-
-      const status = d.isCorrect ? "✅" : "❌";
-      const n = d._idx + 1;
-
-      row.innerHTML = `
-        <div style="font-weight:900">${status} ${n}. ${escapeHTML(d.difficulty)} • ${escapeHTML(d.type)}</div>
-        <div class="muted small" style="margin-top:6px">${escapeHTML(d.question || "")}</div>
-
-        <div class="muted small" style="margin-top:8px">
-          Ваш ответ: <b>${escapeHTML(d.userAnswer || "—")}</b>
-        </div>
-        <div class="muted small">
-          Правильно: <b>${escapeHTML(d.correctAnswer || "—")}</b>
-        </div>
-
-        ${d.explanation ? `<div class="muted small" style="margin-top:8px">${escapeHTML(d.explanation)}</div>` : ``}
-      `;
-
-      body.appendChild(row);
-    });
-
-    block.appendChild(head);
-    block.appendChild(body);
-    wrap.appendChild(block);
-  });
-}
-
-  function syncPracticeResultBadges() {
-  const attempt = state.practiceLastAttempt;
-  if (!attempt || !Array.isArray(attempt.details)) return;
-
-  const wrong = attempt.details.filter(d => !d.isCorrect);
-  const topics = Array.from(new Set(wrong.map(d => d.topic || "General")));
-
-  const reviewCountEl = $("#practice-review-count");
-  if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
-
-  const recsCountEl = $("#practice-recs-count");
-  if (recsCountEl) recsCountEl.textContent = String(topics.length);
-}
- 
-  function renderPracticeRecs() {
-    const wrap = $("#practice-recs-list");
-    if (!wrap) return;
-
-    const attempt = state.practiceLastAttempt;
-    if (!attempt || !Array.isArray(attempt.details)) {
-      wrap.innerHTML = `<div class="empty muted">Нет данных для рекомендаций. Сначала пройдите практику.</div>`;
-      return;
-    }
-
-    // Topics from wrong answers
-    const topics = attempt.details
-      .filter(d => !d.isCorrect)
-      .map(d => d.topic || "General");
-
-    const uniq = Array.from(new Set(topics));
-
-    // Save to "My recommendations" (v1: topics-only)
-const res = addMyRecsFromAttempt(attempt);
-if (!res.added) {
-  // if there are no mistakes -> nothing to save
-} else {
-  showToast(t("practice_saved_to_my_recs"));
-}
-     
-    if (!uniq.length) {
-      wrap.innerHTML = `<div class="empty muted">Ошибок нет — рекомендации не требуются. Неприлично красиво.</div>`;
-      return;
-    }
-
-    // v1: пока без привязки к книге/страницам — даём структурные “что читать”
-    wrap.innerHTML = "";
-    uniq.forEach(tp => {
-      const item = document.createElement("div");
-      item.className = "list-item";
-      const refs = getReadingRefs(attempt.subjectKey, tp);
-
-let refsHtml = "";
-if (refs.length) {
-  refsHtml = `
-    <div class="muted small" style="margin-top:6px">
-      ${refs.slice(0, 3).map(r =>
-        `• ${escapeHTML(r.title || "")}${r.ref ? ` — ${escapeHTML(r.ref)}` : ""}${r.pages ? ` (${escapeHTML(r.pages)})` : ""}`
-      ).join("<br>")}
-    </div>
-  `;
-}
-
-item.innerHTML = `
-  <div style="font-weight:900">${escapeHTML(tp)}</div>
-  <div class="muted small">Рекомендуем повторить теорию и примеры по теме “${escapeHTML(tp)}”.</div>
-  ${refsHtml || `<div class="muted small" style="margin-top:6px">Источник: будет добавлен из книги по предмету.</div>`}
-  <div style="margin-top:10px">
-    <button type="button" class="btn" data-open-books="1">Открыть «Книги»</button>
-  </div>
-`;
-
-const btn = item.querySelector('button[data-open-books="1"]');
-btn?.addEventListener("click", (e) => {
-  e.stopPropagation();
-  pushCourses("books");
-});
-      wrap.appendChild(item);
-    });
-  }
+/* ----- Profile topbar ----- */
+.profile-topbar{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: 0 0 12px 0;
+  background: var(--bg);
+}
 
-function renderMyRecs() {
-  const wrap = $("#my-recs-list");
-  if (!wrap) return;
+.profile-topbar-title{
+  font-weight: 900;
+  letter-spacing: -0.2px;
+}
 
-  const subjectKey = state.courses.subjectKey;
-  const store = loadMyRecs();
-  const list = store?.bySubject?.[subjectKey] || [];
+/* ----- Settings spacing (fix gaps like in the rest of the app) ----- */
+#profile-settings > .card{
+  margin-bottom: 12px;
+}
+#profile-settings > .card:last-of-type{
+  margin-bottom: 0;
+}
 
-  if (!list.length) {
-    wrap.innerHTML = `<div class="empty muted">Пока пусто.</div>`;
-    return;
-  }
+#profile-settings-pinned-toggle{
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+}
 
-  wrap.innerHTML = "";
-  list.forEach(item => {
-    const el = document.createElement("div");
-    el.className = "list-item";
-    el.innerHTML = `
-      <div style="font-weight:800">${escapeHTML(item.topic)}</div>
-      <div class="muted small">Сохранено: ${escapeHTML(formatDateTime(item.ts))}</div>
-    `;
-    wrap.appendChild(el);
-  });
-}
-   
-    // ---------------------------
-  // Tour (strict) — T1+T2+T3 (mock now, DB later)
-  // ---------------------------
-  const TOUR_CONFIG = {
-    total: 20,
-    dist: { easy: 6, medium: 9, hard: 5 },
-    questionTimeSec: 45,           // per question
-    maxViolations: 3,              // anti-cheat threshold
-    autoSubmitOnMaxViolations: true
-  };
-
-  let tourTick = null;
-
-  function openTourRules() {
-    pushCourses("tour-rules");
-    const cb = $("#tour-rules-accept");
-    if (cb) cb.checked = false;
-  }
+/* ----- Settings rows: highlight enabled states ----- */
+.settings-row.is-on{
+  background: rgba(77, 138, 255, 0.10);
+  border: 1px solid rgba(77, 138, 255, 0.25);
+}
 
-  // ---------- T3: Data contract ----------
-  // UI expects rows in this shape:
-  // { id, subject_key, tour_no, difficulty, question_text, options[], correct_index, explanation?, source? }
-  function getTourQuestionsMock(subjectKey, tourNo) {
-    // 20 вопросов: 6 easy / 9 medium / 5 hard (mock)
-    const mk = (i, diff) => ({
-      id: `mock_${subjectKey || "subject"}_${tourNo}_${i}`,
-      subject_key: subjectKey || "subject",
-      tour_no: tourNo || 1,
-      difficulty: diff,
-      question_text: `Which process occurs during the light-dependent stage of photosynthesis? (Q${i})`,
-      options: [
-        "Photolysis of water molecules",
-        "Fixation of carbon dioxide",
-        "Production of glucose",
-        "Reduction of NADP to NADPH"
-      ],
-      correct_index: 0,
-      explanation: "Light-dependent reactions include photolysis and formation of ATP/NADPH.",
-      source: "Uzbekistan Academic Standards"
-    });
-
-    const items = [];
-    let i = 1;
-
-    for (let k = 0; k < TOUR_CONFIG.dist.easy; k++) items.push(mk(i++, "easy"));
-    for (let k = 0; k < TOUR_CONFIG.dist.medium; k++) items.push(mk(i++, "medium"));
-    for (let k = 0; k < TOUR_CONFIG.dist.hard; k++) items.push(mk(i++, "hard"));
-
-    // маленькая перемешка (стабильная)
-    return shuffleArrayStable(items, `${subjectKey || "s"}_${tourNo || 1}`);
-  }
+/* Make the switch more “obvious” when ON */
+.switch input:checked + .slider{
+  background: rgba(77, 138, 255, 0.95);
+}
+.switch input:checked + .slider:before{
+  box-shadow: 0 6px 18px rgba(77, 138, 255, 0.35);
+}
 
-  function shuffleArrayStable(arr, seedStr) {
-    const a = [...arr];
-    let seed = 0;
-    for (let i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) >>> 0;
-    function rnd() {
-      seed = (seed * 1664525 + 1013904223) >>> 0;
-      return seed / 0xFFFFFFFF;
-    }
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(rnd() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
+/* =========================
+   Profile dashboard (v1)
+   ========================= */
+.profile-dash{
+  display: grid;
+  gap: 12px;
+}
 
-  function initTourSession({ subjectKey = null, tourNo = 1, isArchive = false } = {}) {
-    const questions = getTourQuestionsMock(subjectKey, tourNo);
-
-    state.tourContext = {
-      isArchive,
-      subjectKey,
-      tourNo,
-      startedAt: Date.now(),
-      qStartedAt: Date.now(),
-      index: 0,
-      correct: 0,
-      answers: [],              // {qid, pickedIndex, isCorrect, spentSec}
-      violations: 0,
-      lastViolationAt: null,
-      questionTimeLimit: TOUR_CONFIG.questionTimeSec
-    };
-
-    // strict lock only for ACTIVE tour
-    state.quizLock = isArchive ? null : "tour";
-    saveState();
-  }
+.profile-dash-top{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
 
-  function openTourQuiz() {
-    const accept = $("#tour-rules-accept");
-    if (!accept || !accept.checked) {
-      showToast(t("tour_rules_accept_required"));
-      return;
-    }
-
-    // subjectKey/tourNo можно позже брать из active предмета/тура
-    initTourSession({ subjectKey: "biology", tourNo: 4, isArchive: false });
-
-    pushCourses("tour-quiz");
-    bindTourAntiCheatOnce();
-    startTourTick();
-    renderTourQuestion();
-  }
+.profile-name{
+  font-weight: 900;
+  font-size: 18px;
+  line-height: 1.1;
+}
 
-  function startTourTick() {
-    stopTourTick();
-    tourTick = setInterval(() => {
-      renderTourHUD();
-
-      // auto-finish if violations too many
-      if (!state.tourContext?.isArchive && state.tourContext?.violations >= TOUR_CONFIG.maxViolations) {
-        stopTourTick();
-        finishTour({ reason: "violations" });
-      }
-
-      // auto-finish if question time exceeded and no answer chosen (optional behavior)
-      const ctx = state.tourContext;
-      if (ctx && !ctx.isArchive) {
-        const qElapsed = Math.floor((Date.now() - ctx.qStartedAt) / 1000);
-        if (qElapsed >= ctx.questionTimeLimit) {
-          // if no selection yet, we keep button disabled; auto mark as wrong and go next
-          if (!ctx.answers.some(a => a.index === ctx.index)) {
-            submitTourAnswer({ pickedIndex: null, auto: true });
-          }
-        }
-      }
-    }, 250);
-  }
+.profile-metrics{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
 
-  function stopTourTick() {
-    if (tourTick) clearInterval(tourTick);
-    tourTick = null;
-  }
+.metric{
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  padding: 10px;
+  text-align: center;
+}
 
-  // ---------- T2: Anti-cheat ----------
-  let antiCheatBound = false;
-
-  function bindTourAntiCheatOnce() {
-    if (antiCheatBound) return;
-    antiCheatBound = true;
-
-    document.addEventListener("visibilitychange", () => {
-      if (!state.tourContext || state.tourContext.isArchive) return;
-      if (document.visibilityState !== "visible") registerTourViolation("visibility");
-    });
-
-    window.addEventListener("blur", () => {
-      if (!state.tourContext || state.tourContext.isArchive) return;
-      registerTourViolation("blur");
-    });
-  }
+.metric-val{
+  font-weight: 950;
+  font-size: 18px;
+  margin-bottom: 2px;
+}
 
-  function registerTourViolation(type) {
-    const ctx = state.tourContext;
-    if (!ctx || ctx.isArchive) return;
+.profile-actions{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
 
-    // simple debounce: 1 violation per 2s
-    const now = Date.now();
-    if (ctx.lastViolationAt && (now - ctx.lastViolationAt) < 2000) return;
+.profile-hint{
+  opacity: 0.85;
+}
 
-    ctx.violations += 1;
-    ctx.lastViolationAt = now;
-    saveState();
+/* Settings helpers */
+.settings-list{
+  display: grid;
+  gap: 10px;
+}
 
-    const warnBtn = $("#tour-warn-btn");
-    if (warnBtn) warnBtn.style.display = "inline-flex";
+.settings-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+}
 
-    const warnPill = $("#tour-anti-cheat"); // legacy id might exist elsewhere
-    if (warnPill) warnPill.style.display = "inline-flex";
+.settings-row-btn{
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
 
-    showToast(`Warning: session monitoring (${ctx.violations}/${TOUR_CONFIG.maxViolations})`);
-  }
+.settings-row-title{
+  font-weight: 900;
+}
 
-  // ---------- Render ----------
-  function renderTourHUD() {
-    const ctx = state.tourContext;
-    if (!ctx) return;
+.settings-row-arrow{
+  font-size: 20px;
+  font-weight: 900;
+  color: rgba(15,23,42,0.45);
+}
 
-    const total = TOUR_CONFIG.total;
-    const qNo = Math.min(total, ctx.index + 1);
+.select{
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+}
+.lang-seg{
+  display: grid;
+  grid-auto-flow: column;
+  gap: 8px;
+}
 
-    const qof = $("#tour-qof");
-    if (qof) qof.textContent = `Question ${qNo} of ${total}`;
+.lang-btn{
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.06);
+  font-weight: 800;
+  cursor: pointer;
+}
 
-    const pct = Math.round((qNo / total) * 100);
-    const pctEl = $("#tour-progress-pct");
-    if (pctEl) pctEl.textContent = `${pct}%`;
+.lang-btn.is-active{
+  background: rgba(77,138,255,0.22);
+  border: 1px solid rgba(77,138,255,0.40);
+  color: rgba(77,138,255,1);
+}
 
-    const fill = $("#tour-progress-fill");
-    if (fill) fill.style.width = `${pct}%`;
+.lang-btn:not(.is-active){
+  opacity: 0.55;
+}
 
-    const badge = $("#tour-badge");
-    if (badge) {
-      const subjLabel = String(ctx.subjectKey || "SUBJECT").toUpperCase();
-      badge.textContent = `CAMBRIDGE ${subjLabel} • TOUR #${ctx.tourNo}`;
-    }
+/* Simple switch (если вы захотите включать реальные тумблеры дальше) */
+.switch{
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+}
+.switch input{ display:none; }
+.slider{
+  position:absolute;
+  cursor:pointer;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(15,23,42,0.06);
+  border: 1px solid rgba(15,23,42,0.10);
+  border-radius: 999px;
+  transition: .2s;
+}
 
-    const overall = formatMsToMMSS(Date.now() - ctx.startedAt);
-    const overallEl = $("#tour-overall-time");
-    if (overallEl) overallEl.textContent = overall;
+.slider:before{
+  position:absolute;
+  content:"";
+  height: 20px; width: 20px;
+  left: 3px; top: 2px;
+  background: #fff;
+  border-radius: 50%;
+  transition: .2s;
+}
+.switch input:checked + .slider{
+  background: rgba(77, 138, 255, 0.55);
+}
+.switch input:checked + .slider:before{
+  transform: translateX(20px);
+}
 
-    const qElapsed = formatMsToMMSS(Date.now() - ctx.qStartedAt);
-    const qEl = $("#tour-question-time");
-    if (qEl) qEl.textContent = qElapsed;
+/* Small screens */
+@media (max-width: 380px){
+  .profile-metrics{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .profile-actions{ grid-template-columns: 1fr; }
+}
 
-    // warning visibility
-    const warnBtn = $("#tour-warn-btn");
-    if (warnBtn) warnBtn.style.display = (!ctx.isArchive && ctx.violations > 0) ? "inline-flex" : "none";
-  }
+/* =========================================================
+   RATINGS / LEADERBOARD (UI skeleton)
+   ========================================================= */
 
-  function renderTourQuestion() {
-    const ctx = state.tourContext;
-    if (!ctx) return;
-
-    const q = ctx.questions?.[ctx.index];
-    if (!q) {
-      finishTour({ reason: "done" });
-      return;
-    }
-
-    ctx.qStartedAt = Date.now();
-    saveState();
-
-    const qEl = $("#tour-question");
-    if (qEl) qEl.textContent = q.question_text;
-
-    const wrap = $("#tour-options");
-    if (wrap) {
-      wrap.innerHTML = "";
-
-      q.options.forEach((opt, i) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "option";
-        btn.dataset.action = "tour-pick";
-        btn.dataset.index = String(i);
-
-        btn.innerHTML = `
-          <span class="dot" aria-hidden="true"></span>
-          <span class="opt-text">${escapeHTML(opt)}</span>
-        `;
-
-        wrap.appendChild(btn);
-      });
-    }
-
-    // disable next until choose
-    const next = $("#tour-next-btn");
-    if (next) {
-      next.disabled = true;
-      next.textContent = (ctx.index >= TOUR_CONFIG.total - 1) ? "Finish Tour →" : "Next Question →";
-    }
-
-    // clear active option styles
-    $$("#tour-options .option").forEach(o => o.classList.remove("is-selected"));
-    renderTourHUD();
-  }
+.leaderboard{
+  padding-bottom: 92px; /* ✅ только под My Rank bar; tabbar уже учтён в .main */
+}
 
-  function submitTourAnswer({ pickedIndex, auto = false } = {}) {
-    const ctx = state.tourContext;
-    if (!ctx) return;
+.lb-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom: 10px;
+}
 
-    const q = ctx.questions?.[ctx.index];
-    if (!q) return;
+.lb-title{
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  flex: 1;
+  text-align: center;
+}
 
-    const spentSec = Math.max(0, Math.floor((Date.now() - ctx.qStartedAt) / 1000));
-    const isCorrect = (pickedIndex !== null && pickedIndex !== undefined) ? (Number(pickedIndex) === Number(q.correct_index)) : false;
+.lb-info{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: rgba(255,255,255,0.92);
+  font-weight: 900;
+  cursor: pointer;
+}
 
-    ctx.answers = ctx.answers || [];
-    ctx.answers.push({
-      qid: q.id,
-      pickedIndex: (pickedIndex === null || pickedIndex === undefined) ? null : Number(pickedIndex),
-      isCorrect,
-      spentSec,
-      index: ctx.index
-    });
+.lb-back{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: rgba(255,255,255,0.92);
+  font-weight: 900;
+  cursor: pointer;
+}
 
-    if (isCorrect) ctx.correct += 1;
+.lb-segment{
+  display:flex;
+  gap:6px;
+  padding:6px;
+  border-radius: 16px;
+  background: rgba(15,23,42,0.06);
+  border: 1px solid rgba(15,23,42,0.08);
+  margin-bottom: 10px;
+}
 
-    // next index
-    ctx.index += 1;
-    saveState();
+.seg-btn{
+  flex:1;
+  border:0;
+  background: transparent;
+  padding: 10px 10px;
+  border-radius: 12px;
+  font-weight: 900;
+  color: rgba(15,23,42,0.55);
+  cursor: pointer;
+  transition: .15s;
+}
 
-    if (ctx.index >= TOUR_CONFIG.total) {
-      finishTour({ reason: auto ? "auto_done" : "done" });
-      return;
-    }
+.seg-btn.is-active{
+  background: #fff;
+  color: var(--primary);
+  box-shadow: 0 8px 18px rgba(15,23,42,0.10);
+}
 
-    renderTourQuestion();
-  }
+.lb-search{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(15,23,42,0.10);
+  box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+  margin-bottom: 10px;
+}
 
-  function finishTour({ reason = "done" } = {}) {
-    stopTourTick();
+.lb-search-ico{
+  opacity: .65;
+}
 
-    const ctx = state.tourContext;
+.lb-search-input{
+  flex:1;
+  border:0;
+  outline:none;
+  font-weight: 800;
+  background: transparent;
+}
 
-    // result meta
-    const meta = $("#tour-result-meta");
-    if (meta && ctx) {
-      meta.textContent = `Score: ${ctx.correct}/${TOUR_CONFIG.total} • Violations: ${ctx.violations || 0}`;
-    }
+.lb-search-clear{
+  border:0;
+  background: transparent;
+  cursor:pointer;
+  opacity: .6;
+  font-weight: 900;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
 
-    if (ctx?.isArchive) {
-      showToast("Архивный тур: вне рейтинга");
-    } else if (reason === "violations") {
-      showToast("Tour finished: session violations");
-    }
+.lb-search-clear:hover{
+  background: rgba(15,23,42,0.06);
+}
 
-    // unlock
-    state.quizLock = null;
-    state.tourContext = null;
-    saveState();
+.lb-head{
+  display:grid;
+  grid-template-columns: 52px 1fr 80px 70px;
+  gap: 10px;
+  padding: 10px 6px 8px;
+  font-size: 11px;
+  font-weight: 900;
+  color: rgba(15,23,42,0.55);
+  letter-spacing: .04em;
+}
 
-    pushCourses("tour-result");
-  }
+.lb-head-right{
+  text-align:right;
+}
 
-  function formatMsToMMSS(ms) {
-    const sec = Math.max(0, Math.floor(ms / 1000));
-    const mm = Math.floor(sec / 60);
-    const ss = sec % 60;
-    return `${mm}:${String(ss).padStart(2, "0")}`;
-  }
+.lb-list{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-  // ---------------------------
-// Global UI bindings
-// ---------------------------
-function bindTabbar() {
-  let lastTapTs = 0;
-
-  const handle = (btn) => {
-    const tab = btn.dataset.tab;
-    if (!tab) return;
-
-    // ✅ Ratings доступен только школьникам
-    if (tab === "ratings") {
-      const p = loadProfile();
-      if (!p || !p.is_school_student) {
-        showToast(t("disabled_not_school"));
-        return;
-      }
-    }
-
-    if (state.quizLock === "tour") {
-      showToast("Tour is in progress");
-      return;
-    }
-    if (state.quizLock === "practice") {
-      showToast("Pause practice to leave");
-      return;
-    }
-
-    // ✅ Требование: кнопка нижнего таба “Courses” всегда открывает All Subjects
-    if (tab === "courses") {
-      setTab("courses");
-      replaceCourses("all-subjects"); // сбрасывает stack + показывает all-subjects
-      updateTopbarForView("courses");
-      return;
-    }
-
-    setTab(tab);
-  };
-
-  $$(".tabbar .tab").forEach(btn => {
-    // ✅ Mobile-friendly: pointerup работает стабильнее, чем click в WebView
-        btn.addEventListener("pointerup", (e) => {
-      const now = Date.now();
-      if (now - lastTapTs < 250) return; // антидубль
-      lastTapTs = now;
-
-      e.preventDefault();
-      handle(btn);
-
-      // ✅ убираем “липкий” focus на мобилках
-      try { btn.blur(); } catch {}
-    });
-
-    // ✅ Desktop fallback
-    btn.addEventListener("click", () => {
-      handle(btn);
-      try { btn.blur(); } catch {}
-    });
-  });
-}
-
-  function bindTopbar() {
-    const backBtn = $("#topbar-back");
-    if (!backBtn) return;
-
-    backBtn.addEventListener("click", (event) => {
-  event.stopPropagation();
-  if (state.quizLock) return;
-
-  // ✅ Registration: назад = закрыть апп (возвращаться некуда)
-  const regView = document.getElementById("view-registration");
-  if (regView && regView.classList.contains("is-active")) {
-    if (window.Telegram?.WebApp?.close) window.Telegram.WebApp.close();
-    return;
-  }
+.lb-row{
+  display:grid;
+  grid-template-columns: 52px 1fr 80px 70px;
+  gap: 10px;
+  align-items:center;
+  padding: 12px 12px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid rgba(15,23,42,0.10);
+  box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+}
 
-  const topView = state.viewStack?.[state.viewStack.length - 1];
+.lb-rank-badge{
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 1000;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: rgba(15,23,42,0.04);
+}
 
-  // If we are on global screen -> go back in global stack
-  if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
-    globalBack();
-    return;
-  }
+.lb-rank-badge.is-top1{ background: rgba(255, 193, 7, 0.20); border-color: rgba(255, 193, 7, 0.35); }
+.lb-rank-badge.is-top2{ background: rgba(148, 163, 184, 0.22); border-color: rgba(148, 163, 184, 0.35); }
+.lb-rank-badge.is-top3{ background: rgba(245, 158, 11, 0.18); border-color: rgba(245, 158, 11, 0.30); }
 
-      // ✅ Profile back MUST work even if state.tab accidentally isn't "profile"
-const ps = document.getElementById("profile-settings");
-const psActive = !!(ps && ps.classList.contains("is-active") && ps.hidden !== true);
+.lb-student{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  min-width: 0;
+}
 
-// 1) Если реально открыт экран настроек профиля — возвращаем на main напрямую
-if (psActive) {
-  state.tab = "profile";
-  replaceProfile("main");     // stack=["main"] + showProfileScreen("main")
-  renderProfileMain();        // чтобы сразу перерисовать
-  updateTopbarForView("profile");
-  return;
+.lb-avatar{
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(47,111,214,0.22), rgba(47,111,214,0.06));
+  border: 1px solid rgba(47,111,214,0.18);
+  flex: 0 0 auto;
+  overflow:hidden;
 }
 
-// 2) Обычный сценарий профиля
-if (state.tab === "profile") {
-  popProfile();
-  renderProfileStack();
-  return;
+.lb-avatar img{
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  display:block;
 }
 
+.lb-student-txt{
+  min-width: 0;
+}
 
+.lb-name{
+  font-weight: 1000;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-      // If in courses -> pop courses stack
-      if (state.tab === "courses") {
-        popCourses();
-        return;
-      }
-    });
-  }
+.lb-meta{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  function bindRegistration() {
-    const isSchool = $("#reg-is-school");
-    const isSchoolToggle = $("#reg-is-school-toggle");
-    if (isSchool) isSchool.addEventListener("change", updateSchoolFieldsVisibility);
-    if (isSchoolToggle) {
-      isSchoolToggle.addEventListener("change", updateSchoolFieldsVisibility);
-    }
-     updateSchoolFieldsVisibility();
-
-    initRegionDistrictUI();
-    initRegSubjectChips(); 
-
-    const form = $("#reg-form");
-    if (!form) return;
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const fullName = $("#reg-fullname")?.value?.trim() || "";
-      const lang = $("#reg-language")?.value || "ru";
-
-      const region = $("#reg-region")?.value || "";
-      const district = $("#reg-district")?.value || "";
-
-      const isSchoolStudent = ($("#reg-is-school-toggle")?.checked || $("#reg-is-school")?.value === "yes");
-      const school = $("#reg-school")?.value?.trim() || "";
-      const klass = $("#reg-class")?.value?.trim() || "";
-
-      const main1 = $("#reg-main-subject-1")?.value || "";
-      const main2 = $("#reg-main-subject-2")?.value || "";
-      const add1 = $("#reg-additional-subject")?.value || "";
-
-      if (!fullName || !region || !district || !main1) {
-        showToast(t("error_try_again"));
-        return;
-      }
-
-      const subjects = [];
-
-      subjects.push({
-        key: main1,
-        mode: isSchoolStudent ? "competitive" : "study",
-        pinned: true
-      });
-
-      if (main2) {
-        subjects.push({
-          key: main2,
-          mode: isSchoolStudent ? "competitive" : "study",
-          pinned: true
-        });
-      }
-
-      if (add1) {
-        subjects.push({
-          key: add1,
-          mode: "study",
-          pinned: true
-        });
-      }
-
-      if (subjects.filter(s => s.mode === "competitive").length > 2) {
-        showToast("Competitive subjects limit is 2");
-        return;
-      }
-
-      const tgUser = tg?.initDataUnsafe?.user || {};
-      const avatar = tgUser?.photo_url || "";
-
-      const profile = {
-        created_at: nowISO(),
-        full_name: fullName,
-        language: lang,
-        is_school_student: isSchoolStudent,
-        region,
-        district,
-        school: isSchoolStudent ? school : "",
-        class: isSchoolStudent ? klass : "",
-        telegram: {
-          id: tgUser?.id || null,
-          username: tgUser?.username || null,
-          first_name: tgUser?.first_name || null,
-          last_name: tgUser?.last_name || null,
-          photo_url: avatar || null
-        },
-        subjects
-      };
-
-      saveProfile(profile);
-      window.i18n?.setLang(lang);
-      applyStaticI18n();
-
-      state.tab = "home";
-      state.prevTab = "home";
-      state.viewStack = ["home"];
-      state.courses.stack = ["all-subjects"];
-      state.courses.subjectKey = null;
-      state.courses.lessonId = null;
-      state.courses.entryTab = "home";
-      state.quizLock = null;
-      saveState();
-
-      renderAllSubjects();
-      renderHome();
-      setTab("home");
-    });
-  }
+.lb-score{
+  text-align:right;
+  font-weight: 1000;
+  color: var(--primary);
+}
 
-  function bindActions() {
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-action]");
-      if (!btn) return;
-
-      const action = btn.dataset.action;
-
-            // ===== Profile local navigation (must work from anywhere) =====
-      if (action === "profile-settings") {
-       setTab("profile");
-       openProfileSettings();   // ✅ push в стек + правильный рендер
-       return;
-      }
-    
-      if (action === "profile-settings-back") {
-     // ✅ ведём себя как обычный back: из settings -> main профиля
-     if (state.tab !== "profile") setTab("profile");
-     openProfileMain();
-     return;
-   }
-
-
-      // ---------- Global navigation actions (available everywhere) ----------
-      if (action === "back") { // generic back
-  if (state.quizLock) return;
-
-  // ✅ FALLBACK: если видим settings профиля, но state.tab почему-то не "profile"
-  const ps = document.getElementById("profile-settings");
-  const psActive = ps && ps.classList.contains("is-active") && ps.hidden !== true;
-  if (psActive) {
-    // возвращаемся на main профиля предсказуемо
-    state.tab = "profile";
-    openProfileMain();
-    return;
-  }
+.lb-time{
+  text-align:right;
+  font-weight: 900;
+  color: rgba(15,23,42,0.55);
+}
 
-  const topView = state.viewStack?.[state.viewStack.length - 1];
-  if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
-    globalBack();
-    return;
-  }
-  if (state.tab === "courses") {
-    popCourses();
-    return;
+@media (max-width: 420px){
+  .lb-head{
+    grid-template-columns: 40px minmax(0, 1fr) 60px 54px;
   }
-  if (state.tab === "profile") {
-    if (getProfileTopScreen() !== "main") {
-      popProfile();
-      return;
-    }
-    setTab(state.prevTab || "home");
-    return;
+  .lb-row{
+    grid-template-columns: 40px minmax(0, 1fr) 60px 54px;
   }
-  if (state.tab === "ratings") {
-    setTab(state.prevTab || "home");
-    return;
+  .lb-score{
+    font-size: 12px;
   }
-  return;
-}
-
-      if (action === "go-home") { setTab("home"); return; }
-      if (action === "go-profile") { setTab("profile"); return; }
-      if (action === "open-ratings") { setTab("ratings"); return; }
-      if (action === "ratings-info") { showToast(t("ratings_info")); return; }
-
-      if (action === "open-resources") { openGlobal("resources"); return; }
-      if (action === "open-news") { openGlobal("news"); return; }
-      if (action === "open-notifications") { openGlobal("notifications"); return; }
-      if (action === "open-community") { openGlobal("community"); return; }
-      if (action === "open-about") { openGlobal("about"); return; }
-      if (action === "open-certificates") { openGlobal("certificates"); return; }
-      if (action === "open-archive") {
-  if (!canOpenArchiveNow()) {
-    showToast("Архив откроется после завершения активного тура.");
-    return;
+  .lb-time{
+    font-size: 12px;
   }
-  openGlobal("archive");
-  return;
-}
-
-         // All Subjects from anywhere (Home tile, etc.)
-if (action === "open-all-subjects") {
-  if (state.quizLock) return;
-  setTab("courses");
-  replaceCourses("all-subjects");
-  renderAllSubjects();
-  return;
-}
-
-      // Community links
-      if (action === "open-channel") {
-        openExternal("https://t.me/iClubuzofficial");
-        return;
-      }
-      if (action === "open-chat") {
-        openExternal("https://t.me/+yp3GKhnohKQxOTdi");
-        return;
-      }
-
-      // Resources hub: global books button (still placeholder)
-      if (action === "open-books-global") {
-        showToast("Books list: подключим через базу");
-        return;
-      }
-
-       if (action === "open-my-recs-global") {
-  // логика как из профиля
-  const profile = loadProfile();
-  const subjects = Array.isArray(profile?.subjects) ? profile.subjects : [];
-  const pick =
-    subjects.find(s => s.mode === "competitive")?.key ||
-    subjects.find(s => s.pinned)?.key ||
-    subjects[0]?.key ||
-    null;
-
-  if (!pick) {
-    showToast("Сначала выберите предметы в Courses.");
-    return;
-  }
+}
 
-  state.courses.subjectKey = pick;
-  saveState();
-  setTab("courses");
-  replaceCourses("my-recs");
-  renderMyRecs();
-  return;
-}
-
-      // ---------- Tab-specific / Courses actions ----------
-        if (action === "profile-certificates") { openGlobal("certificates"); return; }
-        if (action === "profile-community") { openGlobal("community"); return; }
-        if (action === "profile-about") { openGlobal("about"); return; }
-        if (action === "profile-open-my-recs") {
-  // открыть "Мои рекомендации" по первому разумному предмету
-  const profile = loadProfile();
-  const subjects = Array.isArray(profile?.subjects) ? profile.subjects : [];
-  const pick =
-    subjects.find(s => s.mode === "competitive")?.key ||
-    subjects.find(s => s.pinned)?.key ||
-    subjects[0]?.key ||
-    null;
-
-  if (!pick) {
-    showToast("Сначала выберите предметы в Courses.");
-    return;
-  }
+/* Bottom My Rank bar (поверх, как в примере) */
+.lb-mybar{
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(74px + var(--safe-bottom));
+  z-index: 30;
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  padding: 12px 12px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(47,111,214,0.98), rgba(47,111,214,0.86));
+  color: #fff;
+  box-shadow: 0 18px 40px rgba(15,23,42,0.28);
+}
 
-  state.courses.subjectKey = pick;
-  saveState();
-  setTab("courses");
-  replaceCourses("my-recs");
-  renderMyRecs();
-  return;
-}
-
-if (action === "profile-open-courses") {
-  setTab("courses");
-  replaceCourses("all-subjects");
-  renderAllSubjects();
-  return;
-}
-
-if (action === "profile-open-ratings") {
-  setTab("ratings");
-  return;
-}
-
-      // Courses actions
-      if (action === "to-subject-hub") {
-        replaceCourses("subject-hub");
-        renderSubjectHub();
-        return;
-      }
-
-      if (action === "open-all-subjects") {
-        replaceCourses("all-subjects");
-        renderAllSubjects();
-        return;
-      }
-
-      if (action === "open-lessons") {
-        pushCourses("lessons");
-        renderLessons();
-        return;
-      }
-
-      if (action === "open-practice") {
-        openPracticeStart();
-        return;
-      }
-
-      if (action === "practice-start") {
-        startPracticeNew();
-        return;
-      }
-
-       if (action === "practice-resume") {
-  const subjectKey = state.courses.subjectKey;
-  const draft = loadPracticeDraft();
-  if (!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz)) {
-    showToast(t("not_available"));
-    return;
-  }
+.lb-mybar-left{
+  width: 68px;
+  border-right: 1px solid rgba(255,255,255,0.22);
+  padding-right: 10px;
+}
 
-  state.quizLock = "practice";
-  state.quiz = draft.quiz;
-  state.quiz.paused = false;
-  state.quiz.pauseStartedAt = null;
-  clearPracticeDraft();
-
-  saveState();
-  replaceCourses("practice-quiz");
-  renderPracticeQuiz();
-  startPracticeQuestionTimer();
-  return;
-}
-
-      if (action === "practice-pause") {
-        handlePracticePause();
-        return;
-      }
-
-      if (action === "practice-submit") {
-        handlePracticeSubmit(false);
-        return;
-      }
-
-      if (action === "practice-review") {
-  pushCourses("practice-review");
-  renderPracticeReview();
-  return;
-}
-
-if (action === "practice-recommendations") {
-  pushCourses("practice-recs");
-  renderPracticeRecs();
-  return;
-}
-
-      if (action === "practice-back-to-result") {
-        // go to result without destroying stack
-        // simplest: pop until practice-result
-        while (state.courses.stack.length > 0 && getCoursesTopScreen() !== "practice-result") {
-          state.courses.stack.pop();
-        }
-        if (state.courses.stack.length === 0) state.courses.stack = ["practice-result"];
-        saveState();
-        showCoursesScreen(getCoursesTopScreen());
-        return;
-      }
-
-      if (action === "practice-again") {
-        clearPracticeDraft();
-        startPracticeNew();
-        return;
-      }
-
-      if (action === "open-tours") {
-        const profile = loadProfile();
-        const eligibility = canOpenActiveTours(profile, state.courses.subjectKey);
-        if (!eligibility.ok) {
-          toastToursDenied(eligibility.reason);
-          return;
-        }
-        pushCourses("tours");
-        return;
-      }
-
-       if (action === "open-archive-tours") {
-  if (!canOpenArchiveNow()) {
-    showToast("Архив откроется после завершения активного тура.");
-    return;
-  }
-  // пока архив — глобальный экран
-  openGlobal("archive");
-  return;
-}
-
-      if (action === "tour-start") {
-  openTourQuiz();
-  return;
-}
-
-// pick option
-if (action === "tour-pick") {
-  const ctx = state.tourContext;
-  if (!ctx) return;
-
-  const picked = Number(btn.dataset.index);
-  // highlight
-  $$("#tour-options .option").forEach(o => o.classList.remove("is-selected"));
-  btn.classList.add("is-selected");
-
-  // enable next
-  const next = $("#tour-next-btn");
-  if (next) next.disabled = false;
-
-  // store temporarily (not final submit yet)
-  ctx._pickedIndex = picked;
-  saveState();
-  return;
-}
-
-// next / finish
-if (action === "tour-next" || action === "tour-submit") {
-  const ctx = state.tourContext;
-  if (!ctx) return;
-
-  const picked = (ctx._pickedIndex === null || ctx._pickedIndex === undefined) ? null : Number(ctx._pickedIndex);
-  ctx._pickedIndex = null;
-  saveState();
-
-  submitTourAnswer({ pickedIndex: picked, auto: false });
-  return;
-}
-
-      if (action === "tour-review") {
-        pushCourses("tour-review");
-        return;
-      }
-
-      if (action === "tour-back-to-result") {
-        while (state.courses.stack.length > 0 && getCoursesTopScreen() !== "tour-result") {
-          state.courses.stack.pop();
-        }
-        if (state.courses.stack.length === 0) state.courses.stack = ["tour-result"];
-        saveState();
-        showCoursesScreen(getCoursesTopScreen());
-        return;
-      }
-
-      if (action === "tour-certificate") {
-        openGlobal("certificates");
-        return;
-      }
-
-      if (action === "open-books") {
-        pushCourses("books");
-        return;
-      }
-
-      if (action === "open-my-recommendations") {
-       pushCourses("my-recs");
-       renderMyRecs();
-       return;
-      }
-
-      if (action === "video-skip") {
-        showToast("video_skipped logged (demo)");
-        openPracticeStart();
-        return;
-      }
-
-      if (action === "video-complete") {
-        showToast("video_completed logged (demo)");
-        openPracticeStart();
-        return;
-      }
-
-      if (action === "resources-archive") {
-  if (!canOpenArchiveNow()) {
-    showToast("Архив откроется после завершения активного тура.");
-    return;
-  }
-  openGlobal("archive");
-  return;
-}
-    });
-
-    // Tours list click (demo)
-    const toursList = $("#tours-list");
-    if (toursList) {
-      toursList.addEventListener("click", () => {
-        openTourRules();
-      });
-    }
-  }
+.lb-mybar-label{
+  font-size: 10px;
+  font-weight: 900;
+  opacity: .92;
+  letter-spacing: .06em;
+}
+
+.lb-mybar-rank{
+  font-size: 18px;
+  font-weight: 1000;
+  margin-top: 2px;
+}
 
-  // ---------------------------
-  // Boot
-  // ---------------------------
-    // ---------------------------
-  // Splash: wait for critical images
-  // ---------------------------
-  function preloadImages(urls, { timeoutMs = 6000 } = {}) {
-    const unique = Array.from(new Set((urls || []).filter(Boolean)));
+.lb-mybar-mid{
+  flex: 1;
+  min-width: 0;
+}
 
-    const tasks = unique.map((url) => new Promise((resolve) => {
-      const img = new Image();
-      const done = () => resolve({ url, ok: true });
+.lb-mybar-name{
+  font-weight: 1000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-      img.onload = done;
-      img.onerror = () => resolve({ url, ok: false });
+.lb-mybar-meta{
+  font-size: 12px;
+  font-weight: 800;
+  opacity: .9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-      // ⚠️ чтобы не зависнуть навсегда на плохом файле
-      const timer = setTimeout(() => resolve({ url, ok: false, timeout: true }), timeoutMs);
+.lb-mybar-right{
+  text-align: right;
+  flex: 0 0 auto;
+}
 
-      img.onload = () => { clearTimeout(timer); done(); };
-      img.onerror = () => { clearTimeout(timer); resolve({ url, ok: false }); };
+.lb-mybar-score{
+  font-weight: 1000;
+}
 
-      img.src = url;
-    }));
+.lb-mybar-time{
+  font-size: 12px;
+  font-weight: 800;
+  opacity: .92;
+}
 
-    return Promise.all(tasks);
-  }
+/* =========================================================
+   TOUR QUIZ (strict) — UI like reference
+   ========================================================= */
 
-  function preloadAppImages() {
-    // ✅ критичные картинки, которые видны сразу
-    const urls = [
-      "logo.png",
-      "asset/informatics.png.png",
-      "asset/economics.png.png",
-      "asset/biology.png.png",
-      "asset/chemistry.png.png",
-      "asset/mathematics.png.png",
-    ];
-
-    return preloadImages(urls, { timeoutMs: 6000 });
-  }
+.tour-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+  margin: 6px 0 10px;
+}
+
+.tour-qof{
+  font-weight: 1000;
+  font-size: 14px;
+}
+
+.tour-progress-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.tour-progress-label{
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(15,23,42,0.55);
+}
+
+.tour-progress-pct{
+  font-size: 12px;
+  font-weight: 1000;
+  color: rgba(15,23,42,0.65);
+}
+
+.tour-progress-bar{
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.10);
+  overflow:hidden;
+  margin-top: 6px;
+}
+
+.tour-progress-fill{
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(47,111,214,0.95), rgba(47,111,214,0.75));
+}
+
+.tour-warn{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(239,68,68,0.25);
+  background: rgba(239,68,68,0.08);
+  cursor:pointer;
+}
+
+.tour-badges{
+  margin: 8px 0 10px;
+}
+
+.tour-badge{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 1000;
+  letter-spacing: .03em;
+  border: 1px solid rgba(47,111,214,0.20);
+  background: rgba(47,111,214,0.08);
+  color: rgba(15,23,42,0.78);
+}
+
+.tour-timers{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tour-timer-card{
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+  padding: 10px 12px;
+}
 
-     function boot() {
-    // ✅ показать splash и скрыть topbar (updateTopbarForView("splash") сработает внутри showView)
-    showView("splash");
-
-    const profile = loadProfile();
-    const lang = profile?.language || getTelegramLang() || "ru";
-    window.i18n?.setLang(lang);
-    applyStaticI18n();
-
-    const statusEl = $("#splash-status");
-    if (statusEl) statusEl.textContent = t("loading");
-
-    // ✅ минимум показываем splash чуть-чуть, чтобы не “мигало”
-    const minDelay = new Promise((r) => setTimeout(r, 250));
-
-    Promise.all([preloadAppImages(), minDelay]).then(() => {
-      if (!isRegistered()) {
-        showView("registration");
-        bindRegistration();
-        return;
-      }
-
-      renderAllSubjects();
-      renderHome();
-
-            // ✅ Требование: при полном запуске (reload/новый старт) всегда стартуем с Home
-      // Сворачивание/возврат не трогаем — там не происходит reload.
-      state.tab = "home";
-      saveState();
-
-      // ✅ Courses всегда начинает с All Subjects (когда пользователь туда зайдёт)
-      state.courses = state.courses || {};
-      state.courses.stack = ["all-subjects"];
-      saveState();
-
-      // Start at Home
-      setTab("home");
-    });
+.tour-timer-card.danger{
+  border-color: rgba(239,68,68,0.28);
+  background: rgba(239,68,68,0.05);
+}
+
+.tour-timer-cap{
+  font-size: 11px;
+  font-weight: 1000;
+  color: rgba(15,23,42,0.55);
+  letter-spacing: .05em;
+}
+
+.tour-timer-val{
+  font-size: 20px;
+  font-weight: 1100;
+  margin-top: 4px;
+}
+
+.tour-timer-delta{
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 900;
+  color: rgba(239,68,68,0.85);
+  min-height: 14px;
+}
+
+.tour-monitor{
+  margin: 10px 2px 0;
+  text-align:center;
+  letter-spacing: .10em;
+  font-weight: 900;
+  font-size: 10px;
+  opacity: .8;
+}
+
+/* ===== Profile Settings polish ===== */
+.settings-head{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+  padding: 10px 0 12px;
+  margin-bottom: 10px;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 2px;
+  align-items: center;
+}
+
+.settings-back{
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+}
+
+.settings-head-title{
+  font-weight: 900;
+  font-size: 16px;
+  line-height: 1.1;
+}
+
+.settings-head-sub{
+  grid-column: 2 / 3;
+  font-size: 12px;
+}
+
+/* card head with right button */
+.settings-card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+/* highlight chosen rows */
+.settings-row.is-on{
+  background: rgba(47,111,214,0.10);
+  border: 1px solid rgba(47,111,214,0.35);
+}
+.settings-row.is-on .muted.small{
+  color: rgba(47,111,214,0.95);
+}
+
+/* disabled because limit reached */
+/* Было: гасили всю строку */
+.settings-row.is-disabled{
+  opacity: 1;                 /* <-- важно */
+}
+
+/* Новое: приглушаем только текст/мету */
+.settings-row.is-disabled .settings-row-title{
+  opacity: 0.78;
+}
+.settings-row.is-disabled .muted,
+.settings-row.is-disabled .small{
+  opacity: 0.70;
+}
+
+/* Switch при disabled оставляем визуально нормальным */
+.settings-row.is-disabled .switch{
+  opacity: 1;
+}
+
+.settings-row.is-disabled .switch{
+  pointer-events: none;
+  opacity: 1;
+  display: inline-flex;
+}
+
+/* locked rows (non-competitive subjects): muted + no border + visible disabled switch */
+.settings-row.is-locked{
+  border: 0;
+  background: transparent;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+/* гасим только текстовую часть */
+.settings-row.is-locked .settings-row-left{
+  opacity: 0.55;
+}
+
+/* тумблер оставляем читаемым */
+.settings-row.is-locked .switch{
+  display: inline-flex;
+  opacity: 1;
+}
+
+.settings-row.is-locked .slider{
+  cursor: default;
+  opacity: 1;
+  background: rgba(15,23,42,0.06);
+  border: 1px solid rgba(15,23,42,0.12);
+}
+
+.settings-row.is-locked .slider:before{
+  background: rgba(255,255,255,0.95);
+}
+
+.settings-row.is-locked .slider:before{
+  background: rgba(255,255,255,0.95);
+}
+
+/* More nav rows */
+.settings-nav{
+  width: 100%;
+  border: 0;
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-nav + .settings-nav{
+  margin-top: 10px;
+}
+
+.settings-nav-ico{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(15,23,42,0.06);
+}
+
+.settings-nav-text{
+  min-width: 0;
+  display:flex;
+  flex-direction: column;
+  align-items:flex-start;
+  gap: 2px;
+  flex: 1;
+}
+
+.settings-nav-title{
+  font-weight: 900;
+}
+
+.settings-nav-sub{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.settings-nav-arrow{
+  font-size: 18px;
+  font-weight: 900;
+  color: rgba(15,23,42,0.35);
+}
+
+/* ===========================
+   Subject Hub (v2 layout)
+   =========================== */
+.subject-hub-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.subject-hub-title{
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.subject-hub-meta{
+  margin-top: 4px;
+  letter-spacing: 0.2px;
+}
+
+.subject-hub-all-btn{
+  padding: 10px 12px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.subject-hub-panels{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 560px) {
+  .subject-hub-panels{ grid-template-columns: 1fr 1fr; }
+}
+
+.panel-card{
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+.panel-row{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.panel-ico{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(47,111,214,0.12);
+  flex: 0 0 auto;
+}
+
+.mentor-avatar{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(47,111,214,0.12);
+  border: 1px solid rgba(0,0,0,0.06);
+  flex: 0 0 auto;
+}
+
+.panel-col{ min-width: 0; }
+
+.panel-kicker{
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: rgba(47,111,214,0.85);
+  margin-bottom: 2px;
+}
+
+.panel-title{
+  font-weight: 800;
+}
+
+.subject-hub-tabs{
+  display:flex;
+  align-items:center;
+  justify-content:space-between; /* ✅ равномерно */
+  gap: 0;                        /* ✅ убираем “зажатость” */
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  padding: 4px 0 0;
+  margin-bottom: 10px;
+}
+
+.hub-tab{
+  flex: 1 1 0;                   /* ✅ каждый таб занимает одинаковую долю */
+  text-align: center;            /* ✅ по центру */
+  appearance:none;
+  border: 0;
+  background: transparent;
+  padding: 12px 0;               /* чуть комфортнее */
+  font-weight: 800;
+  color: rgba(0,0,0,0.55);
+  cursor: pointer;
+  position: relative;
+}
+
+.hub-tab.is-active{
+  color: var(--primary);
+}
+
+.hub-tab.is-active::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-1px;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 999px;
+}
+
+.subject-hub-actions{
+  margin-top: 6px;
+}
+
+/* Bottom "All Subjects" button must be full-width like other cards */
+.cards-grid.subject-hub-bottom{
+  margin-top: 14px;
+  grid-template-columns: 1fr; /* force single column */
+}
+
+/* keep single column even on desktop where .cards-grid becomes 2 columns */
+@media (min-width: 560px) {
+  .cards-grid.subject-hub-bottom{
+    grid-template-columns: 1fr;
   }
+}
+
+.cards-grid.subject-hub-bottom .card-btn{
+  width: 100%;
+}
+/* Subject Hub lists should behave like Profile nav rows (single column) */
+.subject-hub-list{
+  display:block;
+}
+
+.subject-hub-actions{
+  margin-top: 6px;
+}
+
+.subject-hub-bottom{
+  margin-top: 14px;
+}
+
+/* Courses: section headers inside grid (Main / Additional) */
+.grid-section-title{
+  grid-column: 1 / -1;
+  margin-top: 6px;
+  padding: 10px 2px 6px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  color: rgba(0,0,0,0.75);
+}
+
+.grid-section-title:first-child{
+  margin-top: 0;
+}
+/* Courses: filter row under Main section title */
+.grid-section-filters{
+  grid-column: 1 / -1;
+  display:flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 2px 0 10px;
+}
 
-  function bindUI() {
-  bindTabbar();
-  bindTopbar();
-  bindActions();
-  bindRatingsUI(); // ✅ Leaderboard controls
+.grid-section-filters .chip{
+  appearance:none;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: rgba(15,23,42,0.03);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 13px;
+  cursor: pointer;
 }
 
-  // Init
-  bindUI();
-  boot();
+.grid-section-filters .chip.is-active{
+  border-color: rgba(47,111,214,0.35);
+  background: rgba(47,111,214,0.10);
+  color: var(--primary);
+}
+/* Courses: typography polish (premium, not childish) */
+.catalog-head .card-title{
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: 0.1px;
+}
+
+.catalog-badges .badge{
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+/* Courses catalog: icon like Home */
+.catalog-left{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.catalog-text{
+  min-width: 0;
+}
 
-})();
+.catalog-ico{
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: rgba(47,111,214,0.10);
+  border: 1px solid rgba(47,111,214,0.16);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.catalog-ico-img{
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  display:block;
+}
+/* ===== Courses: remove subject icons in catalog cards ===== */
+#view-courses .catalog-ico{
+  display: none !important;
+}
+#view-courses .catalog-left{
+  gap: 0 !important;
+}
+/* ===== Tabbar: SVG alignment + prevent sticky tap highlight ===== */
+.tab .tab-ico svg { display: block; }
+
+.tabbar .tab{
+  -webkit-tap-highlight-color: transparent;
+}
+.tabbar .tab:focus{
+  outline: none;
+}
