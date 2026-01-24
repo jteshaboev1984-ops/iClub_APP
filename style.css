@@ -2494,3 +2494,35 @@ body.modal-open { overflow: hidden; }
   font-size: 12px;
   padding: 5px 10px;
 }
+
+/* Courses catalog: icon like Home */
+.catalog-left{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.catalog-text{
+  min-width: 0;
+}
+
+.catalog-ico{
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: rgba(47,111,214,0.10);
+  border: 1px solid rgba(47,111,214,0.16);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.catalog-ico-img{
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  display:block;
+}
