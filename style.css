@@ -42,7 +42,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-bottom: calc(72px + var(--safe-bottom));
+  /* padding-bottom убран: он создавал лишний “пустой скролл” */
 }
 
 /* ----- Topbar ----- */
@@ -142,7 +142,8 @@ body {
 /* ----- Main / Views ----- */
 .main {
   flex: 1;
-  padding: 10px 12px 18px;
+  /* место под фиксированный tabbar + safe-area */
+  padding: 10px 12px calc(18px + 64px + var(--safe-bottom));
 }
 
 .view { display: none; }
@@ -1697,7 +1698,8 @@ body.modal-open { overflow: hidden; }
    ========================================================= */
 
 .leaderboard{
-  padding-bottom: calc(86px + var(--safe-bottom)); /* место под My Rank + tabbar */
+  /* tabbar уже учтён в .main, здесь оставляем место только под My Rank */
+  padding-bottom: 88px;
 }
 
 .lb-header{
@@ -2525,4 +2527,20 @@ body.modal-open { overflow: hidden; }
   height: 30px;
   object-fit: contain;
   display:block;
+}
+/* ===== Courses: remove subject icons in catalog cards ===== */
+#view-courses .catalog-ico{
+  display: none !important;
+}
+#view-courses .catalog-left{
+  gap: 0 !important;
+}
+/* ===== Tabbar: SVG alignment + prevent sticky tap highlight ===== */
+.tab .tab-ico svg { display: block; }
+
+.tabbar .tab{
+  -webkit-tap-highlight-color: transparent;
+}
+.tabbar .tab:focus{
+  outline: none;
 }
