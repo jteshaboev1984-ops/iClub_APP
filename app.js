@@ -622,20 +622,36 @@ function getReadingRefs(subjectKey, topic) {
     el.classList.toggle("is-active", v === viewName);
   });
 
-  // ✅ FIX: Telegram/Chrome may restore scroll AFTER we change DOM.
-  // Do a deferred reset to beat scroll restoration/anchoring.
-  const resetScroll = () => {
-    try {
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    } catch (e) {}
-  };
-  resetScroll();
-  requestAnimationFrame(resetScroll);
-  setTimeout(resetScroll, 0);
-
   updateTopbarForView(viewName);
+
+  // ✅ FIX: не просто "вверх страницы", а "к началу активного view"
+  const target = document.getElementById(`view-${viewName}`);
+  if (!target) return;
+
+  const jumpToTargetTop = () => {
+    // 1) если скроллится main — сбрасываем его
+    const mainEl = document.getElementById("main");
+    if (mainEl) mainEl.scrollTop = 0;
+
+    // 2) если скроллится документ — тоже сбрасываем
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // 3) главное: принудительно ставим начало активного view в верх видимой области
+    // (работает даже если браузер/вебвью "держит" странную позицию)
+    try {
+      target.scrollIntoView({ block: "start", inline: "nearest" });
+    } catch (e) {
+      // fallback
+      target.scrollIntoView(true);
+    }
+  };
+
+  // делаем несколько раз: сразу + после кадра + после 0ms,
+  // потому что WebView иногда "переигрывает" скролл после рендера
+  jumpToTargetTop();
+  requestAnimationFrame(jumpToTargetTop);
+  setTimeout(jumpToTargetTop, 0);
 }
 
   function setTab(tabName) {
