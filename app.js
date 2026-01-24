@@ -1910,40 +1910,45 @@ btn.addEventListener("click", (e) => {
   const mainSubjects = SUBJECTS.filter(s => s.type === "main");
 const additionalSubjects = SUBJECTS.filter(s => s.type !== "main");
 
-       // ---- Main catalog filter (Competitive / Study)
-  state.courses = state.courses || {};
+       // ---- Main catalog filter (Competitive / Study) — chips under Courses title
+state.courses = state.courses || {};
 
-  // ✅ миграция: если в старом стейте осталось "all" — считаем это "study"
-  if (!state.courses.mainFilter || state.courses.mainFilter === "all") {
-    state.courses.mainFilter = "study"; // competitive | study
-    saveState();
-  }
+// миграция: если осталось "all" — считаем "study"
+if (!state.courses.mainFilter || state.courses.mainFilter === "all") {
+  state.courses.mainFilter = "study"; // competitive | study
+  saveState();
+}
 
-  const renderMainFilterRow = () => {
-    const row = document.createElement("div");
-    row.className = "grid-section-filters";
-    row.innerHTML = `
-      <button type="button" class="chip ${state.courses.mainFilter === "competitive" ? "is-active" : ""}" data-main-filter="competitive">Competitive</button>
-      <button type="button" class="chip ${state.courses.mainFilter === "study" ? "is-active" : ""}" data-main-filter="study">Study</button>
-    `;
+const filtersWrap = $("#courses-filter-row");
+if (filtersWrap) filtersWrap.innerHTML = "";
 
-    row.querySelectorAll("[data-main-filter]").forEach(btn => {
-      const v = btn.getAttribute("data-main-filter");
-      btn.addEventListener("pointerup", (e) => {
-        e.preventDefault();
-        state.courses.mainFilter = v;
-        saveState();
-        renderAllSubjects();
-      });
-      btn.addEventListener("click", () => {
-        state.courses.mainFilter = v;
-        saveState();
-        renderAllSubjects();
-      });
+const renderMainFilterRow = () => {
+  if (!filtersWrap) return;
+
+  const row = document.createElement("div");
+  row.className = "grid-section-filters";
+  row.innerHTML = `
+    <button type="button" class="chip ${state.courses.mainFilter === "competitive" ? "is-active" : ""}" data-main-filter="competitive">Competitive</button>
+    <button type="button" class="chip ${state.courses.mainFilter === "study" ? "is-active" : ""}" data-main-filter="study">Study</button>
+  `;
+
+  row.querySelectorAll("[data-main-filter]").forEach(btn => {
+    const v = btn.getAttribute("data-main-filter");
+    btn.addEventListener("pointerup", (e) => {
+      e.preventDefault();
+      state.courses.mainFilter = v;
+      saveState();
+      renderAllSubjects();
     });
+    btn.addEventListener("click", () => {
+      state.courses.mainFilter = v;
+      saveState();
+      renderAllSubjects();
+    });
+  });
 
-    grid.appendChild(row);
-  };
+  filtersWrap.appendChild(row);
+};
 
   const isPinnedKey = (key) => {
     const us = userSubjects.find(x => x.key === key) || null;
@@ -1979,17 +1984,36 @@ const appendSubjectCard = (s) => {
   const head = document.createElement("button");
   head.type = "button";
   head.className = "catalog-head";
-  head.innerHTML = `
-    <div class="catalog-row">
-      <div>
+  const imgKey = String(s.key || "").trim();
+const imgPng2 = `asset/${imgKey}.png.png`;
+const imgPng = `asset/${imgKey}.png`;
+
+head.innerHTML = `
+  <div class="catalog-row">
+    <div class="catalog-left">
+      <div class="catalog-thumb" aria-hidden="true">
+        <img class="catalog-thumb-img" src="${imgPng2}" alt="">
+      </div>
+      <div class="catalog-text">
         <div class="card-title" style="margin:0">${escapeHTML(s.title)}</div>
       </div>
-      <div class="catalog-badges">
-     ${isPinned ? `<span class="badge badge-pin">Pinned</span>` : ``}
-     ${s.type === "main" && isComp ? `<span class="badge badge-comp">Competitive</span>` : ``}
-   </div>
- </div>
-  `;
+    </div>
+
+    <div class="catalog-badges">
+      ${isPinned ? `<span class="badge badge-pin">Pinned</span>` : ``}
+      ${s.type === "main" && isComp ? `<span class="badge badge-comp">Competitive</span>` : ``}
+    </div>
+  </div>
+`;
+
+// fallback: если нет .png.png — пробуем .png
+const imgEl = head.querySelector(".catalog-thumb-img");
+if (imgEl) {
+  imgEl.onerror = () => {
+    imgEl.onerror = null;
+    imgEl.src = imgPng;
+  };
+}
 
   head.addEventListener("click", () => {
     // "Открыть" — без изменения профиля, как в контракте
@@ -2046,28 +2070,31 @@ const appendSubjectCard = (s) => {
 };
 
   // ---- MAIN section + filter row + pinned-first + filter mode
-  if (mainSubjects.length) {
-    appendSectionTitle("Main (Cambridge)");
-    renderMainFilterRow();
+  // ✅ chips render once under "Courses"
+renderMainFilterRow();
 
-    let mainOut = mainSubjects.slice();
-    if (state.courses.mainFilter === "competitive") {
-      mainOut = mainOut.filter(s => isCompetitiveKey(s.key));
-    } else if (state.courses.mainFilter === "study") {
-      mainOut = mainOut.filter(s => !isCompetitiveKey(s.key));
-    }
-    mainOut = sortPinnedFirst(mainOut);
+if (mainSubjects.length) {
+  appendSectionTitle("Main (Cambridge)");
 
-    mainOut.forEach(appendSubjectCard);
+  let mainOut = mainSubjects.slice();
+  if (state.courses.mainFilter === "competitive") {
+    mainOut = mainOut.filter(s => isCompetitiveKey(s.key));
+  } else if (state.courses.mainFilter === "study") {
+    mainOut = mainOut.filter(s => !isCompetitiveKey(s.key));
   }
+  mainOut = sortPinnedFirst(mainOut);
+
+  mainOut.forEach(appendSubjectCard);
+}
+
 
     // ---- ADDITIONAL section (always Study by spec), pinned-first
-  // ✅ По UX: при фильтре Competitive доп. предметы не показываем
-  if (state.courses.mainFilter !== "competitive" && additionalSubjects.length) {
-    appendSectionTitle("Additional");
-    const addOut = sortPinnedFirst(additionalSubjects);
-    addOut.forEach(appendSubjectCard);
-  }
+  // ✅ при Competitive additional не показываем
+   if (state.courses.mainFilter !== "competitive" && additionalSubjects.length) {
+     appendSectionTitle("Additional");
+     const addOut = sortPinnedFirst(additionalSubjects);
+     addOut.forEach(appendSubjectCard);
+   }
 }
 
   function openSubjectHub(subjectKey) {
