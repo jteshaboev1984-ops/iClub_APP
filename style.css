@@ -14,7 +14,13 @@ body {
   background: var(--bg);
   overflow-x: hidden;
 }
-
+/* ✅ Disable scroll anchoring (prevents “blank area then content” after DOM changes) */
+html, body {
+  overflow-anchor: none;
+}
+.view, .main, .content {
+  overflow-anchor: none;
+}
 /* ----- Theme ----- */
 :root {
   --primary: #2F6FD6;
