@@ -6,15 +6,15 @@
 /* ----- CSS Reset (lightweight) ----- */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
+
 body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   line-height: 1.35;
   color: var(--text);
   background: var(--bg);
-  overflow-x: hidden;
+  overflow: hidden; /* ✅ ключевое: больше не скроллим body */
 }
-
 /* ----- Theme ----- */
 :root {
   --primary: #2F6FD6;
@@ -39,12 +39,12 @@ body {
 
 /* ----- App Shell ----- */
 .app {
-  min-height: 100dvh;          /* ✅ min-height тоже на dvh, чтобы не раздувало экран */
-  height: 100dvh;
+  height: 100dvh; /* ✅ одна высота, без конфликтов */
   display: flex;
   flex-direction: column;
-  padding-bottom: 0;
+  padding-bottom: calc(64px + var(--safe-bottom)); /* ✅ резерв под фикс-tabbar */
 }
+
 .main{
   min-height: 0;               /* ✅ чтобы flex-ребёнок не раздувал высоту */
 }
@@ -145,7 +145,10 @@ body {
 /* ----- Main / Views ----- */
 .main {
   flex: 1;
-  padding: 10px 12px calc(18px + 64px + var(--safe-bottom)); /* ✅ место под tabbar */
+  min-height: 0;          /* ✅ важно для flex-scroll */
+  overflow-y: auto;       /* ✅ скролл теперь здесь */
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 12px 18px; /* ✅ обычный нижний отступ, без “таббар-подушки” */
 }
 
 .view { display: none; }
