@@ -2423,3 +2423,39 @@ body.modal-open { overflow: hidden; }
 .grid-section-title:first-child{
   margin-top: 0;
 }
+/* Courses: filter row under Main section title */
+.grid-section-filters{
+  grid-column: 1 / -1;
+  display:flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 2px 0 10px;
+}
+
+.grid-section-filters .chip{
+  appearance:none;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: rgba(15,23,42,0.03);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.grid-section-filters .chip.is-active{
+  border-color: rgba(47,111,214,0.35);
+  background: rgba(47,111,214,0.10);
+  color: var(--primary);
+}
+/* Courses: typography polish (premium, not childish) */
+.catalog-head .card-title{
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: 0.1px;
+}
+
+.catalog-badges .badge{
+  font-size: 12px;
+  padding: 5px 10px;
+}
