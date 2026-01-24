@@ -1926,14 +1926,6 @@ btn.addEventListener("click", (e) => {
           <span class="badge ${isComp ? "badge-comp" : "badge-study"}">${isComp ? "Competitive" : "Study"}</span>
         </div>
       </div>
-
-      <div class="muted small catalog-hint">
-        ${us
-          ? (isComp
-              ? `Competitive управляется в Profile Settings (лимит 2).`
-              : `Учебный режим. Можно закрепить или открыть разово.`)
-          : `Не добавлен. Можно закрепить или открыть разово.`}
-      </div>
     `;
 
     head.addEventListener("click", () => {
@@ -1944,16 +1936,28 @@ btn.addEventListener("click", (e) => {
       renderSubjectHub();
     });
 
-    // Actions row
+        // Actions row
     const actions = document.createElement("div");
     actions.className = "catalog-actions";
 
-    // 1) Pin/Unpin
+    // 1) Open (primary)
+    const btnOpen = document.createElement("button");
+    btnOpen.type = "button";
+    btnOpen.className = "mini-btn";
+    btnOpen.textContent = "Открыть";
+    btnOpen.addEventListener("click", (e) => {
+      e.stopPropagation();
+      state.courses.subjectKey = s.key;
+      saveState();
+      pushCourses("subject-hub");
+      renderSubjectHub();
+    });
+
+    // 2) Pin/Unpin (secondary)
     const btnPin = document.createElement("button");
     btnPin.type = "button";
     btnPin.className = "mini-btn ghost";
-    btnPin.textContent = isPinned ? "Убрать из закреплённых" : "Закрепить";
-
+    btnPin.textContent = isPinned ? "Открепить" : "Закрепить";
     btnPin.addEventListener("click", (e) => {
       e.stopPropagation();
 
@@ -1964,63 +1968,16 @@ btn.addEventListener("click", (e) => {
       }
 
       saveProfile(updated);
-      renderHome();       // Home должен сразу обновляться
-      renderAllSubjects(); // и каталог тоже
-      showToast(isPinned ? "Убрано из закреплённых" : "Закреплено");
+      renderHome();
+      renderAllSubjects();
+      showToast(isPinned ? "Откреплено" : "Закреплено");
     });
 
-    // 2) Open once (explicit action)
-    const btnOnce = document.createElement("button");
-    btnOnce.type = "button";
-    btnOnce.className = "mini-btn";
-    btnOnce.textContent = "Открыть один раз";
-    btnOnce.addEventListener("click", (e) => {
-      e.stopPropagation();
-      state.courses.subjectKey = s.key;
-      saveState();
-      pushCourses("subject-hub");
-      renderSubjectHub();
-    });
-
+    actions.appendChild(btnOpen);
     actions.appendChild(btnPin);
-    actions.appendChild(btnOnce);
-
-    // 3) Competitive manage (disabled-ish action pointing to Profile Settings)
-    const compRow = document.createElement("div");
-compRow.className = "catalog-competitive-row";
-
-const compInfo = document.createElement("div");
-compInfo.className = "catalog-competitive-info";
-
-const infoText = document.createElement("div");
-infoText.className = "muted small";
-if (!profile.is_school_student) {
-  infoText.textContent = "Competitive/туры недоступны (не школьник).";
-} else if (isComp) {
-  infoText.textContent = "Competitive включён. Управление — в Profile Settings.";
-} else if (competitiveCount >= 2) {
-  infoText.textContent = "Лимит 2 Competitive. Управление — в Profile Settings.";
-} else {
-  infoText.textContent = "Competitive настраивается в Profile Settings (лимит 2).";
-}
-
-const btnManage = document.createElement("button");
-btnManage.type = "button";
-btnManage.className = "link-btn";
-btnManage.textContent = "В настройки";
-btnManage.addEventListener("click", (e) => {
-  e.stopPropagation();
-  setTab("profile");
-  openProfileSettings();
-});
-
-compInfo.appendChild(infoText);
-compInfo.appendChild(btnManage);
-compRow.appendChild(compInfo);
 
     card.appendChild(head);
     card.appendChild(actions);
-    card.appendChild(compRow);
 
     grid.appendChild(card);
   });
