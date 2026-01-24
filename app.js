@@ -3267,17 +3267,23 @@ function bindTabbar() {
 
   $$(".tabbar .tab").forEach(btn => {
     // ✅ Mobile-friendly: pointerup работает стабильнее, чем click в WebView
-    btn.addEventListener("pointerup", (e) => {
+        btn.addEventListener("pointerup", (e) => {
       const now = Date.now();
       if (now - lastTapTs < 250) return; // антидубль
       lastTapTs = now;
 
       e.preventDefault();
       handle(btn);
+
+      // ✅ убираем “липкий” focus на мобилках
+      try { btn.blur(); } catch {}
     });
 
     // ✅ Desktop fallback
-    btn.addEventListener("click", () => handle(btn));
+    btn.addEventListener("click", () => {
+      handle(btn);
+      try { btn.blur(); } catch {}
+    });
   });
 }
 
@@ -3887,25 +3893,18 @@ if (action === "tour-next" || action === "tour-submit") {
       renderAllSubjects();
       renderHome();
 
-      if (!["home", "courses", "ratings", "profile"].includes(state.tab)) {
-        state.tab = "home";
-        saveState();
-      }
+            // ✅ Требование: при полном запуске (reload/новый старт) всегда стартуем с Home
+      // Сворачивание/возврат не трогаем — там не происходит reload.
+      state.tab = "home";
+      saveState();
 
-      // ✅ ВАЖНО: если таб courses был активен до reload — НЕ восстанавливаем subject-hub
-      if (state.tab === "courses") {
-        state.courses = state.courses || {};
-        state.courses.stack = ["all-subjects"];
-        saveState();
-      }
+      // ✅ Courses всегда начинает с All Subjects (когда пользователь туда зайдёт)
+      state.courses = state.courses || {};
+      state.courses.stack = ["all-subjects"];
+      saveState();
 
-      // Start at base tab view
-      setTab(state.tab);
-
-      // ✅ Safety: на старте courses всегда показывает All Subjects
-      if (state.tab === "courses") {
-        replaceCourses("all-subjects");
-      }
+      // Start at Home
+      setTab("home");
     });
   }
 
