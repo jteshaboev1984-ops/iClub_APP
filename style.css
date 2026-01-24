@@ -39,13 +39,12 @@ body {
 
 /* ----- App Shell ----- */
 .app {
-  min-height: 100vh;
-  height: 100dvh;              /* ✅ фикс “пустого скролла” на коротких экранах */
+  min-height: 100dvh;          /* ✅ min-height тоже на dvh, чтобы не раздувало экран */
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   padding-bottom: 0;
 }
-
 .main{
   min-height: 0;               /* ✅ чтобы flex-ребёнок не раздувал высоту */
 }
@@ -177,7 +176,7 @@ body {
 
 /* ----- Splash ----- */
 .center {
-  min-height: calc(100vh - 120px);
+  min-height: calc(100dvh - 120px); /* ✅ */
   display: flex;
   flex-direction: column;
   align-items: center;
