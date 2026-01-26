@@ -100,6 +100,26 @@
       toast_lang_updated: "Язык интерфейса обновлён",
 
       practice: "Практика",
+      practice_subtitle: "10 вопросов • от простого к сложному",
+      practice_chip_no_anticheat: "Без античита",
+      practice_chip_pause: "Можно прервать",
+      practice_chip_best_saved: "Лучший результат сохраняется",
+
+      practice_subject_label: "Предмет",
+      practice_best_result: "Лучший результат",
+      practice_best_time: "Лучшее время",
+      practice_last_attempts: "Последние попытки",
+      practice_all: "Все",
+      practice_no_attempts: "Пока нет попыток",
+
+      practice_col_date: "Дата",
+      practice_col_score: "Счёт",
+      practice_col_time: "Время",
+
+      practice_start: "Начать практику",
+      practice_time_min_suffix: "м",
+      practice_time_sec_suffix: "с",
+ 
       practice_paused: "Практика приостановлена",
       practice_resume: "Продолжить",
       practice_restart: "Начать заново",
@@ -211,6 +231,26 @@
       toast_lang_updated: "Interfeys tili yangilandi",
        
       practice: "Amaliyot",
+      practice_subtitle: "10 savol • osondan qiyinga",
+      practice_chip_no_anticheat: "Anti-cheatsiz",
+      practice_chip_pause: "To‘xtatish mumkin",
+      practice_chip_best_saved: "Eng yaxshi natija saqlanadi",
+
+      practice_subject_label: "Fan",
+      practice_best_result: "Eng yaxshi natija",
+      practice_best_time: "Eng yaxshi vaqt",
+      practice_last_attempts: "So‘nggi urinishlar",
+      practice_all: "Barchasi",
+      practice_no_attempts: "Hali urinish yo‘q",
+
+      practice_col_date: "Sana",
+      practice_col_score: "Hisob",
+      practice_col_time: "Vaqt",
+
+      practice_start: "Amaliyotni boshlash",
+      practice_time_min_suffix: "m",
+      practice_time_sec_suffix: "s",
+ 
       practice_paused: "Amaliyot to‘xtatildi",
       practice_resume: "Davom ettirish",
       practice_restart: "Qayta boshlash",
@@ -322,6 +362,26 @@
       toast_lang_updated: "Interface language updated",
  
       practice: "Practice",
+      practice_subtitle: "10 questions • easy to hard",
+      practice_chip_no_anticheat: "No anti-cheat",
+      practice_chip_pause: "Can pause",
+      practice_chip_best_saved: "Best result is saved",
+
+      practice_subject_label: "Subject",
+      practice_best_result: "Best result",
+      practice_best_time: "Best time",
+      practice_last_attempts: "Recent attempts",
+      practice_all: "All",
+      practice_no_attempts: "No attempts yet",
+
+      practice_col_date: "Date",
+      practice_col_score: "Score",
+      practice_col_time: "Time",
+
+      practice_start: "Start practice",
+      practice_time_min_suffix: "m",
+      practice_time_sec_suffix: "s",
+ 
       practice_paused: "Practice paused",
       practice_resume: "Resume",
       practice_restart: "Start over",
