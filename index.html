@@ -397,22 +397,67 @@
             <!-- Practice Start -->
             <section id="courses-practice-start" class="stack-screen" data-stack="courses" data-screen="practice-start">
               <div class="section">
-                <div class="h1">Практика</div>
-                <div class="muted">10 вопросов, “лесенка” по сложности</div>
+                <div class="h1" data-i18n="practice">Практика</div>
+                <div class="muted" data-i18n="practice_subtitle">10 вопросов • от простого к сложному</div>
               </div>
 
-              <div class="card">
-                <div class="card-title">Правила</div>
-                <ul class="muted small">
-                  <li>Античит не применяется</li>
-                  <li>Можно остановить и продолжить позже</li>
-                  <li>Лучший результат сохраняется</li>
-                </ul>
+              <div class="practice-chips" role="list" aria-label="Practice highlights">
+                <span class="chip" role="listitem" data-i18n="practice_chip_no_anticheat">Без античита</span>
+                <span class="chip" role="listitem" data-i18n="practice_chip_pause">Можно прервать</span>
+                <span class="chip" role="listitem" data-i18n="practice_chip_best_saved">Лучший результат сохраняется</span>
               </div>
 
-              <div class="actions-row">
-               <button id="practice-resume-btn" class="btn" type="button" data-action="practice-resume" style="display:none">Продолжить</button>
-               <button id="practice-restart-btn" class="btn primary" type="button" data-action="practice-start">Начать</button>
+              <div class="practice-hero">
+                <div class="practice-hero-top">
+                  <div class="practice-hero-left">
+                    <div class="practice-hero-kicker" data-i18n="practice_subject_label">Предмет</div>
+                    <div id="practice-subject-title" class="practice-hero-title">—</div>
+                  </div>
+                </div>
+
+                <div class="practice-hero-metrics">
+                  <div class="practice-metric">
+                    <div class="practice-metric-label" data-i18n="practice_best_result">Лучший результат</div>
+                    <div class="practice-metric-value">
+                      <span id="practice-best-score">—</span>
+                      <span id="practice-best-percent" class="practice-metric-sub"></span>
+                    </div>
+                  </div>
+
+                  <div class="practice-metric">
+                    <div class="practice-metric-label" data-i18n="practice_best_time">Лучшее время</div>
+                    <div class="practice-metric-value">
+                      <span id="practice-best-time">—</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="practice-last card">
+                <div class="practice-last-head">
+                  <div class="card-title" data-i18n="practice_last_attempts">Последние попытки</div>
+                  <button id="practice-history-link" class="btn-link" type="button" data-action="practice-history" style="display:none" data-i18n="practice_all">Все</button>
+                </div>
+
+                <div id="practice-last-empty" class="muted small" style="display:none" data-i18n="practice_no_attempts">Пока нет попыток</div>
+
+                <div class="practice-table-wrap">
+                  <table class="practice-table" aria-label="Practice attempts">
+                    <thead>
+                      <tr>
+                        <th data-i18n="practice_col_date">Дата</th>
+                        <th data-i18n="practice_col_score">Счёт</th>
+                        <th data-i18n="practice_col_time">Время</th>
+                      </tr>
+                    </thead>
+                    <tbody id="practice-last-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="practice-start-actions">
+                <button id="practice-resume-btn" class="btn" type="button" data-action="practice-resume" style="display:none" data-i18n="practice_resume">Продолжить</button>
+                <button id="practice-restart-btn" class="btn primary" type="button" data-action="practice-start" data-i18n="practice_start">Начать практику</button>
               </div>
             </section>
 
