@@ -679,6 +679,8 @@ function getReadingRefs(subjectKey, topic) {
     const regionEl = $("#reg-region");
     const districtEl = $("#reg-district");
     if (!regionEl || !districtEl) return;
+    // detect fallback mode (default = true, switch off if DB is used)
+    let fallback = true;
 
     // default state
     districtEl.disabled = true;
@@ -701,6 +703,7 @@ function getReadingRefs(subjectKey, topic) {
     const useDb = sbRegions.length > 0;
 
     if (useDb) {
+     fallback = false;
       // DB mode: region value = region.id, label = region.name
       fillSelectOptionsKV(
         regionEl,
