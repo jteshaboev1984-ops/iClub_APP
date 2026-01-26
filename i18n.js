@@ -135,9 +135,24 @@
       practice_saved_to_my_recs: "Рекомендации сохранены в «Мои рекомендации»",
       practice_nothing_to_save: "Нет ошибок — сохранять нечего. Красиво.",
 
+      progress_trend: "Тренд прогресса",
+      open_tour_btn: "Открыть тур",
+
+      tours_tour_label: "Тур",
+      tours_best_result: "Лучший результат",
+      tours_best_time: "Лучшее время",
+
+      tours_status_title: "Туры пока недоступны",
+      tours_status_desc: "Даты и список туров появятся здесь после публикации.",
+
+      tours_status_not_school_title: "Туры доступны только школьникам",
+      tours_status_not_school_desc: "Заполните профиль как школьник, чтобы участвовать в турах.",
+   
+      tours_status_not_comp_title: "Туры доступны только в соревновательном режиме",
+      tours_status_not_comp_desc: "Добавьте предмет в соревновательном режиме, чтобы открыть туры.",
       tours_empty_title: "Туры появятся позже",
       tours_empty_desc: "Этот раздел активируется после подключения базы и публикации дат туров.",
-            tours_title: "Туры",
+      tours_title: "Туры",
       tours_subtitle: "Активные и прошедшие",
       tours_subject_label: "Предмет",
       tours_fact_questions: "Вопросов",
@@ -285,6 +300,22 @@
       practice_topics: "Mavzular",
       practice_saved_to_my_recs: "Tavsiyalar «Mening tavsiyalarim»ga saqlandi",
       practice_nothing_to_save: "Xato yo‘q — saqlash shart emas. Zo‘r.",
+
+      progress_trend: "O‘sish trendlari",
+      open_tour_btn: "Turni ochish",
+
+      tours_tour_label: "Tur",
+      tours_best_result: "Eng yaxshi natija",
+      tours_best_time: "Eng yaxshi vaqt",
+
+      tours_status_title: "Turlar hozircha mavjud emas",
+      tours_status_desc: "Tur sanalari va ro‘yxati e’lon qilingach shu yerda ko‘rinadi.",
+
+      tours_status_not_school_title: "Turlar faqat o‘quvchilar uchun",
+      tours_status_not_school_desc: "Ishtirok etish uchun profilni o‘quvchi sifatida to‘ldiring.",
+
+      tours_status_not_comp_title: "Turlar uchun competitive rejim kerak",
+      tours_status_not_comp_desc: "Turlarni ochish uchun fanni competitive rejimda qo‘shing.",
 
       tours_empty_title: "Turlar keyinroq paydo bo‘ladi",
       tours_empty_desc: "Bu bo‘lim baza ulanganidan va tur sanalari e’lon qilingandan so‘ng ishlaydi.",
@@ -438,6 +469,22 @@
       practice_saved_to_my_recs: "Saved to “My recommendations”",
       practice_nothing_to_save: "No mistakes — nothing to save. Nice.",
 
+      progress_trend: "Progress trend",
+      open_tour_btn: "Open tour",
+
+      tours_tour_label: "Tour",
+      tours_best_result: "Best result",
+      tours_best_time: "Best time",
+
+      tours_status_title: "Tours are not available yet",
+      tours_status_desc: "Tour dates and the list will appear here after publication.",
+
+      tours_status_not_school_title: "Tours are for students only",
+      tours_status_not_school_desc: "Complete your profile as a student to participate.",
+
+      tours_status_not_comp_title: "Tours require competitive mode",
+      tours_status_not_comp_desc: "Add this subject in competitive mode to unlock tours.",
+        
       tours_empty_title: "Tours will appear later",
       tours_empty_desc: "This section becomes available after the database is connected and tour dates are published.",
       tours_title: "Tours",
