@@ -1105,7 +1105,7 @@ function bindRatingsUI() {
     return;
   }
 
-        if (state.courses.stack.length > 1) {
+          if (state.courses.stack.length > 1) {
     state.courses.stack.pop();
     saveState();
 
@@ -1114,7 +1114,7 @@ function bindRatingsUI() {
 
     // ✅ Ensure correct screen rendering after back
     if (next === "tours") {
-      renderToursStart();
+      renderToursStart();          // ✅ вернёт корректный вид туров после выхода из правил
     } else if (next === "practice-start") {
       renderPracticeStart();
     } else if (next === "subject-hub") {
@@ -1122,6 +1122,7 @@ function bindRatingsUI() {
     }
 
     return;
+  }
 
   const targetTab = state.courses.entryTab || state.prevTab || "home";
   setTab(targetTab);
