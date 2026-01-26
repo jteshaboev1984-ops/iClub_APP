@@ -550,19 +550,56 @@
 
             <!-- Tours List -->
             <section id="courses-tours" class="stack-screen" data-stack="courses" data-screen="tours">
-              <div class="section">
-                <div class="h1">Туры</div>
-                <div class="muted">Активные и прошедшие</div>
-              </div>
-              <div id="tours-list" class="list">
-                <div class="empty muted">Туры появятся при подключении базы.</div>
-              </div>
+  <div class="section">
+    <div class="h1" data-i18n="tours_title">Туры</div>
+    <div class="muted" data-i18n="tours_subtitle">Активные и прошедшие</div>
+  </div>
 
-              <div class="actions-row">
-                <button class="btn" type="button" data-action="open-archive">Архив туров</button>
-                <button class="btn primary" type="button" data-action="to-subject-hub">К предмету</button>
-              </div>
-            </section>
+  <!-- Subject hero -->
+  <div class="tours-hero">
+    <div class="tours-hero-top">
+      <div>
+        <div class="tours-hero-kicker" data-i18n="tours_subject_label">Предмет</div>
+        <div id="tours-subject-title" class="tours-hero-title">—</div>
+      </div>
+    </div>
+
+    <div class="tours-hero-facts" aria-label="Tour facts">
+      <div class="tours-fact">
+        <div class="tours-fact-label" data-i18n="tours_fact_questions">Вопросов</div>
+        <div class="tours-fact-val">20</div>
+      </div>
+      <div class="tours-fact">
+        <div class="tours-fact-label" data-i18n="tours_fact_attempts">Попытка</div>
+        <div class="tours-fact-val" data-i18n="tours_fact_attempts_one">1</div>
+      </div>
+      <div class="tours-fact">
+        <div class="tours-fact-label" data-i18n="tours_fact_pause">Пауза</div>
+        <div class="tours-fact-val" data-i18n="tours_fact_pause_no">Нет</div>
+      </div>
+      <div class="tours-fact">
+        <div class="tours-fact-label" data-i18n="tours_fact_rules">Контроль</div>
+        <div class="tours-fact-val" data-i18n="tours_fact_rules_on">Включён</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tours-tabs" role="tablist" aria-label="Tours tabs">
+    <button id="tours-tab-active" class="tours-tab is-active" type="button" data-action="tours-tab-active" role="tab" aria-selected="true" data-i18n="tours_tab_active">Активные</button>
+    <button id="tours-tab-past" class="tours-tab" type="button" data-action="tours-tab-past" role="tab" aria-selected="false" data-i18n="tours_tab_past">Прошедшие</button>
+  </div>
+
+  <!-- List -->
+  <div id="tours-list" class="list">
+    <div class="empty muted" data-i18n="tours_empty">Туры появятся при подключении базы.</div>
+  </div>
+
+  <div class="actions-row">
+    <button class="btn" type="button" data-action="open-archive" data-i18n="tours_archive_btn">Архив туров</button>
+    <button class="btn primary" type="button" data-action="to-subject-hub" data-i18n="to_subject_btn">К предмету</button>
+  </div>
+</section>
 
             <!-- Tour Rules -->
             <section id="courses-tour-rules" class="stack-screen" data-stack="courses" data-screen="tour-rules">
