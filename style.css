@@ -1002,6 +1002,40 @@ html, body {
   gap: 10px;
   margin-top: 12px;
 }
+.practice-micro{
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.16);
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.practice-micro-label{
+  font-size: 12px;
+  font-weight: 800;
+  opacity: .92;
+  white-space: nowrap;
+}
+.practice-micro-bars{
+  flex: 1;
+  display:flex;
+  align-items:flex-end;
+  justify-content: flex-end;
+  gap: 6px;
+  min-height: 22px;
+}
+.practice-micro-bar{
+  width: 16px;
+  border-radius: 6px;
+  background: rgba(255,255,255,.34);
+  border: 1px solid rgba(255,255,255,.18);
+  height: 6px; /* will be overridden inline */
+}
+.practice-micro-bar.is-last{
+  background: rgba(255,255,255,.62);
+  border-color: rgba(255,255,255,.28);
+}
 .practice-metric{
   background: rgba(255,255,255,.10);
   border: 1px solid rgba(255,255,255,.16);
