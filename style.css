@@ -1025,6 +1025,24 @@ html, body {
   justify-content: space-between;
   gap: 12px;
 }
+.practice-micro-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.practice-micro-delta{
+  font-size: 12px;
+  font-weight: 900;
+  opacity: .92;
+  white-space: nowrap;
+}
+
+.practice-micro-delta.is-pos{ opacity: .95; }
+.practice-micro-delta.is-neg{ opacity: .95; }
+
 .practice-micro-label{
   font-size: 12px;
   font-weight: 800;
@@ -2860,4 +2878,115 @@ body.modal-open { overflow: hidden; }
 .tours-empty-desc{
   font-size: 13px;
   line-height: 1.35;
+}
+.tours-hero-sub{
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  opacity: .92;
+}
+
+.tours-hero-metrics{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.tours-metric{
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.tours-metric-label{
+  font-size: 12px;
+  opacity: .9;
+}
+
+.tours-metric-value{
+  margin-top: 6px;
+  display:flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.tours-metric-sub{
+  font-size: 12px;
+  font-weight: 700;
+  opacity: .9;
+}
+
+/* Trend like practice */
+.tours-micro{
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.16);
+}
+
+.tours-micro-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.tours-micro-label{
+  font-size: 12px;
+  font-weight: 800;
+  opacity: .92;
+  white-space: nowrap;
+}
+
+.tours-micro-delta{
+  font-size: 12px;
+  font-weight: 900;
+  opacity: .92;
+  white-space: nowrap;
+}
+
+.tours-micro-bars{
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-end;
+  gap: 6px;
+  min-height: 22px;
+}
+
+.tours-micro-bar{
+  width: 16px;
+  border-radius: 6px;
+  background: rgba(255,255,255,.34);
+  border: 1px solid rgba(255,255,255,.18);
+  height: 6px; /* overridden inline */
+}
+
+.tours-micro-bar.is-last{
+  background: rgba(255,255,255,.62);
+  border-color: rgba(255,255,255,.28);
+}
+
+.tours-status{
+  margin: 0 14px 10px;
+  text-align: center;
+  padding: 16px 14px;
+}
+
+.tours-status-title{
+  font-weight: 900;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.tours-status-desc{
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.tours-open-wrap{
+  margin: 0 14px 10px;
 }
