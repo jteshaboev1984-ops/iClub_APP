@@ -4347,6 +4347,41 @@ if (action === "tour-next" || action === "tour-submit") {
     return preloadImages(urls, { timeoutMs: 6000 });
   }
 
+     // ---------------------------
+  // Debug: Registration reset helpers
+  // ---------------------------
+  function resetRegistrationSoft() {
+    // Local-only reset (keeps Supabase auth session)
+    try {
+      localStorage.removeItem("profile");
+      localStorage.removeItem("state");
+
+      // если у тебя есть другие ключи — добавим позже точечно
+    } catch (e) {}
+
+    showView("registration");
+    bindRegistration();
+  }
+
+  async function resetRegistrationHard() {
+    // Full reset: sign out + clear local storage + reload
+    try {
+      if (window.sb) {
+        await window.sb.auth.signOut();
+      }
+    } catch (e) {}
+
+    try {
+      localStorage.clear();
+    } catch (e) {}
+
+    location.reload();
+  }
+
+  // expose to console
+  window.resetRegistrationSoft = resetRegistrationSoft;
+  window.resetRegistrationHard = resetRegistrationHard;
+
        async function boot() {
     // ✅ показать splash и скрыть topbar (updateTopbarForView("splash") сработает внутри showView)
     showView("splash");
