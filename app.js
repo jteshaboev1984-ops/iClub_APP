@@ -1105,12 +1105,23 @@ function bindRatingsUI() {
     return;
   }
 
-  if (state.courses.stack.length > 1) {
+    if (state.courses.stack.length > 1) {
     state.courses.stack.pop();
     saveState();
-    showCoursesScreen(getCoursesTopScreen());
+
+    const next = getCoursesTopScreen();
+    showCoursesScreen(next);
+
+    // ✅ Ensure correct screen rendering after back
+    if (next === "tours") {
+      renderToursStart();
+    } else if (next === "practice-start") {
+      renderPracticeStart();
+    } else if (next === "subject-hub") {
+      renderSubjectHub();
+    }
+
     return;
-  }
 
   const targetTab = state.courses.entryTab || state.prevTab || "home";
   setTab(targetTab);
@@ -3977,21 +3988,25 @@ if (action === "practice-recommendations") {
         renderToursStart(); // ✅ fill stats + hide trend when <2
         return;
       }
+      if (action === "open-tour") {
+        openTourRules();
+        return;
+      }
 
-       if (action === "open-archive-tours") {
-  if (!canOpenArchiveNow()) {
-    showToast("Архив откроется после завершения активного тура.");
-    return;
-  }
+     if (action === "open-archive-tours") {
+     if (!canOpenArchiveNow()) {
+       showToast("Архив откроется после завершения активного тура.");
+       return;
+     }
   // пока архив — глобальный экран
-  openGlobal("archive");
-  return;
-}
+     openGlobal("archive");
+        return;
+      }
 
       if (action === "tour-start") {
-  openTourQuiz();
-  return;
-}
+        openTourQuiz();
+        return;
+      }
 
 // pick option
 if (action === "tour-pick") {
