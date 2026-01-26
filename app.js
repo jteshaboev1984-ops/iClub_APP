@@ -22,7 +22,7 @@
 }
 
   function safeJsonParse(s, fallback) {
-  if (s === null || s === undefined || s === "") return fallbacаk;
+  if (s === null || s === undefined || s === "") return fallback;
   try { return JSON.parse(s); } catch { return fallback; }
 }
 
