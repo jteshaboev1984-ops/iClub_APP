@@ -95,7 +95,14 @@
     };
 
     // upsert by primary key id
-    await sb.from("users").upsert(payload, { onConflict: "id" });
+        await sb.from("users").upsert(payload, { onConflict: "id" });
+
+    // ✅ smoke test: write event (confirms auth + RLS + insert)
+    await sb.from("app_events").insert({
+      user_id: u.id,
+      event_type: "boot",
+      payload: { has_tg: !!tg, ua: navigator.userAgent },
+    });
 
     return sb;
   }
