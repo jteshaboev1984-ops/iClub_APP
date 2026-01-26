@@ -432,10 +432,13 @@
                   </div>
                 </div>
 
-                <!-- Micro progress (last attempts) -->
-                <div class="practice-micro">
-                  <div class="practice-micro-label" data-i18n="practice_progress">Прогресс</div>
-                  <div id="practice-micro-bars" class="practice-micro-bars" aria-label="Progress"></div>
+                                <!-- Trend progress (show only if >=2 attempts) -->
+                <div class="practice-micro" id="practice-trend">
+                  <div class="practice-micro-head">
+                    <div class="practice-micro-label" data-i18n="progress_trend">Тренд прогресса</div>
+                    <div id="practice-micro-delta" class="practice-micro-delta"></div>
+                  </div>
+                  <div id="practice-micro-bars" class="practice-micro-bars" aria-label="Progress trend bars"></div>
                 </div>
               </div>
 
@@ -555,53 +558,57 @@
     <div class="muted" data-i18n="tours_subtitle">Активные и прошедшие</div>
   </div>
 
-  <!-- Subject hero -->
+    <!-- Subject hero (stats like practice) -->
   <div class="tours-hero">
     <div class="tours-hero-top">
       <div>
         <div class="tours-hero-kicker" data-i18n="tours_subject_label">Предмет</div>
         <div id="tours-subject-title" class="tours-hero-title">—</div>
+        <div id="tours-tour-label" class="tours-hero-sub" data-i18n="tours_tour_label">Тур</div>
       </div>
     </div>
 
-    <div class="tours-hero-facts" aria-label="Tour facts">
-      <div class="tours-fact">
-        <div class="tours-fact-label" data-i18n="tours_fact_questions">Вопросов</div>
-        <div class="tours-fact-val">20</div>
+    <div class="tours-hero-metrics">
+      <div class="tours-metric">
+        <div class="tours-metric-label" data-i18n="tours_best_result">Лучший результат</div>
+        <div class="tours-metric-value">
+          <span id="tours-best-score">—</span>
+          <span id="tours-best-percent" class="tours-metric-sub"></span>
+        </div>
       </div>
-      <div class="tours-fact">
-        <div class="tours-fact-label" data-i18n="tours_fact_attempts">Попытка</div>
-        <div class="tours-fact-val" data-i18n="tours_fact_attempts_one">1</div>
+
+      <div class="tours-metric">
+        <div class="tours-metric-label" data-i18n="tours_best_time">Лучшее время</div>
+        <div class="tours-metric-value">
+          <span id="tours-best-time">—</span>
+        </div>
       </div>
-      <div class="tours-fact">
-        <div class="tours-fact-label" data-i18n="tours_fact_pause">Пауза</div>
-        <div class="tours-fact-val" data-i18n="tours_fact_pause_no">Нет</div>
+    </div>
+
+    <!-- Trend progress (show only if >=2 attempts) -->
+    <div class="tours-micro" id="tours-trend">
+      <div class="tours-micro-head">
+        <div class="tours-micro-label" data-i18n="progress_trend">Тренд прогресса</div>
+        <div id="tours-micro-delta" class="tours-micro-delta"></div>
       </div>
-      <div class="tours-fact">
-        <div class="tours-fact-label" data-i18n="tours_fact_rules">Контроль</div>
-        <div class="tours-fact-val" data-i18n="tours_fact_rules_on">Включён</div>
-      </div>
+      <div id="tours-micro-bars" class="tours-micro-bars" aria-label="Tour progress trend bars"></div>
     </div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tours-tabs" role="tablist" aria-label="Tours tabs">
-    <button id="tours-tab-active" class="tours-tab is-active" type="button" data-action="tours-tab-active" role="tab" aria-selected="true" data-i18n="tours_tab_active">Активные</button>
-    <button id="tours-tab-past" class="tours-tab" type="button" data-action="tours-tab-past" role="tab" aria-selected="false" data-i18n="tours_tab_past">Прошедшие</button>
-  </div>
-
-  <!-- List -->
-  <div id="tours-list" class="list">
-  <div class="card tours-empty">
-    <div class="tours-empty-title" data-i18n="tours_empty_title">Туры появятся позже</div>
-    <div class="tours-empty-desc muted" data-i18n="tours_empty_desc">
-      Этот раздел активируется после подключения базы и публикации дат туров.
+  <!-- Status message (not clickable) -->
+  <div class="card tours-status" id="tours-status">
+    <div class="tours-status-title" id="tours-status-title" data-i18n="tours_status_title">Туры пока недоступны</div>
+    <div class="tours-status-desc muted" id="tours-status-desc" data-i18n="tours_status_desc">
+      Даты и список туров появятся здесь после публикации.
     </div>
   </div>
-</div>
+
+  <!-- Open tour (only when active tour exists) -->
+  <div class="tours-open-wrap">
+    <button id="tours-open-btn" class="btn primary" type="button" data-action="open-tour" style="display:none" data-i18n="open_tour_btn">Открыть тур</button>
+  </div>
 
   <div class="actions-row">
-    <button class="btn" type="button" data-action="open-archive" data-i18n="tours_archive_btn">Архив туров</button>
     <button class="btn primary" type="button" data-action="to-subject-hub" data-i18n="to_subject_btn">К предмету</button>
   </div>
 </section>
