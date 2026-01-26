@@ -993,11 +993,20 @@ if (actionBtn) {
    }
 
        if (viewName === "registration") {
-     titleEl.textContent = t("reg_title");
-     backBtn.style.visibility = "hidden";
-     syncTopbarLeftState();
-     return;
-   }
+  // ✅ Topbar как везде
+  titleEl.textContent = t("app_name");
+  subEl.textContent = "Smarter together";
+
+  // ✅ Back показываем: он закрывает апп (bindTopbar уже делает close на registration)
+  backBtn.style.visibility = "visible";
+
+  // ✅ На регистрации нижний таббар не показываем вообще
+  if (tabbarEl) tabbarEl.style.display = "none";
+
+  syncTopbarLeftState();
+  return;
+}
+
      // применяем для default-состояния
      syncTopbarLeftState();
 
@@ -1975,7 +1984,13 @@ input?.addEventListener("change", () => {
     const block = $("#reg-school-block");
     if (!block) return;
     block.style.display = isSchool ? "grid" : "none";
-  }
+
+     // ✅ Поясняем смысл: школьник => main subjects становятся competitive
+      const subjTitle = document.querySelector('[data-i18n="reg_competitive_subject_title"]');
+        if (subjTitle) {
+        subjTitle.textContent = (isSchoolStudent ? "Competitive Subject" : "Study Subject");
+        }
+    }
   
   function initRegSubjectChips() {
     const wrap = $("#reg-subject-chips");
@@ -3695,6 +3710,14 @@ function bindTabbar() {
   const handle = (btn) => {
     const tab = btn.dataset.tab;
     if (!tab) return;
+    
+     // ✅ До регистрации табы запрещены (и на registration таббар скрыт, но это страховка)
+  const p0 = loadProfile();
+  if (!p0) {
+    showToast(t("complete_registration_first") || "Сначала завершите регистрацию.");
+    showView("registration");
+    return;
+  }
 
     // ✅ Ratings доступен только школьникам
     if (tab === "ratings") {
