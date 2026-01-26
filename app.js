@@ -59,9 +59,22 @@
     }
 
     // 1) ensure we have a session (Anonymous Sign-in)
-    const { data: sessData } = await sb.auth.getSession();
+        const { data: sessData } = await sb.auth.getSession();
     if (!sessData?.session) {
-      await sb.auth.signInAnonymously();
+      const { data: anonData, error: anonErr } = await sb.auth.signInAnonymously();
+
+      if (anonErr) {
+        console.error("[Supabase] Anonymous sign-in failed:", anonErr);
+
+        const statusEl = document.getElementById("splash-status");
+        if (statusEl) statusEl.textContent = "Supabase auth error: " + (anonErr.message || "unknown");
+
+        // Не валим приложение — просто работаем без базы (пока не починим настройки)
+        return sb;
+      }
+
+      // На всякий случай — лог успешного входа
+      console.log("[Supabase] Anonymous session OK:", !!anonData?.session);
     }
 
     // 2) ensure users row exists (id == auth.uid())
