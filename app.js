@@ -621,9 +621,10 @@ function getReadingRefs(subjectKey, topic) {
     return true;
   }
 
-  // ---------------------------
-  // Regions / Districts (v1 demo)
-  // Later: load from DB
+   // ---------------------------
+  // Regions / Districts
+  // - Uses Supabase if available (regions/districts tables)
+  // - Falls back to local demo map
   // ---------------------------
   const REGIONS = {
     "Tashkent": ["Chilonzor", "Yunusobod", "Mirzo Ulug‘bek", "Shaykhontohur", "Yakkasaroy"],
@@ -647,17 +648,107 @@ function getReadingRefs(subjectKey, topic) {
 
     options.forEach(v => {
       const o = document.createElement("option");
-      o.value = v;
-      o.textContent = v;
+      o.value = String(v);
+      o.textContent = String(v);
       selectEl.appendChild(o);
     });
   }
 
-  function initRegionDistrictUI() {
+  function fillSelectOptionsKV(selectEl, options, placeholder) {
+    // options: [{value, label}]
+    if (!selectEl) return;
+
+    selectEl.innerHTML = "";
+
+    const ph = document.createElement("option");
+    ph.value = "";
+    ph.disabled = true;
+    ph.selected = true;
+    ph.textContent = placeholder;
+    selectEl.appendChild(ph);
+
+    options.forEach(it => {
+      const o = document.createElement("option");
+      o.value = String(it.value);
+      o.textContent = String(it.label);
+      selectEl.appendChild(o);
+    });
+  }
+
+  async function initRegionDistrictUI() {
     const regionEl = $("#reg-region");
     const districtEl = $("#reg-district");
     if (!regionEl || !districtEl) return;
 
+    // default state
+    districtEl.disabled = true;
+    fillSelectOptions(districtEl, [], "Сначала выберите район…");
+
+    // 1) try Supabase regions
+    let sbRegions = [];
+    try {
+      if (window.sb) {
+        const { data, error } = await window.sb
+          .from("regions")
+          .select("id,name")
+          .order("name", { ascending: true });
+        if (!error && Array.isArray(data) && data.length) sbRegions = data;
+      }
+    } catch (e) {
+      sbRegions = [];
+    }
+
+    const useDb = sbRegions.length > 0;
+
+    if (useDb) {
+      // DB mode: region value = region.id, label = region.name
+      fillSelectOptionsKV(
+        regionEl,
+        sbRegions.map(r => ({ value: r.id, label: r.name })),
+        "Выберите регион…"
+      );
+
+      // on change -> load districts by region_id
+      regionEl.addEventListener("change", async () => {
+        const regionId = regionEl.value ? Number(regionEl.value) : null;
+
+        districtEl.disabled = true;
+        fillSelectOptions(districtEl, [], "Загрузка районов…");
+
+        if (!regionId || !window.sb) {
+          fillSelectOptions(districtEl, [], "Сначала выберите регион…");
+          return;
+        }
+
+        try {
+          const { data, error } = await window.sb
+            .from("districts")
+            .select("id,name,region_id")
+            .eq("region_id", regionId)
+            .order("name", { ascending: true });
+
+          const rows = (!error && Array.isArray(data)) ? data : [];
+          districtEl.disabled = rows.length === 0;
+
+          if (rows.length) {
+            fillSelectOptionsKV(
+              districtEl,
+              rows.map(d => ({ value: d.id, label: d.name })),
+              "Выберите район…"
+            );
+          } else {
+            fillSelectOptions(districtEl, [], "Нет районов");
+          }
+        } catch (e) {
+          districtEl.disabled = true;
+          fillSelectOptions(districtEl, [], "Ошибка загрузки");
+        }
+      });
+
+      return;
+    }
+
+    // 2) fallback local demo map (old behavior)
     const regionList = Object.keys(REGIONS);
     fillSelectOptions(regionEl, regionList, "Выберите регион…");
 
