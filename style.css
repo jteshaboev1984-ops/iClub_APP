@@ -2579,3 +2579,27 @@ body.modal-open { overflow: hidden; }
 .rule-icon {
   font-size: 13px;
 }
+
+/* =========================
+   Practice statistics
+========================= */
+
+.practice-stats-card {
+  margin-top: 12px;
+}
+
+.practice-stats-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.practice-stat-value {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.practice-stats-last {
+  margin-top: 8px;
+}
