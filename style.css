@@ -948,7 +948,9 @@ html, body {
   gap:8px;
   flex-wrap:wrap;
   margin: 2px 14px 10px;
+  justify-content: center; /* симметрия */
 }
+
 .chip{
   display:inline-flex;
   align-items:center;
@@ -958,8 +960,20 @@ html, body {
   border: 1px solid var(--border);
   background: rgba(0,0,0,.02);
   font-size: 12px;
-  line-height: 1;
+  line-height: 1.1;
+
+  /* ✅ чтобы влезало на всех языках */
+  max-width: 100%;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 360px){
+  .chip{
+    font-size: 11px;
+    padding: 7px 9px;
+  }
 }
 .chip::before{
   content:"";
@@ -2744,4 +2758,73 @@ body.modal-open { overflow: hidden; }
 }
 .tabbar .tab:focus{
   outline: none;
+}
+/* ----- Tours Start (Courses stack) ----- */
+.tours-hero{
+  margin: 8px 14px 12px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: linear-gradient(135deg, rgba(29,98,255,.95), rgba(29,98,255,.78));
+  color:#fff;
+  box-shadow: var(--shadow-sm);
+}
+.tours-hero-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.tours-hero-kicker{
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity:.9;
+}
+.tours-hero-title{
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1.1;
+  margin-top: 4px;
+}
+
+.tours-hero-facts{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+.tours-fact{
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.tours-fact-label{
+  font-size: 12px;
+  opacity: .9;
+}
+.tours-fact-val{
+  margin-top: 6px;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.tours-tabs{
+  margin: 0 14px 10px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.tours-tab{
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,.02);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 900;
+  cursor:pointer;
+}
+.tours-tab.is-active{
+  border-color: rgba(29,98,255,.35);
+  box-shadow: 0 0 0 2px rgba(29,98,255,.10) inset;
 }
