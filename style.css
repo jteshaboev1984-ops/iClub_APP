@@ -2548,3 +2548,34 @@ body.modal-open { overflow: hidden; }
 .tabbar .tab:focus{
   outline: none;
 }
+/* =========================
+   Practice start screen
+========================= */
+
+.practice-meta {
+  margin: 6px 16px 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.practice-rules-chips {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+  flex-wrap: wrap;
+}
+
+.rule-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #f2f5f9;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.rule-icon {
+  font-size: 13px;
+}
