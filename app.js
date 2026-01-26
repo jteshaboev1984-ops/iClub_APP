@@ -2313,7 +2313,54 @@ function addMyRecsFromAttempt(attempt) {
     return String(v ?? "").trim().replace(",", ".");
   }
 
-  // ---- Practice history render (inject into practice-start) ----
+  function renderTrendBars({ wrapEl, deltaEl, attemptsNewestFirst, barClass, lastClass }) {
+  if (!wrapEl) return;
+
+  const list = Array.isArray(attemptsNewestFirst) ? attemptsNewestFirst : [];
+  if (list.length < 2) {
+    if (wrapEl) wrapEl.innerHTML = "";
+    if (deltaEl) deltaEl.textContent = "";
+    // hide container (parent card section)
+    const root = wrapEl.closest(".practice-micro, .tours-micro");
+    if (root) root.style.display = "none";
+    return;
+  }
+
+  const root = wrapEl.closest(".practice-micro, .tours-micro");
+  if (root) root.style.display = "block";
+
+  // delta between newest and previous
+  const a0 = Number(list[0]?.percent) || 0;
+  const a1 = Number(list[1]?.percent) || 0;
+  const d = a0 - a1;
+  const sign = d > 0 ? "+" : d < 0 ? "−" : "";
+  const abs = Math.abs(d);
+  const txt = sign ? `${sign}${abs.toFixed(1)}%` : `0.0%`;
+
+  if (deltaEl) {
+    deltaEl.textContent = txt;
+    deltaEl.classList.remove("is-pos", "is-neg");
+    if (d > 0) deltaEl.classList.add("is-pos");
+    if (d < 0) deltaEl.classList.add("is-neg");
+  }
+
+  // bars: oldest -> newest, up to 5
+  const seq = list.slice(0, 5).slice().reverse(); // oldest-first
+  wrapEl.innerHTML = "";
+
+  seq.forEach((a, idx) => {
+    const p = Math.max(0, Math.min(100, Number(a.percent) || 0));
+    const h = 6 + Math.round((p / 100) * 16);
+
+    const b = document.createElement("div");
+    b.className = barClass + (idx === seq.length - 1 ? ` ${lastClass}` : "");
+    b.style.height = `${h}px`;
+    b.title = `${p}%`;
+    wrapEl.appendChild(b);
+  });
+}
+   
+   // ---- Practice history render (inject into practice-start) ----
   function renderPracticeStart() {
     const subjectKey = state.courses.subjectKey;
     const subj = subjectByKey(subjectKey);
@@ -3094,6 +3141,7 @@ function renderMyRecs() {
       isArchive,
       subjectKey,
       tourNo,
+      questions,                // ✅ IMPORTANT: prevents instant finish
       startedAt: Date.now(),
       qStartedAt: Date.now(),
       index: 0,
@@ -3116,8 +3164,8 @@ function renderMyRecs() {
       return;
     }
 
-    // subjectKey/tourNo можно позже брать из active предмета/тура
-    initTourSession({ subjectKey: "biology", tourNo: 4, isArchive: false });
+        // Later: tourNo will come from DB (active tour). For now safe default = 1.
+    initTourSession({ subjectKey: state.courses?.subjectKey || null, tourNo: 1, isArchive: false });
 
     pushCourses("tour-quiz");
     bindTourAntiCheatOnce();
@@ -3312,10 +3360,48 @@ function renderMyRecs() {
     renderTourQuestion();
   }
 
+   function getTourHistoryKey(subjectKey, tourNo) {
+  return `tour_history:${subjectKey || "unknown"}:${tourNo || 1}`;
+}
+
+function loadTourHistoryLocal(subjectKey, tourNo) {
+  try {
+    const raw = localStorage.getItem(getTourHistoryKey(subjectKey, tourNo));
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
+  try {
+    const key = getTourHistoryKey(subjectKey, tourNo);
+    const arr = loadTourHistoryLocal(subjectKey, tourNo);
+    arr.unshift(attempt);
+    localStorage.setItem(key, JSON.stringify(arr.slice(0, 20)));
+  } catch {}
+}
+
   function finishTour({ reason = "done" } = {}) {
     stopTourTick();
 
     const ctx = state.tourContext;
+
+        // Save attempt locally (for stats/trend). Does not affect future DB integration.
+    if (ctx?.subjectKey) {
+      const durationSec = Math.max(0, Math.round((Date.now() - (ctx.startedAt || Date.now())) / 1000));
+      const total = TOUR_CONFIG.total;
+      const percent = total ? Math.round((ctx.correct / total) * 100) : 0;
+
+      saveTourAttemptLocal(ctx.subjectKey, ctx.tourNo || 1, {
+        ts: Date.now(),
+        score: ctx.correct,
+        total,
+        percent,
+        durationSec
+      });
+    }
 
     // result meta
     const meta = $("#tour-result-meta");
