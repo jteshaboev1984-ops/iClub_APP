@@ -2317,43 +2317,85 @@ function addMyRecsFromAttempt(attempt) {
   function renderPracticeStart() {
     const subjectKey = state.courses.subjectKey;
     const subj = subjectByKey(subjectKey);
-    const section = $("#courses-practice-start");
-    if (!section) return;
 
-    // Remove old injected block if exists
-    const old = $("#practice-history-card");
-    if (old) old.remove();
+    // --- Subject title in hero card ---
+    const titleEl = $("#practice-subject-title");
+    if (titleEl) titleEl.textContent = subj?.title || subjectKey || "—";
 
     const h = loadPracticeHistory(subjectKey);
-    const best = h.best;
-    const last = h.last || [];
+    const best = h?.best || null;
+    const last = Array.isArray(h?.last) ? h.last : [];
 
-    const card = document.createElement("div");
-    card.className = "card";
-    card.id = "practice-history-card";
+    const bestScoreEl = $("#practice-best-score");
+    const bestPctEl = $("#practice-best-percent");
+    const bestTimeEl = $("#practice-best-time");
 
-    const bestLine = best
-      ? `Лучший результат: ${best.score}/${best.total} (${best.percent}%) • ${best.durationSec}s • ${formatDateTime(best.ts)}`
-      : "Лучший результат: пока нет попыток";
+    const formatSecShort = (sec) => {
+      const s = Number(sec);
+      if (!Number.isFinite(s) || s < 0) return "—";
+      if (s < 60) return `${s}${t("practice_time_sec_suffix")}`;
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${m}${t("practice_time_min_suffix")} ${r}${t("practice_time_sec_suffix")}`;
+    };
 
-    const lastLines = last.length
-      ? last.map(a => `• ${a.score}/${a.total} (${a.percent}%) • ${a.durationSec}s • ${formatDateTime(a.ts)}`).join("<br>")
-      : "Пока нет попыток";
-
-    card.innerHTML = `
-      <div class="card-title">Статистика практики</div>
-      <div class="muted small">${escapeHTML(subj?.title || subjectKey || "")}</div>
-      <div class="muted" style="margin-top:8px">${bestLine}</div>
-      <div class="muted small" style="margin-top:8px">Последние попытки (до 5):<br>${lastLines}</div>
-    `;
-
-    // Insert after rules card (second card in section)
-    const cards = section.querySelectorAll(".card");
-    if (cards && cards.length >= 1) {
-      cards[cards.length - 1].after(card);
+    if (best) {
+      if (bestScoreEl) bestScoreEl.textContent = `${best.score}/${best.total}`;
+      if (bestPctEl) bestPctEl.textContent = `(${best.percent}%)`;
+      if (bestTimeEl) bestTimeEl.textContent = formatSecShort(best.durationSec);
     } else {
-      section.appendChild(card);
+      if (bestScoreEl) bestScoreEl.textContent = "—";
+      if (bestPctEl) bestPctEl.textContent = "";
+      if (bestTimeEl) bestTimeEl.textContent = "—";
     }
+
+    // --- Last attempts table (up to 5) ---
+    const tbody = $("#practice-last-tbody");
+    const emptyEl = $("#practice-last-empty");
+    if (tbody) tbody.innerHTML = "";
+
+    const rows = last.slice(0, 5);
+
+    if (!rows.length) {
+      if (emptyEl) emptyEl.style.display = "block";
+      return;
+    }
+
+    if (emptyEl) emptyEl.style.display = "none";
+
+    const pctClass = (p) => {
+      const n = Number(p);
+      if (!Number.isFinite(n)) return "pct-med";
+      if (n < 40) return "pct-low";
+      if (n < 70) return "pct-med";
+      return "pct-high";
+    };
+
+    rows.forEach(a => {
+      const tr = document.createElement("tr");
+
+      const dt = formatDateTime(a.ts);
+      const dateMain = dt.split(",")[0] || dt;
+      const dateSub = dt.includes(",") ? dt.split(",").slice(1).join(",").trim() : "";
+
+      tr.innerHTML = `
+        <td>
+          <div class="practice-date">
+            <div class="practice-date-main">${escapeHTML(dateMain)}</div>
+            ${dateSub ? `<div class="practice-date-sub">${escapeHTML(dateSub)}</div>` : ""}
+          </div>
+        </td>
+        <td>
+          <div class="practice-score">
+            <span class="practice-score-main">${escapeHTML(`${a.score}/${a.total}`)}</span>
+            <span class="pct-badge ${pctClass(a.percent)}">${escapeHTML(`${a.percent}%`)}</span>
+          </div>
+        </td>
+        <td class="practice-time">${escapeHTML(formatSecShort(a.durationSec))}</td>
+      `;
+
+      if (tbody) tbody.appendChild(tr);
+    });
   }
 
   // ---- Practice timer (per-question) ----
@@ -2398,8 +2440,8 @@ function addMyRecsFromAttempt(attempt) {
 
   const canResume = !!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz);
 
-  if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
-  if (restartBtn) restartBtn.textContent = canResume ? "Начать заново" : "Начать";
+   if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
+  if (restartBtn) restartBtn.textContent = canResume ? t("practice_restart") : t("practice_start");
 
   if (canResume) {
     showToast(t("practice_resume_prompt"));
