@@ -2356,6 +2356,29 @@ function addMyRecsFromAttempt(attempt) {
 
     const rows = last.slice(0, 5);
 
+        // --- Micro progress bars (based on last attempts, oldest -> newest) ---
+    const barsWrap = $("#practice-micro-bars");
+    if (barsWrap) {
+      barsWrap.innerHTML = "";
+
+      // take up to 5 attempts, display in chronological order for "progress"
+      const seq = rows.slice().reverse(); // rows are newest-first; reverse -> oldest-first
+
+      // if no attempts, keep micro empty (looks clean)
+      seq.forEach((a, idx) => {
+        const p = Math.max(0, Math.min(100, Number(a.percent) || 0));
+
+        // map 0..100 -> 6..22 px (small, premium, symmetric)
+        const h = 6 + Math.round((p / 100) * 16);
+
+        const b = document.createElement("div");
+        b.className = "practice-micro-bar" + (idx === seq.length - 1 ? " is-last" : "");
+        b.style.height = `${h}px`;
+        b.title = `${p}%`;
+        barsWrap.appendChild(b);
+      });
+    }
+
     if (!rows.length) {
       if (emptyEl) emptyEl.style.display = "block";
       return;
