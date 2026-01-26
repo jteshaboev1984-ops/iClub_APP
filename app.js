@@ -222,7 +222,19 @@ function applyStaticI18n() {
   function loadProfile() {
     return safeJsonParse(localStorage.getItem(LS.profile), null);
   }
+   function resetRegistrationSoft() {
+  // 1) Очистка локального состояния
+  localStorage.removeItem("profile");
+  localStorage.removeItem("state");
 
+  // если есть кастомные ключи — добавь сюда
+  // localStorage.removeItem("user_subjects");
+
+  // 2) Перезапуск в регистрацию
+  showView("registration");
+  bindRegistration();
+}
+   
   function saveProfile(profile) {
     localStorage.setItem(LS.profile, JSON.stringify(profile));
   }
