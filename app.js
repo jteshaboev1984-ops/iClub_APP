@@ -6,14 +6,14 @@
 (() => {
   "use strict";
 
-  // ---------------------------
+    // ---------------------------
   // Helpers
   // ---------------------------
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  function escapeHTML(value) {
-  return String(value ?? "")
+  function escapeHTML(v) {
+    return String(v ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -26,6 +26,67 @@
   try { return JSON.parse(s); } catch { return fallback; }
 }
 
+    // ---------------------------
+  // Supabase (v1 connect)
+  // ---------------------------
+  // ✅ ВАЖНО: заполни эти 2 значения из Supabase → Project Settings → API
+  const SUPABASE_URL = "https://mmmduffgpvwjdpruzikw.supabase.co";      // например: https://xxxx.supabase.co
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1tbWR1ZmZncHZ3amRwcnV6aWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwNzEwMzksImV4cCI6MjA4NDY0NzAzOX0.G3bV2tOaToFsMr9ejTRuXBHYZQvissIds3g_g7K0t7I"; // anon public key
+
+  let sb = null;
+
+  function getTelegramUserSafe() {
+    try {
+      return window.Telegram?.WebApp?.initDataUnsafe?.user || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function initSupabaseSession() {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+    if (!window.supabase?.createClient) return null;
+
+    if (!sb) {
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: false,
+        },
+      });
+      window.sb = sb; // удобно для отладки в консоли
+    }
+
+    // 1) ensure we have a session (Anonymous Sign-in)
+    const { data: sessData } = await sb.auth.getSession();
+    if (!sessData?.session) {
+      await sb.auth.signInAnonymously();
+    }
+
+    // 2) ensure users row exists (id == auth.uid())
+    const { data: userData } = await sb.auth.getUser();
+    const u = userData?.user;
+    if (!u?.id) return sb;
+
+    const tg = getTelegramUserSafe();
+    const langGuess = tg?.language_code || (typeof getTelegramLang === "function" ? getTelegramLang() : null) || "ru";
+
+    const payload = {
+      id: u.id,
+      telegram_user_id: tg?.id ? String(tg.id) : null,
+      first_name: tg?.first_name || null,
+      last_name: tg?.last_name || null,
+      avatar_url: null,
+      language_code: langGuess,
+    };
+
+    // upsert by primary key id
+    await sb.from("users").upsert(payload, { onConflict: "id" });
+
+    return sb;
+  }
+ 
   function nowISO() {
     return new Date().toISOString();
   }
@@ -4147,7 +4208,7 @@ if (action === "tour-next" || action === "tour-submit") {
     return preloadImages(urls, { timeoutMs: 6000 });
   }
 
-     function boot() {
+       async function boot() {
     // ✅ показать splash и скрыть topbar (updateTopbarForView("splash") сработает внутри showView)
     showView("splash");
 
@@ -4162,7 +4223,10 @@ if (action === "tour-next" || action === "tour-submit") {
     // ✅ минимум показываем splash чуть-чуть, чтобы не “мигало”
     const minDelay = new Promise((r) => setTimeout(r, 250));
 
-    Promise.all([preloadAppImages(), minDelay]).then(() => {
+    // ✅ параллельно поднимаем Supabase-сессию (не блокируем UX)
+    const supaReady = initSupabaseSession().catch(() => null);
+
+    Promise.all([preloadAppImages(), minDelay, supaReady]).then(() => {
       if (!isRegistered()) {
         showView("registration");
         bindRegistration();
@@ -4172,7 +4236,7 @@ if (action === "tour-next" || action === "tour-submit") {
       renderAllSubjects();
       renderHome();
 
-            // ✅ Требование: при полном запуске (reload/новый старт) всегда стартуем с Home
+      // ✅ Требование: при полном запуске (reload/новый старт) всегда стартуем с Home
       // Сворачивание/возврат не трогаем — там не происходит reload.
       state.tab = "home";
       saveState();
