@@ -135,6 +135,8 @@
       practice_saved_to_my_recs: "Рекомендации сохранены в «Мои рекомендации»",
       practice_nothing_to_save: "Нет ошибок — сохранять нечего. Красиво.",
 
+      tours_empty_title: "Туры появятся позже",
+      tours_empty_desc: "Этот раздел активируется после подключения базы и публикации дат туров.",
       tour_rules_title: "Правила тура",
       tour_rules_accept_required: "Подтвердите согласие с правилами, чтобы начать тур."
     },
@@ -267,6 +269,8 @@
       practice_saved_to_my_recs: "Tavsiyalar «Mening tavsiyalarim»ga saqlandi",
       practice_nothing_to_save: "Xato yo‘q — saqlash shart emas. Zo‘r.",
 
+      tours_empty_title: "Turlar keyinroq paydo bo‘ladi",
+      tours_empty_desc: "Bu bo‘lim baza ulanganidan va tur sanalari e’lon qilingandan so‘ng ishlaydi.",
       tour_rules_title: "Tur qoidalari",
       tour_rules_accept_required: "Tur boshlash uchun qoidalarga rozilikni tasdiqlang."
     },
@@ -399,6 +403,8 @@
       practice_saved_to_my_recs: "Saved to “My recommendations”",
       practice_nothing_to_save: "No mistakes — nothing to save. Nice.",
 
+      tours_empty_title: "Tours will appear later",
+      tours_empty_desc: "This section becomes available after the database is connected and tour dates are published.",
       tour_rules_title: "Tour rules",
       tour_rules_accept_required: "Please accept the rules to start the tour."
     }
