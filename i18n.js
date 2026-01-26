@@ -137,6 +137,23 @@
 
       tours_empty_title: "Туры появятся позже",
       tours_empty_desc: "Этот раздел активируется после подключения базы и публикации дат туров.",
+            tours_title: "Туры",
+      tours_subtitle: "Активные и прошедшие",
+      tours_subject_label: "Предмет",
+      tours_fact_questions: "Вопросов",
+      tours_fact_attempts: "Попытка",
+      tours_fact_attempts_one: "1",
+      tours_fact_pause: "Пауза",
+      tours_fact_pause_no: "Нет",
+      tours_fact_rules: "Контроль",
+      tours_fact_rules_on: "Включён",
+      tours_tab_active: "Активные",
+      tours_tab_past: "Прошедшие",
+      tours_archive_btn: "Архив туров",
+      to_subject_btn: "К предмету",
+      tours_empty_title: "Туры появятся позже",
+      tours_empty_desc: "Этот раздел активируется после подключения базы и публикации дат туров.",
+
       tour_rules_title: "Правила тура",
       tour_rules_accept_required: "Подтвердите согласие с правилами, чтобы начать тур."
     },
@@ -271,8 +288,26 @@
 
       tours_empty_title: "Turlar keyinroq paydo bo‘ladi",
       tours_empty_desc: "Bu bo‘lim baza ulanganidan va tur sanalari e’lon qilingandan so‘ng ishlaydi.",
+      tours_title: "Turlar",
+      tours_subtitle: "Faol va o‘tgan",
+      tours_subject_label: "Fan",
+      tours_fact_questions: "Savollar",
+      tours_fact_attempts: "Urinish",
+      tours_fact_attempts_one: "1",
+      tours_fact_pause: "Pauza",
+      tours_fact_pause_no: "Yo‘q",
+      tours_fact_rules: "Nazorat",
+      tours_fact_rules_on: "Yoqilgan",
+      tours_tab_active: "Faol",
+      tours_tab_past: "O‘tgan",
+      tours_archive_btn: "Turlar arxivi",
+      to_subject_btn: "Fanga qaytish",
+      tours_empty_title: "Turlar keyinroq paydo bo‘ladi",
+      tours_empty_desc: "Bu bo‘lim baza ulanganidan va tur sanalari e’lon qilingandan so‘ng ishlaydi.",
+
       tour_rules_title: "Tur qoidalari",
       tour_rules_accept_required: "Tur boshlash uchun qoidalarga rozilikni tasdiqlang."
+
     },
 
     en: {
@@ -405,8 +440,26 @@
 
       tours_empty_title: "Tours will appear later",
       tours_empty_desc: "This section becomes available after the database is connected and tour dates are published.",
+      tours_title: "Tours",
+      tours_subtitle: "Active and past",
+      tours_subject_label: "Subject",
+      tours_fact_questions: "Questions",
+      tours_fact_attempts: "Attempt",
+      tours_fact_attempts_one: "1",
+      tours_fact_pause: "Pause",
+      tours_fact_pause_no: "No",
+      tours_fact_rules: "Monitoring",
+      tours_fact_rules_on: "On",
+      tours_tab_active: "Active",
+      tours_tab_past: "Past",
+      tours_archive_btn: "Tour archive",
+      to_subject_btn: "Back to subject",
+      tours_empty_title: "Tours will appear later",
+      tours_empty_desc: "This section becomes available after the database is connected and tour dates are published.",
+
       tour_rules_title: "Tour rules",
       tour_rules_accept_required: "Please accept the rules to start the tour."
+
     }
   };
 
