@@ -3806,8 +3806,21 @@ if (state.tab === "profile") {
       const fullName = $("#reg-fullname")?.value?.trim() || "";
       const lang = $("#reg-language")?.value || "ru";
 
-      const region = $("#reg-region")?.value || "";
-      const district = $("#reg-district")?.value || "";
+      let region = "";
+      let district = "";
+
+      const regionEl = $("#reg-region");
+      const districtEl = $("#reg-district");
+
+      if (regionEl && regionEl.value) {
+        const regionOpt = regionEl.options[regionEl.selectedIndex];
+        region = regionOpt ? regionOpt.textContent.trim() : "";
+      }
+
+      if (districtEl && districtEl.value) {
+        const districtOpt = districtEl.options[districtEl.selectedIndex];
+        district = districtOpt ? districtOpt.textContent.trim() : "";
+      }
 
       const isSchoolStudent = ($("#reg-is-school-toggle")?.checked || $("#reg-is-school")?.value === "yes");
       const school = $("#reg-school")?.value?.trim() || "";
