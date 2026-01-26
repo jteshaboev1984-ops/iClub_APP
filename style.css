@@ -1050,6 +1050,9 @@ html, body {
   background: rgba(255,255,255,.62);
   border-color: rgba(255,255,255,.28);
 }
+.practice-micro-bar.is-dim{
+  opacity: .35;
+}
 .practice-metric{
   background: rgba(255,255,255,.10);
   border: 1px solid rgba(255,255,255,.16);
@@ -2693,12 +2696,29 @@ body.modal-open { overflow: hidden; }
   font-weight: 900;
   font-size: 13px;
   cursor: pointer;
-}
 
+  /* i18n safety: long labels should not break layout */
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .grid-section-filters .chip.is-active{
   border-color: rgba(47,111,214,0.35);
   background: rgba(47,111,214,0.10);
   color: var(--primary);
+}
+@media (max-width: 420px){
+  .grid-section-filters{
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .grid-section-filters .chip{
+    flex: 0 0 auto;
+    max-width: 78vw;
+  }
 }
 /* Courses: typography polish (premium, not childish) */
 .catalog-head .card-title{
@@ -2827,4 +2847,17 @@ body.modal-open { overflow: hidden; }
 .tours-tab.is-active{
   border-color: rgba(29,98,255,.35);
   box-shadow: 0 0 0 2px rgba(29,98,255,.10) inset;
+}
+.tours-empty{
+  text-align: center;
+  padding: 16px 14px;
+}
+.tours-empty-title{
+  font-weight: 900;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+.tours-empty-desc{
+  font-size: 13px;
+  line-height: 1.35;
 }
