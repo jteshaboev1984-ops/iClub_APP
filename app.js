@@ -2037,6 +2037,30 @@ input?.addEventListener("change", () => {
 
     // update subject names in chips/selects too
     try { applyRegSubjectI18n(); } catch {}
+           // show/hide subjects section for non-school users
+    const subjectSection = $("#reg-subject-section");
+    const nonStudentCard = $("#reg-nonstudent-subjects");
+
+    if (subjectSection) subjectSection.classList.toggle("hidden", !isSchool);
+    if (nonStudentCard) nonStudentCard.classList.toggle("hidden", isSchool);
+
+    // when switching OFF school mode: clear selected subjects (avoid accidental saving)
+    if (!isSchool) {
+      const main1 = $("#reg-main-subject-1");
+      const main2 = $("#reg-main-subject-2");
+      const add1  = $("#reg-additional-subject");
+
+      if (main1) main1.value = "";
+      if (main2) main2.value = "";
+      if (add1) add1.value = "";
+
+      // clear chip UI
+      const chipBtns = $$("#reg-subject-chips .chip-btn");
+      chipBtns.forEach(b => b.classList.remove("is-active"));
+    }
+
+    // refresh submit readiness (if implemented)
+    try { updateRegSubmitReady?.(); } catch {}
   }
 
      function applyRegSubjectI18n() {
@@ -4028,40 +4052,44 @@ if (state.tab === "profile") {
         !districtEl.disabled &&
         (districtEl.options?.length || 0) > 1;
 
-      if (!fullName || !region || (districtRequired && !district) || !main1) {
-        showToast(t("fill_required_fields"));
-        return;
-      }
+      if (!fullName || !region || (districtRequired && !district) || (isSchoolStudent && !main1)) {
+     showToast(t("fill_required_fields"));
+     return;
+   }
 
       const subjects = [];
 
-      subjects.push({
-        key: main1,
-        mode: isSchoolStudent ? "competitive" : "study",
-        pinned: true
-      });
+if (isSchoolStudent) {
+  subjects.push({
+    key: main1,
+    mode: "competitive",
+    pinned: true
+  });
 
-      if (main2) {
-        subjects.push({
-          key: main2,
-          mode: isSchoolStudent ? "competitive" : "study",
-          pinned: true
-        });
-      }
+  if (main2) {
+    subjects.push({
+      key: main2,
+      mode: "competitive",
+      pinned: true
+    });
+  }
 
-      if (add1) {
-        subjects.push({
-          key: add1,
-          mode: "study",
-          pinned: true
-        });
-      }
+  if (add1) {
+    subjects.push({
+      key: add1,
+      mode: "study",
+      pinned: true
+    });
+  }
+} else {
+  // Non-school users: no subjects during registration.
+  // They can study/practice all subjects without tours and manage subjects later in Profile.
+}
 
      if (subjects.filter(s => s.mode === "competitive").length > 2) {
         showToast(t("competitive_subjects_limit_2"));
         return;
       }
-
 
       const tgUser = tg?.initDataUnsafe?.user || {};
       const avatar = tgUser?.photo_url || "";
