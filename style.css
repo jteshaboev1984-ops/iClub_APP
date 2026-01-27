@@ -3074,3 +3074,38 @@ body.modal-open { overflow: hidden; }
   gap: 8px;
   margin-bottom: 6px;
 }
+/* ===========================
+   Courses — reuse profile toggle
+   =========================== */
+
+/* контейнер строки */
+.course-toggle-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 10px 14px 12px;
+}
+
+/* подписи слева */
+.course-toggle-text{
+  display:flex;
+  flex-direction:column;
+  gap: 2px;
+}
+
+.course-toggle-title{
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.course-toggle-state{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,0.55);
+}
+
+/* когда включено — как в профиле */
+.course-toggle-row.is-on .course-toggle-state{
+  color: var(--primary);
+}
