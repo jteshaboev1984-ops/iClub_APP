@@ -50,8 +50,13 @@
       reg_school_no_label: "Школа №",
       reg_school_no_placeholder: "например 154",
       reg_grade_label: "Класс",
-      reg_competitive_subject_label: "Competitive Subject",
-      reg_competitive_subject_hint: "Выберите основной предмет для рейтинга",
+      reg_competitive_subject_label: "🎯 Предмет для соревнований",
+      reg_competitive_subject_hint: "Он используется для рейтингов и сертификатов",
+
+      reg_subject_primary_tag: "Основной",
+      reg_subject_secondary_tag: "Дополнительный",
+      reg_subject_summary_none: "Выберите до 2 предметов",
+
       reg_terms_text: "Я соглашаюсь с условиями и даю согласие на обработку данных об обучении.",
       reg_complete_btn: "Завершить регистрацию",
       reg_subjects_limit: "Можно выбрать максимум 2 предмета.",
@@ -248,8 +253,13 @@
       reg_school_no_label: "School No.",
       reg_school_no_placeholder: "e.g. 154",
       reg_grade_label: "Grade",
-      reg_competitive_subject_label: "Competitive Subject",
-      reg_competitive_subject_hint: "Choose your primary focus for the leaderboard",
+      reg_competitive_subject_label: "🎯 Reyting fani",
+      reg_competitive_subject_hint: "Reyting va sertifikatlar uchun ishlatiladi",
+
+      reg_subject_primary_tag: "Asosiy",
+      reg_subject_secondary_tag: "Qo‘shimcha",
+      reg_subject_summary_none: "2 tagacha fan tanlang",
+
       reg_terms_text: "I agree to the Terms of Service and consent to processing of my education data.",
       reg_complete_btn: "Complete Registration",
       reg_subjects_limit: "Ko‘pi bilan 2 ta fan tanlash mumkin.",
@@ -448,8 +458,13 @@
       reg_school_no_label: "School No.",
       reg_school_no_placeholder: "e.g. 154",
       reg_grade_label: "Grade",
-      reg_competitive_subject_label: "Competitive Subject",
-      reg_competitive_subject_hint: "Choose your primary focus for the leaderboard",
+      reg_competitive_subject_label: "🎯 Competitive subject",
+      reg_competitive_subject_hint: "Used for leaderboards and certificates",
+
+      reg_subject_primary_tag: "Primary",
+      reg_subject_secondary_tag: "Secondary",
+      reg_subject_summary_none: "Select up to 2 subjects",
+
       reg_terms_text: "I agree to the Terms of Service and consent to processing of my education data.",
       reg_complete_btn: "Complete Registration",
       reg_subjects_limit: "You can choose up to 2 subjects.",
