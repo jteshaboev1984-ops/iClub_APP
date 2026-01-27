@@ -1655,20 +1655,24 @@ if (langWrap) {
     const expanded = !!profile?.pinnedExpanded;
 
     const userSubjects = Array.isArray(profile.subjects) ? profile.subjects : [];
-    const pinnedSet = new Set(userSubjects.filter(s => !!s.pinned).map(s => s.key));
+   const pinnedSet = new Set(
+     userSubjects
+       .filter(s => !!s.pinned && s.mode === "study")
+       .map(s => s.key)
+      );
 
     // Study (Pinned) can show all subjects when expanded, otherwise only pinned
-const allSubjects = Array.isArray(SUBJECTS) ? SUBJECTS.slice() : [];
+   const allSubjects = Array.isArray(SUBJECTS) ? SUBJECTS.slice() : [];
 
-const pinnedList = allSubjects.filter(s => pinnedSet.has(s.key));
-const otherList  = allSubjects.filter(s => !pinnedSet.has(s.key));
+   const pinnedList = allSubjects.filter(s => pinnedSet.has(s.key));
+   const otherList  = allSubjects.filter(s => !pinnedSet.has(s.key));
 
-const listToRender = expanded ? [...pinnedList, ...otherList] : pinnedList;
+   const listToRender = expanded ? [...pinnedList, ...otherList] : pinnedList;
 
-    if (!listToRender.length) {
-      pinnedWrap.innerHTML = `<div class="empty muted">${t("settings_no_pinned")}</div>`;
-      return;
-    }
+       if (!listToRender.length) {
+         pinnedWrap.innerHTML = `<div class="empty muted">${t("settings_no_pinned")}</div>`;
+         return;
+       }
 
     listToRender.forEach(subj => {
       const isPinned = pinnedSet.has(subj.key);
@@ -2225,7 +2229,8 @@ input?.addEventListener("change", () => {
     }
 
     const comp = profile.subjects?.filter(s => s.mode === "competitive") || [];
-    const pinned = profile.subjects?.filter(s => !!s.pinned) || [];
+    const pinned = profile.subjects?.filter(s => !!s.pinned && s.mode === "study") || [];
+
 
     if (!comp.length) compWrap.innerHTML = `<div class="empty muted">${t("home_competitive_empty")}</div>`;
     if (!pinned.length) pinnedWrap.innerHTML = `<div class="empty muted">${t("home_pinned_empty")}</div>`;
@@ -4061,26 +4066,26 @@ if (state.tab === "profile") {
 
 if (isSchoolStudent) {
   subjects.push({
-    key: main1,
-    mode: "competitive",
+  key: main1,
+  mode: isSchoolStudent ? "competitive" : "study",
+  pinned: isSchoolStudent ? false : true
+});
+
+if (main2) {
+  subjects.push({
+    key: main2,
+    mode: isSchoolStudent ? "competitive" : "study",
+    pinned: isSchoolStudent ? false : true
+  });
+}
+
+if (add1) {
+  subjects.push({
+    key: add1,
+    mode: "study",
     pinned: true
   });
-
-  if (main2) {
-    subjects.push({
-      key: main2,
-      mode: "competitive",
-      pinned: true
-    });
-  }
-
-  if (add1) {
-    subjects.push({
-      key: add1,
-      mode: "study",
-      pinned: true
-    });
-  }
+}
 } else {
   // Non-school users: no subjects during registration.
   // They can study/practice all subjects without tours and manage subjects later in Profile.
