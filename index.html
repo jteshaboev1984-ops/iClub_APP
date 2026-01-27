@@ -167,14 +167,22 @@
               </label>
             </div>
 
-             <label class="field visually-hidden">
-              <span class="label">Язык</span>
-              <select id="reg-language" class="input">
-                <option value="ru">Русский</option>
-                <option value="uz">O‘zbek</option>
-                <option value="en">English</option>
-              </select>
-            </label>
+             <label class="field">
+  <span class="label" data-i18n="reg_language_label">Язык</span>
+  <select id="reg-language" class="input">
+    <option value="ru" data-i18n="lang_ru">Русский</option>
+    <option value="uz" data-i18n="lang_uz">O‘zbek</option>
+    <option value="en" data-i18n="lang_en">English</option>
+  </select>
+
+  <div class="field-hint" data-i18n="reg_language_hint">
+    Далее этот язык используется для практики, туров и сертификатов.
+  </div>
+
+  <div class="field-note" data-i18n="reg_language_reset_note">
+    Важно: смена языка после регистрации сбросит прогресс.
+  </div>
+</label>
 
             <label class="checkbox reg-consent">
               <input id="reg-consent" type="checkbox" required />
