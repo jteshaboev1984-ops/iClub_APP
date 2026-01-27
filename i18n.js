@@ -127,7 +127,12 @@
       profile_empty_slot: "Empty Competitive Slot",
       profile_settings_more: "More",
       profile_settings_community: "Community",
-      profile_settings_about: "About project",     
+      profile_settings_about: "About project",
+
+      course_toggle_on: "Включено",
+      course_toggle_off: "Выключено",
+      course_toggle_aria: "Показывать на главном",
+
 
       toast_time_expired_answer_saved: "Время истекло. Ответ сохранён…",
       toast_time_expired_no_answer: "Время истекло. Вопрос сохранён без ответа…",
@@ -338,6 +343,10 @@
       course_competitive_detach_message: "Fan Competitive’dan olib tashlanadi.\n\n• Turlar, reytinglar va sertifikatlar mavjud bo‘lmaydi.\n• Study (o‘quv) rejimi qoladi.\n\nMuhim: keyin Competitive’ni qayta yoqsangiz, tur/reyting progressi qaytadan boshlanishi mumkin.",
       course_competitive_detach_ok: "Olib tashlash",
       course_competitive_detach_toast: "Competitive o‘chirildi. Fan Study’ga o‘tkazildi.",
+
+      course_toggle_on: "Yoqilgan",
+      course_toggle_off: "O‘chirilgan",
+      course_toggle_aria: "Home’da ko‘rsatish",
  
       toast_time_expired_answer_saved: "Vaqt tugadi. Javob saqlandi…",
       toast_time_expired_no_answer: "Vaqt tugadi. Savol javobsiz saqlandi…",
@@ -550,6 +559,10 @@
       course_competitive_detach_message: "This subject will be removed from Competitive.\n\n• Tours, leaderboards and certificates will be unavailable.\n• Study mode will remain available.\n\nNote: if you enable Competitive again, tour/leaderboard progress may restart.",
       course_competitive_detach_ok: "Detach",
       course_competitive_detach_toast: "Competitive disabled. Subject moved to Study.",
+
+      course_toggle_on: "Enabled",
+      course_toggle_off: "Disabled",
+      course_toggle_aria: "Show on Home",
  
       toast_time_expired_answer_saved: "Time is up. Answer saved…",
       toast_time_expired_no_answer: "Time is up. Question saved without an answer…",
