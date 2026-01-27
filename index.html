@@ -136,7 +136,7 @@
               </label>
             </div>
 
-             <div class="card reg-subject-card">
+             <div id="reg-subject-section" class="card reg-subject-card">
               <div class="card-title" data-i18n="reg_competitive_subject_label">Competitive Subject</div>
                 <p class="muted small" data-i18n="reg_competitive_subject_hint">Choose your primary focus for the leaderboard</p>
 
@@ -187,7 +187,15 @@
               </label>
             </div>
 
-             <label class="checkbox reg-consent">
+             <div id="reg-nonstudent-subjects" class="card reg-nonstudent-card hidden">
+               <div class="card-title" data-i18n="reg_nonstudent_title">Обучение без школьного режима</div>
+                <div class="muted small" data-i18n="reg_nonstudent_text">
+                Если вы не ученик школы, вы можете изучать и практиковаться по всем предметам без туров.
+                Подключать и удалять предметы можно позже в профиле.
+              </div>
+            </div>
+            
+            <label class="checkbox reg-consent">
               <input id="reg-consent" type="checkbox" required />
               <span data-i18n="reg_terms_text">I agree to the Terms of Service and consent to processing of my education data.</span>
             </label>
