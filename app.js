@@ -2071,51 +2071,97 @@ input?.addEventListener("change", () => {
   }
 
   function initRegSubjectChips() {
-    const wrap = $("#reg-subject-chips");
-    const main1 = $("#reg-main-subject-1");
-    const main2 = $("#reg-main-subject-2");
-    if (!wrap || !main1 || !main2) return;
+  const wrap = $("#reg-subject-chips");
+  const main1 = $("#reg-main-subject-1");
+  const main2 = $("#reg-main-subject-2");
+  if (!wrap || !main1 || !main2) return;
 
-    const buttons = () => $$("#reg-subject-chips .chip-btn");
+  const summaryEl = $("#reg-subject-summary");
+  const buttons = () => $$("#reg-subject-chips .chip-btn");
 
-    const syncChipsFromSelects = () => {
-      const selected = [main1.value, main2.value].filter(Boolean);
-      buttons().forEach(btn => {
-        btn.classList.toggle("is-active", selected.includes(btn.dataset.subjectKey));
-      });
-    };
+  const tt = (key, fallback) => {
+    const v = t(key);
+    return (v && v !== key) ? v : fallback;
+  };
 
-    const syncSelectsFromChips = () => {
-      const selected = buttons().filter(b => b.classList.contains("is-active")).map(b => b.dataset.subjectKey);
-      main1.value = selected[0] || "";
-      main2.value = selected[1] || "";
-    };
+  const getSubjectLabel = (subjectKey) => {
+    if (!subjectKey) return "";
+    const k = "subj_" + subjectKey;
+    const v = t(k);
+    if (v && v !== k) return v;
 
-    wrap.addEventListener("click", (e) => {
-      const btn = e.target.closest(".chip-btn");
-      if (!btn) return;
-      const current = buttons().filter(b => b.classList.contains("is-active"));
+    const btn = buttons().find(b => b.dataset.subjectKey === subjectKey);
+    return btn ? btn.textContent.trim() : subjectKey;
+  };
 
-      if (btn.classList.contains("is-active")) {
-        btn.classList.remove("is-active");
-        syncSelectsFromChips();
-        return;
-      }
+  const updateSummary = () => {
+    if (!summaryEl) return;
 
-      if (current.length >= 2) {
-        showToast(t("reg_subjects_limit"));
-        return;
-      }
+    const a = (main1.value || "").trim();
+    const b = (main2.value || "").trim();
 
-      btn.classList.add("is-active");
-      syncSelectsFromChips();
+    if (!a && !b) {
+      summaryEl.textContent = tt("reg_subject_summary_none", "Выберите до 2 предметов");
+      return;
+    }
+
+    const primaryTag = tt("reg_subject_primary_tag", "Основной");
+    const secondaryTag = tt("reg_subject_secondary_tag", "Дополнительный");
+
+    const rows = [];
+    if (a) {
+      rows.push(
+        `<div class="reg-subject-line"><span class="reg-subject-tag">${escapeHTML(primaryTag)}</span><span class="reg-subject-val">${escapeHTML(getSubjectLabel(a))}</span></div>`
+      );
+    }
+    if (b) {
+      rows.push(
+        `<div class="reg-subject-line"><span class="reg-subject-tag">${escapeHTML(secondaryTag)}</span><span class="reg-subject-val">${escapeHTML(getSubjectLabel(b))}</span></div>`
+      );
+    }
+    summaryEl.innerHTML = rows.join("");
+  };
+
+  const syncChipsFromSelects = () => {
+    const selected = [main1.value, main2.value].filter(Boolean);
+    buttons().forEach(btn => {
+      btn.classList.toggle("is-active", selected.includes(btn.dataset.subjectKey));
     });
+    updateSummary();
+  };
 
-    main1.addEventListener("change", syncChipsFromSelects);
-    main2.addEventListener("change", syncChipsFromSelects);
-    syncChipsFromSelects();
-  } 
+  const syncSelectsFromChips = () => {
+    const selected = buttons().filter(b => b.classList.contains("is-active")).map(b => b.dataset.subjectKey);
+    main1.value = selected[0] || "";
+    main2.value = selected[1] || "";
+    updateSummary();
+  };
 
+  wrap.addEventListener("click", (e) => {
+    const btn = e.target.closest(".chip-btn");
+    if (!btn) return;
+
+    const current = buttons().filter(b => b.classList.contains("is-active"));
+
+    if (btn.classList.contains("is-active")) {
+      btn.classList.remove("is-active");
+      syncSelectsFromChips();
+      return;
+    }
+
+    if (current.length >= 2) {
+      showToast(t("reg_subjects_limit"));
+      return;
+    }
+
+    btn.classList.add("is-active");
+    syncSelectsFromChips();
+  });
+
+  main1.addEventListener("change", syncChipsFromSelects);
+  main2.addEventListener("change", syncChipsFromSelects);
+  syncChipsFromSelects();
+}
        // live language switch on registration
     const langSel = $("#reg-language");
     if (langSel) {
