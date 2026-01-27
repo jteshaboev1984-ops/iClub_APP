@@ -14,6 +14,14 @@
       done: "Готово",
       error_try_again: "Ошибка — попробуйте ещё раз",
 
+      lang_ru: "Русский",
+      lang_uz: "O‘zbek",
+      lang_en: "English",
+
+      reg_language_label: "Язык",
+      reg_language_hint: "Далее этот язык используется для практики, туров и сертификатов.",
+      reg_language_reset_note: "Важно: смена языка после регистрации сбросит прогресс.",
+ 
       tab_home: "Home",
       tab_courses: "Courses",
       tab_ratings: "Ratings",
@@ -21,26 +29,31 @@
 
       reg_title: "Регистрация",
       reg_consent: "Я согласен(на) на обработку данных",
-      reg_header_title: "Registration",
-      reg_progress_label: "Setup Profile",
-      reg_progress_step: "Step 1 of 2",
-      reg_create_title: "Create your account",
-      reg_create_subtitle: "Enter your details to join the Cambridge curriculum study in Uzbekistan.",
-      reg_full_name_label: "Full Name",
-      reg_full_name_placeholder: "e.g. Alisher Navoiy",
-      reg_region_label: "Region",
-      reg_region_placeholder: "Select your region",
-      reg_district_label: "District",
-      reg_district_placeholder: "Select your district",
-      reg_school_toggle_label: "Are you a school student?",
-      reg_school_toggle_hint: "Enable to provide school details",
-      reg_school_no_label: "School No.",
-      reg_school_no_placeholder: "e.g. 154",
-      reg_grade_label: "Grade",
+      reg_header_title: "Регистрация",
+      reg_progress_label: "Заполнение профиля",
+      reg_progress_step: "Шаг 1 из 2",
+
+      reg_create_title: "Создайте аккаунт",
+      reg_create_subtitle: "Введите данные, чтобы участвовать в обучении по Cambridge curriculum в Узбекистане.",
+
+      reg_full_name_label: "ФИО",
+      reg_full_name_placeholder: "например, Alisher Navoiy",
+
+      reg_region_label: "Регион",
+      reg_region_placeholder: "Выберите регион",
+
+      reg_district_label: "Район",
+      reg_district_placeholder: "Выберите район",
+
+      reg_school_toggle_label: "Вы ученик школы?",
+      reg_school_toggle_hint: "Включите, чтобы указать школу и класс",
+      reg_school_no_label: "Школа №",
+      reg_school_no_placeholder: "например 154",
+      reg_grade_label: "Класс",
       reg_competitive_subject_label: "Competitive Subject",
-      reg_competitive_subject_hint: "Choose your primary focus for the leaderboard",
-      reg_terms_text: "I agree to the Terms of Service and consent to processing of my education data.",
-      reg_complete_btn: "Complete Registration",
+      reg_competitive_subject_hint: "Выберите основной предмет для рейтинга",
+      reg_terms_text: "Я соглашаюсь с условиями и даю согласие на обработку данных об обучении.",
+      reg_complete_btn: "Завершить регистрацию",
       reg_subjects_limit: "Можно выбрать максимум 2 предмета.",
       reg_subject_label_competitive: "Competitive Subject",
       reg_subject_hint_competitive: "Выберите основной предмет для рейтинга",
@@ -203,6 +216,14 @@
       saving: "Saqlanmoqda…",
       done: "Tayyor",
       error_try_again: "Xatolik — qayta urinib ko‘ring",
+
+      lang_ru: "Русский",
+      lang_uz: "O‘zbek",
+      lang_en: "English",
+
+      reg_language_label: "Til",
+      reg_language_hint: "Keyin ushbu til amaliyot, turlar va sertifikatlarda ishlatiladi.",
+      reg_language_reset_note: "Muhim: ro‘yxatdan o‘tgandan keyin tilni o‘zgartirish progressni nolga tushiradi.",
 
       tab_home: "Home",
       tab_courses: "Courses",
@@ -395,6 +416,14 @@
       saving: "Saving…",
       done: "Done",
       error_try_again: "Error — please try again",
+
+      lang_ru: "Русский",
+      lang_uz: "O‘zbek",
+      lang_en: "English",
+
+      reg_language_label: "Language",
+      reg_language_hint: "This language will be used for practice, tours, and certificates.",
+      reg_language_reset_note: "Important: changing the language after registration will reset progress.",
 
       tab_home: "Home",
       tab_courses: "Courses",
