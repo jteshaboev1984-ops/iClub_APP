@@ -3146,3 +3146,8 @@ body.modal-open { overflow: hidden; }
 .view-subject-hub.is-study .chip[data-tab="tours"] {
   color: rgba(15, 23, 42, 0.45);
 }
+/* Subject Hub — Tours tab muted ONLY for Study subjects */
+.view-subject-hub.is-study .tab-btn[data-tab="tours"] {
+  color: rgba(15, 23, 42, 0.45);
+}
+
