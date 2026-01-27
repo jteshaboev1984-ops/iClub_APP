@@ -42,6 +42,25 @@
       reg_terms_text: "I agree to the Terms of Service and consent to processing of my education data.",
       reg_complete_btn: "Complete Registration",
       reg_subjects_limit: "Можно выбрать максимум 2 предмета.",
+      reg_subject_label_competitive: "Competitive Subject",
+      reg_subject_hint_competitive: "Выберите основной предмет для рейтинга",
+      reg_subject_label_study: "Study Subject",
+      reg_subject_hint_study: "Выберите основной предмет для обучения",
+
+      reg_main_subject_required_label: "Основной предмет (обязательно)",
+      reg_main_subject_optional_label: "Основной предмет №2 (опционально)",
+      reg_add_subject_optional_label: "Дополнительный предмет (опционально)",
+      reg_choose_placeholder: "Выберите…",
+      reg_choose_none: "Не выбирать",
+
+      subj_informatics: "Информатика",
+      subj_economics: "Экономика",
+      subj_biology: "Биология",
+      subj_chemistry: "Химия",
+      subj_mathematics: "Математика",
+
+      competitive_subjects_limit_2: "Лимит competitive-предметов — 2",
+      fill_required_fields: "Заполните обязательные поля"
 
       not_available: "Недоступно",
       disabled_not_school: "Туры и рейтинги доступны только школьникам.",
@@ -208,7 +227,26 @@
       reg_terms_text: "I agree to the Terms of Service and consent to processing of my education data.",
       reg_complete_btn: "Complete Registration",
       reg_subjects_limit: "Ko‘pi bilan 2 ta fan tanlash mumkin.",
+      reg_subject_label_competitive: "Raqobat fani",
+      reg_subject_hint_competitive: "Reyting uchun asosiy fanni tanlang",
+      reg_subject_label_study: "O‘quv fani",
+      reg_subject_hint_study: "O‘rganish uchun asosiy fanni tanlang",
 
+      reg_main_subject_required_label: "Asosiy fan (majburiy)",
+      reg_main_subject_optional_label: "Asosiy fan №2 (ixtiyoriy)",
+      reg_add_subject_optional_label: "Qo‘shimcha fan (ixtiyoriy)",
+      reg_choose_placeholder: "Tanlang…",
+      reg_choose_none: "Tanlamaslik",
+
+      subj_informatics: "Informatika",
+      subj_economics: "Iqtisodiyot",
+      subj_biology: "Biologiya",
+      subj_chemistry: "Kimyo",
+      subj_mathematics: "Matematika",
+
+      competitive_subjects_limit_2: "Raqobat fanlari limiti — 2 ta",
+      fill_required_fields: "Majburiy maydonlarni to‘ldiring"
+   
       not_available: "Mavjud emas",
       disabled_not_school: "Turlar va reytinglar faqat maktab o‘quvchilari uchun.",
       disabled_not_competitive: "Bu funksiya faqat musobaqa rejimidagi fan uchun.",
@@ -376,7 +414,26 @@
       reg_terms_text: "I agree to the Terms of Service and consent to processing of my education data.",
       reg_complete_btn: "Complete Registration",
       reg_subjects_limit: "You can choose up to 2 subjects.",
+      reg_subject_label_competitive: "Competitive Subject",
+      reg_subject_hint_competitive: "Choose your primary focus for the leaderboard",
+      reg_subject_label_study: "Study Subject",
+      reg_subject_hint_study: "Choose your primary subject for studying",
 
+      reg_main_subject_required_label: "Main subject (required)",
+      reg_main_subject_optional_label: "Main subject #2 (optional)",
+      reg_add_subject_optional_label: "Additional subject (optional)",
+      reg_choose_placeholder: "Choose…",
+      reg_choose_none: "Do not choose",
+
+      subj_informatics: "Informatics",
+      subj_economics: "Economics",
+      subj_biology: "Biology",
+      subj_chemistry: "Chemistry",
+      subj_mathematics: "Mathematics",
+
+      competitive_subjects_limit_2: "Competitive subjects limit is 2",
+      fill_required_fields: "Please fill required fields"
+ 
       not_available: "Not available",
       disabled_not_school: "Tours and ratings are available only for school students.",
       disabled_not_competitive: "This feature is available only for competitive subjects.",
