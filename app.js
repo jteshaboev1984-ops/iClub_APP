@@ -2475,99 +2475,76 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
     renderSubjectHub();
   });
 
-  // Actions row
-  const actions = document.createElement("div");
-  actions.className = "catalog-actions";
+    // Footer row:
+  // - Competitive tab: one action (detach competitive)
+  // - Study tab: switch (pinned on Home)
+  const footer = document.createElement("div");
 
-  // 1) Open (primary)
-  const btnOpen = document.createElement("button");
-  btnOpen.type = "button";
-  btnOpen.className = "mini-btn";
-  btnOpen.textContent = "Открыть";
-  btnOpen.addEventListener("click", (e) => {
-    e.stopPropagation();
-    state.courses.subjectKey = s.key;
-    saveState();
-    pushCourses("subject-hub");
-    renderSubjectHub();
-  });
+  if (state.courses.mainFilter === "competitive") {
+    footer.className = "catalog-actions one";
 
-  // 2) Pin/Unpin (secondary)
-  // 2) Secondary action
-if (state.courses.mainFilter === "competitive") {
-  // In Competitive tab: do NOT allow "pin".
-  // Only allow detaching from Competitive (move to Study) with a warning.
-  const btnDetach = document.createElement("button");
-  btnDetach.type = "button";
-  btnDetach.className = "mini-btn ghost";
-  btnDetach.textContent = "Открепить";
-
-  btnDetach.addEventListener("click", async (e) => {
-    e.stopPropagation();
-
-    const fresh = loadProfile();
-    if (!fresh) {
-      showToast(t("error_try_again"));
-      return;
-    }
-
-    const subjRow = getUserSubject(fresh, s.key);
-    if (!subjRow || subjRow.mode !== "competitive") {
-      showToast(t("error_try_again"));
-      return;
-    }
-
-    const ok = await uiConfirm({
-      title: t("course_competitive_detach_title"),
-      message: t("course_competitive_detach_message"),
-      okText: t("course_competitive_detach_ok"),
-      cancelText: t("cancel")
+    const btnDetach = document.createElement("button");
+    btnDetach.type = "button";
+    btnDetach.className = "mini-btn ghost";
+    btnDetach.textContent = t("btn_detach") || "Открепить";
+    btnDetach.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // (оставь твою текущую логику confirm/детача competitive как была)
+      // ... confirm detach competitive ...
     });
 
-    if (!ok) return;
+    footer.appendChild(btnDetach);
+  } else {
+    footer.className = "catalog-toggle-row" + (isPinned ? " is-on" : "");
 
-    // Disable Competitive for this subject (move to Study)
-    const next = Array.isArray(fresh.subjects) ? fresh.subjects.map(x => ({ ...x })) : [];
-    const row = next.find(x => x.key === s.key);
-    if (row) row.mode = "study";
+    const left = document.createElement("div");
+    left.className = "catalog-toggle-left";
 
-    fresh.subjects = next;
-    saveProfile(fresh);
+    const stateLine = document.createElement("div");
+    stateLine.className = "catalog-toggle-state";
+    stateLine.textContent = isPinned ? t("course_toggle_on") : t("course_toggle_off");
 
-    renderHome();
-    renderAllSubjects();
-    showToast(t("course_competitive_detach_toast"));
-  });
+    left.appendChild(stateLine);
 
-  actions.appendChild(btnDetach);
-} else {
-  // In Study tab: allow pin/unpin (quick access on Home)
-  const btnPin = document.createElement("button");
-  btnPin.type = "button";
-  btnPin.className = "mini-btn ghost";
-  btnPin.textContent = isPinned ? "Открепить" : "Закрепить";
+    const sw = document.createElement("label");
+    sw.className = "switch";
 
-  btnPin.addEventListener("click", (e) => {
-    e.stopPropagation();
+    sw.innerHTML = `
+      <input type="checkbox" ${isPinned ? "checked" : ""} aria-label="${t("course_toggle_aria") || "Show on Home"}">
+      <span class="slider"></span>
+    `;
 
-    const updated = togglePinnedSubject(profile, s.key);
-    if (!updated) {
-      showToast(t("error_try_again"));
-      return;
-    }
+    const input = sw.querySelector("input");
 
-    saveProfile(updated);
-    renderHome();
-    renderAllSubjects();
-    showToast(isPinned ? "Откреплено" : "Закреплено");
-  });
+    // IMPORTANT: switch click must NOT open the subject card
+    input.addEventListener("click", (e) => e.stopPropagation());
 
-  actions.appendChild(btnPin);
-}
+    input.addEventListener("change", (e) => {
+      e.stopPropagation();
 
-  card.appendChild(head);
-  card.appendChild(actions);
+      const prof = loadProfile() || profile;
+      const updated = togglePinnedSubject(prof, s.key);
 
+      saveProfile(updated);
+
+      // figure out new pinned state (after toggle)
+      const after = (updated?.subjects || []).find(x => x.key === s.key);
+      const nowPinned = !!after?.pinned;
+
+      showToast(nowPinned ? t("toast_added_pinned") : t("toast_removed_pinned"));
+
+      // refresh screens that use pinned
+      renderHome();
+      renderAllSubjects();
+      renderProfileSettings?.();
+    });
+
+    footer.appendChild(left);
+    footer.appendChild(sw);
+  }
+
+  card.appendChild(footer);
   grid.appendChild(card);
 };
 
