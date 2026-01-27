@@ -52,6 +52,11 @@
       reg_add_subject_optional_label: "Дополнительный предмет (опционально)",
       reg_choose_placeholder: "Выберите…",
       reg_choose_none: "Не выбирать",
+      reg_select_region: "Выберите регион…",
+      reg_select_region_first: "Сначала выберите регион…",
+      reg_select_district: "Выберите район…",
+      reg_loading_districts: "Загрузка районов…",
+      reg_no_districts: "Нет районов"
 
       subj_informatics: "Информатика",
       subj_economics: "Экономика",
@@ -231,7 +236,12 @@
       reg_subject_hint_competitive: "Reyting uchun asosiy fanni tanlang",
       reg_subject_label_study: "O‘quv fani",
       reg_subject_hint_study: "O‘rganish uchun asosiy fanni tanlang",
-
+      reg_select_region: "Viloyatni tanlang…",
+      reg_select_region_first: "Avval viloyatni tanlang…",
+      reg_select_district: "Tumanni tanlang…",
+      reg_loading_districts: "Tumanlar yuklanmoqda…",
+      reg_no_districts: "Tumanlar yo‘q"
+   
       reg_main_subject_required_label: "Asosiy fan (majburiy)",
       reg_main_subject_optional_label: "Asosiy fan №2 (ixtiyoriy)",
       reg_add_subject_optional_label: "Qo‘shimcha fan (ixtiyoriy)",
@@ -424,7 +434,12 @@
       reg_add_subject_optional_label: "Additional subject (optional)",
       reg_choose_placeholder: "Choose…",
       reg_choose_none: "Do not choose",
-
+      reg_select_region: "Choose region…",
+      reg_select_region_first: "Choose region first…",
+      reg_select_district: "Choose district…",
+      reg_loading_districts: "Loading districts…",
+      reg_no_districts: "No districts"
+   
       subj_informatics: "Informatics",
       subj_economics: "Economics",
       subj_biology: "Biology",
