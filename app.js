@@ -2467,13 +2467,15 @@ head.innerHTML = `
 const imgEl = head.querySelector(".catalog-ico-img");
 setImgWithFallback(imgEl, subjectIconCandidates(s.key));
 
-  head.addEventListener("click", () => {
+    head.addEventListener("click", () => {
     // "Открыть" — без изменения профиля, как в контракте
     state.courses.subjectKey = s.key;
     saveState();
     pushCourses("subject-hub");
     renderSubjectHub();
   });
+
+  card.appendChild(head); // ✅ вернуть заголовок с названием предмета
 
     // Footer row:
   // - Competitive tab: one action (detach competitive)
