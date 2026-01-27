@@ -3142,3 +3142,7 @@ body.modal-open { overflow: hidden; }
 .course-toggle-row.is-on .course-toggle-state{
   color: var(--primary);
 }
+/* Subject Hub — Tours chip muted ONLY for Study subjects */
+.view-subject-hub.is-study .chip[data-tab="tours"] {
+  color: rgba(15, 23, 42, 0.45);
+}
