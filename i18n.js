@@ -56,7 +56,7 @@
       reg_select_region_first: "Сначала выберите регион…",
       reg_select_district: "Выберите район…",
       reg_loading_districts: "Загрузка районов…",
-      reg_no_districts: "Нет районов"
+      reg_no_districts: "Нет районов",
 
       subj_informatics: "Информатика",
       subj_economics: "Экономика",
@@ -65,7 +65,7 @@
       subj_mathematics: "Математика",
 
       competitive_subjects_limit_2: "Лимит competitive-предметов — 2",
-      fill_required_fields: "Заполните обязательные поля"
+      fill_required_fields: "Заполните обязательные поля",
 
       not_available: "Недоступно",
       disabled_not_school: "Туры и рейтинги доступны только школьникам.",
@@ -240,7 +240,7 @@
       reg_select_region_first: "Avval viloyatni tanlang…",
       reg_select_district: "Tumanni tanlang…",
       reg_loading_districts: "Tumanlar yuklanmoqda…",
-      reg_no_districts: "Tumanlar yo‘q"
+      reg_no_districts: "Tumanlar yo‘q",
    
       reg_main_subject_required_label: "Asosiy fan (majburiy)",
       reg_main_subject_optional_label: "Asosiy fan №2 (ixtiyoriy)",
@@ -255,7 +255,7 @@
       subj_mathematics: "Matematika",
 
       competitive_subjects_limit_2: "Raqobat fanlari limiti — 2 ta",
-      fill_required_fields: "Majburiy maydonlarni to‘ldiring"
+      fill_required_fields: "Majburiy maydonlarni to‘ldiring",
    
       not_available: "Mavjud emas",
       disabled_not_school: "Turlar va reytinglar faqat maktab o‘quvchilari uchun.",
@@ -438,7 +438,7 @@
       reg_select_region_first: "Choose region first…",
       reg_select_district: "Choose district…",
       reg_loading_districts: "Loading districts…",
-      reg_no_districts: "No districts"
+      reg_no_districts: "No districts",
    
       subj_informatics: "Informatics",
       subj_economics: "Economics",
@@ -447,7 +447,7 @@
       subj_mathematics: "Mathematics",
 
       competitive_subjects_limit_2: "Competitive subjects limit is 2",
-      fill_required_fields: "Please fill required fields"
+      fill_required_fields: "Please fill required fields",
  
       not_available: "Not available",
       disabled_not_school: "Tours and ratings are available only for school students.",
