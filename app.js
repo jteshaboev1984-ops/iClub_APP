@@ -687,100 +687,132 @@ function getReadingRefs(subjectKey, topic) {
     });
   }
 
+    function refreshRegionDistrictPlaceholders() {
+    const regionEl = $("#reg-region");
+    const districtEl = $("#reg-district");
+    if (!regionEl || !districtEl) return;
+
+    // update placeholder texts (first option)
+    if (regionEl.options?.length) {
+      const opt0 = regionEl.options[0];
+      if (opt0 && opt0.value === "") opt0.textContent = t("reg_select_region") || "Выберите регион…";
+    }
+
+    if (districtEl.options?.length) {
+      const opt0 = districtEl.options[0];
+      if (opt0 && opt0.value === "") {
+        opt0.textContent = districtEl.disabled
+          ? (t("reg_select_region_first") || "Сначала выберите регион…")
+          : (t("reg_select_district") || "Выберите район…");
+      }
+    }
+  }
+
   async function initRegionDistrictUI() {
     const regionEl = $("#reg-region");
     const districtEl = $("#reg-district");
     if (!regionEl || !districtEl) return;
-    // detect fallback mode (default = true, switch off if DB is used)
-    let fallback = true;
 
-    // default state
-    districtEl.disabled = true;
-    fillSelectOptions(districtEl, [], "Сначала выберите район…");
-
-    // 1) try Supabase regions
-    let sbRegions = [];
-    try {
-      if (window.sb) {
-        const { data, error } = await window.sb
-          .from("regions")
-          .select("id,name")
-          .order("name", { ascending: true });
-        if (!error && Array.isArray(data) && data.length) sbRegions = data;
-      }
-    } catch (e) {
-      sbRegions = [];
+    // prevent double-binding
+    if (regionEl.dataset.bound === "1") {
+      refreshRegionDistrictPlaceholders();
+      return;
     }
+    regionEl.dataset.bound = "1";
 
-    const useDb = sbRegions.length > 0;
+    // initial state
+    districtEl.disabled = true;
+    regionEl.innerHTML = "";
+    districtEl.innerHTML = "";
 
-    if (useDb) {
-     fallback = false;
-      // DB mode: region value = region.id, label = region.name
-      fillSelectOptionsKV(
-        regionEl,
-        sbRegions.map(r => ({ value: r.id, label: r.name })),
-        "Выберите регион…"
-      );
+    // placeholders
+    const regPh = document.createElement("option");
+    regPh.value = "";
+    regPh.disabled = true;
+    regPh.selected = true;
+    regPh.textContent = t("reg_select_region") || "Выберите регион…";
+    regionEl.appendChild(regPh);
 
-      // on change -> load districts by region_id
-      regionEl.addEventListener("change", async () => {
-        const regionId = regionEl.value ? Number(regionEl.value) : null;
+    const distPh = document.createElement("option");
+    distPh.value = "";
+    distPh.disabled = true;
+    distPh.selected = true;
+    distPh.textContent = t("reg_select_region_first") || "Сначала выберите регион…";
+    districtEl.appendChild(distPh);
 
-        districtEl.disabled = true;
-        fillSelectOptions(districtEl, [], "Загрузка районов…");
-
-        if (!regionId || !window.sb) {
-          fillSelectOptions(districtEl, [], "Сначала выберите регион…");
-          return;
-        }
-
-        try {
-          const { data, error } = await window.sb
-            .from("districts")
-            .select("id,name,region_id")
-            .eq("region_id", regionId)
-            .order("name", { ascending: true });
-
-          const rows = (!error && Array.isArray(data)) ? data : [];
-          districtEl.disabled = rows.length === 0;
-
-          if (rows.length) {
-            fillSelectOptionsKV(
-              districtEl,
-              rows.map(d => ({ value: d.id, label: d.name })),
-              "Выберите район…"
-            );
-          } else {
-            fillSelectOptions(districtEl, [], "Нет районов");
-          }
-        } catch (e) {
-          districtEl.disabled = true;
-          fillSelectOptions(districtEl, [], "Ошибка загрузки");
-        }
-      });
-
+    // DB only
+    if (!window.sb) {
+      showToast("Supabase not ready");
       return;
     }
 
-    // 2) fallback local demo map (old behavior)
-    const regionList = Object.keys(REGIONS);
-    fillSelectOptions(regionEl, regionList, "Выберите регион…");
+    const { data: regions, error: rErr } = await window.sb
+      .from("regions")
+      .select("id,name")
+      .order("name", { ascending: true });
 
-    districtEl.disabled = true;
-    fillSelectOptions(districtEl, [], "Сначала выберите регион…");
+    if (rErr || !Array.isArray(regions) || regions.length === 0) {
+      showToast("No regions in DB");
+      return;
+    }
 
-    regionEl.addEventListener("change", () => {
-      const r = regionEl.value;
-      const districts = REGIONS[r] || [];
-      districtEl.disabled = districts.length === 0;
-      fillSelectOptions(
-        districtEl,
-        districts,
-        districts.length ? "Выберите район…" : "Нет районов"
-      );
+    regions.forEach(r => {
+      const o = document.createElement("option");
+      o.value = String(r.id);
+      o.textContent = r.name;
+      regionEl.appendChild(o);
+    });
+
+    regionEl.addEventListener("change", async () => {
+      const regionId = regionEl.value ? Number(regionEl.value) : null;
+
+      districtEl.disabled = true;
+      districtEl.innerHTML = "";
+
+      const ph = document.createElement("option");
+      ph.value = "";
+      ph.disabled = true;
+      ph.selected = true;
+      ph.textContent = t("reg_loading_districts") || "Загрузка районов…";
+      districtEl.appendChild(ph);
+
+      if (!regionId) {
+        refreshRegionDistrictPlaceholders();
+        return;
+      }
+
+      const { data: dists, error: dErr } = await window.sb
+        .from("districts")
+        .select("id,name,region_id")
+        .eq("region_id", regionId)
+        .order("name", { ascending: true });
+
+      const rows = (!dErr && Array.isArray(dists)) ? dists : [];
+
+      districtEl.innerHTML = "";
+      const ph2 = document.createElement("option");
+      ph2.value = "";
+      ph2.disabled = true;
+      ph2.selected = true;
+      ph2.textContent = rows.length ? (t("reg_select_district") || "Выберите район…") : (t("reg_no_districts") || "Нет районов");
+      districtEl.appendChild(ph2);
+
+      if (!rows.length) {
+        districtEl.disabled = true;
+        return;
+      }
+
+      rows.forEach(d => {
+        const o = document.createElement("option");
+        o.value = String(d.id);
+        o.textContent = d.name;
+        districtEl.appendChild(o);
+      });
+
+      districtEl.disabled = false;
     });
   }
+
 
   // ---------------------------
   // UI: Views & Tabs
@@ -1990,8 +2022,52 @@ input?.addEventListener("change", () => {
         if (subjTitle) {
         subjTitle.textContent = (isSchoolStudent ? "Competitive Subject" : "Study Subject");
         }
+         // ✅ dynamic subject card texts (competitive vs study)
+    const labelEl = document.querySelector('[data-i18n="reg_competitive_subject_label"]');
+    const hintEl  = document.querySelector('[data-i18n="reg_competitive_subject_hint"]');
+
+    if (labelEl) {
+      labelEl.textContent = isSchool ? t("reg_subject_label_competitive") : t("reg_subject_label_study");
     }
-  
+    if (hintEl) {
+      hintEl.textContent = isSchool ? t("reg_subject_hint_competitive") : t("reg_subject_hint_study");
+    }
+
+    // update subject names in chips/selects too
+    try { applyRegSubjectI18n(); } catch {}
+    }
+
+     function applyRegSubjectI18n() {
+    // chips
+    const chipBtns = $$("#reg-subject-chips .chip-btn");
+    chipBtns.forEach(btn => {
+      const key = btn.dataset.subjectKey;
+      if (!key) return;
+      const k = "subj_" + key;
+      const val = t(k);
+      if (val && val !== k) btn.textContent = val;
+    });
+
+    // selects options (keep values, translate labels)
+    const ids = ["reg-main-subject-1", "reg-main-subject-2", "reg-additional-subject"];
+    ids.forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      Array.from(sel.options).forEach(opt => {
+        const v = (opt.value || "").trim();
+        if (!v) {
+          // placeholder / none
+          if (id === "reg-additional-subject") opt.textContent = t("reg_choose_none");
+          else opt.textContent = t("reg_choose_placeholder");
+          return;
+        }
+        const k = "subj_" + v;
+        const val = t(k);
+        if (val && val !== k) opt.textContent = val;
+      });
+    });
+  }
+
   function initRegSubjectChips() {
     const wrap = $("#reg-subject-chips");
     const main1 = $("#reg-main-subject-1");
@@ -2037,6 +2113,22 @@ input?.addEventListener("change", () => {
     main2.addEventListener("change", syncChipsFromSelects);
     syncChipsFromSelects();
   } 
+
+       // live language switch on registration
+    const langSel = $("#reg-language");
+    if (langSel) {
+      langSel.addEventListener("change", () => {
+        try { window.i18n?.setLang(langSel.value); } catch {}
+        try { applyStaticI18n(); } catch {}
+        try { updateSchoolFieldsVisibility(); } catch {}
+        try { applyRegSubjectI18n(); } catch {}
+        try { refreshRegionDistrictPlaceholders?.(); } catch {}
+      });
+    }
+
+    // first paint (ensures no RU/EN mix)
+    try { applyRegSubjectI18n(); } catch {}
+
    
   function isRegistered() {
     return !!loadProfile();
