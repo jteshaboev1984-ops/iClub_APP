@@ -52,7 +52,9 @@
       reg_grade_label: "Класс",
       reg_competitive_subject_label: "🎯 Предмет для соревнований",
       reg_competitive_subject_hint: "Он используется для рейтингов и сертификатов",
-
+      reg_nonstudent_title: "Обучение без школьного режима",
+      reg_nonstudent_text: "Если вы не ученик школы, вы можете изучать и практиковаться по всем предметам без туров. Подключать и удалять предметы можно позже в профиле.",
+ 
       reg_subject_primary_tag: "Основной",
       reg_subject_secondary_tag: "Дополнительный",
       reg_subject_summary_none: "Выберите до 2 предметов",
@@ -255,7 +257,9 @@
       reg_grade_label: "Grade",
       reg_competitive_subject_label: "🎯 Reyting fani",
       reg_competitive_subject_hint: "Reyting va sertifikatlar uchun ishlatiladi",
-
+      reg_nonstudent_title: "Maktab rejimisiz o‘qish",
+      reg_nonstudent_text: "Agar siz maktab o‘quvchisi bo‘lmasangiz, barcha fanlarni turlarsiz o‘rganish va mashq qilish mumkin. Fanlarni keyin profil orqali qo‘shish yoki olib tashlash mumkin.",
+ 
       reg_subject_primary_tag: "Asosiy",
       reg_subject_secondary_tag: "Qo‘shimcha",
       reg_subject_summary_none: "2 tagacha fan tanlang",
@@ -460,7 +464,9 @@
       reg_grade_label: "Grade",
       reg_competitive_subject_label: "🎯 Competitive subject",
       reg_competitive_subject_hint: "Used for leaderboards and certificates",
-
+      reg_nonstudent_title: "Study mode (non-school)",
+      reg_nonstudent_text: "If you are not a school student, you can study and practice all subjects without tours. You can add or remove subjects later in your profile.",
+ 
       reg_subject_primary_tag: "Primary",
       reg_subject_secondary_tag: "Secondary",
       reg_subject_summary_none: "Select up to 2 subjects",
