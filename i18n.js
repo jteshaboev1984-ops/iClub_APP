@@ -306,7 +306,7 @@
       home_rank_label: "Rank",
       home_lessons_label: "Lessons",
       home_competitive_empty: "Hozircha musobaqa fanlari yo‘q.",
-      home_pinned_empty: "Courses’da fanlarni biriktiring.",
+      home_pinned_empty: "Home’da ko‘rinishi uchun Courses → Study’da fanlarni biriktiring. Competitive fanlar yuqorida alohida ko‘rsatiladi.",
       home_need_registration: "Avval ro‘yxatdan o‘ting.",
       profile_title: "Academic Profile",
       profile_status_badge: "ADVANCED STATUS",
@@ -334,6 +334,11 @@
       profile_settings_community: "Community",
       profile_settings_about: "About project",
 
+      course_competitive_detach_title: "Competitive o‘chirilsinmi?",
+      course_competitive_detach_message: "Fan Competitive’dan olib tashlanadi.\n\n• Turlar, reytinglar va sertifikatlar mavjud bo‘lmaydi.\n• Study (o‘quv) rejimi qoladi.\n\nMuhim: keyin Competitive’ni qayta yoqsangiz, tur/reyting progressi qaytadan boshlanishi mumkin.",
+      course_competitive_detach_ok: "Olib tashlash",
+      course_competitive_detach_toast: "Competitive o‘chirildi. Fan Study’ga o‘tkazildi.",
+ 
       toast_time_expired_answer_saved: "Vaqt tugadi. Javob saqlandi…",
       toast_time_expired_no_answer: "Vaqt tugadi. Savol javobsiz saqlandi…",
 
@@ -343,7 +348,7 @@
       settings_show_all: "Barchasini ko‘rsatish",
       settings_pinned: "Biriktirilgan",
       settings_not_pinned: "Biriktirilmagan",
-      settings_no_pinned: "Hozircha biriktirilgan fanlar yo‘q",
+      settings_no_pinned: "Biriktirilgan (Study) fanlar hozircha yo‘q. Home’da tez kirish uchun ularni Courses → Study’da biriktiring.",
       toast_removed_pinned: "Biriktirilganlardan olib tashlandi",
       toast_added_pinned: "Biriktirilganlarga qo‘shildi",
       toast_lang_updated: "Interfeys tili yangilandi",
@@ -513,7 +518,7 @@
       home_rank_label: "Rank",
       home_lessons_label: "Lessons",
       home_competitive_empty: "No competitive subjects yet.",
-      home_pinned_empty: "Pin subjects in Courses.",
+      home_pinned_empty: "Pin study subjects in Courses → Study to see them here. Competitive subjects are shown above separately.",
       home_need_registration: "Please complete registration first.",
       profile_title: "Academic Profile",
       profile_status_badge: "ADVANCED STATUS",
@@ -541,6 +546,11 @@
       profile_settings_community: "Community",
       profile_settings_about: "About project",
 
+      course_competitive_detach_title: "Disable Competitive?",
+      course_competitive_detach_message: "This subject will be removed from Competitive.\n\n• Tours, leaderboards and certificates will be unavailable.\n• Study mode will remain available.\n\nNote: if you enable Competitive again, tour/leaderboard progress may restart.",
+      course_competitive_detach_ok: "Detach",
+      course_competitive_detach_toast: "Competitive disabled. Subject moved to Study.",
+ 
       toast_time_expired_answer_saved: "Time is up. Answer saved…",
       toast_time_expired_no_answer: "Time is up. Question saved without an answer…",
 
@@ -550,7 +560,7 @@
       settings_show_all: "Show all",
       settings_pinned: "Pinned",
       settings_not_pinned: "Not pinned",
-      settings_no_pinned: "No pinned subjects yet",
+      settings_no_pinned: "No pinned study subjects yet. Pin them in Courses → Study for quick access on Home.",
       toast_removed_pinned: "Removed from pinned",
       toast_added_pinned: "Added to pinned",
       toast_lang_updated: "Interface language updated",
