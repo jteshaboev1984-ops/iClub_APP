@@ -2493,10 +2493,60 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
   });
 
   // 2) Pin/Unpin (secondary)
+  // 2) Secondary action
+if (state.courses.mainFilter === "competitive") {
+  // In Competitive tab: do NOT allow "pin".
+  // Only allow detaching from Competitive (move to Study) with a warning.
+  const btnDetach = document.createElement("button");
+  btnDetach.type = "button";
+  btnDetach.className = "mini-btn ghost";
+  btnDetach.textContent = "Открепить";
+
+  btnDetach.addEventListener("click", async (e) => {
+    e.stopPropagation();
+
+    const fresh = loadProfile();
+    if (!fresh) {
+      showToast(t("error_try_again"));
+      return;
+    }
+
+    const subjRow = getUserSubject(fresh, s.key);
+    if (!subjRow || subjRow.mode !== "competitive") {
+      showToast(t("error_try_again"));
+      return;
+    }
+
+    const ok = await uiConfirm({
+      title: t("course_competitive_detach_title"),
+      message: t("course_competitive_detach_message"),
+      okText: t("course_competitive_detach_ok"),
+      cancelText: t("cancel")
+    });
+
+    if (!ok) return;
+
+    // Disable Competitive for this subject (move to Study)
+    const next = Array.isArray(fresh.subjects) ? fresh.subjects.map(x => ({ ...x })) : [];
+    const row = next.find(x => x.key === s.key);
+    if (row) row.mode = "study";
+
+    fresh.subjects = next;
+    saveProfile(fresh);
+
+    renderHome();
+    renderAllSubjects();
+    showToast(t("course_competitive_detach_toast"));
+  });
+
+  actions.appendChild(btnDetach);
+} else {
+  // In Study tab: allow pin/unpin (quick access on Home)
   const btnPin = document.createElement("button");
   btnPin.type = "button";
   btnPin.className = "mini-btn ghost";
   btnPin.textContent = isPinned ? "Открепить" : "Закрепить";
+
   btnPin.addEventListener("click", (e) => {
     e.stopPropagation();
 
@@ -2512,8 +2562,8 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
     showToast(isPinned ? "Откреплено" : "Закреплено");
   });
 
-  actions.appendChild(btnOpen);
   actions.appendChild(btnPin);
+}
 
   card.appendChild(head);
   card.appendChild(actions);
