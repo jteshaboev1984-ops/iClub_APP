@@ -66,6 +66,23 @@
           <p class="muted" data-i18n="reg_create_subtitle">Enter your details to join the Cambridge curriculum study in Uzbekistan.</p>
 
           <form id="reg-form" class="form reg-form">
+           <label class="field">
+            <span class="label" data-i18n="reg_language_label">Язык</span>
+              <select id="reg-language" class="input">
+                <option value="ru" data-i18n="lang_ru">Русский</option>
+                <option value="uz" data-i18n="lang_uz">O‘zbek</option>
+                <option value="en" data-i18n="lang_en">English</option>
+              </select>
+
+            <div class="field-hint" data-i18n="reg_language_hint">
+            Далее этот язык используется для практики, туров и сертификатов.
+            </div>
+
+            <div class="field-note" data-i18n="reg_language_reset_note">
+            Важно: смена языка после регистрации сбросит прогресс.
+           </div>
+          </label>
+
             <label class="field">
               <span class="label" data-i18n="reg_full_name_label">Full Name</span>
               <input id="reg-fullname" class="input" type="text" autocomplete="name" data-i18n-placeholder="reg_full_name_placeholder" placeholder="e.g. Alisher Navoiy" required />
@@ -121,16 +138,19 @@
 
              <div class="card reg-subject-card">
               <div class="card-title" data-i18n="reg_competitive_subject_label">Competitive Subject</div>
-              <p class="muted small" data-i18n="reg_competitive_subject_hint">Choose your primary focus for the leaderboard</p>
-              <div id="reg-subject-chips" class="chip-group">
-                <button class="chip-btn" type="button" data-subject-key="informatics">Информатика</button>
-                <button class="chip-btn" type="button" data-subject-key="economics">Экономика</button>
-                <button class="chip-btn" type="button" data-subject-key="biology">Биология</button>
-                <button class="chip-btn" type="button" data-subject-key="chemistry">Химия</button>
-                <button class="chip-btn" type="button" data-subject-key="mathematics">Математика</button>
-              </div>
+                <p class="muted small" data-i18n="reg_competitive_subject_hint">Choose your primary focus for the leaderboard</p>
 
-               <label class="field visually-hidden">
+                <div id="reg-subject-chips" class="chip-group">
+                  <button class="chip-btn" type="button" data-subject-key="informatics">Информатика</button>
+                  <button class="chip-btn" type="button" data-subject-key="economics">Экономика</button>
+                  <button class="chip-btn" type="button" data-subject-key="biology">Биология</button>
+                  <button class="chip-btn" type="button" data-subject-key="chemistry">Химия</button>
+                  <button class="chip-btn" type="button" data-subject-key="mathematics">Математика</button>
+                </div>
+
+                <div id="reg-subject-summary" class="reg-subject-summary" aria-live="polite"></div>
+
+              <label class="field visually-hidden">
                 <span class="label" data-i18n="reg_main_subject_required_label">Основной предмет (обязательно)</span>
                 <select id="reg-main-subject-1" class="input" required>
                   <option value="" selected disabled data-i18n="reg_choose_placeholder">Выберите…</option>
@@ -167,24 +187,7 @@
               </label>
             </div>
 
-             <label class="field">
-  <span class="label" data-i18n="reg_language_label">Язык</span>
-  <select id="reg-language" class="input">
-    <option value="ru" data-i18n="lang_ru">Русский</option>
-    <option value="uz" data-i18n="lang_uz">O‘zbek</option>
-    <option value="en" data-i18n="lang_en">English</option>
-  </select>
-
-  <div class="field-hint" data-i18n="reg_language_hint">
-    Далее этот язык используется для практики, туров и сертификатов.
-  </div>
-
-  <div class="field-note" data-i18n="reg_language_reset_note">
-    Важно: смена языка после регистрации сбросит прогресс.
-  </div>
-</label>
-
-            <label class="checkbox reg-consent">
+             <label class="checkbox reg-consent">
               <input id="reg-consent" type="checkbox" required />
               <span data-i18n="reg_terms_text">I agree to the Terms of Service and consent to processing of my education data.</span>
             </label>
