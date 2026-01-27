@@ -3051,3 +3051,13 @@ body.modal-open { overflow: hidden; }
     Важно: смена языка после регистрации сбросит прогресс.
   </div>
 </label>
+.reg-nonstudent-card{
+  padding: 14px;
+}
+
+.reg-nonstudent-card .card-title{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
