@@ -1672,6 +1672,39 @@ body.modal-open { overflow: hidden; }
   gap: 10px;
   padding: 0 14px 10px;
 }
+/* Courses → Study: switch row (like Profile Settings) */
+.catalog-actions.one {
+  grid-template-columns: 1fr;
+}
+
+.catalog-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 10px 14px 12px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+
+  background: rgba(255,255,255,0.6);
+}
+
+.catalog-toggle-row.is-on {
+  background: rgba(47, 111, 214, 0.06);
+}
+
+.catalog-toggle-left {
+  min-width: 0;
+}
+
+.catalog-toggle-state {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted, #6B7280);
+  line-height: 1.2;
+}
 
 /* ✅ CTA smaller and cleaner inside catalog */
 .catalog-actions .mini-btn{
