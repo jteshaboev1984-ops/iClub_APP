@@ -746,10 +746,13 @@ function getReadingRefs(subjectKey, topic) {
       return;
     }
 
+    const langCode = (window.i18n?.getLang ? window.i18n.getLang() : "ru");
+    const nameField = langCode === "uz" ? "name_uz" : (langCode === "en" ? "name_en" : "name_ru");
+
     const { data: regions, error: rErr } = await window.sb
       .from("regions")
-      .select("id,name")
-      .order("name", { ascending: true });
+      .select(`id, name_ru, name_uz, name_en`)
+      .order("name_ru", { ascending: true });
 
     if (rErr || !Array.isArray(regions) || regions.length === 0) {
       showToast("No regions in DB");
@@ -759,9 +762,10 @@ function getReadingRefs(subjectKey, topic) {
     regions.forEach(r => {
       const o = document.createElement("option");
       o.value = String(r.id);
-      o.textContent = r.name;
+      o.textContent = String(r?.[nameField] || r?.name_ru || "").trim();
       regionEl.appendChild(o);
     });
+
 
     regionEl.addEventListener("change", async () => {
       const regionId = regionEl.value ? Number(regionEl.value) : null;
@@ -781,11 +785,11 @@ function getReadingRefs(subjectKey, topic) {
         return;
       }
 
-      const { data: dists, error: dErr } = await window.sb
+       const { data: dists, error: dErr } = await window.sb
         .from("districts")
-        .select("id,name,region_id")
+        .select("id, region_id, name_ru, name_uz, name_en")
         .eq("region_id", regionId)
-        .order("name", { ascending: true });
+        .order("name_ru", { ascending: true });
 
       const rows = (!dErr && Array.isArray(dists)) ? dists : [];
 
@@ -805,14 +809,13 @@ function getReadingRefs(subjectKey, topic) {
       rows.forEach(d => {
         const o = document.createElement("option");
         o.value = String(d.id);
-        o.textContent = d.name;
+        o.textContent = String(d?.[nameField] || d?.name_ru || "").trim();
         districtEl.appendChild(o);
       });
 
       districtEl.disabled = false;
     });
   }
-
 
   // ---------------------------
   // UI: Views & Tabs
@@ -2006,23 +2009,22 @@ input?.addEventListener("change", () => {
   // ---------------------------
   // Registration UI
   // ---------------------------
-  function updateSchoolFieldsVisibility() {
+    function updateSchoolFieldsVisibility() {
     const select = $("#reg-is-school");
     const toggle = $("#reg-is-school-toggle");
+
     const isSchool = toggle ? !!toggle.checked : (select?.value === "yes");
+
+    // keep hidden select in sync (legacy)
     if (select && toggle) {
       select.value = isSchool ? "yes" : "no";
     }
-    const block = $("#reg-school-block");
-    if (!block) return;
-    block.style.display = isSchool ? "grid" : "none";
 
-     // ✅ Поясняем смысл: школьник => main subjects становятся competitive
-      const subjTitle = document.querySelector('[data-i18n="reg_competitive_subject_title"]');
-        if (subjTitle) {
-        subjTitle.textContent = (isSchoolStudent ? "Competitive Subject" : "Study Subject");
-        }
-         // ✅ dynamic subject card texts (competitive vs study)
+    // show/hide school fields
+    const block = $("#reg-school-block");
+    if (block) block.style.display = isSchool ? "grid" : "none";
+
+    // ✅ dynamic subject card texts (competitive vs study)
     const labelEl = document.querySelector('[data-i18n="reg_competitive_subject_label"]');
     const hintEl  = document.querySelector('[data-i18n="reg_competitive_subject_hint"]');
 
@@ -2035,7 +2037,7 @@ input?.addEventListener("change", () => {
 
     // update subject names in chips/selects too
     try { applyRegSubjectI18n(); } catch {}
-    }
+  }
 
      function applyRegSubjectI18n() {
     // chips
