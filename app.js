@@ -3960,8 +3960,14 @@ if (state.tab === "profile") {
       const main2 = $("#reg-main-subject-2")?.value || "";
       const add1 = $("#reg-additional-subject")?.value || "";
 
-      if (!fullName || !region || !district || !main1) {
-        showToast(t("error_try_again"));
+      // district required ONLY when select is enabled and has real options
+      const districtRequired =
+        !!districtEl &&
+        !districtEl.disabled &&
+        (districtEl.options?.length || 0) > 1;
+
+      if (!fullName || !region || (districtRequired && !district) || !main1) {
+        showToast(t("fill_required_fields"));
         return;
       }
 
@@ -3989,10 +3995,11 @@ if (state.tab === "profile") {
         });
       }
 
-      if (subjects.filter(s => s.mode === "competitive").length > 2) {
-        showToast("Competitive subjects limit is 2");
+     if (subjects.filter(s => s.mode === "competitive").length > 2) {
+        showToast(t("competitive_subjects_limit_2"));
         return;
       }
+
 
       const tgUser = tg?.initDataUnsafe?.user || {};
       const avatar = tgUser?.photo_url || "";
