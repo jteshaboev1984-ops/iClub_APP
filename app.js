@@ -3918,6 +3918,20 @@ if (state.tab === "profile") {
   }
 
   function bindRegistration() {
+    // ---------------------------
+    // Registration language: default from Telegram user language_code
+    // ---------------------------
+    const langSel = $("#reg-language");
+    if (langSel && !langSel.dataset.init) {
+      const tgLang = window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code || "";
+      const defLang = window.i18n?.normalizeLang ? window.i18n.normalizeLang(tgLang || "ru") : "ru";
+
+      langSel.value = defLang || "ru";
+      langSel.dataset.init = "1";
+
+      try { window.i18n?.setLang(langSel.value); } catch {}
+      try { applyStaticI18n(); } catch {}
+    }
     const isSchool = $("#reg-is-school");
     const isSchoolToggle = $("#reg-is-school-toggle");
     if (isSchool) isSchool.addEventListener("change", updateSchoolFieldsVisibility);
