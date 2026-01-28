@@ -2727,7 +2727,15 @@ body.modal-open { overflow: hidden; }
   background: var(--primary);
   border-radius: 999px;
 }
+/* Subject Hub — make "Tours" tab label muted ONLY in Study mode (visual only) */
+#courses-subject-hub.is-study .subject-hub-tabs .hub-tab[data-action="open-tours"]{
+  color: rgba(0,0,0,0.40);
+}
 
+/* even if Tours becomes active — keep it muted (text only) */
+#courses-subject-hub.is-study .subject-hub-tabs .hub-tab.is-active[data-action="open-tours"]{
+  color: rgba(0,0,0,0.40);
+}
 .subject-hub-actions{
   margin-top: 6px;
 }
