@@ -2532,6 +2532,8 @@ input?.addEventListener("change", () => {
       ? "Закреплённые предметы уже ускоряют доступ. Дальше — стабильность."
       : "Закрепите 1–3 предмета — и вы будете открывать нужное быстрее, чем Telegram.";
   }
+      // Credentials (Profile: list + progress)
+  try { renderProfileCredentialsUI(); } catch {}
  }
 
      // ---------------------------
@@ -3214,26 +3216,29 @@ if (mainSubjects.length) {
   // Subject Hub rendering
   // ---------------------------
   function renderSubjectHub() {
-    const profile = loadProfile();
-    const subj = subjectByKey(state.courses.subjectKey);
+  const profile = loadProfile();
+  const subj = subjectByKey(state.courses.subjectKey);
 
-    const titleEl = $("#subject-hub-title");
-    const metaEl = $("#subject-hub-meta");
+  const titleEl = $("#subject-hub-title");
+  const metaEl = $("#subject-hub-meta");
 
-   const us = profile?.subjects?.find(x => x.key === state.courses.subjectKey) || null;
+  const subjectKey = state.courses.subjectKey;
+  const us = profile?.subjects?.find(x => x.key === subjectKey) || null;
 
-   if (titleEl) titleEl.textContent = subj ? subj.title : "Subject";
-   if (metaEl) {
-     metaEl.textContent = us ? `${us.mode.toUpperCase()} • ${us.pinned ? "PINNED" : "NOT PINNED"}` : "NOT ADDED";
-   }
+  if (titleEl) titleEl.textContent = subj ? subj.title : "Subject";
+  if (metaEl) {
+    metaEl.textContent = us ? `${us.mode.toUpperCase()} • ${us.pinned ? "PINNED" : "NOT PINNED"}` : "NOT ADDED";
+  }
 
-   // ✅ Visual-only mode flag for CSS (Study vs Competitive)
-   const hubRoot = $("#courses-subject-hub");
+  // Credentials inline (Subject Hub: Focused + Practice)
+  try { renderSubjectHubCredentialsInline(subjectKey); } catch {}
+
+  // ✅ Visual-only mode flag for CSS (Study vs Competitive)
+  const hubRoot = $("#courses-subject-hub");
    if (hubRoot) {
      hubRoot.classList.toggle("is-study", us?.mode === "study");
      hubRoot.classList.toggle("is-competitive", us?.mode === "competitive");
    }
-
          // ---- Availability toggles in Subject Hub (Tours only when allowed) ----
     const toursBtn = document.querySelector('#courses-subject-hub [data-action="open-tours"]');
     const toursSub = toursBtn?.querySelector(".muted.small");
@@ -5359,6 +5364,253 @@ if (action === "tour-next" || action === "tour-submit") {
       setTab("home");
     });
   }
+
+   // ---------------------------
+// Credentials UI (Profile + Subject Hub)
+// ---------------------------
+function getCredTitleKey(credKey) {
+  switch (credKey) {
+    case "consistent_learner": return "cred_consistent_title";
+    case "focused_study_streak": return "cred_focused_title";
+    case "active_video_learner": return "cred_video_title";
+    case "practice_mastery": return "cred_practice_title";
+    case "error_driven_learner": return "cred_error_title";
+    case "research_oriented": return "cred_research_title";
+    case "fair_play": return "cred_fairplay_title";
+    default: return credKey;
+  }
+}
+
+function formatCredStatus(status) {
+  if (!status) return "";
+  if (status === "active") return t("cred_status_active");
+  if (status === "inactive") return t("cred_status_inactive");
+  if (status === "expired") return t("cred_status_expired");
+  if (status === "revoked") return t("cred_status_revoked");
+  return String(status);
+}
+
+function formatDateShortSafe(ts) {
+  if (!ts) return "";
+  try {
+    const d = new Date(ts);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+  } catch {
+    return "";
+  }
+}
+
+function readCredStoreSafe() {
+  try {
+    // функция должна уже существовать из прошлых патчей
+    if (typeof getCredentialStore === "function") return getCredentialStore();
+  } catch {}
+  return null;
+}
+
+function getCredRecord(store, credKey) {
+  if (!store) return null;
+
+  // Ожидаемый слой хранения из документа: user_credentials[credential_key]
+  // (Если у тебя структура слегка отличается — ниже есть fallback)
+  if (store.user_credentials && store.user_credentials[credKey]) return store.user_credentials[credKey];
+
+  // fallback: иногда кладут прямо в store.credentials
+  if (store.credentials && store.credentials[credKey]) return store.credentials[credKey];
+
+  return null;
+}
+
+function getCredEvidence(rec) {
+  return rec?.evidence_snapshot || rec?.evidence || null;
+}
+
+function buildProgressLine(credKey, rec) {
+  const ev = getCredEvidence(rec);
+  if (!ev) return "";
+
+  // Progress hints строго по документу (>=60%) — показываем только если уже есть метрики
+  // Consistent: показывать когда active_days_14d >= 5
+  if (credKey === "consistent_learner") {
+    const x = Number(ev.active_days_14d ?? ev.active_days ?? NaN);
+    if (!Number.isFinite(x)) return "";
+    if (x >= 5 && x < 7) return t("cred_progress_consistent", { x: String(x) });
+    return "";
+  }
+
+  // Focused: 3/5+
+  if (credKey === "focused_study_streak") {
+    const x = Number(ev.focused_sessions_in_row ?? ev.sessions_in_row ?? NaN);
+    if (!Number.isFinite(x)) return "";
+    if (x >= 3 && x < 5) return t("cred_progress_focused", { x: String(x) });
+    return "";
+  }
+
+  // Practice: attempts_count>=5 как мягкий прогресс (без новых правил) — показываем только если есть счётчики
+  if (credKey === "practice_mastery") {
+    const attempts = Number(ev.attempts_count ?? NaN);
+    if (!Number.isFinite(attempts)) return "";
+    if (attempts >= 5 && attempts < 8) return t("cred_progress_practice_attempts", { x: String(attempts) });
+    return "";
+  }
+
+  // Error-driven: cycles_count>=2
+  if (credKey === "error_driven_learner") {
+    const cycles = Number(ev.cycles_count ?? NaN);
+    if (!Number.isFinite(cycles)) return "";
+    if (cycles >= 2 && cycles < 3) return t("cred_progress_error_cycles", { x: String(cycles) });
+    return "";
+  }
+
+  // Research: opens>=2
+  if (credKey === "research_oriented") {
+    const opens = Number(ev.resource_opens_total ?? ev.opens ?? NaN);
+    const days = Number(ev.distinct_return_days ?? ev.return_days ?? NaN);
+    if (!Number.isFinite(opens) || !Number.isFinite(days)) return "";
+    // мягко: если opens>=2 или days>=1, показываем только когда близко к 60%
+    if (opens >= 2 || days >= 1) return t("cred_progress_research", { x: String(opens), y: String(days) });
+    return "";
+  }
+
+  return "";
+}
+
+function renderProfileCredentialsUI() {
+  const grid = document.querySelector(".profile-credentials-grid");
+  if (!grid) return;
+
+  const store = readCredStoreSafe();
+  const keys = [
+    "consistent_learner",
+    "focused_study_streak",
+    "active_video_learner",
+    "practice_mastery",
+    "error_driven_learner",
+    "research_oriented",
+    "fair_play"
+  ];
+
+  // Собираем active credentials (как “список”)
+  const actives = [];
+  const progressLines = [];
+
+  keys.forEach(k => {
+    const rec = getCredRecord(store, k);
+    if (!rec) return;
+
+    const status = rec.status;
+    const title = t(getCredTitleKey(k));
+    const statusText = formatCredStatus(status);
+    const achieved = formatDateShortSafe(rec.achieved_at);
+
+    if (status === "active") {
+      actives.push({ title, statusText, achieved });
+    }
+
+    const p = buildProgressLine(k, rec);
+    if (p) progressLines.push(p);
+  });
+
+  // Рендер “список”
+  grid.innerHTML = "";
+
+  if (actives.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "card-sub";
+    empty.textContent = t("cred_none_yet");
+    grid.appendChild(empty);
+  } else {
+    actives.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "credential-card";
+
+      const titleEl = document.createElement("div");
+      titleEl.className = "credential-title";
+      titleEl.textContent = item.title;
+
+      const metaEl = document.createElement("div");
+      metaEl.className = "credential-meta";
+      metaEl.textContent = item.achieved ? `${item.statusText} • ${item.achieved}` : item.statusText;
+
+      card.appendChild(titleEl);
+      card.appendChild(metaEl);
+      grid.appendChild(card);
+    });
+  }
+
+  // Рендер “прогресс” (inline)
+  let progWrap = document.getElementById("profile-credentials-progress");
+  if (!progWrap) {
+    progWrap = document.createElement("div");
+    progWrap.id = "profile-credentials-progress";
+    progWrap.className = "cred-progress-list";
+    grid.insertAdjacentElement("afterend", progWrap);
+  }
+
+  if (progressLines.length === 0) {
+    progWrap.classList.add("hidden");
+    progWrap.innerHTML = "";
+  } else {
+    progWrap.classList.remove("hidden");
+    progWrap.innerHTML = progressLines.map(s => `<div class="cred-progress-item">${escapeHTML(s)}</div>`).join("");
+  }
+}
+
+function renderSubjectHubCredentialsInline(subjectKey) {
+  const hub = document.getElementById("view-subject-hub");
+  if (!hub) return;
+
+  const meta = document.getElementById("subject-hub-meta");
+  if (!meta) return;
+
+  const store = readCredStoreSafe();
+
+  const focusedRec = getCredRecord(store, "focused_study_streak");
+  const practiceRec = getCredRecord(store, "practice_mastery");
+
+  const focusedEv = getCredEvidence(focusedRec);
+  const practiceEv = getCredEvidence(practiceRec);
+
+  const focusedCount = Number(focusedEv?.focused_sessions_in_row ?? focusedEv?.sessions_in_row ?? 0);
+  const focusedSubject = String(focusedEv?.current_subject_key ?? focusedEv?.current_subject_id ?? "");
+  const isFocusedSame = focusedSubject && (String(focusedSubject) === String(subjectKey));
+
+  const practiceBest = Number(practiceEv?.best_percent ?? NaN);
+  const practiceMedian = Number(practiceEv?.median_percent ?? NaN);
+  const practiceAttempts = Number(practiceEv?.attempts_count ?? NaN);
+
+  let wrap = document.getElementById("subject-hub-credential-hints");
+  if (!wrap) {
+    wrap = document.createElement("div");
+    wrap.id = "subject-hub-credential-hints";
+    wrap.className = "cred-hints";
+    meta.insertAdjacentElement("afterend", wrap);
+  }
+
+  const lines = [];
+
+  // Focused — показываем только для текущего subject
+  if (isFocusedSame && focusedCount > 0 && focusedCount < 5) {
+    lines.push(t("cred_hub_focused", { x: String(focusedCount) }));
+  }
+
+  // Practice — если есть метрики по предмету, показываем нейтрально
+  // (без новых правил — просто “best/median/attempts”, если присутствуют)
+  if (Number.isFinite(practiceAttempts) && practiceAttempts > 0) {
+    const bestTxt = Number.isFinite(practiceBest) ? `${Math.round(practiceBest)}%` : "—";
+    const medTxt = Number.isFinite(practiceMedian) ? `${Math.round(practiceMedian)}%` : "—";
+    lines.push(t("cred_hub_practice", { a: String(practiceAttempts), b: bestTxt, m: medTxt }));
+  }
+
+  if (lines.length === 0) {
+    wrap.classList.add("hidden");
+    wrap.innerHTML = "";
+  } else {
+    wrap.classList.remove("hidden");
+    wrap.innerHTML = lines.map(s => `<div class="cred-hint-item">${escapeHTML(s)}</div>`).join("");
+  }
+}
 
   function bindUI() {
   bindTabbar();
