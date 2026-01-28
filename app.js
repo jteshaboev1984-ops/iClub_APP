@@ -2594,11 +2594,20 @@ if (mainSubjects.length) {
 
     const titleEl = $("#subject-hub-title");
     const metaEl = $("#subject-hub-meta");
-    if (titleEl) titleEl.textContent = subj ? subj.title : "Subject";
-    if (metaEl) {
-      const us = profile?.subjects?.find(x => x.key === state.courses.subjectKey);
-      metaEl.textContent = us ? `${us.mode.toUpperCase()} • ${us.pinned ? "PINNED" : "NOT PINNED"}` : "NOT ADDED";
-    }
+
+   const us = profile?.subjects?.find(x => x.key === state.courses.subjectKey) || null;
+
+   if (titleEl) titleEl.textContent = subj ? subj.title : "Subject";
+   if (metaEl) {
+     metaEl.textContent = us ? `${us.mode.toUpperCase()} • ${us.pinned ? "PINNED" : "NOT PINNED"}` : "NOT ADDED";
+   }
+
+   // ✅ Visual-only mode flag for CSS (Study vs Competitive)
+   const hubRoot = $("#courses-subject-hub");
+   if (hubRoot) {
+     hubRoot.classList.toggle("is-study", us?.mode === "study");
+     hubRoot.classList.toggle("is-competitive", us?.mode === "competitive");
+   }
 
          // ---- Availability toggles in Subject Hub (Tours only when allowed) ----
     const toursBtn = document.querySelector('#courses-subject-hub [data-action="open-tours"]');
