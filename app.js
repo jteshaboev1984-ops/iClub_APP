@@ -5370,13 +5370,13 @@ if (action === "tour-next" || action === "tour-submit") {
 // ---------------------------
 function getCredTitleKey(credKey) {
   switch (credKey) {
-    case "consistent_learner": return "cred_consistent_title";
-    case "focused_study_streak": return "cred_focused_title";
-    case "active_video_learner": return "cred_video_title";
-    case "practice_mastery": return "cred_practice_title";
-    case "error_driven_learner": return "cred_error_title";
-    case "research_oriented": return "cred_research_title";
-    case "fair_play": return "cred_fairplay_title";
+    case "consistent_learner": return "cred_consistent_learner";
+    case "focused_study_streak": return "cred_focused_study_streak";
+    case "active_video_learner": return "cred_active_video_learner";
+    case "practice_mastery": return "cred_practice_mastery_subject";
+    case "error_driven_learner": return "cred_error_driven_learner";
+    case "research_oriented": return "cred_research_oriented_learner";
+    case "fair_play": return "cred_fair_play_participant";
     default: return credKey;
   }
 }
@@ -5558,13 +5558,25 @@ function renderProfileCredentialsUI() {
 }
 
 function renderSubjectHubCredentialsInline(subjectKey) {
-  const hub = document.getElementById("view-subject-hub");
-  if (!hub) return;
+  const wrap = document.getElementById("subject-hub-credential-hints");
+  if (!wrap) return;
 
-  const meta = document.getElementById("subject-hub-meta");
-  if (!meta) return;
+  // set labels from i18n (so RU/UZ/EN match)
+  const kickerEl = wrap.querySelector(".panel-kicker");
+  const focusedLabelEl = document.getElementById("hub-cred-focused-label");
+  const practiceLabelEl = document.getElementById("hub-cred-practice-label");
+  const focusedValEl = document.getElementById("hub-cred-focused-value");
+  const practiceValEl = document.getElementById("hub-cred-practice-value");
+
+  if (kickerEl) kickerEl.textContent = t("cred_kicker_progress");
+  if (focusedLabelEl) focusedLabelEl.textContent = t("cred_label_focused");
+  if (practiceLabelEl) practiceLabelEl.textContent = t("cred_label_practice");
+
+  if (focusedValEl) focusedValEl.textContent = "—";
+  if (practiceValEl) practiceValEl.textContent = "—";
 
   const store = readCredStoreSafe();
+  if (!store) return;
 
   const focusedRec = getCredRecord(store, "focused_study_streak");
   const practiceRec = getCredRecord(store, "practice_mastery");
@@ -5572,43 +5584,24 @@ function renderSubjectHubCredentialsInline(subjectKey) {
   const focusedEv = getCredEvidence(focusedRec);
   const practiceEv = getCredEvidence(practiceRec);
 
+  // Focused: показываем "4/5" только если серия по этому предмету и еще не достигла 5
   const focusedCount = Number(focusedEv?.focused_sessions_in_row ?? focusedEv?.sessions_in_row ?? 0);
   const focusedSubject = String(focusedEv?.current_subject_key ?? focusedEv?.current_subject_id ?? "");
   const isFocusedSame = focusedSubject && (String(focusedSubject) === String(subjectKey));
 
+  if (focusedValEl && isFocusedSame && focusedCount > 0 && focusedCount < 5) {
+    focusedValEl.textContent = `${focusedCount}/5`;
+  }
+
+  // Practice: аккуратно показываем best/median, если уже есть попытки
+  const practiceAttempts = Number(practiceEv?.attempts_count ?? NaN);
   const practiceBest = Number(practiceEv?.best_percent ?? NaN);
   const practiceMedian = Number(practiceEv?.median_percent ?? NaN);
-  const practiceAttempts = Number(practiceEv?.attempts_count ?? NaN);
 
-  let wrap = document.getElementById("subject-hub-credential-hints");
-  if (!wrap) {
-    wrap = document.createElement("div");
-    wrap.id = "subject-hub-credential-hints";
-    wrap.className = "cred-hints";
-    meta.insertAdjacentElement("afterend", wrap);
-  }
-
-  const lines = [];
-
-  // Focused — показываем только для текущего subject
-  if (isFocusedSame && focusedCount > 0 && focusedCount < 5) {
-    lines.push(t("cred_hub_focused", { x: String(focusedCount) }));
-  }
-
-  // Practice — если есть метрики по предмету, показываем нейтрально
-  // (без новых правил — просто “best/median/attempts”, если присутствуют)
-  if (Number.isFinite(practiceAttempts) && practiceAttempts > 0) {
+  if (practiceValEl && Number.isFinite(practiceAttempts) && practiceAttempts > 0) {
     const bestTxt = Number.isFinite(practiceBest) ? `${Math.round(practiceBest)}%` : "—";
     const medTxt = Number.isFinite(practiceMedian) ? `${Math.round(practiceMedian)}%` : "—";
-    lines.push(t("cred_hub_practice", { a: String(practiceAttempts), b: bestTxt, m: medTxt }));
-  }
-
-  if (lines.length === 0) {
-    wrap.classList.add("hidden");
-    wrap.innerHTML = "";
-  } else {
-    wrap.classList.remove("hidden");
-    wrap.innerHTML = lines.map(s => `<div class="cred-hint-item">${escapeHTML(s)}</div>`).join("");
+    practiceValEl.textContent = `${bestTxt} • ${medTxt}`;
   }
 }
 
