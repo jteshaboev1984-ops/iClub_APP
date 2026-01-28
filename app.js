@@ -114,13 +114,16 @@
   // ---------------------------
   // Storage keys
   // ---------------------------
-  const LS = {
-  state: "iclub_state_v1",
-  profile: "iclub_profile_v1",
-  practiceDraft: "iclub_practice_draft_v1",
-  myRecs: "iclub_my_recs_v1"
-};
+    const LS = {
+    state: "iclub_state_v1",
+    profile: "iclub_profile_v1",
+    practiceDraft: "iclub_practice_draft_v1",
+    myRecs: "iclub_my_recs_v1",
 
+    // Earned Credentials (v1.3 FINAL)
+    events: "iclub_events_v1",
+    credentials: "iclub_credentials_v1"
+  };
 
   // ---------------------------
   // i18n
@@ -137,7 +140,627 @@ function applyStaticI18n() {
       if (key) el.setAttribute("placeholder", t(key));
     });
   }
-   
+
+   function applyStaticI18n() {
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.dataset.i18n;
+      if (key) el.textContent = t(key);
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+      const key = el.dataset.i18nPlaceholder;
+      if (key) el.setAttribute("placeholder", t(key));
+    });
+  }
+
+  // =========================================================
+  // Earned Credentials — Engine (v1.3 FINAL) + Event Mapping
+  // Plain storage (local) + optional Supabase app_events mirror
+  // =========================================================
+
+  const TZ = "Asia/Tashkent";
+
+  function loadJsonLS(key, fallback) {
+    return safeJsonParse(localStorage.getItem(key), fallback);
+  }
+  function saveJsonLS(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  function pad2(n) { return String(n).padStart(2, "0"); }
+
+  // Local “calendar day” key in Asia/Tashkent
+  function dayKeyTashkent(ts = Date.now()) {
+    try {
+      const d = new Date(ts);
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: TZ,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).formatToParts(d);
+      const y = parts.find(p => p.type === "year")?.value || "1970";
+      const m = parts.find(p => p.type === "month")?.value || "01";
+      const da = parts.find(p => p.type === "day")?.value || "01";
+      return `${y}-${m}-${da}`;
+    } catch {
+      const d = new Date(ts);
+      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    }
+  }
+
+  function getUserIdSafe() {
+    try {
+      return window.sb?.auth ? (window.sb.auth.getUser?.().then ? null : null) : null;
+    } catch {}
+    return null;
+  }
+
+  function eventsStore() {
+    const s = loadJsonLS(LS.events, { seq: 0, items: [] });
+    if (!Array.isArray(s.items)) s.items = [];
+    if (typeof s.seq !== "number") s.seq = 0;
+    return s;
+  }
+
+  function credentialsStore() {
+    const base = {
+      version: "v1.3",
+      last_daily_eval_day: null,
+
+      consistent_learner: {
+        status: "inactive",
+        achieved_at: null,
+        last_evaluated_at: null,
+        evidence: { computed_at: null, window_start: null, window_end: null, active_days_14d: 0, last_events: [] },
+        // buffer counter required by contract (degradation buffer)
+        degradation_counter_days: 0
+      },
+
+      focused_study_streak: {
+        status: "inactive",
+        achieved_at: null,
+        last_evaluated_at: null,
+        evidence: { computed_at: null, current_subject_id: null, focused_sessions_in_row: 0, last_events: [] }
+      },
+
+      active_video_learner: {
+        status: "inactive",
+        achieved_at: null,
+        last_evaluated_at: null,
+        evidence: { computed_at: null, videos_decided: 0, videos_completed: 0, completion_rate: 0, last_events: [] },
+        decided_by_lesson: {} // { [lesson_id]: { decided: true, completed: bool } }
+      },
+
+      practice_mastery_subject: {
+        by_subject: {} // subject_id => { status, achieved_at, last_evaluated_at, evidence:{attempts_count,best,median,last_events}, percents:[] }
+      },
+
+      error_driven_learner: {
+        status: "inactive",
+        achieved_at: null,
+        last_evaluated_at: null,
+        evidence: { computed_at: null, cycles_count: 0, error_reduction: 0, last_events: [] },
+        // minimal trace:
+        // - last attempt A with errors per (subject_id + topic)
+        last_attempt_a: {}, // key => { attempt_key, errors_count, ts, subject_id, topic }
+        // - review opened markers for attempt A
+        reviewed_attempts: {}, // attempt_key => { ts }
+        cycles_count: 0
+      },
+
+      research_oriented_learner: {
+        status: "inactive",
+        achieved_at: null,
+        last_evaluated_at: null,
+        evidence: { computed_at: null, resource_opens_total: 0, distinct_return_days: 0, last_events: [] }
+      },
+
+      fair_play_participant: {
+        status: "inactive",
+        achieved_at: null,
+        last_evaluated_at: null,
+        evidence: { computed_at: null, tours_participated: 0, has_critical_violation: false, last_events: [] },
+        tours_participated: 0,
+        has_critical_violation: false
+      }
+    };
+
+    const s = loadJsonLS(LS.credentials, base);
+    // Ensure missing keys for forward safety
+    return Object.assign({}, base, s);
+  }
+
+  function saveCredentialsStore(s) {
+    saveJsonLS(LS.credentials, s);
+  }
+
+  function pushLastEvents(list, eventId, limit = 5) {
+    const arr = Array.isArray(list) ? list.slice() : [];
+    if (eventId) arr.unshift(eventId);
+    return arr.slice(0, limit);
+  }
+
+  async function mirrorEventToSupabase(type, payload) {
+    try {
+      if (!window.sb) return;
+      const { data: userData } = await window.sb.auth.getUser();
+      const u = userData?.user;
+      if (!u?.id) return;
+      await window.sb.from("app_events").insert({
+        user_id: u.id,
+        event_type: type,
+        payload: payload || {}
+      });
+    } catch {
+      // Silent: local storage is primary in v1 UI stage
+    }
+  }
+
+  function trackEvent(type, payload = {}) {
+    const store = eventsStore();
+    const id = ++store.seq;
+    const ts = Date.now();
+
+    const item = {
+      id,
+      type,
+      ts,
+      day: dayKeyTashkent(ts),
+      payload: payload || {}
+    };
+
+    store.items.push(item);
+
+    // keep last N events (avoid LS overflow)
+    if (store.items.length > 2000) store.items = store.items.slice(-2000);
+
+    saveJsonLS(LS.events, store);
+
+    // optional: mirror to Supabase app_events
+    mirrorEventToSupabase(type, { ...payload, ts: new Date(ts).toISOString() });
+
+    // realtime evaluation hooks
+    evaluateRealtimeCredentials(item);
+
+    return item;
+  }
+
+  function listEventsByType(types) {
+    const st = eventsStore();
+    const set = new Set(Array.isArray(types) ? types : [types]);
+    return st.items.filter(e => set.has(e.type));
+  }
+
+  function getEventsInLastDays(days) {
+    const st = eventsStore();
+    const cutoff = Date.now() - Math.max(0, Number(days) || 0) * 24 * 60 * 60 * 1000;
+    return st.items.filter(e => e.ts >= cutoff);
+  }
+
+  // ---------------------------
+  // Credential evaluation
+  // ---------------------------
+
+  function evaluateConsistentLearnerDaily() {
+    const c = credentialsStore();
+    const todayDay = dayKeyTashkent(Date.now());
+
+    // run once per “calendar day”
+    if (c.last_daily_eval_day === todayDay) return c;
+
+    const windowEvents = getEventsInLastDays(14);
+    const activeTypes = new Set([
+      "video_opened",
+      "video_completed",
+      "video_skipped",
+      "practice_attempt_finished",
+      "tour_attempt_finished",
+      "resource_opened",
+      "recommendation_opened"
+    ]);
+
+    const activeDays = new Set();
+    windowEvents.forEach(e => {
+      if (activeTypes.has(e.type)) activeDays.add(e.day);
+    });
+
+    const active_days_14d = activeDays.size;
+    const exists_valid_14d_window = (active_days_14d >= 7);
+
+    const hadEverActive = (c.consistent_learner.achieved_at != null) || (c.consistent_learner.status === "active");
+
+    if (exists_valid_14d_window) {
+      c.consistent_learner.status = "active";
+      if (!c.consistent_learner.achieved_at) c.consistent_learner.achieved_at = Date.now();
+      c.consistent_learner.degradation_counter_days = 0;
+    } else {
+      // buffer logic (no “instant death”)
+      if (hadEverActive) {
+        c.consistent_learner.degradation_counter_days = (Number(c.consistent_learner.degradation_counter_days) || 0) + 1;
+        if (c.consistent_learner.degradation_counter_days >= 14) {
+          c.consistent_learner.status = "inactive";
+        } else {
+          c.consistent_learner.status = "active"; // inside buffer
+        }
+      } else {
+        // never earned: stays inactive until first valid window
+        c.consistent_learner.status = "inactive";
+        c.consistent_learner.degradation_counter_days = 0;
+      }
+    }
+
+    c.consistent_learner.last_evaluated_at = Date.now();
+    c.consistent_learner.evidence = {
+      computed_at: Date.now(),
+      window_start: Date.now() - 13 * 24 * 60 * 60 * 1000,
+      window_end: Date.now(),
+      active_days_14d,
+      last_events: (c.consistent_learner.evidence?.last_events || []).slice(0, 5)
+    };
+
+    c.last_daily_eval_day = todayDay;
+    saveCredentialsStore(c);
+    return c;
+  }
+
+  function evaluateResearchOrientedDaily() {
+    const c = credentialsStore();
+    const ev = listEventsByType(["resource_opened", "recommendation_opened"]);
+    const opens = ev.length;
+    const days = new Set(ev.map(x => x.day));
+    const distinct_return_days = days.size;
+
+    const active = (opens >= 3 && distinct_return_days >= 2);
+
+    const prev = c.research_oriented_learner.status;
+    c.research_oriented_learner.status = active ? "active" : "inactive";
+    if (active && !c.research_oriented_learner.achieved_at) c.research_oriented_learner.achieved_at = Date.now();
+    c.research_oriented_learner.last_evaluated_at = Date.now();
+    c.research_oriented_learner.evidence = {
+      computed_at: Date.now(),
+      resource_opens_total: opens,
+      distinct_return_days,
+      last_events: (c.research_oriented_learner.evidence?.last_events || []).slice(0, 5)
+    };
+
+    if (prev !== c.research_oriented_learner.status) saveCredentialsStore(c);
+    else saveCredentialsStore(c);
+    return c;
+  }
+
+  function median(arr) {
+    const a = arr.slice().sort((x, y) => x - y);
+    if (!a.length) return 0;
+    const mid = Math.floor(a.length / 2);
+    if (a.length % 2) return a[mid];
+    return Math.round((a[mid - 1] + a[mid]) / 2);
+  }
+
+  function ensurePracticeSubjectBucket(c, subjectId) {
+    const sid = String(subjectId || "");
+    if (!sid) return null;
+    if (!c.practice_mastery_subject.by_subject[sid]) {
+      c.practice_mastery_subject.by_subject[sid] = {
+        status: "inactive",
+        achieved_at: null,
+        last_evaluated_at: null,
+        evidence: { computed_at: null, attempts_count: 0, best_percent: 0, median_percent: 0, last_events: [] },
+        percents: []
+      };
+    }
+    return c.practice_mastery_subject.by_subject[sid];
+  }
+
+  function evaluatePracticeMasteryRealtime(subjectId, percent, eventId) {
+    const c = credentialsStore();
+    const bucket = ensurePracticeSubjectBucket(c, subjectId);
+    if (!bucket) return;
+
+    const p = Math.max(0, Math.min(100, Number(percent) || 0));
+    bucket.percents = Array.isArray(bucket.percents) ? bucket.percents : [];
+    bucket.percents.push(p);
+
+    // keep last 30 attempts for stats stability
+    if (bucket.percents.length > 30) bucket.percents = bucket.percents.slice(-30);
+
+    const attempts_count = bucket.percents.length;
+    const best_percent = Math.max(...bucket.percents);
+    const median_percent = median(bucket.percents);
+
+    const active = (attempts_count >= 8 && best_percent >= 80 && median_percent >= 70);
+
+    bucket.status = active ? "active" : bucket.status; // no loss (фиксируется на момент достижения)
+    if (active && !bucket.achieved_at) bucket.achieved_at = Date.now();
+
+    bucket.last_evaluated_at = Date.now();
+    bucket.evidence = {
+      computed_at: Date.now(),
+      attempts_count,
+      best_percent,
+      median_percent,
+      last_events: pushLastEvents(bucket.evidence?.last_events, eventId, 5)
+    };
+
+    saveCredentialsStore(c);
+  }
+
+  function evaluateActiveVideoLearnerRealtime(event) {
+    const c = credentialsStore();
+    const lessonId = event?.payload?.lesson_id ? String(event.payload.lesson_id) : "";
+    if (!lessonId) return;
+
+    const decided = c.active_video_learner.decided_by_lesson || {};
+    const prev = decided[lessonId] || null;
+
+    if (event.type === "video_skipped") {
+      decided[lessonId] = { decided: true, completed: false };
+    }
+    if (event.type === "video_completed") {
+      decided[lessonId] = { decided: true, completed: true };
+    }
+
+    c.active_video_learner.decided_by_lesson = decided;
+
+    const all = Object.values(decided);
+    const videos_decided = all.filter(x => x && x.decided).length;
+    const videos_completed = all.filter(x => x && x.decided && x.completed).length;
+    const completion_rate = videos_decided ? (videos_completed / videos_decided) : 0;
+
+    const active = (videos_decided >= 10 && completion_rate >= 0.70);
+
+    c.active_video_learner.status = active ? "active" : "inactive";
+    if (active && !c.active_video_learner.achieved_at) c.active_video_learner.achieved_at = Date.now();
+
+    c.active_video_learner.last_evaluated_at = Date.now();
+    c.active_video_learner.evidence = {
+      computed_at: Date.now(),
+      videos_decided,
+      videos_completed,
+      completion_rate: Math.round(completion_rate * 1000) / 1000,
+      last_events: pushLastEvents(c.active_video_learner.evidence?.last_events, event.id, 5)
+    };
+
+    saveCredentialsStore(c);
+  }
+
+  function evaluateFocusedStreakRealtime(event) {
+    // valid sessions строго: video_completed / practice_attempt_finished / tour_attempt_finished
+    if (!["video_completed", "practice_attempt_finished", "tour_attempt_finished"].includes(event.type)) return;
+
+    const c = credentialsStore();
+    const subjectId = event?.payload?.subject_id ? String(event.payload.subject_id) : "";
+    if (!subjectId) return;
+
+    const ev = c.focused_study_streak.evidence || {};
+    const current_subject_id = ev.current_subject_id ? String(ev.current_subject_id) : null;
+    let counter = Number(ev.focused_sessions_in_row) || 0;
+
+    if (current_subject_id && current_subject_id === subjectId) {
+      counter += 1;
+    } else {
+      // subject switch kills streak + expires if was active
+      if (c.focused_study_streak.status === "active") {
+        c.focused_study_streak.status = "expired";
+      } else if (c.focused_study_streak.status !== "expired") {
+        // keep inactive/expired as-is, but we restart counter
+      }
+      counter = 1;
+    }
+
+    // earned
+    if (counter >= 5) {
+      c.focused_study_streak.status = "active";
+      if (!c.focused_study_streak.achieved_at) c.focused_study_streak.achieved_at = Date.now();
+    } else {
+      // before earned: keep inactive; after earned: keep whatever (active/expired)
+      if (!c.focused_study_streak.achieved_at && c.focused_study_streak.status !== "expired") {
+        c.focused_study_streak.status = "inactive";
+      }
+    }
+
+    c.focused_study_streak.last_evaluated_at = Date.now();
+    c.focused_study_streak.evidence = {
+      computed_at: Date.now(),
+      current_subject_id: subjectId,
+      focused_sessions_in_row: counter,
+      last_events: pushLastEvents(ev.last_events, event.id, 5)
+    };
+
+    saveCredentialsStore(c);
+  }
+
+  function evaluateFairPlayRealtime(event) {
+    const c = credentialsStore();
+
+    if (event.type === "anti_cheat_event") {
+      const severity = String(event?.payload?.severity || "").toLowerCase();
+      if (severity === "critical") {
+        c.fair_play_participant.status = "revoked";
+        c.fair_play_participant.has_critical_violation = true;
+        c.fair_play_participant.last_evaluated_at = Date.now();
+        c.fair_play_participant.evidence = {
+          computed_at: Date.now(),
+          tours_participated: Number(c.fair_play_participant.tours_participated) || 0,
+          has_critical_violation: true,
+          last_events: pushLastEvents(c.fair_play_participant.evidence?.last_events, event.id, 5)
+        };
+        saveCredentialsStore(c);
+      }
+      return;
+    }
+
+    if (event.type === "tour_attempt_finished") {
+      const isArchive = !!event?.payload?.is_archive;
+      if (!isArchive) {
+        c.fair_play_participant.tours_participated = (Number(c.fair_play_participant.tours_participated) || 0) + 1;
+      }
+
+      const tours_participated = Number(c.fair_play_participant.tours_participated) || 0;
+      const has_critical_violation = !!c.fair_play_participant.has_critical_violation;
+
+      if (has_critical_violation) {
+        c.fair_play_participant.status = "revoked";
+      } else if (tours_participated >= 1) {
+        c.fair_play_participant.status = "active";
+        if (!c.fair_play_participant.achieved_at) c.fair_play_participant.achieved_at = Date.now();
+      } else {
+        c.fair_play_participant.status = "inactive";
+      }
+
+      c.fair_play_participant.last_evaluated_at = Date.now();
+      c.fair_play_participant.evidence = {
+        computed_at: Date.now(),
+        tours_participated,
+        has_critical_violation,
+        last_events: pushLastEvents(c.fair_play_participant.evidence?.last_events, event.id, 5)
+      };
+
+      saveCredentialsStore(c);
+    }
+  }
+
+  function evaluateErrorDrivenDailyOrOnReview() {
+    // Minimal implementation:
+    // cycle = attempt A (has errors) -> review opened -> attempt B (fewer errors)
+    // No time limits.
+    const c = credentialsStore();
+
+    // compute error_reduction from cycles only (simplified: each cycle has (a_errors, b_errors))
+    // We store cycles_count in c.error_driven_learner.cycles_count and track reduction via last pair only for now.
+    const cycles_count = Number(c.error_driven_learner.cycles_count) || 0;
+
+    // If we have 3+ cycles we mark active, but requirement includes ≥30% reduction.
+    // We approximate reduction using last captured baseline/current when present.
+    const baseline = Number(c.error_driven_learner.evidence?.baseline_errors || 0) || 0;
+    const current = Number(c.error_driven_learner.evidence?.current_errors || 0) || 0;
+    const reduction = baseline > 0 ? ((baseline - current) / baseline) : 0;
+
+    c.error_driven_learner.evidence = {
+      ...(c.error_driven_learner.evidence || {}),
+      computed_at: Date.now(),
+      cycles_count,
+      error_reduction: Math.max(0, Math.round(reduction * 1000) / 1000),
+      last_events: (c.error_driven_learner.evidence?.last_events || []).slice(0, 5),
+      baseline_errors: baseline,
+      current_errors: current
+    };
+
+    if (cycles_count >= 3 && reduction >= 0.30) {
+      c.error_driven_learner.status = "active";
+      if (!c.error_driven_learner.achieved_at) c.error_driven_learner.achieved_at = Date.now();
+    }
+
+    c.error_driven_learner.last_evaluated_at = Date.now();
+    saveCredentialsStore(c);
+    return c;
+  }
+
+  function onPracticeReviewOpened(attemptKey, eventId) {
+    const c = credentialsStore();
+    const key = String(attemptKey || "");
+    if (!key) return;
+    c.error_driven_learner.reviewed_attempts = c.error_driven_learner.reviewed_attempts || {};
+    c.error_driven_learner.reviewed_attempts[key] = { ts: Date.now() };
+    c.error_driven_learner.evidence = {
+      ...(c.error_driven_learner.evidence || {}),
+      last_events: pushLastEvents(c.error_driven_learner.evidence?.last_events, eventId, 5)
+    };
+    saveCredentialsStore(c);
+    evaluateErrorDrivenDailyOrOnReview();
+  }
+
+  function onPracticeAttemptFinishedForErrorDriven(subjectId, topicsErrorsMap, attemptKey, eventId) {
+    // topicsErrorsMap: { [topic]: errorsCount }
+    const c = credentialsStore();
+    const sid = String(subjectId || "");
+    if (!sid) return;
+
+    c.error_driven_learner.last_attempt_a = c.error_driven_learner.last_attempt_a || {};
+    c.error_driven_learner.reviewed_attempts = c.error_driven_learner.reviewed_attempts || {};
+
+    Object.keys(topicsErrorsMap || {}).forEach(topic => {
+      const key = `${sid}::${String(topic || "General")}`;
+      const errors = Number(topicsErrorsMap[topic]) || 0;
+
+      // If this attempt has errors, store as A baseline for that topic
+      if (errors > 0) {
+        c.error_driven_learner.last_attempt_a[key] = {
+          attempt_key: String(attemptKey || ""),
+          errors_count: errors,
+          ts: Date.now(),
+          subject_id: sid,
+          topic: String(topic || "General")
+        };
+      } else {
+        // errors == 0 can be “attempt B” candidate: check last A + review marker
+        const prevA = c.error_driven_learner.last_attempt_a[key];
+        if (!prevA || !prevA.attempt_key) return;
+
+        const reviewed = c.error_driven_learner.reviewed_attempts[String(prevA.attempt_key || "")];
+        if (!reviewed) return;
+
+        const aErr = Number(prevA.errors_count) || 0;
+        const bErr = errors;
+        if (aErr <= 0) return;
+
+        // “improvement” = bErr < aErr and reduction >= 30%
+        const reduction = (aErr - bErr) / aErr;
+        if (bErr < aErr && reduction >= 0.30) {
+          c.error_driven_learner.cycles_count = (Number(c.error_driven_learner.cycles_count) || 0) + 1;
+
+          c.error_driven_learner.evidence = {
+            ...(c.error_driven_learner.evidence || {}),
+            baseline_errors: aErr,
+            current_errors: bErr,
+            last_events: pushLastEvents(c.error_driven_learner.evidence?.last_events, eventId, 5)
+          };
+
+          // consume baseline so user cannot farm same A infinitely
+          delete c.error_driven_learner.last_attempt_a[key];
+        }
+      }
+    });
+
+    saveCredentialsStore(c);
+    evaluateErrorDrivenDailyOrOnReview();
+  }
+
+  function evaluateRealtimeCredentials(event) {
+    // Consistent learner is daily; but we still want its evidence “last events”
+    // We'll update evidence list opportunistically
+    const c = credentialsStore();
+    c.consistent_learner.evidence = c.consistent_learner.evidence || { last_events: [] };
+    c.consistent_learner.evidence.last_events = pushLastEvents(c.consistent_learner.evidence.last_events, event.id, 5);
+    saveCredentialsStore(c);
+
+    // Focused streak: realtime
+    evaluateFocusedStreakRealtime(event);
+
+    // Active Video Learner: realtime on decided events
+    if (event.type === "video_skipped" || event.type === "video_completed") {
+      evaluateActiveVideoLearnerRealtime(event);
+    }
+
+    // Fair Play: realtime
+    if (event.type === "tour_attempt_finished" || event.type === "anti_cheat_event") {
+      evaluateFairPlayRealtime(event);
+    }
+  }
+
+  function runDailyCredentialJobs() {
+    evaluateConsistentLearnerDaily();
+    evaluateResearchOrientedDaily();
+    evaluateErrorDrivenDailyOrOnReview();
+  }
+
+  // =========================================================
+  // End Earned Credentials Engine
+  // =========================================================
+
+  // ---------------------------
+  // Telegram WebApp integration (safe)
+  // ---------------------------
+
   // ---------------------------
   // Telegram WebApp integration (safe)
   // ---------------------------
@@ -3293,6 +3916,31 @@ function addMyRecsFromAttempt(attempt) {
       details
     };
 
+         // ---------------------------
+    // Earned Credentials — events + realtime evaluation
+    // ---------------------------
+    const subject_id = attempt.subjectKey ? String(attempt.subjectKey) : "";
+    const attempt_key = String(attempt.ts || finishedAt);
+
+    const ev = trackEvent("practice_attempt_finished", {
+      subject_id,
+      score: attempt.score,
+      percent: attempt.percent,
+      time_seconds: attempt.durationSec,
+      attempt_key
+    });
+
+    // Practice Mastery — per subject
+    evaluatePracticeMasteryRealtime(subject_id, attempt.percent, ev?.id);
+
+    // Error-Driven — build topic error counts from attempt.details
+    const topicErrors = {};
+    (attempt.details || []).forEach(d => {
+      const topic = String(d.topic || "General");
+      if (!d.isCorrect) topicErrors[topic] = (Number(topicErrors[topic]) || 0) + 1;
+    });
+    onPracticeAttemptFinishedForErrorDriven(subject_id, topicErrors, attempt_key, ev?.id);
+
     // Save best + last 5
     const hx = updatePracticeHistory(quiz.subjectKey, attempt);
 
@@ -3337,11 +3985,20 @@ replaceCourses("practice-result");
     syncPracticeResultBadges();
   }
 
-  function renderPracticeReview() {
+    function renderPracticeReview() {
   const wrap = $("#practice-review-list");
   if (!wrap) return;
 
   const attempt = state.practiceLastAttempt;
+
+  // Earned Credentials — review opened (for Error-Driven cycle)
+  if (attempt && attempt.ts) {
+    const subject_id = attempt.subjectKey ? String(attempt.subjectKey) : "";
+    const attempt_key = String(attempt.ts);
+    const ev = trackEvent("practice_review_opened", { subject_id, attempt_key });
+    onPracticeReviewOpened(attempt_key, ev?.id);
+  }
+
   if (!attempt || !Array.isArray(attempt.details)) {
     wrap.innerHTML = `<div class="empty muted">Нет данных для разбора. Сначала пройдите практику.</div>`;
     return;
@@ -3889,11 +4546,26 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
       meta.textContent = `Score: ${ctx.correct}/${TOUR_CONFIG.total} • Violations: ${ctx.violations || 0}`;
     }
 
-    if (ctx?.isArchive) {
+        if (ctx?.isArchive) {
       showToast("Архивный тур: вне рейтинга");
     } else if (reason === "violations") {
       showToast("Tour finished: session violations");
     }
+
+    // Earned Credentials — tour finished
+    try {
+      const subject_id = ctx?.subjectKey ? String(ctx.subjectKey) : (state?.courses?.subjectKey ? String(state.courses.subjectKey) : "");
+      const tour_id = ctx?.tourId != null ? String(ctx.tourId) : "";
+      const is_archive = !!ctx?.isArchive;
+
+      trackEvent("tour_attempt_finished", {
+        subject_id,
+        tour_id,
+        is_archive,
+        // если у тебя дальше появятся точные percent/score — сюда же добавим
+        status: reason || "finished"
+      });
+    } catch {}
 
     // unlock
     state.quizLock = null;
@@ -4531,14 +5203,20 @@ if (action === "tour-next" || action === "tour-submit") {
        return;
       }
 
-      if (action === "video-skip") {
-        showToast("video_skipped logged (demo)");
+            if (action === "video-skip") {
+        const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : (state?.activeSubjectKey ? String(state.activeSubjectKey) : "");
+        const lesson_id = state?.courses?.lessonId ? String(state.courses.lessonId) : "";
+        trackEvent("video_skipped", { subject_id, lesson_id });
+
         openPracticeStart();
         return;
       }
 
       if (action === "video-complete") {
-        showToast("video_completed logged (demo)");
+        const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : (state?.activeSubjectKey ? String(state.activeSubjectKey) : "");
+        const lesson_id = state?.courses?.lessonId ? String(state.courses.lessonId) : "";
+        trackEvent("video_completed", { subject_id, lesson_id });
+
         openPracticeStart();
         return;
       }
@@ -4688,6 +5366,9 @@ if (action === "tour-next" || action === "tour-submit") {
   bindActions();
   bindRatingsUI(); // ✅ Leaderboard controls
 }
+
+     // Earned Credentials — daily evaluation jobs (once per Tashkent day)
+  try { runDailyCredentialJobs(); } catch {}
 
   // Init
   bindUI();
