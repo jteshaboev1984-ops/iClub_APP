@@ -106,11 +106,19 @@
 
     // ✅ Earned Credentials: hydrate local events store from Supabase (only if local empty)
     try {
-      const hydrated = await hydrateLocalEventsFromSupabase(sb, u.id);
-      if (hydrated) {
-        try { runDailyCredentialJobs(); } catch {}
-      }
-    } catch {}
+  const changed = await hydrateLocalEventsFromSupabase(sb, u.id);
+
+  // Always recalc after hydration attempt:
+  // - changed=true  -> we merged DB events
+  // - changed=false -> still ensures daily job runs at least once per day
+  try { runDailyCredentialJobs(); } catch {}
+
+  // If we merged something new — update profile UI if it’s already on screen
+  if (changed) {
+    try { renderProfile(); } catch {}
+    try { renderSubjectHub(); } catch {}
+  }
+} catch {}
 
     return sb;
   }
@@ -123,77 +131,77 @@
   // LS.events must be { seq:number, items:[{id,type,payload,ts,day}] }
   // ---------------------------
   async function hydrateLocalEventsFromSupabase(sbClient, userId) {
-    if (!sbClient || !userId) return false;
+  if (!sbClient || !userId) return false;
 
-    // local store format used by eventsStore()
-        const local = loadJsonLS(LS.events, { seq: 0, items: [] });
+  // Always keep strict format: { seq:number, items:[{id,type,payload,ts,day}] }
+  const local = loadJsonLS(LS.events, { seq: 0, items: [] });
+  const localItems = Array.isArray(local?.items) ? local.items : [];
+  let seq = Number(local?.seq) || 0;
 
-    // ✅ if local has events but in wrong shape (ts string / missing day), allow rehydrate
-    const hasSome = Array.isArray(local?.items) && local.items.length > 0;
-    const looksValid = hasSome && local.items.some(e => typeof e?.ts === "number" && !!e?.day && !!e?.type);
+  // Build a fast "already have" set using db_created_at signature
+  const have = new Set(
+    localItems
+      .map(e => e?.payload?._db_created_at ? `${e.type}|${e.payload._db_created_at}` : null)
+      .filter(Boolean)
+  );
 
-    if (looksValid) return false;
+  // Fetch last events from DB (we keep it simple & safe: take recent 5000)
+  const { data, error } = await sbClient
+    .from("app_events")
+    .select("event_type,payload,created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true })
+    .limit(5000);
 
-    const { data, error } = await sbClient
-      .from("app_events")
-      .select("event_type,payload,created_at")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: true })
-      .limit(5000);
+  if (error) throw error;
 
-    if (error) throw error;
+  let added = 0;
 
-    let seq = 0;
-    const items = (data || []).map((r) => {
-      const ts = Date.parse(r.created_at) || Date.now();
-      const evt = {
-        id: ++seq,
-        type: r.event_type,
-        payload: r.payload || {},
-        ts,
-        day: dayKeyTashkent(ts),
-      };
-      return evt;
-    });
+  (data || []).forEach((r) => {
+    const dbCreatedAt = r.created_at || null;
+    const sig = dbCreatedAt ? `${r.event_type}|${dbCreatedAt}` : null;
 
-    saveJsonLS(LS.events, { seq, items });
-    return items.length > 0;
+    // If we already merged this DB row before — skip
+    if (sig && have.has(sig)) return;
+
+    const ts = Date.parse(dbCreatedAt) || Date.now();
+
+    const evt = {
+      id: ++seq,
+      type: r.event_type,
+      payload: { ...(r.payload || {}), _db_created_at: dbCreatedAt },
+      ts,
+      day: dayKeyTashkent(ts),
+    };
+
+    localItems.push(evt);
+    if (sig) have.add(sig);
+    added += 1;
+  });
+
+  // keep last N events (avoid LS overflow)
+  if (localItems.length > 2000) {
+    const sliced = localItems.slice(-2000);
+    // re-seq to keep ids compact and monotonic
+    let s = 0;
+    const re = sliced.map(e => ({ ...e, id: ++s }));
+    saveJsonLS(LS.events, { seq: s, items: re });
+  } else {
+    saveJsonLS(LS.events, { seq, items: localItems });
   }
+
+  return added > 0;
+}
 
   // ---------------------------
   // Credentials: hydrate local events from Supabase (only if needed)
   // ---------------------------
   async function hydrateLocalEventsFromSupabaseIfNeeded(sbClient, userId) {
-    if (!sbClient || !userId) return;
-
-    // if local already has events — do nothing
-    const local = loadJsonLS(LS.events, null);
-    const localItems = Array.isArray(local) ? local : (local?.items || []);
-    if (localItems && localItems.length > 0) return;
-
-    const { data, error } = await sbClient
-      .from("app_events")
-      .select("event_type,payload,created_at")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: true })
-      .limit(5000);
-
-    if (error) throw error;
-
-    const items = (data || []).map((r) => ({
-      type: r.event_type,
-      payload: r.payload || {},
-      ts: r.created_at || nowISO(),
-      source: "db",
-    }));
-
-    // keep backward compatibility: if you previously stored array — store array
-    if (Array.isArray(local)) {
-      saveJsonLS(LS.events, items);
-    } else {
-      saveJsonLS(LS.events, { items, hydrated_at: nowISO() });
-    }
-  }
+  // Keep ONE truthy hydrator to avoid format corruption
+  try {
+    await hydrateLocalEventsFromSupabase(sbClient, userId);
+  } catch {}
+}
    
   // ---------------------------
   // Storage keys
