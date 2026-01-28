@@ -3319,4 +3319,58 @@ body.modal-open { overflow: hidden; }
 #subject-hub-credential-hints .muted.small {
   font-size: 13px;
 }
+/* =========================================================
+   Earned Credentials (v1.3) — Profile UI (current classes)
+   ========================================================= */
+
+.profile-credentials-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+@media (min-width: 520px) {
+  .profile-credentials-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* cards rendered by app (46).js */
+.credential-card {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(20, 20, 20, 0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.credential-title {
+  font-weight: 650;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.credential-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+/* progress list (inline, neutral) */
+.cred-progress-list {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.cred-progress-item {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+}
 
