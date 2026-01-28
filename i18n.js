@@ -111,6 +111,32 @@
       profile_competitive_slots: "Competitive Slots",
       profile_active_slots_label: "Active",
       profile_earned_credentials: "Earned Credentials",
+
+      // Earned Credentials (v1.3) — labels
+      cred_kicker_progress: "PROGRESS",
+      cred_label_focused: "Focused streak",
+      cred_label_practice: "Practice mastery",
+
+      // Earned Credentials (v1.3) — credential names (keys)
+      cred_consistent_learner: "Consistent Learner",
+      cred_focused_study_streak: "Focused Study Streak",
+      cred_active_video_learner: "Active Video Learner",
+      cred_practice_mastery_subject: "Practice Mastery",
+      cred_error_driven_learner: "Error-Driven Learner",
+      cred_research_oriented_learner: "Research-Oriented Learner",
+      cred_fair_play_participant: "Fair Play Participant",
+
+      // Earned Credentials (v1.3) — statuses
+      cred_status_active: "Активен",
+      cred_status_inactive: "Неактивен",
+      cred_status_expired: "Серия завершена",
+      cred_status_revoked: "Отозван",
+
+      // Earned Credentials (v1.3) — meta
+      cred_meta_achieved: "Achieved",
+      cred_meta_status: "Status",
+      cred_meta_risk: "Risk of loss",
+
       profile_recommendations_archive: "My Recommendations Archive",
       profile_view_btn: "VIEW",
       profile_slots_empty: "Нет активных Competitive слотов.",
@@ -321,6 +347,32 @@
       profile_competitive_slots: "Competitive Slots",
       profile_active_slots_label: "Active",
       profile_earned_credentials: "Earned Credentials",
+      
+      // Earned Credentials (v1.3) — labels
+      cred_kicker_progress: "PROGRESS",
+      cred_label_focused: "Focused streak",
+      cred_label_practice: "Practice mastery",
+
+      // Earned Credentials (v1.3) — credential names (keys)
+      cred_consistent_learner: "Consistent Learner",
+      cred_focused_study_streak: "Focused Study Streak",
+      cred_active_video_learner: "Active Video Learner",
+      cred_practice_mastery_subject: "Practice Mastery",
+      cred_error_driven_learner: "Error-Driven Learner",
+      cred_research_oriented_learner: "Research-Oriented Learner",
+      cred_fair_play_participant: "Fair Play Participant",
+
+      // Earned Credentials (v1.3) — statuses
+      cred_status_active: "Faol",
+      cred_status_inactive: "Nofaol",
+      cred_status_expired: "Seriya yakunlandi",
+      cred_status_revoked: "Bekor qilindi",
+
+      // Earned Credentials (v1.3) — meta
+      cred_meta_achieved: "Achieved",
+      cred_meta_status: "Status",
+      cred_meta_risk: "Risk of loss",
+
       profile_recommendations_archive: "My Recommendations Archive",
       profile_view_btn: "VIEW",
       profile_slots_empty: "Faol Competitive slotlar yo‘q.",
@@ -435,7 +487,6 @@
 
       tour_rules_title: "Tur qoidalari",
       tour_rules_accept_required: "Tur boshlash uchun qoidalarga rozilikni tasdiqlang."
-
     },
 
     en: {
@@ -537,6 +588,32 @@
       profile_competitive_slots: "Competitive Slots",
       profile_active_slots_label: "Active",
       profile_earned_credentials: "Earned Credentials",
+      
+      // Earned Credentials (v1.3) — labels
+      cred_kicker_progress: "PROGRESS",
+      cred_label_focused: "Focused streak",
+      cred_label_practice: "Practice mastery",
+
+      // Earned Credentials (v1.3) — credential names (keys)
+      cred_consistent_learner: "Consistent Learner",
+      cred_focused_study_streak: "Focused Study Streak",
+      cred_active_video_learner: "Active Video Learner",
+      cred_practice_mastery_subject: "Practice Mastery",
+      cred_error_driven_learner: "Error-Driven Learner",
+      cred_research_oriented_learner: "Research-Oriented Learner",
+      cred_fair_play_participant: "Fair Play Participant",
+
+      // Earned Credentials (v1.3) — statuses
+      cred_status_active: "Active",
+      cred_status_inactive: "Inactive",
+      cred_status_expired: "Expired",
+      cred_status_revoked: "Revoked",
+
+      // Earned Credentials (v1.3) — meta
+      cred_meta_achieved: "Achieved",
+      cred_meta_status: "Status",
+      cred_meta_risk: "Risk of loss",
+
       profile_recommendations_archive: "My Recommendations Archive",
       profile_view_btn: "VIEW",
       profile_slots_empty: "No active Competitive slots.",
