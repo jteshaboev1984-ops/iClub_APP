@@ -11,6 +11,10 @@
       app_name: "iClub",
       loading: "Загрузка…",
       saving: "Сохранение…",
+      ratings_subject: "Предмет",
+      ratings_tour: "Тур",
+      ratings_all_tours: "Все туры",
+      ratings_viewer_hint: "Рейтинг доступен для просмотра. “Мой ранг” показывается только участникам (Competitive).",
       done: "Готово",
       error_try_again: "Ошибка — попробуйте ещё раз",
 
@@ -253,6 +257,11 @@
       app_name: "iClub",
       loading: "Yuklanmoqda…",
       saving: "Saqlanmoqda…",
+      ratings_subject: "Fan",
+      ratings_tour: "Tur",
+      ratings_all_tours: "Barcha turlar",
+      ratings_viewer_hint: "Reytingni ko‘rish mumkin. “Mening o‘rnim” faqat Competitive ishtirokchilar uchun ko‘rsatiladi.",
+
       done: "Tayyor",
       error_try_again: "Xatolik — qayta urinib ko‘ring",
 
@@ -495,6 +504,11 @@
       app_name: "iClub",
       loading: "Loading…",
       saving: "Saving…",
+      ratings_subject: "Subject",
+      ratings_tour: "Tour",
+      ratings_all_tours: "All tours",
+      ratings_viewer_hint: "Leaderboards are available for viewing. “My rank” is shown only for Competitive participants.",
+
       done: "Done",
       error_try_again: "Error — please try again",
 
