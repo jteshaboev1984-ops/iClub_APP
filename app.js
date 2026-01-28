@@ -2453,14 +2453,16 @@ head.innerHTML = `
       </div>
 
       <div class="catalog-text">
-        <div class="card-title" style="margin:0">${escapeHTML(s.title)}</div>
+        <div class="card-title-row">
+          <div class="card-title" style="margin:0">${escapeHTML(s.title)}</div>
+          ${isPinned ? `<span class="badge badge-pin badge-inline">Pinned</span>` : ``}
+        </div>
       </div>
-    </div>
+   </div>
 
-    <div class="catalog-badges">
-      ${isPinned ? `<span class="badge badge-pin">Pinned</span>` : ``}
-      ${s.type === "main" && isComp ? `<span class="badge badge-comp">Competitive</span>` : ``}
-    </div>
+   <div class="catalog-badges">
+     ${s.type === "main" && isComp ? `<span class="badge badge-comp">Competitive</span>` : ``}
+      </div>
   </div>
 `;
 // ✅ icon image with robust fallback (.png.png -> .png -> .PNG + IELTS special)
