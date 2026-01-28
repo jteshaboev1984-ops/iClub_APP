@@ -3158,4 +3158,24 @@ body.modal-open { overflow: hidden; }
 .view-subject-hub.is-study .tab-btn[data-tab="tours"] {
   color: rgba(15, 23, 42, 0.45);
 }
+/* Courses → Study subject row chevron (lines, not dots) */
+.catalog-toggle-row {
+  position: relative;
+}
 
+/* chevron above toggle */
+.catalog-toggle-row::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 10px;
+
+  width: 8px;
+  height: 8px;
+
+  border-right: 2px solid rgba(15, 23, 42, 0.45);
+  border-bottom: 2px solid rgba(15, 23, 42, 0.45);
+  transform: rotate(-45deg);
+
+  pointer-events: none; /* purely visual */
+}
