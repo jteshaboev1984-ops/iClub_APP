@@ -97,17 +97,20 @@
     // upsert by primary key id
         await sb.from("users").upsert(payload, { onConflict: "id" });
 
-        // ✅ smoke test: write event (confirms auth + RLS + insert)
+            // ✅ smoke test: write event (confirms auth + RLS + insert)
     await sb.from("app_events").insert({
       user_id: u.id,
       event_type: "boot",
       payload: { has_tg: !!tg, ua: navigator.userAgent },
     });
 
-    // ✅ Credentials: hydrate local event log from Supabase (only if local is empty)
+    // ✅ Earned Credentials: hydrate local events store from Supabase (only if local empty)
     try {
-      await hydrateLocalEventsFromSupabaseIfNeeded(sb, u.id);
-    } catch (e) {}
+      const hydrated = await hydrateLocalEventsFromSupabase(sb, u.id);
+      if (hydrated) {
+        try { runDailyCredentialJobs(); } catch {}
+      }
+    } catch {}
 
     return sb;
   }
@@ -115,6 +118,43 @@
   function nowISO() {
     return new Date().toISOString();
   }
+     // ---------------------------
+  // Earned Credentials: hydrate LS.events from Supabase app_events
+  // LS.events must be { seq:number, items:[{id,type,payload,ts,day}] }
+  // ---------------------------
+  async function hydrateLocalEventsFromSupabase(sbClient, userId) {
+    if (!sbClient || !userId) return false;
+
+    // local store format used by eventsStore()
+    const local = loadJsonLS(LS.events, { seq: 0, items: [] });
+    if (Array.isArray(local?.items) && local.items.length > 0) return false;
+
+    const { data, error } = await sbClient
+      .from("app_events")
+      .select("event_type,payload,created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true })
+      .limit(5000);
+
+    if (error) throw error;
+
+    let seq = 0;
+    const items = (data || []).map((r) => {
+      const ts = Date.parse(r.created_at) || Date.now();
+      const evt = {
+        id: ++seq,
+        type: r.event_type,
+        payload: r.payload || {},
+        ts,
+        day: dayKeyTashkent(ts),
+      };
+      return evt;
+    });
+
+    saveJsonLS(LS.events, { seq, items });
+    return items.length > 0;
+  }
+
   // ---------------------------
   // Credentials: hydrate local events from Supabase (only if needed)
   // ---------------------------
