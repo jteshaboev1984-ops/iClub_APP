@@ -111,6 +111,7 @@
       profile_competitive_slots: "Competitive Slots",
       profile_active_slots_label: "Active",
       profile_earned_credentials: "Earned Credentials",
+      cred_none_yet: "No credentials yet",
 
       // Earned Credentials (v1.3) — labels
       cred_kicker_progress: "PROGRESS",
@@ -347,7 +348,8 @@
       profile_competitive_slots: "Competitive Slots",
       profile_active_slots_label: "Active",
       profile_earned_credentials: "Earned Credentials",
-      
+      cred_none_yet: "Hozircha credential yo‘q.",
+       
       // Earned Credentials (v1.3) — labels
       cred_kicker_progress: "PROGRESS",
       cred_label_focused: "Focused streak",
@@ -588,7 +590,8 @@
       profile_competitive_slots: "Competitive Slots",
       profile_active_slots_label: "Active",
       profile_earned_credentials: "Earned Credentials",
-      
+      cred_none_yet: "No credentials yet",
+
       // Earned Credentials (v1.3) — labels
       cred_kicker_progress: "PROGRESS",
       cred_label_focused: "Focused streak",
