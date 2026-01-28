@@ -1555,16 +1555,27 @@ if (tabName === "ratings") {
       state.viewStack = [state.tab || "home"];
     }
 
-    const top = state.viewStack[state.viewStack.length - 1];
+       const top = state.viewStack[state.viewStack.length - 1];
     if (top === viewName) {
+
+      // Earned Credentials: Research-Oriented — resource opened
+      if (viewName === "resources") {
+        try { trackEvent("resource_opened", { source: "global_resources" }); } catch {}
+      }
+
       showView(viewName);
       return;
     }
 
-    state.viewStack.push(viewName);
+        state.viewStack.push(viewName);
     saveState();
+
+    // Earned Credentials: Research-Oriented — resource opened
+    if (viewName === "resources") {
+      try { trackEvent("resource_opened", { source: "global_resources" }); } catch {}
+    }
+
     showView(viewName);
-  }
 
   function canGlobalBack() {
     return Array.isArray(state.viewStack) && state.viewStack.length > 1;
@@ -4978,11 +4989,14 @@ if (action === "open-all-subjects") {
   state.courses.subjectKey = pick;
   saveState();
   setTab("courses");
+
+  // Earned Credentials: Research-Oriented — recommendation opened
+  try { trackEvent("recommendation_opened", { source: "global_my_recs", subject_id: String(pick) }); } catch {}
+
   replaceCourses("my-recs");
   renderMyRecs();
   return;
 }
-
       // ---------- Tab-specific / Courses actions ----------
         if (action === "profile-certificates") { openGlobal("certificates"); return; }
         if (action === "profile-community") { openGlobal("community"); return; }
@@ -5005,6 +5019,10 @@ if (action === "open-all-subjects") {
   state.courses.subjectKey = pick;
   saveState();
   setTab("courses");
+
+  // Earned Credentials: Research-Oriented — recommendation opened
+  try { trackEvent("recommendation_opened", { source: "profile_my_recs", subject_id: String(pick) }); } catch {}
+
   replaceCourses("my-recs");
   renderMyRecs();
   return;
@@ -5203,10 +5221,15 @@ if (action === "tour-next" || action === "tour-submit") {
       }
 
       if (action === "open-my-recommendations") {
-       pushCourses("my-recs");
-       renderMyRecs();
-       return;
-      }
+  const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : "";
+
+  // Earned Credentials: Research-Oriented — recommendation opened
+  try { trackEvent("recommendation_opened", { source: "subject_hub_my_recs", subject_id }); } catch {}
+
+  pushCourses("my-recs");
+  renderMyRecs();
+  return;
+}
 
             if (action === "video-skip") {
         const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : (state?.activeSubjectKey ? String(state.activeSubjectKey) : "");
