@@ -3235,10 +3235,10 @@ if (mainSubjects.length) {
 
   // ✅ Visual-only mode flag for CSS (Study vs Competitive)
   const hubRoot = $("#courses-subject-hub");
-   if (hubRoot) {
-     hubRoot.classList.toggle("is-study", us?.mode === "study");
-     hubRoot.classList.toggle("is-competitive", us?.mode === "competitive");
-   }
+  if (hubRoot) {
+    hubRoot.classList.toggle("is-study", us?.mode === "study");
+    hubRoot.classList.toggle("is-competitive", us?.mode === "competitive");
+  }
          // ---- Availability toggles in Subject Hub (Tours only when allowed) ----
     const toursBtn = document.querySelector('#courses-subject-hub [data-action="open-tours"]');
     const toursSub = toursBtn?.querySelector(".muted.small");
