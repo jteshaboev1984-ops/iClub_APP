@@ -126,8 +126,13 @@
     if (!sbClient || !userId) return false;
 
     // local store format used by eventsStore()
-    const local = loadJsonLS(LS.events, { seq: 0, items: [] });
-    if (Array.isArray(local?.items) && local.items.length > 0) return false;
+        const local = loadJsonLS(LS.events, { seq: 0, items: [] });
+
+    // ✅ if local has events but in wrong shape (ts string / missing day), allow rehydrate
+    const hasSome = Array.isArray(local?.items) && local.items.length > 0;
+    const looksValid = hasSome && local.items.some(e => typeof e?.ts === "number" && !!e?.day && !!e?.type);
+
+    if (looksValid) return false;
 
     const { data, error } = await sbClient
       .from("app_events")
@@ -274,10 +279,62 @@ function applyStaticI18n() {
     return null;
   }
 
-  function eventsStore() {
-    const s = loadJsonLS(LS.events, { seq: 0, items: [] });
+    function eventsStore() {
+    let s = loadJsonLS(LS.events, { seq: 0, items: [] });
+
+    // accept old shapes:
+    // 1) array of events
+    // 2) { items: [...], hydrated_at: ... }
+    if (Array.isArray(s)) {
+      s = { seq: 0, items: s };
+    } else if (s && !Array.isArray(s.items) && Array.isArray(s?.items?.items)) {
+      // just in case of nested shapes
+      s = { seq: 0, items: s.items.items };
+    } else if (s && !Array.isArray(s.items) && Array.isArray(s?.items)) {
+      s = { seq: 0, items: s.items };
+    }
+
+    if (!s || typeof s !== "object") s = { seq: 0, items: [] };
     if (!Array.isArray(s.items)) s.items = [];
     if (typeof s.seq !== "number") s.seq = 0;
+
+    // ✅ normalize events (fix ts/day/id)
+    let maxId = 0;
+    for (let i = 0; i < s.items.length; i++) {
+      const e = s.items[i] || {};
+      // ts: allow number OR ISO string
+      let ts = e.ts;
+      if (typeof ts === "string") {
+        const parsed = Date.parse(ts);
+        ts = Number.isFinite(parsed) ? parsed : Date.now();
+      } else if (typeof ts !== "number" || !Number.isFinite(ts)) {
+        ts = Date.now();
+      }
+
+      // id
+      let id = e.id;
+      if (typeof id !== "number" || !Number.isFinite(id)) id = i + 1;
+
+      // day
+      const day = e.day || dayKeyTashkent(ts);
+
+      s.items[i] = {
+        id,
+        type: e.type,
+        payload: e.payload || {},
+        ts,
+        day
+      };
+
+      if (id > maxId) maxId = id;
+    }
+
+    // ensure seq >= max id
+    if (maxId > s.seq) s.seq = maxId;
+
+    // persist normalized store (important for next runs)
+    try { saveJsonLS(LS.events, s); } catch {}
+
     return s;
   }
 
