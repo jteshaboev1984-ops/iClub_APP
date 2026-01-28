@@ -524,8 +524,9 @@ function applyStaticI18n() {
   }
 
   function evaluateFocusedStreakRealtime(event) {
-    // valid sessions строго: video_completed / practice_attempt_finished / tour_attempt_finished
-    if (!["video_completed", "practice_attempt_finished", "tour_attempt_finished"].includes(event.type)) return;
+    // valid sessions: video_completed / video_skipped / practice_attempt_finished / tour_attempt_finished
+    // (video_skipped разрешён по документам проекта)
+    if (!["video_completed", "video_skipped", "practice_attempt_finished", "tour_attempt_finished"].includes(event.type)) return;
 
     const c = credentialsStore();
     const subjectId = event?.payload?.subject_id ? String(event.payload.subject_id) : "";
