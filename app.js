@@ -4100,10 +4100,11 @@ function addMyRecsFromAttempt(attempt) {
     });
 
     // Practice Mastery — per subject
-    evaluatePracticeMasteryRealtime(subject_id, attempt.p
+    try { evaluatePracticeMasteryRealtime(subject_id, attempt.percent, ev && ev.id); } catch {}
 
     // Error-Driven — build topic error counts from attempt.details
     const topicErrors = {};
+
     (attempt.details || []).forEach(d => {
       const topic = String(d.topic || "General");
       if (!d.isCorrect) topicErrors[topic] = (Number(topicErrors[topic]) || 0) + 1;
