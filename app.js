@@ -9,17 +9,24 @@
     // ---------------------------
   // Helpers
   // ---------------------------
-  const $ = (sel, root = document) => root.querySelector(sel);
+    const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  function escapeHTML(v) {
-    return String(v ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+  function escapeHTML(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  // ---------------------------
+  // Credentials: normalize subject_id (IMPORTANT)
+  // ---------------------------
+  function normSubjectId(v) {
+    return String(v ?? "").trim().toLowerCase();
+  }
 
   function safeJsonParse(s, fallback) {
   if (s === null || s === undefined || s === "") return fallback;
@@ -4081,7 +4088,7 @@ function addMyRecsFromAttempt(attempt) {
          // ---------------------------
     // Earned Credentials — events + realtime evaluation
     // ---------------------------
-    const subject_id = attempt.subjectKey ? String(attempt.subjectKey) : "";
+    const subject_id = normSubjectId(attempt.subjectKey);
     const attempt_key = String(attempt.ts || finishedAt);
 
     const ev = trackEvent("practice_attempt_finished", {
@@ -4093,7 +4100,7 @@ function addMyRecsFromAttempt(attempt) {
     });
 
     // Practice Mastery — per subject
-    evaluatePracticeMasteryRealtime(subject_id, attempt.percent, ev?.id);
+    evaluatePracticeMasteryRealtime(subject_id, attempt.p
 
     // Error-Driven — build topic error counts from attempt.details
     const topicErrors = {};
@@ -4716,7 +4723,7 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
 
     // Earned Credentials — tour finished
     try {
-      const subject_id = ctx?.subjectKey ? String(ctx.subjectKey) : (state?.courses?.subjectKey ? String(state.courses.subjectKey) : "");
+            const subject_id = normSubjectId(ctx?.subjectKey || state?.courses?.subjectKey);
       const tour_id = ctx?.tourId != null ? String(ctx.tourId) : "";
       const is_archive = !!ctx?.isArchive;
 
@@ -5137,7 +5144,7 @@ if (action === "open-all-subjects") {
   setTab("courses");
 
   // Earned Credentials: Research-Oriented — recommendation opened
-  try { trackEvent("recommendation_opened", { source: "global_my_recs", subject_id: String(pick) }); } catch {}
+    try { trackEvent("recommendation_opened", { source: "global_my_recs", subject_id: normSubjectId(pick) }); } catch {}
 
   replaceCourses("my-recs");
   renderMyRecs();
@@ -5167,7 +5174,7 @@ if (action === "open-all-subjects") {
   setTab("courses");
 
   // Earned Credentials: Research-Oriented — recommendation opened
-  try { trackEvent("recommendation_opened", { source: "profile_my_recs", subject_id: String(pick) }); } catch {}
+  try { trackEvent("recommendation_opened", { source: "profile_my_recs", subject_id: normSubjectId(pick) }); } catch {}
 
   replaceCourses("my-recs");
   renderMyRecs();
@@ -5369,8 +5376,8 @@ if (action === "tour-next" || action === "tour-submit") {
       if (action === "open-my-recommendations") {
   const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : "";
 
-  // Earned Credentials: Research-Oriented — recommendation opened
-  try { trackEvent("recommendation_opened", { source: "subject_hub_my_recs", subject_id }); } catch {}
+ // Earned Credentials: Research-Oriented — recommendation opened
+  try { trackEvent("recommendation_opened", { source: "subject_hub_my_recs", subject_id: normSubjectId(subject_id) }); } catch {}
 
   pushCourses("my-recs");
   renderMyRecs();
