@@ -3169,7 +3169,7 @@ body.modal-open { overflow: hidden; }
   position: absolute;
 
   /* ✅ 1) поднимаем стрелку на уровень названия предмета (вверх, в header) */
-  top: -30px;
+  top: -25px;
 
   /* ✅ 2) выравниваем по центру тумблера (switch = 46px ширина) */
   right: 33px;
