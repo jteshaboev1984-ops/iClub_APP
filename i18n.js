@@ -111,12 +111,12 @@
       profile_competitive_slots: "Competitive Slots",
       profile_active_slots_label: "Active",
       profile_earned_credentials: "Earned Credentials",
-      cred_none_yet: "No credentials yet",
+      cred_none_yet: "Пока нет",
 
       // Earned Credentials (v1.3) — labels
-      cred_kicker_progress: "PROGRESS",
-      cred_label_focused: "Focused streak",
-      cred_label_practice: "Practice mastery",
+      cred_kicker_progress: "ПРОГРЕСС",
+      cred_label_focused: "Фокус-серия",
+      cred_label_practice: "Мастерство практики",
 
       // Earned Credentials (v1.3) — credential names (keys)
       cred_consistent_learner: "Consistent Learner",
@@ -134,9 +134,9 @@
       cred_status_revoked: "Отозван",
 
       // Earned Credentials (v1.3) — meta
-      cred_meta_achieved: "Achieved",
-      cred_meta_status: "Status",
-      cred_meta_risk: "Risk of loss",
+      cred_meta_achieved: "Получено",
+      cred_meta_status: "Статус",
+      cred_meta_risk: "Риск потери",
 
       profile_recommendations_archive: "My Recommendations Archive",
       profile_view_btn: "VIEW",
@@ -348,12 +348,12 @@
       profile_competitive_slots: "Competitive Slots",
       profile_active_slots_label: "Active",
       profile_earned_credentials: "Earned Credentials",
-      cred_none_yet: "Hozircha credential yo‘q.",
+      cred_none_yet: "Hozircha yo‘q.",
        
       // Earned Credentials (v1.3) — labels
       cred_kicker_progress: "PROGRESS",
-      cred_label_focused: "Focused streak",
-      cred_label_practice: "Practice mastery",
+      cred_label_focused: "Fokus seriyasi",
+      cred_label_practice: "Amaliyot mahorati",
 
       // Earned Credentials (v1.3) — credential names (keys)
       cred_consistent_learner: "Consistent Learner",
@@ -371,9 +371,9 @@
       cred_status_revoked: "Bekor qilindi",
 
       // Earned Credentials (v1.3) — meta
-      cred_meta_achieved: "Achieved",
+      cred_meta_achieved: "Olingan",
       cred_meta_status: "Status",
-      cred_meta_risk: "Risk of loss",
+      cred_meta_risk: "Yo‘qotish riski",
 
       profile_recommendations_archive: "My Recommendations Archive",
       profile_view_btn: "VIEW",
