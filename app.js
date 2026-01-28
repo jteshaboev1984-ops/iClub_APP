@@ -97,12 +97,17 @@
     // upsert by primary key id
         await sb.from("users").upsert(payload, { onConflict: "id" });
 
-    // ✅ smoke test: write event (confirms auth + RLS + insert)
+        // ✅ smoke test: write event (confirms auth + RLS + insert)
     await sb.from("app_events").insert({
       user_id: u.id,
       event_type: "boot",
       payload: { has_tg: !!tg, ua: navigator.userAgent },
     });
+
+    // ✅ Credentials: hydrate local event log from Supabase (only if local is empty)
+    try {
+      await hydrateLocalEventsFromSupabaseIfNeeded(sb, u.id);
+    } catch (e) {}
 
     return sb;
   }
@@ -110,7 +115,41 @@
   function nowISO() {
     return new Date().toISOString();
   }
+  // ---------------------------
+  // Credentials: hydrate local events from Supabase (only if needed)
+  // ---------------------------
+  async function hydrateLocalEventsFromSupabaseIfNeeded(sbClient, userId) {
+    if (!sbClient || !userId) return;
 
+    // if local already has events — do nothing
+    const local = loadJsonLS(LS.events, null);
+    const localItems = Array.isArray(local) ? local : (local?.items || []);
+    if (localItems && localItems.length > 0) return;
+
+    const { data, error } = await sbClient
+      .from("app_events")
+      .select("event_type,payload,created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true })
+      .limit(5000);
+
+    if (error) throw error;
+
+    const items = (data || []).map((r) => ({
+      type: r.event_type,
+      payload: r.payload || {},
+      ts: r.created_at || nowISO(),
+      source: "db",
+    }));
+
+    // keep backward compatibility: if you previously stored array — store array
+    if (Array.isArray(local)) {
+      saveJsonLS(LS.events, items);
+    } else {
+      saveJsonLS(LS.events, { items, hydrated_at: nowISO() });
+    }
+  }
+   
   // ---------------------------
   // Storage keys
   // ---------------------------
