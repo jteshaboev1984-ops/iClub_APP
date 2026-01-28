@@ -1576,6 +1576,7 @@ if (tabName === "ratings") {
     }
 
     showView(viewName);
+  }
 
   function canGlobalBack() {
     return Array.isArray(state.viewStack) && state.viewStack.length > 1;
@@ -5642,4 +5643,4 @@ function renderSubjectHubCredentialsInline(subjectKey) {
   bindUI();
   boot();
 
-}})();
+})();
