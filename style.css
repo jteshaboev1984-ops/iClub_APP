@@ -3197,4 +3197,126 @@ body.modal-open { overflow: hidden; }
   font-weight: 800;
   line-height: 1;
 }
+/* =========================================================
+   Earned Credentials (v1.3 FINAL) — neutral academic UI
+   ========================================================= */
+
+.profile-credentials-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+@media (min-width: 520px) {
+  .profile-credentials-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.credential-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(20, 20, 20, 0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.credential-item.is-active {
+  border-color: rgba(0, 122, 255, 0.25);
+}
+
+.credential-item.is-inactive,
+.credential-item.is-expired {
+  opacity: 0.78;
+}
+
+.credential-item.is-revoked {
+  border-color: rgba(220, 38, 38, 0.30);
+}
+
+.credential-ico {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 122, 255, 0.08);
+  border: 1px solid rgba(0, 122, 255, 0.10);
+  flex: 0 0 38px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.credential-item.is-revoked .credential-ico {
+  background: rgba(220, 38, 38, 0.10);
+  border-color: rgba(220, 38, 38, 0.18);
+}
+
+.credential-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.credential-title {
+  font-weight: 650;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.credential-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.credential-progress {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.credential-progress-bar {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  flex: 1 1 auto;
+}
+
+.credential-progress-bar > i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: rgba(0, 122, 255, 0.65);
+}
+
+.credential-progress-text {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+  white-space: nowrap;
+}
+
+#profile-credentials-hints {
+  margin-top: 6px;
+}
+
+/* Subject Hub inline credential hints */
+#subject-hub-credential-hints .panel-kicker {
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+#subject-hub-credential-hints .muted.small {
+  font-size: 13px;
+}
 
