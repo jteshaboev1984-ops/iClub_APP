@@ -3167,8 +3167,12 @@ body.modal-open { overflow: hidden; }
 .catalog-toggle-row::after {
   content: "";
   position: absolute;
-  right: 14px;
-  top: 10px;
+
+  /* ✅ vertically aligned with subject title */
+  top: 18px;
+
+  /* ✅ centered above the switch, not near the edge */
+  right: 28px;
 
   width: 8px;
   height: 8px;
@@ -3177,5 +3181,6 @@ body.modal-open { overflow: hidden; }
   border-bottom: 2px solid rgba(15, 23, 42, 0.45);
   transform: rotate(-45deg);
 
-  pointer-events: none; /* purely visual */
+  pointer-events: none;
 }
+
