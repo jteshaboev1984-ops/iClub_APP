@@ -5638,8 +5638,8 @@ function renderSubjectHubCredentialsInline(subjectKey) {
      // Earned Credentials — daily evaluation jobs (once per Tashkent day)
   try { runDailyCredentialJobs(); } catch {}
 
-  // Init
+    // Init
   bindUI();
   boot();
 
-})();
+}})();
