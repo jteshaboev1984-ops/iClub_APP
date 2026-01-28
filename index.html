@@ -290,13 +290,32 @@
               <!-- Subject Hub -->
             <section id="courses-subject-hub" class="stack-screen" data-stack="courses" data-screen="subject-hub">
     <div class="subject-hub-head">
-    <div class="subject-hub-head-left">
-      <div id="subject-hub-title" class="subject-hub-title">Предмет</div>
-      <div id="subject-hub-meta" class="subject-hub-meta muted">Study / Competitive</div>
+  <div class="subject-hub-head-left">
+    <div id="subject-hub-title" class="subject-hub-title">Предмет</div>
+    <div id="subject-hub-meta" class="subject-hub-meta muted">Study / Competitive</div>
+  </div>
+</div>
+
+<!-- Credentials (inline progress hints) — filled by app.js -->
+<div id="subject-hub-credential-hints" class="panel-card subject-hub-panel" style="margin-top:12px">
+  <div class="panel-row">
+    <div class="panel-col">
+      <div class="panel-kicker">PROGRESS</div>
+
+      <div class="muted small">
+        <span id="hub-cred-focused-label">Focused streak</span>:
+        <span id="hub-cred-focused-value">—</span>
+      </div>
+
+      <div class="muted small" style="margin-top:6px">
+        <span id="hub-cred-practice-label">Practice mastery</span>:
+        <span id="hub-cred-practice-value">—</span>
+      </div>
     </div>
   </div>
+</div>
 
-  <div class="subject-hub-panels">
+<div class="subject-hub-panels">
   <div class="panel-card subject-hub-panel">
     <div class="panel-row">
       <div class="mentor-avatar" aria-hidden="true"></div>
@@ -903,18 +922,15 @@
 <div class="profile-section">
   <div class="profile-section-title" data-i18n="profile_earned_credentials">Earned Credentials</div>
 
-  <div class="profile-credentials-grid">
-    <div class="credential-card">
-      <div class="credential-ico">🏆</div>
-      <div class="credential-title">C1 Advanced Prep</div>
-      <div class="muted small">Verified: Oct 2023</div>
-    </div>
+  <!-- Filled by app.js (CORE 7 credentials). -->
+  <div id="profile-credentials-hints" class="muted small"></div>
 
-    <div class="credential-card">
-      <div class="credential-ico">🎖️</div>
-      <div class="credential-title">Grammar Mastery II</div>
-      <div class="muted small">Verified: Aug 2023</div>
-    </div>
+  <div id="profile-credentials-grid" class="profile-credentials-grid">
+    <!-- filled by app.js -->
+  </div>
+
+  <div id="profile-credentials-empty" class="empty muted" style="display:none">
+    <!-- filled by app.js (optional) -->
   </div>
 </div>
 
