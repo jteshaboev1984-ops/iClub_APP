@@ -1295,55 +1295,183 @@ function getReadingRefs(subjectKey, topic) {
     return "medium";
   }
 
-  function pickN(pool, n) {
-    const s = shuffle(pool);
-    return s.slice(0, Math.max(0, n));
+function pickN(pool, n) {
+  const s = shuffle(pool);
+  return s.slice(0, Math.max(0, n));
+}
+
+// --- helpers: options parsing + answer normalization ---
+function parseOptionsText(raw) {
+  if (raw === null || raw === undefined) return null;
+  if (Array.isArray(raw)) return raw.map(String);
+
+  const s = String(raw).trim();
+  if (!s) return null;
+
+  // try JSON first
+  try {
+    const parsed = JSON.parse(s);
+    if (Array.isArray(parsed)) return parsed.map(x => String(x));
+  } catch {}
+
+  // fallback: split lines / separators
+  if (s.includes("\n")) return s.split("\n").map(x => x.trim()).filter(Boolean);
+  if (s.includes("||")) return s.split("||").map(x => x.trim()).filter(Boolean);
+  if (s.includes("|")) return s.split("|").map(x => x.trim()).filter(Boolean);
+
+  return [s];
+}
+
+function isNumericLike(v) {
+  const s = String(v ?? "").trim().replace(",", ".");
+  return s !== "" && !Number.isNaN(Number(s));
+}
+
+// --- DB-first practice set builder ---
+async function buildPracticeSet(subjectKey) {
+  // If no Supabase — fallback to local bank (old behavior)
+  if (!window.sb) return buildPracticeSetLocal(subjectKey);
+
+  const uid = await getAuthUid();
+  if (!uid) return buildPracticeSetLocal(subjectKey);
+
+  const subjectId = await getSubjectIdByKey(subjectKey);
+  if (!subjectId) {
+    await logDbErrorToEvents(uid, "subject_lookup", { message: "subject_id not found" }, { subject_key: subjectKey });
+    return buildPracticeSetLocal(subjectKey);
   }
 
-    function buildPracticeSet(subjectKey) {
-    const bank = getPracticeBankForSubject(subjectKey).map(q => ({ ...q, difficulty: normalizeDifficulty(q.difficulty) }));
+  // Pull a pool of questions from DB for this subject
+  // Берём запас, чтобы гарантировать 3/5/2 и добивки
+  const { data, error } = await window.sb
+    .from("questions")
+    .select("id, topic, difficulty, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active")
+    .eq("subject_id", subjectId)
+    .eq("is_active", true)
+    .limit(200);
 
-    // группируем по сложности
-    const by = {
-      easy: bank.filter(q => q.difficulty === "easy"),
-      medium: bank.filter(q => q.difficulty === "medium"),
-      hard: bank.filter(q => q.difficulty === "hard")
+  if (error) {
+    await logDbErrorToEvents(uid, "practice_questions_select", error, { subject_id: subjectId, subject_key: subjectKey });
+    return buildPracticeSetLocal(subjectKey);
+  }
+
+  const poolRaw = Array.isArray(data) ? data : [];
+  if (!poolRaw.length) return buildPracticeSetLocal(subjectKey);
+
+  const normalizeDiff = (d) => normalizeDifficulty(d || "easy");
+  const normalizeType = (t) => (String(t || "mcq").toLowerCase() === "input" ? "input" : "mcq");
+
+  const pool = poolRaw.map(r => {
+    const type = normalizeType(r.qtype);
+    const opts = type === "mcq" ? (parseOptionsText(r.options_text) || []) : null;
+
+    // correctIndex for MCQ:
+    // support: "2" (index), "B" (A/B/C/D), or exact option text
+    let correctIndex = 0;
+    if (type === "mcq") {
+      const ca = String(r.correct_answer ?? "").trim();
+      const asInt = Number(ca);
+      if (!Number.isNaN(asInt) && Number.isFinite(asInt)) {
+        correctIndex = asInt;
+      } else if (/^[A-D]$/i.test(ca)) {
+        correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
+      } else if (opts && opts.length) {
+        const idx = opts.findIndex(x => String(x).trim().toLowerCase() === ca.toLowerCase());
+        if (idx >= 0) correctIndex = idx;
+      }
+      if (!Number.isFinite(correctIndex) || correctIndex < 0) correctIndex = 0;
+    }
+
+    const correctAnswer = type === "input" ? String(r.correct_answer ?? "").trim() : "";
+
+    return {
+      id: Number(r.id),                // ✅ важно: numeric question_id
+      topic: r.topic || "General",
+      difficulty: normalizeDiff(r.difficulty),
+      type,
+      question: r.question_text || "",
+      options: opts || [],
+      correctIndex,
+      correctAnswer,
+      explanation: r.explanation || "",
+      imageUrl: r.image_url || null,
+      inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
+      inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
     };
+  }).filter(q => Number.isFinite(q.id));
 
-    // если банк пустой — делаем fallback (чтобы практика не падала)
-    if (bank.length === 0) {
-      return Array.from({ length: PRACTICE_CONFIG.total }).map((_, i) => ({
-        id: `fallback_${subjectKey}_${i + 1}`,
-        topic: "General",
-        difficulty: i < 3 ? "easy" : (i < 8 ? "medium" : "hard"),
-        type: "mcq",
-        question: `Вопрос ${i + 1} (demo)`,
-        options: ["A", "B", "C", "D"],
-        correctIndex: 0,
-        explanation: "Демо-вопрос. Позже заменим на банк/базу."
-      }));
-    }
+  if (!pool.length) return buildPracticeSetLocal(subjectKey);
 
-    const set = [
-      ...pickN(by.easy.length ? by.easy : bank, PRACTICE_CONFIG.dist.easy),
-      ...pickN(by.medium.length ? by.medium : bank, PRACTICE_CONFIG.dist.medium),
-      ...pickN(by.hard.length ? by.hard : bank, PRACTICE_CONFIG.dist.hard)
-    ];
+  // группируем по сложности
+  const by = {
+    easy: pool.filter(q => q.difficulty === "easy"),
+    medium: pool.filter(q => q.difficulty === "medium"),
+    hard: pool.filter(q => q.difficulty === "hard")
+  };
 
-    // если вдруг не набрали 10 — добиваем из общего банка
-    const need = PRACTICE_CONFIG.total - set.length;
-    if (need > 0) {
-      const used = new Set(set.map(x => x.id));
-      const rest = bank.filter(x => !used.has(x.id));
-      set.push(...pickN(rest.length ? rest : bank, need));
-    }
+  const set = [
+    ...pickN(by.easy.length ? by.easy : pool, PRACTICE_CONFIG.dist.easy),
+    ...pickN(by.medium.length ? by.medium : pool, PRACTICE_CONFIG.dist.medium),
+    ...pickN(by.hard.length ? by.hard : pool, PRACTICE_CONFIG.dist.hard)
+  ];
 
-    // “лесенка” сложности: easy -> medium -> hard
-    const order = { easy: 1, medium: 2, hard: 3 };
-    set.sort((a, b) => (order[a.difficulty] - order[b.difficulty]));
-
-    return set.slice(0, PRACTICE_CONFIG.total);
+  // добивка до 10
+  const need = PRACTICE_CONFIG.total - set.length;
+  if (need > 0) {
+    const used = new Set(set.map(x => x.id));
+    const rest = pool.filter(x => !used.has(x.id));
+    set.push(...pickN(rest.length ? rest : pool, need));
   }
+
+  // “лесенка” сложности: easy -> medium -> hard
+  const order = { easy: 1, medium: 2, hard: 3 };
+  set.sort((a, b) => (order[a.difficulty] - order[b.difficulty]));
+
+  return set.slice(0, PRACTICE_CONFIG.total);
+}
+
+// --- old local implementation (your previous buildPracticeSet) ---
+// IMPORTANT: сюда вставь твой ПРЕДЫДУЩИЙ buildPracticeSet(...) целиком, только переименуй в buildPracticeSetLocal
+function buildPracticeSetLocal(subjectKey) {
+  const bank = getPracticeBankForSubject(subjectKey).map(q => ({ ...q, difficulty: normalizeDifficulty(q.difficulty) }));
+
+  const by = {
+    easy: bank.filter(q => q.difficulty === "easy"),
+    medium: bank.filter(q => q.difficulty === "medium"),
+    hard: bank.filter(q => q.difficulty === "hard")
+  };
+
+  if (bank.length === 0) {
+    return Array.from({ length: PRACTICE_CONFIG.total }).map((_, i) => ({
+      id: `fallback_${subjectKey}_${i + 1}`,
+      topic: "General",
+      difficulty: i < 3 ? "easy" : (i < 8 ? "medium" : "hard"),
+      type: "mcq",
+      question: `Вопрос ${i + 1} (demo)`,
+      options: ["A", "B", "C", "D"],
+      correctIndex: 0,
+      explanation: "Демо-вопрос. Позже заменим на банк/базу."
+    }));
+  }
+
+  const set = [
+    ...pickN(by.easy.length ? by.easy : bank, PRACTICE_CONFIG.dist.easy),
+    ...pickN(by.medium.length ? by.medium : bank, PRACTICE_CONFIG.dist.medium),
+    ...pickN(by.hard.length ? by.hard : bank, PRACTICE_CONFIG.dist.hard)
+  ];
+
+  const need = PRACTICE_CONFIG.total - set.length;
+  if (need > 0) {
+    const used = new Set(set.map(x => x.id));
+    const rest = bank.filter(x => !used.has(x.id));
+    set.push(...pickN(rest.length ? rest : bank, need));
+  }
+
+  const order = { easy: 1, medium: 2, hard: 3 };
+  set.sort((a, b) => (order[a.difficulty] - order[b.difficulty]));
+
+  return set.slice(0, PRACTICE_CONFIG.total);
+}
 
   function practiceStorageKey(subjectKey) {
     return `practice_history_v1:${subjectKey}`;
@@ -4326,36 +4454,35 @@ function addMyRecsFromAttempt(attempt) {
   }
 }
 
-  function startPracticeNew() {
-    const subjectKey = state.courses.subjectKey;
-    const questions = buildPracticeSet(subjectKey);
+async function startPracticeNew() {
+  const subjectKey = state.courses.subjectKey;
 
-    state.quizLock = "practice";
-    state.quiz = {
-      mode: "practice",
-      subjectKey,
-      startedAt: Date.now(),
-      paused: false,
-      pauseStartedAt: null,
-      pausedTotalMs: 0,
+  // DB-first questions (may fallback to local automatically)
+  const questions = await buildPracticeSet(subjectKey);
 
-      index: 0,
-      questions,
-      // user answers:
-      // mcq -> number (selected index), input -> string
-      answers: Array.from({ length: questions.length }).map(() => null),
-      correct: Array.from({ length: questions.length }).map(() => false),
+  state.quizLock = "practice";
+  state.quiz = {
+    mode: "practice",
+    subjectKey,
+    startedAt: Date.now(),
+    paused: false,
+    pauseStartedAt: null,
+    pausedTotalMs: 0,
 
-      // time per question
-      qTimeLeft: PRACTICE_CONFIG.timeByDifficulty[questions[0].difficulty] || 60,
-      qTimerId: null
-    };
+    index: 0,
+    questions,
+    answers: Array.from({ length: questions.length }).map(() => null),
+    correct: Array.from({ length: questions.length }).map(() => false),
 
-    saveState();
-    replaceCourses("practice-quiz");
-    renderPracticeQuiz();
-    startPracticeQuestionTimer();
-  }
+    qTimeLeft: PRACTICE_CONFIG.timeByDifficulty[questions[0]?.difficulty] || 60,
+    qTimerId: null
+  };
+
+  saveState();
+  replaceCourses("practice-quiz");
+  renderPracticeQuiz();
+  startPracticeQuestionTimer();
+}
 
   // ---- Rendering question (MCQ or INPUT) ----
   function renderPracticeQuiz() {
