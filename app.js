@@ -1989,6 +1989,32 @@ async function getAuthUid() {
   }
 }
 
+// ---------------------------
+// Supabase helpers (Practice DB-first)
+// ---------------------------
+const _subjectIdByKeyCache = new Map();
+
+async function getSubjectIdByKey(subjectKey) {
+  const key = String(subjectKey || "").trim();
+  if (!key) return null;
+
+  if (_subjectIdByKeyCache.has(key)) return _subjectIdByKeyCache.get(key);
+
+  if (!window.sb) return null;
+
+  const { data, error } = await window.sb
+    .from("subjects")
+    .select("id,subject_key")
+    .eq("subject_key", key)
+    .maybeSingle();
+
+  if (error) return null;
+
+  const id = data?.id ? Number(data.id) : null;
+  _subjectIdByKeyCache.set(key, id);
+  return id;
+}
+
 async function getMyUserRow(uid) {
   if (!uid) return null;
   const { data, error } = await window.sb
@@ -4475,15 +4501,82 @@ function addMyRecsFromAttempt(attempt) {
     const attempt_key = String(attempt.ts || finishedAt);
 
     const ev = trackEvent("practice_attempt_finished", {
-      subject_id,
-      score: attempt.score,
-      percent: attempt.percent,
-      time_seconds: attempt.durationSec,
-      attempt_key
-    });
+  subject_id,
+  score: attempt.score,
+  percent: attempt.percent,
+  time_seconds: attempt.durationSec,
+  attempt_key
+});
 
-    // Practice Mastery — per subject
-    try { evaluatePracticeMasteryRealtime(subject_id, attempt.percent, ev && ev.id); } catch {}
+// ---------------------------
+// DB-first Practice (write practice_attempts + practice_answers)
+// ---------------------------
+(async () => {
+  try {
+    if (!window.sb) return;
+
+    const uid = await getAuthUid();
+    if (!uid) return;
+
+    const subjectId = await getSubjectIdByKey(quiz.subjectKey);
+    if (!subjectId) {
+      console.warn("[Practice][DB] subject_id not found for subject_key:", quiz.subjectKey);
+      return;
+    }
+
+    // 1) create attempt row
+    const { data: attRow, error: attErr } = await window.sb
+      .from("practice_attempts")
+      .insert({
+        user_id: uid,
+        subject_id: subjectId,
+        score: Number(attempt.score) || 0,
+        percent: Number(attempt.percent) || 0,
+        time_seconds: Number(attempt.durationSec) || 0
+      })
+      .select("id")
+      .single();
+
+    if (attErr) throw attErr;
+
+    const attemptId = attRow?.id ? Number(attRow.id) : null;
+    if (!attemptId) return;
+
+    // 2) create answers rows (best-effort)
+    const rows = (attempt.details || []).map((d, i) => {
+      // If user didn't answer: keep null/empty
+      const rawUA = quiz.answers?.[i];
+      const userAnswer =
+        rawUA === null || rawUA === undefined ? null : String(rawUA);
+
+      return {
+        attempt_id: attemptId,
+        question_id: Number(d.id),
+        user_answer: userAnswer,
+        is_correct: !!d.isCorrect,
+        time_spent: 0
+      };
+    }).filter(r => Number.isFinite(r.question_id));
+
+    if (rows.length) {
+      const { error: ansErr } = await window.sb
+        .from("practice_answers")
+        .insert(rows);
+
+      if (ansErr) throw ansErr;
+    }
+
+    // store for UI/debug (optional, harmless)
+    state.practiceLastAttempt = { ...state.practiceLastAttempt, db_attempt_id: attemptId };
+
+  } catch (e) {
+    console.error("[Practice][DB] save failed:", e);
+    // do not break UX; DB can be fixed without blocking practice
+  }
+})();
+
+// Practice Mastery — per subject
+try { evaluatePracticeMasteryRealtime(subject_id, attempt.percent, ev && ev.id); } catch {}
 
     // Error-Driven — build topic error counts from attempt.details
     const topicErrors = {};
