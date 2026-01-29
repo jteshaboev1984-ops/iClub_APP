@@ -1990,17 +1990,17 @@ async function getAuthUid() {
 }
 
 // ---------------------------
-// Supabase helpers (Practice DB-first)
+// Practice → Supabase (DB-first)
+// - Writes practice_attempts + practice_answers
+// - On failure writes practice_db_error into app_events
 // ---------------------------
 const _subjectIdByKeyCache = new Map();
 
 async function getSubjectIdByKey(subjectKey) {
   const key = String(subjectKey || "").trim();
-  if (!key) return null;
+  if (!key || !window.sb) return null;
 
   if (_subjectIdByKeyCache.has(key)) return _subjectIdByKeyCache.get(key);
-
-  if (!window.sb) return null;
 
   const { data, error } = await window.sb
     .from("subjects")
@@ -2013,6 +2013,102 @@ async function getSubjectIdByKey(subjectKey) {
   const id = data?.id ? Number(data.id) : null;
   _subjectIdByKeyCache.set(key, id);
   return id;
+}
+
+async function logDbErrorToEvents(uid, where, error, extraPayload = {}) {
+  try {
+    if (!window.sb || !uid) return;
+    await window.sb.from("app_events").insert({
+      user_id: uid,
+      event_type: "practice_db_error",
+      payload: {
+        where: String(where || "unknown"),
+        message: String(error?.message || error || "unknown"),
+        code: error?.code || null,
+        details: error?.details || null,
+        hint: error?.hint || null,
+        ...extraPayload
+      }
+    });
+  } catch {}
+}
+
+async function savePracticeAttemptToSupabase(attempt, quiz) {
+  if (!window.sb) return { ok: false, reason: "no_sb" };
+
+  const uid = await getAuthUid();
+  if (!uid) return { ok: false, reason: "no_uid" };
+
+  const subjectId = await getSubjectIdByKey(quiz?.subjectKey);
+  if (!subjectId) {
+    await logDbErrorToEvents(uid, "subject_lookup", { message: "subject_id not found" }, { subject_key: quiz?.subjectKey });
+    return { ok: false, reason: "no_subject_id" };
+  }
+
+  // 1) insert attempt (WITHOUT .select() to avoid “select permission” pitfalls)
+  const insertAttemptPayload = {
+    user_id: uid,
+    subject_id: subjectId,
+    score: Number(attempt?.score) || 0,
+    percent: Number(attempt?.percent) || 0,
+    time_seconds: Number(attempt?.durationSec) || 0
+  };
+
+  const { error: insErr } = await window.sb
+    .from("practice_attempts")
+    .insert(insertAttemptPayload);
+
+  if (insErr) {
+    await logDbErrorToEvents(uid, "attempt_insert", insErr, { subject_id: subjectId });
+    return { ok: false, reason: "attempt_insert_failed" };
+  }
+
+  // 2) fetch the just-inserted attempt id (latest for this user+subject)
+  const { data: lastRow, error: selErr } = await window.sb
+    .from("practice_attempts")
+    .select("id,created_at")
+    .eq("user_id", uid)
+    .eq("subject_id", subjectId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (selErr || !lastRow?.id) {
+    await logDbErrorToEvents(uid, "attempt_select_latest", selErr || { message: "no_attempt_row" }, { subject_id: subjectId });
+    return { ok: false, reason: "attempt_select_failed" };
+  }
+
+  const attemptId = Number(lastRow.id);
+
+  // 3) insert answers (best-effort)
+  const details = Array.isArray(attempt?.details) ? attempt.details : [];
+  const answers = Array.isArray(quiz?.answers) ? quiz.answers : [];
+
+  const rows = details.map((d, i) => {
+    const rawUA = answers[i];
+    const userAnswer = (rawUA === null || rawUA === undefined) ? null : String(rawUA);
+
+    return {
+      attempt_id: attemptId,
+      question_id: Number(d?.id),
+      user_answer: userAnswer,
+      is_correct: !!d?.isCorrect,
+      time_spent: 0
+    };
+  }).filter(r => Number.isFinite(r.question_id));
+
+  if (rows.length) {
+    const { error: ansErr } = await window.sb
+      .from("practice_answers")
+      .insert(rows);
+
+    if (ansErr) {
+      await logDbErrorToEvents(uid, "answers_insert", ansErr, { attempt_id: attemptId, rows: rows.length });
+      return { ok: false, reason: "answers_insert_failed", attemptId };
+    }
+  }
+
+  return { ok: true, attemptId, subjectId };
 }
 
 async function getMyUserRow(uid) {
@@ -4494,7 +4590,7 @@ function addMyRecsFromAttempt(attempt) {
       details
     };
 
-         // ---------------------------
+    // ---------------------------
     // Earned Credentials — events + realtime evaluation
     // ---------------------------
     const subject_id = normSubjectId(attempt.subjectKey);
@@ -4508,75 +4604,23 @@ function addMyRecsFromAttempt(attempt) {
   attempt_key
 });
 
-// ---------------------------
-// DB-first Practice (write practice_attempts + practice_answers)
-// ---------------------------
+// ✅ DB-first: save attempt + answers to Supabase (non-blocking UX)
 (async () => {
   try {
-    if (!window.sb) return;
-
-    const uid = await getAuthUid();
-    if (!uid) return;
-
-    const subjectId = await getSubjectIdByKey(quiz.subjectKey);
-    if (!subjectId) {
-      console.warn("[Practice][DB] subject_id not found for subject_key:", quiz.subjectKey);
-      return;
-    }
-
-    // 1) create attempt row
-    const { data: attRow, error: attErr } = await window.sb
-      .from("practice_attempts")
-      .insert({
-        user_id: uid,
-        subject_id: subjectId,
-        score: Number(attempt.score) || 0,
-        percent: Number(attempt.percent) || 0,
-        time_seconds: Number(attempt.durationSec) || 0
-      })
-      .select("id")
-      .single();
-
-    if (attErr) throw attErr;
-
-    const attemptId = attRow?.id ? Number(attRow.id) : null;
-    if (!attemptId) return;
-
-    // 2) create answers rows (best-effort)
-    const rows = (attempt.details || []).map((d, i) => {
-      // If user didn't answer: keep null/empty
-      const rawUA = quiz.answers?.[i];
-      const userAnswer =
-        rawUA === null || rawUA === undefined ? null : String(rawUA);
-
-      return {
-        attempt_id: attemptId,
-        question_id: Number(d.id),
-        user_answer: userAnswer,
-        is_correct: !!d.isCorrect,
-        time_spent: 0
-      };
-    }).filter(r => Number.isFinite(r.question_id));
-
-    if (rows.length) {
-      const { error: ansErr } = await window.sb
-        .from("practice_answers")
-        .insert(rows);
-
-      if (ansErr) throw ansErr;
-    }
-
-    // store for UI/debug (optional, harmless)
-    state.practiceLastAttempt = { ...state.practiceLastAttempt, db_attempt_id: attemptId };
-
+    const res = await savePracticeAttemptToSupabase(attempt, quiz);
+    // optionally keep for debug/UI
+    state.practiceLastAttempt = { ...(state.practiceLastAttempt || {}), db: res };
   } catch (e) {
-    console.error("[Practice][DB] save failed:", e);
-    // do not break UX; DB can be fixed without blocking practice
+    try {
+      const uid = await getAuthUid();
+      await logDbErrorToEvents(uid, "savePracticeAttemptToSupabase_crash", e);
+    } catch {}
   }
 })();
 
 // Practice Mastery — per subject
 try { evaluatePracticeMasteryRealtime(subject_id, attempt.percent, ev && ev.id); } catch {}
+
 
     // Error-Driven — build topic error counts from attempt.details
     const topicErrors = {};
