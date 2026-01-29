@@ -102,17 +102,20 @@
     };
 
     // upsert by primary key id
-        await sb.from("users").upsert(payload, { onConflict: "id" });
+    await sb.from("users").upsert(payload, { onConflict: "id" });
 
-            // ✅ smoke test: write event (confirms auth + RLS + insert)
-    await sb.from("app_events").insert({
-      user_id: u.id,
-      event_type: "boot",
-      payload: { has_tg: !!tg, ua: navigator.userAgent },
-    });
+// ✅ reset subject cache for this session (prevents poisoned null cache)
+try { _subjectIdByKeyCache.clear(); } catch {}
 
-    // ✅ Earned Credentials: hydrate local events store from Supabase (only if local empty)
-    try {
+// ✅ smoke test: write event (confirms auth + RLS + insert)
+await sb.from("app_events").insert({
+  user_id: u.id,
+  event_type: "boot",
+  payload: { has_tg: !!tg, ua: navigator.userAgent },
+});
+
+// ✅ Earned Credentials: hydrate local events store from Supabase (only if local empty)
+try {
   const changed = await hydrateLocalEventsFromSupabase(sb, u.id);
 
   // Always recalc after hydration attempt:
