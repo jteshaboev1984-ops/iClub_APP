@@ -2000,18 +2000,34 @@ async function getSubjectIdByKey(subjectKey) {
   const key = String(subjectKey || "").trim();
   if (!key || !window.sb) return null;
 
-  if (_subjectIdByKeyCache.has(key)) return _subjectIdByKeyCache.get(key);
+  // IMPORTANT: if cache holds a real number, return it.
+  // Do NOT cache null/undefined (it becomes a “poisoned cache”).
+  if (_subjectIdByKeyCache.has(key)) {
+    const cached = _subjectIdByKeyCache.get(key);
+    if (cached !== null && cached !== undefined) return cached;
+    // cached null → ignore and re-fetch
+  }
 
   const { data, error } = await window.sb
     .from("subjects")
-    .select("id,subject_key")
+    .select("id,subject_key,is_active")
     .eq("subject_key", key)
     .maybeSingle();
 
-  if (error) return null;
+  if (error) {
+    // log the real reason (RLS / permissions / network)
+    try {
+      const uid = await getAuthUid();
+      await logDbErrorToEvents(uid, "subject_lookup_select_error", error, { subject_key: key });
+    } catch {}
+    return null;
+  }
 
   const id = data?.id ? Number(data.id) : null;
-  _subjectIdByKeyCache.set(key, id);
+
+  // cache only when we have a real id
+  if (id) _subjectIdByKeyCache.set(key, id);
+
   return id;
 }
 
