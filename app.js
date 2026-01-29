@@ -2235,13 +2235,13 @@ async function savePracticeAttemptToSupabase(attempt, quiz) {
     const rawUA = answers[i];
     const userAnswer = (rawUA === null || rawUA === undefined) ? null : String(rawUA);
 
-    return {
-      attempt_id: attemptId,
-      question_id: Number(d?.id),
-      user_answer: userAnswer,
-      is_correct: !!d?.isCorrect,
-      time_spent: 0
-    };
+   return {
+     attempt_id: attemptId,
+     question_id: Number(d?.id),
+     user_answer: userAnswer,
+     is_correct: !!d?.isCorrect,
+     time_spent: Math.max(0, Math.round(Number(d?.timeSpent) || 0))
+   };
   }).filter(r => Number.isFinite(r.question_id));
 
   if (rows.length) {
@@ -4662,10 +4662,18 @@ async function startPracticeNew() {
       showToast(userAns ? t("toast_time_expired_answer_saved") : t("toast_time_expired_no_answer"));
     }
 
-    // Next question or finish
-    stopPracticeQuestionTimer();
+  // ---- time_spent per question (seconds) ----
+  // We store: time_allowed - time_left at the moment of submit/timeout.
+  const allowed = Number(PRACTICE_CONFIG.timeByDifficulty[q.difficulty]) || 60;
+  const left = Number(quiz.qTimeLeft) || 0;
 
-    const nextIndex = quiz.index + 1;
+  if (!Array.isArray(quiz.timeSpent)) quiz.timeSpent = new Array(quiz.questions.length).fill(0);
+  quiz.timeSpent[quiz.index] = Math.max(0, Math.min(allowed, allowed - left));
+
+  // Next question or finish
+  stopPracticeQuestionTimer();
+
+  const nextIndex = quiz.index + 1;
 
     if (nextIndex >= quiz.questions.length) {
       finishPractice();
@@ -4698,6 +4706,7 @@ async function startPracticeNew() {
     const percent = Math.round((score / total) * 100);
 
     // Build details for review/recs
+     if (!Array.isArray(quiz.timeSpent)) quiz.timeSpent = new Array(quiz.questions.length).fill(0);
     const details = quiz.questions.map((q, i) => {
       const ua = quiz.answers[i];
       let correctDisplay = "";
@@ -4713,18 +4722,19 @@ async function startPracticeNew() {
         userDisplay = String(ua ?? "").trim();
       }
 
-      return {
-        id: q.id,
-        topic: q.topic || "General",
-        difficulty: q.difficulty,
-        type: q.type,
-        question: q.question,
-        userAnswer: userDisplay,
-        correctAnswer: correctDisplay,
-        isCorrect: !!quiz.correct[i],
-        explanation: q.explanation || ""
-      };
-    });
+   return {
+     id: q.id,
+     topic: q.topic || "General",
+     difficulty: q.difficulty,
+     type: q.type,
+     question: q.question,
+     userAnswer: userDisplay,
+     correctAnswer: correctDisplay,
+     isCorrect: !!quiz.correct[i],
+     timeSpent: Number(quiz.timeSpent[i]) || 0,
+     explanation: q.explanation || ""
+   };
+ });
 
     const attempt = {
       ts: finishedAt,
