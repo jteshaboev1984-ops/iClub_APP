@@ -4606,21 +4606,52 @@ function addMyRecsFromAttempt(attempt) {
 
 // ✅ DB-first: save attempt + answers to Supabase (non-blocking UX)
 (async () => {
+  // DEBUG 1: we entered DB save branch
+  try {
+    trackEvent("practice_db_save_started", {
+      subject_key: quiz?.subjectKey || null,
+      attempt_key,
+      score: attempt?.score ?? null,
+      percent: attempt?.percent ?? null
+    });
+  } catch {}
+
   try {
     const res = await savePracticeAttemptToSupabase(attempt, quiz);
-    // optionally keep for debug/UI
+
+    // DEBUG 2: DB save result
+    try {
+      trackEvent("practice_db_save_result", {
+        ok: !!res?.ok,
+        reason: res?.reason || null,
+        attempt_id: res?.attemptId ?? null,
+        subject_id_db: res?.subjectId ?? null,
+        subject_key: quiz?.subjectKey || null,
+        attempt_key
+      });
+    } catch {}
+
     state.practiceLastAttempt = { ...(state.practiceLastAttempt || {}), db: res };
+
   } catch (e) {
+    // DEBUG 3: crash (must show in app_events no matter what)
+    try {
+      trackEvent("practice_db_save_crash", {
+        message: String(e?.message || e || "unknown"),
+        subject_key: quiz?.subjectKey || null,
+        attempt_key
+      });
+    } catch {}
+
     try {
       const uid = await getAuthUid();
-      await logDbErrorToEvents(uid, "savePracticeAttemptToSupabase_crash", e);
+      await logDbErrorToEvents(uid, "savePracticeAttemptToSupabase_crash", e, { attempt_key, subject_key: quiz?.subjectKey || null });
     } catch {}
   }
 })();
 
 // Practice Mastery — per subject
 try { evaluatePracticeMasteryRealtime(subject_id, attempt.percent, ev && ev.id); } catch {}
-
 
     // Error-Driven — build topic error counts from attempt.details
     const topicErrors = {};
