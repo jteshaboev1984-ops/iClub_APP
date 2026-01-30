@@ -2119,6 +2119,46 @@ async function getAuthUid() {
     return null;
   }
 }
+async function syncUserSubjectToSupabase(subjectKey, mode, isPinned) {
+  if (!window.sb) return { ok: false, reason: "no_sb" };
+
+  const uid = await getAuthUid();
+  if (!uid) return { ok: false, reason: "no_uid" };
+
+  const subjectId = await getSubjectIdByKey(subjectKey);
+  if (!subjectId) {
+    try { await logDbErrorToEvents(uid, "subject_lookup", { message: "subject_id not found" }, { subject_key: subjectKey }); } catch {}
+    return { ok: false, reason: "no_subject_id" };
+  }
+
+  const payload = {
+    user_id: uid,
+    subject_id: subjectId,
+    mode: (mode === "competitive") ? "competitive" : "study",
+    is_pinned: !!isPinned
+  };
+
+  // 1) Prefer UPSERT (requires unique constraint on (user_id, subject_id))
+  let { error } = await window.sb
+    .from("user_subjects")
+    .upsert(payload, { onConflict: "user_id,subject_id" });
+
+  // 2) Fallback: UPDATE (if upsert fails for any reason)
+  if (error) {
+    const { error: updErr } = await window.sb
+      .from("user_subjects")
+      .update({ mode: payload.mode, is_pinned: payload.is_pinned })
+      .eq("user_id", uid)
+      .eq("subject_id", subjectId);
+
+    if (!updErr) return { ok: true, uid, subjectId, method: "update" };
+
+    try { await logDbErrorToEvents(uid, "user_subjects_save", updErr, { subject_id: subjectId, subject_key: subjectKey }); } catch {}
+    return { ok: false, reason: "user_subjects_save_failed" };
+  }
+
+  return { ok: true, uid, subjectId, method: "upsert" };
+}
 
 // ---------------------------
 // Stage B (DB-backed registration)
@@ -3321,6 +3361,29 @@ mainSubjects.forEach(subj => {
 
     fresh.subjects = next;
     saveProfile(fresh);
+     // ✅ DB-backed user_subjects sync (non-blocking)
+(async () => {
+  try {
+    const us = Array.isArray(fresh?.subjects) ? fresh.subjects.find(s => s.key === subj.key) : null;
+    const mode = us?.mode || "study";
+    const pinned = !!us?.pinned;
+
+    try {
+      trackEvent("user_subjects_save_started", { subject_key: subj.key, mode, is_pinned: pinned });
+    } catch {}
+
+    const res = await syncUserSubjectToSupabase(subj.key, mode, pinned);
+
+    try {
+      trackEvent("user_subjects_save_result", {
+        ok: !!res?.ok,
+        reason: res?.reason || null,
+        method: res?.method || null,
+        subject_key: subj.key
+      });
+    } catch {}
+  } catch {}
+})();
 
     renderHome();
     if (state.tab === "courses") {
@@ -3432,6 +3495,30 @@ input?.addEventListener("change", () => {
 
   const updated = togglePinnedSubject(fresh, subj.key);
   saveProfile(updated);
+
+  // ✅ DB-backed user_subjects sync (non-blocking)
+  (async () => {
+    try {
+      const us = Array.isArray(updated?.subjects) ? updated.subjects.find(s => s.key === subj.key) : null;
+      const mode = us?.mode || "study";
+      const pinned = !!us?.pinned;
+
+      try {
+        trackEvent("user_subjects_save_started", { subject_key: subj.key, mode, is_pinned: pinned });
+      } catch {}
+
+      const res = await syncUserSubjectToSupabase(subj.key, mode, pinned);
+
+      try {
+        trackEvent("user_subjects_save_result", {
+          ok: !!res?.ok,
+          reason: res?.reason || null,
+          method: res?.method || null,
+          subject_key: subj.key
+        });
+      } catch {}
+    } catch {}
+  })();
 
   renderHome();
   if (state.tab === "courses") renderAllSubjects();
