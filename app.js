@@ -5174,14 +5174,16 @@ function renderPracticeReview() {
 
   // DB-first: mastery + focus streak
   const masteryEl =
-    $("#practice-mastery") ||
-    $("#practice-mastery-value") ||
-    $("#practice-master");
+  $("#hub-cred-practice-value") ||
+  $("#practice-mastery") ||
+  $("#practice-mastery-value") ||
+  $("#practice-master");
 
-  const streakEl =
-    $("#practice-focus-streak") ||
-    $("#practice-streak") ||
-    $("#practice-focus");
+const streakEl =
+  $("#hub-cred-focused-value") ||
+  $("#practice-focus-streak") ||
+  $("#practice-streak") ||
+  $("#practice-focus");
 
   // If UI elements not present on this screen, do nothing
   if (!masteryEl && !streakEl) return;
