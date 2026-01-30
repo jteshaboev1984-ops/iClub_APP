@@ -2225,11 +2225,14 @@ async function saveRegistrationToSupabase(profile) {
     const subjectId = await getSubjectIdByKey(key);
     if (!subjectId) continue;
 
-    rows.push({
+    const mode = (s?.mode === "competitive") ? "competitive" : "study";
+
+      rows.push({
       user_id: uid,
       subject_id: subjectId,
-      mode: (s?.mode === "competitive") ? "competitive" : "study",
-      is_pinned: !!s?.pinned
+      mode,
+     // ❗ project rule: competitive subjects cannot be pinned
+      is_pinned: (mode === "competitive") ? false : !!s?.pinned
     });
   }
 
