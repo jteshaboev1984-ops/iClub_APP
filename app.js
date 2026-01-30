@@ -2179,6 +2179,82 @@ async function logDbErrorToEvents(uid, where, error, extraPayload = {}) {
     });
   } catch {}
 }
+async function saveRegistrationToSupabase(profile) {
+  if (!window.sb) return { ok: false, reason: "no_sb" };
+
+  const uid = await getAuthUid();
+  if (!uid) return { ok: false, reason: "no_uid" };
+
+  const p = profile || {};
+  const tgUser = p.telegram || {};
+
+  const userPayload = {
+    id: uid,
+    telegram_user_id: (tgUser.id != null ? String(tgUser.id) : null),
+    first_name: tgUser.first_name ?? null,
+    last_name: tgUser.last_name ?? null,
+    avatar_url: tgUser.photo_url ?? null,
+    language_code: p.language ?? "ru",
+    is_school_student: !!p.is_school_student,
+    region: p.region ?? null,
+    district: p.district ?? null,
+    school: p.is_school_student ? (p.school || null) : null,
+    class: p.is_school_student ? (p.class || null) : null
+  };
+
+  // 1) upsert users by id (auth.uid) — avoids duplicates
+  const { error: upErr } = await window.sb
+    .from("users")
+    .upsert(userPayload, { onConflict: "id" });
+
+  if (upErr) {
+    try { await logDbErrorToEvents(uid, "registration_users_upsert", upErr, { has_profile: !!profile }); } catch {}
+    return { ok: false, reason: "users_upsert_failed" };
+  }
+
+  // 2) sync user_subjects (best-effort)
+  const subjects = Array.isArray(p.subjects) ? p.subjects : [];
+  const chosen = subjects
+    .map(s => ({
+      key: String(s?.key || "").trim(),
+      mode: (s?.mode === "competitive") ? "competitive" : "study",
+      is_pinned: !!s?.pinned
+    }))
+    .filter(s => !!s.key);
+
+  if (!chosen.length) return { ok: true, uid, subjects_saved: 0 };
+
+  // clear old selection to prevent duplicates on re-registration
+  try { await window.sb.from("user_subjects").delete().eq("user_id", uid); } catch {}
+
+  const rows = [];
+  for (const s of chosen) {
+    const sid = await getSubjectIdByKey(s.key);
+    if (!sid) {
+      try { await logDbErrorToEvents(uid, "registration_subject_lookup", { message: "subject_id not found" }, { subject_key: s.key }); } catch {}
+      continue;
+    }
+    rows.push({
+      user_id: uid,
+      subject_id: sid,
+      mode: s.mode,
+      is_pinned: s.is_pinned
+    });
+  }
+
+  if (!rows.length) return { ok: true, uid, subjects_saved: 0 };
+
+  const { error: insErr } = await window.sb
+    .from("user_subjects")
+    .insert(rows);
+
+  if (insErr) {
+    try { await logDbErrorToEvents(uid, "registration_user_subjects_insert", insErr, { rows: rows.length }); } catch {}
+    return { ok: false, reason: "user_subjects_insert_failed" };
+  }
+
+  return { ok: true, uid, subjects_saved: rows.length };
+}
 
 async function savePracticeAttemptToSupabase(attempt, quiz) {
   if (!window.sb) return { ok: false, reason: "no_sb" };
@@ -5789,122 +5865,154 @@ if (state.tab === "profile") {
     const form = $("#reg-form");
     if (!form) return;
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+    form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-      const fullName = $("#reg-fullname")?.value?.trim() || "";
-      const lang = $("#reg-language")?.value || "ru";
+  const submitBtn = form.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.disabled = true;
 
-      let region = "";
-      let district = "";
+  try {
+    const fullName = $("#reg-fullname")?.value?.trim() || "";
+    const lang = $("#reg-language")?.value || "ru";
 
-      const regionEl = $("#reg-region");
-      const districtEl = $("#reg-district");
+    let region = "";
+    let district = "";
 
-      if (regionEl && regionEl.value) {
-        const regionOpt = regionEl.options[regionEl.selectedIndex];
-        region = regionOpt ? regionOpt.textContent.trim() : "";
+    const regionEl = $("#reg-region");
+    const districtEl = $("#reg-district");
+
+    if (regionEl && regionEl.value) {
+      const regionOpt = regionEl.options[regionEl.selectedIndex];
+      region = regionOpt ? regionOpt.textContent.trim() : "";
+    }
+
+    if (districtEl && districtEl.value) {
+      const districtOpt = districtEl.options[districtEl.selectedIndex];
+      district = districtOpt ? districtOpt.textContent.trim() : "";
+    }
+
+    const isSchoolStudent = ($("#reg-is-school-toggle")?.checked || $("#reg-is-school")?.value === "yes");
+    const school = $("#reg-school")?.value?.trim() || "";
+    const klass = $("#reg-class")?.value?.trim() || "";
+
+    const main1 = $("#reg-main-subject-1")?.value || "";
+    const main2 = $("#reg-main-subject-2")?.value || "";
+    const add1 = $("#reg-additional-subject")?.value || "";
+
+    // district required ONLY when select is enabled and has real options
+    const districtRequired =
+      !!districtEl &&
+      !districtEl.disabled &&
+      (districtEl.options?.length || 0) > 1;
+
+    if (!fullName || !region || (districtRequired && !district) || (isSchoolStudent && !main1)) {
+      showToast(t("fill_required_fields"));
+      return;
+    }
+
+    const subjects = [];
+
+    if (isSchoolStudent) {
+      subjects.push({
+        key: main1,
+        mode: "competitive",
+        pinned: false
+      });
+
+      if (main2) {
+        subjects.push({
+          key: main2,
+          mode: "competitive",
+          pinned: false
+        });
       }
 
-      if (districtEl && districtEl.value) {
-        const districtOpt = districtEl.options[districtEl.selectedIndex];
-        district = districtOpt ? districtOpt.textContent.trim() : "";
+      if (add1) {
+        subjects.push({
+          key: add1,
+          mode: "study",
+          pinned: true
+        });
       }
+    } else {
+      // Non-school users: no subjects during registration.
+      // They can study/practice all subjects without tours and manage subjects later in Profile.
+    }
 
-      const isSchoolStudent = ($("#reg-is-school-toggle")?.checked || $("#reg-is-school")?.value === "yes");
-      const school = $("#reg-school")?.value?.trim() || "";
-      const klass = $("#reg-class")?.value?.trim() || "";
+    if (subjects.filter(s => s.mode === "competitive").length > 2) {
+      showToast(t("competitive_subjects_limit_2"));
+      return;
+    }
 
-      const main1 = $("#reg-main-subject-1")?.value || "";
-      const main2 = $("#reg-main-subject-2")?.value || "";
-      const add1 = $("#reg-additional-subject")?.value || "";
+    const tgUser = tg?.initDataUnsafe?.user || {};
+    const avatar = tgUser?.photo_url || "";
 
-      // district required ONLY when select is enabled and has real options
-      const districtRequired =
-        !!districtEl &&
-        !districtEl.disabled &&
-        (districtEl.options?.length || 0) > 1;
+    const profile = {
+      created_at: nowISO(),
+      full_name: fullName,
+      language: lang,
+      is_school_student: isSchoolStudent,
+      region,
+      district,
+      school: isSchoolStudent ? school : "",
+      class: isSchoolStudent ? klass : "",
+      telegram: {
+        id: tgUser?.id || null,
+        username: tgUser?.username || null,
+        first_name: tgUser?.first_name || null,
+        last_name: tgUser?.last_name || null,
+        photo_url: avatar || null
+      },
+      subjects
+    };
 
-      if (!fullName || !region || (districtRequired && !district) || (isSchoolStudent && !main1)) {
-     showToast(t("fill_required_fields"));
-     return;
-   }
+    // ✅ Stage B: DB-backed registration (users + user_subjects)
+    try {
+      trackEvent("registration_db_save_started", {
+        is_school_student: !!profile.is_school_student,
+        subjects_count: Array.isArray(profile.subjects) ? profile.subjects.length : 0
+      });
+    } catch {}
 
-      const subjects = [];
+    const dbRes = await saveRegistrationToSupabase(profile);
 
-if (isSchoolStudent) {
-  subjects.push({
-  key: main1,
-  mode: isSchoolStudent ? "competitive" : "study",
-  pinned: isSchoolStudent ? false : true
-});
+    try {
+      trackEvent("registration_db_save_result", {
+        ok: !!dbRes?.ok,
+        reason: dbRes?.reason || null,
+        subjects_saved: dbRes?.subjects_saved ?? null
+      });
+    } catch {}
 
-if (main2) {
-  subjects.push({
-    key: main2,
-    mode: isSchoolStudent ? "competitive" : "study",
-    pinned: isSchoolStudent ? false : true
+    if (!dbRes?.ok) {
+      showToast("Не удалось сохранить регистрацию в базе. Попробуйте ещё раз.");
+      return;
+    }
+
+    // keep local profile as UX fallback (DB is source of truth now)
+    saveProfile(profile);
+
+    window.i18n?.setLang(lang);
+    applyStaticI18n();
+
+    state.tab = "home";
+    state.prevTab = "home";
+    state.viewStack = ["home"];
+    state.courses.stack = ["all-subjects"];
+    state.courses.subjectKey = null;
+    state.courses.lessonId = null;
+    state.courses.entryTab = "home";
+    state.quizLock = null;
+    saveState();
+
+    renderAllSubjects();
+    renderHome();
+    setTab("home");
+  } finally {
+       if (submitBtn) submitBtn.disabled = false;
+     }
   });
 }
-
-if (add1) {
-  subjects.push({
-    key: add1,
-    mode: "study",
-    pinned: true
-  });
-}
-} else {
-  // Non-school users: no subjects during registration.
-  // They can study/practice all subjects without tours and manage subjects later in Profile.
-}
-
-     if (subjects.filter(s => s.mode === "competitive").length > 2) {
-        showToast(t("competitive_subjects_limit_2"));
-        return;
-      }
-
-      const tgUser = tg?.initDataUnsafe?.user || {};
-      const avatar = tgUser?.photo_url || "";
-
-      const profile = {
-        created_at: nowISO(),
-        full_name: fullName,
-        language: lang,
-        is_school_student: isSchoolStudent,
-        region,
-        district,
-        school: isSchoolStudent ? school : "",
-        class: isSchoolStudent ? klass : "",
-        telegram: {
-          id: tgUser?.id || null,
-          username: tgUser?.username || null,
-          first_name: tgUser?.first_name || null,
-          last_name: tgUser?.last_name || null,
-          photo_url: avatar || null
-        },
-        subjects
-      };
-
-      saveProfile(profile);
-      window.i18n?.setLang(lang);
-      applyStaticI18n();
-
-      state.tab = "home";
-      state.prevTab = "home";
-      state.viewStack = ["home"];
-      state.courses.stack = ["all-subjects"];
-      state.courses.subjectKey = null;
-      state.courses.lessonId = null;
-      state.courses.entryTab = "home";
-      state.quizLock = null;
-      saveState();
-
-      renderAllSubjects();
-      renderHome();
-      setTab("home");
-    });
-  }
 
   function bindActions() {
     document.addEventListener("click", (e) => {
