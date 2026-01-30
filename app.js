@@ -2121,6 +2121,154 @@ async function getAuthUid() {
 }
 
 // ---------------------------
+// Stage B (DB-backed registration)
+// - Save registration fields into public.users
+// - Save selected subjects into public.user_subjects
+// - Optional: hydrate local profile from DB if missing
+// ---------------------------
+
+function getTelegramUserSafe() {
+  try {
+    const tg = window.Telegram?.WebApp;
+    return tg?.initDataUnsafe?.user || null;
+  } catch {
+    return null;
+  }
+}
+
+async function saveRegistrationToSupabase(profile) {
+  if (!window.sb) return { ok: false, reason: "no_sb" };
+
+  const uid = await getAuthUid();
+  if (!uid) return { ok: false, reason: "no_uid" };
+
+  const tgUser = getTelegramUserSafe() || {};
+  const avatar = tgUser?.photo_url || null;
+
+  // 1) update users row
+  const usersPayload = {
+    id: uid,
+    telegram_user_id: (tgUser?.id != null) ? String(tgUser.id) : null,
+    first_name: tgUser?.first_name || null,
+    last_name: tgUser?.last_name || null,
+    avatar_url: avatar,
+    language_code: profile?.language || tgUser?.language_code || "ru",
+    is_school_student: !!profile?.is_school_student,
+    region: profile?.region || null,
+    district: profile?.district || null,
+    school: profile?.school || null,
+    class: profile?.class || null
+  };
+
+  const { error: uErr } = await window.sb
+    .from("users")
+    .upsert(usersPayload, { onConflict: "id" });
+
+  if (uErr) {
+    try { trackEvent("registration_db_error", { where: "users_upsert", message: String(uErr?.message || uErr) }); } catch {}
+    return { ok: false, reason: "users_upsert_failed" };
+  }
+
+  // 2) upsert user_subjects rows
+  const subjects = Array.isArray(profile?.subjects) ? profile.subjects : [];
+  const rows = [];
+
+  for (const s of subjects) {
+    const key = String(s?.key || "").trim();
+    if (!key) continue;
+
+    const subjectId = await getSubjectIdByKey(key);
+    if (!subjectId) continue;
+
+    rows.push({
+      user_id: uid,
+      subject_id: subjectId,
+      mode: (s?.mode === "competitive") ? "competitive" : "study",
+      is_pinned: !!s?.pinned
+    });
+  }
+
+  if (rows.length) {
+    const { error: usErr } = await window.sb
+      .from("user_subjects")
+      .upsert(rows, { onConflict: "user_id,subject_id" });
+
+    if (usErr) {
+      // IMPORTANT: если нет уникального ограничения, upsert будет падать.
+      // Мы это логируем, но регистрацию не ломаем.
+      try {
+        trackEvent("registration_db_error", {
+          where: "user_subjects_upsert",
+          message: String(usErr?.message || usErr),
+          hint: "need_unique(user_id,subject_id)"
+        });
+      } catch {}
+      return { ok: false, reason: "user_subjects_upsert_failed_need_unique" };
+    }
+  }
+
+  return { ok: true, user_id: uid, user_subjects_rows: rows.length };
+}
+
+async function hydrateLocalProfileFromSupabaseIfMissing() {
+  if (loadProfile()) return { ok: true, skipped: true, reason: "local_profile_exists" };
+  if (!window.sb) return { ok: false, reason: "no_sb" };
+
+  const uid = await getAuthUid();
+  if (!uid) return { ok: false, reason: "no_uid" };
+
+  const me = await getMyUserRow(uid);
+  if (!me) return { ok: false, reason: "no_users_row" };
+
+  // Load user_subjects with subject_key (FK relationship expected)
+  let subjRows = [];
+  try {
+    const { data, error } = await window.sb
+      .from("user_subjects")
+      .select("mode,is_pinned, subjects(subject_key)")
+      .eq("user_id", uid);
+
+    if (!error && Array.isArray(data)) subjRows = data;
+  } catch {}
+
+  const subjects = subjRows
+    .map(r => {
+      const key = r?.subjects?.subject_key;
+      if (!key) return null;
+      return {
+        key,
+        mode: (r?.mode === "competitive") ? "competitive" : "study",
+        pinned: !!r?.is_pinned
+      };
+    })
+    .filter(Boolean);
+
+  const fullName = [me.first_name, me.last_name].filter(Boolean).join(" ").trim();
+
+  const profile = {
+    created_at: nowISO(),
+    full_name: fullName || "User",
+    language: me.language_code || "ru",
+    is_school_student: !!me.is_school_student,
+    region: me.region || "",
+    district: me.district || "",
+    school: me.school || "",
+    class: me.class || "",
+    telegram: {
+      id: null,
+      username: null,
+      first_name: me.first_name || null,
+      last_name: me.last_name || null,
+      photo_url: me.avatar_url || null
+    },
+    subjects
+  };
+
+  saveProfile(profile);
+  return { ok: true, hydrated: true, subjects: subjects.length };
+}
+
+// ---------------------------
 // Practice → Supabase (DB-first)
 // - Writes practice_attempts + practice_answers
 // - On failure writes practice_db_error into app_events
@@ -5990,10 +6138,27 @@ if (state.tab === "profile") {
     }
 
     // keep local profile as UX fallback (DB is source of truth now)
-    saveProfile(profile);
+          saveProfile(profile);
 
-    window.i18n?.setLang(lang);
-    applyStaticI18n();
+      // Stage B: write registration + subjects into Supabase (blocking is OK for registration)
+      (async () => {
+        try {
+          const res = await saveRegistrationToSupabase(profile);
+          try {
+            trackEvent("registration_db_saved", {
+              ok: !!res?.ok,
+              reason: res?.reason || null,
+              user_subjects_rows: res?.user_subjects_rows ?? null
+            });
+          } catch {}
+        } catch (e) {
+          try { trackEvent("registration_db_crash", { message: String(e?.message || e || "unknown") }); } catch {}
+        }
+      })();
+
+      window.i18n?.setLang(lang);
+      applyStaticI18n();
+
 
     state.tab = "home";
     state.prevTab = "home";
@@ -6511,7 +6676,10 @@ if (action === "tour-next" || action === "tour-submit") {
     // ✅ параллельно поднимаем Supabase-сессию (не блокируем UX)
     const supaReady = initSupabaseSession().catch(() => null);
 
-    Promise.all([preloadAppImages(), minDelay, supaReady]).then(() => {
+        Promise.all([preloadAppImages(), minDelay, supaReady]).then(async () => {
+      // Stage B: if local profile is missing, try hydrate from DB
+      try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
+
       if (!isRegistered()) {
         showView("registration");
         bindRegistration();
