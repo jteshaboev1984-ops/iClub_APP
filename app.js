@@ -2132,11 +2132,16 @@ async function syncUserSubjectToSupabase(subjectKey, mode, isPinned) {
   }
 
   const payload = {
-    user_id: uid,
-    subject_id: subjectId,
-    mode: (mode === "competitive") ? "competitive" : "study",
-    is_pinned: !!isPinned
-  };
+  user_id: uid,
+  subject_id: subjectId,
+  mode: (mode === "competitive") ? "competitive" : "study",
+  is_pinned: !!isPinned
+};
+
+// ✅ DB-guard: competitive subjects cannot be pinned (project rule)
+if (payload.mode === "competitive" && payload.is_pinned) {
+  payload.is_pinned = false;
+}
 
   // 1) Prefer UPSERT (requires unique constraint on (user_id, subject_id))
   let { error } = await window.sb
@@ -3492,6 +3497,20 @@ const input = row.querySelector('input[type="checkbox"]');
 input?.addEventListener("change", () => {
   const fresh = loadProfile();
   if (!fresh) return;
+
+  // ✅ UI-guard: cannot pin if mode=competitive (project rule)
+  const curr = Array.isArray(fresh?.subjects) ? fresh.subjects.find(s => s.key === subj.key) : null;
+  const currMode = curr?.mode || "study";
+  const currPinned = !!curr?.pinned;
+
+  // If user is trying to TURN ON pin while competitive → block & revert UI
+  const wantsPin = !currPinned; // because we toggle
+  if (wantsPin && currMode === "competitive") {
+    // revert toggle UI to OFF
+    try { input.checked = false; } catch {}
+    showToast(t("toast_pin_competitive_forbidden") || "Нельзя закрепить предмет в режиме Competitive");
+    return; // IMPORTANT: no local change, no DB write
+  }
 
   const updated = togglePinnedSubject(fresh, subj.key);
   saveProfile(updated);
