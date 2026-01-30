@@ -4760,6 +4760,9 @@ async function startPracticeNew() {
   attempt_key
 });
 
+// Keep last attempt in state for result/review/recs screens (DO NOT lose db info)
+state.practiceLastAttempt = { ...(attempt || {}), db: (state.practiceLastAttempt && state.practiceLastAttempt.db) ? state.practiceLastAttempt.db : null };
+
 // ✅ DB-first: save attempt + answers to Supabase (non-blocking UX)
 (async () => {
   // DEBUG 1: we entered DB save branch
@@ -4787,7 +4790,8 @@ async function startPracticeNew() {
       });
     } catch {}
 
-    state.practiceLastAttempt = { ...(state.practiceLastAttempt || {}), db: res };
+    // merge db result into current attempt without overwriting the attempt object
+    state.practiceLastAttempt = { ...(state.practiceLastAttempt || attempt || {}), db: res };
 
   } catch (e) {
     // DEBUG 3: crash (must show in app_events no matter what)
@@ -4805,24 +4809,6 @@ async function startPracticeNew() {
     } catch {}
   }
 })();
-
-// Practice Mastery — per subject
-try { evaluatePracticeMasteryRealtime(subject_id, attempt.percent, ev && ev.id); } catch {}
-
-    // Error-Driven — build topic error counts from attempt.details
-    const topicErrors = {};
-
-    (attempt.details || []).forEach(d => {
-      const topic = String(d.topic || "General");
-      if (!d.isCorrect) topicErrors[topic] = (Number(topicErrors[topic]) || 0) + 1;
-    });
-    onPracticeAttemptFinishedForErrorDriven(subject_id, topicErrors, attempt_key, ev?.id);
-
-    // Save best + last 5
-    const hx = updatePracticeHistory(quiz.subjectKey, attempt);
-
-    // Keep last attempt in state for result/review/recs screens
-    state.practiceLastAttempt = attempt;
 
     // Clear paused draft if any
     clearPracticeDraft();
@@ -4862,7 +4848,7 @@ replaceCourses("practice-result");
     syncPracticeResultBadges();
   }
 
-    function renderPracticeReview() {
+function renderPracticeReview() {
   const wrap = $("#practice-review-list");
   if (!wrap) return;
 
@@ -4876,104 +4862,222 @@ replaceCourses("practice-result");
     onPracticeReviewOpened(attempt_key, ev?.id);
   }
 
-  if (!attempt || !Array.isArray(attempt.details)) {
-    wrap.innerHTML = `<div class="empty muted">Нет данных для разбора. Сначала пройдите практику.</div>`;
-    return;
-  }
+  // Helper: render from "details" array in one place
+  const renderFromDetails = (details) => {
+    if (!Array.isArray(details) || !details.length) {
+      wrap.innerHTML = `<div class="empty muted">Нет данных для разбора. Сначала пройдите практику.</div>`;
+      return;
+    }
 
-  // Group by topic
-  const byTopic = new Map();
-  attempt.details.forEach((d, idx) => {
-    const topic = d.topic || "General";
-    if (!byTopic.has(topic)) byTopic.set(topic, []);
-    byTopic.get(topic).push({ ...d, _idx: idx });
-  });
-
-  // Sort topics: topics with more wrong first, then alphabetically
-  const topics = Array.from(byTopic.keys()).sort((a, b) => {
-    const wa = byTopic.get(a).filter(x => !x.isCorrect).length;
-    const wb = byTopic.get(b).filter(x => !x.isCorrect).length;
-    if (wb !== wa) return wb - wa;
-    return String(a).localeCompare(String(b));
-  });
-
-  wrap.innerHTML = "";
-
-  topics.forEach((topic, tIndex) => {
-    const items = byTopic.get(topic);
-    const wrongCount = items.filter(x => !x.isCorrect).length;
-    const totalCount = items.length;
-
-    const block = document.createElement("div");
-    block.className = "card";
-    block.style.marginBottom = "10px";
-
-    const head = document.createElement("button");
-    head.type = "button";
-    head.className = "btn";
-    head.style.width = "100%";
-    head.style.display = "flex";
-    head.style.justifyContent = "space-between";
-    head.style.alignItems = "center";
-    head.style.gap = "10px";
-    head.style.padding = "12px 12px";
-    head.style.borderRadius = "16px";
-
-    const left = document.createElement("div");
-    left.style.textAlign = "left";
-    left.innerHTML = `
-      <div style="font-weight:900">${escapeHTML(topic)}</div>
-      <div class="muted small">Вопросов: ${totalCount} • Ошибок: ${wrongCount}</div>
-    `;
-
-    const right = document.createElement("div");
-    right.className = "badge badge-pin";
-    right.textContent = wrongCount ? `❌ ${wrongCount}` : `✅ 0`;
-
-    head.appendChild(left);
-    head.appendChild(right);
-
-    const body = document.createElement("div");
-    body.style.marginTop = "10px";
-    body.style.display = (tIndex === 0) ? "block" : "none"; // первая тема раскрыта
-    body.dataset.open = (tIndex === 0) ? "1" : "0";
-
-    head.addEventListener("click", () => {
-      const open = body.dataset.open === "1";
-      body.dataset.open = open ? "0" : "1";
-      body.style.display = open ? "none" : "block";
+    // Group by topic
+    const byTopic = new Map();
+    details.forEach((d, idx) => {
+      const topic = d.topic || "General";
+      if (!byTopic.has(topic)) byTopic.set(topic, []);
+      byTopic.get(topic).push({ ...d, _idx: idx });
     });
 
-    // Render questions inside topic
-    items.forEach(d => {
-      const row = document.createElement("div");
-      row.className = "list-item";
-      row.style.marginBottom = "10px";
+    // Sort topics: topics with more wrong first, then alphabetically
+    const topics = Array.from(byTopic.keys()).sort((a, b) => {
+      const wa = byTopic.get(a).filter(x => !x.isCorrect).length;
+      const wb = byTopic.get(b).filter(x => !x.isCorrect).length;
+      if (wb !== wa) return wb - wa;
+      return String(a).localeCompare(String(b));
+    });
 
-      const status = d.isCorrect ? "✅" : "❌";
-      const n = d._idx + 1;
+    wrap.innerHTML = "";
 
-      row.innerHTML = `
-        <div style="font-weight:900">${status} ${n}. ${escapeHTML(d.difficulty)} • ${escapeHTML(d.type)}</div>
-        <div class="muted small" style="margin-top:6px">${escapeHTML(d.question || "")}</div>
+    topics.forEach((topic, tIndex) => {
+      const items = byTopic.get(topic);
+      const wrongCount = items.filter(x => !x.isCorrect).length;
+      const totalCount = items.length;
 
-        <div class="muted small" style="margin-top:8px">
-          Ваш ответ: <b>${escapeHTML(d.userAnswer || "—")}</b>
-        </div>
-        <div class="muted small">
-          Правильно: <b>${escapeHTML(d.correctAnswer || "—")}</b>
-        </div>
+      const block = document.createElement("div");
+      block.className = "card";
+      block.style.marginBottom = "10px";
 
-        ${d.explanation ? `<div class="muted small" style="margin-top:8px">${escapeHTML(d.explanation)}</div>` : ``}
+      const head = document.createElement("button");
+      head.type = "button";
+      head.className = "btn";
+      head.style.width = "100%";
+      head.style.display = "flex";
+      head.style.justifyContent = "space-between";
+      head.style.alignItems = "center";
+      head.style.gap = "10px";
+      head.style.padding = "12px 12px";
+      head.style.borderRadius = "16px";
+
+      const left = document.createElement("div");
+      left.style.textAlign = "left";
+      left.innerHTML = `
+        <div style="font-weight:900">${escapeHTML(topic)}</div>
+        <div class="muted small">Вопросов: ${totalCount} • Ошибок: ${wrongCount}</div>
       `;
 
-      body.appendChild(row);
-    });
+      const right = document.createElement("div");
+      right.className = "badge badge-pin";
+      right.textContent = wrongCount ? `❌ ${wrongCount}` : `✅ 0`;
 
-    block.appendChild(head);
-    block.appendChild(body);
-    wrap.appendChild(block);
-  });
+      head.appendChild(left);
+      head.appendChild(right);
+
+      const body = document.createElement("div");
+      body.style.marginTop = "10px";
+      body.style.display = (tIndex === 0) ? "block" : "none"; // первая тема раскрыта
+      body.dataset.open = (tIndex === 0) ? "1" : "0";
+
+      head.addEventListener("click", () => {
+        const open = body.dataset.open === "1";
+        body.dataset.open = open ? "0" : "1";
+        body.style.display = open ? "none" : "block";
+      });
+
+      // Render questions inside topic
+      items.forEach(d => {
+        const row = document.createElement("div");
+        row.className = "list-item";
+        row.style.marginBottom = "10px";
+
+        const status = d.isCorrect ? "✅" : "❌";
+        const n = d._idx + 1;
+
+        row.innerHTML = `
+          <div style="font-weight:900">${status} ${n}. ${escapeHTML(d.difficulty)} • ${escapeHTML(d.type)}</div>
+          <div class="muted small" style="margin-top:6px">${escapeHTML(d.question || "")}</div>
+
+          <div class="muted small" style="margin-top:8px">
+            Ваш ответ: <b>${escapeHTML(d.userAnswer || "—")}</b>
+          </div>
+          <div class="muted small">
+            Правильно: <b>${escapeHTML(d.correctAnswer || "—")}</b>
+          </div>
+
+          ${d.explanation ? `<div class="muted small" style="margin-top:8px">${escapeHTML(d.explanation)}</div>` : ``}
+        `;
+
+        body.appendChild(row);
+      });
+
+      block.appendChild(head);
+      block.appendChild(body);
+      wrap.appendChild(block);
+    });
+  };
+
+  // If we have DB attempt id -> DB-first review
+  const dbAttemptId = attempt?.db?.ok ? Number(attempt?.db?.attemptId) : null;
+
+  // First paint: loading
+  wrap.innerHTML = `<div class="empty muted">Загружаем разбор из базы…</div>`;
+
+  // DB-first flow (best-effort)
+  (async () => {
+    if (!window.sb || !dbAttemptId) {
+      // fallback to local
+      const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
+      renderFromDetails(localDetails);
+      return;
+    }
+
+    try {
+      const uid = await getAuthUid();
+      if (!uid) {
+        const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
+        renderFromDetails(localDetails);
+        return;
+      }
+
+      // 1) read answers for this attempt
+      const { data: ansRows, error: ansErr } = await window.sb
+        .from("practice_answers")
+        .select("question_id,user_answer,is_correct,time_spent,created_at")
+        .eq("attempt_id", dbAttemptId)
+        .order("id", { ascending: true });
+
+      if (ansErr) {
+        try { trackEvent("practice_review_db_error", { where: "answers_select", attempt_id: dbAttemptId }); } catch {}
+        await logDbErrorToEvents(uid, "practice_review_answers_select", ansErr, { attempt_id: dbAttemptId });
+        const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
+        renderFromDetails(localDetails);
+        return;
+      }
+
+      const ids = (ansRows || []).map(r => Number(r.question_id)).filter(n => Number.isFinite(n));
+      if (!ids.length) {
+        const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
+        renderFromDetails(localDetails);
+        return;
+      }
+
+      // 2) read questions
+      const { data: qRows, error: qErr } = await window.sb
+        .from("questions")
+        .select("id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url")
+        .in("id", ids)
+        .eq("is_active", true);
+
+      if (qErr) {
+        try { trackEvent("practice_review_db_error", { where: "questions_select", attempt_id: dbAttemptId }); } catch {}
+        await logDbErrorToEvents(uid, "practice_review_questions_select", qErr, { attempt_id: dbAttemptId, ids: ids.length });
+        const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
+        renderFromDetails(localDetails);
+        return;
+      }
+
+      const qMap = new Map((qRows || []).map(q => [Number(q.id), q]));
+
+      // 3) normalize into the same "details" shape UI expects
+      const details = (ansRows || []).map((a) => {
+        const q = qMap.get(Number(a.question_id)) || null;
+
+        let type = "mcq";
+        if (q?.qtype) type = String(q.qtype);
+
+        let difficulty = q?.difficulty ? String(q.difficulty) : "easy";
+
+        // options_text is stored as text (often JSON array string)
+        let options = null;
+        if (q && q.options_text) {
+          try {
+            const parsed = JSON.parse(q.options_text);
+            if (Array.isArray(parsed)) options = parsed.map(x => String(x));
+          } catch {}
+        }
+
+        // userAnswer: store as text, but for mcq your DB stores "0/1/2/3" or "A/B/C"
+        const ua = (a.user_answer === null || a.user_answer === undefined) ? "" : String(a.user_answer);
+
+        return {
+          id: Number(a.question_id),
+          topic: q?.topic || "General",
+          subtopic: q?.subtopic || null,
+          difficulty,
+          type,
+          question: q?.question_text || "",
+          options,
+          userAnswer: ua || "—",
+          correctAnswer: (q?.correct_answer === null || q?.correct_answer === undefined) ? "—" : String(q.correct_answer),
+          explanation: q?.explanation || "",
+          isCorrect: !!a.is_correct,
+          timeSpent: Number(a.time_spent) || 0
+        };
+      });
+
+      // 4) render DB-first
+      renderFromDetails(details);
+
+    } catch (e) {
+      // fallback
+      try { trackEvent("practice_review_db_crash", { message: String(e?.message || e || "unknown"), attempt_id: dbAttemptId || null }); } catch {}
+      try {
+        const uid = await getAuthUid();
+        await logDbErrorToEvents(uid, "practice_review_db_crash", e, { attempt_id: dbAttemptId || null });
+      } catch {}
+
+      const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
+      renderFromDetails(localDetails);
+    }
+  })();
 }
 
   function syncPracticeResultBadges() {
