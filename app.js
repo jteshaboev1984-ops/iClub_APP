@@ -2316,6 +2316,43 @@ async function hydrateLocalProfileFromSupabaseIfMissing() {
   return { ok: true, hydrated: true, subjects: subjects.length };
 }
 
+   async function syncUserSubjectsFromSupabaseIntoLocalProfile() {
+  if (!window.sb) return { ok: false, reason: "no_sb" };
+
+  const uid = await getAuthUid();
+  if (!uid) return { ok: false, reason: "no_uid" };
+
+  // Read user's subjects from DB (join subjects to get subject_key)
+  const { data, error } = await window.sb
+    .from("user_subjects")
+    .select("subject_id, mode, is_pinned, subjects(subject_key)")
+    .eq("user_id", uid);
+
+  if (error) {
+    try { await logDbErrorToEvents(uid, "user_subjects_select", error, {}); } catch {}
+    return { ok: false, reason: "select_failed" };
+  }
+
+  const list = (Array.isArray(data) ? data : [])
+    .map(r => ({
+      key: r?.subjects?.subject_key || null,
+      mode: r?.mode || "study",
+      pinned: !!r?.is_pinned
+    }))
+    .filter(x => !!x.key);
+
+  const profile = loadProfile();
+  if (!profile) {
+    // no local profile yet (registration may still be shown)
+    return { ok: true, applied: false, count: list.length };
+  }
+
+  profile.subjects = list;
+  saveProfile(profile);
+
+  return { ok: true, applied: true, count: list.length };
+}
+
 // ---------------------------
 // Practice → Supabase (DB-first)
 // - Writes practice_attempts + practice_answers
@@ -6788,6 +6825,9 @@ if (action === "tour-next" || action === "tour-submit") {
         Promise.all([preloadAppImages(), minDelay, supaReady]).then(async () => {
       // Stage B: if local profile is missing, try hydrate from DB
       try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
+
+// Stage B2: always sync user_subjects from DB → local profile (single source for UI)
+try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
 
       if (!isRegistered()) {
         showView("registration");
