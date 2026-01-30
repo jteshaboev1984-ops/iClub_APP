@@ -4831,21 +4831,29 @@ if (meta) {
     ` • ${t("practice_topics")}: ${topics.length}`;
 }
 
-// Counters on buttons
-const reviewCountEl = $("#practice-review-count");
-if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
+      // Counters on buttons
+   const reviewCountEl = $("#practice-review-count");
+   if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
 
-const recsCountEl = $("#practice-recs-count");
-if (recsCountEl) recsCountEl.textContent = String(topics.length);
+   const recsCountEl = $("#practice-recs-count");
+   if (recsCountEl) recsCountEl.textContent = String(topics.length);
 
-// Show result screen (replace quiz screen to avoid "dead" back navigation)
-replaceCourses("practice-result");
+      // Show result screen (replace quiz screen to avoid "dead" back navigation)
+   replaceCourses("practice-result");
 
-    // Optional: toast best update
-    if (hx.best && hx.best.ts === attempt.ts) {
-      showToast("Новый лучший результат");
-    }
-    syncPracticeResultBadges();
+      // Save best + last 5 (safe)
+   let hx = null;
+      try {
+        hx = updatePracticeHistory(quiz.subjectKey, attempt);
+      } catch (e) {
+      try { trackEvent("practice_history_error", { message: String(e?.message || e || "unknown") }); } catch {}
+      }
+
+      // Optional: toast best update
+      if (hx && hx.best && hx.best.ts === attempt.ts) {
+        showToast("Новый лучший результат");
+      }
+   syncPracticeResultBadges();
   }
 
 function renderPracticeReview() {
