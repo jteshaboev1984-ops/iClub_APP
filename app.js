@@ -2258,6 +2258,76 @@ async function savePracticeAttemptToSupabase(attempt, quiz) {
   return { ok: true, attemptId, subjectId };
 }
 
+   async function getPracticeDbMetricsBySubjectKey(subjectKey) {
+  if (!window.sb) return { ok: false, reason: "no_sb" };
+
+  const uid = await getAuthUid();
+  if (!uid) return { ok: false, reason: "no_uid" };
+
+  const subjectId = await getSubjectIdByKey(subjectKey);
+  if (!subjectId) return { ok: false, reason: "no_subject_id" };
+
+  // Pull last 30 attempts to compute streak reliably
+  const { data: rows, error } = await window.sb
+    .from("practice_attempts")
+    .select("percent,created_at")
+    .eq("user_id", uid)
+    .eq("subject_id", subjectId)
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  if (error) {
+    await logDbErrorToEvents(uid, "practice_metrics_select", error, { subject_id: subjectId });
+    return { ok: false, reason: "select_failed", subjectId };
+  }
+
+  const attempts = Array.isArray(rows) ? rows : [];
+
+  // Mastery: avg percent over last 10
+  const last10 = attempts.slice(0, 10);
+  const mastery = last10.length
+    ? Math.round(last10.reduce((s, r) => s + (Number(r.percent) || 0), 0) / last10.length)
+    : 0;
+
+  // Focus streak: consecutive days with at least 1 attempt
+  // Normalize to YYYY-MM-DD in UTC
+  const days = [];
+  for (const r of attempts) {
+    const d = new Date(r.created_at);
+    if (Number.isNaN(d.getTime())) continue;
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(d.getUTCDate()).padStart(2, "0");
+    days.push(`${y}-${m}-${dd}`);
+  }
+
+  const uniqDays = Array.from(new Set(days)); // already in desc order due to attempts order
+  let streak = 0;
+
+  if (uniqDays.length) {
+    // Compare day-by-day starting from most recent day
+    const toDay = (s) => {
+      const [y, m, d] = s.split("-").map(Number);
+      return Date.UTC(y, m - 1, d) / 86400000;
+    };
+
+    let prev = toDay(uniqDays[0]);
+    streak = 1;
+
+    for (let i = 1; i < uniqDays.length; i++) {
+      const cur = toDay(uniqDays[i]);
+      if (prev - cur === 1) {
+        streak += 1;
+        prev = cur;
+      } else {
+        break;
+      }
+    }
+  }
+
+  return { ok: true, subjectId, mastery, streak };
+}
+
 async function getMyUserRow(uid) {
   if (!uid) return null;
   const { data, error } = await window.sb
@@ -5092,6 +5162,7 @@ function renderPracticeReview() {
   const attempt = state.practiceLastAttempt;
   if (!attempt || !Array.isArray(attempt.details)) return;
 
+  // keep existing counts
   const wrong = attempt.details.filter(d => !d.isCorrect);
   const topics = Array.from(new Set(wrong.map(d => d.topic || "General")));
 
@@ -5100,6 +5171,47 @@ function renderPracticeReview() {
 
   const recsCountEl = $("#practice-recs-count");
   if (recsCountEl) recsCountEl.textContent = String(topics.length);
+
+  // DB-first: mastery + focus streak
+  const masteryEl =
+    $("#practice-mastery") ||
+    $("#practice-mastery-value") ||
+    $("#practice-master");
+
+  const streakEl =
+    $("#practice-focus-streak") ||
+    $("#practice-streak") ||
+    $("#practice-focus");
+
+  // If UI elements not present on this screen, do nothing
+  if (!masteryEl && !streakEl) return;
+
+  // optimistic placeholders
+  if (masteryEl) masteryEl.textContent = "-";
+  if (streakEl) streakEl.textContent = "-";
+
+  (async () => {
+    try {
+      const subjectKey = attempt?.subjectKey || null;
+      if (!subjectKey) return;
+
+      const m = await getPracticeDbMetricsBySubjectKey(subjectKey);
+
+      if (m && m.ok) {
+        if (masteryEl) masteryEl.textContent = `${m.mastery}%`;
+        if (streakEl) streakEl.textContent = String(m.streak);
+        try { trackEvent("practice_metrics_loaded", { subject_key: subjectKey, mastery: m.mastery, streak: m.streak }); } catch {}
+        return;
+      }
+
+      // fallback: keep "-"
+      try { trackEvent("practice_metrics_unavailable", { subject_key: subjectKey, reason: m?.reason || "unknown" }); } catch {}
+
+    } catch (e) {
+      // fallback: keep "-"
+      try { trackEvent("practice_metrics_crash", { message: String(e?.message || e || "unknown") }); } catch {}
+    }
+  })();
 }
  
   function renderPracticeRecs() {
