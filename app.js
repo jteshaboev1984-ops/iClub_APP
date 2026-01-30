@@ -4116,9 +4116,6 @@ if (mainSubjects.length) {
     metaEl.textContent = us ? `${us.mode.toUpperCase()} • ${us.pinned ? "PINNED" : "NOT PINNED"}` : "NOT ADDED";
   }
 
-  // Credentials inline (Subject Hub: Focused + Practice)
-  try { renderSubjectHubCredentialsInline(subjectKey); } catch {}
-
   // ✅ Visual-only mode flag for CSS (Study vs Competitive)
   const hubRoot = $("#courses-subject-hub");
   if (hubRoot) {
@@ -5158,11 +5155,10 @@ function renderPracticeReview() {
   })();
 }
 
-  function syncPracticeResultBadges() {
+function syncPracticeResultBadges() {
   const attempt = state.practiceLastAttempt;
   if (!attempt || !Array.isArray(attempt.details)) return;
 
-  // keep existing counts
   const wrong = attempt.details.filter(d => !d.isCorrect);
   const topics = Array.from(new Set(wrong.map(d => d.topic || "General")));
 
@@ -5171,49 +5167,6 @@ function renderPracticeReview() {
 
   const recsCountEl = $("#practice-recs-count");
   if (recsCountEl) recsCountEl.textContent = String(topics.length);
-
-  // DB-first: mastery + focus streak
-  const masteryEl =
-  $("#hub-cred-practice-value") ||
-  $("#practice-mastery") ||
-  $("#practice-mastery-value") ||
-  $("#practice-master");
-
-const streakEl =
-  $("#hub-cred-focused-value") ||
-  $("#practice-focus-streak") ||
-  $("#practice-streak") ||
-  $("#practice-focus");
-
-  // If UI elements not present on this screen, do nothing
-  if (!masteryEl && !streakEl) return;
-
-  // optimistic placeholders
-  if (masteryEl) masteryEl.textContent = "-";
-  if (streakEl) streakEl.textContent = "-";
-
-  (async () => {
-    try {
-      const subjectKey = attempt?.subjectKey || null;
-      if (!subjectKey) return;
-
-      const m = await getPracticeDbMetricsBySubjectKey(subjectKey);
-
-      if (m && m.ok) {
-        if (masteryEl) masteryEl.textContent = `${m.mastery}%`;
-        if (streakEl) streakEl.textContent = String(m.streak);
-        try { trackEvent("practice_metrics_loaded", { subject_key: subjectKey, mastery: m.mastery, streak: m.streak }); } catch {}
-        return;
-      }
-
-      // fallback: keep "-"
-      try { trackEvent("practice_metrics_unavailable", { subject_key: subjectKey, reason: m?.reason || "unknown" }); } catch {}
-
-    } catch (e) {
-      // fallback: keep "-"
-      try { trackEvent("practice_metrics_crash", { message: String(e?.message || e || "unknown") }); } catch {}
-    }
-  })();
 }
  
   function renderPracticeRecs() {
