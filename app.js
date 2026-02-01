@@ -5634,12 +5634,11 @@ function renderMyRecs() {
   // Tour (strict) — T1+T2+T3 (mock now, DB later)
   // ---------------------------
   const TOUR_CONFIG = {
-    total: 20,
-    dist: { easy: 6, medium: 9, hard: 5 },
-    questionTimeSec: 45,           // per question
-    maxViolations: 3,              // anti-cheat threshold
-    autoSubmitOnMaxViolations: true
-  };
+  total: 20,
+  dist: { easy: 6, medium: 9, hard: 5 },
+  defaultQuestionTimeSec: 45, // ✅ фоллбек ТОЛЬКО если у вопроса нет своего лимита
+  maxViolations: 2,
+};
 
   let tourTick = null;
 
