@@ -4757,7 +4757,7 @@ function addMyRecsFromAttempt(attempt) {
       });
   }
 
-     function renderToursStart() {
+     async function renderToursStart() {
     const profile = loadProfile?.() || null;
     const subjectKey = state.courses?.subjectKey || null;
     const subj = subjectByKey(subjectKey);
@@ -4766,61 +4766,133 @@ function addMyRecsFromAttempt(attempt) {
     const titleEl = document.getElementById("tours-subject-title");
     if (titleEl) titleEl.textContent = subj ? subj.title : "Subject";
 
-    // temporary tour label (until DB)
-    const tourLabelEl = document.getElementById("tours-tour-label");
-    if (tourLabelEl) tourLabelEl.textContent = `${t("tours_tour_label")} 1`;
+    // --------------------------------------
+// Active tour by DB dates (no selection)
+// --------------------------------------
+const tourLabelEl = document.getElementById("tours-tour-label");
+const statusTitle = document.getElementById("tours-status-title");
+const statusDesc = document.getElementById("tours-status-desc");
+const openBtn = document.getElementById("tours-open-btn");
 
-    // History (local, newest-first)
-    const tourNo = 1;
-    const hist = loadTourHistoryLocal(subjectKey, tourNo);
+// eligibility stays exactly as you had
+const eligibility = (typeof canOpenActiveTours === "function")
+  ? canOpenActiveTours(profile, subjectKey)
+  : { ok: true };
 
-    const best = hist.reduce((acc, a) => {
-      if (!acc) return a;
-      if ((a.percent || 0) > (acc.percent || 0)) return a;
-      if ((a.percent || 0) === (acc.percent || 0) && (a.durationSec || 1e9) < (acc.durationSec || 1e9)) return a;
-      return acc;
-    }, null);
+// resolve subject_id
+let subjectId = null;
+try {
+  subjectId = await getSubjectIdByKey(subjectKey);
+} catch {}
 
-    const bestScoreEl = document.getElementById("tours-best-score");
-    const bestPctEl = document.getElementById("tours-best-percent");
-    const bestTimeEl = document.getElementById("tours-best-time");
+// load tours for this subject
+const todayISO = new Date().toISOString().slice(0, 10);
 
-    const formatSecShort = (sec) => {
-      const s = Number(sec);
-      if (!Number.isFinite(s) || s < 0) return "—";
-      if (s < 60) return `${s}${t("practice_time_sec_suffix")}`;
-      const m = Math.floor(s / 60);
-      const r = s % 60;
-      return `${m}${t("practice_time_min_suffix")} ${r}${t("practice_time_sec_suffix")}`;
-    };
+// NULL dates = no restriction (ok for test)
+const isInWindow = (row) => {
+  const sd = row?.start_date ? String(row.start_date) : null;
+  const ed = row?.end_date ? String(row.end_date) : null;
+  const afterStart = !sd || sd <= todayISO;
+  const beforeEnd = !ed || ed >= todayISO;
+  return afterStart && beforeEnd;
+};
 
-    if (best) {
-      if (bestScoreEl) bestScoreEl.textContent = `${best.score}/${best.total}`;
-      if (bestPctEl) bestPctEl.textContent = `(${best.percent}%)`;
-      if (bestTimeEl) bestTimeEl.textContent = formatSecShort(best.durationSec);
-    } else {
-      if (bestScoreEl) bestScoreEl.textContent = "—";
-      if (bestPctEl) bestPctEl.textContent = "";
-      if (bestTimeEl) bestTimeEl.textContent = "—";
-    }
+let dbTours = [];
+if (window.sb && subjectId) {
+  try {
+    const { data, error } = await window.sb
+      .from("tours")
+      .select("id, tour_no, start_date, end_date, is_active")
+      .eq("subject_id", subjectId)
+      .order("tour_no", { ascending: true });
 
-    // ✅ Trend inside blue card (auto-hides when <2)
-    renderTrendBars({
-      wrapEl: document.getElementById("tours-micro-bars"),
-      deltaEl: document.getElementById("tours-micro-delta"),
-      attemptsNewestFirst: hist,
-      barClass: "tours-micro-bar",
-      lastClass: "is-last"
-    });
+    if (!error && Array.isArray(data)) dbTours = data;
+  } catch {}
+}
 
-    // Status + Open button (until DB: keep hidden)
-    const statusTitle = document.getElementById("tours-status-title");
-    const statusDesc = document.getElementById("tours-status-desc");
-    const openBtn = document.getElementById("tours-open-btn");
+// pick active tour: is_active=true AND date window contains today
+const activeTours = dbTours.filter(r => !!r.is_active && isInWindow(r));
+const activeTour = activeTours.length ? activeTours[0] : null;
 
-    const eligibility = (typeof canOpenActiveTours === "function")
-      ? canOpenActiveTours(profile, subjectKey)
-      : { ok: true };
+// save active tour context for start button / quiz
+if (!state.courses) state.courses = {};
+state.courses.activeTourId = activeTour?.id || null;
+state.courses.activeTourNo = activeTour?.tour_no || null;
+
+// label
+if (tourLabelEl) {
+  tourLabelEl.textContent = activeTour
+    ? `${t("tours_tour_label")} ${activeTour.tour_no}`
+    : (t("tours_unavailable_title") || "Turlar hozircha mavjud emas");
+}
+
+// Status + Open button (DB)
+if (!activeTour) {
+  if (statusTitle) statusTitle.textContent = t("tours_unavailable_title") || "Turlar hozircha mavjud emas";
+  if (statusDesc) statusDesc.textContent = t("tours_unavailable_desc") || "Tur sanalari va ro‘yxati e’lon qilingach shu yerda ko‘rinadi.";
+  if (openBtn) openBtn.classList.add("hidden");
+} else {
+  const sd = activeTour.start_date ? String(activeTour.start_date) : null;
+  const ed = activeTour.end_date ? String(activeTour.end_date) : null;
+  const dateTxt = (sd || ed) ? `${sd || "—"} → ${ed || "—"}` : "";
+
+  if (statusTitle) statusTitle.textContent = t("tours_active_now") || "Faol tur";
+  if (statusDesc) statusDesc.textContent =
+    `${t("tours_tour_label") || "Tur"} ${activeTour.tour_no}${dateTxt ? " • " + dateTxt : ""}`;
+
+  if (openBtn) {
+    // show only if eligible
+    if (eligibility?.ok === false) openBtn.classList.add("hidden");
+    else openBtn.classList.remove("hidden");
+  }
+}
+
+saveState();
+
+// --------------------------------------
+// History (local, newest-first) — for ACTIVE tour
+// --------------------------------------
+const tourNo = Number(activeTour?.tour_no || 1);
+const hist = loadTourHistoryLocal(subjectKey, tourNo);
+
+const best = hist.reduce((acc, a) => {
+  if (!acc) return a;
+  if ((a.percent || 0) > (acc.percent || 0)) return a;
+  if ((a.percent || 0) === (acc.percent || 0) && (a.durationSec || 1e9) < (acc.durationSec || 1e9)) return a;
+  return acc;
+}, null);
+
+const bestScoreEl = document.getElementById("tours-best-score");
+const bestPctEl = document.getElementById("tours-best-percent");
+const bestTimeEl = document.getElementById("tours-best-time");
+
+const formatSecShort = (sec) => {
+  const s = Number(sec);
+  if (!Number.isFinite(s) || s < 0) return "—";
+  if (s < 60) return `${s}${t("practice_time_sec_suffix")}`;
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${m}${t("practice_time_min_suffix")} ${r}${t("practice_time_sec_suffix")}`;
+};
+
+if (best) {
+  if (bestScoreEl) bestScoreEl.textContent = `${best.score}/${best.total}`;
+  if (bestPctEl) bestPctEl.textContent = `(${best.percent}%)`;
+  if (bestTimeEl) bestTimeEl.textContent = formatSecShort(best.durationSec);
+} else {
+  if (bestScoreEl) bestScoreEl.textContent = "—";
+  if (bestPctEl) bestPctEl.textContent = "";
+  if (bestTimeEl) bestTimeEl.textContent = "—";
+}
+
+// ✅ Trend inside blue card (auto-hides when <2)
+renderTrendBars({
+  wrapEl: document.getElementById("tours-micro-bars"),
+  deltaEl: document.getElementById("tours-micro-delta"),
+  attemptsNewestFirst: hist,
+  barClass: "tours-micro-bar",
+  lastClass: "is-last"
+});
 
     if (!eligibility?.ok) {
       if (openBtn) openBtn.style.display = "none";
