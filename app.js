@@ -5696,44 +5696,270 @@ function renderMyRecs() {
     return a;
   }
 
-  function initTourSession({ subjectKey = null, tourNo = 1, isArchive = false } = {}) {
-    const questions = getTourQuestionsMock(subjectKey, tourNo);
+   // ---------------------------
+// Tours (DB-first via tour_questions)
+// ---------------------------
 
-    state.tourContext = {
-      isArchive,
-      subjectKey,
-      tourNo,
-      questions,                // ✅ IMPORTANT: prevents instant finish
-      startedAt: Date.now(),
-      qStartedAt: Date.now(),
-      index: 0,
-      correct: 0,
-      answers: [],              // {qid, pickedIndex, isCorrect, spentSec}
-      violations: 0,
-      lastViolationAt: null,
-      questionTimeLimit: TOUR_CONFIG.questionTimeSec
-    };
+async function loadActiveTourBySubjectAndNo(subjectId, tourNo) {
+  if (!window.sb || !subjectId || !tourNo) return null;
 
-    // strict lock only for ACTIVE tour
-    state.quizLock = isArchive ? null : "tour";
-    saveState();
-  }
+  const { data, error } = await window.sb
+    .from("tours")
+    .select("id,subject_id,tour_no,start_date,end_date,is_active")
+    .eq("subject_id", subjectId)
+    .eq("tour_no", tourNo)
+    .eq("is_active", true)
+    .maybeSingle();
 
-  function openTourQuiz() {
-    const accept = $("#tour-rules-accept");
-    if (!accept || !accept.checked) {
-      showToast(t("tour_rules_accept_required"));
-      return;
+  if (error) return null;
+  return data || null;
+}
+
+async function loadTourQuestionsDB(tourId) {
+  if (!window.sb || !tourId) return null;
+
+  const { data, error } = await window.sb
+    .from("tour_questions")
+    .select("order_no, question:questions(id,topic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,is_active)")
+    .eq("tour_id", tourId)
+    .eq("is_active", true)
+    .order("order_no", { ascending: true })
+    .limit(200);
+
+  if (error) return null;
+
+  const rows = Array.isArray(data) ? data : [];
+  const items = rows
+    .map(r => r?.question || null)
+    .filter(q => q && q.is_active);
+
+  // normalize to Tour UI model (same spirit as practice builder)
+  const normalizeDiff = (d) => normalizeDifficulty(d || "easy");
+  const normalizeType = (t) => (String(t || "mcq").toLowerCase() === "input" ? "input" : "mcq");
+
+  return items.map(q => {
+    const type = normalizeType(q.qtype);
+    const opts = type === "mcq" ? (parseOptionsText(q.options_text) || []) : null;
+
+    // correctIndex for mcq:
+    // - if correct_answer is numeric index => use it
+    // - else try match to option text (case-insensitive)
+    let correctIndex = 0;
+    if (type === "mcq") {
+      const ca = String(q.correct_answer ?? "").trim();
+      if (isNumericLike(ca)) {
+        correctIndex = Math.max(0, Math.min(opts.length - 1, Number(String(ca).replace(",", "."))));
+      } else if (opts.length) {
+        const idx = opts.findIndex(o => String(o).trim().toLowerCase() === ca.toLowerCase());
+        if (idx >= 0) correctIndex = idx;
+      }
     }
 
-        // Later: tourNo will come from DB (active tour). For now safe default = 1.
-    initTourSession({ subjectKey: state.courses?.subjectKey || null, tourNo: 1, isArchive: false });
+    return {
+      id: q.id,
+      topic: q.topic || "General",
+      difficulty: normalizeDiff(q.difficulty),
+      type,
+      question: q.question_text,
+      options: opts,
+      correctIndex,
+      correctAnswer: String(q.correct_answer ?? ""),
+      explanation: q.explanation || "",
+      image_url: q.image_url || null
+    };
+  });
+}
 
-    pushCourses("tour-quiz");
-    bindTourAntiCheatOnce();
-    startTourTick();
-    renderTourQuestion();
+async function hasTourAttempt(uid, tourId) {
+  if (!window.sb || !uid || !tourId) return false;
+  const { data, error } = await window.sb
+    .from("tour_attempts")
+    .select("id")
+    .eq("user_id", uid)
+    .eq("tour_id", tourId)
+    .limit(1);
+
+  if (error) return false;
+  return Array.isArray(data) && data.length > 0;
+}
+
+async function createTourAttempt(uid, tourId) {
+  if (!window.sb || !uid || !tourId) return null;
+
+  const { data, error } = await window.sb
+    .from("tour_attempts")
+    .insert([{ user_id: uid, tour_id: tourId, score: 0, percent: 0, total_time: 0, status: "submitted" }])
+    .select("id")
+    .single();
+
+  if (error) return null;
+  return data?.id ?? null;
+}
+
+async function upsertTourAnswer(attemptId, questionId, patch) {
+  if (!window.sb || !attemptId || !questionId) return;
+
+  // Upsert by (attempt_id, question_id) requires a unique constraint in DB.
+  // If you don't have it yet, we fallback to insert-only and ignore duplicates.
+  try {
+    await window.sb
+      .from("tour_answers")
+      .upsert([{
+        attempt_id: attemptId,
+        question_id: questionId,
+        user_answer: patch.user_answer ?? null,
+        answered: !!patch.answered,
+        is_correct: !!patch.is_correct,
+        time_spent: Number(patch.time_spent || 0),
+        finish_reason: patch.finish_reason ?? null
+      }], { onConflict: "attempt_id,question_id" });
+  } catch {
+    try {
+      await window.sb
+        .from("tour_answers")
+        .insert([{
+          attempt_id: attemptId,
+          question_id: questionId,
+          user_answer: patch.user_answer ?? null,
+          answered: !!patch.answered,
+          is_correct: !!patch.is_correct,
+          time_spent: Number(patch.time_spent || 0),
+          finish_reason: patch.finish_reason ?? null
+        }]);
+    } catch {}
   }
+}
+
+async function updateTourAttempt(attemptId, patch) {
+  if (!window.sb || !attemptId) return;
+  try {
+    await window.sb
+      .from("tour_attempts")
+      .update({
+        score: Number(patch.score || 0),
+        percent: Number(patch.percent || 0),
+        total_time: Number(patch.total_time || 0),
+        status: String(patch.status || "submitted")
+      })
+      .eq("id", attemptId);
+  } catch {}
+}
+
+  function initTourSession({ subjectKey = null, tourNo = 1, tourId = null, attemptId = null, questions = [], isArchive = false } = {}) {
+  state.tourContext = {
+    isArchive,
+    subjectKey,
+    tourNo,
+    tourId,        // ✅ DB tour id
+    attemptId,     // ✅ DB attempt id (null for archive)
+    questions,     // ✅ loaded from DB mapping tour_questions
+    startedAt: Date.now(),
+    qStartedAt: Date.now(),
+    index: 0,
+    correct: 0,
+    answers: [],   // {qid, pickedIndex, userAnswer, isCorrect, spentSec}
+    violations: 0,
+    lastViolationAt: null,
+    questionTimeLimit: TOUR_CONFIG.defaultQuestionTimeSec
+  };
+
+  // strict lock only for ACTIVE tour
+  state.quizLock = isArchive ? null : "tour";
+  saveState();
+}
+
+  async function openTourQuiz() {
+  const accept = $("#tour-rules-accept");
+  if (!accept || !accept.checked) {
+    showToast(t("tour_rules_accept_required"));
+    return;
+  }
+
+  const subjectKey = state.courses?.subjectKey || null;
+  if (!subjectKey) {
+    showToast("Subject not selected");
+    return;
+  }
+
+  // 1) eligibility: only school students can participate (tours/ratings)
+  const uid = await getAuthUid();
+  const me = uid ? await getUserProfile(uid) : null;
+
+  if (!me?.is_school_student) {
+    await uiAlert({
+      title: t("disabled_title") || "Недоступно",
+      message: t("tour_disabled_nonstudent") || "Туры доступны только для школьников."
+    });
+    return;
+  }
+
+  // 2) resolve subject_id and active tour (tour_no=1 for now; later from UI selection)
+  const subjectId = await getSubjectIdByKey(subjectKey);
+  if (!subjectId) {
+    showToast("subject_id not found");
+    return;
+  }
+
+  const tourNo = 1; // TODO: take selected tour from Tours List
+  const tour = await loadActiveTourBySubjectAndNo(subjectId, tourNo);
+
+  if (!tour?.id) {
+    await uiAlert({
+      title: t("tour_unavailable_title") || "Тур недоступен",
+      message: t("tour_unavailable_no_active") || "Нет активного тура для этого предмета."
+    });
+    return;
+  }
+
+  // 3) one attempt rule
+  const already = await hasTourAttempt(uid, tour.id);
+  if (already) {
+    await uiAlert({
+      title: t("tour_unavailable_title") || "Тур недоступен",
+      message: t("tour_unavailable_already_attempted") || "У вас уже была попытка в этом туре."
+    });
+    return;
+  }
+
+  // 4) load questions by mapping table tour_questions
+  const questions = await loadTourQuestionsDB(tour.id);
+  if (!questions || questions.length === 0) {
+    await uiAlert({
+      title: t("tour_unavailable_title") || "Тур недоступен",
+      message: t("tour_unavailable_no_questions") || "Для тура не назначены вопросы."
+    });
+    return;
+  }
+
+  // 5) create attempt row
+  const attemptId = await createTourAttempt(uid, tour.id);
+  if (!attemptId) {
+    showToast("Ошибка создания попытки");
+    return;
+  }
+
+  // analytics: started
+  try {
+    trackEvent("tour_attempt_started", {
+      subject_id: String(subjectId),
+      tour_id: String(tour.id)
+    });
+  } catch {}
+
+  initTourSession({
+    subjectKey,
+    tourNo,
+    tourId: tour.id,
+    attemptId,
+    questions,
+    isArchive: false
+  });
+
+  pushCourses("tour-quiz");
+  bindTourAntiCheatOnce();
+  startTourTick();
+  renderTourQuestion();
+}
 
   function startTourTick() {
     stopTourTick();
@@ -5910,6 +6136,22 @@ function renderMyRecs() {
 
     if (isCorrect) ctx.correct += 1;
 
+     // DB autosave (only for active tour)
+try {
+  const ctx = state.tourContext;
+  if (ctx?.attemptId && q?.id) {
+    const spentSec = Math.max(0, Math.round((Date.now() - (ctx.qStartedAt || Date.now())) / 1000));
+    const isCorrect = (pickedIndex === q.correctIndex);
+
+    await upsertTourAnswer(ctx.attemptId, q.id, {
+      user_answer: (q.type === "mcq") ? String(pickedIndex) : String(userInputValue || ""),
+      answered: true,
+      is_correct: isCorrect,
+      time_spent: spentSec
+    });
+  }
+} catch {}
+
     // next index
     ctx.index += 1;
     saveState();
@@ -5945,60 +6187,76 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
   } catch {}
 }
 
-  function finishTour({ reason = "done" } = {}) {
-    stopTourTick();
+  async function finishTour({ reason = "done" } = {}) {
+  stopTourTick();
 
-    const ctx = state.tourContext;
+  const ctx = state.tourContext;
 
-        // Save attempt locally (for stats/trend). Does not affect future DB integration.
-    if (ctx?.subjectKey) {
-      const durationSec = Math.max(0, Math.round((Date.now() - (ctx.startedAt || Date.now())) / 1000));
-      const total = TOUR_CONFIG.total;
-      const percent = total ? Math.round((ctx.correct / total) * 100) : 0;
+  // duration/score summary (used for local + DB)
+  const durationSec = Math.max(0, Math.round((Date.now() - (ctx?.startedAt || Date.now())) / 1000));
+  const total = TOUR_CONFIG.total;
+  const score = Number(ctx?.correct || 0);
+  const percent = total ? Math.round((score / total) * 100) : 0;
 
-      saveTourAttemptLocal(ctx.subjectKey, ctx.tourNo || 1, {
-        ts: Date.now(),
-        score: ctx.correct,
-        total,
-        percent,
-        durationSec
-      });
-    }
-
-    // result meta
-    const meta = $("#tour-result-meta");
-    if (meta && ctx) {
-      meta.textContent = `Score: ${ctx.correct}/${TOUR_CONFIG.total} • Violations: ${ctx.violations || 0}`;
-    }
-
-        if (ctx?.isArchive) {
-      showToast("Архивный тур: вне рейтинга");
-    } else if (reason === "violations") {
-      showToast("Tour finished: session violations");
-    }
-
-    // Earned Credentials — tour finished
-    try {
-            const subject_id = normSubjectId(ctx?.subjectKey || state?.courses?.subjectKey);
-      const tour_id = ctx?.tourId != null ? String(ctx.tourId) : "";
-      const is_archive = !!ctx?.isArchive;
-
-      trackEvent("tour_attempt_finished", {
-        subject_id,
-        tour_id,
-        is_archive,
-        // если у тебя дальше появятся точные percent/score — сюда же добавим
-        status: reason || "finished"
-      });
-    } catch {}
-
-    // unlock
-    state.quizLock = null;
-    state.tourContext = null;
-    saveState();
-
-    pushCourses("tour-result");
+  // Save attempt locally (for stats/trend). Does not affect future DB integration.
+  if (ctx?.subjectKey) {
+    saveTourAttemptLocal(ctx.subjectKey, ctx.tourNo || 1, {
+      ts: Date.now(),
+      score,
+      total,
+      percent,
+      durationSec
+    });
   }
+
+  // DB finalize (only active tours)
+  try {
+    if (ctx?.attemptId && !ctx?.isArchive) {
+      await updateTourAttempt(ctx.attemptId, {
+        score,
+        percent,
+        total_time: durationSec,
+        status:
+          (reason === "violations") ? "anti_cheat"
+          : (reason === "time_expired") ? "time_expired"
+          : "submitted"
+      });
+    }
+  } catch {}
+
+  // result meta
+  const meta = $("#tour-result-meta");
+  if (meta && ctx) {
+    meta.textContent = `Score: ${ctx.correct}/${TOUR_CONFIG.total} • Violations: ${ctx.violations || 0}`;
+  }
+
+  if (ctx?.isArchive) {
+    showToast("Архивный тур: вне рейтинга");
+  } else if (reason === "violations") {
+    showToast("Tour finished: session violations");
+  }
+
+  // Earned Credentials — tour finished
+  try {
+    const subject_id = normSubjectId(ctx?.subjectKey || state?.courses?.subjectKey);
+    const tour_id = ctx?.tourId != null ? String(ctx.tourId) : "";
+    const is_archive = !!ctx?.isArchive;
+
+    trackEvent("tour_attempt_finished", {
+      subject_id,
+      tour_id,
+      is_archive,
+      status: reason || "finished"
+    });
+  } catch {}
+
+  // unlock
+  state.quizLock = null;
+  state.tourContext = null;
+  saveState();
+
+  pushCourses("tour-result");
+}
 
   function formatMsToMMSS(ms) {
     const sec = Math.max(0, Math.floor(ms / 1000));
