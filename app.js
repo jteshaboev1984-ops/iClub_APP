@@ -6115,7 +6115,7 @@ async function updateTourAttempt(attemptId, patch) {
     renderTourHUD();
   }
 
-  function submitTourAnswer({ pickedIndex, auto = false } = {}) {
+    function submitTourAnswer({ pickedIndex, auto = false } = {}) {
     const ctx = state.tourContext;
     if (!ctx) return;
 
@@ -6123,12 +6123,20 @@ async function updateTourAttempt(attemptId, patch) {
     if (!q) return;
 
     const spentSec = Math.max(0, Math.floor((Date.now() - ctx.qStartedAt) / 1000));
-    const isCorrect = (pickedIndex !== null && pickedIndex !== undefined) ? (Number(pickedIndex) === Number(q.correct_index)) : false;
+
+    // normalize correct index (supports both correctIndex and legacy correct_index)
+    const correctIdx =
+      (q.correctIndex !== undefined && q.correctIndex !== null) ? Number(q.correctIndex)
+      : (q.correct_index !== undefined && q.correct_index !== null) ? Number(q.correct_index)
+      : null;
+
+    const pickedNum = (pickedIndex === null || pickedIndex === undefined) ? null : Number(pickedIndex);
+    const isCorrect = (pickedNum !== null && correctIdx !== null) ? (pickedNum === correctIdx) : false;
 
     ctx.answers = ctx.answers || [];
     ctx.answers.push({
       qid: q.id,
-      pickedIndex: (pickedIndex === null || pickedIndex === undefined) ? null : Number(pickedIndex),
+      pickedIndex: pickedNum,
       isCorrect,
       spentSec,
       index: ctx.index
@@ -6136,21 +6144,29 @@ async function updateTourAttempt(attemptId, patch) {
 
     if (isCorrect) ctx.correct += 1;
 
-     // DB autosave (only for active tour)
-try {
-  const ctx = state.tourContext;
-  if (ctx?.attemptId && q?.id) {
-    const spentSec = Math.max(0, Math.round((Date.now() - (ctx.qStartedAt || Date.now())) / 1000));
-    const isCorrect = (pickedIndex === q.correctIndex);
+    // DB autosave (only for active tour) — fire-and-forget (no await inside non-async fn)
+    try {
+      const ctx2 = state.tourContext;
+      if (ctx2?.attemptId && q?.id && !ctx2?.isArchive) {
+        const spentSec2 = Math.max(0, Math.round((Date.now() - (ctx2.qStartedAt || Date.now())) / 1000));
+        const pickedForDb = (pickedNum === null ? "" : String(pickedNum));
 
-    await upsertTourAnswer(ctx.attemptId, q.id, {
-      user_answer: (q.type === "mcq") ? String(pickedIndex) : String(userInputValue || ""),
-      answered: true,
-      is_correct: isCorrect,
-      time_spent: spentSec
-    });
-  }
-} catch {}
+        // if someday you add input questions, this will safely read it (otherwise empty)
+        const inputEl = document.getElementById("tour-input");
+        const inputVal = inputEl ? String(inputEl.value || "").trim() : "";
+
+        const answerForDb = (q.type === "mcq") ? pickedForDb : inputVal;
+
+        Promise
+          .resolve(upsertTourAnswer(ctx2.attemptId, q.id, {
+            user_answer: answerForDb,
+            answered: true,
+            is_correct: isCorrect,
+            time_spent: spentSec2
+          }))
+          .catch(() => {});
+      }
+    } catch {}
 
     // next index
     ctx.index += 1;
