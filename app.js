@@ -5079,20 +5079,20 @@ if (!rows.length) {
     const time = Number(a?.total_time ?? 0);
 
     const rowEl = document.createElement("div");
-    rowEl.className = "tours-history-row";
-    rowEl.innerHTML = `
-      <div class="tours-history-left">
-        <div class="tours-history-tour">${t("tours_tour_label")} ${tourNo}</div>
-        <div class="tours-history-meta">${pct}% • ${t("tours_completed_time_label") || "время"} ${formatSecShort(time)}</div>
-      </div>
-      <div class="tours-history-right">
-        <div class="tours-history-score">${score}/${TOTAL_TOUR_Q}</div>
-        <div class="tours-history-time">${formatSecShort(time)}</div>
-      </div>
-    `;
-    if (historyListEl) historyListEl.appendChild(rowEl);
-  }
-}
+      rowEl.className = "tours-history-row";
+      rowEl.innerHTML = `
+        <div class="tours-history-left">
+          <div class="tours-history-tour">${t("tours_tour_label")} ${tourNo}</div>
+          <div class="tours-history-meta">${pct}%</div>
+           </div>
+              <div class="tours-history-right">
+             <div class="tours-history-score">${score}/${TOTAL_TOUR_Q}</div>
+            <div class="tours-history-time">${formatSecShort(time)}</div>
+        </div>
+      `;
+         if (historyListEl) historyListEl.appendChild(rowEl);
+        }
+      }
 
 // Trend bars (based on completed tours list)
 try {
