@@ -4803,6 +4803,11 @@ if (!subjectId && window.sb && subjectKey) {
 // load tours for this subject
 const todayISO = new Date().toISOString().slice(0, 10);
 
+// UI: show loading first to avoid 1-sec "wrong screen" flicker
+if (statusTitle) statusTitle.textContent = (t("loading") || "Загрузка…");
+if (statusDesc) statusDesc.textContent = (t("loading_desc") || "Получаем список туров…");
+if (openBtn) openBtn.classList.add("hidden");
+
 // NULL dates = no restriction (ok for test)
 const isInWindow = (row) => {
   const sd = row?.start_date ? String(row.start_date) : null;
@@ -4813,7 +4818,33 @@ const isInWindow = (row) => {
 };
 
 let dbTours = [];
-if (window.sb && subjectId) {
+let toursErr = null;
+
+// 1) Prefer join by subject_key (so we don't зависим от subjectId)
+if (window.sb && subjectKey) {
+  try {
+    const { data, error } = await window.sb
+      .from("tours")
+      .select("id, subject_id, tour_no, start_date, end_date, is_active, subjects!inner(subject_key)")
+      .eq("subjects.subject_key", String(subjectKey))
+      .order("tour_no", { ascending: true });
+
+    if (error) toursErr = error;
+    if (!error && Array.isArray(data)) {
+      dbTours = data;
+
+      // backfill subjectId for any later logic that still wants it
+      if (!subjectId && dbTours.length && dbTours[0]?.subject_id) {
+        subjectId = dbTours[0].subject_id;
+      }
+    }
+  } catch (e) {
+    toursErr = e;
+  }
+}
+
+// 2) Fallback: by subject_id (if join is blocked by policy)
+if (!dbTours.length && window.sb && subjectId) {
   try {
     const { data, error } = await window.sb
       .from("tours")
@@ -4821,8 +4852,11 @@ if (window.sb && subjectId) {
       .eq("subject_id", subjectId)
       .order("tour_no", { ascending: true });
 
+    if (error) toursErr = toursErr || error;
     if (!error && Array.isArray(data)) dbTours = data;
-  } catch {}
+  } catch (e) {
+    toursErr = toursErr || e;
+  }
 }
 
 // pick active tour: is_active=true AND date window contains today
@@ -4838,27 +4872,34 @@ state.courses.activeTourNo = activeTour?.tour_no || null;
 if (tourLabelEl) {
   tourLabelEl.textContent = activeTour
     ? `${t("tours_tour_label")} ${activeTour.tour_no}`
-    : (t("tours_unavailable_title") || "Turlar hozircha mavjud emas");
+    : (t("tours_unavailable_title") || "Туры пока недоступны");
 }
 
 // Status + Open button (DB)
 if (!activeTour) {
-  if (statusTitle) statusTitle.textContent = t("tours_unavailable_title") || "Turlar hozircha mavjud emas";
-  if (statusDesc) statusDesc.textContent = t("tours_unavailable_desc") || "Tur sanalari va ro‘yxati e’lon qilingach shu yerda ko‘rinadi.";
+  if (statusTitle) statusTitle.textContent = t("tours_unavailable_title") || "Туры пока недоступны";
+
+  // если есть ошибка чтения туров — показываем человеческий текст (а не “как будто туров нет”)
+  const baseDesc = t("tours_unavailable_desc") || "Даты и список туров появятся здесь после публикации.";
+  const errHint = toursErr ? " (нет доступа к базе туров)" : "";
+  if (statusDesc) statusDesc.textContent = baseDesc + errHint;
+
   if (openBtn) openBtn.classList.add("hidden");
 } else {
   const sd = activeTour.start_date ? String(activeTour.start_date) : null;
   const ed = activeTour.end_date ? String(activeTour.end_date) : null;
   const dateTxt = (sd || ed) ? `${sd || "—"} → ${ed || "—"}` : "";
 
-  if (statusTitle) statusTitle.textContent = t("tours_active_now") || "Faol tur";
+  if (statusTitle) statusTitle.textContent = t("tours_active_now") || "Активный тур сейчас";
   if (statusDesc) statusDesc.textContent =
-    `${t("tours_tour_label") || "Tur"} ${activeTour.tour_no}${dateTxt ? " • " + dateTxt : ""}`;
+    `${t("tours_tour_label") || "Тур"} ${activeTour.tour_no}${dateTxt ? " • " + dateTxt : ""}`;
 
   if (openBtn) {
-    // show only if eligible
     if (eligibility?.ok === false) openBtn.classList.add("hidden");
     else openBtn.classList.remove("hidden");
+
+    // гарантируем клик (иногда у тебя открыт весь список кликом, а кнопка без хэндлера)
+    openBtn.onclick = () => openTourRules();
   }
 }
 
@@ -4869,7 +4910,6 @@ saveState();
 // --------------------------------------
 const tourNo = Number(activeTour?.tour_no || 1);
 const hist = loadTourHistoryLocal(subjectKey, tourNo);
-
 const best = hist.reduce((acc, a) => {
   if (!acc) return a;
   if ((a.percent || 0) > (acc.percent || 0)) return a;
