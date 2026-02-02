@@ -4970,20 +4970,17 @@ if (tourLabelEl) {
 saveState();
 
 // --------------------------------------
-// History (local, newest-first) — for ACTIVE tour
+// Completed tours (DB summary by subject)
+// Best = max percent, tie-break = min time
 // --------------------------------------
-const tourNo = Number(activeTour?.tour_no || 1);
-const hist = loadTourHistoryLocal(subjectKey, tourNo);
-const best = hist.reduce((acc, a) => {
-  if (!acc) return a;
-  if ((a.percent || 0) > (acc.percent || 0)) return a;
-  if ((a.percent || 0) === (acc.percent || 0) && (a.durationSec || 1e9) < (acc.durationSec || 1e9)) return a;
-  return acc;
-}, null);
-
 const bestScoreEl = document.getElementById("tours-best-score");
 const bestPctEl = document.getElementById("tours-best-percent");
 const bestTimeEl = document.getElementById("tours-best-time");
+
+const historyCard = document.getElementById("tours-history-card");
+const historyListEl = document.getElementById("tours-history-list");
+const historyEmptyEl = document.getElementById("tours-history-empty");
+const historySubEl = document.getElementById("tours-history-sub");
 
 const formatSecShort = (sec) => {
   const s = Number(sec);
@@ -4994,15 +4991,134 @@ const formatSecShort = (sec) => {
   return `${m}${t("practice_time_min_suffix")} ${r}${t("practice_time_sec_suffix")}`;
 };
 
+let attempts = [];
+try {
+  const uid = await getAuthUid();
+  if (window.sb && uid && subjectId) {
+    const { data, error } = await window.sb
+      .from("tour_attempts")
+      .select("id, tour_id, score, percent, total_time, created_at, tours!inner(tour_no, subject_id)")
+      .eq("user_id", uid)
+      .eq("tours.subject_id", subjectId)
+      .order("created_at", { ascending: false });
+
+    if (!error && Array.isArray(data)) attempts = data;
+  }
+} catch {}
+
+// Group best attempt per tour_no (although now it's usually 1 attempt)
+const byTour = new Map();
+for (const a of attempts) {
+  const tourNo = Number(a?.tours?.tour_no);
+  if (!Number.isFinite(tourNo)) continue;
+
+  const prev = byTour.get(tourNo) || null;
+  if (!prev) {
+    byTour.set(tourNo, a);
+    continue;
+  }
+
+  const ap = Number(a?.percent || 0);
+  const pp = Number(prev?.percent || 0);
+  const at = Number(a?.total_time || 1e9);
+  const pt = Number(prev?.total_time || 1e9);
+
+  if (ap > pp) byTour.set(tourNo, a);
+  else if (ap === pp && at < pt) byTour.set(tourNo, a);
+}
+
+const rows = Array.from(byTour.entries())
+  .sort((x, y) => x[0] - y[0])
+  .map(([tourNo, a]) => ({ tourNo, a }));
+
+// Best across ALL completed tours for this subject
+let best = null;
+for (const { a } of rows) {
+  if (!best) { best = a; continue; }
+  const ap = Number(a?.percent || 0);
+  const bp = Number(best?.percent || 0);
+  const at = Number(a?.total_time || 1e9);
+  const bt = Number(best?.total_time || 1e9);
+  if (ap > bp) best = a;
+  else if (ap === bp && at < bt) best = a;
+}
+
+// Fill BEST metrics (total questions in tour = 20)
+const TOTAL_TOUR_Q = 20;
 if (best) {
-  if (bestScoreEl) bestScoreEl.textContent = `${best.score}/${best.total}`;
-  if (bestPctEl) bestPctEl.textContent = `(${best.percent}%)`;
-  if (bestTimeEl) bestTimeEl.textContent = formatSecShort(best.durationSec);
+  const score = Number(best?.score ?? 0);
+  const pct = Math.round(Number(best?.percent ?? 0));
+  const time = Number(best?.total_time ?? 0);
+
+  if (bestScoreEl) bestScoreEl.textContent = `${score}/${TOTAL_TOUR_Q}`;
+  if (bestPctEl) bestPctEl.textContent = `(${pct}%)`;
+  if (bestTimeEl) bestTimeEl.textContent = formatSecShort(time);
 } else {
   if (bestScoreEl) bestScoreEl.textContent = "—";
   if (bestPctEl) bestPctEl.textContent = "";
   if (bestTimeEl) bestTimeEl.textContent = "—";
 }
+
+// Render completed list
+if (historyCard) historyCard.style.display = "";
+if (historyListEl) historyListEl.innerHTML = "";
+
+if (!rows.length) {
+  if (historyEmptyEl) historyEmptyEl.style.display = "";
+  if (historySubEl) historySubEl.textContent = "";
+} else {
+  if (historyEmptyEl) historyEmptyEl.style.display = "none";
+  if (historySubEl) historySubEl.textContent =
+    (typeof t === "function" && t("tours_completed_sub", { n: rows.length }) !== "tours_completed_sub")
+      ? t("tours_completed_sub", { n: rows.length })
+      : `Всего: ${rows.length}`;
+
+  for (const { tourNo, a } of rows) {
+    const score = Number(a?.score ?? 0);
+    const pct = Math.round(Number(a?.percent ?? 0));
+    const time = Number(a?.total_time ?? 0);
+
+    const rowEl = document.createElement("div");
+    rowEl.className = "tours-history-row";
+    rowEl.innerHTML = `
+      <div class="tours-history-left">
+        <div class="tours-history-tour">${t("tours_tour_label")} ${tourNo}</div>
+        <div class="tours-history-meta">${pct}% • ${t("tours_completed_time_label") || "время"} ${formatSecShort(time)}</div>
+      </div>
+      <div class="tours-history-right">
+        <div class="tours-history-score">${score}/${TOTAL_TOUR_Q}</div>
+        <div class="tours-history-time">${formatSecShort(time)}</div>
+      </div>
+    `;
+    if (historyListEl) historyListEl.appendChild(rowEl);
+  }
+}
+
+// Trend bars (based on completed tours list)
+try {
+  const trendWrap = document.getElementById("tours-micro-bars");
+  const trendDelta = document.getElementById("tours-micro-delta");
+  const trendBox = document.getElementById("tours-trend");
+
+  const trendAttemptsNewestFirst = rows
+    .slice()
+    .sort((a, b) => a.tourNo - b.tourNo)
+    .map(x => ({ percent: Number(x.a?.percent ?? 0) }))
+    .reverse();
+
+  if (trendAttemptsNewestFirst.length >= 2) {
+    if (trendBox) trendBox.style.display = "";
+    renderTrendBars({
+      wrapEl: trendWrap,
+      deltaEl: trendDelta,
+      attemptsNewestFirst: trendAttemptsNewestFirst,
+      barClass: "tours-micro-bar",
+      lastClass: "is-last"
+    });
+  } else {
+    if (trendBox) trendBox.style.display = "none";
+  }
+} catch {}
 
 renderTrendBars({
   wrapEl: document.getElementById("tours-micro-bars"),
