@@ -1290,10 +1290,43 @@ html, body {
   background: rgba(246,248,252,0.6);
   cursor: pointer;
   user-select: none;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
 }
 
-.option input { margin: 0; }
 .option:active { transform: translateY(1px); }
+.option input { margin: 0; }
+
+/* tour/practice option dot + selected state */
+.option .dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 2px solid rgba(60,100,200,0.35);
+  background: transparent;
+  flex: 0 0 10px;
+}
+
+.option.is-selected{
+  border-color: rgba(37,99,235,0.55);
+  background: rgba(37,99,235,0.08);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
+}
+
+.option.is-selected .dot{
+  border-color: rgba(37,99,235,0.75);
+  background: rgba(37,99,235,0.75);
+}
+
+/* small “saving” feedback for buttons */
+.btn-primary.is-loading{
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* Tours: open button should be full width like the rest of the app */
+#tours-open-btn{
+  width: 100%;
+}
 
 /* ----- Practice INPUT (v1) ----- */
 .input-wrap{
