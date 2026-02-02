@@ -4920,28 +4920,52 @@ if (tourLabelEl) {
      if (statusDesc) statusDesc.textContent = baseDesc + errHint;
 
      if (openBtn) openBtn.classList.add("hidden");
-   } else {
+      } else {
      const sd = activeTour.start_date ? String(activeTour.start_date) : null;
      const ed = activeTour.end_date ? String(activeTour.end_date) : null;
      const dateTxt = (sd || ed) ? `${sd || "—"} → ${ed || "—"}` : "";
 
+     // default: show active info
      if (statusTitle) statusTitle.textContent = tr("tours_active_now", "Активный тур сейчас");
-   if (statusDesc) statusDesc.textContent =
-     `${tr("tours_tour_label", "Тур")} ${activeTour.tour_no}${dateTxt ? " • " + dateTxt : ""}`;
+     if (statusDesc) statusDesc.textContent =
+       `${tr("tours_tour_label", "Тур")} ${activeTour.tour_no}${dateTxt ? " • " + dateTxt : ""}`;
 
-   if (openBtn) {
-     // ✅ show start button for active tour
-     openBtn.classList.remove("hidden");
-     openBtn.style.display = "";
-     openBtn.disabled = false;
+     // ✅ NEW: if already attempted — show it here and hide "Open tour"
+     let alreadyAttempted = false;
+     try {
+       const uid = await getAuthUid();
+       if (uid && typeof hasTourAttempt === "function" && activeTour?.id) {
+         alreadyAttempted = await hasTourAttempt(uid, activeTour.id);
+       }
+     } catch {}
 
-     // Button title (fallback if missing in i18n)
-     openBtn.textContent = tr("tours_open_btn", "Открыть тур");
+     if (alreadyAttempted) {
+       if (statusTitle) statusTitle.textContent = tr("tour_unavailable_title", "Тур недоступен");
+       if (statusDesc) statusDesc.textContent = tr(
+         "tour_unavailable_already_attempted",
+         "Вы уже завершили этот тур. Повторное прохождение недоступно."
+       );
 
-     // start flow
-     openBtn.onclick = () => openTourRules();
+       if (openBtn) {
+         openBtn.classList.add("hidden");
+         openBtn.style.display = "none";
+         openBtn.onclick = null;
+       }
+     } else {
+       if (openBtn) {
+         // ✅ show start button for active tour
+         openBtn.classList.remove("hidden");
+         openBtn.style.display = "";
+         openBtn.disabled = false;
+
+         // Button title (fallback if missing in i18n)
+         openBtn.textContent = tr("tours_open_btn", "Открыть тур");
+
+         // start flow
+         openBtn.onclick = () => openTourRules();
+       }
+     }
    }
-}
 
 saveState();
 
