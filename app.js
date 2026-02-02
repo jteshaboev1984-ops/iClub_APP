@@ -6238,7 +6238,13 @@ const qEl =
   $("#quiz-question") ||
   $("#tour-question-text");
 
-if (qEl) qEl.textContent = q.question_text;
+if (qEl) {
+  const txt =
+    (q.question_text != null && String(q.question_text).trim() !== "")
+      ? String(q.question_text)
+      : (q.question != null ? String(q.question) : "");
+  qEl.textContent = txt || "";
+}
 
 // options wrap (fallback ids/classes)
 const wrap =
@@ -6274,9 +6280,13 @@ if (wrap) {
       const ctx2 = state.tourContext;
       if (!ctx2) return;
 
-      // highlight
-      (wrap.querySelectorAll(".option") || []).forEach(o => o.classList.remove("is-selected"));
-      btn.classList.add("is-selected");
+      // highlight (support both CSS variants)
+   (wrap.querySelectorAll(".option") || []).forEach(o => {
+     o.classList.remove("is-selected");
+     o.classList.remove("selected");
+   });
+   btn.classList.add("is-selected");
+   btn.classList.add("selected");
 
       // enable next
       const nextBtn =
@@ -6293,7 +6303,27 @@ if (wrap) {
 
     wrap.appendChild(btn);
   });
-}
+      // restore selection if user already picked (prevents "looks unselected" after any rerender)
+   if (ctx && ctx._pickedIndex != null) {
+     const picked = Number(ctx._pickedIndex);
+     const btns = (wrap.querySelectorAll(".option") || []);
+     if (btns[picked]) {
+       btns.forEach(o => {
+         o.classList.remove("is-selected");
+         o.classList.remove("selected");
+       });
+       btns[picked].classList.add("is-selected");
+       btns[picked].classList.add("selected");
+
+       const nextBtn2 =
+         $("#tour-next-btn") ||
+         $("#quiz-next-btn") ||
+         document.querySelector('[data-action="tour-next"]');
+
+       if (nextBtn2) nextBtn2.disabled = false;
+     }
+   }
+ }
 
   // disable next until choose (use same fallback selector as click handler)
 const nextBtn =
@@ -6306,14 +6336,20 @@ if (nextBtn) {
   nextBtn.textContent = (ctx.index >= TOUR_CONFIG.total - 1) ? "Finish Tour →" : "Next Question →";
 }
 
-// clear active option styles (use actual wrap if exists)
-if (wrap) {
-  (wrap.querySelectorAll(".option") || []).forEach(o => o.classList.remove("is-selected"));
-} else {
-  $$("#tour-options .option").forEach(o => o.classList.remove("is-selected"));
-}
+   // clear active option styles (support both classes)
+   if (wrap) {
+     (wrap.querySelectorAll(".option") || []).forEach(o => {
+       o.classList.remove("is-selected");
+       o.classList.remove("selected");
+     });
+   } else {
+     $$("#tour-options .option").forEach(o => {
+       o.classList.remove("is-selected");
+       o.classList.remove("selected");
+     });
+   }
 
-renderTourHUD();
+   renderTourHUD();
 
   }
 
@@ -6334,6 +6370,11 @@ renderTourHUD();
 
     const pickedNum = (pickedIndex === null || pickedIndex === undefined) ? null : Number(pickedIndex);
     const isCorrect = (pickedNum !== null && correctIdx !== null) ? (pickedNum === correctIdx) : false;
+    // normalize question type (DB uses qtype, older code may use type)
+      const qType =
+        (q?.qtype != null ? String(q.qtype) : (q?.type != null ? String(q.type) : "mcq"))
+         .toLowerCase();
+      const isMcq = (qType === "mcq" || qType === "multiple_choice");
 
     ctx.answers = ctx.answers || [];
     ctx.answers.push({
@@ -6358,7 +6399,7 @@ renderTourHUD();
         const inputVal = inputEl ? String(inputEl.value || "").trim() : "";
 
         const qType = String(q?.type || q?.qtype || "mcq").toLowerCase();
-        const answerForDb = (qType === "mcq") ? pickedForDb : inputVal;
+        const answerForDb = isMcq ? pickedForDb : inputVal;
 
         Promise
           .resolve(upsertTourAnswer(ctx2.attemptId, q.id, {
