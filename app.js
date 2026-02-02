@@ -4779,13 +4779,28 @@ const eligibility = (typeof canOpenActiveTours === "function")
   ? canOpenActiveTours(profile, subjectKey)
   : { ok: true };
 
-// resolve subject_id (keep, but do NOT depend on it)
+// resolve subject_id
 let subjectId = null;
+
+// 1) Try existing helper (if it works — great)
 try {
   subjectId = await getSubjectIdByKey(subjectKey);
 } catch {}
 
-// load tours for this subject (by subject_key join; works even if subjectId is null)
+// 2) Fallback: resolve subjectId directly from DB by subject_key (most reliable)
+if (!subjectId && window.sb && subjectKey) {
+  try {
+    const { data: srow, error: serr } = await window.sb
+      .from("subjects")
+      .select("id")
+      .eq("subject_key", String(subjectKey))
+      .maybeSingle();
+
+    if (!serr && srow?.id) subjectId = srow.id;
+  } catch {}
+}
+
+// load tours for this subject
 const todayISO = new Date().toISOString().slice(0, 10);
 
 // NULL dates = no restriction (ok for test)
@@ -4798,23 +4813,15 @@ const isInWindow = (row) => {
 };
 
 let dbTours = [];
-if (window.sb && subjectKey) {
+if (window.sb && subjectId) {
   try {
-    // Prefer join by subject_key so Tours screen never dies because subjectId lookup failed
     const { data, error } = await window.sb
       .from("tours")
-      .select("id, subject_id, tour_no, start_date, end_date, is_active, subjects!inner(subject_key)")
-      .eq("subjects.subject_key", String(subjectKey))
+      .select("id, subject_id, tour_no, start_date, end_date, is_active")
+      .eq("subject_id", subjectId)
       .order("tour_no", { ascending: true });
 
-    if (!error && Array.isArray(data)) {
-      dbTours = data;
-
-      // backfill subjectId for any later logic that still wants it
-      if (!subjectId && dbTours.length && dbTours[0]?.subject_id) {
-        subjectId = dbTours[0].subject_id;
-      }
-    }
+    if (!error && Array.isArray(data)) dbTours = data;
   } catch {}
 }
 
