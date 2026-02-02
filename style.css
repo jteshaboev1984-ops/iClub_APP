@@ -972,6 +972,24 @@ html, body {
 }
 
 .btn:active { transform: translateY(1px); }
+/* Disabled buttons must look disabled (visual parity with actual disabled state) */
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn.primary:disabled,
+.btn.primary[disabled] {
+  background: #cfd6e4;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.btn.is-loading {
+  cursor: progress;
+}
 
 .btn.primary {
   background: linear-gradient(180deg, var(--primary), var(--primary-2));
