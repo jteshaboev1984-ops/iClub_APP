@@ -6213,6 +6213,29 @@ async function updateTourAttempt(attemptId, patch) {
     const qElapsed = formatMsToMMSS(Date.now() - ctx.qStartedAt);
     const qEl = $("#tour-question-time");
     if (qEl) qEl.textContent = qElapsed;
+     // ✅ last-10-seconds warning on question timer
+try {
+  const qRow = ctx.questions?.[ctx.index] || null;
+
+  const limitSecRaw =
+    qRow?.time_limit_seconds ??
+    qRow?.timeLimitSec ??
+    TOUR_CONFIG.defaultQuestionTimeSec ??
+    45;
+
+  const limitSec = Math.max(1, Number(limitSecRaw) || 45);
+  const elapsedSec = Math.max(0, Math.floor((Date.now() - ctx.qStartedAt) / 1000));
+  const remainSec = limitSec - elapsedSec;
+
+  const qCard = (qEl && qEl.closest) ? qEl.closest(".tour-timer-card") : null;
+  if (qCard) {
+    if (remainSec <= 10) qCard.classList.add("danger");
+    else qCard.classList.remove("danger");
+
+    if (remainSec <= 5) qCard.classList.add("pulse");
+    else qCard.classList.remove("pulse");
+  }
+} catch {}
 
     // warning visibility
     const warnBtn = $("#tour-warn-btn");
