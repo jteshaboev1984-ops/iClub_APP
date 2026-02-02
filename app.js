@@ -6298,6 +6298,7 @@ try {
   wrap.appendChild(inputWrap);
 
   const inputEl = inputWrap.querySelector("#tour-input");
+   if (inputEl) inputEl.value = ""; // важно: не сохраняем введённое при перерисовке
 
   const nextBtn =
     $("#tour-next-btn") ||
