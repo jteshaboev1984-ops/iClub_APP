@@ -221,6 +221,7 @@
       tours_tour_label: "Тур",
       tours_best_result: "Лучший результат",
       tours_best_time: "Лучшее время",
+      tours_best_time_of_best_result: "Время лучшего результата",
 
       tours_status_title: "Туры пока недоступны",
       tours_status_desc: "Даты и список туров появятся здесь после публикации.",
@@ -467,6 +468,7 @@
       tours_tour_label: "Tur",
       tours_best_result: "Eng yaxshi natija",
       tours_best_time: "Eng yaxshi vaqt",
+      tours_best_time_of_best_result: "Eng yaxshi natijaning vaqti",
 
       tours_status_title: "Turlar hozircha mavjud emas",
       tours_status_desc: "Tur sanalari va ro‘yxati e’lon qilingach shu yerda ko‘rinadi.",
@@ -714,6 +716,7 @@
       tours_tour_label: "Tour",
       tours_best_result: "Best result",
       tours_best_time: "Best time",
+      tours_best_time_of_best_result: "Time of best result",
 
       tours_status_title: "Tours are not available yet",
       tours_status_desc: "Tour dates and the list will appear here after publication.",
