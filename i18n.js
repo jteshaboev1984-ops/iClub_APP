@@ -220,8 +220,13 @@
 
       tours_tour_label: "Тур",
       tours_best_result: "Лучший результат",
-      tours_best_time: "Лучшее время",
+      tours_best_time: "Время лучшего результата",
       tours_best_time_of_best_result: "Время лучшего результата",
+
+      tours_completed_title: "Пройденные туры",
+      tours_completed_empty: "Вы ещё не проходили туры по этому предмету.",
+      tours_completed_sub: "Всего: {n}",
+      tours_completed_time_label: "время",
 
       tours_status_title: "Туры пока недоступны",
       tours_status_desc: "Даты и список туров появятся здесь после публикации.",
@@ -470,6 +475,11 @@
       tours_best_time: "Eng yaxshi vaqt",
       tours_best_time_of_best_result: "Eng yaxshi natijaning vaqti",
 
+      tours_completed_title: "Yakunlangan turlar",
+      tours_completed_empty: "Bu fandan hali tur topshirmagansiz.",
+      tours_completed_sub: "Jami: {n}",
+      tours_completed_time_label: "vaqt",
+
       tours_status_title: "Turlar hozircha mavjud emas",
       tours_status_desc: "Tur sanalari va ro‘yxati e’lon qilingach shu yerda ko‘rinadi.",
 
@@ -717,6 +727,11 @@
       tours_best_result: "Best result",
       tours_best_time: "Best time",
       tours_best_time_of_best_result: "Time of best result",
+
+      tours_completed_title: "Completed tours",
+      tours_completed_empty: "You haven’t completed any tours for this subject yet.",
+      tours_completed_sub: "Total: {n}",
+      tours_completed_time_label: "time",
 
       tours_status_title: "Tours are not available yet",
       tours_status_desc: "Tour dates and the list will appear here after publication.",
