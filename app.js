@@ -4925,24 +4925,26 @@ if (tourLabelEl) {
      const ed = activeTour.end_date ? String(activeTour.end_date) : null;
      const dateTxt = (sd || ed) ? `${sd || "—"} → ${ed || "—"}` : "";
 
-     if (statusTitle) statusTitle.textContent = tr("tours_active_now", "Активный тур сейчас");
-   if (statusDesc) statusDesc.textContent =
-     `${tr("tours_tour_label", "Тур")} ${activeTour.tour_no}${dateTxt ? " • " + dateTxt : ""}`;
+    if (statusTitle) statusTitle.textContent = tr("active_tour_title") || "Активный тур сейчас";
+      if (statusDesc) statusDesc.textContent = tourLabel;
 
-   if (openBtn) {
-     // ✅ show start button for active tour
-     openBtn.classList.remove("hidden");
-     openBtn.style.display = "";
-     openBtn.disabled = false;
+      // If already attempted — show it here (before rules) and hide "Open tour"
+      let alreadyAttempted = false;
+      try {
+        const uid = getCurrentUserId();
+        if (uid && activeTour?.id) alreadyAttempted = await hasTourAttempt(uid, activeTour.id);
+         } catch {}
 
-     // Button title (fallback if missing in i18n)
-     openBtn.textContent = tr("tours_open_btn", "Открыть тур");
-
-     // start flow
-     openBtn.onclick = () => openTourRules();
+         if (alreadyAttempted) {
+           if (statusTitle) statusTitle.textContent = tr("tour_unavailable_title") || "Тур недоступен";
+           if (statusDesc) statusDesc.textContent = tr("tour_unavailable_already_attempted") || "Вы уже завершили этот тур.";
+           if (openBtn) openBtn.classList.add("hidden");
+         } else {
+           if (openBtn) openBtn.classList.remove("hidden");
+           if (openBtn) openBtn.onclick = () => openTourRules();
+         }
+      }
    }
-}
-
 saveState();
 
 // --------------------------------------
@@ -6367,10 +6369,11 @@ try {
     $("#quiz-next-btn") ||
     document.querySelector('[data-action="tour-next"]');
 
-  if (nextBtn) {
-    nextBtn.disabled = true;
-    nextBtn.textContent = (ctx.index >= TOUR_CONFIG.total - 1) ? "Finish Tour →" : "Next Question →";
-  }
+ if (nextBtn) {
+  nextBtn.classList.remove("is-loading"); // <-- добавь
+  nextBtn.disabled = true;
+  nextBtn.textContent = (ctx.index >= TOUR_CONFIG.total - 1) ? "Finish Tour →" : "Next Question →";
+}
 
   renderTourHUD();
 }
@@ -7217,6 +7220,18 @@ if (action === "tour-pick") {
 if (action === "tour-next" || action === "tour-submit") {
   const ctx = state.tourContext;
   if (!ctx) return;
+
+  // UI: show "Saving..." also on Next (not only Finish)
+  const nextBtn =
+    $("#tour-next-btn") ||
+    $("#quiz-next-btn") ||
+    document.querySelector('[data-action="tour-next"]');
+
+  if (nextBtn) {
+    nextBtn.classList.add("is-loading");
+    nextBtn.disabled = true;
+    nextBtn.textContent = (window.i18n?.t ? window.i18n.t("saving") : "Saving…");
+  }
 
   const picked = (ctx._pickedIndex === null || ctx._pickedIndex === undefined) ? null : Number(ctx._pickedIndex);
   ctx._pickedIndex = null;
