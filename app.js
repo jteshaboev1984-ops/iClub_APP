@@ -4940,7 +4940,6 @@ if (best) {
   if (bestTimeEl) bestTimeEl.textContent = "—";
 }
 
-// ✅ Trend inside blue card (auto-hides when <2)
 renderTrendBars({
   wrapEl: document.getElementById("tours-micro-bars"),
   deltaEl: document.getElementById("tours-micro-delta"),
@@ -4949,24 +4948,10 @@ renderTrendBars({
   lastClass: "is-last"
 });
 
-    if (!eligibility?.ok) {
-      if (openBtn) openBtn.style.display = "none";
-
-      if (statusTitle && eligibility.reason === "not_school") statusTitle.textContent = t("tours_status_not_school_title");
-      else if (statusTitle && eligibility.reason === "not_competitive") statusTitle.textContent = t("tours_status_not_comp_title");
-      else if (statusTitle) statusTitle.textContent = t("tours_status_title");
-
-      if (statusDesc && eligibility.reason === "not_school") statusDesc.textContent = t("tours_status_not_school_desc");
-      else if (statusDesc && eligibility.reason === "not_competitive") statusDesc.textContent = t("tours_status_not_comp_desc");
-      else if (statusDesc) statusDesc.textContent = t("tours_status_desc");
-
-      return;
-    }
-
-    if (statusTitle) statusTitle.textContent = t("tours_status_title");
-    if (statusDesc) statusDesc.textContent = t("tours_status_desc");
-    if (openBtn) openBtn.style.display = "none";
-  }
+// ✅ IMPORTANT:
+// eligibility + status + open button уже обработаны выше (DB section).
+// НИЧЕГО больше тут не перетираем.
+}
 
   // ---- Practice timer (per-question) ----
   function stopPracticeQuestionTimer() {
