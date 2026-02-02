@@ -5123,7 +5123,7 @@ try {
 renderTrendBars({
   wrapEl: document.getElementById("tours-micro-bars"),
   deltaEl: document.getElementById("tours-micro-delta"),
-  attemptsNewestFirst: hist,
+  attemptsNewestFirst: (typeof hist !== "undefined" ? hist : []),
   barClass: "tours-micro-bar",
   lastClass: "is-last"
 });
