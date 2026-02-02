@@ -4774,6 +4774,12 @@ const statusTitle = document.getElementById("tours-status-title");
 const statusDesc = document.getElementById("tours-status-desc");
 const openBtn = document.getElementById("tours-open-btn");
 
+// ✅ local i18n helper: if translation missing, show fallback (not the key)
+const tr = (key, fallback) => {
+  const v = (typeof t === "function") ? t(key) : key;
+  return (v && v !== key) ? v : fallback;
+};
+
 // eligibility stays exactly as you had
 const eligibility = (typeof canOpenActiveTours === "function")
   ? canOpenActiveTours(profile, subjectKey)
@@ -4804,8 +4810,8 @@ if (!subjectId && window.sb && subjectKey) {
 const todayISO = new Date().toISOString().slice(0, 10);
 
 // UI: show loading first to avoid 1-sec "wrong screen" flicker
-if (statusTitle) statusTitle.textContent = (t("loading") || "Загрузка…");
-if (statusDesc) statusDesc.textContent = (t("loading_desc") || "Получаем список туров…");
+if (statusTitle) statusTitle.textContent = tr("loading", "Загрузка…");
+if (statusDesc) statusDesc.textContent = tr("loading_desc", "Получаем список туров…");
 if (openBtn) openBtn.classList.add("hidden");
 
 // NULL dates = no restriction (ok for test)
@@ -4875,32 +4881,37 @@ if (tourLabelEl) {
     : (t("tours_unavailable_title") || "Туры пока недоступны");
 }
 
-// Status + Open button (DB)
-if (!activeTour) {
-  if (statusTitle) statusTitle.textContent = t("tours_unavailable_title") || "Туры пока недоступны";
+   // Status + Open button (DB)
+   if (!activeTour) {
+     if (statusTitle) statusTitle.textContent = t("tours_unavailable_title") || "Туры пока недоступны";
 
-  // если есть ошибка чтения туров — показываем человеческий текст (а не “как будто туров нет”)
-  const baseDesc = t("tours_unavailable_desc") || "Даты и список туров появятся здесь после публикации.";
-  const errHint = toursErr ? " (нет доступа к базе туров)" : "";
-  if (statusDesc) statusDesc.textContent = baseDesc + errHint;
+     // если есть ошибка чтения туров — показываем человеческий текст (а не “как будто туров нет”)
+     const baseDesc = t("tours_unavailable_desc") || "Даты и список туров появятся здесь после публикации.";
+     const errHint = toursErr ? " (нет доступа к базе туров)" : "";
+     if (statusDesc) statusDesc.textContent = baseDesc + errHint;
 
-  if (openBtn) openBtn.classList.add("hidden");
-} else {
-  const sd = activeTour.start_date ? String(activeTour.start_date) : null;
-  const ed = activeTour.end_date ? String(activeTour.end_date) : null;
-  const dateTxt = (sd || ed) ? `${sd || "—"} → ${ed || "—"}` : "";
+     if (openBtn) openBtn.classList.add("hidden");
+   } else {
+     const sd = activeTour.start_date ? String(activeTour.start_date) : null;
+     const ed = activeTour.end_date ? String(activeTour.end_date) : null;
+     const dateTxt = (sd || ed) ? `${sd || "—"} → ${ed || "—"}` : "";
 
-  if (statusTitle) statusTitle.textContent = t("tours_active_now") || "Активный тур сейчас";
-  if (statusDesc) statusDesc.textContent =
-    `${t("tours_tour_label") || "Тур"} ${activeTour.tour_no}${dateTxt ? " • " + dateTxt : ""}`;
+     if (statusTitle) statusTitle.textContent = tr("tours_active_now", "Активный тур сейчас");
+   if (statusDesc) statusDesc.textContent =
+     `${tr("tours_tour_label", "Тур")} ${activeTour.tour_no}${dateTxt ? " • " + dateTxt : ""}`;
 
-  if (openBtn) {
-    if (eligibility?.ok === false) openBtn.classList.add("hidden");
-    else openBtn.classList.remove("hidden");
+   if (openBtn) {
+     // ✅ show start button for active tour
+     openBtn.classList.remove("hidden");
+     openBtn.style.display = "";
+     openBtn.disabled = false;
 
-    // гарантируем клик (иногда у тебя открыт весь список кликом, а кнопка без хэндлера)
-    openBtn.onclick = () => openTourRules();
-  }
+     // Button title (fallback if missing in i18n)
+     openBtn.textContent = tr("tours_open_btn", "Открыть тур");
+
+     // start flow
+     openBtn.onclick = () => openTourRules();
+   }
 }
 
 saveState();
