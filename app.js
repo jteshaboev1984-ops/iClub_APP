@@ -6232,39 +6232,89 @@ async function updateTourAttempt(attemptId, patch) {
     ctx.qStartedAt = Date.now();
     saveState();
 
-    const qEl = $("#tour-question");
-    if (qEl) qEl.textContent = q.question_text;
+    // question text (fallback ids)
+const qEl =
+  $("#tour-question") ||
+  $("#quiz-question") ||
+  $("#tour-question-text");
 
-    const wrap = $("#tour-options");
-    if (wrap) {
-      wrap.innerHTML = "";
+if (qEl) qEl.textContent = q.question_text;
 
-      q.options.forEach((opt, i) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "option";
-        btn.dataset.action = "tour-pick";
-        btn.dataset.index = String(i);
+// options wrap (fallback ids/classes)
+const wrap =
+  $("#tour-options") ||
+  $("#tour-options-wrap") ||
+  $("#tour-options-list") ||
+  document.querySelector(".tour-options");
 
-        btn.innerHTML = `
-          <span class="dot" aria-hidden="true"></span>
-          <span class="opt-text">${escapeHTML(opt)}</span>
-        `;
+if (wrap) {
+  wrap.innerHTML = "";
 
-        wrap.appendChild(btn);
-      });
-    }
+  // normalize options list (fallback to 4 dummy options ONLY if no options in DB)
+  const opts = Array.isArray(q.options) && q.options.length
+    ? q.options
+    : ["Option A", "Option B", "Option C", "Option D"];
 
-    // disable next until choose
-    const next = $("#tour-next-btn");
-    if (next) {
-      next.disabled = true;
-      next.textContent = (ctx.index >= TOUR_CONFIG.total - 1) ? "Finish Tour →" : "Next Question →";
-    }
+  opts.forEach((opt, i) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "option";
+    btn.dataset.action = "tour-pick";
+    btn.dataset.index = String(i);
 
-    // clear active option styles
-    $$("#tour-options .option").forEach(o => o.classList.remove("is-selected"));
-    renderTourHUD();
+    btn.innerHTML = `
+      <span class="dot" aria-hidden="true"></span>
+      <span class="opt-text">${escapeHTML(opt)}</span>
+    `;
+
+    // ✅ IMPORTANT: direct click handler (works even if global bindActions fails in WebView)
+    btn.onclick = (ev) => {
+      try { ev.preventDefault(); ev.stopPropagation(); } catch {}
+
+      const ctx2 = state.tourContext;
+      if (!ctx2) return;
+
+      // highlight
+      (wrap.querySelectorAll(".option") || []).forEach(o => o.classList.remove("is-selected"));
+      btn.classList.add("is-selected");
+
+      // enable next
+      const nextBtn =
+        $("#tour-next-btn") ||
+        $("#quiz-next-btn") ||
+        document.querySelector('[data-action="tour-next"]');
+
+      if (nextBtn) nextBtn.disabled = false;
+
+      // store temporarily (final submit happens on Next)
+      ctx2._pickedIndex = i;
+      saveState();
+    };
+
+    wrap.appendChild(btn);
+  });
+}
+
+  // disable next until choose (use same fallback selector as click handler)
+const nextBtn =
+  $("#tour-next-btn") ||
+  $("#quiz-next-btn") ||
+  document.querySelector('[data-action="tour-next"]');
+
+if (nextBtn) {
+  nextBtn.disabled = true;
+  nextBtn.textContent = (ctx.index >= TOUR_CONFIG.total - 1) ? "Finish Tour →" : "Next Question →";
+}
+
+// clear active option styles (use actual wrap if exists)
+if (wrap) {
+  (wrap.querySelectorAll(".option") || []).forEach(o => o.classList.remove("is-selected"));
+} else {
+  $$("#tour-options .option").forEach(o => o.classList.remove("is-selected"));
+}
+
+renderTourHUD();
+
   }
 
     function submitTourAnswer({ pickedIndex, auto = false } = {}) {
@@ -6307,7 +6357,8 @@ async function updateTourAttempt(attemptId, patch) {
         const inputEl = document.getElementById("tour-input");
         const inputVal = inputEl ? String(inputEl.value || "").trim() : "";
 
-        const answerForDb = (q.type === "mcq") ? pickedForDb : inputVal;
+        const qType = String(q?.type || q?.qtype || "mcq").toLowerCase();
+        const answerForDb = (qType === "mcq") ? pickedForDb : inputVal;
 
         Promise
           .resolve(upsertTourAnswer(ctx2.attemptId, q.id, {
