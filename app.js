@@ -6220,138 +6220,122 @@ async function updateTourAttempt(attemptId, patch) {
   }
 
   function renderTourQuestion() {
-    const ctx = state.tourContext;
-    if (!ctx) return;
+  const ctx = state.tourContext;
+  if (!ctx) return;
 
-    const q = ctx.questions?.[ctx.index];
-    if (!q) {
-      finishTour({ reason: "done" });
-      return;
-    }
+  const q = ctx.questions?.[ctx.index];
+  if (!q) {
+    finishTour({ reason: "done" });
+    return;
+  }
 
-    ctx.qStartedAt = Date.now();
-    saveState();
+  ctx.qStartedAt = Date.now();
+  // сбрасываем прошлый выбор при показе нового вопроса
+  ctx._pickedIndex = null;
+  saveState();
 
-    // question text (fallback ids)
-const qEl =
-  $("#tour-question") ||
-  $("#quiz-question") ||
-  $("#tour-question-text");
+  // question text (fallback ids)
+  const qEl =
+    $("#tour-question") ||
+    $("#quiz-question") ||
+    $("#tour-question-text");
 
-if (qEl) {
-  const txt =
-    (q.question_text != null && String(q.question_text).trim() !== "")
-      ? String(q.question_text)
-      : (q.question != null ? String(q.question) : "");
-  qEl.textContent = txt || "";
-}
+  if (qEl) qEl.textContent = (q.question_text ?? q.questionText ?? q.text ?? "");
 
-// options wrap (fallback ids/classes)
-const wrap =
-  $("#tour-options") ||
-  $("#tour-options-wrap") ||
-  $("#tour-options-list") ||
-  document.querySelector(".tour-options");
+  // question type normalize (mcq vs input)
+  const qTypeRaw = String(q.qtype ?? q.type ?? q.question_type ?? "mcq").toLowerCase();
+  const isMcq = (qTypeRaw === "mcq" || qTypeRaw === "choice" || qTypeRaw === "multiple_choice");
 
-if (wrap) {
-  wrap.innerHTML = "";
+  // options wrap (fallback ids/classes)
+  const wrap =
+    $("#tour-options") ||
+    $("#tour-options-wrap") ||
+    $("#tour-options-list") ||
+    document.querySelector(".tour-options");
 
-  // normalize options list (fallback to 4 dummy options ONLY if no options in DB)
-  const opts = Array.isArray(q.options) && q.options.length
-    ? q.options
-    : ["Option A", "Option B", "Option C", "Option D"];
+  if (wrap) {
+    wrap.innerHTML = "";
 
-  opts.forEach((opt, i) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "option";
-    btn.dataset.action = "tour-pick";
-    btn.dataset.index = String(i);
+    if (!isMcq) {
+      // input question UI (no HTML edits needed)
+      const inputWrap = document.createElement("div");
+      inputWrap.className = "input-wrap";
 
-    btn.innerHTML = `
-      <span class="dot" aria-hidden="true"></span>
-      <span class="opt-text">${escapeHTML(opt)}</span>
-    `;
+      inputWrap.innerHTML = `
+        <label class="input-label">${escapeHTML(t("answer") || "Answer")}</label>
+        <input id="tour-input" class="text-input" type="text" placeholder="${escapeHTML(t("type_answer") || "Type your answer")}">
+      `;
 
-    // ✅ IMPORTANT: direct click handler (works even if global bindActions fails in WebView)
-    btn.onclick = (ev) => {
-      try { ev.preventDefault(); ev.stopPropagation(); } catch {}
+      wrap.appendChild(inputWrap);
 
-      const ctx2 = state.tourContext;
-      if (!ctx2) return;
-
-      // highlight (support both CSS variants)
-   (wrap.querySelectorAll(".option") || []).forEach(o => {
-     o.classList.remove("is-selected");
-     o.classList.remove("selected");
-   });
-   btn.classList.add("is-selected");
-   btn.classList.add("selected");
-
-      // enable next
       const nextBtn =
         $("#tour-next-btn") ||
         $("#quiz-next-btn") ||
         document.querySelector('[data-action="tour-next"]');
 
-      if (nextBtn) nextBtn.disabled = false;
+      if (nextBtn) {
+        nextBtn.disabled = false; // для input не блокируем
+        nextBtn.textContent = (ctx.index >= TOUR_CONFIG.total - 1) ? "Finish Tour →" : "Next Question →";
+      }
 
-      // store temporarily (final submit happens on Next)
-      ctx2._pickedIndex = i;
-      saveState();
-    };
+      renderTourHUD();
+      return;
+    }
 
-    wrap.appendChild(btn);
-  });
-      // restore selection if user already picked (prevents "looks unselected" after any rerender)
-   if (ctx && ctx._pickedIndex != null) {
-     const picked = Number(ctx._pickedIndex);
-     const btns = (wrap.querySelectorAll(".option") || []);
-     if (btns[picked]) {
-       btns.forEach(o => {
-         o.classList.remove("is-selected");
-         o.classList.remove("selected");
-       });
-       btns[picked].classList.add("is-selected");
-       btns[picked].classList.add("selected");
+    // MCQ options
+    const opts = Array.isArray(q.options) && q.options.length
+      ? q.options
+      : ["Option A", "Option B", "Option C", "Option D"];
 
-       const nextBtn2 =
-         $("#tour-next-btn") ||
-         $("#quiz-next-btn") ||
-         document.querySelector('[data-action="tour-next"]');
+    opts.forEach((opt, i) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "option";
+      btn.dataset.action = "tour-pick";
+      btn.dataset.index = String(i);
 
-       if (nextBtn2) nextBtn2.disabled = false;
-     }
-   }
- }
+      btn.innerHTML = `
+        <span class="dot" aria-hidden="true"></span>
+        <span class="opt-text">${escapeHTML(opt)}</span>
+      `;
 
-  // disable next until choose (use same fallback selector as click handler)
-const nextBtn =
-  $("#tour-next-btn") ||
-  $("#quiz-next-btn") ||
-  document.querySelector('[data-action="tour-next"]');
+      btn.onclick = (ev) => {
+        try { ev.preventDefault(); ev.stopPropagation(); } catch {}
 
-if (nextBtn) {
-  nextBtn.disabled = true;
-  nextBtn.textContent = (ctx.index >= TOUR_CONFIG.total - 1) ? "Finish Tour →" : "Next Question →";
-}
+        const ctx2 = state.tourContext;
+        if (!ctx2) return;
 
-   // clear active option styles (support both classes)
-   if (wrap) {
-     (wrap.querySelectorAll(".option") || []).forEach(o => {
-       o.classList.remove("is-selected");
-       o.classList.remove("selected");
-     });
-   } else {
-     $$("#tour-options .option").forEach(o => {
-       o.classList.remove("is-selected");
-       o.classList.remove("selected");
-     });
-   }
+        (wrap.querySelectorAll(".option") || []).forEach(o => o.classList.remove("is-selected"));
+        btn.classList.add("is-selected");
 
-   renderTourHUD();
+        const nextBtn =
+          $("#tour-next-btn") ||
+          $("#quiz-next-btn") ||
+          document.querySelector('[data-action="tour-next"]');
 
+        if (nextBtn) nextBtn.disabled = false;
+
+        ctx2._pickedIndex = i;
+        saveState();
+      };
+
+      wrap.appendChild(btn);
+    });
   }
+
+  // disable next until choose (MCQ only)
+  const nextBtn =
+    $("#tour-next-btn") ||
+    $("#quiz-next-btn") ||
+    document.querySelector('[data-action="tour-next"]');
+
+  if (nextBtn) {
+    nextBtn.disabled = true;
+    nextBtn.textContent = (ctx.index >= TOUR_CONFIG.total - 1) ? "Finish Tour →" : "Next Question →";
+  }
+
+  renderTourHUD();
+}
 
     function submitTourAnswer({ pickedIndex, auto = false } = {}) {
     const ctx = state.tourContext;
@@ -6368,18 +6352,37 @@ if (nextBtn) {
       : (q.correct_index !== undefined && q.correct_index !== null) ? Number(q.correct_index)
       : null;
 
+        // normalize question type (DB uses qtype, older code may use type)
+    const qType =
+      (q?.qtype != null ? String(q.qtype) : (q?.type != null ? String(q.type) : "mcq"))
+        .toLowerCase();
+    const isMcq = (qType === "mcq" || qType === "multiple_choice");
+
     const pickedNum = (pickedIndex === null || pickedIndex === undefined) ? null : Number(pickedIndex);
-    const isCorrect = (pickedNum !== null && correctIdx !== null) ? (pickedNum === correctIdx) : false;
-    // normalize question type (DB uses qtype, older code may use type)
-      const qType =
-        (q?.qtype != null ? String(q.qtype) : (q?.type != null ? String(q.type) : "mcq"))
-         .toLowerCase();
-      const isMcq = (qType === "mcq" || qType === "multiple_choice");
+
+    // input value (for non-mcq)
+    const inputEl = document.getElementById("tour-input");
+    const inputVal = inputEl ? String(inputEl.value || "").trim() : "";
+
+    // expected answer (for input questions)
+    const expectedRaw =
+      (q?.correct_answer != null ? q.correct_answer
+        : (q?.correctAnswer != null ? q.correctAnswer
+        : (q?.correct != null ? q.correct
+        : (q?.answer != null ? q.answer : null))));
+
+    const expected = (expectedRaw == null) ? "" : String(expectedRaw).trim();
+
+    // correctness
+    const isCorrect = isMcq
+      ? ((pickedNum !== null && correctIdx !== null) ? (pickedNum === correctIdx) : false)
+      : (expected ? (inputVal.toLowerCase() === expected.toLowerCase()) : false);
 
     ctx.answers = ctx.answers || [];
     ctx.answers.push({
       qid: q.id,
       pickedIndex: pickedNum,
+      input: isMcq ? "" : inputVal,
       isCorrect,
       spentSec,
       index: ctx.index
@@ -6398,7 +6401,6 @@ if (nextBtn) {
         const inputEl = document.getElementById("tour-input");
         const inputVal = inputEl ? String(inputEl.value || "").trim() : "";
 
-        const qType = String(q?.type || q?.qtype || "mcq").toLowerCase();
         const answerForDb = isMcq ? pickedForDb : inputVal;
 
         Promise
@@ -6448,7 +6450,22 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
 }
 
   async function finishTour({ reason = "done" } = {}) {
-  stopTourTick();
+    stopTourTick();
+
+  // UI feedback: saving (prevents “app frozen” feeling)
+  const nextBtn =
+    $("#tour-next-btn") ||
+    $("#quiz-next-btn") ||
+    document.querySelector('[data-action="tour-next"]');
+
+  if (nextBtn) {
+    nextBtn.disabled = true;
+    nextBtn.classList.add("is-loading");
+    nextBtn.textContent = (t("saving") || "Сохранение…");
+  }
+
+  const monitor = document.getElementById("tour-monitor");
+  if (monitor) monitor.textContent = (t("saving") || "Сохранение…");
 
   const ctx = state.tourContext;
 
