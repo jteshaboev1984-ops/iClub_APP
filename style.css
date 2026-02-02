@@ -3095,6 +3095,9 @@ body.modal-open { overflow: hidden; }
 .tours-metric-label{
   font-size: 12px;
   opacity: .9;
+  line-height: 1.15;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .tours-metric-value{
