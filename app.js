@@ -4995,15 +4995,15 @@ renderTrendBars({
 // НИЧЕГО больше тут не перетираем.
 }
 
-  // ---- Practice timer (per-question) ----
-  function stopPracticeQuestionTimer() {
+    // ---- Practice timer (per-question) ----
+  const stopPracticeQuestionTimer = () => {
     if (state.quiz?.qTimerId) {
       clearInterval(state.quiz.qTimerId);
       state.quiz.qTimerId = null;
     }
-  }
+  };
 
-  function startPracticeQuestionTimer() {
+  const startPracticeQuestionTimer = () => {
     stopPracticeQuestionTimer();
 
     const timerEl = $("#practice-timer");
@@ -5020,7 +5020,7 @@ renderTrendBars({
         handlePracticeSubmit(true);
       }
     }, 1000);
-  }
+  };
 
   // ---- Entry point from Subject Hub ----
   function openPracticeStart() {
