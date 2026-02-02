@@ -6240,7 +6240,11 @@ async function updateTourAttempt(attemptId, patch) {
     $("#quiz-question") ||
     $("#tour-question-text");
 
-  if (qEl) qEl.textContent = (q.question_text ?? q.questionText ?? q.text ?? "");
+  if (qEl) {
+  const qText =
+    (q.question ?? q.question_text ?? q.questionText ?? q.text ?? q.prompt ?? q.title ?? "");
+  qEl.textContent = String(qText || "");
+}
 
   // question type normalize (mcq vs input)
   const qTypeRaw = String(q.qtype ?? q.type ?? q.question_type ?? "mcq").toLowerCase();
@@ -6257,30 +6261,41 @@ async function updateTourAttempt(attemptId, patch) {
     wrap.innerHTML = "";
 
     if (!isMcq) {
-      // input question UI (no HTML edits needed)
-      const inputWrap = document.createElement("div");
-      inputWrap.className = "input-wrap";
+  // input question UI (no HTML edits needed)
+  const inputWrap = document.createElement("div");
+  inputWrap.className = "input-wrap";
 
-      inputWrap.innerHTML = `
-        <label class="input-label">${escapeHTML(t("answer") || "Answer")}</label>
-        <input id="tour-input" class="text-input" type="text" placeholder="${escapeHTML(t("type_answer") || "Type your answer")}">
-      `;
+  inputWrap.innerHTML = `
+    <label class="input-label">${escapeHTML(t("answer") || "Answer")}</label>
+    <input id="tour-input" class="text-input" type="text" placeholder="${escapeHTML(t("type_answer") || "Type your answer")}">
+  `;
 
-      wrap.appendChild(inputWrap);
+  wrap.appendChild(inputWrap);
 
-      const nextBtn =
-        $("#tour-next-btn") ||
-        $("#quiz-next-btn") ||
-        document.querySelector('[data-action="tour-next"]');
+  const inputEl = inputWrap.querySelector("#tour-input");
 
-      if (nextBtn) {
-        nextBtn.disabled = false; // для input не блокируем
-        nextBtn.textContent = (ctx.index >= TOUR_CONFIG.total - 1) ? "Finish Tour →" : "Next Question →";
-      }
+  const nextBtn =
+    $("#tour-next-btn") ||
+    $("#quiz-next-btn") ||
+    document.querySelector('[data-action="tour-next"]');
 
-      renderTourHUD();
-      return;
-    }
+  if (nextBtn) {
+    nextBtn.disabled = true; // ⛔ пока пусто
+    nextBtn.textContent = (ctx.index >= TOUR_CONFIG.total - 1)
+      ? "Finish Tour →"
+      : "Next Question →";
+  }
+
+  // ✅ активируем Next только когда есть ввод
+  if (inputEl && nextBtn) {
+    inputEl.addEventListener("input", () => {
+      nextBtn.disabled = inputEl.value.trim().length === 0;
+    });
+  }
+
+  renderTourHUD();
+  return;
+}
 
     // MCQ options
     const opts = Array.isArray(q.options) && q.options.length
