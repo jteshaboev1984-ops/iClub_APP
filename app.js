@@ -2119,6 +2119,35 @@ async function getAuthUid() {
     return null;
   }
 }
+
+// ✅ DB profile fetch (used by tours eligibility, etc.)
+async function getUserProfile(uid) {
+  try {
+    // 1) local fallback (if your project has it)
+    const lp = (typeof loadProfile === "function") ? loadProfile() : null;
+
+    // if local profile exists and looks valid, return it immediately
+    if (lp && typeof lp === "object") {
+      // optional: if local profile has uid and matches, prefer it
+      if (!lp.id || !uid || String(lp.id) === String(uid)) return lp;
+    }
+
+    // 2) DB fetch
+    if (!window.sb || !uid) return lp || null;
+
+    const { data, error } = await window.sb
+      .from("users")
+      .select("id, telegram_user_id, first_name, last_name, avatar_url, language_code, is_school_student, region, district, school, class, region_id, district_id")
+      .eq("id", uid)
+      .maybeSingle();
+
+    if (error) return lp || null;
+    return data || lp || null;
+  } catch {
+    return (typeof loadProfile === "function") ? (loadProfile() || null) : null;
+  }
+}
+
 async function syncUserSubjectToSupabase(subjectKey, mode, isPinned) {
   if (!window.sb) return { ok: false, reason: "no_sb" };
 
