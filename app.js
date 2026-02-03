@@ -4530,23 +4530,23 @@ if (mainSubjects.length) {
 
             // Additional subjects: tours do not exist by spec
       if (isAdditionalSubjectKey(state.courses.subjectKey)) {
-        toursBtn.disabled = false;                 // важно: чтобы клик работал и показал сообщение
-        toursBtn.classList.add("is-disabled");     // визуально как disabled
-        if (toursSub) toursSub.textContent = "Туры доступны только для основных предметов.";
-      } else if (!eligibility.ok) {
-        toursBtn.disabled = false;                 // важно: чтобы клик работал и показал стандартный toast
-        toursBtn.classList.add("is-disabled");     // визуально как disabled
-        if (toursSub) {
-          if (eligibility.reason === "not_school") toursSub.textContent = t("disabled_not_school");
-          else if (eligibility.reason === "not_competitive") toursSub.textContent = t("disabled_not_competitive");
-          else toursSub.textContent = t("not_available");
-        }
-      } else {
-        toursBtn.disabled = false;
-        toursBtn.classList.remove("is-disabled");
-        if (toursSub) toursSub.textContent = "Активные и прошедшие";
-      }
-    }
+     toursBtn.disabled = false;
+     toursBtn.classList.add("is-disabled");
+     if (toursSub) toursSub.textContent = t("tours_only_main_subjects") || "Туры доступны только для основных предметов.";
+   } else if (!eligibility.ok) {
+     toursBtn.disabled = false;
+     toursBtn.classList.add("is-disabled");
+     if (toursSub) {
+       if (eligibility.reason === "not_school") toursSub.textContent = t("disabled_not_school") || "";
+       else if (eligibility.reason === "not_competitive") toursSub.textContent = t("disabled_not_competitive") || "";
+       else toursSub.textContent = t("not_available") || "";
+     }
+   } else {
+     toursBtn.disabled = false;
+     toursBtn.classList.remove("is-disabled");
+     if (toursSub) toursSub.textContent = t("tours_active_and_completed") || "Активные и прошедшие";
+   }
+ }
 
     updateTopbarForView("courses");
   }
@@ -6236,9 +6236,11 @@ async function updateTourAttempt(attemptId, patch) {
   // analytics: started
   try {
     trackEvent("tour_attempt_started", {
-      subject_id: String(subjectId),
-      tour_id: String(tour.id)
-    });
+     ts: new Date().toISOString(),
+     tour_id: String(tourId),
+     subject_id: String(subjectId),
+     subject_key: String(subjectKey || "")
+   });
   } catch {}
 
   initTourSession({
@@ -6702,11 +6704,13 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     const is_archive = !!ctx?.isArchive;
 
     trackEvent("tour_attempt_finished", {
-      subject_id,
-      tour_id,
-      is_archive,
-      status: reason || "finished"
-    });
+     ts,
+     status: "done",
+     tour_id: String(tourId),
+     is_archive: false,
+     subject_id: String(subjectId),
+     subject_key: String(subjectKey || "")
+   });
   } catch {}
 
   // unlock
@@ -7308,9 +7312,9 @@ if (action === "practice-recommendations") {
            if (action === "open-tours") {
         // additional subjects: tours are not available
         if (isAdditionalSubjectKey(state.courses.subjectKey)) {
-          showToast("Туры доступны только для основных предметов.");
-          return;
-        }
+        showToast(t("tours_only_main_subjects") || "Туры доступны только для основных предметов.");
+        return;
+      }
 
         const profile = loadProfile();
         const eligibility = canOpenActiveTours(profile, state.courses.subjectKey);
