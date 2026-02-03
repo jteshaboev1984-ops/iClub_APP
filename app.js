@@ -2851,28 +2851,39 @@ async function ensureRatingsBoot() {
   const showLoading = () => { if (loadingEl) loadingEl.style.display = "flex"; };
   const hideLoading = () => { if (loadingEl) loadingEl.style.display = "none"; };
 
+  // total participants (used for "out of N")
+  let totalN = 0;
+
   const renderRowHTML = (row) => {
+
     const topClass =
       row.rank === 1 ? "is-top1" :
       (row.rank === 2 ? "is-top2" :
       (row.rank === 3 ? "is-top3" : ""));
 
-    return `
-      <div class="lb-row">
-        <div class="lb-rank">
+        return `
+      <div class="lb-row" style="display:grid;grid-template-columns:56px 1fr 64px 64px;gap:10px;align-items:center;">
+        <div class="lb-rank" style="display:flex;justify-content:center;">
           <div class="lb-rank-badge ${topClass}">${row.rank}</div>
         </div>
 
-            <div class="lb-student">
-          <div class="lb-student-text">
-            <div class="lb-name">${escapeHTML(row.name)}</div>
-            <div class="lb-meta">${escapeHTML(row.meta || "")}</div>
+        <div class="lb-student" style="min-width:0;">
+          <div class="lb-student-text" style="min-width:0;">
+            <div class="lb-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${escapeHTML(row.name)}
+            </div>
+            <div class="lb-meta" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${escapeHTML(row.meta || "")}
+            </div>
           </div>
         </div>
 
-
-        <div class="lb-score">${row.score}</div>
-        <div class="lb-time">${escapeHTML(row.time)}</div>
+        <div class="lb-score" style="text-align:right;font-variant-numeric:tabular-nums;">
+          ${row.score}
+        </div>
+        <div class="lb-time" style="text-align:right;font-variant-numeric:tabular-nums;">
+          ${escapeHTML(row.time)}
+        </div>
       </div>
     `;
   };
@@ -2979,7 +2990,7 @@ async function ensureRatingsBoot() {
     // 2) top 50
     const topRes = await window.sb
       .from("ratings_cache")
-      .select("user_id,score,total_time,rank_no,users(first_name,last_name,avatar_url,school,class,region,district)")
+      .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district)")
       .eq("tour_id", tourId)
       .eq("rank_type", scopeRankType)
       .lte("rank_no", 10)
@@ -3011,7 +3022,7 @@ async function ensureRatingsBoot() {
 
       const aroundRes = await window.sb
         .from("ratings_cache")
-        .select("user_id,score,total_time,rank_no,users(first_name,last_name,avatar_url,school,class,region,district)")
+        .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district)")
         .eq("tour_id", tourId)
         .eq("rank_type", scopeRankType)
         .gte("rank_no", lo)
@@ -3026,7 +3037,7 @@ async function ensureRatingsBoot() {
     let bottomData = [];
     const bottomRes = await window.sb
       .from("ratings_cache")
-      .select("user_id,score,total_time,rank_no,users(first_name,last_name,avatar_url,school,class,region,district)")
+      .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district)")
       .eq("tour_id", tourId)
       .eq("rank_type", scopeRankType)
       .order("rank_no", { ascending: false })
@@ -3044,7 +3055,7 @@ async function ensureRatingsBoot() {
         score: Number(r.score || 0),
         total_time: Number(r.total_time || 0),
         time: formatSecondsToMMSS(r.total_time),
-        avatar: u.avatar_url || null,
+                // avatar removed from ratings UI
         user_id: r.user_id
       };
     };
@@ -3053,7 +3064,7 @@ async function ensureRatingsBoot() {
     let aroundRows = (aroundData || []).map(mapDbToRow);
     let bottomRows = (bottomData || []).map(mapDbToRow);
 
-    const totalN = (totalRes?.data && totalRes.data.length) ? Number(totalRes.data[0].rank_no || 0) : 0;
+        totalN = (totalRes?.data && totalRes.data.length) ? Number(totalRes.data[0].rank_no || 0) : 0;
          
      // Fallback: if cache is empty, compute leaderboard from tour_attempts for this tour
     const cacheEmpty = !topRows.length && !aroundRows.length && !bottomRows.length;
@@ -3183,7 +3194,11 @@ async function ensureRatingsBoot() {
             listEl.innerHTML =
         renderSection(t("ratings_top") || "Top 10", dedupeByRank(topRows), "") +
         (isParticipant && myRow?.rank_no ? renderSection(t("ratings_around") || "Around me", dedupeByRank(aroundRows), "±2") : "") +
-        (shouldShowBottom ? renderSection(t("ratings_bottom") || "Bottom 3", dedupeByRank(bottomRows), "") : "");
+        (shouldShowBottom ? renderSection(
+  t("ratings_bottom") || "Bottom 3",
+  dedupeByRank(bottomRows),
+  totalN ? `${t("ratings_out_of") || "out of"} ${totalN}` : ""
+) : "");
     }
 
         // mybar
@@ -3221,7 +3236,7 @@ async function ensureRatingsBoot() {
 
   const { data: attempts, error: attErr } = await window.sb
     .from("tour_attempts")
-    .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,avatar_url,school,class,region,district)")
+    .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district)")
     .in("tour_id", tourIds)
     .in("status", ["submitted", "time_expired"])
     .limit(5000);
@@ -3281,7 +3296,10 @@ async function ensureRatingsBoot() {
     if (b.score !== a.score) return b.score - a.score;
     return a.total_time - b.total_time;
   });
-  rowsAll = rowsAll.map((r, idx) => ({ ...r, rank: idx + 1 }));
+    rowsAll = rowsAll.map((r, idx) => ({ ...r, rank: idx + 1 }));
+
+  // total participants for this view
+  totalN = rowsAll.length;
 
   hideLoading();
 
@@ -3318,8 +3336,12 @@ async function ensureRatingsBoot() {
         listEl.innerHTML =
       renderSection(t("ratings_top") || "Top 10", dedupeByRank(topRows), "") +
       (isParticipant && myIndex >= 0 ? renderSection(t("ratings_around") || "Around me", dedupeByRank(aroundRows), "±2") : "") +
-      (shouldShowBottom ? renderSection(t("ratings_bottom") || "Bottom 3", dedupeByRank(bottomClean), "") : "");
-  }
+      (shouldShowBottom ? renderSection(
+        t("ratings_bottom") || "Bottom 3",
+        dedupeByRank(bottomClean),
+        totalN ? `${t("ratings_out_of") || "out of"} ${totalN}` : ""
+         ) : "");
+     }
 
     // My rank (only if participant)
   if (isParticipant && mybar) {
