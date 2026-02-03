@@ -259,6 +259,21 @@
       tours_empty_title: "Туры появятся позже",
       tours_empty_desc: "Этот раздел активируется после подключения базы и публикации дат туров.",
 
+      school_prefix: "Школа",
+      class_suffix: "класс",
+
+      ratings_my_rank: "МОЙ РАНГ",
+      ratings_search_title: "Поиск",
+      ratings_search_label: "Имя / школа / класс",
+      ratings_search_hint: "Введите часть имени, школы или класса.",
+      btn_reset: "Сброс",
+      btn_apply: "Применить",
+
+      ratings_top: "Топ 10",
+      ratings_around: "Рядом со мной",
+      ratings_bottom: "Нижние 3",
+      ratings_out_of: "из",
+
       tour_rules_title: "Правила тура",
       tour_rules_accept_required: "Подтвердите согласие с правилами, чтобы начать тур."
     },
@@ -516,6 +531,21 @@
       tours_empty_title: "Turlar keyinroq paydo bo‘ladi",
       tours_empty_desc: "Bu bo‘lim baza ulanganidan va tur sanalari e’lon qilingandan so‘ng ishlaydi.",
 
+      school_prefix: "Maktab",
+      class_suffix: "-sinf",
+
+      ratings_my_rank: "MENING O'RNIM",
+      ratings_search_title: "Qidiruv",
+      ratings_search_label: "Ism / maktab / sinf",
+      ratings_search_hint: "Ism, maktab yoki sinf bo‘yicha qidiring.",
+      btn_reset: "Tozalash",
+      btn_apply: "Qo‘llash",
+
+      ratings_top: "Top 10",
+      ratings_around: "Mening atrofimda",
+      ratings_bottom: "Oxirgi 3",
+      ratings_out_of: "dan",
+
       tour_rules_title: "Tur qoidalari",
       tour_rules_accept_required: "Tur boshlash uchun qoidalarga rozilikni tasdiqlang."
     },
@@ -772,6 +802,21 @@
       to_subject_btn: "Back to subject",
       tours_empty_title: "Tours will appear later",
       tours_empty_desc: "This section becomes available after the database is connected and tour dates are published.",
+
+      school_prefix: "School",
+      class_suffix: "grade",
+
+      ratings_my_rank: "MY RANK",
+      ratings_search_title: "Search",
+      ratings_search_label: "Name / school / class",
+      ratings_search_hint: "Type any part of a name, school or class.",
+      btn_reset: "Reset",
+      btn_apply: "Apply",
+
+      ratings_top: "Top 10",
+      ratings_around: "Around me",
+      ratings_bottom: "Bottom 3",
+      ratings_out_of: "out of",
 
       tour_rules_title: "Tour rules",
       tour_rules_accept_required: "Please accept the rules to start the tour."
