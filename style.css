@@ -2334,6 +2334,52 @@ body.modal-open { overflow: hidden; }
     font-size: 12px;
   }
 }
+/* Leaderboard sections + loader */
+.lb-section-title{
+  margin: 10px 2px 8px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(15,23,42,0.04);
+  border: 1px solid rgba(15,23,42,0.06);
+  font-weight: 1000;
+  font-size: 12px;
+  letter-spacing: .02em;
+  color: rgba(15,23,42,0.78);
+}
+
+.lb-loader{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 12px 0 6px;
+  display: flex;
+  justify-content: center;
+}
+
+.lb-loader-card{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(15,23,42,0.08);
+  box-shadow: 0 10px 24px rgba(15,23,42,0.10);
+  backdrop-filter: blur(8px);
+}
+
+.lb-loader-logo{
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.lb-loader-text{
+  font-weight: 1000;
+  font-size: 12px;
+  color: rgba(15,23,42,0.75);
+}
 
 /* Bottom My Rank bar (поверх, как в примере) */
 .lb-mybar{
