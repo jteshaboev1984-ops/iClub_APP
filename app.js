@@ -2838,6 +2838,7 @@ async function ensureRatingsBoot() {
   });
 }
 
+    const mybar = $("#ratings-mybar");
   const myRankEl = $("#ratings-mybar-rank");
   const myTotalEl = $("#ratings-mybar-total");
   const myScoreEl = $("#ratings-mybar-score");
@@ -3069,18 +3070,20 @@ async function ensureRatingsBoot() {
         (shouldShowBottom ? renderSection("Bottom 20", dedupeByRank(bottomRows), "") : "");
     }
 
-    // mybar
+        // mybar
     if (isParticipant && mybar && myRow) {
-        myRankEl.textContent = String(myRow.rank_no ?? "—");
+      myRankEl.textContent = String(myRow.rank_no ?? "—");
 
-        const outOf = t("ratings_out_of") || "out of";
-        const totalN = rows?.length ? Number(rows.length) : 0;
-        if (myTotalEl) myTotalEl.textContent = totalN ? `${outOf} ${totalN}` : "—";
+      const outOf = t("ratings_out_of") || "out of";
+      // total участников в rating_cache проще всего взять по максимальному рангу из bottomData (если он есть)
+      const totalN = (bottomData && bottomData.length)
+        ? Number(bottomData[bottomData.length - 1].rank_no || 0)
+        : 0;
+      if (myTotalEl) myTotalEl.textContent = totalN ? `${outOf} ${totalN}` : "—";
 
-        myScoreEl.textContent = `${String(myRow.score ?? "—")} pts`;
-        myTimeEl.textContent = formatSecondsToMMSS(myRow.total_time);
-        mybar.style.display = "flex";
-
+      myScoreEl.textContent = `${String(myRow.score ?? "—")} pts`;
+      myTimeEl.textContent = formatSecondsToMMSS(myRow.total_time);
+      mybar.style.display = "flex";
     } else {
       if (mybar) mybar.style.display = "none";
     }
@@ -3197,7 +3200,7 @@ async function ensureRatingsBoot() {
       (shouldShowBottom ? renderSection("Bottom 20", dedupeByRank(bottomRows), "") : "");
   }
 
-  // My rank (only if participant)
+    // My rank (only if participant)
   if (isParticipant && mybar) {
     const myIndex = rowsAll.findIndex(r => String(r.user_id) === String(uid));
     if (myIndex >= 0) {
@@ -3205,13 +3208,12 @@ async function ensureRatingsBoot() {
       myRankEl.textContent = String(mine.rank);
 
       const outOf = t("ratings_out_of") || "out of";
-      const totalN = rows?.length ? Number(rows.length) : 0;
+      const totalN = Number(rowsAll.length || 0);
       if (myTotalEl) myTotalEl.textContent = totalN ? `${outOf} ${totalN}` : "—";
 
       myScoreEl.textContent = `${String(mine.score)} pts`;
       myTimeEl.textContent = formatSecondsToMMSS(mine.total_time);
       mybar.style.display = "flex";
-
     } else {
       mybar.style.display = "none";
     }
