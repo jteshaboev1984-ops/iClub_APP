@@ -9,8 +9,28 @@
     // ---------------------------
   // Helpers
   // ---------------------------
-    const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+// ---------------------------
+// Tours loading overlay (Subject Tours screen)
+// ---------------------------
+function showToursLoading() {
+  const el = document.getElementById("tours-loading");
+  if (!el) return;
+
+  // update label via i18n if available
+  const txt = el.querySelector(".tours-loading-text");
+  if (txt && typeof t === "function") txt.textContent = t("loading") || txt.textContent;
+
+  el.classList.remove("hidden");
+}
+
+function hideToursLoading() {
+  const el = document.getElementById("tours-loading");
+  if (!el) return;
+  el.classList.add("hidden");
+}
 
   function escapeHTML(value) {
     return String(value ?? "")
@@ -3049,6 +3069,61 @@ async function renderRatings() {
   }
 }
 
+   function setRatingsLoader(on) {
+  const el = document.getElementById("ratings-loader");
+  if (!el) return;
+  el.style.display = on ? "flex" : "none";
+  el.setAttribute("aria-hidden", on ? "false" : "true");
+}
+
+function computeLeaderboardSections(rows, uid, opts = {}) {
+  const topN = Number(opts.topN ?? 50);
+  const aroundN = Number(opts.aroundN ?? 10);
+  const bottomN = Number(opts.bottomN ?? 20);
+
+  const total = Array.isArray(rows) ? rows.slice() : [];
+  // rows are assumed sorted by rank asc
+  const top = total.slice(0, topN);
+
+  const myIndex = uid ? total.findIndex(r => String(r.user_id) === String(uid)) : -1;
+  const around = (myIndex >= 0)
+    ? total.slice(Math.max(0, myIndex - aroundN), Math.min(total.length, myIndex + aroundN + 1))
+    : [];
+
+  let bottom = [];
+  if (total.length > 0 && bottomN > 0) {
+    bottom = total.slice(Math.max(0, total.length - bottomN));
+  }
+
+  return { top, around, bottom, myIndex, meRow: (myIndex >= 0 ? total[myIndex] : null) };
+}
+
+function renderLeaderboardSectionTitle(title) {
+  return `<div class="lb-section-title">${escapeHTML(title)}</div>`;
+}
+
+function renderLeaderboardRowsHtml(rows, uid) {
+  return (rows || []).map(row => {
+    const isMe = uid && String(row.user_id) === String(uid);
+    return `
+      <div class="lb-row ${isMe ? "is-me" : ""}">
+        <div class="lb-rank">${row.rank}</div>
+
+        <div class="lb-student">
+          <div class="lb-avatar">${row.avatar ? `<img src="${escapeHTML(row.avatar)}" alt="" />` : "👤"}</div>
+          <div class="lb-student-text">
+            <div class="lb-name">${escapeHTML(row.name)}</div>
+            <div class="lb-meta">${escapeHTML(row.meta || "")}</div>
+          </div>
+        </div>
+
+        <div class="lb-score">${row.score}</div>
+        <div class="lb-time">${escapeHTML(row.time)}</div>
+      </div>
+    `;
+  }).join("");
+}
+
 function bindRatingsUI() {
   const search = $("#ratings-search");
   const clear = $("#ratings-search-clear");
@@ -4790,8 +4865,8 @@ function addMyRecsFromAttempt(attempt) {
   }
 
      async function renderToursStart() {
-    showToursLoading();
-
+  showToursLoading();
+  try {
     const profile = loadProfile?.() || null;
     const subjectKey = state.courses?.subjectKey || null;
     const subj = subjectByKey(subjectKey);
@@ -4972,7 +5047,11 @@ if (tourLabelEl) {
      }
    }
 
-saveState();
+    saveState();
+  } finally {
+    hideToursLoading();
+  }
+}
 
 // --------------------------------------
 // Completed tours (DB summary by subject)
