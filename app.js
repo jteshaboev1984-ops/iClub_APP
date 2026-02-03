@@ -2121,10 +2121,26 @@ function getFullName(u) {
 
 function buildUserMeta(u) {
   const parts = [];
-  if (u?.class) parts.push(String(u.class));
-  if (u?.school) parts.push(`${t("school_prefix") || "School"} №${String(u.school)}`);
-  if (u?.district) parts.push(String(u.district));
-  if (u?.region) parts.push(String(u.region));
+
+  // class
+  if (u?.class) {
+    const c = String(u.class).trim();
+    const suffix = t("class_suffix") || "";
+    // если suffix задан — показываем "10 класс" / "10-sinf" / "10 grade"
+    parts.push(suffix ? `${c} ${suffix}`.trim() : c);
+  }
+
+  // school
+  if (u?.school) {
+    let s = String(u.school).trim();
+    if (s && !/^№/i.test(s)) s = `№${s}`;
+    const sp = t("school_prefix") || "";
+    parts.push(sp ? `${sp} ${s}`.trim() : s);
+  }
+
+  if (u?.district) parts.push(String(u.district).trim());
+  if (u?.region) parts.push(String(u.region).trim());
+
   return parts.filter(Boolean).join(" • ");
 }
 
@@ -2243,12 +2259,20 @@ async function saveRegistrationToSupabase(profile) {
   const tgUser = getTelegramUserSafe() || {};
   const avatar = tgUser?.photo_url || null;
 
-  // 1) update users row
+   // 1) update users row
+  const fullNameRaw = String(profile?.full_name || profile?.name || "").trim();
+  const nameParts = fullNameRaw ? fullNameRaw.split(/\s+/).filter(Boolean) : [];
+  const firstFromProfile = nameParts.length ? nameParts[0] : null;
+  const lastFromProfile = (nameParts.length > 1) ? nameParts.slice(1).join(" ") : null;
+
   const usersPayload = {
     id: uid,
     telegram_user_id: (tgUser?.id != null) ? String(tgUser.id) : null,
-    first_name: tgUser?.first_name || null,
-    last_name: tgUser?.last_name || null,
+
+    // ✅ если Telegram не дал first/last_name — берём из формы регистрации
+    first_name: tgUser?.first_name || firstFromProfile || null,
+    last_name: tgUser?.last_name || lastFromProfile || null,
+
     avatar_url: avatar,
     language_code: profile?.language || tgUser?.language_code || "ru",
     is_school_student: !!profile?.is_school_student,
@@ -2807,10 +2831,15 @@ async function ensureRatingsBoot() {
   const listEl = $("#ratings-list");
   const loadingEl = $("#ratings-loading");
 
-  const mybar = $("#ratings-mybar");
+    if (q) {
+  rows = rows.filter(x => {
+    const blob = `${x.name || ""} ${x.meta || ""}`.toLowerCase();
+    return blob.includes(q);
+  });
+}
+
   const myRankEl = $("#ratings-mybar-rank");
-  const myNameEl = $("#ratings-mybar-name");
-  const myMetaEl = $("#ratings-mybar-meta");
+  const myTotalEl = $("#ratings-mybar-total");
   const myScoreEl = $("#ratings-mybar-score");
   const myTimeEl = $("#ratings-mybar-time");
   const hintEl = $("#ratings-viewer-hint");
@@ -3041,12 +3070,16 @@ async function ensureRatingsBoot() {
 
     // mybar
     if (isParticipant && mybar && myRow) {
-      myRankEl.textContent = String(myRow.rank_no ?? "—");
-      myNameEl.textContent = getFullName(me);
-      myMetaEl.textContent = buildUserMeta(me) || "—";
-      myScoreEl.textContent = `${String(myRow.score ?? "—")} pts`;
-      myTimeEl.textContent = formatSecondsToMMSS(myRow.total_time);
-      mybar.style.display = "flex";
+        myRankEl.textContent = String(myRow.rank_no ?? "—");
+
+        const outOf = t("ratings_out_of") || "out of";
+        const totalN = rows?.length ? Number(rows.length) : 0;
+        if (myTotalEl) myTotalEl.textContent = totalN ? `${outOf} ${totalN}` : "—";
+
+        myScoreEl.textContent = `${String(myRow.score ?? "—")} pts`;
+        myTimeEl.textContent = formatSecondsToMMSS(myRow.total_time);
+        mybar.style.display = "flex";
+
     } else {
       if (mybar) mybar.style.display = "none";
     }
@@ -3169,11 +3202,15 @@ async function ensureRatingsBoot() {
     if (myIndex >= 0) {
       const mine = rowsAll[myIndex];
       myRankEl.textContent = String(mine.rank);
-      myNameEl.textContent = getFullName(me);
-      myMetaEl.textContent = buildUserMeta(me) || "—";
+
+      const outOf = t("ratings_out_of") || "out of";
+      const totalN = rows?.length ? Number(rows.length) : 0;
+      if (myTotalEl) myTotalEl.textContent = totalN ? `${outOf} ${totalN}` : "—";
+
       myScoreEl.textContent = `${String(mine.score)} pts`;
       myTimeEl.textContent = formatSecondsToMMSS(mine.total_time);
       mybar.style.display = "flex";
+
     } else {
       mybar.style.display = "none";
     }
@@ -3182,11 +3219,72 @@ async function ensureRatingsBoot() {
   }
 }
 
+   function openRatingsSearchModal() {
+  const title = t("ratings_search_title") || "Search";
+  const label = t("ratings_search_label") || "Name / School / Class";
+  const hint = t("ratings_search_hint") || "Type any part of a name, school or class.";
+  const btnReset = t("btn_reset") || "Reset";
+  const btnApply = t("btn_apply") || "Apply";
+
+  const current = String(ratingsState.q || "");
+
+  const html = `
+    <div class="modal-backdrop" data-modal-backdrop data-close="backdrop">
+      <div class="modal">
+        <div class="modal-title">${escapeHTML(title)}</div>
+
+        <div class="modal-text" style="text-align:left">
+          <div style="font-weight:900; margin-bottom:6px;">${escapeHTML(label)}</div>
+          <input id="ratings-search-input" type="search" value="${escapeHTML(current)}"
+            style="width:100%; border:1px solid rgba(15,23,42,.12); border-radius:14px; padding:12px 12px; font-weight:900; outline:none;" />
+          <div style="margin-top:8px; font-size:12px; font-weight:800; color:rgba(15,23,42,.55);">
+            ${escapeHTML(hint)}
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn" data-modal-action="reset">${escapeHTML(btnReset)}</button>
+          <button type="button" class="btn primary" data-modal-action="apply">${escapeHTML(btnApply)}</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  openModal(html);
+
+  const input = document.getElementById("ratings-search-input");
+  if (input) setTimeout(() => input.focus(), 50);
+
+  const root = document.getElementById("modal-root");
+  if (!root) return;
+
+  root.querySelectorAll("[data-modal-action]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const act = btn.dataset.modalAction;
+
+      if (act === "reset") {
+        ratingsState.q = "";
+        closeModal(true);
+        renderRatings();
+        return;
+      }
+
+      if (act === "apply") {
+        const v = (input ? input.value : "");
+        ratingsState.q = String(v || "").trim();
+        closeModal(true);
+        renderRatings();
+        return;
+      }
+
+      closeModal(false);
+    });
+  });
+}
+
 function bindRatingsUI() {
-  const search = $("#ratings-search");
-  const clear = $("#ratings-search-clear");
   const listEl = $("#ratings-list");
-     const subjectSelect = $("#ratings-subject");
+  const subjectSelect = $("#ratings-subject");
   const tourSelect = $("#ratings-tour");
 
   if (subjectSelect) {
@@ -3228,25 +3326,7 @@ function bindRatingsUI() {
     });
   });
 
-  // search
-  if (search) {
-    search.addEventListener("input", () => {
-      ratingsState.q = search.value || "";
-      renderRatings();
-    });
-  }
-
-  // clear
-  if (clear && search) {
-    clear.addEventListener("click", () => {
-      search.value = "";
-      ratingsState.q = "";
-      renderRatings();
-      search.focus();
-    });
-  }
-
-  // optional: click on list rows later (open student profile) — пока пусто
+    // optional: click on list rows later (open student profile) — пока пусто
   if (listEl) {
     listEl.addEventListener("click", (e) => {
       const row = e.target.closest(".lb-row");
@@ -7251,7 +7331,7 @@ if (state.tab === "profile") {
       if (action === "go-home") { setTab("home"); return; }
       if (action === "go-profile") { setTab("profile"); return; }
       if (action === "open-ratings") { setTab("ratings"); return; }
-      if (action === "ratings-info") { showToast(t("ratings_info")); return; }
+      if (action === "ratings-info") { openRatingsSearchModal(); return; }
 
       if (action === "open-resources") { openGlobal("resources"); return; }
       if (action === "open-news") { openGlobal("news"); return; }
