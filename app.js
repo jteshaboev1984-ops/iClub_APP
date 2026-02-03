@@ -1091,13 +1091,17 @@ function applyStaticI18n() {
     return { ok: true, reason: "ok" };
   }
 
-  function toastToursDenied(reason) {
-    if (reason === "not_school") { showToast(t("disabled_not_school")); return; }
-    if (reason === "not_competitive") { showToast(t("disabled_not_competitive")); return; }
-    if (reason === "not_main") { showToast("Туры доступны только по основным предметам."); return; }
-    showToast(t("not_available"));
-  }
+  function getToursDeniedText(reason) {
+  if (reason === "not_main") return t("disabled_not_main") || "Туры доступны только для основных предметов.";
+  if (reason === "not_school") return t("disabled_not_school") || "";
+  if (reason === "not_competitive") return t("disabled_not_competitive") || "";
+  return t("not_available") || "";
+}
 
+function toastToursDenied(reason) {
+  const msg = getToursDeniedText(reason);
+  showToast(msg || (t("tours_denied_title") || "Туры недоступны"));
+}
      // ---------------------------
   // Tour schedule (v1: local stub, later from Supabase)
   // ---------------------------
@@ -4530,23 +4534,19 @@ if (mainSubjects.length) {
 
             // Additional subjects: tours do not exist by spec
       if (isAdditionalSubjectKey(state.courses.subjectKey)) {
-     toursBtn.disabled = false;
-     toursBtn.classList.add("is-disabled");
-     if (toursSub) toursSub.textContent = t("tours_only_main_subjects") || "Туры доступны только для основных предметов.";
-   } else if (!eligibility.ok) {
-     toursBtn.disabled = false;
-     toursBtn.classList.add("is-disabled");
-     if (toursSub) {
-       if (eligibility.reason === "not_school") toursSub.textContent = t("disabled_not_school") || "";
-       else if (eligibility.reason === "not_competitive") toursSub.textContent = t("disabled_not_competitive") || "";
-       else toursSub.textContent = t("not_available") || "";
-     }
-   } else {
-     toursBtn.disabled = false;
-     toursBtn.classList.remove("is-disabled");
-     if (toursSub) toursSub.textContent = t("tours_active_and_completed") || "Активные и прошедшие";
-   }
- }
+        toursBtn.disabled = false;
+        toursBtn.classList.add("is-disabled");
+        if (toursSub) toursSub.textContent = getToursDeniedText("not_main");
+      } else if (!eligibility.ok) {
+        toursBtn.disabled = false;
+        toursBtn.classList.add("is-disabled");
+        if (toursSub) toursSub.textContent = getToursDeniedText(eligibility.reason);
+      } else {
+        toursBtn.disabled = false;
+        toursBtn.classList.remove("is-disabled");
+        if (toursSub) toursSub.textContent = t("tours_active_and_completed") || "Активные и прошедшие";
+      }
+    }
 
     updateTopbarForView("courses");
   }
@@ -7312,7 +7312,7 @@ if (action === "practice-recommendations") {
            if (action === "open-tours") {
         // additional subjects: tours are not available
         if (isAdditionalSubjectKey(state.courses.subjectKey)) {
-        showToast(t("tours_only_main_subjects") || "Туры доступны только для основных предметов.");
+        toastToursDenied("not_main");
         return;
       }
 
