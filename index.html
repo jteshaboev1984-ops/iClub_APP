@@ -834,14 +834,7 @@
       Рейтинг доступен для просмотра. “Мой ранг” показывается только участникам (Competitive).
     </div>
 
-    <!-- Search -->
-    <div class="lb-search">
-      <span class="lb-search-ico">🔍</span>
-      <input id="ratings-search" class="lb-search-input" type="search" placeholder="Search students by name..." autocomplete="off" />
-      <button id="ratings-search-clear" class="lb-search-clear" type="button" aria-label="Clear">✕</button>
-    </div>
-
-        <!-- Table header -->
+      <!-- Table header -->
     <div class="lb-head">
       <div>RANK</div>
       <div>STUDENT</div>
@@ -859,14 +852,7 @@
 
         <!-- List -->
     <div class="lb-list-wrap">
-      <div id="ratings-loading" class="lb-loading" aria-hidden="true" style="display:none">
-        <div class="lb-loading-card">
-          <img class="lb-loading-logo" src="logo.png" alt="iClub" />
-          <div class="lb-loading-text" data-i18n="loading">Loading…</div>
-        </div>
-      </div>
-
-      <div id="ratings-list" class="lb-list" aria-label="Leaderboard list">
+          <div id="ratings-list" class="lb-list" aria-label="Leaderboard list">
         <div class="empty muted">Подключим базу — здесь появятся реальные участники.</div>
       </div>
     </div>
@@ -874,13 +860,12 @@
     <!-- Bottom “My rank” bar -->
     <div id="ratings-mybar" class="lb-mybar" aria-label="My rank" style="display:none">
       <div class="lb-mybar-left">
-        <div class="lb-mybar-label">MY RANK</div>
+        <div class="lb-mybar-label" data-i18n="ratings_my_rank">MY RANK</div>
         <div id="ratings-mybar-rank" class="lb-mybar-rank">—</div>
       </div>
 
       <div class="lb-mybar-mid">
-        <div id="ratings-mybar-name" class="lb-mybar-name">—</div>
-        <div id="ratings-mybar-meta" class="lb-mybar-meta">—</div>
+        <div id="ratings-mybar-total" class="lb-mybar-meta">—</div>
       </div>
 
       <div class="lb-mybar-right">
@@ -888,7 +873,6 @@
         <div id="ratings-mybar-time" class="lb-mybar-time">—</div>
       </div>
     </div>
-
   </div>
 </section>
 
@@ -1246,6 +1230,14 @@
 
   <!-- ===== Toast (snackbar) ===== -->
   <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+        <!-- Ratings fullscreen loading overlay -->
+  <div id="ratings-loading" class="lb-loading" aria-hidden="true" style="display:none">
+    <div class="lb-loading-card">
+      <img class="lb-loading-logo" src="logo.png" alt="iClub" />
+      <div class="lb-loading-text" data-i18n="loading">Loading…</div>
+    </div>
+  </div>
 
   <!-- ===== Modal Root ===== -->
   <div id="modal-root" class="modal-root" aria-hidden="true"></div>
