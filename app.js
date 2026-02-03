@@ -4790,6 +4790,8 @@ function addMyRecsFromAttempt(attempt) {
   }
 
      async function renderToursStart() {
+    showToursLoading();
+
     const profile = loadProfile?.() || null;
     const subjectKey = state.courses?.subjectKey || null;
     const subj = subjectByKey(subjectKey);
@@ -5134,6 +5136,7 @@ renderTrendBars({
 // ✅ IMPORTANT:
 // eligibility + status + open button уже обработаны выше (DB section).
 // НИЧЕГО больше тут не перетираем.
+  hideToursLoading();
 }
 
   // ---- Practice timer (per-question) ----
