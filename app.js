@@ -2321,26 +2321,41 @@ async function saveRegistrationToSupabase(profile) {
     });
   }
 
-  if (rows.length) {
-    const { error: usErr } = await window.sb
+    if (rows.length) {
+    // ВАЖНО: upsert с onConflict требует UNIQUE(user_id,subject_id).
+    // Чтобы не зависеть от уникального ограничения (и не ловить 400),
+    // делаем синхронизацию "delete → insert".
+    const { error: delErr } = await window.sb
       .from("user_subjects")
-      .upsert(rows, { onConflict: "user_id,subject_id" });
+      .delete()
+      .eq("user_id", uid);
 
-    if (usErr) {
-      // IMPORTANT: если нет уникального ограничения, upsert будет падать.
-      // Мы это логируем, но регистрацию не ломаем.
+    if (delErr) {
       try {
         trackEvent("registration_db_error", {
-          where: "user_subjects_upsert",
-          message: String(usErr?.message || usErr),
-          hint: "need_unique(user_id,subject_id)"
+          where: "user_subjects_delete",
+          message: String(delErr?.message || delErr)
         });
       } catch {}
-      return { ok: false, reason: "user_subjects_upsert_failed_need_unique" };
+      return { ok: false, reason: "user_subjects_delete_failed" };
+    }
+
+    const { error: insErr } = await window.sb
+      .from("user_subjects")
+      .insert(rows);
+
+    if (insErr) {
+      try {
+        trackEvent("registration_db_error", {
+          where: "user_subjects_insert",
+          message: String(insErr?.message || insErr)
+        });
+      } catch {}
+      return { ok: false, reason: "user_subjects_insert_failed" };
     }
   }
 
-  return { ok: true, user_id: uid, user_subjects_rows: rows.length };
+  return { ok: true, user_id: uid, user_subjects_rows: rows.length, subjects_saved: rows.length };
 }
 
 async function hydrateLocalProfileFromSupabaseIfMissing() {
@@ -7297,24 +7312,17 @@ if (state.tab === "profile") {
       return;
     }
 
-    // keep local profile as UX fallback (DB is source of truth now)
-          saveProfile(profile);
+        // keep local profile as UX fallback (DB is source of truth now)
+    saveProfile(profile);
 
-      // Stage B: write registration + subjects into Supabase (blocking is OK for registration)
-      (async () => {
-        try {
-          const res = await saveRegistrationToSupabase(profile);
-          try {
-            trackEvent("registration_db_saved", {
-              ok: !!res?.ok,
-              reason: res?.reason || null,
-              user_subjects_rows: res?.user_subjects_rows ?? null
-            });
-          } catch {}
-        } catch (e) {
-          try { trackEvent("registration_db_crash", { message: String(e?.message || e || "unknown") }); } catch {}
-        }
-      })();
+    // Уже сохранили в БД выше (dbRes). Повторно НЕ сохраняем, чтобы не ловить ошибки/дубли.
+    try {
+      trackEvent("registration_db_saved", {
+        ok: true,
+        reason: null,
+        user_subjects_rows: dbRes?.user_subjects_rows ?? null
+      });
+    } catch {}
 
       window.i18n?.setLang(lang);
       applyStaticI18n();
