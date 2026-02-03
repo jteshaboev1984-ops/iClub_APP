@@ -2831,21 +2831,14 @@ async function ensureRatingsBoot() {
   const listEl = $("#ratings-list");
   const loadingEl = $("#ratings-loading");
 
-    if (q) {
-  rows = rows.filter(x => {
-    const blob = `${x.name || ""} ${x.meta || ""}`.toLowerCase();
-    return blob.includes(q);
-  });
-}
-
-    const mybar = $("#ratings-mybar");
+  const mybar = $("#ratings-mybar");
   const myRankEl = $("#ratings-mybar-rank");
   const myTotalEl = $("#ratings-mybar-total");
   const myScoreEl = $("#ratings-mybar-score");
   const myTimeEl = $("#ratings-mybar-time");
   const hintEl = $("#ratings-viewer-hint");
 
-    if (!listEl) return;
+  if (!listEl) return;
 
   const q = String(ratingsState.q || "").trim().toLowerCase();
 
