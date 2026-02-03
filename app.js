@@ -1831,7 +1831,13 @@ if (tabName === "profile") {
   renderProfileStack();
 }
 if (tabName === "ratings") {
-  renderRatings(); // ✅ Leaderboard UI skeleton (mock now, DB later)
+  // ✅ show loader immediately (before async boot/selects)
+  try {
+    const loadingEl = document.getElementById("ratings-loading");
+    if (loadingEl) loadingEl.style.display = "flex";
+  } catch {}
+
+  renderRatings();
 }
 }
 
