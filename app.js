@@ -2803,8 +2803,10 @@ async function ensureRatingsBoot() {
   ratingsState._booted = true;
 }
 
-async function renderRatings() {
+async function renderRatings() async function renderRatings() {
   const listEl = $("#ratings-list");
+  const loadingEl = $("#ratings-loading");
+
   const mybar = $("#ratings-mybar");
   const myRankEl = $("#ratings-mybar-rank");
   const myNameEl = $("#ratings-mybar-name");
@@ -2814,6 +2816,61 @@ async function renderRatings() {
   const hintEl = $("#ratings-viewer-hint");
 
   if (!listEl) return;
+
+  const showLoading = () => { if (loadingEl) loadingEl.style.display = "flex"; };
+  const hideLoading = () => { if (loadingEl) loadingEl.style.display = "none"; };
+
+  const renderRowHTML = (row) => {
+    const topClass =
+      row.rank === 1 ? "is-top1" :
+      (row.rank === 2 ? "is-top2" :
+      (row.rank === 3 ? "is-top3" : ""));
+
+    return `
+      <div class="lb-row">
+        <div class="lb-rank">
+          <div class="lb-rank-badge ${topClass}">${row.rank}</div>
+        </div>
+
+        <div class="lb-student">
+          <div class="lb-avatar">${row.avatar ? `<img src="${escapeHTML(row.avatar)}" alt="" />` : "👤"}</div>
+          <div class="lb-student-text">
+            <div class="lb-name">${escapeHTML(row.name)}</div>
+            <div class="lb-meta">${escapeHTML(row.meta || "")}</div>
+          </div>
+        </div>
+
+        <div class="lb-score">${row.score}</div>
+        <div class="lb-time">${escapeHTML(row.time)}</div>
+      </div>
+    `;
+  };
+
+  const renderSection = (title, rows, subText) => {
+    if (!rows || !rows.length) return "";
+    const sub = subText ? `<div class="lb-section-sub">${escapeHTML(subText)}</div>` : `<div class="lb-section-sub"></div>`;
+    return `
+      <div class="lb-section">
+        <div class="lb-section-head">
+          <div class="lb-section-title">${escapeHTML(title)}</div>
+          ${sub}
+        </div>
+        ${rows.map(renderRowHTML).join("")}
+      </div>
+    `;
+  };
+
+  const dedupeByRank = (rows) => {
+    const out = [];
+    const seen = new Set();
+    for (const r of rows || []) {
+      const k = String(r.rank);
+      if (!k || seen.has(k)) continue;
+      seen.add(k);
+      out.push(r);
+    }
+    return out;
+  };
 
   // сегменты
   $$(".lb-segment .seg-btn").forEach(btn => {
@@ -2827,6 +2884,7 @@ async function renderRatings() {
     listEl.innerHTML = `<div class="empty muted">${t("loading")}</div>`;
     if (mybar) mybar.style.display = "none";
     if (hintEl) hintEl.style.display = "none";
+    hideLoading();
     return;
   }
 
@@ -2836,7 +2894,8 @@ async function renderRatings() {
   await ensureRatingsBoot();
 
   // loading UI
-  listEl.innerHTML = `<div class="empty muted">${t("loading")}</div>`;
+  listEl.innerHTML = "";
+  showLoading();
   if (mybar) mybar.style.display = "none";
 
   // user / participant
@@ -2845,7 +2904,7 @@ async function renderRatings() {
   const myComp = await getMyCompetitiveSubjects(uid);
   const isParticipant = !!me?.is_school_student && (myComp?.length > 0);
 
-  // если не участник — показываем hint и прячем my rank
+  // hint
   if (hintEl) hintEl.style.display = isParticipant ? "none" : "block";
 
   // если у меня нет district/region — принудительно republic, иначе фильтры бессмысленны
@@ -2860,6 +2919,7 @@ async function renderRatings() {
 
   // guards
   if (!ratingsState.subjectId) {
+    hideLoading();
     listEl.innerHTML = `<div class="empty muted">No subjects.</div>`;
     return;
   }
@@ -2868,100 +2928,140 @@ async function renderRatings() {
   const scopeRankType = mapScopeToRankType(ratingsState.scope);
 
   // =========================
-  //  A) конкретный тур: берём из ratings_cache
+  // A) конкретный тур: ratings_cache
   // =========================
   if (ratingsState.tourId) {
     const tourId = Number(ratingsState.tourId);
 
-    const { data, error } = await window.sb
-      .from("ratings_cache")
-      .select("user_id,score,total_time,rank_no,users(first_name,last_name,avatar_url,school,class,region,district)")
-      .eq("tour_id", tourId)
-      .eq("rank_type", scopeRankType)
-      .order("rank_no", { ascending: true })
-      .limit(200);
-
-    if (token !== ratingsState._token) return;
-
-    if (error) {
-      listEl.innerHTML = `<div class="empty muted">Ошибка загрузки рейтинга.</div>`;
-      return;
-    }
-
-    let rows = (Array.isArray(data) ? data : []).map(r => {
-      const u = r.users || {};
-      const name = getFullName(u);
-      return {
-        rank: Number(r.rank_no || 0),
-        name,
-        meta: buildUserMeta(u),
-        score: Number(r.score || 0),
-        time: formatSecondsToMMSS(r.total_time),
-        avatar: u.avatar_url || null,
-        user_id: r.user_id
-      };
-    });
-
-    if (q) rows = rows.filter(x => String(x.name || "").toLowerCase().includes(q));
-
-    if (rows.length === 0) {
-      listEl.innerHTML = `<div class="empty muted">Ничего не найдено.</div>`;
-    } else {
-      listEl.innerHTML = rows.map(row => {
-        const topClass = row.rank === 1 ? "is-top1" : (row.rank === 2 ? "is-top2" : (row.rank === 3 ? "is-top3" : ""));
-        return `
-          <div class="lb-row">
-            <div class="lb-rank">
-              <div class="lb-rank-badge ${topClass}">${row.rank}</div>
-            </div>
-
-            <div class="lb-student">
-              <div class="lb-avatar">${row.avatar ? `<img src="${escapeHTML(row.avatar)}" alt="" />` : "👤"}</div>
-              <div class="lb-student-text">
-                <div class="lb-name">${escapeHTML(row.name)}</div>
-                <div class="lb-meta">${escapeHTML(row.meta || "")}</div>
-              </div>
-            </div>
-
-            <div class="lb-score">${row.score}</div>
-            <div class="lb-time">${escapeHTML(row.time)}</div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    // My rank (only if participant)
-    if (isParticipant && mybar) {
-      const { data: myRow } = await window.sb
+    // 1) my row (for around + mybar)
+    let myRow = null;
+    if (isParticipant && uid) {
+      const mr = await window.sb
         .from("ratings_cache")
         .select("rank_no,score,total_time")
         .eq("tour_id", tourId)
         .eq("rank_type", scopeRankType)
         .eq("user_id", uid)
         .maybeSingle();
+      if (!mr?.error) myRow = mr?.data || null;
+    }
 
-      if (myRow) {
-        myRankEl.textContent = String(myRow.rank_no ?? "—");
-        myNameEl.textContent = getFullName(me);
-        myMetaEl.textContent = buildUserMeta(me) || "—";
-        myScoreEl.textContent = `${String(myRow.score ?? "—")} pts`;
-        myTimeEl.textContent = formatSecondsToMMSS(myRow.total_time);
-        mybar.style.display = "flex";
-      } else {
-        mybar.style.display = "none";
-      }
+    // 2) top 50
+    const topRes = await window.sb
+      .from("ratings_cache")
+      .select("user_id,score,total_time,rank_no,users(first_name,last_name,avatar_url,school,class,region,district)")
+      .eq("tour_id", tourId)
+      .eq("rank_type", scopeRankType)
+      .lte("rank_no", 50)
+      .order("rank_no", { ascending: true });
+
+    if (token !== ratingsState._token) return;
+
+    if (topRes?.error) {
+      hideLoading();
+      listEl.innerHTML = `<div class="empty muted">Ошибка загрузки рейтинга.</div>`;
+      return;
+    }
+
+    // 3) around me ±10
+    let aroundData = [];
+    if (isParticipant && myRow?.rank_no) {
+      const myRank = Number(myRow.rank_no || 0);
+      const lo = Math.max(1, myRank - 10);
+      const hi = myRank + 10;
+
+      const aroundRes = await window.sb
+        .from("ratings_cache")
+        .select("user_id,score,total_time,rank_no,users(first_name,last_name,avatar_url,school,class,region,district)")
+        .eq("tour_id", tourId)
+        .eq("rank_type", scopeRankType)
+        .gte("rank_no", lo)
+        .lte("rank_no", hi)
+        .order("rank_no", { ascending: true });
+
+      if (token !== ratingsState._token) return;
+      if (!aroundRes?.error && Array.isArray(aroundRes?.data)) aroundData = aroundRes.data;
+    }
+
+    // 4) bottom 20 (optional)
+    let bottomData = [];
+    const bottomRes = await window.sb
+      .from("ratings_cache")
+      .select("user_id,score,total_time,rank_no,users(first_name,last_name,avatar_url,school,class,region,district)")
+      .eq("tour_id", tourId)
+      .eq("rank_type", scopeRankType)
+      .order("rank_no", { ascending: false })
+      .limit(20);
+
+    if (token !== ratingsState._token) return;
+    if (!bottomRes?.error && Array.isArray(bottomRes?.data)) bottomData = bottomRes.data.slice().reverse();
+
+    const mapDbToRow = (r) => {
+      const u = r.users || {};
+      return {
+        rank: Number(r.rank_no || 0),
+        name: getFullName(u),
+        meta: buildUserMeta(u),
+        score: Number(r.score || 0),
+        total_time: Number(r.total_time || 0),
+        time: formatSecondsToMMSS(r.total_time),
+        avatar: u.avatar_url || null,
+        user_id: r.user_id
+      };
+    };
+
+    let topRows = (topRes.data || []).map(mapDbToRow);
+    let aroundRows = (aroundData || []).map(mapDbToRow);
+    let bottomRows = (bottomData || []).map(mapDbToRow);
+
+    // search inside
+    if (q) {
+      const f = (arr) => arr.filter(x =>
+        String(x.name || "").toLowerCase().includes(q) ||
+        String(x.meta || "").toLowerCase().includes(q)
+      );
+      topRows = f(topRows);
+      aroundRows = f(aroundRows);
+      bottomRows = f(bottomRows);
+    }
+
+    // bottom show only if ranks exceed top zone
+    const shouldShowBottom = bottomRows.length && bottomRows.some(r => r.rank > 50);
+
+    hideLoading();
+
+    if (!topRows.length && !aroundRows.length && !bottomRows.length) {
+      listEl.innerHTML = `<div class="empty muted">Ничего не найдено.</div>`;
+    } else {
+      listEl.innerHTML =
+        renderSection("Top 50", dedupeByRank(topRows), "") +
+        (isParticipant && myRow?.rank_no ? renderSection("Around me", dedupeByRank(aroundRows), "±10") : "") +
+        (shouldShowBottom ? renderSection("Bottom 20", dedupeByRank(bottomRows), "") : "");
+    }
+
+    // mybar
+    if (isParticipant && mybar && myRow) {
+      myRankEl.textContent = String(myRow.rank_no ?? "—");
+      myNameEl.textContent = getFullName(me);
+      myMetaEl.textContent = buildUserMeta(me) || "—";
+      myScoreEl.textContent = `${String(myRow.score ?? "—")} pts`;
+      myTimeEl.textContent = formatSecondsToMMSS(myRow.total_time);
+      mybar.style.display = "flex";
+    } else {
+      if (mybar) mybar.style.display = "none";
     }
 
     return;
   }
 
   // =========================
-  //  B) All tours: считаем из tour_attempts (1 попытка на тур уже гарантирована БД)
+  // B) All tours: tour_attempts aggregation
   // =========================
   const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
   const tourIds = tours.map(x => x.id).filter(Boolean);
 
   if (!tourIds.length) {
+    hideLoading();
     listEl.innerHTML = `<div class="empty muted">Нет туров для этого предмета.</div>`;
     return;
   }
@@ -2976,6 +3076,7 @@ async function renderRatings() {
   if (token !== ratingsState._token) return;
 
   if (attErr) {
+    hideLoading();
     listEl.innerHTML = `<div class="empty muted">Ошибка загрузки рейтинга.</div>`;
     return;
   }
@@ -2997,12 +3098,11 @@ async function renderRatings() {
     const prev = agg.get(id) || { user_id: id, score: 0, total_time: 0, users: u };
     prev.score += Number(a.score || 0);
     prev.total_time += Number(a.total_time || 0);
-    // keep user object
     prev.users = u;
     agg.set(id, prev);
   }
 
-  let rows = Array.from(agg.values()).map(r => {
+  let rowsAll = Array.from(agg.values()).map(r => {
     const u = r.users || {};
     return {
       user_id: r.user_id,
@@ -3016,47 +3116,58 @@ async function renderRatings() {
   });
 
   // search
-  if (q) rows = rows.filter(x => String(x.name || "").toLowerCase().includes(q));
+  if (q) {
+    rowsAll = rowsAll.filter(x =>
+      String(x.name || "").toLowerCase().includes(q) ||
+      String(x.meta || "").toLowerCase().includes(q)
+    );
+  }
 
   // sort + rank
-  rows.sort((a, b) => {
+  rowsAll.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     return a.total_time - b.total_time;
   });
+  rowsAll = rowsAll.map((r, idx) => ({ ...r, rank: idx + 1 }));
 
-  rows = rows.slice(0, 200).map((r, idx) => ({ ...r, rank: idx + 1 }));
+  hideLoading();
 
-  if (rows.length === 0) {
-    listEl.innerHTML = `<div class="empty muted">Ничего не найдено.</div>`;
-  } else {
-    listEl.innerHTML = rows.map(row => {
-      const topClass = row.rank === 1 ? "is-top1" : (row.rank === 2 ? "is-top2" : (row.rank === 3 ? "is-top3" : ""));
-      return `
-        <div class="lb-row">
-          <div class="lb-rank">
-            <div class="lb-rank-badge ${topClass}">${row.rank}</div>
-          </div>
-
-          <div class="lb-student">
-            <div class="lb-avatar">${row.avatar ? `<img src="${escapeHTML(row.avatar)}" alt="" />` : "👤"}</div>
-            <div class="lb-student-text">
-              <div class="lb-name">${escapeHTML(row.name)}</div>
-              <div class="lb-meta">${escapeHTML(row.meta || "")}</div>
-            </div>
-          </div>
-
-          <div class="lb-score">${row.score}</div>
-          <div class="lb-time">${escapeHTML(row.time)}</div>
-        </div>
-      `;
-    }).join("");
+  if (!rowsAll.length) {
+    listEl.innerHTML = `<div class="empty muted">${q ? "Ничего не найдено." : "Нет участников."}</div>`;
+    if (mybar) mybar.style.display = "none";
+    return;
   }
 
-  // My rank for All tours (only if participant)
+  // sections
+  if (q) {
+    const view = rowsAll.slice(0, 200);
+    listEl.innerHTML = renderSection("Results", view, `${view.length}`);
+  } else {
+    const topRows = rowsAll.slice(0, 50);
+
+    let aroundRows = [];
+    let myIndex = -1;
+    if (isParticipant && uid) myIndex = rowsAll.findIndex(r => String(r.user_id) === String(uid));
+    if (isParticipant && myIndex >= 0) {
+      const lo = Math.max(0, myIndex - 10);
+      const hi = Math.min(rowsAll.length, myIndex + 11);
+      aroundRows = rowsAll.slice(lo, hi);
+    }
+
+    const bottomRows = rowsAll.length > 70 ? rowsAll.slice(-20) : [];
+    const shouldShowBottom = bottomRows.length && bottomRows.some(r => r.rank > 50);
+
+    listEl.innerHTML =
+      renderSection("Top 50", dedupeByRank(topRows), "") +
+      (isParticipant && myIndex >= 0 ? renderSection("Around me", dedupeByRank(aroundRows), "±10") : "") +
+      (shouldShowBottom ? renderSection("Bottom 20", dedupeByRank(bottomRows), "") : "");
+  }
+
+  // My rank (only if participant)
   if (isParticipant && mybar) {
-    const myIndex = rows.findIndex(r => String(r.user_id) === String(uid));
+    const myIndex = rowsAll.findIndex(r => String(r.user_id) === String(uid));
     if (myIndex >= 0) {
-      const mine = rows[myIndex];
+      const mine = rowsAll[myIndex];
       myRankEl.textContent = String(mine.rank);
       myNameEl.textContent = getFullName(me);
       myMetaEl.textContent = buildUserMeta(me) || "—";
@@ -3066,62 +3177,9 @@ async function renderRatings() {
     } else {
       mybar.style.display = "none";
     }
+  } else {
+    if (mybar) mybar.style.display = "none";
   }
-}
-
-   function setRatingsLoader(on) {
-  const el = document.getElementById("ratings-loader");
-  if (!el) return;
-  el.style.display = on ? "flex" : "none";
-  el.setAttribute("aria-hidden", on ? "false" : "true");
-}
-
-function computeLeaderboardSections(rows, uid, opts = {}) {
-  const topN = Number(opts.topN ?? 50);
-  const aroundN = Number(opts.aroundN ?? 10);
-  const bottomN = Number(opts.bottomN ?? 20);
-
-  const total = Array.isArray(rows) ? rows.slice() : [];
-  // rows are assumed sorted by rank asc
-  const top = total.slice(0, topN);
-
-  const myIndex = uid ? total.findIndex(r => String(r.user_id) === String(uid)) : -1;
-  const around = (myIndex >= 0)
-    ? total.slice(Math.max(0, myIndex - aroundN), Math.min(total.length, myIndex + aroundN + 1))
-    : [];
-
-  let bottom = [];
-  if (total.length > 0 && bottomN > 0) {
-    bottom = total.slice(Math.max(0, total.length - bottomN));
-  }
-
-  return { top, around, bottom, myIndex, meRow: (myIndex >= 0 ? total[myIndex] : null) };
-}
-
-function renderLeaderboardSectionTitle(title) {
-  return `<div class="lb-section-title">${escapeHTML(title)}</div>`;
-}
-
-function renderLeaderboardRowsHtml(rows, uid) {
-  return (rows || []).map(row => {
-    const isMe = uid && String(row.user_id) === String(uid);
-    return `
-      <div class="lb-row ${isMe ? "is-me" : ""}">
-        <div class="lb-rank">${row.rank}</div>
-
-        <div class="lb-student">
-          <div class="lb-avatar">${row.avatar ? `<img src="${escapeHTML(row.avatar)}" alt="" />` : "👤"}</div>
-          <div class="lb-student-text">
-            <div class="lb-name">${escapeHTML(row.name)}</div>
-            <div class="lb-meta">${escapeHTML(row.meta || "")}</div>
-          </div>
-        </div>
-
-        <div class="lb-score">${row.score}</div>
-        <div class="lb-time">${escapeHTML(row.time)}</div>
-      </div>
-    `;
-  }).join("");
 }
 
 function bindRatingsUI() {
