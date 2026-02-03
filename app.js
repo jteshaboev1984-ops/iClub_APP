@@ -113,16 +113,18 @@ function hideToursLoading() {
     const langGuess = tg?.language_code || (typeof getTelegramLang === "function" ? getTelegramLang() : null) || "ru";
 
     const payload = {
-      id: u.id,
-      telegram_user_id: tg?.id ? String(tg.id) : null,
-      first_name: tg?.first_name || null,
-      last_name: tg?.last_name || null,
-      avatar_url: null,
-      language_code: langGuess,
-    };
+  id: u.id,
+  telegram_user_id: tg?.id ? String(tg.id) : null,
+  avatar_url: null,
+  language_code: langGuess,
+};
 
-    // upsert by primary key id
-    await sb.from("users").upsert(payload, { onConflict: "id" });
+// ✅ НЕ перезатираем имя/фамилию в NULL на boot
+if (tg?.first_name) payload.first_name = String(tg.first_name).trim();
+if (tg?.last_name) payload.last_name = String(tg.last_name).trim();
+
+// upsert by primary key id
+await sb.from("users").upsert(payload, { onConflict: "id" });
 
 // ✅ reset subject cache for this session (prevents poisoned null cache)
 try { _subjectIdByKeyCache.clear(); } catch {}
@@ -2494,82 +2496,6 @@ async function logDbErrorToEvents(uid, where, error, extraPayload = {}) {
       }
     });
   } catch {}
-}
-async function saveRegistrationToSupabase(profile) {
-  if (!window.sb) return { ok: false, reason: "no_sb" };
-
-  const uid = await getAuthUid();
-  if (!uid) return { ok: false, reason: "no_uid" };
-
-  const p = profile || {};
-  const tgUser = p.telegram || {};
-
-  const userPayload = {
-    id: uid,
-    telegram_user_id: (tgUser.id != null ? String(tgUser.id) : null),
-    first_name: tgUser.first_name ?? null,
-    last_name: tgUser.last_name ?? null,
-    avatar_url: tgUser.photo_url ?? null,
-    language_code: p.language ?? "ru",
-    is_school_student: !!p.is_school_student,
-    region: p.region ?? null,
-    district: p.district ?? null,
-    school: p.is_school_student ? (p.school || null) : null,
-    class: p.is_school_student ? (p.class || null) : null
-  };
-
-  // 1) upsert users by id (auth.uid) — avoids duplicates
-  const { error: upErr } = await window.sb
-    .from("users")
-    .upsert(userPayload, { onConflict: "id" });
-
-  if (upErr) {
-    try { await logDbErrorToEvents(uid, "registration_users_upsert", upErr, { has_profile: !!profile }); } catch {}
-    return { ok: false, reason: "users_upsert_failed" };
-  }
-
-  // 2) sync user_subjects (best-effort)
-  const subjects = Array.isArray(p.subjects) ? p.subjects : [];
-  const chosen = subjects
-    .map(s => ({
-      key: String(s?.key || "").trim(),
-      mode: (s?.mode === "competitive") ? "competitive" : "study",
-      is_pinned: !!s?.pinned
-    }))
-    .filter(s => !!s.key);
-
-  if (!chosen.length) return { ok: true, uid, subjects_saved: 0 };
-
-  // clear old selection to prevent duplicates on re-registration
-  try { await window.sb.from("user_subjects").delete().eq("user_id", uid); } catch {}
-
-  const rows = [];
-  for (const s of chosen) {
-    const sid = await getSubjectIdByKey(s.key);
-    if (!sid) {
-      try { await logDbErrorToEvents(uid, "registration_subject_lookup", { message: "subject_id not found" }, { subject_key: s.key }); } catch {}
-      continue;
-    }
-    rows.push({
-      user_id: uid,
-      subject_id: sid,
-      mode: s.mode,
-      is_pinned: s.is_pinned
-    });
-  }
-
-  if (!rows.length) return { ok: true, uid, subjects_saved: 0 };
-
-  const { error: insErr } = await window.sb
-    .from("user_subjects")
-    .insert(rows);
-
-  if (insErr) {
-    try { await logDbErrorToEvents(uid, "registration_user_subjects_insert", insErr, { rows: rows.length }); } catch {}
-    return { ok: false, reason: "user_subjects_insert_failed" };
-  }
-
-  return { ok: true, uid, subjects_saved: rows.length };
 }
 
 async function savePracticeAttemptToSupabase(attempt, quiz) {
