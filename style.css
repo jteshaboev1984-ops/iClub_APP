@@ -3562,3 +3562,39 @@ body.modal-open { overflow: hidden; }
   font-size: 12px;
   opacity: .82;
 }
+/* ===========================
+   Tours loading overlay
+   =========================== */
+.tours-loading-overlay{
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tours-loading-overlay.hidden{
+  display: none;
+}
+
+.tours-loading-card{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.9;
+}
+
+.tours-loading-logo{
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.tours-loading-text{
+  font-size: 13px;
+  font-weight: 800;
+  opacity: 0.75;
+}
