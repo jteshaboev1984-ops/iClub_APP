@@ -5060,49 +5060,52 @@ if (tourLabelEl) {
        }
      }
    }
-
-    saveState();
-  } finally {
-    hideToursLoading();
+   try { await renderToursHistorySummary(subjectId); } catch {}
+      saveState();
+      } finally {
+     hideToursLoading();
+   }
   }
-}
 
-// --------------------------------------
+   // --------------------------------------
 // Completed tours (DB summary by subject)
 // Best = max percent, tie-break = min time
 // --------------------------------------
-const bestScoreEl = document.getElementById("tours-best-score");
-const bestPctEl = document.getElementById("tours-best-percent");
-const bestTimeEl = document.getElementById("tours-best-time");
+async function renderToursHistorySummary(subjectId) {
+  const bestScoreEl = document.getElementById("tours-best-score");
+  const bestPctEl = document.getElementById("tours-best-percent");
+  const bestTimeEl = document.getElementById("tours-best-time");
 
-const historyCard = document.getElementById("tours-history-card");
-const historyListEl = document.getElementById("tours-history-list");
-const historyEmptyEl = document.getElementById("tours-history-empty");
-const historySubEl = document.getElementById("tours-history-sub");
+  const historyCard = document.getElementById("tours-history-card");
+  const historyListEl = document.getElementById("tours-history-list");
+  const historyEmptyEl = document.getElementById("tours-history-empty");
+  const historySubEl = document.getElementById("tours-history-sub");
 
-const formatSecShort = (sec) => {
-  const s = Number(sec);
-  if (!Number.isFinite(s) || s < 0) return "—";
-  if (s < 60) return `${s}${t("practice_time_sec_suffix")}`;
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return `${m}${t("practice_time_min_suffix")} ${r}${t("practice_time_sec_suffix")}`;
-};
+  const formatSecShort = (sec) => {
+    const s = Number(sec);
+    if (!Number.isFinite(s) || s < 0) return "—";
+    if (s < 60) return `${s}${t("practice_time_sec_suffix")}`;
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return `${m}${t("practice_time_min_suffix")} ${r}${t("practice_time_sec_suffix")}`;
+  };
 
-let attempts = [];
-try {
-  const uid = await getAuthUid();
-  if (window.sb && uid && subjectId) {
-    const { data, error } = await window.sb
-      .from("tour_attempts")
-      .select("id, tour_id, score, percent, total_time, created_at, tours!inner(tour_no, subject_id)")
-      .eq("user_id", uid)
-      .eq("tours.subject_id", subjectId)
-      .order("created_at", { ascending: false });
+  let attempts = [];
+  try {
+    const uid = await getAuthUid();
+    if (window.sb && uid && subjectId) {
+      const { data, error } = await window.sb
+        .from("tour_attempts")
+        .select("id, tour_id, score, percent, total_time, created_at, tours!inner(tour_no, subject_id)")
+        .eq("user_id", uid)
+        .eq("tours.subject_id", subjectId)
+        .order("created_at", { ascending: false });
 
-    if (!error && Array.isArray(data)) attempts = data;
-  }
-} catch {}
+      if (!error && Array.isArray(data)) attempts = data;
+    }
+  } catch {}
+}
+
 
 // Group best attempt per tour_no (although now it's usually 1 attempt)
 const byTour = new Map();
