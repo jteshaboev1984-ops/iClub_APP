@@ -3620,7 +3620,10 @@ body.modal-open { overflow: hidden; }
   align-items: center;
   justify-content: center;
 }
-
+/* Ensure tours loading overlay covers the tours screen correctly */
+#courses-tours{
+  position: relative;
+}
 .tours-loading-overlay.hidden{
   display: none;
 }
