@@ -2857,13 +2857,13 @@ async function ensureRatingsBoot() {
           <div class="lb-rank-badge ${topClass}">${row.rank}</div>
         </div>
 
-        <div class="lb-student">
-          <div class="lb-avatar">${row.avatar ? `<img src="${escapeHTML(row.avatar)}" alt="" />` : "👤"}</div>
+            <div class="lb-student">
           <div class="lb-student-text">
             <div class="lb-name">${escapeHTML(row.name)}</div>
             <div class="lb-meta">${escapeHTML(row.meta || "")}</div>
           </div>
         </div>
+
 
         <div class="lb-score">${row.score}</div>
         <div class="lb-time">${escapeHTML(row.time)}</div>
@@ -2976,7 +2976,7 @@ async function ensureRatingsBoot() {
       .select("user_id,score,total_time,rank_no,users(first_name,last_name,avatar_url,school,class,region,district)")
       .eq("tour_id", tourId)
       .eq("rank_type", scopeRankType)
-      .lte("rank_no", 50)
+      .lte("rank_no", 10)
       .order("rank_no", { ascending: true });
 
     if (token !== ratingsState._token) return;
@@ -2991,8 +2991,8 @@ async function ensureRatingsBoot() {
     let aroundData = [];
     if (isParticipant && myRow?.rank_no) {
       const myRank = Number(myRow.rank_no || 0);
-      const lo = Math.max(1, myRank - 10);
-      const hi = myRank + 10;
+      const lo = Math.max(1, myRank - 2);
+      const hi = myRank + 2;
 
       const aroundRes = await window.sb
         .from("ratings_cache")
@@ -3015,7 +3015,7 @@ async function ensureRatingsBoot() {
       .eq("tour_id", tourId)
       .eq("rank_type", scopeRankType)
       .order("rank_no", { ascending: false })
-      .limit(20);
+      .limit(3);
 
     if (token !== ratingsState._token) return;
     if (!bottomRes?.error && Array.isArray(bottomRes?.data)) bottomData = bottomRes.data.slice().reverse();
@@ -3038,6 +3038,13 @@ async function ensureRatingsBoot() {
     let aroundRows = (aroundData || []).map(mapDbToRow);
     let bottomRows = (bottomData || []).map(mapDbToRow);
 
+         // remove duplicates across sections (Top -> Around -> Bottom)
+    const topRanks = new Set(dedupeByRank(topRows).map(r => String(r.rank)));
+    aroundRows = (aroundRows || []).filter(r => !topRanks.has(String(r.rank)));
+
+    const aroundRanks = new Set(dedupeByRank(aroundRows).map(r => String(r.rank)));
+    bottomRows = (bottomRows || []).filter(r => !topRanks.has(String(r.rank)) && !aroundRanks.has(String(r.rank)));
+
     // search inside
     if (q) {
       const f = (arr) => arr.filter(x =>
@@ -3050,17 +3057,17 @@ async function ensureRatingsBoot() {
     }
 
     // bottom show only if ranks exceed top zone
-    const shouldShowBottom = bottomRows.length && bottomRows.some(r => r.rank > 50);
+    const shouldShowBottom = bottomRows.length && bottomRows.some(r => r.rank > 10);
 
     hideLoading();
 
     if (!topRows.length && !aroundRows.length && !bottomRows.length) {
       listEl.innerHTML = `<div class="empty muted">Ничего не найдено.</div>`;
     } else {
-      listEl.innerHTML =
-        renderSection("Top 50", dedupeByRank(topRows), "") +
-        (isParticipant && myRow?.rank_no ? renderSection("Around me", dedupeByRank(aroundRows), "±10") : "") +
-        (shouldShowBottom ? renderSection("Bottom 20", dedupeByRank(bottomRows), "") : "");
+            listEl.innerHTML =
+        renderSection(t("ratings_top") || "Top 10", dedupeByRank(topRows), "") +
+        (isParticipant && myRow?.rank_no ? renderSection(t("ratings_around") || "Around me", dedupeByRank(aroundRows), "±2") : "") +
+        (shouldShowBottom ? renderSection(t("ratings_bottom") || "Bottom 3", dedupeByRank(bottomRows), "") : "");
     }
 
         // mybar
@@ -3173,19 +3180,19 @@ async function ensureRatingsBoot() {
     const view = rowsAll.slice(0, 200);
     listEl.innerHTML = renderSection("Results", view, `${view.length}`);
   } else {
-    const topRows = rowsAll.slice(0, 50);
+    const topRows = rowsAll.slice(0, 10);
 
     let aroundRows = [];
     let myIndex = -1;
     if (isParticipant && uid) myIndex = rowsAll.findIndex(r => String(r.user_id) === String(uid));
     if (isParticipant && myIndex >= 0) {
-      const lo = Math.max(0, myIndex - 10);
-      const hi = Math.min(rowsAll.length, myIndex + 11);
+      const lo = Math.max(0, myIndex - 2);
+      const hi = Math.min(rowsAll.length, myIndex + 3);
       aroundRows = rowsAll.slice(lo, hi);
     }
 
-    const bottomRows = rowsAll.length > 70 ? rowsAll.slice(-20) : [];
-    const shouldShowBottom = bottomRows.length && bottomRows.some(r => r.rank > 50);
+    const bottomRows = rowsAll.length > 13 ? rowsAll.slice(-3) : [];
+    const shouldShowBottom = bottomRows.length && bottomRows.some(r => r.rank > 10);
 
     listEl.innerHTML =
       renderSection("Top 50", dedupeByRank(topRows), "") +
