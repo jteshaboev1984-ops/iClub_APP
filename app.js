@@ -4528,12 +4528,14 @@ if (mainSubjects.length) {
     if (toursBtn) {
       const eligibility = canOpenActiveTours(profile, state.courses.subjectKey);
 
-      // Additional subjects: tours do not exist by spec
+            // Additional subjects: tours do not exist by spec
       if (isAdditionalSubjectKey(state.courses.subjectKey)) {
-        toursBtn.disabled = true;
-        if (toursSub) toursSub.textContent = "Для дополнительных предметов туры не проводятся.";
+        toursBtn.disabled = false;                 // важно: чтобы клик работал и показал сообщение
+        toursBtn.classList.add("is-disabled");     // визуально как disabled
+        if (toursSub) toursSub.textContent = "Туры доступны только для основных предметов.";
       } else if (!eligibility.ok) {
-        toursBtn.disabled = true;
+        toursBtn.disabled = false;                 // важно: чтобы клик работал и показал стандартный toast
+        toursBtn.classList.add("is-disabled");     // визуально как disabled
         if (toursSub) {
           if (eligibility.reason === "not_school") toursSub.textContent = t("disabled_not_school");
           else if (eligibility.reason === "not_competitive") toursSub.textContent = t("disabled_not_competitive");
@@ -4541,6 +4543,7 @@ if (mainSubjects.length) {
         }
       } else {
         toursBtn.disabled = false;
+        toursBtn.classList.remove("is-disabled");
         if (toursSub) toursSub.textContent = "Активные и прошедшие";
       }
     }
@@ -7302,17 +7305,25 @@ if (action === "practice-recommendations") {
         return;
       }
 
-            if (action === "open-tours") {
+           if (action === "open-tours") {
+        // additional subjects: tours are not available
+        if (isAdditionalSubjectKey(state.courses.subjectKey)) {
+          showToast("Туры доступны только для основных предметов.");
+          return;
+        }
+
         const profile = loadProfile();
         const eligibility = canOpenActiveTours(profile, state.courses.subjectKey);
         if (!eligibility.ok) {
           toastToursDenied(eligibility.reason);
           return;
         }
+
         pushCourses("tours");
         renderToursStart(); // ✅ fill stats + hide trend when <2
         return;
       }
+
 
        if (action === "open-tour") {
         openTourRules();
