@@ -5232,7 +5232,9 @@ renderTrendBars({
 // ✅ IMPORTANT:
 // eligibility + status + open button уже обработаны выше (DB section).
 // НИЧЕГО больше тут не перетираем.
-  hideToursLoading();
+   } finally {
+     hideToursLoading();
+   }
 }
 
   // ---- Practice timer (per-question) ----
