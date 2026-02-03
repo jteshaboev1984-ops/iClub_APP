@@ -3193,11 +3193,16 @@ async function ensureRatingsBoot() {
 
     const bottomRows = rowsAll.length > 13 ? rowsAll.slice(-3) : [];
     const shouldShowBottom = bottomRows.length && bottomRows.some(r => r.rank > 10);
+    const topRanks = new Set(dedupeByRank(topRows).map(r => String(r.rank)));
+    aroundRows = (aroundRows || []).filter(r => !topRanks.has(String(r.rank)));
 
-    listEl.innerHTML =
-      renderSection("Top 50", dedupeByRank(topRows), "") +
-      (isParticipant && myIndex >= 0 ? renderSection("Around me", dedupeByRank(aroundRows), "±10") : "") +
-      (shouldShowBottom ? renderSection("Bottom 20", dedupeByRank(bottomRows), "") : "");
+    const aroundRanks = new Set(dedupeByRank(aroundRows).map(r => String(r.rank)));
+    const bottomClean = (bottomRows || []).filter(r => !topRanks.has(String(r.rank)) && !aroundRanks.has(String(r.rank)));
+  
+        listEl.innerHTML =
+      renderSection(t("ratings_top") || "Top 10", dedupeByRank(topRows), "") +
+      (isParticipant && myIndex >= 0 ? renderSection(t("ratings_around") || "Around me", dedupeByRank(aroundRows), "±2") : "") +
+      (shouldShowBottom ? renderSection(t("ratings_bottom") || "Bottom 3", dedupeByRank(bottomClean), "") : "");
   }
 
     // My rank (only if participant)
