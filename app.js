@@ -2803,7 +2803,7 @@ async function ensureRatingsBoot() {
   ratingsState._booted = true;
 }
 
-async function renderRatings() async function renderRatings() {
+ async function renderRatings() {
   const listEl = $("#ratings-list");
   const loadingEl = $("#ratings-loading");
 
