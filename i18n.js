@@ -233,7 +233,9 @@
 
       tours_status_not_school_title: "Туры доступны только школьникам",
       tours_status_not_school_desc: "Заполните профиль как школьник, чтобы участвовать в турах.",
-   
+      tours_only_main_subjects: "Туры доступны только для основных предметов.",
+      tours_active_and_completed: "Активные и прошедшие",
+    
       tours_status_not_comp_title: "Туры доступны только в соревновательном режиме",
       tours_status_not_comp_desc: "Добавьте предмет в соревновательном режиме, чтобы открыть туры.",
       tours_empty_title: "Туры появятся позже",
@@ -482,7 +484,9 @@
 
       tours_status_title: "Turlar hozircha mavjud emas",
       tours_status_desc: "Tur sanalari va ro‘yxati e’lon qilingach shu yerda ko‘rinadi.",
-
+      tours_only_main_subjects: "Turlar faqat asosiy fanlar uchun mavjud.",
+      tours_active_and_completed: "Faol va yakunlangan",
+ 
       tours_status_not_school_title: "Turlar faqat o‘quvchilar uchun",
       tours_status_not_school_desc: "Ishtirok etish uchun profilni o‘quvchi sifatida to‘ldiring.",
 
@@ -735,7 +739,9 @@
 
       tours_status_title: "Tours are not available yet",
       tours_status_desc: "Tour dates and the list will appear here after publication.",
-
+      tours_only_main_subjects: "Tours are available only for main subjects.",
+      tours_active_and_completed: "Active and completed",
+ 
       tours_status_not_school_title: "Tours are for students only",
       tours_status_not_school_desc: "Complete your profile as a student to participate.",
 
