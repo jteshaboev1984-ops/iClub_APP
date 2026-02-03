@@ -841,12 +841,20 @@
       <button id="ratings-search-clear" class="lb-search-clear" type="button" aria-label="Clear">✕</button>
     </div>
 
-    <!-- Table header -->
+        <!-- Table header -->
     <div class="lb-head">
       <div>RANK</div>
       <div>STUDENT</div>
       <div class="lb-head-right">SCORE</div>
       <div class="lb-head-right">TIME</div>
+    </div>
+
+    <!-- Loader (logo) -->
+    <div id="ratings-loader" class="lb-loader" style="display:none" aria-hidden="true">
+      <div class="lb-loader-card">
+        <img class="lb-loader-logo" src="logo.png" alt="iClub" />
+        <div class="lb-loader-text" data-i18n="loading">Loading…</div>
+      </div>
     </div>
 
     <!-- List -->
