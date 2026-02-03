@@ -4863,6 +4863,20 @@ function addMyRecsFromAttempt(attempt) {
         lastClass: "is-last"
       });
   }
+           // ---------------------------
+  // Tours loading overlay helpers
+  // ---------------------------
+  function showToursLoading() {
+    const el = document.getElementById("tours-loading");
+    if (!el) return;
+    el.classList.remove("hidden");
+  }
+
+  function hideToursLoading() {
+    const el = document.getElementById("tours-loading");
+    if (!el) return;
+    el.classList.add("hidden");
+  }
 
      async function renderToursStart() {
   showToursLoading();
