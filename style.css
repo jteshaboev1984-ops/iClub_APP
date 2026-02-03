@@ -2241,30 +2241,31 @@ body.modal-open { overflow: hidden; }
 }
 
 .lb-loading{
-  position: absolute;
+  position: fixed;
   inset: 0;
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 5;
-  background: rgba(255,255,255,0.82);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border-radius: 18px;
+  z-index: 9999;
+  background: rgba(255,255,255,0.86);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 0;
+  padding: 24px;
 }
-
 .lb-loading-card{
   display:flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.95);
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.96);
   border: 1px solid rgba(15,23,42,0.10);
-  box-shadow: 0 16px 40px rgba(15,23,42,0.12);
+  box-shadow: 0 18px 46px rgba(15,23,42,0.14);
+  max-width: 240px;
+  width: 100%;
 }
-
 .lb-loading-logo{
   width: 44px;
   height: 44px;
