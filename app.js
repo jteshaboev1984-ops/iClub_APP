@@ -2979,6 +2979,15 @@ async function ensureRatingsBoot() {
       .lte("rank_no", 10)
       .order("rank_no", { ascending: true });
 
+         // total participants (max rank_no) for "out of N"
+    const totalRes = await window.sb
+      .from("ratings_cache")
+      .select("rank_no")
+      .eq("tour_id", tourId)
+      .eq("rank_type", scopeRankType)
+      .order("rank_no", { ascending: false })
+      .limit(1);
+
     if (token !== ratingsState._token) return;
 
     if (topRes?.error) {
@@ -3037,6 +3046,107 @@ async function ensureRatingsBoot() {
     let topRows = (topRes.data || []).map(mapDbToRow);
     let aroundRows = (aroundData || []).map(mapDbToRow);
     let bottomRows = (bottomData || []).map(mapDbToRow);
+
+    const totalN = (totalRes?.data && totalRes.data.length) ? Number(totalRes.data[0].rank_no || 0) : 0;
+         
+     // Fallback: if cache is empty, compute leaderboard from tour_attempts for this tour
+    const cacheEmpty = !topRows.length && !aroundRows.length && !bottomRows.length;
+
+    if (cacheEmpty) {
+      const { data: attData, error: attErr } = await window.sb
+        .from("tour_attempts")
+        .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district)")
+        .eq("tour_id", tourId)
+        .in("status", ["submitted", "time_expired"])
+        .limit(5000);
+
+      if (attErr) {
+        listEl.innerHTML = `<div class="empty muted">Ошибка загрузки рейтинга.</div>`;
+        hideLoading();
+        return;
+      }
+
+      // scope filter by my profile (district/region)
+      const scoped = (Array.isArray(attData) ? attData : []).filter(a => {
+        const u = a.users || {};
+        if (ratingsState.scope === "district") return !!me?.district && String(u.district || "") === String(me.district || "");
+        if (ratingsState.scope === "region") return !!me?.region && String(u.region || "") === String(me.region || "");
+        return true;
+      });
+
+      let rows = scoped.map(a => {
+        const u = a.users || {};
+        return {
+          user_id: a.user_id,
+          score: Number(a.score || 0),
+          total_time: Number(a.total_time || 0),
+          name: getFullName(u),
+          meta: buildUserMeta(u),
+          time: formatSecondsToMMSS(Number(a.total_time || 0))
+        };
+      });
+
+      // search by name + meta
+      if (q) {
+        rows = rows.filter(x => {
+          const blob = `${x.name || ""} ${x.meta || ""}`.toLowerCase();
+          return blob.includes(q);
+        });
+      }
+
+      // rank
+      rows.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.total_time - b.total_time;
+      });
+      rows = rows.map((r, idx) => ({ ...r, rank: idx + 1 }));
+
+      // sections: top10 / around±2 / bottom3 (no duplicates)
+      let topRows2 = rows.slice(0, 10);
+      let aroundRows2 = [];
+      let bottomRows2 = rows.length > 13 ? rows.slice(-3) : [];
+
+      if (isParticipant && uid) {
+        const myIndex = rows.findIndex(r => String(r.user_id) === String(uid));
+        if (myIndex >= 0) {
+          const lo = Math.max(0, myIndex - 2);
+          const hi = Math.min(rows.length, myIndex + 3);
+          aroundRows2 = rows.slice(lo, hi);
+        }
+      }
+
+      const topRanks = new Set(dedupeByRank(topRows2).map(r => String(r.rank)));
+      aroundRows2 = (aroundRows2 || []).filter(r => !topRanks.has(String(r.rank)));
+
+      const aroundRanks = new Set(dedupeByRank(aroundRows2).map(r => String(r.rank)));
+      bottomRows2 = (bottomRows2 || []).filter(r => !topRanks.has(String(r.rank)) && !aroundRanks.has(String(r.rank)));
+
+      const shouldShowBottom2 = bottomRows2.length && bottomRows2.some(r => r.rank > 10);
+
+      listEl.innerHTML =
+        renderSection(t("ratings_top") || "Top 10", dedupeByRank(topRows2), "") +
+        (isParticipant ? renderSection(t("ratings_around") || "Around me", dedupeByRank(aroundRows2), "±2") : "") +
+        (shouldShowBottom2 ? renderSection(t("ratings_bottom") || "Bottom 3", dedupeByRank(bottomRows2), "") : "");
+
+      // My rank: out of N
+      if (isParticipant && mybar) {
+        const myIndex2 = rows.findIndex(r => String(r.user_id) === String(uid));
+        if (myIndex2 >= 0) {
+          const mine = rows[myIndex2];
+          myRankEl.textContent = String(mine.rank);
+          const outOf = t("ratings_out_of") || "out of";
+          if (myTotalEl) myTotalEl.textContent = `${outOf} ${rows.length}`;
+          myScoreEl.textContent = `${String(mine.score)} pts`;
+          myTimeEl.textContent = formatSecondsToMMSS(mine.total_time);
+          mybar.style.display = "flex";
+        } else {
+          mybar.style.display = "none";
+        }
+      }
+
+      hideLoading();
+      return;
+    }
 
          // remove duplicates across sections (Top -> Around -> Bottom)
     const topRanks = new Set(dedupeByRank(topRows).map(r => String(r.rank)));
@@ -3213,7 +3323,6 @@ async function ensureRatingsBoot() {
       myRankEl.textContent = String(mine.rank);
 
       const outOf = t("ratings_out_of") || "out of";
-      const totalN = Number(rowsAll.length || 0);
       if (myTotalEl) myTotalEl.textContent = totalN ? `${outOf} ${totalN}` : "—";
 
       myScoreEl.textContent = `${String(mine.score)} pts`;
