@@ -166,7 +166,6 @@
       course_toggle_off: "Выключено",
       course_toggle_aria: "Показывать на главном",
 
-
       toast_time_expired_answer_saved: "Время истекло. Ответ сохранён…",
       toast_time_expired_no_answer: "Время истекло. Вопрос сохранён без ответа…",
 
@@ -268,6 +267,7 @@
       ratings_search_hint: "Введите часть имени, школы или класса.",
       btn_reset: "Сброс",
       btn_apply: "Применить",
+      ratings_out_of: "из",
 
       ratings_top: "Топ 10",
       ratings_around: "Рядом со мной",
@@ -540,6 +540,7 @@
       ratings_search_hint: "Ism, maktab yoki sinf bo‘yicha qidiring.",
       btn_reset: "Tozalash",
       btn_apply: "Qo‘llash",
+      ratings_out_of: "dan",
 
       ratings_top: "Top 10",
       ratings_around: "Mening atrofimda",
@@ -812,6 +813,7 @@
       ratings_search_hint: "Type any part of a name, school or class.",
       btn_reset: "Reset",
       btn_apply: "Apply",
+      ratings_out_of: "out of",
 
       ratings_top: "Top 10",
       ratings_around: "Around me",
