@@ -2844,7 +2844,9 @@ async function ensureRatingsBoot() {
   const myTimeEl = $("#ratings-mybar-time");
   const hintEl = $("#ratings-viewer-hint");
 
-  if (!listEl) return;
+    if (!listEl) return;
+
+  const q = String(ratingsState.q || "").trim().toLowerCase();
 
   const showLoading = () => { if (loadingEl) loadingEl.style.display = "flex"; };
   const hideLoading = () => { if (loadingEl) loadingEl.style.display = "none"; };
@@ -2953,7 +2955,6 @@ async function ensureRatingsBoot() {
     return;
   }
 
-  const q = String(ratingsState.q || "").trim().toLowerCase();
   const scopeRankType = mapScopeToRankType(ratingsState.scope);
 
   // =========================
