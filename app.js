@@ -2342,7 +2342,7 @@ async function saveRegistrationToSupabase(profile) {
   });
 
   if (rows.length) {
-    // delete → insert (safe even without unique constraint)
+        // delete → insert (safe even without unique constraint)
     const { error: delErr } = await window.sb
       .from("user_subjects")
       .delete()
@@ -2375,19 +2375,7 @@ async function saveRegistrationToSupabase(profile) {
     }
   }
 
-  return { ok: true, user_id: uid, user_subjects_rows: rows.length, subjects_saved: rows.length };
-
-    if (insErr) {
-      try {
-        trackEvent("registration_db_error", {
-          where: "user_subjects_insert",
-          message: String(insErr?.message || insErr)
-        });
-      } catch {}
-      return { ok: false, reason: "user_subjects_insert_failed" };
-    }
-  }
-
+  // успех
   return { ok: true, user_id: uid, user_subjects_rows: rows.length, subjects_saved: rows.length };
 }
 
