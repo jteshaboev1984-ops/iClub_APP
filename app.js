@@ -2355,6 +2355,7 @@ async function saveRegistrationToSupabase(profile) {
     }
   }
 
+   __profileSubjectsDbReady = false;
   return { ok: true, user_id: uid, user_subjects_rows: rows.length, subjects_saved: rows.length };
 }
 
@@ -2451,6 +2452,27 @@ async function hydrateLocalProfileFromSupabaseIfMissing() {
   saveProfile(profile);
 
   return { ok: true, applied: true, count: list.length };
+}
+
+   // ---------------------------
+// Profile counts must be DB-accurate
+// ---------------------------
+let __profileSubjectsDbReady = false;
+let __profileSubjectsDbSyncing = false;
+
+async function ensureProfileSubjectsDbSynced() {
+  if (!window.sb) return { ok: false, reason: "no_sb" };
+  if (__profileSubjectsDbSyncing) return { ok: true, skipped: true };
+  if (__profileSubjectsDbReady) return { ok: true, skipped: true };
+
+  __profileSubjectsDbSyncing = true;
+  try {
+    const res = await syncUserSubjectsFromSupabaseIntoLocalProfile();
+    if (res?.ok) __profileSubjectsDbReady = true;
+    return res;
+  } finally {
+    __profileSubjectsDbSyncing = false;
+  }
 }
 
 // ---------------------------
@@ -3926,6 +3948,30 @@ input?.addEventListener("change", () => {
 
   function renderProfileMain() {
   const profile = loadProfile();
+
+     function renderProfileMain() {
+  const profile = loadProfile();
+
+  // ✅ DB-sync before computing Competitive/Study counts
+  // avoid showing wrong numbers from stale localStorage
+  if (profile && window.sb && !__profileSubjectsDbReady) {
+    const compElTmp = document.getElementById("profile-metric-competitive");
+    const studyElTmp = document.getElementById("profile-metric-study");
+    if (compElTmp) compElTmp.textContent = "…";
+    if (studyElTmp) studyElTmp.textContent = "…";
+
+    ensureProfileSubjectsDbSynced()
+      .then(() => {
+        // if still on profile tab — re-render with fresh DB snapshot
+        if (state?.tab === "profile") {
+          try { renderProfileMain(); } catch {}
+          try { renderProfileSettings(); } catch {}
+        }
+      })
+      .catch(() => {});
+
+    return;
+  }
 
   const nameEl = document.getElementById("profile-dash-name");
   const metaEl = document.getElementById("profile-dash-meta");
