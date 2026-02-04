@@ -2299,9 +2299,9 @@ async function saveRegistrationToSupabase(profile) {
     return { ok: false, reason: "users_upsert_failed" };
   }
 
-    // 2) sync user_subjects rows
+  // 2) upsert user_subjects rows
   const subjects = Array.isArray(profile?.subjects) ? profile.subjects : [];
-  const rowsRaw = [];
+  const rows = [];
 
   for (const s of subjects) {
     const key = String(s?.key || "").trim();
@@ -2312,37 +2312,19 @@ async function saveRegistrationToSupabase(profile) {
 
     const mode = (s?.mode === "competitive") ? "competitive" : "study";
 
-    rowsRaw.push({
+      rows.push({
       user_id: uid,
       subject_id: subjectId,
       mode,
-      // project rule: competitive subjects cannot be pinned
+     // ❗ project rule: competitive subjects cannot be pinned
       is_pinned: (mode === "competitive") ? false : !!s?.pinned
     });
   }
 
-  // ---- NORMALIZE rows: (1) de-duplicate by subject_id, (2) enforce competitive ≤ 2
-  const dedupMap = new Map(); // subject_id -> row
-  for (const r of rowsRaw) {
-    if (!dedupMap.has(r.subject_id)) dedupMap.set(r.subject_id, r);
-  }
-
-  let rows = Array.from(dedupMap.values());
-
-  // enforce competitive max 2 (downgrade extra to study, deterministic order)
-  let compCount = 0;
-  rows = rows.map(r => {
-    if (r.mode === "competitive") {
-      compCount += 1;
-      if (compCount > 2) {
-        return { ...r, mode: "study", is_pinned: !!r.is_pinned };
-      }
-    }
-    return r;
-  });
-
-  if (rows.length) {
-        // delete → insert (safe even without unique constraint)
+    if (rows.length) {
+    // ВАЖНО: upsert с onConflict требует UNIQUE(user_id,subject_id).
+    // Чтобы не зависеть от уникального ограничения (и не ловить 400),
+    // делаем синхронизацию "delete → insert".
     const { error: delErr } = await window.sb
       .from("user_subjects")
       .delete()
@@ -2366,18 +2348,12 @@ async function saveRegistrationToSupabase(profile) {
       try {
         trackEvent("registration_db_error", {
           where: "user_subjects_insert",
-          message: String(insErr?.message || insErr),
-          rows_count: rows.length,
-          comp_count: rows.filter(x => x.mode === "competitive").length
+          message: String(insErr?.message || insErr)
         });
       } catch {}
       return { ok: false, reason: "user_subjects_insert_failed" };
     }
   }
-
-  // успех
-  // after registration, force next profile open to re-sync from DB
-  window.__profileDbSubjectsReady = false;
 
   return { ok: true, user_id: uid, user_subjects_rows: rows.length, subjects_saved: rows.length };
 }
@@ -2535,44 +2511,6 @@ async function logDbErrorToEvents(uid, where, error, extraPayload = {}) {
       }
     });
   } catch {}
-}
-
-   async function logUserSubjectHistory(row) {
-  try {
-    if (!window.sb) return { ok: false, reason: "no_sb" };
-
-    const uid = row?.user_id || (await getAuthUid());
-    if (!uid) return { ok: false, reason: "no_uid" };
-
-    const payload = {
-      user_id: uid,
-      subject_id: Number(row?.subject_id),
-      action: String(row?.action || "unknown"),
-      from_mode: row?.from_mode ?? null,
-      to_mode: row?.to_mode ?? null,
-      from_pinned: (row?.from_pinned === undefined) ? null : !!row.from_pinned,
-      to_pinned: (row?.to_pinned === undefined) ? null : !!row.to_pinned,
-      source: row?.source ?? null,
-      meta: row?.meta ?? null
-    };
-
-    const { error } = await window.sb.from("user_subjects_history").insert(payload);
-    if (error) {
-      // fallback: at least keep it in app_events
-      try {
-        await window.sb.from("app_events").insert({
-          user_id: uid,
-          event_type: "user_subjects_history_write_failed",
-          payload: { message: String(error?.message || error), ...payload }
-        });
-      } catch {}
-      return { ok: false, reason: "insert_failed" };
-    }
-
-    return { ok: true };
-  } catch {
-    return { ok: false, reason: "exception" };
-  }
 }
 
 async function savePracticeAttemptToSupabase(attempt, quiz) {
@@ -3690,29 +3628,6 @@ function openProfileMain() {
   updateTopbarForView("profile");
 }
 
-   // ---------------------------
-// Profile DB sync flags (for accurate counts)
-// ---------------------------
-window.__profileDbSubjectsReady = window.__profileDbSubjectsReady || false;
-window.__profileDbSubjectsSyncing = window.__profileDbSubjectsSyncing || false;
-
-async function ensureProfileSubjectsFromDbFresh() {
-  if (!window.sb) return { ok: false, reason: "no_sb" };
-  if (window.__profileDbSubjectsSyncing) return { ok: true, skipped: true, reason: "syncing" };
-
-  window.__profileDbSubjectsSyncing = true;
-  try {
-    const res = await syncUserSubjectsFromSupabaseIntoLocalProfile();
-    // even if no local profile exists, this means DB read is OK
-    window.__profileDbSubjectsReady = true;
-    return { ok: true, ...res };
-  } catch (e) {
-    return { ok: false, reason: "sync_failed" };
-  } finally {
-    window.__profileDbSubjectsSyncing = false;
-  }
-}
-
 function renderProfileStack() {
   const top = getProfileTopScreen();
   showProfileScreen(top);
@@ -3787,9 +3702,21 @@ mainSubjects.forEach(subj => {
 
     const next = subjects.map(s => ({ ...s }));
     const was = next.find(s => s.key === subj.key);
-        const turningOn = !isCompetitiveForUser(fresh, subj.key);
-    const fromMode = turningOn ? "study" : "competitive";
-    const toMode   = turningOn ? "competitive" : "study";
+    const turningOn = !isCompetitiveForUser(fresh, subj.key);
+
+    const ok = await uiConfirm({
+      title: turningOn ? "Competitive режим" : "Выключить Competitive",
+      message: turningOn
+        ? "Сделать этот предмет Competitive?\n\nЭто включит: туры, рейтинги, сертификаты.\nУчебный режим останется доступен."
+        : "Убрать предмет из Competitive?\n\nТуры/рейтинг/сертификаты по предмету станут недоступны.\nУчебный режим останется.",
+      okText: turningOn ? "Включить" : "Выключить",
+      cancelText: "Отмена"
+    });
+
+    if (!ok) {
+      input.checked = !turningOn;
+      return;
+    }
 
     if (turningOn) {
       const compNow = next.filter(s => s.mode === "competitive").length;
@@ -3811,43 +3738,29 @@ mainSubjects.forEach(subj => {
 
     fresh.subjects = next;
     saveProfile(fresh);
+     // ✅ DB-backed user_subjects sync (non-blocking)
+(async () => {
+  try {
+    const us = Array.isArray(fresh?.subjects) ? fresh.subjects.find(s => s.key === subj.key) : null;
+    const mode = us?.mode || "study";
+    const pinned = !!us?.pinned;
 
-    // ✅ DB sync (await) + history + re-sync local from DB
-    input.disabled = true;
     try {
-      const us = Array.isArray(fresh?.subjects) ? fresh.subjects.find(s => s.key === subj.key) : null;
-      const mode = us?.mode || "study";
-      const pinned = !!us?.pinned;
+      trackEvent("user_subjects_save_started", { subject_key: subj.key, mode, is_pinned: pinned });
+    } catch {}
 
-      try { trackEvent("user_subjects_save_started", { subject_key: subj.key, mode, is_pinned: pinned }); } catch {}
-      const res = await syncUserSubjectToSupabase(subj.key, mode, pinned);
-      try { trackEvent("user_subjects_save_result", { ok: !!res?.ok, reason: res?.reason || null, method: res?.method || null, subject_key: subj.key }); } catch {}
+    const res = await syncUserSubjectToSupabase(subj.key, mode, pinned);
 
-      if (res?.ok) {
-        // write history
-        try {
-          await logUserSubjectHistory({
-            user_id: res.uid,
-            subject_id: res.subjectId,
-            action: "mode_change",
-            from_mode: fromMode,
-            to_mode: toMode,
-            source: "profile",
-            meta: { subject_key: subj.key }
-          });
-        } catch {}
-
-        // force fresh DB snapshot for counts
-        window.__profileDbSubjectsReady = false;
-        await ensureProfileSubjectsFromDbFresh();
-      } else {
-        // rollback UI on failure
-        input.checked = !turningOn;
-        showToast("Не удалось сохранить. Попробуйте ещё раз.");
-      }
-    } finally {
-      input.disabled = false;
-    }
+    try {
+      trackEvent("user_subjects_save_result", {
+        ok: !!res?.ok,
+        reason: res?.reason || null,
+        method: res?.method || null,
+        subject_key: subj.key
+      });
+    } catch {}
+  } catch {}
+})();
 
     renderHome();
     if (state.tab === "courses") {
@@ -4013,29 +3926,6 @@ input?.addEventListener("change", () => {
 
   function renderProfileMain() {
   const profile = loadProfile();
-       function renderProfileMain() {
-  const profile = loadProfile();
-
-  // ✅ IMPORTANT: make profile counts DB-accurate
-  // If DB is available and we haven't synced yet this session — sync first and re-render
-  if (window.sb && profile && !window.__profileDbSubjectsReady) {
-    // show lightweight loading state (no wrong numbers)
-    const compElTmp = document.getElementById("profile-metric-competitive");
-    const studyElTmp = document.getElementById("profile-metric-study");
-    const slotsCountElTmp = document.getElementById("profile-competitive-slots-count");
-    if (compElTmp) compElTmp.textContent = "…";
-    if (studyElTmp) studyElTmp.textContent = "…";
-    if (slotsCountElTmp) slotsCountElTmp.textContent = "…/2";
-
-    ensureProfileSubjectsFromDbFresh().then(() => {
-      // re-render profile screens with fresh DB state
-      try { renderProfileMain(); } catch {}
-      try { renderProfileSettings(); } catch {}
-      try { renderHome(); } catch {}
-    });
-
-    return;
-  }
 
   const nameEl = document.getElementById("profile-dash-name");
   const metaEl = document.getElementById("profile-dash-meta");
@@ -4872,22 +4762,6 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
       } catch {}
 
       showToast(t("detach_comp_done") || "Competitive снят. Прогресс обнулён.");
-           try {
-  const uid = await getAuthUid();
-  const subjectId = await getSubjectIdByKey(s.key);
-  if (uid && subjectId) {
-    await logUserSubjectHistory({
-      user_id: uid,
-      subject_id: subjectId,
-      action: "detach_competitive",
-      from_mode: "competitive",
-      to_mode: "study",
-      source: "courses",
-      meta: { subject_key: s.key }
-    });
-  }
-} catch {}
-
       renderHome();
       renderAllSubjects();
       renderProfileSettings?.();
@@ -7449,7 +7323,7 @@ if (state.tab === "profile") {
         pinned: false
       });
 
-      if (main2 && main2 !== main1) {
+      if (main2) {
         subjects.push({
           key: main2,
           mode: "competitive",
@@ -8026,7 +7900,6 @@ if (action === "tour-next" || action === "tour-submit") {
     try {
       localStorage.removeItem("profile");
       localStorage.removeItem("state");
-       window.__profileDbSubjectsReady = false;
 
       // если у тебя есть другие ключи — добавим позже точечно
     } catch (e) {}
