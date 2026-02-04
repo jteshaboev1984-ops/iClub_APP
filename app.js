@@ -2299,9 +2299,9 @@ async function saveRegistrationToSupabase(profile) {
     return { ok: false, reason: "users_upsert_failed" };
   }
 
-  // 2) upsert user_subjects rows
+    // 2) sync user_subjects rows
   const subjects = Array.isArray(profile?.subjects) ? profile.subjects : [];
-  const rows = [];
+  const rowsRaw = [];
 
   for (const s of subjects) {
     const key = String(s?.key || "").trim();
@@ -2312,19 +2312,37 @@ async function saveRegistrationToSupabase(profile) {
 
     const mode = (s?.mode === "competitive") ? "competitive" : "study";
 
-      rows.push({
+    rowsRaw.push({
       user_id: uid,
       subject_id: subjectId,
       mode,
-     // ❗ project rule: competitive subjects cannot be pinned
+      // project rule: competitive subjects cannot be pinned
       is_pinned: (mode === "competitive") ? false : !!s?.pinned
     });
   }
 
-    if (rows.length) {
-    // ВАЖНО: upsert с onConflict требует UNIQUE(user_id,subject_id).
-    // Чтобы не зависеть от уникального ограничения (и не ловить 400),
-    // делаем синхронизацию "delete → insert".
+  // ---- NORMALIZE rows: (1) de-duplicate by subject_id, (2) enforce competitive ≤ 2
+  const dedupMap = new Map(); // subject_id -> row
+  for (const r of rowsRaw) {
+    if (!dedupMap.has(r.subject_id)) dedupMap.set(r.subject_id, r);
+  }
+
+  let rows = Array.from(dedupMap.values());
+
+  // enforce competitive max 2 (downgrade extra to study, deterministic order)
+  let compCount = 0;
+  rows = rows.map(r => {
+    if (r.mode === "competitive") {
+      compCount += 1;
+      if (compCount > 2) {
+        return { ...r, mode: "study", is_pinned: !!r.is_pinned };
+      }
+    }
+    return r;
+  });
+
+  if (rows.length) {
+    // delete → insert (safe even without unique constraint)
     const { error: delErr } = await window.sb
       .from("user_subjects")
       .delete()
@@ -2343,6 +2361,21 @@ async function saveRegistrationToSupabase(profile) {
     const { error: insErr } = await window.sb
       .from("user_subjects")
       .insert(rows);
+
+    if (insErr) {
+      try {
+        trackEvent("registration_db_error", {
+          where: "user_subjects_insert",
+          message: String(insErr?.message || insErr),
+          rows_count: rows.length,
+          comp_count: rows.filter(x => x.mode === "competitive").length
+        });
+      } catch {}
+      return { ok: false, reason: "user_subjects_insert_failed" };
+    }
+  }
+
+  return { ok: true, user_id: uid, user_subjects_rows: rows.length, subjects_saved: rows.length };
 
     if (insErr) {
       try {
@@ -7323,7 +7356,7 @@ if (state.tab === "profile") {
         pinned: false
       });
 
-      if (main2) {
+      if (main2 && main2 !== main1) {
         subjects.push({
           key: main2,
           mode: "competitive",
