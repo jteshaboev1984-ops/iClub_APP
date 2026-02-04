@@ -4704,11 +4704,67 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
     btnDetach.type = "button";
     btnDetach.className = "mini-btn ghost";
     btnDetach.textContent = t("btn_detach") || "Открепить";
-    btnDetach.addEventListener("click", async (e) => {
+        btnDetach.addEventListener("click", async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      // (оставь твою текущую логику confirm/детача competitive как была)
-      // ... confirm detach competitive ...
+
+      const ok = await uiConfirm({
+        title: t("detach_comp_title") || "Снять Competitive?",
+        message:
+          (t("detach_comp_text") || "Вы действительно хотите снять Competitive с этого предмета?\n\nПоследствия:\n• прогресс и попытки по предмету будут обнулены\n• предмет перестанет участвовать в рейтингах\n\nВы сможете выбрать другой предмет в Competitive."),
+        okText: t("detach_comp_ok") || "Снять",
+        cancelText: t("cancel") || "Отмена"
+      });
+
+      if (!ok) return;
+
+      const prof = loadProfile() || profile;
+      const us = (prof.subjects || []).find(x => x.key === s.key) || null;
+      if (!us) return;
+
+      // 1) local: переводим в study + снимаем pin
+      us.mode = "study";
+      us.pinned = false;
+      saveProfile(prof);
+
+      // 2) DB: записываем mode/pinned
+      try {
+        const res = await syncUserSubjectToSupabase(s.key, "study", false);
+        if (!res?.ok) {
+          showToast("Не удалось сохранить в базе. Попробуйте ещё раз.");
+          renderAllSubjects();
+          return;
+        }
+      } catch {
+        showToast("Ошибка сети. Попробуйте ещё раз.");
+        renderAllSubjects();
+        return;
+      }
+
+      // 3) DB: обнуляем достижения по предмету (практика/туры/кеш рейтинга)
+      try {
+        const uid = await getAuthUid();
+        const subjectId = await getSubjectIdByKey(s.key);
+
+        if (window.sb && uid && subjectId) {
+          // practice
+          try { await window.sb.from("practice_answers").delete().eq("user_id", uid).eq("subject_id", subjectId); } catch {}
+          try { await window.sb.from("practice_attempts").delete().eq("user_id", uid).eq("subject_id", subjectId); } catch {}
+
+          // tours
+          try { await window.sb.from("tour_attempts").delete().eq("user_id", uid).eq("subject_id", subjectId); } catch {}
+          try { await window.sb.from("tour_progress").delete().eq("user_id", uid).eq("subject_id", subjectId); } catch {}
+          try { await window.sb.from("user_answers").delete().eq("user_id", uid).eq("subject_id", subjectId); } catch {}
+
+          // ratings cache
+          try { await window.sb.from("ratings_cache").delete().eq("user_id", uid).eq("subject_id", subjectId); } catch {}
+        }
+      } catch {}
+
+      showToast(t("detach_comp_done") || "Competitive снят. Прогресс обнулён.");
+      renderHome();
+      renderAllSubjects();
+      renderProfileSettings?.();
     });
 
     footer.appendChild(btnDetach);
@@ -4737,19 +4793,44 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
     // IMPORTANT: switch click must NOT open the subject card
     input.addEventListener("click", (e) => e.stopPropagation());
 
-    input.addEventListener("change", (e) => {
+        input.addEventListener("change", async (e) => {
       e.stopPropagation();
 
       const prof = loadProfile() || profile;
       const updated = togglePinnedSubject(prof, s.key);
-
       saveProfile(updated);
 
-      // figure out new pinned state (after toggle)
-      const after = (updated?.subjects || []).find(x => x.key === s.key);
+      // new state
+      const after = (updated?.subjects || []).find(x => x.key === s.key) || null;
       const nowPinned = !!after?.pinned;
+      const mode = after?.mode || "study";
 
+      // UI feedback instantly
       showToast(nowPinned ? t("toast_added_pinned") : t("toast_removed_pinned"));
+
+      // ✅ DB sync (so pinned is реально сохранён в базе)
+      try {
+        const res = await syncUserSubjectToSupabase(s.key, mode, nowPinned);
+        if (!res?.ok) {
+          // если база отказала — откатываем локально и UI
+          const prof2 = loadProfile() || updated;
+          const us2 = (prof2.subjects || []).find(x => x.key === s.key) || null;
+          if (us2) us2.pinned = !nowPinned;
+          saveProfile(prof2);
+
+          input.checked = !nowPinned;
+          showToast("Не удалось сохранить в базе. Попробуйте ещё раз.");
+        }
+      } catch {
+        // откат на всякий случай
+        const prof2 = loadProfile() || updated;
+        const us2 = (prof2.subjects || []).find(x => x.key === s.key) || null;
+        if (us2) us2.pinned = !nowPinned;
+        saveProfile(prof2);
+
+        input.checked = !nowPinned;
+        showToast("Ошибка сети. Попробуйте ещё раз.");
+      }
 
       // refresh screens that use pinned
       renderHome();
