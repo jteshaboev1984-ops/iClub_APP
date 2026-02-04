@@ -8367,5 +8367,6 @@ function renderSubjectHubCredentialsInline(subjectKey) {
     // Init
   bindUI();
   boot();
-
+     
+} // <-- FIX: closing missing block from previous patches
 })();
