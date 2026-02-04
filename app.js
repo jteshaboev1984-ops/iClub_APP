@@ -8072,44 +8072,36 @@ if (action === "tour-next" || action === "tour-submit") {
     // ✅ параллельно поднимаем Supabase-сессию (не блокируем UX)
     const supaReady = initSupabaseSession().catch(() => null);
 
-        Promise.all([preloadAppImages(), minDelay, supaReady]).then(() => {
-  // ✅ DB warmup runs in background (must NOT block splash)
-  (async () => {
-    const withTimeout = (p, ms) =>
-      Promise.race([p, new Promise((resolve) => setTimeout(() => resolve({ ok: false, timeout: true }), ms))]);
+        Promise.all([preloadAppImages(), minDelay, supaReady]).then(async () => {
+      // Stage B: if local profile is missing, try hydrate from DB
+      try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
 
-    // Stage B: if local profile is missing, try hydrate from DB (bounded)
-    try { await withTimeout(hydrateLocalProfileFromSupabaseIfMissing(), 1500); } catch {}
+// Stage B2: always sync user_subjects from DB → local profile (single source for UI)
+try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
 
-    // Stage B2: always sync user_subjects from DB → local profile (bounded)
-    try { await withTimeout(syncUserSubjectsFromSupabaseIntoLocalProfile(), 1500); } catch {}
+      if (!isRegistered()) {
+        showView("registration");
+        bindRegistration();
+        return;
+      }
 
-    // After warmup, allow profile counts to refresh next time
-    try { window.__profileDbSubjectsReady = false; } catch {}
-  })();
+      renderAllSubjects();
+      renderHome();
 
-  // ✅ Continue app start immediately
-  if (!isRegistered()) {
-    showView("registration");
-    bindRegistration();
-    return;
+      // ✅ Требование: при полном запуске (reload/новый старт) всегда стартуем с Home
+      // Сворачивание/возврат не трогаем — там не происходит reload.
+      state.tab = "home";
+      saveState();
+
+      // ✅ Courses всегда начинает с All Subjects (когда пользователь туда зайдёт)
+      state.courses = state.courses || {};
+      state.courses.stack = ["all-subjects"];
+      saveState();
+
+      // Start at Home
+      setTab("home");
+    });
   }
-
-  renderAllSubjects();
-  renderHome();
-
-  // ✅ Full reload starts at Home
-  state.tab = "home";
-  saveState();
-
-     // ✅ Courses always opens All Subjects
-     state.courses = state.courses || {};
-     state.courses.stack = ["all-subjects"];
-     saveState();
-
-     setTab("home");
-   });
-}
 
    // ---------------------------
 // Credentials UI (Profile + Subject Hub)
@@ -8375,5 +8367,5 @@ function renderSubjectHubCredentialsInline(subjectKey) {
     // Init
   bindUI();
   boot();
-     
+
 })();
