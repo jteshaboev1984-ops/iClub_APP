@@ -4095,8 +4095,9 @@ input?.addEventListener("change", async () => {
 
        ensureProfileSubjectsDbSynced()
      .then((res) => {
-       // ✅ перерисовываем ТОЛЬКО если синк реально успешен
-       if (res?.ok && state?.tab === "profile") {
+       // ✅ перерисовываем ТОЛЬКО после завершённого sync,
+       // чтобы не уйти в цикл мгновенных .then() при res.skipped=true
+       if (res?.ok && !res?.skipped && state?.tab === "profile") {
          try { renderProfileMain(); } catch {}
          try { renderProfileSettings(); } catch {}
        }
