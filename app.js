@@ -3797,12 +3797,12 @@ mainSubjects.forEach(subj => {
     const toMode = mode;
     const toPinned = (toMode === "competitive") ? false : pinned;
  
-    try {
+        try {
       trackEvent("user_subjects_save_started", { subject_key: subj.key, mode, is_pinned: pinned });
     } catch {}
 
     try {
-            const res = await syncUserSubjectToSupabase(subj.key, mode, pinned);
+      const res = await syncUserSubjectToSupabase(subj.key, mode, pinned);
 
       try {
         trackEvent("user_subjects_save_result", {
@@ -3838,7 +3838,13 @@ mainSubjects.forEach(subj => {
         showToast("Не удалось сохранить. Попробуйте ещё раз.");
         return;
       }
-     
+    } catch (e) {
+      // ❗rollback UI on network/JS error
+      input.checked = !turningOn;
+      showToast("Ошибка сети. Попробуйте ещё раз.");
+      return;
+    }
+
     renderHome();
     if (state.tab === "courses") {
       renderAllSubjects();
