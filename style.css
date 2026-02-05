@@ -2499,7 +2499,8 @@ body.modal-open { overflow: hidden; }
 }
 
 .lb-mybar-mid{
-  display: none;
+  flex: 1;
+  min-width: 0;
 }
 
 .lb-mybar-name{
