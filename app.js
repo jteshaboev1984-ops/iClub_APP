@@ -3444,7 +3444,7 @@ async function ensureRatingsBoot() {
         </div>
 
         <div class="modal-actions">
-          <button class="btn" type="button" data-close="modal">${escapeHTML(t("done") || "Done")}</button>
+          <button type="button" class="btn primary" data-modal-action="ok">${escapeHTML(t("done") || "Done")}</button>
         </div>
       </div>
     </div>
@@ -3507,11 +3507,21 @@ function bindRatingsUI() {
   if (searchInput) {
     searchInput.placeholder = t("ratings_search_placeholder") || "Search...";
 
-    searchInput.addEventListener("input", () => {
-      const v = searchInput.value || "";
-      if (searchTimer) clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => applySearch(v), 180);
-    });
+    searchInput.addEventListener("input", (e) => {
+  // Не мешаем набору текста (особенно на мобилках/IME)
+  if (e && e.isComposing) return;
+
+  const v = String(searchInput.value || "");
+  const trimmed = v.trim();
+
+     // Не запускаем поиск по 1 символу — это “дёргает” экран и ломает UX
+     if (trimmed.length === 1) return;
+
+     if (searchTimer) clearTimeout(searchTimer);
+
+     // Мягче debounce: пользователь успевает набрать запрос
+     searchTimer = setTimeout(() => applySearch(v), 450);
+   });
   }
 
   if (searchClear) {
