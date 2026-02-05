@@ -837,6 +837,21 @@
       Рейтинг доступен для просмотра. “Мой ранг” показывается только участникам (Competitive).
     </div>
 
+        <!-- Search (panel) -->
+    <button id="ratings-search-backdrop" class="lb-search-backdrop" type="button" aria-label="Close search" style="display:none"></button>
+
+    <div id="ratings-search-panel" class="lb-search-panel" style="display:none">
+      <div class="lb-search">
+        <span class="lb-search-ico">🔍</span>
+        <input id="ratings-search" class="lb-search-input" type="search" placeholder="Search..." autocomplete="off" />
+        <button id="ratings-search-clear" class="lb-search-clear" type="button" aria-label="Clear">✕</button>
+      </div>
+
+      <div class="lb-search-hint" data-i18n="ratings_search_hint_inline">
+        Search by name, school, class, region or district
+      </div>
+    </div>
+
       <!-- Table header -->
     <div class="lb-head">
       <div>RANK</div>
