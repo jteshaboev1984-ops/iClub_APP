@@ -3426,73 +3426,106 @@ async function ensureRatingsBoot() {
   }
 }
 
-   function openRatingsSearchModal() {
-  const title = t("ratings_search_title") || "Search";
-  const label = t("ratings_search_label") || "Name / School / Class";
-  const hint = t("ratings_search_hint") || "Type any part of a name, school or class.";
-  const btnReset = t("btn_reset") || "Reset";
-  const btnApply = t("btn_apply") || "Apply";
-
-  const current = String(ratingsState.q || "");
+ function openRatingsInfoModal() {
+  const title = t("ratings_info_title") || "Leaderboard info";
+  const text1 = t("ratings_info_text1") || "Leaderboards are available for viewing by everyone.";
+  const text2 = t("ratings_info_text2") || "“My rank” is shown only for Competitive participants.";
+  const text3 = t("ratings_info_text3") || "Ranking: higher score wins; if tied, lower time wins.";
 
   const html = `
     <div class="modal-backdrop" data-modal-backdrop data-close="backdrop">
       <div class="modal">
         <div class="modal-title">${escapeHTML(title)}</div>
 
-        <div class="modal-text" style="text-align:left">
-          <div style="font-weight:900; margin-bottom:6px;">${escapeHTML(label)}</div>
-          <input id="ratings-search-input" type="search" value="${escapeHTML(current)}"
-            style="width:100%; border:1px solid rgba(15,23,42,.12); border-radius:14px; padding:12px 12px; font-weight:900; outline:none;" />
-          <div style="margin-top:8px; font-size:12px; font-weight:800; color:rgba(15,23,42,.55);">
-            ${escapeHTML(hint)}
-          </div>
+        <div class="modal-text" style="text-align:left; line-height:1.45">
+          <div style="font-weight:900; margin-bottom:8px;">${escapeHTML(text1)}</div>
+          <div style="margin-bottom:8px;">${escapeHTML(text2)}</div>
+          <div>${escapeHTML(text3)}</div>
         </div>
 
         <div class="modal-actions">
-          <button type="button" class="btn" data-modal-action="reset">${escapeHTML(btnReset)}</button>
-          <button type="button" class="btn primary" data-modal-action="apply">${escapeHTML(btnApply)}</button>
+          <button class="btn" type="button" data-close="modal">${escapeHTML(t("done") || "Done")}</button>
         </div>
       </div>
     </div>
   `;
 
   openModal(html);
+}
 
-  const input = document.getElementById("ratings-search-input");
-  if (input) setTimeout(() => input.focus(), 50);
+   function openRatingsSearchPanel() {
+  const panel = document.getElementById("ratings-search-panel");
+  const backdrop = document.getElementById("ratings-search-backdrop");
+  const input = document.getElementById("ratings-search");
 
-  const root = document.getElementById("modal-root");
-  if (!root) return;
+  if (panel) panel.style.display = "block";
+  if (backdrop) backdrop.style.display = "block";
 
-  root.querySelectorAll("[data-modal-action]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const act = btn.dataset.modalAction;
+  if (input) {
+    input.placeholder = t("ratings_search_placeholder") || "Search...";
+    setTimeout(() => { try { input.focus(); } catch {} }, 0);
+  }
+}
 
-      if (act === "reset") {
-        ratingsState.q = "";
-        closeModal(true);
-        renderRatings();
-        return;
-      }
+function closeRatingsSearchPanel() {
+  const panel = document.getElementById("ratings-search-panel");
+  const backdrop = document.getElementById("ratings-search-backdrop");
 
-      if (act === "apply") {
-        const v = (input ? input.value : "");
-        ratingsState.q = String(v || "").trim();
-        closeModal(true);
-        renderRatings();
-        return;
-      }
+  if (panel) panel.style.display = "none";
+  if (backdrop) backdrop.style.display = "none";
+}
 
-      closeModal(false);
-    });
-  });
+function toggleRatingsSearchPanel() {
+  const panel = document.getElementById("ratings-search-panel");
+  const isOpen = !!panel && panel.style.display === "block";
+  if (isOpen) closeRatingsSearchPanel();
+  else openRatingsSearchPanel();
 }
 
 function bindRatingsUI() {
   const listEl = $("#ratings-list");
   const subjectSelect = $("#ratings-subject");
   const tourSelect = $("#ratings-tour");
+     // Search panel controls
+  const searchInput = document.getElementById("ratings-search");
+  const searchClear = document.getElementById("ratings-search-clear");
+  const searchBackdrop = document.getElementById("ratings-search-backdrop");
+
+  let searchTimer = null;
+
+  const applySearch = (val) => {
+    ratingsState.q = String(val || "").trim();
+    renderRatings();
+  };
+
+  if (searchBackdrop) {
+    searchBackdrop.addEventListener("click", () => {
+      closeRatingsSearchPanel();
+    });
+  }
+
+  if (searchInput) {
+    searchInput.placeholder = t("ratings_search_placeholder") || "Search...";
+
+    searchInput.addEventListener("input", () => {
+      const v = searchInput.value || "";
+      if (searchTimer) clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => applySearch(v), 180);
+    });
+  }
+
+  if (searchClear) {
+    searchClear.addEventListener("click", () => {
+      if (!searchInput) return;
+      if (String(searchInput.value || "").length > 0) {
+        searchInput.value = "";
+        applySearch("");
+      } else {
+        // если пусто — закрываем панель
+        closeRatingsSearchPanel();
+      }
+    });
+  }
 
   if (subjectSelect) {
     subjectSelect.addEventListener("change", async () => {
@@ -7704,7 +7737,8 @@ if (state.tab === "profile") {
       if (action === "go-home") { setTab("home"); return; }
       if (action === "go-profile") { setTab("profile"); return; }
       if (action === "open-ratings") { setTab("ratings"); return; }
-      if (action === "ratings-info") { openRatingsSearchModal(); return; }
+      if (action === "ratings-search") { toggleRatingsSearchPanel(); return; }
+      if (action === "ratings-info") { openRatingsInfoModal(); return; }
 
       if (action === "open-resources") { openGlobal("resources"); return; }
       if (action === "open-news") { openGlobal("news"); return; }
