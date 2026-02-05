@@ -2492,14 +2492,14 @@ body.modal-open { overflow: hidden; }
 }
 
 .lb-mybar-rank{
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 1000;
   margin-top: 2px;
+  font-variant-numeric: tabular-nums;
 }
 
 .lb-mybar-mid{
-  flex: 1;
-  min-width: 0;
+  display: none;
 }
 
 .lb-mybar-name{
@@ -2525,6 +2525,8 @@ body.modal-open { overflow: hidden; }
 
 .lb-mybar-score{
   font-weight: 1000;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
 }
 
 .lb-mybar-time{
