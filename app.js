@@ -2892,36 +2892,49 @@ async function ensureRatingsBoot() {
   // total participants (used for "out of N")
   let totalN = 0;
 
-  const renderRowHTML = (row) => {
+    function applyRatingsNamePolicy(rows) {
+    const arr = Array.isArray(rows) ? rows : [];
+    const counts = new Map();
 
+    for (const r of arr) {
+      const full = String(r?.name || "—").trim();
+      const first = full.split(/\s+/)[0] || "—";
+      counts.set(first, (counts.get(first) || 0) + 1);
+    }
+
+    for (const r of arr) {
+      const full = String(r?.name || "—").trim();
+      const first = full.split(/\s+/)[0] || "—";
+      const dup = (counts.get(first) || 0) > 1;
+
+      // по умолчанию — только имя, но если имя дублируется — показываем полное ФИО
+      r.display_name = (first !== "—" && !dup) ? first : (full || "—");
+    }
+  }
+
+  const renderRowHTML = (row) => {
     const topClass =
       row.rank === 1 ? "is-top1" :
       (row.rank === 2 ? "is-top2" :
       (row.rank === 3 ? "is-top3" : ""));
 
-        return `
-      <div class="lb-row" style="display:grid;grid-template-columns:56px 1fr 64px 64px;gap:10px;align-items:center;">
-        <div class="lb-rank" style="display:flex;justify-content:center;">
+    const displayName = row.display_name || row.name || "—";
+
+    return `
+      <div class="lb-row">
+        <div class="lb-rank">
           <div class="lb-rank-badge ${topClass}">${row.rank}</div>
         </div>
 
-        <div class="lb-student" style="min-width:0;">
-          <div class="lb-student-text" style="min-width:0;">
-            <div class="lb-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-              ${escapeHTML(row.name)}
-            </div>
-            <div class="lb-meta" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-              ${escapeHTML(row.meta || "")}
-            </div>
+        <div class="lb-student">
+          <div class="lb-student-text">
+            <div class="lb-name">${escapeHTML(displayName)}</div>
+            <div class="lb-meta">${escapeHTML(row.meta || "")}</div>
           </div>
         </div>
 
-        <div class="lb-score" style="text-align:right;font-variant-numeric:tabular-nums;">
-          ${row.score}
-        </div>
-        <div class="lb-time" style="text-align:right;font-variant-numeric:tabular-nums;">
-          ${escapeHTML(row.time)}
-        </div>
+        <div class="lb-score">${row.score}</div>
+        <div class="lb-time">${escapeHTML(row.time)}</div>
       </div>
     `;
   };
@@ -3229,6 +3242,8 @@ async function ensureRatingsBoot() {
     if (!topRows.length && !aroundRows.length && !bottomRows.length) {
       listEl.innerHTML = `<div class="empty muted">Ничего не найдено.</div>`;
     } else {
+          // политика имени: только имя, но если имена повторяются — показываем фамилию (полное ФИО)
+      applyRatingsNamePolicy([...(topRows || []), ...(aroundRows || []), ...(bottomRows || [])]);
             listEl.innerHTML =
         renderSection(t("ratings_top") || "Top 10", dedupeByRank(topRows), "") +
         (isParticipant && myRow?.rank_no ? renderSection(t("ratings_around") || "Around me", dedupeByRank(aroundRows), "±2") : "") +
