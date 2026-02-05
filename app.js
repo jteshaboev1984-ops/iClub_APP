@@ -2453,23 +2453,69 @@ async function hydrateLocalProfileFromSupabaseIfMissing() {
   if (!uid) return { ok: false, reason: "no_uid" };
 
   // Read user's subjects from DB (join subjects to get subject_key)
-  const { data, error } = await window.sb
-    .from("user_subjects")
-    .select("subject_id, mode, is_pinned, subjects(subject_key)")
-    .eq("user_id", uid);
+  let data = null;
+let error = null;
 
-  if (error) {
-    try { await logDbErrorToEvents(uid, "user_subjects_select", error, {}); } catch {}
-    return { ok: false, reason: "select_failed" };
-  }
+({ data, error } = await window.sb
+  .from("user_subjects")
+  .select("subject_id, mode, is_pinned, subjects(subject_key)")
+  .eq("user_id", uid));
 
-  const list = (Array.isArray(data) ? data : [])
+let list = [];
+
+if (!error) {
+  // ✅ основной путь (если relationship работает)
+  list = (Array.isArray(data) ? data : [])
     .map(r => ({
       key: r?.subjects?.subject_key || null,
       mode: r?.mode || "study",
       pinned: !!r?.is_pinned
     }))
     .filter(x => !!x.key);
+} else {
+  // ✅ fallback путь (без join)
+  try { await logDbErrorToEvents(uid, "user_subjects_select_join_failed", error, {}); } catch {}
+
+  const { data: usRows, error: usErr } = await window.sb
+    .from("user_subjects")
+    .select("subject_id, mode, is_pinned")
+    .eq("user_id", uid);
+
+  if (usErr) {
+    try { await logDbErrorToEvents(uid, "user_subjects_select_plain_failed", usErr, {}); } catch {}
+    return { ok: false, reason: "select_failed" };
+  }
+
+  const ids = Array.from(new Set((Array.isArray(usRows) ? usRows : [])
+    .map(r => Number(r?.subject_id))
+    .filter(n => Number.isFinite(n) && n > 0)));
+
+  const idToKey = new Map();
+  if (ids.length) {
+    const { data: subjRows, error: subjErr } = await window.sb
+      .from("subjects")
+      .select("id, subject_key")
+      .in("id", ids);
+
+    if (subjErr) {
+      try { await logDbErrorToEvents(uid, "subjects_select_for_map_failed", subjErr, { ids_count: ids.length }); } catch {}
+    } else {
+      (Array.isArray(subjRows) ? subjRows : []).forEach(s => {
+        const id = Number(s?.id);
+        const key = String(s?.subject_key || "").trim();
+        if (Number.isFinite(id) && id > 0 && key) idToKey.set(id, key);
+      });
+    }
+  }
+
+  list = (Array.isArray(usRows) ? usRows : [])
+    .map(r => ({
+      key: idToKey.get(Number(r?.subject_id)) || null,
+      mode: r?.mode || "study",
+      pinned: !!r?.is_pinned
+    }))
+    .filter(x => !!x.key);
+}
 
   const profile = loadProfile();
   if (!profile) {
@@ -4047,16 +4093,16 @@ input?.addEventListener("change", async () => {
     if (compElTmp) compElTmp.textContent = "…";
     if (studyElTmp) studyElTmp.textContent = "…";
 
-    ensureProfileSubjectsDbSynced()
-      .then(() => {
-        if (state?.tab === "profile") {
-          try { renderProfileMain(); } catch {}
-          try { renderProfileSettings(); } catch {}
-        }
-      })
-      .catch(() => {});
-
-    return;
+       ensureProfileSubjectsDbSynced()
+     .then((res) => {
+       // ✅ перерисовываем ТОЛЬКО если синк реально успешен
+       if (res?.ok && state?.tab === "profile") {
+         try { renderProfileMain(); } catch {}
+         try { renderProfileSettings(); } catch {}
+       }
+     })
+     .catch(() => {});
+   return;
   }
   
   const nameEl = document.getElementById("profile-dash-name");
