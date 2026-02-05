@@ -2242,6 +2242,35 @@ if (payload.mode === "competitive" && payload.is_pinned) {
   return { ok: true, uid, subjectId, method: "upsert" };
 }
 
+   async function writeUserSubjectsHistory(row) {
+  try {
+    if (!window.sb) return { ok: false };
+    const uid = row?.user_id || await getAuthUid();
+    if (!uid) return { ok: false };
+
+    const payload = {
+      user_id: uid,
+      subject_id: Number(row?.subject_id),
+      action: String(row?.action),
+      from_mode: row?.from_mode ?? null,
+      to_mode: row?.to_mode ?? null,
+      from_pinned: row?.from_pinned ?? null,
+      to_pinned: row?.to_pinned ?? null,
+      source: row?.source ?? null,
+      meta: row?.meta ?? null
+    };
+
+    const { error } = await window.sb.from("user_subjects_history").insert(payload);
+    if (error) {
+      try { await logDbErrorToEvents(uid, "user_subjects_history_insert", error, payload); } catch {}
+      return { ok: false };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
+}
+   
 // ---------------------------
 // Stage B (DB-backed registration)
 // - Save registration fields into public.users
@@ -2355,6 +2384,7 @@ async function saveRegistrationToSupabase(profile) {
     }
   }
 
+   __profileSubjectsDbReady = false;
   return { ok: true, user_id: uid, user_subjects_rows: rows.length, subjects_saved: rows.length };
 }
 
@@ -2451,6 +2481,27 @@ async function hydrateLocalProfileFromSupabaseIfMissing() {
   saveProfile(profile);
 
   return { ok: true, applied: true, count: list.length };
+}
+
+   // ---------------------------
+// Profile counts must be DB-accurate
+// ---------------------------
+let __profileSubjectsDbReady = false;
+let __profileSubjectsDbSyncing = false;
+
+async function ensureProfileSubjectsDbSynced() {
+  if (!window.sb) return { ok: false, reason: "no_sb" };
+  if (__profileSubjectsDbSyncing) return { ok: true, skipped: true };
+  if (__profileSubjectsDbReady) return { ok: true, skipped: true };
+
+  __profileSubjectsDbSyncing = true;
+  try {
+    const res = await syncUserSubjectsFromSupabaseIntoLocalProfile();
+    if (res?.ok) __profileSubjectsDbReady = true;
+    return res;
+  } finally {
+    __profileSubjectsDbSyncing = false;
+  }
 }
 
 // ---------------------------
@@ -3702,6 +3753,8 @@ mainSubjects.forEach(subj => {
 
     const next = subjects.map(s => ({ ...s }));
     const was = next.find(s => s.key === subj.key);
+    const fromMode = was?.mode || "study";
+    const fromPinned = !!was?.pinned;
     const turningOn = !isCompetitiveForUser(fresh, subj.key);
 
     const ok = await uiConfirm({
@@ -3738,30 +3791,54 @@ mainSubjects.forEach(subj => {
 
     fresh.subjects = next;
     saveProfile(fresh);
-     // ✅ DB-backed user_subjects sync (non-blocking)
-(async () => {
-  try {
     const us = Array.isArray(fresh?.subjects) ? fresh.subjects.find(s => s.key === subj.key) : null;
     const mode = us?.mode || "study";
     const pinned = !!us?.pinned;
-
+    const toMode = mode;
+    const toPinned = (toMode === "competitive") ? false : pinned;
+ 
     try {
       trackEvent("user_subjects_save_started", { subject_key: subj.key, mode, is_pinned: pinned });
     } catch {}
 
-    const res = await syncUserSubjectToSupabase(subj.key, mode, pinned);
-
     try {
-      trackEvent("user_subjects_save_result", {
-        ok: !!res?.ok,
-        reason: res?.reason || null,
-        method: res?.method || null,
-        subject_key: subj.key
-      });
-    } catch {}
-  } catch {}
-})();
+            const res = await syncUserSubjectToSupabase(subj.key, mode, pinned);
 
+      try {
+        trackEvent("user_subjects_save_result", {
+          ok: !!res?.ok,
+          reason: res?.reason || null,
+          method: res?.method || null,
+          subject_key: subj.key
+        });
+      } catch {}
+
+      // ✅ only on success: write history + resync profile snapshot
+      if (res?.ok) {
+        const subjectId = res?.subjectId || await getSubjectIdByKey(subj.key);
+        if (subjectId) {
+          await writeUserSubjectsHistory({
+            user_id: res?.uid,
+            subject_id: subjectId,
+            action: "mode_change",
+            from_mode: fromMode,
+            to_mode: toMode,
+            from_pinned: fromPinned,
+            to_pinned: toPinned,
+            source: "profile_settings",
+            meta: { subject_key: subj.key }
+          });
+        }
+
+        __profileSubjectsDbReady = false;
+        await ensureProfileSubjectsDbSynced();
+      } else {
+        // ❗rollback UI if DB rejected (limit/RLS/etc.)
+        input.checked = !turningOn;
+        showToast("Не удалось сохранить. Попробуйте ещё раз.");
+        return;
+      }
+     
     renderHome();
     if (state.tab === "courses") {
       renderAllSubjects();
@@ -3866,7 +3943,7 @@ if (langWrap) {
 
 const input = row.querySelector('input[type="checkbox"]');
 
-input?.addEventListener("change", () => {
+input?.addEventListener("change", async () => {
   const fresh = loadProfile();
   if (!fresh) return;
 
@@ -3886,30 +3963,61 @@ input?.addEventListener("change", () => {
 
   const updated = togglePinnedSubject(fresh, subj.key);
   saveProfile(updated);
+  const after = (updated?.subjects || []).find(x => x.key === subj.key) || null;
+  const fromPinned = currPinned;
+  const toPinned = !!after?.pinned;
+  const fromMode = currMode;
+  const toMode = after?.mode || "study";
 
-  // ✅ DB-backed user_subjects sync (non-blocking)
-  (async () => {
-    try {
-      const us = Array.isArray(updated?.subjects) ? updated.subjects.find(s => s.key === subj.key) : null;
-      const mode = us?.mode || "study";
-      const pinned = !!us?.pinned;
+  try {
+    const us = Array.isArray(updated?.subjects) ? updated.subjects.find(s => s.key === subj.key) : null;
+    const mode = us?.mode || "study";
+    const pinned = !!us?.pinned;
 
-      try {
-        trackEvent("user_subjects_save_started", { subject_key: subj.key, mode, is_pinned: pinned });
-      } catch {}
-
-      const res = await syncUserSubjectToSupabase(subj.key, mode, pinned);
-
-      try {
-        trackEvent("user_subjects_save_result", {
-          ok: !!res?.ok,
-          reason: res?.reason || null,
-          method: res?.method || null,
-          subject_key: subj.key
-        });
-      } catch {}
+ try {
+      trackEvent("user_subjects_save_started", { subject_key: subj.key, mode, is_pinned: pinned });
     } catch {}
-  })();
+     
+        const res = await syncUserSubjectToSupabase(subj.key, mode, pinned);
+
+  try {
+    trackEvent("user_subjects_save_result", {
+      ok: !!res?.ok,
+      reason: res?.reason || null,
+      method: res?.method || null,
+      subject_key: subj.key
+    });
+  } catch {}
+
+  if (res?.ok) {
+    const subjectId = res?.subjectId || await getSubjectIdByKey(subj.key);
+    if (subjectId) {
+      await writeUserSubjectsHistory({
+        user_id: res?.uid,
+        subject_id: subjectId,
+        action: "pin_change",
+        from_mode: fromMode,
+        to_mode: toMode,
+        from_pinned: fromPinned,
+        to_pinned: toPinned,
+        source: "profile_settings",
+        meta: { subject_key: subj.key }
+      });
+    }
+
+    __profileSubjectsDbReady = false;
+    await ensureProfileSubjectsDbSynced();
+  } else {
+    // rollback UI
+    try { input.checked = fromPinned; } catch {}
+    showToast("Не удалось сохранить. Попробуйте ещё раз.");
+    return;
+  }
+} catch {
+  try { input.checked = fromPinned; } catch {}
+  showToast("Ошибка сохранения. Попробуйте ещё раз.");
+  return;
+}
 
   renderHome();
   if (state.tab === "courses") renderAllSubjects();
@@ -3927,6 +4035,24 @@ input?.addEventListener("change", () => {
   function renderProfileMain() {
   const profile = loadProfile();
 
+  if (profile && window.sb && !__profileSubjectsDbReady) {
+    const compElTmp = document.getElementById("profile-metric-competitive");
+    const studyElTmp = document.getElementById("profile-metric-study");
+    if (compElTmp) compElTmp.textContent = "…";
+    if (studyElTmp) studyElTmp.textContent = "…";
+
+    ensureProfileSubjectsDbSynced()
+      .then(() => {
+        if (state?.tab === "profile") {
+          try { renderProfileMain(); } catch {}
+          try { renderProfileSettings(); } catch {}
+        }
+      })
+      .catch(() => {});
+
+    return;
+  }
+  
   const nameEl = document.getElementById("profile-dash-name");
   const metaEl = document.getElementById("profile-dash-meta");
   const avatarEl = document.getElementById("profile-avatar");
@@ -4735,6 +4861,20 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
           renderAllSubjects();
           return;
         }
+      
+        const uid = await getAuthUid();
+        const subjectId = res?.subjectId || await getSubjectIdByKey(s.key);
+        if (uid && subjectId) {
+          await writeUserSubjectsHistory({
+            user_id: uid,
+            subject_id: subjectId,
+            action: "detach_competitive",
+            from_mode: "competitive",
+            to_mode: "study",
+            source: "courses",
+            meta: { subject_key: s.key }
+          });
+        }   
       } catch {
         showToast("Ошибка сети. Попробуйте ещё раз.");
         renderAllSubjects();
@@ -7904,9 +8044,10 @@ if (action === "tour-next" || action === "tour-submit") {
       // если у тебя есть другие ключи — добавим позже точечно
     } catch (e) {}
 
-    showView("registration");
-    bindRegistration();
-  }
+       __profileSubjectsDbReady = false;
+      showView("registration");
+      bindRegistration();
+   }
 
   async function resetRegistrationHard() {
     // Full reset: sign out + clear local storage + reload
