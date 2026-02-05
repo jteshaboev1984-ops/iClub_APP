@@ -4887,23 +4887,19 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
         return;
       }
 
-      // 3) DB: обнуляем достижения по предмету (практика/туры/кеш рейтинга)
+            // 3) DB: soft reset progress server-side (RPC) — no client DELETE, no 400/404 in console
       try {
-        const uid = await getAuthUid();
         const subjectId = await getSubjectIdByKey(s.key);
 
-        if (window.sb && uid && subjectId) {
-          // practice
-          try { await window.sb.from("practice_answers").delete().eq("user_id", uid).eq("subject_id", subjectId); } catch {}
-          try { await window.sb.from("practice_attempts").delete().eq("user_id", uid).eq("subject_id", subjectId); } catch {}
+        if (window.sb && subjectId) {
+          const { error } = await window.sb.rpc("reset_subject_progress", { p_subject_id: subjectId });
 
-          // tours
-          try { await window.sb.from("tour_attempts").delete().eq("user_id", uid).eq("subject_id", subjectId); } catch {}
-          try { await window.sb.from("tour_progress").delete().eq("user_id", uid).eq("subject_id", subjectId); } catch {}
-          try { await window.sb.from("user_answers").delete().eq("user_id", uid).eq("subject_id", subjectId); } catch {}
-
-          // ratings cache
-          try { await window.sb.from("ratings_cache").delete().eq("user_id", uid).eq("subject_id", subjectId); } catch {}
+          if (error) {
+            try {
+              const uid2 = await getAuthUid();
+              await logDbErrorToEvents(uid2, "reset_subject_progress", error, { subject_id: subjectId, subject_key: s.key });
+            } catch {}
+          }
         }
       } catch {}
 
