@@ -273,6 +273,8 @@
       ratings_around: "Рядом со мной",
       ratings_bottom: "Нижние 3",
       ratings_out_of: "из",
+      ratings_of_total: "из {total}",
+      points_short: "бал.", 
 
       tour_rules_title: "Правила тура",
       tour_rules_accept_required: "Подтвердите согласие с правилами, чтобы начать тур."
@@ -541,6 +543,8 @@
       btn_reset: "Tozalash",
       btn_apply: "Qo‘llash",
       ratings_out_of: "dan",
+      ratings_of_total: "{total} dan",
+      points_short: "ball",
 
       ratings_top: "Top 10",
       ratings_around: "Mening atrofimda",
@@ -819,6 +823,8 @@
       ratings_around: "Around me",
       ratings_bottom: "Bottom 3",
       ratings_out_of: "out of",
+      ratings_of_total: "of {total}",
+      points_short: "pts",
 
       tour_rules_title: "Tour rules",
       tour_rules_accept_required: "Please accept the rules to start the tour."
