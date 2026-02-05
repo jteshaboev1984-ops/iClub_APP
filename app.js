@@ -3194,7 +3194,15 @@ async function ensureRatingsBoot() {
       listEl.innerHTML =
         renderSection(t("ratings_top") || "Top 10", dedupeByRank(topRows2), "") +
         (isParticipant ? renderSection(t("ratings_around") || "Around me", dedupeByRank(aroundRows2), "±2") : "") +
-        (shouldShowBottom2 ? renderSection(t("ratings_bottom") || "Bottom 3", dedupeByRank(bottomRows2), "") : "");
+        (shouldShowBottom2
+            ? renderSection(
+            t("ratings_bottom") || "Bottom 3",
+            dedupeByRank(bottomRows2),
+            t("ratings_of_total", { total: rows.length })
+           )
+        : ""
+      );
+
 
       // My rank: out of N
       if (isParticipant && mybar) {
@@ -3250,7 +3258,7 @@ async function ensureRatingsBoot() {
         (shouldShowBottom ? renderSection(
   t("ratings_bottom") || "Bottom 3",
   dedupeByRank(bottomRows),
-  totalN ? `${t("ratings_out_of") || "out of"} ${totalN}` : ""
+  totalN ? t("ratings_of_total", { total: totalN }) : ""
 ) : "");
     }
 
@@ -3392,7 +3400,8 @@ async function ensureRatingsBoot() {
       (shouldShowBottom ? renderSection(
         t("ratings_bottom") || "Bottom 3",
         dedupeByRank(bottomClean),
-        totalN ? `${t("ratings_out_of") || "out of"} ${totalN}` : ""
+        totalN ? t("ratings_of_total", { total: totalN }) : ""
+
          ) : "");
      }
 
