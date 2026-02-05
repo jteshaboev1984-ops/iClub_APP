@@ -2367,18 +2367,25 @@ body.modal-open { overflow: hidden; }
 .lb-name{
   font-weight: 1000;
   line-height: 1.1;
-  white-space: nowrap;
+
+  /* 1 строка, аккуратное обрезание */
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .lb-meta{
+  margin-top: 3px;
   font-size: 12px;
   font-weight: 800;
   color: rgba(15,23,42,0.55);
-  white-space: nowrap;
+
+  /* 2 строки, чтобы “класс/школа/район/регион” читались */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .lb-score{
