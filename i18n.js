@@ -15,6 +15,12 @@
       ratings_tour: "Тур",
       ratings_all_tours: "Все туры",
       ratings_viewer_hint: "Рейтинг доступен для просмотра. “Мой ранг” показывается только участникам (Competitive).",
+      ratings_search_placeholder: "Поиск...",
+      ratings_search_hint_inline: "Поиск по имени, школе, классу, региону или району",
+      ratings_info_title: "О рейтинге",
+      ratings_info_text1: "Рейтинг доступен для просмотра всем пользователям.",
+      ratings_info_text2: "“Мой ранг” показывается только участникам Competitive.",
+      ratings_info_text3: "Сортировка: больше баллов выше; при равенстве — меньшее время выше.",
       done: "Готово",
       error_try_again: "Ошибка — попробуйте ещё раз",
 
@@ -288,7 +294,13 @@
       ratings_tour: "Tur",
       ratings_all_tours: "Barcha turlar",
       ratings_viewer_hint: "Reytingni ko‘rish mumkin. “Mening o‘rnim” faqat Competitive ishtirokchilar uchun ko‘rsatiladi.",
-
+      ratings_search_placeholder: "Qidirish...",
+      ratings_search_hint_inline: "Ism, maktab, sinf, viloyat yoki tuman bo‘yicha qidirish",
+      ratings_info_title: "Reyting haqida",
+      ratings_info_text1: "Reytingni hamma foydalanuvchi ko‘rishi mumkin.",
+      ratings_info_text2: "“Mening o‘rnim” faqat Competitive ishtirokchilar uchun ko‘rsatiladi.",
+      ratings_info_text3: "Tartiblash: bal ko‘p bo‘lsa yuqori; teng bo‘lsa — vaqt kam bo‘lsa yuqori.",
+ 
       done: "Tayyor",
       error_try_again: "Xatolik — qayta urinib ko‘ring",
 
@@ -563,6 +575,12 @@
       ratings_tour: "Tour",
       ratings_all_tours: "All tours",
       ratings_viewer_hint: "Leaderboards are available for viewing. “My rank” is shown only for Competitive participants.",
+      ratings_search_placeholder: "Search...",
+      ratings_search_hint_inline: "Search by name, school, class, region or district",
+      ratings_info_title: "Leaderboard info",
+      ratings_info_text1: "Leaderboards are available for viewing by everyone.",
+      ratings_info_text2: "“My rank” is shown only for Competitive participants.",
+      ratings_info_text3: "Ranking: higher score wins; if tied, lower time wins.",
 
       done: "Done",
       error_try_again: "Error — please try again",
