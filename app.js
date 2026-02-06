@@ -3182,8 +3182,14 @@ async function ensureRatingsBoot() {
       // load more visibility: if we got full page, there might be more
       const maybeHasMore = (Array.isArray(pageData) && pageData.length === ratingsState._searchLimit);
 
-      listEl.innerHTML = `
-        <div class="lb-section-title">Results</div>
+            listEl.innerHTML = `
+        <div class="lb-section-title lb-results-head">
+          <span>Results</span>
+          <button type="button" class="lb-search-reset" id="ratings-reset-search">
+            Search: “${escapeHTML(String(q))}” ✕
+          </button>
+        </div>
+
         <div class="lb-section-sub">${shown.length}${totalN ? ` / ${totalN}` : ""}</div>
         ${htmlRows || `<div class="empty muted">Ничего не найдено.</div>`}
         ${maybeHasMore ? `
@@ -3586,24 +3592,22 @@ function bindRatingsUI() {
     });
   }
 
-  if (searchInput) {
+    if (searchInput) {
     searchInput.placeholder = t("ratings_search_placeholder") || "Search...";
 
-    searchInput.addEventListener("input", (e) => {
-  // Не мешаем набору текста (особенно на мобилках/IME)
-  if (e && e.isComposing) return;
+    // Ввод текста — без запуска поиска
+    searchInput.addEventListener("input", () => {});
 
-  const v = String(searchInput.value || "");
-  const trimmed = v.trim();
+    // Поиск — ТОЛЬКО по Enter
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
 
-     // Не запускаем поиск по 1 символу — это “дёргает” экран и ломает UX
-     if (trimmed.length === 1) return;
+      const v = String(searchInput.value || "").trim();
+      if (v.length < 2) return;
 
-     if (searchTimer) clearTimeout(searchTimer);
-
-     // Мягче debounce: пользователь успевает набрать запрос
-     searchTimer = setTimeout(() => applySearch(v), 450);
-   });
+      applySearch(v);
+      closeRatingsSearchPanel();
+    });
   }
 
   if (searchClear) {
@@ -3618,13 +3622,25 @@ function bindRatingsUI() {
       }
     });
   }
-        // Load more (event delegation, because button is rendered dynamically)
+                // Load more + Reset (event delegation, because buttons are rendered dynamically)
   document.addEventListener("click", (e) => {
-    const btn = e?.target?.closest?.("#ratings-load-more");
-    if (!btn) return;
+    const loadBtn = e?.target?.closest?.("#ratings-load-more");
+    if (loadBtn) {
+      ratingsState._searchOffset += ratingsState._searchLimit;
+      renderRatings();
+      return;
+    }
 
-    ratingsState._searchOffset += ratingsState._searchLimit;
-    renderRatings();
+    const resetBtn = e?.target?.closest?.("#ratings-reset-search");
+    if (resetBtn) {
+      ratingsState.q = "";
+      ratingsState._searchOffset = 0;
+      ratingsState._searchRows = [];
+
+      if (searchInput) searchInput.value = "";
+      renderRatings();
+      return;
+    }
   });
 
   if (subjectSelect) {
@@ -7836,8 +7852,33 @@ if (state.tab === "profile") {
 
       if (action === "go-home") { setTab("home"); return; }
       if (action === "go-profile") { setTab("profile"); return; }
-      if (action === "open-ratings") { setTab("ratings"); return; }
-      if (action === "ratings-search") { toggleRatingsSearchPanel(); return; }
+            if (action === "open-ratings") { setTab("ratings"); return; }
+      if (action === "ratings-search") {
+        const panel = document.getElementById("ratings-search-panel");
+        const isOpen = !!panel && panel.style.display === "block";
+        const input = document.getElementById("ratings-search");
+        const v = String(input?.value || "").trim();
+
+        if (!isOpen) {
+          openRatingsSearchPanel();
+          return;
+        }
+
+        // панель открыта
+        if (v.length >= 2) {
+          ratingsState.q = v;
+          // сбрасываем paging при новом применении
+          ratingsState._searchOffset = 0;
+          ratingsState._searchRows = [];
+          renderRatings();
+          closeRatingsSearchPanel();
+          return;
+        }
+
+        // пусто → просто закрыть
+        closeRatingsSearchPanel();
+        return;
+      }
       if (action === "ratings-info") { openRatingsInfoModal(); return; }
 
       if (action === "open-resources") { openGlobal("resources"); return; }
