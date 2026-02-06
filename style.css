@@ -2477,7 +2477,7 @@ body.modal-open { overflow: hidden; }
   gap: 10px;
 }
 
-.lb-results-head > span{
+.lb-results-head .lb-section-title{
   min-width: 0;
 }
 
@@ -2492,6 +2492,8 @@ body.modal-open { overflow: hidden; }
   padding: 6px 10px;
   border-radius: 999px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
   box-shadow: 0 8px 18px rgba(15,23,42,0.08);
   backdrop-filter: blur(8px);
 
