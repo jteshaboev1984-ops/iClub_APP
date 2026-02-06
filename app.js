@@ -2078,7 +2078,7 @@ const ratingsState = {
   tourId: null, // null = All tours
   _booted: false,
   _loading: false,
-  _token: 0
+  _token: 0,
    // search paging
   _searchKey: "",
   _searchOffset: 0,
