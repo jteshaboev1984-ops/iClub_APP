@@ -2079,6 +2079,11 @@ const ratingsState = {
   _booted: false,
   _loading: false,
   _token: 0
+   // search paging
+  _searchKey: "",
+  _searchOffset: 0,
+  _searchLimit: 200,
+  _searchRows: []
 };
 
 function getLeaderboardDataMock(scope) {
@@ -3116,7 +3121,84 @@ async function ensureRatingsBoot() {
     let bottomRows = (bottomData || []).map(mapDbToRow);
 
         totalN = (totalRes?.data && totalRes.data.length) ? Number(totalRes.data[0].rank_no || 0) : 0;
-         
+             // =========================
+    // Search mode (cache) + "Load more"
+    // =========================
+    if (q) {
+      const searchKey = `${scopeRankType}|${tourId}|${String(q).trim().toLowerCase()}`;
+
+      // reset paging when query or filters changed
+      if (ratingsState._searchKey !== searchKey) {
+        ratingsState._searchKey = searchKey;
+        ratingsState._searchOffset = 0;
+        ratingsState._searchRows = [];
+      }
+
+      const from = ratingsState._searchOffset;
+      const to = from + ratingsState._searchLimit - 1;
+
+      const { data: pageData, error: pageErr } = await window.sb
+        .from("ratings_cache")
+        .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district)")
+        .eq("tour_id", tourId)
+        .eq("rank_type", scopeRankType)
+        .order("rank_no", { ascending: true })
+        .range(from, to);
+
+      if (token !== ratingsState._token) return;
+
+      if (pageErr) {
+        listEl.innerHTML = `<div class="empty muted">Ошибка загрузки рейтинга.</div>`;
+        hideLoading();
+        return;
+      }
+
+      let pageRows = (Array.isArray(pageData) ? pageData : []).map(mapDbToRow);
+
+      // filter by name + meta
+      const qq = String(q).trim().toLowerCase();
+      pageRows = pageRows.filter(x => {
+        const blob = `${x.name || ""} ${x.meta || ""}`.toLowerCase();
+        return blob.includes(qq);
+      });
+
+      // append (avoid duplicates by user_id+rank)
+      const seen = new Set(ratingsState._searchRows.map(r => `${r.user_id}|${r.rank}`));
+      for (const r of pageRows) {
+        const k = `${r.user_id}|${r.rank}`;
+        if (!seen.has(k)) {
+          ratingsState._searchRows.push(r);
+          seen.add(k);
+        }
+      }
+
+      applyRatingsNamePolicy(ratingsState._searchRows);
+
+      hideLoading();
+
+      const shown = ratingsState._searchRows.slice(0, 10000); // safety
+      const htmlRows = shown.slice(0, 400).map(renderRowHTML).join(""); // DOM safety (пока)
+
+      // load more visibility: if we got full page, there might be more
+      const maybeHasMore = (Array.isArray(pageData) && pageData.length === ratingsState._searchLimit);
+
+      listEl.innerHTML = `
+        <div class="lb-section-title">Results</div>
+        <div class="lb-section-sub">${shown.length}${totalN ? ` / ${totalN}` : ""}</div>
+        ${htmlRows || `<div class="empty muted">Ничего не найдено.</div>`}
+        ${maybeHasMore ? `
+          <div class="lb-loadmore-wrap">
+            <button id="ratings-load-more" type="button" class="lb-loadmore-btn">Показать ещё</button>
+          </div>
+        ` : ``}
+      `;
+
+      // hide mybar during search (clean UX)
+      if (mybar) mybar.style.display = "none";
+
+      return;
+    }
+
      // Fallback: if cache is empty, compute leaderboard from tour_attempts for this tour
     const cacheEmpty = !topRows.length && !aroundRows.length && !bottomRows.length;
 
@@ -3536,6 +3618,14 @@ function bindRatingsUI() {
       }
     });
   }
+        // Load more (event delegation, because button is rendered dynamically)
+  document.addEventListener("click", (e) => {
+    const btn = e?.target?.closest?.("#ratings-load-more");
+    if (!btn) return;
+
+    ratingsState._searchOffset += ratingsState._searchLimit;
+    renderRatings();
+  });
 
   if (subjectSelect) {
     subjectSelect.addEventListener("change", async () => {
