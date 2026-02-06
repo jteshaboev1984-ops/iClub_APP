@@ -3182,11 +3182,12 @@ async function ensureRatingsBoot() {
       // load more visibility: if we got full page, there might be more
       const maybeHasMore = (Array.isArray(pageData) && pageData.length === ratingsState._searchLimit);
 
-            listEl.innerHTML = `
-        <div class="lb-section-title lb-results-head">
-          <span>Results</span>
+                        listEl.innerHTML = `
+        <div class="lb-section-head lb-results-head">
+          <div class="lb-section-title">Results</div>
+
           <button type="button" class="lb-search-reset" id="ratings-reset-search">
-            Search: “${escapeHTML(String(q))}” ✕
+            “${escapeHTML(String(q))}” ✕
           </button>
         </div>
 
