@@ -3282,18 +3282,35 @@ async function ensureRatingsBoot() {
 
       const shouldShowBottom2 = bottomRows2.length && bottomRows2.some(r => r.rank > 10);
 
+            const showSearchHead = !!q;
+
+      const searchHeadHTML = showSearchHead ? `
+        <div class="lb-section-head lb-results-head">
+          <div class="lb-section-title">Results</div>
+
+          <button type="button" class="lb-search-reset" id="ratings-reset-search" aria-label="Reset search">
+            <span class="lb-reset-label">Reset</span>
+            <span class="lb-reset-q">“${escapeHTML(String(q))}”</span>
+            <span class="lb-reset-x">✕</span>
+          </button>
+        </div>
+      ` : ``;
+
       listEl.innerHTML =
+        searchHeadHTML +
         renderSection(t("ratings_top") || "Top 10", dedupeByRank(topRows2), "") +
         (isParticipant ? renderSection(t("ratings_around") || "Around me", dedupeByRank(aroundRows2), "±2") : "") +
         (shouldShowBottom2
-            ? renderSection(
-            t("ratings_bottom") || "Bottom 3",
-            dedupeByRank(bottomRows2),
-            t("ratings_of_total", { total: rows.length })
-           )
-        : ""
-      );
+          ? renderSection(
+              t("ratings_bottom") || "Bottom 3",
+              dedupeByRank(bottomRows2),
+              t("ratings_of_total", { total: rows.length })
+            )
+          : ""
+        );
 
+      // UX: во время поиска — как и в single-tour — скрываем mybar, чтобы не мешал
+      if (showSearchHead && mybar) mybar.style.display = "none";
 
       // My rank: out of N
       if (isParticipant && mybar) {
