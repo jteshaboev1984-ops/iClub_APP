@@ -3849,3 +3849,37 @@ body.modal-open { overflow: hidden; }
   font-size: 12px;
   cursor: pointer;
 }
+/* Ratings search reset — make it clearly a button */
+.lb-search-reset{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-width: 96px;
+  justify-content: center;
+
+  border: 1px solid rgba(47,111,214,0.28);
+  background: rgba(47,111,214,0.10);
+  color: rgba(15,23,42,0.85);
+}
+
+.lb-search-reset .lb-reset-label{
+  font-weight: 1000;
+}
+
+.lb-search-reset .lb-reset-q{
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.lb-search-reset .lb-reset-x{
+  font-weight: 1000;
+  opacity: 0.9;
+}
+
+.lb-search-reset:active{
+  transform: translateY(1px);
+}
