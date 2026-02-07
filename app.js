@@ -3183,16 +3183,18 @@ async function ensureRatingsBoot() {
       const maybeHasMore = (Array.isArray(pageData) && pageData.length === ratingsState._searchLimit);
 
                         listEl.innerHTML = `
-        <div class="lb-section-head lb-results-head">
-          <div class="lb-section-title">Results</div>
+  <div class="lb-section-head lb-results-head">
+    <div class="lb-section-title">Results</div>
 
-          <button type="button" class="lb-search-reset" id="ratings-reset-search">
-            “${escapeHTML(String(q))}” ✕
-          </button>
-        </div>
+    <button type="button" class="lb-search-reset" id="ratings-reset-search" aria-label="Reset search">
+      <span class="lb-reset-label">Reset</span>
+      <span class="lb-reset-q">“${escapeHTML(String(q))}”</span>
+      <span class="lb-reset-x">✕</span>
+    </button>
+  </div>
 
-        <div class="lb-section-sub">${shown.length}${totalN ? ` / ${totalN}` : ""}</div>
-        ${htmlRows || `<div class="empty muted">Ничего не найдено.</div>`}
+  <div class="lb-section-sub">${shown.length}${totalN ? ` / ${totalN}` : ""}</div>
+  ${htmlRows || `<div class="empty muted">Ничего не найдено.</div>`}
         ${maybeHasMore ? `
           <div class="lb-loadmore-wrap">
             <button id="ratings-load-more" type="button" class="lb-loadmore-btn">Показать ещё</button>
