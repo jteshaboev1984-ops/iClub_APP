@@ -477,6 +477,110 @@ function getCredentialStore() {
     }
   }
 
+      // ---------------------------
+// ✅ Credentials → Supabase (user_credentials) sync
+// ---------------------------
+let __credIdsCache = null;           // { code: id }
+let __credSyncTimer = null;
+let __credSyncInFlight = false;
+
+async function getCredentialIdsMap() {
+  if (__credIdsCache && typeof __credIdsCache === "object") return __credIdsCache;
+  if (!window.sb) return {};
+
+  const { data, error } = await window.sb
+    .from("credential_definitions")
+    .select("id,code")
+    .eq("is_active", true);
+
+  if (error) {
+    try { console.error("[cred] credential_definitions read error:", error); } catch {}
+    return {};
+  }
+
+  const map = {};
+  (data || []).forEach(r => { if (r?.code && r?.id) map[r.code] = r.id; });
+  __credIdsCache = map;
+  return map;
+}
+
+function buildCredentialSnapshotForDb(cStore) {
+  // Берём ровно те коды, которые у тебя есть в credentialsStore()
+  return {
+    consistent_learner: cStore.consistent_learner || null,
+    focused_study_streak: cStore.focused_study_streak || null,
+    active_video_learner: cStore.active_video_learner || null,
+    practice_mastery_subject: cStore.practice_mastery_subject || null,
+    error_driven_learner: cStore.error_driven_learner || null,
+    research_oriented_learner: cStore.research_oriented_learner || null,
+    fair_play_participant: cStore.fair_play_participant || null
+  };
+}
+
+async function syncCredentialsToSupabaseOnce() {
+  if (__credSyncInFlight) return;
+  if (!window.sb) return;
+
+  __credSyncInFlight = true;
+  try {
+    const { data: userData } = await window.sb.auth.getUser();
+    const uid = userData?.user?.id;
+    if (!uid) return;
+
+    const ids = await getCredentialIdsMap();
+    if (!ids || Object.keys(ids).length === 0) return;
+
+    const c = credentialsStore();
+    const snap = buildCredentialSnapshotForDb(c);
+
+    const rows = [];
+    Object.keys(snap).forEach(code => {
+      const defId = ids[code];
+      const rec = snap[code];
+      if (!defId || !rec) return;
+
+      // статус для practice_mastery_subject вычисляем: active если есть хоть один active по предметам
+      let status = (rec.status || "inactive");
+      if (code === "practice_mastery_subject") {
+        const by = rec?.by_subject || {};
+        const anyActive = Object.values(by).some(x => x && x.status === "active");
+        status = anyActive ? "active" : "inactive";
+      }
+
+      rows.push({
+        user_id: uid,
+        credential_id: defId,
+        status: status,
+        evidence_snapshot: rec, // кладём весь record (как jsonb snapshot)
+        last_evaluated_at: rec.last_evaluated_at ? new Date(rec.last_evaluated_at).toISOString() : null
+      });
+    });
+
+    if (rows.length === 0) return;
+
+    const { error: upErr } = await window.sb
+      .from("user_credentials")
+      .upsert(rows, { onConflict: "user_id,credential_id" });
+
+    if (upErr) {
+      try { console.error("[cred] user_credentials upsert error:", upErr); } catch {}
+    }
+  } catch (e) {
+    try { console.error("[cred] sync exception:", e); } catch {}
+  } finally {
+    __credSyncInFlight = false;
+  }
+}
+
+function scheduleCredentialsDbSync(delayMs = 1200) {
+  if (!window.sb) return;
+  if (__credSyncTimer) clearTimeout(__credSyncTimer);
+  __credSyncTimer = setTimeout(() => {
+    __credSyncTimer = null;
+    syncCredentialsToSupabaseOnce();
+  }, Math.max(200, Number(delayMs) || 1200));
+}
+
   function trackEvent(type, payload = {}) {
     const store = eventsStore();
     const id = ++store.seq;
@@ -907,34 +1011,39 @@ function getCredentialStore() {
     evaluateErrorDrivenDailyOrOnReview();
   }
 
-  function evaluateRealtimeCredentials(event) {
-    // Consistent learner is daily; but we still want its evidence “last events”
-    // We'll update evidence list opportunistically
-    const c = credentialsStore();
-    c.consistent_learner.evidence = c.consistent_learner.evidence || { last_events: [] };
-    c.consistent_learner.evidence.last_events = pushLastEvents(c.consistent_learner.evidence.last_events, event.id, 5);
-    saveCredentialsStore(c);
+function evaluateRealtimeCredentials(event) {
+  // Consistent learner is daily; but we still want its evidence “last events”
+  // We'll update evidence list opportunistically
+  const c = credentialsStore();
+  c.consistent_learner.evidence = c.consistent_learner.evidence || { last_events: [] };
+  c.consistent_learner.evidence.last_events = pushLastEvents(c.consistent_learner.evidence.last_events, event.id, 5);
+  saveCredentialsStore(c);
 
-    // Focused streak: realtime
-    evaluateFocusedStreakRealtime(event);
+  // Focused streak: realtime
+  evaluateFocusedStreakRealtime(event);
 
-    // Active Video Learner: realtime on decided events
-    if (event.type === "video_skipped" || event.type === "video_completed") {
-      evaluateActiveVideoLearnerRealtime(event);
-    }
-
-    // Fair Play: realtime
-    if (event.type === "tour_attempt_finished" || event.type === "anti_cheat_event") {
-      evaluateFairPlayRealtime(event);
-    }
+  // Active Video Learner: realtime on decided events
+  if (event.type === "video_skipped" || event.type === "video_completed") {
+    evaluateActiveVideoLearnerRealtime(event);
   }
 
-  function runDailyCredentialJobs() {
-    evaluateConsistentLearnerDaily();
-    evaluateResearchOrientedDaily();
-    evaluateErrorDrivenDailyOrOnReview();
+  // Fair Play: realtime
+  if (event.type === "tour_attempt_finished" || event.type === "anti_cheat_event") {
+    evaluateFairPlayRealtime(event);
   }
 
+  // ✅ после любых realtime-пересчётов — пушим снапшот в БД (с дебаунсом)
+  scheduleCredentialsDbSync(1200);
+}
+
+function runDailyCredentialJobs() {
+  evaluateConsistentLearnerDaily();
+  evaluateResearchOrientedDaily();
+  evaluateErrorDrivenDailyOrOnReview();
+
+  // ✅ daily пересчёты тоже фиксируем в БД
+  scheduleCredentialsDbSync(1200);
+}
   // =========================================================
   // End Earned Credentials Engine
   // =========================================================
@@ -3604,10 +3713,35 @@ async function ensureRatingsBoot() {
     return;
   }
 
-  // sections
+    // sections
   if (q) {
     const view = rowsAll.slice(0, 200);
-    listEl.innerHTML = renderSection("Results", view, `${view.length}`);
+
+    const resetLabel = t("ratings_reset") || "Reset";
+    const searchHeadHTML = `
+      <div class="lb-results-head">
+        <div class="lb-results-title">${t("ratings_results") || "Results"}</div>
+        <button id="ratings-reset-search" class="chip lb-search-reset" type="button">
+          <span class="lb-reset-label">${resetLabel}</span>
+          <span class="lb-reset-q">“${escapeHTML(q)}”</span>
+        </button>
+      </div>
+    `;
+
+    listEl.innerHTML = searchHeadHTML + renderSection("Results", view, `${view.length}`);
+
+    // bind reset (important for All tours branch)
+    const resetBtn = document.getElementById("ratings-reset-search");
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        ratingsState.q = "";
+        try { localStorage.setItem("ratings:q", ""); } catch {}
+        renderRatings();
+      };
+    }
+
+    // while searching: mybar hides (so UI doesn’t look “stuck”)
+    if (mybar) mybar.style.display = "none";
   } else {
     const topRows = rowsAll.slice(0, 10);
 
