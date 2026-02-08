@@ -124,6 +124,11 @@
       profile_active_slots_label: "Active",
       profile_earned_credentials: "Earned Credentials",
       cred_none_yet: "Пока нет",
+      cred_progress_consistent: "{x} / 7 активных дней",
+      cred_progress_focused: "{x} / 5 фокус-сессий подряд",
+      cred_progress_practice_attempts: "{x} практик — близко к mastery",
+      cred_progress_error_cycles: "{x} / 3 цикла “ошибка → разбор → повтор”",
+      cred_progress_research: "Ресурсы: {x} открытия • {y} дней возврата",
 
       // Earned Credentials (v1.3) — labels
       cred_kicker_progress: "ПРОГРЕСС",
@@ -399,7 +404,12 @@
       profile_active_slots_label: "Active",
       profile_earned_credentials: "Earned Credentials",
       cred_none_yet: "Hozircha yo‘q.",
-       
+      cred_progress_consistent: "{x} / 7 faol kun",
+      cred_progress_focused: "{x} / 5 ketma-ket fokus sessiya",
+      cred_progress_practice_attempts: "{x} ta praktika — masteryga yaqin",
+      cred_progress_error_cycles: "{x} / 3 “xato → tahlil → qayta” sikl",
+      cred_progress_research: "Resurslar: {x} ochish • {y} qaytish kuni",
+ 
       // Earned Credentials (v1.3) — labels
       cred_kicker_progress: "PROGRESS",
       cred_label_focused: "Fokus seriyasi",
@@ -680,6 +690,11 @@
       profile_active_slots_label: "Active",
       profile_earned_credentials: "Earned Credentials",
       cred_none_yet: "No credentials yet",
+      cred_progress_consistent: "{x} / 7 active days",
+      cred_progress_focused: "{x} / 5 focused sessions in a row",
+      cred_progress_practice_attempts: "{x} practices — close to mastery",
+      cred_progress_error_cycles: "{x} / 3 “error → review → retry” cycles",
+      cred_progress_research: "Resources: {x} opens • {y} return days",
 
       // Earned Credentials (v1.3) — labels
       cred_kicker_progress: "PROGRESS",
