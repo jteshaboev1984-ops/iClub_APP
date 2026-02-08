@@ -447,8 +447,13 @@ function applyStaticI18n() {
   }
 
   function saveCredentialsStore(s) {
-    saveJsonLS(LS.credentials, s);
-  }
+  saveJsonLS(LS.credentials, s);
+}
+
+// ✅ UI-обёртка (renderProfileCredentialsUI читает через неё)
+function getCredentialStore() {
+  return credentialsStore();
+}
 
   function pushLastEvents(list, eventId, limit = 5) {
     const arr = Array.isArray(list) ? list.slice() : [];
@@ -2171,6 +2176,127 @@ async function getAuthUid() {
   } catch {
     return null;
   }
+}
+
+   // ---------------------------
+// ✅ Credentials DB → LS sync
+// ---------------------------
+let __credDbSyncInFlight = null;
+let __credDbReady = false;
+
+async function ensureCredentialsDbSynced() {
+  if (__credDbReady) return { ok: true, skipped: true, reason: "already_ready" };
+  if (__credDbSyncInFlight) return __credDbSyncInFlight;
+  if (!window.sb) return { ok: false, reason: "no_sb" };
+
+  __credDbSyncInFlight = (async () => {
+    const uid = await getAuthUid();
+    if (!uid) return { ok: false, reason: "no_uid" };
+
+    // 1) читаем user_credentials
+    const { data: urows, error: uerr } = await window.sb
+      .from("user_credentials")
+      .select("credential_id,status,evidence_snapshot,last_evaluated_at,created_at")
+      .eq("user_id", uid);
+
+    if (uerr) {
+      try { console.error("[cred] user_credentials select error:", uerr); } catch {}
+      return { ok: false, reason: "user_credentials_select_failed", error: String(uerr?.message || uerr) };
+    }
+
+    const ids = Array.from(new Set((urows || []).map(r => r.credential_id).filter(Boolean)));
+    if (ids.length === 0) {
+      __credDbReady = true;
+      return { ok: true, empty: true, rows: 0 };
+    }
+
+    // 2) читаем credential_definitions для кодов
+    const { data: defs, error: derr } = await window.sb
+      .from("credential_definitions")
+      .select("id,code,title,description,is_core,is_active")
+      .in("id", ids);
+
+    if (derr) {
+      try { console.error("[cred] credential_definitions select error:", derr); } catch {}
+      return { ok: false, reason: "credential_definitions_select_failed", error: String(derr?.message || derr) };
+    }
+
+    const idToCode = {};
+    (defs || []).forEach(d => { if (d?.id && d?.code) idToCode[d.id] = d.code; });
+
+    // 3) применяем в LS.credentials (в формате твоего credentialsStore())
+    const s = credentialsStore();
+
+    (urows || []).forEach(r => {
+      const code = idToCode[r.credential_id];
+      if (!code) return;
+
+      const rec = {
+        status: r.status || "inactive",
+        achieved_at: r.created_at || null,
+        last_evaluated_at: r.last_evaluated_at || null,
+        evidence: r.evidence_snapshot || {},
+        evidence_snapshot: r.evidence_snapshot || {}
+      };
+
+      // practice_mastery_subject — спец-структура по предметам
+      if (code === "practice_mastery_subject") {
+        const snap = r.evidence_snapshot || {};
+        if (snap?.by_subject && typeof snap.by_subject === "object") {
+          s.practice_mastery_subject = s.practice_mastery_subject || { by_subject: {} };
+          s.practice_mastery_subject.by_subject = Object.assign({}, s.practice_mastery_subject.by_subject || {}, snap.by_subject);
+        } else {
+          // если храните 1 предмет в snapshot (subject_id)
+          const sid = snap?.subject_id;
+          if (sid != null) {
+            s.practice_mastery_subject = s.practice_mastery_subject || { by_subject: {} };
+            s.practice_mastery_subject.by_subject[sid] = {
+              status: rec.status,
+              achieved_at: rec.achieved_at,
+              last_evaluated_at: rec.last_evaluated_at,
+              evidence: rec.evidence,
+              evidence_snapshot: rec.evidence_snapshot
+            };
+          }
+        }
+        return;
+      }
+
+      // прямые коды (consistent_learner, focused_study_streak, error_driven_learner, research_oriented_learner, fair_play_participant, active_video_learner)
+      if (s[code] && typeof s[code] === "object") {
+        s[code] = Object.assign({}, s[code], rec);
+        // поддержим оба имени поля evidence/evidence_snapshot
+        s[code].evidence = rec.evidence;
+        s[code].evidence_snapshot = rec.evidence_snapshot;
+        return;
+      }
+
+      // если БД использует короткие коды под UI
+      if (code === "research_oriented" && s.research_oriented_learner) {
+        s.research_oriented_learner = Object.assign({}, s.research_oriented_learner, rec);
+        s.research_oriented_learner.evidence = rec.evidence;
+        s.research_oriented_learner.evidence_snapshot = rec.evidence_snapshot;
+        return;
+      }
+      if (code === "fair_play" && s.fair_play_participant) {
+        s.fair_play_participant = Object.assign({}, s.fair_play_participant, rec);
+        s.fair_play_participant.evidence = rec.evidence;
+        s.fair_play_participant.evidence_snapshot = rec.evidence_snapshot;
+        return;
+      }
+
+      // иначе просто игнорируем неизвестный код (не ломаем UI)
+    });
+
+    saveCredentialsStore(s);
+    __credDbReady = true;
+
+    return { ok: true, rows: (urows || []).length, defs: (defs || []).length };
+  })();
+
+  const res = await __credDbSyncInFlight;
+  __credDbSyncInFlight = null;
+  return res;
 }
 
 // ✅ DB profile fetch (used by tours eligibility, etc.)
@@ -4493,8 +4619,15 @@ input?.addEventListener("change", async () => {
       : "Закрепите 1–3 предмета — и вы будете открывать нужное быстрее, чем Telegram.";
   }
       // Credentials (Profile: list + progress)
-  try { renderProfileCredentialsUI(); } catch {}
- }
+try { renderProfileCredentialsUI(); } catch {}
+
+   // ✅ подтягиваем из БД и перерисовываем (чтобы работало у всех и всегда)
+   if (window.sb) {
+     ensureCredentialsDbSynced()
+       .then(() => { try { renderProfileCredentialsUI(); } catch {} })
+       .catch(() => {});
+      }
+    }
 
      // ---------------------------
   // Modal (for confirmations in Telegram WebApp)
@@ -8423,21 +8556,60 @@ function formatDateShortSafe(ts) {
 
 function readCredStoreSafe() {
   try {
-    // функция должна уже существовать из прошлых патчей
     if (typeof getCredentialStore === "function") return getCredentialStore();
   } catch {}
+
+  // ✅ fallback: если обёртку когда-то удалят
+  try {
+    if (typeof credentialsStore === "function") return credentialsStore();
+  } catch {}
+
   return null;
 }
 
 function getCredRecord(store, credKey) {
   if (!store) return null;
 
-  // Ожидаемый слой хранения из документа: user_credentials[credential_key]
-  // (Если у тебя структура слегка отличается — ниже есть fallback)
+  // 1) DB-формат: store.user_credentials[code]
   if (store.user_credentials && store.user_credentials[credKey]) return store.user_credentials[credKey];
 
-  // fallback: иногда кладут прямо в store.credentials
+  // 2) fallback: иногда кладут прямо в store.credentials
   if (store.credentials && store.credentials[credKey]) return store.credentials[credKey];
+
+  // 3) Маппинг UI-ключей → реальные ключи стора/БД
+  if (credKey === "research_oriented") {
+    return store.user_credentials?.research_oriented_learner || store.research_oriented_learner || null;
+  }
+  if (credKey === "fair_play") {
+    return store.user_credentials?.fair_play_participant || store.fair_play_participant || null;
+  }
+
+  // 4) Practice Mastery: UI просит "practice_mastery", а в сторе/логике это "practice_mastery_subject"
+  if (credKey === "practice_mastery") {
+    // если вдруг БД хранит агрегированный рекорд
+    if (store.user_credentials?.practice_mastery) return store.user_credentials.practice_mastery;
+
+    // иначе берём лучший/самый “живой” из by_subject
+    const by = store.practice_mastery_subject?.by_subject || {};
+    const entries = Object.values(by).filter(Boolean);
+    if (entries.length === 0) return null;
+
+    const actives = entries.filter(r => r.status === "active");
+    if (actives.length > 0) {
+      actives.sort((a, b) => (Number(new Date(b.achieved_at || 0)) - Number(new Date(a.achieved_at || 0))));
+      return actives[0];
+    }
+
+    entries.sort((a, b) => {
+      const ea = a?.evidence?.attempts_count ?? a?.evidence_snapshot?.attempts_count ?? 0;
+      const eb = b?.evidence?.attempts_count ?? b?.evidence_snapshot?.attempts_count ?? 0;
+      return Number(eb) - Number(ea);
+    });
+    return entries[0] || null;
+  }
+
+  // 5) Прямой доступ (consistent_learner, focused_study_streak, ...)
+  if (store[credKey]) return store[credKey];
 
   return null;
 }
