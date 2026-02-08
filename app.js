@@ -265,17 +265,6 @@ function applyStaticI18n() {
     });
   }
 
-   function applyStaticI18n() {
-    document.querySelectorAll("[data-i18n]").forEach(el => {
-      const key = el.dataset.i18n;
-      if (key) el.textContent = t(key);
-    });
-    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
-      const key = el.dataset.i18nPlaceholder;
-      if (key) el.setAttribute("placeholder", t(key));
-    });
-  }
-
   // =========================================================
   // Earned Credentials — Engine (v1.3 FINAL) + Event Mapping
   // Plain storage (local) + optional Supabase app_events mirror
@@ -8806,7 +8795,9 @@ function renderProfileCredentialsUI() {
   const grid = document.querySelector(".profile-credentials-grid");
   if (!grid) return;
 
+  const hints = document.getElementById("profile-credentials-hints"); // если есть в HTML
   const store = readCredStoreSafe();
+
   const keys = [
     "consistent_learner",
     "focused_study_streak",
@@ -8817,7 +8808,17 @@ function renderProfileCredentialsUI() {
     "fair_play"
   ];
 
-  // Собираем active credentials (как “список”)
+  // Иконки нейтральные, “академические”
+  const ICON = {
+    consistent_learner: "📅",
+    focused_study_streak: "🎯",
+    active_video_learner: "▶️",
+    practice_mastery: "🧠",
+    error_driven_learner: "🧪",
+    research_oriented: "📚",
+    fair_play: "🛡️"
+  };
+
   const actives = [];
   const progressLines = [];
 
@@ -8830,15 +8831,17 @@ function renderProfileCredentialsUI() {
     const statusText = formatCredStatus(status);
     const achieved = formatDateShortSafe(rec.achieved_at);
 
+    // “Earned Credentials” = только active
     if (status === "active") {
-      actives.push({ title, statusText, achieved });
+      actives.push({ key: k, title, statusText, achieved, status });
     }
 
+    // Progress hints (>=60%) — собираем отдельно
     const p = buildProgressLine(k, rec);
     if (p) progressLines.push(p);
   });
 
-  // Рендер “список”
+  // 1) Grid
   grid.innerHTML = "";
 
   if (actives.length === 0) {
@@ -8849,7 +8852,14 @@ function renderProfileCredentialsUI() {
   } else {
     actives.forEach(item => {
       const card = document.createElement("div");
-      card.className = "credential-card";
+      card.className = "credential-item is-active";
+
+      const ico = document.createElement("div");
+      ico.className = "credential-ico";
+      ico.textContent = ICON[item.key] || "✓";
+
+      const body = document.createElement("div");
+      body.className = "credential-body";
 
       const titleEl = document.createElement("div");
       titleEl.className = "credential-title";
@@ -8857,31 +8867,38 @@ function renderProfileCredentialsUI() {
 
       const metaEl = document.createElement("div");
       metaEl.className = "credential-meta";
-      metaEl.textContent = item.achieved ? `${item.statusText} • ${item.achieved}` : item.statusText;
+      metaEl.textContent = item.achieved
+        ? `${item.statusText} • ${t("cred_meta_achieved")}: ${item.achieved}`
+        : item.statusText;
 
-      card.appendChild(titleEl);
-      card.appendChild(metaEl);
+      body.appendChild(titleEl);
+      body.appendChild(metaEl);
+
+      card.appendChild(ico);
+      card.appendChild(body);
       grid.appendChild(card);
     });
   }
 
-  // Рендер “прогресс” (inline)
-  let progWrap = document.getElementById("profile-credentials-progress");
-  if (!progWrap) {
-    progWrap = document.createElement("div");
-    progWrap.id = "profile-credentials-progress";
-    progWrap.className = "cred-progress-list";
-    grid.insertAdjacentElement("afterend", progWrap);
-  }
+  // 2) Progress (выводим, если есть контейнер)
+  if (hints) {
+    hints.innerHTML = "";
+    if (progressLines.length > 0) {
+      const kicker = document.createElement("div");
+      kicker.className = "card-kicker";
+      kicker.textContent = t("cred_kicker_progress");
+      hints.appendChild(kicker);
 
-  if (progressLines.length === 0) {
-    progWrap.classList.add("hidden");
-    progWrap.innerHTML = "";
-  } else {
-    progWrap.classList.remove("hidden");
-    progWrap.innerHTML = progressLines.map(s => `<div class="cred-progress-item">${escapeHTML(s)}</div>`).join("");
+      progressLines.slice(0, 4).forEach(line => {
+        const p = document.createElement("div");
+        p.className = "card-sub";
+        p.textContent = line;
+        hints.appendChild(p);
+      });
+    }
   }
 }
+
 
 function renderSubjectHubCredentialsInline(subjectKey) {
   const wrap = document.getElementById("subject-hub-credential-hints");
