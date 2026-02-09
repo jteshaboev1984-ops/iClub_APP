@@ -3094,14 +3094,15 @@ async function ensureRatingsBoot() {
   renderRatingsSelectOptions(tourSelect, tourItems);
 
   // default = All tours
-  ratingsState.tourId = null;
-  if (tourSelect) tourSelect.value = "__all__";
+ratingsState.tourId = "__all__";
+if (tourSelect) tourSelect.value = "__all__";
 
   ratingsState._booted = true;
 }
 
  async function renderRatings() {
   const listEl = $("#ratings-list");
+   listEl.innerHTML = "";
   const loadingEl = $("#ratings-loading");
 
   const mybar = $("#ratings-mybar");
@@ -3248,11 +3249,11 @@ async function ensureRatingsBoot() {
 
   const scopeRankType = mapScopeToRankType(ratingsState.scope);
 
-  // =========================
-  // A) конкретный тур: ratings_cache
-  // =========================
-  if (ratingsState.tourId) {
-    const tourId = Number(ratingsState.tourId);
+ // =========================
+// A) конкретный тур: ratings_cache
+// =========================
+if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
+  const tourId = Number(ratingsState.tourId);
 
     // 1) my row (for around + mybar)
     let myRow = null;
@@ -3717,7 +3718,7 @@ async function ensureRatingsBoot() {
       </div>
     `;
 
-    listEl.innerHTML = searchHeadHTML + renderSection("Results", view, `${view.length}`);
+    listEl.innerHTML = searchHeadHTML + view.map(renderRowHTML).join("");
 
     // bind reset (important for All tours branch)
     const resetBtn = document.getElementById("ratings-reset-search");
