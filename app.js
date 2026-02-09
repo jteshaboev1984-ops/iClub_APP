@@ -2175,7 +2175,7 @@ if (actionBtn) {
 // Ratings (Leaderboard) — UI skeleton now, DB later
 // ---------------------------
 const ratingsState = {
-  scope: "district", // district | region | republic
+  scope: "district", // district | region | country
   q: "",
   subjectId: null,
   tourId: null, // null = All tours
@@ -2190,7 +2190,7 @@ const ratingsState = {
 };
 
 function getLeaderboardDataMock(scope) {
-  // Позже заменим на Supabase: district/region/republic + subject/tour + competitive only
+  // Позже заменим на Supabase: district/region/country + subject/tour + competitive only
   const base = [
     { rank: 1, name: "Shakhzod Alimov", meta: "Tashkent International School", score: 980, time: "12:45", avatar: null },
     { rank: 2, name: "Nilufar Karimova", meta: "Presidential School", score: 975, time: "13:10", avatar: null },
@@ -2263,7 +2263,7 @@ function buildUserMeta(u) {
 function mapScopeToRankType(scope) {
   if (scope === "district") return "district";
   if (scope === "region") return "region";
-  return "country"; // republic
+  return "country";
 }
 
 async function getAuthUid() {
@@ -3230,9 +3230,9 @@ if (tourSelect) tourSelect.value = "__all__";
   // hint
   if (hintEl) hintEl.style.display = isParticipant ? "none" : "block";
 
-  // если у меня нет district/region — принудительно republic, иначе фильтры бессмысленны
+    // если у меня нет district/region — принудительно country, иначе фильтры бессмысленны
   if ((ratingsState.scope === "district" && !me?.district) || (ratingsState.scope === "region" && !me?.region)) {
-    ratingsState.scope = "republic";
+    ratingsState.scope = "country";
     $$(".lb-segment .seg-btn").forEach(btn => {
       const active = btn.dataset.scope === ratingsState.scope;
       btn.classList.toggle("is-active", active);
@@ -3801,7 +3801,7 @@ istEl.innerHTML = `
     const u = a.users || {};
     if (ratingsState.scope === "district") return !!me?.district && String(u.district || "") === String(me.district || "");
     if (ratingsState.scope === "region") return !!me?.region && String(u.region || "") === String(me.region || "");
-    return true; // republic
+    return true; // country
   });
 
   // aggregate per user
