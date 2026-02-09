@@ -3255,6 +3255,154 @@ if (tourSelect) tourSelect.value = "__all__";
 if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
   const tourId = Number(ratingsState.tourId);
 
+       // If cache is empty for this tour+scope — fallback to tour_attempts (so Tour 1 works even without cache build)
+    const cacheProbe = await window.sb
+      .from("ratings_cache")
+      .select("rank_no")
+      .eq("tour_id", tourId)
+      .eq("rank_type", scopeRankType)
+      .limit(1);
+
+    if (token !== ratingsState._token) return;
+
+    const cacheHasData = !cacheProbe?.error && Array.isArray(cacheProbe?.data) && cacheProbe.data.length > 0;
+
+    if (!cacheHasData) {
+      // -------- fallback: compute leaderboard from tour_attempts --------
+      const attemptsRes = await window.sb
+        .from("tour_attempts")
+        .select("user_id,score,total_time,status,users(first_name,last_name,school,class,region,district)")
+        .eq("tour_id", tourId);
+
+      if (token !== ratingsState._token) return;
+
+      if (attemptsRes?.error) {
+        hideLoading();
+        listEl.innerHTML = `<div class="empty muted">Ошибка загрузки рейтинга.</div>`;
+        return;
+      }
+
+      const raw = Array.isArray(attemptsRes?.data) ? attemptsRes.data : [];
+
+      // keep only finished attempts (if status exists)
+      let pool = raw.filter(r => !r.status || String(r.status) === "finished");
+
+      // scope filter via user profile (same behavior as cache)
+      if (ratingsState.scope === "district" && me?.district) {
+        pool = pool.filter(r => String(r?.users?.district || "") === String(me.district));
+      } else if (ratingsState.scope === "region" && me?.region) {
+        pool = pool.filter(r => String(r?.users?.region || "") === String(me.region));
+      }
+
+      // sort: score desc, time asc
+      pool.sort((a, b) => {
+        const ds = Number(b.score || 0) - Number(a.score || 0);
+        if (ds !== 0) return ds;
+        return Number(a.total_time || 0) - Number(b.total_time || 0);
+      });
+
+      const rowsAll = pool.map((r, idx) => {
+        const u = r.users || {};
+        const timeVal = Number(r.total_time || 0);
+        return {
+          rank: idx + 1,
+          name: getFullName(u),
+          meta: buildUserMeta(u),
+          score: Number(r.score || 0),
+          total_time: timeVal,
+          time: formatSecondsToMMSS(timeVal),
+          user_id: r.user_id
+        };
+      });
+
+      totalN = rowsAll.length;
+
+      // search inside fallback (same search UX)
+      const qq = String(ratingsState.q || "").trim().toLowerCase();
+      if (qq) {
+        const filtered = rowsAll.filter(x => {
+          const blob = `${x.name || ""} ${x.meta || ""}`.toLowerCase();
+          return blob.includes(qq);
+        });
+
+        applyRatingsNamePolicy(filtered);
+
+        const resetLabel = t("ratings_reset") || (t("btn_reset") || "Reset");
+        const resultsLabel = t("ratings_results") || "Results";
+        const htmlRows = filtered.slice(0, 200).map(renderRowHTML).join("");
+
+        listEl.innerHTML = `
+          <div class="lb-section-head lb-results-head">
+            <div class="lb-section-title">${escapeHTML(resultsLabel)}</div>
+
+            <button type="button" class="lb-search-reset" id="ratings-reset-search" aria-label="Reset search">
+              <span class="lb-reset-label">${escapeHTML(resetLabel)}</span>
+              <span class="lb-reset-q">“${escapeHTML(String(qq))}”</span>
+              <span class="lb-reset-x">✕</span>
+            </button>
+          </div>
+
+          ${htmlRows || `<div class="empty muted">${t("ratings_empty") || "Ничего не найдено."}</div>`}
+        `;
+
+        if (mybar) mybar.style.display = "none";
+        hideLoading();
+        return;
+      }
+
+      // normal sections (Top / Around / Bottom)
+      applyRatingsNamePolicy(rowsAll);
+
+      const topRows = rowsAll.slice(0, 10);
+
+      let aroundRows = [];
+      let myIndex = -1;
+      if (isParticipant && uid) myIndex = rowsAll.findIndex(r => String(r.user_id) === String(uid));
+      if (isParticipant && myIndex >= 0) {
+        const lo = Math.max(0, myIndex - 2);
+        const hi = Math.min(rowsAll.length, myIndex + 3);
+        aroundRows = rowsAll.slice(lo, hi);
+      }
+
+      const bottomRows = rowsAll.length > 13 ? rowsAll.slice(-3) : [];
+      const shouldShowBottom = bottomRows.length && bottomRows.some(r => r.rank > 10);
+
+      const topRanks = new Set(dedupeByRank(topRows).map(r => String(r.rank)));
+      aroundRows = (aroundRows || []).filter(r => !topRanks.has(String(r.rank)));
+
+      const aroundRanks = new Set(dedupeByRank(aroundRows).map(r => String(r.rank)));
+      const bottomClean = (bottomRows || []).filter(r => !topRanks.has(String(r.rank)) && !aroundRanks.has(String(r.rank)));
+
+      listEl.innerHTML =
+        renderSection(t("ratings_top") || "Top 10", dedupeByRank(topRows), "") +
+        (isParticipant && myIndex >= 0 ? renderSection(t("ratings_around") || "Around me", dedupeByRank(aroundRows), "±2") : "") +
+        (shouldShowBottom ? renderSection(
+          t("ratings_bottom") || "Bottom 3",
+          dedupeByRank(bottomClean),
+          totalN ? t("ratings_of_total", { total: totalN }) : ""
+        ) : "");
+
+      // My rank (only if participant)
+      if (isParticipant && mybar) {
+        if (myIndex >= 0) {
+          const mine = rowsAll[myIndex];
+          myRankEl.textContent = String(mine.rank);
+
+          const outOf = t("ratings_out_of") || "out of";
+          if (myTotalEl) myTotalEl.textContent = totalN ? `${outOf} ${totalN}` : "—";
+          if (myScoreEl) myScoreEl.textContent = `${mine.score} ${t("points_short") || "pts"}`;
+          if (myTimeEl) myTimeEl.textContent = mine.time || "—";
+
+          mybar.style.display = "block";
+        } else {
+          mybar.style.display = "none";
+        }
+      }
+
+      hideLoading();
+      return;
+    }
+
     // 1) my row (for around + mybar)
     let myRow = null;
     if (isParticipant && uid) {
@@ -3407,16 +3555,17 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
       // load more visibility: if we got full page, there might be more
       const maybeHasMore = (Array.isArray(pageData) && pageData.length === ratingsState._searchLimit);
 
-                        listEl.innerHTML = `
+istEl.innerHTML = `
   <div class="lb-section-head lb-results-head">
-    <div class="lb-section-title">Results</div>
+    <div class="lb-section-title">${escapeHTML(t("ratings_results") || "Results")}</div>
 
     <button type="button" class="lb-search-reset" id="ratings-reset-search" aria-label="Reset search">
-      <span class="lb-reset-label">Reset</span>
+      <span class="lb-reset-label">${escapeHTML(t("ratings_reset") || (t("btn_reset") || "Reset"))}</span>
       <span class="lb-reset-q">“${escapeHTML(String(q))}”</span>
       <span class="lb-reset-x">✕</span>
     </button>
   </div>
+
 
   <div class="lb-section-sub">${shown.length}${totalN ? ` / ${totalN}` : ""}</div>
   ${htmlRows || `<div class="empty muted">Ничего не найдено.</div>`}
@@ -3704,34 +3853,32 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
   }
 
     // sections
-  if (q) {
+    if (q) {
     const view = rowsAll.slice(0, 200);
 
-    const resetLabel = t("ratings_reset") || "Reset";
-    const searchHeadHTML = `
-      <div class="lb-results-head">
-        <div class="lb-results-title">${t("ratings_results") || "Results"}</div>
-        <button id="ratings-reset-search" class="chip lb-search-reset" type="button">
-          <span class="lb-reset-label">${resetLabel}</span>
-          <span class="lb-reset-q">“${escapeHTML(q)}”</span>
+    const resetLabel = t("ratings_reset") || (t("btn_reset") || "Reset");
+    const resultsLabel = t("ratings_results") || "Results";
+    const htmlRows = view.map(renderRowHTML).join("");
+
+    listEl.innerHTML = `
+      <div class="lb-section-head lb-results-head">
+        <div class="lb-section-title">${escapeHTML(resultsLabel)}</div>
+
+        <button type="button" class="lb-search-reset" id="ratings-reset-search" aria-label="Reset search">
+          <span class="lb-reset-label">${escapeHTML(resetLabel)}</span>
+          <span class="lb-reset-q">“${escapeHTML(String(q))}”</span>
+          <span class="lb-reset-x">✕</span>
         </button>
       </div>
+
+      ${htmlRows || `<div class="empty muted">${t("ratings_empty") || "Ничего не найдено."}</div>`}
     `;
-
-    listEl.innerHTML = searchHeadHTML + view.map(renderRowHTML).join("");
-
-    // bind reset (important for All tours branch)
-    const resetBtn = document.getElementById("ratings-reset-search");
-    if (resetBtn) {
-      resetBtn.onclick = () => {
-        ratingsState.q = "";
-        try { localStorage.setItem("ratings:q", ""); } catch {}
-        renderRatings();
-      };
-    }
 
     // while searching: mybar hides (so UI doesn’t look “stuck”)
     if (mybar) mybar.style.display = "none";
+
+    hideLoading();
+    return;
   } else {
     const topRows = rowsAll.slice(0, 10);
 
