@@ -3282,10 +3282,14 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
         return;
       }
 
-      const raw = Array.isArray(attemptsRes?.data) ? attemptsRes.data : [];
+            const raw = Array.isArray(attemptsRes?.data) ? attemptsRes.data : [];
 
-      // keep only finished attempts (if status exists)
-      let pool = raw.filter(r => !r.status || String(r.status) === "finished");
+      // keep only completed attempts (different DB variants)
+      const OK_STATUSES = new Set(["submitted", "time_expired", "anti_cheat", "finished"]);
+      let pool = raw.filter(r => {
+        const st = String(r?.status || "").trim();
+        return !st || OK_STATUSES.has(st);
+      });
 
       // scope filter via user profile (same behavior as cache)
       if (ratingsState.scope === "district" && me?.district) {
