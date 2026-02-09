@@ -1272,6 +1272,36 @@ function toastToursDenied(reason) {
     return !hasAnyActiveTourNow();
   }
 
+         // DB check (real source of truth). If DB not available — fallback to local schedule.
+async function dbHasAnyActiveTourNow() {
+  if (!window.sb) return null; // unknown
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const d0 = new Date();
+  const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
+
+  const isInWindow = (row) => {
+    const sd = row?.start_date ? String(row.start_date) : null;
+    const ed = row?.end_date ? String(row.end_date) : null;
+    const afterStart = !sd || sd <= todayISO;
+    const beforeEnd = !ed || ed >= todayISO;
+    return afterStart && beforeEnd;
+  };
+
+  try {
+    const { data, error } = await window.sb
+      .from("tours")
+      .select("id,start_date,end_date,is_active")
+      .eq("is_active", true);
+
+    if (error) return null;
+    const list = Array.isArray(data) ? data : [];
+    return list.some(r => !!r.is_active && isInWindow(r));
+  } catch {
+    return null;
+  }
+}
+
      // ---------------------------
   // Practice v1 (10Q: 3/5/2 + MCQ+INPUT + per-question timer + attempts history)
   // ---------------------------
@@ -6024,8 +6054,10 @@ if (!subjectId && window.sb && subjectKey) {
   } catch {}
 }
 
-// load tours for this subject
-const todayISO = new Date().toISOString().slice(0, 10);
+// load tours for this subject (LOCAL date, not UTC)
+const pad2 = (n) => String(n).padStart(2, "0");
+const d0 = new Date();
+const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
 
 // UI: show loading first to avoid 1-sec "wrong screen" flicker
 if (statusTitle) statusTitle.textContent = tr("loading", "Загрузка…");
@@ -8316,6 +8348,27 @@ if (state.tab === "profile") {
       if (action === "open-about") { openGlobal("about"); return; }
       if (action === "open-certificates") { openGlobal("certificates"); return; }
       if (action === "open-archive") {
+  // Prefer DB truth. If unknown (no access / no sb) — fallback to local schedule.
+  try {
+    if (window.sb) {
+      showToast("Проверяем доступность архива…");
+      dbHasAnyActiveTourNow().then((hasActive) => {
+        // if cannot determine — do NOT open (safer than violating rules)
+        if (hasActive === null) {
+          showToast("Архив временно недоступен (нет доступа к базе туров).");
+          return;
+        }
+        if (hasActive) {
+          showToast("Архив откроется после завершения активного тура.");
+          return;
+        }
+        openGlobal("archive");
+      });
+      return;
+    }
+  } catch {}
+
+  // fallback: local schedule
   if (!canOpenArchiveNow()) {
     showToast("Архив откроется после завершения активного тура.");
     return;
