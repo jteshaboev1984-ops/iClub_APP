@@ -4215,12 +4215,16 @@ function bindRatingsUI() {
     showCoursesScreen(next);
 
     // ✅ Ensure correct screen rendering after back
-    if (next === "tours") {
+        if (next === "tours") {
       renderToursStart();          // ✅ вернёт корректный вид туров после выхода из правил
     } else if (next === "practice-start") {
       renderPracticeStart();
     } else if (next === "subject-hub") {
       renderSubjectHub();
+    } else if (next === "books") {
+      renderBooks();
+    } else if (next === "my-recs") {
+      renderMyRecs();
     }
 
     return;
@@ -7107,6 +7111,7 @@ const btn = item.querySelector('button[data-open-books="1"]');
 btn?.addEventListener("click", (e) => {
   e.stopPropagation();
   pushCourses("books");
+  renderBooks();
 });
       wrap.appendChild(item);
     });
@@ -7136,7 +7141,100 @@ function renderMyRecs() {
     wrap.appendChild(el);
   });
 }
-   
+        list.forEach(item => {
+    const el = document.createElement("div");
+    el.className = "list-item";
+    el.innerHTML = `
+      <div style="font-weight:800">${escapeHTML(item.topic)}</div>
+      <div class="muted small">Сохранено: ${escapeHTML(formatDateTime(item.ts))}</div>
+    `;
+    wrap.appendChild(el);
+  });
+}
+
+async function renderBooks() {
+  const wrap = $("#books-list");
+  if (!wrap) return;
+
+  // show loading
+  wrap.innerHTML = `<div class="empty muted">Загрузка…</div>`;
+
+  const subjectKey = state?.courses?.subjectKey ? String(state.courses.subjectKey) : "";
+  if (!subjectKey) {
+    wrap.innerHTML = `<div class="empty muted">Сначала выберите предмет.</div>`;
+    return;
+  }
+
+  if (!window.sb) {
+    wrap.innerHTML = `<div class="empty muted">Нет подключения к базе.</div>`;
+    return;
+  }
+
+  // Resolve subject_id (prefer existing helper if present)
+  let subjectId = null;
+  try {
+    if (typeof getSubjectIdByKey === "function") {
+      subjectId = await getSubjectIdByKey(subjectKey);
+    }
+  } catch {}
+
+  if (!subjectId) {
+    try {
+      const { data, error } = await window.sb
+        .from("subjects")
+        .select("id")
+        .eq("subject_key", subjectKey)
+        .maybeSingle();
+      if (!error && data?.id) subjectId = data.id;
+    } catch {}
+  }
+
+  if (!subjectId) {
+    wrap.innerHTML = `<div class="empty muted">Предмет не найден в базе.</div>`;
+    return;
+  }
+
+  // Load books
+  let rows = [];
+  try {
+    const { data, error } = await window.sb
+      .from("books")
+      .select("id,title,file_url,is_active,created_at")
+      .eq("subject_id", subjectId)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+
+    if (!error && Array.isArray(data)) rows = data;
+  } catch {}
+
+  if (!rows.length) {
+    wrap.innerHTML = `<div class="empty muted">По этому предмету книги пока не добавлены.</div>`;
+    return;
+  }
+
+  wrap.innerHTML = "";
+
+  rows.forEach((b) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "settings-nav";
+    btn.innerHTML = `
+      <span class="settings-nav-ico">📘</span>
+      <span class="settings-nav-text">
+        <span class="settings-nav-title">${escapeHTML(b.title || "Book")}</span>
+        <span class="settings-nav-sub muted small">Открыть PDF</span>
+      </span>
+      <span class="settings-nav-arrow">›</span>
+    `;
+    btn.addEventListener("click", () => {
+      const url = String(b.file_url || "").trim();
+      if (!url) return;
+      openExternal(url);
+    });
+    wrap.appendChild(btn);
+  });
+}
+
     // ---------------------------
   // Tour (strict) — T1+T2+T3 (mock now, DB later)
   // ---------------------------
@@ -8396,9 +8494,27 @@ if (action === "open-all-subjects") {
         return;
       }
 
-      // Resources hub: global books button (still placeholder)
+            // Resources hub: global books button
       if (action === "open-books-global") {
-        showToast("Books list: подключим через базу");
+        const profile = loadProfile();
+        const subjects = Array.isArray(profile?.subjects) ? profile.subjects : [];
+        const pick =
+          subjects.find(s => s.mode === "competitive")?.key ||
+          subjects.find(s => s.pinned)?.key ||
+          subjects[0]?.key ||
+          null;
+
+        if (!pick) {
+          showToast("Сначала выберите предметы в Courses.");
+          return;
+        }
+
+        state.courses.subjectKey = pick;
+        saveState();
+        setTab("courses");
+
+        replaceCourses("books");
+        renderBooks();
         return;
       }
 
@@ -8666,8 +8782,9 @@ if (action === "tour-next" || action === "tour-submit") {
         return;
       }
 
-      if (action === "open-books") {
+            if (action === "open-books") {
         pushCourses("books");
+        renderBooks();
         return;
       }
 
