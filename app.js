@@ -7141,16 +7141,6 @@ function renderMyRecs() {
     wrap.appendChild(el);
   });
 }
-        list.forEach(item => {
-    const el = document.createElement("div");
-    el.className = "list-item";
-    el.innerHTML = `
-      <div style="font-weight:800">${escapeHTML(item.topic)}</div>
-      <div class="muted small">Сохранено: ${escapeHTML(formatDateTime(item.ts))}</div>
-    `;
-    wrap.appendChild(el);
-  });
-}
 
 async function renderBooks() {
   const wrap = $("#books-list");
