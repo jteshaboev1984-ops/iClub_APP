@@ -919,7 +919,7 @@
       points_short: "pts",
 
       tour_rules_title: "Tour rules",
-      tour_rules_accept_required: "Please accept the rules to start the tour."
+      tour_rules_accept_required: "Please accept the rules to start the tour.",
 
            // --- Profile language blocks ---
     profile_ui_language_title: "Interface Language",
