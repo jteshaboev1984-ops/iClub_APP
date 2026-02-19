@@ -1024,9 +1024,9 @@
 <div id="profile-settings" class="profile-screen">
      
   <!-- Language (move to top) -->
-  <div class="card">
-  <div class="card-title">Язык интерфейса</div>
-  <p class="muted small">
+ <div class="card">
+  <div class="card-title" data-i18n="profile_ui_language_title">Язык интерфейса</div>
+  <p class="muted small" data-i18n="profile_ui_language_desc">
     Меняется только интерфейс приложения и не влияет на туры/практику.
   </p>
 
@@ -1043,8 +1043,8 @@
 
 <!-- Content language (Tours/Practice) -->
 <div class="card">
-  <div class="card-title">Язык туров и практики</div>
-  <p class="muted small">
+  <div class="card-title" data-i18n="profile_content_language_title">Язык туров и практики</div>
+  <p class="muted small" data-i18n="profile_content_language_desc">
     Смена этого языка удалит весь прогресс (туры, практика, ответы). Используйте только если действительно нужно.
   </p>
 
@@ -1061,11 +1061,8 @@
 
     <!-- Competitive mode -->
   <div class="card">
-    <div class="card-title">Соревновательный режим (Competitive)</div>
-    <p class="muted small" id="settings-competitive-note">
-      Можно выбрать максимум 2 предмета в Competitive.
-      Настраивается только здесь.
-    </p>
+  <div class="card-title" data-i18n="profile_settings_competitive_title">Соревновательный режим</div>
+  <p class="muted small" id="settings-competitive-note"></p>
 
     <div id="profile-competitive-list" class="settings-list">
       <!-- filled by app.js -->
@@ -1075,15 +1072,15 @@
   <!-- Study mode / Pinned (after Competitive) -->
   <div class="card">
     <div class="settings-card-head">
-     <div class="card-title">Учебный режим (Study)</div>
-     <button id="profile-settings-pinned-toggle" class="btn mini ghost" type="button">
+  <div class="card-title" data-i18n="profile_settings_study_title">Учебный режим</div>
+  <button id="profile-settings-pinned-toggle" class="btn mini ghost" type="button">
     Показать все
   </button>
 </div>
 
-    <p class="muted small">
-      Закреплённые — для быстрого доступа в учебном режиме. Competitive настраивается выше.
-    </p>
+<p class="muted small" data-i18n="profile_settings_study_desc">
+  Закреплённые — для быстрого доступа в учебном режиме. Competitive настраивается выше.
+</p>
 
     <div id="profile-settings-pinned-list" class="settings-list">
       <!-- filled by app.js -->
@@ -1092,14 +1089,17 @@
 
   <!-- More -->
   <div class="card">
-    <div class="card-title">More</div>
+  <div class="card-title" data-i18n="profile_settings_more_title">More</div>
 
-    <div class="settings-list">
-      <button class="settings-nav" type="button" data-action="open-news">
-        <span class="settings-nav-ico">📰</span>
-        <span class="settings-nav-text">
-          <span class="settings-nav-title">Новости</span>
-          <span class="settings-nav-sub muted small">Анонсы и обновления</span>
+  <div class="settings-list">
+    <button class="settings-nav" type="button" data-action="open-news">
+      <span class="settings-nav-ico">📰</span>
+      <span class="settings-nav-text">
+        <span class="settings-nav-title" data-i18n="profile_settings_news_title">Новости</span>
+        <span class="settings-nav-sub muted small" data-i18n="profile_settings_news_sub">Анонсы и обновления</span>
+      </span>
+      <span class="settings-nav-arrow">›</span>
+    </button>
         </span>
         <span class="settings-nav-arrow">›</span>
       </button>
@@ -1107,8 +1107,8 @@
       <button class="settings-nav" type="button" data-action="open-notifications">
         <span class="settings-nav-ico">🔔</span>
         <span class="settings-nav-text">
-          <span class="settings-nav-title">Уведомления</span>
-          <span class="settings-nav-sub muted small">Системные события</span>
+          <span class="settings-nav-title" data-i18n="profile_settings_notifications_title">Уведомления</span>
+          <span class="settings-nav-sub muted small" data-i18n="profile_settings_notifications_sub">Системные события</span>
         </span>
         <span class="settings-nav-arrow">›</span>
       </button>
@@ -1116,8 +1116,8 @@
       <button class="settings-nav" type="button" data-action="open-community">
         <span class="settings-nav-ico">💬</span>
         <span class="settings-nav-text">
-          <span class="settings-nav-title">Комьюнити</span>
-          <span class="settings-nav-sub muted small">@iClubuzofficial</span>
+          <span class="settings-nav-title" data-i18n="profile_settings_community_title">Комьюнити</span>
+          <span class="settings-nav-sub muted small" data-i18n="profile_settings_community_sub">@iClubuzofficial</span>
         </span>
         <span class="settings-nav-arrow">›</span>
       </button>
