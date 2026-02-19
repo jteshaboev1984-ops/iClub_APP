@@ -275,7 +275,7 @@
 
       <section id="courses-all-subjects" class="stack-screen is-active" data-stack="courses" data-screen="all-subjects">
   <div class="section">
-    <div class="section-title">Courses</div>
+    <div class="section-title" data-i18n="courses_title">Courses</div>
 
     <!-- ✅ chips go here (rendered by app.js) -->
     <div id="courses-filter-row" class="courses-filter-row"></div>
@@ -290,8 +290,8 @@
             <section id="courses-subject-hub" class="stack-screen" data-stack="courses" data-screen="subject-hub">
     <div class="subject-hub-head">
   <div class="subject-hub-head-left">
-    <div id="subject-hub-title" class="subject-hub-title">Предмет</div>
-    <div id="subject-hub-meta" class="subject-hub-meta muted">Study / Competitive</div>
+    <div id="subject-hub-title" class="subject-hub-title" data-i18n="subject_hub_title">Предмет</div>
+    <div id="subject-hub-meta" class="subject-hub-meta muted" data-i18n="subject_hub_meta">Study / Competitive</div>
   </div>
 </div>
 
@@ -804,22 +804,21 @@
 
     <!-- Header inside Ratings (как в примере) -->
     <div class="lb-header">
-      <button class="lb-back" type="button" data-action="back" aria-label="Back">←</button>
-      <div class="lb-title">Leaderboard</div>
+  <button class="lb-back" type="button" data-action="back" aria-label="Back">←</button>
+  <div class="lb-title" data-i18n="ratings_title">Leaderboard</div>
 
-      <div class="lb-header-actions">
-        <button class="lb-search-btn" type="button" data-action="ratings-search" aria-label="Search">🔍</button>
-        <button class="lb-info" type="button" data-action="ratings-info" aria-label="Info">i</button>
-      </div>
-    </div>
+  <div class="lb-header-actions">
+    <button class="lb-search-btn" type="button" data-action="ratings-search" aria-label="Search">🔍</button>
+    <button class="lb-info" type="button" data-action="ratings-info" aria-label="Info">i</button>
+  </div>
+</div>
 
-    <!-- Segmented: District / Region / Republic -->
-    <div class="lb-segment" role="tablist" aria-label="Leaderboard scope">
-      <button class="seg-btn is-active" type="button" data-scope="district" role="tab" aria-selected="true">District</button>
-      <button class="seg-btn" type="button" data-scope="region" role="tab" aria-selected="false">Region</button>
-      <button class="seg-btn" type="button" data-scope="country" role="tab" aria-selected="false">Republic</button>
-    </div>
-
+<!-- Segmented: District / Region / Republic -->
+<div class="seg" role="tablist" aria-label="Leaderboard scope">
+  <button class="seg-btn is-active" type="button" data-scope="district" role="tab" aria-selected="true" data-i18n="ratings_scope_district">District</button>
+  <button class="seg-btn" type="button" data-scope="region" role="tab" aria-selected="false" data-i18n="ratings_scope_region">Region</button>
+  <button class="seg-btn" type="button" data-scope="country" role="tab" aria-selected="false" data-i18n="ratings_scope_republic">Republic</button>
+</div>
         <!-- Filters: Subject / Tour -->
     <div class="lb-filters" aria-label="Leaderboard filters">
       <label class="lb-filter">
@@ -854,12 +853,12 @@
 
       <!-- Table header -->
     <div class="lb-head">
-      <div>RANK</div>
-      <div>STUDENT</div>
-      <div class="lb-head-right">SCORE</div>
-      <div class="lb-head-right">TIME</div>
-    </div>
-
+  <div data-i18n="ratings_col_rank">RANK</div>
+  <div data-i18n="ratings_col_student">STUDENT</div>
+  <div class="lb-head-right" data-i18n="ratings_col_score">SCORE</div>
+  <div class="lb-head-right" data-i18n="ratings_col_time">TIME</div>
+</div>
+    
     <!-- Loader (logo) -->
     <div id="ratings-loader" class="lb-loader" style="display:none" aria-hidden="true">
       <div class="lb-loader-card">
@@ -917,12 +916,12 @@
        <div class="profile-stats">
       <div class="profile-stat">
         <div class="profile-stat-value" id="profile-metric-competitive">0</div>
-        <div class="muted small">Competitive</div>
-      </div>
+          <div class="muted small" data-i18n="profile_metric_competitive">Competitive</div>
+        </div>
       <div class="profile-stat">
         <div class="profile-stat-value" id="profile-metric-study">0</div>
-        <div class="muted small">Study</div>
-      </div>
+          <div class="muted small" data-i18n="profile_metric_study">Study</div>
+        </div>
       <div class="profile-stat">
         <div class="profile-stat-value" id="profile-metric-tours">—</div>
         <div class="muted small">Tours</div>
@@ -1238,17 +1237,17 @@
     <nav id="tabbar" class="tabbar" aria-label="Bottom navigation">
       <button class="tab is-active" type="button" data-tab="home" aria-label="Home">
         <span class="tab-ico">⌂</span>
-        <span class="tab-txt">Home</span>
+        <span class="tab-txt" data-i18n="tab_home">Home</span>
       </button>
 
       <button class="tab" type="button" data-tab="courses" aria-label="Courses">
         <span class="tab-ico">▦</span>
-        <span class="tab-txt">Courses</span>
+        <span class="tab-txt" data-i18n="tab_courses">Courses</span>
       </button>
 
       <button class="tab" type="button" data-tab="ratings" aria-label="Ratings">
         <span class="tab-ico">▤</span>
-        <span class="tab-txt">Ratings</span>
+        <span class="tab-txt" data-i18n="tab_ratings">Ratings</span>
       </button>
 
       <button class="tab" type="button" data-tab="profile" aria-label="Profile">
@@ -1258,7 +1257,7 @@
       <path d="M4.6 20.7c.9-3.7 4.3-6.1 7.4-6.1s6.5 2.4 7.4 6.1c.1.4-.2.8-.6.8H5.2c-.4 0-.7-.4-.6-.8Z" fill="currentColor"/>
     </svg>
   </span>
-  <span class="tab-txt">Profile</span>
+  <span class="tab-txt" data-i18n="tab_profile">Profile</span>
 </button>
     </nav>
 
