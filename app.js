@@ -4600,10 +4600,13 @@ if (contentLangWrap) {
       const cur = fresh.language || "ru";
       if (nextLang === cur) return;
 
-      const ok = window.confirm(
-        "Смена языка туров и практики удалит весь прогресс (туры, практика, ответы). Продолжить?"
-      );
-      if (!ok) return;
+     const ok = await uiConfirm({
+  title: t("profile_content_language_title"),
+  message: t("confirm_content_lang_change"),
+  okText: t("yes"),
+  cancelText: t("cancel")
+});
+if (!ok) return;
 
       // 1) DB wipe (если есть Supabase + uid)
       try {
@@ -4669,7 +4672,7 @@ if (contentLangWrap) {
       renderProfileMain();
       renderProfileSettings();
 
-      showToast("Язык туров и практики изменён. Прогресс сброшен.");
+      showToast(t("toast_content_lang_changed"));
     };
   });
 }
@@ -5034,10 +5037,10 @@ input?.addEventListener("change", async () => {
   }
 
   if (hintEl) {
-    hintEl.textContent = pinned.length
-      ? "Закреплённые предметы уже ускоряют доступ. Дальше — стабильность."
-      : "Закрепите 1–3 предмета — и вы будете открывать нужное быстрее, чем Telegram.";
-  }
+  hintEl.textContent = pinned.length
+    ? t("profile_pinned_hint_has")
+    : t("profile_pinned_hint_empty");
+}
       // Credentials (Profile: list + progress)
 try { renderProfileCredentialsUI(); } catch {}
 
@@ -5094,46 +5097,51 @@ try { renderProfileCredentialsUI(); } catch {}
     });
   }
 
-  function uiConfirm({ title, message, okText = "OK", cancelText = "Cancel" }) {
-    return new Promise((resolve) => {
-      modalResolve = resolve;
+  function uiConfirm({ title, message, okText, cancelText } = {}) {
+  const _ok = okText ?? (typeof t === "function" ? (t("ok") || "OK") : "OK");
+  const _cancel = cancelText ?? (typeof t === "function" ? (t("cancel") || "Cancel") : "Cancel");
 
-      const html = `
-        <div class="modal-backdrop" data-modal-backdrop data-close="none">
-          <div class="modal">
-            <div class="modal-title">${escapeHTML(title || "")}</div>
-            <div class="modal-text">${escapeHTML(message || "")}</div>
-            <div class="modal-actions">
-              <button type="button" class="btn" data-modal-action="cancel">${escapeHTML(cancelText)}</button>
-              <button type="button" class="btn primary" data-modal-action="ok">${escapeHTML(okText)}</button>
-            </div>
+  return new Promise((resolve) => {
+    modalResolve = resolve;
+
+    const html = `
+      <div class="modal-backdrop" data-modal-backdrop data-close="none">
+        <div class="modal">
+          <div class="modal-title">${escapeHTML(title || "")}</div>
+          <div class="modal-text">${escapeHTML(message || "")}</div>
+          <div class="modal-actions">
+            <button type="button" class="btn" data-modal-action="cancel">${escapeHTML(_cancel)}</button>
+            <button type="button" class="btn primary" data-modal-action="ok">${escapeHTML(_ok)}</button>
           </div>
         </div>
-      `;
+      </div>
+    `;
 
-      openModal(html);
-    });
-  }
+    openModal(html);
+  });
+}
 
-  function uiAlert({ title, message, okText = "OK" }) {
-    return new Promise((resolve) => {
-      modalResolve = resolve;
+function uiAlert({ title, message, okText } = {}) {
+  const _ok = okText ?? (typeof t === "function" ? (t("ok") || "OK") : "OK");
 
-      const html = `
-        <div class="modal-backdrop" data-modal-backdrop data-close="none">
-          <div class="modal">
-            <div class="modal-title">${escapeHTML(title || "")}</div>
-            <div class="modal-text">${escapeHTML(message || "")}</div>
-            <div class="modal-actions modal-actions-single">
-              <button type="button" class="btn primary" data-modal-action="ok">${escapeHTML(okText)}</button>
-            </div>
+  return new Promise((resolve) => {
+    modalResolve = resolve;
+
+    const html = `
+      <div class="modal-backdrop" data-modal-backdrop data-close="none">
+        <div class="modal">
+          <div class="modal-title">${escapeHTML(title || "")}</div>
+          <div class="modal-text">${escapeHTML(message || "")}</div>
+          <div class="modal-actions modal-actions-single">
+            <button type="button" class="btn primary" data-modal-action="ok">${escapeHTML(_ok)}</button>
           </div>
         </div>
-      `;
+      </div>
+    `;
 
-      openModal(html);
-    });
-  }
+    openModal(html);
+  });
+}
 
   // ---------------------------
   // Toast
