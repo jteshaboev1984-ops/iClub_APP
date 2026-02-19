@@ -3899,7 +3899,7 @@ istEl.innerHTML = `
   hideLoading();
 
   if (!rowsAll.length) {
-    listEl.innerHTML = `<div class="empty muted">${q ? "Ничего не найдено." : "Нет участников."}</div>`;
+    listEl.innerHTML = `<div class="empty muted">${q ? t("ratings_empty") : t("ratings_no_participants")}</div>`;
     if (mybar) mybar.style.display = "none";
     return;
   }
