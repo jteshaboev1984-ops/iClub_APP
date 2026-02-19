@@ -28,6 +28,23 @@
       ratings_results: "Результаты",
       ratings_reset: "Сброс",
       ratings_empty: "Ничего не найдено.",
+      ratings_title: "Рейтинг",
+      ratings_scope_district: "Район",
+      ratings_scope_region: "Регион",
+      ratings_scope_republic: "Республика",
+      ratings_col_rank: "МЕСТО",
+      ratings_col_student: "УЧАСТНИК",
+      ratings_col_score: "БАЛЛЫ",
+      ratings_col_time: "ВРЕМЯ",
+      ratings_no_participants: "Нет участников.",
+
+      courses_title: "Курсы",
+
+      subject_hub_title: "Предмет",
+      subject_hub_meta: "Учебный / Соревновательный",
+
+      profile_metric_competitive: "Соревновательный",
+      profile_metric_study: "Учебный",
 
       done: "Готово",
       error_try_again: "Ошибка — попробуйте ещё раз",
@@ -400,6 +417,23 @@
       ratings_results: "Natijalar",
       ratings_reset: "Tozalash",
       ratings_empty: "Hech narsa topilmadi.",
+      ratings_title: "Reyting",
+      ratings_scope_district: "Tuman",
+      ratings_scope_region: "Viloyat",
+      ratings_scope_republic: "Respublika",
+      ratings_col_rank: "O‘RIN",
+      ratings_col_student: "ISHTIROKCHI",
+      ratings_col_score: "BALL",
+      ratings_col_time: "VAQT",
+      ratings_no_participants: "Ishtirokchilar yo‘q.",
+
+      courses_title: "Kurslar",
+
+      subject_hub_title: "Fan",
+      subject_hub_meta: "O‘quv / Musobaqa",
+
+      profile_metric_competitive: "Musobaqa",
+      profile_metric_study: "O‘quv",
 
       done: "Tayyor",
       error_try_again: "Xatolik — qayta urinib ko‘ring",
@@ -779,6 +813,23 @@
       ratings_results: "Results",
       ratings_reset: "Reset",
       ratings_empty: "Nothing found.",
+      ratings_title: "Leaderboard",
+      ratings_scope_district: "District",
+      ratings_scope_region: "Region",
+      ratings_scope_republic: "Republic",
+      ratings_col_rank: "RANK",
+      ratings_col_student: "STUDENT",
+      ratings_col_score: "SCORE",
+      ratings_col_time: "TIME",
+      ratings_no_participants: "No participants.",
+
+      courses_title: "Courses",
+
+      subject_hub_title: "Subject",
+      subject_hub_meta: "Study / Competitive",
+
+      profile_metric_competitive: "Competitive",
+      profile_metric_study: "Study",
 
       done: "Done",
       error_try_again: "Error — please try again",
