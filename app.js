@@ -4583,6 +4583,97 @@ if (langWrap) {
   });
 }
 
+      // --- Content language segmented buttons (Tours/Practice) ---
+const contentLangWrap = document.getElementById("profile-settings-content-language");
+if (contentLangWrap) {
+  const currentContentLang = profile.language || "ru";
+
+  contentLangWrap.querySelectorAll(".lang-btn").forEach(btn => {
+    const lang = btn.dataset.lang;
+    btn.classList.toggle("is-active", lang === currentContentLang);
+
+    btn.onclick = async () => {
+      const fresh = loadProfile();
+      if (!fresh) return;
+
+      const nextLang = String(btn.dataset.lang || "ru");
+      const cur = fresh.language || "ru";
+      if (nextLang === cur) return;
+
+      const ok = window.confirm(
+        "Смена языка туров и практики удалит весь прогресс (туры, практика, ответы). Продолжить?"
+      );
+      if (!ok) return;
+
+      // 1) DB wipe (если есть Supabase + uid)
+      try {
+        const uid = await getAuthUid();
+        if (window.sb && uid) {
+          // --- Practice wipe ---
+          const { data: pAtt } = await window.sb
+            .from("practice_attempts")
+            .select("id")
+            .eq("user_id", uid)
+            .limit(10000);
+
+          const pIds = (Array.isArray(pAtt) ? pAtt : []).map(x => x.id).filter(Boolean);
+          if (pIds.length) {
+            // delete answers by attempt_id (safe if column exists)
+            for (let i = 0; i < pIds.length; i += 500) {
+              const chunk = pIds.slice(i, i + 500);
+              await window.sb.from("practice_answers").delete().in("attempt_id", chunk);
+            }
+          }
+          await window.sb.from("practice_attempts").delete().eq("user_id", uid);
+
+          // --- Tour wipe ---
+          const { data: tAtt } = await window.sb
+            .from("tour_attempts")
+            .select("id")
+            .eq("user_id", uid)
+            .limit(10000);
+
+          const tIds = (Array.isArray(tAtt) ? tAtt : []).map(x => x.id).filter(Boolean);
+          if (tIds.length) {
+            for (let i = 0; i < tIds.length; i += 500) {
+              const chunk = tIds.slice(i, i + 500);
+              await window.sb.from("tour_answers").delete().in("attempt_id", chunk);
+            }
+          }
+          await window.sb.from("tour_attempts").delete().eq("user_id", uid);
+
+          // 2) update content language in users table
+          await window.sb.from("users").upsert({ id: uid, language_code: nextLang }, { onConflict: "id" });
+        }
+      } catch (e) {
+        // если где-то не получилось — лучше не падать UI
+        try { trackEvent("content_lang_change_db_error", { message: String(e?.message || e) }); } catch {}
+      }
+
+      // 3) local wipe (без удаления профиля)
+      try { localStorage.removeItem(LS.state); } catch {}
+      try { localStorage.removeItem(LS.practiceDraft); } catch {}
+      try { localStorage.removeItem(LS.myRecs); } catch {}
+      try { localStorage.removeItem(LS.events); } catch {}
+      try { localStorage.removeItem(LS.credentials); } catch {}
+
+      // 4) apply content language
+      fresh.language = nextLang;
+      // UI язык не трогаем намеренно (ваше требование). Но если uiLanguage ещё нет — зафиксируем.
+      if (!fresh.uiLanguage) fresh.uiLanguage = window.i18n?.getLang?.() || nextLang;
+      saveProfile(fresh);
+
+      // 5) перерендер
+      renderHome();
+      if (state.tab === "courses") renderAllSubjects();
+      renderProfileMain();
+      renderProfileSettings();
+
+      showToast("Язык туров и практики изменён. Прогресс сброшен.");
+    };
+  });
+}
+
     // --- Pinned list ---
   const pinnedToggleBtn = document.getElementById("profile-settings-pinned-toggle");
   if (pinnedToggleBtn) {
