@@ -112,11 +112,15 @@ function hideToursLoading() {
     const tg = getTelegramUserSafe();
     const langGuess = tg?.language_code || (typeof getTelegramLang === "function" ? getTelegramLang() : null) || "ru";
 
-    const payload = {
+// ✅ если локальный профиль уже есть — считаем content language источником истины
+const lp = safeJsonParse(localStorage.getItem(LS.profile), null);
+const contentLang = lp?.language || langGuess;
+
+const payload = {
   id: u.id,
   telegram_user_id: tg?.id ? String(tg.id) : null,
   avatar_url: null,
-  language_code: langGuess,
+  language_code: contentLang,
 };
 
 // ✅ НЕ перезатираем имя/фамилию в NULL на boot
@@ -1504,7 +1508,7 @@ async function buildPracticeSet(subjectKey) {
   // Берём запас, чтобы гарантировать 3/5/2 и добивки
   const { data, error } = await window.sb
     .from("questions")
-    .select("id, topic, difficulty, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active")
+    .select("id, topic, difficulty, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
     .eq("subject_id", subjectId)
     .eq("is_active", true)
     .limit(200);
@@ -1520,9 +1524,18 @@ async function buildPracticeSet(subjectKey) {
   const normalizeDiff = (d) => normalizeDifficulty(d || "easy");
   const normalizeType = (t) => (String(t || "mcq").toLowerCase() === "input" ? "input" : "mcq");
 
+   const contentLang = (loadProfile()?.language) || "ru";
+      const pickL = (obj, base) => {
+      const k = contentLang === "uz" ? (base + "_uz") : contentLang === "en" ? (base + "_en") : (base + "_ru");
+      return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
+   };
+
   const pool = poolRaw.map(r => {
-    const type = normalizeType(r.qtype);
-    const opts = type === "mcq" ? (parseOptionsText(r.options_text) || []) : null;
+   const type = normalizeType(r.qtype);
+
+   // ✅ options по языку контента
+   const optionsRaw = pickL(r, "options_text");
+   const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : null;
 
     // correctIndex for MCQ:
     // support: "2" (index), "B" (A/B/C/D), or exact option text
@@ -1544,20 +1557,22 @@ async function buildPracticeSet(subjectKey) {
     const correctAnswer = type === "input" ? String(r.correct_answer ?? "").trim() : "";
 
     return {
-      id: Number(r.id),                // ✅ важно: numeric question_id
-      topic: r.topic || "General",
-      difficulty: normalizeDiff(r.difficulty),
-      type,
-      question: r.question_text || "",
-      options: opts || [],
-      correctIndex,
-      correctAnswer,
-      explanation: r.explanation || "",
-      imageUrl: r.image_url || null,
-      inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
-      inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
-    };
-  }).filter(q => Number.isFinite(q.id));
+        id: Number(r.id),
+        topic: r.topic || "General",
+        difficulty: normalizeDiff(r.difficulty),
+        type,
+        // ✅ вопрос по языку контента
+           question: pickL(r, "question_text") || "",
+           options: opts || [],
+           correctIndex,
+           correctAnswer,
+        // ✅ объяснение по языку контента
+           explanation: pickL(r, "explanation") || "",
+           imageUrl: r.image_url || null,
+           inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
+           inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
+         };
+      }).filter(q => Number.isFinite(q.id));
 
   if (!pool.length) return buildPracticeSetLocal(subjectKey);
 
@@ -2682,11 +2697,14 @@ async function hydrateLocalProfileFromSupabaseIfMissing() {
 
   const fullName = [me.first_name, me.last_name].filter(Boolean).join(" ").trim();
 
-  const profile = {
-    created_at: nowISO(),
-    full_name: fullName || "User",
-    language: me.language_code || "ru",
-    is_school_student: !!me.is_school_student,
+ const profile = {
+  created_at: nowISO(),
+  full_name: fullName || "User",
+  // language = язык контента (туры/практика)
+  language: me.language_code || "ru",
+  // uiLanguage = язык интерфейса (если ранее был выбран локально — сохраняем)
+  uiLanguage: (loadProfile()?.uiLanguage) || (me.language_code || "ru"),
+  is_school_student: !!me.is_school_student,
     region: me.region || "",
     district: me.district || "",
     school: me.school || "",
@@ -4534,7 +4552,7 @@ mainSubjects.forEach(subj => {
       // --- Language segmented buttons ---
 const langWrap = document.getElementById("profile-settings-language");
 if (langWrap) {
-  const currentLang = profile.language || "ru";
+  const currentLang = profile.uiLanguage || profile.language || "ru";
 
   langWrap.querySelectorAll(".lang-btn").forEach(btn => {
     const lang = btn.dataset.lang;
@@ -4545,9 +4563,11 @@ if (langWrap) {
       if (!fresh) return;
 
       const nextLang = String(btn.dataset.lang || "ru");
-      if (nextLang === (fresh.language || "ru")) return;
+      const cur = fresh.uiLanguage || fresh.language || "ru";
+      if (nextLang === cur) return;
 
-      fresh.language = nextLang;
+      // ✅ меняем только язык интерфейса
+      fresh.uiLanguage = nextLang;
       saveProfile(fresh);
 
       window.i18n?.setLang(nextLang);
@@ -7315,7 +7335,7 @@ async function loadTourQuestionsDB(tourId) {
 
   const { data, error } = await window.sb
     .from("tour_questions")
-    .select("order_no, question:questions(id,topic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,is_active)")
+    .select("order_no, question:questions(id,topic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,is_active,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en)")
     .eq("tour_id", tourId)
     .eq("is_active", true)
     .order("order_no", { ascending: true })
@@ -7332,9 +7352,18 @@ async function loadTourQuestionsDB(tourId) {
   const normalizeDiff = (d) => normalizeDifficulty(d || "easy");
   const normalizeType = (t) => (String(t || "mcq").toLowerCase() === "input" ? "input" : "mcq");
 
+   const contentLang = (loadProfile()?.language) || "ru";
+   const pickL = (obj, base) => {
+   const k = contentLang === "uz" ? (base + "_uz") : contentLang === "en" ? (base + "_en") : (base + "_ru");
+   return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
+};
+
   return items.map(q => {
     const type = normalizeType(q.qtype);
-    const opts = type === "mcq" ? (parseOptionsText(q.options_text) || []) : null;
+
+      // ✅ options по языку контента
+      const optionsRaw = pickL(q, "options_text");
+      const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : null;
 
     // correctIndex for mcq:
     // - if correct_answer is numeric index => use it
@@ -7351,17 +7380,19 @@ async function loadTourQuestionsDB(tourId) {
     }
 
     return {
-      id: q.id,
-      topic: q.topic || "General",
-      difficulty: normalizeDiff(q.difficulty),
-      type,
-      question: q.question_text,
-      options: opts,
-      correctIndex,
-      correctAnswer: String(q.correct_answer ?? ""),
-      explanation: q.explanation || "",
-      image_url: q.image_url || null
-    };
+        id: q.id,
+        topic: q.topic || "General",
+        difficulty: normalizeDiff(q.difficulty),
+        type,
+        // ✅ вопрос по языку контента
+        question: pickL(q, "question_text") || "",
+        options: opts,
+        correctIndex,
+        correctAnswer: String(q.correct_answer ?? ""),
+        // ✅ объяснение по языку контента
+        explanation: pickL(q, "explanation") || "",
+        image_url: q.image_url || null
+     };
   });
 }
 
@@ -8908,10 +8939,11 @@ if (action === "tour-next" || action === "tour-submit") {
     // ✅ показать splash и скрыть topbar (updateTopbarForView("splash") сработает внутри showView)
     showView("splash");
 
-    const profile = loadProfile();
-    const lang = profile?.language || getTelegramLang() || "ru";
-    window.i18n?.setLang(lang);
-    applyStaticI18n();
+      const profile = loadProfile();
+      // UI язык: uiLanguage (если есть), иначе fallback на content language (profile.language)
+      const lang = profile?.uiLanguage || profile?.language || getTelegramLang() || "ru";
+      window.i18n?.setLang(lang);
+      applyStaticI18n();
 
     const statusEl = $("#splash-status");
     if (statusEl) statusEl.textContent = t("loading");
