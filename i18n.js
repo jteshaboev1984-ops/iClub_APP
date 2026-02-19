@@ -291,8 +291,33 @@
       points_short: "бал.", 
 
       tour_rules_title: "Правила тура",
-      tour_rules_accept_required: "Подтвердите согласие с правилами, чтобы начать тур."
-    },
+      tour_rules_accept_required: "Подтвердите согласие с правилами, чтобы начать тур.",
+
+          // --- Profile language blocks ---
+    profile_ui_language_title: "Язык интерфейса",
+    profile_ui_language_desc: "Меняется только интерфейс приложения и не влияет на туры и практику.",
+    profile_content_language_title: "Язык туров и практики",
+    profile_content_language_desc: "Смена этого языка удалит весь прогресс (туры, практика, ответы). Используйте только при необходимости.",
+
+    // --- Confirm / Toast ---
+    confirm_content_lang_change: "Смена языка туров и практики удалит весь прогресс. Продолжить?",
+    toast_content_lang_changed: "Язык туров и практики изменён. Прогресс сброшен.",
+    toast_lang_updated: "Язык интерфейса обновлён",
+
+    // --- Practice input ---
+    input_number: "Введите число",
+    input_text: "Введите ответ",
+    select_option_required: "Выберите вариант ответа",
+    invalid_answer_format: "Проверьте формат ответа",
+
+    // --- Topics ---
+    topic_general: "Общие вопросы",
+
+    // --- Global ---
+    yes: "Да",
+    no: "Нет",
+    cancel: "Отмена"
+  },
 
     uz: {
       app_name: "iClub",
@@ -580,8 +605,33 @@
       ratings_out_of: "dan",
 
       tour_rules_title: "Tur qoidalari",
-      tour_rules_accept_required: "Tur boshlash uchun qoidalarga rozilikni tasdiqlang."
-    },
+      tour_rules_accept_required: "Tur boshlash uchun qoidalarga rozilikni tasdiqlang.",
+
+           // --- Profile language blocks ---
+    profile_ui_language_title: "Interfeys tili",
+    profile_ui_language_desc: "Bu faqat ilova interfeysini o‘zgartiradi va turlar hamda amaliyotga ta’sir qilmaydi.",
+    profile_content_language_title: "Turlar va amaliyot tili",
+    profile_content_language_desc: "Bu tilni o‘zgartirish barcha progressni (turlar, amaliyot, javoblar) o‘chiradi. Faqat zarurat bo‘lsa foydalaning.",
+
+    // --- Confirm / Toast ---
+    confirm_content_lang_change: "Turlar va amaliyot tilini o‘zgartirish barcha progressni o‘chiradi. Davom etilsinmi?",
+    toast_content_lang_changed: "Turlar va amaliyot tili o‘zgartirildi. Progress o‘chirildi.",
+    toast_lang_updated: "Interfeys tili yangilandi",
+
+    // --- Practice input ---
+    input_number: "Raqam kiriting",
+    input_text: "Javobni kiriting",
+    select_option_required: "Variantni tanlang",
+    invalid_answer_format: "Javob formatini tekshiring",
+
+    // --- Topics ---
+    topic_general: "Umumiy savollar",
+
+    // --- Global ---
+    yes: "Ha",
+    no: "Yo‘q",
+    cancel: "Bekor qilish"
+  },
 
     en: {
       app_name: "iClub",
@@ -871,8 +921,32 @@
       tour_rules_title: "Tour rules",
       tour_rules_accept_required: "Please accept the rules to start the tour."
 
-    }
-  };
+           // --- Profile language blocks ---
+    profile_ui_language_title: "Interface Language",
+    profile_ui_language_desc: "Changes only the application interface and does not affect tours or practice.",
+    profile_content_language_title: "Tours & Practice Language",
+    profile_content_language_desc: "Changing this language will delete all progress (tours, practice, answers). Use only if necessary.",
+
+    // --- Confirm / Toast ---
+    confirm_content_lang_change: "Changing the tours and practice language will delete all progress. Continue?",
+    toast_content_lang_changed: "Tours and practice language updated. Progress has been reset.",
+    toast_lang_updated: "Interface language updated",
+
+    // --- Practice input ---
+    input_number: "Enter a number",
+    input_text: "Enter your answer",
+    select_option_required: "Please select an option",
+    invalid_answer_format: "Please check the answer format",
+
+    // --- Topics ---
+    topic_general: "General",
+
+    // --- Global ---
+    yes: "Yes",
+    no: "No",
+    cancel: "Cancel"
+  }
+};
 
   // --- language state (default: Telegram language_code -> ru fallback)
 let currentLang = "ru";
