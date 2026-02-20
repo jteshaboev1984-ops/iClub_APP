@@ -156,6 +156,26 @@
       home_pinned_empty: "Закрепите предметы в разделе «Предметы».",
       home_need_registration: "Сначала пройдите регистрацию.",
 
+      // UI badges / labels (Courses + Home)
+      badge_active: "АКТИВНО",
+      badge_pinned: "Закреплён",
+      badge_competitive: "Соревновательный",
+      module_label: "МОДУЛЬ {n}",
+      open_subject_btn: "Открыть предмет",
+
+      // Courses UI
+      courses_filter_competitive: "Соревновательный",
+      courses_filter_study: "Учебный",
+      courses_section_main: "Основные (Cambridge)",
+      courses_section_additional: "Дополнительные",
+
+      // Modes / Subject Hub meta
+      mode_competitive: "Соревновательный",
+      mode_study: "Учебный",
+      hub_pinned: "Закреплён",
+      hub_not_pinned: "Не закреплён",
+      hub_not_added: "Не добавлен",
+
       // Profile
       profile_title: "Учебный профиль",
       profile_status_badge: "ПРОДВИНУТЫЙ УРОВЕНЬ",
@@ -547,6 +567,25 @@
       home_pinned_empty: "«Fanlar» bo‘limida fanlarni biriktiring.",
       home_need_registration: "Avval ro‘yxatdan o‘ting.",
 
+      // UI badges / labels (Courses + Home)
+      badge_active: "FAOL",
+      badge_pinned: "Biriktirilgan",
+      badge_competitive: "Musobaqa",
+      module_label: "MODUL {n}",
+      open_subject_btn: "Fanni ochish",
+
+      // Courses UI
+      courses_filter_competitive: "Musobaqa",
+      courses_filter_study: "O‘quv",
+      courses_section_main: "Asosiy (Cambridge)",
+      courses_section_additional: "Qo‘shimcha",
+
+      // Modes / Subject Hub meta
+      mode_competitive: "Musobaqa",
+      mode_study: "O‘quv",
+      hub_pinned: "Biriktirilgan",
+      hub_not_pinned: "Biriktirilmagan",
+      hub_not_added: "Qo‘shilmagan",
       // Profile
       profile_title: "O‘quv profili",
       profile_status_badge: "Yuqori daraja",
@@ -936,6 +975,26 @@
       home_competitive_empty: "No competitive subjects yet.",
       home_pinned_empty: "Pin subjects in Courses to see them here.",
       home_need_registration: "Please complete registration first.",
+
+      // UI badges / labels (Courses + Home)
+      badge_active: "ACTIVE",
+      badge_pinned: "Pinned",
+      badge_competitive: "Competitive",
+      module_label: "MODULE {n}",
+      open_subject_btn: "Open subject",
+
+      // Courses UI
+      courses_filter_competitive: "Competitive",
+      courses_filter_study: "Study",
+      courses_section_main: "Main (Cambridge)",
+      courses_section_additional: "Additional",
+
+      // Modes / Subject Hub meta
+      mode_competitive: "Competitive",
+      mode_study: "Study",
+      hub_pinned: "Pinned",
+      hub_not_pinned: "Not pinned",
+      hub_not_added: "Not added",
 
       // Profile
       profile_title: "Academic Profile",
