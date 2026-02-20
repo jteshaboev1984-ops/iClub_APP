@@ -128,6 +128,12 @@
       subj_biology: "Биология",
       subj_chemistry: "Химия",
       subj_mathematics: "Математика",
+       // Additional Subjects
+      subj_english_a1: "Английский (A1)",
+      subj_english_a2: "Английский (A2)",
+      subj_english_b1: "Английский (B1)",
+      subj_sat: "SAT",
+      subj_ielts: "IELTS",
 
       // Limits / Validation
       competitive_subjects_limit_2: "Лимит предметов соревновательного режима — 2",
@@ -538,6 +544,12 @@
       subj_biology: "Biologiya",
       subj_chemistry: "Kimyo",
       subj_mathematics: "Matematika",
+      // Additional Subjects
+      subj_english_a1: "Ingliz tili (A1)",
+      subj_english_a2: "Ingliz tili (A2)",
+      subj_english_b1: "Ingliz tili (B1)",
+      subj_sat: "SAT",
+      subj_ielts: "IELTS", 
 
       // Limits / Validation
       competitive_subjects_limit_2: "Musobaqa rejimi fanlari limiti — 2 ta",
@@ -949,6 +961,12 @@
       subj_biology: "Biology",
       subj_chemistry: "Chemistry",
       subj_mathematics: "Mathematics",
+       // Additional Subjects
+      subj_english_a1: "English (A1)",
+      subj_english_a2: "English (A2)",
+      subj_english_b1: "English (B1)",
+      subj_sat: "SAT",
+      subj_ielts: "IELTS",
 
       // Limits / Validation
       competitive_subjects_limit_2: "Competitive subjects limit is 2",
