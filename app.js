@@ -4420,7 +4420,7 @@ mainSubjects.forEach(subj => {
   row.innerHTML = `
   <div class="settings-row-left">
     <div style="font-weight:800">${escapeHTML(subj.title)}</div>
-    <div class="muted small">${isOn ? "Competitive" : "Выключено"}</div>
+    <div class="muted small">${isOn ? t("mode_competitive") : t("course_toggle_off")}</div>
   </div>
   <label class="switch">
     <input type="checkbox"
@@ -5395,17 +5395,20 @@ function uiAlert({ title, message, okText } = {}) {
   // ✅ нужно для CSS-картинок по предмету
   el.dataset.subject = String(userSubject.key || "").toLowerCase();
 
+    const badgeActive = t("badge_active") || "ACTIVE";
+  const moduleTxt = t("module_label", { n: 3 }) || "MODULE 3";
+
   el.innerHTML = `
-    <div class="home-competitive-badge">ACTIVE</div>
+    <div class="home-competitive-badge">${escapeHTML(badgeActive)}</div>
     <div class="home-competitive-hero">
       <div class="home-competitive-hero-img" aria-hidden="true"></div>
     </div>
     <div class="home-competitive-body">
-      <div class="home-competitive-module">MODULE 3</div>
+      <div class="home-competitive-module">${escapeHTML(moduleTxt)}</div>
       <div class="home-competitive-title">${escapeHTML(title)}</div>
       <div class="home-competitive-meta">
         <span>${t("home_course_completion")}</span>
-        <span class="home-competitive-rank">${t("home_rank_label")}: 12th</span>
+        <span class="home-competitive-rank">${t("home_rank_label")}: 12</span>
       </div>
       <div class="home-progress">
         <div class="home-progress-fill" style="width:65%"></div>
@@ -5413,11 +5416,11 @@ function uiAlert({ title, message, okText } = {}) {
     </div>
    `;
 
-    const btn = document.createElement("button");
-btn.type = "button";
-btn.className = "btn primary home-competitive-btn";
-btn.textContent = "Открыть предмет";
-btn.addEventListener("click", (e) => {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn primary home-competitive-btn";
+  btn.textContent = t("open_subject_btn") || "Open subject";
+  btn.addEventListener("click", (e) => {
   e.stopPropagation();
 
   // ✅ Home: сразу открываем Subject Hub (без промежуточных туров)
@@ -5530,9 +5533,9 @@ const renderMainFilterRow = () => {
 
   const row = document.createElement("div");
   row.className = "grid-section-filters";
-  row.innerHTML = `
-    <button type="button" class="chip ${state.courses.mainFilter === "competitive" ? "is-active" : ""}" data-main-filter="competitive">Competitive</button>
-    <button type="button" class="chip ${state.courses.mainFilter === "study" ? "is-active" : ""}" data-main-filter="study">Study</button>
+    row.innerHTML = `
+    <button type="button" class="chip ${state.courses.mainFilter === "competitive" ? "is-active" : ""}" data-main-filter="competitive">${escapeHTML(t("courses_filter_competitive") || "Competitive")}</button>
+    <button type="button" class="chip ${state.courses.mainFilter === "study" ? "is-active" : ""}" data-main-filter="study">${escapeHTML(t("courses_filter_study") || "Study")}</button>
   `;
 
   row.querySelectorAll("[data-main-filter]").forEach(btn => {
@@ -5601,13 +5604,13 @@ head.innerHTML = `
       <div class="catalog-text">
         <div class="card-title-row">
           <div class="card-title" style="margin:0">${escapeHTML(s.title)}</div>
-          ${isPinned ? `<span class="badge badge-pin badge-inline">Pinned</span>` : ``}
+          ${isPinned ? `<span class="badge badge-pin badge-inline">${escapeHTML(t("badge_pinned") || "Pinned")}</span>` : ``}
         </div>
       </div>
    </div>
 
    <div class="catalog-badges">
-     ${s.type === "main" && isComp ? `<span class="badge badge-comp">Competitive</span>` : ``}
+          ${s.type === "main" && isComp ? `<span class="badge badge-comp">${escapeHTML(t("badge_competitive") || "Competitive")}</span>` : ``}
       </div>
   </div>
 `;
@@ -5794,7 +5797,7 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
 renderMainFilterRow();
 
 if (mainSubjects.length) {
-  appendSectionTitle("Main (Cambridge)");
+  appendSectionTitle(t("courses_section_main") || "Main (Cambridge)");
 
   let mainOut = mainSubjects.slice();
   if (state.courses.mainFilter === "competitive") {
@@ -5811,7 +5814,7 @@ if (mainSubjects.length) {
     // ---- ADDITIONAL section (always Study by spec), pinned-first
   // ✅ при Competitive additional не показываем
    if (state.courses.mainFilter !== "competitive" && additionalSubjects.length) {
-     appendSectionTitle("Additional");
+     appendSectionTitle(t("courses_section_additional") || "Additional");
      const addOut = sortPinnedFirst(additionalSubjects);
      addOut.forEach(appendSubjectCard);
    }
@@ -5837,9 +5840,15 @@ if (mainSubjects.length) {
   const subjectKey = state.courses.subjectKey;
   const us = profile?.subjects?.find(x => x.key === subjectKey) || null;
 
-  if (titleEl) titleEl.textContent = subj ? subj.title : "Subject";
+    if (titleEl) titleEl.textContent = subj ? subj.title : "Subject";
   if (metaEl) {
-    metaEl.textContent = us ? `${us.mode.toUpperCase()} • ${us.pinned ? "PINNED" : "NOT PINNED"}` : "NOT ADDED";
+    if (us) {
+      const modeLabel = us.mode === "competitive" ? t("mode_competitive") : t("mode_study");
+      const pinLabel = us.pinned ? t("hub_pinned") : t("hub_not_pinned");
+      metaEl.textContent = `${modeLabel} • ${pinLabel}`;
+    } else {
+      metaEl.textContent = t("hub_not_added") || "Not added";
+    }
   }
 
   // ✅ Visual-only mode flag for CSS (Study vs Competitive)
