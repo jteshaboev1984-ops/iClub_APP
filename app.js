@@ -1184,8 +1184,19 @@ function runDailyCredentialJobs() {
     { key: "ielts", title: "IELTS", type: "additional" }
   ];
 
-  function subjectByKey(key) {
+    function subjectByKey(key) {
     return SUBJECTS.find(s => s.key === key) || null;
+  }
+
+  // i18n subject title resolver (key -> subj_<key>)
+  function subjectTitle(subjectKey, fallbackTitle = "") {
+    const k = String(subjectKey || "").toLowerCase();
+    if (!k) return fallbackTitle || "";
+    const i18nKey = `subj_${k}`;
+    const v = t(i18nKey);
+    // if translation missing, t() returns the key itself
+    if (v && v !== i18nKey) return v;
+    return fallbackTitle || k;
   }
 
      // ---------------------------
@@ -3114,7 +3125,10 @@ async function ensureRatingsBoot() {
 
   // 1) subjects
   const subjects = await loadRatingsSubjectsForSelect();
-  const subjectItems = subjects.map(s => ({ value: s.id, label: s.title }));
+  const subjectItems = subjects.map(s => ({
+    value: s.id,
+    label: subjectTitle(s.subject_key, s.title)
+  }));
 
   renderRatingsSelectOptions(subjectSelect, subjectItems, {
     placeholder: t("loading")
@@ -4419,7 +4433,7 @@ mainSubjects.forEach(subj => {
 
   row.innerHTML = `
   <div class="settings-row-left">
-    <div style="font-weight:800">${escapeHTML(subj.title)}</div>
+    <div style="font-weight:800">${escapeHTML(subjectTitle(subj.key, subj.title))}</div>
     <div class="muted small">${isOn ? t("mode_competitive") : t("course_toggle_off")}</div>
   </div>
   <label class="switch">
@@ -4726,7 +4740,7 @@ if (!ok) return;
 
       row.innerHTML = `
   <div>
-    <div style="font-weight:800">${escapeHTML(subj.title)}</div>
+    <div style="font-weight:800">${escapeHTML(subjectTitle(subj.key, subj.title))}</div>
     <div class="muted small">${isPinned ? t("settings_pinned") : t("settings_not_pinned")}</div>
   </div>
   <label class="switch">
@@ -4990,7 +5004,7 @@ input?.addEventListener("change", async () => {
       row.className = "slot-card";
       row.innerHTML = `
         <div>
-          <div class="slot-title">${escapeHTML(subj?.title || us.key)}</div>
+          <div class="slot-title">${escapeHTML(subjectTitle(us.key, subj?.title || us.key))}</div>
           <div class="muted small">${t("profile_slot_hint")}</div>
         </div>
         <button type="button" class="btn mini" data-subject="${escapeHTML(us.key)}">${t("profile_view_btn")}</button>
@@ -5386,8 +5400,8 @@ function uiAlert({ title, message, okText } = {}) {
   }
 
     function homeCompetitiveCardEl(userSubject) {
-  const subj = subjectByKey(userSubject.key);
-  const title = subj ? subj.title : userSubject.key;
+      const subj = subjectByKey(userSubject.key);
+      const title = subjectTitle(userSubject.key, subj ? subj.title : userSubject.key);
 
   const el = document.createElement("div");
   el.className = "home-competitive-card";
@@ -5603,7 +5617,7 @@ head.innerHTML = `
 
       <div class="catalog-text">
         <div class="card-title-row">
-          <div class="card-title" style="margin:0">${escapeHTML(s.title)}</div>
+          <div class="card-title" style="margin:0">${escapeHTML(subjectTitle(s.key, s.title))}</div>
           ${isPinned ? `<span class="badge badge-pin badge-inline">${escapeHTML(t("badge_pinned") || "Pinned")}</span>` : ``}
         </div>
       </div>
@@ -5840,7 +5854,7 @@ if (mainSubjects.length) {
   const subjectKey = state.courses.subjectKey;
   const us = profile?.subjects?.find(x => x.key === subjectKey) || null;
 
-    if (titleEl) titleEl.textContent = subj ? subj.title : "Subject";
+    if (titleEl) titleEl.textContent = subjectTitle(subjectKey, subj ? subj.title : "Subject");
   if (metaEl) {
     if (us) {
       const modeLabel = us.mode === "competitive" ? t("mode_competitive") : t("mode_study");
@@ -5904,7 +5918,7 @@ if (mainSubjects.length) {
       item.className = "list-item";
       item.innerHTML = `
         <div style="font-weight:800">${lesson.title}</div>
-        <div class="muted small">${subj ? subj.title : ""} • ${lesson.topic}</div>
+        <div class="muted small">${escapeHTML(subjectTitle(state.courses.subjectKey, subj ? subj.title : ""))} • ${lesson.topic}</div>
       `;
       item.addEventListener("click", () => {
         state.courses.lessonId = lesson.id;
@@ -6035,7 +6049,7 @@ function addMyRecsFromAttempt(attempt) {
 
     // --- Subject title in hero card ---
     const titleEl = $("#practice-subject-title");
-    if (titleEl) titleEl.textContent = subj?.title || subjectKey || "—";
+    if (titleEl) titleEl.textContent = subjectTitle(subjectKey, subj?.title || subjectKey || "—");
 
     const h = loadPracticeHistory(subjectKey);
     const best = h?.best || null;
@@ -6144,7 +6158,7 @@ function addMyRecsFromAttempt(attempt) {
 
     // subject title
     const titleEl = document.getElementById("tours-subject-title");
-    if (titleEl) titleEl.textContent = subj ? subj.title : "Subject";
+    if (titleEl) titleEl.textContent = subjectTitle(subjectKey, subj ? subj.title : "Subject");
 
     // --------------------------------------
 // Active tour by DB dates (no selection)
