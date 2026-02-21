@@ -2708,14 +2708,29 @@ async function hydrateLocalProfileFromSupabaseIfMissing() {
 
   const fullName = [me.first_name, me.last_name].filter(Boolean).join(" ").trim();
 
- const profile = {
-  created_at: nowISO(),
-  full_name: fullName || "User",
-  // language = язык контента (туры/практика)
-  language: me.language_code || "ru",
-  // uiLanguage = язык интерфейса (если ранее был выбран локально — сохраняем)
-  uiLanguage: (loadProfile()?.uiLanguage) || (me.language_code || "ru"),
-  is_school_student: !!me.is_school_student,
+   // ✅ Маркер завершённой регистрации в БД:
+  // users.is_school_student должен быть именно TRUE/FALSE. Если NULL — регистрация не завершена.
+  const regFlag =
+    (me.is_school_student === true) ? true :
+    (me.is_school_student === false) ? false :
+    null;
+
+  if (regFlag === null) {
+    // Не создаём local profile-заглушку, иначе апп “проскочит” регистрацию
+    return { ok: true, hydrated: false, reason: "db_registration_not_completed" };
+  }
+
+  const profile = {
+    created_at: nowISO(),
+    full_name: fullName || "",
+    // language = язык контента (туры/практика)
+    language: me.language_code || "ru",
+    // uiLanguage = язык интерфейса (если ранее был выбран локально — сохраняем)
+    uiLanguage: (loadProfile()?.uiLanguage) || (me.language_code || "ru"),
+
+    // ✅ ВАЖНО: не !!..., а строго boolean из БД
+    is_school_student: regFlag,
+
     region: me.region || "",
     district: me.district || "",
     school: me.school || "",
@@ -5365,9 +5380,36 @@ function uiAlert({ title, message, okText } = {}) {
     // first paint (ensures no RU/EN mix)
     try { applyRegSubjectI18n(); } catch {}
 
-   
-  function isRegistered() {
-    return !!loadProfile();
+   function isRegistered() {
+    const p = loadProfile();
+    if (!p || typeof p !== "object") return false;
+
+    const fullName = String(p.full_name || "").trim();
+    const lang = String(p.language || "").trim();
+
+    // Ключевой маркер завершённой регистрации:
+    // пользователь явно выбрал "школьник/не школьник", значит это boolean, а не null/undefined
+    if (typeof p.is_school_student !== "boolean") return false;
+
+    if (!fullName) return false;
+    if (!lang) return false;
+
+    // Если школьник — нужны subjects (минимум 1 competitive) + базовые поля школы
+    if (p.is_school_student === true) {
+      const subjects = Array.isArray(p.subjects) ? p.subjects : [];
+      const compCnt = subjects.filter(s => s && s.mode === "competitive" && s.key).length;
+      if (compCnt < 1) return false;
+
+      const region = String(p.region || "").trim();
+      const district = String(p.district || "").trim();
+      if (!region) return false;
+
+      // district может быть не обязателен в твоей форме, но если он есть в форме как required — он уже проверяется там.
+      // Здесь не ужесточаем лишнего: оставляем как мягкое условие.
+      // if (!district) return false;
+    }
+
+    return true;
   }
 
   // ---------------------------
@@ -8372,11 +8414,15 @@ if (state.tab === "profile") {
       !districtEl.disabled &&
       (districtEl.options?.length || 0) > 1;
 
-    if (!fullName || !region || (districtRequired && !district) || (isSchoolStudent && !main1)) {
-      showToast(t("fill_required_fields"));
-      return;
-    }
-
+    if (
+      !fullName ||
+      !region ||
+      (districtRequired && !district) ||
+      (isSchoolStudent && (!main1 || !school || !klass))
+      ) {
+     showToast(t("fill_required_fields"));
+     return;
+   }
     const subjects = [];
 
     if (isSchoolStudent) {
