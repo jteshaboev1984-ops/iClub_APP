@@ -5459,10 +5459,109 @@ function uiAlert({ title, message, okText } = {}) {
     if (!comp.length) compWrap.innerHTML = `<div class="empty muted">${t("home_competitive_empty")}</div>`;
     if (!pinned.length) pinnedWrap.innerHTML = `<div class="empty muted">${t("home_pinned_empty")}</div>`;
 
-    comp.forEach(s => compWrap.appendChild(homeCompetitiveCardEl(s)));
+        comp.forEach(s => {
+      const card = homeCompetitiveCardEl(s);
+      compWrap.appendChild(card);
+      // ✅ догружаем реальные Rank + Progress (если есть Supabase-данные)
+      updateHomeCompetitiveCard(card, s.key);
+    });
+
     pinned.slice(0, 4).forEach((s, idx) => pinnedWrap.appendChild(homePinnedTileEl(s, idx)));
   }
 
+      // ===========================
+// Home (Competitive) — real Rank + Progress
+// ===========================
+async function computeHomeCompetitiveStats(subjectKey) {
+  try {
+    if (!window.sb) return { moduleNo: 1, progressPct: 0, rankNo: null };
+
+    const subjectId = await getSubjectIdByKey(subjectKey);
+    if (!subjectId) return { moduleNo: 1, progressPct: 0, rankNo: null };
+
+    const uid = await getAuthUid();
+    if (!uid) return { moduleNo: 1, progressPct: 0, rankNo: null };
+
+    // 1) tours for this subject
+    const toursRes = await window.sb
+      .from("tours")
+      .select("id,tour_no")
+      .eq("subject_id", subjectId)
+      .order("tour_no", { ascending: true });
+
+    const tours = Array.isArray(toursRes?.data) ? toursRes.data : [];
+    if (!tours.length) return { moduleNo: 1, progressPct: 0, rankNo: null };
+
+    const tourIds = tours.map(t => t.id);
+
+    // 2) my attempts
+    const attemptsRes = await window.sb
+      .from("tour_attempts")
+      .select("tour_id,status")
+      .eq("user_id", uid)
+      .in("tour_id", tourIds);
+
+    const OK_STATUSES = new Set(["submitted", "time_expired", "anti_cheat", "finished"]);
+    const attempts = Array.isArray(attemptsRes?.data) ? attemptsRes.data : [];
+
+    const doneIds = new Set(
+      attempts
+        .filter(r => {
+          const st = String(r?.status || "").trim();
+          return !st || OK_STATUSES.has(st);
+        })
+        .map(r => r.tour_id)
+    );
+
+    const doneTours = tours.filter(t => doneIds.has(t.id));
+    const completedCount = doneTours.length;
+
+    const maxTourNo = tours.reduce((m, t) => Math.max(m, Number(t?.tour_no || 0)), 0);
+    const maxCompletedNo = doneTours.reduce((m, t) => Math.max(m, Number(t?.tour_no || 0)), 0);
+
+    const moduleNo = Math.min(Math.max(maxCompletedNo + 1, 1), Math.max(maxTourNo || 1, 1));
+    const progressPct = Math.max(0, Math.min(100, Math.round((completedCount / tours.length) * 100)));
+
+    // 3) rank from cache (country)
+    const rankTourNo = maxCompletedNo || moduleNo;
+    const rankTour = tours.find(t => Number(t?.tour_no || 0) === Number(rankTourNo));
+
+    let rankNo = null;
+    if (rankTour?.id) {
+      const rankRes = await window.sb
+        .from("ratings_cache")
+        .select("rank_no")
+        .eq("tour_id", rankTour.id)
+        .eq("rank_type", "country")
+        .eq("user_id", uid)
+        .maybeSingle();
+
+      if (!rankRes?.error) rankNo = rankRes?.data?.rank_no ?? null;
+    }
+
+    return { moduleNo, progressPct, rankNo };
+  } catch {
+    return { moduleNo: 1, progressPct: 0, rankNo: null };
+  }
+}
+
+async function updateHomeCompetitiveCard(cardEl, subjectKey) {
+  try {
+    if (!cardEl) return;
+
+    const modEl = cardEl.querySelector(".js-home-comp-module");
+    const rankEl = cardEl.querySelector(".js-home-comp-rank");
+    const fillEl = cardEl.querySelector(".js-home-comp-fill");
+
+    const s = await computeHomeCompetitiveStats(subjectKey);
+
+    if (modEl) modEl.textContent = t("module_label", { n: s.moduleNo }) || `MODULE ${s.moduleNo}`;
+    if (rankEl) rankEl.textContent = `${t("home_rank_label")}: ${s.rankNo ?? "—"}`;
+    if (fillEl) fillEl.style.width = `${s.progressPct}%`;
+  } catch {
+    // silent
+  }
+}
     function homeCompetitiveCardEl(userSubject) {
       const subj = subjectByKey(userSubject.key);
       const title = subjectTitle(userSubject.key, subj ? subj.title : userSubject.key);
@@ -5473,8 +5572,8 @@ function uiAlert({ title, message, okText } = {}) {
   // ✅ нужно для CSS-картинок по предмету
   el.dataset.subject = String(userSubject.key || "").toLowerCase();
 
-    const badgeActive = t("badge_active") || "ACTIVE";
-  const moduleTxt = t("module_label", { n: 3 }) || "MODULE 3";
+      const badgeActive = t("badge_active") || "ACTIVE";
+  const moduleTxt = t("module_label", { n: 1 }) || "MODULE 1";
 
   el.innerHTML = `
     <div class="home-competitive-badge">${escapeHTML(badgeActive)}</div>
@@ -5482,14 +5581,14 @@ function uiAlert({ title, message, okText } = {}) {
       <div class="home-competitive-hero-img" aria-hidden="true"></div>
     </div>
     <div class="home-competitive-body">
-      <div class="home-competitive-module">${escapeHTML(moduleTxt)}</div>
+      <div class="home-competitive-module js-home-comp-module">${escapeHTML(moduleTxt)}</div>
       <div class="home-competitive-title">${escapeHTML(title)}</div>
       <div class="home-competitive-meta">
         <span>${t("home_course_completion")}</span>
-        <span class="home-competitive-rank">${t("home_rank_label")}: 12</span>
+        <span class="home-competitive-rank js-home-comp-rank">${t("home_rank_label")}: —</span>
       </div>
       <div class="home-progress">
-        <div class="home-progress-fill" style="width:65%"></div>
+        <div class="home-progress-fill js-home-comp-fill" style="width:0%"></div>
       </div>
     </div>
    `;
