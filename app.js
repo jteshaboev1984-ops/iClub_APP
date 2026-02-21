@@ -8282,13 +8282,16 @@ function bindTabbar() {
     }
 
     // ✅ Требование: кнопка нижнего таба “Courses” всегда открывает All Subjects
-    if (tab === "courses") {
-      setTab("courses");
-      replaceCourses("all-subjects"); // сбрасывает stack + показывает all-subjects
-      updateTopbarForView("courses");
-      return;
-    }
+      if (tab === "courses") {
+        setTab("courses");
+        replaceCourses("all-subjects"); // сбрасывает stack + показывает all-subjects
 
+     // ✅ фикс: Subjects не обновлялись при смене UI-языка до перезагрузки
+        renderAllSubjects();
+
+        updateTopbarForView("courses");
+        return;
+      }
     setTab(tab);
   };
 
