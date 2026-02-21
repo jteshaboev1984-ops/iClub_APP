@@ -4704,11 +4704,26 @@ if (!ok) return;
 
       // 5) перерендер
       renderHome();
-      if (state.tab === "courses") renderAllSubjects();
-      renderProfileMain();
-      renderProfileSettings();
 
-      showToast(t("toast_content_lang_changed"));
+if (state.tab === "courses") {
+  const top = getCoursesTopScreen();
+  showCoursesScreen(top);
+
+  if (top === "all-subjects") renderAllSubjects();
+  else if (top === "subject-hub") renderSubjectHub();
+  else if (top === "lessons") renderLessons();
+  else if (top === "tours") { if (typeof renderToursStart === "function") renderToursStart(); }
+  else if (top === "books") { if (typeof renderBooks === "function") renderBooks(); }
+  else if (top === "my-recs") { if (typeof renderMyRecs === "function") renderMyRecs(); }
+  else if (top === "practice-start") { if (typeof renderPracticeStart === "function") renderPracticeStart(); }
+  else if (top === "practice-review") { if (typeof renderPracticeReview === "function") renderPracticeReview(); }
+  else if (top === "practice-recs") { if (typeof renderPracticeRecs === "function") renderPracticeRecs(); }
+}
+
+renderProfileMain();
+renderProfileSettings();
+
+showToast(t("toast_lang_updated"));
     };
   });
 }
