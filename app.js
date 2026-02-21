@@ -5466,7 +5466,12 @@ function uiAlert({ title, message, okText } = {}) {
       updateHomeCompetitiveCard(card, s.key);
     });
 
-    pinned.slice(0, 4).forEach((s, idx) => pinnedWrap.appendChild(homePinnedTileEl(s, idx)));
+    pinned.slice(0, 4).forEach((s, idx) => {
+      const tile = homePinnedTileEl(s, idx);
+      pinnedWrap.appendChild(tile);
+      // ✅ реальный прогресс X/Y (tours completed / total tours)
+      updateHomePinnedTile(tile, s.key);
+    });
   }
 
       // ===========================
@@ -5474,13 +5479,13 @@ function uiAlert({ title, message, okText } = {}) {
 // ===========================
 async function computeHomeCompetitiveStats(subjectKey) {
   try {
-    if (!window.sb) return { moduleNo: 1, progressPct: 0, rankNo: null };
+   if (!window.sb) return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
 
     const subjectId = await getSubjectIdByKey(subjectKey);
-    if (!subjectId) return { moduleNo: 1, progressPct: 0, rankNo: null };
+    if (!subjectId) return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
 
     const uid = await getAuthUid();
-    if (!uid) return { moduleNo: 1, progressPct: 0, rankNo: null };
+    if (!uid) return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
 
     // 1) tours for this subject
     const toursRes = await window.sb
@@ -5490,7 +5495,7 @@ async function computeHomeCompetitiveStats(subjectKey) {
       .order("tour_no", { ascending: true });
 
     const tours = Array.isArray(toursRes?.data) ? toursRes.data : [];
-    if (!tours.length) return { moduleNo: 1, progressPct: 0, rankNo: null };
+    if (!tours.length) return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
 
     const tourIds = tours.map(t => t.id);
 
@@ -5539,9 +5544,9 @@ async function computeHomeCompetitiveStats(subjectKey) {
       if (!rankRes?.error) rankNo = rankRes?.data?.rank_no ?? null;
     }
 
-    return { moduleNo, progressPct, rankNo };
+    return { moduleNo, progressPct, rankNo, completedCount, totalTours: tours.length };
   } catch {
-    return { moduleNo: 1, progressPct: 0, rankNo: null };
+    return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
   }
 }
 
