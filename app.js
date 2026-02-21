@@ -4600,10 +4600,17 @@ if (langWrap) {
       saveProfile(fresh);
 
       window.i18n?.setLang(nextLang);
-      applyStaticI18n?.();
+         applyStaticI18n?.();
 
-      renderHome();
-      if (state.tab === "courses") renderAllSubjects();
+         renderHome();
+      if (state.tab === "courses") {
+        renderAllSubjects();
+      try {
+       if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() === "subject-hub") {
+         renderSubjectHub();
+       }
+     } catch {}
+   }
       renderProfileMain();
       renderProfileSettings();
 
