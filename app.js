@@ -5567,7 +5567,24 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
     // silent
   }
 }
-    function homeCompetitiveCardEl(userSubject) {
+   async function updateHomePinnedTile(tileEl, subjectKey) {
+  try {
+    if (!tileEl) return;
+
+    const countEl = tileEl.querySelector(".js-home-pin-count");
+    if (!countEl) return;
+
+    const s = await computeHomeCompetitiveStats(subjectKey);
+    const done = Number(s?.completedCount || 0);
+    const total = Number(s?.totalTours || 0);
+
+    countEl.textContent = total > 0 ? `${done}/${total}` : "—/—";
+  } catch {
+    // silent
+  }
+} 
+   
+   function homeCompetitiveCardEl(userSubject) {
       const subj = subjectByKey(userSubject.key);
       const title = subjectTitle(userSubject.key, subj ? subj.title : userSubject.key);
 
@@ -5620,8 +5637,7 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
   function homePinnedTileEl(userSubject, index = 0) {
   const subj = subjectByKey(userSubject.key);
   const title = subjectTitle(userSubject.key, subj ? subj.title : userSubject.key);
-  const lessonCounts = ["8/12", "15/20", "4/10", "2/15"];
-  const lessons = lessonCounts[index % lessonCounts.length];
+    const lessons = "—/—";
 
   const el = document.createElement("button");
   el.type = "button";
@@ -5629,7 +5645,7 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
   el.innerHTML = `
     <div class="home-pinned-ico">📘</div>
     <div class="home-pinned-title">${escapeHTML(title)}</div>
-    <div class="home-pinned-meta">${lessons} ${t("home_lessons_label")}</div>
+    <div class="home-pinned-meta"><span class="js-home-pin-count">${escapeHTML(lessons)}</span> ${escapeHTML(t("home_lessons_label") || "")}</div>
   `;
 
   el.addEventListener("click", () => {
