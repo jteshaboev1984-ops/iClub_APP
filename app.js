@@ -5500,7 +5500,7 @@ function uiAlert({ title, message, okText } = {}) {
 
   function homePinnedTileEl(userSubject, index = 0) {
   const subj = subjectByKey(userSubject.key);
-  const title = subj ? subj.title : userSubject.key;
+  const title = subjectTitle(userSubject.key, subj ? subj.title : userSubject.key);
   const lessonCounts = ["8/12", "15/20", "4/10", "2/15"];
   const lessons = lessonCounts[index % lessonCounts.length];
 
