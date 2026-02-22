@@ -466,6 +466,23 @@ tour_violations_finish_toast: "Тур завершён: нарушения се�
       profile_settings_community_title: "Сообщество",
       profile_settings_community_sub: "@iClubuzofficial",
 
+       books_title: "Книги",
+books_subtitle: "Ресурсы по предмету",
+books_empty_static: "Список книг подключим через базу.",
+
+books_loading: "Загрузка…",
+books_pick_subject_first: "Сначала выберите предмет.",
+books_no_db: "Нет подключения к базе.",
+books_subject_not_found: "Предмет не найден в базе.",
+books_empty: "По этому предмету книги пока не добавлены.",
+books_open_pdf: "Открыть PDF",
+
+my_recs_screen_title: "Мои рекомендации",
+my_recs_screen_subtitle: "Сохранённые рекомендации по чтению",
+my_recs_empty_static: "Пока пусто.",
+my_recs_empty: "Пока пусто.",
+saved_at_label: "Сохранено",
+
       // Pinned hints
       profile_pinned_hint_has:
         "Закреплённые предметы уже ускоряют доступ. Дальше — стабильность.",
@@ -940,6 +957,23 @@ tour_violations_finish_toast: "Tur yakunlandi: sessiya buzilishlari",
       profile_settings_community_title: "Hamjamiyat",
       profile_settings_community_sub: "@iClubuzofficial",
 
+       books_title: "Kitoblar",
+books_subtitle: "Fan bo‘yicha resurslar",
+books_empty_static: "Kitoblar ro‘yxati bazadan ulanadi.",
+
+books_loading: "Yuklanmoqda…",
+books_pick_subject_first: "Avval fanni tanlang.",
+books_no_db: "Baza bilan ulanish yo‘q.",
+books_subject_not_found: "Fan bazada topilmadi.",
+books_empty: "Bu fan bo‘yicha kitoblar hali qo‘shilmagan.",
+books_open_pdf: "PDFni ochish",
+
+my_recs_screen_title: "Mening tavsiyalarim",
+my_recs_screen_subtitle: "O‘qish bo‘yicha saqlangan tavsiyalar",
+my_recs_empty_static: "Hozircha bo‘sh.",
+my_recs_empty: "Hozircha bo‘sh.",
+saved_at_label: "Saqlangan",
+
       // Pinned hints
       profile_pinned_hint_has:
         "Biriktirilgan fanlar tezkor kirishni ta’minlaydi. Barqarorlik — natijaning asosi.",
@@ -1383,6 +1417,23 @@ tour_violations_finish_toast: "Tour finished: session violations",
       profile_settings_notifications_sub: "System events",
       profile_settings_community_title: "Community",
       profile_settings_community_sub: "@iClubuzofficial",
+
+       books_title: "Books",
+books_subtitle: "Subject resources",
+books_empty_static: "Books list will be connected via the database.",
+
+books_loading: "Loading…",
+books_pick_subject_first: "Please choose a subject first.",
+books_no_db: "No database connection.",
+books_subject_not_found: "Subject not found in the database.",
+books_empty: "No books have been added for this subject yet.",
+books_open_pdf: "Open PDF",
+
+my_recs_screen_title: "My recommendations",
+my_recs_screen_subtitle: "Saved reading recommendations",
+my_recs_empty_static: "Nothing here yet.",
+my_recs_empty: "Nothing here yet.",
+saved_at_label: "Saved",
 
       profile_pinned_hint_has: "Pinned subjects already speed things up. Next: consistency.",
       profile_pinned_hint_empty: "Pin 1–3 subjects to make access noticeably faster."
