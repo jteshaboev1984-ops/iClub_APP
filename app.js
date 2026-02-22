@@ -4277,7 +4277,11 @@ function bindRatingsUI() {
     return;
   }
 
-  const targetTab = state.courses.entryTab || state.prevTab || "home";
+    let targetTab = state.courses.entryTab || state.prevTab || "home";
+
+  // ✅ Guard: back из Courses-стека не должен возвращать в базовый Courses (all-subjects без back)
+  if (targetTab === "courses") targetTab = "home";
+
   setTab(targetTab);
 }
 
@@ -5623,7 +5627,11 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
   e.stopPropagation();
 
   // ✅ Home: сразу открываем Subject Hub (без промежуточных туров)
-  state.courses.subjectKey = userSubject.key;
+    state.courses.subjectKey = userSubject.key;
+
+  // ✅ Home is the entry point for this flow
+  state.courses.entryTab = "home";
+
   saveState();
   setTab("courses");
   replaceCourses("subject-hub");
@@ -5649,7 +5657,11 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
   `;
 
   el.addEventListener("click", () => {
-    state.courses.subjectKey = userSubject.key;
+        state.courses.subjectKey = userSubject.key;
+
+    // ✅ Home is the entry point for this flow
+    state.courses.entryTab = "home";
+
     saveState();
     setTab("courses");
     replaceCourses("subject-hub");
