@@ -225,6 +225,8 @@ archive_empty: "Архив пуст. Значит, туры ещё свежие 
       profile_competitive_slots: "Слоты соревновательного режима",
       profile_active_slots_label: "Активные",
       profile_earned_credentials: "Достижения",
+      profile_my_recs_row_title: "Мои рекомендации",
+      profile_my_recs_row_sub: "Архив рекомендаций",
 
       cred_none_yet: "Пока нет",
       cred_progress_consistent: "{x} / 7 активных дней",
@@ -742,6 +744,8 @@ archive_empty: "Arxiv bo‘sh. Demak, turlar hali “yangi” — deadline oldid
       profile_competitive_slots: "Musobaqa rejimi slotlari",
       profile_active_slots_label: "Faol",
       profile_earned_credentials: "Yutuqlar",
+      profile_my_recs_row_title: "Tavsiyalarim",
+      profile_my_recs_row_sub: "Tavsiyalar arxivi",
 
       cred_none_yet: "Hozircha yo‘q",
       cred_progress_consistent: "{x} / 7 faol kun",
@@ -1258,6 +1262,8 @@ archive_empty: "Archive is empty. Tours are still fresh — like pre-deadline an
       profile_competitive_slots: "Competitive Slots",
       profile_active_slots_label: "Active",
       profile_earned_credentials: "Earned Credentials",
+      profile_my_recs_row_title: "My recommendations",
+      profile_my_recs_row_sub: "Recommendations archive",
 
       cred_none_yet: "No credentials yet",
       cred_progress_consistent: "{x} / 7 active days",
