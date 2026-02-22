@@ -300,27 +300,26 @@
     <div class="panel-row">
       <div class="mentor-avatar" aria-hidden="true"></div>
       <div class="panel-col">
-        <div class="panel-kicker">YOUR MENTOR</div>
-        <div class="panel-title">Ментор назначается</div>
-        <div class="muted small">Скоро появится профиль</div>
+        <div class="panel-kicker" data-i18n="mentor_kicker">YOUR MENTOR</div>
+        <div class="panel-title" data-i18n="mentor_assigning">Ментор назначается</div>
+        <div class="muted small" data-i18n="mentor_profile_soon">Скоро появится профиль</div>
       </div>
     </div>
   </div>
 </div>
 
   <div class="subject-hub-tabs" role="tablist" aria-label="Subject hub tabs">
-    <button class="hub-tab is-active" type="button" data-action="open-lessons">Уроки</button>
-    <button class="hub-tab" type="button" data-action="open-practice">Практика</button>
-    <button class="hub-tab" type="button" data-action="open-tours">Туры</button>
-    <button class="hub-tab" type="button" data-action="open-books">Ресурсы</button>
-  </div>
-
+  <button class="hub-tab is-active" type="button" data-action="open-lessons" data-i18n="home_lessons_label">Уроки</button>
+  <button class="hub-tab" type="button" data-action="open-practice" data-i18n="practice">Практика</button>
+  <button class="hub-tab" type="button" data-action="open-tours" data-i18n="tours_title">Туры</button>
+  <button class="hub-tab" type="button" data-action="open-books" data-i18n="resources_title">Ресурсы</button>
+</div>
     <div class="subject-hub-list subject-hub-actions">
   <button class="settings-nav" type="button" data-action="open-lessons">
     <span class="settings-nav-ico">🎬</span>
     <span class="settings-nav-text">
-      <span class="settings-nav-title">Видео-уроки</span>
-      <span class="settings-nav-sub muted small">Смотреть или пропустить (“я знаю тему”)</span>
+      <span class="settings-nav-title" data-i18n="hub_video_lessons_title">Видео-уроки</span>
+      <span class="settings-nav-sub muted small" data-i18n="hub_video_lessons_sub">Смотреть или пропустить (“я знаю тему”)</span>
     </span>
     <span class="settings-nav-arrow">›</span>
   </button>
@@ -328,23 +327,23 @@
   <button class="settings-nav" type="button" data-action="open-my-recommendations">
     <span class="settings-nav-ico">📚</span>
     <span class="settings-nav-text">
-      <span class="settings-nav-title">Мои рекомендации</span>
-      <span class="settings-nav-sub muted small">Повторный доступ к чтению</span>
+      <span class="settings-nav-title" data-i18n="practice_my_recs_title">Мои рекомендации</span>
+      <span class="settings-nav-sub muted small" data-i18n="hub_my_recs_sub">Повторный доступ к чтению</span>
     </span>
     <span class="settings-nav-arrow">›</span>
   </button>
 </div>
 
   <div class="section" style="margin-top:14px">
-    <div class="h2">Системные</div>
+    <div class="h2" data-i18n="hub_system_section">Системные</div>
   </div>
 
   <div class="subject-hub-list">
   <button class="settings-nav" type="button" data-action="open-certificates">
     <span class="settings-nav-ico">🎓</span>
     <span class="settings-nav-text">
-      <span class="settings-nav-title">Сертификаты</span>
-      <span class="settings-nav-sub muted small">Tours & final results</span>
+      <span class="settings-nav-title" data-i18n="profile_certificates_title">Сертификаты</span>
+      <span class="settings-nav-sub muted small" data-i18n="profile_certificates_row_sub">Tours & final results</span>
     </span>
     <span class="settings-nav-arrow">›</span>
   </button>
@@ -352,8 +351,8 @@
   <button class="settings-nav" type="button" data-action="open-archive">
     <span class="settings-nav-ico">🗂️</span>
     <span class="settings-nav-text">
-      <span class="settings-nav-title">Архив туров</span>
-      <span class="settings-nav-sub muted small">Прошедшие туры</span>
+      <span class="settings-nav-title" data-i18n="tours_archive_btn">Архив туров</span>
+      <span class="settings-nav-sub muted small" data-i18n="hub_archive_sub">Прошедшие туры</span>
     </span>
     <span class="settings-nav-arrow">›</span>
   </button>
@@ -363,8 +362,8 @@
   <button class="settings-nav" type="button" data-action="open-all-subjects">
     <span class="settings-nav-ico">🧭</span>
     <span class="settings-nav-text">
-      <span class="settings-nav-title">Все предметы</span>
-      <span class="settings-nav-sub muted small">Каталог предметов</span>
+      <span class="settings-nav-title" data-i18n="hub_all_subjects_title">Все предметы</span>
+      <span class="settings-nav-sub muted small" data-i18n="hub_all_subjects_sub">Каталог предметов</span>
     </span>
     <span class="settings-nav-arrow">›</span>
   </button>
@@ -374,9 +373,9 @@
             <!-- Lessons List -->
             <section id="courses-lessons" class="stack-screen" data-stack="courses" data-screen="lessons">
               <div class="section">
-                <div class="h1">Уроки</div>
-                <div class="muted">Список видео-уроков</div>
-              </div>
+                <div class="h1" data-i18n="home_lessons_label">Уроки</div>
+              <div class="muted" data-i18n="lessons_list_subtitle">Список видео-уроков</div>
+            </div>
               <div id="lessons-list" class="list">
                 <!-- filled by app.js -->
               </div>
