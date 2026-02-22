@@ -353,6 +353,7 @@ archive_empty: "Архив пуст. Значит, туры ещё свежие 
 
       progress_trend: "Тренд прогресса",
       open_tour_btn: "Открыть тур",
+      tours_archive_locked_toast: "🔒 Архив закрыт. Сначала завершите активный тур.",
 
       tours_active_now: "Активный тур сейчас",
       tour_unavailable_title: "Тур недоступен",
@@ -871,7 +872,8 @@ archive_empty: "Arxiv bo‘sh. Demak, turlar hali “yangi” — deadline oldid
       practice_nothing_to_save: "Xato yo‘q — saqlash shart emas.",
 
       progress_trend: "Progress trendlari",
-open_tour_btn: "Turni ochish",
+      open_tour_btn: "Turni ochish",
+      tours_archive_locked_toast: "🔒 Arxiv yopiq. Avval faol turni yakunlang.",
 
 tours_active_now: "Hozir faol tur",
 tour_unavailable_title: "Tur mavjud emas",
@@ -1381,6 +1383,7 @@ archive_empty: "Archive is empty. Tours are still fresh — like pre-deadline an
 
       progress_trend: "Progress trend",
       open_tour_btn: "Open tour",
+      tours_archive_locked_toast: "🔒 Archive is locked. Finish the active tour first.",
 
       tours_active_now: "Active tour now",
       tour_unavailable_title: "Tour unavailable",
