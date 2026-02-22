@@ -6457,66 +6457,30 @@ state.courses.activeTourNo = activeTour?.tour_no || null;
 // label
 if (tourLabelEl) {
   tourLabelEl.textContent = activeTour
-    ? `${t("tours_tour_label")} ${activeTour.tour_no}`
-    : (t("tours_unavailable_title") || "Туры пока недоступны");
+    ? `${tr("tours_tour_label", "Тур")} ${activeTour.tour_no}`
+    : tr("tours_status_title", "Туры пока недоступны");
 }
 
-   // Status + Open button (DB)
-   if (!activeTour) {
-     if (statusTitle) statusTitle.textContent = t("tours_unavailable_title") || "Туры пока недоступны";
+// Status + Open button (DB)
+if (!activeTour) {
+  if (statusTitle) statusTitle.textContent = tr("tours_status_title", "Туры пока недоступны");
 
-     // если есть ошибка чтения туров — показываем человеческий текст (а не “как будто туров нет”)
-     const baseDesc = t("tours_unavailable_desc") || "Даты и список туров появятся здесь после публикации.";
-     const errHint = toursErr ? " (нет доступа к базе туров)" : "";
-     if (statusDesc) statusDesc.textContent = baseDesc + errHint;
+  // если есть ошибка чтения туров — показываем человеческий текст (а не “как будто туров нет”)
+  const baseDesc = tr("tours_status_desc", "Даты и список туров появятся здесь после публикации.");
+  const errHint = toursErr ? " (нет доступа к базе туров)" : "";
+  if (statusDesc) statusDesc.textContent = baseDesc + errHint;
 
-     if (openBtn) openBtn.classList.add("hidden");
-      } else {
-     const sd = activeTour.start_date ? String(activeTour.start_date) : null;
-     const ed = activeTour.end_date ? String(activeTour.end_date) : null;
-     const dateTxt = (sd || ed) ? `${sd || "—"} → ${ed || "—"}` : "";
-
-     // default: show active info
-     if (statusTitle) statusTitle.textContent = tr("tours_active_now", "Активный тур сейчас");
-     if (statusDesc) statusDesc.textContent =
-       `${tr("tours_tour_label", "Тур")} ${activeTour.tour_no}${dateTxt ? " • " + dateTxt : ""}`;
-
-     // ✅ NEW: if already attempted — show it here and hide "Open tour"
-     let alreadyAttempted = false;
-     try {
-       const uid = await getAuthUid();
-       if (uid && typeof hasTourAttempt === "function" && activeTour?.id) {
-         alreadyAttempted = await hasTourAttempt(uid, activeTour.id);
-       }
-     } catch {}
-
-     if (alreadyAttempted) {
-       if (statusTitle) statusTitle.textContent = tr("tour_unavailable_title", "Тур недоступен");
-       if (statusDesc) statusDesc.textContent = tr(
-         "tour_unavailable_already_attempted",
-         "Вы уже завершили этот тур. Повторное прохождение недоступно."
-       );
-
-       if (openBtn) {
-         openBtn.classList.add("hidden");
-         openBtn.style.display = "none";
-         openBtn.onclick = null;
-       }
-     } else {
-       if (openBtn) {
-         // ✅ show start button for active tour
-         openBtn.classList.remove("hidden");
-         openBtn.style.display = "";
-         openBtn.disabled = false;
-
-         // Button title (fallback if missing in i18n)
-         openBtn.textContent = tr("tours_open_btn", "Открыть тур");
-
-         // start flow
-         openBtn.onclick = () => openTourRules();
-       }
-     }
-   }
+  if (openBtn) openBtn.classList.add("hidden");
+} else {
+  ...
+  if (openBtn) {
+    ...
+    // Button title (fallback if missing in i18n)
+    openBtn.textContent = tr("open_tour_btn", "Открыть тур");
+    ...
+  }
+ }
+}
       try { await renderToursHistorySummary(subjectId); } catch {}
      
       saveState();
