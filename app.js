@@ -7961,7 +7961,7 @@ async function updateTourAttempt(attemptId, patch) {
     const warnPill = $("#tour-anti-cheat"); // legacy id might exist elsewhere
     if (warnPill) warnPill.style.display = "inline-flex";
 
-    showToast(`Warning: session monitoring (${ctx.violations}/${TOUR_CONFIG.maxViolations})`);
+    showToast(t("tour_violation_toast", { v: ctx.violations, max: TOUR_CONFIG.maxViolations }));
   }
 
   // ---------- Render ----------
@@ -7973,7 +7973,7 @@ async function updateTourAttempt(attemptId, patch) {
     const qNo = Math.min(total, ctx.index + 1);
 
     const qof = $("#tour-qof");
-    if (qof) qof.textContent = `Question ${qNo} of ${total}`;
+    if (qof) qof.textContent = t("tour_question_of", { q: qNo, total });
 
     const pct = Math.round((qNo / total) * 100);
     const pctEl = $("#tour-progress-pct");
@@ -8325,14 +8325,18 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
   // result meta
   const meta = $("#tour-result-meta");
   if (meta && ctx) {
-    meta.textContent = `Score: ${ctx.correct}/${TOUR_CONFIG.total} • Violations: ${ctx.violations || 0}`;
+    meta.textContent = t("tour_result_meta", {
+        score: ctx.correct,
+        total: TOUR_CONFIG.total,
+        v: (ctx.violations || 0)
+      });
   }
 
   if (ctx?.isArchive) {
-    showToast("Архивный тур: вне рейтинга");
-  } else if (reason === "violations") {
-    showToast("Tour finished: session violations");
-  }
+     showToast(t("tour_archive_toast"));
+   } else if (reason === "violations") {
+     showToast(t("tour_violations_finish_toast"));
+   }
 
   // Earned Credentials — tour finished
   try {
