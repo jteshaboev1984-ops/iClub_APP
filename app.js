@@ -8812,35 +8812,35 @@ if (state.tab === "profile") {
       if (action === "open-community") { openGlobal("community"); return; }
       if (action === "open-about") { openGlobal("about"); return; }
       if (action === "open-certificates") { openGlobal("certificates"); return; }
-      if (action === "open-archive") {
-  // Prefer DB truth. If unknown (no access / no sb) — fallback to local schedule.
-  try {
-    if (window.sb) {
-      showToast("Проверяем доступность архива…");
-      dbHasAnyActiveTourNow().then((hasActive) => {
-        // if cannot determine — do NOT open (safer than violating rules)
-        if (hasActive === null) {
-          showToast("Архив временно недоступен (нет доступа к базе туров).");
-          return;
-        }
-        if (hasActive) {
-          showToast("Архив откроется после завершения активного тура.");
+           if (action === "open-archive") {
+        // Prefer DB truth. If unknown (no access / no sb) — fallback to local schedule.
+        try {
+          if (window.sb) {
+            showToast(t("archive_checking_toast"));
+            dbHasAnyActiveTourNow().then((hasActive) => {
+              // if cannot determine — do NOT open (safer than violating rules)
+              if (hasActive === null) {
+                showToast(t("archive_unavailable_toast"));
+                return;
+              }
+              if (hasActive) {
+                showToast(t("archive_unlock_after_toast"));
+                return;
+              }
+              openGlobal("archive");
+            });
+            return;
+          }
+        } catch {}
+
+        // fallback: local schedule
+        if (!canOpenArchiveNow()) {
+          showToast(t("archive_unlock_after_toast"));
           return;
         }
         openGlobal("archive");
-      });
-      return;
-    }
-  } catch {}
-
-  // fallback: local schedule
-  if (!canOpenArchiveNow()) {
-    showToast("Архив откроется после завершения активного тура.");
-    return;
-  }
-  openGlobal("archive");
-  return;
-}
+        return;
+      }
 
          // All Subjects from anywhere (Home tile, etc.)
 if (action === "open-all-subjects") {
