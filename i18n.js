@@ -390,6 +390,40 @@
       // Tour rules
       tour_rules_title: "Правила тура",
       tour_rules_accept_required: "Подтвердите согласие с правилами, чтобы начать тур.",
+      tour_rules_subtitle: "Перед стартом необходимо согласие",
+tour_rules_important: "Важное",
+tour_rules_li1: "Одна попытка, без пауз",
+tour_rules_li2: "Назад-вперёд запрещено",
+tour_rules_li3: "Античит: 2 нарушения → завершение",
+tour_rules_li4: "Автосохранение при таймауте",
+tour_rules_accept: "Я ознакомился и согласен с правилами",
+tour_start_btn: "Начать тур",
+
+tour_progress_label: "Прогресс тура",
+tour_overall_tour: "ТУР — ОБЩЕЕ ВРЕМЯ",
+tour_question_time: "ВРЕМЯ НА ВОПРОС",
+tour_monitoring_active: "СЕССИЯ ПОД МОНИТОРИНГОМ",
+tour_next_question: "Следующий вопрос →",
+
+tour_result_title: "Результат тура",
+tour_review_title: "Разбор тура",
+tour_review_sub: "Ответы, объяснения, ошибки",
+tour_certificate_title: "Сертификат",
+tour_certificate_sub: "Если доступен по правилам",
+
+tour_review_screen_title: "Разбор тура",
+tour_review_screen_sub: "Ответы, объяснения и работа над ошибками",
+tour_review_empty: "Разбор появится после подключения данных тура.",
+
+back_to_result: "Назад к результату",
+to_subject: "К предмету",
+open_ratings: "Рейтинг",
+
+tour_question_of: "Вопрос {q} из {total}",
+tour_result_meta: "Результат: {score}/{total} • Нарушения: {v}",
+tour_violation_toast: "Внимание: мониторинг сессии ({v}/{max})",
+tour_archive_toast: "Архивный тур: вне рейтинга",
+tour_violations_finish_toast: "Тур завершён: нарушения сессии",
 
       // Profile language blocks
       profile_ui_language_title: "Язык интерфейса",
@@ -828,8 +862,41 @@
 
       // Tour rules
       tour_rules_title: "Tur qoidalari",
-      tour_rules_accept_required:
-        "Tur boshlash uchun qoidalarga rozilikni tasdiqlang.",
+      tour_rules_accept_required: "Tur boshlash uchun qoidalarga rozilikni tasdiqlang.",
+       tour_rules_subtitle: "Boshlashdan oldin rozilik kerak",
+tour_rules_important: "Muhim",
+tour_rules_li1: "Bitta urinish, pauzasiz",
+tour_rules_li2: "Orqaga-oldinga taqiqlangan",
+tour_rules_li3: "Anti-cheat: 2 buzilish → yakun",
+tour_rules_li4: "Vaqt tugasa avtomatik saqlanadi",
+tour_rules_accept: "Qoidalar bilan tanishdim va roziman",
+tour_start_btn: "Turni boshlash",
+
+tour_progress_label: "Tur jarayoni",
+tour_overall_tour: "TUR — UMUMIY VAQT",
+tour_question_time: "SAVOL VAQTI",
+tour_monitoring_active: "SESSIYA NAZORATDA",
+tour_next_question: "Keyingi savol →",
+
+tour_result_title: "Tur natijasi",
+tour_review_title: "Tur tahlili",
+tour_review_sub: "Javoblar, izohlar, xatolar",
+tour_certificate_title: "Sertifikat",
+tour_certificate_sub: "Qoidalarga ko‘ra mavjud bo‘lsa",
+
+tour_review_screen_title: "Tur tahlili",
+tour_review_screen_sub: "Javoblar, izohlar va xatolar ustida ishlash",
+tour_review_empty: "Tur ma’lumotlari ulangach tahlil ko‘rinadi.",
+
+back_to_result: "Natijaga qaytish",
+to_subject: "Fanga",
+open_ratings: "Reyting",
+
+tour_question_of: "{q}/{total} savol",
+tour_result_meta: "Natija: {score}/{total} • Buzilish: {v}",
+tour_violation_toast: "Ogohlantirish: sessiya nazorati ({v}/{max})",
+tour_archive_toast: "Arxiv tur: reytingga kirmaydi",
+tour_violations_finish_toast: "Tur yakunlandi: sessiya buzilishlari",
 
       // Profile language blocks
       profile_ui_language_title: "Interfeys tili",
@@ -1246,6 +1313,40 @@
 
       tour_rules_title: "Tour rules",
       tour_rules_accept_required: "Please accept the rules to start the tour.",
+       tour_rules_subtitle: "Consent required before starting",
+tour_rules_important: "Important",
+tour_rules_li1: "One attempt, no pauses",
+tour_rules_li2: "Back/forward is not allowed",
+tour_rules_li3: "Anti-cheat: 2 violations → finish",
+tour_rules_li4: "Auto-save on timeout",
+tour_rules_accept: "I have read and accept the rules",
+tour_start_btn: "Start tour",
+
+tour_progress_label: "Tour Progress",
+tour_overall_tour: "OVERALL TOUR",
+tour_question_time: "QUESTION TIME",
+tour_monitoring_active: "SESSION MONITORING ACTIVE",
+tour_next_question: "Next Question →",
+
+tour_result_title: "Tour result",
+tour_review_title: "Tour review",
+tour_review_sub: "Answers, explanations, mistakes",
+tour_certificate_title: "Certificate",
+tour_certificate_sub: "If available by rules",
+
+tour_review_screen_title: "Tour review",
+tour_review_screen_sub: "Answers, explanations and work on mistakes",
+tour_review_empty: "Review will appear after tour data is connected.",
+
+back_to_result: "Back to result",
+to_subject: "To subject",
+open_ratings: "Ratings",
+
+tour_question_of: "Question {q} of {total}",
+tour_result_meta: "Score: {score}/{total} • Violations: {v}",
+tour_violation_toast: "Warning: session monitoring ({v}/{max})",
+tour_archive_toast: "Archived tour: not in ratings",
+tour_violations_finish_toast: "Tour finished: session violations",
 
       profile_ui_language_title: "Interface Language",
       profile_ui_language_desc:
