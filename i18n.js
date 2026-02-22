@@ -27,6 +27,9 @@ about_card_body: "Здесь будет официальный текст из �
 archive_title: "Архив",
 archive_sub: "Прошедшие туры (только после завершения активного тура).",
 archive_empty: "Архив пуст. Значит, туры ещё свежие — как ваша тревога перед дедлайном.",
+archive_checking_toast: "Проверяем доступность архива…",
+archive_unavailable_toast: "Архив временно недоступен. Попробуйте позже.",
+archive_unlock_after_toast: "Архив откроется после завершения активного тура.",
        
       // Ratings
       ratings_subject: "Предмет",
@@ -546,6 +549,9 @@ about_card_body: "Bu yerda loyiha hujjatidagi rasmiy matn bo‘ladi: maqsadlar, 
 archive_title: "Arxiv",
 archive_sub: "O‘tgan turlar (faol tur yakunlangandan keyin).",
 archive_empty: "Arxiv bo‘sh. Demak, turlar hali “yangi” — deadline oldidagi hayajoningiz kabi.",
+archive_checking_toast: "Arxiv mavjudligi tekshirilmoqda…",
+archive_unavailable_toast: "Arxiv vaqtincha mavjud emas. Keyinroq urinib ko‘ring.",
+archive_unlock_after_toast: "Arxiv faol tur yakunlangandan keyin ochiladi.",
       // Ratings
       ratings_subject: "Fan",
       ratings_tour: "Tur",
@@ -1071,6 +1077,9 @@ about_card_body: "Official project text will appear here: goals, participation r
 archive_title: "Archive",
 archive_sub: "Past tours (only after the active tour is finished).",
 archive_empty: "Archive is empty. Tours are still fresh — like pre-deadline anxiety.",
+archive_checking_toast: "Checking archive availability…",
+archive_unavailable_toast: "Archive is temporarily unavailable. Please try again later.",
+archive_unlock_after_toast: "Archive will open after you finish the active tour.",
 
       // Ratings
       ratings_subject: "Subject",
