@@ -42,6 +42,23 @@
 
       subject_hub_title: "Предмет",
       subject_hub_meta: "Учебный / Соревновательный",
+      resources_title: "Ресурсы",
+
+      mentor_kicker: "ВАШ МЕНТОР",
+      mentor_assigning: "Ментор назначается",
+      mentor_profile_soon: "Скоро появится профиль",
+
+      hub_video_lessons_title: "Видео-уроки",
+      hub_video_lessons_sub: "Смотреть или пропустить (“я знаю тему”)",
+      hub_my_recs_sub: "Повторный доступ к чтению",
+
+      hub_system_section: "Системные",
+      hub_archive_sub: "Прошедшие туры",
+
+      hub_all_subjects_title: "Все предметы",
+      hub_all_subjects_sub: "Каталог предметов",
+
+      lessons_list_subtitle: "Список видео-уроков", 
 
       profile_metric_competitive: "Соревновательный",
       profile_metric_study: "Учебный",
@@ -457,6 +474,23 @@
 
       subject_hub_title: "Fan",
       subject_hub_meta: "O‘quv / Musobaqa",
+      resources_title: "Resurslar",
+
+      mentor_kicker: "MENTORINGIZ",
+      mentor_assigning: "Mentor tayinlanmoqda",
+      mentor_profile_soon: "Tez orada profil paydo bo‘ladi",
+
+      hub_video_lessons_title: "Video darslar",
+      hub_video_lessons_sub: "Ko‘rish yoki o‘tkazib yuborish (“mavzuni bilaman”)",
+      hub_my_recs_sub: "Qayta ko‘rish uchun ochish",
+
+      hub_system_section: "Tizim",
+      hub_archive_sub: "O‘tgan turlar",
+
+      hub_all_subjects_title: "Barcha fanlar",
+      hub_all_subjects_sub: "Fanlar katalogi",
+
+      lessons_list_subtitle: "Video darslar ro‘yxati", 
 
       profile_metric_competitive: "Musobaqa",
       profile_metric_study: "O‘quv",
@@ -878,6 +912,23 @@
 
       subject_hub_title: "Subject",
       subject_hub_meta: "Study / Competitive",
+      resources_title: "Resources",
+
+      mentor_kicker: "YOUR MENTOR",
+      mentor_assigning: "Mentor will be assigned",
+      mentor_profile_soon: "Profile coming soon",
+
+      hub_video_lessons_title: "Video lessons",
+      hub_video_lessons_sub: "Watch or skip (“I know this topic”)",
+      hub_my_recs_sub: "Re-open for review",
+
+      hub_system_section: "System",
+      hub_archive_sub: "Past tours",
+
+      hub_all_subjects_title: "All subjects",
+      hub_all_subjects_sub: "Subjects catalog",
+
+      lessons_list_subtitle: "Video lessons list",
 
       profile_metric_competitive: "Competitive",
       profile_metric_study: "Study",
