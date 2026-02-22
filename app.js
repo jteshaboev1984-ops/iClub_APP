@@ -9070,14 +9070,14 @@ if (action === "practice-recommendations") {
       }
 
      if (action === "open-archive-tours") {
-     if (!canOpenArchiveNow()) {
-       showToast("Архив откроется после завершения активного тура.");
-       return;
-     }
+  if (!canOpenArchiveNow()) {
+    showToast(tr("tours_archive_locked_toast", "🔒 Архив закрыт. Сначала завершите активный тур."));
+    return;
+  }
   // пока архив — глобальный экран
-     openGlobal("archive");
-        return;
-      }
+  openGlobal("archive");
+  return;
+}
 
       if (action === "tour-start") {
         openTourQuiz();
