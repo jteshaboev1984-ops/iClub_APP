@@ -8,10 +8,11 @@
 
   const DICT = {
     ru: {
-      app_name: "iClub",
-      loading: "Загрузка…",
-      saving: "Сохранение…",
-
+  app_name: "iClub",
+  loading: "Загрузка…",
+  loading_desc: "Получаем список туров…",
+  saving: "Сохранение…",
+       
       // Ratings
       ratings_subject: "Предмет",
       ratings_tour: "Тур",
@@ -328,8 +329,12 @@
       progress_trend: "Тренд прогресса",
       open_tour_btn: "Открыть тур",
 
-      // Tours
-      tours_tour_label: "Тур",
+      tours_active_now: "Активный тур сейчас",
+      tour_unavailable_title: "Тур недоступен",
+      tour_unavailable_already_attempted: "Вы уже завершили этот тур. Повторное прохождение недоступно.",
+
+// Tours
+tours_tour_label: "Тур",
       tours_best_result: "Лучший результат",
       tours_best_time: "Время лучшего результата",
       tours_best_time_of_best_result: "Время лучшего результата",
@@ -491,10 +496,10 @@ saved_at_label: "Сохранено",
     },
 
     uz: {
-      app_name: "iClub",
-      loading: "Yuklanmoqda…",
-      saving: "Saqlanmoqda…",
-
+        app_name: "iClub",
+        loading: "Yuklanmoqda…",
+        loading_desc: "Turlar ro‘yxati yuklanmoqda…",
+        saving: "Saqlanmoqda…",
       // Ratings
       ratings_subject: "Fan",
       ratings_tour: "Tur",
@@ -812,10 +817,14 @@ saved_at_label: "Сохранено",
       practice_nothing_to_save: "Xato yo‘q — saqlash shart emas.",
 
       progress_trend: "Progress trendlari",
-      open_tour_btn: "Turni ochish",
+open_tour_btn: "Turni ochish",
 
-      // Tours
-      tours_tour_label: "Tur",
+tours_active_now: "Hozir faol tur",
+tour_unavailable_title: "Tur mavjud emas",
+tour_unavailable_already_attempted: "Siz bu turni allaqachon yakunlagansiz. Qayta topshirish mumkin emas.",
+
+// Tours
+tours_tour_label: "Tur",
       tours_best_result: "Eng yaxshi natija",
       tours_best_time: "Eng yaxshi natija vaqti",
       tours_best_time_of_best_result: "Eng yaxshi natija vaqti",
@@ -982,9 +991,10 @@ saved_at_label: "Saqlangan",
     },
 
     en: {
-      app_name: "iClub",
-      loading: "Loading…",
-      saving: "Saving…",
+  app_name: "iClub",
+  loading: "Loading…",
+  loading_desc: "Fetching tour list…",
+  saving: "Saving…",
 
       // Ratings
       ratings_subject: "Subject",
@@ -1288,6 +1298,11 @@ saved_at_label: "Saqlangan",
       progress_trend: "Progress trend",
       open_tour_btn: "Open tour",
 
+      tours_active_now: "Active tour now",
+      tour_unavailable_title: "Tour unavailable",
+      tour_unavailable_already_attempted: "You have already completed this tour. Retakes are not available.",
+
+      // Tours
       tours_tour_label: "Tour",
       tours_best_result: "Best result",
       tours_best_time: "Best time",
