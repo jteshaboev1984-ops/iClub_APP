@@ -7452,7 +7452,7 @@ function renderMyRecs() {
   const list = store?.bySubject?.[subjectKey] || [];
 
   if (!list.length) {
-    wrap.innerHTML = `<div class="empty muted">Пока пусто.</div>`;
+    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("my_recs_empty") || "")}</div>`;
     return;
   }
 
@@ -7462,27 +7462,26 @@ function renderMyRecs() {
     el.className = "list-item";
     el.innerHTML = `
       <div style="font-weight:800">${escapeHTML(item.topic)}</div>
-      <div class="muted small">Сохранено: ${escapeHTML(formatDateTime(item.ts))}</div>
+      <div class="muted small">${escapeHTML(t("saved_at_label") || "")}: ${escapeHTML(formatDateTime(item.ts))}</div>
     `;
     wrap.appendChild(el);
   });
 }
-
 async function renderBooks() {
   const wrap = $("#books-list");
   if (!wrap) return;
 
   // show loading
-  wrap.innerHTML = `<div class="empty muted">Загрузка…</div>`;
+  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_loading") || "")}</div>`;
 
   const subjectKey = state?.courses?.subjectKey ? String(state.courses.subjectKey) : "";
   if (!subjectKey) {
-    wrap.innerHTML = `<div class="empty muted">Сначала выберите предмет.</div>`;
+    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_pick_subject_first") || "")}</div>`;
     return;
   }
 
   if (!window.sb) {
-    wrap.innerHTML = `<div class="empty muted">Нет подключения к базе.</div>`;
+    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_no_db") || "")}</div>`;
     return;
   }
 
@@ -7506,7 +7505,7 @@ async function renderBooks() {
   }
 
   if (!subjectId) {
-    wrap.innerHTML = `<div class="empty muted">Предмет не найден в базе.</div>`;
+    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_subject_not_found") || "")}</div>`;
     return;
   }
 
@@ -7524,7 +7523,7 @@ async function renderBooks() {
   } catch {}
 
   if (!rows.length) {
-    wrap.innerHTML = `<div class="empty muted">По этому предмету книги пока не добавлены.</div>`;
+    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_empty") || "")}</div>`;
     return;
   }
 
@@ -7538,7 +7537,7 @@ async function renderBooks() {
       <span class="settings-nav-ico">📘</span>
       <span class="settings-nav-text">
         <span class="settings-nav-title">${escapeHTML(b.title || "Book")}</span>
-        <span class="settings-nav-sub muted small">Открыть PDF</span>
+        <span class="settings-nav-sub muted small">${escapeHTML(t("books_open_pdf") || "")}</span>
       </span>
       <span class="settings-nav-arrow">›</span>
     `;
