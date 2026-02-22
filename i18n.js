@@ -39,6 +39,7 @@
       ratings_no_participants: "Нет участников.",
 
       courses_title: "Курсы",
+      btn_detach: "Открепить",
 
       subject_hub_title: "Предмет",
       subject_hub_meta: "Учебный / Соревновательный",
@@ -471,6 +472,7 @@
       ratings_no_participants: "Ishtirokchilar yo‘q.",
 
       courses_title: "Kurslar",
+      btn_detach: "Biriktirishni yechish",
 
       subject_hub_title: "Fan",
       subject_hub_meta: "O‘quv / Musobaqa",
@@ -909,6 +911,7 @@
       ratings_no_participants: "No participants.",
 
       courses_title: "Courses",
+      btn_detach: "Unpin",
 
       subject_hub_title: "Subject",
       subject_hub_meta: "Study / Competitive",
