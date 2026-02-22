@@ -282,6 +282,7 @@ archive_empty: "Архив пуст. Значит, туры ещё свежие 
       profile_settings_more: "Ещё",
       profile_settings_community: "Сообщество",
       profile_settings_about: "О проекте",
+      profile_settings_about_sub: "Правила и организаторы",
 
       // Courses toggles / detach
       course_competitive_detach_title: "Отключить соревновательный режим?",
@@ -798,7 +799,7 @@ archive_empty: "Arxiv bo‘sh. Demak, turlar hali “yangi” — deadline oldid
       profile_settings_more: "Qo‘shimcha",
       profile_settings_community: "Hamjamiyat",
       profile_settings_about: "Loyiha haqida",
-
+      profile_settings_about_sub: "Qoidalar va tashkilotchilar",
       // Courses toggles / detach
       course_competitive_detach_title: "Musobaqa rejimini o‘chirish?",
       course_competitive_detach_message:
@@ -1310,6 +1311,7 @@ archive_empty: "Archive is empty. Tours are still fresh — like pre-deadline an
       profile_settings_more: "More",
       profile_settings_community: "Community",
       profile_settings_about: "About project",
+      profile_settings_about_sub: "Rules and organizers",
 
       course_competitive_detach_title: "Disable Competitive?",
       course_competitive_detach_message:
