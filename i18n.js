@@ -12,6 +12,21 @@
   loading: "Загрузка…",
   loading_desc: "Получаем список туров…",
   saving: "Сохранение…",
+
+       community_title: "Комьюнити",
+community_sub: "Официальный канал и чат обсуждений.",
+community_channel_title: "Канал",
+community_chat_title: "Чат обсуждений",
+community_join: "Присоединиться",
+
+about_title: "О проекте",
+about_sub: "Кратко, по делу, без “воды” (её у нас достаточно в задачах по физике).",
+about_card_title: "iClub",
+about_card_body: "Здесь будет официальный текст из документа проекта: цели, правила участия, форматы туров, условия сертификатов и рейтингов.",
+
+archive_title: "Архив",
+archive_sub: "Прошедшие туры (только после завершения активного тура).",
+archive_empty: "Архив пуст. Значит, туры ещё свежие — как ваша тревога перед дедлайном.",
        
       // Ratings
       ratings_subject: "Предмет",
@@ -512,6 +527,21 @@ saved_at_label: "Сохранено",
         loading: "Yuklanmoqda…",
         loading_desc: "Turlar ro‘yxati yuklanmoqda…",
         saving: "Saqlanmoqda…",
+
+       community_title: "Hamjamiyat",
+community_sub: "Rasmiy kanal va muhokama chati.",
+community_channel_title: "Kanal",
+community_chat_title: "Muhokama chati",
+community_join: "Qo‘shilish",
+
+about_title: "Loyiha haqida",
+about_sub: "Qisqa va aniq. “Suv”siz (u esa bizda fizika masalalarida yetarli).",
+about_card_title: "iClub",
+about_card_body: "Bu yerda loyiha hujjatidagi rasmiy matn bo‘ladi: maqsadlar, qatnashish qoidalari, tur formatlari, sertifikat va reyting shartlari.",
+
+archive_title: "Arxiv",
+archive_sub: "O‘tgan turlar (faol tur yakunlangandan keyin).",
+archive_empty: "Arxiv bo‘sh. Demak, turlar hali “yangi” — deadline oldidagi hayajoningiz kabi.",
       // Ratings
       ratings_subject: "Fan",
       ratings_tour: "Tur",
@@ -1019,6 +1049,21 @@ saved_at_label: "Saqlangan",
   loading: "Loading…",
   loading_desc: "Fetching tour list…",
   saving: "Saving…",
+
+       community_title: "Community",
+community_sub: "Official channel and discussion chat.",
+community_channel_title: "Channel",
+community_chat_title: "Discussion chat",
+community_join: "Join",
+
+about_title: "About",
+about_sub: "Short and clear. No “water” (we have enough of it in physics tasks).",
+about_card_title: "iClub",
+about_card_body: "Official project text will appear here: goals, participation rules, tour formats, certificate and rating rules.",
+
+archive_title: "Archive",
+archive_sub: "Past tours (only after the active tour is finished).",
+archive_empty: "Archive is empty. Tours are still fresh — like pre-deadline anxiety.",
 
       // Ratings
       ratings_subject: "Subject",
