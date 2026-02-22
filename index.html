@@ -1145,44 +1145,33 @@
       <!-- ============ Community (Global) ============ -->
       <section id="view-community" class="view" data-view="community" aria-label="Community">
         <div class="content">
-          <h1 class="h1">Комьюнити</h1>
-          <p class="muted">Официальный канал и чат обсуждений.</p>
+          <h1 class="h1" data-i18n="community_title">Комьюнити</h1>
+          <p class="muted" data-i18n="community_sub">Официальный канал и чат обсуждений.</p>
 
           <div class="cards-grid">
             <button class="card-btn" type="button" data-action="open-channel">
-              <div class="card-title">Канал</div>
+              <div class="card-title" data-i18n="community_channel_title">Канал</div>
               <div class="muted small">@iClubuzofficial</div>
             </button>
 
             <button class="card-btn" type="button" data-action="open-chat">
-              <div class="card-title">Чат обсуждений</div>
-              <div class="muted small">Присоединиться</div>
+              <div class="card-title" data-i18n="community_chat_title">Чат обсуждений</div>
+              <div class="muted small" data-i18n="community_join">Присоединиться</div>
             </button>
-          </div>
-
-          <div class="actions-row">
-            <button class="btn" type="button" data-action="back">Назад</button>
-            <button class="btn primary" type="button" data-action="go-home">На главную</button>
           </div>
         </div>
       </section>
-
       <!-- ============ About (Global) ============ -->
       <section id="view-about" class="view" data-view="about" aria-label="About">
         <div class="content">
-          <h1 class="h1">О проекте</h1>
-          <p class="muted">Кратко, по делу, без “воды” (её у нас достаточно в задачах по физике).</p>
+          <h1 class="h1" data-i18n="about_title">О проекте</h1>
+          <p class="muted" data-i18n="about_sub">Кратко, по делу, без “воды” (её у нас достаточно в задачах по физике).</p>
 
           <div class="card">
-            <div class="card-title">iClub</div>
-            <div class="muted small">
+            <div class="card-title" data-i18n="about_card_title">iClub</div>
+            <div class="muted small" data-i18n="about_card_body">
               Здесь будет официальный текст из документа проекта: цели, правила участия, форматы туров, условия сертификатов и рейтингов.
             </div>
-          </div>
-
-          <div class="actions-row">
-            <button class="btn" type="button" data-action="back">Назад</button>
-            <button class="btn primary" type="button" data-action="open-community">Комьюнити</button>
           </div>
         </div>
       </section>
@@ -1202,20 +1191,14 @@
       <!-- ============ Archive (Global) ============ -->
       <section id="view-archive" class="view" data-view="archive" aria-label="Archive">
         <div class="content">
-          <h1 class="h1">Архив</h1>
-          <p class="muted">Прошедшие туры (только после завершения активного тура).</p>
+          <h1 class="h1" data-i18n="archive_title">Архив</h1>
+          <p class="muted" data-i18n="archive_sub">Прошедшие туры (только после завершения активного тура).</p>
 
           <div id="archive-list" class="list">
-            <div class="empty muted">Архив пуст. Значит, туры ещё свежие — как ваша тревога перед дедлайном.</div>
-          </div>
-
-          <div class="actions-row">
-            <button class="btn" type="button" data-action="back">Назад</button>
-            <button class="btn primary" type="button" data-action="open-ratings">Рейтинги</button>
+            <div class="empty muted" data-i18n="archive_empty">Архив пуст. Значит, туры ещё свежие — как ваша тревога перед дедлайном.</div>
           </div>
         </div>
       </section>
-
     </main>
 
     <!-- ===== Bottom Tab Bar ===== -->
