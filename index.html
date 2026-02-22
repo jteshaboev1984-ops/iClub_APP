@@ -642,27 +642,27 @@
             <!-- Tour Rules -->
             <section id="courses-tour-rules" class="stack-screen" data-stack="courses" data-screen="tour-rules">
               <div class="section">
-                <div class="h1">Правила тура</div>
-                <div class="muted">Перед стартом необходимо согласие</div>
+                <div class="h1" data-i18n="tour_rules_title">Правила тура</div>
+                <div class="muted" data-i18n="tour_rules_subtitle">Перед стартом необходимо согласие</div>
               </div>
 
               <div class="card">
-                <div class="card-title">Важное</div>
+                <div class="card-title" data-i18n="tour_rules_important">Важное</div>
                 <ul class="muted small">
-                  <li>Одна попытка, без пауз</li>
-                  <li>Назад-вперёд запрещено</li>
-                  <li>Античит: 2 нарушения → завершение</li>
-                  <li>Автосохранение при таймауте</li>
+                  <li data-i18n="tour_rules_li1">Одна попытка, без пауз</li>
+                  <li data-i18n="tour_rules_li2">Назад-вперёд запрещено</li>
+                  <li data-i18n="tour_rules_li3">Античит: 2 нарушения → завершение</li>
+                  <li data-i18n="tour_rules_li4">Автосохранение при таймауте</li>
                 </ul>
               </div>
 
               <label class="checkbox">
                 <input id="tour-rules-accept" type="checkbox" />
-                <span>Я ознакомился и согласен с правилами</span>
+                <span data-i18n="tour_rules_accept">Я ознакомился и согласен с правилами</span>
               </label>
 
               <div class="actions-row">
-                <button class="btn primary" type="button" data-action="tour-start">Начать тур</button>
+                <button class="btn primary" type="button" data-action="tour-start" data-i18n="tour_start_btn">Начать тур</button>
               </div>
             </section>
 
@@ -672,10 +672,9 @@
   <!-- Top line: Question X of 20 + Warning -->
   <div class="tour-head">
     <div class="tour-head-left">
-      <div id="tour-qof" class="tour-qof">Question 1 of 20</div>
-
+      <div id="tour-qof" class="tour-qof">—</div>
       <div class="tour-progress-row">
-        <div class="tour-progress-label">Tour Progress</div>
+        <div class="tour-progress-label" data-i18n="tour_progress_label">Tour Progress</div>
         <div id="tour-progress-pct" class="tour-progress-pct">0%</div>
       </div>
 
@@ -697,13 +696,13 @@
   <!-- Timers cards -->
   <div class="tour-timers">
     <div class="tour-timer-card">
-      <div class="tour-timer-cap">OVERALL TOUR</div>
+      <div class="tour-timer-cap" data-i18n="tour_overall_tour">OVERALL TOUR</div>
       <div id="tour-overall-time" class="tour-timer-val">0:00</div>
       <div id="tour-overall-delta" class="tour-timer-delta"></div>
     </div>
 
     <div class="tour-timer-card danger">
-      <div class="tour-timer-cap">QUESTION TIME</div>
+      <div class="tour-timer-cap" data-i18n="tour_question_time">QUESTION TIME</div>
       <div id="tour-question-time" class="tour-timer-val">0:00</div>
       <div id="tour-question-delta" class="tour-timer-delta"></div>
     </div>
@@ -716,15 +715,15 @@
   </div>
 
   <!-- Footer hint -->
-  <div class="tour-monitor muted small">
+  <div id="tour-monitor" class="tour-monitor muted small" data-i18n="tour_monitoring_active">
     SESSION MONITORING ACTIVE
-  </div>
+</div>
 
   <!-- Actions -->
   <div class="actions-row">
-    <button id="tour-next-btn" class="btn primary" type="button" data-action="tour-next" disabled>
-      Next Question →
-    </button>
+   <button id="tour-next-btn" class="btn primary" type="button" data-action="tour-next" disabled data-i18n="tour_next_question">
+  Next Question →
+</button>
   </div>
 
 </section>
@@ -732,43 +731,42 @@
             <!-- Tour Result -->
             <section id="courses-tour-result" class="stack-screen" data-stack="courses" data-screen="tour-result">
               <div class="section">
-                <div class="h1">Результат тура</div>
-                <div id="tour-result-meta" class="muted">Score: 0/20</div>
+                <div class="h1" data-i18n="tour_result_title">Результат тура</div>
+                <div id="tour-result-meta" class="muted">—</div>
               </div>
 
               <div class="cards-grid">
                 <button class="card-btn" type="button" data-action="tour-review">
-                  <div class="card-title">Разбор тура</div>
-                  <div class="muted small">Ответы, объяснения, ошибки</div>
+                  <div class="card-title" data-i18n="tour_review_title">Разбор тура</div>
+                  <div class="muted small" data-i18n="tour_review_sub">Ответы, объяснения, ошибки</div>
                 </button>
 
                 <button class="card-btn" type="button" data-action="tour-certificate">
-                  <div class="card-title">Сертификат</div>
-                  <div class="muted small">Если доступен по правилам</div>
+                  <div class="card-title" data-i18n="tour_certificate_title">Сертификат</div>
+                  <div class="muted small" data-i18n="tour_certificate_sub">Если доступен по правилам</div>
                 </button>
               </div>
 
               <div class="actions-row">
-                <button class="btn" type="button" data-action="open-ratings">Рейтинг</button>
-                <button class="btn primary" type="button" data-action="to-subject-hub">К предмету</button>
+                <button class="btn" type="button" data-action="open-ratings" data-i18n="open_ratings">Рейтинг</button>
+                <button class="btn primary" type="button" data-action="to-subject-hub" data-i18n="to_subject">К предмету</button>
               </div>
             </section>
 
             <!-- Tour Review (active) -->
             <section id="courses-tour-review" class="stack-screen" data-stack="courses" data-screen="tour-review">
               <div class="section">
-                <div class="h1">Разбор тура</div>
-                <div class="muted">Ответы, объяснения и работа над ошибками</div>
+               <div class="h1" data-i18n="tour_review_screen_title">Разбор тура</div>
+                <div class="muted" data-i18n="tour_review_screen_sub">Ответы, объяснения и работа над ошибками</div>
+
+                <div id="tour-review-list" class="list">
+                <div class="empty muted" data-i18n="tour_review_empty">Разбор появится после подключения данных тура.</div>
               </div>
 
-              <div id="tour-review-list" class="list">
-                <div class="empty muted">Разбор появится после подключения данных тура.</div>
-              </div>
-
-              <div class="actions-row">
-                <button class="btn" type="button" data-action="tour-back-to-result">Назад к результату</button>
-                <button class="btn primary" type="button" data-action="to-subject-hub">К предмету</button>
-              </div>
+                <div class="actions-row">
+                  <button class="btn" type="button" data-action="tour-back-to-result" data-i18n="back_to_result">Назад к результату</button>
+                  <button class="btn primary" type="button" data-action="to-subject-hub" data-i18n="to_subject">К предмету</button>
+               </div>
             </section>
 
             <!-- Books -->
