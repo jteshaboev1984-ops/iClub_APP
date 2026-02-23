@@ -1317,6 +1317,180 @@ async function dbHasAnyActiveTourNow() {
   }
 }
 
+      async function renderArchiveView() {
+  const listEl = document.getElementById("archive-list");
+  if (!listEl) return;
+
+  // 1) Loading state
+  listEl.innerHTML = `
+    <div class="empty muted">${t("archive_loading")}</div>
+  `;
+
+  // 2) Determine availability
+  let isLocked = false;
+  let availabilityUnknown = false;
+
+  try {
+    if (window.sb) {
+      const hasActive = await dbHasAnyActiveTourNow();
+      if (hasActive === null) {
+        availabilityUnknown = true;
+      } else {
+        isLocked = !!hasActive;
+      }
+    } else {
+      // No DB: fallback to local schedule rule
+      isLocked = !canOpenArchiveNow();
+    }
+  } catch {
+    availabilityUnknown = true;
+  }
+
+  // 3) Locked / unavailable UI (on screen, not toast)
+  if (availabilityUnknown) {
+    listEl.innerHTML = `
+      <div class="empty muted">
+        <div style="font-weight:800; margin-bottom:6px;">${t("archive_unavailable_title")}</div>
+        <div class="small">${t("archive_unavailable_sub")}</div>
+      </div>
+    `;
+    return;
+  }
+
+  if (isLocked) {
+    listEl.innerHTML = `
+      <div class="empty muted">
+        <div style="font-weight:800; margin-bottom:6px;">${t("archive_locked_title")}</div>
+        <div class="small">${t("archive_locked_sub")}</div>
+      </div>
+    `;
+    return;
+  }
+
+  // 4) If DB not available for content, show empty (safe)
+  if (!window.sb) {
+    listEl.innerHTML = `
+      <div class="empty muted">${t("archive_empty")}</div>
+    `;
+    return;
+  }
+
+  // 5) Load archive items for current subject
+  const subjectKey = state?.courses?.subjectKey;
+  const uid = await getAuthUid();
+
+  if (!uid || !subjectKey) {
+    listEl.innerHTML = `
+      <div class="empty muted">${t("archive_empty")}</div>
+    `;
+    return;
+  }
+
+  const subjectId = await getSubjectIdByKey(subjectKey);
+  if (!subjectId) {
+    listEl.innerHTML = `
+      <div class="empty muted">${t("archive_empty")}</div>
+    `;
+    return;
+  }
+
+  // Load tours for subject
+  const { data: tours, error: toursErr } = await window.sb
+    .from("tours")
+    .select("id,tour_no,start_date,end_date,is_active")
+    .eq("subject_id", subjectId)
+    .order("tour_no", { ascending: true });
+
+  if (toursErr || !Array.isArray(tours) || tours.length === 0) {
+    listEl.innerHTML = `
+      <div class="empty muted">${t("archive_empty")}</div>
+    `;
+    return;
+  }
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const d0 = new Date();
+  const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
+
+  const isInWindow = (row) => {
+    const sd = row?.start_date ? String(row.start_date) : null;
+    const ed = row?.end_date ? String(row.end_date) : null;
+    const afterStart = !sd || sd <= todayISO;
+    const beforeEnd = !ed || ed >= todayISO;
+    return afterStart && beforeEnd;
+  };
+
+  // Past = not active now OR is_active === false
+  const pastTours = tours.filter(t => !t?.is_active || !isInWindow(t));
+  const pastTourIds = pastTours.map(t => Number(t.id)).filter(Boolean);
+
+  if (pastTourIds.length === 0) {
+    listEl.innerHTML = `
+      <div class="empty muted">${t("archive_empty")}</div>
+    `;
+    return;
+  }
+
+  // Load user attempts for those tours
+  const { data: atts, error: attsErr } = await window.sb
+    .from("tour_attempts")
+    .select("tour_id,score,total_time,status")
+    .eq("user_id", uid)
+    .in("tour_id", pastTourIds)
+    .in("status", ["submitted", "time_expired"]);
+
+  if (attsErr || !Array.isArray(atts) || atts.length === 0) {
+    listEl.innerHTML = `
+      <div class="empty muted">${t("archive_empty")}</div>
+    `;
+    return;
+  }
+
+  // Best attempt per tour: max score, then min time
+  const bestByTour = new Map();
+  for (const a of atts) {
+    const tid = Number(a.tour_id);
+    const score = Number(a.score) || 0;
+    const time = Number(a.total_time) || 0;
+
+    const cur = bestByTour.get(tid);
+    if (!cur) {
+      bestByTour.set(tid, { score, time });
+      continue;
+    }
+    if (score > cur.score || (score === cur.score && time > 0 && time < cur.time)) {
+      bestByTour.set(tid, { score, time });
+    }
+  }
+
+  // Render list
+  const rows = pastTours
+    .filter(t => bestByTour.has(Number(t.id)))
+    .map(t => {
+      const best = bestByTour.get(Number(t.id));
+      const title = `${tr("tours_tour_label", "Тур")} ${t.tour_no}`;
+
+      const parts = [];
+      parts.push(`${t("archive_score_label")}: ${best.score}`);
+      if (best.time) parts.push(`${t("archive_time_label")}: ${formatSecondsToMMSS(best.time)}`);
+
+      return `
+        <div class="list-item" style="cursor:default;">
+          <div style="font-weight:800; margin-bottom:4px;">${title}</div>
+          <div class="muted small">${parts.join(" • ")}</div>
+        </div>
+      `;
+    });
+
+  if (rows.length === 0) {
+    listEl.innerHTML = `
+      <div class="empty muted">${t("archive_empty")}</div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = rows.join("");
+}
      // ---------------------------
   // Practice v1 (10Q: 3/5/2 + MCQ+INPUT + per-question timer + attempts history)
   // ---------------------------
@@ -2050,6 +2224,10 @@ if (tabName === "ratings") {
     }
 
     showView(viewName);
+
+      if (viewName === "archive") {
+     renderArchiveView();
+   }
   }
 
   function canGlobalBack() {
@@ -8812,35 +8990,7 @@ if (state.tab === "profile") {
       if (action === "open-community") { openGlobal("community"); return; }
       if (action === "open-about") { openGlobal("about"); return; }
       if (action === "open-certificates") { openGlobal("certificates"); return; }
-           if (action === "open-archive") {
-        // Prefer DB truth. If unknown (no access / no sb) — fallback to local schedule.
-        try {
-          if (window.sb) {
-            showToast(t("archive_checking_toast"));
-            dbHasAnyActiveTourNow().then((hasActive) => {
-              // if cannot determine — do NOT open (safer than violating rules)
-              if (hasActive === null) {
-                showToast(t("archive_unavailable_toast"));
-                return;
-              }
-              if (hasActive) {
-                showToast(t("archive_unlock_after_toast"));
-                return;
-              }
-              openGlobal("archive");
-            });
-            return;
-          }
-        } catch {}
-
-        // fallback: local schedule
-        if (!canOpenArchiveNow()) {
-          showToast(t("archive_unlock_after_toast"));
-          return;
-        }
-        openGlobal("archive");
-        return;
-      }
+      if (action === "open-archive") { openGlobal("archive"); return; }
 
          // All Subjects from anywhere (Home tile, etc.)
 if (action === "open-all-subjects") {
