@@ -87,12 +87,11 @@ html, body {
 
 /* ✅ сам back скрывается через JS visibility, но чтобы не вылезал, обнуляем его размер */
 .topbar.is-no-left #topbar-back{
-  width: 0;
-  padding: 0;
-  border: none;
-  overflow: hidden;
+  position: absolute;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
 }
-
 /* ✅ бренд занимает место слева */
 .topbar.is-no-left .topbar-brand{
   grid-column: 1 / 3;
