@@ -1759,7 +1759,7 @@ async function buildPracticeSet(subjectKey) {
   // Берём запас, чтобы гарантировать 3/5/2 и добивки
   const { data, error } = await window.sb
     .from("questions")
-    .select("id, topic, difficulty, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
+        .select("id, topic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
     .eq("subject_id", subjectId)
     .eq("is_active", true)
     .limit(200);
@@ -1811,8 +1811,8 @@ async function buildPracticeSet(subjectKey) {
         id: Number(r.id),
         topic: r.topic || "General",
         difficulty: normalizeDiff(r.difficulty),
-        type,
-        // ✅ вопрос по языку контента
+        timeLimitSec: (r.time_limit_sec != null && Number(r.time_limit_sec) >= 10) ? Number(r.time_limit_sec) : null,
+        type,        // ✅ вопрос по языку контента
            question: pickL(r, "question_text") || "",
            options: opts || [],
            correctIndex,
@@ -2829,10 +2829,16 @@ async function saveRegistrationToSupabase(profile) {
     last_name: tgUser?.last_name || lastFromProfile || null,
 
     avatar_url: avatar,
-    language_code: profile?.language || tgUser?.language_code || "ru",
+        language_code: profile?.language || tgUser?.language_code || "ru",
     is_school_student: !!profile?.is_school_student,
+
+    // ✅ сохраняем ID (FK), а текст оставляем для отображения/резерва
+    region_id: (profile?.region_id != null && profile.region_id !== "") ? Number(profile.region_id) : null,
+    district_id: (profile?.district_id != null && profile.district_id !== "") ? Number(profile.district_id) : null,
+
     region: profile?.region || null,
     district: profile?.district || null,
+
     school: profile?.school || null,
     class: profile?.class || null
   };
@@ -2868,40 +2874,22 @@ async function saveRegistrationToSupabase(profile) {
     });
   }
 
-    if (rows.length) {
-    // ВАЖНО: upsert с onConflict требует UNIQUE(user_id,subject_id).
-    // Чтобы не зависеть от уникального ограничения (и не ловить 400),
-    // делаем синхронизацию "delete → insert".
-    const { error: delErr } = await window.sb
+      if (rows.length) {
+    // ✅ Теперь в БД есть UNIQUE(user_id, subject_id) → можно безопасно upsert
+    const { error: upErr } = await window.sb
       .from("user_subjects")
-      .delete()
-      .eq("user_id", uid);
+      .upsert(rows, { onConflict: "user_id,subject_id" });
 
-    if (delErr) {
+    if (upErr) {
       try {
         trackEvent("registration_db_error", {
-          where: "user_subjects_delete",
-          message: String(delErr?.message || delErr)
+          where: "user_subjects_upsert",
+          message: String(upErr?.message || upErr)
         });
       } catch {}
-      return { ok: false, reason: "user_subjects_delete_failed" };
-    }
-
-    const { error: insErr } = await window.sb
-      .from("user_subjects")
-      .insert(rows);
-
-    if (insErr) {
-      try {
-        trackEvent("registration_db_error", {
-          where: "user_subjects_insert",
-          message: String(insErr?.message || insErr)
-        });
-      } catch {}
-      return { ok: false, reason: "user_subjects_insert_failed" };
+      return { ok: false, reason: "user_subjects_upsert_failed" };
     }
   }
-
    __profileSubjectsDbReady = false;
   return { ok: true, user_id: uid, user_subjects_rows: rows.length, subjects_saved: rows.length };
 }
@@ -7103,7 +7091,7 @@ async function startPracticeNew() {
     answers: Array.from({ length: questions.length }).map(() => null),
     correct: Array.from({ length: questions.length }).map(() => false),
 
-    qTimeLeft: PRACTICE_CONFIG.timeByDifficulty[questions[0]?.difficulty] || 60,
+    qTimeLeft: Number(questions[0]?.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[questions[0]?.difficulty] || 60,
     qTimerId: null
   };
 
@@ -7293,7 +7281,7 @@ async function startPracticeNew() {
 
   // ---- time_spent per question (seconds) ----
   // We store: time_allowed - time_left at the moment of submit/timeout.
-  const allowed = Number(PRACTICE_CONFIG.timeByDifficulty[q.difficulty]) || 60;
+    const allowed = Number(q.timeLimitSec) || Number(PRACTICE_CONFIG.timeByDifficulty[q.difficulty]) || 60;
   const left = Number(quiz.qTimeLeft) || 0;
 
   if (!Array.isArray(quiz.timeSpent)) quiz.timeSpent = new Array(quiz.questions.length).fill(0);
@@ -7311,7 +7299,7 @@ async function startPracticeNew() {
 
     quiz.index = nextIndex;
     const nextQ = quiz.questions[quiz.index];
-    quiz.qTimeLeft = PRACTICE_CONFIG.timeByDifficulty[nextQ.difficulty] || 60;
+    quiz.qTimeLeft = Number(nextQ.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[nextQ.difficulty] || 60;
 
     saveState();
     renderPracticeQuiz();
@@ -8876,18 +8864,23 @@ if (state.tab === "profile") {
     const fullName = $("#reg-fullname")?.value?.trim() || "";
     const lang = $("#reg-language")?.value || "ru";
 
-    let region = "";
+        let region = "";
     let district = "";
+
+    let region_id = null;
+    let district_id = null;
 
     const regionEl = $("#reg-region");
     const districtEl = $("#reg-district");
 
     if (regionEl && regionEl.value) {
+      region_id = Number(regionEl.value) || null;
       const regionOpt = regionEl.options[regionEl.selectedIndex];
       region = regionOpt ? regionOpt.textContent.trim() : "";
     }
 
     if (districtEl && districtEl.value) {
+      district_id = Number(districtEl.value) || null;
       const districtOpt = districtEl.options[districtEl.selectedIndex];
       district = districtOpt ? districtOpt.textContent.trim() : "";
     }
@@ -8952,11 +8945,15 @@ if (state.tab === "profile") {
     const tgUser = tg?.initDataUnsafe?.user || {};
     const avatar = tgUser?.photo_url || "";
 
-    const profile = {
+        const profile = {
       created_at: nowISO(),
       full_name: fullName,
       language: lang,
       is_school_student: isSchoolStudent,
+
+      region_id,
+      district_id,
+
       region,
       district,
       school: isSchoolStudent ? school : "",
