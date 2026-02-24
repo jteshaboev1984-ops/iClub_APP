@@ -14,6 +14,9 @@
 </head>
 
 <body>
+  <div id="offline-banner" class="offline-banner" role="status" aria-live="polite" style="display:none">
+  <span data-i18n="offline_banner">Нет подключения к интернету. Данные могут не сохраниться.</span>
+</div>
   <!-- ===== App Shell ===== -->
   <div id="app" class="app">
 
@@ -389,8 +392,11 @@
               </div>
 
               <div class="card">
-                <div class="muted small">Видео-плеер будет подключён позже (URL из базы).</div>
-                <div class="video-placeholder">Video</div>
+                <div id="video-empty" class="muted small" data-i18n="video_empty">
+                  Видео недоступно (нет URL в базе).
+                </div>
+
+                <video id="video-player" class="video-player" controls playsinline style="display:none"></video>
               </div>
 
               <div class="actions-row">
