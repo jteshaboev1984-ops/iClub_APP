@@ -2192,11 +2192,8 @@ function buildPracticeSetLocal(subjectKey) {
     }
   };
 
-  // делаем несколько раз: сразу + после кадра + после 0ms,
-  // потому что WebView иногда "переигрывает" скролл после рендера
-  jumpToTargetTop();
-  requestAnimationFrame(jumpToTargetTop);
-  setTimeout(jumpToTargetTop, 0);
+  // достаточно одного вызова с микро-задержкой, чтобы дать DOM перерисоваться
+  setTimeout(jumpToTargetTop, 10);
 }
 
   function setTab(tabName) {
@@ -3877,7 +3874,7 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
       // load more visibility: if we got full page, there might be more
       const maybeHasMore = (Array.isArray(pageData) && pageData.length === ratingsState._searchLimit);
 
-istEl.innerHTML = `
+listEl.innerHTML = `
   <div class="lb-section-head lb-results-head">
     <div class="lb-section-title">${escapeHTML(t("ratings_results") || "Results")}</div>
 
