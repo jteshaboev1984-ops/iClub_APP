@@ -133,12 +133,22 @@ await sb.from("users").upsert(payload, { onConflict: "id" });
 // ✅ reset subject cache for this session (prevents poisoned null cache)
 try { _subjectIdByKeyCache.clear(); } catch {}
 
-// ✅ smoke test: write event (confirms auth + RLS + insert)
-await sb.from("app_events").insert({
-  user_id: u.id,
-  event_type: "boot",
-  payload: { has_tg: !!tg, ua: navigator.userAgent },
-});
+// ✅ boot event: write at most once per day per device (prevents DB flooding)
+try {
+  const day = dayKeyTashkent(Date.now());
+  const k = "iclub_boot_day_v1";
+  const last = String(localStorage.getItem(k) || "");
+  if (last !== day) {
+    await sb.from("app_events").insert({
+      user_id: u.id,
+      event_type: "boot",
+      payload: { has_tg: !!tg, ua: navigator.userAgent },
+    });
+    localStorage.setItem(k, day);
+  }
+} catch (e) {
+  logClientError("boot_event_insert", e);
+}
 
 // ✅ Earned Credentials: hydrate local events store from Supabase (only if local empty)
 try {
@@ -181,13 +191,26 @@ try {
       .filter(Boolean)
   );
 
-  // Fetch last events from DB (we keep it simple & safe: take recent 5000)
-  const { data, error } = await sbClient
+    // Fetch only NEW events from DB (lightweight)
+  let lastDbTs = null;
+  try {
+    const dbTs = localItems
+      .map(e => e?.payload?._db_created_at ? Date.parse(e.payload._db_created_at) : NaN)
+      .filter(n => Number.isFinite(n))
+      .sort((a,b) => b-a)[0];
+    if (Number.isFinite(dbTs)) lastDbTs = new Date(dbTs).toISOString();
+  } catch {}
+
+  let q = sbClient
     .from("app_events")
     .select("event_type,payload,created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: true })
-    .limit(5000);
+    .limit(500);
+
+  if (lastDbTs) q = q.gt("created_at", lastDbTs);
+
+  const { data, error } = await q;
 
   if (error) throw error;
 
@@ -269,6 +292,20 @@ function applyStaticI18n() {
     });
   }
 
+     function updateOfflineBanner() {
+    try {
+      const el = document.getElementById("offline-banner");
+      if (!el) return;
+      const isOn = (navigator.onLine === false);
+      el.style.display = isOn ? "block" : "none";
+    } catch {}
+  }
+
+     function logClientError(where, err) {
+    try {
+      console.warn("[iClub]", where, err);
+    } catch {}
+  }
   // =========================================================
   // Earned Credentials — Engine (v1.3 FINAL) + Event Mapping
   // Plain storage (local) + optional Supabase app_events mirror
@@ -1800,17 +1837,9 @@ function buildPracticeSetLocal(subjectKey) {
     hard: bank.filter(q => q.difficulty === "hard")
   };
 
-  if (bank.length === 0) {
-    return Array.from({ length: PRACTICE_CONFIG.total }).map((_, i) => ({
-      id: `fallback_${subjectKey}_${i + 1}`,
-      topic: "General",
-      difficulty: i < 3 ? "easy" : (i < 8 ? "medium" : "hard"),
-      type: "mcq",
-      question: `Вопрос ${i + 1} (demo)`,
-      options: ["A", "B", "C", "D"],
-      correctIndex: 0,
-      explanation: "Демо-вопрос. Позже заменим на банк/базу."
-    }));
+    if (bank.length === 0) {
+    // ✅ No demo questions
+    return [];
   }
 
   const set = [
@@ -3065,7 +3094,14 @@ async function getSubjectIdByKey(subjectKey) {
     return null;
   }
 
-  const id = data?.id ? Number(data.id) : null;
+    const isActive = (data?.is_active === true);
+  const id = (isActive && data?.id) ? Number(data.id) : null;
+
+  // если предмет деактивирован — очищаем кеш и возвращаем null
+  if (!isActive) {
+    try { _subjectIdByKeyCache.delete(key); } catch {}
+    return null;
+  }
 
   // cache only when we have a real id
   if (id) _subjectIdByKeyCache.set(key, id);
@@ -3103,7 +3139,7 @@ async function savePracticeAttemptToSupabase(attempt, quiz) {
     return { ok: false, reason: "no_subject_id" };
   }
 
-  // 1) insert attempt (WITHOUT .select() to avoid “select permission” pitfalls)
+   // 1) insert attempt WITH returning id (fixes race condition 100%)
   const insertAttemptPayload = {
     user_id: uid,
     subject_id: subjectId,
@@ -3112,31 +3148,18 @@ async function savePracticeAttemptToSupabase(attempt, quiz) {
     time_seconds: Number(attempt?.durationSec) || 0
   };
 
-  const { error: insErr } = await window.sb
+  const { data: insRow, error: insErr } = await window.sb
     .from("practice_attempts")
-    .insert(insertAttemptPayload);
+    .insert(insertAttemptPayload)
+    .select("id")
+    .single();
 
-  if (insErr) {
-    await logDbErrorToEvents(uid, "attempt_insert", insErr, { subject_id: subjectId });
+  if (insErr || !insRow?.id) {
+    await logDbErrorToEvents(uid, "attempt_insert", insErr || { message: "no_returning_id" }, { subject_id: subjectId });
     return { ok: false, reason: "attempt_insert_failed" };
   }
 
-  // 2) fetch the just-inserted attempt id (latest for this user+subject)
-  const { data: lastRow, error: selErr } = await window.sb
-    .from("practice_attempts")
-    .select("id,created_at")
-    .eq("user_id", uid)
-    .eq("subject_id", subjectId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (selErr || !lastRow?.id) {
-    await logDbErrorToEvents(uid, "attempt_select_latest", selErr || { message: "no_attempt_row" }, { subject_id: subjectId });
-    return { ok: false, reason: "attempt_select_failed" };
-  }
-
-  const attemptId = Number(lastRow.id);
+  const attemptId = Number(insRow.id);
 
   // 3) insert answers (best-effort)
   const details = Array.isArray(attempt?.details) ? attempt.details : [];
@@ -3438,17 +3461,8 @@ if (tourSelect) tourSelect.value = "__all__";
     `;
   };
 
-  const dedupeByRank = (rows) => {
-    const out = [];
-    const seen = new Set();
-    for (const r of rows || []) {
-      const k = String(r.rank);
-      if (!k || seen.has(k)) continue;
-      seen.add(k);
-      out.push(r);
-    }
-    return out;
-  };
+    // ✅ Do NOT dedupe by rank — ties are valid (several people can be #1)
+  const dedupeByRank = (rows) => Array.isArray(rows) ? rows : [];
 
   // сегменты
   $$(".lb-segment .seg-btn").forEach(btn => {
@@ -6274,41 +6288,123 @@ if (mainSubjects.length) {
   // ---------------------------
   // Lessons (demo)
   // ---------------------------
-  function renderLessons() {
+  async function renderLessons() {
     const list = $("#lessons-list");
     const subj = subjectByKey(state.courses.subjectKey);
     if (!list) return;
 
+    list.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка...")}</div>`;
+
+    if (!window.sb) {
+      list.innerHTML = `<div class="empty muted">${escapeHTML(t("lessons_no_db") || "База не подключена. Уроки недоступны.")}</div>`;
+      return;
+    }
+
+    const subjectKey = state.courses.subjectKey;
+    const subjectId = await getSubjectIdByKey(subjectKey);
+
+    if (!subjectId) {
+      list.innerHTML = `<div class="empty muted">${escapeHTML(t("lessons_empty") || "Уроки пока не добавлены.")}</div>`;
+      return;
+    }
+
+    const { data, error } = await window.sb
+      .from("lessons")
+      .select("id,title,topic,order_no")
+      .eq("subject_id", subjectId)
+      .order("order_no", { ascending: true });
+
+    if (error) {
+      logClientError("lessons_select_error", error);
+      list.innerHTML = `<div class="empty muted">${escapeHTML(t("lessons_load_error") || "Ошибка загрузки уроков.")}</div>`;
+      return;
+    }
+
+    const lessons = Array.isArray(data) ? data : [];
+    if (!lessons.length) {
+      list.innerHTML = `<div class="empty muted">${escapeHTML(t("lessons_empty") || "Уроки пока не добавлены.")}</div>`;
+      return;
+    }
+
     list.innerHTML = "";
 
-    const demoLessons = [
-      { id: "l1", title: "Lesson 1 — Intro", topic: "Basics" },
-      { id: "l2", title: "Lesson 2 — Core", topic: "Core" },
-      { id: "l3", title: "Lesson 3 — Practice", topic: "Application" }
-    ];
-
-    demoLessons.forEach(lesson => {
+    lessons.forEach((lesson) => {
       const item = document.createElement("div");
       item.className = "list-item";
+
+      const title = String(lesson?.title || "").trim() || (t("lesson") || "Урок");
+      const topic = String(lesson?.topic || "").trim();
+
       item.innerHTML = `
-        <div style="font-weight:800">${lesson.title}</div>
-        <div class="muted small">${escapeHTML(subjectTitle(state.courses.subjectKey, subj ? subj.title : ""))} • ${lesson.topic}</div>
+        <div style="font-weight:800">${escapeHTML(title)}</div>
+        <div class="muted small">${escapeHTML(subjectTitle(subjectKey, subj ? subj.title : ""))}${topic ? ` • ${escapeHTML(topic)}` : ""}</div>
       `;
-      item.addEventListener("click", () => {
+
+      item.addEventListener("click", async () => {
         state.courses.lessonId = lesson.id;
         saveState();
         pushCourses("video");
-        renderVideo(lesson);
+        await renderVideo({ id: lesson.id, title, topic });
       });
+
       list.appendChild(item);
     });
   }
 
-  function renderVideo(lesson) {
+  async function renderVideo(lesson) {
     const tEl = $("#video-title");
     const mEl = $("#video-meta");
-    if (tEl) tEl.textContent = lesson?.title || "Video";
+    if (tEl) tEl.textContent = lesson?.title || (t("video") || "Видео");
     if (mEl) mEl.textContent = lesson?.topic || "";
+
+    const player = document.getElementById("video-player");
+    const emptyEl = document.getElementById("video-empty");
+
+    // reset UI
+    try {
+      if (player) {
+        player.pause?.();
+        player.removeAttribute("src");
+        player.load?.();
+        player.style.display = "none";
+      }
+      if (emptyEl) emptyEl.style.display = "block";
+    } catch {}
+
+    if (!window.sb || !lesson?.id) {
+      updateTopbarForView("courses");
+      return;
+    }
+
+    const { data, error } = await window.sb
+      .from("videos")
+      .select("video_url")
+      .eq("lesson_id", lesson.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      logClientError("videos_select_error", error);
+      updateTopbarForView("courses");
+      return;
+    }
+
+    const url = String(data?.video_url || "").trim();
+    if (!url) {
+      updateTopbarForView("courses");
+      return;
+    }
+
+    try {
+      if (player) {
+        player.src = url;
+        player.style.display = "block";
+      }
+      if (emptyEl) emptyEl.style.display = "none";
+    } catch (e) {
+      logClientError("video_player_bind_error", e);
+    }
+
     updateTopbarForView("courses");
   }
 
@@ -6941,6 +7037,11 @@ async function startPracticeNew() {
 
   // DB-first questions (may fallback to local automatically)
   const questions = await buildPracticeSet(subjectKey);
+
+  if (!Array.isArray(questions) || questions.length === 0) {
+    showToast(t("practice_no_questions") || "Нет вопросов для практики по этому предмету.");
+    return;
+  }
 
   state.quizLock = "practice";
   state.quiz = {
@@ -9431,7 +9532,9 @@ if (action === "tour-next" || action === "tour-submit") {
   window.resetRegistrationSoft = resetRegistrationSoft;
   window.resetRegistrationHard = resetRegistrationHard;
 
-       async function boot() {
+   async function boot() {
+    try { document.documentElement.classList.add("i18n-pending"); } catch {}
+
     // ✅ показать splash и скрыть topbar (updateTopbarForView("splash") сработает внутри showView)
     showView("splash");
 
@@ -9440,6 +9543,18 @@ if (action === "tour-next" || action === "tour-submit") {
       const lang = profile?.uiLanguage || profile?.language || getTelegramLang() || "ru";
       window.i18n?.setLang(lang);
       applyStaticI18n();
+      try { document.documentElement.classList.remove("i18n-pending"); } catch {}
+
+      try {
+        updateOfflineBanner();
+        window.addEventListener("online", updateOfflineBanner);
+        window.addEventListener("offline", updateOfflineBanner);
+      } catch {}
+
+      try {
+        window.addEventListener("error", (e) => logClientError("window_error", e?.error || e?.message || e));
+        window.addEventListener("unhandledrejection", (e) => logClientError("unhandledrejection", e?.reason || e));
+      } catch {}
 
     const statusEl = $("#splash-status");
     if (statusEl) statusEl.textContent = t("loading");
