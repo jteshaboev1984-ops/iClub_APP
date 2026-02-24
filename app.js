@@ -1081,16 +1081,14 @@ function runDailyCredentialJobs() {
   // ---------------------------
   // Telegram WebApp integration (safe)
   // ---------------------------
-
-  // ---------------------------
-  // Telegram WebApp integration (safe)
-  // ---------------------------
-  const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+    const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
   if (tg) {
     try {
       tg.ready();
       tg.expand();
-    } catch {}
+    } catch (e) {
+      logClientError("tg_ready_expand", e);
+    }
   }
 
   function getTelegramLang() {
@@ -1098,19 +1096,49 @@ function runDailyCredentialJobs() {
     return window.i18n?.normalizeLang ? window.i18n.normalizeLang(code) : "ru";
   }
 
+  // ✅ #21: Safe external links (block javascript:, data:, file:, etc.)
+  function normalizeExternalUrl(raw) {
+    const s = String(raw || "").trim();
+    if (!s) return null;
+
+    // allow t.me links (with or without scheme)
+    if (/^t\.me\//i.test(s)) return `https://${s}`;
+    if (/^https?:\/\/t\.me\//i.test(s)) return s;
+
+    // allow only http/https
+    try {
+      const u = new URL(s);
+      if (u.protocol === "http:" || u.protocol === "https:") return u.toString();
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
   function openExternal(url) {
+    const safeUrl = normalizeExternalUrl(url);
+
+    if (!safeUrl) {
+      try { showToast(t("invalid_link") || "Неверная ссылка."); } catch {}
+      logClientError("openExternal_blocked", { url });
+      return;
+    }
+
     // Prefer Telegram openTelegramLink/openLink if available
     try {
-      if (tg?.openTelegramLink && /^(https?:\/\/)?t\.me\//i.test(url)) {
-        tg.openTelegramLink(url.replace(/^https?:\/\//i, ""));
+      if (tg?.openTelegramLink && /^https?:\/\/t\.me\//i.test(safeUrl)) {
+        tg.openTelegramLink(safeUrl.replace(/^https?:\/\//i, ""));
         return;
       }
       if (tg?.openLink) {
-        tg.openLink(url);
+        tg.openLink(safeUrl);
         return;
       }
-    } catch {}
-    window.open(url, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      logClientError("openExternal_tg_error", e);
+    }
+
+    window.open(safeUrl, "_blank", "noopener,noreferrer");
   }
 
   // ---------------------------
@@ -1340,7 +1368,7 @@ async function dbHasAnyActiveTourNow() {
     return afterStart && beforeEnd;
   };
 
-  try {
+    try {
     const { data, error } = await window.sb
       .from("tours")
       .select("id,start_date,end_date,is_active")
@@ -1349,7 +1377,8 @@ async function dbHasAnyActiveTourNow() {
     if (error) return null;
     const list = Array.isArray(data) ? data : [];
     return list.some(r => !!r.is_active && isInWindow(r));
-  } catch {
+  } catch (e) {
+    logClientError("dbHasAnyActiveTourNow", e);
     return null;
   }
 }
