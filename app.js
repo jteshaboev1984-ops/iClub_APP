@@ -4310,21 +4310,37 @@ function bindRatingsUI() {
     renderRatings();
   };
 
-  if (searchBackdrop) {
+    if (searchBackdrop) {
     searchBackdrop.addEventListener("click", () => {
       closeRatingsSearchPanel();
     });
   }
 
-    if (searchInput) {
+  if (searchInput) {
     searchInput.placeholder = t("ratings_search_placeholder") || "Search...";
 
-    // Ввод текста — без запуска поиска
-    searchInput.addEventListener("input", () => {});
+    // ✅ Debounce: поиск запускаем через 300мс после остановки ввода
+    searchInput.addEventListener("input", () => {
+      if (searchTimer) clearTimeout(searchTimer);
 
-    // Поиск — ТОЛЬКО по Enter
+      searchTimer = setTimeout(() => {
+        const v = String(searchInput.value || "").trim();
+
+        // если меньше 2 символов — считаем, что поиска нет (сбрасываем фильтр)
+        if (v.length < 2) {
+          if (String(ratingsState.q || "") !== "") applySearch("");
+          return;
+        }
+
+        applySearch(v);
+      }, 400);
+    });
+
+    // ✅ Enter — применяем сразу и закрываем панель (как было)
     searchInput.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
+
+      if (searchTimer) clearTimeout(searchTimer);
 
       const v = String(searchInput.value || "").trim();
       if (v.length < 2) return;
@@ -4333,7 +4349,6 @@ function bindRatingsUI() {
       closeRatingsSearchPanel();
     });
   }
-
   if (searchClear) {
     searchClear.addEventListener("click", () => {
       if (!searchInput) return;
