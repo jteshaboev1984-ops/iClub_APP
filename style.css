@@ -6,6 +6,10 @@
 /* ----- CSS Reset (lightweight) ----- */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
+/* Prevent i18n flicker: hide UI until translations are applied */
+html.i18n-pending body {
+  visibility: hidden;
+}
 body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
