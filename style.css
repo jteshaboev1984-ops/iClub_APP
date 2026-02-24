@@ -85,9 +85,12 @@ html, body {
   grid-template-columns: 0px 1fr auto;
 }
 
-/* ✅ и сам back реально убираем из layout, чтобы не резервировал место */
+/* ✅ сам back скрывается через JS visibility, но чтобы не вылезал, обнуляем его размер */
 .topbar.is-no-left #topbar-back{
-  display: none !important;
+  width: 0;
+  padding: 0;
+  border: none;
+  overflow: hidden;
 }
 
 /* ✅ бренд занимает место слева */
