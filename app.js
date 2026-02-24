@@ -8068,10 +8068,9 @@ async function createTourAttempt(uid, tourId) {
 async function upsertTourAnswer(attemptId, questionId, patch) {
   if (!window.sb || !attemptId || !questionId) return;
 
-  // Upsert by (attempt_id, question_id) requires a unique constraint in DB.
-  // If you don't have it yet, we fallback to insert-only and ignore duplicates.
+  // ✅ UNIQUE(attempt_id, question_id) уже есть в БД — fallback больше не нужен.
   try {
-    await window.sb
+    const { error } = await window.sb
       .from("tour_answers")
       .upsert([{
         attempt_id: attemptId,
@@ -8082,20 +8081,10 @@ async function upsertTourAnswer(attemptId, questionId, patch) {
         time_spent: Number(patch.time_spent || 0),
         finish_reason: patch.finish_reason ?? null
       }], { onConflict: "attempt_id,question_id" });
-  } catch {
-    try {
-      await window.sb
-        .from("tour_answers")
-        .insert([{
-          attempt_id: attemptId,
-          question_id: questionId,
-          user_answer: patch.user_answer ?? null,
-          answered: !!patch.answered,
-          is_correct: !!patch.is_correct,
-          time_spent: Number(patch.time_spent || 0),
-          finish_reason: patch.finish_reason ?? null
-        }]);
-    } catch {}
+
+    if (error) logClientError("upsertTourAnswer_error", error);
+  } catch (e) {
+    logClientError("upsertTourAnswer_exception", e);
   }
 }
 
