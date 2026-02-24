@@ -3883,3 +3883,25 @@ body.modal-open { overflow: hidden; }
 .lb-search-reset:active{
   transform: translateY(1px);
 }
+/* #16: avoid i18n flicker (we toggle via JS) */
+html.i18n-pending body { visibility: hidden; }
+
+/* #20: offline banner */
+.offline-banner{
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(8px);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* #18: video player */
+.video-player{
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  display: block;
+}
