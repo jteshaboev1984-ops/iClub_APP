@@ -3490,8 +3490,27 @@ if (tourSelect) tourSelect.value = "__all__";
     `;
   };
 
-    // ✅ Do NOT dedupe by rank — ties are valid (several people can be #1)
-  const dedupeByRank = (rows) => Array.isArray(rows) ? rows : [];
+    // ✅ Ties are valid (several people can be #1).
+  // Dedupe ONLY the same person across sections (Top/Around/Bottom), not by rank.
+  const rowDedupeKey = (r) => {
+    if (!r) return "";
+    if (r.user_id) return `u:${String(r.user_id)}`;
+    if (r.telegram_user_id) return `tg:${String(r.telegram_user_id)}`;
+    return `f:${String(r.name || "")}|${String(r.score ?? "")}|${String(r.total_time ?? "")}|${String(r.time ?? "")}`;
+  };
+
+  const dedupeByRank = (rows) => {
+    if (!Array.isArray(rows)) return [];
+    const seen = new Set();
+    const out = [];
+    for (const r of rows) {
+      const k = rowDedupeKey(r);
+      if (!k || seen.has(k)) continue;
+      seen.add(k);
+      out.push(r);
+    }
+    return out;
+  };
 
   // сегменты
   $$(".lb-segment .seg-btn").forEach(btn => {
@@ -3669,11 +3688,12 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
       const bottomRows = rowsAll.length > 13 ? rowsAll.slice(-3) : [];
       const shouldShowBottom = bottomRows.length && bottomRows.some(r => r.rank > 10);
 
-      const topRanks = new Set(dedupeByRank(topRows).map(r => String(r.rank)));
-      aroundRows = (aroundRows || []).filter(r => !topRanks.has(String(r.rank)));
+      const topKeys = new Set(dedupeByRank(topRows).map(rowDedupeKey));
+      aroundRows = (aroundRows || []).filter(r => !topKeys.has(rowDedupeKey(r)));
 
-      const aroundRanks = new Set(dedupeByRank(aroundRows).map(r => String(r.rank)));
-      const bottomClean = (bottomRows || []).filter(r => !topRanks.has(String(r.rank)) && !aroundRanks.has(String(r.rank)));
+      const aroundKeys = new Set(dedupeByRank(aroundRows).map(rowDedupeKey));
+       
+      const bottomClean = (bottomRows || []).filter(r => !topKeys.has(rowDedupeKey(r)) && !aroundKeys.has(rowDedupeKey(r)));
 
       listEl.innerHTML =
         renderSection(t("ratings_top") || "Top 10", dedupeByRank(topRows), "") +
@@ -3950,11 +3970,11 @@ istEl.innerHTML = `
         }
       }
 
-      const topRanks = new Set(dedupeByRank(topRows2).map(r => String(r.rank)));
-      aroundRows2 = (aroundRows2 || []).filter(r => !topRanks.has(String(r.rank)));
+      const topKeys = new Set(dedupeByRank(topRows2).map(rowDedupeKey));
+      aroundRows2 = (aroundRows2 || []).filter(r => !topKeys.has(rowDedupeKey(r)));
 
-      const aroundRanks = new Set(dedupeByRank(aroundRows2).map(r => String(r.rank)));
-      bottomRows2 = (bottomRows2 || []).filter(r => !topRanks.has(String(r.rank)) && !aroundRanks.has(String(r.rank)));
+      const aroundKeys = new Set(dedupeByRank(aroundRows2).map(rowDedupeKey));
+      bottomRows2 = (bottomRows2 || []).filter(r => !topKeys.has(rowDedupeKey(r)) && !aroundKeys.has(rowDedupeKey(r)));
 
       const shouldShowBottom2 = bottomRows2.length && bottomRows2.some(r => r.rank > 10);
 
