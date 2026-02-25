@@ -9385,8 +9385,17 @@ if (action === "profile-open-ratings") {
     return;
   }
 
-  state.quizLock = "practice";
+    state.quizLock = "practice";
   state.quiz = draft.quiz;
+
+  // ✅ add paused time into pausedTotalMs (so итоговое время не включает паузу)
+  try {
+    const now = Date.now();
+    const pausedAt = Number(draft?.pausedAt || state.quiz.pauseStartedAt || now);
+    const addMs = Math.max(0, now - pausedAt);
+    state.quiz.pausedTotalMs = Number(state.quiz.pausedTotalMs || 0) + addMs;
+  } catch {}
+
   state.quiz.paused = false;
   state.quiz.pauseStartedAt = null;
   clearPracticeDraft();
