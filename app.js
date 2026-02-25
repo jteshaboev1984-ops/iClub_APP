@@ -611,7 +611,7 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
   }, Math.max(200, Number(delayMs) || 1200));
 }
 
-  function trackEvent(type, payload = {}) {
+    function trackEvent(type, payload = {}) {
     const store = eventsStore();
     const id = ++store.seq;
     const ts = Date.now();
@@ -638,6 +638,35 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
     evaluateRealtimeCredentials(item);
 
     return item;
+  }
+
+  // ✅ DB sync for video analytics (video_events)
+  async function insertVideoEventToSupabase(event_type, lesson_id, watch_seconds) {
+    try {
+      if (!window.sb) return;
+
+      const lid = Number(lesson_id);
+      if (!lid) return;
+
+      const { data: uData, error: uErr } = await window.sb.auth.getUser();
+      if (uErr) return;
+
+      const uid = uData?.user?.id;
+      if (!uid) return;
+
+      const ws = Math.max(0, Math.round(Number(watch_seconds) || 0));
+
+      const { error: insErr } = await window.sb.from("video_events").insert({
+        user_id: uid,
+        lesson_id: lid,
+        event_type: String(event_type),
+        watch_seconds: ws
+      });
+
+      if (insErr) logClientError("video_events_insert_error", insErr);
+    } catch (e) {
+      logClientError("video_events_insert_exception", e);
+    }
   }
 
   function listEventsByType(types) {
@@ -1067,9 +1096,19 @@ function evaluateRealtimeCredentials(event) {
 }
 
 function runDailyCredentialJobs() {
+  const c = credentialsStore();
+  const today = dayKeyTashkent(Date.now());
+
+  // ✅ Уже делали daily пересчёты сегодня — выходим
+  if (c.last_daily_eval_day === today) return;
+
   evaluateConsistentLearnerDaily();
   evaluateResearchOrientedDaily();
   evaluateErrorDrivenDailyOrOnReview();
+
+  // ✅ фиксируем, что daily пересчёт на сегодня выполнен
+  c.last_daily_eval_day = today;
+  saveCredentialsStore(c);
 
   // ✅ daily пересчёты тоже фиксируем в БД
   scheduleCredentialsDbSync(1200);
@@ -3080,6 +3119,10 @@ async function ensureProfileSubjectsDbSynced() {
 // - On failure writes practice_db_error into app_events
 // ---------------------------
 const _subjectIdByKeyCache = new Map();
+
+// ✅ Home (Competitive) stats cache (in-memory)
+const _homeStatsCache = new Map();
+const HOME_STATS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 async function getSubjectIdByKey(subjectKey) {
   const key = String(subjectKey || "").trim();
@@ -5726,8 +5769,14 @@ function uiAlert({ title, message, okText } = {}) {
 // Home (Competitive) — real Rank + Progress
 // ===========================
 async function computeHomeCompetitiveStats(subjectKey) {
+  const cacheKey = `home_comp:${String(subjectKey || "").trim()}`;
+  const cached = _homeStatsCache.get(cacheKey);
+  if (cached && (Date.now() - cached.ts) < HOME_STATS_CACHE_TTL_MS) {
+    return cached.data;
+  }
+
   try {
-   if (!window.sb) return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
+    if (!window.sb) return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
 
     const subjectId = await getSubjectIdByKey(subjectKey);
     if (!subjectId) return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
@@ -5745,54 +5794,47 @@ async function computeHomeCompetitiveStats(subjectKey) {
     const tours = Array.isArray(toursRes?.data) ? toursRes.data : [];
     if (!tours.length) return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
 
-    const tourIds = tours.map(t => t.id);
-
-    // 2) my attempts
-    const attemptsRes = await window.sb
+    // 2) attempts for this subject (submitted only)
+    const attemptRes = await window.sb
       .from("tour_attempts")
-      .select("tour_id,status")
+      .select("id,tour_id,percent,status")
       .eq("user_id", uid)
-      .in("tour_id", tourIds);
+      .in("status", ["submitted"])
+      .order("created_at", { ascending: false });
 
-    const OK_STATUSES = new Set(["submitted", "time_expired", "anti_cheat", "finished"]);
-    const attempts = Array.isArray(attemptsRes?.data) ? attemptsRes.data : [];
+    const attempts = Array.isArray(attemptRes?.data) ? attemptRes.data : [];
 
-    const doneIds = new Set(
-      attempts
-        .filter(r => {
-          const st = String(r?.status || "").trim();
-          return !st || OK_STATUSES.has(st);
-        })
-        .map(r => r.tour_id)
-    );
+    const completedTourIds = new Set(attempts.map(a => Number(a.tour_id)).filter(Boolean));
+    const completedCount = tours.filter(t => completedTourIds.has(Number(t.id))).length;
 
-    const doneTours = tours.filter(t => doneIds.has(t.id));
-    const completedCount = doneTours.length;
+    const totalTours = tours.length || 0;
+    const progressPct = totalTours ? Math.round((completedCount / totalTours) * 100) : 0;
 
-    const maxTourNo = tours.reduce((m, t) => Math.max(m, Number(t?.tour_no || 0)), 0);
-    const maxCompletedNo = doneTours.reduce((m, t) => Math.max(m, Number(t?.tour_no || 0)), 0);
+    // moduleNo = next tour number (1..7)
+    const moduleNo = Math.min(7, Math.max(1, completedCount + 1));
 
-    const moduleNo = Math.min(Math.max(maxCompletedNo + 1, 1), Math.max(maxTourNo || 1, 1));
-    const progressPct = Math.max(0, Math.min(100, Math.round((completedCount / tours.length) * 100)));
-
-    // 3) rank from cache (country)
-    const rankTourNo = maxCompletedNo || moduleNo;
-    const rankTour = tours.find(t => Number(t?.tour_no || 0) === Number(rankTourNo));
-
+    // 3) rank: if ratings_cache exists, use it; otherwise null
     let rankNo = null;
-    if (rankTour?.id) {
-      const rankRes = await window.sb
-        .from("ratings_cache")
-        .select("rank_no")
-        .eq("tour_id", rankTour.id)
-        .eq("rank_type", "country")
-        .eq("user_id", uid)
-        .maybeSingle();
+    try {
+      // pick the latest tour id for rank reference (or current module)
+      const currentTour = tours.find(t => Number(t.tour_no) === Number(moduleNo)) || tours[tours.length - 1];
+      if (currentTour?.id) {
+        const rRes = await window.sb
+          .from("ratings_cache")
+          .select("rank_no")
+          .eq("tour_id", Number(currentTour.id))
+          .eq("user_id", uid)
+          .eq("rank_type", "country")
+          .limit(1);
 
-      if (!rankRes?.error) rankNo = rankRes?.data?.rank_no ?? null;
-    }
+        const row = Array.isArray(rRes?.data) ? rRes.data[0] : null;
+        if (row && row.rank_no != null) rankNo = Number(row.rank_no);
+      }
+    } catch {}
 
-    return { moduleNo, progressPct, rankNo, completedCount, totalTours: tours.length };
+    const out = { moduleNo, progressPct, rankNo, completedCount, totalTours: tours.length };
+    _homeStatsCache.set(cacheKey, { ts: Date.now(), data: out });
+    return out;
   } catch {
     return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
   }
@@ -6484,10 +6526,56 @@ function saveMyRecs(data) {
   localStorage.setItem(LS.myRecs, JSON.stringify(data));
 }
 
+// ✅ DB sync for recommendations table
+async function syncMyRecsToSupabase(subjectKey, topics) {
+  try {
+    if (!window.sb) return;
+    const uid = await getAuthUid();
+    if (!uid) return;
+
+    const subjectId = await getSubjectIdByKey(subjectKey);
+    if (!subjectId) return;
+
+    const list = Array.from(new Set((topics || []).map(x => String(x || "").trim()).filter(Boolean)));
+    if (!list.length) return;
+
+    // Avoid duplicates: check which topics already exist in DB for this user+subject
+    const { data: existingRows, error: selErr } = await window.sb
+      .from("recommendations")
+      .select("topic")
+      .eq("user_id", uid)
+      .eq("subject_id", subjectId)
+      .eq("source_type", "practice")
+      .in("topic", list);
+
+    if (selErr) {
+      logClientError("recommendations_select_error", selErr);
+      return;
+    }
+
+    const exists = new Set((existingRows || []).map(r => String(r.topic || "").trim()).filter(Boolean));
+    const toInsert = list
+      .filter(tp => !exists.has(tp))
+      .map(tp => ({
+        user_id: uid,
+        subject_id: subjectId,
+        source_type: "practice",
+        topic: tp
+      }));
+
+    if (!toInsert.length) return;
+
+    const { error: insErr } = await window.sb.from("recommendations").insert(toInsert);
+    if (insErr) logClientError("recommendations_insert_error", insErr);
+  } catch (e) {
+    logClientError("recommendations_sync_exception", e);
+  }
+}
+
 function addMyRecsFromAttempt(attempt) {
   const wrong = (attempt?.details || []).filter(d => !d.isCorrect);
   const topics = Array.from(new Set(wrong.map(d => d.topic || "General")));
-  if (!topics.length) return { added: 0, topics: [] };
+  if (!topics.length) return { added: 0, topics: [], addedTopics: [] };
 
   const store = loadMyRecs();
   store.bySubject = store.bySubject || {};
@@ -6503,7 +6591,7 @@ function addMyRecsFromAttempt(attempt) {
   store.bySubject[subjKey] = [...add, ...(store.bySubject[subjKey] || [])].slice(0, 50);
   saveMyRecs(store);
 
-  return { added: add.length, topics };
+  return { added: add.length, topics, addedTopics: add.map(x => x.topic) };
 }
 
   function formatMMSS(sec) {
@@ -7754,12 +7842,17 @@ function syncPracticeResultBadges() {
 
     const uniq = Array.from(new Set(topics));
 
-    // Save to "My recommendations" (v1: topics-only)
+        // Save to "My recommendations" (v1: topics-only)
 const res = addMyRecsFromAttempt(attempt);
 if (!res.added) {
   // if there are no mistakes -> nothing to save
 } else {
   showToast(t("practice_saved_to_my_recs"));
+
+  // ✅ write recs into DB (non-blocking)
+  try {
+    syncMyRecsToSupabase(attempt.subjectKey, res.addedTopics);
+  } catch {}
 }
      
     if (!uniq.length) {
@@ -9467,10 +9560,17 @@ if (action === "tour-next" || action === "tour-submit") {
   return;
 }
 
-            if (action === "video-skip") {
+      if (action === "video-skip") {
         const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : (state?.activeSubjectKey ? String(state.activeSubjectKey) : "");
         const lesson_id = state?.courses?.lessonId ? String(state.courses.lessonId) : "";
         trackEvent("video_skipped", { subject_id, lesson_id });
+
+        // ✅ write to DB video_events (non-blocking)
+        try {
+          const p = document.getElementById("video-player");
+          const ws = p ? (p.currentTime || 0) : 0;
+          insertVideoEventToSupabase("skipped", lesson_id, ws);
+        } catch {}
 
         openPracticeStart();
         return;
@@ -9481,10 +9581,17 @@ if (action === "tour-next" || action === "tour-submit") {
         const lesson_id = state?.courses?.lessonId ? String(state.courses.lessonId) : "";
         trackEvent("video_completed", { subject_id, lesson_id });
 
+        // ✅ write to DB video_events (non-blocking)
+        try {
+          const p = document.getElementById("video-player");
+          const ws = p ? (p.currentTime || 0) : 0;
+          insertVideoEventToSupabase("completed", lesson_id, ws);
+        } catch {}
+
         openPracticeStart();
         return;
       }
-
+       
       if (action === "resources-archive") {
   if (!canOpenArchiveNow()) {
     showToast("Архив откроется после завершения активного тура.");
