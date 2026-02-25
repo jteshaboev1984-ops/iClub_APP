@@ -4319,24 +4319,27 @@ function bindRatingsUI() {
   if (searchInput) {
     searchInput.placeholder = t("ratings_search_placeholder") || "Search...";
 
-    // ✅ Debounce: поиск запускаем через 300мс после остановки ввода
+        // ✅ Debounce: пользователь перестал печатать → применяем поиск и показываем результат (закрываем панель)
     searchInput.addEventListener("input", () => {
       if (searchTimer) clearTimeout(searchTimer);
 
       searchTimer = setTimeout(() => {
         const v = String(searchInput.value || "").trim();
 
-        // если меньше 2 символов — считаем, что поиска нет (сбрасываем фильтр)
+        // <2 символов: считаем, что поиска нет (сбрасываем фильтр), панель НЕ закрываем
         if (v.length < 2) {
           if (String(ratingsState.q || "") !== "") applySearch("");
           return;
         }
 
         applySearch(v);
-      }, 400);
+
+        // ✅ UX: после автопоиска сразу показываем результаты
+        closeRatingsSearchPanel();
+      }, 500);
     });
 
-    // ✅ Enter — применяем сразу и закрываем панель (как было)
+    // ✅ Enter — применяем сразу и закрываем панель
     searchInput.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
 
