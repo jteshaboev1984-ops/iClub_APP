@@ -1283,6 +1283,80 @@ function runDailyCredentialJobs() {
     localStorage.setItem(LS.profile, JSON.stringify(profile));
   }
 
+      // ---------------------------
+// ✅ Geo translations hydration (region/district)
+// For old profiles that don't have region_tr/district_tr yet
+// ---------------------------
+let __geoHydrateInFlight = null;
+
+async function ensureProfileGeoTranslationsHydrated() {
+  if (__geoHydrateInFlight) return __geoHydrateInFlight;
+
+  __geoHydrateInFlight = (async () => {
+    const p = loadProfile();
+    if (!p) return { ok: false, reason: "no_profile" };
+    if (!window.sb) return { ok: false, reason: "no_supabase" };
+
+    const needRegion = !!p.region_id && (!p.region_tr || !p.region_tr.ru || !p.region_tr.uz || !p.region_tr.en);
+    const needDistrict = !!p.district_id && (!p.district_tr || !p.district_tr.ru || !p.district_tr.uz || !p.district_tr.en);
+
+    if (!needRegion && !needDistrict) return { ok: true, skipped: true };
+
+    let changed = false;
+
+    try {
+      if (needRegion) {
+        const { data: rRow } = await window.sb
+          .from("regions")
+          .select("id,name_ru,name_uz,name_en,name")
+          .eq("id", Number(p.region_id))
+          .maybeSingle();
+
+        if (rRow) {
+          p.region_tr = {
+            ru: String(rRow.name_ru || rRow.name || "").trim(),
+            uz: String(rRow.name_uz || rRow.name_ru || rRow.name || "").trim(),
+            en: String(rRow.name_en || rRow.name_ru || rRow.name || "").trim()
+          };
+          changed = true;
+        }
+      }
+
+      if (needDistrict) {
+        const { data: dRow } = await window.sb
+          .from("districts")
+          .select("id,name_ru,name_uz,name_en,name")
+          .eq("id", Number(p.district_id))
+          .maybeSingle();
+
+        if (dRow) {
+          p.district_tr = {
+            ru: String(dRow.name_ru || dRow.name || "").trim(),
+            uz: String(dRow.name_uz || dRow.name_ru || dRow.name || "").trim(),
+            en: String(dRow.name_en || dRow.name_ru || dRow.name || "").trim()
+          };
+          changed = true;
+        }
+      }
+    } catch (e) {
+      console.warn("[geo hydrate] failed:", e);
+      return { ok: false, reason: "exception" };
+    }
+
+    if (changed) {
+      saveProfile(p);
+      return { ok: true, updated: true };
+    }
+
+    return { ok: true, updated: false };
+  })();
+
+  try {
+    return await __geoHydrateInFlight;
+  } finally {
+    __geoHydrateInFlight = null;
+  }
+}
    function togglePinnedSubject(profile, subjectKey) {
   if (!profile) return null;
   const p = structuredClone(profile);
@@ -5261,6 +5335,21 @@ input?.addEventListener("change", async () => {
 
   function renderProfileMain() {
   const profile = loadProfile();
+
+  // ✅ ensure old profiles get region_tr/district_tr from DB (so geo translates on UI language switch)
+  if (profile && window.sb) {
+    ensureProfileGeoTranslationsHydrated()
+      .then((res) => {
+        if (res?.ok && res?.updated) {
+          try { renderHome(); } catch {}
+          if (state?.tab === "profile") {
+            try { renderProfileMain(); } catch {}
+            try { renderProfileSettings(); } catch {}
+          }
+        }
+      })
+      .catch(() => {});
+  }
 
   if (profile && window.sb && !__profileSubjectsDbReady) {
     const compElTmp = document.getElementById("profile-metric-competitive");
