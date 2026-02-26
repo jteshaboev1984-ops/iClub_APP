@@ -5424,11 +5424,91 @@ input?.addEventListener("change", async () => {
     if (avatarInitials) avatarInitials.textContent = photo ? "" : (fullName.split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase() || "IC");
   }
 
+    // ✅ Geo should follow current UI language (not the language used during registration)
+  const lang = (window.i18n?.getLang ? window.i18n.getLang() : "ru");
+
+  const pickTr = (tr, fallback) => {
+    let obj = tr;
+    if (typeof obj === "string") {
+      try { obj = JSON.parse(obj); } catch { obj = null; }
+    }
+    if (obj && typeof obj === "object") {
+      if (lang === "uz") return String(obj.uz || obj.ru || fallback || "").trim();
+      if (lang === "en") return String(obj.en || obj.ru || fallback || "").trim();
+      return String(obj.ru || fallback || "").trim();
+    }
+    return String(fallback || "").trim();
+  };
+
+  // If we have ids but no translations cached locally — hydrate once from DB and rerender
+  if (window.sb && (profile.region_id || profile.district_id) && (!profile.region_tr || !profile.district_tr)) {
+    (async () => {
+      try {
+        const p2 = loadProfile();
+        if (!p2) return;
+
+        let changed = false;
+
+        if (p2.region_id && !p2.region_tr) {
+          const { data: rRow } = await window.sb
+            .from("regions")
+            .select("id,name_ru,name_uz,name_en,name")
+            .eq("id", Number(p2.region_id))
+            .maybeSingle();
+
+          if (rRow) {
+            p2.region_tr = {
+              ru: String(rRow.name_ru || rRow.name || "").trim(),
+              uz: String(rRow.name_uz || rRow.name_ru || rRow.name || "").trim(),
+              en: String(rRow.name_en || rRow.name_ru || rRow.name || "").trim()
+            };
+            changed = true;
+          }
+        }
+
+        if (p2.district_id && !p2.district_tr) {
+          const { data: dRow } = await window.sb
+            .from("districts")
+            .select("id,name_ru,name_uz,name_en,name")
+            .eq("id", Number(p2.district_id))
+            .maybeSingle();
+
+          if (dRow) {
+            p2.district_tr = {
+              ru: String(dRow.name_ru || dRow.name || "").trim(),
+              uz: String(dRow.name_uz || dRow.name_ru || dRow.name || "").trim(),
+              en: String(dRow.name_en || dRow.name_ru || dRow.name || "").trim()
+            };
+            changed = true;
+          }
+        }
+
+        if (changed) {
+          saveProfile(p2);
+          // rerender profile so meta updates immediately after hydrate
+          renderProfileMain();
+        }
+      } catch {}
+    })();
+  }
+
   const metaParts = [];
-  if (profile.region) metaParts.push(profile.region);
-  if (profile.district) metaParts.push(profile.district);
-  if (profile.school) metaParts.push(`№${String(profile.school).replace(/^№/,"")}`);
-  if (profile.class) metaParts.push(`${profile.class} класс`);
+
+  const regionLabel = pickTr(profile.region_tr, profile.region);
+  const districtLabel = pickTr(profile.district_tr, profile.district);
+
+  if (regionLabel) metaParts.push(regionLabel);
+  if (districtLabel) metaParts.push(districtLabel);
+
+  if (profile.school) {
+    metaParts.push(`№${String(profile.school).replace(/^№/,"")}`);
+  }
+
+  if (profile.class) {
+    const suffix = t("class_suffix") || "";
+    metaParts.push(suffix ? `${String(profile.class).trim()} ${suffix}`.trim() : String(profile.class).trim());
+  }
+
   metaEl.textContent = metaParts.join(" • ") || "—";
 
     const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
