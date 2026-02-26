@@ -412,6 +412,7 @@ tours_tour_label: "Тур",
       // School labels
       school_prefix: "Школа",
       class_suffix: "класс",
+      reg_submit_btn: "Завершить регистрацию",
 
       // Ratings UI
       ratings_my_rank: "МОЙ РАНГ",
@@ -946,6 +947,7 @@ tours_tour_label: "Tur",
       // School labels
       school_prefix: "Maktab",
       class_suffix: "-sinf",
+      reg_submit_btn: "Ro‘yxatdan o‘tishni yakunlash",
 
       // Ratings UI
       ratings_my_rank: "MENING O‘RNIM",
@@ -1462,6 +1464,7 @@ archive_unlock_after_toast: "Archive will open after you finish the active tour.
 
       school_prefix: "School",
       class_suffix: "grade",
+      reg_submit_btn: "Finish registration",
 
       ratings_my_rank: "MY RANK",
       ratings_search_title: "Search",
