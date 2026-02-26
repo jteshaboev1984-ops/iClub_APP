@@ -2103,6 +2103,7 @@ function buildPracticeSetLocal(subjectKey) {
     // prevent double-binding
     if (regionEl.dataset.bound === "1") {
       refreshRegionDistrictPlaceholders();
+      refreshRegionDistrictOptionLabels();
       return;
     }
     regionEl.dataset.bound = "1";
@@ -2157,7 +2158,8 @@ function buildPracticeSetLocal(subjectKey) {
       o.textContent = String(r?.[nameField] || r?.name_ru || "").trim();
       regionEl.appendChild(o);
     });
-
+      // ensure labels match current UI language (in case user switched language while loading)
+    refreshRegionDistrictOptionLabels();
 
     regionEl.addEventListener("change", async () => {
       const regionId = regionEl.value ? Number(regionEl.value) : null;
@@ -2209,6 +2211,9 @@ function buildPracticeSetLocal(subjectKey) {
         o.textContent = String(d?.[nameField] || d?.name_ru || "").trim();
         districtEl.appendChild(o);
       });
+
+      // ensure labels match current UI language
+      refreshRegionDistrictOptionLabels();
 
       districtEl.disabled = false;
     });
@@ -2601,6 +2606,21 @@ function getFullName(u) {
 function buildUserMeta(u) {
   const parts = [];
 
+  const lang = (window.i18n?.getLang ? window.i18n.getLang() : "ru");
+
+  const pickTr = (tr, fallback) => {
+    let obj = tr;
+    if (typeof obj === "string") {
+      try { obj = JSON.parse(obj); } catch { obj = null; }
+    }
+    if (obj && typeof obj === "object") {
+      if (lang === "uz") return String(obj.uz || obj.ru || fallback || "").trim();
+      if (lang === "en") return String(obj.en || obj.ru || fallback || "").trim();
+      return String(obj.ru || fallback || "").trim();
+    }
+    return String(fallback || "").trim();
+  };
+
   // class
   if (u?.class) {
     const c = String(u.class).trim();
@@ -2617,8 +2637,11 @@ function buildUserMeta(u) {
     parts.push(sp ? `${sp} ${s}`.trim() : s);
   }
 
-  if (u?.district) parts.push(String(u.district).trim());
-  if (u?.region) parts.push(String(u.region).trim());
+  const districtLabel = pickTr(u?.district_tr, u?.district);
+  const regionLabel = pickTr(u?.region_tr, u?.region);
+
+  if (districtLabel) parts.push(districtLabel);
+  if (regionLabel) parts.push(regionLabel);
 
   return parts.filter(Boolean).join(" • ");
 }
@@ -9011,8 +9034,11 @@ if (state.tab === "profile") {
     const fullName = $("#reg-fullname")?.value?.trim() || "";
     const lang = $("#reg-language")?.value || "ru";
 
-        let region = "";
+    let region = "";
     let district = "";
+
+    let region_tr = null;
+    let district_tr = null;
 
     let region_id = null;
     let district_id = null;
@@ -9024,12 +9050,14 @@ if (state.tab === "profile") {
       region_id = Number(regionEl.value) || null;
       const regionOpt = regionEl.options[regionEl.selectedIndex];
       region = regionOpt ? regionOpt.textContent.trim() : "";
+      region_tr = regionOpt ? { ru: regionOpt.dataset.ru || "", uz: regionOpt.dataset.uz || "", en: regionOpt.dataset.en || "" } : null;
     }
 
     if (districtEl && districtEl.value) {
       district_id = Number(districtEl.value) || null;
       const districtOpt = districtEl.options[districtEl.selectedIndex];
       district = districtOpt ? districtOpt.textContent.trim() : "";
+      district_tr = districtOpt ? { ru: districtOpt.dataset.ru || "", uz: districtOpt.dataset.uz || "", en: districtOpt.dataset.en || "" } : null;
     }
 
     const isSchoolStudent = ($("#reg-is-school-toggle")?.checked || $("#reg-is-school")?.value === "yes");
@@ -9101,6 +9129,9 @@ if (state.tab === "profile") {
       region_id,
       district_id,
 
+      region_tr,
+      district_tr,
+
       region,
       district,
       school: isSchoolStudent ? school : "",
@@ -9138,7 +9169,16 @@ if (state.tab === "profile") {
       return;
     }
 
-        // keep local profile as UX fallback (DB is source of truth now)
+       // keep local profile as UX fallback (DB is source of truth now)
+
+    // ✅ fresh start after re-registration (prevents showing old local attempts/stats)
+    try {
+      localStorage.removeItem(LS.practiceDraft);
+      localStorage.removeItem(LS.myRecs);
+      localStorage.removeItem(LS.events);
+      localStorage.removeItem(LS.credentials);
+    } catch {}
+
     saveProfile(profile);
 
     // Уже сохранили в БД выше (dbRes). Повторно НЕ сохраняем, чтобы не ловить ошибки/дубли.
