@@ -71,13 +71,13 @@ function hideToursLoading() {
   }
 
    // ✅ Автоматическое подключение пользователя к боту
-async function tryLinkBotOnce(reason = "registration") {
+      async function tryLinkBotOnce(reason = "registration") {
   try {
     const tg = window.Telegram?.WebApp;
     if (!tg || typeof tg.sendData !== "function") return false;
 
     // если уже отправляли — не повторяем
-    if (localStorage.getItem("iclub_bot_linked_v1") === "1") return true;
+    if (localStorage.getItem(LS.botLinked) === "1") return true;
 
     let uid = null;
     try {
@@ -97,13 +97,14 @@ async function tryLinkBotOnce(reason = "registration") {
 
     tg.sendData(JSON.stringify(payload));
 
-    localStorage.setItem("iclub_bot_linked_v1", "1");
+    localStorage.setItem(LS.botLinked, "1");
     return true;
   } catch {
     return false;
   }
 }
-  async function initSupabaseSession() {
+   
+   async function initSupabaseSession() {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
     if (!window.supabase?.createClient) return null;
 
@@ -303,6 +304,7 @@ try {
     profile: "iclub_profile_v1",
     practiceDraft: "iclub_practice_draft_v1",
     myRecs: "iclub_my_recs_v1",
+    botLinked: "iclub_bot_linked_v1",
 
     // Earned Credentials (v1.3 FINAL)
     events: "iclub_events_v1",
@@ -7564,7 +7566,7 @@ async function startPracticeNew() {
 }
 
   // ---- Pause / Submit / Finish ----
-  function handlePracticePause() {
+    function handlePracticePause() {
     const quiz = state.quiz;
     if (!quiz || quiz.mode !== "practice") return;
 
@@ -7575,12 +7577,21 @@ async function startPracticeNew() {
     quiz.pauseStartedAt = Date.now();
 
     // store snapshot to draft (so even refresh won't kill it)
-    savePracticeDraft({
-      status: "paused",
-      subjectKey: quiz.subjectKey,
-      pausedAt: Date.now(),
-      quiz
-    });
+    try {
+      // do not persist timer id
+      const quizForDraft = { ...quiz, qTimerId: null };
+
+      savePracticeDraft({
+        status: "paused",
+        subjectKey: quiz.subjectKey,
+        pausedAt: Date.now(),
+        quiz: quizForDraft
+      });
+    } catch (e) {
+      // if draft NOT saved — do NOT destroy current attempt
+      showToast(t("not_available"));
+      return;
+    }
 
     // unlock UI navigation
     state.quizLock = null;
@@ -9673,8 +9684,9 @@ if (action === "profile-open-ratings") {
     return;
   }
 
-    state.quizLock = "practice";
+      state.quizLock = "practice";
   state.quiz = draft.quiz;
+  state.quiz.qTimerId = null;
 
   // ✅ add paused time into pausedTotalMs (so итоговое время не включает паузу)
   try {
@@ -9687,7 +9699,6 @@ if (action === "profile-open-ratings") {
   state.quiz.paused = false;
   state.quiz.pauseStartedAt = null;
   clearPracticeDraft();
-
   saveState();
   replaceCourses("practice-quiz");
   renderPracticeQuiz();
@@ -9953,19 +9964,17 @@ if (action === "tour-next" || action === "tour-submit") {
      // ---------------------------
   // Debug: Registration reset helpers
   // ---------------------------
-  function resetRegistrationSoft() {
+    function resetRegistrationSoft() {
     // Local-only reset (keeps Supabase auth session)
     try {
-      localStorage.removeItem("profile");
-      localStorage.removeItem("state");
-
-      // если у тебя есть другие ключи — добавим позже точечно
+      localStorage.removeItem(LS.profile);
+      localStorage.removeItem(LS.state);
     } catch (e) {}
 
-       __profileSubjectsDbReady = false;
-      showView("registration");
-      bindRegistration();
-   }
+    __profileSubjectsDbReady = false;
+    showView("registration");
+    bindRegistration();
+  }
 
   async function resetRegistrationHard() {
     // Full reset: sign out + clear local storage + reload
