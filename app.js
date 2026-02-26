@@ -9202,57 +9202,60 @@ if (state.tab === "profile") {
       return;
     }
 
-      // keep local profile as UX fallback (DB is source of truth now)
+            // keep local profile as UX fallback (DB is source of truth now)
 
-// ✅ fresh start after re-registration (prevents showing old local attempts/stats)
-try {
-  localStorage.removeItem(LS.practiceDraft);
-  localStorage.removeItem(LS.myRecs);
-  localStorage.removeItem(LS.events);
-  localStorage.removeItem(LS.credentials);
-  // если уже линковали бота раньше — при новой регистрации разрешаем снова
-  try { localStorage.removeItem(LS.botLinked); } catch {}
-} catch {}
+      // ✅ fresh start after re-registration (prevents showing old local attempts/stats)
+      try {
+        localStorage.removeItem(LS.practiceDraft);
+        localStorage.removeItem(LS.myRecs);
+        localStorage.removeItem(LS.events);
+        localStorage.removeItem(LS.credentials);
+        // если уже линковали бота раньше — при новой регистрации разрешаем снова
+        try { localStorage.removeItem(LS.botLinked); } catch {}
+      } catch {}
 
-saveProfile(profile);
+      saveProfile(profile);
 
-// ✅ auto-link this user to bot (chat_id will be captured by bot on web_app_data)
-// отправляем чуть позже, чтобы UI успел перейти на Home
-try {
-  setTimeout(() => {
-    try { tryLinkBotOnce("registration"); } catch {}
-  }, 300);
-} catch {}
+      // ✅ auto-link this user to bot (chat_id will be captured by bot on web_app_data)
+      // отправляем чуть позже, чтобы UI успел перейти на Home
+      try {
+        setTimeout(() => {
+          try { tryLinkBotOnce("registration"); } catch {}
+        }, 300);
+      } catch {}
 
-// Уже сохранили в БД выше (dbRes). Повторно НЕ сохраняем, чтобы не ловить ошибки/дубли.
-try {
-  trackEvent("registration_db_saved", {
-    ok: true,
-    reason: null,
-    user_subjects_rows: dbRes?.user_subjects_rows ?? null
-  });
-} catch {}
+      // Уже сохранили в БД выше (dbRes). Повторно НЕ сохраняем, чтобы не ловить ошибки/дубли.
+      try {
+        trackEvent("registration_db_saved", {
+          ok: true,
+          reason: null,
+          user_subjects_rows: dbRes?.user_subjects_rows ?? null
+        });
+      } catch {}
 
-window.i18n?.setLang(lang);
-applyStaticI18n();
+      window.i18n?.setLang(lang);
+      applyStaticI18n();
 
-state.tab = "home";
-state.prevTab = "home";
-state.viewStack = ["home"];
-state.courses.stack = ["all-subjects"];
-state.courses.subjectKey = null;
-state.courses.lessonId = null;
-state.courses.entryTab = "home";
-state.quizLock = null;
-saveState();
+      state.tab = "home";
+      state.prevTab = "home";
+      state.viewStack = ["home"];
+      state.courses.stack = ["all-subjects"];
+      state.courses.subjectKey = null;
+      state.courses.lessonId = null;
+      state.courses.entryTab = "home";
+      state.quizLock = null;
+      saveState();
 
       // порядок важен: сначала активируем таб, потом рисуем
       setTab("home");
       renderHome();
       renderAllSubjects();
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
   });
 }
-
+   
   function bindActions() {
     document.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-action]");
