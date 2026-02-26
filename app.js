@@ -2070,6 +2070,31 @@ function buildPracticeSetLocal(subjectKey) {
     }
   }
 
+  function refreshRegionDistrictOptionLabels() {
+    const regionEl = $("#reg-region");
+    const districtEl = $("#reg-district");
+    if (!regionEl || !districtEl) return;
+
+    const lang = (window.i18n?.getLang ? window.i18n.getLang() : "ru");
+
+    const pick = (opt) => {
+      if (!opt) return "";
+      if (lang === "uz") return opt.dataset.uz || opt.dataset.ru || opt.textContent || "";
+      if (lang === "en") return opt.dataset.en || opt.dataset.ru || opt.textContent || "";
+      return opt.dataset.ru || opt.textContent || "";
+    };
+
+    // skip placeholder (index 0)
+    for (let i = 1; i < regionEl.options.length; i++) {
+      const o = regionEl.options[i];
+      o.textContent = String(pick(o)).trim();
+    }
+    for (let i = 1; i < districtEl.options.length; i++) {
+      const o = districtEl.options[i];
+      o.textContent = String(pick(o)).trim();
+    }
+  }
+
   async function initRegionDistrictUI() {
     const regionEl = $("#reg-region");
     const districtEl = $("#reg-district");
@@ -2121,9 +2146,14 @@ function buildPracticeSetLocal(subjectKey) {
       return;
     }
 
-    regions.forEach(r => {
+        regions.forEach(r => {
       const o = document.createElement("option");
       o.value = String(r.id);
+
+      o.dataset.ru = String(r?.name_ru || "").trim();
+      o.dataset.uz = String(r?.name_uz || "").trim();
+      o.dataset.en = String(r?.name_en || "").trim();
+
       o.textContent = String(r?.[nameField] || r?.name_ru || "").trim();
       regionEl.appendChild(o);
     });
@@ -2168,9 +2198,14 @@ function buildPracticeSetLocal(subjectKey) {
         return;
       }
 
-      rows.forEach(d => {
+            rows.forEach(d => {
         const o = document.createElement("option");
         o.value = String(d.id);
+
+        o.dataset.ru = String(d?.name_ru || "").trim();
+        o.dataset.uz = String(d?.name_uz || "").trim();
+        o.dataset.en = String(d?.name_en || "").trim();
+
         o.textContent = String(d?.[nameField] || d?.name_ru || "").trim();
         districtEl.appendChild(o);
       });
@@ -5679,16 +5714,17 @@ function uiAlert({ title, message, okText } = {}) {
   syncChipsFromSelects();
 }
        // live language switch on registration
-    const langSel = $("#reg-language");
-    if (langSel) {
-      langSel.addEventListener("change", () => {
-        try { window.i18n?.setLang(langSel.value); } catch {}
-        try { applyStaticI18n(); } catch {}
-        try { updateSchoolFieldsVisibility(); } catch {}
-        try { applyRegSubjectI18n(); } catch {}
-        try { refreshRegionDistrictPlaceholders?.(); } catch {}
-      });
-    }
+         const langSel = $("#reg-language");
+     if (langSel) {
+       langSel.addEventListener("change", () => {
+         try { window.i18n?.setLang(langSel.value); } catch {}
+         try { applyStaticI18n(); } catch {}
+         try { updateSchoolFieldsVisibility(); } catch {}
+         try { applyRegSubjectI18n(); } catch {}
+         try { refreshRegionDistrictPlaceholders?.(); } catch {}
+         try { refreshRegionDistrictOptionLabels?.(); } catch {}
+       });
+     }
 
     // first paint (ensures no RU/EN mix)
     try { applyRegSubjectI18n(); } catch {}
