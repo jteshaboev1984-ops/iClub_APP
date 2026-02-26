@@ -70,6 +70,39 @@ function hideToursLoading() {
     }
   }
 
+   // ✅ Автоматическое подключение пользователя к боту
+async function tryLinkBotOnce(reason = "registration") {
+  try {
+    const tg = window.Telegram?.WebApp;
+    if (!tg || typeof tg.sendData !== "function") return false;
+
+    // если уже отправляли — не повторяем
+    if (localStorage.getItem("iclub_bot_linked_v1") === "1") return true;
+
+    let uid = null;
+    try {
+      const { data } = await window.sb?.auth?.getUser();
+      uid = data?.user?.id || null;
+    } catch {}
+
+    const u = window.Telegram?.WebApp?.initDataUnsafe?.user || null;
+
+    const payload = {
+      type: "link_bot",
+      v: 1,
+      reason,
+      uid,
+      telegram_user_id: u?.id ? String(u.id) : null
+    };
+
+    tg.sendData(JSON.stringify(payload));
+
+    localStorage.setItem("iclub_bot_linked_v1", "1");
+    return true;
+  } catch {
+    return false;
+  }
+}
   async function initSupabaseSession() {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
     if (!window.supabase?.createClient) return null;
@@ -9169,47 +9202,54 @@ if (state.tab === "profile") {
       return;
     }
 
-       // keep local profile as UX fallback (DB is source of truth now)
+      // keep local profile as UX fallback (DB is source of truth now)
 
-    // ✅ fresh start after re-registration (prevents showing old local attempts/stats)
-    try {
-      localStorage.removeItem(LS.practiceDraft);
-      localStorage.removeItem(LS.myRecs);
-      localStorage.removeItem(LS.events);
-      localStorage.removeItem(LS.credentials);
-    } catch {}
+// ✅ fresh start after re-registration (prevents showing old local attempts/stats)
+try {
+  localStorage.removeItem(LS.practiceDraft);
+  localStorage.removeItem(LS.myRecs);
+  localStorage.removeItem(LS.events);
+  localStorage.removeItem(LS.credentials);
+  // если уже линковали бота раньше — при новой регистрации разрешаем снова
+  try { localStorage.removeItem(LS.botLinked); } catch {}
+} catch {}
 
-    saveProfile(profile);
+saveProfile(profile);
 
-    // Уже сохранили в БД выше (dbRes). Повторно НЕ сохраняем, чтобы не ловить ошибки/дубли.
-    try {
-      trackEvent("registration_db_saved", {
-        ok: true,
-        reason: null,
-        user_subjects_rows: dbRes?.user_subjects_rows ?? null
-      });
-    } catch {}
+// ✅ auto-link this user to bot (chat_id will be captured by bot on web_app_data)
+// отправляем чуть позже, чтобы UI успел перейти на Home
+try {
+  setTimeout(() => {
+    try { tryLinkBotOnce("registration"); } catch {}
+  }, 300);
+} catch {}
 
-      window.i18n?.setLang(lang);
-      applyStaticI18n();
+// Уже сохранили в БД выше (dbRes). Повторно НЕ сохраняем, чтобы не ловить ошибки/дубли.
+try {
+  trackEvent("registration_db_saved", {
+    ok: true,
+    reason: null,
+    user_subjects_rows: dbRes?.user_subjects_rows ?? null
+  });
+} catch {}
 
+window.i18n?.setLang(lang);
+applyStaticI18n();
 
-    state.tab = "home";
-    state.prevTab = "home";
-    state.viewStack = ["home"];
-    state.courses.stack = ["all-subjects"];
-    state.courses.subjectKey = null;
-    state.courses.lessonId = null;
-    state.courses.entryTab = "home";
-    state.quizLock = null;
-    saveState();
+state.tab = "home";
+state.prevTab = "home";
+state.viewStack = ["home"];
+state.courses.stack = ["all-subjects"];
+state.courses.subjectKey = null;
+state.courses.lessonId = null;
+state.courses.entryTab = "home";
+state.quizLock = null;
+saveState();
 
-    renderAllSubjects();
-    renderHome();
-    setTab("home");
-  } finally {
-       if (submitBtn) submitBtn.disabled = false;
-     }
+      // порядок важен: сначала активируем таб, потом рисуем
+      setTab("home");
+      renderHome();
+      renderAllSubjects();
   });
 }
 
