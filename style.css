@@ -3910,3 +3910,4 @@ html.i18n-pending body { visibility: hidden; }
   border-radius: 16px;
   display: block;
 }
+button.is-loading { opacity: .85; }
