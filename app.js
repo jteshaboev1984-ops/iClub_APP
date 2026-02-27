@@ -2237,7 +2237,10 @@ function buildPracticeSetLocal(subjectKey) {
     distPh.textContent = t("reg_select_region_first") || "Сначала выберите регион…";
     districtEl.appendChild(distPh);
 
-    // DB only
+        // DB only
+    if (!window.sb) {
+      try { await initSupabaseSession(); } catch {}
+    }
     if (!window.sb) {
       showToast("Supabase not ready");
       return;
@@ -7771,7 +7774,11 @@ state.practiceLastAttempt = { ...(attempt || {}), db: (state.practiceLastAttempt
   } catch {}
 
   try {
-    const res = await savePracticeAttemptToSupabase(attempt, quiz);
+        const res = await savePracticeAttemptToSupabase(attempt, quiz);
+
+    if (res?.ok) {
+      clearPracticeDraft();
+    }
 
     // DEBUG 2: DB save result
     try {
@@ -7804,9 +7811,6 @@ state.practiceLastAttempt = { ...(attempt || {}), db: (state.practiceLastAttempt
     } catch {}
   }
 })();
-
-    // Clear paused draft if any
-    clearPracticeDraft();
 
     // Unlock
     state.quizLock = null;
@@ -9240,8 +9244,14 @@ if (state.tab === "profile") {
     form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const submitBtn = form.querySelector('button[type="submit"]');
-  if (submitBtn) submitBtn.disabled = true;
+    const submitBtn = form.querySelector('button[type="submit"]');
+  const __prevSubmitText = submitBtn ? submitBtn.textContent : null;
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = (t("saving") || "Сохранение…");
+    submitBtn.classList.add("is-loading");
+  }
 
   try {
     const fullName = $("#reg-fullname")?.value?.trim() || "";
@@ -9430,8 +9440,12 @@ if (state.tab === "profile") {
       setTab("home");
       renderHome();
       renderAllSubjects();
-    } finally {
-      if (submitBtn) submitBtn.disabled = false;
+        } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove("is-loading");
+        if (__prevSubmitText != null) submitBtn.textContent = __prevSubmitText;
+      }
     }
   });
 }
@@ -10006,7 +10020,13 @@ if (action === "tour-next" || action === "tour-submit") {
       const lang = profile?.uiLanguage || profile?.language || getTelegramLang() || "ru";
       window.i18n?.setLang(lang);
       applyStaticI18n();
-      try { document.documentElement.classList.remove("i18n-pending"); } catch {}
+
+      // снимаем "i18n-pending" после кадра отрисовки, чтобы не было мигания
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          try { document.documentElement.classList.remove("i18n-pending"); } catch {}
+        });
+      });
 
       try {
         updateOfflineBanner();
