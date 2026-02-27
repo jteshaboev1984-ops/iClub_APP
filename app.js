@@ -7464,30 +7464,54 @@ async function renderToursHistorySummary(subjectId) {
 }
 
   // ---- Practice timer (per-question) ----
-  function stopPracticeQuestionTimer() {
+    function stopPracticeQuestionTimer() {
     if (state.quiz?.qTimerId) {
       clearInterval(state.quiz.qTimerId);
       state.quiz.qTimerId = null;
     }
   }
 
-  function startPracticeQuestionTimer() {
-    stopPracticeQuestionTimer();
+  function tickPracticeTimerNow() {
+    const quiz = state.quiz;
+    if (!quiz || quiz.mode !== "practice") return;
+    if (quiz.paused) return;
+
+    if (!quiz.qEndsAtMs) {
+      quiz.qEndsAtMs = Date.now() + (Number(quiz.qTimeLeft) || 0) * 1000;
+    }
+
+    const now = Date.now();
+    const leftSec = Math.max(0, Math.ceil((Number(quiz.qEndsAtMs) - now) / 1000));
+
+    // keep existing API for the rest of the code
+    quiz.qTimeLeft = leftSec;
 
     const timerEl = $("#practice-timer");
-    if (timerEl) timerEl.textContent = formatMMSS(state.quiz.qTimeLeft);
+    if (timerEl) timerEl.textContent = formatMMSS(leftSec);
 
-    state.quiz.qTimerId = setInterval(() => {
-      if (!state.quiz || state.quiz.paused) return;
+    if (leftSec <= 0) {
+      stopPracticeQuestionTimer();
+      handlePracticeSubmit(true);
+    }
+  }
 
-      state.quiz.qTimeLeft -= 1;
-      if (timerEl) timerEl.textContent = formatMMSS(state.quiz.qTimeLeft);
+    function startPracticeQuestionTimer() {
+    stopPracticeQuestionTimer();
 
-      if (state.quiz.qTimeLeft <= 0) {
-        stopPracticeQuestionTimer();
-        handlePracticeSubmit(true);
+    // initialize deadline from current qTimeLeft
+    try {
+      if (state.quiz && state.quiz.mode === "practice") {
+        state.quiz.qEndsAtMs = Date.now() + (Number(state.quiz.qTimeLeft) || 0) * 1000;
       }
-    }, 1000);
+    } catch {}
+
+    // paint immediately (important after returning from background)
+    tickPracticeTimerNow();
+
+    // faster tick to avoid background throttling issues; logic is deadline-based
+    state.quiz.qTimerId = setInterval(() => {
+      tickPracticeTimerNow();
+    }, 250);
   }
 
   // ---- Entry point from Subject Hub ----
@@ -7525,7 +7549,7 @@ async function startPracticeNew() {
   }
 
   state.quizLock = "practice";
-  state.quiz = {
+    state.quiz = {
     mode: "practice",
     subjectKey,
     startedAt: Date.now(),
@@ -7539,6 +7563,7 @@ async function startPracticeNew() {
     correct: Array.from({ length: questions.length }).map(() => false),
 
     qTimeLeft: Number(questions[0]?.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[questions[0]?.difficulty] || 60,
+    qEndsAtMs: null,   // ✅ NEW (deadline for current question)
     qTimerId: null
   };
 
@@ -7753,9 +7778,10 @@ async function startPracticeNew() {
       return;
     }
 
-    quiz.index = nextIndex;
+       quiz.index = nextIndex;
     const nextQ = quiz.questions[quiz.index];
     quiz.qTimeLeft = Number(nextQ.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[nextQ.difficulty] || 60;
+    quiz.qEndsAtMs = null; // ✅ NEW: force recompute for next question
 
     saveState();
     renderPracticeQuiz();
@@ -9952,8 +9978,9 @@ if (action === "profile-open-ratings") {
     state.quiz.pausedTotalMs = Number(state.quiz.pausedTotalMs || 0) + addMs;
   } catch {}
 
-  state.quiz.paused = false;
+    state.quiz.paused = false;
   state.quiz.pauseStartedAt = null;
+  state.quiz.qEndsAtMs = null; // ✅ NEW: rebuild deadline from saved qTimeLeft
   clearPracticeDraft();
   saveState();
   replaceCourses("practice-quiz");
