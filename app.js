@@ -8709,14 +8709,14 @@ async function updateTourAttempt(attemptId, patch) {
     return;
   }
 
-  // analytics: started
-    try {
+    // analytics: started
+  try {
     trackEvent("tour_attempt_started", {
-     ts: new Date().toISOString(),
-     tour_id: String(tour.id),
-     subject_id: String(subjectId),
-     subject_key: String(subjectKey || "")
-   });
+      ts: new Date().toISOString(),
+      tour_id: String(tour.id),
+      subject_id: String(subjectId),
+      subject_key: String(subjectKey || "")
+    });
   } catch {}
 
   initTourSession({
@@ -9214,20 +9214,20 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
      showToast(t("tour_violations_finish_toast"));
    }
 
-  // Earned Credentials — tour finished
+    // Earned Credentials — tour finished
   try {
     const subject_id = normSubjectId(ctx?.subjectKey || state?.courses?.subjectKey);
     const tour_id = ctx?.tourId != null ? String(ctx.tourId) : "";
     const is_archive = !!ctx?.isArchive;
 
-        trackEvent("tour_attempt_finished", {
-     ts,
-     status: "done",
-     tour_id,
-     is_archive,
-     subject_id,
-     subject_key: String(ctx?.subjectKey || state?.courses?.subjectKey || "")
-   });
+    trackEvent("tour_attempt_finished", {
+      ts,
+      status: "done",
+      tour_id,
+      is_archive,
+      subject_id: String(subject_id || ""),
+      subject_key: String(ctx?.subjectKey || state?.courses?.subjectKey || "")
+    });
   } catch {}
 
   // unlock
