@@ -48,10 +48,27 @@ function hideToursLoading() {
     return String(v ?? "").trim().toLowerCase();
   }
 
-  function safeJsonParse(s, fallback) {
+    function safeJsonParse(s, fallback) {
   if (s === null || s === undefined || s === "") return fallback;
   try { return JSON.parse(s); } catch { return fallback; }
 }
+
+  // ---------------------------
+  // DB write retry (critical writes only)
+  // ---------------------------
+  async function dbWriteWithRetry(fn, { tries = 3, baseDelayMs = 350 } = {}) {
+    let lastErr = null;
+    for (let i = 0; i < tries; i++) {
+      try {
+        return await fn();
+      } catch (e) {
+        lastErr = e;
+        const delay = baseDelayMs * Math.pow(2, i);
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+    throw lastErr;
+  }
 
     // ---------------------------
   // Supabase (v1 connect)
@@ -8477,14 +8494,63 @@ async function hasTourAttempt(uid, tourId) {
 async function createTourAttempt(uid, tourId) {
   if (!window.sb || !uid || !tourId) return null;
 
-  const { data, error } = await window.sb
-    .from("tour_attempts")
-    .insert([{ user_id: uid, tour_id: tourId, score: 0, percent: 0, total_time: 0, status: "submitted" }])
-    .select("id")
-    .single();
+  // 0) if attempt already exists — reuse it (idempotent)
+  try {
+    const { data: existing, error: exErr } = await window.sb
+      .from("tour_attempts")
+      .select("id")
+      .eq("user_id", uid)
+      .eq("tour_id", tourId)
+      .order("id", { ascending: true })
+      .limit(1);
 
-  if (error) return null;
-  return data?.id ?? null;
+    if (!exErr && Array.isArray(existing) && existing.length) {
+      return existing[0]?.id ?? null;
+    }
+  } catch {}
+
+  // 1) try insert with retry
+  let insertedId = null;
+  try {
+    const res = await dbWriteWithRetry(async () => {
+      const { data, error } = await window.sb
+        .from("tour_attempts")
+        .insert([{ user_id: uid, tour_id: tourId, score: 0, percent: 0, total_time: 0, status: "submitted" }])
+        .select("id")
+        .single();
+      if (error) throw error;
+      return data?.id ?? null;
+    }, { tries: 3, baseDelayMs: 350 });
+
+    insertedId = res;
+  } catch {
+    insertedId = null;
+  }
+
+  // 2) final: pick earliest attempt id and delete duplicate we created (if any)
+  try {
+    const { data: pick, error: pErr } = await window.sb
+      .from("tour_attempts")
+      .select("id")
+      .eq("user_id", uid)
+      .eq("tour_id", tourId)
+      .order("id", { ascending: true })
+      .limit(1);
+
+    if (!pErr && Array.isArray(pick) && pick.length) {
+      const winnerId = pick[0]?.id ?? null;
+
+      if (winnerId && insertedId && winnerId !== insertedId) {
+        try {
+          await window.sb.from("tour_attempts").delete().eq("id", insertedId);
+        } catch {}
+      }
+
+      return winnerId;
+    }
+  } catch {}
+
+  return insertedId;
 }
 
 async function upsertTourAnswer(attemptId, questionId, patch) {
@@ -8511,18 +8577,29 @@ async function upsertTourAnswer(attemptId, questionId, patch) {
 }
 
 async function updateTourAttempt(attemptId, patch) {
-  if (!window.sb || !attemptId) return;
+  if (!window.sb || !attemptId) return { ok: false, reason: "no_sb_or_id" };
+
   try {
-    await window.sb
-      .from("tour_attempts")
-      .update({
-        score: Number(patch.score || 0),
-        percent: Number(patch.percent || 0),
-        total_time: Number(patch.total_time || 0),
-        status: String(patch.status || "submitted")
-      })
-      .eq("id", attemptId);
-  } catch {}
+    await dbWriteWithRetry(async () => {
+      const { error } = await window.sb
+        .from("tour_attempts")
+        .update({
+          score: Number(patch.score || 0),
+          percent: Number(patch.percent || 0),
+          total_time: Number(patch.total_time || 0),
+          status: String(patch.status || "submitted")
+        })
+        .eq("id", attemptId);
+
+      if (error) throw error;
+      return true;
+    }, { tries: 3, baseDelayMs: 350 });
+
+    return { ok: true };
+  } catch (e) {
+    try { trackEvent("tour_db_save_failed", { attempt_id: String(attemptId), message: String(e?.message || e) }); } catch {}
+    return { ok: false, reason: "db_error", error: e };
+  }
 }
 
   function initTourSession({ subjectKey = null, tourNo = 1, tourId = null, attemptId = null, questions = [], isArchive = false } = {}) {
@@ -8643,28 +8720,31 @@ async function updateTourAttempt(attemptId, patch) {
   renderTourQuestion();
 }
 
+    function enforceTourAutoRulesNow() {
+    const ctx = state.tourContext;
+    if (!ctx || ctx.isArchive) return;
+
+    // 1) auto-finish if violations too many
+    if (ctx.violations >= TOUR_CONFIG.maxViolations) {
+      stopTourTick();
+      finishTour({ reason: "violations" });
+      return;
+    }
+
+    // 2) per-question timeout: auto submit if exceeded and not answered for this question index
+    const qElapsed = Math.floor((Date.now() - ctx.qStartedAt) / 1000);
+    if (qElapsed >= ctx.questionTimeLimit) {
+      if (!ctx.answers.some(a => a.index === ctx.index)) {
+        submitTourAnswer({ pickedIndex: null, auto: true });
+      }
+    }
+  }
+
   function startTourTick() {
     stopTourTick();
     tourTick = setInterval(() => {
       renderTourHUD();
-
-      // auto-finish if violations too many
-      if (!state.tourContext?.isArchive && state.tourContext?.violations >= TOUR_CONFIG.maxViolations) {
-        stopTourTick();
-        finishTour({ reason: "violations" });
-      }
-
-      // auto-finish if question time exceeded and no answer chosen (optional behavior)
-      const ctx = state.tourContext;
-      if (ctx && !ctx.isArchive) {
-        const qElapsed = Math.floor((Date.now() - ctx.qStartedAt) / 1000);
-        if (qElapsed >= ctx.questionTimeLimit) {
-          // if no selection yet, we keep button disabled; auto mark as wrong and go next
-          if (!ctx.answers.some(a => a.index === ctx.index)) {
-            submitTourAnswer({ pickedIndex: null, auto: true });
-          }
-        }
-      }
+      enforceTourAutoRulesNow();
     }, 250);
   }
 
@@ -8680,9 +8760,19 @@ async function updateTourAttempt(attemptId, patch) {
     if (antiCheatBound) return;
     antiCheatBound = true;
 
-    document.addEventListener("visibilitychange", () => {
+        document.addEventListener("visibilitychange", () => {
       if (!state.tourContext || state.tourContext.isArchive) return;
-      if (document.visibilityState !== "visible") registerTourViolation("visibility");
+
+      if (document.visibilityState !== "visible") {
+        registerTourViolation("visibility");
+
+        // если дошли до лимита — финишим сразу, не ждём тика
+        try { enforceTourAutoRulesNow(); } catch {}
+        return;
+      }
+
+      // при возврате на экран — сразу применяем авто-правила (timeout/violations)
+      try { enforceTourAutoRulesNow(); } catch {}
     });
 
     window.addEventListener("blur", () => {
@@ -8702,6 +8792,18 @@ async function updateTourAttempt(attemptId, patch) {
     ctx.violations += 1;
     ctx.lastViolationAt = now;
     saveState();
+
+    // ✅ mirror to DB via app_events (trackEvent already mirrors)
+    try {
+      trackEvent("tour_violation", {
+        violation_type: String(type || ""),
+        violations: Number(ctx.violations || 0),
+        tour_id: String(ctx.tourId || ""),
+        attempt_id: String(ctx.attemptId || ""),
+        subject_key: String(ctx.subjectKey || ""),
+        tour_no: Number(ctx.tourNo || 0)
+      });
+    } catch {}
 
     const warnBtn = $("#tour-warn-btn");
     if (warnBtn) warnBtn.style.display = "inline-flex";
@@ -9055,10 +9157,10 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     });
   }
 
-  // DB finalize (only active tours)
+   // DB finalize (only active tours)
   try {
     if (ctx?.attemptId && !ctx?.isArchive) {
-      await updateTourAttempt(ctx.attemptId, {
+      const res = await updateTourAttempt(ctx.attemptId, {
         score,
         percent,
         total_time: durationSec,
@@ -9067,6 +9169,10 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
           : (reason === "time_expired") ? "time_expired"
           : "submitted"
       });
+
+      if (!res?.ok) {
+        showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
+      }
     }
   } catch {}
 
