@@ -3061,7 +3061,7 @@ async function saveRegistrationToSupabase(profile) {
     return { ok: false, reason: "users_upsert_failed" };
   }
 
-  // 2) upsert user_subjects rows
+    // 2) upsert user_subjects rows
   const subjects = Array.isArray(profile?.subjects) ? profile.subjects : [];
   const rows = [];
 
@@ -3074,16 +3074,16 @@ async function saveRegistrationToSupabase(profile) {
 
     const mode = (s?.mode === "competitive") ? "competitive" : "study";
 
-      rows.push({
+    rows.push({
       user_id: uid,
       subject_id: subjectId,
       mode,
-     // ❗ project rule: competitive subjects cannot be pinned
+      // ❗ project rule: competitive subjects cannot be pinned
       is_pinned: (mode === "competitive") ? false : !!s?.pinned
     });
   }
 
-      if (rows.length) {
+  if (rows.length) {
     // ✅ Теперь в БД есть UNIQUE(user_id, subject_id) → можно безопасно upsert
     const { error: upErr } = await window.sb
       .from("user_subjects")
@@ -3098,8 +3098,38 @@ async function saveRegistrationToSupabase(profile) {
       } catch {}
       return { ok: false, reason: "user_subjects_upsert_failed" };
     }
+
+    // ✅ NEW: стартовая точка для аналитики (только регистрация)
+    try {
+      const historyRows = rows.map(r => ({
+        user_id: uid,
+        subject_id: r.subject_id,
+        action: "initial_registration",
+        from_mode: null,
+        to_mode: r.mode,
+        from_pinned: null,
+        to_pinned: r.is_pinned,
+        source: "registration",
+        meta: { v: 1 }
+      }));
+
+      const { error: hErr } = await window.sb
+        .from("user_subjects_history")
+        .insert(historyRows);
+
+      if (hErr) {
+        try {
+          trackEvent("registration_db_error", {
+            where: "user_subjects_history_insert",
+            message: String(hErr?.message || hErr)
+          });
+        } catch {}
+        // ❗ Регистрацию НЕ валим — история вторична, subjects уже сохранены
+      }
+    } catch {}
   }
-   __profileSubjectsDbReady = false;
+
+  __profileSubjectsDbReady = false;
   return { ok: true, user_id: uid, user_subjects_rows: rows.length, subjects_saved: rows.length };
 }
 
