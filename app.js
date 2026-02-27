@@ -8625,12 +8625,26 @@ async function updateTourAttempt(attemptId, patch) {
   saveState();
 }
 
-  async function openTourQuiz() {
-  const accept = $("#tour-rules-accept");
-  if (!accept || !accept.checked) {
-    showToast(t("tour_rules_accept_required"));
-    return;
+  let __tourStartInFlight = false;
+ async function openTourQuiz() {
+  if (__tourStartInFlight) return;
+  __tourStartInFlight = true;
+
+  const startBtn = document.querySelector('[data-action="tour-start"]');
+  const __startPrevText = startBtn ? startBtn.textContent : null;
+
+  if (startBtn) {
+    startBtn.disabled = true;
+    startBtn.classList.add("is-loading");
+    startBtn.textContent = (t("saving") || "Сохранение…");
   }
+
+  try {
+    const accept = $("#tour-rules-accept");
+    if (!accept || !accept.checked) {
+      showToast(t("tour_rules_accept_required"));
+      return;
+    }
 
   const subjectKey = state.courses?.subjectKey || null;
   if (!subjectKey) {
@@ -8696,10 +8710,10 @@ async function updateTourAttempt(attemptId, patch) {
   }
 
   // analytics: started
-  try {
+    try {
     trackEvent("tour_attempt_started", {
      ts: new Date().toISOString(),
-     tour_id: String(tourId),
+     tour_id: String(tour.id),
      subject_id: String(subjectId),
      subject_key: String(subjectKey || "")
    });
@@ -8714,10 +8728,18 @@ async function updateTourAttempt(attemptId, patch) {
     isArchive: false
   });
 
-  pushCourses("tour-quiz");
+    pushCourses("tour-quiz");
   bindTourAntiCheatOnce();
   startTourTick();
   renderTourQuestion();
+} finally {
+  __tourStartInFlight = false;
+  if (startBtn) {
+    startBtn.disabled = false;
+    startBtn.classList.remove("is-loading");
+    if (__startPrevText != null) startBtn.textContent = __startPrevText;
+     }
+   }
 }
 
     function enforceTourAutoRulesNow() {
@@ -9198,13 +9220,13 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     const tour_id = ctx?.tourId != null ? String(ctx.tourId) : "";
     const is_archive = !!ctx?.isArchive;
 
-    trackEvent("tour_attempt_finished", {
+        trackEvent("tour_attempt_finished", {
      ts,
      status: "done",
-     tour_id: String(tourId),
-     is_archive: false,
-     subject_id: String(subjectId),
-     subject_key: String(subjectKey || "")
+     tour_id,
+     is_archive,
+     subject_id,
+     subject_key: String(ctx?.subjectKey || state?.courses?.subjectKey || "")
    });
   } catch {}
 
