@@ -3422,14 +3422,31 @@ async function savePracticeAttemptToSupabase(attempt, quiz) {
     time_seconds: Number(attempt?.durationSec) || 0
   };
 
-  const { data: insRow, error: insErr } = await window.sb
-    .from("practice_attempts")
-    .insert(insertAttemptPayload)
-    .select("id")
-    .single();
+    let insRow = null;
+  let insErr = null;
 
-  if (insErr || !insRow?.id) {
-    await logDbErrorToEvents(uid, "attempt_insert", insErr || { message: "no_returning_id" }, { subject_id: subjectId });
+  try {
+    insRow = await dbWriteWithRetry(async () => {
+      const { data, error } = await window.sb
+        .from("practice_attempts")
+        .insert(insertAttemptPayload)
+        .select("id")
+        .single();
+
+      if (error) throw error;
+      return data || null;
+    }, { tries: 3, baseDelayMs: 350 });
+  } catch (e) {
+    insErr = e;
+  }
+
+  if (!insRow?.id) {
+    await logDbErrorToEvents(
+      uid,
+      "attempt_insert",
+      insErr || { message: "no_returning_id" },
+      { subject_id: subjectId }
+    );
     return { ok: false, reason: "attempt_insert_failed" };
   }
 
@@ -3452,10 +3469,21 @@ async function savePracticeAttemptToSupabase(attempt, quiz) {
    };
   }).filter(r => Number.isFinite(r.question_id));
 
-  if (rows.length) {
-    const { error: ansErr } = await window.sb
-      .from("practice_answers")
-      .insert(rows);
+    if (rows.length) {
+    let ansErr = null;
+
+    try {
+      await dbWriteWithRetry(async () => {
+        const { error } = await window.sb
+          .from("practice_answers")
+          .insert(rows);
+
+        if (error) throw error;
+        return true;
+      }, { tries: 3, baseDelayMs: 350 });
+    } catch (e) {
+      ansErr = e;
+    }
 
     if (ansErr) {
       await logDbErrorToEvents(uid, "answers_insert", ansErr, { attempt_id: attemptId, rows: rows.length });
@@ -8554,25 +8582,30 @@ async function createTourAttempt(uid, tourId) {
 }
 
 async function upsertTourAnswer(attemptId, questionId, patch) {
-  if (!window.sb || !attemptId || !questionId) return;
+  if (!window.sb || !attemptId || !questionId) return { ok: false, reason: "no_sb_or_ids" };
 
-  // ✅ UNIQUE(attempt_id, question_id) уже есть в БД — fallback больше не нужен.
   try {
-    const { error } = await window.sb
-      .from("tour_answers")
-      .upsert([{
-        attempt_id: attemptId,
-        question_id: questionId,
-        user_answer: patch.user_answer ?? null,
-        answered: !!patch.answered,
-        is_correct: !!patch.is_correct,
-        time_spent: Number(patch.time_spent || 0),
-        finish_reason: patch.finish_reason ?? null
-      }], { onConflict: "attempt_id,question_id" });
+    await dbWriteWithRetry(async () => {
+      const { error } = await window.sb
+        .from("tour_answers")
+        .upsert([{
+          attempt_id: attemptId,
+          question_id: questionId,
+          user_answer: patch.user_answer ?? null,
+          answered: !!patch.answered,
+          is_correct: !!patch.is_correct,
+          time_spent: Number(patch.time_spent || 0),
+          finish_reason: patch.finish_reason ?? null
+        }], { onConflict: "attempt_id,question_id" });
 
-    if (error) logClientError("upsertTourAnswer_error", error);
+      if (error) throw error;
+      return true;
+    }, { tries: 3, baseDelayMs: 350 });
+
+    return { ok: true };
   } catch (e) {
-    logClientError("upsertTourAnswer_exception", e);
+    try { logClientError("upsertTourAnswer_failed", e); } catch {}
+    return { ok: false, reason: "db_error", error: e };
   }
 }
 
@@ -8615,6 +8648,7 @@ async function updateTourAttempt(attemptId, patch) {
     index: 0,
     correct: 0,
     answers: [],   // {qid, pickedIndex, userAnswer, isCorrect, spentSec}
+    pendingDbAnswers: [], // ✅ NEW: ответы, которые не удалось записать в БД
     violations: 0,
     lastViolationAt: null,
     questionTimeLimit: TOUR_CONFIG.defaultQuestionTimeSec
@@ -9096,14 +9130,43 @@ try {
 
         const answerForDb = isMcq ? pickedForDb : inputVal;
 
-        Promise
+               Promise
           .resolve(upsertTourAnswer(ctx2.attemptId, q.id, {
             user_answer: answerForDb,
             answered: true,
             is_correct: isCorrect,
             time_spent: spentSec2
           }))
-          .catch(() => {});
+          .then((res) => {
+            if (!res?.ok) {
+              ctx2.pendingDbAnswers = Array.isArray(ctx2.pendingDbAnswers) ? ctx2.pendingDbAnswers : [];
+              ctx2.pendingDbAnswers.push({
+                attemptId: ctx2.attemptId,
+                questionId: q.id,
+                patch: {
+                  user_answer: answerForDb,
+                  answered: true,
+                  is_correct: isCorrect,
+                  time_spent: spentSec2
+                }
+              });
+              saveState();
+            }
+          })
+          .catch(() => {
+            ctx2.pendingDbAnswers = Array.isArray(ctx2.pendingDbAnswers) ? ctx2.pendingDbAnswers : [];
+            ctx2.pendingDbAnswers.push({
+              attemptId: ctx2.attemptId,
+              questionId: q.id,
+              patch: {
+                user_answer: answerForDb,
+                answered: true,
+                is_correct: isCorrect,
+                time_spent: spentSec2
+              }
+            });
+            saveState();
+          });
       }
     } catch {}
 
@@ -9142,6 +9205,25 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
   } catch {}
 }
 
+   async function flushPendingTourAnswers(ctx) {
+  if (!ctx || ctx.isArchive) return;
+
+  const pend = Array.isArray(ctx.pendingDbAnswers) ? ctx.pendingDbAnswers : [];
+  if (!pend.length) return;
+
+  const keep = [];
+  for (const item of pend) {
+    try {
+      const res = await upsertTourAnswer(item.attemptId, item.questionId, item.patch || {});
+      if (!res?.ok) keep.push(item);
+    } catch {
+      keep.push(item);
+    }
+  }
+
+  ctx.pendingDbAnswers = keep;
+  saveState();
+}
   async function finishTour({ reason = "done" } = {}) {
     stopTourTick();
 
@@ -9179,9 +9261,11 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     });
   }
 
-   // DB finalize (only active tours)
+    // DB finalize (only active tours)
   try {
     if (ctx?.attemptId && !ctx?.isArchive) {
+      await flushPendingTourAnswers(ctx);
+
       const res = await updateTourAttempt(ctx.attemptId, {
         score,
         percent,
