@@ -3069,9 +3069,20 @@ async function saveRegistrationToSupabase(profile) {
     class: profile?.class || null
   };
 
-  const { error: uErr } = await window.sb
-    .from("users")
-    .upsert(usersPayload, { onConflict: "id" });
+    let uErr = null;
+  try {
+    await dbWriteWithRetry(async () => {
+      const { error } = await window.sb
+        .from("users")
+        .upsert(usersPayload, { onConflict: "id" });
+
+      if (error) throw error;
+      return true;
+    }, { tries: 3, baseDelayMs: 350 });
+
+  } catch (e) {
+    uErr = e;
+  }
 
   if (uErr) {
     try { trackEvent("registration_db_error", { where: "users_upsert", message: String(uErr?.message || uErr) }); } catch {}
@@ -3101,10 +3112,22 @@ async function saveRegistrationToSupabase(profile) {
   }
 
   if (rows.length) {
-    // ✅ Теперь в БД есть UNIQUE(user_id, subject_id) → можно безопасно upsert
-    const { error: upErr } = await window.sb
-      .from("user_subjects")
-      .upsert(rows, { onConflict: "user_id,subject_id" });
+        // ✅ Теперь в БД есть UNIQUE(user_id, subject_id) → можно безопасно upsert
+    let upErr = null;
+
+    try {
+      await dbWriteWithRetry(async () => {
+        const { error } = await window.sb
+          .from("user_subjects")
+          .upsert(rows, { onConflict: "user_id,subject_id" });
+
+        if (error) throw error;
+        return true;
+      }, { tries: 3, baseDelayMs: 350 });
+
+    } catch (e) {
+      upErr = e;
+    }
 
     if (upErr) {
       try {
