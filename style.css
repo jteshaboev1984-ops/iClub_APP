@@ -1314,6 +1314,9 @@ html, body {
   cursor: pointer;
   user-select: none;
   transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+
+  /* ✅ Fix: multiline option text must be left-aligned (Tours + Practice) */
+  text-align: left;
 }
 
 .option:active { transform: translateY(1px); }
