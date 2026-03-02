@@ -9108,11 +9108,13 @@ try {
     document.querySelector('[data-action="tour-next"]');
 
   if (nextBtn) {
-    nextBtn.disabled = true; // ⛔ пока пусто
-    nextBtn.textContent = (ctx.index >= TOUR_CONFIG.total - 1)
-      ? "Finish Tour →"
-      : "Next Question →";
-  }
+  nextBtn.disabled = true; // ⛔ пока пусто
+
+  const isLast = (ctx.index >= TOUR_CONFIG.total - 1);
+  nextBtn.textContent = isLast
+    ? (t("tour_finish_button") || "Finish Tour →")
+    : (t("tour_next_question") || "Next Question →");
+}
 
   // ✅ активируем Next только когда есть ввод
   if (inputEl && nextBtn) {
@@ -9175,7 +9177,11 @@ try {
   if (nextBtn) {
   nextBtn.classList.remove("is-loading"); // <-- добавь
   nextBtn.disabled = true;
-  nextBtn.textContent = (ctx.index >= TOUR_CONFIG.total - 1) ? "Finish Tour →" : "Next Question →";
+
+  const isLast = (ctx.index >= TOUR_CONFIG.total - 1);
+  nextBtn.textContent = isLast
+    ? (t("tour_finish_button") || "Finish Tour →")
+    : (t("tour_next_question") || "Next Question →");
 }
 
   renderTourHUD();
