@@ -70,7 +70,98 @@ function hideToursLoading() {
     throw lastErr;
   }
 
-    // ---------------------------
+        async function dbWriteWithRetry(fn, { tries = 3, baseDelayMs = 350 } = {}) {
+    let lastErr = null;
+    for (let i = 0; i < tries; i++) {
+      try {
+        return await fn();
+      } catch (e) {
+        lastErr = e;
+        const delay = baseDelayMs * Math.pow(2, i);
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+    throw lastErr;
+  }
+
+  // ---------------------------
+  // Pending DB ops (offline-safe)
+  // ---------------------------
+  function loadPendingOps() {
+    try {
+      const raw = localStorage.getItem(LS.pendingOps);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function savePendingOps(arr) {
+    try {
+      localStorage.setItem(LS.pendingOps, JSON.stringify(Array.isArray(arr) ? arr.slice(0, 200) : []));
+    } catch {}
+  }
+
+  function enqueuePendingOp(op) {
+    try {
+      const arr = loadPendingOps();
+      arr.push({ ...op, ts: Date.now() });
+      savePendingOps(arr);
+    } catch {}
+  }
+
+  let _flushPendingOpsInFlight = false;
+
+  async function flushPendingOps() {
+    if (_flushPendingOpsInFlight) return;
+    if (!window.sb) return;
+
+    const uid = await getAuthUid().catch(() => null);
+    if (!uid) return;
+
+    const ops = loadPendingOps();
+    if (!ops.length) return;
+
+    _flushPendingOpsInFlight = true;
+    try {
+      const keep = [];
+
+      for (const op of ops) {
+        try {
+          if (op?.type === "practice_save") {
+            // op.payload: { attempt, quiz }
+            const res = await savePracticeAttemptToSupabase(op.payload?.attempt, op.payload?.quiz);
+            if (!res?.ok) keep.push(op);
+            continue;
+          }
+
+          if (op?.type === "tour_answer") {
+            const r = await upsertTourAnswer(op.attemptId, op.questionId, op.patch || {});
+            if (!r?.ok) keep.push(op);
+            continue;
+          }
+
+          if (op?.type === "tour_finalize") {
+            const r = await updateTourAttempt(op.attemptId, op.patch || {});
+            if (!r?.ok) keep.push(op);
+            continue;
+          }
+
+          // unknown op → keep (safer)
+          keep.push(op);
+        } catch {
+          keep.push(op);
+        }
+      }
+
+      savePendingOps(keep);
+    } finally {
+      _flushPendingOpsInFlight = false;
+    }
+  }
+
+  // ---------------------------
   // Supabase (v1 connect)
   // ---------------------------
   // ✅ ВАЖНО: заполни эти 2 значения из Supabase → Project Settings → API
@@ -232,8 +323,18 @@ try {
     return sb;
   }
  
-  function nowISO() {
+    function nowISO() {
     return new Date().toISOString();
+  }
+
+  // ✅ monotonic time (not affected by changing device clock)
+  function monoNow() {
+    try {
+      if (typeof performance !== "undefined" && typeof performance.now === "function") {
+        return performance.now();
+      }
+    } catch {}
+    return Date.now();
   }
      // ---------------------------
   // Earned Credentials: hydrate LS.events from Supabase app_events
@@ -334,6 +435,9 @@ try {
     practiceDraft: "iclub_practice_draft_v1",
     myRecs: "iclub_my_recs_v1",
     botLinked: "iclub_bot_linked_v1",
+
+    // ✅ Pending DB operations (offline-safe queue)
+    pendingOps: "iclub_pending_ops_v1",
 
     // Earned Credentials (v1.3 FINAL)
     events: "iclub_events_v1",
@@ -7529,12 +7633,12 @@ async function renderToursHistorySummary(subjectId) {
     if (!quiz || quiz.mode !== "practice") return;
     if (quiz.paused) return;
 
-    if (!quiz.qEndsAtMs) {
-      quiz.qEndsAtMs = Date.now() + (Number(quiz.qTimeLeft) || 0) * 1000;
+    if (!quiz.qEndsAtMono) {
+      quiz.qEndsAtMono = monoNow() + (Number(quiz.qTimeLeft) || 0) * 1000;
     }
 
-    const now = Date.now();
-    const leftSec = Math.max(0, Math.ceil((Number(quiz.qEndsAtMs) - now) / 1000));
+    const now = monoNow();
+    const leftSec = Math.max(0, Math.ceil((Number(quiz.qEndsAtMono) - now) / 1000));
 
     // keep existing API for the rest of the code
     quiz.qTimeLeft = leftSec;
@@ -7548,13 +7652,13 @@ async function renderToursHistorySummary(subjectId) {
     }
   }
 
-    function startPracticeQuestionTimer() {
+        function startPracticeQuestionTimer() {
     stopPracticeQuestionTimer();
 
-    // initialize deadline from current qTimeLeft
+    // initialize deadline from current qTimeLeft (monotonic)
     try {
       if (state.quiz && state.quiz.mode === "practice") {
-        state.quiz.qEndsAtMs = Date.now() + (Number(state.quiz.qTimeLeft) || 0) * 1000;
+        state.quiz.qEndsAtMono = monoNow() + (Number(state.quiz.qTimeLeft) || 0) * 1000;
       }
     } catch {}
 
@@ -7930,8 +8034,14 @@ state.practiceLastAttempt = { ...(attempt || {}), db: (state.practiceLastAttempt
   try {
         const res = await savePracticeAttemptToSupabase(attempt, quiz);
 
-    if (res?.ok) {
+        if (res?.ok) {
       clearPracticeDraft();
+    } else {
+      // ✅ offline-safe: queue practice save for retry after reconnect
+      enqueuePendingOp({
+        type: "practice_save",
+        payload: { attempt, quiz }
+      });
     }
 
     // DEBUG 2: DB save result
@@ -8762,6 +8872,8 @@ async function updateTourAttempt(attemptId, patch) {
     questions,     // ✅ loaded from DB mapping tour_questions
     startedAt: Date.now(),
     qStartedAt: Date.now(),
+    startedAtMono: monoNow(),
+    qStartedAtMono: monoNow(),
     index: 0,
     correct: 0,
     answers: [],   // {qid, pickedIndex, userAnswer, isCorrect, spentSec}
@@ -8905,7 +9017,7 @@ async function updateTourAttempt(attemptId, patch) {
     }
 
     // 2) per-question timeout: auto submit if exceeded and not answered for this question index
-    const qElapsed = Math.floor((Date.now() - ctx.qStartedAt) / 1000);
+    const qElapsed = Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000);
     if (qElapsed >= ctx.questionTimeLimit) {
       if (!ctx.answers.some(a => a.index === ctx.index)) {
         submitTourAnswer({ pickedIndex: null, auto: true });
@@ -9011,11 +9123,11 @@ async function updateTourAttempt(attemptId, patch) {
       badge.textContent = `CAMBRIDGE ${subjLabel} • TOUR #${ctx.tourNo}`;
     }
 
-    const overall = formatMsToMMSS(Date.now() - ctx.startedAt);
+       const overall = formatMsToMMSS(monoNow() - (ctx.startedAtMono ?? ctx.startedAt));
     const overallEl = $("#tour-overall-time");
     if (overallEl) overallEl.textContent = overall;
 
-    const qElapsed = formatMsToMMSS(Date.now() - ctx.qStartedAt);
+    const qElapsed = formatMsToMMSS(monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt));
     const qEl = $("#tour-question-time");
     if (qEl) qEl.textContent = qElapsed;
      // ✅ last-10-seconds warning on question timer
@@ -9029,7 +9141,7 @@ try {
     45;
 
   const limitSec = Math.max(1, Number(limitSecRaw) || 45);
-  const elapsedSec = Math.max(0, Math.floor((Date.now() - ctx.qStartedAt) / 1000));
+  const elapsedSec = Math.max(0, Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000));
   const remainSec = limitSec - elapsedSec;
 
   const qCard = (qEl && qEl.closest) ? qEl.closest(".tour-timer-card") : null;
@@ -9058,6 +9170,7 @@ try {
   }
 
   ctx.qStartedAt = Date.now();
+  ctx.qStartedAtMono = monoNow();
   // сбрасываем прошлый выбор при показе нового вопроса
   ctx._pickedIndex = null;
   saveState();
@@ -9194,7 +9307,7 @@ try {
     const q = ctx.questions?.[ctx.index];
     if (!q) return;
 
-    const spentSec = Math.max(0, Math.floor((Date.now() - ctx.qStartedAt) / 1000));
+    const spentSec = Math.max(0, Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000));
 
     // normalize correct index (supports both correctIndex and legacy correct_index)
     const correctIdx =
@@ -9344,9 +9457,22 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     }
   }
 
-  ctx.pendingDbAnswers = keep;
+    ctx.pendingDbAnswers = keep;
   saveState();
+
+  // ✅ also mirror to global pending queue so answers survive even after ctx is cleared
+  try {
+    for (const item of keep) {
+      enqueuePendingOp({
+        type: "tour_answer",
+        attemptId: item.attemptId,
+        questionId: item.questionId,
+        patch: item.patch || {}
+      });
+    }
+  } catch {}
 }
+   
   async function finishTour({ reason = "done" } = {}) {
     stopTourTick();
 
@@ -9389,7 +9515,7 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     if (ctx?.attemptId && !ctx?.isArchive) {
       await flushPendingTourAnswers(ctx);
 
-      const res = await updateTourAttempt(ctx.attemptId, {
+            const finalizePatch = {
         score,
         percent,
         total_time: durationSec,
@@ -9397,9 +9523,18 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
           (reason === "violations") ? "anti_cheat"
           : (reason === "time_expired") ? "time_expired"
           : "submitted"
-      });
+      };
+
+      const res = await updateTourAttempt(ctx.attemptId, finalizePatch);
 
       if (!res?.ok) {
+        // ✅ queue finalize for retry after reconnect
+        enqueuePendingOp({
+          type: "tour_finalize",
+          attemptId: ctx.attemptId,
+          patch: finalizePatch
+        });
+
         showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
       }
     }
@@ -10398,6 +10533,9 @@ if (action === "tour-next" || action === "tour-submit") {
         updateOfflineBanner();
         window.addEventListener("online", updateOfflineBanner);
         window.addEventListener("offline", updateOfflineBanner);
+
+        // ✅ when internet returns — flush pending db ops
+        window.addEventListener("online", () => { flushPendingOps().catch(() => null); });
       } catch {}
 
       try {
@@ -10417,6 +10555,9 @@ if (action === "tour-next" || action === "tour-submit") {
         Promise.all([preloadAppImages(), minDelay, supaReady]).then(async () => {
       // Stage B: if local profile is missing, try hydrate from DB
       try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
+
+      // ✅ flush pending ops after Supabase is ready
+      try { await flushPendingOps(); } catch {}
 
 // Stage B2: always sync user_subjects from DB → local profile (single source for UI)
 try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
