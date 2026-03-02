@@ -4793,7 +4793,11 @@ function bindRatingsUI() {
     updateTopbarForView("courses");
   }
 
-  function pushCourses(screenName) {
+    function pushCourses(screenName) {
+    // ✅ harden: stack must always be array
+    state.courses = (state.courses && typeof state.courses === "object") ? state.courses : {};
+    state.courses.stack = Array.isArray(state.courses.stack) ? state.courses.stack : ["all-subjects"];
+
     state.courses.stack.push(screenName);
     saveState();
     showCoursesScreen(screenName);
@@ -4809,6 +4813,15 @@ function bindRatingsUI() {
   if (state.quizLock) return;
 
   const top = getCoursesTopScreen();
+    // ✅ tour-result back MUST go to Subject Hub (no return to questions)
+  if (top === "tour-result") {
+    // чистим тур-флоу из стека, чтобы назад не вёл в quiz
+    state.courses.stack = ["subject-hub"];
+    saveState();
+    showCoursesScreen("subject-hub");
+    renderSubjectHub();
+    return;
+  }
 
   // ✅ Safety: если тур-экран оказался первым в стеке (stack=1),
   // то back должен вести в subject-hub, а не выкидывать в Home.
@@ -5237,20 +5250,8 @@ if (!ok) return;
           await window.sb.from("practice_attempts").delete().eq("user_id", uid);
 
           // --- Tour wipe ---
-          const { data: tAtt } = await window.sb
-            .from("tour_attempts")
-            .select("id")
-            .eq("user_id", uid)
-            .limit(10000);
-
-          const tIds = (Array.isArray(tAtt) ? tAtt : []).map(x => x.id).filter(Boolean);
-          if (tIds.length) {
-            for (let i = 0; i < tIds.length; i += 500) {
-              const chunk = tIds.slice(i, i + 500);
-              await window.sb.from("tour_answers").delete().in("attempt_id", chunk);
-            }
-          }
-          await window.sb.from("tour_attempts").delete().eq("user_id", uid);
+          // ✅ Tours НЕ очищаем при смене языка контента.
+          // Иначе user получает повторную попытку, что ломает one-attempt rule.
 
           // 2) update content language in users table
           await window.sb.from("users").upsert({ id: uid, language_code: nextLang }, { onConflict: "id" });
