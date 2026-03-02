@@ -1691,9 +1691,19 @@ saved_at_label: "Saved",
   }
 
   function t(key, vars) {
-    const langPack = DICT[currentLang] || DICT.ru;
+    const lang = currentLang;
+    const langPack = DICT[lang] || DICT.ru;
     const ruPack = DICT.ru;
-    const raw = (langPack && langPack[key]) || (ruPack && ruPack[key]) || key;
+
+    const raw =
+      (langPack && langPack[key]) ||
+      (ruPack && ruPack[key]);
+
+    if (!raw) {
+      try { console.warn(`Missing translation: [${lang}] ${key}`); } catch {}
+      return `[${lang}] ${key}`;
+    }
+
     return template(raw, vars);
   }
 
