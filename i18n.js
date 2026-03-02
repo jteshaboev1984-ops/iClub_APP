@@ -39,11 +39,14 @@
   network_error_try_again: "Ошибка сети. Попробуйте ещё раз.",
   save_failed_try_again: "Не удалось сохранить. Попробуйте ещё раз.",
   save_failed_db_try_again: "Не удалось сохранить в базе. Попробуйте ещё раз.",
+  offline_banner: "Оффлайн: некоторые функции могут быть недоступны.",
+  video_empty: "Пока нет видео-уроков.",
+
   recs_books_available_source: "Источник: книги по предмету уже доступны — откройте раздел «Книги».",
   recs_books_later_source: "Источник: книги по предмету будут добавлены позже.",
 
-       community_title: "Комьюнити",
-community_sub: "Официальный канал и чат обсуждений.",
+  community_title: "Комьюнити",
+  community_sub: "Официальный канал и чат обсуждений.",
 community_channel_title: "Канал",
 community_chat_title: "Чат обсуждений",
 community_join: "Присоединиться",
@@ -599,6 +602,9 @@ saved_at_label: "Сохранено",
         network_error_try_again: "Tarmoq xatosi. Qayta urinib ko‘ring.",
         save_failed_try_again: "Saqlab bo‘lmadi. Qayta urinib ko‘ring.",
         save_failed_db_try_again: "Bazaga saqlab bo‘lmadi. Qayta urinib ko‘ring.",
+        offline_banner: "Offline: ayrim funksiyalar vaqtincha mavjud emas.",
+        video_empty: "Hozircha video-darslar yo‘q.",
+
         recs_books_available_source: "Fan bo‘yicha kitoblar mavjud — «Kitoblar» bo‘limini oching.",
         recs_books_later_source: "Fan bo‘yicha kitoblar keyinroq joylanadi.",
 
@@ -1165,6 +1171,9 @@ saved_at_label: "Saqlangan",
   network_error_try_again: "Network error. Please try again.",
   save_failed_try_again: "Couldn’t save. Please try again.",
   save_failed_db_try_again: "Couldn’t save to the database. Please try again.",
+  offline_banner: "Offline: some features may be unavailable.",
+  video_empty: "No video lessons yet.",
+
   recs_books_available_source: "Source: subject books are already available — open “Books”.",
   recs_books_later_source: "Source: subject books will be added later.",
 
