@@ -127,10 +127,26 @@ function hideToursLoading() {
   }
 
   let _flushPendingOpsInFlight = false;
+  let _flushPendingOpsTimer = null;
 
-  async function flushPendingOps() {
+  function scheduleFlushPendingOps(delayMs = 0) {
+    try {
+      if (_flushPendingOpsTimer) clearTimeout(_flushPendingOpsTimer);
+      _flushPendingOpsTimer = setTimeout(() => {
+        _flushPendingOpsTimer = null;
+        flushPendingOps().catch(() => null);
+      }, Math.max(0, Number(delayMs) || 0));
+    } catch {}
+  }
+
+    async function flushPendingOps() {
     if (_flushPendingOpsInFlight) return;
     if (!window.sb) return;
+
+    // ✅ не пытаемся синкать в оффлайне
+    try {
+      if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+    } catch {}
 
     const uid = await getAuthUid().catch(() => null);
     if (!uid) return;
@@ -10618,8 +10634,20 @@ if (action === "tour-next" || action === "tour-submit") {
         window.addEventListener("online", updateOfflineBanner);
         window.addEventListener("offline", updateOfflineBanner);
 
-        // ✅ when internet returns — flush pending db ops
-        window.addEventListener("online", () => { flushPendingOps().catch(() => null); });
+        // ✅ when internet returns — flush pending db ops (debounced)
+        window.addEventListener("online", () => { scheduleFlushPendingOps(350); });
+
+        // ✅ when user returns to app — also try to flush
+        document.addEventListener("visibilitychange", () => {
+          try {
+            if (document.visibilityState === "visible") scheduleFlushPendingOps(250);
+          } catch {}
+        });
+
+        // ✅ gentle periodic flush (in case events were missed)
+        setInterval(() => {
+          try { scheduleFlushPendingOps(0); } catch {}
+        }, 20000);
       } catch {}
 
       try {
@@ -10640,8 +10668,8 @@ if (action === "tour-next" || action === "tour-submit") {
       // Stage B: if local profile is missing, try hydrate from DB
       try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
 
-      // ✅ flush pending ops after Supabase is ready
-      try { await flushPendingOps(); } catch {}
+      // ✅ flush pending ops after Supabase is ready (debounced)
+      try { scheduleFlushPendingOps(0); } catch {}
 
 // Stage B2: always sync user_subjects from DB → local profile (single source for UI)
 try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
