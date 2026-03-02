@@ -8345,15 +8345,6 @@ if (!res.added) {
         wrap.appendChild(item);
       });
     })();
-
-const btn = item.querySelector('button[data-open-books="1"]');
-btn?.addEventListener("click", (e) => {
-  e.stopPropagation();
-  pushCourses("books");
-  renderBooks();
-});
-      wrap.appendChild(item);
-    });
   }
 
 function renderMyRecs() {
