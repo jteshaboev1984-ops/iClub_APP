@@ -109,11 +109,23 @@ function hideToursLoading() {
         }
       }
 
-      if (next?.type === "tour_finalize" && next.attemptId) {
+            if (next?.type === "tour_finalize" && next.attemptId) {
         const aId = String(next.attemptId);
         for (let i = arr.length - 1; i >= 0; i--) {
           const it = arr[i];
           if (it?.type === "tour_finalize" && String(it.attemptId) === aId) {
+            arr.splice(i, 1);
+            break;
+          }
+        }
+      }
+
+      // ✅ дедупликация app_event по clientEventId (чтобы не спамить)
+      if (next?.type === "app_event" && next.clientEventId != null) {
+        const eId = String(next.clientEventId);
+        for (let i = arr.length - 1; i >= 0; i--) {
+          const it = arr[i];
+          if (it?.type === "app_event" && String(it.clientEventId) === eId) {
             arr.splice(i, 1);
             break;
           }
@@ -173,9 +185,21 @@ function hideToursLoading() {
             continue;
           }
 
-          if (op?.type === "tour_finalize") {
+                    if (op?.type === "tour_finalize") {
             const r = await updateTourAttempt(op.attemptId, op.patch || {});
             if (!r?.ok) keep.push(op);
+            continue;
+          }
+
+          if (op?.type === "app_event") {
+            // ✅ best-effort: insert analytics event
+            const { error } = await window.sb.from("app_events").insert({
+              user_id: op.userId,
+              event_type: op.eventType,
+              payload: op.payload || {}
+            });
+
+            if (error) keep.push(op);
             continue;
           }
 
@@ -690,19 +714,30 @@ function getCredentialStore() {
     return arr.slice(0, limit);
   }
 
-  async function mirrorEventToSupabase(type, payload) {
+    async function mirrorEventToSupabase(type, payload) {
     try {
       if (!window.sb) return;
+
       const { data: userData } = await window.sb.auth.getUser();
       const u = userData?.user;
       if (!u?.id) return;
-      await window.sb.from("app_events").insert({
-        user_id: u.id,
-        event_type: type,
-        payload: payload || {}
+
+      const p = payload || {};
+      const clientEventId = p.client_event_id;
+
+      // ✅ отправляем через pending ops (надёжно при оффлайне)
+      enqueuePendingOp({
+        type: "app_event",
+        userId: u.id,
+        eventType: type,
+        payload: p,
+        clientEventId
       });
+
+      // ✅ пробуем синкнуть сразу (если онлайн)
+      try { scheduleFlushPendingOps(0); } catch {}
     } catch {
-      // Silent: local storage is primary in v1 UI stage
+      // silent
     }
   }
 
@@ -820,7 +855,7 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
       type,
       ts,
       day: dayKeyTashkent(ts),
-      payload: payload || {}
+      payload: Object.assign({}, (payload || {}), { client_event_id: id })
     };
 
     store.items.push(item);
