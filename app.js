@@ -53,24 +53,10 @@ function hideToursLoading() {
   try { return JSON.parse(s); } catch { return fallback; }
 }
 
-  // ---------------------------
+    // ---------------------------
   // DB write retry (critical writes only)
   // ---------------------------
   async function dbWriteWithRetry(fn, { tries = 3, baseDelayMs = 350 } = {}) {
-    let lastErr = null;
-    for (let i = 0; i < tries; i++) {
-      try {
-        return await fn();
-      } catch (e) {
-        lastErr = e;
-        const delay = baseDelayMs * Math.pow(2, i);
-        await new Promise(r => setTimeout(r, delay));
-      }
-    }
-    throw lastErr;
-  }
-
-        async function dbWriteWithRetry(fn, { tries = 3, baseDelayMs = 350 } = {}) {
     let lastErr = null;
     for (let i = 0; i < tries; i++) {
       try {
@@ -2088,23 +2074,35 @@ async function buildPracticeSet(subjectKey) {
 
     const correctAnswer = type === "input" ? String(r.correct_answer ?? "").trim() : "";
 
-    return {
+          const diff = normalizeDiff(r.difficulty);
+
+      return {
         id: Number(r.id),
         topic: r.topic || "General",
-        difficulty: normalizeDiff(r.difficulty),
-        timeLimitSec: (r.time_limit_sec != null && Number(r.time_limit_sec) >= 10) ? Number(r.time_limit_sec) : null,
-        type,        // ✅ вопрос по языку контента
-           question: pickL(r, "question_text") || "",
-           options: opts || [],
-           correctIndex,
-           correctAnswer,
+        difficulty: diff,
+
+        // ✅ если time_limit_sec не задан — используем дефолт по сложности
+        timeLimitSec:
+          (r.time_limit_sec != null && Number(r.time_limit_sec) >= 10)
+            ? Number(r.time_limit_sec)
+            : (PRACTICE_CONFIG?.timeByDifficulty?.[diff] || 60),
+
+        type,
+
+        // ✅ вопрос по языку контента
+        question: pickL(r, "question_text") || "",
+        options: opts || [],
+        correctIndex,
+        correctAnswer,
+
         // ✅ объяснение по языку контента
-           explanation: pickL(r, "explanation") || "",
-           imageUrl: r.image_url || null,
-           inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
-           inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
-         };
-      }).filter(q => Number.isFinite(q.id));
+        explanation: pickL(r, "explanation") || "",
+        imageUrl: r.image_url || null,
+
+        inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
+        inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
+      };
+   }).filter(q => Number.isFinite(q.id));
 
   if (!pool.length) return buildPracticeSetLocal(subjectKey);
 
@@ -2379,17 +2377,49 @@ function buildPracticeSetLocal(subjectKey) {
       return;
     }
 
+    // ---------------------------
+    // Geo cache (TTL)
+    // ---------------------------
+    const GEO_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+    const geoCacheGet = (key) => {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return null;
+        const obj = JSON.parse(raw);
+        if (!obj || !obj.data || !obj.updated_at) return null;
+        if ((Date.now() - Number(obj.updated_at)) > GEO_TTL_MS) return null;
+        return obj.data;
+      } catch {
+        return null;
+      }
+    };
+
+    const geoCacheSet = (key, data) => {
+      try {
+        localStorage.setItem(key, JSON.stringify({ updated_at: Date.now(), data }));
+      } catch {}
+    };
+     
     const langCode = (window.i18n?.getLang ? window.i18n.getLang() : "ru");
     const nameField = langCode === "uz" ? "name_uz" : (langCode === "en" ? "name_en" : "name_ru");
 
-    const { data: regions, error: rErr } = await window.sb
-      .from("regions")
-      .select(`id, name_ru, name_uz, name_en`)
-      .order("name_ru", { ascending: true });
+        const regionsCacheKey = "geo_regions_v1";
+    let regions = geoCacheGet(regionsCacheKey);
 
-    if (rErr || !Array.isArray(regions) || regions.length === 0) {
-      showToast(t("toast_no_regions_in_db"));
-      return;
+    if (!Array.isArray(regions) || regions.length === 0) {
+      const res = await window.sb
+        .from("regions")
+        .select(`id, name_ru, name_uz, name_en`)
+        .order("name_ru", { ascending: true });
+
+      if (res?.error || !Array.isArray(res?.data) || res.data.length === 0) {
+        showToast(t("toast_no_regions_in_db"));
+        return;
+      }
+
+      regions = res.data;
+      geoCacheSet(regionsCacheKey, regions);
     }
 
         regions.forEach(r => {
@@ -2424,13 +2454,21 @@ function buildPracticeSetLocal(subjectKey) {
         return;
       }
 
-       const { data: dists, error: dErr } = await window.sb
-        .from("districts")
-        .select("id, region_id, name_ru, name_uz, name_en")
-        .eq("region_id", regionId)
-        .order("name_ru", { ascending: true });
+             const dCacheKey = `geo_districts_v1_${regionId}`;
+      let rows = geoCacheGet(dCacheKey);
 
-      const rows = (!dErr && Array.isArray(dists)) ? dists : [];
+      if (!Array.isArray(rows)) rows = [];
+
+      if (rows.length === 0) {
+        const res = await window.sb
+          .from("districts")
+          .select("id, region_id, name_ru, name_uz, name_en")
+          .eq("region_id", regionId)
+          .order("name_ru", { ascending: true });
+
+        rows = (!res?.error && Array.isArray(res?.data)) ? res.data : [];
+        if (rows.length) geoCacheSet(dCacheKey, rows);
+      }
 
       districtEl.innerHTML = "";
       const ph2 = document.createElement("option");
@@ -7957,9 +7995,9 @@ async function startPracticeNew() {
     const durationMs = Math.max(0, finishedAt - startedAt - (quiz.pausedTotalMs || 0));
     const durationSec = Math.round(durationMs / 1000);
 
-    const total = quiz.questions.length;
-    const score = quiz.correct.filter(Boolean).length;
-    const percent = Math.round((score / total) * 100);
+    const total = Array.isArray(quiz.questions) ? quiz.questions.length : 0;
+    const score = Array.isArray(quiz.correct) ? quiz.correct.filter(Boolean).length : 0;
+    const percent = total ? Math.round((score / total) * 100) : 0;
 
     // Build details for review/recs
      if (!Array.isArray(quiz.timeSpent)) quiz.timeSpent = new Array(quiz.questions.length).fill(0);
