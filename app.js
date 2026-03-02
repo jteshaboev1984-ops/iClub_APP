@@ -2271,7 +2271,7 @@ function buildPracticeSetLocal(subjectKey) {
       try { await initSupabaseSession(); } catch {}
     }
     if (!window.sb) {
-      showToast("Supabase not ready");
+      showToast(t("toast_supabase_not_ready"));
       return;
     }
 
@@ -2284,7 +2284,7 @@ function buildPracticeSetLocal(subjectKey) {
       .order("name_ru", { ascending: true });
 
     if (rErr || !Array.isArray(regions) || regions.length === 0) {
-      showToast("No regions in DB");
+      showToast(t("toast_no_regions_in_db"));
       return;
     }
 
@@ -2465,11 +2465,11 @@ if (tabName === "ratings") {
 
     // If user is in quiz lock, do not allow leaving
     if (state.quizLock === "tour") {
-      showToast("Tour is in progress");
+      showToast(t("toast_tour_in_progress"));
       return;
     }
     if (state.quizLock === "practice") {
-      showToast("Pause practice to leave");
+      showToast(t("toast_pause_practice_to_leave"));
       return;
     }
 
@@ -3903,7 +3903,7 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
 
       if (attemptsRes?.error) {
         hideLoading();
-        listEl.innerHTML = `<div class="empty muted">Ошибка загрузки рейтинга.</div>`;
+        listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("ratings_load_error"))}</div>`;
         return;
       }
 
@@ -4068,7 +4068,7 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
 
     if (topRes?.error) {
       hideLoading();
-      listEl.innerHTML = `<div class="empty muted">Ошибка загрузки рейтинга.</div>`;
+      listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("ratings_load_error"))}</div>`;
       return;
     }
 
@@ -4151,7 +4151,7 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
       if (token !== ratingsState._token) return;
 
       if (pageErr) {
-        listEl.innerHTML = `<div class="empty muted">Ошибка загрузки рейтинга.</div>`;
+        listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("ratings_load_error"))}</div>`;
         hideLoading();
         return;
       }
@@ -4224,7 +4224,7 @@ listEl.innerHTML = `
         .limit(5000);
 
       if (attErr) {
-        listEl.innerHTML = `<div class="empty muted">Ошибка загрузки рейтинга.</div>`;
+        listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("ratings_load_error"))}</div>`;
         hideLoading();
         return;
       }
@@ -4360,7 +4360,7 @@ listEl.innerHTML = `
     hideLoading();
 
     if (!topRows.length && !aroundRows.length && !bottomRows.length) {
-      listEl.innerHTML = `<div class="empty muted">Ничего не найдено.</div>`;
+      listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("ratings_nothing_found"))}</div>`;
     } else {
           // политика имени: только имя, но если имена повторяются — показываем фамилию (полное ФИО)
       applyRatingsNamePolicy([...(topRows || []), ...(aroundRows || []), ...(bottomRows || [])]);
@@ -4403,7 +4403,7 @@ listEl.innerHTML = `
 
   if (!tourIds.length) {
     hideLoading();
-    listEl.innerHTML = `<div class="empty muted">Нет туров для этого предмета.</div>`;
+    listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("tours_empty_for_subject"))}</div>`;
     return;
   }
 
@@ -4418,7 +4418,7 @@ listEl.innerHTML = `
 
   if (attErr) {
     hideLoading();
-    listEl.innerHTML = `<div class="empty muted">Ошибка загрузки рейтинга.</div>`;
+    listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("ratings_load_error"))}</div>`;
     return;
   }
 
@@ -5075,10 +5075,10 @@ mainSubjects.forEach(subj => {
         return;
       }
       was.mode = "competitive";
-      showToast("Предмет переведён в Competitive");
+      showToast(t("toast_switched_to_competitive"));
     } else {
       was.mode = "study";
-      showToast("Предмет переведён в Study");
+      showToast(t("toast_switched_to_study"));
     }
 
     fresh.subjects = next;
@@ -5507,7 +5507,7 @@ input?.addEventListener("change", async () => {
   if (!nameEl || !metaEl || !compEl || !studyEl || !bestEl || !trendEl || !stabilityEl || !toursEl) return;
 
     if (!profile) {
-    nameEl.textContent = "Сначала регистрация";
+    nameEl.textContent = t("profile_need_registration_title");
     metaEl.textContent = "—";
     if (avatarEl) avatarEl.style.backgroundImage = "";
     if (avatarInitials) avatarInitials.textContent = "";
@@ -5525,7 +5525,7 @@ input?.addEventListener("change", async () => {
 
     if (ratingsBtn) ratingsBtn.disabled = true;
 
-    if (hintEl) hintEl.textContent = "После регистрации профиль станет вашим дашбордом.";
+    if (hintEl) hintEl.textContent = t("profile_need_registration_hint");
     return;
   }
 
@@ -6395,7 +6395,7 @@ function subjectIconCandidates(subjectKey) {
   // Если нет профиля — каталогу нечего делать (но это не должно случаться)
   grid.innerHTML = "";
   if (!profile) {
-    grid.innerHTML = `<div class="empty muted">Сначала регистрация.</div>`;
+    grid.innerHTML = `<div class="empty muted">${escapeHTML(t("need_registration_short"))}</div>`;
     return;
   }
 
@@ -8025,7 +8025,7 @@ function renderPracticeReview() {
   // Helper: render from "details" array in one place
   const renderFromDetails = (details) => {
     if (!Array.isArray(details) || !details.length) {
-      wrap.innerHTML = `<div class="empty muted">Нет данных для разбора. Сначала пройдите практику.</div>`;
+      wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_review_loading_db"))}</div>`;
       return;
     }
 
@@ -8268,7 +8268,7 @@ function syncPracticeResultBadges() {
 
     const attempt = state.practiceLastAttempt;
     if (!attempt || !Array.isArray(attempt.details)) {
-      wrap.innerHTML = `<div class="empty muted">Нет данных для рекомендаций. Сначала пройдите практику.</div>`;
+      wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_recs_empty"))}</div>`;
       return;
     }
 
@@ -8293,7 +8293,7 @@ if (!res.added) {
 }
      
     if (!uniq.length) {
-      wrap.innerHTML = `<div class="empty muted">Ошибок нет — рекомендации не требуются. Неприлично красиво.</div>`;
+      wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_recs_no_errors"))}</div>`;
       return;
     }
 
@@ -8798,7 +8798,7 @@ async function updateTourAttempt(attemptId, patch) {
 
   const subjectKey = state.courses?.subjectKey || null;
   if (!subjectKey) {
-    showToast("Subject not selected");
+    showToast(t("toast_subject_not_selected"));
     return;
   }
 
@@ -8817,7 +8817,7 @@ async function updateTourAttempt(attemptId, patch) {
   // 2) resolve subject_id and active tour (tour_no=1 for now; later from UI selection)
   const subjectId = await getSubjectIdByKey(subjectKey);
   if (!subjectId) {
-    showToast("subject_id not found");
+    showToast(t("toast_subject_id_not_found"));
     return;
   }
 
@@ -8855,7 +8855,7 @@ async function updateTourAttempt(attemptId, patch) {
   // 5) create attempt row
   const attemptId = await createTourAttempt(uid, tour.id);
   if (!attemptId) {
-    showToast("Ошибка создания попытки");
+    showToast(t("toast_tour_create_failed"));
     return;
   }
 
