@@ -178,8 +178,20 @@ const payload = {
 if (tg?.first_name) payload.first_name = String(tg.first_name).trim();
 if (tg?.last_name) payload.last_name = String(tg.last_name).trim();
 
-// upsert by primary key id
-await sb.from("users").upsert(payload, { onConflict: "id" });
+// upsert by primary key id (critical) — with retry + safe catch
+try {
+  await dbWriteWithRetry(async () => {
+    const { error } = await sb.from("users").upsert(payload, { onConflict: "id" });
+    if (error) throw error;
+    return true;
+  }, { tries: 3, baseDelayMs: 350 });
+} catch (e) {
+  // не валим приложение — но фиксируем в events
+  try {
+    const uid = u?.id || null;
+    await logDbErrorToEvents(uid, "boot_users_upsert_failed", e, { has_tg: !!tg });
+  } catch {}
+}
 
 // ✅ reset subject cache for this session (prevents poisoned null cache)
 try { _subjectIdByKeyCache.clear(); } catch {}
@@ -8141,9 +8153,9 @@ function renderPracticeReview() {
       }
 
       // 2) read questions
-      const { data: qRows, error: qErr } = await window.sb
+            const { data: qRows, error: qErr } = await window.sb
         .from("questions")
-        .select("id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url")
+        .select("id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en")
         .in("id", ids)
         .eq("is_active", true);
 
@@ -8158,6 +8170,14 @@ function renderPracticeReview() {
       const qMap = new Map((qRows || []).map(q => [Number(q.id), q]));
 
       // 3) normalize into the same "details" shape UI expects
+            const contentLang = (loadProfile()?.language) || "ru";
+      const pickL = (obj, base) => {
+        const k = contentLang === "uz" ? (base + "_uz") : contentLang === "en" ? (base + "_en") : (base + "_ru");
+        const v = (obj && obj[k] != null) ? String(obj[k]).trim() : "";
+        // ✅ правильный fallback: сначала локализованное, потом base
+        return v !== "" ? obj[k] : (obj?.[base] ?? "");
+      };
+
       const details = (ansRows || []).map((a) => {
         const q = qMap.get(Number(a.question_id)) || null;
 
@@ -8166,16 +8186,16 @@ function renderPracticeReview() {
 
         let difficulty = q?.difficulty ? String(q.difficulty) : "easy";
 
-        // options_text is stored as text (often JSON array string)
+        // ✅ options по content language
         let options = null;
-        if (q && q.options_text) {
+        const optionsRaw = q ? pickL(q, "options_text") : null;
+        if (optionsRaw) {
           try {
-            const parsed = JSON.parse(q.options_text);
+            const parsed = JSON.parse(String(optionsRaw));
             if (Array.isArray(parsed)) options = parsed.map(x => String(x));
           } catch {}
         }
 
-        // userAnswer: store as text, but for mcq your DB stores "0/1/2/3" or "A/B/C"
         const ua = (a.user_answer === null || a.user_answer === undefined) ? "" : String(a.user_answer);
 
         return {
@@ -8184,11 +8204,11 @@ function renderPracticeReview() {
           subtopic: q?.subtopic || null,
           difficulty,
           type,
-          question: q?.question_text || "",
+          question: q ? (pickL(q, "question_text") || "") : "",
           options,
           userAnswer: ua || "—",
           correctAnswer: (q?.correct_answer === null || q?.correct_answer === undefined) ? "—" : String(q.correct_answer),
-          explanation: q?.explanation || "",
+          explanation: q ? (pickL(q, "explanation") || "") : "",
           isCorrect: !!a.is_correct,
           timeSpent: Number(a.time_spent) || 0
         };
@@ -8260,32 +8280,71 @@ if (!res.added) {
       return;
     }
 
-    // v1: пока без привязки к книге/страницам — даём структурные “что читать”
-    wrap.innerHTML = "";
-    uniq.forEach(tp => {
-      const item = document.createElement("div");
-      item.className = "list-item";
-      const refs = getReadingRefs(attempt.subjectKey, tp);
+        // v1: если refs пусто — показываем корректный текст:
+    // - если книги по предмету есть -> "Книги уже доступны"
+    // - если книг нет -> "Будет добавлено позже"
+    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_loading") || "Loading…")}</div>`;
 
-let refsHtml = "";
-if (refs.length) {
-  refsHtml = `
-    <div class="muted small" style="margin-top:6px">
-      ${refs.slice(0, 3).map(r =>
-        `• ${escapeHTML(r.title || "")}${r.ref ? ` — ${escapeHTML(r.ref)}` : ""}${r.pages ? ` (${escapeHTML(r.pages)})` : ""}`
-      ).join("<br>")}
-    </div>
-  `;
-}
+    (async () => {
+      let booksAvailable = false;
 
-item.innerHTML = `
-  <div style="font-weight:900">${escapeHTML(tp)}</div>
-  <div class="muted small">Рекомендуем повторить теорию и примеры по теме “${escapeHTML(tp)}”.</div>
-  ${refsHtml || `<div class="muted small" style="margin-top:6px">Источник: будет добавлен из книги по предмету.</div>`}
-  <div style="margin-top:10px">
-    <button type="button" class="btn" data-open-books="1">Открыть «Книги»</button>
-  </div>
-`;
+      try {
+        if (window.sb) {
+          const subjectId = await getSubjectIdByKey(attempt.subjectKey);
+          if (subjectId) {
+            const { data, error } = await window.sb
+              .from("books")
+              .select("id")
+              .eq("subject_id", subjectId)
+              .eq("is_active", true)
+              .limit(1);
+
+            if (!error && Array.isArray(data) && data.length) booksAvailable = true;
+          }
+        }
+      } catch {}
+
+      wrap.innerHTML = "";
+      uniq.forEach(tp => {
+        const item = document.createElement("div");
+        item.className = "list-item";
+
+        const refs = getReadingRefs(attempt.subjectKey, tp);
+
+        let refsHtml = "";
+        if (refs.length) {
+          refsHtml = `
+            <div class="muted small" style="margin-top:6px">
+              ${refs.slice(0, 3).map(r =>
+                `• ${escapeHTML(r.title || "")}${r.ref ? ` — ${escapeHTML(r.ref)}` : ""}${r.pages ? ` (${escapeHTML(r.pages)})` : ""}`
+              ).join("<br>")}
+            </div>
+          `;
+        }
+
+        const fallbackText = booksAvailable
+          ? `Источник: книги по предмету уже доступны — откройте раздел «Книги».`
+          : `Источник: книги по предмету будут добавлены позже.`;
+
+        item.innerHTML = `
+          <div style="font-weight:900">${escapeHTML(tp)}</div>
+          <div class="muted small">Рекомендуем повторить теорию и примеры по теме “${escapeHTML(tp)}”.</div>
+          ${refsHtml || `<div class="muted small" style="margin-top:6px">${escapeHTML(fallbackText)}</div>`}
+          <div style="margin-top:10px">
+            <button type="button" class="btn" data-open-books="1">Открыть «Книги»</button>
+          </div>
+        `;
+
+        const btn = item.querySelector('button[data-open-books="1"]');
+        btn?.addEventListener("click", (e) => {
+          e.stopPropagation();
+          pushCourses("books");
+          renderBooks();
+        });
+
+        wrap.appendChild(item);
+      });
+    })();
 
 const btn = item.querySelector('button[data-open-books="1"]');
 btn?.addEventListener("click", (e) => {
