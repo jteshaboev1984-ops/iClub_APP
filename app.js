@@ -3015,11 +3015,27 @@ function mapScopeToRankType(scope) {
   return "country";
 }
 
+let _cachedAuthUid = null;
+let _cachedAuthUidAt = 0;
+
 async function getAuthUid() {
   try {
     if (!window.sb?.auth?.getUser) return null;
+
+    const now = Date.now();
+
+    // ✅ reuse UID for 10 seconds to prevent auth lock contention
+    if (_cachedAuthUid && (now - _cachedAuthUidAt) < 10000) {
+      return _cachedAuthUid;
+    }
+
     const { data } = await window.sb.auth.getUser();
-    return data?.user?.id || null;
+    const uid = data?.user?.id || null;
+
+    _cachedAuthUid = uid;
+    _cachedAuthUidAt = now;
+
+    return uid;
   } catch {
     return null;
   }
