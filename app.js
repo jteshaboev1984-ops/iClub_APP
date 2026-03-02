@@ -5133,7 +5133,7 @@ mainSubjects.forEach(subj => {
     } catch (e) {
       // ❗rollback UI on network/JS error
       input.checked = !turningOn;
-      showToast("Ошибка сети. Попробуйте ещё раз.");
+      showToast(t("network_error_try_again"));
       return;
     }
 
@@ -5426,7 +5426,7 @@ input?.addEventListener("change", async () => {
   } else {
     // rollback UI
     try { input.checked = fromPinned; } catch {}
-    showToast("Не удалось сохранить. Попробуйте ещё раз.");
+    showToast(t("save_failed_try_again"));
     return;
   }
 } catch {
@@ -5867,7 +5867,24 @@ function uiAlert({ title, message, okText } = {}) {
   function showToast(message, ms = 2500) {
     const el = $("#toast");
     if (!el) return;
-    el.textContent = message;
+
+    // ✅ translate legacy hardcoded RU messages (and keep normal messages intact)
+    let msg = message;
+    if (typeof msg === "string") {
+      const legacyMap = {
+        "Выберите вариант ответа": "select_option_required",
+        "Проверьте формат ответа": "invalid_answer_format",
+        "Ошибка сети. Попробуйте ещё раз.": "network_error_try_again",
+        "Неверная ссылка.": "invalid_link",
+        "Не удалось сохранить. Попробуйте ещё раз.": "save_failed_try_again",
+        "Не удалось сохранить в базе. Попробуйте ещё раз.": "save_failed_db_try_again",
+        "Туры доступны только для основных предметов.": "disabled_not_main"
+      };
+      const key = legacyMap[msg];
+      if (key) msg = t(key);
+    }
+
+    el.textContent = msg;
     el.classList.add("is-show");
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.remove("is-show"), ms);
@@ -6539,7 +6556,7 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
       try {
         const res = await syncUserSubjectToSupabase(s.key, "study", false);
         if (!res?.ok) {
-          showToast("Не удалось сохранить в базе. Попробуйте ещё раз.");
+          showToast(t("save_failed_db_try_again"));
           renderAllSubjects();
           return;
         }
@@ -7752,7 +7769,7 @@ async function startPracticeNew() {
     if (!isAutoTimeout) {
       if (q.type === "mcq") {
         if (userAns === null || userAns === undefined) {
-          showToast("Выберите вариант ответа");
+          showToast(t("select_option_required"));
           return;
         }
       } else {
@@ -7760,10 +7777,10 @@ async function startPracticeNew() {
         if (!isValidInputAnswer(q, val)) {
           const errEl = $("#practice-input-error");
           if (errEl) {
-            errEl.textContent = "Проверьте формат ответа";
+            errEl.textContent = t("invalid_answer_format");
             errEl.style.display = "block";
           } else {
-            showToast("Проверьте формат ответа");
+            showToast(t("invalid_answer_format"));
           }
           return;
         }
@@ -8323,8 +8340,8 @@ if (!res.added) {
         }
 
         const fallbackText = booksAvailable
-          ? `Источник: книги по предмету уже доступны — откройте раздел «Книги».`
-          : `Источник: книги по предмету будут добавлены позже.`;
+          ? t("recs_books_available_source")
+          : t("recs_books_later_source");
 
         item.innerHTML = `
           <div style="font-weight:900">${escapeHTML(tp)}</div>
