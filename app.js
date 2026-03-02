@@ -4133,11 +4133,10 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
 
     if (!cacheHasData) {
       // -------- fallback: compute leaderboard from tour_attempts --------
-      const attemptsRes = await window.sb
+            const attemptsRes = await window.sb
         .from("tour_attempts")
-        .select("user_id,score,total_time,status,users(first_name,last_name,school,class,region,district)")
+        .select("user_id,score,total_time,status,users(first_name,last_name,school,class,region,district,region_id,district_id)")
         .eq("tour_id", tourId);
-
       if (token !== ratingsState._token) return;
 
       if (attemptsRes?.error) {
@@ -4155,11 +4154,21 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
         return !st || OK_STATUSES.has(st);
       });
 
-      // scope filter via user profile (same behavior as cache)
-      if (ratingsState.scope === "district" && me?.district) {
-        pool = pool.filter(r => String(r?.users?.district || "") === String(me.district));
-      } else if (ratingsState.scope === "region" && me?.region) {
-        pool = pool.filter(r => String(r?.users?.region || "") === String(me.region));
+            // scope filter via user profile (same behavior as cache)
+      if (ratingsState.scope === "district") {
+        const myDid = me?.district_id != null ? String(me.district_id) : "";
+        if (myDid) {
+          pool = pool.filter(r => String(r?.users?.district_id ?? "") === myDid);
+        } else if (me?.district) {
+          pool = pool.filter(r => String(r?.users?.district || "") === String(me.district));
+        }
+      } else if (ratingsState.scope === "region") {
+        const myRid = me?.region_id != null ? String(me.region_id) : "";
+        if (myRid) {
+          pool = pool.filter(r => String(r?.users?.region_id ?? "") === myRid);
+        } else if (me?.region) {
+          pool = pool.filter(r => String(r?.users?.region || "") === String(me.region));
+        }
       }
 
       // sort: score desc, time asc
@@ -9205,12 +9214,15 @@ async function updateTourAttempt(attemptId, patch) {
     const ctx = state.tourContext;
     if (!ctx || ctx.isArchive) return;
 
-    // simple debounce: 1 violation per 2s
-    const now = Date.now();
-    if (ctx.lastViolationAt && (now - ctx.lastViolationAt) < 2000) return;
+    // simple debounce: 1 violation per 2s (✅ use monotonic time for delta)
+    const nowMono = monoNow();
+    const lastMono = Number(ctx.lastViolationAtMono ?? NaN);
+    if (Number.isFinite(lastMono) && (nowMono - lastMono) < 2000) return;
+
+    ctx.lastViolationAtMono = nowMono; // ✅ reliable delta across clock changes/sleep
+    ctx.lastViolationAt = Date.now();  // optional calendar timestamp for logs
 
     ctx.violations += 1;
-    ctx.lastViolationAt = now;
     saveState();
 
     // ✅ mirror to DB via app_events (trackEvent already mirrors)
@@ -9645,12 +9657,11 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     });
   }
 
-    // DB finalize (only active tours)
+     // DB finalize (only active tours)
   try {
     if (ctx?.attemptId && !ctx?.isArchive) {
-      await flushPendingTourAnswers(ctx);
 
-            const finalizePatch = {
+      const finalizePatch = {
         score,
         percent,
         total_time: durationSec,
@@ -9660,17 +9671,40 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
           : "submitted"
       };
 
-      const res = await updateTourAttempt(ctx.attemptId, finalizePatch);
+      // 1) сначала пытаемся досохранить ответы
+      await flushPendingTourAnswers(ctx);
 
-      if (!res?.ok) {
-        // ✅ queue finalize for retry after reconnect
+      // 2) если ответы НЕ успели уйти в БД — НЕ ставим submitted сейчас
+      const stillPending =
+        Array.isArray(ctx?.pendingDbAnswers) && ctx.pendingDbAnswers.length > 0;
+
+      if (stillPending) {
+        // финализацию ставим в очередь, но не фиксируем статус в БД прямо сейчас
         enqueuePendingOp({
           type: "tour_finalize",
           attemptId: ctx.attemptId,
           patch: finalizePatch
         });
 
+        // попробуем досинкать в ближайшие секунды
+        try { scheduleFlushPendingOps(700); } catch {}
+
         showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
+      } else {
+        // 3) ответы ушли — можно финализировать attempt
+        const res = await updateTourAttempt(ctx.attemptId, finalizePatch);
+
+        if (!res?.ok) {
+          enqueuePendingOp({
+            type: "tour_finalize",
+            attemptId: ctx.attemptId,
+            patch: finalizePatch
+          });
+
+          try { scheduleFlushPendingOps(700); } catch {}
+
+          showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
+        }
       }
     }
   } catch {}
