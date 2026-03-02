@@ -89,10 +89,39 @@ function hideToursLoading() {
     } catch {}
   }
 
-  function enqueuePendingOp(op) {
+    function enqueuePendingOp(op) {
     try {
       const arr = loadPendingOps();
-      arr.push({ ...op, ts: Date.now() });
+
+      const next = { ...op, ts: Date.now() };
+
+      // ✅ дедупликация: держим только последнюю версию
+      if (next?.type === "tour_answer" && next.attemptId && next.questionId) {
+        const aId = String(next.attemptId);
+        const qId = String(next.questionId);
+
+        for (let i = arr.length - 1; i >= 0; i--) {
+          const it = arr[i];
+          if (it?.type === "tour_answer" && String(it.attemptId) === aId && String(it.questionId) === qId) {
+            arr.splice(i, 1);
+            break;
+          }
+        }
+      }
+
+      if (next?.type === "tour_finalize" && next.attemptId) {
+        const aId = String(next.attemptId);
+        for (let i = arr.length - 1; i >= 0; i--) {
+          const it = arr[i];
+          if (it?.type === "tour_finalize" && String(it.attemptId) === aId) {
+            arr.splice(i, 1);
+            break;
+          }
+        }
+      }
+
+      // ✅ лимит очереди (безопасно)
+      arr.push(next);
       savePendingOps(arr);
     } catch {}
   }
@@ -3662,8 +3691,25 @@ async function savePracticeAttemptToSupabase(attempt, quiz) {
       ansErr = e;
     }
 
-    if (ansErr) {
+        if (ansErr) {
       await logDbErrorToEvents(uid, "answers_insert", ansErr, { attempt_id: attemptId, rows: rows.length });
+
+      // ✅ cleanup: не оставляем сиротскую попытку без ответов
+      try {
+        await dbWriteWithRetry(async () => {
+          const { error } = await window.sb
+            .from("practice_attempts")
+            .delete()
+            .eq("id", attemptId)
+            .eq("user_id", uid);
+          if (error) throw error;
+          return true;
+        }, { tries: 2, baseDelayMs: 250 });
+      } catch (e) {
+        // best-effort: если delete не вышел — хотя бы залогировали
+        try { await logDbErrorToEvents(uid, "attempt_cleanup_failed", e, { attempt_id: attemptId }); } catch {}
+      }
+
       return { ok: false, reason: "answers_insert_failed", attemptId };
     }
   }
