@@ -6,19 +6,33 @@
 (() => {
   "use strict";
 
-  // --- YouTube API (Telegram Safe) ---
+    // --- YouTube API (Telegram Safe) ---
   let ytPlayer = null;
   let isYtReady = false;
 
-  const ytScript = document.createElement('script');
-  ytScript.src = "https://www.youtube.com/iframe_api";
-  const firstScriptTag = document.getElementsByTagName('script')[0];
-  firstScriptTag.parentNode.insertBefore(ytScript, firstScriptTag);
+  const isTelegramWebApp = (() => {
+    try {
+      return !!(window.Telegram && window.Telegram.WebApp);
+    } catch {
+      return false;
+    }
+  })();
 
-  window.onYouTubeIframeAPIReady = function() {
-    isYtReady = true;
-  };
+  // В Telegram WebApp: НЕ грузим YouTube IFrame API (часто ломает postMessage/origin)
+  if (!isTelegramWebApp) {
+    const ytScript = document.createElement('script');
+    ytScript.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    if (firstScriptTag && firstScriptTag.parentNode) {
+      firstScriptTag.parentNode.insertBefore(ytScript, firstScriptTag);
+    } else {
+      document.head.appendChild(ytScript);
+    }
 
+    window.onYouTubeIframeAPIReady = function() {
+      isYtReady = true;
+    };
+  }
   // ---------------------------
   // Helpers
   // ---------------------------
@@ -7364,20 +7378,33 @@ if (mainSubjects.length) {
         if (wrapEl) wrapEl.style.display = "block";
         if (emptyEl) emptyEl.style.display = "none";
 
-        // 1. Вставляем ссылку прямо в iframe
-        const safeOrigin = encodeURIComponent(window.location.origin);
-        if (iframe) {
-          iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&origin=${safeOrigin}`;
+                // 1. Вставляем ссылку прямо в iframe
+        const isTg = !!(window.Telegram && window.Telegram.WebApp);
+
+        // В Telegram WebApp выключаем enablejsapi + origin (иначе частые postMessage/origin проблемы)
+        const base = `https://www.youtube-nocookie.com/embed/${videoId}`;
+        const params = new URLSearchParams();
+        params.set("playsinline", "1");
+        params.set("rel", "0");
+        params.set("modestbranding", "1");
+
+        if (!isTg) {
+          params.set("enablejsapi", "1");
+          params.set("origin", window.location.origin);
+        } else {
+          params.set("enablejsapi", "0");
         }
 
-        // 2. Подключаем умный API для аналитики с жесткой привязкой origin
-        if (isYtReady && window.YT && window.YT.Player) {
+        if (iframe) {
+          iframe.src = `${base}?${params.toString()}`;
+        }
+
+        // 2. YT API подключаем только вне Telegram (в TG intentionally disabled)
+        if (!isTg && isYtReady && window.YT && window.YT.Player) {
           if (!ytPlayer) {
             ytPlayer = new window.YT.Player('video-player', {
               host: 'https://www.youtube-nocookie.com',
-              playerVars: {
-                'origin': window.location.origin
-              }
+              playerVars: { origin: window.location.origin }
             });
           }
         }
