@@ -6,11 +6,17 @@
 (() => {
   "use strict";
 
-  // --- YouTube IFrame API ---
+  // --- YouTube API (Telegram Safe) ---
   let ytPlayer = null;
+  let isYtReady = false;
+
+  const ytScript = document.createElement('script');
+  ytScript.src = "https://www.youtube.com/iframe_api";
+  const firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(ytScript, firstScriptTag);
 
   window.onYouTubeIframeAPIReady = function() {
-    // ✅ Убрали раннюю инициализацию! Плеер будет создан только в момент открытия урока.
+    isYtReady = true;
   };
 
   // ---------------------------
@@ -5265,9 +5271,13 @@ function bindRatingsUI() {
 
   const top = getCoursesTopScreen();
 
-  // ✅ Ставим видео на паузу при уходе с экрана
-  if (top === "video" && ytPlayer && typeof ytPlayer.pauseVideo === "function") {
-    ytPlayer.pauseVideo();
+  // ✅ Ставим видео на паузу и жестко глушим iframe при уходе
+  if (top === "video") {
+    try {
+      if (ytPlayer && typeof ytPlayer.pauseVideo === "function") ytPlayer.pauseVideo();
+      const iframe = document.getElementById("video-player");
+      if (iframe && iframe.tagName === "IFRAME") iframe.removeAttribute("src");
+    } catch {}
   }
 
     // ✅ tour-result back MUST go to Subject Hub (no return to questions)
@@ -7303,11 +7313,13 @@ if (mainSubjects.length) {
     if (mEl) mEl.textContent = lesson?.topic || "";
 
     const wrapEl = document.getElementById("video-player-wrap");
+    const iframe = document.getElementById("video-player");
     const emptyEl = document.getElementById("video-empty");
 
     // reset UI
     try {
       if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
+      if (iframe) iframe.removeAttribute("src");
       if (wrapEl) wrapEl.style.display = "none";
       if (emptyEl) emptyEl.style.display = "block";
     } catch {}
@@ -7330,45 +7342,44 @@ if (mainSubjects.length) {
       return;
     }
 
-    let url = String(data?.video_url || "").trim();
+    const url = String(data?.video_url || "").trim();
     if (!url) {
       updateTopbarForView("courses");
       return;
     }
 
-    // Вытаскиваем ID видео для YouTube API
+    // Вытаскиваем ID видео
     let videoId = "";
     if (url.includes("youtu.be/")) {
-      videoId = url.split("youtu.be/")[1]?.split("?")[0];
+      videoId = url.split("youtu.be/")[1]?.split("?")[0] || "";
     } else if (url.includes("youtube.com/watch")) {
-      try { videoId = new URL(url).searchParams.get("v"); } catch {}
+      try { videoId = new URL(url).searchParams.get("v") || ""; } catch {}
     }
 
-   try {
+    // ✅ Бронебойная очистка от багов: удаляем пробелы, \r, \n и скрытые символы
+    videoId = videoId.replace(/[^a-zA-Z0-9_-]/g, "");
+
+    try {
       if (videoId) {
-        // ✅ Сначала делаем блок видимым!
         if (wrapEl) wrapEl.style.display = "block";
         if (emptyEl) emptyEl.style.display = "none";
 
-        if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
-          // ✅ Заменяем loadVideoById на cueVideoById. 
-          // Это загрузит превью видео и будет ждать, пока пользователь сам нажмет Play,
-          // что разрешено строгими правилами Telegram WebApp.
-          ytPlayer.cueVideoById(videoId);
-        } else if (window.YT && window.YT.Player) {
-          // ✅ Создаем плеер
-          ytPlayer = new window.YT.Player('video-player', {
-            height: '100%',
-            width: '100%',
-            videoId: videoId,
-            host: 'https://www.youtube-nocookie.com', // ✅ Обходим блокировки трекеров внутри Telegram
-            playerVars: { 
-              'playsinline': 1, 
-              'rel': 0, 
-              'modestbranding': 1,
-              'origin': window.location.origin 
-            }
-          });
+        // 1. Вставляем ссылку прямо в iframe
+        const safeOrigin = encodeURIComponent(window.location.origin);
+        if (iframe) {
+          iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&origin=${safeOrigin}`;
+        }
+
+        // 2. Подключаем умный API для аналитики с жесткой привязкой origin
+        if (isYtReady && window.YT && window.YT.Player) {
+          if (!ytPlayer) {
+            ytPlayer = new window.YT.Player('video-player', {
+              host: 'https://www.youtube-nocookie.com',
+              playerVars: {
+                'origin': window.location.origin
+              }
+            });
+          }
         }
       }
     } catch (e) {
@@ -10791,10 +10802,13 @@ if (action === "tour-next" || action === "tour-submit") {
         const lesson_id = state?.courses?.lessonId ? String(state.courses.lessonId) : "";
         trackEvent("video_skipped", { subject_id, lesson_id });
 
-        // ✅ write to DB video_events from YouTube API
         try {
           const ws = (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') ? Math.round(ytPlayer.getCurrentTime()) : 0;
           if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
+          
+          const iframe = document.getElementById("video-player");
+          if (iframe && iframe.tagName === "IFRAME") iframe.removeAttribute("src");
+          
           insertVideoEventToSupabase("skipped", lesson_id, ws);
         } catch {}
 
@@ -10807,10 +10821,13 @@ if (action === "tour-next" || action === "tour-submit") {
         const lesson_id = state?.courses?.lessonId ? String(state.courses.lessonId) : "";
         trackEvent("video_completed", { subject_id, lesson_id });
 
-        // ✅ write to DB video_events from YouTube API
         try {
           const ws = (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') ? Math.round(ytPlayer.getCurrentTime()) : 0;
           if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
+          
+          const iframe = document.getElementById("video-player");
+          if (iframe && iframe.tagName === "IFRAME") iframe.removeAttribute("src");
+          
           insertVideoEventToSupabase("completed", lesson_id, ws);
         } catch {}
 
