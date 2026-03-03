@@ -4387,8 +4387,17 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
     let aroundRows = (aroundData || []).map(mapDbToRow);
     let bottomRows = (bottomData || []).map(mapDbToRow);
 
-        totalN = (totalRes?.data && totalRes.data.length) ? Number(totalRes.data[0].rank_no || 0) : 0;
-             // =========================
+    totalN = (totalRes?.data && totalRes.data.length) ? Number(totalRes.data[0].rank_no || 0) : 0;
+
+    // -------------------------
+    // Fallback search paging state
+    // -------------------------
+    if (ratingsState._fbSearchLimit == null) ratingsState._fbSearchLimit = 300;
+    if (ratingsState._fbSearchOffset == null) ratingsState._fbSearchOffset = 0;
+    if (!Array.isArray(ratingsState._fbSearchRows)) ratingsState._fbSearchRows = [];
+    if (ratingsState._pagingMode == null) ratingsState._pagingMode = "";
+   
+    // =========================
     // Search mode (cache) + "Load more"
     // =========================
     if (q) {
@@ -4479,10 +4488,127 @@ listEl.innerHTML = `
      // Fallback: if cache is empty, compute leaderboard from tour_attempts for this tour
     const cacheEmpty = !topRows.length && !aroundRows.length && !bottomRows.length;
 
-    if (cacheEmpty) {
+      if (cacheEmpty) {
+
+      // =========================
+      // Fallback SEARCH (paged) to avoid pulling 5000 rows at once
+      // =========================
+      if (q) {
+        ratingsState._pagingMode = "fb_search";
+
+        const fbKey = `${scopeRankType}|${tourId}|${String(q).trim().toLowerCase()}|${ratingsState.scope}`;
+        if (ratingsState._fbSearchKey !== fbKey) {
+          ratingsState._fbSearchKey = fbKey;
+          ratingsState._fbSearchOffset = 0;
+          ratingsState._fbSearchRows = [];
+        }
+
+        const from = ratingsState._fbSearchOffset;
+        const to = from + ratingsState._fbSearchLimit - 1;
+
+        const { data: pageData, error: pageErr } = await window.sb
+          .from("tour_attempts")
+          .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district,region_id,district_id)")
+          .eq("tour_id", tourId)
+          .in("status", ["submitted", "time_expired"])
+          .order("score", { ascending: false })
+          .order("total_time", { ascending: true })
+          .range(from, to);
+
+        if (token !== ratingsState._token) return;
+
+        if (pageErr) {
+          listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("ratings_load_error"))}</div>`;
+          hideLoading();
+          return;
+        }
+
+        // scope filter (id-first, string fallback)
+        const myRid = me?.region_id != null ? String(me.region_id) : "";
+        const myDid = me?.district_id != null ? String(me.district_id) : "";
+        const scopedPage = (Array.isArray(pageData) ? pageData : []).filter(a => {
+          const u = a.users || {};
+          if (ratingsState.scope === "district") {
+            if (myDid) return String(u.district_id ?? "") === myDid;
+            if (me?.district) return String(u.district || "") === String(me.district || "");
+            return false;
+          }
+          if (ratingsState.scope === "region") {
+            if (myRid) return String(u.region_id ?? "") === myRid;
+            if (me?.region) return String(u.region || "") === String(me.region || "");
+            return false;
+          }
+          return true;
+        });
+
+        // map
+        let pageRows = scopedPage.map(a => {
+          const u = a.users || {};
+          return {
+            user_id: a.user_id,
+            score: Number(a.score || 0),
+            total_time: Number(a.total_time || 0),
+            name: getFullName(u),
+            meta: buildUserMeta(u),
+            time: formatSecondsToMMSS(Number(a.total_time || 0))
+          };
+        });
+
+        // filter by search string
+        const qq = String(q).trim().toLowerCase();
+        pageRows = pageRows.filter(x => {
+          const blob = `${x.name || ""} ${x.meta || ""}`.toLowerCase();
+          return blob.includes(qq);
+        });
+
+        // append unique (avoid duplicates)
+        const seen = new Set(ratingsState._fbSearchRows.map(r => String(r.user_id)));
+        for (const r of pageRows) {
+          const k = String(r.user_id);
+          if (!seen.has(k)) {
+            ratingsState._fbSearchRows.push(r);
+            seen.add(k);
+          }
+        }
+
+        applyRatingsNamePolicy(ratingsState._fbSearchRows);
+
+        hideLoading();
+
+        const shown = ratingsState._fbSearchRows.slice(0, 400);
+        const htmlRows = shown.map(renderRowHTML).join("");
+
+        const maybeHasMore = Array.isArray(pageData) && pageData.length === ratingsState._fbSearchLimit;
+
+        listEl.innerHTML = `
+          <div class="lb-section-head lb-results-head">
+            <div class="lb-section-title">${escapeHTML(t("ratings_results") || "Results")}</div>
+
+            <button type="button" class="lb-search-reset" id="ratings-reset-search" aria-label="Reset search">
+              <span class="lb-reset-label">${escapeHTML(t("ratings_reset") || (t("btn_reset") || "Reset"))}</span>
+              <span class="lb-reset-q">“${escapeHTML(String(q))}”</span>
+              <span class="lb-reset-x">✕</span>
+            </button>
+          </div>
+
+          <div class="lb-section-sub">${shown.length}${totalN ? ` / ${totalN}` : ""}</div>
+          ${htmlRows || `<div class="empty muted">${escapeHTML(t("ratings_empty") || "Ничего не найдено.")}</div>`}
+          ${maybeHasMore ? `
+            <div class="lb-loadmore-wrap">
+              <button id="ratings-load-more" type="button" class="lb-loadmore-btn">Показать ещё</button>
+            </div>
+          ` : ``}
+        `;
+
+        if (mybar) mybar.style.display = "none";
+        return;
+      }
+
+      // default fallback (no search): keep previous behavior (safe)
+      ratingsState._pagingMode = "";
       const { data: attData, error: attErr } = await window.sb
         .from("tour_attempts")
-        .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district)")
+        .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district,region_id,district_id)")
         .eq("tour_id", tourId)
         .in("status", ["submitted", "time_expired"])
         .limit(5000);
@@ -4952,19 +5078,28 @@ function bindRatingsUI() {
     });
   }
                 // Load more + Reset (event delegation, because buttons are rendered dynamically)
-  document.addEventListener("click", (e) => {
+    document.addEventListener("click", (e) => {
     const loadBtn = e?.target?.closest?.("#ratings-load-more");
     if (loadBtn) {
-      ratingsState._searchOffset += ratingsState._searchLimit;
+      if (ratingsState._pagingMode === "fb_search") {
+        ratingsState._fbSearchOffset += ratingsState._fbSearchLimit;
+      } else {
+        ratingsState._searchOffset += ratingsState._searchLimit;
+      }
       renderRatings();
       return;
     }
 
     const resetBtn = e?.target?.closest?.("#ratings-reset-search");
-    if (resetBtn) {
+        if (resetBtn) {
       ratingsState.q = "";
       ratingsState._searchOffset = 0;
       ratingsState._searchRows = [];
+
+      ratingsState._fbSearchOffset = 0;
+      ratingsState._fbSearchRows = [];
+      ratingsState._fbSearchKey = "";
+      ratingsState._pagingMode = "";
 
       if (searchInput) searchInput.value = "";
       renderRatings();
