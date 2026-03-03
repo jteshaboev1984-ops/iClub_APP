@@ -8,19 +8,12 @@
 
   // --- YouTube IFrame API ---
   let ytPlayer = null;
-  let isYtReady = false;
 
   window.onYouTubeIframeAPIReady = function() {
-    isYtReady = true;
-    ytPlayer = new YT.Player('video-player', {
-      height: '100%',
-      width: '100%',
-      videoId: '',
-      playerVars: { 'playsinline': 1, 'rel': 0, 'modestbranding': 1 }
-    });
+    // ✅ Убрали раннюю инициализацию! Плеер будет создан только в момент открытия урока.
   };
 
-    // ---------------------------
+  // ---------------------------
   // Helpers
   // ---------------------------
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -7254,11 +7247,24 @@ if (mainSubjects.length) {
       try { videoId = new URL(url).searchParams.get("v"); } catch {}
     }
 
-    try {
-      if (isYtReady && ytPlayer && videoId) {
-        ytPlayer.loadVideoById(videoId);
+   try {
+      if (videoId) {
+        // ✅ Сначала делаем блок видимым!
         if (wrapEl) wrapEl.style.display = "block";
         if (emptyEl) emptyEl.style.display = "none";
+
+        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+          // Если плеер уже существует, просто грузим новое видео
+          ytPlayer.loadVideoById(videoId);
+        } else if (window.YT && window.YT.Player) {
+          // ✅ Создаем плеер ВПЕРВЫЕ только сейчас
+          ytPlayer = new window.YT.Player('video-player', {
+            height: '100%',
+            width: '100%',
+            videoId: videoId,
+            playerVars: { 'playsinline': 1, 'rel': 0, 'modestbranding': 1 }
+          });
+        }
       }
     } catch (e) {
       logClientError("video_player_bind_error", e);
@@ -10682,7 +10688,7 @@ if (action === "tour-next" || action === "tour-submit") {
 
         // ✅ write to DB video_events from YouTube API
         try {
-          const ws = (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') ? ytPlayer.getCurrentTime() : 0;
+          const ws = (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') ? Math.round(ytPlayer.getCurrentTime()) : 0;
           if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
           insertVideoEventToSupabase("skipped", lesson_id, ws);
         } catch {}
@@ -10698,7 +10704,7 @@ if (action === "tour-next" || action === "tour-submit") {
 
         // ✅ write to DB video_events from YouTube API
         try {
-          const ws = (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') ? ytPlayer.getCurrentTime() : 0;
+          const ws = (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') ? Math.round(ytPlayer.getCurrentTime()) : 0;
           if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
           insertVideoEventToSupabase("completed", lesson_id, ws);
         } catch {}
