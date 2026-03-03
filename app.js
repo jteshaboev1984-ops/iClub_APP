@@ -3693,50 +3693,147 @@ async function savePracticeAttemptToSupabase(attempt, quiz) {
     return { ok: false, reason: "no_subject_id" };
   }
 
-  // attempt.details у тебя формируется в finishPractice(): [{ id, userAnswer, isCorrect, timeSpent, ... }]
+  // Build answers payload:
+  // - MCQ: quiz.answers[i] is usually 0/1/2/3 → store as "0"/"1"/"2"/"3" (TEXT in DB, but it's still the index)
+  // - INPUT: quiz.answers[i] is text → store as text
   const details = Array.isArray(attempt?.details) ? attempt.details : [];
-  const answersPayload = details
-    .map((d) => ({
+  const answers = Array.isArray(quiz?.answers) ? quiz.answers : [];
+
+  const answersPayload = details.map((d, i) => {
+    const rawUA = answers[i];
+    const userAnswer = (rawUA === null || rawUA === undefined) ? "" : String(rawUA);
+
+    return {
       question_id: Number(d?.id),
-      user_answer: (d?.userAnswer === null || d?.userAnswer === undefined) ? "" : String(d.userAnswer),
+      user_answer: userAnswer,
       is_correct: !!d?.isCorrect,
-      time_spent: Number(d?.timeSpent) || 0
-    }))
-    .filter((x) => Number.isFinite(x.question_id) && x.question_id > 0);
+      time_spent: Math.max(0, Math.round(Number(d?.timeSpent) || 0))
+    };
+  }).filter(r => Number.isFinite(r.question_id) && r.question_id > 0);
 
-  // 1 RPC = 1 транзакция (attempt + answers)
-  const rpcCall = () =>
-    window.sb.rpc("submit_practice_attempt", {
-      p_subject_id: subjectId,
-      p_score: Number(attempt?.score) || 0,
-      p_percent: Number(attempt?.percent) || 0,
-      p_time_seconds: Number(attempt?.durationSec) || 0,
-      p_answers: answersPayload
-    });
+  // =========================
+  // RPC path (atomic + anti-duplicate via unique index + ON CONFLICT)
+  // =========================
+  try {
+    const rpcCall = async () => {
+      const { data, error } = await window.sb.rpc("submit_practice_attempt", {
+        p_subject_id: subjectId,
+        p_score: Number(attempt?.score) || 0,
+        p_percent: Number(attempt?.percent) || 0,
+        p_time_seconds: Number(attempt?.durationSec) || 0,
+        p_answers: answersPayload
+      });
+      if (error) throw error;
+      return data;
+    };
 
-  const { data, error } = await dbWriteWithRetry(rpcCall, {
-    where: "practice_rpc_submit"
-  });
+    const attemptIdRpc = await dbWriteWithRetry(rpcCall, { tries: 3, baseDelayMs: 350 });
 
-  if (error) {
-    await logDbErrorToEvents(uid, "practice_rpc_submit_error", error, {
-      subject_id: subjectId,
-      answers_count: answersPayload.length
-    });
-    return { ok: false, reason: "rpc_error" };
+    const attemptId = (attemptIdRpc !== null && attemptIdRpc !== undefined) ? Number(attemptIdRpc) : null;
+    if (!attemptId) {
+      await logDbErrorToEvents(uid, "practice_rpc_bad_id", { message: "RPC returned empty attempt_id" }, { subject_id: subjectId });
+      return { ok: false, reason: "rpc_bad_id" };
+    }
+
+    return { ok: true, attemptId, subjectId, via: "rpc" };
+  } catch (e) {
+    // If RPC is missing or fails — fallback to legacy so UX never breaks
+    try { await logDbErrorToEvents(uid, "practice_rpc_failed", e, { subject_id: subjectId }); } catch {}
   }
 
-  // RPC returns bigint attempt_id (scalar)
-  const attemptId = (data !== null && data !== undefined) ? Number(data) : null;
+  // =========================
+  // Legacy fallback (safe): current 2-step method
+  // =========================
 
-  if (!attemptId) {
-    await logDbErrorToEvents(uid, "practice_rpc_submit_bad_id", { message: "RPC returned empty attempt_id" }, {
-      subject_id: subjectId
-    });
-    return { ok: false, reason: "bad_attempt_id" };
+  // 1) insert attempt WITH returning id
+  const insertAttemptPayload = {
+    user_id: uid,
+    subject_id: subjectId,
+    score: Number(attempt?.score) || 0,
+    percent: Number(attempt?.percent) || 0,
+    time_seconds: Number(attempt?.durationSec) || 0
+  };
+
+  let insRow = null;
+  let insErr = null;
+
+  try {
+    insRow = await dbWriteWithRetry(async () => {
+      const { data, error } = await window.sb
+        .from("practice_attempts")
+        .insert(insertAttemptPayload)
+        .select("id")
+        .single();
+
+      if (error) throw error;
+      return data || null;
+    }, { tries: 3, baseDelayMs: 350 });
+  } catch (e) {
+    insErr = e;
   }
 
-  return { ok: true, attemptId, subjectId };
+  if (!insRow?.id) {
+    await logDbErrorToEvents(
+      uid,
+      "attempt_insert",
+      insErr || { message: "no_returning_id" },
+      { subject_id: subjectId }
+    );
+    return { ok: false, reason: "attempt_insert_failed" };
+  }
+
+  const attemptId = Number(insRow.id);
+
+  const rows = details.map((d, i) => {
+    const rawUA = answers[i];
+    const userAnswer = (rawUA === null || rawUA === undefined) ? null : String(rawUA);
+
+    return {
+      attempt_id: attemptId,
+      question_id: Number(d?.id),
+      user_answer: userAnswer,
+      is_correct: !!d?.isCorrect,
+      time_spent: Math.max(0, Math.round(Number(d?.timeSpent) || 0))
+    };
+  }).filter(r => Number.isFinite(r.question_id));
+
+  if (rows.length) {
+    let ansErr = null;
+
+    try {
+      await dbWriteWithRetry(async () => {
+        const { error } = await window.sb
+          .from("practice_answers")
+          .insert(rows);
+
+        if (error) throw error;
+        return true;
+      }, { tries: 3, baseDelayMs: 350 });
+    } catch (e) {
+      ansErr = e;
+    }
+
+    if (ansErr) {
+      await logDbErrorToEvents(uid, "answers_insert", ansErr, { attempt_id: attemptId, rows: rows.length });
+
+      // cleanup: не оставляем сиротскую попытку без ответов
+      try {
+        await dbWriteWithRetry(async () => {
+          const { error } = await window.sb
+            .from("practice_attempts")
+            .delete()
+            .eq("id", attemptId)
+            .eq("user_id", uid);
+          if (error) throw error;
+          return true;
+        }, { tries: 2, baseDelayMs: 250 });
+      } catch {}
+
+      return { ok: false, reason: "answers_insert_failed" };
+    }
+  }
+
+  return { ok: true, attemptId, subjectId, via: "legacy" };
 }
 
    async function getPracticeDbMetricsBySubjectKey(subjectKey) {
