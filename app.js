@@ -3686,99 +3686,47 @@ async function savePracticeAttemptToSupabase(attempt, quiz) {
     return { ok: false, reason: "no_subject_id" };
   }
 
-   // 1) insert attempt WITH returning id (fixes race condition 100%)
-  const insertAttemptPayload = {
-    user_id: uid,
-    subject_id: subjectId,
-    score: Number(attempt?.score) || 0,
-    percent: Number(attempt?.percent) || 0,
-    time_seconds: Number(attempt?.durationSec) || 0
-  };
-
-    let insRow = null;
-  let insErr = null;
-
-  try {
-    insRow = await dbWriteWithRetry(async () => {
-      const { data, error } = await window.sb
-        .from("practice_attempts")
-        .insert(insertAttemptPayload)
-        .select("id")
-        .single();
-
-      if (error) throw error;
-      return data || null;
-    }, { tries: 3, baseDelayMs: 350 });
-  } catch (e) {
-    insErr = e;
-  }
-
-  if (!insRow?.id) {
-    await logDbErrorToEvents(
-      uid,
-      "attempt_insert",
-      insErr || { message: "no_returning_id" },
-      { subject_id: subjectId }
-    );
-    return { ok: false, reason: "attempt_insert_failed" };
-  }
-
-  const attemptId = Number(insRow.id);
-
-  // 3) insert answers (best-effort)
+  // attempt.details у тебя формируется в finishPractice(): [{ id, userAnswer, isCorrect, timeSpent, ... }]
   const details = Array.isArray(attempt?.details) ? attempt.details : [];
-  const answers = Array.isArray(quiz?.answers) ? quiz.answers : [];
+  const answersPayload = details
+    .map((d) => ({
+      question_id: Number(d?.id),
+      user_answer: (d?.userAnswer === null || d?.userAnswer === undefined) ? "" : String(d.userAnswer),
+      is_correct: !!d?.isCorrect,
+      time_spent: Number(d?.timeSpent) || 0
+    }))
+    .filter((x) => Number.isFinite(x.question_id) && x.question_id > 0);
 
-  const rows = details.map((d, i) => {
-    const rawUA = answers[i];
-    const userAnswer = (rawUA === null || rawUA === undefined) ? null : String(rawUA);
+  // 1 RPC = 1 транзакция (attempt + answers)
+  const rpcCall = () =>
+    window.sb.rpc("submit_practice_attempt", {
+      p_subject_id: subjectId,
+      p_score: Number(attempt?.score) || 0,
+      p_percent: Number(attempt?.percent) || 0,
+      p_time_seconds: Number(attempt?.durationSec) || 0,
+      p_answers: answersPayload
+    });
 
-   return {
-     attempt_id: attemptId,
-     question_id: Number(d?.id),
-     user_answer: userAnswer,
-     is_correct: !!d?.isCorrect,
-     time_spent: Math.max(0, Math.round(Number(d?.timeSpent) || 0))
-   };
-  }).filter(r => Number.isFinite(r.question_id));
+  const { data, error } = await dbWriteWithRetry(rpcCall, {
+    where: "practice_rpc_submit"
+  });
 
-    if (rows.length) {
-    let ansErr = null;
+  if (error) {
+    await logDbErrorToEvents(uid, "practice_rpc_submit_error", error, {
+      subject_id: subjectId,
+      answers_count: answersPayload.length
+    });
+    return { ok: false, reason: "rpc_error" };
+  }
 
-    try {
-      await dbWriteWithRetry(async () => {
-        const { error } = await window.sb
-          .from("practice_answers")
-          .insert(rows);
+  // RPC returns bigint attempt_id (scalar)
+  const attemptId = (data !== null && data !== undefined) ? Number(data) : null;
 
-        if (error) throw error;
-        return true;
-      }, { tries: 3, baseDelayMs: 350 });
-    } catch (e) {
-      ansErr = e;
-    }
-
-        if (ansErr) {
-      await logDbErrorToEvents(uid, "answers_insert", ansErr, { attempt_id: attemptId, rows: rows.length });
-
-      // ✅ cleanup: не оставляем сиротскую попытку без ответов
-      try {
-        await dbWriteWithRetry(async () => {
-          const { error } = await window.sb
-            .from("practice_attempts")
-            .delete()
-            .eq("id", attemptId)
-            .eq("user_id", uid);
-          if (error) throw error;
-          return true;
-        }, { tries: 2, baseDelayMs: 250 });
-      } catch (e) {
-        // best-effort: если delete не вышел — хотя бы залогировали
-        try { await logDbErrorToEvents(uid, "attempt_cleanup_failed", e, { attempt_id: attemptId }); } catch {}
-      }
-
-      return { ok: false, reason: "answers_insert_failed", attemptId };
-    }
+  if (!attemptId) {
+    await logDbErrorToEvents(uid, "practice_rpc_submit_bad_id", { message: "RPC returned empty attempt_id" }, {
+      subject_id: subjectId
+    });
+    return { ok: false, reason: "bad_attempt_id" };
   }
 
   return { ok: true, attemptId, subjectId };
