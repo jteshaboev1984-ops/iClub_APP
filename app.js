@@ -7350,15 +7350,18 @@ if (mainSubjects.length) {
         if (wrapEl) wrapEl.style.display = "block";
         if (emptyEl) emptyEl.style.display = "none";
 
-        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-          // Если плеер уже существует, просто грузим новое видео
-          ytPlayer.loadVideoById(videoId);
+        if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
+          // ✅ Заменяем loadVideoById на cueVideoById. 
+          // Это загрузит превью видео и будет ждать, пока пользователь сам нажмет Play,
+          // что разрешено строгими правилами Telegram WebApp.
+          ytPlayer.cueVideoById(videoId);
         } else if (window.YT && window.YT.Player) {
-          // ✅ Создаем плеер ВПЕРВЫЕ только сейчас и передаем origin сайта
+          // ✅ Создаем плеер
           ytPlayer = new window.YT.Player('video-player', {
             height: '100%',
             width: '100%',
             videoId: videoId,
+            host: 'https://www.youtube-nocookie.com', // ✅ Обходим блокировки трекеров внутри Telegram
             playerVars: { 
               'playsinline': 1, 
               'rel': 0, 
