@@ -8,6 +8,7 @@
 
   <!-- Telegram WebApp (optional but standard) -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
 
   <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="style.css" />
@@ -396,7 +397,9 @@
                   Видео недоступно (нет URL в базе).
                 </div>
 
-                <video id="video-player" class="video-player" controls playsinline style="display:none"></video>
+                <div id="video-player-wrap" style="display:none; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; background: #000; width: 100%;">
+                  <div id="video-player"></div>
+                </div>
               </div>
 
               <div class="actions-row">
