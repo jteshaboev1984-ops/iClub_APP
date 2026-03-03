@@ -6,6 +6,20 @@
 (() => {
   "use strict";
 
+  // --- YouTube IFrame API ---
+  let ytPlayer = null;
+  let isYtReady = false;
+
+  window.onYouTubeIframeAPIReady = function() {
+    isYtReady = true;
+    ytPlayer = new YT.Player('video-player', {
+      height: '100%',
+      width: '100%',
+      videoId: '',
+      playerVars: { 'playsinline': 1, 'rel': 0, 'modestbranding': 1 }
+    });
+  };
+
     // ---------------------------
   // Helpers
   // ---------------------------
@@ -5160,6 +5174,12 @@ function bindRatingsUI() {
   if (state.quizLock) return;
 
   const top = getCoursesTopScreen();
+
+  // ✅ Ставим видео на паузу при уходе с экрана
+  if (top === "video" && ytPlayer && typeof ytPlayer.pauseVideo === "function") {
+    ytPlayer.pauseVideo();
+  }
+
     // ✅ tour-result back MUST go to Subject Hub (no return to questions)
   if (top === "tour-result") {
     // чистим тур-флоу из стека, чтобы назад не вёл в quiz
@@ -7192,17 +7212,13 @@ if (mainSubjects.length) {
     if (tEl) tEl.textContent = lesson?.title || (t("video") || "Видео");
     if (mEl) mEl.textContent = lesson?.topic || "";
 
-    const player = document.getElementById("video-player");
+    const wrapEl = document.getElementById("video-player-wrap");
     const emptyEl = document.getElementById("video-empty");
 
     // reset UI
     try {
-      if (player) {
-        player.pause?.();
-        player.removeAttribute("src");
-        player.load?.();
-        player.style.display = "none";
-      }
+      if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
+      if (wrapEl) wrapEl.style.display = "none";
       if (emptyEl) emptyEl.style.display = "block";
     } catch {}
 
@@ -7224,18 +7240,26 @@ if (mainSubjects.length) {
       return;
     }
 
-    const url = String(data?.video_url || "").trim();
+    let url = String(data?.video_url || "").trim();
     if (!url) {
       updateTopbarForView("courses");
       return;
     }
 
+    // Вытаскиваем ID видео для YouTube API
+    let videoId = "";
+    if (url.includes("youtu.be/")) {
+      videoId = url.split("youtu.be/")[1]?.split("?")[0];
+    } else if (url.includes("youtube.com/watch")) {
+      try { videoId = new URL(url).searchParams.get("v"); } catch {}
+    }
+
     try {
-      if (player) {
-        player.src = url;
-        player.style.display = "block";
+      if (isYtReady && ytPlayer && videoId) {
+        ytPlayer.loadVideoById(videoId);
+        if (wrapEl) wrapEl.style.display = "block";
+        if (emptyEl) emptyEl.style.display = "none";
       }
-      if (emptyEl) emptyEl.style.display = "none";
     } catch (e) {
       logClientError("video_player_bind_error", e);
     }
@@ -10656,10 +10680,10 @@ if (action === "tour-next" || action === "tour-submit") {
         const lesson_id = state?.courses?.lessonId ? String(state.courses.lessonId) : "";
         trackEvent("video_skipped", { subject_id, lesson_id });
 
-        // ✅ write to DB video_events (non-blocking)
+        // ✅ write to DB video_events from YouTube API
         try {
-          const p = document.getElementById("video-player");
-          const ws = p ? (p.currentTime || 0) : 0;
+          const ws = (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') ? ytPlayer.getCurrentTime() : 0;
+          if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
           insertVideoEventToSupabase("skipped", lesson_id, ws);
         } catch {}
 
@@ -10672,10 +10696,10 @@ if (action === "tour-next" || action === "tour-submit") {
         const lesson_id = state?.courses?.lessonId ? String(state.courses.lessonId) : "";
         trackEvent("video_completed", { subject_id, lesson_id });
 
-        // ✅ write to DB video_events (non-blocking)
+        // ✅ write to DB video_events from YouTube API
         try {
-          const p = document.getElementById("video-player");
-          const ws = p ? (p.currentTime || 0) : 0;
+          const ws = (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') ? ytPlayer.getCurrentTime() : 0;
+          if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
           insertVideoEventToSupabase("completed", lesson_id, ws);
         } catch {}
 
