@@ -7257,12 +7257,17 @@ if (mainSubjects.length) {
           // Если плеер уже существует, просто грузим новое видео
           ytPlayer.loadVideoById(videoId);
         } else if (window.YT && window.YT.Player) {
-          // ✅ Создаем плеер ВПЕРВЫЕ только сейчас
+          // ✅ Создаем плеер ВПЕРВЫЕ только сейчас и передаем origin сайта
           ytPlayer = new window.YT.Player('video-player', {
             height: '100%',
             width: '100%',
             videoId: videoId,
-            playerVars: { 'playsinline': 1, 'rel': 0, 'modestbranding': 1 }
+            playerVars: { 
+              'playsinline': 1, 
+              'rel': 0, 
+              'modestbranding': 1,
+              'origin': window.location.origin 
+            }
           });
         }
       }
