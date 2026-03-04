@@ -572,6 +572,12 @@ rec_read_text: "Изучите тему в книге:",
 rec_btn_back: "Назад",
 rec_btn_books: "Книги",
 rec_btn_train: "Тренировка по теме",
+rec_detail_subtitle: "Персональный разбор и план",
+rec_mistakes_title: "Ошибки по теме",
+rec_mistakes_subtitle: "Ваши последние неправильные ответы по этой теме.",
+rec_mistake_card_title: "Ошибка",
+rec_your_answer: "Ваш ответ",
+rec_correct_answer: "Правильный",       
 
       // Pinned hints
       profile_pinned_hint_has:
@@ -1151,6 +1157,12 @@ rec_read_text: "Kitobdagi mavzuni o‘rganing:",
 rec_btn_back: "Orqaga",
 rec_btn_books: "Kitoblar",
 rec_btn_train: "Mavzu bo‘yicha amaliyot",
+rec_detail_subtitle: "Shaxsiy tahlil va reja",
+rec_mistakes_title: "Mavzu bo‘yicha xatolar",
+rec_mistakes_subtitle: "Ushbu mavzu bo‘yicha so‘nggi noto‘g‘ri javoblaringiz.",
+rec_mistake_card_title: "Xato",
+rec_your_answer: "Sizning javobingiz",
+rec_correct_answer: "To‘g‘ri javob",
 
       // Pinned hints
       profile_pinned_hint_has:
@@ -1703,6 +1715,12 @@ rec_read_text: "Study this topic in the book:",
 rec_btn_back: "Back",
 rec_btn_books: "Books",
 rec_btn_train: "Practice by topic",
+rec_detail_subtitle: "Personal review and plan",
+rec_mistakes_title: "Mistakes by topic",
+rec_mistakes_subtitle: "Your latest incorrect answers on this topic.",
+rec_mistake_card_title: "Mistake",
+rec_your_answer: "Your answer",
+rec_correct_answer: "Correct",
 
       profile_pinned_hint_has: "Pinned subjects already speed things up. Next: consistency.",
       profile_pinned_hint_empty: "Pin 1–3 subjects to make access noticeably faster."
