@@ -9228,18 +9228,25 @@ async function renderMyRecDetail() {
       }).join("")
     : `<div class="list-item"><div style="font-weight:900">Что прочитать</div><div class="muted small" style="margin-top:6px">Ссылки на главы добавим через topic_book_map.</div></div>`;
 
-  body.innerHTML = `
+    body.innerHTML = `
     ${headerCard}
+
     <div class="list-item" style="margin-top:10px">
       <div style="font-weight:900">Ошибки по теме</div>
       <div class="muted small" style="margin-top:6px">Ваши последние неправильные ответы по этой теме.</div>
     </div>
     ${mistakesHtml}
+
     <div class="list-item" style="margin-top:10px">
       <div style="font-weight:900">Что прочитать</div>
       <div class="muted small" style="margin-top:6px">Сначала теория, потом тренировка.</div>
     </div>
-    ${refsHtml}
+
+    ${refs.length ? refsHtml : `
+      <div class="list-item">
+        <div class="muted small">Пока нет привязок к книге. Добавьте их в topic_book_map для этой темы.</div>
+      </div>
+    `}
   `;
 
   body.querySelectorAll("button[data-open-book-url]").forEach(btn => {
