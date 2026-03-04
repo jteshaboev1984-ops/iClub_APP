@@ -992,6 +992,18 @@ html, body {
   box-shadow: none;
 }
 
+/* Secondary buttons — consistent neutral look */
+.actions-row .btn:not(.primary) {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.12);
+  color: #111;
+}
+
+/* Slight hover for desktop */
+.actions-row .btn:not(.primary):hover {
+  background: rgba(0,0,0,.03);
+}
+
 .btn.is-loading {
   cursor: progress;
 }
