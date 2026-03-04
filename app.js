@@ -7521,11 +7521,19 @@ async function syncMyRecsToSupabase(subjectKey, recs) {
 
     // recs: [{ topic, subtopic }]
     const normalized = (Array.isArray(recs) ? recs : [])
-      .map(r => ({
-        topic: String(r?.topic || "").trim(),
-        subtopic: r?.subtopic ? String(r.subtopic).trim() : null
-      }))
-      .filter(r => r.topic);
+  .map(r => {
+    // backwards compatible:
+    // - string -> topic
+    // - object -> {topic, subtopic}
+    if (typeof r === "string") {
+      return { topic: String(r).trim(), subtopic: null };
+    }
+    return {
+      topic: String(r?.topic || "").trim(),
+      subtopic: r?.subtopic ? String(r.subtopic).trim() : null
+    };
+  })
+  .filter(r => r.topic);
 
     if (!normalized.length) return;
 
@@ -8986,7 +8994,7 @@ function syncPracticeResultBadges() {
 
     const uniq = Array.from(new Set(topics));
 
-        // Save to "My recommendations" (v1: topics-only)
+        // Save to "My recommendations"
 const res = addMyRecsFromAttempt(attempt);
 
 if (res?.added) {
@@ -8994,7 +9002,8 @@ if (res?.added) {
 
   // ✅ write recs into DB (non-blocking)
   try {
-    syncMyRecsToSupabase(attempt.subjectKey, res.addedTopics);
+    // new format: [{ topic, subtopic }]
+    syncMyRecsToSupabase(attempt.subjectKey, res.addedRecs || res.recs || []);
   } catch {}
 }
 
