@@ -8297,7 +8297,10 @@ async function startPracticeNew() {
     const diff = document.createElement("div");
     diff.className = "muted small";
     diff.style.marginBottom = "8px";
-    diff.textContent = `Сложность: ${q.difficulty}`;
+    const diffLabel = t("practice_difficulty") || "Сложность";
+    const diffKey = `difficulty_${String(q.difficulty || "").toLowerCase()}`;
+    const diffText = t(diffKey) || q.difficulty || "";
+    diff.textContent = `${diffLabel}: ${diffText}`;
     wrap.appendChild(diff);
 
     if (q.type === "mcq") {
@@ -8631,7 +8634,9 @@ if (!quiz?.drillType) {
     } catch {}
 
     // merge db result into current attempt without overwriting the attempt object
-    state.practiceLastAttempt = { ...(state.practiceLastAttempt || attempt || {}), db: res };
+    if (!quiz?.drillType) {
+  state.practiceLastAttempt = { ...(state.practiceLastAttempt || attempt || {}), db: res };
+}
 
   } catch (e) {
     // DEBUG 3: crash (must show in app_events no matter what)
@@ -9635,6 +9640,12 @@ async function startPracticeByRec() {
     drillType: "topic_drill"
   };
 
+   // ✅ remember return target for drills
+try {
+  if (!state.courses) state.courses = {};
+  state.courses.myRecReturnTarget = "my-rec-detail";
+} catch {}
+   
   saveState();
   replaceCourses("practice-quiz");
   renderPracticeQuiz();
@@ -9681,6 +9692,12 @@ async function startPracticeByRec() {
     drillType: "retry_mistakes"
   };
 
+      // ✅ remember return target for drills
+try {
+  if (!state.courses) state.courses = {};
+  state.courses.myRecReturnTarget = "my-rec-detail";
+} catch {}
+      
   saveState();
   replaceCourses("practice-quiz");
   renderPracticeQuiz();
@@ -11412,6 +11429,15 @@ if (action === "profile-open-ratings") {
 
       // Courses actions
       if (action === "to-subject-hub") {
+        // ✅ after drills: go back to My Rec Detail (AI tutor), not Subject Hub
+try {
+  const d = state?.courses?.myRecDrillLast;
+  if (d?.drillType && state?.courses?.myRecReturnTarget === "my-rec-detail") {
+    replaceCourses("my-rec-detail");
+    renderMyRecDetail();
+    return;
+  }
+} catch {}
         replaceCourses("subject-hub");
         renderSubjectHub();
         return;
@@ -11505,10 +11531,22 @@ if (action === "practice-recommendations") {
       }
 
       if (action === "practice-again") {
-        clearPracticeDraft();
-        startPracticeNew();
-        return;
-      }
+  // ✅ if last finished was a drill — repeat that drill
+  const d = state?.courses?.myRecDrillLast;
+  if (d?.drillType === "rec_mistakes") {
+    startPracticeRetryMistakes();
+    return;
+  }
+  if (d?.drillType === "rec_topic") {
+    startPracticeByRec();
+    return;
+  }
+
+  // fallback: normal practice
+  clearPracticeDraft();
+  startPracticeNew();
+  return;
+}
 
            if (action === "open-tours") {
         // additional subjects: tours are not available
