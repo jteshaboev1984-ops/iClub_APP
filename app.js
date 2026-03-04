@@ -8504,6 +8504,24 @@ async function startPracticeNew() {
     const score = Array.isArray(quiz.correct) ? quiz.correct.filter(Boolean).length : 0;
     const percent = total ? Math.round((score / total) * 100) : 0;
 
+    // ✅ DRILL mini-result for My Recs (no DB, no last-practice overwrite)
+try {
+  if (quiz?.drillType && (quiz.drillType === "rec_mistakes" || quiz.drillType === "rec_topic")) {
+    if (!state.courses) state.courses = {};
+    state.courses.myRecDrillLast = {
+      subjectKey: quiz.subjectKey || null,
+      topic: quiz.recTopic || null,
+      subtopic: quiz.recSubtopic || null,
+      drillType: quiz.drillType,
+      score,
+      total,
+      percent,
+      ts: Date.now()
+    };
+    saveState();
+  }
+} catch {}
+     
     // Build details for review/recs
      if (!Array.isArray(quiz.timeSpent)) quiz.timeSpent = new Array(quiz.questions.length).fill(0);
     const details = quiz.questions.map((q, i) => {
@@ -9250,6 +9268,36 @@ async function renderMyRecDetail() {
   if (titleEl) titleEl.textContent = topic;
   if (subEl) subEl.textContent = subtopic ? subtopic : (t("rec_detail_subtitle") || "Персональный разбор и план");
 
+   // ✅ mini result (only for current rec/topic)
+let drillMiniHtml = "";
+try {
+  const d = state?.courses?.myRecDrillLast;
+  const same =
+    d &&
+    String(d.subjectKey || "") === String(subjectKey || "") &&
+    String(d.topic || "") === String(rec?.topic || "") &&
+    (d.drillType === "rec_mistakes" || d.drillType === "rec_topic");
+
+  if (same) {
+    const line = (t("rec_drill_mini_line") || "{score}/{total} • {percent}%")
+      .replace("{score}", String(d.score))
+      .replace("{total}", String(d.total))
+      .replace("{percent}", String(d.percent));
+
+    drillMiniHtml = `
+      <div class="list-item" style="margin-top:10px">
+        <div style="font-weight:900">${escapeHTML(t("rec_drill_mini_title") || "Natija")}</div>
+        <div class="muted small" style="margin-top:6px">${escapeHTML(line)}</div>
+        <div style="margin-top:10px">
+          <button class="btn" type="button" data-action="my-rec-repeat-drill">
+            ${escapeHTML(t("rec_drill_repeat") || "Yana bir bor")}
+          </button>
+        </div>
+      </div>
+    `;
+  }
+} catch {}
+   
   body.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
 
 const [mistakes, refs] = await Promise.all([
@@ -9330,8 +9378,9 @@ saveState();
       </div>
     </div>
     ${mistakesHtml}
+    ${drillMiniHtml}
 
-       <div class="list-item">
+   <div class="list-item">
       <div style="font-weight:900">
         ${escapeHTML(t("rec_read_title") || "Что прочитать")}
       </div>
@@ -11332,6 +11381,21 @@ if (action === "my-rec-retry") {
        
 if (action === "my-rec-train") {
   startPracticeByRec();
+  return;
+}
+if (action === "my-rec-repeat-drill") {
+  const d = state?.courses?.myRecDrillLast;
+  if (!d) return;
+
+  // repeat the same type of drill
+  if (d.drillType === "rec_mistakes") {
+    startPracticeRetryMistakes();
+    return;
+  }
+  if (d.drillType === "rec_topic") {
+    startPracticeByRec();
+    return;
+  }
   return;
 }
 if (action === "profile-open-courses") {
