@@ -30,6 +30,20 @@
   tours_empty_for_subject: "Нет туров для этого предмета.",
   need_registration_short: "Сначала регистрация.",
 
+practice_stop: "Остановить",
+practice_submit: "Ответить",
+practice_again: "Пройти снова",
+practice_to_subject: "К предмету",
+practice_back_to_result: "Назад к результату",
+
+practice_difficulty: "Сложность",
+difficulty_easy: "легко",
+difficulty_medium: "средне",
+difficulty_hard: "сложно",
+
+drill_repeat: "Повторить ещё раз",
+back: "Назад",
+       
   practice_review_empty: "Нет данных для разбора. Сначала пройдите практику.",
   practice_review_loading_db: "Загружаем разбор из базы…",
   practice_recs_empty: "Нет данных для рекомендаций. Сначала пройдите практику.",
@@ -620,6 +634,20 @@ rec_drill_repeat: "Повторить ещё раз",
         tours_empty_for_subject: "Bu fan uchun turlar yo‘q.",
         need_registration_short: "Avval ro‘yxatdan o‘ting.",
 
+        practice_stop: "To‘xtatish",
+practice_submit: "Javob berish",
+practice_again: "Qayta o‘tish",
+practice_to_subject: "Fanga",
+practice_back_to_result: "Natijaga qaytish",
+
+practice_difficulty: "Murakkablik",
+difficulty_easy: "oson",
+difficulty_medium: "o‘rtacha",
+difficulty_hard: "qiyin",
+
+drill_repeat: "Yana bir bor",
+back: "Orqaga",
+       
         practice_review_empty: "Tahlil uchun ma’lumot yo‘q. Avval amaliyotni bajaring.",
         practice_review_loading_db: "Bazadan tahlil yuklanmoqda…",
         practice_recs_empty: "Tavsiyalar uchun ma’lumot yo‘q. Avval amaliyotni bajaring.",
@@ -1215,6 +1243,20 @@ rec_drill_repeat: "Yana bir bor",
   ratings_nothing_found: "Nothing found.",
   tours_empty_for_subject: "No tours for this subject.",
   need_registration_short: "Registration required.",
+
+  practice_stop: "Stop",
+practice_submit: "Submit",
+practice_again: "Try again",
+practice_to_subject: "To subject",
+practice_back_to_result: "Back to result",
+
+practice_difficulty: "Difficulty",
+difficulty_easy: "easy",
+difficulty_medium: "medium",
+difficulty_hard: "hard",
+
+drill_repeat: "Repeat again",
+back: "Back",
 
   practice_review_empty: "No data to review. Complete a practice first.",
   practice_review_loading_db: "Loading review from the database…",
