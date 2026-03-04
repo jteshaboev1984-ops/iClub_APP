@@ -5341,6 +5341,14 @@ function bindRatingsUI() {
     showCoursesScreen(screenName);
   }
 
+   function replaceCoursesTop(screenName) {
+  state.courses.stack = Array.isArray(state.courses.stack) ? state.courses.stack : [screenName];
+  if (!state.courses.stack.length) state.courses.stack = [screenName];
+  state.courses.stack[state.courses.stack.length - 1] = screenName;
+  saveState();
+  showCoursesScreen(screenName);
+}
+   
   function popCourses() {
   if (state.quizLock) return;
 
@@ -8280,6 +8288,14 @@ async function startPracticeNew() {
 
     const q = quiz.questions[quiz.index];
     if (!q) return;
+   // ✅ keep Pause button translated (and allow drill-specific label)
+try {
+  const btn = document.querySelector('[data-action="practice-pause"]');
+  if (btn) {
+    const key = quiz?.drillType ? "practice_pause_btn_drill" : "practice_pause_btn";
+    btn.textContent = t(key) || btn.textContent;
+  }
+} catch {}
 
     const qno = $("#practice-qno");
     const qtext = $("#practice-question");
@@ -8288,7 +8304,7 @@ async function startPracticeNew() {
 
     if (qno) qno.textContent = `${quiz.index + 1}/${Array.isArray(quiz.questions) ? quiz.questions.length : PRACTICE_CONFIG.total}`;
     if (timerEl) timerEl.textContent = formatMMSS(quiz.qTimeLeft);
-    if (qtext) qtext.textContent = q.question || "Вопрос…";
+    if (qtext) qtext.textContent = q.question || (t("practice_question_placeholder") || "Вопрос…");
     if (!wrap) return;
 
     wrap.innerHTML = "";
@@ -8681,7 +8697,8 @@ if (meta) {
    if (recsCountEl) recsCountEl.textContent = String(topics.length);
 
       // Show result screen (replace quiz screen to avoid "dead" back navigation)
-   replaceCourses("practice-result");
+   if (quiz?.drillType) replaceCoursesTop("practice-result");
+   else replaceCourses("practice-result");
 
       // Save best + last 5 (safe)
    let hx = null;
@@ -9609,7 +9626,7 @@ async function startPracticeByRec() {
   }
 
   // ✅ Topic practice is also a DRILL (Variant A): short, focused, no DB write
-  const DRILL_LIMIT = 15;
+  const DRILL_LIMIT = 10;
   const questions = questionsAll.slice(0, DRILL_LIMIT);
 
   state.quizLock = "practice";
@@ -9637,7 +9654,7 @@ async function startPracticeByRec() {
     recSubtopic: rec.subtopic || null,
 
     // ✅ important: treated as DRILL everywhere (no overwriting last practice, no DB save)
-    drillType: "topic_drill"
+    drillType: "rec_topic"
   };
 
    // ✅ remember return target for drills
@@ -9647,9 +9664,9 @@ try {
 } catch {}
    
   saveState();
-  replaceCourses("practice-quiz");
-  renderPracticeQuiz();
-  startPracticeQuestionTimer();
+pushCourses("practice-quiz");
+renderPracticeQuiz();
+startPracticeQuestionTimer();
 }
 
    async function startPracticeRetryMistakes() {
@@ -9689,7 +9706,7 @@ try {
 
     recTopic: rec.topic || null,
     recSubtopic: rec.subtopic || null,
-    drillType: "retry_mistakes"
+    drillType: "rec_mistakes"
   };
 
       // ✅ remember return target for drills
@@ -9699,9 +9716,9 @@ try {
 } catch {}
       
   saveState();
-  replaceCourses("practice-quiz");
-  renderPracticeQuiz();
-  startPracticeQuestionTimer();
+pushCourses("practice-quiz");
+renderPracticeQuiz();
+startPracticeQuestionTimer();
 }
    
 async function renderBooks() {
