@@ -8874,20 +8874,21 @@ function syncPracticeResultBadges() {
 
         // Save to "My recommendations" (v1: topics-only)
 const res = addMyRecsFromAttempt(attempt);
-if (!res.added) {
-  // if there are no mistakes -> nothing to save
-} else {
+
+if (res?.added) {
   showToast(t("practice_saved_to_my_recs"));
 
- // ✅ write recs into DB (non-blocking)
-try {
-  syncMyRecsToSupabase(attempt.subjectKey, res.addedTopics);
-} catch {}
-     
-    if (!uniq.length) {
-      wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_recs_no_errors"))}</div>`;
-      return;
-    }
+  // ✅ write recs into DB (non-blocking)
+  try {
+    syncMyRecsToSupabase(attempt.subjectKey, res.addedTopics);
+  } catch {}
+}
+
+// дальше код функции идёт как был
+if (!uniq.length) {
+  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_recs_no_errors"))}</div>`;
+  return;
+}
 
         // v1: если refs пусто — показываем корректный текст:
     // - если книги по предмету есть -> "Книги уже доступны"
