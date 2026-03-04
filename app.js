@@ -8225,7 +8225,7 @@ async function startPracticeNew() {
     const wrap = $("#practice-options");
     const timerEl = $("#practice-timer");
 
-    if (qno) qno.textContent = `${quiz.index + 1}/${PRACTICE_CONFIG.total}`;
+    if (qno) qno.textContent = `${quiz.index + 1}/${Array.isArray(quiz.questions) ? quiz.questions.length : PRACTICE_CONFIG.total}`;
     if (timerEl) timerEl.textContent = formatMMSS(quiz.qTimeLeft);
     if (qtext) qtext.textContent = q.question || "Вопрос…";
     if (!wrap) return;
@@ -8957,30 +8957,458 @@ if (!uniq.length) {
     })();
   }
 
-function renderMyRecs() {
+async function fetchMyRecsDB(subjectKey) {
+  try {
+    if (!window.sb) return [];
+
+    const uid = await getAuthUid();
+    if (!uid) return [];
+
+    const subjectId = await getSubjectIdByKey(subjectKey);
+    if (!subjectId) return [];
+
+    const { data, error } = await window.sb
+      .from("recommendations")
+      .select("id, source_type, topic, subtopic, book_id, book_reference, created_at")
+      .eq("user_id", uid)
+      .eq("subject_id", subjectId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      logClientError("myrecs_select_error", error);
+      return [];
+    }
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    logClientError("myrecs_select_exception", e);
+    return [];
+  }
+}
+
+async function renderMyRecs() {
   const wrap = $("#my-recs-list");
   if (!wrap) return;
 
   const subjectKey = state.courses.subjectKey;
-  const store = loadMyRecs();
-  const list = store?.bySubject?.[subjectKey] || [];
 
-  if (!list.length) {
+  wrap.innerHTML = `<div class="empty muted">Загрузка…</div>`;
+
+  // 1) DB-first
+  let rows = await fetchMyRecsDB(subjectKey);
+
+  // 2) fallback: local (старое поведение, если DB недоступна/пусто)
+  if (!rows.length) {
+    const store = loadMyRecs();
+    const local = store?.bySubject?.[subjectKey] || [];
+    rows = local.map(x => ({
+      id: null,
+      source_type: "practice",
+      topic: x.topic || "General",
+      subtopic: null,
+      book_id: null,
+      book_reference: null,
+      created_at: x.ts ? new Date(x.ts).toISOString() : null
+    }));
+  }
+
+  if (!rows.length) {
     wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("my_recs_empty") || "")}</div>`;
     return;
   }
 
   wrap.innerHTML = "";
-  list.forEach(item => {
+  rows.forEach(rec => {
     const el = document.createElement("div");
     el.className = "list-item";
+
+    const dt = rec.created_at ? formatDateTime(rec.created_at) : "";
+    const sub = rec.subtopic ? String(rec.subtopic) : "";
+
     el.innerHTML = `
-      <div style="font-weight:800">${escapeHTML(item.topic)}</div>
-      <div class="muted small">${escapeHTML(t("saved_at_label") || "")}: ${escapeHTML(formatDateTime(item.ts))}</div>
+      <div style="font-weight:900">${escapeHTML(rec.topic || "General")}</div>
+      ${sub ? `<div class="muted small" style="margin-top:4px">${escapeHTML(sub)}</div>` : ""}
+      <div class="muted small" style="margin-top:4px">${escapeHTML(t("saved_at_label") || "Сохранено")}: ${escapeHTML(dt)}</div>
     `;
+
+    el.addEventListener("click", async () => {
+      state.courses.myRecCurrent = rec; // держим выбранную рекомендацию
+      saveState();
+      pushCourses("my-rec-detail");
+      await renderMyRecDetail();
+    });
+
     wrap.appendChild(el);
   });
 }
+   async function fetchRecentMistakesByRec(subjectKey, rec) {
+  try {
+    if (!window.sb) return [];
+
+    const uid = await getAuthUid();
+    if (!uid) return [];
+
+    const subjectId = await getSubjectIdByKey(subjectKey);
+    if (!subjectId) return [];
+
+    // 1) последние попытки практики пользователя по предмету
+    const { data: attempts, error: aErr } = await window.sb
+      .from("practice_attempts")
+      .select("id, created_at")
+      .eq("user_id", uid)
+      .eq("subject_id", subjectId)
+      .order("created_at", { ascending: false })
+      .limit(12);
+
+    if (aErr || !Array.isArray(attempts) || !attempts.length) return [];
+
+    const attemptIds = attempts.map(x => x.id);
+
+    // 2) неправильные ответы + вопрос
+    const { data: ans, error: pErr } = await window.sb
+      .from("practice_answers")
+      .select("id, attempt_id, question_id, user_answer, is_correct, created_at, question:questions(id, topic, subtopic, question_text, options_text, correct_answer, explanation, qtype, difficulty, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en)")
+      .in("attempt_id", attemptIds)
+      .eq("is_correct", false)
+      .order("created_at", { ascending: false })
+      .limit(60);
+
+    if (pErr || !Array.isArray(ans)) return [];
+
+    const topic = String(rec?.topic || "").trim();
+    const subtopic = rec?.subtopic ? String(rec.subtopic).trim() : null;
+
+    const filtered = ans
+      .map(x => ({ ...x, q: x.question }))
+      .filter(x => x.q && x.q.is_active)
+      .filter(x => String(x.q.topic || "").trim() === topic)
+      .filter(x => subtopic ? (String(x.q.subtopic || "").trim() === subtopic) : true)
+      .slice(0, 10);
+
+    return filtered;
+  } catch (e) {
+    logClientError("myrec_mistakes_exception", e);
+    return [];
+  }
+}
+
+async function fetchBookRefsForRec(subjectKey, rec) {
+  // приоритет:
+  // 1) то, что уже записано в recommendations (последние патчи)
+  // 2) topic_book_map (если есть)
+  const direct = [];
+  if (rec?.book_id || rec?.book_reference) {
+    direct.push({
+      book_id: rec.book_id || null,
+      book_reference: rec.book_reference || null,
+      title: null,
+      file_url: null
+    });
+  }
+
+  try {
+    if (!window.sb) return direct;
+
+    const subjectId = await getSubjectIdByKey(subjectKey);
+    if (!subjectId) return direct;
+
+    let q = window.sb
+      .from("topic_book_map")
+      .select("book_id, book_reference, priority")
+      .eq("subject_id", subjectId)
+      .eq("topic", rec.topic)
+      .eq("is_active", true)
+      .order("priority", { ascending: true })
+      .limit(5);
+
+    if (rec.subtopic) q = q.eq("subtopic", rec.subtopic);
+
+    const { data: maps, error: mErr } = await q;
+    if (mErr || !Array.isArray(maps) || !maps.length) return direct;
+
+    const bookIds = Array.from(new Set(maps.map(m => m.book_id).filter(Boolean)));
+    let books = [];
+    if (bookIds.length) {
+      const { data: b, error: bErr } = await window.sb
+        .from("books")
+        .select("id, title, file_url")
+        .in("id", bookIds)
+        .eq("is_active", true);
+      if (!bErr && Array.isArray(b)) books = b;
+    }
+    const byId = new Map(books.map(x => [String(x.id), x]));
+
+    const mapped = maps.map(m => {
+      const bk = m.book_id ? byId.get(String(m.book_id)) : null;
+      return {
+        book_id: m.book_id || null,
+        book_reference: m.book_reference || null,
+        title: bk?.title || null,
+        file_url: bk?.file_url || null
+      };
+    });
+
+    // merge unique
+    const all = [...direct, ...mapped];
+    const seen = new Set();
+    return all.filter(x => {
+      const k = `${x.book_id || ""}::${x.book_reference || ""}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  } catch (e) {
+    logClientError("myrec_refs_exception", e);
+    return direct;
+  }
+}
+
+async function renderMyRecDetail() {
+  const rec = state?.courses?.myRecCurrent;
+  const subjectKey = state?.courses?.subjectKey;
+  const body = $("#my-rec-body");
+  const titleEl = $("#my-rec-title");
+  const subEl = $("#my-rec-subtitle");
+  if (!body || !rec || !subjectKey) return;
+
+  const topic = rec.topic || "General";
+  const subtopic = rec.subtopic ? String(rec.subtopic) : "";
+  if (titleEl) titleEl.textContent = topic;
+  if (subEl) subEl.textContent = subtopic ? subtopic : "Персональный разбор и план";
+
+  body.innerHTML = `<div class="empty muted">Загрузка…</div>`;
+
+  const [mistakes, refs] = await Promise.all([
+    fetchRecentMistakesByRec(subjectKey, rec),
+    fetchBookRefsForRec(subjectKey, rec)
+  ]);
+
+  const headerCard = `
+    <div class="card" style="padding:14px">
+      <div class="muted small">План на 10 минут</div>
+      <div style="margin-top:8px">1) Разберите ошибки ниже.</div>
+      <div>2) Прочитайте рекомендованные места.</div>
+      <div>3) Нажмите “Тренировка по теме”.</div>
+    </div>
+  `;
+
+  const mistakesHtml = mistakes.length
+    ? mistakes.map(x => {
+        const q = x.q;
+        const qText = pickContentText(q, "question_text");
+        const expl = pickContentText(q, "explanation");
+        const ua = x.user_answer ? String(x.user_answer) : "";
+        const ca = q.correct_answer != null ? String(q.correct_answer) : "";
+
+        return `
+          <div class="list-item">
+            <div style="font-weight:900">Ошибка</div>
+            <div style="margin-top:6px">${escapeHTML(qText || "")}</div>
+            <div class="muted small" style="margin-top:8px">Ваш ответ: ${escapeHTML(ua || "—")}</div>
+            <div class="muted small">Правильный: ${escapeHTML(ca || "—")}</div>
+            ${expl ? `<div class="muted small" style="margin-top:8px">${escapeHTML(expl)}</div>` : ""}
+          </div>
+        `;
+      }).join("")
+    : `<div class="list-item"><div style="font-weight:900">Ошибки по теме</div><div class="muted small" style="margin-top:6px">Пока нет зафиксированных ошибок по этой теме. Значит, вы либо молодец, либо ещё не успели ошибиться 😄</div></div>`;
+
+  const refsHtml = refs.length
+    ? refs.map(r => {
+        const title = r.title ? escapeHTML(r.title) : (r.book_id ? `Книга #${escapeHTML(String(r.book_id))}` : "Книга");
+        const ref = r.book_reference ? `• ${escapeHTML(String(r.book_reference))}` : "";
+        const has = !!r.file_url;
+        return `
+          <div class="list-item">
+            <div style="font-weight:900">${title}</div>
+            ${ref ? `<div class="muted small" style="margin-top:6px">${ref}</div>` : ""}
+            ${has ? `<div style="margin-top:10px"><button class="btn" type="button" data-open-book-url="${escapeHTML(r.file_url)}">Открыть</button></div>` : ""}
+          </div>
+        `;
+      }).join("")
+    : `<div class="list-item"><div style="font-weight:900">Что прочитать</div><div class="muted small" style="margin-top:6px">Ссылки на главы добавим через topic_book_map.</div></div>`;
+
+  body.innerHTML = `
+    ${headerCard}
+    <div class="list-item" style="margin-top:10px">
+      <div style="font-weight:900">Ошибки по теме</div>
+      <div class="muted small" style="margin-top:6px">Ваши последние неправильные ответы по этой теме.</div>
+    </div>
+    ${mistakesHtml}
+    <div class="list-item" style="margin-top:10px">
+      <div style="font-weight:900">Что прочитать</div>
+      <div class="muted small" style="margin-top:6px">Сначала теория, потом тренировка.</div>
+    </div>
+    ${refsHtml}
+  `;
+
+  body.querySelectorAll("button[data-open-book-url]").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const url = btn.getAttribute("data-open-book-url");
+      if (url) openExternal(url);
+    });
+  });
+}
+
+// helper: content language picker for question rows
+function pickContentText(obj, base) {
+  try {
+    const lang = (loadProfile()?.language) || "ru";
+    const k = lang === "uz" ? (base + "_uz") : lang === "en" ? (base + "_en") : (base + "_ru");
+    const v = obj && obj[k] != null && String(obj[k]).trim() !== "" ? obj[k] : obj[base];
+    return v != null ? String(v) : "";
+  } catch {
+    return (obj && obj[base] != null) ? String(obj[base]) : "";
+  }
+}
+   async function buildPracticeSetByRec(subjectKey, rec) {
+  if (!window.sb) return [];
+
+  const uid = await getAuthUid();
+  if (!uid) return [];
+
+  const subjectId = await getSubjectIdByKey(subjectKey);
+  if (!subjectId) return [];
+
+  const topic = String(rec?.topic || "").trim();
+  const subtopic = rec?.subtopic ? String(rec.subtopic).trim() : null;
+  if (!topic) return [];
+
+  let q = window.sb
+    .from("questions")
+    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
+    .eq("subject_id", subjectId)
+    .eq("is_active", true)
+    .eq("topic", topic)
+    .limit(200);
+
+  if (subtopic) q = q.eq("subtopic", subtopic);
+
+  const { data, error } = await q;
+  if (error || !Array.isArray(data) || !data.length) return [];
+
+  // нормализация = как в buildPracticeSet()
+  const normalizeDiff = (d) => normalizeDifficulty(d || "easy");
+  const normalizeType = (t) => (String(t || "mcq").toLowerCase() === "input" ? "input" : "mcq");
+
+  const lang = (loadProfile()?.language) || "ru";
+  const pickL = (obj, base) => {
+    const k = lang === "uz" ? (base + "_uz") : lang === "en" ? (base + "_en") : (base + "_ru");
+    return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
+  };
+
+  const pool = data.map(r => {
+    const type = normalizeType(r.qtype);
+    const optionsRaw = pickL(r, "options_text");
+    const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
+
+    let correctIndex = 0;
+    if (type === "mcq") {
+      const ca = String(r.correct_answer ?? "").trim();
+      const asInt = Number(ca);
+      if (!Number.isNaN(asInt) && Number.isFinite(asInt)) {
+        correctIndex = asInt;
+      } else if (/^[A-D]$/i.test(ca)) {
+        correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
+      } else if (opts.length) {
+        const idx = opts.findIndex(x => String(x).trim().toLowerCase() === ca.toLowerCase());
+        if (idx >= 0) correctIndex = idx;
+      }
+      if (!Number.isFinite(correctIndex) || correctIndex < 0) correctIndex = 0;
+    }
+
+    const correctAnswer = type === "input" ? String(r.correct_answer ?? "").trim() : "";
+    const diff = normalizeDiff(r.difficulty);
+
+    return {
+      id: Number(r.id),
+      topic: r.topic || "General",
+      subtopic: r.subtopic || null,
+      difficulty: diff,
+      timeLimitSec:
+        (r.time_limit_sec != null && Number(r.time_limit_sec) >= 10)
+          ? Number(r.time_limit_sec)
+          : (PRACTICE_CONFIG?.timeByDifficulty?.[diff] || 60),
+      type,
+      question: pickL(r, "question_text") || "",
+      options: opts,
+      correctIndex,
+      correctAnswer,
+      explanation: pickL(r, "explanation") || "",
+      imageUrl: r.image_url || null,
+      inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
+      inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
+    };
+  }).filter(q => Number.isFinite(q.id));
+
+  if (!pool.length) return [];
+
+  // делаем набор как обычная практика (6/9/5), но только внутри темы
+  const by = {
+    easy: pool.filter(q => q.difficulty === "easy"),
+    medium: pool.filter(q => q.difficulty === "medium"),
+    hard: pool.filter(q => q.difficulty === "hard")
+  };
+
+  const set = [
+    ...pickN(by.easy.length ? by.easy : pool, PRACTICE_CONFIG.dist.easy),
+    ...pickN(by.medium.length ? by.medium : pool, PRACTICE_CONFIG.dist.medium),
+    ...pickN(by.hard.length ? by.hard : pool, PRACTICE_CONFIG.dist.hard)
+  ];
+
+  const need = PRACTICE_CONFIG.total - set.length;
+  if (need > 0) {
+    const used = new Set(set.map(x => x.id));
+    const rest = pool.filter(x => !used.has(x.id));
+    set.push(...pickN(rest.length ? rest : pool, need));
+  }
+
+  const order = { easy: 1, medium: 2, hard: 3 };
+  set.sort((a, b) => (order[a.difficulty] - order[b.difficulty]));
+
+  return set.slice(0, PRACTICE_CONFIG.total);
+}
+
+async function startPracticeByRec() {
+  const rec = state?.courses?.myRecCurrent;
+  const subjectKey = state?.courses?.subjectKey;
+  if (!rec || !subjectKey) return;
+
+  const questions = await buildPracticeSetByRec(subjectKey, rec);
+  if (!questions.length) {
+    showToast("Нет вопросов для тренировки по этой теме.");
+    return;
+  }
+
+  state.quizLock = "practice";
+  state.quiz = {
+    mode: "practice",
+    subjectKey,
+    startedAt: Date.now(),
+    paused: false,
+    pauseStartedAt: null,
+    pausedTotalMs: 0,
+
+    index: 0,
+    questions,
+    answers: Array.from({ length: questions.length }).map(() => null),
+    correct: Array.from({ length: questions.length }).map(() => false),
+
+    qTimeLeft: Number(questions[0]?.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[questions[0]?.difficulty] || 60,
+    qEndsAtMs: null,
+    qTimerId: null,
+
+    // метка, чтобы потом в аналитике видеть, что это “тренировка по рекомендации”
+    recTopic: rec.topic || null,
+    recSubtopic: rec.subtopic || null
+  };
+
+  saveState();
+  replaceCourses("practice-quiz");
+  renderPracticeQuiz();
+  startPracticeQuestionTimer();
+}
+   
 async function renderBooks() {
   const wrap = $("#books-list");
   if (!wrap) return;
@@ -10655,7 +11083,23 @@ if (action === "open-all-subjects") {
   renderMyRecs();
   return;
 }
+   if (action === "my-rec-back") {
+  // назад к списку рекомендаций
+  replaceCourses("my-recs");
+  renderMyRecs();
+  return;
+}
 
+if (action === "my-rec-open-books") {
+  pushCourses("books");
+  renderBooks();
+  return;
+}
+
+if (action === "my-rec-train") {
+  startPracticeByRec();
+  return;
+}
 if (action === "profile-open-courses") {
   setTab("courses");
   replaceCourses("all-subjects");
