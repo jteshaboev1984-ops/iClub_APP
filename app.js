@@ -8551,8 +8551,14 @@ async function startPracticeNew() {
   attempt_key
 });
 
-// Keep last attempt in state for result/review/recs screens (DO NOT lose db info)
-state.practiceLastAttempt = { ...(attempt || {}), db: (state.practiceLastAttempt && state.practiceLastAttempt.db) ? state.practiceLastAttempt.db : null };
+// state for result/review/recs screens (DO NOT lose db info)
+// ✅ drills must NOT overwrite "last practice" UX
+if (!quiz?.drillType) {
+  state.practiceLastAttempt = {
+    ...(attempt || {}),
+    db: (state.practiceLastAttempt && state.practiceLastAttempt.db) ? state.practiceLastAttempt.db : null
+  };
+}
 
 // ✅ DB-first: save attempt + answers to Supabase (non-blocking UX)
 (async () => {
@@ -8567,9 +8573,13 @@ state.practiceLastAttempt = { ...(attempt || {}), db: (state.practiceLastAttempt
   } catch {}
 
   try {
-        const res = await savePracticeAttemptToSupabase(attempt, quiz);
+  // ✅ Variant A: drills (retry_mistakes / topic_drill) do NOT write to practice_attempts
+  let res = { ok: true, reason: "drill_no_db" };
 
-        if (res?.ok) {
+  if (!quiz?.drillType) {
+    res = await savePracticeAttemptToSupabase(attempt, quiz);
+
+    if (res?.ok) {
       clearPracticeDraft();
     } else {
       // ✅ offline-safe: queue practice save for retry after reconnect
@@ -8578,6 +8588,9 @@ state.practiceLastAttempt = { ...(attempt || {}), db: (state.practiceLastAttempt
         payload: { attempt, quiz }
       });
     }
+  } else {
+    // drill: never clear normal draft, never enqueue DB save
+  }
 
     // DEBUG 2: DB save result
     try {
@@ -9537,11 +9550,15 @@ async function startPracticeByRec() {
   const subjectKey = state?.courses?.subjectKey;
   if (!rec || !subjectKey) return;
 
-  const questions = await buildPracticeSetByRec(subjectKey, rec);
-  if (!questions.length) {
+  const questionsAll = await buildPracticeSetByRec(subjectKey, rec);
+  if (!questionsAll.length) {
     showToast(t("rec_no_questions") || "Нет вопросов для тренировки по этой теме.");
     return;
   }
+
+  // ✅ Topic practice is also a DRILL (Variant A): short, focused, no DB write
+  const DRILL_LIMIT = 15;
+  const questions = questionsAll.slice(0, DRILL_LIMIT);
 
   state.quizLock = "practice";
   state.quiz = {
@@ -9557,13 +9574,18 @@ async function startPracticeByRec() {
     answers: Array.from({ length: questions.length }).map(() => null),
     correct: Array.from({ length: questions.length }).map(() => false),
 
-    qTimeLeft: Number(questions[0]?.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[questions[0]?.difficulty] || 60,
+    qTimeLeft:
+      Number(questions[0]?.timeLimitSec) ||
+      (PRACTICE_CONFIG?.timeByDifficulty?.[questions[0]?.difficulty] || 60),
     qEndsAtMs: null,
     qTimerId: null,
 
     // метка, чтобы потом в аналитике видеть, что это “тренировка по рекомендации”
     recTopic: rec.topic || null,
-    recSubtopic: rec.subtopic || null
+    recSubtopic: rec.subtopic || null,
+
+    // ✅ important: treated as DRILL everywhere (no overwriting last practice, no DB save)
+    drillType: "topic_drill"
   };
 
   saveState();
