@@ -577,7 +577,13 @@ rec_mistakes_title: "Ошибки по теме",
 rec_mistakes_subtitle: "Ваши последние неправильные ответы по этой теме.",
 rec_mistake_card_title: "Ошибка",
 rec_your_answer: "Ваш ответ",
-rec_correct_answer: "Правильный",       
+rec_correct_answer: "Правильный",
+rec_show_expl: "Пояснение",
+rec_btn_retry: "Повторить ошибки",
+rec_retry_empty: "Нет ошибок для повтора.",
+rec_open_book: "Открыть",
+rec_no_mistakes_text: "По этой теме пока нет зафиксированных ошибок.",
+rec_no_questions: "Нет вопросов для тренировки по этой теме.",
 
       // Pinned hints
       profile_pinned_hint_has:
@@ -1163,6 +1169,12 @@ rec_mistakes_subtitle: "Ushbu mavzu bo‘yicha so‘nggi noto‘g‘ri javoblari
 rec_mistake_card_title: "Xato",
 rec_your_answer: "Sizning javobingiz",
 rec_correct_answer: "To‘g‘ri javob",
+rec_show_expl: "Izoh",
+rec_btn_retry: "Xatolarni qayta ishlash",
+rec_retry_empty: "Qayta ishlash uchun xatolar yo‘q.",
+rec_open_book: "Ochish",
+rec_no_mistakes_text: "Bu mavzu bo‘yicha hozircha xatolar qayd etilmagan.",
+rec_no_questions: "Bu mavzu bo‘yicha mashq uchun savollar yo‘q.",
 
       // Pinned hints
       profile_pinned_hint_has:
@@ -1721,6 +1733,12 @@ rec_mistakes_subtitle: "Your latest incorrect answers on this topic.",
 rec_mistake_card_title: "Mistake",
 rec_your_answer: "Your answer",
 rec_correct_answer: "Correct",
+rec_show_expl: "Explanation",
+rec_btn_retry: "Retry mistakes",
+rec_retry_empty: "No mistakes to retry.",
+rec_open_book: "Open",
+rec_no_mistakes_text: "No mistakes recorded for this topic yet.",
+rec_no_questions: "No questions available for this topic.",
 
       profile_pinned_hint_has: "Pinned subjects already speed things up. Next: consistency.",
       profile_pinned_hint_empty: "Pin 1–3 subjects to make access noticeably faster."
