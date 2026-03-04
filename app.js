@@ -8590,16 +8590,7 @@ try {
    };
  });
 
-    const attempt = {
-      ts: finishedAt,
-      subjectKey: quiz.subjectKey,
-      score,
-      total,
-      percent,
-      durationSec,
-      details
-    };
-          const attempt = {
+     const attempt = {
       ts: finishedAt,
       subjectKey: quiz.subjectKey,
       score,
