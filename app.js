@@ -2115,6 +2115,58 @@ function isNumericLike(v) {
   return s !== "" && !Number.isNaN(Number(s));
 }
 
+   function idxToLetter(i) {
+  const n = Number(i);
+  if (!Number.isFinite(n)) return "";
+  const idx = Math.trunc(n);
+  const ABCD = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  return (idx >= 0 && idx < ABCD.length) ? ABCD[idx] : "";
+}
+
+function letterToIdx(ch) {
+  const s = String(ch ?? "").trim().toUpperCase();
+  if (!s) return null;
+  const code = s.charCodeAt(0) - 65; // A->0
+  return (code >= 0 && code < 26) ? code : null;
+}
+
+// ✅ show answers consistently: "B — option text" (if options exist)
+function formatAnswerForDisplay(q, rawAnswer) {
+  const raw = String(rawAnswer ?? "").trim();
+  if (!raw) return "—";
+
+  let opts = null;
+  try {
+    const oText = (typeof pickContentText === "function")
+      ? pickContentText(q, "options_text")
+      : (q?.options_text ?? null);
+    opts = parseOptionsText(oText);
+  } catch {}
+
+  // user stored index: "0/1/2/3"
+  if (opts && isNumericLike(raw)) {
+    const idx = Math.trunc(Number(raw));
+    if (idx >= 0 && idx < opts.length) {
+      const L = idxToLetter(idx);
+      const txt = String(opts[idx] ?? "").trim();
+      return txt ? `${L} — ${txt}` : (L || raw);
+    }
+    return raw;
+  }
+
+  // stored letter: "A/B/C/D"
+  if (opts) {
+    const li = letterToIdx(raw);
+    if (li !== null && li >= 0 && li < opts.length) {
+      const L = raw.toUpperCase();
+      const txt = String(opts[li] ?? "").trim();
+      return txt ? `${L} — ${txt}` : L;
+    }
+  }
+
+  return raw;
+}
+   
 // --- DB-first practice set builder ---
 async function buildPracticeSet(subjectKey) {
   // If no Supabase — fallback to local bank (old behavior)
@@ -9177,12 +9229,18 @@ async function renderMyRecDetail() {
   if (titleEl) titleEl.textContent = topic;
   if (subEl) subEl.textContent = subtopic ? subtopic : (t("rec_detail_subtitle") || "Персональный разбор и план");
 
-  body.innerHTML = `<div class="empty muted">Загрузка…</div>`;
+  body.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
 
-  const [mistakes, refs] = await Promise.all([
-    fetchRecentMistakesByRec(subjectKey, rec),
-    fetchBookRefsForRec(subjectKey, rec)
-  ]);
+const [mistakes, refs] = await Promise.all([
+  fetchRecentMistakesByRec(subjectKey, rec),
+  fetchBookRefsForRec(subjectKey, rec)
+]);
+
+// ✅ store qids for "retry mistakes"
+state.courses.myRecMistakeQids = Array.isArray(mistakes)
+  ? Array.from(new Set(mistakes.map(m => m?.q?.id).filter(Boolean))).slice(0, 10)
+  : [];
+saveState();
 
   const headerCard = `
   <div class="card" style="padding:14px">
@@ -9192,27 +9250,48 @@ async function renderMyRecDetail() {
   </div>
 `;
 
-  const mistakesHtml = mistakes.length
-    ? mistakes.map(x => {
-        const q = x.q;
-        const qText = pickContentText(q, "question_text");
-        const expl = pickContentText(q, "explanation");
-        const ua = x.user_answer ? String(x.user_answer) : "";
-        const ca = q.correct_answer != null ? String(q.correct_answer) : "";
+   const mistakesHtml = mistakes.length
+  ? mistakes.map(x => {
+      const q = x.q;
+      const qText = pickContentText(q, "question_text");
+      const expl = pickContentText(q, "explanation");
 
-        return `
-          <div class="list-item">
-            <div style="font-weight:900">Ошибка</div>
-            <div style="margin-top:6px">${escapeHTML(qText || "")}</div>
-            <div class="muted small" style="margin-top:8px">Ваш ответ: ${escapeHTML(ua || "—")}</div>
-            <div class="muted small">Правильный: ${escapeHTML(ca || "—")}</div>
-            ${expl ? `<div class="muted small" style="margin-top:8px">${escapeHTML(expl)}</div>` : ""}
+      const uaDisp = formatAnswerForDisplay(q, x.user_answer);
+      const caDisp = formatAnswerForDisplay(q, q.correct_answer);
+
+      return `
+        <div class="list-item">
+          <div style="font-weight:900">${escapeHTML(t("rec_mistake_card_title") || "Ошибка")}</div>
+
+          <div style="margin-top:6px">${escapeHTML(qText || "")}</div>
+
+          <div class="muted small" style="margin-top:8px">
+            ${escapeHTML(t("rec_your_answer") || "Ваш ответ")}: ${escapeHTML(uaDisp)}
           </div>
-        `;
-      }).join("")
-    : `<div class="list-item"><div style="font-weight:900">Ошибки по теме</div><div class="muted small" style="margin-top:6px">Пока нет зафиксированных ошибок по этой теме. Значит, вы либо молодец, либо ещё не успели ошибиться 😄</div></div>`;
 
-  const refsHtml = refs.length
+          <div class="muted small">
+            ${escapeHTML(t("rec_correct_answer") || "Правильный")}: ${escapeHTML(caDisp)}
+          </div>
+
+          ${expl ? `
+            <details style="margin-top:10px">
+              <summary class="muted small" style="cursor:pointer;font-weight:800">
+                ${escapeHTML(t("rec_show_expl") || "Пояснение")}
+              </summary>
+              <div class="muted small" style="margin-top:8px">${escapeHTML(expl)}</div>
+            </details>
+          ` : ""}
+        </div>
+      `;
+    }).join("")
+  : `
+    <div class="list-item">
+      <div style="font-weight:900">${escapeHTML(t("rec_mistakes_title") || "Ошибки по теме")}</div>
+      <div class="muted small" style="margin-top:6px">${escapeHTML(t("rec_no_mistakes_text") || "По этой теме пока нет зафиксированных ошибок.")}</div>
+    </div>
+  `;
+   
+    const refsHtml = refs.length
     ? refs.map(r => {
         const title = r.title ? escapeHTML(r.title) : (r.book_id ? `Книга #${escapeHTML(String(r.book_id))}` : "Книга");
         const ref = r.book_reference ? `• ${escapeHTML(String(r.book_reference))}` : "";
@@ -9221,7 +9300,7 @@ async function renderMyRecDetail() {
           <div class="list-item">
             <div style="font-weight:900">${title}</div>
             ${ref ? `<div class="muted small" style="margin-top:6px">${ref}</div>` : ""}
-            ${has ? `<div style="margin-top:10px"><button class="btn" type="button" data-open-book-url="${escapeHTML(r.file_url)}">Открыть</button></div>` : ""}
+            ${has ? `<div style="margin-top:10px"><button class="btn" type="button" data-open-book-url="${escapeHTML(r.file_url)}">${escapeHTML(t("rec_open_book") || "Открыть")}</button></div>` : ""}
           </div>
         `;
       }).join("")
@@ -9381,6 +9460,78 @@ function pickContentText(obj, base) {
   return set.slice(0, PRACTICE_CONFIG.total);
 }
 
+     async function buildPracticeSetByQuestionIds(subjectKey, questionIds) {
+  if (!window.sb) return [];
+
+  const subjectId = await getSubjectIdByKey(subjectKey);
+  if (!subjectId) return [];
+
+  const ids = Array.isArray(questionIds) ? questionIds.filter(Boolean).slice(0, 10) : [];
+  if (!ids.length) return [];
+
+  const { data, error } = await window.sb
+    .from("questions")
+    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
+    .eq("subject_id", subjectId)
+    .eq("is_active", true)
+    .in("id", ids);
+
+  if (error || !Array.isArray(data) || !data.length) return [];
+
+  // same normalization as buildPracticeSetByRec
+  const normalizeDiff = (d) => normalizeDifficulty(d || "easy");
+  const normalizeType = (t) => (String(t || "mcq").toLowerCase() === "input" ? "input" : "mcq");
+
+  const lang = (loadProfile()?.language) || "ru";
+  const pickL = (obj, base) => {
+    const k = lang === "uz" ? (base + "_uz") : lang === "en" ? (base + "_en") : (base + "_ru");
+    return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
+  };
+
+  return data.map(r => {
+    const type = normalizeType(r.qtype);
+    const optionsRaw = pickL(r, "options_text");
+    const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
+
+    let correctIndex = 0;
+    if (type === "mcq") {
+      const ca = String(r.correct_answer ?? "").trim();
+      const asInt = Number(ca);
+      if (!Number.isNaN(asInt) && Number.isFinite(asInt)) {
+        correctIndex = asInt;
+      } else if (/^[A-D]$/i.test(ca)) {
+        correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
+      } else if (opts.length) {
+        const idx = opts.findIndex(x => String(x).trim().toLowerCase() === ca.toLowerCase());
+        if (idx >= 0) correctIndex = idx;
+      }
+      if (!Number.isFinite(correctIndex) || correctIndex < 0) correctIndex = 0;
+    }
+
+    const correctAnswer = type === "input" ? String(r.correct_answer ?? "").trim() : "";
+    const diff = normalizeDiff(r.difficulty);
+
+    return {
+      id: Number(r.id),
+      topic: r.topic || "General",
+      subtopic: r.subtopic || null,
+      difficulty: diff,
+      timeLimitSec:
+        (r.time_limit_sec != null && Number(r.time_limit_sec) >= 10)
+          ? Number(r.time_limit_sec)
+          : (PRACTICE_CONFIG?.timeByDifficulty?.[diff] || 60),
+      type,
+      question: pickL(r, "question_text") || "",
+      options: opts,
+      correctIndex,
+      correctAnswer,
+      explanation: pickL(r, "explanation") || "",
+      imageUrl: r.image_url || null,
+      inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
+      inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
+    };
+  }).filter(q => Number.isFinite(q.id));
+} 
 async function startPracticeByRec() {
   const rec = state?.courses?.myRecCurrent;
   const subjectKey = state?.courses?.subjectKey;
@@ -9388,7 +9539,7 @@ async function startPracticeByRec() {
 
   const questions = await buildPracticeSetByRec(subjectKey, rec);
   if (!questions.length) {
-    showToast("Нет вопросов для тренировки по этой теме.");
+    showToast(t("rec_no_questions") || "Нет вопросов для тренировки по этой теме.");
     return;
   }
 
@@ -9413,6 +9564,52 @@ async function startPracticeByRec() {
     // метка, чтобы потом в аналитике видеть, что это “тренировка по рекомендации”
     recTopic: rec.topic || null,
     recSubtopic: rec.subtopic || null
+  };
+
+  saveState();
+  replaceCourses("practice-quiz");
+  renderPracticeQuiz();
+  startPracticeQuestionTimer();
+}
+
+   async function startPracticeRetryMistakes() {
+  const rec = state?.courses?.myRecCurrent;
+  const subjectKey = state?.courses?.subjectKey;
+  const qids = state?.courses?.myRecMistakeQids || [];
+  if (!rec || !subjectKey) return;
+
+  if (!Array.isArray(qids) || !qids.length) {
+    showToast(t("rec_retry_empty") || "Нет ошибок для повтора.");
+    return;
+  }
+
+  const questions = await buildPracticeSetByQuestionIds(subjectKey, qids);
+  if (!questions.length) {
+    showToast(t("rec_retry_empty") || "Нет ошибок для повтора.");
+    return;
+  }
+
+  state.quizLock = "practice";
+  state.quiz = {
+    mode: "practice",
+    subjectKey,
+    startedAt: Date.now(),
+    paused: false,
+    pauseStartedAt: null,
+    pausedTotalMs: 0,
+
+    index: 0,
+    questions: questions.slice(0, 10),
+    answers: Array.from({ length: Math.min(10, questions.length) }).map(() => null),
+    correct: Array.from({ length: Math.min(10, questions.length) }).map(() => false),
+
+    qTimeLeft: Number(questions[0]?.timeLimitSec) || 60,
+    qEndsAtMs: null,
+    qTimerId: null,
+
+    recTopic: rec.topic || null,
+    recSubtopic: rec.subtopic || null,
+    drillType: "retry_mistakes"
   };
 
   saveState();
@@ -11108,6 +11305,11 @@ if (action === "my-rec-open-books") {
   return;
 }
 
+if (action === "my-rec-retry") {
+  startPracticeRetryMistakes();
+  return;
+}
+       
 if (action === "my-rec-train") {
   startPracticeByRec();
   return;
