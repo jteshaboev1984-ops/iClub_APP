@@ -9236,11 +9236,6 @@ async function renderMyRecDetail() {
     </div>
     ${mistakesHtml}
 
-    <div class="list-item" style="margin-top:10px">
-      <div style="font-weight:900">Что прочитать</div>
-      <div class="muted small" style="margin-top:6px">Сначала теория, потом тренировка.</div>
-    </div>
-
     <div class="list-item">
   <div style="font-weight:900">${escapeHTML(t("rec_read_title") || "Что прочитать")}</div>
   <div class="muted small" style="margin-top:6px">
