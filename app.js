@@ -8748,7 +8748,7 @@ if (meta) {
       if (hx && hx.best && hx.best.ts === attempt.ts) {
         showToast("Новый лучший результат");
       }
-   syncPracticeResultBadges();
+   syncPracticeResultBadges(attempt);
   }
 
 function renderPracticeReview() {
@@ -8844,20 +8844,41 @@ function renderPracticeReview() {
         const status = d.isCorrect ? "✅" : "❌";
         const n = d._idx + 1;
 
-        row.innerHTML = `
-          <div style="font-weight:900">${status} ${n}. ${escapeHTML(d.difficulty)} • ${escapeHTML(d.type)}</div>
-          <div class="muted small" style="margin-top:6px">${escapeHTML(d.question || "")}</div>
+        // ✅ pretty answers: convert "0/1/2/3" -> "A/B/C/D" and show text if available
+let userDisp = "";
+let corrDisp = "";
+try {
+  const qForFmt = {
+    // formatAnswerForDisplay reads options_text; we pass options as JSON
+    options_text: Array.isArray(d.options) ? JSON.stringify(d.options) : (d.options_text || null)
+  };
+  userDisp = formatAnswerForDisplay(qForFmt, d.userAnswer);
+  corrDisp = formatAnswerForDisplay(qForFmt, d.correctAnswer);
+} catch {
+  userDisp = String(d.userAnswer || "—");
+  corrDisp = String(d.correctAnswer || "—");
+}
 
-          <div class="muted small" style="margin-top:8px">
-            Ваш ответ: <b>${escapeHTML(d.userAnswer || "—")}</b>
-          </div>
-          <div class="muted small">
-            Правильно: <b>${escapeHTML(d.correctAnswer || "—")}</b>
-          </div>
+const diffLabel = t("practice_difficulty") || "Сложность";
+const diffKey = `difficulty_${String(d.difficulty || "").toLowerCase()}`;
+const diffText = t(diffKey) || d.difficulty || "";
 
-          ${d.explanation ? `<div class="muted small" style="margin-top:8px">${escapeHTML(d.explanation)}</div>` : ``}
-        `;
+const yourAnsLabel = t("your_answer") || "Ваш ответ";
+const correctLabel = t("correct_answer") || "Правильно";
 
+row.innerHTML = `
+  <div style="font-weight:900">${status} ${n}. ${escapeHTML(diffText)} • ${escapeHTML(d.type)}</div>
+  <div class="muted small" style="margin-top:6px">${escapeHTML(d.question || "")}</div>
+
+  <div class="muted small" style="margin-top:8px">
+    ${escapeHTML(yourAnsLabel)}: <b>${escapeHTML(userDisp || "—")}</b>
+  </div>
+  <div class="muted small">
+    ${escapeHTML(correctLabel)}: <b>${escapeHTML(corrDisp || "—")}</b>
+  </div>
+
+  ${d.explanation ? `<div class="muted small" style="margin-top:8px">${escapeHTML(d.explanation)}</div>` : ``}
+`;
         body.appendChild(row);
       });
 
@@ -8991,8 +9012,8 @@ function renderPracticeReview() {
   })();
 }
 
-function syncPracticeResultBadges() {
-  const attempt = state.practiceLastAttempt;
+function syncPracticeResultBadges(attemptOverride) {
+  const attempt = attemptOverride || state.practiceLastAttempt;
   if (!attempt || !Array.isArray(attempt.details)) return;
 
   const wrong = attempt.details.filter(d => !d.isCorrect);
