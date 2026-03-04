@@ -9185,18 +9185,30 @@ async function renderMyRecs() {
       .in("attempt_id", attemptIds)
       .eq("is_correct", false)
       .order("created_at", { ascending: false })
-      .limit(60);
+      .limit(150);
 
     if (pErr || !Array.isArray(ans)) return [];
 
-    const topic = String(rec?.topic || "").trim();
-    const subtopic = rec?.subtopic ? String(rec.subtopic).trim() : null;
+        const norm = (v) => String(v || "").trim().toLowerCase();
+
+    const topic = norm(rec?.topic);
+    const subtopic = rec?.subtopic ? norm(rec.subtopic) : "";
 
     const filtered = ans
       .map(x => ({ ...x, q: x.question }))
       .filter(x => x.q && x.q.is_active)
-      .filter(x => String(x.q.topic || "").trim() === topic)
-      .filter(x => subtopic ? (String(x.q.subtopic || "").trim() === subtopic) : true)
+      .filter(x => {
+        const qt = norm(x.q.topic);
+        const qs = norm(x.q.subtopic);
+
+        // если в рекомендации topic пустой — не режем
+        if (topic && qt !== topic) return false;
+
+        // если subtopic указан — режем по нему тоже
+        if (subtopic && qs !== subtopic) return false;
+
+        return true;
+      })
       .slice(0, 10);
 
     return filtered;
