@@ -7610,10 +7610,20 @@ async function syncMyRecsToSupabase(subjectKey, recs) {
       };
     });
 
-    const { error: insErr } = await window.sb.from("recommendations").insert(toInsert);
-    if (insErr) logClientError("recommendations_insert_error", insErr);
+        const { error: insErr } = await window.sb.from("recommendations").insert(toInsert);
+    if (insErr) {
+      logClientError("recommendations_insert_error", insErr);
+      try {
+        const uid2 = await getAuthUid();
+        await logDbErrorToEvents(uid2, "recommendations_insert_error", insErr, { subject_id: subjectId, count: toInsert.length });
+      } catch {}
+    }
   } catch (e) {
     logClientError("recommendations_sync_exception", e);
+    try {
+      const uid2 = await getAuthUid();
+      await logDbErrorToEvents(uid2, "recommendations_sync_exception", e, {});
+    } catch {}
   }
 }
 
@@ -8589,7 +8599,38 @@ try {
       durationSec,
       details
     };
+          const attempt = {
+      ts: finishedAt,
+      subjectKey: quiz.subjectKey,
+      score,
+      total,
+      percent,
+      durationSec,
+      details
+    };
 
+    // ✅ Save "My recommendations" + sync to DB right here (always, no UI dependency)
+    try {
+      // only for main practice (do NOT generate new recs from drill sessions)
+      if (!quiz?.drillType) {
+        const res = addMyRecsFromAttempt(attempt);
+
+        if (res?.added) {
+          // optional UX toast (keep existing behavior)
+          try { showToast(t("practice_saved_to_my_recs")); } catch {}
+
+          // ✅ write recs into DB (non-blocking)
+          try {
+            syncMyRecsToSupabase(attempt.subjectKey, res.addedRecs || res.recs || []);
+          } catch {}
+        }
+      }
+    } catch {}
+
+    // ---------------------------
+    // Earned Credentials — events + realtime evaluation
+    // ---------------------------
+    const subject_id = normSubjectId(attempt.subjectKey);
     // ---------------------------
     // Earned Credentials — events + realtime evaluation
     // ---------------------------
