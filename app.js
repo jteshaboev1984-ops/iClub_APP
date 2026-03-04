@@ -9263,13 +9263,6 @@ state.courses.myRecMistakeQids = Array.isArray(mistakes)
   : [];
 saveState();
 
-   const headerCard = `
-  <div class="card" style="padding:14px">
-    <div class="muted small">${escapeHTML(t("rec_plan_title") || "План")}</div>
-    <div style="margin-top:8px">${escapeHTML(t("rec_plan_step1") || "1) Разберите ошибки ниже.")}</div>
-  </div>
-`;
-
    const mistakesHtml = mistakes.length
   ? mistakes.map(x => {
       const q = x.q;
@@ -9324,18 +9317,10 @@ saveState();
           </div>
         `;
       }).join("")
-        : `
-      <div class="list-item">
-        <div style="font-weight:900">${escapeHTML(t("rec_read_title") || "Что прочитать")}</div>
-        <div class="muted small" style="margin-top:6px">
-          ${escapeHTML(t("rec_read_no_refs") || "")}
-        </div>
-      </div>
-    `;
+        : ``;
    
     body.innerHTML = `
-    ${headerCard}
-
+   
     <div class="list-item" style="margin-top:10px">
       <div style="font-weight:900">
         ${escapeHTML(t("rec_mistakes_title") || "Ошибки по теме")}
