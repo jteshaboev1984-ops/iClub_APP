@@ -5231,7 +5231,7 @@ function bindRatingsUI() {
   // ---------------------------
   // Courses stack
   // ---------------------------
-  const COURSES_SCREENS = [
+    const COURSES_SCREENS = [
     "all-subjects",
     "subject-hub",
     "lessons",
@@ -5247,7 +5247,8 @@ function bindRatingsUI() {
     "tour-result",
     "tour-review",
     "books",
-    "my-recs"
+    "my-recs",
+    "my-rec-detail"
   ];
 
   function getCoursesTopScreen() {
