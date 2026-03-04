@@ -8622,10 +8622,6 @@ try {
     // Earned Credentials — events + realtime evaluation
     // ---------------------------
     const subject_id = normSubjectId(attempt.subjectKey);
-    // ---------------------------
-    // Earned Credentials — events + realtime evaluation
-    // ---------------------------
-    const subject_id = normSubjectId(attempt.subjectKey);
     const attempt_key = String(attempt.ts || finishedAt);
 
     const ev = trackEvent("practice_attempt_finished", {
