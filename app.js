@@ -8879,11 +8879,10 @@ if (!res.added) {
 } else {
   showToast(t("practice_saved_to_my_recs"));
 
-  // ✅ write recs into DB (non-blocking)
- try {
-  syncMyRecsToSupabase(attempt.subjectKey, res.addedRecs);
-} catch
-}
+ // ✅ write recs into DB (non-blocking)
+try {
+  syncMyRecsToSupabase(attempt.subjectKey, res.addedTopics);
+} catch {}
      
     if (!uniq.length) {
       wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_recs_no_errors"))}</div>`;
