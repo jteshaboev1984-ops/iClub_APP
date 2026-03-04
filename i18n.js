@@ -563,6 +563,16 @@ my_recs_empty_static: "Пока пусто.",
 my_recs_empty: "Пока пусто.",
 saved_at_label: "Сохранено",
 
+// My Recs — Detail (AI tutor)
+rec_plan_title: "План на 10 минут",
+rec_plan_step1: "1) Разберите ошибки ниже.",
+rec_plan_step2: "2) Нажмите «Тренировка по теме».",
+rec_read_title: "Что прочитать",
+rec_read_text: "Изучите тему в книге:",
+rec_btn_back: "Назад",
+rec_btn_books: "Книги",
+rec_btn_train: "Тренировка по теме",
+
       // Pinned hints
       profile_pinned_hint_has:
         "Закреплённые предметы уже ускоряют доступ. Дальше — стабильность.",
@@ -1132,6 +1142,16 @@ my_recs_empty_static: "Hozircha bo‘sh.",
 my_recs_empty: "Hozircha bo‘sh.",
 saved_at_label: "Saqlangan",
 
+// My Recs — Detail (AI tutor)
+rec_plan_title: "10 daqiqalik reja",
+rec_plan_step1: "1) Quyidagi xatolarni ko‘rib chiqing.",
+rec_plan_step2: "2) «Mavzu bo‘yicha mashq» tugmasini bosing.",
+rec_read_title: "Nimani o‘qish kerak",
+rec_read_text: "Kitobdagi mavzuni o‘rganing:",
+rec_btn_back: "Orqaga",
+rec_btn_books: "Kitoblar",
+rec_btn_train: "Mavzu bo‘yicha amaliyot",
+
       // Pinned hints
       profile_pinned_hint_has:
         "Biriktirilgan fanlar tezkor kirishni ta’minlaydi. Barqarorlik — natijaning asosi.",
@@ -1670,9 +1690,19 @@ books_open_pdf: "Open PDF",
 
 my_recs_screen_title: "My recommendations",
 my_recs_screen_subtitle: "Saved reading recommendations",
-my_recs_empty_static: "Nothing here yet.",
-my_recs_empty: "Nothing here yet.",
+my_recs_empty_static: "Empty for now.",
+my_recs_empty: "Empty for now.",
 saved_at_label: "Saved",
+
+// My Recs — Detail (AI tutor)
+rec_plan_title: "10-minute plan",
+rec_plan_step1: "1) Review the mistakes below.",
+rec_plan_step2: "2) Press “Practice by topic”.",
+rec_read_title: "What to read",
+rec_read_text: "Study this topic in the book:",
+rec_btn_back: "Back",
+rec_btn_books: "Books",
+rec_btn_train: "Practice by topic",
 
       profile_pinned_hint_has: "Pinned subjects already speed things up. Next: consistency.",
       profile_pinned_hint_empty: "Pin 1–3 subjects to make access noticeably faster."
