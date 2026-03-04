@@ -9175,7 +9175,7 @@ async function renderMyRecDetail() {
   const topic = rec.topic || "General";
   const subtopic = rec.subtopic ? String(rec.subtopic) : "";
   if (titleEl) titleEl.textContent = topic;
-  if (subEl) subEl.textContent = subtopic ? subtopic : "Персональный разбор и план";
+  if (subEl) subEl.textContent = subtopic ? subtopic : (t("rec_detail_subtitle") || "Персональный разбор и план");
 
   body.innerHTML = `<div class="empty muted">Загрузка…</div>`;
 
@@ -9231,20 +9231,26 @@ async function renderMyRecDetail() {
     ${headerCard}
 
     <div class="list-item" style="margin-top:10px">
-      <div style="font-weight:900">Ошибки по теме</div>
-      <div class="muted small" style="margin-top:6px">Ваши последние неправильные ответы по этой теме.</div>
+      <div style="font-weight:900">
+        ${escapeHTML(t("rec_mistakes_title") || "Ошибки по теме")}
+      </div>
+      <div class="muted small" style="margin-top:6px">
+        ${escapeHTML(t("rec_mistakes_subtitle") || "Ваши последние неправильные ответы по этой теме.")}
+      </div>
     </div>
     ${mistakesHtml}
 
     <div class="list-item">
-  <div style="font-weight:900">${escapeHTML(t("rec_read_title") || "Что прочитать")}</div>
-  <div class="muted small" style="margin-top:6px">
-    ${escapeHTML(t("rec_read_text") || "Изучите тему в книге:")}
-  </div>
-  <div style="margin-top:8px;font-weight:700">
-    ${escapeHTML(rec.topic || "")}
-  </div>
-</div>
+      <div style="font-weight:900">
+        ${escapeHTML(t("rec_read_title") || "Что прочитать")}
+      </div>
+      <div class="muted small" style="margin-top:6px">
+        ${escapeHTML(t("rec_read_text") || "Изучите тему в книге:")}
+      </div>
+      <div style="margin-top:8px;font-weight:700">
+        ${escapeHTML(rec.topic || "")}
+      </div>
+    </div>
   `;
 
   body.querySelectorAll("button[data-open-book-url]").forEach(btn => {
