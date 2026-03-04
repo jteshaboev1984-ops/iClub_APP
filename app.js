@@ -2143,14 +2143,22 @@ function formatAnswerForDisplay(q, rawAnswer) {
     opts = parseOptionsText(oText);
   } catch {}
 
-  // user stored index: "0/1/2/3"
-  if (opts && isNumericLike(raw)) {
+    // user stored index: "0/1/2/3"
+  // ✅ even if options are missing/empty — show A/B/C/D instead of "0/1/2/3"
+  if (isNumericLike(raw)) {
     const idx = Math.trunc(Number(raw));
-    if (idx >= 0 && idx < opts.length) {
+
+    // if we have options — show "B — text"
+    if (opts && idx >= 0 && idx < opts.length) {
       const L = idxToLetter(idx);
       const txt = String(opts[idx] ?? "").trim();
       return txt ? `${L} — ${txt}` : (L || raw);
     }
+
+    // if options are missing — show just the letter
+    const L = idxToLetter(idx);
+    if (L) return L;
+
     return raw;
   }
 
@@ -9058,7 +9066,7 @@ async function renderMyRecs() {
 
   const subjectKey = state.courses.subjectKey;
 
-  wrap.innerHTML = `<div class="empty muted">Загрузка…</div>`;
+    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
 
   // 1) DB-first
   let rows = await fetchMyRecsDB(subjectKey);
@@ -9255,11 +9263,10 @@ state.courses.myRecMistakeQids = Array.isArray(mistakes)
   : [];
 saveState();
 
-  const headerCard = `
+   const headerCard = `
   <div class="card" style="padding:14px">
-    <div class="muted small">${escapeHTML(t("rec_plan_title") || "План на 10 минут")}</div>
+    <div class="muted small">${escapeHTML(t("rec_plan_title") || "План")}</div>
     <div style="margin-top:8px">${escapeHTML(t("rec_plan_step1") || "1) Разберите ошибки ниже.")}</div>
-    <div>${escapeHTML(t("rec_plan_step2") || "2) Нажмите “Тренировка по теме”.")}</div>
   </div>
 `;
 
@@ -9317,8 +9324,15 @@ saveState();
           </div>
         `;
       }).join("")
-    : `<div class="list-item"><div style="font-weight:900">Что прочитать</div><div class="muted small" style="margin-top:6px">Ссылки на главы добавим через topic_book_map.</div></div>`;
-
+        : `
+      <div class="list-item">
+        <div style="font-weight:900">${escapeHTML(t("rec_read_title") || "Что прочитать")}</div>
+        <div class="muted small" style="margin-top:6px">
+          ${escapeHTML(t("rec_read_no_refs") || "")}
+        </div>
+      </div>
+    `;
+   
     body.innerHTML = `
     ${headerCard}
 
@@ -9332,17 +9346,16 @@ saveState();
     </div>
     ${mistakesHtml}
 
-    <div class="list-item">
+       <div class="list-item">
       <div style="font-weight:900">
         ${escapeHTML(t("rec_read_title") || "Что прочитать")}
       </div>
       <div class="muted small" style="margin-top:6px">
-        ${escapeHTML(t("rec_read_text") || "Изучите тему в книге:")}
-      </div>
-      <div style="margin-top:8px;font-weight:700">
-        ${escapeHTML(rec.topic || "")}
+        ${escapeHTML((t("rec_read_line") || 'Kitobdagi mavzu — "{topic}".').replace("{topic}", String(rec.topic || "").trim()))}
       </div>
     </div>
+
+    ${refsHtml}
   `;
 
   body.querySelectorAll("button[data-open-book-url]").forEach(btn => {
