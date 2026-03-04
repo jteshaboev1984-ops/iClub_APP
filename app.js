@@ -7441,7 +7441,7 @@ function saveMyRecs(data) {
 }
 
 // ✅ DB sync for recommendations table
-async function syncMyRecsToSupabase(subjectKey, topics) {
+async function syncMyRecsToSupabase(subjectKey, recs) {
   try {
     if (!window.sb) return;
     const uid = await getAuthUid();
@@ -7450,34 +7450,88 @@ async function syncMyRecsToSupabase(subjectKey, topics) {
     const subjectId = await getSubjectIdByKey(subjectKey);
     if (!subjectId) return;
 
-    const list = Array.from(new Set((topics || []).map(x => String(x || "").trim()).filter(Boolean)));
-    if (!list.length) return;
+    // recs: [{ topic, subtopic }]
+    const normalized = (Array.isArray(recs) ? recs : [])
+      .map(r => ({
+        topic: String(r?.topic || "").trim(),
+        subtopic: r?.subtopic ? String(r.subtopic).trim() : null
+      }))
+      .filter(r => r.topic);
 
-    // Avoid duplicates: check which topics already exist in DB for this user+subject
+    if (!normalized.length) return;
+
+    // unique by topic+subtopic
+    const key = (r) => `${r.topic}::${r.subtopic || ""}`;
+    const uniqMap = new Map();
+    normalized.forEach(r => { uniqMap.set(key(r), r); });
+    const uniq = Array.from(uniqMap.values());
+    const topics = Array.from(new Set(uniq.map(r => r.topic)));
+
+    // 1) existing in DB (avoid duplicates)
     const { data: existingRows, error: selErr } = await window.sb
       .from("recommendations")
-      .select("topic")
+      .select("topic, subtopic")
       .eq("user_id", uid)
       .eq("subject_id", subjectId)
       .eq("source_type", "practice")
-      .in("topic", list);
+      .in("topic", topics);
 
     if (selErr) {
       logClientError("recommendations_select_error", selErr);
       return;
     }
 
-    const exists = new Set((existingRows || []).map(r => String(r.topic || "").trim()).filter(Boolean));
-    const toInsert = list
-      .filter(tp => !exists.has(tp))
-      .map(tp => ({
+    const exists = new Set(
+      (existingRows || []).map(r => `${String(r.topic || "").trim()}::${r.subtopic ? String(r.subtopic).trim() : ""}`)
+    );
+
+    const need = uniq.filter(r => !exists.has(key(r)));
+    if (!need.length) return;
+
+    // 2) try to enrich with book_id/book_reference via topic_book_map (best-effort)
+    let mapRows = [];
+    try {
+      const { data: mData, error: mErr } = await window.sb
+        .from("topic_book_map")
+        .select("topic, subtopic, book_id, book_reference, priority, is_active")
+        .eq("subject_id", subjectId)
+        .eq("is_active", true)
+        .in("topic", topics)
+        .order("priority", { ascending: true });
+
+      if (!mErr && Array.isArray(mData)) mapRows = mData;
+    } catch {}
+
+    // pick best match: (topic+subtopic) first, else (topic only)
+    const bestFor = (topic, subtopic) => {
+      const t = String(topic || "").trim();
+      const s = subtopic ? String(subtopic).trim() : null;
+
+      const exact = mapRows.find(x =>
+        String(x.topic || "").trim() === t &&
+        (String(x.subtopic || "").trim() || null) === (s || null)
+      );
+      if (exact) return exact;
+
+      const byTopic = mapRows.find(x =>
+        String(x.topic || "").trim() === t &&
+        (x.subtopic == null || String(x.subtopic).trim() === "")
+      );
+      return byTopic || null;
+    };
+
+    const toInsert = need.map(r => {
+      const best = bestFor(r.topic, r.subtopic);
+      return {
         user_id: uid,
         subject_id: subjectId,
         source_type: "practice",
-        topic: tp
-      }));
-
-    if (!toInsert.length) return;
+        topic: r.topic,
+        subtopic: r.subtopic,
+        book_id: best?.book_id || null,
+        book_reference: best?.book_reference || null
+      };
+    });
 
     const { error: insErr } = await window.sb.from("recommendations").insert(toInsert);
     if (insErr) logClientError("recommendations_insert_error", insErr);
@@ -7488,9 +7542,20 @@ async function syncMyRecsToSupabase(subjectKey, topics) {
 
 function addMyRecsFromAttempt(attempt) {
   const wrong = (attempt?.details || []).filter(d => !d.isCorrect);
-  const topics = Array.from(new Set(wrong.map(d => d.topic || "General")));
-  if (!topics.length) return { added: 0, topics: [], addedTopics: [] };
 
+  // build unique recs by topic+subtopic
+  const recMap = new Map();
+  wrong.forEach(d => {
+    const topic = String(d?.topic || "General").trim();
+    const subtopic = d?.subtopic ? String(d.subtopic).trim() : null;
+    const k = `${topic}::${subtopic || ""}`;
+    if (!recMap.has(k)) recMap.set(k, { topic, subtopic });
+  });
+
+  const recs = Array.from(recMap.values());
+  if (!recs.length) return { added: 0, recs: [], addedRecs: [] };
+
+  // local UX fallback: store only topic titles as before (lightweight)
   const store = loadMyRecs();
   store.bySubject = store.bySubject || {};
   const subjKey = attempt.subjectKey || "unknown";
@@ -7498,14 +7563,15 @@ function addMyRecsFromAttempt(attempt) {
   const existing = new Set((store.bySubject[subjKey] || []).map(x => x.topic));
   const nowTs = Date.now();
 
-  const add = topics
+  const add = recs
+    .map(r => r.topic)
     .filter(tp => !existing.has(tp))
     .map(tp => ({ topic: tp, ts: nowTs }));
 
   store.bySubject[subjKey] = [...add, ...(store.bySubject[subjKey] || [])].slice(0, 50);
   saveMyRecs(store);
 
-  return { added: add.length, topics, addedTopics: add.map(x => x.topic) };
+  return { added: add.length, recs, addedRecs: recs };
 }
 
   function formatMMSS(sec) {
@@ -8814,9 +8880,9 @@ if (!res.added) {
   showToast(t("practice_saved_to_my_recs"));
 
   // ✅ write recs into DB (non-blocking)
-  try {
-    syncMyRecsToSupabase(attempt.subjectKey, res.addedTopics);
-  } catch {}
+ try {
+  syncMyRecsToSupabase(attempt.subjectKey, res.addedRecs);
+} catch
 }
      
     if (!uniq.length) {
