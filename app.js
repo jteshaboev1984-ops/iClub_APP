@@ -9185,13 +9185,12 @@ async function renderMyRecDetail() {
   ]);
 
   const headerCard = `
-    <div class="card" style="padding:14px">
-      <div class="muted small">План на 10 минут</div>
-      <div style="margin-top:8px">1) Разберите ошибки ниже.</div>
-      <div>2) Прочитайте рекомендованные места.</div>
-      <div>3) Нажмите “Тренировка по теме”.</div>
-    </div>
-  `;
+  <div class="card" style="padding:14px">
+    <div class="muted small">${escapeHTML(t("rec_plan_title") || "План на 10 минут")}</div>
+    <div style="margin-top:8px">${escapeHTML(t("rec_plan_step1") || "1) Разберите ошибки ниже.")}</div>
+    <div>${escapeHTML(t("rec_plan_step2") || "2) Нажмите “Тренировка по теме”.")}</div>
+  </div>
+`;
 
   const mistakesHtml = mistakes.length
     ? mistakes.map(x => {
@@ -9242,11 +9241,15 @@ async function renderMyRecDetail() {
       <div class="muted small" style="margin-top:6px">Сначала теория, потом тренировка.</div>
     </div>
 
-    ${refs.length ? refsHtml : `
-      <div class="list-item">
-        <div class="muted small">Пока нет привязок к книге. Добавьте их в topic_book_map для этой темы.</div>
-      </div>
-    `}
+    <div class="list-item">
+  <div style="font-weight:900">${escapeHTML(t("rec_read_title") || "Что прочитать")}</div>
+  <div class="muted small" style="margin-top:6px">
+    ${escapeHTML(t("rec_read_text") || "Изучите тему в книге:")}
+  </div>
+  <div style="margin-top:8px;font-weight:700">
+    ${escapeHTML(rec.topic || "")}
+  </div>
+</div>
   `;
 
   body.querySelectorAll("button[data-open-book-url]").forEach(btn => {
