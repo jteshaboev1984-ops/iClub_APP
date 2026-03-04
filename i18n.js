@@ -586,6 +586,9 @@ rec_retry_empty: "Нет ошибок для повтора.",
 rec_open_book: "Открыть",
 rec_no_mistakes_text: "По этой теме пока нет зафиксированных ошибок.",
 rec_no_questions: "Нет вопросов для тренировки по этой теме.",
+rec_drill_mini_title: "Результат",
+rec_drill_mini_line: "{score}/{total} • {percent}%",
+rec_drill_repeat: "Повторить ещё раз",
 
       // Pinned hints
       profile_pinned_hint_has:
@@ -1179,6 +1182,9 @@ rec_retry_empty: "Qayta ishlash uchun xatolar yo‘q.",
 rec_open_book: "Ochish",
 rec_no_mistakes_text: "Bu mavzu bo‘yicha hozircha xatolar qayd etilmagan.",
 rec_no_questions: "Bu mavzu bo‘yicha mashq uchun savollar yo‘q.",
+rec_drill_mini_title: "Natija",
+rec_drill_mini_line: "{score}/{total} • {percent}%",
+rec_drill_repeat: "Yana bir bor",
 
       // Pinned hints
       profile_pinned_hint_has:
@@ -1745,6 +1751,9 @@ rec_retry_empty: "No mistakes to retry.",
 rec_open_book: "Open",
 rec_no_mistakes_text: "No mistakes recorded for this topic yet.",
 rec_no_questions: "No questions available for this topic.",
+rec_drill_mini_title: "Result",
+rec_drill_mini_line: "{score}/{total} • {percent}%",
+rec_drill_repeat: "Repeat again",
 
       profile_pinned_hint_has: "Pinned subjects already speed things up. Next: consistency.",
       profile_pinned_hint_empty: "Pin 1–3 subjects to make access noticeably faster."
