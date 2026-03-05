@@ -517,11 +517,8 @@ try {
     practiceDraft: "iclub_practice_draft_v1",
     myRecs: "iclub_my_recs_v1",
     botLinked: "iclub_bot_linked_v1",
-
-    // ✅ Pending DB operations (offline-safe queue)
+    homeExtraOpen: "iclub_home_extra_open_v1",
     pendingOps: "iclub_pending_ops_v1",
-
-    // Earned Credentials (v1.3 FINAL)
     events: "iclub_events_v1",
     credentials: "iclub_credentials_v1"
   };
@@ -6672,7 +6669,32 @@ function uiAlert({ title, message, okText } = {}) {
   // ---------------------------
   // Home rendering (demo)
   // ---------------------------
-  function renderHome() {
+  function applyHomeExtraState() {
+  const card = $("#home-extra-card");
+  const body = $("#home-extra-body");
+  if (!card || !body) return;
+
+  let open = false;
+  try {
+    open = localStorage.getItem(LS.homeExtraOpen) === "1";
+  } catch {}
+
+  card.classList.toggle("is-open", !!open);
+}
+
+function toggleHomeExtra() {
+  const card = $("#home-extra-card");
+  if (!card) return;
+
+  const next = !card.classList.contains("is-open");
+  card.classList.toggle("is-open", next);
+
+  try {
+    localStorage.setItem(LS.homeExtraOpen, next ? "1" : "0");
+  } catch {}
+}
+
+function renderHome() {
     const profile = loadProfile();
     const compWrap = $("#home-competitive-list");
     const pinnedWrap = $("#home-study-list");
@@ -6702,12 +6724,14 @@ function uiAlert({ title, message, okText } = {}) {
     });
 
     pinned.slice(0, 4).forEach((s, idx) => {
-      const tile = homePinnedTileEl(s, idx);
-      pinnedWrap.appendChild(tile);
-      // ✅ реальный прогресс X/Y (tours completed / total tours)
-      updateHomePinnedTile(tile, s.key);
-    });
-  }
+  const tile = homePinnedTileEl(s, idx);
+  pinnedWrap.appendChild(tile);
+  updateHomePinnedTile(tile, s.key);
+});
+
+// ✅ Home extra accordion (restore open/closed)
+applyHomeExtraState();
+}
 
       // ===========================
 // Home (Competitive) — real Rank + Progress
@@ -11452,6 +11476,8 @@ if (state.tab === "profile") {
       if (action === "open-notifications") { openGlobal("notifications"); return; }
       if (action === "open-community") { openGlobal("community"); return; }
       if (action === "open-about") { openGlobal("about"); return; }
+
+      if (action === "home-extra-toggle") { toggleHomeExtra(); return; }
       if (action === "open-certificates") { openGlobal("certificates"); return; }
       if (action === "open-archive") { openGlobal("archive"); return; }
 
