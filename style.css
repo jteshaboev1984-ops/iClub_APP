@@ -3948,3 +3948,7 @@ button.is-loading { opacity: .85; }
 #screen-my-rec-detail .actions-row .btn:not(.primary):active {
   transform: translateY(1px);
 }
+/* ✅ My Rec Detail: give extra space before the last (danger) action */
+#courses-my-rec-detail .actions-row .btn.danger {
+  margin-top: 10px;
+}
