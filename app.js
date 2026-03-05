@@ -1438,6 +1438,16 @@ function runDailyCredentialJobs() {
     window.open(safeUrl, "_blank", "noopener,noreferrer");
   }
 
+      function openTelegramUrl(url) {
+  try {
+    const tg = window.Telegram && window.Telegram.WebApp;
+    if (tg && typeof tg.openTelegramLink === "function") {
+      tg.openTelegramLink(url);
+      return;
+    }
+  } catch {}
+  try { window.open(url, "_blank", "noopener"); } catch {}
+}
   // ---------------------------
   // App state
   // ---------------------------
@@ -11472,9 +11482,18 @@ if (state.tab === "profile") {
       if (action === "ratings-info") { openRatingsInfoModal(); return; }
 
       if (action === "open-resources") { openGlobal("resources"); return; }
-      if (action === "open-news") { openGlobal("news"); return; }
       if (action === "open-notifications") { openGlobal("notifications"); return; }
-      if (action === "open-community") { openGlobal("community"); return; }
+      if (action === "open-news") {
+  // Telegram channel (news live here)
+  openTelegramUrl("https://t.me/iClubuzofficial");
+  return;
+}
+
+if (action === "open-community") {
+  // Telegram chat (community)
+  openTelegramUrl("https://t.me/+yp3GKhnohKQxOTdi");
+  return;
+}
       if (action === "open-about") { openGlobal("about"); return; }
 
       if (action === "home-extra-toggle") { toggleHomeExtra(); return; }
