@@ -8624,12 +8624,13 @@ try {
     const subject_id = normSubjectId(attempt.subjectKey);
     const attempt_key = String(attempt.ts || finishedAt);
 
-    const ev = trackEvent("practice_attempt_finished", {
+   const ev = trackEvent(quiz?.drillType ? "practice_drill_finished" : "practice_attempt_finished", {
   subject_id,
   score: attempt.score,
   percent: attempt.percent,
   time_seconds: attempt.durationSec,
-  attempt_key
+  attempt_key,
+  drill_type: quiz?.drillType || null
 });
 
 // state for result/review/recs screens (DO NOT lose db info)
@@ -8736,20 +8737,24 @@ if (meta) {
    if (quiz?.drillType) replaceCoursesTop("practice-result");
    else replaceCourses("practice-result");
 
-      // Save best + last 5 (safe)
-   let hx = null;
-      try {
-        hx = updatePracticeHistory(quiz.subjectKey, attempt);
-      } catch (e) {
-      try { trackEvent("practice_history_error", { message: String(e?.message || e || "unknown") }); } catch {}
-      }
-
-      // Optional: toast best update
-      if (hx && hx.best && hx.best.ts === attempt.ts) {
-        showToast("Новый лучший результат");
-      }
-   syncPracticeResultBadges(attempt);
+      // Save best + last 5 (ONLY for main practice; drills must not affect Subject Hub stats)
+let hx = null;
+if (!quiz?.drillType) {
+  try {
+    hx = updatePracticeHistory(quiz.subjectKey, attempt);
+  } catch (e) {
+    try { trackEvent("practice_history_error", { message: String(e?.message || e || "unknown") }); } catch {}
   }
+
+  // Optional: toast best update
+  if (hx && hx.best && hx.best.ts === attempt.ts) {
+    showToast(t("practice_best_new_toast") || "Новый лучший результат");
+  }
+
+  // badges / subject widgets rely on main practice only
+  syncPracticeResultBadges(attempt);
+   }
+}
 
 function renderPracticeReview() {
   const wrap = $("#practice-review-list");
