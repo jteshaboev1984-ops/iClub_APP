@@ -229,6 +229,50 @@
             </div>
           </div>
 
+            <!-- ✅ Qo‘shimcha (Home) — collapsible, with “About” always visible -->
+<div class="home-block" id="home-extra-block">
+  <div class="card home-extra-card" id="home-extra-card">
+    <button class="home-extra-head" type="button" data-action="home-extra-toggle">
+      <div class="home-extra-title" data-i18n="home_extra_title">Qo‘shimcha</div>
+      <div class="home-extra-arrow" id="home-extra-arrow">›</div>
+    </button>
+
+    <!-- Always visible item: About -->
+    <div class="home-extra-always">
+      <button class="settings-nav" type="button" data-action="open-about">
+        <span class="settings-nav-ico">ℹ️</span>
+        <span class="settings-nav-text">
+          <span class="settings-nav-title" data-i18n="profile_settings_about">О проекте</span>
+          <span class="settings-nav-sub muted small" data-i18n="profile_settings_about_sub">Правила и организаторы</span>
+        </span>
+        <span class="settings-nav-arrow">›</span>
+      </button>
+    </div>
+
+    <!-- Collapsible items -->
+    <div class="home-extra-body" id="home-extra-body">
+      <div class="settings-list">
+        <button class="settings-nav" type="button" data-action="open-news">
+          <span class="settings-nav-ico">📰</span>
+          <span class="settings-nav-text">
+            <span class="settings-nav-title" data-i18n="profile_settings_news_title">Новости</span>
+            <span class="settings-nav-sub muted small" data-i18n="profile_settings_news_sub">Анонсы и обновления</span>
+          </span>
+          <span class="settings-nav-arrow">›</span>
+        </button>
+
+        <button class="settings-nav" type="button" data-action="open-community">
+          <span class="settings-nav-ico">💬</span>
+          <span class="settings-nav-text">
+            <span class="settings-nav-title" data-i18n="profile_settings_community_title">Комьюнити</span>
+            <span class="settings-nav-sub muted small" data-i18n="profile_settings_community_sub">@iClubuzofficial</span>
+          </span>
+          <span class="settings-nav-arrow">›</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
            <div class="home-legacy">
             <div class="section">
               <div class="section-title">Быстрые действия</div>
@@ -1108,15 +1152,6 @@
     <span class="settings-nav-text">
       <span class="settings-nav-title" data-i18n="profile_settings_news_title">Новости</span>
       <span class="settings-nav-sub muted small" data-i18n="profile_settings_news_sub">Анонсы и обновления</span>
-    </span>
-    <span class="settings-nav-arrow">›</span>
-  </button>
-
-  <button class="settings-nav" type="button" data-action="open-notifications">
-    <span class="settings-nav-ico">🔔</span>
-    <span class="settings-nav-text">
-      <span class="settings-nav-title" data-i18n="profile_settings_notifications_title">Уведомления</span>
-      <span class="settings-nav-sub muted small" data-i18n="profile_settings_notifications_sub">Системные события</span>
     </span>
     <span class="settings-nav-arrow">›</span>
   </button>
