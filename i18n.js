@@ -252,6 +252,7 @@ archive_unlock_after_toast: "Архив откроется после завер
       home_competitive_empty: "Пока нет предметов в соревновательном режиме.",
       home_pinned_empty: "Закрепите предметы в разделе «Предметы».",
       home_need_registration: "Сначала пройдите регистрацию.",
+      home_extra_title: "Дополнительно", 
 
       // UI badges / labels (Courses + Home)
       badge_active: "АКТИВНО",
@@ -876,6 +877,7 @@ archive_unlock_after_toast: "Arxiv faol tur yakunlangandan keyin ochiladi.",
       home_competitive_empty: "Hozircha musobaqa rejimida fan yo‘q.",
       home_pinned_empty: "«Fanlar» bo‘limida fanlarni biriktiring.",
       home_need_registration: "Avval ro‘yxatdan o‘ting.",
+      home_extra_title: "Qo‘shimcha", 
 
       // UI badges / labels (Courses + Home)
       badge_active: "FAOL",
@@ -1496,6 +1498,7 @@ archive_unlock_after_toast: "Archive will open after you finish the active tour.
       home_competitive_empty: "No competitive subjects yet.",
       home_pinned_empty: "Pin subjects in Courses to see them here.",
       home_need_registration: "Please complete registration first.",
+      home_extra_title: "More", 
 
       // UI badges / labels (Courses + Home)
       badge_active: "ACTIVE",
