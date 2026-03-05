@@ -9403,8 +9403,23 @@ state.courses.myRecMistakeQids = Array.isArray(mistakes)
   : [];
 saveState();
 
-   const mistakesHtml = mistakes.length
-  ? mistakes.map(x => {
+   const totalMistakes = Array.isArray(mistakes) ? mistakes.length : 0;
+
+// ✅ Header (with total count) — always shown
+const mistakesHeaderHtml = `
+  <div class="list-item" style="margin-top:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div style="font-weight:900">${escapeHTML(t("rec_mistakes_title") || "Ошибки по теме")}</div>
+      <span class="pill">${escapeHTML(String(totalMistakes))}</span>
+    </div>
+    <div class="muted small" style="margin-top:6px">
+      ${escapeHTML(t("rec_mistakes_subtitle") || "Ваши последние неправильные ответы по этой теме.")}
+    </div>
+  </div>
+`;
+
+const mistakesHtml = totalMistakes
+  ? mistakes.map((x, idx) => {
       const q = x.q;
       const qText = pickContentText(q, "question_text");
       const expl = pickContentText(q, "explanation");
@@ -9412,9 +9427,14 @@ saveState();
       const uaDisp = formatAnswerForDisplay(q, x.user_answer);
       const caDisp = formatAnswerForDisplay(q, q.correct_answer);
 
+      const num = `${idx + 1}/${totalMistakes}`;
+
       return `
         <div class="list-item">
-          <div style="font-weight:900">${escapeHTML(t("rec_mistake_card_title") || "Ошибка")}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div style="font-weight:900">${escapeHTML(t("rec_mistake_card_title") || "Ошибка")}</div>
+            <span class="pill">${escapeHTML(num)}</span>
+          </div>
 
           <div style="margin-top:6px">${escapeHTML(qText || "")}</div>
 
@@ -9439,8 +9459,9 @@ saveState();
     }).join("")
   : `
     <div class="list-item">
-      <div style="font-weight:900">${escapeHTML(t("rec_mistakes_title") || "Ошибки по теме")}</div>
-      <div class="muted small" style="margin-top:6px">${escapeHTML(t("rec_no_mistakes_text") || "По этой теме пока нет зафиксированных ошибок.")}</div>
+      <div class="muted small" style="font-weight:800">
+        ${escapeHTML(t("rec_no_mistakes_text") || "По этой теме пока нет зафиксированных ошибок.")}
+      </div>
     </div>
   `;
    
@@ -9461,14 +9482,7 @@ saveState();
    
     body.innerHTML = `
    
-    <div class="list-item" style="margin-top:10px">
-      <div style="font-weight:900">
-        ${escapeHTML(t("rec_mistakes_title") || "Ошибки по теме")}
-      </div>
-      <div class="muted small" style="margin-top:6px">
-        ${escapeHTML(t("rec_mistakes_subtitle") || "Ваши последние неправильные ответы по этой теме.")}
-      </div>
-    </div>
+    ${mistakesHeaderHtml}
     ${mistakesHtml}
     ${drillMiniHtml}
 
@@ -9493,7 +9507,51 @@ saveState();
   });
 }
 
-// helper: content language picker for question rows
+async function deleteMyRecCurrent() {
+  try {
+    const rec = state?.courses?.myRecCurrent;
+    const subjectKey = state?.courses?.subjectKey;
+    if (!rec || !subjectKey) return;
+
+    const ok = await uiConfirm({
+      title: t("rec_delete_title") || "Отметить как освоено?",
+      message: t("rec_delete_text") || "Рекомендация будет удалена из списка.",
+      okText: t("rec_delete_ok") || "Удалить",
+      cancelText: t("rec_delete_cancel") || (t("cancel") || "Отмена")
+    });
+
+    if (!ok) return;
+
+    // DB delete (only this record)
+    try {
+      const uid = await getAuthUid().catch(() => null);
+      if (window.sb && uid && rec?.id) {
+        const { error } = await window.sb
+          .from("recommendations")
+          .delete()
+          .eq("id", rec.id)
+          .eq("user_id", uid);
+
+        if (error) logClientError("myrec_delete_db_error", error);
+      }
+    } catch (e) {
+      logClientError("myrec_delete_db_exception", e);
+    }
+
+    showToast(t("rec_deleted_toast") || "Рекомендация удалена.");
+
+    // go back to list + refresh
+    state.courses.myRecCurrent = null;
+    saveState();
+
+    replaceCourses("my-recs");
+    renderMyRecs();
+  } catch (e) {
+    logClientError("myrec_delete_exception", e);
+  }
+}
+
+// helper: content language pick
 function pickContentText(obj, base) {
   try {
     const lang = (loadProfile()?.language) || "ru";
@@ -11482,7 +11540,12 @@ if (action === "my-rec-retry") {
   startPracticeRetryMistakes();
   return;
 }
-       
+
+if (action === "my-rec-delete") {
+  deleteMyRecCurrent();
+  return;
+}
+
 if (action === "my-rec-train") {
   startPracticeByRec();
   return;
