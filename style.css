@@ -3952,3 +3952,52 @@ button.is-loading { opacity: .85; }
 #courses-my-rec-detail .actions-row .btn.danger {
   margin-top: 10px;
 }
+/* ✅ Home Qo‘shimcha — accordion */
+.home-extra-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.home-extra-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px 8px;
+  background: transparent;
+  border: none;
+  text-align: left;
+}
+
+.home-extra-title {
+  font-weight: 900;
+}
+
+.home-extra-arrow {
+  font-size: 20px;
+  line-height: 1;
+  transform: rotate(90deg);
+  opacity: 0.65;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.home-extra-card.is-open .home-extra-arrow {
+  transform: rotate(-90deg);
+  opacity: 0.9;
+}
+
+.home-extra-always {
+  padding: 0 10px 8px;
+}
+
+.home-extra-body {
+  padding: 0 10px 12px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 220ms ease;
+}
+
+.home-extra-card.is-open .home-extra-body {
+  max-height: 420px; /* enough for 2 items */
+}
