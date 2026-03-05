@@ -11704,10 +11704,16 @@ if (action === "practice-exit") {
 
   // ✅ DRILL: go back to recommendation detail (topic screen)
   if (ctx === "drill" && state?.courses?.myRecCurrent) {
-    replaceCourses("my-rec-detail");
-    renderMyRecDetail();
-    return;
-  }
+  // ✅ restore stack so header back arrow appears:
+  // my-recs -> my-rec-detail
+  state.courses = state.courses || {};
+  state.courses.stack = ["my-recs", "my-rec-detail"];
+  saveState();
+
+  showCoursesScreen("my-rec-detail");
+  renderMyRecDetail();
+  return;
+}
 
   // ✅ MAIN: go to Subject Hub as before
   replaceCourses("subject-hub");
