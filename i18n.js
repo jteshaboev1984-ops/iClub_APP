@@ -613,6 +613,12 @@ rec_no_questions: "Нет вопросов для тренировки по эт
 rec_drill_mini_title: "Результат",
 rec_drill_mini_line: "{score}/{total} • {percent}%",
 rec_drill_repeat: "Повторить ещё раз",
+rec_btn_done: "Освоено",
+rec_delete_title: "Отметить как освоено?",
+rec_delete_text: "Рекомендация будет удалена из списка.",
+rec_delete_ok: "Удалить",
+rec_delete_cancel: "Отмена",
+rec_deleted_toast: "Рекомендация удалена.",
 
       // Pinned hints
       profile_pinned_hint_has:
@@ -1232,6 +1238,12 @@ rec_no_questions: "Bu mavzu bo‘yicha mashq uchun savollar yo‘q.",
 rec_drill_mini_title: "Natija",
 rec_drill_mini_line: "{score}/{total} • {percent}%",
 rec_drill_repeat: "Yana bir bor",
+rec_btn_done: "O‘zlashtirildi",
+rec_delete_title: "O‘zlashtirildi deb belgilaysizmi?",
+rec_delete_text: "Bu tavsiya ro‘yxatdan o‘chiriladi.",
+rec_delete_ok: "O‘chirish",
+rec_delete_cancel: "Bekor qilish",
+rec_deleted_toast: "Tavsiya ro‘yxatdan o‘chirildi.",
 
       // Pinned hints
       profile_pinned_hint_has:
@@ -1825,6 +1837,12 @@ rec_no_questions: "No questions available for this topic.",
 rec_drill_mini_title: "Result",
 rec_drill_mini_line: "{score}/{total} • {percent}%",
 rec_drill_repeat: "Repeat again",
+rec_btn_done: "Mastered",
+rec_delete_title: "Mark as mastered?",
+rec_delete_text: "This will remove the recommendation from your list.",
+rec_delete_ok: "Remove",
+rec_delete_cancel: "Cancel",
+rec_deleted_toast: "Removed from recommendations.",
 
       profile_pinned_hint_has: "Pinned subjects already speed things up. Next: consistency.",
       profile_pinned_hint_empty: "Pin 1–3 subjects to make access noticeably faster."
