@@ -8731,11 +8731,33 @@ if (meta) {
    if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
 
    const recsCountEl = $("#practice-recs-count");
-   if (recsCountEl) recsCountEl.textContent = String(topics.length);
+if (recsCountEl) recsCountEl.textContent = String(topics.length);
+
+// ✅ set “exit” button label based on context (main vs drill)
+try {
+  const exitKey = quiz?.drillType ? "practice_to_recs" : "practice_to_subject";
+  const btn1 = $("#practice-to-subject-btn");
+  const btn2 = $("#practice-review-to-subject-btn");
+  if (btn1) btn1.textContent = t(exitKey);
+  if (btn2) btn2.textContent = t(exitKey);
+} catch {}
 
       // Show result screen (replace quiz screen to avoid "dead" back navigation)
-   if (quiz?.drillType) replaceCoursesTop("practice-result");
-   else replaceCourses("practice-result");
+if (quiz?.drillType) replaceCoursesTop("practice-result");
+else replaceCourses("practice-result");
+
+// ✅ remember which attempt should be used by Result/Review (main vs drill)
+state.courses = state.courses || {};
+state.courses.practiceContext = quiz?.drillType ? "drill" : "main";
+
+// ✅ store drill attempt separately (must NOT overwrite main practice last attempt)
+if (quiz?.drillType) {
+  state.practiceLastDrillAttempt = attempt;
+} else {
+  state.practiceLastDrillAttempt = null;
+}
+
+saveState();
 
       // Save best + last 5 (ONLY for main practice; drills must not affect Subject Hub stats)
 let hx = null;
@@ -8760,7 +8782,11 @@ function renderPracticeReview() {
   const wrap = $("#practice-review-list");
   if (!wrap) return;
 
-  const attempt = state.practiceLastAttempt;
+  const ctx = state?.courses?.practiceContext || "main";
+const attempt =
+  (ctx === "drill" && state.practiceLastDrillAttempt)
+    ? state.practiceLastDrillAttempt
+    : state.practiceLastAttempt;
 
   // Earned Credentials — review opened (for Error-Driven cycle)
   if (attempt && attempt.ts) {
@@ -11670,6 +11696,22 @@ try {
 if (action === "practice-recommendations") {
   pushCourses("practice-recs");
   renderPracticeRecs();
+  return;
+}
+
+if (action === "practice-exit") {
+  const ctx = state?.courses?.practiceContext || "main";
+
+  // ✅ DRILL: go back to recommendation detail (topic screen)
+  if (ctx === "drill" && state?.courses?.myRecCurrent) {
+    replaceCourses("my-rec-detail");
+    renderMyRecDetail();
+    return;
+  }
+
+  // ✅ MAIN: go to Subject Hub as before
+  replaceCourses("subject-hub");
+  renderSubjectHub();
   return;
 }
 
