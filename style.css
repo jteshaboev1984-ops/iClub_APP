@@ -993,7 +993,7 @@ html, body {
 }
 
 /* Secondary buttons — consistent neutral look */
-.actions-row .btn:not(.primary) {
+.actions-row .btn:not(.primary):not(.danger) {
   background: #fff;
   border: 1px solid rgba(0,0,0,.12);
   color: #111;
@@ -1014,6 +1014,18 @@ html, body {
   color: white;
 }
 
+/* ✅ Danger button (e.g., “Освоено”) */
+.btn.danger{
+  background: linear-gradient(180deg, #EF4444, #B91C1C);
+  border-color: rgba(220,38,38,0.35);
+  color: #fff;
+}
+.btn.danger:hover{
+  filter: brightness(0.98);
+}
+.btn.danger:active{
+  transform: translateY(1px);
+}
 .btn.ghost {
   background: transparent;
   box-shadow: none;
