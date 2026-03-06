@@ -2067,37 +2067,119 @@ async function dbHasAnyActiveTourNow() {
     return;
   }
 
-  // team
+    // team (TOP APP)
+  const initials = (name) => {
+    const s = String(name || "").trim();
+    if (!s) return "—";
+    const parts = s.split(/\s+/).filter(Boolean);
+    const a = (parts[0] || "")[0] || "";
+    const b = (parts[1] || "")[0] || "";
+    return (a + b).toUpperCase() || "—";
+  };
+
+  const personCard = ({ name, role, meta, vacant }) => `
+    <div class="person-card">
+      <div class="person-avatar ${vacant ? "is-vacant" : ""}">${vacant ? " " : escapeHTML(initials(name))}</div>
+      <div class="person-body">
+        <div class="person-name">${escapeHTML(vacant ? t("about_team_vacant_title") : name)}</div>
+        <div class="person-role">${escapeHTML(role || "")}</div>
+        ${meta ? `<div class="person-meta muted small">${escapeHTML(meta)}</div>` : ""}
+        ${vacant ? `<div class="person-meta muted small" style="margin-top:6px">${escapeHTML(t("about_team_vacant_text"))}</div>` : ""}
+      </div>
+    </div>
+  `;
+
+  // ✅ DATA (v1): from your posters. Later -> DB
+  const board = [
+    {
+      name: "Erkinov Azizbek Jasurbek o‘g‘li",
+      role: "Ta’sischi — Prezident",
+      meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi",
+      vacant: false
+    },
+    { name: "", role: "Vitse-Prezident", meta: "", vacant: true },
+    { name: "", role: "Chief Operating Officer", meta: "", vacant: true },
+    { name: "", role: "Media guruh rahbari", meta: "", vacant: true },
+    {
+      name: "Marhabo Mahkamtoasheva",
+      role: "Academic Quality Assurance Lead",
+      meta: "Yosh kitobxon tanlovi g‘olibasi (2023) • IELTS 7",
+      vacant: false
+    }
+  ];
+
+  const mentors = [
+    { name: "Komiljonova Ruxsora", role: "AS level Chemistry", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi" },
+    { name: "Olimov Shohjahon", role: "AS level Biology", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi" },
+    { name: "Jasur Abduhakimov", role: "IGCSE Computer Science", meta: "Toshkent shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi" },
+    { name: "Erkinov Azizbek", role: "AS level Economics", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi" },
+    { name: "To‘ychiboyeva Madina", role: "AS level Mathematics", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi" },
+    { name: "Akobirov Humoyun", role: "IELTS mentor", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Green” sinf o‘quvchisi • IELTS 8.0" },
+
+    { name: "Jamshidbek Yaxiyakulov", role: "SAT English", meta: "Samarqand viloyati Invest in education xususiy maktabi 11-sinf • IELTS 7.5 • SAT English 690" },
+    { name: "Iskandarov Bunyodbek", role: "SAT Math", meta: "Xorazm viloyati Hazorasp tumani, To‘laqim FM xususiy maktabi 11-sinf • SAT Math 790" },
+    { name: "Munisa Ro‘ziboyeva", role: "English A2 mentor", meta: "Samarqand viloyati Paxtachi tumani 12-maktab 11 “Moliya-iqtisod” • IELTS 6" },
+    { name: "Madina Umarova", role: "English B1 mentor", meta: "Toshkent Davlat sharqshunoslik universiteti 1-kurs • IELTS 6.5" },
+    { name: "Kamolaxon Qodirova", role: "Ingliz tili mentori", meta: "Navoiy davlat universiteti 3-bosqich • IELTS 7.5" }
+  ];
+
+  const media = [
+    { name: "Akbaraliyeva Zilola", role: "Video tahrirchi", meta: "Toshkent Xalqaro Vestminster universiteti 1-kurs talabasi" },
+    { name: "Iskandarov Shohrubek", role: "Video tahrirchi", meta: "Xiva shahridagi Prezident maktabining 10 “Green” sinf o‘quvchisi" },
+    { name: "", role: "Copywriter", meta: "", vacant: true },
+    { name: "", role: "Dizayner", meta: "", vacant: true },
+    { name: "Davlatboyeva Sevara", role: "Telegram menejer", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi" },
+    { name: "Kucharova Dilrabo", role: "Instagram menejer", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Green” sinf o‘quvchisi" }
+  ];
+
   contentEl.innerHTML = `
     <div class="card">
       <div class="card-title">${escapeHTML(t("about_team_who_title"))}</div>
       <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_team_who_text"))}</div>
     </div>
 
-    <div class="list-item">
-      <div style="font-weight:900">${escapeHTML(t("about_team_contact_title"))}</div>
+    <div class="card">
+      <div class="card-title">${escapeHTML(t("about_team_structure_title"))}</div>
+      <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_team_structure_sub"))}</div>
+    </div>
 
-      <div class="cards-grid" style="margin-top:10px">
-        <button class="card-btn" type="button" data-action="open-channel">
-          <div class="card-title">${escapeHTML(t("about_team_channel_title"))}</div>
-          <div class="muted small">@iClubuzofficial</div>
-        </button>
-
-        <button class="card-btn" type="button" data-action="open-chat">
-          <div class="card-title">${escapeHTML(t("about_team_chat_title"))}</div>
-          <div class="muted small">${escapeHTML(t("community_join"))}</div>
-        </button>
+    <div class="card">
+      <div class="card-title">${escapeHTML(t("about_team_board_title"))}</div>
+      <div class="people-grid">
+        ${board.map(x => personCard(x)).join("")}
       </div>
     </div>
 
-    <div class="list-item">
-      <div style="font-weight:900">${escapeHTML(t("about_team_suggest_title"))}</div>
-      <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_team_suggest_text"))}</div>
+    <div class="card">
+      <div class="card-title">${escapeHTML(t("about_team_mentors_title"))}</div>
+      <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_team_mentors_note"))}</div>
+      <div class="people-grid" style="margin-top:10px">
+        ${mentors.map(x => personCard({ ...x, vacant: false })).join("")}
+      </div>
     </div>
 
-    <div class="list-item">
-      <div style="font-weight:900">${escapeHTML(t("about_team_mentors_title"))}</div>
-      <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_team_mentors_text"))}</div>
+    <div class="card">
+      <div class="card-title">${escapeHTML(t("about_team_media_title"))}</div>
+      <div class="people-grid">
+        ${media.map(x => personCard(x)).join("")}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">${escapeHTML(t("about_team_contact_title"))}</div>
+
+      <button class="btn primary" type="button" data-action="open-admin" style="width:100%; margin-top:10px">
+        ${escapeHTML(t("about_team_admin_btn"))}
+      </button>
+
+      <div class="muted small" style="margin-top:8px">
+        ${escapeHTML(t("about_team_admin_sub"))}
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="font-weight:900">${escapeHTML(t("about_team_suggest_title"))}</div>
+        <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_team_suggest_text"))}</div>
+      </div>
     </div>
   `;
 }
@@ -11689,13 +11771,19 @@ if (action === "open-all-subjects") {
   return;
 }
 
-      // Community links
+            // Community links
       if (action === "open-channel") {
         openExternal("https://t.me/iClubuzofficial");
         return;
       }
       if (action === "open-chat") {
         openExternal("https://t.me/+yp3GKhnohKQxOTdi");
+        return;
+      }
+
+      // ✅ About → Team: admin contact
+      if (action === "open-admin") {
+        openExternal("https://t.me/AzizbekErkinovNPS");
         return;
       }
 
