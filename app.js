@@ -2067,7 +2067,10 @@ async function dbHasAnyActiveTourNow() {
     return;
   }
 
-    // team (TOP APP)
+      // team — overview + sub-screens (top-app)
+  if (!state.about) state.about = { tab: "project" };
+  const teamScreen = state.about.teamScreen || "overview";
+
   const initials = (name) => {
     const s = String(name || "").trim();
     if (!s) return "—";
@@ -2079,7 +2082,7 @@ async function dbHasAnyActiveTourNow() {
 
   const personCard = ({ name, role, meta, vacant }) => `
     <div class="person-card">
-      <div class="person-avatar ${vacant ? "is-vacant" : ""}">${vacant ? " " : escapeHTML(initials(name))}</div>
+      <div class="person-avatar ${vacant ? "is-vacant" : ""}">${vacant ? "" : escapeHTML(initials(name))}</div>
       <div class="person-body">
         <div class="person-name">${escapeHTML(vacant ? t("about_team_vacant_title") : name)}</div>
         <div class="person-role">${escapeHTML(role || "")}</div>
@@ -2089,7 +2092,7 @@ async function dbHasAnyActiveTourNow() {
     </div>
   `;
 
-  // ✅ DATA (v1): from your posters. Later -> DB
+  // DATA v1 (from your posters) — later will be loaded from DB
   const board = [
     {
       name: "Erkinov Azizbek Jasurbek o‘g‘li",
@@ -2132,6 +2135,51 @@ async function dbHasAnyActiveTourNow() {
     { name: "Kucharova Dilrabo", role: "Instagram menejer", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Green” sinf o‘quvchisi" }
   ];
 
+  const subHeader = (titleKey) => `
+    <div class="about-subhead">
+      <button class="about-subhead-back" type="button" data-action="about-team-back">‹</button>
+      <div class="about-subhead-title">${escapeHTML(t(titleKey))}</div>
+    </div>
+  `;
+
+  if (teamScreen === "board") {
+    contentEl.innerHTML = `
+      ${subHeader("about_team_board_title")}
+      <div class="card">
+        <div class="people-grid">
+          ${board.map(x => personCard(x)).join("")}
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  if (teamScreen === "mentors") {
+    contentEl.innerHTML = `
+      ${subHeader("about_team_mentors_title")}
+      <div class="card">
+        <div class="muted small">${escapeHTML(t("about_team_mentors_note"))}</div>
+        <div class="people-grid" style="margin-top:10px">
+          ${mentors.map(x => personCard({ ...x, vacant: false })).join("")}
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  if (teamScreen === "media") {
+    contentEl.innerHTML = `
+      ${subHeader("about_team_media_title")}
+      <div class="card">
+        <div class="people-grid">
+          ${media.map(x => personCard(x)).join("")}
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // overview
   contentEl.innerHTML = `
     <div class="card">
       <div class="card-title">${escapeHTML(t("about_team_who_title"))}</div>
@@ -2141,27 +2189,31 @@ async function dbHasAnyActiveTourNow() {
     <div class="card">
       <div class="card-title">${escapeHTML(t("about_team_structure_title"))}</div>
       <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_team_structure_sub"))}</div>
-    </div>
 
-    <div class="card">
-      <div class="card-title">${escapeHTML(t("about_team_board_title"))}</div>
-      <div class="people-grid">
-        ${board.map(x => personCard(x)).join("")}
-      </div>
-    </div>
+      <div class="settings-list" style="margin-top:10px">
+        <button class="settings-nav" type="button" data-action="about-team-open" data-screen="board">
+          <span class="settings-nav-ico">🏛</span>
+          <span class="settings-nav-text">
+            <span class="settings-nav-title">${escapeHTML(t("about_team_nav_board"))}</span>
+          </span>
+          <span class="settings-nav-arrow">›</span>
+        </button>
 
-    <div class="card">
-      <div class="card-title">${escapeHTML(t("about_team_mentors_title"))}</div>
-      <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_team_mentors_note"))}</div>
-      <div class="people-grid" style="margin-top:10px">
-        ${mentors.map(x => personCard({ ...x, vacant: false })).join("")}
-      </div>
-    </div>
+        <button class="settings-nav" type="button" data-action="about-team-open" data-screen="mentors">
+          <span class="settings-nav-ico">🎓</span>
+          <span class="settings-nav-text">
+            <span class="settings-nav-title">${escapeHTML(t("about_team_nav_mentors"))}</span>
+          </span>
+          <span class="settings-nav-arrow">›</span>
+        </button>
 
-    <div class="card">
-      <div class="card-title">${escapeHTML(t("about_team_media_title"))}</div>
-      <div class="people-grid">
-        ${media.map(x => personCard(x)).join("")}
+        <button class="settings-nav" type="button" data-action="about-team-open" data-screen="media">
+          <span class="settings-nav-ico">🎬</span>
+          <span class="settings-nav-text">
+            <span class="settings-nav-title">${escapeHTML(t("about_team_nav_media"))}</span>
+          </span>
+          <span class="settings-nav-arrow">›</span>
+        </button>
       </div>
     </div>
 
@@ -2174,11 +2226,6 @@ async function dbHasAnyActiveTourNow() {
 
       <div class="muted small" style="margin-top:8px">
         ${escapeHTML(t("about_team_admin_sub"))}
-      </div>
-
-      <div style="margin-top:12px">
-        <div style="font-weight:900">${escapeHTML(t("about_team_suggest_title"))}</div>
-        <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_team_suggest_text"))}</div>
       </div>
     </div>
   `;
@@ -11754,6 +11801,39 @@ if (action === "open-community") {
         const tab = btn.dataset.tab || "project";
         if (!state.about) state.about = { tab: "project" };
         state.about.tab = tab;
+        saveState();
+        renderAboutView();
+        return;
+      }
+             // ✅ About tabs
+      if (action === "about-tab") {
+        const tab = btn.dataset.tab || "project";
+        if (!state.about) state.about = { tab: "project" };
+        state.about.tab = tab;
+
+        // reset team subview when switching tabs
+        if (tab !== "team") {
+          state.about.teamScreen = "overview";
+        }
+
+        saveState();
+        renderAboutView();
+        return;
+      }
+
+      // ✅ About → Team sub-screens
+      if (action === "about-team-open") {
+        const screen = btn.dataset.screen || "overview";
+        if (!state.about) state.about = { tab: "project" };
+        state.about.teamScreen = screen;
+        saveState();
+        renderAboutView();
+        return;
+      }
+
+      if (action === "about-team-back") {
+        if (!state.about) state.about = { tab: "project" };
+        state.about.teamScreen = "overview";
         saveState();
         renderAboutView();
         return;
