@@ -2084,42 +2084,41 @@ async function fetchTeamPeopleFromDb(groupKey) {
     const g = String(groupKey || "").trim().toLowerCase();
     if (!g) return null;
 
-    const tryTable = async (table) => {
-  const { data, error } = await window.sb
-    .from(table)
-    .select("group_key,name,role,meta,photo_path,photo_url,is_vacant,priority,is_active")
-    .eq("group_key", g)
-    .eq("is_active", true)
-    .order("priority", { ascending: true })
-    .limit(50);
-
-  if (error) return null;
-  if (!Array.isArray(data) || data.length === 0) return [];
-
-  // ✅ build public URL from Storage path (Variant A)
-  const toPublicUrl = (photoPath) => {
-    const p = String(photoPath || "").trim();
-    if (!p) return null;
-    try {
-      const res = window.sb.storage.from("team-photos").getPublicUrl(p);
-      return res?.data?.publicUrl || null;
-    } catch {
-      return null;
-    }
-  };
-
-  return data.map(r => {
-    const directUrl = r.photo_url ? String(r.photo_url) : null; // optional legacy support
-    const fromPath = toPublicUrl(r.photo_path);
-    return {
-      name: String(r.name || ""),
-      role: String(r.role || ""),
-      meta: String(r.meta || ""),
-      photoUrl: directUrl || fromPath,
-      vacant: !!r.is_vacant
+    const toPublicUrl = (photoPath) => {
+      const p = String(photoPath || "").trim();
+      if (!p) return null;
+      try {
+        const res = window.sb.storage.from("team-photos").getPublicUrl(p);
+        return res?.data?.publicUrl || null;
+      } catch {
+        return null;
+      }
     };
-  });
-};
+
+    const tryTable = async (table) => {
+      const { data, error } = await window.sb
+        .from(table)
+        .select("group_key,name,role,meta,photo_path,photo_url,is_vacant,priority,is_active")
+        .eq("group_key", g)
+        .eq("is_active", true)
+        .order("priority", { ascending: true })
+        .limit(100);
+
+      if (error) return null;
+      if (!Array.isArray(data) || data.length === 0) return [];
+
+      return data.map(r => {
+        const directUrl = r.photo_url ? String(r.photo_url) : null; // legacy support
+        const fromPath = toPublicUrl(r.photo_path);
+        return {
+          name: String(r.name || ""),
+          role: String(r.role || ""),
+          meta: String(r.meta || ""),
+          photoUrl: directUrl || fromPath,
+          vacant: !!r.is_vacant
+        };
+      });
+    };
 
     // prefer team_people; fallback to team_members
     const a = await tryTable("team_people");
