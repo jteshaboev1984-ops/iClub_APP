@@ -2067,6 +2067,83 @@ async function dbHasAnyActiveTourNow() {
     return;
   }
 
+         // ---------------------------
+// About → Team: DB-backed people (optional, safe)
+// Tables supported (either one):
+// 1) public.team_people
+// 2) public.team_members
+//
+// Expected columns (minimum):
+// group_key: "board" | "mentors" | "media"
+// name, role, meta, photo_url, is_vacant, priority, is_active
+// ---------------------------
+async function fetchTeamPeopleFromDb(groupKey) {
+  try {
+    if (!window.sb) return null;
+
+    const g = String(groupKey || "").trim().toLowerCase();
+    if (!g) return null;
+
+    const tryTable = async (table) => {
+      const { data, error } = await window.sb
+        .from(table)
+        .select("group_key,name,role,meta,photo_url,is_vacant,priority,is_active")
+        .eq("group_key", g)
+        .eq("is_active", true)
+        .order("priority", { ascending: true })
+        .limit(50);
+
+      if (error) return null;
+      if (!Array.isArray(data) || data.length === 0) return [];
+      return data.map(r => ({
+        name: String(r.name || ""),
+        role: String(r.role || ""),
+        meta: String(r.meta || ""),
+        photoUrl: r.photo_url ? String(r.photo_url) : null,
+        vacant: !!r.is_vacant
+      }));
+    };
+
+    // prefer team_people; fallback to team_members
+    const a = await tryTable("team_people");
+    if (a !== null) return a;
+
+    const b = await tryTable("team_members");
+    if (b !== null) return b;
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function ensureTeamCacheInit() {
+  if (!state.about) state.about = { tab: "project" };
+  if (!state.about.teamPeopleCache) state.about.teamPeopleCache = {};
+  if (!state.about.teamPeopleCacheTs) state.about.teamPeopleCacheTs = {};
+}
+
+// loads once per screen (or refresh after 6h)
+function ensureTeamPeopleLoaded(screenKey) {
+  ensureTeamCacheInit();
+
+  const s = String(screenKey || "overview");
+  const ts = Number(state.about.teamPeopleCacheTs?.[s]) || 0;
+  const tooOld = !ts || (Date.now() - ts > 6 * 60 * 60 * 1000);
+
+  // already have fresh cache
+  if (!tooOld && Array.isArray(state.about.teamPeopleCache?.[s])) return;
+
+  // fire-and-forget (render fallback first, then rerender if DB returns)
+  fetchTeamPeopleFromDb(s).then(list => {
+    if (!Array.isArray(list) || list.length === 0) return;
+    ensureTeamCacheInit();
+    state.about.teamPeopleCache[s] = list;
+    state.about.teamPeopleCacheTs[s] = Date.now();
+    saveState();
+    renderAboutView(); // rerender current screen with photos
+  }).catch(() => null);
+}
       // team — overview + sub-screens (top-app)
   if (!state.about) state.about = { tab: "project" };
   const teamScreen = state.about.teamScreen || "overview";
@@ -2080,9 +2157,17 @@ async function dbHasAnyActiveTourNow() {
     return (a + b).toUpperCase() || "—";
   };
 
-  const personCard = ({ name, role, meta, vacant }) => `
-    <div class="person-card">
-      <div class="person-avatar ${vacant ? "is-vacant" : ""}">${vacant ? "" : escapeHTML(initials(name))}</div>
+  const personCard = ({ name, role, meta, vacant, photoUrl, large }) => {
+  const hasPhoto = !!(photoUrl && String(photoUrl).trim());
+  const cardCls = `person-card${large ? " is-large" : ""}`;
+
+  const avatarHtml = hasPhoto
+    ? `<img class="person-photo" src="${escapeHTML(photoUrl)}" alt="${escapeHTML(name || "")}" loading="lazy" />`
+    : `<div class="person-avatar ${vacant ? "is-vacant" : ""}">${vacant ? "" : escapeHTML(initials(name))}</div>`;
+
+  return `
+    <div class="${cardCls}">
+      ${avatarHtml}
       <div class="person-body">
         <div class="person-name">${escapeHTML(vacant ? t("about_team_vacant_title") : name)}</div>
         <div class="person-role">${escapeHTML(role || "")}</div>
@@ -2091,6 +2176,7 @@ async function dbHasAnyActiveTourNow() {
       </div>
     </div>
   `;
+};
 
   // DATA v1 (from your posters) — later will be loaded from DB
   const board = [
@@ -2143,41 +2229,72 @@ async function dbHasAnyActiveTourNow() {
   `;
 
   if (teamScreen === "board") {
-    contentEl.innerHTML = `
-      ${subHeader("about_team_board_title")}
-      <div class="card">
-        <div class="people-grid">
-          ${board.map(x => personCard(x)).join("")}
-        </div>
+  ensureTeamCacheInit();
+
+  const dbList = state.about.teamPeopleCache?.board;
+  const list = Array.isArray(dbList) && dbList.length ? dbList : board;
+
+  contentEl.innerHTML = `
+    ${subHeader("about_team_board_title")}
+    <div class="card">
+      <div class="people-grid">
+        ${list.map(x => personCard({ ...x, large: true })).join("")}
       </div>
-    `;
-    return;
+    </div>
+  `;
+
+  // if we’re still on fallback — try DB in background
+  if (!(Array.isArray(dbList) && dbList.length)) {
+    try { ensureTeamPeopleLoaded("board"); } catch {}
   }
+
+  return;
+}
 
   if (teamScreen === "mentors") {
-    contentEl.innerHTML = `
-      ${subHeader("about_team_mentors_title")}
-      <div class="card">
-        <div class="muted small">${escapeHTML(t("about_team_mentors_note"))}</div>
-        <div class="people-grid" style="margin-top:10px">
-          ${mentors.map(x => personCard({ ...x, vacant: false })).join("")}
-        </div>
+  ensureTeamCacheInit();
+
+  const dbList = state.about.teamPeopleCache?.mentors;
+  const list = Array.isArray(dbList) && dbList.length ? dbList : mentors;
+
+  contentEl.innerHTML = `
+    ${subHeader("about_team_mentors_title")}
+    <div class="card">
+      <div class="muted small">${escapeHTML(t("about_team_mentors_note"))}</div>
+      <div class="people-grid" style="margin-top:10px">
+        ${list.map(x => personCard({ ...x, vacant: !!x.vacant, large: true })).join("")}
       </div>
-    `;
-    return;
+    </div>
+  `;
+
+  if (!(Array.isArray(dbList) && dbList.length)) {
+    try { ensureTeamPeopleLoaded("mentors"); } catch {}
   }
 
+  return;
+}
+
   if (teamScreen === "media") {
-    contentEl.innerHTML = `
-      ${subHeader("about_team_media_title")}
-      <div class="card">
-        <div class="people-grid">
-          ${media.map(x => personCard(x)).join("")}
-        </div>
+  ensureTeamCacheInit();
+
+  const dbList = state.about.teamPeopleCache?.media;
+  const list = Array.isArray(dbList) && dbList.length ? dbList : media;
+
+  contentEl.innerHTML = `
+    ${subHeader("about_team_media_title")}
+    <div class="card">
+      <div class="people-grid">
+        ${list.map(x => personCard({ ...x, large: true })).join("")}
       </div>
-    `;
-    return;
+    </div>
+  `;
+
+  if (!(Array.isArray(dbList) && dbList.length)) {
+    try { ensureTeamPeopleLoaded("media"); } catch {}
   }
+
+  return;
+}
 
   // overview
   contentEl.innerHTML = `
@@ -11823,13 +11940,17 @@ if (action === "open-community") {
 
       // ✅ About → Team sub-screens
       if (action === "about-team-open") {
-        const screen = btn.dataset.screen || "overview";
-        if (!state.about) state.about = { tab: "project" };
-        state.about.teamScreen = screen;
-        saveState();
-        renderAboutView();
-        return;
-      }
+  const screen = btn.dataset.screen || "overview";
+  if (!state.about) state.about = { tab: "project" };
+  state.about.teamScreen = screen;
+  saveState();
+
+  // render instantly (fallback), then try DB/photos
+  renderAboutView();
+  try { ensureTeamPeopleLoaded(screen); } catch {}
+
+  return;
+}
 
       if (action === "about-team-back") {
         if (!state.about) state.about = { tab: "project" };
