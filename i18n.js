@@ -67,7 +67,7 @@ community_chat_title: "Чат обсуждений",
 community_join: "Присоединиться",
 
 about_title: "О проекте",
-about_sub: "Кратко, по делу, без “воды” (её у нас достаточно в задачах по физике).",
+about_sub: "Коротко о платформе, правилах и команде.",
 about_card_title: "iClub",
 about_card_body: "Здесь будет официальный текст из документа проекта: цели, правила участия, форматы туров, условия сертификатов и рейтингов.",
 // About — tabs + content
@@ -130,7 +130,19 @@ about_team_suggest_text:
 about_team_mentors_title: "Менторы",
 about_team_mentors_text:
   "По каждому предмету будут добавлены короткие профили менторов и фото (появится позже).",
+about_team_structure_title: "Структура",
+about_team_structure_sub: "Правление, менторы и медиа-команда — всё ради качества и результата.",
 
+about_team_board_title: "Правление",
+about_team_media_title: "Медиа-команда",
+
+about_team_vacant_title: "Вакансия",
+about_team_vacant_text: "Кандидаты рассматриваются. Для связи напишите администратору.",
+
+about_team_admin_btn: "Написать администратору",
+about_team_admin_sub: "Ошибки, предложения и партнёрства: @AzizbekErkinovNPS",
+
+about_team_mentors_note: "Список менторов расширяется. Профили и фото будут загружены в базу позже.",
 archive_title: "Архив",
 archive_sub: "Прошедшие туры (только после завершения активного тура).",
 archive_empty: "Архив пуст. Значит, туры ещё свежие — как ваша тревога перед дедлайном.",
@@ -750,7 +762,7 @@ community_chat_title: "Muhokama chati",
 community_join: "Qo‘shilish",
 
 about_title: "Loyiha haqida",
-about_sub: "Qisqa va aniq. “Suv”siz (u esa bizda fizika masalalarida yetarli).",
+about_sub: "Platforma, qoidalar va jamoa haqida qisqacha.",
 about_card_title: "iClub",
 about_card_body: "Bu yerda loyiha hujjatidagi rasmiy matn bo‘ladi: maqsadlar, qatnashish qoidalari, tur formatlari, sertifikat va reyting shartlari.",
 // About — tabs + content
@@ -813,7 +825,19 @@ about_team_suggest_text:
 about_team_mentors_title: "Mentorlar",
 about_team_mentors_text:
   "Har bir fan bo‘yicha mentorlar haqida qisqacha ma’lumot va mentor rasmi keyinroq qo‘shiladi.",
+about_team_structure_title: "Tuzilma",
+about_team_structure_sub: "Boshqaruv, mentorlar va media jamoasi — barchasi sifat va natija uchun.",
 
+about_team_board_title: "Boshqaruv a’zolari",
+about_team_media_title: "Media jamoasi",
+
+about_team_vacant_title: "Vakant",
+about_team_vacant_text: "Nomzodlar ko‘rib chiqiladi. Murojaat uchun administratorga yozing.",
+
+about_team_admin_btn: "Administratorga yozish",
+about_team_admin_sub: "Xato, taklif va hamkorlik: @AzizbekErkinovNPS",
+
+about_team_mentors_note: "Mentorlar ro‘yxati bosqichma-bosqich kengayadi. Profil va rasmlar keyinroq bazaga yuklanadi.",
 archive_title: "Arxiv",
 archive_sub: "O‘tgan turlar (faol tur yakunlangandan keyin).",
 archive_empty: "Arxiv bo‘sh. Demak, turlar hali “yangi” — deadline oldidagi hayajoningiz kabi.",
@@ -1438,7 +1462,7 @@ community_chat_title: "Discussion chat",
 community_join: "Join",
 
 about_title: "About",
-about_sub: "Short and clear. No “water” (we have enough of it in physics tasks).",
+about_sub: "A quick overview of the platform, rules, and the team.",
 about_card_title: "iClub",
 about_card_body: "Official project text will appear here: goals, participation rules, tour formats, certificate and rating rules.",
 // About — tabs + content
@@ -1499,8 +1523,20 @@ about_team_suggest_title: "Suggestions",
 about_team_suggest_text:
   "If you find an issue or have an idea — message the chat. We improve the app regularly.",
 about_team_mentors_title: "Mentors",
-about_team_mentors_text:
-  "Short mentor profiles and photos for each subject will be added later.",
+about_team_mentors_text: "Short mentor profiles and photos for each subject will be added later.",
+about_team_structure_title: "Structure",
+about_team_structure_sub: "Board, mentors, and media team — focused on quality and results.",
+
+about_team_board_title: "Board",
+about_team_media_title: "Media team",
+
+about_team_vacant_title: "Vacant",
+about_team_vacant_text: "Candidates are being reviewed. Contact the administrator.",
+
+about_team_admin_btn: "Message the administrator",
+about_team_admin_sub: "Bugs, suggestions, partnerships: @AzizbekErkinovNPS",
+
+about_team_mentors_note: "The mentor list is growing. Profiles and photos will be added to the database later.",
 
 archive_title: "Archive",
 archive_sub: "Past tours (only after the active tour is finished).",
