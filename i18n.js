@@ -141,6 +141,9 @@ about_team_vacant_text: "Кандидаты рассматриваются. Дл
 
 about_team_admin_btn: "Написать администратору",
 about_team_admin_sub: "Ошибки, предложения и партнёрства: @AzizbekErkinovNPS",
+about_team_nav_board: "Правление",
+about_team_nav_mentors: "Менторы",
+about_team_nav_media: "Медиа-команда",
 
 about_team_mentors_note: "Список менторов расширяется. Профили и фото будут загружены в базу позже.",
 archive_title: "Архив",
@@ -836,6 +839,9 @@ about_team_vacant_text: "Nomzodlar ko‘rib chiqiladi. Murojaat uchun administra
 
 about_team_admin_btn: "Administratorga yozish",
 about_team_admin_sub: "Xato, taklif va hamkorlik: @AzizbekErkinovNPS",
+about_team_nav_board: "Boshqaruv a’zolari",
+about_team_nav_mentors: "Mentorlar",
+about_team_nav_media: "Media jamoasi",
 
 about_team_mentors_note: "Mentorlar ro‘yxati bosqichma-bosqich kengayadi. Profil va rasmlar keyinroq bazaga yuklanadi.",
 archive_title: "Arxiv",
@@ -1535,6 +1541,9 @@ about_team_vacant_text: "Candidates are being reviewed. Contact the administrato
 
 about_team_admin_btn: "Message the administrator",
 about_team_admin_sub: "Bugs, suggestions, partnerships: @AzizbekErkinovNPS",
+about_team_nav_board: "Board",
+about_team_nav_mentors: "Mentors",
+about_team_nav_media: "Media team",
 
 about_team_mentors_note: "The mentor list is growing. Profiles and photos will be added to the database later.",
 
