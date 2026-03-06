@@ -4087,3 +4087,32 @@ button.is-loading { opacity: .85; }
   font-weight: 900;
   font-size: 18px;
 }
+/* About → Team: large cards with photo (sub-screens) */
+.person-card.is-large{
+  grid-template-columns: 72px 1fr;
+  padding: 14px;
+}
+
+.person-card.is-large .person-avatar{
+  width: 72px;
+  height: 72px;
+  font-size: 18px;
+}
+
+.person-photo{
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid rgba(15,23,42,0.12);
+  box-shadow: var(--shadow-sm);
+  background: rgba(15,23,42,0.04);
+}
+
+.person-card.is-large .person-name{
+  font-size: 15px;
+}
+
+.person-card.is-large .person-role{
+  font-size: 13px;
+}
