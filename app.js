@@ -1464,6 +1464,12 @@ function runDailyCredentialJobs() {
   profile: {
     stack: ["main"] // main | settings
   },
+
+  // ✅ About tabs state
+  about: {
+    tab: "project" // project | rules | team
+  },
+
   quizLock: null
 };
 
@@ -1937,6 +1943,163 @@ async function dbHasAnyActiveTourNow() {
   }
 
   listEl.innerHTML = rows.join("");
+}
+
+      function renderAboutView() {
+  const tabsEl = document.getElementById("about-tabs");
+  const contentEl = document.getElementById("about-content");
+  if (!tabsEl || !contentEl) return;
+
+  const tab = (state.about && state.about.tab) ? state.about.tab : "project";
+
+  const tabBtn = (key, value) => {
+    const active = (tab === value) ? "is-active" : "";
+    return `
+      <button class="hub-tab ${active}" type="button" data-action="about-tab" data-tab="${value}">
+        ${escapeHTML(t(key))}
+      </button>
+    `;
+  };
+
+  tabsEl.innerHTML = `
+    <div class="subject-hub-tabs about-tabs">
+      ${tabBtn("about_tab_project", "project")}
+      ${tabBtn("about_tab_rules", "rules")}
+      ${tabBtn("about_tab_team", "team")}
+    </div>
+  `;
+
+  if (tab === "project") {
+    contentEl.innerHTML = `
+      <div class="card">
+        <div class="card-title">${escapeHTML(t("about_project_title"))}</div>
+        <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_project_desc"))}</div>
+      </div>
+
+      <div class="list-item">
+        <div style="font-weight:900">${escapeHTML(t("about_why_title"))}</div>
+        <ul class="muted small" style="margin:10px 0 0 18px; line-height:1.35">
+          <li>${escapeHTML(t("about_why_1"))}</li>
+          <li>${escapeHTML(t("about_why_2"))}</li>
+          <li>${escapeHTML(t("about_why_3"))}</li>
+        </ul>
+      </div>
+
+      <div class="list-item">
+        <div style="font-weight:900">${escapeHTML(t("about_steps_title"))}</div>
+        <ol class="muted small" style="margin:10px 0 0 18px; line-height:1.35">
+          <li>${escapeHTML(t("about_step_1"))}</li>
+          <li>${escapeHTML(t("about_step_2"))}</li>
+          <li>${escapeHTML(t("about_step_3"))}</li>
+          <li>${escapeHTML(t("about_step_4"))}</li>
+        </ol>
+      </div>
+
+      <div class="list-item">
+        <div style="font-weight:900">${escapeHTML(t("about_modes_title"))}</div>
+        <ul class="muted small" style="margin:10px 0 0 18px; line-height:1.35">
+          <li><b>${escapeHTML(t("about_mode_study_title"))}:</b> ${escapeHTML(t("about_mode_study_text"))}</li>
+          <li><b>${escapeHTML(t("about_mode_comp_title"))}:</b> ${escapeHTML(t("about_mode_comp_text"))}</li>
+        </ul>
+      </div>
+    `;
+    return;
+  }
+
+  if (tab === "rules") {
+    contentEl.innerHTML = `
+      <div class="list-item">
+        <div style="font-weight:900">${escapeHTML(t("about_rules_participation_title"))}</div>
+        <ul class="muted small" style="margin:10px 0 0 18px; line-height:1.35">
+          <li>${escapeHTML(t("about_rules_participation_1"))}</li>
+          <li>${escapeHTML(t("about_rules_participation_2"))}</li>
+        </ul>
+      </div>
+
+      <div class="list-item">
+        <div style="font-weight:900">${escapeHTML(t("about_rules_format_title"))}</div>
+        <ul class="muted small" style="margin:10px 0 0 18px; line-height:1.35">
+          <li>${escapeHTML(t("about_rules_format_1"))}</li>
+          <li>${escapeHTML(t("about_rules_format_2"))}</li>
+          <li>${escapeHTML(t("about_rules_format_3"))}</li>
+        </ul>
+      </div>
+
+      <div class="list-item">
+        <div style="font-weight:900">${escapeHTML(t("about_rules_fair_title"))}</div>
+        <ul class="muted small" style="margin:10px 0 0 18px; line-height:1.35">
+          <li>${escapeHTML(t("about_rules_fair_1"))}</li>
+          <li>${escapeHTML(t("about_rules_fair_2"))}</li>
+        </ul>
+      </div>
+
+      <div class="list-item">
+        <div style="font-weight:900">${escapeHTML(t("about_rules_scoring_title"))}</div>
+        <ul class="muted small" style="margin:10px 0 0 18px; line-height:1.35">
+          <li>${escapeHTML(t("about_rules_scoring_1"))}</li>
+          <li>${escapeHTML(t("about_rules_scoring_2"))}</li>
+        </ul>
+      </div>
+
+      <div class="list-item">
+        <div style="font-weight:900">${escapeHTML(t("about_rules_recs_title"))}</div>
+        <ul class="muted small" style="margin:10px 0 0 18px; line-height:1.35">
+          <li>${escapeHTML(t("about_rules_recs_1"))}</li>
+          <li>${escapeHTML(t("about_rules_recs_2"))}</li>
+          <li>${escapeHTML(t("about_rules_recs_3"))}</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">${escapeHTML(t("about_faq_title"))}</div>
+        <div class="muted small" style="margin-top:10px; line-height:1.45">
+          <b>${escapeHTML(t("about_faq_q1"))}</b><br/>
+          ${escapeHTML(t("about_faq_a1"))}
+          <br/><br/>
+          <b>${escapeHTML(t("about_faq_q2"))}</b><br/>
+          ${escapeHTML(t("about_faq_a2"))}
+          <br/><br/>
+          <b>${escapeHTML(t("about_faq_q3"))}</b><br/>
+          ${escapeHTML(t("about_faq_a3"))}
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // team
+  contentEl.innerHTML = `
+    <div class="card">
+      <div class="card-title">${escapeHTML(t("about_team_who_title"))}</div>
+      <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_team_who_text"))}</div>
+    </div>
+
+    <div class="list-item">
+      <div style="font-weight:900">${escapeHTML(t("about_team_contact_title"))}</div>
+
+      <div class="cards-grid" style="margin-top:10px">
+        <button class="card-btn" type="button" data-action="open-channel">
+          <div class="card-title">${escapeHTML(t("about_team_channel_title"))}</div>
+          <div class="muted small">@iClubuzofficial</div>
+        </button>
+
+        <button class="card-btn" type="button" data-action="open-chat">
+          <div class="card-title">${escapeHTML(t("about_team_chat_title"))}</div>
+          <div class="muted small">${escapeHTML(t("community_join"))}</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="list-item">
+      <div style="font-weight:900">${escapeHTML(t("about_team_suggest_title"))}</div>
+      <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_team_suggest_text"))}</div>
+    </div>
+
+    <div class="list-item">
+      <div style="font-weight:900">${escapeHTML(t("about_team_mentors_title"))}</div>
+      <div class="muted small" style="margin-top:6px">${escapeHTML(t("about_team_mentors_text"))}</div>
+    </div>
+  `;
 }
      // ---------------------------
   // Practice v1 (10Q: 3/5/2 + MCQ+INPUT + per-question timer + attempts history)
@@ -2803,7 +2966,11 @@ if (tabName === "ratings") {
       }
 
       showView(viewName);
-      return;
+
+      if (viewName === "about") {
+      renderAboutView();
+      }
+     return;
     }
 
         state.viewStack.push(viewName);
@@ -2816,10 +2983,15 @@ if (tabName === "ratings") {
 
     showView(viewName);
 
-      if (viewName === "archive") {
-     renderArchiveView();
-   }
+  if (viewName === "archive") {
+    renderArchiveView();
   }
+
+  // ✅ About: render tabs + content
+  if (viewName === "about") {
+    renderAboutView();
+  }
+}
 
   function canGlobalBack() {
     return Array.isArray(state.viewStack) && state.viewStack.length > 1;
@@ -11495,7 +11667,15 @@ if (action === "open-community") {
   return;
 }
       if (action === "open-about") { openGlobal("about"); return; }
-
+      // ✅ About tabs
+      if (action === "about-tab") {
+        const tab = btn.dataset.tab || "project";
+        if (!state.about) state.about = { tab: "project" };
+        state.about.tab = tab;
+        saveState();
+        renderAboutView();
+        return;
+      }
       if (action === "home-extra-toggle") { toggleHomeExtra(); return; }
       if (action === "open-certificates") { openGlobal("certificates"); return; }
       if (action === "open-archive") { openGlobal("archive"); return; }
