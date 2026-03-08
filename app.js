@@ -1467,8 +1467,11 @@ function runDailyCredentialJobs() {
 
   // ✅ About tabs state
   about: {
-    tab: "project" // project | rules | team
-  },
+  tab: "project",        // project | rules | team
+  teamScreen: "overview", // overview | board | mentors | media | member
+  teamPrevScreen: "overview",
+  teamMemberKey: null
+},
 
   quizLock: null
 };
@@ -2172,25 +2175,70 @@ function ensureTeamPeopleLoaded(screenKey) {
     return (a + b).toUpperCase() || "—";
   };
 
-  const personCard = ({ name, role, meta, vacant, photoUrl, large }) => {
+  const personCard = ({ name, role, meta, vacant, photoUrl, large, group, memberKey }) => {
   const hasPhoto = !!(photoUrl && String(photoUrl).trim());
-  const cardCls = `person-card${large ? " is-large" : ""}`;
+  const cardCls = `person-card${large ? " is-large" : ""}${!vacant ? " is-clickable" : ""}`;
 
   const avatarHtml = hasPhoto
     ? `<img class="person-photo" src="${escapeHTML(photoUrl)}" alt="${escapeHTML(name || "")}" loading="lazy" />`
     : `<div class="person-avatar ${vacant ? "is-vacant" : ""}">${vacant ? "" : escapeHTML(initials(name))}</div>`;
 
-  return `
-    <div class="${cardCls}">
-      ${avatarHtml}
-      <div class="person-body">
-        <div class="person-name">${escapeHTML(vacant ? t("about_team_vacant_title") : name)}</div>
-        <div class="person-role">${escapeHTML(role || "")}</div>
-        ${meta ? `<div class="person-meta muted small">${escapeHTML(meta)}</div>` : ""}
-        ${vacant ? `<div class="person-meta muted small" style="margin-top:6px">${escapeHTML(t("about_team_vacant_text"))}</div>` : ""}
-      </div>
+  const bodyHtml = `
+    ${avatarHtml}
+    <div class="person-body">
+      <div class="person-name">${escapeHTML(vacant ? t("about_team_vacant_title") : name)}</div>
+      <div class="person-role">${escapeHTML(role || "")}</div>
+      ${meta ? `<div class="person-meta muted small">${escapeHTML(meta)}</div>` : ""}
+      ${vacant ? `<div class="person-meta muted small" style="margin-top:6px">${escapeHTML(t("about_team_vacant_text"))}</div>` : ""}
     </div>
   `;
+
+  if (vacant) {
+    return `<div class="${cardCls}">${bodyHtml}</div>`;
+  }
+
+  return `
+    <button class="${cardCls}" type="button" data-action="about-person-open" data-group="${escapeHTML(group || "")}" data-key="${escapeHTML(memberKey || "")}">
+      ${bodyHtml}
+    </button>
+  `;
+};
+         const memberKeyOf = (x) => {
+  const a = String(x.name || "").trim().toLowerCase();
+  const b = String(x.role || "").trim().toLowerCase();
+  return `${a}__${b}`;
+};
+
+const enrichPersonProfile = (x) => {
+  const role = String(x.role || "");
+  const meta = String(x.meta || "");
+  const group = String(x.group || "");
+
+  let about = "";
+  let achievements = "";
+  let education = meta || "";
+
+  if (group === "board") {
+    about = t("about_member_about_board") || "Loyiha strategiyasi, sifat va rivojlanish yo‘nalishlari ustida ishlaydi.";
+    achievements = meta || (t("about_member_achievements_default") || "Tajriba va faolligi bilan jamoa ishiga hissa qo‘shadi.");
+  } else if (group === "media") {
+    about = t("about_member_about_media") || "Kontent, kommunikatsiya va iClub’ning media yo‘nalishlari ustida ishlaydi.";
+    achievements = meta || (t("about_member_achievements_default") || "Jamoa ishiga amaliy hissa qo‘shadi.");
+  } else {
+    about = t("about_member_about_mentor") || "O‘quvchilarga fan bo‘yicha yo‘nalish, tushuncha va motivatsiya beradi.";
+    achievements = meta || (t("about_member_achievements_default") || "Fan bo‘yicha tayyorgarlik va amaliyotda yordam beradi.");
+  }
+
+  if (/IELTS/i.test(meta) || /SAT/i.test(meta)) {
+    achievements = meta;
+  }
+
+  return {
+    ...x,
+    about,
+    achievements,
+    education
+  };
 };
 
   // DATA v1 (from your posters) — later will be loaded from DB
@@ -2247,16 +2295,23 @@ function ensureTeamPeopleLoaded(screenKey) {
   ensureTeamCacheInit();
 
   const dbList = state.about.teamPeopleCache?.board;
-  const list = Array.isArray(dbList) && dbList.length ? dbList : board;
+const list = Array.isArray(dbList) && dbList.length ? dbList : board;
 
-  contentEl.innerHTML = `
-    ${subHeader("about_team_board_title")}
-    <div class="card">
-      <div class="people-grid">
-        ${list.map(x => personCard({ ...x, large: true })).join("")}
-      </div>
+state.about.teamPeopleResolved = state.about.teamPeopleResolved || {};
+state.about.teamPeopleResolved.board = list.map(x => ({
+  ...x,
+  group: "board",
+  memberKey: memberKeyOf(x)
+}));
+
+contentEl.innerHTML = `
+  ${subHeader("about_team_board_title")}
+  <div class="card">
+    <div class="people-grid">
+      ${state.about.teamPeopleResolved.board.map(x => personCard({ ...x, large: true })).join("")}
     </div>
-  `;
+  </div>
+`;
 
   // if we’re still on fallback — try DB in background
   if (!(Array.isArray(dbList) && dbList.length)) {
@@ -2270,17 +2325,24 @@ function ensureTeamPeopleLoaded(screenKey) {
   ensureTeamCacheInit();
 
   const dbList = state.about.teamPeopleCache?.mentors;
-  const list = Array.isArray(dbList) && dbList.length ? dbList : mentors;
+const list = Array.isArray(dbList) && dbList.length ? dbList : mentors;
 
-  contentEl.innerHTML = `
-    ${subHeader("about_team_mentors_title")}
-    <div class="card">
-      <div class="muted small">${escapeHTML(t("about_team_mentors_note"))}</div>
-      <div class="people-grid" style="margin-top:10px">
-        ${list.map(x => personCard({ ...x, vacant: !!x.vacant, large: true })).join("")}
-      </div>
+state.about.teamPeopleResolved = state.about.teamPeopleResolved || {};
+state.about.teamPeopleResolved.mentors = list.map(x => ({
+  ...x,
+  group: "mentors",
+  memberKey: memberKeyOf(x)
+}));
+
+contentEl.innerHTML = `
+  ${subHeader("about_team_mentors_title")}
+  <div class="card">
+    <div class="muted small">${escapeHTML(t("about_team_mentors_note"))}</div>
+    <div class="people-grid" style="margin-top:10px">
+      ${state.about.teamPeopleResolved.mentors.map(x => personCard({ ...x, vacant: !!x.vacant, large: true })).join("")}
     </div>
-  `;
+  </div>
+`;
 
   if (!(Array.isArray(dbList) && dbList.length)) {
     try { ensureTeamPeopleLoaded("mentors"); } catch {}
@@ -2293,16 +2355,23 @@ function ensureTeamPeopleLoaded(screenKey) {
   ensureTeamCacheInit();
 
   const dbList = state.about.teamPeopleCache?.media;
-  const list = Array.isArray(dbList) && dbList.length ? dbList : media;
+const list = Array.isArray(dbList) && dbList.length ? dbList : media;
 
-  contentEl.innerHTML = `
-    ${subHeader("about_team_media_title")}
-    <div class="card">
-      <div class="people-grid">
-        ${list.map(x => personCard({ ...x, large: true })).join("")}
-      </div>
+state.about.teamPeopleResolved = state.about.teamPeopleResolved || {};
+state.about.teamPeopleResolved.media = list.map(x => ({
+  ...x,
+  group: "media",
+  memberKey: memberKeyOf(x)
+}));
+
+contentEl.innerHTML = `
+  ${subHeader("about_team_media_title")}
+  <div class="card">
+    <div class="people-grid">
+      ${state.about.teamPeopleResolved.media.map(x => personCard({ ...x, large: true })).join("")}
     </div>
-  `;
+  </div>
+`;
 
   if (!(Array.isArray(dbList) && dbList.length)) {
     try { ensureTeamPeopleLoaded("media"); } catch {}
@@ -2310,7 +2379,58 @@ function ensureTeamPeopleLoaded(screenKey) {
 
   return;
 }
+      if (teamScreen === "member") {
+  const prev = state.about.teamPrevScreen || "board";
+  const src = state.about.teamPeopleResolved?.[prev] || [];
+  const raw = Array.isArray(src)
+    ? src.find(x => String(x.memberKey || "") === String(state.about.teamMemberKey || ""))
+    : null;
 
+  if (!raw) {
+    state.about.teamScreen = prev;
+    state.about.teamMemberKey = null;
+    saveState();
+    renderAboutView();
+    return;
+  }
+
+  const person = enrichPersonProfile(raw);
+  const hasPhoto = !!(person.photoUrl && String(person.photoUrl).trim());
+
+  contentEl.innerHTML = `
+    ${subHeader("about_team_profile_title")}
+
+    <div class="card team-profile-card">
+      <div class="team-profile-hero">
+        ${hasPhoto
+          ? `<img class="team-profile-photo" src="${escapeHTML(person.photoUrl)}" alt="${escapeHTML(person.name || "")}" loading="lazy" />`
+          : `<div class="team-profile-fallback">${escapeHTML(initials(person.name))}</div>`
+        }
+
+        <div class="team-profile-head">
+          <div class="team-profile-name">${escapeHTML(person.name || "")}</div>
+          <div class="team-profile-role">${escapeHTML(person.role || "")}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">${escapeHTML(t("about_member_about_title"))}</div>
+      <div class="muted small" style="margin-top:8px; line-height:1.45">${escapeHTML(person.about || "")}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">${escapeHTML(t("about_member_achievements_title"))}</div>
+      <div class="muted small" style="margin-top:8px; line-height:1.45">${escapeHTML(person.achievements || "")}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">${escapeHTML(t("about_member_education_title"))}</div>
+      <div class="muted small" style="margin-top:8px; line-height:1.45">${escapeHTML(person.education || "")}</div>
+    </div>
+  `;
+  return;
+}
   // overview
   contentEl.innerHTML = `
     <div class="card">
@@ -12026,28 +12146,21 @@ if (action === "open-community") {
       if (action === "open-about") { openGlobal("about"); return; }
       // ✅ About tabs
       if (action === "about-tab") {
-        const tab = btn.dataset.tab || "project";
-        if (!state.about) state.about = { tab: "project" };
-        state.about.tab = tab;
-        saveState();
-        renderAboutView();
-        return;
-      }
-             // ✅ About tabs
-      if (action === "about-tab") {
-        const tab = btn.dataset.tab || "project";
-        if (!state.about) state.about = { tab: "project" };
-        state.about.tab = tab;
+  const tab = btn.dataset.tab || "project";
+  if (!state.about) state.about = { tab: "project" };
+  state.about.tab = tab;
 
-        // reset team subview when switching tabs
-        if (tab !== "team") {
-          state.about.teamScreen = "overview";
-        }
+  // reset team subview when switching tabs
+  if (tab !== "team") {
+    state.about.teamScreen = "overview";
+    state.about.teamPrevScreen = "overview";
+    state.about.teamMemberKey = null;
+  }
 
-        saveState();
-        renderAboutView();
-        return;
-      }
+  saveState();
+  renderAboutView();
+  return;
+}
 
       // ✅ About → Team sub-screens
       if (action === "about-team-open") {
@@ -12063,13 +12176,40 @@ if (action === "open-community") {
   return;
 }
 
+if (action === "about-person-open") {
+  const group = btn.dataset.group || "board";
+  const key = btn.dataset.key || "";
+  if (!state.about) state.about = { tab: "project" };
+
+  const src = state.about.teamPeopleResolved?.[group];
+  const person = Array.isArray(src)
+    ? src.find(x => String(x.memberKey || "") === String(key))
+    : null;
+
+  if (!person || person.vacant) return;
+
+  state.about.teamPrevScreen = group;
+  state.about.teamScreen = "member";
+  state.about.teamMemberKey = key;
+  saveState();
+  renderAboutView();
+  return;
+}
+
       if (action === "about-team-back") {
-        if (!state.about) state.about = { tab: "project" };
-        state.about.teamScreen = "overview";
-        saveState();
-        renderAboutView();
-        return;
-      }
+  if (!state.about) state.about = { tab: "project" };
+
+  if (state.about.teamScreen === "member") {
+    state.about.teamScreen = state.about.teamPrevScreen || "overview";
+    state.about.teamMemberKey = null;
+  } else {
+    state.about.teamScreen = "overview";
+  }
+
+  saveState();
+  renderAboutView();
+  return;
+}
       if (action === "home-extra-toggle") { toggleHomeExtra(); return; }
       if (action === "open-certificates") { openGlobal("certificates"); return; }
       if (action === "open-archive") { openGlobal("archive"); return; }
