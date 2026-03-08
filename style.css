@@ -4124,3 +4124,61 @@ button.is-loading { opacity: .85; }
 .person-card.is-large .person-role{
   font-size: 13px;
 }
+/* About team: clickable cards */
+.person-card.is-clickable{
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  cursor: pointer;
+}
+
+.person-card.is-clickable:active{
+  transform: translateY(1px);
+}
+
+/* About team: member profile */
+.team-profile-card{
+  overflow: hidden;
+}
+
+.team-profile-hero{
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 14px;
+  align-items: center;
+}
+
+.team-profile-photo{
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  object-fit: cover;
+  border: 1px solid rgba(15,23,42,0.08);
+  box-shadow: var(--shadow-sm);
+  background: rgba(15,23,42,0.04);
+}
+
+.team-profile-fallback{
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 28px;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(180deg, var(--primary), var(--primary-2));
+}
+
+.team-profile-name{
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.team-profile-role{
+  margin-top: 6px;
+  font-weight: 800;
+  color: rgba(15,23,42,0.72);
+}
