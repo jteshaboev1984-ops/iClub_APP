@@ -2096,29 +2096,28 @@ async function fetchTeamPeopleFromDb(groupKey) {
     };
 
     const tryTable = async (table) => {
-      const { data, error } = await window.sb
-        .from(table)
-        .select("group_key,name,role,meta,photo_path,photo_url,is_vacant,priority,is_active")
-        .eq("group_key", g)
-        .eq("is_active", true)
-        .order("priority", { ascending: true })
-        .limit(100);
+  const { data, error } = await window.sb
+    .from(table)
+    .select("group_key,name,role,meta,photo_path,is_vacant,priority,is_active")
+    .eq("group_key", g)
+    .eq("is_active", true)
+    .order("priority", { ascending: true })
+    .limit(100);
 
-      if (error) return null;
-      if (!Array.isArray(data) || data.length === 0) return [];
+  if (error) return null;
+  if (!Array.isArray(data) || data.length === 0) return [];
 
-      return data.map(r => {
-        const directUrl = r.photo_url ? String(r.photo_url) : null; // legacy support
-        const fromPath = toPublicUrl(r.photo_path);
-        return {
-          name: String(r.name || ""),
-          role: String(r.role || ""),
-          meta: String(r.meta || ""),
-          photoUrl: directUrl || fromPath,
-          vacant: !!r.is_vacant
-        };
-      });
+  return data.map(r => {
+    const fromPath = toPublicUrl(r.photo_path);
+    return {
+      name: String(r.name || ""),
+      role: String(r.role || ""),
+      meta: String(r.meta || ""),
+      photoUrl: fromPath,
+      vacant: !!r.is_vacant
     };
+  });
+};
 
     // prefer team_people; fallback to team_members
     const a = await tryTable("team_people");
