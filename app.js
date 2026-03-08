@@ -7734,6 +7734,100 @@ if (mainSubjects.length) {
     renderSubjectHub();
   }
 
+    // ---------------------------
+  // Subject Hub mentor
+  // ---------------------------
+  function mentorPhotoUrlFromPath(photoPath) {
+    const p = String(photoPath || "").trim();
+    if (!p || !window.sb?.storage) return null;
+    try {
+      const res = window.sb.storage.from("team-photos").getPublicUrl(p);
+      return res?.data?.publicUrl || null;
+    } catch {
+      return null;
+    }
+  }
+
+  function mentorRoleForSubject(subjectKey) {
+    const key = String(subjectKey || "").trim().toLowerCase();
+    const map = {
+      chemistry: "AS level Chemistry",
+      biology: "AS level Biology",
+      informatics: "IGCSE Computer Science",
+      economics: "AS level Economics",
+      mathematics: "AS level Mathematics"
+    };
+    return map[key] || null;
+  }
+
+  async function fetchSubjectMentor(subjectKey) {
+    const role = mentorRoleForSubject(subjectKey);
+    if (!role) return null;
+
+    // 1) DB first
+    try {
+      if (window.sb) {
+        const { data, error } = await window.sb
+          .from("team_people")
+          .select("name,role,meta,photo_path,is_vacant,is_active")
+          .eq("group_key", "mentors")
+          .eq("role", role)
+          .eq("is_active", true)
+          .limit(1);
+
+        if (!error && Array.isArray(data) && data[0] && !data[0].is_vacant) {
+          const row = data[0];
+          return {
+            name: String(row.name || ""),
+            role: String(row.role || ""),
+            meta: String(row.meta || ""),
+            photoUrl: mentorPhotoUrlFromPath(row.photo_path)
+          };
+        }
+      }
+    } catch {}
+
+    // 2) local fallback
+    const local = (Array.isArray(mentors) ? mentors : []).find(x => String(x.role || "") === role);
+    if (!local) return null;
+
+    return {
+      name: String(local.name || ""),
+      role: String(local.role || ""),
+      meta: String(local.meta || ""),
+      photoUrl: null
+    };
+  }
+
+  async function renderSubjectHubMentorCard(subjectKey) {
+    const requestedKey = String(subjectKey || "").trim();
+
+    const avatarEl = $("#subject-hub-mentor-avatar");
+    const titleEl = $("#subject-hub-mentor-title");
+    const subEl = $("#subject-hub-mentor-sub");
+    if (!avatarEl || !titleEl || !subEl) return;
+
+    // default state
+    avatarEl.classList.remove("has-photo");
+    avatarEl.style.backgroundImage = "";
+    titleEl.textContent = t("mentor_assigning") || "Ментор назначается";
+    subEl.textContent = t("mentor_profile_soon") || "Скоро появится профиль";
+
+    const mentor = await fetchSubjectMentor(requestedKey).catch(() => null);
+
+    // subject changed while waiting
+    if (requestedKey !== String(state?.courses?.subjectKey || "").trim()) return;
+    if (!mentor) return;
+
+    titleEl.textContent = mentor.name || (t("mentor_assigning") || "Ментор назначается");
+    subEl.textContent = mentor.role || (t("mentor_profile_soon") || "Скоро появится профиль");
+
+    if (mentor.photoUrl) {
+      avatarEl.classList.add("has-photo");
+      avatarEl.style.backgroundImage = `url("${mentor.photoUrl}")`;
+    }
+  }
+
   // ---------------------------
   // Subject Hub rendering
   // ---------------------------
@@ -7787,9 +7881,11 @@ if (mainSubjects.length) {
       }
     }
 
-    updateTopbarForView("courses");
-  }
+        updateTopbarForView("courses");
 
+    // ✅ Subject mentor card
+    renderSubjectHubMentorCard(subjectKey).catch(() => null);
+  }
   // ---------------------------
   // Lessons (demo)
   // ---------------------------
