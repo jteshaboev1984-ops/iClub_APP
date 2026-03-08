@@ -71,10 +71,10 @@ about_sub: "Коротко о платформе, правилах и коман
 about_card_title: "iClub",
 about_card_body: "Здесь будет официальный текст из документа проекта: цели, правила участия, форматы туров, условия сертификатов и рейтингов.",
 // About — tabs + content
-about_tab_project: "ЛОЙИҲА",
-about_tab_rules: "ҚОИДАЛАР",
-about_tab_team: "ЖАМОА",
-
+about_tab_project: "ПРОЕКТ",
+about_tab_rules: "ПРАВИЛА",
+about_tab_team: "КОМАНДА",
+       
 about_project_title: "iClub — Smarter together",
 about_project_desc:
   "iClub — платформа для закрепления знаний и подготовки к соревнованиям по Cambridge curriculum. Здесь вы практикуетесь на реальных вопросах, работаете над ошибками и видите рост по фактам.",
