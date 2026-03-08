@@ -3020,6 +3020,14 @@ body.modal-open { overflow: hidden; }
   background: rgba(47,111,214,0.12);
   border: 1px solid rgba(0,0,0,0.06);
   flex: 0 0 auto;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.mentor-avatar.has-photo{
+  border-color: rgba(15,23,42,0.08);
+  background-color: rgba(15,23,42,0.04);
 }
 
 .panel-col{ min-width: 0; }
