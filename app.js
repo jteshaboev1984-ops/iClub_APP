@@ -8012,10 +8012,19 @@ async function renderSubjectHubMentorCard(subjectKey) {
     return clean;
   }
 
-  function stripPracticeQuizSecrets(quiz) {
+    function stripPracticeQuizSecrets(quiz) {
     if (!quiz || typeof quiz !== "object") return quiz;
 
-    const clean = { ...quiz, qTimerId: null };
+    const clean = {
+      ...quiz,
+      qTimerId: null,
+      qEndsAtMono: null
+    };
+
+    // paused draft should not carry correctness cache
+    if (Array.isArray(clean.correct)) {
+      clean.correct = Array.from({ length: clean.correct.length }).map(() => false);
+    }
 
     if (Array.isArray(clean.questions)) {
       clean.questions = clean.questions.map(stripPracticeQuestionSecrets);
