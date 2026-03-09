@@ -8057,19 +8057,32 @@ async function renderSubjectHubMentorCard(subjectKey) {
   return clean;
 }
 
-function stripActiveTourContextSecrets(ctx) {
-  if (!ctx || typeof ctx !== "object") return ctx;
-  if (ctx.isArchive) return ctx;
+  function stripActiveTourContextSecrets(ctx) {
+    if (!ctx || typeof ctx !== "object") return ctx;
+    if (ctx.isArchive) return ctx;
 
-  const clean = { ...ctx };
+    const clean = { ...ctx };
 
-  if (Array.isArray(clean.questions)) {
-    clean.questions = clean.questions.map(stripTourQuestionSecrets);
+    if (Array.isArray(clean.questions)) {
+      clean.questions = clean.questions.map(stripTourQuestionSecrets);
+    }
+
+    return clean;
   }
 
-  return clean;
-}
-   
+  function stripAnsweredTourQuestionInRuntime(ctx, questionIndex) {
+    if (!ctx || ctx.isArchive) return;
+    if (!Array.isArray(ctx.questions)) return;
+
+    const idx = Number(questionIndex);
+    if (!Number.isFinite(idx) || idx < 0 || idx >= ctx.questions.length) return;
+
+    const q = ctx.questions[idx];
+    if (!q) return;
+
+    ctx.questions[idx] = stripTourQuestionSecrets(q);
+  }
+
   function buildPracticeSavePayload(attempt, quiz) {
     return {
       attempt,
@@ -11464,7 +11477,13 @@ try {
             saveState();
           });
       }
-    } catch {}
+        } catch {}
+
+    // anti-slip: current answered question no longer needs secrets in runtime
+    stripAnsweredTourQuestionInRuntime(ctx, ctx.index);
+
+    // clear transient pick cache before moving on
+    ctx._pickedIndex = null;
 
     // next index
     ctx.index += 1;
@@ -11533,8 +11552,15 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
   } catch {}
 }
    
-  async function finishTour({ reason = "done" } = {}) {
+    async function finishTour({ reason = "done" } = {}) {
     stopTourTick();
+
+    // anti-slip: before any final state save, strip all question secrets from runtime
+    try {
+      if (state?.tourContext && !state.tourContext.isArchive) {
+        state.tourContext = stripActiveTourContextSecrets(state.tourContext);
+      }
+    } catch {}
 
   // UI feedback: saving (prevents “app frozen” feeling)
   const nextBtn =
