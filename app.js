@@ -1467,10 +1467,11 @@ function runDailyCredentialJobs() {
 
   // ✅ About tabs state
   about: {
-  tab: "project",        // project | rules | team
+  tab: "project",         // project | rules | team
   teamScreen: "overview", // overview | board | mentors | media | member
   teamPrevScreen: "overview",
-  teamMemberKey: null
+  teamMemberKey: null,
+  teamEntry: null         // null | subject
 },
 
   quizLock: null
@@ -7949,6 +7950,125 @@ if (mainSubjects.length) {
   }
 
   // ---------------------------
+// Subject Hub mentor
+// ---------------------------
+function mentorPhotoUrlFromPath(photoPath) {
+  const p = String(photoPath || "").trim();
+  if (!p || !window.sb?.storage) return null;
+  try {
+    const res = window.sb.storage.from("team-photos").getPublicUrl(p);
+    return res?.data?.publicUrl || null;
+  } catch {
+    return null;
+  }
+}
+
+function mentorRoleForSubject(subjectKey) {
+  const key = String(subjectKey || "").trim().toLowerCase();
+  const map = {
+    chemistry: "AS level Chemistry",
+    biology: "AS level Biology",
+    informatics: "IGCSE Computer Science",
+    economics: "AS level Economics",
+    mathematics: "AS level Mathematics"
+  };
+  return map[key] || null;
+}
+
+async function fetchSubjectMentor(subjectKey) {
+  const role = mentorRoleForSubject(subjectKey);
+  if (!role) return null;
+
+  // cache first
+  state.courses = state.courses || {};
+  state.courses.subjectMentorCache = state.courses.subjectMentorCache || {};
+  if (state.courses.subjectMentorCache[subjectKey]) {
+    return state.courses.subjectMentorCache[subjectKey];
+  }
+
+  // DB first
+  try {
+    if (window.sb) {
+      const { data, error } = await window.sb
+        .from("team_people")
+        .select("name,role,meta,photo_path,is_vacant,is_active")
+        .eq("group_key", "mentors")
+        .eq("role", role)
+        .eq("is_active", true)
+        .limit(1);
+
+      if (!error && Array.isArray(data) && data[0] && !data[0].is_vacant) {
+        const row = data[0];
+        const mentor = {
+          name: String(row.name || ""),
+          role: String(row.role || ""),
+          meta: String(row.meta || ""),
+          photoUrl: mentorPhotoUrlFromPath(row.photo_path)
+        };
+        state.courses.subjectMentorCache[subjectKey] = mentor;
+        saveState();
+        return mentor;
+      }
+    }
+  } catch {}
+
+  // local fallback
+  const local = (Array.isArray(mentors) ? mentors : []).find(x => String(x.role || "") === role);
+  if (!local) return null;
+
+  const mentor = {
+    name: String(local.name || ""),
+    role: String(local.role || ""),
+    meta: String(local.meta || ""),
+    photoUrl: null
+  };
+  state.courses.subjectMentorCache[subjectKey] = mentor;
+  saveState();
+  return mentor;
+}
+
+function memberKeyOf(x) {
+  const a = String(x?.name || "").trim().toLowerCase();
+  const b = String(x?.role || "").trim().toLowerCase();
+  return `${a}__${b}`;
+}
+
+async function renderSubjectHubMentorCard(subjectKey) {
+  const requestedKey = String(subjectKey || "").trim();
+
+  const btnEl = $("#subject-hub-mentor-btn");
+  const avatarEl = $("#subject-hub-mentor-avatar");
+  const titleEl = $("#subject-hub-mentor-title");
+  const subEl = $("#subject-hub-mentor-sub");
+  if (!btnEl || !avatarEl || !titleEl || !subEl) return;
+
+  // default
+  btnEl.disabled = true;
+  avatarEl.classList.remove("has-photo");
+  avatarEl.style.backgroundImage = "";
+  titleEl.textContent = t("mentor_assigning") || "Ментор назначается";
+  subEl.textContent = t("mentor_profile_soon") || "Скоро появится профиль";
+
+  const mentor = await fetchSubjectMentor(requestedKey).catch(() => null);
+
+  // subject changed while waiting
+  if (requestedKey !== String(state?.courses?.subjectKey || "").trim()) return;
+  if (!mentor) return;
+
+  state.courses.subjectHubMentor = mentor;
+  saveState();
+
+  btnEl.disabled = false;
+  titleEl.textContent = mentor.name || (t("mentor_assigning") || "Ментор назначается");
+  subEl.textContent = mentor.role || (t("mentor_profile_soon") || "Скоро появится профиль");
+
+  if (mentor.photoUrl) {
+    avatarEl.classList.add("has-photo");
+    avatarEl.style.backgroundImage = `url("${mentor.photoUrl}")`;
+  }
+}
+
+// ---------------------------
   // Subject Hub rendering
   // ---------------------------
   function renderSubjectHub() {
@@ -12144,6 +12264,30 @@ if (action === "open-community") {
   return;
 }
       if (action === "open-about") { openGlobal("about"); return; }
+
+if (action === "open-subject-mentor") {
+  const mentor = state?.courses?.subjectHubMentor;
+  if (!mentor) return;
+
+  if (!state.about) state.about = { tab: "project" };
+  state.about.tab = "team";
+  state.about.teamEntry = "subject";
+  state.about.teamPrevScreen = "mentors";
+  state.about.teamScreen = "member";
+  state.about.teamPeopleResolved = state.about.teamPeopleResolved || {};
+  state.about.teamPeopleResolved.mentors = [{
+    ...mentor,
+    group: "mentors",
+    vacant: false,
+    memberKey: memberKeyOf(mentor)
+  }];
+  state.about.teamMemberKey = memberKeyOf(mentor);
+  saveState();
+
+  openGlobal("about");
+  renderAboutView();
+  return;
+}
       // ✅ About tabs
       if (action === "about-tab") {
   const tab = btn.dataset.tab || "project";
@@ -12198,6 +12342,19 @@ if (action === "about-person-open") {
 
       if (action === "about-team-back") {
   if (!state.about) state.about = { tab: "project" };
+
+  // entered from Subject Hub mentor card → return back to subject
+  if (state.about.teamScreen === "member" && state.about.teamEntry === "subject") {
+    state.about.teamScreen = "overview";
+    state.about.teamPrevScreen = "overview";
+    state.about.teamMemberKey = null;
+    state.about.teamEntry = null;
+    saveState();
+
+    globalBack();
+    renderSubjectHub();
+    return;
+  }
 
   if (state.about.teamScreen === "member") {
     state.about.teamScreen = state.about.teamPrevScreen || "overview";
