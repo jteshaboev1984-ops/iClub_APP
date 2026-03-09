@@ -1470,8 +1470,14 @@ function runDailyCredentialJobs() {
      return merged;
   }
 
-  function saveState() {
-    localStorage.setItem(LS.state, JSON.stringify(state));
+    function saveState() {
+    const nextState = structuredClone(state);
+
+    if (nextState?.quiz?.mode === "practice") {
+      nextState.quiz = stripPracticeQuizSecrets(nextState.quiz);
+    }
+
+    localStorage.setItem(LS.state, JSON.stringify(nextState));
   }
 
     // ---------------------------
@@ -8152,12 +8158,135 @@ async function renderSubjectHubMentorCard(subjectKey) {
   // best + last 5 attempts, review + recommendations
   // ---------------------------
 
-  function loadPracticeDraft() {
+    function loadPracticeDraft() {
     return safeJsonParse(localStorage.getItem(LS.practiceDraft), null);
   }
-  function savePracticeDraft(draft) {
-    localStorage.setItem(LS.practiceDraft, JSON.stringify(draft));
+
+  function stripPracticeQuestionSecrets(q) {
+    if (!q || typeof q !== "object") return q;
+
+    const clean = { ...q };
+    delete clean.correctIndex;
+    delete clean.correctAnswer;
+    delete clean.explanation;
+    delete clean.inputKind;
+    delete clean.inputHint;
+
+    return clean;
   }
+
+  function stripPracticeQuizSecrets(quiz) {
+    if (!quiz || typeof quiz !== "object") return quiz;
+
+    const clean = { ...quiz, qTimerId: null };
+
+    if (Array.isArray(clean.questions)) {
+      clean.questions = clean.questions.map(stripPracticeQuestionSecrets);
+    }
+
+    return clean;
+  }
+
+  function buildPracticeSavePayload(attempt, quiz) {
+    return {
+      attempt,
+      quiz: {
+        subjectKey: quiz?.subjectKey || null,
+        answers: Array.isArray(quiz?.answers) ? quiz.answers.slice() : []
+      }
+    };
+  }
+
+  async function restorePracticeQuizSecrets(quiz) {
+    try {
+      if (!quiz || quiz.mode !== "practice") return null;
+      if (!Array.isArray(quiz.questions) || !quiz.questions.length) return null;
+      if (!window.sb) return null;
+
+      const ids = quiz.questions
+        .map(q => Number(q?.id))
+        .filter(id => Number.isFinite(id) && id > 0);
+
+      if (!ids.length) return null;
+
+      const subjectId = await getSubjectIdByKey(quiz.subjectKey);
+      if (!subjectId) return null;
+
+      const { data, error } = await window.sb
+        .from("questions")
+        .select("id,subject_id,topic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en")
+        .eq("subject_id", subjectId)
+        .in("id", ids)
+        .limit(100);
+
+      if (error) return null;
+
+      const rows = Array.isArray(data) ? data : [];
+      const byId = new Map(rows.map(r => [Number(r.id), r]));
+      const contentLang = (loadProfile()?.language) || "ru";
+
+      const pickL = (obj, base) => {
+        const k =
+          contentLang === "uz" ? (base + "_uz")
+          : contentLang === "en" ? (base + "_en")
+          : (base + "_ru");
+
+        return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
+      };
+
+      const restoredQuestions = quiz.questions.map(oldQ => {
+        const row = byId.get(Number(oldQ?.id));
+        if (!row) return oldQ;
+
+        const type = String(row.qtype || oldQ?.type || "mcq").toLowerCase() === "input" ? "input" : "mcq";
+        const optionsRaw = pickL(row, "options_text");
+        const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
+
+        let correctIndex = 0;
+        const correctAnswer = String(row.correct_answer ?? "");
+
+        if (type === "mcq") {
+          const ca = String(row.correct_answer ?? "").trim();
+
+          if (isNumericLike(ca)) {
+            correctIndex = Math.max(0, Math.min(opts.length - 1, Number(String(ca).replace(",", "."))));
+          } else if (opts.length) {
+            const idx = opts.findIndex(o => String(o).trim().toLowerCase() === ca.toLowerCase());
+            if (idx >= 0) correctIndex = idx;
+          }
+        }
+
+        return {
+          ...oldQ,
+          type,
+          correctIndex,
+          correctAnswer,
+          explanation: pickL(row, "explanation") || "",
+          inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
+          inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
+        };
+      });
+
+      return {
+        ...quiz,
+        questions: restoredQuestions
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function savePracticeDraft(draft) {
+    const safeDraft = draft && typeof draft === "object"
+      ? {
+          ...draft,
+          quiz: stripPracticeQuizSecrets(draft.quiz)
+        }
+      : draft;
+
+    localStorage.setItem(LS.practiceDraft, JSON.stringify(safeDraft));
+  }
+
   function clearPracticeDraft() {
     localStorage.removeItem(LS.practiceDraft);
   }
@@ -9065,8 +9194,8 @@ try {
 
     // store snapshot to draft (so even refresh won't kill it)
     try {
-      // do not persist timer id
-      const quizForDraft = { ...quiz, qTimerId: null };
+            // do not persist secrets or timer id
+      const quizForDraft = stripPracticeQuizSecrets(quiz);
 
       savePracticeDraft({
         status: "paused",
@@ -9312,9 +9441,9 @@ if (!quiz?.drillType) {
       clearPracticeDraft();
     } else {
       // ✅ offline-safe: queue practice save for retry after reconnect
-      enqueuePendingOp({
+           enqueuePendingOp({
         type: "practice_save",
-        payload: { attempt, quiz }
+        payload: buildPracticeSavePayload(attempt, quiz)
       });
     }
   } else {
@@ -12412,7 +12541,7 @@ try {
         return;
       }
 
-       if (action === "practice-resume") {
+              if (action === "practice-resume") {
   const subjectKey = state.courses.subjectKey;
   const draft = loadPracticeDraft();
   if (!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz)) {
@@ -12420,8 +12549,14 @@ try {
     return;
   }
 
-      state.quizLock = "practice";
-  state.quiz = draft.quiz;
+  const restoredQuiz = await restorePracticeQuizSecrets(draft.quiz);
+  if (!restoredQuiz) {
+    showToast(t("not_available"));
+    return;
+  }
+
+  state.quizLock = "practice";
+  state.quiz = restoredQuiz;
   state.quiz.qTimerId = null;
 
   // ✅ add paused time into pausedTotalMs (so итоговое время не включает паузу)
@@ -12432,7 +12567,7 @@ try {
     state.quiz.pausedTotalMs = Number(state.quiz.pausedTotalMs || 0) + addMs;
   } catch {}
 
-    state.quiz.paused = false;
+  state.quiz.paused = false;
   state.quiz.pauseStartedAt = null;
   state.quiz.qEndsAtMs = null; // ✅ NEW: rebuild deadline from saved qTimeLeft
   clearPracticeDraft();
