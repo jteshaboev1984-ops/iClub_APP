@@ -1475,14 +1475,18 @@ function runDailyCredentialJobs() {
   }
 
     function saveState() {
-    const nextState = structuredClone(state);
+  const nextState = structuredClone(state);
 
-    if (nextState?.quiz?.mode === "practice") {
-      nextState.quiz = stripPracticeQuizSecrets(nextState.quiz);
-    }
-
-    localStorage.setItem(LS.state, JSON.stringify(nextState));
+  if (nextState?.quiz?.mode === "practice") {
+    nextState.quiz = stripPracticeQuizSecrets(nextState.quiz);
   }
+
+  if (nextState?.tourContext && !nextState.tourContext.isArchive) {
+    nextState.tourContext = stripActiveTourContextSecrets(nextState.tourContext);
+  }
+
+  localStorage.setItem(LS.state, JSON.stringify(nextState));
+}
 
     // ---------------------------
   // Profile (local demo)
@@ -8033,6 +8037,39 @@ async function renderSubjectHubMentorCard(subjectKey) {
     return clean;
   }
 
+      function stripTourQuestionSecrets(q) {
+  if (!q || typeof q !== "object") return q;
+
+  const clean = { ...q };
+
+  delete clean.correctIndex;
+  delete clean.correct_index;
+  delete clean.correctAnswer;
+  delete clean.correct_answer;
+  delete clean.correct;
+  delete clean.answer;
+
+  delete clean.explanation;
+  delete clean.explanation_ru;
+  delete clean.explanation_uz;
+  delete clean.explanation_en;
+
+  return clean;
+}
+
+function stripActiveTourContextSecrets(ctx) {
+  if (!ctx || typeof ctx !== "object") return ctx;
+  if (ctx.isArchive) return ctx;
+
+  const clean = { ...ctx };
+
+  if (Array.isArray(clean.questions)) {
+    clean.questions = clean.questions.map(stripTourQuestionSecrets);
+  }
+
+  return clean;
+}
+   
   function buildPracticeSavePayload(attempt, quiz) {
     return {
       attempt,
@@ -10691,9 +10728,9 @@ async function loadActiveTourBySubjectAndNo(subjectId, tourNo) {
 async function loadTourQuestionsDB(tourId) {
   if (!window.sb || !tourId) return null;
 
-  const { data, error } = await window.sb
+    const { data, error } = await window.sb
     .from("tour_questions")
-    .select("order_no, question:questions(id,topic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,is_active,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en)")
+    .select("order_no, question:questions(id,topic,difficulty,qtype,question_text,options_text,correct_answer,image_url,is_active,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en)")
     .eq("tour_id", tourId)
     .eq("is_active", true)
     .order("order_no", { ascending: true })
@@ -10737,20 +10774,19 @@ async function loadTourQuestionsDB(tourId) {
       }
     }
 
-    return {
-        id: q.id,
-        topic: q.topic || "General",
-        difficulty: normalizeDiff(q.difficulty),
-        type,
-        // ✅ вопрос по языку контента
-        question: pickL(q, "question_text") || "",
-        options: opts,
-        correctIndex,
-        correctAnswer: String(q.correct_answer ?? ""),
-        // ✅ объяснение по языку контента
-        explanation: pickL(q, "explanation") || "",
-        image_url: q.image_url || null
-     };
+        return {
+      id: Number(q.id),
+      topic: q.topic || "General",
+      difficulty: normalizeDiff(q.difficulty),
+      type,
+      question: pickL(q, "question_text") || "",
+      options: opts || [],
+      correctIndex,
+      correct_answer: String(q.correct_answer ?? "").trim(),
+      correctAnswer: String(q.correct_answer ?? "").trim(),
+      imageUrl: q.image_url || null,
+      timeLimitSec: TOUR_CONFIG.defaultQuestionTimeSec
+    };
   });
 }
 
