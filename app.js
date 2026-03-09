@@ -12132,8 +12132,8 @@ if (state.tab === "profile") {
   });
 }
    
-  function bindActions() {
-    document.addEventListener("click", (e) => {
+    function bindActions() {
+    document.addEventListener("click", async (e) => {
       const btn = e.target.closest("[data-action]");
       if (!btn) return;
 
@@ -12541,7 +12541,7 @@ try {
         return;
       }
 
-              if (action === "practice-resume") {
+                     if (action === "practice-resume") {
   const subjectKey = state.courses.subjectKey;
   const draft = loadPracticeDraft();
   if (!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz)) {
@@ -12569,7 +12569,8 @@ try {
 
   state.quiz.paused = false;
   state.quiz.pauseStartedAt = null;
-  state.quiz.qEndsAtMs = null; // ✅ NEW: rebuild deadline from saved qTimeLeft
+  state.quiz.qEndsAtMs = null;
+  state.quiz.qEndsAtMono = null;
   clearPracticeDraft();
   saveState();
   replaceCourses("practice-quiz");
