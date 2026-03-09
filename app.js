@@ -9194,7 +9194,7 @@ try {
 }
 
   // ---- Pause / Submit / Finish ----
-    function handlePracticePause() {
+      function handlePracticePause() {
     const quiz = state.quiz;
     if (!quiz || quiz.mode !== "practice") return;
 
@@ -9206,7 +9206,7 @@ try {
 
     // store snapshot to draft (so even refresh won't kill it)
     try {
-            // do not persist secrets or timer id
+      // do not persist secrets or timer id
       const quizForDraft = stripPracticeQuizSecrets(quiz);
 
       savePracticeDraft({
@@ -12144,7 +12144,7 @@ if (state.tab === "profile") {
   });
 }
    
-    function bindActions() {
+      function bindActions() {
     document.addEventListener("click", async (e) => {
       const btn = e.target.closest("[data-action]");
       if (!btn) return;
@@ -12553,7 +12553,7 @@ try {
         return;
       }
 
-                     if (action === "practice-resume") {
+                            if (action === "practice-resume") {
   const subjectKey = state.courses.subjectKey;
   const draft = loadPracticeDraft();
   if (!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz)) {
