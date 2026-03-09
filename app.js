@@ -261,9 +261,9 @@ function hideToursLoading() {
     // если уже отправляли — не повторяем
     if (localStorage.getItem(LS.botLinked) === "1") return true;
 
-    let uid = null;
+        let uid = null;
     try {
-      const { data } = await window.sb?.auth?.getUser();
+      const { data } = await (sb || window.sb)?.auth?.getUser();
       uid = data?.user?.id || null;
     } catch {}
 
@@ -290,7 +290,7 @@ function hideToursLoading() {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
     if (!window.supabase?.createClient) return null;
 
-        if (!sb) {
+           if (!sb) {
       sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: {
           persistSession: true,
@@ -298,6 +298,10 @@ function hideToursLoading() {
           detectSessionInUrl: false,
         },
       });
+
+      // compatibility bridge:
+      // large parts of the app still read window.sb directly
+      window.sb = sb;
     }
 
     // 1) ensure we have a session (Anonymous Sign-in)
