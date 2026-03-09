@@ -252,15 +252,7 @@ function hideToursLoading() {
 
   let sb = null;
 
-  function getTelegramUserSafe() {
-    try {
-      return window.Telegram?.WebApp?.initDataUnsafe?.user || null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-   // ✅ Автоматическое подключение пользователя к боту
+     // ✅ Автоматическое подключение пользователя к боту
       async function tryLinkBotOnce(reason = "registration") {
   try {
     const tg = window.Telegram?.WebApp;
@@ -499,16 +491,6 @@ try {
 }
 
   // ---------------------------
-  // Credentials: hydrate local events from Supabase (only if needed)
-  // ---------------------------
-  async function hydrateLocalEventsFromSupabaseIfNeeded(sbClient, userId) {
-  // Keep ONE truthy hydrator to avoid format corruption
-  try {
-    await hydrateLocalEventsFromSupabase(sbClient, userId);
-  } catch {}
-}
-   
-  // ---------------------------
   // Storage keys
   // ---------------------------
     const LS = {
@@ -589,14 +571,7 @@ function applyStaticI18n() {
     }
   }
 
-  function getUserIdSafe() {
-    try {
-      return window.sb?.auth ? (window.sb.auth.getUser?.().then ? null : null) : null;
-    } catch {}
-    return null;
-  }
-
-    function eventsStore() {
+      function eventsStore() {
     let s = loadJsonLS(LS.events, { seq: 0, items: [] });
 
     // accept old shapes:
@@ -1504,25 +1479,13 @@ function runDailyCredentialJobs() {
     localStorage.setItem(LS.state, JSON.stringify(state));
   }
 
-  // ---------------------------
+    // ---------------------------
   // Profile (local demo)
   // later replace with Supabase
   // ---------------------------
   function loadProfile() {
     return safeJsonParse(localStorage.getItem(LS.profile), null);
   }
-   function resetRegistrationSoft() {
-  // 1) Очистка локального состояния
-  localStorage.removeItem("profile");
-  localStorage.removeItem("state");
-
-  // если есть кастомные ключи — добавь сюда
-  // localStorage.removeItem("user_subjects");
-
-  // 2) Перезапуск в регистрацию
-  showView("registration");
-  bindRegistration();
-}
    
   function saveProfile(profile) {
     localStorage.setItem(LS.profile, JSON.stringify(profile));
@@ -2073,13 +2036,12 @@ async function dbHasAnyActiveTourNow() {
 
          // ---------------------------
 // About → Team: DB-backed people (optional, safe)
-// Tables supported (either one):
+// Table supported:
 // 1) public.team_people
-// 2) public.team_members
 //
 // Expected columns (minimum):
 // group_key: "board" | "mentors" | "media"
-// name, role, meta, photo_url, is_vacant, priority, is_active
+// name, role, meta, photo_path, is_vacant, priority, is_active
 // ---------------------------
 async function fetchTeamPeopleFromDb(groupKey) {
   try {
@@ -2123,12 +2085,8 @@ async function fetchTeamPeopleFromDb(groupKey) {
   });
 };
 
-    // prefer team_people; fallback to team_members
     const a = await tryTable("team_people");
     if (a !== null) return a;
-
-    const b = await tryTable("team_members");
-    if (b !== null) return b;
 
     return null;
   } catch {
@@ -7854,102 +7812,8 @@ if (mainSubjects.length) {
     pushCourses("subject-hub");
     renderSubjectHub();
   }
-
-    // ---------------------------
-  // Subject Hub mentor
-  // ---------------------------
-  function mentorPhotoUrlFromPath(photoPath) {
-    const p = String(photoPath || "").trim();
-    if (!p || !window.sb?.storage) return null;
-    try {
-      const res = window.sb.storage.from("team-photos").getPublicUrl(p);
-      return res?.data?.publicUrl || null;
-    } catch {
-      return null;
-    }
-  }
-
-  function mentorRoleForSubject(subjectKey) {
-    const key = String(subjectKey || "").trim().toLowerCase();
-    const map = {
-      chemistry: "AS level Chemistry",
-      biology: "AS level Biology",
-      informatics: "IGCSE Computer Science",
-      economics: "AS level Economics",
-      mathematics: "AS level Mathematics"
-    };
-    return map[key] || null;
-  }
-
-  async function fetchSubjectMentor(subjectKey) {
-    const role = mentorRoleForSubject(subjectKey);
-    if (!role) return null;
-
-    // 1) DB first
-    try {
-      if (window.sb) {
-        const { data, error } = await window.sb
-          .from("team_people")
-          .select("name,role,meta,photo_path,is_vacant,is_active")
-          .eq("group_key", "mentors")
-          .eq("role", role)
-          .eq("is_active", true)
-          .limit(1);
-
-        if (!error && Array.isArray(data) && data[0] && !data[0].is_vacant) {
-          const row = data[0];
-          return {
-            name: String(row.name || ""),
-            role: String(row.role || ""),
-            meta: String(row.meta || ""),
-            photoUrl: mentorPhotoUrlFromPath(row.photo_path)
-          };
-        }
-      }
-    } catch {}
-
-    // 2) local fallback
-    const local = (Array.isArray(mentors) ? mentors : []).find(x => String(x.role || "") === role);
-    if (!local) return null;
-
-    return {
-      name: String(local.name || ""),
-      role: String(local.role || ""),
-      meta: String(local.meta || ""),
-      photoUrl: null
-    };
-  }
-
-  async function renderSubjectHubMentorCard(subjectKey) {
-    const requestedKey = String(subjectKey || "").trim();
-
-    const avatarEl = $("#subject-hub-mentor-avatar");
-    const titleEl = $("#subject-hub-mentor-title");
-    const subEl = $("#subject-hub-mentor-sub");
-    if (!avatarEl || !titleEl || !subEl) return;
-
-    // default state
-    avatarEl.classList.remove("has-photo");
-    avatarEl.style.backgroundImage = "";
-    titleEl.textContent = t("mentor_assigning") || "Ментор назначается";
-    subEl.textContent = t("mentor_profile_soon") || "Скоро появится профиль";
-
-    const mentor = await fetchSubjectMentor(requestedKey).catch(() => null);
-
-    // subject changed while waiting
-    if (requestedKey !== String(state?.courses?.subjectKey || "").trim()) return;
-    if (!mentor) return;
-
-    titleEl.textContent = mentor.name || (t("mentor_assigning") || "Ментор назначается");
-    subEl.textContent = mentor.role || (t("mentor_profile_soon") || "Скоро появится профиль");
-
-    if (mentor.photoUrl) {
-      avatarEl.classList.add("has-photo");
-      avatarEl.style.backgroundImage = `url("${mentor.photoUrl}")`;
-    }
-  }
-
-  // ---------------------------
+         
+// ---------------------------
 // Subject Hub mentor
 // ---------------------------
 function mentorPhotoUrlFromPath(photoPath) {
@@ -8614,22 +8478,8 @@ function addMyRecsFromAttempt(attempt) {
         lastClass: "is-last"
       });
   }
-           // ---------------------------
-  // Tours loading overlay helpers
-  // ---------------------------
-  function showToursLoading() {
-    const el = document.getElementById("tours-loading");
-    if (!el) return;
-    el.classList.remove("hidden");
-  }
-
-  function hideToursLoading() {
-    const el = document.getElementById("tours-loading");
-    if (!el) return;
-    el.classList.add("hidden");
-  }
-
-     async function renderToursStart() {
+ 
+         async function renderToursStart() {
   showToursLoading();
   try {
     const profile = loadProfile?.() || null;
