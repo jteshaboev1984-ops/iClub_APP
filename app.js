@@ -2454,119 +2454,6 @@ contentEl.innerHTML = `
     keepLastAttempts: 5
   };
 
-  // Мини-банк вопросов для практики (позже заменим на базу).
-  // ВАЖНО: добавляй/расширяй — но структура должна быть стабильной.
-  // type: "mcq" | "input"
-  // inputKind: "numeric" | "letter"
-  const PRACTICE_BANK = {
-    economics: [
-      {
-        id: "eco_p_001",
-        topic: "Basics",
-        difficulty: "easy",
-        type: "mcq",
-        question: "Что такое альтернативная стоимость?",
-        options: ["Стоимость производства", "Стоимость упущенной лучшей альтернативы", "Цена товара", "Налог на товар"],
-        correctIndex: 1,
-        explanation: "Альтернативная стоимость — ценность лучшей упущенной альтернативы при выборе."
-      },
-      {
-        id: "eco_p_002",
-        topic: "Elasticity",
-        difficulty: "medium",
-        type: "input",
-        inputKind: "numeric",
-        inputHint: "Введите число (например 1.5)",
-        question: "Если %ΔQ = 10% и %ΔP = 5%, чему равна эластичность спроса по цене (по модулю)?",
-        correctAnswer: "2",
-        explanation: "Ed = |%ΔQ / %ΔP| = 10/5 = 2."
-      },
-      {
-        id: "eco_p_003",
-        topic: "Demand & Supply",
-        difficulty: "hard",
-        type: "input",
-        inputKind: "letter",
-        inputHint: "Введите 1 букву (не a/b/c/d)",
-        question: "Какая буква обычно обозначает равновесную цену? (одна буква)",
-        correctAnswer: "P",
-        explanation: "Чаще всего цену обозначают P (price), равновесную — Pe."
-      }
-    ],
-    mathematics: [
-      {
-        id: "math_p_001",
-        topic: "Algebra",
-        difficulty: "easy",
-        type: "mcq",
-        question: "Чему равно (x^2) * (x^3)?",
-        options: ["x^5", "x^6", "x^9", "x^1"],
-        correctIndex: 0,
-        explanation: "При умножении степеней с одинаковым основанием показатели складываются: 2+3=5."
-      },
-      {
-        id: "math_p_002",
-        topic: "Functions",
-        difficulty: "medium",
-        type: "input",
-        inputKind: "numeric",
-        inputHint: "Введите число",
-        question: "Если f(x)=2x+3, чему равно f(4)?",
-        correctAnswer: "11",
-        explanation: "2*4+3=11."
-      }
-    ],
-    chemistry: [
-      {
-        id: "chem_p_001",
-        topic: "Basics",
-        difficulty: "easy",
-        type: "mcq",
-        question: "Какой заряд у протона?",
-        options: ["-1", "0", "+1", "+2"],
-        correctIndex: 2,
-        explanation: "Протон имеет заряд +1."
-      }
-    ],
-    biology: [
-      {
-        id: "bio_p_001",
-        topic: "Cells",
-        difficulty: "easy",
-        type: "mcq",
-        question: "Основная функция митохондрий?",
-        options: ["Фотосинтез", "Синтез белка", "Производство АТФ", "Хранение ДНК"],
-        correctIndex: 2,
-        explanation: "Митохондрии — основной источник АТФ."
-      }
-    ],
-    informatics: [
-      {
-        id: "inf_p_001",
-        topic: "Algorithms",
-        difficulty: "easy",
-        type: "mcq",
-        question: "Какой алгоритм обычно имеет сложность O(n log n)?",
-        options: ["Binary search", "Merge sort", "Linear search", "Bubble sort (worst)"],
-        correctIndex: 1,
-        explanation: "Merge sort обычно O(n log n)."
-      }
-    ]
-  };
-
-// ---------------------------
-// Reading map (v1 skeleton)
-// Later we will fill from конкретных книг по предметам.
-// Key idea: topic -> list of reading refs
-// ---------------------------
-const READING_MAP = {
-  // economics: {
-  //   "Unemployment": [
-  //     { title: "AS Level Economics Coursebook", ref: "Ch 19", pages: "p. 210–225" }
-  //   ]
-  // }
-};
-
 function getReadingRefs(subjectKey, topic) {
   const s = READING_MAP?.[subjectKey] || null;
   if (!s) return [];
@@ -2574,10 +2461,6 @@ function getReadingRefs(subjectKey, topic) {
   return Array.isArray(refs) ? refs : [];
 }
    
-  function getPracticeBankForSubject(subjectKey) {
-    return PRACTICE_BANK[subjectKey] || [];
-  }
-
   function shuffle(arr) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -2692,16 +2575,15 @@ function formatAnswerForDisplay(q, rawAnswer) {
    
 // --- DB-first practice set builder ---
 async function buildPracticeSet(subjectKey) {
-  // If no Supabase — fallback to local bank
-  if (!window.sb) return buildPracticeSetLocal(subjectKey);
+  if (!window.sb) return [];
 
   const uid = await getAuthUid();
-  if (!uid) return buildPracticeSetLocal(subjectKey);
+  if (!uid) return [];
 
   const subjectId = await getSubjectIdByKey(subjectKey);
   if (!subjectId) {
     await logDbErrorToEvents(uid, "subject_lookup", { message: "subject_id not found" }, { subject_key: subjectKey });
-    return buildPracticeSetLocal(subjectKey);
+    return [];
   }
 
   const { data, error } = await window.sb
@@ -2713,11 +2595,11 @@ async function buildPracticeSet(subjectKey) {
 
   if (error) {
     await logDbErrorToEvents(uid, "practice_questions_select", error, { subject_id: subjectId, subject_key: subjectKey });
-    return buildPracticeSetLocal(subjectKey);
+    return [];
   }
 
   const poolRaw = Array.isArray(data) ? data : [];
-  if (!poolRaw.length) return buildPracticeSetLocal(subjectKey);
+  if (!poolRaw.length) return [];
 
   const normalizeType = (t) => (String(t || "mcq").toLowerCase() === "input" ? "input" : "mcq");
 
@@ -2773,64 +2655,22 @@ async function buildPracticeSet(subjectKey) {
     };
   }).filter(q => Number.isFinite(q.id));
 
-  if (!pool.length) return buildPracticeSetLocal(subjectKey);
+  if (!pool.length) return [];
 
+  const usedIds = new Set();
   const by = {
     easy: pool.filter(q => q.difficulty === "easy"),
     medium: pool.filter(q => q.difficulty === "medium"),
     hard: pool.filter(q => q.difficulty === "hard")
   };
 
-  const usedIds = new Set();
   const set = [];
-
   set.push(...pickN(by.easy, PRACTICE_CONFIG.dist.easy, usedIds));
   set.push(...pickN(by.medium, PRACTICE_CONFIG.dist.medium, usedIds));
   set.push(...pickN(by.hard, PRACTICE_CONFIG.dist.hard, usedIds));
 
-  // добираем недостающие квоты из общего пула, но без дублей
   if (set.length < PRACTICE_CONFIG.total) {
     set.push(...pickN(pool, PRACTICE_CONFIG.total - set.length, usedIds));
-  }
-
-  const order = { easy: 1, medium: 2, hard: 3 };
-  set.sort((a, b) => (order[a.difficulty] - order[b.difficulty]));
-
-  // если в БД всё ещё меньше 10 уникальных — уходим в local fallback
-  if (set.length < PRACTICE_CONFIG.total) {
-    return buildPracticeSetLocal(subjectKey);
-  }
-
-  return set.slice(0, PRACTICE_CONFIG.total);
-}
-
-// --- old local implementation (your previous buildPracticeSet) ---
-// IMPORTANT: сюда вставь твой ПРЕДЫДУЩИЙ buildPracticeSet(...) целиком, только переименуй в buildPracticeSetLocal
-function buildPracticeSetLocal(subjectKey) {
-  const bank = getPracticeBankForSubject(subjectKey).map(q => ({
-    ...q,
-    difficulty: normalizeDifficulty(q.difficulty)
-  }));
-
-  if (bank.length === 0) {
-    return [];
-  }
-
-  const by = {
-    easy: bank.filter(q => q.difficulty === "easy"),
-    medium: bank.filter(q => q.difficulty === "medium"),
-    hard: bank.filter(q => q.difficulty === "hard")
-  };
-
-  const usedIds = new Set();
-  const set = [];
-
-  set.push(...pickN(by.easy, PRACTICE_CONFIG.dist.easy, usedIds));
-  set.push(...pickN(by.medium, PRACTICE_CONFIG.dist.medium, usedIds));
-  set.push(...pickN(by.hard, PRACTICE_CONFIG.dist.hard, usedIds));
-
-  if (set.length < PRACTICE_CONFIG.total) {
-    set.push(...pickN(bank, PRACTICE_CONFIG.total - set.length, usedIds));
   }
 
   const order = { easy: 1, medium: 2, hard: 3 };
@@ -8203,107 +8043,78 @@ async function renderSubjectHubMentorCard(subjectKey) {
     );
     if (alreadyReady) return { ...quiz };
 
-    const hasNumericIds = quiz.questions.every(q => {
-      const id = Number(q?.id);
-      return Number.isFinite(id) && id > 0;
-    });
+    const sbClient = sb || null;
+    if (!sbClient) return null;
 
-    // --- 1) DB restore path ---
-    if (hasNumericIds) {
-      const sbClient = sb || window.sb || null;
-      if (sbClient) {
-        const ids = quiz.questions
-          .map(q => Number(q?.id))
-          .filter(id => Number.isFinite(id) && id > 0);
+    const ids = quiz.questions
+      .map(q => Number(q?.id))
+      .filter(id => Number.isFinite(id) && id > 0);
 
-        const subjectId = await getSubjectIdByKey(quiz.subjectKey);
-        if (subjectId && ids.length) {
-          const { data, error } = await sbClient
-            .from("questions")
-            .select("id,subject_id,topic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en")
-            .eq("subject_id", subjectId)
-            .in("id", ids)
-            .limit(100);
+    if (!ids.length) return null;
 
-          if (!error) {
-            const rows = Array.isArray(data) ? data : [];
-            const byId = new Map(rows.map(r => [Number(r.id), r]));
-            const contentLang = (loadProfile()?.language) || "ru";
+    const subjectId = await getSubjectIdByKey(quiz.subjectKey);
+    if (!subjectId) return null;
 
-            const pickL = (obj, base) => {
-              const k =
-                contentLang === "uz" ? (base + "_uz")
-                : contentLang === "en" ? (base + "_en")
-                : (base + "_ru");
+    const { data, error } = await sbClient
+      .from("questions")
+      .select("id,subject_id,topic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en")
+      .eq("subject_id", subjectId)
+      .in("id", ids)
+      .limit(100);
 
-              return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
-            };
+    if (error) return null;
 
-            const restoredQuestions = quiz.questions.map(oldQ => {
-              const row = byId.get(Number(oldQ?.id));
-              if (!row) return oldQ;
+    const rows = Array.isArray(data) ? data : [];
+    const byId = new Map(rows.map(r => [Number(r.id), r]));
+    const contentLang = (loadProfile()?.language) || "ru";
 
-              const type = String(row.qtype || oldQ?.type || "mcq").toLowerCase() === "input" ? "input" : "mcq";
-              const optionsRaw = pickL(row, "options_text");
-              const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
+    const pickL = (obj, base) => {
+      const k =
+        contentLang === "uz" ? (base + "_uz")
+        : contentLang === "en" ? (base + "_en")
+        : (base + "_ru");
 
-              let correctIndex = 0;
-              const correctAnswer = String(row.correct_answer ?? "");
+      return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
+    };
 
-              if (type === "mcq") {
-                const ca = String(row.correct_answer ?? "").trim();
+    const restoredQuestions = quiz.questions.map(oldQ => {
+      const row = byId.get(Number(oldQ?.id));
+      if (!row) return oldQ;
 
-                if (isNumericLike(ca)) {
-                  correctIndex = Math.max(0, Math.min(opts.length - 1, Number(String(ca).replace(",", "."))));
-                } else if (/^[A-D]$/i.test(ca)) {
-                  correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
-                } else if (opts.length) {
-                  const idx = opts.findIndex(o => String(o).trim().toLowerCase() === ca.toLowerCase());
-                  if (idx >= 0) correctIndex = idx;
-                }
-              }
+      const type = String(row.qtype || oldQ?.type || "mcq").toLowerCase() === "input" ? "input" : "mcq";
+      const optionsRaw = pickL(row, "options_text");
+      const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
 
-              return {
-                ...oldQ,
-                type,
-                correctIndex,
-                correctAnswer,
-                explanation: pickL(row, "explanation") || "",
-                inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
-                inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
-              };
-            });
+      let correctIndex = 0;
+      const correctAnswer = String(row.correct_answer ?? "");
 
-            return {
-              ...quiz,
-              questions: restoredQuestions
-            };
-          }
+      if (type === "mcq") {
+        const ca = String(row.correct_answer ?? "").trim();
+
+        if (isNumericLike(ca)) {
+          correctIndex = Math.max(0, Math.min(opts.length - 1, Number(String(ca).replace(",", "."))));
+        } else if (/^[A-D]$/i.test(ca)) {
+          correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
+        } else if (opts.length) {
+          const idx = opts.findIndex(o => String(o).trim().toLowerCase() === ca.toLowerCase());
+          if (idx >= 0) correctIndex = idx;
         }
       }
-    }
-
-    // --- 2) Local bank restore path ---
-    const localBank = getPracticeBankForSubject(quiz.subjectKey) || [];
-    const localById = new Map(localBank.map(q => [String(q.id), q]));
-
-    const restoredLocal = quiz.questions.map(oldQ => {
-      const src = localById.get(String(oldQ?.id));
-      if (!src) return oldQ;
 
       return {
         ...oldQ,
-        correctIndex: src.correctIndex,
-        correctAnswer: src.correctAnswer,
-        explanation: src.explanation || "",
-        inputKind: src.inputKind || null,
-        inputHint: src.inputHint || ""
+        type,
+        correctIndex,
+        correctAnswer,
+        explanation: pickL(row, "explanation") || "",
+        inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
+        inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
       };
     });
 
     return {
       ...quiz,
-      questions: restoredLocal
+      questions: restoredQuestions
     };
   } catch {
     return null;
@@ -9063,7 +8874,13 @@ async function renderToursHistorySummary(subjectId) {
   const resumeBtn = $("#practice-resume-btn");
   const restartBtn = $("#practice-restart-btn");
 
-  const canResume = !!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz);
+    const canResume = !!(
+    draft?.status === "paused" &&
+    draft?.subjectKey === subjectKey &&
+    draft?.quiz &&
+    Array.isArray(draft.quiz.questions) &&
+    draft.quiz.questions.length > 0
+  );
 
    if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
   if (restartBtn) restartBtn.textContent = canResume ? t("practice_restart") : t("practice_start");
@@ -9079,13 +8896,8 @@ async function startPracticeNew() {
   // DB-first questions (may fallback to local automatically)
   const questions = await buildPracticeSet(subjectKey);
 
-    if (!Array.isArray(questions) || questions.length === 0) {
+      if (!Array.isArray(questions) || questions.length === 0) {
     showToast(t("practice_no_questions") || "Нет вопросов для практики по этому предмету.");
-    return;
-  }
-
-  if (questions.length < PRACTICE_CONFIG.total) {
-    showToast(t("practice_not_enough_questions") || "Для этой практики пока недостаточно вопросов.");
     return;
   }
 
