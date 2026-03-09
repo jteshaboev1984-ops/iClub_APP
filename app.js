@@ -290,7 +290,7 @@ function hideToursLoading() {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
     if (!window.supabase?.createClient) return null;
 
-    if (!sb) {
+        if (!sb) {
       sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: {
           persistSession: true,
@@ -298,7 +298,6 @@ function hideToursLoading() {
           detectSessionInUrl: false,
         },
       });
-      window.sb = sb; // удобно для отладки в консоли
     }
 
     // 1) ensure we have a session (Anonymous Sign-in)
@@ -315,9 +314,6 @@ function hideToursLoading() {
         // Не валим приложение — просто работаем без базы (пока не починим настройки)
         return sb;
       }
-
-      // На всякий случай — лог успешного входа
-      console.log("[Supabase] Anonymous session OK:", !!anonData?.session);
     }
 
     // 2) ensure users row exists (id == auth.uid())
@@ -1100,10 +1096,9 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
     saveCredentialsStore(c);
   }
 
-  function evaluateFocusedStreakRealtime(event) {
-    // valid sessions: video_completed / video_skipped / practice_attempt_finished / tour_attempt_finished
-    // (video_skipped разрешён по документам проекта)
-    if (!["video_completed", "video_skipped", "practice_attempt_finished", "tour_attempt_finished"].includes(event.type)) return;
+    function evaluateFocusedStreakRealtime(event) {
+    // valid sessions: video_completed / practice_attempt_finished / tour_attempt_finished
+    if (!["video_completed", "practice_attempt_finished", "tour_attempt_finished"].includes(event.type)) return;
 
     const c = credentialsStore();
     const subjectId = event?.payload?.subject_id ? String(event.payload.subject_id) : "";
@@ -1546,8 +1541,7 @@ async function ensureProfileGeoTranslationsHydrated() {
           changed = true;
         }
       }
-    } catch (e) {
-      console.warn("[geo hydrate] failed:", e);
+        } catch (e) {
       return { ok: false, reason: "exception" };
     }
 
