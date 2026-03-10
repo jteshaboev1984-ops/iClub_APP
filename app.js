@@ -8362,23 +8362,30 @@ function addMyRecsFromAttempt(attempt) {
   const recs = Array.from(recMap.values());
   if (!recs.length) return { added: 0, recs: [], addedRecs: [] };
 
-  // local UX fallback: store only topic titles as before (lightweight)
   const store = loadMyRecs();
-  store.bySubject = store.bySubject || {};
-  const subjKey = attempt.subjectKey || "unknown";
+store.bySubject = store.bySubject || {};
+const subjKey = attempt.subjectKey || "unknown";
 
-  const existing = new Set((store.bySubject[subjKey] || []).map(x => x.topic));
-  const nowTs = Date.now();
+const existing = new Set(
+  (store.bySubject[subjKey] || []).map(x =>
+    `${String(x?.topic || "").trim()}::${x?.subtopic ? String(x.subtopic).trim() : ""}`
+  )
+);
 
-  const add = recs
-    .map(r => r.topic)
-    .filter(tp => !existing.has(tp))
-    .map(tp => ({ topic: tp, ts: nowTs }));
+const nowTs = Date.now();
 
-  store.bySubject[subjKey] = [...add, ...(store.bySubject[subjKey] || [])].slice(0, 50);
-  saveMyRecs(store);
+const add = recs
+  .filter(r => !existing.has(`${r.topic}::${r.subtopic || ""}`))
+  .map(r => ({
+    topic: r.topic,
+    subtopic: r.subtopic || null,
+    ts: nowTs
+  }));
 
-  return { added: add.length, recs, addedRecs: recs };
+store.bySubject[subjKey] = [...add, ...(store.bySubject[subjKey] || [])].slice(0, 50);
+saveMyRecs(store);
+
+return { added: add.length, recs, addedRecs: add };
 }
 
   function formatMMSS(sec) {
@@ -9430,21 +9437,26 @@ if (!quiz?.drillType) {
     const meta = $("#practice-result-meta");
 
 const wrong = attempt.details.filter(d => !d.isCorrect);
-const topics = Array.from(new Set(wrong.map(d => d.topic || "General")));
+const recKeys = Array.from(new Set(
+  wrong.map(d => {
+    const topic = String(d?.topic || t("topic_general") || "General").trim();
+    const subtopic = d?.subtopic ? String(d.subtopic).trim() : "";
+    return `${topic}::${subtopic}`;
+  })
+));
 
 if (meta) {
   meta.textContent =
     `Score: ${attempt.score}/${attempt.total} (${attempt.percent}%) • ${attempt.durationSec}s` +
     ` • ${t("practice_errors")}: ${wrong.length}` +
-    ` • ${t("practice_topics")}: ${topics.length}`;
+    ` • ${t("practice_topics")}: ${recKeys.length}`;
 }
 
-      // Counters on buttons
-   const reviewCountEl = $("#practice-review-count");
-   if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
+const reviewCountEl = $("#practice-review-count");
+if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
 
-   const recsCountEl = $("#practice-recs-count");
-if (recsCountEl) recsCountEl.textContent = String(topics.length);
+const recsCountEl = $("#practice-recs-count");
+if (recsCountEl) recsCountEl.textContent = String(recKeys.length);
 
 // ✅ set “exit” button label based on context (main vs drill)
 try {
@@ -9784,27 +9796,16 @@ function syncPracticeResultBadges(attemptOverride) {
       return;
     }
 
-    // Topics from wrong answers
-    const topics = attempt.details
-      .filter(d => !d.isCorrect)
-      .map(d => d.topic || "General");
+    const wrong = attempt.details.filter(d => !d.isCorrect);
 
-    const uniq = Array.from(new Set(topics));
+const uniq = Array.from(new Map(
+  wrong.map(d => {
+    const topic = String(d?.topic || t("topic_general") || "General").trim();
+    const subtopic = d?.subtopic ? String(d.subtopic).trim() : "";
+    return [`${topic}::${subtopic}`, { topic, subtopic }];
+  })
+).values());
 
-        // Save to "My recommendations"
-const res = addMyRecsFromAttempt(attempt);
-
-if (res?.added) {
-  showToast(t("practice_saved_to_my_recs"));
-
-  // ✅ write recs into DB (non-blocking)
-  try {
-    // new format: [{ topic, subtopic }]
-    syncMyRecsToSupabase(attempt.subjectKey, res.addedRecs || res.recs || []);
-  } catch {}
-}
-
-// дальше код функции идёт как был
 if (!uniq.length) {
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_recs_no_errors"))}</div>`;
   return;
@@ -9834,31 +9835,30 @@ if (!uniq.length) {
         }
       } catch {}
 
-      wrap.innerHTML = "";
-      uniq.forEach(tp => {
-        const item = document.createElement("div");
-        item.className = "list-item";
+     wrap.innerHTML = "";
+uniq.forEach(rec => {
+  const item = document.createElement("div");
+  item.className = "list-item";
 
-        const refs = getReadingRefs(attempt.subjectKey, tp);
+  const refs = getReadingRefs(attempt.subjectKey, rec.topic);
 
-        let refsHtml = "";
-        if (refs.length) {
-          refsHtml = `
-            <div class="muted small" style="margin-top:6px">
-              ${refs.slice(0, 3).map(r =>
-                `• ${escapeHTML(r.title || "")}${r.ref ? ` — ${escapeHTML(r.ref)}` : ""}${r.pages ? ` (${escapeHTML(r.pages)})` : ""}`
-              ).join("<br>")}
-            </div>
-          `;
-        }
+  let refsHtml = "";
+  if (refs.length) {
+    refsHtml = `
+      <div class="muted small" style="margin-top:6px">
+        ${refs.slice(0, 3).map(r =>
+          `• ${escapeHTML(r.title || "")}${r.ref ? ` — ${escapeHTML(r.ref)}` : ""}${r.pages ? ` (${escapeHTML(r.pages)})` : ""}`
+        ).join("<br>")}
+      </div>
+    `;
+  }
 
-        const fallbackText = booksAvailable
-          ? t("recs_books_available_source")
-          : t("recs_books_later_source");
-
+  const fallbackText = booksAvailable
+    ? t("recs_books_available_source")
+    : t("recs_books_later_source");
         item.innerHTML = `
-          <div style="font-weight:900">${escapeHTML(tp)}</div>
-          <div class="muted small">Рекомендуем повторить теорию и примеры по теме “${escapeHTML(tp)}”.</div>
+          <div style="font-weight:900">${escapeHTML(rec.topic)}</div>
+          ${rec.subtopic ? `<div class="muted small" style="margin-top:4px">${escapeHTML(rec.subtopic)}</div>` : ``}
           ${refsHtml || `<div class="muted small" style="margin-top:6px">${escapeHTML(fallbackText)}</div>`}
           <div style="margin-top:10px">
             <button type="button" class="btn" data-open-books="1">Открыть «Книги»</button>
