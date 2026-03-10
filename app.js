@@ -4156,16 +4156,25 @@ async function savePracticeAttemptToSupabase(attempt, quiz) {
   const answers = Array.isArray(quiz?.answers) ? quiz.answers : [];
 
   const answersPayload = details.map((d, i) => {
-    const rawUA = answers[i];
-    const userAnswer = (rawUA === null || rawUA === undefined) ? "" : String(rawUA);
+  const rawUA = answers[i];
 
-    return {
-      question_id: Number(d?.id),
-      user_answer: userAnswer,
-      is_correct: !!d?.isCorrect,
-      time_spent: Math.max(0, Math.round(Number(d?.timeSpent) || 0))
-    };
-  }).filter(r => Number.isFinite(r.question_id) && r.question_id > 0);
+  let userAnswer = "";
+  if (rawUA !== null && rawUA !== undefined) {
+    if (String(d?.type || "").toLowerCase() === "mcq") {
+      const idx = Number(rawUA);
+      userAnswer = idxToLetter(idx) || String(rawUA);
+    } else {
+      userAnswer = String(rawUA);
+    }
+  }
+
+  return {
+    question_id: Number(d?.id),
+    user_answer: userAnswer,
+    is_correct: !!d?.isCorrect,
+    time_spent: Math.max(0, Math.round(Number(d?.timeSpent) || 0))
+  };
+}).filter(r => Number.isFinite(r.question_id) && r.question_id > 0);
 
   // =========================
   // RPC path (atomic + anti-duplicate via unique index + ON CONFLICT)
@@ -10015,9 +10024,42 @@ async function renderMyRecs() {
     const topic = norm(rec?.topic);
     const subtopic = rec?.subtopic ? norm(rec.subtopic) : "";
 
-        const base = ans
+            const cleaned = ans
       .map(x => ({ ...x, q: x.question }))
       .filter(x => x.q && x.q.is_active)
+      .filter(x => {
+        const q = x.q;
+        const qType = String(q.qtype || "mcq").toLowerCase();
+
+        // Для input/других типов оставляем как есть
+        if (qType !== "mcq") return true;
+
+        const uaRaw = String(x.user_answer ?? "").trim();
+        const caRaw = String(q.correct_answer ?? "").trim();
+
+        const toIdx = (raw) => {
+          if (!raw) return null;
+          if (isNumericLike(raw)) return Math.trunc(Number(raw));
+          const li = letterToIdx(raw);
+          return (li !== null && li >= 0) ? li : null;
+        };
+
+        const uaIdx = toIdx(uaRaw);
+        const caIdx = toIdx(caRaw);
+
+        // Если оба значения распознаны и они совпадают — такую "ошибку" не показываем
+        if (uaIdx !== null && caIdx !== null && uaIdx === caIdx) return false;
+
+        const uaDisp = formatAnswerForDisplay(q, x.user_answer);
+        const caDisp = formatAnswerForDisplay(q, q.correct_answer);
+
+        // Дополнительная защита на уровне отображения
+        if (uaDisp && caDisp && uaDisp === caDisp) return false;
+
+        return true;
+      });
+
+    const base = cleaned
       .filter(x => {
         const qt = norm(x.q.topic);
         return topic ? qt === topic : true;
