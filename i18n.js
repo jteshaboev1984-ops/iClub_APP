@@ -712,7 +712,7 @@ ratings_empty: "Рейтинг появится после старта туро
 achievements_empty: "Пока достижений нет.",
 recommendations_empty: "Пока рекомендаций нет.",
 certificates_empty: "Пока сертификатов нет.",
-archive_empty: "Архив пока пуст."
+archive_empty: "Архив пока пуст.",
 
       // Pinned hints
       profile_pinned_hint_has: "Закреплённые предметы уже ускоряют доступ. Дальше — стабильность.",
@@ -1429,7 +1429,7 @@ ratings_empty: "Turlar boshlangach reyting paydo bo‘ladi.",
 achievements_empty: "Hozircha yutuqlar yo‘q.",
 recommendations_empty: "Hozircha tavsiyalar yo‘q.",
 certificates_empty: "Hozircha sertifikatlar yo‘q.",
-archive_empty: "Arxiv hozircha bo‘sh."
+archive_empty: "Arxiv hozircha bo‘sh.",
 
       // Pinned hints
       profile_pinned_hint_has:
@@ -2122,7 +2122,7 @@ ratings_empty: "Rankings will appear after the tours start.",
 achievements_empty: "No achievements yet.",
 recommendations_empty: "No recommendations yet.",
 certificates_empty: "No certificates yet.",
-archive_empty: "The archive is empty for now."
+archive_empty: "The archive is empty for now.",
 
       profile_pinned_hint_has: "Pinned subjects already speed things up. Next: consistency.",
       profile_pinned_hint_empty: "Pin 1–3 subjects to make access noticeably faster."
