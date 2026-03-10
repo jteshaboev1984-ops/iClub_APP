@@ -10312,43 +10312,39 @@ const mistakesHtml = totalMistakes
   `;
    
         const refsHtml = refs.length
-      ? refs.map(r => {
-          const title = r.title ? escapeHTML(r.title) : (r.book_id ? `Книга #${escapeHTML(String(r.book_id))}` : "Книга");
-          const ref = r.book_reference ? `• ${escapeHTML(String(r.book_reference))}` : "";
-          const has = !!r.file_url;
-          return `
-            <div class="list-item">
-              <div style="font-weight:900">${title}</div>
-              ${ref ? `<div class="muted small" style="margin-top:6px">${ref}</div>` : ""}
-              ${has ? `<div style="margin-top:10px"><button class="btn" type="button" data-open-book-url="${escapeHTML(r.file_url)}">${escapeHTML(t("rec_open_book") || "Открыть")}</button></div>` : ""}
-            </div>
-          `;
-        }).join("")
-      : `
+  ? refs.map(r => {
+      const title = r.title ? escapeHTML(r.title) : (r.book_id ? `Книга #${escapeHTML(String(r.book_id))}` : "Книга");
+      const ref = r.book_reference ? `• ${escapeHTML(String(r.book_reference))}` : "";
+      const has = !!r.file_url;
+      return `
         <div class="list-item">
-          <div class="muted small" style="font-weight:800">
-            ${escapeHTML(t("rec_read_no_refs") || "Ссылки на главы добавим через topic_book_map.")}
-          </div>
+          <div style="font-weight:900">${title}</div>
+          ${ref ? `<div class="muted small" style="margin-top:6px">${ref}</div>` : ""}
+          ${has ? `<div style="margin-top:10px"><button class="btn" type="button" data-open-book-url="${escapeHTML(r.file_url)}">${escapeHTML(t("rec_open_book") || "Открыть")}</button></div>` : ""}
         </div>
       `;
+    }).join("")
+  : ``;
    
-    body.innerHTML = `
-   
-    ${mistakesHeaderHtml}
-    ${mistakesHtml}
-    ${drillMiniHtml}
-
-   <div class="list-item">
-      <div style="font-weight:900">
-        ${escapeHTML(t("rec_read_title") || "Что прочитать")}
-      </div>
-      <div class="muted small" style="margin-top:6px">
-        ${escapeHTML((t("rec_read_line") || 'Kitobdagi mavzu — "{topic}".').replace("{topic}", String(rec.topic || "").trim()))}
-      </div>
+    const readBlockHtml = refs.length ? `
+  <div class="list-item">
+    <div style="font-weight:900">
+      ${escapeHTML(t("rec_read_title") || "Что прочитать")}
     </div>
+    <div class="muted small" style="margin-top:6px">
+      ${escapeHTML((t("rec_read_line") || 'Тема в книге — "{topic}".').replace("{topic}", String(rec.topic || "").trim()))}
+    </div>
+  </div>
 
-    ${refsHtml}
-  `;
+  ${refsHtml}
+` : ``;
+
+body.innerHTML = `
+  ${mistakesHeaderHtml}
+  ${mistakesHtml}
+  ${drillMiniHtml}
+  ${readBlockHtml}
+`;
 
   body.querySelectorAll("button[data-open-book-url]").forEach(btn => {
     btn.addEventListener("click", (e) => {
