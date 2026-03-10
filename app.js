@@ -9936,7 +9936,7 @@ async function renderMyRecs() {
 
   const subjectKey = state.courses.subjectKey;
 
-    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
+  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
 
   // 1) DB-first
   let rows = await fetchMyRecsDB(subjectKey);
@@ -9949,7 +9949,7 @@ async function renderMyRecs() {
       id: null,
       source_type: "practice",
       topic: x.topic || "General",
-      subtopic: null,
+      subtopic: x.subtopic || null,
       book_id: null,
       book_reference: null,
       created_at: x.ts ? new Date(x.ts).toISOString() : null
@@ -9957,9 +9957,28 @@ async function renderMyRecs() {
   }
 
   if (!rows.length) {
-  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("recommendations_empty") || "Пока рекомендаций нет.")}</div>`;
-  return;
-}
+    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("recommendations_empty") || "Пока рекомендаций нет.")}</div>`;
+    return;
+  }
+
+  // 3) hide stale recommendations (no real mistakes left)
+  const checks = await Promise.all(
+    rows.map(async (rec) => {
+      try {
+        const mistakes = await fetchRecentMistakesByRec(subjectKey, rec);
+        return { rec, keep: Array.isArray(mistakes) && mistakes.length > 0 };
+      } catch {
+        return { rec, keep: true };
+      }
+    })
+  );
+
+  rows = checks.filter(x => x.keep).map(x => x.rec);
+
+  if (!rows.length) {
+    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("recommendations_empty") || "Пока рекомендаций нет.")}</div>`;
+    return;
+  }
 
   wrap.innerHTML = "";
   rows.forEach(rec => {
@@ -9976,7 +9995,7 @@ async function renderMyRecs() {
     `;
 
     el.addEventListener("click", async () => {
-      state.courses.myRecCurrent = rec; // держим выбранную рекомендацию
+      state.courses.myRecCurrent = rec;
       saveState();
       pushCourses("my-rec-detail");
       await renderMyRecDetail();
