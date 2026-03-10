@@ -2475,8 +2475,12 @@ contentEl.innerHTML = `
   };
 
 function getReadingRefs(subjectKey, topic) {
-  const s = READING_MAP?.[subjectKey] || null;
-  if (!s) return [];
+  const map = (typeof READING_MAP !== "undefined" && READING_MAP) ? READING_MAP : null;
+  if (!map || typeof map !== "object") return [];
+
+  const s = map?.[subjectKey] || null;
+  if (!s || typeof s !== "object") return [];
+
   const refs = s?.[topic] || [];
   return Array.isArray(refs) ? refs : [];
 }
@@ -9777,13 +9781,20 @@ function syncPracticeResultBadges(attemptOverride) {
   if (!attempt || !Array.isArray(attempt.details)) return;
 
   const wrong = attempt.details.filter(d => !d.isCorrect);
-  const topics = Array.from(new Set(wrong.map(d => d.topic || "General")));
+
+  const recKeys = Array.from(new Set(
+    wrong.map(d => {
+      const topic = String(d?.topic || t("topic_general") || "General").trim();
+      const subtopic = d?.subtopic ? String(d.subtopic).trim() : "";
+      return `${topic}::${subtopic}`;
+    })
+  ));
 
   const reviewCountEl = $("#practice-review-count");
   if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
 
   const recsCountEl = $("#practice-recs-count");
-  if (recsCountEl) recsCountEl.textContent = String(topics.length);
+  if (recsCountEl) recsCountEl.textContent = String(recKeys.length);
 }
  
   function renderPracticeRecs() {
@@ -9840,7 +9851,11 @@ uniq.forEach(rec => {
   const item = document.createElement("div");
   item.className = "list-item";
 
-  const refs = getReadingRefs(attempt.subjectKey, rec.topic);
+    const preferredKey = rec.subtopic || rec.topic;
+  const preferredRefs = getReadingRefs(attempt.subjectKey, preferredKey);
+  const refs = preferredRefs.length
+    ? preferredRefs
+    : getReadingRefs(attempt.subjectKey, rec.topic);
 
   let refsHtml = "";
   if (refs.length) {
