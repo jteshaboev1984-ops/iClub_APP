@@ -9288,9 +9288,10 @@ try {
         userDisplay = String(ua ?? "").trim();
       }
 
-   return {
+         return {
      id: q.id,
-     topic: q.topic || "General",
+     topic: q.topic || (t("topic_general") || "General"),
+     subtopic: q.subtopic || null,
      difficulty: q.difficulty,
      type: q.type,
      question: q.question,
@@ -9602,16 +9603,20 @@ try {
   corrDisp = String(d.correctAnswer || "—");
 }
 
-const diffLabel = t("practice_difficulty") || "Сложность";
 const diffKey = `difficulty_${String(d.difficulty || "").toLowerCase()}`;
 const diffText = t(diffKey) || d.difficulty || "";
-
 const yourAnsLabel = t("your_answer") || "Ваш ответ";
 const correctLabel = t("correct_answer") || "Правильно";
+const explLabel = t("rec_show_expl") || "Объяснение";
+
+const topicText = String(d.topic || t("topic_general") || "General").trim();
+const subtopicText = String(d.subtopic || "").trim();
 
 row.innerHTML = `
-  <div style="font-weight:900">${status} ${n}. ${escapeHTML(diffText)} • ${escapeHTML(d.type)}</div>
-  <div class="muted small" style="margin-top:6px">${escapeHTML(d.question || "")}</div>
+  <div style="font-weight:900">${status} ${n}. ${escapeHTML(topicText)}</div>
+  ${subtopicText ? `<div class="muted small" style="margin-top:4px">${escapeHTML(subtopicText)}</div>` : ``}
+  ${diffText ? `<div class="muted small" style="margin-top:4px">${escapeHTML(diffText)}</div>` : ``}
+  <div class="muted small" style="margin-top:8px">${escapeHTML(d.question || "")}</div>
 
   <div class="muted small" style="margin-top:8px">
     ${escapeHTML(yourAnsLabel)}: <b>${escapeHTML(userDisp || "—")}</b>
@@ -9620,7 +9625,7 @@ row.innerHTML = `
     ${escapeHTML(correctLabel)}: <b>${escapeHTML(corrDisp || "—")}</b>
   </div>
 
-  ${d.explanation ? `<div class="muted small" style="margin-top:8px">${escapeHTML(d.explanation)}</div>` : ``}
+  ${d.explanation ? `<div class="muted small" style="margin-top:8px"><b>${escapeHTML(explLabel)}:</b> ${escapeHTML(d.explanation)}</div>` : ``}
 `;
         body.appendChild(row);
       });
