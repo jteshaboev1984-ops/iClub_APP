@@ -706,11 +706,17 @@ rec_delete_ok: "Удалить",
 rec_delete_cancel: "Отмена",
 rec_deleted_toast: "Рекомендация удалена.",
 
+lessons_empty: "Уроки скоро появятся.",
+notifications_empty: "Пока уведомлений нет.",
+ratings_empty: "Рейтинг появится после старта туров.",
+achievements_empty: "Пока достижений нет.",
+recommendations_empty: "Пока рекомендаций нет.",
+certificates_empty: "Пока сертификатов нет.",
+archive_empty: "Архив пока пуст."
+
       // Pinned hints
-      profile_pinned_hint_has:
-        "Закреплённые предметы уже ускоряют доступ. Дальше — стабильность.",
-      profile_pinned_hint_empty:
-        "Закрепите 1–3 предмета — и доступ к нужному станет заметно быстрее."
+      profile_pinned_hint_has: "Закреплённые предметы уже ускоряют доступ. Дальше — стабильность.",
+      profile_pinned_hint_empty: "Закрепите 1–3 предмета — и доступ к нужному станет заметно быстрее."
     },
 
     uz: {
@@ -1417,6 +1423,14 @@ rec_delete_ok: "O‘chirish",
 rec_delete_cancel: "Bekor qilish",
 rec_deleted_toast: "Tavsiya ro‘yxatdan o‘chirildi.",
 
+           lessons_empty: "Darslar tez orada paydo bo‘ladi.",
+notifications_empty: "Hozircha bildirishnomalar yo‘q.",
+ratings_empty: "Turlar boshlangach reyting paydo bo‘ladi.",
+achievements_empty: "Hozircha yutuqlar yo‘q.",
+recommendations_empty: "Hozircha tavsiyalar yo‘q.",
+certificates_empty: "Hozircha sertifikatlar yo‘q.",
+archive_empty: "Arxiv hozircha bo‘sh."
+
       // Pinned hints
       profile_pinned_hint_has:
         "Biriktirilgan fanlar tezkor kirishni ta’minlaydi. Barqarorlik — natijaning asosi.",
@@ -2101,6 +2115,14 @@ rec_delete_text: "This will remove the recommendation from your list.",
 rec_delete_ok: "Remove",
 rec_delete_cancel: "Cancel",
 rec_deleted_toast: "Removed from recommendations.",
+
+           lessons_empty: "Lessons will be available soon.",
+notifications_empty: "No notifications yet.",
+ratings_empty: "Rankings will appear after the tours start.",
+achievements_empty: "No achievements yet.",
+recommendations_empty: "No recommendations yet.",
+certificates_empty: "No certificates yet.",
+archive_empty: "The archive is empty for now."
 
       profile_pinned_hint_has: "Pinned subjects already speed things up. Next: consistency.",
       profile_pinned_hint_empty: "Pin 1–3 subjects to make access noticeably faster."
