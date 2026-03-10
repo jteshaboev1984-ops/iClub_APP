@@ -9928,9 +9928,9 @@ async function renderMyRecs() {
   }
 
   if (!rows.length) {
-    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("my_recs_empty") || "")}</div>`;
-    return;
-  }
+  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("recommendations_empty") || "Пока рекомендаций нет.")}</div>`;
+  return;
+}
 
   wrap.innerHTML = "";
   rows.forEach(rec => {
