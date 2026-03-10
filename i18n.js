@@ -71,7 +71,7 @@ community_join: "Присоединиться",
 about_title: "О проекте",
 about_sub: "Коротко о платформе, правилах и команде.",
 about_card_title: "iClub",
-about_card_body: "Здесь будет официальный текст из документа проекта: цели, правила участия, форматы туров, условия сертификатов и рейтингов.",
+about_card_body: "iClub — образовательная платформа для практики, туров, работы над ошибками и отслеживания прогресса.",
 // About — tabs + content
 about_tab_project: "ПРОЕКТ",
 about_tab_rules: "ПРАВИЛА",
@@ -598,7 +598,7 @@ tour_certificate_sub: "Если доступен по правилам",
 
 tour_review_screen_title: "Разбор тура",
 tour_review_screen_sub: "Ответы, объяснения и работа над ошибками",
-tour_review_empty: "Разбор появится после подключения данных тура.",
+tour_review_empty: "Нет данных для разбора тура.",
 
 back_to_result: "Назад к результату",
 to_subject: "К предмету",
@@ -658,7 +658,7 @@ tour_violations_finish_toast: "Тур завершён: нарушения се�
 
        books_title: "Книги",
 books_subtitle: "Ресурсы по предмету",
-books_empty_static: "Список книг подключим через базу.",
+books_empty_static: "Пока книги не добавлены.",
 
 books_loading: "Загрузка…",
 books_pick_subject_first: "Сначала выберите предмет.",
@@ -671,6 +671,7 @@ my_recs_screen_title: "Мои рекомендации",
 my_recs_screen_subtitle: "Сохранённые рекомендации по чтению",
 my_recs_empty_static: "Пока рекомендаций нет.",
 my_recs_empty: "Пока рекомендаций нет.",
+my_rec_loading: "Загрузка…",
 saved_at_label: "Сохранено",
 
 // My Recs — Detail (AI tutor)
@@ -785,7 +786,7 @@ community_join: "Qo‘shilish",
 about_title: "Loyiha haqida",
 about_sub: "Platforma, qoidalar va jamoa haqida qisqacha.",
 about_card_title: "iClub",
-about_card_body: "Bu yerda loyiha hujjatidagi rasmiy matn bo‘ladi: maqsadlar, qatnashish qoidalari, tur formatlari, sertifikat va reyting shartlari.",
+about_card_body: "iClub — amaliyot, turlar, xatolar ustida ishlash va progressni kuzatish uchun ta’lim platformasi.",
 // About — tabs + content
 about_tab_project: "LOYIHA",
 about_tab_rules: "QOIDALAR",
@@ -1316,7 +1317,7 @@ tour_certificate_sub: "Qoidalarga ko‘ra mavjud bo‘lsa",
 
 tour_review_screen_title: "Tur tahlili",
 tour_review_screen_sub: "Javoblar, izohlar va xatolar ustida ishlash",
-tour_review_empty: "Tur ma’lumotlari ulangach tahlil ko‘rinadi.",
+tour_review_empty: "Tur tahlili uchun ma’lumot yo‘q.",
 
 back_to_result: "Natijaga qaytish",
 to_subject: "Fanga",
@@ -1377,7 +1378,7 @@ tour_violations_finish_toast: "Tur yakunlandi: sessiya buzilishlari",
 
        books_title: "Kitoblar",
 books_subtitle: "Fan bo‘yicha resurslar",
-books_empty_static: "Kitoblar ro‘yxati bazadan ulanadi.",
+books_empty_static: "Hozircha kitoblar qo‘shilmagan.",
 
 books_loading: "Yuklanmoqda…",
 books_pick_subject_first: "Avval fanni tanlang.",
@@ -1390,6 +1391,7 @@ my_recs_screen_title: "Mening tavsiyalarim",
 my_recs_screen_subtitle: "O‘qish bo‘yicha saqlangan tavsiyalar",
 my_recs_empty_static: "Hozircha tavsiyalar yo‘q.",
 my_recs_empty: "Hozircha tavsiyalar yo‘q.",
+my_rec_loading: "Yuklanmoqda…",
 saved_at_label: "Saqlangan",
 
 // My Recs — Detail (AI tutor)
@@ -1506,7 +1508,7 @@ community_join: "Join",
 about_title: "About",
 about_sub: "A quick overview of the platform, rules, and the team.",
 about_card_title: "iClub",
-about_card_body: "Official project text will appear here: goals, participation rules, tour formats, certificate and rating rules.",
+about_card_body: "iClub is an educational platform for practice, tours, mistake review, and progress tracking.",
 // About — tabs + content
 about_tab_project: "PROJECT",
 about_tab_rules: "RULES",
@@ -2017,7 +2019,7 @@ tour_certificate_sub: "If available by rules",
 
 tour_review_screen_title: "Tour review",
 tour_review_screen_sub: "Answers, explanations and work on mistakes",
-tour_review_empty: "Review will appear after tour data is connected.",
+tour_review_empty: "No data available for tour review.",
 
 back_to_result: "Back to result",
 to_subject: "To subject",
@@ -2072,7 +2074,7 @@ tour_violations_finish_toast: "Tour finished: session violations",
 
        books_title: "Books",
 books_subtitle: "Subject resources",
-books_empty_static: "Books list will be connected via the database.",
+books_empty_static: "No books added yet.",
 
 books_loading: "Loading…",
 books_pick_subject_first: "Please choose a subject first.",
@@ -2085,6 +2087,7 @@ my_recs_screen_title: "My recommendations",
 my_recs_screen_subtitle: "Saved reading recommendations",
 my_recs_empty_static: "No recommendations yet.",
 my_recs_empty: "No recommendations yet.",
+my_rec_loading: "Loading…",
 saved_at_label: "Saved",
 
 // My Recs — Detail (AI tutor)
