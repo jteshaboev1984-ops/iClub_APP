@@ -9872,13 +9872,13 @@ uniq.forEach(rec => {
     ? t("recs_books_available_source")
     : t("recs_books_later_source");
         item.innerHTML = `
-          <div style="font-weight:900">${escapeHTML(rec.topic)}</div>
-          ${rec.subtopic ? `<div class="muted small" style="margin-top:4px">${escapeHTML(rec.subtopic)}</div>` : ``}
-          ${refsHtml || `<div class="muted small" style="margin-top:6px">${escapeHTML(fallbackText)}</div>`}
-          <div style="margin-top:10px">
-            <button type="button" class="btn" data-open-books="1">Открыть «Книги»</button>
-          </div>
-        `;
+  <div style="font-weight:900">${escapeHTML(rec.topic)}</div>
+  ${rec.subtopic ? `<div class="muted small" style="margin-top:4px">${escapeHTML(rec.subtopic)}</div>` : ``}
+  ${refsHtml || `<div class="muted small" style="margin-top:6px">${escapeHTML(fallbackText)}</div>`}
+  <div style="margin-top:10px">
+    <button type="button" class="btn" data-open-books="1">${escapeHTML(t("rec_btn_books") || "Книги")}</button>
+  </div>
+`;
 
         const btn = item.querySelector('button[data-open-books="1"]');
         btn?.addEventListener("click", (e) => {
@@ -10015,22 +10015,21 @@ async function renderMyRecs() {
     const topic = norm(rec?.topic);
     const subtopic = rec?.subtopic ? norm(rec.subtopic) : "";
 
-    const filtered = ans
+        const base = ans
       .map(x => ({ ...x, q: x.question }))
       .filter(x => x.q && x.q.is_active)
       .filter(x => {
         const qt = norm(x.q.topic);
-        const qs = norm(x.q.subtopic);
+        return topic ? qt === topic : true;
+      });
 
-        // если в рекомендации topic пустой — не режем
-        if (topic && qt !== topic) return false;
+    const exact = subtopic
+      ? base.filter(x => norm(x.q.subtopic) === subtopic).slice(0, 10)
+      : [];
 
-        // если subtopic указан — режем по нему тоже
-        if (subtopic && qs !== subtopic) return false;
-
-        return true;
-      })
-      .slice(0, 10);
+    const filtered = exact.length
+      ? exact
+      : base.slice(0, 10);
 
     return filtered;
   } catch (e) {
@@ -10059,19 +10058,41 @@ async function fetchBookRefsForRec(subjectKey, rec) {
     const subjectId = await getSubjectIdByKey(subjectKey);
     if (!subjectId) return direct;
 
-    let q = window.sb
-      .from("topic_book_map")
-      .select("book_id, book_reference, priority")
-      .eq("subject_id", subjectId)
-      .eq("topic", rec.topic)
-      .eq("is_active", true)
-      .order("priority", { ascending: true })
-      .limit(5);
+    let maps = [];
+let mErr = null;
 
-    if (rec.subtopic) q = q.eq("subtopic", rec.subtopic);
+// 1) exact: topic + subtopic
+if (rec.subtopic) {
+  const exactQ = await window.sb
+    .from("topic_book_map")
+    .select("book_id, book_reference, priority")
+    .eq("subject_id", subjectId)
+    .eq("topic", rec.topic)
+    .eq("subtopic", rec.subtopic)
+    .eq("is_active", true)
+    .order("priority", { ascending: true })
+    .limit(5);
 
-    const { data: maps, error: mErr } = await q;
-    if (mErr || !Array.isArray(maps) || !maps.length) return direct;
+  maps = Array.isArray(exactQ.data) ? exactQ.data : [];
+  mErr = exactQ.error || null;
+}
+
+// 2) fallback: topic only
+if (!maps.length) {
+  const baseQ = await window.sb
+    .from("topic_book_map")
+    .select("book_id, book_reference, priority")
+    .eq("subject_id", subjectId)
+    .eq("topic", rec.topic)
+    .eq("is_active", true)
+    .order("priority", { ascending: true })
+    .limit(5);
+
+  maps = Array.isArray(baseQ.data) ? baseQ.data : [];
+  mErr = mErr || baseQ.error || null;
+}
+
+if (mErr || !maps.length) return direct;
 
     const bookIds = Array.from(new Set(maps.map(m => m.book_id).filter(Boolean)));
     let books = [];
@@ -10128,10 +10149,11 @@ let drillMiniHtml = "";
 try {
   const d = state?.courses?.myRecDrillLast;
   const same =
-    d &&
-    String(d.subjectKey || "") === String(subjectKey || "") &&
-    String(d.topic || "") === String(rec?.topic || "") &&
-    (d.drillType === "rec_mistakes" || d.drillType === "rec_topic");
+  d &&
+  String(d.subjectKey || "") === String(subjectKey || "") &&
+  String(d.topic || "") === String(rec?.topic || "") &&
+  String(d.subtopic || "") === String(rec?.subtopic || "") &&
+  (d.drillType === "rec_mistakes" || d.drillType === "rec_topic");
 
   if (same) {
     const line = (t("rec_drill_mini_line") || "{score}/{total} • {percent}%")
@@ -10153,7 +10175,7 @@ try {
   }
 } catch {}
    
-  body.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
+  body.innerHTML = `<div class="empty muted">${escapeHTML(t("my_rec_loading") || "Загрузка…")}</div>`;
 
 const [mistakes, refs] = await Promise.all([
   fetchRecentMistakesByRec(subjectKey, rec),
@@ -10228,20 +10250,26 @@ const mistakesHtml = totalMistakes
     </div>
   `;
    
-    const refsHtml = refs.length
-    ? refs.map(r => {
-        const title = r.title ? escapeHTML(r.title) : (r.book_id ? `Книга #${escapeHTML(String(r.book_id))}` : "Книга");
-        const ref = r.book_reference ? `• ${escapeHTML(String(r.book_reference))}` : "";
-        const has = !!r.file_url;
-        return `
-          <div class="list-item">
-            <div style="font-weight:900">${title}</div>
-            ${ref ? `<div class="muted small" style="margin-top:6px">${ref}</div>` : ""}
-            ${has ? `<div style="margin-top:10px"><button class="btn" type="button" data-open-book-url="${escapeHTML(r.file_url)}">${escapeHTML(t("rec_open_book") || "Открыть")}</button></div>` : ""}
+        const refsHtml = refs.length
+      ? refs.map(r => {
+          const title = r.title ? escapeHTML(r.title) : (r.book_id ? `Книга #${escapeHTML(String(r.book_id))}` : "Книга");
+          const ref = r.book_reference ? `• ${escapeHTML(String(r.book_reference))}` : "";
+          const has = !!r.file_url;
+          return `
+            <div class="list-item">
+              <div style="font-weight:900">${title}</div>
+              ${ref ? `<div class="muted small" style="margin-top:6px">${ref}</div>` : ""}
+              ${has ? `<div style="margin-top:10px"><button class="btn" type="button" data-open-book-url="${escapeHTML(r.file_url)}">${escapeHTML(t("rec_open_book") || "Открыть")}</button></div>` : ""}
+            </div>
+          `;
+        }).join("")
+      : `
+        <div class="list-item">
+          <div class="muted small" style="font-weight:800">
+            ${escapeHTML(t("rec_read_no_refs") || "Ссылки на главы добавим через topic_book_map.")}
           </div>
-        `;
-      }).join("")
-        : ``;
+        </div>
+      `;
    
     body.innerHTML = `
    
@@ -10338,18 +10366,39 @@ function pickContentText(obj, base) {
   const subtopic = rec?.subtopic ? String(rec.subtopic).trim() : null;
   if (!topic) return [];
 
-  let q = window.sb
-    .from("questions")
-    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
-    .eq("subject_id", subjectId)
-    .eq("is_active", true)
-    .eq("topic", topic)
-    .limit(200);
+    let data = [];
+  let error = null;
 
-  if (subtopic) q = q.eq("subtopic", subtopic);
+  // 1) exact: topic + subtopic
+  if (subtopic) {
+    const exactQ = await window.sb
+      .from("questions")
+      .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
+      .eq("subject_id", subjectId)
+      .eq("is_active", true)
+      .eq("topic", topic)
+      .eq("subtopic", subtopic)
+      .limit(200);
 
-  const { data, error } = await q;
-  if (error || !Array.isArray(data) || !data.length) return [];
+    data = Array.isArray(exactQ.data) ? exactQ.data : [];
+    error = exactQ.error || null;
+  }
+
+  // 2) fallback: topic only
+  if (!data.length) {
+    const baseQ = await window.sb
+      .from("questions")
+      .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
+      .eq("subject_id", subjectId)
+      .eq("is_active", true)
+      .eq("topic", topic)
+      .limit(200);
+
+    data = Array.isArray(baseQ.data) ? baseQ.data : [];
+    error = error || baseQ.error || null;
+  }
+
+  if (error || !data.length) return [];
 
   // нормализация = как в buildPracticeSet()
   const normalizeDiff = (d) => normalizeDifficulty(d || "easy");
