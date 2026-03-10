@@ -2104,6 +2104,15 @@ async function fetchTeamPeopleFromDb(groupKey) {
 
 function ensureTeamCacheInit() {
   if (!state.about) state.about = { tab: "project" };
+
+  if (Number(state.about.teamPeopleCacheVersion || 0) !== TEAM_CACHE_VERSION) {
+    state.about.teamPeopleCache = {};
+    state.about.teamPeopleCacheTs = {};
+    state.about.teamPeopleResolved = {};
+    state.about.teamPeopleCacheVersion = TEAM_CACHE_VERSION;
+    saveState();
+  }
+
   if (!state.about.teamPeopleCache) state.about.teamPeopleCache = {};
   if (!state.about.teamPeopleCacheTs) state.about.teamPeopleCacheTs = {};
 }
@@ -2114,19 +2123,22 @@ function ensureTeamPeopleLoaded(screenKey) {
 
   const s = String(screenKey || "overview");
   const ts = Number(state.about.teamPeopleCacheTs?.[s]) || 0;
+  const cached = state.about.teamPeopleCache?.[s];
   const tooOld = !ts || (Date.now() - ts > 6 * 60 * 60 * 1000);
 
-  // already have fresh cache
-  if (!tooOld && Array.isArray(state.about.teamPeopleCache?.[s])) return;
+  const hasAnyPhoto = Array.isArray(cached) && cached.some(x => !!String(x?.photoUrl || "").trim());
 
-  // fire-and-forget (render fallback first, then rerender if DB returns)
+  // если кэш свежий и уже содержит хотя бы одно фото — не дёргаем БД
+  if (!tooOld && Array.isArray(cached) && hasAnyPhoto) return;
+
+  // иначе перечитываем из БД
   fetchTeamPeopleFromDb(s).then(list => {
     if (!Array.isArray(list) || list.length === 0) return;
     ensureTeamCacheInit();
     state.about.teamPeopleCache[s] = list;
     state.about.teamPeopleCacheTs[s] = Date.now();
     saveState();
-    renderAboutView(); // rerender current screen with photos
+    renderAboutView();
   }).catch(() => null);
 }
       // team — overview + sub-screens (top-app)
@@ -7657,6 +7669,8 @@ if (mainSubjects.length) {
 // ---------------------------
 // Subject Hub mentor
 // ---------------------------
+const TEAM_CACHE_VERSION = 2;
+
 function mentorPhotoUrlFromPath(photoPath) {
   const p = String(photoPath || "").trim();
   if (!p || !window.sb?.storage) return null;
@@ -7684,11 +7698,19 @@ async function fetchSubjectMentor(subjectKey) {
   const role = mentorRoleForSubject(subjectKey);
   if (!role) return null;
 
-  // cache first
+    // cache first
   state.courses = state.courses || {};
   state.courses.subjectMentorCache = state.courses.subjectMentorCache || {};
-  if (state.courses.subjectMentorCache[subjectKey]) {
-    return state.courses.subjectMentorCache[subjectKey];
+
+  if (Number(state.courses.subjectMentorCacheVersion || 0) !== TEAM_CACHE_VERSION) {
+    state.courses.subjectMentorCache = {};
+    state.courses.subjectMentorCacheVersion = TEAM_CACHE_VERSION;
+    saveState();
+  }
+
+  const cachedMentor = state.courses.subjectMentorCache[subjectKey];
+  if (cachedMentor && String(cachedMentor?.photoUrl || "").trim()) {
+    return cachedMentor;
   }
 
   // DB first
