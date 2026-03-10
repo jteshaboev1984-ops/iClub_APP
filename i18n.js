@@ -669,8 +669,8 @@ books_open_pdf: "Открыть PDF",
 
 my_recs_screen_title: "Мои рекомендации",
 my_recs_screen_subtitle: "Сохранённые рекомендации по чтению",
-my_recs_empty_static: "Пока пусто.",
-my_recs_empty: "Пока пусто.",
+my_recs_empty_static: "Пока рекомендаций нет.",
+my_recs_empty: "Пока рекомендаций нет.",
 saved_at_label: "Сохранено",
 
 // My Recs — Detail (AI tutor)
@@ -1388,8 +1388,8 @@ books_open_pdf: "PDFni ochish",
 
 my_recs_screen_title: "Mening tavsiyalarim",
 my_recs_screen_subtitle: "O‘qish bo‘yicha saqlangan tavsiyalar",
-my_recs_empty_static: "Hozircha bo‘sh.",
-my_recs_empty: "Hozircha bo‘sh.",
+my_recs_empty_static: "Hozircha tavsiyalar yo‘q.",
+my_recs_empty: "Hozircha tavsiyalar yo‘q.",
 saved_at_label: "Saqlangan",
 
 // My Recs — Detail (AI tutor)
@@ -2083,8 +2083,8 @@ books_open_pdf: "Open PDF",
 
 my_recs_screen_title: "My recommendations",
 my_recs_screen_subtitle: "Saved reading recommendations",
-my_recs_empty_static: "Empty for now.",
-my_recs_empty: "Empty for now.",
+my_recs_empty_static: "No recommendations yet.",
+my_recs_empty: "No recommendations yet.",
 saved_at_label: "Saved",
 
 // My Recs — Detail (AI tutor)
