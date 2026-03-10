@@ -9511,9 +9511,9 @@ const attempt =
   // Helper: render from "details" array in one place
   const renderFromDetails = (details) => {
     if (!Array.isArray(details) || !details.length) {
-      wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_review_loading_db"))}</div>`;
-      return;
-    }
+  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_review_empty"))}</div>`;
+  return;
+}
 
     // Group by topic
     const byTopic = new Map();
@@ -9635,7 +9635,7 @@ row.innerHTML = `
   const dbAttemptId = attempt?.db?.ok ? Number(attempt?.db?.attemptId) : null;
 
   // First paint: loading
-  wrap.innerHTML = `<div class="empty muted">Загружаем разбор из базы…</div>`;
+  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_review_loading_db"))}</div>`;
 
   // DB-first flow (best-effort)
   (async () => {
