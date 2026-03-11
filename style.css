@@ -4171,3 +4171,54 @@ button.is-loading { opacity: .85; }
   font-weight: 800;
   color: rgba(15,23,42,0.72);
 }
+
+#view-certificates .empty,
+#view-certificates .card .muted {
+  line-height: 1.45;
+}
+/* =========================
+   Certificates
+   ========================= */
+
+#certificate-viewer-wrap {
+  margin-top: 18px;
+}
+
+#certificate-viewer-card {
+  border-radius: 22px;
+}
+
+#certificate-canvas-root {
+  border-radius: 22px;
+}
+
+#certificate-canvas-root .card {
+  border-radius: 18px;
+}
+
+#certificate-canvas-root b {
+  font-weight: 900;
+}
+
+@media (max-width: 640px) {
+  #certificate-canvas-root {
+    padding: 14px !important;
+  }
+
+  #certificate-canvas-root > div {
+    padding: 16px !important;
+    border-radius: 18px !important;
+  }
+
+  #certificate-canvas-root div[style*="font-size:30px"] {
+    font-size: 24px !important;
+  }
+
+  #certificate-canvas-root div[style*="grid-template-columns:repeat(3,minmax(0,1fr))"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  #certificate-canvas-root div[style*="grid-template-columns:repeat(2,minmax(0,1fr))"] {
+    grid-template-columns: 1fr !important;
+  }
+}
