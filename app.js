@@ -3176,8 +3176,17 @@ if (tabName === "ratings") {
         renderAboutView();
       }
 
-      if (viewName === "certificates") {
-        renderCertificatesView();
+            if (viewName === "certificates") {
+        (async () => {
+          const subjectKey = state?.courses?.subjectKey || null;
+          if (subjectKey) {
+            const subjectId = await getSubjectIdByKey(subjectKey).catch(() => null);
+            if (subjectId) {
+              await tryIssueFinalCertificateForSubject(subjectId).catch(() => null);
+            }
+          }
+          await renderCertificatesView();
+        })();
       }
 
       return;
@@ -3201,8 +3210,17 @@ if (tabName === "ratings") {
       renderAboutView();
     }
 
-    if (viewName === "certificates") {
-      renderCertificatesView();
+        if (viewName === "certificates") {
+      (async () => {
+        const subjectKey = state?.courses?.subjectKey || null;
+        if (subjectKey) {
+          const subjectId = await getSubjectIdByKey(subjectKey).catch(() => null);
+          if (subjectId) {
+            await tryIssueFinalCertificateForSubject(subjectId).catch(() => null);
+          }
+        }
+        await renderCertificatesView();
+      })();
     }
 }
 
@@ -4224,7 +4242,29 @@ async function issueFinalCertificateDb(userId, subjectId) {
     return null;
   }
 }
+async function tryIssueFinalCertificateForSubject(subjectId) {
+  try {
+    if (!window.sb || !subjectId) return null;
 
+    const uid = await getAuthUid();
+    if (!uid) return null;
+
+    const row = await issueFinalCertificateDb(uid, Number(subjectId));
+    if (!row?.id) return null;
+
+    if (!state.certificates) {
+      state.certificates = { selectedId: null, lastIssuedId: null };
+    }
+
+    state.certificates.selectedId = Number(row.id);
+    state.certificates.lastIssuedId = Number(row.id);
+    saveState();
+
+    return row;
+  } catch {
+    return null;
+  }
+}
 async function fetchMyCertificatesDb() {
   try {
     if (!window.sb) return [];
@@ -4400,19 +4440,40 @@ async function renderCertificatesView() {
 
   const rows = await fetchMyCertificatesDb();
 
-  if (!rows.length) {
+    if (!rows.length) {
     listEl.innerHTML = `
-      <div class="empty muted">${escapeHTML(t("certificates_empty") || "Пока сертификатов нет.")}</div>
+      <div class="card" style="text-align:center; padding:20px;">
+        <div style="font-size:34px; line-height:1; margin-bottom:10px;">🏅</div>
+        <div style="font-weight:900; margin-bottom:6px;">
+          ${escapeHTML(t("certificates_empty_title") || "Сертификатов пока нет")}
+        </div>
+        <div class="muted" style="margin-bottom:14px;">
+          ${escapeHTML(t("certificates_empty") || "Пока сертификатов нет.")}
+        </div>
+        <div class="muted small">
+          ${escapeHTML(t("certificates_empty_hint") || "Завершите активный тур, чтобы здесь появился ваш официальный результат.")}
+        </div>
+      </div>
     `;
+
+    const oldViewer = document.getElementById("certificate-viewer-wrap");
+    if (oldViewer) oldViewer.remove();
     return;
   }
 
-  const selectedId =
+    const selectedId =
     Number(state?.certificates?.selectedId || 0) ||
-    Number(state?.certificates?.lastIssuedId || 0) ||
     Number(state?.courses?.lastTourCertificateId || 0) ||
+    Number(state?.certificates?.lastIssuedId || 0) ||
     0;
 
+        if (!selectedId && rows[0]?.id) {
+    if (!state.certificates) {
+      state.certificates = { selectedId: null, lastIssuedId: null };
+    }
+    state.certificates.selectedId = Number(rows[0].id);
+    saveState();
+  }
     listEl.innerHTML = rows.map((row) => {
     const isSelected = Number(row.id) === selectedId;
     const title = certificateTypeLabel(row);
@@ -12402,7 +12463,7 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
   }
 
   // try to issue certificate only after successful DB finalize
-  if (
+    if (
     finalizeSavedToDb &&
     ctx?.attemptId &&
     !ctx?.isArchive &&
@@ -12414,6 +12475,14 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
         state.courses.lastTourCertificateId = Number(certRow.id);
         state.certificates.selectedId = Number(certRow.id);
         state.certificates.lastIssuedId = Number(certRow.id);
+      }
+
+      const subjectKey = state?.courses?.subjectKey || null;
+      if (subjectKey) {
+        const subjectId = await getSubjectIdByKey(subjectKey).catch(() => null);
+        if (subjectId) {
+          await tryIssueFinalCertificateForSubject(subjectId).catch(() => null);
+        }
       }
     } catch {}
   }
@@ -13466,7 +13535,7 @@ if (action === "tour-next" || action === "tour-submit") {
         return;
       }
 
-                  if (action === "tour-certificate") {
+               if (action === "tour-certificate") {
         const certId = Number(state?.courses?.lastTourCertificateId || 0);
 
         if (!state.certificates) {
@@ -13481,12 +13550,12 @@ if (action === "tour-next" || action === "tour-submit") {
         await renderCertificatesView();
 
         if (!certId) {
-          showToast(t("certificates_empty") || "Пока сертификатов нет.");
+          showToast(t("certificates_pending_hint") || "Сертификат появится после первой сохранённой попытки.");
         }
 
         return;
       }
-
+       
             if (action === "open-books") {
         pushCourses("books");
         renderBooks();
