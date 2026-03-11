@@ -4140,6 +4140,28 @@ async function getSubjectIdByKey(subjectKey) {
   return data || null;
 }
 
+      function formatDateShortSafe(value) {
+  try {
+    if (!value) return "—";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "—";
+    return d.toLocaleDateString(currentLang() || "ru");
+  } catch {
+    return "—";
+  }
+}
+
+function buildCertificateDownloadName(row, ext) {
+  const type = String(row?.certificate_type || "certificate").toLowerCase();
+  const subjectKey = String(row?.subject_key || "subject").toLowerCase();
+  const suffix =
+    type === "final"
+      ? "final"
+      : `tour-${Number(row?.tour_no || 0) || "x"}`;
+
+  return `iclub-${subjectKey}-${suffix}-${Number(row?.id || 0)}.${ext}`;
+}
+   
 async function issueTourCertificateDb(attemptId) {
   try {
     if (!window.sb || !attemptId) return null;
@@ -4391,7 +4413,7 @@ async function renderCertificatesView() {
     Number(state?.courses?.lastTourCertificateId || 0) ||
     0;
 
-  listEl.innerHTML = rows.map((row) => {
+    listEl.innerHTML = rows.map((row) => {
     const isSelected = Number(row.id) === selectedId;
     const title = certificateTypeLabel(row);
     const subjectText = row.subject_title || (t("subject_label") || "Предмет");
@@ -4421,8 +4443,252 @@ async function renderCertificatesView() {
       </div>
     `;
   }).join("");
+
+  await renderCertificateViewer(rows);
 }
-   
+   function findSelectedCertificateRow(rows) {
+  const selectedId =
+    Number(state?.certificates?.selectedId || 0) ||
+    Number(state?.certificates?.lastIssuedId || 0) ||
+    Number(state?.courses?.lastTourCertificateId || 0) ||
+    0;
+
+  if (!selectedId) return rows[0] || null;
+
+  return rows.find(r => Number(r.id) === selectedId) || rows[0] || null;
+}
+
+function certificateViewerHtml(row) {
+  if (!row) {
+    return `
+      <div class="card">
+        <div class="muted">${escapeHTML(t("certificates_empty") || "Пока сертификатов нет.")}</div>
+      </div>
+    `;
+  }
+
+  const profile = loadProfile?.() || {};
+  const fullName =
+    String(profile?.fullName || profile?.fullname || profile?.name || "").trim() ||
+    "iClub User";
+
+  const certTitle = certificateTypeLabel(row);
+  const subjectText = row.subject_title || (t("subject_label") || "Предмет");
+  const issueDate = formatDateShortSafe(row.created_at);
+
+  return `
+    <div class="card" id="certificate-viewer-card" style="padding:0; overflow:hidden;">
+      <div id="certificate-canvas-root" style="background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%); padding:20px;">
+        <div style="border:2px solid rgba(47,111,214,.22); border-radius:20px; padding:24px; background:#fff; box-shadow:0 8px 24px rgba(15,23,42,.06);">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <img src="logo.png" alt="iClub" style="width:48px; height:48px; object-fit:contain;" />
+              <div>
+                <div style="font-size:20px; font-weight:900; line-height:1;">iClub</div>
+                <div class="muted small">${escapeHTML(t("certificates_title") || "Сертификаты")}</div>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div class="muted small">${escapeHTML(t("certificate_number_label") || "Номер")}</div>
+              <div style="font-weight:800;">${escapeHTML(String(row.certificate_number || "—"))}</div>
+            </div>
+          </div>
+
+          <div style="text-align:center; margin:18px 0 24px;">
+            <div class="muted small" style="letter-spacing:.10em; text-transform:uppercase;">
+              ${escapeHTML(t("certificate_awarded_label") || "Настоящий сертификат подтверждает")}
+            </div>
+            <div style="font-size:30px; font-weight:900; margin-top:10px; line-height:1.15;">
+              ${escapeHTML(fullName)}
+            </div>
+            <div style="font-size:16px; margin-top:12px;">
+              ${escapeHTML(t("certificate_for_subject_label") || "за результат по предмету")}
+              <b>${escapeHTML(subjectText)}</b>
+            </div>
+            <div style="font-size:16px; margin-top:8px;">
+              <b>${escapeHTML(certTitle)}</b>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px;">
+            <div class="card" style="margin:0; padding:14px;">
+              <div class="muted small">${escapeHTML(t("archive_score_label") || "Балл")}</div>
+              <div style="font-weight:900; font-size:22px;">${escapeHTML(String(row.score ?? "—"))}</div>
+            </div>
+
+            <div class="card" style="margin:0; padding:14px;">
+              <div class="muted small">%</div>
+              <div style="font-weight:900; font-size:22px;">${escapeHTML(String(row.percent ?? "—"))}</div>
+            </div>
+
+            <div class="card" style="margin:0; padding:14px;">
+              <div class="muted small">${escapeHTML(t("participants_total_label") || "Участников")}</div>
+              <div style="font-weight:900; font-size:22px;">${escapeHTML(String(row.participants_total ?? "—"))}</div>
+            </div>
+
+            <div class="card" style="margin:0; padding:14px;">
+              <div class="muted small">${escapeHTML(t("date_label") || "Дата")}</div>
+              <div style="font-weight:900; font-size:18px;">${escapeHTML(issueDate)}</div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:12px;">
+            <div class="card" style="margin:0; padding:14px;">
+              <div class="muted small">${escapeHTML(t("rank_district_label") || "Район")}</div>
+              <div style="font-weight:900; font-size:22px;">${escapeHTML(String(row.rank_district ?? "—"))}</div>
+            </div>
+
+            <div class="card" style="margin:0; padding:14px;">
+              <div class="muted small">${escapeHTML(t("rank_region_label") || "Регион")}</div>
+              <div style="font-weight:900; font-size:22px;">${escapeHTML(String(row.rank_region ?? "—"))}</div>
+            </div>
+
+            <div class="card" style="margin:0; padding:14px;">
+              <div class="muted small">${escapeHTML(t("rank_country_label") || "Республика")}</div>
+              <div style="font-weight:900; font-size:22px;">${escapeHTML(String(row.rank_country ?? "—"))}</div>
+            </div>
+          </div>
+
+          ${
+            String(row?.certificate_type || "") === "final"
+              ? `
+          <div class="card" style="margin-top:12px; padding:14px;">
+            <div class="muted small">${escapeHTML(t("completed_tours_label") || "Завершено туров")}</div>
+            <div style="font-weight:900; font-size:22px;">
+              ${escapeHTML(String(row.completed_tours ?? 0))}/${escapeHTML(String(row.total_tours ?? 7))}
+            </div>
+          </div>
+          `
+              : ``
+          }
+
+          <div style="margin-top:18px; display:flex; align-items:center; justify-content:space-between; gap:16px;">
+            <div class="muted small">
+              ${escapeHTML(t("certificate_footer_label") || "Официальный результат участника платформы iClub")}
+            </div>
+            <div style="font-weight:900; color:#2F6FD6;">iClub</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:14px 16px; border-top:1px solid rgba(15,23,42,.08); display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn primary" type="button" data-action="certificate-download-png" data-id="${Number(row.id)}">
+          ${escapeHTML(t("download_png_label") || "Скачать PNG")}
+        </button>
+        <button class="btn" type="button" data-action="certificate-download-pdf" data-id="${Number(row.id)}">
+          ${escapeHTML(t("download_pdf_label") || "Скачать PDF")}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+async function renderCertificateViewer(rows) {
+  const listEl = document.getElementById("certificates-list");
+  if (!listEl) return;
+
+  const selected = findSelectedCertificateRow(rows || []);
+  const oldViewer = document.getElementById("certificate-viewer-wrap");
+  if (oldViewer) oldViewer.remove();
+
+  const wrap = document.createElement("div");
+  wrap.id = "certificate-viewer-wrap";
+  wrap.style.marginTop = "16px";
+  wrap.innerHTML = certificateViewerHtml(selected);
+
+  listEl.parentNode.appendChild(wrap);
+}
+
+async function ensureHtml2CanvasLoaded() {
+  if (window.html2canvas) return true;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return !!window.html2canvas;
+}
+
+async function ensureJsPdfLoaded() {
+  if (window.jspdf?.jsPDF) return true;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js";
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return !!window.jspdf?.jsPDF;
+}
+
+function triggerBlobDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    try { URL.revokeObjectURL(url); } catch {}
+    try { a.remove(); } catch {}
+  }, 1500);
+}
+
+async function buildCertificateCanvasBlob(kind) {
+  const root = document.getElementById("certificate-canvas-root");
+  if (!root) {
+    showToast(t("certificates_empty") || "Пока сертификатов нет.");
+    return null;
+  }
+
+  await ensureHtml2CanvasLoaded();
+
+  const canvas = await window.html2canvas(root, {
+    backgroundColor: "#ffffff",
+    scale: 2,
+    useCORS: true
+  });
+
+  if (kind === "png") {
+    return await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  }
+
+  return canvas;
+}
+
+async function downloadCertificateAsPng(row) {
+  try {
+    const blob = await buildCertificateCanvasBlob("png");
+    if (!blob) return;
+    triggerBlobDownload(blob, buildCertificateDownloadName(row, "png"));
+  } catch {
+    showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
+  }
+}
+
+async function downloadCertificateAsPdf(row) {
+  try {
+    const canvas = await buildCertificateCanvasBlob("pdf");
+    if (!canvas) return;
+
+    await ensureJsPdfLoaded();
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "px",
+      format: [canvas.width, canvas.height]
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height, undefined, "FAST");
+    pdf.save(buildCertificateDownloadName(row, "pdf"));
+  } catch {
+    showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
+  }
+}
 async function logDbErrorToEvents(uid, where, error, extraPayload = {}) {
   try {
     if (!window.sb || !uid) return;
@@ -12745,7 +13011,7 @@ if (action === "about-person-open") {
         return;
       }
 
-      if (action === "certificate-open") {
+            if (action === "certificate-open") {
         const certId = Number(btn.dataset.id || 0);
         if (!certId) return;
 
@@ -12761,6 +13027,26 @@ if (action === "about-person-open") {
           openGlobal("certificates");
         }
         await renderCertificatesView();
+        return;
+      }
+
+      if (action === "certificate-download-png" || action === "certificate-download-pdf") {
+        const certId = Number(btn.dataset.id || 0);
+        if (!certId) return;
+
+        const rows = await fetchMyCertificatesDb();
+        const row = rows.find(r => Number(r.id) === certId);
+        if (!row) {
+          showToast(t("certificates_empty") || "Пока сертификатов нет.");
+          return;
+        }
+
+        if (action === "certificate-download-png") {
+          await downloadCertificateAsPng(row);
+          return;
+        }
+
+        await downloadCertificateAsPdf(row);
         return;
       }
 
@@ -13180,7 +13466,7 @@ if (action === "tour-next" || action === "tour-submit") {
         return;
       }
 
-            if (action === "tour-certificate") {
+                  if (action === "tour-certificate") {
         const certId = Number(state?.courses?.lastTourCertificateId || 0);
 
         if (!state.certificates) {
@@ -13193,6 +13479,11 @@ if (action === "tour-next" || action === "tour-submit") {
 
         openGlobal("certificates");
         await renderCertificatesView();
+
+        if (!certId) {
+          showToast(t("certificates_empty") || "Пока сертификатов нет.");
+        }
+
         return;
       }
 
