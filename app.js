@@ -13326,66 +13326,6 @@ function renderProfileCredentialsUI() {
   }
 }
 
-
-function renderSubjectHubCredentialsInline(subjectKey) {
-  const wrap = document.getElementById("subject-hub-credential-hints");
-  if (!wrap) return;
-
-  // set labels from i18n (so RU/UZ/EN match)
-  const kickerEl = wrap.querySelector(".panel-kicker");
-  const focusedLabelEl = document.getElementById("hub-cred-focused-label");
-  const practiceLabelEl = document.getElementById("hub-cred-practice-label");
-  const focusedValEl = document.getElementById("hub-cred-focused-value");
-  const practiceValEl = document.getElementById("hub-cred-practice-value");
-
-  if (kickerEl) kickerEl.textContent = t("cred_kicker_progress");
-  if (focusedLabelEl) focusedLabelEl.textContent = t("cred_label_focused");
-  if (practiceLabelEl) practiceLabelEl.textContent = t("cred_label_practice");
-
-  if (focusedValEl) focusedValEl.textContent = "—";
-  if (practiceValEl) practiceValEl.textContent = "—";
-
-    const store = readCredStoreSafe();
-  if (!store) return;
-
-  const subject_id = normSubjectId(subjectKey);
-
-  const focusedRec = getCredRecord(store, "focused_study_streak");
-
-  // ✅ Practice Mastery хранится ПО ПРЕДМЕТАМ: practice_mastery_subject.by_subject[subject_id]
-  const practiceBucket =
-    store?.practice_mastery_subject?.by_subject?.[subject_id] || null;
-
-  const focusedEv = getCredEvidence(focusedRec);
-  const practiceEv = getCredEvidence(practiceBucket);
-
-  // Focused: показываем "4/5" только если серия по этому предмету и еще не достигла 5
-  const focusedCount = Number(
-    focusedEv?.focused_sessions_in_row ?? focusedEv?.sessions_in_row ?? 0
-  );
-  const focusedSubject = String(
-    focusedEv?.current_subject_key ?? focusedEv?.current_subject_id ?? ""
-  );
-
-  const isFocusedSame =
-    focusedSubject && (String(normSubjectId(focusedSubject)) === String(subject_id));
-
-  if (focusedValEl && isFocusedSame && focusedCount > 0 && focusedCount < 5) {
-    focusedValEl.textContent = `${focusedCount}/5`;
-  }
-
-  // Practice: аккуратно показываем best/median, если уже есть попытки
-  const practiceAttempts = Number(practiceEv?.attempts_count ?? NaN);
-  const practiceBest = Number(practiceEv?.best_percent ?? NaN);
-  const practiceMedian = Number(practiceEv?.median_percent ?? NaN);
-
-  if (practiceValEl && Number.isFinite(practiceAttempts) && practiceAttempts > 0) {
-    const bestTxt = Number.isFinite(practiceBest) ? `${Math.round(practiceBest)}%` : "—";
-    const medTxt = Number.isFinite(practiceMedian) ? `${Math.round(practiceMedian)}%` : "—";
-    practiceValEl.textContent = `${bestTxt} • ${medTxt}`;
-  }
-}
-
   function bindUI() {
   bindTabbar();
   bindTopbar();
