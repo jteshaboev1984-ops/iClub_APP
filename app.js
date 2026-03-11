@@ -5517,13 +5517,6 @@ function closeRatingsSearchPanel() {
   if (backdrop) backdrop.style.display = "none";
 }
 
-function toggleRatingsSearchPanel() {
-  const panel = document.getElementById("ratings-search-panel");
-  const isOpen = !!panel && panel.style.display === "block";
-  if (isOpen) closeRatingsSearchPanel();
-  else openRatingsSearchPanel();
-}
-
 function bindRatingsUI() {
   const listEl = $("#ratings-list");
   const subjectSelect = $("#ratings-subject");
