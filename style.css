@@ -4611,13 +4611,30 @@ button.is-loading { opacity: .85; }
 }
 
 @media (max-width: 640px) {
-  .cert-info-grid,
-  .cert-result-grid,
+  .cert-info-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .cert-result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
   .cert-rank-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 
   .cert-info-value {
-    font-size: 15px;
+    font-size: 14px;
+  }
+
+  .cert-stat-value,
+  .cert-rank-value {
+    font-size: 22px;
+  }
+
+  .cert-rank-label,
+  .cert-info-label,
+  .cert-stat-label {
+    font-size: 11px;
   }
 }
