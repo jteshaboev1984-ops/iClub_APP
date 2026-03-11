@@ -9,6 +9,7 @@
   const DICT = {
     ru: {
   app_name: "iClub",
+  brand_tagline: "Smarter together",     
   loading: "Загрузка…",
   loading_desc: "Получаем список туров…",
   saving: "Сохранение…",
@@ -740,6 +741,7 @@ archive_empty: "Архив пока пуст.",
 
     uz: {
         app_name: "iClub",
+        brand_tagline: "Smarter together",
         loading: "Yuklanmoqda…",
         loading_desc: "Turlar ro‘yxati yuklanmoqda…",
         saving: "Saqlanmoqda…",
@@ -1478,6 +1480,7 @@ archive_empty: "Arxiv hozircha bo‘sh.",
 
     en: {
   app_name: "iClub",
+  brand_tagline: "Smarter together",     
   loading: "Loading…",
   loading_desc: "Fetching tour list…",
   saving: "Saving…",
