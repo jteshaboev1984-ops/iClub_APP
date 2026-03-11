@@ -4557,12 +4557,21 @@ function certificateViewerHtml(row) {
 
   const profile = loadProfile?.() || {};
   const fullName =
-    String(profile?.fullName || profile?.fullname || profile?.name || "").trim() ||
+    String(
+      profile?.full_name ||
+      profile?.fullName ||
+      profile?.fullname ||
+      profile?.name ||
+      ""
+    ).trim() ||
+    [profile?.first_name, profile?.last_name].filter(Boolean).join(" ").trim() ||
     "iClub User";
 
-  const certTitle = certificateTypeLabel(row);
   const subjectText = row.subject_title || (t("subject_label") || "Предмет");
-  const issueDate = formatDateShortSafe(row.created_at);
+  const regionText =
+    String(profile?.region || row?.region || t("rank_region_label") || "Регион").trim();
+  const districtText =
+    String(profile?.district || row?.district || t("rank_district_label") || "Район").trim();
 
   return `
     <div class="card" id="certificate-viewer-card" style="padding:0; overflow:hidden;">
@@ -4588,63 +4597,49 @@ function certificateViewerHtml(row) {
             <div class="cert-name">${escapeHTML(fullName)}</div>
           </div>
 
-          <div class="cert-info-line">
-            <div class="cert-info-pill">
-              <span>${escapeHTML(t("subject_label") || "Предмет")}</span>
-              <b>${escapeHTML(subjectText)}</b>
+          <div class="cert-grid-main-3 cert-info-grid">
+            <div class="cert-info-card">
+              <div class="cert-info-label">${escapeHTML(t("subject_label") || "Предмет")}</div>
+              <div class="cert-info-value">${escapeHTML(subjectText)}</div>
             </div>
 
-            <div class="cert-info-pill">
-              <span>${escapeHTML(t("tours_tour_label") || "Тур")}</span>
-              <b>${escapeHTML(String(row.tour_no || "—"))}</b>
+            <div class="cert-info-card">
+              <div class="cert-info-label">${escapeHTML(t("tours_tour_label") || "Тур")}</div>
+              <div class="cert-info-value">${escapeHTML(String(row.tour_no || "—"))}</div>
             </div>
 
-            <div class="cert-info-pill">
-              <span>${escapeHTML(t("date_label") || "Дата")}</span>
-              <b>${escapeHTML(issueDate)}</b>
-            </div>
-          </div>
-
-          <div class="cert-type">${escapeHTML(certTitle)}</div>
-
-          <div class="cert-grid cert-grid-main-3">
-            <div class="cert-stat cert-stat-primary">
-              <div class="cert-stat-label">${escapeHTML(t("archive_score_label") || "Балл")}</div>
-              <div class="cert-stat-value">${escapeHTML(String(row.score ?? "—"))}</div>
-            </div>
-
-            <div class="cert-stat cert-stat-primary">
-              <div class="cert-stat-label">%</div>
-              <div class="cert-stat-value">${escapeHTML(String(row.percent ?? "—"))}</div>
-            </div>
-
-            <div class="cert-stat cert-stat-primary">
-              <div class="cert-stat-label">${escapeHTML(t("rank_country_label") || "Республика")}</div>
-              <div class="cert-stat-value">${escapeHTML(String(row.rank_country ?? "—"))}</div>
+            <div class="cert-info-card">
+              <div class="cert-info-label">${escapeHTML(t("participants_total_label") || "Участников")}</div>
+              <div class="cert-info-value">${escapeHTML(String(row.participants_total ?? "—"))}</div>
             </div>
           </div>
 
-          <div class="cert-grid cert-grid-main-2 cert-grid-second">
+          <div class="cert-grid-main-2 cert-result-grid">
+            <div class="cert-stat cert-stat-primary">
+              <div class="cert-stat-label">${escapeHTML(t("certificate_result_label") || "Натижа")}</div>
+              <div class="cert-stat-value">${escapeHTML(String(row.score ?? "—"))} ${escapeHTML(t("points_label") || "балл")}</div>
+            </div>
+
+            <div class="cert-stat cert-stat-primary">
+              <div class="cert-stat-label">${escapeHTML(t("correct_answers_percent_label") || "Тўғри жавоб")}</div>
+              <div class="cert-stat-value">${escapeHTML(String(row.percent ?? "—"))}%</div>
+            </div>
+          </div>
+
+          <div class="cert-grid-main-3 cert-rank-grid">
             <div class="cert-rank">
-              <div class="cert-rank-label">${escapeHTML(t("rank_region_label") || "Регион")}</div>
-              <div class="cert-rank-value">${escapeHTML(String(row.rank_region ?? "—"))}</div>
+              <div class="cert-rank-label">${escapeHTML(t("rank_country_label") || "Республика")}</div>
+              <div class="cert-rank-value">${escapeHTML(String(row.rank_country ?? "—"))}-${escapeHTML(t("rank_suffix_label") || "ўрин")}</div>
             </div>
 
             <div class="cert-rank">
-              <div class="cert-rank-label">${escapeHTML(t("rank_district_label") || "Район")}</div>
-              <div class="cert-rank-value">${escapeHTML(String(row.rank_district ?? "—"))}</div>
-            </div>
-          </div>
-
-          <div class="cert-grid cert-grid-main-2 cert-grid-meta">
-            <div class="cert-stat">
-              <div class="cert-stat-label">${escapeHTML(t("participants_total_label") || "Участников")}</div>
-              <div class="cert-stat-value cert-stat-meta">${escapeHTML(String(row.participants_total ?? "—"))}</div>
+              <div class="cert-rank-label">${escapeHTML(regionText)}</div>
+              <div class="cert-rank-value">${escapeHTML(String(row.rank_region ?? "—"))}-${escapeHTML(t("rank_suffix_label") || "ўрин")}</div>
             </div>
 
-            <div class="cert-stat">
-              <div class="cert-stat-label">${escapeHTML(t("certificate_number_label") || "Номер сертификата")}</div>
-              <div class="cert-stat-value cert-stat-code">${escapeHTML(String(row.certificate_number || "—"))}</div>
+            <div class="cert-rank">
+              <div class="cert-rank-label">${escapeHTML(districtText)}</div>
+              <div class="cert-rank-value">${escapeHTML(String(row.rank_district ?? "—"))}-${escapeHTML(t("rank_suffix_label") || "ўрин")}</div>
             </div>
           </div>
 
@@ -4658,6 +4653,11 @@ function certificateViewerHtml(row) {
           `
               : ``
           }
+
+          <div class="cert-date-line">
+            <span>${escapeHTML(t("date_label") || "Дата")}:</span>
+            <b>${escapeHTML(formatDateShortSafe(row.created_at))}</b>
+          </div>
 
           <div class="cert-footer">
             <div class="cert-footer-text">${escapeHTML(t("certificate_footer_label") || "Официальный результат участника платформы iClub")}</div>
@@ -13116,7 +13116,13 @@ if (action === "about-person-open") {
   return;
 }
       if (action === "home-extra-toggle") { toggleHomeExtra(); return; }
-      if (action === "open-certificates") {
+            if (action === "open-certificates") {
+        if (!state.certificates) {
+          state.certificates = { selectedId: null, lastIssuedId: null };
+        }
+        state.certificates.selectedId = null;
+        saveState();
+
         openGlobal("certificates");
         return;
       }
@@ -13240,7 +13246,16 @@ if (action === "open-all-subjects") {
   return;
 }
       // ---------- Tab-specific / Courses actions ----------
-        if (action === "profile-certificates") { openGlobal("certificates"); return; }
+        if (action === "profile-certificates") {
+          if (!state.certificates) {
+            state.certificates = { selectedId: null, lastIssuedId: null };
+          }
+          state.certificates.selectedId = null;
+          saveState();
+
+          openGlobal("certificates");
+          return;
+        }
         if (action === "profile-community") { openGlobal("community"); return; }
         if (action === "profile-about") { openGlobal("about"); return; }
         if (action === "profile-open-my-recs") {
@@ -13578,14 +13593,14 @@ if (action === "tour-next" || action === "tour-submit") {
         return;
       }
 
-       if (action === "tour-certificate") {
+             if (action === "tour-certificate") {
         const certId = Number(state?.courses?.lastTourCertificateId || 0);
 
         if (!state.certificates) {
           state.certificates = { selectedId: null, lastIssuedId: null };
         }
 
-        state.certificates.selectedId = certId || null;
+        state.certificates.selectedId = null;
         if (certId) state.certificates.lastIssuedId = certId;
         saveState();
 
