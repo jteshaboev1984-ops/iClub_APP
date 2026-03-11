@@ -4593,100 +4593,91 @@ function certificateViewerHtml(row) {
 
   return `
     <div class="card" id="certificate-viewer-card" style="padding:0; overflow:hidden;">
-      <div id="certificate-canvas-root" style="background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%); padding:20px;">
-        <div style="border:2px solid rgba(47,111,214,.22); border-radius:20px; padding:24px; background:#fff; box-shadow:0 8px 24px rgba(15,23,42,.06);">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px;">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <img src="logo.png" alt="iClub" style="width:48px; height:48px; object-fit:contain;" />
+      <div id="certificate-canvas-root" class="cert-sheet">
+        <div class="cert-paper">
+          <div class="cert-top">
+            <div class="cert-brand">
+              <img src="logo.png" alt="iClub" class="cert-logo" />
               <div>
-                <div style="font-size:20px; font-weight:900; line-height:1;">iClub</div>
-                <div class="muted small">${escapeHTML(t("certificates_title") || "Сертификаты")}</div>
+                <div class="cert-brand-name">iClub</div>
+                <div class="cert-brand-sub">${escapeHTML(t("certificates_title") || "Сертификаты")}</div>
               </div>
             </div>
-            <div style="text-align:right;">
-              <div class="muted small">${escapeHTML(t("certificate_number_label") || "Номер")}</div>
-              <div style="font-weight:800;">${escapeHTML(String(row.certificate_number || "—"))}</div>
+
+            <div class="cert-number-box">
+              <div class="cert-number-label">${escapeHTML(t("certificate_number_label") || "Номер сертификата")}</div>
+              <div class="cert-number-value">${escapeHTML(String(row.certificate_number || "—"))}</div>
             </div>
           </div>
 
-          <div style="text-align:center; margin:18px 0 24px;">
-            <div class="muted small" style="letter-spacing:.10em; text-transform:uppercase;">
-              ${escapeHTML(t("certificate_awarded_label") || "Настоящий сертификат подтверждает")}
-            </div>
-            <div style="font-size:30px; font-weight:900; margin-top:10px; line-height:1.15;">
-              ${escapeHTML(fullName)}
-            </div>
-            <div style="font-size:16px; margin-top:12px;">
+          <div class="cert-hero">
+            <div class="cert-kicker">${escapeHTML(t("certificate_awarded_label") || "Настоящий сертификат подтверждает")}</div>
+            <div class="cert-name">${escapeHTML(fullName)}</div>
+            <div class="cert-line">
               ${escapeHTML(t("certificate_for_subject_label") || "за результат по предмету")}
-              <b>${escapeHTML(subjectText)}</b>
+              <span>${escapeHTML(subjectText)}</span>
             </div>
-            <div style="font-size:16px; margin-top:8px;">
-              <b>${escapeHTML(certTitle)}</b>
+            <div class="cert-type">${escapeHTML(certTitle)}</div>
+          </div>
+
+          <div class="cert-grid cert-grid-main">
+            <div class="cert-stat">
+              <div class="cert-stat-label">${escapeHTML(t("archive_score_label") || "Балл")}</div>
+              <div class="cert-stat-value">${escapeHTML(String(row.score ?? "—"))}</div>
+            </div>
+
+            <div class="cert-stat">
+              <div class="cert-stat-label">%</div>
+              <div class="cert-stat-value">${escapeHTML(String(row.percent ?? "—"))}</div>
+            </div>
+
+            <div class="cert-stat">
+              <div class="cert-stat-label">${escapeHTML(t("participants_total_label") || "Участников")}</div>
+              <div class="cert-stat-value">${escapeHTML(String(row.participants_total ?? "—"))}</div>
+            </div>
+
+            <div class="cert-stat">
+              <div class="cert-stat-label">${escapeHTML(t("date_label") || "Дата")}</div>
+              <div class="cert-stat-value cert-stat-date">${escapeHTML(issueDate)}</div>
             </div>
           </div>
 
-          <div style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px;">
-            <div class="card" style="margin:0; padding:14px;">
-              <div class="muted small">${escapeHTML(t("archive_score_label") || "Балл")}</div>
-              <div style="font-weight:900; font-size:22px;">${escapeHTML(String(row.score ?? "—"))}</div>
+          <div class="cert-grid cert-grid-ranks">
+            <div class="cert-rank">
+              <div class="cert-rank-label">${escapeHTML(t("rank_district_label") || "Район")}</div>
+              <div class="cert-rank-value">${escapeHTML(String(row.rank_district ?? "—"))}</div>
             </div>
 
-            <div class="card" style="margin:0; padding:14px;">
-              <div class="muted small">%</div>
-              <div style="font-weight:900; font-size:22px;">${escapeHTML(String(row.percent ?? "—"))}</div>
+            <div class="cert-rank">
+              <div class="cert-rank-label">${escapeHTML(t("rank_region_label") || "Регион")}</div>
+              <div class="cert-rank-value">${escapeHTML(String(row.rank_region ?? "—"))}</div>
             </div>
 
-            <div class="card" style="margin:0; padding:14px;">
-              <div class="muted small">${escapeHTML(t("participants_total_label") || "Участников")}</div>
-              <div style="font-weight:900; font-size:22px;">${escapeHTML(String(row.participants_total ?? "—"))}</div>
-            </div>
-
-            <div class="card" style="margin:0; padding:14px;">
-              <div class="muted small">${escapeHTML(t("date_label") || "Дата")}</div>
-              <div style="font-weight:900; font-size:18px;">${escapeHTML(issueDate)}</div>
-            </div>
-          </div>
-
-          <div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:12px;">
-            <div class="card" style="margin:0; padding:14px;">
-              <div class="muted small">${escapeHTML(t("rank_district_label") || "Район")}</div>
-              <div style="font-weight:900; font-size:22px;">${escapeHTML(String(row.rank_district ?? "—"))}</div>
-            </div>
-
-            <div class="card" style="margin:0; padding:14px;">
-              <div class="muted small">${escapeHTML(t("rank_region_label") || "Регион")}</div>
-              <div style="font-weight:900; font-size:22px;">${escapeHTML(String(row.rank_region ?? "—"))}</div>
-            </div>
-
-            <div class="card" style="margin:0; padding:14px;">
-              <div class="muted small">${escapeHTML(t("rank_country_label") || "Республика")}</div>
-              <div style="font-weight:900; font-size:22px;">${escapeHTML(String(row.rank_country ?? "—"))}</div>
+            <div class="cert-rank">
+              <div class="cert-rank-label">${escapeHTML(t("rank_country_label") || "Республика")}</div>
+              <div class="cert-rank-value">${escapeHTML(String(row.rank_country ?? "—"))}</div>
             </div>
           </div>
 
           ${
             String(row?.certificate_type || "") === "final"
               ? `
-          <div class="card" style="margin-top:12px; padding:14px;">
-            <div class="muted small">${escapeHTML(t("completed_tours_label") || "Завершено туров")}</div>
-            <div style="font-weight:900; font-size:22px;">
-              ${escapeHTML(String(row.completed_tours ?? 0))}/${escapeHTML(String(row.total_tours ?? 7))}
-            </div>
+          <div class="cert-final-box">
+            <div class="cert-final-label">${escapeHTML(t("completed_tours_label") || "Завершено туров")}</div>
+            <div class="cert-final-value">${escapeHTML(String(row.completed_tours ?? 0))}/${escapeHTML(String(row.total_tours ?? 7))}</div>
           </div>
           `
               : ``
           }
 
-          <div style="margin-top:18px; display:flex; align-items:center; justify-content:space-between; gap:16px;">
-            <div class="muted small">
-              ${escapeHTML(t("certificate_footer_label") || "Официальный результат участника платформы iClub")}
-            </div>
-            <div style="font-weight:900; color:#2F6FD6;">iClub</div>
+          <div class="cert-footer">
+            <div class="cert-footer-text">${escapeHTML(t("certificate_footer_label") || "Официальный результат участника платформы iClub")}</div>
+            <div class="cert-footer-brand">iClub</div>
           </div>
         </div>
       </div>
 
-      <div style="padding:14px 16px; border-top:1px solid rgba(15,23,42,.08); display:flex; gap:10px; flex-wrap:wrap;">
+      <div class="cert-actions">
         <button class="btn primary" type="button" data-action="certificate-download-png" data-id="${Number(row.id)}">
           ${escapeHTML(t("download_png_label") || "Скачать PNG")}
         </button>
