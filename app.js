@@ -4242,14 +4242,65 @@ async function issueFinalCertificateDb(userId, subjectId) {
     return null;
   }
 }
-async function tryIssueFinalCertificateForSubject(subjectId) {
+   const __finalCertReadyCache = new Map();
+
+async function canIssueFinalCertificateNow(subjectId) {
+  try {
+    if (!window.sb || !subjectId) return false;
+
+    const sid = Number(subjectId);
+    if (!sid) return false;
+
+    const cacheKey = `${sid}`;
+    const cached = __finalCertReadyCache.get(cacheKey);
+    if (cached && (Date.now() - cached.ts < 60 * 1000)) {
+      return !!cached.ready;
+    }
+
+    const today = new Date();
+    const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+    const { data, error } = await window.sb
+      .from("tours")
+      .select("tour_no,end_date,is_active")
+      .eq("subject_id", sid)
+      .gte("tour_no", 1)
+      .lte("tour_no", 7);
+
+    if (error || !Array.isArray(data) || data.length === 0) {
+      __finalCertReadyCache.set(cacheKey, { ready: false, ts: Date.now() });
+      return false;
+    }
+
+    const uniqTours = new Set(
+      data.map(x => Number(x.tour_no)).filter(n => Number.isFinite(n) && n >= 1 && n <= 7)
+    );
+
+    const allFinished =
+      uniqTours.size === 7 &&
+      data.every(row => !!row?.end_date && String(row.end_date) < todayIso);
+
+    __finalCertReadyCache.set(cacheKey, { ready: allFinished, ts: Date.now() });
+    return allFinished;
+  } catch {
+    return false;
+  }
+}
+
+   async function tryIssueFinalCertificateForSubject(subjectId) {
   try {
     if (!window.sb || !subjectId) return null;
+
+    const sid = Number(subjectId);
+    if (!sid) return null;
+
+    const ready = await canIssueFinalCertificateNow(sid);
+    if (!ready) return null;
 
     const uid = await getAuthUid();
     if (!uid) return null;
 
-    const row = await issueFinalCertificateDb(uid, Number(subjectId));
+    const row = await issueFinalCertificateDb(uid, sid);
     if (!row?.id) return null;
 
     if (!state.certificates) {
@@ -4265,6 +4316,7 @@ async function tryIssueFinalCertificateForSubject(subjectId) {
     return null;
   }
 }
+   
 async function fetchMyCertificatesDb() {
   try {
     if (!window.sb) return [];
@@ -4461,20 +4513,22 @@ async function renderCertificatesView() {
     return;
   }
 
-    const selectedId =
+      let selectedId =
     Number(state?.certificates?.selectedId || 0) ||
     Number(state?.courses?.lastTourCertificateId || 0) ||
     Number(state?.certificates?.lastIssuedId || 0) ||
     0;
 
-        if (!selectedId && rows[0]?.id) {
+  if (!selectedId && rows[0]?.id) {
     if (!state.certificates) {
       state.certificates = { selectedId: null, lastIssuedId: null };
     }
-    state.certificates.selectedId = Number(rows[0].id);
+    selectedId = Number(rows[0].id);
+    state.certificates.selectedId = selectedId;
     saveState();
   }
-    listEl.innerHTML = rows.map((row) => {
+
+  listEl.innerHTML = rows.map((row) => {
     const isSelected = Number(row.id) === selectedId;
     const title = certificateTypeLabel(row);
     const subjectText = row.subject_title || (t("subject_label") || "Предмет");
@@ -13074,13 +13128,12 @@ if (action === "about-person-open") {
   return;
 }
       if (action === "home-extra-toggle") { toggleHomeExtra(); return; }
-            if (action === "open-certificates") {
+      if (action === "open-certificates") {
         openGlobal("certificates");
-        await renderCertificatesView();
         return;
       }
 
-            if (action === "certificate-open") {
+       if (action === "certificate-open") {
         const certId = Number(btn.dataset.id || 0);
         if (!certId) return;
 
@@ -13094,7 +13147,9 @@ if (action === "about-person-open") {
         const topView = state.viewStack?.[state.viewStack.length - 1];
         if (topView !== "certificates") {
           openGlobal("certificates");
+          return;
         }
+
         await renderCertificatesView();
         return;
       }
@@ -13535,7 +13590,7 @@ if (action === "tour-next" || action === "tour-submit") {
         return;
       }
 
-               if (action === "tour-certificate") {
+       if (action === "tour-certificate") {
         const certId = Number(state?.courses?.lastTourCertificateId || 0);
 
         if (!state.certificates) {
@@ -13547,7 +13602,6 @@ if (action === "tour-next" || action === "tour-submit") {
         saveState();
 
         openGlobal("certificates");
-        await renderCertificatesView();
 
         if (!certId) {
           showToast(t("certificates_pending_hint") || "Сертификат появится после первой сохранённой попытки.");
