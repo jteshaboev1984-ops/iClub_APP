@@ -4508,15 +4508,20 @@ async function renderCertificatesView() {
     Number(state?.certificates?.selectedId || 0) ||
     0;
 
+    if (selectedId) {
+    listEl.innerHTML = "";
+    await renderCertificateViewer(rows);
+    return;
+  }
+
   listEl.innerHTML = rows.map((row) => {
-    const isSelected = Number(row.id) === selectedId;
     const title = certificateTypeLabel(row);
     const subjectText = row.subject_title || (t("subject_label") || "Предмет");
     const statsHtml = renderCertificateStatsHtml(row);
 
-        return `
+    return `
       <div
-        class="list-item cert-list-card ${isSelected ? "is-selected" : ""}"
+        class="list-item cert-list-card"
         data-action="certificate-open"
         data-id="${Number(row.id)}"
       >
@@ -4525,12 +4530,6 @@ async function renderCertificatesView() {
             <div class="cert-list-title">${escapeHTML(title)}</div>
             <div class="cert-list-subtitle">${escapeHTML(subjectText)}</div>
           </div>
-
-          ${isSelected ? `
-            <div class="cert-list-badge">
-              ${escapeHTML(t("opened_label") || "Очилган")}
-            </div>
-          ` : ``}
         </div>
 
         ${statsHtml}
@@ -4538,7 +4537,8 @@ async function renderCertificatesView() {
     `;
   }).join("");
 
-  await renderCertificateViewer(rows);
+  const oldViewer = document.getElementById("certificate-viewer-wrap");
+  if (oldViewer) oldViewer.remove();
 }
    function findSelectedCertificateRow(rows) {
   const selectedId = Number(state?.certificates?.selectedId || 0);
@@ -4555,7 +4555,21 @@ function certificateViewerHtml(row) {
     `;
   }
 
-  const profile = loadProfile?.() || {};
+    const profile = loadProfile?.() || {};
+  const certLang = String(row?.language_code || currentLang() || "ru").toLowerCase();
+
+  const certT = (key, fallback = "") => {
+    try {
+      const prev = window.i18n?.getLang ? window.i18n.getLang() : "ru";
+      if (window.i18n?.setLang) window.i18n.setLang(certLang);
+      const out = window.i18n?.t ? window.i18n.t(key) : fallback;
+      if (window.i18n?.setLang) window.i18n.setLang(prev);
+      return out || fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
   const fullName =
     String(
       profile?.full_name ||
@@ -4567,14 +4581,18 @@ function certificateViewerHtml(row) {
     [profile?.first_name, profile?.last_name].filter(Boolean).join(" ").trim() ||
     "iClub User";
 
-  const subjectText = row.subject_title || (t("subject_label") || "Предмет");
+  const subjectText = row.subject_title || (certT("subject_label", "Предмет"));
   const regionText =
-    String(profile?.region || row?.region || t("rank_region_label") || "Регион").trim();
+    String(profile?.region_name || profile?.region || row?.region || certT("rank_region_label", "Регион")).trim();
   const districtText =
-    String(profile?.district || row?.district || t("rank_district_label") || "Район").trim();
+    String(profile?.district_name || profile?.district || row?.district || certT("rank_district_label", "Район")).trim();
 
-  return `
+    return `
     <div class="card" id="certificate-viewer-card" style="padding:0; overflow:hidden;">
+      <div class="cert-viewer-topbar">
+        <button class="btn back" type="button" data-action="certificates-back">${escapeHTML(t("back_label") || "Назад")}</button>
+      </div>
+
       <div id="certificate-canvas-root" class="cert-sheet">
         <div class="cert-paper">
           <div class="cert-top">
@@ -4582,72 +4600,72 @@ function certificateViewerHtml(row) {
               <img src="logo.png" alt="iClub" class="cert-logo" />
               <div>
                 <div class="cert-brand-name">iClub</div>
-                <div class="cert-brand-sub">${escapeHTML(t("brand_tagline") || "Smarter together")}</div>
+                <div class="cert-brand-sub">${escapeHTML(certT("brand_tagline") || "Smarter together")}</div>
               </div>
             </div>
 
             <div class="cert-number-box">
-              <div class="cert-number-label">${escapeHTML(t("certificate_number_label") || "Номер сертификата")}</div>
+              <div class="cert-number-label">${escapeHTML(certT("certificate_number_label") || "Номер сертификата")}</div>
               <div class="cert-number-value">${escapeHTML(String(row.certificate_number || "—"))}</div>
             </div>
           </div>
 
-          <div class="cert-hero">
-            <div class="cert-kicker">${escapeHTML(t("certificate_awarded_label") || "Официальный сертификат участника")}</div>
+                    <div class="cert-hero">
+            <div class="cert-kicker">${escapeHTML(certT("certificate_awarded_label", "Официальный сертификат участника"))}</div>
             <div class="cert-name">${escapeHTML(fullName)}</div>
           </div>
 
           <div class="cert-grid-main-3 cert-info-grid">
             <div class="cert-info-card">
-              <div class="cert-info-label">${escapeHTML(t("subject_label") || "Предмет")}</div>
+              <div class="cert-info-label">${escapeHTML(certT("subject_label", "Предмет"))}</div>
               <div class="cert-info-value">${escapeHTML(subjectText)}</div>
             </div>
 
             <div class="cert-info-card">
-              <div class="cert-info-label">${escapeHTML(t("tours_tour_label") || "Тур")}</div>
+              <div class="cert-info-label">${escapeHTML(certT("tours_tour_label", "Тур"))}</div>
               <div class="cert-info-value">${escapeHTML(String(row.tour_no || "—"))}</div>
             </div>
 
             <div class="cert-info-card">
-              <div class="cert-info-label">${escapeHTML(t("participants_total_label") || "Участников")}</div>
+              <div class="cert-info-label">${escapeHTML(certT("participants_total_label", "Участников"))}</div>
               <div class="cert-info-value">${escapeHTML(String(row.participants_total ?? "—"))}</div>
             </div>
           </div>
 
           <div class="cert-grid-main-2 cert-result-grid">
             <div class="cert-stat cert-stat-primary">
-              <div class="cert-stat-label">${escapeHTML(t("certificate_result_label") || "Натижа")}</div>
-              <div class="cert-stat-value">${escapeHTML(String(row.score ?? "—"))} ${escapeHTML(t("points_label") || "балл")}</div>
+              <div class="cert-stat-label">${escapeHTML(certT("certificate_result_label", "Натижа"))}</div>
+              <div class="cert-stat-value">${escapeHTML(String(row.score ?? "—"))} ${escapeHTML(certT("points_label", "балл"))}</div>
             </div>
 
             <div class="cert-stat cert-stat-primary">
-              <div class="cert-stat-label">${escapeHTML(t("correct_answers_percent_label") || "Тўғри жавоб")}</div>
+              <div class="cert-stat-label">${escapeHTML(certT("correct_answers_percent_label", "Тўғри жавоб"))}</div>
               <div class="cert-stat-value">${escapeHTML(String(row.percent ?? "—"))}%</div>
             </div>
           </div>
 
           <div class="cert-grid-main-3 cert-rank-grid">
             <div class="cert-rank">
-              <div class="cert-rank-label">${escapeHTML(t("rank_country_label") || "Республика")}</div>
-              <div class="cert-rank-value">${escapeHTML(String(row.rank_country ?? "—"))}-${escapeHTML(t("rank_suffix_label") || "ўрин")}</div>
+              <div class="cert-rank-label">${escapeHTML(certT("rank_country_label", "Республика"))}</div>
+              <div class="cert-rank-value">${escapeHTML(String(row.rank_country ?? "—"))}-${escapeHTML(certT("rank_suffix_label", "ўрин"))}</div>
             </div>
 
             <div class="cert-rank">
               <div class="cert-rank-label">${escapeHTML(regionText)}</div>
-              <div class="cert-rank-value">${escapeHTML(String(row.rank_region ?? "—"))}-${escapeHTML(t("rank_suffix_label") || "ўрин")}</div>
+              <div class="cert-rank-value">${escapeHTML(String(row.rank_region ?? "—"))}-${escapeHTML(certT("rank_suffix_label", "ўрин"))}</div>
             </div>
 
             <div class="cert-rank">
               <div class="cert-rank-label">${escapeHTML(districtText)}</div>
-              <div class="cert-rank-value">${escapeHTML(String(row.rank_district ?? "—"))}-${escapeHTML(t("rank_suffix_label") || "ўрин")}</div>
+              <div class="cert-rank-value">${escapeHTML(String(row.rank_district ?? "—"))}-${escapeHTML(certT("rank_suffix_label", "ўрин"))}</div>
             </div>
           </div>
 
-          ${
+                    ${
             String(row?.certificate_type || "") === "final"
               ? `
           <div class="cert-final-box">
-            <div class="cert-final-label">${escapeHTML(t("completed_tours_label") || "Завершено туров")}</div>
+            <div class="cert-final-label">${escapeHTML(certT("completed_tours_label", "Завершено туров"))}</div>
             <div class="cert-final-value">${escapeHTML(String(row.completed_tours ?? 0))}/${escapeHTML(String(row.total_tours ?? 7))}</div>
           </div>
           `
@@ -4655,23 +4673,23 @@ function certificateViewerHtml(row) {
           }
 
           <div class="cert-date-line">
-            <span>${escapeHTML(t("date_label") || "Дата")}:</span>
+            <span>${escapeHTML(certT("date_label", "Дата"))}:</span>
             <b>${escapeHTML(formatDateShortSafe(row.created_at))}</b>
           </div>
 
           <div class="cert-footer">
-            <div class="cert-footer-text">${escapeHTML(t("certificate_footer_label") || "Официальный результат участника платформы iClub")}</div>
+            <div class="cert-footer-text">${escapeHTML(certT("certificate_footer_label", "Официальный результат участника платформы iClub"))}</div>
             <div class="cert-footer-brand">iClub</div>
           </div>
         </div>
       </div>
 
-      <div class="cert-actions">
+            <div class="cert-actions">
         <button class="btn primary" type="button" data-action="certificate-download-png" data-id="${Number(row.id)}">
-          ${escapeHTML(t("download_png_label") || "Скачать PNG")}
+          ${escapeHTML(certT("download_png_label", "Скачать PNG"))}
         </button>
         <button class="btn" type="button" data-action="certificate-download-pdf" data-id="${Number(row.id)}">
-          ${escapeHTML(t("download_pdf_label") || "Скачать PDF")}
+          ${escapeHTML(certT("download_pdf_label", "Скачать PDF"))}
         </button>
       </div>
     </div>
@@ -13127,7 +13145,7 @@ if (action === "about-person-open") {
         return;
       }
 
-       if (action === "certificate-open") {
+             if (action === "certificate-open") {
         const certId = Number(btn.dataset.id || 0);
         if (!certId) return;
 
@@ -13138,17 +13156,23 @@ if (action === "about-person-open") {
         state.certificates.selectedId = certId;
         saveState();
 
-        const topView = state.viewStack?.[state.viewStack.length - 1];
-        if (topView !== "certificates") {
-          openGlobal("certificates");
-          return;
+        await renderCertificatesView();
+        return;
+      }
+
+             if (action === "certificates-back") {
+        if (!state.certificates) {
+          state.certificates = { selectedId: null, lastIssuedId: null };
         }
+
+        state.certificates.selectedId = null;
+        saveState();
 
         await renderCertificatesView();
         return;
       }
 
-      if (action === "certificate-download-png" || action === "certificate-download-pdf") {
+       if (action === "certificate-download-png" || action === "certificate-download-pdf") {
         const certId = Number(btn.dataset.id || 0);
         if (!certId) return;
 
