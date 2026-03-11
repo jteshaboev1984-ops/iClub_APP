@@ -417,7 +417,7 @@ archive_unlock_after_toast: "Архив откроется после завер
       notifications_sub: "Системные сообщения и важные события.",
       
       certificates_title: "Сертификаты",
-      certificates_sub: "По турам и итоговые — в зависимости от правил доступа.",
+      certificates_sub: "По турам и итоговые",
       cert_final_label: "Итоговый сертификат",
 opened_label: "Открыт",
 open_label: "Открыть",
@@ -1150,7 +1150,7 @@ archive_unlock_after_toast: "Arxiv faol tur yakunlangandan keyin ochiladi.",
       notifications_sub: "Tizim xabarlari va muhim voqealar.",
       
       certificates_title: "Sertifikatlar",
-      certificates_sub: "Turlar va yakuniy natijalar — kirish qoidalariga ko‘ra.",
+      certificates_sub: "Turlar va yakuniy natijalar",
       cert_final_label: "Yakuniy sertifikat",
 opened_label: "Ochilgan",
 open_label: "Ochish",
@@ -1879,7 +1879,7 @@ archive_unlock_after_toast: "Archive will open after you finish the active tour.
       notifications_sub: "System messages and important events.",
       
       certificates_title: "Certificates",
-      certificates_sub: "Tour and final certificates — depending on access rules.",
+      certificates_sub: "Tour and final certificates",
       cert_final_label: "Final Certificate",
 opened_label: "Opened",
 open_label: "Open",
