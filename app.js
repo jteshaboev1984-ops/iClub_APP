@@ -1425,7 +1425,7 @@ function runDailyCredentialJobs() {
   // ---------------------------
   // App state
   // ---------------------------
-  const defaultState = {
+    const defaultState = {
   tab: "home", // home | courses | ratings | profile
   prevTab: "home",
   viewStack: ["home"], // global screens stack
@@ -1433,10 +1433,17 @@ function runDailyCredentialJobs() {
     stack: ["all-subjects"],
     subjectKey: null,
     lessonId: null,
-    entryTab: "home" 
+    entryTab: "home",
+    lastTourAttemptId: null,
+    lastTourCertificateId: null
   },
   profile: {
     stack: ["main"] // main | settings
+  },
+
+  certificates: {
+    selectedId: null,
+    lastIssuedId: null
   },
 
   // ✅ About tabs state
@@ -1453,7 +1460,7 @@ function runDailyCredentialJobs() {
 
   let state = loadState();
 
-  function loadState() {
+    function loadState() {
     const saved = safeJsonParse(localStorage.getItem(LS.state), null);
     if (!saved) return structuredClone(defaultState);
 
@@ -1462,7 +1469,8 @@ function runDailyCredentialJobs() {
       ...structuredClone(defaultState),
       ...saved,
       courses: { ...structuredClone(defaultState.courses), ...(saved.courses || {}) },
-      profile: { ...structuredClone(defaultState.profile), ...(saved.profile || {}) }
+      profile: { ...structuredClone(defaultState.profile), ...(saved.profile || {}) },
+      certificates: { ...structuredClone(defaultState.certificates), ...(saved.certificates || {}) }
     };
     // Ensure viewStack sane
     if (!Array.isArray(merged.viewStack) || merged.viewStack.length === 0) merged.viewStack = ["home"];
@@ -1471,7 +1479,7 @@ function runDailyCredentialJobs() {
     if (!["home", "courses", "ratings", "profile"].includes(merged.courses.entryTab)) {
       merged.courses.entryTab = merged.prevTab || "home";
     }
-     return merged;
+    return merged;
   }
 
     function saveState() {
@@ -3154,7 +3162,7 @@ if (tabName === "ratings") {
       state.viewStack = [state.tab || "home"];
     }
 
-       const top = state.viewStack[state.viewStack.length - 1];
+           const top = state.viewStack[state.viewStack.length - 1];
     if (top === viewName) {
 
       // Earned Credentials: Research-Oriented — resource opened
@@ -3165,9 +3173,14 @@ if (tabName === "ratings") {
       showView(viewName);
 
       if (viewName === "about") {
-      renderAboutView();
+        renderAboutView();
       }
-     return;
+
+      if (viewName === "certificates") {
+        renderCertificatesView();
+      }
+
+      return;
     }
 
         state.viewStack.push(viewName);
@@ -3178,16 +3191,19 @@ if (tabName === "ratings") {
       try { trackEvent("resource_opened", { source: "global_resources" }); } catch {}
     }
 
-    showView(viewName);
+        showView(viewName);
 
-  if (viewName === "archive") {
-    renderArchiveView();
-  }
+    if (viewName === "archive") {
+      renderArchiveView();
+    }
 
-  // ✅ About: render tabs + content
-  if (viewName === "about") {
-    renderAboutView();
-  }
+    if (viewName === "about") {
+      renderAboutView();
+    }
+
+    if (viewName === "certificates") {
+      renderCertificatesView();
+    }
 }
 
   function canGlobalBack() {
@@ -4119,6 +4135,294 @@ async function getSubjectIdByKey(subjectKey) {
   return id;
 }
 
+      function normalizeRpcSingleRow(data) {
+  if (Array.isArray(data)) return data[0] || null;
+  return data || null;
+}
+
+async function issueTourCertificateDb(attemptId) {
+  try {
+    if (!window.sb || !attemptId) return null;
+
+    const { data, error } = await window.sb.rpc("issue_tour_certificate", {
+      p_attempt_id: Number(attemptId)
+    });
+
+    if (error) {
+      try {
+        const uid = await getAuthUid();
+        await logDbErrorToEvents(uid, "issue_tour_certificate_rpc", error, {
+          attempt_id: Number(attemptId)
+        });
+      } catch {}
+      return null;
+    }
+
+    return normalizeRpcSingleRow(data);
+  } catch (e) {
+    try {
+      const uid = await getAuthUid();
+      await logDbErrorToEvents(uid, "issue_tour_certificate_rpc_catch", e, {
+        attempt_id: Number(attemptId)
+      });
+    } catch {}
+    return null;
+  }
+}
+
+async function issueFinalCertificateDb(userId, subjectId) {
+  try {
+    if (!window.sb || !userId || !subjectId) return null;
+
+    const { data, error } = await window.sb.rpc("issue_final_certificate", {
+      p_user_id: userId,
+      p_subject_id: Number(subjectId)
+    });
+
+    if (error) {
+      try {
+        const uid = await getAuthUid();
+        await logDbErrorToEvents(uid, "issue_final_certificate_rpc", error, {
+          p_user_id: userId,
+          p_subject_id: Number(subjectId)
+        });
+      } catch {}
+      return null;
+    }
+
+    return normalizeRpcSingleRow(data);
+  } catch (e) {
+    try {
+      const uid = await getAuthUid();
+      await logDbErrorToEvents(uid, "issue_final_certificate_rpc_catch", e, {
+        p_user_id: userId,
+        p_subject_id: Number(subjectId)
+      });
+    } catch {}
+    return null;
+  }
+}
+
+async function fetchMyCertificatesDb() {
+  try {
+    if (!window.sb) return [];
+
+    const uid = await getAuthUid();
+    if (!uid) return [];
+
+    const { data, error } = await window.sb
+      .from("certificates")
+      .select(`
+        id,
+        user_id,
+        subject_id,
+        tour_id,
+        certificate_type,
+        score,
+        percent,
+        participants_total,
+        rank_district,
+        rank_region,
+        rank_country,
+        certificate_number,
+        language_code,
+        created_at,
+        completed_tours,
+        total_tours
+      `)
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      try { await logDbErrorToEvents(uid, "certificates_select_failed", error, {}); } catch {}
+      return [];
+    }
+
+    const rows = Array.isArray(data) ? data : [];
+    if (!rows.length) return [];
+
+    const subjectIds = Array.from(
+      new Set(rows.map(r => Number(r.subject_id)).filter(n => Number.isFinite(n) && n > 0))
+    );
+
+    const tourIds = Array.from(
+      new Set(rows.map(r => Number(r.tour_id)).filter(n => Number.isFinite(n) && n > 0))
+    );
+
+    const subjectMap = new Map();
+    const tourMap = new Map();
+
+    if (subjectIds.length) {
+      const { data: srows, error: serr } = await window.sb
+        .from("subjects")
+        .select("id, subject_key, title")
+        .in("id", subjectIds);
+
+      if (!serr && Array.isArray(srows)) {
+        srows.forEach(s => {
+          subjectMap.set(Number(s.id), {
+            subject_key: String(s.subject_key || "").trim(),
+            title: String(s.title || "").trim()
+          });
+        });
+      }
+    }
+
+    if (tourIds.length) {
+      const { data: trows, error: terr } = await window.sb
+        .from("tours")
+        .select("id, tour_no")
+        .in("id", tourIds);
+
+      if (!terr && Array.isArray(trows)) {
+        trows.forEach(tour => {
+          tourMap.set(Number(tour.id), Number(tour.tour_no || 0));
+        });
+      }
+    }
+
+    return rows.map(row => {
+      const sMeta = subjectMap.get(Number(row.subject_id)) || {};
+      const subjectKey = String(sMeta.subject_key || "").trim();
+      const subjectTitleText = subjectKey
+        ? subjectTitle(subjectKey, sMeta.title || "")
+        : (sMeta.title || `#${row.subject_id}`);
+
+      return {
+        ...row,
+        subject_key: subjectKey,
+        subject_title: subjectTitleText,
+        tour_no: row.tour_id ? (tourMap.get(Number(row.tour_id)) || null) : null
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+function certificateTypeLabel(row) {
+  if (String(row?.certificate_type || "") === "final") {
+    return t("cert_final_label") || "Итоговый сертификат";
+  }
+  const no = Number(row?.tour_no || 0);
+  return `${t("tours_tour_label") || "Тур"} ${no || "—"}`;
+}
+
+function renderCertificateStatsHtml(row) {
+  const bits = [];
+
+  if (row?.score != null) {
+    bits.push(`
+      <div><b>${t("archive_score_label") || "Балл"}:</b> ${escapeHTML(String(row.score))}</div>
+    `);
+  }
+
+  if (row?.percent != null) {
+    bits.push(`
+      <div><b>%:</b> ${escapeHTML(String(row.percent))}</div>
+    `);
+  }
+
+  if (row?.participants_total != null) {
+    bits.push(`
+      <div><b>${t("participants_total_label") || "Участников"}:</b> ${escapeHTML(String(row.participants_total))}</div>
+    `);
+  }
+
+  if (row?.rank_country != null) {
+    bits.push(`
+      <div><b>${t("rank_country_label") || "Республика"}:</b> ${escapeHTML(String(row.rank_country))}</div>
+    `);
+  }
+
+  if (row?.rank_region != null) {
+    bits.push(`
+      <div><b>${t("rank_region_label") || "Регион"}:</b> ${escapeHTML(String(row.rank_region))}</div>
+    `);
+  }
+
+  if (row?.rank_district != null) {
+    bits.push(`
+      <div><b>${t("rank_district_label") || "Район"}:</b> ${escapeHTML(String(row.rank_district))}</div>
+    `);
+  }
+
+  if (String(row?.certificate_type || "") === "final") {
+    bits.push(`
+      <div><b>${t("completed_tours_label") || "Завершено туров"}:</b> ${escapeHTML(String(row.completed_tours || 0))}/${escapeHTML(String(row.total_tours || 7))}</div>
+    `);
+  }
+
+  if (row?.certificate_number) {
+    bits.push(`
+      <div><b>${t("certificate_number_label") || "Номер"}:</b> ${escapeHTML(String(row.certificate_number))}</div>
+    `);
+  }
+
+  if (row?.created_at) {
+    bits.push(`
+      <div><b>${t("date_label") || "Дата"}:</b> ${escapeHTML(formatDateShortSafe(row.created_at))}</div>
+    `);
+  }
+
+  return bits.join("");
+}
+
+async function renderCertificatesView() {
+  const listEl = document.getElementById("certificates-list");
+  if (!listEl) return;
+
+  listEl.innerHTML = `
+    <div class="empty muted">${escapeHTML(t("loading") || "Loading…")}</div>
+  `;
+
+  const rows = await fetchMyCertificatesDb();
+
+  if (!rows.length) {
+    listEl.innerHTML = `
+      <div class="empty muted">${escapeHTML(t("certificates_empty") || "Пока сертификатов нет.")}</div>
+    `;
+    return;
+  }
+
+  const selectedId =
+    Number(state?.certificates?.selectedId || 0) ||
+    Number(state?.certificates?.lastIssuedId || 0) ||
+    Number(state?.courses?.lastTourCertificateId || 0) ||
+    0;
+
+  listEl.innerHTML = rows.map((row) => {
+    const isSelected = Number(row.id) === selectedId;
+    const title = certificateTypeLabel(row);
+    const subjectText = row.subject_title || (t("subject_label") || "Предмет");
+    const statsHtml = renderCertificateStatsHtml(row);
+
+    return `
+      <div class="list-item" style="${isSelected ? "border:1px solid rgba(47,111,214,.35); box-shadow:0 8px 24px rgba(47,111,214,.10);" : ""}">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+          <div>
+            <div style="font-weight:900; margin-bottom:4px;">${escapeHTML(title)}</div>
+            <div class="muted small">${escapeHTML(subjectText)}</div>
+          </div>
+
+          <button
+            class="btn ${isSelected ? "primary" : ""}"
+            type="button"
+            data-action="certificate-open"
+            data-id="${Number(row.id)}"
+          >
+            ${escapeHTML(isSelected ? (t("opened_label") || "Открыт") : (t("open_label") || "Открыть"))}
+          </button>
+        </div>
+
+        <div class="muted small" style="margin-top:10px;">
+          ${statsHtml}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+   
 async function logDbErrorToEvents(uid, where, error, extraPayload = {}) {
   try {
     if (!window.sb || !uid) return;
@@ -11737,10 +12041,11 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     });
   }
 
-     // DB finalize (only active tours)
+       // DB finalize (only active tours)
+  let finalizeSavedToDb = false;
+
   try {
     if (ctx?.attemptId && !ctx?.isArchive) {
-
       const finalizePatch = {
         score,
         percent,
@@ -11759,14 +12064,12 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
         Array.isArray(ctx?.pendingDbAnswers) && ctx.pendingDbAnswers.length > 0;
 
       if (stillPending) {
-        // финализацию ставим в очередь, но не фиксируем статус в БД прямо сейчас
         enqueuePendingOp({
           type: "tour_finalize",
           attemptId: ctx.attemptId,
           patch: finalizePatch
         });
 
-        // попробуем досинкать в ближайшие секунды
         try { scheduleFlushPendingOps(700); } catch {}
 
         showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
@@ -11784,6 +12087,8 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
           try { scheduleFlushPendingOps(700); } catch {}
 
           showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
+        } else {
+          finalizeSavedToDb = true;
         }
       }
     }
@@ -11820,6 +12125,32 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
       subject_key: String(ctx?.subjectKey || state?.courses?.subjectKey || "")
     });
   } catch {}
+
+    // save result context for certificate button
+  state.courses = state.courses || {};
+  state.courses.lastTourAttemptId = ctx?.attemptId || null;
+  state.courses.lastTourCertificateId = null;
+
+  if (!state.certificates) {
+    state.certificates = { selectedId: null, lastIssuedId: null };
+  }
+
+  // try to issue certificate only after successful DB finalize
+  if (
+    finalizeSavedToDb &&
+    ctx?.attemptId &&
+    !ctx?.isArchive &&
+    reason !== "violations"
+  ) {
+    try {
+      const certRow = await issueTourCertificateDb(ctx.attemptId);
+      if (certRow?.id) {
+        state.courses.lastTourCertificateId = Number(certRow.id);
+        state.certificates.selectedId = Number(certRow.id);
+        state.certificates.lastIssuedId = Number(certRow.id);
+      }
+    } catch {}
+  }
 
   // unlock
   state.quizLock = null;
@@ -12408,7 +12739,31 @@ if (action === "about-person-open") {
   return;
 }
       if (action === "home-extra-toggle") { toggleHomeExtra(); return; }
-      if (action === "open-certificates") { openGlobal("certificates"); return; }
+            if (action === "open-certificates") {
+        openGlobal("certificates");
+        await renderCertificatesView();
+        return;
+      }
+
+      if (action === "certificate-open") {
+        const certId = Number(btn.dataset.id || 0);
+        if (!certId) return;
+
+        if (!state.certificates) {
+          state.certificates = { selectedId: null, lastIssuedId: null };
+        }
+
+        state.certificates.selectedId = certId;
+        saveState();
+
+        const topView = state.viewStack?.[state.viewStack.length - 1];
+        if (topView !== "certificates") {
+          openGlobal("certificates");
+        }
+        await renderCertificatesView();
+        return;
+      }
+
       if (action === "open-archive") { openGlobal("archive"); return; }
 
          // All Subjects from anywhere (Home tile, etc.)
@@ -12825,8 +13180,19 @@ if (action === "tour-next" || action === "tour-submit") {
         return;
       }
 
-      if (action === "tour-certificate") {
+            if (action === "tour-certificate") {
+        const certId = Number(state?.courses?.lastTourCertificateId || 0);
+
+        if (!state.certificates) {
+          state.certificates = { selectedId: null, lastIssuedId: null };
+        }
+
+        state.certificates.selectedId = certId || null;
+        if (certId) state.certificates.lastIssuedId = certId;
+        saveState();
+
         openGlobal("certificates");
+        await renderCertificatesView();
         return;
       }
 
