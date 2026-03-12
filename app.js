@@ -59,6 +59,33 @@ function hideToursLoading() {
   el.classList.add("hidden");
 }
 
+// ---------------------------
+// Global view transition overlay
+// ---------------------------
+let __viewTransitionTimer = null;
+
+function showViewTransitionOverlay() {
+  const el = document.getElementById("view-transition-overlay");
+  if (!el) return;
+
+  const txt = el.querySelector(".view-transition-text");
+  if (txt && typeof t === "function") {
+    txt.textContent = t("loading") || txt.textContent;
+  }
+
+  el.classList.remove("hidden");
+
+  if (__viewTransitionTimer) {
+    clearTimeout(__viewTransitionTimer);
+    __viewTransitionTimer = null;
+  }
+
+  __viewTransitionTimer = setTimeout(() => {
+    el.classList.add("hidden");
+    __viewTransitionTimer = null;
+  }, 180);
+}
+
   function escapeHTML(value) {
     return String(value ?? "")
       .replace(/&/g, "&amp;")
@@ -3065,7 +3092,11 @@ async function buildPracticeSet(subjectKey) {
     "archive"
   ];
 
-  function showView(viewName) {
+    function showView(viewName) {
+  if (viewName !== "splash") {
+    showViewTransitionOverlay();
+  }
+
   VIEWS.forEach(v => {
     const el = $(`#view-${v}`);
     if (!el) return;
@@ -4759,11 +4790,23 @@ function certificateViewerHtml(row) {
     [profile?.first_name, profile?.last_name].filter(Boolean).join(" ").trim() ||
     "iClub User";
 
-  const subjectText = row.subject_title || (certT("subject_label", "Предмет"));
+    const subjectText = row.subject_title || (certT("subject_label", "Предмет"));
   const regionText =
-    String(profile?.region_name || profile?.region || row?.region || certT("rank_region_label", "Регион")).trim();
+    String(
+      (profile?.region_tr && profile.region_tr[certLang]) ||
+      profile?.region_name ||
+      profile?.region ||
+      row?.region ||
+      certT("rank_region_label", "Регион")
+    ).trim();
   const districtText =
-    String(profile?.district_name || profile?.district || row?.district || certT("rank_district_label", "Район")).trim();
+    String(
+      (profile?.district_tr && profile.district_tr[certLang]) ||
+      profile?.district_name ||
+      profile?.district ||
+      row?.district ||
+      certT("rank_district_label", "Район")
+    ).trim();
 
   return `
     <div class="card" id="certificate-viewer-card" style="padding:0; overflow:hidden;">
@@ -4776,14 +4819,6 @@ function certificateViewerHtml(row) {
                 <div class="cert-brand-name">iClub</div>
                 <div class="cert-brand-sub">${escapeHTML(certT("brand_tagline") || "Smarter together")}</div>
               </div>
-            </div>
-
-            <div class="cert-type-badge">
-              ${
-                String(row?.certificate_type || "") === "final"
-                  ? escapeHTML(certT("cert_final_label", "Итоговый сертификат"))
-                  : `${escapeHTML(certT("tours_tour_label", "Тур"))} ${escapeHTML(String(row.tour_no || "—"))}`
-              }
             </div>
           </div>
 
@@ -4849,7 +4884,7 @@ function certificateViewerHtml(row) {
               : ``
           }
 
-          <div class="cert-bottom">
+                    <div class="cert-bottom">
             <div class="cert-bottom-meta">
               <div class="cert-date-line">
                 <span>${escapeHTML(certT("date_label", "Дата"))}:</span>
@@ -4861,12 +4896,12 @@ function certificateViewerHtml(row) {
                 <div class="cert-number-value">${escapeHTML(String(row.certificate_number || "—"))}</div>
               </div>
 
-              <div class="cert-qr-hint">${escapeHTML(certT("certificate_qr_hint") || "Отсканируйте QR-код для проверки подлинности")}</div>
+              <div class="cert-qr-hint">${escapeHTML(certT("certificate_qr_hint") || "QR orqali tekshirish")}</div>
             </div>
 
             <div class="cert-qr-wrap">
               <div id="certificate-qr" class="cert-qr"></div>
-              <div class="cert-qr-caption">${escapeHTML(certT("certificate_qr_caption") || "Проверить сертификат")}</div>
+              <div class="cert-qr-caption">${escapeHTML(certT("certificate_qr_caption") || "Tekshirish")}</div>
             </div>
           </div>
         </div>
@@ -4887,6 +4922,8 @@ function certificateViewerHtml(row) {
 async function renderCertificateViewer(rows) {
   const listEl = document.getElementById("certificates-list");
   if (!listEl) return;
+
+  try { await ensureProfileGeoTranslationsHydrated(); } catch {}
 
   const selectedId = Number(state?.certificates?.selectedId || 0);
   const oldViewer = document.getElementById("certificate-viewer-wrap");
