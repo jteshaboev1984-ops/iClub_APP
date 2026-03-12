@@ -1817,6 +1817,84 @@ function toastToursDenied(reason) {
   const msg = getToursDeniedText(reason);
   showToast(msg || (t("tours_denied_title") || "Туры недоступны"));
 }
+
+async function getProfileCompetitiveSlotHint(subjectKey) {
+  try {
+    if (!window.sb || !subjectKey) {
+      return t("profile_slot_hint_unpublished");
+    }
+
+    let subjectId = null;
+
+    try {
+      subjectId = await getSubjectIdByKey(subjectKey);
+    } catch {}
+
+    if (!subjectId) {
+      const { data: srow, error: serr } = await window.sb
+        .from("subjects")
+        .select("id")
+        .eq("subject_key", String(subjectKey))
+        .maybeSingle();
+
+      if (!serr && srow?.id) subjectId = Number(srow.id);
+    }
+
+    if (!subjectId) {
+      return t("profile_slot_hint_unpublished");
+    }
+
+    const { data, error } = await window.sb
+      .from("tours")
+      .select("tour_no,start_date,end_date,is_active")
+      .eq("subject_id", subjectId)
+      .eq("is_active", true)
+      .order("tour_no", { ascending: true });
+
+    if (error || !Array.isArray(data) || !data.length) {
+      return t("profile_slot_hint_unpublished");
+    }
+
+    const pad2 = (n) => String(n).padStart(2, "0");
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayISO = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
+
+    const isInWindow = (row) => {
+      const sd = row?.start_date ? String(row.start_date) : null;
+      const ed = row?.end_date ? String(row.end_date) : null;
+      const afterStart = !sd || sd <= todayISO;
+      const beforeEnd = !ed || ed >= todayISO;
+      return afterStart && beforeEnd;
+    };
+
+    const activeTour = data.find(isInWindow);
+    if (activeTour) {
+      return t("profile_slot_hint_active_now");
+    }
+
+    const futureTours = data
+      .filter(row => row?.start_date && String(row.start_date) > todayISO)
+      .sort((a, b) => String(a.start_date).localeCompare(String(b.start_date)));
+
+    const nextTour = futureTours[0];
+    if (!nextTour?.start_date) {
+      return t("profile_slot_hint_unpublished");
+    }
+
+    const startAt = parseLocalDateStart(String(nextTour.start_date));
+    const diffMs = startAt - today.getTime();
+    const diffDays = Math.round(diffMs / (24 * 60 * 60 * 1000));
+
+    if (diffDays <= 0) return t("profile_slot_hint_today");
+    if (diffDays === 1) return t("profile_slot_hint_tomorrow");
+    return t("profile_slot_hint_in_days", { n: diffDays });
+  } catch (e) {
+    logClientError("profile_slot_hint_error", e);
+    return t("profile_slot_hint_unpublished");
+  }
+}
+
      // ---------------------------
   // Tour schedule (v1: local stub, later from Supabase)
   // ---------------------------
@@ -7742,14 +7820,14 @@ input?.addEventListener("change", async () => {
     slotsListEl.innerHTML = "";
 
     // 1) Активные competitive слоты (0..2)
-    comp.forEach(us => {
+        comp.forEach(us => {
       const subj = subjectByKey(us.key);
       const row = document.createElement("div");
       row.className = "slot-card";
       row.innerHTML = `
         <div>
           <div class="slot-title">${escapeHTML(subjectTitle(us.key, subj?.title || us.key))}</div>
-          <div class="muted small">${t("profile_slot_hint")}</div>
+          <div class="muted small" data-slot-hint="${escapeHTML(us.key)}">${t("profile_slot_hint_loading")}</div>
         </div>
         <button type="button" class="btn mini" data-subject="${escapeHTML(us.key)}">${t("profile_view_btn")}</button>
       `;
@@ -7763,6 +7841,16 @@ input?.addEventListener("change", async () => {
       });
 
       slotsListEl.appendChild(row);
+
+      getProfileCompetitiveSlotHint(us.key)
+        .then((hint) => {
+          const hintEl = row.querySelector(`[data-slot-hint="${CSS.escape(String(us.key))}"]`);
+          if (hintEl) hintEl.textContent = hint || t("profile_slot_hint_unpublished");
+        })
+        .catch(() => {
+          const hintEl = row.querySelector(`[data-slot-hint="${CSS.escape(String(us.key))}"]`);
+          if (hintEl) hintEl.textContent = t("profile_slot_hint_unpublished");
+        });
     });
 
     // 2) Пустые слоты до 2 (Empty slot + JOIN)
