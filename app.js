@@ -104,7 +104,7 @@ function showCertificateDownloadOverlay() {
 
   const txt = el.querySelector(".view-transition-text");
   if (txt) {
-    txt.textContent = "Sertifikat tayyorlanmoqda…";
+    txt.textContent = t("certificate_download_preparing") || "Sertifikat tayyorlanmoqda…";
   }
 
   if (__viewTransitionTimer) {
@@ -125,6 +125,11 @@ function hideCertificateDownloadOverlay() {
   }
 
   el.classList.add("hidden");
+}
+
+async function waitForOverlayPaint() {
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  await new Promise((resolve) => setTimeout(resolve, 60));
 }
 
   function escapeHTML(value) {
@@ -4731,14 +4736,15 @@ async function renderCertificateQr(row) {
     mount.style.alignItems = "center";
     mount.style.justifyContent = "center";
 
-    const canvas = document.createElement("canvas");
+        const canvas = document.createElement("canvas");
     canvas.width = qrSize;
     canvas.height = qrSize;
     canvas.style.width = `${qrSize}px`;
     canvas.style.height = `${qrSize}px`;
     canvas.style.display = "block";
-    canvas.style.margin = "0 auto";
+    canvas.style.margin = "0";
     canvas.style.flex = "0 0 auto";
+    canvas.style.transform = "translate3d(0,0,0)";
 
     new window.QRious({
       element: canvas,
@@ -5086,22 +5092,29 @@ async function buildCertificateCanvasBlob(kind) {
 
   await ensureHtml2CanvasLoaded();
 
-  const canvas = await window.html2canvas(root, {
-    backgroundColor: "#ffffff",
-    scale: 2,
-    useCORS: true
-  });
+  root.classList.add("cert-export-mode");
 
-  if (kind === "png") {
-    return await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  try {
+    const canvas = await window.html2canvas(root, {
+      backgroundColor: null,
+      scale: 2,
+      useCORS: true
+    });
+
+    if (kind === "png") {
+      return await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+    }
+
+    return canvas;
+  } finally {
+    root.classList.remove("cert-export-mode");
   }
-
-  return canvas;
 }
 
 async function downloadCertificateAsPng(row) {
   try {
     showCertificateDownloadOverlay();
+    await waitForOverlayPaint();
 
     const blob = await buildCertificateCanvasBlob("png");
     if (!blob) return;
@@ -5117,6 +5130,7 @@ async function downloadCertificateAsPng(row) {
 async function downloadCertificateAsPdf(row) {
   try {
     showCertificateDownloadOverlay();
+    await waitForOverlayPaint();
 
     const canvas = await buildCertificateCanvasBlob("pdf");
     if (!canvas) return;
