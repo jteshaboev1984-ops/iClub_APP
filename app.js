@@ -83,33 +83,6 @@ function showViewTransitionOverlay(duration = 220) {
   }, duration);
 }
 
-// ---------------------------
-// Global view transition overlay
-// ---------------------------
-let __viewTransitionTimer = null;
-
-function showViewTransitionOverlay() {
-  const el = document.getElementById("view-transition-overlay");
-  if (!el) return;
-
-  const txt = el.querySelector(".view-transition-text");
-  if (txt && typeof t === "function") {
-    txt.textContent = t("loading") || txt.textContent;
-  }
-
-  el.classList.remove("hidden");
-
-  if (__viewTransitionTimer) {
-    clearTimeout(__viewTransitionTimer);
-    __viewTransitionTimer = null;
-  }
-
-  __viewTransitionTimer = setTimeout(() => {
-    el.classList.add("hidden");
-    __viewTransitionTimer = null;
-  }, 180);
-}
-
   function escapeHTML(value) {
     return String(value ?? "")
       .replace(/&/g, "&amp;")
