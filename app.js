@@ -4731,7 +4731,7 @@ async function renderCertificateQr(row) {
     const mobile = window.matchMedia("(max-width: 640px)").matches;
     const qrSize = mobile ? 80 : 94;
 
-    mount.innerHTML = "";
+        mount.innerHTML = "";
     mount.style.position = "relative";
     mount.style.display = "block";
     mount.style.padding = "0";
