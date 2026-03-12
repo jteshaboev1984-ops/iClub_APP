@@ -947,7 +947,7 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
   }
 
   // ✅ DB sync for video analytics (video_events)
-  async function insertVideoEventToSupabase(event_type, lesson_id, watch_seconds) {
+    async function insertVideoEventToSupabase(event_type, lesson_id, watch_seconds) {
     try {
       if (!window.sb) return;
 
@@ -972,6 +972,38 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
       if (insErr) logClientError("video_events_insert_error", insErr);
     } catch (e) {
       logClientError("video_events_insert_exception", e);
+    }
+  }
+
+  async function getProfileCompletedToursCount() {
+    try {
+      if (!window.sb) return null;
+
+      const uid = await getAuthUid();
+      if (!uid) return null;
+
+      const { data, error } = await window.sb
+        .from("tour_attempts")
+        .select("tour_id, percent, status")
+        .eq("user_id", uid)
+        .in("status", ["submitted", "time_expired", "anti_cheat"])
+        .order("tour_id", { ascending: true });
+
+      if (error) {
+        logClientError("profile_tours_count_error", error);
+        return null;
+      }
+
+      const uniq = new Set();
+      (data || []).forEach(row => {
+        const tourId = Number(row?.tour_id || 0);
+        if (tourId > 0) uniq.add(tourId);
+      });
+
+      return uniq.size;
+    } catch (e) {
+      logClientError("profile_tours_count_exception", e);
+      return null;
     }
   }
 
@@ -7627,9 +7659,9 @@ input?.addEventListener("change", async () => {
 
   metaEl.textContent = metaParts.join(" • ") || "—";
 
-    const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
+      const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
   const comp = subjects.filter(s => s.mode === "competitive");
-  const study = subjects.filter(s => s.mode === "study");
+  const study = subjects.filter(s => s.mode === "study" && !!s.pinned);
   const pinned = subjects.filter(s => !!s.pinned);
 
   compEl.textContent = String(comp.length);
@@ -7681,15 +7713,23 @@ input?.addEventListener("change", async () => {
   });
     const activeDays = days.size;
 
-  if (!allAttempts.length) {
+    if (!allAttempts.length) {
     stabilityEl.textContent = t("profile_stability_no_data");
   } else {
     const pct = Math.round((activeDays / 7) * 100);
     stabilityEl.textContent = (pct > 0) ? `${pct}%` : t("profile_stability_no_activity");
   }
 
-  // Tours: пока нет локальной истории туров в этом фронте — держим “—”
-  toursEl.textContent = "—";
+  toursEl.textContent = "…";
+  getProfileCompletedToursCount()
+    .then((count) => {
+      if (!toursEl) return;
+      toursEl.textContent = (count == null) ? "—" : String(count);
+    })
+    .catch(() => {
+      if (!toursEl) return;
+      toursEl.textContent = "—";
+    });
   
   if (currentLevelEl) {
     const bestPct = Number(best?.percent || 0);
