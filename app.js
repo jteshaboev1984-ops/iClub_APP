@@ -61,6 +61,21 @@ function hideToursLoading() {
 
 let __viewTransitionTimer = null;
 
+function currentLang() {
+  try {
+    if (window.i18n && typeof window.i18n.getLang === "function") {
+      return String(window.i18n.getLang() || "ru").toLowerCase();
+    }
+  } catch {}
+
+  try {
+    const profile = typeof loadProfile === "function" ? loadProfile() : null;
+    return String(profile?.uiLanguage || profile?.language || "ru").toLowerCase();
+  } catch {}
+
+  return "ru";
+}
+
 function showViewTransitionOverlay(duration = 220) {
   const el = document.getElementById("view-transition-overlay");
   if (!el) return;
@@ -81,6 +96,35 @@ function showViewTransitionOverlay(duration = 220) {
     el.classList.add("hidden");
     __viewTransitionTimer = null;
   }, duration);
+}
+
+function showCertificateDownloadOverlay() {
+  const el = document.getElementById("view-transition-overlay");
+  if (!el) return;
+
+  const txt = el.querySelector(".view-transition-text");
+  if (txt) {
+    txt.textContent = "Sertifikat tayyorlanmoqda…";
+  }
+
+  if (__viewTransitionTimer) {
+    clearTimeout(__viewTransitionTimer);
+    __viewTransitionTimer = null;
+  }
+
+  el.classList.remove("hidden");
+}
+
+function hideCertificateDownloadOverlay() {
+  const el = document.getElementById("view-transition-overlay");
+  if (!el) return;
+
+  const txt = el.querySelector(".view-transition-text");
+  if (txt && typeof t === "function") {
+    txt.textContent = t("loading") || txt.textContent;
+  }
+
+  el.classList.add("hidden");
 }
 
   function escapeHTML(value) {
@@ -4209,7 +4253,7 @@ async function getSubjectIdByKey(subjectKey) {
     if (!value) return "—";
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return "—";
-    return new Intl.DateTimeFormat(currentLang() || "ru", {
+    return new Intl.DateTimeFormat(currentLang(), {
       day: "numeric",
       month: "long",
       year: "numeric"
@@ -4528,7 +4572,7 @@ function renderCertificateStatsHtml(row) {
     chips.push(`
       <div class="cert-list-chip">
         <span class="cert-list-chip-label">${escapeHTML(t("date_label") || "Дата")}</span>
-        <b>${escapeHTML(formatDateForLangSafe(row.created_at, currentLang() || "uz"))}</b>
+        <b>${escapeHTML(formatDateForLangSafe(row.created_at, currentLang()))}</b>
       </div>
     `);
   }
@@ -5057,16 +5101,23 @@ async function buildCertificateCanvasBlob(kind) {
 
 async function downloadCertificateAsPng(row) {
   try {
+    showCertificateDownloadOverlay();
+
     const blob = await buildCertificateCanvasBlob("png");
     if (!blob) return;
+
     triggerBlobDownload(blob, buildCertificateDownloadName(row, "png"));
   } catch {
     showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
+  } finally {
+    hideCertificateDownloadOverlay();
   }
 }
 
 async function downloadCertificateAsPdf(row) {
   try {
+    showCertificateDownloadOverlay();
+
     const canvas = await buildCertificateCanvasBlob("pdf");
     if (!canvas) return;
 
@@ -5084,8 +5135,11 @@ async function downloadCertificateAsPdf(row) {
     pdf.save(buildCertificateDownloadName(row, "pdf"));
   } catch {
     showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
+  } finally {
+    hideCertificateDownloadOverlay();
   }
 }
+   
 async function logDbErrorToEvents(uid, where, error, extraPayload = {}) {
   try {
     if (!window.sb || !uid) return;
