@@ -4316,34 +4316,32 @@ button.is-loading { opacity: .85; }
   overflow: hidden;
 }
 
+.cert-export-mode {
+  background: linear-gradient(180deg, #eef4ff 0%, #f6faff 52%, #ffffff 100%) !important;
+}
+
+.cert-export-mode .cert-paper {
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
 .cert-sheet {
   background:
-    radial-gradient(circle at 12% 10%, rgba(47,111,214,.12) 0%, rgba(47,111,214,.05) 18%, transparent 42%),
-    radial-gradient(circle at 88% 16%, rgba(59,130,246,.12) 0%, rgba(59,130,246,.05) 16%, transparent 38%),
-    radial-gradient(circle at 22% 88%, rgba(14,165,233,.08) 0%, rgba(14,165,233,.04) 16%, transparent 34%),
-    linear-gradient(180deg, #eef5ff 0%, #f8fbff 38%, #ffffff 100%);
+    linear-gradient(180deg, #eef4ff 0%, #f6faff 52%, #ffffff 100%);
   padding: 18px;
 }
 
 .cert-paper {
   position: relative;
-  border: 1px solid rgba(47,111,214,.16);
+  border: 1px solid rgba(47,111,214,.14);
   border-radius: 24px;
   padding: 22px;
-  background: linear-gradient(180deg, rgba(255,255,255,.97) 0%, rgba(255,255,255,.99) 100%);
-  box-shadow:
-    0 18px 44px rgba(15,23,42,.08),
-    0 2px 10px rgba(47,111,214,.05);
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(47,111,214,.06);
 }
 
 .cert-paper::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,.72) 0%, transparent 26%, transparent 76%, rgba(47,111,214,.035) 100%);
+  content: none;
 }
 
 .cert-top {
@@ -4560,9 +4558,9 @@ button.is-loading { opacity: .85; }
 .cert-qr {
   width: 108px;
   height: 108px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  display: grid;
+  place-items: center;
   border-radius: 14px;
   border: 1px solid rgba(15,23,42,.08);
   background: #fff;
@@ -4575,9 +4573,11 @@ button.is-loading { opacity: .85; }
 .cert-qr img {
   width: 94px;
   height: 94px;
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
   display: block;
-  margin: 0 auto;
-  flex: 0 0 auto;
+  margin: 0;
 }
 
 .cert-qr-caption {
@@ -4741,13 +4741,13 @@ button.is-loading { opacity: .85; }
     width: 92px;
   }
 
-        .cert-qr {
+          .cert-qr {
     width: 92px;
     height: 92px;
     margin: 0 0 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative;
+    display: grid;
+    place-items: center;
     padding: 0;
   }
 
@@ -4755,8 +4755,10 @@ button.is-loading { opacity: .85; }
   .cert-qr img {
     width: 80px;
     height: 80px;
-    margin: 0 auto;
-    flex: 0 0 auto;
+    position: absolute;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
   }
 
     .cert-actions {
