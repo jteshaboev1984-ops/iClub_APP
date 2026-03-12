@@ -227,8 +227,9 @@ archive_unlock_after_toast: "Архив откроется после завер
 
       lessons_list_subtitle: "Список видео-уроков", 
 
-      profile_metric_competitive: "Соревновательный",
-      profile_metric_study: "Учебный",
+            profile_metric_competitive: "Соревнование",
+      profile_metric_study: "Учёба",
+      profile_metric_tours: "Туры",
 
       done: "Готово",
       error_try_again: "Ошибка — попробуйте ещё раз",
@@ -980,8 +981,9 @@ archive_unlock_after_toast: "Arxiv faol tur yakunlangandan keyin ochiladi.",
 
       lessons_list_subtitle: "Video darslar ro‘yxati", 
 
-      profile_metric_competitive: "Musobaqa",
+            profile_metric_competitive: "Musobaqa",
       profile_metric_study: "O‘quv",
+      profile_metric_tours: "Turlar",
 
       done: "Tayyor",
       error_try_again: "Xatolik — qayta urinib ko‘ring",
@@ -1739,8 +1741,9 @@ archive_unlock_after_toast: "Archive will open after you finish the active tour.
 
       lessons_list_subtitle: "Video lessons list",
 
-      profile_metric_competitive: "Competitive",
+            profile_metric_competitive: "Competitive",
       profile_metric_study: "Study",
+      profile_metric_tours: "Tours",
 
       done: "Done",
       error_try_again: "Error — please try again",
