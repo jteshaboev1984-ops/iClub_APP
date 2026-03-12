@@ -3829,6 +3829,61 @@ body.modal-open { overflow: hidden; }
 .view-transition-overlay{
   position: fixed;
   inset: 0;
+  z-index: 1600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(247,249,252,.34);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .18s ease, visibility .18s ease;
+  pointer-events: none;
+}
+
+.view-transition-overlay.hidden{
+  opacity: 0;
+  visibility: hidden;
+}
+
+.view-transition-card{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 132px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: 0 12px 28px rgba(15,23,42,.10);
+}
+
+.view-transition-spinner{
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(47,111,214,.22);
+  border-top-color: var(--primary);
+  animation: viewTransitionSpin .75s linear infinite;
+  flex: 0 0 auto;
+}
+
+.view-transition-text{
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+@keyframes viewTransitionSpin{
+  to { transform: rotate(360deg); }
+}
+
+.view-transition-overlay{
+  position: fixed;
+  inset: 0;
   z-index: 1400;
   display: flex;
   align-items: center;
@@ -4714,20 +4769,26 @@ button.is-loading { opacity: .85; }
     font-size: 24px;
   }
 
-    .cert-bottom {
-    grid-template-columns: minmax(0,1fr) 96px;
+      .cert-bottom {
+    grid-template-columns: minmax(0,1fr) 92px;
     align-items: start;
     gap: 10px;
   }
 
   .cert-qr-wrap {
-    width: 96px;
+    width: 92px;
   }
 
   .cert-qr {
-    width: 96px;
-    height: 96px;
+    width: 92px;
+    height: 92px;
     margin: 0 0 0 auto;
+  }
+
+  .cert-qr canvas,
+  .cert-qr img {
+    width: 80px;
+    height: 80px;
   }
 
   .cert-actions {
