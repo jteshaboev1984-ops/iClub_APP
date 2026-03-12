@@ -4743,7 +4743,7 @@ button.is-loading { opacity: .85; }
     align-items: center;
     gap: 6px;
   }
-        .cert-qr {
+          .cert-qr {
     width: 92px;
     height: 92px;
     margin: 0 auto;
@@ -4758,9 +4758,10 @@ button.is-loading { opacity: .85; }
     width: 80px;
     height: 80px;
     position: static;
-    display: block;
-    margin: 0;
+    inset: auto;
     transform: none;
+    margin: 0 auto;
+    flex: 0 0 auto;
   }
     .cert-actions {
     flex-direction: row;
