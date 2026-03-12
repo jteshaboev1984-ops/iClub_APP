@@ -3879,60 +3879,6 @@ body.modal-open { overflow: hidden; }
 
 @keyframes viewTransitionSpin{
   to { transform: rotate(360deg); }
-}
-
-.view-transition-overlay{
-  position: fixed;
-  inset: 0;
-  z-index: 1400;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: rgba(247,249,252,0.38);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-  pointer-events: none;
-  opacity: 1;
-  transition: opacity .18s ease;
-}
-
-.view-transition-overlay.hidden{
-  opacity: 0;
-  visibility: hidden;
-}
-
-.view-transition-card{
-  min-width: 136px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.96);
-  border: 1px solid rgba(15,23,42,0.08);
-  box-shadow: 0 12px 28px rgba(15,23,42,0.10);
-}
-
-.view-transition-dot{
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--primary);
-  box-shadow: 18px 0 0 rgba(47,111,214,.34), 36px 0 0 rgba(47,111,214,.18);
-  animation: viewTransitionPulse 0.9s ease-in-out infinite;
-}
-
-.view-transition-text{
-  padding-left: 34px;
-  font-size: 13px;
-  font-weight: 800;
-  color: #0f172a;
-  white-space: nowrap;
-}
-
-@keyframes viewTransitionPulse{
-  0%{ transform: translateX(0); opacity: 1; }
   50%{ transform: translateX(4px); opacity: .92; }
   100%{ transform: translateX(0); opacity: 1; }
 }
@@ -4374,18 +4320,33 @@ button.is-loading { opacity: .85; }
 
 .cert-sheet {
   background:
-    radial-gradient(circle at top right, rgba(47,111,214,.10), transparent 30%),
-    radial-gradient(circle at bottom left, rgba(47,111,214,.06), transparent 28%),
-    linear-gradient(180deg, #f6f9ff 0%, #ffffff 100%);
+    radial-gradient(circle at 12% 10%, rgba(47,111,214,.12) 0%, rgba(47,111,214,.05) 18%, transparent 42%),
+    radial-gradient(circle at 88% 16%, rgba(59,130,246,.12) 0%, rgba(59,130,246,.05) 16%, transparent 38%),
+    radial-gradient(circle at 22% 88%, rgba(14,165,233,.08) 0%, rgba(14,165,233,.04) 16%, transparent 34%),
+    linear-gradient(180deg, #eef5ff 0%, #f8fbff 38%, #ffffff 100%);
   padding: 18px;
 }
 
 .cert-paper {
-  border: 1px solid rgba(47,111,214,.18);
+  border: 1px solid rgba(47,111,214,.16);
   border-radius: 24px;
   padding: 22px;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-  box-shadow: 0 16px 34px rgba(15,23,42,.07);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(255,255,255,.985) 100%);
+  box-shadow:
+    0 18px 44px rgba(15,23,42,.08),
+    0 2px 10px rgba(47,111,214,.05);
+  position: relative;
+}
+
+.cert-paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.70) 0%, transparent 24%, transparent 76%, rgba(47,111,214,.035) 100%);
 }
 
 .cert-top {
@@ -4456,10 +4417,11 @@ button.is-loading { opacity: .85; }
 
 .cert-number-value {
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.45;
   font-weight: 700;
   color: #0f172a;
   word-break: break-word;
+  letter-spacing: .01em;
 }
 
 .cert-hero {
@@ -4601,13 +4563,15 @@ button.is-loading { opacity: .85; }
 .cert-qr {
   width: 108px;
   height: 108px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 14px;
   border: 1px solid rgba(15,23,42,.08);
   background: #fff;
   box-shadow: 0 8px 18px rgba(15,23,42,.05);
   overflow: hidden;
+  padding: 0;
 }
 
 .cert-qr canvas,
@@ -4615,7 +4579,8 @@ button.is-loading { opacity: .85; }
   width: 94px;
   height: 94px;
   display: block;
-  margin: auto;
+  margin: 0 auto;
+  flex: 0 0 auto;
 }
 
 .cert-qr-caption {
@@ -4779,19 +4744,22 @@ button.is-loading { opacity: .85; }
     width: 92px;
   }
 
-    .cert-qr {
+        .cert-qr {
     width: 92px;
     height: 92px;
     margin: 0 0 0 auto;
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
   }
 
   .cert-qr canvas,
   .cert-qr img {
     width: 80px;
     height: 80px;
-    margin: auto;
+    margin: 0 auto;
+    flex: 0 0 auto;
   }
 
     .cert-actions {
