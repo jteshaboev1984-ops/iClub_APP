@@ -4732,19 +4732,21 @@ async function renderCertificateQr(row) {
     const qrSize = mobile ? 80 : 94;
 
     mount.innerHTML = "";
-    mount.style.display = "flex";
-    mount.style.alignItems = "center";
-    mount.style.justifyContent = "center";
+    mount.style.position = "relative";
+    mount.style.display = "block";
+    mount.style.padding = "0";
 
-        const canvas = document.createElement("canvas");
+    const canvas = document.createElement("canvas");
     canvas.width = qrSize;
     canvas.height = qrSize;
     canvas.style.width = `${qrSize}px`;
     canvas.style.height = `${qrSize}px`;
+    canvas.style.position = "absolute";
+    canvas.style.left = "50%";
+    canvas.style.top = "50%";
+    canvas.style.transform = "translate(-50%, -50%)";
     canvas.style.display = "block";
     canvas.style.margin = "0";
-    canvas.style.flex = "0 0 auto";
-    canvas.style.transform = "translate3d(0,0,0)";
 
     new window.QRious({
       element: canvas,
