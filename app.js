@@ -4219,6 +4219,28 @@ async function getSubjectIdByKey(subjectKey) {
   }
 }
 
+function formatDateForLangSafe(value, lang = "ru") {
+  try {
+    if (!value) return "—";
+
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "—";
+
+    const months = {
+      ru: ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"],
+      uz: ["yanvar","fevral","mart","aprel","may","iyun","iyul","avgust","sentyabr","oktyabr","noyabr","dekabr"],
+      en: ["January","February","March","April","May","June","July","August","September","October","November","December"]
+    };
+
+    const safeLang = String(lang || "ru").toLowerCase();
+    const pack = months[safeLang] || months.ru;
+
+    return `${d.getDate()} ${pack[d.getMonth()]} ${d.getFullYear()}`;
+  } catch {
+    return "—";
+  }
+}
+
 function buildCertificateDownloadName(row, ext) {
   const type = String(row?.certificate_type || "certificate").toLowerCase();
   const subjectKey = String(row?.subject_key || "subject").toLowerCase();
@@ -4657,11 +4679,21 @@ async function renderCertificateQr(row) {
     await ensureQriousLoaded();
     if (!window.QRious) return;
 
+    const mobile = window.matchMedia("(max-width: 640px)").matches;
+    const qrSize = mobile ? 80 : 94;
+
     const canvas = document.createElement("canvas");
+    canvas.width = qrSize;
+    canvas.height = qrSize;
+    canvas.style.width = `${qrSize}px`;
+    canvas.style.height = `${qrSize}px`;
+    canvas.style.display = "block";
+    canvas.style.margin = "auto";
+
     new window.QRious({
       element: canvas,
       value: verifyUrl,
-      size: 132,
+      size: qrSize,
       level: "H",
       background: "#ffffff",
       foreground: "#0f172a",
@@ -4901,7 +4933,7 @@ function certificateViewerHtml(row) {
             <div class="cert-bottom-meta">
               <div class="cert-date-line">
                 <span>${escapeHTML(certT("date_label", "Дата"))}:</span>
-                <b>${escapeHTML(formatDateShortSafe(row.created_at))}</b>
+                <b>${escapeHTML(formatDateForLangSafe(row.created_at, certLang))}</b>
               </div>
 
               <div class="cert-number-box cert-number-box-bottom">
