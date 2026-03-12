@@ -435,7 +435,7 @@
                 <div id="video-meta" class="muted">Урок</div>
               </div>
 
-              <div class="card">
+                            <div class="card">
                 <div id="video-empty" class="muted small" data-i18n="video_empty">
                   Видео недоступно (нет URL в базе).
                 </div>
@@ -449,6 +449,15 @@
                   allowfullscreen
                   referrerpolicy="strict-origin-when-cross-origin"
                   ></iframe>
+                </div>
+
+                <div id="video-external-box" style="display:none;">
+                  <div id="video-external-hint" class="muted small" data-i18n="video_external_hint" style="margin-bottom:12px;">
+                    Откройте видео по кнопке ниже.
+                  </div>
+                  <button id="video-open-external" class="btn primary" type="button" data-i18n="video_open_external_btn">
+                    Открыть видео
+                  </button>
                 </div>
               </div>
 
