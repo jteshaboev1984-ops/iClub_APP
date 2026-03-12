@@ -1518,6 +1518,18 @@ function isTelegramVideoUrl(rawUrl) {
   return /^https?:\/\/t\.me\//i.test(url) || /^t\.me\//i.test(url);
 }
 
+function getLessonDisplayTitle(lesson) {
+  const rawTitle = String(lesson?.title || "").trim();
+  const orderNo = Number(lesson?.order_no || 0);
+
+  if (orderNo > 0) {
+    const template = t("video_lesson_title") || "Видеоурок {n}";
+    return template.replace("{n}", String(orderNo));
+  }
+
+  return rawTitle || (t("lesson") || "Урок");
+}
+
   // ---------------------------
   // App state
   // ---------------------------
@@ -8966,7 +8978,7 @@ async function renderSubjectHubMentorCard(subjectKey) {
       const item = document.createElement("div");
       item.className = "list-item";
 
-      const title = String(lesson?.title || "").trim() || (t("lesson") || "Урок");
+            const title = getLessonDisplayTitle(lesson);
       const topic = String(lesson?.topic || "").trim();
 
       item.innerHTML = `
@@ -8974,11 +8986,11 @@ async function renderSubjectHubMentorCard(subjectKey) {
         <div class="muted small">${escapeHTML(subjectTitle(subjectKey, subj ? subj.title : ""))}${topic ? ` • ${escapeHTML(topic)}` : ""}</div>
       `;
 
-      item.addEventListener("click", async () => {
+            item.addEventListener("click", async () => {
         state.courses.lessonId = lesson.id;
         saveState();
         pushCourses("video");
-        await renderVideo({ id: lesson.id, title, topic });
+        await renderVideo({ id: lesson.id, title: lesson.title, topic, order_no: lesson.order_no });
       });
 
       list.appendChild(item);
@@ -8988,7 +9000,7 @@ async function renderSubjectHubMentorCard(subjectKey) {
     async function renderVideo(lesson) {
     const tEl = $("#video-title");
     const mEl = $("#video-meta");
-    if (tEl) tEl.textContent = lesson?.title || (t("video") || "Видео");
+    if (tEl) tEl.textContent = getLessonDisplayTitle(lesson);
     if (mEl) mEl.textContent = lesson?.topic || "";
 
     const wrapEl = document.getElementById("video-player-wrap");
