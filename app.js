@@ -4528,7 +4528,7 @@ function renderCertificateStatsHtml(row) {
     chips.push(`
       <div class="cert-list-chip">
         <span class="cert-list-chip-label">${escapeHTML(t("date_label") || "Дата")}</span>
-        <b>${escapeHTML(formatDateShortSafe(row.created_at))}</b>
+        <b>${escapeHTML(formatDateForLangSafe(row.created_at, currentLang() || "uz"))}</b>
       </div>
     `);
   }
@@ -4682,13 +4682,19 @@ async function renderCertificateQr(row) {
     const mobile = window.matchMedia("(max-width: 640px)").matches;
     const qrSize = mobile ? 80 : 94;
 
+    mount.innerHTML = "";
+    mount.style.display = "flex";
+    mount.style.alignItems = "center";
+    mount.style.justifyContent = "center";
+
     const canvas = document.createElement("canvas");
     canvas.width = qrSize;
     canvas.height = qrSize;
     canvas.style.width = `${qrSize}px`;
     canvas.style.height = `${qrSize}px`;
     canvas.style.display = "block";
-    canvas.style.margin = "auto";
+    canvas.style.margin = "0 auto";
+    canvas.style.flex = "0 0 auto";
 
     new window.QRious({
       element: canvas,
@@ -4700,7 +4706,6 @@ async function renderCertificateQr(row) {
       padding: 4
     });
 
-    mount.innerHTML = "";
     mount.appendChild(canvas);
   } catch {
     mount.innerHTML = "";
