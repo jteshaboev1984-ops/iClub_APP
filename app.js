@@ -3047,7 +3047,7 @@ async function buildPracticeSet(subjectKey) {
   // ---------------------------
   // UI: Views & Tabs
   // ---------------------------
-  const VIEWS = [
+    const VIEWS = [
     "splash",
     "registration",
     "home",
@@ -3061,6 +3061,7 @@ async function buildPracticeSet(subjectKey) {
     "community",
     "about",
     "certificates",
+    "certificate-verify",
     "archive"
   ];
 
@@ -3326,13 +3327,30 @@ if (actionBtn) {
      // применяем для default-состояния
      syncTopbarLeftState();
 
+        if (viewName === "certificate-verify") {
+  titleEl.textContent = t("certificate_verify_title") || "Проверка сертификата";
+  subEl.textContent = t("certificate_verify_sub") || "Публичная проверка подлинности";
+  backBtn.style.visibility = "hidden";
+  if (tabbarEl) tabbarEl.style.display = "none";
+  syncTopbarLeftState();
+  return;
+}
+
     // Global screens (resources/news/...)
     if (["resources", "news", "notifications", "community", "about", "certificates", "archive"].includes(viewName)) {
-  backBtn.style.visibility = canGlobalBack() ? "visible" : "hidden";
+  const certViewerOpened =
+    viewName === "certificates" && Number(state?.certificates?.selectedId || 0) > 0;
 
-  // ✅ Рядом с лого всегда бренд как на Home/Profile
-  titleEl.textContent = t("app_name");
-  subEl.textContent = "Smarter together";
+  backBtn.style.visibility = (certViewerOpened || canGlobalBack()) ? "visible" : "hidden";
+
+  if (certViewerOpened) {
+    titleEl.textContent = t("certificates_title") || "Сертификаты";
+    subEl.textContent = t("certificates_sub") || "";
+  } else {
+    titleEl.textContent = t("app_name");
+    subEl.textContent = "Smarter together";
+  }
+
   syncTopbarLeftState();
   return;
 }
@@ -4540,10 +4558,170 @@ async function renderCertificatesView() {
   const oldViewer = document.getElementById("certificate-viewer-wrap");
   if (oldViewer) oldViewer.remove();
 }
-   function findSelectedCertificateRow(rows) {
+      function findSelectedCertificateRow(rows) {
   const selectedId = Number(state?.certificates?.selectedId || 0);
   if (!selectedId) return null;
   return rows.find(r => Number(r.id) === selectedId) || null;
+}
+
+function buildCertificateVerifyUrl(certificateNumber) {
+  const certNo = String(certificateNumber || "").trim();
+  if (!certNo) return "";
+
+  try {
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.hash = "";
+    url.searchParams.set("verify_certificate", certNo);
+    return url.toString();
+  } catch {
+    return `${window.location.origin}${window.location.pathname}?verify_certificate=${encodeURIComponent(certNo)}`;
+  }
+}
+
+function getVerifyCertificateNumberFromUrl() {
+  try {
+    const url = new URL(window.location.href);
+    return String(url.searchParams.get("verify_certificate") || "").trim();
+  } catch {
+    return "";
+  }
+}
+
+async function ensureQriousLoaded() {
+  if (window.QRious) return true;
+
+  await new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[data-qrious="1"]');
+    if (existing) {
+      existing.addEventListener("load", resolve, { once: true });
+      existing.addEventListener("error", reject, { once: true });
+      return;
+    }
+
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js";
+    s.async = true;
+    s.dataset.qrious = "1";
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+
+  return !!window.QRious;
+}
+
+async function renderCertificateQr(row) {
+  const mount = document.getElementById("certificate-qr");
+  if (!mount) return;
+
+  const verifyUrl = buildCertificateVerifyUrl(row?.certificate_number);
+  if (!verifyUrl) {
+    mount.innerHTML = "";
+    return;
+  }
+
+  try {
+    await ensureQriousLoaded();
+    if (!window.QRious) return;
+
+    const canvas = document.createElement("canvas");
+    new window.QRious({
+      element: canvas,
+      value: verifyUrl,
+      size: 132,
+      level: "H",
+      background: "#ffffff",
+      foreground: "#0f172a",
+      padding: 4
+    });
+
+    mount.innerHTML = "";
+    mount.appendChild(canvas);
+  } catch {
+    mount.innerHTML = "";
+  }
+}
+
+async function fetchCertificateVerificationRow(certificateNumber) {
+  try {
+    if (!window.sb || !certificateNumber) return null;
+
+    const { data, error } = await window.sb.rpc("verify_certificate", {
+      p_certificate_number: String(certificateNumber).trim()
+    });
+
+    if (error) return null;
+    return normalizeRpcSingleRow(data);
+  } catch {
+    return null;
+  }
+}
+
+async function renderCertificateVerifyView(certificateNumber) {
+  const resultEl = document.getElementById("certificate-verify-result");
+  if (!resultEl) return;
+
+  resultEl.innerHTML = `
+    <div class="card cert-verify-card">
+      <div class="muted">${escapeHTML(t("certificate_verify_loading") || "Проверяем сертификат…")}</div>
+    </div>
+  `;
+
+  const row = await fetchCertificateVerificationRow(certificateNumber);
+
+  if (!row) {
+    resultEl.innerHTML = `
+      <div class="card cert-verify-card cert-verify-card-empty">
+        <div class="cert-verify-state">✕</div>
+        <div class="cert-verify-title">${escapeHTML(t("certificate_verify_not_found_title") || "Сертификат не найден")}</div>
+        <div class="muted">${escapeHTML(t("certificate_verify_not_found_text") || "Проверьте номер сертификата или QR-код.")}</div>
+      </div>
+    `;
+    return;
+  }
+
+  const subjectText = row.subject_key
+    ? subjectTitle(row.subject_key, row.subject_title || "")
+    : (row.subject_title || (t("subject_label") || "Предмет"));
+
+  const typeText =
+    String(row?.certificate_type || "") === "final"
+      ? (t("cert_final_label") || "Итоговый сертификат")
+      : `${t("tours_tour_label") || "Тур"} ${Number(row?.tour_no || 0) || "—"}`;
+
+  resultEl.innerHTML = `
+    <div class="card cert-verify-card">
+      <div class="cert-verify-badge">${escapeHTML(t("certificate_verify_valid") || "Сертификат действителен")}</div>
+
+      <div class="cert-verify-grid">
+        <div class="cert-verify-row">
+          <div class="cert-verify-label">${escapeHTML(t("certificate_number_label") || "Номер сертификата")}</div>
+          <div class="cert-verify-value cert-verify-number">${escapeHTML(String(row.certificate_number || "—"))}</div>
+        </div>
+
+        <div class="cert-verify-row">
+          <div class="cert-verify-label">${escapeHTML(t("subject_label") || "Предмет")}</div>
+          <div class="cert-verify-value">${escapeHTML(subjectText)}</div>
+        </div>
+
+        <div class="cert-verify-row">
+          <div class="cert-verify-label">${escapeHTML(t("certificates_title") || "Сертификат")}</div>
+          <div class="cert-verify-value">${escapeHTML(typeText)}</div>
+        </div>
+
+        <div class="cert-verify-row">
+          <div class="cert-verify-label">${escapeHTML(t("certificate_result_label") || "Результат")}</div>
+          <div class="cert-verify-value">${escapeHTML(String(row.score ?? "—"))} ${escapeHTML(t("points_label") || "балл")} · ${escapeHTML(String(row.percent ?? "—"))}%</div>
+        </div>
+
+        <div class="cert-verify-row">
+          <div class="cert-verify-label">${escapeHTML(t("date_label") || "Дата")}</div>
+          <div class="cert-verify-value">${escapeHTML(formatDateShortSafe(row.created_at))}</div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function certificateViewerHtml(row) {
@@ -4555,7 +4733,7 @@ function certificateViewerHtml(row) {
     `;
   }
 
-    const profile = loadProfile?.() || {};
+  const profile = loadProfile?.() || {};
   const certLang = String(row?.language_code || currentLang() || "ru").toLowerCase();
 
   const certT = (key, fallback = "") => {
@@ -4587,12 +4765,8 @@ function certificateViewerHtml(row) {
   const districtText =
     String(profile?.district_name || profile?.district || row?.district || certT("rank_district_label", "Район")).trim();
 
-    return `
+  return `
     <div class="card" id="certificate-viewer-card" style="padding:0; overflow:hidden;">
-      <div class="cert-viewer-topbar">
-        <button class="btn back" type="button" data-action="certificates-back">${escapeHTML(t("back_label") || "Назад")}</button>
-      </div>
-
       <div id="certificate-canvas-root" class="cert-sheet">
         <div class="cert-paper">
           <div class="cert-top">
@@ -4604,13 +4778,16 @@ function certificateViewerHtml(row) {
               </div>
             </div>
 
-            <div class="cert-number-box">
-              <div class="cert-number-label">${escapeHTML(certT("certificate_number_label") || "Номер сертификата")}</div>
-              <div class="cert-number-value">${escapeHTML(String(row.certificate_number || "—"))}</div>
+            <div class="cert-type-badge">
+              ${
+                String(row?.certificate_type || "") === "final"
+                  ? escapeHTML(certT("cert_final_label", "Итоговый сертификат"))
+                  : `${escapeHTML(certT("tours_tour_label", "Тур"))} ${escapeHTML(String(row.tour_no || "—"))}`
+              }
             </div>
           </div>
 
-                    <div class="cert-hero">
+          <div class="cert-hero">
             <div class="cert-kicker">${escapeHTML(certT("certificate_awarded_label", "Официальный сертификат участника"))}</div>
             <div class="cert-name">${escapeHTML(fullName)}</div>
           </div>
@@ -4634,12 +4811,12 @@ function certificateViewerHtml(row) {
 
           <div class="cert-grid-main-2 cert-result-grid">
             <div class="cert-stat cert-stat-primary">
-              <div class="cert-stat-label">${escapeHTML(certT("certificate_result_label", "Натижа"))}</div>
+              <div class="cert-stat-label">${escapeHTML(certT("certificate_result_label", "Результат"))}</div>
               <div class="cert-stat-value">${escapeHTML(String(row.score ?? "—"))} ${escapeHTML(certT("points_label", "балл"))}</div>
             </div>
 
             <div class="cert-stat cert-stat-primary">
-              <div class="cert-stat-label">${escapeHTML(certT("correct_answers_percent_label", "Тўғри жавоб"))}</div>
+              <div class="cert-stat-label">${escapeHTML(certT("correct_answers_percent_label", "Правильных ответов"))}</div>
               <div class="cert-stat-value">${escapeHTML(String(row.percent ?? "—"))}%</div>
             </div>
           </div>
@@ -4647,21 +4824,21 @@ function certificateViewerHtml(row) {
           <div class="cert-grid-main-3 cert-rank-grid">
             <div class="cert-rank">
               <div class="cert-rank-label">${escapeHTML(certT("rank_country_label", "Республика"))}</div>
-              <div class="cert-rank-value">${escapeHTML(String(row.rank_country ?? "—"))}-${escapeHTML(certT("rank_suffix_label", "ўрин"))}</div>
+              <div class="cert-rank-value">${escapeHTML(String(row.rank_country ?? "—"))}-${escapeHTML(certT("rank_suffix_label", "место"))}</div>
             </div>
 
             <div class="cert-rank">
               <div class="cert-rank-label">${escapeHTML(regionText)}</div>
-              <div class="cert-rank-value">${escapeHTML(String(row.rank_region ?? "—"))}-${escapeHTML(certT("rank_suffix_label", "ўрин"))}</div>
+              <div class="cert-rank-value">${escapeHTML(String(row.rank_region ?? "—"))}-${escapeHTML(certT("rank_suffix_label", "место"))}</div>
             </div>
 
             <div class="cert-rank">
               <div class="cert-rank-label">${escapeHTML(districtText)}</div>
-              <div class="cert-rank-value">${escapeHTML(String(row.rank_district ?? "—"))}-${escapeHTML(certT("rank_suffix_label", "ўрин"))}</div>
+              <div class="cert-rank-value">${escapeHTML(String(row.rank_district ?? "—"))}-${escapeHTML(certT("rank_suffix_label", "место"))}</div>
             </div>
           </div>
 
-                    ${
+          ${
             String(row?.certificate_type || "") === "final"
               ? `
           <div class="cert-final-box">
@@ -4672,19 +4849,30 @@ function certificateViewerHtml(row) {
               : ``
           }
 
-          <div class="cert-date-line">
-            <span>${escapeHTML(certT("date_label", "Дата"))}:</span>
-            <b>${escapeHTML(formatDateShortSafe(row.created_at))}</b>
-          </div>
+          <div class="cert-bottom">
+            <div class="cert-bottom-meta">
+              <div class="cert-date-line">
+                <span>${escapeHTML(certT("date_label", "Дата"))}:</span>
+                <b>${escapeHTML(formatDateShortSafe(row.created_at))}</b>
+              </div>
 
-          <div class="cert-footer">
-            <div class="cert-footer-text">${escapeHTML(certT("certificate_footer_label", "Официальный результат участника платформы iClub"))}</div>
-            <div class="cert-footer-brand">iClub</div>
+              <div class="cert-number-box cert-number-box-bottom">
+                <div class="cert-number-label">${escapeHTML(certT("certificate_number_label") || "Номер сертификата")}</div>
+                <div class="cert-number-value">${escapeHTML(String(row.certificate_number || "—"))}</div>
+              </div>
+
+              <div class="cert-qr-hint">${escapeHTML(certT("certificate_qr_hint") || "Отсканируйте QR-код для проверки подлинности")}</div>
+            </div>
+
+            <div class="cert-qr-wrap">
+              <div id="certificate-qr" class="cert-qr"></div>
+              <div class="cert-qr-caption">${escapeHTML(certT("certificate_qr_caption") || "Проверить сертификат")}</div>
+            </div>
           </div>
         </div>
       </div>
 
-            <div class="cert-actions">
+      <div class="cert-actions">
         <button class="btn primary" type="button" data-action="certificate-download-png" data-id="${Number(row.id)}">
           ${escapeHTML(certT("download_png_label", "Скачать PNG"))}
         </button>
@@ -4718,6 +4906,7 @@ async function renderCertificateViewer(rows) {
   wrap.innerHTML = certificateViewerHtml(selected);
 
   listEl.parentNode.appendChild(wrap);
+  await renderCertificateQr(selected);
 }
 
 async function ensureHtml2CanvasLoaded() {
@@ -12649,7 +12838,15 @@ function bindTabbar() {
     return;
   }
 
-  const topView = state.viewStack?.[state.viewStack.length - 1];
+    const topView = state.viewStack?.[state.viewStack.length - 1];
+
+  if (topView === "certificates" && Number(state?.certificates?.selectedId || 0) > 0) {
+    state.certificates.selectedId = null;
+    saveState();
+    renderCertificatesView();
+    updateTopbarForView("certificates");
+    return;
+  }
 
   // If we are on global screen -> go back in global stack
   if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
@@ -12961,7 +13158,16 @@ if (state.tab === "profile") {
     return;
   }
 
-  const topView = state.viewStack?.[state.viewStack.length - 1];
+    const topView = state.viewStack?.[state.viewStack.length - 1];
+
+  if (topView === "certificates" && Number(state?.certificates?.selectedId || 0) > 0) {
+    state.certificates.selectedId = null;
+    saveState();
+    renderCertificatesView();
+    updateTopbarForView("certificates");
+    return;
+  }
+
   if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
     globalBack();
     return;
@@ -13850,6 +14056,13 @@ if (action === "tour-next" || action === "tour-submit") {
 
 // Stage B2: always sync user_subjects from DB → local profile (single source for UI)
 try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
+
+      const verifyCertificateNumber = getVerifyCertificateNumberFromUrl();
+      if (verifyCertificateNumber) {
+        showView("certificate-verify");
+        await renderCertificateVerifyView(verifyCertificateNumber);
+        return;
+      }
 
       if (!isRegistered()) {
         showView("registration");
