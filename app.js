@@ -4204,12 +4204,16 @@ async function getSubjectIdByKey(subjectKey) {
   return data || null;
 }
 
-      function formatDateShortSafe(value) {
+           function formatDateShortSafe(value) {
   try {
     if (!value) return "—";
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return "—";
-    return d.toLocaleDateString(currentLang() || "ru");
+    return new Intl.DateTimeFormat(currentLang() || "ru", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    }).format(d);
   } catch {
     return "—";
   }
@@ -14166,7 +14170,11 @@ function formatDateShortSafe(ts) {
   try {
     const d = new Date(ts);
     if (Number.isNaN(d.getTime())) return "";
-    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+    return new Intl.DateTimeFormat(currentLang() || "ru", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    }).format(d);
   } catch {
     return "";
   }
