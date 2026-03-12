@@ -4731,9 +4731,11 @@ async function renderCertificateQr(row) {
     const mobile = window.matchMedia("(max-width: 640px)").matches;
     const qrSize = mobile ? 80 : 94;
 
-        mount.innerHTML = "";
+            mount.innerHTML = "";
     mount.style.position = "relative";
-    mount.style.display = "block";
+    mount.style.display = "flex";
+    mount.style.alignItems = "center";
+    mount.style.justifyContent = "center";
     mount.style.padding = "0";
 
     const canvas = document.createElement("canvas");
@@ -4741,12 +4743,10 @@ async function renderCertificateQr(row) {
     canvas.height = qrSize;
     canvas.style.width = `${qrSize}px`;
     canvas.style.height = `${qrSize}px`;
-    canvas.style.position = "absolute";
-    canvas.style.left = "50%";
-    canvas.style.top = "50%";
-    canvas.style.transform = "translate(-50%, -50%)";
+    canvas.style.position = "static";
     canvas.style.display = "block";
     canvas.style.margin = "0";
+    canvas.style.transform = "none";
 
     new window.QRious({
       element: canvas,
