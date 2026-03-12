@@ -59,6 +59,30 @@ function hideToursLoading() {
   el.classList.add("hidden");
 }
 
+let __viewTransitionTimer = null;
+
+function showViewTransitionOverlay(duration = 220) {
+  const el = document.getElementById("view-transition-overlay");
+  if (!el) return;
+
+  const txt = el.querySelector(".view-transition-text");
+  if (txt && typeof t === "function") {
+    txt.textContent = t("loading") || txt.textContent;
+  }
+
+  el.classList.remove("hidden");
+
+  if (__viewTransitionTimer) {
+    clearTimeout(__viewTransitionTimer);
+    __viewTransitionTimer = null;
+  }
+
+  __viewTransitionTimer = setTimeout(() => {
+    el.classList.add("hidden");
+    __viewTransitionTimer = null;
+  }, duration);
+}
+
 // ---------------------------
 // Global view transition overlay
 // ---------------------------
@@ -4827,15 +4851,27 @@ function certificateViewerHtml(row) {
             <div class="cert-name">${escapeHTML(fullName)}</div>
           </div>
 
-          <div class="cert-grid-main-3 cert-info-grid">
+                   <div class="cert-grid-main-3 cert-info-grid">
             <div class="cert-info-card">
               <div class="cert-info-label">${escapeHTML(certT("subject_label", "Предмет"))}</div>
               <div class="cert-info-value">${escapeHTML(subjectText)}</div>
             </div>
 
             <div class="cert-info-card">
-              <div class="cert-info-label">${escapeHTML(certT("tours_tour_label", "Тур"))}</div>
-              <div class="cert-info-value">${escapeHTML(String(row.tour_no || "—"))}</div>
+              <div class="cert-info-label">
+                ${
+                  String(row?.certificate_type || "") === "final"
+                    ? escapeHTML(certT("certificates_title", "Сертификат"))
+                    : escapeHTML(certT("tours_tour_label", "Тур"))
+                }
+              </div>
+              <div class="cert-info-value">
+                ${
+                  String(row?.certificate_type || "") === "final"
+                    ? escapeHTML(certT("cert_final_label", "Итоговый сертификат"))
+                    : escapeHTML(String(row.tour_no || "—"))
+                }
+              </div>
             </div>
 
             <div class="cert-info-card">
@@ -12877,7 +12913,8 @@ function bindTabbar() {
 
     const topView = state.viewStack?.[state.viewStack.length - 1];
 
-  if (topView === "certificates" && Number(state?.certificates?.selectedId || 0) > 0) {
+    if (topView === "certificates" && Number(state?.certificates?.selectedId || 0) > 0) {
+    showViewTransitionOverlay(260);
     state.certificates.selectedId = null;
     saveState();
     renderCertificatesView();
@@ -12887,6 +12924,7 @@ function bindTabbar() {
 
   // If we are on global screen -> go back in global stack
   if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
+    showViewTransitionOverlay(260);
     globalBack();
     return;
   }
