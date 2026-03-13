@@ -8483,11 +8483,14 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
     const rankEl = cardEl.querySelector(".js-home-comp-rank");
     const fillEl = cardEl.querySelector(".js-home-comp-fill");
 
-    const s = await computeHomeCompetitiveStats(subjectKey);
+    const s = await computeHomeStudyPracticeStats(subjectKey);
+    const done = Number(s?.masteredCount || 0);
+    const total = Number(s?.totalCount || 0);
+    const progressPct = total > 0 ? Math.max(0, Math.min(100, Math.round((done / total) * 100))) : 0;
 
-    if (modEl) modEl.textContent = t("module_label", { n: s.moduleNo }) || `MODULE ${s.moduleNo}`;
-    if (rankEl) rankEl.textContent = `${t("home_rank_label")}: ${s.rankNo ?? "—"}`;
-    if (fillEl) fillEl.style.width = `${s.progressPct}%`;
+    if (modEl) modEl.textContent = t("home_practice_progress_label");
+    if (rankEl) rankEl.textContent = total > 0 ? `${done}/${total}` : "—/—";
+    if (fillEl) fillEl.style.width = `${progressPct}%`;
   } catch {
     // silent
   }
@@ -8590,7 +8593,7 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
   }
 } 
    
-   function homeCompetitiveCardEl(userSubject) {
+      function homeCompetitiveCardEl(userSubject) {
       const subj = subjectByKey(userSubject.key);
       const title = subjectTitle(userSubject.key, subj ? subj.title : userSubject.key);
 
@@ -8601,7 +8604,7 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
   el.dataset.subject = String(userSubject.key || "").toLowerCase();
 
       const badgeActive = t("badge_active") || "ACTIVE";
-  const moduleTxt = t("module_label", { n: 1 }) || "MODULE 1";
+  const moduleTxt = t("home_practice_progress_label") || "";
 
   el.innerHTML = `
     <div class="home-competitive-badge">${escapeHTML(badgeActive)}</div>
@@ -8612,8 +8615,8 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
       <div class="home-competitive-module js-home-comp-module">${escapeHTML(moduleTxt)}</div>
       <div class="home-competitive-title">${escapeHTML(title)}</div>
       <div class="home-competitive-meta">
-        <span>${t("home_course_completion")}</span>
-        <span class="home-competitive-rank js-home-comp-rank">${t("home_rank_label")}: —</span>
+        <span>${t("home_practice_progress_label")}</span>
+        <span class="home-competitive-rank js-home-comp-rank">—/—</span>
       </div>
       <div class="home-progress">
         <div class="home-progress-fill js-home-comp-fill" style="width:0%"></div>
