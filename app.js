@@ -8989,6 +8989,8 @@ function mentorRoleForSubject(subjectKey) {
 }
 
 async function fetchSubjectMentor(subjectKey) {
+  if (!isSubjectActive(subjectKey)) return null;
+
   const role = mentorRoleForSubject(subjectKey);
   if (!role) return null;
 
@@ -9002,7 +9004,12 @@ async function fetchSubjectMentor(subjectKey) {
     saveState();
   }
 
-  const cachedMentor = state.courses.subjectMentorCache[subjectKey];
+    const cachedMentor = state.courses.subjectMentorCache[subjectKey];
+  if (!isSubjectActive(subjectKey)) {
+    delete state.courses.subjectMentorCache[subjectKey];
+    saveState();
+    return null;
+  }
   if (cachedMentor && String(cachedMentor?.photoUrl || "").trim()) {
     return cachedMentor;
   }
