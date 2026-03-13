@@ -104,7 +104,7 @@ function showCertificateDownloadOverlay() {
 
   const txt = el.querySelector(".view-transition-text");
   if (txt) {
-    txt.textContent = t("certificate_download_preparing") || "Sertifikat tayyorlanmoqda…";
+    txt.textContent = t("certificate_download_preparing");
   }
 
   if (__viewTransitionTimer) {
@@ -3270,7 +3270,7 @@ async function buildPracticeSet(subjectKey) {
       ph.value = "";
       ph.disabled = true;
       ph.selected = true;
-      ph.textContent = t("reg_loading_districts") || "Загрузка районов…";
+      ph.textContent = t("reg_loading_districts");
       districtEl.appendChild(ph);
 
       if (!regionId) {
@@ -3299,7 +3299,7 @@ async function buildPracticeSet(subjectKey) {
       ph2.value = "";
       ph2.disabled = true;
       ph2.selected = true;
-      ph2.textContent = rows.length ? (t("reg_select_district") || "Выберите район…") : (t("reg_no_districts") || "Нет районов");
+      ph2.textContent = rows.length ? t("reg_select_district") : t("reg_no_districts");
       districtEl.appendChild(ph2);
 
       if (!rows.length) {
@@ -3614,8 +3614,8 @@ if (actionBtn) {
      syncTopbarLeftState();
 
         if (viewName === "certificate-verify") {
-  titleEl.textContent = t("certificate_verify_title") || "Проверка сертификата";
-  subEl.textContent = t("certificate_verify_sub") || "Публичная проверка подлинности";
+    titleEl.textContent = t("certificate_verify_title");
+  subEl.textContent = t("certificate_verify_sub");
   backBtn.style.visibility = "hidden";
   if (tabbarEl) tabbarEl.style.display = "none";
   syncTopbarLeftState();
@@ -7706,9 +7706,8 @@ input?.addEventListener("change", async () => {
     return;
   }
 
-
-  const fullName = String(profile.full_name || "").trim();
-  nameEl.textContent = fullName || "Профиль";
+    const fullName = String(profile.full_name || "").trim();
+  nameEl.textContent = fullName || t("profile_title");
 
   if (avatarEl) {
     const photo = profile?.telegram?.photo_url || "";
@@ -8010,8 +8009,8 @@ try { renderProfileCredentialsUI(); } catch {}
   }
 
   function uiConfirm({ title, message, okText, cancelText } = {}) {
-  const _ok = okText ?? (typeof t === "function" ? (t("ok") || "OK") : "OK");
-  const _cancel = cancelText ?? (typeof t === "function" ? (t("cancel") || "Cancel") : "Cancel");
+  const _ok = okText ?? t("ok");
+  const _cancel = cancelText ?? t("cancel");
 
   return new Promise((resolve) => {
     modalResolve = resolve;
@@ -8034,7 +8033,7 @@ try { renderProfileCredentialsUI(); } catch {}
 }
 
 function uiAlert({ title, message, okText } = {}) {
-  const _ok = okText ?? (typeof t === "function" ? (t("ok") || "OK") : "OK");
+  const _ok = okText ?? t("ok");
 
   return new Promise((resolve) => {
     modalResolve = resolve;
@@ -8216,13 +8215,13 @@ function uiAlert({ title, message, okText } = {}) {
     const a = (main1.value || "").trim();
     const b = (main2.value || "").trim();
 
-    if (!a && !b) {
-      summaryEl.textContent = tt("reg_subject_summary_none", "Выберите до 2 предметов");
+        if (!a && !b) {
+      summaryEl.textContent = t("reg_subject_summary_none");
       return;
     }
 
-    const primaryTag = tt("reg_subject_primary_tag", "Основной");
-    const secondaryTag = tt("reg_subject_secondary_tag", "Дополнительный");
+    const primaryTag = t("reg_subject_primary_tag");
+    const secondaryTag = t("reg_subject_secondary_tag");
 
     const rows = [];
     if (a) {
@@ -8948,7 +8947,7 @@ if (mainSubjects.length) {
 
     function openSubjectHub(subjectKey) {
     if (!isSubjectActive(subjectKey)) {
-      showToast(t("not_available") || "Недоступно");
+      showToast(t("not_available"));
       setTab("courses");
       replaceCourses("all-subjects");
       renderAllSubjects();
@@ -12515,7 +12514,7 @@ async function updateTourAttempt(attemptId, patch) {
 
   if (!me?.is_school_student) {
     await uiAlert({
-      title: t("disabled_title") || "Недоступно",
+      title: t("disabled_title") || t("not_available"),
       message: t("tour_disabled_nonstudent") || "Туры доступны только для школьников."
     });
     return;
