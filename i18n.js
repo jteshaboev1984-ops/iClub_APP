@@ -186,11 +186,11 @@ archive_unlock_after_toast: "Архив откроется после завер
         "Рейтинг доступен для просмотра. «Мой ранг» показывается только участникам соревновательного режима.",
       ratings_search_placeholder: "Поиск…",
       ratings_search_hint_inline: "Поиск по имени, школе, классу, региону или району",
-      ratings_info_title: "О рейтинге",
-      ratings_info_text1: "Рейтинг доступен для просмотра всем пользователям.",
-      ratings_info_text2: "«Мой ранг» показывается только участникам соревновательного режима.",
+            ratings_info_title: "Как работает рейтинг",
+      ratings_info_text1: "Рейтинг могут просматривать все пользователи.",
+      ratings_info_text2: "Блок «Мой ранг» показывается только участникам соревновательного режима.",
       ratings_info_text3:
-        "Сортировка: больше баллов — выше; при равенстве — меньшее время — выше.",
+        "Место определяется по баллу: больше баллов — выше. Если баллы равны, выше будет участник с меньшим временем.",
       ratings_results: "Результаты",
       ratings_reset: "Сброс",
       ratings_empty: "Ничего не найдено.",
@@ -203,6 +203,7 @@ archive_unlock_after_toast: "Архив откроется после завер
       ratings_col_score: "БАЛЛЫ",
       ratings_col_time: "ВРЕМЯ",
       ratings_no_participants: "Нет участников.",
+      ratings_total_participants: "Всего участников",
 
       courses_title: "Курсы",
       btn_detach: "Открепить",
@@ -232,6 +233,7 @@ archive_unlock_after_toast: "Архив откроется после завер
       profile_metric_tours: "Туры",
 
       done: "Готово",
+      close: "Закрыть",
       error_try_again: "Ошибка — попробуйте ещё раз",
 
       // Languages
@@ -946,12 +948,12 @@ archive_unlock_after_toast: "Arxiv faol tur yakunlangandan keyin ochiladi.",
         "Reytingni ko‘rish mumkin. «Mening o‘rnim» faqat musobaqa rejimi ishtirokchilariga ko‘rsatiladi.",
       ratings_search_placeholder: "Qidirish…",
       ratings_search_hint_inline: "Ism, maktab, sinf, viloyat yoki tuman bo‘yicha qidirish",
-      ratings_info_title: "Reyting haqida",
-      ratings_info_text1: "Reytingni hamma foydalanuvchi ko‘rishi mumkin.",
+            ratings_info_title: "Reyting qanday ishlaydi",
+      ratings_info_text1: "Reytingni barcha foydalanuvchilar ko‘rishi mumkin.",
       ratings_info_text2:
-        "«Mening o‘rnim» faqat musobaqa rejimi ishtirokchilariga ko‘rsatiladi.",
+        "«Mening o‘rnim» bloki faqat musobaqa rejimi ishtirokchilariga ko‘rsatiladi.",
       ratings_info_text3:
-        "Tartib: ball ko‘proq bo‘lsa — yuqoriroq; teng bo‘lsa — vaqt kam bo‘lsa — yuqoriroq.",
+        "O‘rin ball bo‘yicha aniqlanadi: ball ko‘proq bo‘lsa — yuqoriroq. Agar ball teng bo‘lsa, vaqti kamroq bo‘lgan ishtirokchi yuqoriroq turadi.",
       ratings_results: "Natijalar",
       ratings_reset: "Tozalash",
       ratings_empty: "Hech narsa topilmadi.",
@@ -964,6 +966,7 @@ archive_unlock_after_toast: "Arxiv faol tur yakunlangandan keyin ochiladi.",
       ratings_col_score: "BALL",
       ratings_col_time: "VAQT",
       ratings_no_participants: "Ishtirokchilar yo‘q.",
+      ratings_total_participants: "Jami ishtirokchilar",
 
       courses_title: "Kurslar",
       btn_detach: "Biriktirishni yechish",
@@ -993,6 +996,7 @@ archive_unlock_after_toast: "Arxiv faol tur yakunlangandan keyin ochiladi.",
       profile_metric_tours: "Turlar",
 
       done: "Tayyor",
+      close: "Yopish",
       error_try_again: "Xatolik — qayta urinib ko‘ring",
 
       // Languages
@@ -1715,10 +1719,10 @@ archive_unlock_after_toast: "Archive will open after you finish the active tour.
         "Leaderboards are available for viewing. “My rank” is shown only for Competitive participants.",
       ratings_search_placeholder: "Search…",
       ratings_search_hint_inline: "Search by name, school, class, region or district",
-      ratings_info_title: "Leaderboard info",
-      ratings_info_text1: "Leaderboards are available for viewing by everyone.",
-      ratings_info_text2: "“My rank” is shown only for Competitive participants.",
-      ratings_info_text3: "Ranking: higher score wins; if tied, lower time wins.",
+            ratings_info_title: "How the leaderboard works",
+      ratings_info_text1: "The leaderboard can be viewed by all users.",
+      ratings_info_text2: "The “My rank” block is shown only to participants in Competitive mode.",
+      ratings_info_text3: "Rank is determined by score: a higher score places higher. If scores are equal, the participant with less time ranks higher.",
       ratings_results: "Results",
       ratings_reset: "Reset",
       ratings_empty: "Nothing found.",
@@ -1731,6 +1735,7 @@ archive_unlock_after_toast: "Archive will open after you finish the active tour.
       ratings_col_score: "SCORE",
       ratings_col_time: "TIME",
       ratings_no_participants: "No participants.",
+      ratings_total_participants: "Total participants",
 
       courses_title: "Courses",
       btn_detach: "Unpin",
@@ -1760,6 +1765,7 @@ archive_unlock_after_toast: "Archive will open after you finish the active tour.
       profile_metric_tours: "Tours",
 
       done: "Done",
+      close: "Close",
       error_try_again: "Error — please try again",
 
       // Languages
