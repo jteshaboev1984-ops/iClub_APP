@@ -8441,16 +8441,23 @@ async function computeHomeCompetitiveStats(subjectKey) {
     // moduleNo = next tour number (1..7)
     const moduleNo = Math.min(7, Math.max(1, completedCount + 1));
 
-    // 3) rank: if ratings_cache exists, use it; otherwise null
+        // 3) rank: show place for the latest COMPLETED tour, not for the next module
     let rankNo = null;
     try {
-      // pick the latest tour id for rank reference (or current module)
-      const currentTour = tours.find(t => Number(t.tour_no) === Number(moduleNo)) || tours[tours.length - 1];
-      if (currentTour?.id) {
+      const completedToursDesc = tours
+        .filter(t => completedTourIds.has(Number(t.id)))
+        .sort((a, b) => Number(b.tour_no) - Number(a.tour_no));
+
+      const rankTour =
+        completedToursDesc[0] ||
+        tours.find(t => Number(t.tour_no) === Number(moduleNo)) ||
+        tours[tours.length - 1];
+
+      if (rankTour?.id) {
         const rRes = await window.sb
           .from("ratings_cache")
           .select("rank_no")
-          .eq("tour_id", Number(currentTour.id))
+          .eq("tour_id", Number(rankTour.id))
           .eq("user_id", uid)
           .eq("rank_type", "country")
           .limit(1);
