@@ -8492,16 +8492,97 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
     // silent
   }
 }
-   async function updateHomePinnedTile(tileEl, subjectKey) {
+
+async function computeHomeStudyPracticeStats(subjectKey) {
+  const cacheKey = `home_study:${String(subjectKey || "").trim()}`;
+  const cached = _homeStatsCache.get(cacheKey);
+  if (cached && (Date.now() - cached.ts) < HOME_STATS_CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  try {
+    if (!window.sb) return { masteredCount: 0, totalCount: 0 };
+
+    const subjectId = await getSubjectIdByKey(subjectKey);
+    if (!subjectId) return { masteredCount: 0, totalCount: 0 };
+
+    const uid = await getAuthUid();
+    if (!uid) return { masteredCount: 0, totalCount: 0 };
+
+    // 1) all practice questions of this subject
+    const poolsRes = await window.sb
+      .from("practice_pools")
+      .select("id")
+      .eq("subject_id", subjectId)
+      .eq("is_active", true);
+
+    const poolIds = (Array.isArray(poolsRes?.data) ? poolsRes.data : [])
+      .map(x => Number(x?.id))
+      .filter(Boolean);
+
+    let totalCount = 0;
+    if (poolIds.length) {
+      const ppqRes = await window.sb
+        .from("practice_pool_questions")
+        .select("question_id")
+        .in("pool_id", poolIds)
+        .eq("is_active", true);
+
+      const totalQuestionIds = new Set(
+        (Array.isArray(ppqRes?.data) ? ppqRes.data : [])
+          .map(x => Number(x?.question_id))
+          .filter(Boolean)
+      );
+
+      totalCount = totalQuestionIds.size;
+    }
+
+    // 2) unique correctly answered practice questions by this user in this subject
+    const attemptsRes = await window.sb
+      .from("practice_attempts")
+      .select("id")
+      .eq("user_id", uid)
+      .eq("subject_id", subjectId);
+
+    const attemptIds = (Array.isArray(attemptsRes?.data) ? attemptsRes.data : [])
+      .map(x => Number(x?.id))
+      .filter(Boolean);
+
+    let masteredCount = 0;
+    if (attemptIds.length) {
+      const answersRes = await window.sb
+        .from("practice_answers")
+        .select("question_id")
+        .in("attempt_id", attemptIds)
+        .eq("is_correct", true);
+
+      const masteredQuestionIds = new Set(
+        (Array.isArray(answersRes?.data) ? answersRes.data : [])
+          .map(x => Number(x?.question_id))
+          .filter(Boolean)
+      );
+
+      masteredCount = masteredQuestionIds.size;
+    }
+
+    const out = { masteredCount, totalCount };
+    _homeStatsCache.set(cacheKey, { ts: Date.now(), data: out });
+    return out;
+  } catch {
+    return { masteredCount: 0, totalCount: 0 };
+  }
+}
+
+async function updateHomePinnedTile(tileEl, subjectKey) {
   try {
     if (!tileEl) return;
 
     const countEl = tileEl.querySelector(".js-home-pin-count");
     if (!countEl) return;
 
-    const s = await computeHomeCompetitiveStats(subjectKey);
-    const done = Number(s?.completedCount || 0);
-    const total = Number(s?.totalTours || 0);
+    const s = await computeHomeStudyPracticeStats(subjectKey);
+    const done = Number(s?.masteredCount || 0);
+    const total = Number(s?.totalCount || 0);
 
     countEl.textContent = total > 0 ? `${done}/${total}` : "—/—";
   } catch {
@@ -8563,7 +8644,7 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
   return el;
 }
 
-  function homePinnedTileEl(userSubject, index = 0) {
+    function homePinnedTileEl(userSubject, index = 0) {
   const subj = subjectByKey(userSubject.key);
   const title = subjectTitle(userSubject.key, subj ? subj.title : userSubject.key);
     const lessons = "—/—";
@@ -8574,7 +8655,7 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
   el.innerHTML = `
     <div class="home-pinned-ico">📘</div>
     <div class="home-pinned-title">${escapeHTML(title)}</div>
-    <div class="home-pinned-meta"><span class="js-home-pin-count">${escapeHTML(lessons)}</span> ${escapeHTML(t("home_lessons_label") || "")}</div>
+    <div class="home-pinned-meta"><span class="js-home-pin-count">${escapeHTML(lessons)}</span> ${escapeHTML(t("home_practice_progress_label") || "")}</div>
   `;
 
   el.addEventListener("click", () => {
