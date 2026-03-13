@@ -2548,17 +2548,17 @@ body.modal-open { overflow: hidden; }
   }
 }
 
-/* Bottom My Rank bar (поверх, как в примере) */
+/* Bottom My Rank bar */
 .lb-mybar{
   position: fixed;
   left: 12px;
   right: 12px;
   bottom: calc(74px + var(--safe-bottom));
   z-index: 30;
-  display:flex;
-  align-items:center;
+  display: flex;
+  align-items: flex-end;
   gap: 12px;
-  padding: 12px 12px;
+  padding: 12px 14px;
   border-radius: 18px;
   background: linear-gradient(180deg, rgba(47,111,214,0.98), rgba(47,111,214,0.86));
   color: #fff;
@@ -2566,28 +2566,34 @@ body.modal-open { overflow: hidden; }
 }
 
 .lb-mybar-left{
-  width: 68px;
+  flex: 0 0 52px;
+  min-width: 52px;
   border-right: 1px solid rgba(255,255,255,0.22);
   padding-right: 10px;
 }
 
 .lb-mybar-label{
   font-size: 10px;
+  line-height: 1.05;
   font-weight: 900;
   opacity: .92;
-  letter-spacing: .06em;
+  letter-spacing: .04em;
 }
 
 .lb-mybar-rank{
   font-size: 22px;
+  line-height: 1;
   font-weight: 1000;
-  margin-top: 2px;
+  margin-top: 4px;
   font-variant-numeric: tabular-nums;
 }
 
 .lb-mybar-mid{
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 2px;
 }
 
 .lb-mybar-name{
@@ -2598,29 +2604,65 @@ body.modal-open { overflow: hidden; }
 }
 
 .lb-mybar-meta{
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 1.2;
   font-weight: 800;
-  opacity: .9;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  opacity: .96;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .lb-mybar-right{
-  text-align: right;
   flex: 0 0 auto;
+  min-width: 64px;
+  text-align: right;
 }
 
 .lb-mybar-score{
   font-weight: 1000;
   font-size: 16px;
+  line-height: 1.05;
   font-variant-numeric: tabular-nums;
 }
 
 .lb-mybar-time{
   font-size: 12px;
+  line-height: 1.1;
   font-weight: 800;
   opacity: .92;
+}
+
+@media (max-width: 380px){
+  .lb-mybar{
+    gap: 10px;
+    padding: 11px 12px;
+  }
+
+  .lb-mybar-left{
+    flex-basis: 48px;
+    min-width: 48px;
+    padding-right: 8px;
+  }
+
+  .lb-mybar-rank{
+    font-size: 20px;
+  }
+
+  .lb-mybar-meta{
+    font-size: 10.5px;
+  }
+
+  .lb-mybar-score{
+    font-size: 15px;
+  }
+
+  .lb-mybar-time{
+    font-size: 11px;
+  }
 }
 
 /* =========================================================
