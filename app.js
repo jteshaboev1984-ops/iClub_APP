@@ -6041,14 +6041,14 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
           totalN ? t("ratings_of_total", { total: totalN }) : ""
         ) : "");
 
-      // My rank (only if participant)
+            // My rank (only if participant)
       if (isParticipant && mybar) {
         if (myIndex >= 0) {
           const mine = rowsAll[myIndex];
           myRankEl.textContent = String(mine.rank);
 
-          const outOf = t("ratings_out_of") || "out of";
-          if (myTotalEl) myTotalEl.textContent = totalN ? `${outOf} ${totalN}` : "—";
+          const totalLabel = t("ratings_total_participants");
+          if (myTotalEl) myTotalEl.textContent = totalN ? `${totalLabel}: ${totalN}` : "—";
           if (myScoreEl) myScoreEl.textContent = `${mine.score} ${t("points_short") || "pts"}`;
           if (myTimeEl) myTimeEl.textContent = mine.time || "—";
 
@@ -6530,16 +6530,16 @@ listEl.innerHTML = `
 ) : "");
     }
 
-        // mybar
+                // mybar
     if (isParticipant && mybar && myRow) {
       myRankEl.textContent = String(myRow.rank_no ?? "—");
 
-      const outOf = t("ratings_out_of") || "out of";
+      const totalLabel = t("ratings_total_participants");
       // total участников в rating_cache проще всего взять по максимальному рангу из bottomData (если он есть)
       const totalN = (bottomData && bottomData.length)
         ? Number(bottomData[bottomData.length - 1].rank_no || 0)
         : 0;
-      if (myTotalEl) myTotalEl.textContent = totalN ? `${outOf} ${totalN}` : "—";
+      if (myTotalEl) myTotalEl.textContent = totalN ? `${totalLabel}: ${totalN}` : "—";
 
       myScoreEl.textContent = `${String(myRow.score ?? "—")} pts`;
       myTimeEl.textContent = formatSecondsToMMSS(myRow.total_time);
