@@ -6052,7 +6052,7 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
           if (myScoreEl) myScoreEl.textContent = `${mine.score} ${t("points_short") || "pts"}`;
           if (myTimeEl) myTimeEl.textContent = mine.time || "—";
 
-          mybar.style.display = "block";
+          mybar.style.display = "flex";
         } else {
           mybar.style.display = "none";
         }
