@@ -56,7 +56,7 @@
             <img class="logo" src="logo.png" alt="iClub logo" />
           </div>
           <div class="splash-title">iClub</div>
-          <div id="splash-status" class="muted">Загрузка…</div>
+          <div id="splash-status" class="muted" data-i18n="loading">Загрузка…</div>
         </div>
       </section>
 
@@ -90,17 +90,17 @@
               <input id="reg-fullname" class="input" type="text" autocomplete="name" data-i18n-placeholder="reg_full_name_placeholder" placeholder="e.g. Alisher Navoiy" required />
             </label>
 
-             <label class="field">
+                         <label class="field">
               <span class="label" data-i18n="reg_region_label">Region</span>
               <select id="reg-region" class="input" required>
-                <option value="" selected disabled>Выберите регион…</option>
+                <option value="" selected disabled data-i18n="reg_select_region">Выберите регион…</option>
               </select>
             </label>
 
             <label class="field">
               <span class="label" data-i18n="reg_district_label">District</span>
               <select id="reg-district" class="input" required disabled>
-                <option value="" selected disabled>Сначала выберите регион…</option>
+                <option value="" selected disabled data-i18n="reg_select_region_first">Сначала выберите регион…</option>
               </select>
             </label>
 
@@ -113,9 +113,9 @@
                 <input id="reg-is-school-toggle" type="checkbox" checked>
                 <span class="slider"></span>
               </label>
-              <select id="reg-is-school" class="input visually-hidden">
-                <option value="yes" selected>Да</option>
-                <option value="no">Нет</option>
+               <select id="reg-is-school" class="input visually-hidden">
+                <option value="yes" selected data-i18n="yes">Да</option>
+                <option value="no" data-i18n="no">Нет</option>
               </select>  
             </div>
 
@@ -142,12 +142,12 @@
               <div class="card-title" data-i18n="reg_competitive_subject_label">Competitive Subject</div>
                 <p class="muted small" data-i18n="reg_competitive_subject_hint">Choose your primary focus for the leaderboard</p>
 
-                <div id="reg-subject-chips" class="chip-group">
-                  <button class="chip-btn" type="button" data-subject-key="informatics">Информатика</button>
-                  <button class="chip-btn" type="button" data-subject-key="economics">Экономика</button>
-                  <button class="chip-btn" type="button" data-subject-key="biology">Биология</button>
-                  <button class="chip-btn" type="button" data-subject-key="chemistry">Химия</button>
-                  <button class="chip-btn" type="button" data-subject-key="mathematics">Математика</button>
+                 <div id="reg-subject-chips" class="chip-group">
+                  <button class="chip-btn" type="button" data-subject-key="informatics" data-i18n="subj_informatics">Информатика</button>
+                  <button class="chip-btn" type="button" data-subject-key="economics" data-i18n="subj_economics">Экономика</button>
+                  <button class="chip-btn" type="button" data-subject-key="biology" data-i18n="subj_biology">Биология</button>
+                  <button class="chip-btn" type="button" data-subject-key="chemistry" data-i18n="subj_chemistry">Химия</button>
+                  <button class="chip-btn" type="button" data-subject-key="mathematics" data-i18n="subj_mathematics">Математика</button>
                 </div>
 
                 <div id="reg-subject-summary" class="reg-subject-summary" aria-live="polite"></div>
@@ -1136,7 +1136,7 @@
   <div class="card">
     <div class="settings-card-head">
   <div class="card-title" data-i18n="profile_settings_study_title">Учебный режим</div>
-  <button id="profile-settings-pinned-toggle" class="btn mini ghost" type="button">
+    <button id="profile-settings-pinned-toggle" class="btn mini ghost" type="button" data-i18n="settings_show_all">
     Показать все
   </button>
 </div>
