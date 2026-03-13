@@ -9077,6 +9077,10 @@ async function renderSubjectHubMentorCard(subjectKey) {
   titleEl.textContent = t("mentor_assigning") || "Ментор назначается";
   subEl.textContent = t("mentor_profile_soon") || "Скоро появится профиль";
 
+  if (!isSubjectActive(requestedKey)) {
+    return;
+  }
+
   const mentor = await fetchSubjectMentor(requestedKey).catch(() => null);
 
   // subject changed while waiting
