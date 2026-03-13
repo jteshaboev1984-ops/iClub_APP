@@ -6477,11 +6477,12 @@ listEl.innerHTML = `
         if (myIndex2 >= 0) {
           const mine = rows[myIndex2];
           myRankEl.textContent = String(mine.rank);
-          const outOf = t("ratings_out_of") || "out of";
-          if (myTotalEl) myTotalEl.textContent = `${outOf} ${rows.length}`;
-          myScoreEl.textContent = `${String(mine.score)} pts`;
-          myTimeEl.textContent = formatSecondsToMMSS(mine.total_time);
-          mybar.style.display = "flex";
+      const totalLabel = t("ratings_total_participants");
+      if (myTotalEl) myTotalEl.textContent = totalN ? `${totalLabel}: ${totalN}` : "—";
+
+      myScoreEl.textContent = `${String(mine.score)} pts`;
+      myTimeEl.textContent = formatSecondsToMMSS(mine.total_time);
+      mybar.style.display = "flex";
         } else {
           mybar.style.display = "none";
         }
@@ -6716,11 +6717,11 @@ listEl.innerHTML = `
   }
 }
 
- function openRatingsInfoModal() {
-  const title = t("ratings_info_title") || "Leaderboard info";
-  const text1 = t("ratings_info_text1") || "Leaderboards are available for viewing by everyone.";
-  const text2 = t("ratings_info_text2") || "“My rank” is shown only for Competitive participants.";
-  const text3 = t("ratings_info_text3") || "Ranking: higher score wins; if tied, lower time wins.";
+  function openRatingsInfoModal() {
+  const title = t("ratings_info_title");
+  const text1 = t("ratings_info_text1");
+  const text2 = t("ratings_info_text2");
+  const text3 = t("ratings_info_text3");
 
   const html = `
     <div class="modal-backdrop" data-modal-backdrop data-close="backdrop">
@@ -6734,7 +6735,7 @@ listEl.innerHTML = `
         </div>
 
         <div class="modal-actions">
-          <button type="button" class="btn primary" data-modal-action="ok">${escapeHTML(t("done") || "Done")}</button>
+          <button type="button" class="btn primary" data-modal-action="ok">${escapeHTML(t("close"))}</button>
         </div>
       </div>
     </div>
