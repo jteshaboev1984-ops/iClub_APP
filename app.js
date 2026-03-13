@@ -6696,15 +6696,15 @@ listEl.innerHTML = `
          ) : "");
      }
 
-    // My rank (only if participant)
+        // My rank (only if participant)
   if (isParticipant && mybar) {
     const myIndex = rowsAll.findIndex(r => String(r.user_id) === String(uid));
     if (myIndex >= 0) {
       const mine = rowsAll[myIndex];
       myRankEl.textContent = String(mine.rank);
 
-      const outOf = t("ratings_out_of") || "out of";
-      if (myTotalEl) myTotalEl.textContent = totalN ? `${outOf} ${totalN}` : "—";
+      const totalLabel = t("ratings_total_participants");
+      if (myTotalEl) myTotalEl.textContent = totalN ? `${totalLabel}: ${totalN}` : "—";
 
       myScoreEl.textContent = `${String(mine.score)} pts`;
       myTimeEl.textContent = formatSecondsToMMSS(mine.total_time);
