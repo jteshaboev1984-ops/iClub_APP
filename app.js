@@ -1745,7 +1745,7 @@ async function ensureProfileGeoTranslationsHydrated() {
   // ---------------------------
   // Demo subjects (keys match index.html selects)
   // ---------------------------
-  const SUBJECTS = [
+    const SUBJECTS = [
     { key: "informatics", title: "Информатика", type: "main" },
     { key: "economics", title: "Экономика", type: "main" },
     { key: "biology", title: "Биология", type: "main" },
@@ -1758,6 +1758,69 @@ async function ensureProfileGeoTranslationsHydrated() {
     { key: "sat", title: "SAT", type: "additional" },
     { key: "ielts", title: "IELTS", type: "additional" }
   ];
+
+  function getDefaultActiveSubjectKeys() {
+    return SUBJECTS.map(s => String(s.key || "").trim()).filter(Boolean);
+  }
+
+  function getActiveSubjectKeys() {
+    const raw = Array.isArray(state?.catalog?.activeSubjectKeys)
+      ? state.catalog.activeSubjectKeys
+      : [];
+    const list = raw.length ? raw : getDefaultActiveSubjectKeys();
+    return Array.from(new Set(list.map(x => String(x || "").trim()).filter(Boolean)));
+  }
+
+  function setActiveSubjectKeys(keys) {
+    state.catalog = state.catalog || {};
+    state.catalog.activeSubjectKeys = Array.from(
+      new Set((Array.isArray(keys) ? keys : []).map(x => String(x || "").trim()).filter(Boolean))
+    );
+    saveState();
+  }
+
+  function isSubjectActive(subjectKey) {
+    const key = String(subjectKey || "").trim();
+    if (!key) return false;
+    return getActiveSubjectKeys().includes(key);
+  }
+
+  function getVisibleSubjectsCatalog() {
+    return SUBJECTS.filter(s => isSubjectActive(s.key));
+  }
+
+  function filterActiveUserSubjects(list) {
+    return (Array.isArray(list) ? list : []).filter(s => isSubjectActive(s?.key));
+  }
+
+  async function refreshActiveSubjectsCatalogFromSupabase() {
+    try {
+      if (!window.sb) return { ok: false, reason: "no_sb" };
+
+      const { data, error } = await window.sb
+        .from("subjects")
+        .select("subject_key,is_active");
+
+      if (error) {
+        logClientError("subjects_active_catalog_error", error);
+        return { ok: false, reason: "select_failed" };
+      }
+
+      const activeKeys = (Array.isArray(data) ? data : [])
+        .filter(row => row?.is_active === true)
+        .map(row => String(row?.subject_key || "").trim())
+        .filter(Boolean);
+
+      if (activeKeys.length) {
+        setActiveSubjectKeys(activeKeys);
+      }
+
+      return { ok: true, keys: activeKeys };
+    } catch (e) {
+      logClientError("subjects_active_catalog_exception", e);
+      return { ok: false, reason: "exception" };
+    }
+  }
 
     function subjectByKey(key) {
     return SUBJECTS.find(s => s.key === key) || null;
@@ -4236,8 +4299,10 @@ async function hydrateLocalProfileFromSupabaseIfMissing() {
   return { ok: true, hydrated: true, subjects: subjects.length };
 }
 
-   async function syncUserSubjectsFromSupabaseIntoLocalProfile() {
+      async function syncUserSubjectsFromSupabaseIntoLocalProfile() {
   if (!window.sb) return { ok: false, reason: "no_sb" };
+
+  await refreshActiveSubjectsCatalogFromSupabase().catch(() => null);
 
   const uid = await getAuthUid();
   if (!uid) return { ok: false, reason: "no_uid" };
@@ -4307,16 +4372,16 @@ if (!error) {
     .filter(x => !!x.key);
 }
 
-  const profile = loadProfile();
+    const profile = loadProfile();
   if (!profile) {
     // no local profile yet (registration may still be shown)
-    return { ok: true, applied: false, count: list.length };
+    return { ok: true, applied: false, count: filterActiveUserSubjects(list).length };
   }
 
-  profile.subjects = list;
+  profile.subjects = filterActiveUserSubjects(list);
   saveProfile(profile);
 
-  return { ok: true, applied: true, count: list.length };
+  return { ok: true, applied: true, count: profile.subjects.length };
 }
 
    // ---------------------------
@@ -7439,7 +7504,7 @@ showToast(t("toast_lang_updated"));
       );
 
     // Study (Pinned) can show all subjects when expanded, otherwise only pinned
-   const allSubjects = Array.isArray(SUBJECTS) ? SUBJECTS.slice() : [];
+   const allSubjects = getVisibleSubjectsCatalog();
 
    const pinnedList = allSubjects.filter(s => pinnedSet.has(s.key));
    const otherList  = allSubjects.filter(s => !pinnedSet.has(s.key));
@@ -7737,7 +7802,7 @@ input?.addEventListener("change", async () => {
 
   metaEl.textContent = metaParts.join(" • ") || "—";
 
-      const subjects = Array.isArray(profile.subjects) ? profile.subjects : [];
+          const subjects = filterActiveUserSubjects(profile.subjects || []);
   const comp = subjects.filter(s => s.mode === "competitive");
   const study = subjects.filter(s => s.mode === "study" && !!s.pinned);
   const pinned = subjects.filter(s => !!s.pinned);
@@ -8076,12 +8141,15 @@ function uiAlert({ title, message, okText } = {}) {
     try { updateRegSubmitReady?.(); } catch {}
   }
 
-     function applyRegSubjectI18n() {
+          function applyRegSubjectI18n() {
     // chips
     const chipBtns = $$("#reg-subject-chips .chip-btn");
     chipBtns.forEach(btn => {
-      const key = btn.dataset.subjectKey;
+      const key = String(btn.dataset.subjectKey || "").trim();
       if (!key) return;
+
+      btn.classList.toggle("hidden", !isSubjectActive(key));
+
       const k = "subj_" + key;
       const val = t(k);
       if (val && val !== k) btn.textContent = val;
@@ -8092,18 +8160,28 @@ function uiAlert({ title, message, okText } = {}) {
     ids.forEach(id => {
       const sel = document.getElementById(id);
       if (!sel) return;
+
       Array.from(sel.options).forEach(opt => {
-        const v = (opt.value || "").trim();
+        const v = String(opt.value || "").trim();
+
         if (!v) {
-          // placeholder / none
           if (id === "reg-additional-subject") opt.textContent = t("reg_choose_none");
           else opt.textContent = t("reg_choose_placeholder");
+          opt.hidden = false;
           return;
         }
+
+        opt.hidden = !isSubjectActive(v);
+
         const k = "subj_" + v;
         const val = t(k);
         if (val && val !== k) opt.textContent = val;
       });
+
+      const selected = String(sel.value || "").trim();
+      if (selected && !isSubjectActive(selected)) {
+        sel.value = "";
+      }
     });
   }
 
@@ -8290,8 +8368,9 @@ function renderHome() {
       return;
     }
 
-    const comp = profile.subjects?.filter(s => s.mode === "competitive") || [];
-    const pinned = profile.subjects?.filter(s => !!s.pinned && s.mode === "study") || [];
+        const visibleUserSubjects = filterActiveUserSubjects(profile.subjects || []);
+    const comp = visibleUserSubjects.filter(s => s.mode === "competitive");
+    const pinned = visibleUserSubjects.filter(s => !!s.pinned && s.mode === "study");
 
 
     if (!comp.length) compWrap.innerHTML = `<div class="empty muted">${t("home_competitive_empty")}</div>`;
@@ -8555,11 +8634,12 @@ function subjectIconCandidates(subjectKey) {
     return;
   }
 
-  const userSubjects = Array.isArray(profile.subjects) ? profile.subjects : [];
+    const userSubjects = filterActiveUserSubjects(profile.subjects || []);
   const competitiveCount = userSubjects.filter(s => s.mode === "competitive").length;
 
-  const mainSubjects = SUBJECTS.filter(s => s.type === "main");
-const additionalSubjects = SUBJECTS.filter(s => s.type !== "main");
+  const visibleSubjects = getVisibleSubjectsCatalog();
+  const mainSubjects = visibleSubjects.filter(s => s.type === "main");
+const additionalSubjects = visibleSubjects.filter(s => s.type !== "main");
 
        // ---- Main catalog filter (Competitive / Study) — chips under Courses title
 state.courses = state.courses || {};
@@ -8865,7 +8945,15 @@ if (mainSubjects.length) {
    }
 }
 
-  function openSubjectHub(subjectKey) {
+    function openSubjectHub(subjectKey) {
+    if (!isSubjectActive(subjectKey)) {
+      showToast(t("not_available") || "Недоступно");
+      setTab("courses");
+      replaceCourses("all-subjects");
+      renderAllSubjects();
+      return;
+    }
+
     state.courses.subjectKey = subjectKey;
     saveState();
     pushCourses("subject-hub");
@@ -9004,7 +9092,7 @@ async function renderSubjectHubMentorCard(subjectKey) {
 // ---------------------------
   // Subject Hub rendering
   // ---------------------------
-  function renderSubjectHub() {
+    function renderSubjectHub() {
   const profile = loadProfile();
   const subj = subjectByKey(state.courses.subjectKey);
 
@@ -9012,6 +9100,13 @@ async function renderSubjectHubMentorCard(subjectKey) {
   const metaEl = $("#subject-hub-meta");
 
   const subjectKey = state.courses.subjectKey;
+
+  if (!isSubjectActive(subjectKey)) {
+    showToast(t("not_available") || "Недоступно");
+    replaceCourses("all-subjects");
+    renderAllSubjects();
+    return;
+  }
   const us = profile?.subjects?.find(x => x.key === subjectKey) || null;
 
     if (titleEl) titleEl.textContent = subjectTitle(subjectKey, subj ? subj.title : "Subject");
@@ -13279,7 +13374,13 @@ if (state.tab === "profile") {
      updateSchoolFieldsVisibility();
 
     initRegionDistrictUI();
-    initRegSubjectChips(); 
+    initRegSubjectChips();
+
+    refreshActiveSubjectsCatalogFromSupabase()
+      .then(() => {
+        try { applyRegSubjectI18n(); } catch {}
+      })
+      .catch(() => null);
 
     const form = $("#reg-form");
     if (!form) return;
@@ -13330,9 +13431,13 @@ if (state.tab === "profile") {
     const school = $("#reg-school")?.value?.trim() || "";
     const klass = $("#reg-class")?.value?.trim() || "";
 
-    const main1 = $("#reg-main-subject-1")?.value || "";
-    const main2 = $("#reg-main-subject-2")?.value || "";
-    const add1 = $("#reg-additional-subject")?.value || "";
+        const main1Raw = $("#reg-main-subject-1")?.value || "";
+    const main2Raw = $("#reg-main-subject-2")?.value || "";
+    const add1Raw = $("#reg-additional-subject")?.value || "";
+
+    const main1 = isSubjectActive(main1Raw) ? main1Raw : "";
+    const main2 = isSubjectActive(main2Raw) ? main2Raw : "";
+    const add1 = isSubjectActive(add1Raw) ? add1Raw : "";
 
     // district required ONLY when select is enabled and has real options
     const districtRequired =
