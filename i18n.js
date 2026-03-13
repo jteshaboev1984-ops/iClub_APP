@@ -325,7 +325,8 @@ archive_unlock_after_toast: "Архив откроется после завер
       fill_required_fields: "Заполните обязательные поля",
 
       // Availability messages
-      not_available: "Недоступно",
+            not_available: "Недоступно",
+      disabled_title: "Недоступно",
       disabled_not_school: "Туры и рейтинги доступны только школьникам.",
       disabled_not_competitive: "Функция доступна только для предмета соревновательного режима.",
       tours_denied_title: "Туры недоступны",
@@ -1085,8 +1086,9 @@ archive_unlock_after_toast: "Arxiv faol tur yakunlangandan keyin ochiladi.",
       fill_required_fields: "Majburiy maydonlarni to‘ldiring",
 
       // Availability messages
-      not_available: "Mavjud emas",
-      disabled_not_school: "Turlar va reyting faqat maktab o‘quvchilari uchun.",
+            not_available: "Mavjud emas",
+      disabled_title: "Mavjud emas",
+      disabled_not_school: "Turlar va reytinglar faqat maktab o‘quvchilari uchun.",
       disabled_not_competitive:
         "Bu funksiya faqat musobaqa rejimidagi fan uchun mavjud.",
       tours_denied_title: "Turlar mavjud emas",
@@ -1846,8 +1848,9 @@ archive_unlock_after_toast: "Archive will open after you finish the active tour.
       fill_required_fields: "Please fill required fields",
 
       // Availability messages
-      not_available: "Not available",
-      disabled_not_school: "Tours and ratings are available only for school students.",
+            not_available: "Not available",
+      disabled_title: "Not available",
+      disabled_not_school: "Tours and ratings are available only to school students.",
       disabled_not_competitive: "This feature is available only for competitive subjects.",
       tours_denied_title: "Tours unavailable",
       disabled_not_main: "Tours are available only for main subjects.",
