@@ -2589,28 +2589,29 @@ contentEl.innerHTML = `
   return;
 }
 
-  if (teamScreen === "mentors") {
+    if (teamScreen === "mentors") {
   ensureTeamCacheInit();
 
   const dbList = state.about.teamPeopleCache?.mentors;
-const list = Array.isArray(dbList) && dbList.length ? dbList : mentors;
+  const sourceList = Array.isArray(dbList) && dbList.length ? dbList : mentors;
+  const list = sourceList.filter(x => isMentorVisibleBySubjectActivity(x));
 
-state.about.teamPeopleResolved = state.about.teamPeopleResolved || {};
-state.about.teamPeopleResolved.mentors = list.map(x => ({
-  ...x,
-  group: "mentors",
-  memberKey: memberKeyOf(x)
-}));
+  state.about.teamPeopleResolved = state.about.teamPeopleResolved || {};
+  state.about.teamPeopleResolved.mentors = list.map(x => ({
+    ...x,
+    group: "mentors",
+    memberKey: memberKeyOf(x)
+  }));
 
-contentEl.innerHTML = `
-  ${subHeader("about_team_mentors_title")}
-  <div class="card">
-    <div class="muted small">${escapeHTML(t("about_team_mentors_note"))}</div>
-    <div class="people-grid" style="margin-top:10px">
-      ${state.about.teamPeopleResolved.mentors.map(x => personCard({ ...x, vacant: !!x.vacant, large: true })).join("")}
+  contentEl.innerHTML = `
+    ${subHeader("about_team_mentors_title")}
+    <div class="card">
+      <div class="muted small">${escapeHTML(t("about_team_mentors_note"))}</div>
+      <div class="people-grid" style="margin-top:10px">
+        ${state.about.teamPeopleResolved.mentors.map(x => personCard({ ...x, vacant: !!x.vacant, large: true })).join("")}
+      </div>
     </div>
-  </div>
-`;
+  `;
 
   if (!(Array.isArray(dbList) && dbList.length)) {
     try { ensureTeamPeopleLoaded("mentors"); } catch {}
@@ -8986,6 +8987,33 @@ function mentorRoleForSubject(subjectKey) {
     mathematics: "AS level Mathematics"
   };
   return map[key] || null;
+}
+
+function mentorRoleToSubjectKey(role) {
+  const r = String(role || "").trim().toLowerCase();
+
+  const map = {
+    "as level chemistry": "chemistry",
+    "as level biology": "biology",
+    "igcse computer science": "informatics",
+    "as level economics": "economics",
+    "as level mathematics": "mathematics",
+
+    "ielts mentor": "ielts",
+    "sat english": "sat",
+    "sat math": "sat",
+    "english a2 mentor": "english_a2",
+    "english b1 mentor": "english_b1",
+    "ingliz tili mentori": "english_a1"
+  };
+
+  return map[r] || null;
+}
+
+function isMentorVisibleBySubjectActivity(person) {
+  const subjectKey = mentorRoleToSubjectKey(person?.role);
+  if (!subjectKey) return true;
+  return isSubjectActive(subjectKey);
 }
 
 async function fetchSubjectMentor(subjectKey) {
