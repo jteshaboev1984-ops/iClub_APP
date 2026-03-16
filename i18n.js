@@ -328,7 +328,7 @@ force_password_confirm_placeholder: "Повторите пароль",
 force_password_submit: "Сохранить новый пароль",
 force_password_done: "Пароль успешно обновлён.",
 
-lesson_lang_disclaimer: "Уроки пока доступны в основном на узбекском языке. Изначально проект запускался для Узбекистана. Английская версия скоро будет добавлена."
+lesson_lang_disclaimer: "Уроки пока доступны в основном на узбекском языке. Изначально проект запускался для Узбекистана. Английская версия скоро будет добавлена.",
       reg_subject_label_competitive: "Основной предмет (для рейтинга)",
       reg_subject_hint_competitive: "Выберите основной предмет для рейтинга",
       reg_subject_label_study: "Основной предмет (для обучения)",
@@ -1128,7 +1128,7 @@ force_password_confirm_placeholder: "Parolni qayta kiriting",
 force_password_submit: "Yangi parolni saqlash",
 force_password_done: "Parol muvaffaqiyatli yangilandi.",
 
-lesson_lang_disclaimer: "Darslar hozircha asosan o‘zbek tilida mavjud. Loyiha dastlab O‘zbekiston uchun boshlangan. Inglizcha versiya tez orada qo‘shiladi."
+lesson_lang_disclaimer: "Darslar hozircha asosan o‘zbek tilida mavjud. Loyiha dastlab O‘zbekiston uchun boshlangan. Inglizcha versiya tez orada qo‘shiladi.",
       reg_subject_label_competitive: "Asosiy fan (reyting uchun)",
       reg_subject_hint_competitive: "Reyting uchun asosiy fanni tanlang",
       reg_subject_label_study: "Asosiy fan (o‘qish uchun)",
@@ -1929,7 +1929,7 @@ force_password_confirm_placeholder: "Repeat your password",
 force_password_submit: "Save new password",
 force_password_done: "Password updated successfully.",
 
-lesson_lang_disclaimer: "Lessons are currently available mainly in Uzbek. The project originally started for Uzbekistan. An English version is coming soon."
+lesson_lang_disclaimer: "Lessons are currently available mainly in Uzbek. The project originally started for Uzbekistan. An English version is coming soon.",
       reg_subject_label_competitive: "Competitive subject",
       reg_subject_hint_competitive: "Choose your primary focus for the leaderboard",
       reg_subject_label_study: "Study subject",
