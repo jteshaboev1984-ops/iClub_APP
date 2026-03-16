@@ -3362,6 +3362,7 @@ async function buildPracticeSet(subjectKey) {
   // ---------------------------
     const VIEWS = [
 "splash",
+"login",
 "registration",
 "force-password",
 "home",
@@ -13526,43 +13527,19 @@ if (state.tab === "profile") {
     });
   }
 
-  function bindRegistration() {
-    // ---------------------------
-    // Registration language: default from Telegram user language_code
-    // ---------------------------
-    const langSel = $("#reg-language");
-    if (langSel && !langSel.dataset.init) {
-      const tgLang = window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code || "";
-      const defLang = window.i18n?.normalizeLang ? window.i18n.normalizeLang(tgLang || "ru") : "ru";
+      function bindLoginView() {
+  const loginForm = $("#auth-login-form");
+  const goToRegistrationBtn = $("#login-go-to-registration");
 
-      langSel.value = defLang || "ru";
-      langSel.dataset.init = "1";
+  if (goToRegistrationBtn && !goToRegistrationBtn.dataset.bound) {
+    goToRegistrationBtn.dataset.bound = "1";
+    goToRegistrationBtn.addEventListener("click", () => {
+      showView("registration");
+      bindRegistration();
+    });
+  }
 
-      try { window.i18n?.setLang(langSel.value); } catch {}
-      try { applyStaticI18n(); } catch {}
-    }
-    const isSchool = $("#reg-is-school");
-    const isSchoolToggle = $("#reg-is-school-toggle");
-    if (isSchool) isSchool.addEventListener("change", updateSchoolFieldsVisibility);
-    if (isSchoolToggle) {
-      isSchoolToggle.addEventListener("change", updateSchoolFieldsVisibility);
-    }
-     updateSchoolFieldsVisibility();
-
-    initRegionDistrictUI();
-    initRegSubjectChips();
-
-    refreshActiveSubjectsCatalogFromSupabase()
-      .then(() => {
-        try { applyRegSubjectI18n(); } catch {}
-      })
-      .catch(() => null);
-
-    const form = $("#reg-form");
-if (!form) return;
-
-const loginForm = $("#auth-login-form");
-if (loginForm && !loginForm.dataset.bound) {
+  if (!loginForm || loginForm.dataset.bound === "1") return;
   loginForm.dataset.bound = "1";
 
   loginForm.addEventListener("submit", async (e) => {
@@ -13627,6 +13604,49 @@ if (loginForm && !loginForm.dataset.bound) {
         btn.classList.remove("is-loading");
       }
     }
+  });
+}  
+   function bindRegistration() {
+    // ---------------------------
+    // Registration language: default from Telegram user language_code
+    // ---------------------------
+    const langSel = $("#reg-language");
+    if (langSel && !langSel.dataset.init) {
+      const tgLang = window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code || "";
+      const defLang = window.i18n?.normalizeLang ? window.i18n.normalizeLang(tgLang || "ru") : "ru";
+
+      langSel.value = defLang || "ru";
+      langSel.dataset.init = "1";
+
+      try { window.i18n?.setLang(langSel.value); } catch {}
+      try { applyStaticI18n(); } catch {}
+    }
+    const isSchool = $("#reg-is-school");
+    const isSchoolToggle = $("#reg-is-school-toggle");
+    if (isSchool) isSchool.addEventListener("change", updateSchoolFieldsVisibility);
+    if (isSchoolToggle) {
+      isSchoolToggle.addEventListener("change", updateSchoolFieldsVisibility);
+    }
+     updateSchoolFieldsVisibility();
+
+    initRegionDistrictUI();
+    initRegSubjectChips();
+
+    refreshActiveSubjectsCatalogFromSupabase()
+      .then(() => {
+        try { applyRegSubjectI18n(); } catch {}
+      })
+      .catch(() => null);
+
+    const form = $("#reg-form");
+if (!form) return;
+
+const backToLoginBtn = $("#registration-back-to-login");
+if (backToLoginBtn && !backToLoginBtn.dataset.bound) {
+  backToLoginBtn.dataset.bound = "1";
+  backToLoginBtn.addEventListener("click", () => {
+    showView("login");
+    bindLoginView();
   });
 }
 
@@ -14795,16 +14815,16 @@ if (action === "tour-next" || action === "tour-submit") {
   // Debug: Registration reset helpers
   // ---------------------------
     function resetRegistrationSoft() {
-    // Local-only reset (keeps Supabase auth session)
-    try {
-      localStorage.removeItem(LS.profile);
-      localStorage.removeItem(LS.state);
-    } catch (e) {}
+  // Local-only reset (keeps Supabase auth session)
+  try {
+    localStorage.removeItem(LS.profile);
+    localStorage.removeItem(LS.state);
+  } catch (e) {}
 
-    __profileSubjectsDbReady = false;
-    showView("registration");
-    bindRegistration();
-  }
+  __profileSubjectsDbReady = false;
+  showView("login");
+  bindLoginView();
+}
 
   async function resetRegistrationHard() {
     // Full reset: sign out + clear local storage + reload
@@ -14889,10 +14909,10 @@ if (action === "tour-next" || action === "tour-submit") {
     const profileNow = loadProfile();
 
     if (!hasSession && !profileNow) {
-      showView("registration");
-      bindRegistration();
-      return;
-    }
+  showView("login");
+  bindLoginView();
+  return;
+}
   } catch {}
 
   // ✅ flush pending ops after Supabase is ready (debounced)
@@ -14916,10 +14936,10 @@ if (action === "tour-next" || action === "tour-submit") {
   }
 
   if (!isRegistered()) {
-    showView("registration");
-    bindRegistration();
-    return;
-  }
+  showView("login");
+  bindLoginView();
+  return;
+}
 
       renderAllSubjects();
       renderHome();
