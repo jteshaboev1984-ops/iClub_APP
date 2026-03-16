@@ -3391,7 +3391,18 @@ async function buildPracticeSet(subjectKey) {
     el.classList.toggle("is-active", v === viewName);
   });
 
-  updateTopbarForView(viewName);
+  const tabbarEl = $("#tabbar");
+const hideOnViews = ["splash", "login", "registration", "force-password"];
+
+try {
+  document.body.classList.toggle("auth-locked", hideOnViews.includes(viewName));
+} catch {}
+
+if (tabbarEl) {
+  tabbarEl.style.display = hideOnViews.includes(viewName) ? "none" : "";
+}
+
+updateTopbarForView(viewName);
 
   // ✅ FIX: не просто "вверх страницы", а "к началу активного view"
   const target = document.getElementById(`view-${viewName}`);
@@ -3570,11 +3581,12 @@ const actionBtn = $("#topbar-action");
 
 if (!backBtn || !titleEl || !subEl) return;
 
-// ✅ Splash/Loading: topbar и tabbar не показываем вообще
+// ✅ Splash/Auth: topbar и tabbar не показываем вообще
 const tabbarEl = $("#tabbar");
+const authLikeViews = ["splash", "login", "registration", "force-password"];
 
 if (topbarEl) {
-  if (viewName === "splash") {
+  if (authLikeViews.includes(viewName)) {
     topbarEl.style.display = "none";
     if (tabbarEl) tabbarEl.style.display = "none";
     return;
@@ -3582,7 +3594,7 @@ if (topbarEl) {
   topbarEl.style.display = ""; // вернуть дефолт (grid из CSS)
 }
 
-if (tabbarEl) tabbarEl.style.display = ""; // вернуть таббар после splash
+if (tabbarEl) tabbarEl.style.display = ""; // вернуть таббар только после входа
 
 // лого теперь не прячем
 if (logoEl) logoEl.style.display = "block";
@@ -3628,22 +3640,7 @@ if (actionBtn) {
      return;
    }
 
-       if (viewName === "registration") {
-  // ✅ Topbar как везде
-  titleEl.textContent = t("app_name");
-  subEl.textContent = "Smarter together";
-
-  // ✅ Back показываем: он закрывает апп (bindTopbar уже делает close на registration)
-  backBtn.style.visibility = "visible";
-
-  // ✅ На регистрации нижний таббар не показываем вообще
-  if (tabbarEl) tabbarEl.style.display = "none";
-
-  syncTopbarLeftState();
-  return;
-}
-
-     // применяем для default-состояния
+       // применяем для default-состояния
      syncTopbarLeftState();
 
         if (viewName === "certificate-verify") {
@@ -13399,14 +13396,38 @@ function bindTabbar() {
   let lastTapTs = 0;
 
   const handle = (btn) => {
-    const tab = btn.dataset.tab;
-    if (!tab) return;
-    
-     // ✅ До регистрации табы запрещены (и на registration таббар скрыт, но это страховка)
+  const tab = btn.dataset.tab;
+  if (!tab) return;
+
+  const authViews = ["login", "registration", "force-password", "splash"];
+  const activeAuthView = authViews.find(v => document.getElementById(`view-${v}`)?.classList.contains("is-active"));
+
+  // ✅ До входа нижний таббар полностью запрещён
+  if (activeAuthView) {
+    const tabbarEl = $("#tabbar");
+    if (tabbarEl) tabbarEl.style.display = "none";
+
+    if (activeAuthView === "registration") {
+      showView("registration");
+      bindRegistration();
+    } else if (activeAuthView === "force-password") {
+      showView("force-password");
+      bindForcePassword();
+    } else {
+      showView("login");
+      bindLoginView();
+    }
+    return;
+  }
+
+  // ✅ До регистрации/входа табы запрещены (страховка)
   const p0 = loadProfile();
   if (!p0) {
+    const tabbarEl = $("#tabbar");
+    if (tabbarEl) tabbarEl.style.display = "none";
     showToast(t("complete_registration_first") || "Сначала завершите регистрацию.");
-    showView("registration");
+    showView("login");
+    bindLoginView();
     return;
   }
 
