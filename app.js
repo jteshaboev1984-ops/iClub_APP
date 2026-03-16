@@ -8362,7 +8362,8 @@ function initRegSubjectChips() {
 }
 
     // first paint (ensures no RU/EN mix)
-    try { applyRegSubjectI18n(); } catch {}
+try { applyRegSubjectI18n(); } catch {}
+try { refreshCountryOptionLabels(); } catch {}
 
    function isRegistered() {
     const p = loadProfile();
