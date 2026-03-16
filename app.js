@@ -8187,62 +8187,60 @@ function uiAlert({ title, message, okText } = {}) {
   }
 
           function applyRegSubjectI18n() {
-    // chips
-    const chipBtns = $$("#reg-subject-chips .chip-btn");
-    chipBtns.forEach(btn => {
-      const key = String(btn.dataset.subjectKey || "").trim();
-      if (!key) return;
+  // chips
+  const chipBtns = $$("#reg-subject-chips .chip-btn");
+  chipBtns.forEach(btn => {
+    const key = String(btn.dataset.subjectKey || "").trim();
+    if (!key) return;
 
-      btn.classList.toggle("hidden", !isSubjectActive(key));
+    btn.classList.toggle("hidden", !isSubjectActive(key));
 
-      const k = "subj_" + key;
-      const val = t(k);
-      if (val && val !== k) btn.textContent = val;
-    });
+    const k = "subj_" + key;
+    const val = t(k);
+    if (val && val !== k) btn.textContent = val;
+  });
 
-    // selects options (keep values, translate labels)
-    const ids = ["reg-main-subject-1", "reg-main-subject-2", "reg-additional-subject"];
-    ids.forEach(id => {
-      const sel = document.getElementById(id);
-      if (!sel) return;
+  // selects options (keep values, translate labels)
+  const ids = ["reg-main-subject-1", "reg-main-subject-2", "reg-additional-subject"];
+  ids.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
 
-      Array.from(sel.options).forEach(opt => {
-        const v = String(opt.value || "").trim();
+    Array.from(sel.options).forEach(opt => {
+      const v = String(opt.value || "").trim();
 
-        if (!v) {
-          if (id === "reg-additional-subject") opt.textContent = t("reg_choose_none");
-          else opt.textContent = t("reg_choose_placeholder");
-          opt.hidden = false;
-          return;
-        }
-
-        opt.hidden = !isSubjectActive(v);
-
-        const k = "subj_" + v;
-        const val = t(k);
-        if (val && val !== k) opt.textContent = val;
-      });
-
-      const selected = String(sel.value || "").trim();
-      if (selected && !isSubjectActive(selected)) {
-        sel.value = "";
+      if (!v) {
+        if (id === "reg-additional-subject") opt.textContent = t("reg_choose_none");
+        else opt.textContent = t("reg_choose_placeholder");
+        opt.hidden = false;
+        return;
       }
-    });
-  }
 
-  function initRegSubjectChips() {
-  const wrap = $("#reg-subject-chips");
+      opt.hidden = !isSubjectActive(v);
+
+      const k = "subj_" + v;
+      const val = t(k);
+      if (val && val !== k) opt.textContent = val;
+    });
+
+    const selected = String(sel.value || "").trim();
+    if (selected && !isSubjectActive(selected)) {
+      sel.value = "";
+    }
+  });
+
+  try { refreshRegSubjectSummary(); } catch {}
+}
+
+  function refreshRegSubjectSummary() {
+  const summaryEl = $("#reg-subject-summary");
   const main1 = $("#reg-main-subject-1");
   const main2 = $("#reg-main-subject-2");
-  if (!wrap || !main1 || !main2) return;
+  const wrap = $("#reg-subject-chips");
 
-  const summaryEl = $("#reg-subject-summary");
+  if (!summaryEl || !main1 || !main2 || !wrap) return;
+
   const buttons = () => $$("#reg-subject-chips .chip-btn");
-
-  const tt = (key, fallback) => {
-    const v = t(key);
-    return (v && v !== key) ? v : fallback;
-  };
 
   const getSubjectLabel = (subjectKey) => {
     if (!subjectKey) return "";
@@ -8254,33 +8252,45 @@ function uiAlert({ title, message, okText } = {}) {
     return btn ? btn.textContent.trim() : subjectKey;
   };
 
-  const updateSummary = () => {
-    if (!summaryEl) return;
+  const a = (main1.value || "").trim();
+  const b = (main2.value || "").trim();
 
-    const a = (main1.value || "").trim();
-    const b = (main2.value || "").trim();
+  if (!a && !b) {
+    summaryEl.textContent = t("reg_subject_summary_none");
+    return;
+  }
 
-        if (!a && !b) {
-      summaryEl.textContent = t("reg_subject_summary_none");
-      return;
-    }
+  const primaryTag = t("reg_subject_primary_tag");
+  const secondaryTag = t("reg_subject_secondary_tag");
 
-    const primaryTag = t("reg_subject_primary_tag");
-    const secondaryTag = t("reg_subject_secondary_tag");
+  const rows = [];
+  if (a) {
+    rows.push(
+      `<div class="reg-subject-line"><span class="reg-subject-tag">${escapeHTML(primaryTag)}</span><span class="reg-subject-val">${escapeHTML(getSubjectLabel(a))}</span></div>`
+    );
+  }
+  if (b) {
+    rows.push(
+      `<div class="reg-subject-line"><span class="reg-subject-tag">${escapeHTML(secondaryTag)}</span><span class="reg-subject-val">${escapeHTML(getSubjectLabel(b))}</span></div>`
+    );
+  }
+  summaryEl.innerHTML = rows.join("");
+}
 
-    const rows = [];
-    if (a) {
-      rows.push(
-        `<div class="reg-subject-line"><span class="reg-subject-tag">${escapeHTML(primaryTag)}</span><span class="reg-subject-val">${escapeHTML(getSubjectLabel(a))}</span></div>`
-      );
-    }
-    if (b) {
-      rows.push(
-        `<div class="reg-subject-line"><span class="reg-subject-tag">${escapeHTML(secondaryTag)}</span><span class="reg-subject-val">${escapeHTML(getSubjectLabel(b))}</span></div>`
-      );
-    }
-    summaryEl.innerHTML = rows.join("");
+function initRegSubjectChips() {
+  const wrap = $("#reg-subject-chips");
+  const main1 = $("#reg-main-subject-1");
+  const main2 = $("#reg-main-subject-2");
+  if (!wrap || !main1 || !main2) return;
+
+  const buttons = () => $$("#reg-subject-chips .chip-btn");
+
+  const tt = (key, fallback) => {
+    const v = t(key);
+    return (v && v !== key) ? v : fallback;
   };
+
+  const updateSummary = refreshRegSubjectSummary;
 
   const syncChipsFromSelects = () => {
     const selected = [main1.value, main2.value].filter(Boolean);
@@ -8325,15 +8335,16 @@ function uiAlert({ title, message, okText } = {}) {
        // live language switch on registration
          const langSel = $("#reg-language");
      if (langSel) {
-       langSel.addEventListener("change", () => {
-         try { window.i18n?.setLang(langSel.value); } catch {}
-         try { applyStaticI18n(); } catch {}
-         try { updateSchoolFieldsVisibility(); } catch {}
-         try { applyRegSubjectI18n(); } catch {}
-         try { refreshRegionDistrictPlaceholders?.(); } catch {}
-         try { refreshRegionDistrictOptionLabels?.(); } catch {}
-       });
-     }
+  langSel.addEventListener("change", () => {
+    try { window.i18n?.setLang(langSel.value); } catch {}
+    try { applyStaticI18n(); } catch {}
+    try { updateSchoolFieldsVisibility(); } catch {}
+    try { applyRegSubjectI18n(); } catch {}
+    try { refreshRegSubjectSummary(); } catch {}
+    try { refreshRegionDistrictPlaceholders?.(); } catch {}
+    try { refreshRegionDistrictOptionLabels?.(); } catch {}
+  });
+}
 
     // first paint (ensures no RU/EN mix)
     try { applyRegSubjectI18n(); } catch {}
