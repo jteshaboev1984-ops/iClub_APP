@@ -8857,45 +8857,67 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
   // - Study tab: switch (pinned on Home)
   const footer = document.createElement("div");
 
-  if (state.courses.mainFilter === "competitive") {
-    footer.className = "catalog-actions one";
+    if (state.courses.mainFilter === "competitive") {
+    footer.className = "catalog-toggle-row is-on";
 
-    const btnDetach = document.createElement("button");
-    btnDetach.type = "button";
-    btnDetach.className = "mini-btn ghost";
-    btnDetach.textContent = t("btn_detach") || "Открепить";
-        btnDetach.addEventListener("click", async (e) => {
-      e.preventDefault();
+    const left = document.createElement("div");
+    left.className = "catalog-toggle-left";
+
+    const stateLine = document.createElement("div");
+    stateLine.className = "catalog-toggle-state";
+    stateLine.textContent = t("course_toggle_on") || "Yoqilgan";
+
+    left.appendChild(stateLine);
+
+    const sw = document.createElement("label");
+    sw.className = "switch";
+
+    sw.innerHTML = `
+      <input type="checkbox" checked aria-label="${t("btn_detach") || "Detach competitive"}">
+      <span class="slider"></span>
+    `;
+
+    const input = sw.querySelector("input");
+
+    input.addEventListener("click", (e) => e.stopPropagation());
+
+    input.addEventListener("change", async (e) => {
       e.stopPropagation();
 
       const ok = await uiConfirm({
         title: t("detach_comp_title") || "Снять Competitive?",
         message:
-          (t("detach_comp_text") || "Вы действительно хотите снять Competitive с этого предмета?\n\nПоследствия:\n• прогресс и попытки по предмету будут обнулены\n• предмет перестанет участвовать в рейтингах\n\nВы сможете выбрать другой предмет в Competitive."),
+          t("detach_comp_text") ||
+          "Вы действительно хотите перевести этот предмет в O‘quv?\n\nСоревновательный прогресс по предмету будет сброшен.",
         okText: t("detach_comp_ok") || "Снять",
         cancelText: t("cancel") || "Отмена"
       });
 
-      if (!ok) return;
+      if (!ok) {
+        input.checked = true;
+        return;
+      }
 
       const prof = loadProfile() || profile;
       const us = (prof.subjects || []).find(x => x.key === s.key) || null;
-      if (!us) return;
+      if (!us) {
+        input.checked = true;
+        return;
+      }
 
-      // 1) local: переводим в study + снимаем pin
       us.mode = "study";
       us.pinned = false;
       saveProfile(prof);
 
-      // 2) DB: записываем mode/pinned
       try {
         const res = await syncUserSubjectToSupabase(s.key, "study", false);
         if (!res?.ok) {
+          input.checked = true;
           showToast(t("save_failed_db_try_again"));
           renderAllSubjects();
           return;
         }
-      
+
         const uid = await getAuthUid();
         const subjectId = res?.subjectId || await getSubjectIdByKey(s.key);
         if (uid && subjectId) {
@@ -8908,14 +8930,14 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
             source: "courses",
             meta: { subject_key: s.key }
           });
-        }   
+        }
       } catch {
+        input.checked = true;
         showToast("Ошибка сети. Попробуйте ещё раз.");
         renderAllSubjects();
         return;
       }
 
-            // 3) DB: soft reset progress server-side (RPC) — no client DELETE, no 400/404 in console
       try {
         const subjectId = await getSubjectIdByKey(s.key);
 
@@ -8925,7 +8947,10 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
           if (error) {
             try {
               const uid2 = await getAuthUid();
-              await logDbErrorToEvents(uid2, "reset_subject_progress", error, { subject_id: subjectId, subject_key: s.key });
+              await logDbErrorToEvents(uid2, "reset_subject_progress", error, {
+                subject_id: subjectId,
+                subject_key: s.key
+              });
             } catch {}
           }
         }
@@ -8937,79 +8962,179 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
       renderProfileSettings?.();
     });
 
-    footer.appendChild(btnDetach);
+    footer.appendChild(left);
+    footer.appendChild(sw);
   } else {
-    footer.className = "catalog-toggle-row" + (isPinned ? " is-on" : "");
+        if (s.type === "main") {
+      footer.className = "catalog-toggle-row";
 
-    const left = document.createElement("div");
-    left.className = "catalog-toggle-left";
+      const left = document.createElement("div");
+      left.className = "catalog-toggle-left";
 
-    const stateLine = document.createElement("div");
-    stateLine.className = "catalog-toggle-state";
-    stateLine.textContent = isPinned ? t("course_toggle_on") : t("course_toggle_off");
+      const stateLine = document.createElement("div");
+      stateLine.className = "catalog-toggle-state";
+      stateLine.textContent = t("course_toggle_off") || "O‘chirilgan";
 
-    left.appendChild(stateLine);
+      left.appendChild(stateLine);
 
-    const sw = document.createElement("label");
-    sw.className = "switch";
+      const sw = document.createElement("label");
+      sw.className = "switch";
 
-    sw.innerHTML = `
-      <input type="checkbox" ${isPinned ? "checked" : ""} aria-label="${t("course_toggle_aria") || "Show on Home"}">
-      <span class="slider"></span>
-    `;
+      sw.innerHTML = `
+        <input type="checkbox" aria-label="${t("attach_comp_ok") || "Attach competitive"}">
+        <span class="slider"></span>
+      `;
 
-    const input = sw.querySelector("input");
+      const input = sw.querySelector("input");
 
-    // IMPORTANT: switch click must NOT open the subject card
-    input.addEventListener("click", (e) => e.stopPropagation());
+      input.addEventListener("click", (e) => e.stopPropagation());
 
-        input.addEventListener("change", async (e) => {
-      e.stopPropagation();
+      input.addEventListener("change", async (e) => {
+        e.stopPropagation();
 
-      const prof = loadProfile() || profile;
-      const updated = togglePinnedSubject(prof, s.key);
-      saveProfile(updated);
+        const fresh = loadProfile() || profile;
+        const compNow = (fresh.subjects || []).filter(x => (x.mode || "study") === "competitive").length;
 
-      // new state
-      const after = (updated?.subjects || []).find(x => x.key === s.key) || null;
-      const nowPinned = !!after?.pinned;
-      const mode = after?.mode || "study";
+        if (compNow >= 2) {
+          input.checked = false;
+          await uiAlert({
+            title: t("comp_limit_title") || "Лимит Competitive",
+            message:
+              t("comp_limit_text") ||
+              "Можно выбрать максимум 2 основных предмета в Musobaqa.",
+            okText: t("comp_limit_ok") || t("ok") || "OK"
+          });
+          return;
+        }
 
-      // UI feedback instantly
-      showToast(nowPinned ? t("toast_added_pinned") : t("toast_removed_pinned"));
+        const ok = await uiConfirm({
+          title: t("attach_comp_title") || "Добавить в Competitive?",
+          message:
+            t("attach_comp_text") ||
+            "Предмет будет переведён в Musobaqa и исчезнет из списка O‘quv.",
+          okText: t("attach_comp_ok") || "Добавить",
+          cancelText: t("cancel") || "Отмена"
+        });
 
-      // ✅ DB sync (so pinned is реально сохранён в базе)
-      try {
-        const res = await syncUserSubjectToSupabase(s.key, mode, nowPinned);
-        if (!res?.ok) {
-          // если база отказала — откатываем локально и UI
+        if (!ok) {
+          input.checked = false;
+          return;
+        }
+
+        const prof = loadProfile() || profile;
+        const us = (prof.subjects || []).find(x => x.key === s.key) || null;
+        if (!us) {
+          input.checked = false;
+          return;
+        }
+
+        us.mode = "competitive";
+        us.pinned = false;
+        saveProfile(prof);
+
+        try {
+          const res = await syncUserSubjectToSupabase(s.key, "competitive", false);
+          if (!res?.ok) {
+            input.checked = false;
+            showToast(t("save_failed_db_try_again"));
+            renderAllSubjects();
+            return;
+          }
+
+          const uid = await getAuthUid();
+          const subjectId = res?.subjectId || await getSubjectIdByKey(s.key);
+          if (uid && subjectId) {
+            await writeUserSubjectsHistory({
+              user_id: uid,
+              subject_id: subjectId,
+              action: "attach_competitive",
+              from_mode: "study",
+              to_mode: "competitive",
+              source: "courses",
+              meta: { subject_key: s.key }
+            });
+          }
+        } catch {
+          input.checked = false;
+          showToast("Ошибка сети. Попробуйте ещё раз.");
+          renderAllSubjects();
+          return;
+        }
+
+        showToast(t("toast_switched_to_competitive") || "Предмет переведён в Musobaqa.");
+        renderHome();
+        renderAllSubjects();
+        renderProfileSettings?.();
+      });
+
+      footer.appendChild(left);
+      footer.appendChild(sw);
+    } else {
+      footer.className = "catalog-toggle-row" + (isPinned ? " is-on" : "");
+
+      const left = document.createElement("div");
+      left.className = "catalog-toggle-left";
+
+      const stateLine = document.createElement("div");
+      stateLine.className = "catalog-toggle-state";
+      stateLine.textContent = isPinned ? t("course_toggle_on") : t("course_toggle_off");
+
+      left.appendChild(stateLine);
+
+      const sw = document.createElement("label");
+      sw.className = "switch";
+
+      sw.innerHTML = `
+        <input type="checkbox" ${isPinned ? "checked" : ""} aria-label="${t("course_toggle_aria") || "Show on Home"}">
+        <span class="slider"></span>
+      `;
+
+      const input = sw.querySelector("input");
+
+      input.addEventListener("click", (e) => e.stopPropagation());
+
+      input.addEventListener("change", async (e) => {
+        e.stopPropagation();
+
+        const prof = loadProfile() || profile;
+        const updated = togglePinnedSubject(prof, s.key);
+        saveProfile(updated);
+
+        const after = (updated?.subjects || []).find(x => x.key === s.key) || null;
+        const nowPinned = !!after?.pinned;
+        const mode = after?.mode || "study";
+
+        showToast(nowPinned ? t("toast_added_pinned") : t("toast_removed_pinned"));
+
+        try {
+          const res = await syncUserSubjectToSupabase(s.key, mode, nowPinned);
+          if (!res?.ok) {
+            const prof2 = loadProfile() || updated;
+            const us2 = (prof2.subjects || []).find(x => x.key === s.key) || null;
+            if (us2) us2.pinned = !nowPinned;
+            saveProfile(prof2);
+
+            input.checked = !nowPinned;
+            showToast("Не удалось сохранить в базе. Попробуйте ещё раз.");
+          }
+        } catch {
           const prof2 = loadProfile() || updated;
           const us2 = (prof2.subjects || []).find(x => x.key === s.key) || null;
           if (us2) us2.pinned = !nowPinned;
           saveProfile(prof2);
 
           input.checked = !nowPinned;
-          showToast("Не удалось сохранить в базе. Попробуйте ещё раз.");
+          showToast("Ошибка сети. Попробуйте ещё раз.");
         }
-      } catch {
-        // откат на всякий случай
-        const prof2 = loadProfile() || updated;
-        const us2 = (prof2.subjects || []).find(x => x.key === s.key) || null;
-        if (us2) us2.pinned = !nowPinned;
-        saveProfile(prof2);
 
-        input.checked = !nowPinned;
-        showToast("Ошибка сети. Попробуйте ещё раз.");
-      }
+        renderHome();
+        renderAllSubjects();
+        renderProfileSettings?.();
+      });
 
-      // refresh screens that use pinned
-      renderHome();
-      renderAllSubjects();
-      renderProfileSettings?.();
-    });
-
-    footer.appendChild(left);
-    footer.appendChild(sw);
+      footer.appendChild(left);
+      footer.appendChild(sw);
+    }
   }
 
   card.appendChild(footer);
@@ -13432,10 +13557,21 @@ function bindTabbar() {
   event.stopPropagation();
   if (state.quizLock) return;
 
-  // ✅ Registration: назад = закрыть апп (возвращаться некуда)
+    // ✅ Registration: назад = закрыть апп (возвращаться некуда)
   const regView = document.getElementById("view-registration");
-  if (regView && regView.classList.contains("is-active")) {
-    if (window.Telegram?.WebApp?.close) window.Telegram.WebApp.close();
+  const isRegistrationActive =
+    !!(regView && regView.classList.contains("is-active")) ||
+    (Array.isArray(state?.viewStack) && state.viewStack[state.viewStack.length - 1] === "registration");
+
+  if (isRegistrationActive) {
+    try {
+      if (window.Telegram?.WebApp?.close) {
+        window.Telegram.WebApp.close();
+        return;
+      }
+    } catch {}
+
+    try { history.back(); } catch {}
     return;
   }
 
