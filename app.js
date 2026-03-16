@@ -3193,19 +3193,17 @@ async function buildPracticeSet(subjectKey) {
   const countryEl = $("#reg-country");
   if (!countryEl) return;
 
-  const lang = (window.i18n?.getLang ? window.i18n.getLang() : "ru");
+  Array.from(countryEl.options).forEach((opt) => {
+    const key = String(opt.dataset.i18nCountry || "").trim();
+    if (!key) return;
 
-  const pick = (opt) => {
-    if (!opt) return "";
-    if (lang === "uz") return opt.dataset.uz || opt.dataset.ru || opt.dataset.en || opt.textContent || "";
-    if (lang === "en") return opt.dataset.en || opt.dataset.ru || opt.textContent || "";
-    return opt.dataset.ru || opt.dataset.en || opt.textContent || "";
-  };
-
-  Array.from(countryEl.options).forEach((o) => {
-    o.textContent = String(pick(o)).trim();
+    const val = t(key);
+    if (val && val !== key) {
+      opt.textContent = val;
+    }
   });
 }
+   
   async function initRegionDistrictUI() {
     const regionEl = $("#reg-region");
     const districtEl = $("#reg-district");
