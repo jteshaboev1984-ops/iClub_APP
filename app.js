@@ -8142,7 +8142,7 @@ function uiAlert({ title, message, okText } = {}) {
     try { updateRegSubmitReady?.(); } catch {}
   }
 
-          function applyRegSubjectI18n() {
+            function applyRegSubjectI18n() {
     // chips
     const chipBtns = $$("#reg-subject-chips .chip-btn");
     chipBtns.forEach(btn => {
@@ -8184,6 +8184,11 @@ function uiAlert({ title, message, okText } = {}) {
         sel.value = "";
       }
     });
+
+    // ✅ refresh translated summary text after language switch
+    try {
+      document.dispatchEvent(new CustomEvent("reg-subjects-i18n-updated"));
+    } catch {}
   }
 
   function initRegSubjectChips() {
@@ -8237,8 +8242,10 @@ function uiAlert({ title, message, okText } = {}) {
     }
     summaryEl.innerHTML = rows.join("");
   };
-
-  const syncChipsFromSelects = () => {
+  
+     document.addEventListener("reg-subjects-i18n-updated", updateSummary);
+  
+     const syncChipsFromSelects = () => {
     const selected = [main1.value, main2.value].filter(Boolean);
     buttons().forEach(btn => {
       btn.classList.toggle("is-active", selected.includes(btn.dataset.subjectKey));
