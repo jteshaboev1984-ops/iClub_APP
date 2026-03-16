@@ -4877,34 +4877,3 @@ button.is-loading { opacity: .85; }
     font-size: 11px;
   }
 }
-/* ===== Auth / login / forced password ===== */
-.auth-entry-card,
-.reg-auth-card{
-  margin-bottom: 14px;
-  padding: 14px;
-}
-
-.auth-entry-card .field + .field,
-.reg-auth-card .field + .field{
-  margin-top: 10px;
-}
-
-.notice-banner{
-  margin: 10px 0 12px;
-  padding: 12px 14px;
-  border: 1px solid rgba(47,111,214,0.18);
-  background: linear-gradient(180deg, rgba(47,111,214,0.08), rgba(47,111,214,0.03));
-  border-radius: 14px;
-  color: var(--text);
-  font-size: 13px;
-  line-height: 1.4;
-  box-shadow: var(--shadow-sm);
-}
-#login-go-to-registration,
-#registration-back-to-login{
-  margin-top: 10px;
-  width: 100%;
-}
-body.auth-locked #tabbar{
-  display: none !important;
-}
