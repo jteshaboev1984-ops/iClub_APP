@@ -58,12 +58,11 @@
           <div class="splash-title">iClub</div>
           <div id="splash-status" class="muted" data-i18n="loading">Загрузка…</div>
         </div>
-      </section>
+           </section>
 
-      <!-- ============ Registration ============ -->
-      <section id="view-registration" class="view" data-view="registration" aria-label="Registration">
+           <!-- ============ Login ============ -->
+      <section id="view-login" class="view" data-view="login" aria-label="Login">
   <div class="content reg">
-
     <div class="card auth-entry-card">
       <div class="card-title" data-i18n="auth_login_title">Вход</div>
       <div class="muted small" data-i18n="auth_login_subtitle">Для входа используйте логин и пароль, созданные при регистрации или выданные вам администратором.</div>
@@ -81,7 +80,15 @@
 
         <button id="auth-login-submit" class="btn primary" type="submit" data-i18n="auth_login_btn">Войти</button>
       </form>
+
+      <button id="login-go-to-registration" class="btn ghost" type="button" data-i18n="auth_new_user_btn">Новый пользователь</button>
     </div>
+  </div>
+</section>
+
+      <!-- ============ Registration ============ -->
+      <section id="view-registration" class="view" data-view="registration" aria-label="Registration">
+  <div class="content reg">
 
     <h1 class="h1" data-i18n="reg_create_title">Create your account</h1>
 
@@ -255,6 +262,7 @@
 </label>
 
             <button id="reg-submit" class="btn primary" type="submit" data-i18n="reg_submit_btn">Завершить регистрацию</button>
+            <button id="registration-back-to-login" class="btn ghost" type="button" data-i18n="auth_back_to_login_btn">Назад ко входу</button>
           </form>
         </div>
       </section>
