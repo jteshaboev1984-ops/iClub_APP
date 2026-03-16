@@ -3189,7 +3189,23 @@ async function buildPracticeSet(subjectKey) {
       o.textContent = String(pick(o)).trim();
     }
   }
+      function refreshCountryOptionLabels() {
+  const countryEl = $("#reg-country");
+  if (!countryEl) return;
 
+  const lang = (window.i18n?.getLang ? window.i18n.getLang() : "ru");
+
+  const pick = (opt) => {
+    if (!opt) return "";
+    if (lang === "uz") return opt.dataset.uz || opt.dataset.ru || opt.dataset.en || opt.textContent || "";
+    if (lang === "en") return opt.dataset.en || opt.dataset.ru || opt.textContent || "";
+    return opt.dataset.ru || opt.dataset.en || opt.textContent || "";
+  };
+
+  Array.from(countryEl.options).forEach((o) => {
+    o.textContent = String(pick(o)).trim();
+  });
+}
   async function initRegionDistrictUI() {
     const regionEl = $("#reg-region");
     const districtEl = $("#reg-district");
@@ -8341,6 +8357,7 @@ function initRegSubjectChips() {
     try { updateSchoolFieldsVisibility(); } catch {}
     try { applyRegSubjectI18n(); } catch {}
     try { refreshRegSubjectSummary(); } catch {}
+    try { refreshCountryOptionLabels(); } catch {}
     try { refreshRegionDistrictPlaceholders?.(); } catch {}
     try { refreshRegionDistrictOptionLabels?.(); } catch {}
   });
