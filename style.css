@@ -4900,3 +4900,7 @@ button.is-loading { opacity: .85; }
   line-height: 1.4;
   box-shadow: var(--shadow-sm);
 }
+#login-go-to-registration,
+#registration-back-to-login{
+  margin-top: 10px;
+}
