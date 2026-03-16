@@ -4903,4 +4903,5 @@ button.is-loading { opacity: .85; }
 #login-go-to-registration,
 #registration-back-to-login{
   margin-top: 10px;
+  width: 100%;
 }
