@@ -325,38 +325,78 @@ async function waitForOverlayPaint() {
 
   let sb = null;
 
-     // ✅ Автоматическое подключение пользователя к боту
-      async function tryLinkBotOnce(reason = "registration") {
-  try {
-    const tg = window.Telegram?.WebApp;
-    if (!tg || typeof tg.sendData !== "function") return false;
+const AUTH_EMAIL_DOMAIN = "iclub.local";
 
-    // если уже отправляли — не повторяем
-    if (localStorage.getItem(LS.botLinked) === "1") return true;
+function normalizeLogin(v) {
+  return String(v || "").trim().toLowerCase();
+}
 
-        let uid = null;
-    try {
-      const { data } = await (sb || window.sb)?.auth?.getUser();
-      uid = data?.user?.id || null;
-    } catch {}
+function isValidLogin(v) {
+  return /^[a-z0-9._-]{4,32}$/i.test(String(v || "").trim());
+}
 
-    const u = window.Telegram?.WebApp?.initDataUnsafe?.user || null;
+function isValidPassword(v) {
+  return String(v || "").length >= 6;
+}
 
-    const payload = {
-      type: "link_bot",
-      v: 1,
-      reason,
-      uid,
-      telegram_user_id: u?.id ? String(u.id) : null
-    };
+function loginToEmail(login) {
+  return `${normalizeLogin(login)}@${AUTH_EMAIL_DOMAIN}`;
+}
 
-    tg.sendData(JSON.stringify(payload));
+async function signUpWithLoginPassword(login, password) {
+  if (!window.sb) return { ok: false, reason: "no_sb" };
 
-    localStorage.setItem(LS.botLinked, "1");
-    return true;
-  } catch {
-    return false;
+  const email = loginToEmail(login);
+
+  const { data, error } = await window.sb.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        login: normalizeLogin(login)
+      }
+    }
+  });
+
+  if (error) {
+    const msg = String(error.message || "").toLowerCase();
+    if (
+      msg.includes("already registered") ||
+      msg.includes("already been registered") ||
+      msg.includes("user already registered")
+    ) {
+      return { ok: false, reason: "login_taken", error };
+    }
+    return { ok: false, reason: "signup_failed", error };
   }
+
+  return { ok: true, data, email };
+}
+
+async function signInWithLoginPassword(login, password) {
+  if (!window.sb) return { ok: false, reason: "no_sb" };
+
+  const email = loginToEmail(login);
+
+  const { data, error } = await window.sb.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) return { ok: false, reason: "signin_failed", error };
+  return { ok: true, data, email };
+}
+
+async function updateCurrentUserPassword(newPassword) {
+  if (!window.sb) return { ok: false, reason: "no_sb" };
+  const { data, error } = await window.sb.auth.updateUser({ password: newPassword });
+  if (error) return { ok: false, reason: "update_failed", error };
+  return { ok: true, data };
+}
+
+   // ✅ Автоматическое подключение пользователя к боту
+    async function tryLinkBotOnce(reason = "registration") {
+  return false;
 }
    
    async function initSupabaseSession() {
@@ -377,26 +417,17 @@ async function waitForOverlayPaint() {
       window.sb = sb;
     }
 
-    // 1) ensure we have a session (Anonymous Sign-in)
-        const { data: sessData } = await sb.auth.getSession();
-    if (!sessData?.session) {
-      const { data: anonData, error: anonErr } = await sb.auth.signInAnonymously();
+    // 1) only read current session
+const { data: sessData } = await sb.auth.getSession();
+const hasSession = !!sessData?.session;
 
-      if (anonErr) {
-        console.error("[Supabase] Anonymous sign-in failed:", anonErr);
+// 2) no auto-anonymous sign-in anymore
+if (!hasSession) return sb;
 
-        const statusEl = document.getElementById("splash-status");
-        if (statusEl) statusEl.textContent = "Supabase auth error: " + (anonErr.message || "unknown");
-
-        // Не валим приложение — просто работаем без базы (пока не починим настройки)
-        return sb;
-      }
-    }
-
-    // 2) ensure users row exists (id == auth.uid())
-    const { data: userData } = await sb.auth.getUser();
-    const u = userData?.user;
-    if (!u?.id) return sb;
+// 3) continue only for signed-in user
+const { data: userData } = await sb.auth.getUser();
+const u = userData?.user;
+if (!u?.id) return sb;
 
     const tg = getTelegramUserSafe();
     const langGuess = tg?.language_code || (typeof getTelegramLang === "function" ? getTelegramLang() : null) || "ru";
@@ -3330,12 +3361,13 @@ async function buildPracticeSet(subjectKey) {
   // UI: Views & Tabs
   // ---------------------------
     const VIEWS = [
-    "splash",
-    "registration",
-    "home",
-    "courses",
-    "ratings",
-    "profile",
+"splash",
+"registration",
+"force-password",
+"home",
+"courses",
+"ratings",
+"profile",
     // Global screens
     "resources",
     "news",
@@ -4098,27 +4130,33 @@ async function saveRegistrationToSupabase(profile) {
   const lastFromProfile = (nameParts.length > 1) ? nameParts.slice(1).join(" ") : null;
 
   const usersPayload = {
-    id: uid,
-    telegram_user_id: (tgUser?.id != null) ? String(tgUser.id) : null,
+  id: uid,
+  telegram_user_id: (tgUser?.id != null) ? String(tgUser.id) : null,
 
-    // ✅ если Telegram не дал first/last_name — берём из формы регистрации
-    first_name: tgUser?.first_name || firstFromProfile || null,
-    last_name: tgUser?.last_name || lastFromProfile || null,
+  // ✅ если Telegram не дал first/last_name — берём из формы регистрации
+  first_name: tgUser?.first_name || firstFromProfile || null,
+  last_name: tgUser?.last_name || lastFromProfile || null,
 
-    avatar_url: avatar,
-        language_code: profile?.language || tgUser?.language_code || "ru",
-    is_school_student: !!profile?.is_school_student,
+  avatar_url: avatar,
+  language_code: profile?.language || tgUser?.language_code || "ru",
+  is_school_student: !!profile?.is_school_student,
 
-    // ✅ сохраняем ID (FK), а текст оставляем для отображения/резерва
-    region_id: (profile?.region_id != null && profile.region_id !== "") ? Number(profile.region_id) : null,
-    district_id: (profile?.district_id != null && profile.district_id !== "") ? Number(profile.district_id) : null,
+  country_code: profile?.country_code || "UZ",
+  country: profile?.country || "Uzbekistan",
+  login: normalizeLogin(profile?.login || ""),
+  auth_email: profile?.auth_email || null,
+  must_change_password: !!profile?.must_change_password,
 
-    region: profile?.region || null,
-    district: profile?.district || null,
+  // ✅ сохраняем ID (FK), а текст оставляем для отображения/резерва
+  region_id: (profile?.region_id != null && profile.region_id !== "") ? Number(profile.region_id) : null,
+  district_id: (profile?.district_id != null && profile.district_id !== "") ? Number(profile.district_id) : null,
 
-    school: profile?.school || null,
-    class: profile?.class || null
-  };
+  region: profile?.region || null,
+  district: profile?.district || null,
+
+  school: profile?.school || null,
+  class: profile?.class || null
+};
 
     let uErr = null;
   try {
@@ -4272,29 +4310,37 @@ async function hydrateLocalProfileFromSupabaseIfMissing() {
   }
 
   const profile = {
-    created_at: nowISO(),
-    full_name: fullName || "",
-    // language = язык контента (туры/практика)
-    language: me.language_code || "ru",
-    // uiLanguage = язык интерфейса (если ранее был выбран локально — сохраняем)
-    uiLanguage: (loadProfile()?.uiLanguage) || (me.language_code || "ru"),
+  created_at: nowISO(),
+  full_name: fullName || "",
+  // language = язык контента (туры/практика)
+  language: me.language_code || "ru",
+  // uiLanguage = язык интерфейса (если ранее был выбран локально — сохраняем)
+  uiLanguage: (loadProfile()?.uiLanguage) || (me.language_code || "ru"),
 
-    // ✅ ВАЖНО: не !!..., а строго boolean из БД
-    is_school_student: regFlag,
+  // ✅ ВАЖНО: не !!..., а строго boolean из БД
+  is_school_student: regFlag,
 
-    region: me.region || "",
-    district: me.district || "",
-    school: me.school || "",
-    class: me.class || "",
-    telegram: {
-      id: null,
-      username: null,
-      first_name: me.first_name || null,
-      last_name: me.last_name || null,
-      photo_url: me.avatar_url || null
-    },
-    subjects
-  };
+  country_code: me.country_code || "UZ",
+  country: me.country || "Uzbekistan",
+  login: me.login || "",
+  auth_email: me.auth_email || null,
+  must_change_password: !!me.must_change_password,
+
+  region_id: me.region_id ?? null,
+  district_id: me.district_id ?? null,
+  region: me.region || "",
+  district: me.district || "",
+  school: me.school || "",
+  class: me.class || "",
+  telegram: {
+    id: null,
+    username: null,
+    first_name: me.first_name || null,
+    last_name: me.last_name || null,
+    photo_url: me.avatar_url || null
+  },
+  subjects
+};
 
   saveProfile(profile);
   return { ok: true, hydrated: true, subjects: subjects.length };
@@ -5623,7 +5669,7 @@ async function getMyUserRow(uid) {
   if (!uid) return null;
   const { data, error } = await window.sb
     .from("users")
-    .select("id,first_name,last_name,avatar_url,is_school_student,region,district,school,class")
+    .select("id,first_name,last_name,avatar_url,is_school_student,region,district,school,class,region_id,district_id,country,country_code,login,auth_email,must_change_password")
     .eq("id", uid)
     .maybeSingle();
   if (error) return null;
@@ -13513,9 +13559,78 @@ if (state.tab === "profile") {
       .catch(() => null);
 
     const form = $("#reg-form");
-    if (!form) return;
+if (!form) return;
 
-    form.addEventListener("submit", async (e) => {
+const loginForm = $("#auth-login-form");
+if (loginForm && !loginForm.dataset.bound) {
+  loginForm.dataset.bound = "1";
+
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const login = normalizeLogin($("#auth-login")?.value || "");
+    const password = $("#auth-password")?.value || "";
+
+    if (!isValidLogin(login)) {
+      showToast(t("auth_invalid_login"));
+      return;
+    }
+    if (!password) {
+      showToast(t("auth_password_label") || "Введите пароль");
+      return;
+    }
+
+    const btn = $("#auth-login-submit");
+    const prev = btn ? btn.textContent : "";
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = t("saving") || "Сохранение…";
+      btn.classList.add("is-loading");
+    }
+
+    try {
+      const res = await signInWithLoginPassword(login, password);
+      if (!res?.ok) {
+        showToast(t("auth_login_failed"));
+        return;
+      }
+
+      try {
+        localStorage.removeItem(LS.profile);
+        localStorage.removeItem(LS.state);
+      } catch {}
+
+      await hydrateLocalProfileFromSupabaseIfMissing();
+
+      const profile = loadProfile();
+      if (profile?.must_change_password) {
+        showView("force-password");
+        bindForcePassword();
+        return;
+      }
+
+      const lang = profile?.uiLanguage || profile?.language || "ru";
+      window.i18n?.setLang(lang);
+      applyStaticI18n();
+
+      state.tab = "home";
+      state.prevTab = "home";
+      state.viewStack = ["home"];
+      saveState();
+
+      showView("home");
+      setTab("home");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = prev || (t("auth_login_btn") || "Войти");
+        btn.classList.remove("is-loading");
+      }
+    }
+  });
+}
+
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
     const submitBtn = form.querySelector('button[type="submit"]');
@@ -13529,10 +13644,25 @@ if (state.tab === "profile") {
 
   try {
     const fullName = $("#reg-fullname")?.value?.trim() || "";
-    const lang = $("#reg-language")?.value || "ru";
+const lang = $("#reg-language")?.value || "ru";
 
-    let region = "";
-    let district = "";
+const countryEl = $("#reg-country");
+const country_code = String(countryEl?.value || "UZ").trim().toUpperCase();
+const countryMap = {
+  UZ: "Uzbekistan",
+  KZ: "Kazakhstan",
+  KG: "Kyrgyzstan",
+  TJ: "Tajikistan",
+  TM: "Turkmenistan"
+};
+const country = countryMap[country_code] || "Uzbekistan";
+
+const login = normalizeLogin($("#reg-login")?.value || "");
+const password = $("#reg-password")?.value || "";
+const passwordConfirm = $("#reg-password-confirm")?.value || "";
+
+let region = "";
+let district = "";
 
     let region_tr = null;
     let district_tr = null;
@@ -13576,14 +13706,29 @@ if (state.tab === "profile") {
       (districtEl.options?.length || 0) > 1;
 
     if (
-      !fullName ||
-      !region ||
-      (districtRequired && !district) ||
-      (isSchoolStudent && (!main1 || !school || !klass))
-      ) {
-     showToast(t("fill_required_fields"));
-     return;
-   }
+  !fullName ||
+  !region ||
+  (districtRequired && !district) ||
+  (isSchoolStudent && (!main1 || !school || !klass))
+) {
+  showToast(t("fill_required_fields"));
+  return;
+}
+
+if (!isValidLogin(login)) {
+  showToast(t("auth_invalid_login"));
+  return;
+}
+
+if (!isValidPassword(password)) {
+  showToast(t("auth_invalid_password"));
+  return;
+}
+
+if (password !== passwordConfirm) {
+  showToast(t("auth_password_mismatch"));
+  return;
+}
     const subjects = [];
 
     if (isSchoolStudent) {
@@ -13621,23 +13766,39 @@ if (state.tab === "profile") {
     const tgUser = tg?.initDataUnsafe?.user || {};
     const avatar = tgUser?.photo_url || "";
 
-        const profile = {
-      created_at: nowISO(),
-      full_name: fullName,
-      language: lang,
-      is_school_student: isSchoolStudent,
+        const signUpRes = await signUpWithLoginPassword(login, password);
+if (!signUpRes?.ok) {
+  if (signUpRes.reason === "login_taken") {
+    showToast(t("auth_login_taken"));
+  } else {
+    showToast(t("auth_signup_failed"));
+  }
+  return;
+}
 
-      region_id,
-      district_id,
+const profile = {
+  created_at: nowISO(),
+  full_name: fullName,
+  language: lang,
+  is_school_student: isSchoolStudent,
 
-      region_tr,
-      district_tr,
+  country_code,
+  country,
+  login,
+  auth_email: loginToEmail(login),
+  must_change_password: false,
 
-      region,
-      district,
-      school: isSchoolStudent ? school : "",
-      class: isSchoolStudent ? klass : "",
-      telegram: {
+  region_id,
+  district_id,
+
+  region_tr,
+  district_tr,
+
+  region,
+  district,
+  school: isSchoolStudent ? school : "",
+  class: isSchoolStudent ? klass : "",
+  telegram: {
         id: tgUser?.id || null,
         username: tgUser?.username || null,
         first_name: tgUser?.first_name || null,
@@ -13686,11 +13847,7 @@ if (state.tab === "profile") {
 
       // ✅ auto-link this user to bot (chat_id will be captured by bot on web_app_data)
       // отправляем чуть позже, чтобы UI успел перейти на Home
-      try {
-        setTimeout(() => {
-          try { tryLinkBotOnce("registration"); } catch {}
-        }, 300);
-      } catch {}
+      /* bot link disabled: auth is now login/password based */
 
       // Уже сохранили в БД выше (dbRes). Повторно НЕ сохраняем, чтобы не ловить ошибки/дубли.
       try {
@@ -13727,7 +13884,76 @@ if (state.tab === "profile") {
     }
   });
 }
-   
+   function bindForcePassword() {
+  const form = $("#force-password-form");
+  if (!form || form.dataset.bound === "1") return;
+  form.dataset.bound = "1";
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const newPassword = $("#force-password-new")?.value || "";
+    const confirmPassword = $("#force-password-confirm")?.value || "";
+
+    if (!isValidPassword(newPassword)) {
+      showToast(t("auth_invalid_password"));
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showToast(t("auth_password_mismatch"));
+      return;
+    }
+
+    const btn = $("#force-password-submit");
+    const prev = btn ? btn.textContent : "";
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = t("saving") || "Сохранение…";
+      btn.classList.add("is-loading");
+    }
+
+    try {
+      const passRes = await updateCurrentUserPassword(newPassword);
+      if (!passRes?.ok) {
+        showToast(t("save_failed_try_again"));
+        return;
+      }
+
+      const uid = await getAuthUid();
+      if (uid && window.sb) {
+        await window.sb
+          .from("users")
+          .update({
+            must_change_password: false,
+            auth_migrated_at: new Date().toISOString()
+          })
+          .eq("id", uid);
+      }
+
+      const profile = loadProfile() || {};
+      profile.must_change_password = false;
+      saveProfile(profile);
+
+      showToast(t("force_password_done"));
+
+      state.tab = "home";
+      state.prevTab = "home";
+      state.viewStack = ["home"];
+      saveState();
+
+      showView("home");
+      setTab("home");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = prev || (t("force_password_submit") || "Сохранить новый пароль");
+        btn.classList.remove("is-loading");
+      }
+    }
+  });
+}
       function bindActions() {
     document.addEventListener("click", async (e) => {
       const btn = e.target.closest("[data-action]");
@@ -14654,27 +14880,46 @@ if (action === "tour-next" || action === "tour-submit") {
     const supaReady = initSupabaseSession().catch(() => null);
 
         Promise.all([preloadAppImages(), minDelay, supaReady]).then(async () => {
-      // Stage B: if local profile is missing, try hydrate from DB
-      try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
+  // Stage B: if local profile is missing, try hydrate from DB
+  try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
 
-      // ✅ flush pending ops after Supabase is ready (debounced)
-      try { scheduleFlushPendingOps(0); } catch {}
+  try {
+    const { data: sess } = await window.sb.auth.getSession();
+    const hasSession = !!sess?.session;
+    const profileNow = loadProfile();
 
-// Stage B2: always sync user_subjects from DB → local profile (single source for UI)
-try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
+    if (!hasSession && !profileNow) {
+      showView("registration");
+      bindRegistration();
+      return;
+    }
+  } catch {}
 
-      const verifyCertificateNumber = getVerifyCertificateNumberFromUrl();
-      if (verifyCertificateNumber) {
-        showView("certificate-verify");
-        await renderCertificateVerifyView(verifyCertificateNumber);
-        return;
-      }
+  // ✅ flush pending ops after Supabase is ready (debounced)
+  try { scheduleFlushPendingOps(0); } catch {}
 
-      if (!isRegistered()) {
-        showView("registration");
-        bindRegistration();
-        return;
-      }
+  // Stage B2: always sync user_subjects from DB → local profile (single source for UI)
+  try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
+
+  const verifyCertificateNumber = getVerifyCertificateNumberFromUrl();
+  if (verifyCertificateNumber) {
+    showView("certificate-verify");
+    await renderCertificateVerifyView(verifyCertificateNumber);
+    return;
+  }
+
+  const liveProfile = loadProfile();
+  if (liveProfile?.must_change_password) {
+    showView("force-password");
+    bindForcePassword();
+    return;
+  }
+
+  if (!isRegistered()) {
+    showView("registration");
+    bindRegistration();
+    return;
+  }
 
       renderAllSubjects();
       renderHome();
