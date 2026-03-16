@@ -205,8 +205,21 @@ archive_unlock_after_toast: "Архив откроется после завер
       ratings_no_participants: "Нет участников.",
       ratings_total_participants: "Всего участников",
 
-      courses_title: "Курсы",
+            courses_title: "Курсы",
       btn_detach: "Открепить",
+      btn_attach_comp: "Закрепить",
+      detach_comp_title: "Убрать из соревновательного режима?",
+      detach_comp_text:
+        "Этот предмет будет переведён в учебный режим.\n\nТуры, рейтинг и сертификаты по нему станут недоступны, а соревновательный прогресс по предмету будет сброшен.\n\nПозже вы сможете выбрать другой предмет.",
+      detach_comp_ok: "Убрать",
+      attach_comp_title: "Добавить в соревновательный режим?",
+      attach_comp_text:
+        "Этот предмет станет соревновательным.\n\nДля него откроются туры, рейтинг и сертификаты.\nУчебный режим при этом сохранится.",
+      attach_comp_ok: "Добавить",
+      comp_limit_title: "Лимит соревновательных предметов",
+      comp_limit_text:
+        "Можно выбрать максимум 2 основных предмета в соревновательном режиме.\nСначала уберите один из текущих.",
+      comp_limit_ok: "Понятно",
 
       subject_hub_title: "Предмет",
       subject_hub_meta: "Учебный / Соревновательный",
@@ -968,8 +981,21 @@ archive_unlock_after_toast: "Arxiv faol tur yakunlangandan keyin ochiladi.",
       ratings_no_participants: "Ishtirokchilar yo‘q.",
       ratings_total_participants: "Jami ishtirokchilar",
 
-      courses_title: "Kurslar",
+            courses_title: "Kurslar",
       btn_detach: "Biriktirishni yechish",
+      btn_attach_comp: "Biriktirish",
+      detach_comp_title: "Musobaqa rejimidan chiqarilsinmi?",
+      detach_comp_text:
+        "Bu fan o‘quv rejimiga o‘tkaziladi.\n\nU bo‘yicha turlar, reyting va sertifikatlar yopiladi, musobaqa progressi esa tozalanadi.\n\nKeyin boshqa fan tanlashingiz mumkin.",
+      detach_comp_ok: "Chiqarish",
+      attach_comp_title: "Musobaqa rejimiga qo‘shilsinmi?",
+      attach_comp_text:
+        "Bu fan musobaqa faniga aylanadi.\n\nU uchun turlar, reyting va sertifikatlar ochiladi.\nO‘quv rejimi esa saqlanib qoladi.",
+      attach_comp_ok: "Qo‘shish",
+      comp_limit_title: "Musobaqa fanlari limiti",
+      comp_limit_text:
+        "Musobaqa rejimida maksimum 2 ta asosiy fan bo‘lishi mumkin.\nAvval hozirgilardan birini olib tashlang.",
+      comp_limit_ok: "Tushunarli",
 
       subject_hub_title: "Fan",
       subject_hub_meta: "O‘quv / Musobaqa",
@@ -1737,8 +1763,21 @@ archive_unlock_after_toast: "Archive will open after you finish the active tour.
       ratings_no_participants: "No participants.",
       ratings_total_participants: "Total participants",
 
-      courses_title: "Courses",
+            courses_title: "Courses",
       btn_detach: "Unpin",
+      btn_attach_comp: "Attach",
+      detach_comp_title: "Remove from Competitive mode?",
+      detach_comp_text:
+        "This subject will be moved to Study mode.\n\nTours, leaderboard access, and certificates for this subject will become unavailable, and its competitive progress will be reset.\n\nYou will be able to choose another subject later.",
+      detach_comp_ok: "Remove",
+      attach_comp_title: "Add to Competitive mode?",
+      attach_comp_text:
+        "This subject will become Competitive.\n\nTours, leaderboard access, and certificates will be enabled for it.\nStudy mode will still remain available.",
+      attach_comp_ok: "Add",
+      comp_limit_title: "Competitive subjects limit",
+      comp_limit_text:
+        "You can choose a maximum of 2 main subjects in Competitive mode.\nPlease remove one of the current subjects first.",
+      comp_limit_ok: "Got it",
 
       subject_hub_title: "Subject",
       subject_hub_meta: "Study / Competitive",
