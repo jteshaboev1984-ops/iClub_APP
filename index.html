@@ -105,17 +105,29 @@
            </div>
           </label>
 
-            <label class="field">
-              <span class="label" data-i18n="reg_full_name_label">Full Name</span>
-              <input id="reg-fullname" class="input" type="text" autocomplete="name" data-i18n-placeholder="reg_full_name_placeholder" placeholder="e.g. Alisher Navoiy" required />
-            </label>
+           <label class="field">
+  <span class="label" data-i18n="reg_full_name_label">Full Name</span>
+  <input id="reg-fullname" class="input" type="text" autocomplete="name" data-i18n-placeholder="reg_full_name_placeholder" placeholder="e.g. Alisher Navoiy" required />
+</label>
 
-                         <label class="field">
-              <span class="label" data-i18n="reg_region_label">Region</span>
-              <select id="reg-region" class="input" required>
-                <option value="" selected disabled data-i18n="reg_select_region">Выберите регион…</option>
-              </select>
-            </label>
+<label class="field">
+  <span class="label" data-i18n="reg_country_label">Country</span>
+  <select id="reg-country" class="input" required>
+    <option value="UZ" selected>Uzbekistan</option>
+    <option value="KZ">Kazakhstan</option>
+    <option value="KG">Kyrgyzstan</option>
+    <option value="TJ">Tajikistan</option>
+    <option value="TM">Turkmenistan</option>
+  </select>
+  <div class="field-hint" data-i18n="reg_country_hint">Пока основной фокус проекта — страны Центральной Азии.</div>
+</label>
+
+<label class="field">
+  <span class="label" data-i18n="reg_region_label">Region</span>
+  <select id="reg-region" class="input" required>
+    <option value="" selected disabled data-i18n="reg_select_region">Выберите регион…</option>
+  </select>
+</label>
 
             <label class="field">
               <span class="label" data-i18n="reg_district_label">District</span>
