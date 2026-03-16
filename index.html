@@ -62,12 +62,32 @@
 
       <!-- ============ Registration ============ -->
       <section id="view-registration" class="view" data-view="registration" aria-label="Registration">
-        <div class="content reg">
-          <h1 class="h1" data-i18n="reg_create_title">Create your account</h1>
+  <div class="content reg">
 
-          <p class="muted" data-i18n="reg_create_subtitle">Enter your details to join the Cambridge curriculum study in Uzbekistan.</p>
+    <div class="card auth-entry-card">
+      <div class="card-title" data-i18n="auth_login_title">Вход</div>
+      <div class="muted small" data-i18n="auth_login_subtitle">Для входа используйте логин и пароль, созданные при регистрации или выданные вам администратором.</div>
 
-          <form id="reg-form" class="form reg-form">
+      <form id="auth-login-form" class="form" style="margin-top:10px;">
+        <label class="field">
+          <span class="label" data-i18n="auth_login_label">Логин</span>
+          <input id="auth-login" class="input" type="text" autocomplete="username" data-i18n-placeholder="auth_login_placeholder" placeholder="например, jasurbek_01" />
+        </label>
+
+        <label class="field">
+          <span class="label" data-i18n="auth_password_label">Пароль</span>
+          <input id="auth-password" class="input" type="password" autocomplete="current-password" data-i18n-placeholder="auth_password_placeholder" placeholder="Введите пароль" />
+        </label>
+
+        <button id="auth-login-submit" class="btn primary" type="submit" data-i18n="auth_login_btn">Войти</button>
+      </form>
+    </div>
+
+    <h1 class="h1" data-i18n="reg_create_title">Create your account</h1>
+
+    <p class="muted" data-i18n="reg_create_subtitle">Enter your details to join the Cambridge curriculum study in Uzbekistan.</p>
+
+    <form id="reg-form" class="form reg-form">
            <label class="field">
             <span class="label" data-i18n="reg_language_label">Язык</span>
               <select id="reg-language" class="input">
@@ -190,23 +210,66 @@
             </div>
 
              <div id="reg-nonstudent-subjects" class="card reg-nonstudent-card hidden">
-               <div class="card-title" data-i18n="reg_nonstudent_title">Обучение без школьного режима</div>
-                <div class="muted small" data-i18n="reg_nonstudent_text">
-                Если вы не ученик школы, вы можете изучать и практиковаться по всем предметам без туров.
-                Подключать и удалять предметы можно позже в профиле.
-              </div>
-            </div>
-            
-            <label class="checkbox reg-consent">
-              <input id="reg-consent" type="checkbox" required />
-              <span data-i18n="reg_terms_text">I agree to the Terms of Service and consent to processing of my education data.</span>
-            </label>
+  <div class="card-title" data-i18n="reg_nonstudent_title">Обучение без школьного режима</div>
+  <div class="muted small" data-i18n="reg_nonstudent_text">
+    Если вы не ученик школы, вы можете изучать и практиковаться по всем предметам без туров.
+    Подключать и удалять предметы можно позже в профиле.
+  </div>
+</div>
+
+<div class="card reg-auth-card">
+  <div class="card-title" data-i18n="reg_auth_block_title">Данные для входа</div>
+  <div class="muted small" data-i18n="reg_auth_block_subtitle">Эти логин и пароль будут вашим входом в приложение.</div>
+
+  <label class="field">
+    <span class="label" data-i18n="reg_login_label">Логин</span>
+    <input id="reg-login" class="input" type="text" autocomplete="username" data-i18n-placeholder="reg_login_placeholder" placeholder="например, jasurbek_01" required />
+  </label>
+
+  <label class="field">
+    <span class="label" data-i18n="reg_password_label">Пароль</span>
+    <input id="reg-password" class="input" type="password" autocomplete="new-password" data-i18n-placeholder="reg_password_placeholder" placeholder="Минимум 6 символов" required />
+  </label>
+
+  <label class="field">
+    <span class="label" data-i18n="reg_password_confirm_label">Повторите пароль</span>
+    <input id="reg-password-confirm" class="input" type="password" autocomplete="new-password" data-i18n-placeholder="reg_password_confirm_placeholder" placeholder="Повторите пароль" required />
+  </label>
+</div>
+
+<label class="checkbox reg-consent">
+  <input id="reg-consent" type="checkbox" required />
+  <span data-i18n="reg_terms_text">I agree to the Terms of Service and consent to processing of my education data.</span>
+</label>
 
             <button id="reg-submit" class="btn primary" type="submit" data-i18n="reg_submit_btn">Завершить регистрацию</button>
           </form>
         </div>
       </section>
 
+      <section id="view-force-password" class="view" data-view="force-password" aria-label="Change password">
+  <div class="content reg">
+    <div class="card auth-entry-card">
+      <div class="card-title" data-i18n="force_password_title">Смена пароля</div>
+      <div class="muted small" data-i18n="force_password_subtitle">Для безопасности замените временный пароль на свой постоянный.</div>
+
+      <form id="force-password-form" class="form" style="margin-top:10px;">
+        <label class="field">
+          <span class="label" data-i18n="force_password_new_label">Новый пароль</span>
+          <input id="force-password-new" class="input" type="password" autocomplete="new-password" data-i18n-placeholder="force_password_new_placeholder" placeholder="Минимум 6 символов" />
+        </label>
+
+        <label class="field">
+          <span class="label" data-i18n="force_password_confirm_label">Повторите пароль</span>
+          <input id="force-password-confirm" class="input" type="password" autocomplete="new-password" data-i18n-placeholder="force_password_confirm_placeholder" placeholder="Повторите пароль" />
+        </label>
+
+        <button id="force-password-submit" class="btn primary" type="submit" data-i18n="force_password_submit">Сохранить новый пароль</button>
+      </form>
+    </div>
+  </div>
+</section>
+      
       <!-- ============ Home (Tab) ============ -->
       <section id="view-home" class="view" data-view="home" aria-label="Home">
         <div class="content">
@@ -430,12 +493,16 @@
 
             <!-- Video Player -->
             <section id="courses-video" class="stack-screen" data-stack="courses" data-screen="video">
-              <div class="section">
-                <div id="video-title" class="h1">Видео</div>
-                <div id="video-meta" class="muted">Урок</div>
-              </div>
+  <div class="section">
+    <div id="video-title" class="h1">Видео</div>
+    <div id="video-meta" class="muted">Урок</div>
+  </div>
 
-                            <div class="card">
+  <div class="notice-banner" data-i18n="lesson_lang_disclaimer">
+    Уроки пока доступны в основном на узбекском языке. Изначально проект запускался для Узбекистана. Английская версия скоро будет добавлена.
+  </div>
+
+  <div class="card">
                 <div id="video-empty" class="muted small" data-i18n="video_empty">
                   Видео недоступно (нет URL в базе).
                 </div>
@@ -1186,10 +1253,14 @@
       <section id="view-about" class="view" data-view="about" aria-label="About">
   <div class="content">
     <h1 class="h1" data-i18n="about_title">О проекте</h1>
-    <p class="muted" data-i18n="about_sub">Коротко о платформе, правилах и команде.</p>
+<p class="muted" data-i18n="about_sub">Коротко о платформе, правилах и команде.</p>
 
-    <!-- Tabs (rendered by JS) -->
-    <div id="about-tabs"></div>
+<div class="notice-banner" data-i18n="lesson_lang_disclaimer">
+  Уроки пока доступны в основном на узбекском языке. Изначально проект запускался для Узбекистана. Английская версия скоро будет добавлена.
+</div>
+
+<!-- Tabs (rendered by JS) -->
+<div id="about-tabs"></div>
 
     <!-- Content (rendered by JS) -->
     <div id="about-content" class="list"></div>
