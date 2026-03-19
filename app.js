@@ -3039,13 +3039,17 @@ async function buildPracticeSet(subjectKey) {
     }
   }
 
-  function isValidInputAnswer(q, value) {
+    function isValidInputAnswer(q, value) {
     const v = String(value ?? "").trim();
     if (!v) return false;
 
     if (q.inputKind === "numeric") {
-      // допускаем число с точкой/запятой
-      return /^-?\d+([.,]\d+)?$/.test(v);
+      // допускаем:
+      // 12
+      // 12.5 / 12,5
+      // 1.505e23
+      // 1.505*10^23 / 1.505×10^23 / 1.505x10^23
+      return /^-?\d+([.,]\d+)?(([eE][+-]?\d+)|(([x×*])\s*10\^[+-]?\d+))?$/.test(v);
     }
 
     if (q.inputKind === "letter") {
@@ -10007,8 +10011,43 @@ return { added: add.length, recs, addedRecs: add };
     return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
   }
 
-  function normalizeNumericInput(v) {
-    return String(v ?? "").trim().replace(",", ".");
+    function normalizeNumericInput(v) {
+    return String(v ?? "")
+      .trim()
+      .replace(/\s+/g, "")
+      .replace(/,/g, ".")
+      .replace(/−/g, "-")
+      .replace(/×/g, "*");
+  }
+
+  function parseFlexibleScientificNumber(v) {
+    const s0 = normalizeNumericInput(v);
+    if (!s0) return null;
+
+    let s = s0;
+
+    // 1.5050*10^23  /  1.5050x10^23  /  1.5050×10^23
+    s = s.replace(/^([+-]?\d+(?:\.\d+)?)(?:\*|x)10\^([+-]?\d+)$/i, "$1e$2");
+
+    // обычное число или scientific e-формат
+    if (!/^[+-]?\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i.test(s)) return null;
+
+    const n = Number(s);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function areNumericAnswersEquivalent(a, b) {
+    const na = parseFlexibleScientificNumber(a);
+    const nb = parseFlexibleScientificNumber(b);
+
+    if (na === null || nb === null) {
+      return normalizeNumericInput(a) === normalizeNumericInput(b);
+    }
+
+    const diff = Math.abs(na - nb);
+    const scale = Math.max(1, Math.abs(na), Math.abs(nb));
+
+    return diff <= scale * 1e-9;
   }
 
   function renderTrendBars({ wrapEl, deltaEl, attemptsNewestFirst, barClass, lastClass }) {
@@ -10803,7 +10842,7 @@ try {
       }
     }
 
-    // Evaluate correctness
+        // Evaluate correctness
     let isCorrect = false;
 
     if (q.type === "mcq") {
@@ -10813,9 +10852,7 @@ try {
       const raw = String(userAns ?? "").trim();
       if (raw) {
         if (q.inputKind === "numeric") {
-          const u = normalizeNumericInput(raw);
-          const c = normalizeNumericInput(q.correctAnswer);
-          isCorrect = (u === c);
+          isCorrect = areNumericAnswersEquivalent(raw, q.correctAnswer);
         } else {
           isCorrect = (raw.toLowerCase() === String(q.correctAnswer || "").trim().toLowerCase());
         }
@@ -12513,7 +12550,7 @@ async function loadTourQuestionsDB(tourId) {
    return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
 };
 
-  return items.map(q => {
+    return items.map(q => {
     const type = normalizeType(q.qtype);
 
       // ✅ options по языку контента
@@ -12522,12 +12559,22 @@ async function loadTourQuestionsDB(tourId) {
 
     // correctIndex for mcq:
     // - if correct_answer is numeric index => use it
+    // - if correct_answer is A/B/C/D => convert to index
     // - else try match to option text (case-insensitive)
     let correctIndex = 0;
     if (type === "mcq") {
       const ca = String(q.correct_answer ?? "").trim();
+
       if (isNumericLike(ca)) {
-        correctIndex = Math.max(0, Math.min(opts.length - 1, Number(String(ca).replace(",", "."))));
+        correctIndex = Math.max(
+          0,
+          Math.min((opts?.length || 1) - 1, Math.trunc(Number(String(ca).replace(",", "."))))
+        );
+      } else if (/^[A-D]$/i.test(ca)) {
+        const idx = letterToIdx(ca);
+        if (idx !== null) {
+          correctIndex = Math.max(0, Math.min((opts?.length || 1) - 1, idx));
+        }
       } else if (opts.length) {
         const idx = opts.findIndex(o => String(o).trim().toLowerCase() === ca.toLowerCase());
         if (idx >= 0) correctIndex = idx;
@@ -13154,12 +13201,21 @@ try {
         : (q?.correct != null ? q.correct
         : (q?.answer != null ? q.answer : null))));
 
-    const expected = (expectedRaw == null) ? "" : String(expectedRaw).trim();
+       const expected = (expectedRaw == null) ? "" : String(expectedRaw).trim();
+    const isNumericInputQuestion = (!isMcq && expected !== "" && parseFlexibleScientificNumber(expected) !== null);
 
     // correctness
     const isCorrect = isMcq
       ? ((pickedNum !== null && correctIdx !== null) ? (pickedNum === correctIdx) : false)
-      : (expected ? (inputVal.toLowerCase() === expected.toLowerCase()) : false);
+      : (
+          expected
+            ? (
+                isNumericInputQuestion
+                  ? areNumericAnswersEquivalent(inputVal, expected)
+                  : (inputVal.toLowerCase() === expected.toLowerCase())
+              )
+            : false
+        );
 
     ctx.answers = ctx.answers || [];
     ctx.answers.push({
@@ -13177,8 +13233,8 @@ try {
     try {
       const ctx2 = state.tourContext;
       if (ctx2?.attemptId && q?.id && !ctx2?.isArchive) {
-        const spentSec2 = Math.max(0, Math.round((Date.now() - (ctx2.qStartedAt || Date.now())) / 1000));
-        const pickedForDb = (pickedNum === null ? "" : String(pickedNum));
+                const spentSec2 = Math.max(0, Math.round((Date.now() - (ctx2.qStartedAt || Date.now())) / 1000));
+        const pickedForDb = (pickedNum === null ? "" : (idxToLetter(pickedNum) || String(pickedNum)));
 
         // if someday you add input questions, this will safely read it (otherwise empty)
         const inputEl = document.getElementById("tour-input");
