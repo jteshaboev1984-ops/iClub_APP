@@ -4983,12 +4983,83 @@ async function fetchCertificateVerificationRow(certificateNumber) {
   try {
     if (!window.sb || !certificateNumber) return null;
 
-    const { data, error } = await window.sb.rpc("verify_certificate", {
-      p_certificate_number: String(certificateNumber).trim()
-    });
+    const certNo = String(certificateNumber).trim();
 
-    if (error) return null;
-    return normalizeRpcSingleRow(data);
+    let baseRow = null;
+
+    try {
+      const { data, error } = await window.sb.rpc("verify_certificate", {
+        p_certificate_number: certNo
+      });
+
+      if (!error) {
+        baseRow = normalizeRpcSingleRow(data);
+      }
+    } catch {}
+
+    const { data: certRow, error: certErr } = await window.sb
+      .from("certificates")
+      .select("id,user_id,subject_id,tour_id,certificate_type,score,percent,certificate_number,language_code,created_at")
+      .eq("certificate_number", certNo)
+      .maybeSingle();
+
+    if (certErr || !certRow) {
+      return baseRow;
+    }
+
+    let userRow = null;
+    let subjectRow = null;
+    let tourRow = null;
+
+    try {
+      if (certRow.user_id) {
+        const { data } = await window.sb
+          .from("users")
+          .select("first_name,last_name,school,class,region,district")
+          .eq("id", certRow.user_id)
+          .maybeSingle();
+
+        userRow = data || null;
+      }
+    } catch {}
+
+    try {
+      if (certRow.subject_id) {
+        const { data } = await window.sb
+          .from("subjects")
+          .select("id,subject_key,title")
+          .eq("id", certRow.subject_id)
+          .maybeSingle();
+
+        subjectRow = data || null;
+      }
+    } catch {}
+
+    try {
+      if (certRow.tour_id) {
+        const { data } = await window.sb
+          .from("tours")
+          .select("id,tour_no")
+          .eq("id", certRow.tour_id)
+          .maybeSingle();
+
+        tourRow = data || null;
+      }
+    } catch {}
+
+    return {
+      ...(baseRow || {}),
+      ...certRow,
+      subject_key: baseRow?.subject_key || subjectRow?.subject_key || null,
+      subject_title: baseRow?.subject_title || subjectRow?.title || null,
+      tour_no: baseRow?.tour_no || tourRow?.tour_no || null,
+      first_name: baseRow?.first_name || userRow?.first_name || null,
+      last_name: baseRow?.last_name || userRow?.last_name || null,
+      school: baseRow?.school || userRow?.school || null,
+      class: baseRow?.class || userRow?.class || null,
+      region: baseRow?.region || userRow?.region || null,
+      district: baseRow?.district || userRow?.district || null
+    };
   } catch {
     return null;
   }
@@ -5021,10 +5092,22 @@ async function renderCertificateVerifyView(certificateNumber) {
     ? subjectTitle(row.subject_key, row.subject_title || "")
     : (row.subject_title || (t("subject_label") || "Предмет"));
 
-  const typeText =
+    const typeText =
     String(row?.certificate_type || "") === "final"
       ? (t("cert_final_label") || "Итоговый сертификат")
       : `${t("tours_tour_label") || "Тур"} ${Number(row?.tour_no || 0) || "—"}`;
+
+  const participantName =
+    String(
+      [row?.first_name, row?.last_name].filter(Boolean).join(" ").trim() ||
+      row?.full_name ||
+      ""
+    ).trim() || "—";
+
+  const schoolText = String(row?.school || "").trim();
+  const classText = String(row?.class || "").trim();
+  const regionText = String(row?.region || "").trim();
+  const districtText = String(row?.district || "").trim();
 
   resultEl.innerHTML = `
     <div class="card cert-verify-card">
@@ -5036,11 +5119,37 @@ async function renderCertificateVerifyView(certificateNumber) {
           <div class="cert-verify-value cert-verify-number">${escapeHTML(String(row.certificate_number || "—"))}</div>
         </div>
 
+               <div class="cert-verify-row">
+          <div class="cert-verify-label">${escapeHTML(t("participant_label") || "Участник")}</div>
+          <div class="cert-verify-value">${escapeHTML(participantName)}</div>
+        </div>
+
         <div class="cert-verify-row">
           <div class="cert-verify-label">${escapeHTML(t("subject_label") || "Предмет")}</div>
           <div class="cert-verify-value">${escapeHTML(subjectText)}</div>
         </div>
 
+        ${
+          schoolText
+            ? `
+              <div class="cert-verify-row">
+                <div class="cert-verify-label">${escapeHTML(t("school_prefix") || "Школа")}</div>
+                <div class="cert-verify-value">${escapeHTML(schoolText)}${classText ? ` · ${escapeHTML(classText)} ${escapeHTML(t("class_suffix") || "класс")}` : ""}</div>
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          (regionText || districtText)
+            ? `
+              <div class="cert-verify-row">
+                <div class="cert-verify-label">${escapeHTML(t("rank_region_label") || "Регион")} / ${escapeHTML(t("rank_district_label") || "Район")}</div>
+                <div class="cert-verify-value">${escapeHTML(regionText || "—")}${districtText ? ` · ${escapeHTML(districtText)}` : ""}</div>
+              </div>
+            `
+            : ""
+        }
         <div class="cert-verify-row">
           <div class="cert-verify-label">${escapeHTML(t("certificates_title") || "Сертификат")}</div>
           <div class="cert-verify-value">${escapeHTML(typeText)}</div>
@@ -12614,12 +12723,12 @@ async function loadTourQuestionsDB(tourId) {
   if (!window.sb || !tourId) return null;
 
     const { data, error } = await window.sb
-    .from("tour_questions")
-    .select("order_no, question:questions(id,topic,difficulty,qtype,question_text,options_text,correct_answer,image_url,is_active,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en)")
-    .eq("tour_id", tourId)
-    .eq("is_active", true)
-    .order("order_no", { ascending: true })
-    .limit(200);
+  .from("tour_questions")
+  .select("order_no, question:questions(id,topic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,is_active,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en)")
+  .eq("tour_id", tourId)
+  .eq("is_active", true)
+  .order("order_no", { ascending: true })
+  .limit(200);
 
   if (error) return null;
 
@@ -13388,6 +13497,147 @@ try {
     renderTourQuestion();
   }
 
+   async function renderTourReview() {
+  const wrap = $("#tour-review-list");
+  if (!wrap) return;
+
+  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
+
+  const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
+  const localPayload = state?.courses?.lastTourReviewPayload || null;
+
+  const renderFromDetails = (details) => {
+    if (!Array.isArray(details) || !details.length) {
+      wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("tour_review_empty") || "Нет данных для разбора тура.")}</div>`;
+      return;
+    }
+
+    wrap.innerHTML = details.map((d, idx) => {
+      const qForFmt = {
+        qtype: d.type,
+        options_text: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+        options_text_ru: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+        options_text_uz: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+        options_text_en: Array.isArray(d.options) ? JSON.stringify(d.options) : null
+      };
+
+      const userDisp = formatAnswerForDisplay(qForFmt, d.userAnswer);
+      const corrDisp = formatAnswerForDisplay(qForFmt, d.correctAnswer);
+
+      return `
+        <div class="list-item">
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <div style="font-size:24px;line-height:1">${d.isCorrect ? "✓" : "✕"}</div>
+            <div style="min-width:0;flex:1">
+              <div style="font-weight:900">${escapeHTML(`${idx + 1}. ${d.topic || (t("topic_general") || "General")}`)}</div>
+              ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.difficulty))}</div>` : ""}
+              <div style="margin-top:10px">${escapeHTML(d.question || "")}</div>
+              <div class="muted small" style="margin-top:10px">
+                ${escapeHTML(t("rec_your_answer") || "Ваш ответ")}: <b>${escapeHTML(userDisp || "—")}</b>
+              </div>
+              <div class="muted small" style="margin-top:4px">
+                ${escapeHTML(t("rec_correct_answer") || "Правильный")}: <b>${escapeHTML(corrDisp || "—")}</b>
+              </div>
+              ${d.explanation ? `
+                <div class="muted small" style="margin-top:10px">
+                  <b>${escapeHTML(t("explanation_label") || "Explanation")}:</b> ${escapeHTML(d.explanation)}
+                </div>
+              ` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  };
+
+  // 1) instant local payload right after finish
+  if (localPayload && Array.isArray(localPayload.items) && localPayload.items.length) {
+    renderFromDetails(localPayload.items);
+  }
+
+  // 2) DB-backed version (authoritative)
+  if (!window.sb || !attemptId) {
+    if (!(localPayload && Array.isArray(localPayload.items) && localPayload.items.length)) {
+      renderFromDetails([]);
+    }
+    return;
+  }
+
+  try {
+    const { data, error } = await window.sb
+      .from("tour_answers")
+      .select(`
+        question_id,
+        user_answer,
+        is_correct,
+        time_spent,
+        question:questions(
+          id,
+          topic,
+          difficulty,
+          qtype,
+          question_text,
+          options_text,
+          correct_answer,
+          explanation,
+          question_text_ru,
+          question_text_uz,
+          question_text_en,
+          options_text_ru,
+          options_text_uz,
+          options_text_en,
+          explanation_ru,
+          explanation_uz,
+          explanation_en
+        )
+      `)
+      .eq("attempt_id", attemptId)
+      .eq("answered", true)
+      .limit(100);
+
+    if (error || !Array.isArray(data) || !data.length) {
+      if (!(localPayload && Array.isArray(localPayload.items) && localPayload.items.length)) {
+        renderFromDetails([]);
+      }
+      return;
+    }
+
+    const details = data.map((x, idx) => {
+      const q = x?.question || {};
+      const type = String(q?.qtype || "mcq").toLowerCase() === "input" ? "input" : "mcq";
+      const options = parseOptionsText(pickContentText(q, "options_text") || "") || [];
+
+      let normalizedIsCorrect = !!x?.is_correct;
+
+      if (type === "mcq") {
+        const uaDisp = formatAnswerForDisplay(q, x.user_answer);
+        const caDisp = formatAnswerForDisplay(q, q.correct_answer);
+        if (uaDisp && caDisp && uaDisp === caDisp) normalizedIsCorrect = true;
+      }
+
+      return {
+        id: Number(q?.id || x?.question_id || idx + 1),
+        topic: q?.topic || (t("topic_general") || "General"),
+        difficulty: q?.difficulty || "easy",
+        type,
+        question: pickContentText(q, "question_text") || "",
+        options,
+        userAnswer: String(x?.user_answer ?? ""),
+        correctAnswer: String(q?.correct_answer ?? ""),
+        explanation: pickContentText(q, "explanation") || "",
+        isCorrect: normalizedIsCorrect,
+        timeSpent: Number(x?.time_spent || 0)
+      };
+    });
+
+    renderFromDetails(details);
+  } catch {
+    if (!(localPayload && Array.isArray(localPayload.items) && localPayload.items.length)) {
+      renderFromDetails([]);
+    }
+  }
+}
+   
    function getTourHistoryKey(subjectKey, tourNo) {
   return `tour_history:${subjectKey || "unknown"}:${tourNo || 1}`;
 }
@@ -13572,10 +13822,56 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     });
   } catch {}
 
-    // save result context for certificate button
+      // save result context for certificate button + review screen
   state.courses = state.courses || {};
   state.courses.lastTourAttemptId = ctx?.attemptId || null;
   state.courses.lastTourCertificateId = null;
+
+  try {
+    const reviewItems = Array.isArray(ctx?.answers)
+      ? ctx.answers.map((ans, idx) => {
+          const q = ctx?.questions?.[Number(ans.index)] || null;
+          const qType = String(q?.type || q?.qtype || "mcq").toLowerCase();
+          const isMcq = (qType === "mcq" || qType === "multiple_choice");
+
+          const userAnswer = isMcq
+            ? ((ans?.pickedIndex === null || ans?.pickedIndex === undefined) ? "" : (idxToLetter(Number(ans.pickedIndex)) || String(ans.pickedIndex)))
+            : String(ans?.input || "").trim();
+
+          const correctAnswer =
+            q?.correct_answer != null
+              ? String(q.correct_answer).trim()
+              : (q?.correctAnswer != null
+                  ? String(q.correctAnswer).trim()
+                  : ((q?.correctIndex !== null && q?.correctIndex !== undefined)
+                      ? (idxToLetter(Number(q.correctIndex)) || String(q.correctIndex))
+                      : ""));
+
+          return {
+            id: Number(q?.id || idx + 1),
+            topic: q?.topic || (t("topic_general") || "General"),
+            difficulty: q?.difficulty || "easy",
+            type: isMcq ? "mcq" : "input",
+            question: q?.question || "",
+            options: Array.isArray(q?.options) ? q.options.slice() : [],
+            userAnswer,
+            correctAnswer,
+            explanation: pickContentText(q || {}, "explanation") || "",
+            isCorrect: !!ans?.isCorrect,
+            timeSpent: Number(ans?.spentSec || 0)
+          };
+        })
+      : [];
+
+    state.courses.lastTourReviewPayload = {
+      attemptId: ctx?.attemptId || null,
+      subjectKey: ctx?.subjectKey || null,
+      tourNo: ctx?.tourNo || 1,
+      items: reviewItems
+    };
+  } catch {
+    state.courses.lastTourReviewPayload = null;
+  }
 
   if (!state.certificates) {
     state.certificates = { selectedId: null, lastIssuedId: null };
@@ -14701,8 +14997,9 @@ if (action === "tour-next" || action === "tour-submit") {
   return;
 }
 
-      if (action === "tour-review") {
+            if (action === "tour-review") {
         pushCourses("tour-review");
+        await renderTourReview();
         return;
       }
 
