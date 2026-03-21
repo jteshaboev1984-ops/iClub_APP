@@ -5659,15 +5659,51 @@ async function loadRatingsSubjectsForSelect() {
 }
 
 async function loadRatingsToursForSubject(subjectId) {
-  if (!subjectId) return [];
-  const { data, error } = await window.sb
-    .from("tours")
-    .select("id,tour_no,is_active,start_date,end_date")
-    .eq("subject_id", subjectId)
-    .order("tour_no", { ascending: true });
+  if (!subjectId || !window.sb) return [];
 
-  if (error) return [];
-  return Array.isArray(data) ? data : [];
+  let subjectKey = null;
+
+  // 1) Сначала узнаём subject_key по id
+  try {
+    const { data: subjRow, error: subjErr } = await window.sb
+      .from("subjects")
+      .select("id,subject_key")
+      .eq("id", subjectId)
+      .maybeSingle();
+
+    if (!subjErr && subjRow?.subject_key) {
+      subjectKey = String(subjRow.subject_key).trim();
+    }
+  } catch {}
+
+  // 2) Предпочтительный путь: через subjects!inner(subject_key)
+  if (subjectKey) {
+    try {
+      const { data, error } = await window.sb
+        .from("tours")
+        .select("id,subject_id,tour_no,is_active,start_date,end_date,subjects!inner(subject_key)")
+        .eq("subjects.subject_key", subjectKey)
+        .order("tour_no", { ascending: true });
+
+      if (!error && Array.isArray(data) && data.length) {
+        return data;
+      }
+    } catch {}
+  }
+
+  // 3) Fallback: старый путь по subject_id
+  try {
+    const { data, error } = await window.sb
+      .from("tours")
+      .select("id,subject_id,tour_no,is_active,start_date,end_date")
+      .eq("subject_id", subjectId)
+      .order("tour_no", { ascending: true });
+
+    if (error) return [];
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
 }
 
 function renderRatingsSelectOptions(selectEl, items, { placeholder = null } = {}) {
@@ -6556,40 +6592,57 @@ listEl.innerHTML = `
   }
 
   // =========================
-  // B) All tours: tour_attempts aggregation
-  // =========================
-  const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
-  const tourIds = tours.map(x => x.id).filter(Boolean);
+// B) All tours: tour_attempts aggregation
+// =========================
+const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
+const tourIds = Array.from(
+  new Set((Array.isArray(tours) ? tours : []).map(x => Number(x?.id)).filter(Boolean))
+);
 
-  if (!tourIds.length) {
-    hideLoading();
-    listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("tours_empty_for_subject"))}</div>`;
-    return;
-  }
+if (!tourIds.length) {
+  hideLoading();
+  listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("tours_empty_for_subject"))}</div>`;
+  return;
+}
 
-  const { data: attempts, error: attErr } = await window.sb
+const { data: attempts, error: attErr } = await window.sb
   .from("tour_attempts")
-  .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district)")
+  .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district,region_id,district_id)")
   .in("tour_id", tourIds)
-  .in("status", ["finished", "submitted", "time_expired"])
   .limit(5000);
 
-  if (token !== ratingsState._token) return;
+if (token !== ratingsState._token) return;
 
-  if (attErr) {
-    hideLoading();
-    listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("ratings_load_error"))}</div>`;
-    return;
+if (attErr) {
+  hideLoading();
+  listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("ratings_load_error"))}</div>`;
+  return;
+}
+
+const OK_STATUSES = new Set(["finished", "submitted", "time_expired", "anti_cheat"]);
+
+// filter by status + scope using my profile
+const filteredAttempts = (Array.isArray(attempts) ? attempts : []).filter(a => {
+  const st = String(a?.status || "").trim();
+  if (st && !OK_STATUSES.has(st)) return false;
+
+  const u = a.users || {};
+
+  if (ratingsState.scope === "district") {
+    const myDid = me?.district_id != null ? String(me.district_id) : "";
+    if (myDid) return String(u.district_id ?? "") === myDid;
+    return !!me?.district && String(u.district || "") === String(me.district || "");
   }
 
-  // filter by scope using my profile (district/region)
-  const filteredAttempts = (Array.isArray(attempts) ? attempts : []).filter(a => {
-    const u = a.users || {};
-    if (ratingsState.scope === "district") return !!me?.district && String(u.district || "") === String(me.district || "");
-    if (ratingsState.scope === "region") return !!me?.region && String(u.region || "") === String(me.region || "");
-    return true; // country
-  });
+  if (ratingsState.scope === "region") {
+    const myRid = me?.region_id != null ? String(me.region_id) : "";
+    if (myRid) return String(u.region_id ?? "") === myRid;
+    return !!me?.region && String(u.region || "") === String(me.region || "");
+  }
 
+  return true; // country
+});
+    
   // aggregate per user
   const agg = new Map();
   for (const a of filteredAttempts) {
