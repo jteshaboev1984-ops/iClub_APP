@@ -1742,7 +1742,79 @@ async function ensureProfileGeoTranslationsHydrated() {
   // в v1 оставляем его (чтобы не терять режим/историю). Удаление сделаем позже, если потребуется.
   return p;
 }
+function upsertUserSubjectMode(profile, subjectKey, mode) {
+  if (!profile) return null;
 
+  const p = structuredClone(profile);
+  p.subjects = Array.isArray(p.subjects) ? p.subjects : [];
+
+  const idx = p.subjects.findIndex(s => s.key === subjectKey);
+  const normalizedMode = (mode === "competitive") ? "competitive" : "study";
+
+  if (idx === -1) {
+    p.subjects.push({
+      key: subjectKey,
+      mode: normalizedMode,
+      pinned: false
+    });
+    return p;
+  }
+
+  p.subjects[idx].mode = normalizedMode;
+
+  if (normalizedMode === "competitive") {
+    p.subjects[idx].pinned = false;
+  } else {
+    p.subjects[idx].pinned = !!p.subjects[idx].pinned;
+  }
+
+  return p;
+}
+
+function removeUserSubject(profile, subjectKey) {
+  if (!profile) return null;
+
+  const p = structuredClone(profile);
+  p.subjects = Array.isArray(p.subjects) ? p.subjects : [];
+  p.subjects = p.subjects.filter(s => s.key !== subjectKey);
+  return p;
+}
+
+async function deleteUserSubjectFromSupabase(subjectKey) {
+  try {
+    if (!window.sb) return { ok: false, reason: "no_sb" };
+
+    const uid = await getAuthUid();
+    if (!uid) return { ok: false, reason: "no_uid" };
+
+    const subjectId = await getSubjectIdByKey(subjectKey);
+    if (!subjectId) return { ok: false, reason: "no_subject_id" };
+
+    const { error } = await window.sb
+      .from("user_subjects")
+      .delete()
+      .eq("user_id", uid)
+      .eq("subject_id", subjectId);
+
+    if (error) {
+      try {
+        await logDbErrorToEvents(uid, "user_subjects_delete", error, {
+          subject_id: subjectId,
+          subject_key: subjectKey
+        });
+      } catch {}
+      return { ok: false, reason: "delete_failed" };
+    }
+
+    return { ok: true, uid, subjectId };
+  } catch (e) {
+    try {
+      const uid = await getAuthUid();
+      await logDbErrorToEvents(uid, "user_subjects_delete_exception", e, { subject_key: subjectKey });
+    } catch {}
+    return { ok: false, reason: "exception" };
+  }
+}
   // ---------------------------
   // Demo subjects (keys match index.html selects)
   // ---------------------------
@@ -8951,18 +9023,32 @@ const renderMainFilterRow = () => {
   filtersWrap.appendChild(row);
 };
 
-  const isPinnedKey = (key) => {
-    const us = userSubjects.find(x => x.key === key) || null;
-    return !!us?.pinned;
+    const getUserSubjectRow = (key) => {
+    return userSubjects.find(x => x.key === key) || null;
   };
 
   const isCompetitiveKey = (key) => {
-    const us = userSubjects.find(x => x.key === key) || null;
-    return (us?.mode || "study") === "competitive";
+    const us = getUserSubjectRow(key);
+    return (us?.mode || null) === "competitive";
   };
 
-  const sortPinnedFirst = (list) => {
-    return list.slice().sort((a, b) => Number(isPinnedKey(b.key)) - Number(isPinnedKey(a.key)));
+  const isStudyActiveKey = (key) => {
+    const us = getUserSubjectRow(key);
+    return (us?.mode || null) === "study";
+  };
+
+  const sortByCurrentTabState = (list) => {
+    return list.slice().sort((a, b) => {
+      const aOn = state.courses.mainFilter === "competitive"
+        ? Number(isCompetitiveKey(a.key))
+        : Number(isStudyActiveKey(a.key));
+
+      const bOn = state.courses.mainFilter === "competitive"
+        ? Number(isCompetitiveKey(b.key))
+        : Number(isStudyActiveKey(b.key));
+
+      return bOn - aOn;
+    });
   };
 
 const appendSectionTitle = (text) => {
@@ -8974,9 +9060,9 @@ const appendSectionTitle = (text) => {
 
 const appendSubjectCard = (s) => {
   const us = userSubjects.find(x => x.key === s.key) || null;
-  const isPinned = !!us?.pinned;
-  const mode = us?.mode || "study"; // default display
-  const isComp = mode === "competitive";
+const mode = us?.mode || null;
+const isComp = mode === "competitive";
+const isStudyActive = mode === "study";
 
   const card = document.createElement("div");
   card.className = "catalog-card";
@@ -8997,16 +9083,9 @@ head.innerHTML = `
       </div>
 
       <div class="catalog-text">
-        <div class="card-title-row">
-          <div class="card-title" style="margin:0">${escapeHTML(subjectTitle(s.key, s.title))}</div>
-          ${isPinned ? `<span class="badge badge-pin badge-inline">${escapeHTML(t("badge_pinned") || "Pinned")}</span>` : ``}
-        </div>
+        <div class="card-title" style="margin:0">${escapeHTML(subjectTitle(s.key, s.title))}</div>
       </div>
-   </div>
-
-   <div class="catalog-badges">
-          ${s.type === "main" && isComp ? `<span class="badge badge-comp">${escapeHTML(t("badge_competitive") || "Competitive")}</span>` : ``}
-      </div>
+    </div>
   </div>
 `;
 // ✅ icon image with robust fallback (.png.png -> .png -> .PNG + IELTS special)
@@ -9023,147 +9102,54 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
 
   card.appendChild(head); // ✅ вернуть заголовок с названием предмета
 
-    // Footer row:
-  // - Competitive tab: one action (detach competitive)
-  // - Study tab: switch (pinned on Home)
+      // Footer row:
+  // Competitive tab -> toggle subject active/inactive in competitive
+  // Study tab       -> toggle subject active/inactive in study
   const footer = document.createElement("div");
+  const isCompetitiveTab = state.courses.mainFilter === "competitive";
+  const isActiveInCurrentTab = isCompetitiveTab ? isComp : isStudyActive;
 
-    if (state.courses.mainFilter === "competitive") {
-    footer.className = "catalog-toggle-row is-on";
+  footer.className = "catalog-toggle-row" + (isActiveInCurrentTab ? " is-on" : "");
 
-    const left = document.createElement("div");
-    left.className = "catalog-toggle-left";
+  const left = document.createElement("div");
+  left.className = "catalog-toggle-left";
 
-    const stateLine = document.createElement("div");
-    stateLine.className = "catalog-toggle-state";
-    stateLine.textContent = t("course_toggle_on") || "Yoqilgan";
+  const stateLine = document.createElement("div");
+  stateLine.className = "catalog-toggle-state";
+  stateLine.textContent = isActiveInCurrentTab
+    ? (t("course_toggle_on") || "Включено")
+    : (t("course_toggle_off") || "Выключено");
 
-    left.appendChild(stateLine);
+  left.appendChild(stateLine);
 
-    const sw = document.createElement("label");
-    sw.className = "switch";
+  const sw = document.createElement("label");
+  sw.className = "switch";
 
-    sw.innerHTML = `
-      <input type="checkbox" checked aria-label="${t("btn_detach") || "Detach competitive"}">
-      <span class="slider"></span>
-    `;
+  sw.innerHTML = `
+    <input
+      type="checkbox"
+      ${isActiveInCurrentTab ? "checked" : ""}
+      aria-label="${escapeHTML(
+        isCompetitiveTab
+          ? (t("courses_filter_competitive") || "Competitive")
+          : (t("courses_filter_study") || "Study")
+      )}"
+    >
+    <span class="slider"></span>
+  `;
 
-    const input = sw.querySelector("input");
+  const input = sw.querySelector("input");
 
-    input.addEventListener("click", (e) => e.stopPropagation());
+  input.addEventListener("click", (e) => e.stopPropagation());
 
-    input.addEventListener("change", async (e) => {
-      e.stopPropagation();
+  input.addEventListener("change", async (e) => {
+    e.stopPropagation();
 
-      const ok = await uiConfirm({
-        title: t("detach_comp_title") || "Снять Competitive?",
-        message:
-          t("detach_comp_text") ||
-          "Вы действительно хотите перевести этот предмет в O‘quv?\n\nСоревновательный прогресс по предмету будет сброшен.",
-        okText: t("detach_comp_ok") || "Снять",
-        cancelText: t("cancel") || "Отмена"
-      });
+    const wantsOn = !!input.checked;
+    const fresh = loadProfile() || profile;
 
-      if (!ok) {
-        input.checked = true;
-        return;
-      }
-
-      const prof = loadProfile() || profile;
-      const us = (prof.subjects || []).find(x => x.key === s.key) || null;
-      if (!us) {
-        input.checked = true;
-        return;
-      }
-
-      us.mode = "study";
-      us.pinned = false;
-      saveProfile(prof);
-
-      try {
-        const res = await syncUserSubjectToSupabase(s.key, "study", false);
-        if (!res?.ok) {
-          input.checked = true;
-          showToast(t("save_failed_db_try_again"));
-          renderAllSubjects();
-          return;
-        }
-
-        const uid = await getAuthUid();
-        const subjectId = res?.subjectId || await getSubjectIdByKey(s.key);
-        if (uid && subjectId) {
-          await writeUserSubjectsHistory({
-            user_id: uid,
-            subject_id: subjectId,
-            action: "detach_competitive",
-            from_mode: "competitive",
-            to_mode: "study",
-            source: "courses",
-            meta: { subject_key: s.key }
-          });
-        }
-      } catch {
-        input.checked = true;
-        showToast("Ошибка сети. Попробуйте ещё раз.");
-        renderAllSubjects();
-        return;
-      }
-
-      try {
-        const subjectId = await getSubjectIdByKey(s.key);
-
-        if (window.sb && subjectId) {
-          const { error } = await window.sb.rpc("reset_subject_progress", { p_subject_id: subjectId });
-
-          if (error) {
-            try {
-              const uid2 = await getAuthUid();
-              await logDbErrorToEvents(uid2, "reset_subject_progress", error, {
-                subject_id: subjectId,
-                subject_key: s.key
-              });
-            } catch {}
-          }
-        }
-      } catch {}
-
-      showToast(t("detach_comp_done") || "Competitive снят. Прогресс обнулён.");
-      renderHome();
-      renderAllSubjects();
-      renderProfileSettings?.();
-    });
-
-    footer.appendChild(left);
-    footer.appendChild(sw);
-  } else {
-        if (s.type === "main") {
-      footer.className = "catalog-toggle-row";
-
-      const left = document.createElement("div");
-      left.className = "catalog-toggle-left";
-
-      const stateLine = document.createElement("div");
-      stateLine.className = "catalog-toggle-state";
-      stateLine.textContent = t("course_toggle_off") || "O‘chirilgan";
-
-      left.appendChild(stateLine);
-
-      const sw = document.createElement("label");
-      sw.className = "switch";
-
-      sw.innerHTML = `
-        <input type="checkbox" aria-label="${t("attach_comp_ok") || "Attach competitive"}">
-        <span class="slider"></span>
-      `;
-
-      const input = sw.querySelector("input");
-
-      input.addEventListener("click", (e) => e.stopPropagation());
-
-      input.addEventListener("change", async (e) => {
-        e.stopPropagation();
-
-        const fresh = loadProfile() || profile;
+    if (isCompetitiveTab) {
+      if (wantsOn) {
         const compNow = (fresh.subjects || []).filter(x => (x.mode || "study") === "competitive").length;
 
         if (compNow >= 2) {
@@ -9172,18 +9158,18 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
             title: t("comp_limit_title") || "Лимит Competitive",
             message:
               t("comp_limit_text") ||
-              "Можно выбрать максимум 2 основных предмета в Musobaqa.",
+              "Можно выбрать максимум 2 основных предмета в Competitive.",
             okText: t("comp_limit_ok") || t("ok") || "OK"
           });
           return;
         }
 
         const ok = await uiConfirm({
-          title: t("attach_comp_title") || "Добавить в Competitive?",
+          title: t("courses_activate_comp_title") || "Включить в Competitive?",
           message:
-            t("attach_comp_text") ||
-            "Предмет будет переведён в Musobaqa и исчезнет из списка O‘quv.",
-          okText: t("attach_comp_ok") || "Добавить",
+            t("courses_activate_comp_text") ||
+            "Предмет будет активирован в соревновательном режиме.",
+          okText: t("courses_activate_comp_ok") || "Включить",
           cancelText: t("cancel") || "Отмена"
         });
 
@@ -9192,16 +9178,8 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
           return;
         }
 
-        const prof = loadProfile() || profile;
-        const us = (prof.subjects || []).find(x => x.key === s.key) || null;
-        if (!us) {
-          input.checked = false;
-          return;
-        }
-
-        us.mode = "competitive";
-        us.pinned = false;
-        saveProfile(prof);
+        const updated = upsertUserSubjectMode(fresh, s.key, "competitive");
+        saveProfile(updated);
 
         try {
           const res = await syncUserSubjectToSupabase(s.key, "competitive", false);
@@ -9212,102 +9190,161 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
             return;
           }
 
-          const uid = await getAuthUid();
-          const subjectId = res?.subjectId || await getSubjectIdByKey(s.key);
-          if (uid && subjectId) {
-            await writeUserSubjectsHistory({
-              user_id: uid,
-              subject_id: subjectId,
-              action: "attach_competitive",
-              from_mode: "study",
-              to_mode: "competitive",
-              source: "courses",
-              meta: { subject_key: s.key }
-            });
-          }
+          try {
+            const uid = await getAuthUid();
+            const subjectId = res?.subjectId || await getSubjectIdByKey(s.key);
+            if (uid && subjectId) {
+              await writeUserSubjectsHistory({
+                user_id: uid,
+                subject_id: subjectId,
+                action: "attach_competitive",
+                from_mode: mode || null,
+                to_mode: "competitive",
+                source: "courses",
+                meta: { subject_key: s.key }
+              });
+            }
+          } catch {}
+
+          showToast(t("toast_subject_activated_competitive") || "Предмет включён в соревновательный режим.");
         } catch {
           input.checked = false;
-          showToast("Ошибка сети. Попробуйте ещё раз.");
+          showToast(t("network_error_try_again") || "Ошибка сети. Попробуйте ещё раз.");
           renderAllSubjects();
           return;
         }
+      } else {
+        const ok = await uiConfirm({
+          title: t("courses_deactivate_comp_title") || "Выключить предмет?",
+          message:
+            t("courses_deactivate_comp_text") ||
+            "Предмет будет выключен в соревновательном режиме. Прогресс Competitive по предмету будет сброшен.",
+          okText: t("courses_deactivate_comp_ok") || "Выключить",
+          cancelText: t("cancel") || "Отмена"
+        });
 
-        showToast(t("toast_switched_to_competitive") || "Предмет переведён в Musobaqa.");
-        renderHome();
-        renderAllSubjects();
-        renderProfileSettings?.();
-      });
-
-      footer.appendChild(left);
-      footer.appendChild(sw);
-    } else {
-      footer.className = "catalog-toggle-row" + (isPinned ? " is-on" : "");
-
-      const left = document.createElement("div");
-      left.className = "catalog-toggle-left";
-
-      const stateLine = document.createElement("div");
-      stateLine.className = "catalog-toggle-state";
-      stateLine.textContent = isPinned ? t("course_toggle_on") : t("course_toggle_off");
-
-      left.appendChild(stateLine);
-
-      const sw = document.createElement("label");
-      sw.className = "switch";
-
-      sw.innerHTML = `
-        <input type="checkbox" ${isPinned ? "checked" : ""} aria-label="${t("course_toggle_aria") || "Show on Home"}">
-        <span class="slider"></span>
-      `;
-
-      const input = sw.querySelector("input");
-
-      input.addEventListener("click", (e) => e.stopPropagation());
-
-      input.addEventListener("change", async (e) => {
-        e.stopPropagation();
-
-        const prof = loadProfile() || profile;
-        const updated = togglePinnedSubject(prof, s.key);
-        saveProfile(updated);
-
-        const after = (updated?.subjects || []).find(x => x.key === s.key) || null;
-        const nowPinned = !!after?.pinned;
-        const mode = after?.mode || "study";
-
-        showToast(nowPinned ? t("toast_added_pinned") : t("toast_removed_pinned"));
-
-        try {
-          const res = await syncUserSubjectToSupabase(s.key, mode, nowPinned);
-          if (!res?.ok) {
-            const prof2 = loadProfile() || updated;
-            const us2 = (prof2.subjects || []).find(x => x.key === s.key) || null;
-            if (us2) us2.pinned = !nowPinned;
-            saveProfile(prof2);
-
-            input.checked = !nowPinned;
-            showToast("Не удалось сохранить в базе. Попробуйте ещё раз.");
-          }
-        } catch {
-          const prof2 = loadProfile() || updated;
-          const us2 = (prof2.subjects || []).find(x => x.key === s.key) || null;
-          if (us2) us2.pinned = !nowPinned;
-          saveProfile(prof2);
-
-          input.checked = !nowPinned;
-          showToast("Ошибка сети. Попробуйте ещё раз.");
+        if (!ok) {
+          input.checked = true;
+          return;
         }
 
-        renderHome();
-        renderAllSubjects();
-        renderProfileSettings?.();
-      });
+        const updated = removeUserSubject(fresh, s.key);
+        saveProfile(updated);
 
-      footer.appendChild(left);
-      footer.appendChild(sw);
+        try {
+          const res = await deleteUserSubjectFromSupabase(s.key);
+          if (!res?.ok) {
+            input.checked = true;
+            showToast(t("save_failed_db_try_again"));
+            renderAllSubjects();
+            return;
+          }
+
+          try {
+            const subjectId = res?.subjectId || await getSubjectIdByKey(s.key);
+
+            if (window.sb && subjectId) {
+              const { error } = await window.sb.rpc("reset_subject_progress", { p_subject_id: subjectId });
+
+              if (error) {
+                try {
+                  const uid2 = await getAuthUid();
+                  await logDbErrorToEvents(uid2, "reset_subject_progress", error, {
+                    subject_id: subjectId,
+                    subject_key: s.key
+                  });
+                } catch {}
+              }
+            }
+          } catch {}
+
+          showToast(t("toast_subject_deactivated") || "Предмет выключен.");
+        } catch {
+          input.checked = true;
+          showToast(t("network_error_try_again") || "Ошибка сети. Попробуйте ещё раз.");
+          renderAllSubjects();
+          return;
+        }
+      }
+    } else {
+      if (wantsOn) {
+        const ok = await uiConfirm({
+          title: t("courses_activate_study_title") || "Включить предмет?",
+          message:
+            t("courses_activate_study_text") ||
+            "Предмет будет активирован в учебном режиме.",
+          okText: t("courses_activate_study_ok") || "Включить",
+          cancelText: t("cancel") || "Отмена"
+        });
+
+        if (!ok) {
+          input.checked = false;
+          return;
+        }
+
+        const updated = upsertUserSubjectMode(fresh, s.key, "study");
+        saveProfile(updated);
+
+        try {
+          const res = await syncUserSubjectToSupabase(s.key, "study", false);
+          if (!res?.ok) {
+            input.checked = false;
+            showToast(t("save_failed_db_try_again"));
+            renderAllSubjects();
+            return;
+          }
+
+          showToast(t("toast_subject_activated_study") || "Предмет включён в учебный режим.");
+        } catch {
+          input.checked = false;
+          showToast(t("network_error_try_again") || "Ошибка сети. Попробуйте ещё раз.");
+          renderAllSubjects();
+          return;
+        }
+      } else {
+        const ok = await uiConfirm({
+          title: t("courses_deactivate_study_title") || "Выключить предмет?",
+          message:
+            t("courses_deactivate_study_text") ||
+            "Предмет будет выключен в учебном режиме.",
+          okText: t("courses_deactivate_study_ok") || "Выключить",
+          cancelText: t("cancel") || "Отмена"
+        });
+
+        if (!ok) {
+          input.checked = true;
+          return;
+        }
+
+        const updated = removeUserSubject(fresh, s.key);
+        saveProfile(updated);
+
+        try {
+          const res = await deleteUserSubjectFromSupabase(s.key);
+          if (!res?.ok) {
+            input.checked = true;
+            showToast(t("save_failed_db_try_again"));
+            renderAllSubjects();
+            return;
+          }
+
+          showToast(t("toast_subject_deactivated") || "Предмет выключен.");
+        } catch {
+          input.checked = true;
+          showToast(t("network_error_try_again") || "Ошибка сети. Попробуйте ещё раз.");
+          renderAllSubjects();
+          return;
+        }
+      }
     }
-  }
 
+    renderHome();
+    renderAllSubjects();
+    renderProfileSettings?.();
+  });
+
+  footer.appendChild(left);
+  footer.appendChild(sw);
   card.appendChild(footer);
   grid.appendChild(card);
 };
@@ -9320,22 +9357,28 @@ if (mainSubjects.length) {
   appendSectionTitle(t("courses_section_main") || "Main (Cambridge)");
 
   let mainOut = mainSubjects.slice();
+
   if (state.courses.mainFilter === "competitive") {
-    mainOut = mainOut.filter(s => isCompetitiveKey(s.key));
+    // если competitive < 2 — показываем все main
+    // если competitive = 2 — показываем только эти 2
+    if (competitiveCount >= 2) {
+      mainOut = mainOut.filter(s => isCompetitiveKey(s.key));
+    }
   } else if (state.courses.mainFilter === "study") {
+    // в study показываем только те main, которые не находятся в competitive
     mainOut = mainOut.filter(s => !isCompetitiveKey(s.key));
   }
-  mainOut = sortPinnedFirst(mainOut);
 
+  mainOut = sortByCurrentTabState(mainOut);
   mainOut.forEach(appendSubjectCard);
 }
 
 
     // ---- ADDITIONAL section (always Study by spec), pinned-first
   // ✅ при Competitive additional не показываем
-   if (state.courses.mainFilter !== "competitive" && additionalSubjects.length) {
+      if (state.courses.mainFilter !== "competitive" && additionalSubjects.length) {
      appendSectionTitle(t("courses_section_additional") || "Additional");
-     const addOut = sortPinnedFirst(additionalSubjects);
+     const addOut = sortByCurrentTabState(additionalSubjects);
      addOut.forEach(appendSubjectCard);
    }
 }
