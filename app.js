@@ -11369,40 +11369,71 @@ row.innerHTML = `
       };
 
       const details = (ansRows || []).map((a) => {
-        const q = qMap.get(Number(a.question_id)) || null;
+  const q = qMap.get(Number(a.question_id)) || null;
 
-        let type = "mcq";
-        if (q?.qtype) type = String(q.qtype);
+  let type = "mcq";
+  if (q?.qtype) type = String(q.qtype);
 
-        let difficulty = q?.difficulty ? String(q.difficulty) : "easy";
+  let difficulty = q?.difficulty ? String(q.difficulty) : "easy";
 
-        // ✅ options по content language
-        let options = null;
-        const optionsRaw = q ? pickL(q, "options_text") : null;
-        if (optionsRaw) {
-          try {
-            const parsed = JSON.parse(String(optionsRaw));
-            if (Array.isArray(parsed)) options = parsed.map(x => String(x));
-          } catch {}
-        }
+  // ✅ options по content language
+  let options = null;
+  const optionsRaw = q ? pickL(q, "options_text") : null;
+  if (optionsRaw) {
+    try {
+      const parsed = JSON.parse(String(optionsRaw));
+      if (Array.isArray(parsed)) options = parsed.map(x => String(x));
+    } catch {}
+  }
 
-        const ua = (a.user_answer === null || a.user_answer === undefined) ? "" : String(a.user_answer);
+  const ua = (a.user_answer === null || a.user_answer === undefined) ? "" : String(a.user_answer);
+  const ca = (q?.correct_answer === null || q?.correct_answer === undefined) ? "" : String(q.correct_answer);
 
-        return {
-          id: Number(a.question_id),
-          topic: q?.topic || "General",
-          subtopic: q?.subtopic || null,
-          difficulty,
-          type,
-          question: q ? (pickL(q, "question_text") || "") : "",
-          options,
-          userAnswer: ua || "—",
-          correctAnswer: (q?.correct_answer === null || q?.correct_answer === undefined) ? "—" : String(q.correct_answer),
-          explanation: q ? (pickL(q, "explanation") || "") : "",
-          isCorrect: !!a.is_correct,
-          timeSpent: Number(a.time_spent) || 0
-        };
-      });
+  const toIdx = (raw) => {
+    const s = String(raw || "").trim();
+    if (!s) return null;
+
+    if (isNumericLike(s)) {
+      return Math.trunc(Number(s));
+    }
+
+    const li = letterToIdx(s);
+    return (li !== null && li >= 0) ? li : null;
+  };
+
+  let normalizedIsCorrect = !!a.is_correct;
+
+  if (String(type).toLowerCase() === "mcq") {
+    const uaIdx = toIdx(ua);
+    const caIdx = toIdx(ca);
+
+    if (uaIdx !== null && caIdx !== null) {
+      normalizedIsCorrect = (uaIdx === caIdx);
+    } else {
+      const uaDisp = formatAnswerForDisplay(q, ua);
+      const caDisp = formatAnswerForDisplay(q, ca);
+
+      if (uaDisp && caDisp && uaDisp === caDisp) {
+        normalizedIsCorrect = true;
+      }
+    }
+  }
+
+  return {
+    id: Number(a.question_id),
+    topic: q?.topic || "General",
+    subtopic: q?.subtopic || null,
+    difficulty,
+    type,
+    question: q ? (pickL(q, "question_text") || "") : "",
+    options,
+    userAnswer: ua || "—",
+    correctAnswer: ca || "—",
+    explanation: q ? (pickL(q, "explanation") || "") : "",
+    isCorrect: normalizedIsCorrect,
+    timeSpent: Number(a.time_spent) || 0
+  };
+});
 
       // 4) render DB-first
       renderFromDetails(details);
