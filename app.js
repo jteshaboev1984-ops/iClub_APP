@@ -1303,8 +1303,18 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
     }
   }
 
-      const cyclesCount = Number(c.error_driven_learner.cycles_count) || 0;
-    const lastReduction = Math.max(0, Number(c.error_driven_learner?.evidence?.error_reduction) || 0);
+        function evaluateErrorDrivenDailyOrOnReview() {
+    const c = credentialsStore();
+
+    const cyclesCount = Number(c.error_driven_learner.cycles_count) || 0;
+
+    const baseline = Math.max(0, Number(c.error_driven_learner?.evidence?.baseline_errors) || 0);
+    const current = Math.max(0, Number(c.error_driven_learner?.evidence?.current_errors) || 0);
+
+    let lastReduction = Math.max(0, Number(c.error_driven_learner?.evidence?.error_reduction) || 0);
+    if (baseline > 0) {
+      lastReduction = Math.max(0, (baseline - current) / baseline);
+    }
 
     c.error_driven_learner.status = (cyclesCount >= 3 && lastReduction >= 0.30)
       ? "active"
@@ -1319,39 +1329,12 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
       ...(c.error_driven_learner.evidence || {}),
       computed_at: Date.now(),
       cycles_count: cyclesCount,
+      baseline_errors: baseline,
+      current_errors: current,
       error_reduction: Math.round(lastReduction * 1000) / 1000,
       last_events: (c.error_driven_learner.evidence?.last_events || []).slice(0, 5)
     };
 
-    saveCredentialsStore(c);
-    return c;
-
-    // compute error_reduction from cycles only (simplified: each cycle has (a_errors, b_errors))
-    // We store cycles_count in c.error_driven_learner.cycles_count and track reduction via last pair only for now.
-    const cycles_count = Number(c.error_driven_learner.cycles_count) || 0;
-
-    // If we have 3+ cycles we mark active, but requirement includes ≥30% reduction.
-    // We approximate reduction using last captured baseline/current when present.
-    const baseline = Number(c.error_driven_learner.evidence?.baseline_errors || 0) || 0;
-    const current = Number(c.error_driven_learner.evidence?.current_errors || 0) || 0;
-    const reduction = baseline > 0 ? ((baseline - current) / baseline) : 0;
-
-    c.error_driven_learner.evidence = {
-      ...(c.error_driven_learner.evidence || {}),
-      computed_at: Date.now(),
-      cycles_count,
-      error_reduction: Math.max(0, Math.round(reduction * 1000) / 1000),
-      last_events: (c.error_driven_learner.evidence?.last_events || []).slice(0, 5),
-      baseline_errors: baseline,
-      current_errors: current
-    };
-
-    if (cycles_count >= 3 && reduction >= 0.30) {
-      c.error_driven_learner.status = "active";
-      if (!c.error_driven_learner.achieved_at) c.error_driven_learner.achieved_at = Date.now();
-    }
-
-    c.error_driven_learner.last_evaluated_at = Date.now();
     saveCredentialsStore(c);
     return c;
   }
