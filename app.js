@@ -6568,11 +6568,11 @@ listEl.innerHTML = `
   }
 
   const { data: attempts, error: attErr } = await window.sb
-    .from("tour_attempts")
-    .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district)")
-    .in("tour_id", tourIds)
-    .in("status", ["submitted", "time_expired"])
-    .limit(5000);
+  .from("tour_attempts")
+  .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district)")
+  .in("tour_id", tourIds)
+  .in("status", ["finished", "submitted", "time_expired"])
+  .limit(5000);
 
   if (token !== ratingsState._token) return;
 
