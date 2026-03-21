@@ -2947,6 +2947,15 @@ function formatAnswerForDisplay(q, rawAnswer) {
   const raw = String(rawAnswer ?? "").trim();
   if (!raw) return "—";
 
+  const qType = String(q?.qtype ?? q?.type ?? "mcq").toLowerCase();
+  const isMcq = (qType === "mcq" || qType === "multiple_choice");
+
+  // Для input-вопросов ничего не преобразуем в буквы.
+  // Числа должны оставаться числами, текст — текстом.
+  if (!isMcq) {
+    return raw;
+  }
+
   let opts = null;
   try {
     const oText = (typeof pickContentText === "function")
@@ -2955,26 +2964,21 @@ function formatAnswerForDisplay(q, rawAnswer) {
     opts = parseOptionsText(oText);
   } catch {}
 
-    // user stored index: "0/1/2/3"
-  // ✅ even if options are missing/empty — show A/B/C/D instead of "0/1/2/3"
   if (isNumericLike(raw)) {
     const idx = Math.trunc(Number(raw));
 
-    // if we have options — show "B — text"
     if (opts && idx >= 0 && idx < opts.length) {
       const L = idxToLetter(idx);
       const txt = String(opts[idx] ?? "").trim();
       return txt ? `${L} — ${txt}` : (L || raw);
     }
 
-    // if options are missing — show just the letter
     const L = idxToLetter(idx);
     if (L) return L;
 
     return raw;
   }
 
-  // stored letter: "A/B/C/D"
   if (opts) {
     const li = letterToIdx(raw);
     if (li !== null && li >= 0 && li < opts.length) {
