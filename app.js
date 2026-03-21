@@ -13571,7 +13571,6 @@ ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(S
 
   try {
     const { data, error } = await window.sb
-      const { data, error } = await window.sb
   .from("tour_answers")
   .select(`
     question_id,
