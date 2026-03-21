@@ -10019,7 +10019,77 @@ function saveMyRecs(data) {
 function saveMyTourRecs(data) {
   localStorage.setItem(LS.myTourRecs, JSON.stringify(data));
 }
+      async function saveTourRecsToDB(subjectKey, tourNo, recs) {
+  try {
+    if (!window.sb) return false;
 
+    const uid = await getAuthUid();
+    if (!uid) return false;
+
+    const subjectId = await getSubjectIdByKey(subjectKey);
+    if (!subjectId) return false;
+
+    const items = (Array.isArray(recs) ? recs : [])
+      .map(r => ({
+        source_type: "tour",
+        topic: String(r?.topic || "").trim(),
+        subtopic: r?.subtopic ? String(r.subtopic).trim() : null,
+        tour_no: Number(tourNo || 0) || null
+      }))
+      .filter(r => r.topic && r.tour_no);
+
+    if (!items.length) return false;
+
+    const { data: existing, error: selErr } = await window.sb
+      .from("recommendations")
+      .select("id, topic, subtopic, tour_no")
+      .eq("user_id", uid)
+      .eq("subject_id", subjectId)
+      .eq("source_type", "tour")
+      .eq("tour_no", Number(tourNo));
+
+    if (selErr) {
+      logClientError("tour_recs_existing_select_error", selErr);
+      return false;
+    }
+
+    const existingSet = new Set(
+      (Array.isArray(existing) ? existing : []).map(x =>
+        `${Number(x?.tour_no || 0)}::${String(x?.topic || "").trim()}::${x?.subtopic ? String(x.subtopic).trim() : ""}`
+      )
+    );
+
+    const toInsert = items
+      .filter(r => !existingSet.has(`${r.tour_no}::${r.topic}::${r.subtopic || ""}`))
+      .map(r => ({
+        user_id: uid,
+        subject_id: subjectId,
+        source_type: "tour",
+        tour_no: r.tour_no,
+        topic: r.topic,
+        subtopic: r.subtopic,
+        book_id: null,
+        book_reference: null
+      }));
+
+    if (!toInsert.length) return true;
+
+    const { error: insErr } = await window.sb
+      .from("recommendations")
+      .insert(toInsert);
+
+    if (insErr) {
+      logClientError("tour_recs_insert_error", insErr);
+      return false;
+    }
+
+    return true;
+  } catch (e) {
+    logClientError("tour_recs_insert_exception", e);
+    return false;
+  }
+}
+   
 function addMyTourRecsFromTourAttempt(ctx) {
   try {
     const subjectKey = String(ctx?.subjectKey || "").trim();
@@ -10070,12 +10140,16 @@ function addMyTourRecsFromTourAttempt(ctx) {
 
     if (!added.length) return { added: 0, recs: [] };
 
-    store.bySubject[subjectKey] = [
+        store.bySubject[subjectKey] = [
       ...added,
       ...(store.bySubject[subjectKey] || [])
     ].slice(0, 100);
 
     saveMyTourRecs(store);
+
+    // DB-first persistence; local остаётся как безопасный fallback
+    saveTourRecsToDB(subjectKey, tourNo, added).catch(() => {});
+
     return { added: added.length, recs: added };
   } catch {
     return { added: 0, recs: [] };
@@ -11816,12 +11890,12 @@ async function fetchMyRecsDB(subjectKey) {
     if (!subjectId) return [];
 
     const { data, error } = await window.sb
-      .from("recommendations")
-      .select("id, source_type, topic, subtopic, book_id, book_reference, created_at")
-      .eq("user_id", uid)
-      .eq("subject_id", subjectId)
-      .order("created_at", { ascending: false })
-      .limit(50);
+  .from("recommendations")
+  .select("id, source_type, tour_no, topic, subtopic, book_id, book_reference, created_at")
+  .eq("user_id", uid)
+  .eq("subject_id", subjectId)
+  .order("created_at", { ascending: false })
+  .limit(100);
 
     if (error) {
       logClientError("myrecs_select_error", error);
@@ -11848,9 +11922,18 @@ async function renderMyRecs() {
 
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
 
-  // PRACTICE — DB first
-  let practiceRows = await fetchMyRecsDB(subjectKey);
+    // DB-first for both practice and tour
+  const dbRows = await fetchMyRecsDB(subjectKey);
 
+  let practiceRows = dbRows.filter(r => String(r?.source_type || "") === "practice");
+  let tourRows = dbRows
+    .filter(r => String(r?.source_type || "") === "tour")
+    .map(r => ({
+      ...r,
+      tourNo: Number(r?.tour_no || 0) || null
+    }));
+
+  // PRACTICE fallback
   if (!practiceRows.length) {
     const store = loadMyRecs();
     const local = store?.bySubject?.[subjectKey] || [];
@@ -11880,17 +11963,33 @@ async function renderMyRecs() {
     practiceRows = checks.filter(x => x.keep).map(x => x.rec);
   }
 
-  // TOUR — local store with tourNo
-  const tourStore = loadMyTourRecs();
-  const tourRows = (tourStore?.bySubject?.[subjectKey] || []).map(x => ({
-    id: null,
-    source_type: "tour",
-    topic: x.topic || "General",
-    subtopic: x.subtopic || null,
-    created_at: x.ts ? new Date(x.ts).toISOString() : null,
-    tourNo: Number(x.tourNo || 0) || null
-  }));
+  // TOUR fallback only if DB has nothing yet
+  if (!tourRows.length) {
+    const tourStore = loadMyTourRecs();
+    tourRows = (tourStore?.bySubject?.[subjectKey] || []).map(x => ({
+      id: null,
+      source_type: "tour",
+      topic: x.topic || "General",
+      subtopic: x.subtopic || null,
+      created_at: x.ts ? new Date(x.ts).toISOString() : null,
+      tourNo: Number(x.tourNo || 0) || null
+    }));
+  }
+        try {
+    if (!dbRows.some(r => String(r?.source_type || "") === "tour") && tourRows.length) {
+      const byTour = new Map();
+      tourRows.forEach(r => {
+        const key = Number(r?.tourNo || 0) || 0;
+        if (!key) return;
+        if (!byTour.has(key)) byTour.set(key, []);
+        byTour.get(key).push(r);
+      });
 
+      for (const [tourNo, recs] of byTour.entries()) {
+        await saveTourRecsToDB(subjectKey, tourNo, recs);
+      }
+    }
+  } catch {}
   const hasPractice = practiceRows.length > 0;
   const hasTour = tourRows.length > 0;
 
@@ -11953,8 +12052,17 @@ async function renderMyRecs() {
         const dt = rec.created_at ? formatDateTime(rec.created_at) : "";
         const sub = rec.subtopic ? String(rec.subtopic) : "";
 
-        return `
-          <div class="list-item" data-open-rec="tour" data-tour-no="${escapeHTML(String(tourNo || 0))}" data-topic="${escapeHTML(rec.topic || "")}" data-subtopic="${escapeHTML(sub)}" data-created-at="${escapeHTML(rec.created_at || "")}">
+               return `
+          <div
+            class="list-item"
+            data-open-rec="tour"
+            data-rec-id="${escapeHTML(String(rec.id || ""))}"
+            data-tour-no="${escapeHTML(String(tourNo || 0))}"
+            data-topic="${escapeHTML(rec.topic || "")}"
+            data-subtopic="${escapeHTML(sub)}"
+            data-created-at="${escapeHTML(rec.created_at || "")}"
+            data-book-reference="${escapeHTML(String(rec.book_reference || ""))}"
+          >
             <div style="font-weight:900">${escapeHTML(rec.topic || "General")}</div>
             ${sub ? `<div class="muted small" style="margin-top:4px">${escapeHTML(sub)}</div>` : ""}
             <div class="muted small" style="margin-top:4px">${escapeHTML(t("saved_at_label") || "Сохранено")}: ${escapeHTML(dt)}</div>
@@ -12002,15 +12110,16 @@ async function renderMyRecs() {
     return;
   }
 
-  wrap.querySelectorAll('[data-open-rec="tour"]').forEach(el => {
+   wrap.querySelectorAll('[data-open-rec="tour"]').forEach(el => {
     el.addEventListener("click", async () => {
       const tourNo = Number(el.getAttribute("data-tour-no") || 0);
       const rec = {
-        id: null,
+        id: el.getAttribute("data-rec-id") ? Number(el.getAttribute("data-rec-id")) : null,
         source_type: "tour",
         topic: String(el.getAttribute("data-topic") || "").trim() || "General",
         subtopic: String(el.getAttribute("data-subtopic") || "").trim() || null,
         created_at: String(el.getAttribute("data-created-at") || "").trim() || null,
+        book_reference: String(el.getAttribute("data-book-reference") || "").trim() || null,
         tourNo
       };
 
