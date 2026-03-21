@@ -567,16 +567,17 @@ try {
   // Storage keys
   // ---------------------------
     const LS = {
-    state: "iclub_state_v1",
-    profile: "iclub_profile_v1",
-    practiceDraft: "iclub_practice_draft_v1",
-    myRecs: "iclub_my_recs_v1",
-    botLinked: "iclub_bot_linked_v1",
-    homeExtraOpen: "iclub_home_extra_open_v1",
-    pendingOps: "iclub_pending_ops_v1",
-    events: "iclub_events_v1",
-    credentials: "iclub_credentials_v1"
-  };
+  state: "iclub_state_v1",
+  profile: "iclub_profile_v1",
+  practiceDraft: "iclub_practice_draft_v1",
+  myRecs: "iclub_my_recs_v1",
+  myTourRecs: "iclub_my_tour_recs_v1",
+  botLinked: "iclub_bot_linked_v1",
+  homeExtraOpen: "iclub_home_extra_open_v1",
+  pendingOps: "iclub_pending_ops_v1",
+  events: "iclub_events_v1",
+  credentials: "iclub_credentials_v1"
+};
 
   // ---------------------------
   // i18n
@@ -10011,6 +10012,76 @@ function saveMyRecs(data) {
   localStorage.setItem(LS.myRecs, JSON.stringify(data));
 }
 
+   function loadMyTourRecs() {
+  return safeJsonParse(localStorage.getItem(LS.myTourRecs), { bySubject: {} });
+}
+
+function saveMyTourRecs(data) {
+  localStorage.setItem(LS.myTourRecs, JSON.stringify(data));
+}
+
+function addMyTourRecsFromTourAttempt(ctx) {
+  try {
+    const subjectKey = String(ctx?.subjectKey || "").trim();
+    const tourNo = Number(ctx?.tourNo || 0);
+
+    if (!subjectKey || !tourNo) return { added: 0, recs: [] };
+
+    const wrong = (Array.isArray(ctx?.answers) ? ctx.answers : [])
+      .filter(a => a && a.isCorrect === false)
+      .map(a => {
+        const q = ctx?.questions?.[Number(a.index)] || null;
+        return {
+          topic: String(q?.topic || "General").trim(),
+          subtopic: q?.subtopic ? String(q.subtopic).trim() : null
+        };
+      })
+      .filter(x => x.topic);
+
+    if (!wrong.length) return { added: 0, recs: [] };
+
+    const uniqMap = new Map();
+    wrong.forEach(r => {
+      const k = `${tourNo}::${r.topic}::${r.subtopic || ""}`;
+      if (!uniqMap.has(k)) uniqMap.set(k, r);
+    });
+
+    const uniq = Array.from(uniqMap.values());
+    const store = loadMyTourRecs();
+    store.bySubject = store.bySubject || {};
+
+    const existing = new Set(
+      (store.bySubject[subjectKey] || []).map(x =>
+        `${Number(x?.tourNo || 0)}::${String(x?.topic || "").trim()}::${x?.subtopic ? String(x.subtopic).trim() : ""}`
+      )
+    );
+
+    const nowTs = Date.now();
+
+    const added = uniq
+      .filter(r => !existing.has(`${tourNo}::${r.topic}::${r.subtopic || ""}`))
+      .map(r => ({
+        source_type: "tour",
+        topic: r.topic,
+        subtopic: r.subtopic,
+        tourNo,
+        ts: nowTs
+      }));
+
+    if (!added.length) return { added: 0, recs: [] };
+
+    store.bySubject[subjectKey] = [
+      ...added,
+      ...(store.bySubject[subjectKey] || [])
+    ].slice(0, 100);
+
+    saveMyTourRecs(store);
+    return { added: added.length, recs: added };
+  } catch {
+    return { added: 0, recs: [] };
+  }
+}
+   
 // ✅ DB sync for recommendations table
 async function syncMyRecsToSupabase(subjectKey, recs) {
   try {
@@ -11767,18 +11838,23 @@ async function renderMyRecs() {
   const wrap = $("#my-recs-list");
   if (!wrap) return;
 
-  const subjectKey = state.courses.subjectKey;
+  const subjectKey = String(state?.courses?.subjectKey || "").trim();
+  if (!subjectKey) {
+    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("recommendations_empty") || "Пока рекомендаций нет.")}</div>`;
+    return;
+  }
+
+  const activeTab = String(state?.courses?.myRecsActiveTab || "practice");
 
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
 
-  // 1) DB-first
-  let rows = await fetchMyRecsDB(subjectKey);
+  // PRACTICE — DB first
+  let practiceRows = await fetchMyRecsDB(subjectKey);
 
-  // 2) fallback: local (старое поведение, если DB недоступна/пусто)
-  if (!rows.length) {
+  if (!practiceRows.length) {
     const store = loadMyRecs();
     const local = store?.bySubject?.[subjectKey] || [];
-    rows = local.map(x => ({
+    practiceRows = local.map(x => ({
       id: null,
       source_type: "practice",
       topic: x.topic || "General",
@@ -11789,52 +11865,172 @@ async function renderMyRecs() {
     }));
   }
 
-  if (!rows.length) {
+  if (practiceRows.length) {
+    const checks = await Promise.all(
+      practiceRows.map(async (rec) => {
+        try {
+          const mistakes = await fetchRecentMistakesByRec(subjectKey, rec);
+          return { rec, keep: Array.isArray(mistakes) && mistakes.length > 0 };
+        } catch {
+          return { rec, keep: true };
+        }
+      })
+    );
+
+    practiceRows = checks.filter(x => x.keep).map(x => x.rec);
+  }
+
+  // TOUR — local store with tourNo
+  const tourStore = loadMyTourRecs();
+  const tourRows = (tourStore?.bySubject?.[subjectKey] || []).map(x => ({
+    id: null,
+    source_type: "tour",
+    topic: x.topic || "General",
+    subtopic: x.subtopic || null,
+    created_at: x.ts ? new Date(x.ts).toISOString() : null,
+    tourNo: Number(x.tourNo || 0) || null
+  }));
+
+  const hasPractice = practiceRows.length > 0;
+  const hasTour = tourRows.length > 0;
+
+  if (!hasPractice && !hasTour) {
     wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("recommendations_empty") || "Пока рекомендаций нет.")}</div>`;
     return;
   }
 
-  // 3) hide stale recommendations (no real mistakes left)
-  const checks = await Promise.all(
-    rows.map(async (rec) => {
-      try {
-        const mistakes = await fetchRecentMistakesByRec(subjectKey, rec);
-        return { rec, keep: Array.isArray(mistakes) && mistakes.length > 0 };
-      } catch {
-        return { rec, keep: true };
-      }
-    })
-  );
+  const tabBtn = (key, label, isActive) => `
+    <button
+      type="button"
+      class="btn ${isActive ? "primary" : ""}"
+      data-myrecs-tab="${escapeHTML(key)}"
+      style="flex:1 1 0"
+    >
+      ${escapeHTML(label)}
+    </button>
+  `;
 
-  rows = checks.filter(x => x.keep).map(x => x.rec);
+  const renderPracticeList = () => {
+    if (!practiceRows.length) {
+      return `<div class="empty muted">${escapeHTML(t("my_recs_practice_empty") || "Рекомендаций по практике пока нет.")}</div>`;
+    }
 
-  if (!rows.length) {
-    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("recommendations_empty") || "Пока рекомендаций нет.")}</div>`;
+    return practiceRows.map(rec => {
+      const dt = rec.created_at ? formatDateTime(rec.created_at) : "";
+      const sub = rec.subtopic ? String(rec.subtopic) : "";
+
+      return `
+        <div class="list-item" data-open-rec="practice">
+          <div style="font-weight:900">${escapeHTML(rec.topic || "General")}</div>
+          ${sub ? `<div class="muted small" style="margin-top:4px">${escapeHTML(sub)}</div>` : ""}
+          <div class="muted small" style="margin-top:4px">${escapeHTML(t("saved_at_label") || "Сохранено")}: ${escapeHTML(dt)}</div>
+        </div>
+      `;
+    }).join("");
+  };
+
+  const renderTourList = () => {
+    if (!tourRows.length) {
+      return `<div class="empty muted">${escapeHTML(t("my_recs_tour_empty") || "Рекомендаций по турам пока нет.")}</div>`;
+    }
+
+    const groups = new Map();
+    tourRows.forEach(rec => {
+      const key = Number(rec.tourNo || 0) || 0;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(rec);
+    });
+
+    const orderedKeys = Array.from(groups.keys()).sort((a, b) => b - a);
+
+    return orderedKeys.map(tourNo => {
+      const items = groups.get(tourNo) || [];
+      const title = tourNo > 0
+        ? `${t("tours_tour_label") || "Тур"} ${tourNo}`
+        : (t("tour_label_generic") || "Тур");
+
+      const cards = items.map(rec => {
+        const dt = rec.created_at ? formatDateTime(rec.created_at) : "";
+        const sub = rec.subtopic ? String(rec.subtopic) : "";
+
+        return `
+          <div class="list-item" data-open-rec="tour" data-tour-no="${escapeHTML(String(tourNo || 0))}" data-topic="${escapeHTML(rec.topic || "")}" data-subtopic="${escapeHTML(sub)}" data-created-at="${escapeHTML(rec.created_at || "")}">
+            <div style="font-weight:900">${escapeHTML(rec.topic || "General")}</div>
+            ${sub ? `<div class="muted small" style="margin-top:4px">${escapeHTML(sub)}</div>` : ""}
+            <div class="muted small" style="margin-top:4px">${escapeHTML(t("saved_at_label") || "Сохранено")}: ${escapeHTML(dt)}</div>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div class="list-item" style="padding-bottom:10px">
+          <div style="font-weight:900">${escapeHTML(title)}</div>
+        </div>
+        ${cards}
+      `;
+    }).join("");
+  };
+
+  wrap.innerHTML = `
+    <div style="display:flex;gap:10px;margin-bottom:12px">
+      ${tabBtn("practice", t("my_recs_tab_practice") || "Практика", activeTab === "practice")}
+      ${tabBtn("tour", t("my_recs_tab_tour") || "Туры", activeTab === "tour")}
+    </div>
+    ${activeTab === "tour" ? renderTourList() : renderPracticeList()}
+  `;
+
+  wrap.querySelectorAll("[data-myrecs-tab]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      state.courses = state.courses || {};
+      state.courses.myRecsActiveTab = String(btn.getAttribute("data-myrecs-tab") || "practice");
+      saveState();
+      await renderMyRecs();
+    });
+  });
+
+  if (activeTab === "practice") {
+    const cards = Array.from(wrap.querySelectorAll('[data-open-rec="practice"]'));
+    cards.forEach((el, idx) => {
+      const rec = practiceRows[idx];
+      el.addEventListener("click", async () => {
+        state.courses.myRecCurrent = rec;
+        saveState();
+        pushCourses("my-rec-detail");
+        await renderMyRecDetail();
+      });
+    });
     return;
   }
 
-  wrap.innerHTML = "";
-  rows.forEach(rec => {
-    const el = document.createElement("div");
-    el.className = "list-item";
-
-    const dt = rec.created_at ? formatDateTime(rec.created_at) : "";
-    const sub = rec.subtopic ? String(rec.subtopic) : "";
-
-    el.innerHTML = `
-      <div style="font-weight:900">${escapeHTML(rec.topic || "General")}</div>
-      ${sub ? `<div class="muted small" style="margin-top:4px">${escapeHTML(sub)}</div>` : ""}
-      <div class="muted small" style="margin-top:4px">${escapeHTML(t("saved_at_label") || "Сохранено")}: ${escapeHTML(dt)}</div>
-    `;
-
+  wrap.querySelectorAll('[data-open-rec="tour"]').forEach(el => {
     el.addEventListener("click", async () => {
+      const tourNo = Number(el.getAttribute("data-tour-no") || 0);
+      const rec = {
+        id: null,
+        source_type: "tour",
+        topic: String(el.getAttribute("data-topic") || "").trim() || "General",
+        subtopic: String(el.getAttribute("data-subtopic") || "").trim() || null,
+        created_at: String(el.getAttribute("data-created-at") || "").trim() || null,
+        tourNo
+      };
+
+      const canOpen = tourNo > 0
+        ? await isTourGloballyClosed(subjectKey, tourNo)
+        : false;
+
+      if (!canOpen) {
+        showToast(
+          t("tour_rec_locked_until_global_end") ||
+          "Рекомендации по этому туру будут доступны после завершения тура для всех участников."
+        );
+        return;
+      }
+
       state.courses.myRecCurrent = rec;
       saveState();
       pushCourses("my-rec-detail");
       await renderMyRecDetail();
     });
-
-    wrap.appendChild(el);
   });
 }
    async function fetchRecentMistakesByRec(subjectKey, rec) {
@@ -12033,10 +12229,15 @@ async function renderMyRecDetail() {
   const subEl = $("#my-rec-subtitle");
   if (!body || !rec || !subjectKey) return;
 
+  const isTourRec = String(rec?.source_type || "practice") === "tour";
   const topic = rec.topic || "General";
   const subtopic = rec.subtopic ? String(rec.subtopic) : "";
   if (titleEl) titleEl.textContent = topic;
-  if (subEl) subEl.textContent = subtopic ? subtopic : (t("rec_detail_subtitle") || "Персональный разбор и план");
+  if (subEl) {
+    subEl.textContent = isTourRec
+      ? (subtopic || (t("tour_rec_detail_subtitle") || "Рекомендации по итогам тура"))
+      : (subtopic ? subtopic : (t("rec_detail_subtitle") || "Персональный разбор и план"));
+  }
 
    // ✅ mini result (only for current rec/topic)
 let drillMiniHtml = "";
@@ -12069,18 +12270,22 @@ try {
   }
 } catch {}
    
-  body.innerHTML = `<div class="empty muted">${escapeHTML(t("my_rec_loading") || "Загрузка…")}</div>`;
+    body.innerHTML = `<div class="empty muted">${escapeHTML(t("my_rec_loading") || "Загрузка…")}</div>`;
 
-const [mistakes, refs] = await Promise.all([
-  fetchRecentMistakesByRec(subjectKey, rec),
-  fetchBookRefsForRec(subjectKey, rec)
-]);
+  const refs = await fetchBookRefsForRec(subjectKey, rec);
 
-// ✅ store qids for "retry mistakes"
-state.courses.myRecMistakeQids = Array.isArray(mistakes)
-  ? Array.from(new Set(mistakes.map(m => m?.q?.id).filter(Boolean))).slice(0, 10)
-  : [];
-saveState();
+  let mistakes = [];
+  if (!isTourRec) {
+    mistakes = await fetchRecentMistakesByRec(subjectKey, rec);
+
+    state.courses.myRecMistakeQids = Array.isArray(mistakes)
+      ? Array.from(new Set(mistakes.map(m => m?.q?.id).filter(Boolean))).slice(0, 10)
+      : [];
+    saveState();
+  } else {
+    state.courses.myRecMistakeQids = [];
+    saveState();
+  }
 
    const totalMistakes = Array.isArray(mistakes) ? mistakes.length : 0;
 
@@ -12172,7 +12377,28 @@ const mistakesHtml = totalMistakes
   ${refsHtml}
 ` : ``;
 
-body.innerHTML = `
+body.innerHTML = isTourRec ? `
+  <div class="list-item">
+    <div style="font-weight:900">${escapeHTML(t("tour_rec_readonly_title") || "Рекомендации по туру")}</div>
+    <div class="muted small" style="margin-top:6px">
+      ${escapeHTML(t("tour_rec_readonly_text") || "Подробный разбор туровых вопросов недоступен здесь. Отработать тему дополнительно можно в практике.")}
+    </div>
+  </div>
+
+  ${readBlockHtml || `
+    <div class="list-item">
+      <div class="muted small">${escapeHTML(t("recs_books_later_source") || "Книги по этой теме будут добавлены позже.")}</div>
+    </div>
+  `}
+
+  <div class="list-item">
+    <div style="margin-top:4px">
+      <button class="btn" type="button" data-action="my-rec-open-practice">
+        ${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}
+      </button>
+    </div>
+  </div>
+` : `
   ${mistakesHeaderHtml}
   ${mistakesHtml}
   ${drillMiniHtml}
@@ -13498,6 +13724,34 @@ try {
     renderTourQuestion();
   }
 
+         async function isTourGloballyClosed(subjectKey, tourNo) {
+  try {
+    if (!window.sb) return false;
+
+    const subjectId = await getSubjectIdByKey(subjectKey);
+    if (!subjectId) return false;
+
+    const { data, error } = await window.sb
+      .from("tours")
+      .select("id, tour_no, start_date, end_date, is_active")
+      .eq("subject_id", subjectId)
+      .eq("tour_no", Number(tourNo || 0))
+      .maybeSingle();
+
+    if (error || !data) return false;
+
+    const todayISO = new Date().toISOString().slice(0, 10);
+    const endDate = data?.end_date ? String(data.end_date) : "";
+
+    if (endDate && endDate < todayISO) return true;
+    if (!data?.is_active && endDate && endDate <= todayISO) return true;
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+   
    async function renderTourReview() {
   const wrap = $("#tour-review-list");
   if (!wrap) return;
@@ -13507,13 +13761,25 @@ try {
   const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
   const localPayload = state?.courses?.lastTourReviewPayload || null;
 
-  const renderFromDetails = (details) => {
-    if (!Array.isArray(details) || !details.length) {
-      wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("tour_review_empty") || "Нет данных для разбора тура.")}</div>`;
+    const renderFromDetails = (details) => {
+    const mistakesOnly = (Array.isArray(details) ? details : []).filter(d => !d.isCorrect);
+
+    if (!mistakesOnly.length) {
+      wrap.innerHTML = `
+        <div class="empty muted">${escapeHTML(t("tour_review_no_mistakes") || "По этому туру ошибок не найдено.")}</div>
+        <div class="list-item" style="margin-top:12px">
+          <div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div>
+          <div style="margin-top:10px">
+            <button class="btn" type="button" data-action="tour-review-open-practice">
+              ${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}
+            </button>
+          </div>
+        </div>
+      `;
       return;
     }
 
-    wrap.innerHTML = details.map((d, idx) => {
+    wrap.innerHTML = mistakesOnly.map((d, idx) => {
       const qForFmt = {
         qtype: d.type,
         options_text: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
@@ -13553,7 +13819,16 @@ ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(S
           </div>
         </div>
       `;
-    }).join("");
+        }).join("") + `
+      <div class="list-item" style="margin-top:12px">
+        <div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div>
+        <div style="margin-top:10px">
+          <button class="btn" type="button" data-action="tour-review-open-practice">
+            ${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}
+          </button>
+        </div>
+      </div>
+    `;
   };
 
   // 1) instant local payload right after finish
@@ -13835,7 +14110,7 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
   state.courses.lastTourAttemptId = ctx?.attemptId || null;
   state.courses.lastTourCertificateId = null;
 
-  try {
+    try {
     const reviewItems = Array.isArray(ctx?.answers)
       ? ctx.answers.map((ans, idx) => {
           const q = ctx?.questions?.[Number(ans.index)] || null;
@@ -13855,22 +14130,22 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
                       ? (idxToLetter(Number(q.correctIndex)) || String(q.correctIndex))
                       : ""));
 
-         return {
-  id: Number(q?.id || idx + 1),
-  topic: q?.topic || (t("topic_general") || "General"),
-  subtopic: q?.subtopic || null,
-  difficulty: q?.difficulty || "easy",
-  type: isMcq ? "mcq" : "input",
-  question: q?.question || "",
-  options: Array.isArray(q?.options) ? q.options.slice() : [],
-  userAnswer,
-  correctAnswer,
-  explanation: pickContentText(q || {}, "explanation") || "",
-  isCorrect: !!ans?.isCorrect,
-  timeSpent: Number(ans?.spentSec || 0)
-      };
-    })
-: [];
+          return {
+            id: Number(q?.id || idx + 1),
+            topic: q?.topic || (t("topic_general") || "General"),
+            subtopic: q?.subtopic || null,
+            difficulty: q?.difficulty || "easy",
+            type: isMcq ? "mcq" : "input",
+            question: q?.question || "",
+            options: Array.isArray(q?.options) ? q.options.slice() : [],
+            userAnswer,
+            correctAnswer,
+            explanation: pickContentText(q || {}, "explanation") || "",
+            isCorrect: !!ans?.isCorrect,
+            timeSpent: Number(ans?.spentSec || 0)
+          };
+        })
+      : [];
 
     state.courses.lastTourReviewPayload = {
       attemptId: ctx?.attemptId || null,
@@ -13878,6 +14153,9 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
       tourNo: ctx?.tourNo || 1,
       items: reviewItems
     };
+
+    // локально сохраняем туровые рекомендации по ошибкам
+    addMyTourRecsFromTourAttempt(ctx);
   } catch {
     state.courses.lastTourReviewPayload = null;
   }
@@ -13911,12 +14189,19 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     } catch {}
   }
 
-  // unlock
+   // unlock
   state.quizLock = null;
   state.tourContext = null;
   saveState();
 
   pushCourses("tour-result");
+
+  if (finalizeSavedToDb && !ctx?.isArchive) {
+    showToast(
+      t("tour_result_saved_toast") ||
+      "Результат сохранён. Вы можете посмотреть своё место в рейтинге. Подробный разбор будет доступен после завершения тура для всех участников."
+    );
+  }
 }
 
   function formatMsToMMSS(ms) {
@@ -14647,8 +14932,7 @@ if (action === "open-all-subjects") {
         return;
       }
 
-       if (action === "open-my-recs-global") {
-  // логика как из профиля
+              if (action === "open-my-recs-global") {
   const profile = loadProfile();
   const subjects = Array.isArray(profile?.subjects) ? profile.subjects : [];
   const pick =
@@ -14658,16 +14942,23 @@ if (action === "open-all-subjects") {
     null;
 
   if (!pick) {
-    showToast("Сначала выберите предметы в Courses.");
+    showToast(t("pick_subjects_first_toast") || "Сначала выберите предметы в Courses.");
     return;
   }
 
+  state.courses = state.courses || {};
   state.courses.subjectKey = pick;
+  state.courses.myRecsActiveTab = state.courses.myRecsActiveTab || "practice";
   saveState();
+
   setTab("courses");
 
-  // Earned Credentials: Research-Oriented — recommendation opened
-    try { trackEvent("recommendation_opened", { source: "global_my_recs", subject_id: normSubjectId(pick) }); } catch {}
+  try {
+    trackEvent("recommendation_opened", {
+      source: "global_my_recs",
+      subject_id: normSubjectId(pick)
+    });
+  } catch {}
 
   replaceCourses("my-recs");
   renderMyRecs();
@@ -14686,8 +14977,7 @@ if (action === "open-all-subjects") {
         }
         if (action === "profile-community") { openGlobal("community"); return; }
         if (action === "profile-about") { openGlobal("about"); return; }
-        if (action === "profile-open-my-recs") {
-  // открыть "Мои рекомендации" по первому разумному предмету
+               if (action === "profile-open-my-recs") {
   const profile = loadProfile();
   const subjects = Array.isArray(profile?.subjects) ? profile.subjects : [];
   const pick =
@@ -14697,16 +14987,23 @@ if (action === "open-all-subjects") {
     null;
 
   if (!pick) {
-    showToast("Сначала выберите предметы в Courses.");
+    showToast(t("pick_subjects_first_toast") || "Сначала выберите предметы в Courses.");
     return;
   }
 
+  state.courses = state.courses || {};
   state.courses.subjectKey = pick;
+  state.courses.myRecsActiveTab = state.courses.myRecsActiveTab || "practice";
   saveState();
+
   setTab("courses");
 
-  // Earned Credentials: Research-Oriented — recommendation opened
-  try { trackEvent("recommendation_opened", { source: "profile_my_recs", subject_id: normSubjectId(pick) }); } catch {}
+  try {
+    trackEvent("recommendation_opened", {
+      source: "profile_my_recs",
+      subject_id: normSubjectId(pick)
+    });
+  } catch {}
 
   replaceCourses("my-recs");
   renderMyRecs();
@@ -14724,7 +15021,11 @@ if (action === "my-rec-open-books") {
   renderBooks();
   return;
 }
-
+   if (action === "my-rec-open-practice") {
+  openPracticeStart();
+  return;
+}
+       
 if (action === "my-rec-retry") {
   startPracticeRetryMistakes();
   return;
@@ -15006,7 +15307,26 @@ if (action === "tour-next" || action === "tour-submit") {
   return;
 }
 
-            if (action === "tour-review") {
+                  if (action === "tour-review") {
+        const reviewPayload = state?.courses?.lastTourReviewPayload || null;
+        const subjectKey =
+          String(reviewPayload?.subjectKey || state?.courses?.subjectKey || "").trim();
+        const tourNo = Number(reviewPayload?.tourNo || state?.courses?.activeTourNo || 0);
+
+        const canOpen = subjectKey && tourNo
+          ? await isTourGloballyClosed(subjectKey, tourNo)
+          : false;
+
+        if (!canOpen) {
+          showToast(
+            t("tour_review_locked_until_global_end") ||
+            "Подробный разбор тура будет доступен после завершения тура для всех участников."
+          );
+          replaceCourses("subject-hub");
+          renderSubjectHub();
+          return;
+        }
+
         pushCourses("tour-review");
         await renderTourReview();
         return;
@@ -15021,7 +15341,10 @@ if (action === "tour-next" || action === "tour-submit") {
         showCoursesScreen(getCoursesTopScreen());
         return;
       }
-
+                   if (action === "tour-review-open-practice") {
+        openPracticeStart();
+        return;
+      }  
              if (action === "tour-certificate") {
         const certId = Number(state?.courses?.lastTourCertificateId || 0);
 
@@ -15048,16 +15371,24 @@ if (action === "tour-next" || action === "tour-submit") {
         return;
       }
 
-      if (action === "open-my-recommendations") {
-  const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : "";
+            if (action === "open-my-recommendations") {
+        const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : "";
 
- // Earned Credentials: Research-Oriented — recommendation opened
-  try { trackEvent("recommendation_opened", { source: "subject_hub_my_recs", subject_id: normSubjectId(subject_id) }); } catch {}
+        try {
+          trackEvent("recommendation_opened", {
+            source: "subject_hub_my_recs",
+            subject_id: normSubjectId(subject_id)
+          });
+        } catch {}
 
-  pushCourses("my-recs");
-  renderMyRecs();
-  return;
-}
+        state.courses = state.courses || {};
+        state.courses.myRecsActiveTab = state.courses.myRecsActiveTab || "practice";
+        saveState();
+
+        pushCourses("my-recs");
+        renderMyRecs();
+        return;
+      }
 
       if (action === "video-skip") {
         const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : (state?.activeSubjectKey ? String(state.activeSubjectKey) : "");
