@@ -12724,7 +12724,7 @@ async function loadTourQuestionsDB(tourId) {
 
     const { data, error } = await window.sb
   .from("tour_questions")
-  .select("order_no, question:questions(id,topic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,is_active,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en)")
+  .select("order_no, question:questions(id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,image_url,is_active,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en)")
   .eq("tour_id", tourId)
   .eq("is_active", true)
   .order("order_no", { ascending: true })
@@ -12779,17 +12779,18 @@ async function loadTourQuestionsDB(tourId) {
     }
 
         return {
-      id: Number(q.id),
-      topic: q.topic || "General",
-      difficulty: normalizeDiff(q.difficulty),
-      type,
-      question: pickL(q, "question_text") || "",
-      options: opts || [],
-      correctIndex,
-      correct_answer: String(q.correct_answer ?? "").trim(),
-      correctAnswer: String(q.correct_answer ?? "").trim(),
-      imageUrl: q.image_url || null,
-      timeLimitSec: TOUR_CONFIG.defaultQuestionTimeSec
+  id: Number(q.id),
+  topic: q.topic || "General",
+  subtopic: q.subtopic || null,
+  difficulty: normalizeDiff(q.difficulty),
+  type,
+  question: pickL(q, "question_text") || "",
+  options: opts || [],
+  correctIndex,
+  correct_answer: String(q.correct_answer ?? "").trim(),
+  correctAnswer: String(q.correct_answer ?? "").trim(),
+  imageUrl: q.image_url || null,
+  timeLimitSec: TOUR_CONFIG.defaultQuestionTimeSec
     };
   });
 }
@@ -13530,8 +13531,13 @@ try {
             <div style="font-size:24px;line-height:1">${d.isCorrect ? "✓" : "✕"}</div>
             <div style="min-width:0;flex:1">
               <div style="font-weight:900">${escapeHTML(`${idx + 1}. ${d.topic || (t("topic_general") || "General")}`)}</div>
-              ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.difficulty))}</div>` : ""}
-              <div style="margin-top:10px">${escapeHTML(d.question || "")}</div>
+${
+  d.subtopic
+    ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.subtopic))}</div>`
+    : ""
+}
+${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.difficulty))}</div>` : ""}
+<div style="margin-top:10px">${escapeHTML(d.question || "")}</div>
               <div class="muted small" style="margin-top:10px">
                 ${escapeHTML(t("rec_your_answer") || "Ваш ответ")}: <b>${escapeHTML(userDisp || "—")}</b>
               </div>
@@ -13565,35 +13571,37 @@ try {
 
   try {
     const { data, error } = await window.sb
-      .from("tour_answers")
-      .select(`
-        question_id,
-        user_answer,
-        is_correct,
-        time_spent,
-        question:questions(
-          id,
-          topic,
-          difficulty,
-          qtype,
-          question_text,
-          options_text,
-          correct_answer,
-          explanation,
-          question_text_ru,
-          question_text_uz,
-          question_text_en,
-          options_text_ru,
-          options_text_uz,
-          options_text_en,
-          explanation_ru,
-          explanation_uz,
-          explanation_en
-        )
-      `)
-      .eq("attempt_id", attemptId)
-      .eq("answered", true)
-      .limit(100);
+      const { data, error } = await window.sb
+  .from("tour_answers")
+  .select(`
+    question_id,
+    user_answer,
+    is_correct,
+    time_spent,
+    question:questions(
+      id,
+      topic,
+      subtopic,
+      difficulty,
+      qtype,
+      question_text,
+      options_text,
+      correct_answer,
+      explanation,
+      question_text_ru,
+      question_text_uz,
+      question_text_en,
+      options_text_ru,
+      options_text_uz,
+      options_text_en,
+      explanation_ru,
+      explanation_uz,
+      explanation_en
+    )
+  `)
+  .eq("attempt_id", attemptId)
+  .eq("answered", true)
+  .limit(100);
 
     if (error || !Array.isArray(data) || !data.length) {
       if (!(localPayload && Array.isArray(localPayload.items) && localPayload.items.length)) {
@@ -13616,18 +13624,19 @@ try {
       }
 
       return {
-        id: Number(q?.id || x?.question_id || idx + 1),
-        topic: q?.topic || (t("topic_general") || "General"),
-        difficulty: q?.difficulty || "easy",
-        type,
-        question: pickContentText(q, "question_text") || "",
-        options,
-        userAnswer: String(x?.user_answer ?? ""),
-        correctAnswer: String(q?.correct_answer ?? ""),
-        explanation: pickContentText(q, "explanation") || "",
-        isCorrect: normalizedIsCorrect,
-        timeSpent: Number(x?.time_spent || 0)
-      };
+  id: Number(q?.id || x?.question_id || idx + 1),
+  topic: q?.topic || (t("topic_general") || "General"),
+  subtopic: q?.subtopic || null,
+  difficulty: q?.difficulty || "easy",
+  type,
+  question: pickContentText(q, "question_text") || "",
+  options,
+  userAnswer: String(x?.user_answer ?? ""),
+  correctAnswer: String(q?.correct_answer ?? ""),
+  explanation: pickContentText(q, "explanation") || "",
+  isCorrect: normalizedIsCorrect,
+  timeSpent: Number(x?.time_spent || 0)
+};
     });
 
     renderFromDetails(details);
@@ -13847,21 +13856,22 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
                       ? (idxToLetter(Number(q.correctIndex)) || String(q.correctIndex))
                       : ""));
 
-          return {
-            id: Number(q?.id || idx + 1),
-            topic: q?.topic || (t("topic_general") || "General"),
-            difficulty: q?.difficulty || "easy",
-            type: isMcq ? "mcq" : "input",
-            question: q?.question || "",
-            options: Array.isArray(q?.options) ? q.options.slice() : [],
-            userAnswer,
-            correctAnswer,
-            explanation: pickContentText(q || {}, "explanation") || "",
-            isCorrect: !!ans?.isCorrect,
-            timeSpent: Number(ans?.spentSec || 0)
-          };
-        })
-      : [];
+         return {
+  id: Number(q?.id || idx + 1),
+  topic: q?.topic || (t("topic_general") || "General"),
+  subtopic: q?.subtopic || null,
+  difficulty: q?.difficulty || "easy",
+  type: isMcq ? "mcq" : "input",
+  question: q?.question || "",
+  options: Array.isArray(q?.options) ? q.options.slice() : [],
+  userAnswer,
+  correctAnswer,
+  explanation: pickContentText(q || {}, "explanation") || "",
+  isCorrect: !!ans?.isCorrect,
+  timeSpent: Number(ans?.spentSec || 0)
+      };
+    })
+: [];
 
     state.courses.lastTourReviewPayload = {
       attemptId: ctx?.attemptId || null,
