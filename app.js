@@ -5355,15 +5355,19 @@ async function downloadCertificateAsPdf(row) {
     await ensureJsPdfLoaded();
 
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "px",
-      format: [canvas.width, canvas.height]
-    });
 
-    const imgData = canvas.toDataURL("image/png");
-    pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height, undefined, "FAST");
-    pdf.save(buildCertificateDownloadName(row, "pdf"));
+const pdfOrientation = canvas.width > canvas.height ? "landscape" : "portrait";
+
+const pdf = new jsPDF({
+  orientation: pdfOrientation,
+  unit: "px",
+  format: [canvas.width, canvas.height],
+  hotfixes: ["px_scaling"]
+});
+
+const imgData = canvas.toDataURL("image/png");
+pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height, undefined, "NONE");
+pdf.save(buildCertificateDownloadName(row, "pdf"));
   } catch {
     showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
   } finally {
