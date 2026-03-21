@@ -884,10 +884,11 @@ async function syncCredentialsToSupabaseOnce() {
         status = anyActive ? "active" : "inactive";
       }
 
-      rows.push({
+            rows.push({
         user_id: uid,
         credential_id: defId,
         status: status,
+        achieved_at: rec.achieved_at ? new Date(rec.achieved_at).toISOString() : null,
         evidence_snapshot: rec, // кладём весь record (как jsonb snapshot)
         last_evaluated_at: rec.last_evaluated_at ? new Date(rec.last_evaluated_at).toISOString() : null
       });
@@ -1302,11 +1303,28 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
     }
   }
 
-  function evaluateErrorDrivenDailyOrOnReview() {
-    // Minimal implementation:
-    // cycle = attempt A (has errors) -> review opened -> attempt B (fewer errors)
-    // No time limits.
-    const c = credentialsStore();
+      const cyclesCount = Number(c.error_driven_learner.cycles_count) || 0;
+    const lastReduction = Math.max(0, Number(c.error_driven_learner?.evidence?.error_reduction) || 0);
+
+    c.error_driven_learner.status = (cyclesCount >= 3 && lastReduction >= 0.30)
+      ? "active"
+      : "inactive";
+
+    if (c.error_driven_learner.status === "active" && !c.error_driven_learner.achieved_at) {
+      c.error_driven_learner.achieved_at = Date.now();
+    }
+
+    c.error_driven_learner.last_evaluated_at = Date.now();
+    c.error_driven_learner.evidence = {
+      ...(c.error_driven_learner.evidence || {}),
+      computed_at: Date.now(),
+      cycles_count: cyclesCount,
+      error_reduction: Math.round(lastReduction * 1000) / 1000,
+      last_events: (c.error_driven_learner.evidence?.last_events || []).slice(0, 5)
+    };
+
+    saveCredentialsStore(c);
+    return c;
 
     // compute error_reduction from cycles only (simplified: each cycle has (a_errors, b_errors))
     // We store cycles_count in c.error_driven_learner.cycles_count and track reduction via last pair only for now.
@@ -1353,60 +1371,86 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
   }
 
   function onPracticeAttemptFinishedForErrorDriven(subjectId, topicsErrorsMap, attemptKey, eventId) {
-    // topicsErrorsMap: { [topic]: errorsCount }
-    const c = credentialsStore();
-    const sid = String(subjectId || "");
-    if (!sid) return;
+  // topicsErrorsMap: { [topic]: errorsCount }
+  const c = credentialsStore();
+  const sid = String(subjectId || "");
+  if (!sid) return;
 
-    c.error_driven_learner.last_attempt_a = c.error_driven_learner.last_attempt_a || {};
-    c.error_driven_learner.reviewed_attempts = c.error_driven_learner.reviewed_attempts || {};
+  c.error_driven_learner.last_attempt_a = c.error_driven_learner.last_attempt_a || {};
+  c.error_driven_learner.reviewed_attempts = c.error_driven_learner.reviewed_attempts || {};
+  c.error_driven_learner.cycles_count = Number(c.error_driven_learner.cycles_count) || 0;
 
-    Object.keys(topicsErrorsMap || {}).forEach(topic => {
-      const key = `${sid}::${String(topic || "General")}`;
-      const errors = Number(topicsErrorsMap[topic]) || 0;
+  Object.keys(topicsErrorsMap || {}).forEach(topic => {
+    const safeTopic = String(topic || "General");
+    const key = `${sid}::${safeTopic}`;
+    const errors = Math.max(0, Number(topicsErrorsMap[topic]) || 0);
 
-      // If this attempt has errors, store as A baseline for that topic
+    const prevA = c.error_driven_learner.last_attempt_a[key];
+    const reviewed = prevA?.attempt_key
+      ? c.error_driven_learner.reviewed_attempts[String(prevA.attempt_key || "")]
+      : null;
+
+    // 1) If we already have A + review, current attempt becomes candidate B
+    if (prevA && prevA.attempt_key && reviewed) {
+      const aErr = Math.max(0, Number(prevA.errors_count) || 0);
+      const bErr = errors;
+
+      if (aErr > 0) {
+        const reduction = (aErr - bErr) / aErr;
+
+        if (bErr < aErr && reduction >= 0.30) {
+          c.error_driven_learner.cycles_count += 1;
+
+          c.error_driven_learner.evidence = {
+            ...(c.error_driven_learner.evidence || {}),
+            computed_at: Date.now(),
+            cycles_count: c.error_driven_learner.cycles_count,
+            baseline_errors: aErr,
+            current_errors: bErr,
+            error_reduction: Math.round(reduction * 1000) / 1000,
+            subject_id: sid,
+            topic: safeTopic,
+            last_events: pushLastEvents(c.error_driven_learner.evidence?.last_events, eventId, 5)
+          };
+
+          // consume A so same baseline cannot be farmed repeatedly
+          delete c.error_driven_learner.last_attempt_a[key];
+          return;
+        }
+      }
+
+      // no sufficient improvement -> if current attempt still has errors, replace baseline with fresher A
       if (errors > 0) {
         c.error_driven_learner.last_attempt_a[key] = {
           attempt_key: String(attemptKey || ""),
           errors_count: errors,
           ts: Date.now(),
           subject_id: sid,
-          topic: String(topic || "General")
+          topic: safeTopic
         };
       } else {
-        // errors == 0 can be “attempt B” candidate: check last A + review marker
-        const prevA = c.error_driven_learner.last_attempt_a[key];
-        if (!prevA || !prevA.attempt_key) return;
-
-        const reviewed = c.error_driven_learner.reviewed_attempts[String(prevA.attempt_key || "")];
-        if (!reviewed) return;
-
-        const aErr = Number(prevA.errors_count) || 0;
-        const bErr = errors;
-        if (aErr <= 0) return;
-
-        // “improvement” = bErr < aErr and reduction >= 30%
-        const reduction = (aErr - bErr) / aErr;
-        if (bErr < aErr && reduction >= 0.30) {
-          c.error_driven_learner.cycles_count = (Number(c.error_driven_learner.cycles_count) || 0) + 1;
-
-          c.error_driven_learner.evidence = {
-            ...(c.error_driven_learner.evidence || {}),
-            baseline_errors: aErr,
-            current_errors: bErr,
-            last_events: pushLastEvents(c.error_driven_learner.evidence?.last_events, eventId, 5)
-          };
-
-          // consume baseline so user cannot farm same A infinitely
-          delete c.error_driven_learner.last_attempt_a[key];
-        }
+        // perfect attempt but without valid cycle -> clear stale baseline
+        delete c.error_driven_learner.last_attempt_a[key];
       }
-    });
 
-    saveCredentialsStore(c);
-    evaluateErrorDrivenDailyOrOnReview();
-  }
+      return;
+    }
+
+    // 2) No valid reviewed A yet -> if current attempt has errors, save as new baseline A
+    if (errors > 0) {
+      c.error_driven_learner.last_attempt_a[key] = {
+        attempt_key: String(attemptKey || ""),
+        errors_count: errors,
+        ts: Date.now(),
+        subject_id: sid,
+        topic: safeTopic
+      };
+    }
+  });
+
+  saveCredentialsStore(c);
+  evaluateErrorDrivenDailyOrOnReview();
+}
 
 function evaluateRealtimeCredentials(event) {
   // Consistent learner is daily; but we still want its evidence “last events”
@@ -3935,9 +3979,9 @@ async function ensureCredentialsDbSynced() {
     if (!uid) return { ok: false, reason: "no_uid" };
 
     // 1) читаем user_credentials
-    const { data: urows, error: uerr } = await window.sb
+        const { data: urows, error: uerr } = await window.sb
       .from("user_credentials")
-      .select("credential_id,status,evidence_snapshot,last_evaluated_at,created_at")
+      .select("credential_id,status,achieved_at,evidence_snapshot,last_evaluated_at,created_at")
       .eq("user_id", uid);
 
     if (uerr) {
@@ -3972,9 +4016,9 @@ async function ensureCredentialsDbSynced() {
       const code = idToCode[r.credential_id];
       if (!code) return;
 
-      const rec = {
+            const rec = {
         status: r.status || "inactive",
-        achieved_at: r.created_at || null,
+        achieved_at: r.achieved_at || null,
         last_evaluated_at: r.last_evaluated_at || null,
         evidence: r.evidence_snapshot || {},
         evidence_snapshot: r.evidence_snapshot || {}
