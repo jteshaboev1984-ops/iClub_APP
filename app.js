@@ -5134,7 +5134,7 @@ async function renderCertificateQr(row) {
     if (!window.QRious) return;
 
     const mobile = window.matchMedia("(max-width: 640px)").matches;
-    const qrSize = mobile ? 80 : 94;
+    const qrSize = mobile ? 148 : 156;
 
             mount.innerHTML = "";
     mount.style.position = "relative";
@@ -5153,14 +5153,14 @@ async function renderCertificateQr(row) {
     canvas.style.margin = "0";
     canvas.style.transform = "none";
 
-    new window.QRious({
+        new window.QRious({
       element: canvas,
       value: verifyUrl,
       size: qrSize,
       level: "H",
       background: "#ffffff",
       foreground: "#0f172a",
-      padding: 4
+      padding: 0
     });
 
     mount.appendChild(canvas);
