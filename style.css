@@ -4760,3 +4760,7 @@ button.is-loading { opacity: .85; }
     padding: 6px 0 10px;
   }
 }
+.cert-actions .btn.is-loading{
+  opacity: 0.8;
+  pointer-events: none;
+}
