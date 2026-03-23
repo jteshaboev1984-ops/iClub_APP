@@ -5274,164 +5274,166 @@ async function renderCertificateVerifyView(certificateNumber) {
 }
 
 function certificateViewerHtml(row) {
-  if (!row) {
-    return `
-      <div class="card">
-        <div class="muted">${escapeHTML(t("certificates_empty") || "Пока сертификатов нет.")}</div>
-      </div>
-    `;
-  }
-
-  const profile = loadProfile?.() || {};
-  const certLang = String(row?.language_code || currentLang() || "ru").toLowerCase();
-
-  const certT = (key, fallback = "") => {
-    try {
-      const prev = window.i18n?.getLang ? window.i18n.getLang() : "ru";
-      if (window.i18n?.setLang) window.i18n.setLang(certLang);
-      const out = window.i18n?.t ? window.i18n.t(key) : fallback;
-      if (window.i18n?.setLang) window.i18n.setLang(prev);
-      return out || fallback;
-    } catch {
-      return fallback;
-    }
-  };
+  const profile = (typeof loadProfile === "function" ? loadProfile() : null) || {};
 
   const fullName =
     String(
-      profile?.full_name ||
       profile?.fullName ||
-      profile?.fullname ||
+      [
+        profile?.first_name,
+        profile?.last_name
+      ].filter(Boolean).join(" ") ||
       profile?.name ||
-      ""
-    ).trim() ||
-    [profile?.first_name, profile?.last_name].filter(Boolean).join(" ").trim() ||
-    "iClub User";
+      t("participant_label") ||
+      "Participant"
+    ).trim();
 
-    const subjectText = row.subject_title || (certT("subject_label", "Предмет"));
-  const regionText =
+  const subjectText =
     String(
-      (profile?.region_tr && profile.region_tr[certLang]) ||
-      profile?.region_name ||
-      profile?.region ||
-      row?.region ||
-      certT("rank_region_label", "Регион")
+      row?.subject_title ||
+      row?.subject_key ||
+      t("subject_label") ||
+      "Subject"
     ).trim();
-  const districtText =
-    String(
-      (profile?.district_tr && profile.district_tr[certLang]) ||
-      profile?.district_name ||
-      profile?.district ||
-      row?.district ||
-      certT("rank_district_label", "Район")
-    ).trim();
+
+  const certLang = String(
+    row?.language_code ||
+    profile?.uiLanguage ||
+    profile?.language ||
+    currentLang() ||
+    "en"
+  ).toLowerCase();
+
+  const rankSuffix = String(t("rank_suffix_label") || "place").trim();
+
+  const regionText = String(
+    profile?.region_name ||
+    profile?.region ||
+    t("rank_region_label") ||
+    "Region"
+  ).trim();
+
+  const districtText = String(
+    profile?.district_name ||
+    profile?.district ||
+    t("rank_district_label") ||
+    "District"
+  ).trim();
+
+  const countryPlace =
+    row?.rank_country != null ? `${escapeHTML(String(row.rank_country))}-${escapeHTML(rankSuffix)}` : "—";
+  const regionPlace =
+    row?.rank_region != null ? `${escapeHTML(String(row.rank_region))}-${escapeHTML(rankSuffix)}` : "—";
+  const districtPlace =
+    row?.rank_district != null ? `${escapeHTML(String(row.rank_district))}-${escapeHTML(rankSuffix)}` : "—";
+
+  const isFinal = String(row?.certificate_type || "") === "final";
 
   return `
     <div class="card" id="certificate-viewer-card" style="padding:0; overflow:hidden;">
-      <div id="certificate-canvas-root" class="cert-sheet">
-        <div class="cert-paper">
-          <div class="cert-top">
-            <div class="cert-brand">
-              <img src="logo.png" alt="iClub" class="cert-logo" />
-              <div>
-                <div class="cert-brand-name">iClub</div>
-                <div class="cert-brand-sub">${escapeHTML(certT("brand_tagline") || "Smarter together")}</div>
+      <div id="certificate-canvas-root" class="cert-sheet cert-sheet-premium">
+        <div class="cert-paper cert-paper-premium">
+          <div class="cert-frame-inner"></div>
+
+          <div class="cert-header-premium">
+            <div class="cert-brand-premium">
+              <img src="logo.png" alt="iClub" class="cert-logo-premium" />
+              <div class="cert-brand-copy">
+                <div class="cert-brand-name-premium">iClub</div>
+                <div class="cert-brand-sub-premium">${escapeHTML(t("brand_tagline") || "Smarter together")}</div>
               </div>
             </div>
           </div>
 
-          <div class="cert-hero">
-            <div class="cert-kicker">${escapeHTML(certT("certificate_awarded_label", "Официальный сертификат участника"))}</div>
-            <div class="cert-name">${escapeHTML(fullName)}</div>
+          <div class="cert-title-top">
+            ${escapeHTML(t("certificate_awarded_label") || "OFFICIAL PARTICIPANT CERTIFICATE")}
           </div>
 
-                   <div class="cert-grid-main-3 cert-info-grid">
-            <div class="cert-info-card">
-              <div class="cert-info-label">${escapeHTML(certT("subject_label", "Предмет"))}</div>
-              <div class="cert-info-value">${escapeHTML(subjectText)}</div>
-            </div>
-
-            <div class="cert-info-card">
-              <div class="cert-info-label">
-                ${
-                  String(row?.certificate_type || "") === "final"
-                    ? escapeHTML(certT("certificates_title", "Сертификат"))
-                    : escapeHTML(certT("tours_tour_label", "Тур"))
-                }
-              </div>
-              <div class="cert-info-value">
-                ${
-                  String(row?.certificate_type || "") === "final"
-                    ? escapeHTML(certT("cert_final_label", "Итоговый сертификат"))
-                    : escapeHTML(String(row.tour_no || "—"))
-                }
-              </div>
-            </div>
-
-            <div class="cert-info-card">
-              <div class="cert-info-label">${escapeHTML(certT("participants_total_label", "Участников"))}</div>
-              <div class="cert-info-value">${escapeHTML(String(row.participants_total ?? "—"))}</div>
-            </div>
+          <div class="cert-name cert-name-premium">
+            ${escapeHTML(fullName)}
           </div>
 
-          <div class="cert-grid-main-2 cert-result-grid">
-            <div class="cert-stat cert-stat-primary">
-              <div class="cert-stat-label">${escapeHTML(certT("certificate_result_label", "Результат"))}</div>
-              <div class="cert-stat-value">${escapeHTML(String(row.score ?? "—"))} ${escapeHTML(certT("points_label", "балл"))}</div>
-            </div>
-
-            <div class="cert-stat cert-stat-primary">
-              <div class="cert-stat-label">${escapeHTML(certT("correct_answers_percent_label", "Правильных ответов"))}</div>
-              <div class="cert-stat-value">${escapeHTML(String(row.percent ?? "—"))}%</div>
-            </div>
+          <div class="cert-lead-premium">
+            ${escapeHTML(isFinal ? (t("certificate_footer_label") || "has successfully achieved outstanding results in") : "has successfully achieved outstanding results in")}
           </div>
 
-          <div class="cert-grid-main-3 cert-rank-grid">
-            <div class="cert-rank">
-              <div class="cert-rank-label">${escapeHTML(certT("rank_country_label", "Республика"))}</div>
-              <div class="cert-rank-value">${escapeHTML(String(row.rank_country ?? "—"))}-${escapeHTML(certT("rank_suffix_label", "место"))}</div>
-            </div>
-
-            <div class="cert-rank">
-              <div class="cert-rank-label">${escapeHTML(regionText)}</div>
-              <div class="cert-rank-value">${escapeHTML(String(row.rank_region ?? "—"))}-${escapeHTML(certT("rank_suffix_label", "место"))}</div>
-            </div>
-
-            <div class="cert-rank">
-              <div class="cert-rank-label">${escapeHTML(districtText)}</div>
-              <div class="cert-rank-value">${escapeHTML(String(row.rank_district ?? "—"))}-${escapeHTML(certT("rank_suffix_label", "место"))}</div>
-            </div>
+          <div class="cert-subject-premium">
+            ${escapeHTML(subjectText)}
           </div>
 
-          ${
-            String(row?.certificate_type || "") === "final"
-              ? `
-          <div class="cert-final-box">
-            <div class="cert-final-label">${escapeHTML(certT("completed_tours_label", "Завершено туров"))}</div>
-            <div class="cert-final-value">${escapeHTML(String(row.completed_tours ?? 0))}/${escapeHTML(String(row.total_tours ?? 7))}</div>
-          </div>
-          `
-              : ``
-          }
-
-                    <div class="cert-bottom">
-            <div class="cert-bottom-meta">
-              <div class="cert-date-line">
-                <span>${escapeHTML(certT("date_label", "Дата"))}:</span>
-                <b>${escapeHTML(formatDateForLangSafe(row.created_at, certLang))}</b>
+          <div class="cert-main-premium">
+            <div class="cert-main-left">
+              <div class="cert-line-premium">
+                <span class="cert-line-label-premium">${escapeHTML(t("rank_country_label") || "Country")}:</span>
+                <span class="cert-line-value-premium">${countryPlace}</span>
               </div>
 
-              <div class="cert-number-box cert-number-box-bottom">
-                <div class="cert-number-label">${escapeHTML(certT("certificate_number_label") || "Номер сертификата")}</div>
-                <div class="cert-number-value">${escapeHTML(String(row.certificate_number || "—"))}</div>
+              <div class="cert-line-premium">
+                <span class="cert-line-label-premium">${escapeHTML(regionText)}:</span>
+                <span class="cert-line-value-premium">${regionPlace}</span>
               </div>
 
-              <div class="cert-qr-hint">${escapeHTML(certT("certificate_qr_hint") || "QR orqali tekshirish")}</div>
+              <div class="cert-line-premium">
+                <span class="cert-line-label-premium">${escapeHTML(districtText)}:</span>
+                <span class="cert-line-value-premium">${districtPlace}</span>
+              </div>
             </div>
 
-            <div class="cert-qr-wrap">
-              <div id="certificate-qr" class="cert-qr"></div>
-              <div class="cert-qr-caption">${escapeHTML(certT("certificate_qr_caption") || "Tekshirish")}</div>
+            <div class="cert-main-divider"></div>
+
+            <div class="cert-main-right">
+              <div class="cert-line-premium">
+                <span class="cert-line-label-premium">${escapeHTML(t("certificate_result_label") || "Result")}:</span>
+                <span class="cert-line-value-premium">
+                  ${escapeHTML(String(row.score ?? "—"))} ${escapeHTML(t("points_label") || "points")}
+                </span>
+              </div>
+
+              <div class="cert-line-premium">
+                <span class="cert-line-label-premium">${escapeHTML(t("correct_answers_percent_label") || "Correct answers")}:</span>
+                <span class="cert-line-value-premium">
+                  ${escapeHTML(String(row.percent ?? "—"))}%
+                </span>
+              </div>
+
+              <div class="cert-line-premium">
+                <span class="cert-line-label-premium">
+                  ${escapeHTML(isFinal ? (t("completed_tours_label") || "Completed tours") : ((t("tours_tour_label") || "Tour") + ":"))}
+                </span>
+                <span class="cert-line-value-premium">
+                  ${
+                    isFinal
+                      ? `${escapeHTML(String(row.completed_tours ?? 0))}/${escapeHTML(String(row.total_tours ?? 7))}`
+                      : `${escapeHTML(String(row.tour_no ?? "—"))}`
+                  }
+                </span>
+              </div>
+
+              <div class="cert-line-premium">
+                <span class="cert-line-label-premium">${escapeHTML(t("participants_total_label") || "Participants")}:</span>
+                <span class="cert-line-value-premium">
+                  ${escapeHTML(String(row.participants_total ?? "—"))}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="cert-footer-premium">
+            <div class="cert-footer-left">
+              <div class="cert-footer-date">
+                ${escapeHTML(formatDateForLangSafe(row.created_at, certLang))}
+              </div>
+
+              <div class="cert-footer-id">
+                <span class="cert-footer-id-label">${escapeHTML(t("certificate_number_label") || "Certificate ID")}:</span>
+                <span class="cert-footer-id-value">${escapeHTML(String(row.certificate_number || "—"))}</span>
+              </div>
+
+              <div class="cert-footer-line"></div>
+            </div>
+
+            <div class="cert-qr-wrap cert-qr-wrap-premium">
+              <div id="certificate-qr" class="cert-qr cert-qr-premium"></div>
             </div>
           </div>
         </div>
@@ -5439,10 +5441,10 @@ function certificateViewerHtml(row) {
 
       <div class="cert-actions">
         <button class="btn primary" type="button" data-action="certificate-download-png" data-id="${Number(row.id)}">
-          ${escapeHTML(certT("download_png_label", "Скачать PNG"))}
+          ${escapeHTML(t("download_png_label") || "Download PNG")}
         </button>
         <button class="btn" type="button" data-action="certificate-download-pdf" data-id="${Number(row.id)}">
-          ${escapeHTML(certT("download_pdf_label", "Скачать PDF"))}
+          ${escapeHTML(t("download_pdf_label") || "Download PDF")}
         </button>
       </div>
     </div>
@@ -5513,7 +5515,7 @@ function triggerBlobDownload(blob, filename) {
   }, 1500);
 }
 
-async function buildCertificateCanvasBlob(kind) {
+async function buildCertificateCanvasBlob(kind) async function buildCertificateCanvasBlob(kind) {
   const root = document.getElementById("certificate-canvas-root");
   if (!root) {
     showToast(t("certificates_empty") || "Пока сертификатов нет.");
@@ -5522,12 +5524,23 @@ async function buildCertificateCanvasBlob(kind) {
 
   await ensureHtml2CanvasLoaded();
 
+  const prevWidth = root.style.width;
+  const prevMaxWidth = root.style.maxWidth;
+  const prevMinWidth = root.style.minWidth;
+  const prevPadding = root.style.padding;
+
   root.classList.add("cert-export-mode");
+  root.style.width = "1365px";
+  root.style.maxWidth = "1365px";
+  root.style.minWidth = "1365px";
+  root.style.padding = "22px";
 
   try {
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
     const canvas = await window.html2canvas(root, {
-      backgroundColor: null,
-      scale: 2,
+      backgroundColor: "#f6f3eb",
+      scale: 3,
       useCORS: true
     });
 
@@ -5538,6 +5551,10 @@ async function buildCertificateCanvasBlob(kind) {
     return canvas;
   } finally {
     root.classList.remove("cert-export-mode");
+    root.style.width = prevWidth;
+    root.style.maxWidth = prevMaxWidth;
+    root.style.minWidth = prevMinWidth;
+    root.style.padding = prevPadding;
   }
 }
 
