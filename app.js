@@ -5515,7 +5515,7 @@ function triggerBlobDownload(blob, filename) {
   }, 1500);
 }
 
-async function buildCertificateCanvasBlob(kind) async function buildCertificateCanvasBlob(kind) {
+async function buildCertificateCanvasBlob(kind) {
   const root = document.getElementById("certificate-canvas-root");
   if (!root) {
     showToast(t("certificates_empty") || "Пока сертификатов нет.");
