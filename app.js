@@ -4682,6 +4682,91 @@ async function issueFinalCertificateDb(userId, subjectId) {
     return null;
   }
 }
+   const __tourCertReadyCache = new Map();
+
+async function canIssueTourCertificateNow(tourId) {
+  try {
+    if (!window.sb || !tourId) return false;
+
+    const tid = Number(tourId);
+    if (!tid) return false;
+
+    const cacheKey = `tour:${tid}`;
+    const cached = __tourCertReadyCache.get(cacheKey);
+    if (cached && (Date.now() - cached.ts < 60 * 1000)) {
+      return !!cached.ready;
+    }
+
+    const today = new Date();
+    const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+    const { data, error } = await window.sb
+      .from("tours")
+      .select("id,end_date,is_active")
+      .eq("id", tid)
+      .limit(1)
+      .maybeSingle();
+
+    const ready = !!(data?.end_date && String(data.end_date) < todayIso);
+
+    if (error || !data) {
+      __tourCertReadyCache.set(cacheKey, { ready: false, ts: Date.now() });
+      return false;
+    }
+
+    __tourCertReadyCache.set(cacheKey, { ready, ts: Date.now() });
+    return ready;
+  } catch {
+    return false;
+  }
+}
+
+async function ensureEligibleCertificatesIssued() {
+  try {
+    if (!window.sb) return;
+
+    const uid = await getAuthUid();
+    if (!uid) return;
+
+    const { data: attempts, error } = await window.sb
+      .from("tour_attempts")
+      .select("id,tour_id,subject_id,status")
+      .eq("user_id", uid)
+      .in("status", ["submitted", "time_expired"])
+      .order("id", { ascending: false });
+
+    if (error || !Array.isArray(attempts) || !attempts.length) {
+      return;
+    }
+
+    const seenTourIds = new Set();
+    const seenSubjectIds = new Set();
+
+    for (const row of attempts) {
+      const attemptId = Number(row?.id || 0);
+      const tourId = Number(row?.tour_id || 0);
+      const subjectId = Number(row?.subject_id || 0);
+
+      if (subjectId > 0) {
+        seenSubjectIds.add(subjectId);
+      }
+
+      if (attemptId > 0 && tourId > 0 && !seenTourIds.has(tourId)) {
+        seenTourIds.add(tourId);
+
+        const ready = await canIssueTourCertificateNow(tourId);
+        if (ready) {
+          await issueTourCertificateDb(attemptId).catch(() => null);
+        }
+      }
+    }
+
+    for (const subjectId of seenSubjectIds) {
+      await tryIssueFinalCertificateForSubject(subjectId).catch(() => null);
+    }
+  } catch {}
+}
+   
    const __finalCertReadyCache = new Map();
 
 async function canIssueFinalCertificateNow(subjectId) {
@@ -4921,20 +5006,21 @@ async function renderCertificatesView() {
     <div class="empty muted">${escapeHTML(t("loading") || "Loading…")}</div>
   `;
 
+  await ensureEligibleCertificatesIssued();
   const rows = await fetchMyCertificatesDb();
 
-    if (!rows.length) {
+      if (!rows.length) {
     listEl.innerHTML = `
       <div class="card" style="text-align:center; padding:20px;">
         <div style="font-size:34px; line-height:1; margin-bottom:10px;">🏅</div>
         <div style="font-weight:900; margin-bottom:6px;">
-          ${escapeHTML(t("certificates_empty_title") || "Сертификатов пока нет")}
+          ${escapeHTML(t("certificates_empty_title") || "Certificates are not available yet")}
         </div>
         <div class="muted" style="margin-bottom:14px;">
-          ${escapeHTML(t("certificates_empty") || "Пока сертификатов нет.")}
+          ${escapeHTML(t("certificates_empty") || "No certificates yet")}
         </div>
         <div class="muted small">
-          ${escapeHTML(t("certificates_empty_hint") || "Завершите активный тур, чтобы здесь появился ваш официальный результат.")}
+          ${escapeHTML(t("certificates_empty_hint") || "Certificates become available only after the global completion of the corresponding tour or all tours.")}
         </div>
       </div>
     `;
@@ -5276,63 +5362,81 @@ async function renderCertificateVerifyView(certificateNumber) {
 function certificateViewerHtml(row) {
   const profile = (typeof loadProfile === "function" ? loadProfile() : null) || {};
 
+  const certLang = String(
+    row?.language_code ||
+    profile?.language ||
+    currentLang() ||
+    "en"
+  ).toLowerCase();
+
+  const certT = (key, fallback = "") => {
+    try {
+      const prev = window.i18n?.getLang ? window.i18n.getLang() : "ru";
+      if (window.i18n?.setLang) window.i18n.setLang(certLang);
+      const out = window.i18n?.t ? window.i18n.t(key) : fallback;
+      if (window.i18n?.setLang) window.i18n.setLang(prev);
+      return out || fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
   const fullName =
     String(
+      profile?.full_name ||
       profile?.fullName ||
-      [
-        profile?.first_name,
-        profile?.last_name
-      ].filter(Boolean).join(" ") ||
+      profile?.fullname ||
+      [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") ||
       profile?.name ||
-      t("participant_label") ||
-      "Participant"
+      certT("participant_label", "Participant")
     ).trim();
 
   const subjectText =
     String(
       row?.subject_title ||
       row?.subject_key ||
-      t("subject_label") ||
-      "Subject"
+      certT("subject_label", "Subject")
     ).trim();
 
-  const certLang = String(
-    row?.language_code ||
-    profile?.uiLanguage ||
-    profile?.language ||
-    currentLang() ||
-    "en"
-  ).toLowerCase();
-
-  const rankSuffix = String(t("rank_suffix_label") || "place").trim();
+  const rankSuffix = String(certT("rank_suffix_label", "place")).trim();
 
   const regionText = String(
+    (profile?.region_tr && profile.region_tr[certLang]) ||
     profile?.region_name ||
     profile?.region ||
-    t("rank_region_label") ||
-    "Region"
+    row?.region ||
+    certT("rank_region_label", "Region")
   ).trim();
 
   const districtText = String(
+    (profile?.district_tr && profile.district_tr[certLang]) ||
     profile?.district_name ||
     profile?.district ||
-    t("rank_district_label") ||
-    "District"
+    row?.district ||
+    certT("rank_district_label", "District")
   ).trim();
 
   const countryPlace =
-    row?.rank_country != null ? `${escapeHTML(String(row.rank_country))}-${escapeHTML(rankSuffix)}` : "—";
+    row?.rank_country != null && row?.rank_country !== ""
+      ? `${escapeHTML(String(row.rank_country))}-${escapeHTML(rankSuffix)}`
+      : "—";
+
   const regionPlace =
-    row?.rank_region != null ? `${escapeHTML(String(row.rank_region))}-${escapeHTML(rankSuffix)}` : "—";
+    row?.rank_region != null && row?.rank_region !== ""
+      ? `${escapeHTML(String(row.rank_region))}-${escapeHTML(rankSuffix)}`
+      : "—";
+
   const districtPlace =
-    row?.rank_district != null ? `${escapeHTML(String(row.rank_district))}-${escapeHTML(rankSuffix)}` : "—";
+    row?.rank_district != null && row?.rank_district !== ""
+      ? `${escapeHTML(String(row.rank_district))}-${escapeHTML(rankSuffix)}`
+      : "—";
 
   const isFinal = String(row?.certificate_type || "") === "final";
 
   return `
     <div class="card" id="certificate-viewer-card" style="padding:0; overflow:hidden;">
-      <div id="certificate-canvas-root" class="cert-sheet cert-sheet-premium">
-        <div class="cert-paper cert-paper-premium">
+      <div id="certificate-canvas-root" class="cert-sheet-premium">
+        <div class="cert-paper-premium">
           <div class="cert-frame-inner"></div>
 
           <div class="cert-header-premium">
@@ -5340,21 +5444,21 @@ function certificateViewerHtml(row) {
               <img src="logo.png" alt="iClub" class="cert-logo-premium" />
               <div class="cert-brand-copy">
                 <div class="cert-brand-name-premium">iClub</div>
-                <div class="cert-brand-sub-premium">${escapeHTML(t("brand_tagline") || "Smarter together")}</div>
+                <div class="cert-brand-sub-premium">Smarter together</div>
               </div>
             </div>
           </div>
 
           <div class="cert-title-top">
-            ${escapeHTML(t("certificate_awarded_label") || "OFFICIAL PARTICIPANT CERTIFICATE")}
+            ${escapeHTML(certT("certificate_awarded_label", "Official participant certificate"))}
           </div>
 
-          <div class="cert-name cert-name-premium">
+          <div class="cert-name-premium">
             ${escapeHTML(fullName)}
           </div>
 
           <div class="cert-lead-premium">
-            ${escapeHTML(isFinal ? (t("certificate_footer_label") || "has successfully achieved outstanding results in") : "has successfully achieved outstanding results in")}
+            ${escapeHTML(certT("certificate_footer_label", "Official result of an iClub platform participant"))}
           </div>
 
           <div class="cert-subject-premium">
@@ -5364,7 +5468,7 @@ function certificateViewerHtml(row) {
           <div class="cert-main-premium">
             <div class="cert-main-left">
               <div class="cert-line-premium">
-                <span class="cert-line-label-premium">${escapeHTML(t("rank_country_label") || "Country")}:</span>
+                <span class="cert-line-label-premium">${escapeHTML(certT("rank_country_label", "Country"))}:</span>
                 <span class="cert-line-value-premium">${countryPlace}</span>
               </div>
 
@@ -5383,23 +5487,21 @@ function certificateViewerHtml(row) {
 
             <div class="cert-main-right">
               <div class="cert-line-premium">
-                <span class="cert-line-label-premium">${escapeHTML(t("certificate_result_label") || "Result")}:</span>
+                <span class="cert-line-label-premium">${escapeHTML(certT("certificate_result_label", "Result"))}:</span>
                 <span class="cert-line-value-premium">
-                  ${escapeHTML(String(row.score ?? "—"))} ${escapeHTML(t("points_label") || "points")}
+                  ${escapeHTML(String(row.score ?? "—"))} ${escapeHTML(certT("points_label", "points"))}
                 </span>
               </div>
 
               <div class="cert-line-premium">
-                <span class="cert-line-label-premium">${escapeHTML(t("correct_answers_percent_label") || "Correct answers")}:</span>
+                <span class="cert-line-label-premium">${escapeHTML(certT("correct_answers_percent_label", "Correct answers"))}:</span>
                 <span class="cert-line-value-premium">
                   ${escapeHTML(String(row.percent ?? "—"))}%
                 </span>
               </div>
 
               <div class="cert-line-premium">
-                <span class="cert-line-label-premium">
-                  ${escapeHTML(isFinal ? (t("completed_tours_label") || "Completed tours") : ((t("tours_tour_label") || "Tour") + ":"))}
-                </span>
+                <span class="cert-line-label-premium">${escapeHTML(isFinal ? certT("completed_tours_label", "Completed Tours") : certT("tours_tour_label", "Tour"))}:</span>
                 <span class="cert-line-value-premium">
                   ${
                     isFinal
@@ -5410,7 +5512,7 @@ function certificateViewerHtml(row) {
               </div>
 
               <div class="cert-line-premium">
-                <span class="cert-line-label-premium">${escapeHTML(t("participants_total_label") || "Participants")}:</span>
+                <span class="cert-line-label-premium">${escapeHTML(certT("participants_total_label", "Participants"))}:</span>
                 <span class="cert-line-value-premium">
                   ${escapeHTML(String(row.participants_total ?? "—"))}
                 </span>
@@ -5425,15 +5527,15 @@ function certificateViewerHtml(row) {
               </div>
 
               <div class="cert-footer-id">
-                <span class="cert-footer-id-label">${escapeHTML(t("certificate_number_label") || "Certificate ID")}:</span>
+                <span class="cert-footer-id-label">${escapeHTML(certT("certificate_number_label", "Certificate Number"))}:</span>
                 <span class="cert-footer-id-value">${escapeHTML(String(row.certificate_number || "—"))}</span>
               </div>
 
               <div class="cert-footer-line"></div>
             </div>
 
-            <div class="cert-qr-wrap cert-qr-wrap-premium">
-              <div id="certificate-qr" class="cert-qr cert-qr-premium"></div>
+            <div class="cert-qr-wrap-premium">
+              <div id="certificate-qr" class="cert-qr-premium"></div>
             </div>
           </div>
         </div>
@@ -5441,10 +5543,10 @@ function certificateViewerHtml(row) {
 
       <div class="cert-actions">
         <button class="btn primary" type="button" data-action="certificate-download-png" data-id="${Number(row.id)}">
-          ${escapeHTML(t("download_png_label") || "Download PNG")}
+          ${escapeHTML(certT("download_png_label", "Download PNG"))}
         </button>
         <button class="btn" type="button" data-action="certificate-download-pdf" data-id="${Number(row.id)}">
-          ${escapeHTML(t("download_pdf_label") || "Download PDF")}
+          ${escapeHTML(certT("download_pdf_label", "Download PDF"))}
         </button>
       </div>
     </div>
@@ -5469,8 +5571,9 @@ async function renderCertificateViewer(rows) {
 
   if (!selected) return;
 
-  const wrap = document.createElement("div");
+    const wrap = document.createElement("div");
   wrap.id = "certificate-viewer-wrap";
+  wrap.className = "certificate-viewer-wrap-premium";
   wrap.style.marginTop = "16px";
   wrap.innerHTML = certificateViewerHtml(selected);
 
@@ -14364,29 +14467,15 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     state.certificates = { selectedId: null, lastIssuedId: null };
   }
 
-  // try to issue certificate only after successful DB finalize
-    if (
+  //   // Сертификаты не выдаём сразу после финиша.
+  // Они становятся доступны только после глобального завершения тура / всех туров.
+  if (
     finalizeSavedToDb &&
     ctx?.attemptId &&
     !ctx?.isArchive &&
     reason !== "violations"
   ) {
-    try {
-      const certRow = await issueTourCertificateDb(ctx.attemptId);
-      if (certRow?.id) {
-        state.courses.lastTourCertificateId = Number(certRow.id);
-        state.certificates.selectedId = Number(certRow.id);
-        state.certificates.lastIssuedId = Number(certRow.id);
-      }
-
-      const subjectKey = state?.courses?.subjectKey || null;
-      if (subjectKey) {
-        const subjectId = await getSubjectIdByKey(subjectKey).catch(() => null);
-        if (subjectId) {
-          await tryIssueFinalCertificateForSubject(subjectId).catch(() => null);
-        }
-      }
-    } catch {}
+    state.courses.lastTourCertificateId = null;
   }
 
    // unlock
