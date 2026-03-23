@@ -5434,9 +5434,11 @@ function certificateViewerHtml(row) {
   const isFinal = String(row?.certificate_type || "") === "final";
 
   return `
-    <div class="card" id="certificate-viewer-card" style="padding:0; overflow:hidden;">
-      <div id="certificate-canvas-root" class="cert-sheet-premium">
-        <div class="cert-paper-premium">
+        <div class="card" id="certificate-viewer-card" style="padding:0; overflow:hidden;">
+      <div class="certificate-preview-stage">
+        <div class="certificate-preview-scale" id="certificate-preview-scale">
+          <div id="certificate-canvas-root" class="cert-sheet-premium">
+            <div class="cert-paper-premium">
           <div class="cert-frame-inner"></div>
 
           <div class="cert-header-premium">
@@ -5537,6 +5539,7 @@ function certificateViewerHtml(row) {
             <div class="cert-qr-wrap-premium">
               <div id="certificate-qr" class="cert-qr-premium"></div>
             </div>
+         < /div>
           </div>
         </div>
       </div>
@@ -5553,6 +5556,24 @@ function certificateViewerHtml(row) {
   `;
 }
 
+   function syncCertificatePreviewScale() {
+  const stage = document.querySelector("#certificate-viewer-wrap .certificate-preview-stage");
+  const scaleEl = document.getElementById("certificate-preview-scale");
+  if (!stage || !scaleEl) return;
+
+  const baseWidth = 1365;
+  const baseHeight = Math.round(baseWidth * 3 / 4); // 4:3
+
+  const stageWidth = Math.max(280, stage.clientWidth);
+  const scale = Math.min(1, stageWidth / baseWidth);
+
+  scaleEl.style.width = `${baseWidth}px`;
+  scaleEl.style.height = `${baseHeight}px`;
+  scaleEl.style.transform = `scale(${scale})`;
+
+  stage.style.height = `${Math.round(baseHeight * scale)}px`;
+}
+   
 async function renderCertificateViewer(rows) {
   const listEl = document.getElementById("certificates-list");
   if (!listEl) return;
@@ -5571,7 +5592,7 @@ async function renderCertificateViewer(rows) {
 
   if (!selected) return;
 
-    const wrap = document.createElement("div");
+      const wrap = document.createElement("div");
   wrap.id = "certificate-viewer-wrap";
   wrap.className = "certificate-viewer-wrap-premium";
   wrap.style.marginTop = "16px";
@@ -5579,6 +5600,14 @@ async function renderCertificateViewer(rows) {
 
   listEl.parentNode.appendChild(wrap);
   await renderCertificateQr(selected);
+
+  syncCertificatePreviewScale();
+  requestAnimationFrame(syncCertificatePreviewScale);
+
+  if (!window.__certificatePreviewResizeBound) {
+    window.addEventListener("resize", syncCertificatePreviewScale, { passive: true });
+    window.__certificatePreviewResizeBound = true;
+  }
 }
 
 async function ensureHtml2CanvasLoaded() {
