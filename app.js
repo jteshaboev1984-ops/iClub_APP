@@ -5557,15 +5557,30 @@ function certificateViewerHtml(row) {
 }
 
    function syncCertificatePreviewScale() {
+  const wrap = document.getElementById("certificate-viewer-wrap");
   const stage = document.querySelector("#certificate-viewer-wrap .certificate-preview-stage");
   const scaleEl = document.getElementById("certificate-preview-scale");
-  if (!stage || !scaleEl) return;
+  const actions = document.querySelector("#certificate-viewer-wrap .cert-actions");
+
+  if (!wrap || !stage || !scaleEl) return;
 
   const baseWidth = 1365;
   const baseHeight = Math.round(baseWidth * 3 / 4); // 4:3
 
-  const stageWidth = Math.max(280, stage.clientWidth);
-  const scale = Math.min(1, stageWidth / baseWidth);
+  const wrapWidth = Math.max(280, wrap.clientWidth || stage.clientWidth || 0);
+
+  const viewportH = window.innerHeight || document.documentElement.clientHeight || 800;
+  const topbarH = document.getElementById("topbar")?.offsetHeight || 72;
+  const tabbarH = document.getElementById("tabbar")?.offsetHeight || 64;
+  const actionsH = actions?.offsetHeight || 64;
+
+  // Оставляем место под заголовок экрана, кнопки и нижний таббар
+  const reservedH = topbarH + tabbarH + actionsH + 150;
+  const maxPreviewH = Math.max(220, viewportH - reservedH);
+
+  const scaleByWidth = wrapWidth / baseWidth;
+  const scaleByHeight = maxPreviewH / baseHeight;
+  const scale = Math.min(1, scaleByWidth, scaleByHeight);
 
   scaleEl.style.width = `${baseWidth}px`;
   scaleEl.style.height = `${baseHeight}px`;
@@ -5598,11 +5613,14 @@ async function renderCertificateViewer(rows) {
   wrap.style.marginTop = "16px";
   wrap.innerHTML = certificateViewerHtml(selected);
 
-  listEl.parentNode.appendChild(wrap);
+    listEl.parentNode.appendChild(wrap);
   await renderCertificateQr(selected);
 
   syncCertificatePreviewScale();
-  requestAnimationFrame(syncCertificatePreviewScale);
+  requestAnimationFrame(() => {
+    syncCertificatePreviewScale();
+    requestAnimationFrame(syncCertificatePreviewScale);
+  });
 
   if (!window.__certificatePreviewResizeBound) {
     window.addEventListener("resize", syncCertificatePreviewScale, { passive: true });
