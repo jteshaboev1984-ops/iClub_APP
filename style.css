@@ -4570,8 +4570,8 @@ button.is-loading { opacity: .85; }
   right: 56px;
   bottom: 34px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 170px;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 20px;
   align-items: end;
 }
 
@@ -4612,16 +4612,16 @@ button.is-loading { opacity: .85; }
 }
 
 .cert-qr-wrap-premium{
-  width: 170px;
+  width: 210px;
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
 }
 
 .cert-qr-premium{
-  width: 156px;
-  height: 156px;
-  border-radius: 18px;
+  width: 188px;
+  height: 188px;
+  border-radius: 20px;
   border: none;
   background: #ffffff;
   box-shadow: none;
@@ -4633,8 +4633,8 @@ button.is-loading { opacity: .85; }
 
 .cert-qr-premium canvas,
 .cert-qr-premium img{
-  width: 132px;
-  height: 132px;
+  width: 164px;
+  height: 164px;
   display: block;
 }
 
