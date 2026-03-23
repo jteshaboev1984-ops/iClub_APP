@@ -104,7 +104,8 @@ function showCertificateDownloadOverlay() {
 
   const txt = el.querySelector(".view-transition-text");
   if (txt) {
-    txt.textContent = t("certificate_download_preparing");
+    const label = (typeof t === "function" ? t("certificate_download_preparing") : "") || "Подготавливаем сертификат…";
+    txt.textContent = label;
   }
 
   if (__viewTransitionTimer) {
@@ -5668,6 +5669,9 @@ function triggerBlobDownload(blob, filename) {
 
 async function buildCertificateCanvasBlob(kind) {
   const root = document.getElementById("certificate-canvas-root");
+  const stage = document.querySelector("#certificate-viewer-wrap .certificate-preview-stage");
+  const scaleEl = document.getElementById("certificate-preview-scale");
+
   if (!root) {
     showToast(t("certificates_empty") || "Пока сертификатов нет.");
     return null;
@@ -5675,16 +5679,44 @@ async function buildCertificateCanvasBlob(kind) {
 
   await ensureHtml2CanvasLoaded();
 
-  const prevWidth = root.style.width;
-  const prevMaxWidth = root.style.maxWidth;
-  const prevMinWidth = root.style.minWidth;
-  const prevPadding = root.style.padding;
+  const prevRootWidth = root.style.width;
+  const prevRootMaxWidth = root.style.maxWidth;
+  const prevRootMinWidth = root.style.minWidth;
+  const prevRootPadding = root.style.padding;
+  const prevRootOverflow = root.style.overflow;
+
+  const prevStageHeight = stage ? stage.style.height : "";
+  const prevStageOverflow = stage ? stage.style.overflow : "";
+  const prevStageDisplay = stage ? stage.style.display : "";
+  const prevStageJustify = stage ? stage.style.justifyContent : "";
+  const prevStageAlign = stage ? stage.style.alignItems : "";
+
+  const prevScaleTransform = scaleEl ? scaleEl.style.transform : "";
+  const prevScaleWidth = scaleEl ? scaleEl.style.width : "";
+  const prevScaleHeight = scaleEl ? scaleEl.style.height : "";
+  const prevScaleOrigin = scaleEl ? scaleEl.style.transformOrigin : "";
 
   root.classList.add("cert-export-mode");
   root.style.width = "1365px";
   root.style.maxWidth = "1365px";
   root.style.minWidth = "1365px";
-  root.style.padding = "22px";
+  root.style.padding = "0";
+  root.style.overflow = "visible";
+
+  if (stage) {
+    stage.style.height = "auto";
+    stage.style.overflow = "visible";
+    stage.style.display = "block";
+    stage.style.justifyContent = "initial";
+    stage.style.alignItems = "initial";
+  }
+
+  if (scaleEl) {
+    scaleEl.style.transform = "none";
+    scaleEl.style.width = "1365px";
+    scaleEl.style.height = `${Math.round(1365 * 3 / 4)}px`;
+    scaleEl.style.transformOrigin = "top left";
+  }
 
   try {
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -5702,15 +5734,38 @@ async function buildCertificateCanvasBlob(kind) {
     return canvas;
   } finally {
     root.classList.remove("cert-export-mode");
-    root.style.width = prevWidth;
-    root.style.maxWidth = prevMaxWidth;
-    root.style.minWidth = prevMinWidth;
-    root.style.padding = prevPadding;
+    root.style.width = prevRootWidth;
+    root.style.maxWidth = prevRootMaxWidth;
+    root.style.minWidth = prevRootMinWidth;
+    root.style.padding = prevRootPadding;
+    root.style.overflow = prevRootOverflow;
+
+    if (stage) {
+      stage.style.height = prevStageHeight;
+      stage.style.overflow = prevStageOverflow;
+      stage.style.display = prevStageDisplay;
+      stage.style.justifyContent = prevStageJustify;
+      stage.style.alignItems = prevStageAlign;
+    }
+
+    if (scaleEl) {
+      scaleEl.style.transform = prevScaleTransform;
+      scaleEl.style.width = prevScaleWidth;
+      scaleEl.style.height = prevScaleHeight;
+      scaleEl.style.transformOrigin = prevScaleOrigin;
+    }
   }
 }
 
 async function downloadCertificateAsPng(row) {
+  const btn = document.querySelector(`[data-action="certificate-download-png"][data-id="${Number(row.id)}"]`);
+
   try {
+    if (btn) {
+      btn.disabled = true;
+      btn.classList.add("is-loading");
+    }
+
     showCertificateDownloadOverlay();
     await waitForOverlayPaint();
 
@@ -5721,12 +5776,23 @@ async function downloadCertificateAsPng(row) {
   } catch {
     showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
   } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("is-loading");
+    }
     hideCertificateDownloadOverlay();
   }
 }
 
 async function downloadCertificateAsPdf(row) {
+  const btn = document.querySelector(`[data-action="certificate-download-pdf"][data-id="${Number(row.id)}"]`);
+
   try {
+    if (btn) {
+      btn.disabled = true;
+      btn.classList.add("is-loading");
+    }
+
     showCertificateDownloadOverlay();
     await waitForOverlayPaint();
 
@@ -5737,21 +5803,25 @@ async function downloadCertificateAsPdf(row) {
 
     const { jsPDF } = window.jspdf;
 
-const pdfOrientation = canvas.width > canvas.height ? "landscape" : "portrait";
+    const pdfOrientation = canvas.width > canvas.height ? "landscape" : "portrait";
 
-const pdf = new jsPDF({
-  orientation: pdfOrientation,
-  unit: "px",
-  format: [canvas.width, canvas.height],
-  hotfixes: ["px_scaling"]
-});
+    const pdf = new jsPDF({
+      orientation: pdfOrientation,
+      unit: "px",
+      format: [canvas.width, canvas.height],
+      hotfixes: ["px_scaling"]
+    });
 
-const imgData = canvas.toDataURL("image/png");
-pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height, undefined, "NONE");
-pdf.save(buildCertificateDownloadName(row, "pdf"));
+    const imgData = canvas.toDataURL("image/png");
+    pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height, undefined, "NONE");
+    pdf.save(buildCertificateDownloadName(row, "pdf"));
   } catch {
     showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
   } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("is-loading");
+    }
     hideCertificateDownloadOverlay();
   }
 }
