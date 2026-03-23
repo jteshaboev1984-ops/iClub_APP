@@ -5238,7 +5238,7 @@ async function fetchCertificateVerificationRow(certificateNumber) {
       }
     } catch {}
 
-    return {
+        return {
       ...(baseRow || {}),
       ...certRow,
       subject_key: baseRow?.subject_key || subjectRow?.subject_key || null,
@@ -5246,6 +5246,14 @@ async function fetchCertificateVerificationRow(certificateNumber) {
       tour_no: baseRow?.tour_no || tourRow?.tour_no || null,
       first_name: baseRow?.first_name || userRow?.first_name || null,
       last_name: baseRow?.last_name || userRow?.last_name || null,
+      full_name:
+        baseRow?.full_name ||
+        userRow?.full_name ||
+        [
+          baseRow?.first_name || userRow?.first_name || null,
+          baseRow?.last_name || userRow?.last_name || null
+        ].filter(Boolean).join(" ").trim() ||
+        null,
       school: baseRow?.school || userRow?.school || null,
       class: baseRow?.class || userRow?.class || null,
       region: baseRow?.region || userRow?.region || null,
@@ -5288,10 +5296,10 @@ async function renderCertificateVerifyView(certificateNumber) {
       ? (t("cert_final_label") || "Итоговый сертификат")
       : `${t("tours_tour_label") || "Тур"} ${Number(row?.tour_no || 0) || "—"}`;
 
-  const participantName =
+    const participantName =
     String(
-      [row?.first_name, row?.last_name].filter(Boolean).join(" ").trim() ||
       row?.full_name ||
+      [row?.first_name, row?.last_name].filter(Boolean).join(" ").trim() ||
       ""
     ).trim() || "—";
 
@@ -5360,6 +5368,31 @@ async function renderCertificateVerifyView(certificateNumber) {
   `;
 }
 
+   function formatCertificatePlace(rank, lang) {
+  const n = Number(rank);
+  if (!Number.isFinite(n) || n <= 0) return "—";
+
+  const l = String(lang || "en").toLowerCase();
+
+  if (l === "ru") {
+    return `${n}-е место`;
+  }
+
+  if (l === "uz") {
+    return `${n}-o‘rin`;
+  }
+
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+
+  let suffix = "th";
+  if (mod10 === 1 && mod100 !== 11) suffix = "st";
+  else if (mod10 === 2 && mod100 !== 12) suffix = "nd";
+  else if (mod10 === 3 && mod100 !== 13) suffix = "rd";
+
+  return `${n}${suffix} place`;
+}
+   
 function certificateViewerHtml(row) {
   const profile = (typeof loadProfile === "function" ? loadProfile() : null) || {};
 
@@ -5399,9 +5432,7 @@ function certificateViewerHtml(row) {
       certT("subject_label", "Subject")
     ).trim();
 
-  const rankSuffix = String(certT("rank_suffix_label", "place")).trim();
-
-  const regionText = String(
+    const regionText = String(
     (profile?.region_tr && profile.region_tr[certLang]) ||
     profile?.region_name ||
     profile?.region ||
@@ -5417,19 +5448,19 @@ function certificateViewerHtml(row) {
     certT("rank_district_label", "District")
   ).trim();
 
-  const countryPlace =
+    const countryPlace =
     row?.rank_country != null && row?.rank_country !== ""
-      ? `${escapeHTML(String(row.rank_country))}-${escapeHTML(rankSuffix)}`
+      ? escapeHTML(formatCertificatePlace(row.rank_country, certLang))
       : "—";
 
   const regionPlace =
     row?.rank_region != null && row?.rank_region !== ""
-      ? `${escapeHTML(String(row.rank_region))}-${escapeHTML(rankSuffix)}`
+      ? escapeHTML(formatCertificatePlace(row.rank_region, certLang))
       : "—";
 
   const districtPlace =
     row?.rank_district != null && row?.rank_district !== ""
-      ? `${escapeHTML(String(row.rank_district))}-${escapeHTML(rankSuffix)}`
+      ? escapeHTML(formatCertificatePlace(row.rank_district, certLang))
       : "—";
 
   const isFinal = String(row?.certificate_type || "") === "final";
