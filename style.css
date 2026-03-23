@@ -4666,7 +4666,7 @@ button.is-loading { opacity: .85; }
 }
 
 /* =========================
-   Certificate viewer — fit to screen
+   Certificate viewer — fit to screen FINAL
    ========================= */
 
 #certificate-viewer-wrap.certificate-viewer-wrap-premium{
@@ -4681,6 +4681,7 @@ button.is-loading { opacity: .85; }
   border-radius: 0 !important;
   box-shadow: none !important;
   background: transparent !important;
+  overflow: visible !important;
 }
 
 .certificate-preview-stage{
@@ -4688,10 +4689,13 @@ button.is-loading { opacity: .85; }
   overflow: hidden;
   padding: 8px 0 10px;
   background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .certificate-preview-scale{
-  transform-origin: top left;
+  transform-origin: top center;
   will-change: transform;
 }
 
@@ -4730,7 +4734,18 @@ button.is-loading { opacity: .85; }
 }
 
 .cert-actions{
-  padding-top: 12px;
+  padding: 12px 16px 14px;
+  margin-top: 6px;
+  border-top: 1px solid rgba(15,23,42,.08);
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  background: #fff;
+}
+
+.cert-actions .btn{
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 @media (max-width: 900px){
