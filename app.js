@@ -5434,112 +5434,113 @@ function certificateViewerHtml(row) {
   const isFinal = String(row?.certificate_type || "") === "final";
 
   return `
-        <div class="card" id="certificate-viewer-card" style="padding:0; overflow:hidden;">
+    <div class="card" id="certificate-viewer-card" style="padding:0; overflow:visible;">
       <div class="certificate-preview-stage">
         <div class="certificate-preview-scale" id="certificate-preview-scale">
           <div id="certificate-canvas-root" class="cert-sheet-premium">
             <div class="cert-paper-premium">
-          <div class="cert-frame-inner"></div>
+              <div class="cert-frame-inner"></div>
 
-          <div class="cert-header-premium">
-            <div class="cert-brand-premium">
-              <img src="logo.png" alt="iClub" class="cert-logo-premium" />
-              <div class="cert-brand-copy">
-                <div class="cert-brand-name-premium">iClub</div>
-                <div class="cert-brand-sub-premium">Smarter together</div>
+              <div class="cert-header-premium">
+                <div class="cert-brand-premium">
+                  <img src="logo.png" alt="iClub" class="cert-logo-premium" />
+                  <div class="cert-brand-copy">
+                    <div class="cert-brand-name-premium">iClub</div>
+                    <div class="cert-brand-sub-premium">Smarter together</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cert-title-top">
+                ${escapeHTML(certT("certificate_awarded_label", "Official participant certificate"))}
+              </div>
+
+              <div class="cert-name-premium">
+                ${escapeHTML(fullName)}
+              </div>
+
+              <div class="cert-lead-premium">
+                ${escapeHTML(certT("certificate_footer_label", "Official result of an iClub platform participant"))}
+              </div>
+
+              <div class="cert-subject-premium">
+                ${escapeHTML(subjectText)}
+              </div>
+
+              <div class="cert-main-premium">
+                <div class="cert-main-left">
+                  <div class="cert-line-premium">
+                    <span class="cert-line-label-premium">${escapeHTML(certT("rank_country_label", "Country"))}:</span>
+                    <span class="cert-line-value-premium">${countryPlace}</span>
+                  </div>
+
+                  <div class="cert-line-premium">
+                    <span class="cert-line-label-premium">${escapeHTML(regionText)}:</span>
+                    <span class="cert-line-value-premium">${regionPlace}</span>
+                  </div>
+
+                  <div class="cert-line-premium">
+                    <span class="cert-line-label-premium">${escapeHTML(districtText)}:</span>
+                    <span class="cert-line-value-premium">${districtPlace}</span>
+                  </div>
+                </div>
+
+                <div class="cert-main-divider"></div>
+
+                <div class="cert-main-right">
+                  <div class="cert-line-premium">
+                    <span class="cert-line-label-premium">${escapeHTML(certT("certificate_result_label", "Result"))}:</span>
+                    <span class="cert-line-value-premium">
+                      ${escapeHTML(String(row.score ?? "—"))} ${escapeHTML(certT("points_label", "points"))}
+                    </span>
+                  </div>
+
+                  <div class="cert-line-premium">
+                    <span class="cert-line-label-premium">${escapeHTML(certT("correct_answers_percent_label", "Correct answers"))}:</span>
+                    <span class="cert-line-value-premium">
+                      ${escapeHTML(String(row.percent ?? "—"))}%
+                    </span>
+                  </div>
+
+                  <div class="cert-line-premium">
+                    <span class="cert-line-label-premium">${escapeHTML(isFinal ? certT("completed_tours_label", "Completed Tours") : certT("tours_tour_label", "Tour"))}:</span>
+                    <span class="cert-line-value-premium">
+                      ${
+                        isFinal
+                          ? `${escapeHTML(String(row.completed_tours ?? 0))}/${escapeHTML(String(row.total_tours ?? 7))}`
+                          : `${escapeHTML(String(row.tour_no ?? "—"))}`
+                      }
+                    </span>
+                  </div>
+
+                  <div class="cert-line-premium">
+                    <span class="cert-line-label-premium">${escapeHTML(certT("participants_total_label", "Participants"))}:</span>
+                    <span class="cert-line-value-premium">
+                      ${escapeHTML(String(row.participants_total ?? "—"))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cert-footer-premium">
+                <div class="cert-footer-left">
+                  <div class="cert-footer-date">
+                    ${escapeHTML(formatDateForLangSafe(row.created_at, certLang))}
+                  </div>
+
+                  <div class="cert-footer-id">
+                    <span class="cert-footer-id-label">${escapeHTML(certT("certificate_number_label", "Certificate Number"))}:</span>
+                    <span class="cert-footer-id-value">${escapeHTML(String(row.certificate_number || "—"))}</span>
+                  </div>
+
+                  <div class="cert-footer-line"></div>
+                </div>
+
+                <div class="cert-qr-wrap-premium">
+                  <div id="certificate-qr" class="cert-qr-premium"></div>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div class="cert-title-top">
-            ${escapeHTML(certT("certificate_awarded_label", "Official participant certificate"))}
-          </div>
-
-          <div class="cert-name-premium">
-            ${escapeHTML(fullName)}
-          </div>
-
-          <div class="cert-lead-premium">
-            ${escapeHTML(certT("certificate_footer_label", "Official result of an iClub platform participant"))}
-          </div>
-
-          <div class="cert-subject-premium">
-            ${escapeHTML(subjectText)}
-          </div>
-
-          <div class="cert-main-premium">
-            <div class="cert-main-left">
-              <div class="cert-line-premium">
-                <span class="cert-line-label-premium">${escapeHTML(certT("rank_country_label", "Country"))}:</span>
-                <span class="cert-line-value-premium">${countryPlace}</span>
-              </div>
-
-              <div class="cert-line-premium">
-                <span class="cert-line-label-premium">${escapeHTML(regionText)}:</span>
-                <span class="cert-line-value-premium">${regionPlace}</span>
-              </div>
-
-              <div class="cert-line-premium">
-                <span class="cert-line-label-premium">${escapeHTML(districtText)}:</span>
-                <span class="cert-line-value-premium">${districtPlace}</span>
-              </div>
-            </div>
-
-            <div class="cert-main-divider"></div>
-
-            <div class="cert-main-right">
-              <div class="cert-line-premium">
-                <span class="cert-line-label-premium">${escapeHTML(certT("certificate_result_label", "Result"))}:</span>
-                <span class="cert-line-value-premium">
-                  ${escapeHTML(String(row.score ?? "—"))} ${escapeHTML(certT("points_label", "points"))}
-                </span>
-              </div>
-
-              <div class="cert-line-premium">
-                <span class="cert-line-label-premium">${escapeHTML(certT("correct_answers_percent_label", "Correct answers"))}:</span>
-                <span class="cert-line-value-premium">
-                  ${escapeHTML(String(row.percent ?? "—"))}%
-                </span>
-              </div>
-
-              <div class="cert-line-premium">
-                <span class="cert-line-label-premium">${escapeHTML(isFinal ? certT("completed_tours_label", "Completed Tours") : certT("tours_tour_label", "Tour"))}:</span>
-                <span class="cert-line-value-premium">
-                  ${
-                    isFinal
-                      ? `${escapeHTML(String(row.completed_tours ?? 0))}/${escapeHTML(String(row.total_tours ?? 7))}`
-                      : `${escapeHTML(String(row.tour_no ?? "—"))}`
-                  }
-                </span>
-              </div>
-
-              <div class="cert-line-premium">
-                <span class="cert-line-label-premium">${escapeHTML(certT("participants_total_label", "Participants"))}:</span>
-                <span class="cert-line-value-premium">
-                  ${escapeHTML(String(row.participants_total ?? "—"))}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div class="cert-footer-premium">
-            <div class="cert-footer-left">
-              <div class="cert-footer-date">
-                ${escapeHTML(formatDateForLangSafe(row.created_at, certLang))}
-              </div>
-
-              <div class="cert-footer-id">
-                <span class="cert-footer-id-label">${escapeHTML(certT("certificate_number_label", "Certificate Number"))}:</span>
-                <span class="cert-footer-id-value">${escapeHTML(String(row.certificate_number || "—"))}</span>
-              </div>
-
-              <div class="cert-footer-line"></div>
-            </div>
-
-            <div class="cert-qr-wrap-premium">
-              <div id="certificate-qr" class="cert-qr-premium"></div>
-            </div>
-         < /div>
           </div>
         </div>
       </div>
