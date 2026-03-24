@@ -5203,14 +5203,50 @@ async function fetchCertificateVerificationRow(certificateNumber) {
     let tourRow = null;
 
     try {
-      if (certRow.user_id) {
+            if (certRow.user_id) {
         const { data } = await window.sb
           .from("users")
-          .select("first_name,last_name,school,class,region,district")
+          .select("first_name,last_name,school,class,region,district,region_id,district_id")
           .eq("id", certRow.user_id)
           .maybeSingle();
 
         userRow = data || null;
+
+        if (userRow?.region_id && !userRow.region_tr) {
+          try {
+            const { data: rRow } = await window.sb
+              .from("regions")
+              .select("id,name_ru,name_uz,name_en,name")
+              .eq("id", Number(userRow.region_id))
+              .maybeSingle();
+
+            if (rRow) {
+              userRow.region_tr = {
+                ru: String(rRow.name_ru || rRow.name || "").trim(),
+                uz: String(rRow.name_uz || rRow.name_ru || rRow.name || "").trim(),
+                en: String(rRow.name_en || rRow.name_ru || rRow.name || "").trim()
+              };
+            }
+          } catch {}
+        }
+
+        if (userRow?.district_id && !userRow.district_tr) {
+          try {
+            const { data: dRow } = await window.sb
+              .from("districts")
+              .select("id,name_ru,name_uz,name_en,name")
+              .eq("id", Number(userRow.district_id))
+              .maybeSingle();
+
+            if (dRow) {
+              userRow.district_tr = {
+                ru: String(dRow.name_ru || dRow.name || "").trim(),
+                uz: String(dRow.name_uz || dRow.name_ru || dRow.name || "").trim(),
+                en: String(dRow.name_en || dRow.name_ru || dRow.name || "").trim()
+              };
+            }
+          } catch {}
+        }
       }
     } catch {}
 
@@ -5253,7 +5289,9 @@ async function fetchCertificateVerificationRow(certificateNumber) {
   school: baseRow?.school || userRow?.school || null,
   class: baseRow?.class || userRow?.class || null,
   region: baseRow?.region || userRow?.region || null,
-  district: baseRow?.district || userRow?.district || null
+  district: baseRow?.district || userRow?.district || null,
+  region_tr: baseRow?.region_tr || userRow?.region_tr || null,
+  district_tr: baseRow?.district_tr || userRow?.district_tr || null
 };
   } catch {
     return null;
@@ -5301,14 +5339,6 @@ async function renderCertificateVerifyView(certificateNumber) {
     }
   };
 
-  const viewEl = document.getElementById("view-certificate-verify");
-  if (viewEl) {
-    const h1 = viewEl.querySelector(".content > .h1");
-    const sub = viewEl.querySelector(".content > .muted");
-    if (h1) h1.textContent = verifyT("certificate_verify_title", "Certificate verification");
-    if (sub) sub.textContent = verifyT("certificate_verify_sub", "Public authenticity check");
-  }
-
   const subjectText = row.subject_key
     ? subjectTitle(row.subject_key, row.subject_title || "")
     : (row.subject_title || verifyT("subject_label", "Subject"));
@@ -5327,10 +5357,53 @@ async function renderCertificateVerifyView(certificateNumber) {
       ""
     ).trim() || "—";
 
-  const schoolText = String(row?.school || "").trim();
-  const classText = String(row?.class || "").trim();
-  const regionText = String(row?.region || "").trim();
-  const districtText = String(row?.district || "").trim();
+    const pickTr = (tr, fallback) => {
+    let obj = tr;
+    if (typeof obj === "string") {
+      try { obj = JSON.parse(obj); } catch { obj = null; }
+    }
+    if (obj && typeof obj === "object") {
+      if (certLang === "uz") return String(obj.uz || obj.ru || fallback || "").trim();
+      if (certLang === "en") return String(obj.en || obj.ru || fallback || "").trim();
+      return String(obj.ru || fallback || "").trim();
+    }
+    return String(fallback || "").trim();
+  };
+
+  const rawSchoolText = String(row?.school || "").trim();
+  const rawClassText = String(row?.class || "").trim();
+
+  const formatSchoolValue = (value, lang) => {
+    const v = String(value || "").trim();
+    if (!v) return "";
+
+    if (/^\d+$/.test(v)) {
+      if (lang === "uz") return `${v}-maktab`;
+      if (lang === "en") return `School ${v}`;
+      return `Школа №${v}`;
+    }
+
+    return v;
+  };
+
+  const formatClassValue = (value, lang) => {
+    const v = String(value || "").trim();
+    if (!v) return "";
+
+    if (/^\d+$/.test(v)) {
+      if (lang === "uz") return `${v}-sinf`;
+      if (lang === "en") return `Grade ${v}`;
+      return `${v} класс`;
+    }
+
+    return v;
+  };
+
+  const schoolText = formatSchoolValue(rawSchoolText, certLang);
+  const classText = formatClassValue(rawClassText, certLang);
+
+  const regionText = pickTr(row?.region_tr, row?.region);
+  const districtText = pickTr(row?.district_tr, row?.district);
 
   const schoolClassValue =
     String([schoolText, classText].filter(Boolean).join(" · ")).trim() || "—";
@@ -5424,8 +5497,7 @@ async function renderCertificateVerifyView(certificateNumber) {
           </div>
         </div>
 
-        <div class="cert-verify-footnote">${escapeHTML(verifyT("certificate_verify_footnote", "Verified through the official iClub certificate service."))}</div>
-      </div>
+        </div>
     </div>
   `;
 }
