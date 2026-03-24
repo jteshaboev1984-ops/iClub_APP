@@ -98,13 +98,13 @@ function showViewTransitionOverlay(duration = 220) {
   }, duration);
 }
 
-function showCertificateDownloadOverlay() {
+function showCertificateFlowOverlay(i18nKey = "certificate_download_preparing", fallback = "Подготавливаем сертификат…") {
   const el = document.getElementById("view-transition-overlay");
   if (!el) return;
 
   const txt = el.querySelector(".view-transition-text");
   if (txt) {
-    const label = (typeof t === "function" ? t("certificate_download_preparing") : "") || "Подготавливаем сертификат…";
+    const label = (typeof t === "function" ? t(i18nKey) : "") || fallback;
     txt.textContent = label;
   }
 
@@ -114,6 +114,10 @@ function showCertificateDownloadOverlay() {
   }
 
   el.classList.remove("hidden");
+}
+
+function showCertificateDownloadOverlay() {
+  showCertificateFlowOverlay("certificate_download_preparing", "Подготавливаем сертификат…");
 }
 
 function hideCertificateDownloadOverlay() {
@@ -4683,6 +4687,20 @@ async function issueFinalCertificateDb(userId, subjectId) {
     return null;
   }
 }
+   function isTourGloballyClosed(row, todayIso) {
+  if (!row) return false;
+
+  const endDate = String(row?.end_date || "").trim();
+  if (endDate) {
+    return endDate < todayIso;
+  }
+
+  if (row?.is_active === false) return true;
+  if (row?.is_active === true) return false;
+
+  return false;
+}
+   
    const __tourCertReadyCache = new Map();
 
 async function canIssueTourCertificateNow(tourId) {
@@ -4708,7 +4726,7 @@ async function canIssueTourCertificateNow(tourId) {
       .limit(1)
       .maybeSingle();
 
-    const ready = !!(data?.end_date && String(data.end_date) < todayIso);
+    const ready = isTourGloballyClosed(data, todayIso);
 
     if (error || !data) {
       __tourCertReadyCache.set(cacheKey, { ready: false, ts: Date.now() });
@@ -4823,8 +4841,8 @@ async function canIssueFinalCertificateNow(subjectId) {
     );
 
     const allFinished =
-      uniqTours.size === 7 &&
-      data.every(row => !!row?.end_date && String(row.end_date) < todayIso);
+  uniqTours.size === 7 &&
+  data.every(row => isTourGloballyClosed(row, todayIso));
 
     __finalCertReadyCache.set(cacheKey, { ready: allFinished, ts: Date.now() });
     return allFinished;
@@ -5018,7 +5036,36 @@ function renderCertificateStatsHtml(row) {
 
   return `<div class="cert-list-meta-row">${chips.join("")}</div>`;
 }
+async function canAccessCertificateRow(row) {
+  if (!row) return false;
 
+  if (String(row?.certificate_type || "") === "final") {
+    return await canIssueFinalCertificateNow(Number(row?.subject_id || 0));
+  }
+
+  return await canIssueTourCertificateNow(Number(row?.tour_id || 0));
+}
+
+function getCertificateLockedMessage(row) {
+  if (String(row?.certificate_type || "") === "final") {
+    return t("certificate_final_locked_toast") || "Итоговый сертификат станет доступен после глобального завершения всех туров.";
+  }
+
+  return t("certificate_tour_locked_toast") || "Сертификат станет доступен после глобального завершения этого тура.";
+}
+
+async function filterAvailableCertificateRows(rows) {
+  const src = Array.isArray(rows) ? rows : [];
+  const out = [];
+
+  for (const row of src) {
+    const ok = await canAccessCertificateRow(row);
+    if (ok) out.push(row);
+  }
+
+  return out;
+}
+   
 async function renderCertificatesView() {
   const listEl = document.getElementById("certificates-list");
   if (!listEl) return;
@@ -5027,8 +5074,9 @@ async function renderCertificatesView() {
     <div class="empty muted">${escapeHTML(t("loading") || "Loading…")}</div>
   `;
 
-  await ensureEligibleCertificatesIssued();
-  const rows = await fetchMyCertificatesDb();
+    await ensureEligibleCertificatesIssued();
+  const rawRows = await fetchMyCertificatesDb();
+  const rows = await filterAvailableCertificateRows(rawRows);
 
       if (!rows.length) {
     listEl.innerHTML = `
@@ -5051,14 +5099,24 @@ async function renderCertificatesView() {
     return;
   }
 
-        const selectedId =
+          const selectedId =
     Number(state?.certificates?.selectedId || 0) ||
     0;
 
-    if (selectedId) {
-    listEl.innerHTML = "";
-    await renderCertificateViewer(rows);
-    return;
+  if (selectedId) {
+    const selectedRow = rows.find(r => Number(r.id) === selectedId) || null;
+
+    if (!selectedRow) {
+      if (!state.certificates) {
+        state.certificates = { selectedId: null, lastIssuedId: null };
+      }
+      state.certificates.selectedId = null;
+      saveState();
+    } else {
+      listEl.innerHTML = "";
+      await renderCertificateViewer(rows);
+      return;
+    }
   }
 
   listEl.innerHTML = rows.map((row) => {
@@ -15427,18 +15485,46 @@ if (action === "about-person-open") {
         return;
       }
 
-             if (action === "certificate-open") {
+                   if (action === "certificate-open") {
         const certId = Number(btn.dataset.id || 0);
         if (!certId) return;
 
-        if (!state.certificates) {
-          state.certificates = { selectedId: null, lastIssuedId: null };
+        showCertificateFlowOverlay("certificate_access_checking", "Проверяем сертификат…");
+        await waitForOverlayPaint();
+
+        try {
+          const rows = await fetchMyCertificatesDb();
+          const row = rows.find(r => Number(r.id) === certId);
+
+          if (!row) {
+            showToast(t("certificates_empty") || "Пока сертификатов нет.");
+            return;
+          }
+
+          const allowed = await canAccessCertificateRow(row);
+          if (!allowed) {
+            if (!state.certificates) {
+              state.certificates = { selectedId: null, lastIssuedId: null };
+            }
+            state.certificates.selectedId = null;
+            saveState();
+
+            showToast(getCertificateLockedMessage(row));
+            await renderCertificatesView();
+            return;
+          }
+
+          if (!state.certificates) {
+            state.certificates = { selectedId: null, lastIssuedId: null };
+          }
+
+          state.certificates.selectedId = certId;
+          saveState();
+
+          await renderCertificatesView();
+        } finally {
+          hideCertificateDownloadOverlay();
         }
-
-        state.certificates.selectedId = certId;
-        saveState();
-
-        await renderCertificatesView();
         return;
       }
 
@@ -15454,9 +15540,37 @@ if (action === "about-person-open") {
         return;
       }
 
-       if (action === "certificate-download-png" || action === "certificate-download-pdf") {
+             if (action === "certificate-download-png" || action === "certificate-download-pdf") {
         const certId = Number(btn.dataset.id || 0);
         if (!certId) return;
+
+        showCertificateFlowOverlay("certificate_access_checking", "Проверяем сертификат…");
+        await waitForOverlayPaint();
+
+        try {
+          const rows = await fetchMyCertificatesDb();
+          const row = rows.find(r => Number(r.id) === certId);
+
+          if (!row) {
+            showToast(t("certificates_empty") || "Пока сертификатов нет.");
+            return;
+          }
+
+          const allowed = await canAccessCertificateRow(row);
+          if (!allowed) {
+            if (!state.certificates) {
+              state.certificates = { selectedId: null, lastIssuedId: null };
+            }
+            state.certificates.selectedId = null;
+            saveState();
+
+            showToast(getCertificateLockedMessage(row));
+            await renderCertificatesView();
+            return;
+          }
+        } finally {
+          hideCertificateDownloadOverlay();
+        }
 
         const rows = await fetchMyCertificatesDb();
         const row = rows.find(r => Number(r.id) === certId);
