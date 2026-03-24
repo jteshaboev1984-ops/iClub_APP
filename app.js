@@ -3576,15 +3576,8 @@ if (tabName === "ratings") {
         renderAboutView();
       }
 
-            if (viewName === "certificates") {
+                  if (viewName === "certificates") {
         (async () => {
-          const subjectKey = state?.courses?.subjectKey || null;
-          if (subjectKey) {
-            const subjectId = await getSubjectIdByKey(subjectKey).catch(() => null);
-            if (subjectId) {
-              await tryIssueFinalCertificateForSubject(subjectId).catch(() => null);
-            }
-          }
           await renderCertificatesView();
         })();
       }
@@ -3610,15 +3603,8 @@ if (tabName === "ratings") {
       renderAboutView();
     }
 
-        if (viewName === "certificates") {
+            if (viewName === "certificates") {
       (async () => {
-        const subjectKey = state?.courses?.subjectKey || null;
-        if (subjectKey) {
-          const subjectId = await getSubjectIdByKey(subjectKey).catch(() => null);
-          if (subjectId) {
-            await tryIssueFinalCertificateForSubject(subjectId).catch(() => null);
-          }
-        }
         await renderCertificatesView();
       })();
     }
@@ -4700,6 +4686,19 @@ async function issueFinalCertificateDb(userId, subjectId) {
 
   return false;
 }
+   function isTourGloballyClosedRow(row, todayIso) {
+  if (!row) return false;
+
+  const endDate = String(row?.end_date || "").trim();
+  if (endDate) {
+    return endDate < todayIso;
+  }
+
+  if (row?.is_active === false) return true;
+  if (row?.is_active === true) return false;
+
+  return false;
+}
    
    const __tourCertReadyCache = new Map();
 
@@ -4726,7 +4725,7 @@ async function canIssueTourCertificateNow(tourId) {
       .limit(1)
       .maybeSingle();
 
-    const ready = isTourGloballyClosed(data, todayIso);
+        const ready = isTourGloballyClosedRow(data, todayIso);
 
     if (error || !data) {
       __tourCertReadyCache.set(cacheKey, { ready: false, ts: Date.now() });
@@ -4801,7 +4800,10 @@ async function ensureEligibleCertificatesIssued() {
     }
 
     for (const subjectId of seenSubjectIds) {
-      await tryIssueFinalCertificateForSubject(subjectId).catch(() => null);
+      const ready = await canIssueFinalCertificateNow(subjectId);
+      if (ready) {
+        await tryIssueFinalCertificateForSubject(subjectId).catch(() => null);
+      }
     }
   } catch {}
 }
@@ -4840,9 +4842,9 @@ async function canIssueFinalCertificateNow(subjectId) {
       data.map(x => Number(x.tour_no)).filter(n => Number.isFinite(n) && n >= 1 && n <= 7)
     );
 
-    const allFinished =
-  uniqTours.size === 7 &&
-  data.every(row => isTourGloballyClosed(row, todayIso));
+        const allFinished =
+      uniqTours.size === 7 &&
+      data.every(row => isTourGloballyClosedRow(row, todayIso));
 
     __finalCertReadyCache.set(cacheKey, { ready: allFinished, ts: Date.now() });
     return allFinished;
