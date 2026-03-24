@@ -4731,7 +4731,7 @@ async function ensureEligibleCertificatesIssued() {
 
     const { data: attempts, error } = await window.sb
       .from("tour_attempts")
-      .select("id,tour_id,subject_id,status")
+      .select("id,tour_id,status")
       .eq("user_id", uid)
       .in("status", ["submitted", "time_expired"])
       .order("id", { ascending: false });
@@ -4743,10 +4743,30 @@ async function ensureEligibleCertificatesIssued() {
     const seenTourIds = new Set();
     const seenSubjectIds = new Set();
 
+    const uniqueTourIds = [...new Set(
+      attempts
+        .map(row => Number(row?.tour_id || 0))
+        .filter(n => n > 0)
+    )];
+
+    let tourSubjectMap = new Map();
+
+    if (uniqueTourIds.length) {
+      const { data: toursRows } = await window.sb
+        .from("tours")
+        .select("id,subject_id")
+        .in("id", uniqueTourIds);
+
+      tourSubjectMap = new Map(
+        (Array.isArray(toursRows) ? toursRows : [])
+          .map(row => [Number(row.id), Number(row.subject_id || 0)])
+      );
+    }
+
     for (const row of attempts) {
       const attemptId = Number(row?.id || 0);
       const tourId = Number(row?.tour_id || 0);
-      const subjectId = Number(row?.subject_id || 0);
+      const subjectId = Number(tourSubjectMap.get(tourId) || 0);
 
       if (subjectId > 0) {
         seenSubjectIds.add(subjectId);
