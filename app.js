@@ -5283,84 +5283,134 @@ async function renderCertificateVerifyView(certificateNumber) {
     return;
   }
 
+  const certLang = String(
+    row?.language_code ||
+    currentLang() ||
+    "ru"
+  ).toLowerCase();
+
+  const verifyT = (key, fallback = "") => {
+    try {
+      const prev = window.i18n?.getLang ? window.i18n.getLang() : "ru";
+      if (window.i18n?.setLang) window.i18n.setLang(certLang);
+      const out = window.i18n?.t ? window.i18n.t(key) : fallback;
+      if (window.i18n?.setLang) window.i18n.setLang(prev);
+      return out || fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
   const subjectText = row.subject_key
     ? subjectTitle(row.subject_key, row.subject_title || "")
-    : (row.subject_title || (t("subject_label") || "Предмет"));
+    : (row.subject_title || (verifyT("subject_label", "Subject")));
 
-    const typeText =
+  const typeText =
     String(row?.certificate_type || "") === "final"
-      ? (t("cert_final_label") || "Итоговый сертификат")
-      : `${t("tours_tour_label") || "Тур"} ${Number(row?.tour_no || 0) || "—"}`;
+      ? (verifyT("cert_final_label", "Final Certificate"))
+      : `${verifyT("tours_tour_label", "Tour")} ${Number(row?.tour_no || 0) || "—"}`;
 
-    const participantName =
-  String(
-    row?.participant_name ||
-    row?.full_name ||
-    row?.name ||
-    [row?.first_name, row?.last_name].filter(Boolean).join(" ").trim() ||
-    ""
-  ).trim() || "—";
+  const participantName =
+    String(
+      row?.participant_name ||
+      row?.full_name ||
+      row?.name ||
+      [row?.first_name, row?.last_name].filter(Boolean).join(" ").trim() ||
+      ""
+    ).trim() || "—";
 
   const schoolText = String(row?.school || "").trim();
   const classText = String(row?.class || "").trim();
   const regionText = String(row?.region || "").trim();
   const districtText = String(row?.district || "").trim();
 
+  const schoolClassValue =
+    String([schoolText, classText].filter(Boolean).join(" · ")).trim() || "—";
+
+  const regionDistrictValue =
+    String([regionText, districtText].filter(Boolean).join(" · ")).trim() || "—";
+
+  const scoreValue = row?.score != null && row?.score !== ""
+    ? escapeHTML(String(row.score))
+    : "—";
+
+  const percentValue = row?.percent != null && row?.percent !== ""
+    ? `${escapeHTML(String(row.percent))}%`
+    : "—";
+
+  const dateValue = row?.created_at
+    ? escapeHTML(formatDateForLangSafe(row.created_at, certLang))
+    : "—";
+
   resultEl.innerHTML = `
-    <div class="card cert-verify-card">
-      <div class="cert-verify-badge">${escapeHTML(t("certificate_verify_valid") || "Сертификат действителен")}</div>
+    <div class="cert-verify-shell">
+      <div class="card cert-verify-hero">
+        <div class="cert-verify-hero-mark">✓</div>
+        <div class="cert-verify-hero-copy">
+          <div class="cert-verify-hero-title">${escapeHTML(verifyT("certificate_verify_valid", "Certificate is valid"))}</div>
+          <div class="cert-verify-hero-sub">${escapeHTML(verifyT("certificate_verify_valid_sub", "The authenticity of this document has been confirmed."))}</div>
+        </div>
+      </div>
 
-      <div class="cert-verify-grid">
-        <div class="cert-verify-row">
-          <div class="cert-verify-label">${escapeHTML(t("certificate_number_label") || "Номер сертификата")}</div>
-          <div class="cert-verify-value cert-verify-number">${escapeHTML(String(row.certificate_number || "—"))}</div>
+      <div class="card cert-verify-card cert-verify-card-premium">
+        <div class="cert-verify-section-title">${escapeHTML(verifyT("certificate_verify_doc_section", "Document details"))}</div>
+
+        <div class="cert-verify-grid cert-verify-grid-premium">
+          <div class="cert-verify-row cert-verify-row-premium cert-verify-row-accent">
+            <div class="cert-verify-label">${escapeHTML(verifyT("certificate_number_label", "Certificate ID"))}</div>
+            <div class="cert-verify-value cert-verify-number">${escapeHTML(String(row?.certificate_number || "—"))}</div>
+          </div>
+
+          <div class="cert-verify-row cert-verify-row-premium">
+            <div class="cert-verify-label">${escapeHTML(verifyT("participant_label", "Participant"))}</div>
+            <div class="cert-verify-value">${escapeHTML(participantName)}</div>
+          </div>
+
+          <div class="cert-verify-row cert-verify-row-premium">
+            <div class="cert-verify-label">${escapeHTML(verifyT("subject_label", "Subject"))}</div>
+            <div class="cert-verify-value">${escapeHTML(subjectText)}</div>
+          </div>
+
+          <div class="cert-verify-row cert-verify-row-premium">
+            <div class="cert-verify-label">${escapeHTML(verifyT("certificate_verify_type_label", "Certificate type"))}</div>
+            <div class="cert-verify-value">${escapeHTML(typeText)}</div>
+          </div>
+
+          <div class="cert-verify-row cert-verify-row-premium">
+            <div class="cert-verify-label">${escapeHTML(verifyT("date_label", "Date"))}</div>
+            <div class="cert-verify-value">${dateValue}</div>
+          </div>
         </div>
 
-               <div class="cert-verify-row">
-          <div class="cert-verify-label">${escapeHTML(t("participant_label") || "Участник")}</div>
-          <div class="cert-verify-value">${escapeHTML(participantName)}</div>
+        <div class="cert-verify-section-title">${escapeHTML(verifyT("certificate_verify_result_section", "Result details"))}</div>
+
+        <div class="cert-verify-stats">
+          <div class="cert-verify-stat">
+            <div class="cert-verify-stat-label">${escapeHTML(verifyT("certificate_result_label", "Result"))}</div>
+            <div class="cert-verify-stat-value">${scoreValue}</div>
+          </div>
+
+          <div class="cert-verify-stat">
+            <div class="cert-verify-stat-label">${escapeHTML(verifyT("correct_answers_percent_label", "Correct answers"))}</div>
+            <div class="cert-verify-stat-value">${percentValue}</div>
+          </div>
         </div>
 
-        <div class="cert-verify-row">
-          <div class="cert-verify-label">${escapeHTML(t("subject_label") || "Предмет")}</div>
-          <div class="cert-verify-value">${escapeHTML(subjectText)}</div>
+        <div class="cert-verify-section-title">${escapeHTML(verifyT("certificate_verify_participant_section", "Participant details"))}</div>
+
+        <div class="cert-verify-grid cert-verify-grid-premium">
+          <div class="cert-verify-row cert-verify-row-premium">
+            <div class="cert-verify-label">${escapeHTML(verifyT("certificate_verify_school_class_label", "School / Grade"))}</div>
+            <div class="cert-verify-value">${escapeHTML(schoolClassValue)}</div>
+          </div>
+
+          <div class="cert-verify-row cert-verify-row-premium">
+            <div class="cert-verify-label">${escapeHTML(verifyT("certificate_verify_region_district_label", "Region / District"))}</div>
+            <div class="cert-verify-value">${escapeHTML(regionDistrictValue)}</div>
+          </div>
         </div>
 
-        ${
-          schoolText
-            ? `
-              <div class="cert-verify-row">
-                <div class="cert-verify-label">${escapeHTML(t("school_prefix") || "Школа")}</div>
-                <div class="cert-verify-value">${escapeHTML(schoolText)}${classText ? ` · ${escapeHTML(classText)} ${escapeHTML(t("class_suffix") || "класс")}` : ""}</div>
-              </div>
-            `
-            : ""
-        }
-
-        ${
-          (regionText || districtText)
-            ? `
-              <div class="cert-verify-row">
-                <div class="cert-verify-label">${escapeHTML(t("rank_region_label") || "Регион")} / ${escapeHTML(t("rank_district_label") || "Район")}</div>
-                <div class="cert-verify-value">${escapeHTML(regionText || "—")}${districtText ? ` · ${escapeHTML(districtText)}` : ""}</div>
-              </div>
-            `
-            : ""
-        }
-        <div class="cert-verify-row">
-          <div class="cert-verify-label">${escapeHTML(t("certificates_title") || "Сертификат")}</div>
-          <div class="cert-verify-value">${escapeHTML(typeText)}</div>
-        </div>
-
-        <div class="cert-verify-row">
-          <div class="cert-verify-label">${escapeHTML(t("certificate_result_label") || "Результат")}</div>
-          <div class="cert-verify-value">${escapeHTML(String(row.score ?? "—"))} ${escapeHTML(t("points_label") || "балл")} · ${escapeHTML(String(row.percent ?? "—"))}%</div>
-        </div>
-
-        <div class="cert-verify-row">
-          <div class="cert-verify-label">${escapeHTML(t("date_label") || "Дата")}</div>
-          <div class="cert-verify-value">${escapeHTML(formatDateShortSafe(row.created_at))}</div>
-        </div>
+        <div class="cert-verify-footnote">${escapeHTML(verifyT("certificate_verify_footnote", "Verified through the official iClub certificate service."))}</div>
       </div>
     </div>
   `;
