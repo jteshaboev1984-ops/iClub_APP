@@ -5189,10 +5189,10 @@ async function fetchCertificateVerificationRow(certificateNumber) {
     } catch {}
 
     const { data: certRow, error: certErr } = await window.sb
-      .from("certificates")
-      .select("id,user_id,subject_id,tour_id,certificate_type,score,percent,certificate_number,language_code,created_at")
-      .eq("certificate_number", certNo)
-      .maybeSingle();
+  .from("certificates")
+  .select("id,user_id,subject_id,tour_id,certificate_type,score,percent,certificate_number,language_code,created_at,participant_name")
+  .eq("certificate_number", certNo)
+  .maybeSingle();
 
     if (certErr || !certRow) {
       return baseRow;
@@ -5239,26 +5239,22 @@ async function fetchCertificateVerificationRow(certificateNumber) {
     } catch {}
 
         return {
-      ...(baseRow || {}),
-      ...certRow,
-      subject_key: baseRow?.subject_key || subjectRow?.subject_key || null,
-      subject_title: baseRow?.subject_title || subjectRow?.title || null,
-      tour_no: baseRow?.tour_no || tourRow?.tour_no || null,
-      first_name: baseRow?.first_name || userRow?.first_name || null,
-      last_name: baseRow?.last_name || userRow?.last_name || null,
-      full_name:
-        baseRow?.full_name ||
-        userRow?.full_name ||
-        [
-          baseRow?.first_name || userRow?.first_name || null,
-          baseRow?.last_name || userRow?.last_name || null
-        ].filter(Boolean).join(" ").trim() ||
-        null,
-      school: baseRow?.school || userRow?.school || null,
-      class: baseRow?.class || userRow?.class || null,
-      region: baseRow?.region || userRow?.region || null,
-      district: baseRow?.district || userRow?.district || null
-    };
+  ...(baseRow || {}),
+  ...certRow,
+  subject_key: baseRow?.subject_key || subjectRow?.subject_key || null,
+  subject_title: baseRow?.subject_title || subjectRow?.title || null,
+  tour_no: baseRow?.tour_no || tourRow?.tour_no || null,
+  participant_name:
+    baseRow?.participant_name ||
+    certRow?.participant_name ||
+    null,
+  first_name: baseRow?.first_name || userRow?.first_name || null,
+  last_name: baseRow?.last_name || userRow?.last_name || null,
+  school: baseRow?.school || userRow?.school || null,
+  class: baseRow?.class || userRow?.class || null,
+  region: baseRow?.region || userRow?.region || null,
+  district: baseRow?.district || userRow?.district || null
+};
   } catch {
     return null;
   }
@@ -5297,11 +5293,13 @@ async function renderCertificateVerifyView(certificateNumber) {
       : `${t("tours_tour_label") || "Тур"} ${Number(row?.tour_no || 0) || "—"}`;
 
     const participantName =
-    String(
-      row?.full_name ||
-      [row?.first_name, row?.last_name].filter(Boolean).join(" ").trim() ||
-      ""
-    ).trim() || "—";
+  String(
+    row?.participant_name ||
+    row?.full_name ||
+    row?.name ||
+    [row?.first_name, row?.last_name].filter(Boolean).join(" ").trim() ||
+    ""
+  ).trim() || "—";
 
   const schoolText = String(row?.school || "").trim();
   const classText = String(row?.class || "").trim();
@@ -5416,14 +5414,15 @@ function certificateViewerHtml(row) {
   };
 
   const fullName =
-    String(
-      profile?.full_name ||
-      profile?.fullName ||
-      profile?.fullname ||
-      [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") ||
-      profile?.name ||
-      certT("participant_label", "Participant")
-    ).trim();
+  String(
+    row?.participant_name ||
+    profile?.full_name ||
+    profile?.fullName ||
+    profile?.fullname ||
+    [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") ||
+    profile?.name ||
+    certT("participant_label", "Participant")
+  ).trim();
 
   const subjectText =
     String(
