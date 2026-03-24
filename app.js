@@ -5301,13 +5301,21 @@ async function renderCertificateVerifyView(certificateNumber) {
     }
   };
 
+  const viewEl = document.getElementById("view-certificate-verify");
+  if (viewEl) {
+    const h1 = viewEl.querySelector(".content > .h1");
+    const sub = viewEl.querySelector(".content > .muted");
+    if (h1) h1.textContent = verifyT("certificate_verify_title", "Certificate verification");
+    if (sub) sub.textContent = verifyT("certificate_verify_sub", "Public authenticity check");
+  }
+
   const subjectText = row.subject_key
     ? subjectTitle(row.subject_key, row.subject_title || "")
-    : (row.subject_title || (verifyT("subject_label", "Subject")));
+    : (row.subject_title || verifyT("subject_label", "Subject"));
 
   const typeText =
     String(row?.certificate_type || "") === "final"
-      ? (verifyT("cert_final_label", "Final Certificate"))
+      ? verifyT("cert_final_label", "Final Certificate")
       : `${verifyT("tours_tour_label", "Tour")} ${Number(row?.tour_no || 0) || "—"}`;
 
   const participantName =
@@ -5343,54 +5351,58 @@ async function renderCertificateVerifyView(certificateNumber) {
     : "—";
 
   resultEl.innerHTML = `
-    <div class="cert-verify-shell">
-      <div class="card cert-verify-hero">
+    <div class="cert-verify-shell cert-verify-shell-compact">
+      <div class="card cert-verify-hero cert-verify-hero-compact">
         <div class="cert-verify-hero-mark">✓</div>
         <div class="cert-verify-hero-copy">
           <div class="cert-verify-hero-title">${escapeHTML(verifyT("certificate_verify_valid", "Certificate is valid"))}</div>
-          <div class="cert-verify-hero-sub">${escapeHTML(verifyT("certificate_verify_valid_sub", "The authenticity of this document has been confirmed."))}</div>
+          <div class="cert-verify-hero-sub">${escapeHTML(verifyT("certificate_verify_valid_sub", "The authenticity of this document has been confirmed in the iClub system."))}</div>
         </div>
       </div>
 
-      <div class="card cert-verify-card cert-verify-card-premium">
+      <div class="card cert-verify-card cert-verify-card-premium cert-verify-card-compact">
         <div class="cert-verify-section-title">${escapeHTML(verifyT("certificate_verify_doc_section", "Document details"))}</div>
 
-        <div class="cert-verify-grid cert-verify-grid-premium">
-          <div class="cert-verify-row cert-verify-row-premium cert-verify-row-accent">
+        <div class="cert-verify-grid cert-verify-grid-premium cert-verify-grid-compact">
+          <div class="cert-verify-row cert-verify-row-premium cert-verify-row-accent cert-verify-row-compact">
             <div class="cert-verify-label">${escapeHTML(verifyT("certificate_number_label", "Certificate ID"))}</div>
             <div class="cert-verify-value cert-verify-number">${escapeHTML(String(row?.certificate_number || "—"))}</div>
           </div>
 
-          <div class="cert-verify-row cert-verify-row-premium">
-            <div class="cert-verify-label">${escapeHTML(verifyT("participant_label", "Participant"))}</div>
-            <div class="cert-verify-value">${escapeHTML(participantName)}</div>
+          <div class="cert-verify-grid cert-verify-grid-two">
+            <div class="cert-verify-row cert-verify-row-premium cert-verify-row-compact">
+              <div class="cert-verify-label">${escapeHTML(verifyT("participant_label", "Participant"))}</div>
+              <div class="cert-verify-value">${escapeHTML(participantName)}</div>
+            </div>
+
+            <div class="cert-verify-row cert-verify-row-premium cert-verify-row-compact">
+              <div class="cert-verify-label">${escapeHTML(verifyT("subject_label", "Subject"))}</div>
+              <div class="cert-verify-value">${escapeHTML(subjectText)}</div>
+            </div>
           </div>
 
-          <div class="cert-verify-row cert-verify-row-premium">
-            <div class="cert-verify-label">${escapeHTML(verifyT("subject_label", "Subject"))}</div>
-            <div class="cert-verify-value">${escapeHTML(subjectText)}</div>
-          </div>
+          <div class="cert-verify-grid cert-verify-grid-two">
+            <div class="cert-verify-row cert-verify-row-premium cert-verify-row-compact">
+              <div class="cert-verify-label">${escapeHTML(verifyT("certificate_verify_type_label", "Certificate type"))}</div>
+              <div class="cert-verify-value">${escapeHTML(typeText)}</div>
+            </div>
 
-          <div class="cert-verify-row cert-verify-row-premium">
-            <div class="cert-verify-label">${escapeHTML(verifyT("certificate_verify_type_label", "Certificate type"))}</div>
-            <div class="cert-verify-value">${escapeHTML(typeText)}</div>
-          </div>
-
-          <div class="cert-verify-row cert-verify-row-premium">
-            <div class="cert-verify-label">${escapeHTML(verifyT("date_label", "Date"))}</div>
-            <div class="cert-verify-value">${dateValue}</div>
+            <div class="cert-verify-row cert-verify-row-premium cert-verify-row-compact">
+              <div class="cert-verify-label">${escapeHTML(verifyT("date_label", "Date"))}</div>
+              <div class="cert-verify-value">${dateValue}</div>
+            </div>
           </div>
         </div>
 
-        <div class="cert-verify-section-title">${escapeHTML(verifyT("certificate_verify_result_section", "Result details"))}</div>
+        <div class="cert-verify-section-title">${escapeHTML(verifyT("certificate_verify_result_section", "Result"))}</div>
 
-        <div class="cert-verify-stats">
-          <div class="cert-verify-stat">
+        <div class="cert-verify-stats cert-verify-stats-compact">
+          <div class="cert-verify-stat cert-verify-stat-compact">
             <div class="cert-verify-stat-label">${escapeHTML(verifyT("certificate_result_label", "Result"))}</div>
             <div class="cert-verify-stat-value">${scoreValue}</div>
           </div>
 
-          <div class="cert-verify-stat">
+          <div class="cert-verify-stat cert-verify-stat-compact">
             <div class="cert-verify-stat-label">${escapeHTML(verifyT("correct_answers_percent_label", "Correct answers"))}</div>
             <div class="cert-verify-stat-value">${percentValue}</div>
           </div>
@@ -5398,15 +5410,17 @@ async function renderCertificateVerifyView(certificateNumber) {
 
         <div class="cert-verify-section-title">${escapeHTML(verifyT("certificate_verify_participant_section", "Participant details"))}</div>
 
-        <div class="cert-verify-grid cert-verify-grid-premium">
-          <div class="cert-verify-row cert-verify-row-premium">
-            <div class="cert-verify-label">${escapeHTML(verifyT("certificate_verify_school_class_label", "School / Grade"))}</div>
-            <div class="cert-verify-value">${escapeHTML(schoolClassValue)}</div>
-          </div>
+        <div class="cert-verify-grid cert-verify-grid-premium cert-verify-grid-compact">
+          <div class="cert-verify-grid cert-verify-grid-two">
+            <div class="cert-verify-row cert-verify-row-premium cert-verify-row-compact">
+              <div class="cert-verify-label">${escapeHTML(verifyT("certificate_verify_school_class_label", "School / Grade"))}</div>
+              <div class="cert-verify-value">${escapeHTML(schoolClassValue)}</div>
+            </div>
 
-          <div class="cert-verify-row cert-verify-row-premium">
-            <div class="cert-verify-label">${escapeHTML(verifyT("certificate_verify_region_district_label", "Region / District"))}</div>
-            <div class="cert-verify-value">${escapeHTML(regionDistrictValue)}</div>
+            <div class="cert-verify-row cert-verify-row-premium cert-verify-row-compact">
+              <div class="cert-verify-label">${escapeHTML(verifyT("certificate_verify_region_district_label", "Region / District"))}</div>
+              <div class="cert-verify-value">${escapeHTML(regionDistrictValue)}</div>
+            </div>
           </div>
         </div>
 
