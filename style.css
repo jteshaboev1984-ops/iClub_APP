@@ -4947,3 +4947,184 @@ button.is-loading { opacity: .85; }
     font-size: 20px;
   }
 }
+
+/* =========================
+   Certificate verify — compact mobile polish
+   ========================= */
+
+#view-certificate-verify .content{
+  padding-bottom: 12px;
+}
+
+#view-certificate-verify .content > .h1{
+  margin-bottom: 8px;
+}
+
+#view-certificate-verify .content > .muted{
+  margin-bottom: 12px;
+}
+
+.cert-verify-shell-compact{
+  gap: 10px;
+}
+
+.cert-verify-hero-compact{
+  padding: 12px 14px;
+  border-radius: 20px;
+}
+
+.cert-verify-card-compact{
+  padding: 14px;
+  border-radius: 20px;
+}
+
+.cert-verify-grid-compact{
+  gap: 8px;
+}
+
+.cert-verify-grid-two{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cert-verify-row-compact{
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.cert-verify-label{
+  margin-bottom: 4px;
+}
+
+.cert-verify-value{
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.cert-verify-number{
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.cert-verify-stats-compact{
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.cert-verify-stat-compact{
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.cert-verify-stat-value{
+  font-size: 18px;
+}
+
+.cert-verify-footnote{
+  margin-top: 2px;
+}
+
+@media (max-width: 640px){
+  #view-certificate-verify .content{
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  #view-certificate-verify .content > .h1{
+    font-size: 18px;
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+
+  #view-certificate-verify .content > .muted{
+    font-size: 13px;
+    line-height: 1.35;
+    margin-bottom: 10px;
+  }
+
+  .cert-verify-hero-compact{
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 18px;
+  }
+
+  .cert-verify-hero-mark{
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    font-size: 22px;
+  }
+
+  .cert-verify-hero-title{
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
+
+  .cert-verify-hero-sub{
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .cert-verify-card-compact{
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .cert-verify-section-title{
+    margin: 0 0 8px;
+    font-size: 12px;
+    letter-spacing: .07em;
+  }
+
+  .cert-verify-row-compact{
+    padding: 10px 12px;
+    border-radius: 14px;
+  }
+
+  .cert-verify-label{
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+
+  .cert-verify-value{
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  .cert-verify-number{
+    font-size: 14px;
+    letter-spacing: .01em;
+    word-break: break-word;
+  }
+
+  .cert-verify-grid-two{
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .cert-verify-stats-compact{
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .cert-verify-stat-compact{
+    padding: 10px 12px;
+    border-radius: 14px;
+  }
+
+  .cert-verify-stat-label{
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  .cert-verify-stat-value{
+    font-size: 16px;
+  }
+
+  .cert-verify-footnote{
+    font-size: 11px;
+    line-height: 1.35;
+  }
+}
