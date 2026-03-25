@@ -2311,7 +2311,156 @@ async function dbHasAnyActiveTourNow() {
     return;
   }
 
-  listEl.innerHTML = rows.join("");
+    listEl.innerHTML = rows.join("");
+}
+
+async function markNotificationsRead(rows) {
+  try {
+    if (!window.sb) return;
+
+    const unreadIds = (Array.isArray(rows) ? rows : [])
+      .filter(r => !r?.read_at)
+      .map(r => Number(r?.id))
+      .filter(Boolean);
+
+    if (!unreadIds.length) return;
+
+    await window.sb
+      .from("user_notifications")
+      .update({ read_at: new Date().toISOString() })
+      .in("id", unreadIds);
+  } catch (e) {
+    logClientError("markNotificationsRead", e);
+  }
+}
+
+function applyNotificationTemplate(text, meta = {}) {
+  let out = String(text || "");
+  const subjectKey = String(meta?.subject_key || "").trim();
+  const subjectFallback = String(meta?.subject_title || "").trim();
+  const subjectText = subjectKey
+    ? subjectTitle(subjectKey, subjectFallback)
+    : subjectFallback;
+
+  const tourNo = meta?.tour_no != null ? String(meta.tour_no) : "";
+
+  out = out.replaceAll("{subject_title}", subjectText);
+  out = out.replaceAll("{tour_no}", tourNo);
+
+  return out.trim();
+}
+
+function pickNotificationText(notification, lang = currentLang()) {
+  const n = notification || {};
+  const safeLang = String(lang || "ru").toLowerCase();
+
+  const rawTitle =
+    (safeLang === "uz" ? n.title_uz : safeLang === "en" ? n.title_en : n.title_ru) ||
+    n.title_ru ||
+    n.title_uz ||
+    n.title_en ||
+    "";
+
+  const rawBody =
+    (safeLang === "uz" ? n.body_uz : safeLang === "en" ? n.body_en : n.body_ru) ||
+    n.body_ru ||
+    n.body_uz ||
+    n.body_en ||
+    "";
+
+  return {
+    title: applyNotificationTemplate(rawTitle, n.meta || {}),
+    body: applyNotificationTemplate(rawBody, n.meta || {})
+  };
+}
+
+async function renderNotificationsView() {
+  const listEl = document.getElementById("notifications-list");
+  if (!listEl) return;
+
+  listEl.innerHTML = `
+    <div class="empty muted">${escapeHTML(t("notifications_loading"))}</div>
+  `;
+
+  if (!window.sb) {
+    listEl.innerHTML = `
+      <div class="empty muted">${escapeHTML(t("notifications_no_db"))}</div>
+    `;
+    return;
+  }
+
+  const uid = await getAuthUid().catch(() => null);
+  if (!uid) {
+    listEl.innerHTML = `
+      <div class="empty muted">${escapeHTML(t("notifications_empty"))}</div>
+    `;
+    return;
+  }
+
+  let rows = [];
+
+  try {
+    const { data, error } = await window.sb
+      .from("user_notifications")
+      .select(`
+        id,
+        read_at,
+        created_at,
+        notification:notifications (
+          id,
+          publish_at,
+          kind,
+          title_ru,
+          title_uz,
+          title_en,
+          body_ru,
+          body_uz,
+          body_en,
+          meta
+        )
+      `)
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (error) throw error;
+    rows = Array.isArray(data) ? data.filter(r => r?.notification) : [];
+  } catch (e) {
+    logClientError("renderNotificationsView_load", e);
+    listEl.innerHTML = `
+      <div class="empty muted">${escapeHTML(t("notifications_load_error"))}</div>
+    `;
+    return;
+  }
+
+  if (!rows.length) {
+    listEl.innerHTML = `
+      <div class="empty muted">${escapeHTML(t("notifications_empty"))}</div>
+    `;
+    return;
+  }
+
+  const lang = currentLang();
+
+  listEl.innerHTML = rows.map(row => {
+    const notification = row.notification || {};
+    const copy = pickNotificationText(notification, lang);
+    const stamp = notification.publish_at || row.created_at || null;
+    const dateText = stamp ? formatDateTime(stamp) : "";
+    const unreadClass = row.read_at ? "" : " is-unread";
+
+    return `
+      <article class="card notification-card${unreadClass}">
+        <div class="notification-head">
+          <div class="notification-title">${escapeHTML(copy.title || t("notifications_title"))}</div>
+          <div class="notification-date">${escapeHTML(dateText)}</div>
+        </div>
+        <div class="notification-body">${escapeHTML(copy.body)}</div>
+      </article>
+    `;
+  }).join("");
+
+  await markNotificationsRead(rows);
 }
 
       function renderAboutView() {
@@ -3570,13 +3719,17 @@ if (tabName === "ratings") {
         try { trackEvent("resource_opened", { source: "global_resources" }); } catch {}
       }
 
-      showView(viewName);
+            showView(viewName);
+
+      if (viewName === "notifications") {
+        renderNotificationsView();
+      }
 
       if (viewName === "about") {
         renderAboutView();
       }
 
-                  if (viewName === "certificates") {
+      if (viewName === "certificates") {
         (async () => {
           await renderCertificatesView();
         })();
@@ -3593,17 +3746,21 @@ if (tabName === "ratings") {
       try { trackEvent("resource_opened", { source: "global_resources" }); } catch {}
     }
 
-        showView(viewName);
+                showView(viewName);
 
     if (viewName === "archive") {
       renderArchiveView();
+    }
+
+    if (viewName === "notifications") {
+      renderNotificationsView();
     }
 
     if (viewName === "about") {
       renderAboutView();
     }
 
-            if (viewName === "certificates") {
+    if (viewName === "certificates") {
       (async () => {
         await renderCertificatesView();
       })();
@@ -15520,8 +15677,17 @@ if (action === "about-person-open") {
             state.certificates = { selectedId: null, lastIssuedId: null };
           }
 
-          state.certificates.selectedId = certId;
+                    state.certificates.selectedId = certId;
           saveState();
+
+          try {
+            trackEvent("certificate_opened", {
+              certificate_id: certId,
+              certificate_type: String(row?.certificate_type || ""),
+              subject_key: String(row?.subject_key || ""),
+              tour_no: row?.tour_no ?? null
+            });
+          } catch {}
 
           await renderCertificatesView();
         } finally {
@@ -16036,8 +16202,17 @@ if (action === "tour-next" || action === "tour-submit") {
           return;
         }
 
-        pushCourses("tour-review");
+               pushCourses("tour-review");
         await renderTourReview();
+
+        try {
+          trackEvent("tour_review_opened", {
+            subject_key: subjectKey || null,
+            tour_no: tourNo || null,
+            attempt_id: Number(state?.courses?.lastTourAttemptId || 0) || null
+          });
+        } catch {}
+
         return;
       }
 
