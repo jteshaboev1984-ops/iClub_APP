@@ -259,7 +259,41 @@ html, body {
   font-weight: 800;
   margin-bottom: 6px;
 }
+.notification-card{
+  display:grid;
+  gap:8px;
+}
 
+.notification-card.is-unread{
+  border-color: rgba(47,111,214,.28);
+  box-shadow:
+    0 0 0 1px rgba(47,111,214,.08) inset,
+    var(--shadow-sm);
+}
+
+.notification-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.notification-title{
+  font-weight:800;
+  line-height:1.3;
+}
+
+.notification-date{
+  flex:0 0 auto;
+  font-size:12px;
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+.notification-body{
+  line-height:1.45;
+  white-space:pre-wrap;
+}
 .card-btn {
   padding: 14px;
   text-align: left;
