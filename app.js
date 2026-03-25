@@ -2314,21 +2314,73 @@ async function dbHasAnyActiveTourNow() {
     listEl.innerHTML = rows.join("");
 }
 
+function setNotificationsBadge(count) {
+  const badgeEl = document.getElementById("topbar-notifications-badge");
+  const notifBtn = document.getElementById("topbar-notifications");
+  if (!badgeEl || !notifBtn) return;
+
+  const n = Math.max(0, Number(count || 0));
+
+  if (n <= 0) {
+    badgeEl.hidden = true;
+    badgeEl.textContent = "0";
+    return;
+  }
+
+  badgeEl.hidden = false;
+  badgeEl.textContent = n > 99 ? "99+" : String(n);
+}
+
+async function refreshNotificationsBadge() {
+  try {
+    if (!window.sb) {
+      setNotificationsBadge(0);
+      return;
+    }
+
+    const uid = await getAuthUid().catch(() => null);
+    if (!uid) {
+      setNotificationsBadge(0);
+      return;
+    }
+
+    const { count, error } = await window.sb
+      .from("user_notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", uid)
+      .is("read_at", null);
+
+    if (error) throw error;
+
+    setNotificationsBadge(Number(count || 0));
+  } catch (e) {
+    logClientError("refreshNotificationsBadge", e);
+    setNotificationsBadge(0);
+  }
+}
+
 async function markNotificationsRead(rows) {
   try {
     if (!window.sb) return;
 
-    const unreadIds = (Array.isArray(rows) ? rows : [])
+        const unreadIds = (Array.isArray(rows) ? rows : [])
       .filter(r => !r?.read_at)
       .map(r => Number(r?.id))
       .filter(Boolean);
 
-    if (!unreadIds.length) return;
+    if (!unreadIds.length) {
+      await refreshNotificationsBadge();
+      return;
+    }
 
-    await window.sb
+    const { error } = await window.sb
       .from("user_notifications")
       .update({ read_at: new Date().toISOString() })
       .in("id", unreadIds);
+
+    if (error) throw error;
+
+    await refreshNotificationsBadge();
   } catch (e) {
     logClientError("markNotificationsRead", e);
   }
@@ -2382,10 +2434,11 @@ async function renderNotificationsView() {
     <div class="empty muted">${escapeHTML(t("notifications_loading"))}</div>
   `;
 
-  if (!window.sb) {
+    if (!window.sb) {
     listEl.innerHTML = `
       <div class="empty muted">${escapeHTML(t("notifications_no_db"))}</div>
     `;
+    await refreshNotificationsBadge();
     return;
   }
 
@@ -2394,6 +2447,7 @@ async function renderNotificationsView() {
     listEl.innerHTML = `
       <div class="empty muted">${escapeHTML(t("notifications_empty"))}</div>
     `;
+    await refreshNotificationsBadge();
     return;
   }
 
@@ -2425,11 +2479,12 @@ async function renderNotificationsView() {
 
     if (error) throw error;
     rows = Array.isArray(data) ? data.filter(r => r?.notification) : [];
-  } catch (e) {
+    } catch (e) {
     logClientError("renderNotificationsView_load", e);
     listEl.innerHTML = `
       <div class="empty muted">${escapeHTML(t("notifications_load_error"))}</div>
     `;
+    await refreshNotificationsBadge();
     return;
   }
 
@@ -2437,6 +2492,7 @@ async function renderNotificationsView() {
     listEl.innerHTML = `
       <div class="empty muted">${escapeHTML(t("notifications_empty"))}</div>
     `;
+    await refreshNotificationsBadge();
     return;
   }
 
@@ -3897,16 +3953,17 @@ if (actionBtn) {
   return;
 }
 
-    if (viewName === "home") {
+        if (viewName === "home") {
   titleEl.textContent = t("app_name");
   subEl.textContent = "Smarter together";
   backBtn.style.visibility = "hidden";
   if (logoEl) logoEl.style.display = "block";
 
   if (notifBtn) {
-  notifBtn.style.display = "inline-flex";
-  notifBtn.style.visibility = "visible"; // ✅ иначе остаётся hidden из index.html
-}
+    notifBtn.style.display = "inline-flex";
+    notifBtn.style.visibility = "visible"; // ✅ иначе остаётся hidden из index.html
+    refreshNotificationsBadge();
+  }
 
   syncTopbarLeftState();
   return;
