@@ -4908,31 +4908,25 @@ async function issueFinalCertificateDb(userId, subjectId) {
     return null;
   }
 }
-   function isTourGloballyClosed(row, todayIso) {
+      function isTourGloballyClosed(row, todayIso) {
   if (!row) return false;
 
   const endDate = String(row?.end_date || "").trim();
-  if (endDate) {
-    return endDate < todayIso;
-  }
+  if (!endDate) return false;
 
-  if (row?.is_active === false) return true;
-  if (row?.is_active === true) return false;
-
-  return false;
+  // ✅ строгое правило:
+  // тур считается глобально закрытым только после фактического окончания даты тура
+  return endDate < todayIso;
 }
-   function isTourGloballyClosedRow(row, todayIso) {
+      function isTourGloballyClosedRow(row, todayIso) {
   if (!row) return false;
 
   const endDate = String(row?.end_date || "").trim();
-  if (endDate) {
-    return endDate < todayIso;
-  }
+  if (!endDate) return false;
 
-  if (row?.is_active === false) return true;
-  if (row?.is_active === true) return false;
-
-  return false;
+  // ✅ строгое правило:
+  // тур считается глобально закрытым только после фактического окончания даты тура
+  return endDate < todayIso;
 }
    
    const __tourCertReadyCache = new Map();
@@ -4953,19 +4947,19 @@ async function canIssueTourCertificateNow(tourId) {
     const today = new Date();
     const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-    const { data, error } = await window.sb
+        const { data, error } = await window.sb
       .from("tours")
       .select("id,end_date,is_active")
       .eq("id", tid)
       .limit(1)
       .maybeSingle();
 
-        const ready = isTourGloballyClosedRow(data, todayIso);
-
     if (error || !data) {
       __tourCertReadyCache.set(cacheKey, { ready: false, ts: Date.now() });
       return false;
     }
+
+    const ready = isTourGloballyClosedRow(data, todayIso);
 
     __tourCertReadyCache.set(cacheKey, { ready, ts: Date.now() });
     return ready;
@@ -12121,12 +12115,12 @@ try {
   drill_type: quiz?.drillType || null
 });
 
-// state for result/review/recs screens (DO NOT lose db info)
-// ✅ drills must NOT overwrite "last practice" UX
+// state for result/review/recs screens
+// ✅ new main attempt must NEVER inherit stale db attemptId from previous subject/attempt
 if (!quiz?.drillType) {
   state.practiceLastAttempt = {
     ...(attempt || {}),
-    db: (state.practiceLastAttempt && state.practiceLastAttempt.db) ? state.practiceLastAttempt.db : null
+    db: null
   };
 }
 
@@ -12174,9 +12168,17 @@ if (!quiz?.drillType) {
       });
     } catch {}
 
-    // merge db result into current attempt without overwriting the attempt object
-    if (!quiz?.drillType) {
-  state.practiceLastAttempt = { ...(state.practiceLastAttempt || attempt || {}), db: res };
+   // merge db result only into the SAME current attempt
+if (!quiz?.drillType) {
+  const currentAttemptKey = String(state?.practiceLastAttempt?.attemptKey || "");
+  const resultAttemptKey = String(attempt?.attemptKey || "");
+
+  if (currentAttemptKey && resultAttemptKey && currentAttemptKey === resultAttemptKey) {
+    state.practiceLastAttempt = {
+      ...(state.practiceLastAttempt || attempt || {}),
+      db: res
+    };
+  }
 }
 
   } catch (e) {
@@ -14657,7 +14659,7 @@ try {
     renderTourQuestion();
   }
 
-         async function isTourGloballyClosed(subjectKey, tourNo) {
+                  async function isTourGloballyClosed(subjectKey, tourNo) {
   try {
     if (!window.sb) return false;
 
@@ -14674,12 +14676,12 @@ try {
     if (error || !data) return false;
 
     const todayISO = new Date().toISOString().slice(0, 10);
-    const endDate = data?.end_date ? String(data.end_date) : "";
+    const endDate = data?.end_date ? String(data.end_date).trim() : "";
 
-    if (endDate && endDate < todayISO) return true;
-    if (!data?.is_active && endDate && endDate <= todayISO) return true;
+    if (!endDate) return false;
 
-    return false;
+    // ✅ строгая глобальная проверка для полного review / сертификата
+    return endDate < todayISO;
   } catch {
     return false;
   }
@@ -14735,8 +14737,15 @@ try {
 
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
 
-  const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
+    const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
   const localPayload = state?.courses?.lastTourReviewPayload || null;
+  const currentSubjectKey = String(state?.courses?.subjectKey || "").trim();
+  const payloadSubjectKey = String(localPayload?.subjectKey || "").trim();
+  const payloadItems = Array.isArray(localPayload?.items) ? localPayload.items : [];
+
+  const hasFreshLocalTourPayload =
+    payloadItems.length > 0 &&
+    (!currentSubjectKey || !payloadSubjectKey || currentSubjectKey === payloadSubjectKey);
 
     const renderFromDetails = (details) => {
     const mistakesOnly = (Array.isArray(details) ? details : []).filter(d => !d.isCorrect);
@@ -14808,16 +14817,15 @@ ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(S
     `;
   };
 
-  // 1) instant local payload right after finish
-  if (localPayload && Array.isArray(localPayload.items) && localPayload.items.length) {
-    renderFromDetails(localPayload.items);
+    // 1) instant local payload right after finish
+  if (hasFreshLocalTourPayload) {
+    renderFromDetails(payloadItems);
+    return;
   }
 
-  // 2) DB-backed version (authoritative)
+  // 2) DB-backed version (authoritative fallback)
   if (!window.sb || !attemptId) {
-    if (!(localPayload && Array.isArray(localPayload.items) && localPayload.items.length)) {
-      renderFromDetails([]);
-    }
+    renderFromDetails([]);
     return;
   }
 
