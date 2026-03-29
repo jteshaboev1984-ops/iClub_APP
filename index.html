@@ -152,6 +152,7 @@
                 </div>
 
                 <div id="reg-subject-summary" class="reg-subject-summary" aria-live="polite"></div>
+                <div id="reg-subject-change-note" class="muted small reg-subject-change-note"></div>
 
               <label class="field visually-hidden">
                 <span class="label" data-i18n="reg_main_subject_required_label">Основной предмет (обязательно)</span>
@@ -801,15 +802,19 @@
               <div class="cards-grid">
                 <button class="card-btn" type="button" data-action="tour-review">
                   <div class="card-title" data-i18n="tour_review_title">Разбор тура</div>
-                  <div class="muted small" data-i18n="tour_review_sub">Ответы, объяснения, ошибки</div>
+                  <div id="tour-review-status" class="muted small" data-i18n="tour_review_sub">Ответы, объяснения, ошибки</div>
                 </button>
 
                 <button class="card-btn" type="button" data-action="tour-certificate">
                   <div class="card-title" data-i18n="tour_certificate_title">Сертификат</div>
-                  <div class="muted small" data-i18n="tour_certificate_sub">Если доступен по правилам</div>
+                  <div id="tour-certificate-status" class="muted small" data-i18n="tour_certificate_sub">Если доступен по правилам</div>
                 </button>
               </div>
 
+              <div id="tour-result-summary-note" class="card tour-result-summary-note" hidden>
+  <div class="card-title">Краткая сводка</div>
+  <div id="tour-result-summary-text" class="muted small">—</div>
+</div>
               <div class="actions-row">
                 <button class="btn" type="button" data-action="open-ratings" data-i18n="open_ratings">Рейтинг</button>
                 <button class="btn primary" type="button" data-action="to-subject-hub" data-i18n="to_subject">К предмету</button>
