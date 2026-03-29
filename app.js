@@ -76,6 +76,27 @@ function currentLang() {
   return "ru";
 }
 
+function tr3(ru, uz, en) {
+  const lang = currentLang();
+  if (lang === "uz") return String(uz ?? ru ?? en ?? "");
+  if (lang === "en") return String(en ?? ru ?? uz ?? "");
+  return String(ru ?? uz ?? en ?? "");
+}
+
+function refreshLiveProgressSurfaces() {
+  try { _homeStatsCache?.clear?.(); } catch {}
+
+  try { renderHome(); } catch {}
+  try { renderProfileMain(); } catch {}
+  try { renderProfileSettings(); } catch {}
+
+  try {
+    if (state?.tab === "courses" && typeof getCoursesTopScreen === "function" && getCoursesTopScreen() === "subject-hub") {
+      renderSubjectHub();
+    }
+  } catch {}
+}
+
 function showViewTransitionOverlay(duration = 220) {
   const el = document.getElementById("view-transition-overlay");
   if (!el) return;
@@ -8289,7 +8310,13 @@ mainSubjects.forEach(subj => {
       } else {
         // ❗rollback UI if DB rejected (limit/RLS/etc.)
         input.checked = !turningOn;
-        showToast("Не удалось сохранить. Попробуйте ещё раз.");
+        showToast(
+          tr3(
+            "Не удалось сохранить. Попробуйте ещё раз.",
+            "Saqlab bo‘lmadi. Yana urinib ko‘ring.",
+            "Could not save. Please try again."
+          )
+        );
         return;
       }
     } catch (e) {
@@ -9158,9 +9185,18 @@ function uiAlert({ title, message, okText } = {}) {
     });
 
     // ✅ refresh translated summary text after language switch
-    try {
+       try {
       document.dispatchEvent(new CustomEvent("reg-subjects-i18n-updated"));
     } catch {}
+
+    const noteEl = document.getElementById("reg-subject-change-note");
+    if (noteEl) {
+      noteEl.textContent = tr3(
+        "Основной предмет можно изменить позже в профиле. Соревновательные предметы тоже можно менять в пределах лимита.",
+        "Asosiy fanni keyinroq profilda o‘zgartirish mumkin. Musobaqa fanlarini ham limit doirasida o‘zgartirish mumkin.",
+        "You can change your main subject later in Profile. Competitive subjects can also be changed within the limit."
+      );
+    }
   }
 
   function initRegSubjectChips() {
@@ -12230,8 +12266,9 @@ if (!quiz?.drillType) {
     showToast(t("practice_best_new_toast") || "Новый лучший результат");
   }
 
-  // badges / subject widgets rely on main practice only
+    // badges / subject widgets rely on main practice only
   syncPracticeResultBadges(attempt);
+  refreshLiveProgressSurfaces();
    }
 }
 
@@ -14031,13 +14068,14 @@ async function updateTourAttempt(attemptId, patch) {
   }
 }
 
-  function initTourSession({ subjectKey = null, tourNo = 1, tourId = null, attemptId = null, questions = [], isArchive = false } = {}) {
+  function initTourSession({ subjectKey = null, tourNo = 1, tourId = null, attemptId = null, questions = [], isArchive = false, tourEndDate = null } = {}) {
   state.tourContext = {
     isArchive,
     subjectKey,
     tourNo,
     tourId,        // ✅ DB tour id
     attemptId,     // ✅ DB attempt id (null for archive)
+    tourEndDate,   // ✅ end_date active tour
     questions,     // ✅ loaded from DB mapping tour_questions
     startedAt: Date.now(),
     qStartedAt: Date.now(),
@@ -14151,13 +14189,14 @@ async function updateTourAttempt(attemptId, patch) {
     });
   } catch {}
 
-  initTourSession({
+    initTourSession({
     subjectKey,
     tourNo,
     tourId: tour.id,
     attemptId,
     questions,
-    isArchive: false
+    isArchive: false,
+    tourEndDate: tour?.end_date || null
   });
 
     pushCourses("tour-quiz");
@@ -14262,13 +14301,26 @@ async function updateTourAttempt(attemptId, patch) {
       });
     } catch {}
 
-    const warnBtn = $("#tour-warn-btn");
+        const warnBtn = $("#tour-warn-btn");
     if (warnBtn) warnBtn.style.display = "inline-flex";
 
     const warnPill = $("#tour-anti-cheat"); // legacy id might exist elsewhere
     if (warnPill) warnPill.style.display = "inline-flex";
 
     showToast(t("tour_violation_toast", { v: ctx.violations, max: TOUR_CONFIG.maxViolations }));
+
+    Promise.resolve().then(() => {
+      const left = Math.max(0, Number(TOUR_CONFIG.maxViolations || 0) - Number(ctx.violations || 0));
+      uiAlert({
+        title: tr3("Предупреждение", "Ogohlantirish", "Warning"),
+        message: tr3(
+          `Зафиксировано нарушение ${ctx.violations} из ${TOUR_CONFIG.maxViolations}. ${left > 0 ? `После следующего нарушения тур завершится автоматически.` : `Лимит нарушений исчерпан.`}`,
+          `${ctx.violations}/${TOUR_CONFIG.maxViolations} qoidabuzarlik qayd etildi. ${left > 0 ? `Keyingi qoidabuzarlikdan so‘ng tur avtomatik yakunlanadi.` : `Qoidabuzarlik limiti tugadi.`}`,
+          `Violation ${ctx.violations} of ${TOUR_CONFIG.maxViolations} has been recorded. ${left > 0 ? `After the next violation, the tour will finish automatically.` : `The violation limit has been reached.`}`
+        ),
+        okText: tr3("Понятно", "Tushunarli", "OK")
+      });
+    });
   }
 
   // ---------- Render ----------
@@ -14632,7 +14684,51 @@ try {
     return false;
   }
 }
-   
+   function renderTourResultStatusSummary() {
+  const reviewStatusEl = document.getElementById("tour-review-status");
+  const certStatusEl = document.getElementById("tour-certificate-status");
+  const noteWrapEl = document.getElementById("tour-result-summary-note");
+  const noteTextEl = document.getElementById("tour-result-summary-text");
+
+  if (!reviewStatusEl || !certStatusEl || !noteWrapEl || !noteTextEl) return;
+
+  const payload = state?.courses?.lastTourReviewPayload || null;
+  const items = Array.isArray(payload?.items) ? payload.items : [];
+  const wrong = items.filter(x => !x?.isCorrect);
+  const right = Math.max(0, items.length - wrong.length);
+
+  const rawEndDate = String(state?.courses?.lastTourEndDate || "").trim();
+  const endLabel = rawEndDate || tr3("после глобального завершения тура", "tur global yopilgandan keyin", "after the tour is globally closed");
+
+  reviewStatusEl.textContent = rawEndDate
+    ? tr3(`Полный разбор откроется после ${endLabel}.`, `${endLabel} dan keyin to‘liq tahlil ochiladi.`, `Full review will open after ${endLabel}.`)
+    : tr3("Полный разбор откроется после глобального завершения тура.", "Tur global yopilgandan keyin to‘liq tahlil ochiladi.", "Full review will open after the tour is globally closed.");
+
+  certStatusEl.textContent = rawEndDate
+    ? tr3(`Сертификат станет доступен после ${endLabel}, если выполнены условия.`, `${endLabel} dan keyin, shartlar bajarilgan bo‘lsa, sertifikat ochiladi.`, `The certificate will become available after ${endLabel}, if the conditions are met.`)
+    : tr3("Сертификат станет доступен после глобального завершения тура, если выполнены условия.", "Tur global yopilgandan keyin, shartlar bajarilgan bo‘lsa, sertifikat ochiladi.", "The certificate will become available after the tour is globally closed, if the conditions are met.");
+
+  if (!items.length) {
+    noteWrapEl.hidden = true;
+    return;
+  }
+
+  const topicList = [...new Set(
+    wrong
+      .map(x => String(x?.topic || "").trim())
+      .filter(Boolean)
+  )].slice(0, 3);
+
+  const topicText = topicList.length ? topicList.join(", ") : tr3("без выделенных тем", "ajratilgan mavzularsiz", "no highlighted topics");
+
+  noteTextEl.textContent = tr3(
+    `Сейчас доступна краткая сводка: верно ${right} из ${items.length}, ошибок ${wrong.length}. Слабые темы: ${topicText}.`,
+    `Hozir qisqa xulosa mavjud: ${items.length} ta savoldan ${right} tasi to‘g‘ri, ${wrong.length} ta xato. Zaif mavzular: ${topicText}.`,
+    `A short summary is available now: ${right} correct out of ${items.length}, ${wrong.length} wrong. Weak topics: ${topicText}.`
+  );
+
+  noteWrapEl.hidden = false;
+}
    async function renderTourReview() {
   const wrap = $("#tour-review-list");
   if (!wrap) return;
@@ -14976,6 +15072,7 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     const tour_id = ctx?.tourId != null ? String(ctx.tourId) : "";
     const is_archive = !!ctx?.isArchive;
 
+      try {
     trackEvent("tour_attempt_finished", {
       ts,
       status: "done",
@@ -14985,6 +15082,8 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
       subject_key: String(ctx?.subjectKey || state?.courses?.subjectKey || "")
     });
   } catch {}
+
+  try { _homeStatsCache?.clear?.(); } catch {}
 
       // save result context for certificate button + review screen
   state.courses = state.courses || {};
@@ -15028,12 +15127,14 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
         })
       : [];
 
-    state.courses.lastTourReviewPayload = {
+        state.courses.lastTourReviewPayload = {
       attemptId: ctx?.attemptId || null,
       subjectKey: ctx?.subjectKey || null,
       tourNo: ctx?.tourNo || 1,
       items: reviewItems
     };
+
+    state.courses.lastTourEndDate = String(ctx?.tourEndDate || "").trim() || null;
 
     // локально сохраняем туровые рекомендации по ошибкам
     addMyTourRecsFromTourAttempt(ctx);
@@ -15061,7 +15162,9 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
   state.tourContext = null;
   saveState();
 
-  pushCourses("tour-result");
+    pushCourses("tour-result");
+  renderTourResultStatusSummary();
+  refreshLiveProgressSurfaces();
 
   if (finalizeSavedToDb && !ctx?.isArchive) {
     showToast(
@@ -15271,10 +15374,21 @@ if (state.tab === "profile") {
     submitBtn.classList.add("is-loading");
   }
 
-  try {
+    try {
     const fullName = $("#reg-fullname")?.value?.trim() || "";
     const lang = $("#reg-language")?.value || "ru";
+    const consentEl = $("#reg-consent");
 
+    if (!consentEl?.checked) {
+      showToast(
+        tr3(
+          "Подтвердите согласие с условиями и обработкой данных.",
+          "Shartlar va ma’lumotlarni qayta ishlashga rozilikni tasdiqlang.",
+          "Please confirm your agreement with the terms and data processing."
+        )
+      );
+      return;
+    }
     let region = "";
     let district = "";
 
@@ -15409,11 +15523,16 @@ if (state.tab === "profile") {
       });
     } catch {}
 
-    if (!dbRes?.ok) {
-      showToast("Не удалось сохранить регистрацию в базе. Попробуйте ещё раз.");
+        if (!dbRes?.ok) {
+      showToast(
+        tr3(
+          "Не удалось сохранить регистрацию в базе. Попробуйте ещё раз.",
+          "Ro‘yxatdan o‘tishni bazaga saqlab bo‘lmadi. Yana urinib ko‘ring.",
+          "Could not save registration to the database. Please try again."
+        )
+      );
       return;
     }
-
             // keep local profile as UX fallback (DB is source of truth now)
 
       // ✅ fresh start after re-registration (prevents showing old local attempts/stats)
@@ -16250,14 +16369,17 @@ if (action === "tour-next" || action === "tour-submit") {
           : false;
 
         if (!canOpen) {
-          showToast(
-            t("tour_review_locked_until_global_end") ||
-            "Подробный разбор тура будет доступен после завершения тура для всех участников."
-          );
-          replaceCourses("subject-hub");
-          renderSubjectHub();
-          return;
-        }
+    renderTourResultStatusSummary();
+    showToast(
+      t("tour_review_locked_until_global_end") ||
+      tr3(
+        "Подробный разбор пока закрыт. Ниже доступна краткая сводка по результату тура.",
+        "To‘liq tahlil hozircha yopiq. Pastda tur natijasi bo‘yicha qisqa xulosa mavjud.",
+        "The full review is still locked. A short summary of the tour result is available below."
+      )
+    );
+    return;
+  }
 
                pushCourses("tour-review");
         await renderTourReview();
