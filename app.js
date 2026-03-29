@@ -15066,103 +15066,104 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
      showToast(t("tour_violations_finish_toast"));
    }
 
-    // Earned Credentials — tour finished
+      // Earned Credentials — tour finished
   try {
     const subject_id = normSubjectId(ctx?.subjectKey || state?.courses?.subjectKey);
     const tour_id = ctx?.tourId != null ? String(ctx.tourId) : "";
     const is_archive = !!ctx?.isArchive;
 
-      try {
-    trackEvent("tour_attempt_finished", {
-      ts,
-      status: "done",
-      tour_id,
-      is_archive,
-      subject_id: String(subject_id || ""),
-      subject_key: String(ctx?.subjectKey || state?.courses?.subjectKey || "")
-    });
-  } catch {}
+    try {
+      trackEvent("tour_attempt_finished", {
+        ts,
+        status: "done",
+        tour_id,
+        is_archive,
+        subject_id: String(subject_id || ""),
+        subject_key: String(ctx?.subjectKey || state?.courses?.subjectKey || "")
+      });
+    } catch {}
 
-  try { _homeStatsCache?.clear?.(); } catch {}
+    try { _homeStatsCache?.clear?.(); } catch {}
 
-      // save result context for certificate button + review screen
-  state.courses = state.courses || {};
-  state.courses.lastTourAttemptId = ctx?.attemptId || null;
-  state.courses.lastTourCertificateId = null;
+    // save result context for certificate button + review screen
+    state.courses = state.courses || {};
+    state.courses.lastTourAttemptId = ctx?.attemptId || null;
+    state.courses.lastTourCertificateId = null;
 
     try {
-    const reviewItems = Array.isArray(ctx?.answers)
-      ? ctx.answers.map((ans, idx) => {
-          const q = ctx?.questions?.[Number(ans.index)] || null;
-          const qType = String(q?.type || q?.qtype || "mcq").toLowerCase();
-          const isMcq = (qType === "mcq" || qType === "multiple_choice");
+      const reviewItems = Array.isArray(ctx?.answers)
+        ? ctx.answers.map((ans, idx) => {
+            const q = ctx?.questions?.[Number(ans.index)] || null;
+            const qType = String(q?.type || q?.qtype || "mcq").toLowerCase();
+            const isMcq = (qType === "mcq" || qType === "multiple_choice");
 
-          const userAnswer = isMcq
-            ? ((ans?.pickedIndex === null || ans?.pickedIndex === undefined) ? "" : (idxToLetter(Number(ans.pickedIndex)) || String(ans.pickedIndex)))
-            : String(ans?.input || "").trim();
+            const userAnswer = isMcq
+              ? ((ans?.pickedIndex === null || ans?.pickedIndex === undefined) ? "" : (idxToLetter(Number(ans.pickedIndex)) || String(ans.pickedIndex)))
+              : String(ans?.input || "").trim();
 
-          const correctAnswer =
-            q?.correct_answer != null
-              ? String(q.correct_answer).trim()
-              : (q?.correctAnswer != null
-                  ? String(q.correctAnswer).trim()
-                  : ((q?.correctIndex !== null && q?.correctIndex !== undefined)
-                      ? (idxToLetter(Number(q.correctIndex)) || String(q.correctIndex))
-                      : ""));
+            const correctAnswer =
+              q?.correct_answer != null
+                ? String(q.correct_answer).trim()
+                : (q?.correctAnswer != null
+                    ? String(q.correctAnswer).trim()
+                    : ((q?.correctIndex !== null && q?.correctIndex !== undefined)
+                        ? (idxToLetter(Number(q.correctIndex)) || String(q.correctIndex))
+                        : ""));
 
-          return {
-            id: Number(q?.id || idx + 1),
-            topic: q?.topic || (t("topic_general") || "General"),
-            subtopic: q?.subtopic || null,
-            difficulty: q?.difficulty || "easy",
-            type: isMcq ? "mcq" : "input",
-            question: q?.question || "",
-            options: Array.isArray(q?.options) ? q.options.slice() : [],
-            userAnswer,
-            correctAnswer,
-            explanation: pickContentText(q || {}, "explanation") || "",
-            isCorrect: !!ans?.isCorrect,
-            timeSpent: Number(ans?.spentSec || 0)
-          };
-        })
-      : [];
+            return {
+              id: Number(q?.id || idx + 1),
+              topic: q?.topic || (t("topic_general") || "General"),
+              subtopic: q?.subtopic || null,
+              difficulty: q?.difficulty || "easy",
+              type: isMcq ? "mcq" : "input",
+              question: q?.question || "",
+              options: Array.isArray(q?.options) ? q.options.slice() : [],
+              userAnswer,
+              correctAnswer,
+              explanation: pickContentText(q || {}, "explanation") || "",
+              isCorrect: !!ans?.isCorrect,
+              timeSpent: Number(ans?.spentSec || 0)
+            };
+          })
+        : [];
 
-        state.courses.lastTourReviewPayload = {
-      attemptId: ctx?.attemptId || null,
-      subjectKey: ctx?.subjectKey || null,
-      tourNo: ctx?.tourNo || 1,
-      items: reviewItems
-    };
+      state.courses.lastTourReviewPayload = {
+        attemptId: ctx?.attemptId || null,
+        subjectKey: ctx?.subjectKey || null,
+        tourNo: ctx?.tourNo || 1,
+        items: reviewItems
+      };
 
-    state.courses.lastTourEndDate = String(ctx?.tourEndDate || "").trim() || null;
+      state.courses.lastTourEndDate = String(ctx?.tourEndDate || "").trim() || null;
 
-    // локально сохраняем туровые рекомендации по ошибкам
-    addMyTourRecsFromTourAttempt(ctx);
-  } catch {
-    state.courses.lastTourReviewPayload = null;
-  }
+      // локально сохраняем туровые рекомендации по ошибкам
+      addMyTourRecsFromTourAttempt(ctx);
+    } catch {
+      state.courses.lastTourReviewPayload = null;
+    }
 
-  if (!state.certificates) {
-    state.certificates = { selectedId: null, lastIssuedId: null };
-  }
+    if (!state.certificates) {
+      state.certificates = { selectedId: null, lastIssuedId: null };
+    }
 
-  //   // Сертификаты не выдаём сразу после финиша.
-  // Они становятся доступны только после глобального завершения тура / всех туров.
-  if (
-    finalizeSavedToDb &&
-    ctx?.attemptId &&
-    !ctx?.isArchive &&
-    reason !== "violations"
-  ) {
-    state.courses.lastTourCertificateId = null;
-  }
+    // Сертификаты не выдаём сразу после финиша.
+    // Они становятся доступны только после глобального завершения тура / всех туров.
+    if (
+      finalizeSavedToDb &&
+      ctx?.attemptId &&
+      !ctx?.isArchive &&
+      reason !== "violations"
+    ) {
+      state.courses.lastTourCertificateId = null;
+    }
+  } catch {}
 
-   // unlock
+  // unlock
   state.quizLock = null;
   state.tourContext = null;
   saveState();
 
-    pushCourses("tour-result");
+  pushCourses("tour-result");
   renderTourResultStatusSummary();
   refreshLiveProgressSurfaces();
 
