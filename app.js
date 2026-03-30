@@ -107,6 +107,7 @@ function showViewTransitionOverlay(duration = 220) {
   }
 
   el.classList.remove("hidden");
+  el.classList.remove("is-busy");
 
   if (__viewTransitionTimer) {
     clearTimeout(__viewTransitionTimer);
@@ -115,8 +116,42 @@ function showViewTransitionOverlay(duration = 220) {
 
   __viewTransitionTimer = setTimeout(() => {
     el.classList.add("hidden");
+    el.classList.remove("is-busy");
     __viewTransitionTimer = null;
   }, duration);
+}
+
+function showAsyncOverlay(label) {
+  const el = document.getElementById("view-transition-overlay");
+  if (!el) return;
+
+  const txt = el.querySelector(".view-transition-text");
+  if (txt) {
+    txt.textContent =
+      String(label || "").trim() ||
+      (typeof t === "function" ? (t("loading") || "Загрузка…") : "Загрузка…");
+  }
+
+  if (__viewTransitionTimer) {
+    clearTimeout(__viewTransitionTimer);
+    __viewTransitionTimer = null;
+  }
+
+  el.classList.remove("hidden");
+  el.classList.add("is-busy");
+}
+
+function hideAsyncOverlay() {
+  const el = document.getElementById("view-transition-overlay");
+  if (!el) return;
+
+  const txt = el.querySelector(".view-transition-text");
+  if (txt && typeof t === "function") {
+    txt.textContent = t("loading") || txt.textContent;
+  }
+
+  el.classList.remove("is-busy");
+  el.classList.add("hidden");
 }
 
 function showCertificateFlowOverlay(i18nKey = "certificate_download_preparing", fallback = "Подготавливаем сертификат…") {
@@ -2160,16 +2195,20 @@ async function dbHasAnyActiveTourNow() {
   }
 }
 
-      async function renderArchiveView() {
+            async function renderArchiveView() {
   const listEl = document.getElementById("archive-list");
   if (!listEl) return;
 
-  // 1) Loading state
   listEl.innerHTML = `
     <div class="empty muted">${t("archive_loading")}</div>
   `;
 
-  // 2) Determine availability
+  showAsyncOverlay(tr3(
+    "Загружаем архив…",
+    "Arxiv yuklanmoqda…",
+    "Loading archive…"
+  ));
+
   let isLocked = false;
   let availabilityUnknown = false;
 
@@ -2182,14 +2221,12 @@ async function dbHasAnyActiveTourNow() {
         isLocked = !!hasActive;
       }
     } else {
-      // No DB: fallback to local schedule rule
       isLocked = !canOpenArchiveNow();
     }
   } catch {
     availabilityUnknown = true;
   }
 
-  // 3) Locked / unavailable UI (on screen, not toast)
   if (availabilityUnknown) {
     listEl.innerHTML = `
       <div class="empty muted">
@@ -2197,6 +2234,7 @@ async function dbHasAnyActiveTourNow() {
         <div class="small">${t("archive_unavailable_sub")}</div>
       </div>
     `;
+    hideAsyncOverlay();
     return;
   }
 
@@ -2207,18 +2245,18 @@ async function dbHasAnyActiveTourNow() {
         <div class="small">${t("archive_locked_sub")}</div>
       </div>
     `;
+    hideAsyncOverlay();
     return;
   }
 
-  // 4) If DB not available for content, show empty (safe)
   if (!window.sb) {
     listEl.innerHTML = `
       <div class="empty muted">${t("archive_empty")}</div>
     `;
+    hideAsyncOverlay();
     return;
   }
 
-  // 5) Load archive items for current subject
   const subjectKey = state?.courses?.subjectKey;
   const uid = await getAuthUid();
 
@@ -2226,6 +2264,7 @@ async function dbHasAnyActiveTourNow() {
     listEl.innerHTML = `
       <div class="empty muted">${t("archive_empty")}</div>
     `;
+    hideAsyncOverlay();
     return;
   }
 
@@ -2234,10 +2273,10 @@ async function dbHasAnyActiveTourNow() {
     listEl.innerHTML = `
       <div class="empty muted">${t("archive_empty")}</div>
     `;
+    hideAsyncOverlay();
     return;
   }
 
-  // Load tours for subject
   const { data: tours, error: toursErr } = await window.sb
     .from("tours")
     .select("id,tour_no,start_date,end_date,is_active")
@@ -2248,6 +2287,7 @@ async function dbHasAnyActiveTourNow() {
     listEl.innerHTML = `
       <div class="empty muted">${t("archive_empty")}</div>
     `;
+    hideAsyncOverlay();
     return;
   }
 
@@ -2263,7 +2303,6 @@ async function dbHasAnyActiveTourNow() {
     return afterStart && beforeEnd;
   };
 
-  // Past = not active now OR is_active === false
   const pastTours = tours.filter(t => !t?.is_active || !isInWindow(t));
   const pastTourIds = pastTours.map(t => Number(t.id)).filter(Boolean);
 
@@ -2271,10 +2310,10 @@ async function dbHasAnyActiveTourNow() {
     listEl.innerHTML = `
       <div class="empty muted">${t("archive_empty")}</div>
     `;
+    hideAsyncOverlay();
     return;
   }
 
-  // Load user attempts for those tours
   const { data: atts, error: attsErr } = await window.sb
     .from("tour_attempts")
     .select("tour_id,score,total_time,status")
@@ -2286,10 +2325,10 @@ async function dbHasAnyActiveTourNow() {
     listEl.innerHTML = `
       <div class="empty muted">${t("archive_empty")}</div>
     `;
+    hideAsyncOverlay();
     return;
   }
 
-  // Best attempt per tour: max score, then min time
   const bestByTour = new Map();
   for (const a of atts) {
     const tid = Number(a.tour_id);
@@ -2306,7 +2345,6 @@ async function dbHasAnyActiveTourNow() {
     }
   }
 
-  // Render list
   const rows = pastTours
     .filter(t => bestByTour.has(Number(t.id)))
     .map(t => {
@@ -2329,10 +2367,12 @@ async function dbHasAnyActiveTourNow() {
     listEl.innerHTML = `
       <div class="empty muted">${t("archive_empty")}</div>
     `;
+    hideAsyncOverlay();
     return;
   }
 
-    listEl.innerHTML = rows.join("");
+  listEl.innerHTML = rows.join("");
+  hideAsyncOverlay();
 }
 
 function setNotificationsBadge(count) {
@@ -2455,11 +2495,18 @@ async function renderNotificationsView() {
     <div class="empty muted">${escapeHTML(t("notifications_loading"))}</div>
   `;
 
-    if (!window.sb) {
+  showAsyncOverlay(tr3(
+    "Загружаем уведомления…",
+    "Bildirishnomalar yuklanmoqda…",
+    "Loading notifications…"
+  ));
+
+  if (!window.sb) {
     listEl.innerHTML = `
       <div class="empty muted">${escapeHTML(t("notifications_no_db"))}</div>
     `;
     await refreshNotificationsBadge();
+    hideAsyncOverlay();
     return;
   }
 
@@ -2469,6 +2516,7 @@ async function renderNotificationsView() {
       <div class="empty muted">${escapeHTML(t("notifications_empty"))}</div>
     `;
     await refreshNotificationsBadge();
+    hideAsyncOverlay();
     return;
   }
 
@@ -2500,12 +2548,13 @@ async function renderNotificationsView() {
 
     if (error) throw error;
     rows = Array.isArray(data) ? data.filter(r => r?.notification) : [];
-    } catch (e) {
+  } catch (e) {
     logClientError("renderNotificationsView_load", e);
     listEl.innerHTML = `
       <div class="empty muted">${escapeHTML(t("notifications_load_error"))}</div>
     `;
     await refreshNotificationsBadge();
+    hideAsyncOverlay();
     return;
   }
 
@@ -2514,6 +2563,7 @@ async function renderNotificationsView() {
       <div class="empty muted">${escapeHTML(t("notifications_empty"))}</div>
     `;
     await refreshNotificationsBadge();
+    hideAsyncOverlay();
     return;
   }
 
@@ -2538,6 +2588,7 @@ async function renderNotificationsView() {
   }).join("");
 
   await markNotificationsRead(rows);
+  hideAsyncOverlay();
 }
 
       function renderAboutView() {
@@ -3567,22 +3618,32 @@ async function buildPracticeSet(subjectKey) {
     const langCode = (window.i18n?.getLang ? window.i18n.getLang() : "ru");
     const nameField = langCode === "uz" ? "name_uz" : (langCode === "en" ? "name_en" : "name_ru");
 
-        const regionsCacheKey = "geo_regions_v1";
+                const regionsCacheKey = "geo_regions_v1";
     let regions = geoCacheGet(regionsCacheKey);
 
     if (!Array.isArray(regions) || regions.length === 0) {
-      const res = await window.sb
-        .from("regions")
-        .select(`id, name_ru, name_uz, name_en`)
-        .order("name_ru", { ascending: true });
+      showAsyncOverlay(tr3(
+        "Загружаем регионы…",
+        "Hududlar yuklanmoqda…",
+        "Loading regions…"
+      ));
 
-      if (res?.error || !Array.isArray(res?.data) || res.data.length === 0) {
-        showToast(t("toast_no_regions_in_db"));
-        return;
+      try {
+        const res = await window.sb
+          .from("regions")
+          .select(`id, name_ru, name_uz, name_en`)
+          .order("name_ru", { ascending: true });
+
+        if (res?.error || !Array.isArray(res?.data) || res.data.length === 0) {
+          showToast(t("toast_no_regions_in_db"));
+          return;
+        }
+
+        regions = res.data;
+        geoCacheSet(regionsCacheKey, regions);
+      } finally {
+        hideAsyncOverlay();
       }
-
-      regions = res.data;
-      geoCacheSet(regionsCacheKey, regions);
     }
 
         regions.forEach(r => {
@@ -3617,20 +3678,30 @@ async function buildPracticeSet(subjectKey) {
         return;
       }
 
-             const dCacheKey = `geo_districts_v1_${regionId}`;
+                         const dCacheKey = `geo_districts_v1_${regionId}`;
       let rows = geoCacheGet(dCacheKey);
 
       if (!Array.isArray(rows)) rows = [];
 
       if (rows.length === 0) {
-        const res = await window.sb
-          .from("districts")
-          .select("id, region_id, name_ru, name_uz, name_en")
-          .eq("region_id", regionId)
-          .order("name_ru", { ascending: true });
+        showAsyncOverlay(tr3(
+          "Загружаем районы…",
+          "Tumanlar yuklanmoqda…",
+          "Loading districts…"
+        ));
 
-        rows = (!res?.error && Array.isArray(res?.data)) ? res.data : [];
-        if (rows.length) geoCacheSet(dCacheKey, rows);
+        try {
+          const res = await window.sb
+            .from("districts")
+            .select("id, region_id, name_ru, name_uz, name_en")
+            .eq("region_id", regionId)
+            .order("name_ru", { ascending: true });
+
+          rows = (!res?.error && Array.isArray(res?.data)) ? res.data : [];
+          if (rows.length) geoCacheSet(dCacheKey, rows);
+        } finally {
+          hideAsyncOverlay();
+        }
       }
 
       districtEl.innerHTML = "";
@@ -5305,9 +5376,22 @@ async function renderCertificatesView() {
     <div class="empty muted">${escapeHTML(t("loading") || "Loading…")}</div>
   `;
 
+  showAsyncOverlay(tr3(
+    "Загружаем сертификаты…",
+    "Sertifikatlar yuklanmoqda…",
+    "Loading certificates…"
+  ));
+
+  let rawRows = [];
+  let rows = [];
+
+  try {
     await ensureEligibleCertificatesIssued();
-  const rawRows = await fetchMyCertificatesDb();
-  const rows = await filterAvailableCertificateRows(rawRows);
+    rawRows = await fetchMyCertificatesDb();
+    rows = await filterAvailableCertificateRows(rawRows);
+  } finally {
+    hideAsyncOverlay();
+  }
 
       if (!rows.length) {
     listEl.innerHTML = `
@@ -11749,16 +11833,27 @@ async function renderToursHistorySummary(subjectId) {
 async function startPracticeNew() {
   const subjectKey = state.courses.subjectKey;
 
-  // DB-first questions (may fallback to local automatically)
-  const questions = await buildPracticeSet(subjectKey);
+  let questions = [];
+  showAsyncOverlay(tr3(
+    "Загружаем вопросы практики…",
+    "Amaliyot savollari yuklanmoqda…",
+    "Loading practice questions…"
+  ));
 
-      if (!Array.isArray(questions) || questions.length === 0) {
+  try {
+    // DB-first questions (may fallback to local automatically)
+    questions = await buildPracticeSet(subjectKey);
+  } finally {
+    hideAsyncOverlay();
+  }
+
+  if (!Array.isArray(questions) || questions.length === 0) {
     showToast(t("practice_no_questions") || "Нет вопросов для практики по этому предмету.");
     return;
   }
 
   state.quizLock = "practice";
-    state.quiz = {
+  state.quiz = {
     mode: "practice",
     subjectKey,
     startedAt: Date.now(),
@@ -11772,7 +11867,7 @@ async function startPracticeNew() {
     correct: Array.from({ length: questions.length }).map(() => false),
 
     qTimeLeft: Number(questions[0]?.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[questions[0]?.difficulty] || 60,
-    qEndsAtMs: null,   // ✅ NEW (deadline for current question)
+    qEndsAtMs: null,
     qTimerId: null
   };
 
@@ -12419,7 +12514,7 @@ row.innerHTML = `
     });
   };
 
-  // If we have DB attempt id -> DB-first review
+     // If we have DB attempt id -> DB-first review
   const dbAttemptId = attempt?.db?.ok ? Number(attempt?.db?.attemptId) : null;
 
   // First paint: loading
@@ -12428,11 +12523,16 @@ row.innerHTML = `
   // DB-first flow (best-effort)
   (async () => {
     if (!window.sb || !dbAttemptId) {
-      // fallback to local
       const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
       renderFromDetails(localDetails);
       return;
     }
+
+    showAsyncOverlay(tr3(
+      "Загружаем разбор практики…",
+      "Amaliyot tahlili yuklanmoqda…",
+      "Loading practice review…"
+    ));
 
     try {
       const uid = await getAuthUid();
@@ -12465,7 +12565,7 @@ row.innerHTML = `
       }
 
       // 2) read questions
-            const { data: qRows, error: qErr } = await window.sb
+      const { data: qRows, error: qErr } = await window.sb
         .from("questions")
         .select("id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en")
         .in("id", ids)
@@ -12481,97 +12581,39 @@ row.innerHTML = `
 
       const qMap = new Map((qRows || []).map(q => [Number(q.id), q]));
 
-      // 3) normalize into the same "details" shape UI expects
-            const contentLang = (loadProfile()?.language) || "ru";
-      const pickL = (obj, base) => {
-        const k = contentLang === "uz" ? (base + "_uz") : contentLang === "en" ? (base + "_en") : (base + "_ru");
-        const v = (obj && obj[k] != null) ? String(obj[k]).trim() : "";
-        // ✅ правильный fallback: сначала локализованное, потом base
-        return v !== "" ? obj[k] : (obj?.[base] ?? "");
-      };
+      const details = (ansRows || []).map((x, idx) => {
+        const q = qMap.get(Number(x.question_id)) || {};
+        const type = String(q?.qtype || "mcq").toLowerCase() === "input" ? "input" : "mcq";
+        const options = parseOptionsText(pickContentText(q, "options_text") || "") || [];
 
-      const details = (ansRows || []).map((a) => {
-  const q = qMap.get(Number(a.question_id)) || null;
+        return {
+          id: Number(q?.id || x?.question_id || idx + 1),
+          topic: q?.topic || (t("topic_general") || "General"),
+          subtopic: q?.subtopic || null,
+          difficulty: q?.difficulty || "easy",
+          type,
+          question: pickContentText(q, "question_text") || "",
+          options,
+          userAnswer: String(x?.user_answer ?? ""),
+          correctAnswer: String(q?.correct_answer ?? ""),
+          explanation: pickContentText(q, "explanation") || "",
+          isCorrect: !!x?.is_correct,
+          timeSpent: Number(x?.time_spent || 0)
+        };
+      });
 
-  let type = "mcq";
-  if (q?.qtype) type = String(q.qtype);
-
-  let difficulty = q?.difficulty ? String(q.difficulty) : "easy";
-
-  // ✅ options по content language
-  let options = null;
-  const optionsRaw = q ? pickL(q, "options_text") : null;
-  if (optionsRaw) {
-    try {
-      const parsed = JSON.parse(String(optionsRaw));
-      if (Array.isArray(parsed)) options = parsed.map(x => String(x));
-    } catch {}
-  }
-
-  const ua = (a.user_answer === null || a.user_answer === undefined) ? "" : String(a.user_answer);
-  const ca = (q?.correct_answer === null || q?.correct_answer === undefined) ? "" : String(q.correct_answer);
-
-  const toIdx = (raw) => {
-    const s = String(raw || "").trim();
-    if (!s) return null;
-
-    if (isNumericLike(s)) {
-      return Math.trunc(Number(s));
-    }
-
-    const li = letterToIdx(s);
-    return (li !== null && li >= 0) ? li : null;
-  };
-
-  let normalizedIsCorrect = !!a.is_correct;
-
-  if (String(type).toLowerCase() === "mcq") {
-    const uaIdx = toIdx(ua);
-    const caIdx = toIdx(ca);
-
-    if (uaIdx !== null && caIdx !== null) {
-      normalizedIsCorrect = (uaIdx === caIdx);
-    } else {
-      const uaDisp = formatAnswerForDisplay(q, ua);
-      const caDisp = formatAnswerForDisplay(q, ca);
-
-      if (uaDisp && caDisp && uaDisp === caDisp) {
-        normalizedIsCorrect = true;
-      }
-    }
-  }
-
-  return {
-    id: Number(a.question_id),
-    topic: q?.topic || "General",
-    subtopic: q?.subtopic || null,
-    difficulty,
-    type,
-    question: q ? (pickL(q, "question_text") || "") : "",
-    options,
-    userAnswer: ua || "—",
-    correctAnswer: ca || "—",
-    explanation: q ? (pickL(q, "explanation") || "") : "",
-    isCorrect: normalizedIsCorrect,
-    timeSpent: Number(a.time_spent) || 0
-  };
-});
-
-      // 4) render DB-first
       renderFromDetails(details);
-
-    } catch (e) {
-      // fallback
-      try { trackEvent("practice_review_db_crash", { message: String(e?.message || e || "unknown"), attempt_id: dbAttemptId || null }); } catch {}
-      try {
-        const uid = await getAuthUid();
-        await logDbErrorToEvents(uid, "practice_review_db_crash", e, { attempt_id: dbAttemptId || null });
-      } catch {}
-
+    } catch {
       const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
       renderFromDetails(localDetails);
+    } finally {
+      hideAsyncOverlay();
     }
   })();
+}
+     })().finally(() => {
+    hideAsyncOverlay();
+  });
 }
 
 function syncPracticeResultBadges(attemptOverride) {
@@ -14737,7 +14779,7 @@ try {
 
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
 
-    const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
+  const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
   const localPayload = state?.courses?.lastTourReviewPayload || null;
   const currentSubjectKey = String(state?.courses?.subjectKey || "").trim();
   const payloadSubjectKey = String(localPayload?.subjectKey || "").trim();
@@ -14747,7 +14789,7 @@ try {
     payloadItems.length > 0 &&
     (!currentSubjectKey || !payloadSubjectKey || currentSubjectKey === payloadSubjectKey);
 
-    const renderFromDetails = (details) => {
+  const renderFromDetails = (details) => {
     const mistakesOnly = (Array.isArray(details) ? details : []).filter(d => !d.isCorrect);
 
     if (!mistakesOnly.length) {
@@ -14783,13 +14825,13 @@ try {
             <div style="font-size:24px;line-height:1">${d.isCorrect ? "✓" : "✕"}</div>
             <div style="min-width:0;flex:1">
               <div style="font-weight:900">${escapeHTML(`${idx + 1}. ${d.topic || (t("topic_general") || "General")}`)}</div>
-${
-  d.subtopic
-    ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.subtopic))}</div>`
-    : ""
-}
-${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.difficulty))}</div>` : ""}
-<div style="margin-top:10px">${escapeHTML(d.question || "")}</div>
+              ${
+                d.subtopic
+                  ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.subtopic))}</div>`
+                  : ""
+              }
+              ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.difficulty))}</div>` : ""}
+              <div style="margin-top:10px">${escapeHTML(d.question || "")}</div>
               <div class="muted small" style="margin-top:10px">
                 ${escapeHTML(t("rec_your_answer") || "Ваш ответ")}: <b>${escapeHTML(userDisp || "—")}</b>
               </div>
@@ -14805,7 +14847,7 @@ ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(S
           </div>
         </div>
       `;
-        }).join("") + `
+    }).join("") + `
       <div class="list-item" style="margin-top:12px">
         <div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div>
         <div style="margin-top:10px">
@@ -14817,7 +14859,7 @@ ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(S
     `;
   };
 
-    // 1) instant local payload right after finish
+  // 1) instant local payload right after finish
   if (hasFreshLocalTourPayload) {
     renderFromDetails(payloadItems);
     return;
@@ -14829,43 +14871,47 @@ ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(S
     return;
   }
 
+  showAsyncOverlay(tr3(
+    "Загружаем разбор тура…",
+    "Tur tahlili yuklanmoqda…",
+    "Loading tour review…"
+  ));
+
   try {
     const { data, error } = await window.sb
-  .from("tour_answers")
-  .select(`
-    question_id,
-    user_answer,
-    is_correct,
-    time_spent,
-    question:questions(
-      id,
-      topic,
-      subtopic,
-      difficulty,
-      qtype,
-      question_text,
-      options_text,
-      correct_answer,
-      explanation,
-      question_text_ru,
-      question_text_uz,
-      question_text_en,
-      options_text_ru,
-      options_text_uz,
-      options_text_en,
-      explanation_ru,
-      explanation_uz,
-      explanation_en
-    )
-  `)
-  .eq("attempt_id", attemptId)
-  .eq("answered", true)
-  .limit(100);
+      .from("tour_answers")
+      .select(`
+        question_id,
+        user_answer,
+        is_correct,
+        time_spent,
+        question:questions(
+          id,
+          topic,
+          subtopic,
+          difficulty,
+          qtype,
+          question_text,
+          options_text,
+          correct_answer,
+          explanation,
+          question_text_ru,
+          question_text_uz,
+          question_text_en,
+          options_text_ru,
+          options_text_uz,
+          options_text_en,
+          explanation_ru,
+          explanation_uz,
+          explanation_en
+        )
+      `)
+      .eq("attempt_id", attemptId)
+      .eq("answered", true)
+      .limit(100);
 
     if (error || !Array.isArray(data) || !data.length) {
-      if (!(localPayload && Array.isArray(localPayload.items) && localPayload.items.length)) {
-        renderFromDetails([]);
-      }
+      renderFromDetails([]);
       return;
     }
 
@@ -14883,26 +14929,26 @@ ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(S
       }
 
       return {
-  id: Number(q?.id || x?.question_id || idx + 1),
-  topic: q?.topic || (t("topic_general") || "General"),
-  subtopic: q?.subtopic || null,
-  difficulty: q?.difficulty || "easy",
-  type,
-  question: pickContentText(q, "question_text") || "",
-  options,
-  userAnswer: String(x?.user_answer ?? ""),
-  correctAnswer: String(q?.correct_answer ?? ""),
-  explanation: pickContentText(q, "explanation") || "",
-  isCorrect: normalizedIsCorrect,
-  timeSpent: Number(x?.time_spent || 0)
-};
+        id: Number(q?.id || x?.question_id || idx + 1),
+        topic: q?.topic || (t("topic_general") || "General"),
+        subtopic: q?.subtopic || null,
+        difficulty: q?.difficulty || "easy",
+        type,
+        question: pickContentText(q, "question_text") || "",
+        options,
+        userAnswer: String(x?.user_answer ?? ""),
+        correctAnswer: String(q?.correct_answer ?? ""),
+        explanation: pickContentText(q, "explanation") || "",
+        isCorrect: normalizedIsCorrect,
+        timeSpent: Number(x?.time_spent || 0)
+      };
     });
 
     renderFromDetails(details);
   } catch {
-    if (!(localPayload && Array.isArray(localPayload.items) && localPayload.items.length)) {
-      renderFromDetails([]);
-    }
+    renderFromDetails([]);
+  } finally {
+    hideAsyncOverlay();
   }
 }
    
@@ -15377,11 +15423,17 @@ if (state.tab === "profile") {
     const submitBtn = form.querySelector('button[type="submit"]');
   const __prevSubmitText = submitBtn ? submitBtn.textContent : null;
 
-  if (submitBtn) {
+    if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.textContent = (t("saving") || "Сохранение…");
     submitBtn.classList.add("is-loading");
   }
+
+  showAsyncOverlay(tr3(
+    "Сохраняем регистрацию…",
+    "Ro‘yxatdan o‘tish saqlanmoqda…",
+    "Saving registration…"
+  ));
 
     try {
     const fullName = $("#reg-fullname")?.value?.trim() || "";
@@ -15590,7 +15642,8 @@ if (state.tab === "profile") {
       setTab("home");
       renderHome();
       renderAllSubjects();
-        } finally {
+                } finally {
+      hideAsyncOverlay();
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.classList.remove("is-loading");
