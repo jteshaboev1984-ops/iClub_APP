@@ -2859,6 +2859,201 @@ function ensureTeamPeopleLoaded(screenKey) {
   return `${a}__${b}`;
 };
 
+         const TEAM_ROLE_I18N = {
+  "Ta’sischi — Prezident": {
+    ru: "Основатель — Президент",
+    uz: "Ta’sischi — Prezident",
+    en: "Founder — President"
+  },
+  "Vitse-Prezident": {
+    ru: "Вице-президент",
+    uz: "Vitse-Prezident",
+    en: "Vice President"
+  },
+  "Chief Operating Officer": {
+    ru: "Операционный директор",
+    uz: "Operatsion direktor",
+    en: "Chief Operating Officer"
+  },
+  "Media guruh rahbari": {
+    ru: "Руководитель медиа-группы",
+    uz: "Media guruhi rahbari",
+    en: "Head of Media Group"
+  },
+  "Academic Quality Assurance Lead": {
+    ru: "Руководитель по контролю академического качества",
+    uz: "Akademik sifat nazorati rahbari",
+    en: "Academic Quality Assurance Lead"
+  },
+
+  "AS level Chemistry": {
+    ru: "Химия AS Level",
+    uz: "AS Level Chemistry",
+    en: "AS Level Chemistry"
+  },
+  "AS level Biology": {
+    ru: "Биология AS Level",
+    uz: "AS Level Biology",
+    en: "AS Level Biology"
+  },
+  "IGCSE Computer Science": {
+    ru: "Компьютерные науки IGCSE",
+    uz: "IGCSE Computer Science",
+    en: "IGCSE Computer Science"
+  },
+  "AS level Economics": {
+    ru: "Экономика AS Level",
+    uz: "AS Level Economics",
+    en: "AS Level Economics"
+  },
+  "AS level Mathematics": {
+    ru: "Математика AS Level",
+    uz: "AS Level Mathematics",
+    en: "AS Level Mathematics"
+  },
+  "IELTS mentor": {
+    ru: "Ментор IELTS",
+    uz: "IELTS mentori",
+    en: "IELTS Mentor"
+  },
+  "SAT English": {
+    ru: "SAT English",
+    uz: "SAT English",
+    en: "SAT English"
+  },
+  "SAT Math": {
+    ru: "SAT Math",
+    uz: "SAT Math",
+    en: "SAT Math"
+  },
+  "English A2 mentor": {
+    ru: "Ментор English A2",
+    uz: "English A2 mentori",
+    en: "English A2 Mentor"
+  },
+  "English B1 mentor": {
+    ru: "Ментор English B1",
+    uz: "English B1 mentori",
+    en: "English B1 Mentor"
+  },
+  "Ingliz tili mentori": {
+    ru: "Ментор по английскому языку",
+    uz: "Ingliz tili mentori",
+    en: "English Language Mentor"
+  },
+
+  "Video tahrirchi": {
+    ru: "Видеоредактор",
+    uz: "Video tahrirchi",
+    en: "Video Editor"
+  },
+  "Copywriter": {
+    ru: "Копирайтер",
+    uz: "Kopirayter",
+    en: "Copywriter"
+  },
+  "Dizayner": {
+    ru: "Дизайнер",
+    uz: "Dizayner",
+    en: "Designer"
+  },
+  "Telegram menejer": {
+    ru: "Менеджер Telegram",
+    uz: "Telegram menejeri",
+    en: "Telegram Manager"
+  },
+  "Instagram menejer": {
+    ru: "Менеджер Instagram",
+    uz: "Instagram menejeri",
+    en: "Instagram Manager"
+  }
+};
+
+const TEAM_META_I18N = {
+  "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi": {
+    ru: "Ученик 10 «Blue» класса Президентской школы города Нурафшан, Ташкентская область",
+    uz: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi",
+    en: "Student of Grade 10 “Blue”, Presidential School of Nurafshon, Tashkent Region"
+  },
+  "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Green” sinf o‘quvchisi": {
+    ru: "Ученик 10 «Green» класса Президентской школы города Нурафшан, Ташкентская область",
+    uz: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Green” sinf o‘quvchisi",
+    en: "Student of Grade 10 “Green”, Presidential School of Nurafshon, Tashkent Region"
+  },
+  "Toshkent shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi": {
+    ru: "Ученик 10 «Blue» класса Президентской школы города Ташкент",
+    uz: "Toshkent shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi",
+    en: "Student of Grade 10 “Blue”, Presidential School of Tashkent"
+  },
+  "Yosh kitobxon tanlovi g‘olibasi (2023) • IELTS 7": {
+    ru: "Победительница конкурса «Yosh kitobxon» (2023) • IELTS 7",
+    uz: "Yosh kitobxon tanlovi g‘olibasi (2023) • IELTS 7",
+    en: "Winner of the “Yosh kitobxon” competition (2023) • IELTS 7"
+  },
+  "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Green” sinf o‘quvchisi • IELTS 8.0": {
+    ru: "Ученик 10 «Green» класса Президентской школы города Нурафшан, Ташкентская область • IELTS 8.0",
+    uz: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Green” sinf o‘quvchisi • IELTS 8.0",
+    en: "Student of Grade 10 “Green”, Presidential School of Nurafshon, Tashkent Region • IELTS 8.0"
+  },
+  "Samarqand viloyati Invest in education xususiy maktabi 11-sinf • IELTS 7.5 • SAT English 690": {
+    ru: "11 класс частной школы Invest in Education, Самаркандская область • IELTS 7.5 • SAT English 690",
+    uz: "Samarqand viloyati Invest in education xususiy maktabi 11-sinf • IELTS 7.5 • SAT English 690",
+    en: "Grade 11, Invest in Education private school, Samarkand Region • IELTS 7.5 • SAT English 690"
+  },
+  "Xorazm viloyati Hazorasp tumani, To‘laqim FM xususiy maktabi 11-sinf • SAT Math 790": {
+    ru: "11 класс частной школы To‘laqim FM, Хазараспский район, Хорезмская область • SAT Math 790",
+    uz: "Xorazm viloyati Hazorasp tumani, To‘laqim FM xususiy maktabi 11-sinf • SAT Math 790",
+    en: "Grade 11, To‘laqim FM private school, Hazorasp District, Khorezm Region • SAT Math 790"
+  },
+  "Samarqand viloyati Paxtachi tumani 12-maktab 11 “Moliya-iqtisod” • IELTS 6": {
+    ru: "11 «Финансы-экономика» класс школы №12, Пахтачинский район, Самаркандская область • IELTS 6",
+    uz: "Samarqand viloyati Paxtachi tumani 12-maktab 11 “Moliya-iqtisod” • IELTS 6",
+    en: "Grade 11 “Finance-Economics”, School No. 12, Paxtachi District, Samarkand Region • IELTS 6"
+  },
+  "Toshkent Davlat sharqshunoslik universiteti 1-kurs • IELTS 6.5": {
+    ru: "1 курс Ташкентского государственного университета востоковедения • IELTS 6.5",
+    uz: "Toshkent Davlat sharqshunoslik universiteti 1-kurs • IELTS 6.5",
+    en: "1st year student, Tashkent State University of Oriental Studies • IELTS 6.5"
+  },
+  "Navoiy davlat universiteti 3-bosqich • IELTS 7.5": {
+    ru: "3 курс Навоийского государственного университета • IELTS 7.5",
+    uz: "Navoiy davlat universiteti 3-bosqich • IELTS 7.5",
+    en: "3rd year student, Navoi State University • IELTS 7.5"
+  },
+  "Toshkent Xalqaro Vestminster universiteti 1-kurs talabasi": {
+    ru: "Студент 1 курса Международного Вестминстерского университета в Ташкенте",
+    uz: "Toshkent Xalqaro Vestminster universiteti 1-kurs talabasi",
+    en: "1st year student, Westminster International University in Tashkent"
+  },
+  "Xiva shahridagi Prezident maktabining 10 “Green” sinf o‘quvchisi": {
+    ru: "Ученик 10 «Green» класса Президентской школы города Хива",
+    uz: "Xiva shahridagi Prezident maktabining 10 “Green” sinf o‘quvchisi",
+    en: "Student of Grade 10 “Green”, Presidential School of Khiva"
+  }
+};
+
+function pickTeamLocalizedText(value, dict) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+
+  const lang = currentLang();
+  const row = dict?.[raw];
+
+  if (!row || typeof row !== "object") return raw;
+  if (lang === "uz") return String(row.uz || row.ru || row.en || raw).trim();
+  if (lang === "en") return String(row.en || row.ru || row.uz || raw).trim();
+  return String(row.ru || row.uz || row.en || raw).trim();
+}
+
+function localizeTeamPersonCardData(person) {
+  const x = { ...(person || {}) };
+
+  x.role = pickTeamLocalizedText(x.role, TEAM_ROLE_I18N);
+  x.meta = pickTeamLocalizedText(x.meta, TEAM_META_I18N);
+
+  return x;
+}
+         
 const enrichPersonProfile = (x) => {
   const role = String(x.role || "");
   const meta = String(x.meta || "");
@@ -2948,11 +3143,14 @@ const enrichPersonProfile = (x) => {
 const list = Array.isArray(dbList) && dbList.length ? dbList : board;
 
 state.about.teamPeopleResolved = state.about.teamPeopleResolved || {};
-state.about.teamPeopleResolved.board = list.map(x => ({
-  ...x,
-  group: "board",
-  memberKey: memberKeyOf(x)
-}));
+state.about.teamPeopleResolved.board = list.map(x => {
+  const localized = localizeTeamPersonCardData(x);
+  return {
+    ...localized,
+    group: "board",
+    memberKey: memberKeyOf(localized)
+  };
+});
 
 contentEl.innerHTML = `
   ${subHeader("about_team_board_title")}
@@ -2979,11 +3177,14 @@ contentEl.innerHTML = `
   const list = sourceList.filter(x => isMentorVisibleBySubjectActivity(x));
 
   state.about.teamPeopleResolved = state.about.teamPeopleResolved || {};
-  state.about.teamPeopleResolved.mentors = list.map(x => ({
-    ...x,
+state.about.teamPeopleResolved.mentors = list.map(x => {
+  const localized = localizeTeamPersonCardData(x);
+  return {
+    ...localized,
     group: "mentors",
-    memberKey: memberKeyOf(x)
-  }));
+    memberKey: memberKeyOf(localized)
+  };
+});
 
   contentEl.innerHTML = `
     ${subHeader("about_team_mentors_title")}
@@ -3009,11 +3210,14 @@ contentEl.innerHTML = `
 const list = Array.isArray(dbList) && dbList.length ? dbList : media;
 
 state.about.teamPeopleResolved = state.about.teamPeopleResolved || {};
-state.about.teamPeopleResolved.media = list.map(x => ({
-  ...x,
-  group: "media",
-  memberKey: memberKeyOf(x)
-}));
+state.about.teamPeopleResolved.media = list.map(x => {
+  const localized = localizeTeamPersonCardData(x);
+  return {
+    ...localized,
+    group: "media",
+    memberKey: memberKeyOf(localized)
+  };
+});
 
 contentEl.innerHTML = `
   ${subHeader("about_team_media_title")}
