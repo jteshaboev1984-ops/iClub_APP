@@ -16170,7 +16170,10 @@ if (action === "about-person-open") {
   const key = btn.dataset.key || "";
   if (!state.about) state.about = { tab: "project" };
 
-  const person = getAboutTeamPersonByKey(group, key);
+  const src = state.about.teamPeopleResolved?.[group] || [];
+  const person = Array.isArray(src)
+    ? src.find(x => String(x.memberKey || "") === String(key))
+    : null;
 
   if (!person || person.vacant) return;
 
