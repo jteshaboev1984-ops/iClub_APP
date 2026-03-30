@@ -2838,7 +2838,7 @@ function ensureTeamPeopleLoaded(screenKey) {
     <div class="person-body">
       <div class="person-name">${escapeHTML(vacant ? t("about_team_vacant_title") : name)}</div>
       <div class="person-role">${escapeHTML(role || "")}</div>
-      ${meta ? `<div class="person-meta muted small">${escapeHTML(meta)}</div>` : ""}
+      ${(!vacant && meta) ? `<div class="person-meta muted small">${escapeHTML(meta)}</div>` : ""}
       ${vacant ? `<div class="person-meta muted small" style="margin-top:6px">${escapeHTML(t("about_team_vacant_text"))}</div>` : ""}
     </div>
   `;
