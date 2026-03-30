@@ -12611,7 +12611,6 @@ row.innerHTML = `
     }
    })();
   }
-}
 
 function syncPracticeResultBadges(attemptOverride) {
   const attempt = attemptOverride || state.practiceLastAttempt;
