@@ -3054,6 +3054,42 @@ function localizeTeamPersonCardData(person) {
   return x;
 }
          
+function clearAboutTeamResolvedCache() {
+  if (!state.about) state.about = { tab: "project" };
+  state.about.teamPeopleResolved = {};
+}
+
+function getAboutTeamSourceList(group) {
+  ensureTeamCacheInit();
+
+  const g = String(group || "board");
+
+  if (g === "board") {
+    const dbList = state.about.teamPeopleCache?.board;
+    return Array.isArray(dbList) && dbList.length ? dbList : board;
+  }
+
+  if (g === "mentors") {
+    const dbList = state.about.teamPeopleCache?.mentors;
+    const sourceList = Array.isArray(dbList) && dbList.length ? dbList : mentors;
+    return sourceList.filter(x => isMentorVisibleBySubjectActivity(x));
+  }
+
+  if (g === "media") {
+    const dbList = state.about.teamPeopleCache?.media;
+    return Array.isArray(dbList) && dbList.length ? dbList : media;
+  }
+
+  return [];
+}
+
+function getAboutTeamPersonByKey(group, key) {
+  const list = getAboutTeamSourceList(group);
+  if (!Array.isArray(list) || !list.length) return null;
+
+  return list.find(x => String(memberKeyOf(x) || "") === String(key || "")) || null;
+}
+
 const enrichPersonProfile = (x) => {
   const role = String(x.role || "");
   const meta = String(x.meta || "");
@@ -3236,10 +3272,7 @@ contentEl.innerHTML = `
 }
       if (teamScreen === "member") {
   const prev = state.about.teamPrevScreen || "board";
-  const src = state.about.teamPeopleResolved?.[prev] || [];
-  const raw = Array.isArray(src)
-    ? src.find(x => String(x.memberKey || "") === String(state.about.teamMemberKey || ""))
-    : null;
+  const raw = getAboutTeamPersonByKey(prev, state.about.teamMemberKey || "");
 
   if (!raw) {
     state.about.teamScreen = prev;
@@ -3249,7 +3282,13 @@ contentEl.innerHTML = `
     return;
   }
 
-  const person = enrichPersonProfile(raw);
+  const localizedRaw = localizeTeamPersonCardData({
+    ...raw,
+    group: prev,
+    memberKey: memberKeyOf(raw)
+  });
+
+  const person = enrichPersonProfile(localizedRaw);
   const hasPhoto = !!(person.photoUrl && String(person.photoUrl).trim());
 
   contentEl.innerHTML = `
@@ -8719,24 +8758,32 @@ if (langWrap) {
       const cur = fresh.uiLanguage || fresh.language || "ru";
       if (nextLang === cur) return;
 
-      // ✅ меняем только язык интерфейса
+            // ✅ меняем только язык интерфейса
       fresh.uiLanguage = nextLang;
       saveProfile(fresh);
 
       window.i18n?.setLang(nextLang);
-         applyStaticI18n?.();
+      applyStaticI18n?.();
 
-         renderHome();
+      try { clearAboutTeamResolvedCache(); } catch {}
+
+      renderHome();
       if (state.tab === "courses") {
         renderAllSubjects();
-      try {
-       if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() === "subject-hub") {
-         renderSubjectHub();
-       }
-     } catch {}
-   }
+        try {
+          if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() === "subject-hub") {
+            renderSubjectHub();
+          }
+        } catch {}
+      }
+
       renderProfileMain();
       renderProfileSettings();
+
+      try {
+        const top = Array.isArray(state.viewStack) ? state.viewStack[state.viewStack.length - 1] : "";
+        if (top === "about") renderAboutView();
+      } catch {}
 
       showToast(t("toast_lang_updated"));
     };
@@ -8809,10 +8856,12 @@ if (!ok) return;
       try { localStorage.removeItem(LS.credentials); } catch {}
 
       // 4) apply content language
-      fresh.language = nextLang;
+            fresh.language = nextLang;
       // UI язык не трогаем намеренно (ваше требование). Но если uiLanguage ещё нет — зафиксируем.
       if (!fresh.uiLanguage) fresh.uiLanguage = window.i18n?.getLang?.() || nextLang;
       saveProfile(fresh);
+
+      try { clearAboutTeamResolvedCache(); } catch {}
 
       // 5) перерендер
       renderHome();
@@ -16054,18 +16103,30 @@ if (action === "open-subject-mentor") {
   if (!mentor) return;
 
   if (!state.about) state.about = { tab: "project" };
+  ensureTeamCacheInit();
+
+  const mentorKey = memberKeyOf(mentor);
+  const currentMentors = Array.isArray(state.about.teamPeopleCache?.mentors)
+    ? state.about.teamPeopleCache.mentors
+    : [];
+
+  state.about.teamPeopleCache.mentors = [
+    {
+      ...mentor,
+      group: "mentors",
+      vacant: false
+    },
+    ...currentMentors.filter(x => String(memberKeyOf(x) || "") !== String(mentorKey))
+  ];
+  state.about.teamPeopleCacheTs.mentors = Date.now();
+
+  clearAboutTeamResolvedCache();
+
   state.about.tab = "team";
   state.about.teamEntry = "subject";
   state.about.teamPrevScreen = "mentors";
   state.about.teamScreen = "member";
-  state.about.teamPeopleResolved = state.about.teamPeopleResolved || {};
-  state.about.teamPeopleResolved.mentors = [{
-    ...mentor,
-    group: "mentors",
-    vacant: false,
-    memberKey: memberKeyOf(mentor)
-  }];
-  state.about.teamMemberKey = memberKeyOf(mentor);
+  state.about.teamMemberKey = mentorKey;
   saveState();
 
   openGlobal("about");
@@ -16109,10 +16170,7 @@ if (action === "about-person-open") {
   const key = btn.dataset.key || "";
   if (!state.about) state.about = { tab: "project" };
 
-  const src = state.about.teamPeopleResolved?.[group];
-  const person = Array.isArray(src)
-    ? src.find(x => String(x.memberKey || "") === String(key))
-    : null;
+  const person = getAboutTeamPersonByKey(group, key);
 
   if (!person || person.vacant) return;
 
