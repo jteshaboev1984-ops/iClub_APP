@@ -12609,11 +12609,8 @@ row.innerHTML = `
     } finally {
       hideAsyncOverlay();
     }
-  })();
-}
-     })().finally(() => {
-    hideAsyncOverlay();
-  });
+   })();
+  }
 }
 
 function syncPracticeResultBadges(attemptOverride) {
