@@ -4215,6 +4215,77 @@ function buildUserMeta(u) {
   return parts.filter(Boolean).join(" • ");
 }
 
+   async function enrichRatingsUsersGeoTranslations(rows) {
+  try {
+    if (!window.sb || !Array.isArray(rows) || !rows.length) return rows;
+
+    const regionIds = Array.from(new Set(
+      rows
+        .map(r => Number(r?.users?.region_id || 0))
+        .filter(n => Number.isFinite(n) && n > 0)
+    ));
+
+    const districtIds = Array.from(new Set(
+      rows
+        .map(r => Number(r?.users?.district_id || 0))
+        .filter(n => Number.isFinite(n) && n > 0)
+    ));
+
+    const regionMap = new Map();
+    const districtMap = new Map();
+
+    if (regionIds.length) {
+      const { data } = await window.sb
+        .from("regions")
+        .select("id,name_ru,name_uz,name_en,name")
+        .in("id", regionIds);
+
+      (Array.isArray(data) ? data : []).forEach(x => {
+        regionMap.set(Number(x.id), {
+          ru: String(x.name_ru || x.name || "").trim(),
+          uz: String(x.name_uz || x.name_ru || x.name || "").trim(),
+          en: String(x.name_en || x.name_ru || x.name || "").trim()
+        });
+      });
+    }
+
+    if (districtIds.length) {
+      const { data } = await window.sb
+        .from("districts")
+        .select("id,name_ru,name_uz,name_en,name")
+        .in("id", districtIds);
+
+      (Array.isArray(data) ? data : []).forEach(x => {
+        districtMap.set(Number(x.id), {
+          ru: String(x.name_ru || x.name || "").trim(),
+          uz: String(x.name_uz || x.name_ru || x.name || "").trim(),
+          en: String(x.name_en || x.name_ru || x.name || "").trim()
+        });
+      });
+    }
+
+    rows.forEach(r => {
+      const u = r?.users;
+      if (!u) return;
+
+      const rid = Number(u.region_id || 0);
+      const did = Number(u.district_id || 0);
+
+      if (rid > 0 && !u.region_tr && regionMap.has(rid)) {
+        u.region_tr = regionMap.get(rid);
+      }
+
+      if (did > 0 && !u.district_tr && districtMap.has(did)) {
+        u.district_tr = districtMap.get(did);
+      }
+    });
+
+    return rows;
+  } catch {
+    return rows;
+  }
+}
+   
 function mapScopeToRankType(scope) {
   if (scope === "district") return "district";
   if (scope === "region") return "region";
@@ -6980,7 +7051,8 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
         return;
       }
 
-            const raw = Array.isArray(attemptsRes?.data) ? attemptsRes.data : [];
+          const raw = Array.isArray(attemptsRes?.data) ? attemptsRes.data : [];
+      await enrichRatingsUsersGeoTranslations(raw);
 
       // keep only completed attempts (different DB variants)
       const OK_STATUSES = new Set(["submitted", "time_expired", "anti_cheat", "finished"]);
@@ -7130,9 +7202,9 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
     }
 
     // 2) top 50
-    const topRes = await window.sb
+        const topRes = await window.sb
       .from("ratings_cache")
-      .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district)")
+      .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district,region_id,district_id)")
       .eq("tour_id", tourId)
       .eq("rank_type", scopeRankType)
       .lte("rank_no", 10)
@@ -7162,9 +7234,9 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
       const lo = Math.max(1, myRank - 2);
       const hi = myRank + 2;
 
-      const aroundRes = await window.sb
+            const aroundRes = await window.sb
         .from("ratings_cache")
-        .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district)")
+        .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district,region_id,district_id)")
         .eq("tour_id", tourId)
         .eq("rank_type", scopeRankType)
         .gte("rank_no", lo)
@@ -7177,9 +7249,9 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
 
     // 4) bottom 20 (optional)
     let bottomData = [];
-    const bottomRes = await window.sb
+        const bottomRes = await window.sb
       .from("ratings_cache")
-      .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district)")
+      .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district,region_id,district_id)")
       .eq("tour_id", tourId)
       .eq("rank_type", scopeRankType)
       .order("rank_no", { ascending: false })
@@ -7188,6 +7260,14 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
     if (token !== ratingsState._token) return;
     if (!bottomRes?.error && Array.isArray(bottomRes?.data)) bottomData = bottomRes.data.slice().reverse();
 
+          const cacheRowsForGeo = [
+      ...(Array.isArray(topRes?.data) ? topRes.data : []),
+      ...(Array.isArray(aroundData) ? aroundData : []),
+      ...(Array.isArray(bottomData) ? bottomData : [])
+    ];
+
+    await enrichRatingsUsersGeoTranslations(cacheRowsForGeo);
+   
     const mapDbToRow = (r) => {
       const u = r.users || {};
       return {
@@ -7595,7 +7675,7 @@ listEl.innerHTML = `
         : 0;
       if (myTotalEl) myTotalEl.textContent = totalN ? `${totalLabel}: ${totalN}` : "—";
 
-      myScoreEl.textContent = `${String(myRow.score ?? "—")} pts`;
+      myScoreEl.textContent = `${String(myRow.score ?? "—")} ${tr3("балл", "ball", "pts")}`;
       myTimeEl.textContent = formatSecondsToMMSS(myRow.total_time);
       mybar.style.display = "flex";
     } else {
@@ -7624,6 +7704,8 @@ const { data: attempts, error: attErr } = await window.sb
   .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district,region_id,district_id)")
   .in("tour_id", tourIds)
   .limit(5000);
+
+await enrichRatingsUsersGeoTranslations(Array.isArray(attempts) ? attempts : []);
 
 if (token !== ratingsState._token) return;
 
@@ -7777,7 +7859,7 @@ const filteredAttempts = (Array.isArray(attempts) ? attempts : []).filter(a => {
       const totalLabel = t("ratings_total_participants");
       if (myTotalEl) myTotalEl.textContent = totalN ? `${totalLabel}: ${totalN}` : "—";
 
-      myScoreEl.textContent = `${String(mine.score)} pts`;
+      myScoreEl.textContent = `${String(mine.score)} ${tr3("балл", "ball", "pts")}`;
       myTimeEl.textContent = formatSecondsToMMSS(mine.total_time);
       mybar.style.display = "flex";
     } else {
@@ -11941,10 +12023,9 @@ try {
     }
 
     // INPUT
-    const box = document.createElement("div");
+        const box = document.createElement("div");
     box.className = "input-wrap";
     box.innerHTML = `
-      <div class="muted small">${escapeHTML(q.inputHint || "")}</div>
       <input id="practice-input" class="text-input" type="text" placeholder="${escapeHTML(q.inputHint || "")}">
       <div id="practice-input-error" class="muted small" style="margin-top:6px; display:none;"></div>
     `;
