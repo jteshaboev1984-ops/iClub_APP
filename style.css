@@ -3987,6 +3987,13 @@ body.modal-open { overflow: hidden; }
   pointer-events: none;
 }
 
+.view-transition-overlay.is-busy{
+  background: rgba(246,248,252,.72);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  pointer-events: auto;
+}
+
 .view-transition-overlay.hidden{
   opacity: 0;
   visibility: hidden;
