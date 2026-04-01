@@ -3999,6 +3999,7 @@ async function buildPracticeSet(subjectKey) {
     "community",
     "about",
     "support",
+    "support-topic",
     "certificates",
     "certificate-verify",
     "archive"
@@ -4105,23 +4106,12 @@ if (tabName === "ratings") {
 
   const top = state.viewStack[state.viewStack.length - 1];
   if (top === viewName) {
-    if (viewName === "resources") {
-      try { trackEvent("resource_opened", { source: "global_resources" }); } catch {}
-    }
-
     showView(viewName);
 
-    if (viewName === "notifications") {
-      renderNotificationsView();
-    }
-
-    if (viewName === "about") {
-      renderAboutView();
-    }
-
-    if (viewName === "support") {
-      renderSupportView();
-    }
+    if (viewName === "notifications") renderNotificationsView();
+    if (viewName === "about") renderAboutView();
+    if (viewName === "support") renderSupportView();
+    if (viewName === "support-topic") renderSupportTopicView();
 
     if (viewName === "certificates") {
       (async () => {
@@ -4135,27 +4125,13 @@ if (tabName === "ratings") {
   state.viewStack.push(viewName);
   saveState();
 
-  if (viewName === "resources") {
-    try { trackEvent("resource_opened", { source: "global_resources" }); } catch {}
-  }
-
   showView(viewName);
 
-  if (viewName === "archive") {
-    renderArchiveView();
-  }
-
-  if (viewName === "notifications") {
-    renderNotificationsView();
-  }
-
-  if (viewName === "about") {
-    renderAboutView();
-  }
-
-  if (viewName === "support") {
-    renderSupportView();
-  }
+  if (viewName === "archive") renderArchiveView();
+  if (viewName === "notifications") renderNotificationsView();
+  if (viewName === "about") renderAboutView();
+  if (viewName === "support") renderSupportView();
+  if (viewName === "support-topic") renderSupportTopicView();
 
   if (viewName === "certificates") {
     (async () => {
@@ -9507,10 +9483,10 @@ function uiAlert({ title, message, okText } = {}) {
     toastTimer = setTimeout(() => el.classList.remove("is-show"), ms);
   }
 
-  // ---------------------------
+   // ---------------------------
   // Support
   // ---------------------------
-  const SUPPORT_ADMIN_URL = "https://t.me/AzizbekErkinovNPS";
+  const SUPPORT_BOT_USERNAME = "iClub_Ariza_bot";
 
   let supportUi = {
     category: "",
@@ -9550,72 +9526,97 @@ function uiAlert({ title, message, okText } = {}) {
     };
   }
 
+  function getSupportTelegramUserId() {
+    try {
+      const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+      const n = Number(tgId || 0);
+      if (n > 0) return n;
+    } catch {}
+
+    try {
+      const profileTgId = loadProfile()?.telegram_user_id;
+      const n = Number(profileTgId || 0);
+      if (n > 0) return n;
+    } catch {}
+
+    return null;
+  }
+
+  async function invokeSupportDispatch(ticketId) {
+    const fnUrl = `${SUPABASE_URL}/functions/v1/support-dispatch`;
+
+    const headers = {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+    };
+
+    const res = await fetch(fnUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ ticket_id: Number(ticketId) })
+    });
+
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok || !data?.ok) {
+      throw new Error(data?.error || "support_dispatch_failed");
+    }
+
+    return data;
+  }
+
   function getSupportTopics() {
     return [
       {
         key: "login",
         title: t("support_topic_login"),
+        sub: tr3("Проблемы со входом, профилем и регистрацией", "Kirish, profil va ro‘yxatdan o‘tish muammolari", "Problems with login, profile, and registration"),
         faqs: [
           {
             q: tr3("Не получается войти или профиль выглядит пустым", "Kirish ishlamayapti yoki profil bo‘sh ko‘rinmoqda", "I cannot log in or the profile looks empty"),
             a: tr3("Проверьте интернет и перезапустите приложение. Если проблема повторяется, отправьте обращение ниже.", "Internetni tekshiring va ilovani qayta oching. Muammo takrorlansa, quyida murojaat yuboring.", "Check your internet and reopen the app. If the issue repeats, send a request below.")
-          },
-          {
-            q: tr3("После регистрации что-то не сохранилось", "Ro‘yxatdan o‘tgandan keyin nimadir saqlanmadi", "Something was not saved after registration"),
-            a: tr3("Обычно помогает повторный вход. Если профиль по-прежнему пустой, отправьте обращение с описанием проблемы.", "Odatda qayta kirish yordam beradi. Profil hanuz bo‘sh bo‘lsa, muammoni yozib murojaat yuboring.", "Usually reopening the app helps. If the profile is still empty, send a request with a short description.")
           }
         ]
       },
       {
         key: "modes",
         title: t("support_topic_modes"),
+        sub: tr3("Competitive, Study и доступность предметов", "Competitive, Study va fanlar holati", "Competitive, Study, and subject availability"),
         faqs: [
           {
             q: tr3("Почему туры недоступны", "Nega turlar yopiq", "Why are tours unavailable"),
             a: tr3("Активные туры доступны только школьникам и только по competitive-предметам.", "Faol turlar faqat maktab o‘quvchilari va faqat competitive fanlar uchun ochiladi.", "Active tours are available only for school students and only for competitive subjects.")
-          },
-          {
-            q: tr3("Почему предмет не в соревновании", "Nega fan musobaqa rejimida emas", "Why the subject is not in competition mode"),
-            a: tr3("Competitive настраивается в профиле. Одновременно можно держать максимум 2 таких предмета.", "Competitive rejimi profil orqali yoqiladi. Bir paytda maksimum 2 ta fan bo‘lishi mumkin.", "Competition mode is configured in Profile. You can keep at most 2 competitive subjects at the same time.")
           }
         ]
       },
       {
         key: "practice",
         title: t("support_topic_practice"),
+        sub: tr3("Практика, разбор ошибок и рекомендации", "Amaliyot, xatolar tahlili va tavsiyalar", "Practice, review, and recommendations"),
         faqs: [
           {
             q: tr3("Где разбор ошибок и рекомендации", "Xatolar tahlili va tavsiyalar qayerda", "Where are review and recommendations"),
             a: tr3("Они появляются после завершения практики на экране результата.", "Ular amaliyot tugagach natija ekranida ko‘rinadi.", "They appear on the result screen after you finish practice.")
-          },
-          {
-            q: tr3("Почему рекомендации пустые", "Nega tavsiyalar bo‘sh", "Why recommendations are empty"),
-            a: tr3("Если ошибок нет, рекомендации не строятся. Если ошибка была, а экран пустой, отправьте обращение ниже.", "Agar xato bo‘lmasa, tavsiya qurilmaydi. Xato bo‘lgan bo‘lsa-yu ekran bo‘sh bo‘lsa, quyida murojaat yuboring.", "If there are no mistakes, recommendations are not generated. If you had mistakes but the screen is empty, send a request below.")
           }
         ]
       },
       {
         key: "tours",
         title: t("support_topic_tours"),
+        sub: tr3("Туры, таймер и завершение попытки", "Turlar, taymer va urinish yakuni", "Tours, timer, and attempt completion"),
         faqs: [
           {
             q: tr3("Почему тур завершился раньше", "Nega tur oldinroq tugadi", "Why did the tour finish earlier"),
             a: tr3("Тур может завершиться по времени или из-за anti-cheat правил. Если вы считаете, что это ошибка, нужен ручной разбор.", "Tur vaqt tugagani yoki anti-cheat qoidalari sabab yakunlanishi mumkin. Agar buni xato deb hisoblasangiz, qo‘lda tekshiruv kerak.", "A tour may finish because time expired or because of anti-cheat rules. If you believe it was a mistake, it requires manual review.")
-          },
-          {
-            q: tr3("Не вижу результат тура", "Tur natijasi ko‘rinmayapti", "I cannot see the tour result"),
-            a: tr3("Попробуйте открыть экран ещё раз. Если результат по-прежнему не показывается, отправьте обращение ниже.", "Ekranni yana bir marta ochib ko‘ring. Natija hanuz ko‘rinmasa, quyida murojaat yuboring.", "Try opening the screen again. If the result is still missing, send a request below.")
           }
         ]
       },
       {
         key: "ratings",
         title: t("support_topic_ratings"),
+        sub: tr3("Рейтинг, позиции и отображение результатов", "Reyting, o‘rinlar va natijalar ko‘rinishi", "Ratings, positions, and result visibility"),
         faqs: [
-          {
-            q: tr3("Почему рейтинг пустой", "Nega reyting bo‘sh", "Why is the rating empty"),
-            a: tr3("Рейтинг зависит от активных туров и доступных данных по выбранному уровню.", "Reyting faol turlar va tanlangan darajadagi mavjud ma’lumotlarga bog‘liq.", "Ratings depend on active tours and available data for the selected level.")
-          },
           {
             q: tr3("Кажется, рейтинг неправильный", "Reyting noto‘g‘ri ko‘rinmoqda", "The rating looks incorrect"),
             a: tr3("Это спорный случай и он не решается автоматически. Отправьте обращение ниже.", "Bu bahsli holat va avtomatik hal qilinmaydi. Quyida murojaat yuboring.", "This is a disputed case and it is not resolved automatically. Send a request below.")
@@ -9625,6 +9626,7 @@ function uiAlert({ title, message, okText } = {}) {
       {
         key: "certificates",
         title: t("support_topic_certificates"),
+        sub: tr3("Открытие, доступность и итоговые сертификаты", "Ochilishi, mavjudligi va yakuniy sertifikatlar", "Opening, availability, and final certificates"),
         faqs: [
           {
             q: tr3("Почему сертификат не открывается", "Nega sertifikat ochilmayapti", "Why the certificate does not open"),
@@ -9639,6 +9641,7 @@ function uiAlert({ title, message, okText } = {}) {
       {
         key: "content",
         title: t("support_topic_content"),
+        sub: tr3("Вопросы, ответы, объяснения и переводы", "Savollar, javoblar, tushuntirishlar va tarjimalar", "Questions, answers, explanations, and translations"),
         faqs: [
           {
             q: tr3("Ошибка в вопросе, переводе или объяснении", "Savolda, tarjimada yoki tushuntirishda xato", "There is an issue in a question, translation, or explanation"),
@@ -9649,52 +9652,57 @@ function uiAlert({ title, message, okText } = {}) {
       {
         key: "technical",
         title: t("support_topic_technical"),
+        sub: tr3("Сеть, загрузка, сохранение и технические ошибки", "Tarmoq, yuklash, saqlash va texnik xatolar", "Network, loading, saving, and technical errors"),
         faqs: [
           {
             q: tr3("Ошибка сети или сохранения", "Tarmoq yoki saqlash xatosi", "Network or saving error"),
             a: tr3("Сначала попробуйте повторить действие при стабильном интернете. Если проблема повторяется, отправьте обращение ниже.", "Avval internet barqaror bo‘lganda amalni yana bir marta bajarib ko‘ring. Muammo takrorlansa, quyida murojaat yuboring.", "First retry the action with a stable internet connection. If it happens again, send a request below.")
-          },
-          {
-            q: tr3("Экран не загрузился или пустой", "Ekran yuklanmadi yoki bo‘sh", "The screen did not load or is empty"),
-            a: tr3("Перезапустите приложение. Если пустой экран остаётся, это повод для обращения.", "Ilovani qayta oching. Agar bo‘sh ekran qolsa, murojaat yuborish kerak.", "Reopen the app. If the screen stays empty, this is a case for support.")
           }
         ]
       }
     ];
   }
 
+  function getSupportTopicByKey(key) {
+    return getSupportTopics().find(x => x.key === key) || null;
+  }
+
   function renderSupportView() {
     const topicsEl = document.getElementById("support-topics");
-    const faqEl = document.getElementById("support-faq");
-    const msgEl = document.getElementById("support-message");
-    const statusEl = document.getElementById("support-submit-status");
-    if (!topicsEl || !faqEl) return;
+    if (!topicsEl) return;
 
     const topics = getSupportTopics();
 
-    topicsEl.innerHTML = topics.map(topic => {
-      const active = topic.key === supportUi.category ? " is-active" : "";
-      return `
-        <button class="card-btn support-cat-btn${active}" type="button" data-action="support-topic" data-key="${escapeHTML(topic.key)}">
-          <div class="card-title">${escapeHTML(topic.title)}</div>
-        </button>
-      `;
-    }).join("");
+    topicsEl.innerHTML = topics.map(topic => `
+      <button class="card-btn support-cat-btn" type="button" data-action="open-support-topic" data-key="${escapeHTML(topic.key)}">
+        <div class="card-title">${escapeHTML(topic.title)}</div>
+        <div class="muted small" style="margin-top:6px">${escapeHTML(topic.sub)}</div>
+      </button>
+    `).join("");
+  }
 
-    const selected = topics.find(x => x.key === supportUi.category);
-    if (!selected) {
-      faqEl.innerHTML = `<div class="empty muted">${escapeHTML(t("support_select_topic_to_continue"))}</div>`;
-    } else {
-      faqEl.innerHTML = selected.faqs.map(item => `
-        <div class="card support-faq-card">
-          <div class="support-faq-q">${escapeHTML(item.q)}</div>
-          <div class="support-faq-a muted">${escapeHTML(item.a)}</div>
-        </div>
-      `).join("");
-    }
+  function renderSupportTopicView() {
+    const topic = getSupportTopicByKey(supportUi.category);
+    const titleEl = document.getElementById("support-topic-title");
+    const subEl = document.getElementById("support-topic-sub");
+    const faqEl = document.getElementById("support-topic-faq");
+    const msgEl = document.getElementById("support-message");
+    const statusEl = document.getElementById("support-submit-status");
 
-    if (msgEl && !msgEl.dataset.boundPlaceholder) {
-      msgEl.dataset.boundPlaceholder = "1";
+    if (!topic || !titleEl || !subEl || !faqEl) return;
+
+    titleEl.textContent = topic.title;
+    subEl.textContent = topic.sub || "";
+
+    faqEl.innerHTML = topic.faqs.map(item => `
+      <div class="card">
+        <div style="font-weight:800; margin-bottom:6px">${escapeHTML(item.q)}</div>
+        <div class="muted small">${escapeHTML(item.a)}</div>
+      </div>
+    `).join("");
+
+    if (msgEl) {
+      msgEl.value = "";
       msgEl.setAttribute("placeholder", t("support_message_placeholder"));
     }
 
@@ -9706,7 +9714,7 @@ function uiAlert({ title, message, okText } = {}) {
   function openSupport(prefill = {}) {
     supportUi = {
       ...supportUi,
-      category: prefill.category || supportUi.category || "",
+      category: "",
       sourceErrorCode: prefill.errorCode || null
     };
 
@@ -9715,6 +9723,19 @@ function uiAlert({ title, message, okText } = {}) {
 
     try {
       trackEvent("support_opened", getSupportContext());
+    } catch {}
+  }
+
+  function openSupportTopic(topicKey) {
+    supportUi.category = String(topicKey || "").trim();
+    openGlobal("support-topic");
+    renderSupportTopicView();
+
+    try {
+      trackEvent("support_category_selected", {
+        category: supportUi.category,
+        ...getSupportContext()
+      });
     } catch {}
   }
 
@@ -9768,7 +9789,7 @@ function uiAlert({ title, message, okText } = {}) {
       return;
     }
 
-    const tgUid = Number(loadProfile()?.telegram_user_id || 0) || null;
+    const tgUid = getSupportTelegramUserId();
     const signature = normalizeSupportSignature(`${category}::${message}`);
 
     try {
@@ -9806,21 +9827,40 @@ function uiAlert({ title, message, okText } = {}) {
 
       if (error) throw error;
 
+      let dispatchRes = null;
+      try {
+        dispatchRes = await invokeSupportDispatch(Number(data?.id || 0));
+      } catch (dispatchErr) {
+        try {
+          trackEvent("support_dispatch_failed", {
+            ticket_id: Number(data?.id || 0) || null,
+            category,
+            message: String(dispatchErr?.message || dispatchErr || "unknown")
+          });
+        } catch {}
+
+        if (statusEl) statusEl.textContent = t("support_ticket_dispatch_delayed");
+        showToast(t("support_ticket_dispatch_delayed"));
+        if (msgEl) msgEl.value = "";
+        return;
+      }
+
       try {
         trackEvent("support_ticket_submit_success", {
           ticket_id: Number(data?.id || 0) || null,
-          category
+          category,
+          user_sent: !!dispatchRes?.user_sent
         });
       } catch {}
 
-      if (statusEl) statusEl.textContent = t("support_ticket_saved");
-      showToast(t("support_ticket_saved"));
+      const successKey = dispatchRes?.user_sent === false
+        ? "support_ticket_saved_start_bot"
+        : "support_ticket_saved";
+
+      if (statusEl) statusEl.textContent = t(successKey);
+      showToast(t(successKey));
 
       if (msgEl) msgEl.value = "";
-
-      try {
-        openTelegramUrl(SUPPORT_ADMIN_URL);
-      } catch {}
     } catch (e) {
       try {
         trackEvent("support_ticket_submit_failed", {
@@ -16371,7 +16411,7 @@ if (state.tab === "profile") {
     return;
   }
 
-    if (topView && ["resources","news","notifications","community","about","support","certificates","archive"].includes(topView)) {
+      if (topView && ["resources","news","notifications","community","about","support","support-topic","certificates","archive"].includes(topView)) {
     globalBack();
     return;
   }
@@ -16439,14 +16479,13 @@ if (state.tab === "profile") {
 
       if (action === "open-about") { openGlobal("about"); return; }
 
-      if (action === "open-support") {
+            if (action === "open-support") {
         openSupport();
         return;
       }
 
-      if (action === "support-topic") {
-        supportUi.category = String(btn.dataset.key || "").trim();
-        renderSupportView();
+      if (action === "open-support-topic") {
+        openSupportTopic(String(btn.dataset.key || "").trim());
         return;
       }
 
