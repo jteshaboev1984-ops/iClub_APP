@@ -1078,6 +1078,21 @@
     </button>
   </div>
 </div>
+
+<div class="profile-section">
+  <div class="profile-row-list">
+    <button class="profile-row" type="button" data-action="open-support">
+      <div class="profile-row-left">
+        <div class="profile-row-ico">🛟</div>
+      </div>
+      <div class="profile-row-mid">
+        <div class="profile-row-title" data-i18n="profile_support_title">Поддержка</div>
+        <div class="muted small" data-i18n="profile_support_sub">FAQ и обращение в службу поддержки</div>
+      </div>
+      <div class="profile-row-right">›</div>
+    </button>
+  </div>
+</div>
     
 <!-- /Profile MAIN -->
 </div> <!-- ✅ FIX: закрыли #profile-main -->
@@ -1121,19 +1136,7 @@
   </div>
 </div>
 
-  <!-- Support -->
-  <div class="card">
-    <button class="settings-nav" type="button" data-action="open-support">
-      <span class="settings-nav-ico">🛟</span>
-      <span class="settings-nav-text">
-        <span class="settings-nav-title" data-i18n="profile_settings_support_title">Поддержка</span>
-        <span class="settings-nav-sub muted small" data-i18n="profile_settings_support_sub">FAQ и обращение к администратору</span>
-      </span>
-      <span class="settings-nav-arrow">›</span>
-    </button>
-  </div>
-
-    <!-- Competitive mode -->
+     <!-- Competitive mode -->
   <div class="card">
   <div class="card-title" data-i18n="profile_settings_competitive_title">Соревновательный режим</div>
   <p class="muted small" id="settings-competitive-note"></p>
@@ -1207,22 +1210,32 @@
   </div>
 </section>
 
-      <!-- ============ Support (Global) ============ -->
+            <!-- ============ Support (Global) ============ -->
       <section id="view-support" class="view" data-view="support" aria-label="Support">
         <div class="content">
           <h1 class="h1" data-i18n="support_title">Поддержка</h1>
-          <p class="muted" data-i18n="support_sub">Быстрые ответы и обращение к администратору.</p>
+          <p class="muted" data-i18n="support_sub">Выберите тему обращения.</p>
 
           <div id="support-topics" class="cards-grid"></div>
 
-          <div id="support-faq" class="list" style="margin-top:12px">
-            <div class="empty muted" data-i18n="support_select_topic_to_continue">Выберите тему, чтобы увидеть быстрые ответы.</div>
+          <div class="empty muted" style="margin-top:12px" data-i18n="support_topics_note">
+            Выберите тему. Подсказки и форма обращения откроются на отдельном экране.
           </div>
+        </div>
+      </section>
+
+      <!-- ============ Support Topic (Global) ============ -->
+      <section id="view-support-topic" class="view" data-view="support-topic" aria-label="Support Topic">
+        <div class="content">
+          <h1 id="support-topic-title" class="h1">Поддержка</h1>
+          <p id="support-topic-sub" class="muted"></p>
+
+          <div id="support-topic-faq" class="list" style="margin-top:12px"></div>
 
           <div class="card" style="margin-top:12px">
             <div class="card-title" data-i18n="support_contact_title">Связаться с поддержкой</div>
-            <p class="muted small" data-i18n="support_contact_sub">
-              Если быстрые ответы не помогли, опишите проблему. После сохранения обращения откроется Telegram.
+            <p class="muted small" data-i18n="support_contact_sub_v2">
+              Если подсказки не помогли, отправьте обращение. Ответ придёт вам в Telegram от службы поддержки.
             </p>
 
             <div class="form">
@@ -1233,7 +1246,7 @@
                   class="input support-textarea"
                   rows="5"
                   data-i18n-placeholder="support_message_placeholder"
-                  placeholder="Опишите, что произошло"
+                  placeholder="Кратко опишите, что произошло"
                 ></textarea>
               </label>
 
@@ -1345,6 +1358,6 @@
   <!-- BUILD: confirm1 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="i18n.js"></script>
-  <script src="app.js?v=support1"></script>
+  <script src="app.js?v=support3"></script>
 </body>
 </html>
