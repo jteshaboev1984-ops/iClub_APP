@@ -4108,10 +4108,21 @@ if (tabName === "ratings") {
   if (top === viewName) {
     showView(viewName);
 
-    if (viewName === "notifications") renderNotificationsView();
-    if (viewName === "about") renderAboutView();
-    if (viewName === "support") renderSupportView();
-    if (viewName === "support-topic") renderSupportTopicView();
+        if (viewName === "notifications") {
+      renderNotificationsView();
+    }
+
+    if (viewName === "about") {
+      renderAboutView();
+    }
+
+    if (viewName === "support") {
+      renderSupportView();
+    }
+
+    if (viewName === "support-topic") {
+      renderSupportTopicView();
+    }
 
     if (viewName === "certificates") {
       (async () => {
@@ -4128,16 +4139,27 @@ if (tabName === "ratings") {
   showView(viewName);
 
   if (viewName === "archive") renderArchiveView();
-  if (viewName === "notifications") renderNotificationsView();
-  if (viewName === "about") renderAboutView();
-  if (viewName === "support") renderSupportView();
-  if (viewName === "support-topic") renderSupportTopicView();
+      if (viewName === "notifications") {
+      renderNotificationsView();
+    }
 
-  if (viewName === "certificates") {
-    (async () => {
-      await renderCertificatesView();
-    })();
-  }
+    if (viewName === "about") {
+      renderAboutView();
+    }
+
+    if (viewName === "support") {
+      renderSupportView();
+    }
+
+    if (viewName === "support-topic") {
+      renderSupportTopicView();
+    }
+
+    if (viewName === "certificates") {
+      (async () => {
+        await renderCertificatesView();
+      })();
+    }
 }
 
   function canGlobalBack() {
@@ -4251,8 +4273,8 @@ if (actionBtn) {
   return;
 }
 
-    // Global screens (resources/news/...)
-    if (["resources", "news", "notifications", "community", "about", "certificates", "archive"].includes(viewName)) {
+        // Global screens (resources/news/...)
+    if (["resources", "news", "notifications", "community", "about", "support", "support-topic", "certificates", "archive"].includes(viewName)) {
   const certViewerOpened =
     viewName === "certificates" && Number(state?.certificates?.selectedId || 0) > 0;
 
