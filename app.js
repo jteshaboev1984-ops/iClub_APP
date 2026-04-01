@@ -4273,7 +4273,7 @@ if (actionBtn) {
   return;
 }
 
-        // Global screens (resources/news/...)
+            // Global screens (resources/news/...)
     if (["resources", "news", "notifications", "community", "about", "support", "support-topic", "certificates", "archive"].includes(viewName)) {
   const certViewerOpened =
     viewName === "certificates" && Number(state?.certificates?.selectedId || 0) > 0;
@@ -16079,8 +16079,8 @@ function bindTabbar() {
     return;
   }
 
-  // If we are on global screen -> go back in global stack
-  if (topView && ["resources","news","notifications","community","about","certificates","archive"].includes(topView)) {
+    // If we are on global screen -> go back in global stack
+  if (topView && ["resources","news","notifications","community","about","support","support-topic","certificates","archive"].includes(topView)) {
     showViewTransitionOverlay(260);
     globalBack();
     return;
