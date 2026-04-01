@@ -10,7 +10,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
  
   <link rel="icon" href="logo.png" type="image/png" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=support1" />
 </head>
 
 <body>
@@ -1121,6 +1121,18 @@
   </div>
 </div>
 
+  <!-- Support -->
+  <div class="card">
+    <button class="settings-nav" type="button" data-action="open-support">
+      <span class="settings-nav-ico">🛟</span>
+      <span class="settings-nav-text">
+        <span class="settings-nav-title" data-i18n="profile_settings_support_title">Поддержка</span>
+        <span class="settings-nav-sub muted small" data-i18n="profile_settings_support_sub">FAQ и обращение к администратору</span>
+      </span>
+      <span class="settings-nav-arrow">›</span>
+    </button>
+  </div>
+
     <!-- Competitive mode -->
   <div class="card">
   <div class="card-title" data-i18n="profile_settings_competitive_title">Соревновательный режим</div>
@@ -1181,7 +1193,7 @@
           </div>
         </div>
       </section>
-      <!-- ============ About (Global) ============ -->
+            <!-- ============ About (Global) ============ -->
       <section id="view-about" class="view" data-view="about" aria-label="About">
   <div class="content">
     <h1 class="h1" data-i18n="about_title">О проекте</h1>
@@ -1194,6 +1206,52 @@
     <div id="about-content" class="list"></div>
   </div>
 </section>
+
+      <!-- ============ Support (Global) ============ -->
+      <section id="view-support" class="view" data-view="support" aria-label="Support">
+        <div class="content">
+          <h1 class="h1" data-i18n="support_title">Поддержка</h1>
+          <p class="muted" data-i18n="support_sub">Быстрые ответы и обращение к администратору.</p>
+
+          <div id="support-topics" class="cards-grid"></div>
+
+          <div id="support-faq" class="list" style="margin-top:12px">
+            <div class="empty muted" data-i18n="support_select_topic_to_continue">Выберите тему, чтобы увидеть быстрые ответы.</div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="card-title" data-i18n="support_contact_title">Связаться с поддержкой</div>
+            <p class="muted small" data-i18n="support_contact_sub">
+              Если быстрые ответы не помогли, опишите проблему. После сохранения обращения откроется Telegram.
+            </p>
+
+            <div class="form">
+              <label class="field">
+                <span class="label" data-i18n="support_message_label">Опишите проблему</span>
+                <textarea
+                  id="support-message"
+                  class="input support-textarea"
+                  rows="5"
+                  data-i18n-placeholder="support_message_placeholder"
+                  placeholder="Опишите, что произошло"
+                ></textarea>
+              </label>
+
+              <div id="support-meta-note" class="muted small support-ticket-note" data-i18n="support_meta_note">
+                К обращению автоматически прикладываются экран, предмет, язык и технический контекст.
+              </div>
+
+              <div id="support-submit-status" class="muted small support-submit-status"></div>
+
+              <div class="actions-row">
+                <button id="support-submit" class="btn primary" type="button" data-action="support-submit" data-i18n="support_submit">
+                  Отправить обращение
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <!-- ============ Certificates (Global) ============ -->
       <section id="view-certificates" class="view" data-view="certificates" aria-label="Certificates">
@@ -1287,6 +1345,6 @@
   <!-- BUILD: confirm1 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="i18n.js"></script>
-  <script src="app.js?v=confirm1"></script>
+  <script src="app.js?v=support1"></script>
 </body>
 </html>
