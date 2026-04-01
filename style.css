@@ -5237,3 +5237,47 @@ button.is-loading { opacity: .85; }
     line-height: 1.35;
   }
 }
+
+/* ===========================
+   Support
+   =========================== */
+.support-textarea{
+  min-height: 120px;
+  resize: vertical;
+}
+
+.support-cat-btn{
+  text-align: left;
+  min-height: 88px;
+}
+
+.support-cat-btn.is-active{
+  background: rgba(47,111,214,0.08);
+  border-color: rgba(47,111,214,0.35);
+  box-shadow: var(--shadow-sm);
+}
+
+.support-faq-card{
+  padding: 14px;
+  border-radius: 16px;
+}
+
+.support-faq-q{
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1.35;
+  margin-bottom: 6px;
+}
+
+.support-faq-a{
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.support-ticket-note{
+  margin-top: 8px;
+}
+
+.support-submit-status{
+  margin-top: 10px;
+}
