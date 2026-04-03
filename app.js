@@ -9509,6 +9509,7 @@ function uiAlert({ title, message, okText } = {}) {
   // Support
   // ---------------------------
   const SUPPORT_BOT_USERNAME = "iClub_Ariza_bot";
+  const SUPPORT_MIN_MESSAGE_LEN = 10;
 
   let supportUi = {
     category: "",
@@ -9793,8 +9794,14 @@ function uiAlert({ title, message, okText } = {}) {
       return;
     }
 
-    if (!message) {
+        if (!message) {
       showToast(t("support_message_required"));
+      return;
+    }
+
+    if (message.length < SUPPORT_MIN_MESSAGE_LEN) {
+      showToast(t("support_message_too_short"));
+      if (statusEl) statusEl.textContent = t("support_message_too_short");
       return;
     }
 
