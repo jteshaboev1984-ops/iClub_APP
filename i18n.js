@@ -934,7 +934,7 @@ back: "Orqaga",
 video_open_external_btn: "Videoni ochish",
 video_hub_subtitle: "Fan bo‘yicha video darslar hozircha Telegram’da mavjud",
 video_language_note_title: "Muhim",
-video_uz_language_note: "Hozircha barcha video darslar o‘zbek tilida mavjud.",
+video_uz_language_note: "Hozircha barcha video darslar o‘zbek tilida taqdim etilgan.",
 video_telegram_group_hint: "Fan bo‘yicha darslar joylangan Telegram guruh ochiladi.",
 video_open_telegram_btn: "Telegram’da darslarni ochish",
        
