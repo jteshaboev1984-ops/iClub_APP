@@ -4118,6 +4118,52 @@ html.i18n-pending body { visibility: hidden; }
   display: block;
 }
 button.is-loading { opacity: .85; }
+
+/* ===========================
+   Video hub (subject-level TG entry)
+   =========================== */
+.video-hub-card{
+  padding: 14px;
+}
+
+.video-hub-kicker{
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+  color: rgba(47,111,214,.88);
+  margin-bottom: 6px;
+}
+
+.video-hub-subject{
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.video-hub-note{
+  border: 1px solid rgba(47,111,214,.14);
+  background: rgba(47,111,214,.06);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.video-hub-note-title{
+  font-weight: 900;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.video-hub-caption{
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.video-hub-open-btn{
+  width: 100%;
+}
 /* ✅ My Recommendations actions: secondary buttons must be white */
 #screen-my-rec-detail .actions-row .btn:not(.primary) {
   background: #fff !important;
