@@ -17264,18 +17264,6 @@ if (action === "tour-next" || action === "tour-submit") {
       }
 
       if (action === "video-skip") {
-        const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : (state?.activeSubjectKey ? String(state.activeSubjectKey) : "");
-        const lesson_id = state?.courses?.lessonId ? String(state.courses.lessonId) : "";
-        trackEvent("video_skipped", { subject_id, lesson_id });
-
-        try {
-          const ws = (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') ? Math.round(ytPlayer.getCurrentTime()) : 0;
-          if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
-          
-          const iframe = document.getElementById("video-player");
-          if (iframe && iframe.tagName === "IFRAME") iframe.removeAttribute("src");
-          
-          if (action === "video-skip") {
   // legacy: buttons removed from the current video hub screen
   return;
 }
@@ -17284,16 +17272,16 @@ if (action === "video-complete") {
   // legacy: buttons removed from the current video hub screen
   return;
 }
-       
-      if (action === "resources-archive") {
-  if (!canOpenArchiveNow()) {
-    showToast("Архив откроется после завершения активного тура.");
-    return;
-  }
-  openGlobal("archive");
-  return;
-}
-    });
+
+   if (action === "resources-archive") {
+     if (!canOpenArchiveNow()) {
+       showToast("Архив откроется после завершения активного тура.");
+       return;
+      }
+     openGlobal("archive");
+     return;
+   }
+});
 
     // Tours list click (demo)
     const toursList = $("#tours-list");
