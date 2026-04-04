@@ -289,7 +289,7 @@ network_error_try_again: "Ошибка сети. Попробуйте ещё р�
       mentor_profile_soon: "Скоро появится профиль",
 
       hub_video_lessons_title: "Видео-уроки",
-      hub_video_lessons_sub: "Смотреть или пропустить (“я знаю тему”)",
+      hub_video_lessons_sub: "Видео-уроки доступны в Telegram",
       hub_my_recs_sub: "Повторный доступ к чтению",
 
       hub_system_section: "Системные",
@@ -1151,7 +1151,7 @@ network_error_try_again: "Tarmoq xatosi. Qayta urinib ko‘ring.",
       mentor_profile_soon: "Tez orada profil paydo bo‘ladi",
 
       hub_video_lessons_title: "Video darslar",
-      hub_video_lessons_sub: "Ko‘rish yoki o‘tkazib yuborish (“mavzuni bilaman”)",
+      hub_video_lessons_sub: "Video darslar hozircha Telegram’da",
       hub_my_recs_sub: "Qayta ko‘rish uchun ochish",
 
       hub_system_section: "Tizim",
@@ -2020,9 +2020,8 @@ network_error_try_again: "Network error. Please try again.",
       mentor_profile_soon: "Profile coming soon",
 
       hub_video_lessons_title: "Video lessons",
-      hub_video_lessons_sub: "Watch or skip (“I know this topic”)",
+      hub_video_lessons_sub: "Video lessons available in Telegram",
       hub_my_recs_sub: "Re-open for review",
-
       hub_system_section: "System",
       hub_archive_sub: "Past tours",
 
