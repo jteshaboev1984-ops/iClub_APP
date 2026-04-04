@@ -1639,6 +1639,46 @@ function isTelegramVideoUrl(rawUrl) {
   return /^https?:\/\/t\.me\//i.test(url) || /^t\.me\//i.test(url);
 }
 
+const SUBJECT_TELEGRAM_LESSON_URLS = Object.freeze({
+  biology: "https://t.me/c/2440330033/432/566",
+  informatics: "https://t.me/c/2440330033/319/344",
+  chemistry: "https://t.me/c/2440330033/356/458",
+  mathematics: "https://t.me/c/2440330033/1583/1613",
+  economics: "https://t.me/c/2440330033/78/246"
+});
+
+function getSubjectTelegramLessonUrl(subjectKey) {
+  const key = String(subjectKey || "").trim().toLowerCase();
+  return SUBJECT_TELEGRAM_LESSON_URLS[key] || "";
+}
+
+async function getSubjectPrimaryLessonId(subjectKey) {
+  try {
+    if (!window.sb) return null;
+
+    const subjectId = await getSubjectIdByKey(subjectKey);
+    if (!subjectId) return null;
+
+    const { data, error } = await window.sb
+      .from("lessons")
+      .select("id")
+      .eq("subject_id", subjectId)
+      .order("order_no", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      logClientError("video_primary_lesson_select_error", error);
+      return null;
+    }
+
+    return data?.id ? Number(data.id) : null;
+  } catch (e) {
+    logClientError("video_primary_lesson_exception", e);
+    return null;
+  }
+}
+
 function getLessonDisplayTitle(lesson) {
   const rawTitle = String(lesson?.title || "").trim();
   const orderNo = Number(lesson?.order_no || 0);
@@ -11275,160 +11315,101 @@ async function renderSubjectHubMentorCard(subjectKey) {
       `;
 
             item.addEventListener("click", async () => {
-        state.courses.lessonId = lesson.id;
-        saveState();
-        pushCourses("video");
-        await renderVideo({ id: lesson.id, title: lesson.title, topic, order_no: lesson.order_no });
-      });
+  state.courses.lessonId = lesson.id;
+  saveState();
+  pushCourses("video");
+  await renderVideo();
+});
 
       list.appendChild(item);
     });
   }
 
-    async function renderVideo(lesson) {
-    const tEl = $("#video-title");
-    const mEl = $("#video-meta");
-    if (tEl) tEl.textContent = getLessonDisplayTitle(lesson);
-    if (mEl) mEl.textContent = lesson?.topic || "";
+    async function renderVideo() {
+  const subjectKey = String(state?.courses?.subjectKey || "").trim().toLowerCase();
+  const subj = subjectByKey(subjectKey);
 
-    const wrapEl = document.getElementById("video-player-wrap");
-    const iframe = document.getElementById("video-player");
-    const emptyEl = document.getElementById("video-empty");
-    const externalBox = document.getElementById("video-external-box");
-    const externalBtn = document.getElementById("video-open-external");
-    const externalHint = document.getElementById("video-external-hint");
+  const tEl = $("#video-title");
+  const mEl = $("#video-meta");
+  const subjectEl = document.getElementById("video-hub-subject");
 
-    // reset UI
-    try {
-      if (ytPlayer && typeof ytPlayer.stopVideo === "function") ytPlayer.stopVideo();
-      if (iframe) iframe.removeAttribute("src");
-      if (wrapEl) wrapEl.style.display = "none";
-      if (emptyEl) emptyEl.style.display = "block";
-      if (externalBox) externalBox.style.display = "none";
-      if (externalBtn) {
-        externalBtn.onclick = null;
-        externalBtn.removeAttribute("data-url");
-      }
-      if (externalHint) {
-        externalHint.textContent = t("video_external_hint") || "Откройте видео по кнопке ниже.";
-      }
-    } catch {}
+  const wrapEl = document.getElementById("video-player-wrap");
+  const iframe = document.getElementById("video-player");
+  const emptyEl = document.getElementById("video-empty");
+  const externalBox = document.getElementById("video-external-box");
+  const externalBtn = document.getElementById("video-open-external");
+  const externalHint = document.getElementById("video-external-hint");
 
-    if (!window.sb || !lesson?.id) {
-      updateTopbarForView("courses");
-      return;
+  try {
+    if (ytPlayer && typeof ytPlayer.stopVideo === "function") ytPlayer.stopVideo();
+    if (iframe) iframe.removeAttribute("src");
+  } catch {}
+
+  if (wrapEl) wrapEl.style.display = "none";
+  if (emptyEl) emptyEl.style.display = "none";
+  if (externalBox) externalBox.style.display = "block";
+
+  if (tEl) tEl.textContent = t("hub_video_lessons_title") || "Видео-уроки";
+  if (mEl) mEl.textContent = t("video_hub_subtitle") || "Уроки по предмету доступны в Telegram";
+  if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.title : "Subject");
+
+  const url = getSubjectTelegramLessonUrl(subjectKey);
+
+  // ✅ привязываем subject-level экран к первому lesson_id предмета,
+  // чтобы skip/complete и video_events не ломались
+  const primaryLessonId = await getSubjectPrimaryLessonId(subjectKey);
+  state.courses = state.courses || {};
+  state.courses.lessonId = primaryLessonId || null;
+  saveState();
+
+  if (!url) {
+    if (emptyEl) {
+      emptyEl.style.display = "block";
+      emptyEl.textContent = t("video_empty") || "Видео недоступно.";
     }
-
-    const { data, error } = await window.sb
-      .from("videos")
-      .select("video_url")
-      .eq("lesson_id", lesson.id)
-      .limit(1)
-      .maybeSingle();
-
-    if (error) {
-      logClientError("videos_select_error", error);
-      updateTopbarForView("courses");
-      return;
-    }
-
-    const url = String(data?.video_url || "").trim();
-    if (!url) {
-      updateTopbarForView("courses");
-      return;
-    }
-
-    const videoId = extractYouTubeVideoId(url);
-    const isTelegramUrl = isTelegramVideoUrl(url);
-
-    try {
-      const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : "";
-      const lesson_id = lesson?.id ? String(lesson.id) : "";
-
-      trackEvent("video_opened", {
-        subject_id,
-        lesson_id,
-        provider: videoId ? "youtube" : (isTelegramUrl ? "telegram" : "external")
-      });
-
-      insertVideoEventToSupabase("opened", lesson_id, 0);
-    } catch {}
-
-    try {
-      if (videoId) {
-        if (wrapEl) wrapEl.style.display = "block";
-        if (emptyEl) emptyEl.style.display = "none";
-
-        const isTg = !!(window.Telegram && window.Telegram.WebApp);
-
-        const base = `https://www.youtube-nocookie.com/embed/${videoId}`;
-        const params = new URLSearchParams();
-        params.set("playsinline", "1");
-        params.set("rel", "0");
-        params.set("modestbranding", "1");
-
-        if (!isTg) {
-          params.set("enablejsapi", "1");
-          params.set("origin", window.location.origin);
-        } else {
-          params.set("enablejsapi", "0");
-        }
-
-        if (iframe) {
-          iframe.src = `${base}?${params.toString()}`;
-        }
-
-        if (!isTg && isYtReady && window.YT && window.YT.Player) {
-          if (!ytPlayer) {
-            ytPlayer = new window.YT.Player("video-player", {
-              host: "https://www.youtube-nocookie.com",
-              playerVars: { origin: window.location.origin }
-            });
-          }
-        }
-      } else if (isTelegramUrl) {
-        if (emptyEl) emptyEl.style.display = "none";
-        if (externalBox) externalBox.style.display = "block";
-        if (externalHint) {
-          externalHint.textContent =
-            t("video_external_telegram_hint") ||
-            "Это видео открывается через Telegram.";
-        }
-        if (externalBtn) {
-          externalBtn.setAttribute("data-url", url);
-          externalBtn.onclick = () => {
-            try {
-              const lesson_id = lesson?.id ? String(lesson.id) : "";
-              insertVideoEventToSupabase("started", lesson_id, 0);
-            } catch {}
-            openTelegramUrl(url);
-          };
-        }
-      } else {
-        if (emptyEl) emptyEl.style.display = "none";
-        if (externalBox) externalBox.style.display = "block";
-        if (externalHint) {
-          externalHint.textContent =
-            t("video_external_link_hint") ||
-            "Это видео открывается по внешней ссылке.";
-        }
-        if (externalBtn) {
-          externalBtn.setAttribute("data-url", url);
-          externalBtn.onclick = () => {
-            try {
-              const lesson_id = lesson?.id ? String(lesson.id) : "";
-              insertVideoEventToSupabase("started", lesson_id, 0);
-            } catch {}
-            openExternal(url);
-          };
-        }
-      }
-    } catch (e) {
-      logClientError("video_player_bind_error", e);
-    }
-
+    if (externalBox) externalBox.style.display = "none";
     updateTopbarForView("courses");
+    return;
   }
+
+  try {
+    trackEvent("video_opened", {
+      subject_id: subjectKey,
+      lesson_id: primaryLessonId ? String(primaryLessonId) : "",
+      provider: "telegram_subject_group"
+    });
+
+    if (primaryLessonId) {
+      insertVideoEventToSupabase("opened", primaryLessonId, 0);
+    }
+  } catch {}
+
+  if (externalHint) {
+    externalHint.textContent =
+      t("video_uz_language_note") ||
+      "Пока все видео-уроки доступны на узбекском языке.";
+  }
+
+  if (externalBtn) {
+    externalBtn.onclick = () => {
+      try {
+        trackEvent("video_started", {
+          subject_id: subjectKey,
+          lesson_id: primaryLessonId ? String(primaryLessonId) : "",
+          provider: "telegram_subject_group"
+        });
+
+        if (primaryLessonId) {
+          insertVideoEventToSupabase("started", primaryLessonId, 0);
+        }
+      } catch {}
+
+      openTelegramUrl(url);
+    };
+  }
+
+  updateTopbarForView("courses");
+}
 
     // ---------------------------
   // Practice v1 — per spec:
@@ -16970,10 +16951,10 @@ try {
       }
 
       if (action === "open-lessons") {
-        pushCourses("lessons");
-        renderLessons();
-        return;
-      }
+  pushCourses("video");
+  renderVideo().catch(() => null);
+  return;
+}
 
       if (action === "open-practice") {
         openPracticeStart();
