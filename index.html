@@ -420,54 +420,67 @@
 </section>
 
             <!-- Lessons List -->
-            <section id="courses-lessons" class="stack-screen" data-stack="courses" data-screen="lessons">
-              <div class="section">
-                <div class="h1" data-i18n="home_lessons_label">Уроки</div>
-              <div class="muted" data-i18n="lessons_list_subtitle">Список видео-уроков</div>
-            </div>
-              <div id="lessons-list" class="list">
-                <!-- filled by app.js -->
-              </div>
-            </section>
+            <section id="courses-lessons" class="stack-screen" data-stack="courses" data-screen="lessons" hidden aria-hidden="true">
+  <div class="section">
+    <div class="h1" data-i18n="home_lessons_label">Уроки</div>
+    <div class="muted" data-i18n="lessons_list_subtitle">Список видео-уроков</div>
+  </div>
+  <div id="lessons-list" class="list">
+    <!-- legacy screen kept hidden intentionally -->
+  </div>
+</section>
 
             <!-- Video Player -->
             <section id="courses-video" class="stack-screen" data-stack="courses" data-screen="video">
-              <div class="section">
-                <div id="video-title" class="h1">Видео</div>
-                <div id="video-meta" class="muted">Урок</div>
-              </div>
+  <div class="section">
+    <div id="video-title" class="h1" data-i18n="hub_video_lessons_title">Видео-уроки</div>
+    <div id="video-meta" class="muted" data-i18n="video_hub_subtitle">
+      Уроки по предмету доступны в Telegram
+    </div>
+  </div>
 
-                            <div class="card">
-                <div id="video-empty" class="muted small" data-i18n="video_empty">
-                  Видео недоступно (нет URL в базе).
-                </div>
+  <div class="card video-hub-card">
+    <div class="video-hub-kicker" data-i18n="hub_video_lessons_title">Видео-уроки</div>
+    <div id="video-hub-subject" class="video-hub-subject">—</div>
 
-                <div id="video-player-wrap" style="display:none; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; background: #000; width: 100%;">
-                  <iframe
-                  id="video-player"
-                  title="Lesson video"
-                  style="width:100%; height:100%; border:0; display:block;"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowfullscreen
-                  referrerpolicy="strict-origin-when-cross-origin"
-                  ></iframe>
-                </div>
+    <div id="video-empty" class="muted small" data-i18n="video_empty" style="display:none;">
+      Видео недоступно.
+    </div>
 
-                <div id="video-external-box" style="display:none;">
-                  <div id="video-external-hint" class="muted small" data-i18n="video_external_hint" style="margin-bottom:12px;">
-                    Откройте видео по кнопке ниже.
-                  </div>
-                  <button id="video-open-external" class="btn primary" type="button" data-i18n="video_open_external_btn">
-                    Открыть видео
-                  </button>
-                </div>
-              </div>
+    <div id="video-player-wrap" style="display:none; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; background: #000; width: 100%;">
+      <iframe
+        id="video-player"
+        title="Lesson video"
+        style="width:100%; height:100%; border:0; display:block;"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+    </div>
 
-                            <div class="actions-row">
-                <button class="btn" type="button" data-action="video-skip" data-i18n="video_skip_btn">Пропустить — знаю тему</button>
-                <button class="btn primary" type="button" data-action="video-complete" data-i18n="video_complete_btn">Отметить как просмотрено</button>
-              </div>
-            </section>
+    <div id="video-external-box">
+      <div class="video-hub-note">
+        <div class="video-hub-note-title" data-i18n="video_language_note_title">Важно</div>
+        <div id="video-external-hint" class="muted small" data-i18n="video_uz_language_note">
+          Пока все видео-уроки доступны на узбекском языке.
+        </div>
+      </div>
+
+      <div class="muted small video-hub-caption" data-i18n="video_telegram_group_hint">
+        Откроется Telegram-группа с уроками по предмету.
+      </div>
+
+      <button id="video-open-external" class="btn primary video-hub-open-btn" type="button" data-i18n="video_open_telegram_btn">
+        Открыть уроки в Telegram
+      </button>
+    </div>
+  </div>
+
+  <div class="actions-row">
+    <button class="btn" type="button" data-action="video-skip" data-i18n="video_skip_btn">Пропустить — знаю тему</button>
+    <button class="btn primary" type="button" data-action="video-complete" data-i18n="video_complete_btn">Отметить как просмотрено</button>
+  </div>
+</section>
 
             <!-- Practice Start -->
             <section id="courses-practice-start" class="stack-screen" data-stack="courses" data-screen="practice-start">
