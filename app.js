@@ -11350,8 +11350,8 @@ async function renderSubjectHubMentorCard(subjectKey) {
   if (externalBox) externalBox.style.display = "block";
 
   if (tEl) tEl.textContent = t("hub_video_lessons_title") || "Видео-уроки";
-  if (mEl) mEl.textContent = t("video_hub_subtitle") || "Уроки по предмету доступны в Telegram";
-  if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.title : "Subject");
+if (mEl) mEl.textContent = t("video_hub_subtitle") || "Уроки по предмету доступны в Telegram";
+if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.title : "");
 
   const url = getSubjectTelegramLessonUrl(subjectKey);
 
@@ -17275,31 +17275,15 @@ if (action === "tour-next" || action === "tour-submit") {
           const iframe = document.getElementById("video-player");
           if (iframe && iframe.tagName === "IFRAME") iframe.removeAttribute("src");
           
-          insertVideoEventToSupabase("skipped", lesson_id, ws);
-        } catch {}
+          if (action === "video-skip") {
+  // legacy: buttons removed from the current video hub screen
+  return;
+}
 
-        openPracticeStart();
-        return;
-      }
-
-      if (action === "video-complete") {
-        const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : (state?.activeSubjectKey ? String(state.activeSubjectKey) : "");
-        const lesson_id = state?.courses?.lessonId ? String(state.courses.lessonId) : "";
-        trackEvent("video_completed", { subject_id, lesson_id });
-
-        try {
-          const ws = (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') ? Math.round(ytPlayer.getCurrentTime()) : 0;
-          if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
-          
-          const iframe = document.getElementById("video-player");
-          if (iframe && iframe.tagName === "IFRAME") iframe.removeAttribute("src");
-          
-          insertVideoEventToSupabase("completed", lesson_id, ws);
-        } catch {}
-
-        openPracticeStart();
-        return;
-      }
+if (action === "video-complete") {
+  // legacy: buttons removed from the current video hub screen
+  return;
+}
        
       if (action === "resources-archive") {
   if (!canOpenArchiveNow()) {
