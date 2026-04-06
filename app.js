@@ -2855,12 +2855,29 @@ function ensureTeamCacheInit() {
     state.about.teamPeopleCache = {};
     state.about.teamPeopleCacheTs = {};
     state.about.teamPeopleResolved = {};
+    state.about.teamPeopleLoading = {};
     state.about.teamPeopleCacheVersion = TEAM_CACHE_VERSION;
     saveState();
   }
 
   if (!state.about.teamPeopleCache) state.about.teamPeopleCache = {};
   if (!state.about.teamPeopleCacheTs) state.about.teamPeopleCacheTs = {};
+  if (!state.about.teamPeopleLoading) state.about.teamPeopleLoading = {};
+}
+
+function warmTeamPhotoCache(list) {
+  if (!Array.isArray(list) || !list.length) return;
+
+  list.forEach(item => {
+    const url = String(item?.photoUrl || "").trim();
+    if (!url) return;
+
+    try {
+      const img = new Image();
+      img.decoding = "async";
+      img.src = url;
+    } catch {}
+  });
 }
 
 // loads once per screen (or refresh after 6h)
@@ -2875,17 +2892,39 @@ function ensureTeamPeopleLoaded(screenKey) {
   const hasAnyPhoto = Array.isArray(cached) && cached.some(x => !!String(x?.photoUrl || "").trim());
 
   // если кэш свежий и уже содержит хотя бы одно фото — не дёргаем БД
-  if (!tooOld && Array.isArray(cached) && hasAnyPhoto) return;
+  if (!tooOld && Array.isArray(cached) && hasAnyPhoto) {
+    warmTeamPhotoCache(cached);
+    return;
+  }
 
-  // иначе перечитываем из БД
+  // защита от повторных параллельных загрузок одного и того же экрана
+  if (state.about.teamPeopleLoading?.[s]) return;
+  state.about.teamPeopleLoading[s] = true;
+
   fetchTeamPeopleFromDb(s).then(list => {
     if (!Array.isArray(list) || list.length === 0) return;
+
     ensureTeamCacheInit();
+
+    const prevList = Array.isArray(state.about.teamPeopleCache?.[s]) ? state.about.teamPeopleCache[s] : [];
+    const prevSig = JSON.stringify(prevList.map(x => [x?.name || "", x?.role || "", x?.photoUrl || "", !!x?.vacant]));
+    const nextSig = JSON.stringify(list.map(x => [x?.name || "", x?.role || "", x?.photoUrl || "", !!x?.vacant]));
+
     state.about.teamPeopleCache[s] = list;
     state.about.teamPeopleCacheTs[s] = Date.now();
     saveState();
-    renderAboutView();
-  }).catch(() => null);
+
+    warmTeamPhotoCache(list);
+
+    // перерисовываем только если данные реально изменились
+    if (prevSig !== nextSig) {
+      renderAboutView();
+    }
+  }).catch(() => null).finally(() => {
+    if (state?.about?.teamPeopleLoading) {
+      state.about.teamPeopleLoading[s] = false;
+    }
+  });
 }
       // team — overview + sub-screens (top-app)
   if (!state.about) state.about = { tab: "project" };
@@ -2905,8 +2944,8 @@ function ensureTeamPeopleLoaded(screenKey) {
   const cardCls = `person-card${large ? " is-large" : ""}${!vacant ? " is-clickable" : ""}`;
 
   const avatarHtml = hasPhoto
-    ? `<img class="person-photo" src="${escapeHTML(photoUrl)}" alt="${escapeHTML(name || "")}" loading="lazy" />`
-    : `<div class="person-avatar ${vacant ? "is-vacant" : ""}">${vacant ? "" : escapeHTML(initials(name))}</div>`;
+  ? `<img class="person-photo" src="${escapeHTML(photoUrl)}" alt="${escapeHTML(name || "")}" decoding="async" />`
+  : `<div class="person-avatar ${vacant ? "is-vacant" : ""}">${vacant ? "" : escapeHTML(initials(name))}</div>`;
 
   const bodyHtml = `
     ${avatarHtml}
@@ -3709,9 +3748,9 @@ contentEl.innerHTML = `
     <div class="card team-profile-card">
       <div class="team-profile-hero">
         ${hasPhoto
-          ? `<img class="team-profile-photo" src="${escapeHTML(person.photoUrl)}" alt="${escapeHTML(person.name || "")}" loading="lazy" />`
-          : `<div class="team-profile-fallback">${escapeHTML(initials(person.name))}</div>`
-        }
+  ? `<img class="team-profile-photo" src="${escapeHTML(person.photoUrl)}" alt="${escapeHTML(person.name || "")}" decoding="async" />`
+  : `<div class="team-profile-fallback">${escapeHTML(initials(person.name))}</div>`
+}
 
         <div class="team-profile-head">
           <div class="team-profile-name">${escapeHTML(person.name || "")}</div>
@@ -11399,7 +11438,7 @@ if (mainSubjects.length) {
 // ---------------------------
 // Subject Hub mentor
 // ---------------------------
-const TEAM_CACHE_VERSION = 4;
+const TEAM_CACHE_VERSION = 5;
 
 function mentorPhotoUrlFromPath(photoPath) {
   const p = String(photoPath || "").trim();
