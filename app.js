@@ -11368,7 +11368,7 @@ if (mainSubjects.length) {
 // ---------------------------
 // Subject Hub mentor
 // ---------------------------
-const TEAM_CACHE_VERSION = 2;
+const TEAM_CACHE_VERSION = 3;
 
 function mentorPhotoUrlFromPath(photoPath) {
   const p = String(photoPath || "").trim();
@@ -11477,11 +11477,13 @@ async function fetchSubjectMentor(subjectKey) {
   if (!local) return null;
 
   const mentor = {
-    name: String(local.name || ""),
-    role: String(local.role || ""),
-    meta: String(local.meta || ""),
-    photoUrl: null
-  };
+  ...local,
+  memberKey: String(local?.memberKey || memberKeyOf(local) || ""),
+  name: local.name_i18n ? pickLangValue(local.name_i18n) : String(local.name || ""),
+  role: local.role_i18n ? pickLangValue(local.role_i18n) : String(local.role || ""),
+  meta: local.meta_i18n ? pickLangValue(local.meta_i18n) : String(local.meta || ""),
+  photoUrl: null
+};
   state.courses.subjectMentorCache[subjectKey] = mentor;
   saveState();
   return mentor;
@@ -16857,6 +16859,7 @@ if (action === "open-subject-mentor") {
   state.about.teamPeopleCache.mentors = [
     {
       ...mentor,
+      memberKey: mentorKey,
       group: "mentors",
       vacant: false
     },
