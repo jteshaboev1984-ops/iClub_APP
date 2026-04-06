@@ -3088,11 +3088,24 @@ function pickTeamLocalizedText(value, dict) {
   return String(row.ru || row.uz || row.en || raw).trim();
 }
 
+function pickLangValue(v) {
+  if (!v || typeof v !== "object") return "";
+  const lang = currentLang();
+  if (lang === "uz") return String(v.uz || v.ru || v.en || "").trim();
+  if (lang === "en") return String(v.en || v.ru || v.uz || "").trim();
+  return String(v.ru || v.uz || v.en || "").trim();
+}
+
 function localizeTeamPersonCardData(person) {
   const x = { ...(person || {}) };
 
-  x.role = pickTeamLocalizedText(x.role, TEAM_ROLE_I18N);
-  x.meta = pickTeamLocalizedText(x.meta, TEAM_META_I18N);
+  x.name = x.name_i18n ? pickLangValue(x.name_i18n) : String(x.name || "").trim();
+  x.role = x.role_i18n ? pickLangValue(x.role_i18n) : pickTeamLocalizedText(x.role, TEAM_ROLE_I18N);
+  x.meta = x.meta_i18n ? pickLangValue(x.meta_i18n) : pickTeamLocalizedText(x.meta, TEAM_META_I18N);
+
+  if (x.about_i18n) x.about = pickLangValue(x.about_i18n);
+  if (x.achievements_i18n) x.achievements = pickLangValue(x.achievements_i18n);
+  if (x.education_i18n) x.education = pickLangValue(x.education_i18n);
 
   return x;
 }
@@ -3130,31 +3143,36 @@ function getAboutTeamPersonByKey(group, key) {
   const list = getAboutTeamSourceList(group);
   if (!Array.isArray(list) || !list.length) return null;
 
-  return list.find(x => String(memberKeyOf(x) || "") === String(key || "")) || null;
+  const targetKey = String(key || "");
+  return list.find(x => String(x?.memberKey || memberKeyOf(x) || "") === targetKey) || null;
 }
 
 const enrichPersonProfile = (x) => {
-  const role = String(x.role || "");
   const meta = String(x.meta || "");
   const group = String(x.group || "");
 
-  let about = "";
-  let achievements = "";
-  let education = meta || "";
+  let about = String(x.about || "").trim();
+  let achievements = String(x.achievements || "").trim();
+  let education = String(x.education || "").trim() || meta;
 
-  if (group === "board") {
-    about = t("about_member_about_board") || "Loyiha strategiyasi, sifat va rivojlanish yo‘nalishlari ustida ishlaydi.";
-    achievements = meta || (t("about_member_achievements_default") || "Tajriba va faolligi bilan jamoa ishiga hissa qo‘shadi.");
-  } else if (group === "media") {
-    about = t("about_member_about_media") || "Kontent, kommunikatsiya va iClub’ning media yo‘nalishlari ustida ishlaydi.";
-    achievements = meta || (t("about_member_achievements_default") || "Jamoa ishiga amaliy hissa qo‘shadi.");
-  } else {
-    about = t("about_member_about_mentor") || "O‘quvchilarga fan bo‘yicha yo‘nalish, tushuncha va motivatsiya beradi.";
-    achievements = meta || (t("about_member_achievements_default") || "Fan bo‘yicha tayyorgarlik va amaliyotda yordam beradi.");
+  if (!about) {
+    if (group === "board") {
+      about = t("about_member_about_board") || "Loyiha strategiyasi, sifat va rivojlanish yo‘nalishlari ustida ishlaydi.";
+    } else if (group === "media") {
+      about = t("about_member_about_media") || "Kontent, kommunikatsiya va iClub’ning media yo‘nalishlari ustida ishlaydi.";
+    } else {
+      about = t("about_member_about_mentor") || "O‘quvchilarga fan bo‘yicha yo‘nalish, tushuncha va motivatsiya beradi.";
+    }
   }
 
-  if (/IELTS/i.test(meta) || /SAT/i.test(meta)) {
-    achievements = meta;
+  if (!achievements) {
+    if (group === "board") {
+      achievements = meta || (t("about_member_achievements_default") || "Tajriba va faolligi bilan jamoa ishiga hissa qo‘shadi.");
+    } else if (group === "media") {
+      achievements = meta || (t("about_member_achievements_default") || "Jamoa ishiga amaliy hissa qo‘shadi.");
+    } else {
+      achievements = meta || (t("about_member_achievements_default") || "Fan bo‘yicha tayyorgarlik va amaliyotda yordam beradi.");
+    }
   }
 
   return {
@@ -3168,9 +3186,39 @@ const enrichPersonProfile = (x) => {
   // DATA v1 (from your posters) — later will be loaded from DB
   const board = [
     {
+      memberKey: "board_azizbek_president",
       name: "Erkinov Azizbek Jasurbek o‘g‘li",
+      name_i18n: {
+        ru: "Эркинов Азизбек Жасурбек угли",
+        uz: "Erkinov Azizbek Jasurbek o‘g‘li",
+        en: "Erkinov Azizbek Jasurbek o‘g‘li"
+      },
       role: "Ta’sischi — Prezident",
-      meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi",
+      role_i18n: {
+        ru: "Основатель · Президент",
+        uz: "Asoschi · Prezident",
+        en: "Founder · President"
+      },
+      meta_i18n: {
+        ru: "Основатель и президент iClub. Работает над стратегией, качеством и развитием проекта, объединяя образование и технологии.",
+        uz: "iClub asoschisi va prezidenti. Ta’lim va texnologiyani birlashtirib, loyiha strategiyasi, sifati va rivojlanishi ustida ishlaydi.",
+        en: "Founder and president of iClub. Works on the strategy, quality and development of the project, combining education and technology."
+      },
+      about_i18n: {
+        ru: "Основатель и президент iClub. Работает над развитием современной, системной и результативной образовательной среды для школьников.",
+        uz: "iClub asoschisi va prezidenti. Yoshlar uchun zamonaviy, tizimli va natijaga yo‘naltirilgan ta’lim muhitini rivojlantirish ustida ishlaydi.",
+        en: "Founder and president of iClub. Works on building a modern, structured, and results-driven learning environment for students."
+      },
+      achievements_i18n: {
+        ru: "Основатель iClub. Участвовал в проектах уровня Министерства экономики и финансов. Руководил командами численностью более 50 человек. Имеет результат SAT 1550.",
+        uz: "iClub asoschisi. Iqtisodiyot va moliya vazirligi darajasidagi loyihalarda ishtirok etgan. 50 dan ortiq kishidan iborat jamoalarni boshqargan. SAT 1550 natijaga ega.",
+        en: "Founder of iClub. Participated in projects at the level of the Ministry of Economy and Finance. Led teams of more than 50 people. Scored 1550 on the SAT."
+      },
+      education_i18n: {
+        ru: "Ученик Президентской школы города Нурафшан.",
+        uz: "Nurafshon shahridagi Prezident maktabi o‘quvchisi.",
+        en: "Student at Nurafshan Presidential School."
+      },
       vacant: false
     },
     { name: "", role: "Vitse-Prezident", meta: "", vacant: true },
@@ -3185,12 +3233,156 @@ const enrichPersonProfile = (x) => {
   ];
 
   const mentors = [
-    { name: "Komiljonova Ruxsora", role: "AS level Chemistry", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi" },
-    { name: "Olimov Shohjahon", role: "AS level Biology", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi" },
-    { name: "Jasur Abduhakimov", role: "IGCSE Computer Science", meta: "Toshkent shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi" },
-    { name: "Erkinov Azizbek", role: "AS level Economics", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi" },
-    { name: "To‘ychiboyeva Madina", role: "AS level Mathematics", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi" },
-    { name: "Akobirov Humoyun", role: "IELTS mentor", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Green” sinf o‘quvchisi • IELTS 8.0" },
+    {
+      memberKey: "mentor_ruxsora_chemistry",
+      name: "Ruxsora Komiljonova",
+      role: "AS level Chemistry",
+      role_i18n: {
+        ru: "AS Level Chemistry",
+        uz: "AS Level Chemistry",
+        en: "AS Level Chemistry"
+      },
+      meta_i18n: {
+        ru: "Помогает ученикам развивать понимание химии, практическое мышление и исследовательский интерес.",
+        uz: "Kimyo yo‘nalishida tushuncha, amaliy fikrlash va ilmiy qiziqishni rivojlantirishga yordam beradi.",
+        en: "Helps learners strengthen chemistry understanding, practical thinking, and scientific curiosity."
+      },
+      about_i18n: {
+        ru: "Помогает ученикам в изучении химии, развитии практического мышления и научного интереса.",
+        uz: "Kimyo yo‘nalishida o‘quvchilarga nazariy tushuncha, amaliy fikrlash va ilmiy qiziqish bo‘yicha yo‘l ko‘rsatadi.",
+        en: "Guides learners in chemistry through conceptual clarity, practical thinking, and scientific curiosity."
+      },
+      achievements_i18n: {
+        ru: "Сооснователь проекта “Lucid Vision”. Руководитель направления Chemical Engineering в Muhandis.uz. Менеджер команды контента Grand Zone. Проводит исследование на тему “Biodegradable Bioplastic”. Провела Chemistry Show примерно в 10 школах Ташкентской области. Призёр INNOVUM — 2 место.",
+        uz: "“Lucid Vision” loyihasi hammuassisi. Muhandis.uz platformasida Chemical Engineering bo‘limi rahbari. Grand Zone loyihasida kontent jamoasi menejeri. “Biodegradable Bioplastic” mavzusida tadqiqot olib bormoqda. Toshkent viloyatidagi taxminan 10 ta maktabda Chemistry Show dasturlarini o‘tkazgan. INNOVUM olimpiadasida 2-o‘rin sohibasi.",
+        en: "Co-founder of the “Lucid Vision” project. Head of the Chemical Engineering Department at Muhandis.uz. Content Creation Team Manager at Grand Zone. Conducting research on “Biodegradable Bioplastic.” Led Chemistry Shows in around 10 schools across Tashkent region. 2nd place winner of the INNOVUM Olympiad."
+      },
+      education_i18n: {
+        ru: "Ученица Nurafshan Presidential School. Основное направление — Chemical Engineering.",
+        uz: "Nurafshon Presidential School o‘quvchisi. Asosiy yo‘nalishi — Chemical Engineering.",
+        en: "Student at Nurafshan Presidential School. Major: Chemical Engineering."
+      }
+    },
+    {
+      memberKey: "mentor_shohjahon_biology",
+      name: "Olimov Shohjahon",
+      role: "AS level Biology",
+      role_i18n: {
+        ru: "AS Level Biology",
+        uz: "AS Level Biology",
+        en: "AS Level Biology"
+      },
+      meta_i18n: {
+        ru: "Помогает ученикам разбираться в биологии, укреплять базовые темы и уверенно продвигаться в практике.",
+        uz: "Biologiya fanini tushunish, asosiy mavzularni mustahkamlash va amaliy tayyorgarlikda yordam beradi.",
+        en: "Helps learners understand biology, strengthen core topics, and move forward confidently in practice."
+      },
+      about_i18n: {
+        ru: "Помогает ученикам лучше понимать биологию, укреплять ключевые темы и уверенно двигаться в практике.",
+        uz: "Biologiya fanini tushunish, asosiy mavzularni mustahkamlash va amaliy tayyorgarlikda o‘quvchilarga yo‘l ko‘rsatadi.",
+        en: "Guides learners in understanding biology, strengthening essential topics, and improving through practice."
+      },
+      achievements_i18n: {
+        ru: "Имеет оценку A по IGCSE Biology. Имеет результат IELTS 7.5.",
+        uz: "IGCSE Biology fanidan A bahoga ega. IELTS 7.5 natijaga ega.",
+        en: "Earned grade A in IGCSE Biology. Holds IELTS 7.5."
+      },
+      education_i18n: {
+        ru: "Ученик Президентской школы города Нурафшан.",
+        uz: "Nurafshon shahridagi Prezident maktabi o‘quvchisi.",
+        en: "Student at Nurafshan Presidential School."
+      }
+    },
+    {
+      memberKey: "mentor_jasur_cs",
+      name: "Abduxakimov Jasur",
+      role: "IGCSE Computer Science",
+      role_i18n: {
+        ru: "IGCSE Computer Science",
+        uz: "IGCSE Computer Science",
+        en: "IGCSE Computer Science"
+      },
+      meta_i18n: {
+        ru: "Помогает ученикам развивать алгоритмическое мышление, навыки программирования и уверенное понимание Computer Science.",
+        uz: "Dasturlash, algoritmik fikrlash va informatika asoslarini mustahkamlashda yordam beradi.",
+        en: "Helps learners build algorithmic thinking, programming skills, and a strong foundation in Computer Science."
+      },
+      about_i18n: {
+        ru: "Помогает ученикам в развитии алгоритмического мышления, программирования и понимания современных технологий.",
+        uz: "Informatika yo‘nalishida algoritmik fikrlash, dasturlash va zamonaviy texnologiyalar bo‘yicha o‘quvchilarga yo‘l ko‘rsatadi.",
+        en: "Supports learners in algorithmic thinking, programming, and understanding modern technologies."
+      },
+      achievements_i18n: {
+        ru: "Владеет Python, React, Node.js и Tailwind. Имеет результаты IGCSE: Mathematics A*, Physics A*, Chemistry A, Economics A. Занял 2 место на национальном соревновании по информатике.",
+        uz: "Python, React, Node.js va Tailwind bilan ishlaydi. IGCSE Mathematics fanidan A*, Physics fanidan A*, Chemistry fanidan A, Economics fanidan A natijalarga ega. Informatika bo‘yicha milliy tanlovda 2-o‘rin olgan.",
+        en: "Works with Python, React, Node.js, and Tailwind. Holds IGCSE results: Mathematics A*, Physics A*, Chemistry A, Economics A. Won 2nd place in the national informatics competition."
+      },
+      education_i18n: {
+        ru: "Ученик Президентской школы города Ташкент.",
+        uz: "Toshkent shahridagi Prezident maktabi o‘quvchisi.",
+        en: "Student at Tashkent Presidential School."
+      }
+    },
+    {
+      memberKey: "mentor_azizbek_economics",
+      name: "Erkinov Azizbek",
+      role: "AS level Economics",
+      role_i18n: {
+        ru: "Economics Mentor",
+        uz: "Economics Mentor",
+        en: "Economics Mentor"
+      },
+      meta_i18n: {
+        ru: "Помогает ученикам развивать понимание экономики, практическое мышление и подготовку к олимпиаде по экономике.",
+        uz: "Iqtisodiyot bo‘yicha nazariy tushuncha, amaliy fikrlash va iqtisodiyot olimpiadasiga tayyorgarlik yo‘nalishida o‘quvchilarga yo‘l ko‘rsatadi.",
+        en: "Helps learners build economics understanding, practical thinking, and preparation for economics olympiads."
+      },
+      about_i18n: {
+        ru: "Помогает ученикам в изучении экономики, развитии практического мышления и подготовке к олимпиаде по экономике.",
+        uz: "Iqtisodiyot bo‘yicha nazariy tushuncha, amaliy fikrlash va iqtisodiyot olimpiadasiga tayyorgarlik yo‘nalishida o‘quvchilarga yo‘l ko‘rsatadi.",
+        en: "Guides learners in economics through conceptual clarity, practical thinking, and economics olympiad preparation."
+      },
+      achievements_i18n: {
+        ru: "IGCSE Economics: A*. Дважды вошёл в Top 20 на республиканском этапе олимпиады по экономике. Проходил практику при Министерстве экономики и финансов.",
+        uz: "IGCSE Economics: A*. Iqtisodiyot olimpiadasining respublika bosqichida 2 marta Top 20 natija ko‘rsatgan. Iqtisodiyot va moliya vazirligi huzurida amaliyot o‘tagan.",
+        en: "IGCSE Economics: A*. Reached Top 20 twice at the republican stage of the economics olympiad. Completed internship experience under the Ministry of Economy and Finance."
+      },
+      education_i18n: {
+        ru: "Ученик Президентской школы города Нурафшан.",
+        uz: "Nurafshon shahridagi Prezident maktabi o‘quvchisi.",
+        en: "Student at Nurafshan Presidential School."
+      }
+    },
+    {
+      memberKey: "mentor_madina_math",
+      name: "Madina To‘ychiboyeva",
+      role: "AS level Mathematics",
+      role_i18n: {
+        ru: "AS Level Mathematics",
+        uz: "AS Level Mathematics",
+        en: "AS Level Mathematics"
+      },
+      meta_i18n: {
+        ru: "Помогает ученикам развивать логическое мышление, интерес к науке и устойчивую академическую подготовку.",
+        uz: "Mantiqiy fikrlash, fanlararo qiziqish va izchil tayyorgarlik yo‘lida o‘quvchilarga yordam beradi.",
+        en: "Helps learners build logical thinking, scientific curiosity, and steady academic preparation."
+      },
+      about_i18n: {
+        ru: "Помогает ученикам развивать логическое мышление, междисциплинарный интерес и системную академическую подготовку.",
+        uz: "Mantiqiy fikrlash, fanlararo qiziqish va izchil akademik rivojlanish yo‘nalishida o‘quvchilarga yo‘l ko‘rsatadi.",
+        en: "Supports learners in building logical thinking, interdisciplinary curiosity, and consistent academic growth."
+      },
+      achievements_i18n: {
+        ru: "Полуфиналист IRN. Лауреат JLSAAT Courage Award. Призёр INNOVUM — 2 место.",
+        uz: "IRN semi-finalisti. JLSAAT Courage Award sovrindori. INNOVUM olimpiadasida 2-o‘rin sohibasi.",
+        en: "IRN semi-finalist. JLSAAT Courage Award recipient. 2nd place winner in INNOVUM."
+      },
+      education_i18n: {
+        ru: "Ученица Nurafshan Presidential School ’27. Основное направление — Neuroscience.",
+        uz: "Nurafshon Presidential School ’27 o‘quvchisi. Asosiy yo‘nalishi — Neuroscience.",
+        en: "Student at Nurafshan Presidential School ’27. Major: Neuroscience."
+      }
+    },
 
     { name: "Jamshidbek Yaxiyakulov", role: "SAT English", meta: "Samarqand viloyati Invest in education xususiy maktabi 11-sinf • IELTS 7.5 • SAT English 690" },
     { name: "Iskandarov Bunyodbek", role: "SAT Math", meta: "Xorazm viloyati Hazorasp tumani, To‘laqim FM xususiy maktabi 11-sinf • SAT Math 790" },
@@ -3200,12 +3392,158 @@ const enrichPersonProfile = (x) => {
   ];
 
   const media = [
-    { name: "Akbaraliyeva Zilola", role: "Video tahrirchi", meta: "Toshkent Xalqaro Vestminster universiteti 1-kurs talabasi" },
-    { name: "Iskandarov Shohrubek", role: "Video tahrirchi", meta: "Xiva shahridagi Prezident maktabining 10 “Green” sinf o‘quvchisi" },
-    { name: "", role: "Copywriter", meta: "", vacant: true },
-    { name: "", role: "Dizayner", meta: "", vacant: true },
-    { name: "Davlatboyeva Sevara", role: "Telegram menejer", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Blue” sinf o‘quvchisi" },
-    { name: "Kucharova Dilrabo", role: "Instagram menejer", meta: "Toshkent viloyati Nurafshon shahridagi Prezident maktabi 10 “Green” sinf o‘quvchisi" }
+    {
+      memberKey: "media_zilola_video_editor",
+      name: "Akbaraliyeva Zilola",
+      role: "Video tahrirchi",
+      role_i18n: {
+        ru: "Видеомонтажёр",
+        uz: "Video tahrirchi",
+        en: "Video Editor"
+      },
+      meta_i18n: {
+        ru: "Работает над визуальной подачей и качеством видеоконтента iClub.",
+        uz: "iClub videokontentining vizual sifati va taqdimoti ustida ishlaydi.",
+        en: "Works on the visual quality and presentation of iClub video content."
+      },
+      about_i18n: {
+        ru: "Работает над визуальной подачей и монтажом видеоконтента для iClub.",
+        uz: "iClub uchun videokontentning vizual taqdimoti va montaji ustida ishlaydi.",
+        en: "Works on editing and visual presentation of video content for iClub."
+      },
+      achievements_i18n: {
+        ru: "Участвует в создании и оформлении видеоматериалов для проекта.",
+        uz: "Loyiha uchun videomateriallarni tayyorlash va bezashda ishtirok etadi.",
+        en: "Contributes to the creation and editing of video materials for the project."
+      },
+      education_i18n: {
+        ru: "Студентка 1 курса Ташкентского международного Вестминстерского университета.",
+        uz: "Toshkent Xalqaro Vestminster universiteti 1-kurs talabasi.",
+        en: "First-year student at Westminster International University in Tashkent."
+      }
+    },
+    {
+      memberKey: "media_shohrubek_video_editor",
+      name: "Iskandarov Shohrubek",
+      role: "Video tahrirchi",
+      role_i18n: {
+        ru: "Видеомонтажёр",
+        uz: "Video tahrirchi",
+        en: "Video Editor"
+      },
+      meta_i18n: {
+        ru: "Помогает команде в создании и монтаже видеоконтента iClub.",
+        uz: "iClub videokontentini tayyorlash va montaj qilishda jamoaga yordam beradi.",
+        en: "Supports the team in creating and editing iClub video content."
+      },
+      about_i18n: {
+        ru: "Работает над монтажом видеоматериалов и визуальной подачей контента.",
+        uz: "Videomateriallar montaji va kontentning vizual taqdimoti ustida ishlaydi.",
+        en: "Works on video editing and visual presentation of content."
+      },
+      achievements_i18n: {
+        ru: "Участвует в подготовке видеоконтента для медиа-направления iClub.",
+        uz: "iClub media yo‘nalishi uchun videokontent tayyorlashda ishtirok etadi.",
+        en: "Contributes to video production for the iClub media direction."
+      },
+      education_i18n: {
+        ru: "Ученик Президентской школы города Хива.",
+        uz: "Xiva shahridagi Prezident maktabining o‘quvchisi.",
+        en: "Student at Khiva Presidential School."
+      }
+    },
+    {
+      memberKey: "media_copywriter_vacant",
+      name: "",
+      role: "Copywriter",
+      role_i18n: {
+        ru: "Копирайтер",
+        uz: "Copywriter",
+        en: "Copywriter"
+      },
+      meta_i18n: {
+        ru: "Позиция открыта. Кандидаты рассматриваются.",
+        uz: "Lavozim ochiq. Nomzodlar ko‘rib chiqilmoqda.",
+        en: "Position is open. Candidates are under review."
+      },
+      vacant: true
+    },
+    {
+      memberKey: "media_designer_vacant",
+      name: "",
+      role: "Dizayner",
+      role_i18n: {
+        ru: "Дизайнер",
+        uz: "Dizayner",
+        en: "Designer"
+      },
+      meta_i18n: {
+        ru: "Позиция открыта. Кандидаты рассматриваются.",
+        uz: "Lavozim ochiq. Nomzodlar ko‘rib chiqilmoqda.",
+        en: "Position is open. Candidates are under review."
+      },
+      vacant: true
+    },
+    {
+      memberKey: "media_sevara_telegram_manager",
+      name: "Davlatboyeva Sevara",
+      role: "Telegram menejer",
+      role_i18n: {
+        ru: "Telegram-менеджер",
+        uz: "Telegram menejer",
+        en: "Telegram Manager"
+      },
+      meta_i18n: {
+        ru: "Работает над коммуникацией и развитием iClub в Telegram.",
+        uz: "iClub’ning Telegram’dagi kommunikatsiyasi va rivoji ustida ishlaydi.",
+        en: "Works on communication and growth of iClub on Telegram."
+      },
+      about_i18n: {
+        ru: "Отвечает за коммуникацию, подачу и поддержку активности iClub в Telegram.",
+        uz: "Telegram’da iClub kommunikatsiyasi, taqdimoti va faolligini qo‘llab-quvvatlash ustida ishlaydi.",
+        en: "Supports communication, presentation, and activity of iClub on Telegram."
+      },
+      achievements_i18n: {
+        ru: "Участвует в развитии Telegram-направления и работе с аудиторией проекта.",
+        uz: "Loyihaning Telegram yo‘nalishini rivojlantirish va auditoriya bilan ishlashda ishtirok etadi.",
+        en: "Contributes to the Telegram direction of the project and audience communication."
+      },
+      education_i18n: {
+        ru: "Ученица Президентской школы города Нурафшан.",
+        uz: "Nurafshon shahridagi Prezident maktabi o‘quvchisi.",
+        en: "Student at Nurafshan Presidential School."
+      }
+    },
+    {
+      memberKey: "media_dilrabo_instagram_manager",
+      name: "Kucharova Dilrabo",
+      role: "Instagram menejer",
+      role_i18n: {
+        ru: "Instagram-менеджер",
+        uz: "Instagram menejer",
+        en: "Instagram Manager"
+      },
+      meta_i18n: {
+        ru: "Работает над развитием и визуальной подачей iClub в Instagram.",
+        uz: "iClub’ning Instagram’dagi rivoji va vizual taqdimoti ustida ishlaydi.",
+        en: "Works on growth and visual presentation of iClub on Instagram."
+      },
+      about_i18n: {
+        ru: "Отвечает за визуальную подачу и развитие присутствия iClub в Instagram.",
+        uz: "Instagram’da iClub’ning vizual taqdimoti va rivojlanishi ustida ishlaydi.",
+        en: "Supports the visual presence and growth of iClub on Instagram."
+      },
+      achievements_i18n: {
+        ru: "Участвует в развитии Instagram-направления и медиа-коммуникации проекта.",
+        uz: "Loyihaning Instagram yo‘nalishi va media kommunikatsiyasini rivojlantirishda ishtirok etadi.",
+        en: "Contributes to the Instagram direction and media communication of the project."
+      },
+      education_i18n: {
+        ru: "Ученица Президентской школы города Нурафшан.",
+        uz: "Nurafshon shahridagi Prezident maktabi o‘quvchisi.",
+        en: "Student at Nurafshan Presidential School."
+      }
+    }
   ];
 
   const subHeader = (titleKey) => `
@@ -3227,7 +3565,7 @@ state.about.teamPeopleResolved.board = list.map(x => {
   return {
     ...localized,
     group: "board",
-    memberKey: memberKeyOf(localized)
+    memberKey: String(x?.memberKey || memberKeyOf(x) || "")
   };
 });
 
@@ -3261,7 +3599,7 @@ state.about.teamPeopleResolved.mentors = list.map(x => {
   return {
     ...localized,
     group: "mentors",
-    memberKey: memberKeyOf(localized)
+    memberKey: String(x?.memberKey || memberKeyOf(x) || "")
   };
 });
 
@@ -3294,7 +3632,7 @@ state.about.teamPeopleResolved.media = list.map(x => {
   return {
     ...localized,
     group: "media",
-    memberKey: memberKeyOf(localized)
+    memberKey: String(x?.memberKey || memberKeyOf(x) || "")
   };
 });
 
@@ -3326,10 +3664,10 @@ contentEl.innerHTML = `
   }
 
   const localizedRaw = localizeTeamPersonCardData({
-    ...raw,
-    group: prev,
-    memberKey: memberKeyOf(raw)
-  });
+  ...raw,
+  group: prev,
+  memberKey: String(raw?.memberKey || memberKeyOf(raw) || "")
+});
 
   const person = enrichPersonProfile(localizedRaw);
   const hasPhoto = !!(person.photoUrl && String(person.photoUrl).trim());
@@ -16511,7 +16849,7 @@ if (action === "open-subject-mentor") {
   if (!state.about) state.about = { tab: "project" };
   ensureTeamCacheInit();
 
-  const mentorKey = memberKeyOf(mentor);
+  const mentorKey = String(mentor?.memberKey || memberKeyOf(mentor) || "");
   const currentMentors = Array.isArray(state.about.teamPeopleCache?.mentors)
     ? state.about.teamPeopleCache.mentors
     : [];
@@ -16522,7 +16860,7 @@ if (action === "open-subject-mentor") {
       group: "mentors",
       vacant: false
     },
-    ...currentMentors.filter(x => String(memberKeyOf(x) || "") !== String(mentorKey))
+    ...currentMentors.filter(x => String(x?.memberKey || memberKeyOf(x) || "") !== String(mentorKey))
   ];
   state.about.teamPeopleCacheTs.mentors = Date.now();
 
