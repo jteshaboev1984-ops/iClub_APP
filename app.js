@@ -2795,11 +2795,43 @@ async function fetchTeamPeopleFromDb(groupKey) {
   if (error) return null;
   if (!Array.isArray(data) || data.length === 0) return [];
 
+  const fallbackList =
+    g === "board" ? (Array.isArray(board) ? board : []) :
+    g === "mentors" ? (Array.isArray(mentors) ? mentors : []) :
+    g === "media" ? (Array.isArray(media) ? media : []) :
+    [];
+
   return data.map(r => {
     const fromPath = toPublicUrl(r.photo_path);
+
+    const dbName = String(r.name || "").trim();
+    const dbRole = String(r.role || "").trim();
+
+    const local =
+      fallbackList.find(x =>
+        String(x?.memberKey || "") &&
+        String(x?.memberKey || "") === `${g}_${dbName}_${dbRole}`
+      ) ||
+      fallbackList.find(x =>
+        String(x?.name || "").trim() === dbName &&
+        String(x?.role || "").trim() === dbRole
+      ) ||
+      fallbackList.find(x =>
+        String(x?.role || "").trim() === dbRole
+      ) ||
+      null;
+
+    if (local) {
+      return {
+        ...local,
+        photoUrl: fromPath || local.photoUrl || null,
+        vacant: (r.is_vacant != null) ? !!r.is_vacant : !!local.vacant
+      };
+    }
+
     return {
-      name: String(r.name || ""),
-      role: String(r.role || ""),
+      name: dbName,
+      role: dbRole,
       meta: String(r.meta || ""),
       photoUrl: fromPath,
       vacant: !!r.is_vacant
@@ -3604,14 +3636,13 @@ state.about.teamPeopleResolved.mentors = list.map(x => {
 });
 
   contentEl.innerHTML = `
-    ${subHeader("about_team_mentors_title")}
-    <div class="card">
-      <div class="muted small">${escapeHTML(t("about_team_mentors_note"))}</div>
-      <div class="people-grid" style="margin-top:10px">
-        ${state.about.teamPeopleResolved.mentors.map(x => personCard({ ...x, vacant: !!x.vacant, large: true })).join("")}
-      </div>
+  ${subHeader("about_team_mentors_title")}
+  <div class="card">
+    <div class="people-grid">
+      ${state.about.teamPeopleResolved.mentors.map(x => personCard({ ...x, vacant: !!x.vacant, large: true })).join("")}
     </div>
-  `;
+  </div>
+`;
 
   if (!(Array.isArray(dbList) && dbList.length)) {
     try { ensureTeamPeopleLoaded("mentors"); } catch {}
@@ -11368,7 +11399,7 @@ if (mainSubjects.length) {
 // ---------------------------
 // Subject Hub mentor
 // ---------------------------
-const TEAM_CACHE_VERSION = 3;
+const TEAM_CACHE_VERSION = 4;
 
 function mentorPhotoUrlFromPath(photoPath) {
   const p = String(photoPath || "").trim();
