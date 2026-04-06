@@ -3260,7 +3260,7 @@ const enrichPersonProfile = (x) => {
       memberKey: "board_azizbek_president",
       name: "Erkinov Azizbek Jasurbek o‘g‘li",
       name_i18n: {
-        ru: "Эркинов Азизбек",
+        ru: "Erkinov Azizbek",
         uz: "Erkinov Azizbek Jasurbek o‘g‘li",
         en: "Erkinov Azizbek"
       },
@@ -11438,7 +11438,7 @@ if (mainSubjects.length) {
 // ---------------------------
 // Subject Hub mentor
 // ---------------------------
-const TEAM_CACHE_VERSION = 5;
+const TEAM_CACHE_VERSION = 6;
 
 function mentorPhotoUrlFromPath(photoPath) {
   const p = String(photoPath || "").trim();
