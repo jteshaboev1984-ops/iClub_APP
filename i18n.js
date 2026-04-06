@@ -205,7 +205,7 @@ about_member_about_board: "Работает над стратегией, кач�
 about_member_about_media: "Работает над контентом, коммуникацией и медиа-направлением iClub.",
 about_member_achievements_default: "Вносит практический вклад в развитие команды и проекта.",
 
-about_team_mentors_note: "Список менторов расширяется. Профили и фото будут загружены в базу позже.",
+about_team_mentors_note: "",
 archive_title: "Архив",
 archive_sub: "Прошедшие туры (только после завершения активного тура).",
 archive_loading: "Загрузка архива…",
@@ -1067,7 +1067,7 @@ about_member_about_board: "Loyiha strategiyasi, sifat va rivojlanish yo‘nalish
 about_member_about_media: "Kontent, kommunikatsiya va iClub’ning media yo‘nalishlari ustida ishlaydi.",
 about_member_achievements_default: "Jamoa ishiga faol hissa qo‘shadi.",
 
-about_team_mentors_note: "Mentorlar ro‘yxati bosqichma-bosqich kengayadi. Profil va rasmlar keyinroq bazaga yuklanadi.",
+about_team_mentors_note: "",
 archive_title: "Arxiv",
 archive_sub: "O‘tgan turlar (faol tur yakunlangandan keyin).",
 archive_loading: "Arxiv yuklanmoqda…",
@@ -1936,7 +1936,7 @@ about_member_about_board: "Works on strategy, quality, and long-term project dev
 about_member_about_media: "Works on content, communication, and iClub media direction.",
 about_member_achievements_default: "Contributes actively to the team and project growth.",
 
-about_team_mentors_note: "The mentor list is growing. Profiles and photos will be added to the database later.",
+about_team_mentors_note: "",
 
 archive_title: "Archive",
 archive_sub: "Past tours (only after the active tour is finished).",
