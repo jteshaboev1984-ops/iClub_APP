@@ -3260,9 +3260,9 @@ const enrichPersonProfile = (x) => {
       memberKey: "board_azizbek_president",
       name: "Erkinov Azizbek Jasurbek o‘g‘li",
       name_i18n: {
-        ru: "Эркинов Азизбек Жасурбек угли",
+        ru: "Эркинов Азизбек",
         uz: "Erkinov Azizbek Jasurbek o‘g‘li",
-        en: "Erkinov Azizbek Jasurbek o‘g‘li"
+        en: "Erkinov Azizbek"
       },
       role: "Ta’sischi — Prezident",
       role_i18n: {
