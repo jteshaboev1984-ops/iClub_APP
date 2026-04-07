@@ -11502,7 +11502,7 @@ if (mainSubjects.length) {
    }
 }
 
-    function openSubjectHub(subjectKey) {
+        function openSubjectHub(subjectKey) {
     if (!isSubjectActive(subjectKey)) {
       showToast(t("not_available"));
       setTab("courses");
@@ -11513,6 +11513,20 @@ if (mainSubjects.length) {
 
     state.courses.subjectKey = subjectKey;
     saveState();
+
+    try {
+      const subj = subjectByKey(subjectKey);
+      const profile = loadProfile();
+      const us = profile?.subjects?.find(x => x.key === subjectKey) || null;
+
+      trackEvent("subject_hub_opened", {
+        subject_key: String(subjectKey || ""),
+        subject_title: String(subj?.title || ""),
+        mode: String(us?.mode || ""),
+        pinned: !!us?.pinned
+      });
+    } catch {}
+
     pushCourses("subject-hub");
     renderSubjectHub();
   }
@@ -13066,10 +13080,19 @@ async function startPracticeNew() {
     hideAsyncOverlay();
   }
 
-  if (!Array.isArray(questions) || questions.length === 0) {
+    if (!Array.isArray(questions) || questions.length === 0) {
     showToast(t("practice_no_questions") || "Нет вопросов для практики по этому предмету.");
     return;
   }
+
+  try {
+    trackEvent("practice_attempt_started", {
+      subject_id: normSubjectId(subjectKey),
+      subject_key: String(subjectKey || ""),
+      questions_total: Array.isArray(questions) ? questions.length : 0,
+      source: "subject_hub"
+    });
+  } catch {}
 
   state.quizLock = "practice";
   state.quiz = {
@@ -15027,9 +15050,20 @@ async function renderBooks() {
       </span>
       <span class="settings-nav-arrow">›</span>
     `;
-    btn.addEventListener("click", () => {
+        btn.addEventListener("click", () => {
       const url = String(b.file_url || "").trim();
       if (!url) return;
+
+      try {
+        trackEvent("resource_opened", {
+          resource_type: "book",
+          resource_id: String(b.id || ""),
+          title: String(b.title || ""),
+          url,
+          subject_key: String(state?.courses?.subjectKey || "")
+        });
+      } catch {}
+
       openExternal(url);
     });
     wrap.appendChild(btn);
@@ -15430,6 +15464,16 @@ async function updateTourAttempt(attemptId, patch) {
     return;
   }
 
+    try {
+    trackEvent("tour_rules_accepted", {
+      ts: new Date().toISOString(),
+      tour_id: String(tour.id),
+      subject_id: String(subjectId),
+      subject_key: String(subjectKey || ""),
+      tour_no: Number(tour?.tour_no || tourNo || 0)
+    });
+  } catch {}
+
   // 5) create attempt row
   const attemptId = await createTourAttempt(uid, tour.id);
   if (!attemptId) {
@@ -15442,8 +15486,10 @@ async function updateTourAttempt(attemptId, patch) {
     trackEvent("tour_attempt_started", {
       ts: new Date().toISOString(),
       tour_id: String(tour.id),
+      attempt_id: String(attemptId),
       subject_id: String(subjectId),
-      subject_key: String(subjectKey || "")
+      subject_key: String(subjectKey || ""),
+      tour_no: Number(tour?.tour_no || tourNo || 0)
     });
   } catch {}
 
@@ -15547,13 +15593,31 @@ async function updateTourAttempt(attemptId, patch) {
     ctx.violations += 1;
     saveState();
 
-    // ✅ mirror to DB via app_events (trackEvent already mirrors)
+        // ✅ mirror to DB via app_events (trackEvent already mirrors)
     try {
       trackEvent("tour_violation", {
         violation_type: String(type || ""),
         violations: Number(ctx.violations || 0),
         tour_id: String(ctx.tourId || ""),
         attempt_id: String(ctx.attemptId || ""),
+        subject_key: String(ctx.subjectKey || ""),
+        tour_no: Number(ctx.tourNo || 0)
+      });
+    } catch {}
+
+    try {
+      const severity =
+        Number(ctx.violations || 0) >= Number(TOUR_CONFIG.maxViolations || 0)
+          ? "critical"
+          : "warning";
+
+      trackEvent("anti_cheat_event", {
+        reason: String(type || ""),
+        severity,
+        violations: Number(ctx.violations || 0),
+        tour_id: String(ctx.tourId || ""),
+        attempt_id: String(ctx.attemptId || ""),
+        subject_id: normSubjectId(ctx.subjectKey || ""),
         subject_key: String(ctx.subjectKey || ""),
         tour_no: Number(ctx.tourNo || 0)
       });
@@ -16340,14 +16404,25 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     const tour_id = ctx?.tourId != null ? String(ctx.tourId) : "";
     const is_archive = !!ctx?.isArchive;
 
-    try {
+        try {
+      const finishStatus =
+        (reason === "violations") ? "anti_cheat"
+        : (reason === "time_expired") ? "time_expired"
+        : "submitted";
+
       trackEvent("tour_attempt_finished", {
-        ts,
-        status: "done",
+        ts: new Date().toISOString(),
+        status: finishStatus,
         tour_id,
+        attempt_id: ctx?.attemptId != null ? String(ctx.attemptId) : "",
         is_archive,
         subject_id: String(subject_id || ""),
-        subject_key: String(ctx?.subjectKey || state?.courses?.subjectKey || "")
+        subject_key: String(ctx?.subjectKey || state?.courses?.subjectKey || ""),
+        tour_no: Number(ctx?.tourNo || 0),
+        score: Number(score || 0),
+        percent: Number(percent || 0),
+        total_time: Number(durationSec || 0),
+        violations: Number(ctx?.violations || 0)
       });
     } catch {}
 
