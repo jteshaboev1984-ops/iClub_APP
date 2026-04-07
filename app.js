@@ -2868,21 +2868,52 @@ async function fetchTeamPeopleFromDb(groupKey) {
   }
 }
 
+function getTeamLocalConfigSignature() {
+  try {
+    const compact = (list) => (Array.isArray(list) ? list : []).map(x => ({
+      memberKey: String(x?.memberKey || ""),
+      name: String(x?.name || ""),
+      role: String(x?.role || ""),
+      role_i18n: x?.role_i18n || null,
+      meta_i18n: x?.meta_i18n || null,
+      about_i18n: x?.about_i18n || null,
+      achievements_i18n: x?.achievements_i18n || null,
+      education_i18n: x?.education_i18n || null,
+      vacant: !!x?.vacant,
+      photoUrl: String(x?.photoUrl || "")
+    }));
+
+    return JSON.stringify({
+      board: compact(typeof board !== "undefined" ? board : []),
+      mentors: compact(typeof mentors !== "undefined" ? mentors : []),
+      media: compact(typeof media !== "undefined" ? media : [])
+    });
+  } catch {
+    return "team-local-signature-fallback";
+  }
+}
+
 function ensureTeamCacheInit() {
   if (!state.about) state.about = { tab: "project" };
 
-  if (Number(state.about.teamPeopleCacheVersion || 0) !== TEAM_CACHE_VERSION) {
+  const localSig = getTeamLocalConfigSignature();
+  const versionChanged = Number(state.about.teamPeopleCacheVersion || 0) !== TEAM_CACHE_VERSION;
+  const configChanged = String(state.about.teamPeopleLocalSig || "") !== String(localSig);
+
+  if (versionChanged || configChanged) {
     state.about.teamPeopleCache = {};
     state.about.teamPeopleCacheTs = {};
     state.about.teamPeopleResolved = {};
     state.about.teamPeopleLoading = {};
     state.about.teamPeopleCacheVersion = TEAM_CACHE_VERSION;
+    state.about.teamPeopleLocalSig = localSig;
     saveState();
   }
 
   if (!state.about.teamPeopleCache) state.about.teamPeopleCache = {};
   if (!state.about.teamPeopleCacheTs) state.about.teamPeopleCacheTs = {};
   if (!state.about.teamPeopleLoading) state.about.teamPeopleLoading = {};
+  if (!state.about.teamPeopleLocalSig) state.about.teamPeopleLocalSig = localSig;
 }
 
 function warmTeamPhotoCache(list) {
@@ -3319,19 +3350,19 @@ const enrichPersonProfile = (x) => {
   photoUrl: "https://mmmduffgpvwjdpruzikw.supabase.co/storage/v1/object/public/team-photos/coo.jpg",
   role: "Chief Operating Officer",
   role_i18n: {
-    ru: "Операционный директор",
-    uz: "Operatsion direktor",
-    en: "Chief Operating Officer"
+    ru: "Стратегический советник",
+    uz: "Strategik maslahatchi",
+    en: "Strategic Advisor"
   },
   meta_i18n: {
-    ru: "Операционный директор iClub. Курирует операционные процессы, партнёрства и реализацию образовательных и социальных проектов.",
-    uz: "iClub operatsion direktori. Operatsion jarayonlar, hamkorliklar hamda ta’limiy va ijtimoiy loyihalar ijrosini muvofiqlashtiradi.",
-    en: "Chief Operating Officer of iClub. Oversees operations, partnerships, and the execution of educational and social impact projects."
+    ru: "Стратегический советник iClub. Поддерживает развитие проекта, партнёрства и реализацию образовательных и социальных инициатив.",
+    uz: "iClub strategik maslahatchisi. Loyiha rivoji, hamkorliklar hamda ta’limiy va ijtimoiy tashabbuslarni qo‘llab-quvvatlaydi.",
+    en: "Strategic Advisor at iClub. Supports project growth, partnerships, and the implementation of educational and social initiatives."
   },
   about_i18n: {
-    ru: "Менеджер проектов с опытом более 6 лет в образовательных, технологических и социальных инициативах в Центральной Азии. Официальный представитель FIRST в Узбекистане и руководитель национальной команды по робототехнике.",
-    uz: "Markaziy Osiyoda ta’lim, texnologiya va ijtimoiy ta’sir yo‘nalishidagi tashabbuslarda 6 yildan ortiq tajribaga ega loyiha menejeri. O‘zbekistonda FIRST’ning rasmiy vakili va milliy robototexnika jamoasi rahbari.",
-    en: "Project manager with 6+ years of experience in educational, technological, and social impact initiatives across Central Asia. Official representative of FIRST in Uzbekistan and head coach of the national robotics team."
+    ru: "Менеджер проектов с опытом более 6 лет в образовательных, технологических и социальных инициативах в Центральной Азии. Как стратегический советник, помогает проекту экспертизой, партнёрствами и управленческим опытом.",
+    uz: "Markaziy Osiyoda ta’lim, texnologiya va ijtimoiy ta’sir yo‘nalishidagi tashabbuslarda 6 yildan ortiq tajribaga ega loyiha menejeri. Strategik maslahatchi sifatida loyiha rivojiga ekspertiza, hamkorlik va boshqaruv tajribasi bilan hissa qo‘shadi.",
+    en: "Project manager with 6+ years of experience in educational, technological, and social impact initiatives across Central Asia. As a strategic advisor, supports the project with expertise, partnerships, and management experience."
   },
   achievements_i18n: {
   ru: "Работала в роли Tracker в UzCombinator, Chief Operating Officer в Impact Admissions, официального представителя FIRST в Узбекистане и Assistant Dean в Central Asian University. Имеет опыт в STEM и робототехнике, международном сотрудничестве, управлении командами и взаимодействии с государственным и образовательным секторами.",
@@ -3339,10 +3370,10 @@ const enrichPersonProfile = (x) => {
   en: "Has served as Tracker at UzCombinator, Chief Operating Officer at Impact Admissions, Official Representative of FIRST in Uzbekistan, and Assistant Dean at Central Asian University. Experienced in STEM and robotics, international partnerships, team management, and collaboration with public and education sectors."
 },
   education_i18n: {
-    ru: "Работает с министерствами, образовательными учреждениями и международными платформами над масштабированием инновационных программ для молодёжи.",
-    uz: "Yoshlar uchun innovatsion dasturlarni kengaytirish bo‘yicha vazirliklar, ta’lim muassasalari va xalqaro platformalar bilan hamkorlik qiladi.",
-    en: "Works with ministries, educators, and global platforms to scale innovation-driven learning programs for youth."
-  },
+  ru: "Профессионально работает на стыке образования, STEM, международных программ и управления проектами в Узбекистане и Центральной Азии.",
+  uz: "Professional faoliyati ta’lim, STEM, xalqaro dasturlar va loyiha boshqaruvi yo‘nalishlari kesishmasida shakllangan.",
+  en: "Her professional background is built at the intersection of education, STEM, international programs, and project management in Uzbekistan and Central Asia."
+},
   vacant: false
 },
     { name: "", role: "Media guruh rahbari", meta: "", vacant: true },
@@ -11489,7 +11520,7 @@ if (mainSubjects.length) {
 // ---------------------------
 // Subject Hub mentor
 // ---------------------------
-const TEAM_CACHE_VERSION = 10;
+const TEAM_CACHE_VERSION = 11;
 
 function mentorPhotoUrlFromPath(photoPath) {
   const p = String(photoPath || "").trim();
