@@ -11489,7 +11489,7 @@ if (mainSubjects.length) {
 // ---------------------------
 // Subject Hub mentor
 // ---------------------------
-const TEAM_CACHE_VERSION = 7;
+const TEAM_CACHE_VERSION = 9;
 
 function mentorPhotoUrlFromPath(photoPath) {
   const p = String(photoPath || "").trim();
