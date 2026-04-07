@@ -3293,8 +3293,7 @@ const enrichPersonProfile = (x) => {
       vacant: false
     },
     { name: "", role: "Vitse-Prezident", meta: "", vacant: true },
-    {
- {
+{
   memberKey: "board_safina_coo",
   name: "Safina Teshabayeva",
   photoUrl: "https://mmmduffgpvwjdpruzikw.supabase.co/storage/v1/object/public/team-photos/coo.jpg",
