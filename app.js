@@ -2822,12 +2822,32 @@ async function fetchTeamPeopleFromDb(groupKey) {
       null;
 
     if (local) {
-      return {
-        ...local,
-        photoUrl: fromPath || local.photoUrl || null,
-        vacant: (r.is_vacant != null) ? !!r.is_vacant : !!local.vacant
-      };
-    }
+  const hasLocalRichProfile =
+    !!String(local?.memberKey || "").trim() &&
+    (
+      !!String(local?.name || "").trim() ||
+      !!local?.name_i18n ||
+      !!local?.meta_i18n ||
+      !!local?.about_i18n ||
+      !!local?.achievements_i18n ||
+      !!local?.education_i18n
+    );
+
+  const mergedName = String(dbName || local?.name || "").trim();
+  const mergedRole = String(dbRole || local?.role || "").trim();
+  const mergedMeta =
+    String(local?.meta || "").trim() ||
+    String(r.meta || "").trim();
+
+  return {
+    ...local,
+    name: mergedName,
+    role: mergedRole,
+    meta: mergedMeta,
+    photoUrl: fromPath || local.photoUrl || null,
+    vacant: hasLocalRichProfile ? !!local.vacant : ((r.is_vacant != null) ? !!r.is_vacant : !!local.vacant)
+  };
+}
 
     return {
       name: dbName,
