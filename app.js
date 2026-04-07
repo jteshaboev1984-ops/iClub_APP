@@ -3293,7 +3293,37 @@ const enrichPersonProfile = (x) => {
       vacant: false
     },
     { name: "", role: "Vitse-Prezident", meta: "", vacant: true },
-    { name: "", role: "Chief Operating Officer", meta: "", vacant: true },
+    {
+  memberKey: "board_safina_coo",
+  name: "Safina Teshabayeva",
+  role: "Chief Operating Officer",
+  role_i18n: {
+    ru: "Операционный директор",
+    uz: "Operatsion direktor",
+    en: "Chief Operating Officer"
+  },
+  meta_i18n: {
+    ru: "Операционный директор iClub. Курирует операционные процессы, партнёрства и реализацию образовательных и социальных проектов.",
+    uz: "iClub operatsion direktori. Operatsion jarayonlar, hamkorliklar hamda ta’limiy va ijtimoiy loyihalar ijrosini muvofiqlashtiradi.",
+    en: "Chief Operating Officer of iClub. Oversees operations, partnerships, and the execution of educational and social impact projects."
+  },
+  about_i18n: {
+    ru: "Менеджер проектов с опытом более 6 лет в образовательных, технологических и социальных инициативах в Центральной Азии. Официальный представитель FIRST в Узбекистане и руководитель национальной команды по робототехнике.",
+    uz: "Markaziy Osiyoda ta’lim, texnologiya va ijtimoiy ta’sir yo‘nalishidagi tashabbuslarda 6 yildan ortiq tajribaga ega loyiha menejeri. O‘zbekistonda FIRST’ning rasmiy vakili va milliy robototexnika jamoasi rahbari.",
+    en: "Project manager with 6+ years of experience in educational, technological, and social impact initiatives across Central Asia. Official representative of FIRST in Uzbekistan and head coach of the national robotics team."
+  },
+  achievements_i18n: {
+    ru: "UzCombinator’da Tracker, Impact Admissions’da Chief Operating Officer, FIRST’ning O‘zbekistondagi rasmiy vakili, Central Asian University’da Assistant Dean lavozimlarida faoliyat yuritgan. STEM va robototexnika, xalqaro hamkorlik, jamoa boshqaruvi hamda davlat va ta’lim sektori bilan ishlash bo‘yicha tajribaga ega.",
+    uz: "UzCombinator’da Tracker, Impact Admissions’da Chief Operating Officer, O‘zbekistonda FIRST’ning rasmiy vakili, Central Asian University’da Assistant Dean sifatida faoliyat yuritgan. STEM va robototexnika, xalqaro hamkorlik, jamoa boshqaruvi hamda davlat va ta’lim sektori bilan ishlash bo‘yicha tajribaga ega.",
+    en: "Has served as Tracker at UzCombinator, Chief Operating Officer at Impact Admissions, Official Representative of FIRST in Uzbekistan, and Assistant Dean at Central Asian University. Experienced in STEM and robotics, international partnerships, team management, and collaboration with public and education sectors."
+  },
+  education_i18n: {
+    ru: "Работает с министерствами, образовательными учреждениями и международными платформами над масштабированием инновационных программ для молодёжи.",
+    uz: "Yoshlar uchun innovatsion dasturlarni kengaytirish bo‘yicha vazirliklar, ta’lim muassasalari va xalqaro platformalar bilan hamkorlik qiladi.",
+    en: "Works with ministries, educators, and global platforms to scale innovation-driven learning programs for youth."
+  },
+  vacant: false
+},
     { name: "", role: "Media guruh rahbari", meta: "", vacant: true },
     {
       name: "Marhabo Mahkamtoasheva",
