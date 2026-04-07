@@ -3294,8 +3294,10 @@ const enrichPersonProfile = (x) => {
     },
     { name: "", role: "Vitse-Prezident", meta: "", vacant: true },
     {
+ {
   memberKey: "board_safina_coo",
   name: "Safina Teshabayeva",
+  photoUrl: "https://mmmduffgpvwjdpruzikw.supabase.co/storage/v1/object/public/team-photos/coo.jpg",
   role: "Chief Operating Officer",
   role_i18n: {
     ru: "Операционный директор",
@@ -11468,7 +11470,7 @@ if (mainSubjects.length) {
 // ---------------------------
 // Subject Hub mentor
 // ---------------------------
-const TEAM_CACHE_VERSION = 6;
+const TEAM_CACHE_VERSION = 7;
 
 function mentorPhotoUrlFromPath(photoPath) {
   const p = String(photoPath || "").trim();
