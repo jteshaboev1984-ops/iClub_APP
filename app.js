@@ -3334,10 +3334,10 @@ const enrichPersonProfile = (x) => {
     en: "Project manager with 6+ years of experience in educational, technological, and social impact initiatives across Central Asia. Official representative of FIRST in Uzbekistan and head coach of the national robotics team."
   },
   achievements_i18n: {
-    ru: "UzCombinator’da Tracker, Impact Admissions’da Chief Operating Officer, FIRST’ning O‘zbekistondagi rasmiy vakili, Central Asian University’da Assistant Dean lavozimlarida faoliyat yuritgan. STEM va robototexnika, xalqaro hamkorlik, jamoa boshqaruvi hamda davlat va ta’lim sektori bilan ishlash bo‘yicha tajribaga ega.",
-    uz: "UzCombinator’da Tracker, Impact Admissions’da Chief Operating Officer, O‘zbekistonda FIRST’ning rasmiy vakili, Central Asian University’da Assistant Dean sifatida faoliyat yuritgan. STEM va robototexnika, xalqaro hamkorlik, jamoa boshqaruvi hamda davlat va ta’lim sektori bilan ishlash bo‘yicha tajribaga ega.",
-    en: "Has served as Tracker at UzCombinator, Chief Operating Officer at Impact Admissions, Official Representative of FIRST in Uzbekistan, and Assistant Dean at Central Asian University. Experienced in STEM and robotics, international partnerships, team management, and collaboration with public and education sectors."
-  },
+  ru: "Работала в роли Tracker в UzCombinator, Chief Operating Officer в Impact Admissions, официального представителя FIRST в Узбекистане и Assistant Dean в Central Asian University. Имеет опыт в STEM и робототехнике, международном сотрудничестве, управлении командами и взаимодействии с государственным и образовательным секторами.",
+  uz: "UzCombinator’da Tracker, Impact Admissions’da Chief Operating Officer, O‘zbekistonda FIRST’ning rasmiy vakili, Central Asian University’da Assistant Dean sifatida faoliyat yuritgan. STEM va robototexnika, xalqaro hamkorlik, jamoa boshqaruvi hamda davlat va ta’lim sektori bilan ishlash bo‘yicha tajribaga ega.",
+  en: "Has served as Tracker at UzCombinator, Chief Operating Officer at Impact Admissions, Official Representative of FIRST in Uzbekistan, and Assistant Dean at Central Asian University. Experienced in STEM and robotics, international partnerships, team management, and collaboration with public and education sectors."
+},
   education_i18n: {
     ru: "Работает с министерствами, образовательными учреждениями и международными платформами над масштабированием инновационных программ для молодёжи.",
     uz: "Yoshlar uchun innovatsion dasturlarni kengaytirish bo‘yicha vazirliklar, ta’lim muassasalari va xalqaro platformalar bilan hamkorlik qiladi.",
@@ -11489,7 +11489,7 @@ if (mainSubjects.length) {
 // ---------------------------
 // Subject Hub mentor
 // ---------------------------
-const TEAM_CACHE_VERSION = 9;
+const TEAM_CACHE_VERSION = 10;
 
 function mentorPhotoUrlFromPath(photoPath) {
   const p = String(photoPath || "").trim();
