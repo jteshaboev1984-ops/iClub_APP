@@ -10663,7 +10663,7 @@ function uiAlert({ title, message, okText } = {}) {
     // first paint (ensures no RU/EN mix)
     try { applyRegSubjectI18n(); } catch {}
 
-   function isRegistered() {
+      function isRegistered() {
     const p = loadProfile();
     if (!p || typeof p !== "object") return false;
 
@@ -10677,19 +10677,29 @@ function uiAlert({ title, message, okText } = {}) {
     if (!fullName) return false;
     if (!lang) return false;
 
+    const region = String(p.region || "").trim();
+    if (!region) return false;
+
+    // Если district_id уже есть в профиле, название района тоже должно быть заполнено.
+    // Это не ломает старые профили без district_id, но закрывает обход "пустой district".
+    const hasDistrictId = (p.district_id != null && String(p.district_id).trim() !== "");
+    const district = String(p.district || "").trim();
+    if (hasDistrictId && !district) return false;
+
     // Если школьник — нужны subjects (минимум 1 competitive) + базовые поля школы
     if (p.is_school_student === true) {
       const subjects = Array.isArray(p.subjects) ? p.subjects : [];
+      const subjectKeys = subjects.map(s => String(s?.key || "").trim()).filter(Boolean);
+
+      if (new Set(subjectKeys).size !== subjectKeys.length) return false;
+      if (!subjectKeys.every(k => isSubjectActive(k))) return false;
+
       const compCnt = subjects.filter(s => s && s.mode === "competitive" && s.key).length;
       if (compCnt < 1) return false;
 
-      const region = String(p.region || "").trim();
-      const district = String(p.district || "").trim();
-      if (!region) return false;
-
-      // district может быть не обязателен в твоей форме, но если он есть в форме как required — он уже проверяется там.
-      // Здесь не ужесточаем лишнего: оставляем как мягкое условие.
-      // if (!district) return false;
+      const school = String(p.school || "").trim();
+      const klass = String(p.class || "").trim();
+      if (!school || !klass) return false;
     }
 
     return true;
@@ -16531,13 +16541,12 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
 function bindTabbar() {
   let lastTapTs = 0;
 
-  const handle = (btn) => {
+    const handle = (btn) => {
     const tab = btn.dataset.tab;
     if (!tab) return;
     
      // ✅ До регистрации табы запрещены (и на registration таббар скрыт, но это страховка)
-  const p0 = loadProfile();
-  if (!p0) {
+  if (!isRegistered()) {
     showToast(t("complete_registration_first") || "Сначала завершите регистрацию.");
     showView("registration");
     return;
@@ -16821,8 +16830,20 @@ if (state.tab === "profile") {
       // They can study/practice all subjects without tours and manage subjects later in Profile.
     }
 
-    if (subjects.filter(s => s.mode === "competitive").length > 2) {
+        if (subjects.filter(s => s.mode === "competitive").length > 2) {
       showToast(t("competitive_subjects_limit_2"));
+      return;
+    }
+
+    const subjectKeys = subjects.map(s => String(s?.key || "").trim()).filter(Boolean);
+    if (new Set(subjectKeys).size !== subjectKeys.length) {
+      showToast(
+        tr3(
+          "Выберите разные предметы: одинаковые предметы нельзя указать несколько раз.",
+          "Turli fanlarni tanlang: bir xil fanni bir necha marta ko‘rsatib bo‘lmaydi.",
+          "Choose different subjects: the same subject cannot be selected more than once."
+        )
+      );
       return;
     }
 
