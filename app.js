@@ -14521,9 +14521,9 @@ async function renderMyRecDetail() {
       "Open"
     )
   };
-  if (titleEl) titleEl.textContent = topic;
-  if (subEl) {
-    if (subEl) {
+
+   if (titleEl) titleEl.textContent = topic;
+if (subEl) {
   subEl.textContent = isTourRec
     ? (subtopic || recText.subtitleTour)
     : (subtopic ? subtopic : recText.subtitlePractice);
