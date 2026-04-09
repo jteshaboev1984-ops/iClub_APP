@@ -11750,14 +11750,13 @@ async function renderSubjectHubMentorCard(subjectKey) {
 
     if (titleEl) titleEl.textContent = subjectTitle(subjectKey, subj ? subj.title : "Subject");
   if (metaEl) {
-    if (us) {
-      const modeLabel = us.mode === "competitive" ? t("mode_competitive") : t("mode_study");
-      const pinLabel = us.pinned ? t("hub_pinned") : t("hub_not_pinned");
-      metaEl.textContent = `${modeLabel} • ${pinLabel}`;
-    } else {
-      metaEl.textContent = t("hub_not_added") || "Not added";
-    }
+  if (us) {
+    const modeLabel = us.mode === "competitive" ? t("mode_competitive") : t("mode_study");
+    metaEl.textContent = modeLabel;
+  } else {
+    metaEl.textContent = t("hub_not_added") || "Not added";
   }
+}
 
   // ✅ Visual-only mode flag for CSS (Study vs Competitive)
   const hubRoot = $("#courses-subject-hub");
