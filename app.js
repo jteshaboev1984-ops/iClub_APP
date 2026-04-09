@@ -542,8 +542,8 @@ try {
   }
 } catch {}
 
-    return sb;
-  }
+return sb;
+}
  
     function nowISO() {
     return new Date().toISOString();
@@ -18432,11 +18432,11 @@ function renderProfileCredentialsUI() {
   bindRatingsUI(); // ✅ Leaderboard controls
 }
 
-     // Earned Credentials — daily evaluation jobs (once per Tashkent day)
-  try { runDailyCredentialJobs(); } catch {}
+// Earned Credentials — daily evaluation jobs (once per Tashkent day)
+try { runDailyCredentialJobs(); } catch {}
 
-    // Init
-  bindUI();
-  boot();
+// Init
+bindUI();
+boot();
 
 })();
