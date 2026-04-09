@@ -5093,8 +5093,14 @@ async function getAuthUid() {
       return _cachedAuthUid;
     }
 
-    const { data } = await window.sb.auth.getUser();
-    const uid = data?.user?.id || null;
+    const result = await Promise.race([
+      window.sb.auth.getUser(),
+      new Promise((resolve) => {
+        setTimeout(() => resolve({ data: { user: null }, __timeout: true }), 4000);
+      })
+    ]);
+
+    const uid = result?.data?.user?.id || null;
 
     _cachedAuthUid = uid;
     _cachedAuthUidAt = now;
@@ -14060,7 +14066,7 @@ async function renderMyRecs() {
     }));
   }
 
-  if (practiceRows.length) {
+    if (activeTab === "practice" && practiceRows.length) {
     const checks = await Promise.all(
       practiceRows.map(async (rec) => {
         try {
@@ -14074,7 +14080,7 @@ async function renderMyRecs() {
 
     practiceRows = checks.filter(x => x.keep).map(x => x.rec);
   }
-
+   
   // TOUR fallback only if DB has nothing yet
   if (!tourRows.length) {
     const tourStore = loadMyTourRecs();
