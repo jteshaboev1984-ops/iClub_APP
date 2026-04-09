@@ -207,17 +207,17 @@ about_member_achievements_default: "Вносит практический вкл
 
 about_team_mentors_note: "",
 archive_title: "Архив",
-archive_sub: "Прошедшие туры (только после завершения активного тура).",
+archive_sub: "Прошедшие туры для самопроверки. Раздел откроется после закрытия текущего официального тура.",
 archive_loading: "Загрузка архива…",
-archive_locked_title: "Архив закрыт",
-archive_locked_sub: "Сначала завершите активный тур — затем откроются прошлые туры.",
+archive_locked_title: "Архив пока закрыт",
+archive_locked_sub: "Архив откроется после закрытия текущего официального тура. До этого прошлые туры скрыты для всех, включая учебные предметы.",
 archive_unavailable_title: "Архив недоступен",
 archive_unavailable_sub: "Не удалось проверить доступность. Попробуйте позже.",
 archive_score_label: "Результат",
 archive_time_label: "Время",
 archive_checking_toast: "Проверяем доступность архива…",
 archive_unavailable_toast: "Архив временно недоступен. Попробуйте позже.",
-archive_unlock_after_toast: "Архив откроется после завершения активного тура.",
+archive_unlock_after_toast: "Архив откроется после закрытия текущего официального тура.",
        
       // Ratings
       ratings_subject: "Предмет",
@@ -293,7 +293,7 @@ network_error_try_again: "Ошибка сети. Попробуйте ещё р�
       hub_my_recs_sub: "Повторный доступ к чтению",
 
       hub_system_section: "Системные",
-      hub_archive_sub: "Прошедшие туры",
+      hub_archive_sub: "Самопроверка • вне рейтинга",
 
       hub_all_subjects_title: "Все предметы",
       hub_all_subjects_sub: "Каталог предметов",
@@ -629,7 +629,7 @@ difficulty_hard: "сложно",
 
       progress_trend: "Тренд прогресса",
       open_tour_btn: "Открыть тур",
-      tours_archive_locked_toast: "🔒 Архив закрыт. Сначала завершите активный тур.",
+      tours_archive_locked_toast: "🔒 Архив пока закрыт. Он откроется после закрытия текущего официального тура.",
 
       tours_active_now: "Активный тур сейчас",
       tour_unavailable_title: "Тур недоступен",
@@ -862,7 +862,7 @@ certificates_empty: "Сертификаты пока недоступны.",
 certificates_empty_title: "Сертификаты появятся позже",
 certificates_empty_hint: "Сертификаты становятся доступны только после глобального завершения соответствующего тура или всех туров.",
 certificates_pending_hint: "Сертификат появится после первой сохранённой попытки.",
-archive_empty: "Архив пока пуст.",
+archive_empty: "Доступных архивных туров пока нет.",
 
       // Pinned hints
       profile_pinned_hint_has: "Закреплённые предметы уже ускоряют доступ. Дальше — стабильность.",
@@ -1069,18 +1069,18 @@ about_member_achievements_default: "Jamoa ishiga faol hissa qo‘shadi.",
 
 about_team_mentors_note: "",
 archive_title: "Arxiv",
-archive_sub: "O‘tgan turlar (faol tur yakunlangandan keyin).",
+archive_sub: "O‘tgan turlar o‘zini tekshirish uchun. Bo‘lim joriy rasmiy tur yopilgandan keyin ochiladi.",
 archive_loading: "Arxiv yuklanmoqda…",
-archive_locked_title: "Arxiv yopiq",
-archive_locked_sub: "Avval faol turni yakunlang — shundan so‘ng o‘tgan turlar ochiladi.",
+archive_locked_title: "Arxiv hozircha yopiq",
+archive_locked_sub: "Arxiv joriy rasmiy tur yopilgandan keyin ochiladi. Ungacha o‘tgan turlar hamma uchun, shu jumladan o‘quv fanlari uchun ham yashirin turadi.",
 archive_unavailable_title: "Arxiv mavjud emas",
 archive_unavailable_sub: "Mavjudligini tekshirib bo‘lmadi. Keyinroq urinib ko‘ring.",
 archive_score_label: "Natija",
 archive_time_label: "Vaqt",
 archive_checking_toast: "Arxiv mavjudligi tekshirilmoqda…",
 archive_unavailable_toast: "Arxiv vaqtincha mavjud emas. Keyinroq urinib ko‘ring.",
-archive_unlock_after_toast: "Arxiv faol tur yakunlangandan keyin ochiladi.",
-      // Ratings
+archive_unlock_after_toast: "Arxiv joriy rasmiy tur yopilgandan keyin ochiladi.",
+       // Ratings
       ratings_subject: "Fan",
       ratings_tour: "Tur",
       ratings_all_tours: "Barcha turlar",
@@ -1155,7 +1155,7 @@ network_error_try_again: "Tarmoq xatosi. Qayta urinib ko‘ring.",
       hub_my_recs_sub: "Qayta ko‘rish uchun ochish",
 
       hub_system_section: "Tizim",
-      hub_archive_sub: "O‘tgan turlar",
+      hub_archive_sub: "O‘zini tekshirish • reytingdan tashqari",
 
       hub_all_subjects_title: "Barcha fanlar",
       hub_all_subjects_sub: "Fanlar katalogi",
@@ -1491,7 +1491,7 @@ difficulty_hard: "qiyin",
 
       progress_trend: "Progress trendlari",
       open_tour_btn: "Turni ochish",
-      tours_archive_locked_toast: "🔒 Arxiv yopiq. Avval faol turni yakunlang.",
+      tours_archive_locked_toast: "🔒 Arxiv hozircha yopiq. U joriy rasmiy tur yopilgandan keyin ochiladi.",
 
 tours_active_now: "Hozir faol tur",
 tour_unavailable_title: "Tur mavjud emas",
@@ -1729,7 +1729,7 @@ certificates_empty: "Sertifikatlar hozircha mavjud emas.",
 certificates_empty_title: "Sertifikatlar keyinroq paydo bo‘ladi",
 certificates_empty_hint: "Sertifikatlar faqat tegishli tur yoki barcha turlar global yakunlangandan keyin ochiladi.",
 certificates_pending_hint: "Sertifikat birinchi saqlangan urinishdan keyin paydo bo‘ladi.",
-archive_empty: "Arxiv hozircha bo‘sh.",
+archive_empty: "Hozircha ochiq arxiv turlari yo‘q.",
 
       // Pinned hints
       profile_pinned_hint_has:
@@ -1939,18 +1939,18 @@ about_member_achievements_default: "Contributes actively to the team and project
 about_team_mentors_note: "",
 
 archive_title: "Archive",
-archive_sub: "Past tours (only after the active tour is finished).",
+archive_sub: "Past tours for self-check. This section opens after the current official tour is closed.",
 archive_loading: "Loading archive…",
-archive_locked_title: "Archive locked",
-archive_locked_sub: "Finish the active tour first — then past tours will appear here.",
+archive_locked_title: "Archive is not open yet",
+archive_locked_sub: "The archive will open after the current official tour is closed. Until then, past tours stay hidden for all users, including Study subjects.",
 archive_unavailable_title: "Archive unavailable",
 archive_unavailable_sub: "Could not verify availability. Please try again later.",
 archive_score_label: "Score",
 archive_time_label: "Time",
 archive_checking_toast: "Checking archive availability…",
 archive_unavailable_toast: "Archive is temporarily unavailable. Please try again later.",
-archive_unlock_after_toast: "Archive will open after you finish the active tour.",
-
+archive_unlock_after_toast: "The archive will open after the current official tour is closed.",
+       
       // Ratings
       ratings_subject: "Subject",
       ratings_tour: "Tour",
@@ -2023,7 +2023,7 @@ network_error_try_again: "Network error. Please try again.",
       hub_video_lessons_sub: "Video lessons available in Telegram",
       hub_my_recs_sub: "Re-open for review",
       hub_system_section: "System",
-      hub_archive_sub: "Past tours",
+      hub_archive_sub: "Self-check • off leaderboard",
 
       hub_all_subjects_title: "All subjects",
       hub_all_subjects_sub: "Subjects catalog",
@@ -2349,7 +2349,7 @@ difficulty_hard: "hard",
 
       progress_trend: "Progress trend",
       open_tour_btn: "Open tour",
-      tours_archive_locked_toast: "🔒 Archive is locked. Finish the active tour first.",
+      tours_archive_locked_toast: "🔒 The archive is not open yet. It will open after the current official tour is closed.",
 
       tours_active_now: "Active tour now",
       tour_unavailable_title: "Tour unavailable",
@@ -2575,7 +2575,7 @@ certificates_empty: "Certificates are not available yet.",
 certificates_empty_title: "Certificates will appear later",
 certificates_empty_hint: "Certificates become available only after the global completion of the corresponding tour or all tours.",
 certificates_pending_hint: "The certificate will appear after the first saved attempt.",
-archive_empty: "The archive is empty for now.",
+archive_empty: "No archive tours are available yet.",
 
       profile_pinned_hint_has: "Pinned subjects already speed things up. Next: consistency.",
       profile_pinned_hint_empty: "Pin 1–3 subjects to make access noticeably faster."
