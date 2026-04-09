@@ -76,6 +76,14 @@ function currentLang() {
   return "ru";
 }
 
+function currentContentLang() {
+  try {
+    const profile = typeof loadProfile === "function" ? loadProfile() : null;
+    return String(profile?.language || profile?.uiLanguage || "ru").toLowerCase();
+  } catch {}
+  return "ru";
+}
+
 function tr3(ru, uz, en) {
   const lang = currentLang();
   if (lang === "uz") return String(uz ?? ru ?? en ?? "");
@@ -83,6 +91,12 @@ function tr3(ru, uz, en) {
   return String(ru ?? uz ?? en ?? "");
 }
 
+function tc3(ru, uz, en) {
+  const lang = currentContentLang();
+  if (lang === "uz") return String(uz ?? ru ?? en ?? "");
+  if (lang === "en") return String(en ?? ru ?? uz ?? "");
+  return String(ru ?? uz ?? en ?? "");
+}
 function refreshLiveProgressSurfaces() {
   try { _homeStatsCache?.clear?.(); } catch {}
 
@@ -8947,27 +8961,29 @@ function bindRatingsUI() {
   }
 
           if (state.courses.stack.length > 1) {
-    state.courses.stack.pop();
-    saveState();
+  state.courses.stack.pop();
+  saveState();
 
-    const next = getCoursesTopScreen();
-    showCoursesScreen(next);
+  const next = getCoursesTopScreen();
+  showCoursesScreen(next);
 
-    // ✅ Ensure correct screen rendering after back
-        if (next === "tours") {
-      renderToursStart();          // ✅ вернёт корректный вид туров после выхода из правил
-    } else if (next === "practice-start") {
-      renderPracticeStart();
-    } else if (next === "subject-hub") {
-      renderSubjectHub();
-    } else if (next === "books") {
-      renderBooks();
-    } else if (next === "my-recs") {
-      renderMyRecs();
-    }
-
-    return;
+  // ✅ Ensure correct screen rendering after back
+  if (next === "tours") {
+    renderToursStart();
+  } else if (next === "practice-start") {
+    renderPracticeStart();
+  } else if (next === "subject-hub") {
+    renderSubjectHub();
+  } else if (next === "books") {
+    renderBooks();
+  } else if (next === "my-recs") {
+    renderMyRecs();
+  } else if (next === "my-rec-detail") {
+    renderMyRecDetail();
   }
+
+  return;
+}
 
     let targetTab = state.courses.entryTab || state.prevTab || "home";
 
@@ -8980,15 +8996,15 @@ function bindRatingsUI() {
 function canCoursesBack() {
   const top = getCoursesTopScreen();
 
-  // ✅ special-case: "my-recs" может быть открыт из Profile (stack=1),
-  // но back должен вести обратно в entryTab через popCourses()
-  if (top === "my-recs") return true;
+  // ✅ special-case: my-recs and my-rec-detail may be opened from Profile / Courses,
+  // but back must stay visible and work through popCourses()
+  if (top === "my-recs" || top === "my-rec-detail") return true;
 
   // ✅ туры/экраны тура: даже если stack=1 — back показываем (уйдём в subject-hub)
   if (["tours", "tour-rules", "tour-quiz", "tour-result", "tour-review"].includes(top)) return true;
 
   // ✅ Subject Hub: даже если stack=1 — back должен быть доступен (уйдём в entryTab/prevTab/home)
-  if (top === "subject-hub") return true; 
+  if (top === "subject-hub") return true;
 
   return state.courses.stack.length > 1;
 }
@@ -14441,12 +14457,81 @@ async function renderMyRecDetail() {
   const isTourRec = String(rec?.source_type || "practice") === "tour";
   const topic = rec.topic || "General";
   const subtopic = rec.subtopic ? String(rec.subtopic) : "";
+
+     const recText = {
+    subtitlePractice: tc3(
+      "Персональный разбор и план",
+      "Shaxsiy tahlil va reja",
+      "Personal review and plan"
+    ),
+    subtitleTour: tc3(
+      "Рекомендации по итогам тура",
+      "Tur yakunlari bo‘yicha tavsiyalar",
+      "Recommendations based on the tour"
+    ),
+    resultTitle: tc3(
+      "Результат",
+      "Natija",
+      "Result"
+    ),
+    resultRepeat: tc3(
+      "Повторить ещё раз",
+      "Yana bir bor",
+      "Repeat again"
+    ),
+    mistakesTitle: tc3(
+      "Ошибки по теме",
+      "Mavzu bo‘yicha xatolar",
+      "Mistakes by topic"
+    ),
+    mistakesSubtitle: tc3(
+      "Ваши последние неправильные ответы по этой теме.",
+      "Ushbu mavzu bo‘yicha so‘nggi noto‘g‘ri javoblaringiz.",
+      "Your latest incorrect answers on this topic."
+    ),
+    mistakeCardTitle: tc3(
+      "Ошибка",
+      "Xato",
+      "Mistake"
+    ),
+    yourAnswer: tc3(
+      "Ваш ответ",
+      "Sizning javobingiz",
+      "Your answer"
+    ),
+    correctAnswer: tc3(
+      "Правильный",
+      "To‘g‘ri javob",
+      "Correct"
+    ),
+    explanation: tc3(
+      "Пояснение",
+      "Izoh",
+      "Explanation"
+    ),
+    noMistakes: tc3(
+      "По этой теме пока нет зафиксированных ошибок.",
+      "Bu mavzu bo‘yicha hozircha xatolar qayd etilmagan.",
+      "No mistakes recorded for this topic yet."
+    ),
+    bookFallback: tc3(
+      "Книга",
+      "Kitob",
+      "Book"
+    ),
+    openBook: tc3(
+      "Открыть",
+      "Ochish",
+      "Open"
+    )
+  };
   if (titleEl) titleEl.textContent = topic;
   if (subEl) {
-    subEl.textContent = isTourRec
-      ? (subtopic || (t("tour_rec_detail_subtitle") || "Рекомендации по итогам тура"))
-      : (subtopic ? subtopic : (t("rec_detail_subtitle") || "Персональный разбор и план"));
-  }
+    if (subEl) {
+  subEl.textContent = isTourRec
+    ? (subtopic || recText.subtitleTour)
+    : (subtopic ? subtopic : recText.subtitlePractice);
+}
 
    // ✅ mini result (only for current rec/topic)
 let drillMiniHtml = "";
@@ -14467,11 +14552,11 @@ try {
 
     drillMiniHtml = `
       <div class="list-item" style="margin-top:10px">
-        <div style="font-weight:900">${escapeHTML(t("rec_drill_mini_title") || "Natija")}</div>
+        <div style="font-weight:900">${escapeHTML(recText.resultTitle)}</div>
         <div class="muted small" style="margin-top:6px">${escapeHTML(line)}</div>
         <div style="margin-top:10px">
           <button class="btn" type="button" data-action="my-rec-repeat-drill">
-            ${escapeHTML(t("rec_drill_repeat") || "Yana bir bor")}
+            ${escapeHTML(recText.resultRepeat)}
           </button>
         </div>
       </div>
@@ -14502,15 +14587,15 @@ try {
 const mistakesHeaderHtml = `
   <div class="list-item" style="margin-top:10px">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-      <div style="font-weight:900">${escapeHTML(t("rec_mistakes_title") || "Ошибки по теме")}</div>
+      <div style="font-weight:900">${escapeHTML(recText.mistakesTitle)}</div>
       <span class="pill">${escapeHTML(String(totalMistakes))}</span>
     </div>
     <div class="muted small" style="margin-top:6px">
-      ${escapeHTML(t("rec_mistakes_subtitle") || "Ваши последние неправильные ответы по этой теме.")}
+      ${escapeHTML(recText.mistakesSubtitle)}
     </div>
   </div>
 `;
-
+     
 const mistakesHtml = totalMistakes
   ? mistakes.map((x, idx) => {
       const q = x.q;
@@ -14525,24 +14610,24 @@ const mistakesHtml = totalMistakes
       return `
         <div class="list-item">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-            <div style="font-weight:900">${escapeHTML(t("rec_mistake_card_title") || "Ошибка")}</div>
+            <div style="font-weight:900">${escapeHTML(recText.mistakeCardTitle)}</div>
             <span class="pill">${escapeHTML(num)}</span>
           </div>
 
           <div style="margin-top:6px">${escapeHTML(qText || "")}</div>
 
           <div class="muted small" style="margin-top:8px">
-            ${escapeHTML(t("rec_your_answer") || "Ваш ответ")}: ${escapeHTML(uaDisp)}
+            ${escapeHTML(recText.yourAnswer)}: ${escapeHTML(uaDisp)}
           </div>
 
           <div class="muted small">
-            ${escapeHTML(t("rec_correct_answer") || "Правильный")}: ${escapeHTML(caDisp)}
+            ${escapeHTML(recText.correctAnswer)}: ${escapeHTML(caDisp)}
           </div>
 
           ${expl ? `
             <details style="margin-top:10px">
               <summary class="muted small" style="cursor:pointer;font-weight:800">
-                ${escapeHTML(t("rec_show_expl") || "Пояснение")}
+                ${escapeHTML(recText.explanation)}
               </summary>
               <div class="muted small" style="margin-top:8px">${escapeHTML(expl)}</div>
             </details>
@@ -14553,21 +14638,23 @@ const mistakesHtml = totalMistakes
   : `
     <div class="list-item">
       <div class="muted small" style="font-weight:800">
-        ${escapeHTML(t("rec_no_mistakes_text") || "По этой теме пока нет зафиксированных ошибок.")}
+        ${escapeHTML(recText.noMistakes)}
       </div>
     </div>
   `;
    
         const refsHtml = refs.length
   ? refs.map(r => {
-      const title = r.title ? escapeHTML(r.title) : (r.book_id ? `Книга #${escapeHTML(String(r.book_id))}` : "Книга");
+      const title = r.title
+  ? escapeHTML(r.title)
+  : (r.book_id ? `${escapeHTML(recText.bookFallback)} #${escapeHTML(String(r.book_id))}` : escapeHTML(recText.bookFallback));
       const ref = r.book_reference ? `• ${escapeHTML(String(r.book_reference))}` : "";
       const has = !!r.file_url;
       return `
         <div class="list-item">
           <div style="font-weight:900">${title}</div>
           ${ref ? `<div class="muted small" style="margin-top:6px">${ref}</div>` : ""}
-          ${has ? `<div style="margin-top:10px"><button class="btn" type="button" data-open-book-url="${escapeHTML(r.file_url)}">${escapeHTML(t("rec_open_book") || "Открыть")}</button></div>` : ""}
+          ${has ? `<div style="margin-top:10px"><button class="btn" type="button" data-open-book-url="${escapeHTML(r.file_url)}">${escapeHTML(recText.openBook)}</button></div>` : ""}
         </div>
       `;
     }).join("")
@@ -17512,6 +17599,25 @@ if (action === "profile-open-courses") {
   return;
 }
 
+if (action === "my-rec-to-subject") {
+  state.courses = state.courses || {};
+  state.courses.myRecReturnTarget = null;
+  saveState();
+
+  replaceCourses("subject-hub");
+  renderSubjectHub();
+  return;
+}
+
+if (action === "tour-to-subject") {
+  state.courses = state.courses || {};
+  state.courses.myRecReturnTarget = null;
+  saveState();
+
+  replaceCourses("subject-hub");
+  renderSubjectHub();
+  return;
+}       
 if (action === "profile-open-ratings") {
   setTab("ratings");
   return;
@@ -17519,19 +17625,24 @@ if (action === "profile-open-ratings") {
 
       // Courses actions
       if (action === "to-subject-hub") {
-        // ✅ after drills: go back to My Rec Detail (AI tutor), not Subject Hub
-try {
-  const d = state?.courses?.myRecDrillLast;
-  if (d?.drillType && state?.courses?.myRecReturnTarget === "my-rec-detail") {
-    replaceCourses("my-rec-detail");
-    renderMyRecDetail();
-    return;
-  }
-} catch {}
-        replaceCourses("subject-hub");
-        renderSubjectHub();
-        return;
-      }
+  // ✅ return to My Rec Detail only from practice drill flow,
+  // never from tours / tour result / tour review
+  try {
+    const d = state?.courses?.myRecDrillLast;
+    const top = getCoursesTopScreen();
+    const fromPracticeFlow = ["practice-result", "practice-review", "practice-recs"].includes(top);
+
+    if (fromPracticeFlow && d?.drillType && state?.courses?.myRecReturnTarget === "my-rec-detail") {
+      replaceCourses("my-rec-detail");
+      renderMyRecDetail();
+      return;
+    }
+  } catch {}
+
+  replaceCourses("subject-hub");
+  renderSubjectHub();
+  return;
+}
 
       if (action === "open-all-subjects") {
         replaceCourses("all-subjects");
