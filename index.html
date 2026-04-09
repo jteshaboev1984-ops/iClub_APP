@@ -695,8 +695,8 @@
   </div>
 
   <div class="actions-row">
-    <button class="btn primary" type="button" data-action="to-subject-hub" data-i18n="to_subject_btn">К предмету</button>
-  </div>
+  <button class="btn primary" type="button" data-action="tour-to-subject" data-i18n="to_subject_btn">К предмету</button>
+</div>
       <!-- Tours loading overlay -->
 <div class="tours-loading-overlay hidden" id="tours-loading">
   <div class="tours-loading-card">
@@ -819,9 +819,9 @@
   <div id="tour-result-summary-text" class="muted small">—</div>
 </div>
               <div class="actions-row">
-                <button class="btn" type="button" data-action="open-ratings" data-i18n="open_ratings">Рейтинг</button>
-                <button class="btn primary" type="button" data-action="to-subject-hub" data-i18n="to_subject">К предмету</button>
-              </div>
+  <button class="btn" type="button" data-action="open-ratings" data-i18n="open_ratings">Рейтинг</button>
+  <button class="btn primary" type="button" data-action="tour-to-subject" data-i18n="to_subject">К предмету</button>
+</div>
             </section>
 
             <!-- Tour Review (active) -->
@@ -835,9 +835,9 @@
               </div>
 
                 <div class="actions-row">
-                  <button class="btn" type="button" data-action="tour-back-to-result" data-i18n="back_to_result">Назад к результату</button>
-                  <button class="btn primary" type="button" data-action="to-subject-hub" data-i18n="to_subject">К предмету</button>
-               </div>
+  <button class="btn" type="button" data-action="tour-back-to-result" data-i18n="back_to_result">Назад к результату</button>
+  <button class="btn primary" type="button" data-action="tour-to-subject" data-i18n="to_subject">К предмету</button>
+</div>
             </section>
 
             <!-- Books -->
@@ -874,12 +874,14 @@
   </div>
 
   <div class="actions-row">
+  <button class="btn" type="button" data-action="my-rec-to-subject" data-i18n="to_subject">К предмету</button>
+
   <button class="btn" type="button" data-action="my-rec-open-books" data-i18n="rec_btn_books">Книги</button>
 
   <button class="btn" type="button" data-action="my-rec-retry" data-i18n="rec_btn_retry">Повторить ошибки</button>
 
-  <button class="btn primary" type="button" data-action="my-rec-train" data-i18n="rec_btn_train">Тренировка по теме</button>  
-  <!-- ✅ NEW: “Освоено” (delete this recommendation) -->
+  <button class="btn primary" type="button" data-action="my-rec-train" data-i18n="rec_btn_train">Тренировка по теме</button>
+
   <button class="btn danger" type="button" data-action="my-rec-delete" data-i18n="rec_btn_done">Освоено</button>
 </div>
 </section>
