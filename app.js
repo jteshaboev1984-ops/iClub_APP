@@ -435,114 +435,110 @@ async function waitForOverlayPaint() {
 }
    
    async function initSupabaseSession() {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
-    if (!window.supabase?.createClient) return null;
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+  if (!window.supabase?.createClient) return null;
 
-           if (!sb) {
-      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: false,
-        },
-      });
-
-      // compatibility bridge:
-      // large parts of the app still read window.sb directly
-      window.sb = sb;
-    }
-
-    // 1) ensure we have a session (Anonymous Sign-in)
-        const { data: sessData } = await sb.auth.getSession();
-    if (!sessData?.session) {
-      const { data: anonData, error: anonErr } = await sb.auth.signInAnonymously();
-
-      if (anonErr) {
-        console.error("[Supabase] Anonymous sign-in failed:", anonErr);
-
-        const statusEl = document.getElementById("splash-status");
-        if (statusEl) statusEl.textContent = "Supabase auth error: " + (anonErr.message || "unknown");
-
-        // Не валим приложение — просто работаем без базы (пока не починим настройки)
-        return sb;
-      }
-    }
-
-    // 2) ensure users row exists (id == auth.uid())
-    const { data: userData } = await sb.auth.getUser();
-    const u = userData?.user;
-    if (!u?.id) return sb;
-
-    const tg = getTelegramUserSafe();
-    const langGuess = tg?.language_code || (typeof getTelegramLang === "function" ? getTelegramLang() : null) || "ru";
-
-// ✅ если локальный профиль уже есть — считаем content language источником истины
-const lp = safeJsonParse(localStorage.getItem(LS.profile), null);
-const contentLang = lp?.language || langGuess;
-
-const payload = {
-  id: u.id,
-  telegram_user_id: tg?.id ? String(tg.id) : null,
-  avatar_url: null,
-  language_code: contentLang,
-};
-
-// ✅ НЕ перезатираем имя/фамилию в NULL на boot
-if (tg?.first_name) payload.first_name = String(tg.first_name).trim();
-if (tg?.last_name) payload.last_name = String(tg.last_name).trim();
-
-// upsert by primary key id (critical) — with retry + safe catch
-try {
-  await dbWriteWithRetry(async () => {
-    const { error } = await sb.from("users").upsert(payload, { onConflict: "id" });
-    if (error) throw error;
-    return true;
-  }, { tries: 3, baseDelayMs: 350 });
-} catch (e) {
-  // не валим приложение — но фиксируем в events
-  try {
-    const uid = u?.id || null;
-    await logDbErrorToEvents(uid, "boot_users_upsert_failed", e, { has_tg: !!tg });
-  } catch {}
-}
-
-// ✅ reset subject cache for this session (prevents poisoned null cache)
-try { _subjectIdByKeyCache.clear(); } catch {}
-
-// ✅ boot event: write at most once per day per device (prevents DB flooding)
-try {
-  const day = dayKeyTashkent(Date.now());
-  const k = "iclub_boot_day_v1";
-  const last = String(localStorage.getItem(k) || "");
-  if (last !== day) {
-    await sb.from("app_events").insert({
-      user_id: u.id,
-      event_type: "boot",
-      payload: { has_tg: !!tg, ua: navigator.userAgent },
+  if (!sb) {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false,
+      },
     });
-    localStorage.setItem(k, day);
+
+    // compatibility bridge:
+    // large parts of the app still read window.sb directly
+    window.sb = sb;
   }
-} catch (e) {
-  logClientError("boot_event_insert", e);
-}
 
-// ✅ Earned Credentials: hydrate local events store from Supabase (only if local empty)
-try {
-  const changed = await hydrateLocalEventsFromSupabase(sb, u.id);
+  // 1) ensure we have a session (Anonymous Sign-in)
+  const { data: sessData } = await sb.auth.getSession();
+  if (!sessData?.session) {
+    const { error: anonErr } = await sb.auth.signInAnonymously();
 
-  // Always recalc after hydration attempt:
-  // - changed=true  -> we merged DB events
-  // - changed=false -> still ensures daily job runs at least once per day
-  try { runDailyCredentialJobs(); } catch {}
+    if (anonErr) {
+      console.error("[Supabase] Anonymous sign-in failed:", anonErr);
 
-  // If we merged something new — update profile UI if it’s already on screen
-  if (changed) {
-    try { renderProfile(); } catch {}
-    try { renderSubjectHub(); } catch {}
+      const statusEl = document.getElementById("splash-status");
+      if (statusEl) statusEl.textContent = "Supabase auth error: " + (anonErr.message || "unknown");
+
+      // Не валим приложение — просто работаем без базы
+      return sb;
+    }
   }
-} catch {}
 
-return sb;
+  // 2) ensure users row exists (id == auth.uid())
+  const { data: userData } = await sb.auth.getUser();
+  const u = userData?.user;
+  if (!u?.id) return sb;
+
+  const tg = getTelegramUserSafe();
+  const langGuess = tg?.language_code || (typeof getTelegramLang === "function" ? getTelegramLang() : null) || "ru";
+
+  // ✅ если локальный профиль уже есть — считаем content language источником истины
+  const lp = safeJsonParse(localStorage.getItem(LS.profile), null);
+  const contentLang = lp?.language || langGuess;
+
+  const payload = {
+    id: u.id,
+    telegram_user_id: tg?.id ? String(tg.id) : null,
+    avatar_url: null,
+    language_code: contentLang,
+  };
+
+  // ✅ НЕ перезатираем имя/фамилию в NULL на boot
+  if (tg?.first_name) payload.first_name = String(tg.first_name).trim();
+  if (tg?.last_name) payload.last_name = String(tg.last_name).trim();
+
+  // upsert by primary key id (critical) — with retry + safe catch
+  try {
+    await dbWriteWithRetry(async () => {
+      const { error } = await sb.from("users").upsert(payload, { onConflict: "id" });
+      if (error) throw error;
+      return true;
+    }, { tries: 3, baseDelayMs: 350 });
+  } catch (e) {
+    // не валим приложение — но фиксируем в events
+    try {
+      const uid = u?.id || null;
+      await logDbErrorToEvents(uid, "boot_users_upsert_failed", e, { has_tg: !!tg });
+    } catch {}
+  }
+
+  // ✅ reset subject cache for this session (prevents poisoned null cache)
+  try { _subjectIdByKeyCache.clear(); } catch {}
+
+  // ✅ boot event: write at most once per day per device (prevents DB flooding)
+  try {
+    const day = dayKeyTashkent(Date.now());
+    const k = "iclub_boot_day_v1";
+    const last = String(localStorage.getItem(k) || "");
+    if (last !== day) {
+      await sb.from("app_events").insert({
+        user_id: u.id,
+        event_type: "boot",
+        payload: { has_tg: !!tg, ua: navigator.userAgent },
+      });
+      localStorage.setItem(k, day);
+    }
+  } catch (e) {
+    logClientError("boot_event_insert", e);
+  }
+
+  // ✅ Earned Credentials: hydrate local events store from Supabase
+  try {
+    const changed = await hydrateLocalEventsFromSupabase(sb, u.id);
+
+    try { runDailyCredentialJobs(); } catch {}
+
+    if (changed) {
+      try { renderProfile(); } catch {}
+      try { renderSubjectHub(); } catch {}
+    }
+  } catch {}
+
+  return sb;
 }
  
     function nowISO() {
@@ -18288,7 +18284,7 @@ function buildProgressLine(credKey, rec) {
     return "";
   }
 
-  // Practice: attempts_count>=5 как мягкий прогресс (без новых правил) — показываем только если есть счётчики
+  // Practice: attempts_count>=5 как мягкий прогресс
   if (credKey === "practice_mastery") {
     const attempts = Number(ev.attempts_count ?? NaN);
     if (!Number.isFinite(attempts)) return "";
@@ -18309,7 +18305,6 @@ function buildProgressLine(credKey, rec) {
     const opens = Number(ev.resource_opens_total ?? ev.opens ?? NaN);
     const days = Number(ev.distinct_return_days ?? ev.return_days ?? NaN);
     if (!Number.isFinite(opens) || !Number.isFinite(days)) return "";
-    // мягко: если opens>=2 или days>=1, показываем только когда близко к 60%
     if (opens >= 2 || days >= 1) return t("cred_progress_research", { x: String(opens), y: String(days) });
     return "";
   }
@@ -18321,7 +18316,7 @@ function renderProfileCredentialsUI() {
   const grid = document.querySelector(".profile-credentials-grid");
   if (!grid) return;
 
-  const hints = document.getElementById("profile-credentials-hints"); // если есть в HTML
+  const hints = document.getElementById("profile-credentials-hints");
   const store = readCredStoreSafe();
 
   const keys = [
@@ -18334,7 +18329,6 @@ function renderProfileCredentialsUI() {
     "fair_play"
   ];
 
-  // Иконки нейтральные, “академические”
   const ICON = {
     consistent_learner: "📅",
     focused_study_streak: "🎯",
@@ -18357,12 +18351,10 @@ function renderProfileCredentialsUI() {
     const statusText = formatCredStatus(status);
     const achieved = formatDateShortSafe(rec.achieved_at);
 
-    // “Earned Credentials” = только active
     if (status === "active") {
       actives.push({ key: k, title, statusText, achieved, status });
     }
 
-    // Progress hints (>=60%) — собираем отдельно
     const p = buildProgressLine(k, rec);
     if (p) progressLines.push(p);
   });
@@ -18406,7 +18398,7 @@ function renderProfileCredentialsUI() {
     });
   }
 
-  // 2) Progress (выводим, если есть контейнер)
+  // 2) Progress
   if (hints) {
     hints.innerHTML = "";
     if (progressLines.length > 0) {
@@ -18424,7 +18416,6 @@ function renderProfileCredentialsUI() {
     }
   }
 }
-
   function bindUI() {
   bindTabbar();
   bindTopbar();
