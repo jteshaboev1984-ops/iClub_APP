@@ -439,11 +439,11 @@ practice_past_start: "Практика по прошедшим турам",
 practice_past_done: "Все вопросы прошлых туров уже закрыты правильно.",
 practice_past_empty: "Для прошлых туров пока нет доступных вопросов.",
 practice_start_for_tour: "Начать практику {n} тура",
-practice_past_hint_ready: "Откроются вопросы практики только по уже пройденным турам.",
-practice_past_hint_done: "По прошлым турам новых вопросов не осталось." 
+practice_past_hint_ready: "Откроются вопросы только по уже пройденным турам.",
+practice_past_hint_done: "По прошлым турам новых вопросов не осталось.",
 
-      // UI badges / labels (Courses + Home)
-      badge_active: "АКТИВНО",
+// UI badges / labels (Courses + Home)
+badge_active: "АКТИВНО",
       badge_pinned: "Закреплён",
       badge_competitive: "Соревновательный",
       module_label: "МОДУЛЬ {n}",
@@ -1322,7 +1322,7 @@ practice_past_done: "Oldingi turlar savollari to‘liq to‘g‘ri yopilgan.",
 practice_past_empty: "Oldingi turlar uchun hozircha savollar yo‘q.",
 practice_start_for_tour: "{n}-tur amaliyotini boshlash",
 practice_past_hint_ready: "Faqat oldin o‘tilgan turlar uchun amaliyot savollari ochiladi.",
-practice_past_hint_done: "Oldingi turlar bo‘yicha yangi savollar qolmagan."
+practice_past_hint_done: "Oldingi turlar bo‘yicha yangi savollar qolmagan.",
 
       // UI badges / labels (Courses + Home)
       badge_active: "FAOL",
@@ -2202,7 +2202,7 @@ practice_past_done: "All past tour questions have already been solved correctly.
 practice_past_empty: "There are no available questions for past tours yet.",
 practice_start_for_tour: "Start practice for Tour {n}",
 practice_past_hint_ready: "Only questions from already completed tours will open.",
-practice_past_hint_done: "There are no new questions left for past tours." 
+practice_past_hint_done: "There are no new questions left for past tours.", 
 
       // UI badges / labels (Courses + Home)
       badge_active: "ACTIVE",
