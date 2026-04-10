@@ -433,7 +433,14 @@ practice_stage_all_closed: "Все вопросы этого этапа уже �
       home_competitive_empty: "Пока нет предметов в соревновательном режиме.",
       home_pinned_empty: "Здесь появятся ваши учебные предметы. Откройте раздел «Предметы» и закрепите нужные для быстрого доступа.",
       home_need_registration: "Сначала пройдите регистрацию.",
-      home_extra_title: "Дополнительно", 
+      home_extra_title: "Дополнительно",
+      home_progress: "Прогресс",
+practice_past_start: "Практика по прошедшим турам",
+practice_past_done: "Все вопросы прошлых туров уже закрыты правильно.",
+practice_past_empty: "Для прошлых туров пока нет доступных вопросов.",
+practice_start_for_tour: "Начать практику {n} тура",
+practice_past_hint_ready: "Откроются вопросы практики только по уже пройденным турам.",
+practice_past_hint_done: "По прошлым турам новых вопросов не осталось." 
 
       // UI badges / labels (Courses + Home)
       badge_active: "АКТИВНО",
@@ -1308,7 +1315,14 @@ practice_stage_all_closed: "Bu bosqichdagi barcha savollar allaqachon yopilgan. 
       home_competitive_empty: "Hozircha musobaqa rejimida fanlar yo‘q.",
       home_pinned_empty: "Bu yerda sizning o‘quv fanlaringiz ko‘rinadi. Kerakli fanlarga tezkor kirish uchun «Fanlar» bo‘limida biriktiring.",
       home_need_registration: "Avval ro‘yxatdan o‘ting.",
-      home_extra_title: "Qo‘shimcha", 
+      home_extra_title: "Qo‘shimcha",
+      home_progress: "Progress",
+practice_past_start: "O‘tgan turlar amaliyoti",
+practice_past_done: "Oldingi turlar savollari to‘liq to‘g‘ri yopilgan.",
+practice_past_empty: "Oldingi turlar uchun hozircha savollar yo‘q.",
+practice_start_for_tour: "{n}-tur amaliyotini boshlash",
+practice_past_hint_ready: "Faqat oldin o‘tilgan turlar uchun amaliyot savollari ochiladi.",
+practice_past_hint_done: "Oldingi turlar bo‘yicha yangi savollar qolmagan."
 
       // UI badges / labels (Courses + Home)
       badge_active: "FAOL",
@@ -2181,7 +2195,14 @@ practice_stage_all_closed: "All questions in this stage are already closed. A ne
       home_competitive_empty: "No subjects in competitive mode yet.",
       home_pinned_empty: "Your study subjects will appear here. Open Courses and pin the ones you want for quick access.",
       home_need_registration: "Please complete registration first.",
-      home_extra_title: "More", 
+      home_extra_title: "More",
+      home_progress: "Progress",
+practice_past_start: "Practice for past tours",
+practice_past_done: "All past tour questions have already been solved correctly.",
+practice_past_empty: "There are no available questions for past tours yet.",
+practice_start_for_tour: "Start practice for Tour {n}",
+practice_past_hint_ready: "Only questions from already completed tours will open.",
+practice_past_hint_done: "There are no new questions left for past tours." 
 
       // UI badges / labels (Courses + Home)
       badge_active: "ACTIVE",
