@@ -614,7 +614,12 @@ html, body {
   color:#2563eb;
 }
 
-.home-competitive-badge.is-completed{
+.home-competitive-badge.is-passed{
+  background:rgba(59,130,246,.12);
+  color:#2563eb;
+}
+
+.home-competitive-badge.is-finished{
   background:rgba(239,68,68,.12);
   color:#dc2626;
 }
@@ -662,22 +667,17 @@ html, body {
 .home-competitive-body{
   display:flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.home-competitive-module{
-  font-size: 10px;
-  letter-spacing: .08em;
-  color: rgba(15,23,42,0.55);
-  font-weight: 800;
+  gap: 8px;
 }
 
 .home-competitive-title{
   font-weight: 900;
   font-size: 16px;
+  line-height: 1.2;
+  color: var(--text);
 }
 
-   .home-competitive-note{
+.home-competitive-note{
   font-size: 13px;
   line-height: 1.35;
   color: rgba(15,23,42,0.72);
@@ -687,29 +687,59 @@ html, body {
   display:none;
 }
 
-.home-competitive-rank{
+.home-competitive-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(15,23,42,0.6);
+  margin-top: 2px;
+}
+
+.home-competitive-module{
+  font-size: 12px;
+  line-height: 1.2;
+  color: rgba(15,23,42,0.68);
   font-weight: 800;
-  color: var(--text);
+  letter-spacing: 0;
 }
 
 .home-competitive-percent{
   font-size: 12px;
+  line-height: 1.2;
   color: rgba(15,23,42,0.58);
   text-align: right;
   font-weight: 700;
-  margin-top: -2px;
+  white-space: nowrap;
+  margin-top: 0;
 }
 
 .home-competitive-percent:empty{
   display:none;
 }
 
-.home-competitive-meta{
+.home-competitive-progress-row{
   display:flex;
   align-items:center;
   justify-content:space-between;
+  gap: 10px;
+  margin-top: -1px;
+}
+
+.home-competitive-progress-label{
   font-size: 12px;
-  color: rgba(15,23,42,0.6);
+  line-height: 1.2;
+  color: rgba(15,23,42,0.68);
+  font-weight: 800;
+}
+
+.home-competitive-rank{
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 900;
+  color: var(--text);
+  white-space: nowrap;
 }
 
 .home-progress{
