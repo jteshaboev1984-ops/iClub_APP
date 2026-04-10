@@ -11430,14 +11430,13 @@ if (noteEl) {
 }
 
 if (rankEl) {
-  const progressLabel = t("home_progress") || "Progress";
-  rankEl.textContent = total > 0 ? `${progressLabel} — ${done}/${total}` : `${progressLabel} — —/—`;
+  rankEl.textContent = total > 0 ? `${done}/${total}` : "—/—";
 }
 
 if (percentEl) {
   percentEl.textContent =
     bestPracticePct != null
-      ? `${t("practice_best_result") || "Best result"}: ${bestPracticePct}%`
+      ? `${t("practice_best_result") || "Лучший результат"}: ${bestPracticePct}%`
       : "";
 }
 
