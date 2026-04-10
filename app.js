@@ -4059,28 +4059,299 @@ function formatAnswerForDisplay(q, rawAnswer) {
   return raw;
 }
    
-// --- DB-first practice set builder ---
+// --- Practice stage helpers + DB-first practice set builder ---
+async function getPracticeStageContext(subjectKey) {
+  if (!window.sb) return null;
+
+  const subjectId = await getSubjectIdByKey(subjectKey);
+  if (!subjectId) return null;
+
+  const poolsRes = await window.sb
+    .from("practice_pools")
+    .select("id,subject_id,tour_no,title,is_active")
+    .eq("subject_id", subjectId)
+    .eq("is_active", true)
+    .order("tour_no", { ascending: true });
+
+  const pools = Array.isArray(poolsRes?.data) ? poolsRes.data : [];
+  const maxPoolTourNo = Math.max(1, ...pools.map(p => Number(p?.tour_no || 0)).filter(Boolean), 1);
+
+  const toursRes = await window.sb
+    .from("tours")
+    .select("id,tour_no,start_date,end_date,is_active")
+    .eq("subject_id", subjectId)
+    .order("tour_no", { ascending: true });
+
+  const tours = Array.isArray(toursRes?.data) ? toursRes.data : [];
+  const totalTours = tours.length;
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const d0 = new Date();
+  const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
+
+  const isInWindow = (row) => {
+    const sd = row?.start_date ? String(row.start_date) : null;
+    const ed = row?.end_date ? String(row.end_date) : null;
+    const afterStart = !sd || sd <= todayISO;
+    const beforeEnd = !ed || ed >= todayISO;
+    return afterStart && beforeEnd;
+  };
+
+  const activeTour = tours
+    .filter(t => !!t?.is_active && isInWindow(t))
+    .sort((a, b) => Number(a?.tour_no || 0) - Number(b?.tour_no || 0))[0] || null;
+
+  const globallyClosedCount = tours.filter(t => {
+    const ed = t?.end_date ? String(t.end_date) : null;
+    return !!ed && ed < todayISO;
+  }).length;
+
+  let practiceTourNo = 1;
+
+  if (activeTour?.tour_no) {
+    practiceTourNo = Number(activeTour.tour_no);
+  } else if (totalTours > 0 && globallyClosedCount >= totalTours) {
+    practiceTourNo = Math.min(maxPoolTourNo, totalTours);
+  } else {
+    practiceTourNo = Math.min(maxPoolTourNo, Math.max(1, globallyClosedCount + 1));
+  }
+
+  const poolRow =
+    pools.find(p => Number(p?.tour_no || 0) === Number(practiceTourNo)) ||
+    pools[0] ||
+    null;
+
+  return {
+    subjectId,
+    practiceTourNo: Number(poolRow?.tour_no || practiceTourNo || 1),
+    poolId: Number(poolRow?.id || 0) || null,
+    poolRow,
+    pools,
+    activeTourNo: activeTour?.tour_no ? Number(activeTour.tour_no) : null,
+    globallyClosedCount,
+    totalTours
+  };
+}
+
+async function getPracticePoolQuestionIds(poolId) {
+  if (!window.sb || !poolId) return [];
+
+  const res = await window.sb
+    .from("practice_pool_questions")
+    .select("question_id,order_no")
+    .eq("pool_id", Number(poolId))
+    .eq("is_active", true)
+    .order("order_no", { ascending: true });
+
+  return (Array.isArray(res?.data) ? res.data : [])
+    .map(r => Number(r?.question_id))
+    .filter(Boolean);
+}
+
+async function getClosedPracticeQuestionIds(subjectId, uid, questionIds) {
+  if (!window.sb || !subjectId || !uid || !Array.isArray(questionIds) || !questionIds.length) {
+    return new Set();
+  }
+
+  const attemptsRes = await window.sb
+    .from("practice_attempts")
+    .select("id")
+    .eq("user_id", uid)
+    .eq("subject_id", subjectId);
+
+  const attemptIds = (Array.isArray(attemptsRes?.data) ? attemptsRes.data : [])
+    .map(x => Number(x?.id))
+    .filter(Boolean);
+
+  if (!attemptIds.length) return new Set();
+
+  const answersRes = await window.sb
+    .from("practice_answers")
+    .select("question_id")
+    .in("attempt_id", attemptIds)
+    .in("question_id", questionIds)
+    .eq("is_correct", true);
+
+  return new Set(
+    (Array.isArray(answersRes?.data) ? answersRes.data : [])
+      .map(x => Number(x?.question_id))
+      .filter(Boolean)
+  );
+}
+
+function practiceStorageKey(subjectKey, practiceTourNo = 1) {
+  return `practice_history_v2:${subjectKey}:tour_${Number(practiceTourNo || 1)}`;
+}
+
+function loadPracticeHistory(subjectKey, practiceTourNo = 1) {
+  try {
+    const raw = localStorage.getItem(practiceStorageKey(subjectKey, practiceTourNo));
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (!parsed) return { best: null, last: [] };
+    return {
+      best: parsed.best || null,
+      last: Array.isArray(parsed.last) ? parsed.last : []
+    };
+  } catch {
+    return { best: null, last: [] };
+  }
+}
+
+function savePracticeHistory(subjectKey, practiceTourNo = 1, data) {
+  try {
+    localStorage.setItem(
+      practiceStorageKey(subjectKey, practiceTourNo),
+      JSON.stringify(data)
+    );
+  } catch {}
+}
+
+function updatePracticeHistory(subjectKey, practiceTourNo, attempt) {
+  const h = loadPracticeHistory(subjectKey, practiceTourNo);
+  const last = [attempt, ...(h.last || [])].slice(0, PRACTICE_CONFIG.keepLastAttempts);
+
+  let best = h.best;
+  if (
+    !best ||
+    Number(attempt.percent) > Number(best.percent) ||
+    (
+      Number(attempt.percent) === Number(best.percent) &&
+      Number(attempt.durationSec) < Number(best.durationSec)
+    )
+  ) {
+    best = attempt;
+  }
+
+  savePracticeHistory(subjectKey, practiceTourNo, { best, last });
+  return { best, last };
+}
+
+function loadAllPracticeHistoryBySubject(subjectKey) {
+  const prefix = `practice_history_v2:${subjectKey}:tour_`;
+  const allAttempts = [];
+
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith(prefix)) continue;
+
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : null;
+      const last = Array.isArray(parsed?.last) ? parsed.last : [];
+      allAttempts.push(...last);
+    }
+  } catch {}
+
+  allAttempts.sort((a, b) => (Number(b?.ts) || 0) - (Number(a?.ts) || 0));
+
+  let best = null;
+  allAttempts.forEach(a => {
+    if (
+      !best ||
+      Number(a?.percent) > Number(best?.percent) ||
+      (
+        Number(a?.percent) === Number(best?.percent) &&
+        Number(a?.durationSec) < Number(best?.durationSec)
+      )
+    ) {
+      best = a;
+    }
+  });
+
+  return { best, last: allAttempts };
+}
+
+async function computePracticeStageStats(subjectKey, forcedTourNo = null) {
+  const uid = await getAuthUid().catch(() => null);
+  if (!uid) {
+    return {
+      practiceTourNo: Number(forcedTourNo || 1),
+      poolId: null,
+      totalCount: 0,
+      masteredCount: 0,
+      openCount: 0,
+      best: null,
+      last: []
+    };
+  }
+
+  const ctx = await getPracticeStageContext(subjectKey);
+  if (!ctx?.subjectId) {
+    return {
+      practiceTourNo: Number(forcedTourNo || 1),
+      poolId: null,
+      totalCount: 0,
+      masteredCount: 0,
+      openCount: 0,
+      best: null,
+      last: []
+    };
+  }
+
+  let poolId = ctx.poolId;
+  let practiceTourNo = ctx.practiceTourNo;
+
+  if (forcedTourNo != null) {
+    const row = (Array.isArray(ctx.pools) ? ctx.pools : []).find(
+      p => Number(p?.tour_no || 0) === Number(forcedTourNo)
+    );
+    if (row) {
+      poolId = Number(row.id || 0) || null;
+      practiceTourNo = Number(row.tour_no || forcedTourNo || 1);
+    }
+  }
+
+  const allIds = await getPracticePoolQuestionIds(poolId);
+  const closedIds = await getClosedPracticeQuestionIds(ctx.subjectId, uid, allIds);
+
+  const totalCount = allIds.length;
+  const masteredCount = Array.from(closedIds).length;
+  const openCount = Math.max(0, totalCount - masteredCount);
+
+  const h = loadPracticeHistory(subjectKey, practiceTourNo);
+
+  return {
+    practiceTourNo,
+    poolId,
+    totalCount,
+    masteredCount,
+    openCount,
+    best: h?.best || null,
+    last: Array.isArray(h?.last) ? h.last : []
+  };
+}
+
 async function buildPracticeSet(subjectKey) {
   if (!window.sb) return [];
 
   const uid = await getAuthUid();
   if (!uid) return [];
 
-  const subjectId = await getSubjectIdByKey(subjectKey);
-  if (!subjectId) {
-    await logDbErrorToEvents(uid, "subject_lookup", { message: "subject_id not found" }, { subject_key: subjectKey });
-    return [];
-  }
+  const ctx = await getPracticeStageContext(subjectKey);
+  if (!ctx?.subjectId || !ctx?.poolId) return [];
+
+  const allQuestionIds = await getPracticePoolQuestionIds(ctx.poolId);
+  if (!allQuestionIds.length) return [];
+
+  const closedIds = await getClosedPracticeQuestionIds(ctx.subjectId, uid, allQuestionIds);
+  const questionIds = allQuestionIds.filter(id => !closedIds.has(Number(id)));
+
+  if (!questionIds.length) return [];
 
   const { data, error } = await window.sb
     .from("questions")
-    .select("id, topic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
-    .eq("subject_id", subjectId)
+    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
+    .eq("subject_id", ctx.subjectId)
     .eq("is_active", true)
-    .limit(200);
+    .in("id", questionIds)
+    .limit(300);
 
   if (error) {
-    await logDbErrorToEvents(uid, "practice_questions_select", error, { subject_id: subjectId, subject_key: subjectKey });
+    await logDbErrorToEvents(uid, "practice_questions_select", error, {
+      subject_id: ctx.subjectId,
+      subject_key: subjectKey,
+      practice_tour_no: ctx.practiceTourNo
+    });
     return [];
   }
 
@@ -4095,51 +4366,63 @@ async function buildPracticeSet(subjectKey) {
     return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
   };
 
-  const pool = poolRaw.map(r => {
-    const type = normalizeType(r.qtype);
-    const diff = normalizeDifficulty(r.difficulty || "easy");
+  const orderMap = new Map(allQuestionIds.map((id, idx) => [Number(id), idx]));
 
-    const optionsRaw = pickL(r, "options_text");
-    const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
+  const pool = poolRaw
+    .map(r => {
+      const type = normalizeType(r.qtype);
+      const diff = normalizeDifficulty(r.difficulty || "easy");
 
-    let correctIndex = 0;
-    if (type === "mcq") {
-      const ca = String(r.correct_answer ?? "").trim();
-      const asInt = Number(ca);
+      const optionsRaw = pickL(r, "options_text");
+      const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
 
-      if (!Number.isNaN(asInt) && Number.isFinite(asInt)) {
-        correctIndex = asInt;
-      } else if (/^[A-D]$/i.test(ca)) {
-        correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
-      } else if (opts.length) {
-        const idx = opts.findIndex(x => String(x).trim().toLowerCase() === ca.toLowerCase());
-        if (idx >= 0) correctIndex = idx;
+      let correctIndex = 0;
+      if (type === "mcq") {
+        const ca = String(r.correct_answer ?? "").trim();
+        const asInt = Number(ca);
+
+        if (!Number.isNaN(asInt) && Number.isFinite(asInt)) {
+          correctIndex = asInt;
+        } else if (/^[A-D]$/i.test(ca)) {
+          correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
+        } else if (opts.length) {
+          const idx = opts.findIndex(x => String(x).trim().toLowerCase() === ca.toLowerCase());
+          if (idx >= 0) correctIndex = idx;
+        }
+
+        if (!Number.isFinite(correctIndex) || correctIndex < 0) correctIndex = 0;
       }
 
-      if (!Number.isFinite(correctIndex) || correctIndex < 0) correctIndex = 0;
-    }
+      const correctAnswer = type === "input" ? String(r.correct_answer ?? "").trim() : "";
 
-    const correctAnswer = type === "input" ? String(r.correct_answer ?? "").trim() : "";
-
-    return {
-      id: Number(r.id),
-      topic: r.topic || "General",
-      difficulty: diff,
-      timeLimitSec:
-        (r.time_limit_sec != null && Number(r.time_limit_sec) >= 10)
-          ? Number(r.time_limit_sec)
-          : (PRACTICE_CONFIG?.timeByDifficulty?.[diff] || 60),
-      type,
-      question: pickL(r, "question_text") || "",
-      options: opts || [],
-      correctIndex,
-      correctAnswer,
-      explanation: pickL(r, "explanation") || "",
-      imageUrl: r.image_url || null,
-      inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
-      inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
-    };
-  }).filter(q => Number.isFinite(q.id));
+      return {
+        id: Number(r.id),
+        topic: r.topic || "General",
+        subtopic: r.subtopic || null,
+        difficulty: diff,
+        timeLimitSec:
+          (r.time_limit_sec != null && Number(r.time_limit_sec) >= 10)
+            ? Number(r.time_limit_sec)
+            : (PRACTICE_CONFIG?.timeByDifficulty?.[diff] || 60),
+        type,
+        question: pickL(r, "question_text") || "",
+        options: opts || [],
+        correctIndex,
+        correctAnswer,
+        explanation: pickL(r, "explanation") || "",
+        imageUrl: r.image_url || null,
+        inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
+        inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : "",
+        practiceTourNo: Number(ctx.practiceTourNo || 1),
+        practicePoolId: Number(ctx.poolId || 0) || null
+      };
+    })
+    .filter(q => Number.isFinite(q.id))
+    .sort((a, b) => {
+      const ao = orderMap.get(Number(a?.id)) ?? 999999;
+      const bo = orderMap.get(Number(b?.id)) ?? 999999;
+      return ao - bo;
+    });
 
   if (!pool.length) return [];
 
@@ -4165,44 +4448,7 @@ async function buildPracticeSet(subjectKey) {
   return set.slice(0, PRACTICE_CONFIG.total);
 }
 
-  function practiceStorageKey(subjectKey) {
-    return `practice_history_v1:${subjectKey}`;
-  }
-
-  function loadPracticeHistory(subjectKey) {
-    try {
-      const raw = localStorage.getItem(practiceStorageKey(subjectKey));
-      const parsed = raw ? JSON.parse(raw) : null;
-      if (!parsed) return { best: null, last: [] };
-      return {
-        best: parsed.best || null,
-        last: Array.isArray(parsed.last) ? parsed.last : []
-      };
-    } catch {
-      return { best: null, last: [] };
-    }
-  }
-
-  function savePracticeHistory(subjectKey, data) {
-    try {
-      localStorage.setItem(practiceStorageKey(subjectKey), JSON.stringify(data));
-    } catch {}
-  }
-
-  function updatePracticeHistory(subjectKey, attempt) {
-    const h = loadPracticeHistory(subjectKey);
-    const last = [attempt, ...(h.last || [])].slice(0, PRACTICE_CONFIG.keepLastAttempts);
-
-    let best = h.best;
-    if (!best || (attempt.percent > best.percent) || (attempt.percent === best.percent && attempt.durationSec < best.durationSec)) {
-      best = attempt;
-    }
-
-    savePracticeHistory(subjectKey, { best, last });
-    return { best, last };
-  }
-
-  function formatDateTime(ts) {
+function formatDateTime(ts) {
     try {
       const d = new Date(ts);
       return d.toLocaleString();
@@ -9780,20 +10026,29 @@ input?.addEventListener("change", async () => {
   compEl.textContent = String(comp.length);
   studyEl.textContent = String(study.length);
 
-  // --- Best / Trend / Stability (реальные данные из practice_history_v1:*) ---
-  const keys = subjects.map(s => s.key).filter(Boolean);
+  // --- Best / Trend / Stability (только новая tour-bound история practice_history_v2:*) ---
+const keys = subjects.map(s => s.key).filter(Boolean);
 
-  // Best (max percent)
-  let best = null;
-  const allAttempts = [];
+// Best (max percent)
+let best = null;
+const allAttempts = [];
 
-  keys.forEach(k => {
-    const h = loadPracticeHistory(k);
-    if (h?.best) {
-      if (!best || (Number(h.best.percent) > Number(best.percent))) best = h.best;
+keys.forEach(k => {
+  const h = loadAllPracticeHistoryBySubject(k);
+  if (h?.best) {
+    if (
+      !best ||
+      Number(h.best.percent) > Number(best.percent) ||
+      (
+        Number(h.best.percent) === Number(best.percent) &&
+        Number(h.best.durationSec) < Number(best.durationSec)
+      )
+    ) {
+      best = h.best;
     }
-    if (Array.isArray(h?.last)) allAttempts.push(...h.last.map(a => ({ ...a, _subjectKey: k })));
-  });
+  }
+  if (Array.isArray(h?.last)) allAttempts.push(...h.last.map(a => ({ ...a, _subjectKey: k })));
+});
 
   bestEl.textContent = best ? `${Math.round(Number(best.percent) || 0)}%` : "—";
 
@@ -10801,59 +11056,29 @@ async function computeHomeCompetitiveStats(subjectKey) {
     return cached.data;
   }
 
+  const fallback = {
+    moduleNo: 1,
+    progressPct: 0,
+    rankNo: null,
+    completedCount: 0,
+    totalTours: 0,
+    practiceTourNo: 1,
+    practiceDone: 0,
+    practiceTotal: 0,
+    practicePct: 0,
+    bestPracticePct: null,
+    currentTourNo: 1,
+    tourState: "active",
+  };
+
   try {
-    if (!window.sb) {
-      return {
-        moduleNo: 1,
-        progressPct: 0,
-        rankNo: null,
-        completedCount: 0,
-        totalTours: 0,
-        practiceTourNo: 1,
-        practiceDone: 0,
-        practiceTotal: 0,
-        practicePct: 0,
-        bestPracticePct: null,
-        currentTourNo: 1,
-        tourState: "active",
-      };
-    }
+    if (!window.sb) return fallback;
 
     const subjectId = await getSubjectIdByKey(subjectKey);
-    if (!subjectId) {
-      return {
-        moduleNo: 1,
-        progressPct: 0,
-        rankNo: null,
-        completedCount: 0,
-        totalTours: 0,
-        practiceTourNo: 1,
-        practiceDone: 0,
-        practiceTotal: 0,
-        practicePct: 0,
-        bestPracticePct: null,
-        currentTourNo: 1,
-        tourState: "active",
-      };
-    }
+    if (!subjectId) return fallback;
 
     const uid = await getAuthUid();
-    if (!uid) {
-      return {
-        moduleNo: 1,
-        progressPct: 0,
-        rankNo: null,
-        completedCount: 0,
-        totalTours: 0,
-        practiceTourNo: 1,
-        practiceDone: 0,
-        practiceTotal: 0,
-        practicePct: 0,
-        bestPracticePct: null,
-        currentTourNo: 1,
-        tourState: "active",
-      };
-    }
+    if (!uid) return fallback;
 
     const toursRes = await window.sb
       .from("tours")
@@ -10862,28 +11087,13 @@ async function computeHomeCompetitiveStats(subjectKey) {
       .order("tour_no", { ascending: true });
 
     const tours = Array.isArray(toursRes?.data) ? toursRes.data : [];
-    if (!tours.length) {
-      return {
-        moduleNo: 1,
-        progressPct: 0,
-        rankNo: null,
-        completedCount: 0,
-        totalTours: 0,
-        practiceTourNo: 1,
-        practiceDone: 0,
-        practiceTotal: 0,
-        practicePct: 0,
-        bestPracticePct: null,
-        currentTourNo: 1,
-        tourState: "active",
-      };
-    }
+    if (!tours.length) return fallback;
 
     const attemptRes = await window.sb
       .from("tour_attempts")
       .select("id,tour_id,status")
       .eq("user_id", uid)
-      .in("status", ["submitted"])
+      .in("status", ["submitted", "time_expired", "anti_cheat"])
       .order("created_at", { ascending: false });
 
     const attempts = Array.isArray(attemptRes?.data) ? attemptRes.data : [];
@@ -10915,37 +11125,27 @@ async function computeHomeCompetitiveStats(subjectKey) {
       tourState = completedTourIds.has(Number(activeTour.id)) ? "passed" : "active";
     }
 
-    const practiceTourNo = Math.min(
-      totalTours || 7,
-      Math.max(1, completedCount + ((totalTours > 0 && completedCount >= totalTours) ? 0 : 1))
+    const practiceStageCtx = await getPracticeStageContext(subjectKey);
+    const practiceTourNo = Number(
+      practiceStageCtx?.practiceTourNo ||
+      activeTour?.tour_no ||
+      1
     );
 
-    const currentTourNo =
-      Number(activeTour?.tour_no || 0) ||
-      Math.min(totalTours || 7, Math.max(1, completedCount || 1));
+    const stageStats = await computePracticeStageStats(subjectKey, practiceTourNo);
 
-    const practiceStats = await computeHomeStudyPracticeStats(subjectKey);
-    const practiceDone = Number(practiceStats?.masteredCount || 0);
-    const practiceTotal = Number(practiceStats?.totalCount || 0);
+    const practiceDone = Number(stageStats?.masteredCount || 0);
+    const practiceTotal = Number(stageStats?.totalCount || 0);
     const practicePct = practiceTotal > 0
       ? Math.max(0, Math.min(100, Math.round((practiceDone / practiceTotal) * 100)))
       : 0;
 
-    let bestPracticePct = null;
-    try {
-      const bestRes = await window.sb
-        .from("practice_attempts")
-        .select("percent")
-        .eq("user_id", uid)
-        .eq("subject_id", subjectId)
-        .order("percent", { ascending: false })
-        .limit(1);
-
-      const bestRow = Array.isArray(bestRes?.data) ? bestRes.data[0] : null;
-      if (bestRow?.percent != null && Number.isFinite(Number(bestRow.percent))) {
-        bestPracticePct = Math.round(Number(bestRow.percent));
-      }
-    } catch {}
+    const bestPracticePct = (
+      stageStats?.best?.percent != null &&
+      Number.isFinite(Number(stageStats.best.percent))
+    )
+      ? Math.round(Number(stageStats.best.percent))
+      : null;
 
     const out = {
       moduleNo: practiceTourNo,
@@ -10958,27 +11158,14 @@ async function computeHomeCompetitiveStats(subjectKey) {
       practiceTotal,
       practicePct,
       bestPracticePct,
-      currentTourNo,
+      currentTourNo: Number(activeTour?.tour_no || practiceTourNo || 1),
       tourState,
     };
 
     _homeStatsCache.set(cacheKey, { ts: Date.now(), data: out });
     return out;
   } catch {
-    return {
-      moduleNo: 1,
-      progressPct: 0,
-      rankNo: null,
-      completedCount: 0,
-      totalTours: 0,
-      practiceTourNo: 1,
-      practiceDone: 0,
-      practiceTotal: 0,
-      practicePct: 0,
-      bestPracticePct: null,
-      currentTourNo: 1,
-      tourState: "active",
-    };
+    return fallback;
   }
 }
 
@@ -11064,75 +11251,24 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
   }
 
   try {
-    if (!window.sb) return { masteredCount: 0, totalCount: 0 };
+    const stats = await computePracticeStageStats(subjectKey);
 
-    const subjectId = await getSubjectIdByKey(subjectKey);
-    if (!subjectId) return { masteredCount: 0, totalCount: 0 };
+    const out = {
+      practicedTourNo: Number(stats?.practiceTourNo || 1),
+      masteredCount: Number(stats?.masteredCount || 0),
+      totalCount: Number(stats?.totalCount || 0),
+      openCount: Number(stats?.openCount || 0)
+    };
 
-    const uid = await getAuthUid();
-    if (!uid) return { masteredCount: 0, totalCount: 0 };
-
-    // 1) all practice questions of this subject
-    const poolsRes = await window.sb
-      .from("practice_pools")
-      .select("id")
-      .eq("subject_id", subjectId)
-      .eq("is_active", true);
-
-    const poolIds = (Array.isArray(poolsRes?.data) ? poolsRes.data : [])
-      .map(x => Number(x?.id))
-      .filter(Boolean);
-
-    let totalCount = 0;
-    if (poolIds.length) {
-      const ppqRes = await window.sb
-        .from("practice_pool_questions")
-        .select("question_id")
-        .in("pool_id", poolIds)
-        .eq("is_active", true);
-
-      const totalQuestionIds = new Set(
-        (Array.isArray(ppqRes?.data) ? ppqRes.data : [])
-          .map(x => Number(x?.question_id))
-          .filter(Boolean)
-      );
-
-      totalCount = totalQuestionIds.size;
-    }
-
-    // 2) unique correctly answered practice questions by this user in this subject
-    const attemptsRes = await window.sb
-      .from("practice_attempts")
-      .select("id")
-      .eq("user_id", uid)
-      .eq("subject_id", subjectId);
-
-    const attemptIds = (Array.isArray(attemptsRes?.data) ? attemptsRes.data : [])
-      .map(x => Number(x?.id))
-      .filter(Boolean);
-
-    let masteredCount = 0;
-    if (attemptIds.length) {
-      const answersRes = await window.sb
-        .from("practice_answers")
-        .select("question_id")
-        .in("attempt_id", attemptIds)
-        .eq("is_correct", true);
-
-      const masteredQuestionIds = new Set(
-        (Array.isArray(answersRes?.data) ? answersRes.data : [])
-          .map(x => Number(x?.question_id))
-          .filter(Boolean)
-      );
-
-      masteredCount = masteredQuestionIds.size;
-    }
-
-    const out = { masteredCount, totalCount };
     _homeStatsCache.set(cacheKey, { ts: Date.now(), data: out });
     return out;
   } catch {
-    return { masteredCount: 0, totalCount: 0 };
+    return {
+      practicedTourNo: 1,
+      masteredCount: 0,
+      totalCount: 0,
+      openCount: 0
+    };
   }
 }
 
@@ -12199,14 +12335,16 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
   }
 
   function buildPracticeSavePayload(attempt, quiz) {
-    return {
-      attempt,
-      quiz: {
-        subjectKey: quiz?.subjectKey || null,
-        answers: Array.isArray(quiz?.answers) ? quiz.answers.slice() : []
-      }
-    };
-  }
+  return {
+    attempt,
+    quiz: {
+      subjectKey: quiz?.subjectKey || null,
+      practiceTourNo: Number(quiz?.practiceTourNo || 1),
+      practicePoolId: Number(quiz?.practicePoolId || 0) || null,
+      answers: Array.isArray(quiz?.answers) ? quiz.answers.slice() : []
+    }
+  };
+}
 
   async function restorePracticeQuizSecrets(quiz) {
   try {
@@ -12720,49 +12858,89 @@ return { added: add.length, recs, addedRecs: add };
    
    // ---- Practice history render (inject into practice-start) ----
   function renderPracticeStart() {
-    const subjectKey = state.courses.subjectKey;
-    const subj = subjectByKey(subjectKey);
+  const subjectKey = state.courses.subjectKey;
+  const subj = subjectByKey(subjectKey);
+  const viewSubjectKey = subjectKey;
 
-    // --- Subject title in hero card ---
-    const titleEl = $("#practice-subject-title");
-    if (titleEl) titleEl.textContent = subjectTitle(subjectKey, subj?.title || subjectKey || "—");
+  const titleEl = $("#practice-subject-title");
+  if (titleEl) titleEl.textContent = subjectTitle(subjectKey, subj?.title || subjectKey || "—");
 
-    const h = loadPracticeHistory(subjectKey);
+  const stageMetaEl = $("#practice-stage-meta");
+  if (stageMetaEl) stageMetaEl.textContent = "—";
+
+  const bestScoreEl = $("#practice-best-score");
+  const bestPctEl = $("#practice-best-percent");
+  const bestTimeEl = $("#practice-best-time");
+
+  if (bestScoreEl) bestScoreEl.textContent = "—";
+  if (bestPctEl) bestPctEl.textContent = "";
+  if (bestTimeEl) bestTimeEl.textContent = "—";
+
+  const tbody = $("#practice-last-tbody");
+  const emptyEl = $("#practice-last-empty");
+  if (tbody) tbody.innerHTML = "";
+  if (emptyEl) emptyEl.style.display = "block";
+
+  renderTrendBars({
+    wrapEl: document.getElementById("practice-micro-bars"),
+    deltaEl: document.getElementById("practice-micro-delta"),
+    attemptsNewestFirst: [],
+    barClass: "practice-micro-bar",
+    lastClass: "is-last"
+  });
+
+  const formatSecShort = (sec) => {
+    const s = Number(sec);
+    if (!Number.isFinite(s) || s < 0) return "—";
+    if (s < 60) return `${s}${t("practice_time_sec_suffix")}`;
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return `${m}${t("practice_time_min_suffix")} ${r}${t("practice_time_sec_suffix")}`;
+  };
+
+  (async () => {
+    const stageStats = await computePracticeStageStats(subjectKey);
+    if (state?.courses?.subjectKey !== viewSubjectKey) return;
+
+    const practiceTourNo = Number(stageStats?.practiceTourNo || 1);
+    const done = Number(stageStats?.masteredCount || 0);
+    const total = Number(stageStats?.totalCount || 0);
+
+    if (stageMetaEl) {
+      const titlePart =
+        t("practice_stage_for_tour", { n: practiceTourNo }) ||
+        `Practice for Tour ${practiceTourNo}`;
+
+      const progressPart = total > 0
+        ? (t("practice_stage_progress", { done, total }) || `${done}/${total}`)
+        : "";
+
+      stageMetaEl.textContent = progressPart ? `${titlePart} • ${progressPart}` : titlePart;
+    }
+
+    const h = loadPracticeHistory(subjectKey, practiceTourNo);
     const best = h?.best || null;
     const last = Array.isArray(h?.last) ? h.last : [];
-
-    const bestScoreEl = $("#practice-best-score");
-    const bestPctEl = $("#practice-best-percent");
-    const bestTimeEl = $("#practice-best-time");
-
-    const formatSecShort = (sec) => {
-      const s = Number(sec);
-      if (!Number.isFinite(s) || s < 0) return "—";
-      if (s < 60) return `${s}${t("practice_time_sec_suffix")}`;
-      const m = Math.floor(s / 60);
-      const r = s % 60;
-      return `${m}${t("practice_time_min_suffix")} ${r}${t("practice_time_sec_suffix")}`;
-    };
 
     if (best) {
       if (bestScoreEl) bestScoreEl.textContent = `${best.score}/${best.total}`;
       if (bestPctEl) bestPctEl.textContent = `(${best.percent}%)`;
       if (bestTimeEl) bestTimeEl.textContent = formatSecShort(best.durationSec);
-    } else {
-      if (bestScoreEl) bestScoreEl.textContent = "—";
-      if (bestPctEl) bestPctEl.textContent = "";
-      if (bestTimeEl) bestTimeEl.textContent = "—";
     }
 
-    // --- Last attempts table (up to 5) ---
-    const tbody = $("#practice-last-tbody");
-    const emptyEl = $("#practice-last-empty");
     if (tbody) tbody.innerHTML = "";
 
     const rows = last.slice(0, 5);
-    
+
     if (!rows.length) {
       if (emptyEl) emptyEl.style.display = "block";
+      renderTrendBars({
+        wrapEl: document.getElementById("practice-micro-bars"),
+        deltaEl: document.getElementById("practice-micro-delta"),
+        attemptsNewestFirst: [],
+        barClass: "practice-micro-bar",
+        lastClass: "is-last"
+      });
       return;
     }
 
@@ -12801,15 +12979,16 @@ return { added: add.length, recs, addedRecs: add };
 
       if (tbody) tbody.appendChild(tr);
     });
-     // Trend (>=2 attempts): bars + delta like screenshot
-      renderTrendBars({
-        wrapEl: document.getElementById("practice-micro-bars"),
-        deltaEl: document.getElementById("practice-micro-delta"),
-        attemptsNewestFirst: last,         // last is newest-first
-        barClass: "practice-micro-bar",
-        lastClass: "is-last"
-      });
-  }
+
+    renderTrendBars({
+      wrapEl: document.getElementById("practice-micro-bars"),
+      deltaEl: document.getElementById("practice-micro-delta"),
+      attemptsNewestFirst: last,
+      barClass: "practice-micro-bar",
+      lastClass: "is-last"
+    });
+  })().catch(() => {});
+}
  
          async function renderToursStart() {
   showToursLoading();
@@ -13229,35 +13408,53 @@ async function renderToursHistorySummary(subjectId) {
   function openPracticeStart() {
   const subjectKey = state.courses.subjectKey;
 
-  // Always open Practice Start screen first (premium UX)
   pushCourses("practice-start");
   renderPracticeStart();
 
-  // If paused draft exists — show Resume button
-  const draft = loadPracticeDraft();
   const resumeBtn = $("#practice-resume-btn");
   const restartBtn = $("#practice-restart-btn");
 
+  if (resumeBtn) resumeBtn.style.display = "none";
+  if (restartBtn) restartBtn.textContent = t("practice_start");
+
+  (async () => {
+    const currentStage = await getPracticeStageContext(subjectKey);
+    if (state?.courses?.subjectKey !== subjectKey) return;
+    if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() !== "practice-start") return;
+
+    const currentTourNo = Number(currentStage?.practiceTourNo || 1);
+
+    const draft = loadPracticeDraft();
+    const draftTourNo = Number(
+      draft?.practiceTourNo ||
+      draft?.quiz?.practiceTourNo ||
+      1
+    );
+
     const canResume = !!(
-    draft?.status === "paused" &&
-    draft?.subjectKey === subjectKey &&
-    draft?.quiz &&
-    Array.isArray(draft.quiz.questions) &&
-    draft.quiz.questions.length > 0
-  );
+      draft?.status === "paused" &&
+      draft?.subjectKey === subjectKey &&
+      draft?.quiz &&
+      Array.isArray(draft.quiz.questions) &&
+      draft.quiz.questions.length > 0 &&
+      draftTourNo === currentTourNo
+    );
 
-   if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
-  if (restartBtn) restartBtn.textContent = canResume ? t("practice_restart") : t("practice_start");
+    if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
+    if (restartBtn) restartBtn.textContent = canResume ? t("practice_restart") : t("practice_start");
 
-  if (canResume) {
-    showToast(t("practice_resume_prompt"));
-  }
+    if (canResume) {
+      showToast(t("practice_resume_prompt"));
+    }
+  })().catch(() => {});
 }
 
 async function startPracticeNew() {
   const subjectKey = state.courses.subjectKey;
 
   let questions = [];
+  let stageCtx = null;
+
   showAsyncOverlay(tr3(
     "Загружаем вопросы практики…",
     "Amaliyot savollari yuklanmoqda…",
@@ -13265,14 +13462,31 @@ async function startPracticeNew() {
   ));
 
   try {
-    // DB-first questions (may fallback to local automatically)
+    stageCtx = await getPracticeStageContext(subjectKey);
     questions = await buildPracticeSet(subjectKey);
   } finally {
     hideAsyncOverlay();
   }
 
-    if (!Array.isArray(questions) || questions.length === 0) {
-    showToast(t("practice_no_questions") || "Нет вопросов для практики по этому предмету.");
+  if (!stageCtx?.poolId) {
+    showToast(
+      t("practice_stage_not_ready") ||
+      "Практика для этого этапа пока не опубликована."
+    );
+    return;
+  }
+
+  if (!Array.isArray(questions) || questions.length === 0) {
+    const stageStats = await computePracticeStageStats(subjectKey, stageCtx.practiceTourNo);
+
+    if (Number(stageStats?.totalCount || 0) > 0 && Number(stageStats?.openCount || 0) <= 0) {
+      showToast(
+        t("practice_stage_all_closed") ||
+        "Все вопросы этого этапа уже закрыты. Новый этап откроется после смены официального тура."
+      );
+    } else {
+      showToast(t("practice_no_questions") || "Нет вопросов для практики по этому предмету.");
+    }
     return;
   }
 
@@ -13280,6 +13494,8 @@ async function startPracticeNew() {
     trackEvent("practice_attempt_started", {
       subject_id: normSubjectId(subjectKey),
       subject_key: String(subjectKey || ""),
+      practice_tour_no: Number(stageCtx?.practiceTourNo || 1),
+      practice_pool_id: Number(stageCtx?.poolId || 0) || null,
       questions_total: Array.isArray(questions) ? questions.length : 0,
       source: "subject_hub"
     });
@@ -13289,6 +13505,8 @@ async function startPracticeNew() {
   state.quiz = {
     mode: "practice",
     subjectKey,
+    practiceTourNo: Number(stageCtx?.practiceTourNo || questions[0]?.practiceTourNo || 1),
+    practicePoolId: Number(stageCtx?.poolId || questions[0]?.practicePoolId || 0) || null,
     startedAt: Date.now(),
     paused: false,
     pauseStartedAt: null,
@@ -13432,11 +13650,13 @@ try {
       const quizForDraft = stripPracticeQuizSecrets(quiz);
 
       savePracticeDraft({
-        status: "paused",
-        subjectKey: quiz.subjectKey,
-        pausedAt: Date.now(),
-        quiz: quizForDraft
-      });
+  status: "paused",
+  subjectKey: quiz.subjectKey,
+  practiceTourNo: Number(quiz.practiceTourNo || 1),
+  practicePoolId: Number(quiz.practicePoolId || 0) || null,
+  pausedAt: Date.now(),
+  quiz: quizForDraft
+});
     } catch (e) {
       // if draft NOT saved — do NOT destroy current attempt
       showToast(t("not_available"));
@@ -13600,14 +13820,17 @@ try {
  });
 
      const attempt = {
-      ts: finishedAt,
-      subjectKey: quiz.subjectKey,
-      score,
-      total,
-      percent,
-      durationSec,
-      details
-    };
+  ts: finishedAt,
+  attemptKey: String(finishedAt),
+  subjectKey: quiz.subjectKey,
+  practiceTourNo: Number(quiz.practiceTourNo || 1),
+  practicePoolId: Number(quiz.practicePoolId || 0) || null,
+  score,
+  total,
+  percent,
+  durationSec,
+  details
+};
 
     // ✅ Save "My recommendations" + sync to DB right here (always, no UI dependency)
     try {
@@ -13785,7 +14008,11 @@ saveState();
 let hx = null;
 if (!quiz?.drillType) {
   try {
-    hx = updatePracticeHistory(quiz.subjectKey, attempt);
+    hx = updatePracticeHistory(
+  quiz.subjectKey,
+  Number(quiz.practiceTourNo || 1),
+  attempt
+);
   } catch (e) {
     try { trackEvent("practice_history_error", { message: String(e?.message || e || "unknown") }); } catch {}
   }
@@ -17834,7 +18061,12 @@ if (action === "profile-open-ratings") {
    if (action === "practice-resume") {
   const subjectKey = state.courses.subjectKey;
   const draft = loadPracticeDraft();
-  if (!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz)) {
+
+  const currentStage = await getPracticeStageContext(subjectKey).catch(() => null);
+  const currentTourNo = Number(currentStage?.practiceTourNo || 1);
+  const draftTourNo = Number(draft?.practiceTourNo || draft?.quiz?.practiceTourNo || 1);
+
+  if (!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz && draftTourNo === currentTourNo)) {
     showToast(t("not_available"));
     return;
   }
