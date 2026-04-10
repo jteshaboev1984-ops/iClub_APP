@@ -4448,6 +4448,212 @@ async function buildPracticeSet(subjectKey) {
   return set.slice(0, PRACTICE_CONFIG.total);
 }
 
+   async function buildPracticeSetForTour(subjectKey, forcedTourNo) {
+  if (!window.sb) return [];
+
+  const uid = await getAuthUid().catch(() => null);
+  if (!uid) return [];
+
+  const ctx = await getPracticeStageContext(subjectKey);
+  if (!ctx?.subjectId) return [];
+
+  const row = (Array.isArray(ctx.pools) ? ctx.pools : []).find(
+    p => Number(p?.tour_no || 0) === Number(forcedTourNo)
+  );
+
+  const poolId = Number(row?.id || 0) || null;
+  const practiceTourNo = Number(row?.tour_no || forcedTourNo || 1);
+
+  if (!poolId) return [];
+
+  const allQuestionIds = await getPracticePoolQuestionIds(poolId);
+  if (!allQuestionIds.length) return [];
+
+  const closedIds = await getClosedPracticeQuestionIds(ctx.subjectId, uid, allQuestionIds);
+  const questionIds = allQuestionIds.filter(id => !closedIds.has(Number(id)));
+
+  if (!questionIds.length) return [];
+
+  const { data, error } = await window.sb
+    .from("questions")
+    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
+    .eq("subject_id", ctx.subjectId)
+    .eq("is_active", true)
+    .in("id", questionIds)
+    .limit(300);
+
+  if (error) return [];
+
+  const poolRaw = Array.isArray(data) ? data : [];
+  if (!poolRaw.length) return [];
+
+  const normalizeType = (v) => (String(v || "mcq").toLowerCase() === "input" ? "input" : "mcq");
+
+  const contentLang = (loadProfile()?.language) || "ru";
+  const pickL = (obj, base) => {
+    const k = contentLang === "uz" ? (base + "_uz") : contentLang === "en" ? (base + "_en") : (base + "_ru");
+    return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
+  };
+
+  const orderMap = new Map(allQuestionIds.map((id, idx) => [Number(id), idx]));
+
+  const pool = poolRaw
+    .map(r => {
+      const type = normalizeType(r.qtype);
+      const diff = normalizeDifficulty(r.difficulty || "easy");
+
+      const optionsRaw = pickL(r, "options_text");
+      const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
+
+      let correctIndex = 0;
+      if (type === "mcq") {
+        const ca = String(r.correct_answer ?? "").trim();
+        const asInt = Number(ca);
+
+        if (!Number.isNaN(asInt) && Number.isFinite(asInt)) {
+          correctIndex = asInt;
+        } else if (/^[A-D]$/i.test(ca)) {
+          correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
+        } else if (opts.length) {
+          const idx = opts.findIndex(x => String(x).trim().toLowerCase() === ca.toLowerCase());
+          if (idx >= 0) correctIndex = idx;
+        }
+
+        if (!Number.isFinite(correctIndex) || correctIndex < 0) correctIndex = 0;
+      }
+
+      const correctAnswer = type === "input" ? String(r.correct_answer ?? "").trim() : "";
+
+      return {
+        id: Number(r.id),
+        topic: r.topic || "General",
+        subtopic: r.subtopic || null,
+        difficulty: diff,
+        timeLimitSec:
+          (r.time_limit_sec != null && Number(r.time_limit_sec) >= 10)
+            ? Number(r.time_limit_sec)
+            : (PRACTICE_CONFIG?.timeByDifficulty?.[diff] || 60),
+        type,
+        question: pickL(r, "question_text") || "",
+        options: opts || [],
+        correctIndex,
+        correctAnswer,
+        explanation: pickL(r, "explanation") || "",
+        imageUrl: r.image_url || null,
+        inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
+        inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : "",
+        practiceTourNo,
+        practicePoolId: poolId,
+        orderNo: orderMap.get(Number(r.id)) ?? 999999
+      };
+    })
+    .filter(q => Number.isFinite(q.id));
+
+  if (!pool.length) return [];
+
+  const usedIds = new Set();
+  const by = {
+    easy: pool.filter(q => q.difficulty === "easy"),
+    medium: pool.filter(q => q.difficulty === "medium"),
+    hard: pool.filter(q => q.difficulty === "hard")
+  };
+
+  const set = [];
+  set.push(...pickN(by.easy, PRACTICE_CONFIG.dist.easy, usedIds));
+  set.push(...pickN(by.medium, PRACTICE_CONFIG.dist.medium, usedIds));
+  set.push(...pickN(by.hard, PRACTICE_CONFIG.dist.hard, usedIds));
+
+  if (set.length < PRACTICE_CONFIG.total) {
+    set.push(...pickN(pool, PRACTICE_CONFIG.total - set.length, usedIds));
+  }
+
+  const order = { easy: 1, medium: 2, hard: 3 };
+  set.sort((a, b) => {
+    const byTour = Number(a.practiceTourNo || 0) - Number(b.practiceTourNo || 0);
+    if (byTour !== 0) return byTour;
+    const byDiff = (order[a.difficulty] || 9) - (order[b.difficulty] || 9);
+    if (byDiff !== 0) return byDiff;
+    return Number(a.orderNo || 0) - Number(b.orderNo || 0);
+  });
+
+  return set.slice(0, PRACTICE_CONFIG.total);
+}
+
+async function getPastPracticeTourNos(subjectKey) {
+  const ctx = await getPracticeStageContext(subjectKey);
+  const currentTourNo = Number(ctx?.practiceTourNo || 1);
+
+  return (Array.isArray(ctx?.pools) ? ctx.pools : [])
+    .map(p => Number(p?.tour_no || 0))
+    .filter(n => Number.isFinite(n) && n > 0 && n < currentTourNo)
+    .sort((a, b) => a - b);
+}
+
+async function computePastPracticeStats(subjectKey) {
+  const uid = await getAuthUid().catch(() => null);
+  const ctx = await getPracticeStageContext(subjectKey);
+
+  if (!uid || !ctx?.subjectId) {
+    return { tourNos: [], totalCount: 0, masteredCount: 0, openCount: 0 };
+  }
+
+  const tourNos = await getPastPracticeTourNos(subjectKey);
+  if (!tourNos.length) {
+    return { tourNos: [], totalCount: 0, masteredCount: 0, openCount: 0 };
+  }
+
+  const poolRows = (Array.isArray(ctx.pools) ? ctx.pools : []).filter(
+    p => tourNos.includes(Number(p?.tour_no || 0))
+  );
+
+  const allIdsNested = await Promise.all(
+    poolRows.map(p => getPracticePoolQuestionIds(Number(p?.id || 0) || 0))
+  );
+
+  const allIds = Array.from(new Set(allIdsNested.flat().map(Number).filter(Boolean)));
+  const closedIds = await getClosedPracticeQuestionIds(ctx.subjectId, uid, allIds);
+
+  const totalCount = allIds.length;
+  const masteredCount = Array.from(closedIds).length;
+  const openCount = Math.max(0, totalCount - masteredCount);
+
+  return { tourNos, totalCount, masteredCount, openCount };
+}
+
+async function buildPastPracticeSet(subjectKey) {
+  const tourNos = await getPastPracticeTourNos(subjectKey);
+  if (!tourNos.length) return [];
+
+  const sets = await Promise.all(
+    tourNos.map(tourNo => buildPracticeSetForTour(subjectKey, tourNo))
+  );
+
+  const merged = [];
+  const usedIds = new Set();
+
+  sets.forEach(arr => {
+    (Array.isArray(arr) ? arr : []).forEach(q => {
+      const qid = Number(q?.id || 0);
+      if (!qid || usedIds.has(qid)) return;
+      usedIds.add(qid);
+      merged.push(q);
+    });
+  });
+
+  if (!merged.length) return [];
+
+  const order = { easy: 1, medium: 2, hard: 3 };
+  merged.sort((a, b) => {
+    const byTour = Number(a.practiceTourNo || 0) - Number(b.practiceTourNo || 0);
+    if (byTour !== 0) return byTour;
+    const byDiff = (order[a.difficulty] || 9) - (order[b.difficulty] || 9);
+    if (byDiff !== 0) return byDiff;
+    return Number(a.orderNo || 0) - Number(b.orderNo || 0);
+  });
+
+  return merged.slice(0, PRACTICE_CONFIG.total);
+}
+   
 function formatDateTime(ts) {
     try {
       const d = new Date(ts);
@@ -11209,31 +11415,31 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
     }
 
     if (badgeEl) {
-      badgeEl.textContent = t(badgeKey) || "";
-      badgeEl.classList.toggle("is-passed", tourState === "passed");
-      badgeEl.classList.toggle("is-finished", tourState === "finished");
-    }
+  badgeEl.textContent = t(badgeKey) || "";
+  badgeEl.classList.toggle("is-completed", tourState === "finished");
+}
 
-    if (modEl) {
-      modEl.textContent =
-        t("home_practice_for_tour", { n: practiceTourNo }) ||
-        `Practice for Tour ${practiceTourNo}`;
-    }
+if (modEl) {
+  modEl.textContent =
+    t("home_practice_for_tour", { n: practiceTourNo }) ||
+    `Practice for Tour ${practiceTourNo}`;
+}
 
-    if (noteEl) {
-      noteEl.textContent = t(noteKey) || "";
-    }
+if (noteEl) {
+  noteEl.textContent = t(noteKey) || "";
+}
 
-    if (rankEl) {
-      rankEl.textContent = total > 0 ? `${done}/${total}` : "—/—";
-    }
+if (rankEl) {
+  const progressLabel = t("home_progress") || "Progress";
+  rankEl.textContent = total > 0 ? `${progressLabel} — ${done}/${total}` : `${progressLabel} — —/—`;
+}
 
-    if (percentEl) {
-      percentEl.textContent =
-        bestPracticePct != null
-          ? `${t("practice_best_result") || "Best result"}: ${bestPracticePct}%`
-          : "";
-    }
+if (percentEl) {
+  percentEl.textContent =
+    bestPracticePct != null
+      ? `${t("practice_best_result") || "Best result"}: ${bestPracticePct}%`
+      : "";
+}
 
     if (fillEl) {
       fillEl.style.width = `${practicePct}%`;
@@ -11304,24 +11510,23 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
   const noteTxt = t("home_note_tour_active") || "";
 
   el.innerHTML = `
-    <div class="home-competitive-badge">${escapeHTML(badgeTxt)}</div>
-    <div class="home-competitive-hero">
-      <div class="home-competitive-hero-img" aria-hidden="true"></div>
+  <div class="home-competitive-badge">${escapeHTML(badgeTxt)}</div>
+  <div class="home-competitive-hero">
+    <div class="home-competitive-hero-img" aria-hidden="true"></div>
+  </div>
+  <div class="home-competitive-body">
+    <div class="home-competitive-title">${escapeHTML(title)}</div>
+    <div class="home-competitive-note js-home-comp-note">${escapeHTML(noteTxt)}</div>
+    <div class="home-competitive-module js-home-comp-module">${escapeHTML(moduleTxt)}</div>
+    <div class="home-competitive-meta">
+      <span class="home-competitive-rank js-home-comp-rank">—/—</span>
     </div>
-    <div class="home-competitive-body">
-      <div class="home-competitive-module js-home-comp-module">${escapeHTML(moduleTxt)}</div>
-      <div class="home-competitive-title">${escapeHTML(title)}</div>
-      <div class="home-competitive-note js-home-comp-note">${escapeHTML(noteTxt)}</div>
-      <div class="home-competitive-meta">
-        <span>${escapeHTML(t("home_practice_progress_label") || "Practice")}</span>
-        <span class="home-competitive-rank js-home-comp-rank">—/—</span>
-      </div>
-      <div class="home-competitive-percent js-home-comp-percent"></div>
-      <div class="home-progress">
-        <div class="home-progress-fill js-home-comp-fill" style="width:0%"></div>
-      </div>
+    <div class="home-competitive-percent js-home-comp-percent"></div>
+    <div class="home-progress">
+      <div class="home-progress-fill js-home-comp-fill" style="width:0%"></div>
     </div>
-  `;
+  </div>
+`;
 
   const btn = document.createElement("button");
   btn.type = "button";
@@ -13440,12 +13645,63 @@ async function renderToursHistorySummary(subjectId) {
       draftTourNo === currentTourNo
     );
 
-    if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
-    if (restartBtn) restartBtn.textContent = canResume ? t("practice_restart") : t("practice_start");
+    const restartLabelEl = $("#practice-restart-label");
+const pastBtn = $("#practice-past-btn");
+const pastHint = $("#practice-past-hint");
 
-    if (canResume) {
-      showToast(t("practice_resume_prompt"));
+if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
+
+if (restartBtn) {
+  const restartLabel = canResume
+    ? (t("practice_restart") || "Начать заново")
+    : (
+        t("practice_start_for_tour", { n: currentTourNo }) ||
+        `Начать практику ${currentTourNo} тура`
+      );
+
+  restartBtn.textContent = "";
+  if (restartLabelEl) {
+    restartLabelEl.textContent = restartLabel;
+    restartBtn.appendChild(restartLabelEl);
+  } else {
+    restartBtn.textContent = restartLabel;
+  }
+}
+
+if (canResume) {
+  showToast(t("practice_resume_prompt"));
+}
+
+(async () => {
+  try {
+    const pastStats = await computePastPracticeStats(subjectKey);
+    if (state?.courses?.subjectKey !== subjectKey) return;
+
+    const hasPast = Array.isArray(pastStats?.tourNos) && pastStats.tourNos.length > 0;
+    const remaining = Number(pastStats?.openCount || 0);
+
+    if (!pastBtn) return;
+
+    if (!hasPast) {
+      pastBtn.style.display = "none";
+      if (pastHint) pastHint.style.display = "none";
+      return;
     }
+
+    pastBtn.style.display = "block";
+    pastBtn.disabled = remaining <= 0;
+
+    if (pastHint) {
+      pastHint.style.display = "block";
+      pastHint.textContent = remaining > 0
+        ? (t("practice_past_hint_ready") || "Откроются вопросы только по уже пройденным турам.")
+        : (t("practice_past_hint_done") || "По прошлым турам новых вопросов не осталось.");
+    }
+  } catch {
+    if (pastBtn) pastBtn.style.display = "none";
+    if (pastHint) pastHint.style.display = "none";
+  }
+})();
   })().catch(() => {});
 }
 
@@ -13528,6 +13784,68 @@ async function startPracticeNew() {
   startPracticeQuestionTimer();
 }
 
+   async function startPracticePast() {
+  const subjectKey = state.courses.subjectKey;
+
+  let questions = [];
+  let stats = null;
+
+  showAsyncOverlay(tr3(
+    "Загружаем практику по прошедшим турам…",
+    "O‘tgan turlar amaliyoti yuklanmoqda…",
+    "Loading practice for past tours…"
+  ));
+
+  try {
+    stats = await computePastPracticeStats(subjectKey);
+    questions = await buildPastPracticeSet(subjectKey);
+  } finally {
+    hideAsyncOverlay();
+  }
+
+  if (!Array.isArray(stats?.tourNos) || !stats.tourNos.length) {
+    showToast(t("practice_past_empty") || "Для прошлых туров пока нет доступных вопросов.");
+    return;
+  }
+
+  if (!Array.isArray(questions) || !questions.length) {
+    showToast(
+      Number(stats?.openCount || 0) <= 0
+        ? (t("practice_past_done") || "Все вопросы прошлых туров уже закрыты правильно.")
+        : (t("practice_past_empty") || "Для прошлых туров пока нет доступных вопросов.")
+    );
+    return;
+  }
+
+  state.quizLock = "practice";
+  state.quiz = {
+    mode: "practice",
+    drillType: "past_tours",
+    subjectKey,
+    practiceTourNo: 0,
+    practicePoolId: null,
+    startedAt: Date.now(),
+    paused: false,
+    pauseStartedAt: null,
+    pausedTotalMs: 0,
+
+    index: 0,
+    questions,
+    answers: Array.from({ length: questions.length }).map(() => null),
+    correct: Array.from({ length: questions.length }).map(() => false),
+    timeSpent: Array.from({ length: questions.length }).map(() => 0),
+
+    qTimeLeft: Number(questions[0]?.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[questions[0]?.difficulty] || 60,
+    qEndsAtMono: null,
+    qTimerId: null
+  };
+
+  saveState();
+  replaceCourses("practice-quiz");
+  renderPracticeQuiz();
+  startPracticeQuestionTimer();
+}
+   
   // ---- Rendering question (MCQ or INPUT) ----
   function renderPracticeQuiz() {
     const quiz = state.quiz;
@@ -13980,7 +14298,10 @@ if (recsCountEl) recsCountEl.textContent = String(recKeys.length);
 
 // ✅ set “exit” button label based on context (main vs drill)
 try {
-  const exitKey = quiz?.drillType ? "practice_to_recs" : "practice_to_subject";
+  const exitKey =
+  (quiz?.drillType && quiz.drillType !== "past_tours")
+    ? "practice_to_recs"
+    : "practice_to_subject";
   const btn1 = $("#practice-to-subject-btn");
   const btn2 = $("#practice-review-to-subject-btn");
   if (btn1) btn1.textContent = t(exitKey);
@@ -18054,9 +18375,14 @@ if (action === "profile-open-ratings") {
       }
 
       if (action === "practice-start") {
-        startPracticeNew();
-        return;
-      }
+  startPracticeNew();
+  return;
+}
+
+if (action === "practice-start-past") {
+  startPracticePast();
+  return;
+}
 
    if (action === "practice-resume") {
   const subjectKey = state.courses.subjectKey;
