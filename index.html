@@ -538,9 +538,18 @@
               </div>
 
               <div class="practice-start-actions">
-                <button id="practice-resume-btn" class="btn" type="button" data-action="practice-resume" style="display:none" data-i18n="practice_resume">Продолжить</button>
-                <button id="practice-restart-btn" class="btn primary" type="button" data-action="practice-start" data-i18n="practice_start">Начать практику</button>
-              </div>
+  <button id="practice-resume-btn" class="btn" type="button" data-action="practice-resume" style="display:none" data-i18n="practice_resume">Продолжить</button>
+
+  <button id="practice-restart-btn" class="btn primary" type="button" data-action="practice-start">
+    <span id="practice-restart-label" data-i18n="practice_start">Начать практику</span>
+  </button>
+
+  <button id="practice-past-btn" class="btn" type="button" data-action="practice-start-past" style="display:none">
+    <span id="practice-past-label" data-i18n="practice_past_start">Практика по прошедшим турам</span>
+  </button>
+
+  <div id="practice-past-hint" class="practice-past-hint" style="display:none"></div>
+</div>
             </section>
 
             <!-- Practice Quiz -->
