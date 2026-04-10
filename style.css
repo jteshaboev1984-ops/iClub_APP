@@ -1377,6 +1377,14 @@ html, body {
   margin: 12px 14px 0;
 }
 
+.practice-past-hint{
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+  text-align: center;
+  margin-top: -2px;
+}
+
 @media (min-width: 560px) {
   .actions-row { grid-template-columns: 1fr 1fr; }
 }
