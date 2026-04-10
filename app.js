@@ -11416,7 +11416,8 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
 
     if (badgeEl) {
   badgeEl.textContent = t(badgeKey) || "";
-  badgeEl.classList.toggle("is-completed", tourState === "finished");
+  badgeEl.classList.toggle("is-passed", tourState === "passed");
+  badgeEl.classList.toggle("is-finished", tourState === "finished");
 }
 
 if (modEl) {
@@ -11519,13 +11520,10 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
 
     <div class="home-competitive-meta">
       <span class="home-competitive-module js-home-comp-module">${escapeHTML(moduleTxt)}</span>
-      <span class="home-competitive-percent js-home-comp-percent"></span>
-    </div>
-
-    <div class="home-competitive-progress-row">
-      <span class="home-competitive-progress-label">${escapeHTML(t("home_progress") || "Прогресс")}</span>
       <span class="home-competitive-rank js-home-comp-rank">—/—</span>
     </div>
+
+    <div class="home-competitive-percent js-home-comp-percent"></div>
 
     <div class="home-progress">
       <div class="home-progress-fill js-home-comp-fill" style="width:0%"></div>
@@ -18332,10 +18330,10 @@ if (action === "tour-to-subject") {
   state.courses.myRecReturnTarget = null;
   saveState();
 
-  replaceCourses("subject-hub");
-  renderSubjectHub();
+  openPracticeStart();
   return;
-}       
+}
+       
 if (action === "profile-open-ratings") {
   setTab("ratings");
   return;
