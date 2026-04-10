@@ -10802,74 +10802,183 @@ async function computeHomeCompetitiveStats(subjectKey) {
   }
 
   try {
-    if (!window.sb) return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
+    if (!window.sb) {
+      return {
+        moduleNo: 1,
+        progressPct: 0,
+        rankNo: null,
+        completedCount: 0,
+        totalTours: 0,
+        practiceTourNo: 1,
+        practiceDone: 0,
+        practiceTotal: 0,
+        practicePct: 0,
+        bestPracticePct: null,
+        currentTourNo: 1,
+        tourState: "active",
+      };
+    }
 
     const subjectId = await getSubjectIdByKey(subjectKey);
-    if (!subjectId) return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
+    if (!subjectId) {
+      return {
+        moduleNo: 1,
+        progressPct: 0,
+        rankNo: null,
+        completedCount: 0,
+        totalTours: 0,
+        practiceTourNo: 1,
+        practiceDone: 0,
+        practiceTotal: 0,
+        practicePct: 0,
+        bestPracticePct: null,
+        currentTourNo: 1,
+        tourState: "active",
+      };
+    }
 
     const uid = await getAuthUid();
-    if (!uid) return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
+    if (!uid) {
+      return {
+        moduleNo: 1,
+        progressPct: 0,
+        rankNo: null,
+        completedCount: 0,
+        totalTours: 0,
+        practiceTourNo: 1,
+        practiceDone: 0,
+        practiceTotal: 0,
+        practicePct: 0,
+        bestPracticePct: null,
+        currentTourNo: 1,
+        tourState: "active",
+      };
+    }
 
-    // 1) tours for this subject
     const toursRes = await window.sb
       .from("tours")
-      .select("id,tour_no")
+      .select("id,tour_no,start_date,end_date,is_active")
       .eq("subject_id", subjectId)
       .order("tour_no", { ascending: true });
 
     const tours = Array.isArray(toursRes?.data) ? toursRes.data : [];
-    if (!tours.length) return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
+    if (!tours.length) {
+      return {
+        moduleNo: 1,
+        progressPct: 0,
+        rankNo: null,
+        completedCount: 0,
+        totalTours: 0,
+        practiceTourNo: 1,
+        practiceDone: 0,
+        practiceTotal: 0,
+        practicePct: 0,
+        bestPracticePct: null,
+        currentTourNo: 1,
+        tourState: "active",
+      };
+    }
 
-    // 2) attempts for this subject (submitted only)
     const attemptRes = await window.sb
       .from("tour_attempts")
-      .select("id,tour_id,percent,status")
+      .select("id,tour_id,status")
       .eq("user_id", uid)
       .in("status", ["submitted"])
       .order("created_at", { ascending: false });
 
     const attempts = Array.isArray(attemptRes?.data) ? attemptRes.data : [];
+    const completedTourIds = new Set(
+      attempts.map(a => Number(a?.tour_id)).filter(Boolean)
+    );
 
-    const completedTourIds = new Set(attempts.map(a => Number(a.tour_id)).filter(Boolean));
     const completedCount = tours.filter(t => completedTourIds.has(Number(t.id))).length;
-
     const totalTours = tours.length || 0;
-    const progressPct = totalTours ? Math.round((completedCount / totalTours) * 100) : 0;
 
-    // moduleNo = next tour number (1..7)
-    const moduleNo = Math.min(7, Math.max(1, completedCount + 1));
+    const pad2 = (n) => String(n).padStart(2, "0");
+    const d0 = new Date();
+    const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
 
-        // 3) rank: show place for the latest COMPLETED tour, not for the next module
-    let rankNo = null;
+    const isInWindow = (row) => {
+      const sd = row?.start_date ? String(row.start_date) : null;
+      const ed = row?.end_date ? String(row.end_date) : null;
+      const afterStart = !sd || sd <= todayISO;
+      const beforeEnd = !ed || ed >= todayISO;
+      return afterStart && beforeEnd;
+    };
+
+    const activeTour = tours
+      .filter(t => !!t?.is_active && isInWindow(t))
+      .sort((a, b) => Number(a?.tour_no || 0) - Number(b?.tour_no || 0))[0] || null;
+
+    let tourState = "finished";
+    if (activeTour) {
+      tourState = completedTourIds.has(Number(activeTour.id)) ? "passed" : "active";
+    }
+
+    const practiceTourNo = Math.min(
+      totalTours || 7,
+      Math.max(1, completedCount + ((totalTours > 0 && completedCount >= totalTours) ? 0 : 1))
+    );
+
+    const currentTourNo =
+      Number(activeTour?.tour_no || 0) ||
+      Math.min(totalTours || 7, Math.max(1, completedCount || 1));
+
+    const practiceStats = await computeHomeStudyPracticeStats(subjectKey);
+    const practiceDone = Number(practiceStats?.masteredCount || 0);
+    const practiceTotal = Number(practiceStats?.totalCount || 0);
+    const practicePct = practiceTotal > 0
+      ? Math.max(0, Math.min(100, Math.round((practiceDone / practiceTotal) * 100)))
+      : 0;
+
+    let bestPracticePct = null;
     try {
-      const completedToursDesc = tours
-        .filter(t => completedTourIds.has(Number(t.id)))
-        .sort((a, b) => Number(b.tour_no) - Number(a.tour_no));
+      const bestRes = await window.sb
+        .from("practice_attempts")
+        .select("percent")
+        .eq("user_id", uid)
+        .eq("subject_id", subjectId)
+        .order("percent", { ascending: false })
+        .limit(1);
 
-      const rankTour =
-        completedToursDesc[0] ||
-        tours.find(t => Number(t.tour_no) === Number(moduleNo)) ||
-        tours[tours.length - 1];
-
-      if (rankTour?.id) {
-        const rRes = await window.sb
-          .from("ratings_cache")
-          .select("rank_no")
-          .eq("tour_id", Number(rankTour.id))
-          .eq("user_id", uid)
-          .eq("rank_type", "country")
-          .limit(1);
-
-        const row = Array.isArray(rRes?.data) ? rRes.data[0] : null;
-        if (row && row.rank_no != null) rankNo = Number(row.rank_no);
+      const bestRow = Array.isArray(bestRes?.data) ? bestRes.data[0] : null;
+      if (bestRow?.percent != null && Number.isFinite(Number(bestRow.percent))) {
+        bestPracticePct = Math.round(Number(bestRow.percent));
       }
     } catch {}
 
-    const out = { moduleNo, progressPct, rankNo, completedCount, totalTours: tours.length };
+    const out = {
+      moduleNo: practiceTourNo,
+      progressPct: practicePct,
+      rankNo: null,
+      completedCount,
+      totalTours,
+      practiceTourNo,
+      practiceDone,
+      practiceTotal,
+      practicePct,
+      bestPracticePct,
+      currentTourNo,
+      tourState,
+    };
+
     _homeStatsCache.set(cacheKey, { ts: Date.now(), data: out });
     return out;
   } catch {
-    return { moduleNo: 1, progressPct: 0, rankNo: null, completedCount: 0, totalTours: 0 };
+    return {
+      moduleNo: 1,
+      progressPct: 0,
+      rankNo: null,
+      completedCount: 0,
+      totalTours: 0,
+      practiceTourNo: 1,
+      practiceDone: 0,
+      practiceTotal: 0,
+      practicePct: 0,
+      bestPracticePct: null,
+      currentTourNo: 1,
+      tourState: "active",
+    };
   }
 }
 
@@ -10877,24 +10986,77 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
   try {
     if (!cardEl) return;
 
+    const badgeEl = cardEl.querySelector(".home-competitive-badge");
     const modEl = cardEl.querySelector(".js-home-comp-module");
+    const noteEl = cardEl.querySelector(".js-home-comp-note");
     const rankEl = cardEl.querySelector(".js-home-comp-rank");
+    const percentEl = cardEl.querySelector(".js-home-comp-percent");
     const fillEl = cardEl.querySelector(".js-home-comp-fill");
 
-    const s = await computeHomeStudyPracticeStats(subjectKey);
-    const done = Number(s?.masteredCount || 0);
-    const total = Number(s?.totalCount || 0);
-    const progressPct = total > 0 ? Math.max(0, Math.min(100, Math.round((done / total) * 100))) : 0;
+    const s = await computeHomeCompetitiveStats(subjectKey);
 
-    if (modEl) modEl.textContent = t("home_practice_progress_label");
-    if (rankEl) rankEl.textContent = total > 0 ? `${done}/${total}` : "—/—";
-    if (fillEl) fillEl.style.width = `${progressPct}%`;
+    const practiceTourNo = Number(s?.practiceTourNo || s?.moduleNo || 1);
+    const done = Number(s?.practiceDone || 0);
+    const total = Number(s?.practiceTotal || 0);
+    const practicePct = total > 0
+      ? Math.max(0, Math.min(100, Math.round((done / total) * 100)))
+      : Number(s?.practicePct || 0);
+
+    const bestPracticePct = (
+      s?.bestPracticePct != null && Number.isFinite(Number(s.bestPracticePct))
+    )
+      ? Math.round(Number(s.bestPracticePct))
+      : null;
+
+    const tourState = String(s?.tourState || "active");
+
+    let badgeKey = "home_badge_tour_active";
+    let noteKey = "home_note_tour_active";
+
+    if (tourState === "passed") {
+      badgeKey = "home_badge_tour_passed";
+      noteKey = "home_note_tour_passed";
+    } else if (tourState === "finished") {
+      badgeKey = "home_badge_tour_finished";
+      noteKey = "home_note_tour_finished";
+    }
+
+    if (badgeEl) {
+      badgeEl.textContent = t(badgeKey) || "";
+      badgeEl.classList.toggle("is-passed", tourState === "passed");
+      badgeEl.classList.toggle("is-finished", tourState === "finished");
+    }
+
+    if (modEl) {
+      modEl.textContent =
+        t("home_practice_for_tour", { n: practiceTourNo }) ||
+        `Practice for Tour ${practiceTourNo}`;
+    }
+
+    if (noteEl) {
+      noteEl.textContent = t(noteKey) || "";
+    }
+
+    if (rankEl) {
+      rankEl.textContent = total > 0 ? `${done}/${total}` : "—/—";
+    }
+
+    if (percentEl) {
+      percentEl.textContent =
+        bestPracticePct != null
+          ? `${t("practice_best_result") || "Best result"}: ${bestPracticePct}%`
+          : "";
+    }
+
+    if (fillEl) {
+      fillEl.style.width = `${practicePct}%`;
+    }
   } catch {
     // silent
   }
 }
 
-async function computeHomeStudyPracticeStats(subjectKey) {
+   async function computeHomeStudyPracticeStats(subjectKey) {
   const cacheKey = `home_study:${String(subjectKey || "").trim()}`;
   const cached = _homeStatsCache.get(cacheKey);
   if (cached && (Date.now() - cached.ts) < HOME_STATS_CACHE_TTL_MS) {
@@ -10992,8 +11154,8 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
 } 
    
       function homeCompetitiveCardEl(userSubject) {
-      const subj = subjectByKey(userSubject.key);
-      const title = subjectTitle(userSubject.key, subj ? subj.title : userSubject.key);
+  const subj = subjectByKey(userSubject.key);
+  const title = subjectTitle(userSubject.key, subj ? subj.title : userSubject.key);
 
   const el = document.createElement("div");
   el.className = "home-competitive-card";
@@ -11001,50 +11163,52 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
   // ✅ нужно для CSS-картинок по предмету
   el.dataset.subject = String(userSubject.key || "").toLowerCase();
 
-      const badgeActive = t("badge_active") || "ACTIVE";
-  const moduleTxt = t("home_practice_progress_label") || "";
+  const badgeTxt = t("home_badge_tour_active") || "TOUR ACTIVE";
+  const moduleTxt = t("home_practice_for_tour", { n: 1 }) || "Practice for Tour 1";
+  const noteTxt = t("home_note_tour_active") || "";
 
   el.innerHTML = `
-    <div class="home-competitive-badge">${escapeHTML(badgeActive)}</div>
+    <div class="home-competitive-badge">${escapeHTML(badgeTxt)}</div>
     <div class="home-competitive-hero">
       <div class="home-competitive-hero-img" aria-hidden="true"></div>
     </div>
     <div class="home-competitive-body">
       <div class="home-competitive-module js-home-comp-module">${escapeHTML(moduleTxt)}</div>
       <div class="home-competitive-title">${escapeHTML(title)}</div>
+      <div class="home-competitive-note js-home-comp-note">${escapeHTML(noteTxt)}</div>
       <div class="home-competitive-meta">
-        <span>${t("home_practice_progress_label")}</span>
+        <span>${escapeHTML(t("home_practice_progress_label") || "Practice")}</span>
         <span class="home-competitive-rank js-home-comp-rank">—/—</span>
       </div>
+      <div class="home-competitive-percent js-home-comp-percent"></div>
       <div class="home-progress">
         <div class="home-progress-fill js-home-comp-fill" style="width:0%"></div>
       </div>
     </div>
-   `;
+  `;
 
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "btn primary home-competitive-btn";
   btn.textContent = t("open_subject_btn") || "Open subject";
   btn.addEventListener("click", (e) => {
-  e.stopPropagation();
+    e.stopPropagation();
 
-  // ✅ Home: сразу открываем Subject Hub (без промежуточных туров)
+    // ✅ Home: сразу открываем Subject Hub (без промежуточных туров)
     state.courses.subjectKey = userSubject.key;
 
-  // ✅ Home is the entry point for this flow
-  state.courses.entryTab = "home";
+    // ✅ Home is the entry point for this flow
+    state.courses.entryTab = "home";
 
-  saveState();
-  setTab("courses");
-  replaceCourses("subject-hub");
-  renderSubjectHub();
-});
+    saveState();
+    setTab("courses");
+    replaceCourses("subject-hub");
+    renderSubjectHub();
+  });
 
   el.appendChild(btn);
   return el;
 }
-
     function homePinnedTileEl(userSubject, index = 0) {
   const subj = subjectByKey(userSubject.key);
   const title = subjectTitle(userSubject.key, subj ? subj.title : userSubject.key);
