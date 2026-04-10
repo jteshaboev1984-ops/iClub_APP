@@ -11517,11 +11517,17 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
   <div class="home-competitive-body">
     <div class="home-competitive-title">${escapeHTML(title)}</div>
     <div class="home-competitive-note js-home-comp-note">${escapeHTML(noteTxt)}</div>
-    <div class="home-competitive-module js-home-comp-module">${escapeHTML(moduleTxt)}</div>
+
     <div class="home-competitive-meta">
+      <span class="home-competitive-module js-home-comp-module">${escapeHTML(moduleTxt)}</span>
+      <span class="home-competitive-percent js-home-comp-percent"></span>
+    </div>
+
+    <div class="home-competitive-progress-row">
+      <span class="home-competitive-progress-label">${escapeHTML(t("home_progress") || "Прогресс")}</span>
       <span class="home-competitive-rank js-home-comp-rank">—/—</span>
     </div>
-    <div class="home-competitive-percent js-home-comp-percent"></div>
+
     <div class="home-progress">
       <div class="home-progress-fill js-home-comp-fill" style="width:0%"></div>
     </div>
