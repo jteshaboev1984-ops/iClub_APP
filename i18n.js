@@ -361,7 +361,7 @@ network_error_try_again: "Ошибка сети. Попробуйте ещё р�
       reg_subject_summary_none: "Выберите до 2 предметов",
 
       reg_terms_text:
-        "Я соглашаюсь с условиями и даю согласие на обработку данных об обучении.",
+        "Я даю согласие на обработку своих данных.",
       reg_complete_btn: "Завершить регистрацию",
       reg_subjects_limit: "Можно выбрать максимум 2 предмета.",
 
@@ -1243,7 +1243,7 @@ network_error_try_again: "Tarmoq xatosi. Qayta urinib ko‘ring.",
       reg_subject_summary_none: "2 tagacha fan tanlang",
 
       reg_terms_text:
-        "Men shartlarga roziman va o‘qish ma’lumotlarimni qayta ishlashga rozilik beraman.",
+        "Men ma’lumotlarim qayta ishlanishiga rozilik beraman.",
       reg_complete_btn: "Ro‘yxatdan o‘tishni yakunlash",
       reg_subjects_limit: "Ko‘pi bilan 2 ta fan tanlash mumkin.",
 
@@ -2126,7 +2126,7 @@ network_error_try_again: "Network error. Please try again.",
       reg_subject_secondary_tag: "Secondary",
       reg_subject_summary_none: "Select up to 2 subjects",
 
-      reg_terms_text: "I agree to the Terms of Service and consent to processing of my education data.",
+      reg_terms_text: "I consent to the processing of my data.",
       reg_complete_btn: "Complete Registration",
       reg_subjects_limit: "You can choose up to 2 subjects.",
 
