@@ -4023,14 +4023,18 @@ function formatAnswerForDisplay(q, rawAnswer) {
   const raw = String(rawAnswer ?? "").trim();
   if (!raw) return "—";
 
-  const qType = String(q?.qtype ?? q?.type ?? "mcq").toLowerCase();
-  const isMcq = (qType === "mcq" || qType === "multiple_choice");
+  const qTypeRaw = String(q?.qtype ?? q?.type ?? "").toLowerCase();
 
-  // Для input-вопросов ничего не преобразуем в буквы.
-  // Числа должны оставаться числами, текст — текстом.
-  if (!isMcq) {
-    return raw;
-  }
+  const isExplicitMcq =
+    qTypeRaw === "mcq" ||
+    qTypeRaw === "multiple_choice" ||
+    qTypeRaw === "mcq_single";
+
+  const isExplicitInput =
+    qTypeRaw === "input" ||
+    qTypeRaw === "input_number" ||
+    qTypeRaw === "input_text" ||
+    qTypeRaw === "input_text_short";
 
   let opts = null;
   try {
@@ -4039,6 +4043,19 @@ function formatAnswerForDisplay(q, rawAnswer) {
       : (q?.options_text ?? null);
     opts = parseOptionsText(oText);
   } catch {}
+
+  // ✅ input всегда показываем как есть
+  if (isExplicitInput) {
+    return raw;
+  }
+
+  // ✅ если тип вообще не передали и вариантов нет, не гадаем что это MCQ
+  const inferredMcq = !isExplicitInput && !isExplicitMcq && Array.isArray(opts) && opts.length > 0;
+  const isMcq = isExplicitMcq || inferredMcq;
+
+  if (!isMcq) {
+    return raw;
+  }
 
   if (isNumericLike(raw)) {
     const idx = Math.trunc(Number(raw));
@@ -4049,6 +4066,7 @@ function formatAnswerForDisplay(q, rawAnswer) {
       return txt ? `${L} — ${txt}` : (L || raw);
     }
 
+    // ✅ для явного MCQ без options оставляем старое поведение: 0 -> A
     const L = idxToLetter(idx);
     if (L) return L;
 
@@ -14463,13 +14481,18 @@ const attempt =
         const status = d.isCorrect ? "✅" : "❌";
         const n = d._idx + 1;
 
-        // ✅ pretty answers: convert "0/1/2/3" -> "A/B/C/D" and show text if available
+               // ✅ pretty answers: convert MCQ indexes to letters, but keep INPUT answers as-is
 let userDisp = "";
 let corrDisp = "";
 try {
   const qForFmt = {
+    qtype: d.type,
+    type: d.type,
     // formatAnswerForDisplay reads options_text; we pass options as JSON
-    options_text: Array.isArray(d.options) ? JSON.stringify(d.options) : (d.options_text || null)
+    options_text: Array.isArray(d.options) ? JSON.stringify(d.options) : (d.options_text || null),
+    options_text_ru: Array.isArray(d.options) ? JSON.stringify(d.options) : (d.options_text_ru || null),
+    options_text_uz: Array.isArray(d.options) ? JSON.stringify(d.options) : (d.options_text_uz || null),
+    options_text_en: Array.isArray(d.options) ? JSON.stringify(d.options) : (d.options_text_en || null)
   };
   userDisp = formatAnswerForDisplay(qForFmt, d.userAnswer);
   corrDisp = formatAnswerForDisplay(qForFmt, d.correctAnswer);
@@ -14477,7 +14500,7 @@ try {
   userDisp = String(d.userAnswer || "—");
   corrDisp = String(d.correctAnswer || "—");
 }
-
+         
 const diffKey = `difficulty_${String(d.difficulty || "").toLowerCase()}`;
 const diffText = t(diffKey) || d.difficulty || "";
 const yourAnsLabel = t("your_answer") || "Ваш ответ";
