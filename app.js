@@ -11358,19 +11358,38 @@ async function computeHomeCompetitiveStats(subjectKey) {
       return afterStart && beforeEnd;
     };
 
-    const activeTour = tours
+        const activeTour = tours
       .filter(t => !!t?.is_active && isInWindow(t))
       .sort((a, b) => Number(a?.tour_no || 0) - Number(b?.tour_no || 0))[0] || null;
 
-    let tourState = "finished";
+    const upcomingTour = tours
+      .filter(t => {
+        if (!t?.is_active) return false;
+        const sd = t?.start_date ? String(t.start_date) : null;
+        return !!sd && sd > todayISO;
+      })
+      .sort((a, b) => Number(a?.tour_no || 0) - Number(b?.tour_no || 0))[0] || null;
+
+    const hasStartedOrEndedTour = tours.some(t => {
+      const sd = t?.start_date ? String(t.start_date) : null;
+      const ed = t?.end_date ? String(t.end_date) : null;
+      return (!!sd && sd <= todayISO) || (!!ed && ed < todayISO);
+    });
+
+    let tourState = "upcoming";
     if (activeTour) {
       tourState = completedTourIds.has(Number(activeTour.id)) ? "passed" : "active";
+    } else if (upcomingTour) {
+      tourState = "upcoming";
+    } else if (hasStartedOrEndedTour) {
+      tourState = "finished";
     }
 
     const practiceStageCtx = await getPracticeStageContext(subjectKey);
     const practiceTourNo = Number(
       practiceStageCtx?.practiceTourNo ||
       activeTour?.tour_no ||
+      upcomingTour?.tour_no ||
       1
     );
 
@@ -11437,7 +11456,7 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
       ? Math.round(Number(s.bestPracticePct))
       : null;
 
-    const tourState = String(s?.tourState || "active");
+        const tourState = String(s?.tourState || "active");
 
     let badgeKey = "home_badge_tour_active";
     let noteKey = "home_note_tour_active";
@@ -11445,6 +11464,9 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
     if (tourState === "passed") {
       badgeKey = "home_badge_tour_passed";
       noteKey = "home_note_tour_passed";
+    } else if (tourState === "upcoming") {
+      badgeKey = "home_badge_tour_upcoming";
+      noteKey = "home_note_tour_upcoming";
     } else if (tourState === "finished") {
       badgeKey = "home_badge_tour_finished";
       noteKey = "home_note_tour_finished";
