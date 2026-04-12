@@ -533,12 +533,38 @@ async function waitForOverlayPaint() {
       }
     } catch {}
   }
-  return sb;
+    return sb;
 }
- 
-    function nowISO() {
-    return new Date().toISOString();
+
+async function ensureRegistrationAuthUid({ totalWaitMs = 12000, pollMs = 350 } = {}) {
+  try {
+    if (!window.sb?.auth) return null;
+
+    const startedAt = Date.now();
+
+    while ((Date.now() - startedAt) < totalWaitMs) {
+      const uid = await getAuthUid();
+      if (uid) return uid;
+
+      try {
+        const { data: sessData } = await window.sb.auth.getSession();
+        if (!sessData?.session) {
+          await window.sb.auth.signInAnonymously();
+        }
+      } catch {}
+
+      await new Promise((resolve) => setTimeout(resolve, pollMs));
+    }
+
+    return await getAuthUid();
+  } catch {
+    return null;
   }
+}
+
+function nowISO() {
+  return new Date().toISOString();
+}
 
   // ✅ monotonic time (not affected by changing device clock)
   function monoNow() {
@@ -5829,8 +5855,16 @@ function getTelegramUserSafe() {
 async function saveRegistrationToSupabase(profile) {
   if (!window.sb) return { ok: false, reason: "no_sb" };
 
-  const uid = await getAuthUid();
-  if (!uid) return { ok: false, reason: "no_uid" };
+    const uid = await ensureRegistrationAuthUid({ totalWaitMs: 12000, pollMs: 350 });
+  if (!uid) {
+    try {
+      trackEvent("registration_db_error", {
+        where: "ensure_registration_auth_uid",
+        message: "no_uid_after_retry"
+      });
+    } catch {}
+    return { ok: false, reason: "no_uid" };
+  }
 
   const tgUser = getTelegramUserSafe() || {};
   const avatar = tgUser?.photo_url || null;
