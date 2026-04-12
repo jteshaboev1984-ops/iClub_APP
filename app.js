@@ -5078,8 +5078,18 @@ function formatDateTime(ts) {
       btn.classList.toggle("is-active", btn.dataset.tab === tabName);
     });
 
-    // Maintain global view stack: tab screen becomes "base"
+        // Maintain global view stack: tab screen becomes "base"
     setGlobalBaseView(tabName);
+
+    // ✅ При уходе из Profile снимаем липкое состояние внутренних profile-screen,
+    // чтобы hidden Profile не перехватывал generic back в других табах.
+    if (tabName !== "profile") {
+      document.querySelectorAll("#view-profile .profile-screen").forEach(el => {
+        el.classList.remove("is-active");
+        el.hidden = true;
+        el.style.display = "none";
+      });
+    }
 
     if (tabName === "courses") {
   renderCoursesStack();
@@ -17829,9 +17839,18 @@ if (state.tab === "profile") {
       if (action === "back") { // generic back
   if (state.quizLock) return;
 
-  // ✅ FALLBACK: если видим settings профиля, но state.tab почему-то не "profile"
+    // ✅ FALLBACK только когда реально открыт профиль.
+  // Иначе stale profile-settings перехватывает back у Courses/Tours.
+  const profileView = document.getElementById("view-profile");
+  const profileViewActive = profileView && profileView.classList.contains("is-active");
+
   const ps = document.getElementById("profile-settings");
-  const psActive = ps && ps.classList.contains("is-active") && ps.hidden !== true;
+  const psActive =
+    profileViewActive &&
+    ps &&
+    ps.classList.contains("is-active") &&
+    ps.hidden !== true;
+
   if (psActive) {
     // возвращаемся на main профиля предсказуемо
     state.tab = "profile";
