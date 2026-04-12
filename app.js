@@ -476,76 +476,63 @@ async function waitForOverlayPaint() {
     }
   }
 
-  // 2) ensure users row exists (id == auth.uid())
+    // 2) get auth user, but НЕ создаём public.users-строку до завершения регистрации
   const { data: userData } = await sb.auth.getUser();
   const u = userData?.user;
   if (!u?.id) return sb;
 
   const tg = getTelegramUserSafe();
-  const langGuess = tg?.language_code || (typeof getTelegramLang === "function" ? getTelegramLang() : null) || "ru";
 
-  // ✅ если локальный профиль уже есть — считаем content language источником истины
-  const lp = safeJsonParse(localStorage.getItem(LS.profile), null);
-  const contentLang = lp?.language || langGuess;
-
-  const payload = {
-    id: u.id,
-    telegram_user_id: tg?.id ? String(tg.id) : null,
-    avatar_url: null,
-    language_code: contentLang,
-  };
-
-  // ✅ НЕ перезатираем имя/фамилию в NULL на boot
-  if (tg?.first_name) payload.first_name = String(tg.first_name).trim();
-  if (tg?.last_name) payload.last_name = String(tg.last_name).trim();
-
-  // upsert by primary key id (critical) — with retry + safe catch
+  // ✅ Проверяем, существует ли уже полноценная DB-строка пользователя.
+  // Если её нет, значит регистрация ещё не завершена — shell-row на boot НЕ создаём.
+  let hasDbUserRow = false;
   try {
-    await dbWriteWithRetry(async () => {
-      const { error } = await sb.from("users").upsert(payload, { onConflict: "id" });
-      if (error) throw error;
-      return true;
-    }, { tries: 3, baseDelayMs: 350 });
-  } catch (e) {
-    // не валим приложение — но фиксируем в events
-    try {
-      const uid = u?.id || null;
-      await logDbErrorToEvents(uid, "boot_users_upsert_failed", e, { has_tg: !!tg });
-    } catch {}
+    const { data: existingUserRow, error } = await sb
+      .from("users")
+      .select("id")
+      .eq("id", u.id)
+      .maybeSingle();
+
+    hasDbUserRow = !error && !!existingUserRow?.id;
+  } catch {
+    hasDbUserRow = false;
   }
 
   // ✅ reset subject cache for this session (prevents poisoned null cache)
   try { _subjectIdByKeyCache.clear(); } catch {}
 
-  // ✅ boot event: write at most once per day per device (prevents DB flooding)
-  try {
-    const day = dayKeyTashkent(Date.now());
-    const k = "iclub_boot_day_v1";
-    const last = String(localStorage.getItem(k) || "");
-    if (last !== day) {
-      await sb.from("app_events").insert({
-        user_id: u.id,
-        event_type: "boot",
-        payload: { has_tg: !!tg, ua: navigator.userAgent },
-      });
-      localStorage.setItem(k, day);
+  // ✅ boot event и hydrate credentials делаем только если users-row уже существует.
+  // Иначе app_events/users FK ломается, а в users попадают неполные shell-данные.
+  if (hasDbUserRow) {
+    // ✅ boot event: write at most once per day per device (prevents DB flooding)
+    try {
+      const day = dayKeyTashkent(Date.now());
+      const k = "iclub_boot_day_v1";
+      const last = String(localStorage.getItem(k) || "");
+      if (last !== day) {
+        await sb.from("app_events").insert({
+          user_id: u.id,
+          event_type: "boot",
+          payload: { has_tg: !!tg, ua: navigator.userAgent },
+        });
+        localStorage.setItem(k, day);
+      }
+    } catch (e) {
+      logClientError("boot_event_insert", e);
     }
-  } catch (e) {
-    logClientError("boot_event_insert", e);
+
+    // ✅ Earned Credentials: hydrate local events store from Supabase
+    try {
+      const changed = await hydrateLocalEventsFromSupabase(sb, u.id);
+
+      try { runDailyCredentialJobs(); } catch {}
+
+      if (changed) {
+        try { renderProfile(); } catch {}
+        try { renderSubjectHub(); } catch {}
+      }
+    } catch {}
   }
-
-  // ✅ Earned Credentials: hydrate local events store from Supabase
-  try {
-    const changed = await hydrateLocalEventsFromSupabase(sb, u.id);
-
-    try { runDailyCredentialJobs(); } catch {}
-
-    if (changed) {
-      try { renderProfile(); } catch {}
-      try { renderSubjectHub(); } catch {}
-    }
-  } catch {}
-
   return sb;
 }
  
