@@ -347,10 +347,18 @@ async function waitForOverlayPaint() {
 
       for (const op of ops) {
         try {
-          if (op?.type === "practice_save") {
+                    if (op?.type === "practice_save") {
             // op.payload: { attempt, quiz }
             const res = await savePracticeAttemptToSupabase(op.payload?.attempt, op.payload?.quiz);
-            if (!res?.ok) keep.push(op);
+
+            if (res?.ok) {
+              try {
+                refreshLiveProgressSurfaces();
+              } catch {}
+            } else {
+              keep.push(op);
+            }
+
             continue;
           }
 
@@ -14211,11 +14219,17 @@ if (!quiz?.drillType) {
   // ✅ Variant A: drills (retry_mistakes / topic_drill) do NOT write to practice_attempts
   let res = { ok: true, reason: "drill_no_db" };
 
-  if (!quiz?.drillType) {
+    if (!quiz?.drillType) {
     res = await savePracticeAttemptToSupabase(attempt, quiz);
 
     if (res?.ok) {
       clearPracticeDraft();
+
+      // ✅ после фактического сохранения в БД перерисовываем живые поверхности,
+      // чтобы Home / Profile / Subject Hub увидели уже новые practice-данные
+      try {
+        refreshLiveProgressSurfaces();
+      } catch {}
     } else {
       // ✅ offline-safe: queue practice save for retry after reconnect
            enqueuePendingOp({
