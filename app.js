@@ -14329,8 +14329,13 @@ const recKeys = Array.from(new Set(
 ));
 
 if (meta) {
+  const scoreLabel = t("archive_score_label") || "Результат";
+  const timeLabel = t("archive_time_label") || "Время";
+  const secSuffix = t("practice_time_sec_suffix") || "с";
+
   meta.textContent =
-    `Score: ${attempt.score}/${attempt.total} (${attempt.percent}%) • ${attempt.durationSec}s` +
+    `${scoreLabel}: ${attempt.score}/${attempt.total} (${attempt.percent}%)` +
+    ` • ${timeLabel}: ${attempt.durationSec}${secSuffix}` +
     ` • ${t("practice_errors")}: ${wrong.length}` +
     ` • ${t("practice_topics")}: ${recKeys.length}`;
 }
@@ -14347,12 +14352,16 @@ try {
   (quiz?.drillType && quiz.drillType !== "past_tours")
     ? "practice_to_recs"
     : "practice_to_subject";
+
   const btn1 = $("#practice-to-subject-btn");
   const btn2 = $("#practice-review-to-subject-btn");
+  const btn3 = $("#practice-recs-to-subject-btn");
+
   if (btn1) btn1.textContent = t(exitKey);
   if (btn2) btn2.textContent = t(exitKey);
+  if (btn3) btn3.textContent = t(exitKey);
 } catch {}
-
+     
       // Show result screen (replace quiz screen to avoid "dead" back navigation)
 if (quiz?.drillType) replaceCoursesTop("practice-result");
 else replaceCourses("practice-result");
@@ -14457,11 +14466,15 @@ const attempt =
       head.style.padding = "12px 12px";
       head.style.borderRadius = "16px";
 
-      const left = document.createElement("div");
+            const left = document.createElement("div");
       left.style.textAlign = "left";
+
+      const questionsLabel = t("tours_fact_questions") || "Вопросов";
+      const errorsLabel = t("practice_errors") || "Ошибок";
+
       left.innerHTML = `
         <div style="font-weight:900">${escapeHTML(topic)}</div>
-        <div class="muted small">Вопросов: ${totalCount} • Ошибок: ${wrongCount}</div>
+        <div class="muted small">${escapeHTML(questionsLabel)}: ${totalCount} • ${escapeHTML(errorsLabel)}: ${wrongCount}</div>
       `;
 
       const right = document.createElement("div");
@@ -14663,11 +14676,16 @@ function syncPracticeResultBadges(attemptOverride) {
   if (recsCountEl) recsCountEl.textContent = String(recKeys.length);
 }
  
-  function renderPracticeRecs() {
+    function renderPracticeRecs() {
     const wrap = $("#practice-recs-list");
     if (!wrap) return;
 
-    const attempt = state.practiceLastAttempt;
+    const ctx = state?.courses?.practiceContext || "main";
+    const attempt =
+      (ctx === "drill" && state.practiceLastDrillAttempt)
+        ? state.practiceLastDrillAttempt
+        : state.practiceLastAttempt;
+
     if (!attempt || !Array.isArray(attempt.details)) {
       wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_recs_empty"))}</div>`;
       return;
