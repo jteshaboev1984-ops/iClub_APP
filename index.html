@@ -575,21 +575,27 @@
             </section>
 
             <!-- Practice Result -->
-            <section id="courses-practice-result" class="stack-screen" data-stack="courses" data-screen="practice-result">
+                       <section id="courses-practice-result" class="stack-screen" data-stack="courses" data-screen="practice-result">
               <div class="section">
-                <div class="h1">Результат практики</div>
-                <div id="practice-result-meta" class="muted">Score: 0/10</div>
+                <div class="h1" data-i18n="practice_result_title">Результат практики</div>
+                <div id="practice-result-meta" class="muted">—</div>
               </div>
 
               <div class="cards-grid">
                 <button class="card-btn" type="button" data-action="practice-review">
-                  <div class="card-title">Разбор ошибок <span id="practice-review-count" class="badge badge-pin" style="margin-left:6px">0</span></div>
-                  <div class="muted small">Правильные ответы и объяснения</div>
+                  <div class="card-title">
+                    <span data-i18n="practice_review_title">Разбор ошибок</span>
+                    <span id="practice-review-count" class="badge badge-pin" style="margin-left:6px">0</span>
+                  </div>
+                  <div class="muted small" data-i18n="practice_review_sub">Правильные ответы и объяснения</div>
                 </button>
 
                 <button class="card-btn" type="button" data-action="practice-recommendations">
-                  <div class="card-title">Рекомендуем прочитать <span id="practice-recs-count" class="badge badge-pin" style="margin-left:6px">0</span></div>
-                  <div class="muted small">Главы/страницы по ошибкам</div>
+                  <div class="card-title">
+                    <span data-i18n="practice_recs_title">Рекомендации</span>
+                    <span id="practice-recs-count" class="badge badge-pin" style="margin-left:6px">0</span>
+                  </div>
+                  <div class="muted small" data-i18n="practice_recs_sub">Что прочитать по вашим ошибкам</div>
                 </button>
               </div>
 
@@ -629,7 +635,7 @@
 
 <div class="actions-row">
   <button class="btn" type="button" data-action="practice-back-to-result" data-i18n="practice_back_to_result">Назад к результату</button>
-  <button class="btn primary" type="button" data-action="to-subject-hub" data-i18n="practice_to_subject">К предмету</button>
+  <button id="practice-recs-to-subject-btn" class="btn primary" type="button" data-action="practice-exit" data-i18n="practice_to_subject">К предмету</button>
 </div>
             </section>
 
