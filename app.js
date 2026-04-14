@@ -5042,7 +5042,11 @@ function formatDateTime(ts) {
   ];
 
     function showView(viewName) {
-  if (viewName !== "splash") {
+  const currentActive = document.querySelector(".view.is-active");
+  const currentViewName = currentActive?.dataset?.view || "";
+  const isSplashToRegistration = currentViewName === "splash" && viewName === "registration";
+
+  if (viewName !== "splash" && !isSplashToRegistration) {
     showViewTransitionOverlay();
   }
 
@@ -5054,30 +5058,32 @@ function formatDateTime(ts) {
 
   updateTopbarForView(viewName);
 
-  // ✅ FIX: не просто "вверх страницы", а "к началу активного view"
   const target = document.getElementById(`view-${viewName}`);
   if (!target) return;
 
   const jumpToTargetTop = () => {
-    // 1) если скроллится main — сбрасываем его
     const mainEl = document.getElementById("main");
     if (mainEl) mainEl.scrollTop = 0;
 
-    // 2) если скроллится документ — тоже сбрасываем
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
 
-    // 3) главное: принудительно ставим начало активного view в верх видимой области
-    // (работает даже если браузер/вебвью "держит" странную позицию)
     try {
       target.scrollIntoView({ block: "start", inline: "nearest" });
     } catch (e) {
-      // fallback
       target.scrollIntoView(true);
     }
   };
 
-  // достаточно одного вызова с микро-задержкой, чтобы дать DOM перерисоваться
+  // ✅ для splash → registration не делаем отложенный принудительный jump
+  if (isSplashToRegistration) {
+    const mainEl = document.getElementById("main");
+    if (mainEl) mainEl.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    return;
+  }
+
   setTimeout(jumpToTargetTop, 10);
 }
 
@@ -19120,10 +19126,10 @@ try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
       }
 
       if (!isRegistered()) {
-        showView("registration");
-        bindRegistration();
-        return;
-      }
+  bindRegistration();
+  showView("registration");
+  return;
+}
 
       renderAllSubjects();
       renderHome();
