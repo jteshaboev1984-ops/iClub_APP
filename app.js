@@ -5879,15 +5879,55 @@ async function saveRegistrationToSupabase(profile) {
   }
 
   const tgUser = getTelegramUserSafe() || {};
-  const avatar = tgUser?.photo_url || null;
+const avatar = tgUser?.photo_url || null;
 
-   // 1) update users row
-  const fullNameRaw = String(profile?.full_name || profile?.name || "").trim();
-  const nameParts = fullNameRaw ? fullNameRaw.split(/\s+/).filter(Boolean) : [];
-  const firstFromProfile = nameParts.length ? nameParts[0] : null;
-  const lastFromProfile = (nameParts.length > 1) ? nameParts.slice(1).join(" ") : null;
+// 1) update users row
+const fullNameRaw = String(profile?.full_name || profile?.name || "").trim();
+const nameParts = fullNameRaw ? fullNameRaw.split(/\s+/).filter(Boolean) : [];
+const firstFromProfile = nameParts.length ? nameParts[0] : null;
+const lastFromProfile = (nameParts.length > 1) ? nameParts.slice(1).join(" ") : null;
 
-  const usersPayload = {
+const normalizedLang = ["ru", "uz", "en"].includes(
+  String(profile?.language || tgUser?.language_code || "ru").toLowerCase()
+)
+  ? String(profile?.language || tgUser?.language_code || "ru").toLowerCase()
+  : "ru";
+
+const schoolFlag =
+  profile?.is_school_student === true ? true :
+  profile?.is_school_student === false ? false :
+  null;
+
+if (
+  !fullNameRaw ||
+  schoolFlag === null ||
+  !(Number(profile?.region_id) > 0) ||
+  !(Number(profile?.district_id) > 0) ||
+  !String(profile?.district || "").trim() ||
+  (schoolFlag === true && (
+    !String(profile?.school || "").trim() ||
+    !String(profile?.class || "").trim()
+  ))
+) {
+  try {
+    trackEvent("registration_db_error", {
+      where: "preflight_invalid_profile",
+      has_full_name: !!fullNameRaw,
+      school_flag_known: schoolFlag !== null,
+      region_id: Number(profile?.region_id) || null,
+      district_id: Number(profile?.district_id) || null,
+      has_region_text: !!String(profile?.region || "").trim(),
+      has_district_text: !!String(profile?.district || "").trim(),
+      has_school: !!String(profile?.school || "").trim(),
+      has_class: !!String(profile?.class || "").trim(),
+      subjects_count: Array.isArray(profile?.subjects) ? profile.subjects.length : 0,
+      tg_id_present: tgUser?.id != null
+    });
+  } catch {}
+  return { ok: false, reason: "invalid_profile_payload" };
+}
+
+const usersPayload = {
     id: uid,
     telegram_user_id: (tgUser?.id != null) ? String(tgUser.id) : null,
 
@@ -5896,8 +5936,8 @@ async function saveRegistrationToSupabase(profile) {
     last_name: tgUser?.last_name || lastFromProfile || null,
 
     avatar_url: avatar,
-        language_code: profile?.language || tgUser?.language_code || "ru",
-    is_school_student: !!profile?.is_school_student,
+    language_code: normalizedLang,
+    is_school_student: schoolFlag,
 
     // ✅ сохраняем ID (FK), а текст оставляем для отображения/резерва
     region_id: (profile?.region_id != null && profile.region_id !== "") ? Number(profile.region_id) : null,
@@ -5910,6 +5950,24 @@ async function saveRegistrationToSupabase(profile) {
     class: profile?.class || null
   };
 
+   try {
+  trackEvent("registration_db_payload", {
+    uid_present: !!uid,
+    tg_id_present: tgUser?.id != null,
+    has_first_name: !!usersPayload.first_name,
+    has_last_name: !!usersPayload.last_name,
+    language_code: usersPayload.language_code,
+    is_school_student: usersPayload.is_school_student,
+    region_id: Number(usersPayload.region_id) || null,
+    district_id: Number(usersPayload.district_id) || null,
+    has_region_text: !!String(usersPayload.region || "").trim(),
+    has_district_text: !!String(usersPayload.district || "").trim(),
+    has_school: !!String(usersPayload.school || "").trim(),
+    has_class: !!String(usersPayload.class || "").trim(),
+    subjects_count: Array.isArray(profile?.subjects) ? profile.subjects.length : 0
+  });
+} catch {}
+   
     let uErr = null;
   try {
     await dbWriteWithRetry(async () => {
@@ -17763,32 +17821,34 @@ form.addEventListener("submit", async (e) => {
     }
 
     const isSchoolStudent = ($("#reg-is-school-toggle")?.checked || $("#reg-is-school")?.value === "yes");
-    const school = $("#reg-school")?.value?.trim() || "";
-    const klass = $("#reg-class")?.value?.trim() || "";
+const school = $("#reg-school")?.value?.trim() || "";
+const klass = $("#reg-class")?.value?.trim() || "";
 
-        const main1Raw = $("#reg-main-subject-1")?.value || "";
-    const main2Raw = $("#reg-main-subject-2")?.value || "";
-    const add1Raw = $("#reg-additional-subject")?.value || "";
+const main1Raw = $("#reg-main-subject-1")?.value || "";
+const main2Raw = $("#reg-main-subject-2")?.value || "";
+const add1Raw = $("#reg-additional-subject")?.value || "";
 
-    const main1 = isSubjectActive(main1Raw) ? main1Raw : "";
-    const main2 = isSubjectActive(main2Raw) ? main2Raw : "";
-    const add1 = isSubjectActive(add1Raw) ? add1Raw : "";
+const main1 = isSubjectActive(main1Raw) ? main1Raw : "";
+const main2 = isSubjectActive(main2Raw) ? main2Raw : "";
+const add1 = isSubjectActive(add1Raw) ? add1Raw : "";
 
-    // district required ONLY when select is enabled and has real options
-    const districtRequired =
-      !!districtEl &&
-      !districtEl.disabled &&
-      (districtEl.options?.length || 0) > 1;
+const langNorm = String(lang || "ru").toLowerCase();
+const langAllowed = ["ru", "uz", "en"].includes(langNorm);
 
-    if (
-      !fullName ||
-      !region ||
-      (districtRequired && !district) ||
-      (isSchoolStudent && (!main1 || !school || !klass))
-      ) {
-     showToast(t("fill_required_fields"));
-     return;
-   }
+const regionSelected = Number(region_id) > 0;
+const districtSelected = Number(district_id) > 0;
+
+if (
+  !fullName ||
+  !langAllowed ||
+  !regionSelected ||
+  !district ||
+  !districtSelected ||
+  (isSchoolStudent && (!main1 || !school || !klass))
+) {
+  showToast(t("fill_required_fields"));
+  return;
+}
     const subjects = [];
 
     if (isSchoolStudent) {
