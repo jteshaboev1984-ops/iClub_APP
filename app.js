@@ -245,6 +245,38 @@ async function waitForOverlayPaint() {
     throw lastErr;
   }
 
+   async function hasDbUserRow(uid) {
+  try {
+    if (!window.sb || !uid) return false;
+
+    const { data, error } = await window.sb
+      .from("users")
+      .select("id")
+      .eq("id", uid)
+      .maybeSingle();
+
+    return !error && !!data?.id;
+  } catch {
+    return false;
+  }
+}
+
+async function ensureHomeDbReady() {
+  try {
+    const profile = loadProfile();
+    if (!profile || !window.sb) return { ok: true, skipped: true };
+
+    if (!__profileSubjectsDbReady) {
+      try { await ensureProfileSubjectsDbSynced(); } catch {}
+    }
+
+    try { await ensureProfileGeoTranslationsHydrated(); } catch {}
+
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
+}
   // ---------------------------
   // Pending DB ops (offline-safe)
   // ---------------------------
@@ -374,10 +406,18 @@ async function waitForOverlayPaint() {
             continue;
           }
 
-          if (op?.type === "app_event") {
-            // ✅ best-effort: insert analytics event
+                    if (op?.type === "app_event") {
+            const eventUserId = String(op.userId || "");
+
+            // ✅ не пишем app_events, пока нет полноценной users-row
+            const canWriteEvent = await hasDbUserRow(eventUserId);
+            if (!canWriteEvent) {
+              keep.push(op);
+              continue;
+            }
+
             const { error } = await window.sb.from("app_events").insert({
-              user_id: op.userId,
+              user_id: eventUserId,
               event_type: op.eventType,
               payload: op.payload || {}
             });
@@ -7837,6 +7877,10 @@ async function downloadCertificateAsPdf(row) {
 async function logDbErrorToEvents(uid, where, error, extraPayload = {}) {
   try {
     if (!window.sb || !uid) return;
+
+    const canWriteEvent = await hasDbUserRow(uid);
+    if (!canWriteEvent) return;
+
     await window.sb.from("app_events").insert({
       user_id: uid,
       event_type: "practice_db_error",
@@ -17989,7 +18033,7 @@ if (
         });
       } catch {}
 
-      window.i18n?.setLang(lang);
+                 window.i18n?.setLang(lang);
       applyStaticI18n();
 
       state.tab = "home";
@@ -18002,8 +18046,9 @@ if (
       state.quizLock = null;
       saveState();
 
-      // порядок важен: сначала активируем таб, потом рисуем
+      // порядок важен: сначала активируем таб, потом ждём критичные данные, потом рисуем
       setTab("home");
+      await ensureHomeDbReady();
       renderHome();
       renderAllSubjects();
                 } finally {
@@ -19125,12 +19170,13 @@ try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
         return;
       }
 
-      if (!isRegistered()) {
-  bindRegistration();
-  showView("registration");
-  return;
-}
+            if (!isRegistered()) {
+        showView("registration");
+        bindRegistration();
+        return;
+      }
 
+      await ensureHomeDbReady();
       renderAllSubjects();
       renderHome();
 
