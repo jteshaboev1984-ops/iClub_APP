@@ -1012,33 +1012,38 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
 }
 
     function trackEvent(type, payload = {}) {
-    const store = eventsStore();
-    const id = ++store.seq;
-    const ts = Date.now();
+  const store = eventsStore();
+  const id = ++store.seq;
+  const ts = Date.now();
 
-    const item = {
-      id,
-      type,
-      ts,
-      day: dayKeyTashkent(ts),
-      payload: Object.assign({}, (payload || {}), { client_event_id: id })
-    };
+  const payloadForEvent = Object.assign({}, (payload || {}), {
+    client_event_id: id,
+    ts: new Date(ts).toISOString()
+  });
 
-    store.items.push(item);
+  const item = {
+    id,
+    type,
+    ts,
+    day: dayKeyTashkent(ts),
+    payload: payloadForEvent
+  };
 
-    // keep last N events (avoid LS overflow)
-    if (store.items.length > 2000) store.items = store.items.slice(-2000);
+  store.items.push(item);
 
-    saveJsonLS(LS.events, store);
+  // keep last N events (avoid LS overflow)
+  if (store.items.length > 2000) store.items = store.items.slice(-2000);
 
-    // optional: mirror to Supabase app_events
-    mirrorEventToSupabase(type, { ...payload, ts: new Date(ts).toISOString() });
+  saveJsonLS(LS.events, store);
 
-    // realtime evaluation hooks
-    evaluateRealtimeCredentials(item);
+  // optional: mirror to Supabase app_events
+  mirrorEventToSupabase(type, payloadForEvent);
 
-    return item;
-  }
+  // realtime evaluation hooks
+  evaluateRealtimeCredentials(item);
+
+  return item;
+}
 
   // ✅ DB sync for video analytics (video_events)
     async function insertVideoEventToSupabase(event_type, lesson_id, watch_seconds) {
@@ -5589,7 +5594,7 @@ async function getAuthUid() {
 
     const now = Date.now();
 
-    // ✅ reuse UID for 10 seconds to prevent auth lock contention
+    // ✅ reuse only REAL uid
     if (_cachedAuthUid && (now - _cachedAuthUidAt) < 10000) {
       return _cachedAuthUid;
     }
@@ -5603,11 +5608,18 @@ async function getAuthUid() {
 
     const uid = result?.data?.user?.id || null;
 
-    _cachedAuthUid = uid;
-    _cachedAuthUidAt = now;
+    if (uid) {
+      _cachedAuthUid = uid;
+      _cachedAuthUidAt = now;
+    } else {
+      _cachedAuthUid = null;
+      _cachedAuthUidAt = 0;
+    }
 
     return uid;
   } catch {
+    _cachedAuthUid = null;
+    _cachedAuthUidAt = 0;
     return null;
   }
 }
@@ -11095,6 +11107,12 @@ function uiAlert({ title, message, okText } = {}) {
   const main2 = $("#reg-main-subject-2");
   if (!wrap || !main1 || !main2) return;
 
+  if (wrap.dataset.bound === "1") {
+    try { document.dispatchEvent(new CustomEvent("reg-subjects-i18n-updated")); } catch {}
+    return;
+  }
+  wrap.dataset.bound = "1";
+
   const summaryEl = $("#reg-subject-summary");
   const buttons = () => $$("#reg-subject-chips .chip-btn");
 
@@ -11141,24 +11159,27 @@ function uiAlert({ title, message, okText } = {}) {
     summaryEl.innerHTML = rows.join("");
   };
   
-     document.addEventListener("reg-subjects-i18n-updated", updateSummary);
+     if (!wrap.dataset.i18nBound) {
+  document.addEventListener("reg-subjects-i18n-updated", updateSummary);
+  wrap.dataset.i18nBound = "1";
+}
   
-     const syncChipsFromSelects = () => {
-    const selected = [main1.value, main2.value].filter(Boolean);
-    buttons().forEach(btn => {
-      btn.classList.toggle("is-active", selected.includes(btn.dataset.subjectKey));
-    });
-    updateSummary();
-  };
+const syncChipsFromSelects = () => {
+  const selected = [main1.value, main2.value].filter(Boolean);
+  buttons().forEach(btn => {
+    btn.classList.toggle("is-active", selected.includes(btn.dataset.subjectKey));
+  });
+  updateSummary();
+};
 
-  const syncSelectsFromChips = () => {
-    const selected = buttons().filter(b => b.classList.contains("is-active")).map(b => b.dataset.subjectKey);
-    main1.value = selected[0] || "";
-    main2.value = selected[1] || "";
-    updateSummary();
-  };
+const syncSelectsFromChips = () => {
+  const selected = buttons().filter(b => b.classList.contains("is-active")).map(b => b.dataset.subjectKey);
+  main1.value = selected[0] || "";
+  main2.value = selected[1] || "";
+  updateSummary();
+};
 
-  wrap.addEventListener("click", (e) => {
+wrap.addEventListener("click", (e) => {
     const btn = e.target.closest(".chip-btn");
     if (!btn) return;
 
@@ -11179,9 +11200,15 @@ function uiAlert({ title, message, okText } = {}) {
     syncSelectsFromChips();
   });
 
+  if (!main1.dataset.boundChange) {
   main1.addEventListener("change", syncChipsFromSelects);
+  main1.dataset.boundChange = "1";
+}
+if (!main2.dataset.boundChange) {
   main2.addEventListener("change", syncChipsFromSelects);
-  syncChipsFromSelects();
+  main2.dataset.boundChange = "1";
+}
+syncChipsFromSelects();
 }
        // live language switch on registration
          const langSel = $("#reg-language");
@@ -14019,6 +14046,11 @@ try {
   const btn = $("#practice-submit-btn");
   if (!btn || !quiz || quiz.mode !== "practice") return;
 
+  if (quiz._submitInFlight || quiz._finishing) {
+    btn.disabled = true;
+    return;
+  }
+
   const q = quiz.questions[quiz.index];
   const ua = quiz.answers[quiz.index];
 
@@ -14074,90 +14106,108 @@ try {
   }
 
   function handlePracticeSubmit(isAutoTimeout = false) {
-    const quiz = state.quiz;
-    if (!quiz || quiz.mode !== "practice") return;
+  const quiz = state.quiz;
+  if (!quiz || quiz.mode !== "practice") return;
+  if (quiz._submitInFlight || quiz._finishing) return;
 
-    const q = quiz.questions[quiz.index];
-    const userAns = quiz.answers[quiz.index];
+  quiz._submitInFlight = true;
 
-    // Validate: must have answer if manual submit
-    if (!isAutoTimeout) {
-      if (q.type === "mcq") {
-        if (userAns === null || userAns === undefined) {
-          showToast(t("select_option_required"));
-          return;
-        }
-      } else {
-        const val = String(userAns ?? "").trim();
-        if (!isValidInputAnswer(q, val)) {
-          const errEl = $("#practice-input-error");
-          if (errEl) {
-            errEl.textContent = t("invalid_answer_format");
-            errEl.style.display = "block";
-          } else {
-            showToast(t("invalid_answer_format"));
-          }
-          return;
-        }
-      }
+  const submitBtn = $("#practice-submit-btn");
+  if (submitBtn) submitBtn.disabled = true;
+
+  const releaseSubmitLock = () => {
+    if (state.quiz === quiz && !quiz._finishing) {
+      quiz._submitInFlight = false;
+      updatePracticeSubmitEnabled();
     }
+  };
 
-        // Evaluate correctness
-    let isCorrect = false;
+  const q = quiz.questions[quiz.index];
+  const userAns = quiz.answers[quiz.index];
 
+  // Validate: must have answer if manual submit
+  if (!isAutoTimeout) {
     if (q.type === "mcq") {
-      const idx = (userAns === null || userAns === undefined) ? null : Number(userAns);
-      if (idx !== null && idx === Number(q.correctIndex)) isCorrect = true;
+      if (userAns === null || userAns === undefined) {
+        releaseSubmitLock();
+        showToast(t("select_option_required"));
+        return;
+      }
     } else {
-      const raw = String(userAns ?? "").trim();
-      if (raw) {
-        if (q.inputKind === "numeric") {
-          isCorrect = areNumericAnswersEquivalent(raw, q.correctAnswer);
+      const val = String(userAns ?? "").trim();
+      if (!isValidInputAnswer(q, val)) {
+        releaseSubmitLock();
+        const errEl = $("#practice-input-error");
+        if (errEl) {
+          errEl.textContent = t("invalid_answer_format");
+          errEl.style.display = "block";
         } else {
-          isCorrect = (raw.toLowerCase() === String(q.correctAnswer || "").trim().toLowerCase());
+          showToast(t("invalid_answer_format"));
         }
+        return;
       }
     }
+  }
 
-    quiz.correct[quiz.index] = isCorrect;
+  // Evaluate correctness
+  let isCorrect = false;
 
-    if (isAutoTimeout) {
-      showToast(userAns ? t("toast_time_expired_answer_saved") : t("toast_time_expired_no_answer"));
+  if (q.type === "mcq") {
+    const idx = (userAns === null || userAns === undefined) ? null : Number(userAns);
+    if (idx !== null && idx === Number(q.correctIndex)) isCorrect = true;
+  } else {
+    const raw = String(userAns ?? "").trim();
+    if (raw) {
+      if (q.inputKind === "numeric") {
+        isCorrect = areNumericAnswersEquivalent(raw, q.correctAnswer);
+      } else {
+        isCorrect = (raw.toLowerCase() === String(q.correctAnswer || "").trim().toLowerCase());
+      }
     }
+  }
+
+  quiz.correct[quiz.index] = isCorrect;
+
+  if (isAutoTimeout) {
+    showToast(userAns ? t("toast_time_expired_answer_saved") : t("toast_time_expired_no_answer"));
+  }
 
   // ---- time_spent per question (seconds) ----
-  // We store: time_allowed - time_left at the moment of submit/timeout.
-    const allowed = Number(q.timeLimitSec) || Number(PRACTICE_CONFIG.timeByDifficulty[q.difficulty]) || 60;
+  const allowed = Number(q.timeLimitSec) || Number(PRACTICE_CONFIG.timeByDifficulty[q.difficulty]) || 60;
   const left = Number(quiz.qTimeLeft) || 0;
 
   if (!Array.isArray(quiz.timeSpent)) quiz.timeSpent = new Array(quiz.questions.length).fill(0);
   quiz.timeSpent[quiz.index] = Math.max(0, Math.min(allowed, allowed - left));
 
-  // Next question or finish
   stopPracticeQuestionTimer();
 
   const nextIndex = quiz.index + 1;
 
-    if (nextIndex >= quiz.questions.length) {
-      finishPractice();
-      return;
-    }
-
-       quiz.index = nextIndex;
-    const nextQ = quiz.questions[quiz.index];
-    quiz.qTimeLeft = Number(nextQ.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[nextQ.difficulty] || 60;
-    quiz.qEndsAtMs = null; // ✅ NEW: force recompute for next question
-
-    saveState();
-    renderPracticeQuiz();
-    startPracticeQuestionTimer();
+  if (nextIndex >= quiz.questions.length) {
+    quiz._submitInFlight = false;
+    finishPractice();
+    return;
   }
 
-  function finishPractice() {
-    const quiz = state.quiz;
-    if (!quiz || quiz.mode !== "practice") return;
+  quiz.index = nextIndex;
+  const nextQ = quiz.questions[quiz.index];
+  quiz.qTimeLeft = Number(nextQ.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[nextQ.difficulty] || 60;
+  quiz.qEndsAtMs = null;
 
-    stopPracticeQuestionTimer();
+  quiz._submitInFlight = false;
+
+  saveState();
+  renderPracticeQuiz();
+  startPracticeQuestionTimer();
+}
+
+  function finishPractice() {
+  const quiz = state.quiz;
+  if (!quiz || quiz.mode !== "practice") return;
+  if (quiz._finishing) return;
+
+  quiz._finishing = true;
+  stopPracticeQuestionTimer();
 
     // duration excluding pauses
     const finishedAt = Date.now();
@@ -14276,67 +14326,55 @@ if (!quiz?.drillType) {
 
 // ✅ DB-first: save attempt + answers to Supabase (non-blocking UX)
 (async () => {
-  // DEBUG 1: we entered DB save branch
   try {
-    trackEvent("practice_db_save_started", {
-      subject_key: quiz?.subjectKey || null,
-      attempt_key,
-      score: attempt?.score ?? null,
-      percent: attempt?.percent ?? null
-    });
-  } catch {}
-
-  try {
-  // ✅ Variant A: drills (retry_mistakes / topic_drill) do NOT write to practice_attempts
-  let res = { ok: true, reason: "drill_no_db" };
+    let res = { ok: true, reason: quiz?.drillType ? "drill_no_db" : "not_started" };
 
     if (!quiz?.drillType) {
-    res = await savePracticeAttemptToSupabase(attempt, quiz);
-
-    if (res?.ok) {
-      clearPracticeDraft();
-
-      // ✅ после фактического сохранения в БД перерисовываем живые поверхности,
-      // чтобы Home / Profile / Subject Hub увидели уже новые practice-данные
       try {
-        refreshLiveProgressSurfaces();
+        trackEvent("practice_db_save_started", {
+          subject_key: quiz?.subjectKey || null,
+          attempt_key,
+          score: attempt?.score ?? null,
+          percent: attempt?.percent ?? null
+        });
       } catch {}
-    } else {
-      // ✅ offline-safe: queue practice save for retry after reconnect
-           enqueuePendingOp({
-        type: "practice_save",
-        payload: buildPracticeSavePayload(attempt, quiz)
-      });
+
+      res = await savePracticeAttemptToSupabase(attempt, quiz);
+
+      if (res?.ok) {
+        clearPracticeDraft();
+
+        try {
+          refreshLiveProgressSurfaces();
+        } catch {}
+      } else {
+        enqueuePendingOp({
+          type: "practice_save",
+          payload: buildPracticeSavePayload(attempt, quiz)
+        });
+      }
+
+      try {
+        trackEvent("practice_db_save_result", {
+          ok: !!res?.ok,
+          reason: res?.reason || null,
+          attempt_id: res?.attemptId ?? null,
+          subject_id_db: res?.subjectId ?? null,
+          subject_key: quiz?.subjectKey || null,
+          attempt_key
+        });
+      } catch {}
+
+      const currentAttemptKey = String(state?.practiceLastAttempt?.attemptKey || "");
+      const resultAttemptKey = String(attempt?.attemptKey || "");
+
+      if (currentAttemptKey && resultAttemptKey && currentAttemptKey === resultAttemptKey) {
+        state.practiceLastAttempt = {
+          ...(state.practiceLastAttempt || attempt || {}),
+          db: res
+        };
+      }
     }
-  } else {
-    // drill: never clear normal draft, never enqueue DB save
-  }
-
-    // DEBUG 2: DB save result
-    try {
-      trackEvent("practice_db_save_result", {
-        ok: !!res?.ok,
-        reason: res?.reason || null,
-        attempt_id: res?.attemptId ?? null,
-        subject_id_db: res?.subjectId ?? null,
-        subject_key: quiz?.subjectKey || null,
-        attempt_key
-      });
-    } catch {}
-
-   // merge db result only into the SAME current attempt
-if (!quiz?.drillType) {
-  const currentAttemptKey = String(state?.practiceLastAttempt?.attemptKey || "");
-  const resultAttemptKey = String(attempt?.attemptKey || "");
-
-  if (currentAttemptKey && resultAttemptKey && currentAttemptKey === resultAttemptKey) {
-    state.practiceLastAttempt = {
-      ...(state.practiceLastAttempt || attempt || {}),
-      db: res
-    };
-  }
-}
-
   } catch (e) {
     // DEBUG 3: crash (must show in app_events no matter what)
     try {
@@ -17607,12 +17645,18 @@ if (state.tab === "profile") {
       try { applyStaticI18n(); } catch {}
     }
     const isSchool = $("#reg-is-school");
-    const isSchoolToggle = $("#reg-is-school-toggle");
-    if (isSchool) isSchool.addEventListener("change", updateSchoolFieldsVisibility);
-    if (isSchoolToggle) {
-      isSchoolToggle.addEventListener("change", updateSchoolFieldsVisibility);
-    }
-     updateSchoolFieldsVisibility();
+const isSchoolToggle = $("#reg-is-school-toggle");
+
+if (isSchool && isSchool.dataset.boundChange !== "1") {
+  isSchool.addEventListener("change", updateSchoolFieldsVisibility);
+  isSchool.dataset.boundChange = "1";
+}
+if (isSchoolToggle && isSchoolToggle.dataset.boundChange !== "1") {
+  isSchoolToggle.addEventListener("change", updateSchoolFieldsVisibility);
+  isSchoolToggle.dataset.boundChange = "1";
+}
+
+updateSchoolFieldsVisibility();
 
     initRegionDistrictUI();
     initRegSubjectChips();
@@ -17624,9 +17668,11 @@ if (state.tab === "profile") {
       .catch(() => null);
 
     const form = $("#reg-form");
-    if (!form) return;
+if (!form) return;
+if (form.dataset.submitBound === "1") return;
+form.dataset.submitBound = "1";
 
-    form.addEventListener("submit", async (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
     const submitBtn = form.querySelector('button[type="submit"]');
@@ -17818,14 +17864,21 @@ if (state.tab === "profile") {
             // keep local profile as UX fallback (DB is source of truth now)
 
       // ✅ fresh start after re-registration (prevents showing old local attempts/stats)
-      try {
-        localStorage.removeItem(LS.practiceDraft);
-        localStorage.removeItem(LS.myRecs);
-        localStorage.removeItem(LS.events);
-        localStorage.removeItem(LS.credentials);
-        // если уже линковали бота раньше — при новой регистрации разрешаем снова
-        try { localStorage.removeItem(LS.botLinked); } catch {}
-      } catch {}
+     try {
+  localStorage.removeItem(LS.practiceDraft);
+  localStorage.removeItem(LS.myRecs);
+  localStorage.removeItem(LS.myTourRecs);
+
+  const prevEvents = loadJsonLS(LS.events, { seq: 0, items: [] });
+  saveJsonLS(LS.events, {
+    seq: Number(prevEvents?.seq) || 0,
+    items: []
+  });
+
+  localStorage.removeItem(LS.credentials);
+  // если уже линковали бота раньше — при новой регистрации разрешаем снова
+  try { localStorage.removeItem(LS.botLinked); } catch {}
+} catch {}
 
       saveProfile(profile);
 
