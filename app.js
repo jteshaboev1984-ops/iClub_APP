@@ -996,6 +996,10 @@ async function syncCredentialsToSupabaseOnce() {
     const uid = userData?.user?.id;
     if (!uid) return;
 
+    // ✅ не пишем user_credentials, пока нет полноценной users-row
+    const canWriteCreds = await hasDbUserRow(uid);
+    if (!canWriteCreds) return;
+
     const ids = await getCredentialIdsMap();
     if (!ids || Object.keys(ids).length === 0) return;
 
@@ -1016,7 +1020,7 @@ async function syncCredentialsToSupabaseOnce() {
         status = anyActive ? "active" : "inactive";
       }
 
-            rows.push({
+      rows.push({
         user_id: uid,
         credential_id: defId,
         status: status,
@@ -1033,6 +1037,8 @@ async function syncCredentialsToSupabaseOnce() {
       .upsert(rows, { onConflict: "user_id,credential_id" });
 
     if (upErr) {
+      // ✅ если это всё ещё FK-гонка, не шумим лишний раз — просто подождём следующего sync
+      if (String(upErr?.code || "") === "23503") return;
       try { console.error("[cred] user_credentials upsert error:", upErr); } catch {}
     }
   } catch (e) {
@@ -1041,7 +1047,6 @@ async function syncCredentialsToSupabaseOnce() {
     __credSyncInFlight = false;
   }
 }
-
 function scheduleCredentialsDbSync(delayMs = 1200) {
   if (!window.sb) return;
   if (__credSyncTimer) clearTimeout(__credSyncTimer);
