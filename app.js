@@ -290,10 +290,18 @@ async function ensureHomeDbReady() {
     }
   }
 
-  function savePendingOps(arr) {
+    function savePendingOps(arr) {
     try {
       localStorage.setItem(LS.pendingOps, JSON.stringify(Array.isArray(arr) ? arr.slice(0, 200) : []));
     } catch {}
+  }
+
+  function hasPendingOpsQueued() {
+    try {
+      return loadPendingOps().length > 0;
+    } catch {
+      return false;
+    }
   }
 
     function enqueuePendingOp(op) {
@@ -19138,9 +19146,13 @@ if (action === "video-complete") {
           } catch {}
         });
 
-        // ✅ gentle periodic flush (in case events were missed)
+                // ✅ gentle periodic flush only when queue is not empty
         setInterval(() => {
-          try { scheduleFlushPendingOps(0); } catch {}
+          try {
+            if (hasPendingOpsQueued()) {
+              scheduleFlushPendingOps(0);
+            }
+          } catch {}
         }, 20000);
       } catch {}
 
