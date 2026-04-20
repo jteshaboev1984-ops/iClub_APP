@@ -59,6 +59,26 @@ function hideToursLoading() {
   el.classList.add("hidden");
 }
 
+function formatTourDateShort(isoDate) {
+  const raw = String(isoDate || "").trim();
+  if (!raw) return "";
+
+  const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return raw;
+
+  return `${m[3]}.${m[2]}.${m[1]}`;
+}
+
+function formatTourDateText(startDate, endDate) {
+  const sd = formatTourDateShort(startDate);
+  const ed = formatTourDateShort(endDate);
+
+  if (sd && ed) return `${sd} → ${ed}`;
+  if (sd) return sd;
+  if (ed) return ed;
+  return "";
+}
+
 let __viewTransitionTimer = null;
 
 function currentLang() {
@@ -11577,7 +11597,7 @@ async function computeHomeCompetitiveStats(subjectKey) {
       ? Math.round(Number(stageStats.best.percent))
       : null;
 
-    const out = {
+       const out = {
       moduleNo: practiceTourNo,
       progressPct: practicePct,
       rankNo: null,
@@ -11588,7 +11608,11 @@ async function computeHomeCompetitiveStats(subjectKey) {
       practiceTotal,
       practicePct,
       bestPracticePct,
-      currentTourNo: Number(activeTour?.tour_no || practiceTourNo || 1),
+      currentTourNo: Number(activeTour?.tour_no || upcomingTour?.tour_no || practiceTourNo || 1),
+      upcomingTourNo: Number(upcomingTour?.tour_no || practiceTourNo || 1),
+      upcomingTourStartDate: upcomingTour?.start_date ? String(upcomingTour.start_date) : null,
+      activeTourStartDate: activeTour?.start_date ? String(activeTour.start_date) : null,
+      activeTourEndDate: activeTour?.end_date ? String(activeTour.end_date) : null,
       tourState,
     };
 
@@ -11654,7 +11678,18 @@ if (modEl) {
 }
 
 if (noteEl) {
-  noteEl.textContent = t(noteKey) || "";
+  let noteText = t(noteKey) || "";
+
+  if (tourState === "upcoming") {
+    const upcomingTourNo = Number(s?.upcomingTourNo || s?.currentTourNo || practiceTourNo || 1);
+    const upcomingStartDate = formatTourDateText(s?.upcomingTourStartDate, null);
+
+    noteText = upcomingStartDate
+      ? (t("home_note_tour_upcoming_on", { n: upcomingTourNo, date: upcomingStartDate }) || noteText)
+      : noteText;
+  }
+
+  noteEl.textContent = noteText;
 }
 
 if (rankEl) {
@@ -13537,29 +13572,44 @@ if (!dbTours.length && window.sb && subjectId) {
   }
 }
 
-// pick active tour: is_active=true AND date window contains today
+ // pick active / upcoming tours
 const activeTours = dbTours.filter(r => !!r.is_active && isInWindow(r));
 const activeTour = activeTours.length ? activeTours[0] : null;
 
-// save active tour context for start button / quiz
+const upcomingTours = dbTours
+  .filter(r => {
+    if (!r?.is_active) return false;
+    const sd = r?.start_date ? String(r.start_date) : null;
+    return !!sd && sd > todayISO;
+  })
+  .sort((a, b) => Number(a?.tour_no || 0) - Number(b?.tour_no || 0));
+
+const upcomingTour = upcomingTours.length ? upcomingTours[0] : null;
+
+// save active / upcoming context for later flow
 if (!state.courses) state.courses = {};
 state.courses.activeTourId = activeTour?.id || null;
 state.courses.activeTourNo = activeTour?.tour_no || null;
+state.courses.upcomingTourId = upcomingTour?.id || null;
+state.courses.upcomingTourNo = upcomingTour?.tour_no || null;
 
 // label
 if (tourLabelEl) {
-  tourLabelEl.textContent = activeTour
-    ? `${tr("tours_tour_label", "Тур")} ${activeTour.tour_no}`
-    : tr("tours_status_title", "Туры пока недоступны");
+  if (activeTour) {
+    tourLabelEl.textContent = `${tr("tours_tour_label", "Тур")} ${activeTour.tour_no}`;
+  } else if (upcomingTour) {
+    tourLabelEl.textContent = `${tr("tours_tour_label", "Тур")} ${upcomingTour.tour_no}`;
+  } else {
+    tourLabelEl.textContent = tr("tours_status_title", "Туры пока недоступны");
+  }
 }
 
 // Status + Open button (DB)
-if (!activeTour) {
+if (!activeTour && !upcomingTour) {
   if (statusTitle) {
     statusTitle.textContent = tr("tours_status_title", "Туры пока недоступны");
   }
 
-  // если есть ошибка чтения туров — показываем человеческий текст (а не “как будто туров нет”)
   const baseDesc = tr(
     "tours_status_desc",
     "Даты и список туров появятся здесь после публикации."
@@ -13572,13 +13622,32 @@ if (!activeTour) {
 
   if (openBtn) {
     openBtn.classList.add("hidden");
+    openBtn.style.display = "none";
+    openBtn.onclick = null;
+  }
+} else if (!activeTour && upcomingTour) {
+  const dateTxt = formatTourDateText(upcomingTour?.start_date, upcomingTour?.end_date);
+
+  if (statusTitle) {
+    statusTitle.textContent =
+      t("tours_status_upcoming_title") ||
+      tr3("Тур скоро начнётся", "Tur tez orada boshlanadi", "Tour starts soon");
+  }
+
+  if (statusDesc) {
+    statusDesc.textContent =
+      t("tours_status_upcoming_desc", { n: upcomingTour.tour_no, date: dateTxt }) ||
+      `${tr("tours_tour_label", "Тур")} ${upcomingTour.tour_no}${dateTxt ? " • " + dateTxt : ""}`;
+  }
+
+  if (openBtn) {
+    openBtn.classList.add("hidden");
+    openBtn.style.display = "none";
+    openBtn.onclick = null;
   }
 } else {
-  const sd = activeTour.start_date ? String(activeTour.start_date) : null;
-  const ed = activeTour.end_date ? String(activeTour.end_date) : null;
-  const dateTxt = (sd || ed) ? `${sd || "—"} → ${ed || "—"}` : "";
+  const dateTxt = formatTourDateText(activeTour?.start_date, activeTour?.end_date);
 
-  // default: show active info
   if (statusTitle) {
     statusTitle.textContent = tr("tours_active_now", "Активный тур сейчас");
   }
@@ -13587,7 +13656,6 @@ if (!activeTour) {
       `${tr("tours_tour_label", "Тур")} ${activeTour.tour_no}${dateTxt ? " • " + dateTxt : ""}`;
   }
 
-  // ✅ if already attempted — show it here and hide "Open tour"
   let alreadyAttempted = false;
   try {
     const uid = await getAuthUid();
@@ -13614,15 +13682,10 @@ if (!activeTour) {
     }
   } else {
     if (openBtn) {
-      // ✅ show start button for active tour
       openBtn.classList.remove("hidden");
       openBtn.style.display = "";
       openBtn.disabled = false;
-
-      // Button title (fallback if missing in i18n)
       openBtn.textContent = tr("open_tour_btn", "Открыть тур");
-
-      // start flow
       openBtn.onclick = () => openTourRules();
     }
   }
