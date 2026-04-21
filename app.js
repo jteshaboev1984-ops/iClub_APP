@@ -1749,11 +1749,11 @@ function isTelegramVideoUrl(rawUrl) {
 }
 
 const SUBJECT_TELEGRAM_LESSON_URLS = Object.freeze({
-  biology: "https://t.me/c/2440330033/432/566",
-  informatics: "https://t.me/c/2440330033/319/344",
-  chemistry: "https://t.me/c/2440330033/356/458",
-  mathematics: "https://t.me/c/2440330033/1583/1613",
-  economics: "https://t.me/c/2440330033/78/246"
+  mathematics: "https://t.me/iclubuzvideodarslar/1583/1613",
+  biology: "https://t.me/iclubuzvideodarslar/432/566",
+  informatics: "https://t.me/iclubuzvideodarslar/319/344",
+  chemistry: "https://t.me/iclubuzvideodarslar/356/458",
+  economics: "https://t.me/iclubuzvideodarslar/78/246"
 });
 
 function getSubjectTelegramLessonUrl(subjectKey) {
