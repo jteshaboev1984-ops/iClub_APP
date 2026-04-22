@@ -476,6 +476,44 @@ async function ensureHomeDbReady() {
 
   let sb = null;
 
+// ✅ auth single-flight guards
+let __initSupabaseSessionPromise = null;
+let __anonSignInPromise = null;
+
+async function ensureAnonymousSessionSingleFlight() {
+  const client = window.sb || sb;
+  if (!client?.auth) return null;
+
+  if (__anonSignInPromise) {
+    return __anonSignInPromise;
+  }
+
+  __anonSignInPromise = (async () => {
+    try {
+      // уже есть сессия → ничего не делаем
+      const { data: beforeData } = await client.auth.getSession();
+      if (beforeData?.session) return beforeData.session;
+
+      // в оффлайне не пытаемся плодить auth-попытки
+      try {
+        if (typeof navigator !== "undefined" && navigator.onLine === false) {
+          return null;
+        }
+      } catch {}
+
+      const { error: anonErr } = await client.auth.signInAnonymously();
+      if (anonErr) throw anonErr;
+
+      const { data: afterData } = await client.auth.getSession();
+      return afterData?.session || null;
+    } finally {
+      __anonSignInPromise = null;
+    }
+  })();
+
+  return __anonSignInPromise;
+}
+
      // ✅ Автоматическое подключение пользователя к боту
       async function tryLinkBotOnce(reason = "registration") {
   try {
@@ -514,117 +552,146 @@ async function ensureHomeDbReady() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
   if (!window.supabase?.createClient) return null;
 
-  if (!sb) {
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: false,
-      },
-    });
-
-    // compatibility bridge:
-    // large parts of the app still read window.sb directly
-    window.sb = sb;
+  if (__initSupabaseSessionPromise) {
+    return __initSupabaseSessionPromise;
   }
 
-  // 1) ensure we have a session (Anonymous Sign-in)
-  const { data: sessData } = await sb.auth.getSession();
-  if (!sessData?.session) {
-    const { error: anonErr } = await sb.auth.signInAnonymously();
+  __initSupabaseSessionPromise = (async () => {
+    if (!sb) {
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: false,
+        },
+      });
 
-    if (anonErr) {
+      // compatibility bridge:
+      // large parts of the app still read window.sb directly
+      window.sb = sb;
+    } else if (!window.sb) {
+      window.sb = sb;
+    }
+
+    // 1) ensure we have a session (Anonymous Sign-in) — single-flight
+    try {
+      const { data: sessData } = await sb.auth.getSession();
+      if (!sessData?.session) {
+        await ensureAnonymousSessionSingleFlight();
+      }
+    } catch (anonErr) {
       console.error("[Supabase] Anonymous sign-in failed:", anonErr);
 
       const statusEl = document.getElementById("splash-status");
-      if (statusEl) statusEl.textContent = "Supabase auth error: " + (anonErr.message || "unknown");
+      if (statusEl) {
+        statusEl.textContent = "Supabase auth error: " + (anonErr?.message || "unknown");
+      }
 
       // Не валим приложение — просто работаем без базы
       return sb;
     }
-  }
 
     // 2) get auth user, but НЕ создаём public.users-строку до завершения регистрации
-  const { data: userData } = await sb.auth.getUser();
-  const u = userData?.user;
-  if (!u?.id) return sb;
+    const { data: userData } = await sb.auth.getUser();
+    const u = userData?.user;
+    if (!u?.id) return sb;
 
-  const tg = getTelegramUserSafe();
+    const tg = getTelegramUserSafe();
 
-  // ✅ Проверяем, существует ли уже полноценная DB-строка пользователя.
-  // Если её нет, значит регистрация ещё не завершена — shell-row на boot НЕ создаём.
-  let hasDbUserRow = false;
-  try {
-    const { data: existingUserRow, error } = await sb
-      .from("users")
-      .select("id")
-      .eq("id", u.id)
-      .maybeSingle();
-
-    hasDbUserRow = !error && !!existingUserRow?.id;
-  } catch {
-    hasDbUserRow = false;
-  }
-
-  // ✅ reset subject cache for this session (prevents poisoned null cache)
-  try { _subjectIdByKeyCache.clear(); } catch {}
-
-  // ✅ boot event и hydrate credentials делаем только если users-row уже существует.
-  // Иначе app_events/users FK ломается, а в users попадают неполные shell-данные.
-  if (hasDbUserRow) {
-    // ✅ boot event: write at most once per day per device (prevents DB flooding)
+    // ✅ Проверяем, существует ли уже полноценная DB-строка пользователя.
+    // Если её нет, значит регистрация ещё не завершена — shell-row на boot НЕ создаём.
+    let hasDbUserRow = false;
     try {
-      const day = dayKeyTashkent(Date.now());
-      const k = "iclub_boot_day_v1";
-      const last = String(localStorage.getItem(k) || "");
-      if (last !== day) {
-        await sb.from("app_events").insert({
-          user_id: u.id,
-          event_type: "boot",
-          payload: { has_tg: !!tg, ua: navigator.userAgent },
-        });
-        localStorage.setItem(k, day);
-      }
-    } catch (e) {
-      logClientError("boot_event_insert", e);
+      const { data: existingUserRow, error } = await sb
+        .from("users")
+        .select("id")
+        .eq("id", u.id)
+        .maybeSingle();
+
+      hasDbUserRow = !error && !!existingUserRow?.id;
+    } catch {
+      hasDbUserRow = false;
     }
 
-    // ✅ Earned Credentials: hydrate local events store from Supabase
-    try {
-      const changed = await hydrateLocalEventsFromSupabase(sb, u.id);
+    // ✅ reset subject cache for this session (prevents poisoned null cache)
+    try { _subjectIdByKeyCache.clear(); } catch {}
 
-      try { runDailyCredentialJobs(); } catch {}
-
-      if (changed) {
-        try { renderProfile(); } catch {}
-        try { renderSubjectHub(); } catch {}
+    // ✅ boot event и hydrate credentials делаем только если users-row уже существует.
+    // Иначе app_events/users FK ломается, а в users попадают неполные shell-данные.
+    if (hasDbUserRow) {
+      // ✅ boot event: write at most once per day per device (prevents DB flooding)
+      try {
+        const day = dayKeyTashkent(Date.now());
+        const k = "iclub_boot_day_v1";
+        const last = String(localStorage.getItem(k) || "");
+        if (last !== day) {
+          await sb.from("app_events").insert({
+            user_id: u.id,
+            event_type: "boot",
+            payload: { has_tg: !!tg, ua: navigator.userAgent },
+          });
+          localStorage.setItem(k, day);
+        }
+      } catch (e) {
+        logClientError("boot_event_insert", e);
       }
-    } catch {}
-  }
+
+      // ✅ Earned Credentials: hydrate local events store from Supabase
+      try {
+        const changed = await hydrateLocalEventsFromSupabase(sb, u.id);
+
+        try { runDailyCredentialJobs(); } catch {}
+
+        if (changed) {
+          try { renderProfile(); } catch {}
+          try { renderSubjectHub(); } catch {}
+        }
+      } catch {}
+    }
+
     return sb;
+  })();
+
+  try {
+    return await __initSupabaseSessionPromise;
+  } finally {
+    __initSupabaseSessionPromise = null;
+  }
 }
 
 async function ensureRegistrationAuthUid({ totalWaitMs = 12000, pollMs = 350 } = {}) {
   try {
+    // ✅ registration path shares the same auth bootstrap
+    await initSupabaseSession().catch(() => null);
+
     if (!window.sb?.auth) return null;
 
     const startedAt = Date.now();
+    let lastBootstrapTryAt = 0;
 
     while ((Date.now() - startedAt) < totalWaitMs) {
-      const uid = await getAuthUid();
+      const uid = await getAuthUid().catch(() => null);
       if (uid) return uid;
 
       try {
         const { data: sessData } = await window.sb.auth.getSession();
+
+        // ✅ controlled retry, but only through single-flight helper
         if (!sessData?.session) {
-          await window.sb.auth.signInAnonymously();
+          const now = Date.now();
+
+          // не спамим bootstrap на каждом тике
+          if ((now - lastBootstrapTryAt) >= Math.max(700, pollMs * 2)) {
+            lastBootstrapTryAt = now;
+            await ensureAnonymousSessionSingleFlight().catch(() => null);
+          }
         }
       } catch {}
 
       await new Promise((resolve) => setTimeout(resolve, pollMs));
     }
 
-    return await getAuthUid();
+    return await getAuthUid().catch(() => null);
   } catch {
     return null;
   }
@@ -1631,19 +1698,25 @@ function evaluateRealtimeCredentials(event) {
 }
 
 function runDailyCredentialJobs() {
-  const c = credentialsStore();
   const today = dayKeyTashkent(Date.now());
 
   // ✅ Уже делали daily пересчёты сегодня — выходим
-  if (c.last_daily_eval_day === today) return;
+  // Читаем store только для проверки, НЕ сохраняем эту копию потом
+  {
+    const check = credentialsStore();
+    if (check.last_daily_eval_day === today) return;
+  }
 
   evaluateConsistentLearnerDaily();
   evaluateResearchOrientedDaily();
   evaluateErrorDrivenDailyOrOnReview();
 
   // ✅ фиксируем, что daily пересчёт на сегодня выполнен
-  c.last_daily_eval_day = today;
-  saveCredentialsStore(c);
+  // Читаем СВЕЖУЮ копию store после всех evaluate-функций,
+  // чтобы не затереть их изменения (stale overwrite fix)
+  const fresh = credentialsStore();
+  fresh.last_daily_eval_day = today;
+  saveCredentialsStore(fresh);
 
   // ✅ daily пересчёты тоже фиксируем в БД
   scheduleCredentialsDbSync(1200);
