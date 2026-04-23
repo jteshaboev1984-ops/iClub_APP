@@ -18231,6 +18231,9 @@ if (
             if (!dbRes?.ok) {
   const uiErr = getRegistrationSaveErrorUi(dbRes);
 
+  // ✅ сначала убираем overlay "Сохраняем регистрацию..."
+  hideAsyncOverlay();
+
   await uiAlert({
     title: uiErr.title,
     message: uiErr.recommendation
