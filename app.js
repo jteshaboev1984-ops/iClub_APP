@@ -18229,11 +18229,14 @@ if (
     } catch {}
 
             if (!dbRes?.ok) {
-      const uiErr = getRegistrationSaveErrorUi(dbRes);
+  const uiErr = getRegistrationSaveErrorUi(dbRes);
 
-      showToast(`${uiErr.title} ${uiErr.recommendation}`);
-      return;
-    }
+  await uiAlert({
+    title: uiErr.title,
+    message: uiErr.recommendation
+  });
+  return;
+}
             // keep local profile as UX fallback (DB is source of truth now)
 
       // ✅ fresh start after re-registration (prevents showing old local attempts/stats)
