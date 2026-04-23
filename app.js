@@ -6135,9 +6135,34 @@ const usersPayload = {
     uErr = e;
   }
 
-  if (uErr) {
-    try { trackEvent("registration_db_error", { where: "users_upsert", message: String(uErr?.message || uErr) }); } catch {}
-    return { ok: false, reason: "users_upsert_failed" };
+    if (uErr) {
+    const rawMsg = String(uErr?.message || uErr || "");
+
+    try {
+      trackEvent("registration_db_error", {
+        where: "users_upsert",
+        message: rawMsg
+      });
+    } catch {}
+
+    // ✅ точная причина для случая, который мы уже видели в логах:
+    // duplicate key value violates unique constraint "users_telegram_user_id_key"
+    if (
+      rawMsg.includes('users_telegram_user_id_key') ||
+      rawMsg.includes('duplicate key value violates unique constraint')
+    ) {
+      return {
+        ok: false,
+        reason: "telegram_already_linked",
+        detail: rawMsg
+      };
+    }
+
+    return {
+      ok: false,
+      reason: "users_upsert_failed",
+      detail: rawMsg
+    };
   }
 
     // 2) upsert user_subjects rows
@@ -6224,6 +6249,68 @@ const usersPayload = {
   return { ok: true, user_id: uid, user_subjects_rows: rows.length, subjects_saved: rows.length };
 }
 
+   function getRegistrationSaveErrorUi(dbRes) {
+  const reason = String(dbRes?.reason || "").trim();
+
+  if (reason === "telegram_already_linked") {
+    return {
+      title: tr3(
+        "Этот Telegram-аккаунт уже связан с профилем iClub.",
+        "Bu Telegram akkaunt allaqachon iClub profiliga ulangan.",
+        "This Telegram account is already linked to an iClub profile."
+      ),
+      recommendation: tr3(
+        "Попробуйте открыть приложение на устройстве или в браузере, где вы уже входили раньше. Если это не поможет, напишите в поддержку.",
+        "Ilovani avval kirgan qurilmangizda yoki brauzeringizda ochib ko‘ring. Agar yordam bermasa, qo‘llab-quvvatlashga yozing.",
+        "Try opening the app on the device or browser where you used it before. If that does not help, contact support."
+      )
+    };
+  }
+
+  if (reason === "no_uid") {
+    return {
+      title: tr3(
+        "Не удалось создать сессию входа.",
+        "Kirish sessiyasini yaratib bo‘lmadi.",
+        "Could not create a sign-in session."
+      ),
+      recommendation: tr3(
+        "Проверьте интернет и попробуйте ещё раз.",
+        "Internetni tekshirib, yana urinib ko‘ring.",
+        "Check your internet connection and try again."
+      )
+    };
+  }
+
+  if (reason === "user_subjects_upsert_failed") {
+    return {
+      title: tr3(
+        "Основной профиль сохранён, но не удалось сохранить выбранные предметы.",
+        "Asosiy profil saqlandi, lekin tanlangan fanlarni saqlab bo‘lmadi.",
+        "Your main profile was saved, but the selected subjects could not be saved."
+      ),
+      recommendation: tr3(
+        "Попробуйте ещё раз. Если ошибка повторится, напишите в поддержку.",
+        "Yana urinib ko‘ring. Xato takrorlansa, qo‘llab-quvvatlashga yozing.",
+        "Please try again. If the problem continues, contact support."
+      )
+    };
+  }
+
+  return {
+    title: tr3(
+      "Не удалось сохранить регистрацию.",
+      "Ro‘yxatdan o‘tishni saqlab bo‘lmadi.",
+      "Could not save registration."
+    ),
+    recommendation: tr3(
+      "Попробуйте ещё раз немного позже. Если ошибка повторится, напишите в поддержку.",
+      "Birozdan keyin yana urinib ko‘ring. Xato takrorlansa, qo‘llab-quvvatlashga yozing.",
+      "Please try again a little later. If the problem continues, contact support."
+    )
+  };
+}
+   
 async function hydrateLocalProfileFromSupabaseIfMissing() {
   if (loadProfile()) return { ok: true, skipped: true, reason: "local_profile_exists" };
   if (!window.sb) return { ok: false, reason: "no_sb" };
@@ -18141,14 +18228,10 @@ if (
       });
     } catch {}
 
-        if (!dbRes?.ok) {
-      showToast(
-        tr3(
-          "Не удалось сохранить регистрацию в базе. Попробуйте ещё раз.",
-          "Ro‘yxatdan o‘tishni bazaga saqlab bo‘lmadi. Yana urinib ko‘ring.",
-          "Could not save registration to the database. Please try again."
-        )
-      );
+            if (!dbRes?.ok) {
+      const uiErr = getRegistrationSaveErrorUi(dbRes);
+
+      showToast(`${uiErr.title} ${uiErr.recommendation}`);
       return;
     }
             // keep local profile as UX fallback (DB is source of truth now)
