@@ -5900,17 +5900,15 @@ async function ensureCredentialsDbSynced() {
 // ✅ DB profile fetch (used by tours eligibility, etc.)
 async function getUserProfile(uid) {
   try {
-    // 1) local fallback (if your project has it)
     const lp = (typeof loadProfile === "function") ? loadProfile() : null;
 
-    // if local profile exists and looks valid, return it immediately
-    if (lp && typeof lp === "object") {
-      // optional: if local profile has uid and matches, prefer it
-      if (!lp.id || !uid || String(lp.id) === String(uid)) return lp;
+    // ✅ local profile доверяем только если он явно привязан к текущему uid
+    if (lp && typeof lp === "object" && uid && lp.id && String(lp.id) === String(uid)) {
+      return lp;
     }
 
-    // 2) DB fetch
-    if (!window.sb || !uid) return lp || null;
+    // ✅ если uid нет — лучше ничего не выдумывать
+    if (!window.sb || !uid) return null;
 
     const { data, error } = await window.sb
       .from("users")
@@ -5918,10 +5916,10 @@ async function getUserProfile(uid) {
       .eq("id", uid)
       .maybeSingle();
 
-    if (error) return lp || null;
-    return data || lp || null;
+    if (error) return null;
+    return data || null;
   } catch {
-    return (typeof loadProfile === "function") ? (loadProfile() || null) : null;
+    return null;
   }
 }
 
@@ -6358,7 +6356,8 @@ async function hydrateLocalProfileFromSupabaseIfMissing() {
     return { ok: true, hydrated: false, reason: "db_registration_not_completed" };
   }
 
-  const profile = {
+    const profile = {
+    id: uid,
     created_at: nowISO(),
     full_name: fullName || "",
     // language = язык контента (туры/практика)
@@ -6366,7 +6365,7 @@ async function hydrateLocalProfileFromSupabaseIfMissing() {
     // uiLanguage = язык интерфейса (если ранее был выбран локально — сохраняем)
     uiLanguage: (loadProfile()?.uiLanguage) || (me.language_code || "ru"),
 
-    // ✅ ВАЖНО: не !!..., а строго boolean из БД
+    // ✅ ВАЖНО: не !!. а строго boolean из БД
     is_school_student: regFlag,
 
     region: me.region || "",
@@ -16748,9 +16747,23 @@ async function updateTourAttempt(attemptId, patch) {
     return;
   }
 
-  // 1) eligibility: only school students can participate (tours/ratings)
+    // 1) current identity must exist in DB before any tour start
   const uid = await getAuthUid();
-  const me = uid ? await getUserProfile(uid) : null;
+
+  if (!uid || !(await hasDbUserRow(uid))) {
+    await uiAlert({
+      title: t("not_available") || tr3("Недоступно", "Mavjud emas", "Not available"),
+      message: tr3(
+        "Не удалось подтвердить ваш профиль. Пожалуйста, откройте приложение заново и завершите восстановление профиля.",
+        "Profilingizni tasdiqlab bo‘lmadi. Iltimos, ilovani qayta oching va profilni tiklashni yakunlang.",
+        "We could not verify your profile. Please reopen the app and complete profile recovery."
+      )
+    });
+    return;
+  }
+
+  // 2) eligibility: only school students can participate (tours/ratings)
+  const me = await getUserProfile(uid);
 
   if (!me?.is_school_student) {
     await uiAlert({
@@ -18252,7 +18265,10 @@ if (
         try { localStorage.removeItem(LS.botLinked); } catch {}
       } catch {}
 
-      saveProfile(profile);
+      saveProfile({
+        ...profile,
+        id: dbRes?.user_id || profile?.id || null
+      });
 
       // ✅ auto-link this user to bot (chat_id will be captured by bot on web_app_data)
       // отправляем чуть позже, чтобы UI успел перейти на Home
