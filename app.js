@@ -4614,13 +4614,11 @@ function renderPracticeTourPicker(cards, selectedTourNo) {
 
         const progress = c.total > 0 ? `${c.done}/${c.total}` : "—";
         const stateText = c.isLocked
-          ? "🔒"
-          : c.isDone
-            ? "✓"
-            : c.isActive
-              ? "•"
-              : "";
-
+           ? "🔒"
+           : c.isDone
+             ? "✓"
+             : "";
+         
         return `
           <button
             class="${cls}"
@@ -8842,21 +8840,21 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
     if (!cacheHasData) {
       // -------- fallback: compute leaderboard from tour_attempts --------
             const attemptsRes = await window.sb
-        .from("tour_attempts")
-        .select("user_id,score,total_time,status,users(first_name,last_name,school,class,region,district,region_id,district_id)")
-        .eq("tour_id", tourId);
-      if (token !== ratingsState._token) return;
+  .from("tour_attempts")
+  .select("user_id,score,total_time,status,users(first_name,last_name,school,class,region,district,region_id,district_id)")
+  .eq("tour_id", tourId);
+if (token !== ratingsState._token) return;
 
-          if (topRes?.error) {
-      hideLoading();
-      listEl.innerHTML = `
-        <div class="empty muted">
-          ${escapeHTML(t("ratings_load_error"))}
-          <div class="small" style="margin-top:8px">${escapeHTML(t("support_route_after_retry"))}</div>
-        </div>
-      `;
-      return;
-    }
+if (attemptsRes?.error) {
+  hideLoading();
+  listEl.innerHTML = `
+    <div class="empty muted">
+      ${escapeHTML(t("ratings_load_error"))}
+      <div class="small" style="margin-top:8px">${escapeHTML(t("support_route_after_retry"))}</div>
+    </div>
+  `;
+  return;
+}
 
           const raw = Array.isArray(attemptsRes?.data) ? attemptsRes.data : [];
       await enrichRatingsUsersGeoTranslations(raw);
