@@ -5743,10 +5743,10 @@ if (actionBtn) {
 // Ratings (Leaderboard) — UI skeleton now, DB later
 // ---------------------------
 const ratingsState = {
-  scope: "district", // district | region | country
+  scope: state?.ratings?.scope || "district", // district | region | country
   q: "",
-  subjectId: null,
-  tourId: null, // null = All tours
+  subjectId: state?.ratings?.subjectId || null,
+  tourId: state?.ratings?.tourId || "__all__", // "__all__" = All tours
   _booted: false,
   _loading: false,
   _token: 0,
@@ -5757,39 +5757,29 @@ const ratingsState = {
   _searchRows: []
 };
 
-function getLeaderboardDataMock(scope) {
-  // Позже заменим на Supabase: district/region/country + subject/tour + competitive only
-  const base = [
-    { rank: 1, name: "Shakhzod Alimov", meta: "Tashkent International School", score: 980, time: "12:45", avatar: null },
-    { rank: 2, name: "Nilufar Karimova", meta: "Presidential School", score: 975, time: "13:10", avatar: null },
-    { rank: 3, name: "Jasur Akhmedov", meta: "Samarkand Lyceum #1", score: 962, time: "14:05", avatar: null },
-    { rank: 4, name: "Bekzod Saitov", meta: "School 142, Tashkent", score: 958, time: "14:22", avatar: null },
-    { rank: 5, name: "Madina Kenjayeva", meta: "Westminster Academy", score: 944, time: "15:10", avatar: null },
-    { rank: 6, name: "Aziz Umarov", meta: "Bukhara State Lyceum", score: 940, time: "15:45", avatar: null },
-    { rank: 7, name: "Lola Mansurova", meta: "School 50, Fergana", score: 938, time: "16:02", avatar: null }
-  ];
-
-  // Для ощущения “разных” вкладок — слегка двигаем очки
-  const delta = (scope === "district") ? 0 : (scope === "region" ? -6 : -12);
-  return base.map(x => ({ ...x, score: x.score + delta }));
+function saveRatingsFiltersToState() {
+  try {
+    state.ratings = state.ratings || {};
+    state.ratings.scope = ratingsState.scope || "district";
+    state.ratings.subjectId = ratingsState.subjectId ? Number(ratingsState.subjectId) : null;
+    state.ratings.tourId = ratingsState.tourId || "__all__";
+    saveState();
+  } catch {}
 }
 
-function getMyRankMock(scope) {
-  const p = loadProfile();
-  const displayName = (p?.full_name || p?.name || "You").trim();
-  const district = p?.district || "—";
-  const region = p?.region || "—";
-  const meta = [district, region].filter(Boolean).join(" • ");
+function resetRatingsSearchPaging() {
+  ratingsState.q = String(ratingsState.q || "");
+  ratingsState._searchKey = "";
+  ratingsState._searchOffset = 0;
+  ratingsState._searchRows = [];
 
-  // Мок “моего” места и очков
-  const rank = (scope === "district") ? 12 : (scope === "region" ? 28 : 64);
-  const score = (scope === "district") ? 892 : (scope === "region" ? 861 : 820);
-  const time = "18:30";
-
-  return { rank, name: displayName, meta, score, time };
+  ratingsState._fbSearchOffset = 0;
+  ratingsState._fbSearchRows = [];
+  ratingsState._fbSearchKey = "";
+  ratingsState._pagingMode = "";
 }
 
-   function formatSecondsToMMSS(totalSeconds) {
+ function formatSecondsToMMSS(totalSeconds) {
   const s = Math.max(0, Number(totalSeconds) || 0);
   const mm = Math.floor(s / 60);
   const ss = s % 60;
@@ -8632,19 +8622,22 @@ async function ensureRatingsBoot() {
     placeholder: t("loading")
   });
 
-  // 2) default subject:
-  const uid = await getAuthUid();
-  const myComp = await getMyCompetitiveSubjects(uid);
+  // 2) subject: keep saved subject if it still exists, otherwise choose default
+const uid = await getAuthUid();
+const myComp = await getMyCompetitiveSubjects(uid);
 
-  // если участник — дефолт = его competitive предмет
-  // если не участник — дефолт = первый из списка
-  const defaultSubjectId = (myComp?.[0]?.subject_id) || (subjects?.[0]?.id) || null;
-  ratingsState.subjectId = defaultSubjectId ? Number(defaultSubjectId) : null;
+const savedSubjectId = Number(ratingsState.subjectId || state?.ratings?.subjectId || 0);
+const savedSubjectExists = savedSubjectId > 0 && subjects.some(s => Number(s?.id || 0) === savedSubjectId);
 
-  // отрисуем subjects без placeholder
-  renderRatingsSelectOptions(subjectSelect, subjectItems);
-  if (ratingsState.subjectId && subjectSelect) subjectSelect.value = String(ratingsState.subjectId);
+const defaultSubjectId = (myComp?.[0]?.subject_id) || (subjects?.[0]?.id) || null;
+ratingsState.subjectId = savedSubjectExists
+  ? savedSubjectId
+  : (defaultSubjectId ? Number(defaultSubjectId) : null);
 
+// отрисуем subjects без placeholder
+renderRatingsSelectOptions(subjectSelect, subjectItems);
+if (ratingsState.subjectId && subjectSelect) subjectSelect.value = String(ratingsState.subjectId);
+   
   // 3) tours for subject
   const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
   const tourItems = [
@@ -8653,10 +8646,18 @@ async function ensureRatingsBoot() {
   ];
   renderRatingsSelectOptions(tourSelect, tourItems);
 
-  // default = All tours
-ratingsState.tourId = "__all__";
-if (tourSelect) tourSelect.value = "__all__";
+// keep saved tour only if it belongs to current subject; otherwise All tours
+const savedTourId = ratingsState.tourId && ratingsState.tourId !== "__all__"
+  ? Number(ratingsState.tourId)
+  : null;
 
+const savedTourExists = savedTourId && tours.some(tt => Number(tt?.id || 0) === Number(savedTourId));
+
+ratingsState.tourId = savedTourExists ? savedTourId : "__all__";
+if (tourSelect) tourSelect.value = String(ratingsState.tourId || "__all__");
+
+saveRatingsFiltersToState();
+   
   ratingsState._booted = true;
 }
 
@@ -8802,13 +8803,15 @@ if (tourSelect) tourSelect.value = "__all__";
 
     // если у меня нет district/region — принудительно country, иначе фильтры бессмысленны
   if ((ratingsState.scope === "district" && !me?.district) || (ratingsState.scope === "region" && !me?.region)) {
-    ratingsState.scope = "country";
-    $$(".lb-segment .seg-btn").forEach(btn => {
-      const active = btn.dataset.scope === ratingsState.scope;
-      btn.classList.toggle("is-active", active);
-      btn.setAttribute("aria-selected", active ? "true" : "false");
-    });
-  }
+  ratingsState.scope = "country";
+  saveRatingsFiltersToState();
+
+  $$(".lb-segment .seg-btn").forEach(btn => {
+    const active = btn.dataset.scope === ratingsState.scope;
+    btn.classList.toggle("is-active", active);
+    btn.setAttribute("aria-selected", active ? "true" : "false");
+  });
+}
 
   // guards
   if (!ratingsState.subjectId) {
@@ -9825,44 +9828,59 @@ function bindRatingsUI() {
   });
 
   if (subjectSelect) {
-    subjectSelect.addEventListener("change", async () => {
-      const v = subjectSelect.value;
-      ratingsState.subjectId = v ? Number(v) : null;
+  subjectSelect.addEventListener("change", async () => {
+    const v = subjectSelect.value;
+    ratingsState.subjectId = v ? Number(v) : null;
 
-      // tours reload
-      if (window.sb && ratingsState.subjectId) {
-        const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
-        const tourItems = [
-          { value: "__all__", label: t("ratings_all_tours") || "All tours" },
-          ...tours.map(tt => ({ value: tt.id, label: `Tour ${tt.tour_no}` }))
-        ];
-        renderRatingsSelectOptions(tourSelect, tourItems);
-        if (tourSelect) tourSelect.value = "__all__";
-        ratingsState.tourId = null;
-      }
+    // subject changed => tour belongs to old subject, so reset only tour
+    ratingsState.tourId = "__all__";
+    resetRatingsSearchPaging();
 
-      renderRatings();
-    });
-  }
+    if (window.sb && ratingsState.subjectId) {
+      const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
+      const tourItems = [
+        { value: "__all__", label: t("ratings_all_tours") || "All tours" },
+        ...tours.map(tt => ({ value: tt.id, label: `Tour ${tt.tour_no}` }))
+      ];
+      renderRatingsSelectOptions(tourSelect, tourItems);
+    }
 
-  if (tourSelect) {
-    tourSelect.addEventListener("change", () => {
-      const v = tourSelect.value;
-      ratingsState.tourId = (v && v !== "__all__") ? Number(v) : null;
-      renderRatings();
-    });
-  }
+    if (tourSelect) tourSelect.value = "__all__";
+
+    saveRatingsFiltersToState();
+    renderRatings();
+  });
+}
+ 
+   if (tourSelect) {
+  tourSelect.addEventListener("change", () => {
+    const v = tourSelect.value;
+    ratingsState.tourId = (v && v !== "__all__") ? Number(v) : "__all__";
+    resetRatingsSearchPaging();
+    saveRatingsFiltersToState();
+    renderRatings();
+  });
+}
 
   // segmented tabs
   $$(".lb-segment .seg-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const scope = btn.dataset.scope;
-      if (!scope) return;
-      ratingsState.scope = scope;
-      renderRatings();
-    });
-  });
+  btn.addEventListener("click", () => {
+    const scope = btn.dataset.scope;
+    if (!scope || scope === ratingsState.scope) return;
 
+    ratingsState.scope = scope;
+    resetRatingsSearchPaging();
+    saveRatingsFiltersToState();
+
+    $$(".lb-segment .seg-btn").forEach(x => {
+      const active = x.dataset.scope === ratingsState.scope;
+      x.classList.toggle("is-active", active);
+      x.setAttribute("aria-selected", active ? "true" : "false");
+    });
+
+    renderRatings();
+  });
+});
     // optional: click on list rows later (open student profile) — пока пусто
   if (listEl) {
     listEl.addEventListener("click", (e) => {
