@@ -5389,3 +5389,121 @@ button.is-loading { opacity: .85; }
 .support-submit-status{
   margin-top: 10px;
 }
+
+/* ----- Practice tour selector ----- */
+.practice-tour-picker{
+  margin: 8px 14px 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.practice-tour-picker-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.practice-tour-picker-title{
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.practice-tour-picker-sub{
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--muted);
+  text-align: right;
+  max-width: 48%;
+}
+
+.practice-tour-chip-row{
+  display:flex;
+  gap: 8px;
+  overflow-x:auto;
+  padding: 2px 2px 4px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.practice-tour-chip-row::-webkit-scrollbar{
+  display:none;
+}
+
+.practice-tour-chip{
+  flex: 0 0 auto;
+  min-width: 76px;
+  border: 1px solid var(--border);
+  background: rgba(15,23,42,0.03);
+  border-radius: 14px;
+  padding: 9px 10px;
+  box-shadow: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.practice-tour-chip-main{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.practice-tour-chip-progress{
+  display:block;
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.practice-tour-chip.is-selected{
+  border-color: rgba(47,111,214,0.55);
+  background: rgba(47,111,214,0.12);
+  box-shadow: 0 0 0 1px rgba(47,111,214,0.08) inset;
+}
+
+.practice-tour-chip.is-active .practice-tour-chip-main{
+  color: var(--primary);
+}
+
+.practice-tour-chip.is-done{
+  background: rgba(22,163,74,0.10);
+  border-color: rgba(22,163,74,0.24);
+}
+
+.practice-tour-chip.is-done .practice-tour-chip-main{
+  color: #15803d;
+}
+
+.practice-tour-chip.is-locked{
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 420px){
+  .practice-tour-picker-head{
+    align-items:flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .practice-tour-picker-sub{
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .practice-tour-chip{
+    min-width: 72px;
+    padding: 8px 9px;
+  }
+}
