@@ -15490,10 +15490,21 @@ uniq.forEach(rec => {
 `;
 
         const btn = item.querySelector('button[data-open-books="1"]');
-        btn?.addEventListener("click", (e) => {
+                btn?.addEventListener("click", async (e) => {
           e.stopPropagation();
-          pushCourses("books");
-          renderBooks();
+
+          showAsyncOverlay(tr3(
+            "Загружаем книги…",
+            "Kitoblar yuklanmoqda…",
+            "Loading books…"
+          ));
+
+          try {
+            pushCourses("books");
+            await renderBooks();
+          } finally {
+            hideAsyncOverlay();
+          }
         });
 
         wrap.appendChild(item);
@@ -19079,8 +19090,19 @@ if (action === "open-all-subjects") {
     });
   } catch {}
 
-  replaceCourses("my-recs");
-  renderMyRecs();
+   showAsyncOverlay(tr3(
+    "Загружаем рекомендации…",
+    "Tavsiyalar yuklanmoqda…",
+    "Loading recommendations…"
+  ));
+
+  try {
+    replaceCourses("my-recs");
+    await renderMyRecs();
+  } finally {
+    hideAsyncOverlay();
+  }
+
   return;
 }
       // ---------- Tab-specific / Courses actions ----------
@@ -19129,18 +19151,40 @@ if (action === "open-all-subjects") {
   return;
 }
    if (action === "my-rec-back") {
-  // назад к списку рекомендаций
-  replaceCourses("my-recs");
-  renderMyRecs();
+  showAsyncOverlay(tr3(
+    "Загружаем рекомендации…",
+    "Tavsiyalar yuklanmoqda…",
+    "Loading recommendations…"
+  ));
+
+  try {
+    replaceCourses("my-recs");
+    await renderMyRecs();
+  } finally {
+    hideAsyncOverlay();
+  }
+
   return;
 }
 
 if (action === "my-rec-open-books") {
-  pushCourses("books");
-  renderBooks();
+  showAsyncOverlay(tr3(
+    "Загружаем книги…",
+    "Kitoblar yuklanmoqda…",
+    "Loading books…"
+  ));
+
+  try {
+    pushCourses("books");
+    await renderBooks();
+  } finally {
+    hideAsyncOverlay();
+  }
+
   return;
 }
-   if (action === "my-rec-open-practice") {
+       
+     if (action === "my-rec-open-practice") {
   await openPracticeStart();
   return;
 }
@@ -19186,8 +19230,19 @@ if (action === "my-rec-to-subject") {
   state.courses.myRecReturnTarget = null;
   saveState();
 
-  replaceCourses("subject-hub");
-  renderSubjectHub();
+  showAsyncOverlay(tr3(
+    "Загружаем предмет…",
+    "Fan yuklanmoqda…",
+    "Loading subject…"
+  ));
+
+  try {
+    replaceCourses("subject-hub");
+    await renderSubjectHub();
+  } finally {
+    hideAsyncOverlay();
+  }
+
   return;
 }
 
@@ -19552,9 +19607,20 @@ if (action === "tour-next" || action === "tour-submit") {
         return;
       }
        
-            if (action === "open-books") {
-        pushCourses("books");
-        renderBooks();
+                        if (action === "open-books") {
+        showAsyncOverlay(tr3(
+          "Загружаем книги…",
+          "Kitoblar yuklanmoqda…",
+          "Loading books…"
+        ));
+
+        try {
+          pushCourses("books");
+          await renderBooks();
+        } finally {
+          hideAsyncOverlay();
+        }
+
         return;
       }
 
@@ -19572,8 +19638,19 @@ if (action === "tour-next" || action === "tour-submit") {
         state.courses.myRecsActiveTab = state.courses.myRecsActiveTab || "practice";
         saveState();
 
-        pushCourses("my-recs");
-        renderMyRecs();
+                showAsyncOverlay(tr3(
+          "Загружаем рекомендации…",
+          "Tavsiyalar yuklanmoqda…",
+          "Loading recommendations…"
+        ));
+
+        try {
+          pushCourses("my-recs");
+          await renderMyRecs();
+        } finally {
+          hideAsyncOverlay();
+        }
+
         return;
       }
 
