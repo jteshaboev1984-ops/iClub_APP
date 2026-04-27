@@ -12032,7 +12032,8 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
     const noteEl = cardEl.querySelector(".js-home-comp-note");
     const rankEl = cardEl.querySelector(".js-home-comp-rank");
     const percentEl = cardEl.querySelector(".js-home-comp-percent");
-    const fillEl = cardEl.querySelector(".js-home-comp-fill");
+        const fillEl = cardEl.querySelector(".js-home-comp-fill");
+    const btnEl = cardEl.querySelector(".home-competitive-btn");
 
     const s = await computeHomeCompetitiveStats(subjectKey);
 
@@ -12103,9 +12104,11 @@ if (percentEl) {
       : "";
 }
 
-    if (fillEl) {
+        if (fillEl) {
       fillEl.style.width = `${practicePct}%`;
     }
+
+    if (btnEl) btnEl.disabled = false;
   } catch {
     // silent
   }
@@ -12167,9 +12170,9 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
   // ✅ нужно для CSS-картинок по предмету
   el.dataset.subject = String(userSubject.key || "").toLowerCase();
 
-  const badgeTxt = t("home_badge_tour_active") || "TOUR ACTIVE";
-  const moduleTxt = t("home_practice_for_tour", { n: 1 }) || "Practice for Tour 1";
-  const noteTxt = t("home_note_tour_active") || "";
+  const badgeTxt = t("loading") || "Загрузка…";
+  const moduleTxt = t("loading") || "Загрузка…";
+  const noteTxt = "";
 
   el.innerHTML = `
   <div class="home-competitive-badge">${escapeHTML(badgeTxt)}</div>
@@ -12196,22 +12199,34 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "btn primary home-competitive-btn";
-  btn.textContent = t("open_subject_btn") || "Open subject";
-  btn.addEventListener("click", (e) => {
+    btn.textContent = t("open_subject_btn") || "Open subject";
+  btn.disabled = true;
+
+  setTimeout(() => {
+    try { btn.disabled = false; } catch {}
+  }, 3500);
+
+  btn.addEventListener("click", async (e) => {
     e.stopPropagation();
 
-    // ✅ Home: сразу открываем Subject Hub (без промежуточных туров)
-    state.courses.subjectKey = userSubject.key;
+    showAsyncOverlay(tr3(
+      "Загружаем предмет…",
+      "Fan yuklanmoqda…",
+      "Loading subject…"
+    ));
 
-    // ✅ Home is the entry point for this flow
-    state.courses.entryTab = "home";
+    try {
+      state.courses.subjectKey = userSubject.key;
+      state.courses.entryTab = "home";
 
-    saveState();
-    setTab("courses");
-    replaceCourses("subject-hub");
-    renderSubjectHub();
+      saveState();
+      setTab("courses");
+      replaceCourses("subject-hub");
+      await renderSubjectHub();
+    } finally {
+      hideAsyncOverlay();
+    }
   });
-
   el.appendChild(btn);
   return el;
 }
@@ -12901,7 +12916,7 @@ async function renderSubjectHubMentorCard(subjectKey) {
 // ---------------------------
   // Subject Hub rendering
   // ---------------------------
-    function renderSubjectHub() {
+    async function renderSubjectHub() {
   const profile = loadProfile();
   const subj = subjectByKey(state.courses.subjectKey);
 
@@ -12959,8 +12974,8 @@ async function renderSubjectHubMentorCard(subjectKey) {
 
         updateTopbarForView("courses");
 
-    // ✅ Subject mentor card
-    renderSubjectHubMentorCard(subjectKey).catch(() => null);
+        // ✅ Subject mentor card
+    await renderSubjectHubMentorCard(subjectKey).catch(() => null);
   }
   // ---------------------------
   // Lessons (demo)
@@ -14316,42 +14331,53 @@ async function renderToursHistorySummary(subjectId) {
   }
 
   // ---- Entry point from Subject Hub ----
-  function openPracticeStart() {
+  async function openPracticeStart() {
   const subjectKey = state.courses.subjectKey;
 
-  pushCourses("practice-start");
-  renderPracticeStart();
+  showAsyncOverlay(tr3(
+    "Загружаем практику…",
+    "Amaliyot yuklanmoqda…",
+    "Loading practice…"
+  ));
 
-  const resumeBtn = $("#practice-resume-btn");
-  const restartBtn = $("#practice-restart-btn");
+  try {
+    pushCourses("practice-start");
 
-  if (resumeBtn) resumeBtn.style.display = "none";
-  if (restartBtn) restartBtn.textContent = t("practice_start");
+    const resumeBtn = $("#practice-resume-btn");
+    const restartBtn = $("#practice-restart-btn");
 
-  (async () => {
+    if (resumeBtn) resumeBtn.style.display = "none";
+    if (restartBtn) restartBtn.textContent = t("practice_start");
+
     const currentStage = await getPracticeStageContext(subjectKey);
-if (state?.courses?.subjectKey !== subjectKey) return;
-if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() !== "practice-start") return;
 
-const picker = await getPracticeTourCards(subjectKey);
+    if (state?.courses?.subjectKey !== subjectKey) return;
+    if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() !== "practice-start") return;
 
-const draft = loadPracticeDraft();
-const draftTourNo = Number(
-  draft?.practiceTourNo ||
-  draft?.quiz?.practiceTourNo ||
-  1
-);
+    const picker = await getPracticeTourCards(subjectKey);
 
-let currentTourNo = Number(picker?.selectedTourNo || currentStage?.practiceTourNo || 1);
+    const draft = loadPracticeDraft();
+    const draftTourNo = Number(
+      draft?.practiceTourNo ||
+      draft?.quiz?.practiceTourNo ||
+      1
+    );
 
-if (
-  draft?.status === "paused" &&
-  draft?.subjectKey === subjectKey &&
-  draftTourNo > 0
-) {
-  currentTourNo = draftTourNo;
-  setSelectedPracticeTourNo(subjectKey, draftTourNo);
-}
+    let currentTourNo = Number(picker?.selectedTourNo || currentStage?.practiceTourNo || 1);
+
+    if (
+      draft?.status === "paused" &&
+      draft?.subjectKey === subjectKey &&
+      draftTourNo > 0
+    ) {
+      currentTourNo = draftTourNo;
+      setSelectedPracticeTourNo(subjectKey, draftTourNo);
+    }
+
+    await renderPracticeStart();
+
+    if (state?.courses?.subjectKey !== subjectKey) return;
+    if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() !== "practice-start") return;
 
     const canResume = !!(
       draft?.status === "paused" &&
@@ -14362,19 +14388,18 @@ if (
       draftTourNo === currentTourNo
     );
 
-    const restartLabelEl = $("#practice-restart-label");
+    if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
 
-if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
+    updatePracticeStartButtonForTour(currentTourNo, canResume);
 
-updatePracticeStartButtonForTour(currentTourNo, canResume);
-     
-if (canResume) {
-  showToast(t("practice_resume_prompt"));
+    if (canResume) {
+      showToast(t("practice_resume_prompt"));
+    }
+  } finally {
+    hideAsyncOverlay();
+  }
 }
-
-  })().catch(() => {});
-}
-
+   
 async function startPracticeNew() {
   const subjectKey = state.courses.subjectKey;
 
@@ -19116,7 +19141,7 @@ if (action === "my-rec-open-books") {
   return;
 }
    if (action === "my-rec-open-practice") {
-  openPracticeStart();
+  await openPracticeStart();
   return;
 }
        
@@ -19171,7 +19196,7 @@ if (action === "tour-to-subject") {
   state.courses.myRecReturnTarget = null;
   saveState();
 
-  openPracticeStart();
+  await openPracticeStart();
   return;
 }
        
@@ -19213,8 +19238,8 @@ if (action === "profile-open-ratings") {
   return;
 }
 
-      if (action === "open-practice") {
-        openPracticeStart();
+            if (action === "open-practice") {
+        await openPracticeStart();
         return;
       }
 
@@ -19504,9 +19529,9 @@ if (action === "tour-next" || action === "tour-submit") {
         return;
       }
                    if (action === "tour-review-open-practice") {
-        openPracticeStart();
-        return;
-      }  
+  await openPracticeStart();
+  return;
+}  
              if (action === "tour-certificate") {
         const certId = Number(state?.courses?.lastTourCertificateId || 0);
 
