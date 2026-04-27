@@ -16480,12 +16480,24 @@ async function loadActiveTourBySubjectAndNo(subjectId, tourNo) {
     .from("tours")
     .select("id,subject_id,tour_no,start_date,end_date,is_active")
     .eq("subject_id", subjectId)
-    .eq("tour_no", tourNo)
+    .eq("tour_no", Number(tourNo))
     .eq("is_active", true)
     .maybeSingle();
 
-  if (error) return null;
-  return data || null;
+  if (error || !data?.id) return null;
+
+  // ✅ local date check: closed/future tours must not start from stale state
+  const padLocal = (n) => String(n).padStart(2, "0");
+  const d0 = new Date();
+  const todayISO = `${d0.getFullYear()}-${padLocal(d0.getMonth() + 1)}-${padLocal(d0.getDate())}`;
+
+  const sd = data?.start_date ? String(data.start_date) : null;
+  const ed = data?.end_date ? String(data.end_date) : null;
+
+  if (sd && sd > todayISO) return null;
+  if (ed && ed < todayISO) return null;
+
+  return data;
 }
 
 async function loadTourQuestionsDB(tourId) {
@@ -16773,20 +16785,45 @@ async function updateTourAttempt(attemptId, patch) {
     return;
   }
 
-  // 2) resolve subject_id and active tour (tour_no=1 for now; later from UI selection)
+   // 2) resolve subject_id and active tour selected from Tours List
   const subjectId = await getSubjectIdByKey(subjectKey);
   if (!subjectId) {
     showToast(t("toast_subject_id_not_found"));
     return;
   }
 
-  const tourNo = 1; // TODO: take selected tour from Tours List
-  const tour = await loadActiveTourBySubjectAndNo(subjectId, tourNo);
+  const selectedTourNo = Number(state?.courses?.activeTourNo || 0);
+  const selectedTourId = state?.courses?.activeTourId != null
+    ? String(state.courses.activeTourId)
+    : "";
 
-  if (!tour?.id) {
+  if (!selectedTourNo || !selectedTourId) {
     await uiAlert({
       title: t("tour_unavailable_title") || "Тур недоступен",
-      message: t("tour_unavailable_no_active") || "Нет активного тура для этого предмета."
+      message:
+        t("tour_unavailable_no_active") ||
+        tr3(
+          "Нет активного тура для этого предмета. Пожалуйста, откройте список туров заново.",
+          "Bu fan uchun faol tur yo‘q. Iltimos, turlar ro‘yxatini qayta oching.",
+          "There is no active tour for this subject. Please reopen the tours list."
+        )
+    });
+    return;
+  }
+
+  const tourNo = selectedTourNo;
+  const tour = await loadActiveTourBySubjectAndNo(subjectId, tourNo);
+
+  if (!tour?.id || String(tour.id) !== selectedTourId) {
+    await uiAlert({
+      title: t("tour_unavailable_title") || "Тур недоступен",
+      message:
+        t("tour_unavailable_no_active") ||
+        tr3(
+          "Данные тура обновились. Пожалуйста, вернитесь к списку туров и откройте тур заново.",
+          "Tur ma’lumotlari yangilandi. Iltimos, turlar ro‘yxatiga qaytib, turni qayta oching.",
+          "Tour data has been updated. Please return to the tours list and open the tour again."
+        )
     });
     return;
   }
