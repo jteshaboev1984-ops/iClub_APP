@@ -4451,6 +4451,166 @@ function loadAllPracticeHistoryBySubject(subjectKey) {
   return { best, last: allAttempts };
 }
 
+   function getSelectedPracticeTourNo(subjectKey, fallbackTourNo = 1) {
+  try {
+    const key = String(subjectKey || state?.courses?.subjectKey || "").trim();
+    const saved = Number(state?.courses?.selectedPracticeTourNoBySubject?.[key] || 0);
+    if (saved > 0) return saved;
+  } catch {}
+
+  return Math.max(1, Number(fallbackTourNo || 1) || 1);
+}
+
+function setSelectedPracticeTourNo(subjectKey, tourNo) {
+  try {
+    const key = String(subjectKey || state?.courses?.subjectKey || "").trim();
+    const n = Math.max(1, Number(tourNo || 1) || 1);
+    state.courses = state.courses || {};
+    state.courses.selectedPracticeTourNoBySubject = state.courses.selectedPracticeTourNoBySubject || {};
+    state.courses.selectedPracticeTourNoBySubject[key] = n;
+    saveState();
+  } catch {}
+}
+
+function getLocalTodayISO() {
+  const d0 = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d0.getFullYear()}-${p(d0.getMonth() + 1)}-${p(d0.getDate())}`;
+}
+
+function isTourRowInWindow(row, todayISO = getLocalTodayISO()) {
+  const sd = row?.start_date ? String(row.start_date) : null;
+  const ed = row?.end_date ? String(row.end_date) : null;
+  return (!sd || sd <= todayISO) && (!ed || ed >= todayISO);
+}
+
+async function getPracticeTourCards(subjectKey) {
+  const ctx = await getPracticeStageContext(subjectKey).catch(() => null);
+  const subjectId = Number(ctx?.subjectId || 0);
+  const currentTourNo = Number(ctx?.practiceTourNo || 1) || 1;
+  const pools = Array.isArray(ctx?.pools) ? ctx.pools : [];
+
+  if (!subjectId || !pools.length) return { currentTourNo, selectedTourNo: currentTourNo, cards: [] };
+
+  let tours = [];
+  try {
+    if (window.sb) {
+      const { data, error } = await window.sb
+        .from("tours")
+        .select("id,tour_no,start_date,end_date,is_active")
+        .eq("subject_id", subjectId)
+        .order("tour_no", { ascending: true });
+
+      if (!error && Array.isArray(data)) tours = data;
+    }
+  } catch {}
+
+  const todayISO = getLocalTodayISO();
+  const tourByNo = new Map(tours.map(r => [Number(r?.tour_no || 0), r]));
+
+  const rawCards = await Promise.all(
+    pools
+      .map(p => Number(p?.tour_no || 0))
+      .filter(n => Number.isFinite(n) && n > 0)
+      .sort((a, b) => a - b)
+      .map(async (tourNo) => {
+        const tourRow = tourByNo.get(tourNo) || null;
+        const stats = await computePracticeStageStats(subjectKey, tourNo).catch(() => null);
+
+        let stateName = "available";
+        if (tourRow) {
+          if (tourRow?.is_active === true && isTourRowInWindow(tourRow, todayISO)) stateName = "active";
+          else if (tourRow?.start_date && String(tourRow.start_date) > todayISO) stateName = "locked";
+          else stateName = "past";
+        } else {
+          stateName = tourNo <= currentTourNo ? (tourNo === currentTourNo ? "active" : "past") : "locked";
+        }
+
+        const total = Number(stats?.totalCount || 0);
+        const done = Number(stats?.masteredCount || 0);
+        const open = Math.max(0, total - done);
+
+        return {
+          tourNo,
+          stateName,
+          isLocked: stateName === "locked" || total <= 0,
+          isActive: stateName === "active",
+          isDone: total > 0 && done >= total,
+          total,
+          done,
+          open,
+          best: stats?.best || null,
+          last: Array.isArray(stats?.last) ? stats.last : []
+        };
+      })
+  );
+
+  const selectedRaw = getSelectedPracticeTourNo(subjectKey, currentTourNo);
+  const selectedCard = rawCards.find(c => c.tourNo === selectedRaw && !c.isLocked);
+  const fallbackCard =
+    rawCards.find(c => c.isActive && !c.isLocked) ||
+    rawCards.find(c => !c.isLocked) ||
+    rawCards[0];
+
+  const selectedTourNo = Number(selectedCard?.tourNo || fallbackCard?.tourNo || currentTourNo || 1);
+  setSelectedPracticeTourNo(subjectKey, selectedTourNo);
+
+  return { currentTourNo, selectedTourNo, cards: rawCards };
+}
+
+function renderPracticeTourPicker(cards, selectedTourNo) {
+  const el = document.getElementById("practice-tour-picker");
+  if (!el) return;
+
+  if (!Array.isArray(cards) || !cards.length) {
+    el.innerHTML = "";
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="practice-tour-picker-head">
+      <div class="practice-tour-picker-title">${escapeHTML(tr3("Выберите тур", "Turni tanlang", "Choose a tour"))}</div>
+      <div class="practice-tour-picker-sub">${escapeHTML(tr3("Статистика ниже относится к выбранной практике", "Quyidagi statistika tanlangan amaliyotga tegishli", "Stats below belong to the selected practice"))}</div>
+    </div>
+
+    <div class="practice-tour-chip-row">
+      ${cards.map(c => {
+        const selected = Number(c.tourNo) === Number(selectedTourNo);
+        const cls = [
+          "practice-tour-chip",
+          selected ? "is-selected" : "",
+          c.isActive ? "is-active" : "",
+          c.isDone ? "is-done" : "",
+          c.isLocked ? "is-locked" : ""
+        ].filter(Boolean).join(" ");
+
+        const progress = c.total > 0 ? `${c.done}/${c.total}` : "—";
+        const stateText = c.isLocked
+          ? "🔒"
+          : c.isDone
+            ? "✓"
+            : c.isActive
+              ? "•"
+              : "";
+
+        return `
+          <button
+            class="${cls}"
+            type="button"
+            ${c.isLocked ? "disabled" : `data-action="practice-select-tour" data-tour-no="${Number(c.tourNo)}"`}
+          >
+            <span class="practice-tour-chip-main">
+              <span>${escapeHTML(tr3("Тур", "Tur", "Tour"))} ${Number(c.tourNo)}</span>
+              <span>${escapeHTML(stateText)}</span>
+            </span>
+            <span class="practice-tour-chip-progress">${escapeHTML(progress)}</span>
+          </button>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+   
 async function computePracticeStageStats(subjectKey, forcedTourNo = null) {
   const uid = await getAuthUid().catch(() => null);
   if (!uid) {
@@ -13528,26 +13688,36 @@ return { added: add.length, recs, addedRecs: add };
   };
 
   (async () => {
-    const stageStats = await computePracticeStageStats(subjectKey);
+    const picker = await getPracticeTourCards(subjectKey);
     if (state?.courses?.subjectKey !== viewSubjectKey) return;
 
-    const practiceTourNo = Number(stageStats?.practiceTourNo || 1);
+    const selectedTourNo = Number(picker?.selectedTourNo || 1);
+    const stageStats = await computePracticeStageStats(subjectKey, selectedTourNo);
+    if (state?.courses?.subjectKey !== viewSubjectKey) return;
+
+    renderPracticeTourPicker(picker.cards, selectedTourNo);
+
     const done = Number(stageStats?.masteredCount || 0);
     const total = Number(stageStats?.totalCount || 0);
+    const open = Math.max(0, total - done);
 
     if (stageMetaEl) {
       const titlePart =
-        t("practice_stage_for_tour", { n: practiceTourNo }) ||
-        `Practice for Tour ${practiceTourNo}`;
+        t("practice_stage_for_tour", { n: selectedTourNo }) ||
+        `Practice for Tour ${selectedTourNo}`;
 
       const progressPart = total > 0
         ? (t("practice_stage_progress", { done, total }) || `${done}/${total}`)
         : "";
 
-      stageMetaEl.textContent = progressPart ? `${titlePart} • ${progressPart}` : titlePart;
+      const leftPart = total > 0
+        ? tr3(`Осталось ${open}`, `${open} ta qoldi`, `${open} left`)
+        : "";
+
+      stageMetaEl.textContent = [titlePart, progressPart, leftPart].filter(Boolean).join(" • ");
     }
 
-    const h = loadPracticeHistory(subjectKey, practiceTourNo);
+    const h = loadPracticeHistory(subjectKey, selectedTourNo);
     const best = h?.best || null;
     const last = Array.isArray(h?.last) ? h.last : [];
 
@@ -13618,7 +13788,7 @@ return { added: add.length, recs, addedRecs: add };
     });
   })().catch(() => {});
 }
- 
+   
          async function renderToursStart() {
   showToursLoading();
   try {
@@ -14076,17 +14246,18 @@ async function renderToursHistorySummary(subjectId) {
 
   (async () => {
     const currentStage = await getPracticeStageContext(subjectKey);
-    if (state?.courses?.subjectKey !== subjectKey) return;
-    if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() !== "practice-start") return;
+if (state?.courses?.subjectKey !== subjectKey) return;
+if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() !== "practice-start") return;
 
-    const currentTourNo = Number(currentStage?.practiceTourNo || 1);
+const picker = await getPracticeTourCards(subjectKey);
+const currentTourNo = Number(picker?.selectedTourNo || currentStage?.practiceTourNo || 1);
 
-    const draft = loadPracticeDraft();
-    const draftTourNo = Number(
-      draft?.practiceTourNo ||
-      draft?.quiz?.practiceTourNo ||
-      1
-    );
+const draft = loadPracticeDraft();
+const draftTourNo = Number(
+  draft?.practiceTourNo ||
+  draft?.quiz?.practiceTourNo ||
+  1
+);
 
     const canResume = !!(
       draft?.status === "paused" &&
@@ -14098,8 +14269,6 @@ async function renderToursHistorySummary(subjectId) {
     );
 
     const restartLabelEl = $("#practice-restart-label");
-const pastBtn = $("#practice-past-btn");
-const pastHint = $("#practice-past-hint");
 
 if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
 
@@ -14124,36 +14293,6 @@ if (canResume) {
   showToast(t("practice_resume_prompt"));
 }
 
-(async () => {
-  try {
-    const pastStats = await computePastPracticeStats(subjectKey);
-    if (state?.courses?.subjectKey !== subjectKey) return;
-
-    const hasPast = Array.isArray(pastStats?.tourNos) && pastStats.tourNos.length > 0;
-    const remaining = Number(pastStats?.openCount || 0);
-
-    if (!pastBtn) return;
-
-    if (!hasPast) {
-      pastBtn.style.display = "none";
-      if (pastHint) pastHint.style.display = "none";
-      return;
-    }
-
-    pastBtn.style.display = "block";
-    pastBtn.disabled = remaining <= 0;
-
-    if (pastHint) {
-      pastHint.style.display = "block";
-      pastHint.textContent = remaining > 0
-        ? (t("practice_past_hint_ready") || "Откроются вопросы только по уже пройденным турам.")
-        : (t("practice_past_hint_done") || "По прошлым турам новых вопросов не осталось.");
-    }
-  } catch {
-    if (pastBtn) pastBtn.style.display = "none";
-    if (pastHint) pastHint.style.display = "none";
-  }
-})();
   })().catch(() => {});
 }
 
@@ -14170,12 +14309,39 @@ async function startPracticeNew() {
   ));
 
   try {
-    stageCtx = await getPracticeStageContext(subjectKey);
-    questions = await buildPracticeSet(subjectKey);
-  } finally {
-    hideAsyncOverlay();
-  }
+  stageCtx = await getPracticeStageContext(subjectKey);
 
+const picker = await getPracticeTourCards(subjectKey);
+const selectedTourNo = Number(picker?.selectedTourNo || stageCtx?.practiceTourNo || 1);
+
+const selectedCard = (Array.isArray(picker?.cards) ? picker.cards : []).find(
+  c => Number(c?.tourNo || 0) === Number(selectedTourNo)
+);
+
+if (selectedCard?.isLocked) {
+  showToast(
+    t("practice_tour_locked") ||
+    tr3(
+      "Эта практика откроется вместе с соответствующим туром.",
+      "Bu amaliyot tegishli tur bilan birga ochiladi.",
+      "This practice opens with the corresponding tour."
+    )
+  );
+  return;
+}
+
+const selectedStats = await computePracticeStageStats(subjectKey, selectedTourNo);
+
+stageCtx = {
+  ...stageCtx,
+  poolId: Number(selectedStats?.poolId || 0) || null,
+  practiceTourNo: Number(selectedStats?.practiceTourNo || selectedTourNo || 1)
+};
+
+questions = await buildPracticeSetForTour(subjectKey, stageCtx.practiceTourNo);
+} finally {
+  hideAsyncOverlay();
+}
   if (!stageCtx?.poolId) {
     showToast(
       t("practice_stage_not_ready") ||
@@ -18978,8 +19144,18 @@ if (action === "profile-open-ratings") {
   return;
 }
 
+if (action === "practice-select-tour") {
+  const tourNo = Number(btn.dataset.tourNo || 0);
+  if (tourNo > 0) {
+    setSelectedPracticeTourNo(state.courses.subjectKey, tourNo);
+    renderPracticeStart();
+  }
+  return;
+}
+
 if (action === "practice-start-past") {
-  startPracticePast();
+  // legacy fallback: old button no longer exists, but keep safe behavior
+  startPracticeNew();
   return;
 }
 
@@ -18988,8 +19164,8 @@ if (action === "practice-start-past") {
   const draft = loadPracticeDraft();
 
   const currentStage = await getPracticeStageContext(subjectKey).catch(() => null);
-  const currentTourNo = Number(currentStage?.practiceTourNo || 1);
-  const draftTourNo = Number(draft?.practiceTourNo || draft?.quiz?.practiceTourNo || 1);
+const currentTourNo = getSelectedPracticeTourNo(subjectKey, Number(currentStage?.practiceTourNo || 1));
+const draftTourNo = Number(draft?.practiceTourNo || draft?.quiz?.practiceTourNo || 1);
 
   if (!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz && draftTourNo === currentTourNo)) {
     showToast(t("not_available"));
