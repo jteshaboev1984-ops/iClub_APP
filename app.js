@@ -4558,6 +4558,34 @@ async function getPracticeTourCards(subjectKey) {
   return { currentTourNo, selectedTourNo, cards: rawCards };
 }
 
+   function updatePracticeStartButtonForTour(tourNo, canResume = false) {
+  const restartBtn = $("#practice-restart-btn");
+  const restartLabelEl = $("#practice-restart-label");
+  if (!restartBtn) return;
+
+  const n = Math.max(1, Number(tourNo || 1) || 1);
+
+  const label = canResume
+    ? (t("practice_restart") || "Начать заново")
+    : (
+        t("practice_start_for_tour", { n }) ||
+        tr3(
+          `Начать практику ${n} тура`,
+          `${n}-tur amaliyotini boshlash`,
+          `Start practice for Tour ${n}`
+        )
+      );
+
+  restartBtn.textContent = "";
+
+  if (restartLabelEl) {
+    restartLabelEl.textContent = label;
+    restartBtn.appendChild(restartLabelEl);
+  } else {
+    restartBtn.textContent = label;
+  }
+}
+
 function renderPracticeTourPicker(cards, selectedTourNo) {
   const el = document.getElementById("practice-tour-picker");
   if (!el) return;
@@ -13692,11 +13720,14 @@ return { added: add.length, recs, addedRecs: add };
     if (state?.courses?.subjectKey !== viewSubjectKey) return;
 
     const selectedTourNo = Number(picker?.selectedTourNo || 1);
-    const stageStats = await computePracticeStageStats(subjectKey, selectedTourNo);
-    if (state?.courses?.subjectKey !== viewSubjectKey) return;
+updatePracticeStartButtonForTour(selectedTourNo, false);
 
-    renderPracticeTourPicker(picker.cards, selectedTourNo);
+const stageStats = await computePracticeStageStats(subjectKey, selectedTourNo);
+if (state?.courses?.subjectKey !== viewSubjectKey) return;
 
+renderPracticeTourPicker(picker.cards, selectedTourNo);
+updatePracticeStartButtonForTour(selectedTourNo, false);
+     
     const done = Number(stageStats?.masteredCount || 0);
     const total = Number(stageStats?.totalCount || 0);
     const open = Math.max(0, total - done);
@@ -14272,23 +14303,8 @@ const draftTourNo = Number(
 
 if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
 
-if (restartBtn) {
-  const restartLabel = canResume
-    ? (t("practice_restart") || "Начать заново")
-    : (
-        t("practice_start_for_tour", { n: currentTourNo }) ||
-        `Начать практику ${currentTourNo} тура`
-      );
-
-  restartBtn.textContent = "";
-  if (restartLabelEl) {
-    restartLabelEl.textContent = restartLabel;
-    restartBtn.appendChild(restartLabelEl);
-  } else {
-    restartBtn.textContent = restartLabel;
-  }
-}
-
+updatePracticeStartButtonForTour(currentTourNo, canResume);
+     
 if (canResume) {
   showToast(t("practice_resume_prompt"));
 }
@@ -19147,12 +19163,26 @@ if (action === "profile-open-ratings") {
 if (action === "practice-select-tour") {
   const tourNo = Number(btn.dataset.tourNo || 0);
   if (tourNo > 0) {
+    showAsyncOverlay(tr3(
+      "Загружаем практику…",
+      "Amaliyot yuklanmoqda…",
+      "Loading practice…"
+    ));
+
     setSelectedPracticeTourNo(state.courses.subjectKey, tourNo);
-    renderPracticeStart();
+    updatePracticeStartButtonForTour(tourNo, false);
+
+    try {
+      renderPracticeStart();
+    } finally {
+      setTimeout(() => {
+        try { hideAsyncOverlay(); } catch {}
+      }, 450);
+    }
   }
   return;
 }
-
+       
 if (action === "practice-start-past") {
   // legacy fallback: old button no longer exists, but keep safe behavior
   startPracticeNew();
