@@ -5747,6 +5747,7 @@ const ratingsState = {
   q: "",
   subjectId: state?.ratings?.subjectId || null,
   tourId: state?.ratings?.tourId || "__all__", // "__all__" = All tours
+  tourNo: state?.ratings?.tourNo || "__all__", // "__all__" or number
   _booted: false,
   _loading: false,
   _token: 0,
@@ -5763,6 +5764,7 @@ function saveRatingsFiltersToState() {
     state.ratings.scope = ratingsState.scope || "district";
     state.ratings.subjectId = ratingsState.subjectId ? Number(ratingsState.subjectId) : null;
     state.ratings.tourId = ratingsState.tourId || "__all__";
+    state.ratings.tourNo = ratingsState.tourNo || "__all__";
     saveState();
   } catch {}
 }
@@ -8593,11 +8595,16 @@ function renderRatingsSelectOptions(selectEl, items, { placeholder = null } = {}
   }
 
   items.forEach(it => {
-    const opt = document.createElement("option");
-    opt.value = String(it.value);
-    opt.textContent = String(it.label);
-    selectEl.appendChild(opt);
-  });
+  const opt = document.createElement("option");
+  opt.value = String(it.value);
+  opt.textContent = String(it.label);
+
+  if (it.tourNo != null) {
+    opt.dataset.tourNo = String(it.tourNo);
+  }
+
+  selectEl.appendChild(opt);
+});
 }
 
 async function ensureRatingsBoot() {
@@ -8642,18 +8649,23 @@ if (ratingsState.subjectId && subjectSelect) subjectSelect.value = String(rating
   const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
   const tourItems = [
     { value: "__all__", label: t("ratings_all_tours") || "All tours" },
-    ...tours.map(tt => ({ value: tt.id, label: `Tour ${tt.tour_no}` }))
+    ...tours.map(tt => ({ value: tt.id, label: `Tour ${tt.tour_no}`, tourNo: Number(tt.tour_no || 0) }))
   ];
   renderRatingsSelectOptions(tourSelect, tourItems);
 
-// keep saved tour only if it belongs to current subject; otherwise All tours
-const savedTourId = ratingsState.tourId && ratingsState.tourId !== "__all__"
-  ? Number(ratingsState.tourId)
+// keep saved tour by tour number, because tour_id is different per subject
+const savedTourNo =
+  ratingsState.tourNo && ratingsState.tourNo !== "__all__"
+    ? Number(ratingsState.tourNo)
+    : null;
+
+const savedTourRow = savedTourNo
+  ? tours.find(tt => Number(tt?.tour_no || 0) === Number(savedTourNo))
   : null;
 
-const savedTourExists = savedTourId && tours.some(tt => Number(tt?.id || 0) === Number(savedTourId));
+ratingsState.tourId = savedTourRow?.id ? Number(savedTourRow.id) : "__all__";
+ratingsState.tourNo = savedTourRow?.tour_no ? Number(savedTourRow.tour_no) : "__all__";
 
-ratingsState.tourId = savedTourExists ? savedTourId : "__all__";
 if (tourSelect) tourSelect.value = String(ratingsState.tourId || "__all__");
 
 saveRatingsFiltersToState();
@@ -8677,8 +8689,13 @@ saveRatingsFiltersToState();
 
   const q = String(ratingsState.q || "").trim().toLowerCase();
 
-  const showLoading = () => { if (loadingEl) loadingEl.style.display = "flex"; };
-  const hideLoading = () => { if (loadingEl) loadingEl.style.display = "none"; };
+  const token = ++ratingsState._token;
+
+const showLoading = () => { if (loadingEl) loadingEl.style.display = "flex"; };
+const hideLoading = () => {
+  if (token !== ratingsState._token) return;
+  if (loadingEl) loadingEl.style.display = "none";
+};
 
   // total participants (used for "out of N")
   let totalN = 0;
@@ -8782,9 +8799,7 @@ saveRatingsFiltersToState();
     return;
   }
 
-  const token = ++ratingsState._token;
-
-  // boot selects (once)
+    // boot selects (once)
   await ensureRatingsBoot();
 
   // loading UI
@@ -9832,20 +9847,36 @@ function bindRatingsUI() {
     const v = subjectSelect.value;
     ratingsState.subjectId = v ? Number(v) : null;
 
-    // subject changed => tour belongs to old subject, so reset only tour
-    ratingsState.tourId = "__all__";
+    const previousTourNo =
+      ratingsState.tourNo && ratingsState.tourNo !== "__all__"
+        ? Number(ratingsState.tourNo)
+        : "__all__";
+
     resetRatingsSearchPaging();
 
     if (window.sb && ratingsState.subjectId) {
       const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
       const tourItems = [
         { value: "__all__", label: t("ratings_all_tours") || "All tours" },
-        ...tours.map(tt => ({ value: tt.id, label: `Tour ${tt.tour_no}` }))
+        ...tours.map(tt => ({ value: tt.id, label: `Tour ${tt.tour_no}`, tourNo: Number(tt.tour_no || 0) }))
       ];
+
       renderRatingsSelectOptions(tourSelect, tourItems);
+
+      if (previousTourNo !== "__all__") {
+        const sameTour = tours.find(tt => Number(tt?.tour_no || 0) === Number(previousTourNo));
+        ratingsState.tourId = sameTour?.id ? Number(sameTour.id) : "__all__";
+        ratingsState.tourNo = sameTour?.tour_no ? Number(sameTour.tour_no) : "__all__";
+      } else {
+        ratingsState.tourId = "__all__";
+        ratingsState.tourNo = "__all__";
+      }
+    } else {
+      ratingsState.tourId = "__all__";
+      ratingsState.tourNo = "__all__";
     }
 
-    if (tourSelect) tourSelect.value = "__all__";
+    if (tourSelect) tourSelect.value = String(ratingsState.tourId || "__all__");
 
     saveRatingsFiltersToState();
     renderRatings();
@@ -9855,7 +9886,13 @@ function bindRatingsUI() {
    if (tourSelect) {
   tourSelect.addEventListener("change", () => {
     const v = tourSelect.value;
+    const opt = tourSelect.options?.[tourSelect.selectedIndex] || null;
+
     ratingsState.tourId = (v && v !== "__all__") ? Number(v) : "__all__";
+    ratingsState.tourNo = (v && v !== "__all__")
+      ? Number(opt?.dataset?.tourNo || 0) || "__all__"
+      : "__all__";
+
     resetRatingsSearchPaging();
     saveRatingsFiltersToState();
     renderRatings();
@@ -13690,7 +13727,7 @@ return { added: add.length, recs, addedRecs: add };
 }
    
    // ---- Practice history render (inject into practice-start) ----
-  function renderPracticeStart() {
+  async function renderPracticeStart() {
   const subjectKey = state.courses.subjectKey;
   const subj = subjectByKey(subjectKey);
   const viewSubjectKey = subjectKey;
@@ -13731,7 +13768,7 @@ return { added: add.length, recs, addedRecs: add };
     return `${m}${t("practice_time_min_suffix")} ${r}${t("practice_time_sec_suffix")}`;
   };
 
-  (async () => {
+   return (async () => {
     const picker = await getPracticeTourCards(subjectKey);
     if (state?.courses?.subjectKey !== viewSubjectKey) return;
 
@@ -14297,7 +14334,6 @@ if (state?.courses?.subjectKey !== subjectKey) return;
 if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() !== "practice-start") return;
 
 const picker = await getPracticeTourCards(subjectKey);
-const currentTourNo = Number(picker?.selectedTourNo || currentStage?.practiceTourNo || 1);
 
 const draft = loadPracticeDraft();
 const draftTourNo = Number(
@@ -14305,6 +14341,17 @@ const draftTourNo = Number(
   draft?.quiz?.practiceTourNo ||
   1
 );
+
+let currentTourNo = Number(picker?.selectedTourNo || currentStage?.practiceTourNo || 1);
+
+if (
+  draft?.status === "paused" &&
+  draft?.subjectKey === subjectKey &&
+  draftTourNo > 0
+) {
+  currentTourNo = draftTourNo;
+  setSelectedPracticeTourNo(subjectKey, draftTourNo);
+}
 
     const canResume = !!(
       draft?.status === "paused" &&
@@ -19189,12 +19236,10 @@ if (action === "practice-select-tour") {
     updatePracticeStartButtonForTour(tourNo, false);
 
     try {
-      renderPracticeStart();
-    } finally {
-      setTimeout(() => {
-        try { hideAsyncOverlay(); } catch {}
-      }, 450);
-    }
+  await renderPracticeStart();
+} finally {
+  hideAsyncOverlay();
+}
   }
   return;
 }
@@ -19209,14 +19254,14 @@ if (action === "practice-start-past") {
   const subjectKey = state.courses.subjectKey;
   const draft = loadPracticeDraft();
 
-  const currentStage = await getPracticeStageContext(subjectKey).catch(() => null);
-const currentTourNo = getSelectedPracticeTourNo(subjectKey, Number(currentStage?.practiceTourNo || 1));
-const draftTourNo = Number(draft?.practiceTourNo || draft?.quiz?.practiceTourNo || 1);
+  const draftTourNo = Number(draft?.practiceTourNo || draft?.quiz?.practiceTourNo || 1);
 
-  if (!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz && draftTourNo === currentTourNo)) {
-    showToast(t("not_available"));
-    return;
-  }
+if (!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.quiz && draftTourNo > 0)) {
+  showToast(t("not_available"));
+  return;
+}
+
+setSelectedPracticeTourNo(subjectKey, draftTourNo);
 
   try {
     await initSupabaseSession();
