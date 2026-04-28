@@ -4508,43 +4508,60 @@ async function getPracticeTourCards(subjectKey) {
   const todayISO = getLocalTodayISO();
   const tourByNo = new Map(tours.map(r => [Number(r?.tour_no || 0), r]));
 
+    const poolTourNos = pools
+    .map(p => Number(p?.tour_no || 0))
+    .filter(n => Number.isFinite(n) && n > 0);
+
+  const dbTourNos = tours
+    .map(t => Number(t?.tour_no || 0))
+    .filter(n => Number.isFinite(n) && n > 0);
+
+  const allTourNos = Array.from(new Set([...dbTourNos, ...poolTourNos]))
+    .sort((a, b) => a - b);
+
   const rawCards = await Promise.all(
-    pools
-      .map(p => Number(p?.tour_no || 0))
-      .filter(n => Number.isFinite(n) && n > 0)
-      .sort((a, b) => a - b)
-      .map(async (tourNo) => {
-        const tourRow = tourByNo.get(tourNo) || null;
-        const stats = await computePracticeStageStats(subjectKey, tourNo).catch(() => null);
+    allTourNos.map(async (tourNo) => {
+      const tourRow = tourByNo.get(tourNo) || null;
+      const hasPool = pools.some(p => Number(p?.tour_no || 0) === Number(tourNo));
 
-        let stateName = "available";
-        if (tourRow) {
-          if (tourRow?.is_active === true && isTourRowInWindow(tourRow, todayISO)) stateName = "active";
-          else if (tourRow?.start_date && String(tourRow.start_date) > todayISO) stateName = "locked";
-          else stateName = "past";
+      let stats = null;
+      if (hasPool) {
+        stats = await computePracticeStageStats(subjectKey, tourNo).catch(() => null);
+      }
+
+      let stateName = "available";
+
+      if (tourRow) {
+        if (tourRow?.is_active === true && isTourRowInWindow(tourRow, todayISO)) {
+          stateName = "active";
+        } else if (tourRow?.start_date && String(tourRow.start_date) > todayISO) {
+          stateName = "locked";
         } else {
-          stateName = tourNo <= currentTourNo ? (tourNo === currentTourNo ? "active" : "past") : "locked";
+          stateName = "past";
         }
+      } else {
+        stateName = tourNo <= currentTourNo ? (tourNo === currentTourNo ? "active" : "past") : "locked";
+      }
 
-        const total = Number(stats?.totalCount || 0);
-        const done = Number(stats?.masteredCount || 0);
-        const open = Math.max(0, total - done);
+      const total = Number(stats?.totalCount || 0);
+      const done = Number(stats?.masteredCount || 0);
+      const open = Math.max(0, total - done);
+      const locked = stateName === "locked" || !hasPool || total <= 0;
 
-        return {
-          tourNo,
-          stateName,
-          isLocked: stateName === "locked" || total <= 0,
-          isActive: stateName === "active",
-          isDone: total > 0 && done >= total,
-          total,
-          done,
-          open,
-          best: stats?.best || null,
-          last: Array.isArray(stats?.last) ? stats.last : []
-        };
-      })
+      return {
+        tourNo,
+        stateName,
+        isLocked: locked,
+        isActive: stateName === "active",
+        isDone: total > 0 && done >= total,
+        total,
+        done,
+        open,
+        best: stats?.best || null,
+        last: Array.isArray(stats?.last) ? stats.last : []
+      };
+    })
   );
-
   const selectedRaw = getSelectedPracticeTourNo(subjectKey, currentTourNo);
   const selectedCard = rawCards.find(c => c.tourNo === selectedRaw && !c.isLocked);
   const fallbackCard =
@@ -4617,9 +4634,10 @@ function renderPracticeTourPicker(cards, selectedTourNo) {
           <button
             class="${cls}"
             type="button"
-            ${c.isLocked ? "disabled" : `data-action="practice-select-tour" data-tour-no="${Number(c.tourNo)}"`}
+            ${c.isLocked ? "disabled aria-disabled=\"true\"" : `data-action="practice-select-tour" data-tour-no="${Number(c.tourNo)}"`}
           >
             <span class="practice-tour-chip-label">
+              ${c.isLocked ? `<span class="practice-tour-chip-lock">🔒</span>` : ""}
               ${escapeHTML(tr3("Тур", "Tur", "Tour"))} ${Number(c.tourNo)}
             </span>
           </button>
