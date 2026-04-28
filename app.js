@@ -4597,39 +4597,31 @@ function renderPracticeTourPicker(cards, selectedTourNo) {
 
   el.innerHTML = `
     <div class="practice-tour-picker-head">
-      <div class="practice-tour-picker-title">${escapeHTML(tr3("Выберите тур", "Turni tanlang", "Choose a tour"))}</div>
-      <div class="practice-tour-picker-sub">${escapeHTML(tr3("Статистика ниже относится к выбранной практике", "Quyidagi statistika tanlangan amaliyotga tegishli", "Stats below belong to the selected practice"))}</div>
+      <div class="practice-tour-picker-title">${escapeHTML(tr3("Выбор тура", "Tur tanlash", "Tour selection"))}</div>
     </div>
 
-    <div class="practice-tour-chip-row">
+    <div class="practice-tour-chip-row" aria-label="${escapeHTML(tr3("Выбор тура", "Tur tanlash", "Tour selection"))}">
       ${cards.map(c => {
         const selected = Number(c.tourNo) === Number(selectedTourNo);
+
         const cls = [
           "practice-tour-chip",
           selected ? "is-selected" : "",
-          c.isActive ? "is-active" : "",
-          c.isDone ? "is-done" : "",
+          c.isDone ? "is-completed" : "",
+          (!c.isDone && c.isActive) ? "is-active" : "",
+          (!c.isDone && !c.isActive && !c.isLocked) ? "is-not-started" : "",
           c.isLocked ? "is-locked" : ""
         ].filter(Boolean).join(" ");
 
-        const progress = c.total > 0 ? `${c.done}/${c.total}` : "—";
-        const stateText = c.isLocked
-           ? "🔒"
-           : c.isDone
-             ? "✓"
-             : "";
-         
         return `
           <button
             class="${cls}"
             type="button"
             ${c.isLocked ? "disabled" : `data-action="practice-select-tour" data-tour-no="${Number(c.tourNo)}"`}
           >
-            <span class="practice-tour-chip-main">
-              <span>${escapeHTML(tr3("Тур", "Tur", "Tour"))} ${Number(c.tourNo)}</span>
-              <span>${escapeHTML(stateText)}</span>
+            <span class="practice-tour-chip-label">
+              ${escapeHTML(tr3("Тур", "Tur", "Tour"))} ${Number(c.tourNo)}
             </span>
-            <span class="practice-tour-chip-progress">${escapeHTML(progress)}</span>
           </button>
         `;
       }).join("")}
