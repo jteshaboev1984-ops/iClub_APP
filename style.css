@@ -5507,3 +5507,93 @@ button.is-loading { opacity: .85; }
     padding: 8px 9px;
   }
 }
+
+.practice-tour-picker {
+  overflow: hidden;
+}
+
+.practice-tour-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.practice-tour-picker-title {
+  font-weight: 900;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.practice-tour-picker-sub {
+  display: none;
+}
+
+.practice-tour-chip-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 6px;
+  margin: 0 -2px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.practice-tour-chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.practice-tour-chip {
+  flex: 0 0 auto;
+  min-width: 76px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.42);
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 900;
+  font-size: 13px;
+  line-height: 1;
+  scroll-snap-align: start;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.practice-tour-chip:active {
+  transform: scale(0.97);
+}
+
+.practice-tour-chip-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.practice-tour-chip.is-not-started {
+  background: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.45);
+  color: #334155;
+}
+
+.practice-tour-chip.is-active {
+  background: #eaf2ff;
+  border-color: rgba(37, 99, 235, 0.55);
+  color: #1d4ed8;
+}
+
+.practice-tour-chip.is-completed {
+  background: #fff1f2;
+  border-color: rgba(225, 29, 72, 0.5);
+  color: #be123c;
+}
+
+.practice-tour-chip.is-selected {
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.16);
+}
+
+.practice-tour-chip.is-locked {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
