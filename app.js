@@ -6603,6 +6603,51 @@ function resetUiAfterIdentityRecovery() {
   } catch {}
 }
 
+   async function checkTelegramLinkedProfile({ source = "boot_linked_profile_check" } = {}) {
+  try {
+    if (!window.sb?.functions?.invoke) {
+      return { ok: false, reason: "functions_not_available" };
+    }
+
+    const initData = String(window.Telegram?.WebApp?.initData || "").trim();
+    if (!initData) {
+      return { ok: false, reason: "telegram_init_data_missing" };
+    }
+
+    const { data, error } = await window.sb.functions.invoke("recover-telegram-user", {
+      body: {
+        initData,
+        mode: "check",
+        source
+      }
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        reason: "edge_function_error",
+        message: String(error?.message || error)
+      };
+    }
+
+    return {
+      ok: !!data?.ok,
+      linked: !!data?.linked,
+      is_current: !!data?.is_current,
+      user_id: data?.user_id || null,
+      current_uid: data?.current_uid || null,
+      reason: data?.reason || null,
+      data
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      reason: "exception",
+      message: String(e?.message || e)
+    };
+  }
+}
+   
 async function recoverTelegramLinkedProfile({ source = "registration_conflict" } = {}) {
   try {
     if (!window.sb?.functions?.invoke) {
@@ -6799,6 +6844,67 @@ try { localStorage.removeItem(LS.profile); } catch {}
       ok: !!rec?.ok,
       blocked: !rec?.ok,
       reason: rec?.reason || "inactive_session"
+    };
+  } catch {
+    return { ok: true, skipped: true, reason: "exception_safe_skip" };
+  }
+}
+
+   async function ensureKnownTelegramProfileOnBoot() {
+  try {
+    // Если local profile уже есть, этот кейс обрабатывает ensureActiveIdentityOrShowRecovery().
+    if (loadProfile()) {
+      return { ok: true, skipped: true, reason: "local_profile_exists" };
+    }
+
+    if (!window.sb?.functions?.invoke) {
+      return { ok: true, skipped: true, reason: "functions_not_available" };
+    }
+
+    const initData = String(window.Telegram?.WebApp?.initData || "").trim();
+    if (!initData) {
+      return { ok: true, skipped: true, reason: "telegram_init_data_missing" };
+    }
+
+    const check = await checkTelegramLinkedProfile({
+      source: "boot_no_local_profile_check"
+    });
+
+    // Важно: если check не сработал из-за сети/Edge — НЕ блокируем.
+    // Просто оставляем обычную регистрацию.
+    if (!check?.ok) {
+      return {
+        ok: true,
+        skipped: true,
+        reason: check?.reason || "check_failed"
+      };
+    }
+
+    // Telegram профиль не найден в БД → это реально новый пользователь.
+    if (!check.linked) {
+      return { ok: true, linked: false };
+    }
+
+    // Уже привязан к текущему uid. Теоретически hydrate должен был поднять профиль,
+    // но если нет — не мешаем обычному flow.
+    if (check.is_current) {
+      return { ok: true, linked: true, is_current: true };
+    }
+
+    // Telegram уже связан с другим active user_id.
+    // Показываем recovery сразу, без заполнения регистрации.
+    showView("registration");
+    bindRegistration();
+
+    const rec = await confirmAndRecoverTelegramProfile({
+      source: "boot_existing_telegram_profile"
+    });
+
+    return {
+      ok: !!rec?.ok,
+      handled: true,
+      blocked: !rec?.ok,
+      reason: rec?.reason || "boot_existing_telegram_profile"
     };
   } catch {
     return { ok: true, skipped: true, reason: "exception_safe_skip" };
@@ -20160,6 +20266,14 @@ if (verifyCertificateNumber) {
 // не пускаем в Home и предлагаем восстановление.
 const activeIdentity = await ensureActiveIdentityOrShowRecovery();
 if (activeIdentity?.blocked) {
+  return;
+}
+
+// ✅ clean-device / Telegram Web guard:
+// если local profile нет, но Telegram аккаунт уже связан с профилем,
+// сразу предлагаем восстановление, без повторного заполнения регистрации.
+const knownTelegramProfile = await ensureKnownTelegramProfileOnBoot();
+if (knownTelegramProfile?.handled || knownTelegramProfile?.blocked) {
   return;
 }
 
