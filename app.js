@@ -6803,14 +6803,17 @@ async function confirmAndRecoverTelegramProfile({ source = "registration_conflic
 }
 
   showToast(
-    tr3(
-      "Профиль восстановлен.",
-      "Profil tiklandi.",
-      "Profile restored."
-    )
-  );
+  tr3(
+    "Профиль восстановлен.",
+    "Profil tiklandi.",
+    "Profile restored."
+  )
+);
 
-  const restoredProfile = loadProfile();
+// ✅ после server-side recovery notification обновляем колокольчик
+try { await refreshNotificationsBadge(); } catch {}
+
+const restoredProfile = loadProfile();
   const restoredLang = restoredProfile?.uiLanguage || restoredProfile?.language || getTelegramLang() || "ru";
 
   try { window.i18n?.setLang(restoredLang); } catch {}
