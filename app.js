@@ -6707,18 +6707,32 @@ async function recoverTelegramLinkedProfile({ source = "registration_conflict" }
   }
 }
 
-async function confirmAndRecoverTelegramProfile({ source = "registration_conflict" } = {}) {
+async function confirmAndRecoverTelegramProfile({ source = "registration_conflict", variant = "linked_profile" } = {}) {
+  const isInactiveSession = variant === "inactive_session";
+
   const confirmed = await uiConfirm({
-    title: tr3(
-      "Профиль уже существует",
-      "Profil mavjud",
-      "Profile already exists"
-    ),
-    message: tr3(
-      "Этот Telegram-аккаунт уже связан с профилем iClub. Можно восстановить профиль на этом устройстве. После подтверждения активным станет это устройство, а предыдущая сессия будет отключена. Продолжить?",
-      "Bu Telegram akkaunt iClub profiliga ulangan. Profilni shu qurilmada tiklash mumkin. Tasdiqlasangiz, shu qurilma faol bo‘ladi, oldingi sessiya esa nofaol bo‘ladi. Davom etamizmi?",
-      "This Telegram account is already linked to an iClub profile. You can restore the profile on this device. After confirmation, this device will become active and the previous session will be disabled. Continue?"
-    ),
+    title: isInactiveSession
+      ? tr3(
+          "Профиль открыт на другом устройстве",
+          "Profil boshqa qurilmada ochilgan",
+          "Profile opened on another device"
+        )
+      : tr3(
+          "Профиль уже существует",
+          "Profil mavjud",
+          "Profile already exists"
+        ),
+    message: isInactiveSession
+      ? tr3(
+          "Этот профиль был активирован на другом устройстве. Чтобы использовать iClub здесь, восстановите профиль на этом устройстве. После подтверждения это устройство станет активным. В целях безопасности восстановление ограничено: 1 раз за 24 часа, 2 раза за 7 дней и 3 раза за 30 дней. Продолжить?",
+          "Bu profil boshqa qurilmada faollashtirilgan. iClub’dan bu yerda foydalanish uchun profilni shu qurilmada tiklang. Tasdiqlasangiz, shu qurilma faol bo‘ladi. Xavfsizlik uchun tiklash cheklangan: 24 soatda 1 marta, 7 kunda 2 marta va 30 kunda 3 marta. Davom etamizmi?",
+          "This profile was activated on another device. To use iClub here, restore the profile on this device. After confirmation, this device will become active. For security, recovery is limited to once per 24 hours, twice per 7 days, and three times per 30 days. Continue?"
+        )
+      : tr3(
+          "Этот Telegram-аккаунт уже связан с профилем iClub. Можно восстановить профиль на этом устройстве. После подтверждения активным станет это устройство, а предыдущая сессия будет отключена. В целях безопасности восстановление ограничено: 1 раз за 24 часа, 2 раза за 7 дней и 3 раза за 30 дней. Продолжить?",
+          "Bu Telegram akkaunt iClub profiliga ulangan. Profilni shu qurilmada tiklash mumkin. Tasdiqlasangiz, shu qurilma faol bo‘ladi, oldingi sessiya esa nofaol bo‘ladi. Xavfsizlik uchun tiklash cheklangan: 24 soatda 1 marta, 7 kunda 2 marta va 30 kunda 3 marta. Davom etamizmi?",
+          "This Telegram account is already linked to an iClub profile. You can restore the profile on this device. After confirmation, this device will become active and the previous session will be disabled. For security, recovery is limited to once per 24 hours, twice per 7 days, and three times per 30 days. Continue?"
+        ),
     okText: tr3(
       "Восстановить профиль",
       "Profilni tiklash",
@@ -6753,21 +6767,40 @@ async function confirmAndRecoverTelegramProfile({ source = "registration_conflic
   hideAsyncOverlay();
 
   if (!recRes?.ok) {
+  const reason = String(recRes?.reason || recRes?.data?.reason || "");
+
+  if (reason === "recovery_limit_reached") {
     await uiAlert({
       title: tr3(
-        "Не удалось восстановить профиль.",
-        "Profilni tiklab bo‘lmadi.",
-        "Could not restore the profile."
+        "Лимит восстановления исчерпан.",
+        "Tiklash limiti tugadi.",
+        "Recovery limit reached."
       ),
       message: tr3(
-        "Закройте и заново откройте приложение из Telegram. Если ошибка повторится, напишите в поддержку.",
-        "Ilovani yopib, Telegram orqali qayta oching. Xato takrorlansa, qo‘llab-quvvatlashga yozing.",
-        "Close and reopen the app from Telegram. If the problem continues, contact support."
+        "В целях безопасности профиль можно восстановить не чаще 1 раза за 24 часа, 2 раз за 7 дней и 3 раз за 30 дней. Если вам нужно восстановить доступ раньше, обратитесь к администратору.",
+        "Xavfsizlik uchun profilni 24 soatda 1 martadan, 7 kunda 2 martadan va 30 kunda 3 martadan ko‘p tiklab bo‘lmaydi. Agar profilni bundan oldinroq tiklash kerak bo‘lsa, administratorga murojaat qiling.",
+        "For security, the profile can be restored no more than once per 24 hours, twice per 7 days, and three times per 30 days. If you need access earlier, contact the administrator."
       )
     });
 
     return recRes;
   }
+
+  await uiAlert({
+    title: tr3(
+      "Не удалось восстановить профиль.",
+      "Profilni tiklashning imkoni bo‘lmadi.",
+      "Could not restore the profile."
+    ),
+    message: tr3(
+      "Закройте и заново откройте приложение из Telegram. Если ошибка повторится, напишите в поддержку.",
+      "Ilovani yopib, Telegram orqali qayta oching. Xato takrorlansa, qo‘llab-quvvatlashga yozing.",
+      "Close and reopen the app from Telegram. If the problem continues, contact support."
+    )
+  });
+
+  return recRes;
+}
 
   showToast(
     tr3(
@@ -6836,9 +6869,10 @@ try { localStorage.removeItem(LS.profile); } catch {}
     showView("registration");
     bindRegistration();
 
-    const rec = await confirmAndRecoverTelegramProfile({
-      source: "inactive_session_boot"
-    });
+   const rec = await confirmAndRecoverTelegramProfile({
+  source: "inactive_session_boot",
+  variant: "inactive_session"
+});
 
     return {
       ok: !!rec?.ok,
@@ -6909,6 +6943,183 @@ try { localStorage.removeItem(LS.profile); } catch {}
   } catch {
     return { ok: true, skipped: true, reason: "exception_safe_skip" };
   }
+}
+
+      let __identityRuntimeGuardInFlight = null;
+let __identityRuntimeGuardLastCheckedAt = 0;
+let __identityRuntimeBlocking = false;
+let __identityRuntimeGuardsBound = false;
+
+function isIdentityRecoverySurfaceActive() {
+  try {
+    const regView = document.getElementById("view-registration");
+    const certView = document.getElementById("view-certificate-verify");
+
+    const regActive = !!(regView && regView.classList.contains("is-active"));
+    const certActive = !!(certView && certView.classList.contains("is-active"));
+
+    const topView = Array.isArray(state?.viewStack)
+      ? state.viewStack[state.viewStack.length - 1]
+      : "";
+
+    return (
+      regActive ||
+      certActive ||
+      topView === "registration" ||
+      topView === "certificate-verify"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function resetRuntimeForInactiveIdentity() {
+  try {
+    if (typeof stopPracticeQuestionTimer === "function") {
+      stopPracticeQuestionTimer();
+    }
+  } catch {}
+
+  try {
+    if (state?.quiz?.qTimerId) clearInterval(state.quiz.qTimerId);
+  } catch {}
+
+  try {
+    if (state?.tourContext?.timerId) clearInterval(state.tourContext.timerId);
+  } catch {}
+
+  try {
+    state.quizLock = null;
+
+    try { delete state.quiz; } catch {}
+    try { delete state.tourContext; } catch {}
+
+    state.tab = "home";
+    state.prevTab = "home";
+    state.viewStack = ["registration"];
+
+    state.courses = state.courses || {};
+    state.courses.stack = ["all-subjects"];
+    state.courses.subjectKey = null;
+    state.courses.lessonId = null;
+    state.courses.entryTab = "home";
+    state.courses.lastTourAttemptId = null;
+    state.courses.lastTourCertificateId = null;
+
+    saveState();
+  } catch {}
+}
+
+async function enforceActiveIdentityOrBlock({ source = "runtime_active_identity", force = false } = {}) {
+  try {
+    if (__identityRuntimeBlocking) return false;
+
+    // На registration/recovery/certificate-verify не мешаем текущему flow.
+    if (isIdentityRecoverySurfaceActive()) return true;
+
+    const localProfile = loadProfile();
+    if (!localProfile || !window.sb) return true;
+
+    const now = Date.now();
+
+    // Не бьём БД на каждый микроклик.
+    if (!force && (now - __identityRuntimeGuardLastCheckedAt) < 5000) {
+      return true;
+    }
+
+    if (__identityRuntimeGuardInFlight) {
+      return await __identityRuntimeGuardInFlight;
+    }
+
+    __identityRuntimeGuardInFlight = (async () => {
+      const uid = await getAuthUid().catch(() => null);
+      if (!uid) return true;
+
+      const userRowCheck = await checkDbUserRow(uid);
+
+      // Если сеть/БД не ответили уверенно — не блокируем нормального пользователя.
+      if (!userRowCheck?.ok) {
+        return true;
+      }
+
+      __identityRuntimeGuardLastCheckedAt = Date.now();
+
+      // Текущий uid всё ещё активен.
+      if (userRowCheck.exists) {
+        return true;
+      }
+
+      // База уверенно сказала: public.users для текущего uid больше нет.
+      // Значит эта открытая вкладка/устройство уже не активны.
+      __identityRuntimeBlocking = true;
+
+      resetRuntimeForInactiveIdentity();
+
+      try { localStorage.removeItem(LS.profile); } catch {}
+
+            showView("registration");
+      bindRegistration();
+
+      try {
+        await confirmAndRecoverTelegramProfile({
+          source,
+          variant: "inactive_session"
+        });
+      } finally {
+        __identityRuntimeBlocking = false;
+      }
+
+      // Важно: старое действие/клик НЕ продолжаем после recovery.
+      return false;
+    })();
+
+    try {
+      return await __identityRuntimeGuardInFlight;
+    } finally {
+      __identityRuntimeGuardInFlight = null;
+    }
+  } catch {
+    return true;
+  }
+}
+
+function bindIdentityRuntimeGuards() {
+  if (__identityRuntimeGuardsBound) return;
+  __identityRuntimeGuardsBound = true;
+
+  const run = (source) => {
+    enforceActiveIdentityOrBlock({ source, force: true }).catch(() => null);
+  };
+
+  try {
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) run("visibility_active_identity_check");
+    });
+  } catch {}
+
+  try {
+    window.addEventListener("focus", () => {
+      run("focus_active_identity_check");
+    });
+  } catch {}
+
+  try {
+    window.addEventListener("online", () => {
+      setTimeout(() => run("online_active_identity_check"), 400);
+    });
+  } catch {}
+
+  // Если оба устройства открыты одновременно, старое окно не должно жить вечно.
+  try {
+    setInterval(() => {
+      if (document.hidden) return;
+
+      enforceActiveIdentityOrBlock({
+        source: "interval_active_identity_check",
+        force: false
+      }).catch(() => null);
+    }, 20000);
+  } catch {}
 }
    
 async function hydrateLocalProfileFromSupabaseIfMissing() {
@@ -18620,9 +18831,9 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
 function bindTabbar() {
   let lastTapTs = 0;
 
-    const handle = (btn) => {
-    const tab = btn.dataset.tab;
-    if (!tab) return;
+    const handle = async (btn) => {
+  const tab = btn.dataset.tab;
+  if (!tab) return;
     
      // ✅ До регистрации табы запрещены (и на registration таббар скрыт, но это страховка)
   if (!isRegistered()) {
@@ -18631,6 +18842,10 @@ function bindTabbar() {
     return;
   }
 
+         if (!(await enforceActiveIdentityOrBlock({ source: `tab_${tab}`, force: true }))) {
+    return;
+  }
+       
     // ✅ Ratings доступен только школьникам
     if (tab === "ratings") {
       const p = loadProfile();
@@ -18671,7 +18886,7 @@ function bindTabbar() {
       lastTapTs = now;
 
       e.preventDefault();
-      handle(btn);
+      handle(btn).catch(() => null);
 
       // ✅ убираем “липкий” focus на мобилках
       try { btn.blur(); } catch {}
@@ -18679,7 +18894,7 @@ function bindTabbar() {
 
     // ✅ Desktop fallback
     btn.addEventListener("click", () => {
-      handle(btn);
+      handle(btn).catch(() => null);
       try { btn.blur(); } catch {}
     });
   });
@@ -18689,9 +18904,14 @@ function bindTabbar() {
     const backBtn = $("#topbar-back");
     if (!backBtn) return;
 
-    backBtn.addEventListener("click", (event) => {
+    backBtn.addEventListener("click", async (event) => {
   event.stopPropagation();
   if (state.quizLock) return;
+
+  if (!(await enforceActiveIdentityOrBlock({ source: "topbar_back", force: true }))) {
+    event.preventDefault();
+    return;
+  }
 
     // ✅ Registration: назад = закрыть апп (возвращаться некуда)
   const regView = document.getElementById("view-registration");
@@ -19066,10 +19286,18 @@ if (
    
       function bindActions() {
     document.addEventListener("click", async (e) => {
-      const btn = e.target.closest("[data-action]");
-      if (!btn) return;
+  const btn = e.target.closest("[data-action]");
+  if (!btn) return;
 
-      const action = btn.dataset.action;
+  const action = btn.dataset.action;
+
+  // ✅ Если это уже неактивное устройство, не даём продолжать пользоваться старым UI.
+  // Registration/recovery/certificate screens не блокируем.
+  if (!(await enforceActiveIdentityOrBlock({ source: `action_${action}` }))) {
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
 
             // ===== Profile local navigation (must work from anywhere) =====
       if (action === "profile-settings") {
@@ -20567,6 +20795,7 @@ function renderProfileCredentialsUI() {
   bindTopbar();
   bindActions();
   bindRatingsUI(); // ✅ Leaderboard controls
+  bindIdentityRuntimeGuards(); // ✅ one-active-device runtime enforcement
 }
 
 // Earned Credentials — daily evaluation jobs (once per Tashkent day)
