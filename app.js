@@ -281,6 +281,36 @@ async function waitForOverlayPaint() {
   }
 }
 
+   async function checkDbUserRow(uid) {
+  try {
+    if (!window.sb || !uid) {
+      return { ok: false, exists: false, reason: "missing_sb_or_uid" };
+    }
+
+    const { data, error } = await window.sb
+      .from("users")
+      .select("id")
+      .eq("id", uid)
+      .maybeSingle();
+
+    if (error) {
+      return { ok: false, exists: false, reason: "db_error", error };
+    }
+
+    return {
+      ok: true,
+      exists: !!data?.id
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      exists: false,
+      reason: "exception",
+      error: e
+    };
+  }
+}
+   
 async function ensureHomeDbReady() {
   try {
     const profile = loadProfile();
@@ -6442,7 +6472,7 @@ const usersPayload = {
     return {
       title: tr3(
         "Этот Telegram-аккаунт уже связан с профилем iClub.",
-        "Bu Telegram akkaunt allaqachon iClub profiliga ulangan.",
+        "Bu Telegram akkaunt iClub profiliga ulangan.",
         "This Telegram account is already linked to an iClub profile."
       ),
       recommendation: tr3(
@@ -6495,6 +6525,284 @@ const usersPayload = {
       "Please try again a little later. If the problem continues, contact support."
     )
   };
+}
+   function closeIClubApp() {
+  try {
+    const tgApp = window.Telegram?.WebApp;
+    if (tgApp && typeof tgApp.close === "function") {
+      tgApp.close();
+      return true;
+    }
+  } catch {}
+
+  try {
+    window.close();
+    return true;
+  } catch {}
+
+  return false;
+}
+
+async function showRecoveryCancelledAndClose() {
+  await uiAlert({
+    title: tr3(
+      "Восстановление отменено.",
+      "Tiklash bekor qilindi.",
+      "Recovery cancelled."
+    ),
+    message: tr3(
+      "Данные не изменены. Используйте устройство, где профиль сейчас активен, или заново откройте приложение и подтвердите восстановление.",
+      "Ma’lumotlar o‘zgartirilmadi. Profil hozir faol bo‘lgan qurilmadan foydalaning yoki ilovani qayta ochib, tiklashni tasdiqlang.",
+      "No data was changed. Use the device where the profile is currently active, or reopen the app and confirm recovery."
+    ),
+    okText: tr3(
+      "Закрыть приложение",
+      "Ilovani yopish",
+      "Close app"
+    )
+  });
+
+  const closed = closeIClubApp();
+
+  if (!closed) {
+    await uiAlert({
+      title: tr3(
+        "Закройте приложение вручную.",
+        "Ilovani qo‘lda yoping.",
+        "Close the app manually."
+      ),
+      message: tr3(
+        "Telegram не разрешил закрыть окно автоматически.",
+        "Telegram oynani avtomatik yopishga ruxsat bermadi.",
+        "Telegram did not allow the window to close automatically."
+      )
+    });
+  }
+}
+
+function resetUiAfterIdentityRecovery() {
+  try {
+    state.tab = "home";
+    state.prevTab = "home";
+    state.viewStack = ["home"];
+
+    state.courses.stack = ["all-subjects"];
+    state.courses.subjectKey = null;
+    state.courses.lessonId = null;
+    state.courses.entryTab = "home";
+    state.courses.lastTourAttemptId = null;
+    state.courses.lastTourCertificateId = null;
+
+    state.quizLock = null;
+
+    // local экранный контекст квиза убираем, DB-прогресс не трогаем
+    try { delete state.quiz; } catch {}
+    try { delete state.tourContext; } catch {}
+
+    saveState();
+  } catch {}
+}
+
+async function recoverTelegramLinkedProfile({ source = "registration_conflict" } = {}) {
+  try {
+    if (!window.sb?.functions?.invoke) {
+      return { ok: false, reason: "functions_not_available" };
+    }
+
+    const initData = String(window.Telegram?.WebApp?.initData || "").trim();
+
+    if (!initData) {
+      return { ok: false, reason: "telegram_init_data_missing" };
+    }
+
+    const { data, error } = await window.sb.functions.invoke("recover-telegram-user", {
+      body: {
+        initData,
+        confirm: true,
+        source
+      }
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        reason: "edge_function_error",
+        message: String(error?.message || error)
+      };
+    }
+
+    if (!data?.ok) {
+      return {
+        ok: false,
+        reason: data?.reason || "recovery_failed",
+        message: data?.message || null,
+        data
+      };
+    }
+
+    // Только local profile пересобираем под новый активный uid.
+    // Practice/tour progress не чистим.
+    try { localStorage.removeItem(LS.profile); } catch {}
+
+    try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
+    try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
+    try { await ensureProfileGeoTranslationsHydrated(); } catch {}
+
+    return {
+      ok: isRegistered(),
+      reason: isRegistered() ? "recovered" : "recovered_but_profile_incomplete",
+      data
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      reason: "exception",
+      message: String(e?.message || e)
+    };
+  }
+}
+
+async function confirmAndRecoverTelegramProfile({ source = "registration_conflict" } = {}) {
+  const confirmed = await uiConfirm({
+    title: tr3(
+      "Профиль уже существует",
+      "Profil mavjud",
+      "Profile already exists"
+    ),
+    message: tr3(
+      "Этот Telegram-аккаунт уже связан с профилем iClub. Можно восстановить профиль на этом устройстве. После подтверждения активным станет это устройство, а предыдущая сессия будет отключена. Продолжить?",
+      "Bu Telegram akkaunt iClub profiliga ulangan. Profilni shu qurilmada tiklash mumkin. Tasdiqlasangiz, shu qurilma faol bo‘ladi, oldingi sessiya esa nofaol bo‘ladi. Davom etamizmi?",
+      "This Telegram account is already linked to an iClub profile. You can restore the profile on this device. After confirmation, this device will become active and the previous session will be disabled. Continue?"
+    ),
+    okText: tr3(
+      "Восстановить профиль",
+      "Profilni tiklash",
+      "Restore profile"
+    ),
+    cancelText: tr3(
+      "Отмена",
+      "Bekor qilish",
+      "Cancel"
+    )
+  });
+
+  if (!confirmed) {
+    await showRecoveryCancelledAndClose();
+    return { ok: false, reason: "cancelled" };
+  }
+
+  showAsyncOverlay(
+    tr3(
+      "Восстанавливаем профиль…",
+      "Profil tiklanmoqda…",
+      "Restoring profile…"
+    )
+  );
+
+  const recRes = await recoverTelegramLinkedProfile({ source }).catch((e) => ({
+    ok: false,
+    reason: "exception",
+    message: String(e?.message || e)
+  }));
+
+  hideAsyncOverlay();
+
+  if (!recRes?.ok) {
+    await uiAlert({
+      title: tr3(
+        "Не удалось восстановить профиль.",
+        "Profilni tiklab bo‘lmadi.",
+        "Could not restore the profile."
+      ),
+      message: tr3(
+        "Закройте и заново откройте приложение из Telegram. Если ошибка повторится, напишите в поддержку.",
+        "Ilovani yopib, Telegram orqali qayta oching. Xato takrorlansa, qo‘llab-quvvatlashga yozing.",
+        "Close and reopen the app from Telegram. If the problem continues, contact support."
+      )
+    });
+
+    return recRes;
+  }
+
+  showToast(
+    tr3(
+      "Профиль восстановлен.",
+      "Profil tiklandi.",
+      "Profile restored."
+    )
+  );
+
+  const restoredProfile = loadProfile();
+  const restoredLang = restoredProfile?.uiLanguage || restoredProfile?.language || getTelegramLang() || "ru";
+
+  try { window.i18n?.setLang(restoredLang); } catch {}
+  try { applyStaticI18n(); } catch {}
+
+  resetUiAfterIdentityRecovery();
+
+  setTab("home");
+  await ensureHomeDbReady();
+  renderHome();
+  renderAllSubjects();
+
+  return { ok: true, reason: "recovered" };
+}
+
+async function ensureActiveIdentityOrShowRecovery() {
+  try {
+    const localProfile = loadProfile();
+    if (!localProfile || !window.sb) {
+      return { ok: true, skipped: true };
+    }
+
+    const uid = await getAuthUid().catch(() => null);
+    if (!uid) {
+      return { ok: true, skipped: true, reason: "no_uid" };
+    }
+
+    const userRowCheck = await checkDbUserRow(uid);
+
+// Важно: если база/сеть не ответила уверенно — НЕ блокируем пользователя.
+// Иначе при временном сбое можно случайно показать recovery нормальному активному пользователю.
+if (!userRowCheck?.ok) {
+  return {
+    ok: true,
+    skipped: true,
+    reason: userRowCheck?.reason || "db_user_check_failed"
+  };
+}
+
+// Если текущий uid активен, но local profile старый/без id — тихо пересобираем local profile.
+if (userRowCheck.exists) {
+  if (!localProfile.id || String(localProfile.id) !== String(uid)) {
+    try { localStorage.removeItem(LS.profile); } catch {}
+    try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
+    try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
+    try { await ensureProfileGeoTranslationsHydrated(); } catch {}
+  }
+
+  return { ok: true, active: true };
+}
+
+// Только если база УВЕРЕННО сказала: users-row для текущего uid нет.
+// Значит эта сессия неактивна: профиль открыт/перенесён на другое устройство.
+try { localStorage.removeItem(LS.profile); } catch {}
+
+    showView("registration");
+    bindRegistration();
+
+    const rec = await confirmAndRecoverTelegramProfile({
+      source: "inactive_session_boot"
+    });
+
+    return {
+      ok: !!rec?.ok,
+      blocked: !rec?.ok,
+      reason: rec?.reason || "inactive_session"
+    };
+  } catch {
+    return { ok: true, skipped: true, reason: "exception_safe_skip" };
+  }
 }
    
 async function hydrateLocalProfileFromSupabaseIfMissing() {
@@ -18570,10 +18878,16 @@ if (
     } catch {}
 
             if (!dbRes?.ok) {
-  const uiErr = getRegistrationSaveErrorUi(dbRes);
-
-  // ✅ сначала убираем overlay "Сохраняем регистрацию..."
   hideAsyncOverlay();
+
+  if (dbRes?.reason === "telegram_already_linked") {
+    await confirmAndRecoverTelegramProfile({
+      source: "registration_conflict"
+    });
+    return;
+  }
+
+  const uiErr = getRegistrationSaveErrorUi(dbRes);
 
   await uiAlert({
     title: uiErr.title,
@@ -19832,24 +20146,32 @@ if (action === "video-complete") {
       try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
 
       // ✅ flush pending ops after Supabase is ready (debounced)
-      try { scheduleFlushPendingOps(0); } catch {}
+try { scheduleFlushPendingOps(0); } catch {}
+
+const verifyCertificateNumber = getVerifyCertificateNumberFromUrl();
+if (verifyCertificateNumber) {
+  showView("certificate-verify");
+  await renderCertificateVerifyView(verifyCertificateNumber);
+  return;
+}
+
+// ✅ active-session guard:
+// если local profile остался от старого uid, но текущий uid уже не активен,
+// не пускаем в Home и предлагаем восстановление.
+const activeIdentity = await ensureActiveIdentityOrShowRecovery();
+if (activeIdentity?.blocked) {
+  return;
+}
 
 // Stage B2: always sync user_subjects from DB → local profile (single source for UI)
+// Делаем это только после active identity check.
 try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
 
-      const verifyCertificateNumber = getVerifyCertificateNumberFromUrl();
-      if (verifyCertificateNumber) {
-        showView("certificate-verify");
-        await renderCertificateVerifyView(verifyCertificateNumber);
-        return;
-      }
-
-            if (!isRegistered()) {
-        showView("registration");
-        bindRegistration();
-        return;
-      }
-
+if (!isRegistered()) {
+  showView("registration");
+  bindRegistration();
+  return;
+}
       await ensureHomeDbReady();
       renderAllSubjects();
       renderHome();
