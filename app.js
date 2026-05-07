@@ -11398,12 +11398,12 @@ input?.addEventListener("change", async () => {
   return;
 }
 
-  renderHome();
-  if (state.tab === "courses") renderAllSubjects();
-  renderProfileMain();
-  renderProfileSettings();
+renderHome();
+if (state.tab === "courses") renderAllSubjects();
+renderProfileMain();
+renderProfileSettings();
 
-  showToast(isPinned ? t("toast_removed_pinned") : t("toast_added_pinned"));
+showToast(toPinned ? t("toast_added_pinned") : t("toast_removed_pinned"));
 });
 
       pinnedWrap.appendChild(row);
@@ -13148,11 +13148,11 @@ const appendSubjectCard = (s) => {
   const us = userSubjects.find(x => x.key === s.key) || null;
 const mode = us?.mode || null;
 const isComp = mode === "competitive";
-const isStudyActive = mode === "study";
+const isStudyPinned = mode === "study" && !!us?.pinned;
 
-  const card = document.createElement("div");
-  card.className = "catalog-card";
-
+const card = document.createElement("div");
+card.className = "catalog-card";
+   
   // Top clickable area: open hub (but does NOT change profile)
   const head = document.createElement("button");
   head.type = "button";
@@ -13192,8 +13192,8 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
   // Competitive tab -> toggle subject active/inactive in competitive
   // Study tab       -> toggle subject active/inactive in study
   const footer = document.createElement("div");
-  const isCompetitiveTab = state.courses.mainFilter === "competitive";
-  const isActiveInCurrentTab = isCompetitiveTab ? isComp : isStudyActive;
+const isCompetitiveTab = state.courses.mainFilter === "competitive";
+const isActiveInCurrentTab = isCompetitiveTab ? isComp : isStudyPinned;
 
   footer.className = "catalog-toggle-row" + (isActiveInCurrentTab ? " is-on" : "");
 
@@ -13201,11 +13201,19 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
   left.className = "catalog-toggle-left";
 
   const stateLine = document.createElement("div");
-  stateLine.className = "catalog-toggle-state";
-  stateLine.textContent = isActiveInCurrentTab
-    ? (t("course_toggle_on") || "Включено")
-    : (t("course_toggle_off") || "Выключено");
-
+stateLine.className = "catalog-toggle-state";
+stateLine.textContent = isCompetitiveTab
+  ? (
+      isActiveInCurrentTab
+        ? (t("course_toggle_on") || "Включено")
+        : (t("course_toggle_off") || "Выключено")
+    )
+  : (
+      isActiveInCurrentTab
+        ? (t("settings_pinned") || "Закреплено")
+        : (t("settings_not_pinned") || "Не закреплено")
+    );
+   
   left.appendChild(stateLine);
 
   const sw = document.createElement("label");
@@ -13353,77 +13361,85 @@ setImgWithFallback(imgEl, subjectIconCandidates(s.key));
         }
       }
     } else {
-      if (wantsOn) {
-        const ok = await uiConfirm({
-          title: t("courses_activate_study_title") || "Включить предмет?",
-          message:
-            t("courses_activate_study_text") ||
-            "Предмет будет активирован в учебном режиме.",
-          okText: t("courses_activate_study_ok") || "Включить",
-          cancelText: t("cancel") || "Отмена"
-        });
+  if (wantsOn) {
+    const ok = await uiConfirm({
+      title: t("courses_activate_study_title") || "Закрепить предмет?",
+      message:
+        t("courses_activate_study_text") ||
+        "Предмет будет закреплён на главном экране в учебном режиме.",
+      okText: t("courses_activate_study_ok") || "Закрепить",
+      cancelText: t("cancel") || "Отмена"
+    });
 
-        if (!ok) {
-          input.checked = false;
-          return;
-        }
+    if (!ok) {
+      input.checked = false;
+      return;
+    }
 
-        const updated = upsertUserSubjectMode(fresh, s.key, "study");
-        saveProfile(updated);
+    const updated = upsertUserSubjectMode(fresh, s.key, "study");
 
-        try {
-          const res = await syncUserSubjectToSupabase(s.key, "study", false);
-          if (!res?.ok) {
-            input.checked = false;
-            showToast(t("save_failed_db_try_again"));
-            renderAllSubjects();
-            return;
-          }
-
-          showToast(t("toast_subject_activated_study") || "Предмет включён в учебный режим.");
-        } catch {
-          input.checked = false;
-          showToast(t("network_error_try_again") || "Ошибка сети. Попробуйте ещё раз.");
-          renderAllSubjects();
-          return;
-        }
-      } else {
-        const ok = await uiConfirm({
-          title: t("courses_deactivate_study_title") || "Выключить предмет?",
-          message:
-            t("courses_deactivate_study_text") ||
-            "Предмет будет выключен в учебном режиме.",
-          okText: t("courses_deactivate_study_ok") || "Выключить",
-          cancelText: t("cancel") || "Отмена"
-        });
-
-        if (!ok) {
-          input.checked = true;
-          return;
-        }
-
-        const updated = removeUserSubject(fresh, s.key);
-        saveProfile(updated);
-
-        try {
-          const res = await deleteUserSubjectFromSupabase(s.key);
-          if (!res?.ok) {
-            input.checked = true;
-            showToast(t("save_failed_db_try_again"));
-            renderAllSubjects();
-            return;
-          }
-
-          showToast(t("toast_subject_deactivated") || "Предмет выключен.");
-        } catch {
-          input.checked = true;
-          showToast(t("network_error_try_again") || "Ошибка сети. Попробуйте ещё раз.");
-          renderAllSubjects();
-          return;
-        }
+    if (Array.isArray(updated?.subjects)) {
+      const idx = updated.subjects.findIndex(x => x.key === s.key);
+      if (idx >= 0) {
+        updated.subjects[idx].pinned = true;
       }
     }
 
+    saveProfile(updated);
+
+    try {
+      const res = await syncUserSubjectToSupabase(s.key, "study", true);
+      if (!res?.ok) {
+        input.checked = false;
+        showToast(t("save_failed_db_try_again"));
+        renderAllSubjects();
+        return;
+      }
+
+      showToast(t("toast_added_pinned") || "Предмет закреплён.");
+    } catch {
+      input.checked = false;
+      showToast(t("network_error_try_again") || "Ошибка сети. Попробуйте ещё раз.");
+      renderAllSubjects();
+      return;
+    }
+  } else {
+    const ok = await uiConfirm({
+      title: t("courses_deactivate_study_title") || "Убрать предмет?",
+      message:
+        t("courses_deactivate_study_text") ||
+        "Предмет будет убран из закреплённых на главном экране.",
+      okText: t("courses_deactivate_study_ok") || "Убрать",
+      cancelText: t("cancel") || "Отмена"
+    });
+
+    if (!ok) {
+      input.checked = true;
+      return;
+    }
+
+    const updated = removeUserSubject(fresh, s.key);
+    saveProfile(updated);
+
+    try {
+      const res = await deleteUserSubjectFromSupabase(s.key);
+      if (!res?.ok) {
+        input.checked = true;
+        showToast(t("save_failed_db_try_again"));
+        renderAllSubjects();
+        return;
+      }
+
+      showToast(t("toast_removed_pinned") || "Предмет убран.");
+    } catch {
+      input.checked = true;
+      showToast(t("network_error_try_again") || "Ошибка сети. Попробуйте ещё раз.");
+      renderAllSubjects();
+      return;
+    }
+  }
+}
+     
     renderHome();
     renderAllSubjects();
     renderProfileSettings?.();
