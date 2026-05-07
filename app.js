@@ -509,10 +509,35 @@ async function ensureHomeDbReady() {
 // ✅ auth single-flight guards
 let __initSupabaseSessionPromise = null;
 let __anonSignInPromise = null;
+let __authRateLimitedUntil = 0;
+
+function isAuthRateLimitedNow() {
+  return Date.now() < Number(__authRateLimitedUntil || 0);
+}
+
+function markAuthRateLimited(err, fallbackMs = 45000) {
+  const msg = String(err?.message || err || "").toLowerCase();
+  const code = String(err?.status || err?.code || "").toLowerCase();
+
+  if (
+    msg.includes("429") ||
+    msg.includes("rate limit") ||
+    code === "429"
+  ) {
+    __authRateLimitedUntil = Date.now() + Math.max(5000, Number(fallbackMs) || 45000);
+    return true;
+  }
+
+  return false;
+}
 
 async function ensureAnonymousSessionSingleFlight() {
   const client = window.sb || sb;
   if (!client?.auth) return null;
+
+  if (isAuthRateLimitedNow()) {
+    return null;
+  }
 
   if (__anonSignInPromise) {
     return __anonSignInPromise;
@@ -531,11 +556,18 @@ async function ensureAnonymousSessionSingleFlight() {
         }
       } catch {}
 
-      const { error: anonErr } = await client.auth.signInAnonymously();
-      if (anonErr) throw anonErr;
+      const { data: anonData, error: anonErr } = await client.auth.signInAnonymously();
 
-      const { data: afterData } = await client.auth.getSession();
-      return afterData?.session || null;
+      if (anonErr) {
+        markAuthRateLimited(anonErr);
+        return null;
+      }
+
+      // ✅ не делаем второй getSession сразу после signInAnonymously()
+      return anonData?.session || null;
+    } catch (e) {
+      markAuthRateLimited(e);
+      return null;
     } finally {
       __anonSignInPromise = null;
     }
@@ -613,12 +645,15 @@ async function ensureAnonymousSessionSingleFlight() {
       if (!sessData?.session && allowAnonymousBootstrap) {
         await ensureAnonymousSessionSingleFlight();
       }
-    } catch (anonErr) {
+        } catch (anonErr) {
+      markAuthRateLimited(anonErr);
       console.error("[Supabase] Session bootstrap failed:", anonErr);
 
-      const statusEl = document.getElementById("splash-status");
-      if (statusEl) {
-        statusEl.textContent = "Supabase auth error: " + (anonErr?.message || "unknown");
+      if (!isAuthRateLimitedNow()) {
+        const statusEl = document.getElementById("splash-status");
+        if (statusEl) {
+          statusEl.textContent = "Supabase auth error: " + (anonErr?.message || "unknown");
+        }
       }
 
       // Не валим приложение — просто работаем без базы
@@ -693,44 +728,46 @@ async function ensureAnonymousSessionSingleFlight() {
   }
 }
 
-async function ensureRegistrationAuthUid({ totalWaitMs = 12000, pollMs = 350 } = {}) {
+async function ensureRegistrationAuthUid({ totalWaitMs = 5000, pollMs = 1000 } = {}) {
   try {
-    // ✅ Только registration-flow имеет право поднять anonymous session,
-    // если активной auth-сессии ещё нет.
+    // ✅ registration-flow может поднять auth, но без спама
     await initSupabaseSession({ allowAnonymousBootstrap: true }).catch(() => null);
 
     if (!window.sb?.auth) return null;
+
+    let uid = await getAuthUid().catch(() => null);
+    if (uid) return uid;
+
     const startedAt = Date.now();
-    let lastBootstrapTryAt = 0;
+    let retriedBootstrap = false;
 
     while ((Date.now() - startedAt) < totalWaitMs) {
-      const uid = await getAuthUid().catch(() => null);
+      await new Promise((resolve) => setTimeout(resolve, pollMs));
+
+      uid = await getAuthUid().catch(() => null);
       if (uid) return uid;
 
-      try {
-        const { data: sessData } = await window.sb.auth.getSession();
+      if (isAuthRateLimitedNow()) {
+        break;
+      }
 
-        // ✅ controlled retry, but only through single-flight helper
-        if (!sessData?.session) {
-          const now = Date.now();
+      // ✅ максимум одна мягкая повторная попытка
+      if (!retriedBootstrap && (Date.now() - startedAt) >= 2200) {
+        retriedBootstrap = true;
+        await ensureAnonymousSessionSingleFlight().catch(() => null);
 
-          // не спамим bootstrap на каждом тике
-          if ((now - lastBootstrapTryAt) >= Math.max(700, pollMs * 2)) {
-            lastBootstrapTryAt = now;
-            await ensureAnonymousSessionSingleFlight().catch(() => null);
-          }
-        }
-      } catch {}
-
-      await new Promise((resolve) => setTimeout(resolve, pollMs));
+        uid = await getAuthUid().catch(() => null);
+        if (uid) return uid;
+      }
     }
 
     return await getAuthUid().catch(() => null);
-  } catch {
+  } catch (e) {
+    markAuthRateLimited(e);
     return null;
   }
 }
-
+   
 function nowISO() {
   return new Date().toISOString();
 }
@@ -6239,7 +6276,7 @@ function getTelegramUserSafe() {
 async function saveRegistrationToSupabase(profile) {
   if (!window.sb) return { ok: false, reason: "no_sb" };
 
-    const uid = await ensureRegistrationAuthUid({ totalWaitMs: 12000, pollMs: 350 });
+        const uid = await ensureRegistrationAuthUid();
   if (!uid) {
     try {
       trackEvent("registration_db_error", {
