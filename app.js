@@ -578,7 +578,7 @@ async function ensureAnonymousSessionSingleFlight() {
   }
 }
    
-   async function initSupabaseSession() {
+   async function initSupabaseSession({ allowAnonymousBootstrap = false } = {}) {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
   if (!window.supabase?.createClient) return null;
 
@@ -603,14 +603,18 @@ async function ensureAnonymousSessionSingleFlight() {
       window.sb = sb;
     }
 
-    // 1) ensure we have a session (Anonymous Sign-in) — single-flight
+    // 1) На обычном boot НЕ создаём anonymous auth.
+    // Используем существующую сессию, если она уже есть.
+    // Anonymous bootstrap разрешаем только там, где это явно нужно
+    // (например, на финальном шаге регистрации).
     try {
       const { data: sessData } = await sb.auth.getSession();
-      if (!sessData?.session) {
+
+      if (!sessData?.session && allowAnonymousBootstrap) {
         await ensureAnonymousSessionSingleFlight();
       }
     } catch (anonErr) {
-      console.error("[Supabase] Anonymous sign-in failed:", anonErr);
+      console.error("[Supabase] Session bootstrap failed:", anonErr);
 
       const statusEl = document.getElementById("splash-status");
       if (statusEl) {
@@ -625,7 +629,7 @@ async function ensureAnonymousSessionSingleFlight() {
     const { data: userData } = await sb.auth.getUser();
     const u = userData?.user;
     if (!u?.id) return sb;
-
+     
     const tg = getTelegramUserSafe();
 
     // ✅ Проверяем, существует ли уже полноценная DB-строка пользователя.
@@ -691,11 +695,11 @@ async function ensureAnonymousSessionSingleFlight() {
 
 async function ensureRegistrationAuthUid({ totalWaitMs = 12000, pollMs = 350 } = {}) {
   try {
-    // ✅ registration path shares the same auth bootstrap
-    await initSupabaseSession().catch(() => null);
+    // ✅ Только registration-flow имеет право поднять anonymous session,
+    // если активной auth-сессии ещё нет.
+    await initSupabaseSession({ allowAnonymousBootstrap: true }).catch(() => null);
 
     if (!window.sb?.auth) return null;
-
     const startedAt = Date.now();
     let lastBootstrapTryAt = 0;
 
@@ -6603,8 +6607,40 @@ function resetUiAfterIdentityRecovery() {
   } catch {}
 }
 
-   async function checkTelegramLinkedProfile({ source = "boot_linked_profile_check" } = {}) {
+async function trySilentBootProfileRecovery(source = "boot_auto_recovery") {
+  const statusEl = document.getElementById("splash-status");
+  const prevText = statusEl?.textContent || "";
+
   try {
+    if (statusEl) {
+      statusEl.textContent = tr3(
+        "Восстанавливаем профиль…",
+        "Profil tiklanmoqda…",
+        "Restoring profile…"
+      );
+    }
+
+    const recRes = await recoverTelegramLinkedProfile({
+      source,
+      silentBoot: true
+    }).catch((e) => ({
+      ok: false,
+      reason: "exception",
+      message: String(e?.message || e)
+    }));
+
+    return recRes;
+  } finally {
+    if (statusEl) {
+      statusEl.textContent =
+        prevText ||
+        (typeof t === "function" ? (t("loading") || "Загрузка…") : "Загрузка…");
+    }
+  }
+}
+
+async function checkTelegramLinkedProfile({ source = "boot_linked_profile_check" } = {}) {
+   try {
     if (!window.sb?.functions?.invoke) {
       return { ok: false, reason: "functions_not_available" };
     }
@@ -6648,7 +6684,10 @@ function resetUiAfterIdentityRecovery() {
   }
 }
    
-async function recoverTelegramLinkedProfile({ source = "registration_conflict" } = {}) {
+async function recoverTelegramLinkedProfile({
+  source = "registration_conflict",
+  silentBoot = false
+} = {}) {
   try {
     if (!window.sb?.functions?.invoke) {
       return { ok: false, reason: "functions_not_available" };
@@ -6693,11 +6732,42 @@ async function recoverTelegramLinkedProfile({ source = "registration_conflict" }
     try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
     try { await ensureProfileGeoTranslationsHydrated(); } catch {}
 
-    return {
-      ok: isRegistered(),
-      reason: isRegistered() ? "recovered" : "recovered_but_profile_incomplete",
-      data
-    };
+    const recoveredOk = isRegistered();
+
+    if (!recoveredOk) {
+      return {
+        ok: false,
+        reason: "recovered_but_profile_incomplete",
+        data
+      };
+    }
+
+    try { await refreshNotificationsBadge(); } catch {}
+
+    const restoredProfile = loadProfile();
+    const restoredLang = restoredProfile?.uiLanguage || restoredProfile?.language || getTelegramLang() || "ru";
+
+    try { window.i18n?.setLang(restoredLang); } catch {}
+    try { applyStaticI18n(); } catch {}
+
+    resetUiAfterIdentityRecovery();
+
+    if (!silentBoot) {
+      showToast(
+        tr3(
+          "Профиль восстановлен.",
+          "Profil tiklandi.",
+          "Profile restored."
+        )
+      );
+
+      setTab("home");
+      await ensureHomeDbReady();
+      renderHome();
+      renderAllSubjects();
+    }
+
+    return { ok: true, reason: "recovered", data };
   } catch (e) {
     return {
       ok: false,
@@ -6706,7 +6776,7 @@ async function recoverTelegramLinkedProfile({ source = "registration_conflict" }
     };
   }
 }
-
+   
 async function confirmAndRecoverTelegramProfile({ source = "registration_conflict", variant = "linked_profile" } = {}) {
   const isInactiveSession = variant === "inactive_session";
 
@@ -6836,46 +6906,92 @@ async function ensureActiveIdentityOrShowRecovery() {
       return { ok: true, skipped: true };
     }
 
-    const uid = await getAuthUid().catch(() => null);
+    let uid = await getAuthUid().catch(() => null);
+
+    // ✅ Если сети нет — не тащим пользователя в recovery по временной оффлайн-ситуации.
     if (!uid) {
-      return { ok: true, skipped: true, reason: "no_uid" };
+      try {
+        if (typeof navigator !== "undefined" && navigator.onLine === false) {
+          return { ok: true, skipped: true, reason: "no_uid_offline" };
+        }
+      } catch {}
+
+      // ✅ Для boot-проблемы "local profile есть, uid нет"
+      // сначала делаем ТИХОЕ восстановление прямо на splash.
+      const silentRec = await trySilentBootProfileRecovery("missing_uid_boot_auto");
+
+      if (silentRec?.ok) {
+        return {
+          ok: true,
+          active: true,
+          recovered: true,
+          reason: silentRec?.reason || "missing_uid_boot_auto"
+        };
+      }
+
+      // fallback — только если тихое восстановление не удалось
+      showView("registration");
+      bindRegistration();
+
+      const rec = await confirmAndRecoverTelegramProfile({
+        source: "missing_uid_boot",
+        variant: "inactive_session"
+      });
+
+      return {
+        ok: !!rec?.ok,
+        blocked: !rec?.ok,
+        reason: rec?.reason || "missing_uid_boot"
+      };
     }
 
     const userRowCheck = await checkDbUserRow(uid);
 
-// Важно: если база/сеть не ответила уверенно — НЕ блокируем пользователя.
-// Иначе при временном сбое можно случайно показать recovery нормальному активному пользователю.
-if (!userRowCheck?.ok) {
-  return {
-    ok: true,
-    skipped: true,
-    reason: userRowCheck?.reason || "db_user_check_failed"
-  };
-}
+    // Важно: если база/сеть не ответила уверенно — НЕ блокируем пользователя.
+    // Иначе при временном сбое можно случайно показать recovery нормальному активному пользователю.
+    if (!userRowCheck?.ok) {
+      return {
+        ok: true,
+        skipped: true,
+        reason: userRowCheck?.reason || "db_user_check_failed"
+      };
+    }
 
-// Если текущий uid активен, но local profile старый/без id — тихо пересобираем local profile.
-if (userRowCheck.exists) {
-  if (!localProfile.id || String(localProfile.id) !== String(uid)) {
+    // Если текущий uid активен, но local profile старый/без id — тихо пересобираем local profile.
+    if (userRowCheck.exists) {
+      if (!localProfile.id || String(localProfile.id) !== String(uid)) {
+        try { localStorage.removeItem(LS.profile); } catch {}
+        try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
+        try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
+        try { await ensureProfileGeoTranslationsHydrated(); } catch {}
+      }
+
+      return { ok: true, active: true };
+    }
+
+    // ✅ users-row для текущего uid нет:
+    // сначала пробуем тихо восстановить профиль на splash
+    const silentRec = await trySilentBootProfileRecovery("inactive_session_boot_auto");
+
+    if (silentRec?.ok) {
+      return {
+        ok: true,
+        active: true,
+        recovered: true,
+        reason: silentRec?.reason || "inactive_session_boot_auto"
+      };
+    }
+
+    // fallback — только если тихое восстановление не удалось
     try { localStorage.removeItem(LS.profile); } catch {}
-    try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
-    try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
-    try { await ensureProfileGeoTranslationsHydrated(); } catch {}
-  }
-
-  return { ok: true, active: true };
-}
-
-// Только если база УВЕРЕННО сказала: users-row для текущего uid нет.
-// Значит эта сессия неактивна: профиль открыт/перенесён на другое устройство.
-try { localStorage.removeItem(LS.profile); } catch {}
 
     showView("registration");
     bindRegistration();
 
-   const rec = await confirmAndRecoverTelegramProfile({
-  source: "inactive_session_boot",
-  variant: "inactive_session"
-});
+    const rec = await confirmAndRecoverTelegramProfile({
+      source: "inactive_session_boot",
+      variant: "inactive_session"
+    });
 
     return {
       ok: !!rec?.ok,
@@ -6886,7 +7002,7 @@ try { localStorage.removeItem(LS.profile); } catch {}
     return { ok: true, skipped: true, reason: "exception_safe_skip" };
   }
 }
-
+   
    async function ensureKnownTelegramProfileOnBoot() {
   try {
     // Если local profile уже есть, этот кейс обрабатывает ensureActiveIdentityOrShowRecovery().
