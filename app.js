@@ -6736,6 +6736,15 @@ async function recoverTelegramLinkedProfile({
       return { ok: false, reason: "telegram_init_data_missing" };
     }
 
+    // ✅ confirm-recovery должен идти уже с реальным current auth uid,
+    // иначе функция не сможет понять, на какой uid переносить профиль
+    await initSupabaseSession({ allowAnonymousBootstrap: true }).catch(() => null);
+
+    const currentUid = await ensureRegistrationAuthUid().catch(() => null);
+    if (!currentUid) {
+      return { ok: false, reason: "no_current_auth_uid" };
+    }
+
     const { data, error } = await window.sb.functions.invoke("recover-telegram-user", {
       body: {
         initData,
@@ -6743,7 +6752,7 @@ async function recoverTelegramLinkedProfile({
         source
       }
     });
-
+     
     if (error) {
       return {
         ok: false,
