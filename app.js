@@ -6651,22 +6651,39 @@ async function trySilentBootProfileRecovery(source = "boot_auto_recovery") {
   try {
     if (statusEl) {
       statusEl.textContent = tr3(
-        "Восстанавливаем профиль…",
-        "Profil tiklanmoqda…",
-        "Restoring profile…"
+        "Проверяем профиль…",
+        "Profil tekshirilmoqda…",
+        "Checking profile…"
       );
     }
 
-    const recRes = await recoverTelegramLinkedProfile({
-      source,
-      silentBoot: true
+    const checkRes = await checkTelegramLinkedProfile({
+      source: "boot_linked_profile_check"
     }).catch((e) => ({
       ok: false,
       reason: "exception",
       message: String(e?.message || e)
     }));
 
-    return recRes;
+    if (checkRes?.ok && checkRes?.linked && checkRes?.is_current) {
+      return {
+        ok: true,
+        reason: "already_current",
+        data: checkRes?.data || null
+      };
+    }
+
+    return {
+      ok: false,
+      reason:
+        checkRes?.reason ||
+        (checkRes?.linked ? "system_profile_mismatch" : "no_linked_profile"),
+      linked: !!checkRes?.linked,
+      is_current: !!checkRes?.is_current,
+      user_id: checkRes?.user_id || null,
+      current_uid: checkRes?.current_uid || null,
+      data: checkRes?.data || null
+    };
   } finally {
     if (statusEl) {
       statusEl.textContent =
@@ -6676,7 +6693,7 @@ async function trySilentBootProfileRecovery(source = "boot_auto_recovery") {
   }
 }
 
-async function checkTelegramLinkedProfile({ source = "boot_linked_profile_check" } = {}) {
+   async function checkTelegramLinkedProfile({ source = "boot_linked_profile_check" } = {}) {
    try {
     if (!window.sb?.functions?.invoke) {
       return { ok: false, reason: "functions_not_available" };
@@ -6730,16 +6747,23 @@ async function recoverTelegramLinkedProfile({
       return { ok: false, reason: "functions_not_available" };
     }
 
-    const initData = String(window.Telegram?.WebApp?.initData || "").trim();
+        const initData = String(window.Telegram?.WebApp?.initData || "").trim();
 
     if (!initData) {
       return { ok: false, reason: "telegram_init_data_missing" };
     }
 
+    if (isSystemRecoverySource(source)) {
+      return {
+        ok: false,
+        reason: "system_source_check_only"
+      };
+    }
+
     // ✅ confirm-recovery должен идти уже с реальным current auth uid,
     // иначе функция не сможет понять, на какой uid переносить профиль
     await initSupabaseSession({ allowAnonymousBootstrap: true }).catch(() => null);
-
+     
     const currentUid = await ensureRegistrationAuthUid().catch(() => null);
     if (!currentUid) {
       return { ok: false, reason: "no_current_auth_uid" };
