@@ -6621,16 +6621,60 @@ async function showRecoveryCancelledAndClose() {
   }
 }
 
-function resetUiAfterIdentityRecovery() {
+function resetUiAfterIdentityRecovery(options = {}) {
   try {
-    state.tab = "home";
-    state.prevTab = "home";
-    state.viewStack = ["home"];
+    const preserve = options?.preserveCourseContext || null;
 
-    state.courses.stack = ["all-subjects"];
-    state.courses.subjectKey = null;
-    state.courses.lessonId = null;
-    state.courses.entryTab = "home";
+    const keepSubjectKey = preserve?.subjectKey
+      ? String(preserve.subjectKey)
+      : "";
+
+    const keepStack = Array.isArray(preserve?.stack) && preserve.stack.length
+      ? preserve.stack
+      : ["subject-tours"];
+
+    const keepEntryTab = preserve?.entryTab
+      ? String(preserve.entryTab)
+      : (state?.courses?.entryTab || state?.prevTab || "home");
+
+    const keepTourNo = preserve?.activeTourNo != null
+      ? Number(preserve.activeTourNo)
+      : null;
+
+    const keepTourId = preserve?.activeTourId != null && preserve?.activeTourId !== ""
+      ? String(preserve.activeTourId)
+      : null;
+
+    state.courses = state.courses || {};
+
+    if (keepSubjectKey) {
+      state.tab = "courses";
+      state.prevTab = keepEntryTab;
+      state.viewStack = ["courses"];
+
+      state.courses.stack = keepStack;
+      state.courses.subjectKey = keepSubjectKey;
+      state.courses.lessonId = null;
+      state.courses.entryTab = keepEntryTab;
+
+      if (keepTourNo && Number.isFinite(keepTourNo) && keepTourNo > 0) {
+        state.courses.activeTourNo = keepTourNo;
+      }
+
+      if (keepTourId) {
+        state.courses.activeTourId = keepTourId;
+      }
+    } else {
+      state.tab = "home";
+      state.prevTab = "home";
+      state.viewStack = ["home"];
+
+      state.courses.stack = ["all-subjects"];
+      state.courses.subjectKey = null;
+      state.courses.lessonId = null;
+      state.courses.entryTab = "home";
+    }
+
     state.courses.lastTourAttemptId = null;
     state.courses.lastTourCertificateId = null;
 
@@ -6643,7 +6687,6 @@ function resetUiAfterIdentityRecovery() {
     saveState();
   } catch {}
 }
-
    function isCheckOnlyRecoverySource(source) {
   const s = String(source || "").trim().toLowerCase();
   return (
@@ -6837,7 +6880,8 @@ function isFreshTgProfileCache(cache, key, ttlMs) {
 async function recoverTelegramLinkedProfile({
   source = "registration_conflict",
   silentBoot = false,
-  force = false
+  force = false,
+  preserveCourseContext = null
 } = {}) {
   try {
     if (!window.sb?.functions?.invoke) {
@@ -6955,7 +6999,7 @@ async function recoverTelegramLinkedProfile({
       try { window.i18n?.setLang(restoredLang); } catch {}
       try { applyStaticI18n(); } catch {}
 
-      resetUiAfterIdentityRecovery();
+      resetUiAfterIdentityRecovery({ preserveCourseContext });
 
       if (!silentBoot) {
         showToast(
@@ -7015,14 +7059,14 @@ async function confirmAndRecoverTelegramProfile({ source = "registration_conflic
         ),
     message: isInactiveSession
       ? tr3(
-          "Этот профиль был активирован на другом устройстве. Чтобы использовать iClub здесь, восстановите профиль на этом устройстве. После подтверждения это устройство станет активным. В целях безопасности восстановление ограничено: 1 раз за 24 часа, 2 раза за 7 дней и 3 раза за 30 дней. Продолжить?",
-          "Bu profil boshqa qurilmada faollashtirilgan. iClub’dan bu yerda foydalanish uchun profilni shu qurilmada tiklang. Tasdiqlasangiz, shu qurilma faol bo‘ladi. Xavfsizlik uchun tiklash cheklangan: 24 soatda 1 marta, 7 kunda 2 marta va 30 kunda 3 marta. Davom etamizmi?",
-          "This profile was activated on another device. To use iClub here, restore the profile on this device. After confirmation, this device will become active. For security, recovery is limited to once per 24 hours, twice per 7 days, and three times per 30 days. Continue?"
+          "Этот профиль был активирован на другом устройстве. Чтобы использовать iClub здесь, восстановите профиль на этом устройстве. После подтверждения это устройство станет активным. В целях безопасности восстановление ограничено: 2 раза за 24 часа, 4 раза за 7 дней и 6 раз за 30 дней. Продолжить?",
+"Bu profil boshqa qurilmada faollashtirilgan. iClub’dan bu yerda foydalanish uchun profilni shu qurilmada tiklang. Tasdiqlasangiz, shu qurilma faol bo‘ladi. Xavfsizlik uchun tiklash cheklangan: 24 soatda 2 marta, 7 kunda 4 marta va 30 kunda 6 marta. Davom etamizmi?",
+"This profile was activated on another device. To use iClub here, restore the profile on this device. After confirmation, this device will become active. For security, recovery is limited to twice per 24 hours, four times per 7 days, and six times per 30 days. Continue?"
         )
       : tr3(
-          "Этот Telegram-аккаунт уже связан с профилем iClub. Можно восстановить профиль на этом устройстве. После подтверждения активным станет это устройство, а предыдущая сессия будет отключена. В целях безопасности восстановление ограничено: 1 раз за 24 часа, 2 раза за 7 дней и 3 раза за 30 дней. Продолжить?",
-          "Bu Telegram akkaunt iClub profiliga ulangan. Profilni shu qurilmada tiklash mumkin. Tasdiqlasangiz, shu qurilma faol bo‘ladi, oldingi sessiya esa nofaol bo‘ladi. Xavfsizlik uchun tiklash cheklangan: 24 soatda 1 marta, 7 kunda 2 marta va 30 kunda 3 marta. Davom etamizmi?",
-          "This Telegram account is already linked to an iClub profile. You can restore the profile on this device. After confirmation, this device will become active and the previous session will be disabled. For security, recovery is limited to once per 24 hours, twice per 7 days, and three times per 30 days. Continue?"
+          "Этот Telegram-аккаунт уже связан с профилем iClub. Можно восстановить профиль на этом устройстве. После подтверждения активным станет это устройство, а предыдущая сессия будет отключена. В целях безопасности восстановление ограничено: 2 раза за 24 часа, 4 раза за 7 дней и 6 раз за 30 дней. Продолжить?",
+"Bu Telegram akkaunt iClub profiliga ulangan. Profilni shu qurilmada tiklash mumkin. Tasdiqlasangiz, shu qurilma faol bo‘ladi, oldingi sessiya esa nofaol bo‘ladi. Xavfsizlik uchun tiklash cheklangan: 24 soatda 2 marta, 7 kunda 4 marta va 30 kunda 6 marta. Davom etamizmi?",
+"This Telegram account is already linked to an iClub profile. You can restore the profile on this device. After confirmation, this device will become active and the previous session will be disabled. For security, recovery is limited to twice per 24 hours, four times per 7 days, and six times per 30 days. Continue?"
         ),
     okText: tr3(
       "Восстановить профиль",
@@ -7068,9 +7112,9 @@ async function confirmAndRecoverTelegramProfile({ source = "registration_conflic
         "Recovery limit reached."
       ),
       message: tr3(
-        "В целях безопасности профиль можно восстановить не чаще 1 раза за 24 часа, 2 раз за 7 дней и 3 раз за 30 дней. Если вам нужно восстановить доступ раньше, обратитесь к администратору.",
-        "Xavfsizlik uchun profilni 24 soatda 1 martadan, 7 kunda 2 martadan va 30 kunda 3 martadan ko‘p tiklab bo‘lmaydi. Agar profilni bundan oldinroq tiklash kerak bo‘lsa, administratorga murojaat qiling.",
-        "For security, the profile can be restored no more than once per 24 hours, twice per 7 days, and three times per 30 days. If you need access earlier, contact the administrator."
+        "В целях безопасности профиль можно восстановить не чаще 2 раз за 24 часа, 4 раз за 7 дней и 6 раз за 30 дней. Если вам нужно восстановить доступ раньше, обратитесь к администратору.",
+"Xavfsizlik uchun profilni 24 soatda 2 martadan, 7 kunda 4 martadan va 30 kunda 6 martadan ko‘p tiklab bo‘lmaydi. Agar profilni bundan oldinroq tiklash kerak bo‘lsa, administratorga murojaat qiling.",
+"For security, the profile can be restored no more than twice per 24 hours, four times per 7 days, and six times per 30 days. If you need access earlier, contact the administrator."
       )
     });
 
@@ -18025,11 +18069,21 @@ async function updateTourAttempt(attemptId, patch) {
       return;
     }
 
-  const subjectKey = state.courses?.subjectKey || null;
+    const subjectKey = state.courses?.subjectKey || null;
   if (!subjectKey) {
     showToast(t("toast_subject_not_selected"));
     return;
   }
+
+  const tourStartCourseContext = {
+    subjectKey,
+    stack: Array.isArray(state?.courses?.stack) && state.courses.stack.length
+      ? [...state.courses.stack]
+      : ["subject-tours"],
+    entryTab: state?.courses?.entryTab || state?.prevTab || "home",
+    activeTourNo: state?.courses?.activeTourNo || null,
+    activeTourId: state?.courses?.activeTourId || null
+  };
 
       // 1) current identity must exist in DB before any tour start
   let uid = await getAuthUid();
@@ -18097,30 +18151,30 @@ async function updateTourAttempt(attemptId, patch) {
         return;
       }
 
-      const recRes = await recoverTelegramLinkedProfile({
+            const recRes = await recoverTelegramLinkedProfile({
         source: "tour_start_profile_recovery",
-        silentBoot: false
+        silentBoot: false,
+        preserveCourseContext: tourStartCourseContext
       }).catch((e) => ({
         ok: false,
         reason: "exception",
         message: String(e?.message || e)
       }));
-
       const recReason = String(recRes?.reason || recRes?.data?.reason || "");
 
       if (!recRes?.ok) {
         if (recReason.includes("limit")) {
           await uiAlert({
             title: tr3(
-              "Лимит восстановления исчерпан.",
-              "Tiklash limiti tugadi.",
-              "Recovery limit reached."
-            ),
-            message: tr3(
-              "Для безопасности количество восстановлений ограничено. Если доступ нужен срочно, обратитесь к администратору.",
-              "Xavfsizlik uchun tiklash soni cheklangan. Agar kirish zudlik bilan kerak bo‘lsa, administratorga murojaat qiling.",
-              "For security, the number of recoveries is limited. If you need urgent access, contact the administrator."
-            )
+  "Профиль временно не удалось подтвердить.",
+  "Profilni vaqtincha tasdiqlab bo‘lmadi.",
+  "Profile could not be confirmed temporarily."
+),
+message: tr3(
+  "Пожалуйста, полностью закройте mini app и откройте его заново из Telegram. Если проблема повторится, напишите администратору.",
+  "Iltimos, mini appni to‘liq yoping va Telegram orqali qayta oching. Muammo takrorlansa, administratorga yozing.",
+  "Please fully close the mini app and reopen it from Telegram. If the problem happens again, contact the administrator."
+)
           });
           return;
         }
