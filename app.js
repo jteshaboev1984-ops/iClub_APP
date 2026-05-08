@@ -6675,6 +6675,31 @@ function isUserRiskyRecoverySource(source) {
   );
 }
 
+   const TG_PROFILE_CHECK_CACHE_MS = 8000;
+const TG_PROFILE_RECOVERY_CACHE_MS = 12000;
+const TG_PROFILE_FAILURE_CACHE_MS = 2500;
+
+let __tgProfileCheckCache = null;
+let __tgProfileRecoveryCache = null;
+const __tgProfileCheckInFlight = new Map();
+const __tgProfileRecoveryInFlight = new Map();
+
+function getTelegramProfileRequestKey(source, currentUid, initData) {
+  const src = String(source || "").trim().toLowerCase();
+  const uid = String(currentUid || "");
+  const initTail = String(initData || "").slice(-80);
+  return `${src}|${uid}|${initTail}`;
+}
+
+function isFreshTgProfileCache(cache, key, ttlMs) {
+  return !!(
+    cache &&
+    cache.key === key &&
+    cache.ts &&
+    Date.now() - cache.ts < ttlMs
+  );
+}
+   
    async function trySilentBootProfileRecovery(source = "boot_auto_recovery") {
   const statusEl = document.getElementById("splash-status");
   const prevText = statusEl?.textContent || "";
@@ -6724,8 +6749,8 @@ function isUserRiskyRecoverySource(source) {
   }
 }
 
-   async function checkTelegramLinkedProfile({ source = "boot_linked_profile_check" } = {}) {
-   try {
+   async function checkTelegramLinkedProfile({ source = "boot_linked_profile_check", force = false } = {}) {
+  try {
     if (!window.sb?.functions?.invoke) {
       return { ok: false, reason: "functions_not_available" };
     }
@@ -6735,31 +6760,71 @@ function isUserRiskyRecoverySource(source) {
       return { ok: false, reason: "telegram_init_data_missing" };
     }
 
-    const { data, error } = await window.sb.functions.invoke("recover-telegram-user", {
-      body: {
-        initData,
-        mode: "check",
-        source
-      }
-    });
+    const currentUid = await getAuthUid().catch(() => null);
+    const key = getTelegramProfileRequestKey(source, currentUid, initData);
 
-    if (error) {
+    if (!force && isFreshTgProfileCache(__tgProfileCheckCache, key, TG_PROFILE_CHECK_CACHE_MS)) {
       return {
-        ok: false,
-        reason: "edge_function_error",
-        message: String(error?.message || error)
+        ...__tgProfileCheckCache.result,
+        from_cache: true
       };
     }
 
-    return {
-      ok: !!data?.ok,
-      linked: !!data?.linked,
-      is_current: !!data?.is_current,
-      user_id: data?.user_id || null,
-      current_uid: data?.current_uid || null,
-      reason: data?.reason || null,
-      data
-    };
+    if (!force && __tgProfileCheckInFlight.has(key)) {
+      return await __tgProfileCheckInFlight.get(key);
+    }
+
+    const task = (async () => {
+      const { data, error } = await window.sb.functions.invoke("recover-telegram-user", {
+        body: {
+          initData,
+          mode: "check",
+          source
+        }
+      });
+
+      if (error) {
+        const res = {
+          ok: false,
+          reason: "edge_function_error",
+          message: String(error?.message || error)
+        };
+
+        __tgProfileCheckCache = {
+          key,
+          ts: Date.now(),
+          result: res
+        };
+
+        return res;
+      }
+
+      const res = {
+        ok: !!data?.ok,
+        linked: !!data?.linked,
+        is_current: !!data?.is_current,
+        user_id: data?.user_id || null,
+        current_uid: data?.current_uid || null,
+        reason: data?.reason || null,
+        data
+      };
+
+      __tgProfileCheckCache = {
+        key,
+        ts: Date.now(),
+        result: res
+      };
+
+      return res;
+    })();
+
+    __tgProfileCheckInFlight.set(key, task);
+
+    try {
+      return await task;
+    } finally {
+      __tgProfileCheckInFlight.delete(key);
+    }
   } catch (e) {
     return {
       ok: false,
@@ -6771,104 +6836,159 @@ function isUserRiskyRecoverySource(source) {
    
 async function recoverTelegramLinkedProfile({
   source = "registration_conflict",
-  silentBoot = false
+  silentBoot = false,
+  force = false
 } = {}) {
   try {
     if (!window.sb?.functions?.invoke) {
       return { ok: false, reason: "functions_not_available" };
     }
 
-        const initData = String(window.Telegram?.WebApp?.initData || "").trim();
+    const initData = String(window.Telegram?.WebApp?.initData || "").trim();
 
     if (!initData) {
       return { ok: false, reason: "telegram_init_data_missing" };
     }
 
-    if (isCheckOnlyRecoverySource(source)) {
-  return {
-    ok: false,
-    reason: "system_source_check_only"
-  };
-}
+    if (typeof isCheckOnlyRecoverySource === "function" && isCheckOnlyRecoverySource(source)) {
+      return {
+        ok: false,
+        reason: "system_source_check_only"
+      };
+    }
 
     // ✅ confirm-recovery должен идти уже с реальным current auth uid,
     // иначе функция не сможет понять, на какой uid переносить профиль
     await initSupabaseSession({ allowAnonymousBootstrap: true }).catch(() => null);
-     
+
     const currentUid = await ensureRegistrationAuthUid().catch(() => null);
     if (!currentUid) {
       return { ok: false, reason: "no_current_auth_uid" };
     }
 
-    const { data, error } = await window.sb.functions.invoke("recover-telegram-user", {
-      body: {
-        initData,
-        confirm: true,
-        source
+    const key = getTelegramProfileRequestKey(source, currentUid, initData);
+
+    if (!force && isFreshTgProfileCache(__tgProfileRecoveryCache, key, TG_PROFILE_RECOVERY_CACHE_MS)) {
+      return {
+        ...__tgProfileRecoveryCache.result,
+        from_cache: true
+      };
+    }
+
+    if (!force && __tgProfileRecoveryInFlight.has(key)) {
+      return await __tgProfileRecoveryInFlight.get(key);
+    }
+
+    const task = (async () => {
+      const { data, error } = await window.sb.functions.invoke("recover-telegram-user", {
+        body: {
+          initData,
+          confirm: true,
+          source
+        }
+      });
+
+      if (error) {
+        const res = {
+          ok: false,
+          reason: "edge_function_error",
+          message: String(error?.message || error)
+        };
+
+        __tgProfileRecoveryCache = {
+          key,
+          ts: Date.now() - TG_PROFILE_RECOVERY_CACHE_MS + TG_PROFILE_FAILURE_CACHE_MS,
+          result: res
+        };
+
+        return res;
       }
-    });
-     
-    if (error) {
-      return {
-        ok: false,
-        reason: "edge_function_error",
-        message: String(error?.message || error)
-      };
-    }
 
-    if (!data?.ok) {
-      return {
-        ok: false,
-        reason: data?.reason || "recovery_failed",
-        message: data?.message || null,
+      if (!data?.ok) {
+        const res = {
+          ok: false,
+          reason: data?.reason || "recovery_failed",
+          message: data?.message || null,
+          data
+        };
+
+        __tgProfileRecoveryCache = {
+          key,
+          ts: Date.now() - TG_PROFILE_RECOVERY_CACHE_MS + TG_PROFILE_FAILURE_CACHE_MS,
+          result: res
+        };
+
+        return res;
+      }
+
+      // Только local profile пересобираем под новый активный uid.
+      // Practice/tour progress не чистим.
+      try { localStorage.removeItem(LS.profile); } catch {}
+
+      try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
+      try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
+      try { await ensureProfileGeoTranslationsHydrated(); } catch {}
+
+      const recoveredOk = isRegistered();
+
+      if (!recoveredOk) {
+        const res = {
+          ok: false,
+          reason: "recovered_but_profile_incomplete",
+          data
+        };
+
+        __tgProfileRecoveryCache = {
+          key,
+          ts: Date.now() - TG_PROFILE_RECOVERY_CACHE_MS + TG_PROFILE_FAILURE_CACHE_MS,
+          result: res
+        };
+
+        return res;
+      }
+
+      try { await refreshNotificationsBadge(); } catch {}
+
+      const restoredProfile = loadProfile();
+      const restoredLang = restoredProfile?.uiLanguage || restoredProfile?.language || getTelegramLang() || "ru";
+
+      try { window.i18n?.setLang(restoredLang); } catch {}
+      try { applyStaticI18n(); } catch {}
+
+      resetUiAfterIdentityRecovery();
+
+      if (!silentBoot) {
+        showToast(
+          tr3(
+            "Профиль восстановлен.",
+            "Profil tiklandi.",
+            "Profile restored."
+          )
+        );
+      }
+
+      const res = {
+        ok: true,
+        reason: data?.reason || "recovered",
         data
       };
-    }
 
-    // Только local profile пересобираем под новый активный uid.
-    // Practice/tour progress не чистим.
-    try { localStorage.removeItem(LS.profile); } catch {}
-
-    try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
-    try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
-    try { await ensureProfileGeoTranslationsHydrated(); } catch {}
-
-    const recoveredOk = isRegistered();
-
-    if (!recoveredOk) {
-      return {
-        ok: false,
-        reason: "recovered_but_profile_incomplete",
-        data
+      __tgProfileRecoveryCache = {
+        key,
+        ts: Date.now(),
+        result: res
       };
+
+      return res;
+    })();
+
+    __tgProfileRecoveryInFlight.set(key, task);
+
+    try {
+      return await task;
+    } finally {
+      __tgProfileRecoveryInFlight.delete(key);
     }
-
-    try { await refreshNotificationsBadge(); } catch {}
-
-    const restoredProfile = loadProfile();
-    const restoredLang = restoredProfile?.uiLanguage || restoredProfile?.language || getTelegramLang() || "ru";
-
-    try { window.i18n?.setLang(restoredLang); } catch {}
-    try { applyStaticI18n(); } catch {}
-
-    resetUiAfterIdentityRecovery();
-
-    if (!silentBoot) {
-      showToast(
-        tr3(
-          "Профиль восстановлен.",
-          "Profil tiklandi.",
-          "Profile restored."
-        )
-      );
-
-      setTab("home");
-      await ensureHomeDbReady();
-      renderHome();
-      renderAllSubjects();
-    }
-
-    return { ok: true, reason: "recovered", data };
   } catch (e) {
     return {
       ok: false,
