@@ -6644,7 +6644,38 @@ function resetUiAfterIdentityRecovery() {
   } catch {}
 }
 
-async function trySilentBootProfileRecovery(source = "boot_auto_recovery") {
+   function isCheckOnlyRecoverySource(source) {
+  const s = String(source || "").trim().toLowerCase();
+  return (
+    s === "boot_auto_recovery" ||
+    s === "boot_linked_profile_check" ||
+    s === "missing_uid_boot_auto" ||
+    s === "inactive_session_boot_auto" ||
+    s === "focus_active_identity_check" ||
+    s === "tour_start_profile_check"
+  );
+}
+
+function isSystemNoLimitRecoverySource(source) {
+  const s = String(source || "").trim().toLowerCase();
+  return (
+    s === "missing_uid_boot" ||
+    s === "inactive_session_boot" ||
+    s === "boot_existing_telegram_profile"
+  );
+}
+
+function isUserRiskyRecoverySource(source) {
+  const s = String(source || "").trim().toLowerCase();
+  return (
+    s === "registration_conflict" ||
+    s === "manual_profile_recovery" ||
+    s === "support_manual_recovery" ||
+    s === "tour_start_profile_recovery"
+  );
+}
+
+   async function trySilentBootProfileRecovery(source = "boot_auto_recovery") {
   const statusEl = document.getElementById("splash-status");
   const prevText = statusEl?.textContent || "";
 
@@ -6753,12 +6784,12 @@ async function recoverTelegramLinkedProfile({
       return { ok: false, reason: "telegram_init_data_missing" };
     }
 
-    if (isSystemRecoverySource(source)) {
-      return {
-        ok: false,
-        reason: "system_source_check_only"
-      };
-    }
+    if (isCheckOnlyRecoverySource(source)) {
+  return {
+    ok: false,
+    reason: "system_source_check_only"
+  };
+}
 
     // ✅ confirm-recovery должен идти уже с реальным current auth uid,
     // иначе функция не сможет понять, на какой uid переносить профиль
@@ -17880,21 +17911,126 @@ async function updateTourAttempt(attemptId, patch) {
     return;
   }
 
-    // 1) current identity must exist in DB before any tour start
-  const uid = await getAuthUid();
+      // 1) current identity must exist in DB before any tour start
+  let uid = await getAuthUid();
 
   if (!uid || !(await hasDbUserRow(uid))) {
-    await uiAlert({
-      title: t("not_available") || tr3("Недоступно", "Mavjud emas", "Not available"),
-      message: tr3(
-        "Не удалось подтвердить ваш профиль. Пожалуйста, откройте приложение заново и завершите восстановление профиля.",
-        "Profilingizni tasdiqlab bo‘lmadi. Iltimos, ilovani qayta oching va profilni tiklashni yakunlang.",
-        "We could not verify your profile. Please reopen the app and complete profile recovery."
-      )
-    });
-    return;
-  }
+    const checkRes = await checkTelegramLinkedProfile({
+      source: "tour_start_profile_check"
+    }).catch((e) => ({
+      ok: false,
+      reason: "exception",
+      message: String(e?.message || e)
+    }));
 
+    if (!checkRes?.ok || !checkRes?.linked) {
+      await uiAlert({
+        title: t("not_available") || tr3("Недоступно", "Mavjud emas", "Not available"),
+        message: tr3(
+          "Не удалось подтвердить ваш профиль. Пожалуйста, закройте и заново откройте приложение из Telegram.",
+          "Profilingizni tasdiqlab bo‘lmadi. Iltimos, ilovani Telegram orqali yopib qayta oching.",
+          "We could not verify your profile. Please close and reopen the app from Telegram."
+        )
+      });
+      return;
+    }
+
+    if (checkRes?.is_current && checkRes?.current_uid) {
+      uid = String(checkRes.current_uid);
+
+      if (!(await hasDbUserRow(uid))) {
+        await uiAlert({
+          title: t("not_available") || tr3("Недоступно", "Mavjud emas", "Not available"),
+          message: tr3(
+            "Профиль найден, но ещё не синхронизирован. Пожалуйста, заново откройте приложение через несколько секунд.",
+            "Profil topildi, lekin hali sinxronlashmagan. Iltimos, bir necha soniyadan keyin ilovani qayta oching.",
+            "The profile was found but is not synced yet. Please reopen the app again in a few seconds."
+          )
+        });
+        return;
+      }
+    } else {
+      const confirmed = await uiConfirm({
+        title: tr3(
+          "Нужно подтвердить профиль",
+          "Profilni tasdiqlash kerak",
+          "Profile confirmation required"
+        ),
+        message: tr3(
+          "Чтобы открыть тур на этом устройстве, нужно подтвердить профиль. Продолжить?",
+          "Bu qurilmada turni ochish uchun profilni tasdiqlash kerak. Davom etamizmi?",
+          "To open the tour on this device, your profile needs to be confirmed. Continue?"
+        ),
+        okText: tr3(
+          "Подтвердить",
+          "Tasdiqlash",
+          "Confirm"
+        ),
+        cancelText: tr3(
+          "Отмена",
+          "Bekor qilish",
+          "Cancel"
+        )
+      });
+
+      if (!confirmed) {
+        return;
+      }
+
+      const recRes = await recoverTelegramLinkedProfile({
+        source: "tour_start_profile_recovery",
+        silentBoot: false
+      }).catch((e) => ({
+        ok: false,
+        reason: "exception",
+        message: String(e?.message || e)
+      }));
+
+      const recReason = String(recRes?.reason || recRes?.data?.reason || "");
+
+      if (!recRes?.ok) {
+        if (recReason.includes("limit")) {
+          await uiAlert({
+            title: tr3(
+              "Лимит восстановления исчерпан.",
+              "Tiklash limiti tugadi.",
+              "Recovery limit reached."
+            ),
+            message: tr3(
+              "Для безопасности количество восстановлений ограничено. Если доступ нужен срочно, обратитесь к администратору.",
+              "Xavfsizlik uchun tiklash soni cheklangan. Agar kirish zudlik bilan kerak bo‘lsa, administratorga murojaat qiling.",
+              "For security, the number of recoveries is limited. If you need urgent access, contact the administrator."
+            )
+          });
+          return;
+        }
+
+        await uiAlert({
+          title: t("not_available") || tr3("Недоступно", "Mavjud emas", "Not available"),
+          message: tr3(
+            "Не удалось подтвердить ваш профиль. Пожалуйста, закройте и снова откройте приложение из Telegram.",
+            "Profilingizni tasdiqlab bo‘lmadi. Iltimos, ilovani Telegram orqali yopib qayta oching.",
+            "We could not verify your profile. Please close and reopen the app from Telegram."
+          )
+        });
+        return;
+      }
+
+      uid = await getAuthUid();
+
+      if (!uid || !(await hasDbUserRow(uid))) {
+        await uiAlert({
+          title: t("not_available") || tr3("Недоступно", "Mavjud emas", "Not available"),
+          message: tr3(
+            "Профиль восстановлен, но ещё не подтверждён для старта тура. Пожалуйста, заново откройте приложение.",
+            "Profil tiklandi, lekin turni boshlash uchun hali tasdiqlanmadi. Iltimos, ilovani qayta oching.",
+            "The profile was restored, but it is not yet confirmed for tour start. Please reopen the app."
+          )
+        });
+        return;
+      }
+    }
+  }
   // 2) eligibility: only school students can participate (tours/ratings)
   const me = await getUserProfile(uid);
 
