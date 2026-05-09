@@ -346,6 +346,31 @@ async function ensureHomeDbReady() {
     } catch {}
   }
 
+   function clearPendingTourOpsAfterIdentityRecovery() {
+  try {
+    const arr = loadPendingOps();
+    if (!Array.isArray(arr) || !arr.length) return { ok: true, removed: 0 };
+
+    const keep = [];
+    let removed = 0;
+
+    for (const op of arr) {
+      const type = String(op?.type || "");
+      if (type === "tour_answer" || type === "tour_finalize") {
+        removed += 1;
+        continue;
+      }
+      keep.push(op);
+    }
+
+    if (removed > 0) savePendingOps(keep);
+
+    return { ok: true, removed };
+  } catch {
+    return { ok: false, removed: 0 };
+  }
+}
+   
   function hasPendingOpsQueued() {
     try {
       return loadPendingOps().length > 0;
@@ -6359,6 +6384,30 @@ const usersPayload = {
     class: profile?.class || null
   };
 
+   // ✅ Telegram ID уже может быть связан со старым профилем.
+// В этом случае НЕ делаем users.upsert, иначе ловим users_telegram_user_id_key
+// и засоряем логи повторными ошибками.
+try {
+  const tgId = String(usersPayload.telegram_user_id || "").trim();
+
+  if (tgId) {
+    const { data: linkedUser, error: linkedErr } = await window.sb
+      .from("users")
+      .select("id")
+      .eq("telegram_user_id", tgId)
+      .maybeSingle();
+
+    if (!linkedErr && linkedUser?.id && String(linkedUser.id) !== String(uid)) {
+      return {
+        ok: false,
+        reason: "telegram_already_linked",
+        detail: "telegram_user_id_belongs_to_another_profile",
+        existing_user_id: linkedUser.id
+      };
+    }
+  }
+} catch {}
+   
    try {
   trackEvent("registration_db_payload", {
     uid_present: !!uid,
@@ -6378,19 +6427,30 @@ const usersPayload = {
 } catch {}
    
     let uErr = null;
-  try {
-    await dbWriteWithRetry(async () => {
-      const { error } = await window.sb
-        .from("users")
-        .upsert(usersPayload, { onConflict: "id" });
 
-      if (error) throw error;
-      return true;
-    }, { tries: 3, baseDelayMs: 350 });
+try {
+  // ✅ Перед users.upsert ещё раз проверяем, что текущая Supabase auth-сессия
+  // действительно совпадает с uid. Иначе RLS users_insert_own/users_update_own
+  // закономерно отклонит запись.
+  const { data: authCheck } = await window.sb.auth.getUser();
+  const authUid = authCheck?.user?.id || null;
 
-  } catch (e) {
-    uErr = e;
+  if (!authUid || String(authUid) !== String(uid)) {
+    return {
+      ok: false,
+      reason: "auth_uid_mismatch",
+      detail: "registration_auth_uid_does_not_match_payload_id"
+    };
   }
+
+  const { error } = await window.sb
+    .from("users")
+    .upsert(usersPayload, { onConflict: "id" });
+
+  if (error) throw error;
+} catch (e) {
+  uErr = e;
+}
 
     if (uErr) {
     const rawMsg = String(uErr?.message || uErr || "");
@@ -6524,6 +6584,21 @@ const usersPayload = {
     };
   }
 
+      if (reason === "auth_uid_mismatch") {
+  return {
+    title: tr3(
+      "Сессия входа устарела.",
+      "Kirish sessiyasi eskirgan.",
+      "The login session has expired."
+    ),
+    recommendation: tr3(
+      "Пожалуйста, полностью закройте mini app и откройте его заново из Telegram.",
+      "Iltimos, mini appni to‘liq yoping va Telegram orqali qayta oching.",
+      "Please fully close the mini app and reopen it from Telegram."
+    )
+  };
+}
+      
   if (reason === "no_uid") {
     return {
       title: tr3(
@@ -6680,11 +6755,15 @@ function resetUiAfterIdentityRecovery(options = {}) {
 
     state.quizLock = null;
 
-    // local экранный контекст квиза убираем, DB-прогресс не трогаем
-    try { delete state.quiz; } catch {}
-    try { delete state.tourContext; } catch {}
+// local экранный контекст квиза убираем, DB-прогресс не трогаем
+try { delete state.quiz; } catch {}
+try { delete state.tourContext; } catch {}
 
-    saveState();
+// ВАЖНО: после смены identity нельзя продолжать старые tour_answer/tour_finalize.
+// Иначе pending ops могут писать в attempt старого uid и снова ловить RLS.
+try { clearPendingTourOpsAfterIdentityRecovery(); } catch {}
+
+saveState();
   } catch {}
 }
    function isCheckOnlyRecoverySource(source) {
@@ -6966,13 +7045,26 @@ async function recoverTelegramLinkedProfile({
       }
 
       // Только local profile пересобираем под новый активный uid.
-      // Practice/tour progress не чистим.
-      try { localStorage.removeItem(LS.profile); } catch {}
+// Practice/tour progress не чистим.
+const profileBeforeRecovery = loadProfile();
 
-      try { await hydrateLocalProfileFromSupabaseIfMissing(); } catch {}
-      try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
-      try { await ensureProfileGeoTranslationsHydrated(); } catch {}
+try { localStorage.removeItem(LS.profile); } catch {}
 
+// ВАЖНО: старые tour pending ops могли принадлежать старому auth.uid.
+try { clearPendingTourOpsAfterIdentityRecovery(); } catch {}
+
+try {
+  await hydrateLocalProfileFromSupabaseIfMissing({
+    force: true,
+    preserveUiLanguage:
+      profileBeforeRecovery?.uiLanguage ||
+      profileBeforeRecovery?.language ||
+      null
+  });
+} catch {}
+
+try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
+try { await ensureProfileGeoTranslationsHydrated(); } catch {}
       const recoveredOk = isRegistered();
 
       if (!recoveredOk) {
@@ -7506,8 +7598,14 @@ function bindIdentityRuntimeGuards() {
   } catch {}
 }
    
-async function hydrateLocalProfileFromSupabaseIfMissing() {
-  if (loadProfile()) return { ok: true, skipped: true, reason: "local_profile_exists" };
+async function hydrateLocalProfileFromSupabaseIfMissing(options = {}) {
+  const force = !!options?.force;
+  const existingProfile = loadProfile();
+
+  if (existingProfile && !force) {
+    return { ok: true, skipped: true, reason: "local_profile_exists" };
+  }
+
   if (!window.sb) return { ok: false, reason: "no_sb" };
 
   const uid = await getAuthUid();
@@ -7516,7 +7614,7 @@ async function hydrateLocalProfileFromSupabaseIfMissing() {
   const me = await getMyUserRow(uid);
   if (!me) return { ok: false, reason: "no_users_row" };
 
-  // Load user_subjects with subject_key (FK relationship expected)
+  // Load user_subjects with subject_key
   let subjRows = [];
   try {
     const { data, error } = await window.sb
@@ -7541,41 +7639,106 @@ async function hydrateLocalProfileFromSupabaseIfMissing() {
 
   const fullName = [me.first_name, me.last_name].filter(Boolean).join(" ").trim();
 
-   // ✅ Маркер завершённой регистрации в БД:
-  // users.is_school_student должен быть именно TRUE/FALSE. Если NULL — регистрация не завершена.
   const regFlag =
     (me.is_school_student === true) ? true :
     (me.is_school_student === false) ? false :
     null;
 
   if (regFlag === null) {
-    // Не создаём local profile-заглушку, иначе апп “проскочит” регистрацию
     return { ok: true, hydrated: false, reason: "db_registration_not_completed" };
   }
 
-    const profile = {
+  const regionId = Number(me.region_id) > 0 ? Number(me.region_id) : null;
+  const districtId = Number(me.district_id) > 0 ? Number(me.district_id) : null;
+
+  let regionText = String(me.region || "").trim();
+  let districtText = String(me.district || "").trim();
+  let regionTr = null;
+  let districtTr = null;
+
+  if (regionId) {
+    try {
+      const { data: rRow } = await window.sb
+        .from("regions")
+        .select("id,name_ru,name_uz,name_en,name")
+        .eq("id", regionId)
+        .maybeSingle();
+
+      if (rRow) {
+        regionTr = {
+          ru: String(rRow.name_ru || rRow.name || "").trim(),
+          uz: String(rRow.name_uz || rRow.name_ru || rRow.name || "").trim(),
+          en: String(rRow.name_en || rRow.name_ru || rRow.name || "").trim()
+        };
+
+        regionText =
+          regionText ||
+          regionTr.ru ||
+          regionTr.uz ||
+          regionTr.en ||
+          "";
+      }
+    } catch {}
+  }
+
+  if (districtId) {
+    try {
+      const { data: dRow } = await window.sb
+        .from("districts")
+        .select("id,name_ru,name_uz,name_en,name")
+        .eq("id", districtId)
+        .maybeSingle();
+
+      if (dRow) {
+        districtTr = {
+          ru: String(dRow.name_ru || dRow.name || "").trim(),
+          uz: String(dRow.name_uz || dRow.name_ru || dRow.name || "").trim(),
+          en: String(dRow.name_en || dRow.name_ru || dRow.name || "").trim()
+        };
+
+        districtText =
+          districtText ||
+          districtTr.ru ||
+          districtTr.uz ||
+          districtTr.en ||
+          "";
+      }
+    } catch {}
+  }
+
+  const profile = {
     id: uid,
     created_at: nowISO(),
     full_name: fullName || "",
-    // language = язык контента (туры/практика)
-    language: me.language_code || "ru",
-    // uiLanguage = язык интерфейса (если ранее был выбран локально — сохраняем)
-    uiLanguage: (loadProfile()?.uiLanguage) || (me.language_code || "ru"),
 
-    // ✅ ВАЖНО: не !!. а строго boolean из БД
+    language: me.language_code || "ru",
+    uiLanguage:
+      options?.preserveUiLanguage ||
+      existingProfile?.uiLanguage ||
+      existingProfile?.language ||
+      me.language_code ||
+      "ru",
+
     is_school_student: regFlag,
 
-    region: me.region || "",
-    district: me.district || "",
+    region_id: regionId,
+    district_id: districtId,
+    region_tr: regionTr,
+    district_tr: districtTr,
+
+    region: regionText,
+    district: districtText,
     school: me.school || "",
     class: me.class || "",
+
     telegram: {
-      id: null,
+      id: me.telegram_user_id || null,
       username: null,
       first_name: me.first_name || null,
       last_name: me.last_name || null,
       photo_url: me.avatar_url || null
     },
+
     subjects
   };
 
@@ -18124,87 +18287,54 @@ async function updateTourAttempt(attemptId, patch) {
         return;
       }
     } else {
-      const confirmed = await uiConfirm({
-        title: tr3(
-          "Нужно подтвердить профиль",
-          "Profilni tasdiqlash kerak",
-          "Profile confirmation required"
-        ),
-        message: tr3(
-          "Чтобы открыть тур на этом устройстве, нужно подтвердить профиль. Продолжить?",
-          "Bu qurilmada turni ochish uchun profilni tasdiqlash kerak. Davom etamizmi?",
-          "To open the tour on this device, your profile needs to be confirmed. Continue?"
-        ),
-        okText: tr3(
-          "Подтвердить",
-          "Tasdiqlash",
-          "Confirm"
-        ),
-        cancelText: tr3(
-          "Отмена",
-          "Bekor qilish",
-          "Cancel"
-        )
-      });
+  // ВАЖНО:
+  // tour-start не должен запускать ручное подтверждение профиля.
+  // Если identity поплыл, это системный repair-path, а не пользовательский risky recovery.
+  const recRes = await recoverTelegramLinkedProfile({
+    source: "inactive_session_boot",
+    silentBoot: true,
+    force: true,
+    preserveCourseContext: tourStartCourseContext
+  }).catch((e) => ({
+    ok: false,
+    reason: "exception",
+    message: String(e?.message || e)
+  }));
 
-      if (!confirmed) {
-        return;
-      }
-
-            const recRes = await recoverTelegramLinkedProfile({
-        source: "tour_start_profile_recovery",
-        silentBoot: false,
-        preserveCourseContext: tourStartCourseContext
-      }).catch((e) => ({
-        ok: false,
-        reason: "exception",
-        message: String(e?.message || e)
-      }));
-      const recReason = String(recRes?.reason || recRes?.data?.reason || "");
-
-      if (!recRes?.ok) {
-        if (recReason.includes("limit")) {
-          await uiAlert({
-            title: tr3(
-  "Профиль временно не удалось подтвердить.",
-  "Profilni vaqtincha tasdiqlab bo‘lmadi.",
-  "Profile could not be confirmed temporarily."
-),
-message: tr3(
-  "Пожалуйста, полностью закройте mini app и откройте его заново из Telegram. Если проблема повторится, напишите администратору.",
-  "Iltimos, mini appni to‘liq yoping va Telegram orqali qayta oching. Muammo takrorlansa, administratorga yozing.",
-  "Please fully close the mini app and reopen it from Telegram. If the problem happens again, contact the administrator."
-)
-          });
-          return;
-        }
-
-        await uiAlert({
-          title: t("not_available") || tr3("Недоступно", "Mavjud emas", "Not available"),
-          message: tr3(
-            "Не удалось подтвердить ваш профиль. Пожалуйста, закройте и снова откройте приложение из Telegram.",
-            "Profilingizni tasdiqlab bo‘lmadi. Iltimos, ilovani Telegram orqali yopib qayta oching.",
-            "We could not verify your profile. Please close and reopen the app from Telegram."
-          )
-        });
-        return;
-      }
-
-      uid = await getAuthUid();
-
-      if (!uid || !(await hasDbUserRow(uid))) {
-        await uiAlert({
-          title: t("not_available") || tr3("Недоступно", "Mavjud emas", "Not available"),
-          message: tr3(
-            "Профиль восстановлен, но ещё не подтверждён для старта тура. Пожалуйста, заново откройте приложение.",
-            "Profil tiklandi, lekin turni boshlash uchun hali tasdiqlanmadi. Iltimos, ilovani qayta oching.",
-            "The profile was restored, but it is not yet confirmed for tour start. Please reopen the app."
-          )
-        });
-        return;
-      }
-    }
+  if (!recRes?.ok) {
+    await uiAlert({
+      title: tr3(
+        "Профиль временно не удалось подтвердить.",
+        "Profilni vaqtincha tasdiqlab bo‘lmadi.",
+        "Profile could not be confirmed temporarily."
+      ),
+      message: tr3(
+        "Пожалуйста, полностью закройте mini app и откройте его заново из Telegram. Если проблема повторится, напишите администратору.",
+        "Iltimos, mini appni to‘liq yoping va Telegram orqali qayta oching. Muammo takrorlansa, administratorga yozing.",
+        "Please fully close the mini app and reopen it from Telegram. If the problem happens again, contact the administrator."
+      )
+    });
+    return;
   }
+
+  uid = await getAuthUid();
+
+  if (!uid || !(await hasDbUserRow(uid))) {
+    await uiAlert({
+      title: tr3(
+        "Профиль временно не удалось подтвердить.",
+        "Profilni vaqtincha tasdiqlab bo‘lmadi.",
+        "Profile could not be confirmed temporarily."
+      ),
+      message: tr3(
+        "Пожалуйста, полностью закройте mini app и откройте его заново из Telegram. Если проблема повторится, напишите администратору.",
+        "Iltimos, mini appni to‘liq yoping va Telegram orqali qayta oching. Muammo takrorlansa, administratorga yozing.",
+        "Please fully close the mini app and reopen it from Telegram. If the problem happens again, contact the administrator."
+      )
+    });
+    return;
+  }
+}
   // 2) eligibility: only school students can participate (tours/ratings)
   const me = await getUserProfile(uid);
 
