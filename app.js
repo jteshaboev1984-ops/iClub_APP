@@ -122,10 +122,26 @@ function inputHintForAnswer(correctAnswer) {
   const expected = String(correctAnswer ?? "").trim();
 
   if (parseFlexibleScientificNumber(expected) !== null) {
+    if (inputExpectedRequiresExplicitSign(expected)) {
+      return tr3(
+        "Введите число со знаком, например +4 или -3",
+        "Belgili son kiriting, masalan +4 yoki -3",
+        "Enter a signed number, e.g. +4 or -3"
+      );
+    }
+
+    if (/[eE]/.test(expected)) {
+      return tr3(
+        "Введите число в формате e, например 1.5e3",
+        "Sonni e formatida kiriting, masalan 1.5e3",
+        "Enter a number in e format, e.g. 1.5e3"
+      );
+    }
+
     return tr3(
-      "Введите число, например +1 или -1",
-      "Son kiriting, masalan +1 yoki -1",
-      "Enter a number, e.g. +1 or -1"
+      "Введите только число без слов, единиц и знаков",
+      "Faqat son kiriting: so‘z, birlik va belgisiz",
+      "Enter only the number: no words, units or signs"
     );
   }
 
@@ -5164,30 +5180,30 @@ function formatDateTime(ts) {
     }
   }
 
-    function isValidInputAnswer(q, value) {
+        function isValidInputAnswer(q, value) {
     const v = String(value ?? "").trim();
     if (!v) return false;
 
-    if (q.inputKind === "numeric") {
-      // допускаем:
-      // 12
-      // +12 / -12 / −12
-      // 12.5 / 12,5
-      // +1.505e23 / -1.505e23
-      // 1.505*10^23 / 1.505×10^23 / 1.505x10^23
-      //
-      // НЕ допускаем trailing-sign форматы: 4+, 3-
-      const normalized = normalizeNumericInput(v);
+    const expected = getInputExpectedAnswer(q);
+    const expectedIsNumeric = parseStrictNumberAnswer(expected) !== null;
 
-      return /^[+-]?\d+(\.\d+)?(([eE][+-]?\d+)|(([x*])10\^[+-]?\d+))?$/i.test(normalized);
+       if (q?.inputKind === "numeric" || expectedIsNumeric) {
+      return parseStrictNumberAnswer(v) !== null && hasAllowedNumericSign(v, expected);
     }
 
-    if (q.inputKind === "letter") {
+    if (q?.inputKind === "letter") {
       // ровно 1 буква, запрещаем a/b/c/d (чтобы не путали с MCQ)
       if (!/^[A-Za-zА-Яа-я]$/.test(v)) return false;
       const low = v.toLowerCase();
       if (low === "a" || low === "b" || low === "c" || low === "d") return false;
       return true;
+    }
+
+    if (isFormulaLikeExpectedAnswer(expected)) {
+      // Formula/token input must be compact: no spaces, no subscripts.
+      if (/[₀₁₂₃₄₅₆₇₈₉]/.test(v)) return false;
+      if (/\s/.test(v)) return false;
+      return /^[A-Za-z][A-Za-z0-9]*$/.test(v);
     }
 
     return true;
@@ -14826,43 +14842,136 @@ return { added: add.length, recs, addedRecs: add };
     return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
   }
 
-    function normalizeNumericInput(v) {
+        function normalizeInputAnswerText(v) {
     return String(v ?? "")
       .trim()
-      .replace(/\s+/g, "")
-      .replace(/,/g, ".")
-      .replace(/−/g, "-")
-      .replace(/×/g, "*");
+      .replace(/[−–—]/g, "-");
   }
 
-  function parseFlexibleScientificNumber(v) {
-    const s0 = normalizeNumericInput(v);
-    if (!s0) return null;
+    function normalizeNumericInput(v) {
+    return normalizeInputAnswerText(v);
+  }
 
-    let s = s0;
+  function hasInternalWhitespace(v) {
+    const s = normalizeInputAnswerText(v);
+    return /\s/.test(s);
+  }
 
-    // 1.5050*10^23  /  1.5050x10^23  /  1.5050×10^23
-    s = s.replace(/^([+-]?\d+(?:\.\d+)?)(?:\*|x)10\^([+-]?\d+)$/i, "$1e$2");
+  function parseStrictNumberAnswer(v) {
+    const s = normalizeNumericInput(v);
+    if (!s) return null;
 
-    // обычное число или scientific e-формат
-    if (!/^[+-]?\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i.test(s)) return null;
+    // Strict app format:
+    // 12
+    // 12.5
+    // +4 / -3
+    // 1.505e23 / 1.505E23
+    //
+    // Intentionally NOT accepted here:
+    // 12,5
+    // 1.505×10^23
+    // 1.505*10^23
+    // answers with units or spaces
+    if (hasInternalWhitespace(s)) return null;
+    if (!/^[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(s)) return null;
 
     const n = Number(s);
     return Number.isFinite(n) ? n : null;
   }
 
-  function areNumericAnswersEquivalent(a, b) {
-    const na = parseFlexibleScientificNumber(a);
-    const nb = parseFlexibleScientificNumber(b);
+  // Backward-compatible name used in older parts of the app.
+  // Now intentionally strict, because question texts specify the exact input format.
+  function parseFlexibleScientificNumber(v) {
+    return parseStrictNumberAnswer(v);
+  }
 
-    if (na === null || nb === null) {
-      return normalizeNumericInput(a) === normalizeNumericInput(b);
+    function inputExpectedRequiresExplicitSign(expectedRaw) {
+    const expected = normalizeNumericInput(expectedRaw);
+
+    // For oxidation-number style answers like +4 or -3,
+    // the sign is part of the required academic format.
+    // If expected is +4, user must write +4, not plain 4.
+    return /^[+-]\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(expected);
+  }
+
+  function hasAllowedNumericSign(userRaw, expectedRaw) {
+    const expected = normalizeNumericInput(expectedRaw);
+    const user = normalizeNumericInput(userRaw);
+
+    if (!user || !expected) return false;
+
+    // Signed expected answer: user must use the same explicit sign.
+    // Example: expected +4 => +4 only, not 4.
+    // Example: expected -3 => -3 only, not 3.
+    if (inputExpectedRequiresExplicitSign(expected)) {
+      if (expected.startsWith("+")) return user.startsWith("+");
+      if (expected.startsWith("-")) return user.startsWith("-");
+      return true;
     }
+
+    // Plain numeric expected answer: user must NOT add a sign.
+    // Example: expected 6 => 6 only, not +6.
+    return !/^[+-]/.test(user);
+  }
+
+  function areNumericAnswersEquivalent(a, b) {
+    const na = parseStrictNumberAnswer(a);
+    const nb = parseStrictNumberAnswer(b);
+
+    if (na === null || nb === null) return false;
+    if (!hasAllowedNumericSign(a, b)) return false;
 
     const diff = Math.abs(na - nb);
     const scale = Math.max(1, Math.abs(na), Math.abs(nb));
 
     return diff <= scale * 1e-9;
+  }
+  function normalizeFreeTextAnswer(v) {
+    return normalizeInputAnswerText(v)
+      .replace(/\s+/g, "")
+      .toLowerCase();
+  }
+
+  function getInputExpectedAnswer(q) {
+    if (!q) return "";
+
+    const raw =
+      q.correctAnswer ?? q.correct_answer ?? q.correct ?? q.answer ?? "";
+
+    return String(raw ?? "").trim();
+  }
+
+  function isFormulaLikeExpectedAnswer(expectedRaw) {
+    const expected = String(expectedRaw ?? "").trim();
+
+    // Short formula/token style answers:
+    // MgO, CO2, C2H6O, BaSO4, NH3, RETURN, EOF
+    return /^[A-Z][A-Za-z0-9]*$/.test(expected);
+  }
+
+    function isInputAnswerCorrect(userRaw, expectedRaw) {
+    const user = String(userRaw ?? "").trim();
+    const expected = String(expectedRaw ?? "").trim();
+
+    if (!user || !expected) return false;
+
+    const expectedNumber = parseStrictNumberAnswer(expected);
+
+    if (expectedNumber !== null) {
+      return areNumericAnswersEquivalent(user, expected);
+    }
+
+    if (isFormulaLikeExpectedAnswer(expected)) {
+      // Keep formula/token answers compact even if correctness is called directly.
+      // Lowercase is accepted as user-friendly input, but spaces/subscripts are not.
+      if (/[₀₁₂₃₄₅₆₇₈₉]/.test(user)) return false;
+      if (/\s/.test(user)) return false;
+      if (!/^[A-Za-z][A-Za-z0-9]*$/.test(user)) return false;
+
+      return normalizeInputAnswerText(user).toLowerCase() === normalizeInputAnswerText(expected).toLowerCase();
+    }
+
+    return normalizeFreeTextAnswer(user) === normalizeFreeTextAnswer(expected);
   }
 
   function renderTrendBars({ wrapEl, deltaEl, attemptsNewestFirst, barClass, lastClass }) {
@@ -15931,24 +16040,18 @@ try {
       }
     }
 
-    let isCorrect = false;
+       let isCorrect = false;
 
     if (q.type === "mcq") {
       const idx = (userAns === null || userAns === undefined) ? null : Number(userAns);
       if (idx !== null && idx === Number(q.correctIndex)) isCorrect = true;
     } else {
       const raw = String(userAns ?? "").trim();
-      if (raw) {
-        if (q.inputKind === "numeric") {
-          isCorrect = areNumericAnswersEquivalent(raw, q.correctAnswer);
-        } else {
-          isCorrect = (raw.toLowerCase() === String(q.correctAnswer || "").trim().toLowerCase());
-        }
-      }
+      isCorrect = isInputAnswerCorrect(raw, getInputExpectedAnswer(q));
     }
 
     quiz.correct[quiz.index] = isCorrect;
-
+     
     if (isAutoTimeout) {
       showToast(userAns ? t("toast_time_expired_answer_saved") : t("toast_time_expired_no_answer"));
     }
@@ -18671,14 +18774,16 @@ try {
   const inputWrap = document.createElement("div");
   inputWrap.className = "input-wrap";
 
-  inputWrap.innerHTML = `
+    inputWrap.innerHTML = `
     <label class="input-label">${escapeHTML(t("answer") || "Answer")}</label>
     <input id="tour-input" class="text-input" type="text" placeholder="${escapeHTML(t("type_answer") || "Type your answer")}">
+    <div id="tour-input-error" class="muted small" style="margin-top:6px; display:none;"></div>
   `;
 
   wrap.appendChild(inputWrap);
 
   const inputEl = inputWrap.querySelector("#tour-input");
+  const errEl = inputWrap.querySelector("#tour-input-error");
 
   const nextBtn =
     $("#tour-next-btn") ||
@@ -18686,7 +18791,7 @@ try {
     document.querySelector('[data-action="tour-next"]');
 
   if (nextBtn) {
-  nextBtn.disabled = true; // ⛔ пока пусто
+  nextBtn.disabled = true; // ⛔ пока формат не валиден
 
   const isLast = (ctx.index >= TOUR_CONFIG.total - 1);
   nextBtn.textContent = isLast
@@ -18694,11 +18799,30 @@ try {
     : (t("tour_next_question") || "Next Question →");
 }
 
-  // ✅ активируем Next только когда есть ввод
+  // ✅ активируем Next только когда input-формат валиден
+  const syncTourInputState = () => {
+    if (!inputEl || !nextBtn) return;
+
+    const raw = String(inputEl.value || "");
+    const hasValue = raw.trim().length > 0;
+    const isValid = hasValue && isValidInputAnswer(q, raw);
+
+    nextBtn.disabled = !isValid;
+
+    if (errEl) {
+      if (hasValue && !isValid) {
+        errEl.textContent = t("invalid_answer_format");
+        errEl.style.display = "block";
+      } else {
+        errEl.textContent = "";
+        errEl.style.display = "none";
+      }
+    }
+  };
+
   if (inputEl && nextBtn) {
-    inputEl.addEventListener("input", () => {
-      nextBtn.disabled = inputEl.value.trim().length === 0;
-    });
+    inputEl.addEventListener("input", syncTourInputState);
+    syncTourInputState();
   }
 
   renderTourHUD();
@@ -18799,22 +18923,24 @@ try {
         : (q?.correct != null ? q.correct
         : (q?.answer != null ? q.answer : null))));
 
-       const expected = (expectedRaw == null) ? "" : String(expectedRaw).trim();
-    const isNumericInputQuestion = (!isMcq && expected !== "" && parseFlexibleScientificNumber(expected) !== null);
+        const expected = (expectedRaw == null) ? "" : String(expectedRaw).trim();
+
+    if (!isMcq && !auto && !isValidInputAnswer(q, inputVal)) {
+      const errEl = document.getElementById("tour-input-error");
+      if (errEl) {
+        errEl.textContent = t("invalid_answer_format");
+        errEl.style.display = "block";
+      } else {
+        showToast(t("invalid_answer_format"));
+      }
+      return;
+    }
 
     // correctness
     const isCorrect = isMcq
       ? ((pickedNum !== null && correctIdx !== null) ? (pickedNum === correctIdx) : false)
-      : (
-          expected
-            ? (
-                isNumericInputQuestion
-                  ? areNumericAnswersEquivalent(inputVal, expected)
-                  : (inputVal.toLowerCase() === expected.toLowerCase())
-              )
-            : false
-        );
-
+      : isInputAnswerCorrect(inputVal, expected);
+       
     ctx.answers = ctx.answers || [];
     ctx.answers.push({
       qid: q.id,
