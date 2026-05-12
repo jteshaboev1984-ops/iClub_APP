@@ -117,6 +117,25 @@ function tc3(ru, uz, en) {
   if (lang === "en") return String(en ?? ru ?? uz ?? "");
   return String(ru ?? uz ?? en ?? "");
 }
+
+function inputHintForAnswer(correctAnswer) {
+  const expected = String(correctAnswer ?? "").trim();
+
+  if (parseFlexibleScientificNumber(expected) !== null) {
+    return tr3(
+      "Введите число, например +1 или -1",
+      "Son kiriting, masalan +1 yoki -1",
+      "Enter a number, e.g. +1 or -1"
+    );
+  }
+
+  return tr3(
+    "Введите ответ",
+    "Javobni kiriting",
+    "Enter answer"
+  );
+}
+
 function refreshLiveProgressSurfaces() {
   try { _homeStatsCache?.clear?.(); } catch {}
 
@@ -4893,8 +4912,8 @@ async function buildPracticeSet(subjectKey) {
         correctAnswer,
         explanation: pickL(r, "explanation") || "",
         imageUrl: r.image_url || null,
-        inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
-        inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : "",
+        inputKind: type === "input" ? (parseFlexibleScientificNumber(correctAnswer) !== null ? "numeric" : "text") : null,
+        inputHint: type === "input" ? inputHintForAnswer(correctAnswer) : "",
         practiceTourNo: Number(ctx.practiceTourNo || 1),
         practicePoolId: Number(ctx.poolId || 0) || null
       };
@@ -5022,8 +5041,8 @@ async function buildPracticeSet(subjectKey) {
         correctAnswer,
         explanation: pickL(r, "explanation") || "",
         imageUrl: r.image_url || null,
-        inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
-        inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : "",
+        inputKind: type === "input" ? (parseFlexibleScientificNumber(correctAnswer) !== null ? "numeric" : "text") : null,
+        inputHint: type === "input" ? inputHintForAnswer(correctAnswer) : "",
         practiceTourNo,
         practicePoolId: poolId,
         orderNo: orderMap.get(Number(r.id)) ?? 999999
@@ -5152,10 +5171,15 @@ function formatDateTime(ts) {
     if (q.inputKind === "numeric") {
       // допускаем:
       // 12
+      // +12 / -12 / −12
       // 12.5 / 12,5
-      // 1.505e23
+      // +1.505e23 / -1.505e23
       // 1.505*10^23 / 1.505×10^23 / 1.505x10^23
-      return /^-?\d+([.,]\d+)?(([eE][+-]?\d+)|(([x×*])\s*10\^[+-]?\d+))?$/.test(v);
+      //
+      // НЕ допускаем trailing-sign форматы: 4+, 3-
+      const normalized = normalizeNumericInput(v);
+
+      return /^[+-]?\d+(\.\d+)?(([eE][+-]?\d+)|(([x*])10\^[+-]?\d+))?$/i.test(normalized);
     }
 
     if (q.inputKind === "letter") {
@@ -5168,7 +5192,6 @@ function formatDateTime(ts) {
 
     return true;
   }
-
    // ---------------------------
   // Regions / Districts
   // - Uses Supabase if available (regions/districts tables)
@@ -14457,7 +14480,7 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
         correctAnswer,
         explanation: pickL(row, "explanation") || "",
         inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
-        inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
+        inputHint: type === "input" ? inputHintForAnswer(correctAnswer) : ""
       };
     });
 
@@ -17527,7 +17550,7 @@ function pickContentText(obj, base) {
       explanation: pickL(r, "explanation") || "",
       imageUrl: r.image_url || null,
       inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
-      inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
+      inputHint: type === "input" ? inputHintForAnswer(correctAnswer) : ""
     };
   }).filter(q => Number.isFinite(q.id));
 
@@ -17627,7 +17650,7 @@ function pickContentText(obj, base) {
       explanation: pickL(r, "explanation") || "",
       imageUrl: r.image_url || null,
       inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
-      inputHint: type === "input" ? (isNumericLike(correctAnswer) ? "Введите число" : "Введите ответ") : ""
+      inputHint: type === "input" ? inputHintForAnswer(correctAnswer) : ""
     };
   }).filter(q => Number.isFinite(q.id));
 } 
