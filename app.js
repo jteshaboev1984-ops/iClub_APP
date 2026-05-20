@@ -4677,7 +4677,11 @@ async function getPracticeTourCards(subjectKey) {
       const total = Number(stats?.totalCount || 0);
       const done = Number(stats?.masteredCount || 0);
       const open = Math.max(0, total - done);
-      const locked = stateName === "locked" || !hasPool || total <= 0;
+
+      // В Practice замок означает только "ещё не опубликовано / будущий этап".
+      // Нельзя блокировать прошедший тур только из-за total=0:
+      // stats могут временно не успеть/не загрузиться, а сама практика при этом доступна.
+      const locked = stateName === "locked" || !hasPool;
 
       return {
         tourNo,
