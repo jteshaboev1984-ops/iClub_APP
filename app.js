@@ -1356,7 +1356,7 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
         .from("tour_attempts")
         .select("tour_id, percent, status")
         .eq("user_id", uid)
-        .in("status", ["submitted", "time_expired", "anti_cheat"])
+        .in("status", ["submitted", "time_expired", "anti_cheat", "finished"])
         .order("tour_id", { ascending: true });
 
       if (error) {
@@ -8076,11 +8076,11 @@ async function ensureEligibleCertificatesIssued() {
     const uid = await getAuthUid();
     if (!uid) return;
 
-    const { data: attempts, error } = await window.sb
+     const { data: attempts, error } = await window.sb
       .from("tour_attempts")
       .select("id,tour_id,status")
       .eq("user_id", uid)
-      .in("status", ["submitted", "time_expired"])
+      .in("status", ["submitted", "time_expired", "finished"])
       .order("id", { ascending: false });
 
     if (error || !Array.isArray(attempts) || !attempts.length) {
@@ -10431,7 +10431,7 @@ listEl.innerHTML = `
           .from("tour_attempts")
           .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district,region_id,district_id)")
           .eq("tour_id", tourId)
-          .in("status", ["submitted", "time_expired"])
+          .in("status", ["submitted", "time_expired", "anti_cheat", "finished"])
           .order("score", { ascending: false })
           .order("total_time", { ascending: true })
           .range(from, to);
@@ -10531,7 +10531,7 @@ listEl.innerHTML = `
         .from("tour_attempts")
         .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district,region_id,district_id)")
         .eq("tour_id", tourId)
-        .in("status", ["submitted", "time_expired"])
+        .in("status", ["submitted", "time_expired", "anti_cheat", "finished"])
         .limit(5000);
 
       if (attErr) {
@@ -13110,7 +13110,7 @@ async function computeHomeCompetitiveStats(subjectKey) {
       .from("tour_attempts")
       .select("id,tour_id,status")
       .eq("user_id", uid)
-      .in("status", ["submitted", "time_expired", "anti_cheat"])
+      .in("status", ["submitted", "time_expired", "anti_cheat", "finished"])
       .order("created_at", { ascending: false });
 
     const attempts = Array.isArray(attemptRes?.data) ? attemptRes.data : [];
