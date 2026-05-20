@@ -9675,13 +9675,12 @@ async function getMyUserRow(uid) {
   if (!uid) return null;
   const { data, error } = await window.sb
     .from("users")
-    .select("id,first_name,last_name,avatar_url,is_school_student,region,district,school,class")
+    .select("id,first_name,last_name,avatar_url,is_school_student,region,district,region_id,district_id,country_code,country,school,class")
     .eq("id", uid)
     .maybeSingle();
   if (error) return null;
   return data || null;
 }
-
 async function getMyCompetitiveSubjects(uid) {
   if (!uid) return [];
   const { data, error } = await window.sb
@@ -9979,25 +9978,61 @@ const hideLoading = () => {
   if (mybar) mybar.style.display = "none";
 
   // user / participant
-  const uid = await getAuthUid();
+    const uid = await getAuthUid();
   const me = await getMyUserRow(uid);
   const myComp = await getMyCompetitiveSubjects(uid);
   const isParticipant = !!me?.is_school_student && (myComp?.length > 0);
 
+  const myRegionId = Number(me?.region_id || 0) > 0 ? String(me.region_id) : "";
+  const myDistrictId = Number(me?.district_id || 0) > 0 ? String(me.district_id) : "";
+
+  const myRegionText = String(me?.region || "").trim();
+  const myDistrictText = String(me?.district || "").trim();
+
+  const hasMyRegion = !!myRegionId || !!myRegionText;
+  const hasMyDistrict = !!myDistrictId || !!myDistrictText;
+
+  const sameMyRegion = (u) => {
+    if (myRegionId) return String(u?.region_id ?? "") === myRegionId;
+    return !!myRegionText && String(u?.region || "").trim() === myRegionText;
+  };
+
+  const sameMyDistrict = (u) => {
+    if (myDistrictId) return String(u?.district_id ?? "") === myDistrictId;
+    return !!myDistrictText && String(u?.district || "").trim() === myDistrictText;
+  };
+
+  const applyLocalRatingsScope = (rows) => {
+    const arr = Array.isArray(rows) ? rows : [];
+
+    if (ratingsState.scope === "district") {
+      return arr.filter(r => sameMyDistrict(r?.users || r));
+    }
+
+    if (ratingsState.scope === "region") {
+      return arr.filter(r => sameMyRegion(r?.users || r));
+    }
+
+    return arr;
+  };
+
   // hint
   if (hintEl) hintEl.style.display = isParticipant ? "none" : "block";
 
-    // если у меня нет district/region — принудительно country, иначе фильтры бессмысленны
-  if ((ratingsState.scope === "district" && !me?.district) || (ratingsState.scope === "region" && !me?.region)) {
-  ratingsState.scope = "country";
-  saveRatingsFiltersToState();
+  // если у меня реально нет district/region — только тогда принудительно country
+  if (
+    (ratingsState.scope === "district" && !hasMyDistrict) ||
+    (ratingsState.scope === "region" && !hasMyRegion)
+  ) {
+    ratingsState.scope = "country";
+    saveRatingsFiltersToState();
 
-  $$(".lb-segment .seg-btn").forEach(btn => {
-    const active = btn.dataset.scope === ratingsState.scope;
-    btn.classList.toggle("is-active", active);
-    btn.setAttribute("aria-selected", active ? "true" : "false");
-  });
-}
+    $$(".lb-segment .seg-btn").forEach(btn => {
+      const active = btn.dataset.scope === ratingsState.scope;
+      btn.classList.toggle("is-active", active);
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+    });
+  }
 
   // guards
   if (!ratingsState.subjectId) {
@@ -10024,7 +10059,13 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
 
     if (token !== ratingsState._token) return;
 
-    const cacheHasData = !cacheProbe?.error && Array.isArray(cacheProbe?.data) && cacheProbe.data.length > 0;
+    // ratings_cache безопасен для country.
+    // Для district/region считаем live из tour_attempts, потому что cache не хранит group key.
+    const cacheHasData =
+      ratingsState.scope === "country" &&
+      !cacheProbe?.error &&
+      Array.isArray(cacheProbe?.data) &&
+      cacheProbe.data.length > 0;
 
     if (!cacheHasData) {
       // -------- fallback: compute leaderboard from tour_attempts --------
@@ -10055,22 +10096,8 @@ if (attemptsRes?.error) {
         return !st || OK_STATUSES.has(st);
       });
 
-            // scope filter via user profile (same behavior as cache)
-      if (ratingsState.scope === "district") {
-        const myDid = me?.district_id != null ? String(me.district_id) : "";
-        if (myDid) {
-          pool = pool.filter(r => String(r?.users?.district_id ?? "") === myDid);
-        } else if (me?.district) {
-          pool = pool.filter(r => String(r?.users?.district || "") === String(me.district));
-        }
-      } else if (ratingsState.scope === "region") {
-        const myRid = me?.region_id != null ? String(me.region_id) : "";
-        if (myRid) {
-          pool = pool.filter(r => String(r?.users?.region_id ?? "") === myRid);
-        } else if (me?.region) {
-          pool = pool.filter(r => String(r?.users?.region || "") === String(me.region));
-        }
-      }
+                  // scope filter via user profile: ID-first, text fallback
+      pool = applyLocalRatingsScope(pool);
 
       // sort: score desc, time asc
       pool.sort((a, b) => {
@@ -10711,27 +10738,14 @@ if (attErr) {
 
 const OK_STATUSES = new Set(["finished", "submitted", "time_expired", "anti_cheat"]);
 
-// filter by status + scope using my profile
-const filteredAttempts = (Array.isArray(attempts) ? attempts : []).filter(a => {
+// filter by status first
+const completedAttempts = (Array.isArray(attempts) ? attempts : []).filter(a => {
   const st = String(a?.status || "").trim();
-  if (st && !OK_STATUSES.has(st)) return false;
-
-  const u = a.users || {};
-
-  if (ratingsState.scope === "district") {
-    const myDid = me?.district_id != null ? String(me.district_id) : "";
-    if (myDid) return String(u.district_id ?? "") === myDid;
-    return !!me?.district && String(u.district || "") === String(me.district || "");
-  }
-
-  if (ratingsState.scope === "region") {
-    const myRid = me?.region_id != null ? String(me.region_id) : "";
-    if (myRid) return String(u.region_id ?? "") === myRid;
-    return !!me?.region && String(u.region || "") === String(me.region || "");
-  }
-
-  return true; // country
+  return !st || OK_STATUSES.has(st);
 });
+
+// then scope filter: ID-first, text fallback
+const filteredAttempts = applyLocalRatingsScope(completedAttempts);
     
   // aggregate per user
   const agg = new Map();
