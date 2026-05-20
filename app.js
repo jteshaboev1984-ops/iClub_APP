@@ -2667,12 +2667,12 @@ async function dbHasAnyActiveTourNow() {
     return;
   }
 
-  const { data: atts, error: attsErr } = await window.sb
+    const { data: atts, error: attsErr } = await window.sb
     .from("tour_attempts")
     .select("tour_id,score,total_time,status")
     .eq("user_id", uid)
     .in("tour_id", pastTourIds)
-    .in("status", ["submitted", "time_expired"]);
+    .in("status", ["submitted", "time_expired", "anti_cheat", "finished"]);
 
   if (attsErr || !Array.isArray(atts) || atts.length === 0) {
     listEl.innerHTML = `
@@ -2698,11 +2698,11 @@ async function dbHasAnyActiveTourNow() {
     }
   }
 
-  const rows = pastTours
-    .filter(t => bestByTour.has(Number(t.id)))
-    .map(t => {
-      const best = bestByTour.get(Number(t.id));
-      const title = `${tr("tours_tour_label", "Тур")} ${t.tour_no}`;
+    const rows = pastTours
+    .filter(tour => bestByTour.has(Number(tour.id)))
+    .map(tour => {
+      const best = bestByTour.get(Number(tour.id));
+      const title = `${tr("tours_tour_label", "Тур")} ${tour.tour_no}`;
 
       const parts = [];
       parts.push(`${t("archive_score_label")}: ${best.score}`);
@@ -2715,7 +2715,7 @@ async function dbHasAnyActiveTourNow() {
         </div>
       `;
     });
-
+               
   if (rows.length === 0) {
     listEl.innerHTML = `
       <div class="empty muted">${t("archive_empty")}</div>
@@ -9843,9 +9843,12 @@ saveRatingsFiltersToState();
   ratingsState._booted = true;
 }
 
- async function renderRatings() {
+  async function renderRatings() {
   const listEl = $("#ratings-list");
-   listEl.innerHTML = "";
+  if (!listEl) return;
+
+  listEl.innerHTML = "";
+
   const loadingEl = $("#ratings-loading");
 
   const mybar = $("#ratings-mybar");
@@ -9854,8 +9857,6 @@ saveRatingsFiltersToState();
   const myScoreEl = $("#ratings-mybar-score");
   const myTimeEl = $("#ratings-mybar-time");
   const hintEl = $("#ratings-viewer-hint");
-
-  if (!listEl) return;
 
   const q = String(ratingsState.q || "").trim().toLowerCase();
 
