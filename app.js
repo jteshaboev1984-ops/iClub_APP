@@ -4861,7 +4861,7 @@ async function buildPracticeSet(subjectKey) {
 
   const { data, error } = await window.sb
     .from("questions")
-    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
+    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, book_ref, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
     .eq("subject_id", ctx.subjectId)
     .eq("is_active", true)
     .in("id", questionIds)
@@ -4932,7 +4932,9 @@ async function buildPracticeSet(subjectKey) {
         correctAnswer,
         explanation: pickL(r, "explanation") || "",
         imageUrl: r.image_url || null,
-        inputKind: type === "input" ? (parseFlexibleScientificNumber(correctAnswer) !== null ? "numeric" : "text") : null,
+        book_ref: r.book_ref || null,
+        bookReference: r.book_ref || null,
+        inputKind: type === "input" ? (parseFlexibleScientificNumber(correctAnswer) !== null ? "numeric" : "text") : null, 
         inputHint: type === "input" ? inputHintForAnswer(correctAnswer) : "",
         practiceTourNo: Number(ctx.practiceTourNo || 1),
         practicePoolId: Number(ctx.poolId || 0) || null
@@ -4997,7 +4999,7 @@ async function buildPracticeSet(subjectKey) {
 
   const { data, error } = await window.sb
     .from("questions")
-    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
+    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, book_ref, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
     .eq("subject_id", ctx.subjectId)
     .eq("is_active", true)
     .in("id", questionIds)
@@ -5061,6 +5063,8 @@ async function buildPracticeSet(subjectKey) {
         correctAnswer,
         explanation: pickL(r, "explanation") || "",
         imageUrl: r.image_url || null,
+        book_ref: r.book_ref || null,
+        bookReference: r.book_ref || null,
         inputKind: type === "input" ? (parseFlexibleScientificNumber(correctAnswer) !== null ? "numeric" : "text") : null,
         inputHint: type === "input" ? inputHintForAnswer(correctAnswer) : "",
         practiceTourNo,
@@ -14812,41 +14816,63 @@ function addMyTourRecsFromTourAttempt(ctx) {
 async function syncMyRecsToSupabase(subjectKey, recs) {
   try {
     if (!window.sb) return;
+
     const uid = await getAuthUid();
     if (!uid) return;
 
     const subjectId = await getSubjectIdByKey(subjectKey);
     if (!subjectId) return;
 
-    // recs: [{ topic, subtopic }]
     const normalized = (Array.isArray(recs) ? recs : [])
-  .map(r => {
-    // backwards compatible:
-    // - string -> topic
-    // - object -> {topic, subtopic}
-    if (typeof r === "string") {
-      return { topic: String(r).trim(), subtopic: null };
-    }
-    return {
-      topic: String(r?.topic || "").trim(),
-      subtopic: r?.subtopic ? String(r.subtopic).trim() : null
-    };
-  })
-  .filter(r => r.topic);
+      .map(r => {
+        if (typeof r === "string") {
+          return {
+            topic: String(r).trim(),
+            subtopic: null,
+            book_id: null,
+            book_reference: null
+          };
+        }
+
+        const bookIdRaw = r?.book_id ?? r?.bookId ?? null;
+        const bookId = Number(bookIdRaw || 0) > 0 ? Number(bookIdRaw) : null;
+        const bookReference = String(
+          r?.book_reference ||
+          r?.bookReference ||
+          r?.book_ref ||
+          r?.bookRef ||
+          ""
+        ).trim() || null;
+
+        return {
+          topic: String(r?.topic || "").trim(),
+          subtopic: r?.subtopic ? String(r.subtopic).trim() : null,
+          book_id: bookId,
+          book_reference: bookReference
+        };
+      })
+      .filter(r => r.topic);
 
     if (!normalized.length) return;
 
-    // unique by topic+subtopic
-    const key = (r) => `${r.topic}::${r.subtopic || ""}`;
-    const uniqMap = new Map();
-    normalized.forEach(r => { uniqMap.set(key(r), r); });
-    const uniq = Array.from(uniqMap.values());
-    const topics = Array.from(new Set(uniq.map(r => r.topic)));
+    const key = (r) => `${String(r.topic || "").trim()}::${r.subtopic ? String(r.subtopic).trim() : ""}`;
 
-    // 1) existing in DB (avoid duplicates)
+    const uniqMap = new Map();
+    normalized.forEach(r => {
+      const k = key(r);
+      const prev = uniqMap.get(k);
+
+      if (!prev || (!prev.book_reference && r.book_reference) || (!prev.book_id && r.book_id)) {
+        uniqMap.set(k, { ...prev, ...r });
+      }
+    });
+
+    const uniq = Array.from(uniqMap.values());
+    const topics = Array.from(new Set(uniq.map(r => r.topic).filter(Boolean)));
+
     const { data: existingRows, error: selErr } = await window.sb
       .from("recommendations")
-      .select("topic, subtopic")
+      .select("id, topic, subtopic, book_id, book_reference")
       .eq("user_id", uid)
       .eq("subject_id", subjectId)
       .eq("source_type", "practice")
@@ -14857,14 +14883,6 @@ async function syncMyRecsToSupabase(subjectKey, recs) {
       return;
     }
 
-    const exists = new Set(
-      (existingRows || []).map(r => `${String(r.topic || "").trim()}::${r.subtopic ? String(r.subtopic).trim() : ""}`)
-    );
-
-    const need = uniq.filter(r => !exists.has(key(r)));
-    if (!need.length) return;
-
-    // 2) try to enrich with book_id/book_reference via topic_book_map (best-effort)
     let mapRows = [];
     try {
       const { data: mData, error: mErr } = await window.sb
@@ -14878,38 +14896,90 @@ async function syncMyRecsToSupabase(subjectKey, recs) {
       if (!mErr && Array.isArray(mData)) mapRows = mData;
     } catch {}
 
-    // pick best match: (topic+subtopic) first, else (topic only)
-    const bestFor = (topic, subtopic) => {
-      const t = String(topic || "").trim();
-      const s = subtopic ? String(subtopic).trim() : null;
-
-      const exact = mapRows.find(x =>
-        String(x.topic || "").trim() === t &&
-        (String(x.subtopic || "").trim() || null) === (s || null)
-      );
-      if (exact) return exact;
-
-      const byTopic = mapRows.find(x =>
-        String(x.topic || "").trim() === t &&
-        (x.subtopic == null || String(x.subtopic).trim() === "")
-      );
-      return byTopic || null;
+    const norm = (v) => String(v || "").trim();
+    const normSub = (v) => {
+      const s = norm(v);
+      return s ? s : null;
     };
 
-    const toInsert = need.map(r => {
-      const best = bestFor(r.topic, r.subtopic);
-      return {
-        user_id: uid,
-        subject_id: subjectId,
-        source_type: "practice",
-        topic: r.topic,
-        subtopic: r.subtopic,
-        book_id: best?.book_id || null,
-        book_reference: best?.book_reference || null
-      };
-    });
+    const bestFor = (item) => {
+      const topic = norm(item.topic);
+      const subtopic = normSub(item.subtopic);
+      const directRef = norm(item.book_reference) || null;
 
-        const { error: insErr } = await window.sb.from("recommendations").insert(toInsert);
+      const exactByDirectRef = directRef
+        ? mapRows.find(x =>
+            norm(x.book_reference) === directRef &&
+            norm(x.topic) === topic &&
+            normSub(x.subtopic) === subtopic
+          )
+        : null;
+
+      const exact = mapRows.find(x =>
+        norm(x.topic) === topic &&
+        normSub(x.subtopic) === subtopic
+      );
+
+      const byTopic = mapRows.find(x =>
+        norm(x.topic) === topic &&
+        normSub(x.subtopic) === null
+      );
+
+      const anyByDirectRef = directRef
+        ? mapRows.find(x => norm(x.book_reference) === directRef)
+        : null;
+
+      const picked = exactByDirectRef || exact || byTopic || anyByDirectRef || null;
+
+      return {
+        book_id: item.book_id || picked?.book_id || null,
+        book_reference: directRef || picked?.book_reference || null
+      };
+    };
+
+    const existingByKey = new Map(
+      (Array.isArray(existingRows) ? existingRows : []).map(r => [key(r), r])
+    );
+
+    for (const item of uniq) {
+      const row = existingByKey.get(key(item));
+      if (!row?.id) continue;
+
+      const best = bestFor(item);
+      const patch = {};
+
+      if (!row.book_reference && best.book_reference) patch.book_reference = best.book_reference;
+      if (!row.book_id && best.book_id) patch.book_id = best.book_id;
+
+      if (Object.keys(patch).length) {
+        const { error: updErr } = await window.sb
+          .from("recommendations")
+          .update(patch)
+          .eq("id", row.id);
+
+        if (updErr) logClientError("recommendations_update_refs_error", updErr);
+      }
+    }
+
+    const toInsert = uniq
+      .filter(r => !existingByKey.has(key(r)))
+      .map(r => {
+        const best = bestFor(r);
+
+        return {
+          user_id: uid,
+          subject_id: subjectId,
+          source_type: "practice",
+          topic: r.topic,
+          subtopic: r.subtopic,
+          book_id: best.book_id || null,
+          book_reference: best.book_reference || null
+        };
+      });
+
+    if (!toInsert.length) return;
+
+    const { error: insErr } = await window.sb.from("recommendations").insert(toInsert);
     if (insErr) {
       logClientError("recommendations_insert_error", insErr);
       try {
@@ -14929,42 +14999,65 @@ async function syncMyRecsToSupabase(subjectKey, recs) {
 function addMyRecsFromAttempt(attempt) {
   const wrong = (attempt?.details || []).filter(d => !d.isCorrect);
 
-  // build unique recs by topic+subtopic
+  // build unique recs by topic+subtopic and keep book source if available
   const recMap = new Map();
   wrong.forEach(d => {
     const topic = String(d?.topic || "General").trim();
     const subtopic = d?.subtopic ? String(d.subtopic).trim() : null;
     const k = `${topic}::${subtopic || ""}`;
-    if (!recMap.has(k)) recMap.set(k, { topic, subtopic });
+
+    const bookIdRaw = d?.book_id ?? d?.bookId ?? null;
+    const bookId = Number(bookIdRaw || 0) > 0 ? Number(bookIdRaw) : null;
+    const bookReference = String(
+      d?.book_reference ||
+      d?.bookReference ||
+      d?.book_ref ||
+      d?.bookRef ||
+      ""
+    ).trim() || null;
+
+    const next = {
+      topic,
+      subtopic,
+      book_id: bookId,
+      book_reference: bookReference
+    };
+
+    const prev = recMap.get(k);
+    if (!prev || (!prev.book_reference && next.book_reference) || (!prev.book_id && next.book_id)) {
+      recMap.set(k, { ...prev, ...next });
+    }
   });
 
   const recs = Array.from(recMap.values());
   if (!recs.length) return { added: 0, recs: [], addedRecs: [] };
 
   const store = loadMyRecs();
-store.bySubject = store.bySubject || {};
-const subjKey = attempt.subjectKey || "unknown";
+  store.bySubject = store.bySubject || {};
+  const subjKey = attempt.subjectKey || "unknown";
 
-const existing = new Set(
-  (store.bySubject[subjKey] || []).map(x =>
-    `${String(x?.topic || "").trim()}::${x?.subtopic ? String(x.subtopic).trim() : ""}`
-  )
-);
+  const existing = new Set(
+    (store.bySubject[subjKey] || []).map(x =>
+      `${String(x?.topic || "").trim()}::${x?.subtopic ? String(x.subtopic).trim() : ""}`
+    )
+  );
 
-const nowTs = Date.now();
+  const nowTs = Date.now();
 
-const add = recs
-  .filter(r => !existing.has(`${r.topic}::${r.subtopic || ""}`))
-  .map(r => ({
-    topic: r.topic,
-    subtopic: r.subtopic || null,
-    ts: nowTs
-  }));
+  const add = recs
+    .filter(r => !existing.has(`${r.topic}::${r.subtopic || ""}`))
+    .map(r => ({
+      topic: r.topic,
+      subtopic: r.subtopic || null,
+      book_id: r.book_id || null,
+      book_reference: r.book_reference || null,
+      ts: nowTs
+    }));
 
-store.bySubject[subjKey] = [...add, ...(store.bySubject[subjKey] || [])].slice(0, 50);
-saveMyRecs(store);
+  store.bySubject[subjKey] = [...add, ...(store.bySubject[subjKey] || [])].slice(0, 50);
+  saveMyRecs(store);
 
-return { added: add.length, recs, addedRecs: add };
+  return { added: add.length, recs, addedRecs: add };
 }
 
   function formatMMSS(sec) {
@@ -16296,7 +16389,10 @@ try {
      correctAnswer: correctDisplay,
      isCorrect: !!quiz.correct[i],
      timeSpent: Number(quiz.timeSpent[i]) || 0,
-     explanation: q.explanation || ""
+     explanation: q.explanation || "",
+     book_id: q.book_id || q.bookId || null,
+     book_reference: String(q.book_reference || q.bookReference || q.book_ref || q.bookRef || "").trim() || null,
+     book_ref: String(q.book_ref || q.bookReference || q.book_reference || q.bookRef || "").trim() || null
    };
  });
 
@@ -16981,8 +17077,8 @@ async function renderMyRecs() {
       source_type: "practice",
       topic: x.topic || "General",
       subtopic: x.subtopic || null,
-      book_id: null,
-      book_reference: null,
+      book_id: x.book_id || null,
+      book_reference: x.book_reference || null,
       created_at: x.ts ? new Date(x.ts).toISOString() : null
     }));
   }
@@ -17063,11 +17159,13 @@ async function renderMyRecs() {
     return practiceRows.map(rec => {
       const dt = rec.created_at ? formatDateTime(rec.created_at) : "";
       const sub = rec.subtopic ? String(rec.subtopic) : "";
+      const bookRef = String(rec.book_reference || "").trim();
 
       return `
         <div class="list-item" data-open-rec="practice">
           <div style="font-weight:900">${escapeHTML(rec.topic || "General")}</div>
           ${sub ? `<div class="muted small" style="margin-top:4px">${escapeHTML(sub)}</div>` : ""}
+          ${bookRef ? `<div class="muted small" style="margin-top:4px">📘 ${escapeHTML(bookRef)}</div>` : ""}
           <div class="muted small" style="margin-top:4px">${escapeHTML(t("saved_at_label") || "Сохранено")}: ${escapeHTML(dt)}</div>
         </div>
       `;
@@ -17715,7 +17813,7 @@ function pickContentText(obj, base) {
   if (subtopic) {
     const exactQ = await window.sb
       .from("questions")
-      .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
+      .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, book_ref, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
       .eq("subject_id", subjectId)
       .eq("is_active", true)
       .eq("topic", topic)
@@ -17730,7 +17828,7 @@ function pickContentText(obj, base) {
   if (!data.length) {
     const baseQ = await window.sb
       .from("questions")
-      .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
+      .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, book_ref, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
       .eq("subject_id", subjectId)
       .eq("is_active", true)
       .eq("topic", topic)
@@ -17835,7 +17933,7 @@ function pickContentText(obj, base) {
 
   const { data, error } = await window.sb
     .from("questions")
-    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
+    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, book_ref, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
     .eq("subject_id", subjectId)
     .eq("is_active", true)
     .in("id", ids);
