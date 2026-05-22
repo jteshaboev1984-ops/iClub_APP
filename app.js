@@ -14558,7 +14558,8 @@ function saveMyRecs(data) {
 function saveMyTourRecs(data) {
   localStorage.setItem(LS.myTourRecs, JSON.stringify(data));
 }
-      async function saveTourRecsToDB(subjectKey, tourNo, recs) {
+
+   async function saveTourRecsToDB(subjectKey, tourNo, recs) {
   try {
     if (!window.sb) return false;
 
@@ -14568,20 +14569,49 @@ function saveMyTourRecs(data) {
     const subjectId = await getSubjectIdByKey(subjectKey);
     if (!subjectId) return false;
 
-    const items = (Array.isArray(recs) ? recs : [])
-      .map(r => ({
-        source_type: "tour",
-        topic: String(r?.topic || "").trim(),
-        subtopic: r?.subtopic ? String(r.subtopic).trim() : null,
-        tour_no: Number(tourNo || 0) || null
-      }))
+    const normalized = (Array.isArray(recs) ? recs : [])
+      .map(r => {
+        const bookIdRaw = r?.book_id ?? r?.bookId ?? null;
+        const bookId = Number(bookIdRaw || 0) > 0 ? Number(bookIdRaw) : null;
+        const bookReference = String(
+          r?.book_reference ||
+          r?.bookReference ||
+          r?.book_ref ||
+          r?.bookRef ||
+          ""
+        ).trim() || null;
+
+        return {
+          source_type: "tour",
+          topic: String(r?.topic || "").trim(),
+          subtopic: r?.subtopic ? String(r.subtopic).trim() : null,
+          tour_no: Number(tourNo || r?.tourNo || r?.tour_no || 0) || null,
+          book_id: bookId,
+          book_reference: bookReference
+        };
+      })
       .filter(r => r.topic && r.tour_no);
 
-    if (!items.length) return false;
+    if (!normalized.length) return false;
+
+    const key = (r) => `${Number(r.tour_no || 0)}::${String(r.topic || "").trim()}::${r.subtopic ? String(r.subtopic).trim() : ""}`;
+
+    const uniqMap = new Map();
+    normalized.forEach(r => {
+      const k = key(r);
+      const prev = uniqMap.get(k);
+
+      if (!prev || (!prev.book_reference && r.book_reference) || (!prev.book_id && r.book_id)) {
+        uniqMap.set(k, { ...prev, ...r });
+      }
+    });
+
+    const items = Array.from(uniqMap.values());
+    const topics = Array.from(new Set(items.map(r => r.topic).filter(Boolean)));
 
     const { data: existing, error: selErr } = await window.sb
       .from("recommendations")
-      .select("id, topic, subtopic, tour_no")
+      .select("id, topic, subtopic, tour_no, book_id, book_reference")
       .eq("user_id", uid)
       .eq("subject_id", subjectId)
       .eq("source_type", "tour")
@@ -14592,24 +14622,99 @@ function saveMyTourRecs(data) {
       return false;
     }
 
-    const existingSet = new Set(
-      (Array.isArray(existing) ? existing : []).map(x =>
-        `${Number(x?.tour_no || 0)}::${String(x?.topic || "").trim()}::${x?.subtopic ? String(x.subtopic).trim() : ""}`
-      )
+    let mapRows = [];
+    try {
+      const { data: mData, error: mErr } = await window.sb
+        .from("topic_book_map")
+        .select("topic, subtopic, book_id, book_reference, priority, is_active")
+        .eq("subject_id", subjectId)
+        .eq("is_active", true)
+        .in("topic", topics)
+        .order("priority", { ascending: true });
+
+      if (!mErr && Array.isArray(mData)) mapRows = mData;
+    } catch {}
+
+    const norm = (v) => String(v || "").trim();
+    const normSub = (v) => {
+      const s = norm(v);
+      return s ? s : null;
+    };
+
+    const bestFor = (item) => {
+      const topic = norm(item.topic);
+      const subtopic = normSub(item.subtopic);
+      const directRef = norm(item.book_reference) || null;
+
+      const exactByDirectRef = directRef
+        ? mapRows.find(x =>
+            norm(x.book_reference) === directRef &&
+            norm(x.topic) === topic &&
+            normSub(x.subtopic) === subtopic
+          )
+        : null;
+
+      const exact = mapRows.find(x =>
+        norm(x.topic) === topic &&
+        normSub(x.subtopic) === subtopic
+      );
+
+      const byTopic = mapRows.find(x =>
+        norm(x.topic) === topic &&
+        normSub(x.subtopic) === null
+      );
+
+      const anyByDirectRef = directRef
+        ? mapRows.find(x => norm(x.book_reference) === directRef)
+        : null;
+
+      const picked = exactByDirectRef || exact || byTopic || anyByDirectRef || null;
+
+      return {
+        book_id: item.book_id || picked?.book_id || null,
+        book_reference: directRef || picked?.book_reference || null
+      };
+    };
+
+    const existingByKey = new Map(
+      (Array.isArray(existing) ? existing : []).map(x => [key(x), x])
     );
 
+    for (const item of items) {
+      const row = existingByKey.get(key(item));
+      if (!row?.id) continue;
+
+      const best = bestFor(item);
+      const patch = {};
+
+      if (!row.book_reference && best.book_reference) patch.book_reference = best.book_reference;
+      if (!row.book_id && best.book_id) patch.book_id = best.book_id;
+
+      if (Object.keys(patch).length) {
+        const { error: updErr } = await window.sb
+          .from("recommendations")
+          .update(patch)
+          .eq("id", row.id);
+
+        if (updErr) logClientError("tour_recs_update_refs_error", updErr);
+      }
+    }
+
     const toInsert = items
-      .filter(r => !existingSet.has(`${r.tour_no}::${r.topic}::${r.subtopic || ""}`))
-      .map(r => ({
-        user_id: uid,
-        subject_id: subjectId,
-        source_type: "tour",
-        tour_no: r.tour_no,
-        topic: r.topic,
-        subtopic: r.subtopic,
-        book_id: null,
-        book_reference: null
-      }));
+      .filter(r => !existingByKey.has(key(r)))
+      .map(r => {
+        const best = bestFor(r);
+        return {
+          user_id: uid,
+          subject_id: subjectId,
+          source_type: "tour",
+          tour_no: r.tour_no,
+          topic: r.topic,
+          subtopic: r.subtopic,
+          book_id: best.book_id || null,
+          book_reference: best.book_reference || null
+        };
+      });
 
     if (!toInsert.length) return true;
 
@@ -14640,9 +14745,11 @@ function addMyTourRecsFromTourAttempt(ctx) {
       .filter(a => a && a.isCorrect === false)
       .map(a => {
         const q = ctx?.questions?.[Number(a.index)] || null;
-        return {
+                return {
           topic: String(q?.topic || "General").trim(),
-          subtopic: q?.subtopic ? String(q.subtopic).trim() : null
+          subtopic: q?.subtopic ? String(q.subtopic).trim() : null,
+          book_id: q?.book_id || q?.bookId || null,
+          book_reference: String(q?.book_reference || q?.bookReference || q?.book_ref || q?.bookRef || "").trim() || null
         };
       })
       .filter(x => x.topic);
@@ -14650,9 +14757,13 @@ function addMyTourRecsFromTourAttempt(ctx) {
     if (!wrong.length) return { added: 0, recs: [] };
 
     const uniqMap = new Map();
-    wrong.forEach(r => {
+        wrong.forEach(r => {
       const k = `${tourNo}::${r.topic}::${r.subtopic || ""}`;
-      if (!uniqMap.has(k)) uniqMap.set(k, r);
+      const prev = uniqMap.get(k);
+
+      if (!prev || (!prev.book_reference && r.book_reference) || (!prev.book_id && r.book_id)) {
+        uniqMap.set(k, { ...prev, ...r });
+      }
     });
 
     const uniq = Array.from(uniqMap.values());
@@ -14669,11 +14780,13 @@ function addMyTourRecsFromTourAttempt(ctx) {
 
     const added = uniq
       .filter(r => !existing.has(`${tourNo}::${r.topic}::${r.subtopic || ""}`))
-      .map(r => ({
+            .map(r => ({
         source_type: "tour",
         topic: r.topic,
         subtopic: r.subtopic,
         tourNo,
+        book_id: r.book_id || null,
+        book_reference: r.book_reference || null,
         ts: nowTs
       }));
 
@@ -16892,17 +17005,24 @@ async function renderMyRecs() {
   // TOUR fallback only if DB has nothing yet
   if (!tourRows.length) {
     const tourStore = loadMyTourRecs();
-    tourRows = (tourStore?.bySubject?.[subjectKey] || []).map(x => ({
+       tourRows = (tourStore?.bySubject?.[subjectKey] || []).map(x => ({
       id: null,
       source_type: "tour",
       topic: x.topic || "General",
       subtopic: x.subtopic || null,
+      book_id: x.book_id || null,
+      book_reference: x.book_reference || null,
       created_at: x.ts ? new Date(x.ts).toISOString() : null,
       tourNo: Number(x.tourNo || 0) || null
     }));
   }
-        try {
-    if (!dbRows.some(r => String(r?.source_type || "") === "tour") && tourRows.length) {
+                try {
+    const shouldSyncTourRows = tourRows.length && (
+      !dbRows.some(r => String(r?.source_type || "") === "tour") ||
+      tourRows.some(r => !String(r?.book_reference || "").trim())
+    );
+
+    if (shouldSyncTourRows) {
       const byTour = new Map();
       tourRows.forEach(r => {
         const key = Number(r?.tourNo || 0) || 0;
@@ -18079,7 +18199,7 @@ async function loadTourQuestionsDB(tourId) {
 
     const { data, error } = await window.sb
   .from("tour_questions")
-  .select("order_no, question:questions(id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,image_url,is_active,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en)")
+  .select("order_no, question:questions(id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,image_url,is_active,book_ref,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en)")
   .eq("tour_id", tourId)
   .eq("is_active", true)
   .order("order_no", { ascending: true })
@@ -18144,7 +18264,9 @@ async function loadTourQuestionsDB(tourId) {
   correctIndex,
   correct_answer: String(q.correct_answer ?? "").trim(),
   correctAnswer: String(q.correct_answer ?? "").trim(),
-  imageUrl: q.image_url || null,
+    imageUrl: q.image_url || null,
+  book_ref: q.book_ref || null,
+  bookReference: q.book_ref || null,
   timeLimitSec: TOUR_CONFIG.defaultQuestionTimeSec
     };
   });
