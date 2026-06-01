@@ -2064,11 +2064,18 @@ function getLessonDisplayTitle(lesson) {
     return merged;
   }
 
-    function saveState() {
+        function saveState() {
   const nextState = structuredClone(state);
 
   if (nextState?.quiz?.mode === "practice") {
-    nextState.quiz = stripPracticeQuizSecrets(nextState.quiz);
+    // Practice is a learning mode. Telegram WebView can reload mid-practice;
+    // if correctness data is stripped from the saved runtime state, correct MCQ
+    // answers may later be saved as wrong. Keep correctness data for active Practice.
+    nextState.quiz = {
+      ...nextState.quiz,
+      qTimerId: null,
+      qEndsAtMono: null
+    };
   }
 
   if (nextState?.tourContext && !nextState.tourContext.isArchive) {
@@ -4311,6 +4318,175 @@ function letterToIdx(ch) {
   if (!s) return null;
   const code = s.charCodeAt(0) - 65; // A->0
   return (code >= 0 && code < 26) ? code : null;
+}
+
+function getQuestionOptionsArray(q) {
+  try {
+    if (Array.isArray(q?.options)) return q.options.map(String);
+
+    const raw =
+      pickContentText(q || {}, "options_text") ||
+      q?.options_text ||
+      q?.optionsText ||
+      "";
+
+    return parseOptionsText(raw) || [];
+  } catch {
+    return [];
+  }
+}
+
+function getMcqCorrectIndexFromQuestion(q) {
+  if (!q || typeof q !== "object") return null;
+
+  const direct = q.correctIndex ?? q.correct_index;
+  if (direct !== null && direct !== undefined && direct !== "") {
+    const n = Number(direct);
+    if (Number.isFinite(n)) return Math.trunc(n);
+  }
+
+  const raw = String(
+    q.correct_answer ??
+    q.correctAnswer ??
+    q.correct ??
+    q.answer ??
+    ""
+  ).trim();
+
+  if (!raw) return null;
+
+  if (/^[A-D]$/i.test(raw)) {
+    return letterToIdx(raw);
+  }
+
+  if (/^[0-3]$/.test(raw)) {
+    return Number(raw);
+  }
+
+  const opts = getQuestionOptionsArray(q);
+  if (opts.length) {
+    const idx = opts.findIndex(o => String(o).trim().toLowerCase() === raw.toLowerCase());
+    if (idx >= 0) return idx;
+  }
+
+  return null;
+}
+
+function isMcqPickedIndexCorrect(q, pickedIndex) {
+  const picked = (pickedIndex === null || pickedIndex === undefined || pickedIndex === "")
+    ? null
+    : Number(pickedIndex);
+
+  const correctIdx = getMcqCorrectIndexFromQuestion(q);
+
+  return (
+    picked !== null &&
+    Number.isFinite(picked) &&
+    correctIdx !== null &&
+    Number.isFinite(Number(correctIdx)) &&
+    Math.trunc(picked) === Math.trunc(Number(correctIdx))
+  );
+}
+
+async function fetchQuestionRuntimeSecrets(questionId) {
+  try {
+    const client = window.sb || sb || null;
+    const id = Number(questionId);
+    if (!client || !Number.isFinite(id) || id <= 0) return null;
+
+    const { data, error } = await client
+      .from("questions")
+            .select("id,topic,subtopic,difficulty,qtype,time_limit_sec,question_text,options_text,correct_answer,explanation,image_url,book_ref,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function mergeRuntimeQuestionSecrets(oldQ, row, fallbackTimeLimitSec = 60) {
+  if (!row) return oldQ;
+
+  const type = String(row.qtype || oldQ?.qtype || oldQ?.type || "mcq").toLowerCase() === "input" ? "input" : "mcq";
+  const optionsRaw = pickContentText(row, "options_text");
+  const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
+  const diff = normalizeDifficulty(row.difficulty || oldQ?.difficulty || "easy");
+
+  const merged = {
+    ...(oldQ || {}),
+    id: Number(row.id || oldQ?.id),
+    topic: row.topic || oldQ?.topic || "General",
+    subtopic: row.subtopic || oldQ?.subtopic || null,
+    difficulty: diff,
+    type,
+    qtype: type,
+    question: oldQ?.question || pickContentText(row, "question_text") || "",
+    options: opts.length ? opts : (Array.isArray(oldQ?.options) ? oldQ.options : []),
+    correct_answer: String(row.correct_answer ?? oldQ?.correct_answer ?? oldQ?.correctAnswer ?? "").trim(),
+    correctAnswer: String(row.correct_answer ?? oldQ?.correct_answer ?? oldQ?.correctAnswer ?? "").trim(),
+    explanation: pickContentText(row, "explanation") || oldQ?.explanation || "",
+    imageUrl: row.image_url || oldQ?.imageUrl || null,
+    book_ref: row.book_ref || oldQ?.book_ref || null,
+    bookReference: row.book_ref || oldQ?.bookReference || oldQ?.book_ref || null,
+    timeLimitSec: Number(oldQ?.timeLimitSec || row.time_limit_sec || fallbackTimeLimitSec)
+  };
+
+  if (type === "mcq") {
+    merged.correctIndex = getMcqCorrectIndexFromQuestion(merged);
+  } else {
+    merged.inputKind = isNumericLike(merged.correctAnswer) ? "numeric" : "text";
+    merged.inputHint = inputHintForAnswer(merged.correctAnswer);
+  }
+
+  return merged;
+}
+
+async function restoreActiveTourQuestionSecrets(ctx, questionIndex) {
+  try {
+    if (!ctx || ctx.isArchive || !Array.isArray(ctx.questions)) return null;
+
+    const idx = Number(questionIndex ?? ctx.index ?? 0);
+    if (!Number.isFinite(idx) || idx < 0 || idx >= ctx.questions.length) return null;
+
+    const oldQ = ctx.questions[idx];
+    const row = await fetchQuestionRuntimeSecrets(oldQ?.id);
+    if (!row) return null;
+
+    const restored = mergeRuntimeQuestionSecrets(oldQ, row, TOUR_CONFIG.defaultQuestionTimeSec);
+    ctx.questions[idx] = restored;
+    return restored;
+  } catch {
+    return null;
+  }
+}
+
+async function getSavedTourAttemptScore(attemptId) {
+  try {
+    const client = window.sb || sb || null;
+    const id = Number(attemptId);
+    if (!client || !Number.isFinite(id) || id <= 0) return null;
+
+    const { data, error } = await client
+      .from("tour_answers")
+      .select("id,is_correct")
+      .eq("attempt_id", id)
+      .limit(30);
+
+    if (error || !Array.isArray(data)) return null;
+
+    const score = data.filter(x => !!x?.is_correct).length;
+    const answerRows = data.length;
+    const percent = TOUR_CONFIG.total
+      ? Math.round((score / TOUR_CONFIG.total) * 10000) / 100
+      : 0;
+
+    return { score, percent, answerRows };
+  } catch {
+    return null;
+  }
 }
 
 // ✅ show answers consistently: "B — option text" (if options exist)
@@ -9557,18 +9733,13 @@ async function savePracticeAttemptToSupabase(attempt, quiz) {
 
   const attemptId = Number(insRow.id);
 
-  const rows = details.map((d, i) => {
-    const rawUA = answers[i];
-    const userAnswer = (rawUA === null || rawUA === undefined) ? null : String(rawUA);
-
-    return {
-      attempt_id: attemptId,
-      question_id: Number(d?.id),
-      user_answer: userAnswer,
-      is_correct: !!d?.isCorrect,
-      time_spent: Math.max(0, Math.round(Number(d?.timeSpent) || 0))
-    };
-  }).filter(r => Number.isFinite(r.question_id));
+    const rows = answersPayload.map(r => ({
+    attempt_id: attemptId,
+    question_id: Number(r?.question_id),
+    user_answer: r?.user_answer ?? null,
+    is_correct: !!r?.is_correct,
+    time_spent: Math.max(0, Math.round(Number(r?.time_spent) || 0))
+  })).filter(r => Number.isFinite(r.question_id) && r.question_id > 0);
 
   if (rows.length) {
     let ansErr = null;
@@ -15812,7 +15983,7 @@ async function renderToursHistorySummary(subjectId) {
 
     if (leftSec <= 0) {
       stopPracticeQuestionTimer();
-      handlePracticeSubmit(true);
+      handlePracticeSubmit(true).catch(() => null);
     }
   }
 
@@ -16223,7 +16394,7 @@ try {
     renderSubjectHub();
   }
 
-  function handlePracticeSubmit(isAutoTimeout = false) {
+   async function handlePracticeSubmit(isAutoTimeout = false) {
   const quiz = state.quiz;
   if (!quiz || quiz.mode !== "practice") return;
   if (quiz._submitInFlight || quiz._finishing) return;
@@ -16240,8 +16411,22 @@ try {
     }
   };
 
-  try {
-    const q = quiz.questions[quiz.index];
+    try {
+    let q = quiz.questions[quiz.index];
+
+    if (String(q?.type || "mcq").toLowerCase() === "mcq" && getMcqCorrectIndexFromQuestion(q) === null) {
+      const restoredQuiz = await restorePracticeQuizSecrets(quiz);
+
+      if (!restoredQuiz || !Array.isArray(restoredQuiz.questions) || !restoredQuiz.questions.length) {
+        showToast(t("save_failed_try_again") || t("not_available") || "Please try again.");
+        return;
+      }
+
+      Object.assign(quiz, restoredQuiz);
+      state.quiz = quiz;
+      q = quiz.questions[quiz.index];
+    }
+
     const userAns = quiz.answers[quiz.index];
 
     if (!isAutoTimeout) {
@@ -16267,9 +16452,8 @@ try {
 
        let isCorrect = false;
 
-    if (q.type === "mcq") {
-      const idx = (userAns === null || userAns === undefined) ? null : Number(userAns);
-      if (idx !== null && idx === Number(q.correctIndex)) isCorrect = true;
+      if (q.type === "mcq") {
+      isCorrect = isMcqPickedIndexCorrect(q, userAns);
     } else {
       const raw = String(userAns ?? "").trim();
       isCorrect = isInputAnswerCorrect(raw, getInputExpectedAnswer(q));
@@ -18477,12 +18661,27 @@ async function updateTourAttempt(attemptId, patch) {
   if (!window.sb || !attemptId) return { ok: false, reason: "no_sb_or_id" };
 
   try {
+    let finalScore = Number(patch.score || 0);
+    let finalPercent = Number(patch.percent || 0);
+
+    const savedScore = await getSavedTourAttemptScore(attemptId);
+    const expectedRows = Number(patch.expected_answer_rows || 0);
+
+    if (savedScore && expectedRows > 0 && savedScore.answerRows < expectedRows) {
+      return { ok: false, reason: "answers_not_ready", savedRows: savedScore.answerRows, expectedRows };
+    }
+
+    if (savedScore && savedScore.answerRows > 0) {
+      finalScore = savedScore.score;
+      finalPercent = savedScore.percent;
+    }
+
     await dbWriteWithRetry(async () => {
       const { error } = await window.sb
         .from("tour_attempts")
         .update({
-          score: Number(patch.score || 0),
-          percent: Number(patch.percent || 0),
+          score: finalScore,
+          percent: finalPercent,
           total_time: Number(patch.total_time || 0),
           status: String(patch.status || "submitted")
         })
@@ -18492,7 +18691,7 @@ async function updateTourAttempt(attemptId, patch) {
       return true;
     }, { tries: 3, baseDelayMs: 350 });
 
-    return { ok: true };
+    return { ok: true, score: finalScore, percent: finalPercent };
   } catch (e) {
     try { trackEvent("tour_db_save_failed", { attempt_id: String(attemptId), message: String(e?.message || e) }); } catch {}
     return { ok: false, reason: "db_error", error: e };
@@ -18785,7 +18984,7 @@ async function updateTourAttempt(attemptId, patch) {
     // 1) auto-finish if violations too many
     if (ctx.violations >= TOUR_CONFIG.maxViolations) {
       stopTourTick();
-      finishTour({ reason: "violations" });
+      finishTour({ reason: "violations" }).catch(() => null);
       return;
     }
 
@@ -18793,7 +18992,7 @@ async function updateTourAttempt(attemptId, patch) {
     const qElapsed = Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000);
     if (qElapsed >= ctx.questionTimeLimit) {
       if (!ctx.answers.some(a => a.index === ctx.index)) {
-        submitTourAnswer({ pickedIndex: null, auto: true });
+        submitTourAnswer({ pickedIndex: null, auto: true }).catch(() => null);
       }
     }
   }
@@ -18972,7 +19171,7 @@ try {
 
   const q = ctx.questions?.[ctx.index];
   if (!q) {
-    finishTour({ reason: "done" });
+    finishTour({ reason: "done" }).catch(() => null);
     return;
   }
 
@@ -19128,28 +19327,51 @@ try {
   renderTourHUD();
 }
 
-    function submitTourAnswer({ pickedIndex, auto = false } = {}) {
+       async function submitTourAnswer({ pickedIndex, auto = false } = {}) {
     const ctx = state.tourContext;
     if (!ctx) return;
 
-    const q = ctx.questions?.[ctx.index];
+    let q = ctx.questions?.[ctx.index];
     if (!q) return;
 
     const spentSec = Math.max(0, Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000));
 
-    // normalize correct index (supports both correctIndex and legacy correct_index)
-    const correctIdx =
-      (q.correctIndex !== undefined && q.correctIndex !== null) ? Number(q.correctIndex)
-      : (q.correct_index !== undefined && q.correct_index !== null) ? Number(q.correct_index)
-      : null;
-
-        // normalize question type (DB uses qtype, older code may use type)
+    // normalize question type (DB uses qtype, older code may use type)
     const qType =
       (q?.qtype != null ? String(q.qtype) : (q?.type != null ? String(q.type) : "mcq"))
         .toLowerCase();
     const isMcq = (qType === "mcq" || qType === "multiple_choice");
 
+          if (isMcq && getMcqCorrectIndexFromQuestion(q) === null && !ctx?.isArchive) {
+      const restoredQ = await restoreActiveTourQuestionSecrets(ctx, ctx.index);
+      if (restoredQ) q = restoredQ;
+    }
+
+        const correctIdx = isMcq ? getMcqCorrectIndexFromQuestion(q) : null;
     const pickedNum = (pickedIndex === null || pickedIndex === undefined) ? null : Number(pickedIndex);
+
+    // Safety guard: if user selected an MCQ option but correctness data is still missing,
+    // do NOT save it as wrong. This prevents false-negative tour answers after WebView reload.
+    if (isMcq && correctIdx === null && !ctx?.isArchive && pickedNum !== null) {
+      showToast(t("save_failed_try_again") || t("not_available") || "Please try again.");
+
+      const nextBtn =
+        $("#tour-next-btn") ||
+        $("#quiz-next-btn") ||
+        document.querySelector('[data-action="tour-next"]');
+
+      if (nextBtn) {
+        nextBtn.classList.remove("is-loading");
+        nextBtn.disabled = false;
+
+        const isLast = (ctx.index >= TOUR_CONFIG.total - 1);
+        nextBtn.textContent = isLast
+          ? (t("tour_finish_button") || "Finish Tour →")
+          : (t("tour_next_question") || "Next Question →");
+      }
+
+      return;
+    }
 
     // input value (for non-mcq)
     const inputEl = document.getElementById("tour-input");
@@ -19177,7 +19399,7 @@ try {
 
     // correctness
     const isCorrect = isMcq
-      ? ((pickedNum !== null && correctIdx !== null) ? (pickedNum === correctIdx) : false)
+      ? isMcqPickedIndexCorrect({ ...q, correctIndex: correctIdx }, pickedNum)
       : isInputAnswerCorrect(inputVal, expected);
        
     ctx.answers = ctx.answers || [];
@@ -19192,58 +19414,58 @@ try {
 
     if (isCorrect) ctx.correct += 1;
 
-    // DB autosave (only for active tour) — fire-and-forget (no await inside non-async fn)
+    // DB autosave (only for active tour). Await it before moving forward;
+    // otherwise Finish can finalize score before the last answer reaches DB.
     try {
       const ctx2 = state.tourContext;
       if (ctx2?.attemptId && q?.id && !ctx2?.isArchive) {
-                const spentSec2 = Math.max(0, Math.round((Date.now() - (ctx2.qStartedAt || Date.now())) / 1000));
+        const spentSec2 = Math.max(0, Math.round((Date.now() - (ctx2.qStartedAt || Date.now())) / 1000));
         const pickedForDb = (pickedNum === null ? "" : (idxToLetter(pickedNum) || String(pickedNum)));
 
-        // if someday you add input questions, this will safely read it (otherwise empty)
         const inputEl = document.getElementById("tour-input");
         const inputVal = inputEl ? String(inputEl.value || "").trim() : "";
 
         const answerForDb = isMcq ? pickedForDb : inputVal;
+        const answerPatch = {
+          user_answer: answerForDb,
+          answered: true,
+          is_correct: isCorrect,
+          time_spent: spentSec2
+        };
 
-               Promise
-          .resolve(upsertTourAnswer(ctx2.attemptId, q.id, {
-            user_answer: answerForDb,
-            answered: true,
-            is_correct: isCorrect,
-            time_spent: spentSec2
-          }))
-          .then((res) => {
-            if (!res?.ok) {
-              ctx2.pendingDbAnswers = Array.isArray(ctx2.pendingDbAnswers) ? ctx2.pendingDbAnswers : [];
-              ctx2.pendingDbAnswers.push({
-                attemptId: ctx2.attemptId,
-                questionId: q.id,
-                patch: {
-                  user_answer: answerForDb,
-                  answered: true,
-                  is_correct: isCorrect,
-                  time_spent: spentSec2
-                }
-              });
-              saveState();
-            }
-          })
-          .catch(() => {
-            ctx2.pendingDbAnswers = Array.isArray(ctx2.pendingDbAnswers) ? ctx2.pendingDbAnswers : [];
-            ctx2.pendingDbAnswers.push({
-              attemptId: ctx2.attemptId,
-              questionId: q.id,
-              patch: {
-                user_answer: answerForDb,
-                answered: true,
-                is_correct: isCorrect,
-                time_spent: spentSec2
-              }
-            });
-            saveState();
+        const res = await upsertTourAnswer(ctx2.attemptId, q.id, answerPatch);
+
+        if (!res?.ok) {
+          ctx2.pendingDbAnswers = Array.isArray(ctx2.pendingDbAnswers) ? ctx2.pendingDbAnswers : [];
+          ctx2.pendingDbAnswers.push({
+            attemptId: ctx2.attemptId,
+            questionId: q.id,
+            patch: answerPatch
           });
+          saveState();
+        }
       }
-        } catch {}
+    } catch {
+      try {
+        const ctx2 = state.tourContext;
+        if (ctx2?.attemptId && q?.id && !ctx2?.isArchive) {
+          const pickedForDb = (pickedNum === null ? "" : (idxToLetter(pickedNum) || String(pickedNum)));
+          const answerForDb = isMcq ? pickedForDb : inputVal;
+          ctx2.pendingDbAnswers = Array.isArray(ctx2.pendingDbAnswers) ? ctx2.pendingDbAnswers : [];
+          ctx2.pendingDbAnswers.push({
+            attemptId: ctx2.attemptId,
+            questionId: q.id,
+            patch: {
+              user_answer: answerForDb,
+              answered: true,
+              is_correct: isCorrect,
+              time_spent: spentSec
+            }
+          });
+          saveState();
+        }
+      } catch {}
+    }
 
     // anti-slip: current answered question no longer needs secrets in runtime
     stripAnsweredTourQuestionInRuntime(ctx, ctx.index);
@@ -19256,13 +19478,13 @@ try {
     saveState();
 
     if (ctx.index >= TOUR_CONFIG.total) {
-      finishTour({ reason: auto ? "auto_done" : "done" });
+      finishTour({ reason: auto ? "auto_done" : "done" }).catch(() => null);
       return;
     }
 
     renderTourQuestion();
   }
-
+   
                   async function isTourGloballyClosed(subjectKey, tourNo) {
   try {
     if (!window.sb) return false;
@@ -19598,9 +19820,11 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
 
   // duration/score summary (used for local + DB)
   const durationSec = Math.max(0, Math.round((Date.now() - (ctx?.startedAt || Date.now())) / 1000));
-  const total = TOUR_CONFIG.total;
-  const score = Number(ctx?.correct || 0);
-  const percent = total ? Math.round((score / total) * 100) : 0;
+    const total = TOUR_CONFIG.total;
+  let score = Array.isArray(ctx?.answers)
+    ? ctx.answers.filter(a => !!a?.isCorrect).length
+    : Number(ctx?.correct || 0);
+  let percent = total ? Math.round((score / total) * 100) : 0;
 
   // Save attempt locally (for stats/trend). Does not affect future DB integration.
   if (ctx?.subjectKey) {
@@ -19618,10 +19842,11 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
 
   try {
     if (ctx?.attemptId && !ctx?.isArchive) {
-      const finalizePatch = {
+            const finalizePatch = {
         score,
         percent,
         total_time: durationSec,
+        expected_answer_rows: Array.isArray(ctx?.answers) ? ctx.answers.length : 0,
         status:
           (reason === "violations") ? "anti_cheat"
           : (reason === "time_expired") ? "time_expired"
@@ -19647,7 +19872,12 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
         showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
       } else {
         // 3) ответы ушли — можно финализировать attempt
-        const res = await updateTourAttempt(ctx.attemptId, finalizePatch);
+               const res = await updateTourAttempt(ctx.attemptId, finalizePatch);
+
+        if (res?.ok && res.score !== undefined) {
+          score = Number(res.score || 0);
+          percent = Number(res.percent || 0);
+        }
 
         if (!res?.ok) {
           enqueuePendingOp({
@@ -19668,9 +19898,9 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
 
   // result meta
   const meta = $("#tour-result-meta");
-  if (meta && ctx) {
+    if (meta && ctx) {
     meta.textContent = t("tour_result_meta", {
-        score: ctx.correct,
+        score,
         total: TOUR_CONFIG.total,
         v: (ctx.violations || 0)
       });
@@ -21026,7 +21256,7 @@ setSelectedPracticeTourNo(subjectKey, draftTourNo);
       }
 
       if (action === "practice-submit") {
-        handlePracticeSubmit(false);
+        handlePracticeSubmit(false).catch(() => null);
         return;
       }
 
@@ -21175,7 +21405,7 @@ if (action === "tour-next" || action === "tour-submit") {
   ctx._pickedIndex = null;
   saveState();
 
-  submitTourAnswer({ pickedIndex: picked, auto: false });
+  submitTourAnswer({ pickedIndex: picked, auto: false }).catch(() => null);
   return;
 }
 
