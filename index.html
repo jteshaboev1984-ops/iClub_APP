@@ -1183,11 +1183,26 @@
  </div>
 <!-- /Profile SETTINGS -->
       </section>
-      <!-- ============ Notifications (Global) ============ -->
+           <!-- ============ Notifications (Global) ============ -->
       <section id="view-notifications" class="view" data-view="notifications" aria-label="Notifications">
   <div class="content">
-    <h1 class="h1" data-i18n="notifications_title">Уведомления</h1>
-    <p class="muted" data-i18n="notifications_sub">Системные сообщения и важные события.</p>
+    <div class="notifications-head">
+      <div>
+        <h1 class="h1" data-i18n="notifications_title">Уведомления</h1>
+        <p class="muted" data-i18n="notifications_sub">Системные сообщения и важные события.</p>
+      </div>
+
+      <button
+        id="notifications-clear-all"
+        class="btn mini ghost notifications-clear-all"
+        type="button"
+        data-action="notifications-delete-all"
+        data-i18n="notifications_delete_all"
+        hidden
+      >
+        Очистить все
+      </button>
+    </div>
 
     <div id="notifications-list" class="list">
       <div class="empty muted" data-i18n="notifications_empty">Пока уведомлений нет.</div>
