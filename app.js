@@ -2769,7 +2769,8 @@ async function refreshNotificationsBadge() {
       .from("user_notifications")
       .select("id", { count: "exact", head: true })
       .eq("user_id", uid)
-      .is("read_at", null);
+      .is("read_at", null)
+      .is("deleted_at", null);
 
     if (error) throw error;
 
@@ -2784,7 +2785,10 @@ async function markNotificationsRead(rows) {
   try {
     if (!window.sb) return;
 
-        const unreadIds = (Array.isArray(rows) ? rows : [])
+    const uid = await getAuthUid().catch(() => null);
+    if (!uid) return;
+
+    const unreadIds = (Array.isArray(rows) ? rows : [])
       .filter(r => !r?.read_at)
       .map(r => Number(r?.id))
       .filter(Boolean);
@@ -2797,6 +2801,7 @@ async function markNotificationsRead(rows) {
     const { error } = await window.sb
       .from("user_notifications")
       .update({ read_at: new Date().toISOString() })
+      .eq("user_id", uid)
       .in("id", unreadIds);
 
     if (error) throw error;
@@ -2807,6 +2812,156 @@ async function markNotificationsRead(rows) {
   }
 }
 
+function setNotificationsClearAllVisible(isVisible) {
+  const btn = document.getElementById("notifications-clear-all");
+  if (!btn) return;
+  btn.hidden = !isVisible;
+  btn.disabled = !isVisible;
+}
+
+function confirmNotificationsClearAll(count) {
+  const root = document.getElementById("modal-root");
+  const title = t("notifications_delete_all_title") || "Очистить уведомления?";
+  const message =
+    t("notifications_delete_all_message", { n: String(count || 0) }) ||
+    "Все сообщения в колокольчике будут скрыты для вас.";
+  const okText = t("notifications_delete_all") || "Очистить все";
+  const cancelText = t("notifications_delete_cancel") || t("cancel") || "Отмена";
+
+  if (!root) {
+    try {
+      return Promise.resolve(window.confirm(`${title}\n\n${message}`));
+    } catch {
+      return Promise.resolve(false);
+    }
+  }
+
+  return new Promise((resolve) => {
+    const close = (answer) => {
+      try {
+        root.setAttribute("aria-hidden", "true");
+        root.innerHTML = "";
+        document.body.classList.remove("modal-open");
+      } catch {}
+      resolve(!!answer);
+    };
+
+    root.innerHTML = `
+      <div class="modal-backdrop" data-action="notifications-modal-cancel">
+        <div class="modal" role="dialog" aria-modal="true">
+          <div class="modal-title">${escapeHTML(title)}</div>
+          <div class="modal-text">${escapeHTML(message)}</div>
+          <div class="modal-actions">
+            <button class="btn" type="button" data-action="notifications-modal-cancel">
+              ${escapeHTML(cancelText)}
+            </button>
+            <button class="btn danger" type="button" data-action="notifications-modal-ok">
+              ${escapeHTML(okText)}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    root.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+
+    const okBtn = root.querySelector('[data-action="notifications-modal-ok"]');
+    const cancelEls = root.querySelectorAll('[data-action="notifications-modal-cancel"]');
+    const modal = root.querySelector(".modal");
+
+    if (modal) {
+      modal.addEventListener("click", (e) => e.stopPropagation());
+    }
+
+    if (okBtn) {
+      okBtn.addEventListener("click", () => close(true), { once: true });
+    }
+
+    cancelEls.forEach(el => {
+      el.addEventListener("click", () => close(false), { once: true });
+    });
+  });
+}
+
+async function deleteNotificationById(rawId) {
+  const id = Number(rawId || 0);
+  if (!id || !window.sb) return;
+
+  showAsyncOverlay(t("notifications_deleting") || "Удаляем уведомление…");
+
+  try {
+    const uid = await getAuthUid().catch(() => null);
+    if (!uid) throw new Error("missing_uid");
+
+    const { error } = await window.sb
+      .from("user_notifications")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("user_id", uid)
+      .eq("id", id);
+
+    if (error) throw error;
+
+    try {
+      trackEvent("notification_deleted", {
+        user_notification_id: id
+      });
+    } catch {}
+
+    showToast(t("notifications_deleted_toast") || "Уведомление удалено.");
+    await renderNotificationsView();
+  } catch (e) {
+    logClientError("deleteNotificationById", e);
+    showToast(t("notifications_delete_failed") || "Не удалось удалить уведомление.");
+  } finally {
+    hideAsyncOverlay();
+  }
+}
+
+async function deleteAllVisibleNotifications() {
+  try {
+    const rows = Array.isArray(state?.notificationsRows)
+      ? state.notificationsRows
+      : [];
+
+    const ids = rows
+      .map(r => Number(r?.id || 0))
+      .filter(Boolean);
+
+    if (!ids.length || !window.sb) return;
+
+    const confirmed = await confirmNotificationsClearAll(ids.length);
+    if (!confirmed) return;
+
+    showAsyncOverlay(t("notifications_deleting") || "Удаляем уведомления…");
+
+    const uid = await getAuthUid().catch(() => null);
+    if (!uid) throw new Error("missing_uid");
+
+    const { error } = await window.sb
+      .from("user_notifications")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("user_id", uid)
+      .in("id", ids);
+
+    if (error) throw error;
+
+    try {
+      trackEvent("notifications_deleted_all", {
+        count: ids.length
+      });
+    } catch {}
+
+    showToast(t("notifications_deleted_all_toast") || "Уведомления очищены.");
+    await renderNotificationsView();
+  } catch (e) {
+    logClientError("deleteAllVisibleNotifications", e);
+    showToast(t("notifications_delete_failed") || "Не удалось удалить уведомления.");
+  } finally {
+    hideAsyncOverlay();
+  }
+}
+   
 function applyNotificationTemplate(text, meta = {}) {
   let out = String(text || "");
   const subjectKey = String(meta?.subject_key || "").trim();
@@ -2851,6 +3006,9 @@ async function renderNotificationsView() {
   const listEl = document.getElementById("notifications-list");
   if (!listEl) return;
 
+  state.notificationsRows = [];
+  setNotificationsClearAllVisible(false);
+
   listEl.innerHTML = `
     <div class="empty muted">${escapeHTML(t("notifications_loading"))}</div>
   `;
@@ -2889,6 +3047,7 @@ async function renderNotificationsView() {
         id,
         read_at,
         created_at,
+        deleted_at,
         notification:notifications (
           id,
           publish_at,
@@ -2903,12 +3062,13 @@ async function renderNotificationsView() {
         )
       `)
       .eq("user_id", uid)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(100);
 
     if (error) throw error;
     rows = Array.isArray(data) ? data.filter(r => r?.notification) : [];
-    } catch (e) {
+  } catch (e) {
     logClientError("renderNotificationsView_load", e);
     listEl.innerHTML = `
       <div class="empty muted">
@@ -2920,6 +3080,9 @@ async function renderNotificationsView() {
     hideAsyncOverlay();
     return;
   }
+
+  state.notificationsRows = rows;
+  setNotificationsClearAllVisible(rows.length > 0);
 
   if (!rows.length) {
     listEl.innerHTML = `
@@ -2941,11 +3104,24 @@ async function renderNotificationsView() {
 
     return `
       <article class="card notification-card${unreadClass}">
-        <div class="notification-head">
-          <div class="notification-title">${escapeHTML(copy.title || t("notifications_title"))}</div>
-          <div class="notification-date">${escapeHTML(dateText)}</div>
+        <div class="notification-main">
+          <div class="notification-head">
+            <div class="notification-title">${escapeHTML(copy.title || t("notifications_title"))}</div>
+            <div class="notification-date">${escapeHTML(dateText)}</div>
+          </div>
+          <div class="notification-body">${escapeHTML(copy.body)}</div>
         </div>
-        <div class="notification-body">${escapeHTML(copy.body)}</div>
+
+        <button
+          class="notification-delete-btn"
+          type="button"
+          data-action="notification-delete"
+          data-id="${Number(row.id)}"
+          aria-label="${escapeHTML(t("notifications_delete_one") || "Удалить")}"
+          title="${escapeHTML(t("notifications_delete_one") || "Удалить")}"
+        >
+          ×
+        </button>
       </article>
     `;
   }).join("");
@@ -20615,8 +20791,24 @@ if (
       }
       if (action === "ratings-info") { openRatingsInfoModal(); return; }
 
-            if (action === "open-resources") { openGlobal("resources"); return; }
-      if (action === "open-notifications") { openGlobal("notifications"); return; }
+                        if (action === "open-resources") { openGlobal("resources"); return; }
+
+      if (action === "open-notifications") {
+        openGlobal("notifications");
+        await renderNotificationsView();
+        return;
+      }
+
+      if (action === "notification-delete") {
+        await deleteNotificationById(btn.dataset.id);
+        return;
+      }
+
+      if (action === "notifications-delete-all") {
+        await deleteAllVisibleNotifications();
+        return;
+      }
+
       if (action === "open-news") {
         openTelegramUrl("https://t.me/iClubuzofficial");
         return;
@@ -21742,8 +21934,10 @@ if (!isRegistered()) {
       state.courses.stack = ["all-subjects"];
       saveState();
 
-      // Start at Home
+         // Start at Home
       setTab("home");
+
+      try { await refreshNotificationsBadge(); } catch {}
     });
   }
 
