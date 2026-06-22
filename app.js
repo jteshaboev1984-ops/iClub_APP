@@ -17621,7 +17621,7 @@ uniq.forEach(rec => {
     })();
   }
 
-async function fetchMyRecsDB(subjectKey) {
+async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
   try {
     if (!window.sb) return [];
 
@@ -17631,24 +17631,81 @@ async function fetchMyRecsDB(subjectKey) {
     const subjectId = await getSubjectIdByKey(subjectKey);
     if (!subjectId) return [];
 
-    const { data, error } = await window.sb
-  .from("recommendations")
-  .select("id, source_type, tour_no, topic, subtopic, book_id, book_reference, created_at")
-  .eq("user_id", uid)
-  .eq("subject_id", subjectId)
-  .order("created_at", { ascending: false })
-  .limit(100);
+    const seasonId =
+      Number(seasonIdArg || 0) ||
+      await getCurrentSeasonId();
 
-    if (error) {
-      logClientError("myrecs_select_error", error);
-      return [];
+    const practicePromise = window.sb
+      .from("recommendations")
+      .select(
+        "id, source_type, tour_no, season_id, topic, subtopic, book_id, book_reference, created_at"
+      )
+      .eq("user_id", uid)
+      .eq("subject_id", subjectId)
+      .eq("source_type", "practice")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    let tourQuery = window.sb
+      .from("recommendations")
+      .select(
+        "id, source_type, tour_no, season_id, topic, subtopic, book_id, book_reference, created_at"
+      )
+      .eq("user_id", uid)
+      .eq("subject_id", subjectId)
+      .eq("source_type", "tour")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (seasonId > 0) {
+      tourQuery = tourQuery.eq("season_id", seasonId);
+    } else {
+      tourQuery = tourQuery.is("season_id", null);
     }
-    return Array.isArray(data) ? data : [];
-  } catch (e) {
-    logClientError("myrecs_select_exception", e);
+
+    const [practiceResult, tourResult] = await Promise.all([
+      practicePromise,
+      tourQuery
+    ]);
+
+    if (practiceResult.error) {
+      logClientError(
+        "myrecs_practice_select_error",
+        practiceResult.error
+      );
+    }
+
+    if (tourResult.error) {
+      logClientError(
+        "myrecs_tour_select_error",
+        tourResult.error
+      );
+    }
+
+    const practiceRows =
+      !practiceResult.error &&
+      Array.isArray(practiceResult.data)
+        ? practiceResult.data
+        : [];
+
+    const tourRows =
+      !tourResult.error &&
+      Array.isArray(tourResult.data)
+        ? tourResult.data
+        : [];
+
+    return [...practiceRows, ...tourRows]
+      .sort((a, b) => {
+        const aTime = new Date(a?.created_at || 0).getTime();
+        const bTime = new Date(b?.created_at || 0).getTime();
+        return bTime - aTime;
+      });
+  } catch (error) {
+    logClientError("myrecs_select_exception", error);
     return [];
   }
 }
+
 
 async function renderMyRecs() {
   const wrap = $("#my-recs-list");
@@ -17662,16 +17719,23 @@ async function renderMyRecs() {
 
   const activeTab = String(state?.courses?.myRecsActiveTab || "practice");
 
+  const selectedSeasonId = await getCurrentSeasonId();
+  const seasonOneId = await getSeasonOneId();
+
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
 
     // DB-first for both practice and tour
-  const dbRows = await fetchMyRecsDB(subjectKey);
+  const dbRows = await fetchMyRecsDB(
+    subjectKey,
+    selectedSeasonId
+  );
 
   let practiceRows = dbRows.filter(r => String(r?.source_type || "") === "practice");
   let tourRows = dbRows
     .filter(r => String(r?.source_type || "") === "tour")
     .map(r => ({
       ...r,
+      seasonId: Number(r?.season_id || 0) || null,
       tourNo: Number(r?.tour_no || 0) || null
     }));
 
@@ -17705,37 +17769,93 @@ async function renderMyRecs() {
     practiceRows = checks.filter(x => x.keep).map(x => x.rec);
   }
    
-  // TOUR fallback only if DB has nothing yet
+  // TOUR fallback only if DB has nothing yet.
+  // Legacy rows without seasonId belong to Season 1 only.
   if (!tourRows.length) {
     const tourStore = loadMyTourRecs();
-       tourRows = (tourStore?.bySubject?.[subjectKey] || []).map(x => ({
-      id: null,
-      source_type: "tour",
-      topic: x.topic || "General",
-      subtopic: x.subtopic || null,
-      book_id: x.book_id || null,
-      book_reference: x.book_reference || null,
-      created_at: x.ts ? new Date(x.ts).toISOString() : null,
-      tourNo: Number(x.tourNo || 0) || null
-    }));
+    const localRows =
+      tourStore?.bySubject?.[subjectKey] || [];
+
+    tourRows = localRows
+      .filter(row => {
+        const rowSeasonId = Number(
+          row?.seasonId ||
+          row?.season_id ||
+          0
+        );
+
+        if (rowSeasonId > 0) {
+          return rowSeasonId === Number(selectedSeasonId || 0);
+        }
+
+        return (
+          Number(selectedSeasonId || 0) > 0 &&
+          Number(selectedSeasonId || 0) ===
+            Number(seasonOneId || 0)
+        );
+      })
+      .map(row => ({
+        id: null,
+        source_type: "tour",
+        seasonId:
+          Number(
+            row?.seasonId ||
+            row?.season_id ||
+            seasonOneId ||
+            0
+          ) || null,
+        topic: row.topic || "General",
+        subtopic: row.subtopic || null,
+        book_id: row.book_id || null,
+        book_reference: row.book_reference || null,
+        created_at: row.ts
+          ? new Date(row.ts).toISOString()
+          : null,
+        tourNo: Number(row.tourNo || 0) || null
+      }));
   }
-                try {
+
+  try {
     const shouldSyncTourRows = tourRows.length && (
       !dbRows.some(r => String(r?.source_type || "") === "tour") ||
       tourRows.some(r => !String(r?.book_reference || "").trim())
     );
 
     if (shouldSyncTourRows) {
-      const byTour = new Map();
-      tourRows.forEach(r => {
-        const key = Number(r?.tourNo || 0) || 0;
-        if (!key) return;
-        if (!byTour.has(key)) byTour.set(key, []);
-        byTour.get(key).push(r);
+      const bySeasonAndTour = new Map();
+
+      tourRows.forEach(row => {
+        const tourNo = Number(row?.tourNo || 0) || 0;
+        const seasonId =
+          Number(
+            row?.seasonId ||
+            row?.season_id ||
+            selectedSeasonId ||
+            0
+          ) || 0;
+
+        if (!tourNo || !seasonId) return;
+
+        const key = `${seasonId}:${tourNo}`;
+
+        if (!bySeasonAndTour.has(key)) {
+          bySeasonAndTour.set(key, {
+            seasonId,
+            tourNo,
+            rows: []
+          });
+        }
+
+        bySeasonAndTour.get(key).rows.push(row);
       });
 
-      for (const [tourNo, recs] of byTour.entries()) {
-        await saveTourRecsToDB(subjectKey, tourNo, recs);
+      for (const group of bySeasonAndTour.values()) {
+        await saveTourRecsToDB(
+          subjectKey,
+          group.tourNo,
+          group.rows,
+          group.seasonId
+        );
       }
     }
   } catch {}
@@ -17809,6 +17929,7 @@ async function renderMyRecs() {
             data-open-rec="tour"
             data-rec-id="${escapeHTML(String(rec.id || ""))}"
             data-tour-no="${escapeHTML(String(tourNo || 0))}"
+            data-season-id="${escapeHTML(String(rec.seasonId || rec.season_id || selectedSeasonId || ""))}"
             data-topic="${escapeHTML(rec.topic || "")}"
             data-subtopic="${escapeHTML(sub)}"
             data-created-at="${escapeHTML(rec.created_at || "")}"
@@ -17863,10 +17984,20 @@ async function renderMyRecs() {
 
    wrap.querySelectorAll('[data-open-rec="tour"]').forEach(el => {
     el.addEventListener("click", async () => {
-      const tourNo = Number(el.getAttribute("data-tour-no") || 0);
+      const tourNo = Number(
+        el.getAttribute("data-tour-no") || 0
+      );
+
+      const seasonId = Number(
+        el.getAttribute("data-season-id") || 0
+      ) || null;
+
       const rec = {
-        id: el.getAttribute("data-rec-id") ? Number(el.getAttribute("data-rec-id")) : null,
+        id: el.getAttribute("data-rec-id")
+          ? Number(el.getAttribute("data-rec-id"))
+          : null,
         source_type: "tour",
+        seasonId,
         topic: String(el.getAttribute("data-topic") || "").trim() || "General",
         subtopic: String(el.getAttribute("data-subtopic") || "").trim() || null,
         created_at: String(el.getAttribute("data-created-at") || "").trim() || null,
@@ -17875,7 +18006,11 @@ async function renderMyRecs() {
       };
 
       const canOpen = tourNo > 0
-        ? await isTourGloballyClosed(subjectKey, tourNo)
+        ? await isTourGloballyClosed(
+            subjectKey,
+            tourNo,
+            seasonId
+          )
         : false;
 
       if (!canOpen) {
@@ -19910,33 +20045,54 @@ try {
     renderTourQuestion();
   }
    
-                  async function isTourGloballyClosed(subjectKey, tourNo) {
+                  async function isTourGloballyClosed(
+  subjectKey,
+  tourNo,
+  seasonIdArg = null
+) {
   try {
     if (!window.sb) return false;
 
     const subjectId = await getSubjectIdByKey(subjectKey);
     if (!subjectId) return false;
 
-    const { data, error } = await window.sb
+    const seasonId =
+      Number(seasonIdArg || 0) ||
+      await getCurrentSeasonId();
+
+    let query = window.sb
       .from("tours")
-      .select("id, tour_no, start_date, end_date, is_active")
+      .select(
+        "id, tour_no, season_id, start_date, end_date, is_active"
+      )
       .eq("subject_id", subjectId)
-      .eq("tour_no", Number(tourNo || 0))
+      .eq("tour_no", Number(tourNo || 0));
+
+    if (seasonId > 0) {
+      query = query.eq("season_id", seasonId);
+    }
+
+    const { data, error } = await query
+      .limit(1)
       .maybeSingle();
 
     if (error || !data) return false;
 
-    const todayISO = new Date().toISOString().slice(0, 10);
-    const endDate = data?.end_date ? String(data.end_date).trim() : "";
+    const today = new Date();
+    const todayISO =
+      `${today.getFullYear()}-` +
+      `${String(today.getMonth() + 1).padStart(2, "0")}-` +
+      `${String(today.getDate()).padStart(2, "0")}`;
 
+    const endDate = String(data?.end_date || "").trim();
     if (!endDate) return false;
 
-    // ✅ строгая глобальная проверка для полного review / сертификата
     return endDate < todayISO;
   } catch {
     return false;
   }
 }
+
    function renderTourResultStatusSummary() {
   const reviewStatusEl = document.getElementById("tour-review-status");
   const certStatusEl = document.getElementById("tour-certificate-status");
