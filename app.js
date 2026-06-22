@@ -16228,7 +16228,12 @@ if (!activeTour && !upcomingTour) {
     }
   }
 }
-     try { await renderToursHistorySummary(subjectId); } catch {}
+     try {
+       await renderToursHistorySummary(
+         subjectId,
+         operationalSeasonId
+       );
+     } catch {}
      
       saveState();
       } finally {
@@ -16240,7 +16245,10 @@ if (!activeTour && !upcomingTour) {
 // Completed tours (DB summary by subject)
 // Best = max percent, tie-break = min time
 // --------------------------------------
-async function renderToursHistorySummary(subjectId) {
+async function renderToursHistorySummary(
+  subjectId,
+  seasonIdArg = null
+) {
   const bestScoreEl = document.getElementById("tours-best-score");
   const bestPctEl = document.getElementById("tours-best-percent");
   const bestTimeEl = document.getElementById("tours-best-time");
@@ -16259,15 +16267,27 @@ async function renderToursHistorySummary(subjectId) {
     return `${m}${t("practice_time_min_suffix")} ${r}${t("practice_time_sec_suffix")}`;
   };
 
+  const seasonId =
+    Number(seasonIdArg || 0) ||
+    await getCurrentSeasonId();
+
   let attempts = [];
+
   try {
     const uid = await getAuthUid();
-    if (window.sb && uid && subjectId) {
+
+    if (
+      window.sb &&
+      uid &&
+      subjectId &&
+      seasonId
+    ) {
       const { data, error } = await window.sb
         .from("tour_attempts")
-        .select("id, tour_id, score, percent, total_time, created_at, tours!inner(tour_no, subject_id)")
+        .select("id, tour_id, score, percent, total_time, created_at, tours!inner(tour_no, subject_id, season_id)")
         .eq("user_id", uid)
         .eq("tours.subject_id", subjectId)
+        .eq("tours.season_id", Number(seasonId))
         .order("created_at", { ascending: false });
 
       if (!error && Array.isArray(data)) attempts = data;
