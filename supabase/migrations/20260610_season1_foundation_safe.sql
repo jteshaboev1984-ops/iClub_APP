@@ -21,6 +21,30 @@ create table if not exists public.seasons (
   constraint seasons_status_check check (status in ('draft', 'current', 'closed'))
 );
 
+-- 1.1) Seasons API security
+alter table public.seasons enable row level security;
+
+drop policy if exists seasons_public_read on public.seasons;
+
+create policy seasons_public_read
+on public.seasons
+for select
+to public
+using (true);
+
+revoke insert, update, delete, truncate, references, trigger
+on table public.seasons
+from anon, authenticated;
+
+grant select
+on table public.seasons
+to anon, authenticated;
+
+-- Only one season may have status=current.
+create unique index if not exists seasons_one_current_idx
+  on public.seasons(status)
+  where status = 'current';
+
 insert into public.seasons (season_no, title, status)
 values (1, 'Season 1', 'closed')
 on conflict (season_no) do update
@@ -133,6 +157,15 @@ create index if not exists certificates_season_user_subject_idx
 
 create index if not exists recommendations_tour_season_user_subject_idx
   on public.recommendations(season_id, user_id, subject_id, source_type, tour_no);
+
+-- 6.1) Certificate idempotency guards
+create unique index if not exists certificates_one_tour_per_user_idx
+  on public.certificates(user_id, tour_id)
+  where certificate_type = 'tour';
+
+create unique index if not exists certificates_one_final_per_user_subject_season_idx
+  on public.certificates(user_id, subject_id, season_id)
+  where certificate_type = 'final';
 
 -- 7) Existing tour certificates must store season_id from their tour
 create or replace function public.issue_tour_certificate(p_attempt_id bigint)
@@ -543,6 +576,11 @@ begin
   return v_inserted;
 end;
 $function$;
+
+-- 8.1) Keep the season helper internal
+revoke all
+on function public.issue_final_certificate_for_season(uuid, bigint, bigint)
+from public, anon, authenticated;
 
 -- 9) Keep old RPC name safe for cached/current app clients.
 create or replace function public.issue_final_certificate(
