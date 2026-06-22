@@ -16032,18 +16032,29 @@ const pad2 = (n) => String(n).padStart(2, "0");
 const d0 = new Date();
 const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
 
+const operationalSeasonId =
+  await getCurrentSeasonId();
+
 // UI: show loading first to avoid 1-sec "wrong screen" flicker
 if (statusTitle) statusTitle.textContent = tr("loading", "Загрузка…");
 if (statusDesc) statusDesc.textContent = tr("loading_desc", "Получаем список туров…");
 if (openBtn) openBtn.classList.add("hidden");
 
-// NULL dates = no restriction (ok for test)
+// Тур без обеих дат остаётся скрытым.
 const isInWindow = (row) => {
-  const sd = row?.start_date ? String(row.start_date) : null;
-  const ed = row?.end_date ? String(row.end_date) : null;
-  const afterStart = !sd || sd <= todayISO;
-  const beforeEnd = !ed || ed >= todayISO;
-  return afterStart && beforeEnd;
+  const sd = row?.start_date
+    ? String(row.start_date)
+    : "";
+
+  const ed = row?.end_date
+    ? String(row.end_date)
+    : "";
+
+  if (!sd || !ed) {
+    return false;
+  }
+
+  return sd <= todayISO && ed >= todayISO;
 };
 
 let dbTours = [];
@@ -16054,8 +16065,9 @@ if (window.sb && subjectKey) {
   try {
     const { data, error } = await window.sb
       .from("tours")
-      .select("id, subject_id, tour_no, start_date, end_date, is_active, subjects!inner(subject_key)")
+      .select("id, subject_id, tour_no, start_date, end_date, is_active, season_id, subjects!inner(subject_key)")
       .eq("subjects.subject_key", String(subjectKey))
+      .eq("season_id", Number(operationalSeasonId))
       .order("tour_no", { ascending: true });
 
     if (error) toursErr = error;
@@ -16077,8 +16089,9 @@ if (!dbTours.length && window.sb && subjectId) {
   try {
     const { data, error } = await window.sb
       .from("tours")
-      .select("id, subject_id, tour_no, start_date, end_date, is_active")
+      .select("id, subject_id, tour_no, start_date, end_date, is_active, season_id")
       .eq("subject_id", subjectId)
+      .eq("season_id", Number(operationalSeasonId))
       .order("tour_no", { ascending: true });
 
     if (error) toursErr = toursErr || error;
@@ -16106,8 +16119,17 @@ const upcomingTour = upcomingTours.length ? upcomingTours[0] : null;
 if (!state.courses) state.courses = {};
 state.courses.activeTourId = activeTour?.id || null;
 state.courses.activeTourNo = activeTour?.tour_no || null;
+state.courses.activeSeasonId =
+  activeTour?.season_id ||
+  operationalSeasonId ||
+  null;
+
 state.courses.upcomingTourId = upcomingTour?.id || null;
 state.courses.upcomingTourNo = upcomingTour?.tour_no || null;
+state.courses.upcomingSeasonId =
+  upcomingTour?.season_id ||
+  operationalSeasonId ||
+  null;
 
 // label
 if (tourLabelEl) {
@@ -19476,8 +19498,17 @@ async function updateTourAttempt(attemptId, patch) {
     return;
   }
 
+  const selectedSeasonId =
+    Number(state?.courses?.activeSeasonId || 0) ||
+    null;
+
   const tourNo = selectedTourNo;
-  const tour = await loadActiveTourBySubjectAndNo(subjectId, tourNo);
+
+  const tour = await loadActiveTourBySubjectAndNo(
+    subjectId,
+    tourNo,
+    selectedSeasonId
+  );
 
   if (!tour?.id || String(tour.id) !== selectedTourId) {
     await uiAlert({
