@@ -52,7 +52,7 @@ set title = excluded.title,
     status = excluded.status;
 
 insert into public.seasons (season_no, title, status)
-values (2, 'Current', 'draft')
+values (2, 'Season 2', 'draft')
 on conflict (season_no) do update
 set title = excluded.title,
     status = excluded.status;
@@ -193,6 +193,10 @@ begin
 
   if not found then
     raise exception 'issue_tour_certificate: attempt not found (%).', p_attempt_id;
+  end if;
+
+  if auth.uid() is not null and auth.uid() <> v_attempt.user_id then
+    raise exception 'issue_tour_certificate: attempt does not belong to current user.';
   end if;
 
   if v_attempt.status not in ('submitted', 'time_expired') then
@@ -582,6 +586,41 @@ revoke all
 on function public.issue_final_certificate_for_season(uuid, bigint, bigint)
 from public, anon, authenticated;
 
+-- 8.2) Safe public RPC: current user + explicit season
+create or replace function public.issue_final_certificate_for_current_user(
+  p_subject_id bigint,
+  p_season_id bigint
+)
+returns public.certificates
+language plpgsql
+security definer
+set search_path to 'public'
+as $function$
+declare
+  v_user_id uuid;
+begin
+  v_user_id := auth.uid();
+
+  if v_user_id is null then
+    raise exception 'issue_final_certificate: authentication required.';
+  end if;
+
+  return public.issue_final_certificate_for_season(
+    v_user_id,
+    p_subject_id,
+    p_season_id
+  );
+end;
+$function$;
+
+revoke all
+on function public.issue_final_certificate_for_current_user(bigint, bigint)
+from public, anon;
+
+grant execute
+on function public.issue_final_certificate_for_current_user(bigint, bigint)
+to authenticated;
+
 -- 9) Keep old RPC name safe for cached/current app clients.
 create or replace function public.issue_final_certificate(
   p_user_id uuid,
@@ -595,6 +634,10 @@ as $function$
 declare
   v_season_id bigint;
 begin
+  if auth.uid() is not null and auth.uid() <> p_user_id then
+    raise exception 'issue_final_certificate: user mismatch.';
+  end if;
+
   -- Pick the latest completed season for this subject.
   -- This keeps existing 2-arg app calls safe after introducing Season 2 draft/current.
   select s.id
@@ -620,5 +663,22 @@ begin
   return public.issue_final_certificate_for_season(p_user_id, p_subject_id, v_season_id);
 end;
 $function$;
+
+-- 9.1) Certificate RPC permissions
+revoke all
+on function public.issue_tour_certificate(bigint)
+from public, anon;
+
+grant execute
+on function public.issue_tour_certificate(bigint)
+to authenticated;
+
+revoke all
+on function public.issue_final_certificate(uuid, bigint)
+from public, anon;
+
+grant execute
+on function public.issue_final_certificate(uuid, bigint)
+to authenticated;
 
 commit;
