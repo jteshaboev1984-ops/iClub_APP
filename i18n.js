@@ -220,6 +220,7 @@ archive_unavailable_toast: "Архив временно недоступен. П
 archive_unlock_after_toast: "Архив откроется после закрытия текущего официального тура.",
        
       // Ratings
+      ratings_season: "Сезон",
       ratings_subject: "Предмет",
       ratings_tour: "Тур",
       ratings_all_tours: "Все туры",
@@ -1114,6 +1115,7 @@ archive_checking_toast: "Arxiv mavjudligi tekshirilmoqda…",
 archive_unavailable_toast: "Arxiv vaqtincha mavjud emas. Keyinroq urinib ko‘ring.",
 archive_unlock_after_toast: "Arxiv joriy rasmiy tur yopilgandan keyin ochiladi.",
        // Ratings
+      ratings_season: "Mavsum",
       ratings_subject: "Fan",
       ratings_tour: "Tur",
       ratings_all_tours: "Barcha turlar",
@@ -2017,6 +2019,7 @@ archive_unavailable_toast: "Archive is temporarily unavailable. Please try again
 archive_unlock_after_toast: "The archive will open after the current official tour is closed.",
        
       // Ratings
+      ratings_season: "Season",
       ratings_subject: "Subject",
       ratings_tour: "Tour",
       ratings_all_tours: "All tours",

@@ -319,6 +319,43 @@ async function getCurrentSeasonId() {
   return await getSeasonOneId();
 }
 
+async function loadPublishedSeasonRows() {
+  try {
+    if (!window.sb) {
+      return [];
+    }
+
+    const { data, error } = await window.sb
+      .from("seasons")
+      .select(
+        "id,season_no,title,status,start_date,end_date"
+      )
+      .neq("status", "draft")
+      .order("season_no", { ascending: false });
+
+    if (error || !Array.isArray(data)) {
+      return [];
+    }
+
+    return data
+      .map(row => ({
+        ...row,
+        id: Number(row?.id || 0),
+        season_no: Number(row?.season_no || 0)
+      }))
+      .filter(row =>
+        row.id > 0 &&
+        row.season_no > 0 &&
+        (
+          row.status === "current" ||
+          row.status === "closed"
+        )
+      );
+  } catch {
+    return [];
+  }
+}
+
 async function getTourSeasonIdByTourId(tourId) {
   try {
     if (!window.sb || !tourId) return null;
@@ -336,32 +373,21 @@ async function getTourSeasonIdByTourId(tourId) {
   }
 }
 
-async function resolveTourSeasonId({ seasonId = null, tourId = null, subjectId = null, subjectKey = "", tourNo = null } = {}) {
+async function resolveTourSeasonId({
+  seasonId = null,
+  tourId = null
+} = {}) {
   const direct = Number(seasonId || 0);
-  if (Number.isFinite(direct) && direct > 0) return direct;
+
+  if (Number.isFinite(direct) && direct > 0) {
+    return direct;
+  }
 
   const byTour = await getTourSeasonIdByTourId(tourId);
-  if (byTour) return byTour;
 
-  try {
-    if (!subjectId && subjectKey && typeof getSubjectIdByKey === "function") {
-      subjectId = await getSubjectIdByKey(subjectKey);
-    }
-
-    if (window.sb && subjectId && tourNo) {
-      const { data, error } = await window.sb
-        .from("tours")
-        .select("season_id,start_date,end_date,id")
-        .eq("subject_id", Number(subjectId))
-        .eq("tour_no", Number(tourNo))
-        .order("start_date", { ascending: false })
-        .limit(1);
-
-      if (!error && Array.isArray(data) && data[0]?.season_id) {
-        return Number(data[0].season_id) || null;
-      }
-    }
-  } catch {}
+  if (byTour) {
+    return byTour;
+  }
 
   return await getCurrentSeasonId();
 }
@@ -2521,10 +2547,20 @@ async function getProfileCompetitiveSlotHint(subjectKey) {
       return t("profile_slot_hint_unpublished");
     }
 
+    const seasonId =
+      await getCurrentSeasonId();
+
+    if (!seasonId) {
+      return t("profile_slot_hint_unpublished");
+    }
+
     const { data, error } = await window.sb
       .from("tours")
-      .select("tour_no,start_date,end_date,is_active")
+      .select(
+        "tour_no,start_date,end_date,is_active,season_id"
+      )
       .eq("subject_id", subjectId)
+      .eq("season_id", Number(seasonId))
       .eq("is_active", true)
       .order("tour_no", { ascending: true });
 
@@ -2538,11 +2574,19 @@ async function getProfileCompetitiveSlotHint(subjectKey) {
     const todayISO = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
 
     const isInWindow = (row) => {
-      const sd = row?.start_date ? String(row.start_date) : null;
-      const ed = row?.end_date ? String(row.end_date) : null;
-      const afterStart = !sd || sd <= todayISO;
-      const beforeEnd = !ed || ed >= todayISO;
-      return afterStart && beforeEnd;
+      const sd = row?.start_date
+        ? String(row.start_date)
+        : "";
+
+      const ed = row?.end_date
+        ? String(row.end_date)
+        : "";
+
+      if (!sd || !ed) {
+        return false;
+      }
+
+      return sd <= todayISO && ed >= todayISO;
     };
 
     const activeTour = data.find(isInWindow);
@@ -2618,25 +2662,44 @@ async function getProfileCompetitiveSlotHint(subjectKey) {
   }
 
          // DB check (real source of truth). If DB not available — fallback to local schedule.
-async function dbHasAnyActiveTourNow() {
-  if (!window.sb) return null; // unknown
+async function dbHasAnyActiveTourNow(
+  seasonIdArg = null
+) {
+  if (!window.sb) return null;
+
+  const seasonId =
+    Number(seasonIdArg || 0) ||
+    await getCurrentSeasonId();
+
+  if (!seasonId) return null;
 
   const pad2 = (n) => String(n).padStart(2, "0");
   const d0 = new Date();
   const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
 
   const isInWindow = (row) => {
-    const sd = row?.start_date ? String(row.start_date) : null;
-    const ed = row?.end_date ? String(row.end_date) : null;
-    const afterStart = !sd || sd <= todayISO;
-    const beforeEnd = !ed || ed >= todayISO;
-    return afterStart && beforeEnd;
+    const sd = row?.start_date
+      ? String(row.start_date)
+      : "";
+
+    const ed = row?.end_date
+      ? String(row.end_date)
+      : "";
+
+    if (!sd || !ed) {
+      return false;
+    }
+
+    return sd <= todayISO && ed >= todayISO;
   };
 
     try {
     const { data, error } = await window.sb
       .from("tours")
-      .select("id,start_date,end_date,is_active")
+      .select(
+        "id,start_date,end_date,is_active,season_id"
+      )
+      .eq("season_id", Number(seasonId))
       .eq("is_active", true);
 
     if (error) return null;
@@ -2649,11 +2712,17 @@ async function dbHasAnyActiveTourNow() {
 }
 
             async function renderArchiveView() {
-  const listEl = document.getElementById("archive-list");
-  if (!listEl) return;
+  const listEl =
+    document.getElementById("archive-list");
+
+  if (!listEl) {
+    return;
+  }
 
   listEl.innerHTML = `
-    <div class="empty muted">${t("archive_loading")}</div>
+    <div class="empty muted">
+      ${escapeHTML(t("archive_loading"))}
+    </div>
   `;
 
   showAsyncOverlay(tr3(
@@ -2662,170 +2731,535 @@ async function dbHasAnyActiveTourNow() {
     "Loading archive…"
   ));
 
-  let isLocked = false;
-  let availabilityUnknown = false;
+  const renderArchiveBody = (
+    contentHtml,
+    seasonRows = [],
+    selectedSeasonId = null
+  ) => {
+    const selectorHtml =
+      Array.isArray(seasonRows) &&
+      seasonRows.length > 1
+        ? `
+          <div
+            class="card"
+            style="
+              padding:12px 14px;
+              margin-bottom:12px;
+            "
+          >
+            <label
+              for="archive-season-select"
+              class="muted small"
+              style="
+                display:block;
+                margin-bottom:7px;
+                font-weight:700;
+              "
+            >
+              ${escapeHTML(tr3(
+                "Сезон",
+                "Mavsum",
+                "Season"
+              ))}
+            </label>
 
-  try {
-    if (window.sb) {
-      const hasActive = await dbHasAnyActiveTourNow();
-      if (hasActive === null) {
-        availabilityUnknown = true;
-      } else {
-        isLocked = !!hasActive;
-      }
-    } else {
-      isLocked = !canOpenArchiveNow();
+            <select
+              id="archive-season-select"
+              class="lb-select"
+              style="width:100%;"
+              aria-label="${escapeHTML(tr3(
+                "Выбор сезона",
+                "Mavsumni tanlash",
+                "Select season"
+              ))}"
+            >
+              ${seasonRows.map(row => {
+                const label = tr3(
+                  `Сезон ${Number(row.season_no)}`,
+                  `${Number(row.season_no)}-mavsum`,
+                  `Season ${Number(row.season_no)}`
+                );
+
+                const selected =
+                  Number(row.id) ===
+                  Number(selectedSeasonId);
+
+                return `
+                  <option
+                    value="${Number(row.id)}"
+                    ${selected ? "selected" : ""}
+                  >
+                    ${escapeHTML(label)}
+                  </option>
+                `;
+              }).join("")}
+            </select>
+          </div>
+        `
+        : "";
+
+    listEl.innerHTML =
+      selectorHtml +
+      String(contentHtml || "");
+
+    const seasonSelect =
+      document.getElementById(
+        "archive-season-select"
+      );
+
+    if (seasonSelect) {
+      seasonSelect.onchange = async () => {
+        const nextSeasonId =
+          Number(seasonSelect.value || 0);
+
+        if (!nextSeasonId) {
+          return;
+        }
+
+        state.courses =
+          state.courses &&
+          typeof state.courses === "object"
+            ? state.courses
+            : {};
+
+        state.courses.archiveSeasonId =
+          nextSeasonId;
+
+        saveState();
+
+        await renderArchiveView();
+      };
     }
-  } catch {
-    availabilityUnknown = true;
-  }
-
-  if (availabilityUnknown) {
-    listEl.innerHTML = `
-      <div class="empty muted">
-        <div style="font-weight:800; margin-bottom:6px;">${t("archive_unavailable_title")}</div>
-        <div class="small">${t("archive_unavailable_sub")}</div>
-      </div>
-    `;
-    hideAsyncOverlay();
-    return;
-  }
-
-  if (isLocked) {
-    listEl.innerHTML = `
-      <div class="empty muted">
-        <div style="font-weight:800; margin-bottom:6px;">${t("archive_locked_title")}</div>
-        <div class="small">${t("archive_locked_sub")}</div>
-      </div>
-    `;
-    hideAsyncOverlay();
-    return;
-  }
-
-  if (!window.sb) {
-    listEl.innerHTML = `
-      <div class="empty muted">${t("archive_empty")}</div>
-    `;
-    hideAsyncOverlay();
-    return;
-  }
-
-  const subjectKey = state?.courses?.subjectKey;
-  const uid = await getAuthUid();
-
-  if (!uid || !subjectKey) {
-    listEl.innerHTML = `
-      <div class="empty muted">${t("archive_empty")}</div>
-    `;
-    hideAsyncOverlay();
-    return;
-  }
-
-  const subjectId = await getSubjectIdByKey(subjectKey);
-  if (!subjectId) {
-    listEl.innerHTML = `
-      <div class="empty muted">${t("archive_empty")}</div>
-    `;
-    hideAsyncOverlay();
-    return;
-  }
-
-  const { data: tours, error: toursErr } = await window.sb
-    .from("tours")
-    .select("id,tour_no,start_date,end_date,is_active")
-    .eq("subject_id", subjectId)
-    .order("tour_no", { ascending: true });
-
-  if (toursErr || !Array.isArray(tours) || tours.length === 0) {
-    listEl.innerHTML = `
-      <div class="empty muted">${t("archive_empty")}</div>
-    `;
-    hideAsyncOverlay();
-    return;
-  }
-
-  const pad2 = (n) => String(n).padStart(2, "0");
-  const d0 = new Date();
-  const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
-
-  const isInWindow = (row) => {
-    const sd = row?.start_date ? String(row.start_date) : null;
-    const ed = row?.end_date ? String(row.end_date) : null;
-    const afterStart = !sd || sd <= todayISO;
-    const beforeEnd = !ed || ed >= todayISO;
-    return afterStart && beforeEnd;
   };
 
-  const pastTours = tours.filter(t => !t?.is_active || !isInWindow(t));
-  const pastTourIds = pastTours.map(t => Number(t.id)).filter(Boolean);
+  try {
+    if (!window.sb) {
+      renderArchiveBody(`
+        <div class="empty muted">
+          ${escapeHTML(t("archive_empty"))}
+        </div>
+      `);
 
-  if (pastTourIds.length === 0) {
-    listEl.innerHTML = `
-      <div class="empty muted">${t("archive_empty")}</div>
-    `;
-    hideAsyncOverlay();
-    return;
-  }
-
-    const { data: atts, error: attsErr } = await window.sb
-    .from("tour_attempts")
-    .select("tour_id,score,total_time,status")
-    .eq("user_id", uid)
-    .in("tour_id", pastTourIds)
-    .in("status", ["submitted", "time_expired", "anti_cheat", "finished"]);
-
-  if (attsErr || !Array.isArray(atts) || atts.length === 0) {
-    listEl.innerHTML = `
-      <div class="empty muted">${t("archive_empty")}</div>
-    `;
-    hideAsyncOverlay();
-    return;
-  }
-
-  const bestByTour = new Map();
-  for (const a of atts) {
-    const tid = Number(a.tour_id);
-    const score = Number(a.score) || 0;
-    const time = Number(a.total_time) || 0;
-
-    const cur = bestByTour.get(tid);
-    if (!cur) {
-      bestByTour.set(tid, { score, time });
-      continue;
+      return;
     }
-    if (score > cur.score || (score === cur.score && time > 0 && time < cur.time)) {
-      bestByTour.set(tid, { score, time });
+
+    const seasonRows =
+      await loadPublishedSeasonRows();
+
+    if (!seasonRows.length) {
+      renderArchiveBody(`
+        <div class="empty muted">
+          <div
+            style="
+              font-weight:800;
+              margin-bottom:6px;
+            "
+          >
+            ${escapeHTML(
+              t("archive_unavailable_title")
+            )}
+          </div>
+
+          <div class="small">
+            ${escapeHTML(
+              t("archive_unavailable_sub")
+            )}
+          </div>
+        </div>
+      `);
+
+      return;
     }
-  }
+
+    const currentSeasonId =
+      await getCurrentSeasonId();
+
+    const savedSeasonId =
+      seasonRows.length > 1
+        ? Number(
+            state?.courses?.archiveSeasonId ||
+            0
+          )
+        : 0;
+
+    const selectedSeason =
+      seasonRows.find(row =>
+        Number(row.id) === savedSeasonId
+      ) ||
+      seasonRows.find(row =>
+        Number(row.id) ===
+        Number(currentSeasonId)
+      ) ||
+      seasonRows[0];
+
+    const selectedSeasonId =
+      Number(selectedSeason?.id || 0);
+
+    if (!selectedSeasonId) {
+      renderArchiveBody(`
+        <div class="empty muted">
+          ${escapeHTML(t("archive_empty"))}
+        </div>
+      `);
+
+      return;
+    }
+
+    if (seasonRows.length > 1) {
+      state.courses =
+        state.courses &&
+        typeof state.courses === "object"
+          ? state.courses
+          : {};
+
+      state.courses.archiveSeasonId =
+        selectedSeasonId;
+
+      saveState();
+    }
+
+    // A closed season remains accessible even while
+    // another current season has an active tour.
+    if (selectedSeason?.status === "current") {
+      const hasActive =
+        await dbHasAnyActiveTourNow(
+          selectedSeasonId
+        );
+
+      if (hasActive === null) {
+        renderArchiveBody(
+          `
+            <div class="empty muted">
+              <div
+                style="
+                  font-weight:800;
+                  margin-bottom:6px;
+                "
+              >
+                ${escapeHTML(
+                  t("archive_unavailable_title")
+                )}
+              </div>
+
+              <div class="small">
+                ${escapeHTML(
+                  t("archive_unavailable_sub")
+                )}
+              </div>
+            </div>
+          `,
+          seasonRows,
+          selectedSeasonId
+        );
+
+        return;
+      }
+
+      if (hasActive) {
+        renderArchiveBody(
+          `
+            <div class="empty muted">
+              <div
+                style="
+                  font-weight:800;
+                  margin-bottom:6px;
+                "
+              >
+                ${escapeHTML(
+                  t("archive_locked_title")
+                )}
+              </div>
+
+              <div class="small">
+                ${escapeHTML(
+                  t("archive_locked_sub")
+                )}
+              </div>
+            </div>
+          `,
+          seasonRows,
+          selectedSeasonId
+        );
+
+        return;
+      }
+    }
+
+    const subjectKey =
+      state?.courses?.subjectKey;
+
+    const uid =
+      await getAuthUid();
+
+    if (!uid || !subjectKey) {
+      renderArchiveBody(
+        `
+          <div class="empty muted">
+            ${escapeHTML(t("archive_empty"))}
+          </div>
+        `,
+        seasonRows,
+        selectedSeasonId
+      );
+
+      return;
+    }
+
+    const subjectId =
+      await getSubjectIdByKey(subjectKey);
+
+    if (!subjectId) {
+      renderArchiveBody(
+        `
+          <div class="empty muted">
+            ${escapeHTML(t("archive_empty"))}
+          </div>
+        `,
+        seasonRows,
+        selectedSeasonId
+      );
+
+      return;
+    }
+
+    const { data: tours, error: toursErr } =
+      await window.sb
+        .from("tours")
+        .select(
+          "id,tour_no,start_date,end_date,is_active,season_id"
+        )
+        .eq("subject_id", subjectId)
+        .eq(
+          "season_id",
+          Number(selectedSeasonId)
+        )
+        .order(
+          "tour_no",
+          { ascending: true }
+        );
+
+    if (
+      toursErr ||
+      !Array.isArray(tours) ||
+      !tours.length
+    ) {
+      renderArchiveBody(
+        `
+          <div class="empty muted">
+            ${escapeHTML(t("archive_empty"))}
+          </div>
+        `,
+        seasonRows,
+        selectedSeasonId
+      );
+
+      return;
+    }
+
+    const pad2 = number =>
+      String(number).padStart(2, "0");
+
+    const now = new Date();
+
+    const todayISO =
+      `${now.getFullYear()}-` +
+      `${pad2(now.getMonth() + 1)}-` +
+      `${pad2(now.getDate())}`;
+
+    // Only tours with a real finished date belong
+    // in the archive. Undated containers stay hidden.
+    const pastTours = tours.filter(tour => {
+      const endDate =
+        String(tour?.end_date || "").trim();
+
+      return !!endDate && endDate < todayISO;
+    });
+
+    const pastTourIds =
+      pastTours
+        .map(tour => Number(tour?.id || 0))
+        .filter(Boolean);
+
+    if (!pastTourIds.length) {
+      renderArchiveBody(
+        `
+          <div class="empty muted">
+            ${escapeHTML(t("archive_empty"))}
+          </div>
+        `,
+        seasonRows,
+        selectedSeasonId
+      );
+
+      return;
+    }
+
+    const { data: attempts, error: attemptsError } =
+      await window.sb
+        .from("tour_attempts")
+        .select(
+          "tour_id,score,total_time,status"
+        )
+        .eq("user_id", uid)
+        .in("tour_id", pastTourIds)
+        .in(
+          "status",
+          [
+            "submitted",
+            "time_expired",
+            "anti_cheat",
+            "finished"
+          ]
+        );
+
+    if (
+      attemptsError ||
+      !Array.isArray(attempts) ||
+      !attempts.length
+    ) {
+      renderArchiveBody(
+        `
+          <div class="empty muted">
+            ${escapeHTML(t("archive_empty"))}
+          </div>
+        `,
+        seasonRows,
+        selectedSeasonId
+      );
+
+      return;
+    }
+
+    const bestByTour = new Map();
+
+    for (const attempt of attempts) {
+      const tourId =
+        Number(attempt?.tour_id || 0);
+
+      const score =
+        Number(attempt?.score || 0);
+
+      const time =
+        Number(attempt?.total_time || 0);
+
+      const current =
+        bestByTour.get(tourId);
+
+      if (
+        !current ||
+        score > current.score ||
+        (
+          score === current.score &&
+          time > 0 &&
+          (
+            current.time <= 0 ||
+            time < current.time
+          )
+        )
+      ) {
+        bestByTour.set(tourId, {
+          score,
+          time
+        });
+      }
+    }
 
     const rows = pastTours
-    .filter(tour => bestByTour.has(Number(tour.id)))
-    .map(tour => {
-      const best = bestByTour.get(Number(tour.id));
-      const title = `${tr("tours_tour_label", "Тур")} ${tour.tour_no}`;
+      .filter(tour =>
+        bestByTour.has(Number(tour.id))
+      )
+      .map(tour => {
+        const best =
+          bestByTour.get(Number(tour.id));
 
-      const parts = [];
-      parts.push(`${t("archive_score_label")}: ${best.score}`);
-      if (best.time) parts.push(`${t("archive_time_label")}: ${formatSecondsToMMSS(best.time)}`);
+        const title =
+          `${tr(
+            "tours_tour_label",
+            "Тур"
+          )} ${Number(tour.tour_no)}`;
 
-      return `
-        <div class="list-item" style="cursor:default;">
-          <div style="font-weight:800; margin-bottom:4px;">${title}</div>
-          <div class="muted small">${parts.join(" • ")}</div>
+        const parts = [
+          `${t("archive_score_label")}: ${best.score}`
+        ];
+
+        if (best.time) {
+          parts.push(
+            `${t("archive_time_label")}: ` +
+            `${formatSecondsToMMSS(best.time)}`
+          );
+        }
+
+        return `
+          <div
+            class="list-item"
+            style="cursor:default;"
+          >
+            <div
+              style="
+                font-weight:800;
+                margin-bottom:4px;
+              "
+            >
+              ${escapeHTML(title)}
+            </div>
+
+            <div class="muted small">
+              ${escapeHTML(parts.join(" • "))}
+            </div>
+          </div>
+        `;
+      });
+
+    if (!rows.length) {
+      renderArchiveBody(
+        `
+          <div class="empty muted">
+            ${escapeHTML(t("archive_empty"))}
+          </div>
+        `,
+        seasonRows,
+        selectedSeasonId
+      );
+
+      return;
+    }
+
+    renderArchiveBody(
+      rows.join(""),
+      seasonRows,
+      selectedSeasonId
+    );
+  } catch (error) {
+    try {
+      logClientError(
+        "renderArchiveView",
+        error
+      );
+    } catch {}
+
+    renderArchiveBody(`
+      <div class="empty muted">
+        <div
+          style="
+            font-weight:800;
+            margin-bottom:6px;
+          "
+        >
+          ${escapeHTML(
+            t("archive_unavailable_title")
+          )}
         </div>
-      `;
-    });
-               
-  if (rows.length === 0) {
-    listEl.innerHTML = `
-      <div class="empty muted">${t("archive_empty")}</div>
-    `;
-    hideAsyncOverlay();
-    return;
-  }
 
-  listEl.innerHTML = rows.join("");
-  hideAsyncOverlay();
+        <div class="small">
+          ${escapeHTML(
+            t("archive_unavailable_sub")
+          )}
+        </div>
+      </div>
+    `);
+  } finally {
+    hideAsyncOverlay();
+  }
 }
 
 function setNotificationsBadge(count) {
@@ -4832,6 +5266,11 @@ async function getPracticeStageContext(subjectKey) {
   const subjectId = await getSubjectIdByKey(subjectKey);
   if (!subjectId) return null;
 
+  const seasonId =
+    await getCurrentSeasonId();
+
+  if (!seasonId) return null;
+
   const poolsRes = await window.sb
     .from("practice_pools")
     .select("id,subject_id,tour_no,title,is_active")
@@ -4844,8 +5283,11 @@ async function getPracticeStageContext(subjectKey) {
 
   const toursRes = await window.sb
     .from("tours")
-    .select("id,tour_no,start_date,end_date,is_active")
+    .select(
+      "id,tour_no,start_date,end_date,is_active,season_id"
+    )
     .eq("subject_id", subjectId)
+    .eq("season_id", Number(seasonId))
     .order("tour_no", { ascending: true });
 
   const tours = Array.isArray(toursRes?.data) ? toursRes.data : [];
@@ -4856,11 +5298,19 @@ async function getPracticeStageContext(subjectKey) {
   const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
 
   const isInWindow = (row) => {
-    const sd = row?.start_date ? String(row.start_date) : null;
-    const ed = row?.end_date ? String(row.end_date) : null;
-    const afterStart = !sd || sd <= todayISO;
-    const beforeEnd = !ed || ed >= todayISO;
-    return afterStart && beforeEnd;
+    const sd = row?.start_date
+      ? String(row.start_date)
+      : "";
+
+    const ed = row?.end_date
+      ? String(row.end_date)
+      : "";
+
+    if (!sd || !ed) {
+      return false;
+    }
+
+    return sd <= todayISO && ed >= todayISO;
   };
 
   const activeTour = tours
@@ -4889,6 +5339,7 @@ async function getPracticeStageContext(subjectKey) {
 
   return {
     subjectId,
+    seasonId: Number(seasonId),
     practiceTourNo: Number(poolRow?.tour_no || practiceTourNo || 1),
     poolId: Number(poolRow?.id || 0) || null,
     poolRow,
@@ -5054,27 +5505,64 @@ function getLocalTodayISO() {
   return `${d0.getFullYear()}-${p(d0.getMonth() + 1)}-${p(d0.getDate())}`;
 }
 
-function isTourRowInWindow(row, todayISO = getLocalTodayISO()) {
-  const sd = row?.start_date ? String(row.start_date) : null;
-  const ed = row?.end_date ? String(row.end_date) : null;
-  return (!sd || sd <= todayISO) && (!ed || ed >= todayISO);
+function isTourRowInWindow(
+  row,
+  todayISO = getLocalTodayISO()
+) {
+  const sd = row?.start_date
+    ? String(row.start_date)
+    : "";
+
+  const ed = row?.end_date
+    ? String(row.end_date)
+    : "";
+
+  if (!sd || !ed) {
+    return false;
+  }
+
+  return sd <= todayISO && ed >= todayISO;
 }
 
 async function getPracticeTourCards(subjectKey) {
   const ctx = await getPracticeStageContext(subjectKey).catch(() => null);
-  const subjectId = Number(ctx?.subjectId || 0);
-  const currentTourNo = Number(ctx?.practiceTourNo || 1) || 1;
-  const pools = Array.isArray(ctx?.pools) ? ctx.pools : [];
+  const subjectId =
+    Number(ctx?.subjectId || 0);
 
-  if (!subjectId || !pools.length) return { currentTourNo, selectedTourNo: currentTourNo, cards: [] };
+  const seasonId =
+    Number(ctx?.seasonId || 0) ||
+    await getCurrentSeasonId();
+
+  const currentTourNo =
+    Number(ctx?.practiceTourNo || 1) || 1;
+
+  const pools =
+    Array.isArray(ctx?.pools)
+      ? ctx.pools
+      : [];
+
+  if (
+    !subjectId ||
+    !seasonId ||
+    !pools.length
+  ) {
+    return {
+      currentTourNo,
+      selectedTourNo: currentTourNo,
+      cards: []
+    };
+  }
 
   let tours = [];
   try {
     if (window.sb) {
       const { data, error } = await window.sb
         .from("tours")
-        .select("id,tour_no,start_date,end_date,is_active")
+        .select(
+          "id,tour_no,start_date,end_date,is_active,season_id"
+        )
         .eq("subject_id", subjectId)
+        .eq("season_id", Number(seasonId))
         .order("tour_no", { ascending: true });
 
       if (!error && Array.isArray(data)) tours = data;
@@ -6346,6 +6834,7 @@ const ratingsState = {
   subjectId: state?.ratings?.subjectId || null,
   tourId: state?.ratings?.tourId || "__all__", // "__all__" = All tours
   tourNo: state?.ratings?.tourNo || "__all__", // "__all__" or number
+  seasonId: state?.ratings?.seasonId || null,
   _booted: false,
   _loading: false,
   _token: 0,
@@ -6363,6 +6852,10 @@ function saveRatingsFiltersToState() {
     state.ratings.subjectId = ratingsState.subjectId ? Number(ratingsState.subjectId) : null;
     state.ratings.tourId = ratingsState.tourId || "__all__";
     state.ratings.tourNo = ratingsState.tourNo || "__all__";
+    state.ratings.seasonId =
+      ratingsState.seasonId
+        ? Number(ratingsState.seasonId)
+        : null;
     saveState();
   } catch {}
 }
@@ -8791,12 +9284,20 @@ async function canIssueFinalCertificateNow(subjectRef, seasonIdArg = null) {
 }
 
    
-async function fetchMyCertificatesDb() {
+async function fetchMyCertificatesDb(
+  seasonIdArg = null
+) {
   try {
     if (!window.sb) return [];
 
     const uid = await getAuthUid();
     if (!uid) return [];
+
+    const seasonId =
+      Number(seasonIdArg || 0) ||
+      await getCurrentSeasonId();
+
+    if (!seasonId) return [];
 
     const { data, error } = await window.sb
       .from("certificates")
@@ -8805,6 +9306,7 @@ async function fetchMyCertificatesDb() {
         user_id,
         subject_id,
         tour_id,
+        season_id,
         certificate_type,
         score,
         percent,
@@ -8819,6 +9321,7 @@ async function fetchMyCertificatesDb() {
         total_tours
       `)
       .eq("user_id", uid)
+      .eq("season_id", Number(seasonId))
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -8950,7 +9453,10 @@ async function canAccessCertificateRow(row) {
   if (!row) return false;
 
   if (String(row?.certificate_type || "") === "final") {
-    return await canIssueFinalCertificateNow(Number(row?.subject_id || 0));
+    return await canIssueFinalCertificateNow(
+      Number(row?.subject_id || 0),
+      Number(row?.season_id || 0) || null
+    );
   }
 
   return await canIssueTourCertificateNow(Number(row?.tour_id || 0));
@@ -8977,11 +9483,28 @@ async function filterAvailableCertificateRows(rows) {
 }
    
 async function renderCertificatesView() {
-  const listEl = document.getElementById("certificates-list");
-  if (!listEl) return;
+  const listEl =
+    document.getElementById("certificates-list");
+
+  if (!listEl) {
+    return;
+  }
+
+  const oldViewerAtStart =
+    document.getElementById(
+      "certificate-viewer-wrap"
+    );
+
+  if (oldViewerAtStart) {
+    oldViewerAtStart.remove();
+  }
 
   listEl.innerHTML = `
-    <div class="empty muted">${escapeHTML(t("loading") || "Loading…")}</div>
+    <div class="empty muted">
+      ${escapeHTML(
+        t("loading") || "Loading…"
+      )}
+    </div>
   `;
 
   showAsyncOverlay(tr3(
@@ -8992,83 +9515,338 @@ async function renderCertificatesView() {
 
   let rawRows = [];
   let rows = [];
+  let seasonRows = [];
+  let certificateSeasonId = null;
+
+  const buildSeasonControlHtml = () => {
+    if (
+      !Array.isArray(seasonRows) ||
+      seasonRows.length <= 1
+    ) {
+      return "";
+    }
+
+    return `
+      <div
+        class="card"
+        style="
+          padding:12px 14px;
+          margin-bottom:12px;
+        "
+      >
+        <label
+          for="certificate-season-select"
+          class="muted small"
+          style="
+            display:block;
+            margin-bottom:7px;
+            font-weight:700;
+          "
+        >
+          ${escapeHTML(tr3(
+            "Сезон",
+            "Mavsum",
+            "Season"
+          ))}
+        </label>
+
+        <select
+          id="certificate-season-select"
+          class="lb-select"
+          style="width:100%;"
+          aria-label="${escapeHTML(tr3(
+            "Выбор сезона",
+            "Mavsumni tanlash",
+            "Select season"
+          ))}"
+        >
+          ${seasonRows.map(season => {
+            const seasonNo =
+              Number(season?.season_no || 0);
+
+            const label = tr3(
+              `Сезон ${seasonNo}`,
+              `${seasonNo}-mavsum`,
+              `Season ${seasonNo}`
+            );
+
+            const selected =
+              Number(season?.id || 0) ===
+              Number(certificateSeasonId || 0);
+
+            return `
+              <option
+                value="${Number(season.id)}"
+                ${selected ? "selected" : ""}
+              >
+                ${escapeHTML(label)}
+              </option>
+            `;
+          }).join("")}
+        </select>
+      </div>
+    `;
+  };
+
+  const bindSeasonControl = () => {
+    const selectEl =
+      document.getElementById(
+        "certificate-season-select"
+      );
+
+    if (!selectEl) {
+      return;
+    }
+
+    selectEl.onchange = async () => {
+      const nextSeasonId =
+        Number(selectEl.value || 0);
+
+      if (!nextSeasonId) {
+        return;
+      }
+
+      state.certificates =
+        state.certificates &&
+        typeof state.certificates === "object"
+          ? state.certificates
+          : {
+              selectedId: null,
+              lastIssuedId: null
+            };
+
+      state.certificates.selectedSeasonId =
+        nextSeasonId;
+
+      state.certificates.selectedId = null;
+
+      saveState();
+
+      await renderCertificatesView();
+    };
+  };
+
+  const renderCertificateContent = html => {
+    listEl.innerHTML =
+      buildSeasonControlHtml() +
+      String(html || "");
+
+    bindSeasonControl();
+  };
 
   try {
     await ensureEligibleCertificatesIssued();
-    rawRows = await fetchMyCertificatesDb();
-    rows = await filterAvailableCertificateRows(rawRows);
+
+    seasonRows =
+      await loadPublishedSeasonRows();
+
+    const currentSeasonId =
+      await getCurrentSeasonId();
+
+    const savedSeasonId =
+      seasonRows.length > 1
+        ? Number(
+            state?.certificates
+              ?.selectedSeasonId ||
+            0
+          )
+        : 0;
+
+    const selectedSeason =
+      seasonRows.find(season =>
+        Number(season?.id || 0) ===
+        savedSeasonId
+      ) ||
+      seasonRows.find(season =>
+        Number(season?.id || 0) ===
+        Number(currentSeasonId || 0)
+      ) ||
+      seasonRows[0] ||
+      null;
+
+    certificateSeasonId =
+      Number(selectedSeason?.id || 0) ||
+      Number(currentSeasonId || 0) ||
+      null;
+
+    if (!certificateSeasonId) {
+      rawRows = [];
+      rows = [];
+    } else {
+      if (seasonRows.length > 1) {
+        state.certificates =
+          state.certificates &&
+          typeof state.certificates === "object"
+            ? state.certificates
+            : {
+                selectedId: null,
+                lastIssuedId: null
+              };
+
+        if (
+          Number(
+            state.certificates
+              .selectedSeasonId ||
+            0
+          ) !==
+          Number(certificateSeasonId)
+        ) {
+          state.certificates
+            .selectedSeasonId =
+              certificateSeasonId;
+
+          state.certificates.selectedId =
+            null;
+
+          saveState();
+        }
+      }
+
+      rawRows =
+        await fetchMyCertificatesDb(
+          certificateSeasonId
+        );
+
+      rows =
+        await filterAvailableCertificateRows(
+          rawRows
+        );
+    }
   } finally {
     hideAsyncOverlay();
   }
 
-      if (!rows.length) {
-    listEl.innerHTML = `
-      <div class="card" style="text-align:center; padding:20px;">
-        <div style="font-size:34px; line-height:1; margin-bottom:10px;">🏅</div>
-        <div style="font-weight:900; margin-bottom:6px;">
-          ${escapeHTML(t("certificates_empty_title") || "Certificates are not available yet")}
+  if (!rows.length) {
+    renderCertificateContent(`
+      <div
+        class="card"
+        style="
+          text-align:center;
+          padding:20px;
+        "
+      >
+        <div
+          style="
+            font-size:34px;
+            line-height:1;
+            margin-bottom:10px;
+          "
+        >
+          🏅
         </div>
-        <div class="muted" style="margin-bottom:14px;">
-          ${escapeHTML(t("certificates_empty") || "No certificates yet")}
+
+        <div
+          style="
+            font-weight:900;
+            margin-bottom:6px;
+          "
+        >
+          ${escapeHTML(
+            t("certificates_empty_title") ||
+            "Certificates are not available yet"
+          )}
         </div>
+
+        <div
+          class="muted"
+          style="margin-bottom:14px;"
+        >
+          ${escapeHTML(
+            t("certificates_empty") ||
+            "No certificates yet"
+          )}
+        </div>
+
         <div class="muted small">
-          ${escapeHTML(t("certificates_empty_hint") || "Certificates become available only after the global completion of the corresponding tour or all tours.")}
+          ${escapeHTML(
+            t("certificates_empty_hint") ||
+            "Certificates become available only after the global completion of the corresponding tour or all tours."
+          )}
         </div>
       </div>
-    `;
+    `);
 
-    const oldViewer = document.getElementById("certificate-viewer-wrap");
-    if (oldViewer) oldViewer.remove();
     return;
   }
 
-          const selectedId =
-    Number(state?.certificates?.selectedId || 0) ||
-    0;
+  const selectedId =
+    Number(
+      state?.certificates?.selectedId ||
+      0
+    );
 
   if (selectedId) {
-    const selectedRow = rows.find(r => Number(r.id) === selectedId) || null;
+    const selectedRow =
+      rows.find(row =>
+        Number(row.id) === selectedId
+      ) ||
+      null;
 
     if (!selectedRow) {
-      if (!state.certificates) {
-        state.certificates = { selectedId: null, lastIssuedId: null };
-      }
+      state.certificates =
+        state.certificates &&
+        typeof state.certificates === "object"
+          ? state.certificates
+          : {
+              selectedId: null,
+              lastIssuedId: null
+            };
+
       state.certificates.selectedId = null;
+
       saveState();
     } else {
       listEl.innerHTML = "";
+
       await renderCertificateViewer(rows);
+
       return;
     }
   }
 
-  listEl.innerHTML = rows.map((row) => {
-    const title = certificateTypeLabel(row);
-    const subjectText = row.subject_title || (t("subject_label") || "Предмет");
-    const statsHtml = renderCertificateStatsHtml(row);
+  const rowsHtml = rows
+    .map(row => {
+      const title =
+        certificateTypeLabel(row);
 
-    return `
-      <div
-        class="list-item cert-list-card"
-        data-action="certificate-open"
-        data-id="${Number(row.id)}"
-      >
-        <div class="cert-list-head">
-          <div>
-            <div class="cert-list-title">${escapeHTML(title)}</div>
-            <div class="cert-list-subtitle">${escapeHTML(subjectText)}</div>
+      const subjectText =
+        row.subject_title ||
+        (
+          t("subject_label") ||
+          "Предмет"
+        );
+
+      const statsHtml =
+        renderCertificateStatsHtml(row);
+
+      return `
+        <div
+          class="list-item cert-list-card"
+          data-action="certificate-open"
+          data-id="${Number(row.id)}"
+        >
+          <div class="cert-list-head">
+            <div>
+              <div class="cert-list-title">
+                ${escapeHTML(title)}
+              </div>
+
+              <div class="cert-list-subtitle">
+                ${escapeHTML(subjectText)}
+              </div>
+            </div>
           </div>
+
+          ${statsHtml}
         </div>
+      `;
+    })
+    .join("");
 
-        ${statsHtml}
-      </div>
-    `;
-  }).join("");
-
-  const oldViewer = document.getElementById("certificate-viewer-wrap");
-  if (oldViewer) oldViewer.remove();
+  renderCertificateContent(rowsHtml);
 }
-      function findSelectedCertificateRow(rows) {
+
+function findSelectedCertificateRow(rows) {
   const selectedId = Number(state?.certificates?.selectedId || 0);
   if (!selectedId) return null;
   return rows.find(r => Number(r.id) === selectedId) || null;
@@ -10278,12 +11056,25 @@ async function loadRatingsSubjectsForSelect() {
   return Array.isArray(data) ? data : [];
 }
 
-async function loadRatingsToursForSubject(subjectId) {
-  if (!subjectId || !window.sb) return [];
+async function loadRatingsToursForSubject(
+  subjectId,
+  seasonIdArg = null
+) {
+  if (!subjectId || !window.sb) {
+    return [];
+  }
+
+  const seasonId =
+    Number(seasonIdArg || 0) ||
+    await getCurrentSeasonId();
+
+  if (!seasonId) {
+    return [];
+  }
 
   let subjectKey = null;
 
-  // 1) Сначала узнаём subject_key по id
+  // 1) Resolve subject_key by subject id.
   try {
     const { data: subjRow, error: subjErr } = await window.sb
       .from("subjects")
@@ -10292,35 +11083,69 @@ async function loadRatingsToursForSubject(subjectId) {
       .maybeSingle();
 
     if (!subjErr && subjRow?.subject_key) {
-      subjectKey = String(subjRow.subject_key).trim();
+      subjectKey =
+        String(subjRow.subject_key).trim();
     }
   } catch {}
 
-  // 2) Предпочтительный путь: через subjects!inner(subject_key)
+  // 2) Preferred path through subject relation.
   if (subjectKey) {
     try {
       const { data, error } = await window.sb
         .from("tours")
-        .select("id,subject_id,tour_no,is_active,start_date,end_date,subjects!inner(subject_key)")
-        .eq("subjects.subject_key", subjectKey)
-        .order("tour_no", { ascending: true });
+        .select(
+          "id,subject_id,tour_no,is_active,start_date,end_date,season_id,subjects!inner(subject_key)"
+        )
+        .eq(
+          "subjects.subject_key",
+          subjectKey
+        )
+        .eq(
+          "season_id",
+          Number(seasonId)
+        )
+        .order(
+          "tour_no",
+          { ascending: true }
+        );
 
-      if (!error && Array.isArray(data) && data.length) {
+      if (
+        !error &&
+        Array.isArray(data) &&
+        data.length
+      ) {
         return data;
       }
     } catch {}
   }
 
-  // 3) Fallback: старый путь по subject_id
+  // 3) Fallback by subject_id, with the same season.
   try {
     const { data, error } = await window.sb
       .from("tours")
-      .select("id,subject_id,tour_no,is_active,start_date,end_date")
-      .eq("subject_id", subjectId)
-      .order("tour_no", { ascending: true });
+      .select(
+        "id,subject_id,tour_no,is_active,start_date,end_date,season_id"
+      )
+      .eq(
+        "subject_id",
+        subjectId
+      )
+      .eq(
+        "season_id",
+        Number(seasonId)
+      )
+      .order(
+        "tour_no",
+        { ascending: true }
+      );
 
-    if (error) return [];
-    return Array.isArray(data) ? data : [];
+    if (error) {
+      return [];
+    }
+
+    return Array.isArray(data)
+      ? data
+      : [];
   } catch {
     return [];
   }
@@ -10351,72 +11176,233 @@ function renderRatingsSelectOptions(selectEl, items, { placeholder = null } = {}
 }
 
 async function ensureRatingsBoot() {
-  if (ratingsState._booted) return;
-
-  if (!window.sb) {
-    // если Supabase ещё не поднялся — просто выйдем, UI покажет заглушку
+  if (ratingsState._booted) {
     return;
   }
 
-  const subjectSelect = document.getElementById("ratings-subject");
-  const tourSelect = document.getElementById("ratings-tour");
+  if (!window.sb) {
+    return;
+  }
 
-  // 1) subjects
-  const subjects = await loadRatingsSubjectsForSelect();
-  const subjectItems = subjects.map(s => ({
-    value: s.id,
-    label: subjectTitle(s.subject_key, s.title)
-  }));
+  const seasonFilter =
+    document.getElementById(
+      "ratings-season-filter"
+    );
 
-  renderRatingsSelectOptions(subjectSelect, subjectItems, {
-    placeholder: t("loading")
-  });
+  const seasonSelect =
+    document.getElementById(
+      "ratings-season"
+    );
 
-  // 2) subject: keep saved subject if it still exists, otherwise choose default
-const uid = await getAuthUid();
-const myComp = await getMyCompetitiveSubjects(uid);
+  const subjectSelect =
+    document.getElementById(
+      "ratings-subject"
+    );
 
-const savedSubjectId = Number(ratingsState.subjectId || state?.ratings?.subjectId || 0);
-const savedSubjectExists = savedSubjectId > 0 && subjects.some(s => Number(s?.id || 0) === savedSubjectId);
+  const tourSelect =
+    document.getElementById(
+      "ratings-tour"
+    );
 
-const defaultSubjectId = (myComp?.[0]?.subject_id) || (subjects?.[0]?.id) || null;
-ratingsState.subjectId = savedSubjectExists
-  ? savedSubjectId
-  : (defaultSubjectId ? Number(defaultSubjectId) : null);
+  // 1. Only current and closed seasons are available.
+  const seasonRows =
+    await loadPublishedSeasonRows();
 
-// отрисуем subjects без placeholder
-renderRatingsSelectOptions(subjectSelect, subjectItems);
-if (ratingsState.subjectId && subjectSelect) subjectSelect.value = String(ratingsState.subjectId);
-   
-  // 3) tours for subject
-  const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
+  const currentSeasonId =
+    await getCurrentSeasonId();
+
+  const savedSeasonId =
+    Number(
+      ratingsState.seasonId ||
+      state?.ratings?.seasonId ||
+      0
+    );
+
+  const selectedSeason =
+    seasonRows.find(season =>
+      Number(season?.id || 0) ===
+      savedSeasonId
+    ) ||
+    seasonRows.find(season =>
+      Number(season?.id || 0) ===
+      Number(currentSeasonId || 0)
+    ) ||
+    seasonRows[0] ||
+    null;
+
+  ratingsState.seasonId =
+    Number(selectedSeason?.id || 0) ||
+    Number(currentSeasonId || 0) ||
+    null;
+
+  const seasonItems =
+    seasonRows.map(season => {
+      const seasonNo =
+        Number(season?.season_no || 0);
+
+      return {
+        value: Number(season.id),
+        label: tr3(
+          `Сезон ${seasonNo}`,
+          `${seasonNo}-mavsum`,
+          `Season ${seasonNo}`
+        )
+      };
+    });
+
+  if (seasonSelect) {
+    renderRatingsSelectOptions(
+      seasonSelect,
+      seasonItems
+    );
+
+    if (ratingsState.seasonId) {
+      seasonSelect.value =
+        String(ratingsState.seasonId);
+    }
+  }
+
+  if (seasonFilter) {
+    seasonFilter.style.display =
+      seasonRows.length > 1
+        ? ""
+        : "none";
+  }
+
+  // 2. Load all active main subjects.
+  const subjects =
+    await loadRatingsSubjectsForSelect();
+
+  const subjectItems =
+    subjects.map(subject => ({
+      value: subject.id,
+      label: subjectTitle(
+        subject.subject_key,
+        subject.title
+      )
+    }));
+
+  renderRatingsSelectOptions(
+    subjectSelect,
+    subjectItems,
+    {
+      placeholder: t("loading")
+    }
+  );
+
+  const uid =
+    await getAuthUid();
+
+  const myCompetitiveSubjects =
+    await getMyCompetitiveSubjects(uid);
+
+  const savedSubjectId =
+    Number(
+      ratingsState.subjectId ||
+      state?.ratings?.subjectId ||
+      0
+    );
+
+  const savedSubjectExists =
+    savedSubjectId > 0 &&
+    subjects.some(subject =>
+      Number(subject?.id || 0) ===
+      savedSubjectId
+    );
+
+  const defaultSubjectId =
+    myCompetitiveSubjects?.[0]?.subject_id ||
+    subjects?.[0]?.id ||
+    null;
+
+  ratingsState.subjectId =
+    savedSubjectExists
+      ? savedSubjectId
+      : (
+          defaultSubjectId
+            ? Number(defaultSubjectId)
+            : null
+        );
+
+  renderRatingsSelectOptions(
+    subjectSelect,
+    subjectItems
+  );
+
+  if (
+    ratingsState.subjectId &&
+    subjectSelect
+  ) {
+    subjectSelect.value =
+      String(ratingsState.subjectId);
+  }
+
+  // 3. Load tours only from the selected season.
+  const tours =
+    await loadRatingsToursForSubject(
+      ratingsState.subjectId,
+      ratingsState.seasonId
+    );
+
   const tourItems = [
-    { value: "__all__", label: t("ratings_all_tours") || "All tours" },
-    ...tours.map(tt => ({ value: tt.id, label: `Tour ${tt.tour_no}`, tourNo: Number(tt.tour_no || 0) }))
+    {
+      value: "__all__",
+      label:
+        t("ratings_all_tours") ||
+        "All tours"
+    },
+    ...tours.map(tour => ({
+      value: tour.id,
+      label: `Tour ${tour.tour_no}`,
+      tourNo:
+        Number(tour.tour_no || 0)
+    }))
   ];
-  renderRatingsSelectOptions(tourSelect, tourItems);
 
-// keep saved tour by tour number, because tour_id is different per subject
-const savedTourNo =
-  ratingsState.tourNo && ratingsState.tourNo !== "__all__"
-    ? Number(ratingsState.tourNo)
-    : null;
+  renderRatingsSelectOptions(
+    tourSelect,
+    tourItems
+  );
 
-const savedTourRow = savedTourNo
-  ? tours.find(tt => Number(tt?.tour_no || 0) === Number(savedTourNo))
-  : null;
+  // Keep the same tour number inside the selected season.
+  const savedTourNo =
+    ratingsState.tourNo &&
+    ratingsState.tourNo !== "__all__"
+      ? Number(ratingsState.tourNo)
+      : null;
 
-ratingsState.tourId = savedTourRow?.id ? Number(savedTourRow.id) : "__all__";
-ratingsState.tourNo = savedTourRow?.tour_no ? Number(savedTourRow.tour_no) : "__all__";
+  const savedTourRow =
+    savedTourNo
+      ? tours.find(tour =>
+          Number(tour?.tour_no || 0) ===
+          Number(savedTourNo)
+        )
+      : null;
 
-if (tourSelect) tourSelect.value = String(ratingsState.tourId || "__all__");
+  ratingsState.tourId =
+    savedTourRow?.id
+      ? Number(savedTourRow.id)
+      : "__all__";
 
-saveRatingsFiltersToState();
-   
+  ratingsState.tourNo =
+    savedTourRow?.tour_no
+      ? Number(savedTourRow.tour_no)
+      : "__all__";
+
+  if (tourSelect) {
+    tourSelect.value =
+      String(
+        ratingsState.tourId ||
+        "__all__"
+      );
+  }
+
+  saveRatingsFiltersToState();
+
   ratingsState._booted = true;
 }
 
-  async function renderRatings() {
+async function renderRatings() {
   const listEl = $("#ratings-list");
   if (!listEl) return;
 
@@ -11283,7 +12269,10 @@ listEl.innerHTML = `
   // =========================
 // B) All tours: tour_attempts aggregation
 // =========================
-const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
+const tours = await loadRatingsToursForSubject(
+  ratingsState.subjectId,
+  ratingsState.seasonId
+);
 const tourIds = Array.from(
   new Set((Array.isArray(tours) ? tours : []).map(x => Number(x?.id)).filter(Boolean))
 );
@@ -11503,6 +12492,7 @@ function closeRatingsSearchPanel() {
 
 function bindRatingsUI() {
   const listEl = $("#ratings-list");
+  const seasonSelect = $("#ratings-season");
   const subjectSelect = $("#ratings-subject");
   const tourSelect = $("#ratings-tour");
      // Search panel controls
@@ -11601,6 +12591,128 @@ function bindRatingsUI() {
     }
   });
 
+  if (seasonSelect) {
+    seasonSelect.addEventListener(
+      "change",
+      async () => {
+        const nextSeasonId =
+          Number(
+            seasonSelect.value ||
+            0
+          );
+
+        if (
+          !nextSeasonId ||
+          nextSeasonId ===
+            Number(
+              ratingsState.seasonId ||
+              0
+            )
+        ) {
+          return;
+        }
+
+        const previousTourNo =
+          ratingsState.tourNo &&
+          ratingsState.tourNo !== "__all__"
+            ? Number(
+                ratingsState.tourNo
+              )
+            : "__all__";
+
+        ratingsState.seasonId =
+          nextSeasonId;
+
+        resetRatingsSearchPaging();
+
+        if (
+          window.sb &&
+          ratingsState.subjectId
+        ) {
+          const tours =
+            await loadRatingsToursForSubject(
+              ratingsState.subjectId,
+              ratingsState.seasonId
+            );
+
+          const tourItems = [
+            {
+              value: "__all__",
+              label:
+                t("ratings_all_tours") ||
+                "All tours"
+            },
+            ...tours.map(tour => ({
+              value: tour.id,
+              label:
+                `Tour ${tour.tour_no}`,
+              tourNo:
+                Number(
+                  tour.tour_no ||
+                  0
+                )
+            }))
+          ];
+
+          renderRatingsSelectOptions(
+            tourSelect,
+            tourItems
+          );
+
+          if (
+            previousTourNo !==
+            "__all__"
+          ) {
+            const sameTour =
+              tours.find(tour =>
+                Number(
+                  tour?.tour_no ||
+                  0
+                ) ===
+                Number(previousTourNo)
+              );
+
+            ratingsState.tourId =
+              sameTour?.id
+                ? Number(sameTour.id)
+                : "__all__";
+
+            ratingsState.tourNo =
+              sameTour?.tour_no
+                ? Number(
+                    sameTour.tour_no
+                  )
+                : "__all__";
+          } else {
+            ratingsState.tourId =
+              "__all__";
+
+            ratingsState.tourNo =
+              "__all__";
+          }
+        } else {
+          ratingsState.tourId =
+            "__all__";
+
+          ratingsState.tourNo =
+            "__all__";
+        }
+
+        if (tourSelect) {
+          tourSelect.value =
+            String(
+              ratingsState.tourId ||
+              "__all__"
+            );
+        }
+
+        saveRatingsFiltersToState();
+
+        renderRatings();
+      }
+    );
+  }
+
   if (subjectSelect) {
   subjectSelect.addEventListener("change", async () => {
     const v = subjectSelect.value;
@@ -11614,7 +12726,10 @@ function bindRatingsUI() {
     resetRatingsSearchPaging();
 
     if (window.sb && ratingsState.subjectId) {
-      const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
+      const tours = await loadRatingsToursForSubject(
+  ratingsState.subjectId,
+  ratingsState.seasonId
+);
       const tourItems = [
         { value: "__all__", label: t("ratings_all_tours") || "All tours" },
         ...tours.map(tt => ({ value: tt.id, label: `Tour ${tt.tour_no}`, tourNo: Number(tt.tour_no || 0) }))
@@ -13640,7 +14755,12 @@ applyHomeExtraState();
 // Home (Competitive) — real Rank + Progress
 // ===========================
 async function computeHomeCompetitiveStats(subjectKey) {
-  const cacheKey = `home_comp:${String(subjectKey || "").trim()}`;
+  const seasonId =
+    await getCurrentSeasonId();
+
+  const cacheKey =
+    `home_comp:${Number(seasonId || 0)}:` +
+    `${String(subjectKey || "").trim()}`;
   const cached = _homeStatsCache.get(cacheKey);
   if (cached && (Date.now() - cached.ts) < HOME_STATS_CACHE_TTL_MS) {
     return cached.data;
@@ -13662,7 +14782,9 @@ async function computeHomeCompetitiveStats(subjectKey) {
   };
 
   try {
-    if (!window.sb) return fallback;
+    if (!window.sb || !seasonId) {
+      return fallback;
+    }
 
     const subjectId = await getSubjectIdByKey(subjectKey);
     if (!subjectId) return fallback;
@@ -13672,8 +14794,11 @@ async function computeHomeCompetitiveStats(subjectKey) {
 
     const toursRes = await window.sb
       .from("tours")
-      .select("id,tour_no,start_date,end_date,is_active")
+      .select(
+        "id,tour_no,start_date,end_date,is_active,season_id"
+      )
       .eq("subject_id", subjectId)
+      .eq("season_id", Number(seasonId))
       .order("tour_no", { ascending: true });
 
     const tours = Array.isArray(toursRes?.data) ? toursRes.data : [];
@@ -13699,11 +14824,19 @@ async function computeHomeCompetitiveStats(subjectKey) {
     const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
 
     const isInWindow = (row) => {
-      const sd = row?.start_date ? String(row.start_date) : null;
-      const ed = row?.end_date ? String(row.end_date) : null;
-      const afterStart = !sd || sd <= todayISO;
-      const beforeEnd = !ed || ed >= todayISO;
-      return afterStart && beforeEnd;
+      const sd = row?.start_date
+        ? String(row.start_date)
+        : "";
+
+      const ed = row?.end_date
+        ? String(row.end_date)
+        : "";
+
+      if (!sd || !ed) {
+        return false;
+      }
+
+      return sd <= todayISO && ed >= todayISO;
     };
 
         const activeTour = tours
@@ -16043,18 +17176,29 @@ const pad2 = (n) => String(n).padStart(2, "0");
 const d0 = new Date();
 const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
 
+const operationalSeasonId =
+  await getCurrentSeasonId();
+
 // UI: show loading first to avoid 1-sec "wrong screen" flicker
 if (statusTitle) statusTitle.textContent = tr("loading", "Загрузка…");
 if (statusDesc) statusDesc.textContent = tr("loading_desc", "Получаем список туров…");
 if (openBtn) openBtn.classList.add("hidden");
 
-// NULL dates = no restriction (ok for test)
+// Тур без обеих дат остаётся скрытым.
 const isInWindow = (row) => {
-  const sd = row?.start_date ? String(row.start_date) : null;
-  const ed = row?.end_date ? String(row.end_date) : null;
-  const afterStart = !sd || sd <= todayISO;
-  const beforeEnd = !ed || ed >= todayISO;
-  return afterStart && beforeEnd;
+  const sd = row?.start_date
+    ? String(row.start_date)
+    : "";
+
+  const ed = row?.end_date
+    ? String(row.end_date)
+    : "";
+
+  if (!sd || !ed) {
+    return false;
+  }
+
+  return sd <= todayISO && ed >= todayISO;
 };
 
 let dbTours = [];
@@ -16065,8 +17209,9 @@ if (window.sb && subjectKey) {
   try {
     const { data, error } = await window.sb
       .from("tours")
-      .select("id, subject_id, tour_no, start_date, end_date, is_active, subjects!inner(subject_key)")
+      .select("id, subject_id, tour_no, start_date, end_date, is_active, season_id, subjects!inner(subject_key)")
       .eq("subjects.subject_key", String(subjectKey))
+      .eq("season_id", Number(operationalSeasonId))
       .order("tour_no", { ascending: true });
 
     if (error) toursErr = error;
@@ -16088,8 +17233,9 @@ if (!dbTours.length && window.sb && subjectId) {
   try {
     const { data, error } = await window.sb
       .from("tours")
-      .select("id, subject_id, tour_no, start_date, end_date, is_active")
+      .select("id, subject_id, tour_no, start_date, end_date, is_active, season_id")
       .eq("subject_id", subjectId)
+      .eq("season_id", Number(operationalSeasonId))
       .order("tour_no", { ascending: true });
 
     if (error) toursErr = toursErr || error;
@@ -16117,8 +17263,17 @@ const upcomingTour = upcomingTours.length ? upcomingTours[0] : null;
 if (!state.courses) state.courses = {};
 state.courses.activeTourId = activeTour?.id || null;
 state.courses.activeTourNo = activeTour?.tour_no || null;
+state.courses.activeSeasonId =
+  activeTour?.season_id ||
+  operationalSeasonId ||
+  null;
+
 state.courses.upcomingTourId = upcomingTour?.id || null;
 state.courses.upcomingTourNo = upcomingTour?.tour_no || null;
+state.courses.upcomingSeasonId =
+  upcomingTour?.season_id ||
+  operationalSeasonId ||
+  null;
 
 // label
 if (tourLabelEl) {
@@ -16217,7 +17372,12 @@ if (!activeTour && !upcomingTour) {
     }
   }
 }
-     try { await renderToursHistorySummary(subjectId); } catch {}
+     try {
+       await renderToursHistorySummary(
+         subjectId,
+         operationalSeasonId
+       );
+     } catch {}
      
       saveState();
       } finally {
@@ -16229,7 +17389,10 @@ if (!activeTour && !upcomingTour) {
 // Completed tours (DB summary by subject)
 // Best = max percent, tie-break = min time
 // --------------------------------------
-async function renderToursHistorySummary(subjectId) {
+async function renderToursHistorySummary(
+  subjectId,
+  seasonIdArg = null
+) {
   const bestScoreEl = document.getElementById("tours-best-score");
   const bestPctEl = document.getElementById("tours-best-percent");
   const bestTimeEl = document.getElementById("tours-best-time");
@@ -16248,15 +17411,27 @@ async function renderToursHistorySummary(subjectId) {
     return `${m}${t("practice_time_min_suffix")} ${r}${t("practice_time_sec_suffix")}`;
   };
 
+  const seasonId =
+    Number(seasonIdArg || 0) ||
+    await getCurrentSeasonId();
+
   let attempts = [];
+
   try {
     const uid = await getAuthUid();
-    if (window.sb && uid && subjectId) {
+
+    if (
+      window.sb &&
+      uid &&
+      subjectId &&
+      seasonId
+    ) {
       const { data, error } = await window.sb
         .from("tour_attempts")
-        .select("id, tour_id, score, percent, total_time, created_at, tours!inner(tour_no, subject_id)")
+        .select("id, tour_id, score, percent, total_time, created_at, tours!inner(tour_no, subject_id, season_id)")
         .eq("user_id", uid)
         .eq("tours.subject_id", subjectId)
+        .eq("tours.season_id", Number(seasonId))
         .order("created_at", { ascending: false });
 
       if (!error && Array.isArray(data)) attempts = data;
@@ -17717,10 +18892,68 @@ async function renderMyRecs() {
     return;
   }
 
-  const activeTab = String(state?.courses?.myRecsActiveTab || "practice");
+  const activeTab = String(
+    state?.courses?.myRecsActiveTab ||
+    "practice"
+  );
 
-  const selectedSeasonId = await getCurrentSeasonId();
-  const seasonOneId = await getSeasonOneId();
+  const seasonRows =
+    await loadPublishedSeasonRows();
+
+  const currentSeasonId =
+    await getCurrentSeasonId();
+
+  const savedSeasonId =
+    seasonRows.length > 1
+      ? Number(
+          state?.courses?.myRecsSeasonId ||
+          0
+        )
+      : 0;
+
+  const selectedSeason =
+    seasonRows.find(row =>
+      Number(row?.id || 0) ===
+      savedSeasonId
+    ) ||
+    seasonRows.find(row =>
+      Number(row?.id || 0) ===
+      Number(currentSeasonId || 0)
+    ) ||
+    seasonRows[0] ||
+    null;
+
+  const selectedSeasonId =
+    Number(selectedSeason?.id || 0) ||
+    Number(currentSeasonId || 0) ||
+    null;
+
+  const seasonOneId =
+    await getSeasonOneId();
+
+  if (
+    seasonRows.length > 1 &&
+    selectedSeasonId
+  ) {
+    state.courses =
+      state.courses &&
+      typeof state.courses === "object"
+        ? state.courses
+        : {};
+
+    if (
+      Number(
+        state.courses.myRecsSeasonId ||
+        0
+      ) !==
+      Number(selectedSeasonId)
+    ) {
+      state.courses.myRecsSeasonId =
+        Number(selectedSeasonId);
+
+      saveState();
+    }
+  }
 
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
 
@@ -17859,14 +19092,6 @@ async function renderMyRecs() {
       }
     }
   } catch {}
-  const hasPractice = practiceRows.length > 0;
-  const hasTour = tourRows.length > 0;
-
-  if (!hasPractice && !hasTour) {
-    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("recommendations_empty") || "Пока рекомендаций нет.")}</div>`;
-    return;
-  }
-
   const tabBtn = (key, label, isActive) => `
     <button
       type="button"
@@ -17877,6 +19102,79 @@ async function renderMyRecs() {
       ${escapeHTML(label)}
     </button>
   `;
+
+  const renderSeasonControl = () => {
+    if (
+      activeTab !== "tour" ||
+      seasonRows.length <= 1
+    ) {
+      return "";
+    }
+
+    return `
+      <div
+        class="card"
+        style="
+          padding:12px 14px;
+          margin-bottom:12px;
+        "
+      >
+        <label
+          for="my-recs-season-select"
+          class="muted small"
+          style="
+            display:block;
+            margin-bottom:7px;
+            font-weight:700;
+          "
+        >
+          ${escapeHTML(tr3(
+            "Сезон",
+            "Mavsum",
+            "Season"
+          ))}
+        </label>
+
+        <select
+          id="my-recs-season-select"
+          class="lb-select"
+          style="width:100%;"
+          aria-label="${escapeHTML(tr3(
+            "Выбор сезона",
+            "Mavsumni tanlash",
+            "Select season"
+          ))}"
+        >
+          ${seasonRows.map(season => {
+            const seasonNo =
+              Number(
+                season?.season_no ||
+                0
+              );
+
+            const label = tr3(
+              `Сезон ${seasonNo}`,
+              `${seasonNo}-mavsum`,
+              `Season ${seasonNo}`
+            );
+
+            const selected =
+              Number(season?.id || 0) ===
+              Number(selectedSeasonId || 0);
+
+            return `
+              <option
+                value="${Number(season.id)}"
+                ${selected ? "selected" : ""}
+              >
+                ${escapeHTML(label)}
+              </option>
+            `;
+          }).join("")}
+        </select>
+      </div>
+    `;
+  };
 
   const renderPracticeList = () => {
     if (!practiceRows.length) {
@@ -17953,10 +19251,28 @@ async function renderMyRecs() {
 
   wrap.innerHTML = `
     <div style="display:flex;gap:10px;margin-bottom:12px">
-      ${tabBtn("practice", t("my_recs_tab_practice") || "Практика", activeTab === "practice")}
-      ${tabBtn("tour", t("my_recs_tab_tour") || "Туры", activeTab === "tour")}
+      ${tabBtn(
+        "practice",
+        t("my_recs_tab_practice") ||
+        "Практика",
+        activeTab === "practice"
+      )}
+
+      ${tabBtn(
+        "tour",
+        t("my_recs_tab_tour") ||
+        "Туры",
+        activeTab === "tour"
+      )}
     </div>
-    ${activeTab === "tour" ? renderTourList() : renderPracticeList()}
+
+    ${renderSeasonControl()}
+
+    ${
+      activeTab === "tour"
+        ? renderTourList()
+        : renderPracticeList()
+    }
   `;
 
   wrap.querySelectorAll("[data-myrecs-tab]").forEach(btn => {
@@ -17967,6 +19283,51 @@ async function renderMyRecs() {
       await renderMyRecs();
     });
   });
+
+  const seasonSelect =
+    wrap.querySelector(
+      "#my-recs-season-select"
+    );
+
+  if (seasonSelect) {
+    seasonSelect.addEventListener(
+      "change",
+      async () => {
+        const nextSeasonId =
+          Number(
+            seasonSelect.value ||
+            0
+          );
+
+        if (
+          !nextSeasonId ||
+          nextSeasonId ===
+            Number(
+              selectedSeasonId ||
+              0
+            )
+        ) {
+          return;
+        }
+
+        state.courses =
+          state.courses &&
+          typeof state.courses === "object"
+            ? state.courses
+            : {};
+
+        state.courses.myRecsSeasonId =
+          nextSeasonId;
+
+        state.courses.myRecCurrent =
+          null;
+
+        saveState();
+
+        await renderMyRecs();
+      }
+    );
+  }
 
   if (activeTab === "practice") {
     const cards = Array.from(wrap.querySelectorAll('[data-open-rec="practice"]'));
@@ -19007,29 +20368,70 @@ async function renderBooks() {
 // Tours (DB-first via tour_questions)
 // ---------------------------
 
-async function loadActiveTourBySubjectAndNo(subjectId, tourNo) {
-  if (!window.sb || !subjectId || !tourNo) return null;
+async function loadActiveTourBySubjectAndNo(
+  subjectId,
+  tourNo,
+  seasonIdArg = null
+) {
+  if (!window.sb || !subjectId || !tourNo) {
+    return null;
+  }
+
+  const seasonId =
+    Number(seasonIdArg || 0) ||
+    await getCurrentSeasonId();
+
+  if (!seasonId) {
+    return null;
+  }
 
   const { data, error } = await window.sb
     .from("tours")
-    .select("id,subject_id,tour_no,start_date,end_date,is_active,season_id")
-    .eq("subject_id", subjectId)
+    .select(
+      "id,subject_id,tour_no,start_date,end_date,is_active,season_id"
+    )
+    .eq("subject_id", Number(subjectId))
     .eq("tour_no", Number(tourNo))
+    .eq("season_id", Number(seasonId))
     .eq("is_active", true)
     .maybeSingle();
 
-  if (error || !data?.id) return null;
+  if (error || !data?.id) {
+    return null;
+  }
 
-  // ✅ local date check: closed/future tours must not start from stale state
-  const padLocal = (n) => String(n).padStart(2, "0");
-  const d0 = new Date();
-  const todayISO = `${d0.getFullYear()}-${padLocal(d0.getMonth() + 1)}-${padLocal(d0.getDate())}`;
+  const padLocal = (number) =>
+    String(number).padStart(2, "0");
 
-  const sd = data?.start_date ? String(data.start_date) : null;
-  const ed = data?.end_date ? String(data.end_date) : null;
+  const now = new Date();
 
-  if (sd && sd > todayISO) return null;
-  if (ed && ed < todayISO) return null;
+  const todayISO =
+    `${now.getFullYear()}-` +
+    `${padLocal(now.getMonth() + 1)}-` +
+    `${padLocal(now.getDate())}`;
+
+  const startDate =
+    data?.start_date
+      ? String(data.start_date)
+      : "";
+
+  const endDate =
+    data?.end_date
+      ? String(data.end_date)
+      : "";
+
+  // Подготовительный тур без дат никогда не открывается.
+  if (!startDate || !endDate) {
+    return null;
+  }
+
+  if (startDate > todayISO) {
+    return null;
+  }
+
+  if (endDate < todayISO) {
+    return null;
+  }
 
   return data;
 }
@@ -19446,8 +20848,17 @@ async function updateTourAttempt(attemptId, patch) {
     return;
   }
 
+  const selectedSeasonId =
+    Number(state?.courses?.activeSeasonId || 0) ||
+    null;
+
   const tourNo = selectedTourNo;
-  const tour = await loadActiveTourBySubjectAndNo(subjectId, tourNo);
+
+  const tour = await loadActiveTourBySubjectAndNo(
+    subjectId,
+    tourNo,
+    selectedSeasonId
+  );
 
   if (!tour?.id || String(tour.id) !== selectedTourId) {
     await uiAlert({
