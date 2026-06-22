@@ -9478,11 +9478,28 @@ async function filterAvailableCertificateRows(rows) {
 }
    
 async function renderCertificatesView() {
-  const listEl = document.getElementById("certificates-list");
-  if (!listEl) return;
+  const listEl =
+    document.getElementById("certificates-list");
+
+  if (!listEl) {
+    return;
+  }
+
+  const oldViewerAtStart =
+    document.getElementById(
+      "certificate-viewer-wrap"
+    );
+
+  if (oldViewerAtStart) {
+    oldViewerAtStart.remove();
+  }
 
   listEl.innerHTML = `
-    <div class="empty muted">${escapeHTML(t("loading") || "Loading…")}</div>
+    <div class="empty muted">
+      ${escapeHTML(
+        t("loading") || "Loading…"
+      )}
+    </div>
   `;
 
   showAsyncOverlay(tr3(
@@ -9493,94 +9510,338 @@ async function renderCertificatesView() {
 
   let rawRows = [];
   let rows = [];
+  let seasonRows = [];
+  let certificateSeasonId = null;
+
+  const buildSeasonControlHtml = () => {
+    if (
+      !Array.isArray(seasonRows) ||
+      seasonRows.length <= 1
+    ) {
+      return "";
+    }
+
+    return `
+      <div
+        class="card"
+        style="
+          padding:12px 14px;
+          margin-bottom:12px;
+        "
+      >
+        <label
+          for="certificate-season-select"
+          class="muted small"
+          style="
+            display:block;
+            margin-bottom:7px;
+            font-weight:700;
+          "
+        >
+          ${escapeHTML(tr3(
+            "Сезон",
+            "Mavsum",
+            "Season"
+          ))}
+        </label>
+
+        <select
+          id="certificate-season-select"
+          class="lb-select"
+          style="width:100%;"
+          aria-label="${escapeHTML(tr3(
+            "Выбор сезона",
+            "Mavsumni tanlash",
+            "Select season"
+          ))}"
+        >
+          ${seasonRows.map(season => {
+            const seasonNo =
+              Number(season?.season_no || 0);
+
+            const label = tr3(
+              `Сезон ${seasonNo}`,
+              `${seasonNo}-mavsum`,
+              `Season ${seasonNo}`
+            );
+
+            const selected =
+              Number(season?.id || 0) ===
+              Number(certificateSeasonId || 0);
+
+            return `
+              <option
+                value="${Number(season.id)}"
+                ${selected ? "selected" : ""}
+              >
+                ${escapeHTML(label)}
+              </option>
+            `;
+          }).join("")}
+        </select>
+      </div>
+    `;
+  };
+
+  const bindSeasonControl = () => {
+    const selectEl =
+      document.getElementById(
+        "certificate-season-select"
+      );
+
+    if (!selectEl) {
+      return;
+    }
+
+    selectEl.onchange = async () => {
+      const nextSeasonId =
+        Number(selectEl.value || 0);
+
+      if (!nextSeasonId) {
+        return;
+      }
+
+      state.certificates =
+        state.certificates &&
+        typeof state.certificates === "object"
+          ? state.certificates
+          : {
+              selectedId: null,
+              lastIssuedId: null
+            };
+
+      state.certificates.selectedSeasonId =
+        nextSeasonId;
+
+      state.certificates.selectedId = null;
+
+      saveState();
+
+      await renderCertificatesView();
+    };
+  };
+
+  const renderCertificateContent = html => {
+    listEl.innerHTML =
+      buildSeasonControlHtml() +
+      String(html || "");
+
+    bindSeasonControl();
+  };
 
   try {
     await ensureEligibleCertificatesIssued();
 
-    const certificateSeasonId =
-      Number(
-        state?.certificates?.selectedSeasonId ||
-        0
-      ) ||
+    seasonRows =
+      await loadPublishedSeasonRows();
+
+    const currentSeasonId =
       await getCurrentSeasonId();
 
-    rawRows = await fetchMyCertificatesDb(
-      certificateSeasonId
-    );
+    const savedSeasonId =
+      seasonRows.length > 1
+        ? Number(
+            state?.certificates
+              ?.selectedSeasonId ||
+            0
+          )
+        : 0;
 
-    rows = await filterAvailableCertificateRows(rawRows);
+    const selectedSeason =
+      seasonRows.find(season =>
+        Number(season?.id || 0) ===
+        savedSeasonId
+      ) ||
+      seasonRows.find(season =>
+        Number(season?.id || 0) ===
+        Number(currentSeasonId || 0)
+      ) ||
+      seasonRows[0] ||
+      null;
+
+    certificateSeasonId =
+      Number(selectedSeason?.id || 0) ||
+      Number(currentSeasonId || 0) ||
+      null;
+
+    if (!certificateSeasonId) {
+      rawRows = [];
+      rows = [];
+    } else {
+      if (seasonRows.length > 1) {
+        state.certificates =
+          state.certificates &&
+          typeof state.certificates === "object"
+            ? state.certificates
+            : {
+                selectedId: null,
+                lastIssuedId: null
+              };
+
+        if (
+          Number(
+            state.certificates
+              .selectedSeasonId ||
+            0
+          ) !==
+          Number(certificateSeasonId)
+        ) {
+          state.certificates
+            .selectedSeasonId =
+              certificateSeasonId;
+
+          state.certificates.selectedId =
+            null;
+
+          saveState();
+        }
+      }
+
+      rawRows =
+        await fetchMyCertificatesDb(
+          certificateSeasonId
+        );
+
+      rows =
+        await filterAvailableCertificateRows(
+          rawRows
+        );
+    }
   } finally {
     hideAsyncOverlay();
   }
 
-      if (!rows.length) {
-    listEl.innerHTML = `
-      <div class="card" style="text-align:center; padding:20px;">
-        <div style="font-size:34px; line-height:1; margin-bottom:10px;">🏅</div>
-        <div style="font-weight:900; margin-bottom:6px;">
-          ${escapeHTML(t("certificates_empty_title") || "Certificates are not available yet")}
+  if (!rows.length) {
+    renderCertificateContent(`
+      <div
+        class="card"
+        style="
+          text-align:center;
+          padding:20px;
+        "
+      >
+        <div
+          style="
+            font-size:34px;
+            line-height:1;
+            margin-bottom:10px;
+          "
+        >
+          🏅
         </div>
-        <div class="muted" style="margin-bottom:14px;">
-          ${escapeHTML(t("certificates_empty") || "No certificates yet")}
+
+        <div
+          style="
+            font-weight:900;
+            margin-bottom:6px;
+          "
+        >
+          ${escapeHTML(
+            t("certificates_empty_title") ||
+            "Certificates are not available yet"
+          )}
         </div>
+
+        <div
+          class="muted"
+          style="margin-bottom:14px;"
+        >
+          ${escapeHTML(
+            t("certificates_empty") ||
+            "No certificates yet"
+          )}
+        </div>
+
         <div class="muted small">
-          ${escapeHTML(t("certificates_empty_hint") || "Certificates become available only after the global completion of the corresponding tour or all tours.")}
+          ${escapeHTML(
+            t("certificates_empty_hint") ||
+            "Certificates become available only after the global completion of the corresponding tour or all tours."
+          )}
         </div>
       </div>
-    `;
+    `);
 
-    const oldViewer = document.getElementById("certificate-viewer-wrap");
-    if (oldViewer) oldViewer.remove();
     return;
   }
 
-          const selectedId =
-    Number(state?.certificates?.selectedId || 0) ||
-    0;
+  const selectedId =
+    Number(
+      state?.certificates?.selectedId ||
+      0
+    );
 
   if (selectedId) {
-    const selectedRow = rows.find(r => Number(r.id) === selectedId) || null;
+    const selectedRow =
+      rows.find(row =>
+        Number(row.id) === selectedId
+      ) ||
+      null;
 
     if (!selectedRow) {
-      if (!state.certificates) {
-        state.certificates = { selectedId: null, lastIssuedId: null };
-      }
+      state.certificates =
+        state.certificates &&
+        typeof state.certificates === "object"
+          ? state.certificates
+          : {
+              selectedId: null,
+              lastIssuedId: null
+            };
+
       state.certificates.selectedId = null;
+
       saveState();
     } else {
       listEl.innerHTML = "";
+
       await renderCertificateViewer(rows);
+
       return;
     }
   }
 
-  listEl.innerHTML = rows.map((row) => {
-    const title = certificateTypeLabel(row);
-    const subjectText = row.subject_title || (t("subject_label") || "Предмет");
-    const statsHtml = renderCertificateStatsHtml(row);
+  const rowsHtml = rows
+    .map(row => {
+      const title =
+        certificateTypeLabel(row);
 
-    return `
-      <div
-        class="list-item cert-list-card"
-        data-action="certificate-open"
-        data-id="${Number(row.id)}"
-      >
-        <div class="cert-list-head">
-          <div>
-            <div class="cert-list-title">${escapeHTML(title)}</div>
-            <div class="cert-list-subtitle">${escapeHTML(subjectText)}</div>
+      const subjectText =
+        row.subject_title ||
+        (
+          t("subject_label") ||
+          "Предмет"
+        );
+
+      const statsHtml =
+        renderCertificateStatsHtml(row);
+
+      return `
+        <div
+          class="list-item cert-list-card"
+          data-action="certificate-open"
+          data-id="${Number(row.id)}"
+        >
+          <div class="cert-list-head">
+            <div>
+              <div class="cert-list-title">
+                ${escapeHTML(title)}
+              </div>
+
+              <div class="cert-list-subtitle">
+                ${escapeHTML(subjectText)}
+              </div>
+            </div>
           </div>
+
+          ${statsHtml}
         </div>
+      `;
+    })
+    .join("");
 
-        ${statsHtml}
-      </div>
-    `;
-  }).join("");
-
-  const oldViewer = document.getElementById("certificate-viewer-wrap");
-  if (oldViewer) oldViewer.remove();
+  renderCertificateContent(rowsHtml);
 }
-      function findSelectedCertificateRow(rows) {
+
+function findSelectedCertificateRow(rows) {
   const selectedId = Number(state?.certificates?.selectedId || 0);
   if (!selectedId) return null;
   return rows.find(r => Number(r.id) === selectedId) || null;
