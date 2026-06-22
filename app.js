@@ -8780,12 +8780,20 @@ async function canIssueFinalCertificateNow(subjectRef, seasonIdArg = null) {
 }
 
    
-async function fetchMyCertificatesDb() {
+async function fetchMyCertificatesDb(
+  seasonIdArg = null
+) {
   try {
     if (!window.sb) return [];
 
     const uid = await getAuthUid();
     if (!uid) return [];
+
+    const seasonId =
+      Number(seasonIdArg || 0) ||
+      await getCurrentSeasonId();
+
+    if (!seasonId) return [];
 
     const { data, error } = await window.sb
       .from("certificates")
@@ -8794,6 +8802,7 @@ async function fetchMyCertificatesDb() {
         user_id,
         subject_id,
         tour_id,
+        season_id,
         certificate_type,
         score,
         percent,
@@ -8808,6 +8817,7 @@ async function fetchMyCertificatesDb() {
         total_tours
       `)
       .eq("user_id", uid)
+      .eq("season_id", Number(seasonId))
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -8939,7 +8949,10 @@ async function canAccessCertificateRow(row) {
   if (!row) return false;
 
   if (String(row?.certificate_type || "") === "final") {
-    return await canIssueFinalCertificateNow(Number(row?.subject_id || 0));
+    return await canIssueFinalCertificateNow(
+      Number(row?.subject_id || 0),
+      Number(row?.season_id || 0) || null
+    );
   }
 
   return await canIssueTourCertificateNow(Number(row?.tour_id || 0));
@@ -8984,7 +8997,18 @@ async function renderCertificatesView() {
 
   try {
     await ensureEligibleCertificatesIssued();
-    rawRows = await fetchMyCertificatesDb();
+
+    const certificateSeasonId =
+      Number(
+        state?.certificates?.selectedSeasonId ||
+        0
+      ) ||
+      await getCurrentSeasonId();
+
+    rawRows = await fetchMyCertificatesDb(
+      certificateSeasonId
+    );
+
     rows = await filterAvailableCertificateRows(rawRows);
   } finally {
     hideAsyncOverlay();
