@@ -8593,11 +8593,15 @@ async function ensureEligibleCertificatesIssued() {
    
    const __finalCertReadyCache = new Map();
 
-async function canIssueFinalCertificateNow(subjectKey, seasonIdArg = null) {
+async function canIssueFinalCertificateNow(subjectRef, seasonIdArg = null) {
   try {
     if (!window.sb) return false;
 
-    const sid = await getSubjectIdByKey(subjectKey);
+    let sid = Number(subjectRef || 0);
+    if (!Number.isFinite(sid) || sid <= 0) {
+      sid = await getSubjectIdByKey(subjectRef);
+    }
+
     if (!sid) return false;
 
     const seasonId = seasonIdArg || await getCurrentSeasonId();
@@ -8634,6 +8638,7 @@ async function canIssueFinalCertificateNow(subjectKey, seasonIdArg = null) {
     return false;
   }
 }
+
 
 
    async function tryIssueFinalCertificateForSubject(subjectId) {
