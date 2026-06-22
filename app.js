@@ -10291,12 +10291,25 @@ async function loadRatingsSubjectsForSelect() {
   return Array.isArray(data) ? data : [];
 }
 
-async function loadRatingsToursForSubject(subjectId) {
-  if (!subjectId || !window.sb) return [];
+async function loadRatingsToursForSubject(
+  subjectId,
+  seasonIdArg = null
+) {
+  if (!subjectId || !window.sb) {
+    return [];
+  }
+
+  const seasonId =
+    Number(seasonIdArg || 0) ||
+    await getCurrentSeasonId();
+
+  if (!seasonId) {
+    return [];
+  }
 
   let subjectKey = null;
 
-  // 1) Сначала узнаём subject_key по id
+  // 1) Resolve subject_key by subject id.
   try {
     const { data: subjRow, error: subjErr } = await window.sb
       .from("subjects")
@@ -10305,35 +10318,69 @@ async function loadRatingsToursForSubject(subjectId) {
       .maybeSingle();
 
     if (!subjErr && subjRow?.subject_key) {
-      subjectKey = String(subjRow.subject_key).trim();
+      subjectKey =
+        String(subjRow.subject_key).trim();
     }
   } catch {}
 
-  // 2) Предпочтительный путь: через subjects!inner(subject_key)
+  // 2) Preferred path through subject relation.
   if (subjectKey) {
     try {
       const { data, error } = await window.sb
         .from("tours")
-        .select("id,subject_id,tour_no,is_active,start_date,end_date,subjects!inner(subject_key)")
-        .eq("subjects.subject_key", subjectKey)
-        .order("tour_no", { ascending: true });
+        .select(
+          "id,subject_id,tour_no,is_active,start_date,end_date,season_id,subjects!inner(subject_key)"
+        )
+        .eq(
+          "subjects.subject_key",
+          subjectKey
+        )
+        .eq(
+          "season_id",
+          Number(seasonId)
+        )
+        .order(
+          "tour_no",
+          { ascending: true }
+        );
 
-      if (!error && Array.isArray(data) && data.length) {
+      if (
+        !error &&
+        Array.isArray(data) &&
+        data.length
+      ) {
         return data;
       }
     } catch {}
   }
 
-  // 3) Fallback: старый путь по subject_id
+  // 3) Fallback by subject_id, with the same season.
   try {
     const { data, error } = await window.sb
       .from("tours")
-      .select("id,subject_id,tour_no,is_active,start_date,end_date")
-      .eq("subject_id", subjectId)
-      .order("tour_no", { ascending: true });
+      .select(
+        "id,subject_id,tour_no,is_active,start_date,end_date,season_id"
+      )
+      .eq(
+        "subject_id",
+        subjectId
+      )
+      .eq(
+        "season_id",
+        Number(seasonId)
+      )
+      .order(
+        "tour_no",
+        { ascending: true }
+      );
 
-    if (error) return [];
-    return Array.isArray(data) ? data : [];
+    if (error) {
+      return [];
+    }
+
+    return Array.isArray(data)
+      ? data
+      : [];
   } catch {
     return [];
   }
