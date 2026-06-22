@@ -2510,10 +2510,20 @@ async function getProfileCompetitiveSlotHint(subjectKey) {
       return t("profile_slot_hint_unpublished");
     }
 
+    const seasonId =
+      await getCurrentSeasonId();
+
+    if (!seasonId) {
+      return t("profile_slot_hint_unpublished");
+    }
+
     const { data, error } = await window.sb
       .from("tours")
-      .select("tour_no,start_date,end_date,is_active")
+      .select(
+        "tour_no,start_date,end_date,is_active,season_id"
+      )
       .eq("subject_id", subjectId)
+      .eq("season_id", Number(seasonId))
       .eq("is_active", true)
       .order("tour_no", { ascending: true });
 
@@ -2527,11 +2537,19 @@ async function getProfileCompetitiveSlotHint(subjectKey) {
     const todayISO = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
 
     const isInWindow = (row) => {
-      const sd = row?.start_date ? String(row.start_date) : null;
-      const ed = row?.end_date ? String(row.end_date) : null;
-      const afterStart = !sd || sd <= todayISO;
-      const beforeEnd = !ed || ed >= todayISO;
-      return afterStart && beforeEnd;
+      const sd = row?.start_date
+        ? String(row.start_date)
+        : "";
+
+      const ed = row?.end_date
+        ? String(row.end_date)
+        : "";
+
+      if (!sd || !ed) {
+        return false;
+      }
+
+      return sd <= todayISO && ed >= todayISO;
     };
 
     const activeTour = data.find(isInWindow);
@@ -2607,25 +2625,44 @@ async function getProfileCompetitiveSlotHint(subjectKey) {
   }
 
          // DB check (real source of truth). If DB not available — fallback to local schedule.
-async function dbHasAnyActiveTourNow() {
-  if (!window.sb) return null; // unknown
+async function dbHasAnyActiveTourNow(
+  seasonIdArg = null
+) {
+  if (!window.sb) return null;
+
+  const seasonId =
+    Number(seasonIdArg || 0) ||
+    await getCurrentSeasonId();
+
+  if (!seasonId) return null;
 
   const pad2 = (n) => String(n).padStart(2, "0");
   const d0 = new Date();
   const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
 
   const isInWindow = (row) => {
-    const sd = row?.start_date ? String(row.start_date) : null;
-    const ed = row?.end_date ? String(row.end_date) : null;
-    const afterStart = !sd || sd <= todayISO;
-    const beforeEnd = !ed || ed >= todayISO;
-    return afterStart && beforeEnd;
+    const sd = row?.start_date
+      ? String(row.start_date)
+      : "";
+
+    const ed = row?.end_date
+      ? String(row.end_date)
+      : "";
+
+    if (!sd || !ed) {
+      return false;
+    }
+
+    return sd <= todayISO && ed >= todayISO;
   };
 
     try {
     const { data, error } = await window.sb
       .from("tours")
-      .select("id,start_date,end_date,is_active")
+      .select(
+        "id,start_date,end_date,is_active,season_id"
+      )
+      .eq("season_id", Number(seasonId))
       .eq("is_active", true);
 
     if (error) return null;
@@ -13754,7 +13791,12 @@ applyHomeExtraState();
 // Home (Competitive) — real Rank + Progress
 // ===========================
 async function computeHomeCompetitiveStats(subjectKey) {
-  const cacheKey = `home_comp:${String(subjectKey || "").trim()}`;
+  const seasonId =
+    await getCurrentSeasonId();
+
+  const cacheKey =
+    `home_comp:${Number(seasonId || 0)}:` +
+    `${String(subjectKey || "").trim()}`;
   const cached = _homeStatsCache.get(cacheKey);
   if (cached && (Date.now() - cached.ts) < HOME_STATS_CACHE_TTL_MS) {
     return cached.data;
@@ -13776,7 +13818,9 @@ async function computeHomeCompetitiveStats(subjectKey) {
   };
 
   try {
-    if (!window.sb) return fallback;
+    if (!window.sb || !seasonId) {
+      return fallback;
+    }
 
     const subjectId = await getSubjectIdByKey(subjectKey);
     if (!subjectId) return fallback;
@@ -13786,8 +13830,11 @@ async function computeHomeCompetitiveStats(subjectKey) {
 
     const toursRes = await window.sb
       .from("tours")
-      .select("id,tour_no,start_date,end_date,is_active")
+      .select(
+        "id,tour_no,start_date,end_date,is_active,season_id"
+      )
       .eq("subject_id", subjectId)
+      .eq("season_id", Number(seasonId))
       .order("tour_no", { ascending: true });
 
     const tours = Array.isArray(toursRes?.data) ? toursRes.data : [];
@@ -13813,11 +13860,19 @@ async function computeHomeCompetitiveStats(subjectKey) {
     const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
 
     const isInWindow = (row) => {
-      const sd = row?.start_date ? String(row.start_date) : null;
-      const ed = row?.end_date ? String(row.end_date) : null;
-      const afterStart = !sd || sd <= todayISO;
-      const beforeEnd = !ed || ed >= todayISO;
-      return afterStart && beforeEnd;
+      const sd = row?.start_date
+        ? String(row.start_date)
+        : "";
+
+      const ed = row?.end_date
+        ? String(row.end_date)
+        : "";
+
+      if (!sd || !ed) {
+        return false;
+      }
+
+      return sd <= todayISO && ed >= todayISO;
     };
 
         const activeTour = tours
