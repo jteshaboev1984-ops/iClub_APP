@@ -336,32 +336,21 @@ async function getTourSeasonIdByTourId(tourId) {
   }
 }
 
-async function resolveTourSeasonId({ seasonId = null, tourId = null, subjectId = null, subjectKey = "", tourNo = null } = {}) {
+async function resolveTourSeasonId({
+  seasonId = null,
+  tourId = null
+} = {}) {
   const direct = Number(seasonId || 0);
-  if (Number.isFinite(direct) && direct > 0) return direct;
+
+  if (Number.isFinite(direct) && direct > 0) {
+    return direct;
+  }
 
   const byTour = await getTourSeasonIdByTourId(tourId);
-  if (byTour) return byTour;
 
-  try {
-    if (!subjectId && subjectKey && typeof getSubjectIdByKey === "function") {
-      subjectId = await getSubjectIdByKey(subjectKey);
-    }
-
-    if (window.sb && subjectId && tourNo) {
-      const { data, error } = await window.sb
-        .from("tours")
-        .select("season_id,start_date,end_date,id")
-        .eq("subject_id", Number(subjectId))
-        .eq("tour_no", Number(tourNo))
-        .order("start_date", { ascending: false })
-        .limit(1);
-
-      if (!error && Array.isArray(data) && data[0]?.season_id) {
-        return Number(data[0].season_id) || null;
-      }
-    }
-  } catch {}
+  if (byTour) {
+    return byTour;
+  }
 
   return await getCurrentSeasonId();
 }
@@ -19007,29 +18996,70 @@ async function renderBooks() {
 // Tours (DB-first via tour_questions)
 // ---------------------------
 
-async function loadActiveTourBySubjectAndNo(subjectId, tourNo) {
-  if (!window.sb || !subjectId || !tourNo) return null;
+async function loadActiveTourBySubjectAndNo(
+  subjectId,
+  tourNo,
+  seasonIdArg = null
+) {
+  if (!window.sb || !subjectId || !tourNo) {
+    return null;
+  }
+
+  const seasonId =
+    Number(seasonIdArg || 0) ||
+    await getCurrentSeasonId();
+
+  if (!seasonId) {
+    return null;
+  }
 
   const { data, error } = await window.sb
     .from("tours")
-    .select("id,subject_id,tour_no,start_date,end_date,is_active,season_id")
-    .eq("subject_id", subjectId)
+    .select(
+      "id,subject_id,tour_no,start_date,end_date,is_active,season_id"
+    )
+    .eq("subject_id", Number(subjectId))
     .eq("tour_no", Number(tourNo))
+    .eq("season_id", Number(seasonId))
     .eq("is_active", true)
     .maybeSingle();
 
-  if (error || !data?.id) return null;
+  if (error || !data?.id) {
+    return null;
+  }
 
-  // ✅ local date check: closed/future tours must not start from stale state
-  const padLocal = (n) => String(n).padStart(2, "0");
-  const d0 = new Date();
-  const todayISO = `${d0.getFullYear()}-${padLocal(d0.getMonth() + 1)}-${padLocal(d0.getDate())}`;
+  const padLocal = (number) =>
+    String(number).padStart(2, "0");
 
-  const sd = data?.start_date ? String(data.start_date) : null;
-  const ed = data?.end_date ? String(data.end_date) : null;
+  const now = new Date();
 
-  if (sd && sd > todayISO) return null;
-  if (ed && ed < todayISO) return null;
+  const todayISO =
+    `${now.getFullYear()}-` +
+    `${padLocal(now.getMonth() + 1)}-` +
+    `${padLocal(now.getDate())}`;
+
+  const startDate =
+    data?.start_date
+      ? String(data.start_date)
+      : "";
+
+  const endDate =
+    data?.end_date
+      ? String(data.end_date)
+      : "";
+
+  // Подготовительный тур без дат никогда не открывается.
+  if (!startDate || !endDate) {
+    return null;
+  }
+
+  if (startDate > todayISO) {
+    return null;
+  }
+
+  if (endDate < todayISO) {
+    return null;
+  }
 
   return data;
 }
