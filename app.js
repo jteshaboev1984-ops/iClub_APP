@@ -6834,6 +6834,7 @@ const ratingsState = {
   subjectId: state?.ratings?.subjectId || null,
   tourId: state?.ratings?.tourId || "__all__", // "__all__" = All tours
   tourNo: state?.ratings?.tourNo || "__all__", // "__all__" or number
+  seasonId: state?.ratings?.seasonId || null,
   _booted: false,
   _loading: false,
   _token: 0,
@@ -6851,6 +6852,10 @@ function saveRatingsFiltersToState() {
     state.ratings.subjectId = ratingsState.subjectId ? Number(ratingsState.subjectId) : null;
     state.ratings.tourId = ratingsState.tourId || "__all__";
     state.ratings.tourNo = ratingsState.tourNo || "__all__";
+    state.ratings.seasonId =
+      ratingsState.seasonId
+        ? Number(ratingsState.seasonId)
+        : null;
     saveState();
   } catch {}
 }
@@ -11171,72 +11176,233 @@ function renderRatingsSelectOptions(selectEl, items, { placeholder = null } = {}
 }
 
 async function ensureRatingsBoot() {
-  if (ratingsState._booted) return;
-
-  if (!window.sb) {
-    // если Supabase ещё не поднялся — просто выйдем, UI покажет заглушку
+  if (ratingsState._booted) {
     return;
   }
 
-  const subjectSelect = document.getElementById("ratings-subject");
-  const tourSelect = document.getElementById("ratings-tour");
+  if (!window.sb) {
+    return;
+  }
 
-  // 1) subjects
-  const subjects = await loadRatingsSubjectsForSelect();
-  const subjectItems = subjects.map(s => ({
-    value: s.id,
-    label: subjectTitle(s.subject_key, s.title)
-  }));
+  const seasonFilter =
+    document.getElementById(
+      "ratings-season-filter"
+    );
 
-  renderRatingsSelectOptions(subjectSelect, subjectItems, {
-    placeholder: t("loading")
-  });
+  const seasonSelect =
+    document.getElementById(
+      "ratings-season"
+    );
 
-  // 2) subject: keep saved subject if it still exists, otherwise choose default
-const uid = await getAuthUid();
-const myComp = await getMyCompetitiveSubjects(uid);
+  const subjectSelect =
+    document.getElementById(
+      "ratings-subject"
+    );
 
-const savedSubjectId = Number(ratingsState.subjectId || state?.ratings?.subjectId || 0);
-const savedSubjectExists = savedSubjectId > 0 && subjects.some(s => Number(s?.id || 0) === savedSubjectId);
+  const tourSelect =
+    document.getElementById(
+      "ratings-tour"
+    );
 
-const defaultSubjectId = (myComp?.[0]?.subject_id) || (subjects?.[0]?.id) || null;
-ratingsState.subjectId = savedSubjectExists
-  ? savedSubjectId
-  : (defaultSubjectId ? Number(defaultSubjectId) : null);
+  // 1. Only current and closed seasons are available.
+  const seasonRows =
+    await loadPublishedSeasonRows();
 
-// отрисуем subjects без placeholder
-renderRatingsSelectOptions(subjectSelect, subjectItems);
-if (ratingsState.subjectId && subjectSelect) subjectSelect.value = String(ratingsState.subjectId);
-   
-  // 3) tours for subject
-  const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
+  const currentSeasonId =
+    await getCurrentSeasonId();
+
+  const savedSeasonId =
+    Number(
+      ratingsState.seasonId ||
+      state?.ratings?.seasonId ||
+      0
+    );
+
+  const selectedSeason =
+    seasonRows.find(season =>
+      Number(season?.id || 0) ===
+      savedSeasonId
+    ) ||
+    seasonRows.find(season =>
+      Number(season?.id || 0) ===
+      Number(currentSeasonId || 0)
+    ) ||
+    seasonRows[0] ||
+    null;
+
+  ratingsState.seasonId =
+    Number(selectedSeason?.id || 0) ||
+    Number(currentSeasonId || 0) ||
+    null;
+
+  const seasonItems =
+    seasonRows.map(season => {
+      const seasonNo =
+        Number(season?.season_no || 0);
+
+      return {
+        value: Number(season.id),
+        label: tr3(
+          `Сезон ${seasonNo}`,
+          `${seasonNo}-mavsum`,
+          `Season ${seasonNo}`
+        )
+      };
+    });
+
+  if (seasonSelect) {
+    renderRatingsSelectOptions(
+      seasonSelect,
+      seasonItems
+    );
+
+    if (ratingsState.seasonId) {
+      seasonSelect.value =
+        String(ratingsState.seasonId);
+    }
+  }
+
+  if (seasonFilter) {
+    seasonFilter.style.display =
+      seasonRows.length > 1
+        ? ""
+        : "none";
+  }
+
+  // 2. Load all active main subjects.
+  const subjects =
+    await loadRatingsSubjectsForSelect();
+
+  const subjectItems =
+    subjects.map(subject => ({
+      value: subject.id,
+      label: subjectTitle(
+        subject.subject_key,
+        subject.title
+      )
+    }));
+
+  renderRatingsSelectOptions(
+    subjectSelect,
+    subjectItems,
+    {
+      placeholder: t("loading")
+    }
+  );
+
+  const uid =
+    await getAuthUid();
+
+  const myCompetitiveSubjects =
+    await getMyCompetitiveSubjects(uid);
+
+  const savedSubjectId =
+    Number(
+      ratingsState.subjectId ||
+      state?.ratings?.subjectId ||
+      0
+    );
+
+  const savedSubjectExists =
+    savedSubjectId > 0 &&
+    subjects.some(subject =>
+      Number(subject?.id || 0) ===
+      savedSubjectId
+    );
+
+  const defaultSubjectId =
+    myCompetitiveSubjects?.[0]?.subject_id ||
+    subjects?.[0]?.id ||
+    null;
+
+  ratingsState.subjectId =
+    savedSubjectExists
+      ? savedSubjectId
+      : (
+          defaultSubjectId
+            ? Number(defaultSubjectId)
+            : null
+        );
+
+  renderRatingsSelectOptions(
+    subjectSelect,
+    subjectItems
+  );
+
+  if (
+    ratingsState.subjectId &&
+    subjectSelect
+  ) {
+    subjectSelect.value =
+      String(ratingsState.subjectId);
+  }
+
+  // 3. Load tours only from the selected season.
+  const tours =
+    await loadRatingsToursForSubject(
+      ratingsState.subjectId,
+      ratingsState.seasonId
+    );
+
   const tourItems = [
-    { value: "__all__", label: t("ratings_all_tours") || "All tours" },
-    ...tours.map(tt => ({ value: tt.id, label: `Tour ${tt.tour_no}`, tourNo: Number(tt.tour_no || 0) }))
+    {
+      value: "__all__",
+      label:
+        t("ratings_all_tours") ||
+        "All tours"
+    },
+    ...tours.map(tour => ({
+      value: tour.id,
+      label: `Tour ${tour.tour_no}`,
+      tourNo:
+        Number(tour.tour_no || 0)
+    }))
   ];
-  renderRatingsSelectOptions(tourSelect, tourItems);
 
-// keep saved tour by tour number, because tour_id is different per subject
-const savedTourNo =
-  ratingsState.tourNo && ratingsState.tourNo !== "__all__"
-    ? Number(ratingsState.tourNo)
-    : null;
+  renderRatingsSelectOptions(
+    tourSelect,
+    tourItems
+  );
 
-const savedTourRow = savedTourNo
-  ? tours.find(tt => Number(tt?.tour_no || 0) === Number(savedTourNo))
-  : null;
+  // Keep the same tour number inside the selected season.
+  const savedTourNo =
+    ratingsState.tourNo &&
+    ratingsState.tourNo !== "__all__"
+      ? Number(ratingsState.tourNo)
+      : null;
 
-ratingsState.tourId = savedTourRow?.id ? Number(savedTourRow.id) : "__all__";
-ratingsState.tourNo = savedTourRow?.tour_no ? Number(savedTourRow.tour_no) : "__all__";
+  const savedTourRow =
+    savedTourNo
+      ? tours.find(tour =>
+          Number(tour?.tour_no || 0) ===
+          Number(savedTourNo)
+        )
+      : null;
 
-if (tourSelect) tourSelect.value = String(ratingsState.tourId || "__all__");
+  ratingsState.tourId =
+    savedTourRow?.id
+      ? Number(savedTourRow.id)
+      : "__all__";
 
-saveRatingsFiltersToState();
-   
+  ratingsState.tourNo =
+    savedTourRow?.tour_no
+      ? Number(savedTourRow.tour_no)
+      : "__all__";
+
+  if (tourSelect) {
+    tourSelect.value =
+      String(
+        ratingsState.tourId ||
+        "__all__"
+      );
+  }
+
+  saveRatingsFiltersToState();
+
   ratingsState._booted = true;
 }
 
-  async function renderRatings() {
+async function renderRatings() {
   const listEl = $("#ratings-list");
   if (!listEl) return;
 
@@ -12103,7 +12269,10 @@ listEl.innerHTML = `
   // =========================
 // B) All tours: tour_attempts aggregation
 // =========================
-const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
+const tours = await loadRatingsToursForSubject(
+  ratingsState.subjectId,
+  ratingsState.seasonId
+);
 const tourIds = Array.from(
   new Set((Array.isArray(tours) ? tours : []).map(x => Number(x?.id)).filter(Boolean))
 );
@@ -12323,6 +12492,7 @@ function closeRatingsSearchPanel() {
 
 function bindRatingsUI() {
   const listEl = $("#ratings-list");
+  const seasonSelect = $("#ratings-season");
   const subjectSelect = $("#ratings-subject");
   const tourSelect = $("#ratings-tour");
      // Search panel controls
@@ -12421,6 +12591,128 @@ function bindRatingsUI() {
     }
   });
 
+  if (seasonSelect) {
+    seasonSelect.addEventListener(
+      "change",
+      async () => {
+        const nextSeasonId =
+          Number(
+            seasonSelect.value ||
+            0
+          );
+
+        if (
+          !nextSeasonId ||
+          nextSeasonId ===
+            Number(
+              ratingsState.seasonId ||
+              0
+            )
+        ) {
+          return;
+        }
+
+        const previousTourNo =
+          ratingsState.tourNo &&
+          ratingsState.tourNo !== "__all__"
+            ? Number(
+                ratingsState.tourNo
+              )
+            : "__all__";
+
+        ratingsState.seasonId =
+          nextSeasonId;
+
+        resetRatingsSearchPaging();
+
+        if (
+          window.sb &&
+          ratingsState.subjectId
+        ) {
+          const tours =
+            await loadRatingsToursForSubject(
+              ratingsState.subjectId,
+              ratingsState.seasonId
+            );
+
+          const tourItems = [
+            {
+              value: "__all__",
+              label:
+                t("ratings_all_tours") ||
+                "All tours"
+            },
+            ...tours.map(tour => ({
+              value: tour.id,
+              label:
+                `Tour ${tour.tour_no}`,
+              tourNo:
+                Number(
+                  tour.tour_no ||
+                  0
+                )
+            }))
+          ];
+
+          renderRatingsSelectOptions(
+            tourSelect,
+            tourItems
+          );
+
+          if (
+            previousTourNo !==
+            "__all__"
+          ) {
+            const sameTour =
+              tours.find(tour =>
+                Number(
+                  tour?.tour_no ||
+                  0
+                ) ===
+                Number(previousTourNo)
+              );
+
+            ratingsState.tourId =
+              sameTour?.id
+                ? Number(sameTour.id)
+                : "__all__";
+
+            ratingsState.tourNo =
+              sameTour?.tour_no
+                ? Number(
+                    sameTour.tour_no
+                  )
+                : "__all__";
+          } else {
+            ratingsState.tourId =
+              "__all__";
+
+            ratingsState.tourNo =
+              "__all__";
+          }
+        } else {
+          ratingsState.tourId =
+            "__all__";
+
+          ratingsState.tourNo =
+            "__all__";
+        }
+
+        if (tourSelect) {
+          tourSelect.value =
+            String(
+              ratingsState.tourId ||
+              "__all__"
+            );
+        }
+
+        saveRatingsFiltersToState();
+
+        renderRatings();
+      }
+    );
+  }
+
   if (subjectSelect) {
   subjectSelect.addEventListener("change", async () => {
     const v = subjectSelect.value;
@@ -12434,7 +12726,10 @@ function bindRatingsUI() {
     resetRatingsSearchPaging();
 
     if (window.sb && ratingsState.subjectId) {
-      const tours = await loadRatingsToursForSubject(ratingsState.subjectId);
+      const tours = await loadRatingsToursForSubject(
+  ratingsState.subjectId,
+  ratingsState.seasonId
+);
       const tourItems = [
         { value: "__all__", label: t("ratings_all_tours") || "All tours" },
         ...tours.map(tt => ({ value: tt.id, label: `Tour ${tt.tour_no}`, tourNo: Number(tt.tour_no || 0) }))
