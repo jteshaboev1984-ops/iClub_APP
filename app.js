@@ -4821,6 +4821,11 @@ async function getPracticeStageContext(subjectKey) {
   const subjectId = await getSubjectIdByKey(subjectKey);
   if (!subjectId) return null;
 
+  const seasonId =
+    await getCurrentSeasonId();
+
+  if (!seasonId) return null;
+
   const poolsRes = await window.sb
     .from("practice_pools")
     .select("id,subject_id,tour_no,title,is_active")
@@ -4833,8 +4838,11 @@ async function getPracticeStageContext(subjectKey) {
 
   const toursRes = await window.sb
     .from("tours")
-    .select("id,tour_no,start_date,end_date,is_active")
+    .select(
+      "id,tour_no,start_date,end_date,is_active,season_id"
+    )
     .eq("subject_id", subjectId)
+    .eq("season_id", Number(seasonId))
     .order("tour_no", { ascending: true });
 
   const tours = Array.isArray(toursRes?.data) ? toursRes.data : [];
@@ -4845,11 +4853,19 @@ async function getPracticeStageContext(subjectKey) {
   const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
 
   const isInWindow = (row) => {
-    const sd = row?.start_date ? String(row.start_date) : null;
-    const ed = row?.end_date ? String(row.end_date) : null;
-    const afterStart = !sd || sd <= todayISO;
-    const beforeEnd = !ed || ed >= todayISO;
-    return afterStart && beforeEnd;
+    const sd = row?.start_date
+      ? String(row.start_date)
+      : "";
+
+    const ed = row?.end_date
+      ? String(row.end_date)
+      : "";
+
+    if (!sd || !ed) {
+      return false;
+    }
+
+    return sd <= todayISO && ed >= todayISO;
   };
 
   const activeTour = tours
@@ -4878,6 +4894,7 @@ async function getPracticeStageContext(subjectKey) {
 
   return {
     subjectId,
+    seasonId: Number(seasonId),
     practiceTourNo: Number(poolRow?.tour_no || practiceTourNo || 1),
     poolId: Number(poolRow?.id || 0) || null,
     poolRow,
@@ -5043,27 +5060,64 @@ function getLocalTodayISO() {
   return `${d0.getFullYear()}-${p(d0.getMonth() + 1)}-${p(d0.getDate())}`;
 }
 
-function isTourRowInWindow(row, todayISO = getLocalTodayISO()) {
-  const sd = row?.start_date ? String(row.start_date) : null;
-  const ed = row?.end_date ? String(row.end_date) : null;
-  return (!sd || sd <= todayISO) && (!ed || ed >= todayISO);
+function isTourRowInWindow(
+  row,
+  todayISO = getLocalTodayISO()
+) {
+  const sd = row?.start_date
+    ? String(row.start_date)
+    : "";
+
+  const ed = row?.end_date
+    ? String(row.end_date)
+    : "";
+
+  if (!sd || !ed) {
+    return false;
+  }
+
+  return sd <= todayISO && ed >= todayISO;
 }
 
 async function getPracticeTourCards(subjectKey) {
   const ctx = await getPracticeStageContext(subjectKey).catch(() => null);
-  const subjectId = Number(ctx?.subjectId || 0);
-  const currentTourNo = Number(ctx?.practiceTourNo || 1) || 1;
-  const pools = Array.isArray(ctx?.pools) ? ctx.pools : [];
+  const subjectId =
+    Number(ctx?.subjectId || 0);
 
-  if (!subjectId || !pools.length) return { currentTourNo, selectedTourNo: currentTourNo, cards: [] };
+  const seasonId =
+    Number(ctx?.seasonId || 0) ||
+    await getCurrentSeasonId();
+
+  const currentTourNo =
+    Number(ctx?.practiceTourNo || 1) || 1;
+
+  const pools =
+    Array.isArray(ctx?.pools)
+      ? ctx.pools
+      : [];
+
+  if (
+    !subjectId ||
+    !seasonId ||
+    !pools.length
+  ) {
+    return {
+      currentTourNo,
+      selectedTourNo: currentTourNo,
+      cards: []
+    };
+  }
 
   let tours = [];
   try {
     if (window.sb) {
       const { data, error } = await window.sb
         .from("tours")
-        .select("id,tour_no,start_date,end_date,is_active")
+        .select(
+          "id,tour_no,start_date,end_date,is_active,season_id"
+        )
         .eq("subject_id", subjectId)
+        .eq("season_id", Number(seasonId))
         .order("tour_no", { ascending: true });
 
       if (!error && Array.isArray(data)) tours = data;
