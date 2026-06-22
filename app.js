@@ -283,6 +283,99 @@ async function waitForOverlayPaint() {
   try { return JSON.parse(s); } catch { return fallback; }
 }
 
+async function getSeasonOneId() {
+  try {
+    if (!window.sb) return null;
+
+    const { data, error } = await window.sb
+      .from("seasons")
+      .select("id")
+      .eq("season_no", 1)
+      .maybeSingle();
+
+    if (error || !data?.id) return null;
+    return Number(data.id) || null;
+  } catch {
+    return null;
+  }
+}
+
+async function getCurrentSeasonId() {
+  try {
+    if (!window.sb) return null;
+
+    const { data, error } = await window.sb
+      .from("seasons")
+      .select("id,season_no,status")
+      .eq("status", "current")
+      .order("season_no", { ascending: false })
+      .limit(1);
+
+    if (!error && Array.isArray(data) && data[0]?.id) {
+      return Number(data[0].id) || null;
+    }
+  } catch {}
+
+  return await getSeasonOneId();
+}
+
+async function getTourSeasonIdByTourId(tourId) {
+  try {
+    if (!window.sb || !tourId) return null;
+
+    const { data, error } = await window.sb
+      .from("tours")
+      .select("season_id")
+      .eq("id", tourId)
+      .maybeSingle();
+
+    if (error || !data?.season_id) return null;
+    return Number(data.season_id) || null;
+  } catch {
+    return null;
+  }
+}
+
+async function resolveTourSeasonId({ seasonId = null, tourId = null, subjectId = null, subjectKey = "", tourNo = null } = {}) {
+  const direct = Number(seasonId || 0);
+  if (Number.isFinite(direct) && direct > 0) return direct;
+
+  const byTour = await getTourSeasonIdByTourId(tourId);
+  if (byTour) return byTour;
+
+  try {
+    if (!subjectId && subjectKey && typeof getSubjectIdByKey === "function") {
+      subjectId = await getSubjectIdByKey(subjectKey);
+    }
+
+    if (window.sb && subjectId && tourNo) {
+      const { data, error } = await window.sb
+        .from("tours")
+        .select("season_id,start_date,end_date,id")
+        .eq("subject_id", Number(subjectId))
+        .eq("tour_no", Number(tourNo))
+        .order("start_date", { ascending: false })
+        .limit(1);
+
+      if (!error && Array.isArray(data) && data[0]?.season_id) {
+        return Number(data[0].season_id) || null;
+      }
+    }
+  } catch {}
+
+  return await getCurrentSeasonId();
+}
+
+function tourRecommendationKeyV1(seasonId, tourNo, topic, subtopic) {
+  return [
+    Number(seasonId || 0),
+    Number(tourNo || 0),
+    String(topic || "").trim(),
+    subtopic ? String(subtopic).trim() : ""
+  ].join("::");
+}
+
+
     // ---------------------------
   // DB write retry (critical writes only)
   // ---------------------------
@@ -8337,23 +8430,40 @@ async function issueTourCertificateDb(attemptId) {
   }
 }
 
-async function issueFinalCertificateDb(userId, subjectId) {
+async function issueFinalCertificateDb(userId, subjectId, seasonIdArg = null) {
   try {
     if (!window.sb || !userId || !subjectId) return null;
 
-    const { data, error } = await window.sb.rpc("issue_final_certificate", {
-      p_user_id: userId,
-      p_subject_id: Number(subjectId)
-    });
+    const seasonId = Number(seasonIdArg || 0);
+
+    const rpcName = seasonId > 0
+      ? "issue_final_certificate_for_current_user"
+      : "issue_final_certificate";
+
+    const rpcParams = seasonId > 0
+      ? {
+          p_subject_id: Number(subjectId),
+          p_season_id: seasonId
+        }
+      : {
+          p_user_id: userId,
+          p_subject_id: Number(subjectId)
+        };
+
+    const { data, error } = await window.sb.rpc(rpcName, rpcParams);
 
     if (error) {
       try {
         const uid = await getAuthUid();
+
         await logDbErrorToEvents(uid, "issue_final_certificate_rpc", error, {
+          rpc_name: rpcName,
           p_user_id: userId,
-          p_subject_id: Number(subjectId)
+          p_subject_id: Number(subjectId),
+          p_season_id: seasonId > 0 ? seasonId : null
         });
       } catch {}
+
       return null;
     }
 
@@ -8361,14 +8471,18 @@ async function issueFinalCertificateDb(userId, subjectId) {
   } catch (e) {
     try {
       const uid = await getAuthUid();
+
       await logDbErrorToEvents(uid, "issue_final_certificate_rpc_catch", e, {
         p_user_id: userId,
-        p_subject_id: Number(subjectId)
+        p_subject_id: Number(subjectId),
+        p_season_id: Number(seasonIdArg || 0) || null
       });
     } catch {}
+
     return null;
   }
 }
+
       function isTourGloballyClosed(row, todayIso) {
   if (!row) return false;
 
@@ -8436,131 +8550,234 @@ async function ensureEligibleCertificatesIssued() {
     const uid = await getAuthUid();
     if (!uid) return;
 
-     const { data: attempts, error } = await window.sb
+    const { data: attempts, error } = await window.sb
       .from("tour_attempts")
       .select("id,tour_id,status")
       .eq("user_id", uid)
-      .in("status", ["submitted", "time_expired", "finished"])
+      .in("status", ["submitted", "time_expired"])
       .order("id", { ascending: false });
 
     if (error || !Array.isArray(attempts) || !attempts.length) {
       return;
     }
 
-    const seenTourIds = new Set();
-    const seenSubjectIds = new Set();
+    const uniqueTourIds = [
+      ...new Set(
+        attempts
+          .map(row => Number(row?.tour_id || 0))
+          .filter(number => number > 0)
+      )
+    ];
 
-    const uniqueTourIds = [...new Set(
-      attempts
-        .map(row => Number(row?.tour_id || 0))
-        .filter(n => n > 0)
-    )];
-
-    let tourSubjectMap = new Map();
+    const tourMetaById = new Map();
 
     if (uniqueTourIds.length) {
-      const { data: toursRows } = await window.sb
+      const { data: tourRows, error: toursError } = await window.sb
         .from("tours")
-        .select("id,subject_id")
+        .select("id,subject_id,season_id")
         .in("id", uniqueTourIds);
 
-      tourSubjectMap = new Map(
-        (Array.isArray(toursRows) ? toursRows : [])
-          .map(row => [Number(row.id), Number(row.subject_id || 0)])
-      );
+      if (
+        !toursError &&
+        Array.isArray(tourRows)
+      ) {
+        tourRows.forEach(row => {
+          const tourId = Number(row?.id || 0);
+
+          if (!tourId) return;
+
+          tourMetaById.set(tourId, {
+            subjectId: Number(row?.subject_id || 0),
+            seasonId: Number(row?.season_id || 0)
+          });
+        });
+      }
     }
+
+    const seenTourIds = new Set();
+    const subjectSeasonPairs = new Map();
 
     for (const row of attempts) {
       const attemptId = Number(row?.id || 0);
       const tourId = Number(row?.tour_id || 0);
-      const subjectId = Number(tourSubjectMap.get(tourId) || 0);
+      const tourMeta = tourMetaById.get(tourId) || null;
 
-      if (subjectId > 0) {
-        seenSubjectIds.add(subjectId);
+      const subjectId = Number(
+        tourMeta?.subjectId || 0
+      );
+
+      const seasonId = Number(
+        tourMeta?.seasonId || 0
+      );
+
+      if (subjectId > 0 && seasonId > 0) {
+        subjectSeasonPairs.set(
+          `${subjectId}:${seasonId}`,
+          {
+            subjectId,
+            seasonId
+          }
+        );
       }
 
-      if (attemptId > 0 && tourId > 0 && !seenTourIds.has(tourId)) {
+      if (
+        attemptId > 0 &&
+        tourId > 0 &&
+        !seenTourIds.has(tourId)
+      ) {
         seenTourIds.add(tourId);
 
-        const ready = await canIssueTourCertificateNow(tourId);
-        if (ready) {
-          await issueTourCertificateDb(attemptId).catch(() => null);
+        const tourReady =
+          await canIssueTourCertificateNow(tourId);
+
+        if (tourReady) {
+          await issueTourCertificateDb(attemptId)
+            .catch(() => null);
         }
       }
     }
 
-    for (const subjectId of seenSubjectIds) {
-      const ready = await canIssueFinalCertificateNow(subjectId);
-      if (ready) {
-        await tryIssueFinalCertificateForSubject(subjectId).catch(() => null);
-      }
+    for (const pair of subjectSeasonPairs.values()) {
+      const finalReady =
+        await canIssueFinalCertificateNow(
+          pair.subjectId,
+          pair.seasonId
+        );
+
+      if (!finalReady) continue;
+
+      await tryIssueFinalCertificateForSubject(
+        pair.subjectId,
+        pair.seasonId
+      ).catch(() => null);
     }
   } catch {}
 }
+
    
    const __finalCertReadyCache = new Map();
 
-async function canIssueFinalCertificateNow(subjectId) {
+async function canIssueFinalCertificateNow(subjectRef, seasonIdArg = null) {
   try {
-    if (!window.sb || !subjectId) return false;
+    if (!window.sb) return false;
 
-    const sid = Number(subjectId);
+    let sid = Number(subjectRef || 0);
+
+    if (!Number.isFinite(sid) || sid <= 0) {
+      sid = await getSubjectIdByKey(subjectRef);
+    }
+
     if (!sid) return false;
 
-    const cacheKey = `${sid}`;
+    const seasonId =
+      Number(seasonIdArg || 0) ||
+      await getCurrentSeasonId();
+
+    const cacheKey = `final:${sid}:${Number(seasonId || 0)}`;
     const cached = __finalCertReadyCache.get(cacheKey);
+
     if (cached && (Date.now() - cached.ts < 60 * 1000)) {
       return !!cached.ready;
     }
 
-    const today = new Date();
-    const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-
-    const { data, error } = await window.sb
+    let query = window.sb
       .from("tours")
-      .select("tour_no,end_date,is_active")
+      .select("tour_no,end_date,is_active,season_id")
       .eq("subject_id", sid)
       .gte("tour_no", 1)
       .lte("tour_no", 7);
 
-    if (error || !Array.isArray(data) || data.length === 0) {
-      __finalCertReadyCache.set(cacheKey, { ready: false, ts: Date.now() });
+    if (seasonId) {
+      query = query.eq("season_id", seasonId);
+    }
+
+    const { data, error } = await query;
+
+    if (error || !Array.isArray(data) || !data.length) {
+      __finalCertReadyCache.set(cacheKey, {
+        ready: false,
+        ts: Date.now()
+      });
+
       return false;
     }
 
-    const uniqTours = new Set(
-      data.map(x => Number(x.tour_no)).filter(n => Number.isFinite(n) && n >= 1 && n <= 7)
+    const uniqueTourNumbers = new Set(
+      data
+        .map(row => Number(row?.tour_no || 0))
+        .filter(number =>
+          Number.isFinite(number) &&
+          number >= 1 &&
+          number <= 7
+        )
     );
 
-        const allFinished =
-      uniqTours.size === 7 &&
-      data.every(row => isTourGloballyClosedRow(row, todayIso));
+    const today = new Date();
+    const todayISO =
+      `${today.getFullYear()}-` +
+      `${String(today.getMonth() + 1).padStart(2, "0")}-` +
+      `${String(today.getDate()).padStart(2, "0")}`;
 
-    __finalCertReadyCache.set(cacheKey, { ready: allFinished, ts: Date.now() });
-    return allFinished;
+    const ready =
+      uniqueTourNumbers.size === 7 &&
+      data.every(row => {
+        const endDate = String(row?.end_date || "").trim();
+        return !!endDate && endDate < todayISO;
+      });
+
+    __finalCertReadyCache.set(cacheKey, {
+      ready,
+      ts: Date.now()
+    });
+
+    return ready;
   } catch {
     return false;
   }
 }
 
-   async function tryIssueFinalCertificateForSubject(subjectId) {
+
+
+
+   async function tryIssueFinalCertificateForSubject(
+  subjectId,
+  seasonIdArg = null
+) {
   try {
     if (!window.sb || !subjectId) return null;
 
     const sid = Number(subjectId);
     if (!sid) return null;
 
-    const ready = await canIssueFinalCertificateNow(sid);
+    const seasonId =
+      Number(seasonIdArg || 0) ||
+      await getCurrentSeasonId();
+
+    if (!seasonId) return null;
+
+    const ready = await canIssueFinalCertificateNow(
+      sid,
+      seasonId
+    );
+
     if (!ready) return null;
 
     const uid = await getAuthUid();
     if (!uid) return null;
 
-    const row = await issueFinalCertificateDb(uid, sid);
+    const row = await issueFinalCertificateDb(
+      uid,
+      sid,
+      seasonId
+    );
+
     if (!row?.id) return null;
 
     if (!state.certificates) {
-      state.certificates = { selectedId: null, lastIssuedId: null };
+      state.certificates = {
+        selectedId: null,
+        lastIssuedId: null
+      };
     }
 
     state.certificates.selectedId = Number(row.id);
@@ -8572,6 +8789,7 @@ async function canIssueFinalCertificateNow(subjectId) {
     return null;
   }
 }
+
    
 async function fetchMyCertificatesDb() {
   try {
@@ -14910,7 +15128,7 @@ function saveMyTourRecs(data) {
   localStorage.setItem(LS.myTourRecs, JSON.stringify(data));
 }
 
-   async function saveTourRecsToDB(subjectKey, tourNo, recs) {
+   async function saveTourRecsToDB(subjectKey, tourNo, recs, seasonIdArg = null) {
   try {
     if (!window.sb) return false;
 
@@ -14919,6 +15137,14 @@ function saveMyTourRecs(data) {
 
     const subjectId = await getSubjectIdByKey(subjectKey);
     if (!subjectId) return false;
+
+    const seasonId = await resolveTourSeasonId({
+      seasonId: seasonIdArg,
+      tourId: state?.tourContext?.tourId || state?.courses?.activeTourId || null,
+      subjectId,
+      subjectKey,
+      tourNo
+    });
 
     const normalized = (Array.isArray(recs) ? recs : [])
       .map(r => {
@@ -14933,6 +15159,7 @@ function saveMyTourRecs(data) {
         ).trim() || null;
 
         return {
+          season_id: seasonId || null,
           source_type: "tour",
           topic: String(r?.topic || "").trim(),
           subtopic: r?.subtopic ? String(r.subtopic).trim() : null,
@@ -14945,7 +15172,12 @@ function saveMyTourRecs(data) {
 
     if (!normalized.length) return false;
 
-    const key = (r) => `${Number(r.tour_no || 0)}::${String(r.topic || "").trim()}::${r.subtopic ? String(r.subtopic).trim() : ""}`;
+    const key = (r) => tourRecommendationKeyV1(
+      r.season_id || seasonId || 0,
+      r.tour_no,
+      r.topic,
+      r.subtopic
+    );
 
     const uniqMap = new Map();
     normalized.forEach(r => {
@@ -14960,13 +15192,18 @@ function saveMyTourRecs(data) {
     const items = Array.from(uniqMap.values());
     const topics = Array.from(new Set(items.map(r => r.topic).filter(Boolean)));
 
-    const { data: existing, error: selErr } = await window.sb
+    let query = window.sb
       .from("recommendations")
-      .select("id, topic, subtopic, tour_no, book_id, book_reference")
+      .select("id, season_id, topic, subtopic, tour_no, book_id, book_reference")
       .eq("user_id", uid)
       .eq("subject_id", subjectId)
       .eq("source_type", "tour")
       .eq("tour_no", Number(tourNo));
+
+    if (seasonId) query = query.eq("season_id", seasonId);
+    else query = query.is("season_id", null);
+
+    const { data: existing, error: selErr } = await query;
 
     if (selErr) {
       logClientError("tour_recs_existing_select_error", selErr);
@@ -14988,8 +15225,8 @@ function saveMyTourRecs(data) {
 
     const norm = (v) => String(v || "").trim();
     const normSub = (v) => {
-      const s = norm(v);
-      return s ? s : null;
+      const st = norm(v);
+      return st ? st : null;
     };
 
     const bestFor = (item) => {
@@ -15040,6 +15277,7 @@ function saveMyTourRecs(data) {
 
       if (!row.book_reference && best.book_reference) patch.book_reference = best.book_reference;
       if (!row.book_id && best.book_id) patch.book_id = best.book_id;
+      if (!row.season_id && seasonId) patch.season_id = seasonId;
 
       if (Object.keys(patch).length) {
         const { error: updErr } = await window.sb
@@ -15058,6 +15296,7 @@ function saveMyTourRecs(data) {
         return {
           user_id: uid,
           subject_id: subjectId,
+          season_id: seasonId || null,
           source_type: "tour",
           tour_no: r.tour_no,
           topic: r.topic,
@@ -15084,11 +15323,13 @@ function saveMyTourRecs(data) {
     return false;
   }
 }
+
    
 function addMyTourRecsFromTourAttempt(ctx) {
   try {
     const subjectKey = String(ctx?.subjectKey || "").trim();
     const tourNo = Number(ctx?.tourNo || 0);
+    const seasonId = Number(ctx?.seasonId || ctx?.season_id || state?.tourContext?.seasonId || 0) || 0;
 
     if (!subjectKey || !tourNo) return { added: 0, recs: [] };
 
@@ -15096,7 +15337,7 @@ function addMyTourRecsFromTourAttempt(ctx) {
       .filter(a => a && a.isCorrect === false)
       .map(a => {
         const q = ctx?.questions?.[Number(a.index)] || null;
-                return {
+        return {
           topic: String(q?.topic || "General").trim(),
           subtopic: q?.subtopic ? String(q.subtopic).trim() : null,
           book_id: q?.book_id || q?.bookId || null,
@@ -15108,8 +15349,8 @@ function addMyTourRecsFromTourAttempt(ctx) {
     if (!wrong.length) return { added: 0, recs: [] };
 
     const uniqMap = new Map();
-        wrong.forEach(r => {
-      const k = `${tourNo}::${r.topic}::${r.subtopic || ""}`;
+    wrong.forEach(r => {
+      const k = tourRecommendationKeyV1(seasonId, tourNo, r.topic, r.subtopic);
       const prev = uniqMap.get(k);
 
       if (!prev || (!prev.book_reference && r.book_reference) || (!prev.book_id && r.book_id)) {
@@ -15123,16 +15364,22 @@ function addMyTourRecsFromTourAttempt(ctx) {
 
     const existing = new Set(
       (store.bySubject[subjectKey] || []).map(x =>
-        `${Number(x?.tourNo || 0)}::${String(x?.topic || "").trim()}::${x?.subtopic ? String(x.subtopic).trim() : ""}`
+        tourRecommendationKeyV1(
+          x?.seasonId || x?.season_id || 0,
+          x?.tourNo || 0,
+          x?.topic || "",
+          x?.subtopic || ""
+        )
       )
     );
 
     const nowTs = Date.now();
 
     const added = uniq
-      .filter(r => !existing.has(`${tourNo}::${r.topic}::${r.subtopic || ""}`))
-            .map(r => ({
+      .filter(r => !existing.has(tourRecommendationKeyV1(seasonId, tourNo, r.topic, r.subtopic)))
+      .map(r => ({
         source_type: "tour",
+        seasonId: seasonId || null,
         topic: r.topic,
         subtopic: r.subtopic,
         tourNo,
@@ -15143,21 +15390,21 @@ function addMyTourRecsFromTourAttempt(ctx) {
 
     if (!added.length) return { added: 0, recs: [] };
 
-        store.bySubject[subjectKey] = [
+    store.bySubject[subjectKey] = [
       ...added,
       ...(store.bySubject[subjectKey] || [])
     ].slice(0, 100);
 
     saveMyTourRecs(store);
 
-    // DB-first persistence; local остаётся как безопасный fallback
-    saveTourRecsToDB(subjectKey, tourNo, added).catch(() => {});
+    saveTourRecsToDB(subjectKey, tourNo, added, seasonId || null).catch(() => {});
 
     return { added: added.length, recs: added };
   } catch {
     return { added: 0, recs: [] };
   }
 }
+
    
 // ✅ DB sync for recommendations table
 async function syncMyRecsToSupabase(subjectKey, recs) {
@@ -17374,7 +17621,7 @@ uniq.forEach(rec => {
     })();
   }
 
-async function fetchMyRecsDB(subjectKey) {
+async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
   try {
     if (!window.sb) return [];
 
@@ -17384,24 +17631,81 @@ async function fetchMyRecsDB(subjectKey) {
     const subjectId = await getSubjectIdByKey(subjectKey);
     if (!subjectId) return [];
 
-    const { data, error } = await window.sb
-  .from("recommendations")
-  .select("id, source_type, tour_no, topic, subtopic, book_id, book_reference, created_at")
-  .eq("user_id", uid)
-  .eq("subject_id", subjectId)
-  .order("created_at", { ascending: false })
-  .limit(100);
+    const seasonId =
+      Number(seasonIdArg || 0) ||
+      await getCurrentSeasonId();
 
-    if (error) {
-      logClientError("myrecs_select_error", error);
-      return [];
+    const practicePromise = window.sb
+      .from("recommendations")
+      .select(
+        "id, source_type, tour_no, season_id, topic, subtopic, book_id, book_reference, created_at"
+      )
+      .eq("user_id", uid)
+      .eq("subject_id", subjectId)
+      .eq("source_type", "practice")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    let tourQuery = window.sb
+      .from("recommendations")
+      .select(
+        "id, source_type, tour_no, season_id, topic, subtopic, book_id, book_reference, created_at"
+      )
+      .eq("user_id", uid)
+      .eq("subject_id", subjectId)
+      .eq("source_type", "tour")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (seasonId > 0) {
+      tourQuery = tourQuery.eq("season_id", seasonId);
+    } else {
+      tourQuery = tourQuery.is("season_id", null);
     }
-    return Array.isArray(data) ? data : [];
-  } catch (e) {
-    logClientError("myrecs_select_exception", e);
+
+    const [practiceResult, tourResult] = await Promise.all([
+      practicePromise,
+      tourQuery
+    ]);
+
+    if (practiceResult.error) {
+      logClientError(
+        "myrecs_practice_select_error",
+        practiceResult.error
+      );
+    }
+
+    if (tourResult.error) {
+      logClientError(
+        "myrecs_tour_select_error",
+        tourResult.error
+      );
+    }
+
+    const practiceRows =
+      !practiceResult.error &&
+      Array.isArray(practiceResult.data)
+        ? practiceResult.data
+        : [];
+
+    const tourRows =
+      !tourResult.error &&
+      Array.isArray(tourResult.data)
+        ? tourResult.data
+        : [];
+
+    return [...practiceRows, ...tourRows]
+      .sort((a, b) => {
+        const aTime = new Date(a?.created_at || 0).getTime();
+        const bTime = new Date(b?.created_at || 0).getTime();
+        return bTime - aTime;
+      });
+  } catch (error) {
+    logClientError("myrecs_select_exception", error);
     return [];
   }
 }
+
 
 async function renderMyRecs() {
   const wrap = $("#my-recs-list");
@@ -17415,16 +17719,23 @@ async function renderMyRecs() {
 
   const activeTab = String(state?.courses?.myRecsActiveTab || "practice");
 
+  const selectedSeasonId = await getCurrentSeasonId();
+  const seasonOneId = await getSeasonOneId();
+
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
 
     // DB-first for both practice and tour
-  const dbRows = await fetchMyRecsDB(subjectKey);
+  const dbRows = await fetchMyRecsDB(
+    subjectKey,
+    selectedSeasonId
+  );
 
   let practiceRows = dbRows.filter(r => String(r?.source_type || "") === "practice");
   let tourRows = dbRows
     .filter(r => String(r?.source_type || "") === "tour")
     .map(r => ({
       ...r,
+      seasonId: Number(r?.season_id || 0) || null,
       tourNo: Number(r?.tour_no || 0) || null
     }));
 
@@ -17458,37 +17769,93 @@ async function renderMyRecs() {
     practiceRows = checks.filter(x => x.keep).map(x => x.rec);
   }
    
-  // TOUR fallback only if DB has nothing yet
+  // TOUR fallback only if DB has nothing yet.
+  // Legacy rows without seasonId belong to Season 1 only.
   if (!tourRows.length) {
     const tourStore = loadMyTourRecs();
-       tourRows = (tourStore?.bySubject?.[subjectKey] || []).map(x => ({
-      id: null,
-      source_type: "tour",
-      topic: x.topic || "General",
-      subtopic: x.subtopic || null,
-      book_id: x.book_id || null,
-      book_reference: x.book_reference || null,
-      created_at: x.ts ? new Date(x.ts).toISOString() : null,
-      tourNo: Number(x.tourNo || 0) || null
-    }));
+    const localRows =
+      tourStore?.bySubject?.[subjectKey] || [];
+
+    tourRows = localRows
+      .filter(row => {
+        const rowSeasonId = Number(
+          row?.seasonId ||
+          row?.season_id ||
+          0
+        );
+
+        if (rowSeasonId > 0) {
+          return rowSeasonId === Number(selectedSeasonId || 0);
+        }
+
+        return (
+          Number(selectedSeasonId || 0) > 0 &&
+          Number(selectedSeasonId || 0) ===
+            Number(seasonOneId || 0)
+        );
+      })
+      .map(row => ({
+        id: null,
+        source_type: "tour",
+        seasonId:
+          Number(
+            row?.seasonId ||
+            row?.season_id ||
+            seasonOneId ||
+            0
+          ) || null,
+        topic: row.topic || "General",
+        subtopic: row.subtopic || null,
+        book_id: row.book_id || null,
+        book_reference: row.book_reference || null,
+        created_at: row.ts
+          ? new Date(row.ts).toISOString()
+          : null,
+        tourNo: Number(row.tourNo || 0) || null
+      }));
   }
-                try {
+
+  try {
     const shouldSyncTourRows = tourRows.length && (
       !dbRows.some(r => String(r?.source_type || "") === "tour") ||
       tourRows.some(r => !String(r?.book_reference || "").trim())
     );
 
     if (shouldSyncTourRows) {
-      const byTour = new Map();
-      tourRows.forEach(r => {
-        const key = Number(r?.tourNo || 0) || 0;
-        if (!key) return;
-        if (!byTour.has(key)) byTour.set(key, []);
-        byTour.get(key).push(r);
+      const bySeasonAndTour = new Map();
+
+      tourRows.forEach(row => {
+        const tourNo = Number(row?.tourNo || 0) || 0;
+        const seasonId =
+          Number(
+            row?.seasonId ||
+            row?.season_id ||
+            selectedSeasonId ||
+            0
+          ) || 0;
+
+        if (!tourNo || !seasonId) return;
+
+        const key = `${seasonId}:${tourNo}`;
+
+        if (!bySeasonAndTour.has(key)) {
+          bySeasonAndTour.set(key, {
+            seasonId,
+            tourNo,
+            rows: []
+          });
+        }
+
+        bySeasonAndTour.get(key).rows.push(row);
       });
 
-      for (const [tourNo, recs] of byTour.entries()) {
-        await saveTourRecsToDB(subjectKey, tourNo, recs);
+      for (const group of bySeasonAndTour.values()) {
+        await saveTourRecsToDB(
+          subjectKey,
+          group.tourNo,
+          group.rows,
+          group.seasonId
+        );
       }
     }
   } catch {}
@@ -17562,6 +17929,7 @@ async function renderMyRecs() {
             data-open-rec="tour"
             data-rec-id="${escapeHTML(String(rec.id || ""))}"
             data-tour-no="${escapeHTML(String(tourNo || 0))}"
+            data-season-id="${escapeHTML(String(rec.seasonId || rec.season_id || selectedSeasonId || ""))}"
             data-topic="${escapeHTML(rec.topic || "")}"
             data-subtopic="${escapeHTML(sub)}"
             data-created-at="${escapeHTML(rec.created_at || "")}"
@@ -17616,10 +17984,20 @@ async function renderMyRecs() {
 
    wrap.querySelectorAll('[data-open-rec="tour"]').forEach(el => {
     el.addEventListener("click", async () => {
-      const tourNo = Number(el.getAttribute("data-tour-no") || 0);
+      const tourNo = Number(
+        el.getAttribute("data-tour-no") || 0
+      );
+
+      const seasonId = Number(
+        el.getAttribute("data-season-id") || 0
+      ) || null;
+
       const rec = {
-        id: el.getAttribute("data-rec-id") ? Number(el.getAttribute("data-rec-id")) : null,
+        id: el.getAttribute("data-rec-id")
+          ? Number(el.getAttribute("data-rec-id"))
+          : null,
         source_type: "tour",
+        seasonId,
         topic: String(el.getAttribute("data-topic") || "").trim() || "General",
         subtopic: String(el.getAttribute("data-subtopic") || "").trim() || null,
         created_at: String(el.getAttribute("data-created-at") || "").trim() || null,
@@ -17628,7 +18006,11 @@ async function renderMyRecs() {
       };
 
       const canOpen = tourNo > 0
-        ? await isTourGloballyClosed(subjectKey, tourNo)
+        ? await isTourGloballyClosed(
+            subjectKey,
+            tourNo,
+            seasonId
+          )
         : false;
 
       if (!canOpen) {
@@ -18630,7 +19012,7 @@ async function loadActiveTourBySubjectAndNo(subjectId, tourNo) {
 
   const { data, error } = await window.sb
     .from("tours")
-    .select("id,subject_id,tour_no,start_date,end_date,is_active")
+    .select("id,subject_id,tour_no,start_date,end_date,is_active,season_id")
     .eq("subject_id", subjectId)
     .eq("tour_no", Number(tourNo))
     .eq("is_active", true)
@@ -18874,12 +19256,13 @@ async function updateTourAttempt(attemptId, patch) {
   }
 }
 
-  function initTourSession({ subjectKey = null, tourNo = 1, tourId = null, attemptId = null, questions = [], isArchive = false, tourEndDate = null } = {}) {
+  function initTourSession({ subjectKey = null, tourNo = 1, tourId = null, seasonId = null, attemptId = null, questions = [], isArchive = false, tourEndDate = null } = {}) {
   state.tourContext = {
     isArchive,
     subjectKey,
     tourNo,
     tourId,        // ✅ DB tour id
+    seasonId,      // ✅ DB season id
     attemptId,     // ✅ DB attempt id (null for archive)
     tourEndDate,   // ✅ end_date active tour
     questions,     // ✅ loaded from DB mapping tour_questions
@@ -19133,6 +19516,7 @@ async function updateTourAttempt(attemptId, patch) {
     subjectKey,
     tourNo,
     tourId: tour.id,
+    seasonId: tour?.season_id || null,
     attemptId,
     questions,
     isArchive: false,
@@ -19661,33 +20045,54 @@ try {
     renderTourQuestion();
   }
    
-                  async function isTourGloballyClosed(subjectKey, tourNo) {
+                  async function isTourGloballyClosed(
+  subjectKey,
+  tourNo,
+  seasonIdArg = null
+) {
   try {
     if (!window.sb) return false;
 
     const subjectId = await getSubjectIdByKey(subjectKey);
     if (!subjectId) return false;
 
-    const { data, error } = await window.sb
+    const seasonId =
+      Number(seasonIdArg || 0) ||
+      await getCurrentSeasonId();
+
+    let query = window.sb
       .from("tours")
-      .select("id, tour_no, start_date, end_date, is_active")
+      .select(
+        "id, tour_no, season_id, start_date, end_date, is_active"
+      )
       .eq("subject_id", subjectId)
-      .eq("tour_no", Number(tourNo || 0))
+      .eq("tour_no", Number(tourNo || 0));
+
+    if (seasonId > 0) {
+      query = query.eq("season_id", seasonId);
+    }
+
+    const { data, error } = await query
+      .limit(1)
       .maybeSingle();
 
     if (error || !data) return false;
 
-    const todayISO = new Date().toISOString().slice(0, 10);
-    const endDate = data?.end_date ? String(data.end_date).trim() : "";
+    const today = new Date();
+    const todayISO =
+      `${today.getFullYear()}-` +
+      `${String(today.getMonth() + 1).padStart(2, "0")}-` +
+      `${String(today.getDate()).padStart(2, "0")}`;
 
+    const endDate = String(data?.end_date || "").trim();
     if (!endDate) return false;
 
-    // ✅ строгая глобальная проверка для полного review / сертификата
     return endDate < todayISO;
   } catch {
     return false;
   }
 }
+
    function renderTourResultStatusSummary() {
   const reviewStatusEl = document.getElementById("tour-review-status");
   const certStatusEl = document.getElementById("tour-certificate-status");
