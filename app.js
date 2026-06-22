@@ -18892,10 +18892,68 @@ async function renderMyRecs() {
     return;
   }
 
-  const activeTab = String(state?.courses?.myRecsActiveTab || "practice");
+  const activeTab = String(
+    state?.courses?.myRecsActiveTab ||
+    "practice"
+  );
 
-  const selectedSeasonId = await getCurrentSeasonId();
-  const seasonOneId = await getSeasonOneId();
+  const seasonRows =
+    await loadPublishedSeasonRows();
+
+  const currentSeasonId =
+    await getCurrentSeasonId();
+
+  const savedSeasonId =
+    seasonRows.length > 1
+      ? Number(
+          state?.courses?.myRecsSeasonId ||
+          0
+        )
+      : 0;
+
+  const selectedSeason =
+    seasonRows.find(row =>
+      Number(row?.id || 0) ===
+      savedSeasonId
+    ) ||
+    seasonRows.find(row =>
+      Number(row?.id || 0) ===
+      Number(currentSeasonId || 0)
+    ) ||
+    seasonRows[0] ||
+    null;
+
+  const selectedSeasonId =
+    Number(selectedSeason?.id || 0) ||
+    Number(currentSeasonId || 0) ||
+    null;
+
+  const seasonOneId =
+    await getSeasonOneId();
+
+  if (
+    seasonRows.length > 1 &&
+    selectedSeasonId
+  ) {
+    state.courses =
+      state.courses &&
+      typeof state.courses === "object"
+        ? state.courses
+        : {};
+
+    if (
+      Number(
+        state.courses.myRecsSeasonId ||
+        0
+      ) !==
+      Number(selectedSeasonId)
+    ) {
+      state.courses.myRecsSeasonId =
+        Number(selectedSeasonId);
+
+      saveState();
+    }
+  }
 
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
 
@@ -19034,14 +19092,6 @@ async function renderMyRecs() {
       }
     }
   } catch {}
-  const hasPractice = practiceRows.length > 0;
-  const hasTour = tourRows.length > 0;
-
-  if (!hasPractice && !hasTour) {
-    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("recommendations_empty") || "Пока рекомендаций нет.")}</div>`;
-    return;
-  }
-
   const tabBtn = (key, label, isActive) => `
     <button
       type="button"
@@ -19052,6 +19102,79 @@ async function renderMyRecs() {
       ${escapeHTML(label)}
     </button>
   `;
+
+  const renderSeasonControl = () => {
+    if (
+      activeTab !== "tour" ||
+      seasonRows.length <= 1
+    ) {
+      return "";
+    }
+
+    return `
+      <div
+        class="card"
+        style="
+          padding:12px 14px;
+          margin-bottom:12px;
+        "
+      >
+        <label
+          for="my-recs-season-select"
+          class="muted small"
+          style="
+            display:block;
+            margin-bottom:7px;
+            font-weight:700;
+          "
+        >
+          ${escapeHTML(tr3(
+            "Сезон",
+            "Mavsum",
+            "Season"
+          ))}
+        </label>
+
+        <select
+          id="my-recs-season-select"
+          class="lb-select"
+          style="width:100%;"
+          aria-label="${escapeHTML(tr3(
+            "Выбор сезона",
+            "Mavsumni tanlash",
+            "Select season"
+          ))}"
+        >
+          ${seasonRows.map(season => {
+            const seasonNo =
+              Number(
+                season?.season_no ||
+                0
+              );
+
+            const label = tr3(
+              `Сезон ${seasonNo}`,
+              `${seasonNo}-mavsum`,
+              `Season ${seasonNo}`
+            );
+
+            const selected =
+              Number(season?.id || 0) ===
+              Number(selectedSeasonId || 0);
+
+            return `
+              <option
+                value="${Number(season.id)}"
+                ${selected ? "selected" : ""}
+              >
+                ${escapeHTML(label)}
+              </option>
+            `;
+          }).join("")}
+        </select>
+      </div>
+    `;
+  };
 
   const renderPracticeList = () => {
     if (!practiceRows.length) {
@@ -19128,10 +19251,28 @@ async function renderMyRecs() {
 
   wrap.innerHTML = `
     <div style="display:flex;gap:10px;margin-bottom:12px">
-      ${tabBtn("practice", t("my_recs_tab_practice") || "Практика", activeTab === "practice")}
-      ${tabBtn("tour", t("my_recs_tab_tour") || "Туры", activeTab === "tour")}
+      ${tabBtn(
+        "practice",
+        t("my_recs_tab_practice") ||
+        "Практика",
+        activeTab === "practice"
+      )}
+
+      ${tabBtn(
+        "tour",
+        t("my_recs_tab_tour") ||
+        "Туры",
+        activeTab === "tour"
+      )}
     </div>
-    ${activeTab === "tour" ? renderTourList() : renderPracticeList()}
+
+    ${renderSeasonControl()}
+
+    ${
+      activeTab === "tour"
+        ? renderTourList()
+        : renderPracticeList()
+    }
   `;
 
   wrap.querySelectorAll("[data-myrecs-tab]").forEach(btn => {
@@ -19142,6 +19283,51 @@ async function renderMyRecs() {
       await renderMyRecs();
     });
   });
+
+  const seasonSelect =
+    wrap.querySelector(
+      "#my-recs-season-select"
+    );
+
+  if (seasonSelect) {
+    seasonSelect.addEventListener(
+      "change",
+      async () => {
+        const nextSeasonId =
+          Number(
+            seasonSelect.value ||
+            0
+          );
+
+        if (
+          !nextSeasonId ||
+          nextSeasonId ===
+            Number(
+              selectedSeasonId ||
+              0
+            )
+        ) {
+          return;
+        }
+
+        state.courses =
+          state.courses &&
+          typeof state.courses === "object"
+            ? state.courses
+            : {};
+
+        state.courses.myRecsSeasonId =
+          nextSeasonId;
+
+        state.courses.myRecCurrent =
+          null;
+
+        saveState();
+
+        await renderMyRecs();
+      }
+    );
+  }
 
   if (activeTab === "practice") {
     const cards = Array.from(wrap.querySelectorAll('[data-open-rec="practice"]'));
