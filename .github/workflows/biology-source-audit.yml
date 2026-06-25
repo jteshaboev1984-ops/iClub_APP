@@ -1,0 +1,10 @@
+name: TEMP Biology source audit
+
+on:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo temporary
