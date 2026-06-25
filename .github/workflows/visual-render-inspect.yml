@@ -1,0 +1,56 @@
+name: Visual rendering inspection
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Print relevant app.js contexts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          for filename, needles in {
+              'app.js': [
+                  'function renderTourQuestion',
+                  'lastTourReviewPayload',
+                  'tour-review-list',
+                  'data-action="tour-review"',
+                  'function renderTour',
+              ],
+              'index.html': [
+                  'id="tour-question"',
+                  'id="tour-review-list"',
+              ],
+              'style.css': [
+                  '.question-text',
+                  '.tour-',
+                  '.options',
+              ],
+          }.items():
+              text = Path(filename).read_text(encoding='utf-8')
+              lines = text.splitlines()
+              print(f'===== {filename} ({len(lines)} lines) =====')
+              seen = set()
+              for needle in needles:
+                  matches = [i for i, line in enumerate(lines) if needle in line]
+                  print(f'--- needle: {needle!r}; matches={len(matches)} ---')
+                  for i in matches[:20]:
+                      start = max(0, i - 35)
+                      end = min(len(lines), i + 90)
+                      key = (start, end)
+                      if key in seen:
+                          continue
+                      seen.add(key)
+                      for n in range(start, end):
+                          print(f'{n+1:05d}: {lines[n]}')
+                      print('--- end context ---')
+          PY
