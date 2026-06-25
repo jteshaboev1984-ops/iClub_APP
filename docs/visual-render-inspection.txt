@@ -812,7 +812,6 @@
 21651:     "Загружаем разбор тура…",
 21652:     "Tur tahlili yuklanmoqda…",
 21653:     "Loading tour review…"
-===== app.js :: 'data-action="tour-review"' :: 0 matches =====
 ===== app.js :: 'renderTourReview' :: 2 matches =====
 --- context around line 21552 ---
 21532:     noteWrapEl.hidden = true;
@@ -1138,6 +1137,1485 @@
 23582:       // ⚠️ чтобы не зависнуть навсегда на плохом файле
 23583:       const timer = setTimeout(() => resolve({ url, ok: false, timeout: true }), timeoutMs);
 23584: 
+===== app.js :: 'qStartedAtMono' :: 6 matches =====
+--- context around line 20674 ---
+20654:     return { ok: true, score: finalScore, percent: finalPercent };
+20655:   } catch (e) {
+20656:     try { trackEvent("tour_db_save_failed", { attempt_id: String(attemptId), message: String(e?.message || e) }); } catch {}
+20657:     return { ok: false, reason: "db_error", error: e };
+20658:   }
+20659: }
+20660: 
+20661:   function initTourSession({ subjectKey = null, tourNo = 1, tourId = null, seasonId = null, attemptId = null, questions = [], isArchive = false, tourEndDate = null } = {}) {
+20662:   state.tourContext = {
+20663:     isArchive,
+20664:     subjectKey,
+20665:     tourNo,
+20666:     tourId,        // ✅ DB tour id
+20667:     seasonId,      // ✅ DB season id
+20668:     attemptId,     // ✅ DB attempt id (null for archive)
+20669:     tourEndDate,   // ✅ end_date active tour
+20670:     questions,     // ✅ loaded from DB mapping tour_questions
+20671:     startedAt: Date.now(),
+20672:     qStartedAt: Date.now(),
+20673:     startedAtMono: monoNow(),
+20674:     qStartedAtMono: monoNow(),
+20675:     index: 0,
+20676:     correct: 0,
+20677:     answers: [],   // {qid, pickedIndex, userAnswer, isCorrect, spentSec}
+20678:     pendingDbAnswers: [], // ✅ NEW: ответы, которые не удалось записать в БД
+20679:     violations: 0,
+20680:     lastViolationAt: null,
+20681:     questionTimeLimit: TOUR_CONFIG.defaultQuestionTimeSec
+20682:   };
+20683: 
+20684:   // strict lock only for ACTIVE tour
+20685:   state.quizLock = isArchive ? null : "tour";
+20686:   saveState();
+20687: }
+20688: 
+20689:   let __tourStartInFlight = false;
+20690:  async function openTourQuiz() {
+20691:   if (__tourStartInFlight) return;
+20692:   __tourStartInFlight = true;
+20693: 
+20694:   const startBtn = document.querySelector('[data-action="tour-start"]');
+20695:   const __startPrevText = startBtn ? startBtn.textContent : null;
+20696: 
+20697:   if (startBtn) {
+20698:     startBtn.disabled = true;
+20699:     startBtn.classList.add("is-loading");
+20700:     startBtn.textContent = (t("saving") || "Сохранение…");
+20701:   }
+20702: 
+20703:   try {
+20704:     const accept = $("#tour-rules-accept");
+20705:     if (!accept || !accept.checked) {
+20706:       showToast(t("tour_rules_accept_required"));
+20707:       return;
+20708:     }
+20709: 
+20710:     const subjectKey = state.courses?.subjectKey || null;
+20711:   if (!subjectKey) {
+20712:     showToast(t("toast_subject_not_selected"));
+20713:     return;
+20714:   }
+20715: 
+20716:   const tourStartCourseContext = {
+20717:     subjectKey,
+20718:     stack: Array.isArray(state?.courses?.stack) && state.courses.stack.length
+20719:       ? [...state.courses.stack]
+--- context around line 20963 ---
+20943:   if (startBtn) {
+20944:     startBtn.disabled = false;
+20945:     startBtn.classList.remove("is-loading");
+20946:     if (__startPrevText != null) startBtn.textContent = __startPrevText;
+20947:      }
+20948:    }
+20949: }
+20950: 
+20951:     function enforceTourAutoRulesNow() {
+20952:     const ctx = state.tourContext;
+20953:     if (!ctx || ctx.isArchive) return;
+20954: 
+20955:     // 1) auto-finish if violations too many
+20956:     if (ctx.violations >= TOUR_CONFIG.maxViolations) {
+20957:       stopTourTick();
+20958:       finishTour({ reason: "violations" }).catch(() => null);
+20959:       return;
+20960:     }
+20961: 
+20962:     // 2) per-question timeout: auto submit if exceeded and not answered for this question index
+20963:     const qElapsed = Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000);
+20964:     if (qElapsed >= ctx.questionTimeLimit) {
+20965:       if (!ctx.answers.some(a => a.index === ctx.index)) {
+20966:         submitTourAnswer({ pickedIndex: null, auto: true }).catch(() => null);
+20967:       }
+20968:     }
+20969:   }
+20970: 
+20971:   function startTourTick() {
+20972:     stopTourTick();
+20973:     tourTick = setInterval(() => {
+20974:       renderTourHUD();
+20975:       enforceTourAutoRulesNow();
+20976:     }, 250);
+20977:   }
+20978: 
+20979:   function stopTourTick() {
+20980:     if (tourTick) clearInterval(tourTick);
+20981:     tourTick = null;
+20982:   }
+20983: 
+20984:   // ---------- T2: Anti-cheat ----------
+20985:   let antiCheatBound = false;
+20986: 
+20987:   function bindTourAntiCheatOnce() {
+20988:     if (antiCheatBound) return;
+20989:     antiCheatBound = true;
+20990: 
+20991:         document.addEventListener("visibilitychange", () => {
+20992:       if (!state.tourContext || state.tourContext.isArchive) return;
+20993: 
+20994:       if (document.visibilityState !== "visible") {
+20995:         registerTourViolation("visibility");
+20996: 
+20997:         // если дошли до лимита — финишим сразу, не ждём тика
+20998:         try { enforceTourAutoRulesNow(); } catch {}
+20999:         return;
+21000:       }
+21001: 
+21002:       // при возврате на экран — сразу применяем авто-правила (timeout/violations)
+21003:       try { enforceTourAutoRulesNow(); } catch {}
+21004:     });
+21005: 
+21006:     window.addEventListener("blur", () => {
+21007:       if (!state.tourContext || state.tourContext.isArchive) return;
+21008:       registerTourViolation("blur");
+--- context around line 21107 ---
+21087:     const qof = $("#tour-qof");
+21088:     if (qof) qof.textContent = t("tour_question_of", { q: qNo, total });
+21089: 
+21090:     const pct = Math.round((qNo / total) * 100);
+21091:     const pctEl = $("#tour-progress-pct");
+21092:     if (pctEl) pctEl.textContent = `${pct}%`;
+21093: 
+21094:     const fill = $("#tour-progress-fill");
+21095:     if (fill) fill.style.width = `${pct}%`;
+21096: 
+21097:     const badge = $("#tour-badge");
+21098:     if (badge) {
+21099:       const subjLabel = String(ctx.subjectKey || "SUBJECT").toUpperCase();
+21100:       badge.textContent = `CAMBRIDGE ${subjLabel} • TOUR #${ctx.tourNo}`;
+21101:     }
+21102: 
+21103:        const overall = formatMsToMMSS(monoNow() - (ctx.startedAtMono ?? ctx.startedAt));
+21104:     const overallEl = $("#tour-overall-time");
+21105:     if (overallEl) overallEl.textContent = overall;
+21106: 
+21107:     const qElapsed = formatMsToMMSS(monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt));
+21108:     const qEl = $("#tour-question-time");
+21109:     if (qEl) qEl.textContent = qElapsed;
+21110:      // ✅ last-10-seconds warning on question timer
+21111: try {
+21112:   const qRow = ctx.questions?.[ctx.index] || null;
+21113: 
+21114:   const limitSecRaw =
+21115:     qRow?.time_limit_seconds ??
+21116:     qRow?.timeLimitSec ??
+21117:     TOUR_CONFIG.defaultQuestionTimeSec ??
+21118:     45;
+21119: 
+21120:   const limitSec = Math.max(1, Number(limitSecRaw) || 45);
+21121:   const elapsedSec = Math.max(0, Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000));
+21122:   const remainSec = limitSec - elapsedSec;
+21123: 
+21124:   const qCard = (qEl && qEl.closest) ? qEl.closest(".tour-timer-card") : null;
+21125:   if (qCard) {
+21126:     if (remainSec <= 10) qCard.classList.add("danger");
+21127:     else qCard.classList.remove("danger");
+21128: 
+21129:     if (remainSec <= 5) qCard.classList.add("pulse");
+21130:     else qCard.classList.remove("pulse");
+21131:   }
+21132: } catch {}
+21133: 
+21134:     // warning visibility
+21135:     const warnBtn = $("#tour-warn-btn");
+21136:     if (warnBtn) warnBtn.style.display = (!ctx.isArchive && ctx.violations > 0) ? "inline-flex" : "none";
+21137:   }
+21138: 
+21139:   function renderTourQuestion() {
+21140:   const ctx = state.tourContext;
+21141:   if (!ctx) return;
+21142: 
+21143:   const q = ctx.questions?.[ctx.index];
+21144:   if (!q) {
+21145:     finishTour({ reason: "done" }).catch(() => null);
+21146:     return;
+21147:   }
+21148: 
+21149:   ctx.qStartedAt = Date.now();
+21150:   ctx.qStartedAtMono = monoNow();
+21151:   // сбрасываем прошлый выбор при показе нового вопроса
+21152:   ctx._pickedIndex = null;
+--- context around line 21121 ---
+21101:     }
+21102: 
+21103:        const overall = formatMsToMMSS(monoNow() - (ctx.startedAtMono ?? ctx.startedAt));
+21104:     const overallEl = $("#tour-overall-time");
+21105:     if (overallEl) overallEl.textContent = overall;
+21106: 
+21107:     const qElapsed = formatMsToMMSS(monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt));
+21108:     const qEl = $("#tour-question-time");
+21109:     if (qEl) qEl.textContent = qElapsed;
+21110:      // ✅ last-10-seconds warning on question timer
+21111: try {
+21112:   const qRow = ctx.questions?.[ctx.index] || null;
+21113: 
+21114:   const limitSecRaw =
+21115:     qRow?.time_limit_seconds ??
+21116:     qRow?.timeLimitSec ??
+21117:     TOUR_CONFIG.defaultQuestionTimeSec ??
+21118:     45;
+21119: 
+21120:   const limitSec = Math.max(1, Number(limitSecRaw) || 45);
+21121:   const elapsedSec = Math.max(0, Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000));
+21122:   const remainSec = limitSec - elapsedSec;
+21123: 
+21124:   const qCard = (qEl && qEl.closest) ? qEl.closest(".tour-timer-card") : null;
+21125:   if (qCard) {
+21126:     if (remainSec <= 10) qCard.classList.add("danger");
+21127:     else qCard.classList.remove("danger");
+21128: 
+21129:     if (remainSec <= 5) qCard.classList.add("pulse");
+21130:     else qCard.classList.remove("pulse");
+21131:   }
+21132: } catch {}
+21133: 
+21134:     // warning visibility
+21135:     const warnBtn = $("#tour-warn-btn");
+21136:     if (warnBtn) warnBtn.style.display = (!ctx.isArchive && ctx.violations > 0) ? "inline-flex" : "none";
+21137:   }
+21138: 
+21139:   function renderTourQuestion() {
+21140:   const ctx = state.tourContext;
+21141:   if (!ctx) return;
+21142: 
+21143:   const q = ctx.questions?.[ctx.index];
+21144:   if (!q) {
+21145:     finishTour({ reason: "done" }).catch(() => null);
+21146:     return;
+21147:   }
+21148: 
+21149:   ctx.qStartedAt = Date.now();
+21150:   ctx.qStartedAtMono = monoNow();
+21151:   // сбрасываем прошлый выбор при показе нового вопроса
+21152:   ctx._pickedIndex = null;
+21153:   saveState();
+21154: 
+21155:   // question text (fallback ids)
+21156:   const qEl =
+21157:     $("#tour-question") ||
+21158:     $("#quiz-question") ||
+21159:     $("#tour-question-text");
+21160: 
+21161:   if (qEl) {
+21162:   const qText =
+21163:     (q.question ?? q.question_text ?? q.questionText ?? q.text ?? q.prompt ?? q.title ?? "");
+21164:   qEl.textContent = String(qText || "");
+21165: }
+21166: 
+--- context around line 21150 ---
+21130:     else qCard.classList.remove("pulse");
+21131:   }
+21132: } catch {}
+21133: 
+21134:     // warning visibility
+21135:     const warnBtn = $("#tour-warn-btn");
+21136:     if (warnBtn) warnBtn.style.display = (!ctx.isArchive && ctx.violations > 0) ? "inline-flex" : "none";
+21137:   }
+21138: 
+21139:   function renderTourQuestion() {
+21140:   const ctx = state.tourContext;
+21141:   if (!ctx) return;
+21142: 
+21143:   const q = ctx.questions?.[ctx.index];
+21144:   if (!q) {
+21145:     finishTour({ reason: "done" }).catch(() => null);
+21146:     return;
+21147:   }
+21148: 
+21149:   ctx.qStartedAt = Date.now();
+21150:   ctx.qStartedAtMono = monoNow();
+21151:   // сбрасываем прошлый выбор при показе нового вопроса
+21152:   ctx._pickedIndex = null;
+21153:   saveState();
+21154: 
+21155:   // question text (fallback ids)
+21156:   const qEl =
+21157:     $("#tour-question") ||
+21158:     $("#quiz-question") ||
+21159:     $("#tour-question-text");
+21160: 
+21161:   if (qEl) {
+21162:   const qText =
+21163:     (q.question ?? q.question_text ?? q.questionText ?? q.text ?? q.prompt ?? q.title ?? "");
+21164:   qEl.textContent = String(qText || "");
+21165: }
+21166: 
+21167:   // question type normalize (mcq vs input)
+21168:   const qTypeRaw = String(q.qtype ?? q.type ?? q.question_type ?? "mcq").toLowerCase();
+21169:   const isMcq = (qTypeRaw === "mcq" || qTypeRaw === "choice" || qTypeRaw === "multiple_choice");
+21170: 
+21171:   // options wrap (fallback ids/classes)
+21172:   const wrap =
+21173:     $("#tour-options") ||
+21174:     $("#tour-options-wrap") ||
+21175:     $("#tour-options-list") ||
+21176:     document.querySelector(".tour-options");
+21177: 
+21178:   if (wrap) {
+21179:     wrap.innerHTML = "";
+21180: 
+21181:     if (!isMcq) {
+21182:   // input question UI (no HTML edits needed)
+21183:   const inputWrap = document.createElement("div");
+21184:   inputWrap.className = "input-wrap";
+21185: 
+21186:     inputWrap.innerHTML = `
+21187:     <label class="input-label">${escapeHTML(t("answer") || "Answer")}</label>
+21188:     <input id="tour-input" class="text-input" type="text" placeholder="${escapeHTML(t("type_answer") || "Type your answer")}">
+21189:     <div id="tour-input-error" class="muted small" style="margin-top:6px; display:none;"></div>
+21190:   `;
+21191: 
+21192:   wrap.appendChild(inputWrap);
+21193: 
+21194:   const inputEl = inputWrap.querySelector("#tour-input");
+21195:   const errEl = inputWrap.querySelector("#tour-input-error");
+--- context around line 21308 ---
+21288:   if (nextBtn) {
+21289:   nextBtn.classList.remove("is-loading"); // <-- добавь
+21290:   nextBtn.disabled = true;
+21291: 
+21292:   const isLast = (ctx.index >= TOUR_CONFIG.total - 1);
+21293:   nextBtn.textContent = isLast
+21294:     ? (t("tour_finish_button") || "Finish Tour →")
+21295:     : (t("tour_next_question") || "Next Question →");
+21296: }
+21297: 
+21298:   renderTourHUD();
+21299: }
+21300: 
+21301:        async function submitTourAnswer({ pickedIndex, auto = false } = {}) {
+21302:     const ctx = state.tourContext;
+21303:     if (!ctx) return;
+21304: 
+21305:     let q = ctx.questions?.[ctx.index];
+21306:     if (!q) return;
+21307: 
+21308:     const spentSec = Math.max(0, Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000));
+21309: 
+21310:     // normalize question type (DB uses qtype, older code may use type)
+21311:     const qType =
+21312:       (q?.qtype != null ? String(q.qtype) : (q?.type != null ? String(q.type) : "mcq"))
+21313:         .toLowerCase();
+21314:     const isMcq = (qType === "mcq" || qType === "multiple_choice");
+21315: 
+21316:           if (isMcq && getMcqCorrectIndexFromQuestion(q) === null && !ctx?.isArchive) {
+21317:       const restoredQ = await restoreActiveTourQuestionSecrets(ctx, ctx.index);
+21318:       if (restoredQ) q = restoredQ;
+21319:     }
+21320: 
+21321:         const correctIdx = isMcq ? getMcqCorrectIndexFromQuestion(q) : null;
+21322:     const pickedNum = (pickedIndex === null || pickedIndex === undefined) ? null : Number(pickedIndex);
+21323: 
+21324:     // Safety guard: if user selected an MCQ option but correctness data is still missing,
+21325:     // do NOT save it as wrong. This prevents false-negative tour answers after WebView reload.
+21326:     if (isMcq && correctIdx === null && !ctx?.isArchive && pickedNum !== null) {
+21327:       showToast(t("save_failed_try_again") || t("not_available") || "Please try again.");
+21328: 
+21329:       const nextBtn =
+21330:         $("#tour-next-btn") ||
+21331:         $("#quiz-next-btn") ||
+21332:         document.querySelector('[data-action="tour-next"]');
+21333: 
+21334:       if (nextBtn) {
+21335:         nextBtn.classList.remove("is-loading");
+21336:         nextBtn.disabled = false;
+21337: 
+21338:         const isLast = (ctx.index >= TOUR_CONFIG.total - 1);
+21339:         nextBtn.textContent = isLast
+21340:           ? (t("tour_finish_button") || "Finish Tour →")
+21341:           : (t("tour_next_question") || "Next Question →");
+21342:       }
+21343: 
+21344:       return;
+21345:     }
+21346: 
+21347:     // input value (for non-mcq)
+21348:     const inputEl = document.getElementById("tour-input");
+21349:     const inputVal = inputEl ? String(inputEl.value || "").trim() : "";
+21350: 
+21351:     // expected answer (for input questions)
+21352:     const expectedRaw =
+21353:       (q?.correct_answer != null ? q.correct_answer
+===== app.js :: 'enforceTourAutoRulesNow' :: 4 matches =====
+--- context around line 20951 ---
+20921:       subject_key: String(subjectKey || ""),
+20922:       tour_no: Number(tour?.tour_no || tourNo || 0)
+20923:     });
+20924:   } catch {}
+20925: 
+20926:     initTourSession({
+20927:     subjectKey,
+20928:     tourNo,
+20929:     tourId: tour.id,
+20930:     seasonId: tour?.season_id || null,
+20931:     attemptId,
+20932:     questions,
+20933:     isArchive: false,
+20934:     tourEndDate: tour?.end_date || null
+20935:   });
+20936: 
+20937:     pushCourses("tour-quiz");
+20938:   bindTourAntiCheatOnce();
+20939:   startTourTick();
+20940:   renderTourQuestion();
+20941: } finally {
+20942:   __tourStartInFlight = false;
+20943:   if (startBtn) {
+20944:     startBtn.disabled = false;
+20945:     startBtn.classList.remove("is-loading");
+20946:     if (__startPrevText != null) startBtn.textContent = __startPrevText;
+20947:      }
+20948:    }
+20949: }
+20950: 
+20951:     function enforceTourAutoRulesNow() {
+20952:     const ctx = state.tourContext;
+20953:     if (!ctx || ctx.isArchive) return;
+20954: 
+20955:     // 1) auto-finish if violations too many
+20956:     if (ctx.violations >= TOUR_CONFIG.maxViolations) {
+20957:       stopTourTick();
+20958:       finishTour({ reason: "violations" }).catch(() => null);
+20959:       return;
+20960:     }
+20961: 
+20962:     // 2) per-question timeout: auto submit if exceeded and not answered for this question index
+20963:     const qElapsed = Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000);
+20964:     if (qElapsed >= ctx.questionTimeLimit) {
+20965:       if (!ctx.answers.some(a => a.index === ctx.index)) {
+20966:         submitTourAnswer({ pickedIndex: null, auto: true }).catch(() => null);
+20967:       }
+20968:     }
+20969:   }
+20970: 
+20971:   function startTourTick() {
+20972:     stopTourTick();
+20973:     tourTick = setInterval(() => {
+20974:       renderTourHUD();
+20975:       enforceTourAutoRulesNow();
+20976:     }, 250);
+20977:   }
+20978: 
+20979:   function stopTourTick() {
+20980:     if (tourTick) clearInterval(tourTick);
+20981:     tourTick = null;
+20982:   }
+20983: 
+20984:   // ---------- T2: Anti-cheat ----------
+20985:   let antiCheatBound = false;
+20986: 
+20987:   function bindTourAntiCheatOnce() {
+20988:     if (antiCheatBound) return;
+20989:     antiCheatBound = true;
+20990: 
+20991:         document.addEventListener("visibilitychange", () => {
+20992:       if (!state.tourContext || state.tourContext.isArchive) return;
+20993: 
+20994:       if (document.visibilityState !== "visible") {
+20995:         registerTourViolation("visibility");
+20996: 
+20997:         // если дошли до лимита — финишим сразу, не ждём тика
+20998:         try { enforceTourAutoRulesNow(); } catch {}
+20999:         return;
+21000:       }
+21001: 
+21002:       // при возврате на экран — сразу применяем авто-правила (timeout/violations)
+21003:       try { enforceTourAutoRulesNow(); } catch {}
+21004:     });
+21005: 
+21006:     window.addEventListener("blur", () => {
+21007:       if (!state.tourContext || state.tourContext.isArchive) return;
+21008:       registerTourViolation("blur");
+21009:     });
+21010:   }
+21011: 
+21012:   function registerTourViolation(type) {
+21013:     const ctx = state.tourContext;
+21014:     if (!ctx || ctx.isArchive) return;
+21015: 
+21016:     // simple debounce: 1 violation per 2s (✅ use monotonic time for delta)
+21017:     const nowMono = monoNow();
+21018:     const lastMono = Number(ctx.lastViolationAtMono ?? NaN);
+21019:     if (Number.isFinite(lastMono) && (nowMono - lastMono) < 2000) return;
+21020: 
+21021:     ctx.lastViolationAtMono = nowMono; // ✅ reliable delta across clock changes/sleep
+21022:     ctx.lastViolationAt = Date.now();  // optional calendar timestamp for logs
+21023: 
+21024:     ctx.violations += 1;
+21025:     saveState();
+21026: 
+21027:         // ✅ mirror to DB via app_events (trackEvent already mirrors)
+21028:     try {
+21029:       trackEvent("tour_violation", {
+21030:         violation_type: String(type || ""),
+21031:         violations: Number(ctx.violations || 0),
+21032:         tour_id: String(ctx.tourId || ""),
+21033:         attempt_id: String(ctx.attemptId || ""),
+21034:         subject_key: String(ctx.subjectKey || ""),
+21035:         tour_no: Number(ctx.tourNo || 0)
+21036:       });
+21037:     } catch {}
+21038: 
+21039:     try {
+21040:       const severity =
+21041:         Number(ctx.violations || 0) >= Number(TOUR_CONFIG.maxViolations || 0)
+--- context around line 20975 ---
+20945:     startBtn.classList.remove("is-loading");
+20946:     if (__startPrevText != null) startBtn.textContent = __startPrevText;
+20947:      }
+20948:    }
+20949: }
+20950: 
+20951:     function enforceTourAutoRulesNow() {
+20952:     const ctx = state.tourContext;
+20953:     if (!ctx || ctx.isArchive) return;
+20954: 
+20955:     // 1) auto-finish if violations too many
+20956:     if (ctx.violations >= TOUR_CONFIG.maxViolations) {
+20957:       stopTourTick();
+20958:       finishTour({ reason: "violations" }).catch(() => null);
+20959:       return;
+20960:     }
+20961: 
+20962:     // 2) per-question timeout: auto submit if exceeded and not answered for this question index
+20963:     const qElapsed = Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000);
+20964:     if (qElapsed >= ctx.questionTimeLimit) {
+20965:       if (!ctx.answers.some(a => a.index === ctx.index)) {
+20966:         submitTourAnswer({ pickedIndex: null, auto: true }).catch(() => null);
+20967:       }
+20968:     }
+20969:   }
+20970: 
+20971:   function startTourTick() {
+20972:     stopTourTick();
+20973:     tourTick = setInterval(() => {
+20974:       renderTourHUD();
+20975:       enforceTourAutoRulesNow();
+20976:     }, 250);
+20977:   }
+20978: 
+20979:   function stopTourTick() {
+20980:     if (tourTick) clearInterval(tourTick);
+20981:     tourTick = null;
+20982:   }
+20983: 
+20984:   // ---------- T2: Anti-cheat ----------
+20985:   let antiCheatBound = false;
+20986: 
+20987:   function bindTourAntiCheatOnce() {
+20988:     if (antiCheatBound) return;
+20989:     antiCheatBound = true;
+20990: 
+20991:         document.addEventListener("visibilitychange", () => {
+20992:       if (!state.tourContext || state.tourContext.isArchive) return;
+20993: 
+20994:       if (document.visibilityState !== "visible") {
+20995:         registerTourViolation("visibility");
+20996: 
+20997:         // если дошли до лимита — финишим сразу, не ждём тика
+20998:         try { enforceTourAutoRulesNow(); } catch {}
+20999:         return;
+21000:       }
+21001: 
+21002:       // при возврате на экран — сразу применяем авто-правила (timeout/violations)
+21003:       try { enforceTourAutoRulesNow(); } catch {}
+21004:     });
+21005: 
+21006:     window.addEventListener("blur", () => {
+21007:       if (!state.tourContext || state.tourContext.isArchive) return;
+21008:       registerTourViolation("blur");
+21009:     });
+21010:   }
+21011: 
+21012:   function registerTourViolation(type) {
+21013:     const ctx = state.tourContext;
+21014:     if (!ctx || ctx.isArchive) return;
+21015: 
+21016:     // simple debounce: 1 violation per 2s (✅ use monotonic time for delta)
+21017:     const nowMono = monoNow();
+21018:     const lastMono = Number(ctx.lastViolationAtMono ?? NaN);
+21019:     if (Number.isFinite(lastMono) && (nowMono - lastMono) < 2000) return;
+21020: 
+21021:     ctx.lastViolationAtMono = nowMono; // ✅ reliable delta across clock changes/sleep
+21022:     ctx.lastViolationAt = Date.now();  // optional calendar timestamp for logs
+21023: 
+21024:     ctx.violations += 1;
+21025:     saveState();
+21026: 
+21027:         // ✅ mirror to DB via app_events (trackEvent already mirrors)
+21028:     try {
+21029:       trackEvent("tour_violation", {
+21030:         violation_type: String(type || ""),
+21031:         violations: Number(ctx.violations || 0),
+21032:         tour_id: String(ctx.tourId || ""),
+21033:         attempt_id: String(ctx.attemptId || ""),
+21034:         subject_key: String(ctx.subjectKey || ""),
+21035:         tour_no: Number(ctx.tourNo || 0)
+21036:       });
+21037:     } catch {}
+21038: 
+21039:     try {
+21040:       const severity =
+21041:         Number(ctx.violations || 0) >= Number(TOUR_CONFIG.maxViolations || 0)
+21042:           ? "critical"
+21043:           : "warning";
+21044: 
+21045:       trackEvent("anti_cheat_event", {
+21046:         reason: String(type || ""),
+21047:         severity,
+21048:         violations: Number(ctx.violations || 0),
+21049:         tour_id: String(ctx.tourId || ""),
+21050:         attempt_id: String(ctx.attemptId || ""),
+21051:         subject_id: normSubjectId(ctx.subjectKey || ""),
+21052:         subject_key: String(ctx.subjectKey || ""),
+21053:         tour_no: Number(ctx.tourNo || 0)
+21054:       });
+21055:     } catch {}
+21056: 
+21057:         const warnBtn = $("#tour-warn-btn");
+21058:     if (warnBtn) warnBtn.style.display = "inline-flex";
+21059: 
+21060:     const warnPill = $("#tour-anti-cheat"); // legacy id might exist elsewhere
+21061:     if (warnPill) warnPill.style.display = "inline-flex";
+21062: 
+21063:     showToast(t("tour_violation_toast", { v: ctx.violations, max: TOUR_CONFIG.maxViolations }));
+21064: 
+21065:     Promise.resolve().then(() => {
+--- context around line 20998 ---
+20968:     }
+20969:   }
+20970: 
+20971:   function startTourTick() {
+20972:     stopTourTick();
+20973:     tourTick = setInterval(() => {
+20974:       renderTourHUD();
+20975:       enforceTourAutoRulesNow();
+20976:     }, 250);
+20977:   }
+20978: 
+20979:   function stopTourTick() {
+20980:     if (tourTick) clearInterval(tourTick);
+20981:     tourTick = null;
+20982:   }
+20983: 
+20984:   // ---------- T2: Anti-cheat ----------
+20985:   let antiCheatBound = false;
+20986: 
+20987:   function bindTourAntiCheatOnce() {
+20988:     if (antiCheatBound) return;
+20989:     antiCheatBound = true;
+20990: 
+20991:         document.addEventListener("visibilitychange", () => {
+20992:       if (!state.tourContext || state.tourContext.isArchive) return;
+20993: 
+20994:       if (document.visibilityState !== "visible") {
+20995:         registerTourViolation("visibility");
+20996: 
+20997:         // если дошли до лимита — финишим сразу, не ждём тика
+20998:         try { enforceTourAutoRulesNow(); } catch {}
+20999:         return;
+21000:       }
+21001: 
+21002:       // при возврате на экран — сразу применяем авто-правила (timeout/violations)
+21003:       try { enforceTourAutoRulesNow(); } catch {}
+21004:     });
+21005: 
+21006:     window.addEventListener("blur", () => {
+21007:       if (!state.tourContext || state.tourContext.isArchive) return;
+21008:       registerTourViolation("blur");
+21009:     });
+21010:   }
+21011: 
+21012:   function registerTourViolation(type) {
+21013:     const ctx = state.tourContext;
+21014:     if (!ctx || ctx.isArchive) return;
+21015: 
+21016:     // simple debounce: 1 violation per 2s (✅ use monotonic time for delta)
+21017:     const nowMono = monoNow();
+21018:     const lastMono = Number(ctx.lastViolationAtMono ?? NaN);
+21019:     if (Number.isFinite(lastMono) && (nowMono - lastMono) < 2000) return;
+21020: 
+21021:     ctx.lastViolationAtMono = nowMono; // ✅ reliable delta across clock changes/sleep
+21022:     ctx.lastViolationAt = Date.now();  // optional calendar timestamp for logs
+21023: 
+21024:     ctx.violations += 1;
+21025:     saveState();
+21026: 
+21027:         // ✅ mirror to DB via app_events (trackEvent already mirrors)
+21028:     try {
+21029:       trackEvent("tour_violation", {
+21030:         violation_type: String(type || ""),
+21031:         violations: Number(ctx.violations || 0),
+21032:         tour_id: String(ctx.tourId || ""),
+21033:         attempt_id: String(ctx.attemptId || ""),
+21034:         subject_key: String(ctx.subjectKey || ""),
+21035:         tour_no: Number(ctx.tourNo || 0)
+21036:       });
+21037:     } catch {}
+21038: 
+21039:     try {
+21040:       const severity =
+21041:         Number(ctx.violations || 0) >= Number(TOUR_CONFIG.maxViolations || 0)
+21042:           ? "critical"
+21043:           : "warning";
+21044: 
+21045:       trackEvent("anti_cheat_event", {
+21046:         reason: String(type || ""),
+21047:         severity,
+21048:         violations: Number(ctx.violations || 0),
+21049:         tour_id: String(ctx.tourId || ""),
+21050:         attempt_id: String(ctx.attemptId || ""),
+21051:         subject_id: normSubjectId(ctx.subjectKey || ""),
+21052:         subject_key: String(ctx.subjectKey || ""),
+21053:         tour_no: Number(ctx.tourNo || 0)
+21054:       });
+21055:     } catch {}
+21056: 
+21057:         const warnBtn = $("#tour-warn-btn");
+21058:     if (warnBtn) warnBtn.style.display = "inline-flex";
+21059: 
+21060:     const warnPill = $("#tour-anti-cheat"); // legacy id might exist elsewhere
+21061:     if (warnPill) warnPill.style.display = "inline-flex";
+21062: 
+21063:     showToast(t("tour_violation_toast", { v: ctx.violations, max: TOUR_CONFIG.maxViolations }));
+21064: 
+21065:     Promise.resolve().then(() => {
+21066:       const left = Math.max(0, Number(TOUR_CONFIG.maxViolations || 0) - Number(ctx.violations || 0));
+21067:       uiAlert({
+21068:         title: tr3("Предупреждение", "Ogohlantirish", "Warning"),
+21069:         message: tr3(
+21070:           `Зафиксировано нарушение ${ctx.violations} из ${TOUR_CONFIG.maxViolations}. ${left > 0 ? `После следующего нарушения тур завершится автоматически.` : `Лимит нарушений исчерпан.`}`,
+21071:           `${ctx.violations}/${TOUR_CONFIG.maxViolations} qoidabuzarlik qayd etildi. ${left > 0 ? `Keyingi qoidabuzarlikdan so‘ng tur avtomatik yakunlanadi.` : `Qoidabuzarlik limiti tugadi.`}`,
+21072:           `Violation ${ctx.violations} of ${TOUR_CONFIG.maxViolations} has been recorded. ${left > 0 ? `After the next violation, the tour will finish automatically.` : `The violation limit has been reached.`}`
+21073:         ),
+21074:         okText: tr3("Понятно", "Tushunarli", "OK")
+21075:       });
+21076:     });
+21077:   }
+21078: 
+21079:   // ---------- Render ----------
+21080:   function renderTourHUD() {
+21081:     const ctx = state.tourContext;
+21082:     if (!ctx) return;
+21083: 
+21084:     const total = TOUR_CONFIG.total;
+21085:     const qNo = Math.min(total, ctx.index + 1);
+21086: 
+21087:     const qof = $("#tour-qof");
+21088:     if (qof) qof.textContent = t("tour_question_of", { q: qNo, total });
+--- context around line 21003 ---
+20973:     tourTick = setInterval(() => {
+20974:       renderTourHUD();
+20975:       enforceTourAutoRulesNow();
+20976:     }, 250);
+20977:   }
+20978: 
+20979:   function stopTourTick() {
+20980:     if (tourTick) clearInterval(tourTick);
+20981:     tourTick = null;
+20982:   }
+20983: 
+20984:   // ---------- T2: Anti-cheat ----------
+20985:   let antiCheatBound = false;
+20986: 
+20987:   function bindTourAntiCheatOnce() {
+20988:     if (antiCheatBound) return;
+20989:     antiCheatBound = true;
+20990: 
+20991:         document.addEventListener("visibilitychange", () => {
+20992:       if (!state.tourContext || state.tourContext.isArchive) return;
+20993: 
+20994:       if (document.visibilityState !== "visible") {
+20995:         registerTourViolation("visibility");
+20996: 
+20997:         // если дошли до лимита — финишим сразу, не ждём тика
+20998:         try { enforceTourAutoRulesNow(); } catch {}
+20999:         return;
+21000:       }
+21001: 
+21002:       // при возврате на экран — сразу применяем авто-правила (timeout/violations)
+21003:       try { enforceTourAutoRulesNow(); } catch {}
+21004:     });
+21005: 
+21006:     window.addEventListener("blur", () => {
+21007:       if (!state.tourContext || state.tourContext.isArchive) return;
+21008:       registerTourViolation("blur");
+21009:     });
+21010:   }
+21011: 
+21012:   function registerTourViolation(type) {
+21013:     const ctx = state.tourContext;
+21014:     if (!ctx || ctx.isArchive) return;
+21015: 
+21016:     // simple debounce: 1 violation per 2s (✅ use monotonic time for delta)
+21017:     const nowMono = monoNow();
+21018:     const lastMono = Number(ctx.lastViolationAtMono ?? NaN);
+21019:     if (Number.isFinite(lastMono) && (nowMono - lastMono) < 2000) return;
+21020: 
+21021:     ctx.lastViolationAtMono = nowMono; // ✅ reliable delta across clock changes/sleep
+21022:     ctx.lastViolationAt = Date.now();  // optional calendar timestamp for logs
+21023: 
+21024:     ctx.violations += 1;
+21025:     saveState();
+21026: 
+21027:         // ✅ mirror to DB via app_events (trackEvent already mirrors)
+21028:     try {
+21029:       trackEvent("tour_violation", {
+21030:         violation_type: String(type || ""),
+21031:         violations: Number(ctx.violations || 0),
+21032:         tour_id: String(ctx.tourId || ""),
+21033:         attempt_id: String(ctx.attemptId || ""),
+21034:         subject_key: String(ctx.subjectKey || ""),
+21035:         tour_no: Number(ctx.tourNo || 0)
+21036:       });
+21037:     } catch {}
+21038: 
+21039:     try {
+21040:       const severity =
+21041:         Number(ctx.violations || 0) >= Number(TOUR_CONFIG.maxViolations || 0)
+21042:           ? "critical"
+21043:           : "warning";
+21044: 
+21045:       trackEvent("anti_cheat_event", {
+21046:         reason: String(type || ""),
+21047:         severity,
+21048:         violations: Number(ctx.violations || 0),
+21049:         tour_id: String(ctx.tourId || ""),
+21050:         attempt_id: String(ctx.attemptId || ""),
+21051:         subject_id: normSubjectId(ctx.subjectKey || ""),
+21052:         subject_key: String(ctx.subjectKey || ""),
+21053:         tour_no: Number(ctx.tourNo || 0)
+21054:       });
+21055:     } catch {}
+21056: 
+21057:         const warnBtn = $("#tour-warn-btn");
+21058:     if (warnBtn) warnBtn.style.display = "inline-flex";
+21059: 
+21060:     const warnPill = $("#tour-anti-cheat"); // legacy id might exist elsewhere
+21061:     if (warnPill) warnPill.style.display = "inline-flex";
+21062: 
+21063:     showToast(t("tour_violation_toast", { v: ctx.violations, max: TOUR_CONFIG.maxViolations }));
+21064: 
+21065:     Promise.resolve().then(() => {
+21066:       const left = Math.max(0, Number(TOUR_CONFIG.maxViolations || 0) - Number(ctx.violations || 0));
+21067:       uiAlert({
+21068:         title: tr3("Предупреждение", "Ogohlantirish", "Warning"),
+21069:         message: tr3(
+21070:           `Зафиксировано нарушение ${ctx.violations} из ${TOUR_CONFIG.maxViolations}. ${left > 0 ? `После следующего нарушения тур завершится автоматически.` : `Лимит нарушений исчерпан.`}`,
+21071:           `${ctx.violations}/${TOUR_CONFIG.maxViolations} qoidabuzarlik qayd etildi. ${left > 0 ? `Keyingi qoidabuzarlikdan so‘ng tur avtomatik yakunlanadi.` : `Qoidabuzarlik limiti tugadi.`}`,
+21072:           `Violation ${ctx.violations} of ${TOUR_CONFIG.maxViolations} has been recorded. ${left > 0 ? `After the next violation, the tour will finish automatically.` : `The violation limit has been reached.`}`
+21073:         ),
+21074:         okText: tr3("Понятно", "Tushunarli", "OK")
+21075:       });
+21076:     });
+21077:   }
+21078: 
+21079:   // ---------- Render ----------
+21080:   function renderTourHUD() {
+21081:     const ctx = state.tourContext;
+21082:     if (!ctx) return;
+21083: 
+21084:     const total = TOUR_CONFIG.total;
+21085:     const qNo = Math.min(total, ctx.index + 1);
+21086: 
+21087:     const qof = $("#tour-qof");
+21088:     if (qof) qof.textContent = t("tour_question_of", { q: qNo, total });
+21089: 
+21090:     const pct = Math.round((qNo / total) * 100);
+21091:     const pctEl = $("#tour-progress-pct");
+21092:     if (pctEl) pctEl.textContent = `${pct}%`;
+21093: 
+===== app.js :: 'stripActiveTourContextSecrets' :: 3 matches =====
+--- context around line 2201 ---
+02176:     // Ensure viewStack sane
+02177:     if (!Array.isArray(merged.viewStack) || merged.viewStack.length === 0) merged.viewStack = ["home"];
+02178:     if (!["home", "courses", "ratings", "profile"].includes(merged.tab)) merged.tab = "home";
+02179:     if (!["home", "courses", "ratings", "profile"].includes(merged.prevTab)) merged.prevTab = merged.tab || "home";
+02180:     if (!["home", "courses", "ratings", "profile"].includes(merged.courses.entryTab)) {
+02181:       merged.courses.entryTab = merged.prevTab || "home";
+02182:     }
+02183:     return merged;
+02184:   }
+02185: 
+02186:         function saveState() {
+02187:   const nextState = structuredClone(state);
+02188: 
+02189:   if (nextState?.quiz?.mode === "practice") {
+02190:     // Practice is a learning mode. Telegram WebView can reload mid-practice;
+02191:     // if correctness data is stripped from the saved runtime state, correct MCQ
+02192:     // answers may later be saved as wrong. Keep correctness data for active Practice.
+02193:     nextState.quiz = {
+02194:       ...nextState.quiz,
+02195:       qTimerId: null,
+02196:       qEndsAtMono: null
+02197:     };
+02198:   }
+02199: 
+02200:   if (nextState?.tourContext && !nextState.tourContext.isArchive) {
+02201:     nextState.tourContext = stripActiveTourContextSecrets(nextState.tourContext);
+02202:   }
+02203: 
+02204:   localStorage.setItem(LS.state, JSON.stringify(nextState));
+02205: }
+02206: 
+02207:     // ---------------------------
+02208:   // Profile (local demo)
+02209:   // later replace with Supabase
+02210:   // ---------------------------
+02211:   function loadProfile() {
+02212:     return safeJsonParse(localStorage.getItem(LS.profile), null);
+02213:   }
+02214:    
+02215:   function saveProfile(profile) {
+02216:     localStorage.setItem(LS.profile, JSON.stringify(profile));
+02217:   }
+02218: 
+02219:       // ---------------------------
+02220: // ✅ Geo translations hydration (region/district)
+02221: // For old profiles that don't have region_tr/district_tr yet
+02222: // ---------------------------
+02223: let __geoHydrateInFlight = null;
+02224: 
+02225: async function ensureProfileGeoTranslationsHydrated() {
+02226:   if (__geoHydrateInFlight) return __geoHydrateInFlight;
+02227: 
+02228:   __geoHydrateInFlight = (async () => {
+02229:     const p = loadProfile();
+02230:     if (!p) return { ok: false, reason: "no_profile" };
+02231:     if (!window.sb) return { ok: false, reason: "no_supabase" };
+02232: 
+02233:     const needRegion = !!p.region_id && (!p.region_tr || !p.region_tr.ru || !p.region_tr.uz || !p.region_tr.en);
+02234:     const needDistrict = !!p.district_id && (!p.district_tr || !p.district_tr.ru || !p.district_tr.uz || !p.district_tr.en);
+02235: 
+02236:     if (!needRegion && !needDistrict) return { ok: true, skipped: true };
+02237: 
+02238:     let changed = false;
+02239: 
+02240:     try {
+02241:       if (needRegion) {
+02242:         const { data: rRow } = await window.sb
+02243:           .from("regions")
+02244:           .select("id,name_ru,name_uz,name_en,name")
+02245:           .eq("id", Number(p.region_id))
+02246:           .maybeSingle();
+02247: 
+02248:         if (rRow) {
+02249:           p.region_tr = {
+02250:             ru: String(rRow.name_ru || rRow.name || "").trim(),
+02251:             uz: String(rRow.name_uz || rRow.name_ru || rRow.name || "").trim(),
+02252:             en: String(rRow.name_en || rRow.name_ru || rRow.name || "").trim()
+02253:           };
+02254:           changed = true;
+02255:         }
+02256:       }
+02257: 
+02258:       if (needDistrict) {
+02259:         const { data: dRow } = await window.sb
+02260:           .from("districts")
+02261:           .select("id,name_ru,name_uz,name_en,name")
+02262:           .eq("id", Number(p.district_id))
+02263:           .maybeSingle();
+02264: 
+02265:         if (dRow) {
+02266:           p.district_tr = {
+02267:             ru: String(dRow.name_ru || dRow.name || "").trim(),
+02268:             uz: String(dRow.name_uz || dRow.name_ru || dRow.name || "").trim(),
+02269:             en: String(dRow.name_en || dRow.name_ru || dRow.name || "").trim()
+02270:           };
+02271:           changed = true;
+02272:         }
+02273:       }
+02274:         } catch (e) {
+02275:       return { ok: false, reason: "exception" };
+02276:     }
+02277: 
+02278:     if (changed) {
+02279:       saveProfile(p);
+02280:       return { ok: true, updated: true };
+02281:     }
+02282: 
+02283:     return { ok: true, updated: false };
+02284:   })();
+02285: 
+02286:   try {
+02287:     return await __geoHydrateInFlight;
+02288:   } finally {
+02289:     __geoHydrateInFlight = null;
+02290:   }
+02291: }
+--- context around line 16104 ---
+16079:     }
+16080: 
+16081:     return clean;
+16082:   }
+16083: 
+16084:       function stripTourQuestionSecrets(q) {
+16085:   if (!q || typeof q !== "object") return q;
+16086: 
+16087:   const clean = { ...q };
+16088: 
+16089:   delete clean.correctIndex;
+16090:   delete clean.correct_index;
+16091:   delete clean.correctAnswer;
+16092:   delete clean.correct_answer;
+16093:   delete clean.correct;
+16094:   delete clean.answer;
+16095: 
+16096:   delete clean.explanation;
+16097:   delete clean.explanation_ru;
+16098:   delete clean.explanation_uz;
+16099:   delete clean.explanation_en;
+16100: 
+16101:   return clean;
+16102: }
+16103: 
+16104:   function stripActiveTourContextSecrets(ctx) {
+16105:     if (!ctx || typeof ctx !== "object") return ctx;
+16106:     if (ctx.isArchive) return ctx;
+16107: 
+16108:     const clean = { ...ctx };
+16109: 
+16110:     if (Array.isArray(clean.questions)) {
+16111:       clean.questions = clean.questions.map(stripTourQuestionSecrets);
+16112:     }
+16113: 
+16114:     return clean;
+16115:   }
+16116: 
+16117:   function stripAnsweredTourQuestionInRuntime(ctx, questionIndex) {
+16118:     if (!ctx || ctx.isArchive) return;
+16119:     if (!Array.isArray(ctx.questions)) return;
+16120: 
+16121:     const idx = Number(questionIndex);
+16122:     if (!Number.isFinite(idx) || idx < 0 || idx >= ctx.questions.length) return;
+16123: 
+16124:     const q = ctx.questions[idx];
+16125:     if (!q) return;
+16126: 
+16127:     ctx.questions[idx] = stripTourQuestionSecrets(q);
+16128:   }
+16129: 
+16130:   function buildPracticeSavePayload(attempt, quiz) {
+16131:   return {
+16132:     attempt,
+16133:     quiz: {
+16134:       subjectKey: quiz?.subjectKey || null,
+16135:       practiceTourNo: Number(quiz?.practiceTourNo || 1),
+16136:       practicePoolId: Number(quiz?.practicePoolId || 0) || null,
+16137:       answers: Array.isArray(quiz?.answers) ? quiz.answers.slice() : []
+16138:     }
+16139:   };
+16140: }
+16141: 
+16142:   async function restorePracticeQuizSecrets(quiz) {
+16143:   try {
+16144:     if (!quiz || quiz.mode !== "practice") return null;
+16145:     if (!Array.isArray(quiz.questions) || !quiz.questions.length) return null;
+16146: 
+16147:     const alreadyReady = quiz.questions.every(q =>
+16148:       q && (
+16149:         Object.prototype.hasOwnProperty.call(q, "correctAnswer") ||
+16150:         Object.prototype.hasOwnProperty.call(q, "correctIndex")
+16151:       )
+16152:     );
+16153:     if (alreadyReady) return { ...quiz };
+16154: 
+16155:     const sbClient = sb || null;
+16156:     if (!sbClient) return null;
+16157: 
+16158:     const ids = quiz.questions
+16159:       .map(q => Number(q?.id))
+16160:       .filter(id => Number.isFinite(id) && id > 0);
+16161: 
+16162:     if (!ids.length) return null;
+16163: 
+16164:     const subjectId = await getSubjectIdByKey(quiz.subjectKey);
+16165:     if (!subjectId) return null;
+16166: 
+16167:     const { data, error } = await sbClient
+16168:       .from("questions")
+16169:       .select("id,subject_id,topic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en")
+16170:       .eq("subject_id", subjectId)
+16171:       .in("id", ids)
+16172:       .limit(100);
+16173: 
+16174:     if (error) return null;
+16175: 
+16176:     const rows = Array.isArray(data) ? data : [];
+16177:     const byId = new Map(rows.map(r => [Number(r.id), r]));
+16178:     const contentLang = (loadProfile()?.language) || "ru";
+16179: 
+16180:     const pickL = (obj, base) => {
+16181:       const k =
+16182:         contentLang === "uz" ? (base + "_uz")
+16183:         : contentLang === "en" ? (base + "_en")
+16184:         : (base + "_ru");
+16185: 
+16186:       return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
+16187:     };
+16188: 
+16189:     const restoredQuestions = quiz.questions.map(oldQ => {
+16190:       const row = byId.get(Number(oldQ?.id));
+16191:       if (!row) return oldQ;
+16192: 
+16193:       const type = String(row.qtype || oldQ?.type || "mcq").toLowerCase() === "input" ? "input" : "mcq";
+16194:       const optionsRaw = pickL(row, "options_text");
+--- context around line 21792 ---
+21767:     }
+21768:   }
+21769: 
+21770:     ctx.pendingDbAnswers = keep;
+21771:   saveState();
+21772: 
+21773:   // ✅ also mirror to global pending queue so answers survive even after ctx is cleared
+21774:   try {
+21775:     for (const item of keep) {
+21776:       enqueuePendingOp({
+21777:         type: "tour_answer",
+21778:         attemptId: item.attemptId,
+21779:         questionId: item.questionId,
+21780:         patch: item.patch || {}
+21781:       });
+21782:     }
+21783:   } catch {}
+21784: }
+21785:    
+21786:     async function finishTour({ reason = "done" } = {}) {
+21787:     stopTourTick();
+21788: 
+21789:     // anti-slip: before any final state save, strip all question secrets from runtime
+21790:     try {
+21791:       if (state?.tourContext && !state.tourContext.isArchive) {
+21792:         state.tourContext = stripActiveTourContextSecrets(state.tourContext);
+21793:       }
+21794:     } catch {}
+21795: 
+21796:   // UI feedback: saving (prevents “app frozen” feeling)
+21797:   const nextBtn =
+21798:     $("#tour-next-btn") ||
+21799:     $("#quiz-next-btn") ||
+21800:     document.querySelector('[data-action="tour-next"]');
+21801: 
+21802:   if (nextBtn) {
+21803:     nextBtn.disabled = true;
+21804:     nextBtn.classList.add("is-loading");
+21805:     nextBtn.textContent = (t("saving") || "Сохранение…");
+21806:   }
+21807: 
+21808:   const monitor = document.getElementById("tour-monitor");
+21809:   if (monitor) monitor.textContent = (t("saving") || "Сохранение…");
+21810: 
+21811:   const ctx = state.tourContext;
+21812: 
+21813:   // duration/score summary (used for local + DB)
+21814:   const durationSec = Math.max(0, Math.round((Date.now() - (ctx?.startedAt || Date.now())) / 1000));
+21815:     const total = TOUR_CONFIG.total;
+21816:   let score = Array.isArray(ctx?.answers)
+21817:     ? ctx.answers.filter(a => !!a?.isCorrect).length
+21818:     : Number(ctx?.correct || 0);
+21819:   let percent = total ? Math.round((score / total) * 100) : 0;
+21820: 
+21821:   // Save attempt locally (for stats/trend). Does not affect future DB integration.
+21822:   if (ctx?.subjectKey) {
+21823:     saveTourAttemptLocal(ctx.subjectKey, ctx.tourNo || 1, {
+21824:       ts: Date.now(),
+21825:       score,
+21826:       total,
+21827:       percent,
+21828:       durationSec
+21829:     });
+21830:   }
+21831: 
+21832:        // DB finalize (only active tours)
+21833:   let finalizeSavedToDb = false;
+21834: 
+21835:   try {
+21836:     if (ctx?.attemptId && !ctx?.isArchive) {
+21837:             const finalizePatch = {
+21838:         score,
+21839:         percent,
+21840:         total_time: durationSec,
+21841:         expected_answer_rows: Array.isArray(ctx?.answers) ? ctx.answers.length : 0,
+21842:         status:
+21843:           (reason === "violations") ? "anti_cheat"
+21844:           : (reason === "time_expired") ? "time_expired"
+21845:           : "submitted"
+21846:       };
+21847: 
+21848:       // 1) сначала пытаемся досохранить ответы
+21849:       await flushPendingTourAnswers(ctx);
+21850: 
+21851:       // 2) если ответы НЕ успели уйти в БД — НЕ ставим submitted сейчас
+21852:       const stillPending =
+21853:         Array.isArray(ctx?.pendingDbAnswers) && ctx.pendingDbAnswers.length > 0;
+21854: 
+21855:       if (stillPending) {
+21856:         enqueuePendingOp({
+21857:           type: "tour_finalize",
+21858:           attemptId: ctx.attemptId,
+21859:           patch: finalizePatch
+21860:         });
+21861: 
+21862:         try { scheduleFlushPendingOps(700); } catch {}
+21863: 
+21864:         showToast(t("save_failed_try_again") || "Не удалось сохранить. Проверьте интернет.");
+21865:       } else {
+21866:         // 3) ответы ушли — можно финализировать attempt
+21867:                const res = await updateTourAttempt(ctx.attemptId, finalizePatch);
+21868: 
+21869:         if (res?.ok && res.score !== undefined) {
+21870:           score = Number(res.score || 0);
+21871:           percent = Number(res.percent || 0);
+21872:         }
+21873: 
+21874:         if (!res?.ok) {
+21875:           enqueuePendingOp({
+21876:             type: "tour_finalize",
+21877:             attemptId: ctx.attemptId,
+21878:             patch: finalizePatch
+21879:           });
+21880: 
+21881:           try { scheduleFlushPendingOps(700); } catch {}
+21882: 
+===== app.js :: 'startTourTick' :: 2 matches =====
+--- context around line 20939 ---
+20914:     // analytics: started
+20915:   try {
+20916:     trackEvent("tour_attempt_started", {
+20917:       ts: new Date().toISOString(),
+20918:       tour_id: String(tour.id),
+20919:       attempt_id: String(attemptId),
+20920:       subject_id: String(subjectId),
+20921:       subject_key: String(subjectKey || ""),
+20922:       tour_no: Number(tour?.tour_no || tourNo || 0)
+20923:     });
+20924:   } catch {}
+20925: 
+20926:     initTourSession({
+20927:     subjectKey,
+20928:     tourNo,
+20929:     tourId: tour.id,
+20930:     seasonId: tour?.season_id || null,
+20931:     attemptId,
+20932:     questions,
+20933:     isArchive: false,
+20934:     tourEndDate: tour?.end_date || null
+20935:   });
+20936: 
+20937:     pushCourses("tour-quiz");
+20938:   bindTourAntiCheatOnce();
+20939:   startTourTick();
+20940:   renderTourQuestion();
+20941: } finally {
+20942:   __tourStartInFlight = false;
+20943:   if (startBtn) {
+20944:     startBtn.disabled = false;
+20945:     startBtn.classList.remove("is-loading");
+20946:     if (__startPrevText != null) startBtn.textContent = __startPrevText;
+20947:      }
+20948:    }
+20949: }
+20950: 
+20951:     function enforceTourAutoRulesNow() {
+20952:     const ctx = state.tourContext;
+20953:     if (!ctx || ctx.isArchive) return;
+20954: 
+20955:     // 1) auto-finish if violations too many
+20956:     if (ctx.violations >= TOUR_CONFIG.maxViolations) {
+20957:       stopTourTick();
+20958:       finishTour({ reason: "violations" }).catch(() => null);
+20959:       return;
+20960:     }
+20961: 
+20962:     // 2) per-question timeout: auto submit if exceeded and not answered for this question index
+20963:     const qElapsed = Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000);
+20964:     if (qElapsed >= ctx.questionTimeLimit) {
+20965:       if (!ctx.answers.some(a => a.index === ctx.index)) {
+20966:         submitTourAnswer({ pickedIndex: null, auto: true }).catch(() => null);
+20967:       }
+20968:     }
+20969:   }
+20970: 
+20971:   function startTourTick() {
+20972:     stopTourTick();
+20973:     tourTick = setInterval(() => {
+20974:       renderTourHUD();
+20975:       enforceTourAutoRulesNow();
+20976:     }, 250);
+20977:   }
+20978: 
+20979:   function stopTourTick() {
+20980:     if (tourTick) clearInterval(tourTick);
+20981:     tourTick = null;
+20982:   }
+20983: 
+20984:   // ---------- T2: Anti-cheat ----------
+20985:   let antiCheatBound = false;
+20986: 
+20987:   function bindTourAntiCheatOnce() {
+20988:     if (antiCheatBound) return;
+20989:     antiCheatBound = true;
+20990: 
+20991:         document.addEventListener("visibilitychange", () => {
+20992:       if (!state.tourContext || state.tourContext.isArchive) return;
+20993: 
+20994:       if (document.visibilityState !== "visible") {
+20995:         registerTourViolation("visibility");
+20996: 
+20997:         // если дошли до лимита — финишим сразу, не ждём тика
+20998:         try { enforceTourAutoRulesNow(); } catch {}
+20999:         return;
+21000:       }
+21001: 
+21002:       // при возврате на экран — сразу применяем авто-правила (timeout/violations)
+21003:       try { enforceTourAutoRulesNow(); } catch {}
+21004:     });
+21005: 
+21006:     window.addEventListener("blur", () => {
+21007:       if (!state.tourContext || state.tourContext.isArchive) return;
+21008:       registerTourViolation("blur");
+21009:     });
+21010:   }
+21011: 
+21012:   function registerTourViolation(type) {
+21013:     const ctx = state.tourContext;
+21014:     if (!ctx || ctx.isArchive) return;
+21015: 
+21016:     // simple debounce: 1 violation per 2s (✅ use monotonic time for delta)
+21017:     const nowMono = monoNow();
+21018:     const lastMono = Number(ctx.lastViolationAtMono ?? NaN);
+21019:     if (Number.isFinite(lastMono) && (nowMono - lastMono) < 2000) return;
+21020: 
+21021:     ctx.lastViolationAtMono = nowMono; // ✅ reliable delta across clock changes/sleep
+21022:     ctx.lastViolationAt = Date.now();  // optional calendar timestamp for logs
+21023: 
+21024:     ctx.violations += 1;
+21025:     saveState();
+21026: 
+21027:         // ✅ mirror to DB via app_events (trackEvent already mirrors)
+21028:     try {
+21029:       trackEvent("tour_violation", {
+--- context around line 20971 ---
+20946:     if (__startPrevText != null) startBtn.textContent = __startPrevText;
+20947:      }
+20948:    }
+20949: }
+20950: 
+20951:     function enforceTourAutoRulesNow() {
+20952:     const ctx = state.tourContext;
+20953:     if (!ctx || ctx.isArchive) return;
+20954: 
+20955:     // 1) auto-finish if violations too many
+20956:     if (ctx.violations >= TOUR_CONFIG.maxViolations) {
+20957:       stopTourTick();
+20958:       finishTour({ reason: "violations" }).catch(() => null);
+20959:       return;
+20960:     }
+20961: 
+20962:     // 2) per-question timeout: auto submit if exceeded and not answered for this question index
+20963:     const qElapsed = Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000);
+20964:     if (qElapsed >= ctx.questionTimeLimit) {
+20965:       if (!ctx.answers.some(a => a.index === ctx.index)) {
+20966:         submitTourAnswer({ pickedIndex: null, auto: true }).catch(() => null);
+20967:       }
+20968:     }
+20969:   }
+20970: 
+20971:   function startTourTick() {
+20972:     stopTourTick();
+20973:     tourTick = setInterval(() => {
+20974:       renderTourHUD();
+20975:       enforceTourAutoRulesNow();
+20976:     }, 250);
+20977:   }
+20978: 
+20979:   function stopTourTick() {
+20980:     if (tourTick) clearInterval(tourTick);
+20981:     tourTick = null;
+20982:   }
+20983: 
+20984:   // ---------- T2: Anti-cheat ----------
+20985:   let antiCheatBound = false;
+20986: 
+20987:   function bindTourAntiCheatOnce() {
+20988:     if (antiCheatBound) return;
+20989:     antiCheatBound = true;
+20990: 
+20991:         document.addEventListener("visibilitychange", () => {
+20992:       if (!state.tourContext || state.tourContext.isArchive) return;
+20993: 
+20994:       if (document.visibilityState !== "visible") {
+20995:         registerTourViolation("visibility");
+20996: 
+20997:         // если дошли до лимита — финишим сразу, не ждём тика
+20998:         try { enforceTourAutoRulesNow(); } catch {}
+20999:         return;
+21000:       }
+21001: 
+21002:       // при возврате на экран — сразу применяем авто-правила (timeout/violations)
+21003:       try { enforceTourAutoRulesNow(); } catch {}
+21004:     });
+21005: 
+21006:     window.addEventListener("blur", () => {
+21007:       if (!state.tourContext || state.tourContext.isArchive) return;
+21008:       registerTourViolation("blur");
+21009:     });
+21010:   }
+21011: 
+21012:   function registerTourViolation(type) {
+21013:     const ctx = state.tourContext;
+21014:     if (!ctx || ctx.isArchive) return;
+21015: 
+21016:     // simple debounce: 1 violation per 2s (✅ use monotonic time for delta)
+21017:     const nowMono = monoNow();
+21018:     const lastMono = Number(ctx.lastViolationAtMono ?? NaN);
+21019:     if (Number.isFinite(lastMono) && (nowMono - lastMono) < 2000) return;
+21020: 
+21021:     ctx.lastViolationAtMono = nowMono; // ✅ reliable delta across clock changes/sleep
+21022:     ctx.lastViolationAt = Date.now();  // optional calendar timestamp for logs
+21023: 
+21024:     ctx.violations += 1;
+21025:     saveState();
+21026: 
+21027:         // ✅ mirror to DB via app_events (trackEvent already mirrors)
+21028:     try {
+21029:       trackEvent("tour_violation", {
+21030:         violation_type: String(type || ""),
+21031:         violations: Number(ctx.violations || 0),
+21032:         tour_id: String(ctx.tourId || ""),
+21033:         attempt_id: String(ctx.attemptId || ""),
+21034:         subject_key: String(ctx.subjectKey || ""),
+21035:         tour_no: Number(ctx.tourNo || 0)
+21036:       });
+21037:     } catch {}
+21038: 
+21039:     try {
+21040:       const severity =
+21041:         Number(ctx.violations || 0) >= Number(TOUR_CONFIG.maxViolations || 0)
+21042:           ? "critical"
+21043:           : "warning";
+21044: 
+21045:       trackEvent("anti_cheat_event", {
+21046:         reason: String(type || ""),
+21047:         severity,
+21048:         violations: Number(ctx.violations || 0),
+21049:         tour_id: String(ctx.tourId || ""),
+21050:         attempt_id: String(ctx.attemptId || ""),
+21051:         subject_id: normSubjectId(ctx.subjectKey || ""),
+21052:         subject_key: String(ctx.subjectKey || ""),
+21053:         tour_no: Number(ctx.tourNo || 0)
+21054:       });
+21055:     } catch {}
+21056: 
+21057:         const warnBtn = $("#tour-warn-btn");
+21058:     if (warnBtn) warnBtn.style.display = "inline-flex";
+21059: 
+21060:     const warnPill = $("#tour-anti-cheat"); // legacy id might exist elsewhere
+21061:     if (warnPill) warnPill.style.display = "inline-flex";
 ===== index.html :: 'id="tour-question"' :: 1 matches =====
 --- context around line 792 ---
 00780:       <div id="tour-overall-delta" class="tour-timer-delta"></div>
