@@ -1,0 +1,1692 @@
+BIOLOGY A LEVEL COURSE BOOK 5TH EDITION — SOURCE AUDIT INDEX
+
+Title:           Untitled
+Creator:         Adobe InDesign 14.0 (Macintosh)
+Producer:        GPL Ghostscript 9.22
+CreationDate:    Tue Jun 23 02:22:09 2020 UTC
+ModDate:         Sun Sep 17 10:20:22 2023 UTC
+Custom Metadata: no
+Metadata Stream: yes
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           658
+Encrypted:       no
+Page size:       620.787 x 782.36 pts
+Page rot:        0
+File size:       50316784 bytes
+Optimized:       yes
+PDF version:     1.5
+
+=== FRONT MATTER / CONTENTS (PDF pages 1-30) ===
+
+--- PDF PAGE 1 ---
+Biology
+ for Cambridge International AS & A Level
+ COURSEBOOK
+
+ Mary Jones, Richard Fosbery, Dennis Taylor & Jennifer Gregory
+
+
+
+
+Fifth edition Digital Access
+
+
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 2 ---
+i
+ rs
+
+
+
+
+Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 3 ---
+Biology
+for Cambridge International AS & A Level
+ COURSEBOOK
+
+ Mary Jones, Richard Fosbery, Dennis Taylor & Jennifer Gregory
+
+
+
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 4 ---
+University Printing House, Cambridge CB2 8BS, United Kingdom
+One Liberty Plaza, 20th Floor, New York, NY 10006, USA
+477 Williamstown Road, Port Melbourne, VIC 3207, Australia
+314–321, 3rd Floor, Plot 3, Splendor Forum, Jasola District Centre, New Delhi – 110025, India
+79 Anson Road, #06–04/06, Singapore 079906
+
+Cambridge University Press is part of the University of Cambridge.
+It furthers the University’s mission by disseminating knowledge in the pursuit of education,
+learning and research at the highest international levels of excellence.
+
+www.cambridge.org
+Information on this title: www.cambridge.org/9781108859028
+© Cambridge University Press 2020
+This publication is in copyright. Subject to statutory exception
+and to the provisions of relevant collective licensing agreements,
+no reproduction of any part may take place without the written
+permission of Cambridge University Press.
+First edition 2003
+Second edition 2007
+Third edition 2012
+Fourth edition 2014
+Fifth edition 2020
+20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1
+Printed in Dubai by Oriental Press
+A catalogue record for this publication is available from the British Library
+ISBN 978-1-108-85902-8 Coursebook Paperback with Digital Access (2 Years)
+ISBN 978-1-108-79651-4 Digital Coursebook (2 Years)
+ISBN 978-1-108-79653-8 Coursebook eBook
+Additional resources for this publication at www.cambridge.org/9781108859028
+Cambridge University Press has no responsibility for the persistence or accuracy
+of URLs for external or third-party internet websites referred to in this publication,
+and does not guarantee that any content on such websites is, or will remain,
+accurate or appropriate. Information regarding prices, travel timetables, and other
+factual information given in this work is correct at the time of first printing but
+Cambridge University Press does not guarantee the accuracy of such information
+thereafter.
+
+
+NOTICE TO TEACHERS IN THE UK
+It is illegal to reproduce any part of this work in material form (including
+photocopying and electronic storage) except under the following circumstances:
+(i) where you are abiding by a licence granted to your school or institution by the
+ Copyright Licensing Agency;
+(ii) where no such licence exists, or where you wish to exceed the terms of a licence,
+ and you have gained the written permission of Cambridge University Press;
+(iii) where you are allowed to reproduce without permission under the provisions
+ of Chapter 3 of the Copyright, Designs and Patents Act 1988, which covers, for
+ example, the reproduction of short passages within certain types of educational
+ anthology and reproduction for the purposes of setting examination questions.
+
+
+NOTICE TO TEACHERS
+Cambridge International copyright material in this publication is reproduced under licence
+and remains the intellectual property of Cambridge Assessment International Education.
+ W
+Cambridge Assessment International Education bears no responsibility for the example
+answers to questions taken from its past question papers which are contained in this
+publication.
+
+Exam-style questions and sample answers have been written by the authors.
+In examinations, the way marks are awarded may be different. References to
+assessment and/or assessment preparation are the publisher’s interpretation of the
+syllabus requirements and may not fully reflect the approach of Cambridge Assessment
+International Education.
+
+Cambridge International recommends that teachers consider using a range of teaching and
+learning resources in preparing learners for assessment, based on their own professional
+judgement of their students’ needs.
+
+
+
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 5 ---
+Teachers play an important part in shaping futures.
+ Our Dedicated Teacher Awards recognise the hard
+ work that teachers put in every day.
+Thank you to everyone who nominated this year; we have been inspired and moved
+ by all of your stories. Well done to all our nominees for your dedication to learning
+ and for inspiring the next generation of thinkers, leaders and innovators.
+
+
+
+
+WINNER
+ WINNER
+ Ahmed Saya Sharon Kong Foong Abhinandan Bhattacharya Anthony Chelliah Candice Green Jimrey Buntas Dapin
+Cordoba School for A-Level, Sunway College, JBCN International School Oshiwara, Gateway College, St Augustine’s College, University of San Jose-Recoletos,
+ Pakistan Malaysia India Sri Lanka Australia Philippines
+
+
+
+
+ For more information about our dedicated teachers and their stories, go to
+ dedicatedteacher.cambridge.org
+
+
+
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 6 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+
+
+ Contents
+Introduction vii 4 Cell membranes and transport
+ 4.1 The importance of membranes 98
+How to use this series ix
+ 4.2 Structure of membranes 98
+How to use this book xi 4.3 Roles of the molecules found in
+ membranes 101
+1 Cell structure 4.4 Cell signalling 102
+ 1.1 Cells are the basic units of life 3 4.5 Movement of substances across
+ 1.2 Cell biology and microscopy 4 membranes 104
+ 1.3 Plant and animal cells as seen with
+ a light microscope 4 5 The mitotic cell cycle
+ 1.4 Measuring size and calculating 5.1 Growth and reproduction 124
+ magnification 11 5.2 Chromosomes 125
+ 1.5 Electron microscopy 14 5.3 The cell cycle 126
+ 1.6 Plant and animal cells as seen with an 5.4 Mitosis 127
+ electron microscope 17 5.5 The role of telomeres 132
+ 1.7 Bacteria 32 5.6 The role of stem cells 133
+ 1.8 Comparing prokaryotic cells with 5.7 Cancers 134
+ eukaryotic cells 34
+ 1.9 Viruses 34 6 Nucleic acids and protein synthesis
+ 6.1 The molecule of life 144
+2 Biological molecules
+ 6.2 The structure of DNA and RNA 144
+ 2.1 Biochemistry 45
+ 6.3 DNA replication 149
+ 2.2 The building blocks of life 45
+ 6.4 The genetic code 150
+ 2.3 Monomers, polymers and
+ macromolecules 45 6.5 Protein synthesis 151
+ 2.4 Carbohydrates 46 6.6 Gene mutations 153
+ 2.5 Lipids 53 7 Transport in plants
+ 2.6 Proteins 57
+ 7.1 The transport needs of plants 163
+ 2.7 Water 66
+ 7.2 Vascular system: xylem and phloem 163
+3 Enzymes 7.3 Structure of stems, roots and leaves and
+ the distribution of xylem and phloem 164
+ 3.1 What is an enzyme? 75
+ 7.4 The transport of water 170
+ 3.2 Mode of action of enzymes 76
+ 7.5 Transport of assimilates 180
+ 3.3 Investigating the progress of an
+ enzyme-catalysed reaction 79 8 Transport in mammals
+ 3.4 Factors that affect enzyme action 81
+ 8.1 Transport systems in animals 194
+ 3.5 Comparing enzyme affinities 84
+ 8.2 The mammalian circulatory system 194
+ 3.6 Enzyme inhibitors 85
+ 8.3 Blood vessels 195
+ 3.7 Immobilising enzymes 87
+
+
+
+
+iv
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 7 ---
+Contents
+
+
+ 8.4 Tissue fluid 200 13 Photosynthesis
+ 8.5 Blood 202 13.1 An energy transfer process 332
+ 8.6 The heart 209 13.2 Structure and function of chloroplasts 333
+ 13.3 The light-dependent stage of
+9 Gas exchange
+ photosynthesis 337
+ 9.1 Gas exchange 224
+ 13.4 The light-independent stage of
+ 9.2 Lungs 225 photosynthesis 339
+ 9.3 Trachea, bronchi and bronchioles 226 13.5 Limiting factors in photosynthesis 340
+ 9.4 Warming and cleaning the air 226
+ 9.5 Alveoli 228 14 Homeostasis
+ 14.1 Homeostasis 349
+10 Infectious disease 14.2 The structure of the kidney 352
+ 10.1 Infectious diseases 238 14.3 Control of water content 360
+ 10.2 Antibiotics 253 14.4 The control of blood glucose 364
+ 14.5 Homeostasis in plants 371
+11 Immunity
+ 11.1 Defence against disease 267 15 Control and coordination
+ 11.2 Cells of the immune system 268 15.1 Hormonal communication 388
+ 11.3 Active and passive immunity 277 15.2 Nervous communication 389
+ 15.3 Muscle contraction 406
+P1 Practical skills for AS Level
+ 15.4 Control and coordination in plants 413
+ P1.1 Practical skills 292
+ P1.2 Experiments 292 16 Inheritance
+ P1.3 Variables and making measurements 292 16.1 Gametes and reproduction 428
+ P1.4 Recording quantitative results 298 16.2 The production of genetic variation 433
+ P1.5 Displaying data 299 16.3 Genetics 435
+ P1.6 Making conclusions 301 16.4 Monohybrid inheritance and genetic
+ P1.7 Describing data 301 diagrams 437
+ P1.8 Making calculations from data 301 16.5 Dihybrid inheritance 441
+ P1.9 Identifying sources of error and 16.6 The chi-squared (χ2) test 449
+ suggesting improvements 303 16.7 Genes, proteins and phenotype 451
+ P1.10 Drawings 304 16.8 Control of gene expression 453
+
+12 Energy and respiration 17 Selection and evolution
+ 12.1 The need for energy in living organisms 312 17.1 Variation 465
+ 12.2 Aerobic respiration 313 17.2 Natural selection 469
+ 12.3 Mitochondrial structure and function 319 17.3 Genetic drift and the founder effect 474
+ 12.4 Respiration without oxygen 320 17.4 The Hardy–Weinberg principle 476
+ 12.5 Respiratory substrates 322 17.5 Artificial selection 478
+ 17.6 Evolution 482
+ 17.7 Identifying evolutionary relationships 486
+
+
+
+
+ v
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 8 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+
+18 Classification, biodiversity and P2 Practical skills for A Level
+ conservation P2.1 Practical skills 582
+ 18.1 Classification 497 P2.2 Planning an investigation 582
+ 18.2 Biodiversity 507 P2.3 Constructing a hypothesis 582
+ 18.3 Maintaining biodiversity 521 P2.4 Identifying variables 583
+ 18.4 Protecting endangered species 524 P2.5 Describing the sequence of steps 586
+ 18.5 Controlling alien species 530 P2.6 Risk assessment 586
+ 18.6 International conservation P2.7 Recording and displaying results 587
+ organisations 531 P2.8 Analysis, conclusions and evaluation 587
+ P2.9 Evaluating evidence 600
+19 Genetic technology
+ P2.10 Conclusions and discussion 600
+ 19.1 Genetic engineering 544
+ 19.2 Tools for the gene technologist 545 Appendix 1: Amino acid R groups 608
+ 19.3 Gene editing 552
+ 19.4 Separating and amplifying DNA 555 Appendix 2: DNA and RNA triplet codes 609
+ 19.5 Analysing and storing genetic
+ information 560 Glossary 611
+ 19.6 Genetic technology and medicine 564 Index 631
+ 19.7 Genetic technology and agriculture 570
+ Acknowledgements 643
+
+
+
+
+vi
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 9 ---
+Introduction
+
+
+
+
+ Introduction
+This is the fifth edition of the Cambridge International AS & A Level Biology
+Coursebook, and it provides everything that you need to support your course for
+Cambridge AS & A Level Biology (9700). It provides full coverage of the syllabus for
+examinations from 2022 onwards.
+The chapters are arranged in the same sequence as the topics in the syllabus.
+Chapters 1 to P1 cover the AS material, and Chapters 12 to P2 cover the material
+needed for A Level. The various features that you will find in these chapters are
+explained on the next two pages.
+Many questions will test a deeper understanding of the facts and concepts that you
+will learn during your course. It is therefore not enough just to learn words and
+diagrams that you can repeat in your examinations; you need to ensure that you really
+understand each concept fully. Trying to answer the questions that you will find within
+each chapter, and at the end of each chapter, should help you to do this.
+Although you will study your biology as a series of different topics, it is very important
+to appreciate that all of these topics link up with each other. You need to make links
+between different areas of the syllabus to answer some questions. For example, you
+might be asked a question that involves bringing together knowledge about protein
+synthesis, infectious disease and transport in mammals. In particular, you will find that
+certain key concepts come up again and again. These include:
+• Cells as units of life
+• Biochemical processes
+• DNA, the molecule of heredity
+• Natural selection
+• Organisms in their environment
+• Observation and experiment.
+As you work through your course, make sure that you keep reflecting on the work that
+you did earlier and how it relates to the current topic that you are studying. Some of
+the reflection questions at the ends of the chapters suggest particular links that you
+could think about. They also ask you to think about how you learn, which may help
+you to make the very best use of your time and abilities as your course progresses. You
+can also use the self-evaluation checklists at the end of each chapter to decide how well
+you have understood each topic in the syllabus, and whether or not you need to do
+more work on each one.
+Practical skills are an important part of your biology course. You will develop these skills
+as you do experiments and other practical work related to the topics you are studying.
+Chapters P1 (for AS Level) and P2 (for A Level) explain what these skills are and what
+you need to be able to do.
+
+
+
+
+ vii
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 10 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+You may like to look at two other books in this series – the Workbook and the
+Practical Workbook. The Workbook provides clear guidance on many of the skills
+that you need to develop as you work through the course – such as constructing
+and analysing graphs, and planning experiments – with exercises for you to try.
+The Practical Workbook is full of detailed explanations of how to carry out all the
+practicals required in the syllabus, and many others too, that will help you to become
+more confident in practical work.
+This is an exciting time to be studying biology, with new discoveries and technologies
+constantly finding their way into the news. We very much hope that you will enjoy
+your biology course, and that this book will help you not only to prepare for your
+examinations but also to develop a life-long interest in this subject.
+
+
+
+
+viii
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 11 ---
+How to use this series
+
+
+
+
+ How to use this series
+This suite of resources supports students and teachers following the Cambridge
+International AS & A Level Biology syllabus (9700). All of the books in the series
+work together to help students develop the necessary knowledge and scientific
+skills required for this subject. With clear language and style, they are designed for
+international learners.
+
+
+
+
+ The coursebook provides comprehensive support
+ Biology for the full Cambridge International AS & A
+ for Cambridge International AS & A Level Level Biology syllabus (9700). It clearly explains
+ COURSEBOOK facts, concepts and practical techniques, and
+ Mary Jones, Richard Fosbery, Dennis Taylor & Jennifer Gregory uses real-world examples of scientific principles.
+ Two chapters provide full guidance to help
+ students develop investigative skills. Questions
+ within each chapter help them to develop their
+ understanding, while exam-style questions
+ provide essential practice.
+
+
+ Fifth edition Digital Access
+
+
+
+
+The workbook contains over 100
+exercises and exam-style questions, Biology
+carefully constructed to help learners for Cambridge International AS & A Level
+develop the skills that they need as they WORKBOOK
+
+progress through their Biology course. Mary Jones & Matthew Parkin
+
+
+The exercises also help students develop
+understanding of the meaning of various
+command words used in questions,
+and provide practice in responding
+appropriately to these.
+
+
+ Second edition Digital Access
+
+
+
+
+ ix
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 12 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+
+
+ Biology
+ for Cambridge International AS & A Level
+ This write-in book provides students with a wealth
+ PRACTICAL WORKBOOK
+ of hands-on practical work, giving them full guidance
+ Mary Jones & Matthew Parkin and support that will help them to develop all of
+ the essential investigative skills. These skills include
+ planning investigations, selecting and handling
+ apparatus, creating hypotheses, recording and
+ displaying results, and analysing and evaluating data.
+
+
+
+
+ Second edition
+
+
+
+
+The teacher’s resource supports and enhances the questions and practical activities
+in the coursebook. This resource includes detailed lesson ideas, as well as answers
+and exemplar data for all questions and activities in the coursebook and workbook.
+The practical teacher’s guide, included with this resource, provides support for the
+practical activities and experiments in the practical workbook.
+Teaching notes for each topic area include a suggested teaching plan, ideas for
+active learning and formative assessment, links to resources, ideas for lesson starters
+and plenaries, differentiation, lists of common misconceptions and suggestions
+for homework activities. Answers are included for every
+question and exercise in the coursebook, workbook
+and practical workbook. Detailed support is provided
+for preparing and carrying out for all the investigations
+in the practical workbook, including tips for getting
+things to work well, and a set of sample results that can
+be used if students cannot do the experiment, or fail to Biology
+collect results. for Cambridge International
+ AS & A Level
+
+
+
+
+ Biology
+ for Cambridge International AS & A Level
+ DIGITAL TEACHER’S RESOURCE ACCESS CARD
+
+
+
+
+ Digital Teacher’s Resource
+
+
+
+ DO NOT Code inside is required to activate your
+ DISCARD purchase of the Teacher’s Resource
+
+
+
+
+x
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 13 ---
+How to use this book
+
+
+
+
+ How to use this book
+Throughout this book, you will notice lots of different features that will help your
+learning. These are explained below.
+
+ LEARNING INTENTIONS KEY WORDS
+ These set the scene for each chapter, help with navigation through the Key vocabulary
+ coursebook and indicate the important concepts in each topic. is highlighted in
+ the text when it is
+ first introduced.
+ BEFORE YOU START Definitions are then
+ given in the margin,
+ This contains questions and activities on subject knowledge you will need which explain the
+ before starting this chapter. meanings of these
+ words and phrases.
+ You will also find
+ SCIENCE IN CONTEXT definitions of these
+ This feature presents real-world examples and applications of the content in words in the Glossary
+ a chapter, encouraging you to look further into topics. There are discussion at the back of this
+ questions at the end which look at some of the benefits and problems of these book.
+ applications.
+
+ COMMAND WORDS
+ PRACTICAL ACTIVITY Command words
+ This book does not contain detailed instructions for doing particular that appear in the
+ experiments, but you will find background information about the practical work syllabus and might
+ you need to do in these boxes. There are also two chapters, P1 and P2, which be used in exams are
+ provide detailed information about the practical skills you need to develop highlighted in the
+ during the course. exam-style questions
+ when they are first
+ introduced. In the
+ margin, you will
+Questions find the Cambridge
+Appearing throughout the text, questions give you a chance to check that you have International
+understood the topic you have just read about. You can find the answers to these definition. You will
+questions in the digital version of the Coursebook. also find these
+ definitions in the
+ Glossary at the
+ back of the book
+ with some further
+ explanation on the
+ meaning of these
+ words.*
+*The information in this section is taken from the Cambridge International syllabus (9700) for examination
+from 2022. You should always refer to the appropriate syllabus document for the year of your examination
+to confirm the details and for more information. The syllabus document is available on the Cambridge
+International website at www.cambridgeinternational.org.
+
+
+
+
+ xi
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 14 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+
+ WORKED EXAMPLE
+ Wherever you need to know how to use a formula to carry out a calculation,
+ there are worked examples boxes to show you how to do this.
+
+
+
+ REFLECTION IMPORTANT
+ These activities ask you to look back on the topics covered in the chapter and Important equations,
+ test how well you understand these topics and encourage you to reflect on facts and tips are
+ your learning. given in these boxes.
+
+
+
+ EXAM-STYLE QUESTIONS
+ Questions at the end of each chapter provide more demanding exam-style questions, some of which may require
+ use of knowledge from previous chapters. Some questions are taken from past papers. Where this is the case, they
+ include references to the relevant past paper. All other questions are written by the authors. Answers to these
+ questions can be found in the digital version of the Coursebook.
+
+
+ SUMMARY
+
+ There is a summary of key points at the end of each chapter.
+
+
+
+
+ SELF-EVALUATION
+ The summary checklists are followed by ‘I can’ statements which match the Learning intentions at the beginning
+ of the chapter. You might find it helpful to rate how confident you are for each of these statements when you are
+ revising. You should revisit any topics that you rated ‘Needs more work’ or ‘Almost there’.
+
+ See Needs Almost Ready to
+ I can
+ section more work there move on
+
+
+
+
+ These boxes tell you where information in the book is extension content,
+ and is not part of the syllabus.
+
+
+
+
+xii
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 15 ---
+Chapter 1
+
+Cell structure
+
+LEARNING INTENTIONS
+In this chapter you will learn how to:
+• explain that cells are the basic units of life
+• use the units of measurement relevant to microscopy
+• recognise the common structures found in cells as seen with a light microscope and outline their
+ structures and functions
+• compare the key structural features of animal and plant cells
+• use a light microscope and make temporary preparations to observe cells
+• recognise, draw and measure cell structures from temporary preparations and micrographs
+• calculate magnifications of images and actual sizes of specimens using drawings or micrographs
+• explain the use of the electron microscope to study cells with reference to the increased resolution of
+ electron microscopes
+• recognise the common structures found in cells as seen with an electron microscope and outline their
+ structures and functions
+• outline briefly the role of ATP in cells
+• describe the structure of bacteria and compare the structure of prokaryotic cells with eukaryotic cells
+• describe the structure of viruses.
+
+
+
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 16 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+
+ BEFORE YOU START
+ • Make a list of structures that could be found in a cell.
+ • Try to write down the functions of the structures you have listed.
+ • Which structures are found in plant cells and which are found in animal cells?
+ • Are there any cells that are not animal or plant cells?
+
+
+ THINKING OUTSIDE THE BOX
+ Progress in science often depends on people
+ thinking ‘outside the box’ – original thinkers who
+ are often ignored or even ridiculed when they
+ first put forward their radical new ideas. One such
+ individual, who battled constantly throughout
+ her career to get her ideas accepted, was the
+ American biologist Lynn Margulis (1938–2011;
+ Figure 1.1). Her greatest achievement was to use
+ evidence from microbiology to help firmly establish
+ an idea that had been around since the mid-19th
+ century – that new organisms can be created from
+ combinations of existing organisms. Importantly,
+ the existing organisms are not necessarily closely
+ related. The organisms form a symbiotic partnership
+ (they live together in a partnership in which both
+ partners benefit). Margulis imagined that one
+ organism engulfed (‘ate’) another. Normally the
+ engulfed organism would be digested and killed, Figure 1.1: Lynn Margulis: ‘My work more than didn’t fit
+ but sometimes the organism engulfed may survive in. It crossed the boundaries that people had spent their
+ and even be of benefit to the organism in which lives building up. It hits some 30 sub-fields of biology,
+ it finds itself. This type of symbiosis is known as even geology.’
+ endosymbiosis (‘endo’ means inside). A completely
+ new type of organism is created, representing a traditional view, first put forward by Charles Darwin,
+ dramatic evolutionary change. that evolution occurs mainly as a result of
+ competition between species.
+ The best-known example of Margulis’ ideas is her
+ suggestion that mitochondria and chloroplasts Questions for discussion
+ were originally free-living bacteria (prokaryotes). • Can you think of any ideas people have had
+ She suggested that these bacteria invaded the which were controversial at the time but
+ ancestors of modern eukaryotic cells, which are are now accepted? Try to think of scientific
+ much larger and more complex cells than bacteria, examples. You may also like to consider why
+ and entered into a symbiotic relationship with the ideas were controversial.
+ the cells. This idea has been confirmed as true by
+ later work. Margulis saw such symbiotic unions • Can you think of any scientific ideas people
+ as a major driving cause of evolutionary change. have now which are controversial and not
+ Throughout her life, she continued to challenge the accepted by everybody?
+
+
+
+
+2
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 17 ---
+1 Cell structure
+
+
+ animals. It was soon also realised that all cells come from
+1.1 Cells are the basic pre-existing cells by the process of cell division. This
+ raises the obvious question of where the original cell
+units of life came from. There are many hypotheses, but we still have
+ no definite answers to this question.
+Towards the middle of the 19th century, scientists made a
+fundamental breakthrough in our understanding of how life
+‘works’. They realised that the basic unit of life is the cell. Why cells?
+The origins of this idea go back to the early days of A cell can be thought of as a bag in which the chemistry
+microscopy when an English scientist, Robert Hooke, of life occurs. The activity going on inside the cell is
+decided to examine thin slices of plant material. He therefore separated from the environment outside the cell.
+chose cork as one of his examples. Looking down the The bag, or cell, is surrounded by a thin membrane. The
+microscope, he made a drawing to show the regular membrane is an essential feature of all cells because it
+appearance of the structure, as you can see in Figure 1.2. controls exchange between the cell and its environment.
+In 1665 he published a book containing It can act as a barrier, but it can also control movement
+this drawing. of materials across the membrane in both directions. The
+ membrane is therefore described as partially permeable.
+ If it were freely permeable, life could not exist, because
+ the chemicals of the cell would simply mix with the
+ surrounding chemicals by diffusion and the inside of the
+ cell would be the same as the outside.
+
+
+ Two types of cell
+ During the 20th century, scientists studying the cells
+ of bacteria and of more complex organisms such as
+ plants and animals began to realise that there were
+ two fundamentally different kinds of cells. Some cells
+ were very simple, but some were much larger and more
+ complex. The complex cells contained a nucleus (plural:
+ nuclei) surrounded by two membranes. The genetic
+ material, DNA, was in the nucleus. In the simple cells
+ the DNA was not surrounded by membranes, but
+ apparently free in the cytoplasm.
+
+Figure 1.2: Drawing of cork cells published by Robert KEY WORDS
+Hooke in 1665.
+ cell: the basic unit of all living organisms; it is
+ surrounded by a cell surface membrane and
+If you examine the drawing you will see the regular
+ contains genetic material (DNA) and cytoplasm
+structures that Hooke called ‘cells’. Each cell appeared
+ containing organelles
+to be an empty box surrounded by a wall. Hooke had
+discovered and described, without realising it, the organelle: a functionally and structurally distinct
+fundamental unit of all living things. part of a cell, e.g. a ribosome or mitochondrion
+Although we now know that the cells of cork are dead, nucleus (plural: nuclei): a relatively large
+Hooke and other scientists made further observations of organelle found in eukaryotic cells, but absent
+cells in living materials. However, it was not until almost from prokaryotic cells; the nucleus contains the
+200 years later that a general cell theory emerged from cell’s DNA and therefore controls the activities
+the work of two German scientists. In 1838 Schleiden, of the cell; it is surrounded by two membranes
+a botanist, suggested that all plants are made of cells. A which together form the nuclear envelope
+year later Schwann, a zoologist, suggested the same for
+
+
+
+
+ 3
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 18 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+Organisms made of cells with membrane-bound are unfamiliar to most people. Before studying light and
+nuclei are now known as eukaryotes, while the simpler electron microscopy further, you need to become familiar
+cells lacking membrane-bound nuclei are known as with these units.
+prokaryotes (‘eu’ means true, ‘karyon’ means nucleus,
+ According to international agreement, the International
+‘pro’ means before). Eukaryotes are thought to have
+ System of Units (SI units) should be used. In this system,
+evolved from prokaryotes more than two billion years
+ the basic unit of length is the metre (symbol, m). More
+ago. Prokaryotes include bacteria. Eukaryotes include
+ units are created by going a thousand times larger or
+animals, plants, fungi and some other organisms.
+ smaller. Standard prefixes are used for the units. For
+ example, the prefix ‘kilo’ means 1000 times. Thus,
+ KEY WORDS 1 kilometre = 1000 metres. The units of length relevant
+ to cell studies are shown in Table 1.1.
+ eukaryote: an organism whose cells contain a
+ nucleus and other membrane-bound organelles The smallest structure visible with the human eye is
+ about 50–100 μm in diameter (roughly the diameter of
+ prokaryote: an organism whose cells do not the sharp end of a pin). The cells in your body vary in
+ contain a nucleus or any other membrane-bound size from about 5 μm to 40 μm. It is difficult to imagine
+ organelles how small these cells are, especially when they are clearly
+ visible using a microscope. An average bacterial cell is
+ about 1 µm across. One of the smallest structures you
+ will study in this book is the ribosome, which is only
+1.2 Cell biology and about 25 nm in diameter! You could line up about
+ 20 000 ribosomes across the full stop at the end of
+microscopy this sentence.
+
+The study of cells has given rise to an important branch
+of biology known as cell biology. Cell biologists study
+cells using many different methods, including the use of
+various types of microscope.
+ 1.3 Plant and animal
+There are two fundamentally different types of cells as seen with a light
+microscope: the light microscope and the electron
+microscope. Both use a form of radiation in order to
+see the specimen being examined. The light microscope
+ microscope
+uses light as a source of radiation, while the electron Microscopes that use light as a source of radiation are
+microscope uses electrons, for reasons which are called light microscopes. Figure 1.3 shows how the light
+discussed later. microscope works.
+
+ Note: the structure of a light microscope is
+Units of measurement extension content, and is not part of the syllabus.
+In order to measure objects in the microscopic world,
+we need to use very small units of measurement, which
+
+
+ Fraction of a metre Unit Symbol
+ –3
+ one thousandth = 0.001 = 1/1000 = 10 millimetre mm
+ –6
+ one millionth = 0.000 001 = 1/1000 000 = 10 micrometre μm
+ one thousand millionth = 0.000 000 001 = nanometre nm
+ 1/1000 000 000 = 10–9
+
+
+Table 1.1: Units of measurement relevant to cell studies: 1 micrometre is a thousandth of a millimetre; 1 nanometre is a
+thousandth of a micrometre.
+
+
+
+
+4
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 19 ---
+1 Cell structure
+
+
+ Eyepiece lens magniﬁes and showing the structure of a generalised plant cell, both
+ eyepiece
+ focuses the image from the as seen with a light microscope. (A generalised cell
+ objective onto the eye. shows all the structures that may commonly be found
+ in a cell.) Figures 1.6 and 1.7 are photomicrographs.
+light beam
+ A photomicrograph is a photograph of a specimen as
+ seen with a light microscope. Figure 1.6 shows some
+ human cells. Figure 1.7 shows a plant cell taken from a
+ leaf. Both figures show cells magnified 400 times, which
+objective Objective lens collects light is equivalent to using the high-power objective lens on
+coverslip passing through the specimen a light microscope. See also Figures 1.8a and 1.8b for
+ and produces a magnified image. labelled drawings of these figures.
+glass slide
+ Many of the cell contents are colourless and transparent
+ Condenser lens focuses the so they need to be stained with coloured dyes to be seen.
+condenser
+ light onto the specimen held The human cells in Figure 1.6 have been stained. The
+ between the coverslip and slide. chromatin in the nuclei is particularly heavily stained.
+iris diaphragm
+ The plant cells in Figure 1.5 have not been stained
+light source Condenser iris diaphragm is
+ because the chloroplasts contain the green pigment
+ closed slightly to produce a
+ pathway of light narrow beam of light.
+ chlorophyll and are easily visible without staining.
+
+ Figure 1.3: How the light microscope works. The coverslip is
+ a thin sheet of glass used to cover the specimen. It protects
+ specimens from drying out and also prevents the objective
+ Question
+ lens from touching the specimen. 1 Using Figures 1.4 and 1.5, name the structures that:
+ a animal and plant cells have in common
+ small structures that b are found only in plant cells
+ Golgi apparatus are difficult to identify c are found only in animal cells.
+ cytoplasm
+
+ mitochondria Features that animal and plant
+ cells have in common
+ Cell surface membrane
+ cell surface All cells, including those of both eukaryotes and
+ membrane prokaryotes, are surrounded by a very thin cell surface
+ membrane. This is also sometimes referred to as the
+ plasma membrane. As mentioned before, it is partially
+ permeable and controls the exchange of materials
+ between the cell and its environment.
+ nuclear envelope
+ chromatin – Nucleus
+ centriole – always deeply staining
+ nucleus All eukaryotic cells contain a nucleus. The nucleus
+ found near nucleus and thread-like
+ is a relatively large structure. It stains intensely and
+ nucleolus –
+ deeply staining
+ KEY WORD
+ Figure 1.4: Structure of a generalised animal cell (diameter
+ about 20 μm) as seen with a very high quality light cell surface membrane: a very thin membrane
+ microscope. (about 7 nm diameter) surrounding all cells; it is
+ partially permeable and controls the exchange of
+ Figure 1.4 is a drawing showing the structure of a materials between the cell and its environment
+ generalised animal cell and Figure 1.5 is a drawing
+
+
+
+
+ 5
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 20 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+ middle lamella – thin layer
+ tonoplast – membrane
+ holding cells together
+ surrounding vacuole
+
+ cell surface membrane plasmodesma –
+ (pressed against cell wall) connects cytoplasm
+ of neighbouring cells
+ vacuole – large cell wall of
+ with central position neighbouring
+ cell
+ cytoplasm
+
+ cell wall
+ mitochondria
+ chloroplast
+
+ nucleolus –
+ deeply staining grana just visible
+ nuclear envelope
+ nucleus
+ chromatin – small structures that
+ deeply staining are diﬃcult to identify
+ and thread-like Golgi apparatus
+
+
+Figure 1.5: Structure of a generalised plant cell (diameter about 40 μm) as seen with a very high quality light microscope.
+
+
+
+
+Figure 1.6: Cells from the lining of the human cheek (×400). Figure 1.7: Cells in a moss leaf (×400). Many green chloroplasts
+Each cell shows a centrally placed nucleus, which is typical are visible inside each cell. The grana are just visible as black
+of animal cells. The cells are part of a tissue known as grains inside the chloroplasts (‘grana’ means grains). Cell walls
+squamous (flattened) epithelium. are also clearly visible (animal cells lack cell walls).
+
+
+
+
+6
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 21 ---
+1 Cell structure
+
+
+is therefore very easy to see when looking down the
+microscope. The deeply staining material in the nucleus KEY WORDS
+is called chromatin (‘chroma’ means colour). Chromatin chromatin: the material of which chromosomes
+is a mass of coiled threads. The threads are seen to are made, consisting of DNA, proteins and small
+collect together to form chromosomes during nuclear amounts of RNA; visible as patches or fibres
+division (Chapter 5, Section 5.2, Chromosomes). within the nucleus when stained
+Chromatin contains DNA (deoxyribonucleic acid), the
+molecule which contains the instructions (genes) that chromosome: in the nucleus of the cells of
+control the activities of the cell (Chapter 6). eukaryotes, a structure made of tightly coiled
+ chromatin (DNA, proteins and RNA) visible during
+Inside the nucleus an even more deeply staining area cell division; the term ‘circular DNA’ is now also
+is visible, the nucleolus. This is made of loops of DNA commonly used for the circular strand of DNA
+from several chromosomes. The number of nucleoli is present in a prokaryotic cell
+variable, one to five being common in mammals. One of
+ nucleolus: a small structure, one or more of
+the main functions of nucleoli is to make ribosomes.
+ which is found inside the nucleus; the nucleolus
+ is usually visible as a densely stained body; its
+Cytoplasm function is to manufacture ribosomes using the
+All the living material inside the cell is called protoplasm. information in its own DNA
+It is also useful to have a term for all the living material
+ protoplasm: all the living material inside a cell
+outside the nucleus; it is called cytoplasm. Therefore,
+ (cytoplasm plus nucleus)
+cytoplasm + nucleus = protoplasm.
+ cytoplasm: the contents of a cell, excluding
+Cytoplasm is an aqueous (watery) material, varying the nucleus
+from a fluid to a jelly-like consistency. Using a light
+microscope, many small structures can be seen within mitochondrion (plural: mitochondria): the
+it. These have been likened to small organs and are organelle in eukaryotes in which aerobic
+therefore known as organelles (meaning ‘little organs’). respiration takes place
+An organelle can be defined as a functionally and cell wall: a wall surrounding prokaryote, plant
+structurally distinct part of a cell. Organelles are often, and fungal cells; the wall contains a strengthening
+but not always, surrounded by one or two membranes material which protects the cell from mechanical
+so that their activities can be separated from the damage, supports it and prevents it from bursting
+surrounding cytoplasm. Organising cell activities in by osmosis if the cell is surrounded by a solution
+separate compartments is essential for a structure as with a higher water potential
+complex as an animal or plant cell to work efficiently.
+
+Mitochondria (singular: mitochondrion) Differences between
+The most numerous organelles seen with the light
+microscope are usually mitochondria (singular: animal and plant cells
+mitochondrion). Mitochondria are only just visible using One of the structures commonly found in animal cells
+a light microscope. Videos of living cells, taken with the which is absent from plant cells is the centriole. Plant
+aid of a light microscope, have shown that mitochondria cells also differ from animal cells in possessing cell walls,
+can move about, change shape and divide. They are large permanent vacuoles and chloroplasts.
+specialised to carry out aerobic respiration.
+ Centrioles
+Golgi apparatus Under the light microscope the centriole appears as
+The use of special stains containing silver resulted in the a small structure close to the nucleus (Figure 1.4).
+Golgi apparatus being discovered in 1898 by Camillo Centrioles are discussed later in this chapter.
+Golgi. The Golgi apparatus collects and processes
+molecules within the cell, particularly proteins.
+ Cell walls and plasmodesmata
+ With a light microscope, individual plant cells are more
+ easily seen than animal cells. This is because they are
+ Note: you do not need to learn this structure. It is
+ usually larger and, unlike animal cells, are surrounded
+ sometimes called the Golgi body or Golgi complex.
+ by a cell wall. Note that the cell wall is an extra
+
+
+
+
+ 7
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 22 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+structure which is outside the cell surface membrane. of the plant, mainly in the leaves. They are relatively
+The wall is relatively rigid because it contains fibres large organelles and so are easily seen with a light
+of cellulose, a polysaccharide which strengthens the microscope. It is even possible to see tiny ‘grains’ or
+wall. The cell wall gives the cell a definite shape. It grana (singular: granum) inside the chloroplasts using
+prevents the cell from bursting when water enters by a light microscope (Figure 1.7). These are the parts
+osmosis, allowing large pressures to develop inside the of the chloroplast that contain chlorophyll, the green
+cell (Chapter 4, Section 4.5, Movement of substances pigment which absorbs light during the process of
+across membranes). Cell walls may be reinforced with photosynthesis. Chloroplasts are discussed further in
+extra cellulose or with a hard material called lignin Chapter 13 (Section 13.2, Structure and function of
+for extra strength (Chapter 7). Cell walls are freely chloroplasts).
+permeable, allowing free movement of molecules and
+ions through to the cell surface membrane.
+ KEY WORDS
+Plant cells are linked to neighbouring cells by means
+of pores containing fine strands of cytoplasm. plasmodesma (plural: plasmodesmata): a
+These structures are called plasmodesmata (singular: pore-like structure found in plant cell walls;
+plasmodesma). They are lined with the cell surface plasmodesmata of neighbouring plant cells line
+membrane. Movement through the pores is thought to up to form tube-like pores through the cell walls,
+be controlled by the structure of the pores. allowing the controlled passage of materials from
+ one cell to the other; the pores contain ER and
+ are lined with the cell surface membrane
+Vacuoles
+Vacuoles are sac-like structures which are surrounded vacuole: an organelle found in eukaryotic cells;
+by a single membrane. Although animal cells may a large, permanent central vacuole is a typical
+possess small vacuoles such as phagocytic vacuoles feature of plant cells, where it has a variety of
+(Chapter 4, Section 4.5, Movement of substances functions, including storage of biochemicals such
+across membranes), which are temporary structures, as salts, sugars and waste products; temporary
+mature plant cells often possess a large, permanent, vacuoles, such as phagocytic vacuoles (also
+central vacuole. The plant vacuole is surrounded by known as phagocytic vesicles), may form in
+a membrane, the tonoplast, which controls exchange animal cells
+between the vacuole and the cytoplasm. The fluid
+ tonoplast: the partially permeable membrane
+in the vacuole is a solution of pigments, enzymes,
+ that surrounds plant vacuoles
+sugars and other organic compounds (including some
+waste products), mineral salts, oxygen and carbon chloroplast: an organelle, bounded by an
+dioxide. envelope (i.e. two membranes), in which
+In plants, vacuoles help to regulate the osmotic photosynthesis takes place in eukaryotes
+properties of cells (the flow of water inwards and photosynthesis: the production of organic
+outwards) as well as having a wide range of other substances from inorganic ones, using energy
+functions. For example, the pigments which colour from light
+the petals of certain flowers and the parts of some
+vegetables, such as the red pigment of beetroots, may grana (singular: granum): stacks of membranes
+be found in vacuoles. inside a chloroplast
+
+Chloroplasts
+Chloroplasts are organelles specialised for the process
+of photosynthesis. They are found in the green parts
+
+
+
+
+8
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 23 ---
+1 Cell structure
+
+
+
+IMPORTANT
+• You can think of a plant cell as being very similar to an animal cell but with extra structures.
+• Plant cells are often larger than animal cells, although cell size varies enormously.
+• Do not confuse the cell wall with the cell surface membrane. Cell walls are relatively thick and physically
+ strong, whereas cell surface membranes are very thin. Cell walls are freely permeable, whereas cell
+ surface membranes are partially permeable. All cells have a cell surface membrane, but animal cells do
+ not have a cell wall.
+• Vacuoles are not confined to plant cells; animal cells may have small vacuoles, such as phagocytic
+ vacuoles, although these are not usually permanent structures.
+
+
+
+PRACTICAL ACTIVITY 1.1
+
+Making temporary slides black and will also colour nuclei and cell walls a pale
+ yellow. A dilute solution of methylene blue can be
+A common method of examining material with a light
+ used to stain animal cells such as cheek cells.
+microscope is to cut thin slices of the material called
+‘sections’. The advantage of cutting sections is that Viewing specimens yourself with a microscope will
+they are thin enough to allow light to pass through help you to understand and remember structures.
+the section. The section is laid (‘mounted’) on a glass Your understanding can be reinforced by making
+slide and covered with a coverslip to protect it. Light a pencil drawing on good quality plain paper.
+passing through the section produces an image Remember always to draw what you see, and not
+which can then be magnified using the objective and what you think you should see.
+eyepiece lenses of the microscope.
+ Procedure
+Biological material may be examined live or in a
+preserved state. Prepared slides contain material that Place the biological specimen on a clean glass slide
+has been killed and preserved in a life-like condition. and add one or two drops of stain. Carefully lower a
+ cover over the specimen to protect the microscope
+Temporary slides are quicker and easier to prepare lens and to help prevent the specimen from drying
+and are often used to examine fresh material out. Adding a drop of glycerine and mixing it with
+containing living cells. In both cases the sections the stain can also help prevent drying out.
+are typically stained before being mounted on the
+glass slide. • Suitable animal material: human cheek cells
+ obtained by gently scraping the lining of the
+Temporary preparations of fresh material are useful cheek with a finger nail
+for quick preliminary investigations. Sometimes
+ • Suitable plant material: onion epidermal cells,
+macerated (chopped up) material can be used,
+ lettuce epidermal cells, Chlorella cells, moss
+as when examining the structure of wood (xylem).
+ slip leaves
+A number of temporary stains are commonly used.
+For example, iodine in potassium iodide solution (See Practical Investigation 1.1 in the Practical
+is useful for plant specimens. It stains starch blue- Workbook for additional information.)
+
+
+
+
+ 9
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 24 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+
+ PRACTICAL ACTIVITY 1.2
+
+ Biological drawing sections of Practical Activity 7.1 before answering
+ the question below, which is relevant to this chapter.
+ To reinforce your learning, you will find it useful to
+ Figures 1.8a and b show examples of good drawing
+ make labelled drawings of some of your temporary
+ and labelling technique based on Figures 1.6
+ and permanent slides, as well as labelled drawings
+ and 1.7. Note that it is acceptable to draw only
+ of photomicrographs.
+ a representative portion of the cell contents of
+ Practical Activity 7.1 in Chapter 7 provides general Figure 1.7, but add a label explaining this.
+ guidance on biological drawing. Read the relevant
+ a
+ cytoplasm
+
+ nucleus
+
+ chromatin
+
+ small structures (organelles?)
+ visible (not all drawn)
+
+
+
+
+ Question
+ 2 A student was asked to make a high-power drawing
+ of three neighbouring cells from Figure 1.6.
+ Figure 1.9 shows the drawing made by the student.
+ Using Practical Activity 7.1 to help you, suggest how
+ b
+ the drawing in Figure 1.9 could be improved.
+
+ eus
+ cytoplasm nucl
+ representative
+ portion of chloroplast
+ cytoplasm cytoplasm
+ drawn grana visible?
+
+ cell wall
+
+
+
+
+ Figure 1.8: Examples of good drawing technique: a high-power
+ drawing of three neighbouring animal cells from Figure 1.6;
+ b high-power drawing of two neighbouring plant cells from Figure 1.9: A student’s high-power drawing of
+ Figure 1.7. three neighbouring cells from Figure 1.6.
+
+ (See Practical Investigation 1.1 in the Practical Workbook for additional information.)
+
+
+
+
+10
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 25 ---
+1 Cell structure
+
+
+
+1.4 Measuring size and Measuring cell size
+ Cells and organelles can be measured with a microscope
+calculating magnification by means of an eyepiece graticule. This is a transparent
+ scale. It usually has 100 divisions (see Figure 1.10a).
+Magnification is the number of times larger an image of The eyepiece graticule is placed in the microscope
+an object is than the real size of the object. eyepiece so that it can be seen at the same time as
+ observed size of the image the object to be measured, as shown in Figure 1.10b.
+ magnification =
+ actual size Figure 1.10b shows the scale over one of a group of
+or six human cheek epithelial cells (like those shown in
+ I Figure 1.6). The cell selected lies between 40 and 60 on
+ M = the scale. We therefore say it measures 20 eyepiece units
+ A
+M = magnification in diameter (the difference between 60 and 40). We will
+ not know the actual size of the eyepiece units until the
+I = observed size of the image (what you can measure
+ eyepiece graticule is calibrated.
+with a ruler)
+A = actual size (the real size – for example, the size of a KEY WORDS
+cell before it is magnified).
+If you know two of the values M, I and A, you can work magnification: the number of times larger an
+out the third one. For example, if the observed size of image of an object is than the real size of the
+the image and the magnification are known, you can object; magnification = image size ÷ actual (real)
+ I size of the object
+work out the actual size A = . If you write the formula
+ M eyepiece graticule: small scale that is placed in a
+in a triangle as shown below and cover up the value you
+want to find, it should be obvious how to do the right microscope eyepiece
+calculation.
+
+ I
+
+
+ M × A
+
+
+
+
+ a cheek cells on a slide b eyepiece graticule c
+ on the stage of the scale (arbitrary
+ microscope units)
+
+
+ 0 10 20 30 40 50 60 70 80 90 100 0 10 20 30 40 50 60 70 80 90 100
+ 0 10 20 30 40 50 60 70 80 90 100
+
+
+
+ 0 0.1 0.2
+
+
+ eyepiece
+ graticule in
+ the eyepiece
+ stage micrometer
+ of the
+ scale (marked in
+ microscope
+ 0.01 mm and 0.1 mm
+ divisions)
+
+Figure 1.10: Microscopical measurement. Three fields of view seen using a high-power (×40) objective lens: a an eyepiece
+graticule scale; b superimposed images of human cheek epithelial cells and the eyepiece graticule scale; c superimposed
+images of the eyepiece graticule scale and the stage micrometer scale.
+
+
+
+
+ 11
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 26 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+To calibrate the eyepiece graticule, a miniature a
+transparent ruler called a stage micrometer is placed on
+the microscope stage and is brought into focus. This
+scale may be etched onto a glass slide or printed on a
+transparent film. It commonly has subdivisions of 0.1
+and 0.01 mm. The images of the stage micrometer and
+the eyepiece graticule can then be superimposed (placed
+on top of one another) as shown in Figure 1.10c.
+
+
+
+Calculating magnification
+Figure 1.11 shows micrographs of two sections through
+the same plant cell. The difference in appearance of the
+two micrographs is explained in the next section.
+If we know the actual (real) length of a cell in such a
+micrograph, we can calculate its magnification, M, using b
+the formula:
+ I
+M =
+ A
+ epidermal cell
+ cell wall
+ KEY WORDS
+ chloroplast
+ stage micrometer: very small, accurately drawn
+ P starch grain
+ scale of known dimensions, engraved on a
+ microscope slide vacuole
+ nucleus
+ micrograph: a picture taken with the aid of a
+ microscope; a photomicrograph (or light mitochondrion
+ micrograph) is taken using a light microscope; cytoplasm
+ an electron micrograph is taken using an
+ electron microscope
+ Figure 1.11: Micrographs of two sections of the same
+ plant cells, as seen a with a light microscope, and b with
+ an electron microscope. Both are shown at the same
+ magnification (about ×750).
+
+
+
+WORKED EXAMPLE
+
+ 1 In the eyepiece graticule shown in Figure 1.10, The diameter of the cell shown superimposed
+ 100 units measure 0.25 mm. Hence, the value of on the scale in Figure 1.8b measures 20 eyepiece
+ each eyepiece unit is: units and so its actual diameter is:
+ 0.25
+ = 0.0025 mm 20 × 2.5 μm = 50 μm
+ 100
+ This diameter is greater than that of many human
+ Or, converting mm to μm: cells because the cell is a flattened epithelial cell.
+ 0. 25 1000
+ 2. 5 µm
+ 100
+
+
+
+
+12
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 27 ---
+1 Cell structure
+
+
+
+WORKED EXAMPLE
+ 2 Suppose we want to know the magnification of the Step 3 Use the equation to calculate the
+ plant cell labelled P in Figure 1.11b. The real length magnification.
+ of the cell is 80 μm.
+ image size, l
+ Step 1 Measure the length in mm of the cell in the magnification, M =
+ actual size, A
+ micrograph using a ruler. You should find
+ 50 000 µm
+ that it is about 50 mm. =
+ 80 µm
+ Step 2 Convert mm to μm. (It is easier if we first = × 625
+ convert all measurements to the same
+ units – in this case micrometres, μm.) The multiplication sign (×) in front of the number
+ 625 means ‘times’. We say that the magnification
+ So: 1 mm = 1000 µm is ‘times 625’.
+ 50 mm = 50 × 1000 µm
+ = 50 000 µm
+
+
+
+Question
+3 a Calculate the magnification of the drawing of b Calculate the actual (real) length of the
+ the animal cell in Figure 1.4. chloroplast labelled X in Figure 1.34.
+
+
+WORKED EXAMPLE
+ 3 Figure 1.12 shows a lymphocyte with a scale Step 1 Measure the scale bar. Here, it is 36 mm.
+ bar. We can use this scale bar to calculate the Step 2 Convert mm to μm:
+ magnification.
+ 36 mm = 36 × 1000 μm = 36 000 μm
+ Step 3 The scale bar represents 6 µm. This is the
+ actual size, A. Use the equation to calculate the
+ magnification:
+ image size, l
+ magnification, M =
+ actualsize, A
+ 36 000µm
+ =
+ 6µm
+ = × 6000
+ 6 µm
+
+ Figure 1.12: A lymphocyte.
+
+
+
+
+ 13
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 28 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+
+Calculating the real size of an separate points. If the two points cannot be resolved,
+ they will be seen as one point. In practice, resolution is
+object from its magnification the amount of detail that can be seen – the greater the
+ resolution, the greater the detail.
+To calculate the real or actual size of an object, we can
+use the same magnification equation. The maximum resolution of a light microscope is 200 nm.
+ The reason for this is explained in the next section, ‘The
+ electromagnetic spectrum’. A resolution of 200 nm means
+ WORKED EXAMPLE that, if two points or objects are closer together than
+ 200 nm, they cannot be distinguished as separate.
+ 4 Figure 1.20 shows parts of three plant cells You might imagine that you could see more detail in
+ magnified ×5600. Suppose we want to know the Figure 1.11a by magnifying it (simply making it larger).
+ actual length of the labelled chloroplast in this In practice you would be able to see what is already
+ electron micrograph. there more easily, but you would not see any more
+ detail. The image would just get more and more blurred
+ Step 1 Measure the observed length of the
+ as magnification increased. The resolution would not
+ image of the chloroplast (I), in mm,
+ be greater.
+ using a ruler. The maximum length is
+ 25 mm.
+
+ Step 2 Convert mm to μm:
+ The electromagnetic spectrum
+ 25 mm = 25 × 1000 μm = 25 000 μm How is resolution linked with the nature of light? One
+ of the properties of light is that it travels in waves. The
+ Step 3 Use the equation to calculate the lengths of the waves of visible light vary, ranging from
+ actual length: about 400 nm to about 700 nm. The human eye can
+ distinguish between these different wavelengths, and
+ image size, l
+ actual size, A = in the brain the differences are converted to colour
+ magnification, M differences. Waves that are 400 nm in length are seen as
+ 25 000 µm violet. Waves that are 700 nm in length are seen
+ =
+ 5600 as red.
+ = 4.5 µm (to one Visible light is a form of electromagnetic radiation.
+ decimal place) The range of different wavelengths of electromagnetic
+ radiation is called the electromagnetic spectrum. Visible
+ light is only one part of this spectrum. Figure 1.13
+ shows some of the parts of the electromagnetic
+1.5 Electron microscopy spectrum. The longer the waves, the lower their
+ frequency. (All the waves travel at the same speed, so
+Before studying what cells look like with an electron imagine them passing a post: shorter waves pass at
+microscope, you need to understand the difference higher frequency.) In theory, there is no limit to how
+between magnification and resolution. short or how long the waves can be. Wavelength changes
+ with energy: the greater the energy, the shorter the
+ wavelength.
+Magnification and resolution
+Look again at Figure 1.11. Figure 1.11a is a light KEY WORD
+micrograph. Figure 1.11b is an electron micrograph.
+Both micrographs are of the same cells and both have resolution: the ability to distinguish between
+the same magnification. However, you can see that two objects very close together; the higher the
+Figure 1.11b, the electron micrograph, is much clearer. resolution of an image, the greater the detail that
+This is because it has greater resolution. Resolution can be seen
+can be defined as the ability to distinguish between two
+
+
+
+
+14
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 29 ---
+1 Cell structure
+
+
+
+ X-rays infrared
+ microwaves
+ gamma rays UV radio and TV waves
+
+
+ 5 7 9 11 13
+ 0.1 nm 10 nm 1000 nm 10 nm 10 nm 10 nm 10 nm 10 nm
+
+
+
+ visible light
+
+ 400 nm 500 nm 600 nm 700 nm
+ violet green orange red
+
+Figure 1.13: Diagram of the electromagnetic spectrum. The numbers indicate the wavelengths of the different types of
+electromagnetic radiation. Note the waves vary from very short to very long. Visible light is part of the spectrum. The double-
+headed arrow labelled UV is ultraviolet light.
+
+
+
+ wavelength stained mitochondrion The general rule when viewing specimens is that the
+ 400 nm of diameter 1000 nm limit of resolution is about one half the wavelength
+ interferes with light waves of the radiation used to view the specimen. In other
+ words, if an object is any smaller than half the
+ wavelength of the radiation used to view it, it cannot
+ be seen separately from nearby objects. This means
+ that the best resolution that can be obtained using a
+ microscope that uses visible light (a light microscope)
+ is 200 nm, since the shortest wavelength of visible light
+ is 400 nm (violet light). Ribosomes are approximately
+ 25 nm in diameter and can therefore never be seen
+ using a light microscope.
+ If an object is transparent, it will allow light waves to
+ pass through it and therefore will still not be visible. This
+ is why many biological structures have to be stained
+ before they can be seen.
+
+
+ Question
+ stained ribosomes of diameter 25 nm 4 Explain why ribosomes are not visible using a light
+ do not interfere with light waves microscope.
+
+Figure 1.14: A mitochondrion and some ribosomes in the
+path of light waves of 400 nm length. The electron microscope
+ So how can we look at things smaller than 200 nm?
+Now look at Figure 1.14. It shows a mitochondrion The only solution to this problem is to use radiation
+and some very small cell organelles called ribosomes. of a shorter wavelength than visible light. If you study
+It also shows some wavy blue lines that represent light Figure 1.13, you will see that ultraviolet light or X-rays
+of 400 nm wavelength. This is the shortest visible look like possible candidates. A much better solution,
+wavelength. The mitochondrion is large enough to though, is to use electrons. Electrons are negatively
+interfere with the light waves. However, the ribosomes charged particles which orbit the nucleus of an atom.
+are far too small to have any effect on the light waves. When a metal becomes very hot, some of its electrons
+
+
+
+
+ 15
+
+ Copyright Material - Review Only - Not for Redistribution
+
+--- PDF PAGE 30 ---
+CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK
+
+
+gain so much energy that they escape from their orbits,
+similar to a rocket escaping from Earth’s gravity. Free
+ Viewing specimens with the
+electrons behave like electromagnetic radiation. They
+have a very short wavelength: the greater the energy,
+ electron microscope
+the shorter the wavelength. Electrons are a very suitable Figure 1.16 shows how a TEM works and Figure 1.17
+form of radiation for microscopy for two major reasons. shows one in use.
+First, their wavelength is extremely short (at least as
+short as that of X-rays). Second, unlike X-rays, they are electron gun and anode –
+negatively charged, so they can be focused easily using produce a beam of electrons
+electromagnets (a magnet can be made to alter the path of
+the beam, the equivalent of a glass lens bending light). electron beam
+Using an electron microscope, a resolution of 0.5 nm can
+ vacuum
+be obtained, 400 times better than a light microscope.
+
+ pathway of electrons
+Transmission and scanning
+ condenser electromagnetic
+electron microscopes lens – directs the electron beam
+Two types of electron microscope are now in common onto the specimen
+use. The transmission electron microscope (TEM) was
+the type originally developed. The beam of electrons is
+passed through the specimen before being viewed. Only specimen is placed on a
+those electrons that are transmitted (pass through the grid
+specimen) are seen. This allows us to see thin sections of
+specimens, and thus to see inside cells. In the scanning
+electron microscope (SEM), the electron beam is used
+ objective electromagnetic
+to scan the surfaces of structures and only the reflected lens – produces an image
+beam is observed.
+An example of a scanning electron micrograph is shown
+in Figure 1.15. The advantage of this microscope is that
+surface structures can be seen. Because much of the projector electromagnetic
+specimen is in focus at the same time, a three-dimensional lenses – focus the magniﬁed
+appearance is achieved. A disadvantage of the SEM is image onto the screen
+that it cannot achieve the same resolution as a TEM.
+Using an SEM, resolution is between 3 nm and 20 nm.
+
+ screen or photographic ﬁlm
+ or sensor – shows the image
+ of the specimen
+
+
+ Figure 1.16: How a TEM works.
+
+
+ Note: the structure of an electron microscope is
+ extension content, and is not part of the syllabus.
+Figure 1.15: Scanning electron micrograph (SEM) of a
+tardigrade. Tardigrades or water bears, are about 0.5 mm It is not possible to see an electron beam, so to make
+long, with four pairs of legs. They are common in soil and the image visible the electron beam has to be projected
+can survive extreme environmental conditions (×86). onto a fluorescent screen. The areas hit by electrons
+
+
+
+
+16
+
+ Copyright Material - Review Only - Not for Redistribution
+
+=== CONCEPT SEARCH CONTEXTS ===
+
+## glycogen — 3 shown
+PDF page 32: cell surface membrane lysosome boundary between mitochondria the two cells nucleolus endoplasmic reticulum nucleus glycogen granules microvillus chromatin nuclear envelope ribosomes Figure 1.18: Parts of two representative animal cells as seen with a TEM. The cells are liver cells from a rat (×9600). The nucleus is clearly visible in one of the cells. The boundary between the two cells is difficult to see because the cell surface membranes are so thin. 18 Copyright Material - Review Only - Not for Redistribution
+PDF page 33: ribosomes nuclear pore lysosome rough endoplasmic reticulum smooth endoplasmic reticulum cytoplasm mitochondrion Figure 1.19: Ultrastructure of a typical animal cell as seen with an electron microscope. This drawing is based on many micrographs of animal cells. In reality, the endoplasmic reticulum is more extensive than shown here, and free ribosomes may be more extensive. Glycogen granules are sometimes present in the cytoplasm. Question 6 Compare Figure 1.19 with Figure 1.4. Name the structures in an animal cell that can be seen with the electron microscope but not with the light microscope. cell surface ribosome membrane vacuole nuclear envelope tonoplast chromatin nucleolus chloroplast nuclear pore cell wall endoplasmic reticulum mitochondrion starch grain Golgi apparatus Figure 1.20: Representative plant cells as seen with a TEM. The cells are palisade cells from a soya bean leaf. The boundaries between the cells can clearly be seen due to the presence of cell walls (×5600). 19 Copyright Material - Review Only - Not for Redistribution
+PDF page 61: here it is above the ring is β-glucose shown as (beta-glucose). Two forms of the same chemical are H C O H H C OH known as isomers, and the extra variety provided by the existence of α- and β-isomers has important biological H C O H H C OH consequences, as you will see in the structures of starch, glycogen and cellulose. H C O H CH2OH H Question 1 The formula for a hexose is C6H12O6 or (CH2O)6. Figure 2.3: Structural formula of glucose. –OH is known as What would be the formula of: a hydroxyl group. There are five in glucose. a a triose? b a pentose? Ring structures Functions of monosaccharides in One important aspect of the structure of pentoses living organisms and hexoses is that the chain of carbon atoms is long Monosaccharides have two major functions. First, enough to close up on itself to form a more stable ring they are commonly used as a source of energy in structure. When glucose forms such a ring, carbon atom respiration. This is due to the large number of carbon– number 1 joins to the oxygen on carbon atom number 5 hydrogen bonds. These bonds can be broken to release OH 6 CH2OH
+
+## non-reducing ends — 0 shown
+
+## companion cells — 3 shown
+PDF page 176: CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK CONTINUED • describe the transport of water from the soil to the root xylem through the apoplast and symplast pathways • relate the structure of phloem to its functions • explain that assimilates dissolved in water, such as sucrose and amino acids, move through phloem sieve tubes from sources to sinks • explain mass flow in phloem sieve tubes down a hydrostatic pressure gradient from source to sink • explain how companion cells transfer assimilates to phloem sieve tubes. BEFORE YOU START In Chapter 4 you considered the effect of an increase in size on the surface area : volume ratio of a structure such as a cell. • How does the surface area : volume ratio change with increasing size? • How can the shape of a structure such as a leaf or a cell with microvilli affect the ratio? • Bearing in mind your answers to these questions, try to explain why large multicellular organisms like plants and animals need transport systems. • What features would you expect such transport systems to have (e.g. their structure and how they work)? DOES GOLD GROW ON TREES? Scientists studying how plants transport materials quantities of gold and transport them throughout over large distances have found eucalyptus trees the plant. Gold is toxic to plant cells, but the trees interesting for two reasons. First, eucalyptus get round this problem by depositing the gold in trees can grow to great heights (only redwoods insoluble calcium oxalate crystals in the leaves and are taller). They are commonly over 60 metres bark (Figure 7.2). in height, the tallest living example being 100.5 metres tall. Second, the leaves are concentrated at the top of the tree (Figure 7.1). The leaves have to supply food to the rest of the tree, including the extensive underground root system, and the roots have to supply water to the leaves. This means that any theory of how plants transport food and water has to explain how transport can occur over these very long distances through the tiny tubes of the transport system. Sugar, for example, has to move through tubes no wider than a fine human hair. Not ea
+PDF page 194: e of the root hair cell. and the location of phloem in the plant is shown in The large number of very fine root hairs provides a Figures 7.4–7.10, 7.14, 7.19 and 7.22. large surface area in contact with the soil surrounding Phloem tissue is made up of several types of cell. The the root, thus increasing the rate at which water two most important types for transport are sieve tube can be absorbed. Root hairs are also important for elements and companion cells (Figures 7.25 and 7.26). the absorption of mineral ions such as nitrate and magnesium. Sieve tube elements and sieve tubes Phloem contains tubes called sieve tubes that are made 7.5 Transport of from cells called sieve tube elements. Unlike xylem vessels, sieve tubes are made of living cells. Figure 7.25 assimilates Assimilates are the chemical compounds made by the KEY WORDS plant itself as a result of assimilation. Assimilation source: a site in a plant which provides food for in plants is the range of processes by which the plant another part of the plant, the sink converts its inorganic nutrients into organic compounds. An example of assimilation is photosynthesis. During sink: a site in a plant which receives food from photosynthesis, inorganic carbon dioxide and water another part of the plant, the source are converted, using energy, to organic solutes like sieve tube element: a cell found in phloem sugars. Another example of assimilation is the use of tissue, with non-thickened cellulose walls, very nitrates obtained from the soil to help make amino little cytoplasm, no nucleus and end walls acids. Sucrose and amino acids are two of the common perforated to form sieve plates, through which assimilates that are transported over long distances in sap containing sucrose is transported the phloem. c
+PDF page 195: membrane cell surface membrane plasmodesmata vacuole cytoplasm tonoplast endoplasmic reticulum nucleus cytoplasm Note Sieve tube elements have no nucleus, tonoplast or ribosomes. Figure 7.25: A phloem sieve tube element and its companion cell. is a diagram showing the structure of a sieve tube microscope. The pores are open, presenting little barrier and its accompanying companion cells. Figure 7.26 to the flow of liquids through them. shows diagrams based on photomicrographs and Each sieve tube element has at least one companion cell photomicrographs of TSs and LSs of phloem tissue. lying close beside it. Companion cells have the structure The LSs show the tube-like nature of sieve tubes. of a typical plant cell, with a cell wall containing Sieve tube elements are elongated in shape. The cells cellulose, a cell surface membrane, cytoplasm, a are joined end to end vertically to form a continuous small vacuole and a nucleus. However, the number of tube. Like a typical plant cell, a sieve tube element has mitochondria and ribosomes is greater than normal, a cell wall containing cellulose, a cell surface membrane and the cells are metabolically very active. and cytoplasm containing endoplasmic reticulum and Companion cells are very closely linked with their mitochondria. However, the amount of cytoplasm is very neighbouring sieve tube elements in terms of their reduced and only forms a thin layer lining the inside of the function. In fact, they are regarded as a single cell wall. There is no nucleus and there are no ribosomes. functional unit. Numerous plasmodesmata pass The most striking feature of sieve tube elements is
+
+## sieve tube elements — 3 shown
+PDF page 194: ine root hairs provides a Figures 7.4–7.10, 7.14, 7.19 and 7.22. large surface area in contact with the soil surrounding Phloem tissue is made up of several types of cell. The the root, thus increasing the rate at which water two most important types for transport are sieve tube can be absorbed. Root hairs are also important for elements and companion cells (Figures 7.25 and 7.26). the absorption of mineral ions such as nitrate and magnesium. Sieve tube elements and sieve tubes Phloem contains tubes called sieve tubes that are made 7.5 Transport of from cells called sieve tube elements. Unlike xylem vessels, sieve tubes are made of living cells. Figure 7.25 assimilates Assimilates are the chemical compounds made by the KEY WORDS plant itself as a result of assimilation. Assimilation source: a site in a plant which provides food for in plants is the range of processes by which the plant another part of the plant, the sink converts its inorganic nutrients into organic compounds. An example of assimilation is photosynthesis. During sink: a site in a plant which receives food from photosynthesis, inorganic carbon dioxide and water another part of the plant, the source are converted, using energy, to organic solutes like sieve tube element: a cell found in phloem sugars. Another example of assimilation is the use of tissue, with non-thickened cellulose walls, very nitrates obtained from the soil to help make amino little cytoplasm, no nucleus and end walls acids. Sucrose and amino acids are two of the common perforated to form sieve plates, through which assimilates that are transported over long distances in sap containing sucrose is transported the phloem. companion cell: a cell with an unthickened Assimilates are transported from sources to sinks in cellulose wall and dense cytoplasm that is found phloem.
+PDF page 195: rough mitochondrion endoplasmic reticulum cellulose cell wall cell surface membrane cell surface membrane plasmodesmata vacuole cytoplasm tonoplast endoplasmic reticulum nucleus cytoplasm Note Sieve tube elements have no nucleus, tonoplast or ribosomes. Figure 7.25: A phloem sieve tube element and its companion cell. is a diagram showing the structure of a sieve tube microscope. The pores are open, presenting little barrier and its accompanying companion cells. Figure 7.26 to the flow of liquids through them. shows diagrams based on photomicrographs and Each sieve tube element has at least one companion cell photomicrographs of TSs and LSs of phloem tissue. lying close beside it. Companion cells have the structure The LSs show the tube-like nature of sieve tubes. of a typical plant cell, with a cell wall containing Sieve tube elements are elongated in shape. The cells cellulose, a cell surface membrane, cytoplasm, a are joined end to end vertically to form a continuous small vacuole and a nucleus. However, the number of tube. Like a typical plant cell, a sieve tube element has mitochondria and ribosomes is greater than normal, a cell wall containing cellulose, a cell surface membrane and the cells are metabolically very active. and cytoplasm containing endoplasmic reticulum and Companion cells are very closely linked with their mitochondria. However, the amount of cytoplasm is very neighbouring sieve tube elements in terms of their reduced and only forms a thin layer lining the inside of the funct
+PDF page 196: sieve plate sieve pore nucleus companion cell dense cytoplasm sieve tube element relatively large lumen with little structure visible thin peripheral layer of cytoplasm (no nucleus) Figure 7.26: Structure of phloem: a diagram in TS; b light micrograph in TS (×300); c diagram in LS; d light micrograph in LS (×200). The red triangles are patches of callose that formed at the sieve plates between the sieve tube elements in response to the damage done as the section was being cut. You can see companion cells, with their denser cytoplasm, lying alongside the sieve tube elements. On the far right are some parenchyma cells. The contents of phloem sieve tubes The liquid inside phloem sieve tubes is called phloem sap, or just sap. Table 7.1 shows the composition of the sap of the castor oil plant, Ricinus communis. 182 Copyright Material - Review Only - Not for Redistribution
+
+## glycolysis — 3 shown
+PDF page 324: Chapter 12 Energy and respiration LEARNING INTENTIONS In this chapter you will learn how to: • outline the need for energy in living organisms • explain how ATP is suited for the role as the universal energy currency • describe how ATP is synthesised • describe the stages in aerobic respiration – glycolysis, the link reaction, the Krebs cycle and oxidative phosphorylation – including the roles of NAD, FAD and coenzyme A • describe the relationship between structure and function of mitochondria • outline lactic acid fermentation and ethanol formation, in anaerobic conditions • explain how rice is adapted to grow with its roots submerged in water • compare the energy values of different respiratory substrates • calculate respiratory quotients • describe how to carry out investigations using respirometers • describe how to carry out investigations using redox indicators. Copyright Material - Review Only - Not for Redistribution
+PDF page 327: ells – can use only glucose as their respiratory substrate. However, other You probably have between 50 g and 200 g of ATP in cells break down fatty acids, glycerol and amino acids your body at this moment, and you will use more than in respiration. Heart muscle, for example, uses fatty 50 kg of ATP today. (That may be similar to your entire acids. body mass.) So, as you can see, your cells need to make ATP constantly. They cannot build up large stores of it, Glucose breakdown can be divided into four stages: but tend to make it as they need it. glycolysis, the link reaction, the Krebs cycle and oxidative phosphorylation (Figure 12.4). ATP is made when a phosphate group is combined with ADP, in a reverse of the reaction shown in Figure 12.3. This is done in two main ways: KEY WORDS • using energy provided directly by another chemical substrate-linked reaction: in the context of reaction – this is called a substrate-linked reaction ATP formation, the transfer of phosphate from • by chemiosmosis, a process that takes place across a substrate molecule directly to ADP to the inner membranes of mitochondria, using energy produce ATP, using energy provided directly by released by the movement of hydrogen ions down another chemical reaction their concentration gradient. chemiosmosis: the synthesis of ATP using energy In humans, all of the ATP is made in respiration, both released by the movement of hydrogen ions by substrate-linked reactions and by chemiosmosis. down their concentration gradient, across a membrane in a mitochondrion or chloroplast 313 Copyright Material - Review Only - Not for Redistribution
+PDF page 328: CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK is a net gain of two ATP molecules per molecule of glucose broken down. glycolysis aerobic pathways A simplified flow diagram of the series of steps in link in mitochondria anaerobic reaction glycolysis is shown in Figure 12.5. pathways glucose (hexose) (6C) to ethanol ATP or lactate Krebs cycle oxidative fructose phosphate (6C) phosphorylation phosphorylation ATP fructose 1,6 bisphosphate 2 molecules of triose phosphate (3C) 2ATP Figure 12.4: The sequence of events in respiration. In glycolysis aerobic respiration, glycolysis takes place in the cytoplasm, and the link reaction, the Krebs cycle and oxidative 2NAD phosphorylation take place inside mitochondria. Anaerobic 2H respiration involves other pathways that take place in the
+
+## oxygen is not required — 0 shown
+
+## ATP binds — 0 shown
+
+## myosin head — 3 shown
+PDF page 424: 9 shows how this myosin, which is a fibrous protein with a globular head. The fibrous portion helps to anchor the molecule into KEY WORDS the thick filament. Within the thick filament, many myosin molecules all lie together in a bundle with their tropomyosin: a fibrous protein that is part of the globular heads all pointing away from the M line. thin filaments in myofibrils in striated muscle; tropomyosin blocks the attachment site on the The main component of thin filaments, actin, is a thin filament for myosin heads so preventing the globular protein. Many actin molecules are linked formation of cross-bridges together to form a chain. Two of these chains are twisted together to form a thin filament. Also twisted troponin: a calcium-binding protein that is part around the actin chains is a fibrous protein called of the thin filaments in myofibrils in striated tropomyosin. Another protein, troponin, is attached to muscle the actin chain at regular intervals (Figure 15.29). M line 1 When the muscle is relaxed, tropomyosin tropomyosin and troponin are sitting in a position in the actin ﬁlament that actin prevents myosin from binding. troponin 2 When muscle contraction starts, the troponin and tropomyosin change shape to myosin head allow myosin heads to bind to actin. 3 Myosin heads move, 4 ATP hydrolysis causes pulling the actin and the release of myosin causing the muscle to
+PDF page 425: n. d Make a model of a sarcomere and use it KEY WORD to explain how the sliding of filaments in a sarcomere leads to the contraction of a sliding filament model: the mechanism of muscle fibre. Use the model you have made to muscle contraction; within each sarcomere the explain the sliding filament model of muscle movement of thin filaments closer together by contraction to someone else. the action of myosin heads in the thick filaments shortens the overall length of each muscle fibre longitudinal section (LS) A B D The energy for the movement comes from ATP molecules that are attached to the myosin heads. Each myosin head is an ATPase. When a muscle contracts, calcium ions are released from stores in the SR and bind to troponin. This stimulates troponin molecules to change shape (Figure 15.29). The troponin and tropomyosin proteins move to a different position on the thin filaments, so exposing parts of the C E F actin molecules, which act as binding sites for myosin. The myosin heads bind with these sites, forming cross- bridges between the two types of filament. transverse section (TS) Next, the myosin heads move, pulling the actin filaments along towards the centre of the sarcomere. The heads then hydrolyse ATP molecules, which provide enough energy to enable the heads to let go of the actin. The heads move back to their previous positions and bind again to the exposed sites on the actin. The thin Figure 15.30: LS and TS of striated muscle fibre. filaments have moved as a result of the previous power stroke, so myosin heads now bind to actin further along the thin filaments closer to the Z disc. The myosin heads move again, pulling the actin filaments even further Stimulating muscle to contract along, then hydrolyse more ATP molecules so that Skeletal muscle contracts when it receives an impulse they can let go again. This continues for as long as the from a neurone. An impulse moves along the axon of a troponin and tropomyosin molecu
+PDF page 426: (and shorten) again. The calcium ions bind with troponin molecules that Each skeletal muscle in the body has an antagonist – are part of the thin filaments. This changes the shape a muscle that restores sarcomeres to their original of the troponin molecules, which causes the troponin lengths when it contracts. For example, the triceps is the and tropomyosin to move so exposing the binding sites antagonist of the biceps. for the myosin heads. The myosin heads attach to the binding sites on the thin filaments and form cross-bridges (Figures 15.29 and 15.31). When there is no longer any stimulation from the motor neurone, there are no Question impulses conducted along the T-tubules. Released from 14 Interneuronal synapses are those found between stimulation, the calcium ion channels in the SR close and neurones, such as those in a reflex arc (Figures 15.9 carrier proteins pump calcium ions back into stores in the and 15.21). Describe the similarities and differences SR. As calcium ions leave their binding sites on troponin, between the structure and function of interneuronal tropomyosin moves back to cover the myosin-binding synapses and neuromuscular junctions. sites on the thin filaments. When there are no cross-bridges between thick and thin filaments, the muscle is in a relaxed state. There is Events at the neuromuscular junction Events in muscle fibre 1 An action potential arrives. 7 The depolarisation of the sarcolemma spreads down T-tubules. 2 The action potential causes the diffusion of calcium ions into the neurone. 8 Channel proteins for calcium ions open and calcium ions diffuse out 3 The calcium ions cause vesicles containing of the sarcoplasmic reticulum. ACh to fuse with the presynaptic membrane.
+
+## telomerase — 3 shown
+PDF page 138: y, scientists had relegated these aims to impossible dreams. Now, however, humans are once again challenging the idea that the process of ageing is inevitable. Why do organisms grow old and die? Interest in the process of ageing was rekindled with the discovery of telomeres in 1978. Telomeres are protective sequences of nucleotides found at the ends of chromosomes, which become shorter every Figure 5.1: A 19th-century oil painting showing an time a cell divides. A gradual degeneration of the alchemist at work. organism occurs, resulting in ageing. Some cells are able to replenish their telomeres Question for discussion using the enzyme telomerase. It is thought that If the ageing process could be slowed or cancer cells can do this and so remain immortal prevented, this would raise some important moral (will never die). It may therefore be possible to and ethical issues. Try to identify and discuss some prevent the ageing of normal cells by keeping the of these issues. enzyme telomerase active. In Chapter 6 you will learn how DNA can copy itself 5.1 Growth and accurately. In this chapter you will learn how whole cells can do the same. reproduction In Chapter 1 you saw that one of the most easily All living organisms grow and reproduce. Living recognised structures in eukaryotic cells is the nucleus. organisms are made of cells, so this means that cells The importance of the nucleus has been obvious ever must be able to grow and reproduce. Cells reproduce since it was realised that the nucleus always divides by dividing and passing on copies of their genes to before a cell divides. Each of the two daughter cells ‘daughter’ cells. The process must be very precisely therefore contains its own nucleus. This is important controlled so that no vital genetic information is lost. because the nucleus controls the cell’s activities. It does 124 Copyright Material - Review Only - Not for Redistribution
+PDF page 147: 5 The mitotic cell cycle The main function of telomeres is to ensure that the adding bases to telomeres is called telomerase. The main ends of the molecule are included in the replication function of telomeres is therefore to prevent the loss and not left out when DNA is replicated. Telomeres of genes during cell division and to allow continued are found at the ends of chromosomes (see Figure 5.11 replication of a cell. and also Figure 5.4). They have been compared with Some cells do not ‘top up’ their telomeres at each the plastic tips on the ends of shoe laces. Telomeres division. These tend to be fully differentiated are made of DNA with short base sequences that are (specialised) cells. With each division, their telomeres get repeated many times (‘multiple repeat sequences’). a little shorter until the vital DNA is no longer protected Telomeres work by making the DNA a bit longer. They and the cell dies. This could be one of the mechanisms have no useful information, but allow the copying of ageing, by which humans grow old and die. This, of enzyme to complete copying all the meaningful DNA. course, suggests that by somehow preventing the loss of As long as extra bases are added to the telomere during telomeres scientists might be able to slow down or even each cell cycle to replace those that are not copied, no prevent the process of ageing (see ‘Why grow old?’ at the vital information will be lost from the non-telomere beginning of the chapter). DNA and the cell will be able to continue dividing successfully. The enzyme that performs the role of
+PDF page 150: se cancer. These are The steps involved in the development of cancer are known as malignant tumours. Malignant tumours shown in Figure 5.14. interfere with the normal functioning of the area where they have started to grow. They may block the intestines, lungs or blood vessels. Cells can break off and spread through the blood and lymphatic system Question to other parts of the body to form secondary growths. 9 Research is being carried out into ways of The spread of cancers in this way is called metastasis. It inactivating the enzyme telomerase in cancer cells. is the most dangerous characteristic of cancer because Explain the reason for this. Carcinogens cause mutations. e.g. UV light 2 Cancerous cell 1 Oncogenes does not respond tar in tobacco transformed to signals from smoke by carcinogens. other cells so asbestos continues to divide. X-rays 3 Mitosis 6 Tumour gets bigger. Cells change their 4 Cancerous cells characteristics and not removed by look different under immune system. 5 Rapid mitosis the microscope. absorption of nutrients 7 Tumour supplied 8 Metastasis. Tumour with blood and cells
+
+## spindle checkpoint — 0 shown
+
+## aquaporin — 3 shown
+PDF page 374: the collecting ducts. The cells of the collecting duct are the target cells for ADH. ADH acts on the luminal Osmoreceptors, the membranes of the collecting ducts cells, making them more permeable to water than usual (Figure 14.17). hypothalamus and ADH This change in permeability is brought about by Osmoregulation is the control of the water potential increasing the number of the water-permeable channels of body fluids. This regulation is an important part of known as aquaporins in the luminal membranes of the homeostasis and involves the hypothalamus, posterior collecting duct cells. The cells contain ready-made pituitary gland and the kidneys (Figure 14.15). The water potential of the blood is constantly KEY WORDS monitored by specialised sensory neurones in the hypothalamus, known as osmoreceptors. When osmoregulation: the control of the water these cells detect a decrease in the water potential potential of blood and tissue fluid by controlling of the blood below the set point, nerve impulses are the water content and/or the concentration of sent along the neurones to where they terminate in ions, particularly sodium ions the posterior pituitary gland (Figure 14.16). These osmoreceptor: type of receptor that detects impulses stimulate the release of antidiuretic hormone changes in the water potential of blood (ADH), which is a peptide hormone made of nine amino acids. Molecules of ADH enter the blood in 360 Copyright Material - Review Only - Not for Redistribution
+PDF page 375: 14 Homeostasis osmoreceptor neurones vesicles that have many aquaporins in their membranes (Figure 14.18). ADH molecules bind to receptor proteins which stimulate the production of cyclic AMP (cAMP), which is a second messenger. Cyclic hypothalamus AMP activates a signalling cascade leading to the phosphorylation of the aquaporin molecules. The activation of the aquaporin molecules causes the vesicles to move towards the luminal membrane and fuse with it, so increasing the permeability of the membrane to water. You can read more about signalling cascades in Chapter 4 (Section 4.4, Cell signalling). The role of anterior posterior cAMP or c-AMP as a second messenger in the control pituitary gland pituitary gland of blood glucose is discussed in Section 14.4, The control of blood glucose. As the fluid flows through the collecting duct,
+PDF page 376: 1 lumen of 4 collecting duct water 5 water water urine 1 ADH binds to receptors in the cell surface membrane of the cells 4 The vesicles fuse with the cell surface membrane. lining the collecting duct. 5 Water can now move freely through other aquaporins (not 2 This activates a series of enzyme-controlled reactions, ending with shown) from the cells down the water potential gradient the production of an active phosphorylase enzyme. into the concentrated tissue fluid and blood plasma in the 3 The phosphorylase causes vesicles, surrounded by membrane medulla of the kidney. containing water-permeable channels (aquaporins), to move to the cell surface membrane. Figure 14.18: How ADH increases water reabsorption in the collecting duct. What happens when you have more than enough water in your body – for example, after enjoying a large volume of your favourite drink? When there is an increase in the water potential of the blood, the osmoreceptors in the hypothalamus are no longer stimulated and the neurones in the posterior pituitary gland stop secreting ADH. With no stimulus from ADH, the aquaporins are moved out of the cell surface membrane of the collecting duct cells, back into the cytoplasm as part of the vesicles. The collecting duct cells are now impermeable to water. The fluid flows down the collecting duct without losing any water, so a dilute urine collects in the renal pelvis and flows down the ureter to the bladder. Under these conditions, you tend to produce large volumes of dilute urine, losing much of the water you drank, in order to keep the water potential of the blood constant. Collecting duct cells do not respond immediately to the reduction in ADH secretion by the posterior pituitary gland. This is because it takes some time for the ADH already in the blood to be broken down; approximately half of it is destroyed every 15–20 minutes. However, Figur
+
+## succinate dehydrogenase — 2 shown
+PDF page 106: [3] e Enzymes are effective because they lower the activation energy of the reactions they catalyse. Explain what is meant by ‘activation energy’. [2] [Total: 10] X A B Rate of reaction 0 10 20 30 40 50 60 Temperature / °C 9 The reaction shown occurs during aerobic respiration. The reaction is catalysed by the enzyme succinate dehydrogenase. COOH COOH CH2 succinate dehydrogenase CH CH2 CH COOH COOH succinic acid fumaric acid a Name the substrate in this reaction. [1] b The molecule malonic acid, which is shown below, inhibits the reaction shown. It does not bind permanently to the enzyme. Describe how malonic acid inhibits the enzyme succinate dehydrogenase. [3] COOH CH2 COOH malonic acid 92 Copyright Material - Review Only - Not for Redistribution
+PDF page 342: CAMBRIDGE INTERNATIONAL AS & A LEVEL BIOLOGY: COURSEBOOK CONTINUED 3 In aerobic respiration, the Krebs cycle is regarded as a series of small steps. One of these steps is the conversion of succinate to fumarate by an enzyme, succinate dehydrogenase A. a State the role played by dehydrogenase enzymes in the Krebs cycle AND explain briefly the importance of this role in the production of ATP. [3] b An investigation was carried out into the effect of different concentrations of aluminium ions on the activity of succinate dehydrogenase. The enzyme concentration and all other conditions were kept constant. The graph below shows the results of this investigation. 65 Rate of fumarate production / mmol min−1 60 55 COMMAND WORDS 50 State: express in clear terms. 45 Describe: state the points of a topic / give characteristics 40 and main features.
+
+## antivenom — 0 shown
+
+## negative control — 0 shown
+
+## Casparian strip — 3 shown
+PDF page 192: oot hairs to xylem. parenchyma xylem cell of cortex vessel passage cell thickened endodermis (not thickened) wall phloem Figure 7.22: Light micrograph of part of a TS of a dicotyledonous root. The endodermis with its thickened walls is shown. Note also the passage cells which allow the passage of water (×250). When the water reaches the endodermis (Figures 7.19 This band is called the Casparian strip and it goes and 7.20), the apoplast pathway is blocked. The right round the cell. It stops water moving through endodermis, like the epidermis, is one cell thick the apoplast. The only way for water coming across (Figure 7.22). It surrounds the vascular tissue in stems the cortex to cross the endodermis is through the and roots. unthickened parts of the wall into the cytoplasm of the endodermis cells. As the endodermis cells get older, the The cells in the endodermis have a thick, waterproof, suberin deposits become more extensive until, except waxy band of suberin in their cell walls (Figure 7.23). 178 Copyright Material - Review Only - Not for Redistribution
+PDF page 193: and is not permeable to water. However, just behind the tip you can see many fine hair-like structures. These are the root hairs. They are extensions of some of the epidermal cells of the root. They reach into spaces between the soil apoplast band of suberin, particles, from where they absorb water and mineral ions. pathway the Casparian strip closed a a symplast pathway older cells open b completely suberised cell, passage cell keeps symplast and apoplast symplast pathway pathways both blocked open Figure 7.23: Suberin deposits in the endodermis stop water moving through the apoplast pathway. a In a young root, the suberin forms bands in the cell walls called Casparian strips. The symplast pathway remains open. b In an older root, entire cells become suberised, closing the symplast pathway too. Only passage cells are then permeable to water. b in certain cells called passage cells, no water can enter dilute soil thin, permeable, solution – higher the cells. Passage cells still have a Casparian strip but cellulose cell wall water potential water can continue to pass using the symplast pathway. osmosis – It is thought that this arrangement gives a plant control water over what mineral ions pass into its xylem vessels, as diﬀusing everything has to cross cell surface membranes. down the partially water Once across the endodermis, water continues to
+PDF page 646: 208 reasons for maintaining, 521–4 carbonic anhydrase, 84, 85, 207–08 bioinformatics, 562 carcinogens, 134, 136 biological classification, 497–8 cardiac cycle, 211–145 biological drawings, 10, 164–70, 230–1, 304–5 cardiac muscle, 209, 210, 214 biological species, 497 carotene, 334–5 biological washing powders, 81–2 carrier, 441 biosensor, 369–70 carrier proteins, 107–8, 113 biotic factors, 469 cartilage, 226 biuret test, 65 Casparian strip, 178–9 bivalent, 430–36 cat species, extinctions, 520–1 black bear, 348 catalase, 76–83 BLAST, 562 cattle, selective breeding, 480–2 blood, 202–9 cell biology, 4 blood glucose, 349, 364–70 cell cycle, 126–7 measurement, 369–71 cell division, 124–5 blood groups, 268, 283, 437, 465–6 cell membranes, 3, 20 blood pressure, 196, 198–200, 356 bacteria, 33 blood vessels, 195–199 molecules, 101–2 blubber, 56 movement of substances across, 104–15 bobcat, North American, 522 structure, 98–101 Bohr shift, 206–7 cell signalling, 102–4, 364 632 Copyright Material - Review Only - Not for Redistribution
+
+## cholera toxin — 0 shown
