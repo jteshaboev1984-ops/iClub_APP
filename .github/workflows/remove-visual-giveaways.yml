@@ -1,0 +1,80 @@
+name: Remove visual answer giveaways
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Correct three SVG files
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          bio = Path('assets/season-2/visual-questions/biology/s2_t7_q5844.svg')
+          text = bio.read_text(encoding='utf-8')
+          text, removed = re.subn(r'<text x="805" y="270"[^>]*>ATP</text>', '', text, count=1)
+          if removed != 1:
+              raise SystemExit('Biology ATP giveaway label not found')
+          old = 'fill="#dc2626" style="">B</text>'
+          if old not in text:
+              raise SystemExit('Biology highlighted B label not found')
+          text = text.replace(old, 'fill="#111827" style="">B</text>', 1)
+          bio.write_text(text, encoding='utf-8')
+
+          math = Path('assets/season-2/visual-questions/mathematics/s2_t1_q6026.svg')
+          text = math.read_text(encoding='utf-8')
+          text, removed = re.subn(r'<line x1="294\.54545454545456" y1="665" x2="905\.4545454545455" y2="665" stroke="#059669"[^>]*/>', '', text, count=1)
+          if removed != 1:
+              raise SystemExit('Mathematics solution interval giveaway not found')
+          math.write_text(text, encoding='utf-8')
+
+          econ = Path('assets/season-2/visual-questions/economics/s2_t4_q6184.svg')
+          text = econ.read_text(encoding='utf-8')
+          old_circle = 'r="10" fill="#dc2626" stroke="#dc2626" stroke-width="4"'
+          if old_circle not in text:
+              raise SystemExit('Economics highlighted A point not found')
+          text = text.replace(old_circle, 'r="10" fill="#111827" stroke="#111827" stroke-width="4"', 1)
+          old_label = 'fill="#dc2626" style="">A</text>'
+          if old_label not in text:
+              raise SystemExit('Economics highlighted A label not found')
+          text = text.replace(old_label, 'fill="#111827" style="">A</text>', 1)
+          econ.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Validate anti-giveaway corrections
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          bio = Path('assets/season-2/visual-questions/biology/s2_t7_q5844.svg').read_text()
+          math = Path('assets/season-2/visual-questions/mathematics/s2_t1_q6026.svg').read_text()
+          econ = Path('assets/season-2/visual-questions/economics/s2_t4_q6184.svg').read_text()
+          assert '>ATP</text>' not in bio
+          assert '#059669' not in math
+          assert 'fill="#dc2626" style="">A</text>' not in econ
+          for text in (bio, math, econ):
+              assert text.startswith('<svg')
+              assert 'viewBox="0 0 1200 800"' in text
+          print('Anti-giveaway corrections validated.')
+          PY
+
+      - name: Commit corrected assets and remove workflow
+        run: |
+          rm -f .github/workflows/remove-visual-giveaways.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Remove answer giveaways from three visual questions"
+          git push origin HEAD:${{ github.head_ref }}
