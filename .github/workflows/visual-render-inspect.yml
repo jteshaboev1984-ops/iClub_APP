@@ -50,7 +50,7 @@ jobs:
           PY
       - name: Commit inspection report once
         run: |
-          if git diff --quiet -- docs/visual-render-inspection.txt; then
+          if [ -z "$(git status --porcelain -- docs/visual-render-inspection.txt)" ]; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
