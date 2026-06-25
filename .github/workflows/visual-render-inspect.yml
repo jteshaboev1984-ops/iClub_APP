@@ -35,7 +35,7 @@ jobs:
               'one active image figure': html.count('id="tour-question-figure"') == 1,
               'one active image element': html.count('id="tour-question-image"') == 1,
               'one global image modal': html.count('id="question-image-modal"') == 1,
-              'preload before attempt': app.count('preloadTourQuestionImages(questions)') == 1,
+              'preload helper and call': app.count('preloadTourQuestionImages(questions)') >= 2,
               'timer readiness state': 'questionReady: false' in app,
               'timeout readiness guard': 'if (!ctx.questionReady || qStart === null || qStart === undefined) return;' in app,
               'review query includes image': 'image_url,' in app,
