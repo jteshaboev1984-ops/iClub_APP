@@ -1,0 +1,36 @@
+name: Generate Season 2 visual assets
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Generate exact SVG assets
+        env:
+          GENERATOR_GZIP_B64: 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
+        run: |
+          printf '%s' "$GENERATOR_GZIP_B64" | base64 -d | gzip -d > /tmp/generate_visual_questions.py
+          sed -i "s|OUT = Path('/mnt/data/visual_questions')|OUT = Path('assets/season-2/visual-questions')|" /tmp/generate_visual_questions.py
+          python /tmp/generate_visual_questions.py
+          test "$(find assets/season-2/visual-questions -name '*.svg' | wc -l)" -eq 35
+
+      - name: Commit assets and remove one-shot workflow
+        run: |
+          rm -f .github/workflows/generate-visual-assets.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add 35 Season 2 hard-question SVG assets"
+          git push origin HEAD:${{ github.head_ref }}
