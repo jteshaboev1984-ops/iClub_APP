@@ -745,15 +745,12 @@ app = sub_once(
         "DB review image select",
     )
 
-app = replace_once(
-    app,
-    '''         question: pickContentText(q, "question_text") || "",
-         options,''',
-    '''         question: pickContentText(q, "question_text") || "",
-         imageUrl: q?.image_url || null,
-         options,''',
-    "DB review image mapping",
-)
+app = sub_once(
+        app,
+        r'(\s+question: pickContentText\(q, "question_text"\) \|\| "",\n)(\s+options,)',
+        r'\1         imageUrl: q?.image_url || null,\n\2',
+        "DB review image mapping",
+    )
 
 app = replace_once(
     app,
