@@ -738,15 +738,12 @@ app = sub_once(
         "local review image",
     )
 
-app = replace_once(
-    app,
-    '''           explanation,
-           question_text_ru,''',
-    '''           explanation,
-           image_url,
-           question_text_ru,''',
-    "DB review image select",
-)
+app = sub_once(
+        app,
+        r'(\s+explanation,\n)(\s+question_text_ru,)',
+        r'\1          image_url,\n\2',
+        "DB review image select",
+    )
 
 app = replace_once(
     app,
