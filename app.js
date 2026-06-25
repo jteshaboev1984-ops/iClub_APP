@@ -20441,7 +20441,7 @@ async function loadTourQuestionsDB(tourId) {
 
     const { data, error } = await window.sb
   .from("tour_questions")
-  .select("order_no, question:questions(id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,image_url,is_active,book_ref,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en)")
+  .select("order_no, question:questions(id,topic,subtopic,difficulty,qtype,time_limit_sec,question_text,options_text,correct_answer,explanation,image_url,is_active,book_ref,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en)")
   .eq("tour_id", tourId)
   .eq("is_active", true)
   .order("order_no", { ascending: true })
@@ -20506,10 +20506,14 @@ async function loadTourQuestionsDB(tourId) {
   correctIndex,
   correct_answer: String(q.correct_answer ?? "").trim(),
   correctAnswer: String(q.correct_answer ?? "").trim(),
-    imageUrl: q.image_url || null,
+  explanation: pickL(q, "explanation") || "",
+  imageUrl: q.image_url || null,
   book_ref: q.book_ref || null,
   bookReference: q.book_ref || null,
-  timeLimitSec: TOUR_CONFIG.defaultQuestionTimeSec
+  timeLimitSec:
+    (q.time_limit_sec != null && Number(q.time_limit_sec) >= 10)
+      ? Number(q.time_limit_sec)
+      : TOUR_CONFIG.defaultQuestionTimeSec
     };
   });
 }
@@ -20669,9 +20673,10 @@ async function updateTourAttempt(attemptId, patch) {
     tourEndDate,   // ✅ end_date active tour
     questions,     // ✅ loaded from DB mapping tour_questions
     startedAt: Date.now(),
-    qStartedAt: Date.now(),
+    qStartedAt: null,
     startedAtMono: monoNow(),
-    qStartedAtMono: monoNow(),
+    qStartedAtMono: null,
+    questionReady: false,
     index: 0,
     correct: 0,
     answers: [],   // {qid, pickedIndex, userAnswer, isCorrect, spentSec}
@@ -20894,6 +20899,42 @@ async function updateTourAttempt(attemptId, patch) {
     return;
   }
 
+
+  showAsyncOverlay(tr3(
+    "Загружаем изображения вопросов…",
+    "Savol rasmlari yuklanmoqda…",
+    "Loading question images…"
+  ));
+
+  let imagePreloadResult = { ok: true, failed: [] };
+  try {
+    imagePreloadResult = await preloadTourQuestionImages(questions);
+  } finally {
+    hideAsyncOverlay();
+  }
+
+  if (!imagePreloadResult?.ok) {
+    try {
+      trackEvent("tour_question_image_preload_failed", {
+        tour_id: String(tour.id || ""),
+        subject_key: String(subjectKey || ""),
+        tour_no: Number(tourNo || 0),
+        failed_urls: (imagePreloadResult.failed || []).map(x => String(x?.url || ""))
+      });
+    } catch {}
+
+    await uiAlert({
+      title: tr3("Изображение не загрузилось", "Rasm yuklanmadi", "Image failed to load"),
+      message: tr3(
+        "Тур не начат и попытка не использована. Проверьте интернет и попробуйте открыть тур снова.",
+        "Tur boshlanmadi va urinish sarflanmadi. Internetni tekshirib, turni qayta ochib ko‘ring.",
+        "The tour was not started and your attempt was not used. Check your connection and open the tour again."
+      ),
+      okText: tr3("Понятно", "Tushunarli", "OK")
+    });
+    return;
+  }
+
     try {
     trackEvent("tour_rules_accepted", {
       ts: new Date().toISOString(),
@@ -20959,8 +21000,12 @@ async function updateTourAttempt(attemptId, patch) {
       return;
     }
 
+    // The question timer is paused until its required image is fully available.
+    const qStart = ctx.qStartedAtMono ?? ctx.qStartedAt;
+    if (!ctx.questionReady || qStart === null || qStart === undefined) return;
+
     // 2) per-question timeout: auto submit if exceeded and not answered for this question index
-    const qElapsed = Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000);
+    const qElapsed = Math.floor((monoNow() - qStart) / 1000);
     if (qElapsed >= ctx.questionTimeLimit) {
       if (!ctx.answers.some(a => a.index === ctx.index)) {
         submitTourAnswer({ pickedIndex: null, auto: true }).catch(() => null);
@@ -21076,6 +21121,328 @@ async function updateTourAttempt(attemptId, patch) {
     });
   }
 
+  // ---------- Question images ----------
+  const __tourQuestionImageCache = new Map();
+  let __questionImageModalBound = false;
+
+  function normalizeQuestionImageUrl(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+
+    try {
+      const parsed = new URL(raw, window.location.href);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return "";
+      return parsed.href;
+    } catch {
+      return "";
+    }
+  }
+
+  function questionImageAltText() {
+    return tr3(
+      "Изображение к вопросу",
+      "Savolga oid rasm",
+      "Question image"
+    );
+  }
+
+  function preloadQuestionImage(rawUrl, { force = false, timeoutMs = 15000 } = {}) {
+    const url = normalizeQuestionImageUrl(rawUrl);
+    if (!url) {
+      return Promise.resolve({ ok: false, url: rawUrl || "", reason: "invalid_url" });
+    }
+
+    const cached = __tourQuestionImageCache.get(url);
+    if (!force && cached?.status === "loaded") {
+      return Promise.resolve({ ok: true, url, image: cached.image, cached: true });
+    }
+    if (!force && cached?.status === "loading" && cached?.promise) {
+      return cached.promise;
+    }
+    if (force || cached?.status === "error") {
+      __tourQuestionImageCache.delete(url);
+    }
+
+    const record = {
+      status: "loading",
+      image: null,
+      promise: null
+    };
+
+    record.promise = new Promise((resolve) => {
+      const image = new Image();
+      record.image = image;
+      image.decoding = "async";
+
+      let settled = false;
+      const timer = setTimeout(() => finish(false, "timeout"), timeoutMs);
+
+      const finish = (ok, reason = null) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        image.onload = null;
+        image.onerror = null;
+        record.status = ok ? "loaded" : "error";
+        record.promise = null;
+        __tourQuestionImageCache.set(url, record);
+        resolve({ ok, url, image, reason });
+      };
+
+      image.onload = () => {
+        try {
+          const decoded = typeof image.decode === "function" ? image.decode() : null;
+          if (decoded && typeof decoded.catch === "function") decoded.catch(() => null);
+        } catch {}
+        finish(true);
+      };
+      image.onerror = () => finish(false, "load_error");
+      image.src = url;
+
+      if (image.complete && image.naturalWidth > 0) {
+        queueMicrotask(() => finish(true));
+      }
+    });
+
+    __tourQuestionImageCache.set(url, record);
+    return record.promise;
+  }
+
+  async function preloadTourQuestionImages(questions) {
+    const urls = Array.from(new Set(
+      (Array.isArray(questions) ? questions : [])
+        .map(q => normalizeQuestionImageUrl(q?.imageUrl ?? q?.image_url))
+        .filter(Boolean)
+    ));
+
+    if (!urls.length) return { ok: true, failed: [] };
+
+    const results = await Promise.all(urls.map(url => preloadQuestionImage(url)));
+    const failed = results.filter(x => !x?.ok);
+    return { ok: failed.length === 0, failed };
+  }
+
+  function setTourAnswerControlsEnabled(enabled) {
+    const wrap =
+      $("#tour-options") ||
+      $("#tour-options-wrap") ||
+      $("#tour-options-list") ||
+      document.querySelector(".tour-options");
+
+    if (!wrap) return;
+    wrap.classList.toggle("is-image-loading", !enabled);
+    wrap.querySelectorAll(".option, #tour-input").forEach(el => {
+      el.disabled = !enabled;
+    });
+  }
+
+  function closeQuestionImageModal() {
+    const modal = document.getElementById("question-image-modal");
+    const image = document.getElementById("question-image-modal-img");
+    if (!modal) return;
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+    if (image) image.removeAttribute("src");
+    document.body.classList.remove("question-image-modal-open");
+  }
+
+  function openQuestionImageModal(rawUrl, altText = "") {
+    const url = normalizeQuestionImageUrl(rawUrl);
+    const modal = document.getElementById("question-image-modal");
+    const image = document.getElementById("question-image-modal-img");
+    if (!url || !modal || !image) return;
+
+    image.alt = String(altText || questionImageAltText());
+    image.src = url;
+    modal.hidden = false;
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("question-image-modal-open");
+  }
+
+  function bindQuestionImageModalOnce() {
+    if (__questionImageModalBound) return;
+    const modal = document.getElementById("question-image-modal");
+    const closeBtn = document.getElementById("question-image-modal-close");
+    if (!modal) return;
+
+    __questionImageModalBound = true;
+    if (closeBtn) closeBtn.addEventListener("click", closeQuestionImageModal);
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeQuestionImageModal();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !modal.hidden) closeQuestionImageModal();
+    });
+  }
+
+  function renderTourQuestionImage(q, { onReady } = {}) {
+    const figure = document.getElementById("tour-question-figure");
+    const status = document.getElementById("tour-question-image-status");
+    const openBtn = document.getElementById("tour-question-image-open");
+    const image = document.getElementById("tour-question-image");
+    const retryBtn = document.getElementById("tour-question-image-retry");
+    const url = normalizeQuestionImageUrl(q?.imageUrl ?? q?.image_url);
+
+    const readyCallback = typeof onReady === "function" ? onReady : () => {};
+    if (!figure || !status || !openBtn || !image || !retryBtn) {
+      readyCallback();
+      return;
+    }
+
+    bindQuestionImageModalOnce();
+    image.onload = null;
+    image.onerror = null;
+    image.removeAttribute("src");
+    image.hidden = true;
+    openBtn.hidden = true;
+    retryBtn.hidden = true;
+    status.hidden = true;
+
+    if (!url) {
+      figure.hidden = true;
+      readyCallback();
+      return;
+    }
+
+    figure.hidden = false;
+    status.hidden = false;
+    status.textContent = tr3(
+      "Загружаем изображение…",
+      "Rasm yuklanmoqda…",
+      "Loading image…"
+    );
+
+    const expectedIndex = Number(state?.tourContext?.index ?? -1);
+    const expectedQuestionId = Number(q?.id || 0);
+    let completed = false;
+
+    const isStillCurrent = () => {
+      const live = state?.tourContext;
+      if (!live || Number(live.index) !== expectedIndex) return false;
+      const currentId = Number(live.questions?.[live.index]?.id || 0);
+      return !expectedQuestionId || !currentId || currentId === expectedQuestionId;
+    };
+
+    const markReady = () => {
+      if (completed || !isStillCurrent()) return;
+      completed = true;
+      status.hidden = true;
+      retryBtn.hidden = true;
+      image.hidden = false;
+      openBtn.hidden = false;
+      readyCallback();
+    };
+
+    const markFailed = (reason = "load_error") => {
+      if (!isStillCurrent()) return;
+      completed = false;
+      image.hidden = true;
+      openBtn.hidden = true;
+      status.hidden = false;
+      retryBtn.hidden = false;
+      status.textContent = tr3(
+        "Изображение не загрузилось. Повторите загрузку.",
+        "Rasm yuklanmadi. Qayta yuklang.",
+        "The image failed to load. Try again."
+      );
+
+      try {
+        trackEvent("tour_question_image_failed", {
+          question_id: String(q?.id || ""),
+          tour_id: String(state?.tourContext?.tourId || ""),
+          tour_no: Number(state?.tourContext?.tourNo || 0),
+          reason: String(reason || "load_error"),
+          image_url: url
+        });
+      } catch {}
+    };
+
+    const loadIntoView = async (force = false) => {
+      if (!isStillCurrent()) return;
+      completed = false;
+      setTourAnswerControlsEnabled(false);
+      retryBtn.hidden = true;
+      status.hidden = false;
+      status.textContent = tr3(
+        "Загружаем изображение…",
+        "Rasm yuklanmoqda…",
+        "Loading image…"
+      );
+
+      const result = await preloadQuestionImage(url, { force });
+      if (!result?.ok) {
+        markFailed(result?.reason || "load_error");
+        return;
+      }
+
+      image.alt = questionImageAltText();
+      image.onload = markReady;
+      image.onerror = () => markFailed("dom_load_error");
+      image.src = result.url;
+
+      if (image.complete && image.naturalWidth > 0) {
+        queueMicrotask(markReady);
+      }
+    };
+
+    openBtn.onclick = () => openQuestionImageModal(url, image.alt);
+    retryBtn.onclick = () => loadIntoView(true);
+    loadIntoView(false).catch(() => markFailed("exception"));
+  }
+
+  function buildReviewQuestionImageHtml(detail) {
+    const url = normalizeQuestionImageUrl(detail?.imageUrl ?? detail?.image_url);
+    if (!url) return "";
+
+    const alt = questionImageAltText();
+    return `
+      <div class="tour-review-image-wrap">
+        <button
+          type="button"
+          class="tour-review-image-button"
+          data-question-image-open="${escapeHTML(url)}"
+          aria-label="${escapeHTML(tr3("Увеличить изображение", "Rasmni kattalashtirish", "Enlarge image"))}"
+        >
+          <img
+            class="tour-review-question-image"
+            src="${escapeHTML(url)}"
+            alt="${escapeHTML(alt)}"
+            loading="lazy"
+            decoding="async"
+          >
+        </button>
+        <div class="tour-review-image-error muted small" hidden>
+          ${escapeHTML(tr3("Изображение недоступно.", "Rasm mavjud emas.", "Image unavailable."))}
+        </div>
+      </div>
+    `;
+  }
+
+  function bindQuestionImageButtons(root) {
+    if (!root) return;
+    bindQuestionImageModalOnce();
+
+    root.querySelectorAll("[data-question-image-open]").forEach(button => {
+      const url = normalizeQuestionImageUrl(button.getAttribute("data-question-image-open"));
+      const image = button.querySelector("img");
+      const error = button.parentElement?.querySelector(".tour-review-image-error");
+
+      if (!url) {
+        button.hidden = true;
+        if (error) error.hidden = false;
+        return;
+      }
+
+      button.addEventListener("click", () => openQuestionImageModal(url, image?.alt || questionImageAltText()));
+      if (image) {
+        image.addEventListener("error", () => {
+          button.hidden = true;
+          if (error) error.hidden = false;
+        }, { once: true });
+      }
+    });
+  }
+
   // ---------- Render ----------
   function renderTourHUD() {
     const ctx = state.tourContext;
@@ -21104,32 +21471,41 @@ async function updateTourAttempt(attemptId, patch) {
     const overallEl = $("#tour-overall-time");
     if (overallEl) overallEl.textContent = overall;
 
-    const qElapsed = formatMsToMMSS(monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt));
     const qEl = $("#tour-question-time");
-    if (qEl) qEl.textContent = qElapsed;
-     // ✅ last-10-seconds warning on question timer
-try {
-  const qRow = ctx.questions?.[ctx.index] || null;
+    const qCard = (qEl && qEl.closest) ? qEl.closest(".tour-timer-card") : null;
+    const qStart = ctx.qStartedAtMono ?? ctx.qStartedAt;
+    const timingReady = !!ctx.questionReady && qStart !== null && qStart !== undefined;
 
-  const limitSecRaw =
-    qRow?.time_limit_seconds ??
-    qRow?.timeLimitSec ??
-    TOUR_CONFIG.defaultQuestionTimeSec ??
-    45;
+    if (!timingReady) {
+      if (qEl) qEl.textContent = "—";
+      if (qCard) {
+        qCard.classList.remove("danger");
+        qCard.classList.remove("pulse");
+      }
+    } else {
+      const qElapsed = formatMsToMMSS(monoNow() - qStart);
+      if (qEl) qEl.textContent = qElapsed;
 
-  const limitSec = Math.max(1, Number(limitSecRaw) || 45);
-  const elapsedSec = Math.max(0, Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000));
-  const remainSec = limitSec - elapsedSec;
+      try {
+        const qRow = ctx.questions?.[ctx.index] || null;
+        const limitSecRaw =
+          qRow?.time_limit_seconds ??
+          qRow?.timeLimitSec ??
+          TOUR_CONFIG.defaultQuestionTimeSec ??
+          45;
+        const limitSec = Math.max(1, Number(limitSecRaw) || 45);
+        const elapsedSec = Math.max(0, Math.floor((monoNow() - qStart) / 1000));
+        const remainSec = limitSec - elapsedSec;
 
-  const qCard = (qEl && qEl.closest) ? qEl.closest(".tour-timer-card") : null;
-  if (qCard) {
-    if (remainSec <= 10) qCard.classList.add("danger");
-    else qCard.classList.remove("danger");
+        if (qCard) {
+          if (remainSec <= 10) qCard.classList.add("danger");
+          else qCard.classList.remove("danger");
 
-    if (remainSec <= 5) qCard.classList.add("pulse");
-    else qCard.classList.remove("pulse");
-  }
-} catch {}
+          if (remainSec <= 5) qCard.classList.add("pulse");
+          else qCard.classList.remove("pulse");
+        }
+      } catch {}
+    }
 
     // warning visibility
     const warnBtn = $("#tour-warn-btn");
@@ -21137,173 +21513,170 @@ try {
   }
 
   function renderTourQuestion() {
-  const ctx = state.tourContext;
-  if (!ctx) return;
+    const ctx = state.tourContext;
+    if (!ctx) return;
 
-  const q = ctx.questions?.[ctx.index];
-  if (!q) {
-    finishTour({ reason: "done" }).catch(() => null);
-    return;
-  }
+    const q = ctx.questions?.[ctx.index];
+    if (!q) {
+      finishTour({ reason: "done" }).catch(() => null);
+      return;
+    }
 
-  ctx.qStartedAt = Date.now();
-  ctx.qStartedAtMono = monoNow();
-  // сбрасываем прошлый выбор при показе нового вопроса
-  ctx._pickedIndex = null;
-  saveState();
+    const renderedIndex = Number(ctx.index);
+    const renderedQuestionId = Number(q?.id || 0);
 
-  // question text (fallback ids)
-  const qEl =
-    $("#tour-question") ||
-    $("#quiz-question") ||
-    $("#tour-question-text");
+    ctx.questionReady = false;
+    ctx.qStartedAt = null;
+    ctx.qStartedAtMono = null;
+    ctx._pickedIndex = null;
+    saveState();
 
-  if (qEl) {
-  const qText =
-    (q.question ?? q.question_text ?? q.questionText ?? q.text ?? q.prompt ?? q.title ?? "");
-  qEl.textContent = String(qText || "");
-}
+    const qEl =
+      $("#tour-question") ||
+      $("#quiz-question") ||
+      $("#tour-question-text");
 
-  // question type normalize (mcq vs input)
-  const qTypeRaw = String(q.qtype ?? q.type ?? q.question_type ?? "mcq").toLowerCase();
-  const isMcq = (qTypeRaw === "mcq" || qTypeRaw === "choice" || qTypeRaw === "multiple_choice");
+    if (qEl) {
+      const qText =
+        (q.question ?? q.question_text ?? q.questionText ?? q.text ?? q.prompt ?? q.title ?? "");
+      qEl.textContent = String(qText || "");
+    }
 
-  // options wrap (fallback ids/classes)
-  const wrap =
-    $("#tour-options") ||
-    $("#tour-options-wrap") ||
-    $("#tour-options-list") ||
-    document.querySelector(".tour-options");
+    const qTypeRaw = String(q.qtype ?? q.type ?? q.question_type ?? "mcq").toLowerCase();
+    const isMcq = (qTypeRaw === "mcq" || qTypeRaw === "choice" || qTypeRaw === "multiple_choice");
 
-  if (wrap) {
-    wrap.innerHTML = "";
+    const wrap =
+      $("#tour-options") ||
+      $("#tour-options-wrap") ||
+      $("#tour-options-list") ||
+      document.querySelector(".tour-options");
 
-    if (!isMcq) {
-  // input question UI (no HTML edits needed)
-  const inputWrap = document.createElement("div");
-  inputWrap.className = "input-wrap";
+    const nextBtn =
+      $("#tour-next-btn") ||
+      $("#quiz-next-btn") ||
+      document.querySelector('[data-action="tour-next"]');
 
-    inputWrap.innerHTML = `
-    <label class="input-label">${escapeHTML(t("answer") || "Answer")}</label>
-    <input id="tour-input" class="text-input" type="text" placeholder="${escapeHTML(t("type_answer") || "Type your answer")}">
-    <div id="tour-input-error" class="muted small" style="margin-top:6px; display:none;"></div>
-  `;
+    let inputEl = null;
+    let syncTourInputState = null;
 
-  wrap.appendChild(inputWrap);
+    if (wrap) {
+      wrap.innerHTML = "";
 
-  const inputEl = inputWrap.querySelector("#tour-input");
-  const errEl = inputWrap.querySelector("#tour-input-error");
+      if (!isMcq) {
+        const inputWrap = document.createElement("div");
+        inputWrap.className = "input-wrap";
+        inputWrap.innerHTML = `
+          <label class="input-label">${escapeHTML(t("answer") || "Answer")}</label>
+          <input id="tour-input" class="text-input" type="text" placeholder="${escapeHTML(t("type_answer") || "Type your answer")}" disabled>
+          <div id="tour-input-error" class="muted small" style="margin-top:6px; display:none;"></div>
+        `;
+        wrap.appendChild(inputWrap);
 
-  const nextBtn =
-    $("#tour-next-btn") ||
-    $("#quiz-next-btn") ||
-    document.querySelector('[data-action="tour-next"]');
+        inputEl = inputWrap.querySelector("#tour-input");
+        const errEl = inputWrap.querySelector("#tour-input-error");
 
-  if (nextBtn) {
-  nextBtn.disabled = true; // ⛔ пока формат не валиден
+        syncTourInputState = () => {
+          if (!inputEl || !nextBtn) return;
+          const liveCtx = state.tourContext;
+          if (!liveCtx?.questionReady) {
+            nextBtn.disabled = true;
+            return;
+          }
 
-  const isLast = (ctx.index >= TOUR_CONFIG.total - 1);
-  nextBtn.textContent = isLast
-    ? (t("tour_finish_button") || "Finish Tour →")
-    : (t("tour_next_question") || "Next Question →");
-}
+          const raw = String(inputEl.value || "");
+          const hasValue = raw.trim().length > 0;
+          const isValid = hasValue && isValidInputAnswer(q, raw);
+          nextBtn.disabled = !isValid;
 
-  // ✅ активируем Next только когда input-формат валиден
-  const syncTourInputState = () => {
-    if (!inputEl || !nextBtn) return;
+          if (errEl) {
+            if (hasValue && !isValid) {
+              errEl.textContent = t("invalid_answer_format");
+              errEl.style.display = "block";
+            } else {
+              errEl.textContent = "";
+              errEl.style.display = "none";
+            }
+          }
+        };
 
-    const raw = String(inputEl.value || "");
-    const hasValue = raw.trim().length > 0;
-    const isValid = hasValue && isValidInputAnswer(q, raw);
-
-    nextBtn.disabled = !isValid;
-
-    if (errEl) {
-      if (hasValue && !isValid) {
-        errEl.textContent = t("invalid_answer_format");
-        errEl.style.display = "block";
+        if (inputEl) inputEl.addEventListener("input", syncTourInputState);
       } else {
-        errEl.textContent = "";
-        errEl.style.display = "none";
+        const opts = Array.isArray(q.options) && q.options.length
+          ? q.options
+          : ["Option A", "Option B", "Option C", "Option D"];
+
+        opts.forEach((opt, i) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "option";
+          btn.dataset.action = "tour-pick";
+          btn.dataset.index = String(i);
+          btn.disabled = true;
+          btn.innerHTML = `
+            <span class="dot" aria-hidden="true"></span>
+            <span class="opt-text">${escapeHTML(opt)}</span>
+          `;
+
+          btn.onclick = (event) => {
+            try { event.preventDefault(); event.stopPropagation(); } catch {}
+            const liveCtx = state.tourContext;
+            if (!liveCtx?.questionReady) return;
+
+            wrap.querySelectorAll(".option").forEach(option => option.classList.remove("is-selected"));
+            btn.classList.add("is-selected");
+            if (nextBtn) nextBtn.disabled = false;
+            liveCtx._pickedIndex = i;
+            saveState();
+          };
+
+          wrap.appendChild(btn);
+        });
       }
     }
-  };
 
-  if (inputEl && nextBtn) {
-    inputEl.addEventListener("input", syncTourInputState);
-    syncTourInputState();
+    if (nextBtn) {
+      nextBtn.classList.remove("is-loading");
+      nextBtn.disabled = true;
+      const isLast = (ctx.index >= TOUR_CONFIG.total - 1);
+      nextBtn.textContent = isLast
+        ? (t("tour_finish_button") || "Finish Tour →")
+        : (t("tour_next_question") || "Next Question →");
+    }
+
+    setTourAnswerControlsEnabled(false);
+
+    const markQuestionReady = () => {
+      const liveCtx = state.tourContext;
+      if (!liveCtx || Number(liveCtx.index) !== renderedIndex) return;
+      const currentQuestionId = Number(liveCtx.questions?.[liveCtx.index]?.id || 0);
+      if (renderedQuestionId && currentQuestionId && renderedQuestionId !== currentQuestionId) return;
+
+      const limitRaw =
+        q?.time_limit_seconds ??
+        q?.timeLimitSec ??
+        TOUR_CONFIG.defaultQuestionTimeSec ??
+        45;
+
+      liveCtx.questionTimeLimit = Math.max(1, Number(limitRaw) || 45);
+      liveCtx.qStartedAt = Date.now();
+      liveCtx.qStartedAtMono = monoNow();
+      liveCtx.questionReady = true;
+      setTourAnswerControlsEnabled(true);
+      if (typeof syncTourInputState === "function") syncTourInputState();
+      saveState();
+      renderTourHUD();
+    };
+
+    renderTourQuestionImage(q, { onReady: markQuestionReady });
+    renderTourHUD();
   }
-
-  renderTourHUD();
-  return;
-}
-
-    // MCQ options
-    const opts = Array.isArray(q.options) && q.options.length
-      ? q.options
-      : ["Option A", "Option B", "Option C", "Option D"];
-
-    opts.forEach((opt, i) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "option";
-      btn.dataset.action = "tour-pick";
-      btn.dataset.index = String(i);
-
-      btn.innerHTML = `
-        <span class="dot" aria-hidden="true"></span>
-        <span class="opt-text">${escapeHTML(opt)}</span>
-      `;
-
-      btn.onclick = (ev) => {
-        try { ev.preventDefault(); ev.stopPropagation(); } catch {}
-
-        const ctx2 = state.tourContext;
-        if (!ctx2) return;
-
-        (wrap.querySelectorAll(".option") || []).forEach(o => o.classList.remove("is-selected"));
-        btn.classList.add("is-selected");
-
-        const nextBtn =
-          $("#tour-next-btn") ||
-          $("#quiz-next-btn") ||
-          document.querySelector('[data-action="tour-next"]');
-
-        if (nextBtn) nextBtn.disabled = false;
-
-        ctx2._pickedIndex = i;
-        saveState();
-      };
-
-      wrap.appendChild(btn);
-    });
-  }
-
-  // disable next until choose (MCQ only)
-  const nextBtn =
-    $("#tour-next-btn") ||
-    $("#quiz-next-btn") ||
-    document.querySelector('[data-action="tour-next"]');
-
-  if (nextBtn) {
-  nextBtn.classList.remove("is-loading"); // <-- добавь
-  nextBtn.disabled = true;
-
-  const isLast = (ctx.index >= TOUR_CONFIG.total - 1);
-  nextBtn.textContent = isLast
-    ? (t("tour_finish_button") || "Finish Tour →")
-    : (t("tour_next_question") || "Next Question →");
-}
-
-  renderTourHUD();
-}
 
        async function submitTourAnswer({ pickedIndex, auto = false } = {}) {
     const ctx = state.tourContext;
     if (!ctx) return;
 
     let q = ctx.questions?.[ctx.index];
-    if (!q) return;
+    if (!q || !ctx.questionReady) return;
 
     const spentSec = Math.max(0, Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000));
 
@@ -21608,6 +21981,7 @@ try {
               }
               ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.difficulty))}</div>` : ""}
               <div style="margin-top:10px">${escapeHTML(d.question || "")}</div>
+              ${buildReviewQuestionImageHtml(d)}
               <div class="muted small" style="margin-top:10px">
                 ${escapeHTML(t("rec_your_answer") || "Ваш ответ")}: <b>${escapeHTML(userDisp || "—")}</b>
               </div>
@@ -21633,6 +22007,7 @@ try {
         </div>
       </div>
     `;
+    bindQuestionImageButtons(wrap);
   };
 
   // 1) instant local payload right after finish
@@ -21671,6 +22046,7 @@ try {
           options_text,
           correct_answer,
           explanation,
+          image_url,
           question_text_ru,
           question_text_uz,
           question_text_en,
@@ -21711,6 +22087,7 @@ try {
         difficulty: q?.difficulty || "easy",
         type,
         question: pickContentText(q, "question_text") || "",
+        imageUrl: q?.image_url || null,
         options,
         userAnswer: String(x?.user_answer ?? ""),
         correctAnswer: String(q?.correct_answer ?? ""),
@@ -21966,6 +22343,7 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
               difficulty: q?.difficulty || "easy",
               type: isMcq ? "mcq" : "input",
               question: q?.question || "",
+               imageUrl: q?.imageUrl || q?.image_url || null,
               options: Array.isArray(q?.options) ? q.options.slice() : [],
               userAnswer,
               correctAnswer,
