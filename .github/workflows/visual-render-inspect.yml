@@ -1,4 +1,4 @@
-name: Diagnose visual question rendering patch
+name: Apply visual question rendering
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  diagnose:
+  apply:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
@@ -17,47 +17,48 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Persist DB review mapping anchor fix
+      - name: Apply visual rendering patch
+        run: python scripts/apply_visual_question_rendering.py
+
+      - name: Validate JavaScript and visual contract
         run: |
+          node --check app.js
+          git diff --check
           python - <<'PY'
           from pathlib import Path
 
-          path = Path('scripts/apply_visual_question_rendering.py')
-          text = path.read_text(encoding='utf-8')
-          section = text.index('# 6. Preserve and display the same image in tour review.')
-          label = text.index('"DB review image mapping"', section)
-          start = text.rfind('app = replace_once(', section, label)
-          if start >= 0:
-              end = text.index('\n)', label) + 2
-              replacement = '''app = sub_once(
-                  app,
-                  r'(\\s+question: pickContentText\\(q, "question_text"\\) \\|\\| "",\\n)(\\s+options,)',
-                  r'\\1         imageUrl: q?.image_url || null,\\n\\2',
-                  "DB review image mapping",
-              )'''
-              text = text[:start] + replacement + text[end:]
-              path.write_text(text, encoding='utf-8')
+          app = Path('app.js').read_text(encoding='utf-8')
+          html = Path('index.html').read_text(encoding='utf-8')
+          css = Path('style.css').read_text(encoding='utf-8')
+
+          checks = {
+              'one active image figure': html.count('id="tour-question-figure"') == 1,
+              'one active image element': html.count('id="tour-question-image"') == 1,
+              'one global image modal': html.count('id="question-image-modal"') == 1,
+              'preload before attempt': app.count('preloadTourQuestionImages(questions)') == 1,
+              'timer readiness state': 'questionReady: false' in app,
+              'timeout readiness guard': 'if (!ctx.questionReady || qStart === null || qStart === undefined) return;' in app,
+              'review query includes image': 'image_url,' in app,
+              'review image mapping': 'imageUrl: q?.image_url || null' in app,
+              'review image rendering': app.count('buildReviewQuestionImageHtml(d)') == 1,
+              'review image binding': app.count('bindQuestionImageButtons(wrap)') == 1,
+              'responsive image CSS': 'Question images — active tours and review' in css,
+          }
+
+          failed = [name for name, ok in checks.items() if not ok]
+          if failed:
+              raise SystemExit('Validation failed: ' + ', '.join(failed))
+          print('Visual rendering contract validated.')
           PY
 
-      - name: Capture next patch result
+      - name: Remove temporary tooling and commit product changes
         run: |
-          set +e
-          python scripts/apply_visual_question_rendering.py > /tmp/visual-patch.log 2>&1
-          status=$?
-          set -e
-          mkdir -p docs
-          {
-            echo "exit_status=$status"
-            cat /tmp/visual-patch.log
-          } > docs/visual-patch-error.txt
-
-      - name: Commit script fix and diagnostic
-        run: |
+          rm -f .github/workflows/visual-render-inspect.yml
+          rm -f scripts/apply_visual_question_rendering.py
+          rm -f docs/visual-render-inspection.txt
+          rm -f docs/visual-patch-error.txt
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add scripts/apply_visual_question_rendering.py docs/visual-patch-error.txt
-          if git diff --cached --quiet; then
-            exit 0
-          fi
-          git commit -m "Make DB review mapping patch anchor flexible [skip diagnose]"
+          git add -A
+          git commit -m "Render visual questions safely in tours and review"
           git push origin HEAD:${{ github.head_ref }}
