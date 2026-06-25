@@ -17,7 +17,7 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Persist DB review select anchor fix
+      - name: Persist DB review mapping anchor fix
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -25,15 +25,15 @@ jobs:
           path = Path('scripts/apply_visual_question_rendering.py')
           text = path.read_text(encoding='utf-8')
           section = text.index('# 6. Preserve and display the same image in tour review.')
-          label = text.index('"DB review image select"', section)
+          label = text.index('"DB review image mapping"', section)
           start = text.rfind('app = replace_once(', section, label)
           if start >= 0:
               end = text.index('\n)', label) + 2
               replacement = '''app = sub_once(
                   app,
-                  r'(\\s+explanation,\\n)(\\s+question_text_ru,)',
-                  r'\\1          image_url,\\n\\2',
-                  "DB review image select",
+                  r'(\\s+question: pickContentText\\(q, "question_text"\\) \\|\\| "",\\n)(\\s+options,)',
+                  r'\\1         imageUrl: q?.image_url || null,\\n\\2',
+                  "DB review image mapping",
               )'''
               text = text[:start] + replacement + text[end:]
               path.write_text(text, encoding='utf-8')
@@ -59,5 +59,5 @@ jobs:
           if git diff --cached --quiet; then
             exit 0
           fi
-          git commit -m "Make DB review select patch anchor flexible [skip diagnose]"
+          git commit -m "Make DB review mapping patch anchor flexible [skip diagnose]"
           git push origin HEAD:${{ github.head_ref }}
