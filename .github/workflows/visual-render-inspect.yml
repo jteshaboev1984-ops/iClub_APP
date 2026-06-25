@@ -5,38 +5,56 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   inspect:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-      - name: Print exact visual rendering anchors
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Generate exact visual rendering report
         run: |
           python - <<'PY'
           from pathlib import Path
 
-          def show(filename, needle, before=18, after=45):
+          output = []
+
+          def show(filename, needle, before=12, after=36, max_hits=10):
               lines = Path(filename).read_text(encoding='utf-8').splitlines()
               hits = [i for i, line in enumerate(lines) if needle in line]
-              print(f'===== {filename} :: {needle!r} :: {len(hits)} matches =====')
-              for i in hits:
+              output.append(f'===== {filename} :: {needle!r} :: {len(hits)} matches =====')
+              for i in hits[:max_hits]:
                   start = max(0, i-before)
                   end = min(len(lines), i+after+1)
-                  print(f'--- context around line {i+1} ---')
+                  output.append(f'--- context around line {i+1} ---')
                   for n in range(start, end):
-                      print(f'{n+1:05d}: {lines[n]}')
+                      output.append(f'{n+1:05d}: {lines[n]}')
 
-          show('app.js', 'function renderTourQuestion', 15, 180)
-          show('app.js', 'lastTourReviewPayload', 30, 90)
-          show('app.js', 'tour-review-list', 35, 120)
-          show('app.js', 'data-action="tour-review"', 25, 70)
-          show('app.js', 'renderTourReview', 25, 160)
-          show('index.html', 'id="tour-question"', 15, 25)
-          show('index.html', 'id="tour-review-list"', 15, 25)
-          show('style.css', '.question-text', 20, 45)
-          show('style.css', '.tour-review', 20, 70)
+          show('app.js', 'function renderTourQuestion', 12, 175, 1)
+          show('app.js', 'lastTourReviewPayload', 22, 75, 10)
+          show('app.js', 'tour-review-list', 25, 100, 10)
+          show('app.js', 'data-action="tour-review"', 20, 55, 10)
+          show('app.js', 'renderTourReview', 20, 140, 10)
+          show('index.html', 'id="tour-question"', 12, 22, 2)
+          show('index.html', 'id="tour-review-list"', 12, 22, 2)
+          show('style.css', '.question-text', 15, 35, 10)
+          show('style.css', '.tour-review', 15, 50, 10)
+
+          path = Path('docs/visual-render-inspection.txt')
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_text('\n'.join(output) + '\n', encoding='utf-8')
           PY
+      - name: Commit inspection report once
+        run: |
+          if git diff --quiet -- docs/visual-render-inspection.txt; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/visual-render-inspection.txt
+          git commit -m "Add visual rendering inspection report [skip inspect]"
+          git push origin HEAD:${{ github.head_ref }}
