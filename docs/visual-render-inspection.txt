@@ -1,0 +1,1320 @@
+===== app.js :: 'function renderTourQuestion' :: 1 matches =====
+--- context around line 21139 ---
+21127:     else qCard.classList.remove("danger");
+21128: 
+21129:     if (remainSec <= 5) qCard.classList.add("pulse");
+21130:     else qCard.classList.remove("pulse");
+21131:   }
+21132: } catch {}
+21133: 
+21134:     // warning visibility
+21135:     const warnBtn = $("#tour-warn-btn");
+21136:     if (warnBtn) warnBtn.style.display = (!ctx.isArchive && ctx.violations > 0) ? "inline-flex" : "none";
+21137:   }
+21138: 
+21139:   function renderTourQuestion() {
+21140:   const ctx = state.tourContext;
+21141:   if (!ctx) return;
+21142: 
+21143:   const q = ctx.questions?.[ctx.index];
+21144:   if (!q) {
+21145:     finishTour({ reason: "done" }).catch(() => null);
+21146:     return;
+21147:   }
+21148: 
+21149:   ctx.qStartedAt = Date.now();
+21150:   ctx.qStartedAtMono = monoNow();
+21151:   // сбрасываем прошлый выбор при показе нового вопроса
+21152:   ctx._pickedIndex = null;
+21153:   saveState();
+21154: 
+21155:   // question text (fallback ids)
+21156:   const qEl =
+21157:     $("#tour-question") ||
+21158:     $("#quiz-question") ||
+21159:     $("#tour-question-text");
+21160: 
+21161:   if (qEl) {
+21162:   const qText =
+21163:     (q.question ?? q.question_text ?? q.questionText ?? q.text ?? q.prompt ?? q.title ?? "");
+21164:   qEl.textContent = String(qText || "");
+21165: }
+21166: 
+21167:   // question type normalize (mcq vs input)
+21168:   const qTypeRaw = String(q.qtype ?? q.type ?? q.question_type ?? "mcq").toLowerCase();
+21169:   const isMcq = (qTypeRaw === "mcq" || qTypeRaw === "choice" || qTypeRaw === "multiple_choice");
+21170: 
+21171:   // options wrap (fallback ids/classes)
+21172:   const wrap =
+21173:     $("#tour-options") ||
+21174:     $("#tour-options-wrap") ||
+21175:     $("#tour-options-list") ||
+21176:     document.querySelector(".tour-options");
+21177: 
+21178:   if (wrap) {
+21179:     wrap.innerHTML = "";
+21180: 
+21181:     if (!isMcq) {
+21182:   // input question UI (no HTML edits needed)
+21183:   const inputWrap = document.createElement("div");
+21184:   inputWrap.className = "input-wrap";
+21185: 
+21186:     inputWrap.innerHTML = `
+21187:     <label class="input-label">${escapeHTML(t("answer") || "Answer")}</label>
+21188:     <input id="tour-input" class="text-input" type="text" placeholder="${escapeHTML(t("type_answer") || "Type your answer")}">
+21189:     <div id="tour-input-error" class="muted small" style="margin-top:6px; display:none;"></div>
+21190:   `;
+21191: 
+21192:   wrap.appendChild(inputWrap);
+21193: 
+21194:   const inputEl = inputWrap.querySelector("#tour-input");
+21195:   const errEl = inputWrap.querySelector("#tour-input-error");
+21196: 
+21197:   const nextBtn =
+21198:     $("#tour-next-btn") ||
+21199:     $("#quiz-next-btn") ||
+21200:     document.querySelector('[data-action="tour-next"]');
+21201: 
+21202:   if (nextBtn) {
+21203:   nextBtn.disabled = true; // ⛔ пока формат не валиден
+21204: 
+21205:   const isLast = (ctx.index >= TOUR_CONFIG.total - 1);
+21206:   nextBtn.textContent = isLast
+21207:     ? (t("tour_finish_button") || "Finish Tour →")
+21208:     : (t("tour_next_question") || "Next Question →");
+21209: }
+21210: 
+21211:   // ✅ активируем Next только когда input-формат валиден
+21212:   const syncTourInputState = () => {
+21213:     if (!inputEl || !nextBtn) return;
+21214: 
+21215:     const raw = String(inputEl.value || "");
+21216:     const hasValue = raw.trim().length > 0;
+21217:     const isValid = hasValue && isValidInputAnswer(q, raw);
+21218: 
+21219:     nextBtn.disabled = !isValid;
+21220: 
+21221:     if (errEl) {
+21222:       if (hasValue && !isValid) {
+21223:         errEl.textContent = t("invalid_answer_format");
+21224:         errEl.style.display = "block";
+21225:       } else {
+21226:         errEl.textContent = "";
+21227:         errEl.style.display = "none";
+21228:       }
+21229:     }
+21230:   };
+21231: 
+21232:   if (inputEl && nextBtn) {
+21233:     inputEl.addEventListener("input", syncTourInputState);
+21234:     syncTourInputState();
+21235:   }
+21236: 
+21237:   renderTourHUD();
+21238:   return;
+21239: }
+21240: 
+21241:     // MCQ options
+21242:     const opts = Array.isArray(q.options) && q.options.length
+21243:       ? q.options
+21244:       : ["Option A", "Option B", "Option C", "Option D"];
+21245: 
+21246:     opts.forEach((opt, i) => {
+21247:       const btn = document.createElement("button");
+21248:       btn.type = "button";
+21249:       btn.className = "option";
+21250:       btn.dataset.action = "tour-pick";
+21251:       btn.dataset.index = String(i);
+21252: 
+21253:       btn.innerHTML = `
+21254:         <span class="dot" aria-hidden="true"></span>
+21255:         <span class="opt-text">${escapeHTML(opt)}</span>
+21256:       `;
+21257: 
+21258:       btn.onclick = (ev) => {
+21259:         try { ev.preventDefault(); ev.stopPropagation(); } catch {}
+21260: 
+21261:         const ctx2 = state.tourContext;
+21262:         if (!ctx2) return;
+21263: 
+21264:         (wrap.querySelectorAll(".option") || []).forEach(o => o.classList.remove("is-selected"));
+21265:         btn.classList.add("is-selected");
+21266: 
+21267:         const nextBtn =
+21268:           $("#tour-next-btn") ||
+21269:           $("#quiz-next-btn") ||
+21270:           document.querySelector('[data-action="tour-next"]');
+21271: 
+21272:         if (nextBtn) nextBtn.disabled = false;
+21273: 
+21274:         ctx2._pickedIndex = i;
+21275:         saveState();
+21276:       };
+21277: 
+21278:       wrap.appendChild(btn);
+21279:     });
+21280:   }
+21281: 
+21282:   // disable next until choose (MCQ only)
+21283:   const nextBtn =
+21284:     $("#tour-next-btn") ||
+21285:     $("#quiz-next-btn") ||
+21286:     document.querySelector('[data-action="tour-next"]');
+21287: 
+21288:   if (nextBtn) {
+21289:   nextBtn.classList.remove("is-loading"); // <-- добавь
+21290:   nextBtn.disabled = true;
+21291: 
+21292:   const isLast = (ctx.index >= TOUR_CONFIG.total - 1);
+21293:   nextBtn.textContent = isLast
+21294:     ? (t("tour_finish_button") || "Finish Tour →")
+21295:     : (t("tour_next_question") || "Next Question →");
+21296: }
+21297: 
+21298:   renderTourHUD();
+21299: }
+21300: 
+21301:        async function submitTourAnswer({ pickedIndex, auto = false } = {}) {
+21302:     const ctx = state.tourContext;
+21303:     if (!ctx) return;
+21304: 
+21305:     let q = ctx.questions?.[ctx.index];
+21306:     if (!q) return;
+21307: 
+21308:     const spentSec = Math.max(0, Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000));
+21309: 
+21310:     // normalize question type (DB uses qtype, older code may use type)
+21311:     const qType =
+21312:       (q?.qtype != null ? String(q.qtype) : (q?.type != null ? String(q.type) : "mcq"))
+21313:         .toLowerCase();
+21314:     const isMcq = (qType === "mcq" || qType === "multiple_choice");
+===== app.js :: 'lastTourReviewPayload' :: 5 matches =====
+--- context around line 21515 ---
+21493:     const todayISO =
+21494:       `${today.getFullYear()}-` +
+21495:       `${String(today.getMonth() + 1).padStart(2, "0")}-` +
+21496:       `${String(today.getDate()).padStart(2, "0")}`;
+21497: 
+21498:     const endDate = String(data?.end_date || "").trim();
+21499:     if (!endDate) return false;
+21500: 
+21501:     return endDate < todayISO;
+21502:   } catch {
+21503:     return false;
+21504:   }
+21505: }
+21506: 
+21507:    function renderTourResultStatusSummary() {
+21508:   const reviewStatusEl = document.getElementById("tour-review-status");
+21509:   const certStatusEl = document.getElementById("tour-certificate-status");
+21510:   const noteWrapEl = document.getElementById("tour-result-summary-note");
+21511:   const noteTextEl = document.getElementById("tour-result-summary-text");
+21512: 
+21513:   if (!reviewStatusEl || !certStatusEl || !noteWrapEl || !noteTextEl) return;
+21514: 
+21515:   const payload = state?.courses?.lastTourReviewPayload || null;
+21516:   const items = Array.isArray(payload?.items) ? payload.items : [];
+21517:   const wrong = items.filter(x => !x?.isCorrect);
+21518:   const right = Math.max(0, items.length - wrong.length);
+21519: 
+21520:   const rawEndDate = String(state?.courses?.lastTourEndDate || "").trim();
+21521:   const endLabel = rawEndDate || tr3("после глобального завершения тура", "tur global yopilgandan keyin", "after the tour is globally closed");
+21522: 
+21523:   reviewStatusEl.textContent = rawEndDate
+21524:     ? tr3(`Полный разбор откроется после ${endLabel}.`, `${endLabel} dan keyin to‘liq tahlil ochiladi.`, `Full review will open after ${endLabel}.`)
+21525:     : tr3("Полный разбор откроется после глобального завершения тура.", "Tur global yopilgandan keyin to‘liq tahlil ochiladi.", "Full review will open after the tour is globally closed.");
+21526: 
+21527:   certStatusEl.textContent = rawEndDate
+21528:     ? tr3(`Сертификат станет доступен после ${endLabel}, если выполнены условия.`, `${endLabel} dan keyin, shartlar bajarilgan bo‘lsa, sertifikat ochiladi.`, `The certificate will become available after ${endLabel}, if the conditions are met.`)
+21529:     : tr3("Сертификат станет доступен после глобального завершения тура, если выполнены условия.", "Tur global yopilgandan keyin, shartlar bajarilgan bo‘lsa, sertifikat ochiladi.", "The certificate will become available after the tour is globally closed, if the conditions are met.");
+21530: 
+21531:   if (!items.length) {
+21532:     noteWrapEl.hidden = true;
+21533:     return;
+21534:   }
+21535: 
+21536:   const topicList = [...new Set(
+21537:     wrong
+21538:       .map(x => String(x?.topic || "").trim())
+21539:       .filter(Boolean)
+21540:   )].slice(0, 3);
+21541: 
+21542:   const topicText = topicList.length ? topicList.join(", ") : tr3("без выделенных тем", "ajratilgan mavzularsiz", "no highlighted topics");
+21543: 
+21544:   noteTextEl.textContent = tr3(
+21545:     `Сейчас доступна краткая сводка: верно ${right} из ${items.length}, ошибок ${wrong.length}. Слабые темы: ${topicText}.`,
+21546:     `Hozir qisqa xulosa mavjud: ${items.length} ta savoldan ${right} tasi to‘g‘ri, ${wrong.length} ta xato. Zaif mavzular: ${topicText}.`,
+21547:     `A short summary is available now: ${right} correct out of ${items.length}, ${wrong.length} wrong. Weak topics: ${topicText}.`
+21548:   );
+21549: 
+21550:   noteWrapEl.hidden = false;
+21551: }
+21552:    async function renderTourReview() {
+21553:   const wrap = $("#tour-review-list");
+21554:   if (!wrap) return;
+21555: 
+21556:   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
+21557: 
+21558:   const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
+21559:   const localPayload = state?.courses?.lastTourReviewPayload || null;
+21560:   const currentSubjectKey = String(state?.courses?.subjectKey || "").trim();
+21561:   const payloadSubjectKey = String(localPayload?.subjectKey || "").trim();
+21562:   const payloadItems = Array.isArray(localPayload?.items) ? localPayload.items : [];
+21563: 
+21564:   const hasFreshLocalTourPayload =
+21565:     payloadItems.length > 0 &&
+21566:     (!currentSubjectKey || !payloadSubjectKey || currentSubjectKey === payloadSubjectKey);
+21567: 
+21568:   const renderFromDetails = (details) => {
+21569:     const mistakesOnly = (Array.isArray(details) ? details : []).filter(d => !d.isCorrect);
+21570: 
+21571:     if (!mistakesOnly.length) {
+21572:       wrap.innerHTML = `
+21573:         <div class="empty muted">${escapeHTML(t("tour_review_no_mistakes") || "По этому туру ошибок не найдено.")}</div>
+21574:         <div class="list-item" style="margin-top:12px">
+21575:           <div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div>
+21576:           <div style="margin-top:10px">
+21577:             <button class="btn" type="button" data-action="tour-review-open-practice">
+21578:               ${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}
+21579:             </button>
+21580:           </div>
+21581:         </div>
+21582:       `;
+21583:       return;
+21584:     }
+21585: 
+21586:     wrap.innerHTML = mistakesOnly.map((d, idx) => {
+21587:       const qForFmt = {
+21588:         qtype: d.type,
+21589:         options_text: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+21590:         options_text_ru: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+--- context around line 21559 ---
+21537:     wrong
+21538:       .map(x => String(x?.topic || "").trim())
+21539:       .filter(Boolean)
+21540:   )].slice(0, 3);
+21541: 
+21542:   const topicText = topicList.length ? topicList.join(", ") : tr3("без выделенных тем", "ajratilgan mavzularsiz", "no highlighted topics");
+21543: 
+21544:   noteTextEl.textContent = tr3(
+21545:     `Сейчас доступна краткая сводка: верно ${right} из ${items.length}, ошибок ${wrong.length}. Слабые темы: ${topicText}.`,
+21546:     `Hozir qisqa xulosa mavjud: ${items.length} ta savoldan ${right} tasi to‘g‘ri, ${wrong.length} ta xato. Zaif mavzular: ${topicText}.`,
+21547:     `A short summary is available now: ${right} correct out of ${items.length}, ${wrong.length} wrong. Weak topics: ${topicText}.`
+21548:   );
+21549: 
+21550:   noteWrapEl.hidden = false;
+21551: }
+21552:    async function renderTourReview() {
+21553:   const wrap = $("#tour-review-list");
+21554:   if (!wrap) return;
+21555: 
+21556:   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
+21557: 
+21558:   const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
+21559:   const localPayload = state?.courses?.lastTourReviewPayload || null;
+21560:   const currentSubjectKey = String(state?.courses?.subjectKey || "").trim();
+21561:   const payloadSubjectKey = String(localPayload?.subjectKey || "").trim();
+21562:   const payloadItems = Array.isArray(localPayload?.items) ? localPayload.items : [];
+21563: 
+21564:   const hasFreshLocalTourPayload =
+21565:     payloadItems.length > 0 &&
+21566:     (!currentSubjectKey || !payloadSubjectKey || currentSubjectKey === payloadSubjectKey);
+21567: 
+21568:   const renderFromDetails = (details) => {
+21569:     const mistakesOnly = (Array.isArray(details) ? details : []).filter(d => !d.isCorrect);
+21570: 
+21571:     if (!mistakesOnly.length) {
+21572:       wrap.innerHTML = `
+21573:         <div class="empty muted">${escapeHTML(t("tour_review_no_mistakes") || "По этому туру ошибок не найдено.")}</div>
+21574:         <div class="list-item" style="margin-top:12px">
+21575:           <div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div>
+21576:           <div style="margin-top:10px">
+21577:             <button class="btn" type="button" data-action="tour-review-open-practice">
+21578:               ${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}
+21579:             </button>
+21580:           </div>
+21581:         </div>
+21582:       `;
+21583:       return;
+21584:     }
+21585: 
+21586:     wrap.innerHTML = mistakesOnly.map((d, idx) => {
+21587:       const qForFmt = {
+21588:         qtype: d.type,
+21589:         options_text: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+21590:         options_text_ru: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+21591:         options_text_uz: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+21592:         options_text_en: Array.isArray(d.options) ? JSON.stringify(d.options) : null
+21593:       };
+21594: 
+21595:       const userDisp = formatAnswerForDisplay(qForFmt, d.userAnswer);
+21596:       const corrDisp = formatAnswerForDisplay(qForFmt, d.correctAnswer);
+21597: 
+21598:       return `
+21599:         <div class="list-item">
+21600:           <div style="display:flex;align-items:flex-start;gap:10px">
+21601:             <div style="font-size:24px;line-height:1">${d.isCorrect ? "✓" : "✕"}</div>
+21602:             <div style="min-width:0;flex:1">
+21603:               <div style="font-weight:900">${escapeHTML(`${idx + 1}. ${d.topic || (t("topic_general") || "General")}`)}</div>
+21604:               ${
+21605:                 d.subtopic
+21606:                   ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.subtopic))}</div>`
+21607:                   : ""
+21608:               }
+21609:               ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.difficulty))}</div>` : ""}
+21610:               <div style="margin-top:10px">${escapeHTML(d.question || "")}</div>
+21611:               <div class="muted small" style="margin-top:10px">
+21612:                 ${escapeHTML(t("rec_your_answer") || "Ваш ответ")}: <b>${escapeHTML(userDisp || "—")}</b>
+21613:               </div>
+21614:               <div class="muted small" style="margin-top:4px">
+21615:                 ${escapeHTML(t("rec_correct_answer") || "Правильный")}: <b>${escapeHTML(corrDisp || "—")}</b>
+21616:               </div>
+21617:               ${d.explanation ? `
+21618:                 <div class="muted small" style="margin-top:10px">
+21619:                   <b>${escapeHTML(t("explanation_label") || "Explanation")}:</b> ${escapeHTML(d.explanation)}
+21620:                 </div>
+21621:               ` : ""}
+21622:             </div>
+21623:           </div>
+21624:         </div>
+21625:       `;
+21626:     }).join("") + `
+21627:       <div class="list-item" style="margin-top:12px">
+21628:         <div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div>
+21629:         <div style="margin-top:10px">
+21630:           <button class="btn" type="button" data-action="tour-review-open-practice">
+21631:             ${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}
+21632:           </button>
+21633:         </div>
+21634:       </div>
+--- context around line 21979 ---
+21957:                     ? String(q.correctAnswer).trim()
+21958:                     : ((q?.correctIndex !== null && q?.correctIndex !== undefined)
+21959:                         ? (idxToLetter(Number(q.correctIndex)) || String(q.correctIndex))
+21960:                         : ""));
+21961: 
+21962:             return {
+21963:               id: Number(q?.id || idx + 1),
+21964:               topic: q?.topic || (t("topic_general") || "General"),
+21965:               subtopic: q?.subtopic || null,
+21966:               difficulty: q?.difficulty || "easy",
+21967:               type: isMcq ? "mcq" : "input",
+21968:               question: q?.question || "",
+21969:               options: Array.isArray(q?.options) ? q.options.slice() : [],
+21970:               userAnswer,
+21971:               correctAnswer,
+21972:               explanation: pickContentText(q || {}, "explanation") || "",
+21973:               isCorrect: !!ans?.isCorrect,
+21974:               timeSpent: Number(ans?.spentSec || 0)
+21975:             };
+21976:           })
+21977:         : [];
+21978: 
+21979:       state.courses.lastTourReviewPayload = {
+21980:         attemptId: ctx?.attemptId || null,
+21981:         subjectKey: ctx?.subjectKey || null,
+21982:         tourNo: ctx?.tourNo || 1,
+21983:         items: reviewItems
+21984:       };
+21985: 
+21986:       state.courses.lastTourEndDate = String(ctx?.tourEndDate || "").trim() || null;
+21987: 
+21988:       // локально сохраняем туровые рекомендации по ошибкам
+21989:       addMyTourRecsFromTourAttempt(ctx);
+21990:     } catch {
+21991:       state.courses.lastTourReviewPayload = null;
+21992:     }
+21993: 
+21994:     if (!state.certificates) {
+21995:       state.certificates = { selectedId: null, lastIssuedId: null };
+21996:     }
+21997: 
+21998:     // Сертификаты не выдаём сразу после финиша.
+21999:     // Они становятся доступны только после глобального завершения тура / всех туров.
+22000:     if (
+22001:       finalizeSavedToDb &&
+22002:       ctx?.attemptId &&
+22003:       !ctx?.isArchive &&
+22004:       reason !== "violations"
+22005:     ) {
+22006:       state.courses.lastTourCertificateId = null;
+22007:     }
+22008:   } catch {}
+22009: 
+22010:   // unlock
+22011:   state.quizLock = null;
+22012:   state.tourContext = null;
+22013:   saveState();
+22014: 
+22015:   pushCourses("tour-result");
+22016:   renderTourResultStatusSummary();
+22017:   refreshLiveProgressSurfaces();
+22018: 
+22019:   if (finalizeSavedToDb && !ctx?.isArchive) {
+22020:     showToast(
+22021:       t("tour_result_saved_toast") ||
+22022:       "Результат сохранён. Вы можете посмотреть своё место в рейтинге. Подробный разбор будет доступен после завершения тура для всех участников."
+22023:     );
+22024:   }
+22025: }
+22026: 
+22027:   function formatMsToMMSS(ms) {
+22028:     const sec = Math.max(0, Math.floor(ms / 1000));
+22029:     const mm = Math.floor(sec / 60);
+22030:     const ss = sec % 60;
+22031:     return `${mm}:${String(ss).padStart(2, "0")}`;
+22032:   }
+22033: 
+22034:   // ---------------------------
+22035: // Global UI bindings
+22036: // ---------------------------
+22037: function bindTabbar() {
+22038:   let lastTapTs = 0;
+22039: 
+22040:     const handle = async (btn) => {
+22041:   const tab = btn.dataset.tab;
+22042:   if (!tab) return;
+22043:     
+22044:      // ✅ До регистрации табы запрещены (и на registration таббар скрыт, но это страховка)
+22045:   if (!isRegistered()) {
+22046:     showToast(t("complete_registration_first") || "Сначала завершите регистрацию.");
+22047:     showView("registration");
+22048:     return;
+22049:   }
+22050: 
+22051:          if (!(await enforceActiveIdentityOrBlock({ source: `tab_${tab}`, force: true }))) {
+22052:     return;
+22053:   }
+22054:        
+--- context around line 21991 ---
+21969:               options: Array.isArray(q?.options) ? q.options.slice() : [],
+21970:               userAnswer,
+21971:               correctAnswer,
+21972:               explanation: pickContentText(q || {}, "explanation") || "",
+21973:               isCorrect: !!ans?.isCorrect,
+21974:               timeSpent: Number(ans?.spentSec || 0)
+21975:             };
+21976:           })
+21977:         : [];
+21978: 
+21979:       state.courses.lastTourReviewPayload = {
+21980:         attemptId: ctx?.attemptId || null,
+21981:         subjectKey: ctx?.subjectKey || null,
+21982:         tourNo: ctx?.tourNo || 1,
+21983:         items: reviewItems
+21984:       };
+21985: 
+21986:       state.courses.lastTourEndDate = String(ctx?.tourEndDate || "").trim() || null;
+21987: 
+21988:       // локально сохраняем туровые рекомендации по ошибкам
+21989:       addMyTourRecsFromTourAttempt(ctx);
+21990:     } catch {
+21991:       state.courses.lastTourReviewPayload = null;
+21992:     }
+21993: 
+21994:     if (!state.certificates) {
+21995:       state.certificates = { selectedId: null, lastIssuedId: null };
+21996:     }
+21997: 
+21998:     // Сертификаты не выдаём сразу после финиша.
+21999:     // Они становятся доступны только после глобального завершения тура / всех туров.
+22000:     if (
+22001:       finalizeSavedToDb &&
+22002:       ctx?.attemptId &&
+22003:       !ctx?.isArchive &&
+22004:       reason !== "violations"
+22005:     ) {
+22006:       state.courses.lastTourCertificateId = null;
+22007:     }
+22008:   } catch {}
+22009: 
+22010:   // unlock
+22011:   state.quizLock = null;
+22012:   state.tourContext = null;
+22013:   saveState();
+22014: 
+22015:   pushCourses("tour-result");
+22016:   renderTourResultStatusSummary();
+22017:   refreshLiveProgressSurfaces();
+22018: 
+22019:   if (finalizeSavedToDb && !ctx?.isArchive) {
+22020:     showToast(
+22021:       t("tour_result_saved_toast") ||
+22022:       "Результат сохранён. Вы можете посмотреть своё место в рейтинге. Подробный разбор будет доступен после завершения тура для всех участников."
+22023:     );
+22024:   }
+22025: }
+22026: 
+22027:   function formatMsToMMSS(ms) {
+22028:     const sec = Math.max(0, Math.floor(ms / 1000));
+22029:     const mm = Math.floor(sec / 60);
+22030:     const ss = sec % 60;
+22031:     return `${mm}:${String(ss).padStart(2, "0")}`;
+22032:   }
+22033: 
+22034:   // ---------------------------
+22035: // Global UI bindings
+22036: // ---------------------------
+22037: function bindTabbar() {
+22038:   let lastTapTs = 0;
+22039: 
+22040:     const handle = async (btn) => {
+22041:   const tab = btn.dataset.tab;
+22042:   if (!tab) return;
+22043:     
+22044:      // ✅ До регистрации табы запрещены (и на registration таббар скрыт, но это страховка)
+22045:   if (!isRegistered()) {
+22046:     showToast(t("complete_registration_first") || "Сначала завершите регистрацию.");
+22047:     showView("registration");
+22048:     return;
+22049:   }
+22050: 
+22051:          if (!(await enforceActiveIdentityOrBlock({ source: `tab_${tab}`, force: true }))) {
+22052:     return;
+22053:   }
+22054:        
+22055:     // ✅ Ratings доступен только школьникам
+22056:     if (tab === "ratings") {
+22057:       const p = loadProfile();
+22058:       if (!p || !p.is_school_student) {
+22059:         showToast(t("disabled_not_school"));
+22060:         return;
+22061:       }
+22062:     }
+22063: 
+22064:     if (state.quizLock === "tour") {
+22065:       showToast("Tour is in progress");
+22066:       return;
+--- context around line 23421 ---
+23399: 
+23400:   // UI: show "Saving..." also on Next (not only Finish)
+23401:   const nextBtn =
+23402:     $("#tour-next-btn") ||
+23403:     $("#quiz-next-btn") ||
+23404:     document.querySelector('[data-action="tour-next"]');
+23405: 
+23406:   if (nextBtn) {
+23407:     nextBtn.classList.add("is-loading");
+23408:     nextBtn.disabled = true;
+23409:     nextBtn.textContent = (window.i18n?.t ? window.i18n.t("saving") : "Saving…");
+23410:   }
+23411: 
+23412:   const picked = (ctx._pickedIndex === null || ctx._pickedIndex === undefined) ? null : Number(ctx._pickedIndex);
+23413:   ctx._pickedIndex = null;
+23414:   saveState();
+23415: 
+23416:   submitTourAnswer({ pickedIndex: picked, auto: false }).catch(() => null);
+23417:   return;
+23418: }
+23419: 
+23420:                   if (action === "tour-review") {
+23421:         const reviewPayload = state?.courses?.lastTourReviewPayload || null;
+23422:         const subjectKey =
+23423:           String(reviewPayload?.subjectKey || state?.courses?.subjectKey || "").trim();
+23424:         const tourNo = Number(reviewPayload?.tourNo || state?.courses?.activeTourNo || 0);
+23425: 
+23426:         const canOpen = subjectKey && tourNo
+23427:           ? await isTourGloballyClosed(subjectKey, tourNo)
+23428:           : false;
+23429: 
+23430:         if (!canOpen) {
+23431:     renderTourResultStatusSummary();
+23432:     showToast(
+23433:       t("tour_review_locked_until_global_end") ||
+23434:       tr3(
+23435:         "Подробный разбор пока закрыт. Ниже доступна краткая сводка по результату тура.",
+23436:         "To‘liq tahlil hozircha yopiq. Pastda tur natijasi bo‘yicha qisqa xulosa mavjud.",
+23437:         "The full review is still locked. A short summary of the tour result is available below."
+23438:       )
+23439:     );
+23440:     return;
+23441:   }
+23442: 
+23443:                pushCourses("tour-review");
+23444:         await renderTourReview();
+23445: 
+23446:         try {
+23447:           trackEvent("tour_review_opened", {
+23448:             subject_key: subjectKey || null,
+23449:             tour_no: tourNo || null,
+23450:             attempt_id: Number(state?.courses?.lastTourAttemptId || 0) || null
+23451:           });
+23452:         } catch {}
+23453: 
+23454:         return;
+23455:       }
+23456: 
+23457:       if (action === "tour-back-to-result") {
+23458:         while (state.courses.stack.length > 0 && getCoursesTopScreen() !== "tour-result") {
+23459:           state.courses.stack.pop();
+23460:         }
+23461:         if (state.courses.stack.length === 0) state.courses.stack = ["tour-result"];
+23462:         saveState();
+23463:         showCoursesScreen(getCoursesTopScreen());
+23464:         return;
+23465:       }
+23466:                    if (action === "tour-review-open-practice") {
+23467:   await openPracticeStart();
+23468:   return;
+23469: }  
+23470:              if (action === "tour-certificate") {
+23471:         const certId = Number(state?.courses?.lastTourCertificateId || 0);
+23472: 
+23473:         if (!state.certificates) {
+23474:           state.certificates = { selectedId: null, lastIssuedId: null };
+23475:         }
+23476: 
+23477:         state.certificates.selectedId = null;
+23478:         if (certId) state.certificates.lastIssuedId = certId;
+23479:         saveState();
+23480: 
+23481:         openGlobal("certificates");
+23482: 
+23483:         if (!certId) {
+23484:           showToast(t("certificates_pending_hint") || "Сертификат появится после первой сохранённой попытки.");
+23485:         }
+23486: 
+23487:         return;
+23488:       }
+23489:        
+23490:                         if (action === "open-books") {
+23491:         showAsyncOverlay(tr3(
+23492:           "Загружаем книги…",
+23493:           "Kitoblar yuklanmoqda…",
+23494:           "Loading books…"
+23495:         ));
+23496: 
+===== app.js :: 'tour-review-list' :: 1 matches =====
+--- context around line 21553 ---
+21528:     ? tr3(`Сертификат станет доступен после ${endLabel}, если выполнены условия.`, `${endLabel} dan keyin, shartlar bajarilgan bo‘lsa, sertifikat ochiladi.`, `The certificate will become available after ${endLabel}, if the conditions are met.`)
+21529:     : tr3("Сертификат станет доступен после глобального завершения тура, если выполнены условия.", "Tur global yopilgandan keyin, shartlar bajarilgan bo‘lsa, sertifikat ochiladi.", "The certificate will become available after the tour is globally closed, if the conditions are met.");
+21530: 
+21531:   if (!items.length) {
+21532:     noteWrapEl.hidden = true;
+21533:     return;
+21534:   }
+21535: 
+21536:   const topicList = [...new Set(
+21537:     wrong
+21538:       .map(x => String(x?.topic || "").trim())
+21539:       .filter(Boolean)
+21540:   )].slice(0, 3);
+21541: 
+21542:   const topicText = topicList.length ? topicList.join(", ") : tr3("без выделенных тем", "ajratilgan mavzularsiz", "no highlighted topics");
+21543: 
+21544:   noteTextEl.textContent = tr3(
+21545:     `Сейчас доступна краткая сводка: верно ${right} из ${items.length}, ошибок ${wrong.length}. Слабые темы: ${topicText}.`,
+21546:     `Hozir qisqa xulosa mavjud: ${items.length} ta savoldan ${right} tasi to‘g‘ri, ${wrong.length} ta xato. Zaif mavzular: ${topicText}.`,
+21547:     `A short summary is available now: ${right} correct out of ${items.length}, ${wrong.length} wrong. Weak topics: ${topicText}.`
+21548:   );
+21549: 
+21550:   noteWrapEl.hidden = false;
+21551: }
+21552:    async function renderTourReview() {
+21553:   const wrap = $("#tour-review-list");
+21554:   if (!wrap) return;
+21555: 
+21556:   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
+21557: 
+21558:   const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
+21559:   const localPayload = state?.courses?.lastTourReviewPayload || null;
+21560:   const currentSubjectKey = String(state?.courses?.subjectKey || "").trim();
+21561:   const payloadSubjectKey = String(localPayload?.subjectKey || "").trim();
+21562:   const payloadItems = Array.isArray(localPayload?.items) ? localPayload.items : [];
+21563: 
+21564:   const hasFreshLocalTourPayload =
+21565:     payloadItems.length > 0 &&
+21566:     (!currentSubjectKey || !payloadSubjectKey || currentSubjectKey === payloadSubjectKey);
+21567: 
+21568:   const renderFromDetails = (details) => {
+21569:     const mistakesOnly = (Array.isArray(details) ? details : []).filter(d => !d.isCorrect);
+21570: 
+21571:     if (!mistakesOnly.length) {
+21572:       wrap.innerHTML = `
+21573:         <div class="empty muted">${escapeHTML(t("tour_review_no_mistakes") || "По этому туру ошибок не найдено.")}</div>
+21574:         <div class="list-item" style="margin-top:12px">
+21575:           <div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div>
+21576:           <div style="margin-top:10px">
+21577:             <button class="btn" type="button" data-action="tour-review-open-practice">
+21578:               ${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}
+21579:             </button>
+21580:           </div>
+21581:         </div>
+21582:       `;
+21583:       return;
+21584:     }
+21585: 
+21586:     wrap.innerHTML = mistakesOnly.map((d, idx) => {
+21587:       const qForFmt = {
+21588:         qtype: d.type,
+21589:         options_text: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+21590:         options_text_ru: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+21591:         options_text_uz: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+21592:         options_text_en: Array.isArray(d.options) ? JSON.stringify(d.options) : null
+21593:       };
+21594: 
+21595:       const userDisp = formatAnswerForDisplay(qForFmt, d.userAnswer);
+21596:       const corrDisp = formatAnswerForDisplay(qForFmt, d.correctAnswer);
+21597: 
+21598:       return `
+21599:         <div class="list-item">
+21600:           <div style="display:flex;align-items:flex-start;gap:10px">
+21601:             <div style="font-size:24px;line-height:1">${d.isCorrect ? "✓" : "✕"}</div>
+21602:             <div style="min-width:0;flex:1">
+21603:               <div style="font-weight:900">${escapeHTML(`${idx + 1}. ${d.topic || (t("topic_general") || "General")}`)}</div>
+21604:               ${
+21605:                 d.subtopic
+21606:                   ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.subtopic))}</div>`
+21607:                   : ""
+21608:               }
+21609:               ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.difficulty))}</div>` : ""}
+21610:               <div style="margin-top:10px">${escapeHTML(d.question || "")}</div>
+21611:               <div class="muted small" style="margin-top:10px">
+21612:                 ${escapeHTML(t("rec_your_answer") || "Ваш ответ")}: <b>${escapeHTML(userDisp || "—")}</b>
+21613:               </div>
+21614:               <div class="muted small" style="margin-top:4px">
+21615:                 ${escapeHTML(t("rec_correct_answer") || "Правильный")}: <b>${escapeHTML(corrDisp || "—")}</b>
+21616:               </div>
+21617:               ${d.explanation ? `
+21618:                 <div class="muted small" style="margin-top:10px">
+21619:                   <b>${escapeHTML(t("explanation_label") || "Explanation")}:</b> ${escapeHTML(d.explanation)}
+21620:                 </div>
+21621:               ` : ""}
+21622:             </div>
+21623:           </div>
+21624:         </div>
+21625:       `;
+21626:     }).join("") + `
+21627:       <div class="list-item" style="margin-top:12px">
+21628:         <div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div>
+21629:         <div style="margin-top:10px">
+21630:           <button class="btn" type="button" data-action="tour-review-open-practice">
+21631:             ${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}
+21632:           </button>
+21633:         </div>
+21634:       </div>
+21635:     `;
+21636:   };
+21637: 
+21638:   // 1) instant local payload right after finish
+21639:   if (hasFreshLocalTourPayload) {
+21640:     renderFromDetails(payloadItems);
+21641:     return;
+21642:   }
+21643: 
+21644:   // 2) DB-backed version (authoritative fallback)
+21645:   if (!window.sb || !attemptId) {
+21646:     renderFromDetails([]);
+21647:     return;
+21648:   }
+21649: 
+21650:   showAsyncOverlay(tr3(
+21651:     "Загружаем разбор тура…",
+21652:     "Tur tahlili yuklanmoqda…",
+21653:     "Loading tour review…"
+===== app.js :: 'data-action="tour-review"' :: 0 matches =====
+===== app.js :: 'renderTourReview' :: 2 matches =====
+--- context around line 21552 ---
+21532:     noteWrapEl.hidden = true;
+21533:     return;
+21534:   }
+21535: 
+21536:   const topicList = [...new Set(
+21537:     wrong
+21538:       .map(x => String(x?.topic || "").trim())
+21539:       .filter(Boolean)
+21540:   )].slice(0, 3);
+21541: 
+21542:   const topicText = topicList.length ? topicList.join(", ") : tr3("без выделенных тем", "ajratilgan mavzularsiz", "no highlighted topics");
+21543: 
+21544:   noteTextEl.textContent = tr3(
+21545:     `Сейчас доступна краткая сводка: верно ${right} из ${items.length}, ошибок ${wrong.length}. Слабые темы: ${topicText}.`,
+21546:     `Hozir qisqa xulosa mavjud: ${items.length} ta savoldan ${right} tasi to‘g‘ri, ${wrong.length} ta xato. Zaif mavzular: ${topicText}.`,
+21547:     `A short summary is available now: ${right} correct out of ${items.length}, ${wrong.length} wrong. Weak topics: ${topicText}.`
+21548:   );
+21549: 
+21550:   noteWrapEl.hidden = false;
+21551: }
+21552:    async function renderTourReview() {
+21553:   const wrap = $("#tour-review-list");
+21554:   if (!wrap) return;
+21555: 
+21556:   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
+21557: 
+21558:   const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
+21559:   const localPayload = state?.courses?.lastTourReviewPayload || null;
+21560:   const currentSubjectKey = String(state?.courses?.subjectKey || "").trim();
+21561:   const payloadSubjectKey = String(localPayload?.subjectKey || "").trim();
+21562:   const payloadItems = Array.isArray(localPayload?.items) ? localPayload.items : [];
+21563: 
+21564:   const hasFreshLocalTourPayload =
+21565:     payloadItems.length > 0 &&
+21566:     (!currentSubjectKey || !payloadSubjectKey || currentSubjectKey === payloadSubjectKey);
+21567: 
+21568:   const renderFromDetails = (details) => {
+21569:     const mistakesOnly = (Array.isArray(details) ? details : []).filter(d => !d.isCorrect);
+21570: 
+21571:     if (!mistakesOnly.length) {
+21572:       wrap.innerHTML = `
+21573:         <div class="empty muted">${escapeHTML(t("tour_review_no_mistakes") || "По этому туру ошибок не найдено.")}</div>
+21574:         <div class="list-item" style="margin-top:12px">
+21575:           <div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div>
+21576:           <div style="margin-top:10px">
+21577:             <button class="btn" type="button" data-action="tour-review-open-practice">
+21578:               ${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}
+21579:             </button>
+21580:           </div>
+21581:         </div>
+21582:       `;
+21583:       return;
+21584:     }
+21585: 
+21586:     wrap.innerHTML = mistakesOnly.map((d, idx) => {
+21587:       const qForFmt = {
+21588:         qtype: d.type,
+21589:         options_text: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+21590:         options_text_ru: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+21591:         options_text_uz: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
+21592:         options_text_en: Array.isArray(d.options) ? JSON.stringify(d.options) : null
+21593:       };
+21594: 
+21595:       const userDisp = formatAnswerForDisplay(qForFmt, d.userAnswer);
+21596:       const corrDisp = formatAnswerForDisplay(qForFmt, d.correctAnswer);
+21597: 
+21598:       return `
+21599:         <div class="list-item">
+21600:           <div style="display:flex;align-items:flex-start;gap:10px">
+21601:             <div style="font-size:24px;line-height:1">${d.isCorrect ? "✓" : "✕"}</div>
+21602:             <div style="min-width:0;flex:1">
+21603:               <div style="font-weight:900">${escapeHTML(`${idx + 1}. ${d.topic || (t("topic_general") || "General")}`)}</div>
+21604:               ${
+21605:                 d.subtopic
+21606:                   ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.subtopic))}</div>`
+21607:                   : ""
+21608:               }
+21609:               ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.difficulty))}</div>` : ""}
+21610:               <div style="margin-top:10px">${escapeHTML(d.question || "")}</div>
+21611:               <div class="muted small" style="margin-top:10px">
+21612:                 ${escapeHTML(t("rec_your_answer") || "Ваш ответ")}: <b>${escapeHTML(userDisp || "—")}</b>
+21613:               </div>
+21614:               <div class="muted small" style="margin-top:4px">
+21615:                 ${escapeHTML(t("rec_correct_answer") || "Правильный")}: <b>${escapeHTML(corrDisp || "—")}</b>
+21616:               </div>
+21617:               ${d.explanation ? `
+21618:                 <div class="muted small" style="margin-top:10px">
+21619:                   <b>${escapeHTML(t("explanation_label") || "Explanation")}:</b> ${escapeHTML(d.explanation)}
+21620:                 </div>
+21621:               ` : ""}
+21622:             </div>
+21623:           </div>
+21624:         </div>
+21625:       `;
+21626:     }).join("") + `
+21627:       <div class="list-item" style="margin-top:12px">
+21628:         <div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div>
+21629:         <div style="margin-top:10px">
+21630:           <button class="btn" type="button" data-action="tour-review-open-practice">
+21631:             ${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}
+21632:           </button>
+21633:         </div>
+21634:       </div>
+21635:     `;
+21636:   };
+21637: 
+21638:   // 1) instant local payload right after finish
+21639:   if (hasFreshLocalTourPayload) {
+21640:     renderFromDetails(payloadItems);
+21641:     return;
+21642:   }
+21643: 
+21644:   // 2) DB-backed version (authoritative fallback)
+21645:   if (!window.sb || !attemptId) {
+21646:     renderFromDetails([]);
+21647:     return;
+21648:   }
+21649: 
+21650:   showAsyncOverlay(tr3(
+21651:     "Загружаем разбор тура…",
+21652:     "Tur tahlili yuklanmoqda…",
+21653:     "Loading tour review…"
+21654:   ));
+21655: 
+21656:   try {
+21657:     const { data, error } = await window.sb
+21658:       .from("tour_answers")
+21659:       .select(`
+21660:         question_id,
+21661:         user_answer,
+21662:         is_correct,
+21663:         time_spent,
+21664:         question:questions(
+21665:           id,
+21666:           topic,
+21667:           subtopic,
+21668:           difficulty,
+21669:           qtype,
+21670:           question_text,
+21671:           options_text,
+21672:           correct_answer,
+21673:           explanation,
+21674:           question_text_ru,
+21675:           question_text_uz,
+21676:           question_text_en,
+21677:           options_text_ru,
+21678:           options_text_uz,
+21679:           options_text_en,
+21680:           explanation_ru,
+21681:           explanation_uz,
+21682:           explanation_en
+21683:         )
+21684:       `)
+21685:       .eq("attempt_id", attemptId)
+21686:       .eq("answered", true)
+21687:       .limit(100);
+21688: 
+21689:     if (error || !Array.isArray(data) || !data.length) {
+21690:       renderFromDetails([]);
+21691:       return;
+21692:     }
+--- context around line 23444 ---
+23424:         const tourNo = Number(reviewPayload?.tourNo || state?.courses?.activeTourNo || 0);
+23425: 
+23426:         const canOpen = subjectKey && tourNo
+23427:           ? await isTourGloballyClosed(subjectKey, tourNo)
+23428:           : false;
+23429: 
+23430:         if (!canOpen) {
+23431:     renderTourResultStatusSummary();
+23432:     showToast(
+23433:       t("tour_review_locked_until_global_end") ||
+23434:       tr3(
+23435:         "Подробный разбор пока закрыт. Ниже доступна краткая сводка по результату тура.",
+23436:         "To‘liq tahlil hozircha yopiq. Pastda tur natijasi bo‘yicha qisqa xulosa mavjud.",
+23437:         "The full review is still locked. A short summary of the tour result is available below."
+23438:       )
+23439:     );
+23440:     return;
+23441:   }
+23442: 
+23443:                pushCourses("tour-review");
+23444:         await renderTourReview();
+23445: 
+23446:         try {
+23447:           trackEvent("tour_review_opened", {
+23448:             subject_key: subjectKey || null,
+23449:             tour_no: tourNo || null,
+23450:             attempt_id: Number(state?.courses?.lastTourAttemptId || 0) || null
+23451:           });
+23452:         } catch {}
+23453: 
+23454:         return;
+23455:       }
+23456: 
+23457:       if (action === "tour-back-to-result") {
+23458:         while (state.courses.stack.length > 0 && getCoursesTopScreen() !== "tour-result") {
+23459:           state.courses.stack.pop();
+23460:         }
+23461:         if (state.courses.stack.length === 0) state.courses.stack = ["tour-result"];
+23462:         saveState();
+23463:         showCoursesScreen(getCoursesTopScreen());
+23464:         return;
+23465:       }
+23466:                    if (action === "tour-review-open-practice") {
+23467:   await openPracticeStart();
+23468:   return;
+23469: }  
+23470:              if (action === "tour-certificate") {
+23471:         const certId = Number(state?.courses?.lastTourCertificateId || 0);
+23472: 
+23473:         if (!state.certificates) {
+23474:           state.certificates = { selectedId: null, lastIssuedId: null };
+23475:         }
+23476: 
+23477:         state.certificates.selectedId = null;
+23478:         if (certId) state.certificates.lastIssuedId = certId;
+23479:         saveState();
+23480: 
+23481:         openGlobal("certificates");
+23482: 
+23483:         if (!certId) {
+23484:           showToast(t("certificates_pending_hint") || "Сертификат появится после первой сохранённой попытки.");
+23485:         }
+23486: 
+23487:         return;
+23488:       }
+23489:        
+23490:                         if (action === "open-books") {
+23491:         showAsyncOverlay(tr3(
+23492:           "Загружаем книги…",
+23493:           "Kitoblar yuklanmoqda…",
+23494:           "Loading books…"
+23495:         ));
+23496: 
+23497:         try {
+23498:           pushCourses("books");
+23499:           await renderBooks();
+23500:         } finally {
+23501:           hideAsyncOverlay();
+23502:         }
+23503: 
+23504:         return;
+23505:       }
+23506: 
+23507:             if (action === "open-my-recommendations") {
+23508:         const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : "";
+23509: 
+23510:         try {
+23511:           trackEvent("recommendation_opened", {
+23512:             source: "subject_hub_my_recs",
+23513:             subject_id: normSubjectId(subject_id)
+23514:           });
+23515:         } catch {}
+23516: 
+23517:         state.courses = state.courses || {};
+23518:         state.courses.myRecsActiveTab = state.courses.myRecsActiveTab || "practice";
+23519:         saveState();
+23520: 
+23521:                 showAsyncOverlay(tr3(
+23522:           "Загружаем рекомендации…",
+23523:           "Tavsiyalar yuklanmoqda…",
+23524:           "Loading recommendations…"
+23525:         ));
+23526: 
+23527:         try {
+23528:           pushCourses("my-recs");
+23529:           await renderMyRecs();
+23530:         } finally {
+23531:           hideAsyncOverlay();
+23532:         }
+23533: 
+23534:         return;
+23535:       }
+23536: 
+23537:       if (action === "video-skip") {
+23538:   // legacy: buttons removed from the current video hub screen
+23539:   return;
+23540: }
+23541: 
+23542: if (action === "video-complete") {
+23543:   // legacy: buttons removed from the current video hub screen
+23544:   return;
+23545: }
+23546: 
+23547:    if (action === "resources-archive") {
+23548:      if (!canOpenArchiveNow()) {
+23549:        showToast("Архив откроется после завершения активного тура.");
+23550:        return;
+23551:       }
+23552:      openGlobal("archive");
+23553:      return;
+23554:    }
+23555: });
+23556: 
+23557:     // Tours list click (demo)
+23558:     const toursList = $("#tours-list");
+23559:     if (toursList) {
+23560:       toursList.addEventListener("click", () => {
+23561:         openTourRules();
+23562:       });
+23563:     }
+23564:   }
+23565: 
+23566:   // ---------------------------
+23567:   // Boot
+23568:   // ---------------------------
+23569:     // ---------------------------
+23570:   // Splash: wait for critical images
+23571:   // ---------------------------
+23572:   function preloadImages(urls, { timeoutMs = 6000 } = {}) {
+23573:     const unique = Array.from(new Set((urls || []).filter(Boolean)));
+23574: 
+23575:     const tasks = unique.map((url) => new Promise((resolve) => {
+23576:       const img = new Image();
+23577:       const done = () => resolve({ url, ok: true });
+23578: 
+23579:       img.onload = done;
+23580:       img.onerror = () => resolve({ url, ok: false });
+23581: 
+23582:       // ⚠️ чтобы не зависнуть навсегда на плохом файле
+23583:       const timer = setTimeout(() => resolve({ url, ok: false, timeout: true }), timeoutMs);
+23584: 
+===== index.html :: 'id="tour-question"' :: 1 matches =====
+--- context around line 792 ---
+00780:       <div id="tour-overall-delta" class="tour-timer-delta"></div>
+00781:     </div>
+00782: 
+00783:     <div class="tour-timer-card danger">
+00784:       <div class="tour-timer-cap" data-i18n="tour_question_time">QUESTION TIME</div>
+00785:       <div id="tour-question-time" class="tour-timer-val">0:00</div>
+00786:       <div id="tour-question-delta" class="tour-timer-delta"></div>
+00787:     </div>
+00788:   </div>
+00789: 
+00790:   <!-- Question -->
+00791:   <div class="card">
+00792:     <div id="tour-question" class="question-text">Вопрос тура…</div>
+00793:     <div id="tour-options" class="options"></div>
+00794:   </div>
+00795: 
+00796:   <!-- Footer hint -->
+00797:   <div id="tour-monitor" class="tour-monitor muted small" data-i18n="tour_monitoring_active">
+00798:     SESSION MONITORING ACTIVE
+00799: </div>
+00800: 
+00801:   <!-- Actions -->
+00802:   <div class="actions-row">
+00803:    <button id="tour-next-btn" class="btn primary" type="button" data-action="tour-next" disabled data-i18n="tour_next_question">
+00804:   Next Question →
+00805: </button>
+00806:   </div>
+00807: 
+00808: </section>
+00809: 
+00810:             <!-- Tour Result -->
+00811:             <section id="courses-tour-result" class="stack-screen" data-stack="courses" data-screen="tour-result">
+00812:               <div class="section">
+00813:                 <div class="h1" data-i18n="tour_result_title">Результат тура</div>
+00814:                 <div id="tour-result-meta" class="muted">—</div>
+===== index.html :: 'id="tour-review-list"' :: 1 matches =====
+--- context around line 845 ---
+00833:               <div class="actions-row">
+00834:   <button class="btn" type="button" data-action="open-ratings" data-i18n="open_ratings">Рейтинг</button>
+00835:   <button class="btn primary" type="button" data-action="tour-to-subject" data-i18n="to_subject">К предмету</button>
+00836: </div>
+00837:             </section>
+00838: 
+00839:             <!-- Tour Review (active) -->
+00840:             <section id="courses-tour-review" class="stack-screen" data-stack="courses" data-screen="tour-review">
+00841:               <div class="section">
+00842:                <div class="h1" data-i18n="tour_review_screen_title">Разбор тура</div>
+00843:                 <div class="muted" data-i18n="tour_review_screen_sub">Ответы, объяснения и работа над ошибками</div>
+00844: 
+00845:                 <div id="tour-review-list" class="list">
+00846:                 <div class="empty muted" data-i18n="tour_review_empty">Нет данных для разбора тура.</div>
+00847:               </div>
+00848: 
+00849:                 <div class="actions-row">
+00850:   <button class="btn" type="button" data-action="tour-back-to-result" data-i18n="back_to_result">Назад к результату</button>
+00851:   <button class="btn primary" type="button" data-action="tour-to-subject" data-i18n="to_subject">К предмету</button>
+00852: </div>
+00853:             </section>
+00854: 
+00855:             <!-- Books -->
+00856: <section id="courses-books" class="stack-screen" data-stack="courses" data-screen="books">
+00857:   <div class="section">
+00858:     <div class="h1" data-i18n="books_title">Книги</div>
+00859:     <div class="muted" data-i18n="books_subtitle">Ресурсы по предмету</div>
+00860:   </div>
+00861:   <div id="books-list" class="list">
+00862:     <div class="empty muted" data-i18n="books_empty_static">Пока книги не добавлены.</div>
+00863:   </div>
+00864: </section>
+00865: 
+00866:             <!-- My Recommendations -->
+00867: <section id="courses-my-recs" class="stack-screen" data-stack="courses" data-screen="my-recs">
+===== style.css :: '.question-text' :: 2 matches =====
+--- context around line 1580 ---
+01565:   justify-content: center;
+01566:   padding: 6px 10px;
+01567:   border-radius: 999px;
+01568:   border: 1px solid var(--border);
+01569:   background: var(--card);
+01570:   box-shadow: var(--shadow-sm);
+01571:   font-size: 12px;
+01572: }
+01573: 
+01574: .pill.danger {
+01575:   color: white;
+01576:   background: linear-gradient(180deg, #EF4444, #B91C1C);
+01577:   border-color: rgba(220,38,38,0.35);
+01578: }
+01579: 
+01580: .question-text {
+01581:   font-weight: 800;
+01582:   font-size: 15px;
+01583:   line-height: 1.5;
+01584:   margin-bottom: 10px;
+01585:   white-space: normal;
+01586:   overflow-wrap: anywhere;
+01587:   word-break: break-word;
+01588:   hyphens: auto;
+01589: }
+01590: 
+01591: .options { display: flex; flex-direction: column; gap: 10px; }
+01592: 
+01593: .option {
+01594:   display: flex;
+01595:   align-items: flex-start;
+01596:   gap: 10px;
+01597:   padding: 12px 12px;
+01598:   border-radius: 14px;
+01599:   border: 1px solid var(--border);
+01600:   background: rgba(246,248,252,0.6);
+01601:   cursor: pointer;
+01602:   user-select: none;
+01603:   transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+01604:   text-align: left;
+01605: }
+01606: 
+01607: .option .opt-text{
+01608:   min-width: 0;
+01609:   flex: 1 1 auto;
+01610:   line-height: 1.45;
+01611:   white-space: normal;
+01612:   overflow-wrap: anywhere;
+01613:   word-break: break-word;
+01614: }
+01615: 
+--- context around line 1625 ---
+01610:   line-height: 1.45;
+01611:   white-space: normal;
+01612:   overflow-wrap: anywhere;
+01613:   word-break: break-word;
+01614: }
+01615: 
+01616: .option .dot{
+01617:   margin-top: 4px;
+01618: }
+01619: 
+01620: .tour-result-summary-note{
+01621:   margin-top: 12px;
+01622: }
+01623: 
+01624: @media (max-width: 420px){
+01625:   .question-text{
+01626:     font-size: 14px;
+01627:     line-height: 1.45;
+01628:   }
+01629: 
+01630:   .option{
+01631:     padding: 11px 11px;
+01632:     gap: 9px;
+01633:   }
+01634: 
+01635:   .option .opt-text{
+01636:     font-size: 14px;
+01637:     line-height: 1.42;
+01638:   }
+01639: }
+01640: 
+01641: .option:active { transform: translateY(1px); }
+01642: .option input { margin: 0; }
+01643: 
+01644: /* tour/practice option dot + selected state */
+01645: .option .dot{
+01646:   width: 10px;
+01647:   height: 10px;
+01648:   border-radius: 999px;
+01649:   border: 2px solid rgba(60,100,200,0.35);
+01650:   background: transparent;
+01651:   flex: 0 0 10px;
+01652: }
+01653: 
+01654: .option.is-selected{
+01655:   border-color: rgba(37,99,235,0.55);
+01656:   background: rgba(37,99,235,0.08);
+01657:   box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
+01658: }
+01659: 
+01660: .option.is-selected .dot{
+===== style.css :: '.tour-review' :: 0 matches =====
