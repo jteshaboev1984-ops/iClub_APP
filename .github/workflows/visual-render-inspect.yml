@@ -1,4 +1,4 @@
-name: Apply visual question rendering
+name: Diagnose visual rendering validation
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  apply:
+  diagnose:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
@@ -17,48 +17,50 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Apply visual rendering patch
-        run: python scripts/apply_visual_question_rendering.py
-
-      - name: Validate JavaScript and visual contract
+      - name: Apply patch and capture checks
         run: |
-          node --check app.js
-          git diff --check
-          python - <<'PY'
+          python scripts/apply_visual_question_rendering.py
+          mkdir -p docs
+          set +e
+          node --check app.js > /tmp/node-check.txt 2>&1
+          node_status=$?
+          git diff --check > /tmp/diff-check.txt 2>&1
+          diff_status=$?
+          set -e
+          python - <<'PY' > /tmp/contract-check.txt
           from pathlib import Path
-
           app = Path('app.js').read_text(encoding='utf-8')
           html = Path('index.html').read_text(encoding='utf-8')
           css = Path('style.css').read_text(encoding='utf-8')
-
-          checks = {
-              'one active image figure': html.count('id="tour-question-figure"') == 1,
-              'one active image element': html.count('id="tour-question-image"') == 1,
-              'one global image modal': html.count('id="question-image-modal"') == 1,
-              'preload helper and call': app.count('preloadTourQuestionImages(questions)') >= 2,
-              'timer readiness state': 'questionReady: false' in app,
-              'timeout readiness guard': 'if (!ctx.questionReady || qStart === null || qStart === undefined) return;' in app,
-              'review query includes image': 'image_url,' in app,
-              'review image mapping': 'imageUrl: q?.image_url || null' in app,
-              'review image rendering': app.count('buildReviewQuestionImageHtml(d)') == 1,
-              'review image binding': app.count('bindQuestionImageButtons(wrap)') == 1,
-              'responsive image CSS': 'Question images — active tours and review' in css,
+          values = {
+              'active_image_figure_count': html.count('id="tour-question-figure"'),
+              'active_image_element_count': html.count('id="tour-question-image"'),
+              'global_image_modal_count': html.count('id="question-image-modal"'),
+              'preload_helper_and_call_count': app.count('preloadTourQuestionImages(questions)'),
+              'timer_readiness_state': 'questionReady: false' in app,
+              'timeout_readiness_guard': 'if (!ctx.questionReady || qStart === null || qStart === undefined) return;' in app,
+              'review_query_includes_image': 'image_url,' in app,
+              'review_image_mapping': 'imageUrl: q?.image_url || null' in app,
+              'review_image_rendering_count': app.count('buildReviewQuestionImageHtml(d)'),
+              'review_image_binding_count': app.count('bindQuestionImageButtons(wrap)'),
+              'responsive_image_css': 'Question images — active tours and review' in css,
           }
-
-          failed = [name for name, ok in checks.items() if not ok]
-          if failed:
-              raise SystemExit('Validation failed: ' + ', '.join(failed))
-          print('Visual rendering contract validated.')
+          for key, value in values.items():
+              print(f'{key}={value}')
           PY
+          {
+            echo "node_status=$node_status"
+            cat /tmp/node-check.txt
+            echo "diff_status=$diff_status"
+            cat /tmp/diff-check.txt
+            cat /tmp/contract-check.txt
+          } > docs/visual-validation-diagnostic.txt
 
-      - name: Remove temporary tooling and commit product changes
+      - name: Commit diagnostic report
         run: |
-          rm -f .github/workflows/visual-render-inspect.yml
-          rm -f scripts/apply_visual_question_rendering.py
-          rm -f docs/visual-render-inspection.txt
-          rm -f docs/visual-patch-error.txt
+          git restore app.js index.html style.css
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "Render visual questions safely in tours and review"
+          git add docs/visual-validation-diagnostic.txt
+          git commit -m "Capture visual rendering validation diagnostic [skip diagnose]"
           git push origin HEAD:${{ github.head_ref }}
