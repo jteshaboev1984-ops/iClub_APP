@@ -1,0 +1,60 @@
+name: Generate Season 2 visual assets
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Reassemble generator and create SVG files
+        run: |
+          cat scripts/visual_gen_chunks/1.txt scripts/visual_gen_chunks/2.txt scripts/visual_gen_chunks/3.txt scripts/visual_gen_chunks/4.txt \
+            | base64 -d | gzip -d > /tmp/generate_visual_questions.py
+          sed -i "s|OUT = Path('/mnt/data/visual_questions')|OUT = Path('assets/season-2/visual-questions')|" /tmp/generate_visual_questions.py
+          python /tmp/generate_visual_questions.py
+
+      - name: Validate generated assets
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('assets/season-2/visual-questions')
+          files = sorted(root.rglob('*.svg'))
+          if len(files) != 35:
+              raise SystemExit(f'Expected 35 SVG files, found {len(files)}')
+
+          for path in files:
+              text = path.read_text(encoding='utf-8')
+              if not text.lstrip().startswith('<svg'):
+                  raise SystemExit(f'Not an SVG: {path}')
+              if 'viewBox="0 0 1200 800"' not in text:
+                  raise SystemExit(f'Invalid viewBox: {path}')
+              if path.stat().st_size < 500:
+                  raise SystemExit(f'Asset too small: {path}')
+              if re.search(r'<script\b', text, re.I):
+                  raise SystemExit(f'Script tag is forbidden: {path}')
+          print('Validated 35 SVG assets.')
+          PY
+
+      - name: Remove staging files and commit assets
+        run: |
+          rm -rf scripts/visual_gen_chunks
+          rm -f docs/visual-generator-diagnostic.txt
+          rm -f .github/workflows/generate-visual-assets.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add 35 Season 2 hard-question SVG assets"
+          git push origin HEAD:${{ github.head_ref }}
