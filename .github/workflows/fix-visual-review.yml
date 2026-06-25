@@ -1,0 +1,73 @@
+name: Fix visual review image mapping
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Correct review image mapping
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('app.js')
+          text = path.read_text(encoding='utf-8')
+
+          tour_start = text.index('async function renderTourReview()')
+          accidental = '         imageUrl: q?.image_url || null,\n'
+          accidental_pos = text.find(accidental, 0, tour_start)
+          if accidental_pos >= 0:
+              text = text[:accidental_pos] + text[accidental_pos + len(accidental):]
+
+          needle = '        question: pickContentText(q, "question_text") || "",\n        options,\n'
+          target_pos = text.find(needle, tour_start)
+          if target_pos < 0:
+              raise SystemExit('Tour review mapping anchor not found')
+
+          replacement = (
+              '        question: pickContentText(q, "question_text") || "",\n'
+              '        imageUrl: q?.image_url || null,\n'
+              '        options,\n'
+          )
+          text = text[:target_pos] + replacement + text[target_pos + len(needle):]
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Validate fix
+        run: |
+          node --check app.js
+          git diff --check
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('app.js').read_text(encoding='utf-8')
+          tour_start = text.index('async function renderTourReview()')
+          tour_end = text.index('function getTourHistoryKey', tour_start)
+          tour_scope = text[tour_start:tour_end]
+          if tour_scope.count('imageUrl: q?.image_url || null') != 1:
+              raise SystemExit('Tour review image mapping must appear exactly once')
+          practice_scope = text[:tour_start]
+          if '         imageUrl: q?.image_url || null,' in practice_scope:
+              raise SystemExit('Accidental practice review insertion remains')
+          print('Review image mapping corrected.')
+          PY
+
+      - name: Commit fix and remove workflow
+        run: |
+          rm -f .github/workflows/fix-visual-review.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Fix tour review image mapping"
+          git push origin HEAD:${{ github.head_ref }}
