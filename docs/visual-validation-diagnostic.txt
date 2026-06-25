@@ -1,0 +1,14 @@
+node_status=0
+diff_status=2
+style.css:5900: new blank line at EOF.
+active_image_figure_count=1
+active_image_element_count=1
+global_image_modal_count=1
+preload_helper_and_call_count=2
+timer_readiness_state=True
+timeout_readiness_guard=True
+review_query_includes_image=True
+review_image_mapping=True
+review_image_rendering_count=1
+review_image_binding_count=1
+responsive_image_css=True
