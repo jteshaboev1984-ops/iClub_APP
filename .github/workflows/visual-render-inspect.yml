@@ -1,4 +1,4 @@
-name: Visual rendering inspection
+name: Apply visual question rendering
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  inspect:
+  apply:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
@@ -16,48 +16,46 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
-      - name: Generate exact visual rendering report
+
+      - name: Apply visual rendering patch
+        run: python scripts/apply_visual_question_rendering.py
+
+      - name: Validate JavaScript and file contract
         run: |
+          node --check app.js
+          git diff --check
           python - <<'PY'
           from pathlib import Path
 
-          output = []
+          app = Path('app.js').read_text(encoding='utf-8')
+          html = Path('index.html').read_text(encoding='utf-8')
+          css = Path('style.css').read_text(encoding='utf-8')
 
-          def show(filename, needle, before=12, after=36, max_hits=20):
-              lines = Path(filename).read_text(encoding='utf-8').splitlines()
-              hits = [i for i, line in enumerate(lines) if needle in line]
-              output.append(f'===== {filename} :: {needle!r} :: {len(hits)} matches =====')
-              for i in hits[:max_hits]:
-                  start = max(0, i-before)
-                  end = min(len(lines), i+after+1)
-                  output.append(f'--- context around line {i+1} ---')
-                  for n in range(start, end):
-                      output.append(f'{n+1:05d}: {lines[n]}')
+          checks = {
+              'one active image figure': html.count('id="tour-question-figure"') == 1,
+              'one active image element': html.count('id="tour-question-image"') == 1,
+              'one global image modal': html.count('id="question-image-modal"') == 1,
+              'preload before attempt': app.count('preloadTourQuestionImages(questions)') == 1,
+              'image timeout guard': app.count('!ctx.questionReady') >= 2,
+              'review image mapping': app.count('imageUrl: q?.image_url || null') == 1,
+              'review image rendering': app.count('buildReviewQuestionImageHtml(d)') == 1,
+              'responsive image CSS': 'Question images — active tours and review' in css,
+          }
 
-          show('app.js', 'function renderTourQuestion', 12, 175, 1)
-          show('app.js', 'lastTourReviewPayload', 22, 75, 10)
-          show('app.js', 'tour-review-list', 25, 100, 10)
-          show('app.js', 'renderTourReview', 20, 140, 10)
-          show('app.js', 'qStartedAtMono', 20, 45, 20)
-          show('app.js', 'enforceTourAutoRulesNow', 30, 90, 10)
-          show('app.js', 'stripActiveTourContextSecrets', 25, 90, 10)
-          show('app.js', 'startTourTick', 25, 90, 10)
-          show('index.html', 'id="tour-question"', 12, 22, 2)
-          show('index.html', 'id="tour-review-list"', 12, 22, 2)
-          show('style.css', '.question-text', 15, 35, 10)
-          show('style.css', '.tour-review', 15, 50, 10)
+          failed = [name for name, ok in checks.items() if not ok]
+          if failed:
+              raise SystemExit('Validation failed: ' + ', '.join(failed))
 
-          path = Path('docs/visual-render-inspection.txt')
-          path.parent.mkdir(parents=True, exist_ok=True)
-          path.write_text('\n'.join(output) + '\n', encoding='utf-8')
+          print('Visual rendering contract validated.')
           PY
-      - name: Commit inspection report
+
+      - name: Remove one-shot tooling and commit product changes
         run: |
-          if [ -z "$(git status --porcelain -- docs/visual-render-inspection.txt)" ]; then
-            exit 0
-          fi
+          rm -f .github/workflows/visual-render-inspect.yml
+          rm -f scripts/apply_visual_question_rendering.py
+          rm -f docs/visual-render-inspection.txt
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/visual-render-inspection.txt
-          git commit -m "Update visual rendering inspection report [skip inspect]"
+          git add app.js index.html style.css .github/workflows/visual-render-inspect.yml scripts/apply_visual_question_rendering.py docs/visual-render-inspection.txt
+          git commit -m "Render visual questions safely in tours and review"
           git push origin HEAD:${{ github.head_ref }}
