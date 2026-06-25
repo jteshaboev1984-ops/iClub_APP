@@ -1,4 +1,4 @@
-name: Apply visual question rendering
+name: Diagnose visual question rendering patch
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  apply:
+  diagnose:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
@@ -17,7 +17,7 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Make local review anchor whitespace-tolerant
+      - name: Persist whitespace-tolerant review anchor
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -25,57 +25,39 @@ jobs:
           path = Path('scripts/apply_visual_question_rendering.py')
           text = path.read_text(encoding='utf-8')
           section = text.index('# 6. Preserve and display the same image in tour review.')
-          start = text.index('app = replace_once(', section)
-          label = text.index('"local review image"', start)
-          end = text.index('\n)', label) + 2
-          replacement = '''app = sub_once(
-              app,
-              r'(\\s+question: q\\?\\.question \\|\\| "",\\n)(\\s+options: Array\\.isArray\\(q\\?\\.options\\) \\? q\\.options\\.slice\\(\\) : \\[\\],)',
-              r'\\1               imageUrl: q?.imageUrl || q?.image_url || null,\\n\\2',
-              "local review image",
-          )'''
-          path.write_text(text[:start] + replacement + text[end:], encoding='utf-8')
+          label = text.index('"local review image"', section)
+          preceding = text.rfind('app = ', section, label)
+          if text.startswith('app = replace_once(', preceding):
+              end = text.index('\n)', label) + 2
+              replacement = '''app = sub_once(
+                  app,
+                  r'(\\s+question: q\\?\\.question \\|\\| "",\\n)(\\s+options: Array\\.isArray\\(q\\?\\.options\\) \\? q\\.options\\.slice\\(\\) : \\[\\],)',
+                  r'\\1               imageUrl: q?.imageUrl || q?.image_url || null,\\n\\2',
+                  "local review image",
+              )'''
+              text = text[:preceding] + replacement + text[end:]
+              path.write_text(text, encoding='utf-8')
           PY
 
-      - name: Apply visual rendering patch
-        run: python scripts/apply_visual_question_rendering.py
-
-      - name: Validate JavaScript and file contract
+      - name: Capture next patch result
         run: |
-          node --check app.js
-          git diff --check
-          python - <<'PY'
-          from pathlib import Path
+          set +e
+          python scripts/apply_visual_question_rendering.py > /tmp/visual-patch.log 2>&1
+          status=$?
+          set -e
+          mkdir -p docs
+          {
+            echo "exit_status=$status"
+            cat /tmp/visual-patch.log
+          } > docs/visual-patch-error.txt
 
-          app = Path('app.js').read_text(encoding='utf-8')
-          html = Path('index.html').read_text(encoding='utf-8')
-          css = Path('style.css').read_text(encoding='utf-8')
-
-          checks = {
-              'one active image figure': html.count('id="tour-question-figure"') == 1,
-              'one active image element': html.count('id="tour-question-image"') == 1,
-              'one global image modal': html.count('id="question-image-modal"') == 1,
-              'preload before attempt': app.count('preloadTourQuestionImages(questions)') == 1,
-              'image timeout guard': app.count('!ctx.questionReady') >= 2,
-              'review image mapping': app.count('imageUrl: q?.image_url || null') == 1,
-              'review image rendering': app.count('buildReviewQuestionImageHtml(d)') == 1,
-              'responsive image CSS': 'Question images — active tours and review' in css,
-          }
-
-          failed = [name for name, ok in checks.items() if not ok]
-          if failed:
-              raise SystemExit('Validation failed: ' + ', '.join(failed))
-          print('Visual rendering contract validated.')
-          PY
-
-      - name: Remove temporary tooling and commit product changes
+      - name: Commit script fix and diagnostic
         run: |
-          rm -f .github/workflows/visual-render-inspect.yml
-          rm -f scripts/apply_visual_question_rendering.py
-          rm -f docs/visual-render-inspection.txt
-          rm -f docs/visual-patch-error.txt
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "Render visual questions safely in tours and review"
+          git add scripts/apply_visual_question_rendering.py docs/visual-patch-error.txt
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Persist visual patch anchor fix and diagnostic [skip diagnose]"
           git push origin HEAD:${{ github.head_ref }}
