@@ -14,43 +14,29 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: Print relevant app.js contexts
+      - name: Print exact visual rendering anchors
         run: |
           python - <<'PY'
           from pathlib import Path
-          for filename, needles in {
-              'app.js': [
-                  'function renderTourQuestion',
-                  'lastTourReviewPayload',
-                  'tour-review-list',
-                  'data-action="tour-review"',
-                  'function renderTour',
-              ],
-              'index.html': [
-                  'id="tour-question"',
-                  'id="tour-review-list"',
-              ],
-              'style.css': [
-                  '.question-text',
-                  '.tour-',
-                  '.options',
-              ],
-          }.items():
-              text = Path(filename).read_text(encoding='utf-8')
-              lines = text.splitlines()
-              print(f'===== {filename} ({len(lines)} lines) =====')
-              seen = set()
-              for needle in needles:
-                  matches = [i for i, line in enumerate(lines) if needle in line]
-                  print(f'--- needle: {needle!r}; matches={len(matches)} ---')
-                  for i in matches[:20]:
-                      start = max(0, i - 35)
-                      end = min(len(lines), i + 90)
-                      key = (start, end)
-                      if key in seen:
-                          continue
-                      seen.add(key)
-                      for n in range(start, end):
-                          print(f'{n+1:05d}: {lines[n]}')
-                      print('--- end context ---')
+
+          def show(filename, needle, before=18, after=45):
+              lines = Path(filename).read_text(encoding='utf-8').splitlines()
+              hits = [i for i, line in enumerate(lines) if needle in line]
+              print(f'===== {filename} :: {needle!r} :: {len(hits)} matches =====')
+              for i in hits:
+                  start = max(0, i-before)
+                  end = min(len(lines), i+after+1)
+                  print(f'--- context around line {i+1} ---')
+                  for n in range(start, end):
+                      print(f'{n+1:05d}: {lines[n]}')
+
+          show('app.js', 'function renderTourQuestion', 15, 180)
+          show('app.js', 'lastTourReviewPayload', 30, 90)
+          show('app.js', 'tour-review-list', 35, 120)
+          show('app.js', 'data-action="tour-review"', 25, 70)
+          show('app.js', 'renderTourReview', 25, 160)
+          show('index.html', 'id="tour-question"', 15, 25)
+          show('index.html', 'id="tour-review-list"', 15, 25)
+          show('style.css', '.question-text', 20, 45)
+          show('style.css', '.tour-review', 20, 70)
           PY
