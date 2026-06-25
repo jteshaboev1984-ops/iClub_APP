@@ -1,3 +1,0 @@
-length=5370
-sha256=e2026ce70704d80806109321a999b78583e515c0fc8ccc94a35d583a25c9bbde
-error=Error: Invalid base64-encoded string: number of data characters (5369) cannot be 1 more than a multiple of 4
