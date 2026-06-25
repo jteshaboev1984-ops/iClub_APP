@@ -731,15 +731,12 @@ app = replace_once(
 # ---------------------------------------------------------------------------
 # 6. Preserve and display the same image in tour review.
 # ---------------------------------------------------------------------------
-app = replace_once(
-    app,
-    '''               question: q?.question || "",
-               options: Array.isArray(q?.options) ? q.options.slice() : [],''',
-    '''               question: q?.question || "",
-               imageUrl: q?.imageUrl || q?.image_url || null,
-               options: Array.isArray(q?.options) ? q.options.slice() : [],''',
-    "local review image",
-)
+app = sub_once(
+        app,
+        r'(\s+question: q\?\.question \|\| "",\n)(\s+options: Array\.isArray\(q\?\.options\) \? q\.options\.slice\(\) : \[\],)',
+        r'\1               imageUrl: q?.imageUrl || q?.image_url || null,\n\2',
+        "local review image",
+    )
 
 app = replace_once(
     app,
