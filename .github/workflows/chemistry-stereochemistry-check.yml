@@ -1,0 +1,65 @@
+name: Chemistry stereochemistry source check
+
+on:
+  push:
+    branches: [chemistry-academic-audit]
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chemistry-academic-audit
+          fetch-depth: 0
+      - name: Extract stereochemistry source contexts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+          curl -L --fail --retry 3 \
+            'https://mmmduffgpvwjdpruzikw.supabase.co/storage/v1/object/public/books/Cambridge_International_AS_A_Level_Chemistry_Coursebook_3e_by_Lawrie%20%282%29.pdf' \
+            -o /tmp/chemistry.pdf
+          pdftotext -layout /tmp/chemistry.pdf /tmp/chemistry.txt
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          raw = Path('/tmp/chemistry.txt').read_text(encoding='utf-8', errors='replace')
+          pages = raw.split('\f')
+          terms = ['meso', '2,3-dibromobutane', 'chiral', 'chirality', 'enantiomer', 'optical isomer', 'E/Z', 'geometric isomer']
+          out = ['CHEMISTRY STEREOCHEMISTRY SOURCE CHECK', '']
+          for term in terms:
+              out.append(f'## {term}')
+              hits = 0
+              for pno, page in enumerate(pages, start=1):
+                  low = page.lower()
+                  start = 0
+                  while True:
+                      idx = low.find(term.lower(), start)
+                      if idx < 0:
+                          break
+                      context = re.sub(r'\s+', ' ', page[max(0, idx-900):idx+2400]).strip()
+                      out.append(f'PDF page {pno}: {context}')
+                      hits += 1
+                      if hits >= 5:
+                          break
+                      start = idx + len(term)
+                  if hits >= 5:
+                      break
+              if hits == 0:
+                  out.append('NO MATCH')
+              out.append('')
+          Path('docs/chemistry-stereochemistry-check.txt').write_text('\n'.join(out), encoding='utf-8')
+          PY
+      - name: Commit result and remove workflow
+        run: |
+          rm -f .github/workflows/chemistry-stereochemistry-check.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Add Chemistry stereochemistry source check'
+          git push origin HEAD:chemistry-academic-audit
