@@ -1,0 +1,50 @@
+name: Informatics source OCR
+
+on:
+  push:
+    branches: [informatics-academic-audit]
+
+permissions:
+  contents: write
+
+jobs:
+  ocr:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: informatics-academic-audit
+          fetch-depth: 0
+      - name: Download and OCR source front matter
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils tesseract-ocr
+          curl -L --fail --retry 3 \
+            'https://mmmduffgpvwjdpruzikw.supabase.co/storage/v1/object/public/books/CS%20book%20%282%29.pdf' \
+            -o /tmp/csbook.pdf
+          pdfinfo /tmp/csbook.pdf > /tmp/pdfinfo.txt
+          pdftotext -layout /tmp/csbook.pdf /tmp/csbook.txt || true
+          mkdir -p /tmp/cs_pages
+          pdftoppm -f 1 -l 35 -r 180 -png /tmp/csbook.pdf /tmp/cs_pages/page >/dev/null 2>&1
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess, re
+          out=['COMPUTER SCIENCE SOURCE — FRONT MATTER OCR','',Path('/tmp/pdfinfo.txt').read_text(errors='replace')]
+          txt=Path('/tmp/csbook.txt').read_text(errors='replace') if Path('/tmp/csbook.txt').exists() else ''
+          out += ['\n=== PDF TEXT SAMPLE ===', re.sub(r'\s+',' ',txt[:20000])]
+          for p in sorted(Path('/tmp/cs_pages').glob('page-*.png')):
+              page_no=int(p.stem.split('-')[-1])
+              proc=subprocess.run(['tesseract',str(p),'stdout','--psm','6'],capture_output=True,text=True)
+              out.append(f'\n--- PDF PAGE {page_no} ---\n{proc.stdout.strip()}')
+          Path('docs/informatics-source-ocr.txt').parent.mkdir(parents=True,exist_ok=True)
+          Path('docs/informatics-source-ocr.txt').write_text('\n'.join(out)+'\n',encoding='utf-8')
+          PY
+      - name: Commit result and remove workflow
+        run: |
+          rm -f .github/workflows/informatics-source-ocr.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Add Informatics source OCR index'
+          git push origin HEAD:informatics-academic-audit
