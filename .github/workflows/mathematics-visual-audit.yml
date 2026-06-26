@@ -1,0 +1,68 @@
+name: Mathematics visual audit
+
+on:
+  push:
+    branches: [mathematics-academic-audit]
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: mathematics-academic-audit
+          fetch-depth: 0
+      - name: Extract SVG labels and geometry
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          import re, math
+
+          paths = sorted(Path('assets/season-2/visual-questions/mathematics').glob('s2_t*_q*.svg'))
+          out = ['MATHEMATICS VISUAL QUESTIONS — SVG AUDIT', '']
+          ns = {'svg':'http://www.w3.org/2000/svg'}
+          for p in paths:
+              root = ET.fromstring(p.read_text(encoding='utf-8'))
+              out.append(f'## {p.name}')
+              texts=[]
+              for e in root.findall('.//svg:text',ns):
+                  txt=''.join(e.itertext()).strip()
+                  if txt:
+                      texts.append((float(e.get('y','0')),float(e.get('x','0')),txt))
+              out.append('TEXT ELEMENTS:')
+              for y,x,txt in sorted(texts):
+                  out.append(f'  ({x:.1f},{y:.1f}) {txt}')
+              lines=root.findall('.//svg:line',ns)
+              circles=root.findall('.//svg:circle',ns)
+              rects=root.findall('.//svg:rect',ns)
+              polys=root.findall('.//svg:polyline',ns)
+              paths_e=root.findall('.//svg:path',ns)
+              out.append(f'GEOMETRY COUNTS: lines={len(lines)}, circles={len(circles)}, rects={len(rects)}, polylines={len(polys)}, paths={len(paths_e)}')
+              if circles:
+                  out.append('CIRCLES:')
+                  for c in circles:
+                      out.append(f"  cx={c.get('cx')} cy={c.get('cy')} r={c.get('r')} fill={c.get('fill')} stroke={c.get('stroke')}")
+              if polys:
+                  out.append('POLYLINE RANGES:')
+                  for i,pl in enumerate(polys,1):
+                      nums=[float(v) for v in re.findall(r'-?\d+(?:\.\d+)?',pl.get('points',''))]
+                      pts=list(zip(nums[0::2],nums[1::2]))
+                      if pts:
+                          xs=[a for a,b in pts]; ys=[b for a,b in pts]
+                          out.append(f'  {i}: n={len(pts)} xmin={min(xs):.1f} xmax={max(xs):.1f} ymin={min(ys):.1f} ymax={max(ys):.1f} first={pts[0]} last={pts[-1]}')
+              out.append('')
+          Path('docs/mathematics-visual-audit.txt').write_text('\n'.join(out)+'\n',encoding='utf-8')
+          PY
+      - name: Commit report and remove workflow
+        run: |
+          rm -f .github/workflows/mathematics-visual-audit.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Add Mathematics visual audit report'
+          git push origin HEAD:mathematics-academic-audit
