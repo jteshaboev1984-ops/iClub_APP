@@ -1,0 +1,61 @@
+MATHEMATICS SEASON 2 — ACADEMIC AUDIT SUMMARY
+
+Scope
+- 140 tour questions across 7 tours.
+- Source: Complete Pure Mathematics 1 for Cambridge International AS & A Level, second edition.
+- The source PDF is image-based, so its contents pages and relevant sections were verified by direct page OCR.
+- Checks covered source alignment, mathematical correctness, recalculation of numerical answers, answer uniqueness, distractor quality, EN/RU/UZ consistency, diagrams, tour order and database structure.
+
+Correct source map
+- Tour 1: Chapter 1 — Quadratics.
+- Tour 2: Chapter 2 — Functions and transformations.
+- Tour 3: Chapter 3 — Coordinate geometry.
+- Tour 4: Chapters 4–5 — Circular measure and trigonometry.
+- Tour 5: Chapters 6–7 — Binomial expansion, sequences and series.
+- Tour 6: Chapters 8–9 — Differentiation and further differentiation.
+- Tour 7: Chapter 10 — Integration and mixed Pure Mathematics 1 review.
+
+Major source-alignment corrections
+- The original metadata placed functions in Chapter 4, coordinate geometry in Chapter 5 and trigonometry in Chapter 8. These references did not match the textbook contents and were corrected.
+- Tours 4 and 5 were in the reverse textbook order. Their 20-question link sets were swapped atomically after confirming that neither tour had attempts.
+- Tour 6 previously contained further-trigonometry material not found in the assigned chapter. Its 20 questions were replaced with differentiation and further-differentiation content.
+- Tour 7 was replaced with Chapter 10 integration content so that the final three textbook chapters were no longer missing.
+- Tour 1 was fully rewritten to contain only Chapter 1 quadratics.
+- Two Tour 2 questions and four Tour 3 questions were replaced to strengthen direct chapter alignment.
+- In total, 66 question records were rewritten in EN, RU and UZ; two further records received targeted source/wording corrections.
+
+Targeted corrections
+- Q6011: an exact historical duplicate was detected before deployment and replaced with a new factorisation problem.
+- Q6034: an exponential-graph reflection item was replaced with a chapter-aligned cubic-graph reflection item.
+- Q6108: wording now explicitly identifies y=cos 2x and y=1/3, matching the diagram and solution.
+
+Visual audit
+- Q6026: parabola and tangent diagram; discriminant calculation gives k=−8.
+- Q6048: combined transformation maps V(2,−4) to (7,13).
+- Q6068: the perpendicular-bisector locus simplifies to 3x+2y=9.
+- Q6084: arithmetic-sequence diagram gives S20=800.
+- Q6108: intersections of y=cos 2x and y=1/3 have x-coordinate sum 180°.
+- Q6125: the derivative changes from positive to negative at x=1, so f has a local maximum there.
+- Q6145: the exact enclosed area between the line and parabola is 125/6.
+- Four diagrams were regenerated to match the revised questions; the other three were checked against their data and solutions.
+
+Final structural result
+- 140/140 questions present, with 140 distinct question IDs.
+- Every tour contains 20 questions: 6 easy, 9 medium and 5 hard.
+- Every tour contains 16 MCQ and 4 input questions.
+- A, B, C and D each occur exactly four times among the MCQs in every tour.
+- All MCQs contain four options in EN, RU and UZ; all input questions have empty option arrays and a canonical answer.
+- Missing source references: 0.
+- Missing EN/RU/UZ question or explanation fields: 0.
+- Invalid MCQ or input structures: 0.
+- Internal duplicate groups: 0.
+- Exact matches with historical questions: 0.
+- Practice overlaps: 0.
+- Seven visual questions: one hard visual question in every tour.
+- All question records remain active and published with quality flag A.
+- All Season 2 Mathematics tour containers remain inactive and undated.
+
+Outcome
+- All keyed calculations and displayed diagram data were independently recalculated.
+- The final seven-tour sequence now follows Chapters 1–10 of the source book without a missing calculus block or an out-of-order middle block.
+- Season 1 content was not modified.
