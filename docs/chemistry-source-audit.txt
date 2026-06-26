@@ -1,0 +1,44 @@
+CHEMISTRY SEASON 2 — ACADEMIC AUDIT SUMMARY
+
+Scope
+- 140 tour questions across 7 tours.
+- Source: Cambridge International AS & A Level Chemistry Coursebook, third edition, by Lawrie Ryan and Roger Norris.
+- Checks: chapter alignment, chemical correctness, calculations, uniqueness of keyed answers, distractor validity, explanation accuracy, RU/UZ/EN consistency, and diagram logic.
+
+Structural result
+- 140/140 questions present.
+- Difficulty distribution: 42 easy, 63 medium, 35 hard.
+- Question types: 112 MCQ and 28 input.
+- All MCQs have four options and valid A–D answer keys.
+- All input questions have a non-empty canonical answer.
+- No missing book references or RU/UZ/EN question and explanation fields.
+- Seven visual questions: one hard visual question in each tour.
+
+Source map
+- Tour 1: Chapters 1–3 — atomic structure, electrons and stoichiometry.
+- Tour 2: Chapters 4–6 — bonding, states of matter and enthalpy.
+- Tour 3: Chapters 7–9 — redox, equilibria and rates.
+- Tour 4: Chapters 10–13 — periodicity, Groups 2 and 17, nitrogen.
+- Tour 5: Chapters 14–18 — introductory and AS organic chemistry.
+- Tour 6: Chapters 19–23 — advanced physical chemistry.
+- Tour 7: Chapters 24–30 — transition elements, advanced organic and analytical chemistry.
+
+Corrections applied
+1. Question 5968: removed an out-of-source meso-form question. The coursebook teaches that a molecule with two independent chiral centres can have four optical isomers, but does not introduce the meso exception. It was replaced with a source-aligned question on CH3CH(OH)CH(NH2)COOH, which has two chiral centres and four possible optical stereoisomers when internal symmetry is absent.
+2. Question 5974: replaced the non-unique claim that dissolving an ionic solid necessarily increases entropy. The revised question uses vaporisation, which unambiguously increases the number of accessible particle and energy arrangements.
+3. Question 6006: clarified the acylation explanation. Phenylamine forms N-phenylethanamide, and HCl formed in the substitution is normally neutralised by excess amine or another base.
+
+Visual audit
+- Q5897: successive-ionisation-energy jump after the second electron correctly supports a Group 2 oxide, XO.
+- Q5854: Hess cycle correctly gives ΔH = −111 kJ mol−1.
+- Q5919: the lower activation-energy pathway is correctly identified as catalysed without changing equilibrium composition.
+- Q5902: increased pressure at constant temperature correctly raises ammonia equilibrium yield while K remains unchanged.
+- Q5966: propene → propan-2-ol → propanone pathway is correct.
+- Q5984: Born–Haber data correctly gives lattice enthalpy of formation −787 kJ mol−1.
+- Q6008: combined IR and proton NMR evidence correctly identifies propanoic acid.
+
+Outcome
+- All numerical answers were recalculated and verified.
+- No incorrect answer key remains.
+- No question remains outside the intended coursebook content.
+- The identified source-alignment, uniqueness and explanation issues were corrected in EN, RU and UZ.
