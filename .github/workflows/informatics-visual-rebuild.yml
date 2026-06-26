@@ -1,0 +1,105 @@
+name: Informatics visual rebuild
+
+on:
+  push:
+    branches: [informatics-academic-audit]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: informatics-academic-audit
+          fetch-depth: 0
+      - name: Build source-aligned Informatics diagrams
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from html import escape
+
+          out=Path('assets/season-2/visual-questions/informatics')
+          out.mkdir(parents=True,exist_ok=True)
+
+          def wrap(body):
+              return '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img">' + '<rect width="1200" height="800" fill="#ffffff"/>' + body + '</svg>'
+          def text(x,y,s,size=30,anchor='middle',weight='500',fill='#111827'):
+              return f'<text x="{x}" y="{y}" text-anchor="{anchor}" font-family="Arial,DejaVu Sans,sans-serif" font-size="{size}" font-weight="{weight}" fill="{fill}">{escape(str(s))}</text>'
+          def box(x,y,w,h,label,fill='#f8fafc',stroke='#334155',size=28):
+              return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="22" fill="{fill}" stroke="{stroke}" stroke-width="4"/>'+text(x+w/2,y+h/2+10,label,size)
+          arrow='<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#334155"/></marker></defs>'
+
+          # T1 Q5628: bitmap and compression calculation.
+          b=arrow+text(600,70,'Bitmap pixel-data calculation',36,weight='700')
+          b+=box(90,135,280,150,'20 × 10 pixels','#eff6ff','#2563eb',30)
+          b+=box(460,135,280,150,'16 colours','#f0fdf4','#16a34a',30)
+          b+=box(830,135,280,150,'4 bits/pixel','#fff7ed','#ea580c',30)
+          b+=f'<line x1="370" y1="210" x2="455" y2="210" stroke="#334155" stroke-width="5" marker-end="url(#arrow)"/><line x1="740" y1="210" x2="825" y2="210" stroke="#334155" stroke-width="5" marker-end="url(#arrow)"/>'
+          b+=box(250,370,700,115,'20 × 10 × 4 = 800 bits = 100 bytes','#f8fafc','#334155',30)
+          b+=f'<line x1="600" y1="485" x2="600" y2="555" stroke="#334155" stroke-width="5" marker-end="url(#arrow)"/>'
+          b+=box(315,565,570,120,'Lossless output = 35% of original','#fefce8','#ca8a04',30)
+          b+=text(600,750,'Compressed size = ?',34,weight='700',fill='#991b1b')
+          out.joinpath('s2_t1_q5628.svg').write_text(wrap(b),encoding='utf-8')
+
+          # T3 Q5679: DNS resolution flow.
+          b=arrow+text(600,75,'Locating a web server',36,weight='700')
+          b+=box(70,275,260,150,'Web browser','#eff6ff','#2563eb',32)
+          b+=box(470,275,260,150,'Service X','#fefce8','#ca8a04',34)
+          b+=box(870,275,260,150,'Web server','#f0fdf4','#16a34a',32)
+          b+=f'<line x1="330" y1="320" x2="465" y2="320" stroke="#334155" stroke-width="5" marker-end="url(#arrow)"/>'
+          b+=text(397,300,'domain name',22)
+          b+=f'<line x1="470" y1="390" x2="335" y2="390" stroke="#334155" stroke-width="5" marker-end="url(#arrow)"/>'
+          b+=text(402,435,'IP address',22)
+          b+=f'<line x1="330" y1="540" x2="865" y2="540" stroke="#334155" stroke-width="5" marker-end="url(#arrow)"/>'
+          b+=text(600,520,'request sent to resolved IP address',23)
+          b+=text(600,680,'What is Service X?',34,weight='700',fill='#991b1b')
+          out.joinpath('s2_t3_q5679.svg').write_text(wrap(b),encoding='utf-8')
+
+          # T4 Q5655: greenhouse feedback system.
+          b=arrow+text(600,65,'Greenhouse feedback system',36,weight='700')
+          b+=box(55,250,245,140,'Temperature\nsensor','#eff6ff','#2563eb',27)
+          b+=box(410,250,380,140,'Controller\nmeasured < set value','#f8fafc','#334155',26)
+          b+=box(900,250,245,140,'Component X','#fff7ed','#ea580c',28)
+          b+=f'<line x1="300" y1="320" x2="405" y2="320" stroke="#334155" stroke-width="5" marker-end="url(#arrow)"/><line x1="790" y1="320" x2="895" y2="320" stroke="#334155" stroke-width="5" marker-end="url(#arrow)"/>'
+          b+=text(350,295,'reading',22)+text(845,295,'control signal',22)
+          b+=f'<path d="M1020 390 C1020 590 180 590 180 395" fill="none" stroke="#64748b" stroke-width="4" stroke-dasharray="12 10" marker-end="url(#arrow)"/>'
+          b+=text(600,610,'continued feedback',24,fill='#475569')
+          b+=box(365,660,470,85,'Required effect: raise temperature','#fef2f2','#dc2626',26)
+          out.joinpath('s2_t4_q5655.svg').write_text(wrap(b),encoding='utf-8')
+
+          # T6 Q5605: 3x3 array diagonal.
+          vals=[[2,7,1],[4,5,6],[9,3,8]]
+          b=text(600,70,'Grid[I,I] for I = 0 to 2',36,weight='700')
+          x0,y0,cell=330,145,180
+          for r,row in enumerate(vals):
+              b+=text(270,y0+r*cell+105,f'row {r}',23,anchor='end',fill='#475569')
+              for c,val in enumerate(row):
+                  diag=r==c
+                  fill='#dbeafe' if diag else '#f8fafc'; stroke='#2563eb' if diag else '#64748b'; sw=6 if diag else 3
+                  x=x0+c*cell; y=y0+r*cell
+                  b+=f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" fill="{fill}" stroke="{stroke}" stroke-width="{sw}"/>'
+                  b+=text(x+cell/2,y+105,val,44,weight='700')
+          for c in range(3): b+=text(x0+c*cell+cell/2,125,f'column {c}',22,fill='#475569')
+          b+=text(600,735,'Add the highlighted main-diagonal values',30,weight='700',fill='#1d4ed8')
+          out.joinpath('s2_t6_q5605.svg').write_text(wrap(b),encoding='utf-8')
+
+          # Copy the two already-correct diagrams to their final tour paths.
+          src=out/'s2_t3_q5579.svg'; dst=out/'s2_t5_q5579.svg'
+          if not src.exists(): raise SystemExit(f'Missing source visual: {src}')
+          dst.write_bytes(src.read_bytes())
+          src=out/'s2_t1_q5534.svg'; dst=out/'s2_t7_q5534.svg'
+          if not src.exists(): raise SystemExit(f'Missing source visual: {src}')
+          dst.write_bytes(src.read_bytes())
+          PY
+      - name: Commit visuals and remove workflow
+        run: |
+          rm -f .github/workflows/informatics-visual-rebuild.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Add source-aligned Informatics tour diagrams'
+          git push origin HEAD:informatics-academic-audit
