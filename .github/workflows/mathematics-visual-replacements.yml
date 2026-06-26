@@ -1,0 +1,85 @@
+name: Mathematics visual replacements
+
+on:
+  push:
+    branches: [mathematics-academic-audit]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: mathematics-academic-audit
+          fetch-depth: 0
+      - name: Generate source-aligned Mathematics SVGs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import math
+
+          out_dir=Path('assets/season-2/visual-questions/mathematics')
+          out_dir.mkdir(parents=True,exist_ok=True)
+
+          def axes(xmin,xmax,ymin,ymax,xticks,yticks):
+              left,right,top,bottom=100,1100,70,690
+              X=lambda x:left+(x-xmin)/(xmax-xmin)*(right-left)
+              Y=lambda y:bottom-(y-ymin)/(ymax-ymin)*(bottom-top)
+              x0=Y(0) if ymin<=0<=ymax else bottom
+              y0=X(0) if xmin<=0<=xmax else left
+              e=['<rect width="1200" height="800" fill="#ffffff"/>','<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#111827"/></marker></defs>',f'<line x1="{left}" y1="{x0}" x2="{right}" y2="{x0}" stroke="#111827" stroke-width="4" marker-end="url(#arrow)"/>',f'<line x1="{y0}" y1="{bottom}" x2="{y0}" y2="{top}" stroke="#111827" stroke-width="4" marker-end="url(#arrow)"/>',f'<text x="{right-5}" y="{x0+42}" text-anchor="end" font-family="Arial,DejaVu Sans,sans-serif" font-size="28">x</text>',f'<text x="{y0-65}" y="{top+8}" text-anchor="middle" font-family="Arial,DejaVu Sans,sans-serif" font-size="28">y</text>']
+              for t in xticks:
+                  px=X(t); e += [f'<line x1="{px}" y1="{x0-7}" x2="{px}" y2="{x0+7}" stroke="#111827" stroke-width="2"/>',f'<text x="{px}" y="{x0+32}" text-anchor="middle" font-family="Arial,DejaVu Sans,sans-serif" font-size="20">{t}</text>']
+              for t in yticks:
+                  py=Y(t); e += [f'<line x1="{y0-7}" y1="{py}" x2="{y0+7}" y2="{py}" stroke="#111827" stroke-width="2"/>',f'<text x="{y0-15}" y="{py+7}" text-anchor="end" font-family="Arial,DejaVu Sans,sans-serif" font-size="20">{t}</text>']
+              return e,X,Y
+
+          def poly(X,Y,fn,a,b,n=300):
+              pts=[]
+              for i in range(n):
+                  x=a+(b-a)*i/(n-1); pts.append(f'{X(x):.1f},{Y(fn(x)):.1f}')
+              return ' '.join(pts)
+
+          # Q6026: tangent to a quadratic
+          e,X,Y=axes(-1,6,-10,12,range(-1,7),[-8,-4,4,8,12])
+          e += [f'<polyline points="{poly(X,Y,lambda x:x*x-4*x+1,-1,6)}" fill="none" stroke="#2563eb" stroke-width="6"/>',f'<polyline points="{poly(X,Y,lambda x:2*x-8,-1,6,100)}" fill="none" stroke="#dc2626" stroke-width="6"/>',f'<circle cx="{X(3)}" cy="{Y(-2)}" r="9" fill="#111827"/>',f'<text x="{X(4.45)}" y="{Y(8.3)}" font-family="Arial,DejaVu Sans,sans-serif" font-size="30" fill="#2563eb">y=x²−4x+1</text>',f'<text x="{X(4.1)}" y="{Y(0.9)}" font-family="Arial,DejaVu Sans,sans-serif" font-size="30" fill="#dc2626">y=2x+k</text>',f'<text x="{X(3)+16}" y="{Y(-2)-15}" font-family="Arial,DejaVu Sans,sans-serif" font-size="28">T</text>']
+          out_dir.joinpath('s2_t1_q6026.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">'+''.join(e)+'</svg>',encoding='utf-8')
+
+          # Q6048: vertex mapping under transformations
+          e,X,Y=axes(-1,5,-5,8,range(-1,6),[-4,0,4,8])
+          e.append(f'<polyline points="{poly(X,Y,lambda x:(x-2)**2-4,-1,5)}" fill="none" stroke="#2563eb" stroke-width="6"/>')
+          for x,y,label in [(0,0,'(0,0)'),(2,-4,'V(2,−4)'),(4,0,'(4,0)')]:
+              e += [f'<circle cx="{X(x)}" cy="{Y(y)}" r="9" fill="#dc2626"/>',f'<text x="{X(x)+12}" y="{Y(y)-14}" font-family="Arial,DejaVu Sans,sans-serif" font-size="25">{label}</text>']
+          e.append(f'<text x="{X(3.8)}" y="{Y(5.5)}" font-family="Arial,DejaVu Sans,sans-serif" font-size="32" fill="#2563eb">y=f(x)</text>')
+          out_dir.joinpath('s2_t2_q6048.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">'+''.join(e)+'</svg>',encoding='utf-8')
+
+          # Q6125: derivative sign graph
+          e,X,Y=axes(-1,7,-5,12,range(-1,8),[-4,0,4,8,12])
+          e.append(f'<polyline points="{poly(X,Y,lambda x:x*x-6*x+5,-1,7)}" fill="none" stroke="#2563eb" stroke-width="6"/>')
+          for x in (1,5):
+              e += [f'<circle cx="{X(x)}" cy="{Y(0)}" r="9" fill="#dc2626"/>',f'<text x="{X(x)}" y="{Y(0)+35}" text-anchor="middle" font-family="Arial,DejaVu Sans,sans-serif" font-size="24">{x}</text>']
+          e += [f'<text x="{X(4.8)}" y="{Y(8.5)}" font-family="Arial,DejaVu Sans,sans-serif" font-size="32" fill="#2563eb">y=f′(x)</text>',f'<text x="{X(2.6)}" y="{Y(-3.8)}" font-family="Arial,DejaVu Sans,sans-serif" font-size="24" fill="#6b7280">f′(x)&lt;0</text>',f'<text x="{X(-0.3)}" y="{Y(7)}" font-family="Arial,DejaVu Sans,sans-serif" font-size="24" fill="#6b7280">f′(x)&gt;0</text>',f'<text x="{X(5.5)}" y="{Y(4)}" font-family="Arial,DejaVu Sans,sans-serif" font-size="24" fill="#6b7280">f′(x)&gt;0</text>']
+          out_dir.joinpath('s2_t6_q6125.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">'+''.join(e)+'</svg>',encoding='utf-8')
+
+          # Q6145: area between line and parabola
+          e,X,Y=axes(-1,6,0,14,range(-1,7),[0,4,8,12])
+          xs=[5*i/199 for i in range(200)]
+          area=[(X(x),Y(x+3)) for x in xs]+[(X(x),Y(x*x-4*x+3)) for x in reversed(xs)]
+          e += [f'<polygon points="{" ".join(f"{a:.1f},{b:.1f}" for a,b in area)}" fill="#bfdbfe" opacity="0.65"/>',f'<polyline points="{poly(X,Y,lambda x:x*x-4*x+3,-1,6)}" fill="none" stroke="#2563eb" stroke-width="6"/>',f'<polyline points="{poly(X,Y,lambda x:x+3,-1,6)}" fill="none" stroke="#dc2626" stroke-width="6"/>']
+          for x,y in [(0,3),(5,8)]:
+              e += [f'<circle cx="{X(x)}" cy="{Y(y)}" r="9" fill="#111827"/>',f'<text x="{X(x)+10}" y="{Y(y)-14}" font-family="Arial,DejaVu Sans,sans-serif" font-size="24">({x},{y})</text>']
+          e += [f'<text x="{X(4.4)}" y="{Y(12)}" font-family="Arial,DejaVu Sans,sans-serif" font-size="30" fill="#2563eb">y=x²−4x+3</text>',f'<text x="{X(3.9)}" y="{Y(8.8)}" font-family="Arial,DejaVu Sans,sans-serif" font-size="30" fill="#dc2626">y=x+3</text>',f'<text x="{X(2.5)}" y="{Y(3.8)}" text-anchor="middle" font-family="Arial,DejaVu Sans,sans-serif" font-size="28" fill="#1e3a8a">R</text>']
+          out_dir.joinpath('s2_t7_q6145.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">'+''.join(e)+'</svg>',encoding='utf-8')
+          PY
+      - name: Commit visuals and remove workflow
+        run: |
+          rm -f .github/workflows/mathematics-visual-replacements.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Replace Mathematics visuals with source-aligned diagrams'
+          git push origin HEAD:mathematics-academic-audit
