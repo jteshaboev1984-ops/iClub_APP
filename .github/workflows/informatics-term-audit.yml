@@ -1,0 +1,50 @@
+name: Informatics term audit
+
+on:
+  push:
+    branches: [informatics-academic-audit]
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: informatics-academic-audit
+          fetch-depth: 0
+      - name: Extract targeted source contexts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+          curl -L --fail --retry 3 'https://mmmduffgpvwjdpruzikw.supabase.co/storage/v1/object/public/books/CS%20book%20%282%29.pdf' -o /tmp/csbook.pdf
+          pdftotext -layout /tmp/csbook.pdf /tmp/csbook.txt
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          pages=Path('/tmp/csbook.txt').read_text(encoding='utf-8',errors='replace').split('\f')
+          terms=['round robin','time slice','multitasking','context switching','memory allocation','memory protection','memory management','ransomware','backup','domain name server','DNS','two-factor authentication','authentication','anti-malware','virus checker','email filtering','bandwidth','cache','array bounds','out of range','session cookie','persistent cookie','blockchain','hash','integrated development environment','IDE','automatic repeat request','ARQ','lossless compression','two’s complement','two\'s complement']
+          out=['INFORMATICS TARGETED TERM AUDIT','']
+          for term in terms:
+              hits=[]
+              for pno,page in enumerate(pages,1):
+                  for m in re.finditer(re.escape(term),page,re.I):
+                      c=' '.join(page[max(0,m.start()-450):m.end()+1000].split())
+                      hits.append(f'PDF {pno}: {c}')
+                      break
+                  if len(hits)>=5: break
+              out.append(f'\n## {term}: {len(hits)} hit(s) shown')
+              out.extend(hits)
+          Path('docs/informatics-term-audit.txt').write_text('\n'.join(out)+'\n',encoding='utf-8')
+          PY
+      - name: Commit and remove workflow
+        run: |
+          rm -f .github/workflows/informatics-term-audit.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Add targeted Informatics source term audit'
+          git push origin HEAD:informatics-academic-audit
