@@ -1475,7 +1475,7 @@ function scheduleCredentialsDbSync(delayMs = 1200) {
         .from("tour_attempts")
         .select("tour_id, percent, status")
         .eq("user_id", uid)
-        .in("status", ["submitted", "time_expired", "anti_cheat", "finished"])
+        .in("status", ["submitted", "time_expired", "anti_cheat"])
         .order("tour_id", { ascending: true });
 
       if (error) {
@@ -3107,8 +3107,7 @@ async function dbHasAnyActiveTourNow(
           [
             "submitted",
             "time_expired",
-            "anti_cheat",
-            "finished"
+            "anti_cheat"
           ]
         );
 
@@ -11650,7 +11649,7 @@ if (attemptsRes?.error) {
       await enrichRatingsUsersGeoTranslations(raw);
 
       // keep only completed attempts (different DB variants)
-      const OK_STATUSES = new Set(["submitted", "time_expired", "anti_cheat", "finished"]);
+      const OK_STATUSES = new Set(["submitted", "time_expired", "anti_cheat"]);
       let pool = raw.filter(r => {
         const st = String(r?.status || "").trim();
         return !st || OK_STATUSES.has(st);
@@ -11990,7 +11989,7 @@ listEl.innerHTML = `
           .from("tour_attempts")
           .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district,region_id,district_id)")
           .eq("tour_id", tourId)
-          .in("status", ["submitted", "time_expired", "anti_cheat", "finished"])
+          .in("status", ["submitted", "time_expired", "anti_cheat"])
           .order("score", { ascending: false })
           .order("total_time", { ascending: true })
           .range(from, to);
@@ -12090,7 +12089,7 @@ listEl.innerHTML = `
         .from("tour_attempts")
         .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district,region_id,district_id)")
         .eq("tour_id", tourId)
-        .in("status", ["submitted", "time_expired", "anti_cheat", "finished"])
+        .in("status", ["submitted", "time_expired", "anti_cheat"])
         .limit(5000);
 
       if (attErr) {
@@ -12299,7 +12298,7 @@ if (attErr) {
   return;
 }
 
-const OK_STATUSES = new Set(["finished", "submitted", "time_expired", "anti_cheat"]);
+const OK_STATUSES = new Set(["submitted", "time_expired", "anti_cheat"]);
 
 // filter by status first
 const completedAttempts = (Array.isArray(attempts) ? attempts : []).filter(a => {
@@ -14808,7 +14807,7 @@ async function computeHomeCompetitiveStats(subjectKey) {
       .from("tour_attempts")
       .select("id,tour_id,status")
       .eq("user_id", uid)
-      .in("status", ["submitted", "time_expired", "anti_cheat", "finished"])
+      .in("status", ["submitted", "time_expired", "anti_cheat"])
       .order("created_at", { ascending: false });
 
     const attempts = Array.isArray(attemptRes?.data) ? attemptRes.data : [];
