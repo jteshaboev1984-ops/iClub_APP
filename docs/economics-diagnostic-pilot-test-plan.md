@@ -22,17 +22,17 @@ Expected:
 
 ## Test 2 — MCQ correct answer
 
-Submit correct MCQ option through the safe RPC.
+Submit correct MCQ option through the safe/checking path.
 
 Expected:
 
 - `is_correct=true`;
 - diagnostic feedback returns;
-- score/percent update only for the test practice attempt.
+- no practice/tour score is changed in the live app.
 
 ## Test 3 — MCQ wrong answer
 
-Submit wrong MCQ option through the safe RPC.
+Submit wrong MCQ option through the safe/checking path.
 
 Expected:
 
@@ -83,12 +83,47 @@ Expected:
 
 ## Test 7 — History safety
 
-After test submissions, verify:
+After demo submissions, verify:
 
 - old tour answers unchanged;
-- old practice answers unrelated to test attempt unchanged;
-- no historical scores recalculated.
+- old practice answers unchanged;
+- no historical scores recalculated;
+- no certificates or ratings changed.
+
+## Test 8 — Summary screen
+
+Complete all 7 demo questions.
+
+Expected:
+
+- final percent is shown;
+- correct count is shown;
+- main weak areas are shown;
+- mistake pattern is shown;
+- next study plan is shown;
+- restart button resets only the browser demo state.
+
+## Test 9 — Student-facing language
+
+Switch EN / RU / UZ in the demo.
+
+Expected:
+
+- static UI copy changes language;
+- question text and options use the selected language when the database has that language;
+- feedback and next action use the selected language when diagnostic text exists;
+- internal values such as `mcq`, `input`, `medium`, function names and table names are not shown to students.
+
+## Test 10 — Hidden release rule
+
+Open the normal live app screens.
+
+Expected:
+
+- the diagnostic demo is not linked from the live UI;
+- live practice and live tour flows continue to work as before;
+- the old public question read policy is not changed until the pilot path is tested end-to-end.
 
 ## Pass condition
 
-The hidden/demo path passes if it gives diagnostic feedback while preserving historical data and not exposing answer keys before submission.
+The hidden/demo path passes if it gives diagnostic feedback and a mini study plan while preserving historical data and not exposing answer keys before submission.
