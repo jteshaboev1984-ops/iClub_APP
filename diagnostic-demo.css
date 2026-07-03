@@ -46,6 +46,15 @@ body {
   margin-bottom: 16px;
 }
 
+.hero-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
 .eyebrow {
   display: inline-flex;
   padding: 7px 12px;
@@ -54,7 +63,31 @@ body {
   color: var(--brand);
   font-size: 13px;
   font-weight: 700;
-  margin-bottom: 14px;
+}
+
+.language-switch {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  border: 1px solid var(--line);
+}
+
+.language-btn {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.language-btn.active {
+  background: #ffffff;
+  color: var(--brand);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
 }
 
 h1,
