@@ -25,6 +25,34 @@
       </p>
     </section>
 
+    <section class="practice-context-card" id="practice-context-card">
+      <div class="practice-context-main">
+        <div>
+          <div class="practice-context-kicker" id="context-kicker">Practice preview</div>
+          <h2 id="context-title">Economics diagnostic practice</h2>
+          <p id="context-copy">This screen shows how diagnostics can appear inside real practice after a safe feature-flag pilot.</p>
+        </div>
+        <div class="practice-context-badge">
+          <strong>7</strong>
+          <span id="context-questions-label">questions</span>
+        </div>
+      </div>
+      <div class="practice-context-grid">
+        <div>
+          <span id="context-card-one-label">Mode</span>
+          <strong id="context-card-one-value">Practice feedback</strong>
+        </div>
+        <div>
+          <span id="context-card-two-label">Data safety</span>
+          <strong id="context-card-two-value">No history changes</strong>
+        </div>
+        <div>
+          <span id="context-card-three-label">Next real step</span>
+          <strong id="context-card-three-value">Feature flag in practice</strong>
+        </div>
+      </div>
+    </section>
+
     <section class="status-card" id="demo-status">Loading diagnostic practice…</section>
 
     <section class="progress-card" id="progress-card">
@@ -95,6 +123,77 @@
     </section>
   </main>
 
+  <script>
+    (() => {
+      const copy = {
+        en: {
+          kicker: 'Practice preview',
+          title: 'Economics diagnostic practice',
+          body: 'This screen shows how diagnostics can appear inside real practice after a safe feature-flag pilot.',
+          questions: 'questions',
+          oneLabel: 'Mode',
+          oneValue: 'Practice feedback',
+          twoLabel: 'Data safety',
+          twoValue: 'No history changes',
+          threeLabel: 'Next real step',
+          threeValue: 'Feature flag in practice',
+        },
+        ru: {
+          kicker: 'Предпросмотр практики',
+          title: 'Диагностическая практика по экономике',
+          body: 'Этот экран показывает, как диагностика может выглядеть внутри реальной практики после безопасного pilot через feature flag.',
+          questions: 'вопросов',
+          oneLabel: 'Режим',
+          oneValue: 'Feedback после ответа',
+          twoLabel: 'Безопасность данных',
+          twoValue: 'История не меняется',
+          threeLabel: 'Следующий реальный шаг',
+          threeValue: 'Feature flag в практике',
+        },
+        uz: {
+          kicker: 'Mashq ko‘rinishi',
+          title: 'Iqtisodiyot bo‘yicha diagnostik mashq',
+          body: 'Bu ekran diagnostika real practice ichida xavfsiz feature flag pilotidan keyin qanday ko‘rinishini ko‘rsatadi.',
+          questions: 'savol',
+          oneLabel: 'Rejim',
+          oneValue: 'Javobdan keyingi feedback',
+          twoLabel: 'Ma’lumot xavfsizligi',
+          twoValue: 'Tarix o‘zgarmaydi',
+          threeLabel: 'Keyingi real qadam',
+          threeValue: 'Practice ichida feature flag',
+        },
+      };
+
+      const ids = {
+        kicker: 'context-kicker',
+        title: 'context-title',
+        body: 'context-copy',
+        questions: 'context-questions-label',
+        oneLabel: 'context-card-one-label',
+        oneValue: 'context-card-one-value',
+        twoLabel: 'context-card-two-label',
+        twoValue: 'context-card-two-value',
+        threeLabel: 'context-card-three-label',
+        threeValue: 'context-card-three-value',
+      };
+
+      function applyContextLanguage(lang) {
+        const row = copy[lang] || copy.en;
+        Object.entries(ids).forEach(([key, id]) => {
+          const el = document.getElementById(id);
+          if (el && row[key]) el.textContent = row[key];
+        });
+      }
+
+      document.addEventListener('click', (event) => {
+        const btn = event.target.closest('.language-btn');
+        if (!btn) return;
+        applyContextLanguage(btn.dataset.lang || 'en');
+      });
+
+      applyContextLanguage('en');
+    })();
+  </script>
   <script src="diagnostic-demo.js"></script>
 </body>
 </html>
