@@ -1,199 +1,163 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>iClub Diagnostic Demo</title>
+  <title>iClub Diagnostic Practice</title>
+  <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="diagnostic-demo.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <main class="demo-shell">
-    <section class="hero-card">
-      <div class="hero-topline">
-        <div class="eyebrow" id="hero-label">Diagnostic Practice Demo</div>
-        <div class="language-switch" aria-label="Demo language">
-          <button type="button" class="language-btn active" data-lang="en">EN</button>
-          <button type="button" class="language-btn" data-lang="ru">RU</button>
-          <button type="button" class="language-btn" data-lang="uz">UZ</button>
-        </div>
-      </div>
-      <h1 id="hero-title">iClub Diagnostic Learning Engine</h1>
-      <p id="hero-copy">
-        Answer a short Economics set. After each answer, iClub explains the mistake and builds a personal mini study plan.
-        Demo results are not saved to student history.
-      </p>
-    </section>
-
-    <section class="practice-context-card" id="practice-context-card">
-      <div class="practice-context-main">
+  <div class="demo-app">
+    <header class="demo-topbar">
+      <div class="topbar-brand">
+        <img class="topbar-logo" src="logo.png" alt="iClub" />
         <div>
-          <div class="practice-context-kicker" id="context-kicker">Practice preview</div>
-          <h2 id="context-title">Economics diagnostic practice</h2>
-          <p id="context-copy">This screen shows how diagnostics can appear inside real practice after a safe feature-flag pilot.</p>
-        </div>
-        <div class="practice-context-badge">
-          <strong>7</strong>
-          <span id="context-questions-label">questions</span>
+          <div class="topbar-title">iClub</div>
+          <div class="topbar-subtitle">Smarter together</div>
         </div>
       </div>
-      <div class="practice-context-grid">
-        <div>
-          <span id="context-card-one-label">Mode</span>
-          <strong id="context-card-one-value">Practice feedback</strong>
-        </div>
-        <div>
-          <span id="context-card-two-label">Data safety</span>
-          <strong id="context-card-two-value">No history changes</strong>
-        </div>
-        <div>
-          <span id="context-card-three-label">Next real step</span>
-          <strong id="context-card-three-value">Feature flag in practice</strong>
-        </div>
+      <div class="language-switch" aria-label="Demo language">
+        <button type="button" class="language-btn" data-lang="en">EN</button>
+        <button type="button" class="language-btn active" data-lang="ru">RU</button>
+        <button type="button" class="language-btn" data-lang="uz">UZ</button>
       </div>
-    </section>
+    </header>
 
-    <section class="status-card" id="demo-status">Loading diagnostic practice…</section>
-
-    <section class="progress-card" id="progress-card">
-      <div class="progress-top">
-        <span id="progress-label">Progress</span>
-        <strong id="progress-count">0 / 7</strong>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
-    </section>
-
-    <section class="question-card hidden" id="question-card">
-      <div class="question-meta" id="question-meta"></div>
-      <h2 id="question-text"></h2>
-      <div class="options-list" id="options-list"></div>
-      <div class="input-wrap hidden" id="input-wrap">
-        <label for="input-answer" id="input-label">Your answer</label>
-        <input id="input-answer" autocomplete="off" placeholder="Type your answer" />
-      </div>
-      <button class="primary-btn" id="submit-answer" type="button">Check answer</button>
-    </section>
-
-    <section class="feedback-card hidden" id="feedback-card">
-      <div class="feedback-title" id="feedback-title"></div>
-      <p id="feedback-text"></p>
-      <div class="feedback-grid">
-        <div>
-          <span id="weak-area-label">Weak area</span>
-          <strong id="weak-area">—</strong>
+    <main class="demo-main">
+      <section class="demo-screen" id="practice-start-screen">
+        <div class="section-head">
+          <h1 id="start-title">Практика</h1>
+          <p id="start-subtitle">7 вопросов • диагностическая обратная связь</p>
         </div>
-        <div>
-          <span id="next-action-label">Next action</span>
-          <strong id="next-action">—</strong>
+
+        <section class="tour-picker-card">
+          <div class="tour-picker-title" id="tour-picker-title">Выбор тура</div>
+          <div class="tour-picker-row" aria-label="Practice tour selector">
+            <button type="button" class="tour-chip">Тур 1</button>
+            <button type="button" class="tour-chip">Тур 2</button>
+            <button type="button" class="tour-chip">Тур 3</button>
+            <button type="button" class="tour-chip">Тур 4</button>
+            <button type="button" class="tour-chip">Тур 5</button>
+            <button type="button" class="tour-chip active" id="tour-active-chip">Тур 6</button>
+          </div>
+        </section>
+
+        <section class="practice-hero">
+          <div class="practice-hero-kicker" id="hero-subject-label">Предмет</div>
+          <div class="practice-hero-title" id="hero-subject-title">Экономика</div>
+          <div class="practice-hero-stage" id="hero-stage-meta">Практика 6 тура • Завершено 0/7 • Осталось 7</div>
+
+          <div class="practice-hero-metrics">
+            <div class="practice-metric">
+              <div class="practice-metric-label" id="best-result-label">Лучший результат</div>
+              <div class="practice-metric-value" id="best-result-value">—</div>
+            </div>
+            <div class="practice-metric">
+              <div class="practice-metric-label" id="best-time-label">Лучшее время</div>
+              <div class="practice-metric-value" id="best-time-value">—</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="practice-last card">
+          <div class="card-title" id="last-attempts-title">Последние попытки</div>
+          <div class="muted small" id="last-attempts-empty">Пока нет попыток</div>
+          <div class="practice-table-wrap">
+            <table class="practice-table" aria-label="Practice attempts">
+              <thead>
+                <tr>
+                  <th id="col-date">Дата</th>
+                  <th id="col-score">Счёт</th>
+                  <th id="col-time">Время</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <button class="btn primary start-btn" id="start-demo" type="button">Начать диагностическую практику</button>
+      </section>
+
+      <section class="demo-screen hidden" id="practice-quiz-screen">
+        <div class="quiz-top">
+          <div class="quiz-progress">
+            <span id="practice-qno">1/7</span>
+            <span id="practice-timer" class="timer-pill">00:58</span>
+          </div>
+          <button id="practice-pause-btn" class="btn ghost" type="button">Пауза</button>
         </div>
-      </div>
-      <button class="secondary-btn" id="next-question" type="button">Next question</button>
-    </section>
 
-    <section class="summary-card hidden" id="summary-card">
-      <div class="summary-header">
-        <div>
-          <div class="eyebrow" id="summary-label">Diagnostic Summary</div>
-          <h2 id="summary-title">Your mini study plan is ready</h2>
+        <section class="card question-card" id="question-card">
+          <h2 id="question-text">Вопрос практики…</h2>
+          <div id="question-difficulty" class="muted small difficulty-line">Сложность: легко</div>
+          <div id="options-list" class="options-list"></div>
+          <div class="input-wrap hidden" id="input-wrap">
+            <label for="input-answer" id="input-label">Ответ</label>
+            <input id="input-answer" autocomplete="off" placeholder="Введите ответ" />
+          </div>
+        </section>
+
+        <div class="actions-row">
+          <button class="btn submit-btn" id="submit-answer" type="button" disabled>Ответить</button>
         </div>
-        <div class="score-ring">
-          <strong id="summary-score">0%</strong>
-          <span id="summary-count">0 / 7</span>
+
+        <section class="card feedback-card hidden" id="feedback-card">
+          <div class="feedback-title" id="feedback-title"></div>
+          <p id="feedback-text"></p>
+          <div class="feedback-grid">
+            <div>
+              <span id="weak-area-label">Слабое место</span>
+              <strong id="weak-area">—</strong>
+            </div>
+            <div>
+              <span id="next-action-label">Следующий шаг</span>
+              <strong id="next-action">—</strong>
+            </div>
+          </div>
+          <button class="btn primary" id="next-question" type="button">Следующий вопрос</button>
+        </section>
+      </section>
+
+      <section class="demo-screen hidden" id="practice-result-screen">
+        <div class="section-head">
+          <h1 id="result-title">Результат практики</h1>
+          <p id="practice-result-meta">—</p>
         </div>
-      </div>
 
-      <div class="summary-grid">
-        <div class="summary-box">
-          <span id="summary-weak-title">Main weak areas</span>
-          <ul id="summary-weak-list"></ul>
+        <section class="result-score-card">
+          <div>
+            <div class="result-score-label" id="result-score-label">Диагностический результат</div>
+            <div class="result-score-main" id="summary-score">0%</div>
+            <div class="result-score-sub" id="summary-count">0 / 7</div>
+          </div>
+        </section>
+
+        <section class="cards-grid result-grid">
+          <div class="card result-box">
+            <div class="card-title" id="summary-weak-title">Главные слабые места</div>
+            <ul id="summary-weak-list"></ul>
+          </div>
+          <div class="card result-box">
+            <div class="card-title" id="summary-mistake-title">Тип ошибок</div>
+            <ul id="summary-mistake-list"></ul>
+          </div>
+          <div class="card result-box wide">
+            <div class="card-title" id="summary-plan-title">Следующий учебный план</div>
+            <ol id="summary-plan-list"></ol>
+          </div>
+        </section>
+
+        <div class="actions-row result-actions">
+          <button class="btn" id="restart-demo" type="button">Пройти снова</button>
+          <button class="btn primary" id="back-to-start" type="button">К практике</button>
         </div>
-        <div class="summary-box">
-          <span id="summary-mistake-title">Mistake pattern</span>
-          <ul id="summary-mistake-list"></ul>
-        </div>
-        <div class="summary-box summary-box-wide">
-          <span id="summary-plan-title">Next study plan</span>
-          <ol id="summary-plan-list"></ol>
-        </div>
-      </div>
+      </section>
+    </main>
+  </div>
 
-      <button class="primary-btn" id="restart-demo" type="button">Restart demo</button>
-    </section>
-  </main>
-
-  <script>
-    (() => {
-      const copy = {
-        en: {
-          kicker: 'Practice preview',
-          title: 'Economics diagnostic practice',
-          body: 'This screen shows how diagnostics can appear inside real practice after a safe feature-flag pilot.',
-          questions: 'questions',
-          oneLabel: 'Mode',
-          oneValue: 'Practice feedback',
-          twoLabel: 'Data safety',
-          twoValue: 'No history changes',
-          threeLabel: 'Next real step',
-          threeValue: 'Feature flag in practice',
-        },
-        ru: {
-          kicker: 'Предпросмотр практики',
-          title: 'Диагностическая практика по экономике',
-          body: 'Этот экран показывает, как диагностика может выглядеть внутри реальной практики после безопасного pilot через feature flag.',
-          questions: 'вопросов',
-          oneLabel: 'Режим',
-          oneValue: 'Feedback после ответа',
-          twoLabel: 'Безопасность данных',
-          twoValue: 'История не меняется',
-          threeLabel: 'Следующий реальный шаг',
-          threeValue: 'Feature flag в практике',
-        },
-        uz: {
-          kicker: 'Mashq ko‘rinishi',
-          title: 'Iqtisodiyot bo‘yicha diagnostik mashq',
-          body: 'Bu ekran diagnostika real practice ichida xavfsiz feature flag pilotidan keyin qanday ko‘rinishini ko‘rsatadi.',
-          questions: 'savol',
-          oneLabel: 'Rejim',
-          oneValue: 'Javobdan keyingi feedback',
-          twoLabel: 'Ma’lumot xavfsizligi',
-          twoValue: 'Tarix o‘zgarmaydi',
-          threeLabel: 'Keyingi real qadam',
-          threeValue: 'Practice ichida feature flag',
-        },
-      };
-
-      const ids = {
-        kicker: 'context-kicker',
-        title: 'context-title',
-        body: 'context-copy',
-        questions: 'context-questions-label',
-        oneLabel: 'context-card-one-label',
-        oneValue: 'context-card-one-value',
-        twoLabel: 'context-card-two-label',
-        twoValue: 'context-card-two-value',
-        threeLabel: 'context-card-three-label',
-        threeValue: 'context-card-three-value',
-      };
-
-      function applyContextLanguage(lang) {
-        const row = copy[lang] || copy.en;
-        Object.entries(ids).forEach(([key, id]) => {
-          const el = document.getElementById(id);
-          if (el && row[key]) el.textContent = row[key];
-        });
-      }
-
-      document.addEventListener('click', (event) => {
-        const btn = event.target.closest('.language-btn');
-        if (!btn) return;
-        applyContextLanguage(btn.dataset.lang || 'en');
-      });
-
-      applyContextLanguage('en');
-    })();
-  </script>
   <script src="diagnostic-demo.js"></script>
 </body>
 </html>
