@@ -1,0 +1,14 @@
+-- NOTE
+-- 2026-07-03: A selected-set diagnostic audit helper was considered for the
+-- President Tech Award pilot, but it was not applied to production in this step.
+-- Reason: the existing subject-level audit plus direct row-count checks were enough
+-- for the current safe pilot stage, and no additional helper was required.
+--
+-- Current safe checks used instead:
+-- - question_answer_diagnostics published rows for selected pilot questions = 27
+-- - question_content_change_decisions applied rows for selected pilot questions = 7
+-- - questions total remained 4567
+-- - practice_answers total remained 8710
+-- - tour_answers total remained 6267
+--
+-- This file intentionally contains no DDL/DML.
