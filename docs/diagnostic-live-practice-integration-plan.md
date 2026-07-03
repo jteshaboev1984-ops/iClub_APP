@@ -4,7 +4,7 @@ Date: 2026-07-03
 
 ## Current state
 
-The diagnostic demo exists as a separate hidden page:
+The diagnostic demo exists as one temporary hidden page:
 
 ```text
 /diagnostic-demo.html
@@ -14,24 +14,26 @@ It is not connected to the live practice/tour flow.
 
 This is intentional because the live app has real users and real history.
 
+Do not create additional demo routes unless there is a strong product reason. The next step should move toward the existing app flow, not create a demo for the demo.
+
 ## Product goal
 
 The final diagnostic experience should feel like a natural part of the main iClub app, not like a separate technical demo.
 
-The demo should eventually become visually and logically close to the real practice flow:
+The diagnostic flow should become part of the real practice experience:
 
-1. subject selection;
-2. practice start screen;
-3. question screen;
-4. per-answer diagnostic feedback;
-5. final diagnostic summary;
+1. existing subject/practice entry point;
+2. existing practice start logic;
+3. existing question screen style;
+4. per-answer diagnostic feedback in practice;
+5. final diagnostic summary on practice result screen;
 6. recommended next practice / lesson.
 
 ## What should be shown in real practice
 
 ### 1. Before practice
 
-Show a normal practice card:
+Show diagnostics as a normal practice feature:
 
 - subject;
 - current tour/topic block;
@@ -72,43 +74,35 @@ Do not reveal answer keys during active tour participation.
 
 ## Safe technical path
 
-### Phase 1 — Hidden demo polish
+### Phase 1 — Keep one hidden demo only
 
-Status: in progress.
+Status: current.
 
 Scope:
 
-- keep `/diagnostic-demo.html` hidden;
-- make it visually close to app design;
-- support EN/RU/UZ;
-- hide technical labels;
-- show final diagnostic summary;
-- no database writes from the demo session.
+- keep only `/diagnostic-demo.html` as a temporary hidden proof-of-concept;
+- use it to validate diagnostic copy, EN/RU/UZ, input checking and summary logic;
+- do not add another standalone demo page;
+- no database writes from the demo session;
+- no live practice/tour changes yet.
 
-### Phase 2 — Real app visual clone
+### Phase 2 — Inspect existing app practice flow
 
-Create a second hidden route that mirrors the main app flow more closely.
+Before writing integration code, inspect the real frontend practice implementation.
 
-Suggested route:
+Find exactly:
 
-```text
-/diagnostic-practice-pilot.html
-```
+- where practice questions are loaded;
+- where answer checking happens;
+- where practice result screen is rendered;
+- where language selection is applied;
+- where user mode/subject/tour context is stored.
 
-This route should include:
+Output should be a precise integration map, not new demo code.
 
-- app-like header;
-- subject card for Economics;
-- start diagnostic practice button;
-- question flow;
-- feedback block;
-- final summary.
+### Phase 3 — Add hidden feature flag inside existing flow
 
-Still hidden. Still no effect on live practice/tour history.
-
-### Phase 3 — Safe pilot in real practice
-
-Add diagnostics behind a feature flag.
+Add diagnostics behind a feature flag in the existing practice flow.
 
 Suggested feature flag:
 
@@ -125,17 +119,26 @@ Enable only for:
 
 Do not enable for all users immediately.
 
-### Phase 4 — Live practice integration
+### Phase 4 — Safe pilot inside real practice
 
-Only after Phase 3 testing:
+Only after Phase 2 mapping and Phase 3 flag:
 
-- load questions through safe payload;
+- load selected diagnostic questions through safe payload;
 - check answers server-side;
-- write diagnostic records safely;
+- show diagnostic feedback after practice answers;
 - update practice result screen with diagnostic summary;
-- keep old scores/history stable.
+- keep old scores/history stable;
+- keep the ability to switch the flag off quickly.
 
-### Phase 5 — Tour review integration
+### Phase 5 — Wider practice integration
+
+Only after the pilot is stable:
+
+- expand diagnostic mapping to more Economics questions;
+- then expand to other subjects;
+- keep old public question read policy unchanged until the safe flow covers live needs.
+
+### Phase 6 — Tour review integration
 
 Only after live practice integration is stable:
 
