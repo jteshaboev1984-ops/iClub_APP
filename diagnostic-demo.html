@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>iClub Diagnostic Demo</title>
+  <link rel="stylesheet" href="diagnostic-demo.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <main class="demo-shell">
+    <section class="hero-card">
+      <div class="eyebrow">President Tech Award Demo</div>
+      <h1>iClub Diagnostic Learning Engine</h1>
+      <p>
+        This hidden pilot shows safe question delivery and diagnostic feedback for selected Economics questions.
+        It does not change student history, scores, ratings or certificates.
+      </p>
+    </section>
+
+    <section class="status-card" id="demo-status">Loading diagnostic pilot…</section>
+
+    <section class="question-card hidden" id="question-card">
+      <div class="question-meta" id="question-meta"></div>
+      <h2 id="question-text"></h2>
+      <div class="options-list" id="options-list"></div>
+      <div class="input-wrap hidden" id="input-wrap">
+        <label for="input-answer">Your answer</label>
+        <input id="input-answer" autocomplete="off" placeholder="Type your answer" />
+      </div>
+      <button class="primary-btn" id="submit-answer" type="button">Check answer</button>
+    </section>
+
+    <section class="feedback-card hidden" id="feedback-card">
+      <div class="feedback-title" id="feedback-title"></div>
+      <p id="feedback-text"></p>
+      <div class="feedback-grid">
+        <div>
+          <span>Weak area</span>
+          <strong id="weak-area">—</strong>
+        </div>
+        <div>
+          <span>Next action</span>
+          <strong id="next-action">—</strong>
+        </div>
+      </div>
+      <button class="secondary-btn" id="next-question" type="button">Next question</button>
+    </section>
+  </main>
+
+  <script src="diagnostic-demo.js"></script>
+</body>
+</html>
