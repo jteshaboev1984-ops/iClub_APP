@@ -22,6 +22,7 @@ const COPY = {
     inputLabel: 'Your answer',
     inputPlaceholder: 'Type your answer',
     checkAnswer: 'Check answer',
+    answerChecked: 'Answer checked',
     correct: 'Correct',
     needsRevision: 'Needs revision',
     weakArea: 'Weak area',
@@ -62,6 +63,7 @@ const COPY = {
     inputLabel: 'Твой ответ',
     inputPlaceholder: 'Введи ответ',
     checkAnswer: 'Проверить ответ',
+    answerChecked: 'Ответ проверен',
     correct: 'Верно',
     needsRevision: 'Нужно повторить',
     weakArea: 'Слабое место',
@@ -102,6 +104,7 @@ const COPY = {
     inputLabel: 'Javobingiz',
     inputPlaceholder: 'Javobni kiriting',
     checkAnswer: 'Javobni tekshirish',
+    answerChecked: 'Javob tekshirildi',
     correct: 'To‘g‘ri',
     needsRevision: 'Qayta ko‘rib chiqish kerak',
     weakArea: 'Zaif joy',
@@ -121,7 +124,7 @@ const COPY = {
     summaryTitle: 'Mini tayyorgarlik rejangiz tayyor',
     mainWeakAreas: 'Asosiy zaif joylar',
     mistakePattern: 'Xato turi',
-    nextStudyPlan: 'Keyingi o‘quv reja',
+    nextStudyPlan: 'Keyingi tayyorgarlik rejasi',
     noWeakArea: 'Bu qisqa blokda katta zaif joy topilmadi.',
     noMistakePattern: 'Takrorlanayotgan xato turi topilmadi.',
     harderSet: 'Iqtisodiyot bo‘yicha qiyinroq blokka o‘ting.',
@@ -131,6 +134,139 @@ const COPY = {
     feedbackMissing: 'Diagnostik izoh hozircha mavjud emas.',
     times: 'marta',
     restart: 'Qayta boshlash',
+  },
+};
+
+const LABELS = {
+  topic: {
+    Market: { en: 'Market', ru: 'Рынок', uz: 'Bozor' },
+    Demand: { en: 'Demand', ru: 'Спрос', uz: 'Talab' },
+    Basics: { en: 'Economics basics', ru: 'Основы экономики', uz: 'Iqtisodiyot asoslari' },
+    PPC: { en: 'PPC', ru: 'Кривая производственных возможностей', uz: 'Ishlab chiqarish imkoniyatlari egri chizig‘i' },
+    Elasticity: { en: 'Elasticity', ru: 'Эластичность', uz: 'Elastiklik' },
+    'Government macroeconomic intervention': {
+      en: 'Government macroeconomic policy',
+      ru: 'Макроэкономическая политика государства',
+      uz: 'Davlatning makroiqtisodiy siyosati',
+    },
+    'Allocative efficiency': { en: 'Allocative efficiency', ru: 'Аллокативная эффективность', uz: 'Allokativ samaradorlik' },
+    'Complementary goods': { en: 'Complementary goods', ru: 'Дополняющие товары', uz: 'To‘ldiruvchi tovarlar' },
+    'Consumer surplus': { en: 'Consumer surplus', ru: 'Потребительский излишек', uz: 'Iste’molchi ortiqchaligi' },
+    'Income from factors of production': {
+      en: 'Income from factors of production',
+      ru: 'Доходы факторов производства',
+      uz: 'Ishlab chiqarish omillari daromadi',
+    },
+    'Fiscal policy': { en: 'Fiscal policy', ru: 'Фискальная политика', uz: 'Fiskal siyosat' },
+    'Opportunity cost on the PPC': {
+      en: 'Opportunity cost on PPC',
+      ru: 'Альтернативная стоимость на PPC',
+      uz: 'PPC bo‘yicha muqobil qiymat',
+    },
+    'Calculating PED': { en: 'Calculating PED', ru: 'Расчёт PED', uz: 'PED hisoblash' },
+  },
+  skill: {
+    'Allocative efficiency vs average-cost logic': {
+      en: 'Allocative efficiency vs average cost',
+      ru: 'Аллокативная эффективность и средние издержки',
+      uz: 'Allokativ samaradorlik va o‘rtacha xarajat',
+    },
+    'Area position on demand diagram': {
+      en: 'Area position on demand diagram',
+      ru: 'Область на графике спроса',
+      uz: 'Talab grafigidagi soha',
+    },
+    'Complement demand shift direction': {
+      en: 'Direction of demand shift for complements',
+      ru: 'Направление сдвига спроса у дополняющих товаров',
+      uz: 'To‘ldiruvchi tovarlarda talab siljishi yo‘nalishi',
+    },
+    'Consumer surplus vs producer/supply area': {
+      en: 'Consumer surplus vs producer area',
+      ru: 'Потребительский излишек и область производителя',
+      uz: 'Iste’molchi ortiqchaligi va ishlab chiqaruvchi sohasi',
+    },
+    'Consumer vs producer surplus': {
+      en: 'Consumer surplus vs producer surplus',
+      ru: 'Потребительский и производительский излишек',
+      uz: 'Iste’molchi va ishlab chiqaruvchi ortiqchaligi',
+    },
+    'Demand shift vs elasticity terminology': {
+      en: 'Demand shift vs elasticity term',
+      ru: 'Сдвиг спроса и термин эластичности',
+      uz: 'Talab siljishi va elastiklik termini',
+    },
+    'Efficiency vs profit outcome': {
+      en: 'Efficiency vs profit result',
+      ru: 'Эффективность и результат прибыли',
+      uz: 'Samaradorlik va foyda natijasi',
+    },
+    'Enterprise vs capital reward': {
+      en: 'Enterprise vs capital reward',
+      ru: 'Доход предпринимательства и капитала',
+      uz: 'Tadbirkorlik va kapital daromadi',
+    },
+    'Fiscal vs monetary policy': {
+      en: 'Fiscal policy vs monetary policy',
+      ru: 'Фискальная и монетарная политика',
+      uz: 'Fiskal va monetar siyosat',
+    },
+    'Labour vs capital reward': {
+      en: 'Labour vs capital reward',
+      ru: 'Доход труда и капитала',
+      uz: 'Mehnat va kapital daromadi',
+    },
+    'Land vs capital reward': {
+      en: 'Land vs capital reward',
+      ru: 'Доход земли и капитала',
+      uz: 'Yer va kapital daromadi',
+    },
+    'Macroeconomic policy categories': {
+      en: 'Macroeconomic policy categories',
+      ru: 'Категории макроэкономической политики',
+      uz: 'Makroiqtisodiy siyosat turlari',
+    },
+    'Market supply misconception': {
+      en: 'Misconception about market supply',
+      ru: 'Неверное понимание предложения',
+      uz: 'Taklif haqida noto‘g‘ri tushuncha',
+    },
+    'Opportunity cost calculation': {
+      en: 'Opportunity cost calculation',
+      ru: 'Расчёт альтернативной стоимости',
+      uz: 'Muqobil qiymatni hisoblash',
+    },
+    'PED calculation': { en: 'PED calculation', ru: 'Расчёт PED', uz: 'PED hisoblash' },
+    'Policy instrument recognition': {
+      en: 'Recognising policy instruments',
+      ru: 'Распознавание инструментов политики',
+      uz: 'Siyosat instrumentlarini tanish',
+    },
+    'Related goods effect': {
+      en: 'Effect of related goods',
+      ru: 'Влияние связанных товаров',
+      uz: 'Bog‘liq tovarlar ta’siri',
+    },
+  },
+  mistake: {
+    concept_confusion: { en: 'Concept confusion', ru: 'Путаница понятий', uz: 'Tushuncha chalkashligi' },
+    diagram_area_direction: { en: 'Diagram area error', ru: 'Ошибка области на графике', uz: 'Diagrammadagi soha xatosi' },
+    direction_error: { en: 'Direction error', ru: 'Ошибка направления', uz: 'Yo‘nalish xatosi' },
+    diagram_area_confusion: { en: 'Diagram area confusion', ru: 'Путаница областей на графике', uz: 'Diagramma sohalarini adashtirish' },
+    producer_surplus_confusion: {
+      en: 'Consumer/producer surplus confusion',
+      ru: 'Путаница потребительского и производительского излишка',
+      uz: 'Iste’molchi va ishlab chiqaruvchi ortiqchaligi chalkashligi',
+    },
+    term_misuse: { en: 'Term misuse', ru: 'Неверное использование термина', uz: 'Termin noto‘g‘ri ishlatilgan' },
+    overgeneralisation: { en: 'Overgeneralisation', ru: 'Слишком общее правило', uz: 'Haddan tashqari umumlashtirish' },
+    factor_reward_confusion: { en: 'Factor income confusion', ru: 'Путаница доходов факторов', uz: 'Omil daromadlari chalkashligi' },
+    policy_type_confusion: { en: 'Policy type confusion', ru: 'Путаница типов политики', uz: 'Siyosat turlari chalkashligi' },
+    policy_scope_confusion: { en: 'Policy scope confusion', ru: 'Путаница области политики', uz: 'Siyosat doirasi chalkashligi' },
+    irrelevant_condition: { en: 'Irrelevant condition', ru: 'Нерелевантное условие', uz: 'Aloqasiz shart' },
+    calculation_error: { en: 'Calculation error', ru: 'Ошибка расчёта', uz: 'Hisoblash xatosi' },
+    formula_or_percentage_error: { en: 'Formula or percentage error', ru: 'Ошибка формулы или процентов', uz: 'Formula yoki foiz xatosi' },
+    missing_link: { en: 'Missing link between ideas', ru: 'Пропущена связь между идеями', uz: 'G‘oyalar orasidagi bog‘lanish tushib qolgan' },
   },
 };
 
@@ -186,6 +322,11 @@ function localField(base, lang = state.lang) {
   return `${base}_${lang}`;
 }
 
+function displayLabel(value, group = 'topic') {
+  if (!value) return '';
+  return LABELS[group]?.[value]?.[state.lang] || LABELS[group]?.[value]?.en || value;
+}
+
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
   statusEl.style.borderColor = isError ? '#fed7aa' : '';
@@ -201,7 +342,6 @@ function updateStaticCopy() {
   progressLabel.textContent = t.progress;
   inputLabel.textContent = t.inputLabel;
   inputAnswer.placeholder = t.inputPlaceholder;
-  submitButton.textContent = t.checkAnswer;
   weakAreaLabel.textContent = t.weakArea;
   nextActionLabel.textContent = t.nextAction;
   summaryLabel.textContent = t.summaryLabel;
@@ -264,14 +404,19 @@ function setAnswerControlsDisabled(disabled) {
   });
 }
 
-function renderQuestion() {
+function renderQuestion(options = {}) {
+  const { reset = true } = options;
   const t = copy();
   const question = state.questions[state.currentIndex];
-  state.selectedOptionIndex = null;
-  state.currentAnswered = false;
-  inputAnswer.value = '';
-  inputAnswer.disabled = false;
-  feedbackCard.classList.add('hidden');
+
+  if (reset) {
+    state.selectedOptionIndex = null;
+    state.currentAnswered = false;
+    inputAnswer.value = '';
+    feedbackCard.classList.add('hidden');
+  }
+
+  inputAnswer.disabled = state.currentAnswered;
   summaryCard.classList.add('hidden');
   progressCard.classList.remove('hidden');
   updateProgress();
@@ -281,10 +426,9 @@ function renderQuestion() {
     return;
   }
 
-  setStatus(t.questionOf(state.currentIndex + 1, state.questions.length));
   questionCard.classList.remove('hidden');
-  submitButton.disabled = false;
-  submitButton.textContent = t.checkAnswer;
+  submitButton.textContent = state.currentAnswered ? t.answerChecked : t.checkAnswer;
+  submitButton.disabled = state.currentAnswered;
 
   questionMeta.innerHTML = '';
   [question.topic, question.subtopic]
@@ -292,7 +436,7 @@ function renderQuestion() {
     .forEach((value) => {
       const pill = document.createElement('span');
       pill.className = 'meta-pill';
-      pill.textContent = value;
+      pill.textContent = displayLabel(value, 'topic');
       questionMeta.appendChild(pill);
     });
 
@@ -302,27 +446,30 @@ function renderQuestion() {
   if (question.qtype === 'input') {
     inputWrap.classList.remove('hidden');
     optionsList.classList.add('hidden');
-    return;
+  } else {
+    inputWrap.classList.add('hidden');
+    optionsList.classList.remove('hidden');
+
+    const optionItems = parseOptions(getText(question, 'options_text'));
+    optionItems.forEach((option, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `option-btn${state.selectedOptionIndex === index ? ' selected' : ''}`;
+      button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+      button.disabled = state.currentAnswered;
+      button.addEventListener('click', () => {
+        if (state.currentAnswered) return;
+        state.selectedOptionIndex = index;
+        document.querySelectorAll('.option-btn').forEach((node) => node.classList.remove('selected'));
+        button.classList.add('selected');
+      });
+      optionsList.appendChild(button);
+    });
   }
 
-  inputWrap.classList.add('hidden');
-  optionsList.classList.remove('hidden');
-
-  const options = parseOptions(getText(question, 'options_text'));
-
-  options.forEach((option, index) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'option-btn';
-    button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
-    button.addEventListener('click', () => {
-      if (state.currentAnswered) return;
-      state.selectedOptionIndex = index;
-      document.querySelectorAll('.option-btn').forEach((node) => node.classList.remove('selected'));
-      button.classList.add('selected');
-    });
-    optionsList.appendChild(button);
-  });
+  if (!state.currentAnswered) {
+    setStatus(t.questionOf(state.currentIndex + 1, state.questions.length));
+  }
 }
 
 async function loadQuestions() {
@@ -350,7 +497,24 @@ async function loadQuestions() {
     return;
   }
 
-  renderQuestion();
+  renderQuestion({ reset: true });
+}
+
+function renderFeedback(result) {
+  const t = copy();
+  const correct = Boolean(result.is_correct);
+  const area = [displayLabel(result.recommended_topic, 'topic'), displayLabel(result.recommended_subtopic, 'topic')]
+    .filter(Boolean)
+    .join(' / ');
+
+  feedbackTitle.textContent = correct ? t.correct : t.needsRevision;
+  feedbackTitle.className = `feedback-title ${correct ? 'good' : 'bad'}`;
+  feedbackText.textContent = getResultText(result, 'feedback') || t.feedbackMissing;
+  weakArea.textContent = displayLabel(result.weak_skill, 'skill') || area || t.reviewRelatedTopic;
+  nextAction.textContent = getResultText(result, 'next_action') || t.trySimilar;
+  nextButton.textContent = state.currentIndex + 1 >= state.questions.length ? t.showSummary : t.nextQuestion;
+  feedbackCard.classList.remove('hidden');
+  setStatus(t.questionChecked(state.currentIndex + 1));
 }
 
 async function submitAnswer() {
@@ -388,23 +552,12 @@ async function submitAnswer() {
   }
 
   const result = data || {};
-  const correct = Boolean(result.is_correct);
   state.currentAnswered = true;
   state.results.push({ question, result });
   updateProgress();
+  renderQuestion({ reset: false });
   setAnswerControlsDisabled(true);
-
-  feedbackTitle.textContent = correct ? t.correct : t.needsRevision;
-  feedbackTitle.className = `feedback-title ${correct ? 'good' : 'bad'}`;
-  feedbackText.textContent = getResultText(result, 'feedback') || t.feedbackMissing;
-
-  const area = [result.recommended_topic, result.recommended_subtopic].filter(Boolean).join(' / ');
-  weakArea.textContent = result.weak_skill || area || t.reviewRelatedTopic;
-  nextAction.textContent = getResultText(result, 'next_action') || t.trySimilar;
-
-  nextButton.textContent = state.currentIndex + 1 >= state.questions.length ? t.showSummary : t.nextQuestion;
-  feedbackCard.classList.remove('hidden');
-  setStatus(t.questionChecked(state.currentIndex + 1));
+  renderFeedback(result);
 }
 
 function countBy(items, getKey) {
@@ -472,12 +625,16 @@ function renderSummary() {
   summaryCount.textContent = `${correctCount} / ${total}`;
 
   const weakAreas = countBy(wrongResults, ({ result }) => {
-    return result.weak_skill || [result.recommended_topic, result.recommended_subtopic].filter(Boolean).join(' / ');
+    return (
+      displayLabel(result.weak_skill, 'skill') ||
+      [displayLabel(result.recommended_topic, 'topic'), displayLabel(result.recommended_subtopic, 'topic')]
+        .filter(Boolean)
+        .join(' / ')
+    );
   });
 
   const mistakeTypes = countBy(wrongResults, ({ result }) => {
-    if (!result.mistake_type) return null;
-    return result.mistake_type.replaceAll('_', ' ');
+    return displayLabel(result.mistake_type, 'mistake');
   });
 
   fillList(summaryWeakList, weakAreas, t.noWeakArea);
@@ -488,7 +645,7 @@ function renderSummary() {
 function goNext() {
   if (!state.currentAnswered) return;
   state.currentIndex += 1;
-  renderQuestion();
+  renderQuestion({ reset: true });
 }
 
 function restartDemo() {
@@ -496,7 +653,7 @@ function restartDemo() {
   state.selectedOptionIndex = null;
   state.currentAnswered = false;
   state.results = [];
-  renderQuestion();
+  renderQuestion({ reset: true });
 }
 
 function setLanguage(lang) {
@@ -512,25 +669,14 @@ function setLanguage(lang) {
     return;
   }
 
-  const hasSummary = !summaryCard.classList.contains('hidden');
-  const hasFeedback = !feedbackCard.classList.contains('hidden');
-
-  if (hasSummary) {
+  if (!summaryCard.classList.contains('hidden')) {
     renderSummary();
-  } else if (hasFeedback) {
-    const last = state.results[state.results.length - 1];
-    if (last) {
-      const correct = Boolean(last.result.is_correct);
-      feedbackTitle.textContent = correct ? copy().correct : copy().needsRevision;
-      feedbackText.textContent = getResultText(last.result, 'feedback') || copy().feedbackMissing;
-      nextAction.textContent = getResultText(last.result, 'next_action') || copy().trySimilar;
-      nextButton.textContent = state.currentIndex + 1 >= state.questions.length ? copy().showSummary : copy().nextQuestion;
-      setStatus(copy().questionChecked(state.currentIndex + 1));
-    }
-    questionText.textContent = getText(state.questions[state.currentIndex], 'question_text');
-  } else {
-    renderQuestion();
+    return;
   }
+
+  renderQuestion({ reset: false });
+  const last = state.currentAnswered ? state.results[state.results.length - 1] : null;
+  if (last) renderFeedback(last.result);
 }
 
 submitButton.addEventListener('click', submitAnswer);
