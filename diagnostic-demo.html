@@ -10,15 +10,25 @@
 <body>
   <main class="demo-shell">
     <section class="hero-card">
-      <div class="eyebrow">President Tech Award Demo</div>
+      <div class="eyebrow">Diagnostic Practice Demo</div>
       <h1>iClub Diagnostic Learning Engine</h1>
       <p>
-        This hidden pilot shows safe question delivery and diagnostic feedback for selected Economics questions.
-        It does not change student history, scores, ratings or certificates.
+        Answer a short Economics set. After each answer, iClub explains the mistake and builds a personal mini study plan.
+        Demo results are not saved to student history.
       </p>
     </section>
 
-    <section class="status-card" id="demo-status">Loading diagnostic pilot…</section>
+    <section class="status-card" id="demo-status">Loading diagnostic practice…</section>
+
+    <section class="progress-card" id="progress-card">
+      <div class="progress-top">
+        <span id="progress-label">Progress</span>
+        <strong id="progress-count">0 / 7</strong>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </section>
 
     <section class="question-card hidden" id="question-card">
       <div class="question-meta" id="question-meta"></div>
@@ -45,6 +55,36 @@
         </div>
       </div>
       <button class="secondary-btn" id="next-question" type="button">Next question</button>
+    </section>
+
+    <section class="summary-card hidden" id="summary-card">
+      <div class="summary-header">
+        <div>
+          <div class="eyebrow">Diagnostic Summary</div>
+          <h2>Your mini study plan is ready</h2>
+        </div>
+        <div class="score-ring">
+          <strong id="summary-score">0%</strong>
+          <span id="summary-count">0 / 7</span>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-box">
+          <span>Main weak areas</span>
+          <ul id="summary-weak-list"></ul>
+        </div>
+        <div class="summary-box">
+          <span>Mistake pattern</span>
+          <ul id="summary-mistake-list"></ul>
+        </div>
+        <div class="summary-box summary-box-wide">
+          <span>Next study plan</span>
+          <ol id="summary-plan-list"></ol>
+        </div>
+      </div>
+
+      <button class="primary-btn" id="restart-demo" type="button">Restart demo</button>
     </section>
   </main>
 
