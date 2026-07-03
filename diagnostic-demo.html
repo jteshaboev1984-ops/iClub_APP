@@ -10,9 +10,16 @@
 <body>
   <main class="demo-shell">
     <section class="hero-card">
-      <div class="eyebrow">Diagnostic Practice Demo</div>
-      <h1>iClub Diagnostic Learning Engine</h1>
-      <p>
+      <div class="hero-topline">
+        <div class="eyebrow" id="hero-label">Diagnostic Practice Demo</div>
+        <div class="language-switch" aria-label="Demo language">
+          <button type="button" class="language-btn active" data-lang="en">EN</button>
+          <button type="button" class="language-btn" data-lang="ru">RU</button>
+          <button type="button" class="language-btn" data-lang="uz">UZ</button>
+        </div>
+      </div>
+      <h1 id="hero-title">iClub Diagnostic Learning Engine</h1>
+      <p id="hero-copy">
         Answer a short Economics set. After each answer, iClub explains the mistake and builds a personal mini study plan.
         Demo results are not saved to student history.
       </p>
@@ -35,7 +42,7 @@
       <h2 id="question-text"></h2>
       <div class="options-list" id="options-list"></div>
       <div class="input-wrap hidden" id="input-wrap">
-        <label for="input-answer">Your answer</label>
+        <label for="input-answer" id="input-label">Your answer</label>
         <input id="input-answer" autocomplete="off" placeholder="Type your answer" />
       </div>
       <button class="primary-btn" id="submit-answer" type="button">Check answer</button>
@@ -46,11 +53,11 @@
       <p id="feedback-text"></p>
       <div class="feedback-grid">
         <div>
-          <span>Weak area</span>
+          <span id="weak-area-label">Weak area</span>
           <strong id="weak-area">—</strong>
         </div>
         <div>
-          <span>Next action</span>
+          <span id="next-action-label">Next action</span>
           <strong id="next-action">—</strong>
         </div>
       </div>
@@ -60,8 +67,8 @@
     <section class="summary-card hidden" id="summary-card">
       <div class="summary-header">
         <div>
-          <div class="eyebrow">Diagnostic Summary</div>
-          <h2>Your mini study plan is ready</h2>
+          <div class="eyebrow" id="summary-label">Diagnostic Summary</div>
+          <h2 id="summary-title">Your mini study plan is ready</h2>
         </div>
         <div class="score-ring">
           <strong id="summary-score">0%</strong>
@@ -71,15 +78,15 @@
 
       <div class="summary-grid">
         <div class="summary-box">
-          <span>Main weak areas</span>
+          <span id="summary-weak-title">Main weak areas</span>
           <ul id="summary-weak-list"></ul>
         </div>
         <div class="summary-box">
-          <span>Mistake pattern</span>
+          <span id="summary-mistake-title">Mistake pattern</span>
           <ul id="summary-mistake-list"></ul>
         </div>
         <div class="summary-box summary-box-wide">
-          <span>Next study plan</span>
+          <span id="summary-plan-title">Next study plan</span>
           <ol id="summary-plan-list"></ol>
         </div>
       </div>
