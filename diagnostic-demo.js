@@ -18,12 +18,12 @@ const COPY = {
     bestResult: 'Best result', bestTime: 'Best time', lastAttempts: 'Last attempts', noAttempts: 'No attempts yet', date: 'Date', score: 'Score', time: 'Time', start: 'Start practice', pause: 'Pause',
     difficulty: 'Difficulty', difficulty_easy: 'easy', difficulty_medium: 'medium', difficulty_hard: 'hard', inputLabel: 'Answer', inputPlaceholder: 'Type your answer', answer: 'Answer', checking: 'Checking…', loadError: 'Could not load practice.', loading: 'Loading practice questions…',
     resultTitle: 'Practice result', resultMeta: 'Review your result and mistakes.', scoreCaption: (score, total) => `${score} of ${total} correct`, correctShort: 'Correct', errors: 'Errors', topics: 'Topics',
-    reviewErrors: 'Review mistakes', reviewErrorsSub: 'Answers, correct logic and explanations', getAi: 'Get AI diagnosis', toPractice: 'To practice',
+    reviewErrors: 'Review mistakes', reviewErrorsSub: 'Answers, correct logic and explanations', getAi: 'Get AI diagnosis', toPractice: 'To practice', backToAiPlan: 'Back to AI plan',
     reviewSubtitle: 'Tap a question to open its detailed review', reviewSummary: 'Review by topics', reviewSummaryCopy: 'Mistakes are grouped by topic. Open a topic and choose a question for detailed explanation.', result: 'Result', questions: 'Questions', mistakes: 'Mistakes',
     aiThinkingTitle: 'AI diagnosis of result', aiThinkingSubtitle: 'Analysing the whole practice attempt', aiThinkingStatus: 'Diagnosing the result…', aiStep1: 'Checking repeated mistakes', aiStep2: 'Finding the main focus', aiStep3: 'Building the next step',
-    aiReadyTitle: 'AI diagnosis is ready', aiReadySubtitle: 'Personal next step after the whole practice', aiDiagnostic: 'AI diagnosis of result', aiFocus: 'Main focus', aiReason: 'Why this first', aiPlan: 'Next plan', backToResult: 'Back to result',
+    aiReadyTitle: 'AI diagnosis is ready', aiReadySubtitle: 'Personal next step after the whole practice', aiDiagnostic: 'AI diagnosis of result', aiFocus: 'Main focus', aiReason: 'Why this first', aiPlan: 'Learning route', backToResult: 'Back to result',
     aiReasonText: (focus, errors) => `${focus} is the best first focus because ${errors} mistake(s) in this attempt are connected to this result pattern.`,
-    miniPlan: (focus) => [`Open the source for ${focus}.`, 'Review the mistake explanations.', 'Complete a short mini-training on this focus.'],
+    miniPlan: (focus) => [`First, restore the key idea in ${focus}: what the question is really asking and which rule should be used.`, 'Then compare your mistaken answers with the correct logic in the review.', 'After that, complete a short mini-training with similar questions to check that the focus is fixed.'],
     aiSourceActionTitle: 'Open source', aiSourceActionSub: 'Material for review', aiReviewActionTitle: 'Open mistake review', aiReviewActionSub: 'Check the logic in your mistakes', aiMiniActionTitle: 'Start mini-training', aiMiniActionSub: 'Short set on the main focus',
     sourceTitle: 'Source for review', sourceSubtitle: 'This material is connected to the main focus from AI diagnosis', sourcePill: 'Material', sourceTopic: 'Topic', sourceRef: 'Source', sourceNote: 'How to use it', sourceBack: 'Back to AI plan', sourceNoteText: 'Review this source first, then return to the mistake review and mini-training.',
     yourAnswer: 'Your answer', feedback: 'Explanation', weakArea: 'Weak area', reinforcement: 'For reinforcement', nextAction: 'Next action', correct: 'Correct', needsRevision: 'Needs revision', times: 'times', backToReview: 'Back to review', questionReview: 'Question review', questionReviewSub: 'Mistake reason and next step', chooseOption: 'Choose one option first.', typeAnswer: 'Type your answer first.'
@@ -34,12 +34,12 @@ const COPY = {
     bestResult: 'Лучший результат', bestTime: 'Лучшее время', lastAttempts: 'Последние попытки', noAttempts: 'Пока нет попыток', date: 'Дата', score: 'Счёт', time: 'Время', start: 'Начать практику', pause: 'Пауза',
     difficulty: 'Сложность', difficulty_easy: 'легко', difficulty_medium: 'средне', difficulty_hard: 'сложно', inputLabel: 'Ответ', inputPlaceholder: 'Введите ответ', answer: 'Ответить', checking: 'Проверяем…', loadError: 'Не удалось загрузить практику.', loading: 'Загружаем вопросы практики…',
     resultTitle: 'Результат практики', resultMeta: 'Посмотрите итог и разбор ошибок.', scoreCaption: (score, total) => `${score} из ${total} верно`, correctShort: 'Верно', errors: 'Ошибки', topics: 'Темы',
-    reviewErrors: 'Разбор ошибок', reviewErrorsSub: 'Ответы, правильная логика и объяснения', getAi: 'Получить ИИ-диагностику', toPractice: 'К практике',
+    reviewErrors: 'Разбор ошибок', reviewErrorsSub: 'Ответы, правильная логика и объяснения', getAi: 'Получить ИИ-диагностику', toPractice: 'К практике', backToAiPlan: 'Назад к ИИ-плану',
     reviewSubtitle: 'Нажмите на вопрос, чтобы открыть подробный разбор', reviewSummary: 'Разбор по темам', reviewSummaryCopy: 'Ошибки сгруппированы по темам. Откройте тему и выберите вопрос для подробного объяснения.', result: 'Результат', questions: 'Вопросов', mistakes: 'Ошибок',
     aiThinkingTitle: 'ИИ-диагностика результата', aiThinkingSubtitle: 'Анализируем всю попытку практики', aiThinkingStatus: 'Идёт диагностика результата…', aiStep1: 'Проверяем повторяющиеся ошибки', aiStep2: 'Определяем главный фокус', aiStep3: 'Собираем следующий шаг',
-    aiReadyTitle: 'ИИ-диагностика готова', aiReadySubtitle: 'Персональный следующий шаг после всей практики', aiDiagnostic: 'ИИ-диагностика результата', aiFocus: 'Главный фокус', aiReason: 'Почему начать с этого', aiPlan: 'Следующий план', backToResult: 'Назад к результату',
+    aiReadyTitle: 'ИИ-диагностика готова', aiReadySubtitle: 'Персональный следующий шаг после всей практики', aiDiagnostic: 'ИИ-диагностика результата', aiFocus: 'Главный фокус', aiReason: 'Почему начать с этого', aiPlan: 'Учебный маршрут', backToResult: 'Назад к результату',
     aiReasonText: (focus, errors) => `${focus} выбран первым, потому что ${errors} ошибк(и) в этой попытке связаны с этим направлением результата.`,
-    miniPlan: (focus) => [`Откройте источник по теме «${focus}».`, 'Посмотрите разбор ошибок и правильную логику.', 'Пройдите короткую мини-тренировку по этому фокусу.'],
+    miniPlan: (focus) => [`Сначала восстановите ключевую идею темы «${focus}»: что именно спрашивает вопрос и какое правило нужно применить.`, 'Затем сравните свои ошибки с правильной логикой в разборе.', 'После этого закрепите тему короткой мини-тренировкой по похожим вопросам.'],
     aiSourceActionTitle: 'Открыть источник', aiSourceActionSub: 'Материал для повторения', aiReviewActionTitle: 'Открыть разбор ошибок', aiReviewActionSub: 'Проверьте логику в ошибках', aiMiniActionTitle: 'Начать мини-тренировку', aiMiniActionSub: 'Короткий набор по главному фокусу',
     sourceTitle: 'Источник для повторения', sourceSubtitle: 'Материал связан с главным фокусом ИИ-диагностики', sourcePill: 'Материал', sourceTopic: 'Тема', sourceRef: 'Источник', sourceNote: 'Как использовать', sourceBack: 'Назад к ИИ-плану', sourceNoteText: 'Сначала повторите этот материал, затем вернитесь к разбору ошибок и мини-тренировке.',
     yourAnswer: 'Ваш ответ', feedback: 'Объяснение', weakArea: 'Слабое место', reinforcement: 'Для закрепления', nextAction: 'Следующий шаг', correct: 'Верно', needsRevision: 'Нужно повторить', times: 'раза', backToReview: 'Назад к разбору', questionReview: 'Разбор вопроса', questionReviewSub: 'Причина ошибки и следующий шаг', chooseOption: 'Сначала выберите один вариант ответа.', typeAnswer: 'Сначала введите ответ.'
@@ -50,12 +50,12 @@ const COPY = {
     bestResult: 'Eng yaxshi natija', bestTime: 'Eng yaxshi vaqt', lastAttempts: 'Oxirgi urinishlar', noAttempts: 'Hozircha urinish yo‘q', date: 'Sana', score: 'Ball', time: 'Vaqt', start: 'Mashqni boshlash', pause: 'Pauza',
     difficulty: 'Qiyinlik', difficulty_easy: 'oson', difficulty_medium: 'o‘rtacha', difficulty_hard: 'qiyin', inputLabel: 'Javob', inputPlaceholder: 'Javobni kiriting', answer: 'Javob berish', checking: 'Tekshirilmoqda…', loadError: 'Mashq yuklanmadi.', loading: 'Mashq savollari yuklanmoqda…',
     resultTitle: 'Mashq natijasi', resultMeta: 'Natijani va xatolar tahlilini ko‘ring.', scoreCaption: (score, total) => `${score} / ${total} to‘g‘ri`, correctShort: 'To‘g‘ri', errors: 'Xatolar', topics: 'Mavzular',
-    reviewErrors: 'Xatolar tahlili', reviewErrorsSub: 'Javoblar, to‘g‘ri mantiq va izohlar', getAi: 'AI diagnostika olish', toPractice: 'Mashqqa',
+    reviewErrors: 'Xatolar tahlili', reviewErrorsSub: 'Javoblar, to‘g‘ri mantiq va izohlar', getAi: 'AI diagnostika olish', toPractice: 'Mashqqa', backToAiPlan: 'AI rejaga qaytish',
     reviewSubtitle: 'Batafsil tahlilni ochish uchun savolni bosing', reviewSummary: 'Mavzular bo‘yicha tahlil', reviewSummaryCopy: 'Xatolar mavzular bo‘yicha guruhlangan. Mavzuni ochib, batafsil izoh uchun savolni tanlang.', result: 'Natija', questions: 'Savollar', mistakes: 'Xatolar',
     aiThinkingTitle: 'Natija AI diagnostikasi', aiThinkingSubtitle: 'Butun mashq urinishi tahlil qilinmoqda', aiThinkingStatus: 'Natija diagnostika qilinmoqda…', aiStep1: 'Takroriy xatolar tekshirilmoqda', aiStep2: 'Asosiy fokus aniqlanmoqda', aiStep3: 'Keyingi qadam tuzilmoqda',
-    aiReadyTitle: 'AI diagnostika tayyor', aiReadySubtitle: 'Butun mashqdan keyingi shaxsiy qadam', aiDiagnostic: 'Natija AI diagnostikasi', aiFocus: 'Asosiy fokus', aiReason: 'Nega bundan boshlash kerak', aiPlan: 'Keyingi reja', backToResult: 'Natijaga qaytish',
+    aiReadyTitle: 'AI diagnostika tayyor', aiReadySubtitle: 'Butun mashqdan keyingi shaxsiy qadam', aiDiagnostic: 'Natija AI diagnostikasi', aiFocus: 'Asosiy fokus', aiReason: 'Nega bundan boshlash kerak', aiPlan: 'O‘quv yo‘nalishi', backToResult: 'Natijaga qaytish',
     aiReasonText: (focus, errors) => `${focus} birinchi fokus sifatida tanlandi, chunki bu urinishdagi ${errors} ta xato shu yo‘nalish bilan bog‘liq.`,
-    miniPlan: (focus) => [`«${focus}» mavzusi bo‘yicha manbani oching.`, 'Xatolar tahlilini ko‘rib, to‘g‘ri mantiqni tekshiring.', 'Shu fokus bo‘yicha qisqa mini-mashqni bajaring.'],
+    miniPlan: (focus) => [`Avval «${focus}» mavzusining asosiy g‘oyasini tiklang: savol nimani so‘rayapti va qaysi qoida kerak.`, 'Keyin xatolaringizni to‘g‘ri mantiq bilan solishtiring.', 'Shundan so‘ng o‘xshash savollar bilan qisqa mini-mashq bajaring.'],
     aiSourceActionTitle: 'Manbani ochish', aiSourceActionSub: 'Takrorlash materiali', aiReviewActionTitle: 'Xatolar tahlilini ochish', aiReviewActionSub: 'Xatolardagi mantiqni tekshiring', aiMiniActionTitle: 'Mini-mashqni boshlash', aiMiniActionSub: 'Asosiy fokus bo‘yicha qisqa blok',
     sourceTitle: 'Takrorlash manbasi', sourceSubtitle: 'Material AI diagnostikadagi asosiy fokus bilan bog‘langan', sourcePill: 'Material', sourceTopic: 'Mavzu', sourceRef: 'Manba', sourceNote: 'Qanday ishlatish kerak', sourceBack: 'AI rejaga qaytish', sourceNoteText: 'Avval shu materialni takrorlang, keyin xatolar tahlili va mini-mashqqa qayting.',
     yourAnswer: 'Sizning javobingiz', feedback: 'Izoh', weakArea: 'Zaif joy', reinforcement: 'Mustahkamlash uchun', nextAction: 'Keyingi qadam', correct: 'To‘g‘ri', needsRevision: 'Qayta ko‘rib chiqish kerak', times: 'marta', backToReview: 'Tahlilga qaytish', questionReview: 'Savol tahlili', questionReviewSub: 'Xato sababi va keyingi qadam', chooseOption: 'Avval bitta javob variantini tanlang.', typeAnswer: 'Avval javobni kiriting.'
@@ -70,7 +70,7 @@ const LABELS = {
 
 const TERM_FIXES_RU = [['related goods demand shifts','сдвиги спроса из-за связанных товаров'],['demand shifters','факторы сдвига спроса'],['capital vs enterprise','капитал и предпринимательство'],['factors of production and rewards','факторы производства и их доходы'],['PED calculation','расчёт PED'],['PPC opportunity cost','альтернативную стоимость на PPC'],['demand/supply diagram','график спроса и предложения'],['government spending and taxation','государственные расходы и налоги'],['substitutes and complements','заменители и дополняющие товары']];
 
-const state = { lang:'ru', screen:'start', allQuestions:[], questions:[], currentIndex:0, selectedOptionIndex:null, results:[], detailIndex:null, aiTimers:[], aiVariant:0 };
+const state = { lang:'ru', screen:'start', allQuestions:[], questions:[], currentIndex:0, selectedOptionIndex:null, results:[], detailIndex:null, aiTimers:[], aiVariant:0, reviewReturnScreen:'result' };
 const $ = (id) => document.getElementById(id);
 const els = {
   topbarBack:$('topbar-back'),
@@ -108,8 +108,7 @@ function showScreen(name){
   els.aiResultScreen.classList.toggle('hidden', name!=='aiResult');
   els.sourceScreen.classList.toggle('hidden', name!=='source');
   els.detailScreen.classList.toggle('hidden', name!=='detail');
-  const showBack = ['review', 'detail', 'aiThinking', 'aiResult', 'source'].includes(name);
-  els.topbarBack.classList.toggle('hidden', !showBack);
+  els.topbarBack.classList.toggle('hidden', name==='start');
 }
 
 function updateStaticCopy(){
@@ -121,7 +120,7 @@ function updateStaticCopy(){
   els.startDemo.textContent=state.allQuestions.length?t.start:t.loading; els.pauseBtn.textContent=t.pause; els.inputLabel.textContent=t.inputLabel; els.inputAnswer.placeholder=t.inputPlaceholder; els.submitButton.textContent=t.answer;
   els.resultTitle.textContent=t.resultTitle; els.resultMeta.textContent=t.resultMeta; els.resultCorrectLabel.textContent=t.correctShort; els.resultErrorsLabel.textContent=t.errors; els.resultTopicsLabel.textContent=t.topics;
   els.reviewDiagnosisTitle.textContent=t.reviewErrors; els.reviewDiagnosisSub.textContent=t.reviewErrorsSub; els.resultPrimaryAction.textContent=t.getAi; els.backToStart.textContent=t.toPractice;
-  els.reviewTitle.textContent=t.reviewErrors; els.reviewSubtitle.textContent=t.reviewSubtitle; els.reviewSummaryTitle.textContent=t.reviewSummary; els.reviewSummaryCopy.textContent=t.reviewSummaryCopy; els.reviewBackToResult.textContent=t.backToResult;
+  els.reviewTitle.textContent=t.reviewErrors; els.reviewSubtitle.textContent=t.reviewSubtitle; els.reviewSummaryTitle.textContent=t.reviewSummary; els.reviewSummaryCopy.textContent=t.reviewSummaryCopy; els.reviewBackToResult.textContent=state.reviewReturnScreen==='aiResult' ? t.backToAiPlan : t.backToResult;
   els.aiThinkingTitle.textContent=t.aiThinkingTitle; els.aiThinkingSubtitle.textContent=t.aiThinkingSubtitle; els.aiThinkingStatus.textContent=t.aiThinkingStatus; els.aiStep1Text.textContent=t.aiStep1; els.aiStep2Text.textContent=t.aiStep2; els.aiStep3Text.textContent=t.aiStep3;
   els.aiResultTitle.textContent=t.aiReadyTitle; els.aiResultSubtitle.textContent=t.aiReadySubtitle; els.aiResultPill.textContent=t.aiDiagnostic; els.aiFocusLabel.textContent=t.aiFocus; els.aiReasonLabel.textContent=t.aiReason; els.aiPlanLabel.textContent=t.aiPlan; els.aiBackToResult.textContent=t.backToResult;
   els.aiSourceActionTitle.textContent=t.aiSourceActionTitle; els.aiSourceActionSub.textContent=t.aiSourceActionSub; els.aiReviewActionTitle.textContent=t.aiReviewActionTitle; els.aiReviewActionSub.textContent=t.aiReviewActionSub; els.aiMiniActionTitle.textContent=t.aiMiniActionTitle; els.aiMiniActionSub.textContent=t.aiMiniActionSub;
@@ -157,7 +156,7 @@ function renderQuestion(){
 function startDemo(questionSet=null){
   const source = Array.isArray(questionSet) && questionSet.length ? questionSet : state.allQuestions;
   if(!source.length) return;
-  state.questions=[...source]; state.currentIndex=0; state.selectedOptionIndex=null; state.results=[]; state.detailIndex=null;
+  state.questions=[...source]; state.currentIndex=0; state.selectedOptionIndex=null; state.results=[]; state.detailIndex=null; state.reviewReturnScreen='result';
   showScreen('quiz'); renderQuestion(); updateStaticCopy();
 }
 
@@ -195,8 +194,8 @@ function renderResult(){
   els.resultCorrectValue.textContent=`${s.correctCount}/${s.total}`; els.resultErrorsValue.textContent=String(s.wrong.length); els.resultTopicsValue.textContent=String(s.topicFocus.length); els.reviewDiagnosisCount.textContent=String(s.wrong.length);
 }
 
-function renderReview(){
-  const t=copy(); showScreen('review');
+function renderReview(returnTo=state.reviewReturnScreen || 'result'){
+  const t=copy(); state.reviewReturnScreen=returnTo; showScreen('review'); updateStaticCopy();
   const byTopic=new Map(); state.results.forEach((item,idx)=>{ const topic=label(item.question.topic,'topic')||'General'; if(!byTopic.has(topic)) byTopic.set(topic,[]); byTopic.get(topic).push({...item,idx}); });
   const topics=[...byTopic.keys()].sort((a,b)=> byTopic.get(b).filter(x=>!x.result.is_correct).length - byTopic.get(a).filter(x=>!x.result.is_correct).length || a.localeCompare(b));
   els.reviewQuestionList.innerHTML='';
@@ -234,7 +233,7 @@ function renderAiResult(){
 }
 
 function renderSource(){
-  const t=copy(); const {stats, rawTopic, item}=getFocusItem(); const focus=stats.topicFocus[0]?.[0] || '—'; showScreen('source');
+  const t=copy(); const {stats, item}=getFocusItem(); const focus=stats.topicFocus[0]?.[0] || '—'; showScreen('source');
   els.sourceFocusTitle.textContent=focus;
   els.sourceTopicValue.textContent=item ? `${label(item.question.topic,'topic')} / ${label(item.question.subtopic,'topic') || item.question.subtopic || '—'}` : focus;
   els.sourceRefValue.textContent=item?.question?.book_ref || item?.question?.bookRef || 'Book reference will be connected here in the real app.';
@@ -246,23 +245,24 @@ function startMiniTraining(){
   startDemo(mini.length ? mini : state.allQuestions);
 }
 
-function resetToStart(){ state.questions=[...state.allQuestions]; state.currentIndex=0; state.selectedOptionIndex=null; state.results=[]; state.detailIndex=null; clearAiTimers(); showScreen('start'); updateStaticCopy(); }
-function goBack(){ if(state.screen==='quiz') return resetToStart(); if(state.screen==='result') return resetToStart(); if(state.screen==='review') return renderResult(); if(state.screen==='detail') return renderReview(); if(state.screen==='aiThinking'){ clearAiTimers(); return renderResult(); } if(state.screen==='aiResult') return renderResult(); if(state.screen==='source') return renderAiResult(); }
-function setLanguage(lang){ if(!COPY[lang]) return; state.lang=lang; els.languageButtons.forEach(b=>b.classList.toggle('active',b.dataset.lang===lang)); updateStaticCopy(); if(state.screen==='quiz') renderQuestion(); if(state.screen==='result') renderResult(); if(state.screen==='review') renderReview(); if(state.screen==='detail' && state.detailIndex!==null) renderQuestionDetail(state.detailIndex); if(state.screen==='aiThinking') openAiThinking(); if(state.screen==='aiResult') renderAiResult(); if(state.screen==='source') renderSource(); }
+function resetToStart(){ state.questions=[...state.allQuestions]; state.currentIndex=0; state.selectedOptionIndex=null; state.results=[]; state.detailIndex=null; state.reviewReturnScreen='result'; clearAiTimers(); showScreen('start'); updateStaticCopy(); }
+function returnFromReview(){ return state.reviewReturnScreen==='aiResult' ? renderAiResult() : renderResult(); }
+function goBack(){ if(state.screen==='quiz') return resetToStart(); if(state.screen==='result') return resetToStart(); if(state.screen==='review') return returnFromReview(); if(state.screen==='detail') return renderReview(state.reviewReturnScreen); if(state.screen==='aiThinking'){ clearAiTimers(); return renderResult(); } if(state.screen==='aiResult') return renderResult(); if(state.screen==='source') return renderAiResult(); }
+function setLanguage(lang){ if(!COPY[lang]) return; state.lang=lang; els.languageButtons.forEach(b=>b.classList.toggle('active',b.dataset.lang===lang)); updateStaticCopy(); if(state.screen==='quiz') renderQuestion(); if(state.screen==='result') renderResult(); if(state.screen==='review') renderReview(state.reviewReturnScreen); if(state.screen==='detail' && state.detailIndex!==null) renderQuestionDetail(state.detailIndex); if(state.screen==='aiThinking') openAiThinking(); if(state.screen==='aiResult') renderAiResult(); if(state.screen==='source') renderSource(); }
 
 els.topbarBack.addEventListener('click',goBack);
 els.startDemo.addEventListener('click',()=>startDemo());
 els.submitButton.addEventListener('click',submitAnswer);
 els.resultPrimaryAction.addEventListener('click',openAiThinking);
 els.backToStart.addEventListener('click',resetToStart);
-els.openReview.addEventListener('click',renderReview);
-els.reviewBackToResult.addEventListener('click',renderResult);
+els.openReview.addEventListener('click',()=>renderReview('result'));
+els.reviewBackToResult.addEventListener('click',returnFromReview);
 els.aiBackToResult.addEventListener('click',renderResult);
-els.aiOpenReview.addEventListener('click',renderReview);
+els.aiOpenReview.addEventListener('click',()=>renderReview('aiResult'));
 els.aiOpenSource.addEventListener('click',renderSource);
 els.startMiniTraining.addEventListener('click',startMiniTraining);
 els.sourceBackToAi.addEventListener('click',renderAiResult);
-els.detailBackToReview.addEventListener('click',renderReview);
+els.detailBackToReview.addEventListener('click',()=>renderReview(state.reviewReturnScreen));
 els.pauseBtn.addEventListener('click',()=>null);
 els.inputAnswer.addEventListener('input',()=>setSubmitReady(hasCurrentAnswer()));
 els.inputAnswer.addEventListener('keydown',e=>{ if(e.key==='Enter'&&hasCurrentAnswer()) submitAnswer(); });
