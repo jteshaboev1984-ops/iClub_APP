@@ -61,7 +61,7 @@
         </section>
 
         <section class="practice-last card">
-          <div class="practice-last-head"><div class="card-title" id="last-attempts-title">Последние попытки</div></div>
+          <div class="card-title" id="last-attempts-title">Последние попытки</div>
           <div class="muted small" id="last-attempts-empty">Пока нет попыток</div>
           <div class="practice-table-wrap">
             <table class="practice-table" aria-label="Practice attempts">
@@ -94,38 +94,48 @@
       <section class="demo-screen hidden" id="practice-result-screen">
         <div class="section-head result-head">
           <h1 id="result-title">Результат практики</h1>
-          <p id="practice-result-meta">Найден главный фокус для роста</p>
+          <p id="practice-result-meta">Сначала обычный итог, затем можно открыть ИИ-диагностику</p>
         </div>
-        <section class="result-focus-card">
-          <div class="ai-pill" id="result-ai-label">ИИ-диагностика</div>
-          <div class="result-focus-label" id="result-focus-label">Главный фокус сейчас</div>
-          <div class="result-focus-title" id="result-focus-title">—</div>
-          <p id="result-focus-copy">На основе ответов определена тема, с которой лучше начать разбор.</p>
+
+        <section class="card result-basic-card">
+          <div class="result-score-main" id="result-score-main">0%</div>
+          <div class="result-score-caption" id="result-score-caption">0 из 7 верно</div>
           <div class="result-stat-row">
             <div><span id="result-correct-label">Верно</span><b id="result-correct-value">0/7</b></div>
             <div><span id="result-errors-label">Ошибки</span><b id="result-errors-value">0</b></div>
-            <div><span id="result-time-label">Разбор</span><b id="result-time-value">≈5 мин</b></div>
+            <div><span id="result-topics-label">Темы</span><b id="result-topics-value">0</b></div>
           </div>
         </section>
+
         <div class="cards-grid result-grid">
           <button class="card-btn result-review-card" id="open-review-diagnosis" type="button">
-            <div class="card-title"><span id="review-diagnosis-title">Разобрать ошибки</span><span id="review-diagnosis-count" class="badge badge-pin">0</span></div>
-            <div class="muted small" id="review-diagnosis-sub">Ответы, причины ошибок и что повторить</div>
+            <div class="card-title"><span id="review-diagnosis-title">Разбор ошибок</span><span id="review-diagnosis-count" class="badge badge-pin">0</span></div>
+            <div class="muted small" id="review-diagnosis-sub">Ответы, правильная логика и объяснения</div>
+          </button>
+
+          <button class="card-btn ai-entry-card" id="open-ai-diagnosis" type="button">
+            <div class="ai-entry-top">
+              <span class="ai-pill" id="ai-entry-label">ИИ-диагностика</span>
+              <span class="ai-pro-badge" id="ai-pro-badge">AI</span>
+            </div>
+            <div class="ai-entry-title" id="ai-entry-title">Получить персональный план</div>
+            <div class="muted small" id="ai-entry-sub">Главный фокус, причина ошибок и следующий шаг</div>
           </button>
         </div>
+
         <div class="actions-row result-actions">
-          <button class="btn primary" id="restart-demo" type="button">Разобрать ошибки</button>
+          <button class="btn primary" id="result-primary-action" type="button">Разбор ошибок</button>
           <button class="btn" id="back-to-start" type="button">К практике</button>
         </div>
       </section>
 
       <section class="demo-screen hidden" id="practice-review-diagnosis-screen">
         <div class="section-head">
-          <h1 id="review-title">Разбор и диагностика</h1>
-          <p id="review-subtitle">Ошибки, объяснения и план повторения</p>
+          <h1 id="review-title">Разбор ошибок</h1>
+          <p id="review-subtitle">Нажми на вопрос, чтобы открыть подробный разбор</p>
         </div>
         <section class="card diagnostic-summary-card">
-          <div class="card-title" id="diagnostic-summary-title">Диагностический итог</div>
+          <div class="card-title" id="review-summary-title">Итог разбора</div>
           <div class="diagnostic-score-row">
             <div><div class="muted small" id="diagnostic-score-label">Результат</div><div class="diagnostic-score" id="diagnostic-score">0%</div></div>
             <div class="diagnostic-mini-stats">
@@ -133,16 +143,51 @@
               <div><span id="diagnostic-topics-label">Темы</span><b id="diagnostic-topics">0</b></div>
             </div>
           </div>
-          <div class="diagnostic-grid">
-            <div><div class="muted small" id="summary-weak-title">Главные слабые места</div><ul id="summary-weak-list"></ul></div>
-            <div><div class="muted small" id="summary-mistake-title">Тип ошибок</div><ul id="summary-mistake-list"></ul></div>
-          </div>
-          <div class="diagnostic-plan-box"><div class="muted small" id="summary-plan-title">Следующий учебный план</div><ol id="summary-plan-list"></ol></div>
         </section>
         <div id="review-question-list" class="review-question-list"></div>
         <div class="actions-row sticky-actions">
           <button class="btn" id="review-back-to-result" type="button">Назад к результату</button>
-          <button class="btn primary" id="review-to-practice" type="button">К практике</button>
+          <button class="btn primary" id="review-to-ai" type="button">ИИ-диагностика</button>
+        </div>
+      </section>
+
+      <section class="demo-screen hidden" id="ai-thinking-screen">
+        <div class="section-head">
+          <h1 id="ai-thinking-title">ИИ-диагностика</h1>
+          <p id="ai-thinking-subtitle">Анализируем результат практики</p>
+        </div>
+        <section class="card ai-thinking-card">
+          <div class="ai-orb" aria-hidden="true"><span></span></div>
+          <div class="ai-thinking-status" id="ai-thinking-status">Идёт диагностика результата…</div>
+          <div class="ai-step-list">
+            <div class="ai-step active" id="ai-step-1"><span>1</span><b id="ai-step-1-text">Проверяем повторяющиеся ошибки</b></div>
+            <div class="ai-step" id="ai-step-2"><span>2</span><b id="ai-step-2-text">Определяем главный фокус</b></div>
+            <div class="ai-step" id="ai-step-3"><span>3</span><b id="ai-step-3-text">Собираем следующий шаг</b></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="demo-screen hidden" id="ai-result-screen">
+        <div class="section-head">
+          <h1 id="ai-result-title">ИИ-диагностика готова</h1>
+          <p id="ai-result-subtitle">Персональный следующий шаг после практики</p>
+        </div>
+        <section class="card ai-result-card">
+          <div class="ai-pill" id="ai-result-pill">ИИ-диагностика</div>
+          <div class="ai-focus-label" id="ai-focus-label">Главный фокус</div>
+          <div class="ai-focus-title" id="ai-focus-title">—</div>
+          <div class="ai-reason-box">
+            <span id="ai-reason-label">Почему именно это</span>
+            <strong id="ai-reason-text">—</strong>
+          </div>
+          <div class="ai-plan-box">
+            <span id="ai-plan-label">Следующий план</span>
+            <ol id="ai-plan-list"></ol>
+          </div>
+        </section>
+        <div class="actions-row sticky-actions">
+          <button class="btn primary" id="start-mini-training" type="button">Начать мини-тренировку</button>
+          <button class="btn" id="ai-back-to-result" type="button">Назад к результату</button>
         </div>
       </section>
 
@@ -161,7 +206,7 @@
         </article>
         <div class="actions-row sticky-actions">
           <button class="btn" id="detail-back-to-review" type="button">Назад к разбору</button>
-          <button class="btn primary" id="detail-to-practice" type="button">К практике</button>
+          <button class="btn primary" id="detail-to-ai" type="button">ИИ-диагностика</button>
         </div>
       </section>
     </main>
