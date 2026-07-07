@@ -98,22 +98,38 @@
           <p id="practice-result-meta">Посмотрите итог и разбор ошибок.</p>
         </div>
 
-        <section class="card result-basic-card">
-          <div class="result-score-main" id="result-score-main">0%</div>
-          <div class="result-score-caption" id="result-score-caption">0 из 7 верно</div>
-          <div class="result-stat-row">
-            <div><span id="result-correct-label">Верно</span><b id="result-correct-value">0/7</b></div>
-            <div><span id="result-errors-label">Ошибки</span><b id="result-errors-value">0</b></div>
-            <div><span id="result-topics-label">Темы</span><b id="result-topics-value">0</b></div>
+        <section class="card result-hero-card">
+          <div class="score-ring" id="score-ring" style="--score:0">
+            <div class="score-ring-inner">
+              <div class="result-score-main" id="result-score-main">0%</div>
+              <div class="score-ring-label" id="result-score-label">результат</div>
+            </div>
           </div>
+          <div class="result-score-caption" id="result-score-caption">0 из 7 верно</div>
+          <div class="result-status-pill" id="result-status-pill">Нужно повторить</div>
         </section>
 
-        <div class="cards-grid result-grid">
-          <button class="card-btn result-review-card" id="open-review-diagnosis" type="button">
-            <div class="card-title"><span id="review-diagnosis-title">Разбор ошибок</span><span id="review-diagnosis-count" class="badge badge-pin">0</span></div>
-            <div class="muted small" id="review-diagnosis-sub">Ответы, правильная логика и объяснения</div>
-          </button>
-        </div>
+        <section class="result-stat-row" aria-label="Practice result summary">
+          <div><span id="result-correct-label">Верно</span><b id="result-correct-value">0/7</b></div>
+          <div class="stat-error"><span id="result-errors-label">Ошибки</span><b id="result-errors-value">0</b></div>
+          <div><span id="result-topics-label">Темы</span><b id="result-topics-value">0</b></div>
+        </section>
+
+        <button class="card-btn result-review-card" id="open-review-diagnosis" type="button">
+          <div class="entry-card-content">
+            <div class="entry-icon">▣</div>
+            <div>
+              <div class="card-title" id="review-diagnosis-title">Разбор ошибок</div>
+              <div class="muted small" id="review-diagnosis-sub">Ответы, правильная логика и объяснения</div>
+            </div>
+          </div>
+          <div class="entry-right"><span id="review-diagnosis-count" class="badge badge-pin">0</span><span class="chevron">›</span></div>
+        </button>
+
+        <section class="card topic-preview-card" id="topic-weakness-section">
+          <div class="topic-preview-title" id="topic-weakness-title">Что требует внимания</div>
+          <div class="topic-weakness-list" id="topic-weakness-list"></div>
+        </section>
 
         <div class="actions-row result-actions">
           <button class="btn ai-primary" id="result-primary-action" type="button">Получить ИИ-диагностику</button>
@@ -158,7 +174,10 @@
           <p id="ai-result-subtitle">Персональный следующий шаг после всей практики</p>
         </div>
         <section class="card ai-result-card">
-          <div class="ai-pill" id="ai-result-pill">ИИ-диагностика результата</div>
+          <div class="ai-result-topline">
+            <div class="ai-pill" id="ai-result-pill">ИИ-диагностика результата</div>
+            <div class="ai-priority"><span id="ai-priority-label">Начните отсюда</span><b id="ai-priority-value">Важно</b></div>
+          </div>
           <div class="ai-focus-label" id="ai-focus-label">Главный фокус</div>
           <div class="ai-focus-title" id="ai-focus-title">—</div>
           <div class="ai-reason-box">
@@ -166,15 +185,15 @@
             <strong id="ai-reason-text">—</strong>
           </div>
           <div class="ai-plan-box">
-            <span id="ai-plan-label">Следующий план</span>
+            <span id="ai-plan-label">Учебный маршрут</span>
             <ol id="ai-plan-list"></ol>
           </div>
         </section>
-        <div class="cards-grid ai-action-grid">
-          <button class="card-btn" id="ai-open-source" type="button"><div class="card-title" id="ai-source-action-title">Открыть источник</div><div class="muted small" id="ai-source-action-sub">Материал для повторения</div></button>
-          <button class="card-btn" id="ai-open-review" type="button"><div class="card-title" id="ai-review-action-title">Открыть разбор ошибок</div><div class="muted small" id="ai-review-action-sub">Проверьте логику в ошибках</div></button>
-          <button class="card-btn" id="start-mini-training" type="button"><div class="card-title" id="ai-mini-action-title">Начать мини-тренировку</div><div class="muted small" id="ai-mini-action-sub">Короткий набор по главному фокусу</div></button>
-        </div>
+        <section class="ai-action-grid">
+          <button class="card-btn ai-action-card" id="ai-open-source" type="button"><div class="action-icon">📘</div><div><div class="card-title" id="ai-source-action-title">Открыть источник</div><div class="muted small" id="ai-source-action-sub">Материал для повторения</div></div><span class="chevron">›</span></button>
+          <button class="card-btn ai-action-card" id="ai-open-review" type="button"><div class="action-icon">▣</div><div><div class="card-title" id="ai-review-action-title">Открыть разбор ошибок</div><div class="muted small" id="ai-review-action-sub">Проверьте логику в ошибках</div></div><span class="chevron">›</span></button>
+          <button class="card-btn ai-action-card ai-action-primary" id="start-mini-training" type="button"><div class="action-icon">⚡</div><div><div class="card-title" id="ai-mini-action-title">Начать мини-тренировку</div><div class="small" id="ai-mini-action-sub">Короткий набор по главному фокусу</div></div><span class="chevron">›</span></button>
+        </section>
         <div class="actions-row sticky-actions">
           <button class="btn" id="ai-back-to-result" type="button">Назад к результату</button>
         </div>
@@ -205,7 +224,7 @@
         <article class="card detail-card">
           <div class="detail-status" id="detail-status">—</div>
           <h2 id="detail-question-text">—</h2>
-          <div class="detail-box"><span id="detail-answer-label">Твой ответ</span><strong id="detail-answer-value">—</strong></div>
+          <div class="detail-box"><span id="detail-answer-label">Ваш ответ</span><strong id="detail-answer-value">—</strong></div>
           <div class="detail-box"><span id="detail-focus-label">Слабое место</span><strong id="detail-focus-value">—</strong></div>
           <div class="detail-box"><span id="detail-feedback-label">Объяснение</span><strong id="detail-feedback-value">—</strong></div>
           <div class="detail-box"><span id="detail-next-label">Следующий шаг</span><strong id="detail-next-value">—</strong></div>
