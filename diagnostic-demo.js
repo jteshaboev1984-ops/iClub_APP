@@ -40,10 +40,16 @@ const COPY = {
     loadError: 'Could not load practice.',
     loading: 'Loading practice questions…',
     resultTitle: 'Practice result',
-    resultMeta: (score, total, percent, wrong, topics) => `Score: ${score}/${total} (${percent}%) • Errors: ${wrong} • Weak topics: ${topics}`,
+    resultFound: 'Main growth focus found',
+    aiDiagnostic: 'AI diagnosis',
+    focusLabel: 'Main focus now',
+    focusCopy: 'Based on your answers, this is the best place to start the review.',
+    correctShort: 'Correct',
+    reviewEstimateLabel: 'Review',
+    reviewEstimateValue: '≈5 min',
+    analyzeErrors: 'Review mistakes',
     reviewDiagnosis: 'Review and diagnosis',
     reviewDiagnosisSub: 'Answers, mistake reasons and what to repeat',
-    tryAgain: 'Try again',
     toPractice: 'To practice',
     reviewSubtitle: 'Mistakes, explanations and repetition plan',
     diagnosticSummary: 'Diagnostic summary',
@@ -98,10 +104,16 @@ const COPY = {
     loadError: 'Не удалось загрузить практику.',
     loading: 'Загружаем вопросы практики…',
     resultTitle: 'Результат практики',
-    resultMeta: (score, total, percent, wrong, topics) => `Счёт: ${score}/${total} (${percent}%) • Ошибки: ${wrong} • Слабые темы: ${topics}`,
+    resultFound: 'Найден главный фокус для роста',
+    aiDiagnostic: 'ИИ-диагностика',
+    focusLabel: 'Главный фокус сейчас',
+    focusCopy: 'На основе ответов определена тема, с которой лучше начать разбор.',
+    correctShort: 'Верно',
+    reviewEstimateLabel: 'Разбор',
+    reviewEstimateValue: '≈5 мин',
+    analyzeErrors: 'Разобрать ошибки',
     reviewDiagnosis: 'Разбор и диагностика',
     reviewDiagnosisSub: 'Ответы, причины ошибок и что повторить',
-    tryAgain: 'Пройти снова',
     toPractice: 'К практике',
     reviewSubtitle: 'Ошибки, объяснения и план повторения',
     diagnosticSummary: 'Диагностический итог',
@@ -156,10 +168,16 @@ const COPY = {
     loadError: 'Mashq yuklanmadi.',
     loading: 'Mashq savollari yuklanmoqda…',
     resultTitle: 'Mashq natijasi',
-    resultMeta: (score, total, percent, wrong, topics) => `Ball: ${score}/${total} (${percent}%) • Xatolar: ${wrong} • Zaif mavzular: ${topics}`,
+    resultFound: 'O‘sish uchun asosiy yo‘nalish topildi',
+    aiDiagnostic: 'AI diagnostika',
+    focusLabel: 'Hozirgi asosiy fokus',
+    focusCopy: 'Javoblar asosida tahlilni qaysi mavzudan boshlash yaxshiroq ekani aniqlandi.',
+    correctShort: 'To‘g‘ri',
+    reviewEstimateLabel: 'Tahlil',
+    reviewEstimateValue: '≈5 daq',
+    analyzeErrors: 'Xatolarni ko‘rish',
     reviewDiagnosis: 'Tahlil va diagnostika',
     reviewDiagnosisSub: 'Javoblar, xato sabablari va qayta ko‘rish rejasi',
-    tryAgain: 'Qayta o‘tish',
     toPractice: 'Mashqqa',
     reviewSubtitle: 'Xatolar, izohlar va takrorlash rejasi',
     diagnosticSummary: 'Diagnostik natija',
@@ -241,15 +259,7 @@ const LABELS = {
   },
 };
 
-const state = {
-  lang: 'ru',
-  screen: 'start',
-  questions: [],
-  currentIndex: 0,
-  selectedOptionIndex: null,
-  results: [],
-};
-
+const state = { lang: 'ru', screen: 'start', questions: [], currentIndex: 0, selectedOptionIndex: null, results: [] };
 const $ = (id) => document.getElementById(id);
 const els = {
   startScreen: $('practice-start-screen'), quizScreen: $('practice-quiz-screen'), resultScreen: $('practice-result-screen'), reviewScreen: $('practice-review-diagnosis-screen'),
@@ -259,7 +269,7 @@ const els = {
   colDate: $('col-date'), colScore: $('col-score'), colTime: $('col-time'), startDemo: $('start-demo'),
   qno: $('practice-qno'), timer: $('practice-timer'), pauseBtn: $('practice-pause-btn'), questionText: $('question-text'), questionDifficulty: $('question-difficulty'),
   optionsList: $('options-list'), inputWrap: $('input-wrap'), inputLabel: $('input-label'), inputAnswer: $('input-answer'), submitButton: $('submit-answer'),
-  resultTitle: $('result-title'), resultMeta: $('practice-result-meta'), openReview: $('open-review-diagnosis'), reviewDiagnosisTitle: $('review-diagnosis-title'), reviewDiagnosisSub: $('review-diagnosis-sub'), reviewDiagnosisCount: $('review-diagnosis-count'), restartButton: $('restart-demo'), backToStart: $('back-to-start'),
+  resultTitle: $('result-title'), resultMeta: $('practice-result-meta'), resultAiLabel: $('result-ai-label'), resultFocusLabel: $('result-focus-label'), resultFocusTitle: $('result-focus-title'), resultFocusCopy: $('result-focus-copy'), resultCorrectLabel: $('result-correct-label'), resultCorrectValue: $('result-correct-value'), resultErrorsLabel: $('result-errors-label'), resultErrorsValue: $('result-errors-value'), resultTimeLabel: $('result-time-label'), resultTimeValue: $('result-time-value'), openReview: $('open-review-diagnosis'), reviewDiagnosisTitle: $('review-diagnosis-title'), reviewDiagnosisSub: $('review-diagnosis-sub'), reviewDiagnosisCount: $('review-diagnosis-count'), restartButton: $('restart-demo'), backToStart: $('back-to-start'),
   reviewTitle: $('review-title'), reviewSubtitle: $('review-subtitle'), diagnosticSummaryTitle: $('diagnostic-summary-title'), diagnosticScoreLabel: $('diagnostic-score-label'), diagnosticScore: $('diagnostic-score'), diagnosticErrorsLabel: $('diagnostic-errors-label'), diagnosticErrors: $('diagnostic-errors'), diagnosticTopicsLabel: $('diagnostic-topics-label'), diagnosticTopics: $('diagnostic-topics'), summaryWeakTitle: $('summary-weak-title'), summaryWeakList: $('summary-weak-list'), summaryMistakeTitle: $('summary-mistake-title'), summaryMistakeList: $('summary-mistake-list'), summaryPlanTitle: $('summary-plan-title'), summaryPlanList: $('summary-plan-list'), reviewQuestionList: $('review-question-list'), reviewBackToResult: $('review-back-to-result'), reviewToPractice: $('review-to-practice'),
   languageButtons: document.querySelectorAll('.language-btn')
 };
@@ -316,9 +326,17 @@ function updateStaticCopy() {
   els.inputAnswer.placeholder = t.inputPlaceholder;
   els.submitButton.textContent = t.answer;
   els.resultTitle.textContent = t.resultTitle;
-  els.reviewDiagnosisTitle.textContent = t.reviewDiagnosis;
+  els.resultMeta.textContent = t.resultFound;
+  els.resultAiLabel.textContent = t.aiDiagnostic;
+  els.resultFocusLabel.textContent = t.focusLabel;
+  els.resultFocusCopy.textContent = t.focusCopy;
+  els.resultCorrectLabel.textContent = t.correctShort;
+  els.resultErrorsLabel.textContent = t.errors;
+  els.resultTimeLabel.textContent = t.reviewEstimateLabel;
+  els.resultTimeValue.textContent = t.reviewEstimateValue;
+  els.reviewDiagnosisTitle.textContent = t.analyzeErrors;
   els.reviewDiagnosisSub.textContent = t.reviewDiagnosisSub;
-  els.restartButton.textContent = t.tryAgain;
+  els.restartButton.textContent = t.analyzeErrors;
   els.backToStart.textContent = t.toPractice;
   els.reviewTitle.textContent = t.reviewDiagnosis;
   els.reviewSubtitle.textContent = t.reviewSubtitle;
@@ -452,8 +470,14 @@ function getDiagnosticStats() {
 function renderResult() {
   const t = copy();
   const stats = getDiagnosticStats();
+  const focus = stats.weakAreas[0]?.[0] || t.noWeakArea;
   showScreen('result');
-  els.resultMeta.textContent = t.resultMeta(stats.correctCount, stats.total, stats.percent, stats.wrong.length, stats.weakAreas.length);
+  els.resultMeta.textContent = t.resultFound;
+  els.resultFocusTitle.textContent = focus;
+  els.resultFocusCopy.textContent = t.focusCopy;
+  els.resultCorrectValue.textContent = `${stats.correctCount}/${stats.total}`;
+  els.resultErrorsValue.textContent = String(stats.wrong.length);
+  els.resultTimeValue.textContent = t.reviewEstimateValue;
   els.reviewDiagnosisCount.textContent = String(stats.wrong.length);
 }
 
@@ -523,9 +547,7 @@ function renderReviewDiagnosis() {
       <div class="review-topic-body" id="${bodyId}" style="display:${topicIndex === 0 ? 'grid' : 'none'}"></div>
     `;
     const body = card.querySelector(`#${bodyId}`);
-    card.querySelector('.review-topic-head')?.addEventListener('click', () => {
-      body.style.display = body.style.display === 'none' ? 'grid' : 'none';
-    });
+    card.querySelector('.review-topic-head')?.addEventListener('click', () => { body.style.display = body.style.display === 'none' ? 'grid' : 'none'; });
     items.forEach(({ question, result, selectedDisplay, idx }) => {
       const item = document.createElement('article');
       item.className = 'review-item';
@@ -567,7 +589,7 @@ function setLanguage(lang) {
 
 els.startDemo.addEventListener('click', startDemo);
 els.submitButton.addEventListener('click', submitAnswer);
-els.restartButton.addEventListener('click', startDemo);
+els.restartButton.addEventListener('click', renderReviewDiagnosis);
 els.backToStart.addEventListener('click', resetToStart);
 els.openReview.addEventListener('click', renderReviewDiagnosis);
 els.reviewBackToResult.addEventListener('click', renderResult);
