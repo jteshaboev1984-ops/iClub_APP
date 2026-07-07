@@ -29,7 +29,7 @@
       <section class="demo-screen" id="practice-start-screen">
         <div class="section-head">
           <h1 id="start-title">Практика</h1>
-          <p id="start-subtitle">7 вопросов • диагностическая обратная связь</p>
+          <p id="start-subtitle">7 вопросов • от простого к сложному</p>
         </div>
 
         <section class="tour-picker-card">
@@ -62,7 +62,9 @@
         </section>
 
         <section class="practice-last card">
-          <div class="card-title" id="last-attempts-title">Последние попытки</div>
+          <div class="practice-last-head">
+            <div class="card-title" id="last-attempts-title">Последние попытки</div>
+          </div>
           <div class="muted small" id="last-attempts-empty">Пока нет попыток</div>
           <div class="practice-table-wrap">
             <table class="practice-table" aria-label="Practice attempts">
@@ -78,7 +80,7 @@
           </div>
         </section>
 
-        <button class="btn primary start-btn" id="start-demo" type="button">Начать диагностическую практику</button>
+        <button class="btn primary start-btn" id="start-demo" type="button">Начать практику</button>
       </section>
 
       <section class="demo-screen hidden" id="practice-quiz-screen">
@@ -103,22 +105,6 @@
         <div class="actions-row">
           <button class="btn submit-btn" id="submit-answer" type="button" disabled>Ответить</button>
         </div>
-
-        <section class="card feedback-card hidden" id="feedback-card">
-          <div class="feedback-title" id="feedback-title"></div>
-          <p id="feedback-text"></p>
-          <div class="feedback-grid">
-            <div>
-              <span id="weak-area-label">Слабое место</span>
-              <strong id="weak-area">—</strong>
-            </div>
-            <div>
-              <span id="next-action-label">Следующий шаг</span>
-              <strong id="next-action">—</strong>
-            </div>
-          </div>
-          <button class="btn primary" id="next-question" type="button">Следующий вопрос</button>
-        </section>
       </section>
 
       <section class="demo-screen hidden" id="practice-result-screen">
@@ -127,32 +113,61 @@
           <p id="practice-result-meta">—</p>
         </div>
 
-        <section class="result-score-card">
-          <div>
-            <div class="result-score-label" id="result-score-label">Диагностический результат</div>
-            <div class="result-score-main" id="summary-score">0%</div>
-            <div class="result-score-sub" id="summary-count">0 / 7</div>
-          </div>
-        </section>
-
-        <section class="cards-grid result-grid">
-          <div class="card result-box">
-            <div class="card-title" id="summary-weak-title">Главные слабые места</div>
-            <ul id="summary-weak-list"></ul>
-          </div>
-          <div class="card result-box">
-            <div class="card-title" id="summary-mistake-title">Тип ошибок</div>
-            <ul id="summary-mistake-list"></ul>
-          </div>
-          <div class="card result-box wide">
-            <div class="card-title" id="summary-plan-title">Следующий учебный план</div>
-            <ol id="summary-plan-list"></ol>
-          </div>
-        </section>
+        <div class="cards-grid result-grid">
+          <button class="card-btn" id="open-review-diagnosis" type="button">
+            <div class="card-title">
+              <span id="review-diagnosis-title">Разбор и диагностика</span>
+              <span id="review-diagnosis-count" class="badge badge-pin">0</span>
+            </div>
+            <div class="muted small" id="review-diagnosis-sub">Ответы, причины ошибок и что повторить</div>
+          </button>
+        </div>
 
         <div class="actions-row result-actions">
           <button class="btn" id="restart-demo" type="button">Пройти снова</button>
           <button class="btn primary" id="back-to-start" type="button">К практике</button>
+        </div>
+      </section>
+
+      <section class="demo-screen hidden" id="practice-review-diagnosis-screen">
+        <div class="section-head">
+          <h1 id="review-title">Разбор и диагностика</h1>
+          <p id="review-subtitle">Ошибки, объяснения и план повторения</p>
+        </div>
+
+        <section class="card diagnostic-summary-card">
+          <div class="card-title" id="diagnostic-summary-title">Диагностический итог</div>
+          <div class="diagnostic-score-row">
+            <div>
+              <div class="muted small" id="diagnostic-score-label">Результат</div>
+              <div class="diagnostic-score" id="diagnostic-score">0%</div>
+            </div>
+            <div class="diagnostic-mini-stats">
+              <div><span id="diagnostic-errors-label">Ошибки</span><b id="diagnostic-errors">0</b></div>
+              <div><span id="diagnostic-topics-label">Темы</span><b id="diagnostic-topics">0</b></div>
+            </div>
+          </div>
+          <div class="diagnostic-grid">
+            <div>
+              <div class="muted small" id="summary-weak-title">Главные слабые места</div>
+              <ul id="summary-weak-list"></ul>
+            </div>
+            <div>
+              <div class="muted small" id="summary-mistake-title">Тип ошибок</div>
+              <ul id="summary-mistake-list"></ul>
+            </div>
+          </div>
+          <div class="diagnostic-plan-box">
+            <div class="muted small" id="summary-plan-title">Следующий учебный план</div>
+            <ol id="summary-plan-list"></ol>
+          </div>
+        </section>
+
+        <div id="review-question-list" class="review-question-list"></div>
+
+        <div class="actions-row">
+          <button class="btn" id="review-back-to-result" type="button">Назад к результату</button>
+          <button class="btn primary" id="review-to-practice" type="button">К практике</button>
         </div>
       </section>
     </main>
