@@ -6,6 +6,7 @@
   <title>iClub Diagnostic Practice</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="diagnostic-demo.css" />
+  <link rel="stylesheet" href="diagnostic-demo-result-layout.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -99,20 +100,23 @@
         </div>
 
         <section class="card result-hero-card">
-          <div class="score-ring" id="score-ring" style="--score:0">
-            <div class="score-ring-inner">
-              <div class="result-score-main" id="result-score-main">0%</div>
-              <div class="score-ring-label" id="result-score-label">результат</div>
+          <div class="result-hero-grid">
+            <div class="result-score-side">
+              <div class="score-ring" id="score-ring" style="--score:0">
+                <div class="score-ring-inner">
+                  <div class="result-score-main" id="result-score-main">0%</div>
+                  <div class="score-ring-label" id="result-score-label">результат</div>
+                </div>
+              </div>
+              <div class="result-score-caption" id="result-score-caption">0 из 7 верно</div>
+              <div class="result-status-pill" id="result-status-pill">Нужно повторить</div>
             </div>
+            <section class="result-stat-row" aria-label="Practice result summary">
+              <div><span id="result-correct-label">Верно</span><b id="result-correct-value">0/7</b></div>
+              <div class="stat-error"><span id="result-errors-label">Ошибки</span><b id="result-errors-value">0</b></div>
+              <div><span id="result-topics-label">Темы</span><b id="result-topics-value">0</b></div>
+            </section>
           </div>
-          <div class="result-score-caption" id="result-score-caption">0 из 7 верно</div>
-          <div class="result-status-pill" id="result-status-pill">Нужно повторить</div>
-        </section>
-
-        <section class="result-stat-row" aria-label="Practice result summary">
-          <div><span id="result-correct-label">Верно</span><b id="result-correct-value">0/7</b></div>
-          <div class="stat-error"><span id="result-errors-label">Ошибки</span><b id="result-errors-value">0</b></div>
-          <div><span id="result-topics-label">Темы</span><b id="result-topics-value">0</b></div>
         </section>
 
         <button class="card-btn result-review-card" id="open-review-diagnosis" type="button">
