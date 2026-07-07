@@ -38,7 +38,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   padding: 6px 8px;
   background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid var(--line);
@@ -48,7 +48,25 @@ body {
   backdrop-filter: blur(10px);
 }
 
-.topbar-brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.topbar-back {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--text);
+  font-size: 24px;
+  line-height: 22px;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.topbar-brand { display: flex; align-items: center; gap: 8px; min-width: 0; margin-right: auto; }
 .topbar-logo { width: 24px; height: 24px; border-radius: 7px; object-fit: cover; box-shadow: 0 3px 10px rgba(15, 23, 42, 0.12); }
 .topbar-title { font-size: 13px; line-height: 1.05; font-weight: 850; }
 .topbar-subtitle { color: var(--muted); font-size: 10px; line-height: 1.05; }
