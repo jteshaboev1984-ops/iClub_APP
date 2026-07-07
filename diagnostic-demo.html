@@ -95,7 +95,7 @@
       <section class="demo-screen hidden" id="practice-result-screen">
         <div class="section-head result-head">
           <h1 id="result-title">Результат практики</h1>
-          <p id="practice-result-meta">Посмотри итог и разбор ошибок. ИИ-план доступен отдельно.</p>
+          <p id="practice-result-meta">Посмотрите итог и разбор ошибок.</p>
         </div>
 
         <section class="card result-basic-card">
@@ -124,17 +124,11 @@
       <section class="demo-screen hidden" id="practice-review-diagnosis-screen">
         <div class="section-head">
           <h1 id="review-title">Разбор ошибок</h1>
-          <p id="review-subtitle">Нажми на вопрос, чтобы открыть подробный разбор</p>
+          <p id="review-subtitle">Нажмите на вопрос, чтобы открыть подробный разбор</p>
         </div>
         <section class="card diagnostic-summary-card">
-          <div class="card-title" id="review-summary-title">Итог разбора</div>
-          <div class="diagnostic-score-row">
-            <div><div class="muted small" id="diagnostic-score-label">Результат</div><div class="diagnostic-score" id="diagnostic-score">0%</div></div>
-            <div class="diagnostic-mini-stats">
-              <div><span id="diagnostic-errors-label">Ошибки</span><b id="diagnostic-errors">0</b></div>
-              <div><span id="diagnostic-topics-label">Темы</span><b id="diagnostic-topics">0</b></div>
-            </div>
-          </div>
+          <div class="card-title" id="review-summary-title">Разбор по темам</div>
+          <p class="muted small" id="review-summary-copy">Ошибки сгруппированы по темам. Откройте тему и выберите вопрос для подробного объяснения.</p>
         </section>
         <div id="review-question-list" class="review-question-list"></div>
         <div class="actions-row sticky-actions">
@@ -176,9 +170,30 @@
             <ol id="ai-plan-list"></ol>
           </div>
         </section>
+        <div class="cards-grid ai-action-grid">
+          <button class="card-btn" id="ai-open-source" type="button"><div class="card-title" id="ai-source-action-title">Открыть источник</div><div class="muted small" id="ai-source-action-sub">Материал для повторения</div></button>
+          <button class="card-btn" id="ai-open-review" type="button"><div class="card-title" id="ai-review-action-title">Открыть разбор ошибок</div><div class="muted small" id="ai-review-action-sub">Проверьте логику в ошибках</div></button>
+          <button class="card-btn" id="start-mini-training" type="button"><div class="card-title" id="ai-mini-action-title">Начать мини-тренировку</div><div class="muted small" id="ai-mini-action-sub">Короткий набор по главному фокусу</div></button>
+        </div>
         <div class="actions-row sticky-actions">
-          <button class="btn primary" id="start-mini-training" type="button">Начать мини-тренировку</button>
           <button class="btn" id="ai-back-to-result" type="button">Назад к результату</button>
+        </div>
+      </section>
+
+      <section class="demo-screen hidden" id="ai-source-screen">
+        <div class="section-head">
+          <h1 id="source-title">Источник для повторения</h1>
+          <p id="source-subtitle">Материал связан с главным фокусом ИИ-диагностики</p>
+        </div>
+        <article class="card detail-card">
+          <div class="ai-pill" id="source-pill">Материал</div>
+          <h2 id="source-focus-title">—</h2>
+          <div class="detail-box"><span id="source-topic-label">Тема</span><strong id="source-topic-value">—</strong></div>
+          <div class="detail-box"><span id="source-ref-label">Источник</span><strong id="source-ref-value">—</strong></div>
+          <div class="detail-box"><span id="source-note-label">Как использовать</span><strong id="source-note-value">—</strong></div>
+        </article>
+        <div class="actions-row sticky-actions">
+          <button class="btn primary" id="source-back-to-ai" type="button">Назад к ИИ-плану</button>
         </div>
       </section>
 
