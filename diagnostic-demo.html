@@ -48,7 +48,6 @@
           <div class="practice-hero-kicker" id="hero-subject-label">Предмет</div>
           <div class="practice-hero-title" id="hero-subject-title">Экономика</div>
           <div class="practice-hero-stage" id="hero-stage-meta">Практика 6 тура • Завершено 0/7 • Осталось 7</div>
-
           <div class="practice-hero-metrics">
             <div class="practice-metric">
               <div class="practice-metric-label" id="best-result-label">Лучший результат</div>
@@ -62,19 +61,11 @@
         </section>
 
         <section class="practice-last card">
-          <div class="practice-last-head">
-            <div class="card-title" id="last-attempts-title">Последние попытки</div>
-          </div>
+          <div class="practice-last-head"><div class="card-title" id="last-attempts-title">Последние попытки</div></div>
           <div class="muted small" id="last-attempts-empty">Пока нет попыток</div>
           <div class="practice-table-wrap">
             <table class="practice-table" aria-label="Practice attempts">
-              <thead>
-                <tr>
-                  <th id="col-date">Дата</th>
-                  <th id="col-score">Счёт</th>
-                  <th id="col-time">Время</th>
-                </tr>
-              </thead>
+              <thead><tr><th id="col-date">Дата</th><th id="col-score">Счёт</th><th id="col-time">Время</th></tr></thead>
               <tbody></tbody>
             </table>
           </div>
@@ -85,13 +76,9 @@
 
       <section class="demo-screen hidden" id="practice-quiz-screen">
         <div class="quiz-top">
-          <div class="quiz-progress">
-            <span id="practice-qno">1/7</span>
-            <span id="practice-timer" class="timer-pill">00:58</span>
-          </div>
+          <div class="quiz-progress"><span id="practice-qno">1/7</span><span id="practice-timer" class="timer-pill">00:58</span></div>
           <button id="practice-pause-btn" class="btn ghost" type="button">Пауза</button>
         </div>
-
         <section class="card question-card" id="question-card">
           <h2 id="question-text">Вопрос практики…</h2>
           <div id="question-difficulty" class="muted small difficulty-line">Сложность: легко</div>
@@ -101,10 +88,7 @@
             <input id="input-answer" autocomplete="off" placeholder="Введите ответ" />
           </div>
         </section>
-
-        <div class="actions-row">
-          <button class="btn submit-btn" id="submit-answer" type="button" disabled>Ответить</button>
-        </div>
+        <div class="actions-row"><button class="btn submit-btn" id="submit-answer" type="button" disabled>Ответить</button></div>
       </section>
 
       <section class="demo-screen hidden" id="practice-result-screen">
@@ -112,38 +96,23 @@
           <h1 id="result-title">Результат практики</h1>
           <p id="practice-result-meta">Найден главный фокус для роста</p>
         </div>
-
         <section class="result-focus-card">
           <div class="ai-pill" id="result-ai-label">ИИ-диагностика</div>
           <div class="result-focus-label" id="result-focus-label">Главный фокус сейчас</div>
           <div class="result-focus-title" id="result-focus-title">—</div>
           <p id="result-focus-copy">На основе ответов определена тема, с которой лучше начать разбор.</p>
           <div class="result-stat-row">
-            <div>
-              <span id="result-correct-label">Верно</span>
-              <b id="result-correct-value">0/7</b>
-            </div>
-            <div>
-              <span id="result-errors-label">Ошибки</span>
-              <b id="result-errors-value">0</b>
-            </div>
-            <div>
-              <span id="result-time-label">Разбор</span>
-              <b id="result-time-value">≈5 мин</b>
-            </div>
+            <div><span id="result-correct-label">Верно</span><b id="result-correct-value">0/7</b></div>
+            <div><span id="result-errors-label">Ошибки</span><b id="result-errors-value">0</b></div>
+            <div><span id="result-time-label">Разбор</span><b id="result-time-value">≈5 мин</b></div>
           </div>
         </section>
-
         <div class="cards-grid result-grid">
           <button class="card-btn result-review-card" id="open-review-diagnosis" type="button">
-            <div class="card-title">
-              <span id="review-diagnosis-title">Разобрать ошибки</span>
-              <span id="review-diagnosis-count" class="badge badge-pin">0</span>
-            </div>
+            <div class="card-title"><span id="review-diagnosis-title">Разобрать ошибки</span><span id="review-diagnosis-count" class="badge badge-pin">0</span></div>
             <div class="muted small" id="review-diagnosis-sub">Ответы, причины ошибок и что повторить</div>
           </button>
         </div>
-
         <div class="actions-row result-actions">
           <button class="btn primary" id="restart-demo" type="button">Разобрать ошибки</button>
           <button class="btn" id="back-to-start" type="button">К практике</button>
@@ -155,40 +124,44 @@
           <h1 id="review-title">Разбор и диагностика</h1>
           <p id="review-subtitle">Ошибки, объяснения и план повторения</p>
         </div>
-
         <section class="card diagnostic-summary-card">
           <div class="card-title" id="diagnostic-summary-title">Диагностический итог</div>
           <div class="diagnostic-score-row">
-            <div>
-              <div class="muted small" id="diagnostic-score-label">Результат</div>
-              <div class="diagnostic-score" id="diagnostic-score">0%</div>
-            </div>
+            <div><div class="muted small" id="diagnostic-score-label">Результат</div><div class="diagnostic-score" id="diagnostic-score">0%</div></div>
             <div class="diagnostic-mini-stats">
               <div><span id="diagnostic-errors-label">Ошибки</span><b id="diagnostic-errors">0</b></div>
               <div><span id="diagnostic-topics-label">Темы</span><b id="diagnostic-topics">0</b></div>
             </div>
           </div>
           <div class="diagnostic-grid">
-            <div>
-              <div class="muted small" id="summary-weak-title">Главные слабые места</div>
-              <ul id="summary-weak-list"></ul>
-            </div>
-            <div>
-              <div class="muted small" id="summary-mistake-title">Тип ошибок</div>
-              <ul id="summary-mistake-list"></ul>
-            </div>
+            <div><div class="muted small" id="summary-weak-title">Главные слабые места</div><ul id="summary-weak-list"></ul></div>
+            <div><div class="muted small" id="summary-mistake-title">Тип ошибок</div><ul id="summary-mistake-list"></ul></div>
           </div>
-          <div class="diagnostic-plan-box">
-            <div class="muted small" id="summary-plan-title">Следующий учебный план</div>
-            <ol id="summary-plan-list"></ol>
-          </div>
+          <div class="diagnostic-plan-box"><div class="muted small" id="summary-plan-title">Следующий учебный план</div><ol id="summary-plan-list"></ol></div>
         </section>
-
         <div id="review-question-list" class="review-question-list"></div>
-
-        <div class="actions-row">
+        <div class="actions-row sticky-actions">
           <button class="btn" id="review-back-to-result" type="button">Назад к результату</button>
           <button class="btn primary" id="review-to-practice" type="button">К практике</button>
+        </div>
+      </section>
+
+      <section class="demo-screen hidden" id="practice-question-detail-screen">
+        <div class="section-head">
+          <h1 id="detail-title">Разбор вопроса</h1>
+          <p id="detail-subtitle">Причина ошибки и следующий шаг</p>
+        </div>
+        <article class="card detail-card">
+          <div class="detail-status" id="detail-status">—</div>
+          <h2 id="detail-question-text">—</h2>
+          <div class="detail-box"><span id="detail-answer-label">Твой ответ</span><strong id="detail-answer-value">—</strong></div>
+          <div class="detail-box"><span id="detail-focus-label">Слабое место</span><strong id="detail-focus-value">—</strong></div>
+          <div class="detail-box"><span id="detail-feedback-label">Объяснение</span><strong id="detail-feedback-value">—</strong></div>
+          <div class="detail-box"><span id="detail-next-label">Следующий шаг</span><strong id="detail-next-value">—</strong></div>
+        </article>
+        <div class="actions-row sticky-actions">
+          <button class="btn" id="detail-back-to-review" type="button">Назад к разбору</button>
+          <button class="btn primary" id="detail-to-practice" type="button">К практике</button>
         </div>
       </section>
     </main>
