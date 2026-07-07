@@ -68,6 +68,7 @@ h1, h2, p { margin: 0; }
 .card,
 .tour-picker-card,
 .practice-hero,
+.result-focus-card,
 .result-score-card,
 .card-btn {
   background: var(--card);
@@ -122,8 +123,20 @@ h1, h2, p { margin: 0; }
 .submit-btn { min-width: 204px; background: #ffffff; color: #64748b; border-color: var(--line); }
 .submit-btn.is-ready { color: #ffffff; background: linear-gradient(180deg, var(--brand) 0%, var(--brand-dark) 100%); border-color: rgba(37, 99, 235, 0.2); }
 
+.result-head { margin-bottom: 10px; }
+.result-focus-card { padding: 12px; margin-bottom: 10px; border-color: #cfe0ff; background: linear-gradient(180deg, #ffffff 0%, #f5f8ff 100%); }
+.ai-pill { display: inline-flex; align-items: center; width: fit-content; padding: 5px 9px; border-radius: 999px; color: var(--brand); background: var(--brand-soft); font-size: 10px; line-height: 1; font-weight: 900; margin-bottom: 10px; }
+.result-focus-label { color: var(--muted); font-size: 11px; font-weight: 850; margin-bottom: 4px; }
+.result-focus-title { font-size: 19px; line-height: 1.12; font-weight: 950; letter-spacing: -0.02em; margin-bottom: 7px; }
+.result-focus-card p { color: #475569; font-size: 12px; line-height: 1.45; }
+.result-stat-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.result-stat-row div { border: 1px solid var(--line); border-radius: 10px; padding: 8px; background: #ffffff; }
+.result-stat-row span { display: block; color: var(--muted); font-size: 10px; margin-bottom: 4px; }
+.result-stat-row b { display: block; font-size: 15px; line-height: 1.1; }
+
 .cards-grid { display: grid; gap: 10px; margin-bottom: 10px; }
 .card-btn { width: 100%; padding: 12px; text-align: left; cursor: pointer; color: var(--text); }
+.result-review-card { border-color: #cfe0ff; }
 .card-btn .card-title { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
 .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; border-radius: 999px; padding: 0 8px; font-size: 11px; font-weight: 900; }
 .badge-pin { color: var(--brand); background: var(--brand-soft); }
