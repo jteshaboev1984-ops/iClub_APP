@@ -1,6 +1,3 @@
-/* Compact premium result hero override.
-   Loaded after diagnostic-demo.css so it can safely refine the result screen only. */
-
 .result-hero-card {
   padding: 12px;
   margin-bottom: 10px;
@@ -12,16 +9,16 @@
 .result-hero-card::after {
   right: 10px;
   top: 6px;
-  font-size: 46px;
-  opacity: 0.35;
+  font-size: 42px;
+  opacity: 0.24;
 }
 
 .result-hero-grid {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 100px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
   align-items: center;
 }
 
@@ -33,18 +30,18 @@
 }
 
 .result-score-side .score-ring {
-  width: 90px;
-  height: 90px;
+  width: 86px;
+  height: 86px;
   margin: 0 0 7px;
 }
 
 .result-score-side .score-ring-inner {
-  width: 66px;
-  height: 66px;
+  width: 62px;
+  height: 62px;
 }
 
 .result-score-side .result-score-main {
-  font-size: 27px;
+  font-size: 25px;
 }
 
 .result-score-side .score-ring-label {
@@ -52,15 +49,12 @@
 }
 
 .result-score-side .result-score-caption {
-  font-size: 11px;
-  line-height: 1.15;
-  text-align: center;
-  font-weight: 950;
+  display: none;
 }
 
 .result-score-side .result-status-pill {
-  margin-top: 6px;
-  max-width: 98px;
+  margin-top: 0;
+  max-width: 92px;
   justify-content: center;
   text-align: center;
   white-space: normal;
@@ -74,23 +68,33 @@
   grid-template-areas:
     "correct correct"
     "errors topics";
-  gap: 7px;
+  gap: 8px;
   margin: 0;
 }
 
 .result-hero-card .result-stat-row div {
-  min-height: 44px;
-  padding: 8px 9px;
-  border-radius: 11px;
+  min-height: auto;
+  padding: 0;
+  border-width: 0;
+  border-radius: 0;
   box-shadow: none;
-  background: rgba(255, 255, 255, 0.94);
-  border-color: #d7e3f4;
+  background: transparent;
 }
 
 .result-hero-card .result-stat-row div:nth-child(1) {
   grid-area: correct;
-  min-height: 50px;
-  background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+  min-height: 38px;
+  padding: 0 0 6px;
+  border-bottom: 1px solid #dce7f6;
+}
+
+.result-hero-card .result-stat-row div:nth-child(2),
+.result-hero-card .result-stat-row div:nth-child(3) {
+  min-height: 45px;
+  padding: 8px 9px;
+  border: 1px solid #d7e3f4;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.86);
 }
 
 .result-hero-card .result-stat-row div:nth-child(2) {
@@ -103,9 +107,10 @@
 }
 
 .result-hero-card .result-stat-row span {
-  font-size: 9px;
+  font-size: 10px;
   margin-bottom: 3px;
   letter-spacing: 0.01em;
+  color: var(--muted);
 }
 
 .result-hero-card .result-stat-row b {
@@ -113,10 +118,18 @@
   line-height: 1.05;
 }
 
+.result-hero-card .result-stat-row div:nth-child(1) span {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .result-hero-card .result-stat-row div:nth-child(1) b {
   color: var(--brand);
-  font-size: 23px;
-  letter-spacing: -0.04em;
+  font-size: 28px;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
 }
 
 .result-review-card {
@@ -137,25 +150,30 @@
   }
 
   .result-hero-grid {
-    grid-template-columns: 92px minmax(0, 1fr);
-    gap: 8px;
+    grid-template-columns: 86px minmax(0, 1fr);
+    gap: 9px;
   }
 
   .result-score-side .score-ring {
-    width: 84px;
-    height: 84px;
+    width: 80px;
+    height: 80px;
   }
 
   .result-score-side .score-ring-inner {
-    width: 62px;
-    height: 62px;
+    width: 58px;
+    height: 58px;
   }
 
   .result-score-side .result-score-main {
-    font-size: 24px;
+    font-size: 23px;
   }
 
-  .result-hero-card .result-stat-row div {
+  .result-hero-card .result-stat-row div:nth-child(1) b {
+    font-size: 25px;
+  }
+
+  .result-hero-card .result-stat-row div:nth-child(2),
+  .result-hero-card .result-stat-row div:nth-child(3) {
     padding: 8px;
   }
 }
