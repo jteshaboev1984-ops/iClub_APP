@@ -2,24 +2,26 @@
    Loaded after diagnostic-demo.css so it can safely refine the result screen only. */
 
 .result-hero-card {
-  padding: 14px;
+  padding: 12px;
   margin-bottom: 10px;
   text-align: left;
+  border-color: #cfe0ff;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
 }
 
 .result-hero-card::after {
-  right: 14px;
-  top: 8px;
-  font-size: 58px;
-  opacity: 0.6;
+  right: 10px;
+  top: 6px;
+  font-size: 46px;
+  opacity: 0.35;
 }
 
 .result-hero-grid {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 10px;
   align-items: center;
 }
 
@@ -31,37 +33,47 @@
 }
 
 .result-score-side .score-ring {
-  width: 104px;
-  height: 104px;
-  margin: 0 0 8px;
+  width: 90px;
+  height: 90px;
+  margin: 0 0 7px;
 }
 
 .result-score-side .score-ring-inner {
-  width: 76px;
-  height: 76px;
+  width: 66px;
+  height: 66px;
 }
 
 .result-score-side .result-score-main {
-  font-size: 30px;
+  font-size: 27px;
+}
+
+.result-score-side .score-ring-label {
+  font-size: 7px;
 }
 
 .result-score-side .result-score-caption {
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.15;
   text-align: center;
+  font-weight: 950;
 }
 
 .result-score-side .result-status-pill {
-  margin-top: 7px;
-  max-width: 110px;
+  margin-top: 6px;
+  max-width: 98px;
   justify-content: center;
   text-align: center;
   white-space: normal;
+  font-size: 9px;
+  padding: 4px 7px;
 }
 
 .result-hero-card .result-stat-row {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    "correct correct"
+    "errors topics";
   gap: 7px;
   margin: 0;
 }
@@ -69,18 +81,42 @@
 .result-hero-card .result-stat-row div {
   min-height: 44px;
   padding: 8px 9px;
-  border-radius: 10px;
+  border-radius: 11px;
   box-shadow: none;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
+  border-color: #d7e3f4;
+}
+
+.result-hero-card .result-stat-row div:nth-child(1) {
+  grid-area: correct;
+  min-height: 50px;
+  background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+}
+
+.result-hero-card .result-stat-row div:nth-child(2) {
+  grid-area: errors;
+  border-left: 3px solid var(--bad);
+}
+
+.result-hero-card .result-stat-row div:nth-child(3) {
+  grid-area: topics;
 }
 
 .result-hero-card .result-stat-row span {
-  font-size: 10px;
+  font-size: 9px;
   margin-bottom: 3px;
+  letter-spacing: 0.01em;
 }
 
 .result-hero-card .result-stat-row b {
   font-size: 16px;
+  line-height: 1.05;
+}
+
+.result-hero-card .result-stat-row div:nth-child(1) b {
+  color: var(--brand);
+  font-size: 23px;
+  letter-spacing: -0.04em;
 }
 
 .result-review-card {
@@ -96,18 +132,30 @@
 }
 
 @media (max-width: 360px) {
+  .result-hero-card {
+    padding: 11px;
+  }
+
   .result-hero-grid {
-    grid-template-columns: 100px minmax(0, 1fr);
-    gap: 10px;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 8px;
   }
 
   .result-score-side .score-ring {
-    width: 96px;
-    height: 96px;
+    width: 84px;
+    height: 84px;
   }
 
   .result-score-side .score-ring-inner {
-    width: 70px;
-    height: 70px;
+    width: 62px;
+    height: 62px;
+  }
+
+  .result-score-side .result-score-main {
+    font-size: 24px;
+  }
+
+  .result-hero-card .result-stat-row div {
+    padding: 8px;
   }
 }
