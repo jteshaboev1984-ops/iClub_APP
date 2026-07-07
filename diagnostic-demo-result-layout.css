@@ -1,0 +1,113 @@
+/* Compact premium result hero override.
+   Loaded after diagnostic-demo.css so it can safely refine the result screen only. */
+
+.result-hero-card {
+  padding: 14px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.result-hero-card::after {
+  right: 14px;
+  top: 8px;
+  font-size: 58px;
+  opacity: 0.6;
+}
+
+.result-hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.result-score-side {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  min-width: 0;
+}
+
+.result-score-side .score-ring {
+  width: 104px;
+  height: 104px;
+  margin: 0 0 8px;
+}
+
+.result-score-side .score-ring-inner {
+  width: 76px;
+  height: 76px;
+}
+
+.result-score-side .result-score-main {
+  font-size: 30px;
+}
+
+.result-score-side .result-score-caption {
+  font-size: 12px;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.result-score-side .result-status-pill {
+  margin-top: 7px;
+  max-width: 110px;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
+}
+
+.result-hero-card .result-stat-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+  margin: 0;
+}
+
+.result-hero-card .result-stat-row div {
+  min-height: 44px;
+  padding: 8px 9px;
+  border-radius: 10px;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.result-hero-card .result-stat-row span {
+  font-size: 10px;
+  margin-bottom: 3px;
+}
+
+.result-hero-card .result-stat-row b {
+  font-size: 16px;
+}
+
+.result-review-card {
+  min-height: 58px;
+}
+
+.topic-preview-card {
+  padding: 10px 12px 12px;
+}
+
+.topic-weakness-item {
+  padding: 8px;
+}
+
+@media (max-width: 360px) {
+  .result-hero-grid {
+    grid-template-columns: 100px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .result-score-side .score-ring {
+    width: 96px;
+    height: 96px;
+  }
+
+  .result-score-side .score-ring-inner {
+    width: 70px;
+    height: 70px;
+  }
+}
