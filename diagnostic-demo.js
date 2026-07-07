@@ -17,7 +17,7 @@ const COPY = {
     stageMeta: (done, total) => `Tour 6 practice • Completed ${done}/${total} • Remaining ${Math.max(0, total - done)}`,
     bestResult: 'Best result', bestTime: 'Best time', lastAttempts: 'Last attempts', noAttempts: 'No attempts yet', date: 'Date', score: 'Score', time: 'Time', start: 'Start practice', pause: 'Pause',
     difficulty: 'Difficulty', difficulty_easy: 'easy', difficulty_medium: 'medium', difficulty_hard: 'hard', inputLabel: 'Answer', inputPlaceholder: 'Type your answer', answer: 'Answer', checking: 'Checking…', loadError: 'Could not load practice.', loading: 'Loading practice questions…',
-    resultTitle: 'Practice result', resultMeta: 'Basic result first. AI diagnosis for the whole attempt opens separately.', scoreCaption: (score, total) => `${score} of ${total} correct`, correctShort: 'Correct', errors: 'Errors', topics: 'Topics',
+    resultTitle: 'Practice result', resultMeta: 'Review your result and mistakes. AI plan is available separately.', scoreCaption: (score, total) => `${score} of ${total} correct`, correctShort: 'Correct', errors: 'Errors', topics: 'Topics',
     reviewErrors: 'Review mistakes', reviewErrorsSub: 'Answers, correct logic and explanations', getAi: 'Get AI diagnosis', toPractice: 'To practice',
     reviewSubtitle: 'Tap a question to open its detailed review', reviewSummary: 'Review summary', result: 'Result', questions: 'Questions', mistakes: 'Mistakes',
     aiThinkingTitle: 'AI diagnosis of result', aiThinkingSubtitle: 'Analysing the whole practice attempt', aiThinkingStatus: 'Diagnosing the result…', aiStep1: 'Checking repeated mistakes', aiStep2: 'Finding the main focus', aiStep3: 'Building the next step',
@@ -31,7 +31,7 @@ const COPY = {
     stageMeta: (done, total) => `Практика 6 тура • Завершено ${done}/${total} • Осталось ${Math.max(0, total - done)}`,
     bestResult: 'Лучший результат', bestTime: 'Лучшее время', lastAttempts: 'Последние попытки', noAttempts: 'Пока нет попыток', date: 'Дата', score: 'Счёт', time: 'Время', start: 'Начать практику', pause: 'Пауза',
     difficulty: 'Сложность', difficulty_easy: 'легко', difficulty_medium: 'средне', difficulty_hard: 'сложно', inputLabel: 'Ответ', inputPlaceholder: 'Введите ответ', answer: 'Ответить', checking: 'Проверяем…', loadError: 'Не удалось загрузить практику.', loading: 'Загружаем вопросы практики…',
-    resultTitle: 'Результат практики', resultMeta: 'Сначала обычный итог. ИИ-диагностика всей попытки открывается отдельно.', scoreCaption: (score, total) => `${score} из ${total} верно`, correctShort: 'Верно', errors: 'Ошибки', topics: 'Темы',
+    resultTitle: 'Результат практики', resultMeta: 'Посмотри итог и разбор ошибок. ИИ-план доступен отдельно.', scoreCaption: (score, total) => `${score} из ${total} верно`, correctShort: 'Верно', errors: 'Ошибки', topics: 'Темы',
     reviewErrors: 'Разбор ошибок', reviewErrorsSub: 'Ответы, правильная логика и объяснения', getAi: 'Получить ИИ-диагностику', toPractice: 'К практике',
     reviewSubtitle: 'Нажми на вопрос, чтобы открыть подробный разбор', reviewSummary: 'Итог разбора', result: 'Результат', questions: 'Вопросов', mistakes: 'Ошибок',
     aiThinkingTitle: 'ИИ-диагностика результата', aiThinkingSubtitle: 'Анализируем всю попытку практики', aiThinkingStatus: 'Идёт диагностика результата…', aiStep1: 'Проверяем повторяющиеся ошибки', aiStep2: 'Определяем главный фокус', aiStep3: 'Собираем следующий шаг',
@@ -45,7 +45,7 @@ const COPY = {
     stageMeta: (done, total) => `6-tur mashqi • Tugallandi ${done}/${total} • Qoldi ${Math.max(0, total - done)}`,
     bestResult: 'Eng yaxshi natija', bestTime: 'Eng yaxshi vaqt', lastAttempts: 'Oxirgi urinishlar', noAttempts: 'Hozircha urinish yo‘q', date: 'Sana', score: 'Ball', time: 'Vaqt', start: 'Mashqni boshlash', pause: 'Pauza',
     difficulty: 'Qiyinlik', difficulty_easy: 'oson', difficulty_medium: 'o‘rtacha', difficulty_hard: 'qiyin', inputLabel: 'Javob', inputPlaceholder: 'Javobni kiriting', answer: 'Javob berish', checking: 'Tekshirilmoqda…', loadError: 'Mashq yuklanmadi.', loading: 'Mashq savollari yuklanmoqda…',
-    resultTitle: 'Mashq natijasi', resultMeta: 'Avval oddiy natija. Butun urinish bo‘yicha AI diagnostika alohida ochiladi.', scoreCaption: (score, total) => `${score} / ${total} to‘g‘ri`, correctShort: 'To‘g‘ri', errors: 'Xatolar', topics: 'Mavzular',
+    resultTitle: 'Mashq natijasi', resultMeta: 'Natijani va xatolar tahlilini ko‘ring. AI reja alohida mavjud.', scoreCaption: (score, total) => `${score} / ${total} to‘g‘ri`, correctShort: 'To‘g‘ri', errors: 'Xatolar', topics: 'Mavzular',
     reviewErrors: 'Xatolar tahlili', reviewErrorsSub: 'Javoblar, to‘g‘ri mantiq va izohlar', getAi: 'AI diagnostika olish', toPractice: 'Mashqqa',
     reviewSubtitle: 'Batafsil tahlilni ochish uchun savolni bosing', reviewSummary: 'Tahlil yakuni', result: 'Natija', questions: 'Savollar', mistakes: 'Xatolar',
     aiThinkingTitle: 'Natija AI diagnostikasi', aiThinkingSubtitle: 'Butun mashq urinishi tahlil qilinmoqda', aiThinkingStatus: 'Natija diagnostika qilinmoqda…', aiStep1: 'Takroriy xatolar tekshirilmoqda', aiStep2: 'Asosiy fokus aniqlanmoqda', aiStep3: 'Keyingi qadam tuzilmoqda',
@@ -100,7 +100,8 @@ function showScreen(name){
   els.aiThinkingScreen.classList.toggle('hidden', name!=='aiThinking');
   els.aiResultScreen.classList.toggle('hidden', name!=='aiResult');
   els.detailScreen.classList.toggle('hidden', name!=='detail');
-  els.topbarBack.classList.toggle('hidden', name==='start');
+  const showBack = ['review', 'detail', 'aiThinking', 'aiResult'].includes(name);
+  els.topbarBack.classList.toggle('hidden', !showBack);
 }
 
 function updateStaticCopy(){
