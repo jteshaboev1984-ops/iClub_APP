@@ -108,15 +108,36 @@
       </section>
 
       <section class="demo-screen hidden" id="practice-result-screen">
-        <div class="section-head">
+        <div class="section-head result-head">
           <h1 id="result-title">Результат практики</h1>
-          <p id="practice-result-meta">—</p>
+          <p id="practice-result-meta">Найден главный фокус для роста</p>
         </div>
 
+        <section class="result-focus-card">
+          <div class="ai-pill" id="result-ai-label">ИИ-диагностика</div>
+          <div class="result-focus-label" id="result-focus-label">Главный фокус сейчас</div>
+          <div class="result-focus-title" id="result-focus-title">—</div>
+          <p id="result-focus-copy">На основе ответов определена тема, с которой лучше начать разбор.</p>
+          <div class="result-stat-row">
+            <div>
+              <span id="result-correct-label">Верно</span>
+              <b id="result-correct-value">0/7</b>
+            </div>
+            <div>
+              <span id="result-errors-label">Ошибки</span>
+              <b id="result-errors-value">0</b>
+            </div>
+            <div>
+              <span id="result-time-label">Разбор</span>
+              <b id="result-time-value">≈5 мин</b>
+            </div>
+          </div>
+        </section>
+
         <div class="cards-grid result-grid">
-          <button class="card-btn" id="open-review-diagnosis" type="button">
+          <button class="card-btn result-review-card" id="open-review-diagnosis" type="button">
             <div class="card-title">
-              <span id="review-diagnosis-title">Разбор и диагностика</span>
+              <span id="review-diagnosis-title">Разобрать ошибки</span>
               <span id="review-diagnosis-count" class="badge badge-pin">0</span>
             </div>
             <div class="muted small" id="review-diagnosis-sub">Ответы, причины ошибок и что повторить</div>
@@ -124,8 +145,8 @@
         </div>
 
         <div class="actions-row result-actions">
-          <button class="btn" id="restart-demo" type="button">Пройти снова</button>
-          <button class="btn primary" id="back-to-start" type="button">К практике</button>
+          <button class="btn primary" id="restart-demo" type="button">Разобрать ошибки</button>
+          <button class="btn" id="back-to-start" type="button">К практике</button>
         </div>
       </section>
 
