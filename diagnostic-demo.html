@@ -11,6 +11,7 @@
 <body>
   <div class="demo-app">
     <header class="demo-topbar">
+      <button class="topbar-back hidden" id="topbar-back" type="button" aria-label="Назад">‹</button>
       <div class="topbar-brand">
         <img class="topbar-logo" src="logo.png" alt="iClub" />
         <div>
@@ -94,7 +95,7 @@
       <section class="demo-screen hidden" id="practice-result-screen">
         <div class="section-head result-head">
           <h1 id="result-title">Результат практики</h1>
-          <p id="practice-result-meta">Сначала обычный итог, затем можно открыть ИИ-диагностику</p>
+          <p id="practice-result-meta">Сначала обычный итог. ИИ-диагностика результата открывается отдельно.</p>
         </div>
 
         <section class="card result-basic-card">
@@ -112,19 +113,10 @@
             <div class="card-title"><span id="review-diagnosis-title">Разбор ошибок</span><span id="review-diagnosis-count" class="badge badge-pin">0</span></div>
             <div class="muted small" id="review-diagnosis-sub">Ответы, правильная логика и объяснения</div>
           </button>
-
-          <button class="card-btn ai-entry-card" id="open-ai-diagnosis" type="button">
-            <div class="ai-entry-top">
-              <span class="ai-pill" id="ai-entry-label">ИИ-диагностика</span>
-              <span class="ai-pro-badge" id="ai-pro-badge">AI</span>
-            </div>
-            <div class="ai-entry-title" id="ai-entry-title">Получить персональный план</div>
-            <div class="muted small" id="ai-entry-sub">Главный фокус, причина ошибок и следующий шаг</div>
-          </button>
         </div>
 
         <div class="actions-row result-actions">
-          <button class="btn primary" id="result-primary-action" type="button">Разбор ошибок</button>
+          <button class="btn ai-primary" id="result-primary-action" type="button">Получить ИИ-диагностику</button>
           <button class="btn" id="back-to-start" type="button">К практике</button>
         </div>
       </section>
@@ -147,14 +139,14 @@
         <div id="review-question-list" class="review-question-list"></div>
         <div class="actions-row sticky-actions">
           <button class="btn" id="review-back-to-result" type="button">Назад к результату</button>
-          <button class="btn primary" id="review-to-ai" type="button">ИИ-диагностика</button>
+          <button class="btn ai-primary" id="review-to-ai" type="button">ИИ-диагностика результата</button>
         </div>
       </section>
 
       <section class="demo-screen hidden" id="ai-thinking-screen">
         <div class="section-head">
-          <h1 id="ai-thinking-title">ИИ-диагностика</h1>
-          <p id="ai-thinking-subtitle">Анализируем результат практики</p>
+          <h1 id="ai-thinking-title">ИИ-диагностика результата</h1>
+          <p id="ai-thinking-subtitle">Анализируем всю попытку практики</p>
         </div>
         <section class="card ai-thinking-card">
           <div class="ai-orb" aria-hidden="true"><span></span></div>
@@ -170,10 +162,10 @@
       <section class="demo-screen hidden" id="ai-result-screen">
         <div class="section-head">
           <h1 id="ai-result-title">ИИ-диагностика готова</h1>
-          <p id="ai-result-subtitle">Персональный следующий шаг после практики</p>
+          <p id="ai-result-subtitle">Персональный следующий шаг после всей практики</p>
         </div>
         <section class="card ai-result-card">
-          <div class="ai-pill" id="ai-result-pill">ИИ-диагностика</div>
+          <div class="ai-pill" id="ai-result-pill">ИИ-диагностика результата</div>
           <div class="ai-focus-label" id="ai-focus-label">Главный фокус</div>
           <div class="ai-focus-title" id="ai-focus-title">—</div>
           <div class="ai-reason-box">
@@ -206,7 +198,7 @@
         </article>
         <div class="actions-row sticky-actions">
           <button class="btn" id="detail-back-to-review" type="button">Назад к разбору</button>
-          <button class="btn primary" id="detail-to-ai" type="button">ИИ-диагностика</button>
+          <button class="btn ai-primary" id="detail-to-ai" type="button">ИИ-диагностика результата</button>
         </div>
       </section>
     </main>
