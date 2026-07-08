@@ -89,13 +89,14 @@
           if (!doc.querySelector('link[data-ai-diagnosis-lab-css="1"]')) {
             var css = doc.createElement('link');
             css.rel = 'stylesheet';
-            css.href = 'ai-diagnosis-archive-preview.css?v=lab2';
+            css.href = 'ai-diagnosis-archive-preview.css?v=lab3';
             css.setAttribute('data-ai-diagnosis-lab-css', '1');
             doc.head.appendChild(css);
           }
 
-          injectScriptOnce(doc, 'ai-diagnosis-archive-preview.js?v=lab2', 'data-ai-diagnosis-lab-js');
-          injectScriptOnce(doc, 'ai-diagnosis-lab-result-fix.js?v=lab2', 'data-ai-diagnosis-lab-result-fix');
+          injectScriptOnce(doc, 'ai-diagnosis-archive-preview.js?v=lab3', 'data-ai-diagnosis-lab-js');
+          injectScriptOnce(doc, 'ai-diagnosis-lab-result-fix.js?v=lab3', 'data-ai-diagnosis-lab-result-fix');
+          injectScriptOnce(doc, 'ai-diagnosis-focus-i18n-fix.js?v=lab3', 'data-ai-diagnosis-focus-i18n-fix');
 
           setTimeout(function () {
             try {
