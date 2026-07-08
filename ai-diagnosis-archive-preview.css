@@ -1,8 +1,12 @@
 .ai-diagnosis-result-card {
   position: relative;
   overflow: hidden;
-  border-color: #c7d8ff !important;
-  background: linear-gradient(135deg, #ffffff 0%, #f6f9ff 46%, #eef4ff 100%) !important;
+  grid-column: 1 / -1;
+  order: -1;
+  min-height: 64px;
+  border-color: #bcd0ff !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f3f7ff 46%, #eaf1ff 100%) !important;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.12) !important;
 }
 
 .ai-diagnosis-result-card::after {
