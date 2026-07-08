@@ -1,7 +1,7 @@
 // Gated production-safe AI diagnosis archive preview.
 // Default: OFF for all users.
 // Enable manually with URL ?ai_diag=1 or localStorage.setItem('iclub_ai_diag_enabled','1').
-// Read-only UI: does not create, update, delete attempts, scores, ratings, certificates or roadmaps.
+// Lab layer only. It does not change scores, ratings, certificates, tours or historical answers.
 
 (() => {
   'use strict';
@@ -9,6 +9,7 @@
   const FLAG_KEY = 'iclub_ai_diag_enabled';
   const SHOW_EMPTY_KEY = 'iclub_ai_diag_show_empty';
   const ENTRY_ID = 'ai-diagnosis-archive-entry';
+  const RESULT_ACTION_ID = 'ai-diagnosis-result-action';
   const OVERLAY_ID = 'ai-diagnosis-archive-overlay';
 
   function isEnabled() {
@@ -62,6 +63,14 @@
       .replace(/'/g, '&#039;');
   }
 
+  function currentSubjectTitle() {
+    const direct = document.getElementById('practice-subject-title')?.textContent?.trim();
+    if (direct && direct !== '—') return direct;
+    const hub = document.getElementById('subject-hub-title')?.textContent?.trim();
+    if (hub && hub !== '—') return hub;
+    return tr('Предмет', 'Fan', 'Subject');
+  }
+
   function formatDate(value) {
     const raw = String(value || '').trim();
     if (!raw) return '—';
@@ -84,7 +93,7 @@
     const percent = Number(item?.percent ?? plan.percent ?? 0);
     return {
       id: item?.id,
-      subjectTitle: item?.subject_title || tr('Предмет', 'Fan', 'Subject'),
+      subjectTitle: item?.subject_title || currentSubjectTitle(),
       createdAt: item?.created_at,
       mainFocus: item?.main_weakness || plan.main_focus || '—',
       message: tr(item?.message_ru, item?.message_uz, item?.message_en) || '',
@@ -115,6 +124,30 @@
     return Array.isArray(data) ? data.map(normalizePlan) : [];
   }
 
+  async function loadLatestPracticeAttempt() {
+    if (!window.sb) throw new Error('no_supabase');
+
+    const { data, error } = await window.sb
+      .from('practice_attempts')
+      .select('id,subject_id,started_at,finished_at,score,percent')
+      .not('finished_at', 'is', null)
+      .order('id', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data?.id) throw new Error('no_finished_practice_attempt');
+    return data;
+  }
+
+  async function createDiagnosisForLatestAttempt() {
+    const attempt = await loadLatestPracticeAttempt();
+    const { data, error } = await window.sb.rpc('create_practice_ai_diagnosis', { p_attempt_id: Number(attempt.id) });
+    if (error) throw error;
+    if (!data) throw new Error('empty_diagnosis');
+    return normalizePlan(data);
+  }
+
   function closeOverlay() {
     const overlay = document.getElementById(OVERLAY_ID);
     if (overlay) overlay.remove();
@@ -139,7 +172,7 @@
           <button class="ai-diagnosis-archive-close" type="button" aria-label="Close">×</button>
         </div>
         <div class="ai-diagnosis-archive-body">
-          ${empty ? `<div class="ai-diagnosis-detail-section"><div class="ai-diagnosis-detail-text">${escapeHtml(tr('Пока нет сохранённых AI-диагностик. После подключения кнопки на результате практики здесь появятся реальные диагностики.', 'Hozircha saqlangan AI diagnostika yo‘q. Amaliyot natijasi ekranidagi tugma ulangandan keyin bu yerda haqiqiy diagnostikalar chiqadi.', 'No saved AI diagnoses yet. After the Practice Result button is connected, real diagnoses will appear here.'))}</div></div>` : items.map((item, index) => `
+          ${empty ? `<div class="ai-diagnosis-detail-section"><div class="ai-diagnosis-detail-text">${escapeHtml(tr('Пока нет сохранённых AI-диагностик. Нажмите AI-диагностика на результате практики.', 'Hozircha saqlangan AI diagnostika yo‘q. Mashq natijasi ekranida AI diagnostika tugmasini bosing.', 'No saved AI diagnoses yet. Press AI diagnosis on the practice result screen.'))}</div></div>` : items.map((item, index) => `
             <button class="ai-diagnosis-archive-card" type="button" data-ai-diagnosis-index="${index}">
               <div class="ai-diagnosis-archive-card-top">
                 <div>
@@ -244,7 +277,46 @@
     }
   }
 
-  async function ensureEntry() {
+  async function openDiagnosisFromResult(button) {
+    const originalTitle = button.querySelector('.card-title')?.textContent || '';
+    const titleNode = button.querySelector('.card-title');
+    const subNode = button.querySelector('.muted');
+
+    try {
+      button.disabled = true;
+      if (titleNode) titleNode.textContent = tr('Формируем AI-диагностику…', 'AI diagnostika tayyorlanmoqda…', 'Building AI diagnosis…');
+      if (subNode) subNode.textContent = tr('Это займёт несколько секунд', 'Bu bir necha soniya davom etadi', 'This takes a few seconds');
+      const diagnosis = await createDiagnosisForLatestAttempt();
+      renderDiagnosisDetailOverlay(diagnosis);
+      setTimeout(ensureEntry, 300);
+    } catch (error) {
+      renderArchiveOverlay([]);
+      if (titleNode) titleNode.textContent = originalTitle || tr('AI-диагностика', 'AI diagnostika', 'AI diagnosis');
+      if (subNode) subNode.textContent = tr('Не удалось открыть. Проверьте, что практика сохранена.', 'Ochilmadi. Mashq saqlanganini tekshiring.', 'Could not open. Make sure the practice was saved.');
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  function ensureResultAction() {
+    if (!isEnabled()) return;
+    const resultScreen = document.getElementById('courses-practice-result');
+    const grid = resultScreen?.querySelector('.cards-grid');
+    if (!grid || document.getElementById(RESULT_ACTION_ID)) return;
+
+    const btn = document.createElement('button');
+    btn.id = RESULT_ACTION_ID;
+    btn.className = 'card-btn ai-diagnosis-result-card';
+    btn.type = 'button';
+    btn.innerHTML = `
+      <div class="card-title">${escapeHtml(tr('AI-диагностика', 'AI diagnostika', 'AI diagnosis'))}</div>
+      <div class="muted small">${escapeHtml(tr('Персональный план по этой практике', 'Ushbu mashq bo‘yicha shaxsiy reja', 'Personal plan for this practice'))}</div>
+    `;
+    btn.addEventListener('click', () => openDiagnosisFromResult(btn));
+    grid.appendChild(btn);
+  }
+
+  async function ensureArchiveEntry() {
     if (!isEnabled()) return;
     const list = document.querySelector('#courses-subject-hub .subject-hub-actions');
     if (!list || document.getElementById(ENTRY_ID)) return;
@@ -272,14 +344,19 @@
     else list.appendChild(btn);
   }
 
+  function refreshUi() {
+    ensureResultAction();
+    ensureArchiveEntry();
+  }
+
   if (!isEnabled()) return;
 
-  window.iClubAiDiagnosisArchivePreview = { openArchive, refresh: ensureEntry };
+  window.iClubAiDiagnosisArchivePreview = { openArchive, refresh: refreshUi };
 
   let timer = null;
   const schedule = () => {
     clearTimeout(timer);
-    timer = setTimeout(ensureEntry, 180);
+    timer = setTimeout(refreshUi, 180);
   };
 
   document.addEventListener('DOMContentLoaded', schedule);
