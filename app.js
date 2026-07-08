@@ -6040,9 +6040,18 @@ async function getPastPracticeTourNos(subjectKey) {
   const ctx = await getPracticeStageContext(subjectKey);
   const currentTourNo = Number(ctx?.practiceTourNo || 1);
 
+  const allToursClosed = (
+    Number(ctx?.totalTours || 0) > 0 &&
+    Number(ctx?.globallyClosedCount || 0) >= Number(ctx?.totalTours || 0)
+  );
+
   return (Array.isArray(ctx?.pools) ? ctx.pools : [])
     .map(p => Number(p?.tour_no || 0))
-    .filter(n => Number.isFinite(n) && n > 0 && n < currentTourNo)
+    .filter(n =>
+      Number.isFinite(n) &&
+      n > 0 &&
+      (allToursClosed ? n <= currentTourNo : n < currentTourNo)
+    )
     .sort((a, b) => a - b);
 }
 
