@@ -1,5 +1,5 @@
 .result-hero-card {
-  padding: 12px;
+  padding: 10px;
   margin-bottom: 10px;
   text-align: left;
   border-color: #cfe0ff;
@@ -7,45 +7,50 @@
 }
 
 .result-hero-card::after {
-  right: 10px;
-  top: 6px;
-  font-size: 42px;
-  opacity: 0.24;
+  display: none;
 }
 
 .result-hero-grid {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr);
-  gap: 12px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+  min-height: 112px;
 }
 
 .result-score-side {
-  display: grid;
-  justify-items: center;
-  align-content: center;
   min-width: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  justify-items: center;
+  align-items: center;
+  align-content: center;
+  padding: 3px 8px 3px 2px;
+  border-right: 1px solid #dce7f6;
 }
 
 .result-score-side .score-ring {
-  width: 86px;
-  height: 86px;
-  margin: 0 0 7px;
+  width: 82px;
+  height: 82px;
+  margin: 0;
 }
 
 .result-score-side .score-ring-inner {
-  width: 62px;
-  height: 62px;
+  width: 60px;
+  height: 60px;
 }
 
 .result-score-side .result-score-main {
-  font-size: 25px;
+  font-size: 24px;
+  line-height: 0.92;
 }
 
 .result-score-side .score-ring-label {
-  font-size: 7px;
+  margin-top: 3px;
+  font-size: 6px;
+  letter-spacing: 0.1em;
 }
 
 .result-score-side .result-score-caption {
@@ -53,23 +58,30 @@
 }
 
 .result-score-side .result-status-pill {
-  margin-top: 0;
-  max-width: 92px;
+  margin-top: 6px;
+  max-width: 104px;
+  min-height: 20px;
   justify-content: center;
   text-align: center;
   white-space: normal;
-  font-size: 9px;
-  padding: 4px 7px;
+  font-size: 8.5px;
+  line-height: 1.1;
+  padding: 4px 8px;
+  box-shadow: none;
 }
 
 .result-hero-card .result-stat-row {
+  height: 100%;
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: 1fr auto;
   grid-template-areas:
     "correct correct"
     "errors topics";
   gap: 8px;
   margin: 0;
+  align-content: stretch;
 }
 
 .result-hero-card .result-stat-row div {
@@ -83,18 +95,22 @@
 
 .result-hero-card .result-stat-row div:nth-child(1) {
   grid-area: correct;
-  min-height: 38px;
-  padding: 0 0 6px;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  padding: 0 2px 4px;
   border-bottom: 1px solid #dce7f6;
 }
 
 .result-hero-card .result-stat-row div:nth-child(2),
 .result-hero-card .result-stat-row div:nth-child(3) {
-  min-height: 45px;
-  padding: 8px 9px;
+  min-height: 38px;
+  display: grid;
+  align-content: center;
+  padding: 7px 8px;
   border: 1px solid #d7e3f4;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .result-hero-card .result-stat-row div:nth-child(2) {
@@ -107,29 +123,37 @@
 }
 
 .result-hero-card .result-stat-row span {
-  font-size: 10px;
-  margin-bottom: 3px;
-  letter-spacing: 0.01em;
+  display: block;
   color: var(--muted);
+  font-size: 9px;
+  line-height: 1.05;
+  font-weight: 900;
+  margin-bottom: 3px;
+  letter-spacing: 0.02em;
 }
 
 .result-hero-card .result-stat-row b {
-  font-size: 16px;
+  display: block;
+  font-size: 15px;
   line-height: 1.05;
+  font-weight: 950;
 }
 
 .result-hero-card .result-stat-row div:nth-child(1) span {
+  order: 2;
+  margin: 4px 0 0;
+  color: #64748b;
   font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  text-transform: lowercase;
+  letter-spacing: 0;
 }
 
 .result-hero-card .result-stat-row div:nth-child(1) b {
+  order: 1;
   color: var(--brand);
-  font-size: 28px;
-  line-height: 0.95;
-  letter-spacing: -0.05em;
+  font-size: 31px;
+  line-height: 0.94;
+  letter-spacing: -0.055em;
 }
 
 .result-review-card {
@@ -146,34 +170,48 @@
 
 @media (max-width: 360px) {
   .result-hero-card {
-    padding: 11px;
+    padding: 9px;
   }
 
   .result-hero-grid {
-    grid-template-columns: 86px minmax(0, 1fr);
-    gap: 9px;
+    gap: 8px;
+    min-height: 106px;
+  }
+
+  .result-score-side {
+    padding-right: 7px;
   }
 
   .result-score-side .score-ring {
-    width: 80px;
-    height: 80px;
+    width: 76px;
+    height: 76px;
   }
 
   .result-score-side .score-ring-inner {
-    width: 58px;
-    height: 58px;
+    width: 56px;
+    height: 56px;
   }
 
   .result-score-side .result-score-main {
-    font-size: 23px;
+    font-size: 22px;
+  }
+
+  .result-score-side .result-status-pill {
+    max-width: 96px;
+    font-size: 8px;
+  }
+
+  .result-hero-card .result-stat-row {
+    gap: 7px;
   }
 
   .result-hero-card .result-stat-row div:nth-child(1) b {
-    font-size: 25px;
+    font-size: 28px;
   }
 
   .result-hero-card .result-stat-row div:nth-child(2),
   .result-hero-card .result-stat-row div:nth-child(3) {
-    padding: 8px;
+    min-height: 36px;
+    padding: 7px;
   }
 }
