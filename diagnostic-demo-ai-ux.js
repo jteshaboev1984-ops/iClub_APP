@@ -83,6 +83,9 @@
 
     const archiveBtn = el('ai-open-archive');
     if (archiveBtn) archiveBtn.textContent = textByLang({ en: 'AI diagnosis archive', ru: 'Архив AI-диагностик', uz: 'AI diagnostika arxivi' });
+    setText('ai-archive-title', textByLang({ en: 'AI diagnosis archive', ru: 'Архив AI-диагностик', uz: 'AI diagnostika arxivi' }));
+    setText('ai-archive-subtitle', textByLang({ en: 'Saved recommendations from practice', ru: 'Сохранённые рекомендации по практикам', uz: 'Mashqlar bo‘yicha saqlangan tavsiyalar' }));
+    setText('archive-back-to-ai', textByLang({ en: 'Back to AI plan', ru: 'Назад к AI-плану', uz: 'AI rejaga qaytish' }));
 
     if (lang === 'ru') {
       setText('source-subtitle', 'Материал связан с главным фокусом AI-диагностики');
@@ -200,6 +203,10 @@
     if (event.target.closest('#ai-open-archive')) {
       event.preventDefault();
       showArchive();
+    }
+    if (event.target.closest('#archive-back-to-ai')) {
+      event.preventDefault();
+      showAiResultAgain();
     }
     if (event.target.closest('.archive-card[data-current="1"]')) {
       event.preventDefault();
