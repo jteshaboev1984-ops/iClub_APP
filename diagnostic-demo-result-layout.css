@@ -17,7 +17,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
   align-items: stretch;
-  min-height: 112px;
+  min-height: 126px;
 }
 
 .result-score-side {
@@ -30,24 +30,24 @@
 }
 
 .result-score-side .score-ring {
-  width: 82px;
-  height: 82px;
+  width: 108px;
+  height: 108px;
   margin: 0;
 }
 
 .result-score-side .score-ring-inner {
-  width: 60px;
-  height: 60px;
+  width: 76px;
+  height: 76px;
 }
 
 .result-score-side .result-score-main {
-  font-size: 24px;
+  font-size: 31px;
   line-height: 0.92;
 }
 
 .result-score-side .score-ring-label {
-  margin-top: 3px;
-  font-size: 6px;
+  margin-top: 4px;
+  font-size: 7px;
   letter-spacing: 0.1em;
 }
 
@@ -80,7 +80,7 @@
 
 .result-hero-card .result-stat-row .result-kpi-card {
   grid-area: correct;
-  min-height: 56px;
+  min-height: 68px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -285,7 +285,7 @@
 
   .result-hero-grid {
     gap: 8px;
-    min-height: 106px;
+    min-height: 116px;
   }
 
   .result-score-side {
@@ -293,17 +293,17 @@
   }
 
   .result-score-side .score-ring {
-    width: 76px;
-    height: 76px;
+    width: 96px;
+    height: 96px;
   }
 
   .result-score-side .score-ring-inner {
-    width: 56px;
-    height: 56px;
+    width: 68px;
+    height: 68px;
   }
 
   .result-score-side .result-score-main {
-    font-size: 22px;
+    font-size: 27px;
   }
 
   .result-kpi-copy b {
@@ -318,6 +318,10 @@
 
   .result-hero-card .result-stat-row {
     gap: 7px;
+  }
+
+  .result-hero-card .result-stat-row .result-kpi-card {
+    min-height: 62px;
   }
 
   .result-hero-card .result-stat-row div:nth-child(2),
