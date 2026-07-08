@@ -1,7 +1,7 @@
 // Clean lab-only AI diagnosis preview layer.
 // Default is OFF unless ai-diagnostic-lab.html injects this file.
-// Safe scope: does not change practice answers, scores, tours, ratings or certificates.
-// It only creates/reads saved learning_roadmaps snapshots through RPC.
+// Safe scope: normal practice history is protected by marking lab attempts as is_lab=true.
+// It creates/reads saved learning_roadmaps snapshots through RPC.
 
 (() => {
   'use strict';
@@ -66,7 +66,6 @@
     const top = Number(topics[0]?.errors || 0);
     const second = Number(topics[1]?.errors || 0);
 
-    // If the top topic is not clearly dominant, do not pretend there is one precise weakness.
     if (totalErrors >= 4 && topics.length > 1 && (top === second || top < Math.ceil(totalErrors * 0.35))) {
       const names = topics.slice(0, 3).map(topicLabel).filter(Boolean).join(', ');
       return tr(
@@ -142,7 +141,7 @@
 
   async function createLatestDiagnosis() {
     if (!window.sb) throw new Error('supabase_not_ready');
-    const { data, error } = await window.sb.rpc('create_latest_practice_ai_diagnosis');
+    const { data, error } = await window.sb.rpc('create_latest_lab_practice_ai_diagnosis');
     if (error) throw error;
     if (!data) throw new Error('empty_diagnosis');
     return normalizePlan(data);
@@ -283,7 +282,7 @@
     try {
       button.disabled = true;
       if (titleNode) titleNode.textContent = tr('Формируем AI-диагностику…', 'AI diagnostika tayyorlanmoqda…', 'Building AI diagnosis…');
-      if (subNode) subNode.textContent = tr('Сохраняем результат этой практики', 'Ushbu mashq natijasi saqlanmoqda', 'Saving this practice result');
+      if (subNode) subNode.textContent = tr('Сохраняем lab-попытку отдельно', 'Lab urinishi alohida saqlanmoqda', 'Saving the lab attempt separately');
 
       const diagnosis = await createLatestDiagnosis();
 
@@ -292,7 +291,7 @@
       renderDiagnosisDetailOverlay(diagnosis);
       setTimeout(refreshUi, 300);
     } catch (error) {
-      console.warn('[AI Diagnosis Lab] create_latest_practice_ai_diagnosis failed:', error);
+      console.warn('[AI Diagnosis Lab] create_latest_lab_practice_ai_diagnosis failed:', error);
       if (titleNode) titleNode.textContent = tr('AI-диагностика', 'AI diagnostika', 'AI diagnosis');
       if (subNode) subNode.textContent = tr('Не удалось сохранить. Попробуйте пройти практику ещё раз.', 'Saqlanmadi. Mashqni yana bir marta bajarib ko‘ring.', 'Could not save. Try completing practice again.');
     } finally {
