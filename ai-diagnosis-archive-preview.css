@@ -1,3 +1,32 @@
+.ai-diagnosis-result-card {
+  position: relative;
+  overflow: hidden;
+  border-color: #c7d8ff !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f6f9ff 46%, #eef4ff 100%) !important;
+}
+
+.ai-diagnosis-result-card::after {
+  content: "AI";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  min-width: 28px;
+  height: 22px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #eaf1ff;
+  color: #2563eb;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 950;
+}
+
+.ai-diagnosis-result-card .card-title,
+.ai-diagnosis-result-card .muted {
+  padding-right: 38px;
+}
+
 .ai-diagnosis-archive-overlay {
   position: fixed;
   inset: 0;
