@@ -7,6 +7,7 @@
   'use strict';
 
   const FLAG_KEY = 'iclub_ai_diag_enabled';
+  const SHOW_EMPTY_KEY = 'iclub_ai_diag_show_empty';
   const ENTRY_ID = 'ai-diagnosis-archive-entry';
   const OVERLAY_ID = 'ai-diagnosis-archive-overlay';
 
@@ -18,6 +19,19 @@
         return true;
       }
       return localStorage.getItem(FLAG_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  function shouldShowEmptyArchiveEntry() {
+    try {
+      const params = new URLSearchParams(window.location.search || '');
+      if (params.get('ai_diag_empty') === '1') {
+        localStorage.setItem(SHOW_EMPTY_KEY, '1');
+        return true;
+      }
+      return localStorage.getItem(SHOW_EMPTY_KEY) === '1';
     } catch {
       return false;
     }
@@ -125,7 +139,7 @@
           <button class="ai-diagnosis-archive-close" type="button" aria-label="Close">×</button>
         </div>
         <div class="ai-diagnosis-archive-body">
-          ${empty ? `<div class="ai-diagnosis-detail-section"><div class="ai-diagnosis-detail-text">${escapeHtml(tr('Пока нет сохранённых AI-диагностик.', 'Hozircha saqlangan AI diagnostika yo‘q.', 'No saved AI diagnoses yet.'))}</div></div>` : items.map((item, index) => `
+          ${empty ? `<div class="ai-diagnosis-detail-section"><div class="ai-diagnosis-detail-text">${escapeHtml(tr('Пока нет сохранённых AI-диагностик. После подключения кнопки на результате практики здесь появятся реальные диагностики.', 'Hozircha saqlangan AI diagnostika yo‘q. Amaliyot natijasi ekranidagi tugma ulangandan keyin bu yerda haqiqiy diagnostikalar chiqadi.', 'No saved AI diagnoses yet. After the Practice Result button is connected, real diagnoses will appear here.'))}</div></div>` : items.map((item, index) => `
             <button class="ai-diagnosis-archive-card" type="button" data-ai-diagnosis-index="${index}">
               <div class="ai-diagnosis-archive-card-top">
                 <div>
@@ -236,7 +250,8 @@
     if (!list || document.getElementById(ENTRY_ID)) return;
 
     const available = await hasArchive();
-    if (!available || document.getElementById(ENTRY_ID)) return;
+    if (!available && !shouldShowEmptyArchiveEntry()) return;
+    if (document.getElementById(ENTRY_ID)) return;
 
     const btn = document.createElement('button');
     btn.id = ENTRY_ID;
@@ -258,6 +273,8 @@
   }
 
   if (!isEnabled()) return;
+
+  window.iClubAiDiagnosisArchivePreview = { openArchive, refresh: ensureEntry };
 
   let timer = null;
   const schedule = () => {
