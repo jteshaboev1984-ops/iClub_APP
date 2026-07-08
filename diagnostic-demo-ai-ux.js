@@ -35,6 +35,18 @@
     });
   }
 
+  function hideArchive() {
+    el('ai-archive-screen')?.classList.add('hidden');
+    document.body.dataset.aiArchiveOpen = '0';
+  }
+
+  function showOnlyScreen(screenId) {
+    document.querySelectorAll('.demo-screen').forEach((screen) => screen.classList.add('hidden'));
+    el(screenId)?.classList.remove('hidden');
+    el('topbar-back')?.classList.toggle('hidden', screenId === 'practice-start-screen');
+    document.body.dataset.aiArchiveOpen = screenId === 'ai-archive-screen' ? '1' : '0';
+  }
+
   function applyMainCopy() {
     replaceAiWord();
 
@@ -175,20 +187,19 @@
   }
 
   function showArchive() {
-    document.querySelectorAll('.demo-screen').forEach((screen) => screen.classList.add('hidden'));
-    const archive = el('ai-archive-screen');
-    if (archive) archive.classList.remove('hidden');
-    el('topbar-back')?.classList.remove('hidden');
+    showOnlyScreen('ai-archive-screen');
     renderArchive();
   }
 
   function showAiResultAgain() {
+    hideArchive();
+    showOnlyScreen('ai-result-screen');
     if (typeof window.renderAiResult === 'function') window.renderAiResult();
-    else {
-      document.querySelectorAll('.demo-screen').forEach((screen) => screen.classList.add('hidden'));
-      el('ai-result-screen')?.classList.remove('hidden');
-    }
+    hideArchive();
+    el('ai-result-screen')?.classList.remove('hidden');
     setTimeout(() => {
+      hideArchive();
+      el('ai-result-screen')?.classList.remove('hidden');
       applyMainCopy();
       applyAiResultPolish();
     }, 0);
@@ -202,14 +213,17 @@
   document.addEventListener('click', (event) => {
     if (event.target.closest('#ai-open-archive')) {
       event.preventDefault();
+      event.stopPropagation();
       showArchive();
     }
     if (event.target.closest('#archive-back-to-ai')) {
       event.preventDefault();
+      event.stopPropagation();
       showAiResultAgain();
     }
     if (event.target.closest('.archive-card[data-current="1"]')) {
       event.preventDefault();
+      event.stopPropagation();
       showAiResultAgain();
     }
   });
