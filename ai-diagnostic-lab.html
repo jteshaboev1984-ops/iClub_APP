@@ -67,6 +67,14 @@
       var frame = document.getElementById('iclub-lab-frame');
       var loading = document.getElementById('lab-loading');
 
+      function injectScriptOnce(doc, src, flag) {
+        if (doc.querySelector('script[' + flag + '="1"]')) return;
+        var js = doc.createElement('script');
+        js.src = src;
+        js.setAttribute(flag, '1');
+        doc.body.appendChild(js);
+      }
+
       function injectIntoFrame() {
         try {
           var win = frame.contentWindow;
@@ -81,17 +89,13 @@
           if (!doc.querySelector('link[data-ai-diagnosis-lab-css="1"]')) {
             var css = doc.createElement('link');
             css.rel = 'stylesheet';
-            css.href = 'ai-diagnosis-archive-preview.css?v=lab1';
+            css.href = 'ai-diagnosis-archive-preview.css?v=lab2';
             css.setAttribute('data-ai-diagnosis-lab-css', '1');
             doc.head.appendChild(css);
           }
 
-          if (!doc.querySelector('script[data-ai-diagnosis-lab-js="1"]')) {
-            var js = doc.createElement('script');
-            js.src = 'ai-diagnosis-archive-preview.js?v=lab1';
-            js.setAttribute('data-ai-diagnosis-lab-js', '1');
-            doc.body.appendChild(js);
-          }
+          injectScriptOnce(doc, 'ai-diagnosis-archive-preview.js?v=lab2', 'data-ai-diagnosis-lab-js');
+          injectScriptOnce(doc, 'ai-diagnosis-lab-result-fix.js?v=lab2', 'data-ai-diagnosis-lab-result-fix');
 
           setTimeout(function () {
             try {
