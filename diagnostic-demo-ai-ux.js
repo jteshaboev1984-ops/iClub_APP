@@ -147,7 +147,7 @@
   function makeArchiveCard({ title, meta, focus, score, errors, current }) {
     const badge = current ? textByLang({ en: 'Current', ru: 'Текущая', uz: 'Joriy' }) : textByLang({ en: 'Saved', ru: 'Сохранено', uz: 'Saqlangan' });
     return `
-      <button class="archive-card" type="button" data-current="${current ? '1' : '0'}">
+      <button class="archive-card" type="button" data-current="${current ? '1' : '0'}" data-focus="${focus}" data-score="${score}" data-errors="${errors}">
         <div class="archive-card-top">
           <div>
             <div class="archive-card-title">${title}</div>
@@ -205,6 +205,46 @@
     }, 0);
   }
 
+  function showSavedDiagnosis(card) {
+    hideArchive();
+    showOnlyScreen('ai-result-screen');
+    const focusText = card?.dataset?.focus || '';
+    const focus = focusText.replace(/^.*?:\s*/, '') || textByLang({ en: 'Saved focus', ru: 'Сохранённый фокус', uz: 'Saqlangan fokus' });
+    setText('ai-result-title', textByLang({ en: 'Saved AI diagnosis', ru: 'Сохранённая AI-диагностика', uz: 'Saqlangan AI diagnostika' }));
+    setText('ai-result-subtitle', textByLang({ en: 'Recommendation opened from archive', ru: 'Рекомендация открыта из архива', uz: 'Tavsiya arxivdan ochildi' }));
+    setText('ai-focus-title', focus);
+    setText('ai-reason-text', textByLang({
+      en: `${focus} was saved as the main focus for this practice recommendation. Review the idea, check the previous mistakes, then repeat similar questions.`,
+      ru: `${focus} сохранён как главный фокус этой рекомендации. Повторите идею, проверьте прошлые ошибки и затем закрепите похожими заданиями.`,
+      uz: `${focus} ushbu tavsiyaning asosiy fokusi sifatida saqlangan. G‘oyani takrorlang, oldingi xatolarni tekshiring va o‘xshash savollar bilan mustahkamlang.`,
+    }));
+    const steps = Array.from(document.querySelectorAll('#ai-plan-list .ai-route-step'));
+    const route = textByLang({
+      en: [
+        ['1. Return to the source', `Open the material connected to ${focus}.`],
+        ['2. Review saved mistakes', 'Compare the old answer with the correct reasoning.'],
+        ['3. Practice again', 'Use a short practice block to check retention.'],
+      ],
+      ru: [
+        ['1. Вернуться к источнику', `Откройте материал, связанный с темой «${focus}».`],
+        ['2. Проверить сохранённые ошибки', 'Сравните прошлый ответ с правильной логикой.'],
+        ['3. Повторить практикой', 'Пройдите короткий блок, чтобы проверить закрепление.'],
+      ],
+      uz: [
+        ['1. Manbaga qaytish', `«${focus}» bilan bog‘liq materialni oching.`],
+        ['2. Saqlangan xatolarni tekshirish', 'Oldingi javobni to‘g‘ri mantiq bilan solishtiring.'],
+        ['3. Qayta mashq qilish', 'Mustahkamlanganini tekshirish uchun qisqa blok bajaring.'],
+      ],
+    });
+    steps.forEach((step, index) => {
+      const title = step.querySelector('.route-step-title');
+      const body = step.querySelector('.route-step-text');
+      if (title && route[index]) title.textContent = route[index][0];
+      if (body && route[index]) body.textContent = route[index][1];
+    });
+    applyMainCopy();
+  }
+
   function applyAll() {
     applyMainCopy();
     applyAiResultPolish();
@@ -221,10 +261,12 @@
       event.stopPropagation();
       showAiResultAgain();
     }
-    if (event.target.closest('.archive-card[data-current="1"]')) {
+    const archiveCard = event.target.closest('.archive-card');
+    if (archiveCard) {
       event.preventDefault();
       event.stopPropagation();
-      showAiResultAgain();
+      if (archiveCard.dataset.current === '1') showAiResultAgain();
+      else showSavedDiagnosis(archiveCard);
     }
   });
 
