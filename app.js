@@ -17056,7 +17056,50 @@ updatePracticeStartButtonForTour(selectedTourNo, false);
       stageMetaEl.textContent = [titlePart, progressPart, leftPart].filter(Boolean).join(" • ");
     }
 
-    const h = loadPracticeHistory(subjectKey, selectedTourNo);
+        let h = null;
+
+    try {
+      if (window.sb) {
+        const { data, error } = await window.sb.rpc("get_practice_progress_summary", {
+          p_subject_key: subjectKey,
+          p_tour_no: Number(selectedTourNo || 0),
+          p_limit: 30
+        });
+
+        if (!error && data?.ok) {
+          const normalizeDbAttempt = (row) => {
+            const total = Number(row?.answers_total || 0) > 0
+              ? Number(row.answers_total)
+              : 10;
+
+            return {
+              id: Number(row?.id || 0),
+              score: Math.max(0, Math.round(Number(row?.score || 0))),
+              total,
+              percent: Math.max(0, Math.min(100, Math.round(Number(row?.percent || 0)))),
+              durationSec: Math.max(0, Math.round(Number(row?.time_seconds || 0))),
+              ts: Date.parse(row?.created_at || "") || Date.now(),
+              source: "db"
+            };
+          };
+
+          const bestDb = data.best ? normalizeDbAttempt(data.best) : null;
+          const lastDb = Array.isArray(data.last)
+            ? data.last.map(normalizeDbAttempt).filter(row => Number(row.id || 0) > 0)
+            : [];
+
+          h = {
+            best: bestDb,
+            last: lastDb
+          };
+        }
+      }
+    } catch {}
+
+    if (!h) {
+      h = loadPracticeHistory(subjectKey, selectedTourNo);
+    }
+
     const best = h?.best || null;
     const last = Array.isArray(h?.last) ? h.last : [];
 
