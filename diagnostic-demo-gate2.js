@@ -30,12 +30,15 @@
     try { store.setItem(key, JSON.stringify(value)); } catch {}
   };
 
-  const initialState = readJson(localStorage, STATE_KEY, {});
+  const initialState = window.ICLUB_DEMO_GATE2_BOOT_STATE || readJson(localStorage, STATE_KEY, {});
   let plan = VALID_PLANS.has(initialState.plan) ? initialState.plan : 'free';
   let scenario = VALID_SCENARIOS.has(initialState.scenario) ? initialState.scenario : 'learning';
   let rememberedScreen = CUSTOM_IDS.has(initialState.screen) ? initialState.screen : 'subject-hub-screen';
   let scenarioOpen = false;
   let trajectoryOrigin = 'hub';
+  if (rememberedScreen === 'plus-chat-screen' && plan === 'free') rememberedScreen = 'plan-comparison-screen';
+  if (rememberedScreen === 'pro-trajectory-screen' && plan !== 'pro') rememberedScreen = 'subject-hub-screen';
+  if (rememberedScreen === 'active-tour-preview-screen' && scenario !== 'active-tour') rememberedScreen = 'subject-hub-screen';
 
   function persist(extra = {}) {
     const prior = readJson(localStorage, STATE_KEY, {});
