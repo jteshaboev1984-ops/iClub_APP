@@ -1,0 +1,188 @@
+/* Mobile readability pass — larger type, calmer hierarchy, touch-safe controls. */
+:root {
+  --demo-text-body: 15px;
+  --demo-text-secondary: 13px;
+  --demo-text-caption: 12px;
+  --demo-text-label: 11px;
+  --demo-line-body: 1.52;
+}
+
+.demo-ai-hub-copy .panel-title,
+.demo-compact-copy .card-title,
+.demo-ai-chat-title,
+.demo-trajectory-hero-copy strong,
+.demo-panel-intro .h2 {
+  font-size: 15px !important;
+  line-height: 1.3 !important;
+}
+
+.demo-ai-hub-copy .muted,
+.demo-compact-copy .muted,
+.demo-ai-chat-sub,
+.demo-panel-intro .muted,
+.demo-insight-sheet-sub {
+  font-size: var(--demo-text-secondary) !important;
+  line-height: 1.45 !important;
+}
+
+.demo-ai-bubble,
+.demo-ai-answer-section p,
+.demo-ai-context > p,
+.demo-ai-microcheck > p,
+.demo-compact-summary,
+.demo-sheet-reason p,
+.demo-method-box,
+.demo-plan-feature-card ul {
+  font-size: var(--demo-text-body) !important;
+  line-height: var(--demo-line-body) !important;
+}
+
+.demo-ai-answer-section b,
+.demo-ai-source b,
+.demo-ai-context > b,
+.demo-ai-microcheck > b,
+.demo-insight-label,
+.demo-compact-reliability span,
+.demo-sheet-status span,
+.demo-method-box > b {
+  font-size: var(--demo-text-label) !important;
+  line-height: 1.3 !important;
+}
+
+.demo-ai-source span,
+.demo-ai-welcome span:last-child,
+.demo-ai-history-copy small,
+.demo-skill-row-copy small,
+.demo-plan-copy span,
+.demo-ai-context-grid small,
+.demo-method-score span,
+.demo-compact-metric span {
+  font-size: var(--demo-text-caption) !important;
+  line-height: 1.35 !important;
+}
+
+.demo-ai-quick-btn,
+.demo-ai-action,
+.demo-ai-fill-btn,
+.demo-ai-chat-tab,
+.demo-ai-send,
+.demo-result-ai-action,
+.demo-review-ai,
+.demo-plan-feature-card .btn,
+.demo-trajectory-tab,
+.demo-trajectory-actions .btn,
+.demo-plan-actions .btn,
+.demo-ai-show-check {
+  font-size: 13px !important;
+  line-height: 1.25 !important;
+}
+
+.demo-ai-quick-btn {
+  min-height: 48px !important;
+  padding: 11px 13px !important;
+}
+
+.demo-ai-action {
+  min-height: 38px !important;
+  padding: 0 12px !important;
+}
+
+.demo-ai-fill-btn {
+  min-height: 34px !important;
+  padding: 0 12px !important;
+}
+
+.demo-ai-chat-tab,
+.demo-trajectory-tab {
+  min-height: 42px !important;
+}
+
+.demo-ai-send,
+.demo-result-ai-action,
+.demo-review-ai,
+.demo-ai-show-check,
+.demo-plan-feature-card .btn,
+.demo-trajectory-actions .btn,
+.demo-plan-actions .btn {
+  min-height: 44px !important;
+}
+
+.demo-ai-input {
+  min-height: 48px !important;
+  padding: 12px 13px !important;
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+}
+
+.demo-ai-message.is-user .demo-ai-bubble {
+  font-size: 15px !important;
+}
+
+.demo-ai-verified,
+.demo-ai-plan-chip,
+.demo-ai-chat-plan,
+.demo-plan-result-badge,
+.demo-skill-chip,
+.demo-plan-verified,
+.demo-trajectory-confidence b,
+.demo-compact-reliability b {
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+}
+
+.demo-ai-welcome b,
+.demo-ai-history-copy b,
+.demo-skill-row-copy b,
+.demo-plan-copy b,
+.demo-insight-card b,
+.demo-unchecked-copy b,
+.demo-sheet-history-row b,
+.demo-method-score b {
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+}
+
+.demo-insight-card small,
+.demo-unchecked-copy small,
+.demo-sheet-history-row span {
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
+
+.demo-skill-row,
+.demo-plan-row,
+.demo-ai-history-row,
+.demo-unchecked-row {
+  min-height: 64px !important;
+}
+
+.demo-compact-metric b {
+  font-size: 19px !important;
+}
+
+.demo-ai-bubble {
+  padding: 13px 14px !important;
+}
+
+.demo-ai-answer-section + .demo-ai-answer-section {
+  margin-top: 12px !important;
+}
+
+.demo-ai-source {
+  margin-top: 12px !important;
+  padding-top: 10px !important;
+}
+
+@media (max-width: 370px) {
+  :root {
+    --demo-text-body: 14px;
+    --demo-text-secondary: 12px;
+    --demo-text-caption: 11px;
+  }
+
+  .demo-ai-hub-copy .panel-title,
+  .demo-compact-copy .card-title,
+  .demo-ai-chat-title {
+    font-size: 14px !important;
+  }
+}
