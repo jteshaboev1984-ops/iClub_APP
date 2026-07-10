@@ -19,6 +19,33 @@
   ]);
 
   const L = window.ICLUB_DEMO_GATE2_COPY;
+  Object.assign(L.en, {
+    currentDiagnosisSub: '7 multiple-choice questions · 2 easy · 3 medium · 2 hard',
+    proFeatures: ['Everything in Plus', 'Question-level learning path', 'Skill states and supporting results', 'Unverified errors and targeted next step'],
+    sendLater: 'Sending is not active in this interface preview.',
+    chatHello: 'Ask about a topic, formula or concept. The tutor interface is ready; sending answers is not active in this preview.',
+    toolsNote: 'Answer autofill and result controls are being prepared. The menu and scenario state are already isolated and persistent.'
+  });
+  Object.assign(L.ru, {
+    currentDiagnosisSub: '7 вопросов с выбором ответа · 2 лёгких · 3 средних · 2 сложных',
+    proAttention: 'Pro связывает результаты по вопросам закрытого тура, последующей практики и новой диагностики.',
+    proFeatures: ['Всё из Plus', 'Траектория на уровне вопросов', 'Статусы навыков и подтверждающие результаты', 'Непроверенные ошибки и точный следующий шаг'],
+    trajectorySub: 'Одна история, интерпретированная с учётом подтверждающих результатов.',
+    trajectoryAction: 'Завершить диагностику и обновить результаты проверки',
+    chatHello: 'Задайте вопрос по теме, формуле или понятию. Интерфейс репетитора подготовлен; отправка ответов в этом предварительном экране пока недоступна.',
+    sendLater: 'Отправка пока недоступна в этом предварительном экране.',
+    toolsNote: 'Автозаполнение ответов и управление результатами проверки готовятся. Меню и состояние сценария уже изолированы и сохраняются.'
+  });
+  Object.assign(L.uz, {
+    currentDiagnosisSub: '7 ta variantli savol · 2 oson · 3 o‘rtacha · 2 qiyin',
+    proAttention: 'Pro yopilgan tur, keyingi mashq va yangi diagnostika natijalarini bog‘laydi.',
+    proFeatures: ['Plus dagi barcha imkoniyatlar', 'Savol darajasidagi o‘quv yo‘li', 'Ko‘nikma holatlari va tasdiqlovchi natijalar', 'Tekshirilmagan xatolar va aniq keyingi qadam'],
+    trajectorySub: 'Bitta tarix tasdiqlovchi natijalar bilan talqin qilinadi.',
+    trajectoryAction: 'Diagnostikani tugatib tekshiruv natijalarini yangilash',
+    chatHello: 'Mavzu, formula yoki tushuncha haqida savol bering. Repetitor interfeysi tayyor; bu oldindan ko‘rish ekranida javob yuborish hozircha o‘chiq.',
+    sendLater: 'Bu oldindan ko‘rish ekranida yuborish hozircha o‘chiq.',
+    toolsNote: 'Javoblarni avtomatik to‘ldirish va tekshiruv natijalarini boshqarish tayyorlanmoqda. Menyu va ssenariy holati allaqachon izolyatsiya qilingan va saqlanadi.'
+  });
 
   const $ = (id) => document.getElementById(id);
   const currentLang = () => L[document.documentElement.lang] ? document.documentElement.lang : 'ru';
@@ -310,7 +337,13 @@
     });
 
     document.querySelectorAll('.language-btn').forEach((button) => {
-      button.addEventListener('click', () => setTimeout(() => { renderDynamic(); persist(); }, 0));
+      button.addEventListener('click', () => {
+        const screenBeforeLanguageChange = visibleScreenId();
+        setTimeout(() => {
+          if (CUSTOM_IDS.has(screenBeforeLanguageChange)) showScreen(screenBeforeLanguageChange);
+          else { renderDynamic(); persist(); }
+        }, 0);
+      });
     });
   }
 
