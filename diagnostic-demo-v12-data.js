@@ -2,23 +2,275 @@
 'use strict';
 const L=(en,ru,uz)=>({en,ru,uz});
 window.ICLUB_DEMO_V12_DATA={
- version:'1.2-gate-1',
- profile:{id:'demo-sardor',name:L('Sardor Karimov','Сардор Каримов','Sardor Karimov'),status:L('Demonstration student','Демонстрационный ученик','Namoyish o‘quvchisi'),initials:'СК',subject:'economics',default_language:'ru'},
- history:[
-  {id:'p1',kind:'practice',no:1,score:10,total:10,date:'2026-05-12',seconds:482},
-  {id:'p2',kind:'practice',no:2,score:10,total:10,date:'2026-05-19',seconds:506},
-  {id:'p3',kind:'practice',no:3,score:10,total:10,date:'2026-05-26',seconds:471},
-  {id:'t4',kind:'tour',no:4,score:6,total:20,date:'2026-06-02',seconds:1148},
-  {id:'p4',kind:'practice',no:4,score:10,total:10,date:'2026-06-06',seconds:524}
- ],
- questions:[
-  {id:'d1',difficulty:'easy',seconds:50,topic:L('Factors of production','Факторы производства','Ishlab chiqarish omillari'),skill:L('Factor rewards','Доходы факторов производства','Ishlab chiqarish omillari daromadi'),ref:'iClub Economics · Factors of production',q:L('Which payment is the reward for labour?','Какой платёж является доходом труда?','Mehnat omilining daromadi qaysi to‘lov?'),o:{en:['Rent','Wages','Interest','Profit'],ru:['Рента','Заработная плата','Процент','Прибыль'],uz:['Renta','Ish haqi','Foiz','Foyda']},a:'B',scenario:'B',ok:L('Wages are the reward paid for labour.','Заработная плата — доход, выплачиваемый за труд.','Ish haqi mehnat uchun to‘lanadigan daromaddir.'),bad:L('The selected payment belongs to another factor of production.','Выбранный доход относится к другому фактору производства.','Tanlangan daromad boshqa ishlab chiqarish omiliga tegishli.'),next:L('Match land, labour, capital and enterprise to their rewards.','Сопоставьте землю, труд, капитал и предпринимательство с их доходами.','Yer, mehnat, kapital va tadbirkorlikni daromadlari bilan moslang.')},
-  {id:'d2',difficulty:'easy',seconds:50,topic:L('Macroeconomic policy','Макроэкономическая политика','Makroiqtisodiy siyosat'),skill:L('Fiscal versus monetary policy','Фискальная и денежно-кредитная политика','Fiskal va pul-kredit siyosati'),ref:'iClub Economics · Fiscal policy',q:L('Which action is expansionary fiscal policy?','Какое действие относится к стимулирующей фискальной политике?','Qaysi harakat rag‘batlantiruvchi fiskal siyosatga kiradi?'),o:{en:['Increase government spending','Raise the policy interest rate','Sell bonds to reduce liquidity','Raise bank reserve requirements'],ru:['Увеличить государственные расходы','Повысить ключевую ставку','Продать облигации для сокращения ликвидности','Повысить банковские резервные требования'],uz:['Davlat xarajatlarini oshirish','Asosiy foiz stavkasini oshirish','Likvidlikni kamaytirish uchun obligatsiya sotish','Bank zaxira talablarini oshirish']},a:'A',scenario:'A',ok:L('Government spending is a fiscal-policy instrument.','Государственные расходы — инструмент фискальной политики.','Davlat xarajatlari fiskal siyosat vositasidir.'),bad:L('The selected action is a monetary or banking-policy tool.','Выбранное действие относится к денежно-кредитной или банковской политике.','Tanlangan harakat pul-kredit yoki bank siyosati vositasidir.'),next:L('Separate government-budget tools from central-bank tools.','Разделите бюджетные инструменты правительства и инструменты центрального банка.','Davlat budjeti vositalari bilan markaziy bank vositalarini ajrating.')},
-  {id:'d3',difficulty:'medium',seconds:60,topic:L('Market efficiency','Эффективность рынка','Bozor samaradorligi'),skill:L('Efficiency conditions','Условия экономической эффективности','Iqtisodiy samaradorlik shartlari'),ref:'iClub Economics · Efficiency conditions',q:L('When is allocative efficiency achieved?','Когда достигается аллокативная эффективность?','Allokativ samaradorlik qachon yuzaga keladi?'),o:{en:['P = MC','Average cost is minimum','MR = MC','Total revenue is maximum'],ru:['P = MC','Средние издержки минимальны','MR = MC','Совокупная выручка максимальна'],uz:['P = MC','O‘rtacha xarajat minimum','MR = MC','Umumiy tushum maksimum']},a:'A',scenario:'B',ok:L('P = MC means the value of the last unit equals its marginal resource cost.','P = MC означает, что ценность последней единицы равна её предельным ресурсным издержкам.','P = MC oxirgi birlik qiymati uning chegaraviy resurs xarajatiga tengligini bildiradi.'),bad:L('Minimum AC describes productive efficiency; MR = MC describes profit maximisation.','Минимум AC описывает производственную эффективность, а MR = MC — максимизацию прибыли.','Minimum AC ishlab chiqarish samaradorligini, MR = MC esa foyda maksimumini bildiradi.'),next:L('Build a map: P = MC, minimum AC, MR = MC.','Составьте карту: P = MC, минимум AC, MR = MC.','Xarita tuzing: P = MC, minimum AC, MR = MC.')},
-  {id:'d4',difficulty:'medium',seconds:60,topic:L('Demand','Спрос','Talab'),skill:L('Complementary goods','Дополняющие товары','To‘ldiruvchi tovarlar'),ref:'iClub Economics · Related goods',q:L('Coffee and filters are complements. What happens to demand for filters when coffee becomes much more expensive?','Кофе и фильтры — дополняющие товары. Что произойдёт со спросом на фильтры при значительном росте цены кофе?','Qahva va filtrlar to‘ldiruvchi tovarlar. Qahva narxi ancha oshsa, filtrlarga talab nima bo‘ladi?'),o:{en:['Shifts right','Shifts left','Moves up the same curve','Filter supply shifts left'],ru:['Сместится вправо','Сместится влево','Движение вверх по той же кривой','Предложение фильтров сместится влево'],uz:['O‘ngga siljiydi','Chapga siljiydi','Shu egri chiziq bo‘ylab yuqoriga harakat','Filtr taklifi chapga siljiydi']},a:'B',scenario:'B',ok:L('Fewer coffee purchases reduce demand for its complement.','Снижение покупок кофе уменьшает спрос на дополняющий товар.','Qahva xaridi kamayishi uning to‘ldiruvchi tovariga talabni kamaytiradi.'),bad:L('A related-good price changes demand, not movement along the same curve or supply.','Цена связанного товара меняет спрос, а не вызывает движение по той же кривой или сдвиг предложения.','Bog‘liq tovar narxi talabni o‘zgartiradi, shu egri chiziq bo‘ylab harakat yoki taklifni emas.'),next:L('Trace changes through both linked markets.','Проследите изменение через оба связанных рынка.','O‘zgarishni ikki bog‘liq bozor orqali kuzating.')},
-  {id:'d5',difficulty:'medium',seconds:65,topic:L('Market welfare','Рыночное благосостояние','Bozor farovonligi'),skill:L('Consumer surplus','Потребительский излишек','Iste’molchi ortiqchaligi'),ref:'iClub Economics · Consumer surplus',q:L('Which area is consumer surplus at equilibrium?','Какая область показывает потребительский излишек в равновесии?','Muvozanatda qaysi soha iste’molchi ortiqchaligini ko‘rsatadi?'),o:{en:['Below price and above supply','Above price and below demand','Between supply and the horizontal axis','The price × quantity rectangle'],ru:['Ниже цены и выше предложения','Выше цены и ниже спроса','Между предложением и горизонтальной осью','Прямоугольник цена × количество'],uz:['Narxdan past va taklifdan yuqori','Narxdan yuqori va talabdan past','Taklif bilan gorizontal o‘q orasida','Narx × miqdor to‘rtburchagi']},a:'B',scenario:'B',ok:L('Consumer surplus lies below demand and above the market price.','Потребительский излишек расположен ниже спроса и выше рыночной цены.','Iste’molchi ortiqchaligi talabdan pastda va bozor narxidan yuqorida joylashadi.'),bad:L('The selected area represents producer surplus, expenditure or an incorrectly bounded region.','Выбранная область показывает излишек производителя, расходы или неверно ограниченную область.','Tanlangan soha ishlab chiqaruvchi ortiqchaligi, xarajat yoki noto‘g‘ri chegaralangan hududni bildiradi.'),next:L('Name every boundary before selecting a welfare area.','Назовите все границы области перед выбором.','Farovonlik sohasini tanlashdan oldin barcha chegaralarni ayting.')},
-  {id:'d6',difficulty:'hard',seconds:75,topic:L('Firm objectives','Цели фирмы','Firma maqsadlari'),skill:L('Profit and efficiency conditions','Условия прибыли и эффективности','Foyda va samaradorlik shartlari'),ref:'iClub Economics · Firm objectives',q:L('A firm produces where MR = MC. What is justified?','Фирма производит при MR = MC. Какой вывод обоснован?','Firma MR = MC bo‘lgan hajmda ishlab chiqaradi. Qaysi xulosa asosli?'),o:{en:['It is productively efficient','It is allocatively efficient','It maximises profit if MC crosses MR from below','It maximises total revenue'],ru:['Она производственно эффективна','Она аллокативно эффективна','Она максимизирует прибыль, если MC пересекает MR снизу','Она максимизирует совокупную выручку'],uz:['U ishlab chiqarish jihatidan samarali','U allokativ samarali','MC MR ni pastdan kesib o‘tsa, foyda maksimum','U umumiy tushumni maksimallashtiradi']},a:'C',scenario:'B',ok:L('Profit is maximised where MR = MC with MC crossing MR from below.','Прибыль максимальна при MR = MC, когда MC пересекает MR снизу.','Foyda MR = MC bo‘lganda va MC MR ni pastdan kesib o‘tganda maksimum bo‘ladi.'),bad:L('Productive efficiency uses minimum AC; allocative efficiency uses P = MC; total revenue uses MR = 0.','Производственная эффективность требует минимума AC, аллокативная — P = MC, максимум выручки — MR = 0.','Ishlab chiqarish samaradorligi minimum AC, allokativ samaradorlik P = MC, tushum maksimumi MR = 0 bilan bog‘liq.'),next:L('Compare the conditions for profit, revenue and efficiency.','Сравните условия прибыли, выручки и эффективности.','Foyda, tushum va samaradorlik shartlarini solishtiring.')},
-  {id:'d7',difficulty:'hard',seconds:75,topic:L('Elasticity and demand','Эластичность и спрос','Elastiklik va talab'),skill:L('Demand shift versus elasticity','Сдвиг спроса и эластичность','Talab siljishi va elastiklik'),ref:'iClub Economics · Demand shifts',q:L('Income rises and demand for a normal good increases at every price. Which statement is most accurate?','Доход вырос, и спрос на нормальный товар увеличился при каждой цене. Какое утверждение наиболее точное?','Daromad oshdi va normal tovarga talab har bir narxda ko‘paydi. Qaysi fikr eng aniq?'),o:{en:['The good became more price elastic','Demand shifted right; PED need not have changed','There was movement down the same curve','Supply shifted right'],ru:['Товар стал более эластичным по цене','Спрос сместился вправо; PED мог не измениться','Произошло движение вниз по той же кривой','Предложение сместилось вправо'],uz:['Tovar narx bo‘yicha elastikroq bo‘ldi','Talab o‘ngga siljidi; PED o‘zgarmagan bo‘lishi mumkin','Shu egri chiziq bo‘ylab pastga harakat','Taklif o‘ngga siljidi']},a:'B',scenario:'A',ok:L('Income is a non-price determinant, so demand shifts; this alone says nothing about a change in PED.','Доход — неценовой фактор, поэтому спрос смещается; само по себе это не доказывает изменение PED.','Daromad narxdan tashqari omil, shuning uchun talab siljiydi; buning o‘zi PED o‘zgarganini ko‘rsatmaydi.'),bad:L('A curve shift, movement along a curve and elasticity are different concepts.','Сдвиг кривой, движение по кривой и эластичность — разные понятия.','Egri chiziq siljishi, chiziq bo‘ylab harakat va elastiklik boshqa tushunchalardir.'),next:L('Use the rule: own price means movement; another determinant means shift.','Используйте правило: собственная цена — движение, другой фактор — сдвиг.','Qoidani qo‘llang: o‘z narxi — harakat, boshqa omil — siljish.')}
- ]
+  version:'1.2-gate-3',
+  profile:{
+    id:'demo-sardor',
+    name:L('Sardor Karimov','Сардор Каримов','Sardor Karimov'),
+    status:L('Demonstration student','Демонстрационный ученик','Namoyish o‘quvchisi'),
+    initials:'СК',
+    subject:'economics',
+    default_language:'ru'
+  },
+  history:[
+    {id:'p1',kind:'practice',no:1,score:10,total:10,date:'2026-05-12',seconds:482},
+    {id:'p2',kind:'practice',no:2,score:10,total:10,date:'2026-05-19',seconds:506},
+    {id:'p3',kind:'practice',no:3,score:10,total:10,date:'2026-05-26',seconds:471},
+    {id:'t4',kind:'tour',no:4,score:6,total:20,date:'2026-06-02',seconds:1148},
+    {id:'p4',kind:'practice',no:4,score:10,total:10,date:'2026-06-06',seconds:524}
+  ],
+  questions:[
+    {
+      id:'d1',order:1,difficulty:'easy',seconds:50,
+      topic:L('Consumer behaviour','Поведение потребителя','Iste’molchi xulqi'),
+      skill:L('Meaning of utility','Понимание полезности','Naflilik mazmuni'),
+      ref:'iClub Economics · Consumer choice · Utility',
+      q:L(
+        'In consumer theory, what does utility mean?',
+        'Что означает полезность в теории поведения потребителя?',
+        'Iste’molchi nazariyasida naflilik nimani anglatadi?'
+      ),
+      o:{
+        en:['The cost of producing a product','The satisfaction gained from consumption','The profit earned by a firm','The market price of a product'],
+        ru:['Издержки производства товара','Удовлетворение от потребления','Прибыль, полученная фирмой','Рыночная цена товара'],
+        uz:['Tovarni ishlab chiqarish xarajati','Iste’moldan olinadigan qoniqish','Firma oladigan foyda','Tovarning bozor narxi']
+      },
+      a:'B',scenario:'C',
+      ok:L(
+        'Utility is the satisfaction or benefit a consumer receives from consuming a good or service.',
+        'Полезность — это удовлетворение или выгода, которую потребитель получает от товара или услуги.',
+        'Naflilik — iste’molchi tovar yoki xizmatdan oladigan qoniqish yoki manfaatdir.'
+      ),
+      bad:L(
+        'Profit belongs to firm theory. Utility describes the consumer’s satisfaction from consumption.',
+        'Прибыль относится к теории фирмы. Полезность описывает удовлетворение потребителя от потребления.',
+        'Foyda firma nazariyasiga tegishli. Naflilik iste’molchining iste’moldan olgan qoniqishini ifodalaydi.'
+      ),
+      next:L(
+        'Separate consumer outcomes such as utility from firm outcomes such as profit.',
+        'Разделите результаты потребителя, такие как полезность, и результаты фирмы, такие как прибыль.',
+        'Naflilik kabi iste’molchi natijalarini foyda kabi firma natijalaridan ajrating.'
+      )
+    },
+    {
+      id:'d2',order:2,difficulty:'medium',seconds:60,
+      topic:L('Consumer behaviour','Поведение потребителя','Iste’molchi xulqi'),
+      skill:L('Diminishing marginal utility','Убывающая предельная полезность','Kamayib boruvchi chegaraviy naflilik'),
+      ref:'iClub Economics · Consumer choice · Marginal utility',
+      q:L(
+        'Which statement best describes diminishing marginal utility?',
+        'Какое утверждение лучше всего описывает убывающую предельную полезность?',
+        'Qaysi fikr kamayib boruvchi chegaraviy naflilikni eng yaxshi ifodalaydi?'
+      ),
+      o:{
+        en:['Total utility must fall after every unit','Each additional unit usually adds less satisfaction than the previous unit','The price of the good always falls as consumption rises','A consumer stops receiving any utility after the first unit'],
+        ru:['Совокупная полезность обязательно падает после каждой единицы','Каждая дополнительная единица обычно приносит меньше дополнительного удовлетворения, чем предыдущая','Цена товара всегда снижается при росте потребления','После первой единицы потребитель больше не получает полезности'],
+        uz:['Har bir birlikdan keyin umumiy naflilik albatta kamayadi','Har bir qo‘shimcha birlik odatda oldingisiga qaraganda kamroq qo‘shimcha qoniqish beradi','Iste’mol oshganda tovar narxi doimo pasayadi','Birinchi birlikdan keyin iste’molchi umuman naflilik olmaydi']
+      },
+      a:'B',scenario:'B',
+      ok:L(
+        'Marginal utility is the extra satisfaction from one more unit, and it usually decreases as consumption rises.',
+        'Предельная полезность — дополнительное удовлетворение от ещё одной единицы; обычно оно снижается по мере роста потребления.',
+        'Chegaraviy naflilik — yana bir birlikdan olinadigan qo‘shimcha qoniqish bo‘lib, iste’mol oshgani sari odatda kamayadi.'
+      ),
+      bad:L(
+        'Diminishing marginal utility concerns the extra satisfaction from the next unit, not an automatic fall in total utility or price.',
+        'Закон касается дополнительного удовлетворения от следующей единицы, а не обязательного падения совокупной полезности или цены.',
+        'Bu qonun keyingi birlikdan olinadigan qo‘shimcha qoniqishga tegishli, umumiy naflilik yoki narxning avtomatik pasayishiga emas.'
+      ),
+      next:L(
+        'Distinguish total utility from marginal utility.',
+        'Различайте совокупную и предельную полезность.',
+        'Umumiy naflilik bilan chegaraviy naflilikni ajrating.'
+      )
+    },
+    {
+      id:'d3',order:3,difficulty:'easy',seconds:50,
+      topic:L('Consumer choice','Потребительский выбор','Iste’molchi tanlovi'),
+      skill:L('Indifference curve definition','Определение кривой безразличия','Befarqlik egri chizig‘i ta’rifi'),
+      ref:'iClub Economics · Consumer choice · Indifference curves',
+      q:L(
+        'What does one indifference curve show?',
+        'Что показывает одна кривая безразличия?',
+        'Bitta befarqlik egri chizig‘i nimani ko‘rsatadi?'
+      ),
+      o:{
+        en:['Combinations of two goods that give the consumer equal satisfaction','Combinations of output that have the same production cost','All affordable combinations at current income and prices','Combinations that maximise a firm’s profit'],
+        ru:['Наборы двух товаров, дающие потребителю одинаковое удовлетворение','Наборы объёма выпуска с одинаковыми производственными издержками','Все доступные наборы при текущем доходе и ценах','Наборы, максимизирующие прибыль фирмы'],
+        uz:['Iste’molchiga bir xil qoniqish beradigan ikki tovar kombinatsiyalari','Bir xil ishlab chiqarish xarajatiga ega mahsulot hajmlari kombinatsiyalari','Joriy daromad va narxlarda sotib olish mumkin bo‘lgan barcha kombinatsiyalar','Firma foydasini maksimallashtiradigan kombinatsiyalar']
+      },
+      a:'A',scenario:'B',
+      ok:L(
+        'Every point on one indifference curve gives the consumer the same level of satisfaction.',
+        'Каждая точка одной кривой безразличия даёт потребителю одинаковый уровень удовлетворения.',
+        'Bitta befarqlik egri chizig‘idagi har bir nuqta iste’molchiga bir xil qoniqish darajasini beradi.'
+      ),
+      bad:L(
+        'Production cost belongs to firm analysis. An indifference curve represents equal consumer satisfaction.',
+        'Производственные издержки относятся к анализу фирмы. Кривая безразличия показывает одинаковое удовлетворение потребителя.',
+        'Ishlab chiqarish xarajati firma tahliliga tegishli. Befarqlik egri chizig‘i bir xil iste’molchi qoniqishini ko‘rsatadi.'
+      ),
+      next:L(
+        'Compare the roles of an indifference curve and a budget line.',
+        'Сравните роль кривой безразличия и бюджетной линии.',
+        'Befarqlik egri chizig‘i va budjet chizig‘ining vazifalarini solishtiring.'
+      )
+    },
+    {
+      id:'d4',order:4,difficulty:'medium',seconds:60,
+      topic:L('Consumer choice','Потребительский выбор','Iste’molchi tanlovi'),
+      skill:L('Budget line after an income rise','Бюджетная линия после роста дохода','Daromad oshgandan keyingi budjet chizig‘i'),
+      ref:'iClub Economics · Consumer choice · Budget constraints',
+      q:L(
+        'A consumer’s income rises while the prices of both goods remain unchanged. What happens to the budget line?',
+        'Доход потребителя вырос, а цены обоих товаров не изменились. Что произойдёт с бюджетной линией?',
+        'Iste’molchining daromadi oshdi, ikki tovar narxi esa o‘zgarmadi. Budjet chizig‘iga nima bo‘ladi?'
+      ),
+      o:{
+        en:['It shifts outward in a parallel way','It rotates inward around the horizontal intercept','It becomes an indifference curve','It does not change'],
+        ru:['Она параллельно сместится наружу','Она повернётся внутрь вокруг горизонтального пересечения','Она станет кривой безразличия','Она не изменится'],
+        uz:['U parallel ravishda tashqariga siljiydi','U gorizontal kesishma atrofida ichkariga buriladi','U befarqlik egri chizig‘iga aylanadi','U o‘zgarmaydi']
+      },
+      a:'A',scenario:'A',
+      ok:L(
+        'With unchanged prices, higher income increases the maximum affordable quantity of both goods, so the line shifts outward in parallel.',
+        'При неизменных ценах рост дохода увеличивает максимально доступное количество обоих товаров, поэтому линия параллельно смещается наружу.',
+        'Narxlar o‘zgarmaganda daromad oshishi har ikki tovarning maksimal xarid miqdorini oshiradi, shuning uchun chiziq parallel ravishda tashqariga siljiydi.'
+      ),
+      bad:L(
+        'A price change rotates the budget line. A pure income change shifts it in parallel.',
+        'Изменение цены поворачивает бюджетную линию. Изменение только дохода сдвигает её параллельно.',
+        'Narx o‘zgarishi budjet chizig‘ini buradi. Faqat daromad o‘zgarishi uni parallel siljitadi.'
+      ),
+      next:L(
+        'Use intercepts to distinguish an income change from a price change.',
+        'Используйте точки пересечения, чтобы различать изменение дохода и изменение цены.',
+        'Daromad o‘zgarishi bilan narx o‘zgarishini ajratish uchun kesishma nuqtalaridan foydalaning.'
+      )
+    },
+    {
+      id:'d5',order:5,difficulty:'medium',seconds:65,
+      topic:L('Economic efficiency','Экономическая эффективность','Iqtisodiy samaradorlik'),
+      skill:L('Allocative efficiency condition','Условие аллокативной эффективности','Allokativ samaradorlik sharti'),
+      ref:'iClub Economics · Efficiency · Allocative efficiency',
+      q:L(
+        'Which condition indicates allocative efficiency?',
+        'Какое условие указывает на аллокативную эффективность?',
+        'Qaysi shart allokativ samaradorlikni bildiradi?'
+      ),
+      o:{
+        en:['Price equals marginal cost (P = MC)','Total revenue equals total cost (TR = TC)','Average cost is at its minimum','Marginal revenue equals zero'],
+        ru:['Цена равна предельным издержкам (P = MC)','Совокупная выручка равна совокупным издержкам (TR = TC)','Средние издержки минимальны','Предельная выручка равна нулю'],
+        uz:['Narx chegaraviy xarajatga teng (P = MC)','Umumiy tushum umumiy xarajatga teng (TR = TC)','O‘rtacha xarajat minimumda','Chegaraviy tushum nolga teng']
+      },
+      a:'A',scenario:'B',
+      ok:L(
+        'Allocative efficiency is achieved where the value consumers place on the last unit, shown by price, equals its marginal resource cost.',
+        'Аллокативная эффективность достигается, когда ценность последней единицы для потребителей, выраженная ценой, равна её предельным ресурсным издержкам.',
+        'Allokativ samaradorlik oxirgi birlikning iste’molchilar uchun qiymati, ya’ni narx, uning chegaraviy resurs xarajatiga teng bo‘lganda yuzaga keladi.'
+      ),
+      bad:L(
+        'TR = TC is a break-even condition. Allocative efficiency uses P = MC.',
+        'TR = TC — условие безубыточности. Для аллокативной эффективности используется P = MC.',
+        'TR = TC zararsizlik shartidir. Allokativ samaradorlik uchun P = MC ishlatiladi.'
+      ),
+      next:L(
+        'Create a formula map: allocative efficiency P = MC; break-even TR = TC.',
+        'Составьте карту формул: аллокативная эффективность — P = MC; безубыточность — TR = TC.',
+        'Formulalar xaritasini tuzing: allokativ samaradorlik — P = MC; zararsizlik — TR = TC.'
+      )
+    },
+    {
+      id:'d6',order:6,difficulty:'hard',seconds:75,
+      topic:L('Economic efficiency','Экономическая эффективность','Iqtisodiy samaradorlik'),
+      skill:L('Productive efficiency condition','Условие производственной эффективности','Ishlab chiqarish samaradorligi sharti'),
+      ref:'iClub Economics · Efficiency · Productive efficiency',
+      q:L(
+        'At which point is a firm productively efficient?',
+        'В какой точке фирма производственно эффективна?',
+        'Firma qaysi nuqtada ishlab chiqarish jihatidan samarali bo‘ladi?'
+      ),
+      o:{
+        en:['At the minimum point of average cost','Where price equals marginal cost','Where total revenue equals total cost','Where marginal revenue equals marginal cost'],
+        ru:['В точке минимума средних издержек','Где цена равна предельным издержкам','Где совокупная выручка равна совокупным издержкам','Где предельная выручка равна предельным издержкам'],
+        uz:['O‘rtacha xarajatning minimum nuqtasida','Narx chegaraviy xarajatga teng bo‘lgan joyda','Umumiy tushum umumiy xarajatga teng bo‘lgan joyda','Chegaraviy tushum chegaraviy xarajatga teng bo‘lgan joyda']
+      },
+      a:'A',scenario:'B',
+      ok:L(
+        'Productive efficiency means producing at the lowest possible average cost.',
+        'Производственная эффективность означает выпуск при минимально возможных средних издержках.',
+        'Ishlab chiqarish samaradorligi eng past mumkin bo‘lgan o‘rtacha xarajatda ishlab chiqarishni anglatadi.'
+      ),
+      bad:L(
+        'P = MC is the condition for allocative efficiency. Productive efficiency uses minimum average cost.',
+        'P = MC — условие аллокативной эффективности. Производственная эффективность требует минимума средних издержек.',
+        'P = MC allokativ samaradorlik shartidir. Ishlab chiqarish samaradorligi o‘rtacha xarajat minimumini talab qiladi.'
+      ),
+      next:L(
+        'Keep neighbouring conditions separate: minimum AC, P = MC, MR = MC and TR = TC.',
+        'Разделите соседние условия: минимум AC, P = MC, MR = MC и TR = TC.',
+        'Yaqin shartlarni ajrating: minimum AC, P = MC, MR = MC va TR = TC.'
+      )
+    },
+    {
+      id:'d7',order:7,difficulty:'hard',seconds:75,
+      topic:L('Growth of firms','Рост фирмы','Firma o‘sishi'),
+      skill:L('Internal versus external growth','Внутренний и внешний рост','Ichki va tashqi o‘sish'),
+      ref:'iClub Economics · Firms · Internal and external growth',
+      q:L(
+        'A firm uses retained profit to open a new branch of its own. How should this growth be classified?',
+        'Фирма использует нераспределённую прибыль, чтобы открыть собственный новый филиал. Как классифицируется такой рост?',
+        'Firma taqsimlanmagan foydadan foydalanib o‘zining yangi filialini ochdi. Bu o‘sish qanday tasniflanadi?'
+      ),
+      o:{
+        en:['Internal growth financed internally','External growth financed externally','External growth through a merger','No growth because ownership is unchanged'],
+        ru:['Внутренний рост с внутренним финансированием','Внешний рост с внешним финансированием','Внешний рост через слияние','Роста нет, потому что собственник не изменился'],
+        uz:['Ichki manba bilan moliyalashtirilgan ichki o‘sish','Tashqi manba bilan moliyalashtirilgan tashqi o‘sish','Qo‘shilish orqali tashqi o‘sish','Egalik o‘zgarmagani uchun o‘sish yo‘q']
+      },
+      a:'A',scenario:'B',
+      ok:L(
+        'Opening a new branch within the same firm is internal growth, and retained profit is an internal source of finance.',
+        'Открытие нового филиала внутри той же фирмы — внутренний рост, а нераспределённая прибыль — внутренний источник финансирования.',
+        'Bir firma ichida yangi filial ochish ichki o‘sish, taqsimlanmagan foyda esa ichki moliyalashtirish manbaidir.'
+      ),
+      bad:L(
+        'Retained profit is not external finance. External growth normally involves merger or takeover of another business.',
+        'Нераспределённая прибыль не является внешним финансированием. Внешний рост обычно связан со слиянием или поглощением другой фирмы.',
+        'Taqsimlanmagan foyda tashqi moliya emas. Tashqi o‘sish odatda boshqa biznes bilan qo‘shilish yoki uni sotib olish orqali yuz beradi.'
+      ),
+      next:L(
+        'Separate the method of growth from the source of finance.',
+        'Разделите способ роста фирмы и источник его финансирования.',
+        'Firma o‘sish usuli bilan moliyalashtirish manbasini ajrating.'
+      )
+    }
+  ]
 };
+
+try {
+  const prefix = 'iclub_demo_v12.';
+  const cacheKey = prefix + 'cache';
+  const historyKey = prefix + 'history';
+  const stateKey = prefix + 'state';
+  const current = JSON.parse(localStorage.getItem(cacheKey) || '{}');
+
+  if (current.datasetVersion !== window.ICLUB_DEMO_V12_DATA.version) {
+    const previousState = JSON.parse(localStorage.getItem(stateKey) || '{}');
+    localStorage.setItem(historyKey, JSON.stringify({
+      datasetVersion: window.ICLUB_DEMO_V12_DATA.version,
+      baseline: window.ICLUB_DEMO_V12_DATA.history,
+      diagnostics: []
+    }));
+    localStorage.setItem(stateKey, JSON.stringify({
+      plan: previousState.plan || 'free',
+      lang: previousState.lang || 'ru',
+      screen: 'hub'
+    }));
+    localStorage.setItem(cacheKey, JSON.stringify({
+      datasetVersion: window.ICLUB_DEMO_V12_DATA.version,
+      currentAttemptId: null,
+      answerEvents: [],
+      autofillRemaining: false
+    }));
+  }
+} catch {}
 })();
