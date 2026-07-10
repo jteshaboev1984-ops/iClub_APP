@@ -1,6 +1,7 @@
 (function(){
   'use strict';
   const $=id=>document.getElementById(id);
+  const set=(id,value)=>{const n=$(id);if(n&&n.textContent!==value)n.textContent=value};
   const COPY={
     ru:{competitive:'Соревновательный',mentor:'ВАШ МЕНТОР',content:'Контент',practice:'Практика',tours:'Туры',resources:'Ресурсы',video:'Видео-уроки',videoSub:'Видео-уроки доступны в Telegram',recs:'Мои рекомендации',recsSub:'Повторный доступ к чтению',aiSection:'AI-возможности',system:'Системные',cert:'Сертификаты',certSub:'Туры и финальные результаты',archive:'Архив туров',archiveSub:'Самопроверка • вне рейтинга',all:'Все предметы',allSub:'Каталог предметов',mentorName:'Erkinov Azizbek',mentorSub:'AS Level Economics'},
     en:{competitive:'Competitive',mentor:'YOUR MENTOR',content:'Content',practice:'Practice',tours:'Tours',resources:'Resources',video:'Video lessons',videoSub:'Video lessons are available in Telegram',recs:'My recommendations',recsSub:'Return to saved reading',aiSection:'AI features',system:'System',cert:'Certificates',certSub:'Tours and final results',archive:'Tour archive',archiveSub:'Self-check • outside ranking',all:'All subjects',allSub:'Subject catalogue',mentorName:'Erkinov Azizbek',mentorSub:'AS Level Economics'},
@@ -57,17 +58,17 @@
     document.querySelectorAll('[data-main-copy]').forEach(n=>{const k=n.dataset.mainCopy;if(c[k]&&n.textContent!==c[k])n.textContent=c[k]});
     const plan=document.body.dataset.demoPlan||'free';
     const source=window.ICLUB_DEMO_GATE2_COPY?.[lang()]||window.ICLUB_DEMO_GATE2_COPY?.ru||{};
-    $('hub-title').textContent=source.economics||c.economics||'Economics';
-    $('hub-subtitle').textContent=c.competitive;
-    $('hub-ai-title').textContent=plan==='free'?source.aiFreeTitle:plan==='plus'?source.aiPlusTitle:source.aiProTitle;
-    $('hub-ai-sub').textContent=plan==='free'?source.aiFreeSub:plan==='plus'?source.aiPlusSub:source.aiProSub;
-    $('hub-diagnostic-title').textContent=source.currentDiagnosis||'Diagnostic practice';
-    $('hub-diagnostic-sub').textContent=source.currentDiagnosisSub||'';
-    $('main-diagnostic-plan').textContent=plan[0].toUpperCase()+plan.slice(1);
+    set('hub-title',source.economics||'Economics');
+    set('hub-subtitle',c.competitive);
+    set('hub-ai-title',plan==='free'?source.aiFreeTitle:plan==='plus'?source.aiPlusTitle:source.aiProTitle);
+    set('hub-ai-sub',plan==='free'?source.aiFreeSub:plan==='plus'?source.aiPlusSub:source.aiProSub);
+    set('hub-diagnostic-title',source.currentDiagnosis||'Diagnostic practice');
+    set('hub-diagnostic-sub',source.currentDiagnosisSub||'');
+    set('main-diagnostic-plan',plan[0].toUpperCase()+plan.slice(1));
   }
-  const schedule=()=>{clearTimeout(window.__iclubMainHubTimer);window.__iclubMainHubTimer=setTimeout(apply,0)};
-  const observer=new MutationObserver(schedule);
-  observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['lang','data-demo-plan']});
+  const wait=setInterval(()=>{if(build()){clearInterval(wait);apply()}},20);
+  setTimeout(()=>{clearInterval(wait);apply()},1500);
+  new MutationObserver(apply).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+  new MutationObserver(apply).observe(document.body,{attributes:true,attributeFilter:['data-demo-plan']});
   document.addEventListener('click',e=>{if(e.target.closest('.language-btn,[data-demo-plan]'))setTimeout(apply,20)});
-  schedule();
 })();
