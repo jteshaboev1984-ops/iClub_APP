@@ -9,7 +9,7 @@
   <title>iClub AI Demo</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="style.css?v=support1" />
-  <link rel="stylesheet" href="diagnostic-demo-main-local.css?v=main-copy-2" />
+  <link rel="stylesheet" href="diagnostic-demo-main-local.css?v=main-copy-3" />
 </head>
 <body>
   <div id="app" class="app">
@@ -132,6 +132,156 @@
               </button>
             </div>
           </section>
+
+          <section id="courses-practice-start" class="stack-screen" data-stack="courses" data-screen="practice-start" hidden aria-hidden="true">
+            <div class="section">
+              <div class="h1" id="practice-title">Практика</div>
+              <div class="muted" id="practice-subtitle">7 вопросов • от простого к сложному</div>
+            </div>
+
+            <div id="practice-tour-picker" class="practice-tour-picker" aria-label="Practice selector"></div>
+
+            <div class="practice-hero">
+              <div class="practice-hero-top">
+                <div class="practice-hero-left">
+                  <div class="practice-hero-kicker" id="practice-subject-label">Предмет</div>
+                  <div id="practice-subject-title" class="practice-hero-title">Экономика</div>
+                  <div id="practice-stage-meta" class="practice-hero-stage">Диагностическая практика • 7 вопросов</div>
+                </div>
+              </div>
+
+              <div class="practice-hero-metrics">
+                <div class="practice-metric">
+                  <div class="practice-metric-label" id="practice-best-result-label">Лучший результат</div>
+                  <div class="practice-metric-value">
+                    <span id="practice-best-score">—</span>
+                    <span id="practice-best-percent" class="practice-metric-sub"></span>
+                  </div>
+                </div>
+
+                <div class="practice-metric">
+                  <div class="practice-metric-label" id="practice-best-time-label">Лучшее время</div>
+                  <div class="practice-metric-value">
+                    <span id="practice-best-time">—</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="practice-micro" id="practice-trend" hidden>
+                <div class="practice-micro-head">
+                  <div class="practice-micro-label" id="practice-trend-label">Тренд прогресса</div>
+                  <div id="practice-micro-delta" class="practice-micro-delta"></div>
+                </div>
+                <div id="practice-micro-bars" class="practice-micro-bars" aria-label="Progress trend bars"></div>
+              </div>
+            </div>
+
+            <div class="practice-last card">
+              <div class="practice-last-head">
+                <div class="card-title" id="practice-last-title">Последние попытки</div>
+              </div>
+              <div id="practice-last-empty" class="muted small" style="display:none">Пока нет попыток</div>
+              <div class="practice-table-wrap">
+                <table class="practice-table" aria-label="Practice attempts">
+                  <thead>
+                    <tr>
+                      <th id="practice-col-date">Дата</th>
+                      <th id="practice-col-score">Счёт</th>
+                      <th id="practice-col-time">Время</th>
+                    </tr>
+                  </thead>
+                  <tbody id="practice-last-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="practice-start-actions">
+              <button id="practice-restart-btn" class="btn primary" type="button">
+                <span id="practice-restart-label">Начать практику</span>
+              </button>
+            </div>
+          </section>
+
+          <section id="courses-practice-quiz" class="stack-screen" data-stack="courses" data-screen="practice-quiz" hidden aria-hidden="true">
+            <div class="quiz-top">
+              <div class="quiz-progress">
+                <span id="practice-qno">1/7</span>
+                <span id="practice-timer" class="pill">00:50</span>
+              </div>
+              <button id="practice-pause-btn" class="btn ghost" type="button">Остановить</button>
+            </div>
+
+            <div class="card">
+              <div id="practice-question" class="question-text">Вопрос практики…</div>
+              <div id="practice-options" class="options"></div>
+            </div>
+
+            <div class="actions-row">
+              <button id="practice-submit-btn" class="btn" type="button" disabled>Ответить</button>
+            </div>
+          </section>
+
+          <section id="courses-practice-result" class="stack-screen" data-stack="courses" data-screen="practice-result" hidden aria-hidden="true">
+            <div class="section">
+              <div class="h1" id="practice-result-title">Результат практики</div>
+              <div id="practice-result-meta" class="muted">—</div>
+            </div>
+
+            <div class="cards-grid">
+              <button class="card-btn" type="button" id="practice-review-open">
+                <div class="card-title">
+                  <span id="practice-review-title">Разбор ошибок</span>
+                  <span id="practice-review-count" class="badge badge-pin" style="margin-left:6px">0</span>
+                </div>
+                <div class="muted small" id="practice-review-sub">Правильные ответы и объяснения</div>
+              </button>
+
+              <button class="card-btn" type="button" id="practice-recs-open">
+                <div class="card-title">
+                  <span id="practice-recs-title">Рекомендации</span>
+                  <span id="practice-recs-count" class="badge badge-pin" style="margin-left:6px">0</span>
+                </div>
+                <div class="muted small" id="practice-recs-sub">Что прочитать по вашим ошибкам</div>
+              </button>
+            </div>
+
+            <div class="actions-row">
+              <button id="practice-again-btn" class="btn" type="button">Пройти снова</button>
+              <button id="practice-to-subject-btn" class="btn primary" type="button">К предмету</button>
+            </div>
+          </section>
+
+          <section id="courses-practice-review" class="stack-screen" data-stack="courses" data-screen="practice-review" hidden aria-hidden="true">
+            <div class="section">
+              <div class="h1" id="practice-review-screen-title">Разбор ошибок</div>
+              <div class="muted" id="practice-review-screen-sub">Правильные ответы и объяснения</div>
+            </div>
+
+            <div id="practice-review-list" class="list">
+              <div class="empty muted">Нет данных для разбора. Сначала пройдите практику.</div>
+            </div>
+
+            <div class="actions-row">
+              <button id="practice-review-back-btn" class="btn" type="button">Назад к результату</button>
+              <button id="practice-review-to-subject-btn" class="btn primary" type="button">К предмету</button>
+            </div>
+          </section>
+
+          <section id="courses-practice-recs" class="stack-screen" data-stack="courses" data-screen="practice-recs" hidden aria-hidden="true">
+            <div class="section">
+              <div class="h1" id="practice-recs-screen-title">Рекомендации</div>
+              <div class="muted" id="practice-recs-screen-sub">Что прочитать по вашим ошибкам</div>
+            </div>
+
+            <div id="practice-recs-list" class="list">
+              <div class="empty muted">Нет данных для рекомендаций. Сначала пройдите практику.</div>
+            </div>
+
+            <div class="actions-row">
+              <button id="practice-recs-back-btn" class="btn" type="button">Назад к результату</button>
+              <button id="practice-recs-to-subject-btn" class="btn primary" type="button">К предмету</button>
+            </div>
+          </section>
         </div>
       </div>
     </main>
@@ -163,6 +313,7 @@
     </div>
   </div>
 
-  <script src="diagnostic-demo-main-local.js?v=main-copy-2"></script>
+  <script src="diagnostic-demo-v12-data.js?v=main-copy-3"></script>
+  <script src="diagnostic-demo-main-local.js?v=main-copy-3"></script>
 </body>
 </html>
