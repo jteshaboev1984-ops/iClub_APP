@@ -101,6 +101,7 @@
     const x = t();
     document.documentElement.lang = lang;
     set('demo-planbar-label', x.showMode);
+    set('demo-scenario-button', x.scenario);
     set('subject-hub-title', x.subject);
     set('subject-hub-meta', x.mode);
     set('mentor-kicker', x.mentor);
@@ -212,7 +213,7 @@
       return;
     }
 
-    if (event.target.closest('#topbar-action')) { openMenu(); return; }
+    if (event.target.closest('#demo-scenario-button')) { openMenu(); return; }
     if (event.target.matches('[data-close-demo-menu]') || event.target.closest('#demo-close')) { closeMenu(); return; }
 
     const menuAction = event.target.closest('[data-demo-menu-action]')?.dataset.demoMenuAction;
