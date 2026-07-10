@@ -10,30 +10,20 @@
   <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="style.css?v=support1" />
   <link rel="stylesheet" href="diagnostic-demo-main-local.css?v=gate3-1" />
-  <link rel="stylesheet" href="diagnostic-demo-gate4.css?v=gate4-1" />
+  <link rel="stylesheet" href="diagnostic-demo-gate4.css?v=gate4-2" />
+  <link rel="stylesheet" href="diagnostic-demo-gate5.css?v=gate5-2" />
 </head>
 <body>
   <div id="app" class="app">
     <header id="topbar" class="topbar" aria-label="Top bar">
-      <button id="topbar-back" class="icon-btn" type="button" aria-label="Назад">
-        <span class="icon">←</span>
-      </button>
-
+      <button id="topbar-back" class="icon-btn" type="button" aria-label="Назад"><span class="icon">←</span></button>
       <div class="topbar-brand">
         <img id="topbar-logo" class="topbar-logo" src="logo.png" alt="iClub" />
-        <div class="topbar-title">
-          <div id="topbar-title" class="title">iClub</div>
-          <div id="topbar-subtitle" class="subtitle">Smarter together</div>
-        </div>
+        <div class="topbar-title"><div id="topbar-title" class="title">iClub</div><div id="topbar-subtitle" class="subtitle">Smarter together</div></div>
       </div>
-
       <div class="topbar-right">
-        <button id="topbar-notifications" class="icon-btn" type="button" aria-label="Уведомления" style="visibility:hidden">
-          <span class="icon">🔔</span>
-        </button>
-        <button id="topbar-action" class="icon-btn" type="button" aria-label="Действие" style="visibility:hidden">
-          <span class="icon">⋯</span>
-        </button>
+        <button id="topbar-notifications" class="icon-btn" type="button" aria-label="Уведомления" style="visibility:hidden"><span class="icon">🔔</span></button>
+        <button id="topbar-action" class="icon-btn" type="button" aria-label="Действие" style="visibility:hidden"><span class="icon">⋯</span></button>
       </div>
     </header>
 
@@ -51,264 +41,82 @@
       <div class="content">
         <div id="courses-stack">
           <section id="courses-subject-hub" class="stack-screen is-active" data-stack="courses" data-screen="subject-hub">
-            <div class="subject-hub-head">
-              <div class="subject-hub-head-left">
-                <div id="subject-hub-title" class="subject-hub-title">Экономика</div>
-                <div id="subject-hub-meta" class="subject-hub-meta muted">Соревновательный</div>
-              </div>
-            </div>
-
+            <div class="subject-hub-head"><div class="subject-hub-head-left"><div id="subject-hub-title" class="subject-hub-title">Экономика</div><div id="subject-hub-meta" class="subject-hub-meta muted">Соревновательный</div></div></div>
             <div class="subject-hub-panels">
               <button id="subject-hub-mentor-btn" class="panel-card subject-hub-panel subject-hub-mentor-btn" type="button">
                 <div class="panel-row">
                   <div id="subject-hub-mentor-avatar" class="mentor-avatar has-photo" aria-hidden="true"></div>
-                  <div class="panel-col">
-                    <div class="panel-kicker" id="mentor-kicker">ВАШ МЕНТОР</div>
-                    <div id="subject-hub-mentor-title" class="panel-title">Erkinov Azizbek</div>
-                    <div id="subject-hub-mentor-sub" class="muted small">AS Level Economics</div>
-                  </div>
+                  <div class="panel-col"><div class="panel-kicker" id="mentor-kicker">ВАШ МЕНТОР</div><div id="subject-hub-mentor-title" class="panel-title">Erkinov Azizbek</div><div id="subject-hub-mentor-sub" class="muted small">AS Level Economics</div></div>
                 </div>
               </button>
             </div>
-
             <div class="subject-hub-tabs" role="tablist" aria-label="Subject hub tabs">
               <button class="hub-tab is-active" type="button" data-hub-tab="content">Контент</button>
               <button class="hub-tab" type="button" data-hub-tab="practice">Практика</button>
               <button class="hub-tab" type="button" data-hub-tab="tours">Туры</button>
               <button class="hub-tab" type="button" data-hub-tab="resources">Ресурсы</button>
             </div>
-
             <div class="subject-hub-list subject-hub-actions">
-              <button class="settings-nav" type="button" data-local-action="video">
-                <span class="settings-nav-ico">🎬</span>
-                <span class="settings-nav-text">
-                  <span class="settings-nav-title" id="hub-video-title">Видео-уроки</span>
-                  <span class="settings-nav-sub muted small" id="hub-video-sub">Видео-уроки доступны в Telegram</span>
-                </span>
-                <span class="settings-nav-arrow">›</span>
-              </button>
-
-              <button class="settings-nav" type="button" data-local-action="recommendations">
-                <span class="settings-nav-ico">📚</span>
-                <span class="settings-nav-text">
-                  <span class="settings-nav-title" id="hub-recs-title">Мои рекомендации</span>
-                  <span class="settings-nav-sub muted small" id="hub-recs-sub">Повторный доступ к чтению</span>
-                </span>
-                <span class="settings-nav-arrow">›</span>
-              </button>
+              <button class="settings-nav" type="button" data-local-action="video"><span class="settings-nav-ico">🎬</span><span class="settings-nav-text"><span class="settings-nav-title" id="hub-video-title">Видео-уроки</span><span class="settings-nav-sub muted small" id="hub-video-sub">Видео-уроки доступны в Telegram</span></span><span class="settings-nav-arrow">›</span></button>
+              <button class="settings-nav" type="button" data-local-action="recommendations"><span class="settings-nav-ico">📚</span><span class="settings-nav-text"><span class="settings-nav-title" id="hub-recs-title">Мои рекомендации</span><span class="settings-nav-sub muted small" id="hub-recs-sub">Повторный доступ к чтению</span></span><span class="settings-nav-arrow">›</span></button>
             </div>
-
-            <div class="section" style="margin-top:14px">
-              <div class="h2" id="hub-system-title">Системные</div>
-            </div>
-
+            <div class="section" style="margin-top:14px"><div class="h2" id="hub-system-title">Системные</div></div>
             <div class="subject-hub-list">
-              <button class="settings-nav" type="button" data-local-action="certificates">
-                <span class="settings-nav-ico">🎓</span>
-                <span class="settings-nav-text">
-                  <span class="settings-nav-title" id="hub-cert-title">Сертификаты</span>
-                  <span class="settings-nav-sub muted small" id="hub-cert-sub">Туры и финальные результаты</span>
-                </span>
-                <span class="settings-nav-arrow">›</span>
-              </button>
-
-              <button class="settings-nav" type="button" data-local-action="archive">
-                <span class="settings-nav-ico">🗂️</span>
-                <span class="settings-nav-text">
-                  <span class="settings-nav-title" id="hub-archive-title">Архив туров</span>
-                  <span class="settings-nav-sub muted small" id="hub-archive-sub">Самопроверка • вне рейтинга</span>
-                </span>
-                <span class="settings-nav-arrow">›</span>
-              </button>
+              <button class="settings-nav" type="button" data-local-action="certificates"><span class="settings-nav-ico">🎓</span><span class="settings-nav-text"><span class="settings-nav-title" id="hub-cert-title">Сертификаты</span><span class="settings-nav-sub muted small" id="hub-cert-sub">Туры и финальные результаты</span></span><span class="settings-nav-arrow">›</span></button>
+              <button class="settings-nav" type="button" data-local-action="archive"><span class="settings-nav-ico">🗂️</span><span class="settings-nav-text"><span class="settings-nav-title" id="hub-archive-title">Архив туров</span><span class="settings-nav-sub muted small" id="hub-archive-sub">Самопроверка • вне рейтинга</span></span><span class="settings-nav-arrow">›</span></button>
             </div>
-
             <div class="subject-hub-list subject-hub-bottom">
-              <button class="settings-nav" type="button" data-local-action="all-subjects">
-                <span class="settings-nav-ico">🧭</span>
-                <span class="settings-nav-text">
-                  <span class="settings-nav-title" id="hub-all-title">Все предметы</span>
-                  <span class="settings-nav-sub muted small" id="hub-all-sub">Каталог предметов</span>
-                </span>
-                <span class="settings-nav-arrow">›</span>
-              </button>
+              <button class="settings-nav" type="button" data-local-action="all-subjects"><span class="settings-nav-ico">🧭</span><span class="settings-nav-text"><span class="settings-nav-title" id="hub-all-title">Все предметы</span><span class="settings-nav-sub muted small" id="hub-all-sub">Каталог предметов</span></span><span class="settings-nav-arrow">›</span></button>
             </div>
           </section>
 
           <section id="courses-practice-start" class="stack-screen" data-stack="courses" data-screen="practice-start" hidden aria-hidden="true">
-            <div class="section">
-              <div class="h1" id="practice-title">Практика</div>
-              <div class="muted" id="practice-subtitle">7 вопросов • от простого к сложному</div>
-            </div>
-
+            <div class="section"><div class="h1" id="practice-title">Практика</div><div class="muted" id="practice-subtitle">7 вопросов • от простого к сложному</div></div>
             <div id="practice-tour-picker" class="practice-tour-picker" aria-label="Practice selector"></div>
-
             <div class="practice-hero">
-              <div class="practice-hero-top">
-                <div class="practice-hero-left">
-                  <div class="practice-hero-kicker" id="practice-subject-label">Предмет</div>
-                  <div id="practice-subject-title" class="practice-hero-title">Экономика</div>
-                  <div id="practice-stage-meta" class="practice-hero-stage">Диагностическая практика • 7 вопросов</div>
-                </div>
-              </div>
-
+              <div class="practice-hero-top"><div class="practice-hero-left"><div class="practice-hero-kicker" id="practice-subject-label">Предмет</div><div id="practice-subject-title" class="practice-hero-title">Экономика</div><div id="practice-stage-meta" class="practice-hero-stage">Диагностическая практика • 7 вопросов</div></div></div>
               <div class="practice-hero-metrics">
-                <div class="practice-metric">
-                  <div class="practice-metric-label" id="practice-best-result-label">Лучший результат</div>
-                  <div class="practice-metric-value">
-                    <span id="practice-best-score">—</span>
-                    <span id="practice-best-percent" class="practice-metric-sub"></span>
-                  </div>
-                </div>
-
-                <div class="practice-metric">
-                  <div class="practice-metric-label" id="practice-best-time-label">Лучшее время</div>
-                  <div class="practice-metric-value">
-                    <span id="practice-best-time">—</span>
-                  </div>
-                </div>
+                <div class="practice-metric"><div class="practice-metric-label" id="practice-best-result-label">Лучший результат</div><div class="practice-metric-value"><span id="practice-best-score">—</span><span id="practice-best-percent" class="practice-metric-sub"></span></div></div>
+                <div class="practice-metric"><div class="practice-metric-label" id="practice-best-time-label">Лучшее время</div><div class="practice-metric-value"><span id="practice-best-time">—</span></div></div>
               </div>
-
-              <div class="practice-micro" id="practice-trend" hidden>
-                <div class="practice-micro-head">
-                  <div class="practice-micro-label" id="practice-trend-label">Тренд прогресса</div>
-                  <div id="practice-micro-delta" class="practice-micro-delta"></div>
-                </div>
-                <div id="practice-micro-bars" class="practice-micro-bars" aria-label="Progress trend bars"></div>
-              </div>
+              <div class="practice-micro" id="practice-trend" hidden><div class="practice-micro-head"><div class="practice-micro-label" id="practice-trend-label">Тренд прогресса</div><div id="practice-micro-delta" class="practice-micro-delta"></div></div><div id="practice-micro-bars" class="practice-micro-bars" aria-label="Progress trend bars"></div></div>
             </div>
-
             <div class="practice-last card">
-              <div class="practice-last-head">
-                <div class="card-title" id="practice-last-title">Последние попытки</div>
-              </div>
+              <div class="practice-last-head"><div class="card-title" id="practice-last-title">Последние попытки</div></div>
               <div id="practice-last-empty" class="muted small" style="display:none">Пока нет попыток</div>
-              <div class="practice-table-wrap">
-                <table class="practice-table" aria-label="Practice attempts">
-                  <thead>
-                    <tr>
-                      <th id="practice-col-date">Дата</th>
-                      <th id="practice-col-score">Счёт</th>
-                      <th id="practice-col-time">Время</th>
-                    </tr>
-                  </thead>
-                  <tbody id="practice-last-tbody"></tbody>
-                </table>
-              </div>
+              <div class="practice-table-wrap"><table class="practice-table" aria-label="Practice attempts"><thead><tr><th id="practice-col-date">Дата</th><th id="practice-col-score">Счёт</th><th id="practice-col-time">Время</th></tr></thead><tbody id="practice-last-tbody"></tbody></table></div>
             </div>
-
-            <div class="practice-start-actions">
-              <button id="practice-restart-btn" class="btn primary" type="button">
-                <span id="practice-restart-label">Начать практику</span>
-              </button>
-            </div>
+            <div class="practice-start-actions"><button id="practice-restart-btn" class="btn primary" type="button"><span id="practice-restart-label">Начать практику</span></button></div>
           </section>
 
           <section id="courses-practice-quiz" class="stack-screen" data-stack="courses" data-screen="practice-quiz" hidden aria-hidden="true">
-            <div class="quiz-top">
-              <div class="quiz-progress">
-                <span id="practice-qno">1/7</span>
-                <span id="practice-timer" class="pill">00:50</span>
-              </div>
-              <button id="practice-pause-btn" class="btn ghost" type="button">Остановить</button>
-            </div>
-
-            <div class="card">
-              <div id="practice-question" class="question-text">Вопрос практики…</div>
-              <div id="practice-options" class="options"></div>
-            </div>
-
-            <div class="demo-ai-before-answer" id="demo-ai-before-answer" aria-live="polite">
-              <span class="demo-ai-before-mark" aria-hidden="true">
-                <img src="iclub-ai-mark.svg" alt="" />
-              </span>
-              <span class="demo-ai-before-copy">
-                <b id="demo-ai-lock-title">AI-разбор недоступен до ответа</b>
-                <small id="demo-ai-lock-copy">Разбор будет доступен после отправки ответа.</small>
-              </span>
-              <span class="demo-ai-before-plan" id="demo-ai-lock-plan">Free</span>
-            </div>
-
-            <div class="demo-show-tools">
-              <button id="demo-tools-toggle" class="demo-tools-toggle" type="button" aria-expanded="false">
-                <span>
-                  <b id="demo-tools-title">Инструменты показа</b>
-                  <small id="demo-tools-hint">Только для демонстрации</small>
-                </span>
-                <span class="demo-tools-chevron" aria-hidden="true">⌄</span>
-              </button>
-              <div id="demo-tools-panel" class="demo-tools-panel" hidden>
-                <button id="demo-answer-btn" class="btn" type="button">Демо-ответ</button>
-                <div id="demo-answer-note" class="muted small">Выбирает утверждённый вариант, но не отправляет ответ.</div>
-              </div>
-            </div>
-
-            <div class="actions-row">
-              <button id="practice-submit-btn" class="btn" type="button" disabled>Ответить</button>
-            </div>
+            <div class="quiz-top"><div class="quiz-progress"><span id="practice-qno">1/7</span><span id="practice-timer" class="pill">00:50</span></div><button id="practice-pause-btn" class="btn ghost" type="button">Остановить</button></div>
+            <div class="card"><div id="practice-question" class="question-text">Вопрос практики…</div><div id="practice-options" class="options"></div></div>
+            <div class="demo-ai-before-answer" id="demo-ai-before-answer" aria-live="polite"><span class="demo-ai-before-mark" aria-hidden="true"><img src="iclub-ai-mark.svg" alt="" /></span><span class="demo-ai-before-copy"><b id="demo-ai-lock-title">AI-разбор недоступен до ответа</b><small id="demo-ai-lock-copy">Разбор будет доступен после отправки ответа.</small></span><span class="demo-ai-before-plan" id="demo-ai-lock-plan">Free</span></div>
+            <div class="demo-show-tools"><button id="demo-tools-toggle" class="demo-tools-toggle" type="button" aria-expanded="false"><span><b id="demo-tools-title">Инструменты показа</b><small id="demo-tools-hint">Только для демонстрации</small></span><span class="demo-tools-chevron" aria-hidden="true">⌄</span></button><div id="demo-tools-panel" class="demo-tools-panel" hidden><button id="demo-answer-btn" class="btn" type="button">Демо-ответ</button><div id="demo-answer-note" class="muted small">Выбирает утверждённый вариант, но не отправляет ответ.</div></div></div>
+            <div class="actions-row"><button id="practice-submit-btn" class="btn" type="button" disabled>Ответить</button></div>
           </section>
 
           <section id="courses-practice-result" class="stack-screen" data-stack="courses" data-screen="practice-result" hidden aria-hidden="true">
-            <div class="section">
-              <div class="h1" id="practice-result-title">Результат практики</div>
-              <div id="practice-result-meta" class="muted">—</div>
-            </div>
-
+            <div class="section"><div class="h1" id="practice-result-title">Результат практики</div><div id="practice-result-meta" class="muted">—</div></div>
             <div class="cards-grid">
-              <button class="card-btn" type="button" id="practice-review-open">
-                <div class="card-title">
-                  <span id="practice-review-title">Разбор ошибок</span>
-                  <span id="practice-review-count" class="badge badge-pin" style="margin-left:6px">0</span>
-                </div>
-                <div class="muted small" id="practice-review-sub">Правильные ответы и объяснения</div>
-              </button>
-
-              <button class="card-btn" type="button" id="practice-recs-open">
-                <div class="card-title">
-                  <span id="practice-recs-title">Рекомендации</span>
-                  <span id="practice-recs-count" class="badge badge-pin" style="margin-left:6px">0</span>
-                </div>
-                <div class="muted small" id="practice-recs-sub">Что прочитать по вашим ошибкам</div>
-              </button>
+              <button class="card-btn" type="button" id="practice-review-open"><div class="card-title"><span id="practice-review-title">Разбор ошибок</span><span id="practice-review-count" class="badge badge-pin" style="margin-left:6px">0</span></div><div class="muted small" id="practice-review-sub">Правильные ответы и объяснения</div></button>
+              <button class="card-btn" type="button" id="practice-recs-open"><div class="card-title"><span id="practice-recs-title">Рекомендации</span><span id="practice-recs-count" class="badge badge-pin" style="margin-left:6px">0</span></div><div class="muted small" id="practice-recs-sub">Что прочитать по вашим ошибкам</div></button>
             </div>
-
             <section id="demo-plan-result" class="card demo-plan-result" hidden></section>
-
-            <div class="actions-row">
-              <button id="practice-again-btn" class="btn" type="button">Пройти снова</button>
-              <button id="practice-to-subject-btn" class="btn primary" type="button">К предмету</button>
-            </div>
+            <div class="actions-row"><button id="practice-again-btn" class="btn" type="button">Пройти снова</button><button id="practice-to-subject-btn" class="btn primary" type="button">К предмету</button></div>
           </section>
 
           <section id="courses-practice-review" class="stack-screen" data-stack="courses" data-screen="practice-review" hidden aria-hidden="true">
-            <div class="section">
-              <div class="h1" id="practice-review-screen-title">Разбор ошибок</div>
-              <div class="muted" id="practice-review-screen-sub">Правильные ответы и объяснения</div>
-            </div>
-
-            <div id="practice-review-list" class="list">
-              <div class="empty muted">Нет данных для разбора. Сначала пройдите практику.</div>
-            </div>
-
-            <div class="actions-row">
-              <button id="practice-review-back-btn" class="btn" type="button">Назад к результату</button>
-              <button id="practice-review-to-subject-btn" class="btn primary" type="button">К предмету</button>
-            </div>
+            <div class="section"><div class="h1" id="practice-review-screen-title">Разбор ошибок</div><div class="muted" id="practice-review-screen-sub">Правильные ответы и объяснения</div></div>
+            <div id="practice-review-list" class="list"><div class="empty muted">Нет данных для разбора. Сначала пройдите практику.</div></div>
+            <div class="actions-row"><button id="practice-review-back-btn" class="btn" type="button">Назад к результату</button><button id="practice-review-to-subject-btn" class="btn primary" type="button">К предмету</button></div>
           </section>
 
           <section id="courses-practice-recs" class="stack-screen" data-stack="courses" data-screen="practice-recs" hidden aria-hidden="true">
-            <div class="section">
-              <div class="h1" id="practice-recs-screen-title">Рекомендации</div>
-              <div class="muted" id="practice-recs-screen-sub">Что прочитать по вашим ошибкам</div>
-            </div>
-
-            <div id="practice-recs-list" class="list">
-              <div class="empty muted">Нет данных для рекомендаций. Сначала пройдите практику.</div>
-            </div>
-
-            <div class="actions-row">
-              <button id="practice-recs-back-btn" class="btn" type="button">Назад к результату</button>
-              <button id="practice-recs-to-subject-btn" class="btn primary" type="button">К предмету</button>
-            </div>
+            <div class="section"><div class="h1" id="practice-recs-screen-title">Рекомендации</div><div class="muted" id="practice-recs-screen-sub">Что прочитать по вашим ошибкам</div></div>
+            <div id="practice-recs-list" class="list"><div class="empty muted">Нет данных для рекомендаций. Сначала пройдите практику.</div></div>
+            <div class="actions-row"><button id="practice-recs-back-btn" class="btn" type="button">Назад к результату</button><button id="practice-recs-to-subject-btn" class="btn primary" type="button">К предмету</button></div>
           </section>
         </div>
       </div>
@@ -316,31 +124,13 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
-
   <div id="modal-root" class="modal-root" aria-hidden="true">
     <div class="modal-backdrop" data-close-demo-menu>
       <div class="modal demo-menu-modal" role="dialog" aria-modal="true" aria-labelledby="demo-menu-title">
         <div class="modal-title" id="demo-menu-title">Сценарий</div>
-
-        <div class="demo-menu-section">
-          <div class="demo-menu-label" id="demo-language-label">Язык интерфейса</div>
-          <div class="demo-language-row" role="group" aria-label="Язык интерфейса">
-            <button type="button" class="demo-language-btn" data-lang="en">EN</button>
-            <button type="button" class="demo-language-btn is-active" data-lang="ru">RU</button>
-            <button type="button" class="demo-language-btn" data-lang="uz">UZ</button>
-          </div>
-        </div>
-
-        <div class="demo-menu-actions">
-          <button type="button" class="btn" data-demo-menu-action="learning" id="demo-normal-learning">Обычное обучение</button>
-          <button type="button" class="btn" data-demo-menu-action="fill-remaining" id="demo-fill-remaining">Заполнить оставшиеся</button>
-          <button type="button" class="btn" data-demo-menu-action="technical" id="demo-technical">Техническая панель</button>
-          <button type="button" class="btn danger" data-demo-menu-action="reset" id="demo-reset">Сбросить demo</button>
-        </div>
-
-        <div class="modal-actions modal-actions-single">
-          <button type="button" class="btn primary" data-close-demo-menu id="demo-close">Закрыть</button>
-        </div>
+        <div class="demo-menu-section"><div class="demo-menu-label" id="demo-language-label">Язык интерфейса</div><div class="demo-language-row" role="group" aria-label="Язык интерфейса"><button type="button" class="demo-language-btn" data-lang="en">EN</button><button type="button" class="demo-language-btn is-active" data-lang="ru">RU</button><button type="button" class="demo-language-btn" data-lang="uz">UZ</button></div></div>
+        <div class="demo-menu-actions"><button type="button" class="btn" data-demo-menu-action="learning" id="demo-normal-learning">Обычное обучение</button><button type="button" class="btn" data-demo-menu-action="fill-remaining" id="demo-fill-remaining">Заполнить оставшиеся</button><button type="button" class="btn" data-demo-menu-action="technical" id="demo-technical">Техническая панель</button><button type="button" class="btn danger" data-demo-menu-action="reset" id="demo-reset">Сбросить demo</button></div>
+        <div class="modal-actions modal-actions-single"><button type="button" class="btn primary" data-close-demo-menu id="demo-close">Закрыть</button></div>
       </div>
     </div>
   </div>
@@ -350,6 +140,9 @@
   <script src="diagnostic-demo-gate3.js?v=gate3-1"></script>
   <script src="diagnostic-demo-gate4-data.js?v=gate4-1"></script>
   <script src="diagnostic-demo-gate4-engine.js?v=gate4-1"></script>
-  <script src="diagnostic-demo-gate4-ui.js?v=gate4-1"></script>
+  <script src="diagnostic-demo-gate4-ui.js?v=gate4-2"></script>
+  <script src="diagnostic-demo-gate5-cards-a.js?v=gate5-2"></script>
+  <script src="diagnostic-demo-gate5-cards-b.js?v=gate5-2"></script>
+  <script src="diagnostic-demo-gate5-ui-v2.js?v=gate5-2"></script>
 </body>
 </html>
