@@ -1,0 +1,150 @@
+/* Demo-only controls. The Subject Hub itself uses main app HTML and style.css unchanged. */
+.demo-planbar {
+  position: sticky;
+  top: calc(53px + var(--safe-top));
+  z-index: 9;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  background: rgba(246, 248, 252, 0.96);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+}
+
+.demo-planbar-label {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.demo-plan-switch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.demo-plan-btn {
+  min-width: 0;
+  height: 32px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: rgba(15, 23, 42, 0.65);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.demo-plan-btn.is-active {
+  color: var(--primary);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+#courses-subject-hub {
+  display: block;
+}
+
+#subject-hub-mentor-avatar {
+  background-image: url('demo-mentor-economics.svg');
+}
+
+.demo-menu-modal {
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+}
+
+.demo-menu-section {
+  padding: 10px 0 2px;
+}
+
+.demo-menu-label {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.demo-language-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.demo-language-btn {
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--muted);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.demo-language-btn.is-active {
+  color: var(--primary);
+  border-color: rgba(47,111,214,.32);
+  background: rgba(47,111,214,.07);
+}
+
+.demo-menu-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.demo-menu-actions .btn {
+  width: 100%;
+}
+
+.demo-technical-card {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(15,23,42,.035);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.demo-technical-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.demo-technical-row + .demo-technical-row {
+  margin-top: 6px;
+}
+
+.demo-technical-row span {
+  color: var(--muted);
+}
+
+.demo-technical-row b {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 370px) {
+  .demo-planbar {
+    gap: 7px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .demo-planbar-label {
+    font-size: 9px;
+  }
+  .demo-plan-btn {
+    font-size: 11px;
+  }
+}
