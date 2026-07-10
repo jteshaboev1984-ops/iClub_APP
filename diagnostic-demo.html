@@ -9,7 +9,7 @@
   <title>iClub AI Demo</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="style.css?v=support1" />
-  <link rel="stylesheet" href="diagnostic-demo-main-local.css?v=main-copy-3" />
+  <link rel="stylesheet" href="diagnostic-demo-main-local.css?v=gate3-1" />
 </head>
 <body>
   <div id="app" class="app">
@@ -216,6 +216,31 @@
               <div id="practice-options" class="options"></div>
             </div>
 
+            <div class="demo-ai-before-answer" id="demo-ai-before-answer" aria-live="polite">
+              <span class="demo-ai-before-mark" aria-hidden="true">
+                <img src="iclub-ai-mark.svg" alt="" />
+              </span>
+              <span class="demo-ai-before-copy">
+                <b id="demo-ai-lock-title">AI-разбор недоступен до ответа</b>
+                <small id="demo-ai-lock-copy">Разбор будет доступен после отправки ответа.</small>
+              </span>
+              <span class="demo-ai-before-plan" id="demo-ai-lock-plan">Free</span>
+            </div>
+
+            <div class="demo-show-tools">
+              <button id="demo-tools-toggle" class="demo-tools-toggle" type="button" aria-expanded="false">
+                <span>
+                  <b id="demo-tools-title">Инструменты показа</b>
+                  <small id="demo-tools-hint">Только для демонстрации</small>
+                </span>
+                <span class="demo-tools-chevron" aria-hidden="true">⌄</span>
+              </button>
+              <div id="demo-tools-panel" class="demo-tools-panel" hidden>
+                <button id="demo-answer-btn" class="btn" type="button">Демо-ответ</button>
+                <div id="demo-answer-note" class="muted small">Выбирает утверждённый вариант, но не отправляет ответ.</div>
+              </div>
+            </div>
+
             <div class="actions-row">
               <button id="practice-submit-btn" class="btn" type="button" disabled>Ответить</button>
             </div>
@@ -244,6 +269,8 @@
                 <div class="muted small" id="practice-recs-sub">Что прочитать по вашим ошибкам</div>
               </button>
             </div>
+
+            <section id="demo-plan-result" class="card demo-plan-result" hidden></section>
 
             <div class="actions-row">
               <button id="practice-again-btn" class="btn" type="button">Пройти снова</button>
@@ -293,6 +320,7 @@
     <div class="modal-backdrop" data-close-demo-menu>
       <div class="modal demo-menu-modal" role="dialog" aria-modal="true" aria-labelledby="demo-menu-title">
         <div class="modal-title" id="demo-menu-title">Сценарий</div>
+
         <div class="demo-menu-section">
           <div class="demo-menu-label" id="demo-language-label">Язык интерфейса</div>
           <div class="demo-language-row" role="group" aria-label="Язык интерфейса">
@@ -301,11 +329,14 @@
             <button type="button" class="demo-language-btn" data-lang="uz">UZ</button>
           </div>
         </div>
+
         <div class="demo-menu-actions">
           <button type="button" class="btn" data-demo-menu-action="learning" id="demo-normal-learning">Обычное обучение</button>
+          <button type="button" class="btn" data-demo-menu-action="fill-remaining" id="demo-fill-remaining">Заполнить оставшиеся</button>
           <button type="button" class="btn" data-demo-menu-action="technical" id="demo-technical">Техническая панель</button>
           <button type="button" class="btn danger" data-demo-menu-action="reset" id="demo-reset">Сбросить demo</button>
         </div>
+
         <div class="modal-actions modal-actions-single">
           <button type="button" class="btn primary" data-close-demo-menu id="demo-close">Закрыть</button>
         </div>
@@ -313,7 +344,8 @@
     </div>
   </div>
 
-  <script src="diagnostic-demo-v12-data.js?v=main-copy-3"></script>
+  <script src="diagnostic-demo-v12-data.js?v=gate3-1"></script>
   <script src="diagnostic-demo-main-local.js?v=main-copy-3"></script>
+  <script src="diagnostic-demo-gate3.js?v=gate3-1"></script>
 </body>
 </html>
