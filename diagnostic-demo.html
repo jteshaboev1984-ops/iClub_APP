@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'" />
   <title>iClub Diagnostic Practice</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="diagnostic-demo.css" />
   <link rel="stylesheet" href="diagnostic-demo-result-layout.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div class="demo-app">
@@ -15,10 +16,7 @@
       <button class="topbar-back hidden" id="topbar-back" type="button" aria-label="Назад">‹</button>
       <div class="topbar-brand">
         <img class="topbar-logo" src="logo.png" alt="iClub" />
-        <div>
-          <div class="topbar-title">iClub</div>
-          <div class="topbar-subtitle">Smarter together</div>
-        </div>
+        <div><div class="topbar-title">iClub</div><div class="topbar-subtitle">Smarter together</div></div>
       </div>
       <div class="language-switch" aria-label="Demo language">
         <button type="button" class="language-btn" data-lang="en">EN</button>
@@ -29,240 +27,103 @@
 
     <main class="demo-main">
       <section class="demo-screen" id="practice-start-screen">
-        <div class="section-head">
-          <h1 id="start-title">Практика</h1>
-          <p id="start-subtitle">7 вопросов • от простого к сложному</p>
-        </div>
-
+        <div class="section-head"><h1 id="start-title">Диагностическая практика</h1><p id="start-subtitle">7 вопросов • от простого к сложному</p></div>
         <section class="tour-picker-card">
-          <div class="tour-picker-title" id="tour-picker-title">Выбор тура</div>
-          <div class="tour-picker-row" aria-label="Practice tour selector">
-            <button type="button" class="tour-chip">Тур 1</button>
-            <button type="button" class="tour-chip">Тур 2</button>
-            <button type="button" class="tour-chip">Тур 3</button>
-            <button type="button" class="tour-chip">Тур 4</button>
-            <button type="button" class="tour-chip">Тур 5</button>
-            <button type="button" class="tour-chip active" id="tour-active-chip">Тур 6</button>
+          <div class="tour-picker-title" id="tour-picker-title">Учебный блок</div>
+          <div class="tour-picker-row" aria-label="Practice selector">
+            <button type="button" class="tour-chip">Практика 1</button>
+            <button type="button" class="tour-chip">Практика 2</button>
+            <button type="button" class="tour-chip">Практика 3</button>
+            <button type="button" class="tour-chip">Практика 4</button>
+            <button type="button" class="tour-chip active" id="tour-active-chip">Диагностика</button>
           </div>
         </section>
-
         <section class="practice-hero">
           <div class="practice-hero-kicker" id="hero-subject-label">Предмет</div>
           <div class="practice-hero-title" id="hero-subject-title">Экономика</div>
-          <div class="practice-hero-stage" id="hero-stage-meta">Практика 6 тура • Завершено 0/7 • Осталось 7</div>
+          <div class="practice-hero-stage" id="hero-stage-meta">Текущая диагностика • Завершено 0/7 • Осталось 7</div>
           <div class="practice-hero-metrics">
-            <div class="practice-metric">
-              <div class="practice-metric-label" id="best-result-label">Лучший результат</div>
-              <div class="practice-metric-value" id="best-result-value">—</div>
-            </div>
-            <div class="practice-metric">
-              <div class="practice-metric-label" id="best-time-label">Лучшее время</div>
-              <div class="practice-metric-value" id="best-time-value">—</div>
-            </div>
+            <div class="practice-metric"><div class="practice-metric-label" id="best-result-label">Лучший результат</div><div class="practice-metric-value" id="best-result-value">—</div></div>
+            <div class="practice-metric"><div class="practice-metric-label" id="best-time-label">Лучшее время</div><div class="practice-metric-value" id="best-time-value">—</div></div>
           </div>
         </section>
-
         <section class="practice-last card">
-          <div class="card-title" id="last-attempts-title">Последние попытки</div>
+          <div class="card-title" id="last-attempts-title">История обучения</div>
           <div class="muted small" id="last-attempts-empty">Пока нет попыток</div>
-          <div class="practice-table-wrap">
-            <table class="practice-table" aria-label="Practice attempts">
-              <thead><tr><th id="col-date">Дата</th><th id="col-score">Счёт</th><th id="col-time">Время</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
+          <div class="practice-table-wrap"><table class="practice-table" aria-label="Practice attempts"><thead><tr><th id="col-date">Дата</th><th id="col-score">Счёт</th><th id="col-time">Время</th></tr></thead><tbody></tbody></table></div>
         </section>
-
-        <button class="btn primary start-btn" id="start-demo" type="button">Начать практику</button>
+        <button class="btn primary start-btn" id="start-demo" type="button">Начать диагностику</button>
       </section>
 
       <section class="demo-screen hidden" id="practice-quiz-screen">
-        <div class="quiz-top">
-          <div class="quiz-progress"><span id="practice-qno">1/7</span><span id="practice-timer" class="timer-pill">00:58</span></div>
-          <button id="practice-pause-btn" class="btn ghost" type="button">Пауза</button>
-        </div>
+        <div class="quiz-top"><div class="quiz-progress"><span id="practice-qno">1/7</span><span id="practice-timer" class="timer-pill">00:50</span></div><button id="practice-pause-btn" class="btn ghost" type="button">Пауза</button></div>
         <section class="card question-card" id="question-card">
-          <h2 id="question-text">Вопрос практики…</h2>
-          <div id="question-difficulty" class="muted small difficulty-line">Сложность: легко</div>
-          <div id="options-list" class="options-list"></div>
-          <div class="input-wrap hidden" id="input-wrap">
-            <label for="input-answer" id="input-label">Ответ</label>
-            <input id="input-answer" autocomplete="off" placeholder="Введите ответ" />
-          </div>
+          <h2 id="question-text">Вопрос практики…</h2><div id="question-difficulty" class="muted small difficulty-line">Сложность: легко</div><div id="options-list" class="options-list"></div>
+          <div class="input-wrap hidden" id="input-wrap"><label for="input-answer" id="input-label">Ответ</label><input id="input-answer" autocomplete="off" placeholder="Введите ответ" /></div>
         </section>
         <div class="actions-row"><button class="btn submit-btn" id="submit-answer" type="button" disabled>Ответить</button></div>
       </section>
 
       <section class="demo-screen hidden" id="practice-result-screen">
-        <div class="section-head result-head">
-          <h1 id="result-title">Результат практики</h1>
-          <p id="practice-result-meta">Посмотрите итог и разбор ошибок.</p>
-        </div>
-
+        <div class="section-head result-head"><h1 id="result-title">Результат практики</h1><p id="practice-result-meta">Посмотрите итог и разбор ответов.</p></div>
         <section class="card result-hero-card">
           <div class="result-hero-grid">
-            <div class="result-score-side">
-              <div class="score-ring" id="score-ring" style="--score:0">
-                <div class="score-ring-inner">
-                  <div class="result-score-main" id="result-score-main">0%</div>
-                  <div class="score-ring-label" id="result-score-label">результат</div>
-                </div>
-              </div>
-              <div class="result-score-caption" id="result-score-caption">0 из 7 верно</div>
-            </div>
+            <div class="result-score-side"><div class="score-ring" id="score-ring" style="--score:0"><div class="score-ring-inner"><div class="result-score-main" id="result-score-main">0%</div><div class="score-ring-label" id="result-score-label">результат</div></div></div><div class="result-score-caption" id="result-score-caption">0 из 7 верно</div></div>
             <section class="result-stat-row" aria-label="Practice result summary">
-              <div class="result-kpi-card">
-                <div class="result-kpi-copy"><span id="result-correct-label">Верно</span><b id="result-correct-value">0/7</b></div>
-                <div class="result-status-pill" id="result-status-pill">Нужно повторить</div>
-              </div>
+              <div class="result-kpi-card"><div class="result-kpi-copy"><span id="result-correct-label">Верно</span><b id="result-correct-value">0/7</b></div><div class="result-status-pill" id="result-status-pill">Нужно повторить</div></div>
               <div class="stat-error"><span id="result-errors-label">Ошибки</span><b id="result-errors-value">0</b></div>
               <div><span id="result-topics-label">Темы</span><b id="result-topics-value">0</b></div>
             </section>
           </div>
         </section>
-
         <button class="card-btn result-review-card" id="open-review-diagnosis" type="button">
-          <div class="entry-card-content">
-            <div class="entry-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 4.75H7.2C6.08 4.75 5.52 4.75 5.092 4.968C4.716 5.16 4.41 5.466 4.218 5.842C4 6.27 4 6.83 4 7.95V18.8C4 19.92 4 20.48 4.218 20.908C4.41 21.284 4.716 21.59 5.092 21.782C5.52 22 6.08 22 7.2 22H16.8C17.92 22 18.48 22 18.908 21.782C19.284 21.59 19.59 21.284 19.782 20.908C20 20.48 20 19.92 20 18.8V7.95C20 6.83 20 6.27 19.782 5.842C19.59 5.466 19.284 5.16 18.908 4.968C18.48 4.75 17.92 4.75 16.8 4.75H16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                <path d="M8.75 5.5C8.75 4.257 9.757 3.25 11 3.25H13C14.243 3.25 15.25 4.257 15.25 5.5C15.25 5.914 14.914 6.25 14.5 6.25H9.5C9.086 6.25 8.75 5.914 8.75 5.5Z" stroke="currentColor" stroke-width="1.8"/>
-                <path d="M8 11.25L9.45 12.7L12.2 9.95" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M14 11.75H17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                <path d="M8 17H17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <div>
-              <div class="card-title" id="review-diagnosis-title">Разбор ошибок</div>
-              <div class="muted small" id="review-diagnosis-sub">Ответы, правильная логика и объяснения</div>
-            </div>
-          </div>
+          <div class="entry-card-content"><div class="entry-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 4.75H7.2C6.08 4.75 5.52 4.75 5.092 4.968C4.716 5.16 4.41 5.466 4.218 5.842C4 6.27 4 6.83 4 7.95V18.8C4 19.92 4 20.48 4.218 20.908C4.41 21.284 4.716 21.59 5.092 21.782C5.52 22 6.08 22 7.2 22H16.8C17.92 22 18.48 22 18.908 21.782C19.284 21.59 19.59 21.284 19.782 20.908C20 20.48 20 19.92 20 18.8V7.95C20 6.83 20 6.27 19.782 5.842C19.59 5.466 19.284 5.16 18.908 4.968C18.48 4.75 17.92 4.75 16.8 4.75H16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8.75 5.5C8.75 4.257 9.757 3.25 11 3.25H13C14.243 3.25 15.25 4.257 15.25 5.5C15.25 5.914 14.914 6.25 14.5 6.25H9.5C9.086 6.25 8.75 5.914 8.75 5.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M8 11.25L9.45 12.7L12.2 9.95" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11.75H17M8 17H17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div><div><div class="card-title" id="review-diagnosis-title">Разбор ответов</div><div class="muted small" id="review-diagnosis-sub">Ответы, правильная логика и объяснения</div></div></div>
           <div class="entry-right"><span id="review-diagnosis-count" class="badge badge-pin">0</span><span class="chevron">›</span></div>
         </button>
-
-        <section class="card topic-preview-card" id="topic-weakness-section">
-          <div class="topic-preview-title" id="topic-weakness-title">Что требует внимания</div>
-          <div class="topic-weakness-list" id="topic-weakness-list"></div>
-        </section>
-
-        <div class="actions-row result-actions">
-          <button class="btn ai-primary" id="result-primary-action" type="button">AI-диагностика</button>
-          <button class="btn" id="back-to-start" type="button">К практике</button>
-        </div>
+        <section class="card topic-preview-card" id="topic-weakness-section"><div class="topic-preview-title" id="topic-weakness-title">Что требует внимания</div><div class="topic-weakness-list" id="topic-weakness-list"></div></section>
+        <div class="actions-row result-actions"><button class="btn ai-primary" id="result-primary-action" type="button">AI-диагностика</button><button class="btn" id="back-to-start" type="button">К практике</button></div>
       </section>
 
       <section class="demo-screen hidden" id="practice-review-diagnosis-screen">
-        <div class="section-head">
-          <h1 id="review-title">Разбор ошибок</h1>
-          <p id="review-subtitle">Нажмите на вопрос, чтобы открыть подробный разбор</p>
-        </div>
-        <section class="card diagnostic-summary-card">
-          <div class="card-title" id="review-summary-title">Разбор по темам</div>
-          <p class="muted small" id="review-summary-copy">Ошибки сгруппированы по темам. Откройте тему и выберите вопрос для подробного объяснения.</p>
-        </section>
-        <div id="review-question-list" class="review-question-list"></div>
-        <div class="actions-row sticky-actions">
-          <button class="btn primary" id="review-back-to-result" type="button">Назад к результату</button>
-        </div>
+        <div class="section-head"><h1 id="review-title">Разбор ответов</h1><p id="review-subtitle">Нажмите на вопрос, чтобы открыть подробный разбор</p></div>
+        <section class="card diagnostic-summary-card"><div class="card-title" id="review-summary-title">Разбор по темам</div><p class="muted small" id="review-summary-copy">Ответы сгруппированы по темам.</p></section>
+        <div id="review-question-list" class="review-question-list"></div><div class="actions-row sticky-actions"><button class="btn primary" id="review-back-to-result" type="button">Назад к результату</button></div>
       </section>
 
       <section class="demo-screen hidden" id="ai-thinking-screen">
-        <div class="section-head">
-          <h1 id="ai-thinking-title">AI-диагностика</h1>
-          <p id="ai-thinking-subtitle">Анализируем только что завершённую практику</p>
-        </div>
-        <section class="card ai-thinking-card">
-          <div class="ai-orb" aria-hidden="true"><span></span></div>
-          <div class="ai-thinking-status" id="ai-thinking-status">Формируем вашу диагностику…</div>
-          <div class="ai-step-list">
-            <div class="ai-step active" id="ai-step-1"><span>1</span><b id="ai-step-1-text">Проверяем повторяющиеся ошибки</b></div>
-            <div class="ai-step" id="ai-step-2"><span>2</span><b id="ai-step-2-text">Определяем главный фокус</b></div>
-            <div class="ai-step" id="ai-step-3"><span>3</span><b id="ai-step-3-text">Собираем следующий шаг</b></div>
-          </div>
-        </section>
+        <div class="section-head"><h1 id="ai-thinking-title">AI-диагностика</h1><p id="ai-thinking-subtitle">Анализируем только что завершённую практику</p></div>
+        <section class="card ai-thinking-card"><div class="ai-orb" aria-hidden="true"><span></span></div><div class="ai-thinking-status" id="ai-thinking-status">Формируем вашу диагностику…</div><div class="ai-step-list"><div class="ai-step active" id="ai-step-1"><span>1</span><b id="ai-step-1-text">Проверяем повторяющиеся ошибки</b></div><div class="ai-step" id="ai-step-2"><span>2</span><b id="ai-step-2-text">Определяем главный фокус</b></div><div class="ai-step" id="ai-step-3"><span>3</span><b id="ai-step-3-text">Собираем следующий шаг</b></div></div></section>
       </section>
 
       <section class="demo-screen hidden" id="ai-result-screen">
-        <div class="section-head">
-          <h1 id="ai-result-title">AI-диагностика готова</h1>
-          <p id="ai-result-subtitle">Рекомендации по только что завершённой практике</p>
-        </div>
-        <section class="card ai-result-card">
-          <div class="ai-result-topline">
-            <div class="ai-pill" id="ai-result-pill">AI-диагностика</div>
-            <div class="ai-priority"><span id="ai-priority-label">Начните отсюда</span><b id="ai-priority-value">Важно</b></div>
-          </div>
-          <div class="ai-focus-label" id="ai-focus-label">Главный фокус</div>
-          <div class="ai-focus-title" id="ai-focus-title">—</div>
-          <div class="ai-reason-box">
-            <span id="ai-reason-label">Диагностический вывод</span>
-            <strong id="ai-reason-text">—</strong>
-          </div>
-          <div class="ai-plan-box">
-            <span id="ai-plan-label">Персональный план</span>
-            <ol id="ai-plan-list"></ol>
-          </div>
-        </section>
+        <div class="section-head"><h1 id="ai-result-title">AI-диагностика готова</h1><p id="ai-result-subtitle">Рекомендации по только что завершённой практике</p></div>
+        <section class="card ai-result-card"><div class="ai-result-topline"><div class="ai-pill" id="ai-result-pill">AI-диагностика</div><div class="ai-priority"><span id="ai-priority-label">Начните отсюда</span><b id="ai-priority-value">Важно</b></div></div><div class="ai-focus-label" id="ai-focus-label">Главный фокус</div><div class="ai-focus-title" id="ai-focus-title">—</div><div class="ai-reason-box"><span id="ai-reason-label">Диагностический вывод</span><strong id="ai-reason-text">—</strong></div><div class="ai-plan-box"><span id="ai-plan-label">Персональный план</span><ol id="ai-plan-list"></ol></div></section>
         <section class="ai-action-grid">
-          <button class="card-btn ai-action-card" id="ai-open-source" type="button"><div class="action-icon">📘</div><div><div class="card-title" id="ai-source-action-title">Открыть источник</div><div class="muted small" id="ai-source-action-sub">Материал по главному фокусу</div></div><span class="chevron">›</span></button>
-          <button class="card-btn ai-action-card" id="ai-open-review" type="button"><div class="action-icon">▣</div><div><div class="card-title" id="ai-review-action-title">Разобрать ошибки</div><div class="muted small" id="ai-review-action-sub">Проверить логику каждого ответа</div></div><span class="chevron">›</span></button>
-          <button class="card-btn ai-action-card ai-action-primary" id="start-mini-training" type="button"><div class="action-icon">⚡</div><div><div class="card-title" id="ai-mini-action-title">Начать мини-тренировку</div><div class="small" id="ai-mini-action-sub">Похожие задания для закрепления</div></div><span class="chevron">›</span></button>
+          <button class="card-btn ai-action-card" id="ai-open-source" type="button"><div class="action-icon" aria-hidden="true">i</div><div><div class="card-title" id="ai-source-action-title">Открыть источник</div><div class="muted small" id="ai-source-action-sub">Материал по главному фокусу</div></div><span class="chevron">›</span></button>
+          <button class="card-btn ai-action-card" id="ai-open-review" type="button"><div class="action-icon" aria-hidden="true">□</div><div><div class="card-title" id="ai-review-action-title">Разобрать ответы</div><div class="muted small" id="ai-review-action-sub">Проверить логику каждого ответа</div></div><span class="chevron">›</span></button>
+          <button class="card-btn ai-action-card ai-action-primary" id="start-mini-training" type="button"><div class="action-icon" aria-hidden="true">→</div><div><div class="card-title" id="ai-mini-action-title">Закрепить в практике</div><div class="small" id="ai-mini-action-sub">Повторить локальный диагностический набор</div></div><span class="chevron">›</span></button>
         </section>
-        <div class="actions-row sticky-actions ai-result-footer-actions">
-          <button class="btn" id="ai-back-to-result" type="button">Назад к результату</button>
-          <button class="btn" id="ai-open-archive" type="button">Архив AI-диагностик</button>
-        </div>
+        <div class="actions-row sticky-actions ai-result-footer-actions"><button class="btn" id="ai-back-to-result" type="button">Назад к результату</button><button class="btn" id="ai-open-archive" type="button">Архив AI-диагностик</button></div>
       </section>
 
       <section class="demo-screen hidden" id="ai-source-screen">
-        <div class="section-head">
-          <h1 id="source-title">Источник для повторения</h1>
-          <p id="source-subtitle">Материал связан с главным фокусом AI-диагностики</p>
-        </div>
-        <article class="card detail-card">
-          <div class="ai-pill" id="source-pill">Материал</div>
-          <h2 id="source-focus-title">—</h2>
-          <div class="detail-box"><span id="source-topic-label">Тема</span><strong id="source-topic-value">—</strong></div>
-          <div class="detail-box"><span id="source-ref-label">Источник</span><strong id="source-ref-value">—</strong></div>
-          <div class="detail-box"><span id="source-note-label">Как использовать</span><strong id="source-note-value">—</strong></div>
-        </article>
-        <div class="actions-row sticky-actions">
-          <button class="btn primary" id="source-back-to-ai" type="button">Назад к AI-плану</button>
-        </div>
+        <div class="section-head"><h1 id="source-title">Источник для повторения</h1><p id="source-subtitle">Материал iClub связан с главным фокусом</p></div>
+        <article class="card detail-card"><div class="ai-pill" id="source-pill">Материал iClub</div><h2 id="source-focus-title">—</h2><div class="detail-box"><span id="source-topic-label">Тема</span><strong id="source-topic-value">—</strong></div><div class="detail-box"><span id="source-ref-label">Источник</span><strong id="source-ref-value">—</strong></div><div class="detail-box"><span id="source-note-label">Как использовать</span><strong id="source-note-value">—</strong></div></article>
+        <div class="actions-row sticky-actions"><button class="btn primary" id="source-back-to-ai" type="button">Назад к AI-плану</button></div>
       </section>
 
       <section class="demo-screen hidden" id="ai-archive-screen">
-        <div class="section-head">
-          <h1 id="ai-archive-title">Архив AI-диагностик</h1>
-          <p id="ai-archive-subtitle">Сохранённые рекомендации по практикам</p>
-        </div>
-        <div class="archive-list" id="ai-archive-list"></div>
-        <div class="actions-row sticky-actions">
-          <button class="btn primary" id="archive-back-to-ai" type="button">Назад к AI-плану</button>
-        </div>
+        <div class="section-head"><h1 id="ai-archive-title">Архив AI-диагностик</h1><p id="ai-archive-subtitle">Только локальные demo-данные</p></div><div class="archive-list" id="ai-archive-list"></div><div class="actions-row sticky-actions"><button class="btn primary" id="archive-back-to-ai" type="button">Назад к AI-плану</button></div>
       </section>
 
       <section class="demo-screen hidden" id="practice-question-detail-screen">
-        <div class="section-head">
-          <h1 id="detail-title">Разбор вопроса</h1>
-          <p id="detail-subtitle">Причина ошибки и следующий шаг</p>
-        </div>
-        <article class="card detail-card">
-          <div class="detail-status" id="detail-status">—</div>
-          <h2 id="detail-question-text">—</h2>
-          <div class="detail-box"><span id="detail-answer-label">Ваш ответ</span><strong id="detail-answer-value">—</strong></div>
-          <div class="detail-box"><span id="detail-focus-label">Слабое место</span><strong id="detail-focus-value">—</strong></div>
-          <div class="detail-box"><span id="detail-feedback-label">Объяснение</span><strong id="detail-feedback-value">—</strong></div>
-          <div class="detail-box"><span id="detail-next-label">Следующий шаг</span><strong id="detail-next-value">—</strong></div>
-        </article>
-        <div class="actions-row sticky-actions">
-          <button class="btn primary" id="detail-back-to-review" type="button">Назад к разбору</button>
-        </div>
+        <div class="section-head"><h1 id="detail-title">Разбор вопроса</h1><p id="detail-subtitle">Логика ответа и следующий шаг</p></div>
+        <article class="card detail-card"><div class="detail-status" id="detail-status">—</div><h2 id="detail-question-text">—</h2><div class="detail-box"><span id="detail-answer-label">Ваш ответ</span><strong id="detail-answer-value">—</strong></div><div class="detail-box"><span id="detail-focus-label">Слабое место</span><strong id="detail-focus-value">—</strong></div><div class="detail-box"><span id="detail-feedback-label">Объяснение</span><strong id="detail-feedback-value">—</strong></div><div class="detail-box"><span id="detail-next-label">Следующий шаг</span><strong id="detail-next-value">—</strong></div></article>
+        <div class="actions-row sticky-actions"><button class="btn primary" id="detail-back-to-review" type="button">Назад к разбору</button></div>
       </section>
     </main>
   </div>
-
-  <script src="diagnostic-demo.js"></script>
-  <script src="diagnostic-demo-ai-ux.js"></script>
+  <script src="diagnostic-demo-v12-data.js"></script>
+  <script src="diagnostic-demo-v12.js"></script>
 </body>
 </html>
