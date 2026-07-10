@@ -4,7 +4,7 @@
   top: calc(53px + var(--safe-top));
   z-index: 9;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   padding: 6px 12px;
@@ -47,6 +47,20 @@
 .demo-plan-btn.is-active {
   color: var(--primary);
   background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.demo-scenario-button {
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
   box-shadow: var(--shadow-sm);
 }
 
@@ -135,14 +149,18 @@
   overflow-wrap: anywhere;
 }
 
-@media (max-width: 370px) {
+@media (max-width: 390px) {
   .demo-planbar {
-    gap: 7px;
+    gap: 6px;
     padding-left: 8px;
     padding-right: 8px;
   }
   .demo-planbar-label {
-    font-size: 9px;
+    display: none;
+  }
+  .demo-scenario-button {
+    padding: 0 9px;
+    font-size: 10px;
   }
   .demo-plan-btn {
     font-size: 11px;
