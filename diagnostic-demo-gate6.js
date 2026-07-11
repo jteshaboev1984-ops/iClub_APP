@@ -254,6 +254,12 @@ document.addEventListener('click',event=>{
  if(event.target.closest('[data-plan],[data-lang],#demo-ai-hub-card,[data-chat-tab],[data-history-message],[data-ai-action],.demo-ai-show-check'))scheduleDecorate(80);
 });
 
-hydrateCards();scheduleDecorate(180);
+function loadGate7Assets(){
+ if(!document.querySelector('link[data-gate7-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='diagnostic-demo-gate7.css?v=gate7-1';link.dataset.gate7Style='1';document.head.appendChild(link)}
+ const load=src=>new Promise((resolve,reject)=>{if(document.querySelector(`script[data-demo-src="${src}"]`))return resolve();const script=document.createElement('script');script.src=`${src}?v=gate7-1`;script.dataset.demoSrc=src;script.onload=resolve;script.onerror=reject;document.body.appendChild(script)});
+ load('diagnostic-demo-gate7-data.js').then(()=>load('diagnostic-demo-gate7.js')).then(()=>load('diagnostic-demo-chat-focus.js')).catch(()=>{});
+}
+
+hydrateCards();scheduleDecorate(180);loadGate7Assets();
 window.ICLUB_DEMO_GATE6={sendGenerated:generatedSend,scrollLatest:scrollLatestAnswer,cache:()=>cacheState().ai_cache,clearCache:()=>saveCache({...cacheState(),ai_cache:{}}),health:()=>fetch('/api/diagnostic-ai').then(response=>response.json())};
 })();
