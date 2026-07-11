@@ -40,6 +40,24 @@ function patchClientGuard(){
  }
 }
 
+function routeActiveTourSend(event,question){
+ const guard=window.ICLUB_DEMO_GATE7;
+ if(!guard?.isActive?.()||!String(question||'').trim())return false;
+ event.preventDefault();event.stopImmediatePropagation();
+ window.ICLUB_DEMO_GATE6?.sendGenerated?.(String(question).trim());
+ return true;
+}
+
+document.addEventListener('click',event=>{
+ if(!event.target.closest('#demo-ai-send'))return;
+ routeActiveTourSend(event,$('demo-ai-input')?.value||'');
+},true);
+
+document.addEventListener('keydown',event=>{
+ if(event.target.id!=='demo-ai-input'||event.key!=='Enter'||event.shiftKey)return;
+ routeActiveTourSend(event,event.target.value||'');
+},true);
+
 function scrollLatest(smooth=true){
  clearTimeout(timer);timer=setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
   const latest=document.querySelector('#demo-ai-chat-body .demo-ai-message:last-child');if(!latest)return;
@@ -51,8 +69,12 @@ function decorateTheory(){
  const state=read(CHAT_KEY,{messages:[]});const messages=(state.messages||[]).filter(message=>message.role==='assistant');const nodes=[...document.querySelectorAll('#demo-ai-chat-body .demo-ai-message.is-assistant')];
  nodes.forEach((node,index)=>{const message=messages[index];if(message?.mode!=='theory_only')return;node.classList.add('is-theory-only-answer');const badge=node.querySelector('.demo-ai-verified span');if(badge)badge.textContent=(text[lang()]||text.ru).theory;const source=node.querySelector('.demo-ai-source span');if(source&&!source.textContent.includes((text[lang()]||text.ru).theory))source.textContent=`${(text[lang()]||text.ru).source} · ${message.source?.section||message.source?.topic||'Economics'}`})
 }
+function loadGate8(){
+ if(!document.querySelector('link[data-gate8-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='diagnostic-demo-gate8.css?v=gate8-1';link.dataset.gate8Style='1';document.head.appendChild(link)}
+ if(!document.querySelector('script[data-demo-src="diagnostic-demo-gate8.js"]')){const script=document.createElement('script');script.src='diagnostic-demo-gate8.js?v=gate8-1';script.dataset.demoSrc='diagnostic-demo-gate8.js';document.body.appendChild(script)}
+}
 const body=$('demo-ai-chat-body');if(body)new MutationObserver(mutations=>{if(!mutations.some(item=>item.addedNodes.length||item.removedNodes.length))return;decorateTheory();scrollLatest(true)}).observe(body,{childList:true});
 document.addEventListener('click',event=>{if(event.target.closest('[data-lang],[data-chat-tab],#demo-ai-hub-card'))setTimeout(()=>{patchClientGuard();decorateTheory();scrollLatest(false)},90)});
-setTimeout(()=>{patchClientGuard();decorateTheory();scrollLatest(false)},220);
+setTimeout(()=>{patchClientGuard();decorateTheory();scrollLatest(false);loadGate8()},220);
 window.ICLUB_DEMO_CHAT_FOCUS={scrollLatest,decorateTheory,patchClientGuard};
 })();
