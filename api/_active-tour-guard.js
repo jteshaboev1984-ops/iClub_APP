@@ -1,6 +1,6 @@
 'use strict';
 
-const ACTIVE_TOUR_VERSION = 'economics-tour5-guard-v1';
+const ACTIVE_TOUR_VERSION = 'economics-tour5-guard-v2';
 
 const ACTIVE_TOUR_QUESTIONS = [
   {
@@ -47,7 +47,7 @@ const ACTIVE_TOUR_QUESTIONS = [
       en: 'A monopsonist employs 40 workers at a wage of 12 dollars. To employ the 41st worker, the firm must raise the wage for all workers to 12.50 dollars. What is the marginal labour cost of the 41st worker?'
     },
     uniqueNumbers: ['40', '12', '41', '12.50'],
-    terms: ['monopsonist', 'marginal labour cost', 'монопсонист', 'предельная стоимость труда', 'monopsonist', 'chegaraviy mehnat xarajati'],
+    terms: ['monopsonist', 'marginal labour cost', 'монопсонист', 'предельная стоимость труда', 'chegaraviy mehnat xarajati'],
     optionPatterns: ['12.50', '20', '32.50', '52.50'],
     theoryCard: 'labour_market_policy'
   },
@@ -125,7 +125,7 @@ function evaluateActiveTourGuard(question, options = {}) {
     const termHits = item.terms.filter(value => text.includes(normalize(value)));
     const optionHits = item.optionPatterns.filter(value => text.includes(normalize(value)));
     const fingerprint = numberHits.length >= Math.min(2, item.uniqueNumbers.length) && termHits.length >= 1;
-    const paraphrase = similarity >= 0.58 || (similarity >= 0.38 && (numberHits.length >= 1 || termHits.length >= 2));
+    const paraphrase = (numberHits.length >= 1 && similarity >= 0.38 && termHits.length >= 1) || (Boolean(solutionIntent || injectionIntent) && similarity >= 0.52 && termHits.length >= 2);
     const optionPattern = optionHits.length >= 2 && termHits.length >= 1;
     const activeTopic = termHits.length >= 1;
     const score = (exact ? 100 : 0) + similarity * 30 + numberHits.length * 7 + termHits.length * 5 + optionHits.length * 3;
