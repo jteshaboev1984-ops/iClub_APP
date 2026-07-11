@@ -1,0 +1,15 @@
+/* Gate 7 — Active Tour 5 protection states */
+.demo-active-tour-warning{margin:9px 0 10px;padding:11px 12px;display:flex;flex-direction:column;gap:4px;border:1px solid rgba(180,83,9,.18);border-radius:14px;background:rgba(245,158,11,.08)}
+.demo-active-tour-warning[hidden]{display:none}
+.demo-active-tour-warning b{font-size:13px;line-height:1.25;color:#92400e}
+.demo-active-tour-warning span{font-size:12px;line-height:1.42;color:#78350f}
+.demo-ai-theory-shield{position:absolute;right:-3px;bottom:-3px;width:17px;height:17px;display:grid;place-items:center;border:2px solid #fff;border-radius:6px;background:#f59e0b;color:#fff;font-size:8px;font-weight:900}
+.demo-ai-theory-shield[hidden]{display:none}
+.demo-ai-hub-card.is-theory-only{border-color:rgba(245,158,11,.22);background:linear-gradient(180deg,#fff,rgba(255,251,235,.86))}
+.demo-ai-hub-card.is-theory-only .demo-ai-plan-chip{color:#92400e;background:rgba(245,158,11,.11);border-color:rgba(245,158,11,.2)}
+.demo-scenario-button.has-active-tour{color:#92400e;border-color:rgba(245,158,11,.28);background:rgba(255,251,235,.96)}
+.demo-ai-gate7-chip{flex:0 0 auto;min-height:36px;color:#92400e!important;border-color:rgba(245,158,11,.22)!important;background:rgba(255,251,235,.98)!important}
+.demo-ai-message.is-active-tour-blocked .demo-ai-bubble{border-color:rgba(245,158,11,.25);background:rgba(255,251,235,.98)}
+.demo-ai-message.is-active-tour-blocked .demo-ai-verified{color:#92400e;background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.2)}
+.demo-ai-message{scroll-margin-top:118px}
+@media(max-width:370px){.demo-active-tour-warning b{font-size:12px}.demo-active-tour-warning span{font-size:11px}.demo-ai-gate7-chip{min-height:34px;font-size:11px!important}}
