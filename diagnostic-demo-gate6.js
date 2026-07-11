@@ -35,7 +35,7 @@ function toast(text){
  clearTimeout(toastTimer);toastTimer=setTimeout(()=>target.classList.remove('is-show'),2400);
 }
 function chatState(){const raw=read(localStorage,CHAT_KEY,{});return{...raw,messages:Array.isArray(raw.messages)?raw.messages:[],draft:String(raw.draft||'')}}
-function saveChat(state){write(localStorage,CHAT_KEY,{...state,version:'gate6-v2'})}
+function saveChat(state){write(localStorage,CHAT_KEY,{...state,version:'gate6-v3'})}
 function cacheState(){const raw=read(sessionStorage,CACHE_KEY,{});return{...raw,ai_cache:raw.ai_cache&&typeof raw.ai_cache==='object'?raw.ai_cache:{}}}
 function saveCache(state){write(sessionStorage,CACHE_KEY,state)}
 function cacheKey(question,contextId){return `${language()}|subject_chat|${contextId}|${normalize(question)}`}
@@ -46,14 +46,16 @@ function setTechnical(payload){
   mode:payload.mode,
   model_call:!!payload.usage?.model_called,
   source_ids:payload.technical?.source_ids||[payload.source?.id].filter(Boolean),
-  source_version:payload.source?.version||'demo-v12-gate6',
+  source_version:payload.source?.version||'demo-v12-gate7',
   latency_ms:Number(payload.technical?.latency_ms||0),
   quota_charged:!!payload.usage?.charged,
   quota_remaining:payload.usage?.demo_limit_remaining,
   cache_hit:!!payload.technical?.cache_hit,
   safe_renderer:'DOM textContent',
   endpoint:'/api/diagnostic-ai',
-  guard_decision:payload.safety?.guard_decision||'allowed'
+  guard_decision:payload.safety?.guard_decision||'allowed',
+  guard_reason:payload.safety?.guard_reason||null,
+  matched_active_question:payload.safety?.matched_question_id||null
  }})
 }
 
@@ -72,7 +74,7 @@ function pushCardFromMessage(message){
   example:all(message.answer.example),
   check:all(message.answer.check),
   checkAnswer:all(message.answer.check_answer),
-  sourceVersion:message.source?.version||'demo-v12-gate6',
+  sourceVersion:message.source?.version||'demo-v12-gate7',
   verified:false,
   liveMode:message.mode
  });
@@ -99,7 +101,21 @@ function appendAssistant(payload,question,contextId){
  saveChat(state);setTechnical(payload);
 }
 
-function refreshChat(){G5.openChat({origin:lastOrigin});scheduleDecorate()}
+function scrollLatestAnswer(smooth=true){
+ const move=()=>{
+  const latest=q('#demo-ai-chat-body .demo-ai-message:last-child');if(!latest)return;
+  const composer=$('demo-ai-composer');
+  const topOffset=112;
+  const bottomLimit=window.innerHeight-(composer?.offsetHeight||96)-12;
+  const rect=latest.getBoundingClientRect();
+  if(rect.top<topOffset||rect.bottom>bottomLimit){
+   const top=Math.max(0,window.scrollY+rect.top-topOffset);
+   window.scrollTo({top,behavior:smooth?'smooth':'auto'});
+  }
+ };
+ requestAnimationFrame(()=>requestAnimationFrame(move));
+}
+function refreshChat(){G5.openChat({origin:lastOrigin});scheduleDecorate();scrollLatestAnswer(true)}
 function showLoading(){
  refreshChat();
  const body=$('demo-ai-chat-body');if(!body)return;
@@ -107,7 +123,7 @@ function showLoading(){
  const bubble=document.createElement('div');bubble.className='demo-ai-bubble';
  const dots=document.createElement('span');dots.className='demo-ai-loading-dots';dots.textContent='•••';
  const text=document.createElement('span');text.textContent=t().thinking;
- bubble.append(dots,text);wrap.appendChild(bubble);body.appendChild(wrap);body.scrollTop=body.scrollHeight;
+ bubble.append(dots,text);wrap.appendChild(bubble);body.appendChild(wrap);scrollLatestAnswer(false);
 }
 
 function localFallback(question,reason){
@@ -132,20 +148,25 @@ async function callEndpoint(question,contextId,retry=true){
  const token=await sessionToken(false);
  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),8500);
  try{
-  const response=await fetch('/api/diagnostic-ai',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({session_token:token,question,language:language(),context_type:'subject_chat',context_id:contextId})});
+  const response=await fetch('/api/diagnostic-ai',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({session_token:token,question,language:language(),context_type:contextId==='demo_active_tour5'?'theory_only':'subject_chat',context_id:contextId})});
   if(response.status===401&&retry){await sessionToken(true);return callEndpoint(question,contextId,false)}
   if(!response.ok)throw new Error(`endpoint_${response.status}`);
   const data=await response.json();
-  if(data.session_token)write(sessionStorage,SESSION_KEY,{token:data.session_token,version:data.technical?.version||'gate6'});
+  if(data.session_token)write(sessionStorage,SESSION_KEY,{token:data.session_token,version:data.technical?.version||'gate7'});
   return data;
  }finally{clearTimeout(timer)}
 }
 
 async function generatedSend(question){
- if(busy||!question.trim())return;
+ if(!question.trim())return;
+ const guardApi=window.ICLUB_DEMO_GATE7;
+ const decision=guardApi?.guard?.(question);
+ if(decision?.blocked){guardApi.handleBlocked(question,decision);return}
+ if(busy)return;
  busy=true;
  const send=$('demo-ai-send');if(send)send.disabled=true;
- const contextId=nextContextId;nextContextId='demo_subject_chat';
+ const requestedContext=nextContextId;nextContextId='demo_subject_chat';
+ const contextId=guardApi?.contextIdFor?.(question,requestedContext)||requestedContext;
  appendUser(question);showLoading();
  const key=cacheKey(question,contextId);const cache=cacheState();
  try{
@@ -154,6 +175,10 @@ async function generatedSend(question){
    payload={...cache.ai_cache[key],mode:'cached',usage:{...cache.ai_cache[key].usage,model_called:false,charged:false},technical:{...cache.ai_cache[key].technical,cache_hit:true,latency_ms:0}};
   }else{
    payload=await callEndpoint(question,contextId);
+   if(payload.mode==='blocked'){
+    guardApi?.handleBlocked?.(question,{blocked:true,reason:payload.safety?.guard_reason||'server_guard',matchedQuestionId:payload.safety?.matched_question_id||null,signals:payload.safety?.signals||{},version:payload.technical?.guard_version||'server'});
+    return;
+   }
    if(payload.mode==='generated'){
     cache.ai_cache[key]={...payload,session_token:undefined,mode:'generated'};saveCache(cache);
    }
@@ -230,5 +255,5 @@ document.addEventListener('click',event=>{
 });
 
 hydrateCards();scheduleDecorate(180);
-window.ICLUB_DEMO_GATE6={sendGenerated:generatedSend,cache:()=>cacheState().ai_cache,clearCache:()=>saveCache({...cacheState(),ai_cache:{}}),health:()=>fetch('/api/diagnostic-ai').then(response=>response.json())};
+window.ICLUB_DEMO_GATE6={sendGenerated:generatedSend,scrollLatest:scrollLatestAnswer,cache:()=>cacheState().ai_cache,clearCache:()=>saveCache({...cacheState(),ai_cache:{}}),health:()=>fetch('/api/diagnostic-ai').then(response=>response.json())};
 })();
