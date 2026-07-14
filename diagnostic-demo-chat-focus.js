@@ -74,9 +74,10 @@ function loadScript(src,version){
  return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=`${src}?v=${version}`;script.dataset.demoSrc=src;script.onload=resolve;script.onerror=reject;document.body.appendChild(script)});
 }
 function loadFinalAssets(){
- if(!document.querySelector('link[data-gate8-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='diagnostic-demo-gate8.css?v=gate8-2';link.dataset.gate8Style='1';document.head.appendChild(link)}
- loadScript('diagnostic-demo-gate8.js','gate8-2')
+ if(!document.querySelector('link[data-gate8-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='diagnostic-demo-gate8.css?v=gate8-3';link.dataset.gate8Style='1';document.head.appendChild(link)}
+ loadScript('diagnostic-demo-gate8.js','gate8-3')
   .then(()=>loadScript('diagnostic-demo-router.js','router-1'))
+  .then(()=>loadScript('diagnostic-demo-context.js','context-1'))
   .then(()=>loadScript('diagnostic-demo-gate8-final.js','gate8-final-1'))
   .catch(()=>{});
 }
