@@ -49,6 +49,9 @@ jobs:
               node --check "$file"
           done
 
+      - name: Dynamic Pro engine tests
+        run: node tests/demo-ai-gate4-engine.test.js
+
       - name: Active Tour 5 guard tests
         run: node tests/demo-ai-gate7-guard.test.js
 
