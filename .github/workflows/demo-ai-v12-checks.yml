@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - demo-ai-v12
+  pull_request:
+    branches:
+      - demo-ai-v12-final-candidate
   workflow_dispatch:
 
 permissions:
@@ -12,7 +15,7 @@ permissions:
 jobs:
   static-and-guard-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,6 +49,9 @@ jobs:
             diagnostic-demo-stage-persist.js \
             diagnostic-demo-gate8.js \
             diagnostic-demo-gate8-final.js \
+            playwright.config.js \
+            tests/demo-ai-e2e-server.js \
+            tests/demo-ai-e2e.spec.js \
             api/_active-tour-guard.js \
             api/_diagnostic-ai-cards.js \
             api/diagnostic-ai.js \
@@ -64,3 +70,33 @@ jobs:
 
       - name: Gate 8 stage and copy tests
         run: node tests/demo-ai-gate8-stage.test.js
+
+  ten-browser-rehearsals:
+    needs: static-and-guard-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save @playwright/test@1.54.1
+          npx playwright install --with-deps chromium
+
+      - name: Run ten complete browser rehearsals
+        run: npx playwright test tests/demo-ai-e2e.spec.js
+
+      - name: Upload rehearsal videos and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-ai-v12-browser-rehearsals
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: 14
