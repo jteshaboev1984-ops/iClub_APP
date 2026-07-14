@@ -1,0 +1,102 @@
+/* Tutor identity polish — follows the visual language of the main iClub shell. */
+.demo-student-context{
+  display:none!important;
+}
+
+.demo-ai-hub-mark,
+.demo-ai-chat-mark,
+.demo-ai-welcome-mark{
+  background:linear-gradient(180deg,#F4F8FF 0%,#E8F1FF 100%)!important;
+  border:1px solid rgba(47,111,214,.20)!important;
+  box-shadow:
+    0 7px 18px rgba(47,111,214,.10),
+    inset 0 1px 0 rgba(255,255,255,.92)!important;
+}
+
+.demo-ai-hub-mark{
+  width:44px!important;
+  height:44px!important;
+  flex-basis:44px!important;
+  border-radius:14px!important;
+}
+
+.demo-ai-chat-mark{
+  width:44px!important;
+  height:44px!important;
+  flex-basis:44px!important;
+  border-radius:14px!important;
+}
+
+.demo-ai-welcome-mark{
+  width:52px!important;
+  height:52px!important;
+  border-radius:17px!important;
+}
+
+.demo-ai-hub-mark img,
+.demo-ai-chat-mark img{
+  width:29px!important;
+  height:29px!important;
+  display:block;
+}
+
+.demo-ai-welcome-mark img{
+  width:32px!important;
+  height:32px!important;
+  display:block;
+}
+
+.demo-ai-chat-title-row{
+  align-items:center!important;
+  gap:12px!important;
+}
+
+.demo-ai-chat-title-copy{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:3px;
+}
+
+.demo-ai-chat-title{
+  margin:0!important;
+  line-height:1.2!important;
+}
+
+.demo-ai-chat-sub{
+  margin-top:0!important;
+  line-height:1.35!important;
+}
+
+.demo-ai-chat-plan{
+  align-self:flex-start;
+  margin-top:2px;
+}
+
+.demo-ai-chat-tabs{
+  margin-top:12px!important;
+}
+
+.demo-ai-hub-card .panel-row{
+  align-items:center!important;
+}
+
+.demo-ai-hub-copy .panel-kicker{
+  color:var(--primary);
+  letter-spacing:.04em;
+}
+
+@media(max-width:370px){
+  .demo-ai-hub-mark,
+  .demo-ai-chat-mark{
+    width:42px!important;
+    height:42px!important;
+    flex-basis:42px!important;
+  }
+
+  .demo-ai-hub-mark img,
+  .demo-ai-chat-mark img{
+    width:27px!important;
+    height:27px!important;
+  }
+}
