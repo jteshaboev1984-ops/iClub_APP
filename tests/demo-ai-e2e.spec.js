@@ -27,8 +27,12 @@ const generatedQuestion = {
   en: 'Why can a firm produce at minimum average cost while price remains above marginal cost?'
 };
 
+async function pollPage(page, evaluator, expected = true, timeout = 20_000) {
+  await expect.poll(() => page.evaluate(evaluator), { timeout }).toBe(expected);
+}
+
 async function waitForDemo(page) {
-  await page.waitForFunction(() => Boolean(
+  await pollPage(page, () => Boolean(
     window.ICLUB_DEMO_MAIN_LOCAL &&
     window.ICLUB_DEMO_GATE3 &&
     window.ICLUB_DEMO_GATE4 &&
@@ -37,7 +41,7 @@ async function waitForDemo(page) {
     window.ICLUB_DEMO_GATE7 &&
     window.ICLUB_DEMO_GATE8_FINAL &&
     window.ICLUB_DEMO_CONTEXT
-  ), null, { timeout: 20_000 });
+  ));
 }
 
 async function chooseLanguage(page, language) {
@@ -68,11 +72,10 @@ async function sendQuestion(page, question) {
 }
 
 async function waitTechnicalMode(page, mode) {
-  await page.waitForFunction(expected => {
-    try {
-      return JSON.parse(sessionStorage.getItem('iclub_demo_v12.technical') || '{}').ai?.mode === expected;
-    } catch { return false; }
-  }, mode, { timeout: 20_000 });
+  await expect.poll(async () => page.evaluate(() => {
+    try { return JSON.parse(sessionStorage.getItem('iclub_demo_v12.technical') || '{}').ai?.mode || null; }
+    catch { return null; }
+  }), { timeout: 20_000 }).toBe(mode);
 }
 
 async function openScenario(page) {
@@ -129,7 +132,7 @@ async function fullRehearsal(page, scenario) {
 
   // 11-13. Pro trajectory and dynamic evidence update from the same attempt.
   await page.locator('[data-plan="pro"]').click();
-  await page.waitForFunction(() => Boolean(document.querySelector('.demo-open-trajectory')));
+  await expect.poll(() => page.locator('.demo-open-trajectory').count(), { timeout: 20_000 }).toBe(1);
   await page.locator('.demo-open-trajectory').click();
   await expect(page.locator('#courses-pro-trajectory')).toBeVisible();
   await expect(page.locator('#courses-pro-trajectory .demo-student-context')).toContainText('Sardor');
@@ -195,17 +198,17 @@ async function fullRehearsal(page, scenario) {
   await openScenario(page);
   await expect(page.locator('#demo-active-tour-button')).toBeVisible();
   await page.locator('#demo-active-tour-button').click();
-  await page.waitForFunction(() => window.ICLUB_DEMO_GATE7.isActive() === true);
+  await expect.poll(() => page.evaluate(() => window.ICLUB_DEMO_GATE7.isActive()), { timeout: 20_000 }).toBe(true);
   await expect(page.locator('#modal-root')).toHaveAttribute('aria-hidden', 'true');
 
   await page.locator('[data-gate7-fill="exact"]').click();
   await page.locator('#demo-ai-send').click();
-  await page.waitForFunction(() => {
+  await expect.poll(async () => page.evaluate(() => {
     try {
       const tech = JSON.parse(sessionStorage.getItem('iclub_demo_v12.technical') || '{}');
       return tech.guard?.decision === 'blocked' && tech.guard?.active_tour === true;
     } catch { return false; }
-  });
+  }), { timeout: 20_000 }).toBe(true);
   await expect(page.locator('#demo-ai-chat-body .demo-ai-message.is-assistant').last()).toContainText(/не могу|cannot|bera olmayman|qila olmayman/i);
 
   await page.locator('[data-gate7-fill="theory"]').click();
@@ -232,11 +235,11 @@ async function fullRehearsal(page, scenario) {
   await openScenario(page);
   await page.locator('#demo-stage-readiness').click();
   await expect(page.locator('#demo-gate8-root')).toHaveAttribute('aria-hidden', 'false');
-  await page.waitForFunction(() => {
+  await expect.poll(async () => page.evaluate(() => {
     const provider = document.querySelector('[data-gate8-final="provider"] .demo-gate8-status');
     const guard = document.querySelector('[data-gate8-final="server-guard"] .demo-gate8-status');
-    return provider?.classList.contains('is-pass') && guard?.classList.contains('is-pass');
-  }, null, { timeout: 20_000 });
+    return Boolean(provider?.classList.contains('is-pass') && guard?.classList.contains('is-pass'));
+  }), { timeout: 20_000 }).toBe(true);
   expect(await page.locator('#demo-gate8-list .demo-gate8-status.is-fail').count()).toBe(0);
   const warningKeys = await page.locator('#demo-gate8-list .demo-gate8-status.is-warn').evaluateAll(nodes => nodes.map(node => node.closest('[data-gate8-final]')?.dataset.gate8Final).filter(Boolean));
   expect(warningKeys.every(key => key === 'video')).toBe(true);
