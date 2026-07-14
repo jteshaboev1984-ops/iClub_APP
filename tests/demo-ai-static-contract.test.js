@@ -85,7 +85,14 @@ assert(endpoint.includes("const MAX_QUESTION = 500"), 'Server prompt length limi
 assert(endpoint.includes('one_active_request_per_session'), 'Server must enforce one active request per session');
 assert(endpoint.includes('DEMO_AI_GENERATED_ENABLED'), 'Emergency generated-AI flag is required');
 assert(endpoint.includes('evaluateActiveTourGuard'), 'Server-side active-tour guard is required');
+assert(endpoint.includes('SENSITIVE_INTENT'), 'Instruction-disclosure prompts must be blocked before model call');
+assert(endpoint.includes('instruction_disclosure_not_supported'), 'Prompt-injection refusal mode is required');
+assert(endpoint.includes('plan_ignored: true'), 'The endpoint must explicitly ignore client plan claims');
 assert(!/supabase/i.test(endpoint), 'AI endpoint must not access Supabase');
 assert(!/\$\{plan\}/.test(endpoint), 'Server cache must not split the same base answer by plan');
+
+const serverCards = require('../api/_diagnostic-ai-cards');
+assert(Array.isArray(serverCards) && serverCards.length >= 10, 'Server retrieval cards must exist');
+assert(serverCards.every(card => ['ru', 'uz', 'en'].every(language => card.facts?.[language])), 'Server retrieval cards must contain RU/UZ/EN facts');
 
 console.log('Demo AI static contract checks passed.');
