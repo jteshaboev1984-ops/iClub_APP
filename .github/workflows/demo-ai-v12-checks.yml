@@ -61,3 +61,6 @@ jobs:
 
       - name: Specification contract tests
         run: node tests/demo-ai-static-contract.test.js
+
+      - name: Gate 8 stage and copy tests
+        run: node tests/demo-ai-gate8-stage.test.js
