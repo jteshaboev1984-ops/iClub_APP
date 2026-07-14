@@ -69,12 +69,19 @@ function decorateTheory(){
  const state=read(CHAT_KEY,{messages:[]});const messages=(state.messages||[]).filter(message=>message.role==='assistant');const nodes=[...document.querySelectorAll('#demo-ai-chat-body .demo-ai-message.is-assistant')];
  nodes.forEach((node,index)=>{const message=messages[index];if(message?.mode!=='theory_only')return;node.classList.add('is-theory-only-answer');const badge=node.querySelector('.demo-ai-verified span');if(badge)badge.textContent=(text[lang()]||text.ru).theory;const source=node.querySelector('.demo-ai-source span');if(source&&!source.textContent.includes((text[lang()]||text.ru).theory))source.textContent=`${(text[lang()]||text.ru).source} · ${message.source?.section||message.source?.topic||'Economics'}`})
 }
-function loadGate8(){
- if(!document.querySelector('link[data-gate8-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='diagnostic-demo-gate8.css?v=gate8-1';link.dataset.gate8Style='1';document.head.appendChild(link)}
- if(!document.querySelector('script[data-demo-src="diagnostic-demo-gate8.js"]')){const script=document.createElement('script');script.src='diagnostic-demo-gate8.js?v=gate8-1';script.dataset.demoSrc='diagnostic-demo-gate8.js';document.body.appendChild(script)}
+function loadScript(src,version){
+ if(document.querySelector(`script[data-demo-src="${src}"]`))return Promise.resolve();
+ return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=`${src}?v=${version}`;script.dataset.demoSrc=src;script.onload=resolve;script.onerror=reject;document.body.appendChild(script)});
+}
+function loadFinalAssets(){
+ if(!document.querySelector('link[data-gate8-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='diagnostic-demo-gate8.css?v=gate8-2';link.dataset.gate8Style='1';document.head.appendChild(link)}
+ loadScript('diagnostic-demo-gate8.js','gate8-2')
+  .then(()=>loadScript('diagnostic-demo-router.js','router-1'))
+  .then(()=>loadScript('diagnostic-demo-gate8-final.js','gate8-final-1'))
+  .catch(()=>{});
 }
 const body=$('demo-ai-chat-body');if(body)new MutationObserver(mutations=>{if(!mutations.some(item=>item.addedNodes.length||item.removedNodes.length))return;decorateTheory();scrollLatest(true)}).observe(body,{childList:true});
 document.addEventListener('click',event=>{if(event.target.closest('[data-lang],[data-chat-tab],#demo-ai-hub-card'))setTimeout(()=>{patchClientGuard();decorateTheory();scrollLatest(false)},90)});
-setTimeout(()=>{patchClientGuard();decorateTheory();scrollLatest(false);loadGate8()},220);
+setTimeout(()=>{patchClientGuard();decorateTheory();scrollLatest(false);loadFinalAssets()},220);
 window.ICLUB_DEMO_CHAT_FOCUS={scrollLatest,decorateTheory,patchClientGuard};
 })();
