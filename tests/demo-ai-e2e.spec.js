@@ -135,7 +135,7 @@ async function fullRehearsal(page, scenario) {
   await expect.poll(() => page.locator('.demo-open-trajectory').count(), { timeout: 20_000 }).toBe(1);
   await page.locator('.demo-open-trajectory').click();
   await expect(page.locator('#courses-pro-trajectory')).toBeVisible();
-  await expect(page.locator('#courses-pro-trajectory .demo-student-context')).toContainText('Sardor');
+  await expect(page.locator('#courses-pro-trajectory .demo-student-context')).toHaveAttribute('data-profile-id', 'demo-sardor');
   const dynamic = await page.evaluate(() => {
     const history = JSON.parse(localStorage.getItem('iclub_demo_v12.history') || '{}');
     const attempt = structuredClone(history.diagnostics.at(-1));
@@ -176,13 +176,14 @@ async function fullRehearsal(page, scenario) {
   expect(technical.model_call).toBe(false);
   expect(technical.quota_charged).toBe(false);
 
-  await sendQuestion(page, generatedQuestion[scenario.lang]);
+  const uniqueLiveQuestion = `${generatedQuestion[scenario.lang]} Rehearsal ${scenario.name}.`;
+  await sendQuestion(page, uniqueLiveQuestion);
   await waitTechnicalMode(page, 'generated');
   technical = await page.evaluate(() => JSON.parse(sessionStorage.getItem('iclub_demo_v12.technical') || '{}').ai);
   expect(technical.model_call).toBe(true);
   expect(technical.quota_charged).toBe(true);
 
-  await sendQuestion(page, generatedQuestion[scenario.lang]);
+  await sendQuestion(page, uniqueLiveQuestion);
   await waitTechnicalMode(page, 'cached');
   technical = await page.evaluate(() => JSON.parse(sessionStorage.getItem('iclub_demo_v12.technical') || '{}').ai);
   expect(technical.model_call).toBe(false);
