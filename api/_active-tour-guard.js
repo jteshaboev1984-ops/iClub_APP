@@ -1,6 +1,6 @@
 'use strict';
 
-const ACTIVE_TOUR_VERSION = 'economics-tour5-guard-v2';
+const ACTIVE_TOUR_VERSION = 'economics-tour5-guard-v3';
 
 const ACTIVE_TOUR_QUESTIONS = [
   {
@@ -11,7 +11,11 @@ const ACTIVE_TOUR_QUESTIONS = [
       en: 'In a labour market, the minimum wage is raised from 6 dollars to 9 dollars per hour. Labour demand falls from 800 workers to 620, while labour supply rises from 760 to 900. How many workers are unemployed at this minimum wage?'
     },
     uniqueNumbers: ['6', '9', '800', '620', '760', '900'],
-    terms: ['minimum wage', 'labour demand', 'labour supply', 'unemployed', 'минимальная заработная плата', 'спрос на труд', 'предложение труда', 'безработ', 'eng kam ish haqi', 'mehnat talabi', 'mehnat taklifi', 'ishsiz'],
+    terms: [
+      'minimum wage', 'wage floor', 'labour demand', 'labour supply', 'unemployed', 'unemployment', 'firms want', 'want jobs',
+      'минимальн заработн', 'минимальн зарплат', 'минимальн ставк', 'спрос на труд', 'предложение труда', 'безработ', 'фирмы нанимают', 'фирмы готовы нанять', 'работать хотят', 'желающих работать',
+      'eng kam ish haqi', 'minimal ish haqi', 'mehnat talabi', 'mehnat taklifi', 'ishsiz', 'ishsizlik', 'firmalar', 'yollaydi', 'ishlashni xohlaydi'
+    ],
     optionPatterns: ['140', '240', '280', '380'],
     theoryCard: 'labour_market_policy'
   },
@@ -66,9 +70,9 @@ const ACTIVE_TOUR_QUESTIONS = [
 ];
 
 const SOLUTION_INTENT = [
-  'solve', 'calculate', 'answer', 'which option', 'correct option', 'is my answer', 'am i right', 'eliminate', 'remove two', 'check my logic', 'give the letter',
-  'реши', 'посчитай', 'ответ', 'какой вариант', 'правильный вариант', 'правильно ли', 'проверь мою логику', 'убери два', 'исключи варианты', 'скажи букву',
-  'yech', 'hisobla', 'javob', 'qaysi variant', 'to‘g‘ri variant', 'togri variant', 'men to‘g‘ri', 'mantiqimni tekshir', 'ikkita variantni olib tashla', 'harfni ayt'
+  'solve', 'calculate', 'answer', 'which option', 'correct option', 'is my answer', 'am i right', 'eliminate', 'remove two', 'check my logic', 'give the letter', 'determine',
+  'реши', 'посчитай', 'ответ', 'какой вариант', 'правильный вариант', 'правильно ли', 'проверь мою логику', 'убери два', 'исключи варианты', 'скажи букву', 'определи',
+  'yech', 'hisobla', 'javob', 'qaysi variant', 'to‘g‘ri variant', 'togri variant', 'men to‘g‘ri', 'mantiqimni tekshir', 'ikkita variantni olib tashla', 'harfni ayt', 'aniqla'
 ];
 
 const INJECTION_INTENT = [
