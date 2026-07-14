@@ -58,7 +58,10 @@ function languageReady(){
  const cards=window.ICLUB_DEMO_GATE5_CARDS||[];if(cards.length<30)return false;
  return cards.slice(0,30).every(card=>['ru','uz','en'].every(code=>card.short?.[code]&&card.simple?.[code]&&card.section?.[code]));
 }
-function guardReady(){const tech=read(sessionStorage,TECH_KEY,{});return tech.guard_tests?.pass===true}
+function guardReady(){
+ const tech=read(sessionStorage,TECH_KEY,{});if(tech.guard_tests?.pass===true)return true;
+ const result=window.ICLUB_DEMO_GATE7?.runClientTests?.();return result?.pass===true;
+}
 function shellReady(){const app=$('app'),hub=$('courses-subject-hub'),mark=q('img[src="iclub-ai-mark.svg"]');return Boolean(app&&hub&&mark)}
 function mobileReady(){const app=$('app');if(!app)return false;const width=app.getBoundingClientRect().width;const composer=$('demo-ai-composer');return width<=431&&(!composer||composer.getBoundingClientRect().width<=431)}
 function databaseReady(){return qa('script[src],link[href]').every(node=>!String(node.src||node.href||'').toLowerCase().includes('supabase'))}
