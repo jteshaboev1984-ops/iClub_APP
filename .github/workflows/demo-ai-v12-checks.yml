@@ -1,0 +1,56 @@
+name: Demo AI v1.2 checks
+
+on:
+  push:
+    branches:
+      - demo-ai-v12
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-and-guard-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Syntax check demo modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            diagnostic-demo-main-local.js \
+            diagnostic-demo-gate3.js \
+            diagnostic-demo-gate4-data.js \
+            diagnostic-demo-gate4-engine.js \
+            diagnostic-demo-gate4-ui.js \
+            diagnostic-demo-gate5-cards-a.js \
+            diagnostic-demo-gate5-cards-b.js \
+            diagnostic-demo-gate5-ui-v2.js \
+            diagnostic-demo-gate6.js \
+            diagnostic-demo-gate7-data.js \
+            diagnostic-demo-gate7.js \
+            diagnostic-demo-chat-focus.js \
+            diagnostic-demo-router.js \
+            diagnostic-demo-context.js \
+            diagnostic-demo-gate8.js \
+            diagnostic-demo-gate8-final.js \
+            api/_active-tour-guard.js \
+            api/diagnostic-ai.js \
+            api/diagnostic-ai-selftest.js; do
+              node --check "$file"
+          done
+
+      - name: Active Tour 5 guard tests
+        run: node tests/demo-ai-gate7-guard.test.js
+
+      - name: Specification contract tests
+        run: node tests/demo-ai-static-contract.test.js
