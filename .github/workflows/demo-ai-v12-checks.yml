@@ -44,6 +44,7 @@ jobs:
             diagnostic-demo-gate8.js \
             diagnostic-demo-gate8-final.js \
             api/_active-tour-guard.js \
+            api/_diagnostic-ai-cards.js \
             api/diagnostic-ai.js \
             api/diagnostic-ai-selftest.js; do
               node --check "$file"
