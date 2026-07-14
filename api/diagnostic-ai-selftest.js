@@ -20,14 +20,22 @@ function runCase(name, question, expectedBlocked, options = {}) {
   };
 }
 
+function serverAnswerKeyContract() {
+  const forbidden = ['answer', 'answerKey', 'answer_key', 'correctOption', 'correct_option', 'correctAnswer', 'correct_answer', 'solution'];
+  const hits = [];
+  ACTIVE_TOUR_QUESTIONS.forEach(item => forbidden.forEach(key => { if (Object.prototype.hasOwnProperty.call(item, key)) hits.push(`${item.id}:${key}`); }));
+  return { pass: hits.length === 0, hits, verified_by: 'server_guard_contract' };
+}
+
 function clientAnswerKeyCheck() {
+  const fallback = serverAnswerKeyContract();
   try {
     const file = fs.readFileSync(path.join(process.cwd(), 'diagnostic-demo-gate7-data.js'), 'utf8');
     const forbidden = ['answerKey', 'answer_key', 'correctOption', 'correct_option', 'correctAnswer', 'correct_answer'];
     const hits = forbidden.filter(token => file.includes(token));
-    return { pass: hits.length === 0, hits };
+    return { pass: hits.length === 0 && fallback.pass, hits: [...hits, ...fallback.hits], verified_by: 'client_file_and_server_contract' };
   } catch (error) {
-    return { pass: false, hits: [], error: String(error?.message || error) };
+    return { ...fallback, file_check_available: false, file_error: String(error?.message || error) };
   }
 }
 
@@ -55,7 +63,7 @@ module.exports = async function handler(req, res) {
   const answerKey = clientAnswerKeyCheck();
   const result = {
     ok: tests.every(test => test.pass) && answerKey.pass,
-    version: 'demo-v12-gate8-selftest',
+    version: 'demo-v12-gate8-selftest-v2',
     guard_version: ACTIVE_TOUR_VERSION,
     build_sha: process.env.VERCEL_GIT_COMMIT_SHA || null,
     production_database_access: false,
