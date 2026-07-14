@@ -2,6 +2,7 @@
 const G=window.ICLUB_DEMO_GATE4_DATA;if(!G)return;
 const uniq=rows=>[...new Set((rows||[]).filter(Boolean))];
 const currentQuestionMap=()=>window.ICLUB_DEMO_V12_DATA?.questions||[];
+const profileId=()=>window.ICLUB_DEMO_V12_DATA?.profile?.id||'demo-sardor';
 const normalizeAttempt=a=>({
  id:String(a?.id||'current'),kind:'diagnostic',score:Number(a?.score||0),total:Number(a?.total||currentQuestionMap().length),date:a?.date||null,seconds:Number(a?.seconds||0),
  answers:(a?.answers||[]).map((x,i)=>{
@@ -90,7 +91,7 @@ function compute(input={}){
  if(tour4Errors.length!==14)invalid.push('tour4_error_count_mismatch');
  if(G.reinforcement.some(q=>q.activeTour))invalid.push('targeted_contains_active_tour');
  if(new Set(G.reinforcement.map(q=>q.id)).size!==G.reinforcement.length)invalid.push('duplicate_targeted_id');
- return {engineVersion:G.version,valid:invalid.length===0,validationErrors:invalid,profileId:'demo_sardor',historicalSummary:{attempts:histAttempts.map(a=>({id:a.id,kind:a.kind,no:a.no,score:a.score,total:a.total,date:a.date,role:a.role,coverageCount:(a.coverage||[]).length})),tour4Errors:tour4Errors.length,practice4OverlapSkills:practice4Overlap,practice4ErrorOverlapSkills:practice4ErrorOverlap,unverifiedTour4Errors:unverifiedErrors},currentAttemptSummary:{id:current.id,score:current.score,total:current.total,answered:currentAnswered,correct:current.answers.filter(x=>x.correct).length,wrong:current.answers.filter(x=>x.selected&&!x.correct).length},skills,pairs,repeatedErrors:repeated.map(x=>x.skillId),positiveSignals:improved.map(x=>x.skillId),whatCanBeConcluded:whatCan,whatCannotBeConcluded:whatCannot,targetedQuestionIds:targeted.map(x=>x.id),targetedSet:targeted,confidence,briefConclusion:brief,claimEvidence:evidenceClaims};
+ return {engineVersion:G.version,valid:invalid.length===0,validationErrors:invalid,profileId:profileId(),historicalSummary:{attempts:histAttempts.map(a=>({id:a.id,kind:a.kind,no:a.no,score:a.score,total:a.total,date:a.date,role:a.role,coverageCount:(a.coverage||[]).length})),tour4Errors:tour4Errors.length,practice4OverlapSkills:practice4Overlap,practice4ErrorOverlapSkills:practice4ErrorOverlap,unverifiedTour4Errors:unverifiedErrors},currentAttemptSummary:{id:current.id,score:current.score,total:current.total,answered:currentAnswered,correct:current.answers.filter(x=>x.correct).length,wrong:current.answers.filter(x=>x.selected&&!x.correct).length},skills,pairs,repeatedErrors:repeated.map(x=>x.skillId),positiveSignals:improved.map(x=>x.skillId),whatCanBeConcluded:whatCan,whatCannotBeConcluded:whatCannot,targetedQuestionIds:targeted.map(x=>x.id),targetedSet:targeted,confidence,briefConclusion:brief,claimEvidence:evidenceClaims};
 }
 window.ICLUB_DEMO_DIAGNOSTIC_ENGINE={version:G.version,compute,normalizeAttempt};
 })();
