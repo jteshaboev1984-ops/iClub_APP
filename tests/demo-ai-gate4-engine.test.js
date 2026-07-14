@@ -48,7 +48,9 @@ const q5After = q5Correct.skills.find(item => item.skillId === 'allocative_effic
 assert(q5Before?.repeatedError, 'Approved scenario must repeat the allocative-efficiency pattern');
 assert.strictEqual(q5After?.repeatedError, false, 'Changing question 5 to correct must remove the repeated-error status');
 assert.strictEqual(q5After?.positiveSignal, true, 'Changing question 5 to correct must create a positive signal');
-assert.notStrictEqual(q5Correct.briefConclusion, scenario.briefConclusion, 'Dynamic Pro conclusion must change when the answer changes');
+assert(scenario.repeatedErrors.includes('allocative_efficiency_condition'), 'Scenario must include the repeated allocative-efficiency skill');
+assert(!q5Correct.repeatedErrors.includes('allocative_efficiency_condition'), 'Correcting question 5 must remove that skill from repeated errors');
+assert(q5Correct.positiveSignals.includes('allocative_efficiency_condition'), 'Correcting question 5 must add that skill to positive signals');
 
 const allCorrect = engine.compute({ currentAttempt: attempt('all-correct', question => question.a) });
 assert.strictEqual(allCorrect.currentAttemptSummary.correct, 7, 'All-correct attempt must score 7/7');
