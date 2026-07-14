@@ -53,20 +53,17 @@ async function completeDiagnosis(page) {
   await expect(page.locator('#courses-practice-start')).toBeVisible();
   await page.locator('#practice-restart-btn').click();
   await expect(page.locator('#courses-practice-quiz')).toBeVisible();
-
   for (let index = 0; index < 7; index += 1) {
     await page.evaluate(() => window.ICLUB_DEMO_GATE3.selectDemoAnswer());
     await expect(page.locator('#practice-submit-btn')).toBeEnabled();
     await page.locator('#practice-submit-btn').click();
   }
-
   await expect(page.locator('#courses-practice-result')).toBeVisible();
   await expect(page.locator('#practice-result-meta')).not.toHaveText('—');
 }
 
 async function sendQuestion(page, question) {
-  const input = page.locator('#demo-ai-input');
-  await input.fill(question);
+  await page.locator('#demo-ai-input').fill(question);
   await page.locator('#demo-ai-send').click();
 }
 
@@ -90,9 +87,7 @@ async function fullRehearsal(page, scenario) {
   const forbiddenRequests = [];
   page.on('pageerror', error => pageErrors.push(String(error?.message || error)));
   page.on('requestfailed', request => failedRequests.push(`${request.method()} ${request.url()} ${request.failure()?.errorText || ''}`));
-  page.on('request', request => {
-    if (/supabase/i.test(request.url())) forbiddenRequests.push(request.url());
-  });
+  page.on('request', request => { if (/supabase/i.test(request.url())) forbiddenRequests.push(request.url()); });
   page.on('dialog', dialog => dialog.accept());
 
   await page.setViewportSize({ width: scenario.width, height: scenario.height });
@@ -105,7 +100,6 @@ async function fullRehearsal(page, scenario) {
   await expect(page.locator('[data-plan="free"]')).toHaveClass(/is-active/);
   expect(await page.evaluate(() => window.ICLUB_DEMO_GATE7.isActive())).toBe(false);
   expect(await page.evaluate(() => document.documentElement.dataset.demoProfile)).toBe('demo-sardor');
-
   const shell = await page.locator('#app').boundingBox();
   expect(shell).not.toBeNull();
   expect(shell.width).toBeLessThanOrEqual(431);
@@ -122,7 +116,7 @@ async function fullRehearsal(page, scenario) {
   await expect(page.locator('.demo-review-card').first()).toBeVisible();
   await page.locator('#practice-review-back-btn').click();
 
-  // 5-6. Plus on the same attempt and contextual review.
+  // 5-6. Plus on the same result and contextual review.
   await page.locator('[data-plan="plus"]').click();
   await expect(page.locator('[data-plan="plus"]')).toHaveClass(/is-active/);
   await expect(page.locator('#demo-plan-result')).toBeVisible();
@@ -133,7 +127,7 @@ async function fullRehearsal(page, scenario) {
   await page.locator('#topbar-back').click();
   await expect(page.locator('#courses-practice-result')).toBeVisible();
 
-  // 11-13. Pro trajectory and dynamic output change from the same attempt.
+  // 11-13. Pro trajectory and dynamic evidence update from the same attempt.
   await page.locator('[data-plan="pro"]').click();
   await page.waitForFunction(() => Boolean(document.querySelector('.demo-open-trajectory')));
   await page.locator('.demo-open-trajectory').click();
@@ -166,7 +160,7 @@ async function fullRehearsal(page, scenario) {
   await page.locator('#topbar-back').click();
   await expect(page.locator('#courses-practice-result')).toBeVisible();
 
-  // 7-10. Plus tutor: verified, live generated, then cached.
+  // 7-10. Plus tutor: verified, generated, then cache.
   await page.locator('#practice-to-subject-btn').click();
   await page.locator('[data-plan="plus"]').click();
   await expect(page.locator('#demo-ai-hub-card')).toBeVisible();
@@ -191,28 +185,28 @@ async function fullRehearsal(page, scenario) {
   expect(technical.model_call).toBe(false);
   expect(technical.cache_hit).toBe(true);
 
-  // 17. Honest fallback state.
+  // 17. Honest fallback.
   await page.locator('[data-gate6-demo="fallback"]').click();
   await page.locator('#demo-ai-send').click();
   await waitTechnicalMode(page, 'fallback');
   await expect(page.locator('#demo-ai-chat-body .is-live-fallback').last()).toBeVisible();
 
-  // 14-16. Active Tour 5: blocked task, allowed theory, technical evidence.
+  // 14-16. Active Tour 5: protected task, allowed theory and technical evidence.
   await openScenario(page);
   await expect(page.locator('#demo-active-tour-button')).toBeVisible();
   await page.locator('#demo-active-tour-button').click();
   await page.waitForFunction(() => window.ICLUB_DEMO_GATE7.isActive() === true);
-  await page.locator('#demo-close').click();
+  await expect(page.locator('#modal-root')).toHaveAttribute('aria-hidden', 'true');
 
   await page.locator('[data-gate7-fill="exact"]').click();
   await page.locator('#demo-ai-send').click();
   await page.waitForFunction(() => {
     try {
       const tech = JSON.parse(sessionStorage.getItem('iclub_demo_v12.technical') || '{}');
-      return tech.ai?.guard_decision === 'blocked_active_tour';
+      return tech.guard?.decision === 'blocked' && tech.guard?.active_tour === true;
     } catch { return false; }
   });
-  await expect(page.locator('#demo-ai-chat-body .demo-ai-message.is-assistant').last()).toContainText(/не могу|cannot|qila olmayman/i);
+  await expect(page.locator('#demo-ai-chat-body .demo-ai-message.is-assistant').last()).toContainText(/не могу|cannot|bera olmayman|qila olmayman/i);
 
   await page.locator('[data-gate7-fill="theory"]').click();
   await page.locator('#demo-ai-send').click();
@@ -222,34 +216,37 @@ async function fullRehearsal(page, scenario) {
   await openScenario(page);
   await page.locator('#demo-technical').click();
   await expect(page.locator('#demo-technical-card')).toBeVisible();
-  await expect(page.locator('#demo-technical-card')).toContainText(/blocked_active_tour|allowed_theory|Защита|Guard|Himoya/i);
+  await expect(page.locator('#demo-technical-card')).toContainText(/allowed_theory|Защита|Guard|Himoya|Theory/i);
 
-  // 18. Language change keeps the same learner, plan, attempt and chat screen.
+  // 18. Language change keeps one learner, plan, attempt and custom chat screen.
   const nextLanguage = scenario.lang === 'ru' ? 'en' : 'ru';
   await page.locator(`[data-lang="${nextLanguage}"]`).click();
-  await page.waitForTimeout(180);
+  await page.waitForTimeout(220);
   expect(await page.evaluate(() => document.documentElement.lang)).toBe(nextLanguage);
   expect(await page.evaluate(() => window.ICLUB_DEMO_MAIN_LOCAL.getState().plan)).toBe('plus');
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('iclub_demo_v12.history')).diagnostics.length)).toBeGreaterThan(0);
   await expect(page.locator('#courses-ai-chat')).toBeVisible();
   await page.locator('#demo-close').click();
 
-  // Readiness panel: runtime API, self-test, provider and layout checks must be green locally.
+  // Runtime readiness: allow the intentional reserve-video warning, but no technical failures.
   await openScenario(page);
   await page.locator('#demo-stage-readiness').click();
   await expect(page.locator('#demo-gate8-root')).toHaveAttribute('aria-hidden', 'false');
   await page.waitForFunction(() => {
-    const rows = [...document.querySelectorAll('#demo-gate8-list .demo-gate8-status')];
-    return rows.length >= 10 && !rows.some(node => node.classList.contains('is-warn'));
+    const provider = document.querySelector('[data-gate8-final="provider"] .demo-gate8-status');
+    const guard = document.querySelector('[data-gate8-final="server-guard"] .demo-gate8-status');
+    return provider?.classList.contains('is-pass') && guard?.classList.contains('is-pass');
   }, null, { timeout: 20_000 });
   expect(await page.locator('#demo-gate8-list .demo-gate8-status.is-fail').count()).toBe(0);
+  const warningKeys = await page.locator('#demo-gate8-list .demo-gate8-status.is-warn').evaluateAll(nodes => nodes.map(node => node.closest('[data-gate8-final]')?.dataset.gate8Final).filter(Boolean));
+  expect(warningKeys.every(key => key === 'video')).toBe(true);
   await page.locator('[data-gate8-close]').last().click();
 
-  // 19. Reset only the demo namespace; unrelated main-app data must remain.
+  // 19. Reset deletes only demo data; unrelated app storage remains.
   await page.evaluate(() => localStorage.setItem('main_app_e2e_sentinel', 'keep'));
   await openScenario(page);
   await page.locator('#demo-reset').click();
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(150);
   expect(await page.evaluate(() => localStorage.getItem('main_app_e2e_sentinel'))).toBe('keep');
   expect(await page.evaluate(() => window.ICLUB_DEMO_MAIN_LOCAL.getState().plan)).toBe('free');
   expect(await page.evaluate(() => window.ICLUB_DEMO_MAIN_LOCAL.getState().productionCalls)).toBe(0);
