@@ -28,10 +28,11 @@ function patchTechnical(){
   }
  },110)
 }
-function loadFinalCopy(){if(document.querySelector('script[data-demo-src="diagnostic-demo-copy-final.js"]'))return;const script=document.createElement('script');script.src='diagnostic-demo-copy-final.js?v=copy-final-1';script.dataset.demoSrc='diagnostic-demo-copy-final.js';document.body.appendChild(script)}
+function loadScript(src,version){if(document.querySelector(`script[data-demo-src="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=${version}`;script.dataset.demoSrc=src;document.body.appendChild(script)}
+function loadStageHelpers(){loadScript('diagnostic-demo-copy-final.js','copy-final-1');loadScript('diagnostic-demo-rehearsal.js','rehearsal-1')}
 function schedule(delay=0){clearTimeout(timer);timer=setTimeout(render,delay)}
 document.addEventListener('click',event=>{if(event.target.closest('[data-lang],#demo-ai-hub-card,.demo-open-trajectory,[data-trajectory-tab]'))schedule(80);if(event.target.closest('[data-demo-menu-action="technical"]'))patchTechnical()});
 const stack=$('courses-stack');if(stack)new MutationObserver(mutations=>{if(mutations.some(item=>item.addedNodes.length))schedule(30)}).observe(stack,{childList:true,subtree:true});
-schedule(220);loadFinalCopy();
+schedule(220);loadStageHelpers();
 window.ICLUB_DEMO_CONTEXT={render,profileId:D.profile.id};
 })();
