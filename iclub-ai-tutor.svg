@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title desc">
+  <title id="title">iClub AI tutor</title>
+  <desc id="desc">Открытая книга с небольшой интеллектуальной искрой</desc>
+  <path d="M7.8 14.3c5.6-.8 10.2.5 13.7 3.7v20.1c-3.6-2.7-8-3.8-13.7-3.1V14.3Z" fill="#F7FAFF" stroke="#2F6FD6" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M40.2 14.3c-5.6-.8-10.2.5-13.7 3.7v20.1c3.6-2.7 8-3.8 13.7-3.1V14.3Z" fill="#F7FAFF" stroke="#2F6FD6" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M24 17.2v21.1" fill="none" stroke="#2F6FD6" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M12.2 21.2c2.6-.1 4.7.5 6.5 1.7M12.2 26c2.6-.1 4.7.5 6.5 1.7M35.8 21.2c-2.6-.1-4.7.5-6.5 1.7M35.8 26c-2.6-.1-4.7.5-6.5 1.7" fill="none" stroke="#8DB2EE" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M34.8 7.3v6.4M31.6 10.5H38M32.5 8.2l4.6 4.6M37.1 8.2l-4.6 4.6" fill="none" stroke="#2F6FD6" stroke-width="2" stroke-linecap="round"/>
+</svg>
