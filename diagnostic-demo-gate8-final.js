@@ -60,7 +60,7 @@ function render(){
   row('responsive',t().responsive,t().responsiveSub,cssContract()),
   row('languages-full',t().languages,t().languagesSub,languageContract()),
   row('build',t().build,t().manual,Boolean(selftest?.build_sha),build),
-  row('video',t().video,t().videoSub,videoDone())
+  row('video',t().video,t().videoSub,videoDone()?true:null)
  ];
  finalRows.forEach(item=>list.appendChild(item));
  let button=$('demo-gate8-video');if(!button){button=document.createElement('button');button.type='button';button.className='btn';button.id='demo-gate8-video';$('demo-gate8-add-run')?.insertAdjacentElement('beforebegin',button)}button.textContent=videoDone()?t().unmarkVideo:t().markVideo;
