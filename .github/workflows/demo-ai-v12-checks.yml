@@ -41,6 +41,7 @@ jobs:
             diagnostic-demo-chat-focus.js \
             diagnostic-demo-router.js \
             diagnostic-demo-context.js \
+            diagnostic-demo-copy-final.js \
             diagnostic-demo-gate8.js \
             diagnostic-demo-gate8-final.js \
             api/_active-tour-guard.js \
