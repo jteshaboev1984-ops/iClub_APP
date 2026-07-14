@@ -39,6 +39,7 @@ const diagnosticAi = require('../api/diagnostic-ai');
 const diagnosticSelftest = require('../api/diagnostic-ai-selftest');
 const root = path.resolve(__dirname, '..');
 const port = Number(process.env.PORT || 4173);
+let apiRequestCounter = 0;
 
 const mime = {
   '.html': 'text/html; charset=utf-8',
@@ -77,6 +78,8 @@ function parseBody(req) {
 
 async function runHandler(handler, req, res) {
   try {
+    apiRequestCounter += 1;
+    req.headers['x-forwarded-for'] = `198.51.100.${(apiRequestCounter % 200) + 1}`;
     if (req.method !== 'GET' && req.method !== 'HEAD') req.body = await parseBody(req);
     await handler(req, res);
   } catch (error) {
