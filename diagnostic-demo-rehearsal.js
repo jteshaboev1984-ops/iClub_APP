@@ -1,12 +1,13 @@
 (()=>{'use strict';
 const P='iclub_demo_v12.';
 const TECH_KEY=P+'technical';
+const STAGE_KEY=P+'stage';
 const $=id=>document.getElementById(id);
 const read=(store,key,fallback)=>{try{return JSON.parse(store.getItem(key)||'')??fallback}catch{return fallback}};
 const write=(store,key,value)=>{try{store.setItem(key,JSON.stringify(value))}catch{}};
 const lang=()=>['ru','uz','en'].includes(document.documentElement.lang)?document.documentElement.lang:(read(localStorage,P+'state',{}).lang||'ru');
 const C={
- ru:{title:'Полный прогон demo',sub:'Один прогон засчитывается только после прохождения всех 19 шагов.',progress:(n,total)=>`${n} из ${total} шагов`,open:'Открыть чек-лист прогона',reset:'Сбросить текущий прогон',finish:'Завершить и засчитать',close:'Закрыть',confirm:'Сбросить отметки текущего прогона?',done:'Полный прогон засчитан.',steps:[
+ ru:{title:'Полный прогон demo',sub:'Один прогон засчитывается только после прохождения всех 19 шагов.',progress:(n,total)=>`${n} из ${total} шагов`,open:'Открыть чек-лист прогона',reset:'Сбросить текущий прогон',finish:'Завершить и засчитать',confirm:'Сбросить отметки текущего прогона?',done:'Полный прогон засчитан.',steps:[
   'Открыть demo и проверить Subject Hub Free.',
   'Открыть «Сценарий» и убедиться, что активный тур выключен.',
   'Открыть диагностику. При необходимости использовать «Демо-ответ», затем вручную нажимать «Ответить».',
@@ -27,7 +28,7 @@ const C={
   'Сменить язык и проверить сохранение тарифа, попытки и текущего экрана.',
   'Выполнить reset и убедиться, что удалены только локальные demo-данные.'
  ]},
- uz:{title:'Demo to‘liq sinovi',sub:'Sinov faqat 19 qadamning barchasi bajarilgandan keyin hisoblanadi.',progress:(n,total)=>`${total} qadamdan ${n} tasi`,open:'Sinov chek-listini ochish',reset:'Joriy sinovni tiklash',finish:'Yakunlash va hisoblash',close:'Yopish',confirm:'Joriy sinov belgilarini tiklaysizmi?',done:'To‘liq sinov hisoblandi.',steps:[
+ uz:{title:'Demo to‘liq sinovi',sub:'Sinov faqat 19 qadamning barchasi bajarilgandan keyin hisoblanadi.',progress:(n,total)=>`${total} qadamdan ${n} tasi`,open:'Sinov chek-listini ochish',reset:'Joriy sinovni tiklash',finish:'Yakunlash va hisoblash',confirm:'Joriy sinov belgilarini tiklaysizmi?',done:'To‘liq sinov hisoblandi.',steps:[
   'Demo ni oching va Free Subject Hub ni tekshiring.',
   '«Ssenariy»ni oching va faol tur o‘chiq ekanini tekshiring.',
   'Diagnostikani oching. Kerak bo‘lsa «Demo javob»dan foydalaning, keyin «Javob berish»ni qo‘lda bosing.',
@@ -48,7 +49,7 @@ const C={
   'Tilni o‘zgartirib, tarif, urinish va joriy ekran saqlanishini tekshiring.',
   'Reset ni bajaring va faqat lokal demo ma’lumotlari o‘chirilganini tekshiring.'
  ]},
- en:{title:'Full demo rehearsal',sub:'A run counts only after all 19 steps are completed.',progress:(n,total)=>`${n} of ${total} steps`,open:'Open rehearsal checklist',reset:'Reset current rehearsal',finish:'Finish and count run',close:'Close',confirm:'Reset all marks in the current rehearsal?',done:'Full rehearsal counted.',steps:[
+ en:{title:'Full demo rehearsal',sub:'A run counts only after all 19 steps are completed.',progress:(n,total)=>`${n} of ${total} steps`,open:'Open rehearsal checklist',reset:'Reset current rehearsal',finish:'Finish and count run',confirm:'Reset all marks in the current rehearsal?',done:'Full rehearsal counted.',steps:[
   'Open the demo and check the Free Subject Hub.',
   'Open Scenario and confirm that Active Tour is off.',
   'Open diagnosis. Use Demo answer when needed, then press Answer manually.',
@@ -73,11 +74,13 @@ const C={
 const t=()=>C[lang()]||C.ru;
 let open=false;
 
-function tech(){return read(sessionStorage,TECH_KEY,{})}
-function current(){const value=tech().gate8_rehearsal_current;return{done:Array.isArray(value?.done)?value.done.filter(Number.isInteger):[]}}
-function saveCurrent(value){write(sessionStorage,TECH_KEY,{...tech(),gate8_rehearsal_current:value})}
+function stage(){const value=read(sessionStorage,STAGE_KEY,{});return{runs:Math.max(0,Math.min(10,Number(value.runs||0))),current:value.current||{done:[]},video:!!value.video,lastCompleted:value.lastCompleted||null}}
+function saveStage(value){write(sessionStorage,STAGE_KEY,{...stage(),...value});mirrorTechnical()}
+function mirrorTechnical(){const value=stage(),tech=read(sessionStorage,TECH_KEY,{});write(sessionStorage,TECH_KEY,{...tech,gate8_runs:value.runs,gate8_rehearsal_current:value.current,gate8_last_completed_run:value.lastCompleted})}
+function current(){const value=stage().current;return{done:Array.isArray(value?.done)?value.done.filter(Number.isInteger):[]}}
+function saveCurrent(value){saveStage({current:value})}
 function toast(message){const node=$('toast');if(!node)return;node.textContent=message;node.classList.add('is-show');setTimeout(()=>node.classList.remove('is-show'),2200)}
-function ensureStyle(){if(document.querySelector('link[data-rehearsal-style]'))return;const link=document.createElement('link');link.rel='stylesheet';link.href='diagnostic-demo-rehearsal.css?v=rehearsal-1';link.dataset.rehearsalStyle='1';document.head.appendChild(link)}
+function ensureStyle(){if(document.querySelector('link[data-rehearsal-style]'))return;const link=document.createElement('link');link.rel='stylesheet';link.href='diagnostic-demo-rehearsal.css?v=rehearsal-2';link.dataset.rehearsalStyle='1';document.head.appendChild(link)}
 function ensureRoot(){
  let root=$('demo-rehearsal-root');if(root)return root;
  root=document.createElement('div');root.id='demo-rehearsal-root';root.className='demo-rehearsal-root';root.setAttribute('aria-hidden','true');
@@ -92,16 +95,16 @@ function ensureRoot(){
 }
 function patchOpenButton(){const button=$('demo-gate8-add-run');if(button)button.textContent=t().open}
 function render(){
- const root=ensureRoot();const copy=t();const state=current();const done=new Set(state.done);$('demo-rehearsal-title').textContent=copy.title;$('demo-rehearsal-sub').textContent=copy.sub;
+ mirrorTechnical();const root=ensureRoot();const copy=t();const state=current();const done=new Set(state.done);$('demo-rehearsal-title').textContent=copy.title;$('demo-rehearsal-sub').textContent=copy.sub;
  const summary=$('demo-rehearsal-summary');summary.replaceChildren();const top=document.createElement('div');top.className='demo-rehearsal-summary-top';const b=document.createElement('b');b.textContent=copy.title;const span=document.createElement('span');span.textContent=copy.progress(done.size,copy.steps.length);top.append(b,span);const progress=document.createElement('div');progress.className='demo-rehearsal-progress';const fill=document.createElement('span');fill.style.width=`${Math.round(done.size/copy.steps.length*100)}%`;progress.appendChild(fill);summary.append(top,progress);
  const list=$('demo-rehearsal-list');list.replaceChildren();copy.steps.forEach((label,index)=>{const button=document.createElement('button');button.type='button';button.className=`demo-rehearsal-step ${done.has(index)?'is-done':''}`;button.dataset.rehearsalStep=String(index);const check=document.createElement('span');check.className='demo-rehearsal-check';check.textContent='✓';const text=document.createElement('span');text.className='demo-rehearsal-copy';text.textContent=`${index+1}. ${label}`;button.append(check,text);list.appendChild(button)});
- $('demo-rehearsal-reset').textContent=copy.reset;$('demo-rehearsal-finish').textContent=copy.finish;$('demo-rehearsal-finish').disabled=done.size!==copy.steps.length||Number(tech().gate8_runs||0)>=10;root.setAttribute('aria-hidden',open?'false':'true');patchOpenButton();
+ $('demo-rehearsal-reset').textContent=copy.reset;$('demo-rehearsal-finish').textContent=copy.finish;$('demo-rehearsal-finish').disabled=done.size!==copy.steps.length||stage().runs>=10;root.setAttribute('aria-hidden',open?'false':'true');patchOpenButton();
 }
 function openSheet(){open=true;render()}
 function closeSheet(){open=false;ensureRoot().setAttribute('aria-hidden','true')}
-function toggleStep(index){const state=current();const done=new Set(state.done);done.has(index)?done.delete(index):done.add(index);saveCurrent({done:[...done].sort((a,b)=>a-b)});render()}
+function toggleStep(index){const done=new Set(current().done);done.has(index)?done.delete(index):done.add(index);saveCurrent({done:[...done].sort((a,b)=>a-b)});render()}
 function reset(){if(!window.confirm(t().confirm))return;saveCurrent({done:[]});render()}
-function finish(){const state=current();if(new Set(state.done).size!==t().steps.length)return;const value=tech();const runs=Math.min(10,Number(value.gate8_runs||0)+1);write(sessionStorage,TECH_KEY,{...value,gate8_runs:runs,gate8_rehearsal_current:{done:[]},gate8_last_completed_run:{run:runs,completedAt:new Date().toISOString(),steps:t().steps.length,language:lang()}});closeSheet();window.ICLUB_DEMO_GATE8?.refresh?.();toast(t().done);setTimeout(patchOpenButton,180)}
+function finish(){const done=new Set(current().done);if(done.size!==t().steps.length)return;const runs=Math.min(10,stage().runs+1);saveStage({runs,current:{done:[]},lastCompleted:{run:runs,completedAt:new Date().toISOString(),steps:t().steps.length,language:lang()}});closeSheet();window.ICLUB_DEMO_GATE8?.refresh?.();toast(t().done);setTimeout(patchOpenButton,180)}
 
 document.addEventListener('click',event=>{
  if(event.target.closest('#demo-gate8-add-run')){event.preventDefault();event.stopImmediatePropagation();openSheet();return}
@@ -109,9 +112,9 @@ document.addEventListener('click',event=>{
  const step=event.target.closest('[data-rehearsal-step]')?.dataset.rehearsalStep;if(step!==undefined){toggleStep(Number(step));return}
  if(event.target.closest('#demo-rehearsal-reset')){reset();return}
  if(event.target.closest('#demo-rehearsal-finish')){finish();return}
- if(event.target.closest('[data-lang],#demo-stage-readiness,#demo-gate8-refresh'))setTimeout(()=>{patchOpenButton();if(open)render()},100)
+ if(event.target.closest('[data-lang],#demo-stage-readiness,#demo-gate8-refresh')){mirrorTechnical();setTimeout(()=>{patchOpenButton();if(open)render()},100)}
 },true);
 
-ensureStyle();ensureRoot();setTimeout(()=>{patchOpenButton();render()},300);
-window.ICLUB_DEMO_REHEARSAL={open:openSheet,current,runCount:()=>Number(tech().gate8_runs||0)};
+ensureStyle();ensureRoot();mirrorTechnical();setTimeout(()=>{patchOpenButton();render()},300);
+window.ICLUB_DEMO_REHEARSAL={open:openSheet,current,runCount:()=>stage().runs,stage};
 })();
