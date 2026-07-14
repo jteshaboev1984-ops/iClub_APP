@@ -1,0 +1,23 @@
+/* Gate 8 — full presentation rehearsal checklist */
+.demo-rehearsal-root{position:fixed;inset:0;z-index:99;display:grid;align-items:end;visibility:hidden;pointer-events:none}
+.demo-rehearsal-root[aria-hidden="false"]{visibility:visible;pointer-events:auto}
+.demo-rehearsal-backdrop{position:absolute;inset:0;border:0;background:rgba(15,23,42,.48)}
+.demo-rehearsal-sheet{position:relative;max-height:92dvh;padding:8px 12px calc(14px + var(--safe-bottom));overflow-y:auto;overscroll-behavior:contain;border-radius:22px 22px 0 0;background:#fff;box-shadow:0 -18px 50px rgba(15,23,42,.28)}
+.demo-rehearsal-handle{width:42px;height:4px;margin:0 auto 8px;border-radius:999px;background:rgba(15,23,42,.18)}
+.demo-rehearsal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.demo-rehearsal-title{font-size:17px;font-weight:900;line-height:1.25}
+.demo-rehearsal-sub{margin-top:3px;color:var(--muted);font-size:12px;line-height:1.4}
+.demo-rehearsal-summary{margin:11px 0;padding:10px 11px;border:1px solid rgba(47,111,214,.13);border-radius:13px;background:rgba(47,111,214,.055)}
+.demo-rehearsal-summary-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.demo-rehearsal-summary b{font-size:13px}.demo-rehearsal-summary span{color:var(--primary);font-size:12px;font-weight:900}
+.demo-rehearsal-progress{height:6px;margin-top:8px;overflow:hidden;border-radius:999px;background:rgba(15,23,42,.08)}
+.demo-rehearsal-progress>span{display:block;height:100%;border-radius:inherit;background:var(--primary);transition:width .18s ease}
+.demo-rehearsal-list{display:grid;gap:7px}
+.demo-rehearsal-step{width:100%;display:grid;grid-template-columns:28px minmax(0,1fr);align-items:start;gap:9px;padding:10px 11px;border:1px solid rgba(15,23,42,.075);border-radius:13px;background:#fff;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.demo-rehearsal-step.is-done{border-color:rgba(16,185,129,.22);background:rgba(236,253,245,.75)}
+.demo-rehearsal-check{width:24px;height:24px;display:grid;place-items:center;border:1px solid rgba(15,23,42,.16);border-radius:8px;color:transparent;font-size:12px;font-weight:900}
+.demo-rehearsal-step.is-done .demo-rehearsal-check{color:#fff;border-color:#059669;background:#059669}
+.demo-rehearsal-copy{font-size:12px;line-height:1.42}
+.demo-rehearsal-actions{position:sticky;bottom:calc(-14px - var(--safe-bottom));display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px -12px calc(-14px - var(--safe-bottom));padding:10px 12px calc(14px + var(--safe-bottom));border-top:1px solid var(--border);background:rgba(255,255,255,.96);backdrop-filter:blur(12px)}
+.demo-rehearsal-actions .btn{min-height:44px;font-size:12px}
+@media(max-width:360px){.demo-rehearsal-sheet{padding-left:10px;padding-right:10px}.demo-rehearsal-actions{grid-template-columns:1fr;margin-left:-10px;margin-right:-10px;padding-left:10px;padding-right:10px}}
