@@ -42,6 +42,8 @@ jobs:
             diagnostic-demo-router.js \
             diagnostic-demo-context.js \
             diagnostic-demo-copy-final.js \
+            diagnostic-demo-rehearsal.js \
+            diagnostic-demo-stage-persist.js \
             diagnostic-demo-gate8.js \
             diagnostic-demo-gate8-final.js \
             api/_active-tour-guard.js \
