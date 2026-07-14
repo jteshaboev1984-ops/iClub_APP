@@ -1,6 +1,6 @@
 'use strict';
 
-const ACTIVE_TOUR_VERSION = 'economics-tour5-guard-v3';
+const ACTIVE_TOUR_VERSION = 'economics-tour5-guard-v4';
 
 const ACTIVE_TOUR_QUESTIONS = [
   {
@@ -12,9 +12,9 @@ const ACTIVE_TOUR_QUESTIONS = [
     },
     uniqueNumbers: ['6', '9', '800', '620', '760', '900'],
     terms: [
-      'minimum wage', 'wage floor', 'labour demand', 'labour supply', 'unemployed', 'unemployment', 'firms want', 'want jobs',
-      'минимальн заработн', 'минимальн зарплат', 'минимальн ставк', 'спрос на труд', 'предложение труда', 'безработ', 'фирмы нанимают', 'фирмы готовы нанять', 'работать хотят', 'желающих работать',
-      'eng kam ish haqi', 'minimal ish haqi', 'mehnat talabi', 'mehnat taklifi', 'ishsiz', 'ishsizlik', 'firmalar', 'yollaydi', 'ishlashni xohlaydi'
+      'minimum wage', 'wage floor', 'labour demand', 'labour supply', 'unemployed', 'unemployment', 'firms want', 'want jobs', 'minimum wage question',
+      'минимальн заработн', 'минимальн зарплат', 'минимальн ставк', 'спрос на труд', 'предложение труда', 'безработ', 'фирмы нанимают', 'фирмы готовы нанять', 'работать хотят', 'желающих работать', 'задаче про ставку', 'задачу с минимальной зарплатой',
+      'eng kam ish haqi', 'minimal ish haqi', 'mehnat talabi', 'mehnat taklifi', 'ishsiz', 'ishsizlik', 'firmalar', 'yollaydi', 'ishlashni xohlaydi', 'masalada taklifdan talabni', 'masalani yech'
     ],
     optionPatterns: ['140', '240', '280', '380'],
     theoryCard: 'labour_market_policy'
@@ -82,18 +82,10 @@ const INJECTION_INTENT = [
 ];
 
 function normalize(value) {
-  return String(value || '')
-    .toLowerCase()
-    .replace(/ё/g, 'е')
-    .replace(/ў/g, 'o')
-    .replace(/ғ/g, 'g')
-    .replace(/қ/g, 'q')
-    .replace(/ҳ/g, 'h')
-    .replace(/[’‘`]/g, "'")
-    .replace(/,/g, '.')
-    .replace(/[^a-zа-я0-9\s.=><]+/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return String(value || '').toLowerCase()
+    .replace(/ё/g, 'е').replace(/ў/g, 'o').replace(/ғ/g, 'g').replace(/қ/g, 'q').replace(/ҳ/g, 'h')
+    .replace(/[’‘`]/g, "'").replace(/,/g, '.').replace(/[^a-zа-я0-9\s.=><]+/gi, ' ')
+    .replace(/\s+/g, ' ').trim();
 }
 
 function tokenSet(value) {
@@ -119,6 +111,7 @@ function evaluateActiveTourGuard(question, options = {}) {
   const scenarioActive = options.scenarioActive === true || options.contextId === 'demo_active_tour5';
   const solutionIntent = phraseHit(text, SOLUTION_INTENT);
   const injectionIntent = phraseHit(text, INJECTION_INTENT);
+  const suspiciousIntent = Boolean(solutionIntent || injectionIntent);
   let best = null;
 
   for (const item of ACTIVE_TOUR_QUESTIONS) {
@@ -129,22 +122,23 @@ function evaluateActiveTourGuard(question, options = {}) {
     const termHits = item.terms.filter(value => text.includes(normalize(value)));
     const optionHits = item.optionPatterns.filter(value => text.includes(normalize(value)));
     const fingerprint = numberHits.length >= Math.min(2, item.uniqueNumbers.length) && termHits.length >= 1;
-    const paraphrase = (numberHits.length >= 1 && similarity >= 0.38 && termHits.length >= 1) || (Boolean(solutionIntent || injectionIntent) && similarity >= 0.52 && termHits.length >= 2);
+    const numericIntent = item.uniqueNumbers.length >= 2 && suspiciousIntent && numberHits.length >= Math.min(3, item.uniqueNumbers.length);
+    const paraphrase = (numberHits.length >= 1 && similarity >= 0.38 && termHits.length >= 1) || (suspiciousIntent && similarity >= 0.52 && termHits.length >= 2);
     const optionPattern = optionHits.length >= 2 && termHits.length >= 1;
     const activeTopic = termHits.length >= 1;
-    const score = (exact ? 100 : 0) + similarity * 30 + numberHits.length * 7 + termHits.length * 5 + optionHits.length * 3;
-    const candidate = { item, exact, similarity, numberHits, termHits, optionHits, fingerprint, paraphrase, optionPattern, activeTopic, score };
+    const score = (exact ? 100 : 0) + (numericIntent ? 45 : 0) + similarity * 30 + numberHits.length * 7 + termHits.length * 5 + optionHits.length * 3;
+    const candidate = { item, exact, similarity, numberHits, termHits, optionHits, fingerprint, numericIntent, paraphrase, optionPattern, activeTopic, score };
     if (!best || candidate.score > best.score) best = candidate;
   }
 
-  const matched = best && (best.exact || best.fingerprint || best.paraphrase || best.optionPattern);
-  const suspiciousIntent = Boolean(solutionIntent || injectionIntent);
+  const matched = best && (best.exact || best.fingerprint || best.numericIntent || best.paraphrase || best.optionPattern);
   const blocked = Boolean(matched || (best?.activeTopic && suspiciousIntent));
   const theoryAllowed = Boolean(!blocked && scenarioActive);
   let reason = 'allowed_general';
   if (blocked) {
     if (best?.exact) reason = 'exact_stem';
     else if (best?.fingerprint) reason = 'numeric_fingerprint';
+    else if (best?.numericIntent) reason = 'numeric_intent_fingerprint';
     else if (best?.optionPattern) reason = 'option_pattern';
     else if (best?.paraphrase) reason = 'paraphrase_match';
     else if (injectionIntent) reason = 'prompt_injection';
@@ -158,21 +152,12 @@ function evaluateActiveTourGuard(question, options = {}) {
     matchedQuestionId: blocked ? best?.item?.id || null : null,
     theoryCard: best?.item?.theoryCard || null,
     signals: {
-      exact: Boolean(best?.exact),
-      similarity: Number((best?.similarity || 0).toFixed(3)),
-      numbers: best?.numberHits || [],
-      terms: best?.termHits || [],
-      options: best?.optionHits || [],
-      solutionIntent,
-      injectionIntent
+      exact: Boolean(best?.exact), similarity: Number((best?.similarity || 0).toFixed(3)),
+      numbers: best?.numberHits || [], terms: best?.termHits || [], options: best?.optionHits || [],
+      solutionIntent, injectionIntent
     },
     version: ACTIVE_TOUR_VERSION
   };
 }
 
-module.exports = {
-  ACTIVE_TOUR_VERSION,
-  ACTIVE_TOUR_QUESTIONS,
-  evaluateActiveTourGuard,
-  normalize
-};
+module.exports = { ACTIVE_TOUR_VERSION, ACTIVE_TOUR_QUESTIONS, evaluateActiveTourGuard, normalize };
