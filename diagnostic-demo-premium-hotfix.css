@@ -1,0 +1,167 @@
+/* Premium pass 1.1 — contrast repair and temporary icon slots. */
+html[data-stitch-premium="1"] .practice-hero{
+  min-height:0!important;
+  padding:16px!important;
+  color:var(--premium-text)!important;
+  -webkit-text-fill-color:currentColor!important;
+  background:linear-gradient(145deg,#FFFFFF 0%,#F5F8FE 100%)!important;
+}
+html[data-stitch-premium="1"] .practice-hero-top,
+html[data-stitch-premium="1"] .practice-hero-left,
+html[data-stitch-premium="1"] .practice-hero-metrics,
+html[data-stitch-premium="1"] .practice-micro{
+  opacity:1!important;
+  visibility:visible!important;
+}
+html[data-stitch-premium="1"] .practice-hero-kicker{
+  color:var(--premium-blue)!important;
+  -webkit-text-fill-color:var(--premium-blue)!important;
+  font-size:10px!important;
+  font-weight:850!important;
+  letter-spacing:.055em!important;
+  text-transform:uppercase;
+}
+html[data-stitch-premium="1"] .practice-hero-title{
+  color:var(--premium-text)!important;
+  -webkit-text-fill-color:var(--premium-text)!important;
+  font-size:20px!important;
+  line-height:1.22!important;
+  font-weight:850!important;
+}
+html[data-stitch-premium="1"] .practice-hero-stage{
+  color:var(--premium-muted)!important;
+  -webkit-text-fill-color:var(--premium-muted)!important;
+  font-size:12px!important;
+  line-height:1.4!important;
+}
+html[data-stitch-premium="1"] .practice-hero-metrics{
+  gap:10px!important;
+  margin-top:15px!important;
+}
+html[data-stitch-premium="1"] .practice-metric{
+  min-height:74px!important;
+  padding:11px 12px!important;
+}
+html[data-stitch-premium="1"] .practice-metric-label,
+html[data-stitch-premium="1"] .practice-micro-label{
+  color:var(--premium-muted)!important;
+  -webkit-text-fill-color:var(--premium-muted)!important;
+  opacity:1!important;
+  font-size:11px!important;
+  font-weight:750!important;
+}
+html[data-stitch-premium="1"] .practice-metric-value,
+html[data-stitch-premium="1"] #practice-best-score,
+html[data-stitch-premium="1"] #practice-best-time{
+  color:var(--premium-text)!important;
+  -webkit-text-fill-color:var(--premium-text)!important;
+  opacity:1!important;
+  font-size:18px!important;
+  font-weight:900!important;
+}
+html[data-stitch-premium="1"] .practice-metric-sub,
+html[data-stitch-premium="1"] #practice-best-percent{
+  color:var(--premium-muted)!important;
+  -webkit-text-fill-color:var(--premium-muted)!important;
+  opacity:1!important;
+}
+html[data-stitch-premium="1"] .practice-micro{
+  margin-top:14px!important;
+  padding-top:12px!important;
+  border-top:1px solid rgba(15,23,42,.07)!important;
+}
+html[data-stitch-premium="1"] .practice-micro-delta{
+  color:var(--premium-blue-dark)!important;
+  -webkit-text-fill-color:var(--premium-blue-dark)!important;
+  opacity:1!important;
+  font-weight:850!important;
+}
+html[data-stitch-premium="1"] .practice-micro-bars,
+html[data-stitch-premium="1"] .practice-micro-bars>*{
+  opacity:1!important;
+  visibility:visible!important;
+}
+
+/* The final icon family will be uploaded later. Until then use a restrained branded AI monogram,
+   not the rejected generic book illustration. */
+html[data-stitch-premium="1"] .demo-ai-hub-mark,
+html[data-stitch-premium="1"] .demo-ai-chat-mark,
+html[data-stitch-premium="1"] .demo-ai-welcome-mark,
+html[data-stitch-premium="1"] .demo-compact-mark,
+html[data-stitch-premium="1"] .demo-trajectory-mark{
+  position:relative!important;
+  overflow:hidden!important;
+  color:#173B72!important;
+  background:linear-gradient(145deg,#FFFFFF 0%,#EAF2FF 100%)!important;
+}
+html[data-stitch-premium="1"] .demo-ai-hub-mark img,
+html[data-stitch-premium="1"] .demo-ai-chat-mark img,
+html[data-stitch-premium="1"] .demo-ai-welcome-mark img,
+html[data-stitch-premium="1"] .demo-compact-mark img,
+html[data-stitch-premium="1"] .demo-trajectory-mark img{
+  opacity:0!important;
+  visibility:hidden!important;
+}
+html[data-stitch-premium="1"] .demo-ai-hub-mark::before,
+html[data-stitch-premium="1"] .demo-ai-chat-mark::before,
+html[data-stitch-premium="1"] .demo-ai-welcome-mark::before,
+html[data-stitch-premium="1"] .demo-compact-mark::before,
+html[data-stitch-premium="1"] .demo-trajectory-mark::before{
+  content:"AI";
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-53%,-45%);
+  color:#173B72;
+  font-size:14px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:-.08em;
+}
+html[data-stitch-premium="1"] .demo-ai-welcome-mark::before{font-size:17px}
+html[data-stitch-premium="1"] .demo-ai-hub-mark::after,
+html[data-stitch-premium="1"] .demo-ai-chat-mark::after,
+html[data-stitch-premium="1"] .demo-ai-welcome-mark::after,
+html[data-stitch-premium="1"] .demo-compact-mark::after,
+html[data-stitch-premium="1"] .demo-trajectory-mark::after{
+  content:"";
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:8px;
+  height:8px;
+  background:var(--premium-blue);
+  clip-path:polygon(50% 0,61% 38%,100% 50%,61% 62%,50% 100%,39% 62%,0 50%,39% 38%);
+}
+html[data-stitch-premium="1"] .demo-ai-welcome-mark::after{top:10px;right:10px;width:10px;height:10px}
+
+html[data-stitch-premium="1"] .demo-ai-verified img{
+  display:none!important;
+}
+html[data-stitch-premium="1"] .demo-ai-verified::before{
+  content:"";
+  width:13px;
+  height:13px;
+  flex:0 0 13px;
+  border-radius:999px;
+  background:currentColor;
+  opacity:.12;
+}
+html[data-stitch-premium="1"] .demo-ai-verified::after{
+  content:"";
+  position:absolute;
+  width:5px;
+  height:3px;
+  margin-left:4px;
+  margin-top:-1px;
+  border-left:1.7px solid currentColor;
+  border-bottom:1.7px solid currentColor;
+  transform:rotate(-45deg);
+}
+html[data-stitch-premium="1"] .demo-ai-verified{position:relative!important}
+
+@media(max-width:370px){
+  html[data-stitch-premium="1"] .practice-hero{padding:14px!important}
+  html[data-stitch-premium="1"] .practice-hero-title{font-size:18px!important}
+  html[data-stitch-premium="1"] .practice-metric{min-height:70px!important;padding:10px!important}
+}
