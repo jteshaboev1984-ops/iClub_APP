@@ -72,6 +72,7 @@ function loadStyle(src,version,key){
 }
 function loadPremiumAssets(){
  loadStyle('diagnostic-demo-stitch-premium.css','stitch-premium-1','stitch-premium');
+ loadStyle('diagnostic-demo-premium-hotfix.css','premium-hotfix-1','premium-hotfix');
  return loadScript('diagnostic-demo-stitch-result.js','stitch-result-1').then(()=>loadScript('diagnostic-demo-stitch-premium-core.js','stitch-premium-1'));
 }
 function loadFinalAssets(){
