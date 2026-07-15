@@ -53,7 +53,8 @@ document.addEventListener('keydown',event=>{if(event.target.id!=='demo-ai-input'
 
 function scrollLatest(smooth=true){
  clearTimeout(timer);timer=setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
-  const latest=document.querySelector('#demo-ai-chat-body .demo-ai-message:last-child:not([hidden])');if(!latest)return;
+  const visible=[...document.querySelectorAll('#demo-ai-chat-body .demo-ai-message:not([hidden])')];
+  const latest=visible[visible.length-1];if(!latest)return;
   const composer=$('demo-ai-composer');const rect=latest.getBoundingClientRect();const topOffset=112;const bottomLimit=window.innerHeight-(composer?.offsetHeight||96)-12;
   if(rect.top<topOffset||rect.bottom>bottomLimit){const top=Math.max(0,window.scrollY+rect.top-topOffset);window.scrollTo({top,behavior:smooth?'smooth':'auto'})}
  })),20)
@@ -76,7 +77,8 @@ function loadPremiumAssets(){
  loadStyle('diagnostic-demo-premium-fixes.css','premium-fixes-1','premium-fixes');
  return loadScript('diagnostic-demo-stitch-result.js','stitch-result-1')
   .then(()=>loadScript('diagnostic-demo-stitch-premium-core.js','stitch-premium-2'))
-  .then(()=>loadScript('diagnostic-demo-premium-fixes.js','premium-fixes-1'));
+  .then(()=>loadScript('diagnostic-demo-premium-fixes.js','premium-fixes-2'))
+  .then(()=>loadScript('diagnostic-demo-premium-runtime.js','premium-runtime-1'));
 }
 function loadFinalAssets(){
  if(!document.querySelector('link[data-gate8-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='diagnostic-demo-gate8.css?v=gate8-3';link.dataset.gate8Style='1';document.head.appendChild(link)}
