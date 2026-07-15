@@ -1,0 +1,22 @@
+(()=>{'use strict';
+const PREFIX='iclub_demo_v12.';
+const HISTORY_KEY=PREFIX+'history';
+const $=id=>document.getElementById(id);
+const read=(store,key,fallback)=>{try{return JSON.parse(store.getItem(key)||'')??fallback}catch{return fallback}};
+const language=()=>['ru','uz','en'].includes(document.documentElement.lang)?document.documentElement.lang:(read(localStorage,PREFIX+'state',{}).lang||'ru');
+const localize=value=>value?.[language()]??value?.ru??value?.en??value?.uz??value??'';
+const el=(tag,cls,text)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined&&text!==null)node.textContent=text;return node};
+const append=(parent,...children)=>{children.filter(Boolean).forEach(child=>parent.appendChild(child));return parent};
+const COPY={
+ ru:{title:'Результат этой попытки',good:'Хорошая база. Теперь важно закрепить различия между близкими понятиями.',mid:'Основа есть, но несколько близких понятий пока смешиваются.',low:'Сначала закрепите ключевые определения, затем повторите диагностику.',correct:'Верно',time:'Время',attention:'Требует внимания'},
+ uz:{title:'Ushbu urinish natijasi',good:'Yaxshi asos. Endi yaqin tushunchalar farqini mustahkamlash kerak.',mid:'Asos bor, ammo ayrim yaqin tushunchalar hali aralashmoqda.',low:'Avval asosiy ta’riflarni mustahkamlang, keyin diagnostikani takrorlang.',correct:'To‘g‘ri',time:'Vaqt',attention:'E’tibor talab qiladi'},
+ en:{title:'This attempt',good:'A good base. Now reinforce the differences between close concepts.',mid:'The foundation is there, but several close concepts are still mixed.',low:'Reinforce the key definitions first, then repeat the diagnosis.',correct:'Correct',time:'Time',attention:'Needs attention'}
+};
+const t=()=>COPY[language()]||COPY.ru;
+function latestAttempt(){const history=read(localStorage,HISTORY_KEY,{diagnostics:[]});const rows=Array.isArray(history.diagnostics)?history.diagnostics:[];return rows[rows.length-1]||null}
+function secondsText(value){const seconds=Math.max(0,Number(value||0));const min=Math.floor(seconds/60),sec=Math.floor(seconds%60);return `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`}
+function sentence(percent){return percent>=75?t().good:percent>=45?t().mid:t().low}
+function weakTopics(attempt){const questions=window.ICLUB_DEMO_V12_DATA?.questions||[];const counts=new Map();(attempt?.answers||[]).filter(answer=>!answer.correct).forEach(answer=>{const question=questions.find(item=>item.id===answer.questionId);const topic=localize(question?.topic)||localize(question?.skill)||'';if(topic)counts.set(topic,(counts.get(topic)||0)+1)});return [...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,2)}
+function render(){const screen=$('courses-practice-result');if(!screen||screen.hidden)return;const attempt=latestAttempt();if(!attempt)return;let overview=screen.querySelector('.premium-result-overview');if(!overview){overview=el('section','premium-result-overview');$('practice-result-meta')?.parentElement?.insertAdjacentElement('afterend',overview)}const answers=Array.isArray(attempt.answers)?attempt.answers:[];const score=Number(attempt.score??answers.filter(item=>item.correct).length);const total=Number(attempt.total??answers.length??7)||7;const percent=Math.round(score/Math.max(1,total)*100);const seconds=Number(attempt.seconds??attempt.durationSeconds??attempt.elapsedSeconds??0);overview.style.setProperty('--score-angle',`${Math.max(0,Math.min(360,percent*3.6))}deg`);overview.replaceChildren();const ring=el('div','premium-score-ring');append(ring,append(el('span'),el('b','',`${score}/${total}`),el('small','',`${percent}%`)));const copy=append(el('div','premium-result-copy'),el('b','',t().title),el('p','',sentence(percent)));const top=append(el('div','premium-result-top'),ring,copy);const stats=el('div','premium-result-stats');append(stats,append(el('div','premium-result-stat'),el('span','',t().correct),el('b','',String(score))),append(el('div','premium-result-stat'),el('span','',t().time),el('b','',secondsText(seconds))));append(overview,top,stats);const weak=weakTopics(attempt);if(weak.length){const list=el('div','premium-weak-topics');weak.forEach(([topic,count])=>append(list,append(el('div','premium-weak-row'),el('b','',topic),el('span','',`${t().attention} · ${count}`))));overview.appendChild(list)}const meta=$('practice-result-meta');if(meta)meta.hidden=true}
+window.ICLUB_DEMO_STITCH_RESULT={render};setTimeout(render,220);
+})();
