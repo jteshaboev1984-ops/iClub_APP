@@ -48,15 +48,8 @@ function routeActiveTourSend(event,question){
  return true;
 }
 
-document.addEventListener('click',event=>{
- if(!event.target.closest('#demo-ai-send'))return;
- routeActiveTourSend(event,$('demo-ai-input')?.value||'');
-},true);
-
-document.addEventListener('keydown',event=>{
- if(event.target.id!=='demo-ai-input'||event.key!=='Enter'||event.shiftKey)return;
- routeActiveTourSend(event,event.target.value||'');
-},true);
+document.addEventListener('click',event=>{if(!event.target.closest('#demo-ai-send'))return;routeActiveTourSend(event,$('demo-ai-input')?.value||'')},true);
+document.addEventListener('keydown',event=>{if(event.target.id!=='demo-ai-input'||event.key!=='Enter'||event.shiftKey)return;routeActiveTourSend(event,event.target.value||'')},true);
 
 function scrollLatest(smooth=true){
  clearTimeout(timer);timer=setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
@@ -73,12 +66,21 @@ function loadScript(src,version){
  if(document.querySelector(`script[data-demo-src="${src}"]`))return Promise.resolve();
  return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=`${src}?v=${version}`;script.dataset.demoSrc=src;script.onload=resolve;script.onerror=reject;document.body.appendChild(script)});
 }
+function loadStyle(src,version,key){
+ if(document.querySelector(`link[data-demo-style="${key||src}"]`))return;
+ const link=document.createElement('link');link.rel='stylesheet';link.href=`${src}?v=${version}`;link.dataset.demoStyle=key||src;document.head.appendChild(link);
+}
+function loadPremiumAssets(){
+ loadStyle('diagnostic-demo-stitch-premium.css','stitch-premium-1','stitch-premium');
+ return loadScript('diagnostic-demo-stitch-result.js','stitch-result-1').then(()=>loadScript('diagnostic-demo-stitch-premium-core.js','stitch-premium-1'));
+}
 function loadFinalAssets(){
  if(!document.querySelector('link[data-gate8-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='diagnostic-demo-gate8.css?v=gate8-3';link.dataset.gate8Style='1';document.head.appendChild(link)}
  loadScript('diagnostic-demo-gate8.js','gate8-3')
   .then(()=>loadScript('diagnostic-demo-router.js','router-1'))
   .then(()=>loadScript('diagnostic-demo-context.js','context-1'))
   .then(()=>loadScript('diagnostic-demo-gate8-final.js','gate8-final-1'))
+  .then(()=>loadPremiumAssets())
   .catch(()=>{});
 }
 const body=$('demo-ai-chat-body');if(body)new MutationObserver(mutations=>{if(!mutations.some(item=>item.addedNodes.length||item.removedNodes.length))return;decorateTheory();scrollLatest(true)}).observe(body,{childList:true});
