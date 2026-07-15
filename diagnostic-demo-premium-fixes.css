@@ -1,0 +1,231 @@
+/* Premium pass 1.2 — dialogue grouping, Pro hierarchy, trend, and evidence layout. */
+html[data-stitch-premium="1"] .premium-dialog-context{
+  margin:4px 0 2px;
+  padding:10px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border:1px solid rgba(47,111,214,.11);
+  border-radius:14px;
+  background:linear-gradient(145deg,#FFFFFF,#F4F8FF);
+}
+html[data-stitch-premium="1"] .premium-dialog-context-copy{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+html[data-stitch-premium="1"] .premium-dialog-context-copy b{
+  font-size:12px;
+  line-height:1.25;
+  color:var(--premium-text);
+}
+html[data-stitch-premium="1"] .premium-dialog-context-copy small{
+  color:var(--premium-muted);
+  font-size:10px;
+  line-height:1.25;
+}
+html[data-stitch-premium="1"] .premium-dialog-history-link{
+  flex:0 0 auto;
+  min-height:34px;
+  padding:0 10px;
+  border:1px solid rgba(47,111,214,.14);
+  border-radius:10px;
+  background:#fff;
+  color:var(--premium-blue-dark);
+  font:inherit;
+  font-size:10px;
+  font-weight:850;
+  cursor:pointer;
+}
+html[data-stitch-premium="1"] .demo-ai-message[hidden]{display:none!important}
+html[data-stitch-premium="1"] .demo-ai-message.is-premium-current-turn{animation:premiumTurnIn .16s ease both}
+@keyframes premiumTurnIn{from{opacity:.3;transform:translateY(3px)}to{opacity:1;transform:none}}
+html[data-stitch-premium="1"] .premium-history-latest{
+  flex:0 0 auto;
+  padding:4px 7px;
+  border-radius:999px;
+  background:rgba(47,111,214,.08);
+  color:var(--premium-blue-dark);
+  font-size:9px;
+  font-weight:850;
+}
+html[data-stitch-premium="1"] .demo-ai-history-row.is-latest{
+  border-color:rgba(47,111,214,.16)!important;
+  background:linear-gradient(145deg,#FFFFFF,#F5F8FF)!important;
+}
+
+/* Free already has score, review, and recommendations. The explanatory plan card is redundant. */
+html[data-stitch-premium="1"] #demo-plan-result.premium-hide-free-result{
+  display:none!important;
+}
+
+/* Pro result: plan is already selected above, so remove the duplicate Pro badge. */
+html[data-stitch-premium="1"] .demo-engine-compact .demo-plan-result-badge{
+  display:none!important;
+}
+html[data-stitch-premium="1"] .demo-engine-compact .demo-compact-head{
+  grid-template-columns:auto minmax(0,1fr)!important;
+}
+html[data-stitch-premium="1"] .demo-engine-compact .premium-inline-reliability{
+  margin-top:11px;
+  padding:8px 10px;
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border:1px solid rgba(15,23,42,.06);
+  border-radius:12px;
+  background:rgba(255,255,255,.72);
+}
+html[data-stitch-premium="1"] .demo-engine-compact .premium-inline-reliability span{
+  font-size:10px!important;
+  color:var(--premium-muted)!important;
+}
+html[data-stitch-premium="1"] .demo-engine-compact .premium-inline-reliability b{
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(34,197,94,.09);
+  font-size:10px!important;
+}
+html[data-stitch-premium="1"] .demo-engine-compact .demo-compact-footer.is-action-only{
+  display:block!important;
+  margin-top:11px!important;
+}
+html[data-stitch-premium="1"] .demo-engine-compact .demo-open-trajectory{
+  width:100%!important;
+  min-height:48px!important;
+  border-radius:14px!important;
+  font-size:13px!important;
+}
+
+/* Actual progress trend. Zero remains zero, but still has a visible baseline marker. */
+html[data-stitch-premium="1"] .practice-micro-bars.premium-trend-bars{
+  height:82px;
+  margin-top:9px;
+  padding:7px 5px 0;
+  display:flex!important;
+  align-items:flex-end;
+  justify-content:space-around;
+  gap:8px;
+  border-radius:12px;
+  background:rgba(255,255,255,.65);
+  border:1px solid rgba(15,23,42,.055);
+}
+html[data-stitch-premium="1"] .premium-trend-item{
+  min-width:0;
+  flex:1;
+  height:100%;
+  display:grid;
+  grid-template-rows:12px 1fr 13px;
+  align-items:end;
+  justify-items:center;
+  gap:3px;
+}
+html[data-stitch-premium="1"] .premium-trend-value{
+  color:var(--premium-text);
+  font-size:9px;
+  line-height:1;
+  font-weight:850;
+}
+html[data-stitch-premium="1"] .premium-trend-track{
+  width:min(24px,68%);
+  height:100%;
+  display:flex;
+  align-items:flex-end;
+  overflow:hidden;
+  border-radius:8px 8px 4px 4px;
+  background:rgba(47,111,214,.075);
+}
+html[data-stitch-premium="1"] .premium-trend-fill{
+  width:100%;
+  min-height:3px;
+  border-radius:inherit;
+  background:linear-gradient(180deg,#4A86E8,#2F6FD6);
+}
+html[data-stitch-premium="1"] .premium-trend-fill.is-zero{
+  height:3px!important;
+  background:rgba(100,116,139,.42);
+}
+html[data-stitch-premium="1"] .premium-trend-label{
+  color:var(--premium-muted);
+  font-size:8px;
+  line-height:1;
+  font-weight:750;
+}
+
+/* Skill evidence is a dedicated near-full-height panel inside the 430 px app shell. */
+html[data-stitch-premium="1"] .demo-insight-sheet-root{
+  justify-items:center;
+}
+html[data-stitch-premium="1"] .demo-insight-sheet{
+  width:min(100%,430px)!important;
+  min-height:min(66dvh,620px);
+  max-height:min(88dvh,780px)!important;
+  display:flex;
+  flex-direction:column;
+  border-radius:24px 24px 0 0!important;
+}
+html[data-stitch-premium="1"] .demo-insight-sheet-head{
+  position:relative;
+  flex:0 0 auto;
+  padding:12px 14px 11px!important;
+  background:#fff;
+}
+html[data-stitch-premium="1"] .demo-insight-sheet-head>div:first-child{
+  min-width:0;
+  padding-right:4px;
+}
+html[data-stitch-premium="1"] .premium-sheet-eyebrow{
+  margin-bottom:3px;
+  color:var(--premium-blue);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+}
+html[data-stitch-premium="1"] .premium-sheet-status{
+  display:inline-flex;
+  margin-top:7px;
+  padding:5px 8px;
+  border-radius:999px;
+  font-size:9px;
+  font-weight:900;
+}
+html[data-stitch-premium="1"] .premium-sheet-status.is-error{color:#B91C1C;background:rgba(239,68,68,.09)}
+html[data-stitch-premium="1"] .premium-sheet-status.is-positive,
+html[data-stitch-premium="1"] .premium-sheet-status.is-confirmed{color:#15803D;background:rgba(34,197,94,.10)}
+html[data-stitch-premium="1"] .premium-sheet-status.is-check{color:#B45309;background:rgba(245,158,11,.10)}
+html[data-stitch-premium="1"] .premium-sheet-status.is-muted{color:#64748B;background:rgba(100,116,139,.10)}
+html[data-stitch-premium="1"] .demo-insight-sheet-body{
+  flex:1 1 auto;
+  max-height:none!important;
+  padding:13px 14px calc(20px + var(--safe-bottom))!important;
+}
+html[data-stitch-premium="1"] .demo-insight-sheet.is-skill-detail .demo-sheet-status{
+  display:none!important;
+}
+html[data-stitch-premium="1"] .demo-insight-sheet.is-skill-detail .demo-sheet-reason{
+  padding:12px!important;
+  background:linear-gradient(145deg,#FFFFFF,#F3F7FF)!important;
+}
+html[data-stitch-premium="1"] .demo-insight-sheet.is-skill-detail .demo-sheet-history-row{
+  min-height:58px;
+  padding:11px 12px!important;
+  border-radius:14px!important;
+}
+html[data-stitch-premium="1"] .demo-insight-sheet.is-skill-detail .demo-sheet-history-row b{
+  font-size:12px!important;
+}
+html[data-stitch-premium="1"] .demo-insight-sheet.is-skill-detail .demo-sheet-history-row span,
+html[data-stitch-premium="1"] .demo-insight-sheet.is-skill-detail .demo-sheet-history-row strong{
+  font-size:10px!important;
+}
+
+@media(max-width:370px){
+  html[data-stitch-premium="1"] .premium-dialog-context{padding:9px 10px}
+  html[data-stitch-premium="1"] .premium-dialog-history-link{padding:0 8px;font-size:9px}
+  html[data-stitch-premium="1"] .demo-insight-sheet{min-height:72dvh}
+}
