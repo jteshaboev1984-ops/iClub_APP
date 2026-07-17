@@ -1,0 +1,51 @@
+/* Precision fix: visible zero-result trend and one real exit from the Pro plan. */
+html[data-stitch-premium="1"] .practice-micro-bars.is-flat-zero{
+  position:relative;
+  min-height:82px;
+  padding:8px 10px 0;
+  overflow:visible;
+}
+html[data-stitch-premium="1"] .practice-micro-bars.is-flat-zero::before{
+  content:"";
+  position:absolute;
+  left:17px;
+  right:17px;
+  bottom:22px;
+  height:2px;
+  border-radius:999px;
+  background:rgba(23,59,114,.24);
+}
+html[data-stitch-premium="1"] .practice-micro-bars.is-flat-zero .premium-trend-track{
+  position:relative;
+  overflow:visible;
+  background:transparent!important;
+}
+html[data-stitch-premium="1"] .practice-micro-bars.is-flat-zero .premium-trend-fill.is-zero{
+  width:12px!important;
+  height:12px!important;
+  min-height:12px!important;
+  margin:0 auto -5px;
+  border:3px solid #2F6FD6;
+  border-radius:999px!important;
+  background:#fff!important;
+  box-shadow:0 0 0 3px rgba(47,111,214,.11);
+  position:relative;
+  z-index:2;
+}
+html[data-stitch-premium="1"] .practice-micro-bars.is-flat-zero .premium-trend-value{
+  color:#0F172A!important;
+  font-size:10px!important;
+}
+html[data-stitch-premium="1"] .practice-micro-bars.is-flat-zero .premium-trend-label{
+  color:#64748B!important;
+  font-size:9px!important;
+}
+html[data-stitch-premium="1"] .premium-plan-practice-btn{
+  grid-column:1/-1;
+  width:100%;
+  min-height:48px!important;
+  margin-top:2px;
+  border-radius:14px!important;
+  font-size:12px!important;
+  box-shadow:0 9px 20px rgba(47,111,214,.18);
+}
