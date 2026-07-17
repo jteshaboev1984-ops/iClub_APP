@@ -75,10 +75,12 @@ function loadPremiumAssets(){
  loadStyle('diagnostic-demo-stitch-premium.css','stitch-premium-1','stitch-premium');
  loadStyle('diagnostic-demo-premium-hotfix.css','premium-hotfix-1','premium-hotfix');
  loadStyle('diagnostic-demo-premium-fixes.css','premium-fixes-1','premium-fixes');
+ loadStyle('diagnostic-demo-flow-refinement.css','flow-refinement-1','flow-refinement');
  return loadScript('diagnostic-demo-stitch-result.js','stitch-result-1')
   .then(()=>loadScript('diagnostic-demo-stitch-premium-core.js','stitch-premium-2'))
   .then(()=>loadScript('diagnostic-demo-premium-fixes.js','premium-fixes-2'))
-  .then(()=>loadScript('diagnostic-demo-premium-runtime.js','premium-runtime-1'));
+  .then(()=>loadScript('diagnostic-demo-premium-runtime.js','premium-runtime-1'))
+  .then(()=>loadScript('diagnostic-demo-flow-refinement.js','flow-refinement-1'));
 }
 function loadFinalAssets(){
  if(!document.querySelector('link[data-gate8-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='diagnostic-demo-gate8.css?v=gate8-3';link.dataset.gate8Style='1';document.head.appendChild(link)}
