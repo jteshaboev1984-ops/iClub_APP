@@ -1,0 +1,45 @@
+/* Premium flow refinement — only the ambiguous post-practice sequence. */
+html[data-stitch-premium="1"] #practice-review-open.premium-flow-first{
+  border-color:rgba(47,111,214,.22)!important;
+  background:linear-gradient(145deg,#FFFFFF 0%,#F4F8FF 100%)!important;
+}
+html[data-stitch-premium="1"] .premium-flow-order{
+  display:inline-flex;
+  align-items:center;
+  width:max-content;
+  margin:0 0 7px;
+  padding:4px 7px;
+  border-radius:999px;
+  background:rgba(47,111,214,.09);
+  color:#1E56B3;
+  font-size:9px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.02em;
+}
+html[data-stitch-premium="1"] #practice-recs-open .premium-flow-order{
+  background:rgba(100,116,139,.08);
+  color:#64748B;
+}
+html[data-stitch-premium="1"] #courses-practice-review .actions-row,
+html[data-stitch-premium="1"] #courses-practice-recs .actions-row{
+  grid-template-columns:1fr 1fr;
+}
+html[data-stitch-premium="1"] #practice-review-back-btn.primary,
+html[data-stitch-premium="1"] #practice-recs-back-btn.primary{
+  border-color:transparent;
+  background:linear-gradient(180deg,#3477E2 0%,#245FC4 100%);
+  color:#fff;
+  box-shadow:0 8px 18px rgba(47,111,214,.18);
+}
+html[data-stitch-premium="1"] #practice-review-to-subject-btn:not(.primary),
+html[data-stitch-premium="1"] #practice-recs-to-subject-btn:not(.primary){
+  border-color:rgba(15,23,42,.10);
+  background:#fff;
+  color:#0F172A;
+  box-shadow:none;
+}
+@media(max-width:370px){
+ html[data-stitch-premium="1"] #courses-practice-review .actions-row,
+ html[data-stitch-premium="1"] #courses-practice-recs .actions-row{grid-template-columns:1fr}
+}
