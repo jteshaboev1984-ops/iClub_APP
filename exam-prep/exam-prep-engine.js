@@ -173,7 +173,10 @@
     const service = serviceState(profile, mode);
     validateComponent(component);
 
-    return Object.freeze({
+    // The top-level preview view model remains mutable only so the UI can attach
+    // ephemeral render-only fields. Every academic source object inside it is frozen.
+    return {
+      lang,
       profile,
       service,
       component,
@@ -192,7 +195,7 @@
       mentorReadinessP1: mentorReadiness(profile, "P1", mode),
       mentorReadinessP5: mentorReadiness(profile, "P5", mode),
       summary: staticData.canonicalSummary
-    });
+    };
   }
 
   function assertAcademicParity(profileId) {
