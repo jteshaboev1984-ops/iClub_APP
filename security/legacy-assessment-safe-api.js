@@ -38,26 +38,11 @@
     return `${p}_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`.slice(0, 128);
   }
 
-  function requireLegacyPracticeQuestionIds(questionIds) {
-    if (
-      !Array.isArray(questionIds) ||
-      questionIds.length < 1 ||
-      questionIds.length > LEGACY_PRACTICE_MAX_QUESTIONS
-    ) {
-      throw new Error("practice_question_selection_must_have_1_to_10");
-    }
-
-    const ids = questionIds.map(x => requirePositiveInt(x, "question_id"));
-    if (new Set(ids).size !== ids.length) throw new Error("duplicate_question_ids");
-    return ids;
-  }
-
   const practice = Object.freeze({
-    async start({ poolId, questionIds, clientSessionId = null }) {
-      return rpc("start_practice_session_safe_v4", {
+    async start({ poolId, clientSessionId = null }) {
+      return rpc("start_practice_session_auto_safe_v4", {
         p_pool_id: requirePositiveInt(poolId, "pool_id"),
-        p_client_session_id: clientSessionId || makeClientSessionId("practice"),
-        p_question_ids: requireLegacyPracticeQuestionIds(questionIds)
+        p_client_session_id: clientSessionId || makeClientSessionId("practice")
       });
     },
 
