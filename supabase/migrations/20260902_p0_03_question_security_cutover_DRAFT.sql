@@ -67,10 +67,10 @@ where q.is_active is true
   );
 
 -- 5. Same firewall for the generic safe RPC used by older diagnostic/learning code.
--- It remains answer-key safe and keeps requested order, but refuses protected Tour content.
+-- Keep the existing return signature exactly; only add Tour-content protection.
 create or replace function public.get_safe_questions_by_ids(p_question_ids bigint[])
 returns table(
-  request_order bigint,
+  request_order integer,
   id bigint,
   subject_id bigint,
   topic text,
@@ -98,7 +98,7 @@ security definer
 set search_path=public,pg_temp
 as $$
   select
-    requested.ord::bigint,
+    requested.ord::integer,
     q.id,q.subject_id,q.topic,q.subtopic,q.difficulty,q.qtype,
     q.question_text,q.options_text,q.image_url,q.is_active,q.created_at,
     q.question_text_ru,q.question_text_uz,q.question_text_en,
