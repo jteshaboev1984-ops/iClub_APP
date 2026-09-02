@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f9fe" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>iClub UI v3 — Implementation Preview</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="stylesheet" href="ui-v3/v3-preview.css" />
+</head>
+<body>
+  <div class="v3-preview-controls" aria-label="Internal preview controls">
+    <div class="v3-preview-controls__inner">
+      <strong>UI v3 preview</strong>
+      <label>
+        Support
+        <select id="v3-mode-select">
+          <option value="core">Core</option>
+          <option value="ai">AI Assist</option>
+          <option value="mentor">Mentor Care</option>
+        </select>
+      </label>
+      <label>
+        Language
+        <select id="v3-lang-select">
+          <option value="en">EN</option>
+          <option value="ru">RU</option>
+          <option value="uz">UZ</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <div id="v3-app" class="v3-app" aria-live="polite"></div>
+
+  <script src="ui-v3/v3-preview.js"></script>
+</body>
+</html>
