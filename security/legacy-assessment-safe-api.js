@@ -47,7 +47,7 @@
     },
 
     async questions(sessionId) {
-      return rpc("get_practice_session_questions_safe_v4", {
+      return rpc("get_practice_session_resume_safe_v4", {
         p_session_id: requirePositiveInt(sessionId, "session_id")
       });
     },
