@@ -2,7 +2,7 @@
   "use strict";
 
   const API_VERSION = "p0-02-v4";
-  const LEGACY_PRACTICE_QUESTION_COUNT = 10;
+  const LEGACY_PRACTICE_MAX_QUESTIONS = 10;
 
   function client() {
     const sb = window.sb || null;
@@ -39,8 +39,12 @@
   }
 
   function requireLegacyPracticeQuestionIds(questionIds) {
-    if (!Array.isArray(questionIds) || questionIds.length !== LEGACY_PRACTICE_QUESTION_COUNT) {
-      throw new Error("practice_question_selection_must_have_10");
+    if (
+      !Array.isArray(questionIds) ||
+      questionIds.length < 1 ||
+      questionIds.length > LEGACY_PRACTICE_MAX_QUESTIONS
+    ) {
+      throw new Error("practice_question_selection_must_have_1_to_10");
     }
 
     const ids = questionIds.map(x => requirePositiveInt(x, "question_id"));
@@ -134,7 +138,7 @@
 
   window.iclubSafeAssessment = Object.freeze({
     version: API_VERSION,
-    legacyPracticeQuestionCount: LEGACY_PRACTICE_QUESTION_COUNT,
+    legacyPracticeMaxQuestions: LEGACY_PRACTICE_MAX_QUESTIONS,
     makeClientSessionId,
     practice,
     tour
