@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const API_VERSION = "p0-02-v3.1";
+  const API_VERSION = "p0-02-v4";
   const LEGACY_PRACTICE_QUESTION_COUNT = 10;
 
   function client() {
@@ -50,24 +50,21 @@
 
   const practice = Object.freeze({
     async start({ poolId, questionIds, clientSessionId = null }) {
-      const pPoolId = requirePositiveInt(poolId, "pool_id");
-      const ids = requireLegacyPracticeQuestionIds(questionIds);
-
-      return rpc("start_practice_session_safe_v3", {
-        p_pool_id: pPoolId,
+      return rpc("start_practice_session_safe_v4", {
+        p_pool_id: requirePositiveInt(poolId, "pool_id"),
         p_client_session_id: clientSessionId || makeClientSessionId("practice"),
-        p_question_ids: ids
+        p_question_ids: requireLegacyPracticeQuestionIds(questionIds)
       });
     },
 
     async questions(sessionId) {
-      return rpc("get_practice_session_questions_safe_v3", {
+      return rpc("get_practice_session_questions_safe_v4", {
         p_session_id: requirePositiveInt(sessionId, "session_id")
       });
     },
 
     async submit({ sessionId, questionId, userAnswer = "", pickedIndex = null, timeSpent = 0 }) {
-      return rpc("submit_practice_session_answer_safe_v3", {
+      return rpc("submit_practice_session_answer_safe_v4", {
         p_session_id: requirePositiveInt(sessionId, "session_id"),
         p_question_id: requirePositiveInt(questionId, "question_id"),
         p_user_answer: userAnswer == null ? "" : String(userAnswer),
@@ -77,14 +74,14 @@
     },
 
     async finalize({ sessionId, totalTime = 0 }) {
-      return rpc("finalize_practice_session_safe_v3", {
+      return rpc("finalize_practice_session_safe_v4", {
         p_session_id: requirePositiveInt(sessionId, "session_id"),
         p_total_time: Math.max(0, Math.floor(Number(totalTime) || 0))
       });
     },
 
     async review(attemptId) {
-      return rpc("get_practice_review_safe_v3", {
+      return rpc("get_practice_review_safe_v4", {
         p_attempt_id: requirePositiveInt(attemptId, "attempt_id")
       });
     }
@@ -92,20 +89,20 @@
 
   const tour = Object.freeze({
     async start({ tourId, clientSessionId = null }) {
-      return rpc("start_tour_attempt_safe_v3", {
+      return rpc("start_tour_attempt_safe_v4", {
         p_tour_id: requirePositiveInt(tourId, "tour_id"),
         p_client_session_id: clientSessionId || makeClientSessionId("tour")
       });
     },
 
     async questions(attemptId) {
-      return rpc("get_tour_session_questions_safe_v3", {
+      return rpc("get_tour_session_questions_safe_v4", {
         p_attempt_id: requirePositiveInt(attemptId, "attempt_id")
       });
     },
 
     async submit({ attemptId, questionId, userAnswer = "", pickedIndex = null, timeSpent = 0, answered = true, finishReason = null }) {
-      return rpc("submit_tour_answer_safe_v3", {
+      return rpc("submit_tour_answer_safe_v4", {
         p_attempt_id: requirePositiveInt(attemptId, "attempt_id"),
         p_question_id: requirePositiveInt(questionId, "question_id"),
         p_user_answer: userAnswer == null ? "" : String(userAnswer),
@@ -121,7 +118,7 @@
       const safeStatus = String(status || "submitted");
       if (!allowed.has(safeStatus)) throw new Error("invalid_tour_status");
 
-      return rpc("finalize_tour_attempt_safe_v3", {
+      return rpc("finalize_tour_attempt_safe_v4", {
         p_attempt_id: requirePositiveInt(attemptId, "attempt_id"),
         p_total_time: Math.max(0, Math.floor(Number(totalTime) || 0)),
         p_status: safeStatus
@@ -129,7 +126,7 @@
     },
 
     async review(attemptId) {
-      return rpc("get_tour_review_safe_v3", {
+      return rpc("get_tour_review_safe_v4", {
         p_attempt_id: requirePositiveInt(attemptId, "attempt_id")
       });
     }
