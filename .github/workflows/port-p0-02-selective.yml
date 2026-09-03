@@ -1,0 +1,84 @@
+name: Port P0-02 selective security release
+
+on:
+  push:
+    branches:
+      - security-p0-02-production-release
+
+permissions:
+  contents: write
+
+jobs:
+  selective-port:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: security-p0-02-production-release
+          fetch-depth: 0
+
+      - name: Stop if port already completed
+        run: |
+          if [ -f .security-p0-02-selective-port ]; then
+            echo "Selective port already completed."
+            exit 0
+          fi
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin iclub-v3-implementation
+
+      - name: Cherry-pick only verified P0-02 frontend commits
+        shell: bash
+        run: |
+          set -euo pipefail
+          commits=(
+            c636eb2238f2994a4def1c81d31854744157f772
+            84aba0bd3ffd2866874697e77d7a666e169a6c41
+            5ce9a955a56792ae80b258db55e4eb23fd95a0f3
+            10a673107d91042fdcd5a0109c85b0c130d98cd1
+            7cf3d1139eb6bd19f3195efdc1a95be8ac497ade
+            799de843efcb5f3249d5d0610718e81d0e46c6ab
+            6f3ae16b05f60e5d30103dadb6ce857fbcd06b97
+            d224eb1e81c9de84baf22fc39f00e9da48390178
+            af94cbddab2030ef74a0120259b2e811de2bb470
+            5672b2d6e420d53bb6bc66c701442c689d9743be
+          )
+          for commit in "${commits[@]}"; do
+            echo "Cherry-picking ${commit}"
+            if ! git cherry-pick "${commit}"; then
+              git cherry-pick --abort || true
+              echo "Conflict while applying ${commit}; refusing automatic resolution."
+              exit 1
+            fi
+          done
+
+      - name: Static release gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check security/legacy-assessment-safe-api.js
+          grep -q 'security/legacy-assessment-safe-api.js' index.html
+          grep -q 'start_practice_session_auto_safe_v4' security/legacy-assessment-safe-api.js
+          grep -q 'start_tour_attempt_safe_v4' security/legacy-assessment-safe-api.js
+          grep -q 'ratings_cache_safe_v4' app.js
+          grep -q 'tour_attempts_leaderboard_safe_v4' app.js
+          grep -q 'resetProgress' security/legacy-assessment-safe-api.js
+
+      - name: Mark exact selective port
+        run: |
+          printf '%s\n' \
+            'P0-02 selective frontend port' \
+            'Base: b66ac6144c38b8ec65cbdebc2d64302c390c107f' \
+            'Scope: safe Practice + auxiliary Practice + Tour + Ratings + Practice reset + legacy writer retirement' \
+            'No Exam Prep/AI feature commits included.' > .security-p0-02-selective-port
+          git add .security-p0-02-selective-port
+          git commit -m "security(p0-02): mark selective production port"
+
+      - name: Push only after all gates pass
+        run: git push origin HEAD:security-p0-02-production-release
