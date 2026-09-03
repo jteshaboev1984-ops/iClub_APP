@@ -37,10 +37,10 @@ function matchingBrace(src, open) {
 }
 
 function range(name) {
-  const needles = [`async function ${name}(`, `function ${name}(`];
-  const hits = needles.map(n => app.indexOf(n)).filter(i => i >= 0);
+  const re = new RegExp(`\\b(?:async\\s+)?function\\s+${name}\\s*\\(`, 'g');
+  const hits = Array.from(app.matchAll(re));
   assert(hits.length === 1, `${name}: expected one declaration, got ${hits.length}`);
-  const start = hits[0];
+  const start = hits[0].index;
   const open = app.indexOf('{', start);
   const end = matchingBrace(app, open) + 1;
   return { start, end, text: app.slice(start, end) };
