@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const API_VERSION = "p0-02-v4-aux1";
+  const API_VERSION = "p0-02-v4-aux2-tour";
   const LEGACY_PRACTICE_MAX_QUESTIONS = 10;
 
   function client() {
@@ -140,6 +140,12 @@
   });
 
   const tour = Object.freeze({
+    async preflight(tourId) {
+      return rpc("get_tour_preflight_questions_safe_v4", {
+        p_tour_id: requirePositiveInt(tourId, "tour_id")
+      });
+    },
+
     async start({ tourId, clientSessionId = null }) {
       return rpc("start_tour_attempt_safe_v4", {
         p_tour_id: requirePositiveInt(tourId, "tour_id"),
@@ -178,7 +184,7 @@
     },
 
     async review(attemptId) {
-      return rpc("get_tour_review_safe_v4", {
+      return rpc("get_tour_review_full_safe_v4", {
         p_attempt_id: requirePositiveInt(attemptId, "attempt_id")
       });
     }
