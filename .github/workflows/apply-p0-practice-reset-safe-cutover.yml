@@ -1,0 +1,50 @@
+name: Apply P0 Practice reset safe cutover
+
+on:
+  push:
+    branches:
+      - iclub-v3-implementation
+    paths:
+      - scripts/p0-practice-reset-safe-cutover.mjs
+      - .github/workflows/apply-p0-practice-reset-safe-cutover.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-practice-reset:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout implementation branch
+        uses: actions/checkout@v4
+        with:
+          ref: iclub-v3-implementation
+          fetch-depth: 0
+
+      - name: Apply guarded Practice reset cutover
+        run: node scripts/p0-practice-reset-safe-cutover.mjs
+
+      - name: Syntax and reset security checks
+        run: |
+          node --check app.js
+          node --check security/legacy-assessment-safe-api.js
+          node --check scripts/p0-practice-reset-safe-cutover.mjs
+          git diff --check
+          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1' index.html
+          grep -q 'app.js?v=support4-p0practicereset1' index.html
+          grep -q 'reset_practice_progress_safe_v4' security/legacy-assessment-safe-api.js
+          grep -q 'practiceApi.resetProgress()' app.js
+          ! grep -q 'await window.sb.from("practice_answers").delete().in("attempt_id", chunk)' app.js
+
+      - name: Commit patched Practice reset frontend
+        run: |
+          if git diff --quiet -- app.js index.html security/legacy-assessment-safe-api.js; then
+            echo 'No Practice reset frontend changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app.js index.html security/legacy-assessment-safe-api.js
+          git commit -m 'Use safe v4 RPC for Practice progress reset'
+          git push origin HEAD:iclub-v3-implementation
