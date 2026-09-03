@@ -5775,265 +5775,13 @@ async function computePracticeStageStats(subjectKey, forcedTourNo = null) {
 }
 
 async function buildPracticeSet(subjectKey) {
-  if (!window.sb) return [];
-
-  const uid = await getAuthUid();
-  if (!uid) return [];
-
-  const ctx = await getPracticeStageContext(subjectKey);
-  if (!ctx?.subjectId || !ctx?.poolId) return [];
-
-  const allQuestionIds = await getPracticePoolQuestionIds(ctx.poolId);
-  if (!allQuestionIds.length) return [];
-
-  const closedIds = await getClosedPracticeQuestionIds(ctx.subjectId, uid, allQuestionIds);
-  const questionIds = allQuestionIds.filter(id => !closedIds.has(Number(id)));
-
-  if (!questionIds.length) return [];
-
-  const { data, error } = await window.sb
-    .from("questions")
-    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, book_ref, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
-    .eq("subject_id", ctx.subjectId)
-    .eq("is_active", true)
-    .in("id", questionIds)
-    .limit(300);
-
-  if (error) {
-    await logDbErrorToEvents(uid, "practice_questions_select", error, {
-      subject_id: ctx.subjectId,
-      subject_key: subjectKey,
-      practice_tour_no: ctx.practiceTourNo
-    });
-    return [];
-  }
-
-  const poolRaw = Array.isArray(data) ? data : [];
-  if (!poolRaw.length) return [];
-
-  const normalizeType = (t) => (String(t || "mcq").toLowerCase() === "input" ? "input" : "mcq");
-
-  const contentLang = (loadProfile()?.language) || "ru";
-  const pickL = (obj, base) => {
-    const k = contentLang === "uz" ? (base + "_uz") : contentLang === "en" ? (base + "_en") : (base + "_ru");
-    return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
-  };
-
-  const orderMap = new Map(allQuestionIds.map((id, idx) => [Number(id), idx]));
-
-  const pool = poolRaw
-    .map(r => {
-      const type = normalizeType(r.qtype);
-      const diff = normalizeDifficulty(r.difficulty || "easy");
-
-      const optionsRaw = pickL(r, "options_text");
-      const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
-
-      let correctIndex = 0;
-      if (type === "mcq") {
-        const ca = String(r.correct_answer ?? "").trim();
-        const asInt = Number(ca);
-
-        if (!Number.isNaN(asInt) && Number.isFinite(asInt)) {
-          correctIndex = asInt;
-        } else if (/^[A-D]$/i.test(ca)) {
-          correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
-        } else if (opts.length) {
-          const idx = opts.findIndex(x => String(x).trim().toLowerCase() === ca.toLowerCase());
-          if (idx >= 0) correctIndex = idx;
-        }
-
-        if (!Number.isFinite(correctIndex) || correctIndex < 0) correctIndex = 0;
-      }
-
-      const correctAnswer = type === "input" ? String(r.correct_answer ?? "").trim() : "";
-
-      return {
-        id: Number(r.id),
-        topic: r.topic || "General",
-        subtopic: r.subtopic || null,
-        difficulty: diff,
-        timeLimitSec:
-          (r.time_limit_sec != null && Number(r.time_limit_sec) >= 10)
-            ? Number(r.time_limit_sec)
-            : (PRACTICE_CONFIG?.timeByDifficulty?.[diff] || 60),
-        type,
-        question: pickL(r, "question_text") || "",
-        options: opts || [],
-        correctIndex,
-        correctAnswer,
-        explanation: pickL(r, "explanation") || "",
-        imageUrl: r.image_url || null,
-        book_ref: r.book_ref || null,
-        bookReference: r.book_ref || null,
-        inputKind: type === "input" ? (parseFlexibleScientificNumber(correctAnswer) !== null ? "numeric" : "text") : null, 
-        inputHint: type === "input" ? inputHintForAnswer(correctAnswer) : "",
-        practiceTourNo: Number(ctx.practiceTourNo || 1),
-        practicePoolId: Number(ctx.poolId || 0) || null
-      };
-    })
-    .filter(q => Number.isFinite(q.id))
-    .sort((a, b) => {
-      const ao = orderMap.get(Number(a?.id)) ?? 999999;
-      const bo = orderMap.get(Number(b?.id)) ?? 999999;
-      return ao - bo;
-    });
-
-  if (!pool.length) return [];
-
-  const usedIds = new Set();
-  const by = {
-    easy: pool.filter(q => q.difficulty === "easy"),
-    medium: pool.filter(q => q.difficulty === "medium"),
-    hard: pool.filter(q => q.difficulty === "hard")
-  };
-
-  const set = [];
-  set.push(...pickN(by.easy, PRACTICE_CONFIG.dist.easy, usedIds));
-  set.push(...pickN(by.medium, PRACTICE_CONFIG.dist.medium, usedIds));
-  set.push(...pickN(by.hard, PRACTICE_CONFIG.dist.hard, usedIds));
-
-  if (set.length < PRACTICE_CONFIG.total) {
-    set.push(...pickN(pool, PRACTICE_CONFIG.total - set.length, usedIds));
-  }
-
-  const order = { easy: 1, medium: 2, hard: 3 };
-  set.sort((a, b) => (order[a.difficulty] - order[b.difficulty]));
-
-  return set.slice(0, PRACTICE_CONFIG.total);
+  void subjectKey;
+  return [];
 }
 
    async function buildPracticeSetForTour(subjectKey, forcedTourNo) {
-  if (!window.sb) return [];
-
-  const uid = await getAuthUid().catch(() => null);
-  if (!uid) return [];
-
-  const ctx = await getPracticeStageContext(subjectKey);
-  if (!ctx?.subjectId) return [];
-
-  const row = (Array.isArray(ctx.pools) ? ctx.pools : []).find(
-    p => Number(p?.tour_no || 0) === Number(forcedTourNo)
-  );
-
-  const poolId = Number(row?.id || 0) || null;
-  const practiceTourNo = Number(row?.tour_no || forcedTourNo || 1);
-
-  if (!poolId) return [];
-
-  const allQuestionIds = await getPracticePoolQuestionIds(poolId);
-  if (!allQuestionIds.length) return [];
-
-  const closedIds = await getClosedPracticeQuestionIds(ctx.subjectId, uid, allQuestionIds);
-  const questionIds = allQuestionIds.filter(id => !closedIds.has(Number(id)));
-
-  if (!questionIds.length) return [];
-
-  const { data, error } = await window.sb
-    .from("questions")
-    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, book_ref, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
-    .eq("subject_id", ctx.subjectId)
-    .eq("is_active", true)
-    .in("id", questionIds)
-    .limit(300);
-
-  if (error) return [];
-
-  const poolRaw = Array.isArray(data) ? data : [];
-  if (!poolRaw.length) return [];
-
-  const normalizeType = (v) => (String(v || "mcq").toLowerCase() === "input" ? "input" : "mcq");
-
-  const contentLang = (loadProfile()?.language) || "ru";
-  const pickL = (obj, base) => {
-    const k = contentLang === "uz" ? (base + "_uz") : contentLang === "en" ? (base + "_en") : (base + "_ru");
-    return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
-  };
-
-  const orderMap = new Map(allQuestionIds.map((id, idx) => [Number(id), idx]));
-
-  const pool = poolRaw
-    .map(r => {
-      const type = normalizeType(r.qtype);
-      const diff = normalizeDifficulty(r.difficulty || "easy");
-
-      const optionsRaw = pickL(r, "options_text");
-      const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
-
-      let correctIndex = 0;
-      if (type === "mcq") {
-        const ca = String(r.correct_answer ?? "").trim();
-        const asInt = Number(ca);
-
-        if (!Number.isNaN(asInt) && Number.isFinite(asInt)) {
-          correctIndex = asInt;
-        } else if (/^[A-D]$/i.test(ca)) {
-          correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
-        } else if (opts.length) {
-          const idx = opts.findIndex(x => String(x).trim().toLowerCase() === ca.toLowerCase());
-          if (idx >= 0) correctIndex = idx;
-        }
-
-        if (!Number.isFinite(correctIndex) || correctIndex < 0) correctIndex = 0;
-      }
-
-      const correctAnswer = type === "input" ? String(r.correct_answer ?? "").trim() : "";
-
-      return {
-        id: Number(r.id),
-        topic: r.topic || "General",
-        subtopic: r.subtopic || null,
-        difficulty: diff,
-        timeLimitSec:
-          (r.time_limit_sec != null && Number(r.time_limit_sec) >= 10)
-            ? Number(r.time_limit_sec)
-            : (PRACTICE_CONFIG?.timeByDifficulty?.[diff] || 60),
-        type,
-        question: pickL(r, "question_text") || "",
-        options: opts || [],
-        correctIndex,
-        correctAnswer,
-        explanation: pickL(r, "explanation") || "",
-        imageUrl: r.image_url || null,
-        book_ref: r.book_ref || null,
-        bookReference: r.book_ref || null,
-        inputKind: type === "input" ? (parseFlexibleScientificNumber(correctAnswer) !== null ? "numeric" : "text") : null,
-        inputHint: type === "input" ? inputHintForAnswer(correctAnswer) : "",
-        practiceTourNo,
-        practicePoolId: poolId,
-        orderNo: orderMap.get(Number(r.id)) ?? 999999
-      };
-    })
-    .filter(q => Number.isFinite(q.id));
-
-  if (!pool.length) return [];
-
-  const usedIds = new Set();
-  const by = {
-    easy: pool.filter(q => q.difficulty === "easy"),
-    medium: pool.filter(q => q.difficulty === "medium"),
-    hard: pool.filter(q => q.difficulty === "hard")
-  };
-
-  const set = [];
-  set.push(...pickN(by.easy, PRACTICE_CONFIG.dist.easy, usedIds));
-  set.push(...pickN(by.medium, PRACTICE_CONFIG.dist.medium, usedIds));
-  set.push(...pickN(by.hard, PRACTICE_CONFIG.dist.hard, usedIds));
-
-  if (set.length < PRACTICE_CONFIG.total) {
-    set.push(...pickN(pool, PRACTICE_CONFIG.total - set.length, usedIds));
-  }
-
-  const order = { easy: 1, medium: 2, hard: 3 };
-  set.sort((a, b) => {
-    const byTour = Number(a.practiceTourNo || 0) - Number(b.practiceTourNo || 0);
-    if (byTour !== 0) return byTour;
-    const byDiff = (order[a.difficulty] || 9) - (order[b.difficulty] || 9);
-    if (byDiff !== 0) return byDiff;
-    return Number(a.orderNo || 0) - Number(b.orderNo || 0);
-  });
-
-  return set.slice(0, PRACTICE_CONFIG.total);
+  void subjectKey; void forcedTourNo;
+  return [];
 }
 
 async function getPastPracticeTourNos(subjectKey) {
@@ -6087,37 +5835,8 @@ async function computePastPracticeStats(subjectKey) {
 }
 
 async function buildPastPracticeSet(subjectKey) {
-  const tourNos = await getPastPracticeTourNos(subjectKey);
-  if (!tourNos.length) return [];
-
-  const sets = await Promise.all(
-    tourNos.map(tourNo => buildPracticeSetForTour(subjectKey, tourNo))
-  );
-
-  const merged = [];
-  const usedIds = new Set();
-
-  sets.forEach(arr => {
-    (Array.isArray(arr) ? arr : []).forEach(q => {
-      const qid = Number(q?.id || 0);
-      if (!qid || usedIds.has(qid)) return;
-      usedIds.add(qid);
-      merged.push(q);
-    });
-  });
-
-  if (!merged.length) return [];
-
-  const order = { easy: 1, medium: 2, hard: 3 };
-  merged.sort((a, b) => {
-    const byTour = Number(a.practiceTourNo || 0) - Number(b.practiceTourNo || 0);
-    if (byTour !== 0) return byTour;
-    const byDiff = (order[a.difficulty] || 9) - (order[b.difficulty] || 9);
-    if (byDiff !== 0) return byDiff;
-    return Number(a.orderNo || 0) - Number(b.orderNo || 0);
-  });
-
-  return merged.slice(0, PRACTICE_CONFIG.total);
+  void subjectKey;
+  return [];
 }
    
 function formatDateTime(ts) {
@@ -16474,104 +16193,22 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
 
 
   async function restorePracticeQuizSecrets(quiz) {
-    if (quiz?.safeSessionId && !quiz?.drillType) {
-      try {
-        const api = getPracticeSafeApi();
-        if (!api) return null;
-        const rows = await api.questions(Number(quiz.safeSessionId));
-        return buildPracticeSafeQuizFromRows(quiz, rows);
-      } catch {
-        return null;
-      }
-    }
   try {
     if (!quiz || quiz.mode !== "practice") return null;
-    if (!Array.isArray(quiz.questions) || !quiz.questions.length) return null;
-
-    const alreadyReady = quiz.questions.every(q =>
-      q && (
-        Object.prototype.hasOwnProperty.call(q, "correctAnswer") ||
-        Object.prototype.hasOwnProperty.call(q, "correctIndex")
-      )
-    );
-    if (alreadyReady) return { ...quiz };
-
-    const sbClient = sb || null;
-    if (!sbClient) return null;
-
-    const ids = quiz.questions
-      .map(q => Number(q?.id))
-      .filter(id => Number.isFinite(id) && id > 0);
-
-    if (!ids.length) return null;
-
-    const subjectId = await getSubjectIdByKey(quiz.subjectKey);
-    if (!subjectId) return null;
-
-    const { data, error } = await sbClient
-      .from("questions")
-      .select("id,subject_id,topic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en")
-      .eq("subject_id", subjectId)
-      .in("id", ids)
-      .limit(100);
-
-    if (error) return null;
-
-    const rows = Array.isArray(data) ? data : [];
-    const byId = new Map(rows.map(r => [Number(r.id), r]));
-    const contentLang = (loadProfile()?.language) || "ru";
-
-    const pickL = (obj, base) => {
-      const k =
-        contentLang === "uz" ? (base + "_uz")
-        : contentLang === "en" ? (base + "_en")
-        : (base + "_ru");
-
-      return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
-    };
-
-    const restoredQuestions = quiz.questions.map(oldQ => {
-      const row = byId.get(Number(oldQ?.id));
-      if (!row) return oldQ;
-
-      const type = String(row.qtype || oldQ?.type || "mcq").toLowerCase() === "input" ? "input" : "mcq";
-      const optionsRaw = pickL(row, "options_text");
-      const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
-
-      let correctIndex = 0;
-      const correctAnswer = String(row.correct_answer ?? "");
-
-      if (type === "mcq") {
-        const ca = String(row.correct_answer ?? "").trim();
-
-        if (isNumericLike(ca)) {
-          correctIndex = Math.max(0, Math.min(opts.length - 1, Number(String(ca).replace(",", "."))));
-        } else if (/^[A-D]$/i.test(ca)) {
-          correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
-        } else if (opts.length) {
-          const idx = opts.findIndex(o => String(o).trim().toLowerCase() === ca.toLowerCase());
-          if (idx >= 0) correctIndex = idx;
-        }
-      }
-
-      return {
-        ...oldQ,
-        type,
-        correctIndex,
-        correctAnswer,
-        explanation: pickL(row, "explanation") || "",
-        inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
-        inputHint: type === "input" ? inputHintForAnswer(correctAnswer) : ""
-      };
-    });
-
-    return {
-      ...quiz,
-      questions: restoredQuestions
-    };
-  } catch {
-    return null;
+    if (quiz.safeSessionId && !quiz.drillType) {
+      const api = getPracticeSafeApi();
+      if (!api?.questions) return null;
+      return buildPracticeSafeQuizFromRows(quiz, await api.questions(Number(quiz.safeSessionId)));
+    }
+    if (quiz.safeDrillSessionId && quiz.drillType) {
+      const api = getPracticeSafeApi()?.drill;
+      if (!api?.questions) return null;
+      return buildPracticeSafeQuizFromRows(quiz, await api.questions(Number(quiz.safeDrillSessionId)));
+    }
+  } catch (error) {
+    try { trackEvent("practice_safe_resume_error", { message: String(error?.message || error || "unknown"), subject_key: quiz?.subjectKey || null, drill_type: quiz?.drillType || null }); } catch {}
   }
+  return null;
 }
 
   function savePracticeDraft(draft) {
@@ -18185,64 +17822,42 @@ async function startPracticeNew() {
 
    async function startPracticePast() {
   const subjectKey = state.courses.subjectKey;
-
-  let questions = [];
-  let stats = null;
-
-  showAsyncOverlay(tr3(
-    "Загружаем практику по прошедшим турам…",
-    "O‘tgan turlar amaliyoti yuklanmoqda…",
-    "Loading practice for past tours…"
-  ));
-
-  try {
-    stats = await computePastPracticeStats(subjectKey);
-    questions = await buildPastPracticeSet(subjectKey);
-  } finally {
-    hideAsyncOverlay();
+  const drillApi = getPracticeSafeApi()?.drill;
+  if (!drillApi || !window.iclubSafeAssessment) {
+    showToast(t("not_available") || "Practice is temporarily unavailable.");
+    return;
   }
 
-  if (!Array.isArray(stats?.tourNos) || !stats.tourNos.length) {
+  const clientSessionId = window.iclubSafeAssessment.makeClientSessionId("practice_past");
+  let safeStart = null, rows = [];
+  showAsyncOverlay(tr3("Загружаем практику по прошедшим турам…", "O‘tgan turlar amaliyoti yuklanmoqda…", "Loading practice for past tours…"));
+  try {
+    safeStart = await dbWriteWithRetry(() => drillApi.startPast({ subjectKey, clientSessionId }), { tries: 3, baseDelayMs: 350 });
+    rows = await dbWriteWithRetry(() => drillApi.questions(Number(safeStart?.session_id)), { tries: 3, baseDelayMs: 350 });
+  } catch (error) {
+    const code = practiceSafeErrorText(error);
+    showToast(code.includes("practice_past_no_open_questions")
+      ? (t("practice_past_done") || "Все вопросы прошлых туров уже закрыты правильно.")
+      : (t("practice_past_empty") || "Для прошлых туров пока нет доступных вопросов."));
+    return;
+  } finally { hideAsyncOverlay(); }
+
+  if (!safeStart?.session_id || !Array.isArray(rows) || !rows.length) {
     showToast(t("practice_past_empty") || "Для прошлых туров пока нет доступных вопросов.");
     return;
   }
 
-  if (!Array.isArray(questions) || !questions.length) {
-    showToast(
-      Number(stats?.openCount || 0) <= 0
-        ? (t("practice_past_done") || "Все вопросы прошлых туров уже закрыты правильно.")
-        : (t("practice_past_empty") || "Для прошлых туров пока нет доступных вопросов.")
-    );
-    return;
-  }
-
-  state.quizLock = "practice";
-  state.quiz = {
-    mode: "practice",
-    drillType: "past_tours",
-    subjectKey,
-    practiceTourNo: 0,
-    practicePoolId: null,
-    startedAt: Date.now(),
-    paused: false,
-    pauseStartedAt: null,
-    pausedTotalMs: 0,
-
-    index: 0,
-    questions,
-    answers: Array.from({ length: questions.length }).map(() => null),
-    correct: Array.from({ length: questions.length }).map(() => false),
-    timeSpent: Array.from({ length: questions.length }).map(() => 0),
-
-    qTimeLeft: Number(questions[0]?.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[questions[0]?.difficulty] || 60,
-    qEndsAtMono: null,
-    qTimerId: null
-  };
-
-  saveState();
-  replaceCourses("practice-quiz");
-  renderPracticeQuiz();
-  startPracticeQuestionTimer();
+  const quiz = buildPracticeSafeQuizFromRows({
+    mode: "practice", drillType: "past_tours", subjectKey,
+    practiceTourNo: 0, practicePoolId: null,
+    safeDrillSessionId: Number(safeStart.session_id), safeDrillClientSessionId: clientSessionId,
+    startedAt: Date.now(), paused: false, pauseStartedAt: null, pausedTotalMs: 0,
+    index: 0, questions: [], answers: [], correct: [], timeSpent: [], qTimeLeft: 0,
+    qEndsAtMono: null, qEndsAtMs: null, qTimerId: null
+  }, rows);
+  if (!quiz) return;
+  state.quizLock = "practice"; state.quiz = quiz; saveState();
+  replaceCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
    
   // ---- Rendering question (MCQ or INPUT) ----
@@ -18335,23 +17950,12 @@ try {
   const quiz = state.quiz;
   const btn = $("#practice-submit-btn");
   if (!btn || !quiz || quiz.mode !== "practice") return;
-
-  if (quiz._submitInFlight || quiz._finishing) {
-    btn.disabled = true;
-    return;
-  }
-
+  if (quiz._submitInFlight || quiz._finishing || quiz._safeFinalizeInFlight) { btn.disabled = true; return; }
   const q = quiz.questions[quiz.index];
   const ua = quiz.answers[quiz.index];
-
   let ok = false;
-
-  if (q.type === "mcq") {
-    ok = (ua !== null && ua !== undefined);
-  } else {
-    ok = isValidInputAnswer(q, String(ua ?? "").trim());
-  }
-
+  if (q.type === "mcq") ok = ua !== null && ua !== undefined;
+  else if (quiz.safeSessionId || quiz.safeDrillSessionId) ok = practiceSafeInputLooksValid(q, String(ua ?? "").trim());
   btn.disabled = !ok;
 }
 
@@ -18395,121 +17999,59 @@ try {
     renderSubjectHub();
   }
 
-   async function handlePracticeSubmit(isAutoTimeout = false) {
+   async function handlePracticeDrillSubmitSafe(isAutoTimeout = false) {
   const quiz = state.quiz;
-  if (!quiz || quiz.mode !== "practice") return;
+  if (!quiz || quiz.mode !== "practice" || !quiz.drillType || !quiz.safeDrillSessionId) return;
   if (quiz._submitInFlight || quiz._finishing) return;
-
-  if (quiz.safeSessionId && !quiz.drillType) {
-    return handlePracticeSubmitSafe(isAutoTimeout);
-  }
-
+  const api = getPracticeSafeApi()?.drill;
+  if (!api?.submit) { showToast(t("not_available") || "Practice is temporarily unavailable."); return; }
   quiz._submitInFlight = true;
-
-  const submitBtn = $("#practice-submit-btn");
-  if (submitBtn) submitBtn.disabled = true;
-
-  const releaseSubmitLock = () => {
-    if (state.quiz === quiz && !quiz._finishing) {
-      quiz._submitInFlight = false;
-      updatePracticeSubmitEnabled();
-    }
-  };
-
-    try {
-    let q = quiz.questions[quiz.index];
-
-    if (String(q?.type || "mcq").toLowerCase() === "mcq" && getMcqCorrectIndexFromQuestion(q) === null) {
-      const restoredQuiz = await restorePracticeQuizSecrets(quiz);
-
-      if (!restoredQuiz || !Array.isArray(restoredQuiz.questions) || !restoredQuiz.questions.length) {
-        showToast(t("save_failed_try_again") || t("not_available") || "Please try again.");
+  try {
+    const q = quiz.questions[quiz.index];
+    const ua = quiz.answers[quiz.index];
+    if (!q) throw new Error("practice_question_missing");
+    if (!isAutoTimeout) {
+      if (q.type === "mcq" && (ua === null || ua === undefined)) { showToast(t("select_option_required")); return; }
+      if (q.type !== "mcq" && !practiceSafeInputLooksValid(q, String(ua ?? "").trim())) {
+        const errEl = $("#practice-input-error");
+        if (errEl) { errEl.textContent = t("invalid_answer_format"); errEl.style.display = "block"; }
         return;
       }
-
-      Object.assign(quiz, restoredQuiz);
-      state.quiz = quiz;
-      q = quiz.questions[quiz.index];
     }
-
-    const userAns = quiz.answers[quiz.index];
-
-    if (!isAutoTimeout) {
-      if (q.type === "mcq") {
-        if (userAns === null || userAns === undefined) {
-          showToast(t("select_option_required"));
-          return;
-        }
-      } else {
-        const val = String(userAns ?? "").trim();
-        if (!isValidInputAnswer(q, val)) {
-          const errEl = $("#practice-input-error");
-          if (errEl) {
-            errEl.textContent = t("invalid_answer_format");
-            errEl.style.display = "block";
-          } else {
-            showToast(t("invalid_answer_format"));
-          }
-          return;
-        }
-      }
-    }
-
-       let isCorrect = false;
-
-      if (q.type === "mcq") {
-      isCorrect = isMcqPickedIndexCorrect(q, userAns);
-    } else {
-      const raw = String(userAns ?? "").trim();
-      isCorrect = isInputAnswerCorrect(raw, getInputExpectedAnswer(q));
-    }
-
-    quiz.correct[quiz.index] = isCorrect;
-     
-    if (isAutoTimeout) {
-      showToast(userAns ? t("toast_time_expired_answer_saved") : t("toast_time_expired_no_answer"));
-    }
-
     const allowed = Number(q.timeLimitSec) || Number(PRACTICE_CONFIG.timeByDifficulty[q.difficulty]) || 60;
-    const left = Number(quiz.qTimeLeft) || 0;
-
-    if (!Array.isArray(quiz.timeSpent)) {
-      quiz.timeSpent = new Array(quiz.questions.length).fill(0);
-    }
-    quiz.timeSpent[quiz.index] = Math.max(0, Math.min(allowed, allowed - left));
-
+    const left = Math.max(0, Number(quiz.qTimeLeft) || 0);
+    const timeSpent = isAutoTimeout ? allowed : Math.max(0, Math.min(allowed, allowed - left));
+    const result = await dbWriteWithRetry(() => api.submit({
+      sessionId: Number(quiz.safeDrillSessionId), questionId: Number(q.id),
+      userAnswer: q.type === "input" ? String(ua ?? "").trim() : "",
+      pickedIndex: q.type === "mcq" && ua !== null && ua !== undefined ? Number(ua) : null,
+      timeSpent
+    }), { tries: 3, baseDelayMs: 350 });
+    applyPracticeSafeFeedback(q, result || {});
+    quiz.correct[quiz.index] = !!result?.is_correct;
+    if (!Array.isArray(quiz.timeSpent)) quiz.timeSpent = new Array(quiz.questions.length).fill(0);
+    quiz.timeSpent[quiz.index] = timeSpent;
     stopPracticeQuestionTimer();
-
-    const nextIndex = quiz.index + 1;
-
-    if (nextIndex >= quiz.questions.length) {
-      quiz._submitInFlight = false;
-      finishPractice();
-      return;
-    }
-
-    quiz.index = nextIndex;
+    if (quiz.index + 1 >= quiz.questions.length) { quiz._submitInFlight = false; finishPractice(); return; }
+    quiz.index += 1;
     const nextQ = quiz.questions[quiz.index];
-    quiz.qTimeLeft = Number(nextQ.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[nextQ.difficulty] || 60;
-    quiz.qEndsAtMs = null;
-
-    saveState();
-    renderPracticeQuiz();
-    startPracticeQuestionTimer();
-  } catch (e) {
-    try {
-      trackEvent("practice_submit_crash", {
-        message: String(e?.message || e || "unknown"),
-        subject_key: quiz?.subjectKey || null,
-        index: Number(quiz?.index || 0)
-      });
-    } catch {}
-
-    try { console.error("[practice] handlePracticeSubmit crash:", e); } catch {}
-    showToast(t("save_failed_try_again"));
+    quiz.qTimeLeft = Number(nextQ?.timeLimitSec) || PRACTICE_CONFIG.timeByDifficulty[nextQ?.difficulty] || 60;
+    quiz.qEndsAtMs = null; quiz.qEndsAtMono = null; saveState();
+    renderPracticeQuiz(); startPracticeQuestionTimer();
+  } catch (error) {
+    try { trackEvent("practice_drill_safe_submit_error", { message: String(error?.message || error || "unknown"), subject_key: quiz?.subjectKey || null, drill_type: quiz?.drillType || null }); } catch {}
+    showToast(t("save_failed_try_again") || "Не удалось сохранить ответ. Попробуйте ещё раз.");
   } finally {
-    releaseSubmitLock();
+    if (state.quiz === quiz && !quiz._finishing) { quiz._submitInFlight = false; updatePracticeSubmitEnabled(); }
   }
+}
+
+async function handlePracticeSubmit(isAutoTimeout = false) {
+  const quiz = state.quiz;
+  if (!quiz || quiz.mode !== "practice") return;
+  if (quiz.safeSessionId && !quiz.drillType) return handlePracticeSubmitSafe(isAutoTimeout);
+  if (quiz.safeDrillSessionId && quiz.drillType) return handlePracticeDrillSubmitSafe(isAutoTimeout);
+  showToast(t("not_available") || "Practice is temporarily unavailable.");
 }
 
   function finishPractice() {
@@ -18998,8 +18540,8 @@ row.innerHTML = `
 
   // DB-first flow (best-effort)
   (async () => {
-    if (!window.sb || !dbAttemptId) {
-      const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
+    const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
+    if (!dbAttemptId) {
       renderFromDetails(localDetails);
       return;
     }
@@ -19012,94 +18554,24 @@ row.innerHTML = `
 
     try {
       const safeApi = getPracticeSafeApi();
-      if (safeApi && dbAttemptId) {
-        try {
-          const safeRows = await safeApi.review(dbAttemptId);
-          const safeDetails = practiceSafeReviewRowsToDetails(safeRows);
-          if (safeDetails.length) {
-            renderFromDetails(safeDetails);
-            return;
-          }
-        } catch (safeReviewError) {
-          try { trackEvent('practice_safe_review_error', { attempt_id: dbAttemptId, message: String(safeReviewError?.message || safeReviewError || 'unknown') }); } catch {}
-        }
-      }
-
-      const uid = await getAuthUid();
-      if (!uid) {
-        const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
-        renderFromDetails(localDetails);
+      if (!safeApi?.review) {
+        renderFromDetails([]);
         return;
       }
-
-      // 1) read answers for this attempt
-      const { data: ansRows, error: ansErr } = await window.sb
-        .from("practice_answers")
-        .select("question_id,user_answer,is_correct,time_spent,created_at")
-        .eq("attempt_id", dbAttemptId)
-        .order("id", { ascending: true });
-
-      if (ansErr) {
-        try { trackEvent("practice_review_db_error", { where: "answers_select", attempt_id: dbAttemptId }); } catch {}
-        await logDbErrorToEvents(uid, "practice_review_answers_select", ansErr, { attempt_id: dbAttemptId });
-        const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
-        renderFromDetails(localDetails);
-        return;
-      }
-
-      const ids = (ansRows || []).map(r => Number(r.question_id)).filter(n => Number.isFinite(n));
-      if (!ids.length) {
-        const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
-        renderFromDetails(localDetails);
-        return;
-      }
-
-      // 2) read questions
-      const { data: qRows, error: qErr } = await window.sb
-        .from("questions")
-        .select("id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en")
-        .in("id", ids)
-        .eq("is_active", true);
-
-      if (qErr) {
-        try { trackEvent("practice_review_db_error", { where: "questions_select", attempt_id: dbAttemptId }); } catch {}
-        await logDbErrorToEvents(uid, "practice_review_questions_select", qErr, { attempt_id: dbAttemptId, ids: ids.length });
-        const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
-        renderFromDetails(localDetails);
-        return;
-      }
-
-      const qMap = new Map((qRows || []).map(q => [Number(q.id), q]));
-
-      const details = (ansRows || []).map((x, idx) => {
-        const q = qMap.get(Number(x.question_id)) || {};
-        const type = String(q?.qtype || "mcq").toLowerCase() === "input" ? "input" : "mcq";
-        const options = parseOptionsText(pickContentText(q, "options_text") || "") || [];
-
-        return {
-          id: Number(q?.id || x?.question_id || idx + 1),
-          topic: q?.topic || (t("topic_general") || "General"),
-          subtopic: q?.subtopic || null,
-          difficulty: q?.difficulty || "easy",
-          type,
-          question: pickContentText(q, "question_text") || "",
-          options,
-          userAnswer: String(x?.user_answer ?? ""),
-          correctAnswer: String(q?.correct_answer ?? ""),
-          explanation: pickContentText(q, "explanation") || "",
-          isCorrect: !!x?.is_correct,
-          timeSpent: Number(x?.time_spent || 0)
-        };
-      });
-
-      renderFromDetails(details);
-    } catch {
-      const localDetails = Array.isArray(attempt?.details) ? attempt.details : [];
-      renderFromDetails(localDetails);
+      const safeRows = await safeApi.review(dbAttemptId);
+      renderFromDetails(practiceSafeReviewRowsToDetails(safeRows));
+    } catch (safeReviewError) {
+      try {
+        trackEvent("practice_safe_review_error", {
+          attempt_id: dbAttemptId,
+          message: String(safeReviewError?.message || safeReviewError || "unknown")
+        });
+      } catch {}
+      renderFromDetails([]);
     } finally {
       hideAsyncOverlay();
     }
-   })();
+  })();
   }
 
 function syncPracticeResultBadges(attemptOverride) {
@@ -19829,95 +19301,29 @@ async function renderMyRecs() {
 }
    async function fetchRecentMistakesByRec(subjectKey, rec) {
   try {
-    if (!window.sb) return [];
-
-    const uid = await getAuthUid();
-    if (!uid) return [];
-
-    const subjectId = await getSubjectIdByKey(subjectKey);
-    if (!subjectId) return [];
-
-    // 1) последние попытки практики пользователя по предмету
-    const { data: attempts, error: aErr } = await window.sb
-      .from("practice_attempts")
-      .select("id, created_at")
-      .eq("user_id", uid)
-      .eq("subject_id", subjectId)
-      .order("created_at", { ascending: false })
-      .limit(12);
-
-    if (aErr || !Array.isArray(attempts) || !attempts.length) return [];
-
-    const attemptIds = attempts.map(x => x.id);
-
-    // 2) неправильные ответы + вопрос
-    const { data: ans, error: pErr } = await window.sb
-      .from("practice_answers")
-      .select("id, attempt_id, question_id, user_answer, is_correct, created_at, question:questions(id, topic, subtopic, question_text, options_text, correct_answer, explanation, qtype, difficulty, is_active, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en)")
-      .in("attempt_id", attemptIds)
-      .eq("is_correct", false)
-      .order("created_at", { ascending: false })
-      .limit(150);
-
-    if (pErr || !Array.isArray(ans)) return [];
-
-        const norm = (v) => String(v || "").trim().toLowerCase();
-
-    const topic = norm(rec?.topic);
-    const subtopic = rec?.subtopic ? norm(rec.subtopic) : "";
-
-            const cleaned = ans
-      .map(x => ({ ...x, q: x.question }))
-      .filter(x => x.q && x.q.is_active)
-      .filter(x => {
-        const q = x.q;
-        const qType = String(q.qtype || "mcq").toLowerCase();
-
-        // Для input/других типов оставляем как есть
-        if (qType !== "mcq") return true;
-
-        const uaRaw = String(x.user_answer ?? "").trim();
-        const caRaw = String(q.correct_answer ?? "").trim();
-
-        const toIdx = (raw) => {
-          if (!raw) return null;
-          if (isNumericLike(raw)) return Math.trunc(Number(raw));
-          const li = letterToIdx(raw);
-          return (li !== null && li >= 0) ? li : null;
-        };
-
-        const uaIdx = toIdx(uaRaw);
-        const caIdx = toIdx(caRaw);
-
-        // Если оба значения распознаны и они совпадают — такую "ошибку" не показываем
-        if (uaIdx !== null && caIdx !== null && uaIdx === caIdx) return false;
-
-        const uaDisp = formatAnswerForDisplay(q, x.user_answer);
-        const caDisp = formatAnswerForDisplay(q, q.correct_answer);
-
-        // Дополнительная защита на уровне отображения
-        if (uaDisp && caDisp && uaDisp === caDisp) return false;
-
-        return true;
-      });
-
-    const base = cleaned
-      .filter(x => {
-        const qt = norm(x.q.topic);
-        return topic ? qt === topic : true;
-      });
-
-    const exact = subtopic
-      ? base.filter(x => norm(x.q.subtopic) === subtopic).slice(0, 10)
-      : [];
-
-    const filtered = exact.length
-      ? exact
-      : base.slice(0, 10);
-
-    return filtered;
+    const api = getPracticeSafeApi();
+    if (!api?.recentMistakes) return [];
+    const rows = await api.recentMistakes({ subjectKey, topic: rec?.topic || null, subtopic: rec?.subtopic || null, limit: 10 });
+    return (Array.isArray(rows) ? rows : []).map(row => ({
+      attempt_id: Number(row?.attempt_id || 0) || null,
+      question_id: Number(row?.question_id || 0) || null,
+      user_answer: String(row?.user_answer ?? ""), is_correct: !!row?.is_correct,
+      time_spent: Number(row?.time_spent || 0), created_at: row?.created_at || null,
+      q: {
+        id: Number(row?.question_id || 0), topic: row?.topic || null, subtopic: row?.subtopic || null,
+        difficulty: row?.difficulty || "medium", qtype: row?.qtype || "mcq",
+        question_text: row?.question_text || null, question_text_ru: row?.question_text_ru || null,
+        question_text_uz: row?.question_text_uz || null, question_text_en: row?.question_text_en || null,
+        options_text: row?.options_text || null, options_text_ru: row?.options_text_ru || null,
+        options_text_uz: row?.options_text_uz || null, options_text_en: row?.options_text_en || null,
+        correct_answer: row?.correct_answer || null,
+        explanation: row?.explanation || null, explanation_ru: row?.explanation_ru || null,
+        explanation_uz: row?.explanation_uz || null, explanation_en: row?.explanation_en || null,
+        image_url: row?.image_url || null, book_ref: row?.book_ref || null
+      }
+    })).filter(x => Number(x?.q?.id || 0) > 0);
   } catch (e) {
-    logClientError("myrec_mistakes_exception", e);
+    logClientError("myrec_mistakes_safe_exception", e);
     return [];
   }
 }
@@ -20335,132 +19741,8 @@ function pickContentText(obj, base) {
   }
 }
    async function buildPracticeSetByRec(subjectKey, rec) {
-  if (!window.sb) return [];
-
-  const uid = await getAuthUid();
-  if (!uid) return [];
-
-  const subjectId = await getSubjectIdByKey(subjectKey);
-  if (!subjectId) return [];
-
-  const topic = String(rec?.topic || "").trim();
-  const subtopic = rec?.subtopic ? String(rec.subtopic).trim() : null;
-  if (!topic) return [];
-
-    let data = [];
-  let error = null;
-
-  // 1) exact: topic + subtopic
-  if (subtopic) {
-    const exactQ = await window.sb
-      .from("questions")
-      .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, book_ref, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
-      .eq("subject_id", subjectId)
-      .eq("is_active", true)
-      .eq("topic", topic)
-      .eq("subtopic", subtopic)
-      .limit(200);
-
-    data = Array.isArray(exactQ.data) ? exactQ.data : [];
-    error = exactQ.error || null;
-  }
-
-  // 2) fallback: topic only
-  if (!data.length) {
-    const baseQ = await window.sb
-      .from("questions")
-      .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, book_ref, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
-      .eq("subject_id", subjectId)
-      .eq("is_active", true)
-      .eq("topic", topic)
-      .limit(200);
-
-    data = Array.isArray(baseQ.data) ? baseQ.data : [];
-    error = error || baseQ.error || null;
-  }
-
-  if (error || !data.length) return [];
-
-  // нормализация = как в buildPracticeSet()
-  const normalizeDiff = (d) => normalizeDifficulty(d || "easy");
-  const normalizeType = (t) => (String(t || "mcq").toLowerCase() === "input" ? "input" : "mcq");
-
-  const lang = (loadProfile()?.language) || "ru";
-  const pickL = (obj, base) => {
-    const k = lang === "uz" ? (base + "_uz") : lang === "en" ? (base + "_en") : (base + "_ru");
-    return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
-  };
-
-  const pool = data.map(r => {
-    const type = normalizeType(r.qtype);
-    const optionsRaw = pickL(r, "options_text");
-    const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
-
-    let correctIndex = 0;
-    if (type === "mcq") {
-      const ca = String(r.correct_answer ?? "").trim();
-      const asInt = Number(ca);
-      if (!Number.isNaN(asInt) && Number.isFinite(asInt)) {
-        correctIndex = asInt;
-      } else if (/^[A-D]$/i.test(ca)) {
-        correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
-      } else if (opts.length) {
-        const idx = opts.findIndex(x => String(x).trim().toLowerCase() === ca.toLowerCase());
-        if (idx >= 0) correctIndex = idx;
-      }
-      if (!Number.isFinite(correctIndex) || correctIndex < 0) correctIndex = 0;
-    }
-
-    const correctAnswer = type === "input" ? String(r.correct_answer ?? "").trim() : "";
-    const diff = normalizeDiff(r.difficulty);
-
-    return {
-      id: Number(r.id),
-      topic: r.topic || "General",
-      subtopic: r.subtopic || null,
-      difficulty: diff,
-      timeLimitSec:
-        (r.time_limit_sec != null && Number(r.time_limit_sec) >= 10)
-          ? Number(r.time_limit_sec)
-          : (PRACTICE_CONFIG?.timeByDifficulty?.[diff] || 60),
-      type,
-      question: pickL(r, "question_text") || "",
-      options: opts,
-      correctIndex,
-      correctAnswer,
-      explanation: pickL(r, "explanation") || "",
-      imageUrl: r.image_url || null,
-      inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
-      inputHint: type === "input" ? inputHintForAnswer(correctAnswer) : ""
-    };
-  }).filter(q => Number.isFinite(q.id));
-
-  if (!pool.length) return [];
-
-  // делаем набор как обычная практика (6/9/5), но только внутри темы
-  const by = {
-    easy: pool.filter(q => q.difficulty === "easy"),
-    medium: pool.filter(q => q.difficulty === "medium"),
-    hard: pool.filter(q => q.difficulty === "hard")
-  };
-
-  const set = [
-    ...pickN(by.easy.length ? by.easy : pool, PRACTICE_CONFIG.dist.easy),
-    ...pickN(by.medium.length ? by.medium : pool, PRACTICE_CONFIG.dist.medium),
-    ...pickN(by.hard.length ? by.hard : pool, PRACTICE_CONFIG.dist.hard)
-  ];
-
-  const need = PRACTICE_CONFIG.total - set.length;
-  if (need > 0) {
-    const used = new Set(set.map(x => x.id));
-    const rest = pool.filter(x => !used.has(x.id));
-    set.push(...pickN(rest.length ? rest : pool, need));
-  }
-
-  const order = { easy: 1, medium: 2, hard: 3 };
-  set.sort((a, b) => (order[a.difficulty] - order[b.difficulty]));
-
-  return set.slice(0, PRACTICE_CONFIG.total);
+  void subjectKey; void rec;
+  return [];
 }
 
      async function buildPracticeSetByQuestionIds(subjectKey, questionIds) {
@@ -20539,107 +19821,62 @@ async function startPracticeByRec() {
   const rec = state?.courses?.myRecCurrent;
   const subjectKey = state?.courses?.subjectKey;
   if (!rec || !subjectKey) return;
-
-  const questionsAll = await buildPracticeSetByRec(subjectKey, rec);
-  if (!questionsAll.length) {
-    showToast(t("rec_no_questions") || "Нет вопросов для тренировки по этой теме.");
-    return;
-  }
-
-  // ✅ Topic practice is also a DRILL (Variant A): short, focused, no DB write
-  const DRILL_LIMIT = 10;
-  const questions = questionsAll.slice(0, DRILL_LIMIT);
-
-  state.quizLock = "practice";
-  state.quiz = {
-    mode: "practice",
-    subjectKey,
-    startedAt: Date.now(),
-    paused: false,
-    pauseStartedAt: null,
-    pausedTotalMs: 0,
-
-    index: 0,
-    questions,
-    answers: Array.from({ length: questions.length }).map(() => null),
-    correct: Array.from({ length: questions.length }).map(() => false),
-
-    qTimeLeft:
-      Number(questions[0]?.timeLimitSec) ||
-      (PRACTICE_CONFIG?.timeByDifficulty?.[questions[0]?.difficulty] || 60),
-    qEndsAtMs: null,
-    qTimerId: null,
-
-    // метка, чтобы потом в аналитике видеть, что это “тренировка по рекомендации”
-    recTopic: rec.topic || null,
-    recSubtopic: rec.subtopic || null,
-
-    // ✅ important: treated as DRILL everywhere (no overwriting last practice, no DB save)
-    drillType: "rec_topic"
-  };
-
-   // ✅ remember return target for drills
-try {
+  const api = getPracticeSafeApi()?.drill;
+  if (!api || !window.iclubSafeAssessment) { showToast(t("not_available") || "Practice is temporarily unavailable."); return; }
+  const clientSessionId = window.iclubSafeAssessment.makeClientSessionId("practice_topic");
+  let started = null, rows = [];
+  showAsyncOverlay(tr3("Загружаем практику по теме…", "Mavzu bo‘yicha amaliyot yuklanmoqda…", "Loading topic practice…"));
+  try {
+    started = await dbWriteWithRetry(() => api.startTopic({ subjectKey, topic: rec.topic, subtopic: rec.subtopic || null, clientSessionId }), { tries: 3, baseDelayMs: 350 });
+    rows = await dbWriteWithRetry(() => api.questions(Number(started?.session_id)), { tries: 3, baseDelayMs: 350 });
+  } catch { showToast(t("rec_practice_empty") || t("practice_no_questions") || "Нет вопросов для практики по этой теме."); return; }
+  finally { hideAsyncOverlay(); }
+  if (!started?.session_id || !Array.isArray(rows) || !rows.length) return;
+  const quiz = buildPracticeSafeQuizFromRows({
+    mode: "practice", subjectKey, practiceTourNo: 0, practicePoolId: null,
+    safeDrillSessionId: Number(started.session_id), safeDrillClientSessionId: clientSessionId,
+    startedAt: Date.now(), paused: false, pauseStartedAt: null, pausedTotalMs: 0,
+    index: 0, questions: [], answers: [], correct: [], timeSpent: [], qTimeLeft: 0,
+    qEndsAtMono: null, qEndsAtMs: null, qTimerId: null,
+    recTopic: rec.topic || null, recSubtopic: rec.subtopic || null, drillType: "rec_topic"
+  }, rows);
+  if (!quiz) return;
   if (!state.courses) state.courses = {};
   state.courses.myRecReturnTarget = "my-rec-detail";
-} catch {}
-   
-  saveState();
-pushCourses("practice-quiz");
-renderPracticeQuiz();
-startPracticeQuestionTimer();
+  state.quizLock = "practice"; state.quiz = quiz; saveState();
+  pushCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
 
    async function startPracticeRetryMistakes() {
   const rec = state?.courses?.myRecCurrent;
   const subjectKey = state?.courses?.subjectKey;
-  const qids = state?.courses?.myRecMistakeQids || [];
+  const qids = Array.isArray(state?.courses?.myRecMistakeQids) ? state.courses.myRecMistakeQids.slice(0, 10) : [];
   if (!rec || !subjectKey) return;
-
-  if (!Array.isArray(qids) || !qids.length) {
-    showToast(t("rec_retry_empty") || "Нет ошибок для повтора.");
-    return;
-  }
-
-  const questions = await buildPracticeSetByQuestionIds(subjectKey, qids);
-  if (!questions.length) {
-    showToast(t("rec_retry_empty") || "Нет ошибок для повтора.");
-    return;
-  }
-
-  state.quizLock = "practice";
-  state.quiz = {
-    mode: "practice",
-    subjectKey,
-    startedAt: Date.now(),
-    paused: false,
-    pauseStartedAt: null,
-    pausedTotalMs: 0,
-
-    index: 0,
-    questions: questions.slice(0, 10),
-    answers: Array.from({ length: Math.min(10, questions.length) }).map(() => null),
-    correct: Array.from({ length: Math.min(10, questions.length) }).map(() => false),
-
-    qTimeLeft: Number(questions[0]?.timeLimitSec) || 60,
-    qEndsAtMs: null,
-    qTimerId: null,
-
-    recTopic: rec.topic || null,
-    recSubtopic: rec.subtopic || null,
-    drillType: "rec_mistakes"
-  };
-
-      // ✅ remember return target for drills
-try {
+  if (!qids.length) { showToast(t("rec_retry_empty") || "Нет ошибок для повтора."); return; }
+  const api = getPracticeSafeApi()?.drill;
+  if (!api || !window.iclubSafeAssessment) { showToast(t("not_available") || "Practice is temporarily unavailable."); return; }
+  const clientSessionId = window.iclubSafeAssessment.makeClientSessionId("practice_mistakes");
+  let started = null, rows = [];
+  showAsyncOverlay(tr3("Загружаем ошибки для повтора…", "Xatolarni takrorlash yuklanmoqda…", "Loading mistakes to retry…"));
+  try {
+    started = await dbWriteWithRetry(() => api.startMistakes({ subjectKey, questionIds: qids, clientSessionId }), { tries: 3, baseDelayMs: 350 });
+    rows = await dbWriteWithRetry(() => api.questions(Number(started?.session_id)), { tries: 3, baseDelayMs: 350 });
+  } catch { showToast(t("rec_retry_empty") || "Нет доступных ошибок для повтора."); return; }
+  finally { hideAsyncOverlay(); }
+  if (!started?.session_id || !Array.isArray(rows) || !rows.length) return;
+  const quiz = buildPracticeSafeQuizFromRows({
+    mode: "practice", subjectKey, practiceTourNo: 0, practicePoolId: null,
+    safeDrillSessionId: Number(started.session_id), safeDrillClientSessionId: clientSessionId,
+    startedAt: Date.now(), paused: false, pauseStartedAt: null, pausedTotalMs: 0,
+    index: 0, questions: [], answers: [], correct: [], timeSpent: [], qTimeLeft: 0,
+    qEndsAtMono: null, qEndsAtMs: null, qTimerId: null,
+    recTopic: rec.topic || null, recSubtopic: rec.subtopic || null, drillType: "rec_mistakes"
+  }, rows);
+  if (!quiz) return;
   if (!state.courses) state.courses = {};
   state.courses.myRecReturnTarget = "my-rec-detail";
-} catch {}
-      
-  saveState();
-pushCourses("practice-quiz");
-renderPracticeQuiz();
-startPracticeQuestionTimer();
+  state.quizLock = "practice"; state.quiz = quiz; saveState();
+  pushCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
    
 async function renderBooks() {
