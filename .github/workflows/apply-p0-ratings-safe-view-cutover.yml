@@ -1,0 +1,57 @@
+name: Apply P0 Ratings safe view cutover
+
+on:
+  push:
+    branches:
+      - iclub-v3-implementation
+    paths:
+      - scripts/p0-ratings-safe-view-cutover.mjs
+      - .github/workflows/apply-p0-ratings-safe-view-cutover.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-ratings:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout implementation branch
+        uses: actions/checkout@v4
+        with:
+          ref: iclub-v3-implementation
+          fetch-depth: 0
+
+      - name: Apply guarded Ratings safe-view cutover
+        run: node scripts/p0-ratings-safe-view-cutover.mjs
+
+      - name: Syntax and Ratings security checks
+        run: |
+          node --check app.js
+          node --check scripts/p0-ratings-safe-view-cutover.mjs
+          git diff --check
+          grep -q 'app.js?v=support4-p0ratings1' index.html
+          grep -q 'ratings_cache_safe_v4' app.js
+          grep -q 'tour_attempts_leaderboard_safe_v4' app.js
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const app = fs.readFileSync('app.js','utf8');
+          const count = s => app.split(s).length - 1;
+          if (count('.from("ratings_cache")') !== 0) throw new Error('legacy ratings_cache reads remain');
+          if (count('.from("ratings_cache_safe_v4")') !== 6) throw new Error('safe ratings cache count mismatch');
+          if (count('.from("tour_attempts_leaderboard_safe_v4")') !== 4) throw new Error('safe live leaderboard count mismatch');
+          if (count('users(first_name') !== 0) throw new Error('direct users relation projection remains');
+          if (count('.from("tour_attempts")') < 1) throw new Error('own Tour queries unexpectedly removed');
+          NODE
+
+      - name: Commit patched Ratings frontend
+        run: |
+          if git diff --quiet -- app.js index.html; then
+            echo 'No Ratings frontend changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app.js index.html
+          git commit -m 'Use safe leaderboard views for Ratings'
+          git push origin HEAD:iclub-v3-implementation
