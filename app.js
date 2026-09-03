@@ -11290,7 +11290,7 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
 
        // If cache is empty for this tour+scope — fallback to tour_attempts (so Tour 1 works even without cache build)
     const cacheProbe = await window.sb
-      .from("ratings_cache")
+      .from("ratings_cache_safe_v4")
       .select("rank_no")
       .eq("tour_id", tourId)
       .eq("rank_type", scopeRankType)
@@ -11309,8 +11309,8 @@ if (ratingsState.tourId && ratingsState.tourId !== "__all__") {
     if (!cacheHasData) {
       // -------- fallback: compute leaderboard from tour_attempts --------
             const attemptsRes = await window.sb
-  .from("tour_attempts")
-  .select("user_id,score,total_time,status,users(first_name,last_name,school,class,region,district,region_id,district_id)")
+  .from("tour_attempts_leaderboard_safe_v4")
+  .select("user_id,score,total_time,status,users")
   .eq("tour_id", tourId);
 if (token !== ratingsState._token) return;
 
@@ -11452,7 +11452,7 @@ if (attemptsRes?.error) {
     let myRow = null;
     if (isParticipant && uid) {
       const mr = await window.sb
-        .from("ratings_cache")
+        .from("ratings_cache_safe_v4")
         .select("rank_no,score,total_time")
         .eq("tour_id", tourId)
         .eq("rank_type", scopeRankType)
@@ -11463,8 +11463,8 @@ if (attemptsRes?.error) {
 
     // 2) top 50
         const topRes = await window.sb
-      .from("ratings_cache")
-      .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district,region_id,district_id)")
+      .from("ratings_cache_safe_v4")
+      .select("user_id,score,total_time,rank_no,users")
       .eq("tour_id", tourId)
       .eq("rank_type", scopeRankType)
       .lte("rank_no", 10)
@@ -11472,7 +11472,7 @@ if (attemptsRes?.error) {
 
          // total participants (max rank_no) for "out of N"
     const totalRes = await window.sb
-      .from("ratings_cache")
+      .from("ratings_cache_safe_v4")
       .select("rank_no")
       .eq("tour_id", tourId)
       .eq("rank_type", scopeRankType)
@@ -11495,8 +11495,8 @@ if (attemptsRes?.error) {
       const hi = myRank + 2;
 
             const aroundRes = await window.sb
-        .from("ratings_cache")
-        .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district,region_id,district_id)")
+        .from("ratings_cache_safe_v4")
+        .select("user_id,score,total_time,rank_no,users")
         .eq("tour_id", tourId)
         .eq("rank_type", scopeRankType)
         .gte("rank_no", lo)
@@ -11510,8 +11510,8 @@ if (attemptsRes?.error) {
     // 4) bottom 20 (optional)
     let bottomData = [];
         const bottomRes = await window.sb
-      .from("ratings_cache")
-      .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district,region_id,district_id)")
+      .from("ratings_cache_safe_v4")
+      .select("user_id,score,total_time,rank_no,users")
       .eq("tour_id", tourId)
       .eq("rank_type", scopeRankType)
       .order("rank_no", { ascending: false })
@@ -11573,8 +11573,8 @@ if (attemptsRes?.error) {
       const to = from + ratingsState._searchLimit - 1;
 
       const { data: pageData, error: pageErr } = await window.sb
-        .from("ratings_cache")
-        .select("user_id,score,total_time,rank_no,users(first_name,last_name,school,class,region,district)")
+        .from("ratings_cache_safe_v4")
+        .select("user_id,score,total_time,rank_no,users")
         .eq("tour_id", tourId)
         .eq("rank_type", scopeRankType)
         .order("rank_no", { ascending: true })
@@ -11666,8 +11666,8 @@ listEl.innerHTML = `
         const to = from + ratingsState._fbSearchLimit - 1;
 
         const { data: pageData, error: pageErr } = await window.sb
-          .from("tour_attempts")
-          .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district,region_id,district_id)")
+          .from("tour_attempts_leaderboard_safe_v4")
+          .select("user_id,score,total_time,status,tour_id,users")
           .eq("tour_id", tourId)
           .in("status", ["submitted", "time_expired", "anti_cheat"])
           .order("score", { ascending: false })
@@ -11766,8 +11766,8 @@ listEl.innerHTML = `
       // default fallback (no search): keep previous behavior (safe)
       ratingsState._pagingMode = "";
       const { data: attData, error: attErr } = await window.sb
-        .from("tour_attempts")
-        .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district,region_id,district_id)")
+        .from("tour_attempts_leaderboard_safe_v4")
+        .select("user_id,score,total_time,status,tour_id,users")
         .eq("tour_id", tourId)
         .in("status", ["submitted", "time_expired", "anti_cheat"])
         .limit(5000);
@@ -11963,8 +11963,8 @@ if (!tourIds.length) {
 }
 
 const { data: attempts, error: attErr } = await window.sb
-  .from("tour_attempts")
-  .select("user_id,score,total_time,status,tour_id,users(first_name,last_name,school,class,region,district,region_id,district_id)")
+  .from("tour_attempts_leaderboard_safe_v4")
+  .select("user_id,score,total_time,status,tour_id,users")
   .in("tour_id", tourIds)
   .limit(5000);
 
