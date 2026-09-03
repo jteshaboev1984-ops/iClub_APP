@@ -1,0 +1,139 @@
+name: P0-02 release regression
+
+on:
+  push:
+    branches:
+      - security-p0-02-production-release
+    paths:
+      - app.js
+      - index.html
+      - security/legacy-assessment-safe-api.js
+      - .github/workflows/p0-02-release-regression.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact release revision
+        uses: actions/checkout@v4
+        with:
+          ref: security-p0-02-production-release
+
+      - name: Static safety gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check security/legacy-assessment-safe-api.js
+          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1' index.html
+          grep -q 'app.js?v=support4-p0legacysaveoff1' index.html
+          grep -q 'start_practice_session_auto_safe_v4' security/legacy-assessment-safe-api.js
+          grep -q 'get_practice_session_resume_safe_v4' security/legacy-assessment-safe-api.js
+          grep -q 'finalize_practice_session_safe_v4' security/legacy-assessment-safe-api.js
+          grep -q 'get_tour_preflight_questions_safe_v4' security/legacy-assessment-safe-api.js
+          grep -q 'start_tour_attempt_safe_v4' security/legacy-assessment-safe-api.js
+          grep -q 'finalize_tour_attempt_safe_v4' security/legacy-assessment-safe-api.js
+          grep -q 'ratings_cache_safe_v4' app.js
+          grep -q 'tour_attempts_leaderboard_safe_v4' app.js
+          grep -q 'practiceApi.resetProgress()' app.js
+          grep -q 'reset_practice_progress_safe_v4' security/legacy-assessment-safe-api.js
+          grep -q 'legacy_practice_write_disabled' app.js
+          grep -q 'safe_v4_persistence_missing' app.js
+          ! grep -q '\.from("ratings_cache")' app.js
+          ! grep -q 'await window.sb.from("practice_answers").delete().in("attempt_id", chunk)' app.js
+          test "$(grep -c 'createTourAttempt(' app.js)" -eq 1
+          test "$(grep -c 'savePracticeAttemptToSupabase(' app.js)" -eq 1
+          test "$(grep -c 'type: "practice_save"' app.js || true)" -eq 0
+
+      - name: Install Chromium harness
+        run: |
+          mkdir -p /tmp/pw
+          cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          ./node_modules/.bin/playwright install --with-deps chromium >/dev/null
+
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/iclub-http.log 2>&1 &
+          echo $! >/tmp/iclub-http.pid
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/iclub-http.log
+          exit 1
+
+      - name: Chromium smoke
+        env:
+          NODE_PATH: /tmp/pw/node_modules
+        run: |
+          mkdir -p artifacts
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const assert = (ok, msg) => { if (!ok) throw new Error(msg); };
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+            const pageErrors = [];
+            const localFailures = [];
+            page.on('pageerror', e => pageErrors.push(String(e?.stack || e?.message || e)));
+            page.on('requestfailed', req => {
+              try {
+                const u = new URL(req.url());
+                if (u.hostname === '127.0.0.1' || u.hostname === 'localhost') {
+                  localFailures.push(`${req.method()} ${req.url()} :: ${req.failure()?.errorText || 'failed'}`);
+                }
+              } catch {}
+            });
+            const response = await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+            assert(response?.ok(), `root response not OK: ${response?.status()}`);
+            await page.waitForTimeout(5000);
+            const result = await page.evaluate(() => ({
+              text: (document.body?.innerText || '').trim().length,
+              app: !!document.querySelector('#app'),
+              activeView: !!document.querySelector('.view.is-active'),
+              overlay: !!document.querySelector('[data-nextjs-dialog], .vite-error-overlay, #webpack-dev-server-client-overlay'),
+              scripts: Array.from(document.scripts).map(s => s.getAttribute('src') || ''),
+              safe: {
+                root: !!window.iclubSafeAssessment,
+                practice: typeof window.iclubSafeAssessment?.practice?.start === 'function',
+                practiceResume: typeof window.iclubSafeAssessment?.practice?.questions === 'function',
+                practiceSubmit: typeof window.iclubSafeAssessment?.practice?.submit === 'function',
+                practiceFinalize: typeof window.iclubSafeAssessment?.practice?.finalize === 'function',
+                practiceReview: typeof window.iclubSafeAssessment?.practice?.review === 'function',
+                practiceReset: typeof window.iclubSafeAssessment?.practice?.resetProgress === 'function',
+                drill: !!window.iclubSafeAssessment?.practice?.drill,
+                tourPreflight: typeof window.iclubSafeAssessment?.tour?.preflight === 'function',
+                tourStart: typeof window.iclubSafeAssessment?.tour?.start === 'function',
+                tourQuestions: typeof window.iclubSafeAssessment?.tour?.questions === 'function',
+                tourSubmit: typeof window.iclubSafeAssessment?.tour?.submit === 'function',
+                tourFinalize: typeof window.iclubSafeAssessment?.tour?.finalize === 'function',
+                tourReview: typeof window.iclubSafeAssessment?.tour?.review === 'function'
+              }
+            }));
+            assert(result.text > 20, 'page appears blank');
+            assert(result.app && result.activeView, 'app shell/active view missing');
+            assert(!result.overlay, 'framework error overlay present');
+            assert(result.scripts.some(x => x.includes('security/legacy-assessment-safe-api.js?v=p002v4reset1')), 'safe adapter script missing');
+            assert(result.scripts.some(x => x.includes('app.js?v=support4-p0legacysaveoff1')), 'release app script missing');
+            for (const [k,v] of Object.entries(result.safe)) assert(v, `safe API missing: ${k}`);
+            assert(pageErrors.length === 0, `page errors: ${JSON.stringify(pageErrors)}`);
+            assert(localFailures.length === 0, `local asset failures: ${JSON.stringify(localFailures)}`);
+            await page.screenshot({ path: 'artifacts/p0-02-release-mobile.png', fullPage: true });
+            console.log(JSON.stringify({ ok: true, result, pageErrors, localFailures }, null, 2));
+            await browser.close();
+          })().catch(err => { console.error(err); process.exit(1); });
+          NODE
+
+      - name: Upload screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-02-release-regression
+          path: artifacts/p0-02-release-mobile.png
+          if-no-files-found: ignore
