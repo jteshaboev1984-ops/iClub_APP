@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const API_VERSION = "p0-02-v4-aux2-tour";
+  const API_VERSION = "p0-02-v4-aux2-tour-reset";
   const LEGACY_PRACTICE_MAX_QUESTIONS = 10;
 
   function client() {
@@ -125,6 +125,10 @@
       return rpc("get_practice_review_full_safe_v4", {
         p_attempt_id: requirePositiveInt(attemptId, "attempt_id")
       });
+    },
+
+    async resetProgress() {
+      return rpc("reset_practice_progress_safe_v4", {});
     },
 
     async recentMistakes({ subjectKey, topic = null, subtopic = null, limit = 10 }) {

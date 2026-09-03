@@ -12991,22 +12991,15 @@ if (!ok) return;
       try {
         const uid = await getAuthUid();
         if (window.sb && uid) {
-          // --- Practice wipe ---
-          const { data: pAtt } = await window.sb
-            .from("practice_attempts")
-            .select("id")
-            .eq("user_id", uid)
-            .limit(10000);
-
-          const pIds = (Array.isArray(pAtt) ? pAtt : []).map(x => x.id).filter(Boolean);
-          if (pIds.length) {
-            // delete answers by attempt_id (safe if column exists)
-            for (let i = 0; i < pIds.length; i += 500) {
-              const chunk = pIds.slice(i, i + 500);
-              await window.sb.from("practice_answers").delete().in("attempt_id", chunk);
-            }
+          // --- Practice wipe (server-authoritative) ---
+          const practiceApi = getPracticeSafeApi();
+          if (!practiceApi?.resetProgress) {
+            throw new Error("practice_reset_safe_api_unavailable");
           }
-          await window.sb.from("practice_attempts").delete().eq("user_id", uid);
+          const resetResult = await practiceApi.resetProgress();
+          if (!resetResult?.ok) {
+            throw new Error("practice_reset_failed");
+          }
 
           // --- Tour wipe ---
           // ✅ Tours НЕ очищаем при смене языка контента.
