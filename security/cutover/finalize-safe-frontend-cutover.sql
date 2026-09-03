@@ -1,6 +1,6 @@
 -- FINAL PRODUCTION CUTOVER HARDENING
 -- ==================================
--- DO NOT APPLY while production main still loads the legacy assessment frontend.
+-- DO NOT APPLY while production main still loads the legacy assessment/credential frontend.
 -- This file intentionally lives outside supabase/migrations so it cannot be picked up
 -- accidentally by a migration runner.
 --
@@ -9,7 +9,8 @@
 --   2) production app.js has no direct .from("questions") reads;
 --   3) production Ratings uses ratings_cache_safe_v4 and tour_attempts_leaderboard_safe_v4;
 --   4) active Practice/Tour writes use safe-v4 RPCs;
---   5) production browser regression is green on the exact deployed revision.
+--   5) credential sync uses sync_user_credentials_safe_v1 instead of direct user_credentials writes;
+--   6) production browser regression is green on the exact deployed revision.
 
 begin;
 
@@ -30,6 +31,9 @@ begin
   end if;
   if to_regprocedure('public.finalize_tour_attempt_safe_v4(bigint,integer,text)') is null then
     raise exception 'cutover_precondition_failed: finalize_tour_attempt_safe_v4 missing';
+  end if;
+  if to_regprocedure('public.sync_user_credentials_safe_v1(jsonb)') is null then
+    raise exception 'cutover_precondition_failed: sync_user_credentials_safe_v1 missing';
   end if;
   if to_regclass('public.ratings_cache_safe_v4') is null then
     raise exception 'cutover_precondition_failed: ratings_cache_safe_v4 missing';
@@ -93,15 +97,33 @@ using (
 revoke all privileges on table public.tour_answers from anon, authenticated;
 grant select on table public.tour_answers to authenticated;
 
+-- 4) Credentials: canonical status/evidence is server-authoritative.
+-- The client may read its own credential rows, but may not self-award/update/delete them.
+drop policy if exists user_credentials_rw_own on public.user_credentials;
+drop policy if exists user_credentials_select_own on public.user_credentials;
+create policy user_credentials_select_own
+on public.user_credentials
+for select
+to authenticated
+using (user_id = auth.uid());
+
+revoke all privileges on table public.user_credentials from anon, authenticated;
+grant select on table public.user_credentials to authenticated;
+revoke all privileges on sequence public.user_credentials_id_seq from anon, authenticated;
+
 comment on table public.questions is
 'Canonical assessment question bank. Direct client access disabled after production safe-v4 frontend cutover.';
+comment on table public.user_credentials is
+'Credential state is server-authoritative. Authenticated clients can read only their own rows; writes occur through validated server RPCs.';
 
 commit;
 
 -- POST-CUTOVER verification checklist (run separately):
 --   * anon/authenticated have no privileges on questions;
 --   * authenticated can only SELECT tour_attempts/tour_answers directly;
+--   * authenticated can only SELECT its own user_credentials directly;
 --   * users_select_all_auth / tour_attempts_select_all_auth / ratings_cache_public_read do not exist;
---   * authenticated own profile/history reads still work;
+--   * authenticated own profile/history/credential reads still work;
 --   * safe Practice/Tour review RPCs return real rows;
+--   * sync_user_credentials_safe_v1 rejects unsupported/self-awarded active credentials;
 --   * production browser regression remains green.
