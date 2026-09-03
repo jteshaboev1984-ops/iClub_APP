@@ -5091,22 +5091,8 @@ function isMcqPickedIndexCorrect(q, pickedIndex) {
 }
 
 async function fetchQuestionRuntimeSecrets(questionId) {
-  try {
-    const client = window.sb || sb || null;
-    const id = Number(questionId);
-    if (!client || !Number.isFinite(id) || id <= 0) return null;
-
-    const { data, error } = await client
-      .from("questions")
-            .select("id,topic,subtopic,difficulty,qtype,time_limit_sec,question_text,options_text,correct_answer,explanation,image_url,book_ref,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en")
-      .eq("id", id)
-      .maybeSingle();
-
-    if (error || !data) return null;
-    return data;
-  } catch {
-    return null;
-  }
+  void questionId;
+  return null;
 }
 
 function mergeRuntimeQuestionSecrets(oldQ, row, fallbackTimeLimitSec = 60) {
@@ -5147,22 +5133,9 @@ function mergeRuntimeQuestionSecrets(oldQ, row, fallbackTimeLimitSec = 60) {
 }
 
 async function restoreActiveTourQuestionSecrets(ctx, questionIndex) {
-  try {
-    if (!ctx || ctx.isArchive || !Array.isArray(ctx.questions)) return null;
-
-    const idx = Number(questionIndex ?? ctx.index ?? 0);
-    if (!Number.isFinite(idx) || idx < 0 || idx >= ctx.questions.length) return null;
-
-    const oldQ = ctx.questions[idx];
-    const row = await fetchQuestionRuntimeSecrets(oldQ?.id);
-    if (!row) return null;
-
-    const restored = mergeRuntimeQuestionSecrets(oldQ, row, TOUR_CONFIG.defaultQuestionTimeSec);
-    ctx.questions[idx] = restored;
-    return restored;
-  } catch {
-    return null;
-  }
+  void ctx;
+  void questionIndex;
+  return null;
 }
 
 async function getSavedTourAttemptScore(attemptId) {
@@ -5849,33 +5822,12 @@ function formatDateTime(ts) {
   }
 
         function isValidInputAnswer(q, value) {
-    const v = String(value ?? "").trim();
-    if (!v) return false;
-
-    const expected = getInputExpectedAnswer(q);
-    const expectedIsNumeric = parseStrictNumberAnswer(expected) !== null;
-
-       if (q?.inputKind === "numeric" || expectedIsNumeric) {
-      return parseStrictNumberAnswer(v) !== null && hasAllowedNumericSign(v, expected);
-    }
-
-    if (q?.inputKind === "letter") {
-      // ровно 1 буква, запрещаем a/b/c/d (чтобы не путали с MCQ)
-      if (!/^[A-Za-zА-Яа-я]$/.test(v)) return false;
-      const low = v.toLowerCase();
-      if (low === "a" || low === "b" || low === "c" || low === "d") return false;
-      return true;
-    }
-
-    if (isFormulaLikeExpectedAnswer(expected)) {
-      // Formula/token input must be compact: no spaces, no subscripts.
-      if (/[₀₁₂₃₄₅₆₇₈₉]/.test(v)) return false;
-      if (/\s/.test(v)) return false;
-      return /^[A-Za-z][A-Za-z0-9]*$/.test(v);
-    }
-
-    return true;
-  }
+  void q;
+  const v = String(value ?? "").trim();
+  if (!v) return false;
+  if (v.length > 500) return false;
+  return !/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(v);
+}
    // ---------------------------
   // Regions / Districts
   // - Uses Supabase if available (regions/districts tables)
@@ -20044,86 +19996,53 @@ async function loadActiveTourBySubjectAndNo(
   return data;
 }
 
+function getTourSafeApi() {
+  return window.iclubSafeAssessment?.tour || null;
+}
+
+function mapTourSafeQuestionRows(rows) {
+  const list = Array.isArray(rows) ? rows.slice() : [];
+  return list
+    .sort((a, b) => Number(a?.order_no || 0) - Number(b?.order_no || 0))
+    .map(row => {
+      const qtype = String(row?.qtype || "mcq").toLowerCase();
+      const type = qtype === "input" ? "input" : "mcq";
+      const options = type === "mcq"
+        ? (parseOptionsText(pickContentText(row || {}, "options_text") || "") || [])
+        : [];
+      const diff = normalizeDifficulty(row?.difficulty || "easy");
+      return {
+        id: Number(row?.id || 0),
+        subject_id: Number(row?.subject_id || 0) || null,
+        topic: row?.topic || "General",
+        subtopic: row?.subtopic || null,
+        difficulty: diff,
+        qtype,
+        type,
+        question: pickContentText(row || {}, "question_text") || "",
+        options,
+        imageUrl: row?.image_url || null,
+        image_url: row?.image_url || null,
+        book_ref: row?.book_ref || null,
+        bookReference: row?.book_ref || null,
+        timeLimitSec:
+          (row?.time_limit_sec != null && Number(row.time_limit_sec) >= 10)
+            ? Number(row.time_limit_sec)
+            : TOUR_CONFIG.defaultQuestionTimeSec
+      };
+    })
+    .filter(q => Number.isFinite(q.id) && q.id > 0);
+}
+
 async function loadTourQuestionsDB(tourId) {
-  if (!window.sb || !tourId) return null;
-
-    const { data, error } = await window.sb
-  .from("tour_questions")
-  .select("order_no, question:questions(id,topic,subtopic,difficulty,qtype,time_limit_sec,question_text,options_text,correct_answer,explanation,image_url,is_active,book_ref,question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en)")
-  .eq("tour_id", tourId)
-  .eq("is_active", true)
-  .order("order_no", { ascending: true })
-  .limit(200);
-
-  if (error) return null;
-
-  const rows = Array.isArray(data) ? data : [];
-  const items = rows
-    .map(r => r?.question || null)
-    .filter(q => q && q.is_active);
-
-  // normalize to Tour UI model (same spirit as practice builder)
-  const normalizeDiff = (d) => normalizeDifficulty(d || "easy");
-  const normalizeType = (t) => (String(t || "mcq").toLowerCase() === "input" ? "input" : "mcq");
-
-   const contentLang = (loadProfile()?.language) || "ru";
-   const pickL = (obj, base) => {
-   const k = contentLang === "uz" ? (base + "_uz") : contentLang === "en" ? (base + "_en") : (base + "_ru");
-   return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
-};
-
-    return items.map(q => {
-    const type = normalizeType(q.qtype);
-
-      // ✅ options по языку контента
-      const optionsRaw = pickL(q, "options_text");
-      const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : null;
-
-    // correctIndex for mcq:
-    // - if correct_answer is numeric index => use it
-    // - if correct_answer is A/B/C/D => convert to index
-    // - else try match to option text (case-insensitive)
-    let correctIndex = 0;
-    if (type === "mcq") {
-      const ca = String(q.correct_answer ?? "").trim();
-
-      if (isNumericLike(ca)) {
-        correctIndex = Math.max(
-          0,
-          Math.min((opts?.length || 1) - 1, Math.trunc(Number(String(ca).replace(",", "."))))
-        );
-      } else if (/^[A-D]$/i.test(ca)) {
-        const idx = letterToIdx(ca);
-        if (idx !== null) {
-          correctIndex = Math.max(0, Math.min((opts?.length || 1) - 1, idx));
-        }
-      } else if (opts.length) {
-        const idx = opts.findIndex(o => String(o).trim().toLowerCase() === ca.toLowerCase());
-        if (idx >= 0) correctIndex = idx;
-      }
-    }
-
-        return {
-  id: Number(q.id),
-  topic: q.topic || "General",
-  subtopic: q.subtopic || null,
-  difficulty: normalizeDiff(q.difficulty),
-  type,
-  question: pickL(q, "question_text") || "",
-  options: opts || [],
-  correctIndex,
-  correct_answer: String(q.correct_answer ?? "").trim(),
-  correctAnswer: String(q.correct_answer ?? "").trim(),
-  explanation: pickL(q, "explanation") || "",
-  imageUrl: q.image_url || null,
-  book_ref: q.book_ref || null,
-  bookReference: q.book_ref || null,
-  timeLimitSec:
-    (q.time_limit_sec != null && Number(q.time_limit_sec) >= 10)
-      ? Number(q.time_limit_sec)
-      : TOUR_CONFIG.defaultQuestionTimeSec
-    };
-  });
+  try {
+    const api = getTourSafeApi();
+    if (!api?.preflight) return [];
+    return mapTourSafeQuestionRows(await api.preflight(Number(tourId)));
+  } catch (error) {
+    try { trackEvent("tour_safe_preflight_error", { tour_id: String(tourId || ""), message: String(error?.message || error || "unknown") }); } catch {}
+    return [];
+  }
 }
 
 async function hasTourAttempt(uid, tourId) {
@@ -20202,71 +20121,40 @@ async function createTourAttempt(uid, tourId) {
 }
 
 async function upsertTourAnswer(attemptId, questionId, patch) {
-  if (!window.sb || !attemptId || !questionId) return { ok: false, reason: "no_sb_or_ids" };
-
   try {
-    await dbWriteWithRetry(async () => {
-      const { error } = await window.sb
-        .from("tour_answers")
-        .upsert([{
-          attempt_id: attemptId,
-          question_id: questionId,
-          user_answer: patch.user_answer ?? null,
-          answered: !!patch.answered,
-          is_correct: !!patch.is_correct,
-          time_spent: Number(patch.time_spent || 0),
-          finish_reason: patch.finish_reason ?? null
-        }], { onConflict: "attempt_id,question_id" });
-
-      if (error) throw error;
-      return true;
-    }, { tries: 3, baseDelayMs: 350 });
-
-    return { ok: true };
-  } catch (e) {
-    try { logClientError("upsertTourAnswer_failed", e); } catch {}
-    return { ok: false, reason: "db_error", error: e };
+    const api = getTourSafeApi();
+    if (!api?.submit) return { ok: false, reason: "safe_api_unavailable" };
+    const p = patch && typeof patch === "object" ? patch : {};
+    const result = await dbWriteWithRetry(() => api.submit({
+      attemptId: Number(attemptId),
+      questionId: Number(questionId),
+      userAnswer: p.user_answer == null ? "" : String(p.user_answer),
+      pickedIndex: p.picked_index ?? p.pickedIndex ?? null,
+      timeSpent: Math.max(0, Number(p.time_spent || 0)),
+      answered: p.answered !== false,
+      finishReason: p.finish_reason ?? p.finishReason ?? null
+    }), { tries: 3, baseDelayMs: 350 });
+    return { ok: !!result?.ok, ...result };
+  } catch (error) {
+    try { trackEvent("tour_safe_submit_error", { attempt_id: String(attemptId || ""), question_id: String(questionId || ""), message: String(error?.message || error || "unknown") }); } catch {}
+    return { ok: false, reason: "safe_submit_failed", error };
   }
 }
 
 async function updateTourAttempt(attemptId, patch) {
-  if (!window.sb || !attemptId) return { ok: false, reason: "no_sb_or_id" };
-
   try {
-    let finalScore = Number(patch.score || 0);
-    let finalPercent = Number(patch.percent || 0);
-
-    const savedScore = await getSavedTourAttemptScore(attemptId);
-    const expectedRows = Number(patch.expected_answer_rows || 0);
-
-    if (savedScore && expectedRows > 0 && savedScore.answerRows < expectedRows) {
-      return { ok: false, reason: "answers_not_ready", savedRows: savedScore.answerRows, expectedRows };
-    }
-
-    if (savedScore && savedScore.answerRows > 0) {
-      finalScore = savedScore.score;
-      finalPercent = savedScore.percent;
-    }
-
-    await dbWriteWithRetry(async () => {
-      const { error } = await window.sb
-        .from("tour_attempts")
-        .update({
-          score: finalScore,
-          percent: finalPercent,
-          total_time: Number(patch.total_time || 0),
-          status: String(patch.status || "submitted")
-        })
-        .eq("id", attemptId);
-
-      if (error) throw error;
-      return true;
-    }, { tries: 3, baseDelayMs: 350 });
-
-    return { ok: true, score: finalScore, percent: finalPercent };
-  } catch (e) {
-    try { trackEvent("tour_db_save_failed", { attempt_id: String(attemptId), message: String(e?.message || e) }); } catch {}
-    return { ok: false, reason: "db_error", error: e };
+    const api = getTourSafeApi();
+    if (!api?.finalize) return { ok: false, reason: "safe_api_unavailable" };
+    const p = patch && typeof patch === "object" ? patch : {};
+    const result = await dbWriteWithRetry(() => api.finalize({
+      attemptId: Number(attemptId),
+      totalTime: Math.max(0, Number(p.total_time || p.totalTime || 0)),
+      status: String(p.status || "submitted")
+    }), { tries: 3, baseDelayMs: 450 });
+    return { ok: !!result?.ok, ...result };
+  } catch (error) {
+    try { trackEvent("tour_safe_finalize_error", { attempt_id: String(attemptId || ""), message: String(error?.message || error || "unknown") }); } catch {}
+    return { ok: false, reason: "safe_finalize_failed", error };
   }
 }
 
@@ -20487,16 +20375,6 @@ async function updateTourAttempt(attemptId, patch) {
     return;
   }
 
-  // 3) one attempt rule
-  const already = await hasTourAttempt(uid, tour.id);
-  if (already) {
-    await uiAlert({
-      title: t("tour_unavailable_title") || "Тур недоступен",
-      message: t("tour_unavailable_already_attempted") || "У вас уже была попытка в этом туре."
-    });
-    return;
-  }
-
   // 4) load questions by mapping table tour_questions
   const questions = await loadTourQuestionsDB(tour.id);
   if (!questions || questions.length === 0) {
@@ -20553,10 +20431,40 @@ async function updateTourAttempt(attemptId, patch) {
     });
   } catch {}
 
-  // 5) create attempt row
-  const attemptId = await createTourAttempt(uid, tour.id);
-  if (!attemptId) {
-    showToast(t("toast_tour_create_failed"));
+  // 5) create/resume server-authoritative attempt after image preflight succeeded
+  const tourApi = getTourSafeApi();
+  if (!tourApi?.start || !tourApi?.questions || !window.iclubSafeAssessment?.makeClientSessionId) {
+    showToast(t("not_available") || "Tour is temporarily unavailable.");
+    return;
+  }
+
+  const tourClientSessionId = window.iclubSafeAssessment.makeClientSessionId("tour");
+  let startResult = null;
+  let runtimeRows = [];
+  try {
+    startResult = await dbWriteWithRetry(() => tourApi.start({
+      tourId: Number(tour.id),
+      clientSessionId: tourClientSessionId
+    }), { tries: 3, baseDelayMs: 400 });
+    runtimeRows = await dbWriteWithRetry(() => tourApi.questions(Number(startResult?.attempt_id)), { tries: 3, baseDelayMs: 350 });
+  } catch (error) {
+    const text = String(error?.message || error || "").toLowerCase();
+    if (text.includes("already_attempted")) {
+      await uiAlert({
+        title: t("tour_unavailable_title") || "Тур недоступен",
+        message: t("tour_unavailable_already_attempted") || "У вас уже была попытка в этом туре."
+      });
+    } else {
+      showToast(t("toast_tour_create_failed") || t("save_failed_try_again") || "Tour could not be started.");
+    }
+    try { trackEvent("tour_safe_start_error", { tour_id: String(tour.id || ""), message: String(error?.message || error || "unknown") }); } catch {}
+    return;
+  }
+
+  const attemptId = Number(startResult?.attempt_id || 0) || null;
+  const runtimeQuestions = mapTourSafeQuestionRows(runtimeRows);
+  if (!attemptId || runtimeQuestions.length !== TOUR_CONFIG.total) {
+    showToast(t("tour_unavailable_no_questions") || "Для тура не назначены вопросы.");
     return;
   }
 
@@ -20578,7 +20486,7 @@ async function updateTourAttempt(attemptId, patch) {
     tourId: tour.id,
     seasonId: tour?.season_id || null,
     attemptId,
-    questions,
+    questions: runtimeQuestions,
     isArchive: false,
     tourEndDate: tour?.end_date || null
   });
@@ -21280,162 +21188,72 @@ async function updateTourAttempt(attemptId, patch) {
   }
 
        async function submitTourAnswer({ pickedIndex, auto = false } = {}) {
-    const ctx = state.tourContext;
-    if (!ctx) return;
+  const ctx = state.tourContext;
+  if (!ctx) return;
 
-    let q = ctx.questions?.[ctx.index];
-    if (!q || !ctx.questionReady) return;
+  const q = ctx.questions?.[ctx.index];
+  if (!q || !ctx.questionReady) return;
 
-    const spentSec = Math.max(0, Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000));
+  const spentSec = Math.max(0, Math.floor((monoNow() - (ctx.qStartedAtMono ?? ctx.qStartedAt)) / 1000));
+  const qType = String(q?.qtype || q?.type || "mcq").toLowerCase();
+  const isMcq = qType === "mcq" || qType === "multiple_choice";
+  const pickedNum = pickedIndex === null || pickedIndex === undefined ? null : Number(pickedIndex);
+  const inputEl = document.getElementById("tour-input");
+  const inputVal = inputEl ? String(inputEl.value || "").trim() : "";
 
-    // normalize question type (DB uses qtype, older code may use type)
-    const qType =
-      (q?.qtype != null ? String(q.qtype) : (q?.type != null ? String(q.type) : "mcq"))
-        .toLowerCase();
-    const isMcq = (qType === "mcq" || qType === "multiple_choice");
-
-          if (isMcq && getMcqCorrectIndexFromQuestion(q) === null && !ctx?.isArchive) {
-      const restoredQ = await restoreActiveTourQuestionSecrets(ctx, ctx.index);
-      if (restoredQ) q = restoredQ;
+  if (!isMcq && !auto && !isValidInputAnswer(q, inputVal)) {
+    const errEl = document.getElementById("tour-input-error");
+    if (errEl) {
+      errEl.textContent = t("invalid_answer_format");
+      errEl.style.display = "block";
+    } else {
+      showToast(t("invalid_answer_format"));
     }
+    return;
+  }
 
-        const correctIdx = isMcq ? getMcqCorrectIndexFromQuestion(q) : null;
-    const pickedNum = (pickedIndex === null || pickedIndex === undefined) ? null : Number(pickedIndex);
-
-    // Safety guard: if user selected an MCQ option but correctness data is still missing,
-    // do NOT save it as wrong. This prevents false-negative tour answers after WebView reload.
-    if (isMcq && correctIdx === null && !ctx?.isArchive && pickedNum !== null) {
-      showToast(t("save_failed_try_again") || t("not_available") || "Please try again.");
-
-      const nextBtn =
-        $("#tour-next-btn") ||
-        $("#quiz-next-btn") ||
-        document.querySelector('[data-action="tour-next"]');
-
-      if (nextBtn) {
-        nextBtn.classList.remove("is-loading");
-        nextBtn.disabled = false;
-
-        const isLast = (ctx.index >= TOUR_CONFIG.total - 1);
-        nextBtn.textContent = isLast
-          ? (t("tour_finish_button") || "Finish Tour →")
-          : (t("tour_next_question") || "Next Question →");
-      }
-
-      return;
-    }
-
-    // input value (for non-mcq)
-    const inputEl = document.getElementById("tour-input");
-    const inputVal = inputEl ? String(inputEl.value || "").trim() : "";
-
-    // expected answer (for input questions)
-    const expectedRaw =
-      (q?.correct_answer != null ? q.correct_answer
-        : (q?.correctAnswer != null ? q.correctAnswer
-        : (q?.correct != null ? q.correct
-        : (q?.answer != null ? q.answer : null))));
-
-        const expected = (expectedRaw == null) ? "" : String(expectedRaw).trim();
-
-    if (!isMcq && !auto && !isValidInputAnswer(q, inputVal)) {
-      const errEl = document.getElementById("tour-input-error");
-      if (errEl) {
-        errEl.textContent = t("invalid_answer_format");
-        errEl.style.display = "block";
-      } else {
-        showToast(t("invalid_answer_format"));
-      }
-      return;
-    }
-
-    // correctness
+  if (ctx.isArchive) {
+    const correctIdx = isMcq ? getMcqCorrectIndexFromQuestion(q) : null;
+    const expected = getInputExpectedAnswer(q);
     const isCorrect = isMcq
       ? isMcqPickedIndexCorrect({ ...q, correctIndex: correctIdx }, pickedNum)
       : isInputAnswerCorrect(inputVal, expected);
-       
     ctx.answers = ctx.answers || [];
-    ctx.answers.push({
-      qid: q.id,
-      pickedIndex: pickedNum,
-      input: isMcq ? "" : inputVal,
-      isCorrect,
-      spentSec,
-      index: ctx.index
-    });
-
+    ctx.answers.push({ qid: q.id, pickedIndex: pickedNum, input: isMcq ? "" : inputVal, isCorrect, spentSec, index: ctx.index });
     if (isCorrect) ctx.correct += 1;
+  } else {
+    const pickedForDb = pickedNum === null ? "" : (idxToLetter(pickedNum) || String(pickedNum));
+    const answerForDb = isMcq ? pickedForDb : inputVal;
+    const answerPatch = {
+      user_answer: answerForDb,
+      picked_index: isMcq ? pickedNum : null,
+      answered: true,
+      time_spent: spentSec,
+      finish_reason: auto ? "question_timeout" : null
+    };
 
-    // DB autosave (only for active tour). Await it before moving forward;
-    // otherwise Finish can finalize score before the last answer reaches DB.
-    try {
-      const ctx2 = state.tourContext;
-      if (ctx2?.attemptId && q?.id && !ctx2?.isArchive) {
-        const spentSec2 = Math.max(0, Math.round((Date.now() - (ctx2.qStartedAt || Date.now())) / 1000));
-        const pickedForDb = (pickedNum === null ? "" : (idxToLetter(pickedNum) || String(pickedNum)));
-
-        const inputEl = document.getElementById("tour-input");
-        const inputVal = inputEl ? String(inputEl.value || "").trim() : "";
-
-        const answerForDb = isMcq ? pickedForDb : inputVal;
-        const answerPatch = {
-          user_answer: answerForDb,
-          answered: true,
-          is_correct: isCorrect,
-          time_spent: spentSec2
-        };
-
-        const res = await upsertTourAnswer(ctx2.attemptId, q.id, answerPatch);
-
-        if (!res?.ok) {
-          ctx2.pendingDbAnswers = Array.isArray(ctx2.pendingDbAnswers) ? ctx2.pendingDbAnswers : [];
-          ctx2.pendingDbAnswers.push({
-            attemptId: ctx2.attemptId,
-            questionId: q.id,
-            patch: answerPatch
-          });
-          saveState();
-        }
-      }
-    } catch {
-      try {
-        const ctx2 = state.tourContext;
-        if (ctx2?.attemptId && q?.id && !ctx2?.isArchive) {
-          const pickedForDb = (pickedNum === null ? "" : (idxToLetter(pickedNum) || String(pickedNum)));
-          const answerForDb = isMcq ? pickedForDb : inputVal;
-          ctx2.pendingDbAnswers = Array.isArray(ctx2.pendingDbAnswers) ? ctx2.pendingDbAnswers : [];
-          ctx2.pendingDbAnswers.push({
-            attemptId: ctx2.attemptId,
-            questionId: q.id,
-            patch: {
-              user_answer: answerForDb,
-              answered: true,
-              is_correct: isCorrect,
-              time_spent: spentSec
-            }
-          });
-          saveState();
-        }
-      } catch {}
+    const result = await upsertTourAnswer(ctx.attemptId, q.id, answerPatch);
+    if (!result?.ok) {
+      ctx.pendingDbAnswers = Array.isArray(ctx.pendingDbAnswers) ? ctx.pendingDbAnswers : [];
+      ctx.pendingDbAnswers.push({ attemptId: ctx.attemptId, questionId: q.id, patch: answerPatch });
     }
 
-    // anti-slip: current answered question no longer needs secrets in runtime
-    stripAnsweredTourQuestionInRuntime(ctx, ctx.index);
-
-    // clear transient pick cache before moving on
-    ctx._pickedIndex = null;
-
-    // next index
-    ctx.index += 1;
-    saveState();
-
-    if (ctx.index >= TOUR_CONFIG.total) {
-      finishTour({ reason: auto ? "auto_done" : "done" }).catch(() => null);
-      return;
-    }
-
-    renderTourQuestion();
+    ctx.answers = ctx.answers || [];
+    ctx.answers.push({ qid: q.id, pickedIndex: pickedNum, input: isMcq ? "" : inputVal, isCorrect: null, spentSec, index: ctx.index });
   }
+
+  stripAnsweredTourQuestionInRuntime(ctx, ctx.index);
+  ctx._pickedIndex = null;
+  ctx.index += 1;
+  saveState();
+
+  if (ctx.index >= TOUR_CONFIG.total) {
+    finishTour({ reason: auto ? "auto_done" : "done" }).catch(() => null);
+    return;
+  }
+
+  renderTourQuestion();
+}
    
                   async function isTourGloballyClosed(
   subjectKey,
@@ -21535,179 +21353,83 @@ async function updateTourAttempt(attemptId, patch) {
   if (!wrap) return;
 
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
-
   const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
   const localPayload = state?.courses?.lastTourReviewPayload || null;
-  const currentSubjectKey = String(state?.courses?.subjectKey || "").trim();
-  const payloadSubjectKey = String(localPayload?.subjectKey || "").trim();
   const payloadItems = Array.isArray(localPayload?.items) ? localPayload.items : [];
 
-  const hasFreshLocalTourPayload =
-    payloadItems.length > 0 &&
-    (!currentSubjectKey || !payloadSubjectKey || currentSubjectKey === payloadSubjectKey);
-
   const renderFromDetails = (details) => {
-    const mistakesOnly = (Array.isArray(details) ? details : []).filter(d => !d.isCorrect);
-
+    const mistakesOnly = (Array.isArray(details) ? details : []).filter(d => d?.isCorrect === false);
     if (!mistakesOnly.length) {
       wrap.innerHTML = `
         <div class="empty muted">${escapeHTML(t("tour_review_no_mistakes") || "По этому туру ошибок не найдено.")}</div>
         <div class="list-item" style="margin-top:12px">
           <div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div>
-          <div style="margin-top:10px">
-            <button class="btn" type="button" data-action="tour-review-open-practice">
-              ${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}
-            </button>
-          </div>
-        </div>
-      `;
+          <div style="margin-top:10px"><button class="btn" type="button" data-action="tour-review-open-practice">${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}</button></div>
+        </div>`;
       return;
     }
 
     wrap.innerHTML = mistakesOnly.map((d, idx) => {
-      const qForFmt = {
-        qtype: d.type,
-        options_text: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
-        options_text_ru: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
-        options_text_uz: Array.isArray(d.options) ? JSON.stringify(d.options) : null,
-        options_text_en: Array.isArray(d.options) ? JSON.stringify(d.options) : null
-      };
-
+      const qForFmt = { qtype: d.type, options_text: Array.isArray(d.options) ? JSON.stringify(d.options) : null };
       const userDisp = formatAnswerForDisplay(qForFmt, d.userAnswer);
       const corrDisp = formatAnswerForDisplay(qForFmt, d.correctAnswer);
-
       return `
         <div class="list-item">
           <div style="display:flex;align-items:flex-start;gap:10px">
-            <div style="font-size:24px;line-height:1">${d.isCorrect ? "✓" : "✕"}</div>
+            <div style="font-size:24px;line-height:1">✕</div>
             <div style="min-width:0;flex:1">
               <div style="font-weight:900">${escapeHTML(`${idx + 1}. ${d.topic || (t("topic_general") || "General")}`)}</div>
-              ${
-                d.subtopic
-                  ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.subtopic))}</div>`
-                  : ""
-              }
+              ${d.subtopic ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.subtopic))}</div>` : ""}
               ${d.difficulty ? `<div class="muted small" style="margin-top:4px">${escapeHTML(String(d.difficulty))}</div>` : ""}
               <div style="margin-top:10px">${escapeHTML(d.question || "")}</div>
               ${buildReviewQuestionImageHtml(d)}
-              <div class="muted small" style="margin-top:10px">
-                ${escapeHTML(t("rec_your_answer") || "Ваш ответ")}: <b>${escapeHTML(userDisp || "—")}</b>
-              </div>
-              <div class="muted small" style="margin-top:4px">
-                ${escapeHTML(t("rec_correct_answer") || "Правильный")}: <b>${escapeHTML(corrDisp || "—")}</b>
-              </div>
-              ${d.explanation ? `
-                <div class="muted small" style="margin-top:10px">
-                  <b>${escapeHTML(t("explanation_label") || "Explanation")}:</b> ${escapeHTML(d.explanation)}
-                </div>
-              ` : ""}
+              <div class="muted small" style="margin-top:10px">${escapeHTML(t("rec_your_answer") || "Ваш ответ")}: <b>${escapeHTML(userDisp || "—")}</b></div>
+              <div class="muted small" style="margin-top:4px">${escapeHTML(t("rec_correct_answer") || "Правильный")}: <b>${escapeHTML(corrDisp || "—")}</b></div>
+              ${d.explanation ? `<div class="muted small" style="margin-top:10px"><b>${escapeHTML(t("explanation_label") || "Explanation")}:</b> ${escapeHTML(d.explanation)}</div>` : ""}
             </div>
           </div>
-        </div>
-      `;
-    }).join("") + `
-      <div class="list-item" style="margin-top:12px">
-        <div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div>
-        <div style="margin-top:10px">
-          <button class="btn" type="button" data-action="tour-review-open-practice">
-            ${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}
-          </button>
-        </div>
-      </div>
-    `;
+        </div>`;
+    }).join("") + `<div class="list-item" style="margin-top:12px"><div class="muted small">${escapeHTML(t("tour_review_practice_hint") || "Отработать темы дополнительно можно в практике.")}</div><div style="margin-top:10px"><button class="btn" type="button" data-action="tour-review-open-practice">${escapeHTML(t("tour_review_open_practice") || "Открыть практику")}</button></div></div>`;
     bindQuestionImageButtons(wrap);
   };
 
-  // 1) instant local payload right after finish
-  if (hasFreshLocalTourPayload) {
+  if (!attemptId) {
     renderFromDetails(payloadItems);
     return;
   }
 
-  // 2) DB-backed version (authoritative fallback)
-  if (!window.sb || !attemptId) {
-    renderFromDetails([]);
-    return;
-  }
-
-  showAsyncOverlay(tr3(
-    "Загружаем разбор тура…",
-    "Tur tahlili yuklanmoqda…",
-    "Loading tour review…"
-  ));
-
+  showAsyncOverlay(tr3("Загружаем разбор тура…", "Tur tahlili yuklanmoqda…", "Loading tour review…"));
   try {
-    const { data, error } = await window.sb
-      .from("tour_answers")
-      .select(`
-        question_id,
-        user_answer,
-        is_correct,
-        time_spent,
-        question:questions(
-          id,
-          topic,
-          subtopic,
-          difficulty,
-          qtype,
-          question_text,
-          options_text,
-          correct_answer,
-          explanation,
-          image_url,
-          question_text_ru,
-          question_text_uz,
-          question_text_en,
-          options_text_ru,
-          options_text_uz,
-          options_text_en,
-          explanation_ru,
-          explanation_uz,
-          explanation_en
-        )
-      `)
-      .eq("attempt_id", attemptId)
-      .eq("answered", true)
-      .limit(100);
-
-    if (error || !Array.isArray(data) || !data.length) {
-      renderFromDetails([]);
-      return;
-    }
-
-    const details = data.map((x, idx) => {
-      const q = x?.question || {};
-      const type = String(q?.qtype || "mcq").toLowerCase() === "input" ? "input" : "mcq";
-      const options = parseOptionsText(pickContentText(q, "options_text") || "") || [];
-
-      let normalizedIsCorrect = !!x?.is_correct;
-
-      if (type === "mcq") {
-        const uaDisp = formatAnswerForDisplay(q, x.user_answer);
-        const caDisp = formatAnswerForDisplay(q, q.correct_answer);
-        if (uaDisp && caDisp && uaDisp === caDisp) normalizedIsCorrect = true;
-      }
-
+    const api = getTourSafeApi();
+    if (!api?.review) throw new Error("safe_tour_review_unavailable");
+    const rows = await api.review(attemptId);
+    const details = (Array.isArray(rows) ? rows : []).map((x, idx) => {
+      const type = String(x?.qtype || "mcq").toLowerCase() === "input" ? "input" : "mcq";
       return {
-        id: Number(q?.id || x?.question_id || idx + 1),
-        topic: q?.topic || (t("topic_general") || "General"),
-        subtopic: q?.subtopic || null,
-        difficulty: q?.difficulty || "easy",
+        id: Number(x?.question_id || idx + 1),
+        topic: x?.topic || (t("topic_general") || "General"),
+        subtopic: x?.subtopic || null,
+        difficulty: x?.difficulty || "easy",
         type,
-        question: pickContentText(q, "question_text") || "",
-        imageUrl: q?.image_url || null,
-        options,
+        question: pickContentText(x || {}, "question_text") || "",
+        imageUrl: x?.image_url || null,
+        options: type === "mcq" ? (parseOptionsText(pickContentText(x || {}, "options_text") || "") || []) : [],
         userAnswer: String(x?.user_answer ?? ""),
-        correctAnswer: String(q?.correct_answer ?? ""),
-        explanation: pickContentText(q, "explanation") || "",
-        isCorrect: normalizedIsCorrect,
+        correctAnswer: String(x?.correct_answer ?? ""),
+        explanation: pickContentText(x || {}, "explanation") || "",
+        isCorrect: !!x?.is_correct,
         timeSpent: Number(x?.time_spent || 0)
       };
     });
-
     renderFromDetails(details);
-  } catch {
-    renderFromDetails([]);
+  } catch (error) {
+    const text = String(error?.message || error || "").toLowerCase();
+    if (text.includes("tour_review_not_open")) {
+      wrap.innerHTML = `<div class="empty muted">${escapeHTML(tr3("Полный разбор откроется после глобального завершения тура.", "To‘liq tahlil tur global yopilgandan keyin ochiladi.", "Full review will open after the tour is globally closed."))}</div>`;
+    } else {
+      wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("not_available") || "Разбор временно недоступен.")}</div>`;
+    }
+    try { trackEvent("tour_safe_review_error", { attempt_id: String(attemptId), message: String(error?.message || error || "unknown") }); } catch {}
   } finally {
     hideAsyncOverlay();
   }
@@ -21795,26 +21517,20 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
 
   const ctx = state.tourContext;
 
-  // duration/score summary (used for local + DB)
+  // duration/score summary. Active Tour score is server-authoritative.
   const durationSec = Math.max(0, Math.round((Date.now() - (ctx?.startedAt || Date.now())) / 1000));
-    const total = TOUR_CONFIG.total;
-  let score = Array.isArray(ctx?.answers)
-    ? ctx.answers.filter(a => !!a?.isCorrect).length
-    : Number(ctx?.correct || 0);
+  const total = TOUR_CONFIG.total;
+  let score = ctx?.isArchive
+    ? (Array.isArray(ctx?.answers) ? ctx.answers.filter(a => !!a?.isCorrect).length : Number(ctx?.correct || 0))
+    : 0;
   let percent = total ? Math.round((score / total) * 100) : 0;
 
-  // Save attempt locally (for stats/trend). Does not affect future DB integration.
-  if (ctx?.subjectKey) {
-    saveTourAttemptLocal(ctx.subjectKey, ctx.tourNo || 1, {
-      ts: Date.now(),
-      score,
-      total,
-      percent,
-      durationSec
-    });
+  // Archive mode remains local. Active Tour is persisted only after authoritative finalize.
+  if (ctx?.subjectKey && ctx?.isArchive) {
+    saveTourAttemptLocal(ctx.subjectKey, ctx.tourNo || 1, { ts: Date.now(), score, total, percent, durationSec });
   }
 
-       // DB finalize (only active tours)
+       // DB finalize (only active tours)       // DB finalize (only active tours)
   let finalizeSavedToDb = false;
 
   try {
@@ -21873,6 +21589,10 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     }
   } catch {}
 
+  if (finalizeSavedToDb && ctx?.subjectKey && !ctx?.isArchive) {
+    saveTourAttemptLocal(ctx.subjectKey, ctx.tourNo || 1, { ts: Date.now(), score, total, percent, durationSec });
+  }
+
   // result meta
   const meta = $("#tour-result-meta");
     if (meta && ctx) {
@@ -21925,54 +21645,33 @@ function saveTourAttemptLocal(subjectKey, tourNo, attempt) {
     state.courses.lastTourCertificateId = null;
 
     try {
-      const reviewItems = Array.isArray(ctx?.answers)
-        ? ctx.answers.map((ans, idx) => {
-            const q = ctx?.questions?.[Number(ans.index)] || null;
-            const qType = String(q?.type || q?.qtype || "mcq").toLowerCase();
-            const isMcq = (qType === "mcq" || qType === "multiple_choice");
-
-            const userAnswer = isMcq
-              ? ((ans?.pickedIndex === null || ans?.pickedIndex === undefined) ? "" : (idxToLetter(Number(ans.pickedIndex)) || String(ans.pickedIndex)))
-              : String(ans?.input || "").trim();
-
-            const correctAnswer =
-              q?.correct_answer != null
+      if (ctx?.isArchive) {
+        const reviewItems = Array.isArray(ctx?.answers)
+          ? ctx.answers.map((ans, idx) => {
+              const q = ctx?.questions?.[Number(ans.index)] || null;
+              const qType = String(q?.type || q?.qtype || "mcq").toLowerCase();
+              const isMcq = qType === "mcq" || qType === "multiple_choice";
+              const userAnswer = isMcq
+                ? ((ans?.pickedIndex === null || ans?.pickedIndex === undefined) ? "" : (idxToLetter(Number(ans.pickedIndex)) || String(ans.pickedIndex)))
+                : String(ans?.input || "").trim();
+              const correctAnswer = q?.correct_answer != null
                 ? String(q.correct_answer).trim()
-                : (q?.correctAnswer != null
-                    ? String(q.correctAnswer).trim()
-                    : ((q?.correctIndex !== null && q?.correctIndex !== undefined)
-                        ? (idxToLetter(Number(q.correctIndex)) || String(q.correctIndex))
-                        : ""));
-
-            return {
-              id: Number(q?.id || idx + 1),
-              topic: q?.topic || (t("topic_general") || "General"),
-              subtopic: q?.subtopic || null,
-              difficulty: q?.difficulty || "easy",
-              type: isMcq ? "mcq" : "input",
-              question: q?.question || "",
-               imageUrl: q?.imageUrl || q?.image_url || null,
-              options: Array.isArray(q?.options) ? q.options.slice() : [],
-              userAnswer,
-              correctAnswer,
-              explanation: pickContentText(q || {}, "explanation") || "",
-              isCorrect: !!ans?.isCorrect,
-              timeSpent: Number(ans?.spentSec || 0)
-            };
-          })
-        : [];
-
-      state.courses.lastTourReviewPayload = {
-        attemptId: ctx?.attemptId || null,
-        subjectKey: ctx?.subjectKey || null,
-        tourNo: ctx?.tourNo || 1,
-        items: reviewItems
-      };
-
+                : (q?.correctAnswer != null ? String(q.correctAnswer).trim() : ((q?.correctIndex !== null && q?.correctIndex !== undefined) ? (idxToLetter(Number(q.correctIndex)) || String(q.correctIndex)) : ""));
+              return {
+                id: Number(q?.id || idx + 1), topic: q?.topic || (t("topic_general") || "General"), subtopic: q?.subtopic || null,
+                difficulty: q?.difficulty || "easy", type: isMcq ? "mcq" : "input", question: q?.question || "",
+                imageUrl: q?.imageUrl || q?.image_url || null, options: Array.isArray(q?.options) ? q.options.slice() : [],
+                userAnswer, correctAnswer, explanation: pickContentText(q || {}, "explanation") || "",
+                isCorrect: !!ans?.isCorrect, timeSpent: Number(ans?.spentSec || 0)
+              };
+            })
+          : [];
+        state.courses.lastTourReviewPayload = { attemptId: null, subjectKey: ctx?.subjectKey || null, tourNo: ctx?.tourNo || 1, items: reviewItems };
+        addMyTourRecsFromTourAttempt(ctx);
+      } else {
+        state.courses.lastTourReviewPayload = { attemptId: ctx?.attemptId || null, subjectKey: ctx?.subjectKey || null, tourNo: ctx?.tourNo || 1, items: [] };
+      }
       state.courses.lastTourEndDate = String(ctx?.tourEndDate || "").trim() || null;
-
-      // локально сохраняем туровые рекомендации по ошибкам
-      addMyTourRecsFromTourAttempt(ctx);
     } catch {
       state.courses.lastTourReviewPayload = null;
     }
