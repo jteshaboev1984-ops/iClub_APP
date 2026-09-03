@@ -23,7 +23,11 @@ jobs:
       - name: Verify expected revision markers
         run: |
           grep -q 'security/legacy-assessment-safe-api.js?v=p002v4tour1' index.html
-          grep -q 'app.js?v=support4-p002v4tour1' index.html
+          grep -q 'app.js?v=support4-p0ratings1' index.html
+          grep -q 'ratings_cache_safe_v4' app.js
+          grep -q 'tour_attempts_leaderboard_safe_v4' app.js
+          ! grep -q '\.from("ratings_cache")' app.js
+          ! grep -q 'users(first_name' app.js
           node --check app.js
           node --check security/legacy-assessment-safe-api.js
 
@@ -98,7 +102,7 @@ jobs:
             assert(result.hasApp, '#app missing');
             assert(result.hasActiveView, 'no active app view');
             assert(result.scripts.some(x => x.includes('security/legacy-assessment-safe-api.js?v=p002v4tour1')), 'safe API script cache key missing in DOM');
-            assert(result.scripts.some(x => x.includes('app.js?v=support4-p002v4tour1')), 'app cache key missing in DOM');
+            assert(result.scripts.some(x => x.includes('app.js?v=support4-p0ratings1')), 'app cache key missing in DOM');
             assert(result.safeApi.root && result.safeApi.practice && result.safeApi.drill, 'safe Practice/drill API not exposed');
             assert(result.safeApi.practiceStart && result.safeApi.practiceReview, 'safe Practice start/review API missing');
             assert(result.safeApi.tour, 'safe Tour API not exposed');
