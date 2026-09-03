@@ -22,12 +22,15 @@ jobs:
 
       - name: Verify expected revision markers
         run: |
-          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4tour1' index.html
-          grep -q 'app.js?v=support4-p0tourwrites1' index.html
+          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1' index.html
+          grep -q 'app.js?v=support4-p0practicereset1' index.html
           grep -q 'ratings_cache_safe_v4' app.js
           grep -q 'tour_attempts_leaderboard_safe_v4' app.js
+          grep -q 'practiceApi.resetProgress()' app.js
+          grep -q 'reset_practice_progress_safe_v4' security/legacy-assessment-safe-api.js
           ! grep -q '\.from("ratings_cache")' app.js
           ! grep -q 'users(first_name' app.js
+          ! grep -q 'await window.sb.from("practice_answers").delete().in("attempt_id", chunk)' app.js
           node --check app.js
           node --check security/legacy-assessment-safe-api.js
           node --input-type=module - <<'NODE'
@@ -99,6 +102,7 @@ jobs:
                 drill: typeof window.iclubSafeAssessment?.practice?.drill === 'object' && !!window.iclubSafeAssessment?.practice?.drill,
                 practiceStart: typeof window.iclubSafeAssessment?.practice?.start === 'function',
                 practiceReview: typeof window.iclubSafeAssessment?.practice?.review === 'function',
+                practiceReset: typeof window.iclubSafeAssessment?.practice?.resetProgress === 'function',
                 tour: typeof window.iclubSafeAssessment?.tour === 'object' && !!window.iclubSafeAssessment?.tour,
                 tourPreflight: typeof window.iclubSafeAssessment?.tour?.preflight === 'function',
                 tourStart: typeof window.iclubSafeAssessment?.tour?.start === 'function',
@@ -112,10 +116,10 @@ jobs:
             assert(result.bodyTextLen > 20, `page appears blank: bodyTextLen=${result.bodyTextLen}`);
             assert(result.hasApp, '#app missing');
             assert(result.hasActiveView, 'no active app view');
-            assert(result.scripts.some(x => x.includes('security/legacy-assessment-safe-api.js?v=p002v4tour1')), 'safe API script cache key missing in DOM');
-            assert(result.scripts.some(x => x.includes('app.js?v=support4-p0tourwrites1')), 'app cache key missing in DOM');
+            assert(result.scripts.some(x => x.includes('security/legacy-assessment-safe-api.js?v=p002v4reset1')), 'safe API script cache key missing in DOM');
+            assert(result.scripts.some(x => x.includes('app.js?v=support4-p0practicereset1')), 'app cache key missing in DOM');
             assert(result.safeApi.root && result.safeApi.practice && result.safeApi.drill, 'safe Practice/drill API not exposed');
-            assert(result.safeApi.practiceStart && result.safeApi.practiceReview, 'safe Practice start/review API missing');
+            assert(result.safeApi.practiceStart && result.safeApi.practiceReview && result.safeApi.practiceReset, 'safe Practice start/review/reset API missing');
             assert(result.safeApi.tour, 'safe Tour API not exposed');
             assert(result.safeApi.tourPreflight && result.safeApi.tourStart && result.safeApi.tourQuestions, 'safe Tour start path missing');
             assert(result.safeApi.tourSubmit && result.safeApi.tourFinalize && result.safeApi.tourReview, 'safe Tour submit/finalize/review path missing');
