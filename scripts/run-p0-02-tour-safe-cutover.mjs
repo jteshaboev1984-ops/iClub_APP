@@ -5,16 +5,18 @@ const sourcePath = 'scripts/p0-02-tour-safe-cutover.mjs';
 const runtimePath = 'scripts/.p0-02-tour-safe-cutover-runtime.mjs';
 let source = fs.readFileSync(sourcePath, 'utf8');
 
-function replaceLiteralOnce(from, to, label) {
+function replaceLiteral(from, to, label, expectedCount = 1) {
   const count = source.split(from).length - 1;
-  if (count !== 1) throw new Error(`${label}: expected exactly 1 literal, found ${count}`);
-  source = source.replace(from, to);
+  if (count !== expectedCount) {
+    throw new Error(`${label}: expected exactly ${expectedCount} literal(s), found ${count}`);
+  }
+  source = source.split(from).join(to);
 }
 
-replaceLiteralOnce("'  // duration/score summary (used for local + DB)'", "'// duration/score summary (used for local + DB)'", 'duration marker');
-replaceLiteralOnce("'  // Save attempt locally (for stats/trend). Does not affect future DB integration.'", "'// Save attempt locally (for stats/trend). Does not affect future DB integration.'", 'save marker');
-replaceLiteralOnce("'       // DB finalize (only active tours)'", "'// DB finalize (only active tours)'", 'finalize marker');
-replaceLiteralOnce("'  } catch {}\\n\\n  // result meta'", "'} catch {}\\n\\n  // result meta'", 'result marker');
+replaceLiteral("'  // duration/score summary (used for local + DB)'", "'// duration/score summary (used for local + DB)'", 'duration marker');
+replaceLiteral("'  // Save attempt locally (for stats/trend). Does not affect future DB integration.'", "'// Save attempt locally (for stats/trend). Does not affect future DB integration.'", 'save marker', 2);
+replaceLiteral("'       // DB finalize (only active tours)'", "'// DB finalize (only active tours)'", 'finalize marker');
+replaceLiteral("'  } catch {}\\n\\n  // result meta'", "'} catch {}\\n\\n  // result meta'", 'result marker');
 
 fs.writeFileSync(runtimePath, source);
 try {
