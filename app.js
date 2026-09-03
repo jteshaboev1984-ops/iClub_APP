@@ -616,18 +616,9 @@ async function ensureHomeDbReady() {
 
       for (const op of ops) {
         try {
-                    if (op?.type === "practice_save") {
-            // op.payload: { attempt, quiz }
-            const res = await savePracticeAttemptToSupabase(op.payload?.attempt, op.payload?.quiz);
-
-            if (res?.ok) {
-              try {
-                refreshLiveProgressSurfaces();
-              } catch {}
-            } else {
-              keep.push(op);
-            }
-
+          if (op?.type === "practice_save") {
+            // Legacy client-scored Practice payloads are no longer trusted.
+            // Drop stale queued writes instead of replaying them into canonical progress.
             continue;
           }
 
@@ -10473,162 +10464,10 @@ async function logDbErrorToEvents(uid, where, error, extraPayload = {}) {
 }
 
 async function savePracticeAttemptToSupabase(attempt, quiz) {
-  if (!window.sb) return { ok: false, reason: "no_sb" };
-
-  const uid = await getAuthUid();
-  if (!uid) return { ok: false, reason: "no_uid" };
-
-  const subjectId = await getSubjectIdByKey(quiz?.subjectKey);
-  if (!subjectId) {
-    await logDbErrorToEvents(uid, "subject_lookup", { message: "subject_id not found" }, { subject_key: quiz?.subjectKey });
-    return { ok: false, reason: "no_subject_id" };
-  }
-
-  // Build answers payload:
-  // - MCQ: quiz.answers[i] is usually 0/1/2/3 → store as "0"/"1"/"2"/"3" (TEXT in DB, but it's still the index)
-  // - INPUT: quiz.answers[i] is text → store as text
-  const details = Array.isArray(attempt?.details) ? attempt.details : [];
-  const answers = Array.isArray(quiz?.answers) ? quiz.answers : [];
-
-  const answersPayload = details.map((d, i) => {
-  const rawUA = answers[i];
-
-  let userAnswer = "";
-  if (rawUA !== null && rawUA !== undefined) {
-    if (String(d?.type || "").toLowerCase() === "mcq") {
-      const idx = Number(rawUA);
-      userAnswer = idxToLetter(idx) || String(rawUA);
-    } else {
-      userAnswer = String(rawUA);
-    }
-  }
-
-  return {
-    question_id: Number(d?.id),
-    user_answer: userAnswer,
-    is_correct: !!d?.isCorrect,
-    time_spent: Math.max(0, Math.round(Number(d?.timeSpent) || 0))
-  };
-}).filter(r => Number.isFinite(r.question_id) && r.question_id > 0);
-
-  // =========================
-  // RPC path (atomic + anti-duplicate via unique index + ON CONFLICT)
-  // =========================
-  try {
-    const rpcCall = async () => {
-      const { data, error } = await window.sb.rpc("submit_practice_attempt", {
-        p_subject_id: subjectId,
-        p_score: Number(attempt?.score) || 0,
-        p_percent: Number(attempt?.percent) || 0,
-        p_time_seconds: Number(attempt?.durationSec) || 0,
-        p_answers: answersPayload
-      });
-      if (error) throw error;
-      return data;
-    };
-
-    const attemptIdRpc = await dbWriteWithRetry(rpcCall, { tries: 3, baseDelayMs: 350 });
-
-    const attemptId = (attemptIdRpc !== null && attemptIdRpc !== undefined) ? Number(attemptIdRpc) : null;
-    if (!attemptId) {
-      await logDbErrorToEvents(uid, "practice_rpc_bad_id", { message: "RPC returned empty attempt_id" }, { subject_id: subjectId });
-      return { ok: false, reason: "rpc_bad_id" };
-    }
-
-    return { ok: true, attemptId, subjectId, via: "rpc" };
-  } catch (e) {
-    // If RPC is missing or fails — fallback to legacy so UX never breaks
-    try { await logDbErrorToEvents(uid, "practice_rpc_failed", e, { subject_id: subjectId }); } catch {}
-  }
-
-  // =========================
-  // Legacy fallback (safe): current 2-step method
-  // =========================
-
-  // 1) insert attempt WITH returning id
-  const insertAttemptPayload = {
-    user_id: uid,
-    subject_id: subjectId,
-    score: Number(attempt?.score) || 0,
-    percent: Number(attempt?.percent) || 0,
-    time_seconds: Number(attempt?.durationSec) || 0
-  };
-
-  let insRow = null;
-  let insErr = null;
-
-  try {
-    insRow = await dbWriteWithRetry(async () => {
-      const { data, error } = await window.sb
-        .from("practice_attempts")
-        .insert(insertAttemptPayload)
-        .select("id")
-        .single();
-
-      if (error) throw error;
-      return data || null;
-    }, { tries: 3, baseDelayMs: 350 });
-  } catch (e) {
-    insErr = e;
-  }
-
-  if (!insRow?.id) {
-    await logDbErrorToEvents(
-      uid,
-      "attempt_insert",
-      insErr || { message: "no_returning_id" },
-      { subject_id: subjectId }
-    );
-    return { ok: false, reason: "attempt_insert_failed" };
-  }
-
-  const attemptId = Number(insRow.id);
-
-    const rows = answersPayload.map(r => ({
-    attempt_id: attemptId,
-    question_id: Number(r?.question_id),
-    user_answer: r?.user_answer ?? null,
-    is_correct: !!r?.is_correct,
-    time_spent: Math.max(0, Math.round(Number(r?.time_spent) || 0))
-  })).filter(r => Number.isFinite(r.question_id) && r.question_id > 0);
-
-  if (rows.length) {
-    let ansErr = null;
-
-    try {
-      await dbWriteWithRetry(async () => {
-        const { error } = await window.sb
-          .from("practice_answers")
-          .insert(rows);
-
-        if (error) throw error;
-        return true;
-      }, { tries: 3, baseDelayMs: 350 });
-    } catch (e) {
-      ansErr = e;
-    }
-
-    if (ansErr) {
-      await logDbErrorToEvents(uid, "answers_insert", ansErr, { attempt_id: attemptId, rows: rows.length });
-
-      // cleanup: не оставляем сиротскую попытку без ответов
-      try {
-        await dbWriteWithRetry(async () => {
-          const { error } = await window.sb
-            .from("practice_attempts")
-            .delete()
-            .eq("id", attemptId)
-            .eq("user_id", uid);
-          if (error) throw error;
-          return true;
-        }, { tries: 2, baseDelayMs: 250 });
-      } catch {}
-
-      return { ok: false, reason: "answers_insert_failed" };
-    }
-  }
-
-  return { ok: true, attemptId, subjectId, via: "legacy" };
+  void attempt;
+  void quiz;
+  // P0 hardening: canonical Practice persistence is server-authoritative via safe-v4 RPCs.
+  return { ok: false, reason: "legacy_practice_write_disabled" };
 }
 
    async function getPracticeDbMetricsBySubjectKey(subjectKey) {
@@ -18158,7 +17997,9 @@ if (!quiz?.drillType) {
           percent: Number(quiz.safePersistedResult.percent || 0)
         };
       } else {
-        res = await savePracticeAttemptToSupabase(attempt, quiz);
+        // Defensive fail-closed path. Main Practice reaches finishPractice only after
+        // safe-v4 finalization; never fall back to client-authoritative persistence.
+        res = { ok: false, reason: 'safe_v4_persistence_missing' };
       }
 
       if (res?.ok) {
@@ -18167,10 +18008,7 @@ if (!quiz?.drillType) {
           refreshLiveProgressSurfaces();
         } catch {}
       } else {
-        enqueuePendingOp({
-          type: "practice_save",
-          payload: buildPracticeSavePayload(attempt, quiz)
-        });
+        try { showToast(t("save_failed_try_again") || "Не удалось сохранить результат. Попробуйте ещё раз."); } catch {}
       }
 
       try {
