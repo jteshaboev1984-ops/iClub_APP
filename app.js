@@ -18341,6 +18341,16 @@ row.innerHTML = `
         renderFromDetails([]);
         return;
       }
+      try {
+        if (safeApi?.reviewOpened) await safeApi.reviewOpened(dbAttemptId);
+      } catch (reviewMarkerError) {
+        try {
+          trackEvent("practice_review_marker_error", {
+            attempt_id: dbAttemptId,
+            message: String(reviewMarkerError?.message || reviewMarkerError || "unknown")
+          });
+        } catch {}
+      }
       const safeRows = await safeApi.review(dbAttemptId);
       renderFromDetails(practiceSafeReviewRowsToDetails(safeRows));
     } catch (safeReviewError) {
