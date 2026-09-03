@@ -5,7 +5,11 @@ on:
     branches:
       - iclub-v3-implementation
     paths:
-      - scripts/apply-p0-02-practice-safe-path.mjs
+      - scripts/p0-02-aux-patcher.mjs
+      - scripts/p0-02-aux-step1.mjs
+      - scripts/p0-02-aux-step2.mjs
+      - scripts/p0-02-aux-step3.mjs
+      - scripts/p0-02-aux-step4.mjs
       - .github/workflows/apply-p0-02-practice-safe-path.yml
   workflow_dispatch:
 
@@ -22,18 +26,26 @@ jobs:
           ref: iclub-v3-implementation
           fetch-depth: 0
 
-      - name: Apply guarded Practice patch
-        run: node scripts/apply-p0-02-practice-safe-path.mjs
+      - name: Apply guarded auxiliary Practice cutover
+        run: |
+          node scripts/p0-02-aux-step1.mjs
+          node scripts/p0-02-aux-step2.mjs
+          node scripts/p0-02-aux-step3.mjs
+          node scripts/p0-02-aux-step4.mjs
 
-      - name: Syntax and whitespace checks
+      - name: Syntax and security checks
         run: |
           node --check app.js
           node --check security/legacy-assessment-safe-api.js
           git diff --check
-          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4' index.html
+          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4aux1' index.html
+          grep -q 'app.js?v=support4-p002v4aux1' index.html
           grep -q 'subject_hub_safe_v4' app.js
           grep -q 'handlePracticeSubmitSafe' app.js
-          grep -q 'finishPracticeSafe' app.js
+          grep -q 'handlePracticeDrillSubmitSafe' app.js
+          grep -q 'safeDrillSessionId' app.js
+          grep -q 'practiceSafeReviewRowsToDetails' app.js
+          grep -q 'practice_drill_safe_submit_error' app.js
 
       - name: Commit patched frontend
         run: |
@@ -44,5 +56,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add app.js index.html
-          git commit -m 'Use safe v4 path for main Practice'
+          git commit -m 'Use safe v4 path for auxiliary Practice'
           git push origin HEAD:iclub-v3-implementation
