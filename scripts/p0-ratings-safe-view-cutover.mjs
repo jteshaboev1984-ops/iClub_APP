@@ -24,7 +24,7 @@ app = replaceAllExact(
   app,
   ratingsSource,
   '.from("ratings_cache_safe_v4")',
-  6,
+  7,
   'ratings_cache source cutover'
 );
 
@@ -62,7 +62,7 @@ app = replaceAllExact(
 );
 
 assert(countLiteral(app, '.from("ratings_cache")') === 0, 'legacy ratings_cache reads remain');
-assert(countLiteral(app, '.from("ratings_cache_safe_v4")') === 6, 'safe ratings cache query count mismatch');
+assert(countLiteral(app, '.from("ratings_cache_safe_v4")') === 7, 'safe ratings cache query count mismatch');
 assert(countLiteral(app, '.from("tour_attempts_leaderboard_safe_v4")') === 4, 'safe live leaderboard query count mismatch');
 assert(countLiteral(app, 'users(first_name') === 0, 'direct users relation projection remains in Ratings');
 assert(countLiteral(app, '.from("tour_attempts")') > 0, 'own Tour history queries were unexpectedly removed');
