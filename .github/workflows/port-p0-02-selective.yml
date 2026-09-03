@@ -1,123 +1,16 @@
 name: Port P0-02 selective security release
 
 on:
-  push:
-    branches:
-      - security-p0-02-production-release
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  selective-port:
-    if: github.actor != 'github-actions[bot]'
+  completed:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout release branch
-        uses: actions/checkout@v4
-        with:
-          ref: security-p0-02-production-release
-          fetch-depth: 0
-
-      - name: Stop if port already completed
+      - name: Release port is frozen
         run: |
-          if [ -f .security-p0-02-selective-port ]; then
-            echo "Selective port already completed."
-            exit 0
-          fi
-
-      - name: Configure git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin iclub-v3-implementation
-
-      - name: Cherry-pick verified Practice Tour Ratings app commits
-        shell: bash
-        run: |
-          set -euo pipefail
-          commits=(
-            c636eb2238f2994a4def1c81d31854744157f772
-            84aba0bd3ffd2866874697e77d7a666e169a6c41
-            5ce9a955a56792ae80b258db55e4eb23fd95a0f3
-            799de843efcb5f3249d5d0610718e81d0e46c6ab
-            6f3ae16b05f60e5d30103dadb6ce857fbcd06b97
-            d224eb1e81c9de84baf22fc39f00e9da48390178
-          )
-          for commit in "${commits[@]}"; do
-            echo "Cherry-picking ${commit}"
-            if ! git cherry-pick "${commit}"; then
-              git cherry-pick --abort || true
-              echo "Conflict in app-behavior commit ${commit}; refusing automatic resolution."
-              exit 1
-            fi
-          done
-
-      - name: Port Practice reset while preserving newer safe adapter
-        shell: bash
-        run: |
-          set -euo pipefail
-          reset_commit=af94cbddab2030ef74a0120259b2e811de2bb470
-          if git cherry-pick "${reset_commit}"; then
-            echo "Reset commit applied cleanly."
-          else
-            conflicts="$(git diff --name-only --diff-filter=U)"
-            expected="security/legacy-assessment-safe-api.js"
-            if [ "${conflicts}" != "${expected}" ]; then
-              echo "Unexpected reset conflict(s):"
-              printf '%s\n' "${conflicts}"
-              git cherry-pick --abort || true
-              exit 1
-            fi
-            # The release branch intentionally carries a newer superset adapter.
-            # It must already expose resetProgress before we keep it.
-            git checkout --ours -- security/legacy-assessment-safe-api.js
-            grep -q 'async resetProgress()' security/legacy-assessment-safe-api.js
-            grep -q 'reset_practice_progress_safe_v4' security/legacy-assessment-safe-api.js
-            git add security/legacy-assessment-safe-api.js
-            git cherry-pick --continue
-          fi
-
-      - name: Retire legacy Practice persistence
-        shell: bash
-        run: |
-          set -euo pipefail
-          commit=5672b2d6e420d53bb6bc66c701442c689d9743be
-          if ! git cherry-pick "${commit}"; then
-            git cherry-pick --abort || true
-            echo "Conflict while retiring legacy Practice persistence; refusing automatic resolution."
-            exit 1
-          fi
-
-      - name: Static release gates
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --check app.js
-          node --check security/legacy-assessment-safe-api.js
-          grep -q 'security/legacy-assessment-safe-api.js' index.html
-          grep -q 'start_practice_session_auto_safe_v4' security/legacy-assessment-safe-api.js
-          grep -q 'start_tour_attempt_safe_v4' security/legacy-assessment-safe-api.js
-          grep -q 'ratings_cache_safe_v4' app.js
-          grep -q 'tour_attempts_leaderboard_safe_v4' app.js
-          grep -q 'reset_practice_progress_safe_v4' security/legacy-assessment-safe-api.js
-          grep -q 'practice_reset_safe_api_unavailable' app.js
-          grep -q 'legacy_practice_write_disabled' app.js
-          if grep -q 'from("practice_answers").delete' app.js; then
-            echo 'Legacy direct Practice answer deletion remains.'
-            exit 1
-          fi
-
-      - name: Mark exact selective port
-        run: |
-          printf '%s\n' \
-            'P0-02 selective frontend port' \
-            'Base: b66ac6144c38b8ec65cbdebc2d64302c390c107f' \
-            'Scope: safe Practice + auxiliary Practice + Tour + Ratings + Practice reset + legacy writer retirement' \
-            'Adapter: newer verified superset preserved during reset commit.' \
-            'Excluded: CI-only helper/parser commits and all Exam Prep/AI feature commits.' > .security-p0-02-selective-port
-          git add .security-p0-02-selective-port
-          git commit -m "security(p0-02): mark selective production port"
-
-      - name: Push only after all gates pass
-        run: git push origin HEAD:security-p0-02-production-release
+          echo "Selective P0-02 port is complete and frozen."
+          echo "Do not rerun cherry-picks; validate the release branch with regression gates instead."
