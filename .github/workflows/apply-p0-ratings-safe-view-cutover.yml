@@ -38,7 +38,7 @@ jobs:
           const app = fs.readFileSync('app.js','utf8');
           const count = s => app.split(s).length - 1;
           if (count('.from("ratings_cache")') !== 0) throw new Error('legacy ratings_cache reads remain');
-          if (count('.from("ratings_cache_safe_v4")') !== 6) throw new Error('safe ratings cache count mismatch');
+          if (count('.from("ratings_cache_safe_v4")') !== 7) throw new Error('safe ratings cache count mismatch');
           if (count('.from("tour_attempts_leaderboard_safe_v4")') !== 4) throw new Error('safe live leaderboard count mismatch');
           if (count('users(first_name') !== 0) throw new Error('direct users relation projection remains');
           if (count('.from("tour_attempts")') < 1) throw new Error('own Tour queries unexpectedly removed');
