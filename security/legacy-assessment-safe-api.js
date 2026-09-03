@@ -70,7 +70,7 @@
     },
 
     async review(attemptId) {
-      return rpc("get_practice_review_safe_v4", {
+      return rpc("get_practice_review_full_safe_v4", {
         p_attempt_id: requirePositiveInt(attemptId, "attempt_id")
       });
     }
