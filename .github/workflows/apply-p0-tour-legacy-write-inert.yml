@@ -1,0 +1,52 @@
+name: Apply P0 Tour legacy write inert
+
+on:
+  push:
+    branches:
+      - iclub-v3-implementation
+    paths:
+      - scripts/p0-tour-legacy-write-inert.mjs
+      - .github/workflows/apply-p0-tour-legacy-write-inert.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-tour-legacy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iclub-v3-implementation
+          fetch-depth: 0
+
+      - name: Apply guarded inert patch
+        run: node scripts/p0-tour-legacy-write-inert.mjs
+
+      - name: Verify syntax and legacy write removal
+        run: |
+          node --check app.js
+          node --check scripts/p0-tour-legacy-write-inert.mjs
+          git diff --check
+          grep -q 'app.js?v=support4-p0tourwrites1' index.html
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import { range } from './scripts/p0-02-aux-patcher.mjs';
+          const app = fs.readFileSync('app.js','utf8');
+          const fn = range(app,'createTourAttempt').text;
+          for (const banned of ['.from("tour_attempts")','.insert(','.delete(','.update(']) {
+            if (fn.includes(banned)) throw new Error(`legacy creator still contains ${banned}`);
+          }
+          const calls = (app.match(/\bcreateTourAttempt\s*\(/g) || []).length;
+          if (calls !== 1) throw new Error(`createTourAttempt is not declaration-only: ${calls}`);
+          NODE
+
+      - name: Commit frontend patch
+        run: |
+          if git diff --quiet -- app.js index.html; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app.js index.html
+          git commit -m 'Inert legacy Tour attempt creator'
+          git push origin HEAD:iclub-v3-implementation
