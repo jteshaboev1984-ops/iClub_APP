@@ -20059,65 +20059,10 @@ async function hasTourAttempt(uid, tourId) {
 }
 
 async function createTourAttempt(uid, tourId) {
-  if (!window.sb || !uid || !tourId) return null;
-
-  // 0) if attempt already exists — reuse it (idempotent)
-  try {
-    const { data: existing, error: exErr } = await window.sb
-      .from("tour_attempts")
-      .select("id")
-      .eq("user_id", uid)
-      .eq("tour_id", tourId)
-      .order("id", { ascending: true })
-      .limit(1);
-
-    if (!exErr && Array.isArray(existing) && existing.length) {
-      return existing[0]?.id ?? null;
-    }
-  } catch {}
-
-  // 1) try insert with retry
-  let insertedId = null;
-  try {
-    const res = await dbWriteWithRetry(async () => {
-      const { data, error } = await window.sb
-        .from("tour_attempts")
-        .insert([{ user_id: uid, tour_id: tourId, score: 0, percent: 0, total_time: 0, status: "submitted" }])
-        .select("id")
-        .single();
-      if (error) throw error;
-      return data?.id ?? null;
-    }, { tries: 3, baseDelayMs: 350 });
-
-    insertedId = res;
-  } catch {
-    insertedId = null;
-  }
-
-  // 2) final: pick earliest attempt id and delete duplicate we created (if any)
-  try {
-    const { data: pick, error: pErr } = await window.sb
-      .from("tour_attempts")
-      .select("id")
-      .eq("user_id", uid)
-      .eq("tour_id", tourId)
-      .order("id", { ascending: true })
-      .limit(1);
-
-    if (!pErr && Array.isArray(pick) && pick.length) {
-      const winnerId = pick[0]?.id ?? null;
-
-      if (winnerId && insertedId && winnerId !== insertedId) {
-        try {
-          await window.sb.from("tour_attempts").delete().eq("id", insertedId);
-        } catch {}
-      }
-
-      return winnerId;
-    }
-  } catch {}
-
-  return insertedId;
+  void uid;
+  void tourId;
+  // P0 hardening: active Tour creation is server-authoritative via start_tour_attempt_safe_v4.
+  return null;
 }
 
 async function upsertTourAnswer(attemptId, questionId, patch) {
