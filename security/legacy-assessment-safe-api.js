@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const API_VERSION = "p0-02-v4";
+  const API_VERSION = "p0-02-v4-aux1";
   const LEGACY_PRACTICE_MAX_QUESTIONS = 10;
 
   function client() {
@@ -31,12 +31,64 @@
     return n;
   }
 
+  function normalizeQuestionIds(values) {
+    const ids = (Array.isArray(values) ? values : [])
+      .map(value => requirePositiveInt(value, "question_id"));
+    if (!ids.length || ids.length > LEGACY_PRACTICE_MAX_QUESTIONS) {
+      throw new Error("invalid_question_ids");
+    }
+    if (new Set(ids).size !== ids.length) throw new Error("duplicate_question_ids");
+    return ids;
+  }
+
   function makeClientSessionId(prefix) {
     const p = String(prefix || "session").replace(/[^a-z0-9_-]/gi, "").slice(0, 24) || "session";
     const uuid = globalThis.crypto?.randomUUID?.();
     if (uuid) return `${p}_${uuid}`.slice(0, 128);
     return `${p}_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`.slice(0, 128);
   }
+
+  const practiceDrill = Object.freeze({
+    async startTopic({ subjectKey, topic, subtopic = null, clientSessionId = null }) {
+      return rpc("start_practice_topic_drill_safe_v4", {
+        p_subject_key: String(subjectKey || ""),
+        p_topic: String(topic || ""),
+        p_subtopic: subtopic == null || String(subtopic).trim() === "" ? null : String(subtopic),
+        p_client_session_id: clientSessionId || makeClientSessionId("practice_topic")
+      });
+    },
+
+    async startMistakes({ subjectKey, questionIds, clientSessionId = null }) {
+      return rpc("start_practice_mistakes_drill_safe_v4", {
+        p_subject_key: String(subjectKey || ""),
+        p_question_ids: normalizeQuestionIds(questionIds),
+        p_client_session_id: clientSessionId || makeClientSessionId("practice_mistakes")
+      });
+    },
+
+    async startPast({ subjectKey, clientSessionId = null }) {
+      return rpc("start_practice_past_drill_safe_v4", {
+        p_subject_key: String(subjectKey || ""),
+        p_client_session_id: clientSessionId || makeClientSessionId("practice_past")
+      });
+    },
+
+    async questions(sessionId) {
+      return rpc("get_practice_drill_resume_safe_v4", {
+        p_session_id: requirePositiveInt(sessionId, "session_id")
+      });
+    },
+
+    async submit({ sessionId, questionId, userAnswer = "", pickedIndex = null, timeSpent = 0 }) {
+      return rpc("submit_practice_drill_answer_safe_v4", {
+        p_session_id: requirePositiveInt(sessionId, "session_id"),
+        p_question_id: requirePositiveInt(questionId, "question_id"),
+        p_user_answer: userAnswer == null ? "" : String(userAnswer),
+        p_picked_index: normalizePickedIndex(pickedIndex),
+        p_time_spent: Math.max(0, Math.floor(Number(timeSpent) || 0))
+      });
+    }
+  });
 
   const practice = Object.freeze({
     async start({ poolId, clientSessionId = null }) {
@@ -73,7 +125,18 @@
       return rpc("get_practice_review_full_safe_v4", {
         p_attempt_id: requirePositiveInt(attemptId, "attempt_id")
       });
-    }
+    },
+
+    async recentMistakes({ subjectKey, topic = null, subtopic = null, limit = 10 }) {
+      return rpc("get_recent_practice_mistakes_safe_v4", {
+        p_subject_key: String(subjectKey || ""),
+        p_topic: topic == null || String(topic).trim() === "" ? null : String(topic),
+        p_subtopic: subtopic == null || String(subtopic).trim() === "" ? null : String(subtopic),
+        p_limit: Math.max(1, Math.min(10, Math.floor(Number(limit) || 10)))
+      });
+    },
+
+    drill: practiceDrill
   });
 
   const tour = Object.freeze({
