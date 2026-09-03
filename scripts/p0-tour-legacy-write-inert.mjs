@@ -1,8 +1,10 @@
 import fs from 'node:fs';
 import { range } from './p0-02-aux-patcher.mjs';
 
-const path = 'app.js';
-let app = fs.readFileSync(path, 'utf8');
+const appPath = 'app.js';
+const htmlPath = 'index.html';
+let app = fs.readFileSync(appPath, 'utf8');
+let html = fs.readFileSync(htmlPath, 'utf8');
 const r = range(app, 'createTourAttempt');
 const callsBefore = (app.match(/\bcreateTourAttempt\s*\(/g) || []).length;
 if (callsBefore !== 1) throw new Error(`createTourAttempt must be declaration-only before inerting; found ${callsBefore} occurrences`);
@@ -22,4 +24,9 @@ for (const banned of ['.from("tour_attempts")', '.insert(', '.delete(', '.update
   if (after.includes(banned)) throw new Error(`createTourAttempt still contains ${banned}`);
 }
 
-fs.writeFileSync(path, app);
+const oldKey = 'app.js?v=support4-p0ratings1';
+if ((html.split(oldKey).length - 1) !== 1) throw new Error('expected current app cache key exactly once');
+html = html.replace(oldKey, 'app.js?v=support4-p0tourwrites1');
+
+fs.writeFileSync(appPath, app);
+fs.writeFileSync(htmlPath, html);
