@@ -34,10 +34,10 @@ export function matchingBrace(src, open) {
 }
 
 export function range(source, name) {
-  const needles = [`async function ${name}(`, `function ${name}(`];
-  const hits = needles.map(n => source.indexOf(n)).filter(i => i >= 0);
+  const re = new RegExp(`\\b(?:async\\s+)?function\\s+${name}\\s*\\(`, 'g');
+  const hits = Array.from(source.matchAll(re));
   assert(hits.length === 1, `${name}: expected one declaration, got ${hits.length}`);
-  const start = hits[0];
+  const start = hits[0].index;
   const open = source.indexOf('{', start);
   assert(open >= 0, `${name}: opening brace not found`);
   const end = matchingBrace(source, open) + 1;
