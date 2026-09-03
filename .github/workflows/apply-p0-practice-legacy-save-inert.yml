@@ -1,0 +1,60 @@
+name: Apply P0 Practice legacy save retirement
+
+on:
+  push:
+    branches:
+      - iclub-v3-implementation
+    paths:
+      - scripts/p0-practice-legacy-save-inert.mjs
+      - .github/workflows/apply-p0-practice-legacy-save-inert.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  retire-legacy-practice-save:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout implementation branch
+        uses: actions/checkout@v4
+        with:
+          ref: iclub-v3-implementation
+          fetch-depth: 0
+
+      - name: Apply guarded legacy Practice save retirement
+        run: node scripts/p0-practice-legacy-save-inert.mjs
+
+      - name: Syntax and fail-closed security checks
+        run: |
+          node --check app.js
+          node --check scripts/p0-practice-legacy-save-inert.mjs
+          git diff --check
+          grep -q 'app.js?v=support4-p0legacysaveoff1' index.html
+          grep -q 'legacy_practice_write_disabled' app.js
+          grep -q 'safe_v4_persistence_missing' app.js
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import { range } from './scripts/p0-02-aux-patcher.mjs';
+          const app = fs.readFileSync('app.js','utf8');
+          const calls = (app.match(/\bsavePracticeAttemptToSupabase\s*\(/g) || []).length;
+          if (calls !== 1) throw new Error(`legacy Practice saver still called: ${calls}`);
+          const fn = range(app,'savePracticeAttemptToSupabase').text;
+          for (const banned of ['.from("practice_attempts")','.from("practice_answers")','.insert(','.delete(','.update(']) {
+            if (fn.includes(banned)) throw new Error(`legacy Practice saver still contains ${banned}`);
+          }
+          if ((app.match(/type: "practice_save"/g) || []).length !== 0) throw new Error('legacy Practice enqueue remains');
+          if ((app.match(/op\?\.type === "practice_save"/g) || []).length !== 1) throw new Error('legacy pending discard path mismatch');
+          NODE
+
+      - name: Commit retired legacy Practice saver
+        run: |
+          if git diff --quiet -- app.js index.html; then
+            echo 'No legacy Practice save changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app.js index.html
+          git commit -m 'Retire legacy client-side Practice persistence'
+          git push origin HEAD:iclub-v3-implementation
