@@ -19746,76 +19746,9 @@ function pickContentText(obj, base) {
 }
 
      async function buildPracticeSetByQuestionIds(subjectKey, questionIds) {
-  if (!window.sb) return [];
-
-  const subjectId = await getSubjectIdByKey(subjectKey);
-  if (!subjectId) return [];
-
-  const ids = Array.isArray(questionIds) ? questionIds.filter(Boolean).slice(0, 10) : [];
-  if (!ids.length) return [];
-
-  const { data, error } = await window.sb
-    .from("questions")
-    .select("id, topic, subtopic, difficulty, time_limit_sec, qtype, question_text, options_text, correct_answer, explanation, image_url, is_active, book_ref, question_text_ru, question_text_uz, question_text_en, options_text_ru, options_text_uz, options_text_en, explanation_ru, explanation_uz, explanation_en")
-    .eq("subject_id", subjectId)
-    .eq("is_active", true)
-    .in("id", ids);
-
-  if (error || !Array.isArray(data) || !data.length) return [];
-
-  // same normalization as buildPracticeSetByRec
-  const normalizeDiff = (d) => normalizeDifficulty(d || "easy");
-  const normalizeType = (t) => (String(t || "mcq").toLowerCase() === "input" ? "input" : "mcq");
-
-  const lang = (loadProfile()?.language) || "ru";
-  const pickL = (obj, base) => {
-    const k = lang === "uz" ? (base + "_uz") : lang === "en" ? (base + "_en") : (base + "_ru");
-    return (obj && obj[k] != null && String(obj[k]).trim() !== "") ? obj[k] : obj[base];
-  };
-
-  return data.map(r => {
-    const type = normalizeType(r.qtype);
-    const optionsRaw = pickL(r, "options_text");
-    const opts = type === "mcq" ? (parseOptionsText(optionsRaw) || []) : [];
-
-    let correctIndex = 0;
-    if (type === "mcq") {
-      const ca = String(r.correct_answer ?? "").trim();
-      const asInt = Number(ca);
-      if (!Number.isNaN(asInt) && Number.isFinite(asInt)) {
-        correctIndex = asInt;
-      } else if (/^[A-D]$/i.test(ca)) {
-        correctIndex = ca.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
-      } else if (opts.length) {
-        const idx = opts.findIndex(x => String(x).trim().toLowerCase() === ca.toLowerCase());
-        if (idx >= 0) correctIndex = idx;
-      }
-      if (!Number.isFinite(correctIndex) || correctIndex < 0) correctIndex = 0;
-    }
-
-    const correctAnswer = type === "input" ? String(r.correct_answer ?? "").trim() : "";
-    const diff = normalizeDiff(r.difficulty);
-
-    return {
-      id: Number(r.id),
-      topic: r.topic || "General",
-      subtopic: r.subtopic || null,
-      difficulty: diff,
-      timeLimitSec:
-        (r.time_limit_sec != null && Number(r.time_limit_sec) >= 10)
-          ? Number(r.time_limit_sec)
-          : (PRACTICE_CONFIG?.timeByDifficulty?.[diff] || 60),
-      type,
-      question: pickL(r, "question_text") || "",
-      options: opts,
-      correctIndex,
-      correctAnswer,
-      explanation: pickL(r, "explanation") || "",
-      imageUrl: r.image_url || null,
-      inputKind: type === "input" ? (isNumericLike(correctAnswer) ? "numeric" : "text") : null,
-      inputHint: type === "input" ? inputHintForAnswer(correctAnswer) : ""
-    };
-  }).filter(q => Number.isFinite(q.id));
+  void subjectKey;
+  void questionIds;
+  return [];
 } 
 async function startPracticeByRec() {
   const rec = state?.courses?.myRecCurrent;
