@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import { assert, range, matchingBrace } from './p0-02-aux-patcher.mjs';
 
+// Trigger file for the guarded auxiliary Practice cutover workflow.
 let app = fs.readFileSync('app.js', 'utf8');
 let html = fs.readFileSync('index.html', 'utf8');
 
