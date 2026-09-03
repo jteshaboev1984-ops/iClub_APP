@@ -1332,53 +1332,23 @@ async function syncCredentialsToSupabaseOnce() {
     const uid = userData?.user?.id;
     if (!uid) return;
 
-    // ✅ не пишем user_credentials, пока нет полноценной users-row
     const canWriteCreds = await hasDbUserRow(uid);
     if (!canWriteCreds) return;
-
-    const ids = await getCredentialIdsMap();
-    if (!ids || Object.keys(ids).length === 0) return;
 
     const c = credentialsStore();
     const snap = buildCredentialSnapshotForDb(c);
 
-    const rows = [];
-    Object.keys(snap).forEach(code => {
-      const defId = ids[code];
-      const rec = snap[code];
-      if (!defId || !rec) return;
-
-      // статус для practice_mastery_subject вычисляем: active если есть хоть один active по предметам
-      let status = (rec.status || "inactive");
-      if (code === "practice_mastery_subject") {
-        const by = rec?.by_subject || {};
-        const anyActive = Object.values(by).some(x => x && x.status === "active");
-        status = anyActive ? "active" : "inactive";
-      }
-
-      rows.push({
-        user_id: uid,
-        credential_id: defId,
-        status: status,
-        achieved_at: rec.achieved_at ? new Date(rec.achieved_at).toISOString() : null,
-        evidence_snapshot: rec, // кладём весь record (как jsonb snapshot)
-        last_evaluated_at: rec.last_evaluated_at ? new Date(rec.last_evaluated_at).toISOString() : null
-      });
+    const { error } = await window.sb.rpc("sync_user_credentials_safe_v1", {
+      p_snapshot: snap
     });
+    if (error) throw error;
 
-    if (rows.length === 0) return;
-
-    const { error: upErr } = await window.sb
-      .from("user_credentials")
-      .upsert(rows, { onConflict: "user_id,credential_id" });
-
-    if (upErr) {
-      // ✅ если это всё ещё FK-гонка, не шумим лишний раз — просто подождём следующего sync
-      if (String(upErr?.code || "") === "23503") return;
-      try { console.error("[cred] user_credentials upsert error:", upErr); } catch {}
-    }
+    // The server is authoritative. Re-hydrate immediately so a rejected
+    // client-side candidate status cannot remain visible in local UI state.
+    __credDbReady = false;
+    await ensureCredentialsDbSynced();
   } catch (e) {
-    try { console.error("[cred] sync exception:", e); } catch {}
+    try { console.error("[cred] safe sync exception:", e); } catch {}
   } finally {
     __credSyncInFlight = false;
   }
