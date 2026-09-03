@@ -1,0 +1,51 @@
+name: P0-02 Tour inspect
+
+on:
+  push:
+    branches:
+      - iclub-v3-implementation
+    paths:
+      - .github/workflows/p0-02-tour-inspect.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-tour:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: iclub-v3-implementation
+      - name: Print exact Tour function bodies
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const src = fs.readFileSync('app.js','utf8');
+          function body(name) {
+            const re = new RegExp(`(?:async\\s+)?function\\s+${name}\\s*\\(`,'g');
+            const hits=[...src.matchAll(re)];
+            if(hits.length!==1) return `<<< ${name}: hits=${hits.length} >>>`;
+            const start=hits[0].index;
+            const open=src.indexOf('{',start);
+            let depth=0, mode='code', quote='', esc=false, tpl=0;
+            for(let i=open;i<src.length;i++){
+              const c=src[i], n=src[i+1]||'';
+              if(mode==='line'){ if(c==='\n') mode='code'; continue; }
+              if(mode==='block'){ if(c==='*'&&n==='/'){mode='code';i++;} continue; }
+              if(mode==='str'){ if(esc){esc=false;continue;} if(c==='\\'){esc=true;continue;} if(c===quote){mode='code';quote='';} continue; }
+              if(mode==='tpl'){ if(esc){esc=false;continue;} if(c==='\\'){esc=true;continue;} if(c==='`'&&tpl===0){mode='code';continue;} if(c==='$'&&n==='{'){tpl++;i++;continue;} if(tpl>0){if(c==='{')tpl++; else if(c==='}')tpl--;} continue; }
+              if(c==='/'&&n==='/'){mode='line';i++;continue;} if(c==='/'&&n==='*'){mode='block';i++;continue;}
+              if(c==='"'||c==="'"){mode='str';quote=c;continue;} if(c==='`'){mode='tpl';tpl=0;continue;}
+              if(c==='{')depth++; else if(c==='}'){depth--; if(depth===0)return src.slice(start,i+1);}
+            }
+            return `<<< ${name}: unmatched >>>`;
+          }
+          const names=[
+            'openTourQuiz','submitTourAnswer','finishTour','flushPendingTourAnswers',
+            'fetchQuestionRuntimeSecrets','restoreActiveTourQuestionSecrets',
+            'loadTourQuestionsDB','upsertTourAnswer','updateTourAttempt','initTourSession'
+          ];
+          for(const n of names){ console.log(`\n===== ${n} =====\n${body(n)}\n===== END ${n} =====`); }
+          NODE
