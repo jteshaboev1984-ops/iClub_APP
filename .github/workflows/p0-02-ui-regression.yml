@@ -22,8 +22,8 @@ jobs:
 
       - name: Verify expected revision markers
         run: |
-          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4aux1' index.html
-          grep -q 'app.js?v=support4-p002v4aux2' index.html
+          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4tour1' index.html
+          grep -q 'app.js?v=support4-p002v4tour1' index.html
           node --check app.js
           node --check security/legacy-assessment-safe-api.js
 
@@ -82,18 +82,28 @@ jobs:
                 root: typeof window.iclubSafeAssessment === 'object' && !!window.iclubSafeAssessment,
                 practice: typeof window.iclubSafeAssessment?.practice === 'object' && !!window.iclubSafeAssessment?.practice,
                 drill: typeof window.iclubSafeAssessment?.practice?.drill === 'object' && !!window.iclubSafeAssessment?.practice?.drill,
-                start: typeof window.iclubSafeAssessment?.practice?.start === 'function',
-                review: typeof window.iclubSafeAssessment?.practice?.review === 'function'
+                practiceStart: typeof window.iclubSafeAssessment?.practice?.start === 'function',
+                practiceReview: typeof window.iclubSafeAssessment?.practice?.review === 'function',
+                tour: typeof window.iclubSafeAssessment?.tour === 'object' && !!window.iclubSafeAssessment?.tour,
+                tourPreflight: typeof window.iclubSafeAssessment?.tour?.preflight === 'function',
+                tourStart: typeof window.iclubSafeAssessment?.tour?.start === 'function',
+                tourQuestions: typeof window.iclubSafeAssessment?.tour?.questions === 'function',
+                tourSubmit: typeof window.iclubSafeAssessment?.tour?.submit === 'function',
+                tourFinalize: typeof window.iclubSafeAssessment?.tour?.finalize === 'function',
+                tourReview: typeof window.iclubSafeAssessment?.tour?.review === 'function'
               }
             }));
 
             assert(result.bodyTextLen > 20, `page appears blank: bodyTextLen=${result.bodyTextLen}`);
             assert(result.hasApp, '#app missing');
             assert(result.hasActiveView, 'no active app view');
-            assert(result.scripts.some(x => x.includes('security/legacy-assessment-safe-api.js?v=p002v4aux1')), 'safe API script cache key missing in DOM');
-            assert(result.scripts.some(x => x.includes('app.js?v=support4-p002v4aux2')), 'app cache key missing in DOM');
+            assert(result.scripts.some(x => x.includes('security/legacy-assessment-safe-api.js?v=p002v4tour1')), 'safe API script cache key missing in DOM');
+            assert(result.scripts.some(x => x.includes('app.js?v=support4-p002v4tour1')), 'app cache key missing in DOM');
             assert(result.safeApi.root && result.safeApi.practice && result.safeApi.drill, 'safe Practice/drill API not exposed');
-            assert(result.safeApi.start && result.safeApi.review, 'safe Practice start/review API missing');
+            assert(result.safeApi.practiceStart && result.safeApi.practiceReview, 'safe Practice start/review API missing');
+            assert(result.safeApi.tour, 'safe Tour API not exposed');
+            assert(result.safeApi.tourPreflight && result.safeApi.tourStart && result.safeApi.tourQuestions, 'safe Tour start path missing');
+            assert(result.safeApi.tourSubmit && result.safeApi.tourFinalize && result.safeApi.tourReview, 'safe Tour submit/finalize/review path missing');
             assert(pageErrors.length === 0, `uncaught page errors: ${JSON.stringify(pageErrors)}`);
             assert(localRequestFailures.length === 0, `local asset request failures: ${JSON.stringify(localRequestFailures)}`);
 
