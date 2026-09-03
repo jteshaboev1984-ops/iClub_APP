@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - security-p0-02-production-release
+      - main
     paths:
       - app.js
       - index.html
@@ -18,10 +19,10 @@ jobs:
   release-regression:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout exact release revision
+      - name: Checkout exact pushed revision
         uses: actions/checkout@v4
         with:
-          ref: security-p0-02-production-release
+          ref: ${{ github.sha }}
 
       - name: Static safety gates
         shell: bash
