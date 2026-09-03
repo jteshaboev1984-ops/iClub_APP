@@ -1,0 +1,5 @@
+P0-02 selective frontend port
+Base: b66ac6144c38b8ec65cbdebc2d64302c390c107f
+Scope: safe Practice + auxiliary Practice + Tour + Ratings + Practice reset + legacy writer retirement
+Adapter: newer verified superset preserved during reset commit.
+Excluded: CI-only helper/parser commits and all Exam Prep/AI feature commits.
