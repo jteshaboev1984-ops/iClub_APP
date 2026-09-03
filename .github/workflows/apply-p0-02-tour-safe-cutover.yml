@@ -6,6 +6,7 @@ on:
       - iclub-v3-implementation
     paths:
       - scripts/p0-02-tour-safe-cutover.mjs
+      - scripts/run-p0-02-tour-safe-cutover.mjs
       - security/legacy-assessment-safe-api.js
       - .github/workflows/apply-p0-02-tour-safe-cutover.yml
   workflow_dispatch:
@@ -24,13 +25,14 @@ jobs:
           fetch-depth: 0
 
       - name: Apply guarded active Tour cutover
-        run: node scripts/p0-02-tour-safe-cutover.mjs
+        run: node scripts/run-p0-02-tour-safe-cutover.mjs
 
       - name: Syntax and Tour security checks
         run: |
           node --check app.js
           node --check security/legacy-assessment-safe-api.js
           node --check scripts/p0-02-tour-safe-cutover.mjs
+          node --check scripts/run-p0-02-tour-safe-cutover.mjs
           git diff --check
           grep -q 'security/legacy-assessment-safe-api.js?v=p002v4tour1' index.html
           grep -q 'app.js?v=support4-p002v4tour1' index.html
