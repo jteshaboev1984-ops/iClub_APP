@@ -14,6 +14,7 @@ on:
       - supabase/tests/p0_16_current_schema_sequencing_matrix.sql
       - supabase/tests/p0_16_mentor_hold_point_matrix.sql
       - supabase/tests/p0_16_capacity_boundary_matrix.sql
+      - supabase/tests/p0_16_core_first_incremental_matrix.sql
       - 'supabase/tests/p0_16_learner_*consent*.sql'
       - .github/workflows/p0-16-controlled-beta.yml
   workflow_dispatch:
@@ -227,12 +228,21 @@ jobs:
           echo '=== Authenticated learner self-consent: own candidate only; no activation side effect ===' | tee -a p016-beta.log
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_learner_self_consent_matrix.sql 2>&1 | tee -a p016-beta.log
 
+      - name: Run Core-first incremental beta matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p016.current_schema=true'
+        run: |
+          set -o pipefail
+          echo '=== Core-first beta: 3 Core start; future enrollment allowed; AI still held ===' | tee -a p016-beta.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_core_first_incremental_matrix.sql 2>&1 | tee -a p016-beta.log
+
       - name: Prove rollback and zero synthetic residue on final current schema
         shell: bash
         run: |
           set -euo pipefail
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
-          users="$(psql -Atqc "select count(*) from auth.users where email like 'p016-%@invalid.example' or email like 'p016c-%@invalid.example' or email like 'p016h-%@invalid.example' or email like 'p016b-%@invalid.example' or email like 'p016g-%@invalid.example' or email like 'p016s-%@invalid.example'")"
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p016-%@invalid.example' or email like 'p016c-%@invalid.example' or email like 'p016h-%@invalid.example' or email like 'p016b-%@invalid.example' or email like 'p016g-%@invalid.example' or email like 'p016s-%@invalid.example' or email like 'p016i-%@invalid.example'")"
           cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
           members="$(psql -Atqc "select count(*) from private.exam_prep_beta_members")"
           consents="$(psql -Atqc "select count(*) from private.exam_prep_beta_consents")"
@@ -258,7 +268,7 @@ jobs:
           test "$timed_results" = '0'
           test "$self_marks" = '0'
           test "$ai_runtime" = 'not_deployed'
-          echo 'P0-16 layered current-schema + learner-consent gates: GREEN' | tee -a p016-beta.log
+          echo 'P0-16 layered current-schema + learner-consent + Core-first gates: GREEN' | tee -a p016-beta.log
 
       - name: Upload beta diagnostics
         if: always()
