@@ -1,0 +1,58 @@
+name: P0-15 Harness Safety
+
+on:
+  push:
+    branches:
+      - exam-prep-p0-host
+    paths:
+      - supabase/tests/p0_15_internal_alpha_matrix.sql
+      - .github/workflows/p0-15-harness-safety.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  safety-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert isolated-only contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          f=supabase/tests/p0_15_internal_alpha_matrix.sql
+          test -f "$f"
+
+          grep -Fq "\\set ON_ERROR_STOP on" "$f"
+          grep -Fq "current_setting('p015.isolated_db', true)" "$f"
+          grep -Fq "P0-15 REFUSED" "$f"
+          grep -Fq "generate_series(1,610)" "$f"
+          grep -Fq "CREATE TEMP TABLE p015_expected" "$f"
+          grep -Fq "expected 10 queue items" "$f"
+          grep -Fq "queue leakage" "$f"
+          grep -Fq "AI outage" "$f"
+          grep -Fq "mentor absence" "$f"
+          grep -Fq "legacy integrity" "$f"
+          grep -Fq "ROLLBACK;" "$f"
+          grep -Fq "rollback failed" "$f"
+          grep -Fq "PASS (all mutations rolled back)" "$f"
+
+          # Production ref must never be embedded in or targeted by this harness.
+          ! grep -Fq "mmmduffgpvwjdpruzikw" "$f"
+
+          # A disposable test should not contain COMMIT.
+          ! grep -Eq '^[[:space:]]*COMMIT[[:space:]]*;' "$f"
+
+      - name: Assert 15-profile expected matrix is complete
+        shell: python
+        run: |
+          import pathlib, re
+          text = pathlib.Path('supabase/tests/p0_15_internal_alpha_matrix.sql').read_text()
+          block = text.split('INSERT INTO p015_expected VALUES',1)[1].split(';',1)[0]
+          rows = {int(x) for x in re.findall(r'\((\d+)\s*,', block)}
+          expected = set(range(1,16))
+          if rows != expected:
+              raise SystemExit(f'P0-15 expected profile matrix mismatch: {sorted(rows)}')
+          print('P0-15 harness safety contract: PASS')
