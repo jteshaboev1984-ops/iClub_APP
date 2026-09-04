@@ -1,0 +1,118 @@
+name: P0-16 Controlled Beta Gate
+
+on:
+  push:
+    branches:
+      - exam-prep-p0-host
+    paths:
+      - 'supabase/migrations/*exam_prep_p0_*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p0_16_controlled_beta_matrix.sql
+      - .github/workflows/p0-16-controlled-beta.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  controlled-beta:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostic log
+        run: printf 'P0-16 controlled beta CI\n' > p016-beta.log
+
+      - name: Bootstrap minimum legacy/Supabase contract
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p016-beta.log
+
+      - name: Apply real Exam Prep P0-04 through P0-16 migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          applied=0
+          for stage in 04 05 06 07 08 09 10 11 12 13 15 16; do
+            mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p0_${stage}_*.sql" | sort)
+            if [ "${#files[@]}" -eq 0 ]; then
+              echo "No migration files found for P0-${stage}" | tee -a p016-beta.log >&2
+              exit 1
+            fi
+            for f in "${files[@]}"; do
+              echo "=== Applying $f ===" | tee -a p016-beta.log
+              if ! psql -v ON_ERROR_STOP=1 -f "$f" >>p016-beta.log 2>&1; then
+                echo "FAILED_MIGRATION=$f" | tee -a p016-beta.log >&2
+                tail -n 160 p016-beta.log
+                exit 1
+              fi
+              applied=$((applied+1))
+            done
+          done
+          echo "Applied $applied Exam Prep migration files" | tee -a p016-beta.log
+
+      - name: Verify deployment remains fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
+          echo "PRE_BETA_STATE=$state" | tee -a p016-beta.log
+          echo "PRE_BETA_COHORTS=$cohorts" | tee -a p016-beta.log
+          test "$state" = 'off|false|false|false|true'
+          test "$cohorts" = '0'
+
+      - name: Run controlled beta matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p016.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_controlled_beta_matrix.sql 2>&1 | tee -a p016-beta.log
+
+      - name: Prove rollback and zero synthetic residue
+        shell: bash
+        run: |
+          set -euo pipefail
+          state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p016-%@invalid.example'")"
+          cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
+          echo "POST_BETA_STATE=$state" | tee -a p016-beta.log
+          echo "POST_BETA_SYNTHETIC_USERS=$users" | tee -a p016-beta.log
+          echo "POST_BETA_COHORTS=$cohorts" | tee -a p016-beta.log
+          test "$state" = 'off|false|false|false|true'
+          test "$users" = '0'
+          test "$cohorts" = '0'
+          echo 'P0-16 controlled beta gate: GREEN' | tee -a p016-beta.log
+
+      - name: Upload beta diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-16-controlled-beta-diagnostics
+          path: p016-beta.log
+          if-no-files-found: error
+          retention-days: 3
