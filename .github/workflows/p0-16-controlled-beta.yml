@@ -13,6 +13,7 @@ on:
       - supabase/tests/p0_16_controlled_beta_matrix.sql
       - supabase/tests/p0_16_current_schema_sequencing_matrix.sql
       - supabase/tests/p0_16_mentor_hold_point_matrix.sql
+      - supabase/tests/p0_16_capacity_boundary_matrix.sql
       - .github/workflows/p0-16-controlled-beta.yml
   workflow_dispatch:
 
@@ -169,12 +170,21 @@ jobs:
           echo '=== Current-schema GO WITH HOLD POINT: zero mentor capacity must not block Core canary ===' | tee -a p016-beta.log
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_mentor_hold_point_matrix.sql 2>&1 | tee -a p016-beta.log
 
+      - name: Run up-to-12 capacity boundary matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p016.current_schema=true'
+        run: |
+          set -o pipefail
+          echo '=== Current-schema capacity boundary: 12 allowed, 13th rejected at RPC and DB layers ===' | tee -a p016-beta.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_capacity_boundary_matrix.sql 2>&1 | tee -a p016-beta.log
+
       - name: Prove rollback and zero synthetic residue on current schema
         shell: bash
         run: |
           set -euo pipefail
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
-          users="$(psql -Atqc "select count(*) from auth.users where email like 'p016-%@invalid.example' or email like 'p016c-%@invalid.example' or email like 'p016h-%@invalid.example'")"
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p016-%@invalid.example' or email like 'p016c-%@invalid.example' or email like 'p016h-%@invalid.example' or email like 'p016b-%@invalid.example'")"
           cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
           members="$(psql -Atqc "select count(*) from private.exam_prep_beta_members")"
           reviews="$(psql -Atqc "select count(*) from private.exam_prep_beta_weekly_reviews")"
