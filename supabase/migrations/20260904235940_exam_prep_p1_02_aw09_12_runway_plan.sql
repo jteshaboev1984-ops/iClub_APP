@@ -42,27 +42,25 @@ select rel.id,s.skill_code,true
 from rel join skills s using(component_code)
 on conflict(release_id,skill_code) do update set required_for_release=excluded.required_for_release;
 
--- The release may depend on skills inside the same AW9-12 window, but it may not
--- introduce a forward/cyclic prerequisite. Every skill prerequisite must already
--- be in an earlier active release or appear earlier in canonical sequence inside
--- this same release.
+-- Every skill prerequisite must already be in an earlier active release or be
+-- present in this same release. Canonical sequence numbers are not used as a
+-- dependency order because some syllabus presentation items intentionally depend
+-- on a later-numbered prerequisite (for example P5-DAT-03 depends on P5-DAT-05).
+-- A separate recursive check rejects cycles inside this release.
 do $$
 declare
   v_program bigint;
-  v_bad int;
+  v_missing int;
+  v_cycles int;
 begin
   select id into v_program
   from private.exam_prep_program_versions
   where program_key='math_as_p1_p5' and version_key='p1_p5_canonical_v1_0';
 
   with current_release as (
-    select r.component_code,rs.skill_code,n.sequence_no
+    select r.component_code,rs.skill_code
     from private.exam_prep_content_runway_releases r
     join private.exam_prep_content_runway_release_skills rs on rs.release_id=r.id and rs.required_for_release
-    join private.exam_prep_syllabus_nodes n
-      on n.program_version_id=r.program_version_id
-     and n.component_code=r.component_code
-     and n.skill_code=rs.skill_code
     where r.program_version_id=v_program
       and r.release_key='aw09_12_core_coverage_ii'
       and r.schedule_status='active'
@@ -74,7 +72,7 @@ begin
       and r.schedule_status='active'
       and r.active_week_through<9
   )
-  select count(*) into v_bad
+  select count(*) into v_missing
   from current_release target
   join private.exam_prep_prerequisite_edges e
     on e.program_version_id=v_program
@@ -82,15 +80,38 @@ begin
    and e.to_skill_code=target.skill_code
   where (e.from_node_code like 'P1-%' or e.from_node_code like 'P5-%')
     and not exists(select 1 from earlier x where x.skill_code=e.from_node_code)
-    and not exists(
-      select 1 from current_release prior
-      where prior.skill_code=e.from_node_code
-        and prior.component_code=target.component_code
-        and prior.sequence_no<target.sequence_no
-    );
+    and not exists(select 1 from current_release x where x.skill_code=e.from_node_code);
 
-  if v_bad<>0 then
-    raise exception 'AW9-12 runway prerequisite closure violations=%',v_bad;
+  if v_missing<>0 then
+    raise exception 'AW9-12 runway prerequisite closure violations=%',v_missing;
+  end if;
+
+  with recursive current_release as (
+    select r.component_code,rs.skill_code
+    from private.exam_prep_content_runway_releases r
+    join private.exam_prep_content_runway_release_skills rs on rs.release_id=r.id and rs.required_for_release
+    where r.program_version_id=v_program
+      and r.release_key='aw09_12_core_coverage_ii'
+      and r.schedule_status='active'
+  ), local_edges as (
+    select e.from_node_code as from_skill,e.to_skill_code as to_skill
+    from private.exam_prep_prerequisite_edges e
+    join current_release a on a.skill_code=e.from_node_code
+    join current_release b on b.skill_code=e.to_skill_code
+    where e.program_version_id=v_program
+  ), walk(start_skill,current_skill,path,cycle) as (
+    select le.from_skill,le.to_skill,array[le.from_skill,le.to_skill]::text[],le.from_skill=le.to_skill
+    from local_edges le
+    union all
+    select w.start_skill,le.to_skill,w.path||le.to_skill,le.to_skill=any(w.path)
+    from walk w
+    join local_edges le on le.from_skill=w.current_skill
+    where not w.cycle and cardinality(w.path)<64
+  )
+  select count(*) into v_cycles from walk where cycle;
+
+  if v_cycles<>0 then
+    raise exception 'AW9-12 runway prerequisite cycle detected count=%',v_cycles;
   end if;
 end $$;
 
