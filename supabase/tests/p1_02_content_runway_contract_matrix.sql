@@ -6,9 +6,12 @@ declare
   v_program bigint;
   v_runway jsonb;
   v_aw2 jsonb;
+  v_aw5 jsonb;
   v_tmp bigint;
   v_failed boolean:=false;
   v_skill text;
+  v_p1_e2_ready int;
+  v_p5_e2_ready int;
 begin
   select id into v_program from private.exam_prep_program_versions
   where program_key='math_as_p1_p5' and version_key='p1_p5_canonical_v1_0';
@@ -35,10 +38,33 @@ begin
     raise exception 'P1-02 matrix: AW1 should expose exactly four governed runway weeks: %',v_runway::text;
   end if;
 
-  -- Runway must decay with time; AW2 still clears hard floor but no longer claims a four-week target without the next batch.
+  -- Runway must decay with time; AW2 still clears hard floor but does not claim four weeks while E2 is incomplete.
   v_aw2:=public.get_exam_prep_content_runway_v1(2::smallint);
   if not coalesce((v_aw2->>'hard_floor_green')::boolean,false) then raise exception 'P1-02 matrix: AW2 should retain >=2 weeks'; end if;
-  if coalesce((v_aw2->>'target_4w_green')::boolean,false) then raise exception 'P1-02 matrix: AW2 must not claim four weeks without next release'; end if;
+  if coalesce((v_aw2->>'target_4w_green')::boolean,false) then raise exception 'P1-02 matrix: AW2 must not claim four weeks while E2 release is incomplete'; end if;
+
+  -- E2 functions bridge is individually governed/ready, but the AW5-8 release must remain fail-closed until all required E2 skills exist.
+  foreach v_skill in array array['P1-FUN-06','P1-FUN-07','P1-FUN-08'] loop
+    if not private.exam_prep_skill_content_ready_v1(v_program,'P1',v_skill) then raise exception 'P1-02 matrix: E2 bridge skill not content-ready: %',v_skill; end if;
+    if not private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1',v_skill,5::smallint) then raise exception 'P1-02 matrix: E2 bridge skill not AW5 eligible: %',v_skill; end if;
+  end loop;
+  select count(*) into v_p1_e2_ready
+  from private.exam_prep_content_runway_release_skills rs
+  join private.exam_prep_content_runway_releases r on r.id=rs.release_id
+  where r.release_key='aw05_08_core_coverage_i' and r.component_code='P1' and rs.required_for_release
+    and private.exam_prep_skill_content_ready_v1(v_program,'P1',rs.skill_code);
+  select count(*) into v_p5_e2_ready
+  from private.exam_prep_content_runway_release_skills rs
+  join private.exam_prep_content_runway_releases r on r.id=rs.release_id
+  where r.release_key='aw05_08_core_coverage_i' and r.component_code='P5' and rs.required_for_release
+    and private.exam_prep_skill_content_ready_v1(v_program,'P5',rs.skill_code);
+  if v_p1_e2_ready<>3 or v_p5_e2_ready<>0 then
+    raise exception 'P1-02 matrix: expected partial E2 readiness P1=3 P5=0, got P1=% P5=%',v_p1_e2_ready,v_p5_e2_ready;
+  end if;
+  v_aw5:=public.get_exam_prep_content_runway_v1(5::smallint);
+  if coalesce((v_aw5->>'hard_floor_green')::boolean,false) or coalesce((v_aw5->>'target_4w_green')::boolean,false) then
+    raise exception 'P1-02 matrix: partial E2 bridge must not turn AW5 overall green: %',v_aw5::text;
+  end if;
 
   -- Empty/partial future content can never be published.
   insert into private.exam_prep_content_versions(program_version_id,content_version,component_code,release_label,status,source_policy)
@@ -60,11 +86,16 @@ begin
   -- New questions remain invisible to legacy delivery.
   if (select count(*) from public.questions where book_ref like 'ExamPrep:P1:p1_foundations_runway_v1:%')<>35 then raise exception 'P1-02 matrix: P1 authored count mismatch'; end if;
   if (select count(*) from public.questions where book_ref like 'ExamPrep:P5:p5_dat02_runway_v1:%')<>7 then raise exception 'P1-02 matrix: P5 DAT02 authored count mismatch'; end if;
-  if exists(select 1 from public.questions where (book_ref like 'ExamPrep:P1:p1_foundations_runway_v1:%' or book_ref like 'ExamPrep:P5:p5_dat02_runway_v1:%') and (is_active or quality_status is distinct from 'draft')) then
-    raise exception 'P1-02 matrix: new question leaked into legacy delivery state';
+  if (select count(*) from public.questions where book_ref like 'ExamPrep:P1:p1_e2_functions_bridge_v1:%')<>21 then raise exception 'P1-02 matrix: E2 functions bridge authored count mismatch'; end if;
+  if exists(select 1 from public.questions where (
+      book_ref like 'ExamPrep:P1:p1_foundations_runway_v1:%'
+      or book_ref like 'ExamPrep:P5:p5_dat02_runway_v1:%'
+      or book_ref like 'ExamPrep:P1:p1_e2_functions_bridge_v1:%'
+    ) and (is_active or quality_status is distinct from 'draft')) then
+    raise exception 'P1-02 matrix: Exam Prep question leaked into legacy delivery state';
   end if;
 
-  -- Deployment invariant: no cohort or feature activation.
+  -- Deployment invariant: no cohort or feature activation in isolated CI.
   if exists(select 1 from private.exam_prep_feature_config where rollout_state<>'off' or core_enabled or ai_enabled or mentor_enabled or not kill_switch) then
     raise exception 'P1-02 matrix: feature state escaped fail-closed';
   end if;
@@ -75,4 +106,5 @@ $$;
 
 select public.get_exam_prep_content_runway_v1(1::smallint) as aw1_runway;
 select public.get_exam_prep_content_runway_v1(2::smallint) as aw2_runway_decay;
+select public.get_exam_prep_content_runway_v1(5::smallint) as aw5_partial_e2_runway;
 \echo 'P1-02 completed content runway matrix: GREEN'
