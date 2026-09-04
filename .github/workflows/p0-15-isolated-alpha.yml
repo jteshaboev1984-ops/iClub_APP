@@ -80,7 +80,7 @@ jobs:
           set -euo pipefail
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
           echo "PRE_ALPHA_STATE=$state" | tee -a p015-isolated.log
-          test "$state" = 'off|f|f|f|t'
+          test "$state" = 'off|false|false|false|true'
           bad_rls="$(psql -Atqc "select count(*) from pg_tables where schemaname='private' and tablename like 'exam_prep%' and not rowsecurity")"
           echo "BAD_RLS_TABLES=$bad_rls" | tee -a p015-isolated.log
           test "$bad_rls" = '0'
@@ -101,7 +101,7 @@ jobs:
           synthetic="$(psql -Atqc "select count(*) from auth.users where email like 'p015-%@invalid.example'")"
           echo "POST_ALPHA_STATE=$state" | tee -a p015-isolated.log
           echo "SYNTHETIC_USERS_AFTER=$synthetic" | tee -a p015-isolated.log
-          test "$state" = 'off|f|f|f|t'
+          test "$state" = 'off|false|false|false|true'
           test "$synthetic" = '0'
           echo 'P0-15 isolated alpha gate: GREEN' | tee -a p015-isolated.log
 
