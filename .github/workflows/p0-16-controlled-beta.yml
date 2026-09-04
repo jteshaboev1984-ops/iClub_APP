@@ -14,7 +14,7 @@ on:
       - supabase/tests/p0_16_current_schema_sequencing_matrix.sql
       - supabase/tests/p0_16_mentor_hold_point_matrix.sql
       - supabase/tests/p0_16_capacity_boundary_matrix.sql
-      - supabase/tests/p0_16_learner_consent_matrix.sql
+      - 'supabase/tests/p0_16_learner_*consent*.sql'
       - .github/workflows/p0-16-controlled-beta.yml
   workflow_dispatch:
 
@@ -58,7 +58,7 @@ jobs:
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p016-beta.log
 
-      - name: Apply real Exam Prep P0-04 through P0-16 migrations except learner-consent overlay
+      - name: Apply real Exam Prep P0-04 through P0-16 migrations except learner-consent overlays
         shell: bash
         run: |
           set -euo pipefail
@@ -71,7 +71,8 @@ jobs:
               exit 1
             fi
             for f in "${files[@]}"; do
-              if [[ "$f" == *"exam_prep_p0_16_learner_consent_gate.sql" ]]; then
+              base="$(basename "$f")"
+              if [[ "$base" == *exam_prep_p0_16_learner_*consent*.sql ]]; then
                 echo "=== Deferring learner-consent overlay until after legacy/current sequencing matrices: $f ===" | tee -a p016-beta.log
                 deferred=$((deferred+1))
                 continue
@@ -85,7 +86,7 @@ jobs:
               applied=$((applied+1))
             done
           done
-          test "$deferred" = '1'
+          test "$deferred" -ge 1
           echo "Applied $applied Exam Prep P0 migration files; deferred consent overlays=$deferred" | tee -a p016-beta.log
 
       - name: Run original P0-16 mixed-service contract matrix
@@ -187,20 +188,22 @@ jobs:
           echo '=== Current-schema capacity boundary: 12 allowed, 13th rejected at RPC and DB layers ===' | tee -a p016-beta.log
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_capacity_boundary_matrix.sql 2>&1 | tee -a p016-beta.log
 
-      - name: Apply learner-consent overlay on full current schema
+      - name: Apply learner-consent overlays on full current schema
         shell: bash
         run: |
           set -euo pipefail
-          f="supabase/migrations/20260904196400_exam_prep_p0_16_learner_consent_gate.sql"
-          test -f "$f"
-          echo "=== Applying deferred learner-consent overlay: $f ===" | tee -a p016-beta.log
-          psql -v ON_ERROR_STOP=1 -f "$f" >>p016-beta.log 2>&1
+          mapfile -t consent_files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p0_16_learner_*consent*.sql' | sort)
+          test "${#consent_files[@]}" -ge 1
+          for f in "${consent_files[@]}"; do
+            echo "=== Applying deferred learner-consent overlay: $f ===" | tee -a p016-beta.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p016-beta.log 2>&1
+          done
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
           consents="$(psql -Atqc "select count(*) from private.exam_prep_beta_consents")"
           trigger_count="$(psql -Atqc "select count(*) from pg_trigger where tgname='exam_prep_beta_member_consent_guard_v1' and not tgisinternal and tgenabled<>'D'")"
-          echo "POST_CONSENT_OVERLAY_STATE=$state" | tee -a p016-beta.log
-          echo "POST_CONSENT_OVERLAY_ROWS=$consents" | tee -a p016-beta.log
-          echo "POST_CONSENT_OVERLAY_TRIGGER=$trigger_count" | tee -a p016-beta.log
+          echo "POST_CONSENT_OVERLAYS_STATE=$state" | tee -a p016-beta.log
+          echo "POST_CONSENT_OVERLAYS_ROWS=$consents" | tee -a p016-beta.log
+          echo "POST_CONSENT_OVERLAYS_TRIGGER=$trigger_count" | tee -a p016-beta.log
           test "$state" = 'off|false|false|false|true'
           test "$consents" = '0'
           test "$trigger_count" = '1'
@@ -214,12 +217,22 @@ jobs:
           echo '=== Current-schema learner consent: approval/activation require opt-in; live revoke fail-closes ===' | tee -a p016-beta.log
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_learner_consent_matrix.sql 2>&1 | tee -a p016-beta.log
 
+      - name: Run learner self-consent matrix when present
+        if: ${{ hashFiles('supabase/tests/p0_16_learner_self_consent_matrix.sql') != '' }}
+        shell: bash
+        env:
+          PGOPTIONS: '-c p016.current_schema=true'
+        run: |
+          set -o pipefail
+          echo '=== Authenticated learner self-consent: own candidate only; no activation side effect ===' | tee -a p016-beta.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_learner_self_consent_matrix.sql 2>&1 | tee -a p016-beta.log
+
       - name: Prove rollback and zero synthetic residue on final current schema
         shell: bash
         run: |
           set -euo pipefail
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
-          users="$(psql -Atqc "select count(*) from auth.users where email like 'p016-%@invalid.example' or email like 'p016c-%@invalid.example' or email like 'p016h-%@invalid.example' or email like 'p016b-%@invalid.example' or email like 'p016g-%@invalid.example'")"
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p016-%@invalid.example' or email like 'p016c-%@invalid.example' or email like 'p016h-%@invalid.example' or email like 'p016b-%@invalid.example' or email like 'p016g-%@invalid.example' or email like 'p016s-%@invalid.example'")"
           cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
           members="$(psql -Atqc "select count(*) from private.exam_prep_beta_members")"
           consents="$(psql -Atqc "select count(*) from private.exam_prep_beta_consents")"
@@ -245,7 +258,7 @@ jobs:
           test "$timed_results" = '0'
           test "$self_marks" = '0'
           test "$ai_runtime" = 'not_deployed'
-          echo 'P0-16 layered current-schema + learner-consent gate: GREEN' | tee -a p016-beta.log
+          echo 'P0-16 layered current-schema + learner-consent gates: GREEN' | tee -a p016-beta.log
 
       - name: Upload beta diagnostics
         if: always()
