@@ -1,1 +1,0 @@
-This branch contains the Core-first controlled-beta correction and its regression evidence. No additional placeholder documentation is required after merge; future status should be maintained in the canonical release records on `main`.
