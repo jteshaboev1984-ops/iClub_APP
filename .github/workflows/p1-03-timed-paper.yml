@@ -11,6 +11,7 @@ on:
       - 'supabase/migrations/*exam_prep_p1_03_*.sql'
       - supabase/tests/p0_15_contract_bootstrap.sql
       - supabase/tests/p1_02_content_runway_contract_matrix.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
       - supabase/tests/p1_03_timed_paper_matrix.sql
       - .github/workflows/p1-03-timed-paper.yml
   workflow_dispatch:
@@ -54,6 +55,12 @@ jobs:
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p103-timed-paper.log
+
+      - name: Mirror pre-existing production answer helpers in ephemeral DB
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p103-timed-paper.log
 
       - name: Apply real Exam Prep P0 migrations
         shell: bash
