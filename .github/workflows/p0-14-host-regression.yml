@@ -32,6 +32,8 @@ jobs:
           node --check exam-prep/exam-prep-host.js
           grep -q 'id="subject-hub-exam-prep-entry"' index.html
           grep -q 'id="exam-prep-host-root"' index.html
+          grep -q 'id="subject-hub-exam-prep-entry"[^>]*hidden[^>]*aria-hidden="true"' index.html
+          grep -q 'id="exam-prep-host-root"[^>]*hidden[^>]*aria-hidden="true"' index.html
           grep -q 'data-action="open-exam-prep"' index.html
           grep -q 'exam-prep/exam-prep-api.js?v=p014h1' index.html
           grep -q 'exam-prep/exam-prep-host.js?v=p014h1' index.html
