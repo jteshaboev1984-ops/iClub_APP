@@ -10,7 +10,7 @@ on:
       - 'supabase/migrations/*exam_prep_p1_02_*.sql'
       - 'supabase/migrations/*exam_prep_p1_03_*.sql'
       - supabase/tests/p0_15_contract_bootstrap.sql
-      - supabase/tests/p0_16_learner_consent_matrix.sql
+      - 'supabase/tests/p0_16_learner_*consent*.sql'
       - supabase/tests/p1_01_weekly_governance_matrix.sql
       - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
       - .github/workflows/p1-01-weekly-governance.yml
@@ -62,7 +62,7 @@ jobs:
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p101-governance.log
 
-      - name: Apply real Exam Prep P0-04 through P0-16 migrations except learner-consent overlay
+      - name: Apply real Exam Prep P0-04 through P0-16 migrations except learner-consent overlays
         shell: bash
         run: |
           set -euo pipefail
@@ -75,7 +75,8 @@ jobs:
               exit 1
             fi
             for f in "${files[@]}"; do
-              if [[ "$f" == *"exam_prep_p0_16_learner_consent_gate.sql" ]]; then
+              base="$(basename "$f")"
+              if [[ "$base" == *exam_prep_p0_16_learner_*consent*.sql ]]; then
                 echo "=== Deferring learner-consent overlay until after weekly-governance matrix: $f ===" | tee -a p101-governance.log
                 deferred=$((deferred+1))
                 continue
@@ -89,7 +90,7 @@ jobs:
               applied=$((applied+1))
             done
           done
-          test "$deferred" = '1'
+          test "$deferred" -ge 1
           echo "Applied $applied P0 Exam Prep migration files; deferred consent overlays=$deferred" | tee -a p101-governance.log
 
       - name: Apply current P1-01 through P1-03 migrations
@@ -161,20 +162,22 @@ jobs:
           test "$reviews" = '0'
           test "$ai_status" = 'not_deployed'
 
-      - name: Apply learner-consent overlay on full P1-01 through P1-03 schema
+      - name: Apply learner-consent overlays on full P1-01 through P1-03 schema
         shell: bash
         run: |
           set -euo pipefail
-          f="supabase/migrations/20260904196400_exam_prep_p0_16_learner_consent_gate.sql"
-          test -f "$f"
-          echo "=== Applying deferred learner-consent overlay: $f ===" | tee -a p101-governance.log
-          psql -v ON_ERROR_STOP=1 -f "$f" >>p101-governance.log 2>&1
+          mapfile -t consent_files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p0_16_learner_*consent*.sql' | sort)
+          test "${#consent_files[@]}" -ge 1
+          for f in "${consent_files[@]}"; do
+            echo "=== Applying deferred learner-consent overlay: $f ===" | tee -a p101-governance.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p101-governance.log 2>&1
+          done
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
           consents="$(psql -Atqc "select count(*) from private.exam_prep_beta_consents")"
           trigger_count="$(psql -Atqc "select count(*) from pg_trigger where tgname='exam_prep_beta_member_consent_guard_v1' and not tgisinternal and tgenabled<>'D'")"
-          echo "POST_P101_CONSENT_OVERLAY_STATE=$state" | tee -a p101-governance.log
-          echo "POST_P101_CONSENT_OVERLAY_ROWS=$consents" | tee -a p101-governance.log
-          echo "POST_P101_CONSENT_OVERLAY_TRIGGER=$trigger_count" | tee -a p101-governance.log
+          echo "POST_P101_CONSENT_OVERLAYS_STATE=$state" | tee -a p101-governance.log
+          echo "POST_P101_CONSENT_OVERLAYS_ROWS=$consents" | tee -a p101-governance.log
+          echo "POST_P101_CONSENT_OVERLAYS_TRIGGER=$trigger_count" | tee -a p101-governance.log
           test "$state" = 'off|false|false|false|true'
           test "$consents" = '0'
           test "$trigger_count" = '1'
@@ -187,12 +190,21 @@ jobs:
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_learner_consent_matrix.sql 2>&1 | tee -a p101-governance.log
 
+      - name: Run learner self-consent integration matrix when present
+        if: ${{ hashFiles('supabase/tests/p0_16_learner_self_consent_matrix.sql') != '' }}
+        shell: bash
+        env:
+          PGOPTIONS: '-c p016.current_schema=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_learner_self_consent_matrix.sql 2>&1 | tee -a p101-governance.log
+
       - name: Prove rollback and zero synthetic residue on final schema
         shell: bash
         run: |
           set -euo pipefail
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
-          users="$(psql -Atqc "select count(*) from auth.users where email like 'p101-%@invalid.example' or email like 'p016g-%@invalid.example'")"
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p101-%@invalid.example' or email like 'p016g-%@invalid.example' or email like 'p016s-%@invalid.example'")"
           cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
           consents="$(psql -Atqc "select count(*) from private.exam_prep_beta_consents")"
           reviews="$(psql -Atqc "select count(*) from private.exam_prep_beta_weekly_reviews")"
