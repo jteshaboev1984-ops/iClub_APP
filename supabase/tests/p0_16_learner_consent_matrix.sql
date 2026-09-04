@@ -64,7 +64,8 @@ BEGIN
   BEGIN
     PERFORM public.approve_exam_prep_controlled_beta_v1('math_as_p1_p5_beta_consent_01');
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'exam_prep_beta_consent_required:%' THEN
+    IF SQLERRM LIKE 'exam_prep_beta_consent_required:%'
+       OR SQLERRM LIKE 'exam_prep_beta_consent_required_for_candidates=%' THEN
       v_expected:=true;
     ELSE
       RAISE;
