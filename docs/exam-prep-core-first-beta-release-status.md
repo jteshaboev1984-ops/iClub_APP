@@ -1,1 +1,0 @@
-Status before merge: implementation and regression are complete on `exam-prep-p0-host`; production remains unchanged and fail-closed. The next repository action is merge to `main`; the next production action is migration deployment followed by real learner consent.
