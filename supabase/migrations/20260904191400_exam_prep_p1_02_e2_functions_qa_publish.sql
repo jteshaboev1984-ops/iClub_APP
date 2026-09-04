@@ -1,0 +1,127 @@
+-- P1-02 QA + publication gate for P1-FUN-06/07/08 bridge pack.
+-- Publishes governed Exam Prep memberships only. public.questions rows remain draft + inactive.
+
+begin;
+
+do $$
+declare v_id bigint; v_skill text; v_bad int; begin
+  select id into v_id from private.exam_prep_content_versions
+  where content_version='p1_e2_functions_bridge_v1' and component_code='P1' and status='draft';
+  if v_id is null then raise exception 'P1-02 E2 functions QA: draft content version missing'; end if;
+  if (select count(*) from private.exam_prep_question_content_meta where content_version_id=v_id)<>21 then
+    raise exception 'P1-02 E2 functions QA: expected 21 question objects';
+  end if;
+  foreach v_skill in array array['P1-FUN-06','P1-FUN-07','P1-FUN-08'] loop
+    if (select count(*) from private.exam_prep_question_content_meta where content_version_id=v_id and primary_skill_code=v_skill and reserve_role='diagnostic')<>1 then raise exception 'P1-02 E2 functions QA: % diagnostic floor',v_skill; end if;
+    if (select count(*) from private.exam_prep_question_content_meta where content_version_id=v_id and primary_skill_code=v_skill and reserve_role='learning')<>3 then raise exception 'P1-02 E2 functions QA: % learning floor',v_skill; end if;
+    if (select count(*) from private.exam_prep_question_content_meta where content_version_id=v_id and primary_skill_code=v_skill and reserve_role='retest')<>2 then raise exception 'P1-02 E2 functions QA: % retest floor',v_skill; end if;
+    if (select count(*) from private.exam_prep_question_content_meta where content_version_id=v_id and primary_skill_code=v_skill and reserve_role='mixed')<>1 then raise exception 'P1-02 E2 functions QA: % mixed floor',v_skill; end if;
+    if (select count(*) from private.exam_prep_written_tasks where content_version_id=v_id and primary_skill_code=v_skill and lifecycle_state='approved')<>1 then raise exception 'P1-02 E2 functions QA: % written floor',v_skill; end if;
+  end loop;
+
+  -- Trilingual payload, legacy isolation and immutable snapshot.
+  select count(*) into v_bad
+  from private.exam_prep_question_content_meta m join public.questions q on q.id=m.question_id
+  where m.content_version_id=v_id and (
+    q.subject_id<>5 or q.is_active or q.quality_status is distinct from 'draft'
+    or nullif(trim(q.question_text_en),'') is null or nullif(trim(q.question_text_ru),'') is null or nullif(trim(q.question_text_uz),'') is null
+    or nullif(trim(q.options_text_en),'') is null or nullif(trim(q.options_text_ru),'') is null or nullif(trim(q.options_text_uz),'') is null
+    or jsonb_typeof(q.options_text_en::jsonb)<>'array' or jsonb_array_length(q.options_text_en::jsonb)<>4
+    or jsonb_typeof(q.options_text_ru::jsonb)<>'array' or jsonb_array_length(q.options_text_ru::jsonb)<>4
+    or jsonb_typeof(q.options_text_uz::jsonb)<>'array' or jsonb_array_length(q.options_text_uz::jsonb)<>4
+    or q.correct_answer not in ('A','B','C','D')
+    or nullif(trim(q.explanation_en),'') is null or nullif(trim(q.explanation_ru),'') is null or nullif(trim(q.explanation_uz),'') is null
+    or md5(concat_ws(chr(31),q.id::text,q.subject_id::text,coalesce(q.topic,''),coalesce(q.subtopic,''),coalesce(q.difficulty,''),coalesce(q.qtype,''),coalesce(q.question_text,''),coalesce(q.options_text,''),coalesce(q.correct_answer,''),coalesce(q.explanation,''),coalesce(q.image_url,''),coalesce(q.is_active::text,''),coalesce(q.question_text_ru,''),coalesce(q.question_text_uz,''),coalesce(q.question_text_en,''),coalesce(q.options_text_ru,''),coalesce(q.options_text_uz,''),coalesce(q.options_text_en,''),coalesce(q.explanation_ru,''),coalesce(q.explanation_uz,''),coalesce(q.explanation_en,''),coalesce(q.book_ref,''),coalesce(q.time_limit_sec::text,''),coalesce(q.quality_flag,''),coalesce(q.quality_status,'')))<>m.question_snapshot_md5
+  );
+  if v_bad<>0 then raise exception 'P1-02 E2 functions QA: % payload/isolation/snapshot failures',v_bad; end if;
+
+  -- Exactly three approved WRONG-option rules per diagnostic.
+  select count(*) into v_bad from (
+    select m.id
+    from private.exam_prep_question_content_meta m
+    join public.questions q on q.id=m.question_id
+    left join private.exam_prep_diagnostic_rules r on r.content_meta_id=m.id and r.status='approved' and r.answer_kind='mcq_option'
+    where m.content_version_id=v_id and m.reserve_role='diagnostic'
+    group by m.id,q.correct_answer
+    having count(r.id)<>3 or count(r.id) filter(where r.answer_match=q.correct_answer)<>0
+  ) x;
+  if v_bad<>0 then raise exception 'P1-02 E2 functions QA: diagnostic rule contract failed for % items',v_bad; end if;
+
+  -- Reserve assessment items must remain holdout; one R02 per skill stays completely unassigned.
+  select count(*) into v_bad
+  from private.exam_prep_assessment_items i join private.exam_prep_assessments a on a.id=i.assessment_id
+  where a.content_version_id=v_id and a.assessment_type in ('diagnostic','retest','mixed') and not i.is_holdout;
+  if v_bad<>0 then raise exception 'P1-02 E2 functions QA: % reserve assessment items not holdout',v_bad; end if;
+  if (select count(*) from private.exam_prep_question_content_meta m where m.content_version_id=v_id and m.reserve_role='retest' and not exists(select 1 from private.exam_prep_assessment_items i where i.question_id=m.question_id))<>3 then
+    raise exception 'P1-02 E2 functions QA: expected three isolated second-retest holdouts';
+  end if;
+end $$;
+
+-- Human-reviewed QA decisions for this original bridge pack.
+update private.exam_prep_question_content_meta m
+set copyright_status='pass',qa_scope_status='pass',qa_math_status='pass',qa_language_status='pass',qa_technical_status='pass',
+    diagnostic_rule_status=case when reserve_role='diagnostic' then 'approved' else 'not_applicable' end,
+    lifecycle_state='approved',approved_at=now(),updated_at=now()
+from private.exam_prep_content_versions cv
+where cv.id=m.content_version_id and cv.content_version='p1_e2_functions_bridge_v1' and cv.status='draft';
+
+update private.exam_prep_content_versions
+set status='approved',approved_at=now()
+where content_version='p1_e2_functions_bridge_v1' and status='draft';
+
+update private.exam_prep_question_content_meta m
+set lifecycle_state=case when reserve_role='learning' then 'published' else 'reserve' end,
+    exposure_state=case when reserve_role='learning' then 'released' else 'withheld' end,
+    published_at=case when reserve_role='learning' then now() else null end,
+    updated_at=now()
+from private.exam_prep_content_versions cv
+where cv.id=m.content_version_id and cv.content_version='p1_e2_functions_bridge_v1' and cv.status='approved';
+
+update private.exam_prep_written_tasks w
+set lifecycle_state='published'
+from private.exam_prep_content_versions cv
+where cv.id=w.content_version_id and cv.content_version='p1_e2_functions_bridge_v1' and cv.status='approved' and w.lifecycle_state='approved';
+
+update private.exam_prep_assessments a
+set status='published',approved_at=coalesce(a.approved_at,now())
+from private.exam_prep_content_versions cv
+where cv.id=a.content_version_id and cv.content_version='p1_e2_functions_bridge_v1' and cv.status='approved' and a.status='approved';
+
+-- Publication trigger independently checks every included skill floor.
+update private.exam_prep_content_versions
+set status='published',published_at=now()
+where content_version='p1_e2_functions_bridge_v1' and status='approved';
+
+-- Final acceptance: bridge skills ready, AW5-8 as a whole still RED, no feature activation.
+do $$
+declare v_program bigint; v_skill text; v_r jsonb; v_p1_ready int; v_p5_ready int; begin
+  select id into v_program from private.exam_prep_program_versions
+  where program_key='math_as_p1_p5' and version_key='p1_p5_canonical_v1_0';
+  foreach v_skill in array array['P1-FUN-06','P1-FUN-07','P1-FUN-08'] loop
+    if not private.exam_prep_skill_content_ready_v1(v_program,'P1',v_skill) then
+      raise exception 'P1-02 E2 functions final: skill not ready %',v_skill;
+    end if;
+  end loop;
+  select count(*) into v_p1_ready
+  from private.exam_prep_content_runway_release_skills rs
+  join private.exam_prep_content_runway_releases r on r.id=rs.release_id
+  where r.release_key='aw05_08_core_coverage_i' and r.component_code='P1' and rs.required_for_release
+    and private.exam_prep_skill_content_ready_v1(v_program,'P1',rs.skill_code);
+  select count(*) into v_p5_ready
+  from private.exam_prep_content_runway_release_skills rs
+  join private.exam_prep_content_runway_releases r on r.id=rs.release_id
+  where r.release_key='aw05_08_core_coverage_i' and r.component_code='P5' and rs.required_for_release
+    and private.exam_prep_skill_content_ready_v1(v_program,'P5',rs.skill_code);
+  if v_p1_ready<>3 or v_p5_ready<>0 then raise exception 'P1-02 E2 functions final: expected AW5 readiness P1=3 P5=0, got P1=% P5=%',v_p1_ready,v_p5_ready; end if;
+  v_r:=public.get_exam_prep_content_runway_v1(5::smallint);
+  if coalesce((v_r->>'hard_floor_green')::boolean,false) or coalesce((v_r->>'target_4w_green')::boolean,false) then
+    raise exception 'P1-02 E2 functions final: AW5 must remain RED until full E2 pack exists: %',v_r::text;
+  end if;
+  if exists(select 1 from private.exam_prep_feature_config where program_key='math_as_p1_p5' and (rollout_state<>'off' or core_enabled or ai_enabled or mentor_enabled or not kill_switch)) then
+    raise exception 'P1-02 E2 functions final: feature escaped fail-closed';
+  end if;
+  if exists(select 1 from private.exam_prep_feature_entitlements where entitlement_status='active') then
+    raise exception 'P1-02 E2 functions final: active entitlement residue';
+  end if;
+end $$;
+commit;
