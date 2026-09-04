@@ -7,8 +7,11 @@ on:
     paths:
       - 'supabase/migrations/*exam_prep_p0_*.sql'
       - 'supabase/migrations/*exam_prep_p1_01_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_02_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_03_*.sql'
       - supabase/tests/p0_15_contract_bootstrap.sql
       - supabase/tests/p1_01_weekly_governance_matrix.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
       - .github/workflows/p1-01-weekly-governance.yml
   workflow_dispatch:
 
@@ -44,13 +47,19 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Initialize diagnostic log
-        run: printf 'P1-01 weekly governance CI\n' > p101-governance.log
+        run: printf 'P1-01 weekly governance full-current-schema CI\n' > p101-governance.log
 
       - name: Bootstrap minimum legacy/Supabase contract
         shell: bash
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p101-governance.log
+
+      - name: Mirror pre-existing production answer helpers in ephemeral DB
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p101-governance.log
 
       - name: Apply real Exam Prep P0-04 through P0-16 migrations
         shell: bash
@@ -67,7 +76,7 @@ jobs:
               echo "=== Applying $f ===" | tee -a p101-governance.log
               if ! psql -v ON_ERROR_STOP=1 -f "$f" >>p101-governance.log 2>&1; then
                 echo "FAILED_MIGRATION=$f" | tee -a p101-governance.log >&2
-                tail -n 180 p101-governance.log
+                tail -n 220 p101-governance.log
                 exit 1
               fi
               applied=$((applied+1))
@@ -75,23 +84,28 @@ jobs:
           done
           echo "Applied $applied P0 Exam Prep migration files" | tee -a p101-governance.log
 
-      - name: Apply real P1-01 governance migrations
+      - name: Apply current P1-01 through P1-03 migrations
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p1_01_*.sql' | sort)
-          if [ "${#files[@]}" -eq 0 ]; then
-            echo 'No P1-01 migrations found' | tee -a p101-governance.log >&2
-            exit 1
-          fi
-          for f in "${files[@]}"; do
-            echo "=== Applying $f ===" | tee -a p101-governance.log
-            if ! psql -v ON_ERROR_STOP=1 -f "$f" >>p101-governance.log 2>&1; then
-              echo "FAILED_MIGRATION=$f" | tee -a p101-governance.log >&2
-              tail -n 220 p101-governance.log
+          applied=0
+          for stage in 01 02 03; do
+            mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p1_${stage}_*.sql" | sort)
+            if [ "${#files[@]}" -eq 0 ]; then
+              echo "No migration files found for P1-${stage}" | tee -a p101-governance.log >&2
               exit 1
             fi
+            for f in "${files[@]}"; do
+              echo "=== Applying $f ===" | tee -a p101-governance.log
+              if ! psql -v ON_ERROR_STOP=1 -f "$f" >>p101-governance.log 2>&1; then
+                echo "FAILED_MIGRATION=$f" | tee -a p101-governance.log >&2
+                tail -n 300 p101-governance.log
+                exit 1
+              fi
+              applied=$((applied+1))
+            done
           done
+          echo "Applied $applied P1 Exam Prep migration files" | tee -a p101-governance.log
 
       - name: Verify deployment remains fail-closed
         shell: bash
@@ -100,17 +114,23 @@ jobs:
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
           cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
           reviews="$(psql -Atqc "select count(*) from private.exam_prep_beta_weekly_reviews")"
+          timed_results="$(psql -Atqc "select count(*) from private.exam_prep_timed_attempt_results")"
+          self_marks="$(psql -Atqc "select count(*) from private.exam_prep_timed_written_self_marks")"
           ai_status="$(psql -Atqc "select runtime_status from private.exam_prep_optional_capability_status where capability_code='ai_assist'")"
           echo "PRE_P101_STATE=$state" | tee -a p101-governance.log
           echo "PRE_P101_COHORTS=$cohorts" | tee -a p101-governance.log
           echo "PRE_P101_REVIEWS=$reviews" | tee -a p101-governance.log
+          echo "PRE_P101_TIMED_RESULTS=$timed_results" | tee -a p101-governance.log
+          echo "PRE_P101_SELF_MARKS=$self_marks" | tee -a p101-governance.log
           echo "PRE_P101_AI_RUNTIME=$ai_status" | tee -a p101-governance.log
           test "$state" = 'off|false|false|false|true'
           test "$cohorts" = '0'
           test "$reviews" = '0'
+          test "$timed_results" = '0'
+          test "$self_marks" = '0'
           test "$ai_status" = 'not_deployed'
 
-      - name: Run P1-01 weekly governance matrix
+      - name: Run P1-01 weekly governance matrix on full current schema
         shell: bash
         env:
           PGOPTIONS: '-c p101.isolated_db=true'
@@ -126,18 +146,24 @@ jobs:
           users="$(psql -Atqc "select count(*) from auth.users where email like 'p101-%@invalid.example'")"
           cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
           reviews="$(psql -Atqc "select count(*) from private.exam_prep_beta_weekly_reviews")"
+          timed_results="$(psql -Atqc "select count(*) from private.exam_prep_timed_attempt_results")"
+          self_marks="$(psql -Atqc "select count(*) from private.exam_prep_timed_written_self_marks")"
           ai_status="$(psql -Atqc "select runtime_status from private.exam_prep_optional_capability_status where capability_code='ai_assist'")"
           echo "POST_P101_STATE=$state" | tee -a p101-governance.log
           echo "POST_P101_SYNTHETIC_USERS=$users" | tee -a p101-governance.log
           echo "POST_P101_COHORTS=$cohorts" | tee -a p101-governance.log
           echo "POST_P101_REVIEWS=$reviews" | tee -a p101-governance.log
+          echo "POST_P101_TIMED_RESULTS=$timed_results" | tee -a p101-governance.log
+          echo "POST_P101_SELF_MARKS=$self_marks" | tee -a p101-governance.log
           echo "POST_P101_AI_RUNTIME=$ai_status" | tee -a p101-governance.log
           test "$state" = 'off|false|false|false|true'
           test "$users" = '0'
           test "$cohorts" = '0'
           test "$reviews" = '0'
+          test "$timed_results" = '0'
+          test "$self_marks" = '0'
           test "$ai_status" = 'not_deployed'
-          echo 'P1-01 weekly governance gate: GREEN' | tee -a p101-governance.log
+          echo 'P1-01 weekly governance full-current-schema gate: GREEN' | tee -a p101-governance.log
 
       - name: Upload P1-01 diagnostics
         if: always()
