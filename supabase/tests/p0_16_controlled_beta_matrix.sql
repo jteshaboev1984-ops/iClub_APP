@@ -68,6 +68,11 @@ FROM p016_people l
 JOIN p016_people m ON m.ord=86+l.ord
 WHERE l.ord BETWEEN 15 AND 18;
 
+-- The harness intentionally switches into service_role for the mutation RPCs.
+-- Grant that role read access to the transaction-local synthetic roster only;
+-- the table disappears on ROLLBACK/connection teardown.
+GRANT SELECT ON TABLE p016_people TO service_role;
+
 -- Exercise the mutation surface through service_role-only RPCs.
 SET LOCAL ROLE service_role;
 
