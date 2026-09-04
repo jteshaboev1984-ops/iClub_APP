@@ -11,6 +11,7 @@
  
   <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="style.css?v=support1" />
+  <link rel="stylesheet" href="exam-prep/exam-prep-host.css?v=p014h1" />
 </head>
 
 <body>
@@ -356,6 +357,19 @@
     </div>
   </button>
 </div>
+
+<div id="subject-hub-exam-prep-entry" class="subject-hub-list exam-prep-host-entry" hidden aria-hidden="true">
+  <button class="settings-nav" type="button" data-action="open-exam-prep">
+    <span class="settings-nav-ico">🎯</span>
+    <span class="settings-nav-text">
+      <span id="subject-hub-exam-prep-title" class="settings-nav-title">Cambridge AS Mathematics · Exam Prep</span>
+      <span id="subject-hub-exam-prep-sub" class="settings-nav-sub muted small">Paper 1 + Paper 5</span>
+    </span>
+    <span class="settings-nav-arrow">›</span>
+  </button>
+</div>
+
+<div id="exam-prep-host-root" class="exam-prep-host-root" hidden aria-hidden="true"></div>
 
   <div class="subject-hub-tabs" role="tablist" aria-label="Subject hub tabs">
   <button class="hub-tab is-active" type="button" data-action="open-lessons" data-i18n="home_lessons_label">Уроки</button>
@@ -1418,8 +1432,10 @@
   <!-- BUILD: confirm1 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="i18n.js"></script>
+  <script src="exam-prep/exam-prep-api.js?v=p014h1"></script>
+  <script src="exam-prep/exam-prep-host.js?v=p014h1"></script>
   <script src="security/legacy-assessment-safe-api.js?v=p002v4reset1"></script>
-<script src="app.js?v=support4-p0legacysaveoff1"></script>
+<script src="app.js?v=support4-p0legacysaveoff1-p014host1"></script>
 
   <div id="question-image-modal" class="question-image-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Question image" hidden>
     <button id="question-image-modal-close" class="question-image-modal-close" type="button" aria-label="Close">×</button>

@@ -1,0 +1,209 @@
+name: P0-16 Controlled Beta Gate
+
+on:
+  push:
+    branches:
+      - exam-prep-p0-host
+    paths:
+      - 'supabase/migrations/*exam_prep_p0_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_01_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_02_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_03_*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p0_16_controlled_beta_matrix.sql
+      - supabase/tests/p0_16_current_schema_sequencing_matrix.sql
+      - supabase/tests/p0_16_mentor_hold_point_matrix.sql
+      - .github/workflows/p0-16-controlled-beta.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  controlled-beta:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostic log
+        run: printf 'P0-16 controlled beta layered recertification CI\n' > p016-beta.log
+
+      - name: Bootstrap minimum legacy/Supabase contract
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p016-beta.log
+
+      - name: Apply real Exam Prep P0-04 through P0-16 migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          applied=0
+          for stage in 04 05 06 07 08 09 10 11 12 13 15 16; do
+            mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p0_${stage}_*.sql" | sort)
+            if [ "${#files[@]}" -eq 0 ]; then
+              echo "No migration files found for P0-${stage}" | tee -a p016-beta.log >&2
+              exit 1
+            fi
+            for f in "${files[@]}"; do
+              echo "=== Applying $f ===" | tee -a p016-beta.log
+              if ! psql -v ON_ERROR_STOP=1 -f "$f" >>p016-beta.log 2>&1; then
+                echo "FAILED_MIGRATION=$f" | tee -a p016-beta.log >&2
+                tail -n 180 p016-beta.log
+                exit 1
+              fi
+              applied=$((applied+1))
+            done
+          done
+          echo "Applied $applied Exam Prep P0 migration files" | tee -a p016-beta.log
+
+      - name: Run original P0-16 mixed-service contract matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p016.isolated_db=true'
+        run: |
+          set -o pipefail
+          echo '=== Legacy P0-16 contract matrix before P1 sequencing overlay ===' | tee -a p016-beta.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_controlled_beta_matrix.sql 2>&1 | tee -a p016-beta.log
+
+      - name: Prove legacy matrix rolled back before P1 overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p016-%@invalid.example'")"
+          echo "POST_LEGACY_STATE=$state" | tee -a p016-beta.log
+          echo "POST_LEGACY_COHORTS=$cohorts" | tee -a p016-beta.log
+          echo "POST_LEGACY_SYNTHETIC_USERS=$users" | tee -a p016-beta.log
+          test "$state" = 'off|false|false|false|true'
+          test "$cohorts" = '0'
+          test "$users" = '0'
+
+      - name: Apply current P1-01 through P1-03 migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          applied=0
+          for stage in 01 02 03; do
+            mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p1_${stage}_*.sql" | sort)
+            if [ "${#files[@]}" -eq 0 ]; then
+              echo "No migration files found for P1-${stage}" | tee -a p016-beta.log >&2
+              exit 1
+            fi
+            for f in "${files[@]}"; do
+              echo "=== Applying $f ===" | tee -a p016-beta.log
+              if ! psql -v ON_ERROR_STOP=1 -f "$f" >>p016-beta.log 2>&1; then
+                echo "FAILED_MIGRATION=$f" | tee -a p016-beta.log >&2
+                tail -n 240 p016-beta.log
+                exit 1
+              fi
+              applied=$((applied+1))
+            done
+          done
+          echo "Applied $applied Exam Prep P1 migration files" | tee -a p016-beta.log
+
+      - name: Verify current-schema deployment remains fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
+          members="$(psql -Atqc "select count(*) from private.exam_prep_beta_members")"
+          reviews="$(psql -Atqc "select count(*) from private.exam_prep_beta_weekly_reviews")"
+          timed_results="$(psql -Atqc "select count(*) from private.exam_prep_timed_attempt_results")"
+          self_marks="$(psql -Atqc "select count(*) from private.exam_prep_timed_written_self_marks")"
+          ai_runtime="$(psql -Atqc "select runtime_status from private.exam_prep_optional_capability_status where capability_code='ai_assist'")"
+          echo "PRE_CURRENT_STATE=$state" | tee -a p016-beta.log
+          echo "PRE_CURRENT_COHORTS=$cohorts" | tee -a p016-beta.log
+          echo "PRE_CURRENT_MEMBERS=$members" | tee -a p016-beta.log
+          echo "PRE_CURRENT_REVIEWS=$reviews" | tee -a p016-beta.log
+          echo "PRE_CURRENT_TIMED_RESULTS=$timed_results" | tee -a p016-beta.log
+          echo "PRE_CURRENT_SELF_MARKS=$self_marks" | tee -a p016-beta.log
+          echo "PRE_CURRENT_AI_RUNTIME=$ai_runtime" | tee -a p016-beta.log
+          test "$state" = 'off|false|false|false|true'
+          test "$cohorts" = '0'
+          test "$members" = '0'
+          test "$reviews" = '0'
+          test "$timed_results" = '0'
+          test "$self_marks" = '0'
+          test "$ai_runtime" = 'not_deployed'
+
+      - name: Run current-schema sequencing matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p016.current_schema=true'
+        run: |
+          set -o pipefail
+          echo '=== Current-schema mixed cohort + Core canary + AI fail-closed matrix ===' | tee -a p016-beta.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_current_schema_sequencing_matrix.sql 2>&1 | tee -a p016-beta.log
+
+      - name: Run Mentor Care hold-point matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p016.current_schema=true'
+        run: |
+          set -o pipefail
+          echo '=== Current-schema GO WITH HOLD POINT: zero mentor capacity must not block Core canary ===' | tee -a p016-beta.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_mentor_hold_point_matrix.sql 2>&1 | tee -a p016-beta.log
+
+      - name: Prove rollback and zero synthetic residue on current schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p016-%@invalid.example' or email like 'p016c-%@invalid.example' or email like 'p016h-%@invalid.example'")"
+          cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
+          members="$(psql -Atqc "select count(*) from private.exam_prep_beta_members")"
+          reviews="$(psql -Atqc "select count(*) from private.exam_prep_beta_weekly_reviews")"
+          timed_results="$(psql -Atqc "select count(*) from private.exam_prep_timed_attempt_results")"
+          self_marks="$(psql -Atqc "select count(*) from private.exam_prep_timed_written_self_marks")"
+          ai_runtime="$(psql -Atqc "select runtime_status from private.exam_prep_optional_capability_status where capability_code='ai_assist'")"
+          echo "POST_CURRENT_STATE=$state" | tee -a p016-beta.log
+          echo "POST_CURRENT_SYNTHETIC_USERS=$users" | tee -a p016-beta.log
+          echo "POST_CURRENT_COHORTS=$cohorts" | tee -a p016-beta.log
+          echo "POST_CURRENT_MEMBERS=$members" | tee -a p016-beta.log
+          echo "POST_CURRENT_REVIEWS=$reviews" | tee -a p016-beta.log
+          echo "POST_CURRENT_TIMED_RESULTS=$timed_results" | tee -a p016-beta.log
+          echo "POST_CURRENT_SELF_MARKS=$self_marks" | tee -a p016-beta.log
+          echo "POST_CURRENT_AI_RUNTIME=$ai_runtime" | tee -a p016-beta.log
+          test "$state" = 'off|false|false|false|true'
+          test "$users" = '0'
+          test "$cohorts" = '0'
+          test "$members" = '0'
+          test "$reviews" = '0'
+          test "$timed_results" = '0'
+          test "$self_marks" = '0'
+          test "$ai_runtime" = 'not_deployed'
+          echo 'P0-16 layered current-schema gate: GREEN' | tee -a p016-beta.log
+
+      - name: Upload beta diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-16-controlled-beta-diagnostics
+          path: p016-beta.log
+          if-no-files-found: error
+          retention-days: 3

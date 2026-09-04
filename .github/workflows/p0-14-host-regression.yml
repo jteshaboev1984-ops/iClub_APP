@@ -1,0 +1,75 @@
+name: P0-14 Host Regression
+
+on:
+  push:
+    branches:
+      - exam-prep-p0-host
+    paths:
+      - app.js
+      - index.html
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-host.js
+      - exam-prep/exam-prep-host.css
+      - exam-prep-preview.html
+      - .github/scripts/p0_14_host_regression.js
+      - .github/scripts/p0_14_legacy_off_regression.js
+      - .github/workflows/p0-14-host-regression.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static contract checks
+        run: |
+          node --check app.js
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-host.js
+          grep -q 'id="subject-hub-exam-prep-entry"' index.html
+          grep -q 'id="exam-prep-host-root"' index.html
+          grep -q 'id="subject-hub-exam-prep-entry"[^>]*hidden[^>]*aria-hidden="true"' index.html
+          grep -q 'id="exam-prep-host-root"[^>]*hidden[^>]*aria-hidden="true"' index.html
+          grep -q 'data-action="open-exam-prep"' index.html
+          grep -q 'exam-prep/exam-prep-api.js?v=p014h1' index.html
+          grep -q 'exam-prep/exam-prep-host.js?v=p014h1' index.html
+          grep -q 'exam-prep/exam-prep-host.css?v=p014h1' index.html
+          grep -q 'window.iClubExamPrep?.syncSubjectHub' app.js
+          grep -q 'window.iClubExamPrep?.isOpen' app.js
+          grep -q 'window.iClubExamPrep?.back' app.js
+          grep -q 'window.iClubExamPrep?.close' app.js
+          ! grep -q 'exam-prep/exam-prep-controller.js' index.html
+          ! grep -q 'exam-prep-static-data.js' index.html
+          ! grep -q '\.from(' exam-prep/exam-prep-api.js
+          ! grep -q '\.from(' exam-prep/exam-prep-host.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-api.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-host.js
+          ! grep -q 'iclub_state_v1' exam-prep/exam-prep-api.js
+          ! grep -q 'iclub_state_v1' exam-prep/exam-prep-host.js
+          grep -q "connect-src 'none'" exam-prep-preview.html
+
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Browser-isolated host bridge matrix
+        run: node .github/scripts/p0_14_host_regression.js
+
+      - name: Start local app server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/p014-http.log 2>&1 &
+          echo $! >/tmp/p014-http.pid
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/p014-http.log
+          exit 1
+
+      - name: Legacy OFF browser smoke
+        run: node .github/scripts/p0_14_legacy_off_regression.js

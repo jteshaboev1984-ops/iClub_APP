@@ -6177,6 +6177,11 @@ function formatDateTime(ts) {
 
   function setTab(tabName) {
     if (!["home", "courses", "ratings", "profile"].includes(tabName)) tabName = "home";
+  // P0-14 HOST BRIDGE: tab switch cannot leave a hidden active Exam Prep surface.
+  if (tabName !== "courses") {
+    try { window.iClubExamPrep?.close?.(); } catch {}
+  }
+
     const prevTab = state.tab;
     if (prevTab && prevTab !== tabName) {
       state.prevTab = prevTab;
@@ -12384,6 +12389,12 @@ function bindRatingsUI() {
   function popCourses() {
   if (state.quizLock) return;
 
+
+  // P0-14 HOST BRIDGE: never write Exam Prep routes into the legacy Courses stack.
+  try {
+    if (window.iClubExamPrep?.isOpen?.() && window.iClubExamPrep?.back?.()) return;
+  } catch {}
+
   const top = getCoursesTopScreen();
 
   // ✅ Ставим видео на паузу и жестко глушим iframe при уходе
@@ -12450,6 +12461,9 @@ function bindRatingsUI() {
 }
 
 function canCoursesBack() {
+  // P0-14 HOST BRIDGE: Exam Prep owns its internal/transient back first.
+  try { if (window.iClubExamPrep?.isOpen?.()) return true; } catch {}
+
   const top = getCoursesTopScreen();
 
   // ✅ special-case: my-recs and my-rec-detail may be opened from Profile / Courses,
@@ -15338,6 +15352,14 @@ async function renderSubjectHubMentorCard(subjectKey) {
     async function renderSubjectHub() {
   const profile = loadProfile();
   const subj = subjectByKey(state.courses.subjectKey);
+
+  // P0-14 HOST BRIDGE: isolated Exam Prep visibility/lifecycle sync; no domain logic here.
+  try {
+    Promise.resolve(window.iClubExamPrep?.syncSubjectHub?.({
+      subjectKey: state.courses.subjectKey,
+      language: currentLang()
+    })).catch(() => null);
+  } catch {}
 
   const titleEl = $("#subject-hub-title");
   const metaEl = $("#subject-hub-meta");
@@ -22633,6 +22655,16 @@ if (action === "profile-open-ratings") {
   renderVideo().catch(() => null);
   return;
 }
+      if (action === "open-exam-prep") {
+        try {
+          await window.iClubExamPrep?.open?.({
+            subjectKey: state.courses.subjectKey,
+            language: currentLang()
+          });
+        } catch {}
+        return;
+      }
+
 
             if (action === "open-practice") {
         await openPracticeStart();
