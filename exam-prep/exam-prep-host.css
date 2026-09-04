@@ -1,0 +1,75 @@
+#subject-hub-exam-prep-entry[hidden],
+#exam-prep-host-root[hidden] {
+  display: none !important;
+}
+
+#courses-subject-hub.exam-prep-host-open > :not(#exam-prep-host-root) {
+  display: none !important;
+}
+
+.exam-prep-host-entry {
+  margin: 12px 0;
+}
+
+.exam-prep-host-entry .settings-nav {
+  width: 100%;
+}
+
+.exam-prep-host-root {
+  width: 100%;
+  min-height: 60vh;
+}
+
+.ep-host-shell {
+  display: grid;
+  gap: 12px;
+  padding: 18px 0 28px;
+}
+
+.ep-host-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .68;
+}
+
+.ep-host-title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.ep-host-subtitle,
+.ep-host-note,
+.ep-host-component-card span {
+  opacity: .72;
+}
+
+.ep-host-note {
+  margin: 0;
+  max-width: 720px;
+  line-height: 1.5;
+}
+
+.ep-host-component-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.ep-host-component-card {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid var(--border, rgba(127,127,127,.22));
+  border-radius: 14px;
+  background: var(--card, rgba(127,127,127,.06));
+}
+
+@media (max-width: 640px) {
+  .ep-host-component-grid {
+    grid-template-columns: 1fr;
+  }
+}
