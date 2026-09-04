@@ -11,6 +11,7 @@ on:
       - 'supabase/migrations/*exam_prep_p1_03_*.sql'
       - supabase/tests/p0_15_contract_bootstrap.sql
       - supabase/tests/p0_16_controlled_beta_matrix.sql
+      - supabase/tests/p0_16_current_schema_sequencing_matrix.sql
       - .github/workflows/p0-16-controlled-beta.yml
   workflow_dispatch:
 
@@ -46,7 +47,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Initialize diagnostic log
-        run: printf 'P0-16 controlled beta current-schema CI\n' > p016-beta.log
+        run: printf 'P0-16 controlled beta layered recertification CI\n' > p016-beta.log
 
       - name: Bootstrap minimum legacy/Supabase contract
         shell: bash
@@ -76,6 +77,29 @@ jobs:
             done
           done
           echo "Applied $applied Exam Prep P0 migration files" | tee -a p016-beta.log
+
+      - name: Run original P0-16 mixed-service contract matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p016.isolated_db=true'
+        run: |
+          set -o pipefail
+          echo '=== Legacy P0-16 contract matrix before P1 sequencing overlay ===' | tee -a p016-beta.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_controlled_beta_matrix.sql 2>&1 | tee -a p016-beta.log
+
+      - name: Prove legacy matrix rolled back before P1 overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p016-%@invalid.example'")"
+          echo "POST_LEGACY_STATE=$state" | tee -a p016-beta.log
+          echo "POST_LEGACY_COHORTS=$cohorts" | tee -a p016-beta.log
+          echo "POST_LEGACY_SYNTHETIC_USERS=$users" | tee -a p016-beta.log
+          test "$state" = 'off|false|false|false|true'
+          test "$cohorts" = '0'
+          test "$users" = '0'
 
       - name: Apply current P1-01 through P1-03 migrations
         shell: bash
@@ -110,45 +134,51 @@ jobs:
           reviews="$(psql -Atqc "select count(*) from private.exam_prep_beta_weekly_reviews")"
           timed_results="$(psql -Atqc "select count(*) from private.exam_prep_timed_attempt_results")"
           self_marks="$(psql -Atqc "select count(*) from private.exam_prep_timed_written_self_marks")"
-          echo "PRE_BETA_STATE=$state" | tee -a p016-beta.log
-          echo "PRE_BETA_COHORTS=$cohorts" | tee -a p016-beta.log
-          echo "PRE_BETA_MEMBERS=$members" | tee -a p016-beta.log
-          echo "PRE_BETA_REVIEWS=$reviews" | tee -a p016-beta.log
-          echo "PRE_BETA_TIMED_RESULTS=$timed_results" | tee -a p016-beta.log
-          echo "PRE_BETA_SELF_MARKS=$self_marks" | tee -a p016-beta.log
+          ai_runtime="$(psql -Atqc "select runtime_status from private.exam_prep_optional_capability_status where capability_code='ai_assist'")"
+          echo "PRE_CURRENT_STATE=$state" | tee -a p016-beta.log
+          echo "PRE_CURRENT_COHORTS=$cohorts" | tee -a p016-beta.log
+          echo "PRE_CURRENT_MEMBERS=$members" | tee -a p016-beta.log
+          echo "PRE_CURRENT_REVIEWS=$reviews" | tee -a p016-beta.log
+          echo "PRE_CURRENT_TIMED_RESULTS=$timed_results" | tee -a p016-beta.log
+          echo "PRE_CURRENT_SELF_MARKS=$self_marks" | tee -a p016-beta.log
+          echo "PRE_CURRENT_AI_RUNTIME=$ai_runtime" | tee -a p016-beta.log
           test "$state" = 'off|false|false|false|true'
           test "$cohorts" = '0'
           test "$members" = '0'
           test "$reviews" = '0'
           test "$timed_results" = '0'
           test "$self_marks" = '0'
+          test "$ai_runtime" = 'not_deployed'
 
-      - name: Run controlled beta matrix on current schema
+      - name: Run current-schema sequencing matrix
         shell: bash
         env:
-          PGOPTIONS: '-c p016.isolated_db=true'
+          PGOPTIONS: '-c p016.current_schema=true'
         run: |
           set -o pipefail
-          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_controlled_beta_matrix.sql 2>&1 | tee -a p016-beta.log
+          echo '=== Current-schema Core canary + AI fail-closed sequencing matrix ===' | tee -a p016-beta.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_16_current_schema_sequencing_matrix.sql 2>&1 | tee -a p016-beta.log
 
       - name: Prove rollback and zero synthetic residue on current schema
         shell: bash
         run: |
           set -euo pipefail
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
-          users="$(psql -Atqc "select count(*) from auth.users where email like 'p016-%@invalid.example'")"
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p016-%@invalid.example' or email like 'p016c-%@invalid.example'")"
           cohorts="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts")"
           members="$(psql -Atqc "select count(*) from private.exam_prep_beta_members")"
           reviews="$(psql -Atqc "select count(*) from private.exam_prep_beta_weekly_reviews")"
           timed_results="$(psql -Atqc "select count(*) from private.exam_prep_timed_attempt_results")"
           self_marks="$(psql -Atqc "select count(*) from private.exam_prep_timed_written_self_marks")"
-          echo "POST_BETA_STATE=$state" | tee -a p016-beta.log
-          echo "POST_BETA_SYNTHETIC_USERS=$users" | tee -a p016-beta.log
-          echo "POST_BETA_COHORTS=$cohorts" | tee -a p016-beta.log
-          echo "POST_BETA_MEMBERS=$members" | tee -a p016-beta.log
-          echo "POST_BETA_REVIEWS=$reviews" | tee -a p016-beta.log
-          echo "POST_BETA_TIMED_RESULTS=$timed_results" | tee -a p016-beta.log
-          echo "POST_BETA_SELF_MARKS=$self_marks" | tee -a p016-beta.log
+          ai_runtime="$(psql -Atqc "select runtime_status from private.exam_prep_optional_capability_status where capability_code='ai_assist'")"
+          echo "POST_CURRENT_STATE=$state" | tee -a p016-beta.log
+          echo "POST_CURRENT_SYNTHETIC_USERS=$users" | tee -a p016-beta.log
+          echo "POST_CURRENT_COHORTS=$cohorts" | tee -a p016-beta.log
+          echo "POST_CURRENT_MEMBERS=$members" | tee -a p016-beta.log
+          echo "POST_CURRENT_REVIEWS=$reviews" | tee -a p016-beta.log
+          echo "POST_CURRENT_TIMED_RESULTS=$timed_results" | tee -a p016-beta.log
+          echo "POST_CURRENT_SELF_MARKS=$self_marks" | tee -a p016-beta.log
+          echo "POST_CURRENT_AI_RUNTIME=$ai_runtime" | tee -a p016-beta.log
           test "$state" = 'off|false|false|false|true'
           test "$users" = '0'
           test "$cohorts" = '0'
@@ -156,7 +186,8 @@ jobs:
           test "$reviews" = '0'
           test "$timed_results" = '0'
           test "$self_marks" = '0'
-          echo 'P0-16 controlled beta current-schema gate: GREEN' | tee -a p016-beta.log
+          test "$ai_runtime" = 'not_deployed'
+          echo 'P0-16 layered current-schema gate: GREEN' | tee -a p016-beta.log
 
       - name: Upload beta diagnostics
         if: always()
