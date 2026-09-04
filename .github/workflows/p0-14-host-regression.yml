@@ -11,6 +11,7 @@ on:
       - exam-prep/exam-prep-host.js
       - exam-prep/exam-prep-host.css
       - exam-prep-preview.html
+      - .p0-14-host-regression-run
   workflow_dispatch:
 
 permissions:
