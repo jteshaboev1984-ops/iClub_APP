@@ -14,7 +14,6 @@ on:
       - .github/scripts/p0_14_host_regression.js
       - .github/scripts/p0_14_legacy_off_regression.js
       - .github/workflows/p0-14-host-regression.yml
-      - .p0-14-host-regression-run
   workflow_dispatch:
 
 permissions:
