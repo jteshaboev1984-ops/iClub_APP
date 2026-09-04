@@ -14,7 +14,6 @@ $$;
 
 BEGIN;
 
--- Baseline must be fail-closed and P0-16 deployment must not pre-enroll anyone.
 DO $$
 DECLARE v_cfg record; v_count int;
 BEGIN
@@ -34,7 +33,7 @@ CREATE TEMP TABLE p016_people(
 ) ON COMMIT DROP;
 
 INSERT INTO p016_people(ord,user_id,kind)
-SELECT g,gen_random_uuid(),'learner' FROM generate_series(1,18) g
+SELECT g,gen_random_uuid(),'learner' FROM generate_series(1,12) g
 UNION ALL
 SELECT 100+g,gen_random_uuid(),'mentor' FROM generate_series(1,4) g;
 
@@ -50,13 +49,13 @@ SELECT user_id,
        ord::text,'en',now(),false
 FROM p016_people;
 
--- Four governed mentors and four Mentor Care assignments (learners 15..18).
+-- Four governed mentors and four Mentor Care assignments (learners 9..12).
 INSERT INTO private.exam_prep_staff_roles(user_id,role_code,role_status)
 SELECT user_id,'mentor','active' FROM p016_people WHERE ord BETWEEN 101 AND 104;
 
 INSERT INTO private.exam_prep_mentor_service_status(learner_user_id,service_status,status_reason)
 SELECT user_id,'assigned_active','P0-16 isolated beta readiness'
-FROM p016_people WHERE ord BETWEEN 15 AND 18;
+FROM p016_people WHERE ord BETWEEN 9 AND 12;
 
 INSERT INTO private.exam_prep_mentor_assignments(
   learner_user_id,mentor_user_id,component_code,assignment_status,valid_from
@@ -65,33 +64,28 @@ SELECT l.user_id,m.user_id,
        CASE WHEN l.ord%2=0 THEN 'P5' ELSE 'P1' END,
        'active',now()
 FROM p016_people l
-JOIN p016_people m ON m.ord=86+l.ord
-WHERE l.ord BETWEEN 15 AND 18;
+JOIN p016_people m ON m.ord=92+l.ord
+WHERE l.ord BETWEEN 9 AND 12;
 
--- The harness intentionally switches into service_role for the mutation RPCs.
--- Grant that role read access to the transaction-local synthetic roster only;
--- the table disappears on ROLLBACK/connection teardown.
 GRANT SELECT ON TABLE p016_people TO service_role;
 
--- Exercise the mutation surface through service_role-only RPCs.
 SET LOCAL ROLE service_role;
 
 SELECT public.stage_exam_prep_controlled_beta_v1(
-  'math_as_p1_p5_beta_test_01',18::smallint,'P0-16 isolated 18-learner controlled-beta matrix'
+  'math_as_p1_p5_beta_test_01',12::smallint,'P0-16 isolated 12-learner controlled-beta matrix'
 );
 
 SELECT public.set_exam_prep_beta_member_v1(
   'math_as_p1_p5_beta_test_01',p.user_id,
-  CASE WHEN p.ord<=7 THEN 'core' WHEN p.ord<=14 THEN 'ai_assist' ELSE 'mentor_care' END,
-  CASE WHEN p.ord IN (1,2,8,9,15) THEN 1::smallint ELSE 2::smallint END
+  CASE WHEN p.ord<=4 THEN 'core' WHEN p.ord<=8 THEN 'ai_assist' ELSE 'mentor_care' END,
+  CASE WHEN p.ord IN (1,2,5,6,9) THEN 1::smallint ELSE 2::smallint END
 )
-FROM p016_people p WHERE p.ord BETWEEN 1 AND 18 ORDER BY p.ord;
+FROM p016_people p WHERE p.ord BETWEEN 1 AND 12 ORDER BY p.ord;
 
 SELECT public.approve_exam_prep_controlled_beta_v1('math_as_p1_p5_beta_test_01');
 
 RESET ROLE;
 
--- Approval is allowlist/sign-off only: nobody may have access yet.
 DO $$
 DECLARE v_cfg record; v_count int; v_mix record;
 BEGIN
@@ -103,7 +97,7 @@ BEGIN
   SELECT count(*) INTO v_count
   FROM private.exam_prep_feature_entitlements e
   JOIN p016_people p ON p.user_id=e.user_id
-  WHERE p.ord<=18 AND e.entitlement_status='active';
+  WHERE p.ord<=12 AND e.entitlement_status='active';
   IF v_count<>0 THEN RAISE EXCEPTION 'P0-16 approval activated % learner entitlements',v_count; END IF;
 
   SELECT
@@ -115,7 +109,7 @@ BEGIN
   FROM private.exam_prep_beta_members m
   JOIN private.exam_prep_beta_cohorts c ON c.id=m.cohort_id
   WHERE c.cohort_key='math_as_p1_p5_beta_test_01' AND m.member_status='approved';
-  IF v_mix.total_n<>18 OR v_mix.core_n<>7 OR v_mix.ai_n<>7 OR v_mix.mentor_n<>4 THEN
+  IF v_mix.total_n<>12 OR v_mix.core_n<>4 OR v_mix.ai_n<>4 OR v_mix.mentor_n<>4 THEN
     RAISE EXCEPTION 'P0-16 service mix mismatch: %',row_to_json(v_mix);
   END IF;
 END
@@ -144,11 +138,10 @@ BEGIN
   FROM private.exam_prep_beta_members m
   JOIN private.exam_prep_beta_cohorts b ON b.id=m.cohort_id
   WHERE b.cohort_key='math_as_p1_p5_beta_test_01';
-  IF v_active<>5 OR v_waiting<>13 THEN
+  IF v_active<>5 OR v_waiting<>7 THEN
     RAISE EXCEPTION 'P0-16 canary counts mismatch active=% waiting=%',v_active,v_waiting;
   END IF;
 
-  -- Core canary.
   SELECT user_id INTO v_uid FROM p016_people WHERE ord=1;
   PERFORM set_config('request.jwt.claim.sub',v_uid::text,true);
   SELECT * INTO c FROM public.get_exam_prep_capabilities_v1();
@@ -156,23 +149,20 @@ BEGIN
     RAISE EXCEPTION 'P0-16 Core canary capability mismatch: %',row_to_json(c);
   END IF;
 
-  -- AI Assist canary.
-  SELECT user_id INTO v_uid FROM p016_people WHERE ord=8;
+  SELECT user_id INTO v_uid FROM p016_people WHERE ord=5;
   PERFORM set_config('request.jwt.claim.sub',v_uid::text,true);
   SELECT * INTO c FROM public.get_exam_prep_capabilities_v1();
   IF NOT c.core_access OR NOT c.ai_assist OR c.mentor_care_entitled OR c.mentor_authority THEN
     RAISE EXCEPTION 'P0-16 AI canary capability mismatch: %',row_to_json(c);
   END IF;
 
-  -- Mentor Care canary.
-  SELECT user_id INTO v_uid FROM p016_people WHERE ord=15;
+  SELECT user_id INTO v_uid FROM p016_people WHERE ord=9;
   PERFORM set_config('request.jwt.claim.sub',v_uid::text,true);
   SELECT * INTO c FROM public.get_exam_prep_capabilities_v1();
   IF NOT c.core_access OR c.ai_assist OR NOT c.mentor_care_entitled OR NOT c.mentor_assignment_active OR NOT c.mentor_authority THEN
     RAISE EXCEPTION 'P0-16 Mentor canary capability mismatch: %',row_to_json(c);
   END IF;
 
-  -- Wave-2 learner must still be completely dark.
   SELECT user_id INTO v_uid FROM p016_people WHERE ord=3;
   PERFORM set_config('request.jwt.claim.sub',v_uid::text,true);
   SELECT * INTO c FROM public.get_exam_prep_capabilities_v1();
@@ -182,7 +172,6 @@ BEGIN
 END
 $$;
 
--- Canary monitor must be green before expansion.
 SET LOCAL ROLE service_role;
 CREATE TEMP TABLE p016_canary_monitor AS
 SELECT public.get_exam_prep_controlled_beta_monitor_v1('math_as_p1_p5_beta_test_01') snapshot;
@@ -202,7 +191,7 @@ BEGIN
 END
 $$;
 
--- Expand to the remaining 13 approved learners.
+-- Expand to the remaining 7 approved learners.
 SET LOCAL ROLE service_role;
 SELECT public.activate_exam_prep_controlled_beta_wave_v1('math_as_p1_p5_beta_test_01',2::smallint);
 RESET ROLE;
@@ -216,14 +205,12 @@ BEGIN
   FROM private.exam_prep_beta_members m
   JOIN private.exam_prep_beta_cohorts c ON c.id=m.cohort_id
   WHERE c.cohort_key='math_as_p1_p5_beta_test_01' AND m.member_status='active';
-  IF v_status<>'active' OR v_count<>18 THEN
+  IF v_status<>'active' OR v_count<>12 THEN
     RAISE EXCEPTION 'P0-16 full cohort activation mismatch status=% active=%',v_status,v_count;
   END IF;
 END
 $$;
 
--- Human-review recommendations are global metadata, but queue work must appear
--- only for the Mentor Care learner with a governed assignment.
 INSERT INTO private.exam_prep_human_review_recommendations(
   learner_user_id,component_code,recommendation_type,source_object_type,source_object_id,recommendation_reason
 )
@@ -234,9 +221,9 @@ FROM p016_people WHERE ord=1;
 INSERT INTO private.exam_prep_human_review_recommendations(
   learner_user_id,component_code,recommendation_type,source_object_type,source_object_id,recommendation_reason
 )
-SELECT user_id,'P1','readiness','p016_beta_test','mentor-15',
+SELECT user_id,'P1','readiness','p016_beta_test','mentor-9',
        'P0-16 Mentor Care learner should enqueue only to the governed assigned mentor.'
-FROM p016_people WHERE ord=15;
+FROM p016_people WHERE ord=9;
 
 DO $$
 DECLARE v_total int; v_core int; v_mentor int;
@@ -252,7 +239,7 @@ BEGIN
   SELECT count(*) INTO v_mentor
   FROM private.exam_prep_mentor_queue_items q
   JOIN private.exam_prep_human_review_recommendations r ON r.id=q.recommendation_id
-  WHERE r.source_object_type='p016_beta_test' AND r.source_object_id='mentor-15';
+  WHERE r.source_object_type='p016_beta_test' AND r.source_object_id='mentor-9';
   IF v_total<>1 OR v_core<>0 OR v_mentor<>1 THEN
     RAISE EXCEPTION 'P0-16 queue isolation mismatch total=% core=% mentor=%',v_total,v_core,v_mentor;
   END IF;
@@ -269,9 +256,9 @@ DECLARE v jsonb;
 BEGIN
   SELECT snapshot INTO v FROM p016_full_monitor;
   IF coalesce((v->>'runway_green')::boolean,false) IS NOT TRUE
-     OR (v#>>'{member_counts,active}')::int<>18
-     OR (v#>>'{active_service_mix,core}')::int<>7
-     OR (v#>>'{active_service_mix,ai_assist}')::int<>7
+     OR (v#>>'{member_counts,active}')::int<>12
+     OR (v#>>'{active_service_mix,core}')::int<>4
+     OR (v#>>'{active_service_mix,ai_assist}')::int<>4
      OR (v#>>'{active_service_mix,mentor_care}')::int<>4
      OR (v#>>'{integrity,queue_leakage}')::int<>0
      OR (v#>>'{mentor_queue,open_items}')::int<>1 THEN
@@ -280,11 +267,10 @@ BEGIN
 END
 $$;
 
--- Emergency rollback must pause access, not delete evidence/state.
 CREATE TEMP TABLE p016_preserve_before AS
 SELECT
-  (SELECT count(*) FROM private.exam_prep_evidence_events e JOIN p016_people p ON p.user_id=e.user_id WHERE p.ord<=18) evidence_n,
-  (SELECT count(*) FROM private.exam_prep_skill_states s JOIN p016_people p ON p.user_id=s.user_id WHERE p.ord<=18) state_n;
+  (SELECT count(*) FROM private.exam_prep_evidence_events e JOIN p016_people p ON p.user_id=e.user_id WHERE p.ord<=12) evidence_n,
+  (SELECT count(*) FROM private.exam_prep_skill_states s JOIN p016_people p ON p.user_id=s.user_id WHERE p.ord<=12) state_n;
 
 SET LOCAL ROLE service_role;
 SELECT public.pause_exam_prep_controlled_beta_v1(
@@ -305,20 +291,20 @@ BEGIN
   FROM private.exam_prep_beta_members m
   JOIN private.exam_prep_beta_cohorts c ON c.id=m.cohort_id
   WHERE c.cohort_key='math_as_p1_p5_beta_test_01';
-  IF v_active<>0 OR v_paused<>18 THEN
+  IF v_active<>0 OR v_paused<>12 THEN
     RAISE EXCEPTION 'P0-16 rollback member states active=% paused=%',v_active,v_paused;
   END IF;
 
   SELECT count(*) INTO v_ent_active
   FROM private.exam_prep_feature_entitlements e
   JOIN p016_people p ON p.user_id=e.user_id
-  WHERE p.ord<=18 AND e.entitlement_status='active';
+  WHERE p.ord<=12 AND e.entitlement_status='active';
   IF v_ent_active<>0 THEN RAISE EXCEPTION 'P0-16 rollback left % active entitlements',v_ent_active; END IF;
 
   SELECT * INTO v_before FROM p016_preserve_before;
   SELECT
-    (SELECT count(*) FROM private.exam_prep_evidence_events e JOIN p016_people p ON p.user_id=e.user_id WHERE p.ord<=18) evidence_n,
-    (SELECT count(*) FROM private.exam_prep_skill_states s JOIN p016_people p ON p.user_id=s.user_id WHERE p.ord<=18) state_n
+    (SELECT count(*) FROM private.exam_prep_evidence_events e JOIN p016_people p ON p.user_id=e.user_id WHERE p.ord<=12) evidence_n,
+    (SELECT count(*) FROM private.exam_prep_skill_states s JOIN p016_people p ON p.user_id=s.user_id WHERE p.ord<=12) state_n
   INTO v_after;
   IF v_after.evidence_n<>v_before.evidence_n OR v_after.state_n<>v_before.state_n THEN
     RAISE EXCEPTION 'P0-16 rollback mutated evidence/state before=% after=%',row_to_json(v_before),row_to_json(v_after);
@@ -328,8 +314,6 @@ $$;
 
 ROLLBACK;
 
--- Rollback proof: the ephemeral test left the persistent schema fail-closed and
--- no synthetic beta/user rows survived.
 DO $$
 DECLARE v_count int; v_cfg record;
 BEGIN
@@ -344,4 +328,4 @@ BEGIN
 END
 $$;
 
-SELECT 'P0-16 controlled beta matrix: PASS (18 learners, 7/7/4, canary, full wave, monitoring, rollback)' AS result;
+SELECT 'P0-16 controlled beta matrix: PASS (12 learners, 4/4/4, canary, full wave, monitoring, rollback)' AS result;
