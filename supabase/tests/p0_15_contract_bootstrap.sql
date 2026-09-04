@@ -58,11 +58,56 @@ create table if not exists public.users (
   must_change_password boolean not null default false
 );
 
--- History-bearing legacy tables are deliberately empty. P0-15 only requires
--- their existence to prove that the Exam Prep drill does not mutate them.
+-- P0-07 reads the existing P1 question inventory but never mutates it. Recreate
+-- only the columns used by the real mapping/QA migrations and seed the exact
+-- legacy IDs they reference with safe published tri-language placeholders.
 create table if not exists public.questions (
-  id bigint generated always as identity primary key
+  id bigint primary key,
+  subject_id integer not null,
+  topic text,
+  subtopic text,
+  difficulty text,
+  qtype text,
+  question_text text,
+  options_text text,
+  correct_answer text,
+  explanation text,
+  image_url text,
+  is_active boolean not null default true,
+  question_text_ru text,
+  question_text_uz text,
+  question_text_en text,
+  options_text_ru text,
+  options_text_uz text,
+  options_text_en text,
+  explanation_ru text,
+  explanation_uz text,
+  explanation_en text,
+  book_ref text,
+  time_limit_sec integer,
+  quality_flag text,
+  quality_status text
 );
+
+insert into public.questions(
+  id,subject_id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,
+  explanation,image_url,is_active,question_text_ru,question_text_uz,question_text_en,
+  options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,
+  explanation_en,book_ref,time_limit_sec,quality_flag,quality_status
+)
+select qid,5,'P1 test contract','safe launch candidate','medium','mcq',
+       'Contract question '||qid,'A|B|C|D','A','Contract explanation',null,true,
+       'RU contract question '||qid,'UZ contract question '||qid,'EN contract question '||qid,
+       'A|B|C|D','A|B|C|D','A|B|C|D',
+       'RU explanation','UZ explanation','EN explanation','P0-15 contract',60,null,'published'
+from unnest(array[
+  6014,6013,1516,6035,6036,6040,2691,2721,6052,6089,6099,6100,6093,6090,2833,
+  2984,3274,2759,6077,6078,6110,6120,6115,6116,6129,6135,6132,6140,6139,6054,2958
+]::bigint[]) as q(qid)
+on conflict(id) do nothing;
+
+-- Remaining history-bearing legacy tables are deliberately empty. P0-15 only
+-- requires their existence to prove the Exam Prep drill does not mutate them.
 create table if not exists public.practice_attempts (
   id bigint generated always as identity primary key
 );
