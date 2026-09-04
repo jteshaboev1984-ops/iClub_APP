@@ -1,0 +1,1 @@
+Safety note: no production learner is activated by the Core-first migrations. All deployment-time assertions require fail-closed state. Learner consent remains separate from project-owner approval, and AI/Mentor capabilities remain independently gated.
