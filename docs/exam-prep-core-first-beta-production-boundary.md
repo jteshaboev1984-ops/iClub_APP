@@ -1,0 +1,1 @@
+Production boundary: repository work may proceed through merge and migration deployment while feature access remains OFF. Actual wave activation must wait for explicit consent from each real learner. The current three production candidates must not be auto-consented.
