@@ -42,8 +42,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Initialize diagnostic log
+        run: printf 'P0-15 isolated alpha CI\n' > p015-isolated.log
+
       - name: Bootstrap minimum legacy/Supabase contract
-        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p015-isolated.log
 
       - name: Apply real Exam Prep P0-04 through P0-13 migrations
         shell: bash
@@ -53,36 +59,57 @@ jobs:
           for stage in 04 05 06 07 08 09 10 11 12 13; do
             mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p0_${stage}_*.sql" | sort)
             if [ "${#files[@]}" -eq 0 ]; then
-              echo "No migration files found for P0-${stage}" >&2
+              echo "No migration files found for P0-${stage}" | tee -a p015-isolated.log >&2
               exit 1
             fi
             for f in "${files[@]}"; do
-              echo "Applying $f"
-              psql -v ON_ERROR_STOP=1 -f "$f"
+              echo "=== Applying $f ===" | tee -a p015-isolated.log
+              if ! psql -v ON_ERROR_STOP=1 -f "$f" >>p015-isolated.log 2>&1; then
+                echo "FAILED_MIGRATION=$f" | tee -a p015-isolated.log >&2
+                tail -n 120 p015-isolated.log
+                exit 1
+              fi
               applied=$((applied+1))
             done
           done
-          echo "Applied $applied Exam Prep migration files"
+          echo "Applied $applied Exam Prep migration files" | tee -a p015-isolated.log
 
       - name: Verify fail-closed pre-alpha baseline
         shell: bash
         run: |
           set -euo pipefail
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          echo "PRE_ALPHA_STATE=$state" | tee -a p015-isolated.log
           test "$state" = 'off|f|f|f|t'
           bad_rls="$(psql -Atqc "select count(*) from pg_tables where schemaname='private' and tablename like 'exam_prep%' and not rowsecurity")"
+          echo "BAD_RLS_TABLES=$bad_rls" | tee -a p015-isolated.log
           test "$bad_rls" = '0'
 
       - name: Run full P0-15 service/security/integrity/rollback matrix
+        shell: bash
         env:
           PGOPTIONS: '-c p015.isolated_db=true'
-        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_internal_alpha_matrix.sql
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_internal_alpha_matrix.sql 2>&1 | tee -a p015-isolated.log
 
       - name: Prove sandbox returned to fail-closed state
         shell: bash
         run: |
           set -euo pipefail
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          synthetic="$(psql -Atqc "select count(*) from auth.users where email like 'p015-%@invalid.example'")"
+          echo "POST_ALPHA_STATE=$state" | tee -a p015-isolated.log
+          echo "SYNTHETIC_USERS_AFTER=$synthetic" | tee -a p015-isolated.log
           test "$state" = 'off|f|f|f|t'
-          test "$(psql -Atqc "select count(*) from auth.users where email like 'p015-%@invalid.example'")" = '0'
-          echo 'P0-15 isolated alpha gate: GREEN'
+          test "$synthetic" = '0'
+          echo 'P0-15 isolated alpha gate: GREEN' | tee -a p015-isolated.log
+
+      - name: Upload isolated diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-15-isolated-diagnostics
+          path: p015-isolated.log
+          if-no-files-found: error
+          retention-days: 3
