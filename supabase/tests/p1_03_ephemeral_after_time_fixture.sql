@@ -2,13 +2,15 @@
 -- The behavioral matrix creates one synthetic, back-dated session directly so it
 -- can test AFTER-TIME buckets without waiting in real time. Production start RPCs
 -- already freeze these values. This narrowly scoped trigger mirrors that freeze
--- only for the synthetic CI session key and disappears with the ephemeral DB.
+-- only for the synthetic CI session key and exists only in the ephemeral CI DB.
 
 \set ON_ERROR_STOP on
 
-create or replace function pg_temp.p103_complete_after_time_fixture_item()
+create or replace function private.p103_complete_after_time_fixture_item()
 returns trigger
 language plpgsql
+security definer
+set search_path=''
 as $$
 declare
   v_client_key text;
@@ -39,8 +41,9 @@ begin
   return new;
 end;
 $$;
+revoke all on function private.p103_complete_after_time_fixture_item() from public,anon,authenticated;
 
 drop trigger if exists p103_complete_after_time_fixture_item on private.exam_prep_session_items;
 create trigger p103_complete_after_time_fixture_item
 before insert on private.exam_prep_session_items
-for each row execute function pg_temp.p103_complete_after_time_fixture_item();
+for each row execute function private.p103_complete_after_time_fixture_item();
