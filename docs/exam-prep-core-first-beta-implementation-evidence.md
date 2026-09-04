@@ -10,6 +10,7 @@
 - P1-03 timed-paper gate remained GREEN.
 - P1-01 weekly-governance gate passed with the learner-consent/Core-first overlay.
 - P0-16 controlled-beta gate passed the legacy mixed-service matrix, current-schema sequencing, Mentor hold point, 12-seat capacity boundary, learner consent, authenticated self-consent, and the new Core-first incremental matrix.
+- P0-14 host regression passed after adding a pre-entitlement invitation/consent UI; the legacy OFF smoke remained GREEN.
 
 ## New acceptance scenario
 
@@ -24,5 +25,7 @@ The P0-16 regression now proves the operational path required for the first real
 7. require consent and approval for the added learner before activation;
 8. allow a later AI candidate to be staged/approved while still blocking AI activation until the AI runtime gate is ready;
 9. roll back all synthetic state with zero residue.
+
+The learner-facing host now exposes the beta invitation before Core entitlement only to an authenticated allowlisted candidate returned by the server invitation RPC. Opening the invitation never grants consent automatically. Grant and revoke require explicit learner actions and the guarded acknowledgement tokens. Consent itself still does not activate Exam Prep.
 
 No production learner was activated while proving this path.
