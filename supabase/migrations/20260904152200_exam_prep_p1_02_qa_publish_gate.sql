@@ -100,7 +100,7 @@ from private.exam_prep_content_versions cv
 where cv.id=w.content_version_id and cv.content_version in ('p1_foundations_runway_v1','p5_dat02_runway_v1') and cv.status='approved' and w.lifecycle_state='approved';
 
 update private.exam_prep_assessments a
-set status='published',approved_at=coalesce(approved_at,now())
+set status='published',approved_at=coalesce(a.approved_at,now())
 from private.exam_prep_content_versions cv
 where cv.id=a.content_version_id and cv.content_version in ('p1_foundations_runway_v1','p5_dat02_runway_v1') and cv.status='approved' and a.status='approved';
 
