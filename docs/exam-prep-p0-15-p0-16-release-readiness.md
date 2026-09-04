@@ -4,25 +4,25 @@
 **Branch:** `exam-prep-p0-host`  
 **Evidence baseline commit:** `393526e96886570338e04ed828ced55a4433a077`  
 **Assessment date:** 2026-09-04  
-**Overall status:** **PENDING HUMAN SIGN-OFF**  
-**Learner beta authorization:** **NO**  
-**AI Assist authorization:** **NO**
+**Overall status:** **APPROVED FOR CONTROLLED BETA — CORE ONLY**  
+**Learner beta authorization:** **YES — FIRST WAVE LIMITED TO 12 LEARNERS**  
+**AI Assist authorization:** **NO**  
+**Mentor Care authorization:** **NO**
 
-> This record is evidence for a human release decision. It is **not** itself an approval and must never be interpreted as permission to activate a learner cohort, Core, AI Assist, or Mentor Care.
+> This record authorizes only the deterministic Core controlled-beta scope written below. It does not authorize AI Assist, Mentor Care, broader rollout, or bypass of any technical gate.
 
 ## 1. Current release decision
 
-Technical P0-15 and P0-16 recertification is GREEN against the current P0 -> P1-03 schema. Production remains fail-closed and contains no beta cohort or learner residue.
+Technical P0-15 and P0-16 recertification is GREEN against the current P0 -> P1-03 schema. The Project Owner has explicitly approved a real controlled beta with the following scope:
 
-The remaining gate is a real human sign-off. No prior Exam Prep sign-off artifact or approval record was found in the current source tree or commit history during the 2026-09-04 readiness audit.
+- service mode: **Core only**;
+- first real learner wave: **12 learners maximum**;
+- AI Assist: **not authorized**;
+- Mentor Care: **not authorized**;
+- expansion beyond the first wave: only after the monitoring/gates required by the Master Plan;
+- any Sev1 integrity/security issue, queue leakage, state corruption, or release-gate violation requires immediate pause/rollback through the existing controlled-beta governance path.
 
-Therefore:
-
-- do **not** stage, approve, or activate a real learner beta solely because CI is GREEN;
-- do **not** promote `ai_assist` runtime readiness;
-- do **not** enable `core_enabled`, `ai_enabled`, or `mentor_enabled` in production;
-- keep the global kill switch engaged until the governed release decision is explicitly recorded;
-- P1-04 / AI work that requires a stable deterministic beta remains gated.
+The approval does not change the independent prerequisite for P1-04 / AI work: deterministic beta must first produce the stability evidence required by the Master Plan.
 
 ## 2. Technical evidence
 
@@ -56,11 +56,11 @@ Therefore:
 
 The current-schema sequencing test intentionally proves that the P1-01 AI runtime gate is effective; it does not weaken or bypass that gate.
 
-## 3. Production snapshot after recertification
+## 3. Production snapshot before activation
 
-Production Supabase was re-read after both recertification gates. No production mutation was performed by this audit.
+Production Supabase was re-read after both recertification gates. No beta activation had occurred at that snapshot.
 
-Expected and observed fail-closed state:
+Observed fail-closed state before activation:
 
 | Control | Observed state |
 |---|---:|
@@ -77,7 +77,7 @@ Expected and observed fail-closed state:
 | AI runtime status | `not_deployed` |
 | AI gate version | `NULL` |
 
-P1-03 remains deployed only as dormant infrastructure. Its presence in production does not grant learner access.
+P1-03 remains dormant infrastructure until the controlled-beta activation path is used.
 
 ## 4. Source-of-truth reconciliation
 
@@ -89,35 +89,41 @@ No production migration was added as part of P0-15/P0-16 recertification; only C
 
 ## 5. Known governance observation
 
-At the time of this record, `exam-prep-p0-host` is not protected by GitHub branch protection and does not enforce required status checks at branch level.
+At the time of approval, `exam-prep-p0-host` is not protected by GitHub branch protection and does not enforce required status checks at branch level.
 
-This does **not** invalidate the successful CI evidence above, but it is an operational governance weakness that the human release decision should explicitly acknowledge or remediate before real learner beta.
+The Project Owner approval acknowledges this operational governance weakness for the limited 12-learner Core-only beta. It does not authorize bypassing the successful P0-15/P0-16 gates or expanding rollout without the Master Plan monitoring requirements.
 
 ## 6. Human sign-off gate
 
-**Status: PENDING**
+**Status: APPROVED**
 
-The following fields must be completed by an authorized human decision-maker. Automation, CI, database state, or an AI assistant may not fill these fields or infer approval.
-
-- Decision: `[ ] APPROVE CONTROLLED BETA`  `[ ] HOLD`  `[ ] REJECT / REMEDIATE`
-- Approved scope (if any): `____________________________________________`
-- Authorized cohort / wave constraints (if any): `_______________________`
-- Human approver name: `_______________________________________________`
-- Human approver role: `________________________________________________`
-- Decision date/time: `_________________________________________________`
-- Evidence / meeting / issue / PR reference: `___________________________`
-- Required remediation before activation: `_____________________________`
-- Notes: `______________________________________________________________`
+- Decision: `[x] APPROVE CONTROLLED BETA`  `[ ] HOLD`  `[ ] REJECT / REMEDIATE`
+- Approved scope: `Deterministic Exam Prep Core only; AI Assist and Mentor Care remain off.`
+- Authorized cohort / wave constraints: `First real learner wave limited to 12 learners.`
+- Human approver name: `Azizbek Erkinov`
+- Human approver role: `Project Owner`
+- Decision date: `2026-09-04`
+- Evidence / decision reference: `Explicit Project Owner approval in the ChatGPT implementation session: "1 Да / 2 Core-only / 3 12 / 4 Azizbek Erkinov — Project Owner".`
+- Required remediation before activation: `Re-run production pre-activation checks; use only governed controlled-beta RPCs; keep AI/Mentor off.`
+- Notes: `Expansion is governed by Master Plan monitoring and stability gates. P1-04 remains blocked until deterministic beta stability evidence exists.`
 
 ### Mandatory interpretation
 
-Until the human sign-off section is explicitly completed and traceable:
-
-**RELEASE GATE = CLOSED**  
-**REAL LEARNER BETA = OFF**  
+**RELEASE GATE = OPEN FOR THE APPROVED 12-LEARNER CORE-ONLY WAVE**  
 **AI ASSIST = NOT DEPLOYED / NOT AUTHORIZED**  
-**P1-04 = BLOCKED BY PREREQUISITE**
+**MENTOR CARE = NOT AUTHORIZED**  
+**P1-04 = STILL BLOCKED BY DETERMINISTIC-BETA STABILITY PREREQUISITE**
 
-## 7. Next action after valid sign-off
+## 7. Authorized next action
 
-If and only if the human decision is an explicit approval, the next operational action is to prepare the smallest governed deterministic Core beta cohort/wave allowed by the approved scope, re-run the production pre-activation checks, and activate only through the existing controlled-beta governance RPCs. AI Assist and Mentor Care must remain independently gated unless the human approval and their own runtime/readiness prerequisites explicitly authorize them.
+The next operational action is to:
+
+1. re-run production pre-activation integrity/security checks;
+2. prepare exactly one governed Core-only beta cohort;
+3. add no more than 12 explicitly selected real learners;
+4. activate the smallest canary wave permitted by the existing P0-16 governance path;
+5. verify capability isolation and production integrity immediately after activation;
+6. monitor the beta according to P1-01 weekly governance and the Master Plan;
+7. expand only after the required GREEN evidence exists.
+
+AI Assist and Mentor Care must remain independently disabled until their own prerequisites and explicit authorization are satisfied.
