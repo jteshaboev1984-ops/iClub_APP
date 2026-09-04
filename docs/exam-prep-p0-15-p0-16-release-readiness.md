@@ -1,139 +1,116 @@
 # Exam Prep P0-15 / P0-16 Release Readiness Record
 
 **Program:** `math_as_p1_p5`  
-**Branch:** `exam-prep-p0-host`  
-**Evidence baseline commit:** `393526e96886570338e04ed828ced55a4433a077`  
-**Assessment date:** 2026-09-04  
-**Overall status:** **APPROVED FOR CONTROLLED BETA — FIRST LIVE WAVE CORE ONLY**  
-**Controlled-beta cohort size:** **12 learners**  
-**First live canary:** **Core only**  
+**Canonical release branch:** `main`  
+**Assessment / amendment date:** 2026-09-04  
+**Overall status:** **APPROVED FOR CORE-FIRST CONTROLLED BETA — NOT YET ACTIVATED**  
+**Controlled-beta capacity:** **up to 12 learners**  
+**Current staged roster:** **3 Core candidates, wave 1**  
+**Learner consent:** **0 / 3 granted**  
 **AI Assist live authorization:** **NO**  
 **Mentor Care live authorization:** **NO**
 
-> The Project Owner approval authorizes a real controlled beta under the Master Plan. “Core-only” refers to the first live learner wave, not to removing the Master Plan requirement that the 12-person controlled-beta cohort represent Core / AI Assist / Mentor Care service modes. Future-mode members remain dark until their independent gates are satisfied.
+> **2026-09-04 operational amendment.** Earlier wording in this record that required an exactly filled, pre-stratified 12-person Core / AI Assist / Mentor Care cohort is superseded for the initial canary. Capacity remains at most 12, but the first controlled-beta wave may start with at least 3 explicitly consented Core learners. AI Assist and Mentor Care representation is deferred until the later waves that actually test those capabilities. Their independent activation gates remain unchanged.
 
 ## 1. Current release decision
 
-Technical P0-15 and P0-16 recertification is GREEN against the current P0 -> P1-03 schema. The Project Owner explicitly approved a real controlled beta with the following operational interpretation, reconciled to the Master Plan:
+The current governed interpretation is:
 
-- total controlled-beta cohort: **12 learners**;
-- cohort must retain representation of all three planned service modes as required by P0-16;
-- planned 12-person service mix for the first cohort: **8 Core + 2 future AI Assist + 2 future Mentor Care**;
-- first live canary wave: **4 Core learners only**;
-- remaining Core learners stay approved/waiting until a later wave decision;
-- AI Assist candidate members remain **approved/waiting with zero entitlement** until the AI runtime/readiness gate is satisfied and a later wave is explicitly allowed;
-- Mentor Care candidate members remain **approved/waiting with zero entitlement** until mentor readiness/capacity and a later wave are explicitly allowed;
-- AI Assist and Mentor Care are therefore **not live-authorized on day one**;
-- expansion beyond the Core canary is governed by monitoring/gates in the Master Plan;
-- any Sev1 integrity/security issue, queue leakage, state corruption, or release-gate violation requires immediate pause/rollback through the existing controlled-beta governance path.
+- `planned_size=12` is cohort **capacity**, not a requirement to fill all seats;
+- the initial controlled beta may start **Core-only with at least 3 real, allowlisted, explicitly consented learners**;
+- the current production roster already contains **3 Core candidates in wave 1**;
+- no artificial AI Assist or Mentor Care placeholders are required to approve the initial Core canary;
+- additional learners may be added later as **future-wave candidates**, up to remaining capacity;
+- every additional learner must separately consent and be approved before activation;
+- AI Assist activation remains blocked until the AI runtime/readiness gate passes;
+- Mentor Care activation remains blocked until assignment/capacity/readiness gates pass;
+- Project Owner approval is not learner consent;
+- any live integrity/security failure or active-learner consent revocation retains the fail-closed pause/rollback path;
+- P1-04 / AI remains blocked until deterministic beta stability evidence exists.
 
-This interpretation preserves both the Project Owner’s “Core-only” day-one decision and the Master Plan requirement that the controlled-beta cohort be stratified rather than permanently Core-only.
-
-The approval does not change the independent prerequisite for P1-04 / AI work: deterministic beta must first produce the stability evidence required by the Master Plan.
+This amendment changes beta enrollment/release sequencing only. It does **not** lower academic evidence standards, content-runway requirements, P1/P5 isolation, rollback requirements, or readiness definitions.
 
 ## 2. Technical evidence
 
-### P0-15 — current-schema isolated alpha
+### Historical P0-15 / P0-16 recertification
 
-- Workflow: `P0-15 Isolated Alpha`
-- GitHub Actions run: `33856650388`
-- Head commit: `1b18f1a48b4d5f327f8f4bc7a19f8bd02404b205`
-- Result: **SUCCESS**
-- Run: https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/33856650388
-- Scope: fresh PostgreSQL bootstrap, real P0 migrations, current P1-01 -> P1-03 migrations, fail-closed precheck, isolated P0-15 behavioral matrix, rollback, zero synthetic residue.
+- `P0-15 Isolated Alpha` run `33856650388` — **SUCCESS**.
+- Earlier `P0-16 Controlled Beta Gate` recertification — **SUCCESS** and preserved rollback / mixed-service isolation.
 
-### P0-16 — layered controlled-beta recertification
+### Core-first convergence evidence
 
-- Workflow: `P0-16 Controlled Beta Gate`
-- GitHub Actions run: `33857445108`
-- Head commit: `393526e96886570338e04ed828ced55a4433a077`
-- Result: **SUCCESS**
-- Run: https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/33857445108
-- Scope:
-  1. fresh PostgreSQL bootstrap;
-  2. real P0-04 -> P0-16 migrations;
-  3. original mixed Core / AI Assist / Mentor Care P0-16 contract matrix;
-  4. proof of rollback before the P1 overlay;
-  5. current P1-01 -> P1-03 migrations;
-  6. fail-closed current-schema verification;
-  7. mixed 12-person cohort staged and approved while global access remains OFF;
-  8. deterministic Core-only canary activation;
-  9. proof that an AI wave is blocked while AI runtime is not ready;
-  10. emergency pause / rollback verification;
-  11. zero synthetic residue after rollback.
+The Core-first change was implemented and regression-tested on `exam-prep-p0-host`, then squash-merged through PR **#13** into `main` as commit `7953563de0c4b57b4e49055492c448124c7aaf85`.
 
-The current-schema sequencing test intentionally proves that mixed cohort governance and Core-only first-wave activation coexist correctly; it also proves that the P1-01 AI runtime gate cannot be bypassed.
+Verified gates include:
 
-## 3. Production snapshot before activation
+- `P0-16 Controlled Beta Gate` run `33900000335` — **SUCCESS**;
+- `P1-01 Weekly Governance Gate` run `33899931900` — **SUCCESS**;
+- `P0-14 Host Regression` run `33900747278` — **SUCCESS**;
+- existing P0-15, P1-02 content runway and P1-03 timed-paper gates remained GREEN during the release line.
 
-Production Supabase was re-read after both recertification gates. No beta activation had occurred at that snapshot.
+The new P0-16 regression proves all of the following in one rolled-back synthetic path:
 
-Observed fail-closed state before activation:
+1. capacity 12 with only 3 initial Core learners;
+2. 3 / 3 explicit consent required before approval;
+3. initial Core-only cohort approval without AI/Mentor placeholders;
+4. wave 1 activates only those Core learners;
+5. an additional Core learner can be added later as a future-wave candidate, consented, approved and activated;
+6. an AI candidate may be staged/approved later while AI activation remains blocked when runtime readiness is not green;
+7. zero synthetic residue after rollback.
+
+The host regression additionally proves that an allowlisted learner can see the beta invitation **before Core entitlement**, while merely viewing/opening the invitation never grants consent automatically. Grant/revoke require explicit learner actions.
+
+## 3. Current production snapshot before deployment of the final overlays
+
+Production was re-read after the GitHub merge and before applying the final self-consent/Core-first overlays:
 
 | Control | Observed state |
 |---|---:|
+| cohort | `math_as_p1_p5_beta_2026_09_01` |
+| cohort status | `draft` |
+| cohort capacity | `12` |
+| current wave | `0` |
+| staged members | `3` |
+| Core candidates | `3` |
+| consent grants | `0 / 3` |
 | `rollout_state` | `off` |
 | `core_enabled` | `false` |
 | `ai_enabled` | `false` |
 | `mentor_enabled` | `false` |
 | `kill_switch` | `true` |
-| beta cohorts | `0` |
-| beta members | `0` |
-| beta weekly reviews | `0` |
-| timed attempt results | `0` |
-| timed written self-marks | `0` |
-| AI runtime status | `not_deployed` |
-| AI gate version | `NULL` |
+| active Exam Prep entitlements | `0` |
 
-P1-03 remains dormant infrastructure until the controlled-beta activation path is used.
+No learner access has been granted. P1-03 remains dormant infrastructure.
 
 ## 4. Source-of-truth reconciliation
 
-The authoritative Exam Prep working branch for this release line is **`exam-prep-p0-host`**.
+The governed release line has been squash-merged into **`main`**. `main` is now the repository source of truth for the Core-first capacity, consent, incremental-enrollment and invitation UI changes.
 
-During recertification, an earlier branch-identification mistake (`exam-prep-p0-core`) was detected and corrected. The `exam-prep-p0-host` source tree was then reconciled against production migration history, including P0-15, P0-16, P1-01, P1-02 and all P1-03 migrations.
+The previous working branch `exam-prep-p0-host` was used only to prove the release line and is no longer the canonical target for new work after the merge.
 
-No production migration was added as part of P0-15/P0-16 recertification; only CI/tests and this readiness record were changed.
+## 5. Human / learner gates
 
-## 5. Known governance observation
+**Project Owner release decision:** APPROVED FOR CONTROLLED BETA.  
+**Learner consent gate:** NOT COMPLETE — currently **0 / 3**.
 
-At the time of approval, `exam-prep-p0-host` is not protected by GitHub branch protection and does not enforce required status checks at branch level.
+Mandatory interpretation:
 
-The Project Owner approval acknowledges this operational governance weakness for the limited 12-learner controlled beta. It does not authorize bypassing the successful P0-15/P0-16 gates or expanding rollout without the Master Plan monitoring requirements.
-
-## 6. Human sign-off gate
-
-**Status: APPROVED**
-
-- Decision: `[x] APPROVE CONTROLLED BETA`  `[ ] HOLD`  `[ ] REJECT / REMEDIATE`
-- Approved operational scope: `12-person stratified controlled-beta cohort; first live canary is Core-only; AI Assist and Mentor Care remain dark until their independent gates.`
-- Planned cohort mix: `8 Core + 2 future AI Assist + 2 future Mentor Care.`
-- First live wave: `4 Core learners.`
-- Human approver name: `Azizbek Erkinov`
-- Human approver role: `Project Owner`
-- Decision date: `2026-09-04`
-- Evidence / decision reference: `Explicit Project Owner approval in the ChatGPT implementation session: "1 Да / 2 Core-only / 3 12 / 4 Azizbek Erkinov — Project Owner"; subsequent instruction: execute the full Master Plan and launch the app.`
-- Required checks before activation: `Production fail-closed precheck; exact 12-user selection; Mentor candidate readiness; governed RPC-only staging/approval; AI/Mentor entitlement must remain zero.`
-- Notes: `Core-only is the first live wave. The mixed cohort exists to preserve the Master Plan service-mode test design; candidate status does not itself grant learner access.`
-
-### Mandatory interpretation
-
-**RELEASE GATE = OPEN FOR A 12-LEARNER STRATIFIED COHORT**  
-**FIRST LIVE CANARY = CORE ONLY**  
-**AI ASSIST LIVE ACCESS = NOT AUTHORIZED / RUNTIME NOT DEPLOYED**  
-**MENTOR CARE LIVE ACCESS = NOT AUTHORIZED**  
+**CONTROLLED-BETA CAPACITY = UP TO 12**  
+**INITIAL LIVE CANARY = CURRENT 3 CORE LEARNERS, AFTER 3 / 3 CONSENT**  
+**AI ASSIST LIVE ACCESS = NOT AUTHORIZED / INDEPENDENT GATE**  
+**MENTOR CARE LIVE ACCESS = NOT AUTHORIZED / INDEPENDENT GATE**  
 **P1-04 = STILL BLOCKED BY DETERMINISTIC-BETA STABILITY PREREQUISITE**
 
-## 7. Authorized next action
+## 6. Authorized next action
 
-The next operational action is to:
+The next operational sequence is:
 
-1. re-run production pre-activation integrity/security checks;
-2. select exactly 12 eligible real learners using an auditable, non-arbitrary selection rule;
-3. stage one 12-person controlled-beta cohort using the planned 8 Core / 2 future AI / 2 future Mentor service mix;
-4. verify the two Mentor Care candidates have valid assignment/capacity before cohort approval;
-5. approve the cohort while global access remains OFF;
-6. activate **wave 1 only**, containing four Core learners;
-7. verify capability isolation and production integrity immediately after activation;
-8. monitor the canary according to P1-01 weekly governance / first-72h rules;
-9. do not activate AI or Mentor waves until their independent prerequisites and later release decisions are satisfied.
+1. apply the tested learner self-consent, Core-first/incremental and incremental-consent overlays to production while the feature remains fail-closed;
+2. verify production still has the same 3 candidates, zero active entitlements, `rollout_state=off` and `kill_switch=true`;
+3. verify the authenticated invitation/consent RPCs are available;
+4. obtain **explicit 3 / 3 learner consent** through the authenticated learner flow;
+5. approve the current cohort;
+6. activate **wave 1 only**, containing the 3 Core learners;
+7. immediately verify capability isolation, legacy integrity and zero AI/Mentor leakage;
+8. begin the first-72h P1-01 monitoring window;
+9. do not activate AI Assist or Mentor Care until their independent prerequisites and later release decisions pass.
