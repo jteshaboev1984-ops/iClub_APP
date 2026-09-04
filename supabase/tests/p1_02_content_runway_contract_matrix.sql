@@ -1,33 +1,44 @@
 \set ON_ERROR_STOP on
-\echo 'P1-02 content runway contract matrix'
+\echo 'P1-02 completed content runway matrix'
 
 do $$
 declare
   v_program bigint;
   v_runway jsonb;
+  v_aw2 jsonb;
   v_tmp bigint;
   v_failed boolean:=false;
+  v_skill text;
 begin
   select id into v_program from private.exam_prep_program_versions
   where program_key='math_as_p1_p5' and version_key='p1_p5_canonical_v1_0';
   if v_program is null then raise exception 'P1-02 matrix: canonical program missing'; end if;
 
-  -- Existing P5 opening slice must be recognized by the generic floor, not special-cased.
-  if not private.exam_prep_skill_content_ready_v1(v_program,'P5','P5-DAT-01') then raise exception 'P1-02 matrix: P5-DAT-01 should be ready'; end if;
-  if not private.exam_prep_skill_content_ready_v1(v_program,'P5','P5-DAT-04') then raise exception 'P1-02 matrix: P5-DAT-04 should be ready'; end if;
-  if not private.exam_prep_skill_content_ready_v1(v_program,'P5','P5-DAT-06') then raise exception 'P1-02 matrix: P5-DAT-06 should be ready'; end if;
+  foreach v_skill in array array['P1-QUA-01','P1-QUA-02','P1-QUA-03','P1-FUN-01','P1-FUN-02'] loop
+    if not private.exam_prep_skill_content_ready_v1(v_program,'P1',v_skill) then raise exception 'P1-02 matrix: P1 skill not ready: %',v_skill; end if;
+    if not private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1',v_skill,1::smallint) then raise exception 'P1-02 matrix: P1 skill not AW1 eligible: %',v_skill; end if;
+  end loop;
+  foreach v_skill in array array['P5-DAT-01','P5-DAT-02','P5-DAT-04','P5-DAT-06'] loop
+    if not private.exam_prep_skill_content_ready_v1(v_program,'P5',v_skill) then raise exception 'P1-02 matrix: P5 skill not ready: %',v_skill; end if;
+    if not private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P5',v_skill,1::smallint) then raise exception 'P1-02 matrix: P5 skill not AW1 eligible: %',v_skill; end if;
+  end loop;
 
-  -- Planned but not-yet-authored runway must remain RED.
-  if private.exam_prep_skill_content_ready_v1(v_program,'P5','P5-DAT-02') then raise exception 'P1-02 matrix: P5-DAT-02 false green'; end if;
-  if private.exam_prep_skill_content_ready_v1(v_program,'P1','P1-QUA-01') then raise exception 'P1-02 matrix: P1-QUA-01 false green'; end if;
-
-  if not private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P5','P5-DAT-01',1::smallint) then raise exception 'P1-02 matrix: governed scheduled P5-DAT-01 should be eligible'; end if;
-  if private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P5','P5-DAT-02',1::smallint) then raise exception 'P1-02 matrix: missing P5-DAT-02 should not be eligible'; end if;
-  if private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1','P1-QUA-01',1::smallint) then raise exception 'P1-02 matrix: missing P1-QUA-01 should not be eligible'; end if;
+  -- A mapped/known skill outside the scheduled opening window must stay fail-closed.
+  if private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1','P1-COO-01',1::smallint) then
+    raise exception 'P1-02 matrix: unscheduled P1-COO-01 leaked into AW1';
+  end if;
 
   v_runway:=public.get_exam_prep_content_runway_v1(1::smallint);
-  if coalesce((v_runway->>'hard_floor_green')::boolean,false) then raise exception 'P1-02 matrix: incomplete runway cannot be hard-floor green'; end if;
-  if coalesce((v_runway->>'target_4w_green')::boolean,false) then raise exception 'P1-02 matrix: incomplete runway cannot be target green'; end if;
+  if not coalesce((v_runway->>'hard_floor_green')::boolean,false) then raise exception 'P1-02 matrix: AW1 two-week floor should be green: %',v_runway::text; end if;
+  if not coalesce((v_runway->>'target_4w_green')::boolean,false) then raise exception 'P1-02 matrix: AW1 four-week target should be green: %',v_runway::text; end if;
+  if (v_runway#>>'{components,P1,ahead_weeks}')::int<>4 or (v_runway#>>'{components,P5,ahead_weeks}')::int<>4 then
+    raise exception 'P1-02 matrix: AW1 should expose exactly four governed runway weeks: %',v_runway::text;
+  end if;
+
+  -- Runway must decay with time; AW2 still clears hard floor but no longer claims a four-week target without the next batch.
+  v_aw2:=public.get_exam_prep_content_runway_v1(2::smallint);
+  if not coalesce((v_aw2->>'hard_floor_green')::boolean,false) then raise exception 'P1-02 matrix: AW2 should retain >=2 weeks'; end if;
+  if coalesce((v_aw2->>'target_4w_green')::boolean,false) then raise exception 'P1-02 matrix: AW2 must not claim four weeks without next release'; end if;
 
   -- Empty/partial future content can never be published.
   insert into private.exam_prep_content_versions(program_version_id,content_version,component_code,release_label,status,source_policy)
@@ -46,6 +57,13 @@ begin
   if not v_failed then raise exception 'P1-02 matrix: publication guard was not exercised'; end if;
   delete from private.exam_prep_content_versions where id=v_tmp;
 
+  -- New questions remain invisible to legacy delivery.
+  if (select count(*) from public.questions where book_ref like 'ExamPrep:P1:p1_foundations_runway_v1:%')<>35 then raise exception 'P1-02 matrix: P1 authored count mismatch'; end if;
+  if (select count(*) from public.questions where book_ref like 'ExamPrep:P5:p5_dat02_runway_v1:%')<>7 then raise exception 'P1-02 matrix: P5 DAT02 authored count mismatch'; end if;
+  if exists(select 1 from public.questions where (book_ref like 'ExamPrep:P1:p1_foundations_runway_v1:%' or book_ref like 'ExamPrep:P5:p5_dat02_runway_v1:%') and (is_active or quality_status is distinct from 'draft')) then
+    raise exception 'P1-02 matrix: new question leaked into legacy delivery state';
+  end if;
+
   -- Deployment invariant: no cohort or feature activation.
   if exists(select 1 from private.exam_prep_feature_config where rollout_state<>'off' or core_enabled or ai_enabled or mentor_enabled or not kill_switch) then
     raise exception 'P1-02 matrix: feature state escaped fail-closed';
@@ -55,5 +73,6 @@ begin
 end;
 $$;
 
-select public.get_exam_prep_content_runway_v1(1::smallint) as runway_before_new_content;
-\echo 'P1-02 content runway contract matrix: GREEN'
+select public.get_exam_prep_content_runway_v1(1::smallint) as aw1_runway;
+select public.get_exam_prep_content_runway_v1(2::smallint) as aw2_runway_decay;
+\echo 'P1-02 completed content runway matrix: GREEN'
