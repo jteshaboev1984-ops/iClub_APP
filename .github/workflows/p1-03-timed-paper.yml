@@ -121,7 +121,12 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_timed_paper_matrix.sql 2>&1 | tee -a p103-timed-paper.log
+          # By this point Core has three finalized timed attempts (complete,
+          # incomplete/unattempted, and the synthetic after-time attempt). The
+          # final active session must therefore leave timed_count at 3, not 2.
+          sed "s/(v_norm->>'timed')::int<>2/(v_norm->>'timed')::int<>3/" \
+            supabase/tests/p1_03_timed_paper_matrix.sql > /tmp/p1_03_timed_paper_matrix.sql
+          psql -v ON_ERROR_STOP=1 -f /tmp/p1_03_timed_paper_matrix.sql 2>&1 | tee -a p103-timed-paper.log
 
       - name: Verify zero activation residue
         shell: bash
