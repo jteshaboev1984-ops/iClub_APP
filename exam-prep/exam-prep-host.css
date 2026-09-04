@@ -68,8 +68,85 @@
   background: var(--card, rgba(127,127,127,.06));
 }
 
+.ep-host-invite-shell {
+  max-width: 760px;
+}
+
+.ep-host-invite-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.ep-host-invite-facts > div {
+  display: grid;
+  gap: 5px;
+  padding: 13px 14px;
+  border: 1px solid var(--border, rgba(127,127,127,.22));
+  border-radius: 12px;
+  background: var(--card, rgba(127,127,127,.06));
+}
+
+.ep-host-invite-facts span,
+.ep-host-consent-state span {
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: .72;
+}
+
+.ep-host-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.ep-host-btn {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border, rgba(127,127,127,.24));
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ep-host-btn:disabled {
+  cursor: wait;
+  opacity: .58;
+}
+
+.ep-host-btn-primary {
+  background: var(--primary, #2563eb);
+  color: #fff;
+  border-color: transparent;
+}
+
+.ep-host-btn-secondary {
+  background: transparent;
+  color: inherit;
+}
+
+.ep-host-consent-state {
+  display: grid;
+  gap: 5px;
+  padding: 13px 14px;
+  border: 1px solid var(--border, rgba(127,127,127,.22));
+  border-radius: 12px;
+}
+
+.ep-host-error {
+  padding: 11px 13px;
+  border: 1px solid currentColor;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
 @media (max-width: 640px) {
-  .ep-host-component-grid {
+  .ep-host-component-grid,
+  .ep-host-invite-facts {
     grid-template-columns: 1fr;
   }
 }

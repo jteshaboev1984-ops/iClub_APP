@@ -35,7 +35,7 @@ CREATE TEMP TABLE p101_people(
 ) ON COMMIT DROP;
 
 INSERT INTO p101_people(ord,user_id,kind)
-SELECT g,gen_random_uuid(),'learner' FROM generate_series(1,18) g
+SELECT g,gen_random_uuid(),'learner' FROM generate_series(1,12) g
 UNION ALL
 SELECT 100+g,gen_random_uuid(),'mentor' FROM generate_series(1,4) g
 UNION ALL
@@ -62,29 +62,28 @@ SELECT user_id,'academic_moderator','active' FROM p101_people WHERE ord=200;
 
 INSERT INTO private.exam_prep_mentor_service_status(learner_user_id,service_status,status_reason)
 SELECT user_id,'assigned_active','P1-01 isolated weekly governance readiness'
-FROM p101_people WHERE ord BETWEEN 15 AND 18;
+FROM p101_people WHERE ord BETWEEN 9 AND 12;
 
 INSERT INTO private.exam_prep_mentor_assignments(
   learner_user_id,mentor_user_id,component_code,assignment_status,valid_from
 )
 SELECT l.user_id,m.user_id,CASE WHEN l.ord%2=0 THEN 'P5' ELSE 'P1' END,'active',now()
 FROM p101_people l
-JOIN p101_people m ON m.ord=86+l.ord
-WHERE l.ord BETWEEN 15 AND 18;
+JOIN p101_people m ON m.ord=92+l.ord
+WHERE l.ord BETWEEN 9 AND 12;
 
 SET LOCAL ROLE service_role;
 SELECT public.stage_exam_prep_controlled_beta_v1(
-  'math_as_p1_p5_beta_p101',18::smallint,'P1-01 isolated governance matrix'
+  'math_as_p1_p5_beta_p101',12::smallint,'P1-01 isolated governance matrix'
 );
 SELECT public.set_exam_prep_beta_member_v1(
   'math_as_p1_p5_beta_p101',p.user_id,
-  CASE WHEN p.ord<=7 THEN 'core' WHEN p.ord<=14 THEN 'ai_assist' ELSE 'mentor_care' END,
-  CASE WHEN p.ord IN (1,2,8,9,15) THEN 1::smallint ELSE 2::smallint END
+  CASE WHEN p.ord<=4 THEN 'core' WHEN p.ord<=8 THEN 'ai_assist' ELSE 'mentor_care' END,
+  CASE WHEN p.ord IN (1,2,5,6,9) THEN 1::smallint ELSE 2::smallint END
 )
-FROM p101_people p WHERE p.ord BETWEEN 1 AND 18 ORDER BY p.ord;
+FROM p101_people p WHERE p.ord BETWEEN 1 AND 12 ORDER BY p.ord;
 SELECT public.approve_exam_prep_controlled_beta_v1('math_as_p1_p5_beta_p101');
 
--- AI entitlement must not activate merely because P0-16 has an AI subcohort.
 DO $$
 BEGIN
   BEGIN
@@ -108,7 +107,6 @@ BEGIN
 END
 $$;
 
--- Test-only stand-in for the future P1-04 governed AI readiness migration.
 UPDATE private.exam_prep_optional_capability_status
 SET runtime_status='ready',gate_version='p1-04-isolated-test',
     evidence=jsonb_build_object('test_only',true,'reason','exercise P1-01 governance after an explicit AI runtime gate'),
@@ -125,7 +123,7 @@ DECLARE v_active int; v_cfg record;
 BEGIN
   SELECT count(*) INTO v_active FROM private.exam_prep_beta_members WHERE member_status='active';
   SELECT * INTO v_cfg FROM private.exam_prep_feature_config WHERE id=1;
-  IF v_active<>18 OR v_cfg.rollout_state<>'controlled_beta' OR v_cfg.kill_switch
+  IF v_active<>12 OR v_cfg.rollout_state<>'controlled_beta' OR v_cfg.kill_switch
      OR NOT v_cfg.core_enabled OR NOT v_cfg.ai_enabled OR NOT v_cfg.mentor_enabled THEN
     RAISE EXCEPTION 'P1-01 full controlled beta activation mismatch active=% cfg=%',v_active,row_to_json(v_cfg);
   END IF;
@@ -174,7 +172,6 @@ BEGIN
 END
 $$;
 
--- An explicit Sev1 incident must block a later false GREEN.
 SET LOCAL ROLE service_role;
 CREATE TEMP TABLE p101_incident AS
 SELECT public.record_exam_prep_beta_ops_incident_v1(
@@ -220,7 +217,6 @@ SELECT public.record_exam_prep_beta_weekly_review_v1(
 ) payload;
 RESET ROLE;
 
--- Optional AI service rollback must preserve Core and Mentor Care.
 SET LOCAL ROLE service_role;
 SELECT public.pause_exam_prep_controlled_beta_service_v1(
   'math_as_p1_p5_beta_p101','ai_assist','Isolated optional-service rollback verification after weekly governance review.'
@@ -239,7 +235,7 @@ BEGIN
   FROM private.exam_prep_feature_entitlements e
   JOIN private.exam_prep_beta_members m ON m.user_id=e.user_id
   WHERE m.service_mode='ai_assist' AND e.entitlement_status='active';
-  IF v_core<>7 OR v_ai<>0 OR v_mentor<>4 OR v_ai_ent<>0
+  IF v_core<>4 OR v_ai<>0 OR v_mentor<>4 OR v_ai_ent<>0
      OR v_cfg.rollout_state<>'controlled_beta' OR v_cfg.kill_switch OR NOT v_cfg.core_enabled OR v_cfg.ai_enabled OR NOT v_cfg.mentor_enabled THEN
     RAISE EXCEPTION 'P1-01 optional AI pause leaked into Core/Mentor: core=% ai=% mentor=% ai_ent=% cfg=%',v_core,v_ai,v_mentor,v_ai_ent,row_to_json(v_cfg);
   END IF;
@@ -257,17 +253,16 @@ DECLARE v_active int; v_cfg record;
 BEGIN
   SELECT count(*) INTO v_active FROM private.exam_prep_beta_members WHERE member_status='active';
   SELECT * INTO v_cfg FROM private.exam_prep_feature_config WHERE id=1;
-  IF v_active<>18 OR NOT v_cfg.ai_enabled OR NOT v_cfg.core_enabled OR NOT v_cfg.mentor_enabled OR v_cfg.kill_switch THEN
+  IF v_active<>12 OR NOT v_cfg.ai_enabled OR NOT v_cfg.core_enabled OR NOT v_cfg.mentor_enabled OR v_cfg.kill_switch THEN
     RAISE EXCEPTION 'P1-01 optional AI resume failed active=% cfg=%',v_active,row_to_json(v_cfg);
   END IF;
 END
 $$;
 
--- Global rollback remains the Core failure path and must preserve accumulated evidence/state.
 CREATE TEMP TABLE p101_preserve_before AS
 SELECT
-  (SELECT count(*) FROM private.exam_prep_evidence_events e JOIN p101_people p ON p.user_id=e.user_id WHERE p.ord<=18) evidence_n,
-  (SELECT count(*) FROM private.exam_prep_skill_states s JOIN p101_people p ON p.user_id=s.user_id WHERE p.ord<=18) state_n;
+  (SELECT count(*) FROM private.exam_prep_evidence_events e JOIN p101_people p ON p.user_id=e.user_id WHERE p.ord<=12) evidence_n,
+  (SELECT count(*) FROM private.exam_prep_skill_states s JOIN p101_people p ON p.user_id=s.user_id WHERE p.ord<=12) state_n;
 
 SET LOCAL ROLE service_role;
 SELECT public.pause_exam_prep_controlled_beta_v1(
@@ -285,8 +280,8 @@ BEGIN
   END IF;
   SELECT * INTO v_before FROM p101_preserve_before;
   SELECT
-    (SELECT count(*) FROM private.exam_prep_evidence_events e JOIN p101_people p ON p.user_id=e.user_id WHERE p.ord<=18) evidence_n,
-    (SELECT count(*) FROM private.exam_prep_skill_states s JOIN p101_people p ON p.user_id=s.user_id WHERE p.ord<=18) state_n
+    (SELECT count(*) FROM private.exam_prep_evidence_events e JOIN p101_people p ON p.user_id=e.user_id WHERE p.ord<=12) evidence_n,
+    (SELECT count(*) FROM private.exam_prep_skill_states s JOIN p101_people p ON p.user_id=s.user_id WHERE p.ord<=12) state_n
   INTO v_after;
   IF v_after.evidence_n<>v_before.evidence_n OR v_after.state_n<>v_before.state_n THEN
     RAISE EXCEPTION 'P1-01 rollback mutated evidence/state before=% after=%',row_to_json(v_before),row_to_json(v_after);
@@ -314,4 +309,4 @@ BEGIN
 END
 $$;
 
-SELECT 'P1-01 weekly governance matrix: PASS (manual GREEN, false-GREEN veto, AI readiness gate, optional rollback/resume, global rollback)' AS result;
+SELECT 'P1-01 weekly governance matrix: PASS (12 learners, manual GREEN, false-GREEN veto, AI readiness gate, optional rollback/resume, global rollback)' AS result;

@@ -2,7 +2,7 @@
 -- Test-only. Requires full P0 -> P1-03 schema and ends in ROLLBACK.
 --
 -- Proves:
--- 1) stratified 12-person cohort may be approved without live Mentor Care staffing;
+-- 1) capacity=12 does not require filling all seats: a stratified 6-person cohort may be approved;
 -- 2) cohort approval creates zero entitlements and keeps global feature state OFF;
 -- 3) wave 1 may activate Core only;
 -- 4) AI/Mentor candidates remain dark with zero entitlement;
@@ -28,7 +28,7 @@ CREATE TEMP TABLE p016h_people(
 ) ON COMMIT DROP;
 
 INSERT INTO p016h_people(ord,user_id)
-SELECT g,gen_random_uuid() FROM generate_series(1,12) g;
+SELECT g,gen_random_uuid() FROM generate_series(1,6) g;
 
 INSERT INTO auth.users(id,aud,role,email,created_at,updated_at,is_sso_user,is_anonymous)
 SELECT user_id,'authenticated','authenticated',
@@ -42,7 +42,7 @@ FROM p016h_people;
 
 GRANT SELECT ON TABLE p016h_people TO service_role;
 
--- Production-like precondition for the hold-point case: no Mentor Care staff/assignments.
+-- Production-like hold-point precondition: no Mentor Care staff/assignments.
 DO $$
 DECLARE v_staff int; v_assign int;
 BEGIN
@@ -66,14 +66,14 @@ $$;
 SET LOCAL ROLE service_role;
 SELECT public.stage_exam_prep_controlled_beta_v1(
   'math_as_p1_p5_beta_hold_01',12::smallint,
-  'P0-16 current-schema GO WITH HOLD POINT: Core canary, Mentor Care waiting.'
+  'P0-16 current-schema GO WITH HOLD POINT: capacity 12, actual roster 6, Core canary first.'
 );
 
--- 8 Core + 2 future AI + 2 future Mentor Care.
--- Wave 1 = four Core only. No AI/Mentor wave is activated in this test.
+-- Actual roster is only 6 of 12 seats: 4 Core + 1 future AI + 1 future Mentor Care.
+-- Wave 1 = four Core only. Optional modes stay dark in this test.
 SELECT public.set_exam_prep_beta_member_v1(
   'math_as_p1_p5_beta_hold_01',p.user_id,
-  CASE WHEN p.ord<=8 THEN 'core' WHEN p.ord<=10 THEN 'ai_assist' ELSE 'mentor_care' END,
+  CASE WHEN p.ord<=4 THEN 'core' WHEN p.ord=5 THEN 'ai_assist' ELSE 'mentor_care' END,
   CASE WHEN p.ord<=4 THEN 1::smallint ELSE 3::smallint END
 )
 FROM p016h_people p
@@ -82,25 +82,27 @@ ORDER BY p.ord;
 SELECT public.approve_exam_prep_controlled_beta_v1('math_as_p1_p5_beta_hold_01');
 RESET ROLE;
 
--- Approval is allowlist only; no entitlement and no global activation.
+-- Approval is allowlist only; underfilled capacity must not manufacture entitlements.
 DO $$
-DECLARE v_cfg record; v_total int; v_core int; v_ai int; v_mentor int; v_ent int;
+DECLARE v_cfg record; v_total int; v_core int; v_ai int; v_mentor int; v_ent int; v_capacity int;
 BEGIN
   SELECT * INTO v_cfg FROM private.exam_prep_feature_config WHERE id=1;
   IF v_cfg.rollout_state<>'off' OR v_cfg.core_enabled OR v_cfg.ai_enabled OR v_cfg.mentor_enabled OR NOT v_cfg.kill_switch THEN
     RAISE EXCEPTION 'P0-16 hold-point approval changed feature config: %',row_to_json(v_cfg);
   END IF;
 
-  SELECT count(*),
+  SELECT c.planned_size,
+         count(*),
          count(*) filter(where m.service_mode='core'),
          count(*) filter(where m.service_mode='ai_assist'),
          count(*) filter(where m.service_mode='mentor_care')
-  INTO v_total,v_core,v_ai,v_mentor
+  INTO v_capacity,v_total,v_core,v_ai,v_mentor
   FROM private.exam_prep_beta_members m
   JOIN private.exam_prep_beta_cohorts c ON c.id=m.cohort_id
-  WHERE c.cohort_key='math_as_p1_p5_beta_hold_01' AND m.member_status='approved';
-  IF v_total<>12 OR v_core<>8 OR v_ai<>2 OR v_mentor<>2 THEN
-    RAISE EXCEPTION 'P0-16 hold-point approved service mix mismatch total=% core=% ai=% mentor=%',v_total,v_core,v_ai,v_mentor;
+  WHERE c.cohort_key='math_as_p1_p5_beta_hold_01' AND m.member_status='approved'
+  GROUP BY c.planned_size;
+  IF v_capacity<>12 OR v_total<>6 OR v_core<>4 OR v_ai<>1 OR v_mentor<>1 THEN
+    RAISE EXCEPTION 'P0-16 hold-point underfilled approval mismatch capacity=% total=% core=% ai=% mentor=%',v_capacity,v_total,v_core,v_ai,v_mentor;
   END IF;
 
   SELECT count(*) INTO v_ent
@@ -111,7 +113,6 @@ BEGIN
 END
 $$;
 
--- First live wave is Core-only.
 SET LOCAL ROLE service_role;
 SELECT public.activate_exam_prep_controlled_beta_wave_v1('math_as_p1_p5_beta_hold_01',1::smallint);
 RESET ROLE;
@@ -134,14 +135,14 @@ BEGIN
   JOIN private.exam_prep_beta_cohorts c ON c.id=m.cohort_id
   WHERE c.cohort_key='math_as_p1_p5_beta_hold_01';
 
-  IF v_active<>4 OR v_core_active<>4 OR v_ai_active<>0 OR v_mentor_active<>0 OR v_waiting<>8 THEN
+  IF v_active<>4 OR v_core_active<>4 OR v_ai_active<>0 OR v_mentor_active<>0 OR v_waiting<>2 THEN
     RAISE EXCEPTION 'P0-16 hold-point canary member state mismatch active=% core=% ai=% mentor=% waiting=%',v_active,v_core_active,v_ai_active,v_mentor_active,v_waiting;
   END IF;
 
   SELECT count(*) INTO v_dark
   FROM private.exam_prep_feature_entitlements e
   JOIN p016h_people p ON p.user_id=e.user_id
-  WHERE p.ord between 9 and 12
+  WHERE p.ord between 5 and 6
     AND e.entitlement_status='active'
     AND (e.core_access OR e.ai_assist OR e.mentor_care_entitled);
   IF v_dark<>0 THEN RAISE EXCEPTION 'P0-16 hold-point future optional members leaked % live entitlements',v_dark; END IF;
@@ -160,7 +161,6 @@ BEGIN
 END
 $$;
 
--- Emergency rollback of the Core canary.
 SET LOCAL ROLE service_role;
 SELECT public.pause_exam_prep_controlled_beta_v1(
   'math_as_p1_p5_beta_hold_01',
@@ -205,4 +205,4 @@ BEGIN
 END
 $$;
 
-\echo 'P0-16 Mentor Care hold-point matrix: GREEN'
+\echo 'P0-16 Mentor Care hold-point matrix: GREEN (capacity 12, actual cohort 6)'
