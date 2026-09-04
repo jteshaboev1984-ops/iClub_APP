@@ -5,15 +5,22 @@ const path = require('path');
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
 
-  await page.setContent(`<!doctype html><html><body>
-    <section id="courses-subject-hub">
-      <div id="subject-hub-exam-prep-entry" hidden aria-hidden="true">
-        <span id="subject-hub-exam-prep-title"></span>
-        <span id="subject-hub-exam-prep-sub"></span>
-      </div>
-      <div id="exam-prep-host-root" hidden aria-hidden="true"></div>
-    </section>
-  </body></html>`);
+  await page.route('http://iclub.test/', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'text/html',
+      body: `<!doctype html><html><body>
+        <section id="courses-subject-hub">
+          <div id="subject-hub-exam-prep-entry" hidden aria-hidden="true">
+            <span id="subject-hub-exam-prep-title"></span>
+            <span id="subject-hub-exam-prep-sub"></span>
+          </div>
+          <div id="exam-prep-host-root" hidden aria-hidden="true"></div>
+        </section>
+      </body></html>`
+    });
+  });
+  await page.goto('http://iclub.test/');
 
   await page.evaluate(() => {
     window.__caps = {
