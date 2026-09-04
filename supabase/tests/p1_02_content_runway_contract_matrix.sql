@@ -21,11 +21,11 @@ begin
   if private.exam_prep_skill_content_ready_v1(v_program,'P5','P5-DAT-02') then raise exception 'P1-02 matrix: P5-DAT-02 false green'; end if;
   if private.exam_prep_skill_content_ready_v1(v_program,'P1','P1-QUA-01') then raise exception 'P1-02 matrix: P1-QUA-01 false green'; end if;
 
-  if not private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P5','P5-DAT-01',1) then raise exception 'P1-02 matrix: governed scheduled P5-DAT-01 should be eligible'; end if;
-  if private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P5','P5-DAT-02',1) then raise exception 'P1-02 matrix: missing P5-DAT-02 should not be eligible'; end if;
-  if private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1','P1-QUA-01',1) then raise exception 'P1-02 matrix: missing P1-QUA-01 should not be eligible'; end if;
+  if not private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P5','P5-DAT-01',1::smallint) then raise exception 'P1-02 matrix: governed scheduled P5-DAT-01 should be eligible'; end if;
+  if private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P5','P5-DAT-02',1::smallint) then raise exception 'P1-02 matrix: missing P5-DAT-02 should not be eligible'; end if;
+  if private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1','P1-QUA-01',1::smallint) then raise exception 'P1-02 matrix: missing P1-QUA-01 should not be eligible'; end if;
 
-  v_runway:=public.get_exam_prep_content_runway_v1(1);
+  v_runway:=public.get_exam_prep_content_runway_v1(1::smallint);
   if coalesce((v_runway->>'hard_floor_green')::boolean,false) then raise exception 'P1-02 matrix: incomplete runway cannot be hard-floor green'; end if;
   if coalesce((v_runway->>'target_4w_green')::boolean,false) then raise exception 'P1-02 matrix: incomplete runway cannot be target green'; end if;
 
@@ -55,5 +55,5 @@ begin
 end;
 $$;
 
-select public.get_exam_prep_content_runway_v1(1) as runway_before_new_content;
+select public.get_exam_prep_content_runway_v1(1::smallint) as runway_before_new_content;
 \echo 'P1-02 content runway contract matrix: GREEN'
