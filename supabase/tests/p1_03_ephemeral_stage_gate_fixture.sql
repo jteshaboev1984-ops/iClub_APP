@@ -8,14 +8,19 @@ language plpgsql
 set search_path=''
 as $$
 begin
-  if new.app_readiness_reason='P1-03 rollback-only fixture' then
-    if new.stage_gate_status like 'synthetic_%' then
-      new.stage_gate_status:='operational';
-    end if;
-    if new.app_readiness_estimate='false' then
-      new.app_readiness_estimate:='INSUFFICIENT_EVIDENCE';
-    end if;
+  -- The behavioral matrix deliberately uses synthetic_* labels to make fixture-only
+  -- stage overrides obvious. Production accepts only the governed enum, so normalize
+  -- those labels before the production constraint is evaluated. This helper never ships.
+  if new.stage_gate_status like 'synthetic_%' then
+    new.stage_gate_status:='operational';
   end if;
+
+  -- Initial rollback-only rows use a deliberately invalid sentinel so the fixture
+  -- cannot be confused with a real readiness decision. Normalize only that sentinel.
+  if new.app_readiness_estimate='false' then
+    new.app_readiness_estimate:='INSUFFICIENT_EVIDENCE';
+  end if;
+
   return new;
 end;
 $$;
