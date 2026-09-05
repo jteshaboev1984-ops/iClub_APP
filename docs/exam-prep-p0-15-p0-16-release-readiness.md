@@ -7,7 +7,9 @@
 **Controlled-beta capacity:** **up to 12 learners**  
 **Current staged roster:** **3 Core candidates, wave 1**  
 **Learner consent:** **0 / 3 granted**  
-**Governed content runway:** **AW1–20 GREEN for both P1 and P5**  
+**Governed content runway:** **AW1–24 GREEN for both P1 and P5**  
+**Syllabus Closure / first coverage:** **81 / 81 canonical skills = 100%**  
+**Exam Ready status:** **NOT CLAIMED — requires learner evidence, correction/retest performance and timed/full-paper readiness**  
 **AI Assist live authorization:** **NO**  
 **Mentor Care live authorization:** **NO**
 
@@ -25,9 +27,9 @@ The governed interpretation is:
 - AI Assist and Mentor Care retain independent activation gates;
 - Project Owner approval is not learner consent;
 - integrity/security failure or active-learner consent revocation retains the fail-closed pause/rollback path;
-- P1-04 / AI remains blocked until deterministic beta stability evidence exists.
+- P1-04 / AI remains blocked until deterministic live-beta stability evidence exists.
 
-This amendment changes beta enrollment/release sequencing only. It does **not** lower academic evidence standards, content-runway requirements, P1/P5 isolation, rollback requirements, or readiness definitions.
+The academic runway has now reached **Syllabus Closure / first coverage**. This does **not** mean that learners are Exam Ready. Exam Ready still requires real learner diagnostic evidence, placement, weekly-plan execution, correction loops, delayed retests, timed sections, cumulative mini-mocks and full-paper evidence.
 
 ## 2. Technical evidence
 
@@ -41,9 +43,9 @@ This amendment changes beta enrollment/release sequencing only. It does **not** 
 
 The controlled-beta regression proves capacity-12/Core-first incremental enrollment, explicit learner consent, isolated Wave 1 activation, later-wave additions, AI activation blocking until readiness, and rollback without synthetic residue. The authenticated invitation flow also proves that viewing an invitation never grants consent automatically.
 
-### P1-02 governed content runway
+### P1-02 governed content runway — Syllabus Closure
 
-Production verification on **2026-09-05** confirms contiguous governed runway through **AW20**:
+Production verification on **2026-09-05** confirms every active governed runway window through **AW24** is complete:
 
 | Release window | P1 | P5 | State |
 |---|---:|---:|---|
@@ -52,30 +54,35 @@ Production verification on **2026-09-05** confirms contiguous governed runway th
 | AW9–12 | 8 / 8 skills ready | 6 / 6 skills ready | GREEN |
 | AW13–16 | 8 / 8 skills ready | 7 / 7 skills ready | GREEN |
 | AW17–20 | 6 / 6 skills ready | 5 / 5 skills ready | GREEN |
+| AW21–24 | 10 / 10 skills ready | 8 / 8 skills ready | GREEN |
 
-Cumulative governed skill coverage through AW20 is:
+Cumulative governed first coverage is now:
 
-- **P1: 35 / 45 = 77.8%**;
-- **P5: 28 / 36 = 77.8%**.
+- **P1: 45 / 45 = 100%**;
+- **P5: 36 / 36 = 100%**;
+- **total: 81 / 81 canonical skills = 100%**.
 
-This aligns with the annual-roadmap AW20 checkpoint of approximately **75–80% first coverage** while remaining an academic-content milestone, not a claim of learner mastery.
+The AW21–24 closure is prerequisite-closed and completes the remaining production prerequisite graph:
 
-The AW17–20 slice is prerequisite-closed and consists of:
+- P1: `COO-05/06`, `DIF-05/06/07`, `INT-01/02/03/04/05`;
+- P5: `DAT-08/09/10`, `NOR-02/03/04/05/06`.
 
-- P1: `SER-03/04/05` and `DIF-02/03/04`;
-- P5: `BIN-02/03`, `GEO-02/03`, `NOR-01`.
+Published governed AW21–24 versions are:
 
-Published governed versions are:
+- `p1_aw21_24_coordinate_v1`;
+- `p1_aw21_24_diff_apps_v1`;
+- `p1_aw21_24_integration_core_v1`;
+- `p1_aw21_24_integration_apps_v1`;
+- `p5_aw21_24_dat08_v1`;
+- `p5_aw21_24_dat09_v1`;
+- `p5_aw21_24_dat10_v1`;
+- `p5_aw21_24_nor02_03_v1`;
+- `p5_aw21_24_nor04_05_v1`;
+- `p5_aw21_24_nor06_v1`.
 
-- `p1_aw17_20_series_v1`;
-- `p1_aw17_20_diff_v1`;
-- `p5_aw17_20_binomial_v1`;
-- `p5_aw17_20_geometric_v1`;
-- `p5_aw17_20_nor01_v1`.
+Production acceptance confirms all ten versions are `published` and their required skills pass `exam_prep_skill_content_ready_v1`.
 
-`NOR-01` is deliberately scoped to normal-model recognition, `N(mu,sigma^2)` notation, symmetry/centre and spread. Standardisation, normal tables/probabilities and inverse-normal work remain later skills (`NOR-02+`).
-
-All new Exam Prep `public.questions` rows remain `draft + inactive`; production acceptance found **0 new legacy-active rows**. Content publication changed no learner entitlement or feature state.
+All Exam Prep rows inserted into legacy `public.questions` remain `draft + inactive`; production acceptance found **0 Exam Prep legacy-active rows**. Content publication changed no learner entitlement or feature state.
 
 ## 3. Current production snapshot
 
@@ -84,10 +91,10 @@ All new Exam Prep `public.questions` rows remain `draft + inactive`; production 
 | cohort | `math_as_p1_p5_beta_2026_09_01` |
 | cohort status | `draft` |
 | cohort capacity | `12` |
-| current wave | `0` |
-| staged members | `3` |
+| current staged members | `3` |
 | Core candidates | `3` |
 | consent grants | `0 / 3` |
+| consent missing | `3 / 3` |
 | `rollout_state` | `off` |
 | `core_enabled` | `false` |
 | `ai_enabled` | `false` |
@@ -98,19 +105,35 @@ All new Exam Prep `public.questions` rows remain `draft + inactive`; production 
 | component placements | `0` |
 | weekly plans | `0` |
 | evidence events | `0` |
-| governed runway | `AW1–20 GREEN P1 + P5` |
-| governed P1 coverage | `35 / 45 = 77.8%` |
-| governed P5 coverage | `28 / 36 = 77.8%` |
+| Exam Prep legacy-active questions | `0` |
+| governed runway | `AW1–24 GREEN P1 + P5` |
+| governed P1 first coverage | `45 / 45 = 100%` |
+| governed P5 first coverage | `36 / 36 = 100%` |
+| combined first coverage | `81 / 81 = 100%` |
 
-No learner access has been granted. P1-01 therefore has no live operational evidence yet, and P1-03 remains dormant infrastructure.
+No learner access has been granted. P1-01 therefore still has no live operational evidence, and P1-03 remains dormant infrastructure.
 
-## 4. Source of truth
+## 4. What Syllabus Closure means — and does not mean
 
-**`main` is the repository source of truth.** It contains the Core-first capacity/consent/incremental-enrollment changes and governed P1-02 content production through AW20.
+**Complete now:** canonical P1/P5 first coverage, governed learning items, diagnostic/retest/mixed reserves, written tasks, QA states, prerequisite closure and fail-closed publication through AW24.
+
+**Not complete yet:** real learner validation, actual placement accuracy, mastery/correction-loop evidence, delayed-retest retention, timed-section performance, cumulative mini-mock performance, full-paper reliability and operational 72-hour beta evidence.
+
+Therefore:
+
+**SYLLABUS CLOSURE = GREEN / 100% FIRST COVERAGE**  
+**EXAM READY = NOT YET PROVEN**  
+**LIVE CONTROLLED BETA = NOT YET ACTIVATED**
+
+## 5. Source of truth and deployment boundary
+
+**`main` is the repository source of truth.** It contains the Core-first capacity/consent/incremental-enrollment changes and governed P1-02 content through AW24 Syllabus Closure.
 
 The previous `exam-prep-p0-host` branch was a working branch for the earlier release line and is not a canonical target for new work.
 
-## 5. Human / learner gates
+The existing Vercel project/configuration is intentionally left **unchanged**. Deployment continues through the established repository/deployment model; this readiness record does not require or authorize Vercel infrastructure restructuring.
+
+## 6. Human / learner gates
 
 **Project Owner release decision:** APPROVED FOR CONTROLLED BETA.  
 **Learner consent gate:** NOT COMPLETE — currently **0 / 3**.
@@ -123,21 +146,25 @@ Mandatory interpretation:
 **MENTOR CARE LIVE ACCESS = NOT AUTHORIZED / INDEPENDENT GATE**  
 **P1-04 = STILL BLOCKED BY DETERMINISTIC-BETA STABILITY PREREQUISITE**
 
-## 6. Next actions
+## 7. Next actions
 
 ### Human-gated live sequence
 
 1. obtain **explicit 3 / 3 learner consent** through the authenticated learner flow;
 2. approve the current cohort;
-3. activate **wave 1 only**, containing the 3 Core learners;
-4. immediately verify capability isolation, legacy integrity and zero AI/Mentor leakage;
-5. begin the first-72h P1-01 monitoring window;
-6. do not activate AI Assist or Mentor Care until their independent prerequisites and later release decisions pass.
+3. verify approval did not create entitlements and feature state remains fail-closed before activation;
+4. activate **wave 1 only**, containing the 3 Core learners;
+5. immediately verify only the 3 Core entitlements are active, AI/Mentor remain zero/off, legacy integrity is unchanged and the kill-switch path remains valid;
+6. begin the first real diagnostic → placement → weekly plan → practice → correction → delayed-retest flow;
+7. begin the first-72h P1-01 monitoring window;
+8. do not activate AI Assist or Mentor Care until their independent prerequisites and later release decisions pass.
 
 ### Work that may continue safely while consent is pending
 
-- continue **P1-02** governed annual content production ahead of learner need; the next academic planning checkpoint is AW24 / syllabus-closure runway and must be built from the production prerequisite graph rather than by calendar percentage alone;
-- preserve the 2-week hard floor / 4-week target and P1/P5 component firewall;
+- shift P1-02 from first-coverage production to **content hardening / exam-readiness depth** rather than adding new syllabus skills;
+- strengthen item diversity, difficulty distribution, mixed transfer, timed sections, cumulative mini-mocks and full-paper coverage without changing the 81-skill canonical denominator;
+- preserve the P1/P5 component firewall and fail-closed release controls;
 - keep P1-03 dormant until Stage 2 timing needs approach;
 - keep P1-04 AI blocked until deterministic live-beta stability exists;
-- do not infer live readiness from content publication alone and do not alter legacy Tours/Practice/history.
+- do not infer Exam Ready from Syllabus Closure alone;
+- do not alter legacy Tours/Practice/history or the existing Vercel configuration as part of this content milestone.
