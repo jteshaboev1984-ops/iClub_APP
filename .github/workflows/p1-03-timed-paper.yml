@@ -14,6 +14,7 @@ on:
       - supabase/tests/p1_02_content_runway_contract_matrix.sql
       - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
       - supabase/tests/p1_03_ephemeral_after_time_fixture.sql
+      - supabase/tests/p1_03_ephemeral_stage_gate_fixture.sql
       - supabase/tests/p1_03_timed_paper_matrix.sql
       - .github/workflows/p1-03-timed-paper.yml
   workflow_dispatch:
@@ -104,11 +105,12 @@ jobs:
             done
           done
 
-      - name: Install scoped after-time fixture helper in ephemeral DB
+      - name: Install scoped P1-03 fixture helpers in ephemeral DB
         shell: bash
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_after_time_fixture.sql 2>&1 | tee -a p103-timed-paper.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_stage_gate_fixture.sql 2>&1 | tee -a p103-timed-paper.log
 
       - name: Regression - P1-02 runway remains green
         shell: bash
