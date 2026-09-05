@@ -7,7 +7,7 @@
 **Controlled-beta capacity:** **up to 12 learners**  
 **Current staged roster:** **3 Core candidates, wave 1**  
 **Learner consent:** **0 / 3 granted**  
-**Governed content runway:** **AW1–16 GREEN for both P1 and P5**  
+**Governed content runway:** **AW1–20 GREEN for both P1 and P5**  
 **AI Assist live authorization:** **NO**  
 **Mentor Care live authorization:** **NO**
 
@@ -19,14 +19,12 @@ The governed interpretation is:
 
 - `planned_size=12` is cohort **capacity**, not a requirement to fill all seats;
 - the initial controlled beta may start **Core-only with at least 3 real, allowlisted, explicitly consented learners**;
-- the production roster contains **3 Core candidates in wave 1**;
+- production contains **3 Core candidates in wave 1**;
 - no artificial AI Assist or Mentor Care placeholders are required for the initial Core canary;
-- additional learners may be added later as **future-wave candidates**, up to remaining capacity;
-- every additional learner must separately consent and be approved before activation;
-- AI Assist activation remains blocked until its independent runtime/readiness gate passes;
-- Mentor Care activation remains blocked until assignment/capacity/readiness gates pass;
+- later learners may be added as future-wave candidates up to remaining capacity, with separate consent and approval;
+- AI Assist and Mentor Care retain independent activation gates;
 - Project Owner approval is not learner consent;
-- any live integrity/security failure or active-learner consent revocation retains the fail-closed pause/rollback path;
+- integrity/security failure or active-learner consent revocation retains the fail-closed pause/rollback path;
 - P1-04 / AI remains blocked until deterministic beta stability evidence exists.
 
 This amendment changes beta enrollment/release sequencing only. It does **not** lower academic evidence standards, content-runway requirements, P1/P5 isolation, rollback requirements, or readiness definitions.
@@ -45,7 +43,7 @@ The controlled-beta regression proves capacity-12/Core-first incremental enrollm
 
 ### P1-02 governed content runway
 
-Production verification on **2026-09-05** confirms contiguous governed runway through **AW16**:
+Production verification on **2026-09-05** confirms contiguous governed runway through **AW20**:
 
 | Release window | P1 | P5 | State |
 |---|---:|---:|---|
@@ -53,19 +51,31 @@ Production verification on **2026-09-05** confirms contiguous governed runway th
 | AW5–8 | 8 / 8 skills ready | 6 / 6 skills ready | GREEN |
 | AW9–12 | 8 / 8 skills ready | 6 / 6 skills ready | GREEN |
 | AW13–16 | 8 / 8 skills ready | 7 / 7 skills ready | GREEN |
+| AW17–20 | 6 / 6 skills ready | 5 / 5 skills ready | GREEN |
 
-At `active_week_no=13`, both components report `ready_through_aw=16`, `ahead_weeks=4`, `hard_floor_2w_green=true` and `target_4w_green=true`; the global runway is GREEN for both the 2-week hard floor and the 4-week target.
+Cumulative governed skill coverage through AW20 is:
 
-Cumulative governed skill coverage through AW16 is:
+- **P1: 35 / 45 = 77.8%**;
+- **P5: 28 / 36 = 77.8%**.
 
-- **P1: 29 / 45 = 64.4%**;
-- **P5: 23 / 36 = 63.9%**.
+This aligns with the annual-roadmap AW20 checkpoint of approximately **75–80% first coverage** while remaining an academic-content milestone, not a claim of learner mastery.
 
-This aligns with the annual-roadmap AW16 planning checkpoint of approximately 60–65% first coverage while remaining an academic-content milestone, not a claim of learner mastery.
+The AW17–20 slice is prerequisite-closed and consists of:
 
-The AW13–16 slice adds P1 Circular/Trigonometry, Series and Differentiation foundations plus P5 Probability, Discrete Random Variables, Binomial-model recognition and Geometric-model recognition. The final P5 closure is published in isolated governed versions including `p5_aw13_16_drv01_v1`, `p5_aw13_16_drv02_v1`, `p5_aw13_16_drv03_v1`, `p5_aw13_16_bin01_v1` and `p5_aw13_16_geo01_v1`.
+- P1: `SER-03/04/05` and `DIF-02/03/04`;
+- P5: `BIN-02/03`, `GEO-02/03`, `NOR-01`.
 
-All new Exam Prep `public.questions` rows remain `draft + inactive`; production verification found **0 new legacy-active rows**. Content publication changed no beta entitlement or feature state.
+Published governed versions are:
+
+- `p1_aw17_20_series_v1`;
+- `p1_aw17_20_diff_v1`;
+- `p5_aw17_20_binomial_v1`;
+- `p5_aw17_20_geometric_v1`;
+- `p5_aw17_20_nor01_v1`.
+
+`NOR-01` is deliberately scoped to normal-model recognition, `N(mu,sigma^2)` notation, symmetry/centre and spread. Standardisation, normal tables/probabilities and inverse-normal work remain later skills (`NOR-02+`).
+
+All new Exam Prep `public.questions` rows remain `draft + inactive`; production acceptance found **0 new legacy-active rows**. Content publication changed no learner entitlement or feature state.
 
 ## 3. Current production snapshot
 
@@ -88,13 +98,15 @@ All new Exam Prep `public.questions` rows remain `draft + inactive`; production 
 | component placements | `0` |
 | weekly plans | `0` |
 | evidence events | `0` |
-| governed runway | `AW1–16 GREEN P1 + P5` |
+| governed runway | `AW1–20 GREEN P1 + P5` |
+| governed P1 coverage | `35 / 45 = 77.8%` |
+| governed P5 coverage | `28 / 36 = 77.8%` |
 
 No learner access has been granted. P1-01 therefore has no live operational evidence yet, and P1-03 remains dormant infrastructure.
 
 ## 4. Source of truth
 
-**`main` is the repository source of truth.** It contains the Core-first capacity/consent/incremental-enrollment changes and the governed P1-02 content runway through AW16.
+**`main` is the repository source of truth.** It contains the Core-first capacity/consent/incremental-enrollment changes and governed P1-02 content production through AW20.
 
 The previous `exam-prep-p0-host` branch was a working branch for the earlier release line and is not a canonical target for new work.
 
@@ -124,7 +136,8 @@ Mandatory interpretation:
 
 ### Work that may continue safely while consent is pending
 
-- continue **P1-02** governed annual content production ahead of learner need, with the next roadmap checkpoint **AW20 ≈ 75–80% first coverage**, preserving prerequisite closure and the 2-week hard floor / 4-week target;
+- continue **P1-02** governed annual content production ahead of learner need; the next academic planning checkpoint is AW24 / syllabus-closure runway and must be built from the production prerequisite graph rather than by calendar percentage alone;
+- preserve the 2-week hard floor / 4-week target and P1/P5 component firewall;
 - keep P1-03 dormant until Stage 2 timing needs approach;
 - keep P1-04 AI blocked until deterministic live-beta stability exists;
 - do not infer live readiness from content publication alone and do not alter legacy Tours/Practice/history.
