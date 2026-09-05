@@ -25,6 +25,7 @@ declare
   v_view jsonb;
   v_result jsonb;
   v_review jsonb;
+  v_catalog jsonb;
   v_session uuid;
   v_sessions uuid[] := '{}'::uuid[];
   v_norm jsonb;
@@ -58,6 +59,12 @@ begin
   if private.exam_prep_timed_time_limit_v1(v_p5_profile,'official_full',50,null)<>4500 then raise exception 'P1-03 matrix: P5 official full timing'; end if;
   if private.exam_prep_timed_time_limit_v1(v_p1_profile,'proportional_marks',20,null)<>1760 then raise exception 'P1-03 matrix: P1 proportional timing'; end if;
   if private.exam_prep_timed_time_limit_v1(v_p5_profile,'proportional_marks',20,null)<>1800 then raise exception 'P1-03 matrix: P5 proportional timing'; end if;
+  if private.exam_prep_timed_min_stage_v1('timed_section')<>2
+     or private.exam_prep_timed_min_stage_v1('modified_paper')<>2
+     or private.exam_prep_timed_min_stage_v1('diagnostic_full')<>2
+     or private.exam_prep_timed_min_stage_v1('full_paper')<>3 then
+    raise exception 'P1-03 matrix: timed operational-stage mapping drift';
+  end if;
   v_failed:=false;
   begin
     perform private.exam_prep_timed_time_limit_v1(v_p1_profile,'proportional_marks',76,null);
@@ -152,10 +159,45 @@ begin
     set rollout_state='controlled_beta',core_enabled=true,ai_enabled=true,mentor_enabled=true,kill_switch=false,updated_at=now()
     where program_key='math_as_p1_p5';
 
+  -- Stage gate fixture: Stage 1 must fail closed; Stage 2 unlocks sections/diagnostic-full.
+  insert into private.exam_prep_stage_states(
+    user_id,program_version_id,component_code,engine_version,denominator_count,l0_count,l1_count,l2_count,l3_count,
+    coverage_count,coverage_pct,open_correction_count,retest_due_count,evidence_stage_candidate,operational_stage,
+    stage_gate_status,app_readiness_estimate,app_readiness_reason
+  ) values
+    (v_core,v_program,'P1','objective_state_v1',45,45,0,0,0,0,0,0,0,1,1,'synthetic_stage1_fixture',false,'P1-03 rollback-only fixture'),
+    (v_ai,v_program,'P1','objective_state_v1',45,45,0,0,0,0,0,0,0,2,2,'synthetic_stage2_fixture',false,'P1-03 rollback-only fixture'),
+    (v_mentor,v_program,'P1','objective_state_v1',45,45,0,0,0,0,0,0,0,2,2,'synthetic_stage2_fixture',false,'P1-03 rollback-only fixture');
+
+  perform set_config('request.jwt.claim.sub',v_core::text,true);
+  v_catalog:=public.get_exam_prep_timed_catalog_safe_v1('P1');
+  if exists(select 1 from jsonb_array_elements(v_catalog->'assessments') j where (j->>'assessment_id')::bigint=v_ass) then
+    raise exception 'P1-03 matrix: Stage 1 catalog exposed Stage 2 timed section';
+  end if;
+  v_failed:=false;
+  begin
+    perform public.authorize_exam_prep_timed_safe_v1(v_ass);
+  exception when others then
+    if position('exam_prep_timed_stage_gate_not_met' in sqlerrm)=0 then raise; end if;
+    v_failed:=true;
+  end;
+  if not v_failed then raise exception 'P1-03 matrix: Stage 1 direct authorization bypassed stage gate'; end if;
+
+  update private.exam_prep_stage_states
+    set evidence_stage_candidate=2,operational_stage=2,stage_gate_status='synthetic_stage2_fixture',derived_at=now()
+    where user_id=v_core and program_version_id=v_program and component_code='P1' and engine_version='objective_state_v1';
+  v_catalog:=public.get_exam_prep_timed_catalog_safe_v1('P1');
+  if not exists(select 1 from jsonb_array_elements(v_catalog->'assessments') j where (j->>'assessment_id')::bigint=v_ass and (j->>'min_operational_stage')::int=2 and (j->>'current_operational_stage')::int=2) then
+    raise exception 'P1-03 matrix: Stage 2 catalog did not expose governed timed section %',v_catalog::text;
+  end if;
+
   -- Same governed section must produce the same timing/academic contract for Core, AI and Mentor entitlements.
   foreach v_uid in array array[v_core,v_ai,v_mentor] loop
     perform set_config('request.jwt.claim.sub',v_uid::text,true);
     v_auth:=public.authorize_exam_prep_timed_safe_v1(v_ass);
+    if (v_auth->>'current_operational_stage')::int<>2 or (v_auth->>'min_operational_stage')::int<>2 then
+      raise exception 'P1-03 matrix: authorization stage snapshot wrong %',v_auth::text;
+    end if;
     v_start:=public.start_exam_prep_session_safe_v1((v_auth->>'authorization_id')::uuid,'p103-start-'||right(v_uid::text,4)||'-0001');
     v_session:=(v_start->>'session_id')::uuid;
     v_sessions:=array_append(v_sessions,v_session);
@@ -223,6 +265,13 @@ begin
     raise exception 'P1-03 matrix: Core/AI/Mentor academic state drift core=% ai=% mentor=%',v_state_core::text,v_state_ai::text,v_state_mentor::text;
   end if;
 
+  -- Rebuild is authoritative and may lower this tiny synthetic fixture below Stage 2.
+  -- Restore Stage 2 only inside this rollback-only matrix so later cases continue testing timed semantics.
+  update private.exam_prep_stage_states
+    set evidence_stage_candidate=greatest(evidence_stage_candidate,2),operational_stage=2,
+        stage_gate_status='synthetic_post_rebuild_stage2',derived_at=now()
+    where user_id=v_core and program_version_id=v_program and component_code='P1' and engine_version='objective_state_v1';
+
   -- Incomplete timed submission is legal and must be scored as unattempted marks, not as a generic incomplete-session error.
   perform set_config('request.jwt.claim.sub',v_core::text,true);
   v_auth:=public.authorize_exam_prep_timed_safe_v1(v_ass);
@@ -263,6 +312,12 @@ begin
   if (v_after_result->>'marks_in_time')::int<>0 or (v_after_result->>'marks_after_time')::int<>4 or (v_after_result->>'pending_review_after_time_marks')::int<>0 then
     raise exception 'P1-03 matrix: after-time self-review buckets wrong %',v_after_result::text;
   end if;
+
+  -- A finalized timed result may rebuild the tiny synthetic state below Stage 2; restore only for the next auth test.
+  update private.exam_prep_stage_states
+    set evidence_stage_candidate=greatest(evidence_stage_candidate,2),operational_stage=2,
+        stage_gate_status='synthetic_pre_active_stage2',derived_at=now()
+    where user_id=v_core and program_version_id=v_program and component_code='P1' and engine_version='objective_state_v1';
 
   -- State rebuild already proved finalized-only. Explicitly prove an active timed response cannot enter state.
   v_auth:=public.authorize_exam_prep_timed_safe_v1(v_ass);
