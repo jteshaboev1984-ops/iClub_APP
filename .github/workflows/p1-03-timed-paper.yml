@@ -16,6 +16,7 @@ on:
       - supabase/tests/p1_03_ephemeral_after_time_fixture.sql
       - supabase/tests/p1_03_ephemeral_stage_gate_fixture.sql
       - supabase/tests/p1_03_timed_paper_matrix.sql
+      - supabase/tests/p1_03_operational_stage_transition_matrix.sql
       - .github/workflows/p1-03-timed-paper.yml
   workflow_dispatch:
 
@@ -130,6 +131,12 @@ jobs:
           sed "s/(v_norm->>'timed')::int<>2/(v_norm->>'timed')::int<>3/" \
             supabase/tests/p1_03_timed_paper_matrix.sql > /tmp/p1_03_timed_paper_matrix.sql
           psql -v ON_ERROR_STOP=1 -f /tmp/p1_03_timed_paper_matrix.sql 2>&1 | tee -a p103-timed-paper.log
+
+      - name: Run P1-03 operational Stage transition matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_operational_stage_transition_matrix.sql 2>&1 | tee -a p103-timed-paper.log
 
       - name: Verify zero activation residue
         shell: bash
