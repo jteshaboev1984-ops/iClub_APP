@@ -137,7 +137,8 @@ begin
   from stage3_key_skill_proposal_v0 p
   join private.exam_prep_skill_contracts c
     on c.program_version_id=v_program_version_id and c.skill_code=p.skill_code
-  join downstream d using(component_code,skill_code)
+  join downstream d
+    on d.component_code=p.component_code and d.skill_code=p.skill_code
   where not (
     c.requires_mixed_for_l3
     or c.contract_profile in ('model_selection','context_reasoning','graph_construction')
