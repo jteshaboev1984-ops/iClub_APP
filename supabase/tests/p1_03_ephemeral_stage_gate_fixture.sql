@@ -13,6 +13,10 @@ begin
   -- those labels before the production constraint is evaluated. This helper never ships.
   if new.stage_gate_status like 'synthetic_%' then
     new.stage_gate_status:='operational';
+    -- Carry an unmistakable CI-only sentinel through the production projection trigger.
+    -- app_readiness_reason is not rewritten by that trigger, so zzz_* can identify
+    -- both the initial synthetic rows and later post-rebuild synthetic overrides.
+    new.app_readiness_reason:='P1-03 rollback-only fixture';
   end if;
 
   -- Initial rollback-only rows use a deliberately invalid sentinel so the fixture
