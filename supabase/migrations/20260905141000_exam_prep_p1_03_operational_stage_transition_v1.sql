@@ -116,14 +116,14 @@ begin
       new.stage_hold_reason:='Stage 1 Foundation remains active because an explicit prerequisite blocker is open.';
     else
       new.stage_hold_reason:=format(
-        'Stage 1 Foundation active; Stage 2 requires %.2f%% confirmed coverage or governed fast-track.',
+        'Stage 1 Foundation active; Stage 2 requires %s%% confirmed coverage or governed fast-track.',
         v_rule.stage1_to_2_min_coverage_pct
       );
     end if;
   elsif new.operational_stage=2 then
     new.stage_gate_status:='operational';
     new.stage_hold_reason:=format(
-      'Stage 2 Syllabus Building active; Stage 3 requires %.2f%% confirmed coverage. Timed sections and modified papers are allowed; full paper remains closed.',
+      'Stage 2 Syllabus Building active; Stage 3 requires %s%% confirmed coverage. Timed sections and modified papers are allowed; full paper remains closed.',
       v_rule.stage2_to_3_min_coverage_pct
     );
   else
