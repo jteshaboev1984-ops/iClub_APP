@@ -51,12 +51,12 @@ Reuse:
   - user/program/component ownership;
   - assessment/version;
   - finalized status;
-  - timing contract.
+  - immutable `timing_contract` snapshot, including `paper_profile_version`, official marks/duration and component.
 - `private.exam_prep_timed_attempt_results`
   - `attempt_kind`;
   - `timing_rule`;
   - `comparison_scope`;
-  - `comparability_key`;
+  - exact-form `comparability_key`;
   - `strict_timing`;
   - available marks;
   - server elapsed seconds;
@@ -71,26 +71,34 @@ Reuse:
 
 A Stage-4 comparable attempt must continue to be component-owned and must not count `timed_section`, `modified_paper` or `diagnostic_full` as a comparable full-paper result.
 
-## 4. Proposed comparable-attempt filter
+## 4. Comparable family vs exact paper identity
 
-For design/testing, a full attempt is a Stage-4 comparable candidate only when all are true:
+Production verification found that current full-paper `comparability_key` values are **form-specific** (`p1-full-paper-01-v1`, `p5-full-paper-01-v1`). Therefore equality of `comparability_key` must **not** become the Stage-4 definition of comparability: otherwise two different original full-paper forms could never form the required comparable pair.
+
+For Stage 4, two attempts belong to the same **comparison family** when their immutable snapshots agree on the academic/condition dimensions that make full-paper performance comparable, including:
 
 - same `user_id`;
 - same `program_version_id`;
 - same `component_code`;
+- compatible `paper_profile_version` / official syllabus profile;
 - finalized `session_type='paper'`;
 - `attempt_kind='full_paper'`;
 - `timing_rule='official_full'`;
 - `comparison_scope='full'`;
 - `strict_timing=true`;
-- final comparability helper returns true.
+- same official marks/time contract for the component;
+- final score-comparability helper returns true.
 
-`comparability_key` must remain available for compatibility checks. A later implementation must not merge unlike syllabus/version/condition families merely because both attempts are called full papers.
+`comparability_key` remains useful as **exact form / contract identity**, duplicate/repeat analysis and audit metadata. Different exact keys may be members of the same Stage-4 comparison family when the immutable profile/condition dimensions above match.
+
+A later implementation must also fail closed across a changed syllabus/profile family even when both attempts happen to be called full papers.
 
 ## 5. Timed trend facts that can already be computed
 
 For each comparable full attempt, the server can deterministically expose:
 
+- exact `comparability_key` / form identity;
+- comparison-family identity derived from immutable snapshot fields;
 - `marks_available`;
 - finally reviewed in-time marks;
 - finally reviewed after-time marks;
@@ -99,9 +107,9 @@ For each comparable full attempt, the server can deterministically expose:
 - `server_elapsed_sec`;
 - `time_limit_sec`;
 - normalized unattempted-mark share;
-- normalized in-time-mark share;
-- chronological attempt order;
-- delta versus the previous compatible comparable attempt.
+- normalized in-time/after-time shares;
+- chronological attempt order within the compatible family;
+- delta versus the previous compatible full attempt.
 
 These are facts. They are not yet a Stage-4 promotion predicate.
 
@@ -125,7 +133,7 @@ A future evaluator may calculate a `timing_trend_facts` object, but until a vers
 - `trend_policy_status='pending'`;
 - `trend_gate_ready=false`.
 
-The raw facts should include at least the latest two compatible comparable attempts and their normalized deltas. This preserves enough evidence for governance without hiding a threshold in code.
+The raw facts should include at least the latest two attempts from one compatible comparison family and their normalized deltas. This preserves enough evidence for governance without hiding a threshold in code.
 
 ## 7. Governance gap B — “all skills >=L3 or explicit corrective plan”
 
@@ -165,14 +173,18 @@ A later implementation can expose a service-role/private evaluator with a payloa
 {
   component_code,
   stage3_exit_ready,
-  comparable_full_attempt_count,
-  comparable_attempt_ids,
-  latest_comparable_attempt_at,
+  comparable_full_attempt_count_total,
+  comparison_family_count,
+  max_compatible_family_attempt_count,
+  comparison_families,
+  exact_form_keys,
+  trend_family_key,
   timing_trend_facts: {
     attempt_1,
     attempt_2,
     unattempted_mark_share_delta,
     in_time_mark_share_delta,
+    after_time_mark_share_delta,
     elapsed_share_delta
   },
   trend_policy_status,
@@ -217,16 +229,17 @@ Before any production DDL, CI must prove at least:
 ### Comparable attempts
 
 - 0/1 compatible full attempts block;
-- 2 compatible finally reviewed strict full attempts satisfy the count fact;
+- 2 different finally reviewed strict full-paper forms under the same immutable component/profile/condition family satisfy the count fact;
+- different exact `comparability_key` values do **not** by themselves make two forms incomparable;
+- a changed `paper_profile_version` / incompatible family does not merge into the prior family;
 - modified paper does not count;
 - timed section does not count;
 - diagnostic full does not count;
-- unresolved written self-review does not count;
-- incompatible `comparability_key` attempts cannot be silently treated as one trend series.
+- unresolved written self-review does not count.
 
 ### Trend
 
-- raw normalized trend facts are reproducible from persisted results;
+- raw normalized trend facts are reproducible from persisted results within one compatible family;
 - no stage promotion occurs while trend policy is pending;
 - no score-only shortcut exists.
 
@@ -256,7 +269,7 @@ The earliest safe implementation sequence is:
 3. approve a numeric/logical `timing_unattempted_trend` rule;
 4. approve the minimum `explicit_corrective_plan` qualification rule;
 5. implement a **read-only Stage-4 evidence evaluator first**, still with `max_automatic_stage=3`;
-6. run the full P1-03 regression line plus the new Stage-4 rollback matrix;
+6. run the full P1-03 regression line plus the Stage-4 rollback matrix;
 7. apply evaluator DDL only after GREEN and verify production fail-closed state;
 8. only in a later release wire Stage 3 -> 4 operational promotion;
 9. Stage 4 -> 5 remains a separate contract/release.

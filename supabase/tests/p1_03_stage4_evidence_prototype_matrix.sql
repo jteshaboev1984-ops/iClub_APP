@@ -18,10 +18,11 @@ declare
   v_stage3 jsonb;
   v_engine text;
   v_total_comparable int:=0;
-  v_distinct_series int:=0;
-  v_max_series_count int:=0;
-  v_series jsonb:='[]'::jsonb;
-  v_pair_key text;
+  v_exact_form_count int:=0;
+  v_family_count int:=0;
+  v_max_family_count int:=0;
+  v_families jsonb:='[]'::jsonb;
+  v_trend_family_key text;
   v_latest_unattempted_share numeric;
   v_previous_unattempted_share numeric;
   v_unattempted_share_delta numeric;
@@ -45,8 +46,18 @@ begin
   where status='active'
   order by created_at desc limit 1;
 
+  -- Exact comparability_key is FORM identity. Stage-4 comparison family is derived
+  -- from the immutable academic/timing snapshot, so two different original paper forms
+  -- can still be comparable when profile/conditions match.
   with eligible as (
-    select t.*
+    select t.*,
+           concat_ws('|',
+             s.program_version_id::text,
+             s.component_code,
+             coalesce(s.timing_contract->>'paper_profile_version','MISSING_PROFILE'),
+             t.attempt_kind,t.timing_rule,t.comparison_scope,t.strict_timing::text,
+             t.marks_available::text,t.time_limit_sec::text
+           ) as family_key
     from private.exam_prep_timed_attempt_results t
     join private.exam_prep_sessions s on s.id=t.session_id
     join private.exam_prep_assessments a on a.id=t.assessment_id
@@ -64,25 +75,36 @@ begin
       and a.status='published'
       and private.exam_prep_timed_score_comparable_v1(t.session_id)
   ), grouped as (
-    select comparability_key,count(*)::int as attempt_count,max(finalized_at) as latest_at
+    select family_key,count(*)::int as attempt_count,
+           count(distinct comparability_key)::int as exact_form_count,
+           max(finalized_at) as latest_at
     from eligible
-    group by comparability_key
+    group by family_key
   )
   select
     (select count(*)::int from eligible),
+    (select count(distinct comparability_key)::int from eligible),
     (select count(*)::int from grouped),
     coalesce((select max(attempt_count) from grouped),0),
     coalesce((select jsonb_agg(jsonb_build_object(
-      'comparability_key',comparability_key,
+      'family_key',family_key,
       'attempt_count',attempt_count,
+      'exact_form_count',exact_form_count,
       'latest_at',latest_at
-    ) order by latest_at,comparability_key) from grouped),'[]'::jsonb)
-  into v_total_comparable,v_distinct_series,v_max_series_count,v_series;
+    ) order by latest_at,family_key) from grouped),'[]'::jsonb)
+  into v_total_comparable,v_exact_form_count,v_family_count,v_max_family_count,v_families;
 
-  -- Pick one deterministic compatible series only for raw trend display:
-  -- highest attempt count, then most recent series. No gate is derived from it.
+  -- Pick one deterministic compatible family only for raw trend display:
+  -- highest attempt count, then most recent family. No gate is derived from it.
   with eligible as (
-    select t.*
+    select t.*,
+           concat_ws('|',
+             s.program_version_id::text,
+             s.component_code,
+             coalesce(s.timing_contract->>'paper_profile_version','MISSING_PROFILE'),
+             t.attempt_kind,t.timing_rule,t.comparison_scope,t.strict_timing::text,
+             t.marks_available::text,t.time_limit_sec::text
+           ) as family_key
     from private.exam_prep_timed_attempt_results t
     join private.exam_prep_sessions s on s.id=t.session_id
     join private.exam_prep_assessments a on a.id=t.assessment_id
@@ -100,16 +122,16 @@ begin
       and a.status='published'
       and private.exam_prep_timed_score_comparable_v1(t.session_id)
   ), grouped as (
-    select comparability_key,count(*)::int as attempt_count,max(finalized_at) as latest_at
-    from eligible group by comparability_key
+    select family_key,count(*)::int as attempt_count,max(finalized_at) as latest_at
+    from eligible group by family_key
   )
-  select comparability_key into v_pair_key
+  select family_key into v_trend_family_key
   from grouped
   where attempt_count>=2
-  order by attempt_count desc,latest_at desc,comparability_key
+  order by attempt_count desc,latest_at desc,family_key
   limit 1;
 
-  if v_pair_key is not null then
+  if v_trend_family_key is not null then
     with ranked as (
       select t.*,
              row_number() over(order by t.finalized_at desc,t.session_id) as rn
@@ -125,7 +147,13 @@ begin
         and t.timing_rule='official_full'
         and t.comparison_scope='full'
         and t.strict_timing
-        and t.comparability_key=v_pair_key
+        and concat_ws('|',
+          s.program_version_id::text,
+          s.component_code,
+          coalesce(s.timing_contract->>'paper_profile_version','MISSING_PROFILE'),
+          t.attempt_kind,t.timing_rule,t.comparison_scope,t.strict_timing::text,
+          t.marks_available::text,t.time_limit_sec::text
+        )=v_trend_family_key
         and private.exam_prep_timed_score_comparable_v1(t.session_id)
     )
     select
@@ -204,7 +232,7 @@ begin
 
   if not coalesce((v_stage3->>'ready')::boolean,false) then
     v_reason:='stage3_exit_incomplete';
-  elsif v_max_series_count<2 then
+  elsif v_max_family_count<2 then
     v_reason:='comparable_full_attempts_incomplete';
   else
     -- Deliberate fail-closed stop. The normative plan has not supplied an
@@ -216,10 +244,11 @@ begin
     'component_code',p_component_code,
     'stage3_exit_ready',coalesce((v_stage3->>'ready')::boolean,false),
     'comparable_full_attempt_count_total',v_total_comparable,
-    'comparable_series_count',v_distinct_series,
-    'max_compatible_series_attempt_count',v_max_series_count,
-    'comparable_series',v_series,
-    'trend_pair_comparability_key',v_pair_key,
+    'exact_form_count',v_exact_form_count,
+    'comparison_family_count',v_family_count,
+    'max_compatible_family_attempt_count',v_max_family_count,
+    'comparison_families',v_families,
+    'trend_family_key',v_trend_family_key,
     'latest_unattempted_share',v_latest_unattempted_share,
     'previous_unattempted_share',v_previous_unattempted_share,
     'unattempted_share_delta',v_unattempted_share_delta,
@@ -248,6 +277,7 @@ create or replace function pg_temp.insert_p1_full_attempt_v0(
   p_content_version_id bigint,
   p_assessment_version text,
   p_comparability_key text,
+  p_paper_profile_version text,
   p_finalized_at timestamptz,
   p_unattempted_marks int,
   p_elapsed_sec int,
@@ -279,8 +309,12 @@ begin
     v_auth,p_user_id,p_program_version_id,p_content_version_id,p_assessment_id,p_assessment_version,
     'P1','paper','finalized','p103-s4proto-session-'||p_suffix,v_items,p_finalized_at-interval '100 minutes',p_finalized_at,
     p_finalized_at,'p103-s4proto-final-'||p_suffix,
-    jsonb_build_object('attempt_kind','full_paper','timing_rule','official_full','comparison_scope','full',
-      'strict_timing',true,'marks_available',75,'time_limit_sec',6600,'comparability_key',p_comparability_key)
+    jsonb_build_object(
+      'contract_version','tcv1','attempt_kind','full_paper','timing_rule','official_full','comparison_scope','full',
+      'comparability_key',p_comparability_key,'strict_timing',true,'marks_available',75,'time_limit_sec',6600,
+      'official_total_marks',75,'official_duration_sec',6600,'paper_profile_version',p_paper_profile_version,
+      'component_code','P1'
+    )
   ) returning id into v_session;
 
   insert into private.exam_prep_session_items(
@@ -307,7 +341,7 @@ begin
   );
 
   -- Close written-review comparability using all governed written mark maxima.
-  -- Awarded marks are intentionally synthetic and are not used as a Stage-4 gate here.
+  -- Awarded marks are synthetic and are not used as a Stage-4 gate here.
   insert into private.exam_prep_timed_written_self_marks(
     session_id,item_order,user_id,marks_awarded,max_marks,was_in_time,idempotency_key,review_note
   )
@@ -395,31 +429,35 @@ begin
 
   -- First finally comparable baseline completes Stage 3, but Stage 4 still needs a second compatible full attempt.
   v_s1:=pg_temp.insert_p1_full_attempt_v0(
-    v_user,v_program,v_ass,v_cv,v_ass_version,'p1-full-paper-01-v1',now()-interval '10 days',12,6500,'01'
+    v_user,v_program,v_ass,v_cv,v_ass_version,'p1-full-paper-01-v1','9709_2026_2027_v1',
+    now()-interval '10 days',12,6500,'01'
   );
   v_status:=pg_temp.stage4_evidence_status_v0(v_user,v_program,'P1');
   if not (v_status->>'stage3_exit_ready')::boolean
      or v_status->>'reason_code'<>'comparable_full_attempts_incomplete'
-     or (v_status->>'max_compatible_series_attempt_count')::int<>1
+     or (v_status->>'max_compatible_family_attempt_count')::int<>1
+     or (v_status->>'exact_form_count')::int<>1
      or (v_status->>'below_l3_count')::int<>1
      or (v_status->>'below_l3_with_raw_corrective_link_count')::int<>0 then
     raise exception 'P1-03 Stage-4 prototype: one-attempt state wrong %',v_status::text;
   end if;
 
-  -- Second compatible full attempt supplies the raw count and raw trend facts.
+  -- Second DIFFERENT full-paper form under the same immutable profile/conditions is comparable.
   v_s2:=pg_temp.insert_p1_full_attempt_v0(
-    v_user,v_program,v_ass,v_cv,v_ass_version,'p1-full-paper-01-v1',now()-interval '4 days',6,6200,'02'
+    v_user,v_program,v_ass,v_cv,v_ass_version,'p1-full-paper-02-v1','9709_2026_2027_v1',
+    now()-interval '4 days',6,6200,'02'
   );
   v_status:=pg_temp.stage4_evidence_status_v0(v_user,v_program,'P1');
   if v_status->>'reason_code'<>'trend_policy_pending'
-     or (v_status->>'max_compatible_series_attempt_count')::int<>2
-     or (v_status->>'comparable_series_count')::int<>1
+     or (v_status->>'max_compatible_family_attempt_count')::int<>2
+     or (v_status->>'comparison_family_count')::int<>1
+     or (v_status->>'exact_form_count')::int<>2
      or (v_status->>'trend_gate_ready')::boolean
      or (v_status->>'corrective_plan_gate_ready')::boolean
      or (v_status->>'stage4_exit_ready')::boolean
      or (v_status->>'stage5_unlocked')::boolean
      or (v_status->>'unattempted_share_delta')::numeric>=0 then
-    raise exception 'P1-03 Stage-4 prototype: two-attempt pending-policy state wrong %',v_status::text;
+    raise exception 'P1-03 Stage-4 prototype: two-form compatible-family state wrong %',v_status::text;
   end if;
 
   -- Existing correction + active weekly-plan linkage is exposed as a RAW signal only.
@@ -450,15 +488,17 @@ begin
     raise exception 'P1-03 Stage-4 prototype: raw corrective linkage was treated incorrectly %',v_status::text;
   end if;
 
-  -- An incompatible comparability key creates another series; it must not inflate the existing compatible-series count.
+  -- A changed paper profile is a separate comparison family even if the attempt is otherwise full/strict.
   v_s3:=pg_temp.insert_p1_full_attempt_v0(
-    v_user,v_program,v_ass,v_cv,v_ass_version,'p1-full-paper-prototype-incompatible-v2',now()-interval '1 day',4,6100,'03'
+    v_user,v_program,v_ass,v_cv,v_ass_version,'p1-full-paper-prototype-v2','prototype_incompatible_profile_v2',
+    now()-interval '1 day',4,6100,'03'
   );
   v_status:=pg_temp.stage4_evidence_status_v0(v_user,v_program,'P1');
   if (v_status->>'comparable_full_attempt_count_total')::int<>3
-     or (v_status->>'comparable_series_count')::int<>2
-     or (v_status->>'max_compatible_series_attempt_count')::int<>2 then
-    raise exception 'P1-03 Stage-4 prototype: incompatible series were merged %',v_status::text;
+     or (v_status->>'exact_form_count')::int<>3
+     or (v_status->>'comparison_family_count')::int<>2
+     or (v_status->>'max_compatible_family_attempt_count')::int<>2 then
+    raise exception 'P1-03 Stage-4 prototype: incompatible profile families were merged %',v_status::text;
   end if;
 
   -- P1 evidence must never satisfy P5.
