@@ -18,6 +18,7 @@ on:
       - supabase/tests/p1_03_timed_paper_matrix.sql
       - supabase/tests/p1_03_operational_stage_transition_matrix.sql
       - supabase/tests/p1_03_stage3_exit_evaluator_matrix.sql
+      - supabase/tests/p1_03_stage3_key_skill_proposal_matrix.sql
       - .github/workflows/p1-03-timed-paper.yml
   workflow_dispatch:
 
@@ -144,6 +145,12 @@ jobs:
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_stage3_exit_evaluator_matrix.sql 2>&1 | tee -a p103-timed-paper.log
+
+      - name: Validate Stage-3 key-skill proposal v0 remains non-authoritative
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_stage3_key_skill_proposal_matrix.sql 2>&1 | tee -a p103-timed-paper.log
 
       - name: Verify zero activation residue
         shell: bash
