@@ -489,6 +489,19 @@ begin
   end if;
 
   -- A changed paper profile is a separate comparison family even if the attempt is otherwise full/strict.
+  -- Do not bypass the production BEFORE INSERT timing trigger: mutate the rollback-only published
+  -- profile row first, then let the trigger attach the new profile version to the third session snapshot.
+  update private.exam_prep_component_paper_profiles p
+  set profile_version='p103_stage4_incompatible_profile_v2'
+  where p.id=(
+    select tc.paper_profile_id
+    from private.exam_prep_timed_assessment_contracts tc
+    where tc.assessment_id=v_ass
+  );
+  if not found then
+    raise exception 'P1-03 Stage-4 prototype: could not locate P1 paper profile for incompatible-family fixture';
+  end if;
+
   v_s3:=pg_temp.insert_p1_full_attempt_v0(
     v_user,v_program,v_ass,v_cv,v_ass_version,'p1-full-paper-prototype-v2','prototype_incompatible_profile_v2',
     now()-interval '1 day',4,6100,'03'
