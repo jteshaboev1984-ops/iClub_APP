@@ -38,6 +38,8 @@ begin
     raise exception 'P1-03 stage matrix: operational-stage policy drift';
   end if;
 
+  insert into auth.users(id,email,role,aud)
+  values(v_user,'p103-stage-transition@invalid.example','authenticated','authenticated');
   insert into public.users(id,first_name,last_name,language_code)
   values(v_user,'P103','StageTransition','en');
 
