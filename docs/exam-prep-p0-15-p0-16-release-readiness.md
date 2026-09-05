@@ -7,7 +7,7 @@
 **Controlled-beta capacity:** **up to 12 learners**  
 **Current staged roster:** **3 Core candidates, wave 1**  
 **Learner consent:** **0 / 3 granted**  
-**Governed content runway:** **AW1–12 GREEN for both P1 and P5**  
+**Governed content runway:** **AW1–16 GREEN for both P1 and P5**  
 **AI Assist live authorization:** **NO**  
 **Mentor Care live authorization:** **NO**
 
@@ -41,36 +41,31 @@ This amendment changes beta enrollment/release sequencing only. It does **not** 
 - `P0-14 Host Regression` run `33900747278` — **SUCCESS**.
 - Core-first convergence was squash-merged through PR **#13** into `main` as commit `7953563de0c4b57b4e49055492c448124c7aaf85`.
 
-The controlled-beta regression proves:
-
-1. capacity 12 with only 3 initial Core learners;
-2. 3 / 3 explicit learner consent required before approval;
-3. initial Core-only cohort approval without AI/Mentor placeholders;
-4. wave 1 activates only those Core learners;
-5. later learners can be added as future-wave candidates and must independently consent/approve;
-6. AI candidates can be staged while AI activation remains blocked until AI readiness is green;
-7. zero synthetic residue after rollback.
-
-The host regression additionally proves that an allowlisted learner can see the beta invitation **before Core entitlement**, while merely viewing/opening the invitation never grants consent automatically. Grant/revoke require explicit authenticated learner actions.
+The controlled-beta regression proves capacity-12/Core-first incremental enrollment, explicit learner consent, isolated Wave 1 activation, later-wave additions, AI activation blocking until readiness, and rollback without synthetic residue. The authenticated invitation flow also proves that viewing an invitation never grants consent automatically.
 
 ### P1-02 governed content runway
 
-Production verification on **2026-09-05** confirms contiguous governed runway through **AW12**:
+Production verification on **2026-09-05** confirms contiguous governed runway through **AW16**:
 
 | Release window | P1 | P5 | State |
 |---|---:|---:|---|
 | AW1–4 | 5 / 5 skills ready | 4 / 4 skills ready | GREEN |
 | AW5–8 | 8 / 8 skills ready | 6 / 6 skills ready | GREEN |
 | AW9–12 | 8 / 8 skills ready | 6 / 6 skills ready | GREEN |
+| AW13–16 | 8 / 8 skills ready | 7 / 7 skills ready | GREEN |
 
-At `active_week_no=9`, both components report `ready_through_aw=12`, `ahead_weeks=4`, `hard_floor_2w_green=true` and `target_4w_green=true`; the global runway is therefore GREEN for both the 2-week hard floor and the 4-week target.
+At `active_week_no=13`, both components report `ready_through_aw=16`, `ahead_weeks=4`, `hard_floor_2w_green=true` and `target_4w_green=true`; the global runway is GREEN for both the 2-week hard floor and the 4-week target.
 
-The final AW9–12 P5 content was published through the existing governed content-floor trigger in two isolated versions:
+Cumulative governed skill coverage through AW16 is:
 
-- `p5_aw09_12_data_v1`: DAT-05 / DAT-03 / DAT-07 — **21 governed questions, 3 written tasks, 8 assessments**;
-- `p5_aw09_12_count_prob_v1`: CNT-05 / PRO-02 / PRO-04 — **21 governed questions, 3 written tasks, 8 assessments**.
+- **P1: 29 / 45 = 64.4%**;
+- **P5: 23 / 36 = 63.9%**.
 
-All new `public.questions` rows remain `draft + inactive`; production verification found **0 legacy-active rows** from these packs. No beta entitlement or feature state was changed by content publication.
+This aligns with the annual-roadmap AW16 planning checkpoint of approximately 60–65% first coverage while remaining an academic-content milestone, not a claim of learner mastery.
+
+The AW13–16 slice adds P1 Circular/Trigonometry, Series and Differentiation foundations plus P5 Probability, Discrete Random Variables, Binomial-model recognition and Geometric-model recognition. The final P5 closure is published in isolated governed versions including `p5_aw13_16_drv01_v1`, `p5_aw13_16_drv02_v1`, `p5_aw13_16_drv03_v1`, `p5_aw13_16_bin01_v1` and `p5_aw13_16_geo01_v1`.
+
+All new Exam Prep `public.questions` rows remain `draft + inactive`; production verification found **0 new legacy-active rows**. Content publication changed no beta entitlement or feature state.
 
 ## 3. Current production snapshot
 
@@ -89,13 +84,17 @@ All new `public.questions` rows remain `draft + inactive`; production verificati
 | `mentor_enabled` | `false` |
 | `kill_switch` | `true` |
 | active Exam Prep entitlements | `0` |
-| governed runway | `AW1–12 GREEN P1 + P5` |
+| Exam Prep sessions | `0` |
+| component placements | `0` |
+| weekly plans | `0` |
+| evidence events | `0` |
+| governed runway | `AW1–16 GREEN P1 + P5` |
 
-No learner access has been granted. P1-03 remains dormant infrastructure.
+No learner access has been granted. P1-01 therefore has no live operational evidence yet, and P1-03 remains dormant infrastructure.
 
 ## 4. Source of truth
 
-**`main` is the repository source of truth.** It contains the Core-first capacity/consent/incremental-enrollment changes and the governed P1-02 content runway through AW12.
+**`main` is the repository source of truth.** It contains the Core-first capacity/consent/incremental-enrollment changes and the governed P1-02 content runway through AW16.
 
 The previous `exam-prep-p0-host` branch was a working branch for the earlier release line and is not a canonical target for new work.
 
@@ -125,7 +124,7 @@ Mandatory interpretation:
 
 ### Work that may continue safely while consent is pending
 
-- continue **P1-02** governed annual content production ahead of learner need, preserving the 2-week hard floor / 4-week target and prerequisite closure;
+- continue **P1-02** governed annual content production ahead of learner need, with the next roadmap checkpoint **AW20 ≈ 75–80% first coverage**, preserving prerequisite closure and the 2-week hard floor / 4-week target;
 - keep P1-03 dormant until Stage 2 timing needs approach;
 - keep P1-04 AI blocked until deterministic live-beta stability exists;
 - do not infer live readiness from content publication alone and do not alter legacy Tours/Practice/history.
