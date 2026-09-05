@@ -17,6 +17,7 @@ on:
       - supabase/tests/p1_03_ephemeral_stage_gate_fixture.sql
       - supabase/tests/p1_03_timed_paper_matrix.sql
       - supabase/tests/p1_03_operational_stage_transition_matrix.sql
+      - supabase/tests/p1_03_stage3_exit_evaluator_matrix.sql
       - .github/workflows/p1-03-timed-paper.yml
   workflow_dispatch:
 
@@ -137,6 +138,12 @@ jobs:
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_operational_stage_transition_matrix.sql 2>&1 | tee -a p103-timed-paper.log
+
+      - name: Run P1-03 Stage-3 exit evaluator matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_stage3_exit_evaluator_matrix.sql 2>&1 | tee -a p103-timed-paper.log
 
       - name: Verify zero activation residue
         shell: bash
