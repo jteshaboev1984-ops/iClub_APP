@@ -9,6 +9,7 @@
 **Learner consent:** **0 / 3 granted**  
 **Governed content runway:** **AW1–24 GREEN for both P1 and P5**  
 **Syllabus Closure / first coverage:** **81 / 81 canonical skills = 100%**  
+**P1-03 pre-live depth:** **Stage-gated timed infrastructure + first P1/P5 Stage-2 timed blocks published, learner-inaccessible until authoritative Stage 2**  
 **Exam Ready status:** **NOT CLAIMED — requires learner evidence, correction/retest performance and timed/full-paper readiness**  
 **AI Assist live authorization:** **NO**  
 **Mentor Care live authorization:** **NO**
@@ -27,9 +28,9 @@ The governed interpretation is:
 - AI Assist and Mentor Care retain independent activation gates;
 - Project Owner approval is not learner consent;
 - integrity/security failure or active-learner consent revocation retains the fail-closed pause/rollback path;
-- P1-04 / AI remains blocked until deterministic live-beta stability evidence exists.
+- P1-04 / AI remains blocked until deterministic beta stability evidence exists.
 
-The academic runway has now reached **Syllabus Closure / first coverage**. This does **not** mean that learners are Exam Ready. Exam Ready still requires real learner diagnostic evidence, placement, weekly-plan execution, correction loops, delayed retests, timed sections, cumulative mini-mocks and full-paper evidence.
+The academic runway has reached **Syllabus Closure / first coverage**. This does **not** mean that learners are Exam Ready. Exam Ready still requires real learner diagnostic evidence, placement, weekly-plan execution, correction loops, delayed retests, timed sections, cumulative mini-mocks and full-paper evidence.
 
 ## 2. Technical evidence
 
@@ -84,6 +85,31 @@ Production acceptance confirms all ten versions are `published` and their requir
 
 All Exam Prep rows inserted into legacy `public.questions` remain `draft + inactive`; production acceptance found **0 Exam Prep legacy-active rows**. Content publication changed no learner entitlement or feature state.
 
+### P1-03 timed / paper depth — pre-live hardening
+
+P1-03 already contained server-authoritative timing, session authorization, feedback firewall, timed finalization/result semantics and official component profiles (**P1: 75 marks / 6600 seconds; P5: 50 marks / 4500 seconds**). Before paper content was added, production had zero timed contracts/items/attempts.
+
+Pre-live hardening now adds:
+
+- operational-stage filtering to `get_exam_prep_timed_catalog_safe_v1`;
+- an independent direct-authorization stage check in `authorize_exam_prep_timed_safe_v1`;
+- fail-closed behavior when authoritative stage state is absent;
+- minimum stage mapping: `timed_section=2`, `modified_paper=2`, `diagnostic_full=2`, `full_paper=3`;
+- a narrowly scoped written-only content publication path for fully governed timed/paper versions while preserving the original P1-02 question floor for versions that contain question metadata.
+
+P1-03 CI run **#50 (`33957175238`)** passed the stage-gate behavioral matrix and zero-activation residue. After written-only timed content support, P1-03 CI run **#52 (`33957557924`)** passed the full migration line, AW1–24 runway regression, Stage-1/Stage-2 access behavior, timed flow and zero-activation checks.
+
+The first two learner-inaccessible Stage-2 timed sections are published in production:
+
+| Component | Assessment | Marks | Strict time | Items | Minimum stage |
+|---|---|---:|---:|---:|---:|
+| P1 | `p1_stage2_timed_block_01` | 15 | 1320 s (22 min) | 3 written | 2 |
+| P5 | `p5_stage2_timed_block_01` | 15 | 1350 s (22 min 30 s) | 3 written | 2 |
+
+These versions are written-only and inserted **0** rows into `public.questions`. They are content-prepositioning only: current production has **0 stage-state rows, 0 timed attempts/results and 0 learner runtime evidence**, so they cannot be surfaced to a real learner yet.
+
+A full-paper publication is deliberately **deferred**. Current stage law requires a first comparable full-paper baseline for Stage 3 while the timed access map currently requires Stage 3 for `full_paper`; `diagnostic_full` is intentionally non-comparable. That Stage-2→Stage-3 transition must be made machine-readable and non-circular before any real full-paper path is authorized.
+
 ## 3. Current production snapshot
 
 | Control | Observed state |
@@ -105,29 +131,35 @@ All Exam Prep rows inserted into legacy `public.questions` remain `draft + inact
 | component placements | `0` |
 | weekly plans | `0` |
 | evidence events | `0` |
+| authoritative stage-state rows | `0` |
+| timed attempt results | `0` |
+| timed written self-marks | `0` |
+| published Stage-2 timed sections | `2` (P1 + P5) |
+| Stage-2 timed-section marks | `15 P1 + 15 P5` |
 | Exam Prep legacy-active questions | `0` |
 | governed runway | `AW1–24 GREEN P1 + P5` |
 | governed P1 first coverage | `45 / 45 = 100%` |
 | governed P5 first coverage | `36 / 36 = 100%` |
 | combined first coverage | `81 / 81 = 100%` |
 
-No learner access has been granted. P1-01 therefore still has no live operational evidence, and P1-03 remains dormant infrastructure.
+No learner access has been granted. P1-01 therefore still has no live operational evidence. P1-03 now has pre-positioned Stage-2 content but remains learner-inaccessible because no learner has reached authoritative Stage 2.
 
 ## 4. What Syllabus Closure means — and does not mean
 
-**Complete now:** canonical P1/P5 first coverage, governed learning items, diagnostic/retest/mixed reserves, written tasks, QA states, prerequisite closure and fail-closed publication through AW24.
+**Complete now:** canonical P1/P5 first coverage, governed learning items, diagnostic/retest/mixed reserves, written tasks, QA states, prerequisite closure and fail-closed publication through AW24; first cross-topic Stage-2 timed sections are also pre-positioned.
 
-**Not complete yet:** real learner validation, actual placement accuracy, mastery/correction-loop evidence, delayed-retest retention, timed-section performance, cumulative mini-mock performance, full-paper reliability and operational 72-hour beta evidence.
+**Not complete yet:** real learner validation, actual placement accuracy, mastery/correction-loop evidence, delayed-retest retention, Stage-2 transition evidence, cumulative mini-mock performance, comparable full-paper baseline, full-paper reliability and operational 72-hour beta evidence.
 
 Therefore:
 
 **SYLLABUS CLOSURE = GREEN / 100% FIRST COVERAGE**  
+**FIRST STAGE-2 TIMED BLOCKS = PUBLISHED BUT ACCESS-GATED**  
 **EXAM READY = NOT YET PROVEN**  
 **LIVE CONTROLLED BETA = NOT YET ACTIVATED**
 
 ## 5. Source of truth and deployment boundary
 
-**`main` is the repository source of truth.** It contains the Core-first capacity/consent/incremental-enrollment changes and governed P1-02 content through AW24 Syllabus Closure.
+**`main` is the repository source of truth.** It contains the Core-first capacity/consent/incremental-enrollment changes, governed P1-02 content through AW24 Syllabus Closure and the current P1-03 pre-live timed hardening/content.
 
 The previous `exam-prep-p0-host` branch was a working branch for the earlier release line and is not a canonical target for new work.
 
@@ -161,10 +193,10 @@ Mandatory interpretation:
 
 ### Work that may continue safely while consent is pending
 
-- shift P1-02 from first-coverage production to **content hardening / exam-readiness depth** rather than adding new syllabus skills;
-- strengthen item diversity, difficulty distribution, mixed transfer, timed sections, cumulative mini-mocks and full-paper coverage without changing the 81-skill canonical denominator;
-- preserve the P1/P5 component firewall and fail-closed release controls;
-- keep P1-03 dormant until Stage 2 timing needs approach;
+- continue P1-03 exam-readiness depth with additional **Stage-2 timed sections** using skills not overrepresented in block 01;
+- after sufficient timed-section breadth, prepare a Stage-2 cumulative mini-mock / modified-paper contract behind the same operational-stage gate;
+- do **not** publish or authorize a real `full_paper` until the Stage-2→Stage-3 comparable-baseline circularity is resolved by an explicit machine-readable stage transition;
+- preserve the 81-skill denominator, P1/P5 firewall and fail-closed release controls;
 - keep P1-04 AI blocked until deterministic live-beta stability exists;
-- do not infer Exam Ready from Syllabus Closure alone;
-- do not alter legacy Tours/Practice/history or the existing Vercel configuration as part of this content milestone.
+- do not infer Exam Ready from Syllabus Closure or pre-positioned timed content;
+- do not alter legacy Tours/Practice/history or the existing Vercel configuration as part of this milestone.
