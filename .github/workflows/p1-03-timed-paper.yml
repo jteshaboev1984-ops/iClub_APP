@@ -3,6 +3,7 @@ name: P1-03 Timed Paper Gate
 on:
   push:
     branches:
+      - main
       - exam-prep-p0-host
     paths:
       - 'supabase/migrations/*exam_prep_p0_*.sql'
