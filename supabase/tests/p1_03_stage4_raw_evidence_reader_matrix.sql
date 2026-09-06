@@ -113,6 +113,20 @@ begin
 end;
 $$;
 
+-- The new production release guard correctly requires a deployed Stage-4 evaluator.
+-- This CI-only stub exists only so this older raw-reader test can temporarily release
+-- Paper02 inside the same rollback transaction; it never ships.
+create or replace function private.exam_prep_stage4_exit_status_v1(
+  p_user_id uuid,p_program_version_id bigint,p_component_code text
+)
+returns jsonb
+language sql
+stable
+set search_path=''
+as $$
+  select jsonb_build_object('ready',false,'reason_code','p103_raw_reader_ci_stub','stage4_unlocked',false);
+$$;
+
 do $$
 declare
   v_program bigint;
@@ -198,6 +212,21 @@ begin
     v_user,v_program,'p1_stage3_full_paper_01','p1-full-paper-01-v1',now()-interval '10 days',array[1,4]::smallint[],'01'
   );
 
+  -- Temporarily satisfy every NEW release guard inside this rollback transaction.
+  -- These are fixtures, not governance decisions, and all are verified gone after rollback.
+  update private.exam_prep_stage4_release_controls
+  set stage4_policy_status='approved',paper02_release_status='approved',updated_at=now()
+  where status='active';
+  update private.exam_prep_stage3_exit_rules
+  set key_registry_status='approved'
+  where status='active';
+  insert into private.exam_prep_stage3_key_skills(
+    rule_version,program_version_id,component_code,skill_code,governance_basis
+  )
+  select rule_version,v_program,'P1','P1-QUA-01','P1-03 rollback-only raw-reader release fixture'
+  from private.exam_prep_stage3_exit_rules where status='active'
+  on conflict do nothing;
+
   -- Temporarily release the pre-positioned second form inside the rollback transaction.
   update private.exam_prep_assessments set status='published' where id=v_p2 and status='approved';
   select id into v_profile from private.exam_prep_component_paper_profiles
@@ -205,9 +234,9 @@ begin
   if v_profile is null then raise exception 'P1-03 Stage-4 raw reader matrix P1 paper profile missing'; end if;
   insert into private.exam_prep_timed_assessment_contracts(
     assessment_id,paper_profile_id,contract_version,attempt_kind,timing_rule,marks_available,fixed_time_limit_sec,
-    strict_timing,comparison_scope,comparability_key,status,published_at
+    strict_timing,comparison_scope,comparability_key,min_operational_stage,status,published_at
   ) values(
-    v_p2,v_profile,'tcv1','full_paper','official_full',75,null,true,'full','p1-full-paper-02-v1','published',now()
+    v_p2,v_profile,'tcv1','full_paper','official_full',75,null,true,'full','p1-full-paper-02-v1',4,'published',now()
   );
 
   v_s2:=pg_temp.insert_stage4_raw_p1_attempt_v1(
@@ -255,14 +284,30 @@ end $$;
 
 rollback;
 
--- Rollback must restore the pre-positioned release boundary.
+-- Rollback must restore the pre-positioned release boundary AND every simulated governance prerequisite.
 do $$
-declare v_p2 bigint; begin
+declare
+  v_p2 bigint;
+  v_control private.exam_prep_stage4_release_controls%rowtype;
+begin
   select id into v_p2 from private.exam_prep_assessments
   where assessment_key='p1_stage4_full_paper_02' and assessment_version='av1' and status='approved';
   if v_p2 is null then raise exception 'P1-03 Stage-4 raw reader matrix rollback did not restore approved Paper02'; end if;
   if exists(select 1 from private.exam_prep_timed_assessment_contracts where assessment_id=v_p2) then
     raise exception 'P1-03 Stage-4 raw reader matrix rollback left Paper02 timed contract';
+  end if;
+  select * into v_control from private.exam_prep_stage4_release_controls where status='active';
+  if v_control.stage4_policy_status<>'pending' or v_control.paper02_release_status<>'pending' then
+    raise exception 'P1-03 Stage-4 raw reader matrix rollback left simulated release approval';
+  end if;
+  if exists(select 1 from private.exam_prep_stage3_key_skills) then
+    raise exception 'P1-03 Stage-4 raw reader matrix rollback left simulated key registry rows';
+  end if;
+  if (select key_registry_status from private.exam_prep_stage3_exit_rules where status='active')<>'pending' then
+    raise exception 'P1-03 Stage-4 raw reader matrix rollback left Stage3 key registry approved';
+  end if;
+  if to_regprocedure('private.exam_prep_stage4_exit_status_v1(uuid,bigint,text)') is not null then
+    raise exception 'P1-03 Stage-4 raw reader matrix rollback left CI-only Stage4 evaluator';
   end if;
 end $$;
 
