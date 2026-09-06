@@ -3,16 +3,19 @@ name: P0-14 Host Regression
 on:
   push:
     branches:
+      - main
       - exam-prep-p0-host
     paths:
       - app.js
       - index.html
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-host.js
+      - exam-prep/exam-prep-live.js
       - exam-prep/exam-prep-host.css
       - exam-prep-preview.html
       - .github/scripts/p0_14_host_regression.js
       - .github/scripts/p0_14_legacy_off_regression.js
+      - .github/scripts/p0_17_live_diagnostic_regression.js
       - .github/workflows/p0-14-host-regression.yml
   workflow_dispatch:
 
@@ -30,6 +33,7 @@ jobs:
           node --check app.js
           node --check exam-prep/exam-prep-api.js
           node --check exam-prep/exam-prep-host.js
+          node --check exam-prep/exam-prep-live.js
           grep -q 'id="subject-hub-exam-prep-entry"' index.html
           grep -q 'id="exam-prep-host-root"' index.html
           grep -q 'id="subject-hub-exam-prep-entry"[^>]*hidden[^>]*aria-hidden="true"' index.html
@@ -38,6 +42,7 @@ jobs:
           grep -q 'exam-prep/exam-prep-api.js?v=p014h1' index.html
           grep -q 'exam-prep/exam-prep-host.js?v=p014h1' index.html
           grep -q 'exam-prep/exam-prep-host.css?v=p014h1' index.html
+          grep -q 'exam-prep-live.js?v=p017live1' exam-prep/exam-prep-api.js
           grep -q 'window.iClubExamPrep?.syncSubjectHub' app.js
           grep -q 'window.iClubExamPrep?.isOpen' app.js
           grep -q 'window.iClubExamPrep?.back' app.js
@@ -46,10 +51,13 @@ jobs:
           ! grep -q 'exam-prep-static-data.js' index.html
           ! grep -q '\.from(' exam-prep/exam-prep-api.js
           ! grep -q '\.from(' exam-prep/exam-prep-host.js
+          ! grep -q '\.from(' exam-prep/exam-prep-live.js
           ! grep -q 'localStorage' exam-prep/exam-prep-api.js
           ! grep -q 'localStorage' exam-prep/exam-prep-host.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-live.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-api.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-host.js
+          ! grep -q 'iclub_state_v1' exam-prep/exam-prep-live.js
           grep -q "connect-src 'none'" exam-prep-preview.html
 
       - name: Install Chromium test dependency
@@ -59,6 +67,9 @@ jobs:
 
       - name: Browser-isolated host bridge matrix
         run: node .github/scripts/p0_14_host_regression.js
+
+      - name: Browser-isolated live diagnostic flow
+        run: node .github/scripts/p0_17_live_diagnostic_regression.js
 
       - name: Start local app server
         run: |
