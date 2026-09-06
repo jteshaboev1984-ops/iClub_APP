@@ -15,7 +15,7 @@ alter table private.exam_prep_timed_assessment_contracts
 
 create or replace function private.exam_prep_timed_effective_min_stage_v1(
   p_attempt_kind text,
-  p_min_operational_stage smallint default null
+  p_min_operational_stage integer default null
 )
 returns smallint
 language plpgsql
@@ -28,14 +28,17 @@ begin
   v_base:=private.exam_prep_timed_min_stage_v1(p_attempt_kind);
   if v_base is null then return null; end if;
   if p_min_operational_stage is null then return v_base; end if;
+  if p_min_operational_stage not between 1 and 5 then
+    raise exception 'exam_prep_timed_stage_override_out_of_range override=%',p_min_operational_stage;
+  end if;
   if p_min_operational_stage<v_base then
     raise exception 'exam_prep_timed_stage_override_below_base base=% override=%',v_base,p_min_operational_stage;
   end if;
-  return p_min_operational_stage;
+  return p_min_operational_stage::smallint;
 end;
 $$;
-revoke all on function private.exam_prep_timed_effective_min_stage_v1(text,smallint) from public,anon,authenticated;
-grant execute on function private.exam_prep_timed_effective_min_stage_v1(text,smallint) to service_role;
+revoke all on function private.exam_prep_timed_effective_min_stage_v1(text,integer) from public,anon,authenticated;
+grant execute on function private.exam_prep_timed_effective_min_stage_v1(text,integer) to service_role;
 
 create or replace function private.exam_prep_validate_timed_stage_override_v1()
 returns trigger
@@ -45,7 +48,7 @@ set search_path to ''
 as $$
 declare v_effective smallint;
 begin
-  v_effective:=private.exam_prep_timed_effective_min_stage_v1(new.attempt_kind,new.min_operational_stage);
+  v_effective:=private.exam_prep_timed_effective_min_stage_v1(new.attempt_kind,new.min_operational_stage::integer);
   if v_effective is null then raise exception 'exam_prep_bad_timed_attempt_kind'; end if;
   return new;
 end;
@@ -87,7 +90,7 @@ begin
     'comparison_scope',c.comparison_scope,
     'comparability_key',c.comparability_key,
     'strict_timing',c.strict_timing,
-    'min_operational_stage',private.exam_prep_timed_effective_min_stage_v1(c.attempt_kind,c.min_operational_stage),
+    'min_operational_stage',private.exam_prep_timed_effective_min_stage_v1(c.attempt_kind,c.min_operational_stage::integer),
     'current_operational_stage',ss.operational_stage
   ) order by a.id),'[]'::jsonb)
   into v_result
@@ -110,8 +113,8 @@ begin
   where a.component_code=p_component_code
     and a.status='published'
     and a.assessment_type in ('timed','paper')
-    and private.exam_prep_timed_effective_min_stage_v1(c.attempt_kind,c.min_operational_stage) is not null
-    and ss.operational_stage>=private.exam_prep_timed_effective_min_stage_v1(c.attempt_kind,c.min_operational_stage);
+    and private.exam_prep_timed_effective_min_stage_v1(c.attempt_kind,c.min_operational_stage::integer) is not null
+    and ss.operational_stage>=private.exam_prep_timed_effective_min_stage_v1(c.attempt_kind,c.min_operational_stage::integer);
 
   return jsonb_build_object('component_code',p_component_code,'assessments',v_result);
 end;
@@ -183,7 +186,7 @@ begin
     raise exception 'exam_prep_timed_reserve_role_mismatch';
   end if;
 
-  v_min_stage:=private.exam_prep_timed_effective_min_stage_v1(v_c.attempt_kind,v_c.min_operational_stage);
+  v_min_stage:=private.exam_prep_timed_effective_min_stage_v1(v_c.attempt_kind,v_c.min_operational_stage::integer);
   if v_min_stage is null then raise exception 'exam_prep_bad_timed_attempt_kind'; end if;
 
   select s.operational_stage
@@ -246,12 +249,12 @@ begin
     and c.min_operational_stage<private.exam_prep_timed_min_stage_v1(c.attempt_kind);
   if v_bad<>0 then raise exception 'P1-03 timed stage override found below-base contracts=%',v_bad; end if;
 
-  select private.exam_prep_timed_effective_min_stage_v1(c.attempt_kind,c.min_operational_stage)
+  select private.exam_prep_timed_effective_min_stage_v1(c.attempt_kind,c.min_operational_stage::integer)
   into v_p1_fp1
   from private.exam_prep_timed_assessment_contracts c
   join private.exam_prep_assessments a on a.id=c.assessment_id
   where a.assessment_key='p1_stage3_full_paper_01' and a.assessment_version='av1' and c.status='published';
-  select private.exam_prep_timed_effective_min_stage_v1(c.attempt_kind,c.min_operational_stage)
+  select private.exam_prep_timed_effective_min_stage_v1(c.attempt_kind,c.min_operational_stage::integer)
   into v_p5_fp1
   from private.exam_prep_timed_assessment_contracts c
   join private.exam_prep_assessments a on a.id=c.assessment_id
