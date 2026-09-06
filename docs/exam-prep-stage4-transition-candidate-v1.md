@@ -10,7 +10,7 @@
 
 ## 1. Purpose
 
-This candidate connects the already deployed Stage-3 exit evidence and Stage-4 raw evidence into one rollback-only decision model. It is designed to test whether the future Stage-4 rules are internally coherent before any production Stage-4 progression exists.
+This candidate connects the already deployed Stage-3 exit evidence and Stage-4 raw evidence into one rollback-only decision model. It tests whether the future Stage-4 rules are internally coherent before any production Stage-4 progression exists.
 
 Nothing in this candidate approves Stage 4, publishes Paper 02, changes learner entitlements, starts the beta, activates AI/Mentor, or changes Vercel.
 
@@ -26,7 +26,7 @@ That means the component already has:
 - at least one finally score-comparable official full-paper baseline;
 - no unknown syllabus section.
 
-The test uses the existing 15-skill proposal only as a rollback fixture: 8 P1 skills and 7 P5 skills. It does **not** approve or populate the production registry.
+The tests use the existing 15-skill proposal only as a rollback fixture: 8 P1 skills and 7 P5 skills. They do **not** approve or populate the production registry.
 
 ## 3. Candidate Stage-4 exit logic
 
@@ -38,7 +38,7 @@ The test-only candidate follows the Master Plan contract:
 4. Every canonical skill is at least L3, **or** every remaining lower-than-L3 skill has a current, exact corrective plan.
 5. Stage 5 remains locked and separate.
 
-Even when all candidate conditions pass, the test returns `stage4_unlocked=false`. The purpose is to validate the decision logic before wiring operational progression.
+Even when all candidate conditions pass, the tests return `stage4_unlocked=false`. The purpose is to validate the decision logic before wiring operational progression.
 
 ## 4. Candidate timing rule
 
@@ -53,6 +53,8 @@ For the latest two compatible full-paper attempts:
 - invalid or missing values fail closed.
 
 A score/review result cannot compensate for worsening time completion.
+
+Completed timed attempts are immutable. A past attempt cannot be rewritten to make a trend look better or worse. A deterioration and a later recovery must be represented by **new full-paper attempts**. This was explicitly verified by the candidate regression after the first draft of the matrix tried to mutate a completed result and was correctly rejected by the existing immutable-fact guard.
 
 ## 5. Candidate explicit-corrective-plan rule
 
@@ -74,9 +76,9 @@ The following do **not** qualify:
 
 This closes the main weakness in candidate v0, where a stale label could look like a valid corrective plan.
 
-## 6. Rollback-only end-to-end matrix
+## 6. P1 rollback-only end-to-end matrix
 
-The new matrix proves, using synthetic data that is rolled back:
+The P1 candidate matrix proves, using synthetic data that is rolled back:
 
 - production-like baseline starts with Stage-3 key registry pending/empty and Stage 4 locked;
 - the full 15-key proposal can be used as a CI fixture without becoming production governance;
@@ -86,16 +88,57 @@ The new matrix proves, using synthetic data that is rolled back:
 - an overdue corrective action still fails;
 - a future exact corrective action can make the candidate evaluator report `ready`;
 - even in that `ready` state, Stage 4 is **not** wired or unlocked;
-- worsening an after-time dimension immediately fails the timing gate even when the corrective plan is valid;
-- restoring the timing evidence restores the candidate result;
+- completed attempt facts cannot be edited;
+- a new attempt with worsening after-time evidence immediately fails the timing gate even when the corrective plan is valid;
+- a later new attempt with improved timing can restore the candidate result;
 - P1 evidence cannot satisfy P5;
 - the automatic stage ceiling remains 3;
 - feature state and entitlements remain off;
 - rollback removes all synthetic approvals, registry rows, Paper-02 contract, synthetic learner and runtime evidence.
 
-## 7. Production boundary
+Final corrected P1 regression: workflow run `34012521669` — **SUCCESS**.
 
-Until a later explicit governance release, production remains:
+## 7. P5 symmetry matrix
+
+A separate rollback-only P5 matrix proves the positive path is not accidentally P1-specific:
+
+- P5 Stage-3 exit becomes eligible only from P5 evidence;
+- one P5 full-paper baseline is insufficient for Stage-4 consolidation;
+- P5 Paper 02 is temporarily represented only inside rollback with a Stage-4-only contract;
+- two compatible P5 full-paper forms with improved completion still fail while a remaining non-key L2 skill has no current corrective plan;
+- a current exact P5 corrective action can make the candidate result `ready`;
+- that `ready` result still does not unlock Stage 4 or Stage 5;
+- P5 evidence cannot satisfy P1;
+- rollback restores Paper 02 to approved/unreleased and deletes all synthetic learner/runtime evidence.
+
+P5 symmetry regression: workflow run `34012673804` — **SUCCESS**. The same run also passed the full existing P1-03 regression chain and the final zero-activation-residue check.
+
+## 8. Production boundary verified after the regressions
+
+A fresh read-only production snapshot after the final P5 run confirms:
+
+- controlled-beta cohort remains `draft`, wave `0`, with 3 staged learners and **0 / 3 consent grants**;
+- rollout remains `off`;
+- Core, AI Assist and Mentor Care remain disabled;
+- kill switch remains on;
+- active Exam Prep entitlements = `0`;
+- Exam Prep sessions = `0`;
+- authoritative stage rows = `0`;
+- timed attempt results = `0`;
+- evidence events = `0`;
+- automatic stage ceiling = `3`;
+- Stage-3 key registry remains `pending` with `0` rows;
+- Stage-4 policy remains `pending`;
+- Paper-02 release remains `pending`;
+- no production Stage-4 exit evaluator exists;
+- P1 Paper 02 remains `approved` with `0` timed contracts;
+- P5 Paper 02 remains `approved` with `0` timed contracts.
+
+Therefore the candidate regressions provide technical evidence only. They do not constitute Stage-4 governance approval or learner activation.
+
+## 9. Production boundary for future work
+
+Until a later explicit governance release, production must remain:
 
 - `key_registry_status='pending'` with 0 Stage-3 key rows;
 - `stage4_policy_status='pending'`;
@@ -107,4 +150,4 @@ Until a later explicit governance release, production remains:
 - AI Assist off;
 - Mentor Care off.
 
-A later production release must still be separately approved. Passing this candidate test is evidence that the future rules are technically coherent; it is not permission to activate them.
+A later production release must still be separately approved. Passing these candidate tests shows that the future rules are technically coherent; it is not permission to activate them.
