@@ -35,6 +35,20 @@ create trigger zzzz_p103_min_stage_contract_projection_fixture
 before insert or update on private.exam_prep_stage_states
 for each row execute function private.p103_min_stage_contract_projection_fixture_v1();
 
+-- CI-only Stage-4 evaluator stub. The release guard requires an actual evaluator to
+-- exist before Paper02 can be released; this stub is only to exercise that later path
+-- inside the rollback transaction and is verified absent afterwards.
+create or replace function private.exam_prep_stage4_exit_status_v1(
+  p_user_id uuid,p_program_version_id bigint,p_component_code text
+)
+returns jsonb
+language sql
+stable
+set search_path=''
+as $$
+  select jsonb_build_object('ready',false,'reason_code','p103_min_stage_ci_stub','stage4_unlocked',false);
+$$;
+
 do $$
 declare
   v_program bigint;
@@ -79,6 +93,21 @@ begin
     v_failed:=true;
   end;
   if not v_failed then raise exception 'P1-03 min-stage override matrix accepted below-base full-paper override'; end if;
+
+  -- Satisfy the NEW release guard only inside this rollback transaction.
+  -- These rows/flags are fixtures, not governance approvals.
+  update private.exam_prep_stage4_release_controls
+  set stage4_policy_status='approved',paper02_release_status='approved',updated_at=now()
+  where status='active';
+  update private.exam_prep_stage3_exit_rules
+  set key_registry_status='approved'
+  where status='active';
+  insert into private.exam_prep_stage3_key_skills(
+    rule_version,program_version_id,component_code,skill_code,governance_basis
+  )
+  select rule_version,v_program,'P1','P1-QUA-01','P1-03 rollback-only min-stage release fixture'
+  from private.exam_prep_stage3_exit_rules where status='active'
+  on conflict do nothing;
 
   -- Release Paper02 only inside this rollback transaction, explicitly Stage-4-only.
   update private.exam_prep_assessments
@@ -184,9 +213,12 @@ end $$;
 rollback;
 
 -- Rollback must preserve the production release boundary for Paper02 and remove
--- the CI-only projection helper/trigger together with every synthetic learner row.
+-- every CI-only governance/stage fixture together with synthetic learner rows.
 do $$
-declare v_p2 bigint; begin
+declare
+  v_p2 bigint;
+  v_control private.exam_prep_stage4_release_controls%rowtype;
+begin
   select id into v_p2 from private.exam_prep_assessments
   where assessment_key='p1_stage4_full_paper_02' and assessment_version='av1' and status='approved';
   if v_p2 is null then raise exception 'P1-03 min-stage override matrix rollback did not restore approved Paper02'; end if;
@@ -194,7 +226,20 @@ declare v_p2 bigint; begin
     raise exception 'P1-03 min-stage override matrix rollback left Paper02 timed contract';
   end if;
   if to_regprocedure('private.p103_min_stage_contract_projection_fixture_v1()') is not null then
-    raise exception 'P1-03 min-stage override matrix rollback left CI helper';
+    raise exception 'P1-03 min-stage override matrix rollback left CI projection helper';
+  end if;
+  if to_regprocedure('private.exam_prep_stage4_exit_status_v1(uuid,bigint,text)') is not null then
+    raise exception 'P1-03 min-stage override matrix rollback left CI-only Stage4 evaluator';
+  end if;
+  select * into v_control from private.exam_prep_stage4_release_controls where status='active';
+  if v_control.stage4_policy_status<>'pending' or v_control.paper02_release_status<>'pending' then
+    raise exception 'P1-03 min-stage override matrix rollback left simulated Stage4 release approval';
+  end if;
+  if (select key_registry_status from private.exam_prep_stage3_exit_rules where status='active')<>'pending' then
+    raise exception 'P1-03 min-stage override matrix rollback left Stage3 key registry approved';
+  end if;
+  if exists(select 1 from private.exam_prep_stage3_key_skills) then
+    raise exception 'P1-03 min-stage override matrix rollback left simulated Stage3 key rows';
   end if;
 end $$;
 
