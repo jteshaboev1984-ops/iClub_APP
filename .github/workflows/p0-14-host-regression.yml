@@ -16,6 +16,7 @@ on:
       - .github/scripts/p0_14_host_regression.js
       - .github/scripts/p0_14_legacy_off_regression.js
       - .github/scripts/p0_17_live_diagnostic_regression.js
+      - .github/scripts/p0_18_live_plan_regression.js
       - .github/workflows/p0-14-host-regression.yml
   workflow_dispatch:
 
@@ -70,6 +71,9 @@ jobs:
 
       - name: Browser-isolated live diagnostic flow
         run: node .github/scripts/p0_17_live_diagnostic_regression.js
+
+      - name: Browser-isolated live weekly plan flow
+        run: node .github/scripts/p0_18_live_plan_regression.js
 
       - name: Start local app server
         run: |
