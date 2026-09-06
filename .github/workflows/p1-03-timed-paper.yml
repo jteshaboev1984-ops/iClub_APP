@@ -24,6 +24,7 @@ on:
       - supabase/tests/p1_03_stage4_transition_candidate_matrix.sql
       - supabase/tests/p1_03_stage4_transition_p5_symmetry_matrix.sql
       - supabase/tests/p1_03_stage4_raw_evidence_reader_matrix.sql
+      - supabase/tests/p1_03_stage5_raw_readiness_matrix.sql
       - supabase/tests/p1_03_timed_contract_stage_override_matrix.sql
       - supabase/tests/p1_03_stage4_paper02_release_guard_matrix.sql
       - .github/workflows/p1-03-timed-paper.yml
@@ -185,6 +186,12 @@ jobs:
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_stage4_raw_evidence_reader_matrix.sql 2>&1 | tee -a p103-timed-paper.log
+
+      - name: Run Stage-5 raw Exam Readiness reader matrix - rollback only
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_stage5_raw_readiness_matrix.sql 2>&1 | tee -a p103-timed-paper.log
 
       - name: Validate per-contract minimum stage override - rollback only
         shell: bash
