@@ -166,6 +166,13 @@
     });
   }
 
+  async function authorizePlanItem(planId, priorityOrder) {
+    return rpc("authorize_exam_prep_plan_item_safe_v1", {
+      p_plan_id: planId,
+      p_priority_order: Number(priorityOrder)
+    });
+  }
+
   async function timedCatalog(componentCode) {
     return rpc("get_exam_prep_timed_catalog_safe_v1", { p_component_code: String(componentCode || "") });
   }
@@ -217,6 +224,7 @@
     finalizeSession,
     weeklyPlan,
     generateWeeklyPlan,
+    authorizePlanItem,
     timedCatalog,
     authorizeTimed,
     finalizeTimed,
@@ -225,9 +233,6 @@
     submitTimedSelfMark
   });
 
-  // Main app loads only api.js + host.js statically. Load the live learner layer
-  // from the same directory without changing legacy/preview wiring. Inline test
-  // injection has no currentScript.src and therefore does not auto-load it.
   try {
     const src = document?.currentScript?.src || "";
     if (src && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-live]')) {
