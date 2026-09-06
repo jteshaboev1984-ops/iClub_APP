@@ -188,8 +188,8 @@ begin
 end;
 $$;
 
--- Rollback-only helper that creates a finally reviewed strict P1 full-paper
--- attempt through the real published assessment/timing-contract path.
+-- Rollback-only helper that creates an immutable, finally reviewed strict P1
+-- full-paper attempt through the real published assessment/timing-contract path.
 create or replace function pg_temp.insert_stage4_transition_p1_attempt_v1(
   p_user_id uuid,
   p_program_version_id bigint,
@@ -197,6 +197,7 @@ create or replace function pg_temp.insert_stage4_transition_p1_attempt_v1(
   p_expected_form_key text,
   p_finalized_at timestamptz,
   p_skip_orders smallint[],
+  p_after_time_lost int,
   p_suffix text
 )
 returns uuid
@@ -236,6 +237,10 @@ begin
   into v_unattempted_items,v_unattempted_marks
   from private.exam_prep_timed_assessment_items ti
   where ti.assessment_id=v_ass and ti.item_order=any(p_skip_orders);
+
+  if p_after_time_lost<0 or p_after_time_lost>75-v_unattempted_marks then
+    raise exception 'P1-03 Stage-4 transition fixture invalid after-time marks=% unattempted=%',p_after_time_lost,v_unattempted_marks;
+  end if;
 
   insert into private.exam_prep_session_authorizations(
     user_id,assessment_id,component_code,purpose,status,valid_until,reason
@@ -280,7 +285,8 @@ begin
   ) values(
     v_session,p_user_id,'P1',v_ass,'full_paper','official_full','full',p_expected_form_key,
     true,75,6600,6200,v_items-v_unattempted_items,v_unattempted_items,
-    0,0,0,0,75-v_unattempted_marks,0,v_unattempted_marks,'submitted',true,false,p_finalized_at
+    0,0,0,p_after_time_lost,75-v_unattempted_marks-p_after_time_lost,0,v_unattempted_marks,
+    'submitted',true,false,p_finalized_at
   );
 
   insert into private.exam_prep_timed_written_self_marks(
@@ -329,10 +335,13 @@ declare
   v_profile bigint;
   v_s1 uuid;
   v_s2 uuid;
+  v_s3 uuid;
+  v_s4 uuid;
   v_case uuid;
   v_plan uuid;
   v_status jsonb;
   v_feature text;
+  v_failed boolean;
 begin
   select id into v_program
   from private.exam_prep_program_versions
@@ -404,7 +413,7 @@ begin
   -- First strict comparable full paper completes Stage-3 exit evidence only.
   v_s1:=pg_temp.insert_stage4_transition_p1_attempt_v1(
     v_user,v_program,'p1_stage3_full_paper_01','p1-full-paper-01-v1',
-    now()-interval '10 days',array[1,4]::smallint[],'01'
+    now()-interval '10 days',array[1,4]::smallint[],0,'01'
   );
 
   v_status:=pg_temp.stage4_transition_candidate_v1(v_user,v_program,'P1');
@@ -445,7 +454,7 @@ begin
 
   v_s2:=pg_temp.insert_stage4_transition_p1_attempt_v1(
     v_user,v_program,'p1_stage4_full_paper_02','p1-full-paper-02-v1',
-    now()-interval '4 days',array[1]::smallint[],'02'
+    now()-interval '4 days',array[1]::smallint[],0,'02'
   );
 
   -- Two compatible forms + improving timing is not enough while one L2 skill
@@ -500,11 +509,27 @@ begin
     raise exception 'P1-03 Stage-4 transition candidate ready-but-locked state wrong %',v_status::text;
   end if;
 
-  -- Score/review completion cannot compensate for a worsening timing dimension.
-  update private.exam_prep_timed_attempt_results
-  set objective_lost_after_time_marks=3,
-      pending_review_in_time_marks=pending_review_in_time_marks-3
-  where session_id=v_s2;
+  -- Completed timed facts are immutable. A bad trend must be represented by a
+  -- new attempt, never by editing history.
+  v_failed:=false;
+  begin
+    update private.exam_prep_timed_attempt_results
+    set objective_lost_after_time_marks=1
+    where session_id=v_s2;
+  exception when others then
+    if position('immutable_exam_prep_fact' in sqlerrm)=0 then raise; end if;
+    v_failed:=true;
+  end;
+  if not v_failed then
+    raise exception 'P1-03 Stage-4 transition candidate allowed completed attempt mutation';
+  end if;
+
+  -- New attempt: unattempted share does not worsen, but after-time loss does.
+  -- The timing gate must fail even though the corrective plan remains valid.
+  v_s3:=pg_temp.insert_stage4_transition_p1_attempt_v1(
+    v_user,v_program,'p1_stage4_full_paper_02','p1-full-paper-02-v1',
+    now()-interval '2 days',array[1]::smallint[],3,'03'
+  );
 
   v_status:=pg_temp.stage4_transition_candidate_v1(v_user,v_program,'P1');
   if v_status->>'reason_code'<>'timing_unattempted_trend_incomplete'
@@ -514,14 +539,19 @@ begin
     raise exception 'P1-03 Stage-4 transition candidate worsening timing was bypassed %',v_status::text;
   end if;
 
-  update private.exam_prep_timed_attempt_results
-  set pending_review_in_time_marks=pending_review_in_time_marks+3,
-      objective_lost_after_time_marks=0
-  where session_id=v_s2;
+  -- Recovery must also be proven by a new attempt. The latest attempt improves
+  -- both unattempted and after-time shares relative to the bad attempt.
+  v_s4:=pg_temp.insert_stage4_transition_p1_attempt_v1(
+    v_user,v_program,'p1_stage4_full_paper_02','p1-full-paper-02-v1',
+    now()-interval '1 day',array[]::smallint[],0,'04'
+  );
 
   v_status:=pg_temp.stage4_transition_candidate_v1(v_user,v_program,'P1');
-  if v_status->>'reason_code'<>'ready' or not (v_status->>'stage4_exit_ready')::boolean then
-    raise exception 'P1-03 Stage-4 transition candidate did not recover after timing restoration %',v_status::text;
+  if v_status->>'reason_code'<>'ready'
+     or not (v_status->>'trend_gate_ready')::boolean
+     or not (v_status->>'stage4_exit_ready')::boolean
+     or (v_status->>'stage4_unlocked')::boolean then
+    raise exception 'P1-03 Stage-4 transition candidate did not recover through new evidence %',v_status::text;
   end if;
 
   -- P1 evidence and plans never satisfy P5.
