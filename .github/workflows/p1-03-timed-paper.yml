@@ -21,6 +21,7 @@ on:
       - supabase/tests/p1_03_stage3_key_skill_proposal_matrix.sql
       - supabase/tests/p1_03_stage4_evidence_prototype_matrix.sql
       - supabase/tests/p1_03_stage4_policy_proposal_matrix.sql
+      - supabase/tests/p1_03_stage4_transition_candidate_matrix.sql
       - supabase/tests/p1_03_stage4_raw_evidence_reader_matrix.sql
       - supabase/tests/p1_03_timed_contract_stage_override_matrix.sql
       - supabase/tests/p1_03_stage4_paper02_release_guard_matrix.sql
@@ -160,11 +161,17 @@ jobs:
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_stage4_evidence_prototype_matrix.sql 2>&1 | tee -a p103-timed-paper.log
 
-      - name: Validate Stage-4 policy proposal v0 - rollback only
+      - name: Validate Stage-4 policy candidate v1 - rollback only
         shell: bash
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_stage4_policy_proposal_matrix.sql 2>&1 | tee -a p103-timed-paper.log
+
+      - name: Run Stage-3 -> Stage-4 transition candidate v1 - rollback only
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_stage4_transition_candidate_matrix.sql 2>&1 | tee -a p103-timed-paper.log
 
       - name: Run Stage-4 raw evidence reader matrix - rollback only
         shell: bash
