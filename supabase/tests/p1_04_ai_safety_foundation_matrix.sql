@@ -85,8 +85,8 @@ SET generation_enabled=true,updated_at=now()
 WHERE id=1;
 
 SELECT set_config(
-  'request.jwt.claims',
-  jsonb_build_object('sub',(SELECT user_id::text FROM p104_user),'role','authenticated')::text,
+  'request.jwt.claim.sub',
+  (SELECT user_id::text FROM p104_user),
   true
 );
 
