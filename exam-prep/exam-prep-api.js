@@ -269,7 +269,13 @@
       script.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-live.js?v=p019timed1");
       document.head.appendChild(script);
     }
+    if (/^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-learner-views]')) {
+      const views = document.createElement("script");
+      views.dataset.examPrepLearnerViews = "true";
+      views.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-learner-views.js?v=p020views2");
+      document.head.appendChild(views);
+    }
   } catch (_) {
-    // Fail closed: the host access shell still works without the optional learner layer.
+    // Fail closed: the host access shell still works without optional learner layers.
   }
 })();
