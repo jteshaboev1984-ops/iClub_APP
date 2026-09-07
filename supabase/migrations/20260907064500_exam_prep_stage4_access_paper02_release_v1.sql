@@ -66,7 +66,6 @@ begin
     return new;
   end if;
 
-  -- Stage 1: identical placement/prerequisite gate to v1.
   if v_gate.user_id is not null
      and v_place.user_id is not null
      and v_place.stage0_complete
@@ -77,20 +76,17 @@ begin
   v_fast_track:=coalesce(v_rule.fast_track_to_stage2,false)
                 and coalesce(v_gate.advanced_route_access,false);
 
-  -- Stage 1 -> 2: unchanged from v1.
   if v_target>=1
      and coalesce(v_place.prerequisite_blocker_count,0)=0
      and (coalesce(new.coverage_pct,0)>=v_rule.stage1_to_2_min_coverage_pct or v_fast_track) then
     v_target:=2;
   end if;
 
-  -- Stage 2 -> 3: unchanged from v1.
   if v_target>=2
      and coalesce(new.coverage_pct,0)>=v_rule.stage2_to_3_min_coverage_pct then
     v_target:=3;
   end if;
 
-  -- Stage 3 -> 4: new governed Syllabus Closure gate; component-local only.
   if v_target>=3 and v_rule.max_automatic_stage>=4 then
     v_stage3:=private.exam_prep_stage3_exit_status_v1(new.user_id,new.program_version_id,new.component_code);
     if coalesce((v_stage3->>'ready')::boolean,false) then
@@ -128,7 +124,6 @@ $$;
 revoke all on function private.exam_prep_apply_stage0_gate_v1() from public,anon,authenticated;
 grant execute on function private.exam_prep_apply_stage0_gate_v1() to service_role;
 
--- Approve Paper02 release only after policy + key-registry + evaluator are already deployed.
 update private.exam_prep_stage4_release_controls
 set paper02_release_status='approved',
     source_note=source_note || ' Release amendment 2026-09-07: Stage-4 operational access v1 approved; original iClub Paper02 forms may be published only behind min operational stage 4.',
@@ -144,14 +139,12 @@ declare v_p1 jsonb; v_p5 jsonb; begin
   end if;
 end $$;
 
--- Publish assessment shells through the existing release guard.
 update private.exam_prep_assessments
-set status='published',published_at=coalesce(published_at,now())
+set status='published'
 where assessment_key in ('p1_stage4_full_paper_02','p5_stage4_full_paper_02')
   and assessment_version='av1'
   and status='approved';
 
--- Publish the timing contracts. The timed item rows already exist and sum to official marks.
 with target as (
   select a.id,a.component_code,a.assessment_key,p.id as paper_profile_id,p.official_total_marks
   from private.exam_prep_assessments a
