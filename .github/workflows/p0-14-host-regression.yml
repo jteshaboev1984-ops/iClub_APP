@@ -22,6 +22,7 @@ on:
       - .github/scripts/p0_19_live_timed_readiness_regression.js
       - .github/scripts/p0_20_live_tracker_corrections_regression.js
       - .github/scripts/p0_21_live_overview_placement_regression.js
+      - .github/scripts/p0_22_live_view_coexistence_regression.js
       - .github/workflows/p0-14-host-regression.yml
   workflow_dispatch:
 
@@ -45,6 +46,7 @@ jobs:
           node --check .github/scripts/p0_19_live_timed_readiness_regression.js
           node --check .github/scripts/p0_20_live_tracker_corrections_regression.js
           node --check .github/scripts/p0_21_live_overview_placement_regression.js
+          node --check .github/scripts/p0_22_live_view_coexistence_regression.js
           grep -q 'id="subject-hub-exam-prep-entry"' index.html
           grep -q 'id="exam-prep-host-root"' index.html
           grep -q 'id="subject-hub-exam-prep-entry"[^>]*hidden[^>]*aria-hidden="true"' index.html
@@ -101,6 +103,9 @@ jobs:
 
       - name: Browser-isolated overview / placement result flow
         run: node .github/scripts/p0_21_live_overview_placement_regression.js
+
+      - name: Browser-isolated combined learner views coexistence
+        run: node .github/scripts/p0_22_live_view_coexistence_regression.js
 
       - name: Start local app server
         run: |
