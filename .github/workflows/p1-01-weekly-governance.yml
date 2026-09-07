@@ -3,6 +3,7 @@ name: P1-01 Weekly Governance Gate
 on:
   push:
     branches:
+      - main
       - exam-prep-p0-host
     paths:
       - 'supabase/migrations/*exam_prep_p0_*.sql'
