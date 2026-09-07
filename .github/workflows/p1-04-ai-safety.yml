@@ -11,6 +11,7 @@ on:
       - supabase/tests/p0_15_contract_bootstrap.sql
       - supabase/tests/p1_04_ai_safety_foundation_matrix.sql
       - 'supabase/functions/exam-prep-ai/**'
+      - .github/scripts/p1_04_ai_edge_context_contract.js
       - .github/workflows/p1-04-ai-safety.yml
   workflow_dispatch:
 
@@ -149,6 +150,9 @@ jobs:
           ! grep -q 'correct_answer' supabase/functions/exam-prep-ai/index.ts
           ! grep -q 'new_mastery_level' supabase/functions/exam-prep-ai/index.ts
           ! grep -q 'OPENAI_API_KEY' supabase/functions/exam-prep-ai/index.ts
+
+      - name: Deterministic context boundary contract
+        run: node .github/scripts/p1_04_ai_edge_context_contract.js
 
       - name: Type-check Edge Function
         uses: denoland/setup-deno@v2
