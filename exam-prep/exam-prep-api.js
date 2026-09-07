@@ -126,6 +126,21 @@
     return rpc("get_exam_prep_state_safe_v1", { p_component_code: String(componentCode || "") });
   }
 
+  async function syllabusTracker(componentCode) {
+    return rpc("get_exam_prep_syllabus_tracker_safe_v1", { p_component_code: String(componentCode || "") });
+  }
+
+  async function skillDetail(componentCode, skillCode) {
+    return rpc("get_exam_prep_skill_detail_safe_v1", {
+      p_component_code: String(componentCode || ""),
+      p_skill_code: String(skillCode || "")
+    });
+  }
+
+  async function correctionQueue(componentCode) {
+    return rpc("get_exam_prep_correction_queue_safe_v1", { p_component_code: String(componentCode || "") });
+  }
+
   async function getSession(sessionId, language = "en") {
     return rpc("get_exam_prep_session_safe_v1", { p_session_id: sessionId, p_language: language });
   }
@@ -226,6 +241,9 @@
     startNextDiagnostic,
     getPlacement,
     getState,
+    syllabusTracker,
+    skillDetail,
+    correctionQueue,
     getSession,
     startSession,
     submitResponse,
