@@ -1,0 +1,42 @@
+name: P1-05 History Note Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-history-note.js
+      - .github/scripts/p1_05_history_note_regression.js
+      - .github/workflows/p1-05-history-note.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  history-note:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static contract checks
+        run: |
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-history-note.js
+          node --check .github/scripts/p1_05_history_note_regression.js
+          grep -q 'get_exam_prep_legacy_reference_summary_safe_v1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-history-note.js?v=p105history1' exam-prep/exam-prep-api.js
+          ! grep -q '\.from(' exam-prep/exam-prep-history-note.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-history-note.js
+          ! grep -q 'correct_answer' exam-prep/exam-prep-history-note.js
+          ! grep -q 'p1_existing_bank_v1' exam-prep/exam-prep-history-note.js
+          ! grep -q 'legacy_readonly' exam-prep/exam-prep-history-note.js
+
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Browser-isolated previous-practice note
+        run: node .github/scripts/p1_05_history_note_regression.js
