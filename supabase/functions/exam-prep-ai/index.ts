@@ -103,6 +103,42 @@ async function currentUser(authorization: string) {
   return data && isUuid(data.id) ? data : null;
 }
 
+async function learnerContext(
+  interaction: string,
+  component: string,
+  skillCode: string | null,
+  authorization: string,
+) {
+  if (interaction === "progress_summary") {
+    return {
+      context_type: "component_overview_v1",
+      data: await rpc("get_exam_prep_overview_safe_v1", { p_component_code: component }, authorization, ANON_KEY),
+    };
+  }
+  if (interaction === "weekly_plan_narration") {
+    return {
+      context_type: "weekly_plan_v1",
+      data: await rpc("get_exam_prep_weekly_plan_safe_v1", { p_component_code: component }, authorization, ANON_KEY),
+    };
+  }
+  if (interaction === "established_error_explanation" || interaction === "repeated_error_summary") {
+    return {
+      context_type: "correction_queue_v1",
+      data: await rpc("get_exam_prep_correction_queue_safe_v1", { p_component_code: component }, authorization, ANON_KEY),
+    };
+  }
+  if ((interaction === "theory_explanation" || interaction === "multilingual_explanation") && skillCode) {
+    return {
+      context_type: "skill_detail_v1",
+      data: await rpc("get_exam_prep_skill_detail_safe_v1", {
+        p_component_code: component,
+        p_skill_code: skillCode,
+      }, authorization, ANON_KEY),
+    };
+  }
+  return null;
+}
+
 async function sha256(value: string) {
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
@@ -129,6 +165,7 @@ async function audit(params: {
   guard: Record<string, unknown>;
   snapshot: any;
   latencyMs: number;
+  deterministicSnapshotHash?: string | null;
   fallbackReason?: string | null;
   sourceCardKeys?: string[];
   safetyFlags?: string[];
@@ -148,6 +185,7 @@ async function audit(params: {
     p_prompt_version: v.prompt_version,
     p_retrieval_policy_version: v.retrieval_policy_version,
     p_response_schema_version: v.response_schema_version,
+    p_deterministic_snapshot_hash: params.deterministicSnapshotHash || null,
     p_latency_ms: Math.max(0, Math.round(params.latencyMs)),
     p_fallback_reason: params.fallbackReason || null,
     p_source_card_keys: params.sourceCardKeys || [],
@@ -176,6 +214,8 @@ Deno.serve(async (req: Request) => {
   const interaction = String((payload as any).interaction_type || "");
   const locale = normalizeLocale((payload as any).locale);
   const userText = typeof (payload as any).user_text === "string" ? (payload as any).user_text : "";
+  const rawSkillCode = typeof (payload as any).skill_code === "string" ? String((payload as any).skill_code).trim() : "";
+  const skillCode = rawSkillCode && rawSkillCode.length <= 80 ? rawSkillCode : null;
 
   if (!VALID_COMPONENTS.has(component)) return response(400, { request_id: requestId, error: "invalid_component" });
   if (!VALID_INTERACTIONS.has(interaction)) return response(400, { request_id: requestId, error: "invalid_interaction" });
@@ -212,6 +252,20 @@ Deno.serve(async (req: Request) => {
     return response(200, { request_id: requestId, mode, reason, component_code: component, interaction_type: interaction, locale, message, generated: false, academic_state_changed: false });
   }
 
+  let deterministicContext: any = null;
+  let deterministicSnapshotHash: string | null = null;
+  try {
+    deterministicContext = await learnerContext(interaction, component, skillCode, authorization);
+    if (deterministicContext) deterministicSnapshotHash = await sha256(JSON.stringify(deterministicContext));
+  } catch {
+    const mode = "fallback";
+    const reason = "context_unavailable";
+    const message = learnerMessage(locale, mode, reason);
+    const outputHash = await sha256(message);
+    await audit({ requestId, userId: user.id, component, interaction, locale, mode, guard, snapshot, latencyMs: performance.now() - started, fallbackReason: reason, safetyFlags: ["context_unavailable"], outputHash }).catch(() => {});
+    return response(200, { request_id: requestId, mode, reason, component_code: component, interaction_type: interaction, locale, message, generated: false, academic_state_changed: false });
+  }
+
   const cardTypeMap: Record<string, string | null> = {
     established_error_explanation: "error_explanation",
     weekly_plan_narration: "weekly_plan_context",
@@ -227,7 +281,7 @@ Deno.serve(async (req: Request) => {
       p_component_code: component,
       p_locale: locale,
       p_card_type: cardTypeMap[interaction] || null,
-      p_skill_code: typeof (payload as any).skill_code === "string" ? (payload as any).skill_code : null,
+      p_skill_code: skillCode,
       p_limit: 8,
     }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
     cards = Array.isArray(result) ? result : [];
@@ -240,8 +294,8 @@ Deno.serve(async (req: Request) => {
     const reason = "approved_source_missing";
     const message = learnerMessage(locale, mode, reason);
     const outputHash = await sha256(message);
-    await audit({ requestId, userId: user.id, component, interaction, locale, mode, guard, snapshot, latencyMs: performance.now() - started, fallbackReason: reason, safetyFlags: ["no_source"], outputHash }).catch(() => {});
-    return response(200, { request_id: requestId, mode, reason, component_code: component, interaction_type: interaction, locale, message, source_cards: [], generated: false, academic_state_changed: false });
+    await audit({ requestId, userId: user.id, component, interaction, locale, mode, guard, snapshot, latencyMs: performance.now() - started, deterministicSnapshotHash, fallbackReason: reason, safetyFlags: ["no_source"], outputHash }).catch(() => {});
+    return response(200, { request_id: requestId, mode, reason, component_code: component, interaction_type: interaction, locale, message, source_cards: [], context_bound: Boolean(deterministicContext), generated: false, academic_state_changed: false });
   }
 
   // Provider/model routing is intentionally not enabled in this foundation release.
@@ -252,6 +306,6 @@ Deno.serve(async (req: Request) => {
   const message = learnerMessage(locale, mode, reason);
   const sourceCardKeys = cards.map((c) => String(c?.source_card_key || "")).filter(Boolean);
   const outputHash = await sha256(message);
-  await audit({ requestId, userId: user.id, component, interaction, locale, mode, guard, snapshot, latencyMs: performance.now() - started, fallbackReason: reason, sourceCardKeys, safetyFlags: ["model_not_configured"], outputHash }).catch(() => {});
-  return response(200, { request_id: requestId, mode, reason, component_code: component, interaction_type: interaction, locale, message, source_cards: sourceCardKeys, generated: false, academic_state_changed: false });
+  await audit({ requestId, userId: user.id, component, interaction, locale, mode, guard, snapshot, latencyMs: performance.now() - started, deterministicSnapshotHash, fallbackReason: reason, sourceCardKeys, safetyFlags: ["model_not_configured"], outputHash }).catch(() => {});
+  return response(200, { request_id: requestId, mode, reason, component_code: component, interaction_type: interaction, locale, message, source_cards: sourceCardKeys, context_bound: Boolean(deterministicContext), generated: false, academic_state_changed: false });
 });
