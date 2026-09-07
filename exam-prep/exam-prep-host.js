@@ -26,80 +26,86 @@
       return {
         title: "Cambridge AS Mathematics · Exam Prep",
         subtitle: "Paper 1 + Paper 5",
-        alpha: "Ichki alpha",
-        note: "Bu host bridge faqat server ruxsati bilan ochiladi. Synthetic o‘quvchi ma’lumotlari ishlatilmaydi.",
+        alpha: "Imtihonga tayyorgarlik",
+        note: "P1 va P5 natijalari alohida hisoblanadi. Mavjud Tours va Practice tarixingiz o‘zgarmaydi.",
         p1: "P1 · Pure Mathematics 1",
         p5: "P5 · Probability & Statistics 1",
-        inviteTitle: "Exam Prep yopiq beta taklifi",
-        inviteSub: "Ishtirokni tasdiqlash kerak",
-        inviteKicker: "Controlled beta",
-        inviteBody: "Siz Cambridge AS Mathematics Exam Prep yopiq sinoviga taklif qilindingiz. Beta davomida javoblaringiz, bajarish vaqti va o‘quv progressi funksiyani tekshirish va yaxshilash uchun ishlatiladi. Ishtirok ixtiyoriy; beta xatolarni o‘z ichiga olishi mumkin. Mavjud Tours va Practice tarixingiz o‘zgartirilmaydi.",
-        wave: "Rejalashtirilgan to‘lqin",
-        mode: "Rejim",
-        capacity: "Beta sig‘imi",
+        skills: "ko‘nikma",
+        inviteTitle: "Exam Prep sinoviga taklif",
+        inviteSub: "Ishtirokingizni tasdiqlang",
+        inviteKicker: "Yangi imkoniyat sinovi",
+        inviteBody: "Siz Cambridge AS Mathematics Exam Prep modulini sinab ko‘rishga taklif qilindingiz. Sinov davomida javoblaringiz, bajarish vaqtingiz va o‘quv progressi modulni yaxshilash uchun ishlatiladi. Ishtirok ixtiyoriy, ayrim xatolar uchrashi mumkin. Mavjud Tours va Practice tarixingiz o‘zgarmaydi.",
+        mode: "O‘qish formati",
+        components: "Komponentlar",
+        history: "Tarix",
+        historyKept: "Saqlanadi",
         consent: "Ishtirok etishga roziman",
         consented: "Rozilik qayd etildi",
-        consentedBody: "Sizning roziligingiz saqlandi. Bu hali Exam Prep kirishini yoqmaydi — kirish alohida xavfsiz wave orqali faollashtiriladi.",
+        consentedBody: "Roziligingiz saqlandi. Exam Prep kirishi sinov boshlanganda alohida faollashtiriladi.",
         revoke: "Rozilikni bekor qilish",
-        revokeConfirm: "Controlled beta ishtirokidan voz kechishni tasdiqlaysizmi?",
+        revokeConfirm: "Exam Prep sinovida ishtirok etishdan voz kechmoqchimisiz?",
         busy: "Saqlanmoqda…",
         error: "Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.",
-        core: "Core",
-        ai: "AI Assist",
-        mentor: "Mentor Care"
+        core: "Mustaqil tayyorgarlik",
+        ai: "AI yordamida tayyorgarlik",
+        mentor: "Mentor ko‘magida tayyorgarlik"
       };
     }
     if (lang === "en") {
       return {
         title: "Cambridge AS Mathematics · Exam Prep",
         subtitle: "Paper 1 + Paper 5",
-        alpha: "Internal alpha",
-        note: "This host bridge opens only after server authorization. No synthetic learner data is shown here.",
+        alpha: "Exam preparation",
+        note: "P1 and P5 results are tracked separately. Your existing Tours and Practice history will not be changed.",
         p1: "P1 · Pure Mathematics 1",
         p5: "P5 · Probability & Statistics 1",
-        inviteTitle: "Exam Prep controlled beta invitation",
-        inviteSub: "Participation confirmation required",
-        inviteKicker: "Controlled beta",
-        inviteBody: "You have been invited to the closed Cambridge AS Mathematics Exam Prep beta. During the beta, your answers, completion time and learning progress will be used to test and improve the feature. Participation is voluntary and the beta may contain errors. Your existing Tours and Practice history will not be changed.",
-        wave: "Planned wave",
-        mode: "Mode",
-        capacity: "Beta capacity",
+        skills: "skills",
+        inviteTitle: "Invitation to test Exam Prep",
+        inviteSub: "Confirm your participation",
+        inviteKicker: "New feature test",
+        inviteBody: "You have been invited to test the Cambridge AS Mathematics Exam Prep module. During the test, your answers, completion time and learning progress will be used to improve the module. Participation is voluntary, and you may encounter errors. Your existing Tours and Practice history will not be changed.",
+        mode: "Study format",
+        components: "Components",
+        history: "History",
+        historyKept: "Preserved",
         consent: "I agree to participate",
         consented: "Consent recorded",
-        consentedBody: "Your consent has been saved. This does not enable Exam Prep access yet; access is activated separately through a guarded beta wave.",
+        consentedBody: "Your consent has been saved. Exam Prep access will be activated separately when testing begins.",
         revoke: "Withdraw consent",
-        revokeConfirm: "Do you want to withdraw from the controlled beta?",
+        revokeConfirm: "Do you want to stop participating in the Exam Prep test?",
         busy: "Saving…",
         error: "The action could not be completed. Please try again.",
-        core: "Core",
-        ai: "AI Assist",
-        mentor: "Mentor Care"
+        core: "Independent preparation",
+        ai: "Preparation with AI support",
+        mentor: "Preparation with mentor support"
       };
     }
     return {
       title: "Cambridge AS Mathematics · Exam Prep",
       subtitle: "Paper 1 + Paper 5",
-      alpha: "Внутренняя alpha",
-      note: "Этот host bridge открывается только после серверного разрешения. Synthetic learner data здесь не показываются.",
+      alpha: "Подготовка к экзамену",
+      note: "Результаты P1 и P5 учитываются отдельно. Ваша существующая история в Tours и Practice останется без изменений.",
       p1: "P1 · Pure Mathematics 1",
       p5: "P5 · Probability & Statistics 1",
-      inviteTitle: "Приглашение в закрытую beta Exam Prep",
-      inviteSub: "Нужно подтвердить участие",
-      inviteKicker: "Controlled beta",
-      inviteBody: "Вы приглашены в закрытое тестирование Cambridge AS Mathematics Exam Prep. Во время beta ваши ответы, время выполнения и учебный прогресс будут использоваться для проверки и улучшения функции. Участие добровольное; beta может содержать ошибки. Ваша существующая история Tours и Practice не изменяется.",
-      wave: "Планируемая волна",
-      mode: "Режим",
-      capacity: "Вместимость beta",
+      skills: "навыков",
+      inviteTitle: "Приглашение протестировать Exam Prep",
+      inviteSub: "Подтвердите участие",
+      inviteKicker: "Тестирование новой функции",
+      inviteBody: "Вы приглашены протестировать модуль Cambridge AS Mathematics Exam Prep. Во время тестирования ваши ответы, время выполнения и учебный прогресс будут использоваться для улучшения модуля. Участие добровольное, возможны ошибки. Ваша существующая история в Tours и Practice останется без изменений.",
+      mode: "Формат подготовки",
+      components: "Компоненты",
+      history: "История",
+      historyKept: "Сохраняется",
       consent: "Я согласен участвовать",
       consented: "Согласие сохранено",
-      consentedBody: "Ваше согласие записано. Это ещё не включает доступ к Exam Prep — доступ активируется отдельно через защищённую beta-волну.",
+      consentedBody: "Согласие сохранено. Доступ к Exam Prep будет включён отдельно, когда начнётся тестирование.",
       revoke: "Отозвать согласие",
-      revokeConfirm: "Вы подтверждаете отказ от участия в controlled beta?",
+      revokeConfirm: "Вы хотите отказаться от участия в тестировании Exam Prep?",
       busy: "Сохраняем…",
       error: "Не удалось выполнить действие. Попробуйте ещё раз.",
-      core: "Core",
-      ai: "AI Assist",
-      mentor: "Mentor Care"
+      core: "Самостоятельная подготовка",
+      ai: "Подготовка с поддержкой ИИ",
+      mentor: "Подготовка с поддержкой ментора"
     };
   }
 
@@ -163,8 +169,8 @@
         <div class="ep-host-subtitle">${text.subtitle}</div>
         <p class="ep-host-note">${text.note}</p>
         <div class="ep-host-component-grid">
-          <div class="ep-host-component-card"><strong>${text.p1}</strong><span>45 canonical skills</span></div>
-          <div class="ep-host-component-card"><strong>${text.p5}</strong><span>36 canonical skills</span></div>
+          <div class="ep-host-component-card"><strong>${text.p1}</strong><span>45 ${text.skills}</span></div>
+          <div class="ep-host-component-card"><strong>${text.p5}</strong><span>36 ${text.skills}</span></div>
         </div>
       </section>`;
     return true;
@@ -190,8 +196,8 @@
         <p class="ep-host-note">${text.inviteBody}</p>
         <div class="ep-host-invite-facts">
           <div><span>${text.mode}</span><strong>${serviceModeText(item.serviceMode, text)}</strong></div>
-          <div><span>${text.wave}</span><strong>${item.activationWave}</strong></div>
-          <div><span>${text.capacity}</span><strong>${item.capacity || 12}</strong></div>
+          <div><span>${text.components}</span><strong>P1 + P5</strong></div>
+          <div><span>${text.history}</span><strong>${text.historyKept}</strong></div>
         </div>
         ${error}
         <div class="ep-host-actions">${action}</div>
