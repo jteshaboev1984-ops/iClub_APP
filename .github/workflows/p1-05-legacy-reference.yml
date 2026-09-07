@@ -1,0 +1,80 @@
+name: P1-05 Legacy Reference Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - supabase/migrations/20260907112000_exam_prep_p1_05_legacy_reference_adapter_v1.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p1_05_legacy_reference_adapter_matrix.sql
+      - .github/workflows/p1-05-legacy-reference.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  legacy-reference:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap minimum legacy/Supabase contract
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql
+
+      - name: Apply Exam Prep P0 foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for stage in 04 05 06 07 08 09 10 11 12 13 15 16; do
+            mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p0_${stage}_*.sql" | sort)
+            test "${#files[@]}" -ge 1
+            for f in "${files[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          done
+
+      - name: Enrich skeletal legacy CI tables only
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+
+      - name: Apply P1-05 legacy reference adapter
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260907112000_exam_prep_p1_05_legacy_reference_adapter_v1.sql
+
+      - name: Run P1-05 isolated matrix
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_legacy_reference_adapter_matrix.sql
+
+      - name: Static legacy immutability contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=supabase/migrations/20260907112000_exam_prep_p1_05_legacy_reference_adapter_v1.sql
+          ! grep -Eqi 'update[[:space:]]+public\.(practice_|tour_|ratings_cache|certificates)' "$file"
+          ! grep -Eqi 'delete[[:space:]]+from[[:space:]]+public\.(practice_|tour_|ratings_cache|certificates)' "$file"
+          ! grep -Eqi 'truncate[[:space:]]+(table[[:space:]]+)?public\.(practice_|tour_|ratings_cache|certificates)' "$file"
+          ! grep -Eqi 'insert[[:space:]]+into[[:space:]]+private\.exam_prep_evidence_events' "$file"
+          ! grep -Eqi 'update[[:space:]]+private\.exam_prep_stage_states' "$file"
+          ! grep -Eqi 'correct_answer|explanation_ru|explanation_uz|explanation_en' "$file"
+          grep -q "source_type='legacy_readonly'" "$file"
+          grep -q "academic_credit=false" "$file"
+          grep -q "mastery_effect','none'" "$file"
