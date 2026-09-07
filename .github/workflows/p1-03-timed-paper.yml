@@ -10,6 +10,8 @@ on:
       - 'supabase/migrations/*exam_prep_p1_01_*.sql'
       - 'supabase/migrations/*exam_prep_p1_02_*.sql'
       - 'supabase/migrations/*exam_prep_p1_03_*.sql'
+      - 'supabase/migrations/*exam_prep_stage*.sql'
+      - supabase/migrations/20260907080000_exam_prep_readiness_state_projection_v1.sql
       - supabase/tests/p0_15_contract_bootstrap.sql
       - supabase/tests/p1_02_content_runway_contract_matrix.sql
       - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
@@ -28,6 +30,7 @@ on:
       - supabase/tests/p1_03_stage5_paper03_release_guard_matrix.sql
       - supabase/tests/p1_03_timed_contract_stage_override_matrix.sql
       - supabase/tests/p1_03_stage4_paper02_release_guard_matrix.sql
+      - supabase/tests/p1_04_stage5_stage6_readiness_matrix.sql
       - .github/workflows/p1-03-timed-paper.yml
   workflow_dispatch:
 
@@ -212,6 +215,51 @@ jobs:
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_stage4_paper02_release_guard_matrix.sql 2>&1 | tee -a p103-timed-paper.log
 
+      - name: Prepare synthetic Core-only stage-release boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' 2>&1 | tee -a p103-timed-paper.log
+          update private.exam_prep_feature_config
+          set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now()
+          where program_key='math_as_p1_p5';
+          SQL
+
+      - name: Apply governed Stage 3-6 release migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f \( -name '20260907*exam_prep_stage*.sql' -o -name '20260907080000_exam_prep_readiness_state_projection_v1.sql' \) | sort)
+          if [ "${#files[@]}" -lt 8 ]; then
+            echo "Stage 3-6 release migration set incomplete: found ${#files[@]}" | tee -a p103-timed-paper.log >&2
+            printf '%s\n' "${files[@]}" | tee -a p103-timed-paper.log
+            exit 1
+          fi
+          for f in "${files[@]}"; do
+            echo "=== Applying governed release $f ===" | tee -a p103-timed-paper.log
+            if ! psql -v ON_ERROR_STOP=1 -f "$f" >>p103-timed-paper.log 2>&1; then
+              echo "FAILED_STAGE_RELEASE_MIGRATION=$f" | tee -a p103-timed-paper.log >&2
+              tail -n 320 p103-timed-paper.log
+              exit 1
+            fi
+          done
+
+      - name: Run Stage-5/6 strong borderline weak matrix - rollback only
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_04_stage5_stage6_readiness_matrix.sql 2>&1 | tee -a p103-timed-paper.log
+
+      - name: Restore ephemeral feature boundary to OFF
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' 2>&1 | tee -a p103-timed-paper.log
+          update private.exam_prep_feature_config
+          set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now()
+          where program_key='math_as_p1_p5';
+          SQL
+
       - name: Verify zero activation residue
         shell: bash
         run: |
@@ -221,17 +269,20 @@ jobs:
           members="$(psql -Atqc "select count(*) from private.exam_prep_beta_members")"
           timed_results="$(psql -Atqc "select count(*) from private.exam_prep_timed_attempt_results")"
           self_marks="$(psql -Atqc "select count(*) from private.exam_prep_timed_written_self_marks")"
+          ci_thresholds="$(psql -Atqc "select count(*) from private.exam_prep_stage5_thresholds where threshold_version like 'ci_stage56_%'")"
           echo "POST_P103_STATE=$state" | tee -a p103-timed-paper.log
           echo "POST_P103_COHORTS=$cohorts" | tee -a p103-timed-paper.log
           echo "POST_P103_MEMBERS=$members" | tee -a p103-timed-paper.log
           echo "POST_P103_TIMED_RESULTS=$timed_results" | tee -a p103-timed-paper.log
           echo "POST_P103_SELF_MARKS=$self_marks" | tee -a p103-timed-paper.log
+          echo "POST_P104_SYNTHETIC_THRESHOLDS=$ci_thresholds" | tee -a p103-timed-paper.log
           test "$state" = 'off|false|false|false|true'
           test "$cohorts" = '0'
           test "$members" = '0'
           test "$timed_results" = '0'
           test "$self_marks" = '0'
-          echo 'P1-03 timed paper contract gate: GREEN' | tee -a p103-timed-paper.log
+          test "$ci_thresholds" = '0'
+          echo 'P1-03/P1-04 timed paper + Stage5/6 contract gate: GREEN' | tee -a p103-timed-paper.log
 
       - name: Upload P1-03 diagnostics
         if: always()
