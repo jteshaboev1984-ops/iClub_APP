@@ -12,6 +12,7 @@ on:
       - exam-prep/exam-prep-host.js
       - exam-prep/exam-prep-live.js
       - exam-prep/exam-prep-learner-views.js
+      - exam-prep/exam-prep-overview-placement.js
       - exam-prep/exam-prep-host.css
       - exam-prep-preview.html
       - .github/scripts/p0_14_host_regression.js
@@ -20,6 +21,7 @@ on:
       - .github/scripts/p0_18_live_plan_regression.js
       - .github/scripts/p0_19_live_timed_readiness_regression.js
       - .github/scripts/p0_20_live_tracker_corrections_regression.js
+      - .github/scripts/p0_21_live_overview_placement_regression.js
       - .github/workflows/p0-14-host-regression.yml
   workflow_dispatch:
 
@@ -39,8 +41,10 @@ jobs:
           node --check exam-prep/exam-prep-host.js
           node --check exam-prep/exam-prep-live.js
           node --check exam-prep/exam-prep-learner-views.js
+          node --check exam-prep/exam-prep-overview-placement.js
           node --check .github/scripts/p0_19_live_timed_readiness_regression.js
           node --check .github/scripts/p0_20_live_tracker_corrections_regression.js
+          node --check .github/scripts/p0_21_live_overview_placement_regression.js
           grep -q 'id="subject-hub-exam-prep-entry"' index.html
           grep -q 'id="exam-prep-host-root"' index.html
           grep -q 'id="subject-hub-exam-prep-entry"[^>]*hidden[^>]*aria-hidden="true"' index.html
@@ -50,6 +54,8 @@ jobs:
           grep -q 'exam-prep/exam-prep-host.js?v=p014h1' index.html
           grep -q 'exam-prep/exam-prep-host.css?v=p014h1' index.html
           grep -q 'exam-prep-live.js?v=p019timed1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-learner-views.js?v=p020views2' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-overview-placement.js?v=p021overview1' exam-prep/exam-prep-api.js
           grep -q 'window.iClubExamPrep?.syncSubjectHub' app.js
           grep -q 'window.iClubExamPrep?.isOpen' app.js
           grep -q 'window.iClubExamPrep?.back' app.js
@@ -60,14 +66,17 @@ jobs:
           ! grep -q '\.from(' exam-prep/exam-prep-host.js
           ! grep -q '\.from(' exam-prep/exam-prep-live.js
           ! grep -q '\.from(' exam-prep/exam-prep-learner-views.js
+          ! grep -q '\.from(' exam-prep/exam-prep-overview-placement.js
           ! grep -q 'localStorage' exam-prep/exam-prep-api.js
           ! grep -q 'localStorage' exam-prep/exam-prep-host.js
           ! grep -q 'localStorage' exam-prep/exam-prep-live.js
           ! grep -q 'localStorage' exam-prep/exam-prep-learner-views.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-overview-placement.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-api.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-host.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-live.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-learner-views.js
+          ! grep -q 'iclub_state_v1' exam-prep/exam-prep-overview-placement.js
           grep -q "connect-src 'none'" exam-prep-preview.html
 
       - name: Install Chromium test dependency
@@ -89,6 +98,9 @@ jobs:
 
       - name: Browser-isolated syllabus tracker / skill detail / corrections flow
         run: node .github/scripts/p0_20_live_tracker_corrections_regression.js
+
+      - name: Browser-isolated overview / placement result flow
+        run: node .github/scripts/p0_21_live_overview_placement_regression.js
 
       - name: Start local app server
         run: |
