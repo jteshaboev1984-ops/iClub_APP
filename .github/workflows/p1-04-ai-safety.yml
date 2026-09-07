@@ -1,0 +1,161 @@
+name: P1-04 AI Safety Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep_p0_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_01_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_04_*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_04_ai_safety_foundation_matrix.sql
+      - 'supabase/functions/exam-prep-ai/**'
+      - .github/workflows/p1-04-ai-safety.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ai-safety:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostic log
+        run: printf 'P1-04 AI safety foundation CI\n' > p104-ai-safety.log
+
+      - name: Bootstrap minimum legacy/Supabase contract
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p104-ai-safety.log
+
+      - name: Apply real Exam Prep P0 migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          for stage in 04 05 06 07 08 09 10 11 12 13 15 16; do
+            mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p0_${stage}_*.sql" | sort)
+            if [ "${#files[@]}" -eq 0 ]; then
+              echo "No P0-${stage} migration files found" | tee -a p104-ai-safety.log >&2
+              exit 1
+            fi
+            for f in "${files[@]}"; do
+              echo "=== Applying $f ===" | tee -a p104-ai-safety.log
+              if ! psql -v ON_ERROR_STOP=1 -f "$f" >>p104-ai-safety.log 2>&1; then
+                echo "FAILED_MIGRATION=$f" | tee -a p104-ai-safety.log >&2
+                tail -n 260 p104-ai-safety.log
+                exit 1
+              fi
+            done
+          done
+
+      - name: Apply P1-01 governance migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p1_01_*.sql' | sort)
+          test "${#files[@]}" -ge 1
+          for f in "${files[@]}"; do
+            echo "=== Applying $f ===" | tee -a p104-ai-safety.log
+            if ! psql -v ON_ERROR_STOP=1 -f "$f" >>p104-ai-safety.log 2>&1; then
+              echo "FAILED_MIGRATION=$f" | tee -a p104-ai-safety.log >&2
+              tail -n 300 p104-ai-safety.log
+              exit 1
+            fi
+          done
+
+      - name: Apply P1-04 AI safety migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p1_04_*.sql' | sort)
+          test "${#files[@]}" -ge 2
+          for f in "${files[@]}"; do
+            echo "=== Applying $f ===" | tee -a p104-ai-safety.log
+            if ! psql -v ON_ERROR_STOP=1 -f "$f" >>p104-ai-safety.log 2>&1; then
+              echo "FAILED_MIGRATION=$f" | tee -a p104-ai-safety.log >&2
+              tail -n 320 p104-ai-safety.log
+              exit 1
+            fi
+          done
+
+      - name: Verify dormant live-contract defaults
+        shell: bash
+        run: |
+          set -euo pipefail
+          generation="$(psql -Atqc "select generation_enabled from private.exam_prep_ai_policy where id=1")"
+          runtime="$(psql -Atqc "select runtime_status from private.exam_prep_optional_capability_status where capability_code='ai_assist'")"
+          cards="$(psql -Atqc "select count(*) from private.exam_prep_ai_source_cards")"
+          audits="$(psql -Atqc "select count(*) from private.exam_prep_ai_audit")"
+          echo "P104_GENERATION=$generation" | tee -a p104-ai-safety.log
+          echo "P104_RUNTIME=$runtime" | tee -a p104-ai-safety.log
+          echo "P104_SOURCE_CARDS=$cards" | tee -a p104-ai-safety.log
+          echo "P104_AUDITS=$audits" | tee -a p104-ai-safety.log
+          test "$generation" = 'f'
+          test "$runtime" = 'shadow'
+          test "$cards" = '0'
+          test "$audits" = '0'
+
+      - name: Run P1-04 isolated AI safety matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p104.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_04_ai_safety_foundation_matrix.sql 2>&1 | tee -a p104-ai-safety.log
+
+      - name: Static Edge Function safety contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f supabase/functions/exam-prep-ai/index.ts
+          grep -q 'verify' .github/workflows/p1-04-ai-safety.yml || true
+          grep -q 'academic_state_changed: false' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'get_exam_prep_ai_guard_v1' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'get_exam_prep_ai_source_cards_service_v1' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'record_exam_prep_ai_audit_service_v1' supabase/functions/exam-prep-ai/index.ts
+          ! grep -q 'correct_answer' supabase/functions/exam-prep-ai/index.ts
+          ! grep -q 'new_mastery_level' supabase/functions/exam-prep-ai/index.ts
+          ! grep -q 'OPENAI_API_KEY' supabase/functions/exam-prep-ai/index.ts
+
+      - name: Type-check Edge Function
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Deno check
+        run: deno check supabase/functions/exam-prep-ai/index.ts
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1-04-ai-safety-diagnostics
+          path: p104-ai-safety.log
+          if-no-files-found: error
+          retention-days: 3
