@@ -130,6 +130,10 @@
     return rpc("get_exam_prep_overview_safe_v1", { p_component_code: String(componentCode || "") });
   }
 
+  async function legacyReferenceSummary(componentCode) {
+    return rpc("get_exam_prep_legacy_reference_summary_safe_v1", { p_component_code: String(componentCode || "") });
+  }
+
   async function placementResult(componentCode) {
     return rpc("get_exam_prep_placement_result_safe_v1", { p_component_code: String(componentCode || "") });
   }
@@ -250,6 +254,7 @@
     getPlacement,
     getState,
     overview,
+    legacyReferenceSummary,
     placementResult,
     syllabusTracker,
     skillDetail,
@@ -296,6 +301,12 @@
       aiUi.dataset.examPrepAiUi = "true";
       aiUi.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-ai-ui.js?v=p104aiui1");
       document.head.appendChild(aiUi);
+    }
+    if (/^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-history-note]')) {
+      const historyNote = document.createElement("script");
+      historyNote.dataset.examPrepHistoryNote = "true";
+      historyNote.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-history-note.js?v=p105history1");
+      document.head.appendChild(historyNote);
     }
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
