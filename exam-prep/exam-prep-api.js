@@ -126,6 +126,14 @@
     return rpc("get_exam_prep_state_safe_v1", { p_component_code: String(componentCode || "") });
   }
 
+  async function overview(componentCode) {
+    return rpc("get_exam_prep_overview_safe_v1", { p_component_code: String(componentCode || "") });
+  }
+
+  async function placementResult(componentCode) {
+    return rpc("get_exam_prep_placement_result_safe_v1", { p_component_code: String(componentCode || "") });
+  }
+
   async function syllabusTracker(componentCode) {
     return rpc("get_exam_prep_syllabus_tracker_safe_v1", { p_component_code: String(componentCode || "") });
   }
@@ -241,6 +249,8 @@
     startNextDiagnostic,
     getPlacement,
     getState,
+    overview,
+    placementResult,
     syllabusTracker,
     skillDetail,
     correctionQueue,
@@ -274,6 +284,12 @@
       views.dataset.examPrepLearnerViews = "true";
       views.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-learner-views.js?v=p020views2");
       document.head.appendChild(views);
+    }
+    if (/^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-overview-placement]')) {
+      const overviewViews = document.createElement("script");
+      overviewViews.dataset.examPrepOverviewPlacement = "true";
+      overviewViews.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-overview-placement.js?v=p021overview1");
+      document.head.appendChild(overviewViews);
     }
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
