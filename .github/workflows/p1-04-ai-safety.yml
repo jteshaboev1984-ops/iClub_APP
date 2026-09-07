@@ -127,14 +127,21 @@ jobs:
           PGOPTIONS: '-c p104.isolated_db=true'
         run: |
           set -o pipefail
-          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_04_ai_safety_foundation_matrix.sql 2>&1 | tee -a p104-ai-safety.log
+          if ! psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_04_ai_safety_foundation_matrix.sql 2>&1 | tee -a p104-ai-safety.log; then
+            {
+              echo '## P1-04 AI safety matrix failure'
+              echo '```text'
+              tail -n 120 p104-ai-safety.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
 
       - name: Static Edge Function safety contract
         shell: bash
         run: |
           set -euo pipefail
           test -f supabase/functions/exam-prep-ai/index.ts
-          grep -q 'verify' .github/workflows/p1-04-ai-safety.yml || true
           grep -q 'academic_state_changed: false' supabase/functions/exam-prep-ai/index.ts
           grep -q 'get_exam_prep_ai_guard_v1' supabase/functions/exam-prep-ai/index.ts
           grep -q 'get_exam_prep_ai_source_cards_service_v1' supabase/functions/exam-prep-ai/index.ts
