@@ -112,8 +112,12 @@ const path = require('path');
     };
   });
   assert(result.synced === true && result.opened === true && result.hidden === false, 'invited candidate must see/open consent shell while Core is OFF');
-  assert(result.entryText.includes('controlled beta invitation'), 'entry must disclose beta invitation state');
+  assert(result.entryText.includes('Invitation to test Exam Prep'), 'entry must clearly identify the Exam Prep test invitation');
   assert(result.shellText.includes('Participation is voluntary'), 'consent shell must disclose voluntary participation');
+  assert(result.shellText.includes('Independent preparation'), 'candidate must see a learner-facing study format, not an internal service label');
+  for (const internalTerm of ['Internal alpha', 'host bridge', 'synthetic learner data', 'Controlled beta', 'Beta capacity', 'Planned wave', 'AI Assist', 'Mentor Care']) {
+    assert(!result.shellText.includes(internalTerm), `learner-facing invitation leaked internal term: ${internalTerm}`);
+  }
   assert(result.beforeGrant === 0 && result.afterOpenGrant === 0, 'viewing invitation must never auto-consent');
 
   await page.click('[data-ep-beta-action="grant"]');
@@ -131,7 +135,7 @@ const path = require('path');
   assert(result.count === 1, 'explicit consent button must issue exactly one grant RPC');
   assert(result.args?.p_cohort_key === 'math_as_p1_p5_beta_2026_09_01', 'consent must target invited cohort only');
   assert(result.args?.p_acknowledgement === 'I_CONSENT_TO_EXAM_PREP_CONTROLLED_BETA_V1', 'consent acknowledgement token mismatch');
-  assert(result.shellText.includes('does not enable Exam Prep access yet'), 'consent success must not imply activation');
+  assert(result.shellText.includes('access will be activated separately when testing begins'), 'consent success must clearly state that access is still activated separately');
   assert(result.caps.core_access === false && result.caps.kill_switch === true, 'consent UI must not mutate capability state');
 
   await page.click('[data-ep-beta-action="revoke"]');
@@ -169,9 +173,10 @@ const path = require('path');
       shellText
     };
   });
-  assert(result.synced === true && result.entryHidden === false, 'alpha Math entry must appear');
-  assert(result.opened === true && result.hostOpen === true, 'alpha open must mount transient root');
-  assert(result.shellText.includes('No synthetic learner data'), 'live shell must explicitly avoid synthetic learner state');
+  assert(result.synced === true && result.entryHidden === false, 'authorized Math entry must appear');
+  assert(result.opened === true && result.hostOpen === true, 'authorized open must mount transient root');
+  assert(result.shellText.includes('P1 and P5 results are tracked separately'), 'live shell must explain the P1/P5 separation in learner-facing language');
+  assert(!result.shellText.includes('Internal alpha') && !result.shellText.includes('host bridge') && !result.shellText.includes('synthetic learner data') && !result.shellText.includes('canonical skills'), 'live shell must not expose internal implementation terminology');
   assert(result.backHandled === true && result.closed === true, 'back must close transient root');
   assert(result.sentinel === 'unchanged', 'host bridge must not pollute localStorage');
 
@@ -210,7 +215,7 @@ const path = require('path');
   assert(rpcCalls.every(name => allowedRpcs.has(name)), 'host called an RPC outside capability/invitation consent boundary');
 
   await browser.close();
-  console.log('P0-14 browser matrix: PASS (live access + pre-entitlement consent)');
+  console.log('P0-14 browser matrix: PASS (live access + pre-entitlement consent + learner-safe copy)');
 })().catch(error => {
   console.error(error);
   process.exit(1);
