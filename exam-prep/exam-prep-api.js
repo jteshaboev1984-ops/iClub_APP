@@ -207,6 +207,14 @@
     });
   }
 
+  async function readiness(componentCode) {
+    return rpc("get_exam_prep_readiness_safe_v1", { p_component_code: String(componentCode || "") });
+  }
+
+  async function finalCalibration(componentCode) {
+    return rpc("get_exam_prep_final_calibration_safe_v1", { p_component_code: String(componentCode || "") });
+  }
+
   root.api = Object.freeze({
     capabilities,
     betaInvitation,
@@ -230,7 +238,9 @@
     finalizeTimed,
     timedResult,
     timedReviewPack,
-    submitTimedSelfMark
+    submitTimedSelfMark,
+    readiness,
+    finalCalibration
   });
 
   try {
@@ -238,10 +248,10 @@
     if (src && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-live]')) {
       const script = document.createElement("script");
       script.dataset.examPrepLive = "true";
-      script.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-live.js?v=p017live1");
+      script.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-live.js?v=p019timed1");
       document.head.appendChild(script);
     }
   } catch (_) {
-    // Fail closed: host consent/access shell still works without the optional live learner layer.
+    // Fail closed: the host access shell still works without the optional learner layer.
   }
 })();
