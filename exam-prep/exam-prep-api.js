@@ -291,6 +291,12 @@
       overviewViews.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-overview-placement.js?v=p021overview1");
       document.head.appendChild(overviewViews);
     }
+    if (/^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-ai-ui]')) {
+      const aiUi = document.createElement("script");
+      aiUi.dataset.examPrepAiUi = "true";
+      aiUi.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-ai-ui.js?v=p104aiui1");
+      document.head.appendChild(aiUi);
+    }
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
   }
