@@ -17,6 +17,10 @@ const path = require('path');
       P1:{component_code:'P1',placement_status:'conservative_foundation',route:'foundation',profile_complete:true,content_ready:true,stage0_complete:true,screening:{required_items:24,required_areas:8,answered_items:24,answered_areas:8,accuracy_pct:70},active_session:null,max_unlocked_stage:1,foundation_learning_access:true},
       P5:{component_code:'P5',placement_status:'screening_incomplete',route:'pending_evidence',profile_complete:true,content_ready:true,stage0_complete:false,screening:{required_items:15,required_areas:5,answered_items:0,answered_areas:0},active_session:null,max_unlocked_stage:0,foundation_learning_access:false}
     };
+    window.__state={
+      P1:{engine_version:'objective_state_v1',components:[{component_code:'P1',operational_stage:1,coverage_pct:0,levels:{L0:45,L1:0,L2:0,L3:0}}],skills:[]},
+      P5:{engine_version:'objective_state_v1',components:[{component_code:'P5',operational_stage:0,coverage_pct:0,levels:{L0:36,L1:0,L2:0,L3:0}}],skills:[]}
+    };
     const makePlan=()=>({plan_id:'00000000-0000-4000-8000-000000008801',component_code:'P1',active_week_no:1,plan_version:1,recovery_mode:'normal',items:[{priority_order:1,item_type:'learning',skill_code:'P1-QUA-01',correction_case_id:null,due_at:null,action_code:'BUILD_FIRST_COVERAGE',action_payload:{},status:'pending'}]});
     window.sb={rpc:async(name,args={})=>{
       window.__calls.push({name,args});
@@ -24,6 +28,7 @@ const path = require('path');
       if(name==='get_my_exam_prep_beta_invitation_v1')return{data:{invited:false,invitations:[]},error:null};
       if(name==='get_exam_prep_exam_profile_v1')return{data:[window.__profile],error:null};
       if(name==='get_exam_prep_diagnostic_progress_safe_v1')return{data:window.__progress[args.p_component_code],error:null};
+      if(name==='get_exam_prep_state_safe_v1')return{data:window.__state[args.p_component_code],error:null};
       if(name==='get_exam_prep_weekly_plan_safe_v1')return{data:window.__plan||{component_code:args.p_component_code,plan:null,items:[]},error:null};
       if(name==='generate_exam_prep_weekly_plan_safe_v1'){window.__plan=makePlan();return{data:{plan_id:window.__plan.plan_id,component_code:'P1',priority_count:1},error:null};}
       if(name==='authorize_exam_prep_plan_item_safe_v1')return{data:{authorization_id:'00000000-0000-4000-8000-000000008802',plan_id:args.p_plan_id,priority_order:args.p_priority_order,item_type:'learning',purpose:'learning'},error:null};
@@ -53,20 +58,21 @@ const path = require('path');
   await page.waitForSelector('[data-ep-live-plan="P1"]');
   await page.click('[data-ep-live-plan="P1"]');
   await page.waitForSelector('[data-ep-live-plan-item="1"]');
-  let text=await page.locator('#exam-prep-host-root').textContent(); assert(text.includes('Build first coverage'),'weekly learning item must render');
+  let text=await page.locator('#exam-prep-host-root').textContent(); assert(text.includes('Study this topic'),'weekly learning item must render with learner-facing copy');
 
   await page.click('[data-ep-live-plan-item="1"]');
   await page.waitForSelector('input[name="ep_live_answer"]');
   await page.check('input[name="ep_live_answer"][value="1"]'); await page.click('[data-ep-live-submit]');
   await page.waitForSelector('textarea[name="ep_live_written_answer"]');
   await page.fill('textarea[name="ep_live_written_answer"]','Because two plus two equals four.'); await page.click('[data-ep-live-submit]');
-  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Task complete. Plan refreshed.'));
+  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Task complete. Plan updated.'));
 
   const result=await page.evaluate(()=>({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent}));
   const names=result.calls.map(x=>x.name);
-  for(const n of ['get_exam_prep_weekly_plan_safe_v1','generate_exam_prep_weekly_plan_safe_v1','authorize_exam_prep_plan_item_safe_v1','start_exam_prep_session_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1'])assert(names.includes(n),`${n} missing`);
+  for(const n of ['get_exam_prep_weekly_plan_safe_v1','generate_exam_prep_weekly_plan_safe_v1','authorize_exam_prep_plan_item_safe_v1','start_exam_prep_session_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','get_exam_prep_state_safe_v1'])assert(names.includes(n),`${n} missing`);
   const written=result.calls.find(x=>x.name==='submit_exam_prep_response_safe_v1'&&x.args.p_item_order===2); assert(written?.args?.p_payload?.artifact?.text,'written solution must be sent as artifact');
   const auth=result.calls.find(x=>x.name==='authorize_exam_prep_plan_item_safe_v1'); assert(auth.args.p_priority_order===1,'plan authorization must target exact priority');
   assert(result.text.includes('Weekly plan'),'must return to refreshed plan');
+  assert(!result.text.includes('P1-QUA-01'),'internal skill code must not be learner-visible');
   await browser.close(); console.log('P0-18 live weekly plan flow: PASS');
 })().catch(e=>{console.error(e);process.exit(1);});
