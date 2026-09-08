@@ -87,7 +87,9 @@ const path = require('path');
 
   const result = await page.evaluate(() => ({
     calls:window.__calls,
-    text:document.querySelector('#exam-prep-host-root').textContent
+    text:document.querySelector('#exam-prep-host-root').textContent,
+    hasP1Plan:Boolean(document.querySelector('[data-ep-live-plan="P1"]')),
+    hasP5Plan:Boolean(document.querySelector('[data-ep-live-plan="P5"]'))
   }));
   const names = result.calls.map(x=>x.name);
   assert(names.includes('save_exam_prep_exam_profile_v2'),'versioned profile save missing');
@@ -104,7 +106,7 @@ const path = require('path');
 
   assert(result.text.includes('Oct/Nov 2027'),'updated series not shown');
   assert(result.text.includes('P1 and P5 remain separate'),'component-separation learner notice missing');
-  assert(document.querySelector('[data-ep-live-plan="P1"]') && document.querySelector('[data-ep-live-plan="P5"]'),'dashboard must remain available after plan update');
+  assert(result.hasP1Plan && result.hasP5Plan,'dashboard must remain available after plan update');
   assert(!/profile_revision|paper_comparability_epoch|comparability|controlled_beta|synthetic|internal skill/i.test(result.text),'internal terminology leaked to learner UI');
 
   await browser.close();
