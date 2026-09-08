@@ -5,12 +5,22 @@ on:
     branches:
       - main
     paths:
+      - 'index.html'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-exam-map.js'
+      - '.github/scripts/p2_09_exam_map_ui_regression.js'
       - 'supabase/migrations/*exam_prep_p2_09_*.sql'
       - 'supabase/tests/p2_09_exam_map_revision_matrix.sql'
       - 'scripts/p2-09-exam-map-revision-regression.cjs'
       - '.github/workflows/p2-09-exam-map-revision.yml'
   pull_request:
     paths:
+      - 'index.html'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-exam-map.js'
+      - '.github/scripts/p2_09_exam_map_ui_regression.js'
       - 'supabase/migrations/*exam_prep_p2_09_*.sql'
       - 'supabase/tests/p2_09_exam_map_revision_matrix.sql'
       - 'scripts/p2-09-exam-map-revision-regression.cjs'
@@ -48,6 +58,27 @@ jobs:
 
       - name: Initialize diagnostics
         run: printf 'P2-09 Exam Map Revision gate\n' > p209.log
+
+      - name: Static learner UI contract
+        run: |
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-exam-map.js
+          node --check .github/scripts/p2_09_exam_map_ui_regression.js
+          grep -q 'save_exam_prep_exam_profile_v2' exam-prep/exam-prep-api.js
+          grep -q 'generate_exam_prep_weekly_plan_safe_v3' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-exam-map.js?v=p209map1' exam-prep/exam-prep-api.js
+          ! grep -q '\.from(' exam-prep/exam-prep-exam-map.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-exam-map.js
+          ! grep -q 'iclub_state_v1' exam-prep/exam-prep-exam-map.js
+          ! grep -q 'correct_answer' exam-prep/exam-prep-exam-map.js
+
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Browser-isolated Exam Map learner editor
+        run: node .github/scripts/p2_09_exam_map_ui_regression.js
 
       - name: Static non-destructive contract
         run: node scripts/p2-09-exam-map-revision-regression.cjs | tee -a p209.log
