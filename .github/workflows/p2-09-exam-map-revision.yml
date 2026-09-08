@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - 'supabase/migrations/20260908103000_exam_prep_p2_09_exam_map_revision_v1.sql'
+      - 'supabase/migrations/*exam_prep_p2_09_*.sql'
       - 'supabase/tests/p2_09_exam_map_revision_matrix.sql'
       - 'scripts/p2-09-exam-map-revision-regression.cjs'
       - '.github/workflows/p2-09-exam-map-revision.yml'
   pull_request:
     paths:
-      - 'supabase/migrations/20260908103000_exam_prep_p2_09_exam_map_revision_v1.sql'
+      - 'supabase/migrations/*exam_prep_p2_09_*.sql'
       - 'supabase/tests/p2_09_exam_map_revision_matrix.sql'
       - 'scripts/p2-09-exam-map-revision-regression.cjs'
       - '.github/workflows/p2-09-exam-map-revision.yml'
