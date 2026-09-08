@@ -4,6 +4,7 @@ function read(path) { return fs.readFileSync(path, 'utf8'); }
 function assert(condition, message) { if (!condition) throw new Error(message); }
 
 const migration = read('supabase/migrations/20260908061000_exam_prep_p2_05_mentor_verified_readiness_v1.sql');
+const roleHotfix = read('supabase/migrations/20260908062500_exam_prep_p2_05_readiness_audit_role_hotfix_v1.sql');
 
 for (const token of [
   'private.exam_prep_readiness_signoffs',
@@ -36,15 +37,26 @@ assert(/private\.exam_prep_active_mentor_assignment_v1\(new\.user_id,new\.compon
 assert(/raw_responses_editable',false/i.test(migration), 'staff packet must state raw responses are immutable');
 assert(/mentor_verified_readiness',coalesce\(\(v_human->>'mentor_verified'\)::boolean,false\)/i.test(migration), 'learner readiness payload must keep human status separate');
 
-for (const forbidden of [
-  /update\s+private\.exam_prep_responses/i,
-  /delete\s+from\s+private\.exam_prep_evidence_events/i,
-  /update\s+private\.exam_prep_skill_states/i,
-  /insert\s+into\s+private\.exam_prep_stage5_thresholds/i,
-  /set\s+mentor_enabled\s*=\s*true/i,
-  /set\s+ai_enabled\s*=\s*true/i,
-  /correct_answer/i
-]) assert(!forbidden.test(migration), `forbidden P2-05 Mentor Verified mutation/surface: ${forbidden}`);
+for (const token of [
+  "v_actor_role:='academic_moderator'",
+  "v_actor_role:='lead_mentor'",
+  "new.reviewer_user_id=v_r.mentor_user_id",
+  "exam_prep_readiness_evidence_changed",
+  "'mentor_verified_readiness_confirmed'"
+]) assert(roleHotfix.includes(token), `readiness audit-role hotfix missing: ${token}`);
+assert(!/'math_as_p1_p5',new\.reviewer_user_id,'academic_moderator','mentor_verified_readiness_confirmed'/.test(roleHotfix), 'hotfix must not mislabel a lead mentor as academic moderator');
+
+for (const source of [migration, roleHotfix]) {
+  for (const forbidden of [
+    /update\s+private\.exam_prep_responses/i,
+    /delete\s+from\s+private\.exam_prep_evidence_events/i,
+    /update\s+private\.exam_prep_skill_states/i,
+    /insert\s+into\s+private\.exam_prep_stage5_thresholds/i,
+    /set\s+mentor_enabled\s*=\s*true/i,
+    /set\s+ai_enabled\s*=\s*true/i,
+    /correct_answer/i
+  ]) assert(!forbidden.test(source), `forbidden P2-05 Mentor Verified mutation/surface: ${forbidden}`);
+}
 
 assert(migration.includes("if v_approved<>0"), 'release must preserve zero approved Stage-5 threshold policy');
 assert(migration.includes("p_component_code not in ('P1','P5')"), 'P1/P5 component boundary missing');
