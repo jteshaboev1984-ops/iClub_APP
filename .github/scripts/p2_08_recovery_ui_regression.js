@@ -8,11 +8,12 @@ const path = require('path');
   await page.route('http://iclub.test/', route => route.fulfill({
     status: 200,
     contentType: 'text/html',
-    body: '<!doctype html><html><head></head><body><section id="courses-subject-hub"><div id="subject-hub-exam-prep-entry" hidden aria-hidden="true"><span id="subject-hub-exam-prep-title"></span><span id="subject-hub-exam-prep-sub"></span></div><div id="exam-prep-host-root" hidden aria-hidden="true"></div></section></body></html>'
+    body: '<!doctype html><html lang="en"><head></head><body><section id="courses-subject-hub"><div id="subject-hub-exam-prep-entry" hidden aria-hidden="true"><span id="subject-hub-exam-prep-title"></span><span id="subject-hub-exam-prep-sub"></span></div><div id="exam-prep-host-root" hidden aria-hidden="true"></div></section></body></html>'
   }));
   await page.goto('http://iclub.test/');
 
   await page.evaluate(() => {
+    window.i18n = { getLang: () => 'en' };
     window.__calls = [];
     window.__profile = { exam_series:'June 2027', target_grade:'A', total_student_hours_available:12, mathematics_hours_budget:6, active_week_no:20 };
     window.__caps = { program_key:'math_as_p1_p5', rollout_state:'controlled_beta', core_access:true, ai_assist:false, mentor_care_entitled:false, mentor_assignment_active:false, mentor_authority:false, kill_switch:false };
