@@ -145,7 +145,7 @@ BEGIN
   ORDER BY rs.skill_code LIMIT 1;
   IF v_skill IS NULL THEN RAISE EXCEPTION 'P2-11 AW21-24 P1 runway fixture missing'; END IF;
 
-  v_status:=private.exam_prep_product_dependency_for_week_v1(v_program,'P1',23);
+  v_status:=private.exam_prep_product_dependency_for_week_v1(v_program,'P1',23::smallint);
   IF (v_status->>'hard_floor_2w_green')::boolean IS DISTINCT FROM true
      OR (v_status->>'can_force_learner_stage')::boolean IS DISTINCT FROM false
      OR (v_status->>'can_raise_learner_mastery')::boolean IS DISTINCT FROM false
@@ -153,15 +153,15 @@ BEGIN
     RAISE EXCEPTION 'P2-11 week-23 dependency contract mismatch: %',v_status;
   END IF;
 
-  IF private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1',v_skill,23) IS DISTINCT FROM true THEN
+  IF private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1',v_skill,23::smallint) IS DISTINCT FROM true THEN
     RAISE EXCEPTION 'P2-11 two-week hard floor should allow governed AW23 learning skill=%',v_skill;
   END IF;
 
-  v_status:=private.exam_prep_product_dependency_for_week_v1(v_program,'P1',24);
+  v_status:=private.exam_prep_product_dependency_for_week_v1(v_program,'P1',24::smallint);
   IF (v_status->>'hard_floor_2w_green')::boolean IS DISTINCT FROM false THEN
     RAISE EXCEPTION 'P2-11 week-24 should fail two-week runway floor: %',v_status;
   END IF;
-  IF private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1',v_skill,24) IS DISTINCT FROM false THEN
+  IF private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1',v_skill,24::smallint) IS DISTINCT FROM false THEN
     RAISE EXCEPTION 'P2-11 insufficient product runway must block NEW learning without promoting learner';
   END IF;
 
