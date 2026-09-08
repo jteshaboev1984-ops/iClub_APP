@@ -322,6 +322,12 @@
       paperPanel.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-past-paper.js?v=p203paper1");
       document.head.appendChild(paperPanel);
     }
+    if (/^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-profile-completeness]')) {
+      const profileGuard = document.createElement("script");
+      profileGuard.dataset.examPrepProfileCompleteness = "true";
+      profileGuard.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-profile-completeness.js?v=p205profile1");
+      document.head.appendChild(profileGuard);
+    }
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
   }
