@@ -5,6 +5,8 @@ function assert(condition, message) { if (!condition) throw new Error(message); 
 
 const migration = read('supabase/migrations/20260908080000_exam_prep_p2_07_recovery_engine_v1.sql');
 const api = read('exam-prep/exam-prep-api.js');
+const ui = read('exam-prep/exam-prep-recovery.js');
+const thresholdLayer = read('exam-prep/exam-prep-threshold-reference.js');
 
 for (const token of [
   'private.exam_prep_recovery_cases',
@@ -41,6 +43,7 @@ assert(/check\(evidence_standards_preserved is true\)/i.test(migration), 'recove
 assert(/check\(absence_stage_downgrade_allowed is false\)/i.test(migration), 'absence-only stage downgrade must be hard-disabled');
 assert(/recovery_mode='recovery_2_3w' and recovery_window_started_on is not null and recovery_window_ends_on=recovery_window_started_on\+13/i.test(migration), '14-day recovery window contract missing');
 assert(/where user_id=v_uid and component_code=v_component and status='active'/i.test(migration), 'component-scoped active recovery handling missing');
+assert(migration.includes("if p_recovery_mode not in ('reserve_1w','source_gap_review','recovery_2_3w','rebaseline_over_1mo')"), 'recovery policy mode validation missing');
 
 for (const forbidden of [
   /update\s+private\.exam_prep_skill_states/i,
@@ -57,5 +60,34 @@ assert(api.includes('generate_exam_prep_weekly_plan_safe_v2'), 'API is not using
 assert(api.includes('get_exam_prep_weekly_plan_safe_v2'), 'API is not reading recovery-aware weekly plan v2');
 assert(api.includes('record_my_exam_prep_interruption_v1'), 'API interruption recorder missing');
 assert(api.includes('get_exam_prep_recovery_safe_v1'), 'API recovery reader missing');
+assert(!/async function generateWeeklyPlan\(componentCode,\s*recoveryMode/i.test(api), 'browser recovery mode parameter must not remain authoritative');
 
-console.log('P2-07 recovery engine regression: GREEN');
+assert(thresholdLayer.includes('exam-prep-recovery.js?v=p207recovery1'), 'recovery learner layer is not loaded');
+for (const token of [
+  'data-ep-recovery-card',
+  'data-ep-recovery-form',
+  'recordInterruption',
+  'Promise.allSettled',
+  'generateWeeklyPlan("P1")',
+  'generateWeeklyPlan("P5")',
+  '50% — обязательные непройденные темы',
+  '25% — задачи по ним',
+  '15% — более ранние темы',
+  '10% — практика на время',
+  'На следующие 14 дней',
+  'Все прежние результаты сохраняются.',
+  'P1 и P5 перепланируются отдельно',
+  '50% majburiy o‘tilmagan mavzular',
+  'For the next 14 days: 50% required uncovered topics'
+]) assert(ui.includes(token), `learner recovery UI contract missing: ${token}`);
+
+for (const forbidden of [
+  'source_gap_review',
+  'Core beta',
+  'Synthetic learner data',
+  'Screening',
+  'REBASELINE_COMPONENT',
+  'RECOVERY_MANDATORY_TOPIC'
+]) assert(!ui.includes(forbidden), `internal recovery wording leaked to learner UI source: ${forbidden}`);
+
+console.log('P2-07 recovery engine + learner flow regression: GREEN');
