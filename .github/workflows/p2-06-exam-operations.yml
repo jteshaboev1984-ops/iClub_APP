@@ -6,11 +6,13 @@ on:
       - main
     paths:
       - 'supabase/migrations/20260908070000_exam_prep_p2_06_exam_operations_v1.sql'
+      - 'supabase/migrations/20260908071000_exam_prep_p2_06_exam_calendar_integrity_v1.sql'
       - 'scripts/p2-06-exam-operations-regression.cjs'
       - '.github/workflows/p2-06-exam-operations.yml'
   pull_request:
     paths:
       - 'supabase/migrations/20260908070000_exam_prep_p2_06_exam_operations_v1.sql'
+      - 'supabase/migrations/20260908071000_exam_prep_p2_06_exam_calendar_integrity_v1.sql'
       - 'scripts/p2-06-exam-operations-regression.cjs'
       - '.github/workflows/p2-06-exam-operations.yml'
   workflow_dispatch:
