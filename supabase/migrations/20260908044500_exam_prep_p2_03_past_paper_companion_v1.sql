@@ -32,10 +32,14 @@ create table if not exists private.exam_prep_paper_metadata (
   check ((component_code='P1' and paper_number=1) or (component_code='P5' and paper_number=5)),
   check (official_url like 'https://www.cambridgeinternational.org/%'),
   check ((resource_kind='official_past_paper_portal' and exam_year is null and exam_series is null and variant_code is null)
-      or resource_kind='official_paper_metadata'),
-  unique(program_version_id,component_code,resource_kind,exam_year,exam_series,variant_code)
+      or resource_kind='official_paper_metadata')
 );
 
+create unique index if not exists exam_prep_paper_metadata_identity_uidx
+  on private.exam_prep_paper_metadata(
+    program_version_id,component_code,resource_kind,
+    coalesce(exam_year,0),coalesce(exam_series,''),coalesce(variant_code,'')
+  );
 create index if not exists exam_prep_paper_metadata_component_idx
   on private.exam_prep_paper_metadata(program_version_id,component_code,publication_status,resource_kind);
 
@@ -138,8 +142,9 @@ begin
   ) order by coalesce(t.min_operational_stage,3),a.id),'[]'::jsonb)
   into v_full
   from private.exam_prep_assessments a
+  join private.exam_prep_content_versions cv on cv.id=a.content_version_id and cv.program_version_id=v_program
   join private.exam_prep_timed_assessment_contracts t on t.assessment_id=a.id
-  where a.program_version_id=v_program and a.component_code=p_component_code
+  where a.component_code=p_component_code
     and a.status='published' and t.status='published'
     and t.attempt_kind='full_paper' and t.comparison_scope='full';
 
@@ -154,8 +159,9 @@ begin
   ) order by case t.attempt_kind when 'timed_section' then 0 else 1 end,a.id),'[]'::jsonb)
   into v_similar
   from private.exam_prep_assessments a
+  join private.exam_prep_content_versions cv on cv.id=a.content_version_id and cv.program_version_id=v_program
   join private.exam_prep_timed_assessment_contracts t on t.assessment_id=a.id
-  where a.program_version_id=v_program and a.component_code=p_component_code
+  where a.component_code=p_component_code
     and a.status='published' and t.status='published'
     and t.attempt_kind in ('timed_section','modified_paper');
 
