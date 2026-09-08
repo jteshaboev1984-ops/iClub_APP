@@ -1,0 +1,208 @@
+name: P2-12 Product Content-Complete Label Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep_p2_12_*.sql'
+      - 'supabase/tests/p2_12_product_content_complete_label_matrix.sql'
+      - 'scripts/p2-12-product-label-regression.cjs'
+      - '.github/workflows/p2-12-product-label.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/*exam_prep_p2_12_*.sql'
+      - 'supabase/tests/p2_12_product_content_complete_label_matrix.sql'
+      - 'scripts/p2-12-product-label-regression.cjs'
+      - '.github/workflows/p2-12-product-label.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  product-label:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostics
+        run: printf 'P2-12 Product Content-Complete label gate\n' > p212.log
+
+      - name: Static non-destructive contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/p2-12-product-label-regression.cjs
+          node scripts/p2-12-product-label-regression.cjs | tee -a p212.log
+
+      - name: Bootstrap legacy and Supabase contract
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p212.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p212.log
+
+      - name: Apply P0 Exam Prep foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for stage in 04 05 06 07 08 09 10 11 12 13 15 16; do
+            mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p0_${stage}_*.sql" | sort)
+            test "${#files[@]}" -ge 1
+            for f in "${files[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >>p212.log 2>&1; done
+          done
+
+      - name: Apply P1-01 through P1-03
+        shell: bash
+        run: |
+          set -euo pipefail
+          for stage in 01 02 03; do
+            mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p1_${stage}_*.sql" | sort)
+            test "${#files[@]}" -ge 1
+            for f in "${files[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >>p212.log 2>&1; done
+          done
+
+      - name: Prepare synthetic Core-only stage-release boundary
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' 2>&1 | tee -a p212.log
+          update private.exam_prep_feature_config
+          set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now()
+          where program_key='math_as_p1_p5';
+          SQL
+
+      - name: Apply governed Stage 3-6 release migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f \( -name '20260907*exam_prep_stage*.sql' -o -name '20260907080000_exam_prep_readiness_state_projection_v1.sql' \) | sort)
+          test "${#files[@]}" -ge 8
+          for f in "${files[@]}"; do
+            echo "=== Applying governed release $f ===" | tee -a p212.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p212.log 2>&1
+          done
+
+      - name: Restore fail-closed boundary
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' 2>&1 | tee -a p212.log
+          update private.exam_prep_feature_config
+          set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now()
+          where program_key='math_as_p1_p5';
+          SQL
+
+      - name: Apply P1-04 AI safety and source metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p1_04_*.sql' | sort)
+          test "${#files[@]}" -ge 2
+          for f in "${files[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >>p212.log 2>&1; done
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260907103000_exam_prep_ai_initial_context_source_pack_v1.sql >>p212.log 2>&1
+
+      - name: Apply P1-05 legacy reference fixture and adapter
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql 2>&1 | tee -a p212.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260907112000_exam_prep_p1_05_legacy_reference_adapter_v1.sql 2>&1 | tee -a p212.log
+
+      - name: Apply P1-06 security hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p1_06_*.sql' | sort)
+          test "${#files[@]}" -ge 1
+          for f in "${files[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >>p212.log 2>&1; done
+
+      - name: Prepare synthetic Core-only P2 release boundary
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' 2>&1 | tee -a p212.log
+          update private.exam_prep_feature_config
+          set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now()
+          where program_key='math_as_p1_p5';
+          SQL
+
+      - name: Apply P2 dependencies through P2-12
+        shell: bash
+        run: |
+          set -euo pipefail
+          for stage in 03 05 06 07 08 09 10 11 12; do
+            mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p2_${stage}_*.sql" | sort)
+            test "${#files[@]}" -ge 1
+            for f in "${files[@]}"; do
+              echo "=== Applying $f ===" | tee -a p212.log
+              psql -v ON_ERROR_STOP=1 -f "$f" >>p212.log 2>&1
+            done
+            if [[ "$stage" == "05" ]]; then
+              f='supabase/migrations/20260908053500_exam_prep_latest_threshold_reference_v1.sql'
+              echo "=== Applying $f ===" | tee -a p212.log
+              psql -v ON_ERROR_STOP=1 -f "$f" >>p212.log 2>&1
+            fi
+          done
+
+      - name: Restore fail-closed boundary after P2 release
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' 2>&1 | tee -a p212.log
+          update private.exam_prep_feature_config
+          set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now()
+          where program_key='math_as_p1_p5';
+          SQL
+
+      - name: Run product label governance matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_12_product_content_complete_label_matrix.sql 2>&1 | tee -a p212.log
+
+      - name: Prove fail-closed baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          evidence="$(psql -Atqc "select count(*) from private.exam_prep_evidence_events")"
+          thresholds="$(psql -Atqc "select count(*) from private.exam_prep_stage5_thresholds where status='approved'")"
+          badlabels="$(psql -Atqc "select count(*) from private.exam_prep_product_roadmap_milestones where lower(product_label) like '%as ready%' or lower(product_label) like '%exam ready%'")"
+          label="$(psql -Atqc "select product_label from private.exam_prep_product_roadmap_milestones where milestone_key='product_content_complete' and milestone_status<>'retired'")"
+          test "$state" = 'off|false|false|false|true'
+          test "$evidence" = '0'
+          test "$thresholds" = '0'
+          test "$badlabels" = '0'
+          test "$label" = 'Product Content-Complete'
+          echo 'P2-12 Product Content-Complete label gate: GREEN' | tee -a p212.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-12-product-label-diagnostics
+          path: p212.log
+          if-no-files-found: error
+          retention-days: 3
