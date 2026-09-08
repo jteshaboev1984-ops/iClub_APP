@@ -121,8 +121,9 @@ select pv.id,'product_calendar_2026_2027_v1',r.milestone_key,r.milestone_kind,r.
 from pv cross join rows r
 on conflict(program_version_id,roadmap_version,milestone_key) do nothing;
 
--- Product->student coupling is one-way and blocking only. The hard runway floor may withhold NEW learning;
--- it cannot promote stage, raise mastery, create evidence or alter corrections/history.
+-- Product->student coupling is one-way and blocking only. The hard runway floor may withhold NEW learning
+-- while future syllabus content is genuinely unavailable. Once the governed syllabus runway is complete through AW24,
+-- a short remaining week horizon must not block closure/catch-up work that is already published and governed.
 create or replace function private.exam_prep_product_dependency_for_week_v1(
   p_program_version_id bigint,
   p_component_code text,
@@ -137,6 +138,9 @@ as $$
 declare
   v_runway jsonb;
   v_component jsonb;
+  v_ready_through int;
+  v_raw_hard_floor boolean;
+  v_terminal_content_complete boolean;
 begin
   if p_component_code not in ('P1','P5') then raise exception 'exam_prep_bad_component'; end if;
   if p_active_week_no is null or p_active_week_no not between 1 and 36 then raise exception 'exam_prep_bad_active_week'; end if;
@@ -147,6 +151,9 @@ begin
 
   v_runway:=public.get_exam_prep_content_runway_v1(p_active_week_no);
   v_component:=v_runway->'components'->p_component_code;
+  v_ready_through:=coalesce((v_component->>'ready_through_aw')::int,p_active_week_no-1);
+  v_raw_hard_floor:=coalesce((v_component->>'hard_floor_2w_green')::boolean,false);
+  v_terminal_content_complete:=v_ready_through>=24;
 
   return jsonb_build_object(
     'component_code',p_component_code,
@@ -154,9 +161,11 @@ begin
     'dependency_mode','block_new_learning_only',
     'hard_floor_weeks',2,
     'target_weeks',4,
-    'ready_through_aw',coalesce((v_component->>'ready_through_aw')::int,p_active_week_no-1),
+    'ready_through_aw',v_ready_through,
     'ahead_weeks',coalesce((v_component->>'ahead_weeks')::int,0),
-    'hard_floor_2w_green',coalesce((v_component->>'hard_floor_2w_green')::boolean,false),
+    'hard_floor_2w_green',v_raw_hard_floor,
+    'terminal_content_runway_complete',v_terminal_content_complete,
+    'learning_dependency_green',(v_raw_hard_floor or v_terminal_content_complete),
     'target_4w_green',coalesce((v_component->>'target_4w_green')::boolean,false),
     'can_block_new_learning',true,
     'can_force_learner_stage',false,
@@ -169,8 +178,9 @@ $$;
 revoke all on function private.exam_prep_product_dependency_for_week_v1(bigint,text,smallint) from public,anon,authenticated;
 grant execute on function private.exam_prep_product_dependency_for_week_v1(bigint,text,smallint) to service_role;
 
--- Harden the existing skill/runway guard with the roadmap hard floor. This is used by weekly-plan generation
--- and learning authorization, so insufficient product runway can withhold new learning without touching learner state.
+-- Harden the existing skill/runway guard with the roadmap dependency gate. Weekly-plan generation and
+-- learning authorization already use this guard, so unavailable future content can withhold new learning
+-- without touching learner state. Terminal AW24 completion keeps already-governed closure learning available.
 create or replace function private.exam_prep_skill_runway_ready_for_week_v1(
   p_program_version_id bigint,
   p_component_code text,
@@ -185,7 +195,7 @@ set search_path=''
 as $$
   select coalesce((private.exam_prep_product_dependency_for_week_v1(
       p_program_version_id,p_component_code,p_active_week_no
-    )->>'hard_floor_2w_green')::boolean,false)
+    )->>'learning_dependency_green')::boolean,false)
     and private.exam_prep_skill_content_ready_v1(p_program_version_id,p_component_code,p_skill_code)
     and exists(
       select 1
@@ -381,8 +391,8 @@ begin
   ) then raise exception 'P2-11 student roadmap gained calendar promotion authority'; end if;
 
   select pg_get_functiondef('private.exam_prep_skill_runway_ready_for_week_v1(bigint,text,text,smallint)'::regprocedure) into v_def;
-  if position('hard_floor_2w_green' in v_def)=0 then
-    raise exception 'P2-11 product runway hard-floor dependency is not enforced on learning';
+  if position('learning_dependency_green' in v_def)=0 then
+    raise exception 'P2-11 product dependency gate is not enforced on learning';
   end if;
 
   if has_table_privilege('authenticated','private.exam_prep_student_roadmap_windows','SELECT')
