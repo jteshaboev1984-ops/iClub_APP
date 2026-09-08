@@ -110,6 +110,9 @@ as $$
 declare v_policy jsonb;
 begin
   if p_interruption_kind not in ('absence','planned_holiday','other') then raise exception 'exam_prep_bad_interruption_kind'; end if;
+  if p_recovery_mode not in ('reserve_1w','source_gap_review','recovery_2_3w','rebaseline_over_1mo') then
+    raise exception 'exam_prep_bad_recovery_mode';
+  end if;
 
   v_policy:=case p_recovery_mode
     when 'reserve_1w' then jsonb_build_object(
@@ -163,7 +166,7 @@ begin
       'automatic_stage_change',false,
       'evidence_standards_unchanged',true
     )
-    else raise exception 'exam_prep_bad_recovery_mode'
+    else '{}'::jsonb
   end;
 
   if p_interruption_kind='planned_holiday' then
