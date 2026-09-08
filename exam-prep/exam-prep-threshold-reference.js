@@ -197,5 +197,20 @@
     internal.thresholdReferenceUiVersion = VERSION;
   }
 
+  function loadRecoveryLayer() {
+    try {
+      const src = document?.currentScript?.src || "";
+      if (!src || !/exam-prep-threshold-reference\.js(?:\?|$)/.test(src)) return;
+      if (document.querySelector('script[data-exam-prep-recovery]')) return;
+      const script = document.createElement("script");
+      script.dataset.examPrepRecovery = "true";
+      script.src = src.replace(/exam-prep-threshold-reference\.js(?:\?.*)?$/, "exam-prep-recovery.js?v=p207recovery1");
+      document.head.appendChild(script);
+    } catch (_) {
+      // Recovery UI is additive; Core remains available if this optional layer cannot load.
+    }
+  }
+
+  loadRecoveryLayer();
   attach();
 })();
