@@ -73,9 +73,21 @@ BEGIN
     RAISE EXCEPTION 'P2-03 copyright boundary failed %',p1->'copyright_boundary';
   END IF;
 
-  IF p1::text ~* '(correct_answer|answer_key|mark_scheme|question_text|rubric_json|examiner_report)' OR
-     p5::text ~* '(correct_answer|answer_key|mark_scheme|question_text|rubric_json|examiner_report)' THEN
-    RAISE EXCEPTION 'P2-03 protected content key leaked in safe payload';
+  -- Check protected CONTENT-BEARING keys structurally. Do not regex the values:
+  -- learner notices legitimately contain phrases such as "mark scheme" while
+  -- explicitly stating that iClub does not store/copy that material.
+  SELECT count(*) INTO v_bad
+  FROM (
+    SELECT x FROM jsonb_array_elements(p1->'external_resources') x
+    UNION ALL SELECT x FROM jsonb_array_elements(p1->'original_full_simulations') x
+    UNION ALL SELECT x FROM jsonb_array_elements(p1->'similar_practice') x
+    UNION ALL SELECT x FROM jsonb_array_elements(p5->'external_resources') x
+    UNION ALL SELECT x FROM jsonb_array_elements(p5->'original_full_simulations') x
+    UNION ALL SELECT x FROM jsonb_array_elements(p5->'similar_practice') x
+  ) s
+  WHERE s.x ?| array['correct_answer','answer_key','mark_scheme','question_text','rubric_json','examiner_report'];
+  IF v_bad<>0 THEN
+    RAISE EXCEPTION 'P2-03 protected content-bearing key leaked in safe payload rows=%',v_bad;
   END IF;
 
   SELECT count(*) INTO v_bad
