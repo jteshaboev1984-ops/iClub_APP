@@ -1,0 +1,62 @@
+name: TMP P2-13 C24 learner UI patch retry2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/_tmp_p213_ui_patch_retry2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Reuse exact reviewed patch script
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path('.github/workflows/_tmp_p213_ui_patch.yml').read_text()
+          marker = '          from pathlib import Path\n'
+          start = source.index(marker)
+          end = source.index('\n          PY\n', start)
+          block = source[start:end]
+          code = '\n'.join(line[10:] if line.startswith('          ') else line for line in block.splitlines())
+          exec(compile(code, '_tmp_p213_ui_patch.py', 'exec'), {})
+          PY
+
+      - name: Static and browser C24 regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-overview-placement.js
+          node --check .github/scripts/p0_14_legacy_off_regression.js
+          node --check .github/scripts/p2_13_stage0_workflow_ui_regression.js
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+          node .github/scripts/p2_13_stage0_workflow_ui_regression.js
+
+      - name: Commit app files only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -- package.json package-lock.json .github/workflows/p0-14-host-regression.yml 2>/dev/null || true
+          rm -rf node_modules
+          git diff --check
+          test "$(git diff --name-only | wc -l | tr -d ' ')" = '4'
+          git diff --name-only | grep -qx 'exam-prep/exam-prep-api.js'
+          git diff --name-only | grep -qx 'exam-prep/exam-prep-overview-placement.js'
+          git diff --name-only | grep -qx 'index.html'
+          git diff --name-only | grep -qx '.github/scripts/p0_14_legacy_off_regression.js'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add exam-prep/exam-prep-api.js exam-prep/exam-prep-overview-placement.js index.html .github/scripts/p0_14_legacy_off_regression.js
+          git commit -m 'feat(exam-prep): surface C24 multi-session placement safely'
+          git push origin HEAD:main
