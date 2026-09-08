@@ -188,6 +188,7 @@
       if (error) error.innerHTML = `<div class="ep-live-error">${esc(copy().error)}</div>`;
     } finally {
       busy = false;
+      queueHydrate();
     }
   }
 
