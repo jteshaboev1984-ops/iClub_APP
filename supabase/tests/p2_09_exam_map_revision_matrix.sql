@@ -32,7 +32,7 @@ SELECT
   (SELECT count(*) FROM private.exam_prep_correction_cases WHERE user_id=(SELECT user_id FROM p209_user)) correction_cases,
   (SELECT count(*) FROM public.practice_attempts WHERE user_id=(SELECT user_id FROM p209_user)) practice_attempts,
   (SELECT count(*) FROM public.tour_attempts WHERE user_id=(SELECT user_id FROM p209_user)) tour_attempts,
-  (SELECT count(*) FROM public.certificates WHERE user_id=(SELECT user_id FROM p209_user)) certificates;
+  (SELECT count(*) FROM public.certificates) certificates;
 
 SELECT set_config('request.jwt.claim.sub',(SELECT user_id::text FROM p209_user),true);
 SET LOCAL ROLE authenticated;
@@ -154,7 +154,7 @@ BEGIN
     (SELECT count(*) FROM private.exam_prep_correction_cases WHERE user_id=v_uid) correction_cases,
     (SELECT count(*) FROM public.practice_attempts WHERE user_id=v_uid) practice_attempts,
     (SELECT count(*) FROM public.tour_attempts WHERE user_id=v_uid) tour_attempts,
-    (SELECT count(*) FROM public.certificates WHERE user_id=v_uid) certificates
+    (SELECT count(*) FROM public.certificates) certificates
   INTO a;
 
   IF row_to_json(a)::text<>row_to_json(b)::text THEN
