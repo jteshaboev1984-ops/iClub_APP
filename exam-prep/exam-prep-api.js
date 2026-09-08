@@ -189,14 +189,28 @@
     });
   }
 
-  async function weeklyPlan(componentCode) {
-    return rpc("get_exam_prep_weekly_plan_safe_v1", { p_component_code: String(componentCode || "") });
+  async function recovery(componentCode) {
+    return rpc("get_exam_prep_recovery_safe_v1", { p_component_code: String(componentCode || "") });
   }
 
-  async function generateWeeklyPlan(componentCode, recoveryMode = "normal") {
-    return rpc("generate_exam_prep_weekly_plan_safe_v1", {
-      p_component_code: String(componentCode || ""),
-      p_recovery_mode: String(recoveryMode || "normal")
+  async function recordInterruption({ startedOn, resumedOn, kind = "absence" } = {}) {
+    const started = String(startedOn || "").trim();
+    const resumed = String(resumedOn || "").trim();
+    if (!started || !resumed) return fail("interruption_dates_required");
+    return rpc("record_my_exam_prep_interruption_v1", {
+      p_interruption_started_on: started,
+      p_resumed_on: resumed,
+      p_interruption_kind: String(kind || "absence")
+    });
+  }
+
+  async function weeklyPlan(componentCode) {
+    return rpc("get_exam_prep_weekly_plan_safe_v2", { p_component_code: String(componentCode || "") });
+  }
+
+  async function generateWeeklyPlan(componentCode) {
+    return rpc("generate_exam_prep_weekly_plan_safe_v2", {
+      p_component_code: String(componentCode || "")
     });
   }
 
@@ -271,6 +285,8 @@
     startSession,
     submitResponse,
     finalizeSession,
+    recovery,
+    recordInterruption,
     weeklyPlan,
     generateWeeklyPlan,
     authorizePlanItem,
