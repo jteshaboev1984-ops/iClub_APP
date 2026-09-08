@@ -1,0 +1,27 @@
+name: P2-05 Exam Profile Completeness Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-profile-completeness.js
+      - scripts/p2-05-profile-completeness-regression.cjs
+      - .github/workflows/p2-05-profile-completeness.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  profile-completeness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check learner scripts
+        run: |
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-profile-completeness.js
+      - name: Run P2-05 profile completeness regression
+        run: node scripts/p2-05-profile-completeness-regression.cjs
