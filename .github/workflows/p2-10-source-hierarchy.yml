@@ -50,7 +50,9 @@ jobs:
         run: printf 'P2-10 Source Hierarchy & Working Tools gate\n' > p210.log
 
       - name: Static non-destructive contract
+        shell: bash
         run: |
+          set -euo pipefail
           node --check scripts/p2-10-source-hierarchy-regression.cjs
           node scripts/p2-10-source-hierarchy-regression.cjs | tee -a p210.log
 
@@ -157,6 +159,11 @@ jobs:
               echo "=== Applying $f ===" | tee -a p210.log
               psql -v ON_ERROR_STOP=1 -f "$f" >>p210.log 2>&1
             done
+            if [[ "$stage" == "05" ]]; then
+              f='supabase/migrations/20260908053500_exam_prep_latest_threshold_reference_v1.sql'
+              echo "=== Applying $f ===" | tee -a p210.log
+              psql -v ON_ERROR_STOP=1 -f "$f" >>p210.log 2>&1
+            fi
           done
 
       - name: Restore fail-closed boundary after P2 release
