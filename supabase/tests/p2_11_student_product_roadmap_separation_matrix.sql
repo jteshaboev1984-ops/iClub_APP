@@ -53,6 +53,7 @@ DECLARE
   v_student int;
   v_product int;
   v_skill text;
+  v_prior_skill text;
   v_status jsonb;
 BEGIN
   SELECT id INTO v_program
@@ -147,6 +148,8 @@ BEGIN
 
   v_status:=private.exam_prep_product_dependency_for_week_v1(v_program,'P1',23::smallint);
   IF (v_status->>'hard_floor_2w_green')::boolean IS DISTINCT FROM true
+     OR (v_status->>'terminal_content_runway_complete')::boolean IS DISTINCT FROM true
+     OR (v_status->>'learning_dependency_green')::boolean IS DISTINCT FROM true
      OR (v_status->>'can_force_learner_stage')::boolean IS DISTINCT FROM false
      OR (v_status->>'can_raise_learner_mastery')::boolean IS DISTINCT FROM false
      OR (v_status->>'can_create_learner_evidence')::boolean IS DISTINCT FROM false THEN
@@ -154,16 +157,49 @@ BEGIN
   END IF;
 
   IF private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1',v_skill,23::smallint) IS DISTINCT FROM true THEN
-    RAISE EXCEPTION 'P2-11 two-week hard floor should allow governed AW23 learning skill=%',v_skill;
+    RAISE EXCEPTION 'P2-11 governed AW23 learning should remain available skill=%',v_skill;
   END IF;
 
+  -- AW24 has only one calendar week left in the runway ledger, but the governed syllabus runway is already complete.
+  -- The dependency must not create an artificial learner block at syllabus closure.
   v_status:=private.exam_prep_product_dependency_for_week_v1(v_program,'P1',24::smallint);
-  IF (v_status->>'hard_floor_2w_green')::boolean IS DISTINCT FROM false THEN
-    RAISE EXCEPTION 'P2-11 week-24 should fail two-week runway floor: %',v_status;
+  IF (v_status->>'hard_floor_2w_green')::boolean IS DISTINCT FROM false
+     OR (v_status->>'terminal_content_runway_complete')::boolean IS DISTINCT FROM true
+     OR (v_status->>'learning_dependency_green')::boolean IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'P2-11 terminal AW24 dependency behavior mismatch: %',v_status;
   END IF;
-  IF private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1',v_skill,24::smallint) IS DISTINCT FROM false THEN
-    RAISE EXCEPTION 'P2-11 insufficient product runway must block NEW learning without promoting learner';
+  IF private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1',v_skill,24::smallint) IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'P2-11 terminal governed closure content must not be blocked by artificial horizon';
   END IF;
+
+  -- Prove the dependency still blocks genuinely unavailable future syllabus content.
+  SELECT rs.skill_code INTO v_prior_skill
+  FROM private.exam_prep_content_runway_releases r
+  JOIN private.exam_prep_content_runway_release_skills rs ON rs.release_id=r.id AND rs.required_for_release
+  WHERE r.program_version_id=v_program AND r.component_code='P1' AND r.schedule_status='active'
+    AND r.active_week_from=17 AND r.active_week_through=20
+  ORDER BY rs.skill_code LIMIT 1;
+  IF v_prior_skill IS NULL THEN RAISE EXCEPTION 'P2-11 AW17-20 P1 runway fixture missing'; END IF;
+
+  UPDATE private.exam_prep_content_runway_releases
+  SET schedule_status='retired'
+  WHERE program_version_id=v_program AND component_code='P1'
+    AND active_week_from=21 AND active_week_through=24 AND schedule_status='active';
+
+  v_status:=private.exam_prep_product_dependency_for_week_v1(v_program,'P1',20::smallint);
+  IF (v_status->>'hard_floor_2w_green')::boolean IS DISTINCT FROM false
+     OR (v_status->>'terminal_content_runway_complete')::boolean IS DISTINCT FROM false
+     OR (v_status->>'learning_dependency_green')::boolean IS DISTINCT FROM false THEN
+    RAISE EXCEPTION 'P2-11 unavailable future content should close dependency gate: %',v_status;
+  END IF;
+  IF private.exam_prep_skill_runway_ready_for_week_v1(v_program,'P1',v_prior_skill,20::smallint) IS DISTINCT FROM false THEN
+    RAISE EXCEPTION 'P2-11 genuinely insufficient product runway must block NEW learning';
+  END IF;
+
+  UPDATE private.exam_prep_content_runway_releases
+  SET schedule_status='active'
+  WHERE program_version_id=v_program AND component_code='P1'
+    AND active_week_from=21 AND active_week_through=24 AND schedule_status='retired';
 
   v_status:=private.exam_prep_product_roadmap_status_v1();
   IF v_status->>'contract_version'<>'p2_11_c22_v1'
@@ -206,9 +242,9 @@ BEGIN
     RAISE EXCEPTION 'P2-11 Stage 0 target/latest-safe projection mismatch: %',v_p1;
   END IF;
 
-  IF (v_p1->'product_dependency'->>'hard_floor_2w_green')::boolean IS DISTINCT FROM true
-     OR (v_p5->'product_dependency'->>'hard_floor_2w_green')::boolean IS DISTINCT FROM true THEN
-    RAISE EXCEPTION 'P2-11 opening learner route lacks required two-week product runway';
+  IF (v_p1->'product_dependency'->>'learning_dependency_green')::boolean IS DISTINCT FROM true
+     OR (v_p5->'product_dependency'->>'learning_dependency_green')::boolean IS DISTINCT FROM true THEN
+    RAISE EXCEPTION 'P2-11 opening learner route lacks governed product dependency';
   END IF;
 
   IF (v_p1->>'p1_p5_mastery_separate')::boolean IS DISTINCT FROM true
