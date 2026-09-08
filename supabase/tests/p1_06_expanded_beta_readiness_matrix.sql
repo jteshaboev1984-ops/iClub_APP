@@ -45,7 +45,7 @@ BEGIN
   END IF;
 
   SELECT count(*) INTO v_cards FROM private.exam_prep_ai_source_cards
-  WHERE status='approved' AND is_enabled AND source_kind='original_iclub';
+  WHERE approval_status='approved' AND is_runtime_allowed AND rights_status='original_iclub';
   SELECT generation_enabled INTO v_generation FROM private.exam_prep_ai_policy WHERE id=1;
   IF v_cards<>12 OR v_generation IS DISTINCT FROM false THEN
     RAISE EXCEPTION 'P1-06 dormant AI contract mismatch approved_cards=% generation=%',v_cards,v_generation;
@@ -55,7 +55,7 @@ BEGIN
     SELECT 1 FROM private.exam_prep_legacy_reference_configs c
     WHERE c.source_type<>'legacy_readonly'
   ) THEN
-    RAISE EXCEPTION 'P1-06 legacy adapter contains a crediting/non-readonly source';
+    RAISE EXCEPTION 'P1-06 legacy adapter contains a non-readonly source';
   END IF;
 END
 $$;
@@ -174,15 +174,19 @@ $$;
 -- AI outage must remove only AI convenience, never Core or Mentor Care.
 UPDATE private.exam_prep_feature_config SET ai_enabled=false,updated_at=now() WHERE id=1;
 DO $$
-DECLARE v_bad int;
+DECLARE r record; c record;
 BEGIN
-  SELECT count(*) INTO v_bad
-  FROM p106_people p
-  CROSS JOIN LATERAL (
-    SELECT * FROM public.get_exam_prep_capabilities_for_user_service_v1(p.user_id)
-  ) c
-  WHERE p.ord<=18 AND (NOT c.core_access OR c.ai_assist);
-  IF v_bad<>0 THEN RAISE EXCEPTION 'P1-06 AI outage damaged Core or left AI active rows=%',v_bad; END IF;
+  FOR r IN SELECT ord,user_id FROM p106_people WHERE ord<=18 LOOP
+    PERFORM set_config('request.jwt.claim.sub',r.user_id::text,true);
+    PERFORM set_config('request.jwt.claim.role','authenticated',true);
+    SELECT * INTO c FROM public.get_exam_prep_capabilities_v1();
+    IF NOT c.core_access OR c.ai_assist THEN
+      RAISE EXCEPTION 'P1-06 AI outage damaged Core or left AI active learner=% payload=%',r.ord,row_to_json(c);
+    END IF;
+    IF (r.ord BETWEEN 15 AND 18) IS DISTINCT FROM c.mentor_authority THEN
+      RAISE EXCEPTION 'P1-06 AI outage changed Mentor authority learner=% payload=%',r.ord,row_to_json(c);
+    END IF;
+  END LOOP;
 END
 $$;
 
