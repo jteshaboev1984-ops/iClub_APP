@@ -1,0 +1,169 @@
+name: TMP P2-13 C24 learner UI patch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/_tmp_p213_ui_patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Apply exact C24 learner patch
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_exact(path, old, new, count=1):
+              p = Path(path)
+              text = p.read_text()
+              actual = text.count(old)
+              if actual != count:
+                  raise SystemExit(f'{path}: expected {count} occurrences, found {actual}: {old[:120]!r}')
+              p.write_text(text.replace(old, new, count))
+
+          # API: add the read-only C24 workflow endpoint and bump only the placement learner layer cache key.
+          replace_exact(
+              'exam-prep/exam-prep-api.js',
+              '  async function placementResult(componentCode) { return rpc("get_exam_prep_placement_result_safe_v1", { p_component_code: componentArg(componentCode) }); }\n  async function syllabusTracker(componentCode) {',
+              '  async function placementResult(componentCode) { return rpc("get_exam_prep_placement_result_safe_v1", { p_component_code: componentArg(componentCode) }); }\n  async function stage0Workflow(componentCode) { return rpc("get_exam_prep_stage0_workflow_safe_v1", { p_component_code: componentArg(componentCode) }); }\n  async function syllabusTracker(componentCode) {'
+          )
+          replace_exact(
+              'exam-prep/exam-prep-api.js',
+              '    legacyReferenceSummary, placementResult, syllabusTracker, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,',
+              '    legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,'
+          )
+          replace_exact(
+              'exam-prep/exam-prep-api.js',
+              'exam-prep-overview-placement.js?v=p021overview1',
+              'exam-prep-overview-placement.js?v=p213placement1'
+          )
+
+          # Placement learner view: multilingual explanation of broad screening vs full multi-session placement.
+          replace_exact('exam-prep/exam-prep-overview-placement.js', 'const VERSION = "p021overview1";', 'const VERSION = "p213placement1";')
+
+          replace_exact(
+              'exam-prep/exam-prep-overview-placement.js',
+              '      diagnostic: "Kirish tekshiruvi", evidenceCorrect: "to‘g‘ri", evidenceIncorrect: "xato", evidenceRecorded: "saqlangan", placementNote: "Noaniq natija tezroq yo‘lni avtomatik ochmaydi. Kerak bo‘lsa qo‘shimcha tekshiruv bilan tasdiqlanadi.", back: "Umumiy ko‘rinishga qaytish"',
+              '      diagnostic: "Kirish tekshiruvi", evidenceCorrect: "to‘g‘ri", evidenceIncorrect: "xato", evidenceRecorded: "saqlangan", placementNote: "Noaniq natija tezroq yo‘lni avtomatik ochmaydi. Kerak bo‘lsa qo‘shimcha tekshiruv bilan tasdiqlanadi.", placementFlowTitle: "Tekshiruv qanday o‘tadi", placementFlowNote: "Kirish diagnostikasi qisqa bloklarda o‘tadi — hammasini bir martada bajarish shart emas. O‘quv yo‘nalishini to‘liq aniqlash uchun bir necha sessiya va faqat natija noaniq bo‘lsa, qo‘shimcha tasdiqlovchi topshiriqlar kerak bo‘lishi mumkin.", back: "Umumiy ko‘rinishga qaytish"'
+          )
+          replace_exact(
+              'exam-prep/exam-prep-overview-placement.js',
+              '      diagnostic: "Entry check", evidenceCorrect: "correct", evidenceIncorrect: "needs review", evidenceRecorded: "recorded", placementNote: "Ambiguous evidence never unlocks a faster route automatically. Extra evidence can be used to confirm the route when needed.", back: "Back to overview"',
+              '      diagnostic: "Entry check", evidenceCorrect: "correct", evidenceIncorrect: "needs review", evidenceRecorded: "recorded", placementNote: "Ambiguous evidence never unlocks a faster route automatically. Extra evidence can be used to confirm the route when needed.", placementFlowTitle: "How the check works", placementFlowNote: "The entry diagnostic runs in short blocks, so you do not need to finish everything at once. Full route placement may take several sessions and, only when the result is unclear, extra confirmation tasks.", back: "Back to overview"'
+          )
+          replace_exact(
+              'exam-prep/exam-prep-overview-placement.js',
+              '      diagnostic: "Входная проверка", evidenceCorrect: "верно", evidenceIncorrect: "нужно разобрать", evidenceRecorded: "сохранено", placementNote: "Неоднозначный результат не открывает ускоренный маршрут автоматически. При необходимости маршрут подтверждается дополнительными заданиями.", back: "Вернуться к обзору"',
+              '      diagnostic: "Входная проверка", evidenceCorrect: "верно", evidenceIncorrect: "нужно разобрать", evidenceRecorded: "сохранено", placementNote: "Неоднозначный результат не открывает ускоренный маршрут автоматически. При необходимости маршрут подтверждается дополнительными заданиями.", placementFlowTitle: "Как проходит проверка", placementFlowNote: "Входная диагностика проходит короткими блоками — не нужно выполнять всё за один раз. Для полного определения маршрута может понадобиться несколько сессий и, только если результат неоднозначный, дополнительные задания.", back: "Вернуться к обзору"'
+          )
+
+          replace_exact(
+              'exam-prep/exam-prep-overview-placement.js',
+              '''    const result = await internal.api.placementResult(component);\n    busy = false;\n    if (!result?.ok) { renderPlacementError(component); return; }\n    renderPlacement(component, result.data || {});\n  }\n\n  function renderPlacement(component, data) {''',
+              '''    const workflowPromise = typeof internal.api?.stage0Workflow === "function"\n      ? internal.api.stage0Workflow(component)\n      : Promise.resolve(null);\n    const [result, workflowResult] = await Promise.all([internal.api.placementResult(component), workflowPromise]);\n    busy = false;\n    if (!result?.ok) { renderPlacementError(component); return; }\n    renderPlacement(component, result.data || {}, workflowResult?.ok ? (workflowResult.data || null) : null);\n  }\n\n  function renderPlacement(component, data, workflow = null) {'''
+          )
+
+          replace_exact(
+              'exam-prep/exam-prep-overview-placement.js',
+              '''    const actionCode = String(data?.next_action_code || "continue_entry_check");\n    const body = !available''',
+              '''    const actionCode = String(data?.next_action_code || "continue_entry_check");\n    const workflowVisible = workflow?.contract_version === "p2_13_c24_v1"\n      && workflow?.placement_model === "multi_session"\n      && workflow?.single_session_completion_required === false;\n    const workflowNote = workflowVisible\n      ? `<div class="ep-placement-note" data-ep-placement-workflow><strong>${esc(c.placementFlowTitle)}</strong><br>${esc(c.placementFlowNote)}</div>`\n      : "";\n    const body = !available'''
+          )
+          replace_exact(
+              'exam-prep/exam-prep-overview-placement.js',
+              '''        <div class="ep-placement-note">${esc(c.foundationChecks)}: ${Number(prerequisites.unknown_count || 0)} ${esc(c.unknownFoundations)} · ${Number(prerequisites.blocker_count || 0)} ${esc(c.foundationBlockers)}</div></div>`;''',
+              '''        <div class="ep-placement-note">${esc(c.foundationChecks)}: ${Number(prerequisites.unknown_count || 0)} ${esc(c.unknownFoundations)} · ${Number(prerequisites.blocker_count || 0)} ${esc(c.foundationBlockers)}</div>${workflowNote}</div>`;'''
+          )
+
+          # Production cache key and compatibility guards.
+          replace_exact(
+              'index.html',
+              '<script src="exam-prep/exam-prep-api.js?v=p210materials1"></script>',
+              '<script src="exam-prep/exam-prep-api.js?v=p213placement1"></script>'
+          )
+          replace_exact(
+              '.github/scripts/p0_14_legacy_off_regression.js',
+              "x.includes('exam-prep/exam-prep-api.js?v=p210materials1'))",
+              "x.includes('exam-prep/exam-prep-api.js?v=p210materials1') || x.includes('exam-prep/exam-prep-api.js?v=p213placement1'))"
+          )
+
+          # General host regression: watch and verify the new learner contract without weakening older checks.
+          replace_exact(
+              '.github/workflows/p0-14-host-regression.yml',
+              "      - .github/scripts/p2_10_materials_ui_regression.js\n      - .github/workflows/p0-14-host-regression.yml",
+              "      - .github/scripts/p2_10_materials_ui_regression.js\n      - .github/scripts/p2_13_stage0_workflow_ui_regression.js\n      - .github/workflows/p0-14-host-regression.yml"
+          )
+          replace_exact(
+              '.github/workflows/p0-14-host-regression.yml',
+              "          node --check .github/scripts/p2_10_materials_ui_regression.js\n          grep -q 'id=\"subject-hub-exam-prep-entry\"' index.html",
+              "          node --check .github/scripts/p2_10_materials_ui_regression.js\n          node --check .github/scripts/p2_13_stage0_workflow_ui_regression.js\n          grep -q 'id=\"subject-hub-exam-prep-entry\"' index.html"
+          )
+          replace_exact(
+              '.github/workflows/p0-14-host-regression.yml',
+              "grep -Eq 'exam-prep/exam-prep-api[.]js[?]v=(p014h1|p209map1|p210materials1)' index.html",
+              "grep -Eq 'exam-prep/exam-prep-api[.]js[?]v=(p014h1|p209map1|p210materials1|p213placement1)' index.html"
+          )
+          replace_exact(
+              '.github/workflows/p0-14-host-regression.yml',
+              "grep -q 'exam-prep-overview-placement.js?v=p021overview1' exam-prep/exam-prep-api.js",
+              "grep -q 'exam-prep-overview-placement.js?v=p213placement1' exam-prep/exam-prep-api.js"
+          )
+          replace_exact(
+              '.github/workflows/p0-14-host-regression.yml',
+              "      - name: Browser-isolated combined learner views coexistence\n        run: node .github/scripts/p0_22_live_view_coexistence_regression.js",
+              "      - name: Browser-isolated Stage-0 multi-session placement copy\n        run: node .github/scripts/p2_13_stage0_workflow_ui_regression.js\n\n      - name: Browser-isolated combined learner views coexistence\n        run: node .github/scripts/p0_22_live_view_coexistence_regression.js"
+          )
+          PY
+
+      - name: Static safety checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-overview-placement.js
+          node --check .github/scripts/p0_14_legacy_off_regression.js
+          node --check .github/scripts/p2_13_stage0_workflow_ui_regression.js
+          grep -q 'get_exam_prep_stage0_workflow_safe_v1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-overview-placement.js?v=p213placement1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep/exam-prep-api.js?v=p213placement1' index.html
+          grep -q 'Как проходит проверка' exam-prep/exam-prep-overview-placement.js
+          grep -q 'Tekshiruv qanday o‘tadi' exam-prep/exam-prep-overview-placement.js
+          grep -q 'How the check works' exam-prep/exam-prep-overview-placement.js
+          ! grep -q '\.from(' exam-prep/exam-prep-overview-placement.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-overview-placement.js
+          ! grep -q 'iclub_state_v1' exam-prep/exam-prep-overview-placement.js
+          ! grep -q 'correct_answer' exam-prep/exam-prep-overview-placement.js
+
+      - name: Browser C24 regression
+        shell: bash
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+          node .github/scripts/p2_13_stage0_workflow_ui_regression.js
+
+      - name: Commit exact patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git status --short
+          test "$(git diff --name-only | wc -l | tr -d ' ')" = '5'
+          git diff --name-only | grep -qx 'exam-prep/exam-prep-api.js'
+          git diff --name-only | grep -qx 'exam-prep/exam-prep-overview-placement.js'
+          git diff --name-only | grep -qx 'index.html'
+          git diff --name-only | grep -qx '.github/scripts/p0_14_legacy_off_regression.js'
+          git diff --name-only | grep -qx '.github/workflows/p0-14-host-regression.yml'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add exam-prep/exam-prep-api.js exam-prep/exam-prep-overview-placement.js index.html .github/scripts/p0_14_legacy_off_regression.js .github/workflows/p0-14-host-regression.yml
+          git commit -m 'feat(exam-prep): surface C24 multi-session placement safely'
+          git push origin HEAD:main
