@@ -1,0 +1,31 @@
+name: P2-07 Recovery Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/20260908080000_exam_prep_p2_07_recovery_engine_v1.sql'
+      - 'exam-prep/exam-prep-api.js'
+      - 'scripts/p2-07-recovery-regression.cjs'
+      - '.github/workflows/p2-07-recovery.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/20260908080000_exam_prep_p2_07_recovery_engine_v1.sql'
+      - 'exam-prep/exam-prep-api.js'
+      - 'scripts/p2-07-recovery-regression.cjs'
+      - '.github/workflows/p2-07-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recovery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check learner API
+        run: node --check exam-prep/exam-prep-api.js
+      - name: Run P2-07 recovery regression
+        run: node scripts/p2-07-recovery-regression.cjs
