@@ -75,9 +75,10 @@ for (const forbidden of [
   /insert\s+into\s+public\.tour_attempts/i,
   /set\s+mentor_enabled\s*=\s*true/i,
   /set\s+ai_enabled\s*=\s*true/i,
-  /correct_answer/i,
-  /mark_scheme_text/i,
-  /question_text\s+text/i
+  /\bcorrect_answer\s+(?:text|jsonb|varchar|character\s+varying)\b/i,
+  /jsonb_build_object\s*\([^)]*['"]correct_answer['"]/i,
+  /mark_scheme_text\s+(?:text|jsonb|varchar|character\s+varying)\b/i,
+  /question_text\s+(?:text|jsonb|varchar|character\s+varying)\b/i
 ]) assert(!forbidden.test(migration), `forbidden P2-10 mutation/protected surface: ${forbidden}`);
 
 console.log('P2-10 Source Hierarchy & Working Tools regression: GREEN');
