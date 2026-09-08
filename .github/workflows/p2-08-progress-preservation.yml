@@ -1,0 +1,35 @@
+name: P2-08 Progress Preservation Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/20260908090000_exam_prep_p2_08_progress_preservation_revalidation_v1.sql'
+      - 'scripts/p2-08-progress-preservation-regression.cjs'
+      - '.github/workflows/p2-08-progress-preservation.yml'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-recovery.js'
+  pull_request:
+    paths:
+      - 'supabase/migrations/20260908090000_exam_prep_p2_08_progress_preservation_revalidation_v1.sql'
+      - 'scripts/p2-08-progress-preservation-regression.cjs'
+      - '.github/workflows/p2-08-progress-preservation.yml'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-recovery.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  progress-preservation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check learner scripts
+        run: |
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-recovery.js
+      - name: Run P2-08 progress preservation regression
+        run: node scripts/p2-08-progress-preservation-regression.cjs
