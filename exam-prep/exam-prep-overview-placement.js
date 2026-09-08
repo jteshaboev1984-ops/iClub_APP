@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p021overview1";
+  const VERSION = "p213placement1";
   let observer = null;
   let busy = false;
   let activeLanguage = "ru";
@@ -36,7 +36,7 @@
       directionPending: "Yetarli dalil yig‘ilmoqda", directionFoundation: "Asoslarni mustahkamlash", directionAccelerated: "Tezlashtirilgan dastur yo‘li", directionConsolidation: "Mustahkamlash va aralash mashqlar", directionExam: "Imtihon rejimi",
       unknownFoundations: "hali tekshirilmagan", foundationBlockers: "mustahkamlash kerak", continueCheck: "Kirish tekshiruvini davom ettirish", openPlan: "Haftalik rejani ochish", workCorrection: "Xato ustida ishlash", delayedRetest: "Qayta tekshirish", mixedPractice: "Aralash mashq", learning: "Keyingi mavzuni o‘rganish", strengthenFoundation: "Tayanch bilimni mustahkamlash", updatePlan: "Rejani yangilash", readiness: "Imtihon tayyorgarligini ko‘rish", finalCalibration: "Yakuniy moslashuv", noResult: "Natija hali mavjud emas.", loading: "Yuklanmoqda…", error: "Ma’lumotni yuklab bo‘lmadi. Qayta urinib ko‘ring.",
       stage0: "Kirish tekshiruvi", stage1: "Asoslarni mustahkamlash", stage2: "Dastur bo‘yicha o‘rganish", stage3: "Dastur qamrovini yopish", stage4: "Vaqt ostida mustahkamlash", stage5: "Imtihon tayyorgarligi", stage6: "Yakuniy moslashuv",
-      diagnostic: "Kirish tekshiruvi", evidenceCorrect: "to‘g‘ri", evidenceIncorrect: "xato", evidenceRecorded: "saqlangan", placementNote: "Noaniq natija tezroq yo‘lni avtomatik ochmaydi. Kerak bo‘lsa qo‘shimcha tekshiruv bilan tasdiqlanadi.", back: "Umumiy ko‘rinishga qaytish"
+      diagnostic: "Kirish tekshiruvi", evidenceCorrect: "to‘g‘ri", evidenceIncorrect: "xato", evidenceRecorded: "saqlangan", placementNote: "Noaniq natija tezroq yo‘lni avtomatik ochmaydi. Kerak bo‘lsa qo‘shimcha tekshiruv bilan tasdiqlanadi.", placementFlowTitle: "Tekshiruv qanday o‘tadi", placementFlowNote: "Kirish diagnostikasi qisqa bloklarda o‘tadi — hammasini bir martada bajarish shart emas. O‘quv yo‘nalishini to‘liq aniqlash uchun bir necha sessiya va faqat natija noaniq bo‘lsa, qo‘shimcha tasdiqlovchi topshiriqlar kerak bo‘lishi mumkin.", back: "Umumiy ko‘rinishga qaytish"
     };
     if (activeLanguage === "en") return {
       overview: "Overview", currentPhase: "Current phase", confirmedCoverage: "Confirmed coverage", lastCheck: "Last confirmation", nextStep: "Next step",
@@ -46,7 +46,7 @@
       directionPending: "Gathering enough evidence", directionFoundation: "Strengthen foundations", directionAccelerated: "Accelerated syllabus route", directionConsolidation: "Consolidation and mixed practice", directionExam: "Exam mode",
       unknownFoundations: "not checked yet", foundationBlockers: "need work", continueCheck: "Continue entry check", openPlan: "Open weekly plan", workCorrection: "Work on a correction", delayedRetest: "Complete delayed check", mixedPractice: "Mixed practice", learning: "Study the next topic", strengthenFoundation: "Strengthen a foundation", updatePlan: "Update weekly plan", readiness: "Review exam readiness", finalCalibration: "Final calibration", noResult: "No result is available yet.", loading: "Loading…", error: "Could not load this information. Try again.",
       stage0: "Entry check", stage1: "Foundation", stage2: "Syllabus learning", stage3: "Syllabus closure", stage4: "Timed consolidation", stage5: "Exam readiness", stage6: "Final calibration",
-      diagnostic: "Entry check", evidenceCorrect: "correct", evidenceIncorrect: "needs review", evidenceRecorded: "recorded", placementNote: "Ambiguous evidence never unlocks a faster route automatically. Extra evidence can be used to confirm the route when needed.", back: "Back to overview"
+      diagnostic: "Entry check", evidenceCorrect: "correct", evidenceIncorrect: "needs review", evidenceRecorded: "recorded", placementNote: "Ambiguous evidence never unlocks a faster route automatically. Extra evidence can be used to confirm the route when needed.", placementFlowTitle: "How the check works", placementFlowNote: "The entry diagnostic runs in short blocks, so you do not need to finish everything at once. Full route placement may take several sessions and, only when the result is unclear, extra confirmation tasks.", back: "Back to overview"
     };
     return {
       overview: "Обзор", currentPhase: "Текущий этап", confirmedCoverage: "Подтверждённое покрытие", lastCheck: "Последнее подтверждение", nextStep: "Следующий шаг",
@@ -56,7 +56,7 @@
       directionPending: "Собираем достаточно подтверждений", directionFoundation: "Укрепление основ", directionAccelerated: "Ускоренное прохождение программы", directionConsolidation: "Закрепление и смешанная практика", directionExam: "Экзаменационный режим",
       unknownFoundations: "ещё не проверено", foundationBlockers: "нужно укрепить", continueCheck: "Продолжить входную проверку", openPlan: "Открыть недельный план", workCorrection: "Разобрать ошибку", delayedRetest: "Пройти повторную проверку", mixedPractice: "Смешанная практика", learning: "Изучить следующую тему", strengthenFoundation: "Укрепить базовое знание", updatePlan: "Обновить недельный план", readiness: "Посмотреть готовность к экзамену", finalCalibration: "Финальная калибровка", noResult: "Результат пока недоступен.", loading: "Загрузка…", error: "Не удалось загрузить данные. Попробуйте ещё раз.",
       stage0: "Входная проверка", stage1: "Фундамент", stage2: "Изучение программы", stage3: "Закрытие программы", stage4: "Закрепление на время", stage5: "Готовность к экзамену", stage6: "Финальная калибровка",
-      diagnostic: "Входная проверка", evidenceCorrect: "верно", evidenceIncorrect: "нужно разобрать", evidenceRecorded: "сохранено", placementNote: "Неоднозначный результат не открывает ускоренный маршрут автоматически. При необходимости маршрут подтверждается дополнительными заданиями.", back: "Вернуться к обзору"
+      diagnostic: "Входная проверка", evidenceCorrect: "верно", evidenceIncorrect: "нужно разобрать", evidenceRecorded: "сохранено", placementNote: "Неоднозначный результат не открывает ускоренный маршрут автоматически. При необходимости маршрут подтверждается дополнительными заданиями.", placementFlowTitle: "Как проходит проверка", placementFlowNote: "Входная диагностика проходит короткими блоками — не нужно выполнять всё за один раз. Для полного определения маршрута может понадобиться несколько сессий и, только если результат неоднозначный, дополнительные задания.", back: "Вернуться к обзору"
     };
   }
 
@@ -167,19 +167,28 @@
     activeLanguage = detectLanguage();
     ensureStyle();
     renderPlacementLoading(component);
-    const result = await internal.api.placementResult(component);
+    const workflowPromise = typeof internal.api?.stage0Workflow === "function"
+      ? internal.api.stage0Workflow(component)
+      : Promise.resolve(null);
+    const [result, workflowResult] = await Promise.all([internal.api.placementResult(component), workflowPromise]);
     busy = false;
     if (!result?.ok) { renderPlacementError(component); return; }
-    renderPlacement(component, result.data || {});
+    renderPlacement(component, result.data || {}, workflowResult?.ok ? (workflowResult.data || null) : null);
   }
 
-  function renderPlacement(component, data) {
+  function renderPlacement(component, data, workflow = null) {
     const root = rootEl(); if (!root) return;
     const c = copy();
     const screening = data?.screening || {};
     const prerequisites = data?.prerequisites || {};
     const available = data?.available !== false;
     const actionCode = String(data?.next_action_code || "continue_entry_check");
+    const workflowVisible = workflow?.contract_version === "p2_13_c24_v1"
+      && workflow?.placement_model === "multi_session"
+      && workflow?.single_session_completion_required === false;
+    const workflowNote = workflowVisible
+      ? `<div class="ep-placement-note" data-ep-placement-workflow><strong>${esc(c.placementFlowTitle)}</strong><br>${esc(c.placementFlowNote)}</div>`
+      : "";
     const body = !available
       ? `<div class="ep-placement-card"><div class="ep-placement-note">${esc(c.noResult)}</div></div>`
       : `<div class="ep-placement-card"><div class="ep-placement-summary">
@@ -188,7 +197,7 @@
           <div class="ep-placement-stat"><span>${esc(c.currentDirection)}</span><strong>${esc(routeLabel(data?.provisional_route))}</strong></div>
           <div class="ep-placement-stat"><span>${esc(c.confidence)}</span><strong>${esc(data?.ambiguity === false ? c.currentRouteConfirmed : c.moreEvidence)}</strong></div>
         </div><div class="ep-placement-note"><strong>${esc(placementStatus(data))}</strong><br>${esc(c.placementNote)}</div>
-        <div class="ep-placement-note">${esc(c.foundationChecks)}: ${Number(prerequisites.unknown_count || 0)} ${esc(c.unknownFoundations)} · ${Number(prerequisites.blocker_count || 0)} ${esc(c.foundationBlockers)}</div></div>`;
+        <div class="ep-placement-note">${esc(c.foundationChecks)}: ${Number(prerequisites.unknown_count || 0)} ${esc(c.unknownFoundations)} · ${Number(prerequisites.blocker_count || 0)} ${esc(c.foundationBlockers)}</div>${workflowNote}</div>`;
     root.innerHTML = `<section class="ep-host-shell ep-placement-shell" data-ep-placement-screen><div class="ep-placement-top"><div><div class="ep-placement-sub">${esc(component)} · Cambridge AS Mathematics</div><div class="ep-placement-title">${esc(c.placementResult)}</div><div class="ep-placement-sub">${esc(c.placementIntro)}</div></div><button class="ep-placement-btn" type="button" data-ep-placement-back>${esc(c.back)}</button></div>${body}<div class="ep-placement-actions"><button class="ep-placement-btn primary" type="button" data-ep-placement-next>${esc(nextActionLabel(actionCode))}</button></div></section>`;
     root.querySelector("[data-ep-placement-back]")?.addEventListener("click", dashboard);
     root.querySelector("[data-ep-placement-next]")?.addEventListener("click", () => runNextAction(component, actionCode));

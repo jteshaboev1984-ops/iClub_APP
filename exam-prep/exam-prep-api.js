@@ -129,6 +129,7 @@
   async function overview(componentCode) { return rpc("get_exam_prep_overview_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function legacyReferenceSummary(componentCode) { return rpc("get_exam_prep_legacy_reference_summary_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function placementResult(componentCode) { return rpc("get_exam_prep_placement_result_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function stage0Workflow(componentCode) { return rpc("get_exam_prep_stage0_workflow_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function syllabusTracker(componentCode) { return rpc("get_exam_prep_syllabus_tracker_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function skillDetail(componentCode, skillCode) {
     return rpc("get_exam_prep_skill_detail_safe_v1", { p_component_code: componentArg(componentCode), p_skill_code: String(skillCode || "") });
@@ -203,7 +204,7 @@
     capabilities, betaInvitation, grantBetaConsent, revokeBetaConsent,
     examProfile, saveExamProfile, examMapStatus,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
-    legacyReferenceSummary, placementResult, syllabusTracker, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
+    legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession,
     recovery, recordInterruption, authorizeRevalidationItem,
     weeklyPlan, generateWeeklyPlan, authorizePlanItem,
@@ -224,7 +225,7 @@
 
     if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p019timed1");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p020views2");
-    load('script[data-exam-prep-overview-placement]', "examPrepOverviewPlacement", "exam-prep-overview-placement.js?v=p021overview1");
+    load('script[data-exam-prep-overview-placement]', "examPrepOverviewPlacement", "exam-prep-overview-placement.js?v=p213placement1");
     load('script[data-exam-prep-ai-ui]', "examPrepAiUi", "exam-prep-ai-ui.js?v=p104aiui1");
     load('script[data-exam-prep-history-note]', "examPrepHistoryNote", "exam-prep-history-note.js?v=p105history1");
     load('script[data-exam-prep-past-paper]', "examPrepPastPaper", "exam-prep-past-paper.js?v=p203paper1");
