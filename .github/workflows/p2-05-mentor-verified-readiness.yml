@@ -1,0 +1,27 @@
+name: P2-05 Mentor Verified Readiness Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/20260908061000_exam_prep_p2_05_mentor_verified_readiness_v1.sql'
+      - 'scripts/p2-05-mentor-verified-readiness-regression.cjs'
+      - '.github/workflows/p2-05-mentor-verified-readiness.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/20260908061000_exam_prep_p2_05_mentor_verified_readiness_v1.sql'
+      - 'scripts/p2-05-mentor-verified-readiness-regression.cjs'
+      - '.github/workflows/p2-05-mentor-verified-readiness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mentor-verified-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run P2-05 Mentor Verified Readiness regression
+        run: node scripts/p2-05-mentor-verified-readiness-regression.cjs
