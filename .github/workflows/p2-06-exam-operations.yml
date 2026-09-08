@@ -1,0 +1,27 @@
+name: P2-06 Exam Operations Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/20260908070000_exam_prep_p2_06_exam_operations_v1.sql'
+      - 'scripts/p2-06-exam-operations-regression.cjs'
+      - '.github/workflows/p2-06-exam-operations.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/20260908070000_exam_prep_p2_06_exam_operations_v1.sql'
+      - 'scripts/p2-06-exam-operations-regression.cjs'
+      - '.github/workflows/p2-06-exam-operations.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exam-operations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run P2-06 exam operations regression
+        run: node scripts/p2-06-exam-operations-regression.cjs
