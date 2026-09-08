@@ -79,6 +79,37 @@ jobs:
             for f in "${files[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >>p209.log 2>&1; done
           done
 
+      - name: Prepare synthetic Core-only stage-release boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' 2>&1 | tee -a p209.log
+          update private.exam_prep_feature_config
+          set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now()
+          where program_key='math_as_p1_p5';
+          SQL
+
+      - name: Apply governed Stage 3-6 release migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f \( -name '20260907*exam_prep_stage*.sql' -o -name '20260907080000_exam_prep_readiness_state_projection_v1.sql' \) | sort)
+          test "${#files[@]}" -ge 8
+          for f in "${files[@]}"; do
+            echo "=== Applying governed release $f ===" | tee -a p209.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p209.log 2>&1
+          done
+
+      - name: Restore fail-closed boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' 2>&1 | tee -a p209.log
+          update private.exam_prep_feature_config
+          set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now()
+          where program_key='math_as_p1_p5';
+          SQL
+
       - name: Apply P1-04 AI safety and source metadata
         shell: bash
         run: |
