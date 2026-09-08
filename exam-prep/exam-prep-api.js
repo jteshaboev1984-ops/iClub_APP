@@ -153,6 +153,13 @@
     return rpc("get_exam_prep_correction_queue_safe_v1", { p_component_code: String(componentCode || "") });
   }
 
+  async function pastPaperCompanion(componentCode, language = "en") {
+    return rpc("get_exam_prep_past_paper_companion_safe_v1", {
+      p_component_code: String(componentCode || ""),
+      p_language: String(language || "en")
+    });
+  }
+
   async function getSession(sessionId, language = "en") {
     return rpc("get_exam_prep_session_safe_v1", { p_session_id: sessionId, p_language: language });
   }
@@ -259,6 +266,7 @@
     syllabusTracker,
     skillDetail,
     correctionQueue,
+    pastPaperCompanion,
     getSession,
     startSession,
     submitResponse,
@@ -307,6 +315,12 @@
       historyNote.dataset.examPrepHistoryNote = "true";
       historyNote.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-history-note.js?v=p105history1");
       document.head.appendChild(historyNote);
+    }
+    if (/^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-past-paper]')) {
+      const paperPanel = document.createElement("script");
+      paperPanel.dataset.examPrepPastPaper = "true";
+      paperPanel.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-past-paper.js?v=p203paper1");
+      document.head.appendChild(paperPanel);
     }
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
