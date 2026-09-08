@@ -1,0 +1,144 @@
+name: P2-03 Past Paper Companion Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep_p0_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_01_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_02_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_03_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_04_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_06_*.sql'
+      - supabase/migrations/20260907103000_exam_prep_ai_initial_context_source_pack_v1.sql
+      - supabase/migrations/20260907112000_exam_prep_p1_05_legacy_reference_adapter_v1.sql
+      - 'supabase/migrations/*exam_prep_p2_03_*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p2_03_past_paper_companion_matrix.sql
+      - .github/workflows/p2-03-past-paper-companion.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  past-paper-companion:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize log
+        run: printf 'P2-03 Past Paper Companion current-schema gate\n' > p203.log
+      - name: Bootstrap legacy/Supabase contract
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p203.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p203.log
+      - name: Apply P0 Exam Prep foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for stage in 04 05 06 07 08 09 10 11 12 13 15 16; do
+            mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p0_${stage}_*.sql" | sort)
+            test "${#files[@]}" -ge 1
+            for f in "${files[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >>p203.log 2>&1; done
+          done
+      - name: Apply P1-01 through P1-03
+        shell: bash
+        run: |
+          set -euo pipefail
+          for stage in 01 02 03; do
+            mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p1_${stage}_*.sql" | sort)
+            test "${#files[@]}" -ge 1
+            for f in "${files[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >>p203.log 2>&1; done
+          done
+      - name: Apply P1-04 AI safety/source metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p1_04_*.sql' | sort)
+          test "${#files[@]}" -ge 2
+          for f in "${files[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >>p203.log 2>&1; done
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260907103000_exam_prep_ai_initial_context_source_pack_v1.sql >>p203.log 2>&1
+      - name: Apply P1-05 read-only legacy adapter
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql 2>&1 | tee -a p203.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260907112000_exam_prep_p1_05_legacy_reference_adapter_v1.sql 2>&1 | tee -a p203.log
+      - name: Apply P1-06 security hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p1_06_*.sql' | sort)
+          test "${#files[@]}" -ge 1
+          for f in "${files[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >>p203.log 2>&1; done
+      - name: Apply P2-03 companion migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p2_03_*.sql' | sort)
+          test "${#files[@]}" -ge 1
+          for f in "${files[@]}"; do
+            echo "=== Applying $f ===" | tee -a p203.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p203.log 2>&1
+          done
+      - name: Verify fail-closed current-schema baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          rows="$(psql -Atqc "select count(*) from private.exam_prep_paper_metadata where publication_status='approved'")"
+          no_rls="$(psql -Atqc "select count(*) from pg_tables where schemaname='private' and tablename like 'exam_prep%' and not rowsecurity")"
+          test "$state" = 'off|false|false|false|true'
+          test "$rows" = '2'
+          test "$no_rls" = '0'
+      - name: Run P2-03 metadata/copyright/component matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p203.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_03_past_paper_companion_matrix.sql 2>&1 | tee -a p203.log
+      - name: Prove zero synthetic residue
+        shell: bash
+        run: |
+          set -euo pipefail
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p203-%@invalid.example'")"
+          state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          evidence="$(psql -Atqc "select count(*) from private.exam_prep_evidence_events")"
+          test "$users" = '0'
+          test "$state" = 'off|false|false|false|true'
+          test "$evidence" = '0'
+          echo 'P2-03 Past Paper Companion gate: GREEN' | tee -a p203.log
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-03-past-paper-companion-diagnostics
+          path: p203.log
+          if-no-files-found: error
+          retention-days: 3
