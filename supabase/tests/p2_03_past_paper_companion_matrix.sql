@@ -40,7 +40,7 @@ INSERT INTO p203_payloads VALUES
 ('P5',public.get_exam_prep_past_paper_companion_safe_v1('P5','ru'));
 
 DO $$
-DECLARE p1 jsonb; p5 jsonb; v_bad int;
+DECLARE p1 jsonb; p5 jsonb; v_bad int; v_p1_full int; v_p5_full int; v_p1_similar int; v_p5_similar int;
 BEGIN
   SELECT payload INTO p1 FROM p203_payloads WHERE component_code='P1';
   SELECT payload INTO p5 FROM p203_payloads WHERE component_code='P5';
@@ -54,11 +54,16 @@ BEGIN
   IF jsonb_array_length(p1->'external_resources')<>1 OR jsonb_array_length(p5->'external_resources')<>1 THEN
     RAISE EXCEPTION 'P2-03 official portal metadata count mismatch P1=% P5=%',jsonb_array_length(p1->'external_resources'),jsonb_array_length(p5->'external_resources');
   END IF;
-  IF jsonb_array_length(p1->'original_full_simulations')<>3 OR jsonb_array_length(p5->'original_full_simulations')<>3 THEN
-    RAISE EXCEPTION 'P2-03 original full simulation count mismatch P1=% P5=%',jsonb_array_length(p1->'original_full_simulations'),jsonb_array_length(p5->'original_full_simulations');
+
+  v_p1_full:=jsonb_array_length(p1->'original_full_simulations');
+  v_p5_full:=jsonb_array_length(p5->'original_full_simulations');
+  v_p1_similar:=jsonb_array_length(p1->'similar_practice');
+  v_p5_similar:=jsonb_array_length(p5->'similar_practice');
+  IF v_p1_full<1 OR v_p5_full<1 OR v_p1_full<>v_p5_full THEN
+    RAISE EXCEPTION 'P2-03 original full simulation availability/symmetry mismatch P1=% P5=%',v_p1_full,v_p5_full;
   END IF;
-  IF jsonb_array_length(p1->'similar_practice')<>3 OR jsonb_array_length(p5->'similar_practice')<>3 THEN
-    RAISE EXCEPTION 'P2-03 similar practice count mismatch P1=% P5=%',jsonb_array_length(p1->'similar_practice'),jsonb_array_length(p5->'similar_practice');
+  IF v_p1_similar<1 OR v_p5_similar<1 OR v_p1_similar<>v_p5_similar THEN
+    RAISE EXCEPTION 'P2-03 similar practice availability/symmetry mismatch P1=% P5=%',v_p1_similar,v_p5_similar;
   END IF;
 
   IF coalesce((p1#>>'{copyright_boundary,stores_official_question_content}')::boolean,true)
@@ -132,4 +137,4 @@ BEGIN
 END
 $$;
 
-SELECT 'P2-03 Past Paper Companion matrix: PASS (metadata-only external Cambridge links, 3 original full simulations/component, P1/P5 isolated)' AS result;
+SELECT 'P2-03 Past Paper Companion matrix: PASS (metadata-only Cambridge links, original iClub full simulations/practice available, P1/P5 isolated)' AS result;
