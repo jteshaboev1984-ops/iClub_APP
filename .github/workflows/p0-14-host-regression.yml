@@ -29,6 +29,7 @@ on:
       - .github/scripts/p1_04_ai_ui_regression.js
       - .github/scripts/p2_09_exam_map_ui_regression.js
       - .github/scripts/p2_10_materials_ui_regression.js
+      - .github/scripts/p2_13_stage0_workflow_ui_regression.js
       - .github/workflows/p0-14-host-regression.yml
   workflow_dispatch:
 
@@ -59,17 +60,18 @@ jobs:
           node --check .github/scripts/p1_04_ai_ui_regression.js
           node --check .github/scripts/p2_09_exam_map_ui_regression.js
           node --check .github/scripts/p2_10_materials_ui_regression.js
+          node --check .github/scripts/p2_13_stage0_workflow_ui_regression.js
           grep -q 'id="subject-hub-exam-prep-entry"' index.html
           grep -q 'id="exam-prep-host-root"' index.html
           grep -q 'id="subject-hub-exam-prep-entry"[^>]*hidden[^>]*aria-hidden="true"' index.html
           grep -q 'id="exam-prep-host-root"[^>]*hidden[^>]*aria-hidden="true"' index.html
           grep -q 'data-action="open-exam-prep"' index.html
-          grep -Eq 'exam-prep/exam-prep-api[.]js[?]v=(p014h1|p209map1|p210materials1)' index.html
+          grep -Eq 'exam-prep/exam-prep-api[.]js[?]v=(p014h1|p209map1|p210materials1|p213placement1)' index.html
           grep -q 'exam-prep/exam-prep-host.js?v=p014h1' index.html
           grep -q 'exam-prep/exam-prep-host.css?v=p014h1' index.html
           grep -q 'exam-prep-live.js?v=p019timed1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-learner-views.js?v=p020views2' exam-prep/exam-prep-api.js
-          grep -q 'exam-prep-overview-placement.js?v=p021overview1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-overview-placement.js?v=p213placement1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-ai-ui.js?v=p104aiui1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-exam-map.js?v=p209map1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-materials.js?v=p210materials1' exam-prep/exam-prep-api.js
@@ -134,6 +136,9 @@ jobs:
 
       - name: Browser-isolated overview / placement result flow
         run: node .github/scripts/p0_21_live_overview_placement_regression.js
+
+      - name: Browser-isolated Stage-0 multi-session placement copy
+        run: node .github/scripts/p2_13_stage0_workflow_ui_regression.js
 
       - name: Browser-isolated combined learner views coexistence
         run: node .github/scripts/p0_22_live_view_coexistence_regression.js
