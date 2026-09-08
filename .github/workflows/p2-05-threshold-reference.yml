@@ -1,0 +1,29 @@
+name: P2-05 Threshold Reference Gate
+
+on:
+  push:
+    paths:
+      - 'exam-prep/exam-prep-threshold-reference.js'
+      - 'exam-prep/exam-prep-profile-completeness.js'
+      - 'supabase/migrations/20260908053500_exam_prep_latest_threshold_reference_v1.sql'
+      - 'scripts/p2-05-threshold-reference-regression.cjs'
+      - '.github/workflows/p2-05-threshold-reference.yml'
+  pull_request:
+    paths:
+      - 'exam-prep/exam-prep-threshold-reference.js'
+      - 'exam-prep/exam-prep-profile-completeness.js'
+      - 'supabase/migrations/20260908053500_exam_prep_latest_threshold_reference_v1.sql'
+      - 'scripts/p2-05-threshold-reference-regression.cjs'
+      - '.github/workflows/p2-05-threshold-reference.yml'
+
+jobs:
+  threshold-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check learner scripts
+        run: |
+          node --check exam-prep/exam-prep-threshold-reference.js
+          node --check exam-prep/exam-prep-profile-completeness.js
+      - name: Run P2-05 threshold reference regression
+        run: node scripts/p2-05-threshold-reference-regression.cjs
