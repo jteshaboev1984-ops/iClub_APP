@@ -6,14 +6,18 @@ on:
       - main
     paths:
       - 'supabase/migrations/20260908090000_exam_prep_p2_08_progress_preservation_revalidation_v1.sql'
+      - 'supabase/migrations/20260908091000_exam_prep_p2_08_revalidation_resume_fix_v1.sql'
       - 'scripts/p2-08-progress-preservation-regression.cjs'
+      - '.github/scripts/p2_08_recovery_ui_regression.js'
       - '.github/workflows/p2-08-progress-preservation.yml'
       - 'exam-prep/exam-prep-api.js'
       - 'exam-prep/exam-prep-recovery.js'
   pull_request:
     paths:
       - 'supabase/migrations/20260908090000_exam_prep_p2_08_progress_preservation_revalidation_v1.sql'
+      - 'supabase/migrations/20260908091000_exam_prep_p2_08_revalidation_resume_fix_v1.sql'
       - 'scripts/p2-08-progress-preservation-regression.cjs'
+      - '.github/scripts/p2_08_recovery_ui_regression.js'
       - '.github/workflows/p2-08-progress-preservation.yml'
       - 'exam-prep/exam-prep-api.js'
       - 'exam-prep/exam-prep-recovery.js'
@@ -27,9 +31,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Syntax check learner scripts
         run: |
           node --check exam-prep/exam-prep-api.js
           node --check exam-prep/exam-prep-recovery.js
+          node --check .github/scripts/p2_08_recovery_ui_regression.js
+
       - name: Run P2-08 progress preservation regression
         run: node scripts/p2-08-progress-preservation-regression.cjs
+
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Browser-isolated retained-knowledge flow
+        run: node .github/scripts/p2_08_recovery_ui_regression.js
