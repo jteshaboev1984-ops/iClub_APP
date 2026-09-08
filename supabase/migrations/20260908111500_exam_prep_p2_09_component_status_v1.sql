@@ -98,7 +98,9 @@ do $$
 declare v_def text;
 begin
   select pg_get_functiondef('public.get_exam_prep_exam_map_status_safe_v1()'::regprocedure) into v_def;
-  if position("'components'" in v_def)=0 or position("'P1','P5'" in v_def)=0 or position("'p1_p5_separate',true" in v_def)=0 then
+  if position('''components''' in v_def)=0
+     or position('''P1'',''P5''' in v_def)=0
+     or position('''p1_p5_separate'', true' in v_def)=0 then
     raise exception 'P2-09 component status: P1/P5 separation contract missing';
   end if;
   if has_table_privilege('authenticated','private.exam_prep_exam_map_revisions','SELECT') then
