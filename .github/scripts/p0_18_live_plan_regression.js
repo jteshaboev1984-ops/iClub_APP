@@ -29,8 +29,8 @@ const path = require('path');
       if(name==='get_exam_prep_exam_profile_v1')return{data:[window.__profile],error:null};
       if(name==='get_exam_prep_diagnostic_progress_safe_v1')return{data:window.__progress[args.p_component_code],error:null};
       if(name==='get_exam_prep_state_safe_v1')return{data:window.__state[args.p_component_code],error:null};
-      if(name==='get_exam_prep_weekly_plan_safe_v1')return{data:window.__plan||{component_code:args.p_component_code,plan:null,items:[]},error:null};
-      if(name==='generate_exam_prep_weekly_plan_safe_v1'){window.__plan=makePlan();return{data:{plan_id:window.__plan.plan_id,component_code:'P1',priority_count:1},error:null};}
+      if(name==='get_exam_prep_weekly_plan_safe_v2')return{data:window.__plan||{component_code:args.p_component_code,plan:null,items:[]},error:null};
+      if(name==='generate_exam_prep_weekly_plan_safe_v3'){window.__plan=makePlan();return{data:{plan_id:window.__plan.plan_id,component_code:'P1',priority_count:1},error:null};}
       if(name==='authorize_exam_prep_plan_item_safe_v1')return{data:{authorization_id:'00000000-0000-4000-8000-000000008802',plan_id:args.p_plan_id,priority_order:args.p_priority_order,item_type:'learning',purpose:'learning'},error:null};
       if(name==='start_exam_prep_session_safe_v1'){
         window.__session={session_id:'00000000-0000-4000-8000-000000008803',status:'active',component_code:'P1',session_type:'learning',total_items:2,items:[
@@ -69,7 +69,9 @@ const path = require('path');
 
   const result=await page.evaluate(()=>({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent}));
   const names=result.calls.map(x=>x.name);
-  for(const n of ['get_exam_prep_weekly_plan_safe_v1','generate_exam_prep_weekly_plan_safe_v1','authorize_exam_prep_plan_item_safe_v1','start_exam_prep_session_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','get_exam_prep_state_safe_v1'])assert(names.includes(n),`${n} missing`);
+  for(const n of ['get_exam_prep_weekly_plan_safe_v2','generate_exam_prep_weekly_plan_safe_v3','authorize_exam_prep_plan_item_safe_v1','start_exam_prep_session_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','get_exam_prep_state_safe_v1'])assert(names.includes(n),`${n} missing`);
+  assert(!names.includes('get_exam_prep_weekly_plan_safe_v1'),'legacy weekly plan read must not be used');
+  assert(!names.includes('generate_exam_prep_weekly_plan_safe_v1'),'legacy weekly plan generator must not be used');
   const written=result.calls.find(x=>x.name==='submit_exam_prep_response_safe_v1'&&x.args.p_item_order===2); assert(written?.args?.p_payload?.artifact?.text,'written solution must be sent as artifact');
   const auth=result.calls.find(x=>x.name==='authorize_exam_prep_plan_item_safe_v1'); assert(auth.args.p_priority_order===1,'plan authorization must target exact priority');
   assert(result.text.includes('Weekly plan'),'must return to refreshed plan');
