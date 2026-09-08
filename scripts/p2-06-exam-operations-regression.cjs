@@ -4,6 +4,7 @@ function read(path) { return fs.readFileSync(path, 'utf8'); }
 function assert(condition, message) { if (!condition) throw new Error(message); }
 
 const migration = read('supabase/migrations/20260908070000_exam_prep_p2_06_exam_operations_v1.sql');
+const integrity = read('supabase/migrations/20260908071000_exam_prep_p2_06_exam_calendar_integrity_v1.sql');
 
 for (const token of [
   'private.exam_prep_exam_calendar',
@@ -33,16 +34,22 @@ for (const token of [
 
 assert(migration.includes('release must not invent a 2027 final timetable row'), 'release must explicitly fail if it seeds a fake final timetable');
 assert(!/insert\s+into\s+private\.exam_prep_exam_calendar/i.test(migration), 'P2-06 must not seed a Cambridge 2027 date before final timetable verification');
+assert(integrity.includes('exam_prep_exam_calendar_final_source_check'), 'verified timetable source constraint missing');
+assert(integrity.includes('cambridgeinternational'), 'final timetable must require an official Cambridge domain');
+assert(integrity.includes('verified_at is not null'), 'final timetable must require explicit verification time');
+assert(integrity.includes('exam_prep_exam_ops_checklist_items_audit_v1'), 'learner-facing checklist governance audit missing');
 
-for (const forbidden of [
-  /update\s+private\.exam_prep_skill_states/i,
-  /insert\s+into\s+private\.exam_prep_evidence_events/i,
-  /update\s+private\.exam_prep_stage_states/i,
-  /insert\s+into\s+private\.exam_prep_stage5_thresholds/i,
-  /set\s+mentor_enabled\s*=\s*true/i,
-  /set\s+ai_enabled\s*=\s*true/i,
-  /correct_answer/i
-]) assert(!forbidden.test(migration), `forbidden P2-06 academic/config mutation: ${forbidden}`);
+for (const source of [migration, integrity]) {
+  for (const forbidden of [
+    /update\s+private\.exam_prep_skill_states/i,
+    /insert\s+into\s+private\.exam_prep_evidence_events/i,
+    /update\s+private\.exam_prep_stage_states/i,
+    /insert\s+into\s+private\.exam_prep_stage5_thresholds/i,
+    /set\s+mentor_enabled\s*=\s*true/i,
+    /set\s+ai_enabled\s*=\s*true/i,
+    /correct_answer/i
+  ]) assert(!forbidden.test(source), `forbidden P2-06 academic/config mutation: ${forbidden}`);
+}
 
 for (const text of [
   'Не начинать большую новую работу менее чем за 24 часа до экзамена',
