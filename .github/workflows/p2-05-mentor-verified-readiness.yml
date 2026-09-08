@@ -6,11 +6,13 @@ on:
       - main
     paths:
       - 'supabase/migrations/20260908061000_exam_prep_p2_05_mentor_verified_readiness_v1.sql'
+      - 'supabase/migrations/20260908062500_exam_prep_p2_05_readiness_audit_role_hotfix_v1.sql'
       - 'scripts/p2-05-mentor-verified-readiness-regression.cjs'
       - '.github/workflows/p2-05-mentor-verified-readiness.yml'
   pull_request:
     paths:
       - 'supabase/migrations/20260908061000_exam_prep_p2_05_mentor_verified_readiness_v1.sql'
+      - 'supabase/migrations/20260908062500_exam_prep_p2_05_readiness_audit_role_hotfix_v1.sql'
       - 'scripts/p2-05-mentor-verified-readiness-regression.cjs'
       - '.github/workflows/p2-05-mentor-verified-readiness.yml'
   workflow_dispatch:
