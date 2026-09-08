@@ -65,9 +65,7 @@
     if (!result.ok) return result;
     const row = Array.isArray(result.data) ? result.data[0] : result.data;
     if (!row || typeof row !== "object") return fail("beta_invitation_payload_missing");
-    const invitations = Array.isArray(row.invitations)
-      ? row.invitations.map(normalizeInvitationItem).filter(Boolean)
-      : [];
+    const invitations = Array.isArray(row.invitations) ? row.invitations.map(normalizeInvitationItem).filter(Boolean) : [];
     return Object.freeze({
       ok: true,
       data: Object.freeze({
@@ -107,70 +105,30 @@
     });
   }
 
-  async function diagnosticProgress(componentCode) {
-    return rpc("get_exam_prep_diagnostic_progress_safe_v1", { p_component_code: String(componentCode || "") });
-  }
+  const componentArg = componentCode => String(componentCode || "");
 
+  async function diagnosticProgress(componentCode) { return rpc("get_exam_prep_diagnostic_progress_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function startNextDiagnostic(componentCode, idempotencyKey) {
-    return rpc("start_exam_prep_next_diagnostic_safe_v1", {
-      p_component_code: String(componentCode || ""),
-      p_idempotency_key: String(idempotencyKey || "")
-    });
+    return rpc("start_exam_prep_next_diagnostic_safe_v1", { p_component_code: componentArg(componentCode), p_idempotency_key: String(idempotencyKey || "") });
   }
-
-  async function getPlacement(componentCode = null) {
-    return rpc("get_exam_prep_placement_safe_v1", { p_component_code: componentCode || null });
-  }
-
-  async function getState(componentCode) {
-    return rpc("get_exam_prep_state_safe_v1", { p_component_code: String(componentCode || "") });
-  }
-
-  async function overview(componentCode) {
-    return rpc("get_exam_prep_overview_safe_v1", { p_component_code: String(componentCode || "") });
-  }
-
-  async function legacyReferenceSummary(componentCode) {
-    return rpc("get_exam_prep_legacy_reference_summary_safe_v1", { p_component_code: String(componentCode || "") });
-  }
-
-  async function placementResult(componentCode) {
-    return rpc("get_exam_prep_placement_result_safe_v1", { p_component_code: String(componentCode || "") });
-  }
-
-  async function syllabusTracker(componentCode) {
-    return rpc("get_exam_prep_syllabus_tracker_safe_v1", { p_component_code: String(componentCode || "") });
-  }
-
+  async function getPlacement(componentCode = null) { return rpc("get_exam_prep_placement_safe_v1", { p_component_code: componentCode || null }); }
+  async function getState(componentCode) { return rpc("get_exam_prep_state_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function overview(componentCode) { return rpc("get_exam_prep_overview_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function legacyReferenceSummary(componentCode) { return rpc("get_exam_prep_legacy_reference_summary_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function placementResult(componentCode) { return rpc("get_exam_prep_placement_result_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function syllabusTracker(componentCode) { return rpc("get_exam_prep_syllabus_tracker_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function skillDetail(componentCode, skillCode) {
-    return rpc("get_exam_prep_skill_detail_safe_v1", {
-      p_component_code: String(componentCode || ""),
-      p_skill_code: String(skillCode || "")
-    });
+    return rpc("get_exam_prep_skill_detail_safe_v1", { p_component_code: componentArg(componentCode), p_skill_code: String(skillCode || "") });
   }
-
-  async function correctionQueue(componentCode) {
-    return rpc("get_exam_prep_correction_queue_safe_v1", { p_component_code: String(componentCode || "") });
-  }
-
+  async function correctionQueue(componentCode) { return rpc("get_exam_prep_correction_queue_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function pastPaperCompanion(componentCode, language = "en") {
-    return rpc("get_exam_prep_past_paper_companion_safe_v1", {
-      p_component_code: String(componentCode || ""),
-      p_language: String(language || "en")
-    });
+    return rpc("get_exam_prep_past_paper_companion_safe_v1", { p_component_code: componentArg(componentCode), p_language: String(language || "en") });
   }
 
-  async function getSession(sessionId, language = "en") {
-    return rpc("get_exam_prep_session_safe_v1", { p_session_id: sessionId, p_language: language });
-  }
-
+  async function getSession(sessionId, language = "en") { return rpc("get_exam_prep_session_safe_v1", { p_session_id: sessionId, p_language: language }); }
   async function startSession(authorizationId, idempotencyKey) {
-    return rpc("start_exam_prep_session_safe_v1", {
-      p_authorization_id: authorizationId,
-      p_idempotency_key: String(idempotencyKey || "")
-    });
+    return rpc("start_exam_prep_session_safe_v1", { p_authorization_id: authorizationId, p_idempotency_key: String(idempotencyKey || "") });
   }
-
   async function submitResponse(sessionId, itemOrder, payload, idempotencyKey, elapsedMs = null, language = "en") {
     return rpc("submit_exam_prep_response_safe_v1", {
       p_session_id: sessionId,
@@ -181,70 +139,38 @@
       p_language: language
     });
   }
-
   async function finalizeSession(sessionId, idempotencyKey) {
-    return rpc("finalize_exam_prep_session_safe_v1", {
-      p_session_id: sessionId,
-      p_idempotency_key: String(idempotencyKey || "")
-    });
+    return rpc("finalize_exam_prep_session_safe_v1", { p_session_id: sessionId, p_idempotency_key: String(idempotencyKey || "") });
   }
 
-  async function recovery(componentCode) {
-    return rpc("get_exam_prep_recovery_safe_v1", { p_component_code: String(componentCode || "") });
-  }
-
+  // Recovery is non-destructive: the server owns the day-band policy and any optional progress confirmation.
+  async function recovery(componentCode) { return rpc("get_exam_prep_recovery_safe_v2", { p_component_code: componentArg(componentCode) }); }
   async function recordInterruption({ startedOn, resumedOn, kind = "absence" } = {}) {
     const started = String(startedOn || "").trim();
     const resumed = String(resumedOn || "").trim();
     if (!started || !resumed) return fail("interruption_dates_required");
-    return rpc("record_my_exam_prep_interruption_v1", {
+    return rpc("record_my_exam_prep_interruption_v2", {
       p_interruption_started_on: started,
       p_resumed_on: resumed,
       p_interruption_kind: String(kind || "absence")
     });
   }
-
-  async function weeklyPlan(componentCode) {
-    return rpc("get_exam_prep_weekly_plan_safe_v2", { p_component_code: String(componentCode || "") });
+  async function authorizeRevalidationItem(caseId, itemOrder) {
+    return rpc("authorize_exam_prep_revalidation_item_safe_v1", { p_case_id: caseId, p_item_order: Number(itemOrder) });
   }
-
-  async function generateWeeklyPlan(componentCode) {
-    return rpc("generate_exam_prep_weekly_plan_safe_v2", {
-      p_component_code: String(componentCode || "")
-    });
-  }
-
+  async function weeklyPlan(componentCode) { return rpc("get_exam_prep_weekly_plan_safe_v2", { p_component_code: componentArg(componentCode) }); }
+  async function generateWeeklyPlan(componentCode) { return rpc("generate_exam_prep_weekly_plan_safe_v3", { p_component_code: componentArg(componentCode) }); }
   async function authorizePlanItem(planId, priorityOrder) {
-    return rpc("authorize_exam_prep_plan_item_safe_v1", {
-      p_plan_id: planId,
-      p_priority_order: Number(priorityOrder)
-    });
+    return rpc("authorize_exam_prep_plan_item_safe_v1", { p_plan_id: planId, p_priority_order: Number(priorityOrder) });
   }
 
-  async function timedCatalog(componentCode) {
-    return rpc("get_exam_prep_timed_catalog_safe_v1", { p_component_code: String(componentCode || "") });
-  }
-
-  async function authorizeTimed(assessmentId) {
-    return rpc("authorize_exam_prep_timed_safe_v1", { p_assessment_id: Number(assessmentId) });
-  }
-
+  async function timedCatalog(componentCode) { return rpc("get_exam_prep_timed_catalog_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function authorizeTimed(assessmentId) { return rpc("authorize_exam_prep_timed_safe_v1", { p_assessment_id: Number(assessmentId) }); }
   async function finalizeTimed(sessionId, idempotencyKey, completionReason = "submitted") {
-    return rpc("finalize_exam_prep_timed_safe_v1", {
-      p_session_id: sessionId,
-      p_idempotency_key: String(idempotencyKey || ""),
-      p_completion_reason: completionReason
-    });
+    return rpc("finalize_exam_prep_timed_safe_v1", { p_session_id: sessionId, p_idempotency_key: String(idempotencyKey || ""), p_completion_reason: completionReason });
   }
-
-  async function timedResult(sessionId) {
-    return rpc("get_exam_prep_timed_result_safe_v1", { p_session_id: sessionId });
-  }
-
-  async function timedReviewPack(sessionId, language = "en") {
-    return rpc("get_exam_prep_timed_review_pack_safe_v1", { p_session_id: sessionId, p_language: language });
-  }
-
+  async function timedResult(sessionId) { return rpc("get_exam_prep_timed_result_safe_v1", { p_session_id: sessionId }); }
+  async function timedReviewPack(sessionId, language = "en") { return rpc("get_exam_prep_timed_review_pack_safe_v1", { p_session_id: sessionId, p_language: language }); }
   async function submitTimedSelfMark(sessionId, itemOrder, marks, idempotencyKey, reviewNote = null) {
     return rpc("submit_exam_prep_timed_written_self_mark_safe_v1", {
       p_session_id: sessionId,
@@ -254,96 +180,41 @@
       p_review_note: reviewNote || null
     });
   }
-
-  async function readiness(componentCode) {
-    return rpc("get_exam_prep_readiness_safe_v1", { p_component_code: String(componentCode || "") });
-  }
-
-  async function finalCalibration(componentCode) {
-    return rpc("get_exam_prep_final_calibration_safe_v1", { p_component_code: String(componentCode || "") });
-  }
+  async function readiness(componentCode) { return rpc("get_exam_prep_readiness_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function finalCalibration(componentCode) { return rpc("get_exam_prep_final_calibration_safe_v1", { p_component_code: componentArg(componentCode) }); }
 
   root.api = Object.freeze({
-    capabilities,
-    betaInvitation,
-    grantBetaConsent,
-    revokeBetaConsent,
-    examProfile,
-    saveExamProfile,
-    diagnosticProgress,
-    startNextDiagnostic,
-    getPlacement,
-    getState,
-    overview,
-    legacyReferenceSummary,
-    placementResult,
-    syllabusTracker,
-    skillDetail,
-    correctionQueue,
-    pastPaperCompanion,
-    getSession,
-    startSession,
-    submitResponse,
-    finalizeSession,
-    recovery,
-    recordInterruption,
-    weeklyPlan,
-    generateWeeklyPlan,
-    authorizePlanItem,
-    timedCatalog,
-    authorizeTimed,
-    finalizeTimed,
-    timedResult,
-    timedReviewPack,
-    submitTimedSelfMark,
-    readiness,
-    finalCalibration
+    capabilities, betaInvitation, grantBetaConsent, revokeBetaConsent,
+    examProfile, saveExamProfile,
+    diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
+    legacyReferenceSummary, placementResult, syllabusTracker, skillDetail, correctionQueue, pastPaperCompanion,
+    getSession, startSession, submitResponse, finalizeSession,
+    recovery, recordInterruption, authorizeRevalidationItem,
+    weeklyPlan, generateWeeklyPlan, authorizePlanItem,
+    timedCatalog, authorizeTimed, finalizeTimed, timedResult, timedReviewPack, submitTimedSelfMark,
+    readiness, finalCalibration
   });
 
   try {
     const src = document?.currentScript?.src || "";
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-live]')) {
+    const valid = /^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src);
+    const load = (selector, datasetKey, filename) => {
+      if (!valid || document.querySelector(selector)) return;
       const script = document.createElement("script");
-      script.dataset.examPrepLive = "true";
-      script.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-live.js?v=p019timed1");
+      script.dataset[datasetKey] = "true";
+      script.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, filename);
       document.head.appendChild(script);
-    }
-    if (/^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-learner-views]')) {
-      const views = document.createElement("script");
-      views.dataset.examPrepLearnerViews = "true";
-      views.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-learner-views.js?v=p020views2");
-      document.head.appendChild(views);
-    }
-    if (/^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-overview-placement]')) {
-      const overviewViews = document.createElement("script");
-      overviewViews.dataset.examPrepOverviewPlacement = "true";
-      overviewViews.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-overview-placement.js?v=p021overview1");
-      document.head.appendChild(overviewViews);
-    }
-    if (/^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-ai-ui]')) {
-      const aiUi = document.createElement("script");
-      aiUi.dataset.examPrepAiUi = "true";
-      aiUi.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-ai-ui.js?v=p104aiui1");
-      document.head.appendChild(aiUi);
-    }
-    if (/^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-history-note]')) {
-      const historyNote = document.createElement("script");
-      historyNote.dataset.examPrepHistoryNote = "true";
-      historyNote.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-history-note.js?v=p105history1");
-      document.head.appendChild(historyNote);
-    }
-    if (/^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-past-paper]')) {
-      const paperPanel = document.createElement("script");
-      paperPanel.dataset.examPrepPastPaper = "true";
-      paperPanel.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-past-paper.js?v=p203paper1");
-      document.head.appendChild(paperPanel);
-    }
-    if (/^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src) && !document.querySelector('script[data-exam-prep-profile-completeness]')) {
-      const profileGuard = document.createElement("script");
-      profileGuard.dataset.examPrepProfileCompleteness = "true";
-      profileGuard.src = src.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-profile-completeness.js?v=p205profile1");
-      document.head.appendChild(profileGuard);
-    }
+    };
+
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p019timed1");
+    load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p020views2");
+    load('script[data-exam-prep-overview-placement]', "examPrepOverviewPlacement", "exam-prep-overview-placement.js?v=p021overview1");
+    load('script[data-exam-prep-ai-ui]', "examPrepAiUi", "exam-prep-ai-ui.js?v=p104aiui1");
+    load('script[data-exam-prep-history-note]', "examPrepHistoryNote", "exam-prep-history-note.js?v=p105history1");
+    load('script[data-exam-prep-past-paper]', "examPrepPastPaper", "exam-prep-past-paper.js?v=p203paper1");
+    load('script[data-exam-prep-profile-completeness]', "examPrepProfileCompleteness", "exam-prep-profile-completeness.js?v=p205profile1");
+    // Load recovery directly with a versioned URL. The older chained loader sees this data attribute and stays idle.
+    load('script[data-exam-prep-recovery]', "examPrepRecovery", "exam-prep-recovery.js?v=p208preserve1");
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
   }
