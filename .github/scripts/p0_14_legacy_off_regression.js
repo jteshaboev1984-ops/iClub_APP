@@ -75,7 +75,7 @@ const assert = (condition, message) => {
   assert(result.hostEntryExists && result.hostEntryHidden && result.hostRootHidden, 'Exam Prep must remain hidden with real OFF capability');
   assert(result.hostFacade && !result.hostOpen && result.directOpen !== true, 'direct Exam Prep open must fail closed while unauthenticated/OFF');
   assert(result.scripts.some(x => x.includes('security/legacy-assessment-safe-api.js?v=p002v4reset1')), 'legacy safe assessment API script missing');
-  assert(result.scripts.some(x => x.includes('exam-prep/exam-prep-api.js?v=p014h1')), 'Exam Prep host API script missing');
+  assert(result.scripts.some(x => x.includes('exam-prep/exam-prep-api.js?v=p014h1') || x.includes('exam-prep/exam-prep-api.js?v=p209map1')), 'Exam Prep host API script missing');
   assert(result.scripts.some(x => x.includes('exam-prep/exam-prep-host.js?v=p014h1')), 'Exam Prep host controller script missing');
   assert(result.scripts.some(x => x.includes('app.js?v=support4-p0legacysaveoff1-p014host1')), 'P0-14 app cache key missing');
   assert(result.safeApi.root && result.safeApi.practice && result.safeApi.tour, 'legacy safe assessment facade missing');
