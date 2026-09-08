@@ -137,6 +137,9 @@
   async function pastPaperCompanion(componentCode, language = "en") {
     return rpc("get_exam_prep_past_paper_companion_safe_v1", { p_component_code: componentArg(componentCode), p_language: String(language || "en") });
   }
+  async function materialsLibrary(language = "en") {
+    return rpc("get_exam_prep_materials_library_safe_v1", { p_language: String(language || "en") });
+  }
 
   async function getSession(sessionId, language = "en") { return rpc("get_exam_prep_session_safe_v1", { p_session_id: sessionId, p_language: language }); }
   async function startSession(authorizationId, idempotencyKey) {
@@ -200,7 +203,7 @@
     capabilities, betaInvitation, grantBetaConsent, revokeBetaConsent,
     examProfile, saveExamProfile, examMapStatus,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
-    legacyReferenceSummary, placementResult, syllabusTracker, skillDetail, correctionQueue, pastPaperCompanion,
+    legacyReferenceSummary, placementResult, syllabusTracker, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession,
     recovery, recordInterruption, authorizeRevalidationItem,
     weeklyPlan, generateWeeklyPlan, authorizePlanItem,
@@ -226,9 +229,9 @@
     load('script[data-exam-prep-history-note]', "examPrepHistoryNote", "exam-prep-history-note.js?v=p105history1");
     load('script[data-exam-prep-past-paper]', "examPrepPastPaper", "exam-prep-past-paper.js?v=p203paper1");
     load('script[data-exam-prep-profile-completeness]', "examPrepProfileCompleteness", "exam-prep-profile-completeness.js?v=p205profile1");
-    // Load recovery and Exam Map directly with versioned URLs. Optional learner layers never own academic truth.
     load('script[data-exam-prep-recovery]', "examPrepRecovery", "exam-prep-recovery.js?v=p208preserve1");
     load('script[data-exam-prep-exam-map]', "examPrepExamMap", "exam-prep-exam-map.js?v=p209map1");
+    load('script[data-exam-prep-materials]', "examPrepMaterials", "exam-prep-materials.js?v=p210materials1");
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
   }
