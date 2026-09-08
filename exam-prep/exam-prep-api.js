@@ -97,13 +97,26 @@
   }
 
   async function saveExamProfile({ examSeries = null, targetGrade = null, totalHours, mathHours } = {}) {
-    return rpc("save_exam_prep_exam_profile_v1", {
+    const result = await rpc("save_exam_prep_exam_profile_v2", {
       p_exam_series: String(examSeries || "").trim() || null,
       p_target_grade: String(targetGrade || "").trim() || null,
       p_total_student_hours_available: Number(totalHours),
       p_mathematics_hours_budget: Number(mathHours)
     });
+    if (!result.ok) return result;
+
+    // Profile changes replan both components independently. Failures here never roll back the saved profile;
+    // opening a component plan can safely retry its governed generator later.
+    if (result.data?.plan_rebuild_required === true) {
+      await Promise.all([
+        rpc("generate_exam_prep_weekly_plan_safe_v3", { p_component_code: "P1" }),
+        rpc("generate_exam_prep_weekly_plan_safe_v3", { p_component_code: "P5" })
+      ]);
+    }
+    return result;
   }
+
+  async function examMapStatus() { return rpc("get_exam_prep_exam_map_status_safe_v1"); }
 
   const componentArg = componentCode => String(componentCode || "");
 
@@ -185,7 +198,7 @@
 
   root.api = Object.freeze({
     capabilities, betaInvitation, grantBetaConsent, revokeBetaConsent,
-    examProfile, saveExamProfile,
+    examProfile, saveExamProfile, examMapStatus,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, syllabusTracker, skillDetail, correctionQueue, pastPaperCompanion,
     getSession, startSession, submitResponse, finalizeSession,
@@ -213,8 +226,9 @@
     load('script[data-exam-prep-history-note]', "examPrepHistoryNote", "exam-prep-history-note.js?v=p105history1");
     load('script[data-exam-prep-past-paper]', "examPrepPastPaper", "exam-prep-past-paper.js?v=p203paper1");
     load('script[data-exam-prep-profile-completeness]', "examPrepProfileCompleteness", "exam-prep-profile-completeness.js?v=p205profile1");
-    // Load recovery directly with a versioned URL. The older chained loader sees this data attribute and stays idle.
+    // Load recovery and Exam Map directly with versioned URLs. Optional learner layers never own academic truth.
     load('script[data-exam-prep-recovery]', "examPrepRecovery", "exam-prep-recovery.js?v=p208preserve1");
+    load('script[data-exam-prep-exam-map]', "examPrepExamMap", "exam-prep-exam-map.js?v=p209map1");
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
   }
