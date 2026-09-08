@@ -10,6 +10,7 @@ on:
       - 'supabase/migrations/*exam_prep_p1_02_*.sql'
       - 'supabase/migrations/*exam_prep_p1_03_*.sql'
       - 'supabase/migrations/*exam_prep_p1_04_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_06_*.sql'
       - supabase/migrations/20260907103000_exam_prep_ai_initial_context_source_pack_v1.sql
       - supabase/migrations/20260907112000_exam_prep_p1_05_legacy_reference_adapter_v1.sql
       - supabase/tests/p0_15_contract_bootstrap.sql
@@ -112,6 +113,17 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql 2>&1 | tee -a p106-expanded-beta.log
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260907112000_exam_prep_p1_05_legacy_reference_adapter_v1.sql 2>&1 | tee -a p106-expanded-beta.log
 
+      - name: Apply P1-06 private stage-governance RLS hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p1_06_*.sql' | sort)
+          test "${#files[@]}" -ge 1
+          for f in "${files[@]}"; do
+            echo "=== Applying $f ===" | tee -a p106-expanded-beta.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p106-expanded-beta.log 2>&1
+          done
+
       - name: Verify fail-closed ephemeral baseline
         shell: bash
         run: |
@@ -119,11 +131,14 @@ jobs:
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
           cards="$(psql -Atqc "select count(*) from private.exam_prep_ai_source_cards where approval_status='approved' and is_runtime_allowed and rights_status='original_iclub'")"
           generation="$(psql -Atqc "select generation_enabled from private.exam_prep_ai_policy where id=1")"
+          no_rls="$(psql -Atqc "select count(*) from pg_tables where schemaname='private' and tablename like 'exam_prep%' and not rowsecurity")"
           echo "P106_BASELINE_STATE=$state" | tee -a p106-expanded-beta.log
           echo "P106_AI_CARDS=$cards" | tee -a p106-expanded-beta.log
+          echo "P106_PRIVATE_NO_RLS=$no_rls" | tee -a p106-expanded-beta.log
           test "$state" = 'off|false|false|false|true'
           test "$cards" = '12'
           test "$generation" = 'f'
+          test "$no_rls" = '0'
 
       - name: Re-run 600 learners / 10 mentor isolation drill on current schema
         shell: bash
