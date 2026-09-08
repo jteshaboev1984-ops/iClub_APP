@@ -1,0 +1,92 @@
+name: TMP P2-09 Cache Bump
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/tmp-p209-cache-bump.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tmp-p209-cache-bump
+  cancel-in-progress: false
+
+jobs:
+  cache-bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Patch exactly one Exam Prep API cache key
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          text = p.read_text(encoding='utf-8')
+          old = 'exam-prep/exam-prep-api.js?v=p014h1'
+          new = 'exam-prep/exam-prep-api.js?v=p209map1'
+          if text.count(old) != 1:
+              raise SystemExit(f'expected exactly one old cache key, found {text.count(old)}')
+          if text.count(new) != 0:
+              raise SystemExit(f'new cache key already present {text.count(new)} time(s)')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+          test "$(git diff --name-only | wc -l)" -eq 1
+          test "$(git diff --name-only)" = 'index.html'
+          grep -q 'exam-prep/exam-prep-api.js?v=p209map1' index.html
+          ! grep -q 'exam-prep/exam-prep-api.js?v=p014h1' index.html
+          git diff --check
+
+      - name: Static safety checks
+        run: |
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-exam-map.js
+          node --check .github/scripts/p2_09_exam_map_ui_regression.js
+          grep -q 'save_exam_prep_exam_profile_v2' exam-prep/exam-prep-api.js
+          grep -q 'generate_exam_prep_weekly_plan_safe_v3' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-exam-map.js?v=p209map1' exam-prep/exam-prep-api.js
+          ! grep -q '\.from(' exam-prep/exam-prep-exam-map.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-exam-map.js
+          ! grep -q 'iclub_state_v1' exam-prep/exam-prep-exam-map.js
+          ! grep -q 'correct_answer' exam-prep/exam-prep-exam-map.js
+
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Browser-isolated Exam Map learner editor
+        run: node .github/scripts/p2_09_exam_map_ui_regression.js
+
+      - name: Start local app server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/p209-cache-http.log 2>&1 &
+          echo $! >/tmp/p209-cache-http.pid
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/p209-cache-http.log
+          exit 1
+
+      - name: Legacy OFF browser smoke on patched index
+        run: node .github/scripts/p0_14_legacy_off_regression.js
+
+      - name: Commit tested cache bump
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --check
+          test "$(git diff --cached --name-only)" = 'index.html'
+          git commit -m 'fix(exam-prep): release P2-09 learner UI cache'
+          git push origin HEAD:main
