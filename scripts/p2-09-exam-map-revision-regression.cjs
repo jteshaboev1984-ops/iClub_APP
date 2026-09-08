@@ -4,6 +4,8 @@ function read(path) { return fs.readFileSync(path, 'utf8'); }
 function assert(condition, message) { if (!condition) throw new Error(message); }
 
 const migration = read('supabase/migrations/20260908103000_exam_prep_p2_09_exam_map_revision_v1.sql');
+const componentStatus = read('supabase/migrations/20260908111500_exam_prep_p2_09_component_status_v1.sql');
+const all = `${migration}\n${componentStatus}`;
 
 for (const token of [
   'profile_revision integer not null default 1',
@@ -27,7 +29,17 @@ for (const token of [
   'get_exam_prep_exam_map_status_safe_v1',
   "'calendar_can_reduce_progress',false",
   "'hours_change_action','rebuild_weekly_plan_preserve_corrections_retests'"
-]) assert(migration.includes(token), `P2-09 contract missing: ${token}`);
+]) assert(all.includes(token), `P2-09 contract missing: ${token}`);
+
+for (const token of [
+  "foreach v_component in array array['P1','P5'] loop",
+  "'components',v_components",
+  "'component_code',v_component",
+  "'p1_p5_separate',true",
+  't.component_code=v_component',
+  's.component_code=v_component',
+  'c.component_code=v_component'
+]) assert(componentStatus.includes(token), `P2-09 component separation missing: ${token}`);
 
 assert(/v_series_changed\s*:=/i.test(migration), 'series-change detector missing');
 assert(/v_hours_changed\s*:=/i.test(migration), 'hours-change detector missing');
@@ -48,6 +60,6 @@ for (const forbidden of [
   /set\s+mentor_enabled\s*=\s*true/i,
   /set\s+ai_enabled\s*=\s*true/i,
   /correct_answer/i
-]) assert(!forbidden.test(migration), `forbidden P2-09 mutation/surface: ${forbidden}`);
+]) assert(!forbidden.test(all), `forbidden P2-09 mutation/surface: ${forbidden}`);
 
 console.log('P2-09 Exam Map revision regression: GREEN');
