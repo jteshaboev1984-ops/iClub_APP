@@ -188,5 +188,20 @@
     internal.profileCompletenessVersion = VERSION;
   }
 
+  function loadThresholdReferenceLayer() {
+    try {
+      const src = document?.currentScript?.src || "";
+      if (!src || !/exam-prep-profile-completeness\.js(?:\?|$)/.test(src)) return;
+      if (document.querySelector('script[data-exam-prep-threshold-reference]')) return;
+      const script = document.createElement("script");
+      script.dataset.examPrepThresholdReference = "true";
+      script.src = src.replace(/exam-prep-profile-completeness\.js(?:\?.*)?$/, "exam-prep-threshold-reference.js?v=p205threshold1");
+      document.head.appendChild(script);
+    } catch (_) {
+      // Read-only learner note is optional; the core flow must remain available without it.
+    }
+  }
+
+  loadThresholdReferenceLayer();
   attach();
 })();
