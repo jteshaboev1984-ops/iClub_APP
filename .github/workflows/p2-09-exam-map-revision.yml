@@ -134,6 +134,16 @@ jobs:
           test "${#files[@]}" -ge 1
           for f in "${files[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >>p209.log 2>&1; done
 
+      - name: Prepare synthetic Core-only P2 release boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' 2>&1 | tee -a p209.log
+          update private.exam_prep_feature_config
+          set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now()
+          where program_key='math_as_p1_p5';
+          SQL
+
       - name: Apply P2 dependencies and P2-09
         shell: bash
         run: |
@@ -146,6 +156,16 @@ jobs:
               psql -v ON_ERROR_STOP=1 -f "$f" >>p209.log 2>&1
             done
           done
+
+      - name: Restore fail-closed boundary after P2 release
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' 2>&1 | tee -a p209.log
+          update private.exam_prep_feature_config
+          set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now()
+          where program_key='math_as_p1_p5';
+          SQL
 
       - name: Run isolated Exam Map revision matrix
         shell: bash
