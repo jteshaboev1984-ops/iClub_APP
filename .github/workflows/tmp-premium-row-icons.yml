@@ -1,0 +1,109 @@
+name: TEMP Premium Row Icons
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/tmp-premium-row-icons.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  premium-icons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Replace learner-facing emoji row icons with line SVG
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          icons = {
+            'ℹ️': '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v6"/><path d="M12 7h.01"/></svg>',
+            '📰': '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>',
+            '💬': '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+            '🎯': '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M15 9l5-5"/><path d="M17 4h3v3"/></svg>',
+            '🎬': '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="6" width="16" height="13" rx="2"/><path d="M4 10h16"/><path d="M8 6l2 4"/><path d="M13 6l2 4"/></svg>',
+            '📚': '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h6v16H5z"/><path d="M13 4h6v16h-6z"/><path d="M7.5 8h1"/><path d="M15.5 8h1"/></svg>',
+            '🎓': '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-5 9 5-9 5z"/><path d="M7 12v4c2 2 8 2 10 0v-4"/></svg>',
+            '🗂️': '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h7l2 2h9v10H3z"/><path d="M3 7V5h7l2 2"/></svg>',
+            '🧭': '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 5-5 2 2-5z"/></svg>',
+          }
+
+          settings_replaced = 0
+          for emoji, svg in icons.items():
+              old = f'<span class="settings-nav-ico">{emoji}</span>'
+              count = s.count(old)
+              if count:
+                  s = s.replace(old, f'<span class="settings-nav-ico">{svg}</span>')
+                  settings_replaced += count
+
+          profile_icons = {
+            '🎓': icons['🎓'],
+            '📄': '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>',
+            '🛟': '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M5.6 5.6l3.6 3.6"/><path d="M14.8 14.8l3.6 3.6"/><path d="M18.4 5.6l-3.6 3.6"/><path d="M9.2 14.8l-3.6 3.6"/></svg>',
+          }
+          profile_replaced = 0
+          for emoji, svg in profile_icons.items():
+              old = f'<div class="profile-row-ico">{emoji}</div>'
+              count = s.count(old)
+              if count:
+                  s = s.replace(old, f'<div class="profile-row-ico">{svg}</div>')
+                  profile_replaced += count
+
+          if settings_replaced < 9:
+              raise SystemExit(f'expected at least 9 settings row icons, replaced {settings_replaced}')
+          if profile_replaced != 3:
+              raise SystemExit(f'expected 3 profile row icons, replaced {profile_replaced}')
+
+          p.write_text(s, encoding='utf-8')
+          print(f'settings icons={settings_replaced}, profile icons={profile_replaced}')
+          PY
+
+      - name: Safety and visual checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          grep -q 'visual/iclub-premium-v3.css?v=premium1' index.html
+          test "$(grep -o '<svg viewBox="0 0 24 24" width="18" height="18"' index.html | wc -l | tr -d ' ')" -ge '12'
+          git diff --check
+          test "$(git diff --name-only)" = 'index.html'
+
+      - name: Install browser runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run premium and live regressions before commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 > /tmp/premium-icons-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 0.2
+          done
+          node .github/scripts/visual_v3_live_regression.js
+          node .github/scripts/visual_v3_premium_regression.js
+
+      - name: Commit tested icon cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          test "$(git diff --cached --name-only)" = 'index.html'
+          git commit -m 'feat(ui): replace premium row emojis with line icons'
+          git push origin HEAD:main
