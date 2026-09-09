@@ -44,7 +44,8 @@ assertion_anchor = "  assert(p1Text.includes('does not change confirmed progress
 assertion_block = '''  assert(await page.locator('#ep-history-note-style').count() === 0, 'history note must not inject a runtime style element');
   const p1Style = await page.locator('[data-ep-history-note="P1"]').evaluate(el => {
     const s = getComputedStyle(el);
-    return { display: s.display, radius: s.borderRadius, overflowWrap: s.overflowWrap };
+    const body = getComputedStyle(el.querySelector('span'));
+    return { display: s.display, radius: s.borderRadius, overflowWrap: body.overflowWrap };
   });
   assert(p1Style.display === 'grid', 'history note external stylesheet must be applied');
   assert(p1Style.radius === '10px', 'history note external stylesheet must preserve geometry');
