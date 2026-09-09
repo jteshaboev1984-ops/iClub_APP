@@ -21,155 +21,19 @@ jobs:
 
       - name: Stage Subject Hub architecture layer
         shell: bash
+        env:
+          SUBJECT_HUB_CSS_B64: LyogPT09PT0gUFJFTUlVTSBTVUJKRUNUIEhVQiBBUkNISVRFQ1RVUkUgdjMuMSA9PT09PSAqLwovKiBMYXlvdXQgYW5kIGhpZXJhcmNoeSBvbmx5LiBFeGlzdGluZyBJRHMsIGFjdGlvbnMsIHJvdXRlcyBhbmQgZGF0YSBiZWhhdmlvciBzdGF5IHVudG91Y2hlZC4gKi8KLmljbHViLXZpc3VhbC12MyAjY291cnNlcy1zdWJqZWN0LWh1YltoaWRkZW5dIHsKICBkaXNwbGF5OiBub25lICFpbXBvcnRhbnQ7Cn0KCi5pY2x1Yi12aXN1YWwtdjMgI2NvdXJzZXMtc3ViamVjdC1odWIuaXMtYWN0aXZlOm5vdChbaGlkZGVuXSkgewogIGRpc3BsYXk6IGZsZXg7CiAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjsKICBnYXA6IDA7Cn0KCi5pY2x1Yi12aXN1YWwtdjMgI2NvdXJzZXMtc3ViamVjdC1odWIgPiAuc3ViamVjdC1odWItaGVhZCB7CiAgb3JkZXI6IDEwOwogIG1hcmdpbi1ib3R0b206IDEwcHg7Cn0KCi5pY2x1Yi12aXN1YWwtdjMgI2NvdXJzZXMtc3ViamVjdC1odWIgPiAjc3ViamVjdC1odWItZXhhbS1wcmVwLWVudHJ5IHsKICBvcmRlcjogMjA7CiAgbWFyZ2luOiAwIDAgMTJweDsKfQoKLmljbHViLXZpc3VhbC12MyAjY291cnNlcy1zdWJqZWN0LWh1YiA+ICNleGFtLXByZXAtaG9zdC1yb290IHsKICBvcmRlcjogMjU7Cn0KCi5pY2x1Yi12aXN1YWwtdjMgI2NvdXJzZXMtc3ViamVjdC1odWIgPiAuc3ViamVjdC1odWItdGFicyB7CiAgb3JkZXI6IDMwOwogIGdyaWQtdGVtcGxhdGUtY29sdW1uczogcmVwZWF0KDIsIG1pbm1heCgwLCAxZnIpKTsKICBnYXA6IDhweDsKICBtYXJnaW46IDAgMCAxMnB4OwogIHBhZGRpbmc6IDA7CiAgYm9yZGVyOiAwOwogIGJhY2tncm91bmQ6IHRyYW5zcGFyZW50Owp9CgouaWNsdWItdmlzdWFsLXYzICNjb3Vyc2VzLXN1YmplY3QtaHViID4gLnN1YmplY3QtaHViLXRhYnMgLmh1Yi10YWIgewogIG1pbi1oZWlnaHQ6IDQ4cHg7CiAgcGFkZGluZzogMTBweCA5cHg7CiAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tdjMtYm9yZGVyKTsKICBib3JkZXItcmFkaXVzOiB2YXIoLS12My1yYWRpdXMtbWQpOwogIGJhY2tncm91bmQ6IHZhcigtLXYzLWNhcmQpOwogIGNvbG9yOiB2YXIoLS12My10ZXh0KTsKICBmb250LXNpemU6IDExLjVweDsKICBmb250LXdlaWdodDogNzQwOwogIGJveC1zaGFkb3c6IHZhcigtLXYzLXByZW1pdW0tc2hhZG93KTsKfQoKLmljbHViLXZpc3VhbC12MyAjY291cnNlcy1zdWJqZWN0LWh1YiA+IC5zdWJqZWN0LWh1Yi10YWJzIC5odWItdGFiLmlzLWFjdGl2ZSB7CiAgYm9yZGVyLWNvbG9yOiAjQ0REOUZBOwogIGJhY2tncm91bmQ6IHZhcigtLXYzLXByaW1hcnktc29mdCk7CiAgY29sb3I6IHZhcigtLXYzLXByaW1hcnkpOwogIGJveC1zaGFkb3c6IDAgNnB4IDE2cHggcmdiYSgzNiwgODcsIDIxNCwgMC4wOSk7Cn0KCi5pY2x1Yi12aXN1YWwtdjMgI2NvdXJzZXMtc3ViamVjdC1odWIgPiAuc3ViamVjdC1odWItbGlzdCB7CiAgb3JkZXI6IDcwOwp9CgouaWNsdWItdmlzdWFsLXYzICNjb3Vyc2VzLXN1YmplY3QtaHViID4gLnN1YmplY3QtaHViLWxpc3Quc3ViamVjdC1odWItYWN0aW9ucyB7CiAgb3JkZXI6IDQwOwogIGRpc3BsYXk6IGdyaWQ7CiAgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiAxZnI7CiAgZ2FwOiA4cHg7CiAgbWFyZ2luLXRvcDogMDsKICBvdmVyZmxvdzogdmlzaWJsZTsKICBib3JkZXI6IDA7CiAgYm9yZGVyLXJhZGl1czogMDsKICBiYWNrZ3JvdW5kOiB0cmFuc3BhcmVudDsKICBib3gtc2hhZG93OiBub25lOwp9CgouaWNsdWItdmlzdWFsLXYzICNjb3Vyc2VzLXN1YmplY3QtaHViID4gLnN1YmplY3QtaHViLWxpc3Quc3ViamVjdC1odWItYWN0aW9ucyAuc2V0dGluZ3MtbmF2IHsKICBtaW4taGVpZ2h0OiA2NHB4OwogIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLXYzLWJvcmRlcik7CiAgYm9yZGVyLXJhZGl1czogdmFyKC0tdjMtcmFkaXVzLWxnKTsKICBiYWNrZ3JvdW5kOiB2YXIoLS12My1jYXJkKTsKICBib3gtc2hhZG93OiB2YXIoLS12My1wcmVtaXVtLXNoYWRvdyk7Cn0KCi5pY2x1Yi12aXN1YWwtdjMgI2NvdXJzZXMtc3ViamVjdC1odWIgPiAuc3ViamVjdC1odWItbGlzdC5zdWJqZWN0LWh1Yi1hY3Rpb25zIC5zZXR0aW5ncy1uYXYgKyAuc2V0dGluZ3MtbmF2IHsKICBib3JkZXItdG9wOiAxcHggc29saWQgdmFyKC0tdjMtYm9yZGVyKTsKfQoKLmljbHViLXZpc3VhbC12MyAjY291cnNlcy1zdWJqZWN0LWh1YiA+IC5zdWJqZWN0LWh1Yi1wYW5lbHMgewogIG9yZGVyOiA1MDsKICBtYXJnaW4tdG9wOiAxOHB4Owp9CgouaWNsdWItdmlzdWFsLXYzICNjb3Vyc2VzLXN1YmplY3QtaHViID4gLnN1YmplY3QtaHViLXBhbmVscyAuc3ViamVjdC1odWItcGFuZWwgewogIHBhZGRpbmc6IDEzcHggMTRweDsKICBib3JkZXItY29sb3I6IHZhcigtLXYzLWJvcmRlcik7CiAgYmFja2dyb3VuZDogI0ZCRkNGRjsKICBib3gtc2hhZG93OiBub25lOwp9CgouaWNsdWItdmlzdWFsLXYzICNjb3Vyc2VzLXN1YmplY3QtaHViID4gLnNlY3Rpb24gewogIG9yZGVyOiA2MDsKICBtYXJnaW4tdG9wOiAyMHB4ICFpbXBvcnRhbnQ7CiAgbWFyZ2luLWJvdHRvbTogMDsKfQoKLmljbHViLXZpc3VhbC12MyAjY291cnNlcy1zdWJqZWN0LWh1YiA+IC5zZWN0aW9uICsgLnN1YmplY3QtaHViLWxpc3QgewogIG1hcmdpbi10b3A6IDhweDsKfQoKLmljbHViLXZpc3VhbC12MyAjY291cnNlcy1zdWJqZWN0LWh1YiA+IC5zdWJqZWN0LWh1Yi1ib3R0b20gewogIG9yZGVyOiA4MDsKICBtYXJnaW4tdG9wOiAxNHB4Owp9CgouaWNsdWItdmlzdWFsLXYzICNjb3Vyc2VzLXN1YmplY3QtaHViLmV4YW0tcHJlcC1hdmFpbGFibGUgPiAuc3ViamVjdC1odWItaGVhZCB7CiAgbWFyZ2luLWJvdHRvbTogOHB4Owp9CgouaWNsdWItdmlzdWFsLXYzICNjb3Vyc2VzLXN1YmplY3QtaHViLmV4YW0tcHJlcC1hdmFpbGFibGUgPiAjc3ViamVjdC1odWItZXhhbS1wcmVwLWVudHJ5IHsKICBib3JkZXItY29sb3I6ICNDOUQ4RkM7CiAgYm94LXNoYWRvdzogMCAxNHB4IDM0cHggcmdiYSgzNiwgODcsIDIxNCwgMC4xMCk7Cn0KCkBtZWRpYSAobWluLXdpZHRoOiA2MjBweCkgewogIC5pY2x1Yi12aXN1YWwtdjMgI2NvdXJzZXMtc3ViamVjdC1odWIgPiAuc3ViamVjdC1odWItdGFicyB7CiAgICBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IHJlcGVhdCg0LCBtaW5tYXgoMCwgMWZyKSk7CiAgfQoKICAuaWNsdWItdmlzdWFsLXYzICNjb3Vyc2VzLXN1YmplY3QtaHViID4gLnN1YmplY3QtaHViLWxpc3Quc3ViamVjdC1odWItYWN0aW9ucyB7CiAgICBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IHJlcGVhdCgyLCBtaW5tYXgoMCwgMWZyKSk7CiAgfQp9CgpAbWVkaWEgKG1heC13aWR0aDogMzUwcHgpIHsKICAuaWNsdWItdmlzdWFsLXYzICNjb3Vyc2VzLXN1YmplY3QtaHViID4gLnN1YmplY3QtaHViLXRhYnMgewogICAgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiAxZnI7CiAgfQp9Cg==
         run: |
           set -euo pipefail
           python3 - <<'PY'
+          import base64, os
           from pathlib import Path
           path = Path('visual/iclub-premium-v3.css')
           css = path.read_text(encoding='utf-8')
           marker = '/* ===== PREMIUM SUBJECT HUB ARCHITECTURE v3.1 ===== */'
-          if marker in css:
-              print('Subject Hub architecture layer already present')
-              raise SystemExit(0)
-          addition = r'''
-
-/* ===== PREMIUM SUBJECT HUB ARCHITECTURE v3.1 ===== */
-/* Layout and hierarchy only. Existing IDs, actions, routes and data behavior stay untouched. */
-.iclub-visual-v3 #courses-subject-hub[hidden] {
-  display: none !important;
-}
-
-.iclub-visual-v3 #courses-subject-hub.is-active:not([hidden]) {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.iclub-visual-v3 #courses-subject-hub > .subject-hub-head {
-  order: 10;
-  margin-bottom: 10px;
-}
-
-.iclub-visual-v3 #courses-subject-hub > #subject-hub-exam-prep-entry {
-  order: 20;
-  margin: 0 0 12px;
-}
-
-.iclub-visual-v3 #courses-subject-hub > #exam-prep-host-root {
-  order: 25;
-}
-
-.iclub-visual-v3 #courses-subject-hub > .subject-hub-tabs {
-  order: 30;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0 0 12px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.iclub-visual-v3 #courses-subject-hub > .subject-hub-tabs .hub-tab {
-  min-height: 48px;
-  padding: 10px 9px;
-  border: 1px solid var(--v3-border);
-  border-radius: var(--v3-radius-md);
-  background: var(--v3-card);
-  color: var(--v3-text);
-  font-size: 11.5px;
-  font-weight: 740;
-  box-shadow: var(--v3-premium-shadow);
-}
-
-.iclub-visual-v3 #courses-subject-hub > .subject-hub-tabs .hub-tab.is-active {
-  border-color: #CDD9FA;
-  background: var(--v3-primary-soft);
-  color: var(--v3-primary);
-  box-shadow: 0 6px 16px rgba(36, 87, 214, 0.09);
-}
-
-.iclub-visual-v3 #courses-subject-hub > .subject-hub-list {
-  order: 70;
-}
-
-.iclub-visual-v3 #courses-subject-hub > .subject-hub-list.subject-hub-actions {
-  order: 40;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-  margin-top: 0;
-  overflow: visible;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.iclub-visual-v3 #courses-subject-hub > .subject-hub-list.subject-hub-actions .settings-nav {
-  min-height: 64px;
-  border: 1px solid var(--v3-border);
-  border-radius: var(--v3-radius-lg);
-  background: var(--v3-card);
-  box-shadow: var(--v3-premium-shadow);
-}
-
-.iclub-visual-v3 #courses-subject-hub > .subject-hub-list.subject-hub-actions .settings-nav + .settings-nav {
-  border-top: 1px solid var(--v3-border);
-}
-
-.iclub-visual-v3 #courses-subject-hub > .subject-hub-panels {
-  order: 50;
-  margin-top: 18px;
-}
-
-.iclub-visual-v3 #courses-subject-hub > .subject-hub-panels .subject-hub-panel {
-  padding: 13px 14px;
-  border-color: var(--v3-border);
-  background: #FBFCFF;
-  box-shadow: none;
-}
-
-.iclub-visual-v3 #courses-subject-hub > .section {
-  order: 60;
-  margin-top: 20px !important;
-  margin-bottom: 0;
-}
-
-.iclub-visual-v3 #courses-subject-hub > .section + .subject-hub-list {
-  margin-top: 8px;
-}
-
-.iclub-visual-v3 #courses-subject-hub > .subject-hub-bottom {
-  order: 80;
-  margin-top: 14px;
-}
-
-.iclub-visual-v3 #courses-subject-hub.exam-prep-available > .subject-hub-head {
-  margin-bottom: 8px;
-}
-
-.iclub-visual-v3 #courses-subject-hub.exam-prep-available > #subject-hub-exam-prep-entry {
-  border-color: #C9D8FC;
-  box-shadow: 0 14px 34px rgba(36, 87, 214, 0.10);
-}
-
-@media (min-width: 620px) {
-  .iclub-visual-v3 #courses-subject-hub > .subject-hub-tabs {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .iclub-visual-v3 #courses-subject-hub > .subject-hub-list.subject-hub-actions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 350px) {
-  .iclub-visual-v3 #courses-subject-hub > .subject-hub-tabs {
-    grid-template-columns: 1fr;
-  }
-}
-'''
-          path.write_text(css.rstrip() + addition + '\n', encoding='utf-8')
+          if marker not in css:
+              addition = base64.b64decode(os.environ['SUBJECT_HUB_CSS_B64']).decode('utf-8')
+              path.write_text(css.rstrip() + '\n\n' + addition, encoding='utf-8')
           print('Subject Hub architecture layer staged')
           PY
 
@@ -179,7 +43,7 @@ jobs:
           set -euo pipefail
           git diff --check
           grep -q 'PREMIUM SUBJECT HUB ARCHITECTURE v3.1' visual/iclub-premium-v3.css
-          grep -q '#courses-subject-hub.is-active:not(\[hidden\])' visual/iclub-premium-v3.css
+          grep -Fq '#courses-subject-hub.is-active:not([hidden])' visual/iclub-premium-v3.css
           ! grep -Eiq 'localStorage|sessionStorage|supabase|\.rpc\s*\(|\.from\s*\(|data-tab\s*=|operational_stage\s*=|innerHTML\s*=' visual/iclub-premium-v3.css
           node --check .github/scripts/visual_v3_subject_hub_architecture_regression.js
 
