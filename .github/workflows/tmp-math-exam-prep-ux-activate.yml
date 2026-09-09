@@ -23,6 +23,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
+          # The current RU learner copy was refined after the UX patch was drafted.
+          # Align only the exact source anchors inside the temporary patch helper.
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('.github/scripts/tmp_math_exam_prep_ux_patch.py')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('Закройте оставшуюся ключевую ошибку', 'Закрыть основную оставшуюся ошибку')
+          s = s.replace('Проверьте время и организацию экзамена', 'Проверить время и экзаменационный порядок')
+          s = s.replace('Снизьте нагрузку и сохраните результат', 'Снизить нагрузку и сохранить форму')
+          p.write_text(s, encoding='utf-8')
+          PY
+
           python3 .github/scripts/tmp_math_exam_prep_ux_patch.py
 
           # Keep existing public cache keys and permanent workflows untouched in
