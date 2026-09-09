@@ -11,6 +11,7 @@ const path = require('path');
     body: '<!doctype html><html lang="en"><head></head><body><section id="courses-subject-hub"><div id="subject-hub-exam-prep-entry" hidden aria-hidden="true"><span id="subject-hub-exam-prep-title"></span><span id="subject-hub-exam-prep-sub"></span></div><div id="exam-prep-host-root" hidden aria-hidden="true"></div></section></body></html>'
   }));
   await page.goto('http://iclub.test/');
+  await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-host.css') });
 
   await page.evaluate(() => {
     window.__calls = [];
@@ -68,6 +69,15 @@ const path = require('path');
   assert(p1Text.includes('Previous practice'), 'P1 history note must use learner-facing wording');
   assert(p1Text.includes('3 earlier Practice/Tour answers found'), 'P1 history note must report only safe reference count');
   assert(p1Text.includes('does not change confirmed progress or exam readiness'), 'P1 history note must explicitly remain non-crediting');
+  assert(await page.locator('#ep-history-note-style').count() === 0, 'history note must not inject a runtime style element');
+  const p1Style = await page.locator('[data-ep-history-note="P1"]').evaluate(el => {
+    const s = getComputedStyle(el);
+    const body = getComputedStyle(el.querySelector('span'));
+    return { display: s.display, radius: s.borderRadius, overflowWrap: body.overflowWrap };
+  });
+  assert(p1Style.display === 'grid', 'history note external stylesheet must be applied');
+  assert(p1Style.radius === '10px', 'history note external stylesheet must preserve geometry');
+  assert(['break-word', 'anywhere'].includes(p1Style.overflowWrap), 'history note must remain language-safe');
   assert(await page.locator('[data-ep-history-note="P5"]').count() === 0, 'P5 history note must stay hidden without approved P5 legacy mapping');
 
   const visible = await page.locator('#exam-prep-host-root').textContent();
