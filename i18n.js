@@ -247,7 +247,7 @@ archive_unlock_after_toast: "Архив откроется после закры
       ratings_no_participants: "Нет участников.",
       ratings_total_participants: "Всего участников",
 
-            courses_title: "Курсы",
+            courses_title: "Учёба",
       courses_activate_comp_title: "Включить в соревновательный режим?",
 courses_activate_comp_text: "Предмет будет активирован в соревновательном режиме.",
 courses_activate_comp_ok: "Включить",
@@ -1153,7 +1153,7 @@ archive_unlock_after_toast: "Arxiv joriy rasmiy tur yopilgandan keyin ochiladi."
       ratings_no_participants: "Ishtirokchilar yo‘q.",
       ratings_total_participants: "Jami ishtirokchilar",
 
-            courses_title: "Kurslar",
+            courses_title: "O‘qish",
       courses_activate_comp_title: "Fan musobaqa rejimiga yoqilsinmi?",
 courses_activate_comp_text: "Fan musobaqa rejimida faollashtiriladi.",
 courses_activate_comp_ok: "Yoqish",
@@ -2065,7 +2065,7 @@ archive_unlock_after_toast: "The archive will open after the current official to
       ratings_no_participants: "No participants.",
       ratings_total_participants: "Total participants",
 
-            courses_title: "Courses",
+            courses_title: "Study",
       courses_activate_comp_title: "Enable in competitive mode?",
 courses_activate_comp_text: "The subject will be activated in competitive mode.",
 courses_activate_comp_ok: "Enable",

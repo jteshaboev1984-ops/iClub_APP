@@ -14656,7 +14656,7 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
   el.type = "button";
   el.className = "home-pinned-tile";
   el.innerHTML = `
-    <div class="home-pinned-ico">📘</div>
+    <div class="home-pinned-ico" aria-hidden="true"><svg class="v3-home-pinned-icon" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5A2.5 2.5 0 0 1 20 21z"/></svg></div>
     <div class="home-pinned-title">${escapeHTML(title)}</div>
     <div class="home-pinned-meta"><span class="js-home-pin-count">${escapeHTML(lessons)}</span> ${escapeHTML(t("home_practice_progress_label") || "")}</div>
   `;
