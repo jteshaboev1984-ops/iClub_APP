@@ -35,6 +35,8 @@ jobs:
               s = s.replace(old, new)
           elif new not in s:
               raise SystemExit('Expected active background assertion not found')
+          obsolete = "  assert(state.firstTabAfterBottom === 'auto', `Legacy active underline positioning leaked into launcher: bottom=${state.firstTabAfterBottom}`);\n"
+          s = s.replace(obsolete, '')
           p.write_text(s, encoding='utf-8')
           PY
 
