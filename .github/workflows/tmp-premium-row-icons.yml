@@ -107,3 +107,5 @@ jobs:
           test "$(git diff --cached --name-only)" = 'index.html'
           git commit -m 'feat(ui): replace premium row emojis with line icons'
           git push origin HEAD:main
+
+# Retry from current main after cleanup commit.
