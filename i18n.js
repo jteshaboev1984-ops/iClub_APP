@@ -321,6 +321,7 @@ network_error_try_again: "Ошибка сети. Попробуйте ещё р�
       reg_language_reset_note: "Важно: смена языка после регистрации сбросит прогресс.",
 
       tab_home: "Главная",
+    tab_study: "Учёба",
       tab_courses: "Предметы",
       tab_ratings: "Рейтинг",
       tab_profile: "Профиль",
@@ -1218,6 +1219,7 @@ network_error_try_again: "Tarmoq xatosi. Qayta urinib ko‘ring.",
         "Muhim: ro‘yxatdan o‘tgandan so‘ng tilni o‘zgartirish progressni o‘chiradi.",
 
       tab_home: "Bosh sahifa",
+    tab_study: "O‘qish",
       tab_courses: "Fanlar",
       tab_ratings: "Reyting",
       tab_profile: "Profil",
@@ -2117,6 +2119,7 @@ network_error_try_again: "Network error. Please try again.",
       reg_language_reset_note: "Important: changing the language after registration will reset progress.",
 
       tab_home: "Home",
+    tab_study: "Study",
       tab_courses: "Courses",
       tab_ratings: "Ratings",
       tab_profile: "Profile",
