@@ -10,6 +10,7 @@ const css = fs.readFileSync('visual/iclub-premium-v3.css', 'utf8');
 
 for (const token of [
   'PREMIUM SUBJECT HUB ARCHITECTURE v3.1',
+  'PREMIUM SUBJECT HUB ACTION AFFORDANCE v3.2',
   '#courses-subject-hub.is-active:not([hidden])',
   '#courses-subject-hub > #subject-hub-exam-prep-entry',
   '#courses-subject-hub > .subject-hub-tabs',
@@ -73,15 +74,21 @@ for (const action of ['open-lessons', 'open-practice', 'open-tours', 'open-books
       },
       tabsColumns: getComputedStyle(tabs).gridTemplateColumns.split(' ').length,
       tabHeight: firstTab.getBoundingClientRect().height,
+      activeTabBackground: getComputedStyle(firstTab).backgroundColor,
+      activeTabColor: getComputedStyle(firstTab).color,
+      mentorBeforeFeature: panels.getBoundingClientRect().top < entry.getBoundingClientRect().top,
       width: document.documentElement.scrollWidth,
       innerWidth: innerWidth
     };
   });
 
   assert(state.display === 'flex', `Subject Hub active layout must be flex, got ${state.display}`);
-  assert(JSON.stringify(state.orders) === JSON.stringify({ head: 10, entry: 20, tabs: 30, actions: 40, panels: 50, system: 60, bottom: 80 }), `Subject Hub hierarchy drift: ${JSON.stringify(state.orders)}`);
+  assert(JSON.stringify(state.orders) === JSON.stringify({ head: 10, entry: 20, tabs: 30, actions: 40, panels: 15, system: 60, bottom: 80 }), `Subject Hub hierarchy drift: ${JSON.stringify(state.orders)}`);
   assert(state.tabsColumns === 2, `Subject Hub mobile primary actions must be 2 columns, got ${state.tabsColumns}`);
-  assert(state.tabHeight >= 46, `Subject Hub primary action target too small: ${state.tabHeight}`);
+  assert(state.tabHeight >= 54, `Subject Hub primary action target too small: ${state.tabHeight}`);
+  assert(state.activeTabBackground === 'rgb(255, 255, 255)', `Primary action must not look pre-selected: ${state.activeTabBackground}`);
+  assert(state.activeTabColor === 'rgb(15, 23, 42)', `Primary action selected-color leak: ${state.activeTabColor}`);
+  assert(state.mentorBeforeFeature === true, 'Mentor card must stay in its original place directly after the subject header');
   assert(state.width <= state.innerWidth, `Subject Hub mobile overflow: ${JSON.stringify(state)}`);
 
   await page.evaluate(() => {
