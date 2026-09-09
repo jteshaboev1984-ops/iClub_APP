@@ -1,0 +1,72 @@
+name: Visual Foundation v3 Live Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'i18n.js'
+      - 'visual/iclub-visual-v3.css'
+      - '.github/scripts/visual_v3_live_regression.js'
+      - '.github/workflows/visual-v3-live.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'i18n.js'
+      - 'visual/iclub-visual-v3.css'
+      - '.github/scripts/visual_v3_live_regression.js'
+      - '.github/workflows/visual-v3-live.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static live-shell contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/visual_v3_live_regression.js
+          grep -q '<body class="iclub-visual-v3">' index.html
+          grep -q 'visual/iclub-visual-v3.css?v=v3foundation1' index.html
+          grep -q 'data-i18n="tab_study">Study</span>' index.html
+          grep -q 'tab_study: "Учёба"' i18n.js
+          grep -q 'tab_study: "O‘qish"' i18n.js
+          grep -q 'tab_study: "Study"' i18n.js
+          grep -q 'LIVE FOUNDATION v3' visual/iclub-visual-v3.css
+
+      - name: Install browser test runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run live-shell visual regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 > /tmp/visual-v3-live-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 0.2
+          done
+          curl -fsS http://127.0.0.1:4173/index.html >/dev/null
+          node .github/scripts/visual_v3_live_regression.js
+
+      - name: Guard state and route boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(grep -o 'data-tab="courses"' index.html | wc -l | tr -d ' ')" = '1'
+          ! grep -q 'data-tab="study"' index.html
+          ! grep -Eiq 'localStorage|sessionStorage|window\.sb|\.rpc\s*\(|\.from\s*\(' visual/iclub-visual-v3.css
+          echo 'Visual Foundation v3 live gate: GREEN'
