@@ -1,0 +1,81 @@
+name: TEMP Run Premium v3 Extended Screens
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/tmp-premium-v3-extended-run.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  premium-extended:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Recover and execute staged patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          src = Path('.github/workflows/tmp-premium-v3-extended.yml').read_text(encoding='utf-8')
+          start = src.index("          python3 - <<'PY'\n") + len("          python3 - <<'PY'\n")
+          end = src.index("\n          PY", start)
+          lines = src[start:end].splitlines()
+          code = '\n'.join(line[10:] if line.startswith('          ') else line for line in lines)
+          compile(code, '<premium-extended-patch>', 'exec')
+          exec(code, {'__name__': '__main__'})
+          PY
+
+      - name: Static safety checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          grep -q 'PREMIUM EXTENDED SCREENS v3' visual/iclub-premium-v3.css
+          grep -q '#view-ratings .lb-segment' visual/iclub-premium-v3.css
+          grep -q '#view-registration .reg-form' visual/iclub-premium-v3.css
+          grep -q '#view-support-topic .support-textarea' visual/iclub-premium-v3.css
+          test "$(grep -o 'class="v3-ratings-icon"' index.html | wc -l | tr -d ' ')" = '3'
+          ! grep -Eiq 'localStorage|sessionStorage|supabase|\.rpc\s*\(|\.from\s*\(|operational_stage\s*=|innerHTML\s*=' visual/iclub-premium-v3.css
+          git diff --check
+          changed="$(git diff --name-only | sort)"
+          test "$changed" = $'index.html\nvisual/iclub-premium-v3.css'
+
+      - name: Install browser runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run existing premium regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 > /tmp/premium-extended-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 0.2
+          done
+          node .github/scripts/visual_v3_live_regression.js
+          node .github/scripts/visual_v3_premium_regression.js
+
+      - name: Commit only tested presentation files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html visual/iclub-premium-v3.css
+          staged="$(git diff --cached --name-only | sort)"
+          test "$staged" = $'index.html\nvisual/iclub-premium-v3.css'
+          git commit -m 'feat(ui): premium polish ratings registration and global screens'
+          git push origin HEAD:main
