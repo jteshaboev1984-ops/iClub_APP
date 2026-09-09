@@ -25,6 +25,19 @@ jobs:
         run: |
           set -euo pipefail
           python3 .github/scripts/tmp_subject_hub_learning_modes_v34.py
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in [
+              'index.html',
+              'i18n.js',
+              'visual/iclub-premium-v3.css',
+              '.github/scripts/visual_v3_premium_regression.js',
+              '.github/scripts/visual_v3_subject_hub_architecture_regression.js',
+          ]:
+              p = Path(name)
+              text = p.read_text(encoding='utf-8')
+              p.write_text('\n'.join(line.rstrip() for line in text.splitlines()) + '\n', encoding='utf-8')
+          PY
 
       - name: Static safety checks
         shell: bash
