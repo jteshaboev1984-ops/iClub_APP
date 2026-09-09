@@ -1,0 +1,68 @@
+name: Visual v3 Premium Screen Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'visual/iclub-premium-v3.css'
+      - 'index.html'
+      - '.github/scripts/visual_v3_premium_regression.js'
+      - '.github/workflows/visual-v3-premium.yml'
+  pull_request:
+    paths:
+      - 'visual/iclub-premium-v3.css'
+      - 'index.html'
+      - '.github/scripts/visual_v3_premium_regression.js'
+      - '.github/workflows/visual-v3-premium.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  premium-screens:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static visual-only contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f visual/iclub-premium-v3.css
+          test -f .github/scripts/visual_v3_premium_regression.js
+          node --check .github/scripts/visual_v3_premium_regression.js
+          grep -q 'visual/iclub-premium-v3.css?v=premium1' index.html
+          ! grep -Eiq 'localStorage|sessionStorage|supabase|\.rpc\s*\(|\.from\s*\(|data-tab\s*=|operational_stage\s*=|innerHTML\s*=' visual/iclub-premium-v3.css
+          grep -q '#view-home .home-block-title' visual/iclub-premium-v3.css
+          grep -q '#courses-all-subjects .section-title' visual/iclub-premium-v3.css
+          grep -q '#courses-subject-hub .subject-hub-head' visual/iclub-premium-v3.css
+          grep -q '#view-profile .profile-hero' visual/iclub-premium-v3.css
+
+      - name: Install browser runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run premium mobile screen regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 > /tmp/visual-v3-premium-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 0.2
+          done
+          node .github/scripts/visual_v3_premium_regression.js
+
+      - name: Premium scope gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          echo 'Visual v3 premium screen gate: GREEN'
