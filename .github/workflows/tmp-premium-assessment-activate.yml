@@ -1,0 +1,69 @@
+name: TEMP Activate Premium Assessment Flows
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/tmp-premium-assessment-activate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  premium-assessment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply visual-only assessment patch
+        run: python3 .github/scripts/tmp_premium_assessment_patch.py
+
+      - name: Static safety checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check .github/scripts/visual_v3_assessment_regression.js
+          grep -q 'PREMIUM ASSESSMENT FLOWS v3' visual/iclub-premium-v3.css
+          grep -q 'class="v3-tour-warning-icon"' index.html
+          ! grep -Eiq 'localStorage|sessionStorage|supabase|\.rpc\s*\(|\.from\s*\(|operational_stage\s*=|data-action\s*=|innerHTML\s*=' visual/iclub-premium-v3.css
+          git diff --check
+          changed="$(git diff --name-only | sort)"
+          test "$changed" = $'index.html\nvisual/iclub-premium-v3.css'
+
+      - name: Install browser runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run live and premium regressions before commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 > /tmp/premium-assessment-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 0.2
+          done
+          node .github/scripts/visual_v3_live_regression.js
+          node .github/scripts/visual_v3_premium_regression.js
+          node .github/scripts/visual_v3_premium_extended_regression.js
+          node .github/scripts/visual_v3_assessment_regression.js
+
+      - name: Commit only tested presentation files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html visual/iclub-premium-v3.css
+          staged="$(git diff --cached --name-only | sort)"
+          test "$staged" = $'index.html\nvisual/iclub-premium-v3.css'
+          git commit -m 'feat(ui): premium polish Practice and Tours flows'
+          git push origin HEAD:main
