@@ -1,0 +1,81 @@
+name: TEMP Premium Dynamic Locale v3.7
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/tmp-dynamic-locale-v37.yml'
+      - '.github/scripts/tmp_dynamic_locale_v37.py'
+      - '.github/scripts/visual_v3_dynamic_locale_regression.js'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  dynamic-locale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply dynamic locale premium layer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/tmp_dynamic_locale_v37.py
+
+      - name: Static safety checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          node --check .github/scripts/visual_v3_dynamic_locale_regression.js
+          grep -q 'PREMIUM DYNAMIC LOCALE SURFACES v3.7' visual/iclub-premium-v3.css
+          grep -q 'LANGUAGE-SAFE WRAPPING' visual/iclub-premium-v3.css
+          ! grep -Eiq 'localStorage|sessionStorage|supabase|\.rpc\s*\(|\.from\s*\(|operational_stage\s*=|innerHTML\s*=' visual/iclub-premium-v3.css
+
+      - name: Install browser runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run visual and host regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 > /tmp/dynamic-locale-v37-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 0.2
+          done
+          node .github/scripts/visual_v3_premium_regression.js
+          node .github/scripts/visual_v3_premium_extended_regression.js
+          node .github/scripts/visual_v3_assessment_regression.js
+          node .github/scripts/visual_v3_math_exam_prep_ux_regression.js
+          node .github/scripts/visual_v3_subject_hub_architecture_regression.js
+          node .github/scripts/visual_v3_home_study_regression.js
+          node .github/scripts/visual_v3_transient_surfaces_regression.js
+          node .github/scripts/visual_v3_dynamic_locale_regression.js
+          node .github/scripts/p0_14_host_regression.js
+          node .github/scripts/p0_22_live_view_coexistence_regression.js
+
+      - name: Commit tested dynamic locale premium layer
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add visual/iclub-premium-v3.css
+          if git diff --cached --quiet; then
+            echo 'No dynamic locale premium change to commit.'
+            exit 0
+          fi
+          git commit -m 'feat(ui): polish dynamic profile ratings and locale wrapping'
+          git push origin HEAD:main
