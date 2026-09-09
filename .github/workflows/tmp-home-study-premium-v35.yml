@@ -24,7 +24,62 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
+          # First build the already-reviewed CSS block using the helper.
           python3 .github/scripts/tmp_home_study_premium_v35.py
+          python3 - <<'PY'
+          from pathlib import Path
+          css = Path('visual/iclub-premium-v3.css').read_text(encoding='utf-8')
+          marker = '/* ===== PREMIUM HOME STUDY ARCHITECTURE v3.5 ===== */'
+          pos = css.index(marker)
+          Path('/tmp/home-study-v35-css.txt').write_text(css[pos:].rstrip() + '\n', encoding='utf-8')
+          PY
+
+          # Restore product files so the final diff contains only intentional lines,
+          # not repo-wide whitespace cleanup. The permanent workflow is updated
+          # separately through the connector because Actions cannot push workflow edits.
+          git checkout HEAD -- app.js i18n.js index.html visual/iclub-premium-v3.css .github/workflows/visual-v3-premium.yml
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          app_path = Path('app.js')
+          app = app_path.read_text(encoding='utf-8')
+          old_icon = '<div class="home-pinned-ico">📘</div>'
+          new_icon = '<div class="home-pinned-ico" aria-hidden="true"><svg class="v3-home-pinned-icon" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5A2.5 2.5 0 0 1 20 21z"/></svg></div>'
+          if app.count(old_icon) != 1:
+              raise SystemExit(f'pinned icon anchor mismatch: {app.count(old_icon)}')
+          app_path.write_text(app.replace(old_icon, new_icon, 1), encoding='utf-8')
+
+          i18n_path = Path('i18n.js')
+          i18n = i18n_path.read_text(encoding='utf-8')
+          replacements = {
+              'courses_title: "Курсы"': 'courses_title: "Учёба"',
+              'courses_title: "Kurslar"': 'courses_title: "O‘qish"',
+              'courses_title: "Courses"': 'courses_title: "Study"',
+          }
+          for old, new in replacements.items():
+              if i18n.count(old) != 1:
+                  raise SystemExit(f'i18n anchor mismatch for {old}: {i18n.count(old)}')
+              i18n = i18n.replace(old, new, 1)
+          i18n_path.write_text(i18n, encoding='utf-8')
+
+          index_path = Path('index.html')
+          html = index_path.read_text(encoding='utf-8')
+          old_title = '<div class="section-title" data-i18n="courses_title">Courses</div>'
+          new_title = '<div class="section-title" data-i18n="courses_title">Study</div>'
+          if html.count(old_title) != 1:
+              raise SystemExit(f'Study fallback title anchor mismatch: {html.count(old_title)}')
+          index_path.write_text(html.replace(old_title, new_title, 1), encoding='utf-8')
+
+          css_path = Path('visual/iclub-premium-v3.css')
+          css = css_path.read_text(encoding='utf-8').rstrip()
+          suffix = Path('/tmp/home-study-v35-css.txt').read_text(encoding='utf-8').rstrip()
+          marker = '/* ===== PREMIUM HOME STUDY ARCHITECTURE v3.5 ===== */'
+          if marker in css:
+              raise SystemExit('Home/Study v3.5 marker unexpectedly already exists in baseline')
+          css_path.write_text(css + '\n\n' + suffix + '\n', encoding='utf-8')
+          PY
 
       - name: Static safety checks
         shell: bash
@@ -75,7 +130,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add app.js i18n.js index.html visual/iclub-premium-v3.css .github/workflows/visual-v3-premium.yml
+          git add app.js i18n.js index.html visual/iclub-premium-v3.css
           if git diff --cached --quiet; then
             echo 'No Home/Study product change to commit.'
             exit 0
