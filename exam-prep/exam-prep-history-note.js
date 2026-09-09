@@ -45,17 +45,6 @@
     );
   }
 
-  function ensureStyle() {
-    if (document.querySelector("#ep-history-note-style")) return;
-    const style = document.createElement("style");
-    style.id = "ep-history-note-style";
-    style.textContent = `
-      .ep-history-note{display:grid;gap:4px;padding:9px 10px;border-radius:10px;background:rgba(127,127,127,.055);border:1px solid rgba(127,127,127,.12)}
-      .ep-history-note strong{font-size:11px;line-height:1.3}.ep-history-note span{font-size:11px;line-height:1.45;opacity:.74}
-    `;
-    document.head.appendChild(style);
-  }
-
   function removeNote(component) {
     rootEl()?.querySelector(`[data-ep-history-note="${component}"]`)?.remove();
   }
@@ -75,7 +64,6 @@
         return;
       }
 
-      ensureStyle();
       const c = copy();
       const note = document.createElement("div");
       note.className = "ep-history-note";
