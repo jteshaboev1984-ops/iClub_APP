@@ -5,6 +5,7 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+// Re-run after live activation to prove the static preview remains isolated and visually stable.
 const html = fs.readFileSync('visual-v3-preview.html', 'utf8');
 const css = fs.readFileSync('visual/iclub-visual-v3.css', 'utf8');
 

@@ -5,6 +5,7 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+// Post-activation verification marker: this regression is intentionally rerun after the bot release commit.
 const html = fs.readFileSync('index.html', 'utf8');
 const i18n = fs.readFileSync('i18n.js', 'utf8');
 const css = fs.readFileSync('visual/iclub-visual-v3.css', 'utf8');
