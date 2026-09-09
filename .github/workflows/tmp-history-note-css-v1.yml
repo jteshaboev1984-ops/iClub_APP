@@ -1,0 +1,133 @@
+name: TEMP History Note CSS Extraction v1
+
+on:
+  push:
+    branches:
+      - exam-prep-css-history-note-v1
+    paths:
+      - '.github/workflows/tmp-history-note-css-v1.yml'
+      - 'exam-prep/exam-prep-history-note.js'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  history-note-css:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Externalize history-note presentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          css_path = Path('exam-prep/exam-prep-host.css')
+          css = css_path.read_text(encoding='utf-8').rstrip()
+          marker = '/* P1-05 previous-practice note — external presentation */'
+          if marker not in css:
+              css += '''\n\n/* P1-05 previous-practice note — external presentation */
+          #exam-prep-host-root .ep-history-note {
+            display: grid;
+            gap: 4px;
+            padding: 9px 10px;
+            border: 1px solid rgba(127, 127, 127, .12);
+            border-radius: 10px;
+            background: rgba(127, 127, 127, .055);
+          }
+
+          #exam-prep-host-root .ep-history-note strong {
+            font-size: 11px;
+            line-height: 1.3;
+          }
+
+          #exam-prep-host-root .ep-history-note span {
+            min-width: 0;
+            font-size: 11px;
+            line-height: 1.45;
+            opacity: .74;
+            overflow-wrap: break-word;
+          }
+          '''
+          css_path.write_text(css.rstrip() + '\n', encoding='utf-8')
+
+          test_path = Path('.github/scripts/p1_05_history_note_regression.js')
+          test = test_path.read_text(encoding='utf-8')
+          style_anchor = "  await page.goto('http://iclub.test/');\n"
+          style_line = "  await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-host.css') });\n"
+          if style_line not in test:
+              if test.count(style_anchor) != 1:
+                  raise SystemExit('page goto anchor mismatch')
+              test = test.replace(style_anchor, style_anchor + style_line, 1)
+
+          assertion_anchor = "  assert(p1Text.includes('does not change confirmed progress or exam readiness'), 'P1 history note must explicitly remain non-crediting');\n"
+          assertion_block = """  assert(await page.locator('#ep-history-note-style').count() === 0, 'history note must not inject a runtime style element');
+          const p1Style = await page.locator('[data-ep-history-note=\"P1\"]').evaluate(el => {
+            const s = getComputedStyle(el);
+            return { display: s.display, radius: s.borderRadius, overflowWrap: s.overflowWrap };
+          });
+          assert(p1Style.display === 'grid', 'history note external stylesheet must be applied');
+          assert(p1Style.radius === '10px', 'history note external stylesheet must preserve geometry');
+          assert(['break-word', 'anywhere'].includes(p1Style.overflowWrap), 'history note must remain language-safe');
+"""
+          if 'history note must not inject a runtime style element' not in test:
+              if test.count(assertion_anchor) != 1:
+                  raise SystemExit('assertion anchor mismatch')
+              test = test.replace(assertion_anchor, assertion_anchor + assertion_block, 1)
+          test_path.write_text(test, encoding='utf-8')
+          PY
+
+      - name: Static safety checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          node --check exam-prep/exam-prep-history-note.js
+          node --check .github/scripts/p1_05_history_note_regression.js
+          grep -q 'P1-05 previous-practice note — external presentation' exam-prep/exam-prep-host.css
+          grep -q '#exam-prep-host-root .ep-history-note' exam-prep/exam-prep-host.css
+          ! grep -q 'ep-history-note-style' exam-prep/exam-prep-history-note.js
+          ! grep -q 'createElement("style")' exam-prep/exam-prep-history-note.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-history-note.js
+          ! grep -q '\.from(' exam-prep/exam-prep-history-note.js
+
+      - name: Install browser runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run isolated and host regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/p1_05_history_note_regression.js
+          python3 -m http.server 4173 > /tmp/history-note-css-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 0.2
+          done
+          node .github/scripts/p0_14_host_regression.js
+          node .github/scripts/p0_22_live_view_coexistence_regression.js
+
+      - name: Commit tested extraction on integration branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add exam-prep/exam-prep-host.css .github/scripts/p1_05_history_note_regression.js
+          if git diff --cached --quiet; then
+            echo 'No staged extraction changes.'
+            exit 0
+          fi
+          git commit -m 'refactor(exam-prep): move history note styles to host CSS'
+          git push origin HEAD:exam-prep-css-history-note-v1
