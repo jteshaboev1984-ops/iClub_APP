@@ -1,0 +1,80 @@
+name: Visual Foundation v3 Preview Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'visual-v3-preview.html'
+      - 'visual/iclub-visual-v3.css'
+      - '.github/scripts/visual_v3_foundation_regression.js'
+      - '.github/workflows/visual-v3-foundation.yml'
+  pull_request:
+    paths:
+      - 'visual-v3-preview.html'
+      - 'visual/iclub-visual-v3.css'
+      - '.github/scripts/visual_v3_foundation_regression.js'
+      - '.github/workflows/visual-v3-foundation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static isolation checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f visual-v3-preview.html
+          test -f visual/iclub-visual-v3.css
+          test -f .github/scripts/visual_v3_foundation_regression.js
+          node --check .github/scripts/visual_v3_foundation_regression.js
+          ! grep -Eiq 'supabase|app\.js|localStorage|sessionStorage|window\.sb|\.rpc\s*\(|\.from\s*\(' visual-v3-preview.html
+          grep -q -- '--v3-brand: #2F6FD6' visual/iclub-visual-v3.css
+          grep -q -- '--v3-primary: #2457D6' visual/iclub-visual-v3.css
+          grep -q -- '--v3-bg: #F7F9FE' visual/iclub-visual-v3.css
+          grep -q -- '--v3-text: #0F172A' visual/iclub-visual-v3.css
+          grep -q -- '--v3-border: #E2E8F0' visual/iclub-visual-v3.css
+          grep -q 'data-v3-nav="Study"' visual-v3-preview.html
+          test "$(grep -o 'class="v3-nav-icon"' visual-v3-preview.html | wc -l | tr -d ' ')" = '4'
+
+      - name: Install browser test runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run mobile visual regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 > /tmp/visual-v3-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/visual-v3-preview.html >/dev/null; then break; fi
+            sleep 0.2
+          done
+          curl -fsS http://127.0.0.1:4173/visual-v3-preview.html >/dev/null
+          node .github/scripts/visual_v3_foundation_regression.js
+
+      - name: Prove preview-only scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check HEAD~1 HEAD
+          changed="$(git diff --name-only HEAD~1 HEAD | sort)"
+          printf '%s\n' "$changed"
+          for f in $changed; do
+            case "$f" in
+              visual-v3-preview.html|visual/iclub-visual-v3.css|.github/scripts/visual_v3_foundation_regression.js|.github/workflows/visual-v3-foundation.yml) ;;
+              *) echo "Unexpected live-app file in Visual v3 preview commit: $f" >&2; exit 1 ;;
+            esac
+          done
+          echo 'Visual Foundation v3 preview gate: GREEN'
