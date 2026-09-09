@@ -16,6 +16,7 @@ on:
       - '.github/scripts/visual_v3_subject_hub_architecture_regression.js'
       - '.github/scripts/visual_v3_home_study_regression.js'
       - '.github/scripts/visual_v3_transient_surfaces_regression.js'
+      - '.github/scripts/visual_v3_dynamic_locale_regression.js'
       - '.github/workflows/visual-v3-premium.yml'
   pull_request:
     paths:
@@ -30,6 +31,7 @@ on:
       - '.github/scripts/visual_v3_subject_hub_architecture_regression.js'
       - '.github/scripts/visual_v3_home_study_regression.js'
       - '.github/scripts/visual_v3_transient_surfaces_regression.js'
+      - '.github/scripts/visual_v3_dynamic_locale_regression.js'
       - '.github/workflows/visual-v3-premium.yml'
   workflow_dispatch:
 
@@ -54,6 +56,7 @@ jobs:
           test -f .github/scripts/visual_v3_subject_hub_architecture_regression.js
           test -f .github/scripts/visual_v3_home_study_regression.js
           test -f .github/scripts/visual_v3_transient_surfaces_regression.js
+          test -f .github/scripts/visual_v3_dynamic_locale_regression.js
           node --check .github/scripts/visual_v3_premium_regression.js
           node --check .github/scripts/visual_v3_premium_extended_regression.js
           node --check .github/scripts/visual_v3_assessment_regression.js
@@ -61,6 +64,7 @@ jobs:
           node --check .github/scripts/visual_v3_subject_hub_architecture_regression.js
           node --check .github/scripts/visual_v3_home_study_regression.js
           node --check .github/scripts/visual_v3_transient_surfaces_regression.js
+          node --check .github/scripts/visual_v3_dynamic_locale_regression.js
           grep -q 'visual/iclub-premium-v3.css?v=premium1' index.html
           ! grep -Eiq 'localStorage|sessionStorage|supabase|\.rpc\s*\(|\.from\s*\(|data-tab\s*=|operational_stage\s*=|innerHTML\s*=' visual/iclub-premium-v3.css
           grep -q '#view-home .home-block-title' visual/iclub-premium-v3.css
@@ -75,6 +79,8 @@ jobs:
           grep -q 'PREMIUM SUBJECT HUB LEARNING MODES v3.4' visual/iclub-premium-v3.css
           grep -q 'PREMIUM HOME STUDY ARCHITECTURE v3.5' visual/iclub-premium-v3.css
           grep -q 'PREMIUM TRANSIENT SURFACES v3.6' visual/iclub-premium-v3.css
+          grep -q 'PREMIUM DYNAMIC LOCALE SURFACES v3.7' visual/iclub-premium-v3.css
+          grep -q 'LANGUAGE-SAFE WRAPPING' visual/iclub-premium-v3.css
           grep -q 'class="v3-tour-warning-icon"' index.html
           grep -q 'id="subject-hub-exam-prep-entry"' index.html
           grep -q 'class="subject-hub-primary-modes"' index.html
@@ -110,6 +116,7 @@ jobs:
           node .github/scripts/visual_v3_subject_hub_architecture_regression.js
           node .github/scripts/visual_v3_home_study_regression.js
           node .github/scripts/visual_v3_transient_surfaces_regression.js
+          node .github/scripts/visual_v3_dynamic_locale_regression.js
 
       - name: Premium scope gate
         shell: bash
