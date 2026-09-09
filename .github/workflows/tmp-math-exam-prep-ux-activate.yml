@@ -24,8 +24,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          # The current RU learner copy was refined after the UX patch was drafted.
-          # Align only the exact source anchors inside the temporary patch helper.
+          # Align the temporary helper with the current learner copy and the
+          # existing premium line-icon contract before applying any UI changes.
           python3 - <<'PY'
           from pathlib import Path
           p = Path('.github/scripts/tmp_math_exam_prep_ux_patch.py')
@@ -33,6 +33,7 @@ jobs:
           s = s.replace('Закройте оставшуюся ключевую ошибку', 'Закрыть основную оставшуюся ошибку')
           s = s.replace('Проверьте время и организацию экзамена', 'Проверить время и экзаменационный порядок')
           s = s.replace('Снизьте нагрузку и сохраните результат', 'Снизить нагрузку и сохранить форму')
+          s = s.replace('<span class="exam-prep-feature-arrow" aria-hidden="true"><svg viewBox="0 0 24 24">', '<span class="exam-prep-feature-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18">')
           p.write_text(s, encoding='utf-8')
           PY
 
