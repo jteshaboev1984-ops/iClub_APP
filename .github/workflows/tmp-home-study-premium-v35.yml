@@ -1,0 +1,84 @@
+name: TEMP Home Study Premium v3.5
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/tmp-home-study-premium-v35.yml'
+      - '.github/scripts/tmp_home_study_premium_v35.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  home-study-premium:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Home and Study premium refinement
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/tmp_home_study_premium_v35.py
+
+      - name: Static safety checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          node --check app.js
+          node --check i18n.js
+          node --check .github/scripts/visual_v3_home_study_regression.js
+          grep -q 'PREMIUM HOME STUDY ARCHITECTURE v3.5' visual/iclub-premium-v3.css
+          grep -q 'class="v3-home-pinned-icon"' app.js
+          ! grep -Fq '<div class="home-pinned-ico">📘</div>' app.js
+          grep -q 'courses_title: "Учёба"' i18n.js
+          grep -q 'courses_title: "O‘qish"' i18n.js
+          grep -q 'courses_title: "Study"' i18n.js
+          ! grep -Eiq 'localStorage|sessionStorage|supabase|\.rpc\s*\(|\.from\s*\(|operational_stage\s*=|innerHTML\s*=' visual/iclub-premium-v3.css
+
+      - name: Install browser runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run visual and host regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 > /tmp/home-study-v35-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 0.2
+          done
+          node .github/scripts/visual_v3_premium_regression.js
+          node .github/scripts/visual_v3_premium_extended_regression.js
+          node .github/scripts/visual_v3_assessment_regression.js
+          node .github/scripts/visual_v3_math_exam_prep_ux_regression.js
+          node .github/scripts/visual_v3_subject_hub_architecture_regression.js
+          node .github/scripts/visual_v3_home_study_regression.js
+          node .github/scripts/p0_14_host_regression.js
+          node .github/scripts/p0_22_live_view_coexistence_regression.js
+
+      - name: Commit tested Home and Study refinement
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app.js i18n.js index.html visual/iclub-premium-v3.css .github/workflows/visual-v3-premium.yml
+          if git diff --cached --quiet; then
+            echo 'No Home/Study product change to commit.'
+            exit 0
+          fi
+          git commit -m 'feat(ui): refine Home and Study premium hierarchy'
+          git push origin HEAD:main
