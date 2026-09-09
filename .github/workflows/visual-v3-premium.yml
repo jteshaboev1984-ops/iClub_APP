@@ -60,9 +60,11 @@ jobs:
           grep -q '#view-registration .reg-form' visual/iclub-premium-v3.css
           grep -q 'PREMIUM ASSESSMENT FLOWS v3' visual/iclub-premium-v3.css
           grep -q 'PREMIUM MATHEMATICS EXAM PREP UX v3' visual/iclub-premium-v3.css
-          grep -q 'PREMIUM SUBJECT HUB ARCHITECTURE v3.1' visual/iclub-premium-v3.css
+          grep -q 'PREMIUM SUBJECT HUB LEARNING MODES v3.4' visual/iclub-premium-v3.css
           grep -q 'class="v3-tour-warning-icon"' index.html
-          grep -q 'class="subject-hub-list exam-prep-host-entry exam-prep-feature-card"' index.html
+          grep -q 'id="subject-hub-exam-prep-entry"' index.html
+          grep -q 'class="subject-hub-primary-modes"' index.html
+          test "$(sed -n '/<section id="courses-subject-hub"/,/<\/section>/p' index.html | grep -c 'data-action="open-lessons"')" -eq 1
 
       - name: Install browser runtime
         shell: bash
