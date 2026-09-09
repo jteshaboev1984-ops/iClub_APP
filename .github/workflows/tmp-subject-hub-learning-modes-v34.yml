@@ -27,11 +27,25 @@ jobs:
           python3 .github/scripts/tmp_subject_hub_learning_modes_v34.py
           python3 - <<'PY'
           from pathlib import Path
+
+          math_test = Path('.github/scripts/visual_v3_math_exam_prep_ux_regression.js')
+          s = math_test.read_text(encoding='utf-8')
+          s = s.replace(
+              "  'class=\"subject-hub-list exam-prep-host-entry exam-prep-feature-card\"',\n",
+              "  'id=\"subject-hub-exam-prep-entry\"',\n  'class=\"subject-hub-list exam-prep-host-entry exam-prep-feature-card subject-mode-card subject-mode-card-exam\"',\n"
+          )
+          s = s.replace(
+              "  assert(entry.titleSize >= 21, `Math feature title hierarchy too weak: ${entry.titleSize}`);",
+              "  assert(entry.titleSize >= 17, `Math feature title hierarchy too weak for peer preparation modes: ${entry.titleSize}`);"
+          )
+          math_test.write_text(s, encoding='utf-8')
+
           for name in [
               'index.html',
               'i18n.js',
               'visual/iclub-premium-v3.css',
               '.github/scripts/visual_v3_premium_regression.js',
+              '.github/scripts/visual_v3_math_exam_prep_ux_regression.js',
               '.github/scripts/visual_v3_subject_hub_architecture_regression.js',
           ]:
               p = Path(name)
@@ -46,6 +60,7 @@ jobs:
           git diff --check
           node --check i18n.js
           node --check .github/scripts/visual_v3_premium_regression.js
+          node --check .github/scripts/visual_v3_math_exam_prep_ux_regression.js
           node --check .github/scripts/visual_v3_subject_hub_architecture_regression.js
           grep -q 'PREMIUM SUBJECT HUB LEARNING MODES v3.4' visual/iclub-premium-v3.css
           grep -q 'subject-hub-primary-modes' index.html
@@ -83,7 +98,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html i18n.js visual/iclub-premium-v3.css .github/scripts/visual_v3_premium_regression.js .github/scripts/visual_v3_subject_hub_architecture_regression.js
+          git add index.html i18n.js visual/iclub-premium-v3.css .github/scripts/visual_v3_premium_regression.js .github/scripts/visual_v3_math_exam_prep_ux_regression.js .github/scripts/visual_v3_subject_hub_architecture_regression.js
           if git diff --cached --quiet; then
             echo 'No learning-mode change to commit.'
             exit 0
