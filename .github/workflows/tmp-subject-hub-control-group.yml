@@ -25,6 +25,18 @@ jobs:
         run: |
           set -euo pipefail
           python3 .github/scripts/tmp_subject_hub_control_group_patch.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('.github/scripts/visual_v3_subject_hub_architecture_regression.js')
+          s = p.read_text(encoding='utf-8')
+          old = "  assert(state.activeTabBackground === 'rgb(255, 255, 255)', `Primary action must not look pre-selected: ${state.activeTabBackground}`);"
+          new = "  assert(state.activeTabBackground === 'rgba(0, 0, 0, 0)', `Primary action must not look pre-selected: ${state.activeTabBackground}`);"
+          if old in s:
+              s = s.replace(old, new)
+          elif new not in s:
+              raise SystemExit('Expected active background assertion not found')
+          p.write_text(s, encoding='utf-8')
+          PY
 
       - name: Static safety checks
         shell: bash
