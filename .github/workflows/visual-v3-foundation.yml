@@ -25,8 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
 
       - name: Static isolation checks
         shell: bash
@@ -66,17 +64,12 @@ jobs:
           curl -fsS http://127.0.0.1:4173/visual-v3-preview.html >/dev/null
           node .github/scripts/visual_v3_foundation_regression.js
 
-      - name: Prove preview-only scope
+      - name: Prove preview stays isolated after live activation
         shell: bash
         run: |
           set -euo pipefail
-          git diff --check HEAD~1 HEAD
-          changed="$(git diff --name-only HEAD~1 HEAD | sort)"
-          printf '%s\n' "$changed"
-          for f in $changed; do
-            case "$f" in
-              visual-v3-preview.html|visual/iclub-visual-v3.css|.github/scripts/visual_v3_foundation_regression.js|.github/workflows/visual-v3-foundation.yml) ;;
-              *) echo "Unexpected live-app file in Visual v3 preview commit: $f" >&2; exit 1 ;;
-            esac
-          done
-          echo 'Visual Foundation v3 preview gate: GREEN'
+          ! grep -Eiq '<script|supabase|app\.js|localStorage|sessionStorage|window\.sb|\.rpc\s*\(|\.from\s*\(' visual-v3-preview.html
+          grep -q 'class="iclub-visual-v3"' visual-v3-preview.html
+          grep -q 'visual/iclub-visual-v3.css' visual-v3-preview.html
+          ! grep -Eq 'data-tab="(home|courses|ratings|profile)"' visual-v3-preview.html
+          echo 'Visual Foundation v3 preview isolation gate: GREEN'
