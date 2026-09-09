@@ -12,6 +12,11 @@ const foundationPos = html.indexOf('visual/iclub-visual-v3.css?v=v3foundation1')
 const premiumPos = html.indexOf('visual/iclub-premium-v3.css?v=premium1');
 assert(foundationPos >= 0 && premiumPos > foundationPos, 'Premium stylesheet must load after Visual Foundation v3');
 
+const premiumRowSvgCount = (html.match(/<svg viewBox="0 0 24 24" width="18" height="18"/g) || []).length;
+assert(premiumRowSvgCount >= 12, `Premium learner rows must use line SVG icons: ${premiumRowSvgCount}`);
+assert(!/<span class="settings-nav-ico">(?:ℹ️|📰|💬|🎯|🎬|📚|🎓|🗂️|🧭)<\/span>/.test(html), 'Premium settings rows still contain emoji icons');
+assert(!/<div class="profile-row-ico">(?:🎓|📄|🛟)<\/div>/.test(html), 'Premium profile rows still contain emoji icons');
+
 for (const token of [
   '#view-home .home-block-title',
   '#courses-all-subjects .section-title',
