@@ -11,7 +11,8 @@ const live = fs.readFileSync('exam-prep/exam-prep-live.js', 'utf8');
 const css = fs.readFileSync('visual/iclub-premium-v3.css', 'utf8');
 
 for (const token of [
-  'class="subject-hub-list exam-prep-host-entry exam-prep-feature-card"',
+  'id="subject-hub-exam-prep-entry"',
+  'class="subject-hub-list exam-prep-host-entry exam-prep-feature-card subject-mode-card subject-mode-card-exam"',
   'id="subject-hub-exam-prep-badge"',
   'id="subject-hub-exam-prep-p1"',
   'id="subject-hub-exam-prep-p5"',
@@ -67,7 +68,7 @@ assert(css.includes('PREMIUM MATHEMATICS EXAM PREP UX v3'), 'Premium Math Exam P
   });
   assert(entry.radius === '12px', `Math feature card radius drift: ${entry.radius}`);
   assert(entry.shadow !== 'none', 'Math feature card must read as a premium product surface');
-  assert(entry.titleSize >= 21, `Math feature title hierarchy too weak: ${entry.titleSize}`);
+  assert(entry.titleSize >= 17, `Math feature title hierarchy too weak for peer preparation modes: ${entry.titleSize}`);
   assert(entry.width <= entry.innerWidth, `Math feature entry overflow: ${JSON.stringify(entry)}`);
 
   await page.evaluate(() => {

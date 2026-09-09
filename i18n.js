@@ -9,7 +9,7 @@
   const DICT = {
     ru: {
   app_name: "iClub",
-  brand_tagline: "Smarter together",     
+  brand_tagline: "Smarter together",
   loading: "Загрузка…",
   loading_desc: "Получаем список туров…",
   saving: "Сохранение…",
@@ -40,7 +40,7 @@ practice_submit: "Ответить",
 practice_again: "Пройти снова",
 practice_to_subject: "К предмету",
 practice_back_to_result: "Назад к результату",
-practice_to_recs: "К рекомендациям",       
+practice_to_recs: "К рекомендациям",
 
 practice_difficulty: "Сложность",
 difficulty_easy: "легко",
@@ -49,14 +49,14 @@ difficulty_hard: "сложно",
 
 drill_repeat: "Повторить ещё раз",
 back: "Назад",
-       
+
   practice_review_empty: "Нет данных для разбора. Сначала пройдите практику.",
   practice_review_loading_db: "Загружаем разбор из базы…",
   practice_recs_empty: "Нет данных для рекомендаций. Сначала пройдите практику.",
   practice_recs_no_errors: "Ошибок нет — рекомендации не требуются.",
   practice_review_sub: "Правильные ответы и объяснения",
-  practice_recs_sub: "Что прочитать по вашим ошибкам", 
-   
+  practice_recs_sub: "Что прочитать по вашим ошибкам",
+
   invalid_link: "Неверная ссылка.",
   network_error_try_again: "Ошибка сети. Попробуйте ещё раз.",
   save_failed_try_again: "Не удалось сохранить. Попробуйте ещё раз.",
@@ -117,7 +117,7 @@ support_topic_tours: "Туры и таймер",
 support_topic_ratings: "Рейтинг и результаты",
 support_topic_certificates: "Сертификаты",
 support_topic_content: "Ошибка в вопросе / переводе",
-support_topic_technical: "Техническая проблема",    
+support_topic_technical: "Техническая проблема",
 about_title: "О проекте",
 about_sub: "Коротко о платформе, правилах и команде.",
 about_card_title: "iClub",
@@ -126,7 +126,7 @@ about_card_body: "iClub — образовательная платформа д
 about_tab_project: "ПРОЕКТ",
 about_tab_rules: "ПРАВИЛА",
 about_tab_team: "КОМАНДА",
-       
+
 about_project_title: "iClub — Smarter together",
 about_project_desc:
   "iClub — платформа для закрепления знаний и подготовки к соревнованиям по Cambridge curriculum. Здесь вы практикуетесь на реальных вопросах, работаете над ошибками и видите рост по фактам.",
@@ -218,7 +218,7 @@ archive_time_label: "Время",
 archive_checking_toast: "Проверяем доступность архива…",
 archive_unavailable_toast: "Архив временно недоступен. Попробуйте позже.",
 archive_unlock_after_toast: "Архив откроется после закрытия текущего официального тура.",
-       
+
       // Ratings
       ratings_season: "Сезон",
       ratings_subject: "Предмет",
@@ -289,6 +289,15 @@ network_error_try_again: "Ошибка сети. Попробуйте ещё р�
       mentor_assigning: "Ментор назначается",
       mentor_profile_soon: "Скоро появится профиль",
 
+
+hub_preparation_section: "Подготовка",
+hub_practice_status: "Всегда доступна",
+hub_practice_sub: "Отрабатывайте темы в своём темпе и возвращайтесь к ошибкам.",
+hub_tours_status: "По расписанию",
+hub_tours_sub: "Проверяйте знания в соревновательном формате, когда тур открыт.",
+hub_materials_section: "Материалы",
+hub_resources_sub: "Книги и материалы по предмету",
+
       hub_video_lessons_title: "Видео-уроки",
       hub_video_lessons_sub: "Видео-уроки доступны в Telegram",
       hub_my_recs_sub: "Повторный доступ к чтению",
@@ -299,7 +308,7 @@ network_error_try_again: "Ошибка сети. Попробуйте ещё р�
       hub_all_subjects_title: "Все предметы",
       hub_all_subjects_sub: "Каталог предметов",
 
-      lessons_list_subtitle: "Список видео-уроков", 
+      lessons_list_subtitle: "Список видео-уроков",
 
             profile_metric_competitive: "Соревнование",
       profile_metric_study: "Учёба",
@@ -428,7 +437,7 @@ network_error_try_again: "Ошибка сети. Попробуйте ещё р�
       practice_stage_for_tour: "Практика {n} тура",
 practice_stage_progress: "Закрыто {done}/{total}",
 practice_stage_not_ready: "Практика для этого этапа пока не опубликована.",
-practice_stage_all_closed: "Все вопросы этого этапа уже закрыты. Новый этап откроется после смены официального тура.", 
+practice_stage_all_closed: "Все вопросы этого этапа уже закрыты. Новый этап откроется после смены официального тура.",
       home_pinned_subjects: "Закреплённые предметы",
       home_show_all_subjects: "Показать все предметы",
       home_course_completion: "Прогресс курса",
@@ -528,7 +537,7 @@ badge_active: "АКТИВНО",
       profile_certificates_title: "Сертификаты",
       notifications_title: "Уведомления",
       notifications_sub: "Системные сообщения и важные события.",
-      
+
       certificates_title: "Сертификаты",
       certificates_sub: "По турам и итоговые",
       cert_final_label: "Итоговый сертификат",
@@ -639,7 +648,7 @@ practice_difficulty: "Сложность",
 difficulty_easy: "легко",
 difficulty_medium: "средне",
 difficulty_hard: "сложно",
-       
+
       practice_result_title: "Результат практики",
       practice_review_title: "Разбор ошибок",
       practice_recs_title: "Рекомендации",
@@ -648,7 +657,7 @@ difficulty_hard: "сложно",
       practice_topics: "Темы",
       practice_saved_to_my_recs: "Рекомендации сохранены в «Мои рекомендации»",
       practice_nothing_to_save: "Нет ошибок — сохранять нечего. Красиво.",
-      practice_best_new_toast: "Новый лучший результат", 
+      practice_best_new_toast: "Новый лучший результат",
 
       progress_trend: "Тренд прогресса",
       open_tour_btn: "Открыть тур",
@@ -938,7 +947,7 @@ practice_again: "Qayta o‘tish",
 practice_to_subject: "Fanga",
 practice_back_to_result: "Natijaga qaytish",
 practice_to_recs: "Tavsiyalarga",
-       
+
 practice_difficulty: "Murakkablik",
 difficulty_easy: "oson",
 difficulty_medium: "o‘rtacha",
@@ -946,7 +955,7 @@ difficulty_hard: "qiyin",
 
 drill_repeat: "Yana bir bor",
 back: "Orqaga",
-       
+
         practice_review_empty: "Tahlil uchun ma’lumot yo‘q. Avval amaliyotni bajaring.",
         practice_review_loading_db: "Bazadan tahlil yuklanmoqda…",
         practice_recs_empty: "Tavsiyalar uchun ma’lumot yo‘q. Avval amaliyotni bajaring.",
@@ -972,7 +981,7 @@ video_language_note_title: "Muhim",
 video_uz_language_note: "Hozircha barcha video darslar o‘zbek tilida taqdim etilgan.",
 video_telegram_group_hint: "Fan bo‘yicha darslar joylangan Telegram guruh ochiladi.",
 video_open_telegram_btn: "Telegram’da darslarni ochish",
-       
+
   recs_books_available_source: "Manba: fan kitoblari allaqachon mavjud — “Kitoblar” bo‘limini oching.",
         recs_books_later_source: "Fan bo‘yicha kitoblar keyinroq joylanadi.",
 
@@ -1186,6 +1195,15 @@ network_error_try_again: "Tarmoq xatosi. Qayta urinib ko‘ring.",
       mentor_assigning: "Mentor tayinlanmoqda",
       mentor_profile_soon: "Tez orada profil paydo bo‘ladi",
 
+
+hub_preparation_section: "Tayyorgarlik",
+hub_practice_status: "Har doim ochiq",
+hub_practice_sub: "Mavzularni o‘z tempingizda mashq qiling va xatolarga qayting.",
+hub_tours_status: "Jadval bo‘yicha",
+hub_tours_sub: "Tur ochilganda bilimni musobaqa formatida tekshiring.",
+hub_materials_section: "Materiallar",
+hub_resources_sub: "Fan bo‘yicha kitoblar va materiallar",
+
       hub_video_lessons_title: "Video darslar",
       hub_video_lessons_sub: "Video darslar hozircha Telegram’da",
       hub_my_recs_sub: "Qayta ko‘rish uchun ochish",
@@ -1196,7 +1214,7 @@ network_error_try_again: "Tarmoq xatosi. Qayta urinib ko‘ring.",
       hub_all_subjects_title: "Barcha fanlar",
       hub_all_subjects_sub: "Fanlar katalogi",
 
-      lessons_list_subtitle: "Video darslar ro‘yxati", 
+      lessons_list_subtitle: "Video darslar ro‘yxati",
 
             profile_metric_competitive: "Musobaqa",
       profile_metric_study: "O‘quv",
@@ -1292,7 +1310,7 @@ network_error_try_again: "Tarmoq xatosi. Qayta urinib ko‘ring.",
       subj_english_a2: "Ingliz tili (A2)",
       subj_english_b1: "Ingliz tili (B1)",
       subj_sat: "SAT",
-      subj_ielts: "IELTS", 
+      subj_ielts: "IELTS",
 
       // Limits / Validation
       competitive_subjects_limit_2: "Musobaqa rejimi fanlari limiti — 2 ta",
@@ -1327,7 +1345,7 @@ network_error_try_again: "Tarmoq xatosi. Qayta urinib ko‘ring.",
       practice_stage_for_tour: "{n}-tur amaliyoti",
 practice_stage_progress: "Yopilganlari: {done}/{total}",
 practice_stage_not_ready: "Bu bosqich uchun amaliyot hali e’lon qilinmagan.",
-practice_stage_all_closed: "Bu bosqichdagi barcha savollar allaqachon yopilgan. Yangi bosqich rasmiy tur almashgandan keyin ochiladi.", 
+practice_stage_all_closed: "Bu bosqichdagi barcha savollar allaqachon yopilgan. Yangi bosqich rasmiy tur almashgandan keyin ochiladi.",
       home_pinned_subjects: "Biriktirilgan fanlar",
       home_show_all_subjects: "Barcha fanlarni ko‘rsatish",
       home_course_completion: "Kurs progressi",
@@ -1426,7 +1444,7 @@ practice_past_hint_done: "Oldingi turlar bo‘yicha yangi savollar qolmagan.",
       profile_certificates_title: "Sertifikatlar",
       notifications_title: "Bildirishnomalar",
       notifications_sub: "Tizim xabarlari va muhim voqealar.",
-      
+
       certificates_title: "Sertifikatlar",
       certificates_sub: "Turlar va yakuniy natijalar",
       cert_final_label: "Yakuniy sertifikat",
@@ -1536,7 +1554,7 @@ practice_difficulty: "Daraja",
 difficulty_easy: "oson",
 difficulty_medium: "o‘rtacha",
 difficulty_hard: "qiyin",
-       
+
       practice_result_title: "Amaliyot natijasi",
       practice_review_title: "Xatolar tahlili",
       practice_recs_title: "Tavsiyalar",
@@ -1545,7 +1563,7 @@ difficulty_hard: "qiyin",
       practice_topics: "Mavzular",
       practice_saved_to_my_recs: "Tavsiyalar «Tavsiyalarim» bo‘limiga saqlandi",
       practice_nothing_to_save: "Xato yo‘q — saqlash shart emas.",
-      practice_best_new_toast: "Yangi eng yaxshi natija", 
+      practice_best_new_toast: "Yangi eng yaxshi natija",
 
       progress_trend: "Progress trendlari",
       open_tour_btn: "Turni ochish",
@@ -1809,7 +1827,7 @@ archive_empty: "Hozircha ochiq arxiv turlari yo‘q.",
 
     en: {
   app_name: "iClub",
-  brand_tagline: "Smarter together",     
+  brand_tagline: "Smarter together",
   loading: "Loading…",
   loading_desc: "Fetching tour list…",
   saving: "Saving…",
@@ -1840,7 +1858,7 @@ practice_submit: "Submit",
 practice_again: "Try again",
 practice_to_subject: "To subject",
 practice_back_to_result: "Back to result",
-practice_to_recs: "Back to recommendations",       
+practice_to_recs: "Back to recommendations",
 
 practice_difficulty: "Difficulty",
 difficulty_easy: "easy",
@@ -2019,7 +2037,7 @@ archive_time_label: "Time",
 archive_checking_toast: "Checking archive availability…",
 archive_unavailable_toast: "Archive is temporarily unavailable. Please try again later.",
 archive_unlock_after_toast: "The archive will open after the current official tour is closed.",
-       
+
       // Ratings
       ratings_season: "Season",
       ratings_subject: "Subject",
@@ -2088,6 +2106,15 @@ network_error_try_again: "Network error. Please try again.",
       mentor_kicker: "YOUR MENTOR",
       mentor_assigning: "Mentor will be assigned",
       mentor_profile_soon: "Profile coming soon",
+
+
+hub_preparation_section: "Preparation",
+hub_practice_status: "Always available",
+hub_practice_sub: "Practice topics at your own pace and return to mistakes.",
+hub_tours_status: "Scheduled",
+hub_tours_sub: "Test your knowledge in competitive mode when a Tour is open.",
+hub_materials_section: "Materials",
+hub_resources_sub: "Books and subject resources",
 
       hub_video_lessons_title: "Video lessons",
       hub_video_lessons_sub: "Video lessons available in Telegram",
@@ -2223,7 +2250,7 @@ network_error_try_again: "Network error. Please try again.",
       practice_stage_for_tour: "Practice for Tour {n}",
 practice_stage_progress: "Closed {done}/{total}",
 practice_stage_not_ready: "Practice for this stage has not been published yet.",
-practice_stage_all_closed: "All questions in this stage are already closed. A new stage will open after the official tour changes.", 
+practice_stage_all_closed: "All questions in this stage are already closed. A new stage will open after the official tour changes.",
       home_pinned_subjects: "Pinned Subjects",
       home_show_all_subjects: "Show All Subjects",
       home_course_completion: "Course progress",
@@ -2240,7 +2267,7 @@ practice_past_done: "All past tour questions have already been solved correctly.
 practice_past_empty: "There are no available questions for past tours yet.",
 practice_start_for_tour: "Start practice for Tour {n}",
 practice_past_hint_ready: "Only questions from already completed tours will open.",
-practice_past_hint_done: "There are no new questions left for past tours.", 
+practice_past_hint_done: "There are no new questions left for past tours.",
 
       // UI badges / labels (Courses + Home)
       badge_active: "ACTIVE",
@@ -2306,14 +2333,14 @@ practice_past_hint_done: "There are no new questions left for past tours.",
       profile_view_btn: "VIEW",
       profile_slots_empty: "No active Competitive slots.",
       profile_slot_hint: "Starts in 2 days",
-       
+
       profile_slot_hint_loading: "Checking tour dates…",
       profile_slot_hint_active_now: "Tour is active now",
       profile_slot_hint_tomorrow: "Starts tomorrow",
       profile_slot_hint_in_days: "Starts in {n} days",
       profile_slot_hint_today: "Starts today",
       profile_slot_hint_unpublished: "Start date has not been published yet",
-      
+
       profile_level_advanced: "Advanced",
       profile_level_intermediate: "Intermediate",
       profile_level_beginner: "Beginner",
@@ -2322,7 +2349,7 @@ practice_past_hint_done: "There are no new questions left for past tours.",
       profile_certificates_title: "Certificates",
       notifications_title: "Notifications",
       notifications_sub: "System messages and important events.",
-      
+
       certificates_title: "Certificates",
       certificates_sub: "Tour and final certificates",
       cert_final_label: "Final Certificate",
@@ -2428,7 +2455,7 @@ practice_difficulty: "Difficulty",
 difficulty_easy: "easy",
 difficulty_medium: "medium",
 difficulty_hard: "hard",
-       
+
       practice_result_title: "Practice result",
       practice_review_title: "Review mistakes",
       practice_recs_title: "Recommendations",
@@ -2437,7 +2464,7 @@ difficulty_hard: "hard",
       practice_topics: "Topics",
       practice_saved_to_my_recs: "Saved to “My recommendations”",
       practice_nothing_to_save: "No mistakes — nothing to save. Nice.",
-      practice_best_new_toast: "New best result", 
+      practice_best_new_toast: "New best result",
 
       progress_trend: "Progress trend",
       open_tour_btn: "Open tour",

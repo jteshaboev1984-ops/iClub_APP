@@ -2298,3 +2298,324 @@ body.iclub-visual-v3 #courses-subject-hub.is-study > .subject-hub-tabs .hub-tab.
     border-right: 1px solid var(--v3-border);
   }
 }
+
+
+/* ===== PREMIUM SUBJECT HUB LEARNING MODES v3.4 ===== */
+/* Practice, Tours and Exam Prep are peer preparation products with different access properties. */
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-primary-modes {
+  order: 20;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-label {
+  margin: 2px 2px -1px;
+  color: var(--v3-muted);
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-card {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--v3-border);
+  border-radius: var(--v3-radius-lg);
+  background: #FFFFFF;
+  color: var(--v3-text);
+  box-shadow: var(--v3-premium-shadow);
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-card-button {
+  width: 100%;
+  display: grid;
+  gap: 7px;
+  min-height: 112px;
+  padding: 13px 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.iclub-visual-v3 #courses-subject-hub button.subject-mode-card-button {
+  border: 1px solid var(--v3-border);
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-card-practice {
+  border-color: #D8E2F7;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFF 100%);
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-card-tours {
+  border-color: #E8DEC8;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFCF6 100%);
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-card-exam {
+  margin: 0;
+  border-color: #C9D8FC;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F2F6FF 100%);
+  box-shadow: var(--v3-premium-shadow);
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-topline,
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-topline {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  justify-content: initial;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #D9E3F8;
+  border-radius: var(--v3-radius-sm);
+  background: #F0F5FF;
+  color: var(--v3-primary);
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-icon-tours {
+  border-color: #EBDDBF;
+  background: #FFF7E8;
+  color: #91601B;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-status {
+  justify-self: start;
+  min-width: 0;
+  max-width: 100%;
+  padding: 4px 7px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 9.5px;
+  line-height: 1.2;
+  font-weight: 800;
+  white-space: normal;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-status-practice {
+  border-color: #CFE9DC;
+  background: #EEF9F3;
+  color: #287451;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-status-tours {
+  border-color: #EADAB7;
+  background: #FFF7E7;
+  color: #8A5B17;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-status-exam {
+  border-color: #D4DFFD;
+  background: #EEF4FF;
+  color: var(--v3-primary);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-arrow,
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-arrow {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  justify-self: end;
+  border: 1px solid #E0E6EF;
+  border-radius: 999px;
+  background: rgba(255,255,255,.86);
+  color: #7C899C;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-arrow svg,
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-arrow svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-title,
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-title {
+  color: var(--v3-text);
+  font-size: 17px;
+  line-height: 1.18;
+  font-weight: 810;
+  letter-spacing: -0.018em;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-description,
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-description {
+  max-width: none;
+  color: #667085;
+  font-size: 11.5px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-state {
+  margin-top: 1px;
+  color: #7B8798;
+  font-size: 10px;
+  line-height: 1.35;
+  font-weight: 650;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-card-tours.is-disabled {
+  opacity: .82;
+  box-shadow: none;
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-card-tours.is-disabled .subject-mode-status-tours {
+  border-color: #E2E8F0;
+  background: #F7F9FC;
+  color: #667085;
+}
+
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-button {
+  gap: 7px;
+  min-height: 126px;
+  padding: 13px 14px;
+}
+
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-components {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 1px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-component,
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-component + .exam-prep-feature-component {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 1 auto;
+  gap: 5px;
+  min-height: 29px;
+  padding: 5px 7px;
+  border: 1px solid #DCE5FA;
+  border-radius: 999px;
+  background: rgba(255,255,255,.78);
+}
+
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-component strong {
+  flex: 0 0 auto;
+  min-width: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--v3-primary);
+  font-size: 9.5px;
+}
+
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-component span {
+  min-width: 0;
+  color: #536178;
+  font-size: 9.5px;
+  line-height: 1.25;
+  font-weight: 650;
+}
+
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-footer {
+  justify-content: flex-end;
+  margin-top: 0;
+  padding-top: 1px;
+  border-top: 0;
+}
+
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-note {
+  display: none;
+}
+
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-cta {
+  min-height: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--v3-primary);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-cta::after {
+  content: none;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-materials-section {
+  order: 30;
+  margin: 2px 0 8px !important;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-materials-section .h2,
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-system-section .h2 {
+  color: var(--v3-muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-list.subject-hub-actions {
+  order: 40;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-system-section {
+  order: 60;
+  margin-top: 18px !important;
+}
+
+@media (hover:hover) {
+  .iclub-visual-v3 #courses-subject-hub .subject-mode-card-button:hover {
+    border-color: #C9D7F8;
+    box-shadow: var(--v3-premium-shadow-hover);
+  }
+
+  .iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-button:hover {
+    background: rgba(255,255,255,.22);
+  }
+}
+
+.iclub-visual-v3 #courses-subject-hub .subject-mode-card-button:active {
+  transform: none;
+  box-shadow: inset 0 0 0 1px rgba(36,87,214,.06);
+}
+
+@media (min-width: 620px) {
+  .iclub-visual-v3 #courses-subject-hub > .subject-hub-primary-modes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .iclub-visual-v3 #courses-subject-hub > .subject-hub-primary-modes > .subject-hub-primary-label,
+  .iclub-visual-v3 #courses-subject-hub > .subject-hub-primary-modes > #subject-hub-exam-prep-entry {
+    grid-column: 1 / -1;
+  }
+}

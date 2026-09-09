@@ -102,7 +102,7 @@ async function activate(page, viewId, stackScreenId = null) {
   const hub = await page.evaluate(() => ({
     headRadius: getComputedStyle(document.querySelector('#courses-subject-hub .subject-hub-head')).borderRadius,
     headShadow: getComputedStyle(document.querySelector('#courses-subject-hub .subject-hub-head')).boxShadow,
-    tabsColumns: getComputedStyle(document.querySelector('#courses-subject-hub .subject-hub-tabs')).gridTemplateColumns,
+    primaryColumns: getComputedStyle(document.querySelector('#courses-subject-hub .subject-hub-primary-modes')).gridTemplateColumns,
     entryRadius: getComputedStyle(document.querySelector('#subject-hub-exam-prep-entry')).borderRadius,
     width: document.documentElement.scrollWidth,
     innerWidth: window.innerWidth
