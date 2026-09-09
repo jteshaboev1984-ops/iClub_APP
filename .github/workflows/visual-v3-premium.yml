@@ -11,6 +11,7 @@ on:
       - '.github/scripts/visual_v3_premium_extended_regression.js'
       - '.github/scripts/visual_v3_assessment_regression.js'
       - '.github/scripts/visual_v3_math_exam_prep_ux_regression.js'
+      - '.github/scripts/visual_v3_subject_hub_architecture_regression.js'
       - '.github/workflows/visual-v3-premium.yml'
   pull_request:
     paths:
@@ -20,6 +21,7 @@ on:
       - '.github/scripts/visual_v3_premium_extended_regression.js'
       - '.github/scripts/visual_v3_assessment_regression.js'
       - '.github/scripts/visual_v3_math_exam_prep_ux_regression.js'
+      - '.github/scripts/visual_v3_subject_hub_architecture_regression.js'
       - '.github/workflows/visual-v3-premium.yml'
   workflow_dispatch:
 
@@ -41,10 +43,12 @@ jobs:
           test -f .github/scripts/visual_v3_premium_extended_regression.js
           test -f .github/scripts/visual_v3_assessment_regression.js
           test -f .github/scripts/visual_v3_math_exam_prep_ux_regression.js
+          test -f .github/scripts/visual_v3_subject_hub_architecture_regression.js
           node --check .github/scripts/visual_v3_premium_regression.js
           node --check .github/scripts/visual_v3_premium_extended_regression.js
           node --check .github/scripts/visual_v3_assessment_regression.js
           node --check .github/scripts/visual_v3_math_exam_prep_ux_regression.js
+          node --check .github/scripts/visual_v3_subject_hub_architecture_regression.js
           grep -q 'visual/iclub-premium-v3.css?v=premium1' index.html
           ! grep -Eiq 'localStorage|sessionStorage|supabase|\.rpc\s*\(|\.from\s*\(|data-tab\s*=|operational_stage\s*=|innerHTML\s*=' visual/iclub-premium-v3.css
           grep -q '#view-home .home-block-title' visual/iclub-premium-v3.css
@@ -56,6 +60,7 @@ jobs:
           grep -q '#view-registration .reg-form' visual/iclub-premium-v3.css
           grep -q 'PREMIUM ASSESSMENT FLOWS v3' visual/iclub-premium-v3.css
           grep -q 'PREMIUM MATHEMATICS EXAM PREP UX v3' visual/iclub-premium-v3.css
+          grep -q 'PREMIUM SUBJECT HUB ARCHITECTURE v3.1' visual/iclub-premium-v3.css
           grep -q 'class="v3-tour-warning-icon"' index.html
           grep -q 'class="subject-hub-list exam-prep-host-entry exam-prep-feature-card"' index.html
 
@@ -81,6 +86,7 @@ jobs:
           node .github/scripts/visual_v3_premium_extended_regression.js
           node .github/scripts/visual_v3_assessment_regression.js
           node .github/scripts/visual_v3_math_exam_prep_ux_regression.js
+          node .github/scripts/visual_v3_subject_hub_architecture_regression.js
 
       - name: Premium scope gate
         shell: bash
