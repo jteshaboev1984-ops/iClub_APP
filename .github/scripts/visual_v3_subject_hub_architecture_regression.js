@@ -11,6 +11,7 @@ const css = fs.readFileSync('visual/iclub-premium-v3.css', 'utf8');
 for (const token of [
   'PREMIUM SUBJECT HUB ARCHITECTURE v3.1',
   'PREMIUM SUBJECT HUB ACTION AFFORDANCE v3.2',
+  'PREMIUM SUBJECT HUB CONTROL GROUP v3.3',
   '#courses-subject-hub.is-active:not([hidden])',
   '#courses-subject-hub > #subject-hub-exam-prep-entry',
   '#courses-subject-hub > .subject-hub-tabs',
@@ -77,6 +78,12 @@ for (const action of ['open-lessons', 'open-practice', 'open-tours', 'open-books
       activeTabBackground: getComputedStyle(firstTab).backgroundColor,
       activeTabColor: getComputedStyle(firstTab).color,
       mentorBeforeFeature: panels.getBoundingClientRect().top < entry.getBoundingClientRect().top,
+      tabsGap: getComputedStyle(tabs).gap,
+      tabsBorder: getComputedStyle(tabs).borderTopStyle,
+      firstTabShadow: getComputedStyle(firstTab).boxShadow,
+      firstTabAfterBackground: getComputedStyle(firstTab, '::after').backgroundColor,
+      firstTabAfterBottom: getComputedStyle(firstTab, '::after').bottom,
+      secondaryGroupBorder: getComputedStyle(actions).borderTopStyle,
       width: document.documentElement.scrollWidth,
       innerWidth: innerWidth
     };
@@ -86,9 +93,14 @@ for (const action of ['open-lessons', 'open-practice', 'open-tours', 'open-books
   assert(JSON.stringify(state.orders) === JSON.stringify({ head: 10, entry: 20, tabs: 30, actions: 40, panels: 15, system: 60, bottom: 80 }), `Subject Hub hierarchy drift: ${JSON.stringify(state.orders)}`);
   assert(state.tabsColumns === 2, `Subject Hub mobile primary actions must be 2 columns, got ${state.tabsColumns}`);
   assert(state.tabHeight >= 54, `Subject Hub primary action target too small: ${state.tabHeight}`);
-  assert(state.activeTabBackground === 'rgb(255, 255, 255)', `Primary action must not look pre-selected: ${state.activeTabBackground}`);
+  assert(state.activeTabBackground === 'rgba(0, 0, 0, 0)', `Primary action must not look pre-selected: ${state.activeTabBackground}`);
   assert(state.activeTabColor === 'rgb(15, 23, 42)', `Primary action selected-color leak: ${state.activeTabColor}`);
   assert(state.mentorBeforeFeature === true, 'Mentor card must stay in its original place directly after the subject header');
+  assert(state.tabsGap === '0px', `Primary actions must read as one control group, gap=${state.tabsGap}`);
+  assert(state.tabsBorder === 'solid', `Primary action group needs a clear outer boundary, border=${state.tabsBorder}`);
+  assert(state.firstTabShadow === 'none', `Primary action cell must not look like a selected floating card: ${state.firstTabShadow}`);
+  assert(state.firstTabAfterBackground === 'rgba(0, 0, 0, 0)', `Legacy active underline leaked into launcher: ${state.firstTabAfterBackground}`);
+  assert(state.secondaryGroupBorder === 'solid', `Secondary actions must be grouped, border=${state.secondaryGroupBorder}`);
   assert(state.width <= state.innerWidth, `Subject Hub mobile overflow: ${JSON.stringify(state)}`);
 
   await page.evaluate(() => {
