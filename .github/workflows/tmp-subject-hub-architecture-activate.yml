@@ -1,0 +1,224 @@
+name: TEMP Activate Subject Hub Architecture v3.1
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/tmp-subject-hub-architecture-activate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  subject-hub-architecture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Stage Subject Hub architecture layer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('visual/iclub-premium-v3.css')
+          css = path.read_text(encoding='utf-8')
+          marker = '/* ===== PREMIUM SUBJECT HUB ARCHITECTURE v3.1 ===== */'
+          if marker in css:
+              print('Subject Hub architecture layer already present')
+              raise SystemExit(0)
+          addition = r'''
+
+/* ===== PREMIUM SUBJECT HUB ARCHITECTURE v3.1 ===== */
+/* Layout and hierarchy only. Existing IDs, actions, routes and data behavior stay untouched. */
+.iclub-visual-v3 #courses-subject-hub[hidden] {
+  display: none !important;
+}
+
+.iclub-visual-v3 #courses-subject-hub.is-active:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-head {
+  order: 10;
+  margin-bottom: 10px;
+}
+
+.iclub-visual-v3 #courses-subject-hub > #subject-hub-exam-prep-entry {
+  order: 20;
+  margin: 0 0 12px;
+}
+
+.iclub-visual-v3 #courses-subject-hub > #exam-prep-host-root {
+  order: 25;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-tabs {
+  order: 30;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-tabs .hub-tab {
+  min-height: 48px;
+  padding: 10px 9px;
+  border: 1px solid var(--v3-border);
+  border-radius: var(--v3-radius-md);
+  background: var(--v3-card);
+  color: var(--v3-text);
+  font-size: 11.5px;
+  font-weight: 740;
+  box-shadow: var(--v3-premium-shadow);
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-tabs .hub-tab.is-active {
+  border-color: #CDD9FA;
+  background: var(--v3-primary-soft);
+  color: var(--v3-primary);
+  box-shadow: 0 6px 16px rgba(36, 87, 214, 0.09);
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-list {
+  order: 70;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-list.subject-hub-actions {
+  order: 40;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-list.subject-hub-actions .settings-nav {
+  min-height: 64px;
+  border: 1px solid var(--v3-border);
+  border-radius: var(--v3-radius-lg);
+  background: var(--v3-card);
+  box-shadow: var(--v3-premium-shadow);
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-list.subject-hub-actions .settings-nav + .settings-nav {
+  border-top: 1px solid var(--v3-border);
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-panels {
+  order: 50;
+  margin-top: 18px;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-panels .subject-hub-panel {
+  padding: 13px 14px;
+  border-color: var(--v3-border);
+  background: #FBFCFF;
+  box-shadow: none;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .section {
+  order: 60;
+  margin-top: 20px !important;
+  margin-bottom: 0;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .section + .subject-hub-list {
+  margin-top: 8px;
+}
+
+.iclub-visual-v3 #courses-subject-hub > .subject-hub-bottom {
+  order: 80;
+  margin-top: 14px;
+}
+
+.iclub-visual-v3 #courses-subject-hub.exam-prep-available > .subject-hub-head {
+  margin-bottom: 8px;
+}
+
+.iclub-visual-v3 #courses-subject-hub.exam-prep-available > #subject-hub-exam-prep-entry {
+  border-color: #C9D8FC;
+  box-shadow: 0 14px 34px rgba(36, 87, 214, 0.10);
+}
+
+@media (min-width: 620px) {
+  .iclub-visual-v3 #courses-subject-hub > .subject-hub-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .iclub-visual-v3 #courses-subject-hub > .subject-hub-list.subject-hub-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 350px) {
+  .iclub-visual-v3 #courses-subject-hub > .subject-hub-tabs {
+    grid-template-columns: 1fr;
+  }
+}
+'''
+          path.write_text(css.rstrip() + addition + '\n', encoding='utf-8')
+          print('Subject Hub architecture layer staged')
+          PY
+
+      - name: Static safety checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          grep -q 'PREMIUM SUBJECT HUB ARCHITECTURE v3.1' visual/iclub-premium-v3.css
+          grep -q '#courses-subject-hub.is-active:not(\[hidden\])' visual/iclub-premium-v3.css
+          ! grep -Eiq 'localStorage|sessionStorage|supabase|\.rpc\s*\(|\.from\s*\(|data-tab\s*=|operational_stage\s*=|innerHTML\s*=' visual/iclub-premium-v3.css
+          node --check .github/scripts/visual_v3_subject_hub_architecture_regression.js
+
+      - name: Install browser runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run visual and host regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 > /tmp/subject-hub-ux-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 0.2
+          done
+          node .github/scripts/visual_v3_premium_regression.js
+          node .github/scripts/visual_v3_premium_extended_regression.js
+          node .github/scripts/visual_v3_assessment_regression.js
+          node .github/scripts/visual_v3_math_exam_prep_ux_regression.js
+          node .github/scripts/visual_v3_subject_hub_architecture_regression.js
+          node .github/scripts/p0_14_host_regression.js
+          node .github/scripts/p0_22_live_view_coexistence_regression.js
+
+      - name: Commit tested Subject Hub architecture
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add visual/iclub-premium-v3.css
+          if git diff --cached --quiet; then
+            echo 'No Subject Hub architecture change to commit.'
+            exit 0
+          fi
+          git commit -m 'feat(ui): restructure Subject Hub information hierarchy'
+          git push origin HEAD:main
