@@ -38,6 +38,8 @@
       readiness: "Imtihon tayyorgarligi", openReadiness: "Tayyorgarlik holatini ko‘rish", readyStrong: "Obyektiv ko‘rsatkichlar tayyor", readyMore: "Yana dalil kerak", readinessPapers: "Hisobga olingan to‘liq ishlar", readinessSkills: "Barqarorlashtirilishi kerak bo‘lgan ko‘nikmalar", readinessCorrections: "Ochiq tuzatishlar", calibration: "Yakuniy moslashuv", openCalibration: "Yakuniy moslashuvni ochish", calibrationUnavailable: "Yakuniy moslashuv tayyorgarlik mezonlari bajarilgandan keyin ochiladi.",
       stage0: "Kirish tekshiruvi", stage1: "Asoslarni mustahkamlash", stage2: "Dastur bo‘yicha o‘rganish", stage3: "Dastur qamrovini yopish", stage4: "Vaqt ostida mustahkamlash", stage5: "Imtihon tayyorgarligi", stage6: "Yakuniy moslashuv",
       thresholdPending: "Tanlangan imtihon seriyasi va maqsad baho uchun tayyorgarlik mezoni hali sozlanmagan.", threePapers: "Tayyorgarlik uchun uchta taqqoslanadigan to‘liq ish kerak.", stage4Incomplete: "Vaqt ostidagi mustahkamlash hali yakunlanmagan.", skillsIncomplete: "Ba’zi ko‘nikmalarda barqaror natija hali yetarli emas.", correctionsOpen: "Ba’zi xatolar bo‘yicha tuzatish sikli hali yopilmagan.", belowThreshold: "Oxirgi uchta to‘liq ishning hammasi maqsad darajasiga yetmagan.", unattemptedHigh: "Bajarilmay qolayotgan ballar hali ko‘p.", afterTimeHigh: "Natijaning bir qismi hali vaqt tugagandan keyingi ishga tayanmoqda.",
+      dashboardEyebrow: "Sizning yo‘lingiz", dashboardTitle: "P1 va P5 bo‘yicha tayyorgarlik", dashboardText: "Har bir komponent o‘z bosqichi, dalillari va keyingi qadami bilan alohida yuradi.",
+      componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "ko‘nikma",
       actionCloseIssue: "Qolgan asosiy xatoni yoping", actionShort: "Qisqa maqsadli mashq", actionTiming: "Vaqt va imtihon tartibini tekshirish", actionTaper: "Yuklamani kamaytirish va natijani saqlash"
     };
     if (state.language === "en") return {
@@ -54,6 +56,8 @@
       readiness: "Exam readiness", openReadiness: "View readiness", readyStrong: "Objective evidence is ready", readyMore: "More evidence is needed", readinessPapers: "Comparable full papers counted", readinessSkills: "Skills still needing stability", readinessCorrections: "Open corrections", calibration: "Final calibration", openCalibration: "Open final calibration", calibrationUnavailable: "Final calibration opens after the readiness criteria are met.",
       stage0: "Entry check", stage1: "Foundation", stage2: "Syllabus learning", stage3: "Syllabus closure", stage4: "Timed consolidation", stage5: "Exam readiness", stage6: "Final calibration",
       thresholdPending: "The readiness threshold for the selected exam series and target grade is not configured yet.", threePapers: "Three comparable full papers are required for readiness.", stage4Incomplete: "Timed consolidation is not complete yet.", skillsIncomplete: "Some skills still need stable evidence.", correctionsOpen: "Some corrective work is still open.", belowThreshold: "The latest three full papers do not all meet the target level.", unattemptedHigh: "Too many marks are still being left unattempted.", afterTimeHigh: "Part of the result still depends on work completed after time.",
+      dashboardEyebrow: "Your route", dashboardTitle: "Preparation for P1 and P5", dashboardText: "Each component moves separately with its own phase, evidence and next action.",
+      componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "skills",
       actionCloseIssue: "Close the main remaining issue", actionShort: "Short targeted practice", actionTiming: "Check timing and exam logistics", actionTaper: "Reduce workload and protect performance"
     };
     return {
@@ -70,6 +74,8 @@
       readiness: "Готовность к экзамену", openReadiness: "Посмотреть готовность", readyStrong: "Объективные показатели готовы", readyMore: "Нужно больше подтверждений", readinessPapers: "Учтено полных сопоставимых работ", readinessSkills: "Навыков требуют стабилизации", readinessCorrections: "Открытых исправлений", calibration: "Финальная калибровка", openCalibration: "Открыть финальную калибровку", calibrationUnavailable: "Финальная калибровка откроется после выполнения критериев готовности.",
       stage0: "Входная проверка", stage1: "Фундамент", stage2: "Изучение программы", stage3: "Закрытие программы", stage4: "Закрепление на время", stage5: "Готовность к экзамену", stage6: "Финальная калибровка",
       thresholdPending: "Критерий готовности для выбранной экзаменационной сессии и целевой оценки ещё не настроен.", threePapers: "Для готовности нужны три сопоставимые полные работы.", stage4Incomplete: "Этап работы на время ещё не завершён.", skillsIncomplete: "По части навыков ещё не хватает стабильных подтверждений.", correctionsOpen: "По части ошибок цикл исправления ещё не закрыт.", belowThreshold: "Не все три последние полные работы достигли целевого уровня.", unattemptedHigh: "Пока остаётся слишком много невыполненных баллов.", afterTimeHigh: "Часть результата всё ещё зависит от работы после окончания времени.",
+      dashboardEyebrow: "Ваш маршрут", dashboardTitle: "Подготовка по P1 и P5", dashboardText: "Каждый компонент идёт отдельно: со своим этапом, подтверждениями и следующим действием.",
+      componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "навыков",
       actionCloseIssue: "Закрыть основную оставшуюся ошибку", actionShort: "Короткая целевая практика", actionTiming: "Проверить время и экзаменационный порядок", actionTaper: "Снизить нагрузку и сохранить форму"
     };
   }
@@ -110,7 +116,8 @@
       .ep-live-plan-item,.ep-live-timed-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid rgba(127,127,127,.2);border-radius:11px}.ep-live-priority{font-weight:800;font-size:18px}.ep-live-due{font-size:11px;opacity:.7}
       .ep-live-stat{display:grid;gap:3px;padding:10px;border:1px solid rgba(127,127,127,.18);border-radius:10px}.ep-live-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ep-live-stat strong{font-size:18px}.ep-live-rubric{display:grid;gap:7px}.ep-live-rubric-row{padding:8px;border-radius:9px;background:rgba(127,127,127,.07);font-size:13px}.ep-live-answer{white-space:pre-wrap;padding:10px;border-radius:9px;background:rgba(127,127,127,.07)}
       .ep-live-timer{font-variant-numeric:tabular-nums;font-weight:800}.ep-live-action-row{display:grid;gap:4px;padding:10px;border:1px solid rgba(127,127,127,.18);border-radius:10px}
-      @media(max-width:680px){.ep-live-grid,.ep-live-form,.ep-live-stats{grid-template-columns:1fr}.ep-live-head{display:grid}.ep-live-safe{text-align:left;max-width:none}.ep-live-plan-item,.ep-live-timed-row{grid-template-columns:1fr}.ep-live-plan-item .ep-live-btn,.ep-live-timed-row .ep-live-btn{width:100%}}
+      .ep-live-dashboard-intro{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 0}.ep-live-dashboard-eyebrow{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.7}.ep-live-dashboard-title{margin:4px 0 5px;font-size:19px;line-height:1.2}.ep-live-dashboard-text{margin:0;max-width:520px;font-size:13px;line-height:1.45;opacity:.76}.ep-live-dashboard-profile{flex:0 0 auto;padding:6px 9px;border:1px solid rgba(127,127,127,.24);border-radius:999px;font-size:11px;font-weight:700}.ep-live-component-head{display:flex;align-items:center;gap:10px}.ep-live-component-code{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:28px;padding:0 8px;border-radius:999px;background:rgba(127,127,127,.1);font-size:11px;font-weight:800}.ep-live-component-copy{display:grid;gap:2px;min-width:0}.ep-live-component-copy>span{font-size:11px;opacity:.68}.ep-live-component-status{display:grid;gap:7px}
+      @media(max-width:680px){.ep-live-grid,.ep-live-form,.ep-live-stats{grid-template-columns:1fr}.ep-live-head{display:grid}.ep-live-safe{text-align:left;max-width:none}.ep-live-dashboard-intro{display:grid}.ep-live-dashboard-profile{width:max-content}.ep-live-plan-item,.ep-live-timed-row{grid-template-columns:1fr}.ep-live-plan-item .ep-live-btn,.ep-live-timed-row .ep-live-btn{width:100%}}
     `;
     document.head.appendChild(style);
   }
@@ -158,6 +165,8 @@
     const pct = reqItems > 0 ? Math.min(100, Math.round(100 * ansItems / reqItems)) : 0;
     const complete = progress?.stage0_complete === true, active = progress?.active_session;
     const stage = Number(summary?.operational_stage || 0), coverage = Number(summary?.coverage_pct || 0);
+    const componentName = component === "P1" ? c.componentP1 : c.componentP5;
+    const skillCount = component === "P1" ? 45 : 36;
     const actions = [];
     if (complete) {
       actions.push(`<button class="ep-live-btn" type="button" data-ep-live-plan="${component}">${esc(c.openPlan)}</button>`);
@@ -167,9 +176,9 @@
       actions.push(`<button class="ep-live-btn" type="button" data-ep-live-start="${component}" ${state.busy ? "disabled" : ""}>${esc(active ? c.resume : c.start)}</button>`);
     }
     const status = complete
-      ? `<div class="ep-live-notice"><strong>${esc(c.stageTitle)}: ${esc(stageLabel(stage))}</strong><div class="ep-live-meta">${esc(c.coverage)}: ${coverage.toFixed(0)}%</div></div>`
-      : `<div><div>${ansItems} / ${reqItems} ${esc(c.items)}</div><div class="ep-live-progress"><span style="width:${pct}%"></span></div><div class="ep-live-meta">${ansAreas} / ${reqAreas} ${esc(c.areas)}</div></div>`;
-    return `<div class="ep-live-card"><strong>${component}</strong>${status}<div class="ep-live-actions">${actions.join("")}</div></div>`;
+      ? `<div class="ep-live-notice ep-live-component-status"><strong>${esc(c.stageTitle)}: ${esc(stageLabel(stage))}</strong><div class="ep-live-meta">${esc(c.coverage)}: ${coverage.toFixed(0)}%</div></div>`
+      : `<div class="ep-live-component-status"><div>${ansItems} / ${reqItems} ${esc(c.items)}</div><div class="ep-live-progress"><span style="width:${pct}%"></span></div><div class="ep-live-meta">${ansAreas} / ${reqAreas} ${esc(c.areas)}</div></div>`;
+    return `<article class="ep-live-card ep-live-component-card" data-ep-live-component="${component}"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${skillCount} ${esc(c.skillsLabel)}</span></div></div>${status}<div class="ep-live-actions">${actions.join("")}</div></article>`;
   }
 
   async function renderDashboard() {
@@ -181,8 +190,10 @@
     ]);
     if (!p1?.ok || !p5?.ok || !s1?.ok || !s5?.ok) { renderError(); return; }
     state.progress.P1 = p1.data; state.progress.P5 = p5.data; state.componentState.P1 = s1.data; state.componentState.P5 = s5.data;
+    const c = copy();
     const profileLine = [state.profile?.exam_series, state.profile?.target_grade].filter(Boolean).join(" · ");
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice">${esc(state.notice)}</div>` : ""}<div class="ep-live-meta">${esc(profileLine)}</div><div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`);
+    const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile">${esc(profileLine)}</div>` : "";
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section><div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`);
     state.notice = null;
     root.querySelectorAll("[data-ep-live-start]").forEach(b => b.addEventListener("click", () => startDiagnostic(b.dataset.epLiveStart)));
     root.querySelectorAll("[data-ep-live-plan]").forEach(b => b.addEventListener("click", () => openPlan(b.dataset.epLivePlan)));

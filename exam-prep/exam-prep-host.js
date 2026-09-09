@@ -31,6 +31,15 @@
         p1: "P1 · Pure Mathematics 1",
         p5: "P5 · Probability & Statistics 1",
         skills: "ko‘nikma",
+        entryBadge: "Cambridge AS · Mathematics",
+        entryTitle: "Exam Prep",
+        entryDesc: "Paper 1 va Paper 5 bo‘yicha shaxsiy tayyorgarlik yo‘li: kirish tekshiruvi, haftalik reja, mavzular, xatolar va vaqtli mashqlar.",
+        entryP1: "Pure Mathematics 1 · 45 ko‘nikma",
+        entryP5: "Probability & Statistics 1 · 36 ko‘nikma",
+        entryNote: "Practice va Tours tarixi o‘zgarmaydi.",
+        entryCta: "Exam Prepni ochish",
+        inviteBadge: "Yangi imkoniyat",
+        inviteCta: "Taklifni ko‘rish",
         inviteTitle: "Exam Prep sinoviga taklif",
         inviteSub: "Ishtirokingizni tasdiqlang",
         inviteKicker: "Yangi imkoniyat sinovi",
@@ -60,6 +69,15 @@
         p1: "P1 · Pure Mathematics 1",
         p5: "P5 · Probability & Statistics 1",
         skills: "skills",
+        entryBadge: "Cambridge AS · Mathematics",
+        entryTitle: "Exam Prep",
+        entryDesc: "A personal route for Paper 1 and Paper 5: entry check, weekly plan, syllabus work, corrections and timed practice.",
+        entryP1: "Pure Mathematics 1 · 45 skills",
+        entryP5: "Probability & Statistics 1 · 36 skills",
+        entryNote: "Practice and Tours history stays unchanged.",
+        entryCta: "Open Exam Prep",
+        inviteBadge: "New feature",
+        inviteCta: "View invitation",
         inviteTitle: "Invitation to test Exam Prep",
         inviteSub: "Confirm your participation",
         inviteKicker: "New feature test",
@@ -88,6 +106,15 @@
       p1: "P1 · Pure Mathematics 1",
       p5: "P5 · Probability & Statistics 1",
       skills: "навыков",
+      entryBadge: "Cambridge AS · Mathematics",
+      entryTitle: "Exam Prep",
+      entryDesc: "Персональный маршрут по Paper 1 и Paper 5: входная проверка, недельный план, темы, исправление ошибок и практика на время.",
+      entryP1: "Pure Mathematics 1 · 45 навыков",
+      entryP5: "Probability & Statistics 1 · 36 навыков",
+      entryNote: "История Practice и Tours остаётся без изменений.",
+      entryCta: "Открыть Exam Prep",
+      inviteBadge: "Новая функция",
+      inviteCta: "Посмотреть приглашение",
       inviteTitle: "Приглашение протестировать Exam Prep",
       inviteSub: "Подтвердите участие",
       inviteKicker: "Тестирование новой функции",
@@ -115,9 +142,11 @@
 
   function setEntryVisible(visible) {
     const el = entryEl();
+    const hub = hubEl();
     if (!el) return;
     el.hidden = !visible;
     el.setAttribute("aria-hidden", visible ? "false" : "true");
+    if (hub) hub.classList.toggle("exam-prep-available", visible === true);
   }
 
   function allowed(caps) {
@@ -151,11 +180,26 @@
 
   function renderEntryCopy() {
     const text = labels(state.language);
+    const entry = entryEl();
+    const badge = $("#subject-hub-exam-prep-badge");
     const title = $("#subject-hub-exam-prep-title");
     const sub = $("#subject-hub-exam-prep-sub");
+    const p1 = $("#subject-hub-exam-prep-p1");
+    const p5 = $("#subject-hub-exam-prep-p5");
+    const note = $("#subject-hub-exam-prep-note");
+    const cta = $("#subject-hub-exam-prep-cta");
     const inviteOnly = invited() && !allowed(state.capabilities);
-    if (title) title.textContent = inviteOnly ? text.inviteTitle : text.title;
-    if (sub) sub.textContent = inviteOnly ? text.inviteSub : text.subtitle;
+    if (entry) {
+      entry.classList.toggle("is-invitation", inviteOnly);
+      entry.setAttribute("data-ep-entry-mode", inviteOnly ? "invitation" : "live");
+    }
+    if (badge) badge.textContent = inviteOnly ? text.inviteBadge : text.entryBadge;
+    if (title) title.textContent = inviteOnly ? text.inviteTitle : text.entryTitle;
+    if (sub) sub.textContent = inviteOnly ? text.inviteSub : text.entryDesc;
+    if (p1) p1.textContent = text.entryP1;
+    if (p5) p5.textContent = text.entryP5;
+    if (note) note.textContent = text.entryNote;
+    if (cta) cta.textContent = inviteOnly ? text.inviteCta : text.entryCta;
   }
 
   function renderLiveShell() {

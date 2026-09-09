@@ -152,3 +152,109 @@
 }
 
 /* Host behavior stays here. Premium v3 owns presentation; Practice and Tours premium flow is covered by the permanent assessment gate. */
+
+
+/* Mathematics Exam Prep feature entry — structural host layer */
+.exam-prep-feature-card {
+  margin: 12px 0 14px;
+}
+
+.exam-prep-feature-button {
+  width: 100%;
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.exam-prep-feature-topline,
+.exam-prep-feature-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.exam-prep-feature-badge {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.exam-prep-feature-arrow {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+}
+
+.exam-prep-feature-arrow svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.exam-prep-feature-title {
+  font-size: 21px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.exam-prep-feature-description {
+  max-width: 640px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.exam-prep-feature-components {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.exam-prep-feature-component {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 10px 11px;
+  border: 1px solid var(--border, rgba(127,127,127,.22));
+  border-radius: 12px;
+}
+
+.exam-prep-feature-component strong {
+  font-size: 11px;
+}
+
+.exam-prep-feature-component span {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.exam-prep-feature-note,
+.exam-prep-feature-cta {
+  font-size: 11px;
+}
+
+.exam-prep-feature-cta {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .exam-prep-feature-components {
+    grid-template-columns: 1fr;
+  }
+
+  .exam-prep-feature-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
