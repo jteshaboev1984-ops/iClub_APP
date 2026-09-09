@@ -8,12 +8,14 @@ on:
       - 'visual/iclub-premium-v3.css'
       - 'index.html'
       - '.github/scripts/visual_v3_premium_regression.js'
+      - '.github/scripts/visual_v3_premium_extended_regression.js'
       - '.github/workflows/visual-v3-premium.yml'
   pull_request:
     paths:
       - 'visual/iclub-premium-v3.css'
       - 'index.html'
       - '.github/scripts/visual_v3_premium_regression.js'
+      - '.github/scripts/visual_v3_premium_extended_regression.js'
       - '.github/workflows/visual-v3-premium.yml'
   workflow_dispatch:
 
@@ -32,13 +34,18 @@ jobs:
           set -euo pipefail
           test -f visual/iclub-premium-v3.css
           test -f .github/scripts/visual_v3_premium_regression.js
+          test -f .github/scripts/visual_v3_premium_extended_regression.js
           node --check .github/scripts/visual_v3_premium_regression.js
+          node --check .github/scripts/visual_v3_premium_extended_regression.js
           grep -q 'visual/iclub-premium-v3.css?v=premium1' index.html
           ! grep -Eiq 'localStorage|sessionStorage|supabase|\.rpc\s*\(|\.from\s*\(|data-tab\s*=|operational_stage\s*=|innerHTML\s*=' visual/iclub-premium-v3.css
           grep -q '#view-home .home-block-title' visual/iclub-premium-v3.css
           grep -q '#courses-all-subjects .section-title' visual/iclub-premium-v3.css
           grep -q '#courses-subject-hub .subject-hub-head' visual/iclub-premium-v3.css
           grep -q '#view-profile .profile-hero' visual/iclub-premium-v3.css
+          grep -q 'PREMIUM EXTENDED SCREENS v3' visual/iclub-premium-v3.css
+          grep -q '#view-ratings .lb-segment' visual/iclub-premium-v3.css
+          grep -q '#view-registration .reg-form' visual/iclub-premium-v3.css
 
       - name: Install browser runtime
         shell: bash
@@ -47,7 +54,7 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
 
-      - name: Run premium mobile screen regression
+      - name: Run premium mobile screen regressions
         shell: bash
         run: |
           set -euo pipefail
@@ -59,6 +66,7 @@ jobs:
             sleep 0.2
           done
           node .github/scripts/visual_v3_premium_regression.js
+          node .github/scripts/visual_v3_premium_extended_regression.js
 
       - name: Premium scope gate
         shell: bash
