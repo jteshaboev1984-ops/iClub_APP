@@ -69,3 +69,5 @@ jobs:
           test "$staged" = $'i18n.js\nindex.html\nvisual/iclub-visual-v3.css'
           git commit -m 'feat(ui): activate Visual Foundation v3 shell'
           git push origin HEAD:main
+
+# Retry marker: patch helper is committed with this workflow.
