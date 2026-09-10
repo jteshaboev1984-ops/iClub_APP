@@ -258,3 +258,24 @@
     flex-direction: column;
   }
 }
+
+/* ===== EXAM PREP CENTRALIZED HISTORY NOTE v1 ===== */
+#exam-prep-host-root .ep-history-note {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid rgba(127,127,127,.12);
+  border-radius: 10px;
+  background: rgba(127,127,127,.055);
+}
+
+#exam-prep-host-root .ep-history-note strong {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+#exam-prep-host-root .ep-history-note span {
+  font-size: 11px;
+  line-height: 1.45;
+  opacity: .74;
+}
