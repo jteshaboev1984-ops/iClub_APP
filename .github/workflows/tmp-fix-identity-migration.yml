@@ -1,0 +1,84 @@
+name: Temporary identity migration self-fix
+
+on:
+  push:
+    branches:
+      - fix/exam-prep-identity-recovery-20260910
+    paths:
+      - '.github/workflows/tmp-fix-identity-migration.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/exam-prep-identity-recovery-20260910
+          fetch-depth: 0
+
+      - name: Patch migration and permanent regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          migration = Path('supabase/migrations/20260910070000_exam_prep_identity_recovery_continuity_v1.sql')
+          text = migration.read_text()
+
+          old_guard = "revoke all on function private.exam_prep_identity_rekey_active_v1() from public;\nrevoke execute on function private.exam_prep_identity_rekey_active_v1() from anon, authenticated, service_role;"
+          new_guard = "revoke all on function private.exam_prep_identity_rekey_active_v1() from public;\n-- Safe read-only predicate used by trigger WHEN clauses. It returns TRUE only for postgres\n-- while the trusted transaction-local re-key context is active.\ngrant execute on function private.exam_prep_identity_rekey_active_v1() to public;"
+          if old_guard not in text:
+              raise SystemExit('guard permission anchor missing')
+          text = text.replace(old_guard, new_guard, 1)
+
+          select_anchor = """      select distinct n.nspname as schema_name,\n             t.relname as table_name,\n             a.attname as column_name\n      from pg_catalog.pg_constraint c"""
+          positions = []
+          start = 0
+          while True:
+              p = text.find(select_anchor, start)
+              if p < 0:
+                  break
+              positions.append(p)
+              start = p + 1
+          if len(positions) != 1:
+              raise SystemExit(f'expected exactly one rekey SELECT anchor, got {len(positions)}')
+          replacement = """      select distinct n.nspname as schema_name,\n             t.relname as table_name,\n             a.attname as column_name,\n             case t.relname\n               when 'exam_prep_beta_consents' then 0\n               when 'exam_prep_beta_members' then 1\n               else 10\n             end as move_priority\n      from pg_catalog.pg_constraint c"""
+          text = text.replace(select_anchor, replacement, 1)
+
+          order_anchor = """      order by\n        case t.relname\n          when 'exam_prep_beta_consents' then 0\n          when 'exam_prep_beta_members' then 1\n          else 10\n        end,\n        t.relname,\n        a.attname"""
+          order_replacement = """      order by move_priority, t.relname, a.attname"""
+          if order_anchor not in text:
+              raise SystemExit('rekey ORDER BY anchor missing')
+          text = text.replace(order_anchor, order_replacement, 1)
+          migration.write_text(text)
+
+          script = Path('scripts/exam-prep-identity-recovery-continuity-regression.cjs')
+          s = script.read_text()
+          s = s.replace("const guardGrantPath = path.join(process.cwd(), 'supabase/migrations/20260910070100_exam_prep_identity_rekey_guard_access_v1.sql');\n", '')
+          s = s.replace("const grantSql = fs.readFileSync(guardGrantPath, 'utf8');\n", '')
+          s = s.replace("mustContain(grantSql, 'grant execute on function private.exam_prep_identity_rekey_active_v1() to public;', 'safe trigger guard runtime access');", "mustContain(sql, 'grant execute on function private.exam_prep_identity_rekey_active_v1() to public;', 'safe trigger guard runtime access');")
+          script.write_text(s)
+
+          workflow = Path('.github/workflows/exam-prep-identity-recovery-continuity.yml')
+          w = workflow.read_text()
+          w = w.replace("      - 'supabase/migrations/20260910070100_exam_prep_identity_rekey_guard_access_v1.sql'\n", '')
+          workflow.write_text(w)
+          PY
+
+          git rm supabase/migrations/20260910070100_exam_prep_identity_rekey_guard_access_v1.sql
+          node --check scripts/exam-prep-identity-recovery-continuity-regression.cjs
+          node scripts/exam-prep-identity-recovery-continuity-regression.cjs
+
+      - name: Commit corrected branch state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add supabase/migrations/20260910070000_exam_prep_identity_recovery_continuity_v1.sql scripts/exam-prep-identity-recovery-continuity-regression.cjs .github/workflows/exam-prep-identity-recovery-continuity.yml
+          git commit -m 'fix(exam-prep): harden identity rekey migration'
+          git push origin HEAD:fix/exam-prep-identity-recovery-20260910
