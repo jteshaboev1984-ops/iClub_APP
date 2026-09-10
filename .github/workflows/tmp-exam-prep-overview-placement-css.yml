@@ -21,10 +21,12 @@ jobs:
           fetch-depth: 0
 
       - name: Stage centralized overview placement styles
+        env:
+          OVERVIEW_CSS_B64: LyogPT09PT0gRVhBTSBQUkVQIENFTlRSQUxJWkVEIE9WRVJWSUVXIFBMQUNFTUVOVCB2MSA9PT09PSAqLwojZXhhbS1wcmVwLWhvc3Qtcm9vdCAuZXAtb3ZlcnZpZXctc3RyaXAgewogIGRpc3BsYXk6IGdyaWQ7CiAgZ2FwOiA5cHg7CiAgYm9yZGVyLXRvcDogMXB4IHNvbGlkIHJnYmEoMTI3LDEyNywxMjcsLjE0KTsKICBwYWRkaW5nLXRvcDogMTBweDsKfQoKI2V4YW0tcHJlcC1ob3N0LXJvb3QgLmVwLW92ZXJ2aWV3LW1pbmkgewogIGRpc3BsYXk6IGdyaWQ7CiAgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiByZXBlYXQoMyxtaW5tYXgoMCwxZnIpKTsKICBnYXA6IDhweDsKfQoKI2V4YW0tcHJlcC1ob3N0LXJvb3QgLmVwLW92ZXJ2aWV3LXN0YXQgewogIGRpc3BsYXk6IGdyaWQ7CiAgZ2FwOiAzcHg7CiAgcGFkZGluZzogOHB4OwogIGJvcmRlci1yYWRpdXM6IDEwcHg7CiAgYmFja2dyb3VuZDogcmdiYSgxMjcsMTI3LDEyNywuMDU1KTsKfQoKI2V4YW0tcHJlcC1ob3N0LXJvb3QgLmVwLW92ZXJ2aWV3LXN0YXQgc3BhbiB7CiAgZm9udC1zaXplOiAxMHB4OwogIG9wYWNpdHk6IC43Owp9CgojZXhhbS1wcmVwLWhvc3Qtcm9vdCAuZXAtb3ZlcnZpZXctc3RhdCBzdHJvbmcgewogIGZvbnQtc2l6ZTogMTNweDsKICBsaW5lLWhlaWdodDogMS4yNTsKfQoKI2V4YW0tcHJlcC1ob3N0LXJvb3QgLmVwLW92ZXJ2aWV3LWxhc3QgewogIGZvbnQtc2l6ZTogMTFweDsKICBvcGFjaXR5OiAuNzY7CiAgbGluZS1oZWlnaHQ6IDEuMzU7Cn0KCiNleGFtLXByZXAtaG9zdC1yb290IC5lcC1wbGFjZW1lbnQtc2hlbGwgewogIGRpc3BsYXk6IGdyaWQ7CiAgZ2FwOiAxMnB4Owp9CgojZXhhbS1wcmVwLWhvc3Qtcm9vdCAuZXAtcGxhY2VtZW50LXRvcCB7CiAgZGlzcGxheTogZmxleDsKICBqdXN0aWZ5LWNvbnRlbnQ6IHNwYWNlLWJldHdlZW47CiAgZ2FwOiAxMHB4OwogIGFsaWduLWl0ZW1zOiBmbGV4LXN0YXJ0Owp9CgojZXhhbS1wcmVwLWhvc3Qtcm9vdCAuZXAtcGxhY2VtZW50LXRpdGxlIHsKICBmb250LXNpemU6IDIwcHg7CiAgZm9udC13ZWlnaHQ6IDgwMDsKfQoKI2V4YW0tcHJlcC1ob3N0LXJvb3QgLmVwLXBsYWNlbWVudC1zdWIgewogIGZvbnQtc2l6ZTogMTJweDsKICBvcGFjaXR5OiAuNzI7CiAgbWFyZ2luLXRvcDogM3B4Owp9CgojZXhhbS1wcmVwLWhvc3Qtcm9vdCAuZXAtcGxhY2VtZW50LWNhcmQgewogIGRpc3BsYXk6IGdyaWQ7CiAgZ2FwOiAxMHB4OwogIGJvcmRlcjogMXB4IHNvbGlkIHJnYmEoMTI3LDEyNywxMjcsLjIyKTsKICBib3JkZXItcmFkaXVzOiAxNHB4OwogIHBhZGRpbmc6IDEzcHg7CiAgYmFja2dyb3VuZDogcmdiYSgxMjcsMTI3LDEyNywuMDM1KTsKfQoKI2V4YW0tcHJlcC1ob3N0LXJvb3QgLmVwLXBsYWNlbWVudC1zdW1tYXJ5IHsKICBkaXNwbGF5OiBncmlkOwogIGdyaWQtdGVtcGxhdGUtY29sdW1uczogcmVwZWF0KDIsbWlubWF4KDAsMWZyKSk7CiAgZ2FwOiA4cHg7Cn0KCiNleGFtLXByZXAtaG9zdC1yb290IC5lcC1wbGFjZW1lbnQtc3RhdCB7CiAgZGlzcGxheTogZ3JpZDsKICBnYXA6IDNweDsKICBib3JkZXI6IDFweCBzb2xpZCByZ2JhKDEyNywxMjcsMTI3LC4xNik7CiAgYm9yZGVyLXJhZGl1czogMTBweDsKICBwYWRkaW5nOiAxMHB4Owp9CgojZXhhbS1wcmVwLWhvc3Qtcm9vdCAuZXAtcGxhY2VtZW50LXN0YXQgc3BhbiB7CiAgZm9udC1zaXplOiAxMXB4OwogIG9wYWNpdHk6IC43MjsKfQoKI2V4YW0tcHJlcC1ob3N0LXJvb3QgLmVwLXBsYWNlbWVudC1zdGF0IHN0cm9uZyB7CiAgZm9udC1zaXplOiAxNXB4OwogIGxpbmUtaGVpZ2h0OiAxLjM7Cn0KCiNleGFtLXByZXAtaG9zdC1yb290IC5lcC1wbGFjZW1lbnQtbm90ZSB7CiAgcGFkZGluZzogMTBweDsKICBib3JkZXItcmFkaXVzOiAxMHB4OwogIGJhY2tncm91bmQ6IHJnYmEoMTI3LDEyNywxMjcsLjA4KTsKICBmb250LXNpemU6IDEycHg7CiAgbGluZS1oZWlnaHQ6IDEuNDU7Cn0KCiNleGFtLXByZXAtaG9zdC1yb290IC5lcC1wbGFjZW1lbnQtYWN0aW9ucyB7CiAgZGlzcGxheTogZmxleDsKICBnYXA6IDhweDsKICBmbGV4LXdyYXA6IHdyYXA7Cn0KCiNleGFtLXByZXAtaG9zdC1yb290IC5lcC1wbGFjZW1lbnQtYnRuIHsKICBib3JkZXI6IDFweCBzb2xpZCByZ2JhKDEyNywxMjcsMTI3LC4yOCk7CiAgYm9yZGVyLXJhZGl1czogMTBweDsKICBwYWRkaW5nOiA4cHggMTBweDsKICBiYWNrZ3JvdW5kOiB0cmFuc3BhcmVudDsKICBjb2xvcjogaW5oZXJpdDsKICBmb250OiBpbmhlcml0OwogIGZvbnQtd2VpZ2h0OiA3MDA7CiAgY3Vyc29yOiBwb2ludGVyOwp9CgojZXhhbS1wcmVwLWhvc3Qtcm9vdCAuZXAtcGxhY2VtZW50LWJ0bi5wcmltYXJ5IHsKICBiYWNrZ3JvdW5kOiAjMTExODI3OwogIGNvbG9yOiAjZmZmOwogIGJvcmRlci1jb2xvcjogIzExMTgyNzsKfQoKI2V4YW0tcHJlcC1ob3N0LXJvb3QgLmVwLXBsYWNlbWVudC1lcnJvciB7CiAgcGFkZGluZzogMTBweDsKICBib3JkZXItcmFkaXVzOiAxMHB4OwogIGJhY2tncm91bmQ6IHJnYmEoMTgwLDMwLDMwLC4xMik7CiAgZm9udC1zaXplOiAxM3B4Owp9CgpAbWVkaWEgKG1heC13aWR0aDogNjgwcHgpIHsKICAjZXhhbS1wcmVwLWhvc3Qtcm9vdCAuZXAtb3ZlcnZpZXctbWluaSwKICAjZXhhbS1wcmVwLWhvc3Qtcm9vdCAuZXAtcGxhY2VtZW50LXN1bW1hcnkgewogICAgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiAxZnI7CiAgfQoKICAjZXhhbS1wcmVwLWhvc3Qtcm9vdCAuZXAtcGxhY2VtZW50LXRvcCB7CiAgICBkaXNwbGF5OiBncmlkOwogIH0KCiAgI2V4YW0tcHJlcC1ob3N0LXJvb3QgLmVwLXBsYWNlbWVudC1hY3Rpb25zIC5lcC1wbGFjZW1lbnQtYnRuIHsKICAgIGZsZXg6IDEgMSBhdXRvOwogIH0KfQo=
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
+          import base64, os, re
 
           js_path = Path('exam-prep/exam-prep-overview-placement.js')
           js = js_path.read_text()
@@ -42,156 +44,8 @@ jobs:
           marker = '/* ===== EXAM PREP CENTRALIZED OVERVIEW PLACEMENT v1 ===== */'
           if marker in css:
               raise SystemExit('Overview/placement CSS marker already exists')
-          css += r'''
-
-/* ===== EXAM PREP CENTRALIZED OVERVIEW PLACEMENT v1 ===== */
-#exam-prep-host-root .ep-overview-strip {
-  display: grid;
-  gap: 9px;
-  border-top: 1px solid rgba(127,127,127,.14);
-  padding-top: 10px;
-}
-
-#exam-prep-host-root .ep-overview-mini {
-  display: grid;
-  grid-template-columns: repeat(3,minmax(0,1fr));
-  gap: 8px;
-}
-
-#exam-prep-host-root .ep-overview-stat {
-  display: grid;
-  gap: 3px;
-  padding: 8px;
-  border-radius: 10px;
-  background: rgba(127,127,127,.055);
-}
-
-#exam-prep-host-root .ep-overview-stat span {
-  font-size: 10px;
-  opacity: .7;
-}
-
-#exam-prep-host-root .ep-overview-stat strong {
-  font-size: 13px;
-  line-height: 1.25;
-}
-
-#exam-prep-host-root .ep-overview-last {
-  font-size: 11px;
-  opacity: .76;
-  line-height: 1.35;
-}
-
-#exam-prep-host-root .ep-placement-shell {
-  display: grid;
-  gap: 12px;
-}
-
-#exam-prep-host-root .ep-placement-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-#exam-prep-host-root .ep-placement-title {
-  font-size: 20px;
-  font-weight: 800;
-}
-
-#exam-prep-host-root .ep-placement-sub {
-  font-size: 12px;
-  opacity: .72;
-  margin-top: 3px;
-}
-
-#exam-prep-host-root .ep-placement-card {
-  display: grid;
-  gap: 10px;
-  border: 1px solid rgba(127,127,127,.22);
-  border-radius: 14px;
-  padding: 13px;
-  background: rgba(127,127,127,.035);
-}
-
-#exam-prep-host-root .ep-placement-summary {
-  display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  gap: 8px;
-}
-
-#exam-prep-host-root .ep-placement-stat {
-  display: grid;
-  gap: 3px;
-  border: 1px solid rgba(127,127,127,.16);
-  border-radius: 10px;
-  padding: 10px;
-}
-
-#exam-prep-host-root .ep-placement-stat span {
-  font-size: 11px;
-  opacity: .72;
-}
-
-#exam-prep-host-root .ep-placement-stat strong {
-  font-size: 15px;
-  line-height: 1.3;
-}
-
-#exam-prep-host-root .ep-placement-note {
-  padding: 10px;
-  border-radius: 10px;
-  background: rgba(127,127,127,.08);
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-#exam-prep-host-root .ep-placement-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-#exam-prep-host-root .ep-placement-btn {
-  border: 1px solid rgba(127,127,127,.28);
-  border-radius: 10px;
-  padding: 8px 10px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-#exam-prep-host-root .ep-placement-btn.primary {
-  background: #111827;
-  color: #fff;
-  border-color: #111827;
-}
-
-#exam-prep-host-root .ep-placement-error {
-  padding: 10px;
-  border-radius: 10px;
-  background: rgba(180,30,30,.12);
-  font-size: 13px;
-}
-
-@media (max-width: 680px) {
-  #exam-prep-host-root .ep-overview-mini,
-  #exam-prep-host-root .ep-placement-summary {
-    grid-template-columns: 1fr;
-  }
-
-  #exam-prep-host-root .ep-placement-top {
-    display: grid;
-  }
-
-  #exam-prep-host-root .ep-placement-actions .ep-placement-btn {
-    flex: 1 1 auto;
-  }
-}
-'''
-          css_path.write_text(css)
+          css_payload = base64.b64decode(os.environ['OVERVIEW_CSS_B64']).decode()
+          css_path.write_text(css.rstrip() + '\n\n' + css_payload)
 
           reg_path = Path('.github/scripts/p0_21_live_overview_placement_regression.js')
           reg = reg_path.read_text()
@@ -203,12 +57,12 @@ jobs:
           anchor = "  assert(!visible.includes('pending_evidence') && !visible.includes('objective_state_v1'), 'overview must hide internal state codes');\n"
           if anchor not in reg:
               raise SystemExit('p0_21 assertion anchor missing')
-          extra = """  const overviewPresentation = await page.evaluate(() => {\n    const root = document.querySelector('#exam-prep-host-root');\n    const strip = root.querySelector('[data-ep-overview-strip=\"P1\"]');\n    const mini = strip.querySelector('.ep-overview-mini');\n    return { runtimeStyle: Boolean(document.querySelector('#ep-overview-placement-style')), stripDisplay: getComputedStyle(strip).display, miniColumns: getComputedStyle(mini).gridTemplateColumns, rootWidth: root.getBoundingClientRect().width, scrollWidth: root.scrollWidth };\n  });\n  assert(overviewPresentation.runtimeStyle === false, 'Overview/placement must not inject a runtime style tag');\n  assert(overviewPresentation.stripDisplay === 'grid', 'Centralized overview CSS did not apply');\n  assert(overviewPresentation.rootWidth + 1 >= overviewPresentation.scrollWidth, `Overview overflow: ${overviewPresentation.scrollWidth} > ${overviewPresentation.rootWidth}`);\n"""
+          extra = "  const overviewPresentation = await page.evaluate(() => {\n    const root = document.querySelector('#exam-prep-host-root');\n    const strip = root.querySelector('[data-ep-overview-strip=\"P1\"]');\n    const mini = strip.querySelector('.ep-overview-mini');\n    return { runtimeStyle: Boolean(document.querySelector('#ep-overview-placement-style')), stripDisplay: getComputedStyle(strip).display, miniColumns: getComputedStyle(mini).gridTemplateColumns, rootWidth: root.getBoundingClientRect().width, scrollWidth: root.scrollWidth };\n  });\n  assert(overviewPresentation.runtimeStyle === false, 'Overview/placement must not inject a runtime style tag');\n  assert(overviewPresentation.stripDisplay === 'grid', 'Centralized overview CSS did not apply');\n  assert(overviewPresentation.rootWidth + 1 >= overviewPresentation.scrollWidth, `Overview overflow: ${overviewPresentation.scrollWidth} > ${overviewPresentation.rootWidth}`);\n"
           reg = reg.replace(anchor, anchor + extra, 1)
           anchor2 = "  assert(!visible.includes('pending_evidence') && !visible.includes('advanced_skip_requires_human'), 'placement result must hide internal route/field names');\n"
           if anchor2 not in reg:
               raise SystemExit('p0_21 placement assertion anchor missing')
-          extra2 = """  const placementPresentation = await page.evaluate(() => {\n    const root = document.querySelector('#exam-prep-host-root');\n    const shell = root.querySelector('.ep-placement-shell');\n    const card = root.querySelector('.ep-placement-card');\n    return { runtimeStyle: Boolean(document.querySelector('#ep-overview-placement-style')), shellDisplay: getComputedStyle(shell).display, cardRadius: getComputedStyle(card).borderRadius, rootWidth: root.getBoundingClientRect().width, scrollWidth: root.scrollWidth };\n  });\n  assert(placementPresentation.runtimeStyle === false, 'Placement runtime style tag appeared');\n  assert(placementPresentation.shellDisplay === 'grid', 'Centralized placement CSS did not apply');\n  assert(placementPresentation.cardRadius === '14px', 'Placement card geometry changed during CSS centralization');\n  assert(placementPresentation.rootWidth + 1 >= placementPresentation.scrollWidth, `Placement overflow: ${placementPresentation.scrollWidth} > ${placementPresentation.rootWidth}`);\n"""
+          extra2 = "  const placementPresentation = await page.evaluate(() => {\n    const root = document.querySelector('#exam-prep-host-root');\n    const shell = root.querySelector('.ep-placement-shell');\n    const card = root.querySelector('.ep-placement-card');\n    return { runtimeStyle: Boolean(document.querySelector('#ep-overview-placement-style')), shellDisplay: getComputedStyle(shell).display, cardRadius: getComputedStyle(card).borderRadius, rootWidth: root.getBoundingClientRect().width, scrollWidth: root.scrollWidth };\n  });\n  assert(placementPresentation.runtimeStyle === false, 'Placement runtime style tag appeared');\n  assert(placementPresentation.shellDisplay === 'grid', 'Centralized placement CSS did not apply');\n  assert(placementPresentation.cardRadius === '14px', 'Placement card geometry changed during CSS centralization');\n  assert(placementPresentation.rootWidth + 1 >= placementPresentation.scrollWidth, `Placement overflow: ${placementPresentation.scrollWidth} > ${placementPresentation.rootWidth}`);\n"
           reg_path.write_text(reg.replace(anchor2, anchor2 + extra2, 1))
           PY
 
