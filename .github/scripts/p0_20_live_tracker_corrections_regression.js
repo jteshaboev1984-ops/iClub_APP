@@ -11,6 +11,7 @@ const path = require('path');
     body: '<!doctype html><html><head></head><body><section id="courses-subject-hub"><div id="subject-hub-exam-prep-entry" hidden aria-hidden="true"><span id="subject-hub-exam-prep-title"></span><span id="subject-hub-exam-prep-sub"></span></div><div id="exam-prep-host-root" hidden aria-hidden="true"></div></section></body></html>'
   }));
   await page.goto('http://iclub.test/');
+  await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-host.css') });
 
   await page.evaluate(() => {
     window.__calls = [];
@@ -102,6 +103,16 @@ const path = require('path');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Syllabus progress'));
   let visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('1 / 45'), 'P1 tracker must preserve the 45-skill denominator');
+  const presentation = await page.evaluate(() => {
+    const root = document.querySelector('#exam-prep-host-root');
+    const shell = root.querySelector('.ep-views-shell');
+    const card = root.querySelector('.ep-views-card');
+    return { runtimeStyle: Boolean(document.querySelector('#ep-learner-views-style')), shellDisplay: getComputedStyle(shell).display, cardRadius: getComputedStyle(card).borderRadius, rootWidth: root.getBoundingClientRect().width, scrollWidth: root.scrollWidth };
+  });
+  assert(presentation.runtimeStyle === false, 'Learner views must not inject a runtime style tag');
+  assert(presentation.shellDisplay === 'grid', 'Centralized learner-view CSS did not apply');
+  assert(presentation.cardRadius === '14px', 'Learner-view card geometry changed during CSS centralization');
+  assert(presentation.scrollWidth <= presentation.rootWidth + 1, `Learner views overflow: ${presentation.scrollWidth} > ${presentation.rootWidth}`);
   assert(visible.includes('Quadratics') && visible.includes('Functions'), 'P1 tracker must group by learner-facing syllabus areas');
   assert(!visible.includes('P1-QUA-01') && !visible.includes('objective_state_v1'), 'tracker must not expose internal codes/engine terminology');
 

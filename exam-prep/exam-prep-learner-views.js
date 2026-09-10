@@ -99,20 +99,6 @@
     return c.noEvidence;
   }
 
-  function ensureStyle() {
-    if (document.querySelector("#ep-learner-views-style")) return;
-    const style = document.createElement("style");
-    style.id = "ep-learner-views-style";
-    style.textContent = `
-      .ep-views-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}.ep-views-btn{border:1px solid rgba(127,127,127,.28);border-radius:10px;padding:8px 10px;background:transparent;color:inherit;font:inherit;font-weight:700;cursor:pointer}.ep-views-btn.primary{background:#111827;color:#fff;border-color:#111827}.ep-views-btn:disabled{opacity:.55;cursor:default}
-      .ep-views-shell{display:grid;gap:12px}.ep-views-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.ep-views-title{font-size:20px;font-weight:800}.ep-views-sub{font-size:12px;opacity:.72;margin-top:3px}.ep-views-card{display:grid;gap:10px;border:1px solid rgba(127,127,127,.22);border-radius:14px;padding:13px;background:rgba(127,127,127,.035)}
-      .ep-views-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ep-views-stat{display:grid;gap:3px;border:1px solid rgba(127,127,127,.16);border-radius:10px;padding:9px}.ep-views-stat span{font-size:11px;opacity:.72}.ep-views-stat strong{font-size:17px}.ep-views-area{display:grid;gap:8px}.ep-views-area-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.ep-views-progress{height:6px;border-radius:999px;background:rgba(127,127,127,.16);overflow:hidden}.ep-views-progress>span{display:block;height:100%;background:currentColor;opacity:.7}
-      .ep-views-skill{width:100%;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;text-align:left;border:0;border-top:1px solid rgba(127,127,127,.14);padding:9px 0 0;background:transparent;color:inherit;font:inherit;cursor:pointer}.ep-views-skill-meta{font-size:11px;opacity:.7}.ep-views-badge{font-size:11px;font-weight:700;border:1px solid rgba(127,127,127,.22);border-radius:999px;padding:4px 7px;white-space:nowrap}
-      .ep-views-list{display:grid;gap:7px}.ep-views-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;padding:9px;border-radius:10px;background:rgba(127,127,127,.06)}.ep-views-row small{opacity:.7}.ep-views-note{padding:10px;border-radius:10px;background:rgba(127,127,127,.08);font-size:12px;line-height:1.45}.ep-views-error{padding:10px;border-radius:10px;background:rgba(180,30,30,.12);font-size:13px}
-      @media(max-width:680px){.ep-views-top{display:grid}.ep-views-summary{grid-template-columns:1fr}.ep-views-skill,.ep-views-row{grid-template-columns:1fr}.ep-views-actions .ep-views-btn{flex:1 1 auto}}
-    `;
-    document.head.appendChild(style);
-  }
 
   function shell(component, title, subtitle, body, backHandler = "dashboard") {
     const c = copy();
@@ -156,7 +142,7 @@
 
   async function openTracker(component) {
     if (busy || !canUse() || typeof internal.api?.syllabusTracker !== "function") return;
-    busy = true; activeLanguage = detectLanguage(); ensureStyle(); renderLoading(component, copy().tracker);
+    busy = true; activeLanguage = detectLanguage(); renderLoading(component, copy().tracker);
     const result = await internal.api.syllabusTracker(component); busy = false;
     if (!result?.ok) { renderError(component, copy().tracker); return; }
     renderTracker(component, result.data || {});
@@ -180,7 +166,7 @@
 
   async function openSkill(component, skillCode) {
     if (busy || !canUse() || typeof internal.api?.skillDetail !== "function") return;
-    busy = true; ensureStyle(); renderLoading(component, copy().detail, "tracker");
+    busy = true; renderLoading(component, copy().detail, "tracker");
     const result = await internal.api.skillDetail(component, skillCode); busy = false;
     if (!result?.ok) { renderError(component, copy().detail, "tracker"); return; }
     renderSkill(component, result.data || {});
@@ -234,7 +220,7 @@
 
   async function openCorrections(component) {
     if (busy || !canUse() || typeof internal.api?.correctionQueue !== "function") return;
-    busy = true; activeLanguage = detectLanguage(); ensureStyle(); renderLoading(component, copy().corrections);
+    busy = true; activeLanguage = detectLanguage(); renderLoading(component, copy().corrections);
     const result = await internal.api.correctionQueue(component); busy = false;
     if (!result?.ok) { renderError(component, copy().corrections); return; }
     renderCorrections(component, result.data || {});
@@ -263,7 +249,7 @@
   function injectDashboardActions() {
     const root = rootEl();
     if (!root || root.hidden || !canUse() || root.querySelector("[data-ep-views-screen]")) return;
-    activeLanguage = detectLanguage(); ensureStyle(); const c = copy();
+    activeLanguage = detectLanguage(); const c = copy();
     root.querySelectorAll(".ep-live-card").forEach(card => {
       if (card.dataset.epViewsInjected === "1") return;
       const component = card.querySelector("[data-ep-live-plan]")?.dataset.epLivePlan || card.querySelector("[data-ep-live-start]")?.dataset.epLiveStart;
