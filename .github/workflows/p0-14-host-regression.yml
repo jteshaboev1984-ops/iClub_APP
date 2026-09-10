@@ -16,6 +16,7 @@ on:
       - exam-prep/exam-prep-ai-ui.js
       - exam-prep/exam-prep-exam-map.js
       - exam-prep/exam-prep-materials.js
+      - exam-prep/exam-prep-past-paper.js
       - exam-prep/exam-prep-host.css
       - exam-prep-preview.html
       - .github/scripts/p0_14_host_regression.js
@@ -27,6 +28,7 @@ on:
       - .github/scripts/p0_21_live_overview_placement_regression.js
       - .github/scripts/p0_22_live_view_coexistence_regression.js
       - .github/scripts/p1_04_ai_ui_regression.js
+      - .github/scripts/p2_03_past_paper_ui_regression.js
       - .github/scripts/p2_09_exam_map_ui_regression.js
       - .github/scripts/p2_10_materials_ui_regression.js
       - .github/scripts/p2_13_stage0_workflow_ui_regression.js
@@ -53,11 +55,13 @@ jobs:
           node --check exam-prep/exam-prep-ai-ui.js
           node --check exam-prep/exam-prep-exam-map.js
           node --check exam-prep/exam-prep-materials.js
+          node --check exam-prep/exam-prep-past-paper.js
           node --check .github/scripts/p0_19_live_timed_readiness_regression.js
           node --check .github/scripts/p0_20_live_tracker_corrections_regression.js
           node --check .github/scripts/p0_21_live_overview_placement_regression.js
           node --check .github/scripts/p0_22_live_view_coexistence_regression.js
           node --check .github/scripts/p1_04_ai_ui_regression.js
+          node --check .github/scripts/p2_03_past_paper_ui_regression.js
           node --check .github/scripts/p2_09_exam_map_ui_regression.js
           node --check .github/scripts/p2_10_materials_ui_regression.js
           node --check .github/scripts/p2_13_stage0_workflow_ui_regression.js
@@ -75,6 +79,7 @@ jobs:
           grep -q 'exam-prep-ai-ui.js?v=p104aiui1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-exam-map.js?v=p209map1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-materials.js?v=p210materials1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-past-paper.js?v=p203paper1' exam-prep/exam-prep-api.js
           grep -q 'window.iClubExamPrep?.syncSubjectHub' app.js
           grep -q 'window.iClubExamPrep?.isOpen' app.js
           grep -q 'window.iClubExamPrep?.back' app.js
@@ -95,6 +100,11 @@ jobs:
           ! grep -q '\.from(' exam-prep/exam-prep-ai-ui.js
           ! grep -q '\.from(' exam-prep/exam-prep-exam-map.js
           ! grep -q '\.from(' exam-prep/exam-prep-materials.js
+          ! grep -q '\.from(' exam-prep/exam-prep-past-paper.js
+          ! grep -q 'ep-past-paper-style' exam-prep/exam-prep-past-paper.js
+          ! grep -q 'document.createElement("style")' exam-prep/exam-prep-past-paper.js
+          grep -q 'EXAM PREP CENTRALIZED PAST PAPER v1' exam-prep/exam-prep-host.css
+          grep -q '#exam-prep-host-root .ep-past-paper' exam-prep/exam-prep-host.css
           ! grep -q 'localStorage' exam-prep/exam-prep-api.js
           ! grep -q 'localStorage' exam-prep/exam-prep-host.js
           ! grep -q 'localStorage' exam-prep/exam-prep-live.js
@@ -103,6 +113,7 @@ jobs:
           ! grep -q 'localStorage' exam-prep/exam-prep-ai-ui.js
           ! grep -q 'localStorage' exam-prep/exam-prep-exam-map.js
           ! grep -q 'localStorage' exam-prep/exam-prep-materials.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-past-paper.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-api.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-host.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-live.js
@@ -111,11 +122,13 @@ jobs:
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-ai-ui.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-exam-map.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-materials.js
+          ! grep -q 'iclub_state_v1' exam-prep/exam-prep-past-paper.js
           ! grep -q 'submit_exam_prep_response' exam-prep/exam-prep-ai-ui.js
           ! grep -q 'save_exam_prep' exam-prep/exam-prep-ai-ui.js
           ! grep -q 'correct_answer' exam-prep/exam-prep-ai-ui.js
           ! grep -q 'correct_answer' exam-prep/exam-prep-exam-map.js
           ! grep -q 'correct_answer' exam-prep/exam-prep-materials.js
+          ! grep -q 'correct_answer' exam-prep/exam-prep-past-paper.js
           ! grep -q 'source_level' exam-prep/exam-prep-materials.js
           ! grep -q 'rights_status' exam-prep/exam-prep-materials.js
           grep -q "connect-src 'none'" exam-prep-preview.html
@@ -151,6 +164,9 @@ jobs:
 
       - name: Browser-isolated dormant AI learner UI
         run: node .github/scripts/p1_04_ai_ui_regression.js
+
+      - name: Past Paper learner UI contract
+        run: node .github/scripts/p2_03_past_paper_ui_regression.js
 
       - name: Browser-isolated Exam Map learner editor
         run: node .github/scripts/p2_09_exam_map_ui_regression.js
