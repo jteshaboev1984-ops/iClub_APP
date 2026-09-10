@@ -1,0 +1,46 @@
+name: Exam Prep Identity Recovery Continuity Gate
+
+on:
+  push:
+    branches:
+      - main
+      - fix/exam-prep-identity-recovery-20260910
+    paths:
+      - 'supabase/migrations/20260910070000_exam_prep_identity_recovery_continuity_v1.sql'
+      - 'supabase/migrations/20260910070100_exam_prep_identity_rekey_guard_access_v1.sql'
+      - 'supabase/tests/exam_prep_identity_recovery_continuity_matrix.sql'
+      - 'scripts/exam-prep-identity-recovery-continuity-regression.cjs'
+      - '.github/workflows/exam-prep-identity-recovery-continuity.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/20260910070000_exam_prep_identity_recovery_continuity_v1.sql'
+      - 'supabase/migrations/20260910070100_exam_prep_identity_rekey_guard_access_v1.sql'
+      - 'supabase/tests/exam_prep_identity_recovery_continuity_matrix.sql'
+      - 'scripts/exam-prep-identity-recovery-continuity-regression.cjs'
+      - '.github/workflows/exam-prep-identity-recovery-continuity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  identity-recovery-continuity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static continuity and non-destructive contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/exam-prep-identity-recovery-continuity-regression.cjs
+          node scripts/exam-prep-identity-recovery-continuity-regression.cjs
+
+      - name: SQL syntax surface checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "private.exam_prep_rekey_user_identity_v1" supabase/migrations/20260910070000_exam_prep_identity_recovery_continuity_v1.sql
+          grep -Fq "private.exam_prep_user_has_identity_refs_v1" supabase/migrations/20260910070000_exam_prep_identity_recovery_continuity_v1.sql
+          grep -Fq "Exam Prep identity recovery continuity matrix: GREEN" supabase/tests/exam_prep_identity_recovery_continuity_matrix.sql
+          echo 'Exam Prep identity recovery continuity gate: GREEN'
