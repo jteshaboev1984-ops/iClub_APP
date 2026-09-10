@@ -7,6 +7,7 @@ on:
     paths:
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-history-note.js
+      - exam-prep/exam-prep-host.css
       - .github/scripts/p1_05_history_note_regression.js
       - .github/workflows/p1-05-history-note.yml
   workflow_dispatch:
@@ -22,11 +23,17 @@ jobs:
 
       - name: Static contract checks
         run: |
+          set -euo pipefail
           node --check exam-prep/exam-prep-api.js
           node --check exam-prep/exam-prep-history-note.js
           node --check .github/scripts/p1_05_history_note_regression.js
           grep -q 'get_exam_prep_legacy_reference_summary_safe_v1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-history-note.js?v=p105history1' exam-prep/exam-prep-api.js
+          grep -q 'EXAM PREP CENTRALIZED HISTORY NOTE v1' exam-prep/exam-prep-host.css
+          grep -q '#exam-prep-host-root .ep-history-note' exam-prep/exam-prep-host.css
+          ! grep -q 'document.createElement("style")' exam-prep/exam-prep-history-note.js
+          ! grep -q 'style.textContent' exam-prep/exam-prep-history-note.js
+          ! grep -q 'ep-history-note-style' exam-prep/exam-prep-history-note.js
           ! grep -q '\.from(' exam-prep/exam-prep-history-note.js
           ! grep -q 'localStorage' exam-prep/exam-prep-history-note.js
           ! grep -q 'correct_answer' exam-prep/exam-prep-history-note.js
