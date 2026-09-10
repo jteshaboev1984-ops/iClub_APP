@@ -5,6 +5,7 @@ on:
     paths:
       - 'exam-prep/exam-prep-threshold-reference.js'
       - 'exam-prep/exam-prep-profile-completeness.js'
+      - 'exam-prep/exam-prep-host.css'
       - 'supabase/migrations/20260908053500_exam_prep_latest_threshold_reference_v1.sql'
       - 'scripts/p2-05-threshold-reference-regression.cjs'
       - '.github/workflows/p2-05-threshold-reference.yml'
@@ -12,6 +13,7 @@ on:
     paths:
       - 'exam-prep/exam-prep-threshold-reference.js'
       - 'exam-prep/exam-prep-profile-completeness.js'
+      - 'exam-prep/exam-prep-host.css'
       - 'supabase/migrations/20260908053500_exam_prep_latest_threshold_reference_v1.sql'
       - 'scripts/p2-05-threshold-reference-regression.cjs'
       - '.github/workflows/p2-05-threshold-reference.yml'
@@ -25,5 +27,8 @@ jobs:
         run: |
           node --check exam-prep/exam-prep-threshold-reference.js
           node --check exam-prep/exam-prep-profile-completeness.js
+          ! grep -q 'ep-threshold-reference-style' exam-prep/exam-prep-threshold-reference.js
+          ! grep -q 'document.createElement("style")' exam-prep/exam-prep-threshold-reference.js
+          grep -q 'EXAM PREP CENTRALIZED THRESHOLD REFERENCE v1' exam-prep/exam-prep-host.css
       - name: Run P2-05 threshold reference regression
         run: node scripts/p2-05-threshold-reference-regression.cjs
