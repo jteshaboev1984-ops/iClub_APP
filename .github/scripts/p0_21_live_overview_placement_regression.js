@@ -3,7 +3,7 @@ const path = require('path');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 
   await page.route('http://iclub.test/', route => route.fulfill({
     status: 200,
@@ -11,6 +11,7 @@ const path = require('path');
     body: '<!doctype html><html><head></head><body><section id="courses-subject-hub"><div id="subject-hub-exam-prep-entry" hidden aria-hidden="true"><span id="subject-hub-exam-prep-title"></span><span id="subject-hub-exam-prep-sub"></span></div><div id="exam-prep-host-root" hidden aria-hidden="true"></div></section></body></html>'
   }));
   await page.goto('http://iclub.test/');
+  await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-host.css') });
 
   await page.evaluate(() => {
     window.__calls = [];
@@ -67,6 +68,15 @@ const path = require('path');
   assert(visible.includes('Current phase') && visible.includes('Next step') && visible.includes('Last confirmation'), 'overview must show stage, next action and last evidence');
   assert(!visible.includes('0 / 81'), 'overview must never publish a combined 81-skill mastery percentage');
   assert(!visible.includes('pending_evidence') && !visible.includes('objective_state_v1'), 'overview must hide internal state codes');
+  const overviewPresentation = await page.evaluate(() => {
+    const root = document.querySelector('#exam-prep-host-root');
+    const strip = root.querySelector('[data-ep-overview-strip="P1"]');
+    const mini = strip.querySelector('.ep-overview-mini');
+    return { runtimeStyle: Boolean(document.querySelector('#ep-overview-placement-style')), stripDisplay: getComputedStyle(strip).display, miniColumns: getComputedStyle(mini).gridTemplateColumns, rootWidth: root.getBoundingClientRect().width, scrollWidth: root.scrollWidth };
+  });
+  assert(overviewPresentation.runtimeStyle === false, 'Overview/placement must not inject a runtime style tag');
+  assert(overviewPresentation.stripDisplay === 'grid', 'Centralized overview CSS did not apply');
+  assert(overviewPresentation.rootWidth + 1 >= overviewPresentation.scrollWidth, `Overview overflow: ${overviewPresentation.scrollWidth} > ${overviewPresentation.rootWidth}`);
 
   await page.click('[data-ep-placement-open="P1"]');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Entry check result'));
@@ -75,6 +85,16 @@ const path = require('path');
   assert(visible.includes('More evidence is needed') && visible.includes('Gathering enough evidence'), 'ambiguous placement must remain conservative and visibly provisional');
   assert(visible.includes('Paper 1 and Paper 5 do not raise each other'), 'placement result must state the component firewall in learner-facing language');
   assert(!visible.includes('pending_evidence') && !visible.includes('advanced_skip_requires_human'), 'placement result must hide internal route/field names');
+  const placementPresentation = await page.evaluate(() => {
+    const root = document.querySelector('#exam-prep-host-root');
+    const shell = root.querySelector('.ep-placement-shell');
+    const card = root.querySelector('.ep-placement-card');
+    return { runtimeStyle: Boolean(document.querySelector('#ep-overview-placement-style')), shellDisplay: getComputedStyle(shell).display, cardRadius: getComputedStyle(card).borderRadius, rootWidth: root.getBoundingClientRect().width, scrollWidth: root.scrollWidth };
+  });
+  assert(placementPresentation.runtimeStyle === false, 'Placement runtime style tag appeared');
+  assert(placementPresentation.shellDisplay === 'grid', 'Centralized placement CSS did not apply');
+  assert(placementPresentation.cardRadius === '14px', 'Placement card geometry changed during CSS centralization');
+  assert(placementPresentation.rootWidth + 1 >= placementPresentation.scrollWidth, `Placement overflow: ${placementPresentation.scrollWidth} > ${placementPresentation.rootWidth}`);
 
   await page.click('[data-ep-placement-back]');
   await page.waitForSelector('[data-ep-overview-strip="P5"]');

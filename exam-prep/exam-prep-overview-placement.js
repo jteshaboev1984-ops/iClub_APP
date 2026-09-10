@@ -60,17 +60,6 @@
     };
   }
 
-  function ensureStyle() {
-    if (document.querySelector("#ep-overview-placement-style")) return;
-    const style = document.createElement("style");
-    style.id = "ep-overview-placement-style";
-    style.textContent = `
-      .ep-overview-strip{display:grid;gap:9px;border-top:1px solid rgba(127,127,127,.14);padding-top:10px}.ep-overview-mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ep-overview-stat{display:grid;gap:3px;padding:8px;border-radius:10px;background:rgba(127,127,127,.055)}.ep-overview-stat span{font-size:10px;opacity:.7}.ep-overview-stat strong{font-size:13px;line-height:1.25}.ep-overview-last{font-size:11px;opacity:.76;line-height:1.35}
-      .ep-placement-shell{display:grid;gap:12px}.ep-placement-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.ep-placement-title{font-size:20px;font-weight:800}.ep-placement-sub{font-size:12px;opacity:.72;margin-top:3px}.ep-placement-card{display:grid;gap:10px;border:1px solid rgba(127,127,127,.22);border-radius:14px;padding:13px;background:rgba(127,127,127,.035)}.ep-placement-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ep-placement-stat{display:grid;gap:3px;border:1px solid rgba(127,127,127,.16);border-radius:10px;padding:10px}.ep-placement-stat span{font-size:11px;opacity:.72}.ep-placement-stat strong{font-size:15px;line-height:1.3}.ep-placement-note{padding:10px;border-radius:10px;background:rgba(127,127,127,.08);font-size:12px;line-height:1.45}.ep-placement-actions{display:flex;gap:8px;flex-wrap:wrap}.ep-placement-btn{border:1px solid rgba(127,127,127,.28);border-radius:10px;padding:8px 10px;background:transparent;color:inherit;font:inherit;font-weight:700;cursor:pointer}.ep-placement-btn.primary{background:#111827;color:#fff;border-color:#111827}.ep-placement-error{padding:10px;border-radius:10px;background:rgba(180,30,30,.12);font-size:13px}
-      @media(max-width:680px){.ep-overview-mini,.ep-placement-summary{grid-template-columns:1fr}.ep-placement-top{display:grid}.ep-placement-actions .ep-placement-btn{flex:1 1 auto}}
-    `;
-    document.head.appendChild(style);
-  }
 
   function stageLabel(value) {
     const c = copy();
@@ -165,7 +154,6 @@
     if (busy || !canUse() || typeof internal.api?.placementResult !== "function") return;
     busy = true;
     activeLanguage = detectLanguage();
-    ensureStyle();
     renderPlacementLoading(component);
     const workflowPromise = typeof internal.api?.stage0Workflow === "function"
       ? internal.api.stage0Workflow(component)
@@ -229,7 +217,6 @@
     const root = rootEl();
     if (!root || root.hidden || !canUse() || root.querySelector("[data-ep-placement-screen]") || root.querySelector("[data-ep-views-screen]")) return;
     activeLanguage = detectLanguage();
-    ensureStyle();
     root.querySelectorAll(".ep-live-card").forEach(card => {
       const component = card.querySelector("[data-ep-live-plan]")?.dataset.epLivePlan || card.querySelector("[data-ep-live-start]")?.dataset.epLiveStart;
       if (!component || !["P1", "P5"].includes(component)) return;
