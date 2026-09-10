@@ -3,7 +3,7 @@ const path = require('path');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.route('http://iclub.test/', route => route.fulfill({
     status: 200,
     contentType: 'text/html',
@@ -16,6 +16,7 @@ const path = require('path');
     </body></html>`
   }));
   await page.goto('http://iclub.test/');
+  await page.addStyleTag({path:path.resolve('exam-prep/exam-prep-host.css')});
 
   await page.evaluate(() => {
     window.__calls = [];
@@ -51,15 +52,31 @@ const path = require('path');
 
   await page.waitForSelector('[data-ep-materials-open="P1"]');
   await page.waitForSelector('[data-ep-materials-open="P5"]');
+  assert(await page.locator('#ep-materials-style').count() === 0, 'Materials must not inject a runtime style tag');
   await page.click('[data-ep-materials-open="P1"]');
   await page.waitForSelector('[data-ep-materials-screen]');
 
-  const p1 = await page.evaluate(() => ({
-    text:document.querySelector('#exam-prep-host-root').textContent,
-    calls:window.__calls,
-    materialKeys:Array.from(document.querySelectorAll('[data-ep-material]')).map(x=>x.dataset.epMaterial),
-    externalButtons:Array.from(document.querySelectorAll('[data-ep-materials-external]')).map(x=>x.dataset.epMaterialsExternal)
-  }));
+  const p1 = await page.evaluate(() => {
+    const root = document.querySelector('#exam-prep-host-root');
+    const shell = document.querySelector('.ep-materials-shell');
+    const card = document.querySelector('.ep-materials-card');
+    const back = document.querySelector('.ep-materials-btn');
+    const action = document.querySelector('.ep-materials-action');
+    const rootRect = root.getBoundingClientRect();
+    return {
+      text:root.textContent,
+      calls:window.__calls,
+      materialKeys:Array.from(document.querySelectorAll('[data-ep-material]')).map(x=>x.dataset.epMaterial),
+      externalButtons:Array.from(document.querySelectorAll('[data-ep-materials-external]')).map(x=>x.dataset.epMaterialsExternal),
+      runtimeStyle:Boolean(document.querySelector('#ep-materials-style')),
+      shellDisplay:getComputedStyle(shell).display,
+      cardRadius:getComputedStyle(card).borderRadius,
+      backWidth:back.getBoundingClientRect().width,
+      actionWidth:action.getBoundingClientRect().width,
+      rootWidth:rootRect.width,
+      scrollWidth:root.scrollWidth
+    };
+  });
 
   assert(p1.text.includes('Study materials'),'learner Materials Library title missing');
   assert(p1.text.includes('Cambridge 9709 syllabus 2026–2027'),'official syllabus missing');
@@ -72,6 +89,11 @@ const path = require('path');
   assert(p1.materialKeys.length===4,'P1 library should contain three shared materials plus one P1 reference');
   assert(p1.externalButtons.length===3,'only official external resources should be clickable');
   assert(p1.externalButtons.every(url=>url.startsWith('https://')),'non-HTTPS external resource exposed');
+  assert(p1.runtimeStyle === false, 'Materials runtime style tag appeared after opening the view');
+  assert(p1.shellDisplay === 'grid', 'Centralized Materials CSS did not apply');
+  assert(p1.cardRadius === '14px', 'Materials card geometry changed during CSS centralization');
+  assert(p1.backWidth > 0 && p1.actionWidth > 0, 'Materials actions disappeared');
+  assert(p1.scrollWidth <= p1.rootWidth + 1, `Materials overflow at 390px: ${p1.scrollWidth} > ${p1.rootWidth}`);
 
   const calls = p1.calls.filter(x=>x.name==='get_exam_prep_materials_library_safe_v1');
   assert(calls.length===1,'Materials Library safe RPC should be called exactly once');
