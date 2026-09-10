@@ -58,18 +58,6 @@
     return Boolean(caps && caps.coreAccess === true && caps.killSwitch === false && caps.rolloutState === "controlled_beta");
   }
 
-  function ensureStyle() {
-    if (document.querySelector("#ep-threshold-reference-style")) return;
-    const style = document.createElement("style");
-    style.id = "ep-threshold-reference-style";
-    style.textContent = `
-      .ep-threshold-reference{display:grid;gap:7px;padding:11px;border:1px solid rgba(127,127,127,.18);border-radius:11px;background:rgba(127,127,127,.055)}
-      .ep-threshold-reference strong{font-size:13px}.ep-threshold-reference-main{font-size:13px;line-height:1.45}.ep-threshold-reference-note{font-size:11px;line-height:1.5;opacity:.78}
-      .ep-threshold-reference a{font-size:11px;font-weight:700;color:inherit;text-underline-offset:2px}
-    `;
-    document.head.appendChild(style);
-  }
-
   function removePanel() {
     rootEl()?.querySelectorAll("[data-ep-threshold-reference]").forEach(node => node.remove());
   }
@@ -112,7 +100,6 @@
 
   function render(card, reference) {
     if (!card?.isConnected || !reference?.available) return;
-    ensureStyle();
     card.querySelectorAll("[data-ep-threshold-reference]").forEach(node => node.remove());
 
     const c = copy();
