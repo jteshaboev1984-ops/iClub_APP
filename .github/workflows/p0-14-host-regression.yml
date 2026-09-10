@@ -69,7 +69,7 @@ jobs:
           grep -Eq 'exam-prep/exam-prep-api[.]js[?]v=(p014h1|p209map1|p210materials1|p213placement1)' index.html
           grep -q 'exam-prep/exam-prep-host.js?v=p014h1' index.html
           grep -q 'exam-prep/exam-prep-host.css?v=p014h1' index.html
-          grep -q 'exam-prep-live.js?v=p019timed1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-live.js?v=p019timed2' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-learner-views.js?v=p020views2' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-overview-placement.js?v=p213placement1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-ai-ui.js?v=p104aiui1' exam-prep/exam-prep-api.js
