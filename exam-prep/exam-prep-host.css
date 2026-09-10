@@ -761,3 +761,69 @@
     flex: 1 1 auto;
   }
 }
+
+
+/* ===== EXAM PREP CENTRALIZED PAST PAPER v1 ===== */
+#exam-prep-host-root .ep-past-paper {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid rgba(127,127,127,.16);
+  border-radius: 14px;
+  background: rgba(127,127,127,.045);
+}
+
+#exam-prep-host-root .ep-past-paper-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+#exam-prep-host-root .ep-past-paper-head strong {
+  font-size: 14px;
+}
+
+#exam-prep-host-root .ep-past-paper-stats {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 8px;
+}
+
+#exam-prep-host-root .ep-past-paper-stat {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(127,127,127,.06);
+}
+
+#exam-prep-host-root .ep-past-paper-stat span {
+  font-size: 11px;
+  line-height: 1.35;
+  opacity: .72;
+}
+
+#exam-prep-host-root .ep-past-paper-stat strong {
+  font-size: 16px;
+}
+
+#exam-prep-host-root .ep-past-paper-note {
+  font-size: 11px;
+  line-height: 1.45;
+  opacity: .74;
+}
+
+#exam-prep-host-root .ep-past-paper-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  #exam-prep-host-root .ep-past-paper-stats { grid-template-columns: 1fr; }
+  #exam-prep-host-root .ep-past-paper-head { align-items: flex-start; flex-direction: column; }
+}

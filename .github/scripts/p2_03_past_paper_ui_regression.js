@@ -2,6 +2,7 @@ const fs = require('fs');
 
 const api = fs.readFileSync('exam-prep/exam-prep-api.js', 'utf8');
 const ui = fs.readFileSync('exam-prep/exam-prep-past-paper.js', 'utf8');
+const css = fs.readFileSync('exam-prep/exam-prep-host.css', 'utf8');
 
 function must(condition, message) {
   if (!condition) throw new Error(`P2-03 UI regression: ${message}`);
@@ -21,6 +22,12 @@ must(ui.includes('Past exam papers'), 'EN learner copy missing');
 must(!/Core beta|Synthetic learner|screening|alpha\b/i.test(ui), 'internal/test terminology leaked to learner copy');
 must(!/correct_answer|rubric_json|mark_scheme/i.test(api), 'protected assessment field referenced in learner API adapter');
 must(!/correct_answer|rubric_json/i.test(ui), 'protected assessment field referenced in learner UI');
+
+must(!ui.includes('ensureStyle('), 'runtime Past Paper style helper returned');
+must(!ui.includes('ep-past-paper-style'), 'runtime Past Paper style id returned');
+must(!ui.includes('document.createElement("style")'), 'runtime Past Paper style injection returned');
+must(css.includes('EXAM PREP CENTRALIZED PAST PAPER v1'), 'centralized Past Paper CSS marker missing');
+must(css.includes('#exam-prep-host-root .ep-past-paper'), 'Past Paper CSS is not host scoped');
 
 new Function(api);
 new Function(ui);

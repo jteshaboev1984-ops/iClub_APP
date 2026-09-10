@@ -50,20 +50,6 @@
     return Boolean(caps && caps.coreAccess === true && caps.killSwitch === false && caps.rolloutState === "controlled_beta");
   }
 
-  function ensureStyle() {
-    if (document.querySelector("#ep-past-paper-style")) return;
-    const style = document.createElement("style");
-    style.id = "ep-past-paper-style";
-    style.textContent = `
-      .ep-past-paper{display:grid;gap:10px;margin-top:12px;padding:14px;border:1px solid rgba(127,127,127,.16);border-radius:14px;background:rgba(127,127,127,.045)}
-      .ep-past-paper-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.ep-past-paper-head strong{font-size:14px}
-      .ep-past-paper-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ep-past-paper-stat{display:grid;gap:2px;padding:10px;border-radius:10px;background:rgba(127,127,127,.06)}
-      .ep-past-paper-stat span{font-size:11px;line-height:1.35;opacity:.72}.ep-past-paper-stat strong{font-size:16px}.ep-past-paper-note{font-size:11px;line-height:1.45;opacity:.74}
-      .ep-past-paper-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;text-align:center}
-      @media(max-width:520px){.ep-past-paper-stats{grid-template-columns:1fr}.ep-past-paper-head{align-items:flex-start;flex-direction:column}}
-    `;
-    document.head.appendChild(style);
-  }
 
   function removePanel() {
     rootEl()?.querySelectorAll("[data-ep-past-paper]").forEach(node => node.remove());
@@ -104,7 +90,6 @@
     const copyright = payload.copyright_boundary || {};
     if (copyright.stores_official_question_content === true || copyright.stores_official_mark_schemes === true || copyright.stores_official_answer_keys === true || copyright.external_metadata_only !== true) return;
 
-    ensureStyle();
     card.querySelectorAll("[data-ep-past-paper]").forEach(node => node.remove());
     const c = copy();
     const fullCount = Array.isArray(payload.original_full_simulations) ? payload.original_full_simulations.length : 0;
