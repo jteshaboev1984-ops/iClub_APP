@@ -1,0 +1,43 @@
+name: Exam Prep Persistence Continuity Gate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-live.js
+      - exam-prep/exam-prep-profile-completeness.js
+      - .github/scripts/exam_prep_persistence_continuity_regression.js
+      - .github/scripts/p0_17_live_diagnostic_regression.js
+      - scripts/p2-05-profile-completeness-regression.cjs
+      - .github/workflows/exam-prep-persistence-continuity.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  persistence-continuity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static safety checks
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-live.js
+          node --check exam-prep/exam-prep-profile-completeness.js
+          node --check .github/scripts/exam_prep_persistence_continuity_regression.js
+          node scripts/p2-05-profile-completeness-regression.cjs
+          ! grep -q 'localStorage' exam-prep/exam-prep-profile-completeness.js
+          ! grep -q 'sessionStorage' exam-prep/exam-prep-profile-completeness.js
+          ! grep -qiE 'delete[[:space:]]+from|truncate[[:space:]]+|drop[[:space:]]+table' exam-prep/exam-prep-profile-completeness.js
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Browser persistence continuity
+        run: |
+          node .github/scripts/exam_prep_persistence_continuity_regression.js
+          node .github/scripts/p0_17_live_diagnostic_regression.js
