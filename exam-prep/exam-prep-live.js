@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p019timed1";
+  const VERSION = "p019timed2";
   let attached = false;
 
   const state = {
@@ -39,7 +39,7 @@
       stage0: "Kirish tekshiruvi", stage1: "Asoslarni mustahkamlash", stage2: "Dastur bo‘yicha o‘rganish", stage3: "Dastur qamrovini yopish", stage4: "Vaqt ostida mustahkamlash", stage5: "Imtihon tayyorgarligi", stage6: "Yakuniy moslashuv",
       thresholdPending: "Tanlangan imtihon seriyasi va maqsad baho uchun tayyorgarlik mezoni hali sozlanmagan.", threePapers: "Tayyorgarlik uchun uchta taqqoslanadigan to‘liq ish kerak.", stage4Incomplete: "Vaqt ostidagi mustahkamlash hali yakunlanmagan.", skillsIncomplete: "Ba’zi ko‘nikmalarda barqaror natija hali yetarli emas.", correctionsOpen: "Ba’zi xatolar bo‘yicha tuzatish sikli hali yopilmagan.", belowThreshold: "Oxirgi uchta to‘liq ishning hammasi maqsad darajasiga yetmagan.", unattemptedHigh: "Bajarilmay qolayotgan ballar hali ko‘p.", afterTimeHigh: "Natijaning bir qismi hali vaqt tugagandan keyingi ishga tayanmoqda.",
       dashboardEyebrow: "Sizning yo‘lingiz", dashboardTitle: "P1 va P5 bo‘yicha tayyorgarlik", dashboardText: "Har bir komponent o‘z bosqichi, dalillari va keyingi qadami bilan alohida yuradi.",
-      componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "ko‘nikma",
+      componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "ko‘nikma", continueCheck: "Kirish tekshiruvini davom ettirish", profileSaved: "Saqlangan reja", targetShort: "Maqsad", totalShort: "Jami", mathShort: "Matematika", hoursShort: "soat/hafta",
       actionCloseIssue: "Qolgan asosiy xatoni yoping", actionShort: "Qisqa maqsadli mashq", actionTiming: "Vaqt va imtihon tartibini tekshirish", actionTaper: "Yuklamani kamaytirish va natijani saqlash"
     };
     if (state.language === "en") return {
@@ -57,7 +57,7 @@
       stage0: "Entry check", stage1: "Foundation", stage2: "Syllabus learning", stage3: "Syllabus closure", stage4: "Timed consolidation", stage5: "Exam readiness", stage6: "Final calibration",
       thresholdPending: "The readiness threshold for the selected exam series and target grade is not configured yet.", threePapers: "Three comparable full papers are required for readiness.", stage4Incomplete: "Timed consolidation is not complete yet.", skillsIncomplete: "Some skills still need stable evidence.", correctionsOpen: "Some corrective work is still open.", belowThreshold: "The latest three full papers do not all meet the target level.", unattemptedHigh: "Too many marks are still being left unattempted.", afterTimeHigh: "Part of the result still depends on work completed after time.",
       dashboardEyebrow: "Your route", dashboardTitle: "Preparation for P1 and P5", dashboardText: "Each component moves separately with its own phase, evidence and next action.",
-      componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "skills",
+      componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "skills", continueCheck: "Continue entry check", profileSaved: "Saved plan", targetShort: "Target grade", totalShort: "Total", mathShort: "Mathematics", hoursShort: "h/week",
       actionCloseIssue: "Close the main remaining issue", actionShort: "Short targeted practice", actionTiming: "Check timing and exam logistics", actionTaper: "Reduce workload and protect performance"
     };
     return {
@@ -75,7 +75,7 @@
       stage0: "Входная проверка", stage1: "Фундамент", stage2: "Изучение программы", stage3: "Закрытие программы", stage4: "Закрепление на время", stage5: "Готовность к экзамену", stage6: "Финальная калибровка",
       thresholdPending: "Критерий готовности для выбранной экзаменационной сессии и целевой оценки ещё не настроен.", threePapers: "Для готовности нужны три сопоставимые полные работы.", stage4Incomplete: "Этап работы на время ещё не завершён.", skillsIncomplete: "По части навыков ещё не хватает стабильных подтверждений.", correctionsOpen: "По части ошибок цикл исправления ещё не закрыт.", belowThreshold: "Не все три последние полные работы достигли целевого уровня.", unattemptedHigh: "Пока остаётся слишком много невыполненных баллов.", afterTimeHigh: "Часть результата всё ещё зависит от работы после окончания времени.",
       dashboardEyebrow: "Ваш маршрут", dashboardTitle: "Подготовка по P1 и P5", dashboardText: "Каждый компонент идёт отдельно: со своим этапом, подтверждениями и следующим действием.",
-      componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "навыков",
+      componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "навыков", continueCheck: "Продолжить входную проверку", profileSaved: "Сохранённый план", targetShort: "Цель", totalShort: "Всего", mathShort: "Математика", hoursShort: "ч/нед",
       actionCloseIssue: "Закрыть основную оставшуюся ошибку", actionShort: "Короткая целевая практика", actionTiming: "Проверить время и экзаменационный порядок", actionTaper: "Снизить нагрузку и сохранить форму"
     };
   }
@@ -116,7 +116,7 @@
       .ep-live-plan-item,.ep-live-timed-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid rgba(127,127,127,.2);border-radius:11px}.ep-live-priority{font-weight:800;font-size:18px}.ep-live-due{font-size:11px;opacity:.7}
       .ep-live-stat{display:grid;gap:3px;padding:10px;border:1px solid rgba(127,127,127,.18);border-radius:10px}.ep-live-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ep-live-stat strong{font-size:18px}.ep-live-rubric{display:grid;gap:7px}.ep-live-rubric-row{padding:8px;border-radius:9px;background:rgba(127,127,127,.07);font-size:13px}.ep-live-answer{white-space:pre-wrap;padding:10px;border-radius:9px;background:rgba(127,127,127,.07)}
       .ep-live-timer{font-variant-numeric:tabular-nums;font-weight:800}.ep-live-action-row{display:grid;gap:4px;padding:10px;border:1px solid rgba(127,127,127,.18);border-radius:10px}
-      .ep-live-dashboard-intro{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 0}.ep-live-dashboard-eyebrow{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.7}.ep-live-dashboard-title{margin:4px 0 5px;font-size:19px;line-height:1.2}.ep-live-dashboard-text{margin:0;max-width:520px;font-size:13px;line-height:1.45;opacity:.76}.ep-live-dashboard-profile{flex:0 0 auto;padding:6px 9px;border:1px solid rgba(127,127,127,.24);border-radius:999px;font-size:11px;font-weight:700}.ep-live-component-head{display:flex;align-items:center;gap:10px}.ep-live-component-code{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:28px;padding:0 8px;border-radius:999px;background:rgba(127,127,127,.1);font-size:11px;font-weight:800}.ep-live-component-copy{display:grid;gap:2px;min-width:0}.ep-live-component-copy>span{font-size:11px;opacity:.68}.ep-live-component-status{display:grid;gap:7px}
+      .ep-live-dashboard-intro{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 0}.ep-live-dashboard-eyebrow{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.7}.ep-live-dashboard-title{margin:4px 0 5px;font-size:19px;line-height:1.2}.ep-live-dashboard-text{margin:0;max-width:520px;font-size:13px;line-height:1.45;opacity:.76}.ep-live-dashboard-profile{flex:0 1 310px;display:grid;gap:2px;padding:7px 9px;border:1px solid rgba(127,127,127,.24);border-radius:10px;font-size:10px;line-height:1.35}.ep-live-dashboard-profile strong{font-size:10px}.ep-live-dashboard-profile span{overflow-wrap:anywhere}.ep-live-component-head{display:flex;align-items:center;gap:10px}.ep-live-component-code{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:28px;padding:0 8px;border-radius:999px;background:rgba(127,127,127,.1);font-size:11px;font-weight:800}.ep-live-component-copy{display:grid;gap:2px;min-width:0}.ep-live-component-copy>span{font-size:11px;opacity:.68}.ep-live-component-status{display:grid;gap:7px}
       @media(max-width:680px){.ep-live-grid,.ep-live-form,.ep-live-stats{grid-template-columns:1fr}.ep-live-head{display:grid}.ep-live-safe{text-align:left;max-width:none}.ep-live-dashboard-intro{display:grid}.ep-live-dashboard-profile{width:max-content}.ep-live-plan-item,.ep-live-timed-row{grid-template-columns:1fr}.ep-live-plan-item .ep-live-btn,.ep-live-timed-row .ep-live-btn{width:100%}}
     `;
     document.head.appendChild(style);
@@ -133,8 +133,8 @@
     clearTimer();
     const root = rootEl(); if (!root) return; const c = copy();
     root.innerHTML = shell(`<div class="ep-live-card"><strong>${esc(c.profileTitle)}</strong><div class="ep-live-meta">${esc(c.profileText)}</div><form class="ep-live-form" data-ep-live-profile-form>
-      <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" placeholder="Oct/Nov 2026"></label>
-      <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" placeholder="A"></label>
+      <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" placeholder="Oct/Nov 2026" required aria-required="true"></label>
+      <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" placeholder="A" required aria-required="true"></label>
       <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" required></label>
       <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" required></label>
       <div class="ep-live-actions"><button class="ep-live-btn" type="submit" data-ep-live-save-profile>${esc(state.busy ? c.saving : c.save)}</button></div></form><div data-ep-live-profile-error></div></div>`);
@@ -145,7 +145,7 @@
     event.preventDefault(); if (state.busy) return;
     const form = event.currentTarget;
     const values = { examSeries: form.elements.exam_series.value, targetGrade: form.elements.target_grade.value, totalHours: Number(form.elements.total_hours.value), mathHours: Number(form.elements.math_hours.value) };
-    if (!(values.totalHours > 0) || !(values.mathHours > 0) || values.mathHours > values.totalHours || values.totalHours > 168) {
+    if (!String(values.examSeries || "").trim() || !String(values.targetGrade || "").trim() || !(values.totalHours > 0) || !(values.mathHours > 0) || values.mathHours > values.totalHours || values.totalHours > 168) {
       const el = rootEl()?.querySelector("[data-ep-live-profile-error]"); if (el) el.innerHTML = `<div class="ep-live-error">${esc(copy().invalid)}</div>`; return;
     }
     state.busy = true; renderLoading();
@@ -173,7 +173,7 @@
       if (stage >= 2) actions.push(`<button class="ep-live-btn secondary" type="button" data-ep-live-timed="${component}">${esc(c.openTimed)}</button>`);
       if (stage >= 5) actions.push(`<button class="ep-live-btn secondary" type="button" data-ep-live-readiness="${component}">${esc(c.openReadiness)}</button>`);
     } else {
-      actions.push(`<button class="ep-live-btn" type="button" data-ep-live-start="${component}" ${state.busy ? "disabled" : ""}>${esc(active ? c.resume : c.start)}</button>`);
+      actions.push(`<button class="ep-live-btn" type="button" data-ep-live-start="${component}" ${state.busy ? "disabled" : ""}>${esc(active || ansItems > 0 ? c.continueCheck : c.start)}</button>`);
     }
     const status = complete
       ? `<div class="ep-live-notice ep-live-component-status"><strong>${esc(c.stageTitle)}: ${esc(stageLabel(stage))}</strong><div class="ep-live-meta">${esc(c.coverage)}: ${coverage.toFixed(0)}%</div></div>`
@@ -191,8 +191,15 @@
     if (!p1?.ok || !p5?.ok || !s1?.ok || !s5?.ok) { renderError(); return; }
     state.progress.P1 = p1.data; state.progress.P5 = p5.data; state.componentState.P1 = s1.data; state.componentState.P5 = s5.data;
     const c = copy();
-    const profileLine = [state.profile?.exam_series, state.profile?.target_grade].filter(Boolean).join(" · ");
-    const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile">${esc(profileLine)}</div>` : "";
+    const totalHours = Number(state.profile?.total_student_hours_available || 0), mathHours = Number(state.profile?.mathematics_hours_budget || 0);
+    const profileBits = [
+      state.profile?.exam_series || "",
+      state.profile?.target_grade ? `${c.targetShort}: ${state.profile.target_grade}` : "",
+      totalHours > 0 ? `${c.totalShort}: ${totalHours} ${c.hoursShort}` : "",
+      mathHours > 0 ? `${c.mathShort}: ${mathHours} ${c.hoursShort}` : ""
+    ].filter(Boolean);
+    const profileLine = profileBits.join(" · ");
+    const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
     root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section><div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`);
     state.notice = null;
     root.querySelectorAll("[data-ep-live-start]").forEach(b => b.addEventListener("click", () => startDiagnostic(b.dataset.epLiveStart)));

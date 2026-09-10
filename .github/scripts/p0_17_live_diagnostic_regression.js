@@ -46,7 +46,7 @@ const path = require('path');
 
   let r=await page.evaluate(async()=>{const synced=await window.iClubExamPrep.syncSubjectHub({subjectKey:'mathematics',language:'en'});const opened=await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});return{synced,opened,profile:!!document.querySelector('[data-ep-live-profile-form]'),version:window.iClubExamPrep.liveFlowVersion};});
   assert(r.synced&&r.opened&&r.profile,'profile screen must open for controlled-beta Core');
-  assert(r.version==='p019timed1','live flow version mismatch');
+  assert(r.version==='p019timed2','live flow version mismatch');
 
   await page.fill('input[name="exam_series"]','Oct/Nov 2026'); await page.fill('input[name="target_grade"]','A'); await page.fill('input[name="total_hours"]','12'); await page.fill('input[name="math_hours"]','6'); await page.click('[data-ep-live-save-profile]');
   await page.waitForFunction(()=>document.querySelector('[data-ep-live-start="P1"]'));

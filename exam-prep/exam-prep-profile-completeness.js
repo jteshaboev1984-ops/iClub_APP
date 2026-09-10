@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p205profile1";
+  const VERSION = "p205profile2";
   let observer = null;
   let queued = false;
   let loading = false;
@@ -23,7 +23,7 @@
   function copy() {
     if (language() === "uz") return {
       title: "Imtihon rejasini to‘ldiring",
-      body: "Imtihon sessiyasi va maqsad bahoni kiriting. Bu ma’lumotlar keyinchalik tayyorgarlik holatini to‘g‘ri baholash uchun kerak. Oldingi natijalaringiz saqlanadi.",
+      body: "Javoblaringiz va progressingiz saqlangan. Faqat yetishmayotgan imtihon ma’lumotlarini to‘ldiring. Mavjud natijalar o‘zgarmaydi.",
       series: "Imtihon sessiyasi",
       target: "Maqsad baho",
       total: "Haftalik umumiy o‘qish vaqti (soat)",
@@ -34,7 +34,7 @@
     };
     if (language() === "en") return {
       title: "Complete your exam plan",
-      body: "Add your exam series and target grade. They are needed later to assess readiness correctly. Your existing progress will be kept.",
+      body: "Your answers and progress are saved. Complete only the missing exam details. Your existing results will not change.",
       series: "Exam series",
       target: "Target grade",
       total: "Total weekly study time (hours)",
@@ -45,7 +45,7 @@
     };
     return {
       title: "Дополните план экзамена",
-      body: "Укажите экзаменационную сессию и целевую оценку. Эти данные понадобятся позже, чтобы корректно оценивать готовность. Уже накопленный прогресс сохранится.",
+      body: "Ваши ответы и прогресс сохранены. Дополните только недостающие данные об экзамене. Уже полученные результаты не изменятся.",
       series: "Экзаменационная сессия",
       target: "Целевая оценка",
       total: "Общее учебное время в неделю (часы)",
@@ -99,21 +99,27 @@
     const c = copy();
     const total = Number(profile?.total_student_hours_available) > 0 ? Number(profile.total_student_hours_available) : "";
     const math = Number(profile?.mathematics_hours_budget) > 0 ? Number(profile.mathematics_hours_budget) : "";
-    root.innerHTML = `<section class="ep-host-shell ep-live" data-ep-profile-completion>
-      <div class="ep-live-card">
-        <strong>${esc(c.title)}</strong>
-        <div class="ep-live-meta">${esc(c.body)}</div>
-        <form class="ep-live-form" data-ep-profile-completion-form>
-          <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" value="${esc(profile?.exam_series || "")}" placeholder="May/June 2027" required aria-required="true"></label>
-          <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" value="${esc(profile?.target_grade || "")}" placeholder="A" required aria-required="true"></label>
-          <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(total)}" required></label>
-          <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(math)}" required></label>
-          <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(c.save)}</button></div>
-        </form>
-        <div data-ep-profile-completion-error></div>
-      </div>
-    </section>`;
-    root.querySelector("[data-ep-profile-completion-form]")?.addEventListener("submit", event => save(event, profile));
+    const shell = root.querySelector(".ep-host-shell.ep-live");
+    const dashboard = root.querySelector(".ep-live-dashboard-intro");
+    const grid = root.querySelector(".ep-live-grid");
+    if (!shell || !dashboard || !grid) return;
+
+    const panel = document.createElement("section");
+    panel.className = "ep-live-card ep-profile-completion-card";
+    panel.dataset.epProfileCompletion = "true";
+    panel.innerHTML = `
+      <strong>${esc(c.title)}</strong>
+      <div class="ep-live-meta">${esc(c.body)}</div>
+      <form class="ep-live-form" data-ep-profile-completion-form>
+        <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" value="${esc(profile?.exam_series || "")}" placeholder="May/June 2027" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" value="${esc(profile?.target_grade || "")}" placeholder="A" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(total)}" required></label>
+        <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(math)}" required></label>
+        <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(c.save)}</button></div>
+      </form>
+      <div data-ep-profile-completion-error></div>`;
+    shell.insertBefore(panel, grid);
+    panel.querySelector("[data-ep-profile-completion-form]")?.addEventListener("submit", event => save(event, profile));
   }
 
   async function save(event, previousProfile) {
