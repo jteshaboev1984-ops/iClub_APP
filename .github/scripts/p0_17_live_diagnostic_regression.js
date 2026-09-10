@@ -1,5 +1,11 @@
 const { chromium } = require('playwright');
 const path = require('path');
+const fs = require('fs');
+const liveSource = fs.readFileSync('exam-prep/exam-prep-live.js', 'utf8');
+const hostCss = fs.readFileSync('exam-prep/exam-prep-host.css', 'utf8');
+if (liveSource.includes('ensureStyle(') || liveSource.includes('ep-live-flow-style') || liveSource.includes('document.createElement("style")')) throw new Error('runtime live-flow style injection returned');
+if (!hostCss.includes('EXAM PREP CENTRALIZED LIVE FLOW v1') || !hostCss.includes('.ep-live-card{')) throw new Error('centralized live-flow CSS contract missing');
+
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
