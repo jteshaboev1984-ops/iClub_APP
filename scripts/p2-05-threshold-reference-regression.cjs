@@ -10,6 +10,7 @@ function assert(condition, message) {
 const migration = read('supabase/migrations/20260908053500_exam_prep_latest_threshold_reference_v1.sql');
 const ui = read('exam-prep/exam-prep-threshold-reference.js');
 const loader = read('exam-prep/exam-prep-profile-completeness.js');
+const hostCss = read('exam-prep/exam-prep-host.css');
 
 for (const token of [
   "('P1','9709/12','A',61,75",
@@ -51,5 +52,14 @@ for (const forbidden of ['Core beta', 'Synthetic learner data', 'Screening']) {
 assert(loader.includes('exam-prep-threshold-reference.js?v=p205threshold1'), 'threshold reference learner layer is not loaded');
 assert(ui.includes('reference.reference_only !== true'), 'UI must require explicit reference-only metadata');
 assert(ui.includes('https:\\/\\/www\\.cambridgeinternational\\.org\\/'), 'UI must only link to official Cambridge domain');
+assert(!ui.includes('ep-threshold-reference-style'), 'threshold reference must not inject a runtime style tag');
+assert(!ui.includes('document.createElement("style")'), 'threshold reference must keep presentation out of runtime JS');
+for (const token of [
+  'EXAM PREP CENTRALIZED THRESHOLD REFERENCE v1',
+  '#exam-prep-host-root .ep-threshold-reference',
+  '#exam-prep-host-root .ep-threshold-reference-main',
+  '#exam-prep-host-root .ep-threshold-reference-note',
+  '#exam-prep-host-root .ep-threshold-reference a'
+]) assert(hostCss.includes(token), `centralized threshold reference CSS missing: ${token}`);
 
 console.log('P2-05 latest threshold reference regression: GREEN');
