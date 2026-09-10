@@ -93,19 +93,6 @@
     return Boolean(caps && caps.coreAccess === true && caps.killSwitch === false && caps.rolloutState === "controlled_beta");
   }
 
-  function ensureStyle() {
-    if (document.querySelector("#ep-materials-style")) return;
-    const style = document.createElement("style");
-    style.id = "ep-materials-style";
-    style.textContent = `
-      .ep-materials-btn{border:1px solid rgba(127,127,127,.28);border-radius:10px;padding:8px 10px;background:transparent;color:inherit;font:inherit;font-weight:700;cursor:pointer}
-      .ep-materials-shell{display:grid;gap:12px}.ep-materials-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.ep-materials-title{font-size:20px;font-weight:800}.ep-materials-sub{font-size:12px;line-height:1.45;opacity:.72;margin-top:4px}
-      .ep-materials-card{display:grid;gap:9px;border:1px solid rgba(127,127,127,.22);border-radius:14px;padding:13px;background:rgba(127,127,127,.035)}.ep-materials-card-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.ep-materials-kind{font-size:11px;font-weight:700;opacity:.72}.ep-materials-note{font-size:12px;line-height:1.5;opacity:.82}.ep-materials-meta{display:flex;gap:6px;flex-wrap:wrap}.ep-materials-chip{font-size:11px;border:1px solid rgba(127,127,127,.22);border-radius:999px;padding:4px 7px}.ep-materials-action{justify-self:start;border:1px solid rgba(127,127,127,.28);border-radius:10px;padding:8px 10px;background:#111827;color:#fff;font:inherit;font-weight:700;cursor:pointer}.ep-materials-safe{padding:10px;border-radius:10px;background:rgba(127,127,127,.08);font-size:12px;line-height:1.45}
-      @media(max-width:680px){.ep-materials-top{display:grid}.ep-materials-card-head{display:grid}.ep-materials-btn,.ep-materials-action{width:100%}}
-    `;
-    document.head.appendChild(style);
-  }
-
   function resourceKindLabel(kind) {
     const c = copy();
     return ({
@@ -202,7 +189,6 @@
     if (busy || !canUse() || !["P1", "P5"].includes(component) || typeof internal.api?.materialsLibrary !== "function") return;
     busy = true;
     activeLanguage = detectLanguage();
-    ensureStyle();
     renderLoading(component);
     const result = await internal.api.materialsLibrary(activeLanguage);
     busy = false;
@@ -217,7 +203,6 @@
     const root = rootEl();
     if (!root || root.hidden || !canUse() || root.querySelector("[data-ep-materials-screen]")) return;
     activeLanguage = detectLanguage();
-    ensureStyle();
     const c = copy();
     root.querySelectorAll(".ep-live-card").forEach(card => {
       if (card.dataset.epMaterialsInjected === "1") return;
