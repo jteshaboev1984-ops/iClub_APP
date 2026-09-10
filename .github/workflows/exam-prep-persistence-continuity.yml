@@ -8,7 +8,10 @@ on:
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-live.js
       - exam-prep/exam-prep-profile-completeness.js
+      - supabase/migrations/20260910050000_exam_prep_identity_recovery_continuity_v1.sql
+      - supabase/migrations/20260910052500_exam_prep_identity_recovery_continuity_v1_1.sql
       - .github/scripts/exam_prep_persistence_continuity_regression.js
+      - .github/scripts/exam_prep_identity_recovery_regression.js
       - .github/scripts/p0_17_live_diagnostic_regression.js
       - scripts/p2-05-profile-completeness-regression.cjs
       - .github/workflows/exam-prep-persistence-continuity.yml
@@ -29,6 +32,8 @@ jobs:
           node --check exam-prep/exam-prep-live.js
           node --check exam-prep/exam-prep-profile-completeness.js
           node --check .github/scripts/exam_prep_persistence_continuity_regression.js
+          node --check .github/scripts/exam_prep_identity_recovery_regression.js
+          node .github/scripts/exam_prep_identity_recovery_regression.js
           node scripts/p2-05-profile-completeness-regression.cjs
           ! grep -q 'localStorage' exam-prep/exam-prep-profile-completeness.js
           ! grep -q 'sessionStorage' exam-prep/exam-prep-profile-completeness.js
