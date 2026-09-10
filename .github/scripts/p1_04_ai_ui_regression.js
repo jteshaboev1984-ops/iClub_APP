@@ -1,5 +1,11 @@
 const { chromium } = require('playwright');
 const path = require('path');
+const fs = require('fs');
+const aiSource = fs.readFileSync('exam-prep/exam-prep-ai-ui.js', 'utf8');
+const hostCss = fs.readFileSync('exam-prep/exam-prep-host.css', 'utf8');
+if (aiSource.includes('ensureStyle(') || aiSource.includes('ep-ai-ui-style') || aiSource.includes('document.createElement("style")')) throw new Error('runtime AI UI style injection returned');
+if (!hostCss.includes('EXAM PREP CENTRALIZED AI UI v1') || !hostCss.includes('.ep-ai-panel{')) throw new Error('centralized AI UI CSS contract missing');
+
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
