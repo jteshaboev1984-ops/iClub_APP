@@ -89,6 +89,9 @@ jobs:
           ! grep -q '\.from(' exam-prep/exam-prep-api.js
           ! grep -q '\.from(' exam-prep/exam-prep-host.js
           ! grep -q '\.from(' exam-prep/exam-prep-live.js
+          ! grep -q 'ep-live-flow-style' exam-prep/exam-prep-live.js
+          ! grep -q 'document.createElement("style")' exam-prep/exam-prep-live.js
+          grep -q 'EXAM PREP CENTRALIZED LIVE FLOW v1' exam-prep/exam-prep-host.css
           ! grep -q '\.from(' exam-prep/exam-prep-learner-views.js
           ! grep -q 'ep-learner-views-style' exam-prep/exam-prep-learner-views.js
           ! grep -q 'document.createElement("style")' exam-prep/exam-prep-learner-views.js
