@@ -88,6 +88,10 @@ jobs:
               echo '=== Normalizing historical Stage-4 patch anchors in isolated CI only ===' | tee -a p236-current-schema.log
               psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >>p236-current-schema.log 2>&1
             fi
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              echo '=== Seeding one production-shaped isolated cohort for P2-36 backfill ===' | tee -a p236-current-schema.log
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('p236-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated P2-36 current-schema validation') on conflict(cohort_key) do nothing" >>p236-current-schema.log 2>&1
+            fi
             echo "=== Applying $f ===" | tee -a p236-current-schema.log
             psql -v ON_ERROR_STOP=1 -f "$f" >>p236-current-schema.log 2>&1
           }
