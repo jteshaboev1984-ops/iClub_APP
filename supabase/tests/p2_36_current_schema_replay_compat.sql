@@ -42,8 +42,8 @@ begin
 
   v_def:=regexp_replace(
     v_def,
-    $re$'corrective_plan_gate_ready',v_corrections_ready,[[:space:]]+'stage4_exit_ready',v_ready,[[:space:]]+'stage4_unlocked',false,[[:space:]]+'stage5_unlocked',false$re$,
-    $rep$'corrective_plan_gate_ready',v_corrections_ready,'stage4_exit_ready',v_ready,'stage4_unlocked',false,'stage5_unlocked',false$rep$
+    $re$'corrective_plan_gate_ready',v_corrections_ready,[[:space:]]+'stage4_exit_ready',v_ready,[[:space:]]+'stage4_unlocked',false,[[:space:]]+'stage5_unlocked',false[[:space:]]*\);$re$,
+    $rep$'corrective_plan_gate_ready',v_corrections_ready,'stage4_exit_ready',v_ready,'stage4_unlocked',false,'stage5_unlocked',false);$rep$
   );
 
   if v_def=v_before then raise exception 'P2-36 replay compat: no formatting drift found'; end if;
@@ -56,7 +56,7 @@ begin
   if position('  elsif not v_trend_ready then v_reason:=''timing_trend_incomplete'';' in v_def)=0 then
     raise exception 'P2-36 replay compat: reason normalization failed';
   end if;
-  if position('''corrective_plan_gate_ready'',v_corrections_ready,''stage4_exit_ready'',v_ready,''stage4_unlocked'',false,''stage5_unlocked'',false' in v_def)=0 then
+  if position('''corrective_plan_gate_ready'',v_corrections_ready,''stage4_exit_ready'',v_ready,''stage4_unlocked'',false,''stage5_unlocked'',false);' in v_def)=0 then
     raise exception 'P2-36 replay compat: return normalization failed';
   end if;
 
