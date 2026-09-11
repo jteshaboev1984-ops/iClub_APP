@@ -11,6 +11,7 @@ on:
       - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
       - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
       - supabase/tests/p1_06_expanded_beta_readiness_matrix.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
       - .github/workflows/p2-36-current-schema-expansion-validation.yml
   push:
     branches:
@@ -22,6 +23,7 @@ on:
       - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
       - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
       - supabase/tests/p1_06_expanded_beta_readiness_matrix.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
       - .github/workflows/p2-36-current-schema-expansion-validation.yml
   workflow_dispatch:
 
@@ -81,6 +83,10 @@ jobs:
             if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
               echo '=== Replaying production Core-only controlled-beta boundary ===' | tee -a p236-current-schema.log
               psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>p236-current-schema.log 2>&1
+            fi
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              echo '=== Normalizing historical Stage-4 patch anchors in isolated CI only ===' | tee -a p236-current-schema.log
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >>p236-current-schema.log 2>&1
             fi
             echo "=== Applying $f ===" | tee -a p236-current-schema.log
             psql -v ON_ERROR_STOP=1 -f "$f" >>p236-current-schema.log 2>&1
