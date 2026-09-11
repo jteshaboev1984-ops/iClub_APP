@@ -74,9 +74,16 @@ jobs:
           mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
           test "${#files[@]}" -ge 1
           for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              echo '=== Replaying production Core-only controlled-beta boundary ===' | tee -a p236-current-schema.log
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>p236-current-schema.log 2>&1
+            fi
             echo "=== Applying $f ===" | tee -a p236-current-schema.log
             psql -v ON_ERROR_STOP=1 -f "$f" >>p236-current-schema.log 2>&1
           done
+          echo '=== Resetting isolated harness to fail-closed baseline after schema replay ===' | tee -a p236-current-schema.log
+          psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p236-current-schema.log 2>&1
 
       - name: Verify P2-36 current-schema contract exists and is fail-closed
         shell: bash
