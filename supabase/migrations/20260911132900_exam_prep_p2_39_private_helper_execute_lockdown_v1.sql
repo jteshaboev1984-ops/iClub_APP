@@ -9,7 +9,14 @@ from public, anon, authenticated;
 grant execute on function private.exam_prep_timed_min_stage_v1(text)
 to service_role;
 
--- Deployment invariant: no private exam_prep_* helper may be client-callable.
+-- Defense in depth for future private helpers created by the migration owner.
+-- New functions in private should not inherit PostgreSQL's default PUBLIC
+-- EXECUTE privilege; explicit grants remain deliberate and reviewable.
+alter default privileges in schema private
+revoke execute on functions from public;
+
+-- Deployment invariant: no existing private exam_prep_* helper may be
+-- client-callable after this migration.
 do $$
 declare
   v_exposed int;
