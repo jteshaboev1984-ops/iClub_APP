@@ -73,7 +73,10 @@ jobs:
           set -euo pipefail
           mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
           test "${#files[@]}" -ge 1
-          for f in "${files[@]}"; do
+
+          apply_one() {
+            local f="$1"
+            local b
             b="$(basename "$f")"
             if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
               echo '=== Replaying production Core-only controlled-beta boundary ===' | tee -a p236-current-schema.log
@@ -81,7 +84,42 @@ jobs:
             fi
             echo "=== Applying $f ===" | tee -a p236-current-schema.log
             psql -v ON_ERROR_STOP=1 -f "$f" >>p236-current-schema.log 2>&1
+          }
+
+          # These six migrations were applied to production in the order below.
+          # Their repository filename timestamps predate the final production
+          # migration versions, so lexical filename order would recreate a state
+          # that never existed in production and break patch-anchor migrations.
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|\
+              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|\
+              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|\
+              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|\
+              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|\
+              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  echo '=== Replaying P2-17..P2-20 in production migration order ===' | tee -a p236-current-schema.log
+                  for rb in "${recent[@]}"; do
+                    apply_one "supabase/migrations/$rb"
+                  done
+                fi
+                continue
+                ;;
+            esac
+            apply_one "$f"
           done
+
           echo '=== Resetting isolated harness to fail-closed baseline after schema replay ===' | tee -a p236-current-schema.log
           psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p236-current-schema.log 2>&1
 
