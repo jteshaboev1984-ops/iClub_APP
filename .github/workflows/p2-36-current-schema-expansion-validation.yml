@@ -1,0 +1,208 @@
+name: P2-36 Current Schema Expansion Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p0_15_internal_alpha_matrix.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p1_06_expanded_beta_readiness_matrix.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - .github/workflows/p2-36-current-schema-expansion-validation.yml
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p0_15_internal_alpha_matrix.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p1_06_expanded_beta_readiness_matrix.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - .github/workflows/p2-36-current-schema-expansion-validation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  current-schema-expansion-validation:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostics
+        run: printf 'P2-36 current-schema expansion validation\n' > p236-current-schema.log
+
+      - name: Bootstrap isolated legacy and Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p236-current-schema.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p236-current-schema.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql 2>&1 | tee -a p236-current-schema.log
+
+      - name: Apply complete current Exam Prep migration stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
+          test "${#files[@]}" -ge 1
+
+          apply_one() {
+            local f="$1"
+            local b
+            b="$(basename "$f")"
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              echo '=== Replaying production Core-only controlled-beta boundary ===' | tee -a p236-current-schema.log
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>p236-current-schema.log 2>&1
+            fi
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              echo '=== Normalizing historical Stage-4 patch anchors in isolated CI only ===' | tee -a p236-current-schema.log
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >>p236-current-schema.log 2>&1
+            fi
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              echo '=== Seeding one production-shaped isolated cohort for P2-36 backfill ===' | tee -a p236-current-schema.log
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('p236-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated P2-36 current-schema validation') on conflict(cohort_key) do nothing" >>p236-current-schema.log 2>&1
+            fi
+            echo "=== Applying $f ===" | tee -a p236-current-schema.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p236-current-schema.log 2>&1
+          }
+
+          # These six migrations were applied to production in the order below.
+          # Their repository filename timestamps predate the final production
+          # migration versions, so lexical filename order would recreate a state
+          # that never existed in production and break patch-anchor migrations.
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|\
+              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|\
+              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|\
+              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|\
+              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|\
+              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  echo '=== Replaying P2-17..P2-20 in production migration order ===' | tee -a p236-current-schema.log
+                  for rb in "${recent[@]}"; do
+                    apply_one "supabase/migrations/$rb"
+                  done
+                fi
+                continue
+                ;;
+            esac
+            apply_one "$f"
+          done
+
+          echo '=== Resetting isolated harness to fail-closed baseline after schema replay ===' | tee -a p236-current-schema.log
+          psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p236-current-schema.log 2>&1
+
+      - name: Verify P2-36 current-schema contract exists and is fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          gate_fn="$(psql -Atqc "select to_regprocedure('public.get_exam_prep_beta_expansion_gate_v1(text)') is not null")"
+          record_fn="$(psql -Atqc "select to_regprocedure('public.record_exam_prep_expansion_validation_v1(text,text,text,text,jsonb)') is not null")"
+          controls="$(psql -Atqc "select count(*) from private.exam_prep_beta_expansion_controls")"
+          generation="$(psql -Atqc "select count(*) from private.exam_prep_beta_expansion_controls where required_validation_generation='p2_36_expansion_v1'")"
+          state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          echo "P236_GATE_FN=$gate_fn" | tee -a p236-current-schema.log
+          echo "P236_RECORD_FN=$record_fn" | tee -a p236-current-schema.log
+          echo "P236_CONTROLS=$controls" | tee -a p236-current-schema.log
+          echo "P236_GENERATION_ROWS=$generation" | tee -a p236-current-schema.log
+          echo "P236_BASELINE_STATE=$state" | tee -a p236-current-schema.log
+          test "$gate_fn" = 't'
+          test "$record_fn" = 't'
+          test "$controls" -ge 1
+          test "$generation" = "$controls"
+          test "$state" = 'off|false|false|false|true'
+          blocked="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts c where (public.get_exam_prep_beta_expansion_gate_v1(c.cohort_key)->>'ready')::boolean is false and public.get_exam_prep_beta_expansion_gate_v1(c.cohort_key)->>'reason_code'='real_monitoring_not_armed'")"
+          test "$blocked" = "$controls"
+
+      - name: Run 600 learners / 10 mentors isolation drill on current schema
+        shell: bash
+        env:
+          PGOPTIONS: '-c p015.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_internal_alpha_matrix.sql 2>&1 | tee -a p236-current-schema.log
+
+      - name: Run Core AI Mentor service-transition isolation on current schema
+        shell: bash
+        env:
+          PGOPTIONS: '-c p106.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_06_expanded_beta_readiness_matrix.sql 2>&1 | tee -a p236-current-schema.log
+
+      - name: Prove rollback cleanliness and P2-36 gate still closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p015-%@invalid.example' or email like 'p106-%@invalid.example'")"
+          recs="$(psql -Atqc "select count(*) from private.exam_prep_human_review_recommendations where source_object_type in ('p015_scale','p106_expanded')")"
+          queues="$(psql -Atqc "select count(*) from private.exam_prep_mentor_queue_items")"
+          evidence="$(psql -Atqc "select count(*) from private.exam_prep_evidence_events")"
+          validations="$(psql -Atqc "select count(*) from private.exam_prep_beta_expansion_validation_evidence")"
+          armed="$(psql -Atqc "select count(*) from private.exam_prep_beta_expansion_controls where development_data_state='real_monitoring' or real_review_epoch_started_at is not null")"
+          state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
+          echo "P236_POST_SYNTHETIC_USERS=$users" | tee -a p236-current-schema.log
+          echo "P236_POST_RECOMMENDATIONS=$recs" | tee -a p236-current-schema.log
+          echo "P236_POST_MENTOR_QUEUE=$queues" | tee -a p236-current-schema.log
+          echo "P236_POST_EVIDENCE=$evidence" | tee -a p236-current-schema.log
+          echo "P236_POST_VALIDATIONS=$validations" | tee -a p236-current-schema.log
+          echo "P236_POST_ARMED=$armed" | tee -a p236-current-schema.log
+          echo "P236_POST_STATE=$state" | tee -a p236-current-schema.log
+          test "$users" = '0'
+          test "$recs" = '0'
+          test "$queues" = '0'
+          test "$evidence" = '0'
+          test "$validations" = '0'
+          test "$armed" = '0'
+          test "$state" = 'off|false|false|false|true'
+          echo 'P2-36 current-schema expansion validation: GREEN' | tee -a p236-current-schema.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-36-current-schema-expansion-validation
+          path: p236-current-schema.log
+          if-no-files-found: error
+          retention-days: 7

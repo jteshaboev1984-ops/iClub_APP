@@ -1,6 +1,6 @@
 -- P0-15 isolated PostgreSQL/Supabase contract bootstrap.
 -- Test-only. Creates the minimum pre-Exam-Prep contract required to apply the
--- real P0-04..P0-13 migrations in an ephemeral CI database.
+-- real Exam Prep migration stack in an ephemeral CI database.
 
 \set ON_ERROR_STOP on
 
@@ -23,7 +23,7 @@ $$;
 
 create schema if not exists auth;
 
--- Minimal auth.uid() compatible with request.jwt.claim.sub used by the app RPCs.
+-- Minimal auth helpers compatible with the Supabase JWT GUCs used by app RPCs.
 create or replace function auth.uid()
 returns uuid
 language sql
@@ -32,8 +32,21 @@ as $$
   select nullif(current_setting('request.jwt.claim.sub', true),'')::uuid;
 $$;
 
+create or replace function auth.role()
+returns text
+language sql
+stable
+as $$
+  select coalesce(
+    nullif(current_setting('request.jwt.claim.role', true),''),
+    nullif((nullif(current_setting('request.jwt.claims', true),'')::jsonb ->> 'role'),''),
+    session_user::text
+  );
+$$;
+
 grant usage on schema auth to anon, authenticated, service_role;
 grant execute on function auth.uid() to anon, authenticated, service_role;
+grant execute on function auth.role() to anon, authenticated, service_role;
 
 -- Minimal auth identity table. The P0-15 harness writes synthetic identities
 -- here only to preserve the production-style FK contract; everything rolls back.
