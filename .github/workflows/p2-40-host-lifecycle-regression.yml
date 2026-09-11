@@ -1,0 +1,45 @@
+name: P2-40 Host Lifecycle Regression
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-host.js
+      - exam-prep/exam-prep-live.js
+      - .github/scripts/p2_40_host_lifecycle_timer_regression.js
+      - .github/workflows/p2-40-host-lifecycle-regression.yml
+  push:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-host.js
+      - exam-prep/exam-prep-live.js
+      - .github/scripts/p2_40_host_lifecycle_timer_regression.js
+      - .github/workflows/p2-40-host-lifecycle-regression.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host-lifecycle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static checks
+        run: |
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-host.js
+          node --check exam-prep/exam-prep-live.js
+          node --check .github/scripts/p2_40_host_lifecycle_timer_regression.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-live.js
+          ! grep -q 'iclub_state_v1' exam-prep/exam-prep-live.js
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Active timed-session teardown matrix
+        run: node .github/scripts/p2_40_host_lifecycle_timer_regression.js
