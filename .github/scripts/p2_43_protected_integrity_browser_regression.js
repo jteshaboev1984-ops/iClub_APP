@@ -1,0 +1,171 @@
+const { chromium } = require('playwright');
+const path = require('path');
+
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+
+  await page.route('http://iclub.test/', route => route.fulfill({
+    status: 200,
+    contentType: 'text/html',
+    body: '<!doctype html><html><body><div id="exam-prep-host-root"><section class="ep-host-shell"><button data-ep-live-submit>Submit</button></section></div></body></html>'
+  }));
+  await page.goto('http://iclub.test/');
+
+  await page.evaluate(() => {
+    localStorage.setItem('p243_legacy_sentinel', 'unchanged');
+    window.__open = true;
+    window.__sessionType = 'paper';
+    window.__sessionStatus = 'active';
+    window.__sessionId = '00000000-0000-4000-8000-000000024300';
+    window.__integrityEvents = [];
+    window.__rpcCalls = [];
+    window.__finalizeCalls = 0;
+    window.__visibility = 'visible';
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => window.__visibility });
+    window.iClubExamPrep = Object.freeze({ isOpen: () => window.__open });
+
+    const integrityPayload = () => {
+      const count = window.__integrityEvents.length;
+      return {
+        policy_version: 'exam_prep_integrity_v1',
+        session_id: window.__sessionId,
+        component_code: 'P1',
+        session_type: window.__sessionType,
+        session_status: window.__sessionStatus,
+        protected: ['diagnostic', 'retest', 'mixed', 'timed', 'paper'].includes(window.__sessionType),
+        event_count: count,
+        status: count === 0 ? 'clean' : count === 1 ? 'warning' : 'review_required',
+        review_required: count >= 2,
+        integrity_allows_comparability: !(count >= 2 && ['timed', 'paper'].includes(window.__sessionType))
+      };
+    };
+
+    window.sb = { rpc: async (name, args = {}) => {
+      window.__rpcCalls.push({ name, args });
+      if (name === 'get_exam_prep_session_safe_v1') {
+        return { data: {
+          session_id: window.__sessionId,
+          status: window.__sessionStatus,
+          component_code: 'P1',
+          session_type: window.__sessionType,
+          total_items: 1,
+          items: [{ item_order: 1, item_kind: 'question', reserve_role: window.__sessionType === 'learning' ? 'learning' : window.__sessionType, answered: false }]
+        }, error: null };
+      }
+      if (name === 'get_exam_prep_integrity_status_safe_v1') return { data: integrityPayload(), error: null };
+      if (name === 'record_exam_prep_integrity_event_safe_v1') {
+        if (!['diagnostic', 'retest', 'mixed', 'timed', 'paper'].includes(window.__sessionType)) {
+          return { data: { ...integrityPayload(), recorded: false, replayed: false, reason: 'not_protected' }, error: null };
+        }
+        const key = String(args.p_client_event_id || '');
+        const replayed = window.__integrityEvents.some(row => row.key === key);
+        if (!replayed) window.__integrityEvents.push({ type: args.p_event_type, key });
+        return { data: { ...integrityPayload(), recorded: !replayed, replayed, reason: replayed ? 'idempotent_replay' : 'recorded' }, error: null };
+      }
+      if (name === 'finalize_exam_prep_timed_safe_v1') {
+        window.__finalizeCalls += 1;
+        window.__sessionStatus = 'finalized';
+        return { data: { session_id: window.__sessionId, status: 'finalized' }, error: null };
+      }
+      return { data: null, error: { message: `unexpected rpc ${name}` } };
+    }};
+  });
+
+  await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-api.js') });
+  await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-integrity.js') });
+
+  const assert = (condition, message) => { if (!condition) throw new Error(message); };
+
+  await page.evaluate(async () => {
+    await window.iClubExamPrepHostInternal.api.getSession(window.__sessionId, 'en');
+  });
+  await page.waitForFunction(() => document.querySelector('[data-ep-integrity-banner]')?.textContent.includes('Stay in iClub'));
+
+  let result = await page.evaluate(() => ({
+    text: document.querySelector('[data-ep-integrity-banner]')?.textContent || '',
+    events: window.__integrityEvents.length,
+    sentinel: localStorage.getItem('p243_legacy_sentinel')
+  }));
+  assert(result.text.includes('Stay in iClub'), 'protected assessment must show the stay-in-iClub rule');
+  assert(result.events === 0, 'opening a protected assessment must not create a violation by itself');
+  assert(result.sentinel === 'unchanged', 'integrity UI must not mutate legacy local persistence');
+
+  await page.evaluate(() => {
+    window.__visibility = 'hidden';
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.waitForFunction(() => window.__integrityEvents.length === 1);
+  await page.waitForFunction(() => document.querySelector('[data-ep-integrity-banner]')?.textContent.includes('This was recorded'));
+
+  // A blur generated by the same tab switch must not double-count the transition.
+  await page.evaluate(() => window.dispatchEvent(new Event('blur')));
+  await page.waitForTimeout(350);
+  result = await page.evaluate(() => ({ events: window.__integrityEvents.length, finalizes: window.__finalizeCalls }));
+  assert(result.events === 1, 'visibility+blur from one switch must count once');
+  assert(result.finalizes === 0, 'first focus exit must not auto-finalize the attempt');
+
+  await page.waitForTimeout(850);
+  await page.evaluate(() => {
+    window.__visibility = 'visible';
+    window.dispatchEvent(new Event('blur'));
+  });
+  await page.waitForFunction(() => window.__integrityEvents.length === 2);
+  await page.waitForFunction(() => document.querySelector('[data-ep-integrity-banner]')?.textContent.includes('will not count as a comparable exam result'));
+
+  result = await page.evaluate(() => ({
+    events: window.__integrityEvents.map(x => x.type),
+    text: document.querySelector('[data-ep-integrity-banner]')?.textContent || '',
+    finalizes: window.__finalizeCalls,
+    sentinel: localStorage.getItem('p243_legacy_sentinel')
+  }));
+  assert(result.events.join('|') === 'visibility_hidden|window_blur', 'two separate focus exits must be recorded with their server event types');
+  assert(result.text.includes('will not count as a comparable exam result'), 'strict attempt must explain the comparability consequence after repeated exits');
+  assert(result.finalizes === 0, 'repeated focus exits must not silently destroy or auto-submit the active attempt');
+  assert(result.sentinel === 'unchanged', 'focus monitoring must not mutate legacy local persistence');
+
+  // Ending the timed attempt through the governed finalizer must clear the protected-session banner.
+  await page.evaluate(async () => {
+    await window.iClubExamPrepHostInternal.api.finalizeTimed(window.__sessionId, 'p243-finalize-0001', 'submitted');
+  });
+  await page.waitForFunction(() => !document.querySelector('[data-ep-integrity-banner]'));
+  result = await page.evaluate(() => ({ finalizes: window.__finalizeCalls, events: window.__integrityEvents.length }));
+  assert(result.finalizes === 1 && result.events === 2, 'finalization must be explicit and must not add an integrity event');
+
+  // Learning is intentionally outside the protected-assessment policy.
+  await page.evaluate(async () => {
+    window.__sessionId = '00000000-0000-4000-8000-000000024301';
+    window.__sessionType = 'learning';
+    window.__sessionStatus = 'active';
+    window.__integrityEvents = [];
+    document.querySelector('#exam-prep-host-root').innerHTML = '<section class="ep-host-shell"><button data-ep-live-submit>Submit</button></section>';
+    await window.iClubExamPrepHostInternal.api.getSession(window.__sessionId, 'ru');
+    window.__visibility = 'hidden';
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.waitForTimeout(500);
+  result = await page.evaluate(() => ({
+    events: window.__integrityEvents.length,
+    banner: Boolean(document.querySelector('[data-ep-integrity-banner]')),
+    sentinel: localStorage.getItem('p243_legacy_sentinel')
+  }));
+  assert(result.events === 0 && result.banner === false, 'learning work must remain outside protected focus monitoring');
+  assert(result.sentinel === 'unchanged', 'learning transition must leave legacy local state untouched');
+
+  // Closing the host prevents background focus signals from being recorded.
+  await page.evaluate(() => {
+    window.__open = false;
+    window.__sessionType = 'paper';
+    window.__visibility = 'hidden';
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.waitForTimeout(300);
+  result = await page.evaluate(() => ({ events: window.__integrityEvents.length }));
+  assert(result.events === 0, 'closed Exam Prep host must not record background focus signals');
+
+  await browser.close();
+  console.log('P2-43 protected assessment integrity browser regression: PASS');
+})().catch(error => {
+  console.error(error);
+  process.exit(1);
+});
