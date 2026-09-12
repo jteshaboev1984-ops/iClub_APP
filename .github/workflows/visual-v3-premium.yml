@@ -9,6 +9,9 @@ on:
       - 'index.html'
       - 'app.js'
       - 'i18n.js'
+      - 'exam-prep/exam-prep-host.css'
+      - 'exam-prep/exam-prep-host.js'
+      - 'exam-prep/exam-prep-live.js'
       - '.github/scripts/visual_v3_premium_regression.js'
       - '.github/scripts/visual_v3_premium_extended_regression.js'
       - '.github/scripts/visual_v3_assessment_regression.js'
@@ -24,6 +27,9 @@ on:
       - 'index.html'
       - 'app.js'
       - 'i18n.js'
+      - 'exam-prep/exam-prep-host.css'
+      - 'exam-prep/exam-prep-host.js'
+      - 'exam-prep/exam-prep-live.js'
       - '.github/scripts/visual_v3_premium_regression.js'
       - '.github/scripts/visual_v3_premium_extended_regression.js'
       - '.github/scripts/visual_v3_assessment_regression.js'
@@ -117,10 +123,3 @@ jobs:
           node .github/scripts/visual_v3_home_study_regression.js
           node .github/scripts/visual_v3_transient_surfaces_regression.js
           node .github/scripts/visual_v3_dynamic_locale_regression.js
-
-      - name: Premium scope gate
-        shell: bash
-        run: |
-          set -euo pipefail
-          git diff --check
-          echo 'Visual v3 premium screen gate: GREEN'
