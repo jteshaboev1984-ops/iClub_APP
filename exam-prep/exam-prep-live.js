@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p019timed2";
+  const VERSION = "p251live1";
   let attached = false;
 
   const state = {
@@ -21,6 +21,21 @@
   function lang(value) {
     const v = String(value || "ru").toLowerCase();
     return ["ru", "uz", "en"].includes(v) ? v : "ru";
+  }
+
+  function dateLocale() {
+    if (state.language === "uz") return "uz-UZ";
+    if (state.language === "en") return "en-GB";
+    return "ru-RU";
+  }
+
+  function formatDateTime(value) {
+    if (!value) return "";
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return new Intl.DateTimeFormat(dateLocale(), {
+      day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+    }).format(date);
   }
 
   function copy() {
@@ -100,13 +115,12 @@
     try { return JSON.stringify(value); } catch (_) { return String(value); }
   }
 
-
   function shell(body) {
     const c = copy();
     return `<section class="ep-host-shell ep-live" aria-label="${esc(c.title)}"><div class="ep-live-head"><div><div class="ep-host-kicker">${esc(c.kicker)}</div><h2 class="ep-host-title">${esc(c.title)}</h2></div><div class="ep-live-safe">${esc(c.safe)}</div></div>${body}</section>`;
   }
-  function renderLoading() { clearTimer(); const root = rootEl(); if (root) root.innerHTML = shell(`<div class="ep-live-card">${esc(copy().loading)}</div>`); }
-  function renderError(message = null) { clearTimer(); const root = rootEl(); if (root) root.innerHTML = shell(`<div class="ep-live-error">${esc(message || copy().error)}</div><button class="ep-live-btn secondary" data-ep-live-home>${esc(copy().overview)}</button>`); root?.querySelector('[data-ep-live-home]')?.addEventListener('click', renderDashboard); }
+  function renderLoading() { clearTimer(); const root = rootEl(); if (root) root.innerHTML = shell(`<div class="ep-live-card" role="status" aria-live="polite">${esc(copy().loading)}</div>`); }
+  function renderError(message = null) { clearTimer(); const root = rootEl(); if (root) root.innerHTML = shell(`<div class="ep-live-error" role="alert" aria-live="assertive">${esc(message || copy().error)}</div><button class="ep-live-btn secondary" type="button" data-ep-live-home>${esc(copy().overview)}</button>`); root?.querySelector('[data-ep-live-home]')?.addEventListener('click', renderDashboard); }
 
   function renderProfile() {
     clearTimer();
@@ -114,9 +128,9 @@
     root.innerHTML = shell(`<div class="ep-live-card"><strong>${esc(c.profileTitle)}</strong><div class="ep-live-meta">${esc(c.profileText)}</div><form class="ep-live-form" data-ep-live-profile-form>
       <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" placeholder="Oct/Nov 2026" required aria-required="true"></label>
       <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" placeholder="A" required aria-required="true"></label>
-      <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" required></label>
-      <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" required></label>
-      <div class="ep-live-actions"><button class="ep-live-btn" type="submit" data-ep-live-save-profile>${esc(state.busy ? c.saving : c.save)}</button></div></form><div data-ep-live-profile-error></div></div>`);
+      <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" required aria-required="true"></label>
+      <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" required aria-required="true"></label>
+      <div class="ep-live-actions"><button class="ep-live-btn" type="submit" data-ep-live-save-profile>${esc(state.busy ? c.saving : c.save)}</button></div></form><div data-ep-live-profile-error role="alert" aria-live="assertive"></div></div>`);
     root.querySelector("[data-ep-live-profile-form]")?.addEventListener("submit", saveProfile);
   }
 
@@ -179,7 +193,7 @@
     ].filter(Boolean);
     const profileLine = profileBits.join(" · ");
     const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section><div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`);
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section><div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`);
     state.notice = null;
     root.querySelectorAll("[data-ep-live-start]").forEach(b => b.addEventListener("click", () => startDiagnostic(b.dataset.epLiveStart)));
     root.querySelectorAll("[data-ep-live-plan]").forEach(b => b.addEventListener("click", () => openPlan(b.dataset.epLivePlan)));
@@ -219,10 +233,10 @@
       const due = item.due_at ? new Date(item.due_at) : null;
       const future = item.item_type === "retest" && due && due.getTime() > Date.now();
       const actionable = ["learning","correction","retest","mixed_transfer"].includes(item.item_type) && item.status === "pending";
-      const button = actionable ? `<button class="ep-live-btn" data-ep-live-plan-item="${Number(item.priority_order)}" ${future ? "disabled" : ""}>${esc(future ? c.notDue : c.startTask)}</button>` : "";
-      return `<div class="ep-live-plan-item"><div><strong>${esc(itemTypeLabel(item.item_type))}</strong>${due ? `<div class="ep-live-due">${esc(due.toLocaleString())}</div>` : ""}</div>${button}</div>`;
+      const button = actionable ? `<button class="ep-live-btn" type="button" data-ep-live-plan-item="${Number(item.priority_order)}" ${future ? "disabled" : ""}>${esc(future ? c.notDue : c.startTask)}</button>` : "";
+      return `<div class="ep-live-plan-item"><div><strong>${esc(itemTypeLabel(item.item_type))}</strong>${due ? `<div class="ep-live-due">${esc(formatDateTime(due))}</div>` : ""}</div>${button}</div>`;
     }).join("") : `<div class="ep-live-notice">${esc(c.noPlan)}</div>`;
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice">${esc(state.notice)}</div>` : ""}<div class="ep-live-card"><div class="ep-live-head"><div><strong>${component} · ${esc(c.plan)}</strong><div class="ep-live-meta">${esc(c.week)} ${Number(plan.active_week_no || 1)}</div></div><button class="ep-live-btn secondary" data-ep-live-dashboard>${esc(c.overview)}</button></div>${rows}</div>`);
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card"><div class="ep-live-head"><div><strong>${component} · ${esc(c.plan)}</strong><div class="ep-live-meta">${esc(c.week)} ${Number(plan.active_week_no || 1)}</div></div><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${rows}</div>`);
     state.notice = null;
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
     root.querySelectorAll('[data-ep-live-plan-item]').forEach(b => b.addEventListener('click', () => launchPlanItem(component, plan.plan_id, Number(b.dataset.epLivePlanItem))));
@@ -247,8 +261,8 @@
   function renderTimedCatalog(component, payload) {
     clearTimer();
     const root = rootEl(); if (!root) return; const c = copy(); const rows = Array.isArray(payload?.assessments) ? payload.assessments : [];
-    const body = rows.length ? rows.map(row => `<div class="ep-live-timed-row"><div><strong>${esc(assessmentTitle(row))}</strong><div class="ep-live-meta">${Number(row.marks_available || 0)} ${esc(c.marks)} · ${minutes(row.time_limit_sec)} ${esc(c.minutes)}</div></div><button class="ep-live-btn" data-ep-live-timed-start="${Number(row.assessment_id)}">${esc(c.startTimed)}</button></div>`).join("") : `<div class="ep-live-notice">${esc(c.noTimed)}</div>`;
-    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.timed)}</strong><button class="ep-live-btn secondary" data-ep-live-dashboard>${esc(c.overview)}</button></div>${body}</div>`);
+    const body = rows.length ? rows.map(row => `<div class="ep-live-timed-row"><div><strong>${esc(assessmentTitle(row))}</strong><div class="ep-live-meta">${Number(row.marks_available || 0)} ${esc(c.marks)} · ${minutes(row.time_limit_sec)} ${esc(c.minutes)}</div></div><button class="ep-live-btn" type="button" data-ep-live-timed-start="${Number(row.assessment_id)}">${esc(c.startTimed)}</button></div>`).join("") : `<div class="ep-live-notice">${esc(c.noTimed)}</div>`;
+    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.timed)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${body}</div>`);
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
     root.querySelectorAll('[data-ep-live-timed-start]').forEach(b => b.addEventListener('click', () => startTimed(component, Number(b.dataset.epLiveTimedStart))));
   }
@@ -310,10 +324,10 @@
       answerControl = `<label class="ep-live-field"><span>${esc(c.written)}</span><textarea class="ep-live-textarea" name="ep_live_written_answer"></textarea></label>`;
     } else if (String(item.qtype || "").toLowerCase() === "mcq" && Array.isArray(item.options)) {
       answerControl = `<div class="ep-live-options">${item.options.map((option, index) => `<label class="ep-live-option"><input type="radio" name="ep_live_answer" value="${index}"><span>${esc(option)}</span></label>`).join("")}</div>`;
-    } else answerControl = `<input class="ep-live-input" name="ep_live_text_answer" autocomplete="off">`;
+    } else answerControl = `<input class="ep-live-input" name="ep_live_text_answer" autocomplete="off" aria-label="${esc(c.submit)}">`;
     const timer = timed ? `<span class="ep-live-timer" data-ep-live-timer></span>` : "";
     const exit = timed ? `<button class="ep-live-btn secondary" type="button" data-ep-live-end>${esc(c.endAttempt)}</button>` : `<button class="ep-live-btn secondary" type="button" data-ep-live-exit>${esc(c.back)}</button>`;
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice">${esc(state.notice)}</div>` : ""}<div class="ep-live-card"><div class="ep-live-head"><strong>${esc(c.question)} ${answered + 1} / ${total}</strong>${timer}</div><div class="ep-live-qtext">${esc(item.text || item.written_prompt || "")}</div>${answerControl}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-submit>${esc(c.submit)}</button>${exit}</div></div>`);
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card"><div class="ep-live-head"><strong>${esc(c.question)} ${answered + 1} / ${total}</strong>${timer}</div><div class="ep-live-qtext">${esc(item.text || item.written_prompt || "")}</div>${answerControl}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-submit>${esc(c.submit)}</button>${exit}</div></div>`);
     state.notice = null;
     root.querySelector('[data-ep-live-submit]')?.addEventListener('click', () => submitAnswer(item));
     root.querySelector('[data-ep-live-exit]')?.addEventListener('click', async () => { state.session = null; if (state.returnView?.kind === "plan") await openPlan(state.returnView.component); else await renderDashboard(); });
@@ -363,7 +377,7 @@
     const root = rootEl(); if (!root) return; const c = copy();
     const criteria = Array.isArray(item?.rubric?.criteria) ? item.rubric.criteria : [];
     const rubric = criteria.length ? `<div class="ep-live-rubric">${criteria.map(x => `<div class="ep-live-rubric-row">${esc(x.rule || "")} <strong>(${Number(x.marks || 0)})</strong></div>`).join("")}</div>` : "";
-    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><div><strong>${esc(c.selfReviewTitle)}</strong><div class="ep-live-meta">${esc(c.selfReviewText)}</div></div><span>${Number(item.item_order)} / ${total}</span></div><div><strong>${esc(c.question)}</strong><div class="ep-live-qtext">${esc(item.prompt || "")}</div></div><div><strong>${esc(c.yourAnswer)}</strong><div class="ep-live-answer">${esc(artifactText(item.learner_artifact))}</div></div><div><strong>${esc(c.rubric)}</strong>${rubric}</div>${item.self_review ? `<div class="ep-live-notice"><strong>${esc(c.selfTip)}:</strong> ${esc(item.self_review)}</div>` : ""}<label class="ep-live-field"><span>${esc(c.award)} (0–${Number(item.max_marks || 0)})</span><input name="ep_live_self_mark" type="number" min="0" max="${Number(item.max_marks || 0)}" step="1"></label><div class="ep-live-actions"><button class="ep-live-btn" data-ep-live-save-self>${esc(c.saveMark)}</button></div></div>`);
+    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><div><strong>${esc(c.selfReviewTitle)}</strong><div class="ep-live-meta">${esc(c.selfReviewText)}</div></div><span>${Number(item.item_order)} / ${total}</span></div><div><strong>${esc(c.question)}</strong><div class="ep-live-qtext">${esc(item.prompt || "")}</div></div><div><strong>${esc(c.yourAnswer)}</strong><div class="ep-live-answer">${esc(artifactText(item.learner_artifact))}</div></div><div><strong>${esc(c.rubric)}</strong>${rubric}</div>${item.self_review ? `<div class="ep-live-notice"><strong>${esc(c.selfTip)}:</strong> ${esc(item.self_review)}</div>` : ""}<label class="ep-live-field"><span>${esc(c.award)} (0–${Number(item.max_marks || 0)})</span><input name="ep_live_self_mark" type="number" min="0" max="${Number(item.max_marks || 0)}" step="1"></label><div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-save-self>${esc(c.saveMark)}</button></div></div>`);
     root.querySelector('[data-ep-live-save-self]')?.addEventListener('click', async () => {
       const input = rootEl()?.querySelector('input[name="ep_live_self_mark"]'); const marks = Number(input?.value);
       if (!Number.isInteger(marks) || marks < 0 || marks > Number(item.max_marks || 0)) return;
@@ -377,7 +391,7 @@
   function renderTimedResult(component, result) {
     clearTimer();
     const root = rootEl(); if (!root) return; const c = copy();
-    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.result)}</strong><button class="ep-live-btn secondary" data-ep-live-dashboard>${esc(c.overview)}</button></div><div class="ep-live-stats"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.inTime)}</span><strong>${Number(result?.marks_in_time || 0)} / ${Number(result?.marks_available || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.afterTime)}</span><strong>${Number(result?.marks_after_time || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.unattempted)}</span><strong>${Number(result?.unattempted_marks || 0)}</strong></div></div><div class="ep-live-notice">${esc(c.comparable)}: <strong>${esc(result?.score_comparable ? c.yes : c.no)}</strong></div><div class="ep-live-actions"><button class="ep-live-btn" data-ep-live-back-timed>${esc(c.backTimed)}</button><button class="ep-live-btn secondary" data-ep-live-readiness="${component}">${esc(c.openReadiness)}</button></div></div>`);
+    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.result)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div><div class="ep-live-stats"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.inTime)}</span><strong>${Number(result?.marks_in_time || 0)} / ${Number(result?.marks_available || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.afterTime)}</span><strong>${Number(result?.marks_after_time || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.unattempted)}</span><strong>${Number(result?.unattempted_marks || 0)}</strong></div></div><div class="ep-live-notice">${esc(c.comparable)}: <strong>${esc(result?.score_comparable ? c.yes : c.no)}</strong></div><div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-back-timed>${esc(c.backTimed)}</button><button class="ep-live-btn secondary" type="button" data-ep-live-readiness="${component}">${esc(c.openReadiness)}</button></div></div>`);
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
     root.querySelector('[data-ep-live-back-timed]')?.addEventListener('click', () => openTimed(component));
     root.querySelector('[data-ep-live-readiness]')?.addEventListener('click', () => openReadiness(component));
@@ -407,8 +421,8 @@
   function renderReadiness(component, data) {
     clearTimer();
     const root = rootEl(); if (!root) return; const c = copy(); const ready = data?.ready === true;
-    const calibration = ready ? `<button class="ep-live-btn" data-ep-live-calibration="${component}">${esc(c.openCalibration)}</button>` : "";
-    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.readiness)}</strong><button class="ep-live-btn secondary" data-ep-live-dashboard>${esc(c.overview)}</button></div><div class="ep-live-notice"><strong>${esc(ready ? c.readyStrong : c.readyMore)}</strong><div class="ep-live-meta">${esc(ready ? c.readyStrong : readinessMessage(data))}</div></div><div class="ep-live-stats"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessPapers)}</span><strong>${Number(data?.last_three_count || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessSkills)}</span><strong>${Number(data?.below_l3_count || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessCorrections)}</span><strong>${Number(data?.unresolved_correction_case_count || 0)}</strong></div></div><div class="ep-live-actions">${calibration}</div></div>`);
+    const calibration = ready ? `<button class="ep-live-btn" type="button" data-ep-live-calibration="${component}">${esc(c.openCalibration)}</button>` : "";
+    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.readiness)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div><div class="ep-live-notice"><strong>${esc(ready ? c.readyStrong : c.readyMore)}</strong><div class="ep-live-meta">${esc(ready ? c.readyStrong : readinessMessage(data))}</div></div><div class="ep-live-stats"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessPapers)}</span><strong>${Number(data?.last_three_count || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessSkills)}</span><strong>${Number(data?.below_l3_count || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessCorrections)}</span><strong>${Number(data?.unresolved_correction_case_count || 0)}</strong></div></div><div class="ep-live-actions">${calibration}</div></div>`);
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
     root.querySelector('[data-ep-live-calibration]')?.addEventListener('click', () => openCalibration(component));
   }
@@ -429,12 +443,12 @@
     clearTimer();
     const root = rootEl(); if (!root) return; const c = copy();
     if (data?.available !== true) {
-      root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.calibration)}</strong><button class="ep-live-btn secondary" data-ep-live-dashboard>${esc(c.overview)}</button></div><div class="ep-live-notice">${esc(c.calibrationUnavailable)}</div></div>`);
+      root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.calibration)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div><div class="ep-live-notice">${esc(c.calibrationUnavailable)}</div></div>`);
       root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard); return;
     }
     const actions = Array.isArray(data?.actions) ? data.actions : [];
     const rows = actions.map((a, index) => `<div class="ep-live-action-row"><strong>${index + 1}. ${esc(calibrationActionLabel(a.action_code))}</strong></div>`).join("");
-    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.calibration)}</strong><button class="ep-live-btn secondary" data-ep-live-dashboard>${esc(c.overview)}</button></div>${rows || `<div class="ep-live-notice">${esc(c.calibration)}</div>`}</div>`);
+    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.calibration)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${rows || `<div class="ep-live-notice">${esc(c.calibration)}</div>`}</div>`);
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
   }
 
