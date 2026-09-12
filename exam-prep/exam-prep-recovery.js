@@ -122,8 +122,8 @@
     const c = copy();
     const check = row?.revalidation;
     if (!check?.available || Number(check.selected_skill_count || 0) < 1) return "";
-    if (check.status === "confirmed") return `<div class="ep-live-notice"><strong>${component}</strong><div class="ep-live-meta">${esc(c.confirmed)}</div></div>`;
-    if (check.status === "refresh_recommended") return `<div class="ep-live-notice"><strong>${component}</strong><div class="ep-live-meta">${esc(c.refresh)}</div></div>`;
+    if (check.status === "confirmed") return `<div class="ep-live-notice" role="status" aria-live="polite"><strong>${component}</strong><div class="ep-live-meta">${esc(c.confirmed)}</div></div>`;
+    if (check.status === "refresh_recommended") return `<div class="ep-live-notice" role="status" aria-live="polite"><strong>${component}</strong><div class="ep-live-meta">${esc(c.refresh)}</div></div>`;
     const label = check.status === "in_progress" ? c.checkContinue : c.checkStart;
     return `<div class="ep-live-notice"><strong>${component} · ${esc(c.checkTitle)}</strong><div class="ep-live-meta">${esc(c.checkBody)}</div><div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-recovery-check="${component}">${esc(label)}</button></div></div>`;
   }
@@ -149,7 +149,7 @@
     const active = activeRows.length > 0;
     const days = active ? Math.max(...activeRows.map(row => Number(row?.missed_days || 0))) : 0;
     const status = active
-      ? `<div class="ep-live-notice"><strong>${esc(c.active)}${days ? ` · ${days} ${esc(c.days)}` : ""}</strong><div class="ep-live-meta">${esc(modeMessage(activeRows[0]))}</div><div class="ep-live-meta">${esc(c.preserved)}</div></div>`
+      ? `<div class="ep-live-notice" role="status" aria-live="polite"><strong>${esc(c.active)}${days ? ` · ${days} ${esc(c.days)}` : ""}</strong><div class="ep-live-meta">${esc(modeMessage(activeRows[0]))}</div><div class="ep-live-meta">${esc(c.preserved)}</div></div>`
       : "";
     const checks = `${checkStatusHtml(p1, "P1")}${checkStatusHtml(p5, "P5")}`;
 
@@ -171,11 +171,11 @@
       <div class="ep-live-head"><strong>${esc(c.formTitle)}</strong><button class="ep-live-btn secondary" type="button" data-ep-recovery-back>${esc(c.back)}</button></div>
       <div class="ep-live-meta">${esc(c.body)}</div>
       <form class="ep-live-form" data-ep-recovery-form>
-        <label class="ep-live-field"><span>${esc(c.from)}</span><input type="date" name="started_on" max="${esc(today)}" required></label>
-        <label class="ep-live-field"><span>${esc(c.resumed)}</span><input type="date" name="resumed_on" max="${esc(today)}" value="${esc(today)}" required></label>
-        <label class="ep-live-field"><span>${esc(c.reason)}</span><select name="kind" required><option value="absence">${esc(c.absence)}</option><option value="planned_holiday">${esc(c.holiday)}</option><option value="other">${esc(c.other)}</option></select></label>
+        <label class="ep-live-field"><span>${esc(c.from)}</span><input type="date" name="started_on" max="${esc(today)}" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.resumed)}</span><input type="date" name="resumed_on" max="${esc(today)}" value="${esc(today)}" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.reason)}</span><select name="kind" required aria-required="true"><option value="absence">${esc(c.absence)}</option><option value="planned_holiday">${esc(c.holiday)}</option><option value="other">${esc(c.other)}</option></select></label>
         <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(c.save)}</button></div>
-      </form><div data-ep-recovery-error></div>
+      </form><div data-ep-recovery-error role="alert" aria-live="assertive"></div>
     </div></section>`;
     root.querySelector("[data-ep-recovery-back]")?.addEventListener("click", reopenOverview);
     root.querySelector("[data-ep-recovery-form]")?.addEventListener("submit", submitInterruption);
@@ -213,7 +213,7 @@
     const root = rootEl(); if (!root) return;
     const c = copy();
     root.innerHTML = `<section class="ep-host-shell ep-live" data-ep-recovery-success><div class="ep-live-card">
-      <strong>${esc(c.done)}</strong><div class="ep-live-notice">${esc(modeMessage(data || {}))}</div>
+      <strong>${esc(c.done)}</strong><div class="ep-live-notice" role="status" aria-live="polite">${esc(modeMessage(data || {}))}</div>
       <div class="ep-live-meta">${esc(c.preserved)}</div>
       <div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-recovery-return>${esc(c.returnOverview)}</button></div>
     </div></section>`;
@@ -267,7 +267,7 @@
     if (String(next.qtype || "").toLowerCase() === "mcq" && Array.isArray(next.options)) {
       answer = `<div class="ep-live-options">${next.options.map((option, index) => `<label class="ep-live-option"><input type="radio" name="ep_recovery_answer" value="${index}"><span>${esc(option)}</span></label>`).join("")}</div>`;
     } else if (next.item_kind === "question") {
-      answer = `<input class="ep-live-input" name="ep_recovery_text_answer" autocomplete="off">`;
+      answer = `<input class="ep-live-input" name="ep_recovery_text_answer" autocomplete="off" aria-label="${esc(c.submit)}">`;
     } else {
       renderCheckError(); return;
     }
@@ -275,7 +275,7 @@
     root.innerHTML = `<section class="ep-host-shell ep-live" data-ep-recovery-check-view><div class="ep-live-card">
       <div class="ep-live-head"><strong>${component} · ${esc(c.checkTitle)}</strong><button class="ep-live-btn secondary" type="button" data-ep-recovery-back>${esc(c.back)}</button></div>
       <div class="ep-live-meta">${esc(c.checkBody)}</div><div class="ep-live-qtext"><strong>${esc(c.question)} ${answered + 1}/${items.length}</strong><br>${esc(next.text || "")}</div>
-      ${answer}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-recovery-submit>${esc(c.submit)}</button></div><div data-ep-recovery-feedback></div>
+      ${answer}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-recovery-submit>${esc(c.submit)}</button></div><div data-ep-recovery-feedback role="status" aria-live="polite"></div>
     </div></section>`;
     itemStartedAt = Date.now();
     root.querySelector("[data-ep-recovery-back]")?.addEventListener("click", reopenOverview);
@@ -321,7 +321,7 @@
     const c = copy();
     const message = status === "confirmed" ? c.confirmed : status === "refresh_recommended" ? c.refresh : c.noCheck;
     root.innerHTML = `<section class="ep-host-shell ep-live" data-ep-recovery-check-result><div class="ep-live-card">
-      <strong>${component} · ${esc(c.checkTitle)}</strong><div class="ep-live-notice">${esc(message)}</div><div class="ep-live-meta">${esc(c.preserved)}</div>
+      <strong>${component} · ${esc(c.checkTitle)}</strong><div class="ep-live-notice" role="status" aria-live="polite">${esc(message)}</div><div class="ep-live-meta">${esc(c.preserved)}</div>
       <div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-recovery-return>${esc(c.returnOverview)}</button></div>
     </div></section>`;
     root.querySelector("[data-ep-recovery-return]")?.addEventListener("click", reopenOverview);
@@ -330,7 +330,7 @@
   function renderCheckError() {
     const root = rootEl(); if (!root) return;
     const c = copy();
-    root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card"><div class="ep-live-error">${esc(c.error)}</div><div class="ep-live-actions"><button class="ep-live-btn secondary" type="button" data-ep-recovery-return>${esc(c.returnOverview)}</button></div></div></section>`;
+    root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card"><div class="ep-live-error" role="alert" aria-live="assertive">${esc(c.error)}</div><div class="ep-live-actions"><button class="ep-live-btn secondary" type="button" data-ep-recovery-return>${esc(c.returnOverview)}</button></div></div></section>`;
     root.querySelector("[data-ep-recovery-return]")?.addEventListener("click", reopenOverview);
   }
 
