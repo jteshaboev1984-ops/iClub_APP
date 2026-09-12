@@ -56,6 +56,7 @@ CREATE TEMP TABLE p243_fixture(
   diagnostic_session uuid,
   timed_session uuid
 ) ON COMMIT DROP;
+GRANT SELECT ON p243_fixture TO authenticated,service_role;
 
 DO $$
 DECLARE
@@ -206,9 +207,8 @@ BEGIN
   IF (v->>'recorded')::boolean IS NOT TRUE OR v->>'status'<>'review_required' OR (v->>'event_count')::int<>2 OR (v->>'review_required')::boolean IS NOT TRUE THEN
     RAISE EXCEPTION 'P2-43 repeated diagnostic exit must require review: %',v;
   END IF;
-
-  IF (SELECT status FROM private.exam_prep_sessions WHERE id=v_diag)<>'active' THEN
-    RAISE EXCEPTION 'P2-43 browser integrity signal must not auto-end diagnostic attempt';
+  IF v->>'session_status'<>'active' THEN
+    RAISE EXCEPTION 'P2-43 browser integrity signal must not auto-end diagnostic attempt: %',v;
   END IF;
 
   v:=public.record_exam_prep_integrity_event_safe_v1(v_timed,'visibility_hidden','p243-timed-event-0001');
@@ -216,17 +216,16 @@ BEGIN
     RAISE EXCEPTION 'P2-43 first timed exit should still allow comparability: %',v;
   END IF;
 
-  IF private.exam_prep_timed_score_comparable_v1(v_timed) IS NOT TRUE THEN
-    RAISE EXCEPTION 'P2-43 one timed exit incorrectly destroyed comparability';
+  v:=public.get_exam_prep_timed_result_safe_v1(v_timed);
+  IF coalesce((v->>'score_comparable')::boolean,false) IS NOT TRUE
+     OR coalesce((v->>'timing_comparable')::boolean,false) IS NOT TRUE
+     OR coalesce((v->>'integrity_event_count')::int,0)<>1 THEN
+    RAISE EXCEPTION 'P2-43 first timed exit incorrectly destroyed comparability: %',v;
   END IF;
 
   v:=public.record_exam_prep_integrity_event_safe_v1(v_timed,'window_blur','p243-timed-event-0002');
   IF v->>'status'<>'review_required' OR (v->>'integrity_allows_comparability')::boolean IS NOT FALSE THEN
     RAISE EXCEPTION 'P2-43 repeated timed exit must block comparability: %',v;
-  END IF;
-
-  IF private.exam_prep_timed_score_comparable_v1(v_timed) IS NOT FALSE THEN
-    RAISE EXCEPTION 'P2-43 repeated timed exits still qualify for comparable readiness evidence';
   END IF;
 
   v:=public.get_exam_prep_timed_result_safe_v1(v_timed);
@@ -249,6 +248,7 @@ DECLARE
   v_diag uuid;
   v_timed uuid;
   v_count int;
+  v_mutation_blocked boolean:=false;
 BEGIN
   SELECT user_id,learning_session,diagnostic_session,timed_session INTO v_uid,v_learning,v_diag,v_timed FROM p243_fixture;
 
@@ -259,19 +259,20 @@ BEGIN
     RAISE EXCEPTION 'P2-43 learning session received an integrity event';
   END IF;
 
-  IF (SELECT academic_credit FROM private.exam_prep_session_authorizations sa JOIN private.exam_prep_sessions s ON s.authorization_id=sa.id WHERE s.id=v_diag) IS NOT TRUE THEN
+  IF (SELECT sa.academic_credit FROM private.exam_prep_session_authorizations sa JOIN private.exam_prep_sessions s ON s.authorization_id=sa.id WHERE s.id=v_diag) IS NOT TRUE THEN
     RAISE EXCEPTION 'P2-43 diagnostic browser signal unexpectedly rewrote academic-credit flag';
   END IF;
 
   BEGIN
-    UPDATE private.exam_prep_integrity_events SET event_type='window_blur' WHERE user_id=v_uid LIMIT 1;
-    RAISE EXCEPTION 'P2-43 integrity event update unexpectedly succeeded';
-  EXCEPTION WHEN feature_not_supported OR object_not_in_prerequisite_state OR raise_exception THEN
-    -- The immutable trigger must reject mutation. Exact SQLSTATE is helper-defined.
-    NULL;
-  WHEN OTHERS THEN
-    NULL;
+    UPDATE private.exam_prep_integrity_events
+    SET event_type='window_blur'
+    WHERE id=(SELECT id FROM private.exam_prep_integrity_events WHERE user_id=v_uid ORDER BY recorded_at,id LIMIT 1);
+  EXCEPTION WHEN OTHERS THEN
+    v_mutation_blocked:=true;
   END;
+  IF NOT v_mutation_blocked THEN
+    RAISE EXCEPTION 'P2-43 integrity event update unexpectedly succeeded';
+  END IF;
 END
 $$;
 
