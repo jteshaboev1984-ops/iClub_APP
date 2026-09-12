@@ -45,13 +45,14 @@ const path = require('path');
       if (name === 'get_exam_prep_recovery_safe_v2') return {data:JSON.parse(JSON.stringify(window.__recovery[args.p_component_code])),error:null};
       if (name === 'authorize_exam_prep_revalidation_item_safe_v1') return {data:{authorization_id:'00000000-0000-4000-8000-000000020802',session_id:null,case_id:args.p_case_id,item_order:args.p_item_order,component_code:'P1',academic_credit:false,resumed:false},error:null};
       if (name === 'start_exam_prep_session_safe_v1') {
-        window.__session = {session_id:'00000000-0000-4000-8000-000000020803',status:'active',component_code:'P1',session_type:'retest',total_items:1,items:[{item_order:1,item_kind:'question',primary_skill_code:'P1-INTERNAL-DO-NOT-SHOW',answered:false,qtype:'mcq',text:'Which value is equal to 2 + 2?',options:['3','4','5']}]};
+        window.__session = {session_id:'00000000-0000-4000-8000-000000020803',status:'active',component_code:'P1',session_type:'retest',total_items:1,items:[{item_order:1,item_kind:'question',primary_skill_code:'P1-INTERNAL-DO-NOT-SHOW',reserve_role:'retest',answered:false,qtype:'mcq',text:'Which value is equal to 2 + 2?',options:['3','4','5']}]};
         return {data:{session_id:window.__session.session_id,status:'active',component_code:'P1',session_type:'retest',total_items:1,resumed:false},error:null};
       }
       if (name === 'get_exam_prep_session_safe_v1') return {data:JSON.parse(JSON.stringify(window.__session)),error:null};
       if (name === 'submit_exam_prep_response_safe_v1') {
         window.__session.items[0].answered = true;
-        return {data:{item_order:1,is_correct:false,verification_status:'app_checked_noncredit'},error:null};
+        window.__session.items[0].feedback_deferred = true;
+        return {data:{item_order:1,verification_status:'app_checked_noncredit',feedback_deferred:true},error:null};
       }
       if (name === 'finalize_exam_prep_session_safe_v1') {
         window.__session.status = 'finalized';
@@ -100,7 +101,7 @@ const path = require('path');
   assert(!text.includes('app_checked_noncredit'),'internal verification status leaked');
   assert(!text.includes('RECOVERY_REFRESH_RETAINED_SKILL'),'internal planner action leaked');
 
-  const result = await page.evaluate(() => ({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent}));
+  const result = await page.evaluate(() => ({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent,session:window.__session}));
   const names = result.calls.map(x => x.name);
   for (const name of [
     'get_exam_prep_recovery_safe_v2','authorize_exam_prep_revalidation_item_safe_v1','start_exam_prep_session_safe_v1',
@@ -111,6 +112,8 @@ const path = require('path');
   assert(auth.args.p_item_order === 1,'wrong revalidation item authorized');
   const submit = result.calls.find(x => x.name === 'submit_exam_prep_response_safe_v1');
   assert(submit && submit.args.p_payload && !('mastery' in submit.args.p_payload) && !('skill_state' in submit.args.p_payload),'learner payload must not write academic state');
+  assert(result.session.items[0].feedback_deferred === true,'active retest response must use deferred-feedback contract');
+  assert(!('is_correct' in result.session.items[0]),'active retest session must not expose correctness');
   const plan = result.calls.find(x => x.name === 'generate_exam_prep_weekly_plan_safe_v3');
   assert(plan.args.p_component_code === 'P1','failed P1 check must not regenerate P5 plan');
 
