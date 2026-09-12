@@ -1,0 +1,57 @@
+name: P2-51 Live Accessibility Locale Regression
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-live.js
+      - .github/scripts/p2_51_live_accessibility_locale_regression.js
+      - .github/scripts/p0_17_live_diagnostic_regression.js
+      - .github/scripts/p0_18_live_plan_regression.js
+      - .github/scripts/p0_19_live_timed_readiness_regression.js
+      - .github/scripts/p2_40_host_lifecycle_timer_regression.js
+      - .github/workflows/p2-51-live-accessibility-locale-regression.yml
+  push:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-live.js
+      - .github/scripts/p2_51_live_accessibility_locale_regression.js
+      - .github/scripts/p0_17_live_diagnostic_regression.js
+      - .github/scripts/p0_18_live_plan_regression.js
+      - .github/scripts/p0_19_live_timed_readiness_regression.js
+      - .github/scripts/p2_40_host_lifecycle_timer_regression.js
+      - .github/workflows/p2-51-live-accessibility-locale-regression.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-accessibility-locale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate live syntax and static boundary
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-live.js
+          node --check .github/scripts/p2_51_live_accessibility_locale_regression.js
+          node --check .github/scripts/p0_17_live_diagnostic_regression.js
+          node --check .github/scripts/p0_18_live_plan_regression.js
+          node --check .github/scripts/p0_19_live_timed_readiness_regression.js
+          node --check .github/scripts/p2_40_host_lifecycle_timer_regression.js
+          node .github/scripts/p2_51_live_accessibility_locale_regression.js
+      - name: Install Chromium test dependency
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Run existing live browser regressions
+        run: |
+          set -euo pipefail
+          node .github/scripts/p0_17_live_diagnostic_regression.js
+          node .github/scripts/p0_18_live_plan_regression.js
+          node .github/scripts/p0_19_live_timed_readiness_regression.js
+          node .github/scripts/p2_40_host_lifecycle_timer_regression.js
