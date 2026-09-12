@@ -76,7 +76,8 @@
       shell.insertBefore(banner, shell.firstChild);
     }
     const strict = ["timed", "paper"].includes(active.sessionType);
-    banner.textContent = text(active.language, active.integrityStatus, strict);
+    const message = text(active.language, active.integrityStatus, strict);
+    if (banner.textContent !== message) banner.textContent = message;
   }
 
   function ensureObserver() {
