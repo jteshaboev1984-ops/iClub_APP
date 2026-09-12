@@ -13,6 +13,7 @@ on:
       - supabase/tests/p1_06_expanded_beta_readiness_matrix.sql
       - supabase/tests/p2_36_current_schema_replay_compat.sql
       - supabase/tests/p2_38_cleanup_gate_matrix.sql
+      - supabase/tests/p2_43_protected_assessment_integrity_matrix.sql
       - .github/workflows/p2-36-current-schema-expansion-validation.yml
   push:
     branches:
@@ -26,6 +27,7 @@ on:
       - supabase/tests/p1_06_expanded_beta_readiness_matrix.sql
       - supabase/tests/p2_36_current_schema_replay_compat.sql
       - supabase/tests/p2_38_cleanup_gate_matrix.sql
+      - supabase/tests/p2_43_protected_assessment_integrity_matrix.sql
       - .github/workflows/p2-36-current-schema-expansion-validation.yml
   workflow_dispatch:
 
@@ -157,6 +159,14 @@ jobs:
           blocked="$(psql -Atqc "select count(*) from private.exam_prep_beta_cohorts c where (public.get_exam_prep_beta_expansion_gate_v1(c.cohort_key)->>'ready')::boolean is false and public.get_exam_prep_beta_expansion_gate_v1(c.cohort_key)->>'reason_code'='real_monitoring_not_armed'")"
           test "$blocked" = "$controls"
 
+      - name: Run P2-43 protected assessment integrity matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p243.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_43_protected_assessment_integrity_matrix.sql 2>&1 | tee -a p236-current-schema.log
+
       - name: Run P2-38 synthetic cleanup residue gate matrix
         shell: bash
         env:
@@ -185,10 +195,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          users="$(psql -Atqc "select count(*) from auth.users where email like 'p015-%@invalid.example' or email like 'p106-%@invalid.example' or email like 'p238-%@invalid.example'")"
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p015-%@invalid.example' or email like 'p106-%@invalid.example' or email like 'p238-%@invalid.example' or email like 'p243-%@invalid.example'")"
           recs="$(psql -Atqc "select count(*) from private.exam_prep_human_review_recommendations where source_object_type in ('p015_scale','p106_expanded')")"
           queues="$(psql -Atqc "select count(*) from private.exam_prep_mentor_queue_items")"
           evidence="$(psql -Atqc "select count(*) from private.exam_prep_evidence_events")"
+          integrity="$(psql -Atqc "select count(*) from private.exam_prep_integrity_events")"
           validations="$(psql -Atqc "select count(*) from private.exam_prep_beta_expansion_validation_evidence")"
           armed="$(psql -Atqc "select count(*) from private.exam_prep_beta_expansion_controls where development_data_state='real_monitoring' or real_review_epoch_started_at is not null")"
           state="$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||ai_enabled||'|'||mentor_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")"
@@ -196,6 +207,7 @@ jobs:
           echo "P236_POST_RECOMMENDATIONS=$recs" | tee -a p236-current-schema.log
           echo "P236_POST_MENTOR_QUEUE=$queues" | tee -a p236-current-schema.log
           echo "P236_POST_EVIDENCE=$evidence" | tee -a p236-current-schema.log
+          echo "P236_POST_INTEGRITY=$integrity" | tee -a p236-current-schema.log
           echo "P236_POST_VALIDATIONS=$validations" | tee -a p236-current-schema.log
           echo "P236_POST_ARMED=$armed" | tee -a p236-current-schema.log
           echo "P236_POST_STATE=$state" | tee -a p236-current-schema.log
@@ -203,6 +215,7 @@ jobs:
           test "$recs" = '0'
           test "$queues" = '0'
           test "$evidence" = '0'
+          test "$integrity" = '0'
           test "$validations" = '0'
           test "$armed" = '0'
           test "$state" = 'off|false|false|false|true'
