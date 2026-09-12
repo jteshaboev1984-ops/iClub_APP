@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p020views2";
+  const VERSION = "p250views1";
   let observer = null;
   let busy = false;
   let activeLanguage = "ru";
@@ -44,7 +44,7 @@
       noEvidence: "Not yet confirmed", developing: "Developing", confirmed: "Confirmed", secure: "Secure", needsWork: "Needs correction",
       detail: "Skill detail", history: "Check history", prerequisites: "Foundation prerequisites", resources: "Resources", correctionHistory: "Correction history",
       noneYet: "No records yet.", prerequisite: "Prerequisite", unknown: "Not checked", blocker: "Needs work", ready: "Secure",
-      writtenNote: "Written solutions are stored separately. The Core learning route continues even when no human review is available.",
+      writtenNote: "Written solutions are stored separately. Your learning route continues even when no human review is available.",
       openCorrections: "Open corrections", queueIntro: "Mistake → practice → delayed check. A correction closes only after a new delayed check confirms it.",
       noCorrections: "There are no corrections to work on right now.", reviewError: "Review the mistake", analogues: "Practise similar questions", waitRetest: "Wait for the delayed check", delayedRetest: "Check again",
       due: "Check date", openPlan: "Open weekly plan", recentResolved: "Recently completed", loading: "Loading…", error: "Could not load this view. Try again.",
@@ -80,6 +80,22 @@
     return "ru";
   }
 
+  function dateLocale() {
+    if (activeLanguage === "uz") return "uz-UZ";
+    if (activeLanguage === "en") return "en-GB";
+    return "ru-RU";
+  }
+
+  function formatDate(value, withTime = false) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    const options = withTime
+      ? { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }
+      : { day: "2-digit", month: "2-digit", year: "numeric" };
+    return new Intl.DateTimeFormat(dateLocale(), options).format(date);
+  }
+
   function canUse() {
     const caps = internal.lastCapabilities;
     return Boolean(caps && caps.coreAccess === true && caps.killSwitch === false && caps.rolloutState === "controlled_beta");
@@ -99,7 +115,6 @@
     return c.noEvidence;
   }
 
-
   function shell(component, title, subtitle, body, backHandler = "dashboard") {
     const c = copy();
     const backText = backHandler === "tracker" ? c.backTracker : c.overview;
@@ -115,13 +130,13 @@
 
   function renderLoading(component, title, backHandler = "dashboard") {
     const root = rootEl(); if (!root) return;
-    root.innerHTML = shell(component, title, "", `<div class="ep-views-card">${esc(copy().loading)}</div>`, backHandler);
+    root.innerHTML = shell(component, title, "", `<div class="ep-views-card" role="status" aria-live="polite">${esc(copy().loading)}</div>`, backHandler);
     bindBack(root, component, backHandler);
   }
 
   function renderError(component, title, backHandler = "dashboard") {
     const root = rootEl(); if (!root) return;
-    root.innerHTML = shell(component, title, "", `<div class="ep-views-error">${esc(copy().error)}</div>`, backHandler);
+    root.innerHTML = shell(component, title, "", `<div class="ep-views-error" role="alert" aria-live="assertive">${esc(copy().error)}</div>`, backHandler);
     bindBack(root, component, backHandler);
   }
 
@@ -200,8 +215,8 @@
     const title = `${c.skill} ${Number(data?.sequence_no || 0)}`;
     const description = activeLanguage === "ru" && data?.description ? `<div class="ep-views-note">${esc(data.description)}</div>` : "";
     const prereqRows = prereqs.length ? prereqs.map((row, index) => `<div class="ep-views-row"><span>${activeLanguage === "ru" && row?.label ? esc(row.label) : `${esc(c.prerequisite)} ${index + 1}`}</span><span class="ep-views-badge">${esc(prerequisiteStatus(row))}</span></div>`).join("") : `<div class="ep-views-note">${esc(c.noneYet)}</div>`;
-    const evidenceRows = evidence.length ? evidence.map(row => `<div class="ep-views-row"><span>${esc(evidenceLabel(row))}</span><small>${row?.created_at ? esc(new Date(row.created_at).toLocaleDateString()) : ""}</small></div>`).join("") : `<div class="ep-views-note">${esc(c.noneYet)}</div>`;
-    const correctionRows = corrections.length ? corrections.map(row => `<div class="ep-views-row"><span>${esc(row.status === "resolved" ? c.completedCorrection : c.needsWork)}</span><small>${row?.retest_due_at ? `${esc(c.due)}: ${esc(new Date(row.retest_due_at).toLocaleDateString())}` : ""}</small></div>`).join("") : `<div class="ep-views-note">${esc(c.noneYet)}</div>`;
+    const evidenceRows = evidence.length ? evidence.map(row => `<div class="ep-views-row"><span>${esc(evidenceLabel(row))}</span><small>${esc(formatDate(row?.created_at))}</small></div>`).join("") : `<div class="ep-views-note">${esc(c.noneYet)}</div>`;
+    const correctionRows = corrections.length ? corrections.map(row => `<div class="ep-views-row"><span>${esc(row.status === "resolved" ? c.completedCorrection : c.needsWork)}</span><small>${row?.retest_due_at ? `${esc(c.due)}: ${esc(formatDate(row.retest_due_at))}` : ""}</small></div>`).join("") : `<div class="ep-views-note">${esc(c.noneYet)}</div>`;
     const resources = data?.resources || {};
     const resourceRows = [
       resources.book_chapter ? `<div class="ep-views-row"><span>${esc(c.book)}</span><small>${esc(resources.book_chapter)}</small></div>` : "",
@@ -229,8 +244,8 @@
   function renderCorrections(component, data) {
     const root = rootEl(); if (!root) return; const c = copy();
     const cases = Array.isArray(data?.cases) ? data.cases : [], resolved = Array.isArray(data?.recent_resolved) ? data.recent_resolved : [];
-    const rows = cases.length ? cases.map(row => `<div class="ep-views-card"><div class="ep-views-area-head"><strong>${esc(areaLabel(row.official_syllabus_section))}</strong><span class="ep-views-badge">${esc(correctionStepLabel(row.process_step))}</span></div>${activeLanguage === "ru" && row?.description ? `<div class="ep-views-sub">${esc(row.description)}</div>` : ""}${row?.retest_due_at ? `<div class="ep-views-note">${esc(c.due)}: ${esc(new Date(row.retest_due_at).toLocaleString())}</div>` : ""}</div>`).join("") : `<div class="ep-views-note">${esc(c.noCorrections)}</div>`;
-    const recent = resolved.length ? `<div class="ep-views-card"><strong>${esc(c.recentResolved)}</strong><div class="ep-views-list">${resolved.map(row => `<div class="ep-views-row"><span>${esc(areaLabel(row.official_syllabus_section))}</span><small>${row?.resolved_at ? esc(new Date(row.resolved_at).toLocaleDateString()) : ""}</small></div>`).join("")}</div></div>` : "";
+    const rows = cases.length ? cases.map(row => `<div class="ep-views-card"><div class="ep-views-area-head"><strong>${esc(areaLabel(row.official_syllabus_section))}</strong><span class="ep-views-badge">${esc(correctionStepLabel(row.process_step))}</span></div>${activeLanguage === "ru" && row?.description ? `<div class="ep-views-sub">${esc(row.description)}</div>` : ""}${row?.retest_due_at ? `<div class="ep-views-note">${esc(c.due)}: ${esc(formatDate(row.retest_due_at, true))}</div>` : ""}</div>`).join("") : `<div class="ep-views-note">${esc(c.noCorrections)}</div>`;
+    const recent = resolved.length ? `<div class="ep-views-card"><strong>${esc(c.recentResolved)}</strong><div class="ep-views-list">${resolved.map(row => `<div class="ep-views-row"><span>${esc(areaLabel(row.official_syllabus_section))}</span><small>${esc(formatDate(row?.resolved_at))}</small></div>`).join("")}</div></div>` : "";
     const body = `<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.corrections)}</span><strong>${Number(data?.active_count || 0)}</strong></div><div class="ep-views-stat"><span>${esc(c.due)}</span><strong>${Number(data?.retest_due_count || 0)}</strong></div><div class="ep-views-stat"><span>${esc(c.recentResolved)}</span><strong>${resolved.length}</strong></div></div>${rows}${recent}<div class="ep-views-actions"><button class="ep-views-btn primary" type="button" data-ep-views-open-plan="${esc(component)}">${esc(c.openPlan)}</button></div>`;
     root.innerHTML = shell(component, c.corrections, c.queueIntro, body);
     bindBack(root, component);
