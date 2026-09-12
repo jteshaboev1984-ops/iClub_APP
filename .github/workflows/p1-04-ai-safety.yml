@@ -1,6 +1,18 @@
 name: P1-04 AI Safety Gate
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep_p0_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_01_*.sql'
+      - 'supabase/migrations/*exam_prep_p1_04_*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_04_ai_safety_foundation_matrix.sql
+      - 'supabase/functions/exam-prep-ai/**'
+      - .github/scripts/p1_04_ai_edge_context_contract.js
+      - .github/workflows/p1-04-ai-safety.yml
   push:
     branches:
       - main

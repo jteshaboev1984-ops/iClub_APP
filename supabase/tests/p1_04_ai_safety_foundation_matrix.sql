@@ -41,6 +41,13 @@ BEGIN
   IF NOT has_function_privilege('authenticated','public.get_exam_prep_ai_guard_v1(text,text,text,integer)','EXECUTE') THEN
     RAISE EXCEPTION 'P1-04 authenticated learner guard missing';
   END IF;
+  IF to_regprocedure('private.exam_prep_has_active_protected_assessment_v1(uuid)') IS NULL THEN
+    RAISE EXCEPTION 'P2-45 subject-wide protected-assessment helper missing';
+  END IF;
+  IF has_function_privilege('authenticated','private.exam_prep_has_active_protected_assessment_v1(uuid)','EXECUTE')
+     OR has_function_privilege('anon','private.exam_prep_has_active_protected_assessment_v1(uuid)','EXECUTE') THEN
+    RAISE EXCEPTION 'P2-45 browser role can execute private protected-assessment helper';
+  END IF;
   IF has_function_privilege('authenticated','public.get_exam_prep_ai_source_cards_service_v1(text,text,text,text,integer)','EXECUTE') THEN
     RAISE EXCEPTION 'P1-04 authenticated can execute service source reader';
   END IF;
@@ -167,12 +174,12 @@ DECLARE v jsonb;
 BEGIN
   v:=public.get_exam_prep_ai_guard_v1('P5','theory_explanation','ru',20);
   IF (v->>'allowed')::boolean OR v->>'reason'<>'active_assessment' OR v->>'mode'<>'blocked' THEN
-    RAISE EXCEPTION 'P1-04 active assessment did not block before AI path: %',v;
+    RAISE EXCEPTION 'P1-04 active assessment did not block same-component AI path: %',v;
   END IF;
 
   v:=public.get_exam_prep_ai_guard_v1('P1','theory_explanation','ru',20);
-  IF coalesce((v->>'allowed')::boolean,false) IS NOT TRUE THEN
-    RAISE EXCEPTION 'P1-04 P5 protected session incorrectly blocked P1 component: %',v;
+  IF (v->>'allowed')::boolean OR v->>'reason'<>'active_assessment' OR v->>'mode'<>'blocked' THEN
+    RAISE EXCEPTION 'P2-45 P5 protected session did not block cross-component P1 AI path: %',v;
   END IF;
 END
 $$;
