@@ -1,0 +1,54 @@
+name: P2-43 Protected Integrity Regression
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-integrity.js
+      - .github/scripts/p2_43_protected_integrity_browser_regression.js
+      - .github/workflows/p2-43-protected-integrity-regression.yml
+  push:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-integrity.js
+      - .github/scripts/p2_43_protected_integrity_browser_regression.js
+      - .github/workflows/p2-43-protected-integrity-regression.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  protected-integrity-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static integrity boundary checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-integrity.js
+          node --check .github/scripts/p2_43_protected_integrity_browser_regression.js
+          grep -q 'get_exam_prep_integrity_status_safe_v1' exam-prep/exam-prep-api.js
+          grep -q 'record_exam_prep_integrity_event_safe_v1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-integrity.js?v=p243integrity1' exam-prep/exam-prep-api.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-integrity.js
+          ! grep -q 'iclub_state_v1' exam-prep/exam-prep-integrity.js
+          ! grep -q 'requestFullscreen' exam-prep/exam-prep-integrity.js
+          ! grep -q 'contextmenu' exam-prep/exam-prep-integrity.js
+          ! grep -q 'clipboard' exam-prep/exam-prep-integrity.js
+          ! grep -q 'preventDefault' exam-prep/exam-prep-integrity.js
+
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Protected assessment focus matrix
+        run: node .github/scripts/p2_43_protected_integrity_browser_regression.js

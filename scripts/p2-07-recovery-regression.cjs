@@ -55,11 +55,12 @@ for (const forbidden of [
   /correct_answer/i
 ]) assert(!forbidden.test(migration), `forbidden recovery mutation/surface: ${forbidden}`);
 
-// The learner API must use the server-derived v2 planner; browser-selected recovery modes are not authoritative.
-assert(api.includes('generate_exam_prep_weekly_plan_safe_v2'), 'API is not using server-derived recovery planner v2');
+// Later hardening moved recovery/interruption reads to v2 and the weekly planner to v3.
+// The browser still must not choose a recovery mode; server policy remains authoritative.
+assert(api.includes('generate_exam_prep_weekly_plan_safe_v3'), 'API is not using current server-derived recovery planner v3');
 assert(api.includes('get_exam_prep_weekly_plan_safe_v2'), 'API is not reading recovery-aware weekly plan v2');
-assert(api.includes('record_my_exam_prep_interruption_v1'), 'API interruption recorder missing');
-assert(api.includes('get_exam_prep_recovery_safe_v1'), 'API recovery reader missing');
+assert(api.includes('record_my_exam_prep_interruption_v2'), 'API current interruption recorder v2 missing');
+assert(api.includes('get_exam_prep_recovery_safe_v2'), 'API current recovery reader v2 missing');
 assert(!/async function generateWeeklyPlan\(componentCode,\s*recoveryMode/i.test(api), 'browser recovery mode parameter must not remain authoritative');
 
 assert(thresholdLayer.includes('exam-prep-recovery.js?v=p207recovery1'), 'recovery learner layer is not loaded');
@@ -75,7 +76,7 @@ for (const token of [
   '15% — более ранние темы',
   '10% — практика на время',
   'На следующие 14 дней',
-  'Все прежние результаты сохраняются.',
+  'Прежние результаты сохраняются',
   'P1 и P5 перепланируются отдельно',
   '50% majburiy o‘tilmagan mavzular',
   'For the next 14 days: 50% required uncovered topics'
