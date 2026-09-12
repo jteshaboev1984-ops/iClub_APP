@@ -1,0 +1,65 @@
+name: P2-52 Auxiliary Status Accessibility
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-profile-completeness.js
+      - exam-prep/exam-prep-recovery.js
+      - exam-prep/exam-prep-exam-map.js
+      - exam-prep/exam-prep-materials.js
+      - scripts/p2-05-profile-completeness-regression.cjs
+      - .github/scripts/p2_08_recovery_ui_regression.js
+      - .github/scripts/p2_09_exam_map_ui_regression.js
+      - .github/scripts/p2_10_materials_ui_regression.js
+      - .github/scripts/p2_52_auxiliary_status_accessibility_regression.js
+      - .github/workflows/p2-52-auxiliary-status-accessibility.yml
+  push:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-profile-completeness.js
+      - exam-prep/exam-prep-recovery.js
+      - exam-prep/exam-prep-exam-map.js
+      - exam-prep/exam-prep-materials.js
+      - scripts/p2-05-profile-completeness-regression.cjs
+      - .github/scripts/p2_08_recovery_ui_regression.js
+      - .github/scripts/p2_09_exam_map_ui_regression.js
+      - .github/scripts/p2_10_materials_ui_regression.js
+      - .github/scripts/p2_52_auxiliary_status_accessibility_regression.js
+      - .github/workflows/p2-52-auxiliary-status-accessibility.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  auxiliary-status-accessibility:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate syntax and static accessibility boundary
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-profile-completeness.js
+          node --check exam-prep/exam-prep-recovery.js
+          node --check exam-prep/exam-prep-exam-map.js
+          node --check exam-prep/exam-prep-materials.js
+          node --check .github/scripts/p2_08_recovery_ui_regression.js
+          node --check .github/scripts/p2_09_exam_map_ui_regression.js
+          node --check .github/scripts/p2_10_materials_ui_regression.js
+          node --check .github/scripts/p2_52_auxiliary_status_accessibility_regression.js
+          node scripts/p2-05-profile-completeness-regression.cjs
+          node .github/scripts/p2_52_auxiliary_status_accessibility_regression.js
+      - name: Install Chromium test dependency
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Run existing auxiliary browser regressions
+        run: |
+          set -euo pipefail
+          node .github/scripts/p2_08_recovery_ui_regression.js
+          node .github/scripts/p2_09_exam_map_ui_regression.js
+          node .github/scripts/p2_10_materials_ui_regression.js

@@ -113,11 +113,11 @@
       <form class="ep-live-form" data-ep-profile-completion-form>
         <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" value="${esc(profile?.exam_series || "")}" placeholder="May/June 2027" required aria-required="true"></label>
         <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" value="${esc(profile?.target_grade || "")}" placeholder="A" required aria-required="true"></label>
-        <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(total)}" required></label>
-        <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(math)}" required></label>
+        <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(total)}" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(math)}" required aria-required="true"></label>
         <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(c.save)}</button></div>
       </form>
-      <div data-ep-profile-completion-error></div>`;
+      <div data-ep-profile-completion-error role="alert" aria-live="assertive"></div>`;
     shell.insertBefore(panel, grid);
     panel.querySelector("[data-ep-profile-completion-form]")?.addEventListener("submit", event => save(event, profile));
   }

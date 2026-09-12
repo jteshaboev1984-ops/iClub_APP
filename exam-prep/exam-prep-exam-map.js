@@ -131,6 +131,8 @@
       const notice = document.createElement("div");
       notice.className = "ep-live-notice";
       notice.dataset.epExamPlanNotice = "true";
+      notice.setAttribute("role", "status");
+      notice.setAttribute("aria-live", "polite");
       notice.textContent = pendingNotice;
       shell.insertBefore(notice, card);
       pendingNotice = null;
@@ -147,12 +149,12 @@
     root.innerHTML = `<section class="ep-host-shell ep-live" data-ep-exam-plan-editor>${header}<div class="ep-live-card">
       <strong>${esc(c.title)}</strong><div class="ep-live-meta">${esc(c.body)}</div>
       <form class="ep-live-form" data-ep-exam-plan-form>
-        <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" value="${esc(profile.exam_series)}" required></label>
-        <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" value="${esc(profile.target_grade)}" required></label>
-        <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.total_student_hours_available)}" required></label>
-        <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.mathematics_hours_budget)}" required></label>
+        <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" value="${esc(profile.exam_series)}" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" value="${esc(profile.target_grade)}" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.total_student_hours_available)}" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.mathematics_hours_budget)}" required aria-required="true"></label>
         <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(c.save)}</button><button class="ep-live-btn secondary" type="button" data-ep-exam-plan-cancel>${esc(c.cancel)}</button></div>
-      </form><div data-ep-exam-plan-error></div>
+      </form><div data-ep-exam-plan-error role="alert" aria-live="assertive"></div>
     </div></section>`;
     root.querySelector("[data-ep-exam-plan-form]")?.addEventListener("submit", save);
     root.querySelector("[data-ep-exam-plan-cancel]")?.addEventListener("click", reopenOverview);

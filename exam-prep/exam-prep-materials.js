@@ -127,14 +127,14 @@
   function renderLoading(component) {
     const root = rootEl();
     if (!root) return;
-    root.innerHTML = shell(component, `<div class="ep-materials-card">${esc(copy().loading)}</div>`);
+    root.innerHTML = shell(component, `<div class="ep-materials-card" role="status" aria-live="polite">${esc(copy().loading)}</div>`);
     bindBack(root);
   }
 
   function renderError(component) {
     const root = rootEl();
     if (!root) return;
-    root.innerHTML = shell(component, `<div class="ep-materials-safe">${esc(copy().error)}</div>`);
+    root.innerHTML = shell(component, `<div class="ep-materials-safe" role="alert" aria-live="assertive">${esc(copy().error)}</div>`);
     bindBack(root);
   }
 
