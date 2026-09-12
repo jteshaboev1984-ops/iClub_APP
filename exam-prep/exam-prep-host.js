@@ -11,7 +11,8 @@
     capabilities: null,
     invitation: null,
     consentBusy: false,
-    consentError: false
+    consentError: false,
+    returnFocusEl: null
   };
 
   const $ = selector => document.querySelector(selector);
@@ -137,8 +138,34 @@
   }
 
   function entryEl() { return $("#subject-hub-exam-prep-entry"); }
+  function entryButtonEl() { return entryEl()?.querySelector('[data-action="open-exam-prep"]') || null; }
   function rootEl() { return $("#exam-prep-host-root"); }
   function hubEl() { return $("#courses-subject-hub"); }
+
+  function canRestoreFocus(el) {
+    if (!el || typeof el.focus !== "function" || !el.isConnected) return false;
+    if (state.subjectKey !== MATHEMATICS_KEY || !showable()) return false;
+    const entry = entryEl();
+    if (!entry || entry.hidden || entry.getAttribute("aria-hidden") === "true") return false;
+    return !el.closest?.("[hidden]");
+  }
+
+  function restoreEntryFocus() {
+    const saved = state.returnFocusEl;
+    state.returnFocusEl = null;
+    const target = canRestoreFocus(saved) ? saved : entryButtonEl();
+    if (!canRestoreFocus(target)) return;
+    try { target.focus({ preventScroll: true }); }
+    catch (_) { try { target.focus(); } catch (_) {} }
+  }
+
+  function focusHostRoot() {
+    const root = rootEl();
+    if (!root || root.hidden || typeof root.focus !== "function") return;
+    root.setAttribute("tabindex", "-1");
+    try { root.focus({ preventScroll: false }); }
+    catch (_) { try { root.focus(); } catch (_) {} }
+  }
 
   function setEntryVisible(visible) {
     const el = entryEl();
@@ -253,6 +280,7 @@
   }
 
   function close() {
+    const shouldRestoreFocus = state.open && showable();
     state.open = false;
     state.consentBusy = false;
     state.consentError = false;
@@ -264,6 +292,8 @@
       root.setAttribute("aria-hidden", "true");
       root.innerHTML = "";
     }
+    if (shouldRestoreFocus) restoreEntryFocus();
+    else state.returnFocusEl = null;
     return true;
   }
 
@@ -394,10 +424,15 @@
       return false;
     }
 
+    const active = document.activeElement;
+    state.returnFocusEl = active && typeof active.focus === "function" && active.closest?.("#subject-hub-exam-prep-entry")
+      ? active
+      : entryButtonEl();
     root.hidden = false;
     root.setAttribute("aria-hidden", "false");
     hub.classList.add("exam-prep-host-open");
     state.open = true;
+    focusHostRoot();
     return true;
   }
 

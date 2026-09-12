@@ -1,0 +1,40 @@
+name: P2-48 Exam Prep Focus Continuity
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-host.js
+      - .github/scripts/p0_14_host_regression.js
+      - .github/workflows/p2-48-focus-continuity.yml
+  push:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-host.js
+      - .github/scripts/p0_14_host_regression.js
+      - .github/workflows/p2-48-focus-continuity.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focus-continuity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: |
+          node --check exam-prep/exam-prep-host.js
+          node --check .github/scripts/p0_14_host_regression.js
+
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run host access and focus matrix
+        run: node .github/scripts/p0_14_host_regression.js
