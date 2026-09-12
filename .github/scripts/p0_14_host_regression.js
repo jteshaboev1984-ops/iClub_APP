@@ -12,8 +12,10 @@ const path = require('path');
       body: `<!doctype html><html><body>
         <section id="courses-subject-hub">
           <div id="subject-hub-exam-prep-entry" hidden aria-hidden="true">
-            <span id="subject-hub-exam-prep-title"></span>
-            <span id="subject-hub-exam-prep-sub"></span>
+            <button type="button" data-action="open-exam-prep">
+              <span id="subject-hub-exam-prep-title"></span>
+              <span id="subject-hub-exam-prep-sub"></span>
+            </button>
           </div>
           <div id="exam-prep-host-root" hidden aria-hidden="true"></div>
         </section>
@@ -162,12 +164,17 @@ const path = require('path');
   result = await page.evaluate(async () => {
     const synced = await window.iClubExamPrep.syncSubjectHub({ subjectKey: 'mathematics', language: 'en' });
     const entryHidden = document.querySelector('#subject-hub-exam-prep-entry').hidden;
+    const trigger = document.querySelector('[data-action="open-exam-prep"]');
+    trigger.focus();
     const opened = await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'en' });
     const shellText = document.querySelector('#exam-prep-host-root').textContent;
     const hostOpen = document.querySelector('#courses-subject-hub').classList.contains('exam-prep-host-open');
+    const focusMovedIntoHost = document.activeElement?.id === 'exam-prep-host-root';
+    const hostTabIndex = document.querySelector('#exam-prep-host-root')?.getAttribute('tabindex');
     const backHandled = window.iClubExamPrep.back();
+    const focusReturnedToTrigger = document.activeElement === trigger;
     return {
-      synced, entryHidden, opened, hostOpen, backHandled,
+      synced, entryHidden, opened, hostOpen, backHandled, focusMovedIntoHost, hostTabIndex, focusReturnedToTrigger,
       closed: !window.iClubExamPrep.isOpen(),
       sentinel: localStorage.getItem('p014_sentinel'),
       shellText
@@ -175,6 +182,8 @@ const path = require('path');
   });
   assert(result.synced === true && result.entryHidden === false, 'authorized Math entry must appear');
   assert(result.opened === true && result.hostOpen === true, 'authorized open must mount transient root');
+  assert(result.focusMovedIntoHost && result.hostTabIndex === '-1', 'opening Exam Prep must move keyboard focus into the visible host without adding a tab stop');
+  assert(result.focusReturnedToTrigger, 'closing Exam Prep with Back must restore focus to the launch control');
   assert(result.shellText.includes('P1 and P5 results are tracked separately'), 'live shell must explain the P1/P5 separation in learner-facing language');
   assert(!result.shellText.includes('Internal alpha') && !result.shellText.includes('host bridge') && !result.shellText.includes('synthetic learner data') && !result.shellText.includes('canonical skills'), 'live shell must not expose internal implementation terminology');
   assert(result.backHandled === true && result.closed === true, 'back must close transient root');
@@ -215,7 +224,7 @@ const path = require('path');
   assert(rpcCalls.every(name => allowedRpcs.has(name)), 'host called an RPC outside capability/invitation consent boundary');
 
   await browser.close();
-  console.log('P0-14 browser matrix: PASS (live access + pre-entitlement consent + learner-safe copy)');
+  console.log('P0-14 browser matrix: PASS (live access + consent + learner-safe copy + keyboard focus continuity)');
 })().catch(error => {
   console.error(error);
   process.exit(1);
