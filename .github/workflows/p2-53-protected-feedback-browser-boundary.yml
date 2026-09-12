@@ -1,0 +1,47 @@
+name: P2-53 Protected Feedback Browser Boundary
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-live.js
+      - supabase/migrations/20260911141111_exam_prep_p2_41_active_assessment_feedback_guard_v1.sql
+      - .github/scripts/p0_17_live_diagnostic_regression.js
+      - .github/workflows/p2-53-protected-feedback-browser-boundary.yml
+  push:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-live.js
+      - supabase/migrations/20260911141111_exam_prep_p2_41_active_assessment_feedback_guard_v1.sql
+      - .github/scripts/p0_17_live_diagnostic_regression.js
+      - .github/workflows/p2-53-protected-feedback-browser-boundary.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  protected-feedback-browser-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate syntax and feedback guard contract
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-live.js
+          node --check .github/scripts/p0_17_live_diagnostic_regression.js
+          grep -q "feedback_deferred" supabase/migrations/20260911141111_exam_prep_p2_41_active_assessment_feedback_guard_v1.sql
+          grep -q "session_type in ('diagnostic','retest','mixed','timed','paper')" supabase/migrations/20260911141111_exam_prep_p2_41_active_assessment_feedback_guard_v1.sql
+          grep -q "feedback_deferred:true" .github/scripts/p0_17_live_diagnostic_regression.js
+          grep -q "active protected diagnostic must not show correctness or explanation before finalization" .github/scripts/p0_17_live_diagnostic_regression.js
+
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run protected diagnostic browser regression
+        run: node .github/scripts/p0_17_live_diagnostic_regression.js

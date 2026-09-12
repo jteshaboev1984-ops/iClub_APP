@@ -6,7 +6,6 @@ const hostCss = fs.readFileSync('exam-prep/exam-prep-host.css', 'utf8');
 if (liveSource.includes('ensureStyle(') || liveSource.includes('ep-live-flow-style') || liveSource.includes('document.createElement("style")')) throw new Error('runtime live-flow style injection returned');
 if (!hostCss.includes('EXAM PREP CENTRALIZED LIVE FLOW v1') || !hostCss.includes('.ep-live-card{')) throw new Error('centralized live-flow CSS contract missing');
 
-
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
@@ -37,10 +36,34 @@ if (!hostCss.includes('EXAM PREP CENTRALIZED LIVE FLOW v1') || !hostCss.includes
       }
       if (name==='get_exam_prep_diagnostic_progress_safe_v1') return {data:window.__progress[args.p_component_code],error:null};
       if (name==='get_exam_prep_state_safe_v1') return {data:window.__state[args.p_component_code],error:null};
-      if (name==='start_exam_prep_next_diagnostic_safe_v1') { window.__session={session_id:'00000000-0000-4000-8000-000000009901',status:'active',component_code:args.p_component_code,session_type:'diagnostic',total_items:1,items:[{item_order:1,item_kind:'question',primary_skill_code:'P1-QUA-01',answered:false,qtype:'mcq',text:'What is 2 + 2?',options:['2','4','6','8']}]}; return {data:{session_id:window.__session.session_id},error:null}; }
+      if (name==='start_exam_prep_next_diagnostic_safe_v1') {
+        window.__session={
+          session_id:'00000000-0000-4000-8000-000000009901',
+          status:'active',component_code:args.p_component_code,session_type:'diagnostic',total_items:2,
+          items:[
+            {item_order:1,item_kind:'question',primary_skill_code:'P1-QUA-01',reserve_role:'diagnostic',answered:false,qtype:'mcq',text:'What is 2 + 2?',options:['2','4','6','8']},
+            {item_order:2,item_kind:'question',primary_skill_code:'P1-QUA-02',reserve_role:'diagnostic',answered:false,qtype:'mcq',text:'What is 3 + 3?',options:['4','5','6','7']}
+          ]
+        };
+        return {data:{session_id:window.__session.session_id},error:null};
+      }
       if (name==='get_exam_prep_session_safe_v1') return {data:window.__session,error:null};
-      if (name==='submit_exam_prep_response_safe_v1') { window.__session.items[0].answered=true; return {data:{item_order:1,is_correct:args.p_payload.picked_index===1,explanation:'2 + 2 = 4.'},error:null}; }
-      if (name==='finalize_exam_prep_session_safe_v1') { window.__session.status='finalized'; window.__progress.P1.screening.answered_items=1; window.__progress.P1.screening.answered_areas=1; return {data:{status:'finalized'},error:null}; }
+      if (name==='submit_exam_prep_response_safe_v1') {
+        const item = window.__session.items.find(x => x.item_order === args.p_item_order);
+        if (item) {
+          item.answered=true;
+          item.response_id=`00000000-0000-4000-8000-0000000099${String(args.p_item_order).padStart(2,'0')}`;
+          item.selected_answer=String(args.p_payload.picked_index);
+          item.feedback_deferred=true;
+        }
+        return {data:{item_order:args.p_item_order,selected_answer:String(args.p_payload.picked_index),verification_status:'app_verified',feedback_deferred:true,replayed:false},error:null};
+      }
+      if (name==='finalize_exam_prep_session_safe_v1') {
+        window.__session.status='finalized';
+        window.__progress.P1.screening.answered_items=2;
+        window.__progress.P1.screening.answered_areas=2;
+        return {data:{status:'finalized'},error:null};
+      }
       return {data:null,error:{message:`unexpected rpc ${name}`}};
     }};
   });
@@ -54,16 +77,45 @@ if (!hostCss.includes('EXAM PREP CENTRALIZED LIVE FLOW v1') || !hostCss.includes
   assert(r.synced&&r.opened&&r.profile,'profile screen must open for controlled-beta Core');
   assert(r.version==='p251live1','live flow version mismatch');
 
-  await page.fill('input[name="exam_series"]','Oct/Nov 2026'); await page.fill('input[name="target_grade"]','A'); await page.fill('input[name="total_hours"]','12'); await page.fill('input[name="math_hours"]','6'); await page.click('[data-ep-live-save-profile]');
+  await page.fill('input[name="exam_series"]','Oct/Nov 2026');
+  await page.fill('input[name="target_grade"]','A');
+  await page.fill('input[name="total_hours"]','12');
+  await page.fill('input[name="math_hours"]','6');
+  await page.click('[data-ep-live-save-profile]');
   await page.waitForFunction(()=>document.querySelector('[data-ep-live-start="P1"]'));
-  await page.click('[data-ep-live-start="P1"]'); await page.waitForFunction(()=>document.querySelector('input[name="ep_live_answer"]'));
-  await page.check('input[name="ep_live_answer"][value="1"]'); await page.click('[data-ep-live-submit]');
-  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('1 / 24'));
+  await page.click('[data-ep-live-start="P1"]');
+  await page.waitForFunction(()=>document.querySelector('input[name="ep_live_answer"]'));
+
+  await page.check('input[name="ep_live_answer"][value="1"]');
+  await page.click('[data-ep-live-submit]');
+  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Question 2 / 2'));
+
+  r=await page.evaluate(()=>({
+    text:document.querySelector('#exam-prep-host-root').textContent,
+    calls:window.__calls,
+    session:window.__session
+  }));
+  assert(r.session.status==='active','protected diagnostic must remain active after the first response');
+  assert(r.session.items[0].feedback_deferred===true,'active protected response must carry deferred-feedback state');
+  assert(!('is_correct' in r.session.items[0]),'active protected session must not expose correctness');
+  assert(!/\bCorrect\b|Review this mistake|2 \+ 2 = 4/i.test(r.text),'active protected diagnostic must not show correctness or explanation before finalization');
+  assert(r.calls.filter(x=>x.name==='finalize_exam_prep_session_safe_v1').length===0,'protected diagnostic must not finalize before all items are answered');
+
+  await page.check('input[name="ep_live_answer"][value="2"]');
+  await page.click('[data-ep-live-submit]');
+  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('2 / 24'));
+
   r=await page.evaluate(()=>({text:document.querySelector('#exam-prep-host-root').textContent,calls:window.__calls}));
   const names=r.calls.map(x=>x.name);
   for (const name of ['save_exam_prep_exam_profile_v2','start_exam_prep_next_diagnostic_safe_v1','get_exam_prep_session_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','get_exam_prep_state_safe_v1']) assert(names.includes(name),`${name} missing`);
   assert(!names.includes('save_exam_prep_exam_profile_v1'),'legacy profile save must not be used');
-  const submit=r.calls.find(x=>x.name==='submit_exam_prep_response_safe_v1'); assert(submit.args.p_payload.picked_index===1,'MCQ index must be zero-based'); assert(r.text.includes('1 / 24'),'progress must refresh');
+  const submits=r.calls.filter(x=>x.name==='submit_exam_prep_response_safe_v1');
+  assert(submits.length===2,'both diagnostic responses must be submitted');
+  assert(submits[0].args.p_payload.picked_index===1,'first MCQ index must be zero-based');
+  assert(submits[1].args.p_payload.picked_index===2,'second MCQ index must be zero-based');
+  assert(r.text.includes('2 / 24'),'progress must refresh after finalization');
   assert(!/Core beta|Synthetic learner data|Screening complete/i.test(r.text),'learner UI must not expose internal rollout terminology');
-  await browser.close(); console.log('P0-17 live entry-check browser flow: PASS');
+
+  await browser.close();
+  console.log('P0-17 live entry-check browser flow: PASS');
 })().catch(e=>{console.error(e);process.exit(1);});
