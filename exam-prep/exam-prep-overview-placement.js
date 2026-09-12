@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p213placement1";
+  const VERSION = "p250placement1";
   let observer = null;
   let busy = false;
   let activeLanguage = "ru";
@@ -60,6 +60,18 @@
     };
   }
 
+  function dateLocale() {
+    if (activeLanguage === "uz") return "uz-UZ";
+    if (activeLanguage === "en") return "en-GB";
+    return "ru-RU";
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return new Intl.DateTimeFormat(dateLocale(), { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+  }
 
   function stageLabel(value) {
     const c = copy();
@@ -88,7 +100,7 @@
     if (!row) return c.noLastCheck;
     const type = String(row.evidence_type || "") === "diagnostic" ? c.diagnostic : c.lastCheck;
     const outcome = typeof row.is_correct === "boolean" ? (row.is_correct ? c.evidenceCorrect : c.evidenceIncorrect) : c.evidenceRecorded;
-    const date = row.created_at ? new Date(row.created_at).toLocaleDateString() : "";
+    const date = formatDate(row.created_at);
     return [type, outcome, date].filter(Boolean).join(" · ");
   }
 
@@ -139,14 +151,14 @@
   function renderPlacementLoading(component) {
     const root = rootEl(); if (!root) return;
     const c = copy();
-    root.innerHTML = `<section class="ep-host-shell ep-placement-shell" data-ep-placement-screen><div class="ep-placement-top"><div><div class="ep-placement-sub">${esc(component)} · Cambridge AS Mathematics</div><div class="ep-placement-title">${esc(c.placementResult)}</div></div><button class="ep-placement-btn" type="button" data-ep-placement-back>${esc(c.back)}</button></div><div class="ep-placement-card">${esc(c.loading)}</div></section>`;
+    root.innerHTML = `<section class="ep-host-shell ep-placement-shell" data-ep-placement-screen><div class="ep-placement-top"><div><div class="ep-placement-sub">${esc(component)} · Cambridge AS Mathematics</div><div class="ep-placement-title">${esc(c.placementResult)}</div></div><button class="ep-placement-btn" type="button" data-ep-placement-back>${esc(c.back)}</button></div><div class="ep-placement-card" role="status" aria-live="polite">${esc(c.loading)}</div></section>`;
     root.querySelector("[data-ep-placement-back]")?.addEventListener("click", dashboard);
   }
 
   function renderPlacementError(component) {
     const root = rootEl(); if (!root) return;
     const c = copy();
-    root.innerHTML = `<section class="ep-host-shell ep-placement-shell" data-ep-placement-screen><div class="ep-placement-top"><div><div class="ep-placement-sub">${esc(component)} · Cambridge AS Mathematics</div><div class="ep-placement-title">${esc(c.placementResult)}</div></div><button class="ep-placement-btn" type="button" data-ep-placement-back>${esc(c.back)}</button></div><div class="ep-placement-error">${esc(c.error)}</div></section>`;
+    root.innerHTML = `<section class="ep-host-shell ep-placement-shell" data-ep-placement-screen><div class="ep-placement-top"><div><div class="ep-placement-sub">${esc(component)} · Cambridge AS Mathematics</div><div class="ep-placement-title">${esc(c.placementResult)}</div></div><button class="ep-placement-btn" type="button" data-ep-placement-back>${esc(c.back)}</button></div><div class="ep-placement-error" role="alert" aria-live="assertive">${esc(c.error)}</div></section>`;
     root.querySelector("[data-ep-placement-back]")?.addEventListener("click", dashboard);
   }
 

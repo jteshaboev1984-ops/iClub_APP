@@ -1,0 +1,48 @@
+name: P2-50 Learner Locale Copy Regression
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-learner-views.js
+      - exam-prep/exam-prep-overview-placement.js
+      - .github/scripts/p2_50_learner_locale_copy_regression.js
+      - .github/workflows/p2-50-learner-locale-copy-regression.yml
+  push:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-learner-views.js
+      - exam-prep/exam-prep-overview-placement.js
+      - .github/scripts/p2_50_learner_locale_copy_regression.js
+      - .github/workflows/p2-50-learner-locale-copy-regression.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  learner-locale-copy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate syntax and learner copy boundary
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-learner-views.js
+          node --check exam-prep/exam-prep-overview-placement.js
+          node --check .github/scripts/p2_50_learner_locale_copy_regression.js
+          node --check .github/scripts/p0_20_live_tracker_corrections_regression.js
+          node --check .github/scripts/p0_21_live_overview_placement_regression.js
+          node .github/scripts/p2_50_learner_locale_copy_regression.js
+      - name: Install Chromium test dependency
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Run existing learner-view browser regressions
+        run: |
+          set -euo pipefail
+          node .github/scripts/p0_20_live_tracker_corrections_regression.js
+          node .github/scripts/p0_21_live_overview_placement_regression.js
