@@ -21,6 +21,10 @@
     }
   }
 
+  function emit(name, detail) {
+    try { window.dispatchEvent(new CustomEvent(name, { detail })); } catch (_) {}
+  }
+
   async function capabilities() {
     const result = await rpc("get_exam_prep_capabilities_v1");
     if (!result.ok) return result;
@@ -142,7 +146,11 @@
     return rpc("get_exam_prep_materials_library_safe_v1", { p_language: String(language || "en") });
   }
 
-  async function getSession(sessionId, language = "en") { return rpc("get_exam_prep_session_safe_v1", { p_session_id: sessionId, p_language: language }); }
+  async function getSession(sessionId, language = "en") {
+    const result = await rpc("get_exam_prep_session_safe_v1", { p_session_id: sessionId, p_language: language });
+    if (result.ok && result.data) emit("iclub:exam-prep-session", { session: result.data, language: String(language || "en") });
+    return result;
+  }
   async function startSession(authorizationId, idempotencyKey) {
     return rpc("start_exam_prep_session_safe_v1", { p_authorization_id: authorizationId, p_idempotency_key: String(idempotencyKey || "") });
   }
@@ -157,7 +165,20 @@
     });
   }
   async function finalizeSession(sessionId, idempotencyKey) {
-    return rpc("finalize_exam_prep_session_safe_v1", { p_session_id: sessionId, p_idempotency_key: String(idempotencyKey || "") });
+    const result = await rpc("finalize_exam_prep_session_safe_v1", { p_session_id: sessionId, p_idempotency_key: String(idempotencyKey || "") });
+    if (result.ok) emit("iclub:exam-prep-session-ended", { sessionId });
+    return result;
+  }
+
+  async function integrityStatus(sessionId) {
+    return rpc("get_exam_prep_integrity_status_safe_v1", { p_session_id: sessionId });
+  }
+  async function recordIntegrityEvent(sessionId, eventType, clientEventId) {
+    return rpc("record_exam_prep_integrity_event_safe_v1", {
+      p_session_id: sessionId,
+      p_event_type: String(eventType || ""),
+      p_client_event_id: String(clientEventId || "")
+    });
   }
 
   // Recovery is non-destructive: the server owns the day-band policy and any optional progress confirmation.
@@ -184,7 +205,9 @@
   async function timedCatalog(componentCode) { return rpc("get_exam_prep_timed_catalog_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function authorizeTimed(assessmentId) { return rpc("authorize_exam_prep_timed_safe_v1", { p_assessment_id: Number(assessmentId) }); }
   async function finalizeTimed(sessionId, idempotencyKey, completionReason = "submitted") {
-    return rpc("finalize_exam_prep_timed_safe_v1", { p_session_id: sessionId, p_idempotency_key: String(idempotencyKey || ""), p_completion_reason: completionReason });
+    const result = await rpc("finalize_exam_prep_timed_safe_v1", { p_session_id: sessionId, p_idempotency_key: String(idempotencyKey || ""), p_completion_reason: completionReason });
+    if (result.ok) emit("iclub:exam-prep-session-ended", { sessionId });
+    return result;
   }
   async function timedResult(sessionId) { return rpc("get_exam_prep_timed_result_safe_v1", { p_session_id: sessionId }); }
   async function timedReviewPack(sessionId, language = "en") { return rpc("get_exam_prep_timed_review_pack_safe_v1", { p_session_id: sessionId, p_language: language }); }
@@ -206,6 +229,7 @@
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession,
+    integrityStatus, recordIntegrityEvent,
     recovery, recordInterruption, authorizeRevalidationItem,
     weeklyPlan, generateWeeklyPlan, authorizePlanItem,
     timedCatalog, authorizeTimed, finalizeTimed, timedResult, timedReviewPack, submitTimedSelfMark,
@@ -224,6 +248,7 @@
     };
 
     if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p019timed2");
+    load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity1");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p020views2");
     load('script[data-exam-prep-overview-placement]', "examPrepOverviewPlacement", "exam-prep-overview-placement.js?v=p213placement1");
     load('script[data-exam-prep-ai-ui]', "examPrepAiUi", "exam-prep-ai-ui.js?v=p104aiui1");
