@@ -44,7 +44,7 @@ BEGIN
   INSERT INTO private.exam_prep_beta_cohorts(
     cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes
   ) VALUES(
-    'p257-ci-cohort','math_as_p1_p5','draft',1,0,72,'isolated P2-57 cleanup-integrity validation'
+    'p257-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated P2-57 cleanup-integrity validation'
   ) RETURNING id INTO v_cohort_id;
 
   INSERT INTO private.exam_prep_beta_expansion_controls(
