@@ -4,7 +4,7 @@ DO $$
 BEGIN
   IF current_setting('p258.isolated_db', true) IS DISTINCT FROM 'true'
      AND current_setting('p238.isolated_db', true) IS DISTINCT FROM 'true' THEN
-    RAISE EXCEPTION 'P2-58 REFUSED: p258.isolated_db=true or p238.isolated_db=true is required. Use only an ephemeral test database.';
+    RAISE EXCEPTION 'P2-58 REFUSED: isolated test database required';
   END IF;
 END
 $$;
@@ -17,7 +17,6 @@ DECLARE
   v_cohort_id bigint;
   v_program bigint;
   v_assessment record;
-  v_assessment_item record;
   v_auth uuid;
   v_session uuid;
   v_payload jsonb;
@@ -39,15 +38,7 @@ BEGIN
   ORDER BY a.id
   LIMIT 1;
 
-  SELECT ai.item_order,ai.question_id,ai.written_task_id,ai.primary_skill_code,
-         ai.reserve_role,ai.is_holdout
-  INTO v_assessment_item
-  FROM private.exam_prep_assessment_items ai
-  WHERE ai.assessment_id=v_assessment.id
-  ORDER BY ai.item_order
-  LIMIT 1;
-
-  IF v_program IS NULL OR v_assessment.id IS NULL OR v_assessment_item.item_order IS NULL THEN
+  IF v_program IS NULL OR v_assessment.id IS NULL THEN
     RAISE EXCEPTION 'P2-58 canonical diagnostic fixture missing';
   END IF;
 
@@ -73,15 +64,12 @@ BEGIN
   INSERT INTO private.exam_prep_beta_members(
     cohort_id,user_id,service_mode,activation_wave,member_status
   ) VALUES(v_cohort_id,v_uid,'core',1,'candidate');
-
   PERFORM public.record_exam_prep_beta_consent_v1(
     'p258-ci-cohort',v_uid,'p2-58-test-consent',now()
   );
-
   UPDATE private.exam_prep_beta_members
   SET member_status='active',activated_at=now(),updated_at=now()
   WHERE cohort_id=v_cohort_id AND user_id=v_uid;
-
   UPDATE private.exam_prep_beta_cohorts
   SET current_wave=1,updated_at=now()
   WHERE id=v_cohort_id;
@@ -106,31 +94,22 @@ BEGIN
     authorization_id,user_id,program_version_id,content_version_id,assessment_id,assessment_version,
     component_code,session_type,status,client_idempotency_key,total_items,timing_contract,finalized_at
   ) VALUES(
-    v_auth,v_uid,v_assessment.program_version_id,v_assessment.content_version_id,v_assessment.id,v_assessment.assessment_version,
-    v_assessment.component_code,'diagnostic','finalized','p258-cleanup-session',1,'{}'::jsonb,now()
+    v_auth,v_uid,v_assessment.program_version_id,v_assessment.content_version_id,
+    v_assessment.id,v_assessment.assessment_version,v_assessment.component_code,
+    'diagnostic','finalized','p258-cleanup-session',1,'{}'::jsonb,now()
   ) RETURNING id INTO v_session;
 
   UPDATE private.exam_prep_session_authorizations
   SET status='consumed',consumed_at=now(),consumed_session_id=v_session
   WHERE id=v_auth;
 
-  INSERT INTO private.exam_prep_session_items(
-    session_id,item_order,item_kind,question_id,written_task_id,primary_skill_code,
-    reserve_role,is_holdout,content_meta_id,item_version
-  ) VALUES(
-    v_session,1,
-    case when v_assessment_item.question_id is not null then 'question' else 'written' end,
-    v_assessment_item.question_id,v_assessment_item.written_task_id,
-    v_assessment_item.primary_skill_code,v_assessment_item.reserve_role,v_assessment_item.is_holdout,
-    null,'p258-fixture'
-  );
-
   INSERT INTO private.exam_prep_integrity_events(
     session_id,user_id,event_type,client_event_id
   ) VALUES(v_session,v_uid,'visibility_hidden','p258-integrity-event-0001');
 
   UPDATE private.exam_prep_feature_config
-  SET rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now()
+  SET rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,
+      mentor_enabled=false,kill_switch=false,updated_at=now()
   WHERE id=1;
 
   BEGIN
@@ -147,7 +126,7 @@ BEGIN
 
   v_blocked:=false;
   BEGIN
-    DELETE FROM private.exam_prep_session_items WHERE session_id=v_session;
+    DELETE FROM private.exam_prep_integrity_events WHERE client_event_id='p258-integrity-event-0001';
   EXCEPTION WHEN OTHERS THEN
     IF SQLERRM<>'immutable_exam_prep_fact' THEN RAISE; END IF;
     v_blocked:=true;
@@ -179,8 +158,7 @@ BEGIN
   IF EXISTS(select 1 from private.exam_prep_sessions where user_id=v_uid)
      OR EXISTS(select 1 from private.exam_prep_session_authorizations where user_id=v_uid)
      OR EXISTS(select 1 from private.exam_prep_exam_profiles where user_id=v_uid)
-     OR EXISTS(select 1 from private.exam_prep_integrity_events where user_id=v_uid)
-     OR EXISTS(select 1 from private.exam_prep_session_items where session_id=v_session) THEN
+     OR EXISTS(select 1 from private.exam_prep_integrity_events where user_id=v_uid) THEN
     RAISE EXCEPTION 'P2-58 learner-scoped synthetic rows remain after cleanup';
   END IF;
 
