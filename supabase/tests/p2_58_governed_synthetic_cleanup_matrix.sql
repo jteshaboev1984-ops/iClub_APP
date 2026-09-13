@@ -39,11 +39,8 @@ BEGIN
   ORDER BY a.id
   LIMIT 1;
 
-  SELECT ai.item_order,ai.item_kind,ai.question_id,ai.written_task_id,ai.primary_skill_code,
-         coalesce(ai.reserve_role,'diagnostic') reserve_role,
-         coalesce(ai.is_holdout,false) is_holdout,
-         ai.content_meta_id,
-         coalesce(ai.item_version,'p258-fixture') item_version
+  SELECT ai.item_order,ai.question_id,ai.written_task_id,ai.primary_skill_code,
+         ai.reserve_role,ai.is_holdout
   INTO v_assessment_item
   FROM private.exam_prep_assessment_items ai
   WHERE ai.assessment_id=v_assessment.id
@@ -111,9 +108,11 @@ BEGIN
     session_id,item_order,item_kind,question_id,written_task_id,primary_skill_code,
     reserve_role,is_holdout,content_meta_id,item_version
   ) VALUES(
-    v_session,1,v_assessment_item.item_kind,v_assessment_item.question_id,v_assessment_item.written_task_id,
+    v_session,1,
+    case when v_assessment_item.question_id is not null then 'question' else 'written' end,
+    v_assessment_item.question_id,v_assessment_item.written_task_id,
     v_assessment_item.primary_skill_code,v_assessment_item.reserve_role,v_assessment_item.is_holdout,
-    v_assessment_item.content_meta_id,v_assessment_item.item_version
+    null,'p258-fixture'
   );
 
   INSERT INTO private.exam_prep_integrity_events(
