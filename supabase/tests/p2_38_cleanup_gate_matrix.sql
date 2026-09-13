@@ -48,7 +48,6 @@ BEGIN
   INSERT INTO public.users(id,first_name,last_name,language_code,created_at,must_change_password)
   VALUES(v_uid,'P238','Cleanup Gate','en',now(),false);
 
-  -- Respect the production consent guard: candidate -> explicit consent -> active.
   INSERT INTO private.exam_prep_beta_members(
     cohort_id,user_id,service_mode,activation_wave,member_status
   ) VALUES(v_cohort_id,v_uid,'core',1,'candidate');
@@ -61,7 +60,6 @@ BEGIN
   SET member_status='active',activated_at=now(),updated_at=now()
   WHERE cohort_id=v_cohort_id AND user_id=v_uid;
 
-  -- This row is intentionally outside the old P2-36 residue list.
   INSERT INTO private.exam_prep_ai_daily_usage(user_id)
   VALUES(v_uid);
 
@@ -132,3 +130,4 @@ $$;
 ROLLBACK;
 
 SELECT 'P2-38 cleanup residue gate matrix: GREEN' AS result;
+\ir p2_57_cleanup_integrity_residue_matrix.sql
