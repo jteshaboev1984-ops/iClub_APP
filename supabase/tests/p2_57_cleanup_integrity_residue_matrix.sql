@@ -2,8 +2,9 @@
 
 DO $$
 BEGIN
-  IF current_setting('p257.isolated_db', true) IS DISTINCT FROM 'true' THEN
-    RAISE EXCEPTION 'P2-57 REFUSED: p257.isolated_db=true is required. Use only an ephemeral test database.';
+  IF current_setting('p257.isolated_db', true) IS DISTINCT FROM 'true'
+     AND current_setting('p238.isolated_db', true) IS DISTINCT FROM 'true' THEN
+    RAISE EXCEPTION 'P2-57 REFUSED: p257.isolated_db=true or p238.isolated_db=true is required. Use only an ephemeral test database.';
   END IF;
 END
 $$;
