@@ -54,7 +54,7 @@ BEGIN
   INSERT INTO private.exam_prep_beta_cohorts(
     cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes
   ) VALUES(
-    'p258-ci-cohort','math_as_p1_p5','canary',12,1,72,'isolated P2-58 governed cleanup validation'
+    'p258-ci-cohort','math_as_p1_p5','canary',12,0,72,'isolated P2-58 governed cleanup validation'
   ) RETURNING id INTO v_cohort_id;
 
   INSERT INTO private.exam_prep_beta_expansion_controls(
@@ -81,6 +81,10 @@ BEGIN
   UPDATE private.exam_prep_beta_members
   SET member_status='active',activated_at=now(),updated_at=now()
   WHERE cohort_id=v_cohort_id AND user_id=v_uid;
+
+  UPDATE private.exam_prep_beta_cohorts
+  SET current_wave=1,updated_at=now()
+  WHERE id=v_cohort_id;
 
   INSERT INTO private.exam_prep_feature_entitlements(
     user_id,entitlement_status,core_access,ai_assist,mentor_care_entitled,cohort_key,valid_from
