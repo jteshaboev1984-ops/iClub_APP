@@ -71,11 +71,17 @@ BEGIN
   VALUES(v_uid,'P258','Governed Cleanup','en',now(),false);
 
   INSERT INTO private.exam_prep_beta_members(
-    cohort_id,user_id,service_mode,activation_wave,member_status,activated_at
-  ) VALUES(v_cohort_id,v_uid,'core',1,'active',now());
-  INSERT INTO private.exam_prep_beta_consents(
-    cohort_id,user_id,consent_status,consent_scope,consent_copy_version,consented_at
-  ) VALUES(v_cohort_id,v_uid,'granted','exam_prep_controlled_beta_v1','p258-ci',now());
+    cohort_id,user_id,service_mode,activation_wave,member_status
+  ) VALUES(v_cohort_id,v_uid,'core',1,'candidate');
+
+  PERFORM public.record_exam_prep_beta_consent_v1(
+    'p258-ci-cohort',v_uid,'p2-58-test-consent',now()
+  );
+
+  UPDATE private.exam_prep_beta_members
+  SET member_status='active',activated_at=now(),updated_at=now()
+  WHERE cohort_id=v_cohort_id AND user_id=v_uid;
+
   INSERT INTO private.exam_prep_feature_entitlements(
     user_id,entitlement_status,core_access,ai_assist,mentor_care_entitled,cohort_key,valid_from
   ) VALUES(v_uid,'active',true,false,false,'p258-ci-cohort',now());
