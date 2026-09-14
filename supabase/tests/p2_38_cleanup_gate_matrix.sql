@@ -143,3 +143,5 @@ SELECT set_config('p266.isolated_db','true',false);
 \ir p2_66_reusable_synthetic_run_engine_matrix.sql
 SELECT set_config('p267.isolated_db','true',false);
 \ir p2_67_canonical_scenario_matrix_v2.sql
+SELECT set_config('p268.isolated_db','true',false);
+\ir p2_68_synthetic_virtual_time_matrix.sql
