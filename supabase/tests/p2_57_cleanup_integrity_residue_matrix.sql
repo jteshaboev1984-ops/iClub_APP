@@ -20,6 +20,7 @@ DECLARE
   v_auth uuid;
   v_session uuid;
   v_payload jsonb;
+  v_expected_total int:=0;
 BEGIN
   SELECT id INTO v_program
   FROM private.exam_prep_program_versions
@@ -110,8 +111,17 @@ BEGIN
      OR coalesce((v_payload#>>'{blocking_counts,session_authorizations}')::int,0)<>1 THEN
     RAISE EXCEPTION 'P2-57 session fixture missing from cleanup breakdown: %',v_payload;
   END IF;
-  IF coalesce((v_payload->>'blocking_rows')::int,0)<>3 THEN
-    RAISE EXCEPTION 'P2-57 expected three blocking rows (authorization/session/integrity), got %',v_payload->>'blocking_rows';
+  IF coalesce((v_payload#>>'{blocking_counts,audit_events}')::int,0)<1 THEN
+    RAISE EXCEPTION 'P2-57 audited session residue missing from cleanup breakdown: %',v_payload;
+  END IF;
+
+  v_expected_total:=
+      coalesce((v_payload#>>'{blocking_counts,session_authorizations}')::int,0)
+    + coalesce((v_payload#>>'{blocking_counts,sessions}')::int,0)
+    + coalesce((v_payload#>>'{blocking_counts,integrity_events}')::int,0)
+    + coalesce((v_payload#>>'{blocking_counts,audit_events}')::int,0);
+  IF coalesce((v_payload->>'blocking_rows')::int,0)<>v_expected_total THEN
+    RAISE EXCEPTION 'P2-57 unexpected residue outside authorization/session/integrity/audit fixture: %',v_payload;
   END IF;
 
   IF has_function_privilege('anon','private.exam_prep_beta_synthetic_residue_v2(bigint)','EXECUTE')
