@@ -158,6 +158,35 @@ SET rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false
 WHERE id=1;
 SELECT set_config('p270.isolated_db','true',false);
 \ir p2_70_content_lifecycle_runway_matrix.sql
+
+-- P2-71 timed/paper sessions require a learner Exam Profile. Seed it only for
+-- P271 rollback-only fixture users, inside this disposable CI connection.
+CREATE OR REPLACE FUNCTION pg_temp.p271_seed_exam_profile_v1()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE v_program bigint;
+BEGIN
+  IF NEW.first_name='P271' THEN
+    SELECT id INTO v_program
+    FROM private.exam_prep_program_versions
+    WHERE program_key='math_as_p1_p5' AND version_key='p1_p5_canonical_v1_0' AND status='active';
+    INSERT INTO private.exam_prep_exam_profiles(
+      user_id,program_version_id,exam_series,target_grade,total_student_hours_available,mathematics_hours_budget,
+      active_week_no,profile_revision,paper_comparability_epoch
+    ) VALUES(NEW.id,v_program,'May/June 2027','A',12,6,1,1,1)
+    ON CONFLICT(user_id) DO NOTHING;
+  END IF;
+  RETURN NEW;
+END
+$$;
+DROP TRIGGER IF EXISTS p271_seed_exam_profile_v1 ON public.users;
+CREATE TRIGGER p271_seed_exam_profile_v1
+AFTER INSERT ON public.users
+FOR EACH ROW EXECUTE FUNCTION pg_temp.p271_seed_exam_profile_v1();
+
 -- P2-71 uses the current content shape: machine diagnostics plus written timed/paper work.
 SELECT set_config('p271.isolated_db','true',false);
 \ir p2_71_failure_adversarial_campaign_matrix.sql
+
+DROP TRIGGER IF EXISTS p271_seed_exam_profile_v1 ON public.users;
