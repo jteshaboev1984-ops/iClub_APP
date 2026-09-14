@@ -3,6 +3,10 @@ begin;
 -- P2-61 periodic self-audit: synthetic beta activation may predate the real
 -- monitoring epoch. The 72-hour operational canary clock must therefore start
 -- from the real-review epoch, not from stale synthetic activation timestamps.
+--
+-- Preserve the complete P2-38 residue guard. Real monitoring can be armed only
+-- after every learner-scoped synthetic row reported by the authoritative
+-- residue helper is gone.
 
 create or replace function public.arm_exam_prep_beta_real_monitoring_v1(
   p_cohort_key text,
@@ -16,8 +20,9 @@ as $$
 declare
   v_c private.exam_prep_beta_cohorts%rowtype;
   v_ctl private.exam_prep_beta_expansion_controls%rowtype;
-  v_residue int:=0;
-  v_epoch timestamptz;
+  v_residue jsonb;
+  v_residue_total int:=0;
+  v_now timestamptz:=now();
   v_monitoring_until timestamptz;
 begin
   if p_cleanup_evidence_ref is null or char_length(trim(p_cleanup_evidence_ref))<8 then
@@ -36,51 +41,38 @@ begin
   from private.exam_prep_beta_expansion_controls
   where cohort_id=v_c.id
   for update;
-  if v_ctl.cohort_id is not null
-     and v_ctl.development_data_state='real_monitoring'
-     and v_ctl.real_review_epoch_started_at is not null then
+  if v_ctl.cohort_id is null then
+    raise exception 'exam_prep_expansion_control_missing';
+  end if;
+  if v_ctl.development_data_state='real_monitoring'
+     or v_ctl.real_review_epoch_started_at is not null then
     raise exception 'exam_prep_real_monitoring_already_armed';
   end if;
-
+  if v_ctl.development_data_state not in ('synthetic_present','clean') then
+    raise exception 'exam_prep_real_monitoring_bad_development_state=%',v_ctl.development_data_state;
+  end if;
   if exists(select 1 from private.exam_prep_beta_weekly_reviews r where r.cohort_id=v_c.id) then
     raise exception 'exam_prep_real_monitoring_requires_zero_prior_weekly_reviews';
   end if;
 
-  select
-    (select count(*) from private.exam_prep_exam_profiles p join private.exam_prep_beta_members bm on bm.user_id=p.user_id and bm.cohort_id=v_c.id where bm.member_status='active')+
-    (select count(*) from private.exam_prep_sessions s join private.exam_prep_beta_members bm on bm.user_id=s.user_id and bm.cohort_id=v_c.id where bm.member_status='active')+
-    (select count(*) from private.exam_prep_evidence_events e join private.exam_prep_beta_members bm on bm.user_id=e.user_id and bm.cohort_id=v_c.id where bm.member_status='active')+
-    (select count(*) from private.exam_prep_correction_cases x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=v_c.id where bm.member_status='active')+
-    (select count(*) from private.exam_prep_retest_events x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=v_c.id where bm.member_status='active')+
-    (select count(*) from private.exam_prep_weekly_plans x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=v_c.id where bm.member_status='active')+
-    (select count(*) from private.exam_prep_recovery_cases x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=v_c.id where bm.member_status='active')+
-    (select count(*) from private.exam_prep_skill_states x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=v_c.id where bm.member_status='active')+
-    (select count(*) from private.exam_prep_stage_states x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=v_c.id where bm.member_status='active')+
-    (select count(*) from private.exam_prep_component_placements x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=v_c.id where bm.member_status='active')
-  into v_residue;
-
-  if v_residue<>0 then
-    raise exception 'exam_prep_synthetic_progress_cleanup_incomplete rows=%',v_residue;
+  v_residue:=private.exam_prep_beta_synthetic_residue_v2(v_c.id);
+  v_residue_total:=coalesce((v_residue->>'total_rows')::int,0);
+  if v_residue_total<>0 then
+    raise exception 'exam_prep_synthetic_progress_cleanup_incomplete rows=%',v_residue_total;
   end if;
 
-  v_epoch:=now();
-  v_monitoring_until:=v_epoch+(v_c.monitoring_hours||' hours')::interval;
+  v_monitoring_until:=v_now+(v_c.monitoring_hours||' hours')::interval;
 
-  insert into private.exam_prep_beta_expansion_controls(
-    cohort_id,development_data_state,real_review_epoch_started_at,cleanup_evidence_ref,
-    required_validation_generation,updated_at
-  ) values(
-    v_c.id,'real_monitoring',v_epoch,trim(p_cleanup_evidence_ref),'p2_36_expansion_v1',v_epoch
-  )
-  on conflict(cohort_id) do update set
-    development_data_state='real_monitoring',
-    real_review_epoch_started_at=excluded.real_review_epoch_started_at,
-    cleanup_evidence_ref=excluded.cleanup_evidence_ref,
-    updated_at=excluded.updated_at;
+  update private.exam_prep_beta_expansion_controls
+  set development_data_state='real_monitoring',
+      real_review_epoch_started_at=v_now,
+      cleanup_evidence_ref=trim(p_cleanup_evidence_ref),
+      updated_at=v_now
+  where cohort_id=v_c.id;
 
   update private.exam_prep_beta_cohorts
   set monitoring_until=v_monitoring_until,
-      updated_at=v_epoch
+      updated_at=v_now
   where id=v_c.id;
 
   insert into private.exam_prep_audit_events(
@@ -91,8 +83,9 @@ begin
     jsonb_build_object(
       'cohort_key',p_cohort_key,
       'cleanup_evidence_ref',trim(p_cleanup_evidence_ref),
-      'synthetic_progress_rows',v_residue,
-      'real_review_epoch_started_at',v_epoch,
+      'synthetic_progress_rows',v_residue_total,
+      'blocking_counts',coalesce(v_residue->'counts','{}'::jsonb),
+      'real_review_epoch_started_at',v_now,
       'monitoring_until',v_monitoring_until,
       'monitoring_hours',v_c.monitoring_hours
     )
@@ -101,10 +94,10 @@ begin
   return jsonb_build_object(
     'cohort_key',p_cohort_key,
     'development_data_state','real_monitoring',
-    'real_review_epoch_started_at',v_epoch,
+    'real_review_epoch_started_at',v_now,
     'monitoring_until',v_monitoring_until,
     'monitoring_hours',v_c.monitoring_hours,
-    'synthetic_progress_rows',v_residue
+    'synthetic_progress_rows',v_residue_total
   );
 end;
 $$;
