@@ -486,10 +486,22 @@ P2-79 -> P2-80
 ## Current progress
 
 - P2-62: COMPLETE
-- P2-63: IN PROGRESS
-- P2-64..P2-80: NOT STARTED
+- P2-63: COMPLETE
+- P2-64: COMPLETE
+- P2-65: COMPLETE
+- P2-66: COMPLETE
+- P2-67: COMPLETE
+- P2-68: IN PROGRESS
+- P2-69..P2-80: NOT STARTED
 
 ## Change Log
+
+### 2026-09-14 — v1.2
+
+- Closed P2-63 through P2-67 after full current-schema CI and production verification.
+- P2-67 merged through PR #60; resulting `main` SHA is `b9890cd9e0ee857313683cd3a5a4d3cb8003a53c`.
+- Canonical synthetic scenario set `p2_67_canonical_v2_0` is active with 15 canonical profiles + 18 adversarial variants, zero locale/structure violations, and no persistent synthetic learner runtime.
+- Began P2-68 on a separate branch. Virtual time is explicitly synthetic academic chronology only; real learners and strict timed-assessment security remain on real server time.
 
 ### 2026-09-14 — v1.1
 
