@@ -219,10 +219,10 @@ BEGIN
   PERFORM pg_temp.p272_finish_session_v1(v_uid,v_p1,'P1','p1-learning');
   PERFORM pg_temp.p272_finish_session_v1(v_uid,v_p5,'P5','p5-learning');
 
-  -- Exercise additional stateful Core paths without touching legacy storage.
+  -- Exercise server-side evidence/state projection. Weekly planning deliberately
+  -- remains outside this small fixture because its Stage-0 prerequisite is
+  -- already covered by the full P2-55 Stage 0->6 browser preservation run.
   PERFORM private.rebuild_exam_prep_state_v1(v_uid,null);
-  PERFORM public.generate_exam_prep_weekly_plan_safe_v3('P1');
-  PERFORM public.generate_exam_prep_weekly_plan_safe_v3('P5');
 END
 $$;
 
