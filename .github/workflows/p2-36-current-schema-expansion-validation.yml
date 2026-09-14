@@ -17,6 +17,8 @@ on:
       - supabase/tests/p2_44_browser_private_boundary_matrix.sql
       - supabase/tests/p2_46_governance_actor_boundary_matrix.sql
       - supabase/tests/p2_56_content_reserve_runway_matrix.sql
+      - supabase/tests/p2_58_governed_synthetic_cleanup_matrix.sql
+      - supabase/tests/p2_60_confirmed_synthetic_provenance_matrix.sql
       - .github/workflows/p2-36-current-schema-expansion-validation.yml
   push:
     branches:
@@ -34,6 +36,8 @@ on:
       - supabase/tests/p2_44_browser_private_boundary_matrix.sql
       - supabase/tests/p2_46_governance_actor_boundary_matrix.sql
       - supabase/tests/p2_56_content_reserve_runway_matrix.sql
+      - supabase/tests/p2_58_governed_synthetic_cleanup_matrix.sql
+      - supabase/tests/p2_60_confirmed_synthetic_provenance_matrix.sql
       - .github/workflows/p2-36-current-schema-expansion-validation.yml
   workflow_dispatch:
 
@@ -199,6 +203,22 @@ jobs:
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_38_cleanup_gate_matrix.sql 2>&1 | tee -a p236-current-schema.log
 
+      - name: Run P2-58/P2-59 governed synthetic cleanup matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p258.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_58_governed_synthetic_cleanup_matrix.sql 2>&1 | tee -a p236-current-schema.log
+
+      - name: Run P2-60 confirmed synthetic provenance matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p260.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_60_confirmed_synthetic_provenance_matrix.sql 2>&1 | tee -a p236-current-schema.log
+
       - name: Run 600 learners / 10 mentors isolation drill on current schema
         shell: bash
         env:
@@ -219,7 +239,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          users="$(psql -Atqc "select count(*) from auth.users where email like 'p015-%@invalid.example' or email like 'p106-%@invalid.example' or email like 'p238-%@invalid.example' or email like 'p243-%@invalid.example'")"
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'p015-%@invalid.example' or email like 'p106-%@invalid.example' or email like 'p238-%@invalid.example' or email like 'p243-%@invalid.example' or email like 'p258-%@invalid.example' or email like 'p260-%@invalid.example'")"
           recs="$(psql -Atqc "select count(*) from private.exam_prep_human_review_recommendations where source_object_type in ('p015_scale','p106_expanded')")"
           queues="$(psql -Atqc "select count(*) from private.exam_prep_mentor_queue_items")"
           evidence="$(psql -Atqc "select count(*) from private.exam_prep_evidence_events")"
