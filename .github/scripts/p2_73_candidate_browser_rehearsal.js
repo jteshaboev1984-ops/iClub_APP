@@ -44,8 +44,8 @@ const assert = (condition, message) => { if (!condition) throw new Error(message
         for (const component of components) {
           const core = root.engine.buildViewModel({ profileId: profile.id, mode: 'core', lang, component });
           const ai = root.engine.buildViewModel({ profileId: profile.id, mode: 'ai', lang, component });
-          if (!core || core.component.code !== component) throw new Error(`core render failed ${profile.id}/${lang}/${component}`);
-          if (!ai || ai.component.code !== component) throw new Error(`ai render failed ${profile.id}/${lang}/${component}`);
+          if (!core || core.component !== component) throw new Error(`core render failed ${profile.id}/${lang}/${component}`);
+          if (!ai || ai.component !== component) throw new Error(`ai render failed ${profile.id}/${lang}/${component}`);
           if (core.mentor.assigned || core.mentor.queueCount !== 0) throw new Error(`core mentor leakage ${profile.id}/${component}`);
           if (ai.mentor.assigned || ai.mentor.queueCount !== 0) throw new Error(`ai mentor leakage ${profile.id}/${component}`);
         }
