@@ -156,3 +156,5 @@ SELECT set_config('p269.isolated_db','true',false);
 UPDATE private.exam_prep_feature_config
 SET rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now()
 WHERE id=1;
+SELECT set_config('p270.isolated_db','true',false);
+\ir p2_70_content_lifecycle_runway_matrix.sql
