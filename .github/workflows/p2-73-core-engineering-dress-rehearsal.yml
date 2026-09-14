@@ -1,0 +1,258 @@
+name: P2-73 Core Engineering Dress Rehearsal
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - 'supabase/tests/p2_*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p0_15_internal_alpha_matrix.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p1_06_expanded_beta_readiness_matrix.sql
+      - exam-prep/**
+      - .github/scripts/p2_55_full_learner_journey_regression.js
+      - .github/scripts/p2_72_legacy_storage_firewall_regression.js
+      - .github/scripts/p2_73_candidate_browser_rehearsal.js
+      - .github/workflows/p2-73-core-engineering-dress-rehearsal.yml
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - 'supabase/tests/p2_*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p0_15_internal_alpha_matrix.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p1_06_expanded_beta_readiness_matrix.sql
+      - exam-prep/**
+      - .github/scripts/p2_55_full_learner_journey_regression.js
+      - .github/scripts/p2_72_legacy_storage_firewall_regression.js
+      - .github/scripts/p2_73_candidate_browser_rehearsal.js
+      - .github/workflows/p2-73-core-engineering-dress-rehearsal.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rehearsal:
+    name: rehearsal-seed-${{ matrix.seed }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [27301, 27302, 27303]
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      P273_SEED: ${{ matrix.seed }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Pin exact release-candidate SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          echo "P273_CANDIDATE_SHA=$actual" | tee p273-rehearsal.log
+          echo "P273_SEED=$P273_SEED" | tee -a p273-rehearsal.log
+          test "$actual" = "$CANDIDATE_SHA"
+          test "${#CANDIDATE_SHA}" = 40
+
+      - name: Bootstrap isolated legacy and Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p273-rehearsal.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p273-rehearsal.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql 2>&1 | tee -a p273-rehearsal.log
+
+      - name: Apply complete current Exam Prep migration stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
+          test "${#files[@]}" -ge 1
+
+          apply_one() {
+            local f="$1"
+            local b
+            b="$(basename "$f")"
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              echo '=== Replaying production Core-only controlled-beta boundary ===' | tee -a p273-rehearsal.log
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>p273-rehearsal.log 2>&1
+            fi
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              echo '=== Normalizing historical Stage-4 patch anchors in isolated CI only ===' | tee -a p273-rehearsal.log
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >>p273-rehearsal.log 2>&1
+            fi
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              echo '=== Seeding isolated production-shaped cohort dependency ===' | tee -a p273-rehearsal.log
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('p236-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated P2-73 rehearsal dependency') on conflict(cohort_key) do nothing" >>p273-rehearsal.log 2>&1
+            fi
+            echo "=== Applying $f ===" | tee -a p273-rehearsal.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p273-rehearsal.log 2>&1
+          }
+
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|\
+              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|\
+              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|\
+              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|\
+              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|\
+              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  echo '=== Replaying P2-17..P2-20 in production migration order ===' | tee -a p273-rehearsal.log
+                  for rb in "${recent[@]}"; do
+                    apply_one "supabase/migrations/$rb"
+                  done
+                fi
+                continue
+                ;;
+            esac
+            apply_one "$f"
+          done
+
+          echo '=== Reset isolated harness to fail-closed baseline ===' | tee -a p273-rehearsal.log
+          psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p273-rehearsal.log 2>&1
+
+      - name: Register exact SHA and deterministic rehearsal seed
+        shell: bash
+        env:
+          PGOPTIONS: -c p273.isolated_db=true -c p273.seed=${{ matrix.seed }} -c p273.git_sha=${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_73_core_engineering_rehearsal_guard.sql 2>&1 | tee -a p273-rehearsal.log
+
+      - name: Run complete Core foundation through P2-71
+        shell: bash
+        env:
+          PGOPTIONS: -c p238.isolated_db=true -c p273.isolated_db=true -c p273.seed=${{ matrix.seed }} -c p273.git_sha=${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_38_cleanup_gate_matrix.sql 2>&1 | tee -a p273-rehearsal.log
+
+      - name: Recheck confirmed provenance boundary
+        shell: bash
+        env:
+          PGOPTIONS: -c p260.isolated_db=true
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_60_confirmed_synthetic_provenance_matrix.sql 2>&1 | tee -a p273-rehearsal.log
+
+      - name: Recheck legacy preservation firewall v2
+        shell: bash
+        env:
+          PGOPTIONS: -c p272.isolated_db=true
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_72_legacy_preservation_firewall_v2_matrix.sql 2>&1 | tee -a p273-rehearsal.log
+
+      - name: Recheck 600 learners and 10 mentor scopes
+        shell: bash
+        env:
+          PGOPTIONS: -c p015.isolated_db=true
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_internal_alpha_matrix.sql 2>&1 | tee -a p273-rehearsal.log
+
+      - name: Recheck Core service-transition isolation
+        shell: bash
+        env:
+          PGOPTIONS: -c p106.isolated_db=true
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_06_expanded_beta_readiness_matrix.sql 2>&1 | tee -a p273-rehearsal.log
+
+      - name: Prove zero residue after database rehearsal
+        shell: bash
+        env:
+          PGOPTIONS: -c p273.isolated_db=true
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_73_core_engineering_postcheck.sql 2>&1 | tee -a p273-rehearsal.log
+
+      - name: Validate browser rehearsal scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/p2_55_full_learner_journey_regression.js
+          node --check .github/scripts/p2_72_legacy_storage_firewall_regression.js
+          node --check .github/scripts/p2_73_candidate_browser_rehearsal.js
+
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run full Stage 0 to 6 browser learner journey
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/p2_55_full_learner_journey_regression.js 2>&1 | tee -a p273-rehearsal.log
+
+      - name: Recheck browser legacy storage firewall
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/p2_72_legacy_storage_firewall_regression.js 2>&1 | tee -a p273-rehearsal.log
+
+      - name: Run all 15 canonical profiles in seeded EN RU UZ order
+        shell: bash
+        env:
+          P273_SEED: ${{ matrix.seed }}
+          P273_CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -o pipefail
+          node .github/scripts/p2_73_candidate_browser_rehearsal.js 2>&1 | tee -a p273-rehearsal.log
+
+      - name: Mark rehearsal GREEN
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "P2-73 REHEARSAL GREEN candidate_sha=$CANDIDATE_SHA seed=$P273_SEED" | tee -a p273-rehearsal.log
+
+      - name: Upload rehearsal evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-73-rehearsal-${{ matrix.seed }}
+          path: p273-rehearsal.log
