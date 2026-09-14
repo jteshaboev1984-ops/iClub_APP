@@ -73,9 +73,9 @@ BEGIN
   VALUES(v_user,'P264','Synthetic','en',now(),false);
 
   INSERT INTO private.exam_prep_synthetic_identities(
-    user_id,run_id,identity_status,evidence_ref,purpose
+    user_id,run_id,identity_kind,fixture_profile_key,identity_status,evidence_ref,purpose
   ) VALUES(
-    v_user,v_run_id,'active','p2-64-identity-proof',
+    v_user,v_run_id,'learner','SVF-P264-RUN-OWNER','active','p2-64-identity-proof',
     'Dedicated P2-64 synthetic identity run-ownership validation.'
   );
 

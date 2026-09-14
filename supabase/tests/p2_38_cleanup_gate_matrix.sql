@@ -137,3 +137,5 @@ SELECT set_config('p263.isolated_db','true',false);
 \ir p2_63_bidirectional_synthetic_firewall_matrix.sql
 SELECT set_config('p264.isolated_db','true',false);
 \ir p2_64_synthetic_run_registry_matrix.sql
+SELECT set_config('p265.isolated_db','true',false);
+\ir p2_65_dedicated_synthetic_identities_matrix.sql
