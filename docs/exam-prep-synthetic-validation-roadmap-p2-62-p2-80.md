@@ -10,7 +10,7 @@ This document exists so the plan survives chat/context limits. It must remain th
 
 - iClub is live. Existing learner data, legacy Practice/Tours, ratings, certificates, history, localStorage and pending operations are protected.
 - Real beta learners are never reused as synthetic test identities.
-- Synthetic evidence must never satisfy a real learner weekly review, Wave expansion gate, readiness gate or real-world release evidence.
+- Synthetic learner/operational evidence must never satisfy a real learner weekly review, real learner readiness gate or real-world release evidence. Explicit engineering validation artifacts may satisfy only the engineering prerequisite they are designed for (for example the existing 600/10 and service-transition validations); they never substitute for the required real weekly reviews or real learner evidence.
 - Synthetic identities/seeders must never read, copy or clone real learner PII/evidence to make fixtures "realistic".
 - P1 and P5 mastery/evidence remain fully independent.
 - AI and Mentor Care remain separately gated. Core must stay fully functional with AI OFF and Mentor OFF.
@@ -140,8 +140,9 @@ Goal: make real/synthetic separation structural, not procedural.
 
 Required:
 
-- explicit synthetic run/evidence classification;
-- real expansion/weekly/readiness gates reject synthetic evidence;
+- explicit synthetic identity/evidence classification before any production-schema synthetic learner data is generated;
+- synthetic learner/operational evidence cannot enter real beta membership, consent, weekly-review or learner-readiness paths;
+- explicitly designated engineering validation artifacts remain allowed only for their existing engineering validation slots and never replace real weekly reviews;
 - synthetic identities/seeders cannot read/clone real learner PII/evidence;
 - negative tests in both directions;
 - browser roles cannot bypass the boundary.
@@ -484,10 +485,17 @@ P2-79 -> P2-80
 
 ## Current progress
 
-- P2-62: IN PROGRESS
-- P2-63..P2-80: NOT STARTED
+- P2-62: COMPLETE
+- P2-63: IN PROGRESS
+- P2-64..P2-80: NOT STARTED
 
 ## Change Log
+
+### 2026-09-14 — v1.1
+
+- Marked P2-62 complete after the roadmap/rebaseline PR merged to `main`.
+- Corrected an overbroad rule: synthetic learner/operational evidence can never replace real weekly/release evidence, while explicitly designated engineering validation artifacts (such as the existing 600/10 and service-transition matrices) may still satisfy only their own engineering prerequisite in the expansion gate.
+- Began P2-63 with structural bidirectional real/synthetic identity boundaries before any new production-schema synthetic learner data is generated.
 
 ### 2026-09-14 — v1.0
 
