@@ -87,22 +87,32 @@ begin
     v_private_rows:=v_private_rows+coalesce(v_count,0);
   end loop;
 
-  if to_regclass('public.practice_attempts') is not null then
-    select count(*) into v_practice_attempts
-    from public.practice_attempts
-    where user_id=p_user_id;
+  -- Isolated CI has intentionally minimal legacy fixture schemas, while live
+  -- production has user_id on these tables. Guard by the actual column contract
+  -- rather than merely table existence so the same migration replays safely in
+  -- both environments.
+  if exists(
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='practice_attempts' and column_name='user_id'
+  ) then
+    execute 'select count(*) from public.practice_attempts where user_id=$1'
+      into v_practice_attempts using p_user_id;
   end if;
 
-  if to_regclass('public.tour_attempts') is not null then
-    select count(*) into v_tour_attempts
-    from public.tour_attempts
-    where user_id=p_user_id;
+  if exists(
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='tour_attempts' and column_name='user_id'
+  ) then
+    execute 'select count(*) from public.tour_attempts where user_id=$1'
+      into v_tour_attempts using p_user_id;
   end if;
 
-  if to_regclass('public.certificates') is not null then
-    select count(*) into v_certificates
-    from public.certificates
-    where user_id=p_user_id;
+  if exists(
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='certificates' and column_name='user_id'
+  ) then
+    execute 'select count(*) from public.certificates where user_id=$1'
+      into v_certificates using p_user_id;
   end if;
 
   return jsonb_build_object(
