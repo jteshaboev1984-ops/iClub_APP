@@ -132,3 +132,4 @@ ROLLBACK;
 SELECT 'P2-38 cleanup residue gate matrix: GREEN' AS result;
 \ir p2_57_cleanup_integrity_residue_matrix.sql
 \ir p2_58_governed_synthetic_cleanup_matrix.sql
+\ir p2_61_real_monitoring_window_matrix.sql
