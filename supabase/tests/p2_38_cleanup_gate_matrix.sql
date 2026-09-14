@@ -158,3 +158,6 @@ SET rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false
 WHERE id=1;
 SELECT set_config('p270.isolated_db','true',false);
 \ir p2_70_content_lifecycle_runway_matrix.sql
+-- P2-71 is rollback-only and temporarily enables Core inside its own transaction.
+SELECT set_config('p271.isolated_db','true',false);
+\ir p2_71_failure_adversarial_campaign_matrix.sql
