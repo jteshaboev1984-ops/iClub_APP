@@ -1,0 +1,228 @@
+name: P2-74 AI Shadow Safety
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - supabase/tests/p2_74_ai_shadow_safety_matrix.sql
+      - 'supabase/functions/exam-prep-ai/**'
+      - .github/scripts/p2_74_ai_shadow_safety_regression.js
+      - .github/workflows/p2-74-ai-shadow-safety.yml
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - supabase/tests/p2_74_ai_shadow_safety_matrix.sql
+      - 'supabase/functions/exam-prep-ai/**'
+      - .github/scripts/p2_74_ai_shadow_safety_regression.js
+      - .github/workflows/p2-74-ai-shadow-safety.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ai-shadow-safety:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostic log
+        run: printf 'P2-74 AI shadow safety CI\n' > p274-ai-shadow.log
+
+      - name: Bootstrap isolated legacy and Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p274-ai-shadow.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p274-ai-shadow.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql 2>&1 | tee -a p274-ai-shadow.log
+
+      - name: Apply complete current Exam Prep migration stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
+          test "${#files[@]}" -ge 1
+
+          apply_one() {
+            local f="$1"
+            local b
+            b="$(basename "$f")"
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              echo '=== Replaying production Core-only controlled-beta boundary ===' | tee -a p274-ai-shadow.log
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>p274-ai-shadow.log 2>&1
+            fi
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              echo '=== Normalizing historical Stage-4 patch anchors in isolated CI only ===' | tee -a p274-ai-shadow.log
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >>p274-ai-shadow.log 2>&1
+            fi
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              echo '=== Seeding isolated production-shaped cohort dependency ===' | tee -a p274-ai-shadow.log
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('p236-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated P2-74 dependency') on conflict(cohort_key) do nothing" >>p274-ai-shadow.log 2>&1
+            fi
+            echo "=== Applying $f ===" | tee -a p274-ai-shadow.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p274-ai-shadow.log 2>&1
+          }
+
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|\
+              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|\
+              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|\
+              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|\
+              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|\
+              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  echo '=== Replaying P2-17..P2-20 in production migration order ===' | tee -a p274-ai-shadow.log
+                  for rb in "${recent[@]}"; do
+                    apply_one "supabase/migrations/$rb"
+                  done
+                fi
+                continue
+                ;;
+            esac
+            apply_one "$f"
+          done
+
+      - name: Normalize production-shaped Core-on AI-off shadow baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' >>p274-ai-shadow.log 2>&1
+          update private.exam_prep_feature_config
+          set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now()
+          where id=1;
+          update private.exam_prep_ai_policy set generation_enabled=false,updated_at=now() where id=1;
+          update private.exam_prep_optional_capability_status
+          set runtime_status='shadow',gate_version=null,updated_at=now()
+          where capability_code='ai_assist';
+          SQL
+
+          generation="$(psql -Atqc "select generation_enabled from private.exam_prep_ai_policy where id=1")"
+          runtime="$(psql -Atqc "select runtime_status from private.exam_prep_optional_capability_status where capability_code='ai_assist'")"
+          cards="$(psql -Atqc "select count(*) from private.exam_prep_ai_source_cards where approval_status='approved' and is_runtime_allowed")"
+          echo "P274_GENERATION=$generation" | tee -a p274-ai-shadow.log
+          echo "P274_RUNTIME=$runtime" | tee -a p274-ai-shadow.log
+          echo "P274_RUNTIME_CARDS=$cards" | tee -a p274-ai-shadow.log
+          test "$generation" = 'f'
+          test "$runtime" = 'shadow'
+          test "$cards" = '12'
+
+      - name: Run rollback-only AI shadow database safety matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p274.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_74_ai_shadow_safety_matrix.sql 2>&1 | tee -a p274-ai-shadow.log
+
+      - name: Validate fake-provider shadow safety script
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/p2_74_ai_shadow_safety_regression.js
+          node .github/scripts/p2_74_ai_shadow_safety_regression.js 2>&1 | tee -a p274-ai-shadow.log
+
+      - name: Recheck production Edge Function remains providerless and non-authoritative
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f supabase/functions/exam-prep-ai/index.ts
+          grep -q 'get_exam_prep_ai_guard_v1' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'get_exam_prep_ai_source_cards_service_v1' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'record_exam_prep_ai_audit_service_v1' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'model_not_configured' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'academic_state_changed: false' supabase/functions/exam-prep-ai/index.ts
+          ! grep -q 'correct_answer' supabase/functions/exam-prep-ai/index.ts
+          ! grep -q 'answer_key' supabase/functions/exam-prep-ai/index.ts
+          ! grep -q 'OPENAI_API_KEY' supabase/functions/exam-prep-ai/index.ts
+          ! grep -q 'ANTHROPIC_API_KEY' supabase/functions/exam-prep-ai/index.ts
+          ! grep -q 'GEMINI_API_KEY' supabase/functions/exam-prep-ai/index.ts
+
+      - name: Type-check production Edge Function
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Deno check
+        run: deno check supabase/functions/exam-prep-ai/index.ts
+
+      - name: Prove rollback restored AI-off shadow and zero P2-74 residue
+        shell: bash
+        run: |
+          set -euo pipefail
+          generation="$(psql -Atqc "select generation_enabled from private.exam_prep_ai_policy where id=1")"
+          runtime="$(psql -Atqc "select runtime_status from private.exam_prep_optional_capability_status where capability_code='ai_assist'")"
+          synth="$(psql -Atqc "select count(*) from private.exam_prep_synthetic_identities where fixture_profile_key='SVF-P274-AI-SHADOW'")"
+          runs="$(psql -Atqc "select count(*) from private.exam_prep_synthetic_validation_runs where run_id='SV-P274CI-AI-SHADOW'")"
+          cards="$(psql -Atqc "select count(*) from private.exam_prep_ai_source_cards where source_card_key like 'p274:%'")"
+          users="$(psql -Atqc "select count(*) from auth.users where email like 'exam-prep-sv-p274-%@invalid.example'")"
+          echo "P274_POST_GENERATION=$generation" | tee -a p274-ai-shadow.log
+          echo "P274_POST_RUNTIME=$runtime" | tee -a p274-ai-shadow.log
+          echo "P274_POST_SYNTH=$synth" | tee -a p274-ai-shadow.log
+          echo "P274_POST_RUNS=$runs" | tee -a p274-ai-shadow.log
+          echo "P274_POST_CARDS=$cards" | tee -a p274-ai-shadow.log
+          echo "P274_POST_USERS=$users" | tee -a p274-ai-shadow.log
+          test "$generation" = 'f'
+          test "$runtime" = 'shadow'
+          test "$synth" = '0'
+          test "$runs" = '0'
+          test "$cards" = '0'
+          test "$users" = '0'
+
+      - name: Mark P2-74 shadow safety GREEN
+        run: echo 'P2-74 AI SHADOW SAFETY GREEN' | tee -a p274-ai-shadow.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-74-ai-shadow-safety
+          path: p274-ai-shadow.log
+          if-no-files-found: error
+          retention-days: 7
