@@ -69,6 +69,7 @@ const read = file => fs.readFileSync(file, 'utf8');
   }, sentinels);
 
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-config.js') });
+  await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-contracts.js') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-static-data.js') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-store.js') });
 
