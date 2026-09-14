@@ -20,6 +20,7 @@ DECLARE
   v_auth uuid;
   v_session uuid;
   v_payload jsonb;
+  v_provenance jsonb;
   v_expected int:=0;
   v_control_audit_before int:=0;
   v_control_audit_after int:=0;
@@ -99,7 +100,7 @@ BEGIN
   ) VALUES(
     v_auth,v_uid,v_assessment.program_version_id,v_assessment.content_version_id,
     v_assessment.id,v_assessment.assessment_version,v_assessment.component_code,
-    'diagnostic','finalized','p258-cleanup-session',1,'{}'::jsonb,now()
+    'diagnostic','finalized','beta-scenario-p258-cleanup-session',1,'{}'::jsonb,now()
   ) RETURNING id INTO v_session;
 
   UPDATE private.exam_prep_session_authorizations
@@ -124,11 +125,15 @@ BEGIN
      OR coalesce((v_payload#>>'{blocking_counts,integrity_events}')::int,0)<>1 THEN
     RAISE EXCEPTION 'P2-58 primary synthetic fixture missing from residue breakdown: %',v_payload;
   END IF;
-  IF coalesce((v_payload#>>'{blocking_counts,audit_events}')::int,0)<1 THEN
-    RAISE EXCEPTION 'P2-58 synthetic audit residue was not counted: %',v_payload;
+  IF coalesce((v_payload#>>'{blocking_counts,audit_events}')::int,0)<1 OR v_expected<=4 THEN
+    RAISE EXCEPTION 'P2-58 full audited residue was not counted: %',v_payload;
   END IF;
-  IF v_expected<=4 THEN
-    RAISE EXCEPTION 'P2-58 full residue total did not include audit/child state: %',v_payload;
+
+  v_provenance:=private.exam_prep_beta_cleanup_provenance_v1(v_cohort_id);
+  IF coalesce((v_provenance->>'eligible')::boolean,false) IS NOT TRUE
+     OR coalesce((v_provenance->>'explicit_synthetic_sessions')::int,0)<>1
+     OR coalesce((v_provenance->>'ambiguous_sessions')::int,-1)<>0 THEN
+    RAISE EXCEPTION 'P2-59 explicit synthetic provenance fixture wrong: %',v_provenance;
   END IF;
 
   SELECT count(*) INTO v_control_audit_before
@@ -144,7 +149,7 @@ BEGIN
   END IF;
 
   BEGIN
-    PERFORM public.cleanup_exam_prep_beta_synthetic_progress_v1(
+    PERFORM public.cleanup_exam_prep_beta_synthetic_progress_v2(
       'p258-ci-cohort',v_expected,'p2-58-kill-switch-proof','I_CONFIRM_SYNTHETIC_EXAM_PREP_CLEANUP_V1'
     );
   EXCEPTION WHEN OTHERS THEN
@@ -164,9 +169,45 @@ BEGIN
   END;
   IF NOT v_blocked THEN RAISE EXCEPTION 'P2-58 immutable fact delete was possible outside governed cleanup'; END IF;
 
+  -- Periodic re-audit guard: a browser-shaped, untagged session must make the
+  -- cleanup fail closed even when all other cleanup gates are satisfied.
+  UPDATE private.exam_prep_sessions
+  SET client_idempotency_key='ep-diag-p258-ambiguous'
+  WHERE id=v_session;
+
+  v_provenance:=private.exam_prep_beta_cleanup_provenance_v1(v_cohort_id);
+  IF coalesce((v_provenance->>'eligible')::boolean,true)
+     OR coalesce((v_provenance->>'ambiguous_sessions')::int,0)<>1 THEN
+    RAISE EXCEPTION 'P2-59 ambiguous session was not detected: %',v_provenance;
+  END IF;
+
+  v_payload:=public.get_exam_prep_beta_cleanup_readiness_v1('p258-ci-cohort');
+  v_expected:=coalesce((v_payload->>'blocking_rows')::int,0);
   v_blocked:=false;
   BEGIN
-    PERFORM public.cleanup_exam_prep_beta_synthetic_progress_v1(
+    PERFORM public.cleanup_exam_prep_beta_synthetic_progress_v2(
+      'p258-ci-cohort',v_expected,'p2-59-provenance-proof','I_CONFIRM_SYNTHETIC_EXAM_PREP_CLEANUP_V1'
+    );
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM NOT LIKE 'exam_prep_cleanup_ambiguous_session_provenance count=%' THEN RAISE; END IF;
+    v_blocked:=true;
+  END;
+  IF NOT v_blocked THEN RAISE EXCEPTION 'P2-59 ambiguous learner provenance did not block cleanup'; END IF;
+
+  UPDATE private.exam_prep_sessions
+  SET client_idempotency_key='beta-scenario-p258-cleanup-session'
+  WHERE id=v_session;
+
+  v_payload:=public.get_exam_prep_beta_cleanup_readiness_v1('p258-ci-cohort');
+  v_expected:=coalesce((v_payload->>'blocking_rows')::int,0);
+  v_provenance:=private.exam_prep_beta_cleanup_provenance_v1(v_cohort_id);
+  IF coalesce((v_provenance->>'eligible')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'P2-59 explicit provenance did not recover after retagging test fixture: %',v_provenance;
+  END IF;
+
+  v_blocked:=false;
+  BEGIN
+    PERFORM public.cleanup_exam_prep_beta_synthetic_progress_v2(
       'p258-ci-cohort',v_expected+1,'p2-58-snapshot-proof','I_CONFIRM_SYNTHETIC_EXAM_PREP_CLEANUP_V1'
     );
   EXCEPTION WHEN OTHERS THEN
@@ -175,15 +216,16 @@ BEGIN
   END;
   IF NOT v_blocked THEN RAISE EXCEPTION 'P2-58 stale expected row count did not block cleanup'; END IF;
 
-  v_payload:=public.cleanup_exam_prep_beta_synthetic_progress_v1(
+  v_payload:=public.cleanup_exam_prep_beta_synthetic_progress_v2(
     'p258-ci-cohort',v_expected,'p2-58-clean-proof','I_CONFIRM_SYNTHETIC_EXAM_PREP_CLEANUP_V1'
   );
 
   IF coalesce((v_payload->>'before_blocking_rows')::int,-1)<>v_expected
      OR coalesce((v_payload->>'after_blocking_rows')::int,-1)<>0
      OR v_payload->>'development_data_state'<>'clean'
-     OR coalesce((v_payload->>'real_monitoring_armed')::boolean,true) THEN
-    RAISE EXCEPTION 'P2-58 cleanup result contract wrong: %',v_payload;
+     OR coalesce((v_payload->>'real_monitoring_armed')::boolean,true)
+     OR coalesce((v_payload#>>'{cleanup_provenance,eligible}')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'P2-58/P2-59 cleanup result contract wrong: %',v_payload;
   END IF;
 
   IF EXISTS(select 1 from private.exam_prep_sessions where user_id=v_uid)
@@ -250,8 +292,11 @@ BEGIN
 
   IF has_function_privilege('anon','public.cleanup_exam_prep_beta_synthetic_progress_v1(text,integer,text,text)','EXECUTE')
      OR has_function_privilege('authenticated','public.cleanup_exam_prep_beta_synthetic_progress_v1(text,integer,text,text)','EXECUTE')
-     OR NOT has_function_privilege('service_role','public.cleanup_exam_prep_beta_synthetic_progress_v1(text,integer,text,text)','EXECUTE') THEN
-    RAISE EXCEPTION 'P2-58 cleanup RPC grant boundary wrong';
+     OR has_function_privilege('service_role','public.cleanup_exam_prep_beta_synthetic_progress_v1(text,integer,text,text)','EXECUTE')
+     OR has_function_privilege('anon','public.cleanup_exam_prep_beta_synthetic_progress_v2(text,integer,text,text)','EXECUTE')
+     OR has_function_privilege('authenticated','public.cleanup_exam_prep_beta_synthetic_progress_v2(text,integer,text,text)','EXECUTE')
+     OR NOT has_function_privilege('service_role','public.cleanup_exam_prep_beta_synthetic_progress_v2(text,integer,text,text)','EXECUTE') THEN
+    RAISE EXCEPTION 'P2-59 cleanup RPC grant boundary wrong';
   END IF;
 END
 $$;
@@ -270,4 +315,4 @@ BEGIN
 END
 $$;
 
-\echo 'P2-58 governed synthetic cleanup matrix: GREEN'
+\echo 'P2-58/P2-59 governed synthetic cleanup provenance matrix: GREEN'
