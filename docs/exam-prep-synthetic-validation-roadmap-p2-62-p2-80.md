@@ -491,10 +491,18 @@ P2-79 -> P2-80
 - P2-65: COMPLETE
 - P2-66: COMPLETE
 - P2-67: COMPLETE
-- P2-68: IN PROGRESS
-- P2-69..P2-80: NOT STARTED
+- P2-68: COMPLETE
+- P2-69: COMPLETE
+- P2-70: IN PROGRESS
+- P2-71..P2-80: NOT STARTED
 
 ## Change Log
+
+### 2026-09-14 — v1.3
+
+- Closed P2-68 after the accelerated academic-time harness and its weekly-plan ownership hotfix both passed full current-schema CI and production verification. The hotfix changed only how synthetic weekly-plan items resolve their owner; real learner time and legacy state remained unchanged.
+- Closed P2-69 after the full rollback-only Stage 0 -> 6 Core synthetic learner journey passed, including independent P1/P5 progression, correction/remediation/delayed retest, mixed evidence, timed/full-paper readiness, zero synthetic residue and unchanged legacy state. P2-69 merged through PR #62; resulting `main` SHA is `3a44e9b71f783c042bbe5a73feb57d28dcbcdb05`.
+- Began P2-70 content lifecycle/runway validation. The read-only audit found three early P5 retest source items whose governed metadata was already `reserve` + `withheld` but whose assessment-item `is_holdout` snapshot flag remained false. No historical session snapshot existed for those three questions. A narrow fail-closed alignment migration and a full 81-skill content lifecycle matrix were staged for validation before any production change.
 
 ### 2026-09-14 — v1.2
 
