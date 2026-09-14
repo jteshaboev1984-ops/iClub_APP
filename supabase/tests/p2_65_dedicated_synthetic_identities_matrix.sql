@@ -146,7 +146,7 @@ BEGIN
   END;
   IF NOT v_blocked THEN RAISE EXCEPTION 'P2-65 reversed synthetic identity kinds were accepted'; END IF;
 
-  -- Real control assignment proves learner-facing RLS has another row to hide.
+  -- Real control assignment proves there is independent real private state to hide.
   INSERT INTO private.exam_prep_mentor_assignments(
     learner_user_id,mentor_user_id,component_code,assignment_status,valid_from
   ) VALUES(v_real,v_real_mentor,'P5','active',now());
@@ -176,25 +176,44 @@ BEGIN
 END
 $$;
 
--- Authenticate as the synthetic learner and prove existing owner RLS cannot read
--- the independent real learner profile/assignment.
+-- Authenticate as the synthetic learner. The current browser boundary denies the
+-- private schema entirely; the public capability surface must also remain fail-closed
+-- despite a same-run synthetic assignment anchor.
 SELECT set_config('request.jwt.claim.sub',(SELECT user_id::text FROM p265_people WHERE person_key='learner_a'),true);
 SELECT set_config('request.jwt.claim.role','authenticated',true);
 SET LOCAL ROLE authenticated;
 
 DO $$
 DECLARE
-  v_profiles int;
-  v_assignments int;
+  v_blocked boolean:=false;
+  v_cap record;
 BEGIN
-  SELECT count(*) INTO v_profiles FROM private.exam_prep_exam_profiles;
-  IF v_profiles<>1 THEN
-    RAISE EXCEPTION 'P2-65 synthetic learner RLS profile isolation failed visible_rows=%',v_profiles;
+  BEGIN
+    PERFORM count(*) FROM private.exam_prep_exam_profiles;
+  EXCEPTION WHEN insufficient_privilege THEN
+    v_blocked:=true;
+  END;
+  IF NOT v_blocked THEN
+    RAISE EXCEPTION 'P2-65 browser unexpectedly read private learner profiles';
   END IF;
 
-  SELECT count(*) INTO v_assignments FROM private.exam_prep_mentor_assignments;
-  IF v_assignments<>1 THEN
-    RAISE EXCEPTION 'P2-65 synthetic learner RLS assignment isolation failed visible_rows=%',v_assignments;
+  v_blocked:=false;
+  BEGIN
+    PERFORM count(*) FROM private.exam_prep_mentor_assignments;
+  EXCEPTION WHEN insufficient_privilege THEN
+    v_blocked:=true;
+  END;
+  IF NOT v_blocked THEN
+    RAISE EXCEPTION 'P2-65 browser unexpectedly read private mentor assignments';
+  END IF;
+
+  SELECT * INTO v_cap FROM public.get_exam_prep_capabilities_v1();
+  IF coalesce(v_cap.core_access,true)
+     OR coalesce(v_cap.ai_assist,true)
+     OR coalesce(v_cap.mentor_care_entitled,true)
+     OR coalesce(v_cap.mentor_assignment_active,true)
+     OR coalesce(v_cap.mentor_authority,true) THEN
+    RAISE EXCEPTION 'P2-65 synthetic identity gained browser capability authority';
   END IF;
 END
 $$;
