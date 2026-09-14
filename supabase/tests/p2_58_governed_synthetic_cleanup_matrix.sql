@@ -20,6 +20,9 @@ DECLARE
   v_auth uuid;
   v_session uuid;
   v_payload jsonb;
+  v_expected int:=0;
+  v_control_audit_before int:=0;
+  v_control_audit_after int:=0;
   v_blocked boolean:=false;
 BEGIN
   SELECT id INTO v_program
@@ -112,9 +115,37 @@ BEGIN
       mentor_enabled=false,kill_switch=false,updated_at=now()
   WHERE id=1;
 
+  v_payload:=public.get_exam_prep_beta_cleanup_readiness_v1('p258-ci-cohort');
+  v_expected:=coalesce((v_payload->>'blocking_rows')::int,0);
+
+  IF coalesce((v_payload#>>'{blocking_counts,exam_profiles}')::int,0)<>1
+     OR coalesce((v_payload#>>'{blocking_counts,session_authorizations}')::int,0)<>1
+     OR coalesce((v_payload#>>'{blocking_counts,sessions}')::int,0)<>1
+     OR coalesce((v_payload#>>'{blocking_counts,integrity_events}')::int,0)<>1 THEN
+    RAISE EXCEPTION 'P2-58 primary synthetic fixture missing from residue breakdown: %',v_payload;
+  END IF;
+  IF coalesce((v_payload#>>'{blocking_counts,audit_events}')::int,0)<1 THEN
+    RAISE EXCEPTION 'P2-58 synthetic audit residue was not counted: %',v_payload;
+  END IF;
+  IF v_expected<=4 THEN
+    RAISE EXCEPTION 'P2-58 full residue total did not include audit/child state: %',v_payload;
+  END IF;
+
+  SELECT count(*) INTO v_control_audit_before
+  FROM private.exam_prep_audit_events a
+  WHERE a.object_type=any(array[
+    'private.exam_prep_beta_members',
+    'private.exam_prep_beta_consents',
+    'private.exam_prep_feature_entitlements'
+  ]::text[])
+    AND (a.target_user_id=v_uid OR a.actor_user_id=v_uid);
+  IF v_control_audit_before<1 THEN
+    RAISE EXCEPTION 'P2-58 expected preserved control audit history';
+  END IF;
+
   BEGIN
     PERFORM public.cleanup_exam_prep_beta_synthetic_progress_v1(
-      'p258-ci-cohort',4,'p2-58-kill-switch-proof','I_CONFIRM_SYNTHETIC_EXAM_PREP_CLEANUP_V1'
+      'p258-ci-cohort',v_expected,'p2-58-kill-switch-proof','I_CONFIRM_SYNTHETIC_EXAM_PREP_CLEANUP_V1'
     );
   EXCEPTION WHEN OTHERS THEN
     IF SQLERRM<>'exam_prep_cleanup_requires_controlled_beta_kill_switch' THEN RAISE; END IF;
@@ -136,7 +167,7 @@ BEGIN
   v_blocked:=false;
   BEGIN
     PERFORM public.cleanup_exam_prep_beta_synthetic_progress_v1(
-      'p258-ci-cohort',999,'p2-58-snapshot-proof','I_CONFIRM_SYNTHETIC_EXAM_PREP_CLEANUP_V1'
+      'p258-ci-cohort',v_expected+1,'p2-58-snapshot-proof','I_CONFIRM_SYNTHETIC_EXAM_PREP_CLEANUP_V1'
     );
   EXCEPTION WHEN OTHERS THEN
     IF SQLERRM NOT LIKE 'exam_prep_cleanup_snapshot_mismatch expected=% actual=%' THEN RAISE; END IF;
@@ -145,10 +176,10 @@ BEGIN
   IF NOT v_blocked THEN RAISE EXCEPTION 'P2-58 stale expected row count did not block cleanup'; END IF;
 
   v_payload:=public.cleanup_exam_prep_beta_synthetic_progress_v1(
-    'p258-ci-cohort',4,'p2-58-clean-proof','I_CONFIRM_SYNTHETIC_EXAM_PREP_CLEANUP_V1'
+    'p258-ci-cohort',v_expected,'p2-58-clean-proof','I_CONFIRM_SYNTHETIC_EXAM_PREP_CLEANUP_V1'
   );
 
-  IF coalesce((v_payload->>'before_blocking_rows')::int,-1)<>4
+  IF coalesce((v_payload->>'before_blocking_rows')::int,-1)<>v_expected
      OR coalesce((v_payload->>'after_blocking_rows')::int,-1)<>0
      OR v_payload->>'development_data_state'<>'clean'
      OR coalesce((v_payload->>'real_monitoring_armed')::boolean,true) THEN
@@ -162,6 +193,45 @@ BEGIN
     RAISE EXCEPTION 'P2-58 learner-scoped synthetic rows remain after cleanup';
   END IF;
 
+  v_payload:=public.get_exam_prep_beta_cleanup_readiness_v1('p258-ci-cohort');
+  IF coalesce((v_payload->>'blocking_rows')::int,-1)<>0 THEN
+    RAISE EXCEPTION 'P2-58 cleanup readiness still reports synthetic residue: %',v_payload;
+  END IF;
+
+  IF EXISTS(
+    SELECT 1 FROM private.exam_prep_audit_events a
+    WHERE a.object_type=any(array[
+      'private.exam_prep_exam_profiles',
+      'private.exam_prep_session_authorizations',
+      'private.exam_prep_sessions'
+    ]::text[])
+      AND (a.target_user_id=v_uid OR a.actor_user_id=v_uid)
+  ) THEN
+    RAISE EXCEPTION 'P2-58 synthetic progress audit rows remain after cleanup';
+  END IF;
+
+  SELECT count(*) INTO v_control_audit_after
+  FROM private.exam_prep_audit_events a
+  WHERE a.object_type=any(array[
+    'private.exam_prep_beta_members',
+    'private.exam_prep_beta_consents',
+    'private.exam_prep_feature_entitlements'
+  ]::text[])
+    AND (a.target_user_id=v_uid OR a.actor_user_id=v_uid);
+  IF v_control_audit_after<>v_control_audit_before THEN
+    RAISE EXCEPTION 'P2-58 preserved control audit history changed before=% after=%',v_control_audit_before,v_control_audit_after;
+  END IF;
+
+  IF NOT EXISTS(
+    SELECT 1 FROM private.exam_prep_audit_events a
+    WHERE a.event_type='beta_synthetic_progress_cleaned'
+      AND a.object_type='private.exam_prep_beta_expansion_controls'
+      AND a.object_id=v_cohort_id::text
+      AND a.metadata->>'cleanup_evidence_ref'='p2-58-clean-proof'
+  ) THEN
+    RAISE EXCEPTION 'P2-58 cleanup summary audit event missing';
+  END IF;
+
   IF NOT EXISTS(select 1 from private.exam_prep_beta_members where cohort_id=v_cohort_id and user_id=v_uid and member_status='active')
      OR NOT EXISTS(select 1 from private.exam_prep_beta_consents where cohort_id=v_cohort_id and user_id=v_uid)
      OR NOT EXISTS(select 1 from private.exam_prep_feature_entitlements where user_id=v_uid)
@@ -169,13 +239,19 @@ BEGIN
     RAISE EXCEPTION 'P2-58 cleanup removed preserved control or public-user state';
   END IF;
 
-  IF (select development_data_state from private.exam_prep_beta_expansion_controls where cohort_id=v_cohort_id)<>'clean' THEN
-    RAISE EXCEPTION 'P2-58 expansion control not moved to clean state';
+  IF (select development_data_state from private.exam_prep_beta_expansion_controls where cohort_id=v_cohort_id)<>'clean'
+     OR (select real_review_epoch_started_at from private.exam_prep_beta_expansion_controls where cohort_id=v_cohort_id) is not null THEN
+    RAISE EXCEPTION 'P2-58 expansion control state wrong after cleanup';
+  END IF;
+
+  IF NOT (select kill_switch from private.exam_prep_feature_config where id=1) THEN
+    RAISE EXCEPTION 'P2-58 cleanup unexpectedly disabled kill switch';
   END IF;
 
   IF has_function_privilege('anon','public.cleanup_exam_prep_beta_synthetic_progress_v1(text,integer,text,text)','EXECUTE')
-     OR has_function_privilege('authenticated','public.cleanup_exam_prep_beta_synthetic_progress_v1(text,integer,text,text)','EXECUTE') THEN
-    RAISE EXCEPTION 'P2-58 cleanup function became browser-executable';
+     OR has_function_privilege('authenticated','public.cleanup_exam_prep_beta_synthetic_progress_v1(text,integer,text,text)','EXECUTE')
+     OR NOT has_function_privilege('service_role','public.cleanup_exam_prep_beta_synthetic_progress_v1(text,integer,text,text)','EXECUTE') THEN
+    RAISE EXCEPTION 'P2-58 cleanup RPC grant boundary wrong';
   END IF;
 END
 $$;
@@ -189,6 +265,8 @@ BEGIN
   IF v_count<>0 THEN RAISE EXCEPTION 'P2-58 rollback left synthetic auth users=%',v_count; END IF;
   SELECT count(*) INTO v_count FROM private.exam_prep_integrity_events WHERE client_event_id='p258-integrity-event-0001';
   IF v_count<>0 THEN RAISE EXCEPTION 'P2-58 rollback left integrity residue=%',v_count; END IF;
+  SELECT count(*) INTO v_count FROM private.exam_prep_audit_events WHERE metadata->>'cleanup_evidence_ref'='p2-58-clean-proof';
+  IF v_count<>0 THEN RAISE EXCEPTION 'P2-58 rollback left cleanup audit evidence=%',v_count; END IF;
 END
 $$;
 
