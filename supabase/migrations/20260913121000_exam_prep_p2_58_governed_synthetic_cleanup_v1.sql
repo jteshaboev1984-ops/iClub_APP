@@ -3,6 +3,179 @@ begin;
 -- P2-58: narrowly governed cleanup of learner-scoped synthetic Exam Prep data.
 -- This does not arm real monitoring and does not touch beta membership, consent,
 -- entitlements, legacy Practice/Tours, ratings, certificates or public users.
+--
+-- Periodic safety re-audit found that learner-scoped audit rows and child rows
+-- were not part of the original residue total. The cleanup gate now counts and
+-- proves removal of those rows too, while preserving audit history for the
+-- beta membership / consent / entitlement controls that survive the cleanup.
+
+create or replace function private.exam_prep_audit_row_change_v1()
+returns trigger
+language plpgsql
+security definer
+set search_path to ''
+as $$
+declare
+  v_before jsonb;
+  v_after jsonb;
+  v_actor_text text;
+  v_target_text text;
+  v_component text;
+  v_object_id text;
+  v_program_key text;
+begin
+  -- Row-level delete/update audit events for synthetic fixtures would themselves
+  -- become synthetic residue. During the service-role-only governed cleanup we
+  -- suppress those per-row events and emit one explicit cleanup summary later.
+  if current_setting('iclub.exam_prep_synthetic_cleanup', true)='on' then
+    return null;
+  end if;
+
+  if tg_op = 'INSERT' then v_before := null; v_after := to_jsonb(new);
+  elsif tg_op = 'UPDATE' then v_before := to_jsonb(old); v_after := to_jsonb(new);
+  else v_before := to_jsonb(old); v_after := null; end if;
+
+  v_actor_text := coalesce(v_after->>'updated_by', v_after->>'created_by', v_before->>'updated_by', v_before->>'created_by');
+  v_target_text := coalesce(v_after->>'user_id', v_after->>'learner_user_id', v_before->>'user_id', v_before->>'learner_user_id');
+  v_component := coalesce(v_after->>'component_code', v_after->>'target_component_code', v_after->>'owner_component_code', v_before->>'component_code', v_before->>'target_component_code', v_before->>'owner_component_code');
+  v_object_id := coalesce(v_after->>'id', v_after->>'program_key', v_after->>'user_id', v_after->>'learner_user_id', v_after->>'skill_code', v_after->>'prerequisite_code', v_after->>'mixed_code', v_before->>'id', v_before->>'program_key', v_before->>'user_id', v_before->>'learner_user_id', v_before->>'skill_code', v_before->>'prerequisite_code', v_before->>'mixed_code');
+  v_program_key := coalesce(v_after->>'program_key', v_before->>'program_key', 'math_as_p1_p5');
+
+  insert into private.exam_prep_audit_events(
+    program_key, actor_user_id, actor_role, event_type, object_type, object_id,
+    target_user_id, component_code, before_state, after_state, metadata
+  )
+  values(
+    v_program_key,
+    coalesce(nullif(v_actor_text, '')::uuid, auth.uid()),
+    coalesce(auth.role(), session_user),
+    lower(tg_op),
+    tg_table_schema || '.' || tg_table_name,
+    v_object_id,
+    nullif(v_target_text, '')::uuid,
+    case when v_component in ('P1','P5') then v_component else null end,
+    v_before,
+    v_after,
+    jsonb_build_object('trigger', tg_name)
+  );
+  return null;
+end;
+$$;
+
+create or replace function private.exam_prep_beta_synthetic_residue_v2(p_cohort_id bigint)
+returns jsonb
+language plpgsql
+stable security definer
+set search_path=''
+as $$
+declare
+  v_counts jsonb;
+  v_total int:=0;
+begin
+  if not exists(select 1 from private.exam_prep_beta_cohorts c where c.id=p_cohort_id) then
+    raise exception 'exam_prep_beta_cohort_not_found' using errcode='P0002';
+  end if;
+
+  select jsonb_build_object(
+    'ai_audit',(select count(*) from private.exam_prep_ai_audit x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'ai_daily_usage',(select count(*) from private.exam_prep_ai_daily_usage x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'audit_events',(
+      select count(*)
+      from private.exam_prep_audit_events x
+      where x.object_type = any(array[
+        'private.exam_prep_correction_cases',
+        'private.exam_prep_exam_appointments',
+        'private.exam_prep_exam_map_revisions',
+        'private.exam_prep_exam_ops_confirmations',
+        'private.exam_prep_exam_profiles',
+        'private.exam_prep_legacy_evidence_references',
+        'private.exam_prep_mentor_assignments',
+        'private.exam_prep_mentor_queue_items',
+        'private.exam_prep_mentor_service_status',
+        'private.exam_prep_progress_revalidation_cases',
+        'private.exam_prep_recovery_cases',
+        'private.exam_prep_retest_events',
+        'private.exam_prep_safeguarding_events',
+        'private.exam_prep_session_authorizations',
+        'private.exam_prep_sessions'
+      ]::text[])
+      and exists(
+        select 1
+        from private.exam_prep_beta_members bm
+        where bm.cohort_id=p_cohort_id
+          and bm.member_status='active'
+          and (bm.user_id=x.target_user_id or bm.user_id=x.actor_user_id)
+      )
+    ),
+    'component_access_gates',(select count(*) from private.exam_prep_component_access_gates x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'component_placements',(select count(*) from private.exam_prep_component_placements x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'correction_actions',(select count(*) from private.exam_prep_correction_actions x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'correction_cases',(select count(*) from private.exam_prep_correction_cases x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'evidence_events',(select count(*) from private.exam_prep_evidence_events x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'exam_appointments',(select count(*) from private.exam_prep_exam_appointments x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'exam_map_revisions',(select count(*) from private.exam_prep_exam_map_revisions x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'exam_ops_confirmations',(select count(*) from private.exam_prep_exam_ops_confirmations x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'exam_profiles',(select count(*) from private.exam_prep_exam_profiles x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'human_review_recommendations',(select count(*) from private.exam_prep_human_review_recommendations x join private.exam_prep_beta_members bm on bm.user_id=x.learner_user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'integrity_events',(select count(*) from private.exam_prep_integrity_events x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'legacy_evidence_references',(select count(*) from private.exam_prep_legacy_evidence_references x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'mentor_assignments',(select count(*) from private.exam_prep_mentor_assignments x join private.exam_prep_beta_members bm on bm.user_id=x.learner_user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'mentor_queue_items',(select count(*) from private.exam_prep_mentor_queue_items x join private.exam_prep_beta_members bm on bm.user_id=x.learner_user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'mentor_reviews',(select count(*) from private.exam_prep_mentor_reviews x join private.exam_prep_beta_members bm on bm.user_id=x.learner_user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'mentor_second_checks',(
+      select count(*) from private.exam_prep_mentor_second_checks x
+      where exists(
+        select 1 from private.exam_prep_mentor_reviews r
+        join private.exam_prep_beta_members bm on bm.user_id=r.learner_user_id and bm.cohort_id=p_cohort_id and bm.member_status='active'
+        where r.id=x.review_id
+      ) or exists(
+        select 1 from private.exam_prep_mentor_queue_items q
+        join private.exam_prep_beta_members bm on bm.user_id=q.learner_user_id and bm.cohort_id=p_cohort_id and bm.member_status='active'
+        where q.id=x.queue_item_id
+      )
+    ),
+    'mentor_service_status',(select count(*) from private.exam_prep_mentor_service_status x join private.exam_prep_beta_members bm on bm.user_id=x.learner_user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'prerequisite_states',(select count(*) from private.exam_prep_prerequisite_states x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'progress_revalidation_cases',(select count(*) from private.exam_prep_progress_revalidation_cases x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'progress_revalidation_items',(
+      select count(*) from private.exam_prep_progress_revalidation_items x
+      join private.exam_prep_progress_revalidation_cases c on c.id=x.case_id
+      join private.exam_prep_beta_members bm on bm.user_id=c.user_id and bm.cohort_id=p_cohort_id
+      where bm.member_status='active'
+    ),
+    'readiness_signoffs',(select count(*) from private.exam_prep_readiness_signoffs x join private.exam_prep_beta_members bm on bm.user_id=x.learner_user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'recovery_cases',(select count(*) from private.exam_prep_recovery_cases x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'responses',(select count(*) from private.exam_prep_responses x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'retest_events',(select count(*) from private.exam_prep_retest_events x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'safeguarding_events',(select count(*) from private.exam_prep_safeguarding_events x join private.exam_prep_beta_members bm on bm.user_id=x.learner_user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'session_authorizations',(select count(*) from private.exam_prep_session_authorizations x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'session_items',(
+      select count(*) from private.exam_prep_session_items x
+      join private.exam_prep_sessions s on s.id=x.session_id
+      join private.exam_prep_beta_members bm on bm.user_id=s.user_id and bm.cohort_id=p_cohort_id
+      where bm.member_status='active'
+    ),
+    'sessions',(select count(*) from private.exam_prep_sessions x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'skill_states',(select count(*) from private.exam_prep_skill_states x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'stage_states',(select count(*) from private.exam_prep_stage_states x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'timed_attempt_results',(select count(*) from private.exam_prep_timed_attempt_results x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'timed_written_self_marks',(select count(*) from private.exam_prep_timed_written_self_marks x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active'),
+    'weekly_plan_items',(
+      select count(*) from private.exam_prep_weekly_plan_items x
+      join private.exam_prep_weekly_plans p on p.id=x.plan_id
+      join private.exam_prep_beta_members bm on bm.user_id=p.user_id and bm.cohort_id=p_cohort_id
+      where bm.member_status='active'
+    ),
+    'weekly_plans',(select count(*) from private.exam_prep_weekly_plans x join private.exam_prep_beta_members bm on bm.user_id=x.user_id and bm.cohort_id=p_cohort_id where bm.member_status='active')
+  ) into v_counts;
+
+  select coalesce(sum(value::int),0)::int into v_total from jsonb_each_text(v_counts);
+  return jsonb_build_object('total_rows',v_total,'counts',v_counts);
+end;
+$$;
+
+revoke all on function private.exam_prep_beta_synthetic_residue_v2(bigint) from public,anon,authenticated;
+grant execute on function private.exam_prep_beta_synthetic_residue_v2(bigint) to service_role;
 
 create or replace function private.exam_prep_block_immutable_mutation_v1()
 returns trigger
@@ -128,7 +301,16 @@ begin
   select jsonb_build_object(
     'active_beta_members',(select count(*) from private.exam_prep_beta_members where cohort_id=v_c.id and member_status='active'),
     'consents',(select count(*) from private.exam_prep_beta_consents where cohort_id=v_c.id),
-    'feature_entitlements',(select count(*) from private.exam_prep_feature_entitlements e where e.user_id=any(v_users))
+    'feature_entitlements',(select count(*) from private.exam_prep_feature_entitlements e where e.user_id=any(v_users)),
+    'control_audit_events',(
+      select count(*) from private.exam_prep_audit_events a
+      where a.object_type=any(array[
+        'private.exam_prep_beta_members',
+        'private.exam_prep_beta_consents',
+        'private.exam_prep_feature_entitlements'
+      ]::text[])
+      and (a.target_user_id=any(v_users) or a.actor_user_id=any(v_users))
+    )
   ) into v_before_controls;
 
   select jsonb_build_object(
@@ -168,7 +350,7 @@ begin
   where i.case_id=c.id and c.user_id=any(v_users);
   delete from private.exam_prep_progress_revalidation_cases where user_id=any(v_users);
 
-  -- Timed, correction and planning graphs.
+  -- Timed, correction and planning graphs. Weekly plan items cascade with plans.
   delete from private.exam_prep_timed_written_self_marks where user_id=any(v_users);
   delete from private.exam_prep_timed_attempt_results where user_id=any(v_users);
   delete from private.exam_prep_correction_actions where user_id=any(v_users);
@@ -176,7 +358,7 @@ begin
   delete from private.exam_prep_weekly_plans where user_id=any(v_users);
   delete from private.exam_prep_correction_cases where user_id=any(v_users);
 
-  -- Immutable assessment facts before session parents.
+  -- Immutable assessment facts before session parents. Session items cascade with sessions.
   delete from private.exam_prep_evidence_events where user_id=any(v_users);
   delete from private.exam_prep_integrity_events where user_id=any(v_users);
   delete from private.exam_prep_responses where user_id=any(v_users);
@@ -198,6 +380,28 @@ begin
   delete from private.exam_prep_skill_states where user_id=any(v_users);
   delete from private.exam_prep_stage_states where user_id=any(v_users);
 
+  -- Remove only audit rows for synthetic progress objects. Control audit rows for
+  -- membership, consent and entitlements are preserved and checked below.
+  delete from private.exam_prep_audit_events a
+  where a.object_type = any(array[
+    'private.exam_prep_correction_cases',
+    'private.exam_prep_exam_appointments',
+    'private.exam_prep_exam_map_revisions',
+    'private.exam_prep_exam_ops_confirmations',
+    'private.exam_prep_exam_profiles',
+    'private.exam_prep_legacy_evidence_references',
+    'private.exam_prep_mentor_assignments',
+    'private.exam_prep_mentor_queue_items',
+    'private.exam_prep_mentor_service_status',
+    'private.exam_prep_progress_revalidation_cases',
+    'private.exam_prep_recovery_cases',
+    'private.exam_prep_retest_events',
+    'private.exam_prep_safeguarding_events',
+    'private.exam_prep_session_authorizations',
+    'private.exam_prep_sessions'
+  ]::text[])
+  and (a.target_user_id=any(v_users) or a.actor_user_id=any(v_users));
+
   if v_prev_cleanup_marker is null then
     perform set_config('iclub.exam_prep_synthetic_cleanup','',true);
   else
@@ -213,7 +417,16 @@ begin
   select jsonb_build_object(
     'active_beta_members',(select count(*) from private.exam_prep_beta_members where cohort_id=v_c.id and member_status='active'),
     'consents',(select count(*) from private.exam_prep_beta_consents where cohort_id=v_c.id),
-    'feature_entitlements',(select count(*) from private.exam_prep_feature_entitlements e where e.user_id=any(v_users))
+    'feature_entitlements',(select count(*) from private.exam_prep_feature_entitlements e where e.user_id=any(v_users)),
+    'control_audit_events',(
+      select count(*) from private.exam_prep_audit_events a
+      where a.object_type=any(array[
+        'private.exam_prep_beta_members',
+        'private.exam_prep_beta_consents',
+        'private.exam_prep_feature_entitlements'
+      ]::text[])
+      and (a.target_user_id=any(v_users) or a.actor_user_id=any(v_users))
+    )
   ) into v_after_controls;
   if v_after_controls<>v_before_controls then
     raise exception 'exam_prep_cleanup_control_state_changed before=% after=%',v_before_controls,v_after_controls;
