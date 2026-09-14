@@ -494,10 +494,21 @@ P2-79 -> P2-80
 - P2-68: COMPLETE
 - P2-69: COMPLETE
 - P2-70: COMPLETE
-- P2-71: IN PROGRESS
-- P2-72..P2-80: NOT STARTED
+- P2-71: COMPLETE
+- P2-72: COMPLETE
+- P2-73: COMPLETE — Core Engineering GREEN
+- P2-74: IN PROGRESS
+- P2-75..P2-80: NOT STARTED
 
 ## Change Log
+
+### 2026-09-14 — v1.5
+
+- Closed P2-71 after the rollback-only failure/adversarial campaign passed and merged to `main` at `418a8aad9b22769743eea51715f119e6bfab3b8c`. It covered offline/retry/idempotency, stale actions, duplicate submit/finalize, timed expiry/integrity, cross-user denial, P1/P5 leakage attempts, protected-answer boundaries and clean rollback.
+- Closed P2-72 after Legacy Preservation Firewall v2 merged to `main` at `668ed7f32874425201b318abfbf6fcc2bea38649`. Isolated database fingerprints and browser storage sentinels showed synthetic-induced mutation = 0; production read-only smoke found zero synthetic-linked legacy rows, zero forbidden Exam Prep legacy DML paths and zero Exam Prep triggers on protected legacy tables.
+- Closed P2-73 after the three-seed Core Engineering Dress Rehearsal merged to `main` at `ea2a3a83e6ec1c04711eb09a1e405a98fca5a331`. The same candidate SHA passed seeds 27301, 27302 and 27303 across Stage 0 -> 6, all 81 skills, adversarial paths, 600/10 isolation, browser journey, EN/RU/UZ, legacy preservation and zero synthetic residue.
+- Core Engineering is GREEN. This remains an engineering result only; real learner UX/calibration/support/capacity evidence is still UNPROVEN.
+- Began P2-74 AI Shadow Safety. Production learner AI remains disabled and no real-user AI enablement is authorized by this status change.
 
 ### 2026-09-14 — v1.4
 
