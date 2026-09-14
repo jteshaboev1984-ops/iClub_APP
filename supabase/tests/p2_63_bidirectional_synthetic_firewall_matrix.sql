@@ -16,6 +16,7 @@ DECLARE
   v_real_shaped uuid:=gen_random_uuid();
   v_bad_email uuid:=gen_random_uuid();
   v_cohort_id bigint;
+  v_run_id text:='SV-P263CI-0001';
   v_preflight jsonb;
   v_report jsonb;
   v_blocked boolean;
@@ -26,6 +27,10 @@ BEGIN
     'p263-ci-real-cohort','math_as_p1_p5','draft',12,0,72,
     'isolated P2-63 real/synthetic firewall validation'
   ) RETURNING id INTO v_cohort_id;
+
+  PERFORM private.register_exam_prep_synthetic_validation_run_v1(
+    v_run_id,'p263-v1',repeat('a',40),'p2-64',263,'core','p2-63-isolated-proof'
+  );
 
   -- Fresh dedicated synthetic account: auth/public identity exists, but no Exam
   -- Prep state, legacy attempts or certificates exist yet.
@@ -48,9 +53,9 @@ BEGIN
   END IF;
 
   INSERT INTO private.exam_prep_synthetic_identities(
-    user_id,identity_status,evidence_ref,purpose
+    user_id,run_id,identity_status,evidence_ref,purpose
   ) VALUES(
-    v_synth,'active','p2-63-isolated-proof',
+    v_synth,v_run_id,'active','p2-63-isolated-proof',
     'Dedicated isolated synthetic learner identity for firewall validation.'
   );
 
@@ -141,9 +146,9 @@ BEGIN
   v_blocked:=false;
   BEGIN
     INSERT INTO private.exam_prep_synthetic_identities(
-      user_id,identity_status,evidence_ref,purpose
+      user_id,run_id,identity_status,evidence_ref,purpose
     ) VALUES(
-      v_real_shaped,'active','p2-63-relabel-proof',
+      v_real_shaped,v_run_id,'active','p2-63-relabel-proof',
       'This insert must fail because the account already has beta state.'
     );
   EXCEPTION WHEN OTHERS THEN
@@ -176,9 +181,9 @@ BEGIN
   v_blocked:=false;
   BEGIN
     INSERT INTO private.exam_prep_synthetic_identities(
-      user_id,identity_status,evidence_ref,purpose
+      user_id,run_id,identity_status,evidence_ref,purpose
     ) VALUES(
-      v_bad_email,'active','p2-63-email-proof',
+      v_bad_email,v_run_id,'active','p2-63-email-proof',
       'This insert must fail because the identity is not dedicated synthetic.'
     );
   EXCEPTION WHEN OTHERS THEN
@@ -251,6 +256,13 @@ BEGIN
   FROM private.exam_prep_synthetic_identities;
   IF v_count<>0 THEN
     RAISE EXCEPTION 'P2-63 rollback left synthetic identity registry rows=%',v_count;
+  END IF;
+
+  SELECT count(*) INTO v_count
+  FROM private.exam_prep_synthetic_validation_runs
+  WHERE run_id='SV-P263CI-0001';
+  IF v_count<>0 THEN
+    RAISE EXCEPTION 'P2-63 rollback left synthetic run registry rows=%',v_count;
   END IF;
 END
 $$;
