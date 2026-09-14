@@ -16,6 +16,7 @@ DECLARE
   v_uid uuid;
   v_real_uid uuid:=gen_random_uuid();
   v_program bigint;
+  v_skill text;
   v_clock jsonb;
   v_virtual_now timestamptz;
   v_plan uuid;
@@ -30,6 +31,16 @@ BEGIN
     AND status='active';
   IF v_program IS NULL THEN
     RAISE EXCEPTION 'P2-68 FIX canonical program missing';
+  END IF;
+
+  SELECT skill_code INTO v_skill
+  FROM private.exam_prep_syllabus_nodes
+  WHERE program_version_id=v_program
+    AND component_code='P1'
+  ORDER BY sequence_no,skill_code
+  LIMIT 1;
+  IF v_skill IS NULL THEN
+    RAISE EXCEPTION 'P2-68 FIX governed P1 skill missing';
   END IF;
 
   PERFORM private.register_exam_prep_canonical_synthetic_run_v2(
@@ -60,7 +71,7 @@ BEGIN
   INSERT INTO private.exam_prep_weekly_plan_items(
     plan_id,priority_order,item_type,skill_code,action_code,action_payload
   ) VALUES(
-    v_plan,1,'learning',null,'BUILD_FIRST_COVERAGE',jsonb_build_object('p2_68_fix',true)
+    v_plan,1,'learning',v_skill,'BUILD_FIRST_COVERAGE',jsonb_build_object('p2_68_fix',true)
   );
 
   SELECT created_at INTO v_synth_created
@@ -91,7 +102,7 @@ BEGIN
   INSERT INTO private.exam_prep_weekly_plan_items(
     plan_id,priority_order,item_type,skill_code,action_code,action_payload
   ) VALUES(
-    v_real_plan,1,'learning',null,'BUILD_FIRST_COVERAGE',jsonb_build_object('p2_68_fix','real-control')
+    v_real_plan,1,'learning',v_skill,'BUILD_FIRST_COVERAGE',jsonb_build_object('p2_68_fix','real-control')
   );
 
   SELECT created_at INTO v_real_created
