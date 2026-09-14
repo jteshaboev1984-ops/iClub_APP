@@ -186,7 +186,7 @@ END
 $$;
 RESET ROLE;
 
-UPDATE private.exam_prep_sessions SET status='abandoned',completed_at=now()
+UPDATE private.exam_prep_sessions SET status='abandoned'
 WHERE user_id=(SELECT user_id FROM p274_people WHERE person_key='learner') AND client_idempotency_key='p274-protected-session-0001';
 
 UPDATE private.exam_prep_feature_config SET ai_enabled=false,updated_at=now() WHERE id=1;
