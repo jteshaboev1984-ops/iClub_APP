@@ -53,9 +53,9 @@ BEGIN
   END IF;
 
   INSERT INTO private.exam_prep_synthetic_identities(
-    user_id,run_id,identity_status,evidence_ref,purpose
+    user_id,run_id,identity_kind,fixture_profile_key,identity_status,evidence_ref,purpose
   ) VALUES(
-    v_synth,v_run_id,'active','p2-63-isolated-proof',
+    v_synth,v_run_id,'learner','SVF-P263-CLEAN','active','p2-63-isolated-proof',
     'Dedicated isolated synthetic learner identity for firewall validation.'
   );
 
@@ -146,9 +146,9 @@ BEGIN
   v_blocked:=false;
   BEGIN
     INSERT INTO private.exam_prep_synthetic_identities(
-      user_id,run_id,identity_status,evidence_ref,purpose
+      user_id,run_id,identity_kind,fixture_profile_key,identity_status,evidence_ref,purpose
     ) VALUES(
-      v_real_shaped,v_run_id,'active','p2-63-relabel-proof',
+      v_real_shaped,v_run_id,'learner','SVF-P263-REAL-SHAPED','active','p2-63-relabel-proof',
       'This insert must fail because the account already has beta state.'
     );
   EXCEPTION WHEN OTHERS THEN
@@ -181,9 +181,9 @@ BEGIN
   v_blocked:=false;
   BEGIN
     INSERT INTO private.exam_prep_synthetic_identities(
-      user_id,run_id,identity_status,evidence_ref,purpose
+      user_id,run_id,identity_kind,fixture_profile_key,identity_status,evidence_ref,purpose
     ) VALUES(
-      v_bad_email,v_run_id,'active','p2-63-email-proof',
+      v_bad_email,v_run_id,'learner','SVF-P263-BAD-EMAIL','active','p2-63-email-proof',
       'This insert must fail because the identity is not dedicated synthetic.'
     );
   EXCEPTION WHEN OTHERS THEN
