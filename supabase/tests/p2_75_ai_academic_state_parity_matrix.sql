@@ -38,30 +38,16 @@ DECLARE
   v_response_id uuid;
   v_evidence_id uuid;
 BEGIN
-  SELECT
-    a.id,
-    a.content_version_id,
-    a.assessment_version,
-    ai.question_id,
-    ai.primary_skill_code,
-    ai.reserve_role,
-    m.id,
-    m.question_snapshot_md5
-  INTO
-    v_assessment_id,
-    v_content_version_id,
-    v_assessment_version,
-    v_question_id,
-    v_skill_code,
-    v_reserve_role,
-    v_content_meta_id,
-    v_question_snapshot_md5
+  SELECT a.id,a.content_version_id,a.assessment_version,
+         ai.question_id,ai.primary_skill_code,ai.reserve_role,
+         m.id,m.question_snapshot_md5
+  INTO v_assessment_id,v_content_version_id,v_assessment_version,
+       v_question_id,v_skill_code,v_reserve_role,
+       v_content_meta_id,v_question_snapshot_md5
   FROM private.exam_prep_assessments a
-  JOIN private.exam_prep_assessment_items ai
-    ON ai.assessment_id=a.id
+  JOIN private.exam_prep_assessment_items ai ON ai.assessment_id=a.id
   JOIN private.exam_prep_question_content_meta m
-    ON m.content_version_id=a.content_version_id
-   AND m.question_id=ai.question_id
+    ON m.content_version_id=a.content_version_id AND m.question_id=ai.question_id
   WHERE a.component_code=p_component
     AND a.assessment_type='learning'
     AND a.status='published'
@@ -143,10 +129,6 @@ SELECT jsonb_build_object(
       'route',p.route,
       'profile_complete',p.profile_complete,
       'content_ready',p.content_ready,
-      'screening_required_items',p.screening_required_items,
-      'screening_required_areas',p.screening_required_areas,
-      'screening_available_items',p.screening_available_items,
-      'screening_available_areas',p.screening_available_areas,
       'screening_answered_items',p.screening_answered_items,
       'screening_answered_areas',p.screening_answered_areas,
       'screening_objective_items',p.screening_objective_items,
@@ -262,12 +244,9 @@ DECLARE
   v_p1_skill text;
   v_delay smallint;
   v_p1_evidence uuid;
-  v_p5_evidence uuid;
   v_case uuid;
   v_retest uuid;
   v_core jsonb;
-  v_ai jsonb;
-  v_core_again jsonb;
   v_count bigint;
 BEGIN
   SELECT id INTO v_program
@@ -330,29 +309,49 @@ BEGIN
   PERFORM set_config('request.jwt.claim.role','authenticated',true);
   PERFORM public.save_exam_prep_exam_profile_v2('CI_P275_PARITY','A',12,6);
 
-  -- Use asymmetric raw evidence so the P1/P5 firewall is exercised while parity is measured.
+  -- Asymmetric evidence simultaneously exercises the P1/P5 firewall.
   v_p1_evidence:=pg_temp.p275_seed_learning_evidence_v1(v_uid,v_program,'P1',v_p1_skill,false,'p1-wrong');
-  v_p5_evidence:=pg_temp.p275_seed_learning_evidence_v1(v_uid,v_program,'P5',null,true,'p5-correct');
+  PERFORM pg_temp.p275_seed_learning_evidence_v1(v_uid,v_program,'P5',null,true,'p5-correct');
 
-  INSERT INTO private.exam_prep_correction_cases(
-    user_id,component_code,skill_code,status,opened_from_evidence_id,engine_version,reason
-  ) VALUES(
-    v_uid,'P1',v_p1_skill,'retest_due',v_p1_evidence,'objective_state_v1',
-    jsonb_build_object('p2_75','parity-retest-eligibility')
-  ) RETURNING id INTO v_case;
+  -- The real evidence machinery must create the unresolved correction from the wrong P1 evidence.
+  SELECT id INTO v_case
+  FROM private.exam_prep_correction_cases
+  WHERE user_id=v_uid
+    AND component_code='P1'
+    AND skill_code=v_p1_skill
+    AND status IN ('open','remediating','retest_due','reopened')
+  ORDER BY opened_at DESC
+  LIMIT 1;
+  IF v_case IS NULL THEN
+    RAISE EXCEPTION 'P2-75 wrong evidence did not open governed correction case';
+  END IF;
 
-  INSERT INTO private.exam_prep_retest_events(
-    correction_case_id,user_id,component_code,skill_code,status,due_not_before
-  ) VALUES(
-    v_case,v_uid,'P1',v_p1_skill,'scheduled',
-    v_now + (v_delay::double precision * interval '1 day')
-  ) RETURNING id INTO v_retest;
+  -- Convert only the isolated fixture to retest-due so eligibility itself is part of the parity snapshot.
+  UPDATE private.exam_prep_correction_cases
+  SET status='retest_due',
+      reason=coalesce(reason,'{}'::jsonb)||jsonb_build_object('p2_75','parity-retest-eligibility')
+  WHERE id=v_case;
+
+  SELECT id INTO v_retest
+  FROM private.exam_prep_retest_events
+  WHERE correction_case_id=v_case
+    AND status IN ('scheduled','authorized')
+  ORDER BY created_at DESC
+  LIMIT 1;
+
+  IF v_retest IS NULL THEN
+    INSERT INTO private.exam_prep_retest_events(
+      correction_case_id,user_id,component_code,skill_code,status,due_not_before
+    ) VALUES(
+      v_case,v_uid,'P1',v_p1_skill,'scheduled',
+      v_now + (v_delay::double precision * interval '1 day')
+    ) RETURNING id INTO v_retest;
+  END IF;
 
   PERFORM private.rebuild_exam_prep_placement_v1(v_uid,'P1');
   PERFORM private.rebuild_exam_prep_placement_v1(v_uid,'P5');
   PERFORM private.rebuild_exam_prep_state_v1(v_uid,'P1');
   PERFORM private.rebuild_exam_prep_state_v1(v_uid,'P5');
-
   v_core:=pg_temp.p275_academic_snapshot_v1(v_uid,v_program);
 
   IF jsonb_array_length(v_core->'placement')<>2 THEN
@@ -366,13 +365,13 @@ BEGIN
   END IF;
   IF jsonb_array_length(v_core#>'{correction_retest,corrections}')<1
      OR jsonb_array_length(v_core#>'{correction_retest,retests}')<1 THEN
-    RAISE EXCEPTION 'P2-75 correction/retest eligibility snapshot is vacuous: %',v_core->'correction_retest';
+    RAISE EXCEPTION 'P2-75 correction/retest snapshot is vacuous: %',v_core->'correction_retest';
   END IF;
   IF (v_core->>'evidence_count')::int<>2 THEN
     RAISE EXCEPTION 'P2-75 expected exactly two controlled raw evidence rows, got %',v_core->>'evidence_count';
   END IF;
 
-  -- Static authority check: deterministic academic functions must not depend on AI capability/state.
+  -- Deterministic academic functions must not depend on AI capability/state.
   SELECT count(*) INTO v_count
   FROM pg_proc p
   JOIN pg_namespace n ON n.oid=p.pronamespace
@@ -384,13 +383,9 @@ BEGIN
     RAISE EXCEPTION 'P2-75 deterministic academic functions reference AI state count=%',v_count;
   END IF;
 
-  -- Enable AI only inside this rollback-only transaction. Raw evidence is unchanged.
-  UPDATE private.exam_prep_feature_entitlements
-  SET ai_assist=true,updated_at=now()
-  WHERE user_id=v_uid;
-  UPDATE private.exam_prep_feature_config
-  SET ai_enabled=true,updated_at=now()
-  WHERE id=1;
+  -- AI is enabled only inside this rolled-back isolated transaction.
+  UPDATE private.exam_prep_feature_entitlements SET ai_assist=true,updated_at=now() WHERE user_id=v_uid;
+  UPDATE private.exam_prep_feature_config SET ai_enabled=true,updated_at=now() WHERE id=1;
   UPDATE private.exam_prep_ai_policy SET generation_enabled=true,updated_at=now() WHERE id=1;
   UPDATE private.exam_prep_optional_capability_status
   SET runtime_status='ready',gate_version='p2-75-isolated-parity',updated_at=now()
@@ -437,7 +432,7 @@ BEGIN
   FROM private.exam_prep_program_versions
   WHERE program_key='math_as_p1_p5' AND version_key='p1_p5_canonical_v1_0' AND status='active';
 
-  -- Recover the Core snapshot deterministically from unchanged raw evidence before comparing AI mode.
+  -- Core-only snapshot from the unchanged raw evidence.
   UPDATE private.exam_prep_feature_entitlements SET ai_assist=false,updated_at=now() WHERE user_id=v_uid;
   UPDATE private.exam_prep_feature_config SET ai_enabled=false,updated_at=now() WHERE id=1;
   UPDATE private.exam_prep_ai_policy SET generation_enabled=false,updated_at=now() WHERE id=1;
@@ -448,7 +443,7 @@ BEGIN
   PERFORM private.rebuild_exam_prep_state_v1(v_uid,'P5');
   v_core:=pg_temp.p275_academic_snapshot_v1(v_uid,v_program);
 
-  -- Re-enable AI and recompute the exact same deterministic state from the exact same evidence.
+  -- Core+AI snapshot from the exact same raw evidence.
   UPDATE private.exam_prep_feature_entitlements SET ai_assist=true,updated_at=now() WHERE user_id=v_uid;
   UPDATE private.exam_prep_feature_config SET ai_enabled=true,updated_at=now() WHERE id=1;
   UPDATE private.exam_prep_ai_policy SET generation_enabled=true,updated_at=now() WHERE id=1;
@@ -469,7 +464,7 @@ BEGIN
     RAISE EXCEPTION 'P2-75 stage parity diff Core=% AI=%',v_core->'stages',v_ai->'stages';
   END IF;
   IF v_core->'correction_retest' IS DISTINCT FROM v_ai->'correction_retest' THEN
-    RAISE EXCEPTION 'P2-75 correction/retest eligibility parity diff Core=% AI=%',v_core->'correction_retest',v_ai->'correction_retest';
+    RAISE EXCEPTION 'P2-75 correction/retest parity diff Core=% AI=%',v_core->'correction_retest',v_ai->'correction_retest';
   END IF;
   IF v_core->'readiness' IS DISTINCT FROM v_ai->'readiness' THEN
     RAISE EXCEPTION 'P2-75 readiness parity diff Core=% AI=%',v_core->'readiness',v_ai->'readiness';
@@ -480,7 +475,7 @@ BEGIN
       v_core->>'evidence_count',v_core->>'evidence_hash',v_ai->>'evidence_count',v_ai->>'evidence_hash';
   END IF;
 
-  -- AI outage/downgrade must return to the same Core academic state without reset or recalculation drift.
+  -- AI outage/downgrade must restore the exact same Core academic state.
   UPDATE private.exam_prep_feature_entitlements SET ai_assist=false,updated_at=now() WHERE user_id=v_uid;
   UPDATE private.exam_prep_feature_config SET ai_enabled=false,updated_at=now() WHERE id=1;
   UPDATE private.exam_prep_ai_policy SET generation_enabled=false,updated_at=now() WHERE id=1;
@@ -492,7 +487,7 @@ BEGIN
   v_core_again:=pg_temp.p275_academic_snapshot_v1(v_uid,v_program);
 
   IF v_core IS DISTINCT FROM v_core_again THEN
-    RAISE EXCEPTION 'P2-75 AI disable/outage failed to return identical Core academic state Core=% CoreAgain=%',v_core,v_core_again;
+    RAISE EXCEPTION 'P2-75 AI disable/outage changed Core academic state Core=% CoreAgain=%',v_core,v_core_again;
   END IF;
 END
 $$;
