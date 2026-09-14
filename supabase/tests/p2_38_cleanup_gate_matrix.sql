@@ -135,3 +135,5 @@ SELECT 'P2-38 cleanup residue gate matrix: GREEN' AS result;
 \ir p2_61_real_monitoring_window_matrix.sql
 SELECT set_config('p263.isolated_db','true',false);
 \ir p2_63_bidirectional_synthetic_firewall_matrix.sql
+SELECT set_config('p264.isolated_db','true',false);
+\ir p2_64_synthetic_run_registry_matrix.sql
