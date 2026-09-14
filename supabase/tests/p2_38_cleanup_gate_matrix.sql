@@ -185,8 +185,41 @@ CREATE TRIGGER p271_seed_exam_profile_v1
 AFTER INSERT ON public.users
 FOR EACH ROW EXECUTE FUNCTION pg_temp.p271_seed_exam_profile_v1();
 
+-- Production timing snapshots are immutable. In this disposable database only,
+-- allow P2-71's explicit virtual-clock acceleration while keeping the default
+-- immutable behavior for every call that does not carry the isolated-test GUC.
+CREATE OR REPLACE FUNCTION private.exam_prep_block_timing_contract_mutation_v1()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path=''
+AS $$
+BEGIN
+  IF old.timing_contract IS DISTINCT FROM new.timing_contract
+     AND current_setting('p271.clock_acceleration',true) IS DISTINCT FROM 'true' THEN
+    RAISE EXCEPTION 'exam_prep_timing_contract_immutable';
+  END IF;
+  RETURN new;
+END
+$$;
+SELECT set_config('p271.clock_acceleration','true',false);
+
 -- P2-71 uses the current content shape: machine diagnostics plus written timed/paper work.
 SELECT set_config('p271.isolated_db','true',false);
 \ir p2_71_failure_adversarial_campaign_matrix.sql
 
 DROP TRIGGER IF EXISTS p271_seed_exam_profile_v1 ON public.users;
+SELECT set_config('p271.clock_acceleration','false',false);
+CREATE OR REPLACE FUNCTION private.exam_prep_block_timing_contract_mutation_v1()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path=''
+AS $$
+BEGIN
+  IF old.timing_contract IS DISTINCT FROM new.timing_contract THEN
+    RAISE EXCEPTION 'exam_prep_timing_contract_immutable';
+  END IF;
+  RETURN new;
+END
+$$;
