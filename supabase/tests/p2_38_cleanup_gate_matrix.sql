@@ -145,5 +145,12 @@ SELECT set_config('p267.isolated_db','true',false);
 \ir p2_67_canonical_scenario_matrix_v2.sql
 SELECT set_config('p268.isolated_db','true',false);
 \ir p2_68_synthetic_virtual_time_matrix.sql
+-- P2-69 uses learner RPCs, so enable Core only inside this disposable CI database.
+UPDATE private.exam_prep_feature_config
+SET rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now()
+WHERE id=1;
 SELECT set_config('p269.isolated_db','true',false);
 \ir p2_69_full_stage0_6_core_simulation.sql
+UPDATE private.exam_prep_feature_config
+SET rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now()
+WHERE id=1;
