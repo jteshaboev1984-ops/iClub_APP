@@ -2,7 +2,8 @@
 
 DO $$
 BEGIN
-  IF current_setting('p261.isolated_db', true) IS DISTINCT FROM 'true' THEN
+  IF current_setting('p261.isolated_db', true) IS DISTINCT FROM 'true'
+     AND current_setting('p238.isolated_db', true) IS DISTINCT FROM 'true' THEN
     RAISE EXCEPTION 'P2-61 REFUSED: isolated test database required';
   END IF;
 END
