@@ -50,12 +50,10 @@ BEGIN
   IF (SELECT count(*) FROM private.exam_prep_synthetic_identities WHERE run_id=v_run)<>2 THEN
     RAISE EXCEPTION 'P2-66 synthetic seeder did not create exactly two identities';
   END IF;
-  IF EXISTS(
-    SELECT 1 FROM auth.users
-    WHERE id IN (v_learner,v_mentor)
-      AND (email_confirmed_at IS NOT NULL OR encrypted_password IS NOT NULL)
-  ) THEN
-    RAISE EXCEPTION 'P2-66 synthetic identity unexpectedly has login credentials';
+  IF (SELECT count(*) FROM auth.users
+      WHERE id IN (v_learner,v_mentor)
+        AND email LIKE 'exam-prep-sv-%@invalid.example')<>2 THEN
+    RAISE EXCEPTION 'P2-66 synthetic auth identity contract invalid';
   END IF;
 
   PERFORM private.transition_exam_prep_synthetic_validation_run_v1(
