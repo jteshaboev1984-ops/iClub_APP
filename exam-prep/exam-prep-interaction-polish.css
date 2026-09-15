@@ -1,4 +1,4 @@
-/* Exam Prep interaction polish: stable answer submits, cleaner plans, compact loading. */
+/* Exam Prep interaction polish: stable answer submits, app-native transitions, cleaner plans. */
 
 .iclub-visual-v3 #exam-prep-host-root .ep-flow-plan-clean .ep-live-head {
   margin-bottom: 2px;
@@ -63,8 +63,9 @@
   font-weight: 740;
 }
 
+/* Keep the exact question surface visually unchanged while an answer is saved. */
 .iclub-visual-v3 #exam-prep-host-root .ep-flow-pending-visual {
-  opacity: .98;
+  opacity: 1;
 }
 
 .iclub-visual-v3 #exam-prep-host-root .ep-flow-pending-visual input,
@@ -95,60 +96,10 @@
   to { transform: rotate(360deg); }
 }
 
-.ep-flow-answer-toast {
-  position: fixed;
-  left: max(16px, env(safe-area-inset-left));
-  right: max(16px, env(safe-area-inset-right));
-  bottom: calc(82px + env(safe-area-inset-bottom));
-  z-index: 2400;
-  max-width: 520px;
-  margin: 0 auto;
-  padding: 11px 13px;
-  border: 1px solid rgba(36, 87, 214, .14);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .98);
-  box-shadow: 0 12px 32px rgba(20, 32, 51, .14);
-  opacity: 0;
-  transform: translateY(10px);
-  pointer-events: none;
-  transition: opacity .16s ease, transform .16s ease;
-}
-
-.ep-flow-answer-toast.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.ep-flow-answer-toast strong {
-  display: block;
-  color: #142033;
-  font-size: 13px;
-  line-height: 1.35;
-  font-weight: 800;
-}
-
-.ep-flow-answer-toast span {
-  display: block;
-  margin-top: 3px;
-  color: #65728A;
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.iclub-visual-v3 #exam-prep-host-root .ep-flow-screen-enter {
-  animation: ep-flow-screen-enter .14s ease-out both;
-}
-
-@keyframes ep-flow-screen-enter {
-  from { opacity: .72; transform: translateY(3px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* Screen changes intentionally have no local fade/translate animation.
+   iClub switches .view / .stack-screen surfaces directly and uses the shared
+   app toast/loading surfaces only when feedback or async status is needed. */
 
 @media (prefers-reduced-motion: reduce) {
   .iclub-visual-v3 .ep-flow-mini-spinner { animation-duration: 1.4s; }
-  .ep-flow-answer-toast,
-  .iclub-visual-v3 #exam-prep-host-root .ep-flow-screen-enter {
-    transition: none;
-    animation: none;
-  }
 }

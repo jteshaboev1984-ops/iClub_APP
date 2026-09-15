@@ -277,14 +277,14 @@
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.dataset.examPrepInteractionPolish = "true";
-    link.href = `${base}exam-prep-interaction-polish.css?v=polish1`;
+    link.href = `${base}exam-prep-interaction-polish.css?v=polish2`;
     document.head.appendChild(link);
   }
 
   if (!document.querySelector('script[data-exam-prep-interaction-polish]')) {
     const script = document.createElement("script");
     script.dataset.examPrepInteractionPolish = "true";
-    script.src = `${base}exam-prep-interaction-polish.js?v=polish1`;
+    script.src = `${base}exam-prep-interaction-polish.js?v=polish2`;
     document.head.appendChild(script);
   }
 })();
