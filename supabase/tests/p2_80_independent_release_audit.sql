@@ -86,13 +86,50 @@ BEGIN
 
   v_scenarios:=private.exam_prep_synthetic_scenario_set_report_v1('p2_67_canonical_v2_0');
   IF coalesce((v_scenarios->>'eligible')::boolean,false) IS NOT TRUE
-     OR coalesce((v_scenarios->>'scenario_count')::int,0)<>15 THEN
+     OR coalesce((v_scenarios->>'total_scenarios')::int,0)<>33
+     OR coalesce((v_scenarios->>'canonical_profiles')::int,0)<>15
+     OR coalesce((v_scenarios->>'canonical_source_profiles')::int,0)<>15
+     OR coalesce((v_scenarios->>'adversarial_variants')::int,0)<>18
+     OR coalesce((v_scenarios->>'locale_violations')::int,-1)<>0
+     OR coalesce((v_scenarios->>'structure_violations')::int,-1)<>0
+     OR coalesce(jsonb_array_length(v_scenarios->'missing_required_tags'),-1)<>0 THEN
     RAISE EXCEPTION 'P2-80 canonical scenario set failed: %',v_scenarios;
   END IF;
-  IF NOT ((v_scenarios->'locales') @> '["en","ru","uz"]'::jsonb)
-     OR NOT ((v_scenarios->'components') @> '["P1","P5"]'::jsonb)
-     OR NOT ((v_scenarios->'service_modes') @> '["core","core_ai","mentor_care"]'::jsonb) THEN
-    RAISE EXCEPTION 'P2-80 scenario coverage incomplete: %',v_scenarios;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM private.exam_prep_synthetic_scenario_sets s
+    WHERE s.scenario_set_version='p2_67_canonical_v2_0'
+      AND s.status='active'
+      AND s.required_locales @> ARRAY['en','ru','uz']::text[]
+      AND s.canonical_profile_count=15
+      AND s.adversarial_variant_count=18
+      AND s.total_scenario_count=33
+  ) THEN
+    RAISE EXCEPTION 'P2-80 scenario-set registry contract drift';
+  END IF;
+
+  IF NOT EXISTS (
+      SELECT 1 FROM private.exam_prep_synthetic_scenarios
+      WHERE scenario_set_version='p2_67_canonical_v2_0' AND capability_mode='core'
+    ) OR NOT EXISTS (
+      SELECT 1 FROM private.exam_prep_synthetic_scenarios
+      WHERE scenario_set_version='p2_67_canonical_v2_0' AND capability_mode='ai_shadow'
+    ) OR NOT EXISTS (
+      SELECT 1 FROM private.exam_prep_synthetic_scenarios
+      WHERE scenario_set_version='p2_67_canonical_v2_0' AND capability_mode='mentor_technical'
+    ) OR NOT EXISTS (
+      SELECT 1 FROM private.exam_prep_synthetic_scenarios
+      WHERE scenario_set_version='p2_67_canonical_v2_0' AND component_focus IN ('P1','BOTH')
+    ) OR NOT EXISTS (
+      SELECT 1 FROM private.exam_prep_synthetic_scenarios
+      WHERE scenario_set_version='p2_67_canonical_v2_0' AND component_focus IN ('P5','BOTH')
+    ) OR EXISTS (
+      SELECT 1 FROM private.exam_prep_synthetic_scenarios
+      WHERE scenario_set_version='p2_67_canonical_v2_0'
+        AND NOT (required_locales @> ARRAY['en','ru','uz']::text[])
+    ) THEN
+    RAISE EXCEPTION 'P2-80 scenario coverage/locale contract drift';
   END IF;
 
   SELECT * INTO v_ai FROM private.exam_prep_ai_policy WHERE id=1;
