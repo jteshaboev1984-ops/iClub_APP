@@ -11,7 +11,8 @@
     language: "ru",
     apiWrapped: false,
     pendingFeedback: null,
-    feedbackFinalized: false
+    feedbackFinalized: false,
+    pendingAnswers: null
   };
 
   function lang(value) {
@@ -23,23 +24,23 @@
     const l = lang(language);
     if (l === "uz") return {
       title: "Tushunishni tekshiring",
-      help: "Qisqa savollar matematik asosni tekshiradi. Keyin yechimingizni o‘z so‘zlaringiz bilan yozing.",
+      help: "Qisqa savollarga javob bering, keyin yechimingizni o‘z so‘zlaringiz bilan tushuntiring.",
       item: "Savol",
-      incomplete: "Avval tushunishni tekshirishdagi barcha savollarga javob bering.",
+      incomplete: "Avval barcha qisqa savollarga javob bering.",
       result: "Tushunish tekshiruvi"
     };
     if (l === "en") return {
       title: "Check your understanding",
-      help: "These short questions check the mathematical idea. Then explain your solution in your own words.",
+      help: "Answer the short questions, then explain your solution in your own words.",
       item: "Check",
-      incomplete: "Answer all understanding checks before submitting your explanation.",
+      incomplete: "Answer all short questions first.",
       result: "Understanding check"
     };
     return {
       title: "Проверьте понимание",
-      help: "Короткие вопросы проверяют математическую основу. Затем объясните решение своими словами.",
+      help: "Ответьте на короткие вопросы, затем объясните решение своими словами.",
       item: "Пункт",
-      incomplete: "Сначала ответьте на все пункты проверки понимания.",
+      incomplete: "Сначала ответьте на все короткие вопросы.",
       result: "Проверка понимания"
     };
   }
@@ -167,6 +168,16 @@
     return [`${c.result}: ${correct}/${total}`, ...missed].filter(Boolean).join(". ");
   }
 
+  function wrappedAnswers(sessionId, itemOrder, item) {
+    const cached = state.pendingAnswers;
+    if (cached
+      && String(cached.sessionId || "") === String(sessionId || "")
+      && Number(cached.itemOrder) === Number(itemOrder)) {
+      return cached.answers;
+    }
+    return collectAnswers(item);
+  }
+
   function wrapApi() {
     if (state.apiWrapped) return;
     const base = internal.api;
@@ -193,10 +204,11 @@
       const item = sessionItem(sessionId, itemOrder);
       let outgoing = payload && typeof payload === "object" ? { ...payload } : {};
       if (item?.item_kind === "written" && checksFor(item).length) {
-        const answers = collectAnswers(item);
+        const answers = wrappedAnswers(sessionId, itemOrder, item);
         if (!answers) return Object.freeze({ ok: false, reason: "understanding_checks_incomplete", error: null });
         outgoing = { ...outgoing, understanding_checks: answers };
       }
+      state.pendingAnswers = null;
       const result = await submitResponse(sessionId, itemOrder, outgoing, idempotencyKey, elapsedMs, language);
       if (!result?.ok || !result.data?.understanding_check?.submitted) return result;
       const explanation = formatFeedback(result.data.understanding_check);
@@ -227,7 +239,16 @@
     if (!button) return;
     const item = currentWrittenItem();
     if (!item || !checksFor(item).length) return;
-    if (collectAnswers(item)) return;
+    const answers = collectAnswers(item);
+    if (answers) {
+      state.pendingAnswers = {
+        sessionId: state.session?.session_id || null,
+        itemOrder: item.item_order,
+        answers
+      };
+      return;
+    }
+    state.pendingAnswers = null;
     event.preventDefault();
     event.stopImmediatePropagation();
     showIncomplete();
