@@ -2,10 +2,11 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p210materials1";
+  const VERSION = "p210materials2";
   let observer = null;
   let busy = false;
   let activeLanguage = "ru";
+  let returnNodes = null;
 
   function rootEl() {
     return document.querySelector("#exam-prep-host-root");
@@ -103,7 +104,25 @@
     })[String(kind || "")] || c.official;
   }
 
+  function captureDashboard() {
+    const root = rootEl();
+    if (!root || root.hidden || root.querySelector("[data-ep-materials-screen]")) return false;
+    returnNodes = Array.from(root.childNodes);
+    return returnNodes.length > 0;
+  }
+
+  function restoreDashboard() {
+    const root = rootEl();
+    if (!root || !Array.isArray(returnNodes) || returnNodes.length === 0) return false;
+    const nodes = returnNodes;
+    returnNodes = null;
+    root.replaceChildren(...nodes);
+    queueMicrotask(injectDashboardActions);
+    return true;
+  }
+
   async function dashboard() {
+    if (restoreDashboard()) return true;
     const app = window.iClubExamPrep;
     if (!app || typeof app.open !== "function") return false;
     return Boolean(await app.open({ subjectKey: "mathematics", language: activeLanguage }));
@@ -187,10 +206,16 @@
 
   async function openMaterials(component) {
     if (busy || !canUse() || !["P1", "P5"].includes(component) || typeof internal.api?.materialsLibrary !== "function") return;
+    if (!captureDashboard()) return;
     busy = true;
     activeLanguage = detectLanguage();
     renderLoading(component);
-    const result = await internal.api.materialsLibrary(activeLanguage);
+    let result;
+    try {
+      result = await internal.api.materialsLibrary(activeLanguage);
+    } catch (_) {
+      result = null;
+    }
     busy = false;
     if (!result?.ok || result.data?.rights_respected !== true || result.data?.protected_content_embedded !== false) {
       renderError(component);
@@ -201,7 +226,11 @@
 
   function injectDashboardActions() {
     const root = rootEl();
-    if (!root || root.hidden || !canUse() || root.querySelector("[data-ep-materials-screen]")) return;
+    if (!root || root.hidden) {
+      returnNodes = null;
+      return;
+    }
+    if (!canUse() || root.querySelector("[data-ep-materials-screen]")) return;
     activeLanguage = detectLanguage();
     const c = copy();
     root.querySelectorAll(".ep-live-card").forEach(card => {
@@ -229,7 +258,7 @@
     }
     if (observer) return;
     observer = new MutationObserver(() => injectDashboardActions());
-    observer.observe(root, { childList: true, subtree: true });
+    observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden", "aria-hidden"] });
     injectDashboardActions();
     internal.materialsView = Object.freeze({ version: VERSION, openMaterials });
   }
