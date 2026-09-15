@@ -247,14 +247,14 @@
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.dataset.examPrepWave1Ux = "true";
-    link.href = `${base}exam-prep-wave1-ux.css?v=wave1ux2`;
+    link.href = `${base}exam-prep-wave1-ux.css?v=wave1ux3`;
     document.head.appendChild(link);
   }
 
   if (!document.querySelector('script[data-exam-prep-wave1-ux]')) {
     const script = document.createElement("script");
     script.dataset.examPrepWave1Ux = "true";
-    script.src = `${base}exam-prep-wave1-ux.js?v=wave1ux2`;
+    script.src = `${base}exam-prep-wave1-ux.js?v=wave1ux3`;
     document.head.appendChild(script);
   }
 
@@ -277,14 +277,14 @@
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.dataset.examPrepInteractionPolish = "true";
-    link.href = `${base}exam-prep-interaction-polish.css?v=polish2`;
+    link.href = `${base}exam-prep-interaction-polish.css?v=polish3`;
     document.head.appendChild(link);
   }
 
   if (!document.querySelector('script[data-exam-prep-interaction-polish]')) {
     const script = document.createElement("script");
     script.dataset.examPrepInteractionPolish = "true";
-    script.src = `${base}exam-prep-interaction-polish.js?v=polish2`;
+    script.src = `${base}exam-prep-interaction-polish.js?v=polish3`;
     document.head.appendChild(script);
   }
 })();
