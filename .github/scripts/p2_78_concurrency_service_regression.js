@@ -76,7 +76,7 @@ async function capabilityWave(learners, mode) {
   const rows = await Promise.all(learners.map(async learner => ({ learner, cap: await capability(learner.user_id) })));
   for (const { learner, cap } of rows) {
     const expectedAi = mode.aiEnabled && learner.ord >= 301;
-    const expectedMentorEntitled = learner.ord <= 30;
+    const expectedMentorEntitled = mode.mentorEnabled && learner.ord <= 30;
     const expectedAssignment = mode.mentorEnabled && learner.ord <= 10 && !mode.pausedLearners?.has(learner.ord);
     assert(cap.core_access === true, `${mode.name}: learner ${learner.ord} lost Core`);
     assert(cap.kill_switch === false, `${mode.name}: learner ${learner.ord} saw kill switch`);
@@ -239,8 +239,8 @@ async function main() {
   await setFlags({ aiEnabled:true, mentorEnabled:true });
   await capabilityWave(learners, { name:'ai-recovered', aiEnabled:true, mentorEnabled:true });
 
-  // Mentor global outage: every learner keeps Core and AI entitlement semantics,
-  // but assignment authority and visible routine mentor queue disappear.
+  // Mentor global outage: stored entitlements remain in the database while the
+  // effective Mentor capability, assignment authority and routine queue fail closed.
   await setFlags({ aiEnabled:true, mentorEnabled:false });
   await capabilityWave(learners, { name:'mentor-outage', aiEnabled:true, mentorEnabled:false });
   await assertQueueHidden(mentors, 0, 'mentor-outage-queue');
