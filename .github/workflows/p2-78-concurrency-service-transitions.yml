@@ -1,0 +1,224 @@
+name: P2-78 600-10 Concurrency and Service Transitions
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - supabase/tests/p2_78_concurrency_service_setup.sql
+      - supabase/tests/p2_78_concurrency_service_cleanup.sql
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - .github/scripts/p2_78_concurrency_service_regression.js
+      - .github/scripts/p2_74_ai_shadow_safety_regression.js
+      - .github/workflows/p2-78-concurrency-service-transitions.yml
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - supabase/tests/p2_78_concurrency_service_setup.sql
+      - supabase/tests/p2_78_concurrency_service_cleanup.sql
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - .github/scripts/p2_78_concurrency_service_regression.js
+      - .github/scripts/p2_74_ai_shadow_safety_regression.js
+      - .github/workflows/p2-78-concurrency-service-transitions.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  concurrency-service-transitions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      P278_POOL_SIZE: '48'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Pin exact candidate SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          printf 'P2-78 600/10 Concurrency and Service Transitions\ncandidate_sha=%s\n' "$CANDIDATE_SHA" > p278-concurrency.log
+
+      - name: Bootstrap isolated legacy and Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p278-concurrency.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p278-concurrency.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql 2>&1 | tee -a p278-concurrency.log
+
+      - name: Apply complete current Exam Prep migration stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
+          test "${#files[@]}" -ge 1
+
+          apply_one() {
+            local f="$1"
+            local b
+            b="$(basename "$f")"
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              echo '=== Replaying production Core-only controlled-beta boundary ===' | tee -a p278-concurrency.log
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>p278-concurrency.log 2>&1
+            fi
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              echo '=== Normalizing historical Stage-4 patch anchors in isolated CI only ===' | tee -a p278-concurrency.log
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >>p278-concurrency.log 2>&1
+            fi
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              echo '=== Seeding isolated production-shaped cohort dependency ===' | tee -a p278-concurrency.log
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('p236-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated P2-78 dependency') on conflict(cohort_key) do nothing" >>p278-concurrency.log 2>&1
+            fi
+            echo "=== Applying $f ===" | tee -a p278-concurrency.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p278-concurrency.log 2>&1
+          }
+
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|\
+              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|\
+              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|\
+              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|\
+              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|\
+              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  echo '=== Replaying P2-17..P2-20 in production migration order ===' | tee -a p278-concurrency.log
+                  for rb in "${recent[@]}"; do apply_one "supabase/migrations/$rb"; done
+                fi
+                continue
+                ;;
+            esac
+            apply_one "$f"
+          done
+
+      - name: Normalize production-shaped optional-layers-off baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' >>p278-concurrency.log 2>&1
+          update private.exam_prep_feature_config
+          set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now()
+          where id=1;
+          update private.exam_prep_ai_policy set generation_enabled=false,updated_at=now() where id=1;
+          update private.exam_prep_optional_capability_status
+          set runtime_status='shadow',gate_version=null,updated_at=now()
+          where capability_code='ai_assist';
+          SQL
+          test "$(psql -Atqc "select core_enabled from private.exam_prep_feature_config where id=1")" = 't'
+          test "$(psql -Atqc "select ai_enabled from private.exam_prep_feature_config where id=1")" = 'f'
+          test "$(psql -Atqc "select mentor_enabled from private.exam_prep_feature_config where id=1")" = 'f'
+
+      - name: Seed governed 600/10 run-owned fixture
+        shell: bash
+        env:
+          PGOPTIONS: '-c p278.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -v p278_git_sha="$CANDIDATE_SHA" -f supabase/tests/p2_78_concurrency_service_setup.sql 2>&1 | tee -a p278-concurrency.log
+
+      - name: Validate concurrency script syntax
+        run: node --check .github/scripts/p2_78_concurrency_service_regression.js
+
+      - name: Install PostgreSQL client dependency for Node concurrency harness
+        run: npm install --no-save pg@8.16.3
+
+      - name: Run 600-client concurrency and service transitions
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/p2_78_concurrency_service_regression.js 2>&1 | tee -a p278-concurrency.log
+
+      - name: Recheck AI outage/fallback with fake provider only
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/p2_74_ai_shadow_safety_regression.js
+          node .github/scripts/p2_74_ai_shadow_safety_regression.js 2>&1 | tee -a p278-concurrency.log
+          echo 'P2-78 paid AI calls: 0' | tee -a p278-concurrency.log
+
+      - name: Governed completion cleanup and zero-residue proof
+        shell: bash
+        env:
+          PGOPTIONS: '-c p278.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_78_concurrency_service_cleanup.sql 2>&1 | tee -a p278-concurrency.log
+
+      - name: Verify post-cleanup production-shaped boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          core="$(psql -Atqc "select core_enabled from private.exam_prep_feature_config where id=1")"
+          ai="$(psql -Atqc "select ai_enabled from private.exam_prep_feature_config where id=1")"
+          mentor="$(psql -Atqc "select mentor_enabled from private.exam_prep_feature_config where id=1")"
+          kill="$(psql -Atqc "select kill_switch from private.exam_prep_feature_config where id=1")"
+          gen="$(psql -Atqc "select generation_enabled from private.exam_prep_ai_policy where id=1")"
+          runtime="$(psql -Atqc "select runtime_status from private.exam_prep_optional_capability_status where capability_code='ai_assist'")"
+          identities="$(psql -Atqc "select count(*) from private.exam_prep_synthetic_identities where run_id='SV-P278-CONCURRENCY'")"
+          echo "P278_POST core=$core ai=$ai mentor=$mentor kill=$kill generation=$gen runtime=$runtime identities=$identities" | tee -a p278-concurrency.log
+          test "$core" = 't'
+          test "$ai" = 'f'
+          test "$mentor" = 'f'
+          test "$kill" = 'f'
+          test "$gen" = 'f'
+          test "$runtime" = 'shadow'
+          test "$identities" = '0'
+
+      - name: Mark P2-78 GREEN
+        run: echo "P2-78 600/10 CONCURRENCY + SERVICE TRANSITIONS GREEN candidate_sha=$CANDIDATE_SHA paid_ai_calls=0" | tee -a p278-concurrency.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-78-concurrency-service-transitions
+          path: p278-concurrency.log
+          if-no-files-found: error
+          retention-days: 7
