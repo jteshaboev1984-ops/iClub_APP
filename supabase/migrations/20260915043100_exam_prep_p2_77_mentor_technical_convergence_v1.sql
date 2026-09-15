@@ -2,8 +2,8 @@ begin;
 
 -- P2-77 convergence hardening.
 -- Keeps the backward-compatible isolation-report key while distinguishing
--- synthetic staff actors from total role grants, and removes a transaction-time
--- edge from assignment handover.
+-- synthetic staff actors from total role grants, and removes transaction-time
+-- edges from assignment handover.
 
 create or replace function private.exam_prep_synthetic_identity_isolation_report_v1()
 returns jsonb
@@ -97,6 +97,7 @@ declare
   v_new_assignment bigint;
   v_moved int:=0;
   v_cfg private.exam_prep_feature_config%rowtype;
+  v_effective_at timestamptz:=now();
   v_handover_at timestamptz:=clock_timestamp();
 begin
   if v_uid is null then raise exception 'exam_prep_auth_required'; end if;
@@ -132,8 +133,11 @@ begin
       and (e.valid_until is null or e.valid_until>now())
   ) then raise exception 'exam_prep_mentor_entitlement_not_active' using errcode='42501'; end if;
 
-  -- clock_timestamp() is deliberate: now() is transaction-stable and can equal
-  -- the fixture/assignment valid_from, violating valid_until > valid_from.
+  -- The old row must close strictly after its valid_from to satisfy the row
+  -- constraint, even when create+handover happen in one transaction. The new
+  -- active row uses transaction-stable now() so active-assignment readers in the
+  -- same transaction can see the replacement immediately. Status='ended' on the
+  -- old row prevents any active-authority overlap.
   v_handover_at:=greatest(v_handover_at,v_old.valid_from + interval '1 microsecond');
 
   update private.exam_prep_mentor_assignments
@@ -145,7 +149,7 @@ begin
   insert into private.exam_prep_mentor_assignments(
     learner_user_id,mentor_user_id,component_code,assignment_status,valid_from,created_by,updated_by
   ) values(
-    v_old.learner_user_id,p_new_mentor_user_id,v_old.component_code,'active',v_handover_at,v_uid,v_uid
+    v_old.learner_user_id,p_new_mentor_user_id,v_old.component_code,'active',v_effective_at,v_uid,v_uid
   ) returning id into v_new_assignment;
 
   update private.exam_prep_mentor_queue_items
@@ -173,14 +177,15 @@ begin
     (select to_jsonb(a) from private.exam_prep_mentor_assignments a where a.id=v_new_assignment),
     jsonb_build_object('reason',trim(p_reason_text),'old_assignment_id',v_old.id,'new_assignment_id',v_new_assignment,
                        'old_mentor_user_id',v_old.mentor_user_id,'new_mentor_user_id',p_new_mentor_user_id,
-                       'moved_open_queue_items',v_moved,'handover_at',v_handover_at)
+                       'moved_open_queue_items',v_moved,'effective_at',v_effective_at,'handover_at',v_handover_at)
   );
 
   return jsonb_build_object(
     'old_assignment_id',v_old.id,'new_assignment_id',v_new_assignment,
     'learner_user_id',v_old.learner_user_id,'component_code',v_old.component_code,
     'old_mentor_user_id',v_old.mentor_user_id,'new_mentor_user_id',p_new_mentor_user_id,
-    'moved_open_queue_items',v_moved,'assignment_status','active','handover_at',v_handover_at
+    'moved_open_queue_items',v_moved,'assignment_status','active',
+    'effective_at',v_effective_at,'handover_at',v_handover_at
   );
 end;
 $$;
