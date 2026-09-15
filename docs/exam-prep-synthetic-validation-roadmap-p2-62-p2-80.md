@@ -501,10 +501,19 @@ P2-79 -> P2-80
 - P2-75: COMPLETE
 - P2-76: COMPLETE — AI Engineering GREEN
 - P2-77: COMPLETE — Mentor Technical GREEN
-- P2-78: IN PROGRESS
-- P2-79..P2-80: NOT STARTED
+- P2-78: COMPLETE
+- P2-79: IN PROGRESS
+- P2-80: NOT STARTED
 
 ## Change Log
+
+### 2026-09-15 — v1.7
+
+- Closed P2-78 after PR #74 merged to `main` at `6ff2fa15e006829ed15b908d6ba921ab3dda74fb`. The scale-shaped isolated gate used 600 dedicated synthetic learners and 10 governed synthetic mentors, produced exactly 10 active human scopes, and produced zero routine mentor queue leakage to the remaining 590 learners.
+- The PR-head P2-78 run `34932623707` passed, and its exact-head P2-73 Core dress rehearsal `34932623724` passed all three deterministic seeds 27301/27302/27303. Post-merge, P2-78 run `34932771666` passed on `main`, and P2-73 run `34932771557` again passed all three seeds.
+- P2-78 exercised concurrent capability/RLS/queue access and retries, AI OFF/ON recovery, Mentor OFF/ON recovery, assignment pause, governed handover and stale retry. Non-zero deterministic academic history remained byte-for-byte/fingerprint equivalent before and after service transitions; paid AI provider calls were 0; governed cleanup left zero synthetic residue.
+- No P2-78 production migration was introduced. Fresh production read-only verification after merge remained `controlled_beta` with Core ON, AI OFF, Mentor OFF, kill switch OFF, AI generation OFF/shadow, zero active synthetic identities, zero active Mentor Care entitlements and zero active mentor assignments.
+- Began P2-79 Recovery / Rollback / Disaster Rehearsal. Recovery must preserve evidence/audit history and legacy state; rollback is logical/additive and must not require manual learner-data repair.
 
 ### 2026-09-15 — v1.6
 
