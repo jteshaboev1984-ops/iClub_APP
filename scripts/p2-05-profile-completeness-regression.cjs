@@ -7,10 +7,14 @@ function assert(condition, message) {
 const api = fs.readFileSync('exam-prep/exam-prep-api.js', 'utf8');
 const guard = fs.readFileSync('exam-prep/exam-prep-profile-completeness.js', 'utf8');
 
-assert(api.includes('exam-prep-profile-completeness.js?v=p205profile2'), 'profile completeness guard is not loaded by Exam Prep API');
+assert(api.includes('exam-prep-profile-completeness.js?v=p205profile3'), 'profile completeness guard is not loaded by Exam Prep API');
 assert(api.includes('data-exam-prep-profile-completeness'), 'profile completeness loader marker missing');
-assert(guard.includes('input.required = true'), 'new Exam Profile form fields are not made required');
-assert(guard.includes('["exam_series", "target_grade"]'), 'exam series and target grade required-field pair missing');
+assert(guard.includes('replaceWithSelect(form, "exam_series", seriesChoices())'), 'new Exam Profile exam-series field is not selectable');
+assert(guard.includes('replaceWithSelect(form, "target_grade", targetChoices())'), 'new Exam Profile target-grade field is not selectable');
+assert(guard.includes('return ["A", "B", "C", "D", "E"]'), 'target-grade choice set must be A-E');
+assert(guard.includes('{ value: "June 2027", label: "May/June 2027" }'), 'May/June 2027 exam-session choice missing');
+assert(guard.includes('{ value: "November 2027", label: "Oct/Nov 2027" }'), 'Oct/Nov 2027 exam-session choice missing');
+assert(guard.includes('if (current && !known)'), 'existing non-standard exam-series value must be preserved instead of silently rewritten');
 assert(guard.includes('String(profile.exam_series || "").trim()'), 'existing profile exam-series completeness check missing');
 assert(guard.includes('String(profile.target_grade || "").trim()'), 'existing profile target-grade completeness check missing');
 assert(guard.includes('data-ep-profile-completion-form'), 'incomplete existing profile repair form missing');
@@ -31,4 +35,4 @@ for (const text of [
   'Your answers and progress are saved'
 ]) assert(guard.includes(text), `required learner-safe copy missing: ${text}`);
 
-console.log('P2-05 Exam Profile completeness regression: GREEN');
+console.log('P2-05 Exam Profile completeness and selectable-field regression: GREEN');
