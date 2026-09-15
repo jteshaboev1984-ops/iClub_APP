@@ -8,7 +8,7 @@ const path = require('path');
   await page.evaluate(() => { window.i18n = { getLang: () => 'ru' }; window.iClubExamPrepHostInternal = {}; });
   await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.css') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.js') });
-  await page.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish2');
+  await page.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish3');
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
   await page.evaluate(() => {
@@ -65,6 +65,32 @@ const path = require('path');
   assert(state.customToast === false, 'Exam Prep must not create its own toast surface outside the app visual system');
   assert(state.question === '3 + 3 = ?', 'next question must remain visible and stable');
   assert(state.hasLocalScreenAnimation === false, 'question-to-question change must match the main app direct stack transition');
+
+  await page.evaluate(() => {
+    const root = document.querySelector('#exam-prep-host-root');
+    root.innerHTML = `<section class="ep-host-shell ep-live" data-test-dashboard><div class="ep-live-grid">Текущий экран подготовки</div><button data-ep-live-plan="P1">Открыть недельный план</button></section>`;
+    root.querySelector('[data-ep-live-plan]').addEventListener('click', () => {
+      root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card" role="status" aria-live="polite">Загрузка…</div></section>`;
+      setTimeout(() => {
+        root.innerHTML = `<section class="ep-host-shell ep-live" data-test-plan-ready><div class="ep-live-card"><div class="ep-live-plan-item">Недельный план готов</div></div></section>`;
+      }, 120);
+    });
+  });
+  await page.click('[data-ep-live-plan]');
+  await page.waitForTimeout(30);
+  state = await page.evaluate(() => ({
+    oldScreen: document.querySelector('[data-test-dashboard]')?.textContent || '',
+    held: Boolean(document.querySelector('[data-ep-transition-hold="1"]')),
+    loadingVisible: /Загрузка/.test(document.querySelector('#exam-prep-host-root')?.textContent || '')
+  }));
+  assert(state.held === true && state.oldScreen.includes('Текущий экран подготовки'), 'the previous Exam Prep screen must remain mounted while the destination data is loading');
+  assert(state.loadingVisible === false, 'intermediate loading text must not replace the previous stable screen');
+  await page.waitForFunction(() => Boolean(document.querySelector('[data-test-plan-ready]')));
+  state = await page.evaluate(() => ({
+    ready: document.querySelector('[data-test-plan-ready]')?.textContent || '',
+    held: Boolean(document.querySelector('[data-ep-transition-hold="1"]'))
+  }));
+  assert(state.ready.includes('Недельный план готов') && state.held === false, 'the ready destination must replace the previous screen directly after its data arrives');
 
   await page.evaluate(() => {
     document.querySelector('#exam-prep-host-root').innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card ep-flow-loading-surface" role="status"><div class="ep-flow-loader"><span class="ep-flow-spinner"></span><div><strong>Обновляем недельный план…</strong><small>Прогресс сохраняется. Не закрывайте экран.</small></div></div></div></section>`;
