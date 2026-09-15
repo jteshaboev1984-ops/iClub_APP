@@ -2,9 +2,9 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "polish1";
+  const VERSION = "polish2";
   let observer = null;
-  let reconcileTimer = null;
+  let reconcileQueued = false;
   let pendingVisual = null;
   let pendingQuestionLabel = "";
   let lastScreenKey = "";
@@ -89,6 +89,12 @@
     return text.replace(/\s{2,}/g, " ").trim();
   }
 
+  function setTextIfChanged(node, value) {
+    if (!node) return;
+    const next = String(value ?? "");
+    if (node.textContent !== next) node.textContent = next;
+  }
+
   function planVisible() {
     const root = rootEl();
     return Boolean(root?.querySelector(".ep-live-plan-item"));
@@ -111,11 +117,11 @@
     }
 
     root.querySelectorAll(".ep-flow-task-name").forEach(node => {
-      node.textContent = humanizeRu(node.textContent);
+      setTextIfChanged(node, humanizeRu(node.textContent));
     });
     root.querySelectorAll(".ep-flow-task-meta").forEach(node => {
       const parts = String(node.textContent || "").split(" · ").filter(Boolean);
-      node.textContent = humanizeRu(parts[0] || "");
+      setTextIfChanged(node, humanizeRu(parts[0] || ""));
     });
   }
 
@@ -123,18 +129,18 @@
     const root = rootEl();
     if (!root) return;
     root.querySelectorAll(".ep-flow-task-name, .ep-flow-correction-title, .ep-flow-completion-skill strong, [data-ep-views-skill] strong").forEach(node => {
-      node.textContent = humanizeRu(node.textContent);
+      setTextIfChanged(node, humanizeRu(node.textContent));
     });
 
     root.querySelectorAll("[data-ep-views-skill] .ep-views-skill-meta").forEach(node => {
       const cleaned = String(node.textContent || "")
         .replace(/\s*·\s*(Навык|Skill|Ko‘nikma)\s+\d+/gi, "")
         .replace(/^\s*·\s*/, " · ");
-      node.textContent = cleaned;
+      setTextIfChanged(node, cleaned);
     });
 
     root.querySelectorAll(".ep-flow-completion-skill > span").forEach(node => {
-      node.textContent = copy().topic;
+      setTextIfChanged(node, copy().topic);
     });
   }
 
@@ -147,6 +153,22 @@
     });
   }
 
+  function setPendingState(screen, { disableControls = false } = {}) {
+    if (!screen) return;
+    screen.classList.add("ep-flow-pending-visual");
+    screen.setAttribute("aria-busy", "true");
+    if (disableControls) {
+      screen.querySelectorAll("input, textarea, select, button").forEach(node => { node.disabled = true; });
+    }
+    const submit = screen.querySelector("[data-ep-live-submit]");
+    if (submit) {
+      submit.classList.add("ep-flow-submit-pending");
+      submit.setAttribute("aria-busy", "true");
+      submit.innerHTML = `<span class="ep-flow-mini-spinner" aria-hidden="true"></span><span>${copy().saving}</span>`;
+    }
+    screen.querySelectorAll(".ep-live-notice[role='status']").forEach(node => node.remove());
+  }
+
   function capturePendingVisual() {
     const root = rootEl();
     if (!root) return;
@@ -154,73 +176,62 @@
     const submit = root.querySelector("[data-ep-live-submit]");
     if (!screen || !submit) return;
     pendingVisual = screen.cloneNode(true);
-    pendingVisual.classList.add("ep-flow-pending-visual");
     pendingQuestionLabel = String(root.querySelector(".ep-live-head strong")?.textContent || "");
+    setPendingState(pendingVisual, { disableControls: true });
+
+    // Match the rest of iClub: keep the current surface in place while work happens.
+    // Only the submit control changes; no opacity animation or screen replacement is shown to the learner.
+    screen.setAttribute("aria-busy", "true");
+    submit.classList.add("ep-flow-submit-pending");
+    submit.setAttribute("aria-busy", "true");
+    submit.innerHTML = `<span class="ep-flow-mini-spinner" aria-hidden="true"></span><span>${copy().saving}</span>`;
+  }
+
+  function looksLikeLoading(root = rootEl()) {
+    if (!root) return false;
+    const status = root.querySelector('[role="status"]');
+    return Boolean(status && (/Загрузка|Loading|Yuklanmoqda|Сохраняем|Saving|Saqlanmoqda/i.test(status.textContent || "") || status.querySelector(".ep-flow-loader")));
   }
 
   function applyPendingVisual() {
     const root = rootEl();
     if (!root || !pendingVisual) return false;
     if (root.querySelector(".ep-flow-pending-visual")) return true;
-    const status = root.querySelector('[role="status"]');
-    const looksLoading = Boolean(status && (/Загрузка|Loading|Yuklanmoqda|Сохраняем|Saving|Saqlanmoqda/i.test(status.textContent || "") || status.querySelector(".ep-flow-loader")));
-    if (!looksLoading) return false;
+    if (!looksLikeLoading(root)) return false;
 
     const clone = pendingVisual.cloneNode(true);
-    clone.classList.add("ep-flow-pending-visual");
-    clone.setAttribute("aria-busy", "true");
-    clone.querySelectorAll("input, textarea, select, button").forEach(node => { node.disabled = true; });
-    const submit = clone.querySelector("[data-ep-live-submit]");
-    if (submit) {
-      submit.classList.add("ep-flow-submit-pending");
-      submit.innerHTML = `<span class="ep-flow-mini-spinner" aria-hidden="true"></span><span>${copy().saving}</span>`;
-    }
-    clone.querySelectorAll(".ep-live-notice[role='status']").forEach(node => node.remove());
+    setPendingState(clone, { disableControls: true });
     root.replaceChildren(clone);
     return true;
   }
 
-  function feedbackSummary(raw) {
+  function feedbackTitle(raw) {
     const c = copy();
     const text = String(raw || "").trim();
-    if (lastSessionType === "diagnostic") return { title: c.saved, detail: "" };
-    if (/^(Верно|Correct|To‘g‘ri)\b/i.test(text)) {
-      const detail = text.split(" — ").slice(1, 2).join("").trim();
-      return { title: c.correct, detail: detail.length <= 120 ? detail : "" };
-    }
-    if (/^(Разберите|Review this mistake|Xatoni)/i.test(text)) {
-      const detail = text.split(" — ").slice(1, 2).join("").trim();
-      return { title: c.incorrect, detail: detail.length <= 120 ? detail : "" };
-    }
-    return { title: c.saved, detail: "" };
+    if (lastSessionType === "diagnostic") return c.saved;
+    if (/^(Верно|Correct|To‘g‘ri)\b/i.test(text)) return c.correct;
+    if (/^(Разберите|Review this mistake|Xatoni|Есть ошибка)/i.test(text)) return c.incorrect;
+    return c.saved;
   }
 
-  function showToast(raw) {
-    const root = rootEl();
-    if (!root) return;
-    const summary = feedbackSummary(raw);
-    let toast = document.querySelector(".ep-flow-answer-toast");
-    if (!toast) {
-      toast = document.createElement("div");
-      toast.className = "ep-flow-answer-toast";
-      toast.setAttribute("role", "status");
-      toast.setAttribute("aria-live", "polite");
-      document.body.appendChild(toast);
-    }
-    toast.innerHTML = `<strong>${summary.title}</strong>${summary.detail ? `<span>${humanizeRu(summary.detail)}</span>` : ""}`;
-    toast.classList.add("show");
+  function showAppToast(raw) {
+    const toast = document.getElementById("toast");
+    if (!toast) return;
+    toast.textContent = feedbackTitle(raw);
+    toast.classList.add("is-show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove("show"), summary.detail ? 2600 : 1600);
+    toastTimer = setTimeout(() => toast.classList.remove("is-show"), 1600);
   }
 
   function compactQuestionNotice() {
     const root = rootEl();
-    if (!root || !root.querySelector("[data-ep-live-submit]") || root.querySelector(".ep-flow-pending-visual")) return;
+    if (!root || !root.querySelector("[data-ep-live-submit]") || root.querySelector(".ep-flow-pending-visual")) return false;
     const notice = root.querySelector(".ep-live-notice[role='status']");
-    if (!notice) return;
+    if (!notice) return false;
     const raw = String(notice.textContent || "");
     notice.remove();
-    showToast(raw);
+    showAppToast(raw);
+    return true;
   }
 
   function findScrollContainer(node) {
@@ -249,19 +260,16 @@
     return "other";
   }
 
-  function smoothScreenEntry() {
+  function syncScreenPosition() {
     const root = rootEl();
     if (!root) return;
     const key = screenKey();
     if (!key || key === lastScreenKey) return;
     const previous = lastScreenKey;
     lastScreenKey = key;
-    const screen = root.firstElementChild;
-    if (screen) {
-      screen.classList.remove("ep-flow-screen-enter");
-      void screen.offsetWidth;
-      screen.classList.add("ep-flow-screen-enter");
-    }
+
+    // Global iClub views/stack screens switch directly. Exam Prep follows the same rule:
+    // no local fade/translate animation and no forced layout reflow.
     if (key !== "question" && key !== "other" && key !== "closed" && previous) {
       const scroller = findScrollContainer(root);
       try {
@@ -308,15 +316,30 @@
     polishPlan();
     polishSkillLabels();
     compactLoading();
-    smoothScreenEntry();
+    syncScreenPosition();
   }
 
   function scheduleReconcile() {
-    if (reconcileTimer) return;
-    reconcileTimer = setTimeout(() => {
-      reconcileTimer = null;
+    if (reconcileQueued) return;
+    reconcileQueued = true;
+    queueMicrotask(() => {
+      reconcileQueued = false;
       reconcile();
-    }, 16);
+    });
+  }
+
+  function onMutations() {
+    const root = rootEl();
+    if (!root) return;
+
+    // These two changes are handled inside the MutationObserver microtask so an
+    // intermediate loading card / inline feedback block cannot reach a painted frame.
+    if (pendingVisual && !root.querySelector(".ep-flow-pending-visual") && looksLikeLoading(root)) {
+      applyPendingVisual();
+      return;
+    }
+    compactQuestionNotice();
+    scheduleReconcile();
   }
 
   function attach() {
@@ -328,7 +351,7 @@
     if (observer) return;
     document.addEventListener("click", onCaptureClick, true);
     window.addEventListener("iclub:exam-prep-session", onSession);
-    observer = new MutationObserver(scheduleReconcile);
+    observer = new MutationObserver(onMutations);
     observer.observe(root, { childList: true, subtree: true, characterData: true });
     scheduleReconcile();
     internal.interactionPolish = Object.freeze({ version: VERSION });
