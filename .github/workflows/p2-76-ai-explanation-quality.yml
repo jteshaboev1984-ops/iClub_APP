@@ -1,0 +1,76 @@
+name: P2-76 AI Explanation Quality
+
+on:
+  push:
+    branches:
+      - hardening/p2-76-ai-explanation-quality
+    paths:
+      - '.github/ai-evals/p2_76_golden*_v1.json'
+      - '.github/scripts/p2_76_ai_explanation_quality_eval.mjs'
+      - '.github/scripts/p2_74_ai_shadow_safety_regression.js'
+      - '.github/workflows/p2-76-ai-explanation-quality.yml'
+      - 'supabase/functions/exam-prep-ai/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/ai-evals/p2_76_golden*_v1.json'
+      - '.github/scripts/p2_76_ai_explanation_quality_eval.mjs'
+      - '.github/scripts/p2_74_ai_shadow_safety_regression.js'
+      - '.github/workflows/p2-76-ai-explanation-quality.yml'
+      - 'supabase/functions/exam-prep-ai/**'
+
+permissions:
+  contents: read
+
+jobs:
+  ai-explanation-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      P276_MODEL: gpt-5.1
+      P276_RESULT_PATH: p276-ai-quality-result.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify production AI remains providerless and non-authoritative
+        run: node .github/scripts/p2_74_ai_shadow_safety_regression.js
+
+      - name: Validate fixed golden packs and evaluator against verified references
+        env:
+          P276_MODE: reference
+          P276_RESULT_PATH: p276-evaluator-selftest.json
+        run: node .github/scripts/p2_76_ai_explanation_quality_eval.mjs
+
+      - name: Require funded OpenAI acceptance credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${OPENAI_API_KEY:-}" ]; then
+            echo 'P2-76 NO-GO: repository secret OPENAI_API_KEY is absent. A real funded provider run is mandatory; reference-only self-test cannot close P2-76.' >&2
+            exit 2
+          fi
+
+      - name: Run funded OpenAI golden quality evaluation
+        env:
+          P276_MODE: provider
+        run: node .github/scripts/p2_76_ai_explanation_quality_eval.mjs
+
+      - name: Print release-gate summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f p276-ai-quality-result.json ]; then
+            node -e "const r=require('./p276-ai-quality-result.json'); console.log(JSON.stringify({stage:r.stage,verdict:r.verdict,model:r.provider_model,cases:r.case_count,passed:r.passed_cases,failed:r.failed_cases,critical:r.critical_failure_count,average:r.average_dimension_score,P1:r.all_components_green,P5:r.all_components_green,locales:r.all_locales_green,theory:r.mathematical_theory_green,tokens:{input:r.total_input_tokens,output:r.total_output_tokens}},null,2))"
+          fi
+
+      - name: Upload P2-76 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-76-ai-explanation-quality
+          path: |
+            p276-evaluator-selftest.json
+            p276-ai-quality-result.json
+          if-no-files-found: warn
+          retention-days: 14
