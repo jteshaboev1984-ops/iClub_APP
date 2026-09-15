@@ -1,10 +1,10 @@
 # Exam Prep Synthetic Validation Roadmap — P2-62 through P2-80
 
-Status: ACTIVE / source of truth for the next Exam Prep development cycle.
+Status: COMPLETE / engineering validation cycle closed. Real-world Evidence remains UNPROVEN.
 
 Owner decision: 2026-09-14.
 
-This document exists so the plan survives chat/context limits. It must remain the canonical working roadmap until P2-80 is complete. The roadmap may be corrected when new evidence requires it, but changes must be explicit: update this file, record the reason in Change Log, and do not silently reuse or skip stage numbers.
+This document exists so the plan survives chat/context limits. It must remain the canonical working roadmap for the completed P2-62 through P2-80 validation cycle. The roadmap may be corrected when new evidence requires it, but changes must be explicit: update this file, record the reason in Change Log, and do not silently reuse or skip stage numbers.
 
 ## Non-negotiable safety rules
 
@@ -502,10 +502,29 @@ P2-79 -> P2-80
 - P2-76: COMPLETE — AI Engineering GREEN
 - P2-77: COMPLETE — Mentor Technical GREEN
 - P2-78: COMPLETE
-- P2-79: IN PROGRESS
-- P2-80: NOT STARTED
+- P2-79: COMPLETE
+- P2-80: COMPLETE — final engineering audit complete; Real-world Evidence UNPROVEN
+
+## Final split verdict
+
+- Core Engineering: GREEN
+- AI Engineering: GREEN
+- Mentor Technical: GREEN
+- Real-world Evidence: UNPROVEN
+- Expanded beta: NO-GO until the real beta evidence gate is satisfied.
+- Mass rollout: NO-GO until the approved real-world release gates are satisfied.
 
 ## Change Log
+
+### 2026-09-15 — v1.8
+
+- Closed P2-79 after PR #76 merged to `main` at `bf8e0399ccfab1de402b97f404f334c0379d8f7c`. PR-head P2-79 run `34933651619` passed and exact-head P2-73 Core run `34933651592` passed all seeds 27301/27302/27303. Post-merge P2-79 run `34933833996` passed, and post-merge Core run `34933833930` again passed all three seeds.
+- P2-79 proved clean recovery from kill-switch interruption, failed isolated migration, learner interruption, stale/retired content, expired/stale client, AI outage with generation disabled, interrupted synthetic run and cleanup, replay and previous-known-good browser rollback. Legacy browser storage remained protected; paid AI provider calls were 0; final synthetic residue was 0.
+- Closed P2-80 after PR #77 merged to `main` at `9fc50773e9e4211c77fa43345c0390f414cf4d14`. Exact-head P2-80 run `34935796701` passed and exact-head P2-73 Core run `34935796799` passed all three deterministic seeds. Post-merge P2-80 run `34935949095` passed, and post-merge P2-73 run `34935949054` again passed all three seeds.
+- P2-80 independently re-audited the approved Master Implementation Plan, Beta Release Plan, Content Governance, AI Safety Architecture, Mentor Care Operating Model, Annual Roadmap compliance, repository/schema/browser boundaries, recovery and legacy protection. The production deployment for the P2-80 merge reached READY on Vercel from exact SHA `9fc50773e9e4211c77fa43345c0390f414cf4d14`.
+- Fresh production read-only verification after the P2-80 merge remained `controlled_beta` with Core ON, AI OFF, Mentor OFF, kill switch OFF, AI generation OFF/shadow, zero active synthetic identities, zero terminal unclean synthetic runs, zero active Mentor Care entitlements and zero active mentor assignments. Legacy counts remained Practice attempts 906, Practice answers 8820, Tour attempts 365, Tour answers 6267, certificates 157 and users 1326.
+- Real beta evidence remains separate and UNPROVEN: 3 active beta members, 3 granted consents, 0 real Exam Prep beta sessions and 0 weekly beta reviews. Therefore the engineering cycle is complete but expanded beta and mass rollout are not authorized by synthetic evidence.
+- Final split verdict: Core Engineering GREEN; AI Engineering GREEN; Mentor Technical GREEN; Real-world Evidence UNPROVEN.
 
 ### 2026-09-15 — v1.7
 
