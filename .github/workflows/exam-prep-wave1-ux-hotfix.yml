@@ -6,7 +6,10 @@ on:
       - 'exam-prep/exam-prep-materials.js'
       - 'exam-prep/exam-prep-wave1-ux.js'
       - 'exam-prep/exam-prep-wave1-ux.css'
+      - 'exam-prep/exam-prep-learner-flow-ux.js'
+      - 'exam-prep/exam-prep-learner-flow-ux.css'
       - '.github/scripts/exam_prep_wave1_ux_regression.js'
+      - '.github/scripts/exam_prep_flow_clarity_regression.js'
       - '.github/workflows/exam-prep-wave1-ux-hotfix.yml'
   push:
     branches:
@@ -15,7 +18,10 @@ on:
       - 'exam-prep/exam-prep-materials.js'
       - 'exam-prep/exam-prep-wave1-ux.js'
       - 'exam-prep/exam-prep-wave1-ux.css'
+      - 'exam-prep/exam-prep-learner-flow-ux.js'
+      - 'exam-prep/exam-prep-learner-flow-ux.css'
       - '.github/scripts/exam_prep_wave1_ux_regression.js'
+      - '.github/scripts/exam_prep_flow_clarity_regression.js'
       - '.github/workflows/exam-prep-wave1-ux-hotfix.yml'
   workflow_dispatch:
 
@@ -32,15 +38,25 @@ jobs:
         run: |
           node --check exam-prep/exam-prep-materials.js
           node --check exam-prep/exam-prep-wave1-ux.js
+          node --check exam-prep/exam-prep-learner-flow-ux.js
           node --check .github/scripts/exam_prep_wave1_ux_regression.js
+          node --check .github/scripts/exam_prep_flow_clarity_regression.js
           grep -q 'const VERSION = "wave1ux2"' exam-prep/exam-prep-wave1-ux.js
+          grep -q 'const VERSION = "flowux3"' exam-prep/exam-prep-learner-flow-ux.js
           grep -q 'exam-prep-wave1-ux.js?v=wave1ux2' exam-prep/exam-prep-materials.js
           grep -q 'exam-prep-wave1-ux.css?v=wave1ux2' exam-prep/exam-prep-materials.js
+          grep -q 'exam-prep-learner-flow-ux.js?v=flowux3' exam-prep/exam-prep-materials.js
+          grep -q 'exam-prep-learner-flow-ux.css?v=flowux3' exam-prep/exam-prep-materials.js
           grep -q 'same-idempotency-key' .github/scripts/exam_prep_wave1_ux_regression.js
+          grep -q 'correction CTA must route to and start the matching governed weekly-plan item' .github/scripts/exam_prep_flow_clarity_regression.js
           ! grep -q '\.from(' exam-prep/exam-prep-wave1-ux.js
           ! grep -q 'localStorage' exam-prep/exam-prep-wave1-ux.js
           ! grep -q 'correct_answer' exam-prep/exam-prep-wave1-ux.js
           ! grep -q 'service_role' exam-prep/exam-prep-wave1-ux.js
+          ! grep -q '\.from(' exam-prep/exam-prep-learner-flow-ux.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-learner-flow-ux.js
+          ! grep -q 'correct_answer' exam-prep/exam-prep-learner-flow-ux.js
+          ! grep -q 'service_role' exam-prep/exam-prep-learner-flow-ux.js
 
       - name: Install Chromium test dependency
         run: |
@@ -49,3 +65,6 @@ jobs:
 
       - name: Browser-isolated Wave 1 stability and UX regression
         run: node .github/scripts/exam_prep_wave1_ux_regression.js
+
+      - name: Browser-isolated learner flow clarity regression
+        run: node .github/scripts/exam_prep_flow_clarity_regression.js
