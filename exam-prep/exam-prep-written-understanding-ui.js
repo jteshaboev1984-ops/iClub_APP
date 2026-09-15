@@ -24,23 +24,29 @@
     const l = lang(language);
     if (l === "uz") return {
       title: "Tushunishni tekshiring",
-      help: "Qisqa savollarga javob bering, keyin yechimingizni o‘z so‘zlaringiz bilan tushuntiring.",
+      helpOne: "Qisqa savolga javob bering, keyin yechimingizni o‘z so‘zlaringiz bilan tushuntiring.",
+      helpMany: "Qisqa savollarga javob bering, keyin yechimingizni o‘z so‘zlaringiz bilan tushuntiring.",
       item: "Savol",
-      incomplete: "Avval barcha qisqa savollarga javob bering.",
+      incompleteOne: "Avval qisqa savolga javob bering.",
+      incompleteMany: "Avval barcha qisqa savollarga javob bering.",
       result: "Tushunish tekshiruvi"
     };
     if (l === "en") return {
       title: "Check your understanding",
-      help: "Answer the short questions, then explain your solution in your own words.",
+      helpOne: "Answer the short question, then explain your solution in your own words.",
+      helpMany: "Answer the short questions, then explain your solution in your own words.",
       item: "Check",
-      incomplete: "Answer all short questions first.",
+      incompleteOne: "Answer the short question first.",
+      incompleteMany: "Answer all short questions first.",
       result: "Understanding check"
     };
     return {
       title: "Проверьте понимание",
-      help: "Ответьте на короткие вопросы, затем объясните решение своими словами.",
+      helpOne: "Ответьте на короткий вопрос, затем объясните решение своими словами.",
+      helpMany: "Ответьте на короткие вопросы, затем объясните решение своими словами.",
       item: "Пункт",
-      incomplete: "Сначала ответьте на все короткие вопросы.",
+      incompleteOne: "Сначала ответьте на короткий вопрос.",
+      incompleteMany: "Сначала ответьте на все короткие вопросы.",
       result: "Проверка понимания"
     };
   }
@@ -95,13 +101,15 @@
     if (!checks.length) return;
 
     const c = copy();
+    const single = checks.length === 1;
     const wrapper = document.createElement("div");
     wrapper.setAttribute("data-ep-written-understanding", "true");
     wrapper.className = "ep-live-written-understanding";
-    wrapper.innerHTML = `<div class="ep-live-notice"><strong>${esc(c.title)}</strong><div class="ep-live-meta">${esc(c.help)}</div></div>${checks.map((check, index) => {
+    wrapper.innerHTML = `<div class="ep-live-notice"><strong>${esc(c.title)}</strong><div class="ep-live-meta">${esc(single ? c.helpOne : c.helpMany)}</div></div>${checks.map((check, index) => {
       const order = Number(check.check_order);
       const options = Array.isArray(check.options) ? check.options : [];
-      return `<div class="ep-live-field" data-ep-written-understanding-check="${order}"><span><strong>${esc(c.item)} ${index + 1}</strong></span><div class="ep-live-qtext">${esc(check.prompt || "")}</div><div class="ep-live-options">${options.map((option, optionIndex) => `<label class="ep-live-option"><input type="radio" name="ep_written_understanding_${order}" value="${optionIndex}"><span>${esc(option)}</span></label>`).join("")}</div></div>`;
+      const itemLabel = single ? "" : `<span><strong>${esc(c.item)} ${index + 1}</strong></span>`;
+      return `<div class="ep-live-field" data-ep-written-understanding-check="${order}">${itemLabel}<div class="ep-live-qtext">${esc(check.prompt || "")}</div><div class="ep-live-options">${options.map((option, optionIndex) => `<label class="ep-live-option"><input type="radio" name="ep_written_understanding_${order}" value="${optionIndex}"><span>${esc(option)}</span></label>`).join("")}</div></div>`;
     }).join("")}<div class="ep-live-error" data-ep-written-understanding-error hidden role="alert" aria-live="assertive"></div>`;
 
     const label = textarea.closest("label") || textarea;
@@ -153,7 +161,9 @@
   function showIncomplete() {
     const error = document.querySelector("#exam-prep-host-root [data-ep-written-understanding-error]");
     if (!error) return;
-    error.textContent = copy().incomplete;
+    const c = copy();
+    const single = checksFor(currentWrittenItem()).length === 1;
+    error.textContent = single ? c.incompleteOne : c.incompleteMany;
     error.hidden = false;
   }
 
