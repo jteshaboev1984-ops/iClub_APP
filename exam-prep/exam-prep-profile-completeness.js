@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p205profile2";
+  const VERSION = "p205profile3";
   let observer = null;
   let queued = false;
   let loading = false;
@@ -29,6 +29,7 @@
       total: "Haftalik umumiy o‘qish vaqti (soat)",
       math: "Matematika uchun vaqt (soat)",
       save: "Saqlash va davom etish",
+      choose: "Tanlang",
       invalid: "Barcha maydonlarni tekshiring. Matematika vaqti 0 dan katta bo‘lishi va umumiy vaqtdan oshmasligi kerak.",
       error: "Ma’lumotni saqlab bo‘lmadi. Qayta urinib ko‘ring."
     };
@@ -40,6 +41,7 @@
       total: "Total weekly study time (hours)",
       math: "Mathematics time (hours)",
       save: "Save and continue",
+      choose: "Select",
       invalid: "Check all fields. Mathematics time must be above 0 and cannot exceed total study time.",
       error: "The information could not be saved. Try again."
     };
@@ -51,9 +53,24 @@
       total: "Общее учебное время в неделю (часы)",
       math: "Время на математику (часы)",
       save: "Сохранить и продолжить",
+      choose: "Выберите",
       invalid: "Проверьте все поля. Время на математику должно быть больше 0 и не превышать общее учебное время.",
       error: "Не удалось сохранить данные. Попробуйте ещё раз."
     };
+  }
+
+  function seriesChoices() {
+    return [
+      { value: "November 2026", label: "Oct/Nov 2026" },
+      { value: "June 2027", label: "May/June 2027" },
+      { value: "November 2027", label: "Oct/Nov 2027" },
+      { value: "June 2028", label: "May/June 2028" },
+      { value: "November 2028", label: "Oct/Nov 2028" }
+    ];
+  }
+
+  function targetChoices() {
+    return ["A", "B", "C", "D", "E"].map(value => ({ value, label: value }));
   }
 
   function canUse() {
@@ -72,18 +89,6 @@
     );
   }
 
-  function requireNativeFields() {
-    const form = rootEl()?.querySelector("[data-ep-live-profile-form]");
-    if (!form) return false;
-    ["exam_series", "target_grade"].forEach(name => {
-      const input = form.elements?.[name];
-      if (!input) return;
-      input.required = true;
-      input.setAttribute("aria-required", "true");
-    });
-    return true;
-  }
-
   function esc(value) {
     return String(value == null ? "" : value)
       .replaceAll("&", "&amp;")
@@ -91,6 +96,39 @@
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
+  }
+
+  function selectMarkup(name, choices, currentValue) {
+    const current = String(currentValue || "").trim();
+    const known = choices.some(item => item.value === current);
+    const rows = [];
+    if (!current) rows.push(`<option value="" selected disabled>${esc(copy().choose)}</option>`);
+    if (current && !known) rows.push(`<option value="${esc(current)}" selected>${esc(current)}</option>`);
+    rows.push(...choices.map(item => `<option value="${esc(item.value)}"${item.value === current ? " selected" : ""}>${esc(item.label)}</option>`));
+    return `<select name="${esc(name)}" required aria-required="true">${rows.join("")}</select>`;
+  }
+
+  function replaceWithSelect(form, name, choices) {
+    const control = form.elements?.[name];
+    if (!control) return;
+    if (control.tagName === "SELECT") {
+      control.required = true;
+      control.setAttribute("aria-required", "true");
+      return;
+    }
+    const holder = document.createElement("div");
+    holder.innerHTML = selectMarkup(name, choices, control.value);
+    const select = holder.firstElementChild;
+    if (!select) return;
+    control.replaceWith(select);
+  }
+
+  function requireNativeFields() {
+    const form = rootEl()?.querySelector("[data-ep-live-profile-form]");
+    if (!form) return false;
+    replaceWithSelect(form, "exam_series", seriesChoices());
+    replaceWithSelect(form, "target_grade", targetChoices());
+    return true;
   }
 
   function renderRepair(profile) {
@@ -111,8 +149,8 @@
       <strong>${esc(c.title)}</strong>
       <div class="ep-live-meta">${esc(c.body)}</div>
       <form class="ep-live-form" data-ep-profile-completion-form>
-        <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" value="${esc(profile?.exam_series || "")}" placeholder="May/June 2027" required aria-required="true"></label>
-        <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" value="${esc(profile?.target_grade || "")}" placeholder="A" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.series)}</span>${selectMarkup("exam_series", seriesChoices(), profile?.exam_series)}</label>
+        <label class="ep-live-field"><span>${esc(c.target)}</span>${selectMarkup("target_grade", targetChoices(), String(profile?.target_grade || "").toUpperCase())}</label>
         <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(total)}" required aria-required="true"></label>
         <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(math)}" required aria-required="true"></label>
         <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(c.save)}</button></div>

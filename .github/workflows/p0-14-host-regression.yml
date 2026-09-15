@@ -77,7 +77,8 @@ jobs:
           grep -q 'exam-prep-learner-views.js?v=p020views2' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-overview-placement.js?v=p213placement1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-ai-ui.js?v=p104aiui1' exam-prep/exam-prep-api.js
-          grep -q 'exam-prep-exam-map.js?v=p209map1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-exam-map.js?v=p209map2' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-profile-completeness.js?v=p205profile3' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-materials.js?v=p210materials1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-past-paper.js?v=p203paper1' exam-prep/exam-prep-api.js
           grep -q 'window.iClubExamPrep?.syncSubjectHub' app.js
