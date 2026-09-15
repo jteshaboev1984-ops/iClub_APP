@@ -2,12 +2,26 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "wave1ux1";
+  const VERSION = "wave1ux2";
   let observer = null;
   let facadeRetry = 0;
+  let recoveryResetTimer = null;
 
   function rootEl() {
     return document.querySelector("#exam-prep-host-root");
+  }
+
+  function ensureStylesheet() {
+    try {
+      if (document.querySelector('link[data-exam-prep-wave1-ux]')) return;
+      const src = String(document.currentScript?.src || "");
+      if (!/exam-prep-wave1-ux\.js(?:\?|$)/.test(src)) return;
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.dataset.examPrepWave1Ux = "true";
+      link.href = src.replace(/exam-prep-wave1-ux\.js(?:\?.*)?$/, "exam-prep-wave1-ux.css?v=wave1ux2");
+      document.head.appendChild(link);
+    } catch (_) {}
   }
 
   function language() {
@@ -165,10 +179,27 @@
     return false;
   }
 
+  function installTopbarBackBridge() {
+    const button = document.querySelector("#topbar-back");
+    if (!button || button.dataset.epWave1BackBridge === VERSION) return;
+    button.dataset.epWave1BackBridge = VERSION;
+    button.addEventListener("click", event => {
+      const root = rootEl();
+      if (!root || root.hidden) return;
+      let open = true;
+      try {
+        if (typeof window.iClubExamPrep?.isOpen === "function") open = window.iClubExamPrep.isOpen() === true;
+      } catch (_) {}
+      if (!open || !handleInternalBack()) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }, true);
+  }
+
   function installBackWrapper() {
     const app = window.iClubExamPrep;
     if (!app || typeof app.back !== "function" || !app.liveFlowVersion) {
-      if (facadeRetry < 80) {
+      if (facadeRetry < 240) {
         facadeRetry += 1;
         setTimeout(installBackWrapper, 50);
       }
@@ -187,6 +218,92 @@
     window.iClubExamPrep = Object.freeze(wrapped);
   }
 
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function retryCall(fn, args, attempts, delays) {
+    let last = null;
+    for (let index = 0; index < attempts; index += 1) {
+      try {
+        last = await fn(...args);
+      } catch (error) {
+        last = Object.freeze({ ok: false, reason: "retry_exception", error });
+      }
+      if (last?.ok) return last;
+      if (index < attempts - 1) await sleep(delays[index] || delays[delays.length - 1] || 180);
+    }
+    return last;
+  }
+
+  function installApiResilience() {
+    const api = internal.api;
+    if (!api || api.wave1ResilienceVersion === VERSION) return;
+
+    const wrapped = Object.assign({}, api);
+    const readMethods = [
+      "examProfile", "examMapStatus", "diagnosticProgress", "getPlacement", "getState", "overview",
+      "legacyReferenceSummary", "placementResult", "stage0Workflow", "syllabusTracker", "skillDetail",
+      "correctionQueue", "pastPaperCompanion", "materialsLibrary", "getSession", "integrityStatus", "recovery",
+      "weeklyPlan", "timedCatalog", "timedResult", "timedReviewPack", "readiness", "finalCalibration"
+    ];
+    const idempotentWriteMethods = [
+      "startNextDiagnostic", "startSession", "submitResponse", "finalizeSession", "finalizeTimed", "submitTimedSelfMark"
+    ];
+
+    readMethods.forEach(name => {
+      if (typeof api[name] !== "function") return;
+      wrapped[name] = (...args) => retryCall(api[name].bind(api), args, 3, [160, 360]);
+    });
+    idempotentWriteMethods.forEach(name => {
+      if (typeof api[name] !== "function") return;
+      wrapped[name] = (...args) => retryCall(api[name].bind(api), args, 2, [180]);
+    });
+
+    wrapped.wave1ResilienceVersion = VERSION;
+    internal.api = Object.freeze(wrapped);
+  }
+
+  function stableViewVisible() {
+    const root = rootEl();
+    if (!root || root.hidden) return false;
+    return Boolean(root.querySelector(
+      ".ep-live-grid, [data-ep-live-profile-form], [data-ep-live-submit], [data-ep-placement-screen], [data-ep-views-screen], [data-ep-materials-screen], [data-ep-recovery-form-view], [data-ep-recovery-check-view]"
+    ));
+  }
+
+  function resetRecoveryAfterStableView() {
+    const root = rootEl();
+    if (!root || root.dataset.epWave1AutoRecovery !== "1" || !stableViewVisible()) return;
+    if (recoveryResetTimer) clearTimeout(recoveryResetTimer);
+    recoveryResetTimer = setTimeout(() => {
+      const current = rootEl();
+      if (current && stableViewVisible() && !current.querySelector(".ep-live-error")) {
+        delete current.dataset.epWave1AutoRecovery;
+      }
+      recoveryResetTimer = null;
+    }, 700);
+  }
+
+  function recoverTransientLiveError() {
+    const root = rootEl();
+    if (!root || root.hidden) return;
+    const error = root.querySelector(".ep-live-error");
+    const home = visibleButton("[data-ep-live-home]");
+    if (!error || !home) {
+      resetRecoveryAfterStableView();
+      return;
+    }
+    if (root.dataset.epWave1AutoRecovery === "1") return;
+    root.dataset.epWave1AutoRecovery = "1";
+    setTimeout(() => {
+      const currentRoot = rootEl();
+      const retryButton = visibleButton("[data-ep-live-home]");
+      if (!currentRoot || currentRoot.hidden || !currentRoot.querySelector(".ep-live-error") || !retryButton) return;
+      retryButton.click();
+    }, 120);
+  }
+
   function placementComponent() {
     const root = rootEl();
     const screen = root?.querySelector("[data-ep-placement-screen]");
@@ -197,8 +314,8 @@
 
   function installCorrectionRouter() {
     const root = rootEl();
-    if (!root || root.dataset.epWave1CorrectionRouter === "1") return;
-    root.dataset.epWave1CorrectionRouter = "1";
+    if (!root || root.dataset.epWave1CorrectionRouter === VERSION) return;
+    root.dataset.epWave1CorrectionRouter = VERSION;
     root.addEventListener("click", event => {
       const button = event.target.closest?.("[data-ep-placement-next]");
       if (!button || !root.contains(button)) return;
@@ -216,8 +333,11 @@
   function reconcile() {
     upgradeProfileForms();
     consolidateExamPlan();
+    installApiResilience();
     installBackWrapper();
+    installTopbarBackBridge();
     installCorrectionRouter();
+    recoverTransientLiveError();
   }
 
   function attach() {
@@ -234,5 +354,6 @@
     internal.wave1UxVersion = VERSION;
   }
 
+  ensureStylesheet();
   attach();
 })();

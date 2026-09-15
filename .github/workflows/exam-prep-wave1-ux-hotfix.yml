@@ -33,8 +33,10 @@ jobs:
           node --check exam-prep/exam-prep-materials.js
           node --check exam-prep/exam-prep-wave1-ux.js
           node --check .github/scripts/exam_prep_wave1_ux_regression.js
-          grep -q 'exam-prep-wave1-ux.js?v=wave1ux1' exam-prep/exam-prep-materials.js
-          grep -q 'exam-prep-wave1-ux.css?v=wave1ux1' exam-prep/exam-prep-materials.js
+          grep -q 'const VERSION = "wave1ux2"' exam-prep/exam-prep-wave1-ux.js
+          grep -q 'exam-prep-wave1-ux.js?v=wave1ux2' exam-prep/exam-prep-materials.js
+          grep -q 'exam-prep-wave1-ux.css?v=wave1ux2' exam-prep/exam-prep-materials.js
+          grep -q 'same-idempotency-key' .github/scripts/exam_prep_wave1_ux_regression.js
           ! grep -q '\.from(' exam-prep/exam-prep-wave1-ux.js
           ! grep -q 'localStorage' exam-prep/exam-prep-wave1-ux.js
           ! grep -q 'correct_answer' exam-prep/exam-prep-wave1-ux.js
@@ -45,5 +47,5 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
 
-      - name: Browser-isolated Wave 1 UX regression
+      - name: Browser-isolated Wave 1 stability and UX regression
         run: node .github/scripts/exam_prep_wave1_ux_regression.js
