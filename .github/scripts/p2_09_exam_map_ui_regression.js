@@ -3,7 +3,7 @@ const path = require('path');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.route('http://iclub.test/', route => route.fulfill({
     status: 200,
     contentType: 'text/html',
@@ -13,8 +13,9 @@ const path = require('path');
 
   await page.evaluate(() => {
     window.__calls = [];
+    window.__profileReads = 0;
     window.__profile = {
-      exam_series:'May/June 2027', target_grade:'A',
+      exam_series:'October 2027', target_grade:'A',
       total_student_hours_available:12, mathematics_hours_budget:6, active_week_no:12
     };
     window.__caps = {program_key:'math_as_p1_p5',rollout_state:'controlled_beta',core_access:true,ai_assist:false,mentor_care_entitled:false,mentor_assignment_active:false,mentor_authority:false,kill_switch:false};
@@ -31,7 +32,11 @@ const path = require('path');
       window.__calls.push({name,args});
       if (name==='get_exam_prep_capabilities_v1') return {data:[window.__caps],error:null};
       if (name==='get_my_exam_prep_beta_invitation_v1') return {data:{invited:false,invitations:[]},error:null};
-      if (name==='get_exam_prep_exam_profile_v1') return {data:[window.__profile],error:null};
+      if (name==='get_exam_prep_exam_profile_v1') {
+        window.__profileReads += 1;
+        await new Promise(resolve => setTimeout(resolve, 25));
+        return {data:[window.__profile],error:null};
+      }
       if (name==='get_exam_prep_diagnostic_progress_safe_v1') return {data:window.__progress[args.p_component_code],error:null};
       if (name==='get_exam_prep_state_safe_v1') return {data:window.__state[args.p_component_code],error:null};
       if (name==='save_exam_prep_exam_profile_v2') {
@@ -54,6 +59,7 @@ const path = require('path');
     }};
   });
 
+  await page.addStyleTag({path:path.resolve('exam-prep/exam-prep-host.css')});
   await page.addScriptTag({path:path.resolve('exam-prep/exam-prep-api.js')});
   await page.addScriptTag({path:path.resolve('exam-prep/exam-prep-host.js')});
   await page.addScriptTag({path:path.resolve('exam-prep/exam-prep-live.js')});
@@ -64,30 +70,71 @@ const path = require('path');
   await page.evaluate(async () => {
     await window.iClubExamPrep.syncSubjectHub({subjectKey:'mathematics',language:'en'});
     await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});
+    const root = document.querySelector('#exam-prep-host-root');
+    for (let i=0;i<8;i+=1) {
+      root.setAttribute('data-race-probe', String(i));
+      root.appendChild(document.createComment(`race-${i}`));
+    }
   });
 
-  await page.waitForSelector('[data-ep-exam-plan-card]');
-  let text = await page.locator('#exam-prep-host-root').textContent();
-  assert(text.includes('Exam plan'),'exam-plan card missing');
-  assert(text.includes('May/June 2027'),'current exam series missing');
-  assert(text.includes('Mathematics 6 h/week'),'mathematics hours summary missing');
+  await page.waitForSelector('[data-ep-exam-plan-edit]');
+  await page.waitForTimeout(80);
+  let presentation = await page.evaluate(() => ({
+    editButtons:document.querySelectorAll('[data-ep-exam-plan-edit]').length,
+    duplicateCards:document.querySelectorAll('[data-ep-exam-plan-card]').length,
+    summaryText:document.querySelector('.ep-live-dashboard-profile')?.textContent || '',
+    rootHidden:document.querySelector('#exam-prep-host-root')?.hidden === true,
+    rootWidth:document.querySelector('#exam-prep-host-root')?.getBoundingClientRect().width || 0,
+    scrollWidth:document.querySelector('#exam-prep-host-root')?.scrollWidth || 0
+  }));
+  assert(presentation.editButtons===1,`exam plan edit action duplicated: ${presentation.editButtons}`);
+  assert(presentation.duplicateCards===0,'separate Exam plan card must not duplicate Saved plan');
+  assert(presentation.summaryText.includes('Saved plan'),'saved-plan summary missing');
+  assert(presentation.summaryText.includes('October 2027'),'current custom exam series missing');
+  assert(presentation.summaryText.includes('Change exam plan'),'edit action is not placed inside Saved plan');
+  assert(!presentation.rootHidden,'Exam Prep unexpectedly closed');
+  assert(presentation.scrollWidth <= presentation.rootWidth + 1,`dashboard overflow: ${presentation.scrollWidth} > ${presentation.rootWidth}`);
 
   await page.click('[data-ep-exam-plan-edit]');
   await page.waitForSelector('[data-ep-exam-plan-form]');
-  text = await page.locator('#exam-prep-host-root').textContent();
+  let text = await page.locator('#exam-prep-host-root').textContent();
   assert(text.includes('Previous progress, correction work and scheduled checks are kept.'),'non-destructive edit explanation missing');
 
-  await page.fill('[data-ep-exam-plan-form] input[name="exam_series"]','Oct/Nov 2027');
+  const editor = await page.evaluate(() => ({
+    seriesTag:document.querySelector('[data-ep-exam-plan-form] [name="exam_series"]')?.tagName,
+    targetTag:document.querySelector('[data-ep-exam-plan-form] [name="target_grade"]')?.tagName,
+    seriesValue:document.querySelector('[data-ep-exam-plan-form] [name="exam_series"]')?.value,
+    targetOptions:Array.from(document.querySelector('[data-ep-exam-plan-form] [name="target_grade"]')?.options || []).map(x=>x.value),
+    seriesOptions:Array.from(document.querySelector('[data-ep-exam-plan-form] [name="exam_series"]')?.options || []).map(x=>x.value)
+  }));
+  assert(editor.seriesTag==='SELECT','exam series must be selectable');
+  assert(editor.targetTag==='SELECT','target grade must be selectable');
+  assert(editor.seriesValue==='October 2027','legacy/custom current series must remain selected until learner changes it');
+  assert(JSON.stringify(editor.targetOptions)===JSON.stringify(['A','B','C','D','E']),'target-grade options must be A-E');
+  assert(editor.seriesOptions.includes('June 2027') && editor.seriesOptions.includes('November 2027'),'standard Cambridge session choices missing');
+
+  // The app-level back arrow must step out of the editor first, not close Exam Prep.
+  await page.evaluate(() => window.iClubExamPrep.back());
+  await page.waitForSelector('.ep-live-dashboard-profile');
+  assert(!(await page.locator('#exam-prep-host-root').evaluate(el=>el.hidden)),'nested Back closed the whole Exam Prep module');
+
+  await page.waitForSelector('[data-ep-exam-plan-edit]');
+  await page.click('[data-ep-exam-plan-edit]');
+  await page.selectOption('[data-ep-exam-plan-form] select[name="exam_series"]','November 2027');
+  await page.selectOption('[data-ep-exam-plan-form] select[name="target_grade"]','B');
   await page.fill('[data-ep-exam-plan-form] input[name="total_hours"]','10');
   await page.fill('[data-ep-exam-plan-form] input[name="math_hours"]','5');
   await page.click('[data-ep-exam-plan-form] button[type="submit"]');
 
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent?.includes('Previous results remain in your history.'));
-  await page.waitForSelector('[data-ep-exam-plan-card]');
+  await page.waitForSelector('[data-ep-exam-plan-edit]');
+  await page.waitForTimeout(60);
 
   const result = await page.evaluate(() => ({
     calls:window.__calls,
     text:document.querySelector('#exam-prep-host-root').textContent,
+    editButtons:document.querySelectorAll('[data-ep-exam-plan-edit]').length,
+    duplicateCards:document.querySelectorAll('[data-ep-exam-plan-card]').length,
     hasP1Plan:Boolean(document.querySelector('[data-ep-live-plan="P1"]')),
     hasP5Plan:Boolean(document.querySelector('[data-ep-live-plan="P5"]'))
   }));
@@ -104,11 +151,18 @@ const path = require('path');
     assert(!names.includes(forbidden),`${forbidden} must not be called by profile editing`);
   }
 
-  assert(result.text.includes('Oct/Nov 2027'),'updated series not shown');
+  assert(result.text.includes('November 2027'),'updated series not shown');
+  assert(result.text.includes('Target grade: B'),'updated target grade not shown');
   assert(result.text.includes('P1 and P5 remain separate'),'component-separation learner notice missing');
   assert(result.hasP1Plan && result.hasP5Plan,'dashboard must remain available after plan update');
+  assert(result.editButtons===1,'exam plan action duplicated after save/remount');
+  assert(result.duplicateCards===0,'old duplicate plan card returned after save/remount');
   assert(!/profile_revision|paper_comparability_epoch|comparability|controlled_beta|synthetic|internal skill/i.test(result.text),'internal terminology leaked to learner UI');
 
+  // On the dashboard, Back is allowed to leave Exam Prep and return to the Mathematics subject hub.
+  await page.evaluate(() => window.iClubExamPrep.back());
+  assert(await page.locator('#exam-prep-host-root').evaluate(el=>el.hidden),'dashboard Back should leave Exam Prep');
+
   await browser.close();
-  console.log('P2-09 Exam Map learner editor: PASS');
+  console.log('P2-09 Exam Map learner editor, dedupe, selectable profile and contextual back: PASS');
 })().catch(error => { console.error(error); process.exit(1); });
