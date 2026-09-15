@@ -156,8 +156,15 @@ jobs:
         env:
           PGOPTIONS: '-c p015.isolated_db=true'
         run: |
+          set -euo pipefail
+          # P0-15 is an older independent drill whose rollback contract is an
+          # OFF/fail-closed baseline. Normalize only this disposable CI database
+          # to that historical precondition, run the drill, then restore the
+          # current production-shaped Core-only baseline for P2-77 postchecks.
+          psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p277-mentor-technical.log 2>&1
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_internal_alpha_matrix.sql 2>&1 | tee -a p277-mentor-technical.log
+          psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>p277-mentor-technical.log 2>&1
 
       - name: Prove zero P2-77 residue and production-shaped baseline
         shell: bash
