@@ -1,0 +1,250 @@
+name: P2-79 Recovery Rollback Disaster Rehearsal
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - supabase/tests/p2_79_recovery_rollback_disaster_matrix.sql
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - .github/scripts/p2_72_legacy_storage_firewall_regression.js
+      - .github/scripts/p2_74_ai_shadow_safety_regression.js
+      - exam-prep/**
+      - .github/workflows/p2-79-recovery-rollback-disaster.yml
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - supabase/tests/p2_79_recovery_rollback_disaster_matrix.sql
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - .github/scripts/p2_72_legacy_storage_firewall_regression.js
+      - .github/scripts/p2_74_ai_shadow_safety_regression.js
+      - exam-prep/**
+      - .github/workflows/p2-79-recovery-rollback-disaster.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recovery-rollback-disaster:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      ROLLBACK_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
+
+      - name: Pin exact candidate and rollback target
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          if [[ -z "${ROLLBACK_SHA:-}" || "$ROLLBACK_SHA" =~ ^0+$ ]]; then
+            ROLLBACK_SHA="$(git rev-parse HEAD^)"
+            echo "ROLLBACK_SHA=$ROLLBACK_SHA" >> "$GITHUB_ENV"
+          fi
+          printf 'P2-79 Recovery / Rollback / Disaster Rehearsal\ncandidate_sha=%s\nrollback_sha=%s\n' \
+            "$CANDIDATE_SHA" "$ROLLBACK_SHA" > p279-recovery.log
+
+      - name: Bootstrap isolated legacy and Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p279-recovery.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p279-recovery.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql 2>&1 | tee -a p279-recovery.log
+
+      - name: Apply complete current Exam Prep migration stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
+          test "${#files[@]}" -ge 1
+
+          apply_one() {
+            local f="$1"
+            local b
+            b="$(basename "$f")"
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              echo '=== Replaying production Core-only controlled-beta boundary ===' | tee -a p279-recovery.log
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>p279-recovery.log 2>&1
+            fi
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              echo '=== Normalizing historical Stage-4 patch anchors in isolated CI only ===' | tee -a p279-recovery.log
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >>p279-recovery.log 2>&1
+            fi
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              echo '=== Seeding isolated production-shaped cohort dependency ===' | tee -a p279-recovery.log
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('p236-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated P2-79 dependency') on conflict(cohort_key) do nothing" >>p279-recovery.log 2>&1
+            fi
+            echo "=== Applying $f ===" | tee -a p279-recovery.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p279-recovery.log 2>&1
+          }
+
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|\
+              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|\
+              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|\
+              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|\
+              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|\
+              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  echo '=== Replaying P2-17..P2-20 in production migration order ===' | tee -a p279-recovery.log
+                  for rb in "${recent[@]}"; do apply_one "supabase/migrations/$rb"; done
+                fi
+                continue
+                ;;
+            esac
+            apply_one "$f"
+          done
+
+      - name: Normalize production-shaped Core-only baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' >>p279-recovery.log 2>&1
+          update private.exam_prep_feature_config
+          set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now()
+          where id=1;
+          update private.exam_prep_ai_policy set generation_enabled=false,updated_at=now() where id=1;
+          update private.exam_prep_optional_capability_status
+          set runtime_status='shadow',gate_version=null,updated_at=now()
+          where capability_code='ai_assist';
+          SQL
+          test "$(psql -Atqc "select core_enabled from private.exam_prep_feature_config where id=1")" = 't'
+          test "$(psql -Atqc "select ai_enabled from private.exam_prep_feature_config where id=1")" = 'f'
+          test "$(psql -Atqc "select mentor_enabled from private.exam_prep_feature_config where id=1")" = 'f'
+          test "$(psql -Atqc "select kill_switch from private.exam_prep_feature_config where id=1")" = 'f'
+
+      - name: Run isolated recovery rollback disaster matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p279.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -v p279_git_sha="$CANDIDATE_SHA" \
+            -f supabase/tests/p2_79_recovery_rollback_disaster_matrix.sql 2>&1 | tee -a p279-recovery.log
+
+      - name: Recheck AI outage fallback without provider spend
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/p2_74_ai_shadow_safety_regression.js
+          node .github/scripts/p2_74_ai_shadow_safety_regression.js 2>&1 | tee -a p279-recovery.log
+          echo 'P2-79 paid AI calls: 0' | tee -a p279-recovery.log
+
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Recheck current browser storage rollback boundary
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/p2_72_legacy_storage_firewall_regression.js 2>&1 | tee -a p279-recovery.log
+
+      - name: Rehearse previous known-good commit rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "$ROLLBACK_SHA"
+          rm -rf /tmp/p279-rollback
+          git worktree add --detach /tmp/p279-rollback "$ROLLBACK_SHA"
+          test "$(git -C /tmp/p279-rollback rev-parse HEAD)" = "$ROLLBACK_SHA"
+          test -f /tmp/p279-rollback/exam-prep/exam-prep-api.js
+          test -f /tmp/p279-rollback/.github/scripts/p2_72_legacy_storage_firewall_regression.js
+          node --check /tmp/p279-rollback/exam-prep/exam-prep-api.js
+          node --check /tmp/p279-rollback/exam-prep/exam-prep-live.js
+          (
+            cd /tmp/p279-rollback
+            NODE_PATH="$GITHUB_WORKSPACE/node_modules" node .github/scripts/p2_72_legacy_storage_firewall_regression.js
+          ) 2>&1 | tee -a "$GITHUB_WORKSPACE/p279-recovery.log"
+          echo "P2-79 rollback target verified sha=$ROLLBACK_SHA" | tee -a p279-recovery.log
+
+      - name: Recheck current Core browser journey after disaster recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/p2_55_full_learner_journey_regression.js
+          node .github/scripts/p2_55_full_learner_journey_regression.js 2>&1 | tee -a p279-recovery.log
+
+      - name: Verify final zero-residue production-shaped boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          core="$(psql -Atqc "select core_enabled from private.exam_prep_feature_config where id=1")"
+          ai="$(psql -Atqc "select ai_enabled from private.exam_prep_feature_config where id=1")"
+          mentor="$(psql -Atqc "select mentor_enabled from private.exam_prep_feature_config where id=1")"
+          kill="$(psql -Atqc "select kill_switch from private.exam_prep_feature_config where id=1")"
+          generation="$(psql -Atqc "select generation_enabled from private.exam_prep_ai_policy where id=1")"
+          runtime="$(psql -Atqc "select runtime_status from private.exam_prep_optional_capability_status where capability_code='ai_assist'")"
+          residue="$(psql -Atqc "select count(*) from private.exam_prep_synthetic_identities where run_id like 'SV-P279-%'")"
+          runs="$(psql -Atqc "select count(*) from private.exam_prep_synthetic_validation_runs where run_id like 'SV-P279-%'")"
+          echo "P279_POST core=$core ai=$ai mentor=$mentor kill=$kill generation=$generation runtime=$runtime residue=$residue runs=$runs" | tee -a p279-recovery.log
+          test "$core" = 't'
+          test "$ai" = 'f'
+          test "$mentor" = 'f'
+          test "$kill" = 'f'
+          test "$generation" = 'f'
+          test "$runtime" = 'shadow'
+          test "$residue" = '0'
+          test "$runs" = '0'
+
+      - name: Mark P2-79 GREEN
+        run: echo "P2-79 RECOVERY / ROLLBACK / DISASTER GREEN candidate_sha=$CANDIDATE_SHA rollback_sha=$ROLLBACK_SHA paid_ai_calls=0" | tee -a p279-recovery.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-79-recovery-rollback-disaster
+          path: p279-recovery.log
+          if-no-files-found: error
+          retention-days: 7
