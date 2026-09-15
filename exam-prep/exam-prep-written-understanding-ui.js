@@ -6,7 +6,7 @@
   if (window.__iclubExamPrepWrittenUnderstanding === MARKER) return;
   window.__iclubExamPrepWrittenUnderstanding = MARKER;
 
-  const state = { session: null, language: "ru", apiWrapped: false };
+  const state = { session: null, language: "ru", apiWrapped: false, pendingFeedback: null };
 
   function lang(value) {
     const v = String(value || "ru").toLowerCase();
@@ -101,6 +101,27 @@
     label.parentNode?.insertBefore(wrapper, label);
   }
 
+  function renderPendingFeedback() {
+    const message = state.pendingFeedback;
+    if (!message) return;
+    const root = document.querySelector("#exam-prep-host-root");
+    if (!root) return;
+    if (root.textContent?.includes(message)) { state.pendingFeedback = null; return; }
+    const stable = root.querySelector('[data-ep-live-submit], [data-ep-live-plan-item], .ep-live-dashboard-intro, [data-ep-live-back-timed]');
+    if (!stable || root.querySelector("[data-ep-written-understanding-feedback]")) return;
+    const shell = root.querySelector(".ep-host-shell");
+    const head = shell?.querySelector(".ep-live-head");
+    if (!shell) return;
+    const notice = document.createElement("div");
+    notice.className = "ep-live-notice";
+    notice.setAttribute("data-ep-written-understanding-feedback", "true");
+    notice.setAttribute("role", "status");
+    notice.setAttribute("aria-live", "polite");
+    notice.textContent = message;
+    if (head?.nextSibling) shell.insertBefore(notice, head.nextSibling); else shell.appendChild(notice);
+    state.pendingFeedback = null;
+  }
+
   function showIncomplete() {
     const error = document.querySelector("#exam-prep-host-root [data-ep-written-understanding-error]");
     if (!error) return;
@@ -135,7 +156,7 @@
       state.language = lang(language);
       const result = await getSession(sessionId, language);
       if (result?.ok && result.data) state.session = result.data;
-      queueMicrotask(renderChecks);
+      queueMicrotask(() => { renderChecks(); renderPendingFeedback(); });
       return result;
     };
 
@@ -152,6 +173,7 @@
       if (!result?.ok || !result.data?.understanding_check?.submitted) return result;
       const explanation = formatFeedback(result.data.understanding_check);
       if (!explanation) return result;
+      state.pendingFeedback = explanation;
       const data = Object.freeze({ ...result.data, explanation: [result.data.explanation, explanation].filter(Boolean).join(" — ") });
       return Object.freeze({ ...result, data });
     };
@@ -171,12 +193,13 @@
     showIncomplete();
   }, true);
 
-  const observer = new MutationObserver(() => renderChecks());
+  const observer = new MutationObserver(() => { renderChecks(); renderPendingFeedback(); });
   const startObserver = () => {
     const root = document.querySelector("#exam-prep-host-root");
     if (!root) { setTimeout(startObserver, 50); return; }
     observer.observe(root, { childList: true, subtree: true });
     renderChecks();
+    renderPendingFeedback();
   };
 
   wrapApi();
