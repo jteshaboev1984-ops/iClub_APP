@@ -1,0 +1,192 @@
+name: P2-77 Mentor Technical Simulation
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - supabase/tests/p0_15_internal_alpha_matrix.sql
+      - supabase/tests/p2_77_mentor_technical_simulation_matrix.sql
+      - .github/workflows/p2-77-mentor-technical-simulation.yml
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - supabase/tests/p0_15_internal_alpha_matrix.sql
+      - supabase/tests/p2_77_mentor_technical_simulation_matrix.sql
+      - .github/workflows/p2-77-mentor-technical-simulation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mentor-technical-simulation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostic log
+        run: printf 'P2-77 Mentor Technical Simulation CI\n' > p277-mentor-technical.log
+
+      - name: Bootstrap isolated legacy and Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p277-mentor-technical.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p277-mentor-technical.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql 2>&1 | tee -a p277-mentor-technical.log
+
+      - name: Apply complete current Exam Prep migration stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
+          test "${#files[@]}" -ge 1
+
+          apply_one() {
+            local f="$1"
+            local b
+            b="$(basename "$f")"
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              echo '=== Replaying production Core-only controlled-beta boundary ===' | tee -a p277-mentor-technical.log
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>p277-mentor-technical.log 2>&1
+            fi
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              echo '=== Normalizing historical Stage-4 patch anchors in isolated CI only ===' | tee -a p277-mentor-technical.log
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >>p277-mentor-technical.log 2>&1
+            fi
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              echo '=== Seeding isolated production-shaped cohort dependency ===' | tee -a p277-mentor-technical.log
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('p236-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated P2-77 dependency') on conflict(cohort_key) do nothing" >>p277-mentor-technical.log 2>&1
+            fi
+            echo "=== Applying $f ===" | tee -a p277-mentor-technical.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p277-mentor-technical.log 2>&1
+          }
+
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|\
+              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|\
+              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|\
+              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|\
+              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|\
+              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  echo '=== Replaying P2-17..P2-20 in production migration order ===' | tee -a p277-mentor-technical.log
+                  for rb in "${recent[@]}"; do apply_one "supabase/migrations/$rb"; done
+                fi
+                continue
+                ;;
+            esac
+            apply_one "$f"
+          done
+
+      - name: Normalize production-shaped Core-on optional-layers-off baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' >>p277-mentor-technical.log 2>&1
+          update private.exam_prep_feature_config
+          set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now()
+          where id=1;
+          update private.exam_prep_ai_policy set generation_enabled=false,updated_at=now() where id=1;
+          update private.exam_prep_optional_capability_status
+          set runtime_status='shadow',gate_version=null,updated_at=now()
+          where capability_code='ai_assist';
+          SQL
+          test "$(psql -Atqc "select core_enabled from private.exam_prep_feature_config where id=1")" = 't'
+          test "$(psql -Atqc "select ai_enabled from private.exam_prep_feature_config where id=1")" = 'f'
+          test "$(psql -Atqc "select mentor_enabled from private.exam_prep_feature_config where id=1")" = 'f'
+
+      - name: Run rollback-only Mentor technical simulation
+        shell: bash
+        env:
+          PGOPTIONS: '-c p277.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_77_mentor_technical_simulation_matrix.sql 2>&1 | tee -a p277-mentor-technical.log
+
+      - name: Recheck established 600 learners / 10 mentor scopes
+        shell: bash
+        env:
+          PGOPTIONS: '-c p015.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_internal_alpha_matrix.sql 2>&1 | tee -a p277-mentor-technical.log
+
+      - name: Prove zero P2-77 residue and production-shaped baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          core="$(psql -Atqc "select core_enabled from private.exam_prep_feature_config where id=1")"
+          ai="$(psql -Atqc "select ai_enabled from private.exam_prep_feature_config where id=1")"
+          mentor="$(psql -Atqc "select mentor_enabled from private.exam_prep_feature_config where id=1")"
+          kill="$(psql -Atqc "select kill_switch from private.exam_prep_feature_config where id=1")"
+          synth="$(psql -Atqc "select count(*) from private.exam_prep_synthetic_identities where fixture_profile_key like 'SVF-P277-%'")"
+          runs="$(psql -Atqc "select count(*) from private.exam_prep_synthetic_validation_runs where run_id='SV-P277-MENTOR-TECH'")"
+          recs="$(psql -Atqc "select count(*) from private.exam_prep_human_review_recommendations where source_object_type='p277'")"
+          echo "P277_POST core=$core ai=$ai mentor=$mentor kill=$kill synth=$synth runs=$runs recommendations=$recs" | tee -a p277-mentor-technical.log
+          test "$core" = 't'
+          test "$ai" = 'f'
+          test "$mentor" = 'f'
+          test "$kill" = 'f'
+          test "$synth" = '0'
+          test "$runs" = '0'
+          test "$recs" = '0'
+
+      - name: Mark P2-77 Mentor Technical GREEN
+        run: echo 'P2-77 MENTOR TECHNICAL SIMULATION GREEN' | tee -a p277-mentor-technical.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-77-mentor-technical-simulation
+          path: p277-mentor-technical.log
+          if-no-files-found: error
+          retention-days: 7
