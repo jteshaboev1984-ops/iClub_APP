@@ -9,6 +9,7 @@ on:
       - 'exam-prep/exam-prep-api.js'
       - 'exam-prep/exam-prep-live.js'
       - 'exam-prep/exam-prep-exam-map.js'
+      - 'exam-prep/exam-prep-profile-completeness.js'
       - '.github/scripts/p2_09_exam_map_ui_regression.js'
       - 'supabase/migrations/*exam_prep_p2_09_*.sql'
       - 'supabase/tests/p2_09_exam_map_revision_matrix.sql'
@@ -20,6 +21,7 @@ on:
       - 'exam-prep/exam-prep-api.js'
       - 'exam-prep/exam-prep-live.js'
       - 'exam-prep/exam-prep-exam-map.js'
+      - 'exam-prep/exam-prep-profile-completeness.js'
       - '.github/scripts/p2_09_exam_map_ui_regression.js'
       - 'supabase/migrations/*exam_prep_p2_09_*.sql'
       - 'supabase/tests/p2_09_exam_map_revision_matrix.sql'
@@ -63,10 +65,16 @@ jobs:
         run: |
           node --check exam-prep/exam-prep-api.js
           node --check exam-prep/exam-prep-exam-map.js
+          node --check exam-prep/exam-prep-profile-completeness.js
           node --check .github/scripts/p2_09_exam_map_ui_regression.js
           grep -q 'save_exam_prep_exam_profile_v2' exam-prep/exam-prep-api.js
           grep -q 'generate_exam_prep_weekly_plan_safe_v3' exam-prep/exam-prep-api.js
-          grep -q 'exam-prep-exam-map.js?v=p209map1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-exam-map.js?v=p209map2' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-profile-completeness.js?v=p205profile3' exam-prep/exam-prep-api.js
+          grep -q 'hydrating' exam-prep/exam-prep-exam-map.js
+          grep -q 'data-ep-exam-plan-edit' exam-prep/exam-prep-exam-map.js
+          grep -q 'select name=' exam-prep/exam-prep-exam-map.js
+          ! grep -q 'data-ep-exam-plan-card' exam-prep/exam-prep-exam-map.js
           ! grep -q '\.from(' exam-prep/exam-prep-exam-map.js
           ! grep -q 'localStorage' exam-prep/exam-prep-exam-map.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-exam-map.js
