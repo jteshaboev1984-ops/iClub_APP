@@ -51,16 +51,21 @@ jobs:
           node --check .github/scripts/exam_prep_interaction_polish_regression.js
           grep -q 'const VERSION = "wave1ux2"' exam-prep/exam-prep-wave1-ux.js
           grep -q 'const VERSION = "flowux3"' exam-prep/exam-prep-learner-flow-ux.js
-          grep -q 'const VERSION = "polish1"' exam-prep/exam-prep-interaction-polish.js
+          grep -q 'const VERSION = "polish2"' exam-prep/exam-prep-interaction-polish.js
           grep -q 'exam-prep-wave1-ux.js?v=wave1ux2' exam-prep/exam-prep-materials.js
           grep -q 'exam-prep-wave1-ux.css?v=wave1ux2' exam-prep/exam-prep-materials.js
           grep -q 'exam-prep-learner-flow-ux.js?v=flowux3' exam-prep/exam-prep-materials.js
           grep -q 'exam-prep-learner-flow-ux.css?v=flowux3' exam-prep/exam-prep-materials.js
-          grep -q 'exam-prep-interaction-polish.js?v=polish1' exam-prep/exam-prep-materials.js
-          grep -q 'exam-prep-interaction-polish.css?v=polish1' exam-prep/exam-prep-materials.js
+          grep -q 'exam-prep-interaction-polish.js?v=polish2' exam-prep/exam-prep-materials.js
+          grep -q 'exam-prep-interaction-polish.css?v=polish2' exam-prep/exam-prep-materials.js
           grep -q 'same-idempotency-key' .github/scripts/exam_prep_wave1_ux_regression.js
           grep -q 'correction CTA must route to and start the matching governed weekly-plan item' .github/scripts/exam_prep_flow_clarity_regression.js
           grep -q 'answer submit must keep the question visually stable while saving' .github/scripts/exam_prep_interaction_polish_regression.js
+          grep -q 'document.getElementById("toast")' exam-prep/exam-prep-interaction-polish.js
+          ! grep -q 'ep-flow-answer-toast' exam-prep/exam-prep-interaction-polish.js
+          ! grep -q 'ep-flow-answer-toast' exam-prep/exam-prep-interaction-polish.css
+          ! grep -q 'ep-flow-screen-enter' exam-prep/exam-prep-interaction-polish.js
+          ! grep -q 'ep-flow-screen-enter' exam-prep/exam-prep-interaction-polish.css
           ! grep -q '\.from(' exam-prep/exam-prep-wave1-ux.js
           ! grep -q 'localStorage' exam-prep/exam-prep-wave1-ux.js
           ! grep -q 'correct_answer' exam-prep/exam-prep-wave1-ux.js
