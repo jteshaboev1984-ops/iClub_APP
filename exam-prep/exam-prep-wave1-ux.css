@@ -1,0 +1,165 @@
+/* Wave 1 controlled-beta UX polish. Scoped to Exam Prep only. */
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-btn,
+.iclub-visual-v3 #exam-prep-host-root .ep-placement-btn,
+.iclub-visual-v3 #exam-prep-host-root .ep-views-btn,
+.iclub-visual-v3 #exam-prep-host-root .ep-materials-btn,
+.iclub-visual-v3 #exam-prep-host-root .ep-materials-action,
+.iclub-visual-v3 #exam-prep-host-root .ep-host-btn {
+  min-height: 42px;
+  padding: 9px 13px;
+  border: 1px solid #D3DFFC;
+  border-radius: var(--v3-radius-md, 12px);
+  background: #F5F8FF;
+  color: var(--v3-primary, #2457D6);
+  font: inherit;
+  font-size: 11.5px;
+  line-height: 1.25;
+  font-weight: 780;
+  text-align: center;
+  box-shadow: none;
+  transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease, transform .08s ease;
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-btn:not(.secondary),
+.iclub-visual-v3 #exam-prep-host-root .ep-placement-btn.primary,
+.iclub-visual-v3 #exam-prep-host-root .ep-views-btn.primary,
+.iclub-visual-v3 #exam-prep-host-root .ep-materials-action,
+.iclub-visual-v3 #exam-prep-host-root .ep-host-btn-primary {
+  border-color: var(--v3-primary, #2457D6);
+  background: var(--v3-primary, #2457D6);
+  color: #FFFFFF;
+  box-shadow: 0 5px 14px rgba(36, 87, 214, .16);
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-btn.secondary,
+.iclub-visual-v3 #exam-prep-host-root .ep-placement-btn:not(.primary),
+.iclub-visual-v3 #exam-prep-host-root .ep-views-btn:not(.primary),
+.iclub-visual-v3 #exam-prep-host-root .ep-materials-btn,
+.iclub-visual-v3 #exam-prep-host-root .ep-host-btn-secondary {
+  border-color: #D3DFFC;
+  background: #F5F8FF;
+  color: var(--v3-primary, #2457D6);
+  box-shadow: none;
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-btn:disabled,
+.iclub-visual-v3 #exam-prep-host-root .ep-placement-btn:disabled,
+.iclub-visual-v3 #exam-prep-host-root .ep-views-btn:disabled,
+.iclub-visual-v3 #exam-prep-host-root .ep-materials-btn:disabled,
+.iclub-visual-v3 #exam-prep-host-root .ep-materials-action:disabled,
+.iclub-visual-v3 #exam-prep-host-root .ep-host-btn:disabled {
+  opacity: .52;
+  cursor: default;
+  box-shadow: none;
+}
+
+@media (hover:hover) {
+  .iclub-visual-v3 #exam-prep-host-root .ep-live-btn:not(:disabled):hover,
+  .iclub-visual-v3 #exam-prep-host-root .ep-placement-btn:not(:disabled):hover,
+  .iclub-visual-v3 #exam-prep-host-root .ep-views-btn:not(:disabled):hover,
+  .iclub-visual-v3 #exam-prep-host-root .ep-materials-btn:not(:disabled):hover,
+  .iclub-visual-v3 #exam-prep-host-root .ep-materials-action:not(:disabled):hover,
+  .iclub-visual-v3 #exam-prep-host-root .ep-host-btn:not(:disabled):hover {
+    border-color: #BFCFF6;
+    filter: brightness(.99);
+  }
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-btn:focus-visible,
+.iclub-visual-v3 #exam-prep-host-root .ep-placement-btn:focus-visible,
+.iclub-visual-v3 #exam-prep-host-root .ep-views-btn:focus-visible,
+.iclub-visual-v3 #exam-prep-host-root .ep-materials-btn:focus-visible,
+.iclub-visual-v3 #exam-prep-host-root .ep-materials-action:focus-visible,
+.iclub-visual-v3 #exam-prep-host-root .ep-host-btn:focus-visible {
+  outline: 3px solid rgba(36, 87, 214, .16);
+  outline-offset: 2px;
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-actions,
+.iclub-visual-v3 #exam-prep-host-root .ep-placement-actions,
+.iclub-visual-v3 #exam-prep-host-root .ep-views-actions,
+.iclub-visual-v3 #exam-prep-host-root .ep-host-actions {
+  gap: 8px;
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-component-card .ep-live-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-component-card .ep-live-actions > .ep-live-btn:not(.secondary):first-child {
+  grid-column: 1 / -1;
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-component-card .ep-live-actions > button {
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-dashboard-profile {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid #D8E2F8;
+  border-radius: var(--v3-radius-md, 12px);
+  background: rgba(255, 255, 255, .88);
+  color: var(--v3-text, #142033);
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-dashboard-profile > strong {
+  color: var(--v3-primary, #2457D6);
+  font-size: 10px;
+  font-weight: 810;
+  letter-spacing: .025em;
+  text-transform: uppercase;
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-dashboard-profile > span {
+  color: var(--v3-muted, #667085);
+  font-size: 10.5px;
+  line-height: 1.4;
+  font-weight: 650;
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-wave1-plan-edit {
+  width: 100%;
+  margin-top: 2px;
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-field select {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 10px 36px 10px 11px;
+  border: 1px solid #D9E1EF;
+  border-radius: var(--v3-radius-md, 12px);
+  background-color: #FFFFFF;
+  color: var(--v3-text, #142033);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.25;
+  outline: none;
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-field select:focus {
+  border-color: #AFC3F5;
+  box-shadow: 0 0 0 3px rgba(36, 87, 214, .10);
+}
+
+.iclub-visual-v3 #exam-prep-host-root .ep-live-form {
+  align-items: start;
+}
+
+@media (max-width: 360px) {
+  .iclub-visual-v3 #exam-prep-host-root .ep-live-component-card .ep-live-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .iclub-visual-v3 #exam-prep-host-root .ep-live-component-card .ep-live-actions > .ep-live-btn:not(.secondary):first-child {
+    grid-column: auto;
+  }
+}
