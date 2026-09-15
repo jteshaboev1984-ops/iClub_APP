@@ -2,10 +2,11 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p209map1";
+  const VERSION = "p209map2";
   let observer = null;
   let queued = false;
   let busy = false;
+  let hydrating = false;
   let pendingNotice = null;
 
   function rootEl() { return document.querySelector("#exam-prep-host-root"); }
@@ -27,6 +28,7 @@
       math: "Matematika uchun vaqt (soat)",
       save: "Saqlash va rejani yangilash",
       cancel: "Bekor qilish",
+      choose: "Tanlang",
       mathShort: "Matematika",
       totalShort: "Jami",
       hours: "soat/hafta",
@@ -46,6 +48,7 @@
       math: "Mathematics time (hours)",
       save: "Save and update plan",
       cancel: "Cancel",
+      choose: "Select",
       mathShort: "Mathematics",
       totalShort: "Total",
       hours: "h/week",
@@ -65,6 +68,7 @@
       math: "Время на математику (часы)",
       save: "Сохранить и обновить план",
       cancel: "Отмена",
+      choose: "Выберите",
       mathShort: "Математика",
       totalShort: "Всего",
       hours: "ч/нед.",
@@ -80,6 +84,31 @@
     return String(value == null ? "" : value)
       .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+  }
+
+  function seriesChoices() {
+    return [
+      { value: "November 2026", label: "Oct/Nov 2026" },
+      { value: "June 2027", label: "May/June 2027" },
+      { value: "November 2027", label: "Oct/Nov 2027" },
+      { value: "June 2028", label: "May/June 2028" },
+      { value: "November 2028", label: "Oct/Nov 2028" }
+    ];
+  }
+
+  function targetChoices() {
+    return ["A", "B", "C", "D", "E"].map(value => ({ value, label: value }));
+  }
+
+  function selectMarkup(name, choices, currentValue) {
+    const c = copy();
+    const current = String(currentValue || "").trim();
+    const known = choices.some(item => item.value === current);
+    const rows = [];
+    if (!current) rows.push(`<option value="" selected disabled>${esc(c.choose)}</option>`);
+    if (current && !known) rows.push(`<option value="${esc(current)}" selected>${esc(current)}</option>`);
+    rows.push(...choices.map(item => `<option value="${esc(item.value)}"${item.value === current ? " selected" : ""}>${esc(item.label)}</option>`));
+    return `<select name="${esc(name)}" required aria-required="true">${rows.join("")}</select>`;
   }
 
   function canUse() {
@@ -104,41 +133,82 @@
     return root?.querySelector(".ep-host-shell.ep-live > .ep-live-head")?.outerHTML || "";
   }
 
+  function localBackControl(root) {
+    if (!root || root.hidden) return null;
+    return root.querySelector([
+      "[data-ep-exam-plan-cancel]",
+      "[data-ep-materials-back]",
+      "[data-ep-placement-back]",
+      "[data-ep-views-back]",
+      "[data-ep-recovery-back]",
+      "[data-ep-live-dashboard]",
+      "[data-ep-live-exit]",
+      "[data-ep-live-end]"
+    ].join(","));
+  }
+
+  function installContextualBack() {
+    const app = window.iClubExamPrep;
+    if (!app || typeof app.back !== "function" || app.examPrepContextualBackVersion === VERSION) return;
+    const originalBack = app.back.bind(app);
+    window.iClubExamPrep = Object.freeze({
+      ...app,
+      back: () => {
+        const root = rootEl();
+        const local = app.isOpen?.() ? localBackControl(root) : null;
+        if (local) {
+          local.click();
+          return true;
+        }
+        return originalBack();
+      },
+      examPrepContextualBackVersion: VERSION
+    });
+  }
+
   async function hydrate() {
     queued = false;
     const root = rootEl();
-    if (!root || root.hidden || busy || !canUse() || !isDashboard(root)) return;
-    if (root.querySelector("[data-ep-exam-plan-card]")) return;
+    if (!root || root.hidden || busy || hydrating || !canUse() || !isDashboard(root)) return;
+    if (root.querySelector("[data-ep-exam-plan-edit]")) return;
     if (typeof internal.api?.examProfile !== "function") return;
 
-    let result;
-    try { result = await internal.api.examProfile(); } catch (_) { return; }
-    const profile = result?.ok ? result.data : null;
-    if (!profileComplete(profile) || !isDashboard(rootEl())) return;
+    hydrating = true;
+    try {
+      let result;
+      try { result = await internal.api.examProfile(); } catch (_) { return; }
+      const profile = result?.ok ? result.data : null;
+      const liveRoot = rootEl();
+      if (liveRoot !== root || !profileComplete(profile) || !isDashboard(root)) return;
+      if (root.querySelector("[data-ep-exam-plan-edit]")) return;
 
-    const c = copy();
-    const card = document.createElement("div");
-    card.className = "ep-live-card";
-    card.dataset.epExamPlanCard = "true";
-    card.innerHTML = `<div class="ep-live-head"><div><strong>${esc(c.title)}</strong><div class="ep-live-meta">${esc(profile.exam_series)} · ${esc(profile.target_grade)} · ${esc(c.mathShort)} ${esc(profile.mathematics_hours_budget)} ${esc(c.hours)} · ${esc(c.totalShort)} ${esc(profile.total_student_hours_available)} ${esc(c.hours)}</div></div><button class="ep-live-btn secondary" type="button" data-ep-exam-plan-edit>${esc(c.edit)}</button></div>`;
+      const profileSummary = root.querySelector(".ep-live-dashboard-profile");
+      if (!profileSummary) return;
+      const c = copy();
+      const button = document.createElement("button");
+      button.className = "ep-live-btn secondary ep-exam-plan-edit";
+      button.type = "button";
+      button.dataset.epExamPlanEdit = "true";
+      button.textContent = c.edit;
+      button.addEventListener("click", () => renderEditor(profile));
+      profileSummary.appendChild(button);
 
-    const shell = root.querySelector(".ep-host-shell.ep-live") || root.firstElementChild || root;
-    const grid = shell.querySelector(".ep-live-grid");
-    if (grid) shell.insertBefore(card, grid);
-    else shell.appendChild(card);
-
-    if (pendingNotice) {
-      const notice = document.createElement("div");
-      notice.className = "ep-live-notice";
-      notice.dataset.epExamPlanNotice = "true";
-      notice.setAttribute("role", "status");
-      notice.setAttribute("aria-live", "polite");
-      notice.textContent = pendingNotice;
-      shell.insertBefore(notice, card);
-      pendingNotice = null;
+      if (pendingNotice) {
+        const shell = root.querySelector(".ep-host-shell.ep-live") || root.firstElementChild || root;
+        const intro = shell.querySelector(".ep-live-dashboard-intro");
+        const notice = document.createElement("div");
+        notice.className = "ep-live-notice";
+        notice.dataset.epExamPlanNotice = "true";
+        notice.setAttribute("role", "status");
+        notice.setAttribute("aria-live", "polite");
+        notice.textContent = pendingNotice;
+        if (intro) shell.insertBefore(notice, intro);
+        else shell.prepend(notice);
+        pendingNotice = null;
+      }
+    } finally {
+      hydrating = false;
     }
-
-    card.querySelector("[data-ep-exam-plan-edit]")?.addEventListener("click", () => renderEditor(profile));
   }
 
   function renderEditor(profile) {
@@ -149,8 +219,8 @@
     root.innerHTML = `<section class="ep-host-shell ep-live" data-ep-exam-plan-editor>${header}<div class="ep-live-card">
       <strong>${esc(c.title)}</strong><div class="ep-live-meta">${esc(c.body)}</div>
       <form class="ep-live-form" data-ep-exam-plan-form>
-        <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" value="${esc(profile.exam_series)}" required aria-required="true"></label>
-        <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" value="${esc(profile.target_grade)}" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.series)}</span>${selectMarkup("exam_series", seriesChoices(), profile.exam_series)}</label>
+        <label class="ep-live-field"><span>${esc(c.target)}</span>${selectMarkup("target_grade", targetChoices(), String(profile.target_grade || "").toUpperCase())}</label>
         <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.total_student_hours_available)}" required aria-required="true"></label>
         <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.mathematics_hours_budget)}" required aria-required="true"></label>
         <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(c.save)}</button><button class="ep-live-btn secondary" type="button" data-ep-exam-plan-cancel>${esc(c.cancel)}</button></div>
@@ -216,6 +286,7 @@
   function attach() {
     const root = rootEl();
     if (!root) { setTimeout(attach, 50); return; }
+    installContextualBack();
     if (observer) observer.disconnect();
     observer = new MutationObserver(queueHydrate);
     observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden", "aria-hidden"] });
