@@ -32,7 +32,7 @@ DECLARE
     'private.exam_prep_synthetic_real_boundary_report_v1()',
     'private.exam_prep_synthetic_identity_isolation_report_v1()',
     'private.exam_prep_synthetic_scenario_set_report_v1(text)',
-    'public.get_exam_prep_content_runway_v1(integer)',
+    'public.get_exam_prep_content_runway_v1(smallint)',
     'public.start_exam_prep_session_safe_v1(uuid,text)',
     'public.submit_exam_prep_response_safe_v1(uuid,integer,jsonb,text,integer,text)',
     'public.finalize_exam_prep_session_safe_v1(uuid,text)',
