@@ -96,7 +96,11 @@ end $$;
 -- The evidence contract remains unchanged: written correctness is still nullable
 -- and the only verification authority added here is metadata labelled
 -- app_checked_noncredit inside the existing self_reviewed evidence payload.
-do $$ begin
+do $$
+declare
+  v_submit text;
+  v_feedback text;
+begin
   if not exists (
     select 1 from pg_constraint
     where conrelid='private.exam_prep_evidence_events'::regclass
@@ -104,12 +108,26 @@ do $$ begin
   ) then
     raise exception 'written-understanding: established self-reviewed evidence contract missing';
   end if;
-  if position('understanding_authority' in pg_get_functiondef('public.submit_exam_prep_response_safe_v1(uuid,integer,jsonb,text,integer,text)'::regprocedure))=0
-     or position('app_checked_noncredit' in pg_get_functiondef('public.submit_exam_prep_response_safe_v1(uuid,integer,jsonb,text,integer,text)'::regprocedure))=0 then
+
+  v_submit:=pg_get_functiondef('public.submit_exam_prep_response_safe_v1(uuid,integer,jsonb,text,integer,text)'::regprocedure);
+  v_feedback:=pg_get_functiondef('private.exam_prep_written_understanding_feedback_v1(uuid,text)'::regprocedure);
+
+  if position('understanding_authority' in v_submit)=0
+     or position('app_checked_noncredit' in v_submit)=0 then
     raise exception 'written-understanding: non-crediting authority marker missing from submit RPC';
   end if;
   if position('understanding_checks' in pg_get_functiondef('public.get_exam_prep_session_safe_v1(uuid,text)'::regprocedure))=0 then
     raise exception 'written-understanding: safe session payload bridge missing';
+  end if;
+
+  -- Server correctness must never be merged into learner_artifact because that
+  -- artifact is readable back through the session payload during active work.
+  if position('understanding_summary' in v_submit)>0
+     or position('understanding_summary' in v_feedback)>0 then
+    raise exception 'written-understanding: server evaluation leaked through learner artifact contract';
+  end if;
+  if position('evidence_payload' in v_feedback)=0 then
+    raise exception 'written-understanding: feedback must read private evidence metadata';
   end if;
 end $$;
 
