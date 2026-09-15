@@ -4,11 +4,11 @@ const path = require('path');
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-  await page.setContent(`<!doctype html><html lang="ru"><body class="iclub-visual-v3"><div id="exam-prep-host-root"></div></body></html>`);
+  await page.setContent(`<!doctype html><html lang="ru"><body class="iclub-visual-v3"><div id="exam-prep-host-root"></div><div id="toast" class="toast" role="status" aria-live="polite"></div></body></html>`);
   await page.evaluate(() => { window.i18n = { getLang: () => 'ru' }; window.iClubExamPrepHostInternal = {}; });
   await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.css') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.js') });
-  await page.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish1');
+  await page.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish2');
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
   await page.evaluate(() => {
@@ -18,11 +18,13 @@ const path = require('path');
   let state = await page.evaluate(() => ({
     backHidden: document.querySelector('[data-ep-live-dashboard]')?.hidden,
     title: document.querySelector('.ep-flow-task-name')?.textContent,
-    meta: document.querySelector('.ep-flow-task-meta')?.textContent
+    meta: document.querySelector('.ep-flow-task-meta')?.textContent,
+    hasLocalScreenAnimation: Boolean(document.querySelector('.ep-flow-screen-enter'))
   }));
   assert(state.backHidden === true, 'weekly plan must rely on the app top back control instead of duplicating a large in-card back button');
   assert(state.title.includes('градусы') && state.title.includes('радианы') && !state.title.includes('degrees'), 'learner-facing Russian skill title must be humanized');
   assert(state.meta === 'Радианная мера и окружность', 'internal skill number must not be exposed in weekly-plan metadata');
+  assert(state.hasLocalScreenAnimation === false, 'Exam Prep must not add a local fade/translate transition that the main app does not use');
 
   await page.evaluate(() => {
     const root = document.querySelector('#exam-prep-host-root');
@@ -36,11 +38,15 @@ const path = require('path');
   state = await page.evaluate(() => ({
     question: document.querySelector('.ep-live-qtext')?.textContent,
     pending: document.querySelector('.ep-flow-submit-pending')?.textContent,
-    hasFullscreenLoading: Boolean(document.querySelector('.ep-flow-loading-surface'))
+    hasFullscreenLoading: Boolean(document.querySelector('.ep-flow-loading-surface')),
+    opacity: getComputedStyle(document.querySelector('.ep-flow-pending-visual')).opacity,
+    animation: getComputedStyle(document.querySelector('.ep-flow-pending-visual')).animationName
   }));
   assert(state.question === '2 + 2 = ?', 'answer submit must keep the question visually stable while saving');
   assert(state.pending.includes('Сохраняем ответ'), 'submit button must show inline saving progress');
   assert(state.hasFullscreenLoading === false, 'answer submit must not flash a full-screen loading card');
+  assert(state.opacity === '1', `question surface must not dim while saving; got opacity ${state.opacity}`);
+  assert(state.animation === 'none', `question surface must not animate while saving; got ${state.animation}`);
 
   await page.evaluate(() => {
     const session = { session_id: 's1', session_type: 'diagnostic' };
@@ -49,11 +55,16 @@ const path = require('path');
   });
   await page.waitForFunction(() => !document.querySelector('#exam-prep-host-root .ep-live-notice'));
   state = await page.evaluate(() => ({
-    toast: document.querySelector('.ep-flow-answer-toast')?.textContent,
-    question: document.querySelector('.ep-live-qtext')?.textContent
+    toast: document.querySelector('#toast')?.textContent,
+    toastShown: document.querySelector('#toast')?.classList.contains('is-show'),
+    customToast: Boolean(document.querySelector('.ep-flow-answer-toast')),
+    question: document.querySelector('.ep-live-qtext')?.textContent,
+    hasLocalScreenAnimation: Boolean(document.querySelector('.ep-flow-screen-enter'))
   }));
-  assert(state.toast.includes('Ответ сохранён') && !state.toast.includes('технический'), 'diagnostic feedback must become a short non-layout status message');
+  assert(state.toastShown === true && state.toast === 'Ответ сохранён', 'diagnostic feedback must use the shared app toast with short learner-facing copy');
+  assert(state.customToast === false, 'Exam Prep must not create its own toast surface outside the app visual system');
   assert(state.question === '3 + 3 = ?', 'next question must remain visible and stable');
+  assert(state.hasLocalScreenAnimation === false, 'question-to-question change must match the main app direct stack transition');
 
   await page.evaluate(() => {
     document.querySelector('#exam-prep-host-root').innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card ep-flow-loading-surface" role="status"><div class="ep-flow-loader"><span class="ep-flow-spinner"></span><div><strong>Обновляем недельный план…</strong><small>Прогресс сохраняется. Не закрывайте экран.</small></div></div></div></section>`;
