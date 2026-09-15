@@ -1,0 +1,153 @@
+{
+  "pack_version": "p2_76_golden_v1_0",
+  "source_pack_version": "iclub_ai_context_v1_2026_09_07",
+  "scope": "runtime-supported progress_summary and weekly_plan_narration only",
+  "status_note": "Theory and established-error generation remain no_source until separately approved runtime source cards exist.",
+  "critical_failure_policy": "zero_tolerance",
+  "cases": [
+    {
+      "case_id": "P276-P1-PROGRESS-EN",
+      "component": "P1",
+      "locale": "en",
+      "interaction": "progress_summary",
+      "source_card_key": "p1:progress_context:en:v1",
+      "source_body": "Paper 1 progress is tracked only from Paper 1 evidence. Confirmed coverage means skills with accepted first-coverage evidence; it is not the same as mastery or exam readiness. Stage movement follows evidence rules, not the calendar.",
+      "facts": {"coverage_percent": 42, "open_corrections": 2, "operational_stage": 2},
+      "required_phrases": ["42%", "2 open corrections", "Paper 1"],
+      "semantic_groups": [["evidence"], ["coverage"], ["mastery", "readiness"], ["calendar", "stage"]],
+      "reference_answer": "Paper 1 has 42% confirmed coverage and 2 open corrections at Stage 2. This progress comes only from Paper 1 evidence, and confirmed coverage is not the same as mastery or exam readiness. Your stage changes when the required evidence is completed, not simply because the calendar moves forward."
+    },
+    {
+      "case_id": "P276-P1-PROGRESS-RU",
+      "component": "P1",
+      "locale": "ru",
+      "interaction": "progress_summary",
+      "source_card_key": "p1:progress_context:ru:v1",
+      "source_body": "Прогресс Paper 1 считается только по подтверждениям Paper 1. Подтверждённое покрытие означает навыки с принятым базовым подтверждением; это не то же самое, что mastery или готовность к экзамену. Переход между этапами определяется подтверждениями, а не календарём.",
+      "facts": {"coverage_percent": 42, "open_corrections": 2, "operational_stage": 2},
+      "required_phrases": ["42%", "2", "Paper 1"],
+      "semantic_groups": [["подтверж", "доказ"], ["покры"], ["mastery", "готовност"], ["календар", "этап"]],
+      "reference_answer": "По Paper 1 подтверждено 42% покрытия, сейчас открыты 2 исправления, текущий этап — 2. Прогресс считается только по подтверждениям Paper 1, а покрытие не означает mastery или готовность к экзамену. Переход дальше зависит от подтверждённых результатов, а не от календаря."
+    },
+    {
+      "case_id": "P276-P1-PROGRESS-UZ",
+      "component": "P1",
+      "locale": "uz",
+      "interaction": "progress_summary",
+      "source_card_key": "p1:progress_context:uz:v1",
+      "source_body": "Paper 1 progressi faqat Paper 1 dalillari asosida hisoblanadi. Tasdiqlangan qamrov qabul qilingan dastlabki dalili bor ko‘nikmalarni anglatadi; bu mastery yoki imtihonga tayyorlik bilan bir xil emas. Bosqichlar kalendar bo‘yicha emas, dalillar bo‘yicha o‘zgaradi.",
+      "facts": {"coverage_percent": 42, "open_corrections": 2, "operational_stage": 2},
+      "required_phrases": ["42%", "2", "Paper 1"],
+      "semantic_groups": [["dalil", "tasdiq"], ["qamrov"], ["mastery", "tayyor"], ["kalendar", "bosqich"]],
+      "reference_answer": "Paper 1 bo‘yicha tasdiqlangan qamrov 42%, hozir 2 ta ochiq tuzatish bor va joriy bosqich 2. Progress faqat Paper 1 dalillariga tayanadi, qamrov esa mastery yoki imtihonga tayyorlik degani emas. Keyingi bosqich kalendar sabab emas, kerakli dalillar tasdiqlanganda ochiladi."
+    },
+    {
+      "case_id": "P276-P5-PROGRESS-EN",
+      "component": "P5",
+      "locale": "en",
+      "interaction": "progress_summary",
+      "source_card_key": "p5:progress_context:en:v1",
+      "source_body": "Paper 5 progress is tracked only from Paper 5 evidence. Confirmed coverage means skills with accepted first-coverage evidence; it is not the same as mastery or exam readiness. Paper 1 results never raise Paper 5 progress.",
+      "facts": {"coverage_percent": 31, "open_corrections": 1, "operational_stage": 1},
+      "required_phrases": ["31%", "1 open correction", "Paper 5", "Paper 1"],
+      "semantic_groups": [["evidence"], ["coverage"], ["mastery", "readiness"], ["never", "does not", "do not", "cannot"]],
+      "reference_answer": "Paper 5 has 31% confirmed coverage and 1 open correction at Stage 1. This progress comes only from Paper 5 evidence, and confirmed coverage is not the same as mastery or exam readiness. Paper 1 results do not raise Paper 5 progress."
+    },
+    {
+      "case_id": "P276-P5-PROGRESS-RU",
+      "component": "P5",
+      "locale": "ru",
+      "interaction": "progress_summary",
+      "source_card_key": "p5:progress_context:ru:v1",
+      "source_body": "Прогресс Paper 5 считается только по подтверждениям Paper 5. Подтверждённое покрытие означает навыки с принятым базовым подтверждением; это не то же самое, что mastery или готовность к экзамену. Результаты Paper 1 не повышают прогресс Paper 5.",
+      "facts": {"coverage_percent": 31, "open_corrections": 1, "operational_stage": 1},
+      "required_phrases": ["31%", "1", "Paper 5", "Paper 1"],
+      "semantic_groups": [["подтверж", "доказ"], ["покры"], ["mastery", "готовност"], ["не повыш", "не увелич", "не влияют"]],
+      "reference_answer": "По Paper 5 подтверждено 31% покрытия, сейчас открыто 1 исправление, текущий этап — 1. Прогресс Paper 5 считается только по подтверждениям Paper 5, а покрытие не означает mastery или готовность к экзамену. Результаты Paper 1 не повышают прогресс Paper 5."
+    },
+    {
+      "case_id": "P276-P5-PROGRESS-UZ",
+      "component": "P5",
+      "locale": "uz",
+      "interaction": "progress_summary",
+      "source_card_key": "p5:progress_context:uz:v1",
+      "source_body": "Paper 5 progressi faqat Paper 5 dalillari asosida hisoblanadi. Tasdiqlangan qamrov qabul qilingan dastlabki dalili bor ko‘nikmalarni anglatadi; bu mastery yoki imtihonga tayyorlik bilan bir xil emas. Paper 1 natijalari Paper 5 progressini oshirmaydi.",
+      "facts": {"coverage_percent": 31, "open_corrections": 1, "operational_stage": 1},
+      "required_phrases": ["31%", "1", "Paper 5", "Paper 1"],
+      "semantic_groups": [["dalil", "tasdiq"], ["qamrov"], ["mastery", "tayyor"], ["oshirmaydi", "oshirmas", "o‘rnini bosmay"]],
+      "reference_answer": "Paper 5 bo‘yicha tasdiqlangan qamrov 31%, hozir 1 ta ochiq tuzatish bor va joriy bosqich 1. Progress faqat Paper 5 dalillariga tayanadi, qamrov esa mastery yoki imtihonga tayyorlik degani emas. Paper 1 natijalari Paper 5 progressini oshirmaydi."
+    },
+    {
+      "case_id": "P276-P1-PLAN-EN",
+      "component": "P1",
+      "locale": "en",
+      "interaction": "weekly_plan_narration",
+      "source_card_key": "p1:weekly_plan_context:en:v1",
+      "source_body": "The Paper 1 weekly plan is built from the learner’s current Paper 1 evidence, open corrections, due retests and available mathematics time. Priority order can change when new verified evidence arrives. The plan does not overwrite prior evidence.",
+      "facts": {"mathematics_minutes": 150, "open_corrections": 2, "due_retests": 1},
+      "required_phrases": ["150", "2 open corrections", "1 due retest", "Paper 1"],
+      "semantic_groups": [["evidence"], ["correction"], ["retest"], ["time", "minutes"], ["does not overwrite", "doesn't overwrite", "preserves"]],
+      "reference_answer": "For Paper 1, use the available 150 minutes to work through the 2 open corrections first and then complete the 1 due retest. The order follows your current Paper 1 evidence and can change when new verified evidence arrives. This weekly plan does not overwrite your earlier evidence."
+    },
+    {
+      "case_id": "P276-P1-PLAN-RU",
+      "component": "P1",
+      "locale": "ru",
+      "interaction": "weekly_plan_narration",
+      "source_card_key": "p1:weekly_plan_context:ru:v1",
+      "source_body": "Недельный план Paper 1 строится по текущим подтверждениям Paper 1, открытым исправлениям, наступившим повторным проверкам и доступному времени на математику. Приоритеты могут меняться после новых подтверждённых результатов. План не переписывает прежние подтверждения.",
+      "facts": {"mathematics_minutes": 150, "open_corrections": 2, "due_retests": 1},
+      "required_phrases": ["150", "2", "1", "Paper 1"],
+      "semantic_groups": [["подтверж", "доказ"], ["исправ"], ["повтор", "ретест"], ["минут", "врем"], ["не перепис", "сохраня"]],
+      "reference_answer": "Для Paper 1 распределите доступные 150 минут так: сначала разберите 2 открытых исправления, затем выполните 1 наступившую повторную проверку. Приоритеты основаны на текущих подтверждениях Paper 1 и могут измениться после новых подтверждённых результатов. Недельный план не переписывает прежние подтверждения."
+    },
+    {
+      "case_id": "P276-P1-PLAN-UZ",
+      "component": "P1",
+      "locale": "uz",
+      "interaction": "weekly_plan_narration",
+      "source_card_key": "p1:weekly_plan_context:uz:v1",
+      "source_body": "Paper 1 haftalik rejasi joriy Paper 1 dalillari, ochiq tuzatishlar, vaqti kelgan qayta tekshiruvlar va matematika uchun mavjud vaqt asosida tuziladi. Yangi tasdiqlangan natijalar kelganda ustuvorliklar o‘zgarishi mumkin. Reja oldingi dalillarni qayta yozmaydi.",
+      "facts": {"mathematics_minutes": 150, "open_corrections": 2, "due_retests": 1},
+      "required_phrases": ["150", "2", "1", "Paper 1"],
+      "semantic_groups": [["dalil", "tasdiq"], ["tuzat"], ["qayta tekshir", "retest"], ["daqiqa", "vaqt"], ["qayta yozmay", "saql"]],
+      "reference_answer": "Paper 1 uchun mavjud 150 daqiqada avval 2 ta ochiq tuzatishni ko‘rib chiqing, keyin vaqti kelgan 1 ta qayta tekshiruvni bajaring. Ustuvorliklar joriy Paper 1 dalillariga asoslanadi va yangi tasdiqlangan natijalar bilan o‘zgarishi mumkin. Haftalik reja oldingi dalillarni qayta yozmaydi."
+    },
+    {
+      "case_id": "P276-P5-PLAN-EN",
+      "component": "P5",
+      "locale": "en",
+      "interaction": "weekly_plan_narration",
+      "source_card_key": "p5:weekly_plan_context:en:v1",
+      "source_body": "The Paper 5 weekly plan is built from the learner’s current Paper 5 evidence, open corrections, due retests and available mathematics time. Paper 1 mastery does not substitute for Paper 5 evidence. The plan does not overwrite prior evidence.",
+      "facts": {"mathematics_minutes": 120, "open_corrections": 1, "due_retests": 2},
+      "required_phrases": ["120", "1 open correction", "2 due retests", "Paper 5", "Paper 1"],
+      "semantic_groups": [["evidence"], ["correction"], ["retest"], ["time", "minutes"], ["does not substitute", "cannot substitute", "does not replace"], ["does not overwrite", "preserves"]],
+      "reference_answer": "For Paper 5, use the available 120 minutes to address the 1 open correction and complete the 2 due retests. The plan is based on Paper 5 evidence; Paper 1 mastery does not substitute for Paper 5 evidence. It also preserves your earlier evidence rather than overwriting it."
+    },
+    {
+      "case_id": "P276-P5-PLAN-RU",
+      "component": "P5",
+      "locale": "ru",
+      "interaction": "weekly_plan_narration",
+      "source_card_key": "p5:weekly_plan_context:ru:v1",
+      "source_body": "Недельный план Paper 5 строится по текущим подтверждениям Paper 5, открытым исправлениям, наступившим повторным проверкам и доступному времени на математику. Mastery Paper 1 не заменяет подтверждения Paper 5. План не переписывает прежние подтверждения.",
+      "facts": {"mathematics_minutes": 120, "open_corrections": 1, "due_retests": 2},
+      "required_phrases": ["120", "1", "2", "Paper 5", "Paper 1"],
+      "semantic_groups": [["подтверж", "доказ"], ["исправ"], ["повтор", "ретест"], ["минут", "врем"], ["не замен"], ["не перепис", "сохраня"]],
+      "reference_answer": "Для Paper 5 используйте доступные 120 минут на 1 открытое исправление и 2 наступившие повторные проверки. План опирается на подтверждения Paper 5, а mastery Paper 1 не заменяет подтверждения Paper 5. Прежние подтверждения при этом не переписываются."
+    },
+    {
+      "case_id": "P276-P5-PLAN-UZ",
+      "component": "P5",
+      "locale": "uz",
+      "interaction": "weekly_plan_narration",
+      "source_card_key": "p5:weekly_plan_context:uz:v1",
+      "source_body": "Paper 5 haftalik rejasi joriy Paper 5 dalillari, ochiq tuzatishlar, vaqti kelgan qayta tekshiruvlar va matematika uchun mavjud vaqt asosida tuziladi. Paper 1 mastery Paper 5 dalillarining o‘rnini bosmaydi. Reja oldingi dalillarni qayta yozmaydi.",
+      "facts": {"mathematics_minutes": 120, "open_corrections": 1, "due_retests": 2},
+      "required_phrases": ["120", "1", "2", "Paper 5", "Paper 1"],
+      "semantic_groups": [["dalil", "tasdiq"], ["tuzat"], ["qayta tekshir", "retest"], ["daqiqa", "vaqt"], ["o‘rnini bosmay", "almashtirmay"], ["qayta yozmay", "saql"]],
+      "reference_answer": "Paper 5 uchun mavjud 120 daqiqani 1 ta ochiq tuzatish va vaqti kelgan 2 ta qayta tekshiruvga ajrating. Reja Paper 5 dalillariga tayanadi, Paper 1 mastery esa Paper 5 dalillarining o‘rnini bosmaydi. Reja oldingi dalillarni qayta yozmaydi."
+    }
+  ]
+}
