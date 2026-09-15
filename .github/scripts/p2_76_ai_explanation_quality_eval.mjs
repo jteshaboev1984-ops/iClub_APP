@@ -4,9 +4,24 @@ import path from 'node:path';
 const evalDir = path.resolve('.github/ai-evals');
 const resultPath = path.resolve(process.env.P276_RESULT_PATH || 'p276-ai-quality-result.json');
 const mode = process.env.P276_MODE || 'provider';
-const model = process.env.P276_MODEL || 'gpt-5.1';
+const model = process.env.P276_MODEL || 'gpt-5.6-luna';
 const apiKey = process.env.OPENAI_API_KEY || '';
 const endpoint = process.env.OPENAI_RESPONSES_URL || 'https://api.openai.com/v1/responses';
+const maxOutputTokens = Number(process.env.P276_MAX_OUTPUT_TOKENS || 180);
+const maxPaidRequests = Number(process.env.P276_MAX_PAID_REQUESTS || 18);
+const maxBudgetUsd = Number(process.env.P276_MAX_BUDGET_USD || 0.02);
+const inputPricePerMToken = Number(process.env.P276_INPUT_PRICE_PER_MTOK || 0.20);
+const outputPricePerMToken = Number(process.env.P276_OUTPUT_PRICE_PER_MTOK || 1.20);
+const reasoningEffort = process.env.P276_REASONING_EFFORT || 'none';
+const textVerbosity = process.env.P276_TEXT_VERBOSITY || 'low';
+const progressive = process.env.P276_PROGRESSIVE !== 'false';
+
+const smokeCaseIds = [
+  'P276-P1-QUA02-EN',
+  'P276-P5-NOR02-RU',
+  'P276-P1-PROGRESS-UZ',
+  'P276-P5-PLAN-EN',
+];
 
 const assert = (condition, message) => {
   if (!condition) throw new Error(message);
@@ -206,8 +221,39 @@ function responseText(data) {
   return pieces.join('\n').trim();
 }
 
+function estimatedCostUsd(inputTokens, outputTokens) {
+  return (Number(inputTokens || 0) / 1_000_000) * inputPricePerMToken
+    + (Number(outputTokens || 0) / 1_000_000) * outputPricePerMToken;
+}
+
+function conservativePreflightCost(cases) {
+  const estimatedInputTokens = cases.reduce((sum, testCase) => {
+    const chars = buildInstructions(testCase).length + buildInput(testCase).length;
+    return sum + Math.ceil(chars / 2);
+  }, 0);
+  const estimatedOutputTokens = cases.length * maxOutputTokens;
+  return {
+    estimated_input_tokens_upper: estimatedInputTokens,
+    estimated_output_tokens_upper: estimatedOutputTokens,
+    estimated_cost_upper_usd: Number(estimatedCostUsd(estimatedInputTokens, estimatedOutputTokens).toFixed(6)),
+  };
+}
+
+function orderProviderCases(cases) {
+  if (!progressive) return cases;
+  const byId = new Map(cases.map((testCase) => [testCase.case_id, testCase]));
+  for (const id of smokeCaseIds) assert(byId.has(id), `P2-76 smoke case missing from golden packs: ${id}`);
+  const smoke = smokeCaseIds.map((id) => byId.get(id));
+  const rest = cases.filter((testCase) => !smokeCaseIds.includes(testCase.case_id));
+  return [...smoke, ...rest];
+}
+
+let providerCalls = 0;
+
 async function callProvider(testCase) {
   assert(apiKey, 'P2-76 funded provider acceptance requires OPENAI_API_KEY; refusing to mark GREEN without a real provider run');
+  assert(providerCalls < maxPaidRequests, `P2-76 paid request cap reached (${maxPaidRequests}); refusing another provider call`);
+  providerCalls += 1;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 30000);
   try {
@@ -221,7 +267,10 @@ async function callProvider(testCase) {
         model,
         instructions: buildInstructions(testCase),
         input: buildInput(testCase),
-        max_output_tokens: 300,
+        reasoning: { effort: reasoningEffort },
+        text: { verbosity: textVerbosity },
+        max_output_tokens: maxOutputTokens,
+        store: false,
       }),
       signal: controller.signal,
     });
@@ -244,13 +293,30 @@ async function callProvider(testCase) {
 
 async function main() {
   const { packs, cases } = loadCases();
+  assert(Number.isFinite(maxOutputTokens) && maxOutputTokens >= 64 && maxOutputTokens <= 300, 'P2-76 max output token cap must be between 64 and 300');
+  assert(Number.isFinite(maxPaidRequests) && maxPaidRequests >= 1 && maxPaidRequests <= cases.length, 'P2-76 paid request cap is invalid');
+  assert(Number.isFinite(maxBudgetUsd) && maxBudgetUsd > 0 && maxBudgetUsd <= 0.05, 'P2-76 budget cap must be > 0 and <= $0.05');
+  assert(model === 'gpt-5.6-luna', `P2-76 funded acceptance is cost-pinned to gpt-5.6-luna; got ${model}`);
+  assert(reasoningEffort === 'none', `P2-76 funded acceptance requires reasoning effort none; got ${reasoningEffort}`);
+  assert(textVerbosity === 'low', `P2-76 funded acceptance requires low verbosity; got ${textVerbosity}`);
+
+  const providerRun = mode !== 'reference';
+  const orderedCases = providerRun ? orderProviderCases(cases) : cases;
+  const preflight = conservativePreflightCost(cases);
+  if (providerRun) {
+    assert(cases.length <= maxPaidRequests, `P2-76 full pack requires ${cases.length} calls, above paid request cap ${maxPaidRequests}`);
+    assert(preflight.estimated_cost_upper_usd <= maxBudgetUsd, `P2-76 preflight cost ceiling $${preflight.estimated_cost_upper_usd} exceeds cap $${maxBudgetUsd}`);
+    console.log(`P2-76 paid preflight model=${model} cases=${cases.length} max_calls=${maxPaidRequests} upper_cost_usd=${preflight.estimated_cost_upper_usd}`);
+  }
+
   const results = [];
   let totalInputTokens = 0;
   let totalOutputTokens = 0;
+  let failFastReason = null;
 
-  for (const testCase of cases) {
+  for (const testCase of orderedCases) {
     let candidate;
-    if (mode === 'reference') {
+    if (!providerRun) {
       candidate = { text: testCase.reference_answer, response_id: null, model: 'reference-answer', usage: null };
     } else {
       candidate = await callProvider(testCase);
@@ -259,6 +325,10 @@ async function main() {
     if (candidate.usage) {
       totalInputTokens += Number(candidate.usage.input_tokens || 0);
       totalOutputTokens += Number(candidate.usage.output_tokens || 0);
+    }
+    const actualEstimatedCost = estimatedCostUsd(totalInputTokens, totalOutputTokens);
+    if (providerRun && actualEstimatedCost > maxBudgetUsd) {
+      throw new Error(`P2-76 actual estimated cost $${actualEstimatedCost.toFixed(6)} exceeded cap $${maxBudgetUsd}; stopping`);
     }
     results.push({
       case_id: testCase.case_id,
@@ -274,44 +344,63 @@ async function main() {
       provider_model: candidate.model,
       ...evaluation,
     });
-    console.log(`${evaluation.pass ? 'PASS' : 'FAIL'} ${testCase.case_id} score=${evaluation.score}/6 semantic=${evaluation.semantic_coverage} critical=${evaluation.critical_failures.length}`);
+    console.log(`${evaluation.pass ? 'PASS' : 'FAIL'} ${testCase.case_id} score=${evaluation.score}/6 semantic=${evaluation.semantic_coverage} critical=${evaluation.critical_failures.length} est_cost_usd=${actualEstimatedCost.toFixed(6)}`);
+
+    if (providerRun && progressive && smokeCaseIds.includes(testCase.case_id) && !evaluation.pass) {
+      failFastReason = `smoke_failed:${testCase.case_id}`;
+      console.error(`P2-76 FAIL-FAST ${failFastReason}; remaining paid cases will not be called.`);
+      break;
+    }
   }
 
   const criticalFailures = results.flatMap((r) => r.critical_failures.map((f) => `${r.case_id}:${f}`));
   const passed = results.filter((r) => r.pass).length;
-  const averageScore = results.reduce((sum, r) => sum + r.score, 0) / results.length;
-  const allComponents = ['P1', 'P5'].every((component) => results.filter((r) => r.component === component).every((r) => r.pass));
-  const allLocales = ['en', 'ru', 'uz'].every((locale) => results.filter((r) => r.locale === locale).every((r) => r.pass));
-  const theoryPass = results.filter((r) => r.interaction === 'theory_explanation').every((r) => r.pass);
-  const providerRun = mode !== 'reference';
+  const averageScore = results.length ? results.reduce((sum, r) => sum + r.score, 0) / results.length : 0;
+  const fullPackExecuted = results.length === cases.length;
+  const allComponents = fullPackExecuted && ['P1', 'P5'].every((component) => results.filter((r) => r.component === component).every((r) => r.pass));
+  const allLocales = fullPackExecuted && ['en', 'ru', 'uz'].every((locale) => results.filter((r) => r.locale === locale).every((r) => r.pass));
+  const theoryPass = fullPackExecuted && results.filter((r) => r.interaction === 'theory_explanation').every((r) => r.pass);
   const green = providerRun
-    ? criticalFailures.length === 0 && passed === results.length && averageScore >= 5.5 && allComponents && allLocales && theoryPass
-    : criticalFailures.length === 0 && passed === results.length;
+    ? fullPackExecuted && criticalFailures.length === 0 && passed === cases.length && averageScore >= 5.5 && allComponents && allLocales && theoryPass
+    : criticalFailures.length === 0 && passed === cases.length;
 
+  const actualEstimatedCost = estimatedCostUsd(totalInputTokens, totalOutputTokens);
   const summary = {
     stage: 'P2-76',
     mode,
     provider_model: providerRun ? model : null,
+    reasoning_effort: providerRun ? reasoningEffort : null,
+    text_verbosity: providerRun ? textVerbosity : null,
     golden_pack_versions: packs.map((p) => p.pack_version),
-    case_count: results.length,
+    planned_case_count: cases.length,
+    executed_case_count: results.length,
+    case_count: cases.length,
     passed_cases: passed,
-    failed_cases: results.length - passed,
+    failed_cases: results.filter((r) => !r.pass).length,
+    full_pack_executed: fullPackExecuted,
+    fail_fast_reason: failFastReason,
     critical_failure_count: criticalFailures.length,
     average_dimension_score: Number(averageScore.toFixed(3)),
     all_components_green: allComponents,
     all_locales_green: allLocales,
     mathematical_theory_green: theoryPass,
     provider_run_required_for_release_gate: true,
-    provider_run_completed: providerRun,
+    provider_run_completed: providerRun && fullPackExecuted,
+    max_paid_requests: maxPaidRequests,
+    provider_calls: providerCalls,
+    max_output_tokens_per_call: maxOutputTokens,
+    max_budget_usd: maxBudgetUsd,
+    preflight_estimated_cost_upper_usd: preflight.estimated_cost_upper_usd,
     total_input_tokens: totalInputTokens,
     total_output_tokens: totalOutputTokens,
+    estimated_actual_cost_usd: Number(actualEstimatedCost.toFixed(6)),
     verdict: green ? (providerRun ? 'GREEN' : 'EVALUATOR_SELFTEST_GREEN') : 'NO-GO',
     generated_at: new Date().toISOString(),
     results,
   };
 
   fs.writeFileSync(resultPath, JSON.stringify(summary, null, 2) + '\n');
-  console.log(`P2-76 verdict=${summary.verdict} cases=${passed}/${results.length} avg=${summary.average_dimension_score} critical=${summary.critical_failure_count}`);
+  console.log(`P2-76 verdict=${summary.verdict} executed=${results.length}/${cases.length} passed=${passed} avg=${summary.average_dimension_score} critical=${summary.critical_failure_count} provider_calls=${providerCalls} est_cost_usd=${summary.estimated_actual_cost_usd}`);
   if (!green) process.exitCode = 1;
 }
 
@@ -320,6 +409,8 @@ main().catch((error) => {
     stage: 'P2-76',
     mode,
     provider_model: mode === 'reference' ? null : model,
+    provider_calls: providerCalls,
+    max_budget_usd: maxBudgetUsd,
     verdict: 'NO-GO',
     harness_error: String(error?.stack || error),
     generated_at: new Date().toISOString(),
