@@ -6,7 +6,13 @@
   if (window.__iclubExamPrepWrittenUnderstanding === MARKER) return;
   window.__iclubExamPrepWrittenUnderstanding = MARKER;
 
-  const state = { session: null, language: "ru", apiWrapped: false, pendingFeedback: null };
+  const state = {
+    session: null,
+    language: "ru",
+    apiWrapped: false,
+    pendingFeedback: null,
+    feedbackFinalized: false
+  };
 
   function lang(value) {
     const v = String(value || "ru").toLowerCase();
@@ -101,14 +107,35 @@
     label.parentNode?.insertBefore(wrapper, label);
   }
 
+  function clearPendingFeedback() {
+    state.pendingFeedback = null;
+    state.feedbackFinalized = false;
+  }
+
   function renderPendingFeedback() {
     const message = state.pendingFeedback;
     if (!message) return;
     const root = document.querySelector("#exam-prep-host-root");
     if (!root) return;
-    if (root.textContent?.includes(message)) { state.pendingFeedback = null; return; }
-    const stable = root.querySelector('[data-ep-live-submit], [data-ep-live-plan-item], .ep-live-dashboard-intro, [data-ep-live-back-timed]');
-    if (!stable || root.querySelector("[data-ep-written-understanding-feedback]")) return;
+
+    const visible = root.textContent?.includes(message) === true;
+    if (!state.feedbackFinalized) {
+      if (visible && root.querySelector("[data-ep-live-submit]")) {
+        const hasUnanswered = Array.isArray(state.session?.items)
+          && state.session.items.some(item => item?.answered !== true);
+        if (hasUnanswered) clearPendingFeedback();
+      }
+      return;
+    }
+
+    const stable = root.querySelector('[data-ep-live-plan-item], .ep-live-dashboard-intro, [data-ep-live-back-timed]');
+    if (!stable) return;
+    if (visible) {
+      clearPendingFeedback();
+      return;
+    }
+    if (root.querySelector("[data-ep-written-understanding-feedback]")) return;
+
     const shell = root.querySelector(".ep-host-shell");
     const head = shell?.querySelector(".ep-live-head");
     if (!shell) return;
@@ -119,7 +146,7 @@
     notice.setAttribute("aria-live", "polite");
     notice.textContent = message;
     if (head?.nextSibling) shell.insertBefore(notice, head.nextSibling); else shell.appendChild(notice);
-    state.pendingFeedback = null;
+    clearPendingFeedback();
   }
 
   function showIncomplete() {
@@ -150,6 +177,7 @@
 
     const getSession = base.getSession.bind(base);
     const submitResponse = base.submitResponse.bind(base);
+    const finalizeSession = typeof base.finalizeSession === "function" ? base.finalizeSession.bind(base) : null;
     const next = { ...base };
 
     next.getSession = async (sessionId, language = "en") => {
@@ -174,9 +202,21 @@
       const explanation = formatFeedback(result.data.understanding_check);
       if (!explanation) return result;
       state.pendingFeedback = explanation;
+      state.feedbackFinalized = false;
       const data = Object.freeze({ ...result.data, explanation: [result.data.explanation, explanation].filter(Boolean).join(" — ") });
       return Object.freeze({ ...result, data });
     };
+
+    if (finalizeSession) {
+      next.finalizeSession = async (sessionId, idempotencyKey) => {
+        const result = await finalizeSession(sessionId, idempotencyKey);
+        if (result?.ok && state.pendingFeedback) {
+          state.feedbackFinalized = true;
+          queueMicrotask(renderPendingFeedback);
+        }
+        return result;
+      };
+    }
 
     internal.api = Object.freeze(next);
     state.apiWrapped = true;
