@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "wave1ux2";
+  const VERSION = "wave1ux3";
   let observer = null;
   let facadeRetry = 0;
   let recoveryResetTimer = null;
@@ -19,7 +19,7 @@
       const link = document.createElement("link");
       link.rel = "stylesheet";
       link.dataset.examPrepWave1Ux = "true";
-      link.href = src.replace(/exam-prep-wave1-ux\.js(?:\?.*)?$/, "exam-prep-wave1-ux.css?v=wave1ux2");
+      link.href = src.replace(/exam-prep-wave1-ux\.js(?:\?.*)?$/, "exam-prep-wave1-ux.css?v=wave1ux3");
       document.head.appendChild(link);
     } catch (_) {}
   }
@@ -147,9 +147,26 @@
     return button;
   }
 
+  function logicalButton(selector) {
+    const root = rootEl();
+    const button = root?.querySelector(selector);
+    return button && !button.disabled ? button : null;
+  }
+
   function handleInternalBack() {
     const root = rootEl();
     if (!root || root.hidden) return false;
+
+    // The weekly-plan card intentionally hides its duplicate in-card Overview button.
+    // The app top arrow must still follow that logical route instead of falling through
+    // to the Mathematics subject hub.
+    if (root.querySelector(".ep-live-plan-item")) {
+      const planBack = logicalButton("[data-ep-live-dashboard]");
+      if (planBack) {
+        planBack.click();
+        return true;
+      }
+    }
 
     const selectors = [
       "[data-ep-exam-plan-cancel]",
