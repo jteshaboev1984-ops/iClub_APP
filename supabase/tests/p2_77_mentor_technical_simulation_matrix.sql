@@ -212,7 +212,7 @@ BEGIN
   PERFORM set_config('request.jwt.claim.sub',v_wrong::text,true);
   PERFORM set_config('request.jwt.claim.role','authenticated',true);
   BEGIN
-    PERFORM public.submit_exam_prep_mentor_review_safe_v1(v_queue,'verified','wrong_scope','Wrong mentor must not be able to review this learner item.',4,'{}'::jsonb);
+    PERFORM public.submit_exam_prep_mentor_review_safe_v1(v_queue,'verified','wrong_scope','Wrong mentor must not be able to review this learner item.',4::smallint,'{}'::jsonb);
   EXCEPTION WHEN OTHERS THEN
     IF SQLERRM='exam_prep_mentor_queue_not_found' THEN v_blocked:=true; ELSE RAISE; END IF;
   END;
@@ -231,7 +231,7 @@ BEGIN
   PERFORM set_config('request.jwt.claim.sub',v_mentor::text,true);
   PERFORM set_config('request.jwt.claim.role','authenticated',true);
   v_result:=public.submit_exam_prep_mentor_review_safe_v1(
-    v_queue,'verified','rubric_verified','Written method is complete and satisfies the governed P2-77 rubric fixture.',4,
+    v_queue,'verified','rubric_verified','Written method is complete and satisfies the governed P2-77 rubric fixture.',4::smallint,
     jsonb_build_object('rubric_version','p277-rubric-v1','judgement_type','written_method')
   );
   v_review:=(v_result->>'review_id')::uuid;
@@ -265,7 +265,7 @@ BEGIN
   PERFORM set_config('request.jwt.claim.sub',v_mentor::text,true);
   PERFORM set_config('request.jwt.claim.role','authenticated',true);
   v_result:=public.submit_exam_prep_mentor_review_safe_v1(
-    v_queue,'confirm','high_impact_override','The proposed high-impact override is supported by linked governed evidence.',null,
+    v_queue,'confirm','high_impact_override','The proposed high-impact override is supported by linked governed evidence.',null::smallint,
     jsonb_build_object('override_scope','P1-only','requested_change','human_verification_only')
   );
   v_review:=(v_result->>'review_id')::uuid;
