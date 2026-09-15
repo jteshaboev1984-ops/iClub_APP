@@ -9,7 +9,7 @@ const path = require('path');
     contentType: 'text/html',
     body: `<!doctype html><html lang="en"><head></head><body>
       <section id="exam-prep-host-root">
-        <div>Overview</div>
+        <div data-dashboard-sentinel>Overview</div>
         <article class="ep-live-card"><div class="ep-live-actions"><button data-ep-live-plan="P1">Weekly plan</button></div></article>
         <article class="ep-live-card"><div class="ep-live-actions"><button data-ep-live-plan="P5">Weekly plan</button></div></article>
       </section>
@@ -21,7 +21,11 @@ const path = require('path');
   await page.evaluate(() => {
     window.__calls = [];
     window.__opened = [];
+    window.__dashboardListenerHits = 0;
+    window.__unexpectedHostReopens = 0;
+    document.querySelector('[data-ep-live-plan="P1"]')?.addEventListener('click', () => { window.__dashboardListenerHits += 1; });
     window.open = url => { window.__opened.push(url); return null; };
+    window.iClubExamPrep = { open: async () => { window.__unexpectedHostReopens += 1; return false; } };
     window.iClubExamPrepHostInternal = {
       lastCapabilities: {
         rolloutState:'controlled_beta', coreAccess:true, aiAssist:false,
@@ -110,6 +114,24 @@ const path = require('path');
   const opened = await page.evaluate(() => window.__opened.slice());
   assert(opened.length===1 && opened[0].startsWith('https://'),'official source did not open through a safe HTTPS link');
 
+  // Returning to Overview must restore the exact live dashboard DOM without a capability/network remount.
+  await page.click('[data-ep-materials-back]');
+  await page.waitForSelector('[data-dashboard-sentinel]');
+  const returned = await page.evaluate(() => ({
+    unexpectedHostReopens:window.__unexpectedHostReopens,
+    hasMaterialsScreen:Boolean(document.querySelector('[data-ep-materials-screen]')),
+    p1Plan:Boolean(document.querySelector('[data-ep-live-plan="P1"]')),
+    p5Plan:Boolean(document.querySelector('[data-ep-live-plan="P5"]')),
+    p1MaterialAction:Boolean(document.querySelector('[data-ep-materials-open="P1"]'))
+  }));
+  assert(returned.unexpectedHostReopens===0,'Overview return must not remount Exam Prep through the network');
+  assert(!returned.hasMaterialsScreen,'Materials screen remained after returning to Overview');
+  assert(returned.p1Plan && returned.p5Plan,'original dashboard was not restored');
+  assert(returned.p1MaterialAction,'Materials action was not preserved on restored dashboard');
+
+  await page.click('[data-ep-live-plan="P1"]');
+  assert((await page.evaluate(() => window.__dashboardListenerHits))===1,'dashboard event listeners were lost during Materials return');
+
   await browser.close();
-  console.log('P2-10 Materials Library learner UI: PASS');
+  console.log('P2-10 Materials Library learner UI and network-independent Overview return: PASS');
 })().catch(error => { console.error(error); process.exit(1); });
