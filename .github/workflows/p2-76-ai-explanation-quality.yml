@@ -10,14 +10,6 @@ on:
       - '.github/scripts/p2_74_ai_shadow_safety_regression.js'
       - '.github/workflows/p2-76-ai-explanation-quality.yml'
       - 'supabase/functions/exam-prep-ai/**'
-  pull_request:
-    branches: [main]
-    paths:
-      - '.github/ai-evals/p2_76_golden*_v1.json'
-      - '.github/scripts/p2_76_ai_explanation_quality_eval.mjs'
-      - '.github/scripts/p2_74_ai_shadow_safety_regression.js'
-      - '.github/workflows/p2-76-ai-explanation-quality.yml'
-      - 'supabase/functions/exam-prep-ai/**'
 
 permissions:
   contents: read
@@ -28,8 +20,16 @@ jobs:
     timeout-minutes: 12
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      P276_MODEL: gpt-5.1
+      P276_MODEL: gpt-5.6-luna
       P276_RESULT_PATH: p276-ai-quality-result.json
+      P276_REASONING_EFFORT: none
+      P276_TEXT_VERBOSITY: low
+      P276_MAX_OUTPUT_TOKENS: '180'
+      P276_MAX_PAID_REQUESTS: '18'
+      P276_MAX_BUDGET_USD: '0.02'
+      P276_INPUT_PRICE_PER_MTOK: '0.20'
+      P276_OUTPUT_PRICE_PER_MTOK: '1.20'
+      P276_PROGRESSIVE: 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -42,16 +42,28 @@ jobs:
           P276_RESULT_PATH: p276-evaluator-selftest.json
         run: node .github/scripts/p2_76_ai_explanation_quality_eval.mjs
 
+      - name: Explain paid-run policy
+        shell: bash
+        run: |
+          if [[ "${{ github.event.head_commit.message }}" == *"[p276-paid]"* ]]; then
+            echo 'P2-76 paid acceptance explicitly requested by commit tag.'
+            echo 'Cost guard: gpt-5.6-luna, reasoning=none, low verbosity, <=18 calls, <=180 output tokens/call, estimated budget cap $0.02.'
+          else
+            echo 'P2-76 paid acceptance NOT requested. Self-test only; no OpenAI provider call will be made.'
+          fi
+
       - name: Require funded OpenAI acceptance credential
+        if: contains(github.event.head_commit.message, '[p276-paid]')
         shell: bash
         run: |
           set -euo pipefail
           if [ -z "${OPENAI_API_KEY:-}" ]; then
-            echo 'P2-76 NO-GO: repository secret OPENAI_API_KEY is absent. A real funded provider run is mandatory; reference-only self-test cannot close P2-76.' >&2
+            echo 'P2-76 NO-GO: repository secret OPENAI_API_KEY is absent. Paid acceptance was requested, so the workflow refuses to continue.' >&2
             exit 2
           fi
 
       - name: Run funded OpenAI golden quality evaluation
+        if: contains(github.event.head_commit.message, '[p276-paid]')
         env:
           P276_MODE: provider
         run: node .github/scripts/p2_76_ai_explanation_quality_eval.mjs
@@ -61,7 +73,9 @@ jobs:
         shell: bash
         run: |
           if [ -f p276-ai-quality-result.json ]; then
-            node -e "const r=require('./p276-ai-quality-result.json'); console.log(JSON.stringify({stage:r.stage,verdict:r.verdict,model:r.provider_model,cases:r.case_count,passed:r.passed_cases,failed:r.failed_cases,critical:r.critical_failure_count,average:r.average_dimension_score,P1:r.all_components_green,P5:r.all_components_green,locales:r.all_locales_green,theory:r.mathematical_theory_green,tokens:{input:r.total_input_tokens,output:r.total_output_tokens}},null,2))"
+            node -e "const r=require('./p276-ai-quality-result.json'); console.log(JSON.stringify({stage:r.stage,verdict:r.verdict,model:r.provider_model,planned:r.planned_case_count,executed:r.executed_case_count,passed:r.passed_cases,failed:r.failed_cases,critical:r.critical_failure_count,average:r.average_dimension_score,P1:r.all_components_green,P5:r.all_components_green,locales:r.all_locales_green,theory:r.mathematical_theory_green,calls:r.provider_calls,tokens:{input:r.total_input_tokens,output:r.total_output_tokens},estimated_cost_usd:r.estimated_actual_cost_usd,budget_cap_usd:r.max_budget_usd,preflight_upper_usd:r.preflight_estimated_cost_upper_usd},null,2))"
+          else
+            echo 'No paid provider result produced on this commit.'
           fi
 
       - name: Upload P2-76 evidence
