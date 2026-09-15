@@ -52,7 +52,7 @@
       "runtime_source_available": false,
       "source_body": "If X is normally distributed with mean mu and standard deviation sigma, standardise with Z = (X - mu) / sigma. Then use the standard normal distribution to evaluate the required probability, taking care to choose the correct tail or interval.",
       "question": "Explain how to standardise a normal random variable before finding a probability.",
-      "semantic_groups": [["Z = (X -", "Z=(X-", "z = (x -", "z=(x-"], ["mean", "mu", "μ"], ["standard deviation", "sigma", "σ"], ["standard normal"], ["tail", "interval"]],
+      "semantic_groups": [["Z = (X -", "Z=(X-", "z = (x -", "z=(x-", "Z=\\frac{X-", "Z = \\frac{X-"], ["mean", "mu", "μ"], ["standard deviation", "sigma", "σ"], ["standard normal"], ["tail", "interval"]],
       "forbidden_claims": ["Z = (X +", "divide by the mean"],
       "reference_answer": "For a normal random variable X with mean mu and standard deviation sigma, standardise using Z = (X - mu) / sigma. Then use the standard normal distribution for the probability, making sure the tail or interval matches the original question."
     },
@@ -65,7 +65,7 @@
       "runtime_source_available": false,
       "source_body": "Если X имеет нормальное распределение со средним mu и стандартным отклонением sigma, стандартизируйте через Z = (X - mu) / sigma. Затем используйте стандартное нормальное распределение для нужной вероятности, правильно выбрав хвост или интервал.",
       "question": "Объясни, как стандартизировать нормальную случайную величину перед нахождением вероятности.",
-      "semantic_groups": [["Z = (X -", "Z=(X-", "z = (x -", "z=(x-"], ["средн", "mu", "μ"], ["стандартн", "sigma", "σ"], ["стандартное нормальное", "стандартного нормального", "стандартному нормальному"], ["хвост", "интервал"]],
+      "semantic_groups": [["Z = (X -", "Z=(X-", "z = (x -", "z=(x-", "Z=\\frac{X-", "Z = \\frac{X-"], ["средн", "mu", "μ"], ["стандартн", "sigma", "σ"], ["стандартное нормальное", "стандартного нормального", "стандартному нормальному"], ["хвост", "интервал"]],
       "forbidden_claims": ["Z = (X +", "делить на среднее"],
       "reference_answer": "Если X нормально распределена со средним mu и стандартным отклонением sigma, используйте Z = (X - mu) / sigma. После этого находите вероятность по стандартному нормальному распределению, внимательно выбирая нужный хвост или интервал."
     },
@@ -78,7 +78,7 @@
       "runtime_source_available": false,
       "source_body": "Agar X o‘rtacha qiymati mu va standart og‘ishi sigma bo‘lgan normal taqsimotga ega bo‘lsa, Z = (X - mu) / sigma orqali standartlashtiring. So‘ng kerakli ehtimolni standart normal taqsimotdan toping va to‘g‘ri dum yoki intervalni tanlang.",
       "question": "Ehtimolni topishdan oldin normal tasodifiy o‘zgaruvchini qanday standartlashtirishni tushuntir.",
-      "semantic_groups": [["Z = (X -", "Z=(X-", "z = (x -", "z=(x-"], ["o‘rtacha", "mu", "μ"], ["standart og‘ish", "sigma", "σ"], ["standart normal"], ["dum", "interval"]],
+      "semantic_groups": [["Z = (X -", "Z=(X-", "z = (x -", "z=(x-", "Z=\\frac{X-", "Z = \\frac{X-"], ["o‘rtacha", "mu", "μ"], ["standart og‘ish", "sigma", "σ"], ["standart normal"], ["dum", "interval"]],
       "forbidden_claims": ["Z = (X +", "o‘rtachaga bo‘linadi"],
       "reference_answer": "X normal taqsimotga ega bo‘lsa, o‘rtacha qiymat mu va standart og‘ish sigma uchun Z = (X - mu) / sigma formulasi bilan standartlashtiring. Keyin standart normal taqsimotdan foydalanib, savolga mos dum yoki interval bo‘yicha ehtimolni toping."
     }
