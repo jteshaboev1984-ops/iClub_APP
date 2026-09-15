@@ -64,7 +64,7 @@ select wt.id,1,'c1-v1','mcq',
   '["P(X≤4)=1−P(X>4)","P(X≤4)=1−P(X=4)","P(X≤4)=P(X>4)","P(X≤4)=1−P(X<4)"]'::jsonb,
   0,
   'The complement of X≤4 is X>4, so their probabilities add to 1.',
-  'Дополнение события X≤4 — это X>4, поэтому суммы их вероятностей равна 1.',
+  'Дополнение события X≤4 — это X>4, поэтому сумма их вероятностей равна 1.',
   'X≤4 hodisasining to‘ldiruvchisi X>4 bo‘ladi, shuning uchun ularning ehtimolliklari yig‘indisi 1 ga teng.',
   'published','pass','pass','pass',now()
 from private.exam_prep_written_tasks wt
