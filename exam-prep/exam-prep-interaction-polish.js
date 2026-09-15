@@ -2,14 +2,50 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "polish2";
+  const VERSION = "polish3";
   let observer = null;
   let reconcileQueued = false;
   let pendingVisual = null;
   let pendingQuestionLabel = "";
+  let transitionVisual = null;
   let lastScreenKey = "";
   let lastSessionType = "";
   let toastTimer = null;
+
+  const TRANSITION_BUTTON_SELECTOR = [
+    "[data-ep-live-start]",
+    "[data-ep-live-plan]",
+    "[data-ep-live-plan-item]",
+    "[data-ep-live-timed]",
+    "[data-ep-live-timed-start]",
+    "[data-ep-live-end]",
+    "[data-ep-live-back-timed]",
+    "[data-ep-live-readiness]",
+    "[data-ep-live-calibration]",
+    "[data-ep-live-save-self]",
+    "[data-ep-live-dashboard]",
+    "[data-ep-live-exit]",
+    "[data-ep-live-home]",
+    "[data-ep-live-save-profile]",
+    "[data-ep-exam-plan-save]",
+    "[data-ep-exam-plan-cancel]",
+    "[data-ep-profile-completion-save]",
+    "[data-ep-placement-open]",
+    "[data-ep-placement-back]",
+    "[data-ep-placement-next]",
+    "[data-ep-views-tracker]",
+    "[data-ep-views-skill]",
+    "[data-ep-views-corrections]",
+    "[data-ep-views-open-plan]",
+    "[data-ep-views-back]",
+    "[data-ep-materials-open]",
+    "[data-ep-materials-back]",
+    "[data-ep-recovery-open]",
+    "[data-ep-recovery-submit]",
+    "[data-ep-recovery-check]",
+    "[data-ep-recovery-back]",
+    "[data-ep-flow-next-plan]"
+  ].join(",");
 
   function rootEl() {
     return document.querySelector("#exam-prep-host-root");
@@ -175,6 +211,7 @@
     const screen = root.firstElementChild;
     const submit = root.querySelector("[data-ep-live-submit]");
     if (!screen || !submit) return;
+    transitionVisual = null;
     pendingVisual = screen.cloneNode(true);
     pendingQuestionLabel = String(root.querySelector(".ep-live-head strong")?.textContent || "");
     setPendingState(pendingVisual, { disableControls: true });
@@ -187,10 +224,26 @@
     submit.innerHTML = `<span class="ep-flow-mini-spinner" aria-hidden="true"></span><span>${copy().saving}</span>`;
   }
 
+  function setTransitionHoldState(screen) {
+    if (!screen) return;
+    screen.dataset.epTransitionHold = "1";
+    screen.setAttribute("aria-busy", "true");
+    screen.querySelectorAll("input, textarea, select, button").forEach(node => { node.disabled = true; });
+  }
+
+  function captureTransitionVisual(button) {
+    const root = rootEl();
+    const screen = root?.firstElementChild;
+    if (!root || !screen || !button?.matches?.(TRANSITION_BUTTON_SELECTOR)) return;
+    if (screen.matches("[data-ep-transition-hold='1']") || screen.classList.contains("ep-flow-pending-visual")) return;
+    transitionVisual = screen.cloneNode(true);
+    setTransitionHoldState(transitionVisual);
+  }
+
   function looksLikeLoading(root = rootEl()) {
     if (!root) return false;
     const status = root.querySelector('[role="status"]');
-    return Boolean(status && (/Загрузка|Loading|Yuklanmoqda|Сохраняем|Saving|Saqlanmoqda/i.test(status.textContent || "") || status.querySelector(".ep-flow-loader")));
+    return Boolean(status && (/Загрузка|Loading|Yuklanmoqda|Сохраняем|Saving|Saqlanmoqda|Обновляем|Updating|Yuklanmoqda/i.test(status.textContent || "") || status.querySelector(".ep-flow-loader")));
   }
 
   function applyPendingVisual() {
@@ -203,6 +256,25 @@
     setPendingState(clone, { disableControls: true });
     root.replaceChildren(clone);
     return true;
+  }
+
+  function applyTransitionVisual() {
+    const root = rootEl();
+    if (!root || !transitionVisual) return false;
+    if (root.querySelector("[data-ep-transition-hold='1']")) return true;
+    if (!looksLikeLoading(root)) return false;
+
+    const clone = transitionVisual.cloneNode(true);
+    setTransitionHoldState(clone);
+    root.replaceChildren(clone);
+    return true;
+  }
+
+  function settleTransitionVisual() {
+    const root = rootEl();
+    if (!transitionVisual || !root) return;
+    if (root.querySelector("[data-ep-transition-hold='1']") || looksLikeLoading(root)) return;
+    transitionVisual = null;
   }
 
   function feedbackTitle(raw) {
@@ -225,7 +297,7 @@
 
   function compactQuestionNotice() {
     const root = rootEl();
-    if (!root || !root.querySelector("[data-ep-live-submit]") || root.querySelector(".ep-flow-pending-visual")) return false;
+    if (!root || !root.querySelector("[data-ep-live-submit]") || root.querySelector(".ep-flow-pending-visual") || root.querySelector("[data-ep-transition-hold='1']")) return false;
     const notice = root.querySelector(".ep-live-notice[role='status']");
     if (!notice) return false;
     const raw = String(notice.textContent || "");
@@ -247,7 +319,7 @@
   function screenKey() {
     const root = rootEl();
     if (!root || root.hidden) return "closed";
-    if (root.querySelector(".ep-flow-pending-visual")) return lastScreenKey || "question";
+    if (root.querySelector(".ep-flow-pending-visual") || root.querySelector("[data-ep-transition-hold='1']")) return lastScreenKey || "other";
     if (root.querySelector(".ep-flow-completion-screen")) return "completion";
     if (root.querySelector("[data-ep-placement-screen]")) return "placement";
     if (root.querySelector("[data-ep-materials-screen]")) return "materials";
@@ -299,7 +371,11 @@
     const root = rootEl();
     const button = event.target?.closest?.("button");
     if (!root || !button || !root.contains(button)) return;
-    if (button.matches("[data-ep-live-submit]")) capturePendingVisual();
+    if (button.matches("[data-ep-live-submit]")) {
+      capturePendingVisual();
+      return;
+    }
+    captureTransitionVisual(button);
   }
 
   function onSession(event) {
@@ -311,6 +387,8 @@
       compactLoading();
       return;
     }
+    if (applyTransitionVisual()) return;
+    settleTransitionVisual();
     clearPendingIfNextQuestionArrived();
     compactQuestionNotice();
     polishPlan();
@@ -332,10 +410,14 @@
     const root = rootEl();
     if (!root) return;
 
-    // These two changes are handled inside the MutationObserver microtask so an
-    // intermediate loading card / inline feedback block cannot reach a painted frame.
+    // MutationObserver runs before the next paint. Keep the previous stable screen
+    // in place while an async route is loading, then swap directly to the ready screen.
     if (pendingVisual && !root.querySelector(".ep-flow-pending-visual") && looksLikeLoading(root)) {
       applyPendingVisual();
+      return;
+    }
+    if (transitionVisual && !root.querySelector("[data-ep-transition-hold='1']") && looksLikeLoading(root)) {
+      applyTransitionVisual();
       return;
     }
     compactQuestionNotice();
