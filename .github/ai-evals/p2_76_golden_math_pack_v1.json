@@ -1,0 +1,86 @@
+{
+  "pack_version": "p2_76_golden_math_v1_0",
+  "scope": "evaluation-only internal Academic QA references; these cases do not make theory runtime-available",
+  "source_note": "References are original iClub QA summaries aligned to the canonical P1/P5 map and mapped coursebook sections.",
+  "critical_failure_policy": "zero_tolerance",
+  "cases": [
+    {
+      "case_id": "P276-P1-QUA02-EN",
+      "component": "P1",
+      "locale": "en",
+      "interaction": "theory_explanation",
+      "skill_code": "P1-QUA-02",
+      "runtime_source_available": false,
+      "source_body": "For ax^2 + bx + c = 0, the discriminant is D = b^2 - 4ac. If D > 0 there are two distinct real roots; if D = 0 there is one repeated real root; if D < 0 there are no real roots.",
+      "question": "Explain how the discriminant tells me how many real roots a quadratic has.",
+      "semantic_groups": [["b^2 - 4ac", "b² - 4ac", "b²−4ac", "b^2−4ac"], ["D > 0", "D>0"], ["two distinct real", "2 distinct real"], ["D = 0", "D=0"], ["repeated real root", "double real root"], ["D < 0", "D<0"], ["no real root"]],
+      "forbidden_claims": ["one real root when D < 0", "two real roots when D = 0"],
+      "reference_answer": "For a quadratic ax^2 + bx + c = 0, calculate D = b^2 - 4ac. If D > 0, the quadratic has two distinct real roots. If D = 0, it has one repeated real root. If D < 0, it has no real roots."
+    },
+    {
+      "case_id": "P276-P1-QUA02-RU",
+      "component": "P1",
+      "locale": "ru",
+      "interaction": "theory_explanation",
+      "skill_code": "P1-QUA-02",
+      "runtime_source_available": false,
+      "source_body": "Для ax^2 + bx + c = 0 дискриминант D = b^2 - 4ac. Если D > 0, есть два различных действительных корня; если D = 0, есть один повторяющийся действительный корень; если D < 0, действительных корней нет.",
+      "question": "Объясни, как дискриминант показывает количество действительных корней квадратного уравнения.",
+      "semantic_groups": [["b^2 - 4ac", "b² - 4ac", "b²−4ac", "b^2−4ac"], ["D > 0", "D>0"], ["два различ", "2 различ"], ["D = 0", "D=0"], ["повтор", "двойной"], ["D < 0", "D<0"], ["действительных корней нет", "нет действительных корней"]],
+      "forbidden_claims": ["один действительный корень при D < 0", "два действительных корня при D = 0"],
+      "reference_answer": "Для ax^2 + bx + c = 0 вычислите D = b^2 - 4ac. При D > 0 есть два различных действительных корня. При D = 0 есть один повторяющийся действительный корень. При D < 0 действительных корней нет."
+    },
+    {
+      "case_id": "P276-P1-QUA02-UZ",
+      "component": "P1",
+      "locale": "uz",
+      "interaction": "theory_explanation",
+      "skill_code": "P1-QUA-02",
+      "runtime_source_available": false,
+      "source_body": "ax^2 + bx + c = 0 uchun diskriminant D = b^2 - 4ac. Agar D > 0 bo‘lsa, ikkita turli haqiqiy ildiz bor; D = 0 bo‘lsa, bitta takroriy haqiqiy ildiz bor; D < 0 bo‘lsa, haqiqiy ildiz yo‘q.",
+      "question": "Diskriminant kvadrat tenglamadagi haqiqiy ildizlar sonini qanday ko‘rsatishini tushuntir.",
+      "semantic_groups": [["b^2 - 4ac", "b² - 4ac", "b²−4ac", "b^2−4ac"], ["D > 0", "D>0"], ["ikkita turli", "2 ta turli"], ["D = 0", "D=0"], ["takroriy", "ikki karra"], ["D < 0", "D<0"], ["haqiqiy ildiz yo‘q", "haqiqiy ildizlar yo‘q"]],
+      "forbidden_claims": ["D < 0 bo‘lsa bitta haqiqiy ildiz", "D = 0 bo‘lsa ikkita haqiqiy ildiz"],
+      "reference_answer": "ax^2 + bx + c = 0 uchun D = b^2 - 4ac ni hisoblang. D > 0 bo‘lsa, ikkita turli haqiqiy ildiz bor. D = 0 bo‘lsa, bitta takroriy haqiqiy ildiz bor. D < 0 bo‘lsa, haqiqiy ildiz yo‘q."
+    },
+    {
+      "case_id": "P276-P5-NOR02-EN",
+      "component": "P5",
+      "locale": "en",
+      "interaction": "theory_explanation",
+      "skill_code": "P5-NOR-02",
+      "runtime_source_available": false,
+      "source_body": "If X is normally distributed with mean mu and standard deviation sigma, standardise with Z = (X - mu) / sigma. Then use the standard normal distribution to evaluate the required probability, taking care to choose the correct tail or interval.",
+      "question": "Explain how to standardise a normal random variable before finding a probability.",
+      "semantic_groups": [["Z = (X -", "Z=(X-", "z = (x -", "z=(x-"], ["mean", "mu", "μ"], ["standard deviation", "sigma", "σ"], ["standard normal"], ["tail", "interval"]],
+      "forbidden_claims": ["Z = (X +", "divide by the mean"],
+      "reference_answer": "For a normal random variable X with mean mu and standard deviation sigma, standardise using Z = (X - mu) / sigma. Then use the standard normal distribution for the probability, making sure the tail or interval matches the original question."
+    },
+    {
+      "case_id": "P276-P5-NOR02-RU",
+      "component": "P5",
+      "locale": "ru",
+      "interaction": "theory_explanation",
+      "skill_code": "P5-NOR-02",
+      "runtime_source_available": false,
+      "source_body": "Если X имеет нормальное распределение со средним mu и стандартным отклонением sigma, стандартизируйте через Z = (X - mu) / sigma. Затем используйте стандартное нормальное распределение для нужной вероятности, правильно выбрав хвост или интервал.",
+      "question": "Объясни, как стандартизировать нормальную случайную величину перед нахождением вероятности.",
+      "semantic_groups": [["Z = (X -", "Z=(X-", "z = (x -", "z=(x-"], ["средн", "mu", "μ"], ["стандартн", "sigma", "σ"], ["стандартное нормальное", "стандартного нормального"], ["хвост", "интервал"]],
+      "forbidden_claims": ["Z = (X +", "делить на среднее"],
+      "reference_answer": "Если X нормально распределена со средним mu и стандартным отклонением sigma, используйте Z = (X - mu) / sigma. После этого находите вероятность по стандартному нормальному распределению, внимательно выбирая нужный хвост или интервал."
+    },
+    {
+      "case_id": "P276-P5-NOR02-UZ",
+      "component": "P5",
+      "locale": "uz",
+      "interaction": "theory_explanation",
+      "skill_code": "P5-NOR-02",
+      "runtime_source_available": false,
+      "source_body": "Agar X o‘rtacha qiymati mu va standart og‘ishi sigma bo‘lgan normal taqsimotga ega bo‘lsa, Z = (X - mu) / sigma orqali standartlashtiring. So‘ng kerakli ehtimolni standart normal taqsimotdan toping va to‘g‘ri dum yoki intervalni tanlang.",
+      "question": "Ehtimolni topishdan oldin normal tasodifiy o‘zgaruvchini qanday standartlashtirishni tushuntir.",
+      "semantic_groups": [["Z = (X -", "Z=(X-", "z = (x -", "z=(x-"], ["o‘rtacha", "mu", "μ"], ["standart og‘ish", "sigma", "σ"], ["standart normal"], ["dum", "interval"]],
+      "forbidden_claims": ["Z = (X +", "o‘rtachaga bo‘linadi"],
+      "reference_answer": "X normal taqsimotga ega bo‘lsa, o‘rtacha qiymat mu va standart og‘ish sigma uchun Z = (X - mu) / sigma formulasi bilan standartlashtiring. Keyin standart normal taqsimotdan foydalanib, savolga mos dum yoki interval bo‘yicha ehtimolni toping."
+    }
+  ]
+}
