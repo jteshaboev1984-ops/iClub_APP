@@ -97,7 +97,7 @@
   function polishPlan() {
     const root = rootEl();
     if (!root || !planVisible()) return;
-    const card = root.querySelector(".ep-live-card:has(.ep-live-plan-item)") || root.querySelector(".ep-live-card");
+    const card = root.querySelector(".ep-live-plan-item")?.closest(".ep-live-card") || root.querySelector(".ep-live-card");
     if (!card) return;
     card.classList.add("ep-flow-plan-clean");
 
