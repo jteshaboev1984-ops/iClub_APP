@@ -272,4 +272,19 @@
     script.src = `${base}exam-prep-learner-flow-ux.js?v=flowux3`;
     document.head.appendChild(script);
   }
+
+  if (!document.querySelector('link[data-exam-prep-interaction-polish]')) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.dataset.examPrepInteractionPolish = "true";
+    link.href = `${base}exam-prep-interaction-polish.css?v=polish1`;
+    document.head.appendChild(link);
+  }
+
+  if (!document.querySelector('script[data-exam-prep-interaction-polish]')) {
+    const script = document.createElement("script");
+    script.dataset.examPrepInteractionPolish = "true";
+    script.src = `${base}exam-prep-interaction-polish.js?v=polish1`;
+    document.head.appendChild(script);
+  }
 })();
