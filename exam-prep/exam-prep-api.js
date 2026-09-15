@@ -257,7 +257,7 @@
     load('script[data-exam-prep-profile-completeness]', "examPrepProfileCompleteness", "exam-prep-profile-completeness.js?v=p205profile3");
     load('script[data-exam-prep-recovery]', "examPrepRecovery", "exam-prep-recovery.js?v=p208preserve1");
     load('script[data-exam-prep-exam-map]', "examPrepExamMap", "exam-prep-exam-map.js?v=p209map2");
-    load('script[data-exam-prep-materials]', "examPrepMaterials", "exam-prep-materials.js?v=p210materials1");
+    load('script[data-exam-prep-materials]', "examPrepMaterials", "exam-prep-materials.js?v=p210materials2");
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
   }
