@@ -169,7 +169,7 @@ BEGIN
     RAISE EXCEPTION 'P2-80 mixed-node fail-closed boundary drift total=% fail_closed=%',v_mixed,v_mixed_fail_closed;
   END IF;
 
-  v_runway:=public.get_exam_prep_content_runway_v1(1);
+  v_runway:=public.get_exam_prep_content_runway_v1(1::smallint);
   IF coalesce((v_runway->>'target_4w_green')::boolean,false) IS NOT TRUE
      OR coalesce((v_runway->>'hard_floor_green')::boolean,false) IS NOT TRUE
      OR coalesce((v_runway#>>'{components,P1,target_4w_green}')::boolean,false) IS NOT TRUE
