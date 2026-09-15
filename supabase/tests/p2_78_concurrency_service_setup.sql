@@ -36,12 +36,6 @@ SELECT private.transition_exam_prep_synthetic_validation_run_v1(
   jsonb_build_object('p2_78','fixture-start','learners',600,'mentors',10)
 );
 
--- Synthetic evidence is governed by the P2-68 academic-time firewall. Give the
--- run its own isolated clock before any evidence row can be stamped.
-SELECT private.initialize_exam_prep_synthetic_clock_v1(
-  'SV-P278-CONCURRENCY','P2-78 isolated concurrency academic clock'
-);
-
 -- Dedicated run-owned identities only. No real account is reused or cloned.
 DO $$
 DECLARE
@@ -67,6 +61,12 @@ BEGIN
   END LOOP;
 END
 $$;
+
+-- Synthetic evidence is governed by the P2-68 academic-time firewall. The
+-- clock can be initialized only after the run owns at least one active identity.
+SELECT private.initialize_exam_prep_synthetic_clock_v1(
+  'SV-P278-CONCURRENCY','P2-78 isolated concurrency academic clock'
+);
 
 -- Enable optional layers only in this disposable database. Provider generation
 -- remains disabled; P2-78 makes zero paid AI calls.
