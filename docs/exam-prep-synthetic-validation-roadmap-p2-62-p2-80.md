@@ -497,10 +497,22 @@ P2-79 -> P2-80
 - P2-71: COMPLETE
 - P2-72: COMPLETE
 - P2-73: COMPLETE — Core Engineering GREEN
-- P2-74: IN PROGRESS
-- P2-75..P2-80: NOT STARTED
+- P2-74: COMPLETE
+- P2-75: COMPLETE
+- P2-76: COMPLETE — AI Engineering GREEN
+- P2-77: COMPLETE — Mentor Technical GREEN
+- P2-78: IN PROGRESS
+- P2-79..P2-80: NOT STARTED
 
 ## Change Log
+
+### 2026-09-15 — v1.6
+
+- Closed P2-74 after AI Shadow Safety merged through PR #69 to `main` at `d2e61dba29aaabe5c96f687f22669c21c37ff4d9`. The shadow gate proved assessment blackout, server-built context, source allowlisting/no-source fallback, answer-key protection, prompt-injection/secret boundaries, rate/budget/timeout/fallback controls and EN/RU/UZ without enabling a real provider or changing learner academic state.
+- Closed P2-75 after PR #70 merged to `main` at `f25bbc8c78d0ebe2243b81dc630691ee215cd089`. Identical raw evidence produced deterministic academic-state diff = 0 across Core-only and Core+AI for placement, P1/P5 state, mastery, stages, correction/retest eligibility and readiness; production AI remained OFF.
+- Closed P2-76 after PR #71 merged to `main` at `86a54036fabf96c7adf655e4c42f518dcb439d9d`. The fixed P1/P5 EN/RU/UZ golden evaluation passed 18/18 with zero critical factual/math failures. The successful funded run used approximately $0.002683 and the earlier fail-fast calibration approximately $0.000288; ordinary CI remains configured not to make paid provider calls. AI Engineering is GREEN, but real learner UX/learning impact remains UNPROVEN and production learner AI remains OFF.
+- Closed P2-77 after PR #72 merged to `main` at `50bf194c6257c2f92a7b7424fb5ef5549c4f323c`. Exact-main Mentor Technical workflow `34930794936` passed, and the exact-main P2-73 dress rehearsal `34930794972` passed all three seeds 27301/27302/27303. Governed production migrations were applied additively; post-migration verification kept Core ON, AI OFF, Mentor OFF, AI generation OFF/shadow, zero active synthetic identities, zero Mentor Care entitlements and zero active mentor assignments. Mentor Technical is GREEN, but real human mentor capacity/calibration remains UNPROVEN.
+- Began P2-78 600/10 Concurrency and Service Transitions. The non-negotiable service law remains: 600 Exam Prep learners with 10 active Mentor Care assignments means exactly those 10 human scopes; the other 590 must generate no routine mentor queue/SLA. P2-78 remains synthetic/isolated and does not authorize Mentor Care or AI for real learners.
 
 ### 2026-09-14 — v1.5
 
