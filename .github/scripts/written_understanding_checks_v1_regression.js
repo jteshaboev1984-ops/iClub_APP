@@ -118,7 +118,7 @@ const path = require('path');
   const afterIncomplete = await page.evaluate(() => window.__calls.filter(x => x.name === 'submit_exam_prep_response_safe_v1').length);
   assert(afterIncomplete === before, 'incomplete structured checks must not submit the written response');
   text = await page.locator('#exam-prep-host-root').textContent();
-  assert(text.includes('Answer all understanding checks'), 'incomplete-check learner message missing');
+  assert(text.includes('Answer all short questions first.'), 'incomplete-check learner message missing');
 
   await page.check('input[name="ep_written_understanding_1"][value="1"]');
   await page.check('input[name="ep_written_understanding_2"][value="2"]');
