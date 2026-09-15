@@ -23,6 +23,7 @@ const path = require('path');
   await page.evaluate(() => {
     window.__outerBack = 0;
     window.__internalBack = 0;
+    window.__planBack = 0;
     window.__edit = 0;
     window.__correction = null;
     window.__readCalls = 0;
@@ -63,7 +64,7 @@ const path = require('path');
 
   await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-wave1-ux.css') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-wave1-ux.js') });
-  await page.waitForFunction(() => window.iClubExamPrep?.wave1UxVersion === 'wave1ux2');
+  await page.waitForFunction(() => window.iClubExamPrep?.wave1UxVersion === 'wave1ux3');
 
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
@@ -131,8 +132,20 @@ const path = require('path');
   state = await page.evaluate(() => ({ internal: window.__internalBack, outer: window.__outerBack }));
   assert(state.internal === 1 && state.outer === 0, 'real topbar back must handle an internal Exam Prep screen before the app shell');
 
+  await page.evaluate(() => {
+    const root = document.querySelector('#exam-prep-host-root');
+    root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card"><div class="ep-live-head"><strong>P1 · Недельный план</strong><button hidden aria-hidden="true" data-ep-live-dashboard>Обзор</button></div><div class="ep-live-plan-item">Задание недели</div></div></section>`;
+    root.querySelector('[data-ep-live-dashboard]').addEventListener('click', () => {
+      window.__planBack += 1;
+      root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-grid">Exam Prep dashboard</div></section>`;
+    });
+  });
   await page.click('#topbar-back');
-  assert(await page.evaluate(() => window.__outerBack) === 1, 'topbar back must fall through to the app shell from the Exam Prep root');
+  state = await page.evaluate(() => ({ planBack: window.__planBack, outer: window.__outerBack, dashboard: Boolean(document.querySelector('.ep-live-grid')) }));
+  assert(state.planBack === 1 && state.outer === 0 && state.dashboard === true, 'topbar back from a weekly plan must follow its hidden logical origin and stay inside Exam Prep');
+
+  await page.click('#topbar-back');
+  assert(await page.evaluate(() => window.__outerBack) === 1, 'topbar back must fall through to Mathematics only from the Exam Prep root dashboard');
 
   await page.evaluate(() => {
     document.querySelector('#exam-prep-host-root').innerHTML = `<section data-ep-placement-screen><div class="ep-placement-sub">P1 · Cambridge AS Mathematics</div><button data-ep-placement-next>Разобрать ошибку</button></section>`;
