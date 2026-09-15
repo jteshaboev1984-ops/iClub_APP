@@ -1,0 +1,232 @@
+name: P2-80 Independent A-to-Z Release Audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - supabase/tests/p2_80_independent_release_audit.sql
+      - supabase/tests/p2_79_recovery_rollback_disaster_matrix.sql
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - .github/scripts/p2_72_legacy_storage_firewall_regression.js
+      - .github/scripts/p2_74_ai_shadow_safety_regression.js
+      - .github/scripts/p2_55_full_learner_journey_regression.js
+      - exam-prep/**
+      - app.js
+      - index.html
+      - .github/workflows/p2-80-independent-release-audit.yml
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - supabase/tests/p2_80_independent_release_audit.sql
+      - supabase/tests/p2_79_recovery_rollback_disaster_matrix.sql
+      - supabase/tests/p0_15_contract_bootstrap.sql
+      - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+      - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - .github/scripts/p2_72_legacy_storage_firewall_regression.js
+      - .github/scripts/p2_74_ai_shadow_safety_regression.js
+      - .github/scripts/p2_55_full_learner_journey_regression.js
+      - exam-prep/**
+      - app.js
+      - index.html
+      - .github/workflows/p2-80-independent-release-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-release-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Pin exact candidate SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          printf 'P2-80 Independent A-to-Z Release Audit\ncandidate_sha=%s\n' "$CANDIDATE_SHA" > p280-audit.log
+
+      - name: Bootstrap isolated legacy and Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p280-audit.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p280-audit.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql 2>&1 | tee -a p280-audit.log
+
+      - name: Apply complete current Exam Prep migration stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
+          test "${#files[@]}" -ge 1
+
+          apply_one() {
+            local f="$1"
+            local b
+            b="$(basename "$f")"
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              echo '=== Replaying production Core-only controlled-beta boundary ===' | tee -a p280-audit.log
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>p280-audit.log 2>&1
+            fi
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              echo '=== Normalizing historical Stage-4 patch anchors in isolated CI only ===' | tee -a p280-audit.log
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >>p280-audit.log 2>&1
+            fi
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              echo '=== Seeding isolated production-shaped cohort dependency ===' | tee -a p280-audit.log
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('p236-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated P2-80 dependency') on conflict(cohort_key) do nothing" >>p280-audit.log 2>&1
+            fi
+            echo "=== Applying $f ===" | tee -a p280-audit.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p280-audit.log 2>&1
+          }
+
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|\
+              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|\
+              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|\
+              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|\
+              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|\
+              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  echo '=== Replaying P2-17..P2-20 in production migration order ===' | tee -a p280-audit.log
+                  for rb in "${recent[@]}"; do apply_one "supabase/migrations/$rb"; done
+                fi
+                continue
+                ;;
+            esac
+            apply_one "$f"
+          done
+
+      - name: Normalize production-shaped Core-only boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL' >>p280-audit.log 2>&1
+          update private.exam_prep_feature_config
+          set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now()
+          where id=1;
+          update private.exam_prep_ai_policy set generation_enabled=false,updated_at=now() where id=1;
+          update private.exam_prep_optional_capability_status
+          set runtime_status='shadow',gate_version=null,updated_at=now()
+          where capability_code='ai_assist';
+          SQL
+
+      - name: Run independent structural release matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_80_independent_release_audit.sql 2>&1 | tee -a p280-audit.log
+
+      - name: Re-run rollback and disaster matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c p279.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -v p279_git_sha="$CANDIDATE_SHA" -f supabase/tests/p2_79_recovery_rollback_disaster_matrix.sql 2>&1 | tee -a p280-audit.log
+
+      - name: Recheck AI safety with fake provider only
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/p2_74_ai_shadow_safety_regression.js
+          node .github/scripts/p2_74_ai_shadow_safety_regression.js 2>&1 | tee -a p280-audit.log
+          echo 'P2-80 paid AI calls: 0' | tee -a p280-audit.log
+
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Recheck browser legacy firewall
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/p2_72_legacy_storage_firewall_regression.js 2>&1 | tee -a p280-audit.log
+
+      - name: Recheck complete Core browser learner journey
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/p2_55_full_learner_journey_regression.js
+          node .github/scripts/p2_55_full_learner_journey_regression.js 2>&1 | tee -a p280-audit.log
+
+      - name: Verify final clean boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          core="$(psql -Atqc "select core_enabled from private.exam_prep_feature_config where id=1")"
+          ai="$(psql -Atqc "select ai_enabled from private.exam_prep_feature_config where id=1")"
+          mentor="$(psql -Atqc "select mentor_enabled from private.exam_prep_feature_config where id=1")"
+          kill="$(psql -Atqc "select kill_switch from private.exam_prep_feature_config where id=1")"
+          generation="$(psql -Atqc "select generation_enabled from private.exam_prep_ai_policy where id=1")"
+          runtime="$(psql -Atqc "select runtime_status from private.exam_prep_optional_capability_status where capability_code='ai_assist'")"
+          active_synth="$(psql -Atqc "select count(*) from private.exam_prep_synthetic_identities where identity_status='active'")"
+          dirty_runs="$(psql -Atqc "select count(*) from private.exam_prep_synthetic_validation_runs where run_status in ('completed','failed','aborted') and cleanup_status<>'clean'")"
+          echo "P280_POST core=$core ai=$ai mentor=$mentor kill=$kill generation=$generation runtime=$runtime active_synth=$active_synth dirty_runs=$dirty_runs" | tee -a p280-audit.log
+          test "$core" = 't'
+          test "$ai" = 'f'
+          test "$mentor" = 'f'
+          test "$kill" = 'f'
+          test "$generation" = 'f'
+          test "$runtime" = 'shadow'
+          test "$active_synth" = '0'
+          test "$dirty_runs" = '0'
+
+      - name: Mark engineering audit GREEN
+        run: echo "P2-80 ENGINEERING AUDIT GREEN candidate_sha=$CANDIDATE_SHA paid_ai_calls=0 real_world_evidence=UNPROVEN" | tee -a p280-audit.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-80-independent-release-audit
+          path: p280-audit.log
+          if-no-files-found: error
+          retention-days: 14
