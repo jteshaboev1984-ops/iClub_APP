@@ -257,4 +257,19 @@
     script.src = `${base}exam-prep-wave1-ux.js?v=wave1ux2`;
     document.head.appendChild(script);
   }
+
+  if (!document.querySelector('link[data-exam-prep-learner-flow-ux]')) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.dataset.examPrepLearnerFlowUx = "true";
+    link.href = `${base}exam-prep-learner-flow-ux.css?v=flowux3`;
+    document.head.appendChild(link);
+  }
+
+  if (!document.querySelector('script[data-exam-prep-learner-flow-ux]')) {
+    const script = document.createElement("script");
+    script.dataset.examPrepLearnerFlowUx = "true";
+    script.src = `${base}exam-prep-learner-flow-ux.js?v=flowux3`;
+    document.head.appendChild(script);
+  }
 })();
