@@ -23,7 +23,7 @@
   function copy() {
     if (language() === "uz") return {
       title: "Oldingi mashqlar",
-      body: count => `Oldingi Practice va Tour javoblaridan ${count} tasi topildi. Ular faqat qo‘shimcha yo‘nalish uchun ishlatiladi va tasdiqlangan progress yoki imtihonga tayyorlikni o‘zgartirmaydi.`
+      body: count => `Oldingi Practice va Tour javoblaridan ${count} tasi topildi. Ular faqat qo‘shimcha ma’lumot sifatida ishlatiladi va tasdiqlangan natijalar yoki imtihonga tayyorgarlik holatini o‘zgartirmaydi.`
     };
     if (language() === "en") return {
       title: "Previous practice",
