@@ -1,0 +1,46 @@
+name: Exam Prep Learner i18n
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-i18n.js
+      - exam-prep/exam-prep-live.js
+      - exam-prep/exam-prep-learner-views.js
+      - exam-prep/exam-prep-learner-flow-ux.js
+      - exam-prep/exam-prep-overview-placement.js
+      - exam-prep/exam-prep-recovery.js
+      - exam-prep/exam-prep-history-note.js
+      - exam-prep/exam-prep-ai-ui.js
+      - .github/scripts/exam_prep_learner_i18n_regression.js
+      - .github/workflows/exam-prep-learner-i18n.yml
+  push:
+    branches:
+      - main
+    paths:
+      - exam-prep/exam-prep-i18n.js
+      - exam-prep/exam-prep-live.js
+      - exam-prep/exam-prep-learner-views.js
+      - exam-prep/exam-prep-learner-flow-ux.js
+      - exam-prep/exam-prep-overview-placement.js
+      - exam-prep/exam-prep-recovery.js
+      - exam-prep/exam-prep-history-note.js
+      - exam-prep/exam-prep-ai-ui.js
+      - .github/scripts/exam_prep_learner_i18n_regression.js
+      - .github/workflows/exam-prep-learner-i18n.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  learner-i18n:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JavaScript syntax
+        run: node --check exam-prep/exam-prep-i18n.js
+      - name: Validate learner translations
+        run: node .github/scripts/exam_prep_learner_i18n_regression.js
