@@ -41,6 +41,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate JavaScript syntax
-        run: node --check exam-prep/exam-prep-i18n.js
+        run: |
+          node --check exam-prep/exam-prep-i18n.js
+          node --check exam-prep/exam-prep-history-note.js
+          node --check exam-prep/exam-prep-ai-ui.js
+          node --check exam-prep/exam-prep-recovery.js
+          node --check .github/scripts/exam_prep_learner_i18n_regression.js
       - name: Validate learner translations
         run: node .github/scripts/exam_prep_learner_i18n_regression.js
