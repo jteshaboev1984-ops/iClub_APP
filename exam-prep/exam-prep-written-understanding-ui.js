@@ -87,7 +87,10 @@
       const order = Number(check.check_order);
       const chosen = root.querySelector(`input[name="ep_written_understanding_${order}"]:checked`);
       if (!chosen) return null;
-      answers.push({ check_order: order, picked_index: Number(chosen.value) });
+      const answer = { check_order: order, picked_index: Number(chosen.value) };
+      const version = String(check?.check_version || "").trim();
+      if (version) answer.check_version = version;
+      answers.push(answer);
     }
     return answers;
   }
