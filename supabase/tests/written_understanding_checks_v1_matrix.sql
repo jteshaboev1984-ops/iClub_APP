@@ -131,6 +131,106 @@ begin
   end if;
 end $$;
 
+-- Final curated-scope contract. These counts are intentionally explicit: adding,
+-- removing or re-versioning a published learner check must be reviewed together
+-- with this matrix instead of silently expanding the production surface.
+do $$
+declare
+  v_checks int;
+  v_tasks int;
+  v_p1_checks int;
+  v_p1_tasks int;
+  v_p5_checks int;
+  v_p5_tasks int;
+  v_single int;
+  v_multi int;
+  v_max int;
+  v_bad int;
+begin
+  select count(*)::int, count(distinct c.written_task_id)::int
+    into v_checks,v_tasks
+  from private.exam_prep_written_understanding_checks c
+  where c.lifecycle_state='published';
+
+  if v_checks<>39 or v_tasks<>36 then
+    raise exception 'written-understanding: curated scope changed; expected 39 checks across 36 tasks, got % across %',v_checks,v_tasks;
+  end if;
+
+  select count(c.id)::int,count(distinct wt.id)::int
+    into v_p1_checks,v_p1_tasks
+  from private.exam_prep_written_understanding_checks c
+  join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
+  where c.lifecycle_state='published' and wt.lifecycle_state='published' and wt.component_code='P1';
+
+  select count(c.id)::int,count(distinct wt.id)::int
+    into v_p5_checks,v_p5_tasks
+  from private.exam_prep_written_understanding_checks c
+  join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
+  where c.lifecycle_state='published' and wt.lifecycle_state='published' and wt.component_code='P5';
+
+  if v_p1_checks<>20 or v_p1_tasks<>17 or v_p5_checks<>19 or v_p5_tasks<>19 then
+    raise exception 'written-understanding: component scope changed; P1 checks/tasks=%/%, P5=%/%',v_p1_checks,v_p1_tasks,v_p5_checks,v_p5_tasks;
+  end if;
+
+  select
+    count(*) filter (where check_count=1)::int,
+    count(*) filter (where check_count>1)::int,
+    max(check_count)::int
+    into v_single,v_multi,v_max
+  from (
+    select c.written_task_id,count(*)::int as check_count
+    from private.exam_prep_written_understanding_checks c
+    where c.lifecycle_state='published'
+    group by c.written_task_id
+  ) q;
+
+  if v_single<>34 or v_multi<>2 or v_max<>3 then
+    raise exception 'written-understanding: per-task cardinality changed; single=%, multi=%, max=%',v_single,v_multi,v_max;
+  end if;
+
+  -- Every published companion must belong to an active P1/P5 written task.
+  select count(*)::int into v_bad
+  from private.exam_prep_written_understanding_checks c
+  left join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
+  where c.lifecycle_state='published'
+    and (wt.id is null or wt.lifecycle_state<>'published' or wt.component_code not in ('P1','P5'));
+  if v_bad<>0 then raise exception 'written-understanding: published check attached outside published P1/P5 scope: %',v_bad; end if;
+
+  -- All three learner languages must have complete, shape-consistent content.
+  select count(*)::int into v_bad
+  from private.exam_prep_written_understanding_checks c
+  where c.lifecycle_state='published'
+    and (
+      coalesce(btrim(c.prompt_en),'')='' or coalesce(btrim(c.prompt_ru),'')='' or coalesce(btrim(c.prompt_uz),'')=''
+      or coalesce(btrim(c.rationale_en),'')='' or coalesce(btrim(c.rationale_ru),'')='' or coalesce(btrim(c.rationale_uz),'')=''
+      or jsonb_typeof(c.options_en)<>'array' or jsonb_typeof(c.options_ru)<>'array' or jsonb_typeof(c.options_uz)<>'array'
+      or jsonb_array_length(c.options_en)<2
+      or jsonb_array_length(c.options_en)<>jsonb_array_length(c.options_ru)
+      or jsonb_array_length(c.options_en)<>jsonb_array_length(c.options_uz)
+      or c.correct_index<0
+      or c.correct_index>=jsonb_array_length(c.options_en)
+      or c.check_kind<>'mcq'
+      or c.check_order<1
+      or c.qa_math_status<>'pass' or c.qa_language_status<>'pass' or c.qa_technical_status<>'pass'
+    );
+  if v_bad<>0 then raise exception 'written-understanding: published content/QA invariant failed for % rows',v_bad; end if;
+
+  -- The privacy guarantee is checked over the entire published surface and all
+  -- learner languages, not only the original P1CIR01 reference task.
+  select count(*)::int into v_bad
+  from (
+    select c.written_task_id,count(*)::int as expected_count
+    from private.exam_prep_written_understanding_checks c
+    where c.lifecycle_state='published'
+    group by c.written_task_id
+  ) t
+  cross join (values('en'),('ru'),('uz')) as l(lang)
+  cross join lateral (select private.exam_prep_written_understanding_payload_v1(t.written_task_id,l.lang) as payload) p
+  where jsonb_array_length(p.payload)<>t.expected_count
+     or p.payload::text ~ 'correct_index|rationale|all_correct|is_correct';
+  if v_bad<>0 then raise exception 'written-understanding: full-scope learner payload invariant failed for % task/language pairs',v_bad; end if;
+end $$;
+
 rollback;
 
 select 'WRITTEN_UNDERSTANDING_CHECKS_V1_GREEN' as result;
