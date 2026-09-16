@@ -68,4 +68,24 @@ for (const phrase of forbiddenExact) {
 assert(en.weeklyBudget === 'Mathematics time', 'EN baseline unexpectedly changed');
 assert(en.timedTitle === 'Timed work and full papers', 'EN baseline unexpectedly changed');
 
+const historySource = fs.readFileSync('exam-prep/exam-prep-history-note.js', 'utf8');
+assert(historySource.includes('Ular faqat qo‘shimcha ma’lumot sifatida ishlatiladi va tasdiqlangan natijalar yoki imtihonga tayyorgarlik holatini o‘zgartirmaydi.'), 'UZ previous-practice wording regressed');
+assert(!historySource.includes('tasdiqlangan progress yoki imtihonga tayyorlikni o‘zgartirmaydi'), 'Old UZ previous-practice progress wording returned');
+
+const aiSource = fs.readFileSync('exam-prep/exam-prep-ai-ui.js', 'utf8');
+assert(aiSource.includes('Tasdiqlangan natijalaringiz va joriy rejangizni sodda qilib tushuntiradi. Natijalaringizni o‘zgartirmaydi.'), 'UZ AI helper note regressed');
+assert(aiSource.includes('progress: "Natijalarimni tushuntirish"'), 'UZ AI helper action regressed');
+assert(!aiSource.includes('Tasdiqlangan progress va joriy rejangizni sodda qilib tushuntiradi.'), 'Old UZ AI helper progress wording returned');
+assert(!aiSource.includes('progress: "Progressni tushuntirish"'), 'Old UZ AI helper action returned');
+
+const recoverySource = fs.readFileSync('exam-prep/exam-prep-recovery.js', 'utf8');
+assert(recoverySource.includes('Bu oldingi natijalarni noldan boshlash degani emas'), 'UZ recovery long-break explanation regressed');
+assert(recoverySource.includes('Tasdiqlangan natijalar va oldingi ma’lumotlar saqlanadi. Faqat vaqt o‘tishi ularni pasaytirmaydi.'), 'UZ recovery preservation copy regressed');
+assert(recoverySource.includes('Bilimlar tasdiqlandi. Oldingi natijalar saqlandi.'), 'UZ recovery confirmation copy regressed');
+assert(recoverySource.includes('Bu mavzuni qisqacha takrorlash foydali bo‘ladi.'), 'UZ recovery refresh copy regressed');
+assert(!recoverySource.includes('Bu progressni qayta boshlash emas'), 'Old UZ recovery progress-reset wording returned');
+assert(!recoverySource.includes('Tasdiqlangan progress va oldingi natijalar saqlanadi'), 'Old UZ recovery preservation wording returned');
+assert(!recoverySource.includes('Oldingi progress saqlangan'), 'Old UZ recovery confirmation wording returned');
+assert(!recoverySource.includes('Oldingi progress va tarix o‘chirilmaydi'), 'Old UZ recovery refresh wording returned');
+
 console.log('EXAM_PREP_LEARNER_I18N_GREEN');
