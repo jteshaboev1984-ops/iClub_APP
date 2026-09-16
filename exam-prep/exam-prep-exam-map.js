@@ -110,11 +110,18 @@
     if (!root || root.hidden || busy || !canUse() || !isDashboard(root)) return;
     if (root.querySelector("[data-ep-exam-plan-card]")) return;
     if (typeof internal.api?.examProfile !== "function") return;
+    // The observer can start overlapping requests. Keep the dashboard identity across the await.
+    const dashboard = root.querySelector(".ep-live-dashboard-intro");
+    if (!dashboard) return;
 
     let result;
     try { result = await internal.api.examProfile(); } catch (_) { return; }
     const profile = result?.ok ? result.data : null;
-    if (!profileComplete(profile) || !isDashboard(rootEl())) return;
+    // Never paint a stale, hidden, replaced, unauthorized or already-hydrated view.
+    if (!profileComplete(profile) || rootEl() !== root || !root.isConnected || root.hidden ||
+        root.getAttribute("aria-hidden") === "true" || busy || !canUse() ||
+        root.querySelector(".ep-live-dashboard-intro") !== dashboard ||
+        !isDashboard(root) || root.querySelector("[data-ep-exam-plan-card]")) return;
 
     const c = copy();
     const card = document.createElement("div");

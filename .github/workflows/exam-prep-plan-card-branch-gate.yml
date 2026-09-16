@@ -1,0 +1,57 @@
+name: Exam Prep Plan Card Branch Gate
+
+on:
+  push:
+    branches:
+      - fix/exam-prep-plan-card-race-20260916
+    paths:
+      - 'exam-prep/exam-prep-exam-map.js'
+      - 'exam-prep/exam-prep-materials.js'
+      - '.github/scripts/exam_prep_exam_map_race_regression.js'
+      - '.github/scripts/exam_prep_materials_async_regression.js'
+      - '.github/scripts/exam_prep_renamed_overview_regression.js'
+      - '.github/scripts/p2_09_exam_map_ui_regression.js'
+      - '.github/scripts/p2_10_materials_ui_regression.js'
+      - '.github/scripts/exam_prep_wave1_ux_regression.js'
+      - '.github/workflows/exam-prep-plan-card-branch-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static safety and syntax
+        run: |
+          node --check exam-prep/exam-prep-exam-map.js
+          node --check exam-prep/exam-prep-materials.js
+          node --check .github/scripts/exam_prep_exam_map_race_regression.js
+          node --check .github/scripts/exam_prep_materials_async_regression.js
+          node --check .github/scripts/exam_prep_renamed_overview_regression.js
+          node --check .github/scripts/p2_09_exam_map_ui_regression.js
+          node --check .github/scripts/p2_10_materials_ui_regression.js
+          node --check .github/scripts/exam_prep_wave1_ux_regression.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-exam-map.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-materials.js
+          ! grep -q '\.from(' exam-prep/exam-prep-exam-map.js
+          ! grep -q '\.from(' exam-prep/exam-prep-materials.js
+      - name: Install isolated browser dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Concurrent and stale dashboard regression
+        run: node .github/scripts/exam_prep_exam_map_race_regression.js
+      - name: Exam plan edit and save regression
+        run: node .github/scripts/p2_09_exam_map_ui_regression.js
+      - name: Materials pending-response and rejection regression
+        run: node .github/scripts/exam_prep_materials_async_regression.js
+      - name: Materials source and copyright UI regression
+        run: node .github/scripts/p2_10_materials_ui_regression.js
+      - name: Wave 1 navigation and consolidation regression
+        run: node .github/scripts/exam_prep_wave1_ux_regression.js
+      - name: Renamed overview and transient-error route regression
+        run: node .github/scripts/exam_prep_renamed_overview_regression.js
+      - name: Non-destructive exam map contract
+        run: node scripts/p2-09-exam-map-revision-regression.cjs

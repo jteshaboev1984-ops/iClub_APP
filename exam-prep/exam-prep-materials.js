@@ -5,6 +5,7 @@
   const VERSION = "p210materials1";
   let observer = null;
   let busy = false;
+  let requestVersion = 0;
   let activeLanguage = "ru";
 
   function rootEl() {
@@ -121,7 +122,12 @@
   }
 
   function bindBack(root) {
-    root.querySelector("[data-ep-materials-back]")?.addEventListener("click", () => dashboard());
+    root.querySelector("[data-ep-materials-back]")?.addEventListener("click", () => {
+      // A pending response belongs to the old screen, even if a new read starts later.
+      requestVersion += 1;
+      busy = false;
+      dashboard();
+    });
   }
 
   function renderLoading(component) {
@@ -185,13 +191,37 @@
     });
   }
 
+  function canPaint(request, loadingScreen) {
+    const root = rootEl();
+    if (request !== requestVersion || !root || root.hidden || !canUse()) return false;
+    // The interaction-polish layer temporarily holds the previous dashboard while
+    // the materials request loads. Its held clone is still part of this route.
+    return root.contains(loadingScreen) || Boolean(root.querySelector('[data-ep-transition-hold="1"]'));
+  }
+
   async function openMaterials(component) {
+    const root = rootEl();
+    // If an external navigation replaced the screen while a read was pending,
+    // allow a fresh request rather than locking the library until the old read ends.
+    if (busy && (!root || root.hidden || !root.querySelector('[data-ep-materials-screen], [data-ep-transition-hold="1"]'))) {
+      requestVersion += 1;
+      busy = false;
+    }
     if (busy || !canUse() || !["P1", "P5"].includes(component) || typeof internal.api?.materialsLibrary !== "function") return;
     busy = true;
+    const request = ++requestVersion;
     activeLanguage = detectLanguage();
     renderLoading(component);
-    const result = await internal.api.materialsLibrary(activeLanguage);
+    const loadingScreen = rootEl()?.querySelector('[data-ep-materials-screen]');
+    let result = null;
+    try {
+      result = await internal.api.materialsLibrary(activeLanguage);
+    } catch (_) {
+      // A rejected read is a recoverable view error, never a write or session reset.
+    }
+    if (request !== requestVersion) return;
     busy = false;
+    if (!canPaint(request, loadingScreen)) return;
     if (!result?.ok || result.data?.rights_respected !== true || result.data?.protected_content_embedded !== false) {
       renderError(component);
       return;
