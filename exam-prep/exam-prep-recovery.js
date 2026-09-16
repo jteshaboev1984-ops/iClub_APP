@@ -28,16 +28,16 @@
       invalid: "Sanalarni tekshiring: qaytish sanasi boshlanish sanasidan keyin va bugundan kech bo‘lmasligi kerak.",
       error: "Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.", done: "Reja moslashtirildi",
       reserve: "Qisqa tanaffus: zaxira vaqtdan foydalanamiz, muhim qayta tekshiruvlar saqlanadi.",
-      gentle: "Rejaga ehtiyotkorlik bilan qaytamiz. Avvalgi natijalar saqlanadi; bosqich faqat vaqt o‘tgani uchun o‘zgarmaydi.",
+      gentle: "Rejaga bosqichma-bosqich qaytamiz. Oldingi natijalar saqlanadi; bosqich faqat vaqt o‘tgani uchun o‘zgarmaydi.",
       twoThree: "Keyingi 14 kun: 50% majburiy o‘tilmagan mavzular, 25% shu mavzular bo‘yicha masalalar, 15% oldingi mavzular, 10% vaqtli mashq. Muhim qayta tekshiruvlar saqlanadi.",
-      extended: "Kengaytirilgan tiklanish rejasi tuziladi. Avvalgi natijalar saqlanadi; kerak bo‘lsa tizim bir necha qisqa savol bilan hozirgi bilimingizni tekshirishni taklif qiladi.",
-      long: "P1 va P5 alohida qayta rejalashtiriladi. Bu progressni qayta boshlash emas: oldingi natijalar saqlanadi, kerak bo‘lsa hozirgi bilim qisqa tekshiruv bilan tasdiqlanadi.",
-      preserved: "Tasdiqlangan progress va oldingi natijalar saqlanadi. Vaqtning o‘zi progressni kamaytirmaydi.",
+      extended: "Kengaytirilgan tiklanish rejasi tuziladi. Oldingi natijalar saqlanadi; kerak bo‘lsa tizim bir necha qisqa savol bilan hozirgi bilimingizni tekshirishni taklif qiladi.",
+      long: "P1 va P5 alohida qayta rejalashtiriladi. Bu oldingi natijalarni noldan boshlash degani emas: natijalar saqlanadi, kerak bo‘lsa hozirgi bilim qisqa tekshiruv bilan tasdiqlanadi.",
+      preserved: "Tasdiqlangan natijalar va oldingi ma’lumotlar saqlanadi. Faqat vaqt o‘tishi ularni pasaytirmaydi.",
       checkTitle: "Saqlangan bilimlarni qisqa tekshirish", checkBody: "Bu qisqa tekshiruv oldingi natijalaringizni o‘chirmaydi. U faqat qaysi bilimlar saqlanganini va nimani qisqacha takrorlash foydali ekanini aniqlaydi.",
       checkStart: "Bilimlarni tekshirish", checkContinue: "Tekshiruvni davom ettirish", question: "Savol", submit: "Javobni yuborish",
-      correct: "To‘g‘ri", incorrect: "Bu mavzuni qisqacha yangilash foydali bo‘ladi.",
-      confirmed: "Bilimlar tasdiqlandi. Oldingi progress saqlangan.",
-      refresh: "Ayrim mavzularni qisqacha takrorlash tavsiya qilindi. Oldingi progress va tarix o‘chirilmaydi; takrorlash keyingi rejaga qo‘shiladi.",
+      correct: "To‘g‘ri", incorrect: "Bu mavzuni qisqacha takrorlash foydali bo‘ladi.",
+      confirmed: "Bilimlar tasdiqlandi. Oldingi natijalar saqlandi.",
+      refresh: "Ayrim mavzularni qisqacha takrorlash tavsiya qilindi. Oldingi natijalar va tarix o‘chirilmaydi; takrorlash keyingi rejaga qo‘shiladi.",
       checkOf: "Qisqa tekshiruv", noCheck: "Hozir qo‘shimcha tekshiruv kerak emas."
     };
     if (language() === "en") return {
