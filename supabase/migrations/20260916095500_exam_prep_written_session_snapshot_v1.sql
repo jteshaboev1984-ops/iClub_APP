@@ -1,21 +1,31 @@
 begin;
 
--- Freeze the exact learner-safe understanding-check versions at session-item creation.
--- This prevents an already-started learning session from changing underneath the learner
--- if a companion check is later retired/re-versioned. Existing response/history rows are
--- not rewritten; active legacy sessions are pinned to the currently published versions.
+-- Freeze the exact learner-safe understanding-check versions without mutating the
+-- append-only session-item fact. Snapshots live in a private derived side table.
+-- Existing active sessions are pinned by INSERT only; finalized history is untouched.
 
-alter table private.exam_prep_session_items
-  add column if not exists understanding_check_versions jsonb;
+create table if not exists private.exam_prep_written_session_check_snapshots (
+  session_id uuid not null,
+  item_order smallint not null check(item_order>0),
+  written_task_id bigint not null references private.exam_prep_written_tasks(id) on delete restrict,
+  check_versions jsonb not null check(jsonb_typeof(check_versions)='array'),
+  created_at timestamptz not null default now(),
+  primary key(session_id,item_order),
+  foreign key(session_id,item_order)
+    references private.exam_prep_session_items(session_id,item_order) on delete cascade
+);
 
-alter table private.exam_prep_session_items
-  drop constraint if exists exam_prep_session_items_understanding_check_versions_shape;
-alter table private.exam_prep_session_items
-  add constraint exam_prep_session_items_understanding_check_versions_shape
-  check (
-    understanding_check_versions is null
-    or jsonb_typeof(understanding_check_versions)='array'
-  );
+alter table private.exam_prep_written_session_check_snapshots enable row level security;
+revoke all on private.exam_prep_written_session_check_snapshots from public,anon,authenticated;
+grant select,insert,delete on private.exam_prep_written_session_check_snapshots to service_role;
+
+-- Snapshot rows are append-only while their parent session item exists. DELETE is
+-- deliberately allowed so parent cleanup/cascade semantics are not changed.
+drop trigger if exists exam_prep_written_session_check_snapshots_no_update_v1
+  on private.exam_prep_written_session_check_snapshots;
+create trigger exam_prep_written_session_check_snapshots_no_update_v1
+before update on private.exam_prep_written_session_check_snapshots
+for each row execute function private.exam_prep_block_immutable_mutation_v1();
 
 create or replace function private.exam_prep_written_understanding_version_snapshot_v1(
   p_written_task_id bigint
@@ -43,38 +53,48 @@ $$;
 revoke all on function private.exam_prep_written_understanding_version_snapshot_v1(bigint) from public,anon,authenticated;
 grant execute on function private.exam_prep_written_understanding_version_snapshot_v1(bigint) to service_role;
 
-create or replace function private.exam_prep_pin_written_understanding_snapshot_v1()
+create or replace function private.exam_prep_capture_written_understanding_snapshot_v1()
 returns trigger
 language plpgsql
 security definer
 set search_path=''
 as $$
 begin
-  if new.item_kind='written' and new.written_task_id is not null and new.understanding_check_versions is null then
-    new.understanding_check_versions:=private.exam_prep_written_understanding_version_snapshot_v1(new.written_task_id);
+  if new.item_kind='written' and new.written_task_id is not null then
+    insert into private.exam_prep_written_session_check_snapshots(
+      session_id,item_order,written_task_id,check_versions
+    ) values(
+      new.session_id,new.item_order,new.written_task_id,
+      private.exam_prep_written_understanding_version_snapshot_v1(new.written_task_id)
+    )
+    on conflict(session_id,item_order) do nothing;
   end if;
   return new;
 end;
 $$;
-revoke all on function private.exam_prep_pin_written_understanding_snapshot_v1() from public,anon,authenticated;
-grant execute on function private.exam_prep_pin_written_understanding_snapshot_v1() to service_role;
+revoke all on function private.exam_prep_capture_written_understanding_snapshot_v1() from public,anon,authenticated;
+grant execute on function private.exam_prep_capture_written_understanding_snapshot_v1() to service_role;
 
-drop trigger if exists exam_prep_pin_written_understanding_snapshot_v1 on private.exam_prep_session_items;
-create trigger exam_prep_pin_written_understanding_snapshot_v1
-before insert on private.exam_prep_session_items
-for each row execute function private.exam_prep_pin_written_understanding_snapshot_v1();
+drop trigger if exists exam_prep_capture_written_understanding_snapshot_v1
+  on private.exam_prep_session_items;
+create trigger exam_prep_capture_written_understanding_snapshot_v1
+after insert on private.exam_prep_session_items
+for each row execute function private.exam_prep_capture_written_understanding_snapshot_v1();
 
--- Only active sessions are backfilled. This preserves the exact currently observable
--- behavior for learners who may resume an already-started session, while old finalized
--- history remains untouched.
-update private.exam_prep_session_items si
-set understanding_check_versions=private.exam_prep_written_understanding_version_snapshot_v1(si.written_task_id)
-from private.exam_prep_sessions s
-where s.id=si.session_id
-  and s.status='active'
+-- Backfill only currently active written items. This does not UPDATE or DELETE any
+-- immutable session item and therefore cannot rewrite learner history.
+insert into private.exam_prep_written_session_check_snapshots(
+  session_id,item_order,written_task_id,check_versions
+)
+select
+  si.session_id,si.item_order,si.written_task_id,
+  private.exam_prep_written_understanding_version_snapshot_v1(si.written_task_id)
+from private.exam_prep_session_items si
+join private.exam_prep_sessions s on s.id=si.session_id
+where s.status='active'
   and si.item_kind='written'
   and si.written_task_id is not null
-  and si.understanding_check_versions is null;
+on conflict(session_id,item_order) do nothing;
 
 create or replace function private.exam_prep_written_understanding_payload_snapshot_v1(
   p_written_task_id bigint,
@@ -97,7 +117,8 @@ begin
   if v_lang not in ('en','ru','uz') then raise exception 'exam_prep_bad_language'; end if;
   if p_written_task_id is null then return '[]'::jsonb; end if;
 
-  -- Null means a pre-snapshot session: preserve the previous current-content behavior.
+  -- Null means a historical pre-snapshot session. Preserve the exact previous
+  -- current-content behavior for those old rows instead of rewriting history.
   if p_snapshot is null then
     return private.exam_prep_written_understanding_payload_v1(p_written_task_id,v_lang);
   end if;
@@ -180,12 +201,14 @@ begin
         'options',case when si.item_kind='question' and q.qtype='mcq' then coalesce(nullif(case v_lang when 'ru' then q.options_text_ru when 'uz' then q.options_text_uz else q.options_text_en end,''),'[]')::jsonb else null end,
         'written_prompt',case when si.item_kind='written' then case v_lang when 'ru' then wt.prompt_ru when 'uz' then wt.prompt_uz else wt.prompt_en end else null end,
         'written_max_marks',case when si.item_kind='written' then nullif(wt.rubric_json->>'max_marks','')::int else null end,
-        'understanding_checks',case when si.item_kind='written' then private.exam_prep_written_understanding_payload_snapshot_v1(si.written_task_id,v_lang,si.understanding_check_versions) else null end
+        'understanding_checks',case when si.item_kind='written' then private.exam_prep_written_understanding_payload_snapshot_v1(si.written_task_id,v_lang,cs.check_versions) else null end
       )) as item_payload
     from private.exam_prep_session_items si
     left join public.questions q on q.id=si.question_id
     left join private.exam_prep_written_tasks wt on wt.id=si.written_task_id
     left join private.exam_prep_responses r on r.session_id=si.session_id and r.item_order=si.item_order
+    left join private.exam_prep_written_session_check_snapshots cs
+      on cs.session_id=si.session_id and cs.item_order=si.item_order
     where si.session_id=v_s.id
   ) x;
 
@@ -204,8 +227,8 @@ end; $$;
 revoke execute on function public.get_exam_prep_session_safe_v1(uuid,text) from public,anon;
 grant execute on function public.get_exam_prep_session_safe_v1(uuid,text) to authenticated,service_role;
 
--- Migration acceptance: active written items are pinned, future inserts have a trigger,
--- and pinned learner payloads expose no private evaluation metadata.
+-- Migration acceptance: active written items are represented only by derived side
+-- snapshots, browser roles cannot read them, and learner payload remains key-free.
 do $$
 declare
   v_task bigint;
@@ -230,11 +253,25 @@ begin
   select count(*)::int into v_bad
   from private.exam_prep_session_items si
   join private.exam_prep_sessions s on s.id=si.session_id
+  left join private.exam_prep_written_session_check_snapshots cs
+    on cs.session_id=si.session_id and cs.item_order=si.item_order
   where s.status='active'
     and si.item_kind='written'
     and si.written_task_id is not null
-    and si.understanding_check_versions is null;
+    and (cs.session_id is null or cs.written_task_id<>si.written_task_id);
   if v_bad<>0 then raise exception 'written-session-snapshot: active written items left unpinned: %',v_bad; end if;
+
+  select count(*)::int into v_bad
+  from private.exam_prep_written_session_check_snapshots cs
+  left join private.exam_prep_session_items si
+    on si.session_id=cs.session_id and si.item_order=cs.item_order
+  where si.session_id is null or si.item_kind<>'written' or si.written_task_id<>cs.written_task_id;
+  if v_bad<>0 then raise exception 'written-session-snapshot: invalid side snapshot linkage: %',v_bad; end if;
+
+  if has_table_privilege('anon','private.exam_prep_written_session_check_snapshots','SELECT')
+     or has_table_privilege('authenticated','private.exam_prep_written_session_check_snapshots','SELECT') then
+    raise exception 'written-session-snapshot: browser role can read private snapshots';
+  end if;
 end $$;
 
 commit;
