@@ -8,6 +8,7 @@ on:
       - 'supabase/migrations/*exam_prep*.sql'
       - supabase/tests/written_understanding_checks_v1_matrix.sql
       - supabase/tests/written_understanding_learning_only_gate.sql
+      - supabase/tests/written_understanding_audit_closure_gate.sql
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-written-understanding-ui.js
       - .github/scripts/written_understanding_checks_v1_regression.js
@@ -20,6 +21,7 @@ on:
       - 'supabase/migrations/*exam_prep*.sql'
       - supabase/tests/written_understanding_checks_v1_matrix.sql
       - supabase/tests/written_understanding_learning_only_gate.sql
+      - supabase/tests/written_understanding_audit_closure_gate.sql
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-written-understanding-ui.js
       - .github/scripts/written_understanding_checks_v1_regression.js
@@ -137,6 +139,9 @@ jobs:
 
       - name: Prove understanding checks remain learning-only
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/written_understanding_learning_only_gate.sql
+
+      - name: Lock audited no-companion boundaries
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/written_understanding_audit_closure_gate.sql
 
       - name: Install Chromium test dependency
         run: |
