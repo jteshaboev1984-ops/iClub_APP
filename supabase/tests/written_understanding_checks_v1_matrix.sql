@@ -251,8 +251,8 @@ begin
   from private.exam_prep_written_understanding_checks c
   where c.lifecycle_state='published';
 
-  if v_checks<>39 or v_tasks<>36 then
-    raise exception 'written-understanding: curated scope changed; expected 39 checks across 36 tasks, got % across %',v_checks,v_tasks;
+  if v_checks<>43 or v_tasks<>40 then
+    raise exception 'written-understanding: curated scope changed; expected 43 checks across 40 tasks, got % across %',v_checks,v_tasks;
   end if;
 
   select count(c.id)::int,count(distinct wt.id)::int
@@ -267,7 +267,7 @@ begin
   join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
   where c.lifecycle_state='published' and wt.lifecycle_state='published' and wt.component_code='P5';
 
-  if v_p1_checks<>20 or v_p1_tasks<>17 or v_p5_checks<>19 or v_p5_tasks<>19 then
+  if v_p1_checks<>21 or v_p1_tasks<>18 or v_p5_checks<>22 or v_p5_tasks<>22 then
     raise exception 'written-understanding: component scope changed; P1 checks/tasks=%/%, P5=%/%',v_p1_checks,v_p1_tasks,v_p5_checks,v_p5_tasks;
   end if;
 
@@ -283,7 +283,7 @@ begin
     group by c.written_task_id
   ) q;
 
-  if v_single<>34 or v_multi<>2 or v_max<>3 then
+  if v_single<>38 or v_multi<>2 or v_max<>3 then
     raise exception 'written-understanding: per-task cardinality changed; single=%, multi=%, max=%',v_single,v_multi,v_max;
   end if;
 
