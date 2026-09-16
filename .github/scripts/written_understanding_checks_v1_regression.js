@@ -30,9 +30,9 @@ const path = require('path');
     window.__session = null;
 
     const checks = [
-      { check_order:1, check_kind:'mcq', prompt:'Which equality correctly links degrees and radians?', options:['90° = π rad','180° = π rad','180° = 2π rad','360° = π rad'] },
-      { check_order:2, check_kind:'mcq', prompt:'What is (π/180) × (180/π)?', options:['π','180','1','π/180'] },
-      { check_order:3, check_kind:'mcq', prompt:'What happens after converting degrees to radians and back?', options:['The original degree value is recovered','The value doubles','The value is divided by 180','The value becomes π times larger'] }
+      { check_order:1, check_version:'v1', check_kind:'mcq', prompt:'Which equality correctly links degrees and radians?', options:['90° = π rad','180° = π rad','180° = 2π rad','360° = π rad'] },
+      { check_order:2, check_version:'v1', check_kind:'mcq', prompt:'What is (π/180) × (180/π)?', options:['π','180','1','π/180'] },
+      { check_order:3, check_version:'v1', check_kind:'mcq', prompt:'What happens after converting degrees to radians and back?', options:['The original degree value is recovered','The value doubles','The value is divided by 180','The value becomes π times larger'] }
     ];
 
     window.sb = { rpc: async (name, args={}) => {
@@ -109,6 +109,7 @@ const path = require('path');
   assert(text.includes('Check your understanding'), 'learner-facing understanding heading missing');
   assert(text.includes('Which equality correctly links degrees and radians?'), 'first structured check missing');
   assert(!text.includes('correct_index'), 'answer-key metadata must never be visible');
+  assert(!text.includes('check_version'), 'transport version metadata must never be learner-visible');
   assert(!text.includes('app_checked_noncredit'), 'internal authority term must never be learner-visible');
 
   await page.fill('textarea[name="ep_live_written_answer"]', 'The factors multiply to 1, so the second conversion reverses the first.');
@@ -132,8 +133,10 @@ const path = require('path');
   assert(written.args.p_payload.artifact.text.includes('multiply to 1'), 'written explanation artifact missing');
   assert(Array.isArray(written.args.p_payload.understanding_checks), 'structured answers not attached to written payload');
   assert(JSON.stringify(written.args.p_payload.understanding_checks) === JSON.stringify([
-    {check_order:1,picked_index:1},{check_order:2,picked_index:2},{check_order:3,picked_index:1}
-  ]), 'structured answer payload mismatch');
+    {check_order:1,picked_index:1,check_version:'v1'},
+    {check_order:2,picked_index:2,check_version:'v1'},
+    {check_order:3,picked_index:1,check_version:'v1'}
+  ]), 'structured answer payload must carry the exact safe check version');
   assert(result.text.includes('The second conversion reverses the first.'), 'server rationale for missed check must remain visible after final item');
   assert(result.text.includes('Weekly plan'), 'written completion must return to weekly plan');
   assert(!result.text.includes('P1-CIR-01'), 'internal skill code must not be learner-visible');
