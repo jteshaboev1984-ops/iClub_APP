@@ -64,7 +64,7 @@ for (const token of [
   'Короткая проверка сохранённых знаний',
   'Эта проверка не может удалить прежние результаты.',
   'Проверить сохранённые знания',
-  'Oldingi progress va tarix o‘chirilmaydi',
+  'Oldingi natijalar va tarix o‘chirilmaydi',
   'Previous progress and history are not deleted',
   'data-ep-recovery-check',
   'authorizeRevalidationItem',

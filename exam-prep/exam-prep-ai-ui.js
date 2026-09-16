@@ -23,8 +23,8 @@
     const language = currentLanguage();
     if (language === "uz") return {
       title: "Tayyorgarlik yordamchisi",
-      note: "Tasdiqlangan progress va joriy rejangizni sodda qilib tushuntiradi. Natijalaringizni o‘zgartirmaydi.",
-      progress: "Progressni tushuntirish",
+      note: "Tasdiqlangan natijalaringiz va joriy rejangizni sodda qilib tushuntiradi. Natijalaringizni o‘zgartirmaydi.",
+      progress: "Natijalarimni tushuntirish",
       plan: "Joriy rejani tushuntirish",
       working: "Tayyorlanmoqda…",
       close: "Yopish",
