@@ -10,6 +10,7 @@ on:
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-written-understanding-ui.js
       - .github/scripts/written_understanding_checks_v1_regression.js
+      - .github/scripts/written_understanding_single_copy_regression.js
       - .github/workflows/written-understanding-checks-v1.yml
   push:
     branches:
@@ -20,6 +21,7 @@ on:
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-written-understanding-ui.js
       - .github/scripts/written_understanding_checks_v1_regression.js
+      - .github/scripts/written_understanding_single_copy_regression.js
       - .github/workflows/written-understanding-checks-v1.yml
   workflow_dispatch:
 
@@ -62,6 +64,7 @@ jobs:
           node --check exam-prep/exam-prep-api.js
           node --check exam-prep/exam-prep-written-understanding-ui.js
           node --check .github/scripts/written_understanding_checks_v1_regression.js
+          node --check .github/scripts/written_understanding_single_copy_regression.js
           grep -q 'exam-prep-written-understanding-ui.js?v=written1' exam-prep/exam-prep-api.js
           ! grep -q 'correct_index' exam-prep/exam-prep-written-understanding-ui.js
           ! grep -q 'localStorage' exam-prep/exam-prep-written-understanding-ui.js
@@ -139,3 +142,6 @@ jobs:
 
       - name: Run written understanding browser regression
         run: node .github/scripts/written_understanding_checks_v1_regression.js
+
+      - name: Run single/plural learner copy regression
+        run: node .github/scripts/written_understanding_single_copy_regression.js
