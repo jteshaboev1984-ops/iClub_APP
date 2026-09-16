@@ -9,6 +9,7 @@ on:
       - 'exam-prep/exam-prep-materials.js'
       - '.github/scripts/exam_prep_exam_map_race_regression.js'
       - '.github/scripts/exam_prep_materials_async_regression.js'
+      - '.github/scripts/exam_prep_renamed_overview_regression.js'
       - '.github/scripts/p2_09_exam_map_ui_regression.js'
       - '.github/scripts/p2_10_materials_ui_regression.js'
       - '.github/scripts/exam_prep_wave1_ux_regression.js'
@@ -28,6 +29,7 @@ jobs:
           node --check exam-prep/exam-prep-materials.js
           node --check .github/scripts/exam_prep_exam_map_race_regression.js
           node --check .github/scripts/exam_prep_materials_async_regression.js
+          node --check .github/scripts/exam_prep_renamed_overview_regression.js
           node --check .github/scripts/p2_09_exam_map_ui_regression.js
           node --check .github/scripts/p2_10_materials_ui_regression.js
           node --check .github/scripts/exam_prep_wave1_ux_regression.js
@@ -49,5 +51,7 @@ jobs:
         run: node .github/scripts/p2_10_materials_ui_regression.js
       - name: Wave 1 navigation and consolidation regression
         run: node .github/scripts/exam_prep_wave1_ux_regression.js
+      - name: Renamed overview and transient-error route regression
+        run: node .github/scripts/exam_prep_renamed_overview_regression.js
       - name: Non-destructive exam map contract
         run: node scripts/p2-09-exam-map-revision-regression.cjs
