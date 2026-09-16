@@ -103,7 +103,7 @@ begin
   order by id limit 1;
 
   update private.exam_prep_written_understanding_checks
-  set lifecycle_state='retired',updated_at=now()
+  set lifecycle_state='retired'
   where written_task_id=v_task and check_order=1 and check_version='v1' and lifecycle_state='published';
 
   if not found then raise exception 'written-understanding: failed to retire disposable v1 reference'; end if;
