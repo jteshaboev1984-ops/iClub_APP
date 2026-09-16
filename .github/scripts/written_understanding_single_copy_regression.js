@@ -4,7 +4,7 @@ const path = require('path');
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
-  await page.setContent('<!doctype html><html><body><div id="exam-prep-host-root"><label><textarea name="ep_live_written_answer"></textarea></label><button data-ep-live-submit>Submit</button></div></body></html>');
+  await page.setContent('<!doctype html><html><body><div id="exam-prep-host-root"></div></body></html>');
 
   await page.evaluate(() => {
     window.__variant = 'single';
@@ -54,13 +54,15 @@ const path = require('path');
 
   for (const tc of cases) {
     await page.evaluate(() => {
-      const root = document.querySelector('#exam-prep-host-root');
-      root.innerHTML = '<label><textarea name="ep_live_written_answer"></textarea></label><button data-ep-live-submit>Submit</button>';
+      document.querySelector('#exam-prep-host-root').innerHTML = '';
       window.__variant = 'single';
     });
     await page.evaluate(async lang => {
       await window.iClubExamPrepHostInternal.api.getSession('00000000-0000-4000-8000-000000009201', lang);
     }, tc.lang);
+    await page.evaluate(() => {
+      document.querySelector('#exam-prep-host-root').innerHTML = '<label><textarea name="ep_live_written_answer"></textarea></label><button data-ep-live-submit>Submit</button>';
+    });
     await page.waitForSelector('[data-ep-written-understanding="true"]');
     let text = await page.locator('#exam-prep-host-root').textContent();
     if (!text.includes(tc.help)) throw new Error(`singular help missing for ${tc.lang}`);
@@ -72,12 +74,14 @@ const path = require('path');
   }
 
   await page.evaluate(() => {
-    const root = document.querySelector('#exam-prep-host-root');
-    root.innerHTML = '<label><textarea name="ep_live_written_answer"></textarea></label><button data-ep-live-submit>Submit</button>';
+    document.querySelector('#exam-prep-host-root').innerHTML = '';
     window.__variant = 'multi';
   });
   await page.evaluate(async () => {
     await window.iClubExamPrepHostInternal.api.getSession('00000000-0000-4000-8000-000000009201', 'en');
+  });
+  await page.evaluate(() => {
+    document.querySelector('#exam-prep-host-root').innerHTML = '<label><textarea name="ep_live_written_answer"></textarea></label><button data-ep-live-submit>Submit</button>';
   });
   await page.waitForSelector('[data-ep-written-understanding="true"]');
   let multiText = await page.locator('#exam-prep-host-root').textContent();
