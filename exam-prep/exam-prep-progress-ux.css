@@ -1,0 +1,85 @@
+/* Opt-in Progress UX. Namespaced inside the existing Exam Prep host only. */
+#exam-prep-host-root .ep-pux-panel {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border, #dae3ed);
+  border-radius: 14px;
+  background: var(--card-bg, #fff);
+  padding: 14px;
+  margin: 12px 0;
+  color: inherit;
+}
+#exam-prep-host-root .ep-pux-overview {
+  display: grid;
+  gap: 8px;
+}
+#exam-prep-host-root .ep-pux-metric {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+#exam-prep-host-root .ep-pux-label,
+#exam-prep-host-root .ep-pux-note {
+  overflow-wrap: anywhere;
+  color: var(--text-secondary, #526276);
+  font-size: 13px;
+  line-height: 1.5;
+}
+#exam-prep-host-root .ep-pux-value {
+  text-align: right;
+  color: inherit;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+#exam-prep-host-root .ep-pux-heading {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+#exam-prep-host-root .ep-pux-counter {
+  font-size: 21px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 12px;
+}
+#exam-prep-host-root .ep-pux-goals { display: grid; gap: 8px; }
+#exam-prep-host-root .ep-pux-goal {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--border, #dae3ed);
+  border-radius: 10px;
+  background: var(--surface, #f8fafc);
+}
+#exam-prep-host-root .ep-pux-goal-title {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.45;
+}
+#exam-prep-host-root .ep-pux-goal-state {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--color-primary, #2259a8);
+}
+#exam-prep-host-root .ep-pux-note { margin: 0; display: block; }
+#exam-prep-host-root .ep-pux-section-caption {
+  margin: 12px 0 2px;
+  font-size: 14px;
+  font-weight: 700;
+}
+#exam-prep-host-root .ep-pux-finish { display: grid; gap: 8px; }
+#exam-prep-host-root .ep-pux-error { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#exam-prep-host-root .ep-pux-error button { min-height: 44px; }
+@media (max-width: 480px) {
+  #exam-prep-host-root .ep-pux-panel { padding: 12px; border-radius: 12px; }
+  #exam-prep-host-root .ep-pux-error { flex-direction: column; align-items: stretch; }
+  #exam-prep-host-root .ep-pux-metric { gap: 8px; }
+  #exam-prep-host-root .ep-pux-label { max-width: 70%; }
+}
