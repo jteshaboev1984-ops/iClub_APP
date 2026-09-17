@@ -2,12 +2,7 @@
   "use strict";
 
   const root = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  // Release activation: presentation assets may load, while actual learner UI/data
-  // remains governed by the existing controlled-beta capability and kill switch.
-  // An explicit false remains an immediate client-side rollback override.
-  if (typeof window.iClubExamPrepProgressUxEnabled !== "boolean") {
-    window.iClubExamPrepProgressUxEnabled = true;
-  }
+  const API_SCRIPT_SRC = typeof document !== "undefined" ? String(document.currentScript?.src || "") : "";
   const CONSENT_ACK = "I_CONSENT_TO_EXAM_PREP_CONTROLLED_BETA_V1";
   const REVOKE_ACK = "I_REVOKE_EXAM_PREP_CONTROLLED_BETA_V1";
 
@@ -31,6 +26,19 @@
     try { window.dispatchEvent(new CustomEvent(name, { detail })); } catch (_) {}
   }
 
+  function loadControlledProgressUx() {
+    if (window.iClubExamPrepProgressUxEnabled === false) return;
+    const caps = root.lastCapabilities;
+    if (!caps || caps.coreAccess !== true || caps.killSwitch !== false || caps.rolloutState !== "controlled_beta") return;
+    if (!/^https?:/i.test(API_SCRIPT_SRC) || !/exam-prep-api\.js(?:\?|$)/.test(API_SCRIPT_SRC)) return;
+    window.iClubExamPrepProgressUxEnabled = true;
+    if (document.querySelector('script[data-exam-prep-progress-ux-boot]')) return;
+    const script = document.createElement("script");
+    script.dataset.examPrepProgressUxBoot = "true";
+    script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux1");
+    document.head.appendChild(script);
+  }
+
   async function capabilities() {
     const result = await rpc("get_exam_prep_capabilities_v1");
     if (!result.ok) return result;
@@ -47,6 +55,7 @@
       killSwitch: row.kill_switch !== false
     });
     root.lastCapabilities = data;
+    loadControlledProgressUx();
     return Object.freeze({ ok: true, data });
   }
 
@@ -243,7 +252,7 @@
   });
 
   try {
-    const src = document?.currentScript?.src || "";
+    const src = API_SCRIPT_SRC;
     const valid = /^https?:/i.test(src) && /exam-prep-api\.js(?:\?|$)/.test(src);
     const load = (selector, datasetKey, filename) => {
       if (!valid || document.querySelector(selector)) return;
@@ -265,7 +274,8 @@
     load('script[data-exam-prep-recovery]', "examPrepRecovery", "exam-prep-recovery.js?v=p208preserve1");
     load('script[data-exam-prep-exam-map]', "examPrepExamMap", "exam-prep-exam-map.js?v=p209map1");
     load('script[data-exam-prep-materials]', "examPrepMaterials", "exam-prep-materials.js?v=p210materials1");
-    // Release-enabled bootstrap; actual UI/data is still gated by server capabilities.
+    // Explicit pre-set true is still supported for preview/tests. In production,
+    // controlled-beta capabilities call loadControlledProgressUx() after auth.
     if (window.iClubExamPrepProgressUxEnabled === true) {
       load('script[data-exam-prep-progress-ux-boot]', "examPrepProgressUxBoot", "exam-prep-progress-ux-boot.js?v=progressux1");
     }
