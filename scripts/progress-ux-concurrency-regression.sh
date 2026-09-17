@@ -70,6 +70,8 @@ orders="$(psql -Atqc "select string_agg(priority_order::text,',' order by priori
 week1_ids="$(psql -Atqc "select string_agg(id::text,',' order by priority_order) from private.exam_prep_weekly_goal_snapshots where user_id='$uid'::uuid and component_code='P1' and active_week_no=1")"
 
 # Simulate planner regeneration in the same week while the learner refreshes from another device.
+# Reuse release-approved week-one skills in a different order so this remains a planner test,
+# not a content-runway bypass.
 psql -v ON_ERROR_STOP=1 -v uid="$uid" <<'SQL'
 update private.exam_prep_weekly_plans set status='superseded'
 where user_id=:'uid'::uuid and component_code='P1' and active_week_no=1 and status='active';
@@ -82,9 +84,9 @@ with profile as (
   from profile returning id
 )
 insert into private.exam_prep_weekly_plan_items(plan_id,priority_order,item_type,skill_code,action_code)
-select id,1,'learning','P1-FUN-01','BUILD_FIRST_COVERAGE' from plan
-union all select id,2,'learning','P1-FUN-02','BUILD_FIRST_COVERAGE' from plan
-union all select id,3,'learning','P1-COO-01','BUILD_FIRST_COVERAGE' from plan;
+select id,1,'learning','P1-QUA-03','BUILD_FIRST_COVERAGE' from plan
+union all select id,2,'learning','P1-QUA-02','BUILD_FIRST_COVERAGE' from plan
+union all select id,3,'learning','P1-QUA-01','BUILD_FIRST_COVERAGE' from plan;
 SQL
 pids=()
 for _ in 1 2 3 4; do (run_ensure >/dev/null) & pids+=("$!"); done
@@ -92,9 +94,13 @@ for pid in "${pids[@]}"; do wait "$pid"; done
 week1_after="$(psql -Atqc "select string_agg(id::text,',' order by priority_order) from private.exam_prep_weekly_goal_snapshots where user_id='$uid'::uuid and component_code='P1' and active_week_no=1")"
 [[ "$week1_after" == "$week1_ids" ]] || { echo "Same-week replan changed frozen goal identities" >&2; exit 1; }
 
-# Roll to week 2, create a new plan, then race first-open calls again.
+# Roll to week 2. Correction goals are used here deliberately so the concurrency test does not
+# manufacture learning content outside the governed academic runway.
 psql -v ON_ERROR_STOP=1 -v uid="$uid" <<'SQL'
 update private.exam_prep_exam_profiles set active_week_no=2 where user_id=:'uid'::uuid;
+insert into private.exam_prep_correction_cases(user_id,component_code,skill_code,status)
+values(:'uid'::uuid,'P1','P1-QUA-01','remediating'),
+      (:'uid'::uuid,'P1','P1-QUA-02','remediating');
 with profile as (
   select program_version_id from private.exam_prep_exam_profiles where user_id=:'uid'::uuid
 ), plan as (
@@ -103,9 +109,15 @@ with profile as (
   select :'uid'::uuid,program_version_id,'P1',2,1,'active','Progress UX concurrency week 2'
   from profile returning id
 )
-insert into private.exam_prep_weekly_plan_items(plan_id,priority_order,item_type,skill_code,action_code)
-select id,1,'learning','P1-CIR-01','BUILD_FIRST_COVERAGE' from plan
-union all select id,2,'learning','P1-TRI-01','BUILD_FIRST_COVERAGE' from plan;
+insert into private.exam_prep_weekly_plan_items
+(plan_id,priority_order,item_type,skill_code,correction_case_id,action_code)
+select id,1,'correction','P1-QUA-01',
+  (select c.id from private.exam_prep_correction_cases c where c.user_id=:'uid'::uuid and c.skill_code='P1-QUA-01' order by c.opened_at desc limit 1),
+  'COMPLETE_CORRECTION_ANALOGUES' from plan
+union all
+select id,2,'correction','P1-QUA-02',
+  (select c.id from private.exam_prep_correction_cases c where c.user_id=:'uid'::uuid and c.skill_code='P1-QUA-02' order by c.opened_at desc limit 1),
+  'COMPLETE_CORRECTION_ANALOGUES' from plan;
 SQL
 pids=()
 for _ in 1 2 3 4 5; do (run_ensure >/dev/null) & pids+=("$!"); done
