@@ -16,7 +16,7 @@
   const WORDS = Object.freeze({
     ru: {
       goals: 'Цели этой недели', available: 'Доступные задания', total: 'Завершено занятий',
-      coverage: 'Покрытие программы', skills: 'Охвачено навыков', corrections: 'Открытых ошибок',
+      coverage: 'Покрытие программы', skills: 'Подтверждено навыков', corrections: 'Открытых ошибок',
       noPlan: 'Недельный план пока не составлен.',
       noProof: 'План этой недели пока не составлен. История занятий сохранена.',
       changed: 'Список доступных заданий изменился. Выполненная работа сохранена.',
@@ -33,7 +33,7 @@
     },
     uz: {
       goals: 'Bu haftadagi maqsadlar', available: 'Mavjud topshiriqlar', total: 'Yakunlangan mashg‘ulotlar',
-      coverage: 'Dastur qamrovi', skills: 'Qamrab olingan ko‘nikmalar', corrections: 'Tuzatilmagan xatolar',
+      coverage: 'Dastur qamrovi', skills: 'Tasdiqlangan ko‘nikmalar', corrections: 'Tuzatilmagan xatolar',
       noPlan: 'Haftalik reja hali tuzilmagan.',
       noProof: 'Bu haftalik reja hali tuzilmagan. Mashg‘ulotlar tarixi saqlangan.',
       changed: 'Mavjud topshiriqlar ro‘yxati o‘zgardi. Bajarilgan ishlar saqlangan.',
@@ -50,7 +50,7 @@
     },
     en: {
       goals: 'This week’s goals', available: 'Available tasks', total: 'Sessions completed',
-      coverage: 'Syllabus coverage', skills: 'Skills covered', corrections: 'Open corrections',
+      coverage: 'Syllabus coverage', skills: 'Confirmed skills', corrections: 'Open corrections',
       noPlan: 'Your weekly plan has not been created yet.',
       noProof: 'This week’s plan has not been created yet. Your session history is preserved.',
       changed: 'Available tasks have changed. Your completed work has been preserved.',
@@ -162,6 +162,10 @@
   function missingPlanText(state, c) {
     return state.finalizedSessions > 0 ? c.noProof : c.noPlan;
   }
+  function showConfirmedMetrics(panel, state, c) {
+    if (state.coveragePct != null) metric(panel,c.coverage,`${state.coveragePct}%`);
+    if (state.confirmedSkills != null) metric(panel,c.skills,`${state.confirmedSkills} / ${state.totalCanonicalSkills}`);
+  }
   function showDashboard(card, data) {
     const { state } = data, c = words();
     const panel = node('section','ep-pux-panel ep-pux-overview');
@@ -172,6 +176,7 @@
       panel.append(node('p','ep-pux-note',missingPlanText(state,c)));
     }
     metric(panel,c.total,state.finalizedSessions);
+    showConfirmedMetrics(panel,state,c);
     metric(panel,c.corrections,state.openCorrections);
     const actions = card.querySelector('.ep-live-actions');
     if (actions) actions.before(panel); else card.append(panel);
@@ -229,6 +234,7 @@
     }
     if (state.hasPlan) metric(section,c.goals,state.goalCounter);
     metric(section,c.total,state.finalizedSessions);
+    showConfirmedMetrics(section,state,c);
     metric(section,c.corrections,state.openCorrections);
     const next = screen.querySelector('.ep-flow-next-card');
     if (next) next.before(section); else screen.append(section);
