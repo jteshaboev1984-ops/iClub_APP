@@ -51,7 +51,7 @@ union all select id,3,'learning','P1-QUA-03','BUILD_FIRST_COVERAGE' from plan;
 SQL
 
 run_ensure() {
-  psql -v ON_ERROR_STOP=1 -v uid="$uid" -Atqc "select set_config('request.jwt.claim.sub', :'uid', false); select set_config('request.jwt.claim.role','authenticated',false); select public.ensure_exam_prep_weekly_goals_safe_v1('P1')->>'created';"
+  psql -v ON_ERROR_STOP=1 -Atqc "select set_config('request.jwt.claim.sub', '$uid', false); select set_config('request.jwt.claim.role','authenticated',false); select public.ensure_exam_prep_weekly_goals_safe_v1('P1')->>'created';"
 }
 export -f run_ensure
 export PGHOST PGPORT PGUSER PGPASSWORD PGDATABASE PGOPTIONS uid
@@ -117,7 +117,7 @@ week1_count="$(psql -Atqc "select count(*) from private.exam_prep_weekly_goal_sn
 [[ "$week1_count" == "3" ]] || { echo "Week rollover damaged week-1 history" >&2; exit 1; }
 
 # Read projection after rollover must point only to week 2 while retaining week 1 history in storage.
-projection="$(psql -v uid="$uid" -Atqc "select set_config('request.jwt.claim.sub', :'uid', false); select set_config('request.jwt.claim.role','authenticated',false); select (public.get_exam_prep_weekly_progress_safe_v1('P1')->>'active_week_no')||'|'||(public.get_exam_prep_weekly_progress_safe_v1('P1')->>'plan_available')||'|'||jsonb_array_length(public.get_exam_prep_weekly_progress_safe_v1('P1')->'goals');")"
+projection="$(psql -Atqc "select set_config('request.jwt.claim.sub', '$uid', false); select set_config('request.jwt.claim.role','authenticated',false); select (public.get_exam_prep_weekly_progress_safe_v1('P1')->>'active_week_no')||'|'||(public.get_exam_prep_weekly_progress_safe_v1('P1')->>'plan_available')||'|'||jsonb_array_length(public.get_exam_prep_weekly_progress_safe_v1('P1')->'goals');")"
 [[ "$projection" == "2|true|2" ]] || { echo "Week-2 projection incorrect: $projection" >&2; exit 1; }
 
 echo 'Progress UX concurrency PASS: simultaneous first-open is idempotent, same-week replan preserves frozen goals, rollover creates a new denominator without damaging history'
