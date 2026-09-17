@@ -99,6 +99,12 @@
   background: var(--ep-pux-card);
   box-shadow: none;
 }
+#exam-prep-host-root .ep-pux-goal-waiting {
+  border-inline-start: 3px solid var(--ep-pux-accent);
+}
+#exam-prep-host-root .ep-pux-goal-rework {
+  border-inline-start: 3px solid var(--warning, #b45309);
+}
 #exam-prep-host-root .ep-pux-goal-title {
   min-width: 0;
   overflow-wrap: anywhere;
@@ -132,6 +138,26 @@
 }
 #exam-prep-host-root .ep-pux-finish {
   border-top: 3px solid var(--ep-pux-accent);
+}
+#exam-prep-host-root .ep-pux-waiting {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  margin-top: 5px;
+  padding: 12px;
+  border: 1px solid var(--ep-pux-border);
+  border-inline-start: 3px solid var(--ep-pux-accent);
+  border-radius: 10px;
+  background: var(--surface, #f1f4f9);
+}
+#exam-prep-host-root .ep-pux-waiting-heading {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+#exam-prep-host-root .ep-pux-waiting .ep-pux-note:last-child {
+  font-weight: 650;
+  color: inherit;
 }
 #exam-prep-host-root .ep-pux-error {
   display: flex;
