@@ -47,7 +47,7 @@ const html=`<!doctype html><html lang="uz"><head><meta name="viewport" content="
       const fits=await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth);
       assert.equal(fits,true,`${width}px must not horizontally overflow`);
       const boxes=await page.locator('.ep-pux-panel').evaluateAll(nodes=>nodes.map(n=>({w:n.getBoundingClientRect().width,left:n.getBoundingClientRect().left,right:n.getBoundingClientRect().right})));
-      assert.ok(boxes.every(b=>b.w>0 && b.left>=-0.5 && b.right<=window.innerWidth+0.5),`${width}px panels must stay within viewport`);
+      assert.ok(boxes.every(b=>b.w>0 && b.left>=-0.5 && b.right<=width+0.5),`${width}px panels must stay within viewport`);
       assert.deepEqual(errors,[],`${width}px must have no uncaught errors`);
       await page.close();
     }
