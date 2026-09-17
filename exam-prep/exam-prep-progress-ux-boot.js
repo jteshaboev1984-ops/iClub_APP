@@ -46,7 +46,7 @@
     try {
       stylesheet('stability','examPrepProgressUxStability');
       await loadScript('stability','examPrepProgressUxStability', () =>
-        internal.progressUxStability?.version === 'progress_ux_stability_v1');
+        internal.progressUxStability?.version === 'progress_ux_stability_v2');
       await loadScript('model', 'examPrepProgressUxModel', () =>
         typeof window.iClubExamPrepProgressUxModel?.normalize === 'function');
       await loadScript('api', 'examPrepProgressUxApi', () =>
