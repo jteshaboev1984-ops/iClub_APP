@@ -3,11 +3,13 @@
   'use strict';
   if (window.iClubExamPrepProgressUxEnabled !== true) return;
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = 'progress_ux_stability_v1';
+  const VERSION = 'progress_ux_stability_v2';
+  const MIN_DISPLAY_MS = 2000;
   if (internal.progressUxStability?.version === VERSION) return;
   const rootEl = () => document.querySelector('#exam-prep-host-root');
   let observer = null;
   let mode = null;
+  let messageKind = null;
   let readyTimer = null;
   let deadlineTimer = null;
   let startedAt = 0;
@@ -27,16 +29,38 @@
   }
   function label(kind) {
     const text = {
-      ru: { dashboard:'Загружаем результаты…', plan:'Готовим цели этой недели…', question:'Готовим задания…' },
-      uz: { dashboard:'Natijalar yuklanmoqda…', plan:'Haftalik maqsadlar tayyorlanmoqda…', question:'Topshiriqlar tayyorlanmoqda…' },
-      en: { dashboard:'Loading your results…', plan:'Preparing this week’s goals…', question:'Preparing your questions…' }
+      ru: {
+        dashboard:'Загружаем обзор подготовки…',
+        plan:'Загружаем цели этой недели…',
+        diagnostic:'Готовим проверку…',
+        task:'Готовим задание…',
+        timed:'Готовим задание на время…',
+        answer:'Сохраняем ответ…'
+      },
+      uz: {
+        dashboard:'Tayyorgarlik holati yuklanmoqda…',
+        plan:'Bu haftadagi maqsadlar yuklanmoqda…',
+        diagnostic:'Tekshiruv tayyorlanmoqda…',
+        task:'Topshiriq tayyorlanmoqda…',
+        timed:'Vaqtli topshiriq tayyorlanmoqda…',
+        answer:'Javob saqlanmoqda…'
+      },
+      en: {
+        dashboard:'Loading preparation overview…',
+        plan:'Loading this week’s goals…',
+        diagnostic:'Preparing the check…',
+        task:'Preparing the task…',
+        timed:'Preparing timed practice…',
+        answer:'Saving your answer…'
+      }
     };
-    return text[language()][kind] || text[language()].question;
+    return text[language()][kind] || text[language()].task;
   }
   function clear() {
     clearTimeout(readyTimer); clearTimeout(deadlineTimer);
     readyTimer = deadlineTimer = null;
     mode = null;
+    messageKind = null;
     const root = rootEl();
     if (!root) return;
     delete root.dataset.epPuxLoading;
@@ -46,7 +70,7 @@
       delete root.dataset.epPuxBusy;
     }
   }
-  function arm(kind) {
+  function arm(kind, copyKind = kind) {
     const root = rootEl();
     if (!permitted(root)) return;
     clearTimeout(readyTimer);
@@ -54,9 +78,10 @@
     readyTimer = null;
     suspendedScreen = null;
     mode = kind;
+    messageKind = copyKind;
     startedAt = Date.now();
     root.dataset.epPuxLoading = kind;
-    root.dataset.epPuxLabel = label(kind);
+    root.dataset.epPuxLabel = label(copyKind);
     if (!root.hasAttribute('aria-busy')) {
       root.setAttribute('aria-busy','true');
       root.dataset.epPuxBusy = '1';
@@ -118,6 +143,15 @@
     }
     return view !== 'loading';
   }
+  function scheduleRelease(root) {
+    if (readyTimer) return;
+    const remaining = Math.max(100, MIN_DISPLAY_MS - (Date.now() - startedAt));
+    const ticket = startedAt;
+    readyTimer = setTimeout(() => {
+      readyTimer = null;
+      if (mode && ticket === startedAt && permitted(root) && ready(root)) clear();
+    }, remaining);
+  }
   function examine() {
     const root = rootEl();
     if (!permitted(root)) { if (mode) clear(); return; }
@@ -126,34 +160,31 @@
       if (suspendedScreen && root.firstElementChild === suspendedScreen) return;
       suspendedScreen = null;
       if (view === 'dashboard' && root.querySelectorAll('.ep-live-component-card').length === 2 &&
-          root.querySelectorAll('.ep-pux-overview, .ep-pux-error').length < 2) arm('dashboard');
-      else if (view === 'plan' && !root.querySelector('.ep-pux-week, .ep-pux-error')) arm('plan');
-      else if (view === 'loading') arm('question');
+          root.querySelectorAll('.ep-pux-overview, .ep-pux-error').length < 2) arm('dashboard','dashboard');
+      else if (view === 'plan' && !root.querySelector('.ep-pux-week, .ep-pux-error')) arm('plan','plan');
+      else if (view === 'loading') arm('question','task');
       else return;
     }
     if (mode === 'question' && view === 'plan') {
       // Finishing an exercise may route directly to a newly generated plan.
-      arm('plan');
+      arm('plan','plan');
     } else if (mode === 'question' && view === 'dashboard') {
-      arm('dashboard');
+      arm('dashboard','dashboard');
     }
     if (!ready(root)) { clearTimeout(readyTimer); readyTimer = null; return; }
-    if (readyTimer) return;
-    // Other existing UI decorators get one quiet frame to finish before reveal.
-    const ticket = startedAt;
-    readyTimer = setTimeout(() => {
-      readyTimer = null;
-      if (mode && ticket === startedAt && permitted(root) && ready(root)) clear();
-    },100);
+    scheduleRelease(root);
   }
   function onClick(event) {
     const root = rootEl();
     if (!permitted(root)) return;
     const button = event.target?.closest?.('button');
     if (!button || !root.contains(button) || button.disabled) return;
-    if (button.matches('[data-ep-live-plan], [data-ep-flow-next-plan]')) arm('plan');
-    else if (button.matches('[data-ep-live-dashboard], [data-ep-live-home]')) arm('dashboard');
-    else if (button.matches('[data-ep-live-start], [data-ep-live-plan-item], [data-ep-live-timed-start], [data-ep-live-submit]')) arm('question');
+    if (button.matches('[data-ep-live-plan], [data-ep-flow-next-plan]')) arm('plan','plan');
+    else if (button.matches('[data-ep-live-dashboard], [data-ep-live-home]')) arm('dashboard','dashboard');
+    else if (button.matches('[data-ep-live-submit]')) arm('question','answer');
+    else if (button.matches('[data-ep-live-timed-start]')) arm('question','timed');
+    else if (button.matches('[data-ep-live-start]')) arm('question','diagnostic');
+    else if (button.matches('[data-ep-live-plan-item]')) arm('question','task');
   }
   function onSession(event) {
     lastSessionType = String(event.detail?.session?.session_type || '');
@@ -167,7 +198,7 @@
     observer = new MutationObserver(examine);
     observer.observe(root,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['hidden','aria-hidden']});
     examine();
-    internal.progressUxStability = Object.freeze({version:VERSION,stop:() => {
+    internal.progressUxStability = Object.freeze({version:VERSION,minimumDisplayMs:MIN_DISPLAY_MS,stop:() => {
       observer?.disconnect(); observer = null;
       document.removeEventListener('click',onClick,true);
       window.removeEventListener('iclub:exam-prep-session',onSession);
