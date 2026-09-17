@@ -115,7 +115,8 @@ const html = lang => `<!doctype html><html lang="${lang}"><head><meta name="view
       await page.waitForSelector('.ep-pux-finish');
       const finish=await page.locator('.ep-pux-finish').innerText();
       assert.ok(finish.includes('+1'),`${language}: completed goal and session deltas must be displayed`);
-      assert.ok(finish.includes('1 / 3'),`${language}: original weekly denominator must survive replan`);
+      const expectedCounter=language==='ru'?'1 из 3':language==='uz'?'3 tadan 1 tasi':'1 of 3';
+      assert.ok(finish.includes(expectedCounter),`${language}: original weekly denominator must survive replan`);
       assert.equal(await page.locator('.ep-pux-finish').count(),1,`${language}: one completion panel`);
       const result=await page.evaluate(()=>window.__journey);
       assert.deepEqual(result.authorizations,[{planId:'synthetic-p1-v1',priority:1}],`${language}: authorization uses original clicked plan`);
