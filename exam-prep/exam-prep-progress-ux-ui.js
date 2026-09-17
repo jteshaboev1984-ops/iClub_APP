@@ -20,7 +20,9 @@
       noPlan: 'Недельный план пока не составлен.',
       noProof: 'План этой недели пока не составлен. История занятий сохранена.',
       changed: 'Список доступных заданий изменился. Выполненная работа сохранена.',
-      work: 'Работа этой недели завершена. Исправление ошибки ожидает повторной проверки.',
+      work: 'Работа по этой цели выполнена. Ошибка остаётся открытой до успешной повторной проверки.',
+      rework: 'Ранее выполненная работа сохранена. Ошибка снова требует внимания.',
+      waitingTitle: 'Ожидается повторная проверка',
       next: 'Следующий шаг показан ниже', unavailable: 'Проверенный прогресс временно недоступен.',
       retry: 'Повторить', goal: 'Цель', mixed: 'Смешанная практика', learning: 'Изучение темы',
       correction: 'Работа над ошибкой', retest: 'Повторная проверка', other: 'Учебная цель',
@@ -37,7 +39,9 @@
       noPlan: 'Haftalik reja hali tuzilmagan.',
       noProof: 'Bu haftalik reja hali tuzilmagan. Mashg‘ulotlar tarixi saqlangan.',
       changed: 'Mavjud topshiriqlar ro‘yxati o‘zgardi. Bajarilgan ishlar saqlangan.',
-      work: 'Bu haftadagi ish bajarildi. Xato qayta tekshiruvgacha ochiq qoladi.',
+      work: 'Ushbu maqsad bo‘yicha ish bajarildi. Xato muvaffaqiyatli qayta tekshiruvgacha ochiq qoladi.',
+      rework: 'Avval bajarilgan ishlar saqlangan. Xato ustida yana ishlash kerak.',
+      waitingTitle: 'Qayta tekshiruv kutilmoqda',
       next: 'Keyingi qadam quyida ko‘rsatilgan', unavailable: 'Tasdiqlangan natijalar vaqtincha mavjud emas.',
       retry: 'Qayta urinish', goal: 'Maqsad', mixed: 'Aralash mashq', learning: 'Mavzuni o‘rganish',
       correction: 'Xato ustida ishlash', retest: 'Qayta tekshirish', other: 'O‘quv maqsadi',
@@ -54,7 +58,9 @@
       noPlan: 'Your weekly plan has not been created yet.',
       noProof: 'This week’s plan has not been created yet. Your session history is preserved.',
       changed: 'Available tasks have changed. Your completed work has been preserved.',
-      work: 'This week’s work is done. The correction remains open pending a later check.',
+      work: 'Work on this goal is complete. The correction remains open until a successful delayed check.',
+      rework: 'Your earlier work is preserved. The correction needs more attention.',
+      waitingTitle: 'Waiting for a delayed check',
       next: 'Your next step is shown below', unavailable: 'Verified progress is temporarily unavailable.',
       retry: 'Retry', goal: 'Goal', mixed: 'Mixed practice', learning: 'Study the topic',
       correction: 'Work on a correction', retest: 'Delayed check', other: 'Study goal',
@@ -169,6 +175,9 @@
     if (state.coveragePct != null) metric(panel,c.coverage,`${state.coveragePct}%`);
     if (state.confirmedSkills != null) metric(panel,c.skills,`${state.confirmedSkills} / ${state.totalCanonicalSkills}`);
   }
+  function waitingGoal(goal) {
+    return goal.weeklyComplete === true && goal.correctionOpen === true && goal.status === 'waiting_retest';
+  }
   function showDashboard(card, data) {
     const { state } = data, c = words();
     const panel = node('section','ep-pux-panel ep-pux-overview');
@@ -197,12 +206,16 @@
       const list = node('div','ep-pux-goals');
       for (const goal of state.goals) {
         const source = raw.goals.find(row => row.goal_id === goal.goalId);
-        const row = node('article','ep-pux-goal');
+        const row = node('article',`ep-pux-goal${waitingGoal(goal) ? ' ep-pux-goal-waiting' : ''}${goal.status === 'needs_rework' ? ' ep-pux-goal-rework' : ''}`);
         row.append(node('strong','ep-pux-goal-title',`${goal.order}. ${titleFor(source,component,tracker)}`));
         row.append(node('span','ep-pux-goal-state',goalStatus(goal,state.labels)));
         if (goal.finalizedSessions>0) row.append(node('small','ep-pux-note',`${c.total}: ${goal.finalizedSessions}`));
-        if (goal.correctionNote) row.append(node('small','ep-pux-note',c.work));
-        if (goal.retestDueAt) row.append(node('small','ep-pux-note',`${c.due}: ${dateText(goal.retestDueAt)}`));
+        if (waitingGoal(goal) || (goal.correctionNote && goal.status === 'weekly_work_done'))
+          row.append(node('small','ep-pux-note',c.work));
+        else if (goal.status === 'needs_rework' && goal.correctionOpen && goal.weeklyComplete)
+          row.append(node('small','ep-pux-note',c.rework));
+        if (goal.retestDueAt && goal.status === 'waiting_retest')
+          row.append(node('small','ep-pux-note',`${c.due}: ${dateText(goal.retestDueAt)}`));
         if (source?.plan_changed === true && !goal.weeklyComplete) row.append(node('small','ep-pux-note',c.changed));
         list.append(row);
       }
@@ -244,6 +257,14 @@
     metric(section,c.total,state.finalizedSessions);
     showConfirmedMetrics(section,state,c);
     metric(section,c.corrections,state.openCorrections);
+    const pending = state.goals.find(waitingGoal);
+    if (pending) {
+      const notice = node('aside','ep-pux-waiting');
+      notice.append(node('strong','ep-pux-waiting-heading',c.waitingTitle));
+      notice.append(node('p','ep-pux-note',c.work));
+      notice.append(node('p','ep-pux-note',`${c.due}: ${dateText(pending.retestDueAt)}`));
+      section.append(notice);
+    }
     const next = screen.querySelector('.ep-flow-next-card');
     if (next) next.before(section); else screen.append(section);
     pendingBefore = null;
