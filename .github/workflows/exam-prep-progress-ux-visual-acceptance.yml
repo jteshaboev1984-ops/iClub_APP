@@ -7,6 +7,8 @@ on:
     paths:
       - 'scripts/progress-ux-visual-acceptance.cjs'
       - 'scripts/progress-ux-retest-date-regression.cjs'
+      - 'scripts/progress-ux-live-acceptance.cjs'
+      - 'exam-prep/exam-prep-live.js'
       - 'exam-prep/exam-prep-progress-ux-*.js'
       - 'exam-prep/exam-prep-progress-ux.css'
       - 'exam-prep/exam-prep-host.css'
@@ -18,6 +20,8 @@ on:
     paths:
       - 'scripts/progress-ux-visual-acceptance.cjs'
       - 'scripts/progress-ux-retest-date-regression.cjs'
+      - 'scripts/progress-ux-live-acceptance.cjs'
+      - 'exam-prep/exam-prep-live.js'
       - 'exam-prep/exam-prep-progress-ux-*.js'
       - 'exam-prep/exam-prep-progress-ux.css'
       - 'exam-prep/exam-prep-host.css'
@@ -34,18 +38,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate synthetic screenshot and date harnesses
+      - name: Validate isolated screenshot, date and real-renderer harnesses
         run: |
           set -euo pipefail
           node --check scripts/progress-ux-visual-acceptance.cjs
           node --check scripts/progress-ux-retest-date-regression.cjs
-          ! grep -Eq 'SUPABASE_SERVICE|SUPABASE_URL|process\.env\.|https?://' scripts/progress-ux-visual-acceptance.cjs scripts/progress-ux-retest-date-regression.cjs
-      - name: Install browser for synthetic visual evidence
+          node --check scripts/progress-ux-live-acceptance.cjs
+          ! grep -Eq 'SUPABASE_SERVICE|SUPABASE_URL|process\.env\.|https?://' scripts/progress-ux-visual-acceptance.cjs scripts/progress-ux-retest-date-regression.cjs scripts/progress-ux-live-acceptance.cjs
+      - name: Install isolated browser
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
       - name: Verify readable delayed-check dates in all languages
         run: node scripts/progress-ux-retest-date-regression.cjs
+      - name: Accept actual Exam Prep renderers with canonical synthetic data
+        run: node scripts/progress-ux-live-acceptance.cjs
       - name: Capture three-language overview and plan
         run: node scripts/progress-ux-visual-acceptance.cjs
       - name: Retain private-to-CI synthetic screenshots for inspection
