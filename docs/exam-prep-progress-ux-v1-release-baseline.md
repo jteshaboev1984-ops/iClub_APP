@@ -38,6 +38,14 @@ Counts below are a point-in-time production baseline. Real users may legitimatel
 
 Additional component observation at capture: production has six P1 weekly-plan versions and no P5 weekly plan. This is an observation, not a frozen expectation; user activity can create new plans later.
 
+## Follow-up production read-only verification — 2026-09-17, 16:16 Asia/Tashkent
+
+Used SELECT-only aggregate queries and PostgreSQL metadata introspection. All 21 numerical baseline counts above matched exactly at the follow-up time. No personal records or user identifiers were retrieved. `private.exam_prep_weekly_goal_snapshots`, `public.ensure_exam_prep_weekly_goals_safe_v1(text)` and `public.get_exam_prep_weekly_progress_safe_v1(text)` are all absent from production, as expected before approval. The active engine version is `objective_state_v1`. This is a second observation, not authorization to migrate.
+
+Source-title audit: production's canonical syllabus registry has **45 P1 skills across eight official sections** and **36 P5 skills across five official sections**. All 13 exact `official_syllabus_section` keys match the opt-in UI's localized area dictionary. The current UI uses the canonical Russian skill description verbatim when available and a syllabus-area name for Uzbek/English instead of inventing per-skill translations. Some source Russian descriptions themselves mix English mathematical terms; their editorial rewrite is a distinct content-governance decision, not a safe unreviewed UI patch. No source content or learner skill records were edited. Fallbacks without a confirmed tracker do not claim an invented exact skill title.
+
+At this comparison the feature branch was 70 commits ahead of `main`, zero behind; `main` remained `95c39e48aa1266f03247e5502e86b3e9e4a6830c`. Recompare on the actual release day rather than assuming this stays true.
+
 ## Release invariants
 
 Before any production SQL or feature enablement:
