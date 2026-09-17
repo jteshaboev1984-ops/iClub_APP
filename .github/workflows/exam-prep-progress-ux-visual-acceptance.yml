@@ -6,6 +6,7 @@ on:
       - feature/exam-prep-progress-ux-v1
     paths:
       - 'scripts/progress-ux-visual-acceptance.cjs'
+      - 'scripts/progress-ux-retest-date-regression.cjs'
       - 'exam-prep/exam-prep-progress-ux-*.js'
       - 'exam-prep/exam-prep-progress-ux.css'
       - 'exam-prep/exam-prep-host.css'
@@ -16,6 +17,7 @@ on:
   pull_request:
     paths:
       - 'scripts/progress-ux-visual-acceptance.cjs'
+      - 'scripts/progress-ux-retest-date-regression.cjs'
       - 'exam-prep/exam-prep-progress-ux-*.js'
       - 'exam-prep/exam-prep-progress-ux.css'
       - 'exam-prep/exam-prep-host.css'
@@ -32,15 +34,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate synthetic screenshot harness
+      - name: Validate synthetic screenshot and date harnesses
         run: |
           set -euo pipefail
           node --check scripts/progress-ux-visual-acceptance.cjs
-          ! grep -Eq 'SUPABASE_SERVICE|SUPABASE_URL|process\.env\.|https?://' scripts/progress-ux-visual-acceptance.cjs
+          node --check scripts/progress-ux-retest-date-regression.cjs
+          ! grep -Eq 'SUPABASE_SERVICE|SUPABASE_URL|process\.env\.|https?://' scripts/progress-ux-visual-acceptance.cjs scripts/progress-ux-retest-date-regression.cjs
       - name: Install browser for synthetic visual evidence
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
+      - name: Verify readable delayed-check dates in all languages
+        run: node scripts/progress-ux-retest-date-regression.cjs
       - name: Capture three-language overview and plan
         run: node scripts/progress-ux-visual-acceptance.cjs
       - name: Retain private-to-CI synthetic screenshots for inspection
