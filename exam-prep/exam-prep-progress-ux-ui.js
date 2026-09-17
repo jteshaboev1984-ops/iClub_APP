@@ -16,7 +16,7 @@
   const WORDS = Object.freeze({
     ru: {
       goals: 'Цели этой недели', available: 'Доступные задания', total: 'Завершено занятий',
-      coverage: 'Покрытие программы', skills: 'Подтверждено навыков', corrections: 'Открытых ошибок',
+      coverage: 'Покрытие программы', skills: 'Навыков с подтверждённым охватом', corrections: 'Открытых ошибок',
       noPlan: 'Недельный план пока не составлен.',
       noProof: 'План этой недели пока не составлен. История занятий сохранена.',
       changed: 'Список доступных заданий изменился. Выполненная работа сохранена.',
@@ -33,7 +33,7 @@
     },
     uz: {
       goals: 'Bu haftadagi maqsadlar', available: 'Mavjud topshiriqlar', total: 'Yakunlangan mashg‘ulotlar',
-      coverage: 'Dastur qamrovi', skills: 'Tasdiqlangan ko‘nikmalar', corrections: 'Tuzatilmagan xatolar',
+      coverage: 'Dastur qamrovi', skills: 'Qamrovi tasdiqlangan ko‘nikmalar', corrections: 'Tuzatilmagan xatolar',
       noPlan: 'Haftalik reja hali tuzilmagan.',
       noProof: 'Bu haftalik reja hali tuzilmagan. Mashg‘ulotlar tarixi saqlangan.',
       changed: 'Mavjud topshiriqlar ro‘yxati o‘zgardi. Bajarilgan ishlar saqlangan.',
@@ -50,7 +50,7 @@
     },
     en: {
       goals: 'This week’s goals', available: 'Available tasks', total: 'Sessions completed',
-      coverage: 'Syllabus coverage', skills: 'Confirmed skills', corrections: 'Open corrections',
+      coverage: 'Syllabus coverage', skills: 'Skills with confirmed coverage', corrections: 'Open corrections',
       noPlan: 'Your weekly plan has not been created yet.',
       noProof: 'This week’s plan has not been created yet. Your session history is preserved.',
       changed: 'Available tasks have changed. Your completed work has been preserved.',
@@ -213,9 +213,14 @@
     }
     const first = card.querySelector('.ep-live-plan-item');
     if (first) {
-      section.append(node('p','ep-pux-section-caption',c.available));
+      const hasAvailableAction = Array.from(card.querySelectorAll('[data-ep-live-plan-item]')).some(button => !button.disabled);
+      section.append(node('p','ep-pux-section-caption',hasAvailableAction ? c.available : c.notAvailable));
       first.before(section);
-    } else card.append(section);
+    } else {
+      section.append(node('p','ep-pux-note',c.notAvailable));
+      const notice = card.querySelector('.ep-live-notice');
+      if (notice) notice.before(section); else card.append(section);
+    }
   }
   function showCompletion(screen, data, component) {
     const { state } = data, c = words();
@@ -266,11 +271,15 @@
       const component = card.dataset.epLiveComponent;
       if (component === 'P1' || component === 'P5') request('dashboard',card,component);
     });
-    const planRows = root.querySelectorAll('.ep-live-plan-item');
-    if (planRows.length) {
-      const card = planRows[0].closest('.ep-live-card');
-      const component = String(card?.querySelector('.ep-live-head strong')?.textContent || '').match(/\b(P1|P5)\b/)?.[1];
-      if (card && component) request('plan',card,component);
+    // The live planner can render a notice without any item rows. Detect the
+    // actual localized plan heading, not the existence of an actionable button.
+    const planCard = Array.from(root.querySelectorAll('.ep-live-card')).find(card => {
+      const title = String(card.querySelector('.ep-live-head strong')?.textContent || '').trim();
+      return /^(P1|P5)\s*·\s*(Недельный план|Haftalik reja|Weekly plan)$/.test(title);
+    });
+    if (planCard) {
+      const component = String(planCard.querySelector('.ep-live-head strong')?.textContent || '').match(/^(P1|P5)\b/)?.[1];
+      if (component) request('plan',planCard,component);
     }
     const completion = root.querySelector('.ep-flow-completion-screen');
     const component = completionSession?.component || pendingBefore?.component;
