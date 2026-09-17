@@ -81,6 +81,7 @@
     '5.4 Discrete random variables': ['Дискретные случайные величины','Diskret tasodifiy miqdorlar','Discrete random variables'],
     '5.5 The normal distribution': ['Нормальное распределение','Normal taqsimot','The normal distribution']
   });
+  const UZ_MONTHS = Object.freeze(['yanvar','fevral','mart','aprel','may','iyun','iyul','avgust','sentabr','oktabr','noyabr','dekabr']);
   const rootEl = () => document.querySelector('#exam-prep-host-root');
   function lang() {
     let value = '';
@@ -127,9 +128,11 @@
   }
   function dateText(value) {
     if (!value || !Number.isFinite(Date.parse(value))) return words().dateUnknown;
-    return new Intl.DateTimeFormat(lang() === 'en' ? 'en-GB' : lang() === 'uz' ? 'uz-UZ' : 'ru-RU', {
+    const date = new Date(value);
+    if (lang() === 'uz') return `${date.getFullYear()}-yil ${date.getDate()}-${UZ_MONTHS[date.getMonth()]}`;
+    return new Intl.DateTimeFormat(lang() === 'en' ? 'en-GB' : 'ru-RU', {
       day: 'numeric', month: 'long', year: 'numeric'
-    }).format(new Date(value));
+    }).format(date);
   }
   async function obtain(component, withTracker = false) {
     if (!allowed() || typeof internal.progressUxApi?.progress !== 'function') return null;
