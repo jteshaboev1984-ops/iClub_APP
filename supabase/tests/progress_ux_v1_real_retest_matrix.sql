@@ -16,7 +16,7 @@ DECLARE
   rec record;
   ass bigint; content_id bigint; ass_ver text;
   q bigint; reserve_role text; meta bigint; checksum text;
-  auth_id uuid; rt_id uuid; session_id uuid;
+  auth_id uuid; rt_id uuid; v_session_id uuid;
   result jsonb; goal jsonb;
 BEGIN
   INSERT INTO auth.users(id,aud,role,email,created_at,updated_at,is_sso_user,is_anonymous)
@@ -100,35 +100,35 @@ BEGIN
     VALUES(rec.case_id,u,'P1',rec.skill_code,'authorized',now()-interval '1 day',auth_id)
     RETURNING id INTO rt_id;
 
-    session_id:=gen_random_uuid();
+    v_session_id:=gen_random_uuid();
     INSERT INTO private.exam_prep_sessions
       (id,authorization_id,user_id,program_version_id,content_version_id,assessment_id,
        assessment_version,component_code,session_type,status,client_idempotency_key,total_items)
-    VALUES(session_id,auth_id,u,prog,content_id,ass,ass_ver,'P1','retest','active',
+    VALUES(v_session_id,auth_id,u,prog,content_id,ass,ass_ver,'P1','retest','active',
       'px-real-retest-'||rec.priority_order::text,1);
     INSERT INTO private.exam_prep_session_items
       (session_id,item_order,item_kind,question_id,primary_skill_code,reserve_role,
        is_holdout,content_meta_id,question_snapshot_md5,item_version)
-    VALUES(session_id,1,'question',q,rec.skill_code,reserve_role,false,meta,checksum,
+    VALUES(v_session_id,1,'question',q,rec.skill_code,reserve_role,false,meta,checksum,
       ass_ver||'|px-real-retest-'||rec.priority_order::text);
     INSERT INTO private.exam_prep_responses
       (session_id,item_order,user_id,client_idempotency_key,response_kind,user_answer,
        is_correct,evaluator_version,elapsed_ms)
-    VALUES(session_id,1,u,'px-real-retest-response-'||rec.priority_order::text,'machine',
+    VALUES(v_session_id,1,u,'px-real-retest-response-'||rec.priority_order::text,'machine',
       'isolated-fixture',rec.should_pass,'progress_ux_real_retest_fixture',1000);
 
     -- This status transition invokes the EXISTING real retest reconciliation trigger.
     UPDATE private.exam_prep_sessions SET status='finalized',finalized_at=clock_timestamp(),
       last_activity_at=clock_timestamp(),finalize_idempotency_key='px-real-retest-final-'||rec.priority_order::text
-    WHERE id=session_id;
+    WHERE id=v_session_id;
 
     IF rec.should_pass THEN
-      IF NOT EXISTS(SELECT 1 FROM private.exam_prep_correction_cases WHERE id=rec.case_id AND status='resolved')
-         OR NOT EXISTS(SELECT 1 FROM private.exam_prep_correction_actions WHERE correction_case_id=rec.case_id AND action_type='retest_passed' AND session_id=session_id) THEN
+      IF NOT EXISTS(SELECT 1 FROM private.exam_prep_correction_cases c WHERE c.id=rec.case_id AND c.status='resolved')
+         OR NOT EXISTS(SELECT 1 FROM private.exam_prep_correction_actions ca WHERE ca.correction_case_id=rec.case_id AND ca.action_type='retest_passed' AND ca.session_id=v_session_id) THEN
         RAISE EXCEPTION 'Real passing retest did not resolve/log pass'; END IF;
     ELSE
-      IF NOT EXISTS(SELECT 1 FROM private.exam_prep_correction_cases WHERE id=rec.case_id AND status='reopened')
-         OR NOT EXISTS(SELECT 1 FROM private.exam_prep_correction_actions WHERE correction_case_id=rec.case_id AND action_type='retest_failed' AND session_id=session_id) THEN
+      IF NOT EXISTS(SELECT 1 FROM private.exam_prep_correction_cases c WHERE c.id=rec.case_id AND c.status='reopened')
+         OR NOT EXISTS(SELECT 1 FROM private.exam_prep_correction_actions ca WHERE ca.correction_case_id=rec.case_id AND ca.action_type='retest_failed' AND ca.session_id=v_session_id) THEN
         RAISE EXCEPTION 'Real failing retest did not reopen/log failure'; END IF;
     END IF;
   END LOOP;
