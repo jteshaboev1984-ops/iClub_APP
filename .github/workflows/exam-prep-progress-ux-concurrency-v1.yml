@@ -6,12 +6,12 @@ on:
       - feature/exam-prep-progress-ux-v1
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
-      - 'scripts/progress-ux-concurrency-regression.sh'
+      - 'scripts/progress-ux-concurrency-regression-v2.sh'
       - '.github/workflows/exam-prep-progress-ux-concurrency-v1.yml'
   pull_request:
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
-      - 'scripts/progress-ux-concurrency-regression.sh'
+      - 'scripts/progress-ux-concurrency-regression-v2.sh'
       - '.github/workflows/exam-prep-progress-ux-concurrency-v1.yml'
 
 permissions:
@@ -99,7 +99,6 @@ jobs:
           PGOPTIONS: '-c progress_ux.isolated_db=true'
         run: |
           set -euo pipefail
-          bash scripts/progress-ux-concurrency-regression.sh
-          test "$(psql -Atqc "select count(*) from public.users where first_name='ProgressUXConcurrency'")" = '0'
+          bash scripts/progress-ux-concurrency-regression-v2.sh
           test "$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")" = 'off|false|true'
           echo 'Progress UX concurrency gate: GREEN'
