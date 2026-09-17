@@ -1,0 +1,53 @@
+name: Exam Prep Progress UX Visual Acceptance
+
+on:
+  push:
+    branches:
+      - feature/exam-prep-progress-ux-v1
+    paths:
+      - 'scripts/progress-ux-visual-acceptance.cjs'
+      - 'exam-prep/exam-prep-progress-ux-*.js'
+      - 'exam-prep/exam-prep-progress-ux.css'
+      - 'exam-prep/exam-prep-host.css'
+      - 'exam-prep/exam-prep-wave1-ux.css'
+      - 'visual/iclub-visual-v3.css'
+      - 'visual/iclub-premium-v3.css'
+      - '.github/workflows/exam-prep-progress-ux-visual-acceptance.yml'
+  pull_request:
+    paths:
+      - 'scripts/progress-ux-visual-acceptance.cjs'
+      - 'exam-prep/exam-prep-progress-ux-*.js'
+      - 'exam-prep/exam-prep-progress-ux.css'
+      - 'exam-prep/exam-prep-host.css'
+      - 'exam-prep/exam-prep-wave1-ux.css'
+      - 'visual/iclub-visual-v3.css'
+      - 'visual/iclub-premium-v3.css'
+      - '.github/workflows/exam-prep-progress-ux-visual-acceptance.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-visual-captures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate synthetic screenshot harness
+        run: |
+          set -euo pipefail
+          node --check scripts/progress-ux-visual-acceptance.cjs
+          ! grep -Eq 'SUPABASE_SERVICE|SUPABASE_URL|process\.env\.|https?://' scripts/progress-ux-visual-acceptance.cjs
+      - name: Install browser for synthetic visual evidence
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Capture three-language overview and plan
+        run: node scripts/progress-ux-visual-acceptance.cjs
+      - name: Retain private-to-CI synthetic screenshots for inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: progress-ux-synthetic-visual-evidence
+          path: progress-ux-visual-evidence/*.png
+          if-no-files-found: warn
+          retention-days: 7
