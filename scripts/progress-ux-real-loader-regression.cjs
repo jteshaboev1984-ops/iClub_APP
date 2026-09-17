@@ -56,12 +56,32 @@ const fixture = {
     }
 
     const off = await scenario(undefined);
-    assert.equal(off.requests.filter(name=>name==='exam-prep-progress-ux-boot.js').length,0,'Default undefined flag cannot load bootstrap');
-    assert.equal(off.requests.filter(name=>name.startsWith('exam-prep-progress-ux-')).length,0,'Default OFF cannot load progress assets');
+    assert.equal(off.requests.filter(name=>name==='exam-prep-progress-ux-boot.js').length,0,'Default undefined flag cannot load bootstrap before authorization');
+    assert.equal(off.requests.filter(name=>name.startsWith('exam-prep-progress-ux-')).length,0,'Default OFF cannot load progress assets before authorization');
     assert.equal(off.requests.filter(name=>name==='exam-prep-live.js').length,1,'Existing Exam Prep loader must remain active');
     assert.equal(await off.page.locator('.ep-pux-panel').count(),0,'OFF must preserve DOM');
     assert.deepEqual(off.errors,[]);
     await off.page.close();
+
+    const gated = await scenario(undefined);
+    await gated.page.evaluate(async()=>{
+      const previous=window.sb.rpc;
+      window.sb.rpc=async(name,args)=>{
+        if(name==='get_exam_prep_capabilities_v1') return {data:{
+          program_key:'math_as_p1_p5',rollout_state:'controlled_beta',core_access:true,
+          ai_assist:false,mentor_care_entitled:false,mentor_assignment_active:false,
+          mentor_authority:false,kill_switch:false
+        },error:null};
+        return previous(name,args);
+      };
+      await window.iClubExamPrepHostInternal.api.capabilities();
+    });
+    await gated.page.waitForFunction(()=>window.iClubExamPrepHostInternal.progressUxBootstrapStatus==='ready');
+    await gated.page.waitForSelector('.ep-pux-overview');
+    assert.equal(await gated.page.evaluate(()=>window.iClubExamPrepProgressUxEnabled),true,'Controlled-beta capability must enable Progress UX');
+    assert.equal(gated.requests.filter(name=>name==='exam-prep-progress-ux-boot.js').length,1,'Controlled-beta activation must load bootstrap once');
+    assert.deepEqual(gated.errors,[]);
+    await gated.page.close();
 
     const on = await scenario(true);
     await on.page.waitForFunction(()=>window.iClubExamPrepHostInternal.progressUxBootstrapStatus==='ready');
@@ -78,6 +98,6 @@ const fixture = {
     });
     await on.page.waitForFunction(()=>document.querySelectorAll('.ep-pux-panel').length===0);
     await on.page.close();
-    console.log('Progress UX real API loader: PASS (default OFF, original loader intact, opt-in boot once, revocation cleanup)');
+    console.log('Progress UX real API loader: PASS (default OFF, controlled-beta release gate, explicit ON, original loader intact, revocation cleanup)');
   } finally { await browser.close(); }
 })().catch(e=>{console.error(e);process.exit(1);});
