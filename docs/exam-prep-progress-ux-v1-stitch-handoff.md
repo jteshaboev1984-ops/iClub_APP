@@ -18,5 +18,11 @@ Use actual iClub Mathematics → Exam Prep screenshots from the current app/feat
 - No dependencies on AI or mentors. Display states must work with AI OFF and Mentor OFF.
 - Work with illustrative learner values in design only; label mockups as examples. Never suggest displayed mock values are actual learner records.
 
+## Verified source-title decision, 2026-09-17
+- Read-only canonical registry matches **eight P1 sections / 45 skills** and **five P5 sections / 36 skills**. All 13 exact official section keys have corresponding localized area labels in the feature UI. P1 and P5 must not share a denominator.
+- For Russian, the existing authorized academic tracker returns `canonical_description` and the UI displays it without silently rewriting the learner's skill. Several canonical Russian descriptions contain mixed English mathematics terminology; a fully rewritten per-skill RU/UZ/EN catalogue needs an explicit content-governance review. Do not treat Stitch's attractive English placeholder as the true academic title.
+- For Uzbek and English the approved fallback is the actual section/topic label; it is **not a per-skill translation**. When the tracker response is missing, show a generic localized action label. Do not invent a topic, exact skill, mastery or score.
+- Keep goal titles distinct from their server-authenticated states and the existing current task card. A waiting-correction goal can be complete as assigned work while the correction stays open; do not claim the entire week is finished unless the server confirms all goals.
+
 ## Acceptance and rollout separation
 Deliver four consistent annotated mobile views plus overview/plan desktop adaptations and explicit spacing/typography/button states. First verify design against current implementation, then make any CSS/markup changes only inside the isolated Progress UX feature branch with the flag OFF by default. Functional CI, SQL rollback evidence and a separate release authorization remain required before production use.
