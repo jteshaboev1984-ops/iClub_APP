@@ -4,9 +4,9 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 
 const EXPECT = {
-  ru: ['Недельный план пока не составлен.', 'История занятий сохранена.'],
-  uz: ['Haftalik reja hali tuzilmagan.', 'Mashg‘ulotlar tarixi saqlangan.'],
-  en: ['Your weekly plan has not been created yet.', 'Your session history is preserved.']
+  ru: ['Недельный план пока не составлен.', 'План этой недели пока не составлен.', 'История занятий сохранена.'],
+  uz: ['Haftalik reja hali tuzilmagan.', 'Bu haftalik reja hali tuzilmagan.', 'Mashg‘ulotlar tarixi saqlangan.'],
+  en: ['Your weekly plan has not been created yet.', 'This week’s plan has not been created yet.', 'Your session history is preserved.']
 };
 const plan = count => ({
   contract_version:'progress_ux_v1',component_code:'P5',active_week_no:1,
@@ -16,7 +16,7 @@ const plan = count => ({
 (async () => {
   const browser = await chromium.launch({headless:true});
   try {
-    for (const [lang,[noPlan,history]] of Object.entries(EXPECT)) {
+    for (const [lang,[noPlan,historicNoPlan,history]] of Object.entries(EXPECT)) {
       const page = await browser.newPage();
       const errors = [];
       page.on('pageerror',e=>errors.push(e.message));
@@ -43,7 +43,8 @@ const plan = count => ({
       await page.waitForFunction(()=>document.querySelector('.ep-pux-overview')?.textContent.includes('4'));
       const previous = await page.locator('.ep-pux-overview').innerText();
       assert.ok(previous.includes(history),`${lang}: actual historical activity must be acknowledged`);
-      assert.ok(previous.includes(noPlan),`${lang}: absent plan must remain absent`);
+      assert.ok(previous.includes(historicNoPlan),`${lang}: absent current plan must remain absent`);
+      assert.ok(!/0 из 3|0 of 3|3 tadan 0/.test(previous),`${lang}: no fabricated denominator with history`);
       assert.deepEqual(errors,[],`${lang}: must have no page errors`);
       await page.close();
     }
