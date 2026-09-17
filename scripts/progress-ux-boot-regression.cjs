@@ -9,7 +9,7 @@ const rootHtml = `<!doctype html><html lang="ru"><head></head><body>
 <article class="ep-live-component-card" data-ep-live-component="P1"><div class="ep-live-actions"></div></article></div></section></div>
 </body></html>`;
 const base = 'https://iclub.test';
-const boot = `${base}/exam-prep/exam-prep-progress-ux-boot.js?v=progressux1`;
+const boot = `${base}/exam-prep/exam-prep-progress-ux-boot.js?v=progressux2`;
 const payload = {
   contract_version:'progress_ux_v1',component_code:'P1',active_week_no:1,
   plan_available:true,completed_goals:0,finalized_study_sessions:1,
@@ -31,8 +31,9 @@ const payload = {
         if (pathname === '/') return route.fulfill({status:200,contentType:'text/html',body:rootHtml});
         const filename = pathname.split('/').at(-1);
         loads.push(filename);
-        if (!/^exam-prep-progress-ux-(?:boot|model|api|ui)\.js$/.test(filename) &&
-            filename !== 'exam-prep-progress-ux.css') throw new Error(`Unexpected request ${pathname}`);
+        if (!/^exam-prep-progress-ux-(?:boot|stability|model|api|ui)\.js$/.test(filename) &&
+            !/^exam-prep-progress-ux(?:-stability)?\.css$/.test(filename))
+          throw new Error(`Unexpected request ${pathname}`);
         if (holdModel && filename === 'exam-prep-progress-ux-model.js') {
           await new Promise(resolve=>{ releaseModel=resolve; });
         }
@@ -56,7 +57,7 @@ const payload = {
     const off=await makePage(false);
     await off.page.addScriptTag({url:boot});
     await off.page.waitForTimeout(120);
-    assert.deepEqual(off.loads,['exam-prep-progress-ux-boot.js'],'OFF must never request model, API, UI or CSS');
+    assert.deepEqual(off.loads,['exam-prep-progress-ux-boot.js'],'OFF must never request optional assets');
     assert.equal(await off.page.locator('.ep-pux-panel').count(),0);
     await off.page.close();
 
@@ -64,8 +65,10 @@ const payload = {
     await on.page.addScriptTag({url:boot});
     await on.page.waitForFunction(()=>window.iClubExamPrepHostInternal.progressUxBootstrapStatus==='ready');
     await on.page.waitForSelector('.ep-pux-overview');
-    for (const asset of ['exam-prep-progress-ux-model.js','exam-prep-progress-ux-api.js','exam-prep-progress-ux-ui.js'])
+    for (const asset of ['exam-prep-progress-ux-stability.js','exam-prep-progress-ux-stability.css',
+      'exam-prep-progress-ux-model.js','exam-prep-progress-ux-api.js','exam-prep-progress-ux-ui.js'])
       assert.equal(on.loads.filter(name=>name===asset).length,1,`Asset ${asset} must load exactly once`);
+    assert.ok(on.loads.indexOf('exam-prep-progress-ux-stability.js')<on.loads.indexOf('exam-prep-progress-ux-model.js'));
     assert.ok(on.loads.indexOf('exam-prep-progress-ux-model.js')<on.loads.indexOf('exam-prep-progress-ux-api.js'));
     assert.ok(on.loads.indexOf('exam-prep-progress-ux-api.js')<on.loads.indexOf('exam-prep-progress-ux-ui.js'));
     await on.page.addScriptTag({url:boot});
@@ -75,14 +78,15 @@ const payload = {
     const lost=await makePage(true,true);
     const load=lost.page.addScriptTag({url:boot});
     await lost.page.waitForFunction(()=>window.iClubExamPrepHostInternal.progressUxBootstrapStatus==='loading');
-    await lost.page.waitForTimeout(100);
+    await lost.page.waitForFunction(()=>window.iClubExamPrepHostInternal.progressUxStability?.version==='progress_ux_stability_v1');
     await lost.page.evaluate(()=>{window.iClubExamPrepProgressUxEnabled=false;});
     lost.release();
     await load;
     await lost.page.waitForFunction(()=>window.iClubExamPrepHostInternal.progressUxBootstrapStatus==='unavailable');
     assert.equal(lost.loads.includes('exam-prep-progress-ux-ui.js'),false,'Revocation during loading must stop presentation');
     assert.equal(await lost.page.locator('.ep-pux-panel').count(),0);
+    assert.equal(await lost.page.locator('#exam-prep-host-root').getAttribute('data-ep-pux-loading'),null,'Revocation must release loading screen');
     await lost.page.close();
-    console.log('Progress UX bootstrap: PASS (OFF, ordered assets, duplicate bootstrap, mid-load disable)');
+    console.log('Progress UX bootstrap: PASS (OFF, stable loader, ordered assets, repeat, revocation)');
   } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exit(1);});
