@@ -259,6 +259,10 @@
     load('script[data-exam-prep-recovery]', "examPrepRecovery", "exam-prep-recovery.js?v=p208preserve1");
     load('script[data-exam-prep-exam-map]', "examPrepExamMap", "exam-prep-exam-map.js?v=p209map1");
     load('script[data-exam-prep-materials]', "examPrepMaterials", "exam-prep-materials.js?v=p210materials1");
+    // Explicit opt-in only. Undefined or false leaves legacy loader, network and UI unchanged.
+    if (window.iClubExamPrepProgressUxEnabled === true) {
+      load('script[data-exam-prep-progress-ux-boot]', "examPrepProgressUxBoot", "exam-prep-progress-ux-boot.js?v=progressux1");
+    }
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
   }
