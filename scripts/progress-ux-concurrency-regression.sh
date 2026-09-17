@@ -94,10 +94,14 @@ for pid in "${pids[@]}"; do wait "$pid"; done
 week1_after="$(psql -Atqc "select string_agg(id::text,',' order by priority_order) from private.exam_prep_weekly_goal_snapshots where user_id='$uid'::uuid and component_code='P1' and active_week_no=1")"
 [[ "$week1_after" == "$week1_ids" ]] || { echo "Same-week replan changed frozen goal identities" >&2; exit 1; }
 
-# Roll to week 2. Correction goals are used here deliberately so the concurrency test does not
-# manufacture learning content outside the governed academic runway.
+# Roll to week 2. The planner owns at most one active plan per component, so the previous
+# week's active plan is first retired exactly as the governed generator does.
+# Correction goals are used here deliberately so the concurrency test does not manufacture
+# learning content outside the governed academic runway.
 psql -v ON_ERROR_STOP=1 -v uid="$uid" <<'SQL'
 update private.exam_prep_exam_profiles set active_week_no=2 where user_id=:'uid'::uuid;
+update private.exam_prep_weekly_plans set status='superseded'
+where user_id=:'uid'::uuid and component_code='P1' and status='active';
 insert into private.exam_prep_correction_cases(user_id,component_code,skill_code,status)
 values(:'uid'::uuid,'P1','P1-QUA-01','remediating'),
       (:'uid'::uuid,'P1','P1-QUA-02','remediating');
