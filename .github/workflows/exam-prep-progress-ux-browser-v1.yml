@@ -12,6 +12,7 @@ on:
       - 'scripts/progress-ux-boot-regression.cjs'
       - 'scripts/progress-ux-real-loader-regression.cjs'
       - 'scripts/progress-ux-copy-regression.cjs'
+      - 'scripts/progress-ux-waiting-regression.cjs'
       - 'scripts/progress-ux-missing-rpc-regression.cjs'
       - 'scripts/progress-ux-responsive-regression.cjs'
       - '.github/workflows/exam-prep-progress-ux-browser-v1.yml'
@@ -24,6 +25,7 @@ on:
       - 'scripts/progress-ux-boot-regression.cjs'
       - 'scripts/progress-ux-real-loader-regression.cjs'
       - 'scripts/progress-ux-copy-regression.cjs'
+      - 'scripts/progress-ux-waiting-regression.cjs'
       - 'scripts/progress-ux-missing-rpc-regression.cjs'
       - 'scripts/progress-ux-responsive-regression.cjs'
       - '.github/workflows/exam-prep-progress-ux-browser-v1.yml'
@@ -48,6 +50,7 @@ jobs:
           node --check scripts/progress-ux-boot-regression.cjs
           node --check scripts/progress-ux-real-loader-regression.cjs
           node --check scripts/progress-ux-copy-regression.cjs
+          node --check scripts/progress-ux-waiting-regression.cjs
           node --check scripts/progress-ux-missing-rpc-regression.cjs
           node --check scripts/progress-ux-responsive-regression.cjs
           ! grep -Eq 'localStorage|sessionStorage|\.from\(|\.rpc\(|fetch\(' exam-prep/exam-prep-progress-ux-ui.js
@@ -67,6 +70,8 @@ jobs:
         run: node scripts/progress-ux-real-loader-regression.cjs
       - name: Three-language learner copy regression
         run: node scripts/progress-ux-copy-regression.cjs
+      - name: Waiting and reopened correction states RU/UZ/EN
+        run: node scripts/progress-ux-waiting-regression.cjs
       - name: Missing Progress RPC must fail closed
         run: node scripts/progress-ux-missing-rpc-regression.cjs
       - name: Responsive phone and desktop layout
