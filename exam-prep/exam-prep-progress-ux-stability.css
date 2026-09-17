@@ -1,0 +1,44 @@
+/* Presentation-only gate: keep intermediate question/weekly-plan DOM out of view. */
+#exam-prep-host-root[data-ep-pux-loading] {
+  position: relative;
+  isolation: isolate;
+  min-height: 280px;
+}
+#exam-prep-host-root[data-ep-pux-loading] > * {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+#exam-prep-host-root[data-ep-pux-loading]::before {
+  content: '';
+  position: absolute;
+  top: 86px;
+  left: calc(50% - 18px);
+  z-index: 4;
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  border: 3px solid var(--border, #e2e8f0);
+  border-top-color: var(--primary, #2457d6);
+  border-radius: 50%;
+  animation: ep-pux-stable-spin 900ms linear infinite;
+}
+#exam-prep-host-root[data-ep-pux-loading]::after {
+  content: attr(data-ep-pux-label);
+  position: absolute;
+  top: 143px;
+  left: 12px;
+  right: 12px;
+  z-index: 4;
+  max-width: 480px;
+  margin-inline: auto;
+  color: var(--text-secondary, #475569);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+@keyframes ep-pux-stable-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  #exam-prep-host-root[data-ep-pux-loading]::before { animation: none; }
+}
