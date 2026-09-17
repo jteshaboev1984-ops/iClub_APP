@@ -16,38 +16,43 @@
   const WORDS = Object.freeze({
     ru: {
       goals: 'Цели этой недели', available: 'Доступные задания', total: 'Завершено занятий',
-      coverage: 'Покрытие программы', skills: 'Охвачено навыков', corrections: 'Ошибок требуют работы',
-      noProof: 'Выполнение прошлых недельных целей пока не подтверждено. История занятий сохранена.',
+      coverage: 'Покрытие программы', skills: 'Охвачено навыков', corrections: 'Открытых ошибок',
+      noPlan: 'Недельный план пока не составлен.',
+      noProof: 'План этой недели пока не составлен. История занятий сохранена.',
       changed: 'Список доступных заданий изменился. Выполненная работа сохранена.',
       work: 'Работа этой недели завершена. Исправление ошибки ожидает повторной проверки.',
       next: 'Следующий шаг показан ниже', unavailable: 'Проверенный прогресс временно недоступен.',
       retry: 'Повторить', goal: 'Цель', mixed: 'Смешанная практика', learning: 'Изучение темы',
       correction: 'Работа над ошибкой', retest: 'Повторная проверка', other: 'Учебная цель',
-      beforeAfter: 'Что изменилось с момента открытия плана', newSession: 'Занятий добавлено',
+      beforeAfter: 'Изменения с момента открытия плана', newSession: 'Занятий добавлено',
       newGoals: 'Дополнительно выполнено целей', newCoverage: 'Покрытие программы',
-      noChange: 'Занятие сохранено, но подтверждённые показатели пока не изменились.',
+      deltaNote: 'Изменения могут включать занятия с других устройств.',
+      noChange: 'После обновления подтверждённые показатели пока не изменились.',
       current: 'Текущий подтверждённый прогресс', dateUnknown: 'Дата уточняется',
       due: 'Повторная проверка', currentTask: 'Текущий шаг', notAvailable: 'Сейчас нет доступного шага'
     },
     uz: {
       goals: 'Bu haftadagi maqsadlar', available: 'Mavjud topshiriqlar', total: 'Yakunlangan mashg‘ulotlar',
-      coverage: 'Dastur qamrovi', skills: 'Qamrab olingan ko‘nikmalar', corrections: 'Ishlanishi kerak bo‘lgan xatolar',
-      noProof: 'Oldingi haftalik maqsadlar bajarilgani hozircha tasdiqlanmagan. Mashg‘ulotlar tarixi saqlangan.',
+      coverage: 'Dastur qamrovi', skills: 'Qamrab olingan ko‘nikmalar', corrections: 'Tuzatilmagan xatolar',
+      noPlan: 'Haftalik reja hali tuzilmagan.',
+      noProof: 'Bu haftalik reja hali tuzilmagan. Mashg‘ulotlar tarixi saqlangan.',
       changed: 'Mavjud topshiriqlar ro‘yxati o‘zgardi. Bajarilgan ishlar saqlangan.',
       work: 'Bu haftadagi ish bajarildi. Xato qayta tekshiruvgacha ochiq qoladi.',
-      next: 'Keyingi qadam quyida ko‘rsatilgan', unavailable: 'Tasdiqlangan progress vaqtincha mavjud emas.',
+      next: 'Keyingi qadam quyida ko‘rsatilgan', unavailable: 'Tasdiqlangan natijalar vaqtincha mavjud emas.',
       retry: 'Qayta urinish', goal: 'Maqsad', mixed: 'Aralash mashq', learning: 'Mavzuni o‘rganish',
       correction: 'Xato ustida ishlash', retest: 'Qayta tekshirish', other: 'O‘quv maqsadi',
       beforeAfter: 'Reja ochilganidan beri o‘zgarishlar', newSession: 'Yangi mashg‘ulotlar',
       newGoals: 'Qo‘shimcha bajarilgan maqsadlar', newCoverage: 'Dastur qamrovi',
-      noChange: 'Mashg‘ulot saqlandi, ammo tasdiqlangan ko‘rsatkichlar hozircha o‘zgarmadi.',
-      current: 'Hozirgi tasdiqlangan progress', dateUnknown: 'Sana aniqlanmoqda',
+      deltaNote: 'O‘zgarishlar boshqa qurilmalardagi mashg‘ulotlarni ham o‘z ichiga olishi mumkin.',
+      noChange: 'Yangilangandan so‘ng tasdiqlangan ko‘rsatkichlar hozircha o‘zgarmadi.',
+      current: 'Hozirgi tasdiqlangan natijalar', dateUnknown: 'Sana aniqlanmoqda',
       due: 'Qayta tekshiruv', currentTask: 'Hozirgi qadam', notAvailable: 'Hozircha mavjud qadam yo‘q'
     },
     en: {
       goals: 'This week’s goals', available: 'Available tasks', total: 'Sessions completed',
-      coverage: 'Syllabus coverage', skills: 'Skills covered', corrections: 'Corrections requiring work',
-      noProof: 'Past weekly goal completion cannot yet be confirmed. Your session history is preserved.',
+      coverage: 'Syllabus coverage', skills: 'Skills covered', corrections: 'Open corrections',
+      noPlan: 'Your weekly plan has not been created yet.',
+      noProof: 'This week’s plan has not been created yet. Your session history is preserved.',
       changed: 'Available tasks have changed. Your completed work has been preserved.',
       work: 'This week’s work is done. The correction remains open pending a later check.',
       next: 'Your next step is shown below', unavailable: 'Verified progress is temporarily unavailable.',
@@ -55,7 +60,8 @@
       correction: 'Work on a correction', retest: 'Delayed check', other: 'Study goal',
       beforeAfter: 'Changes since you opened the plan', newSession: 'New sessions',
       newGoals: 'Additional goals completed', newCoverage: 'Syllabus coverage',
-      noChange: 'Your session was saved, but the verified indicators have not changed yet.',
+      deltaNote: 'Changes may include sessions completed on other devices.',
+      noChange: 'The verified indicators have not changed since the last update.',
       current: 'Current verified progress', dateUnknown: 'Date to be confirmed',
       due: 'Delayed check', currentTask: 'Current step', notAvailable: 'No available step right now'
     }
@@ -153,6 +159,9 @@
   function goalStatus(goal, c) {
     return c.goal[goal.status] || c.goal.unavailable;
   }
+  function missingPlanText(state, c) {
+    return state.finalizedSessions > 0 ? c.noProof : c.noPlan;
+  }
   function showDashboard(card, data) {
     const { state } = data, c = words();
     const panel = node('section','ep-pux-panel ep-pux-overview');
@@ -160,7 +169,7 @@
     if (state.hasPlan) {
       metric(panel,c.goals,state.goalCounter);
     } else {
-      panel.append(node('p','ep-pux-note',c.noProof));
+      panel.append(node('p','ep-pux-note',missingPlanText(state,c)));
     }
     metric(panel,c.total,state.finalizedSessions);
     metric(panel,c.corrections,state.openCorrections);
@@ -174,7 +183,7 @@
     section.setAttribute('aria-label',c.goals);
     section.append(node('h3','ep-pux-heading',c.goals));
     if (!state.hasPlan) {
-      section.append(node('p','ep-pux-note',c.noProof));
+      section.append(node('p','ep-pux-note',missingPlanText(state,c)));
     } else {
       section.append(node('div','ep-pux-counter',state.goalCounter));
       const list = node('div','ep-pux-goals');
@@ -208,13 +217,14 @@
     section.setAttribute('aria-label', comparable ? c.beforeAfter : c.current);
     section.append(node('h3','ep-pux-heading',comparable ? c.beforeAfter : c.current));
     if (comparable) {
+      section.append(node('p','ep-pux-note',c.deltaNote));
       const gainedSessions = state.finalizedSessions - before.finalizedSessions;
       const gainedGoals = state.completedGoals - before.completedGoals;
       if (gainedSessions > 0) metric(section,c.newSession,`+${gainedSessions}`);
       if (gainedGoals > 0) metric(section,c.newGoals,`+${gainedGoals}`);
       if (state.coveragePct != null && before.coveragePct != null && state.coveragePct !== before.coveragePct)
         metric(section,c.newCoverage,`${before.coveragePct}% → ${state.coveragePct}%`);
-      if (gainedSessions <= 0 && gainedGoals <= 0 && state.coveragePct === before.coveragePct)
+      if (gainedSessions === 0 && gainedGoals === 0 && state.coveragePct === before.coveragePct)
         section.append(node('p','ep-pux-note',c.noChange));
     }
     if (state.hasPlan) metric(section,c.goals,state.goalCounter);
