@@ -1,0 +1,145 @@
+name: Exam Prep Progress UX Database v1
+
+on:
+  push:
+    branches:
+      - feature/exam-prep-progress-ux-v1
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - 'supabase/tests/progress_ux_v1_matrix.sql'
+      - 'supabase/tests/progress_ux_v1_lifecycle_matrix.sql'
+      - 'supabase/tests/progress_ux_v1_action_provenance_matrix.sql'
+      - 'supabase/tests/progress_ux_v1_real_retest_matrix.sql'
+      - '.github/workflows/exam-prep-progress-ux-db-v1.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - 'supabase/tests/progress_ux_v1_matrix.sql'
+      - 'supabase/tests/progress_ux_v1_lifecycle_matrix.sql'
+      - 'supabase/tests/progress_ux_v1_action_provenance_matrix.sql'
+      - 'supabase/tests/progress_ux_v1_real_retest_matrix.sql'
+      - '.github/workflows/exam-prep-progress-ux-db-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ephemeral-pg:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create disposable schema and minimum legacy contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql
+      - name: Replay current migrations with the production-verified ordering
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+          apply_one() {
+            local f="$1" b
+            b="$(basename "$f")"
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1"
+            fi
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql
+            fi
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('px-ci-cohort','math_as_p1_p5','draft',12,0,72,'disposable Progress UX schema validation') on conflict(cohort_key) do nothing"
+            fi
+            echo "Migrating $b"
+            psql -v ON_ERROR_STOP=1 -f "$f" > /tmp/px-migration.log 2>&1 || { cat /tmp/px-migration.log; exit 1; }
+          }
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|\
+              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|\
+              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|\
+              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|\
+              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|\
+              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  for rb in "${recent[@]}"; do apply_one "supabase/migrations/$rb"; done
+                fi
+                continue ;;
+            esac
+            apply_one "$f"
+          done
+          psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1"
+      - name: Stable goals, authorization, component and rollback runtime matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c progress_ux.isolated_db=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/progress_ux_v1_matrix.sql
+          test "$(psql -Atqc "select count(*) from private.exam_prep_weekly_goal_snapshots")" = '0'
+          test "$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")" = 'off|false|true'
+          echo 'Progress UX original runtime matrix: GREEN'
+      - name: Finalized sessions, corrections, replan, rollover and rollback lifecycle
+        shell: bash
+        env:
+          PGOPTIONS: '-c progress_ux.isolated_db=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/progress_ux_v1_lifecycle_matrix.sql
+          test "$(psql -Atqc "select count(*) from private.exam_prep_weekly_goal_snapshots")" = '0'
+          test "$(psql -Atqc "select count(*) from public.users where first_name='ProgressUXLifecycle'")" = '0'
+          test "$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")" = 'off|false|true'
+          echo 'Progress UX extended disposable lifecycle gate: GREEN'
+      - name: Same-skill different-assignment provenance and rollback
+        shell: bash
+        env:
+          PGOPTIONS: '-c progress_ux.isolated_db=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/progress_ux_v1_action_provenance_matrix.sql
+          test "$(psql -Atqc "select count(*) from private.exam_prep_weekly_goal_snapshots")" = '0'
+          test "$(psql -Atqc "select count(*) from public.users where first_name='ProgressUXProvenance'")" = '0'
+          test "$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")" = 'off|false|true'
+          echo 'Progress UX action provenance: GREEN'
+      - name: Real retest pass/fail projection and rollback
+        shell: bash
+        env:
+          PGOPTIONS: '-c progress_ux.isolated_db=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/progress_ux_v1_real_retest_matrix.sql
+          test "$(psql -Atqc "select count(*) from private.exam_prep_weekly_goal_snapshots")" = '0'
+          test "$(psql -Atqc "select count(*) from public.users where first_name='ProgressUXRealRetest'")" = '0'
+          test "$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")" = 'off|false|true'
+          echo 'Progress UX real retest lifecycle: GREEN'

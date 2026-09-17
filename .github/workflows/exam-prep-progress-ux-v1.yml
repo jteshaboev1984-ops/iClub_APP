@@ -1,0 +1,42 @@
+name: Exam Prep Progress UX v1
+
+on:
+  push:
+    branches:
+      - feature/exam-prep-progress-ux-v1
+    paths:
+      - 'exam-prep/exam-prep-progress-ux-model.js'
+      - 'scripts/progress-ux-model-regression.cjs'
+      - 'scripts/progress-ux-migration-safety.cjs'
+      - 'supabase/migrations/20260917080000_exam_prep_progress_ux_v1.sql'
+      - 'docs/exam-prep-progress-ux-v1-contract.md'
+      - '.github/workflows/exam-prep-progress-ux-v1.yml'
+  pull_request:
+    paths:
+      - 'exam-prep/exam-prep-progress-ux-model.js'
+      - 'scripts/progress-ux-model-regression.cjs'
+      - 'scripts/progress-ux-migration-safety.cjs'
+      - 'supabase/migrations/20260917080000_exam_prep_progress_ux_v1.sql'
+      - 'docs/exam-prep-progress-ux-v1-contract.md'
+      - '.github/workflows/exam-prep-progress-ux-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and presentation boundary
+        shell: bash
+        run: |
+          node --check exam-prep/exam-prep-progress-ux-model.js
+          node --check scripts/progress-ux-model-regression.cjs
+          node --check scripts/progress-ux-migration-safety.cjs
+          ! grep -Eq 'localStorage|sessionStorage|\.from\(|\.rpc\(|fetch\(' exam-prep/exam-prep-progress-ux-model.js
+          ! grep -Eq 'correct_answer|service_role|private\.exam_prep' exam-prep/exam-prep-progress-ux-model.js
+      - name: Frozen goals and P1/P5 separation
+        run: node scripts/progress-ux-model-regression.cjs
+      - name: Proposed additive migration static safety
+        run: node scripts/progress-ux-migration-safety.cjs
