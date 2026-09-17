@@ -12,6 +12,7 @@
   let deadlineTimer = null;
   let startedAt = 0;
   let lastSessionType = '';
+  let suspendedScreen = null;
 
   function permitted(root) {
     const caps = internal.lastCapabilities;
@@ -51,6 +52,7 @@
     clearTimeout(readyTimer);
     clearTimeout(deadlineTimer);
     readyTimer = null;
+    suspendedScreen = null;
     mode = kind;
     startedAt = Date.now();
     root.dataset.epPuxLoading = kind;
@@ -59,10 +61,17 @@
       root.setAttribute('aria-busy','true');
       root.dataset.epPuxBusy = '1';
     }
-    // A failed or missing optional RPC must not trap the learner behind a loader.
-    deadlineTimer = setTimeout(clear,12000);
+    // A failed or missing optional RPC must never trap the learner behind a loader.
+    deadlineTimer = setTimeout(() => {
+      suspendedScreen = rootEl()?.firstElementChild || null;
+      clear();
+    },12000);
   }
   function currentView(root) {
+    // The existing interaction layer retains a disabled copy of the previous screen
+    // while the server is loading. Never mistake that copy for a newly ready view.
+    if (root.querySelector('.ep-flow-pending-visual, [data-ep-transition-hold="1"]')) return 'loading';
+    if (root.querySelector('.ep-live-error')) return 'error';
     if (root.querySelector('.ep-live-grid')) return 'dashboard';
     const heading = Array.from(root.querySelectorAll('.ep-live-card .ep-live-head strong'))
       .some(el => /^(P1|P5)\s*·\s*(Недельный план|Haftalik reja|Weekly plan)$/.test(String(el.textContent || '').trim()));
@@ -72,7 +81,6 @@
     if (root.querySelector('[role="status"] .ep-flow-loader') ||
         Array.from(root.querySelectorAll('[role="status"]')).some(el =>
           /^(Загрузка|Loading|Yuklanmoqda)/.test(String(el.textContent || '').trim()))) return 'loading';
-    if (root.querySelector('.ep-live-error')) return 'error';
     return 'other';
   }
   function ready(root) {
@@ -112,6 +120,8 @@
     if (!permitted(root)) { if (mode) clear(); return; }
     const view = currentView(root);
     if (!mode) {
+      if (suspendedScreen && root.firstElementChild === suspendedScreen) return;
+      suspendedScreen = null;
       if (view === 'dashboard' && root.querySelectorAll('.ep-live-component-card').length === 2 &&
           root.querySelectorAll('.ep-pux-overview, .ep-pux-error').length < 2) arm('dashboard');
       else if (view === 'plan' && !root.querySelector('.ep-pux-week, .ep-pux-error')) arm('plan');
@@ -126,7 +136,7 @@
     }
     if (!ready(root)) { clearTimeout(readyTimer); readyTimer = null; return; }
     if (readyTimer) return;
-    // The existing course and progress decorators get one quiet frame to finish.
+    // Other existing UI decorators get one quiet frame to finish before reveal.
     const ticket = startedAt;
     readyTimer = setTimeout(() => {
       readyTimer = null;
@@ -134,27 +144,30 @@
     },100);
   }
   function onClick(event) {
-    if (!permitted(rootEl())) return;
+    const root = rootEl();
+    if (!permitted(root)) return;
     const button = event.target?.closest?.('button');
-    if (!button || !rootEl().contains(button) || button.disabled) return;
+    if (!button || !root.contains(button) || button.disabled) return;
     if (button.matches('[data-ep-live-plan], [data-ep-flow-next-plan]')) arm('plan');
     else if (button.matches('[data-ep-live-dashboard], [data-ep-live-home]')) arm('dashboard');
     else if (button.matches('[data-ep-live-start], [data-ep-live-plan-item], [data-ep-live-timed-start], [data-ep-live-submit]')) arm('question');
+  }
+  function onSession(event) {
+    lastSessionType = String(event.detail?.session?.session_type || '');
   }
   function attach() {
     const root = rootEl();
     if (!root) { setTimeout(attach,50); return; }
     if (observer) return;
     document.addEventListener('click',onClick,true);
-    window.addEventListener('iclub:exam-prep-session',event => {
-      lastSessionType = String(event.detail?.session?.session_type || '');
-    });
+    window.addEventListener('iclub:exam-prep-session',onSession);
     observer = new MutationObserver(examine);
     observer.observe(root,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['hidden','aria-hidden']});
     examine();
     internal.progressUxStability = Object.freeze({version:VERSION,stop:() => {
       observer?.disconnect(); observer = null;
       document.removeEventListener('click',onClick,true);
+      window.removeEventListener('iclub:exam-prep-session',onSession);
       clear();
     }});
   }
