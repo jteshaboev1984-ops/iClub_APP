@@ -110,6 +110,9 @@
       }
       if (view === 'dashboard') return !!root.querySelector('.ep-live-grid');
       if (view === 'plan') return !!root.querySelector('.ep-pux-week, .ep-pux-error');
+      // Materials, profile and other existing routes also use the generic loading
+      // notice. They must become visible as soon as their own screen is ready.
+      if (view === 'other') return true;
       return view === 'question' && !!root.querySelector('.ep-live-qtext') &&
         !!root.querySelector('.ep-live-options, .ep-live-textarea, .ep-live-input');
     }
