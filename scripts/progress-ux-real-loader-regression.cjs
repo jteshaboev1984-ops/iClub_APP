@@ -29,11 +29,11 @@ const fixture = {
         if (pathname === '/') return route.fulfill({status:200,contentType:'text/html',body:html});
         const name = path.basename(pathname);
         requests.push(name);
-        const progress = /^exam-prep-progress-ux-(?:model|api|ui|boot)\.js$/.test(name);
+        const progress = /^exam-prep-progress-ux-(?:model|api|ui|boot|stability)\.js$/.test(name);
         if (name === 'exam-prep-api.js' || progress) {
           return route.fulfill({status:200,contentType:'text/javascript',body:fs.readFileSync(path.resolve('exam-prep',name),'utf8')});
         }
-        if (name === 'exam-prep-progress-ux.css') {
+        if (/^exam-prep-progress-ux(?:-stability)?\.css$/.test(name)) {
           return route.fulfill({status:200,contentType:'text/css',body:fs.readFileSync(path.resolve('exam-prep',name),'utf8')});
         }
         if (/^exam-prep-[\w-]+\.js$/.test(name)) return route.fulfill({status:200,contentType:'text/javascript',body:'/* existing optional UI stub */'});
@@ -86,7 +86,8 @@ const fixture = {
     const on = await scenario(true);
     await on.page.waitForFunction(()=>window.iClubExamPrepHostInternal.progressUxBootstrapStatus==='ready');
     await on.page.waitForSelector('.ep-pux-overview');
-    for (const name of ['exam-prep-progress-ux-boot.js','exam-prep-progress-ux-model.js',
+    for (const name of ['exam-prep-progress-ux-boot.js','exam-prep-progress-ux-stability.js',
+      'exam-prep-progress-ux-stability.css','exam-prep-progress-ux-model.js',
       'exam-prep-progress-ux-api.js','exam-prep-progress-ux-ui.js','exam-prep-progress-ux.css']) {
       assert.equal(on.requests.filter(n=>n===name).length,1,`${name} must be requested once`);
     }
@@ -98,6 +99,6 @@ const fixture = {
     });
     await on.page.waitForFunction(()=>document.querySelectorAll('.ep-pux-panel').length===0);
     await on.page.close();
-    console.log('Progress UX real API loader: PASS (default OFF, controlled-beta release gate, explicit ON, original loader intact, revocation cleanup)');
+    console.log('Progress UX real API loader: PASS (default OFF, gated stability assets, original loader and revocation)');
   } finally { await browser.close(); }
 })().catch(e=>{console.error(e);process.exit(1);});
