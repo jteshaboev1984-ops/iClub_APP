@@ -2,7 +2,7 @@
 #exam-prep-host-root[data-ep-pux-loading] {
   position: relative;
   isolation: isolate;
-  min-height: 280px;
+  min-height: 100dvh;
 }
 #exam-prep-host-root[data-ep-pux-loading] > * {
   visibility: hidden !important;
@@ -10,10 +10,10 @@
 }
 #exam-prep-host-root[data-ep-pux-loading]::before {
   content: '';
-  position: absolute;
-  top: 86px;
+  position: fixed;
+  top: calc(50% - 34px);
   left: calc(50% - 18px);
-  z-index: 4;
+  z-index: 1000;
   width: 36px;
   height: 36px;
   box-sizing: border-box;
@@ -21,15 +21,16 @@
   border-top-color: var(--primary, #2457d6);
   border-radius: 50%;
   animation: ep-pux-stable-spin 900ms linear infinite;
+  pointer-events: none;
 }
 #exam-prep-host-root[data-ep-pux-loading]::after {
   content: attr(data-ep-pux-label);
-  position: absolute;
-  top: 143px;
-  left: 12px;
-  right: 12px;
-  z-index: 4;
-  max-width: 480px;
+  position: fixed;
+  top: calc(50% + 18px);
+  left: 16px;
+  right: 16px;
+  z-index: 1000;
+  max-width: 520px;
   margin-inline: auto;
   color: var(--text-secondary, #475569);
   font-size: 14px;
@@ -37,8 +38,16 @@
   line-height: 1.5;
   text-align: center;
   overflow-wrap: anywhere;
+  pointer-events: none;
 }
 @keyframes ep-pux-stable-spin { to { transform: rotate(360deg); } }
+@media (max-width: 480px) {
+  #exam-prep-host-root[data-ep-pux-loading]::after {
+    left: 20px;
+    right: 20px;
+    font-size: 14px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   #exam-prep-host-root[data-ep-pux-loading]::before { animation: none; }
 }

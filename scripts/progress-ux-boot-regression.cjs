@@ -78,7 +78,7 @@ const payload = {
     const lost=await makePage(true,true);
     const load=lost.page.addScriptTag({url:boot});
     await lost.page.waitForFunction(()=>window.iClubExamPrepHostInternal.progressUxBootstrapStatus==='loading');
-    await lost.page.waitForFunction(()=>window.iClubExamPrepHostInternal.progressUxStability?.version==='progress_ux_stability_v1');
+    await lost.page.waitForFunction(()=>window.iClubExamPrepHostInternal.progressUxStability?.version==='progress_ux_stability_v2');
     await lost.page.evaluate(()=>{window.iClubExamPrepProgressUxEnabled=false;});
     lost.release();
     await load;
