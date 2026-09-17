@@ -156,13 +156,14 @@ BEGIN
   RAISE EXCEPTION 'Resolved correction projection wrong: %',result; END IF;
 
  -- Urgent replan cannot erase the frozen first-week denominator or provenance.
+ -- QUA-03 is actually released in active week 1; DIF-01 is not.
  UPDATE private.exam_prep_weekly_plans SET status='superseded' WHERE id=plan_id;
  INSERT INTO private.exam_prep_weekly_plans
  (user_id,program_version_id,component_code,active_week_no,plan_version,status,policy_note)
  VALUES(u,prog,'P1',1,8,'active','Urgent replan') RETURNING id INTO plan_id;
  INSERT INTO private.exam_prep_weekly_plan_items
  (plan_id,priority_order,item_type,skill_code,action_code)
- VALUES(plan_id,1,'learning','P1-DIF-01','BUILD_FIRST_COVERAGE');
+ VALUES(plan_id,1,'learning','P1-QUA-03','BUILD_FIRST_COVERAGE');
  result:=public.get_exam_prep_weekly_progress_safe_v1('P1');
  IF jsonb_array_length(result->'goals')<>3 OR (result->>'completed_goals')::int<>1
     OR result->'goals'->0->>'goal_id'<>frozen_id
