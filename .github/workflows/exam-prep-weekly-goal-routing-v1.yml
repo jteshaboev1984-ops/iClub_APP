@@ -1,0 +1,31 @@
+name: Exam Prep weekly-goal routing safety
+on:
+  pull_request:
+    paths:
+      - 'exam-prep/exam-prep-weekly-goal-routing-v1.js'
+      - 'scripts/weekly-goal-routing-regression.cjs'
+      - '.github/workflows/exam-prep-weekly-goal-routing-v1.yml'
+  push:
+    branches:
+      - 'fix/exam-prep-weekly-goal-flow-safe'
+    paths:
+      - 'exam-prep/exam-prep-weekly-goal-routing-v1.js'
+      - 'scripts/weekly-goal-routing-regression.cjs'
+      - '.github/workflows/exam-prep-weekly-goal-routing-v1.yml'
+permissions:
+  contents: read
+jobs:
+  routing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Parse routing module and test
+        run: |
+          node --check exam-prep/exam-prep-weekly-goal-routing-v1.js
+          node --check scripts/weekly-goal-routing-regression.cjs
+      - name: Verify fail-closed route and exact goal-action binding
+        run: node scripts/weekly-goal-routing-regression.cjs
