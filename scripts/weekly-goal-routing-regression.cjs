@@ -26,7 +26,7 @@ bad({goal:Object.assign({},cir,{weekly_commitment_complete:true})},'goal_not_ope
 bad({eligibility:eligible(cir,plan.items[1],'content_exhausted')},'server_not_ready');
 bad({eligibility:Object.assign(eligible(cir,plan.items[1],'blocked'),{reason:'content_exhausted'})},'content_exhausted');
 const retest={...plan.items[1],item_type:'retest',due_at:'2026-09-20T00:00:00Z'};
-const waiting={...cir,status:'waiting_retest'};
+const waiting={...cir,status:'waiting_retest',weekly_commitment_complete:true};
 bad({plan:{...plan,items:[plan.items[0],retest]},goal:waiting,eligibility:eligible(waiting,retest),now:Date.parse('2026-09-19')},'retest_not_due');
 assert.deepEqual(resolve({component:'P1',progress:p,goal:waiting,plan:{...plan,items:[plan.items[0],retest]},
  eligibility:eligible(waiting,retest),now:Date.parse('2026-09-21')}),
