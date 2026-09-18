@@ -29,3 +29,15 @@ jobs:
           node --check scripts/weekly-goal-routing-regression.cjs
       - name: Verify fail-closed route and exact goal-action binding
         run: node scripts/weekly-goal-routing-regression.cjs
+      - name: Bundle exact branch sources for offline patch review
+        uses: actions/upload-artifact@v4
+        with:
+          name: exam-prep-safe-branch-sources
+          retention-days: 1
+          if-no-files-found: error
+          path: |
+            exam-prep/
+            scripts/progress-ux-*.cjs
+            scripts/weekly-goal-routing-regression.cjs
+            supabase/migrations/*exam_prep*.sql
+            .github/workflows/exam-prep-weekly-goal-routing-v1.yml
