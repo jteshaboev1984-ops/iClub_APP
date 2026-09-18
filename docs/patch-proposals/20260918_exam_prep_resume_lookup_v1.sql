@@ -38,7 +38,9 @@ begin
 
   -- Search ALL plan versions and weeks; the former plan may be superseded.
   -- Do not reveal diagnostic, timed, full-paper, other-user or other-program sessions.
-  select count(*)::integer, min(s.id)
+  -- PostgreSQL does not provide min(uuid): aggregate the text representation and cast
+  -- back ONLY to identify the unique row after checking count=1 below.
+  select count(*)::integer, min(s.id::text)::uuid
     into v_count, v_session_id
   from private.exam_prep_sessions s
   join private.exam_prep_session_authorizations a
