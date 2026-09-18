@@ -17,7 +17,7 @@
     if (!isPositiveOrder(goal.action_priority_order)) return fail('no_current_action');
     if (!TYPES.has(goal.item_type) || !nonempty(goal.skill_code)) return fail('not_actionable');
     if (goal.status === 'completed' || goal.status === 'paused' || goal.status === 'replaced' ||
-        goal.status === 'unavailable' || goal.weekly_commitment_complete === true) return fail('goal_not_open');
+        goal.status === 'unavailable') return fail('goal_not_open');
     const target = plan.items.filter(item => item.priority_order === goal.action_priority_order && item.status === 'pending');
     if (target.length !== 1) return fail('action_not_unique');
     const item = target[0];
@@ -28,8 +28,10 @@
     const twins = plan.items.filter(row => row.status === 'pending' && row.skill_code === goal.skill_code &&
       (row.item_type === goal.item_type || (goal.item_type === 'correction' && row.item_type === 'retest')));
     if (twins.length !== 1) return fail('ambiguous_binding');
-    if (goal.item_type === 'correction' && item.item_type === 'retest' && goal.status !== 'waiting_retest')
+    const delayedTransition = goal.item_type === 'correction' && item.item_type === 'retest' && goal.status === 'waiting_retest';
+    if (goal.item_type === 'correction' && item.item_type === 'retest' && !delayedTransition)
       return fail('retest_transition_unconfirmed');
+    if (goal.weekly_commitment_complete === true && !delayedTransition) return fail('goal_not_open');
     if (item.item_type === 'retest') {
       const due = Date.parse(item.due_at || '');
       if (!Number.isFinite(due) || !Number.isFinite(now) || due > now) return fail('retest_not_due');
