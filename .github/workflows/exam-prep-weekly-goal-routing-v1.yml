@@ -45,15 +45,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify archive integrity and safe extraction
+      - name: Diagnose archive and verify checksum before safe extraction
         shell: bash
         run: |
           set -euo pipefail
-          base64 --decode scripts/weekly_goal_flow_source.tar.xz.b64 > /tmp/weekly-flow-source.tar.xz
-          echo '27bdbb54be8041379089276cf5529e4e0418950c10c5c38bbfad7a4b806043a5  /tmp/weekly-flow-source.tar.xz' | sha256sum -c -
           python3 - <<'PY'
           from pathlib import Path
-          import tarfile
+          import base64, hashlib, tarfile
+          source = Path('scripts/weekly_goal_flow_source.tar.xz.b64').read_text()
+          encoded = ''.join(source.split())
+          bad = [(i, repr(c)) for i,c in enumerate(encoded) if c not in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=']
+          print(f'Archive input: {len(source)} chars; normalized: {len(encoded)}; invalid chars: {len(bad)}; mod4: {len(encoded)%4}')
+          if bad:
+              print('First invalid positions:', bad[:5])
+              raise SystemExit('Archive is not valid base64: regenerate from verified original; never guess bytes')
+          try:
+              decoded = base64.b64decode(encoded, validate=True)
+          except Exception as error:
+              raise SystemExit(f'Invalid base64 padding/length: {error}')
+          digest = hashlib.sha256(decoded).hexdigest()
+          expected = '27bdbb54be8041379089276cf5529e4e0418950c10c5c38bbfad7a4b806043a5'
+          print('Archive checksum matches:', digest == expected)
+          if digest != expected:
+              raise SystemExit('Archive checksum mismatch: do not apply unknown source')
+          Path('/tmp/weekly-flow-source.tar.xz').write_bytes(decoded)
           with tarfile.open('/tmp/weekly-flow-source.tar.xz', 'r:xz') as archive:
               for member in archive.getmembers():
                   path = Path(member.name)
