@@ -22,6 +22,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -31,29 +33,44 @@ jobs:
           node --check scripts/weekly-goal-routing-regression.cjs
       - name: Verify fail-closed route and exact goal-action binding
         run: node scripts/weekly-goal-routing-regression.cjs
-  apply-isolated-source:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/fix/exam-prep-weekly-goal-flow-safe'
+  review-isolated-source:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
-          persist-credentials: true
-      - name: Verify source checksum, prepare exact patch and commit ONLY on isolated branch
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify archive integrity and safe extraction
         shell: bash
         run: |
           set -euo pipefail
-          test "$GITHUB_REF" = 'refs/heads/fix/exam-prep-weekly-goal-flow-safe'
           base64 --decode scripts/weekly_goal_flow_source.tar.xz.b64 > /tmp/weekly-flow-source.tar.xz
           echo '27bdbb54be8041379089276cf5529e4e0418950c10c5c38bbfad7a4b806043a5  /tmp/weekly-flow-source.tar.xz' | sha256sum -c -
-          tar -xJf /tmp/weekly-flow-source.tar.xz
+          python3 - <<'PY'
+          from pathlib import Path
+          import tarfile
+          with tarfile.open('/tmp/weekly-flow-source.tar.xz', 'r:xz') as archive:
+              for member in archive.getmembers():
+                  path = Path(member.name)
+                  if path.is_absolute() or '..' in path.parts or not (member.isfile() or member.isdir()):
+                      raise SystemExit('Unsafe archived path/type: ' + member.name)
+              archive.extractall('.', filter='data')
+          PY
+      - name: Build complete proposed fix in disposable CI checkout only
+        shell: bash
+        run: |
+          set -euo pipefail
           python3 scripts/apply_weekly_flow_patch.py
           python3 - <<'PY'
           from pathlib import Path
           p=Path('supabase/migrations/20260918190000_exam_prep_weekly_goal_flow_safe_v1.sql')
-          s=p.read_text(); old='  return public.authorize_exam_prep_plan_item_safe_v1(p_plan_id,p_priority_order);'
+          s=p.read_text()
+          old='  return public.authorize_exam_prep_plan_item_safe_v1(p_plan_id,p_priority_order);'
           assert s.count(old)==1
           s=s.replace(old,"  return public.authorize_exam_prep_plan_item_safe_v1(p_plan_id,p_priority_order) || jsonb_build_object('component_code',p_component_code);")
           p.write_text(s)
@@ -65,9 +82,21 @@ jobs:
           node --check exam-prep/exam-prep-learner-flow-ux.js
           node scripts/weekly-goal-routing-regression.cjs
           git diff --check
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add exam-prep/exam-prep-live.js exam-prep/exam-prep-progress-ux-api.js exam-prep/exam-prep-progress-ux-ui.js exam-prep/exam-prep-progress-ux-boot.js exam-prep/exam-prep-learner-flow-ux.js exam-prep/exam-prep-progress-ux.css supabase/migrations/20260918190000_exam_prep_weekly_goal_flow_safe_v1.sql
-          if git diff --cached --quiet; then echo 'No patch needed'; exit 0; fi
-          git commit -m 'fix(exam-prep): stable weekly goals, safe authorization and resumable sessions'
-          git push origin HEAD:refs/heads/fix/exam-prep-weekly-goal-flow-safe
+          git diff --stat
+          git status --short
+          git diff > /tmp/weekly-goal-proposal.diff
+      - name: Save proposed files for explicit review; never push or deploy
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-goal-review-only
+          retention-days: 3
+          if-no-files-found: error
+          path: |
+            /tmp/weekly-goal-proposal.diff
+            exam-prep/exam-prep-live.js
+            exam-prep/exam-prep-progress-ux-api.js
+            exam-prep/exam-prep-progress-ux-ui.js
+            exam-prep/exam-prep-progress-ux-boot.js
+            exam-prep/exam-prep-learner-flow-ux.js
+            exam-prep/exam-prep-progress-ux.css
+            supabase/migrations/20260918190000_exam_prep_weekly_goal_flow_safe_v1.sql
