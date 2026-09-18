@@ -56,13 +56,13 @@ jobs:
           encoded = ''.join(source.split())
           bad = [(i, repr(c)) for i,c in enumerate(encoded) if c not in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=']
           print(f'Archive input: {len(source)} chars; normalized: {len(encoded)}; invalid chars: {len(bad)}; mod4: {len(encoded)%4}')
-          if bad:
-              print('First invalid positions:', bad[:5])
-              raise SystemExit('Archive is not valid base64: regenerate from verified original; never guess bytes')
+          if bad or len(encoded)%4 == 1:
+              raise SystemExit('Invalid archive characters/length: regenerate from verified original')
+          encoded += '=' * (-len(encoded) % 4)
           try:
               decoded = base64.b64decode(encoded, validate=True)
           except Exception as error:
-              raise SystemExit(f'Invalid base64 padding/length: {error}')
+              raise SystemExit(f'Invalid base64 even with canonical padding: {error}')
           digest = hashlib.sha256(decoded).hexdigest()
           expected = '27bdbb54be8041379089276cf5529e4e0418950c10c5c38bbfad7a4b806043a5'
           print('Archive checksum matches:', digest == expected)
