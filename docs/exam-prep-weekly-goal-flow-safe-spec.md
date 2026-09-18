@@ -1,0 +1,32 @@
+# Weekly goal → action → evidence: integrated safety contract
+
+Status: implementation gate, NOT a deployable correction. Owner accepted the goal-list-as-primary-entry and no-silent-repeat direction on 2026-09-18. Related: #112 (resume), #113 (stable plan and repeated content). Production baseline main `ac5dd94f4d9fcdc91dd55015341b14ae0290b4e5`. No migration is applied by this document.
+
+## Confirmed live facts (read-only, 2026-09-18)
+
+- P1 current plan v11: frozen goal order 1 P1-CIR-01 maps to current plan priority 2; goal 2 P1-COO-02 maps to priority 1; goal 3 P1-TRI-01 maps to priority 3. Never authorize by frozen goal ordinal.
+- P1-CIR-01 has nine finalized learning attempts of the same assessment (37), with 36 responses, all linked to evidence; the most recent attempts have 2/3 and 1/3 machine correct, each with a written artifact. Correction is still remediating, which is correct. Do not reset history or award completion.
+- Published learning inventory, ALL 81 canonical skills: P1 45/45 and P5 36/36 have exactly **one** published learning assessment with three objective questions per skill. Zero skills have an alternative published learning pack. Therefore a rule that blindly blocks repeats without a governed alternate route can strand the entire cohort; an isolated P1-CIR fix would miss the systemic cause.
+- `exam-prep-live.js::loadSession` regenerates plan v3 after finalized non-diagnostic/non-timed sessions. v3 delegates to v2 and supersedes the active plan. `authorize_exam_prep_plan_item_safe_v1` replays a consumed authorization for a pending slot even when its session is finalized. Changing only one of these operations is unsafe.
+- `exam-prep-progress-ux-ui.js::showPlan` draws an inert goal list above native actionable rows. Progress RPC has `action_priority_order`, but its goal JSON lacks correction_case_id. Exact identity is in private frozen snapshots and current plan items. Never equate the two ordinal positions, nor match only by skill when duplicates exist.
+
+## Product behavior to implement and test together
+
+1. A stable **weekly commitment** contains up to three goals. Each goal card is the single visible entry point; no duplicate task rows. Goal activity (attempt saved), weekly commitment completion, and syllabus mastery/coverage are distinct, server-derived indicators. Keep complete history across same-week replan and week rollover; no calendar-based mastery.
+2. An action button exists only for an authenticated current-plan binding: same user, program, component, week, exact goal/snapshot/correction identity, current plan_id, current pending priority, valid due time. The server remains the authority. On stale/disappearing binding refresh and explain; never guess a priority.
+3. If a session is ACTIVE, resume the identical session and first unanswered item, including after app restart and a superseding plan/week. Never create a replacement or discard partially saved answers. Consumed+FINALIZED authorization must never reopen the same session or create credit anew.
+4. On finalization, show objective count and correct count only when the existing feedback policy permits; show written artifact saved and explicitly NOT independently verified. Explain if correction did not meet 3/3 correct analogues + 1 written in the current attempt; hold the correction open. Successful remediation transitions to delayed fresh retest when due; the retest can alone close correction according to existing Core rules. No lowering of thresholds or inferred mentor verdict.
+5. Repeat policy: do not automatically relaunch exactly the same content as a novel assessment. With just one approved pack per skill, show the earlier outcome, approved teaching/reference route where actually available, and other current goals. A deliberate review of seen questions must be visibly labelled as review and must not masquerade as independent fresh evidence. New assessed analogue sets require authored original content, math and RU/UZ/EN QA and separate exposure roles; diagnostic, mixed and retest reserves remain untouched. If none exists, display an honest waiting/help path instead of inventing questions.
+6. No fresh learning/retention credit from repeated question IDs without a documented academic policy; do not silently modify the existing academic engine to achieve visual progress. Decide and test the non-credit review lane and legitimate fresh-content release before the new routing feature is enabled.
+7. Server RPC for all goal action states should be read-only, access-controlled, P1/P5-scoped, return opaque goal/action identity and reason (ready/resume/waiting/content-exhausted/stale), no answers or protected content. Client read-only resolver rejects cross-component, misordered/mismatched, duplicate, superseded, unavailable and early-retetest targets. Existing authorize/start/submit/finalize RPCs are not wrapped or replaced by optional UI.
+8. UI copy must be reviewed in RU, UZ Latin and EN; one primary action per actionable card, keyboard and touch accessible, symmetric mobile layout, statuses in text, no internal engine jargon.
+
+## Required release gates
+
+- Isolated PostgreSQL fixture: wrong→repeat, remediation pass→scheduled delayed retest→due→fresh pass/fail, 9 previous attempts, exhausted learning bank, credit replay/idempotency, replan/rollover with active session and exact resume, stale plan and concurrent calls. No production learner writes or destructive migrations.
+- Browser fixture: frozen goal1→current action2 and frozen goal2→action1; swapped plan during tap, duplicate goal skill, no action, pending/waiting/due, double tap, no duplicate rows, completion feedback and resume, RU/UZ/EN at phone and desktop widths. Test the real loaded Exam Prep UI, not an inert DOM mock alone.
+- P1 cannot affect P5. Existing Tours, Practice, ratings, certificates, 81 skills, source reserve and real learner evidence preserved. Migration and client branch reviewed independently. Flag defaults OFF. Run CI and controlled beta, inspect DB before/after counts. Separate owner approval for any production migration, PR merge and rollout; Vercel auto-deploy once after approved merge only.
+
+## Work state
+
+The current branch first adds a pure read-only routing resolver and synthetic tests. It is deliberately not imported or enabled: the server eligibility/resumption/repeat policy and native planner transitions must be implemented and validated before wiring the UI. Do not merge it as a completed product fix.
