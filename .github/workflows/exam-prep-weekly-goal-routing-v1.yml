@@ -7,6 +7,7 @@ on:
       - 'scripts/weekly-goal-routing-regression.cjs'
       - 'scripts/session-recovery-policy-regression.cjs'
       - 'docs/patch-proposals/20260918_exam_prep_resume_lookup_v1.sql'
+      - 'docs/patch-proposals/20260918_exam_prep_goal_eligibility_v1.sql'
       - '.github/workflows/exam-prep-weekly-goal-routing-v1.yml'
   push:
     branches:
@@ -17,11 +18,12 @@ on:
       - 'scripts/weekly-goal-routing-regression.cjs'
       - 'scripts/session-recovery-policy-regression.cjs'
       - 'docs/patch-proposals/20260918_exam_prep_resume_lookup_v1.sql'
+      - 'docs/patch-proposals/20260918_exam_prep_goal_eligibility_v1.sql'
       - '.github/workflows/exam-prep-weekly-goal-routing-v1.yml'
 permissions:
   contents: read
 jobs:
-  routing:
+  foundation:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -41,23 +43,28 @@ jobs:
         run: |
           node scripts/weekly-goal-routing-regression.cjs
           node scripts/session-recovery-policy-regression.cjs
-      - name: Ensure proposal remains separate from production migrations
+      - name: Ensure both SQL proposals are read-only and cannot auto-apply
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
-          p=Path('docs/patch-proposals/20260918_exam_prep_resume_lookup_v1.sql')
-          text=p.read_text()
-          assert text.startswith('-- REVIEW PROPOSAL ONLY.')
-          assert 'create or replace function public.get_exam_prep_active_plan_session_safe_v1(' in text
-          assert 'stable\nsecurity definer\nset search_path = ' in text
-          assert 'private.exam_prep_require_core_access_v1()' in text
-          assert 's.user_id = v_uid' in text and 's.component_code = p_component_code' in text
-          assert "s.status = 'active'" in text
-          assert 'resume_independent_of_current_plan' in text
-          assert 'from public;' in text and 'to authenticated;' in text
-          assert not Path('supabase/migrations/20260918194500_exam_prep_resume_lookup_v1.sql').exists()
-          sql=re.sub(r'(?m)^--.*$', '', text)
-          assert not re.search(r'\b(insert\s+into|update\s+private\.|delete\s+from|truncate\s+|drop\s+table)\b',sql,re.I)
-          print('PASS: proposal is read-only, scoped and not a production migration (not a PostgreSQL execution test)')
+          cases={
+            '20260918_exam_prep_resume_lookup_v1.sql': 'get_exam_prep_active_plan_session_safe_v1',
+            '20260918_exam_prep_goal_eligibility_v1.sql': 'get_exam_prep_goal_action_state_safe_v1',
+          }
+          for filename,fn in cases.items():
+              p=Path('docs/patch-proposals') / filename
+              text=p.read_text()
+              assert text.startswith('-- REVIEW PROPOSAL ONLY.'), filename
+              assert f'create or replace function public.{fn}(' in text, filename
+              assert 'stable\nsecurity definer\nset search_path = ' in text, filename
+              assert 'private.exam_prep_require_core_access_v1()' in text, filename
+              assert 's.user_id = v_uid' in text and 's.component_code = p_component_code' in text, filename
+              assert 'from public;' in text and 'to authenticated;' in text, filename
+              assert not any(Path('supabase/migrations').glob('*' + fn + '*.sql')), filename
+              sql=re.sub(r'(?m)^--.*$', '', text)
+              assert not re.search(r'\b(insert\s+into|update\s+private\.|delete\s+from|truncate\s+|drop\s+table)\b',sql,re.I), filename
+              print('PASS: staged read-only access contract:',fn)
+          assert not Path('scripts/weekly_goal_flow_source.tar.xz.b64').exists()
+          print('PASS: opaque corrupt archive absent; no SQL applied; static checks are NOT database tests')
           PY
