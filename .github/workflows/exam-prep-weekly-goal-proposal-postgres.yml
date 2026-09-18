@@ -102,19 +102,19 @@ jobs:
           do $test$
           declare
             fn text;
-            oid oid;
+            v_function_oid oid;
           begin
             foreach fn in array array[
               'public.get_exam_prep_active_plan_session_safe_v1(text)',
               'public.get_exam_prep_goal_action_state_safe_v1(text,uuid,uuid)'
             ] loop
-              oid := to_regprocedure(fn);
-              if oid is null then raise exception 'proposal RPC missing: %',fn; end if;
-              if not exists(select 1 from pg_proc where pg_proc.oid=oid and provolatile='s' and prosecdef) then
+              v_function_oid := to_regprocedure(fn);
+              if v_function_oid is null then raise exception 'proposal RPC missing: %',fn; end if;
+              if not exists(select 1 from pg_proc where pg_proc.oid=v_function_oid and provolatile='s' and prosecdef) then
                 raise exception 'proposal RPC not stable/security-definer: %',fn;
               end if;
-              if has_function_privilege('anon',oid,'EXECUTE') or
-                 not has_function_privilege('authenticated',oid,'EXECUTE') then
+              if has_function_privilege('anon',v_function_oid,'EXECUTE') or
+                 not has_function_privilege('authenticated',v_function_oid,'EXECUTE') then
                 raise exception 'proposal grants unsafe: %',fn;
               end if;
             end loop;
