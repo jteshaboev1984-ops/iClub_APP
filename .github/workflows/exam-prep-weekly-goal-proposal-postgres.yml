@@ -4,11 +4,13 @@ on:
     branches: [main]
     paths:
       - 'docs/patch-proposals/20260918_exam_prep_*.sql'
+      - 'supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql'
       - '.github/workflows/exam-prep-weekly-goal-proposal-postgres.yml'
   push:
     branches: ['fix/exam-prep-weekly-goal-flow-safe']
     paths:
       - 'docs/patch-proposals/20260918_exam_prep_*.sql'
+      - 'supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql'
       - '.github/workflows/exam-prep-weekly-goal-proposal-postgres.yml'
 permissions:
   contents: read
@@ -135,7 +137,15 @@ jobs:
           end
           $test$;
           SQL
-          echo 'PASS: proposal functions compiled in isolated PG17, owner-access guard denied unauthenticated requests, grants scoped. NOT an end-to-end test.'
+          echo 'PASS: proposal compiled in disposable PG17 and authenticated-only access checks passed; real-learner DB untouched.'
+      - name: Exercise synthetic owner/replan/rollover and rollback-only fixture
+        shell: bash
+        env:
+          PGOPTIONS: -c weekly_goal.isolated_db=true
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql >> /tmp/weekly-proposal.log 2>&1
+          echo 'PASS: synthetic ownership, first unanswered, replan, rollover, finalized replay, exposed content and rollback fixture'
       - name: Show isolated SQL failure details without real data
         if: failure()
         run: tail -100 /tmp/weekly-proposal.log
