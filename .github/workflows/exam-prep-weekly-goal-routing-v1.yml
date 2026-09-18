@@ -55,11 +55,12 @@ jobs:
           for filename,fn in cases.items():
               p=Path('docs/patch-proposals') / filename
               text=p.read_text()
+              compact=re.sub(r'\s+','',text)
               assert text.startswith('-- REVIEW PROPOSAL ONLY.'), filename
               assert f'create or replace function public.{fn}(' in text, filename
               assert 'stable\nsecurity definer\nset search_path = ' in text, filename
               assert 'private.exam_prep_require_core_access_v1()' in text, filename
-              assert 's.user_id = v_uid' in text and 's.component_code = p_component_code' in text, filename
+              assert 's.user_id=v_uid' in compact and 's.component_code=p_component_code' in compact, filename
               assert 'from public;' in text and 'to authenticated;' in text, filename
               assert not any(Path('supabase/migrations').glob('*' + fn + '*.sql')), filename
               sql=re.sub(r'(?m)^--.*$', '', text)
