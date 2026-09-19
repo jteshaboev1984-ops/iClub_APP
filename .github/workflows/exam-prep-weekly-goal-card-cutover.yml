@@ -1,9 +1,10 @@
-name: Exam Prep weekly goal-card cutover (read-only dry-run)
+name: Exam Prep weekly goal-card cutover (read-only browser preflight)
 on:
   pull_request:
     branches: [main]
     paths:
       - 'scripts/weekly-flow-goal-card-cutover.cjs'
+      - 'scripts/weekly-flow-goal-card-browser.cjs'
       - '.github/workflows/exam-prep-weekly-goal-card-cutover.yml'
       - 'exam-prep/exam-prep-progress-ux-ui.js'
       - 'exam-prep/exam-prep-progress-ux.css'
@@ -11,6 +12,7 @@ on:
     branches: ['fix/exam-prep-weekly-goal-flow-safe']
     paths:
       - 'scripts/weekly-flow-goal-card-cutover.cjs'
+      - 'scripts/weekly-flow-goal-card-browser.cjs'
       - '.github/workflows/exam-prep-weekly-goal-card-cutover.yml'
       - 'exam-prep/exam-prep-progress-ux-ui.js'
       - 'exam-prep/exam-prep-progress-ux.css'
@@ -19,7 +21,7 @@ permissions:
 jobs:
   isolated-ui:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -43,6 +45,15 @@ jobs:
             test -z "$(git diff --name-only)"
           fi
           node --check exam-prep/exam-prep-progress-ux-ui.js
+          node --check scripts/weekly-flow-goal-card-browser.cjs
           git diff --check
           node scripts/progress-ux-model-regression.cjs
-          echo 'GREEN: verified goal-to-action UI proposal, zero persistent writes.'
+      - name: Install Chromium for genuine RU UZ EN native-and-goal UI
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Six native-goal-card UI acceptance journeys on synthetic RPCs
+        run: |
+          set -euo pipefail
+          node scripts/weekly-flow-goal-card-browser.cjs
+          echo 'GREEN: original weekly-goal order and action binding, no duplicate native rows, no production DB.'
