@@ -188,3 +188,16 @@
   #exam-prep-host-root .ep-pux-value { text-align: start; }
   #exam-prep-host-root .ep-pux-metric { row-gap: 2px; }
 }
+
+/* Optional verified primary weekly goal. Native duplicate rows stay hidden only
+   after an exact server-to-card match; flag OFF renders exactly as before. */
+#exam-prep-host-root .ep-pux-goal-action {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+  margin-top: 4px;
+  white-space: normal;
+  text-align: center;
+}
+#exam-prep-host-root .ep-live-plan-item[hidden] { display: none !important; }
