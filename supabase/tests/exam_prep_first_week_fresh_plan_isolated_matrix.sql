@@ -141,6 +141,19 @@ BEGIN
   IF jsonb_array_length(v_plan->'items')<1 THEN
     RAISE EXCEPTION 'Fresh first plan has no actionable items; investigate content/runway';
   END IF;
+  IF EXISTS (
+    SELECT 1 FROM private.exam_prep_weekly_plan_items pi
+    JOIN private.exam_prep_assessments a ON a.assessment_type='diagnostic'
+      AND a.component_code='P1' AND a.status='published'
+    JOIN private.exam_prep_assessment_items ai ON ai.assessment_id=a.id
+      AND ai.primary_skill_code=pi.skill_code AND ai.question_id IS NOT NULL
+    JOIN private.exam_prep_question_content_meta m ON m.question_id=ai.question_id
+    WHERE pi.plan_id=v_old AND pi.item_type='learning'
+      AND m.reserve_role='learning'
+      AND m.exposure_state='withheld'
+  ) THEN
+    RAISE EXCEPTION 'Fresh plan exposed a withheld learning question';
+  END IF;
   v_second:=public.ensure_exam_prep_stable_weekly_plan_safe_v1('P1');
   IF v_second->>'status'<>'existing' OR (v_second->>'plan_id')::uuid<>v_old THEN
     RAISE EXCEPTION 'Repeated first-week open replaced the plan: %',v_second;
