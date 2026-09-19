@@ -1,10 +1,9 @@
 'use strict';
-// Review-only source patcher. It NEVER contacts Supabase or writes a GitHub branch.
+// Review-only source patcher. NEVER contacts Supabase or writes a GitHub branch.
 // --apply edits three files in a disposable checkout after exact Git blob SHA checks.
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 const assert = require('node:assert/strict');
-const guarded = 'window.iClubExamPrepWeeklyFlowEnabled === true';
 const files = [
   { path: 'exam-prep/exam-prep-api.js', sha: 'bb641ae821d7ac2ff0cc314b6d4340687a7434a5' },
   { path: 'exam-prep/exam-prep-recovery.js', sha: '42692818bbfa9eaf7c74b8a4505e50c7cd07c979' },
@@ -32,9 +31,9 @@ sources[recovery] = replaceOne(sources[recovery],
   '      await Promise.allSettled([internal.api.generateWeeklyPlan("P1"), internal.api.generateWeeklyPlan("P5")]);',
   '      // Store the recovery record but never silently overwrite a guarded weekly plan.\n      // The governed plan entry will create the next plan when there is no current plan.\n      if (window.iClubExamPrepWeeklyFlowEnabled !== true) {\n        await Promise.allSettled([internal.api.generateWeeklyPlan("P1"), internal.api.generateWeeklyPlan("P5")]);\n      }',
   'recovery old generator');
-// Make the guarded recovery UI truthful: recording a break is not replanning.
+// Make guarded recovery UI truthful: recording a break is not replanning.
 const locales = [
-  {id:'uz', after:'      done: "Reja moslashtirildi",', keys:'      recorded: "Tanaffus saqlandi", recordBreak: "Tanaffusni qayd etish", saveBreak: "Tanaffusni saqlash", recordNotice: "Tanaffus saqlandi. Shu haftadagi vazifalar va tugallanmagan mashg‘ulotlar almashtirilmadi. Yangilangan jadval keyingi haftalik reja yaratilganda hisobga olinadi.",'},
+  {id:'uz', after:'done: "Reja moslashtirildi",', keys:'      recorded: "Tanaffus saqlandi", recordBreak: "Tanaffusni qayd etish", saveBreak: "Tanaffusni saqlash", recordNotice: "Tanaffus saqlandi. Shu haftadagi vazifalar va tugallanmagan mashg‘ulotlar almashtirilmadi. Yangilangan jadval keyingi haftalik reja yaratilganda hisobga olinadi.",'},
   {id:'en', after:'      error: "The action could not be completed. Try again.", done: "Plan adjusted",', keys:'      recorded: "Study break saved", recordBreak: "Record study break", saveBreak: "Save study break", recordNotice: "Your study break is recorded. This week’s tasks and unfinished sessions were not replaced. The updated schedule will be considered when a new weekly plan is created.",'},
   {id:'ru', after:'      error: "Не удалось выполнить действие. Попробуйте ещё раз.", done: "План адаптирован",', keys:'      recorded: "Перерыв сохранён", recordBreak: "Указать перерыв", saveBreak: "Сохранить перерыв", recordNotice: "Перерыв учтён. Задания этой недели и незавершённые занятия не заменены. Обновлённый график будет учтён при создании нового недельного плана.",'}
 ];
