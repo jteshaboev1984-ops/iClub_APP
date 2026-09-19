@@ -1,0 +1,46 @@
+name: Exam Prep native weekly-flow cutover dry-run (no writes)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/weekly-flow-native-cutover.cjs'
+      - '.github/workflows/exam-prep-weekly-flow-native-cutover.yml'
+      - 'exam-prep/exam-prep-live.js'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'scripts/weekly-flow-native-cutover.cjs'
+      - '.github/workflows/exam-prep-weekly-flow-native-cutover.yml'
+      - 'exam-prep/exam-prep-live.js'
+permissions:
+  contents: read
+jobs:
+  isolated-patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm only audited source matches and patch compiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/weekly-flow-native-cutover.cjs
+          node scripts/weekly-flow-native-cutover.cjs
+          node scripts/weekly-flow-native-cutover.cjs --apply
+          node --check exam-prep/exam-prep-live.js
+          git diff --check
+          test "$(git diff --name-only)" = 'exam-prep/exam-prep-live.js'
+          git diff -- exam-prep/exam-prep-live.js
+      - name: Existing safety regressions against patched checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/weekly-flow-adapter-regression.cjs
+          node scripts/weekly-goal-routing-regression.cjs
+          node scripts/p2-08-progress-preservation-regression.cjs
+          echo 'DRY-RUN GREEN: only isolated checkout changed; no commit, no database or production writes.'
