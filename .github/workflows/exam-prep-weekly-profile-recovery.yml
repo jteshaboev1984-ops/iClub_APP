@@ -33,20 +33,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Review three exact source blobs before changing a disposable checkout
+      - name: Verify exactly reviewed branch sources without editing checkout
         run: |
           set -euo pipefail
+          test "$(git hash-object exam-prep/exam-prep-api.js)" = '6892ebcc6ed1effceb1be5387f42d030676f3632'
+          test "$(git hash-object exam-prep/exam-prep-recovery.js)" = '5ba398241b2e2055c72362c9fa660b9f0c8f34c5'
+          test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '6d34b51f214799e1d35e3b13464938f2c941a7ea'
           node --check scripts/weekly-flow-profile-recovery-cutover.cjs
-          node scripts/weekly-flow-profile-recovery-cutover.cjs
-          node scripts/weekly-flow-profile-recovery-cutover.cjs --apply
           node --check exam-prep/exam-prep-api.js
           node --check exam-prep/exam-prep-recovery.js
           node --check exam-prep/exam-prep-exam-map.js
-          git diff --check
-          test "$(git diff --name-only | wc -l)" -eq 3
-          git diff --name-only | grep -Fx 'exam-prep/exam-prep-api.js'
-          git diff --name-only | grep -Fx 'exam-prep/exam-prep-recovery.js'
-          git diff --name-only | grep -Fx 'exam-prep/exam-prep-exam-map.js'
+          git diff --exit-code
       - name: Test actual API behavior guarded versus legacy with synthetic RPCs
         run: |
           set -euo pipefail
@@ -62,4 +59,5 @@ jobs:
         run: |
           node --check scripts/weekly-flow-profile-recovery-browser.cjs
           node scripts/weekly-flow-profile-recovery-browser.cjs
-          echo 'GREEN: disposable checkout, blocked production network and no database/branch writes.'
+          git diff --exit-code
+          echo 'GREEN: read-only CI, blocked production network and no database/branch writes.'
