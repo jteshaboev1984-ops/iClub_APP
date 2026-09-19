@@ -4,13 +4,17 @@ on:
     branches: [main]
     paths:
       - 'docs/patch-proposals/20260918_exam_prep_*.sql'
+      - 'docs/patch-proposals/20260919_exam_prep_*.sql'
       - 'supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql'
+      - 'supabase/tests/exam_prep_stable_plan_once_isolated_matrix.sql'
       - '.github/workflows/exam-prep-weekly-goal-proposal-postgres.yml'
   push:
     branches: ['fix/exam-prep-weekly-goal-flow-safe']
     paths:
       - 'docs/patch-proposals/20260918_exam_prep_*.sql'
+      - 'docs/patch-proposals/20260919_exam_prep_*.sql'
       - 'supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql'
+      - 'supabase/tests/exam_prep_stable_plan_once_isolated_matrix.sql'
       - '.github/workflows/exam-prep-weekly-goal-proposal-postgres.yml'
 permissions:
   contents: read
@@ -100,6 +104,7 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f docs/patch-proposals/20260918_exam_prep_resume_lookup_v1.sql >> /tmp/weekly-proposal.log 2>&1
           psql -v ON_ERROR_STOP=1 -f docs/patch-proposals/20260918_exam_prep_goal_eligibility_v1.sql >> /tmp/weekly-proposal.log 2>&1
+          psql -v ON_ERROR_STOP=1 -f docs/patch-proposals/20260919_exam_prep_stable_plan_once_v1.sql >> /tmp/weekly-proposal.log 2>&1
           psql -v ON_ERROR_STOP=1 <<'SQL'
           do $test$
           declare
@@ -120,6 +125,21 @@ jobs:
                 raise exception 'proposal grants unsafe: %',fn;
               end if;
             end loop;
+            foreach fn in array array[
+              'public.ensure_exam_prep_stable_weekly_plan_safe_v1(text)',
+              'public.authorize_exam_prep_goal_once_safe_v1(text,uuid,uuid)',
+              'public.start_exam_prep_plan_session_once_safe_v1(uuid,text)'
+            ] loop
+              v_function_oid:=to_regprocedure(fn);
+              if v_function_oid is null then raise exception 'stable contract missing: %',fn; end if;
+              if not exists(select 1 from pg_proc where pg_proc.oid=v_function_oid and provolatile='v' and prosecdef) then
+                raise exception 'stable contract is not volatile/security-definer: %',fn;
+              end if;
+              if has_function_privilege('anon',v_function_oid,'EXECUTE') or
+                 not has_function_privilege('authenticated',v_function_oid,'EXECUTE') then
+                raise exception 'stable contract grants unsafe: %',fn;
+              end if;
+            end loop;
           end
           $test$;
           do $test$
@@ -134,10 +154,25 @@ jobs:
               raise exception 'missing auth was incorrectly accepted';
             exception when sqlstate '28000' then null;
             end;
+            begin
+              perform public.ensure_exam_prep_stable_weekly_plan_safe_v1('P1');
+              raise exception 'missing auth was incorrectly accepted';
+            exception when sqlstate '28000' then null;
+            end;
+            begin
+              perform public.authorize_exam_prep_goal_once_safe_v1('P1',null,null);
+              raise exception 'missing auth was incorrectly accepted';
+            exception when sqlstate '28000' then null;
+            end;
+            begin
+              perform public.start_exam_prep_plan_session_once_safe_v1(null,'missing-auth-check');
+              raise exception 'missing auth was incorrectly accepted';
+            exception when sqlstate '28000' then null;
+            end;
           end
           $test$;
           SQL
-          echo 'PASS: proposal compiled in disposable PG17 and authenticated-only access checks passed; real-learner DB untouched.'
+          echo 'PASS: proposals compiled in disposable PG17 and grants/unauthenticated denial passed; production untouched.'
       - name: Exercise synthetic owner/replan/rollover and rollback-only fixture
         shell: bash
         env:
@@ -146,6 +181,14 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql >> /tmp/weekly-proposal.log 2>&1
           echo 'PASS: synthetic ownership, first unanswered, replan, rollover, finalized replay, exposed content and rollback fixture'
+      - name: Exercise stable-plan and one-time session fixture with rollback
+        shell: bash
+        env:
+          PGOPTIONS: -c weekly_goal.isolated_db=true
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_stable_plan_once_isolated_matrix.sql >> /tmp/weekly-proposal.log 2>&1
+          echo 'PASS: stable plan + one-time session draft contract in disposable PostgreSQL; not a browser test'
       - name: Show isolated SQL failure details without real data
         if: failure()
         run: tail -100 /tmp/weekly-proposal.log
