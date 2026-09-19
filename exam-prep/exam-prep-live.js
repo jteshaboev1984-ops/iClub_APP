@@ -214,6 +214,31 @@
 
   async function openPlan(component) {
     clearTimer(); renderLoading();
+    // The new weekly flow is an explicit OFF-by-default cutover. Never fall back to
+    // a plan-changing legacy RPC if its audited server contract is unavailable.
+    if (window.iClubExamPrepWeeklyFlowEnabled === true) {
+      const flow = internal.weeklyFlowApi;
+      if (!flow || flow.version !== 'weekly_flow_adapter_v1' || flow.allowed(component)) {
+        renderError(); return;
+      }
+      const ensured = await flow.plan(component);
+      if (!ensured?.ok) { renderError(); return; }
+      if (ensured.data?.status === 'resume_first') {
+        const recovery = ensured.data.recovery;
+        if (!['resume','ready_to_finalize'].includes(recovery?.status) || !recovery?.session_id) {
+          renderError(); return;
+        }
+        state.returnView = { kind: 'plan', component };
+        await loadSession(recovery.session_id);
+        return;
+      }
+      const read = await internal.api.weeklyPlan(component);
+      if (!read?.ok || !read.data?.plan_id || read.data.plan_id !== ensured.data?.plan_id) {
+        renderError(); return;
+      }
+      renderPlan(component, read.data);
+      return;
+    }
     let planResult = await internal.api.weeklyPlan(component);
     if (!planResult?.ok) { renderError(); return; }
     let plan = planResult.data;
@@ -244,6 +269,43 @@
 
   async function launchPlanItem(component, planId, priorityOrder) {
     if (state.busy) return; state.busy = true; renderLoading();
+    if (window.iClubExamPrepWeeklyFlowEnabled === true) {
+      const flow = internal.weeklyFlowApi;
+      const progress = typeof internal.progressUxApi?.progress === 'function'
+        ? await internal.progressUxApi.progress(component) : null;
+      const matching = Array.isArray(progress?.data?.goals) ? progress.data.goals.filter(goal =>
+        goal.component_code === component && goal.action_priority_order === priorityOrder) : [];
+      if (!flow || flow.allowed(component) || !progress?.ok || matching.length !== 1) {
+        state.busy = false; renderError(); return;
+      }
+      const selected = matching[0];
+      const authorization = await flow.authorize(component, selected.goal_id, planId);
+      if (!authorization?.ok) { state.busy = false; renderError(); return; }
+      if (authorization.data?.status === 'resume_existing_session_first' || authorization.data?.status === 'resume') {
+        const sessionId = authorization.data?.recovery?.session_id || authorization.data?.session_id;
+        state.busy = false;
+        if (!sessionId) { renderError(); return; }
+        state.returnView = { kind: 'plan', component }; await loadSession(sessionId); return;
+      }
+      if (authorization.data?.status !== 'authorized' || !authorization.data?.authorization_id) {
+        state.busy = false;
+        const seen = authorization.data?.status === 'content_exhausted';
+        renderError(seen ? ({ ru:'Этот набор уже выполнен. Для новой проверки нужны другие задания. Предыдущие ответы сохранены.',
+          uz:'Bu savollar avval bajarilgan. Yangi tekshiruv uchun boshqa topshiriqlar kerak. Oldingi javoblar saqlangan.',
+          en:'You have already completed these questions. A new check needs different questions. Your earlier answers are saved.' })[state.language] : null);
+        return;
+      }
+      const started = await flow.start(component, authorization.data.authorization_id, key('ep-plan-session'));
+      state.busy = false;
+      const sessionId = started?.ok ? started.data?.session_id :
+        (started?.reason === 'start_outcome_unknown' ? started.recovery?.session_id : null);
+      if (!sessionId || (started?.ok && !['started','resume','resume_existing_session_first'].includes(started.data?.status))) {
+        renderError(); return;
+      }
+      state.returnView = { kind: 'plan', component };
+      await loadSession(sessionId);
+      return;
+    }
     const auth = await internal.api.authorizePlanItem(planId, priorityOrder);
     if (!auth?.ok || !auth.data?.authorization_id) { state.busy = false; renderError(); return; }
     const started = await internal.api.startSession(auth.data.authorization_id, key("ep-plan-session")); state.busy = false;
@@ -309,7 +371,17 @@
       const finishedType = state.session.session_type, component = state.session.component_code;
       state.session = null;
       if (finishedType === "diagnostic") { state.notice = copy().finish; await renderDashboard(); }
-      else { await internal.api.generateWeeklyPlan(component, "normal"); state.notice = copy().completedTask; await openPlan(component); }
+      else {
+        if (window.iClubExamPrepWeeklyFlowEnabled !== true) {
+          await internal.api.generateWeeklyPlan(component, "normal");
+          state.notice = copy().completedTask;
+        } else {
+          state.notice = ({ ru:'Занятие сохранено. Недельный план не изменён.',
+            uz:'Mashg‘ulot saqlandi. Haftalik reja o‘zgarmadi.',
+            en:'Session saved. Your weekly plan has not changed.' })[state.language];
+        }
+        await openPlan(component);
+      }
       return;
     }
     if (!next) { state.session = null; if (state.returnView?.kind === "plan") await openPlan(state.returnView.component); else if (state.returnView?.kind === "timed") await openTimed(state.returnView.component); else await renderDashboard(); return; }
