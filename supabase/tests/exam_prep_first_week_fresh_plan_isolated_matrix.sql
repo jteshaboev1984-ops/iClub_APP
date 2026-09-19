@@ -62,9 +62,10 @@ BEGIN
   END IF;
   RAISE NOTICE 'PASS first plan: Stage 0 incomplete is denied without phantom plan';
 
-  -- Build an explicitly synthetic 24-question/8-area diagnostic evidence set
-  -- from ALREADY published diagnostic-reserved questions, with no question
-  -- metadata updates, no reclassification, no legacy or real learner writes.
+  -- Build explicitly synthetic 24-question/8-area diagnostic evidence from
+  -- published diagnostic ASSESSMENTS whose diagnostic questions correctly have
+  -- reserve lifecycle and withheld exposure (they must NOT be published as
+  -- learning content). No question or metadata updates, no reclassification.
   CREATE TEMP TABLE ep_first_diag ON COMMIT DROP AS
   WITH candidates AS (
     SELECT DISTINCT ON (ai.question_id)
@@ -79,7 +80,7 @@ BEGIN
     WHERE a.status='published' AND a.assessment_type='diagnostic'
       AND a.component_code='P1' AND ai.question_id IS NOT NULL
       AND ai.reserve_role='diagnostic' AND m.reserve_role='diagnostic'
-      AND m.lifecycle_state='published'
+      AND m.lifecycle_state='reserve' AND m.exposure_state='withheld'
     ORDER BY ai.question_id,a.id
   ), ranked AS (
     SELECT *,row_number() OVER (PARTITION BY official_syllabus_section
@@ -90,7 +91,7 @@ BEGIN
   FROM ranked ORDER BY area_rank,official_syllabus_section,question_id LIMIT 24;
   SELECT count(*),count(DISTINCT official_syllabus_section) INTO v_count,v_areas FROM ep_first_diag;
   IF v_count<>24 OR v_areas<8 THEN
-    RAISE EXCEPTION 'Published P1 diagnostic cannot populate 24/8 synthetic Stage 0: questions=%, areas=%',v_count,v_areas;
+    RAISE EXCEPTION 'Reserved P1 diagnostic cannot populate 24/8 synthetic Stage 0: questions=%, areas=%',v_count,v_areas;
   END IF;
   SELECT id,content_version_id,assessment_version INTO STRICT v_assessment,v_cv,v_version
   FROM private.exam_prep_assessments
