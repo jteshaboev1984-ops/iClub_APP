@@ -1,4 +1,4 @@
-name: Exam Prep weekly goal-card cutover (guarded branch-only)
+name: Exam Prep weekly goal-card cutover (read-only browser safety)
 on:
   pull_request:
     branches: [main]
@@ -29,24 +29,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify immutable baseline and exact two-file UI proposal
+      - name: Verify audited goal UI is installed only in this branch
         run: |
           set -euo pipefail
           node --check scripts/weekly-flow-goal-card-cutover.cjs
-          if [[ "$(git hash-object exam-prep/exam-prep-progress-ux-ui.js)" == '01aa708cb06fbe8e398c2a525ae72c0feedec5b5' ]]; then
-            node scripts/weekly-flow-goal-card-cutover.cjs
-            node scripts/weekly-flow-goal-card-cutover.cjs --apply
-            expected=$(printf 'exam-prep/exam-prep-progress-ux-ui.js\nexam-prep/exam-prep-progress-ux.css\n' | sort)
-            actual=$(git diff --name-only | sort)
-            test "$actual" = "$expected"
-          else
-            grep -Fq "async function promoteGoalActions" exam-prep/exam-prep-progress-ux-ui.js
-            grep -Fq "ep-pux-goal-action" exam-prep/exam-prep-progress-ux.css
-            test -z "$(git diff --name-only)"
-          fi
           node --check exam-prep/exam-prep-progress-ux-ui.js
           node --check scripts/weekly-flow-goal-card-browser.cjs
-          git diff --check
+          grep -Fq 'async function promoteGoalActions' exam-prep/exam-prep-progress-ux-ui.js
+          grep -Fq 'await showPlan(target,data,component)' exam-prep/exam-prep-progress-ux-ui.js
+          grep -Fq 'ep-pux-goal-action' exam-prep/exam-prep-progress-ux.css
+          test -z "$(git diff --name-only)"
           node scripts/progress-ux-model-regression.cjs
       - name: Install Chromium for genuine RU UZ EN native-and-goal UI
         run: |
@@ -56,44 +48,4 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/weekly-flow-goal-card-browser.cjs
-          echo 'GREEN: correct goal ordering, no duplicate native rows, no production DB.'
-  promote-reviewed-goals:
-    # One exact, previously browser-tested patch; only the draft branch, never
-    # a pull-request event/main/production. Remove this job after one commit.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/fix/exam-prep-weekly-goal-flow-safe' && github.actor == 'jteshaboev1984-ops'
-    needs: isolated-ui
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: fix/exam-prep-weekly-goal-flow-safe
-          persist-credentials: true
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Promote only reviewed UI and CSS from exact owner feature-branch SHA
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git branch --show-current)" = 'fix/exam-prep-weekly-goal-flow-safe'
-          if [[ "$(git hash-object exam-prep/exam-prep-progress-ux-ui.js)" != '01aa708cb06fbe8e398c2a525ae72c0feedec5b5' ]]; then
-            grep -Fq 'async function promoteGoalActions' exam-prep/exam-prep-progress-ux-ui.js
-            echo 'Already promoted; no duplicate commit.'
-            exit 0
-          fi
-          node scripts/weekly-flow-goal-card-cutover.cjs --apply
-          node --check exam-prep/exam-prep-progress-ux-ui.js
-          node scripts/progress-ux-model-regression.cjs
-          git diff --check
-          expected=$(printf 'exam-prep/exam-prep-progress-ux-ui.js\nexam-prep/exam-prep-progress-ux.css\n' | sort)
-          actual=$(git diff --name-only | sort)
-          test "$actual" = "$expected"
-          git add -- exam-prep/exam-prep-progress-ux-ui.js exam-prep/exam-prep-progress-ux.css
-          test "$(git diff --cached --name-only | sort)" = "$expected"
-          git config user.name 'iClub branch-only safety integration'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git commit -m 'feat(exam-prep): make verified weekly goals actionable without duplicate task rows behind OFF flag'
-          git push origin HEAD:refs/heads/fix/exam-prep-weekly-goal-flow-safe
+          echo 'GREEN: verified goal ordering and actions; production database untouched.'
