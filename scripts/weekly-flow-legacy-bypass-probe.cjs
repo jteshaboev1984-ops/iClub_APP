@@ -1,7 +1,7 @@
 'use strict';
-// EXPECTED-FAILURE SAFETY PROBE. Proves the old callable RPCs are NOT safe yet.
-// Requires the committed synthetic fixture produced by weekly-flow-two-connection.cjs.
-// Do not mistake GREEN here for remediation of the exposed legacy endpoint.
+// EXPECTED-FAILURE SAFETY PROBE followed by an isolated candidate fix test.
+// Requires committed SYNTHETIC fixture from weekly-flow-two-connection.cjs.
+// Candidate SQL runs only in the disposable service; NEVER on production.
 const assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process');
 const env = process.env;
@@ -60,6 +60,17 @@ SELECT 'COUNTS=' ||
  (SELECT count(*) FROM private.exam_prep_sessions WHERE user_id=f.user_id)::text
 FROM weekly_goal_ci.fixture f;`), 'COUNTS');
 assert.equal(after,before,'Bypass observation unexpectedly changed the synthetic fixture');
-console.log('BLOCKER CONFIRMED: legacy starter returns a finalized session ID; guarded starter refuses it.');
-console.log('BLOCKER CONFIRMED: legacy v3 calls v2, which can supersede an active plan.');
-console.log('PROBE GREEN means the vulnerability is reproduced, NOT fixed. Only isolated synthetic rows; no production connection.');
+console.log('BLOCKER REPRODUCED: old session start returns a finalized ID; the old generator can supersede plans.');
+console.log('Applying the review-only atomic compatibility candidate to DISPOSABLE PG17 only.');
+const candidate = spawnSync('psql', ['-X','-v','ON_ERROR_STOP=1','-f',
+  'docs/patch-proposals/20260919_exam_prep_atomic_legacy_rpc_dispatch_v1.sql'], {
+  env,encoding:'utf8',timeout:30000
+});
+assert.equal(candidate.status,0,`Atomic candidate rejected by disposable SQL: ${(candidate.stderr||'').slice(-2500)} ${(candidate.stdout||'').slice(-700)}`);
+console.log('Candidate transaction compiled and committed in disposable PG17; zero enrollments.');
+const smoke = spawnSync(process.execPath,['scripts/weekly-flow-atomic-dispatch-smoke.cjs'],{
+  env,encoding:'utf8',timeout:90000
+});
+if(smoke.stdout) process.stdout.write(smoke.stdout);
+assert.equal(smoke.status,0,`Candidate smoke failed: ${(smoke.stderr||'').slice(-2500)}`);
+console.log('CANDIDATE ISOLATED GREEN only. Live legacy bypass is STILL a deployment blocker.');
