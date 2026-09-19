@@ -1,0 +1,55 @@
+name: Exam Prep profile recovery plan preservation (isolated)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/weekly-flow-profile-recovery-cutover.cjs'
+      - 'scripts/weekly-flow-profile-recovery-regression.cjs'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-recovery.js'
+      - 'exam-prep/exam-prep-exam-map.js'
+      - '.github/workflows/exam-prep-weekly-profile-recovery.yml'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'scripts/weekly-flow-profile-recovery-cutover.cjs'
+      - 'scripts/weekly-flow-profile-recovery-regression.cjs'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-recovery.js'
+      - 'exam-prep/exam-prep-exam-map.js'
+      - '.github/workflows/exam-prep-weekly-profile-recovery.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-entrypoints:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Review three exact source blobs before changing a disposable checkout
+        run: |
+          set -euo pipefail
+          node --check scripts/weekly-flow-profile-recovery-cutover.cjs
+          node scripts/weekly-flow-profile-recovery-cutover.cjs
+          node scripts/weekly-flow-profile-recovery-cutover.cjs --apply
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-recovery.js
+          node --check exam-prep/exam-prep-exam-map.js
+          git diff --check
+          test "$(git diff --name-only | wc -l)" -eq 3
+          git diff --name-only | grep -Fx 'exam-prep/exam-prep-api.js'
+          git diff --name-only | grep -Fx 'exam-prep/exam-prep-recovery.js'
+          git diff --name-only | grep -Fx 'exam-prep/exam-prep-exam-map.js'
+      - name: Test actual API behavior guarded versus legacy with synthetic RPCs
+        run: |
+          set -euo pipefail
+          node --check scripts/weekly-flow-profile-recovery-regression.cjs
+          node scripts/weekly-flow-profile-recovery-regression.cjs
+          node scripts/p2-07-recovery-regression.cjs
+          node scripts/weekly-flow-adapter-regression.cjs
+          echo 'GREEN: no branch write, no production network/database calls.'
