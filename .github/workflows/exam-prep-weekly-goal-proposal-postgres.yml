@@ -1,0 +1,228 @@
+name: Exam Prep weekly goal proposal isolated PostgreSQL
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/patch-proposals/20260918_exam_prep_*.sql'
+      - 'docs/patch-proposals/20260919_exam_prep_*.sql'
+      - 'supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql'
+      - 'supabase/tests/exam_prep_stable_plan_once_isolated_matrix.sql'
+      - 'supabase/tests/exam_prep_weekly_flow_concurrent_seed.sql'
+      - 'supabase/tests/exam_prep_first_week_fresh_plan_isolated_matrix.sql'
+      - 'scripts/weekly-flow-two-connection.cjs'
+      - 'scripts/weekly-flow-legacy-bypass-probe.cjs'
+      - '.github/workflows/exam-prep-weekly-goal-proposal-postgres.yml'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'docs/patch-proposals/20260918_exam_prep_*.sql'
+      - 'docs/patch-proposals/20260919_exam_prep_*.sql'
+      - 'supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql'
+      - 'supabase/tests/exam_prep_stable_plan_once_isolated_matrix.sql'
+      - 'supabase/tests/exam_prep_weekly_flow_concurrent_seed.sql'
+      - 'supabase/tests/exam_prep_first_week_fresh_plan_isolated_matrix.sql'
+      - 'scripts/weekly-flow-two-connection.cjs'
+      - 'scripts/weekly-flow-legacy-bypass-probe.cjs'
+      - '.github/workflows/exam-prep-weekly-goal-proposal-postgres.yml'
+permissions:
+  contents: read
+jobs:
+  proposal-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Bootstrap synthetic-only database
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql > /tmp/weekly-proposal.log 2>&1
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql >> /tmp/weekly-proposal.log 2>&1
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql >> /tmp/weekly-proposal.log 2>&1
+      - name: Replay production-shaped Exam Prep migration order in isolated DB
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
+          test "${#files[@]}" -ge 1
+          apply_one() {
+            local f="$1" b
+            b="$(basename "$f")"
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >> /tmp/weekly-proposal.log 2>&1
+            fi
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >> /tmp/weekly-proposal.log 2>&1
+            fi
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('p236-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated proposal dependency') on conflict(cohort_key) do nothing" >> /tmp/weekly-proposal.log 2>&1
+            fi
+            echo "Applying $(basename "$f")" >> /tmp/weekly-proposal.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >> /tmp/weekly-proposal.log 2>&1
+          }
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|\
+              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|\
+              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|\
+              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|\
+              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|\
+              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  for rb in "${recent[@]}"; do apply_one "supabase/migrations/$rb"; done
+                fi
+                continue;;
+            esac
+            apply_one "$f"
+          done
+          psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >> /tmp/weekly-proposal.log 2>&1
+      - name: Compile proposals and verify privilege and unauthenticated denial
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f docs/patch-proposals/20260918_exam_prep_resume_lookup_v1.sql >> /tmp/weekly-proposal.log 2>&1
+          psql -v ON_ERROR_STOP=1 -f docs/patch-proposals/20260918_exam_prep_goal_eligibility_v1.sql >> /tmp/weekly-proposal.log 2>&1
+          psql -v ON_ERROR_STOP=1 -f docs/patch-proposals/20260919_exam_prep_stable_plan_once_v1.sql >> /tmp/weekly-proposal.log 2>&1
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          do $test$
+          declare
+            fn text;
+            v_function_oid oid;
+          begin
+            foreach fn in array array[
+              'public.get_exam_prep_active_plan_session_safe_v1(text)',
+              'public.get_exam_prep_goal_action_state_safe_v1(text,uuid,uuid)'
+            ] loop
+              v_function_oid := to_regprocedure(fn);
+              if v_function_oid is null then raise exception 'proposal RPC missing: %',fn; end if;
+              if not exists(select 1 from pg_proc where pg_proc.oid=v_function_oid and provolatile='s' and prosecdef) then
+                raise exception 'proposal RPC not stable/security-definer: %',fn;
+              end if;
+              if has_function_privilege('anon',v_function_oid,'EXECUTE') or
+                 not has_function_privilege('authenticated',v_function_oid,'EXECUTE') then
+                raise exception 'proposal grants unsafe: %',fn;
+              end if;
+            end loop;
+            foreach fn in array array[
+              'public.ensure_exam_prep_stable_weekly_plan_safe_v1(text)',
+              'public.authorize_exam_prep_goal_once_safe_v1(text,uuid,uuid)',
+              'public.start_exam_prep_plan_session_once_safe_v1(uuid,text)'
+            ] loop
+              v_function_oid:=to_regprocedure(fn);
+              if v_function_oid is null then raise exception 'stable contract missing: %',fn; end if;
+              if not exists(select 1 from pg_proc where pg_proc.oid=v_function_oid and provolatile='v' and prosecdef) then
+                raise exception 'stable contract is not volatile/security-definer: %',fn;
+              end if;
+              if has_function_privilege('anon',v_function_oid,'EXECUTE') or
+                 not has_function_privilege('authenticated',v_function_oid,'EXECUTE') then
+                raise exception 'stable contract grants unsafe: %',fn;
+              end if;
+            end loop;
+          end
+          $test$;
+          do $test$
+          begin
+            begin
+              perform public.get_exam_prep_active_plan_session_safe_v1('P1');
+              raise exception 'missing auth was incorrectly accepted';
+            exception when sqlstate '28000' then null;
+            end;
+            begin
+              perform public.get_exam_prep_goal_action_state_safe_v1('P5',null,null);
+              raise exception 'missing auth was incorrectly accepted';
+            exception when sqlstate '28000' then null;
+            end;
+            begin
+              perform public.ensure_exam_prep_stable_weekly_plan_safe_v1('P1');
+              raise exception 'missing auth was incorrectly accepted';
+            exception when sqlstate '28000' then null;
+            end;
+            begin
+              perform public.authorize_exam_prep_goal_once_safe_v1('P1',null,null);
+              raise exception 'missing auth was incorrectly accepted';
+            exception when sqlstate '28000' then null;
+            end;
+            begin
+              perform public.start_exam_prep_plan_session_once_safe_v1(null,'missing-auth-check');
+              raise exception 'missing auth was incorrectly accepted';
+            exception when sqlstate '28000' then null;
+            end;
+          end
+          $test$;
+          SQL
+          echo 'PASS: proposals compiled in disposable PG17 and grants/unauthenticated denial passed; production untouched.'
+      - name: Exercise synthetic owner/replan/rollover and rollback-only fixture
+        shell: bash
+        env:
+          PGOPTIONS: -c weekly_goal.isolated_db=true
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql >> /tmp/weekly-proposal.log 2>&1
+          echo 'PASS: synthetic ownership, first unanswered, replan, rollover, finalized replay, exposed content and rollback fixture'
+      - name: Exercise stable-plan and one-time session fixture with rollback
+        shell: bash
+        env:
+          PGOPTIONS: -c weekly_goal.isolated_db=true
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_stable_plan_once_isolated_matrix.sql >> /tmp/weekly-proposal.log 2>&1
+          echo 'PASS: stable plan + one-time session draft contract in disposable PostgreSQL; not a browser test'
+      - name: Two distinct PostgreSQL connections compete on plan, authorize and start
+        shell: bash
+        env:
+          PGOPTIONS: -c weekly_goal.isolated_db=true
+        run: |
+          set -euo pipefail
+          node --check scripts/weekly-flow-two-connection.cjs
+          node scripts/weekly-flow-two-connection.cjs >> /tmp/weekly-proposal.log 2>&1
+          echo 'PASS: two genuine PostgreSQL backends, stable plan, single auth/session, finalized replay denied in disposable DB'
+      - name: Reproduce known direct legacy bypass with synthetic finalized session
+        shell: bash
+        env:
+          PGOPTIONS: -c weekly_goal.isolated_db=true
+        run: |
+          set -euo pipefail
+          node --check scripts/weekly-flow-legacy-bypass-probe.cjs
+          node scripts/weekly-flow-legacy-bypass-probe.cjs
+          echo 'KNOWN RELEASE BLOCKER reproduced, NOT fixed; do not deploy'
+      - name: Generate genuine first P1 weekly plan after synthetic Stage 0
+        shell: bash
+        env:
+          PGOPTIONS: -c weekly_goal.isolated_db=true
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_first_week_fresh_plan_isolated_matrix.sql >> /tmp/weekly-proposal.log 2>&1
+          echo 'PASS: Stage 0 gate, fresh first P1 plan and frozen goals, same-week identity, P5 separation and rollback'
+      - name: Show isolated SQL failure details without real data
+        if: failure()
+        run: tail -100 /tmp/weekly-proposal.log

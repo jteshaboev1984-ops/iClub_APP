@@ -42,6 +42,27 @@
     root.appendChild(link);
   }
 
+  // A separate owner-approved switch is required. Do not mutate internal.api,
+  // make a legacy Core call, or enable new navigation merely by loading assets.
+  function loadOptionalWeeklyAdapter() {
+    if (window.iClubExamPrepWeeklyFlowEnabled !== true) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      if (!stillEnabled()) { reject(new Error('weekly flow disabled')); return; }
+      if (internal.weeklyFlowApi?.version === 'weekly_flow_adapter_v1') { resolve(); return; }
+      if (document.querySelector('script[data-exam-prep-weekly-flow-adapter]')) {
+        reject(new Error('weekly adapter loading without proof')); return;
+      }
+      const asset = document.createElement('script');
+      asset.dataset.examPrepWeeklyFlowAdapter = 'true';
+      asset.src = `${base}exam-prep-weekly-flow-adapter.js?v=weeklyflow1`;
+      asset.async = false;
+      asset.onload = () => internal.weeklyFlowApi?.version === 'weekly_flow_adapter_v1' && stillEnabled()
+        ? resolve() : reject(new Error('weekly adapter contract unavailable'));
+      asset.onerror = () => reject(new Error('weekly adapter asset unavailable'));
+      root.appendChild(asset);
+    });
+  }
+
   async function boot() {
     try {
       stylesheet('stability','examPrepProgressUxStability');
@@ -52,6 +73,13 @@
       await loadScript('api', 'examPrepProgressUxApi', () =>
         typeof internal.progressUxApi?.progress === 'function');
       if (!stillEnabled()) { fail(); return; }
+      // Optional weekly adapter fails independently; existing Progress UX remains.
+      try {
+        await loadOptionalWeeklyAdapter();
+      } catch (_) {
+        internal.weeklyFlowBootstrapStatus = 'unavailable';
+        window.iClubExamPrepWeeklyFlowEnabled = false;
+      }
       if (!document.querySelector('link[data-exam-prep-progress-ux-style]')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';

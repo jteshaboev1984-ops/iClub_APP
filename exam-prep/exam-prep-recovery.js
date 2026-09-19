@@ -27,6 +27,7 @@
       save: "Saqlash va rejani yangilash", back: "Orqaga", returnOverview: "Umumiy ko‘rinishga qaytish",
       invalid: "Sanalarni tekshiring: qaytish sanasi boshlanish sanasidan keyin va bugundan kech bo‘lmasligi kerak.",
       error: "Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.", done: "Reja moslashtirildi",
+      recorded: "Tanaffus saqlandi", recordBreak: "Tanaffusni qayd etish", saveBreak: "Tanaffusni saqlash", recordNotice: "Tanaffus saqlandi. Shu haftadagi vazifalar va tugallanmagan mashg‘ulotlar almashtirilmadi. Yangilangan jadval keyingi haftalik reja yaratilganda hisobga olinadi.",
       reserve: "Qisqa tanaffus: zaxira vaqtdan foydalanamiz, muhim qayta tekshiruvlar saqlanadi.",
       gentle: "Rejaga bosqichma-bosqich qaytamiz. Oldingi natijalar saqlanadi; bosqich faqat vaqt o‘tgani uchun o‘zgarmaydi.",
       twoThree: "Keyingi 14 kun: 50% majburiy o‘tilmagan mavzular, 25% shu mavzular bo‘yicha masalalar, 15% oldingi mavzular, 10% vaqtli mashq. Muhim qayta tekshiruvlar saqlanadi.",
@@ -49,6 +50,7 @@
       save: "Save and update plan", back: "Back", returnOverview: "Return to overview",
       invalid: "Check the dates: the return date must be after the start date and cannot be in the future.",
       error: "The action could not be completed. Try again.", done: "Plan adjusted",
+      recorded: "Study break saved", recordBreak: "Record study break", saveBreak: "Save study break", recordNotice: "Your study break is recorded. This week’s tasks and unfinished sessions were not replaced. The updated schedule will be considered when a new weekly plan is created.",
       reserve: "Short break: reserve time is used and important delayed checks stay in place.",
       gentle: "Return to the plan gently. Previous results stay recorded; your phase does not change just because time passed.",
       twoThree: "For the next 14 days: 50% required uncovered topics, 25% questions on them, 15% older topics and 10% timed practice. Important delayed checks remain.",
@@ -71,6 +73,7 @@
       save: "Сохранить и обновить план", back: "Назад", returnOverview: "Вернуться к обзору",
       invalid: "Проверьте даты: дата возвращения должна быть позже даты начала и не может быть в будущем.",
       error: "Не удалось выполнить действие. Попробуйте ещё раз.", done: "План адаптирован",
+      recorded: "Перерыв сохранён", recordBreak: "Указать перерыв", saveBreak: "Сохранить перерыв", recordNotice: "Перерыв учтён. Задания этой недели и незавершённые занятия не заменены. Обновлённый график будет учтён при создании нового недельного плана.",
       reserve: "Короткий перерыв: используем резерв времени, важные повторные проверки сохраняются.",
       gentle: "Возвращаемся к плану мягко. Прежние результаты сохраняются; этап не меняется только из-за прошедшего времени.",
       twoThree: "На следующие 14 дней: 50% — обязательные непройденные темы, 25% — задачи по ним, 15% — более ранние темы, 10% — практика на время. Важные повторные проверки сохраняются.",
@@ -149,14 +152,14 @@
     const active = activeRows.length > 0;
     const days = active ? Math.max(...activeRows.map(row => Number(row?.missed_days || 0))) : 0;
     const status = active
-      ? `<div class="ep-live-notice" role="status" aria-live="polite"><strong>${esc(c.active)}${days ? ` · ${days} ${esc(c.days)}` : ""}</strong><div class="ep-live-meta">${esc(modeMessage(activeRows[0]))}</div><div class="ep-live-meta">${esc(c.preserved)}</div></div>`
+      ? `<div class="ep-live-notice" role="status" aria-live="polite"><strong>${esc(window.iClubExamPrepWeeklyFlowEnabled === true ? c.recorded : c.active)}${days ? ` · ${days} ${esc(c.days)}` : ""}</strong><div class="ep-live-meta">${esc(window.iClubExamPrepWeeklyFlowEnabled === true ? c.recordNotice : modeMessage(activeRows[0]))}</div><div class="ep-live-meta">${esc(c.preserved)}</div></div>`
       : "";
     const checks = `${checkStatusHtml(p1, "P1")}${checkStatusHtml(p5, "P5")}`;
 
     const card = document.createElement("div");
     card.className = "ep-live-card";
     card.dataset.epRecoveryCard = "true";
-    card.innerHTML = `<strong>${esc(c.title)}</strong><div class="ep-live-meta">${esc(c.body)}</div>${status}${checks}<div class="ep-live-actions"><button class="ep-live-btn secondary" type="button" data-ep-recovery-open>${esc(c.adjust)}</button></div>`;
+    card.innerHTML = `<strong>${esc(c.title)}</strong><div class="ep-live-meta">${esc(c.body)}</div>${status}${checks}<div class="ep-live-actions"><button class="ep-live-btn secondary" type="button" data-ep-recovery-open>${esc(window.iClubExamPrepWeeklyFlowEnabled === true ? c.recordBreak : c.adjust)}</button></div>`;
     const shell = root.querySelector(".ep-host-shell.ep-live") || root.firstElementChild || root;
     shell.appendChild(card);
     card.querySelector("[data-ep-recovery-open]")?.addEventListener("click", renderForm);
@@ -174,7 +177,7 @@
         <label class="ep-live-field"><span>${esc(c.from)}</span><input type="date" name="started_on" max="${esc(today)}" required aria-required="true"></label>
         <label class="ep-live-field"><span>${esc(c.resumed)}</span><input type="date" name="resumed_on" max="${esc(today)}" value="${esc(today)}" required aria-required="true"></label>
         <label class="ep-live-field"><span>${esc(c.reason)}</span><select name="kind" required aria-required="true"><option value="absence">${esc(c.absence)}</option><option value="planned_holiday">${esc(c.holiday)}</option><option value="other">${esc(c.other)}</option></select></label>
-        <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(c.save)}</button></div>
+        <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(window.iClubExamPrepWeeklyFlowEnabled === true ? c.saveBreak : c.save)}</button></div>
       </form><div data-ep-recovery-error role="alert" aria-live="assertive"></div>
     </div></section>`;
     root.querySelector("[data-ep-recovery-back]")?.addEventListener("click", reopenOverview);
@@ -202,7 +205,10 @@
         if (error) error.innerHTML = `<div class="ep-live-error">${esc(copy().error)}</div>`;
         return;
       }
-      await Promise.allSettled([internal.api.generateWeeklyPlan("P1"), internal.api.generateWeeklyPlan("P5")]);
+      // Record recovery without replacing active guarded tasks or pending answers.
+      if (window.iClubExamPrepWeeklyFlowEnabled !== true) {
+        await Promise.allSettled([internal.api.generateWeeklyPlan("P1"), internal.api.generateWeeklyPlan("P5")]);
+      }
       renderSuccess(result.data);
     } catch (_) {
       if (error) error.innerHTML = `<div class="ep-live-error">${esc(copy().error)}</div>`;
@@ -213,7 +219,7 @@
     const root = rootEl(); if (!root) return;
     const c = copy();
     root.innerHTML = `<section class="ep-host-shell ep-live" data-ep-recovery-success><div class="ep-live-card">
-      <strong>${esc(c.done)}</strong><div class="ep-live-notice" role="status" aria-live="polite">${esc(modeMessage(data || {}))}</div>
+      <strong>${esc(window.iClubExamPrepWeeklyFlowEnabled === true ? c.recorded : c.done)}</strong><div class="ep-live-notice" role="status" aria-live="polite">${esc(window.iClubExamPrepWeeklyFlowEnabled === true ? c.recordNotice : modeMessage(data || {}))}</div>
       <div class="ep-live-meta">${esc(c.preserved)}</div>
       <div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-recovery-return>${esc(c.returnOverview)}</button></div>
     </div></section>`;

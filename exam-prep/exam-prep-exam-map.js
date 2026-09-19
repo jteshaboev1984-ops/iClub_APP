@@ -26,6 +26,7 @@
       total: "Haftalik umumiy o‘qish vaqti (soat)",
       math: "Matematika uchun vaqt (soat)",
       save: "Saqlash va rejani yangilash",
+      saveStable: "O‘zgarishlarni saqlash",
       cancel: "Bekor qilish",
       mathShort: "Matematika",
       totalShort: "Jami",
@@ -34,6 +35,7 @@
       error: "Ma’lumotni saqlab bo‘lmadi. Qayta urinib ko‘ring.",
       seriesChanged: "Imtihon sessiyasi yangilandi. Oldingi natijalar tarixda saqlanadi. Yangi sessiyaga tayyorgarlik yangi to‘liq ishlar asosida baholanadi; P1 va P5 alohida hisoblanadi.",
       planChanged: "Reja yangilandi. Oldingi progress, tuzatishlar va qayta tekshiruvlar saqlandi.",
+      savedWithoutReplan: "O‘zgarishlar saqlandi. Joriy haftaning vazifalari va tugallanmagan mashg‘ulotlar almashtirilmadi. Yangi sozlamalar navbatdagi haftalik reja yaratilganda hisobga olinadi.",
       unchanged: "O‘zgarish yo‘q. Joriy reja saqlandi."
     };
     if (language() === "en") return {
@@ -45,6 +47,7 @@
       total: "Total weekly study time (hours)",
       math: "Mathematics time (hours)",
       save: "Save and update plan",
+      saveStable: "Save changes",
       cancel: "Cancel",
       mathShort: "Mathematics",
       totalShort: "Total",
@@ -53,6 +56,7 @@
       error: "The information could not be saved. Try again.",
       seriesChanged: "Your exam series has been updated. Previous results remain in your history. Readiness for the new series will be based on new full papers; P1 and P5 remain separate.",
       planChanged: "Your plan has been updated. Previous progress, corrections and scheduled checks are kept.",
+      savedWithoutReplan: "Your changes were saved. This week’s tasks and unfinished sessions were not replaced. The new settings will be considered when the next weekly plan is created.",
       unchanged: "Nothing changed. Your current plan has been kept."
     };
     return {
@@ -64,6 +68,7 @@
       total: "Общее учебное время в неделю (часы)",
       math: "Время на математику (часы)",
       save: "Сохранить и обновить план",
+      saveStable: "Сохранить изменения",
       cancel: "Отмена",
       mathShort: "Математика",
       totalShort: "Всего",
@@ -72,6 +77,7 @@
       error: "Не удалось сохранить данные. Попробуйте ещё раз.",
       seriesChanged: "Экзаменационная сессия обновлена. Прежние результаты останутся в истории. Готовность к новой сессии будет оцениваться по новым полным работам; P1 и P5 по-прежнему учитываются отдельно.",
       planChanged: "План обновлён. Прежний прогресс, исправления и повторные проверки сохранены.",
+      savedWithoutReplan: "Изменения сохранены. Задания текущей недели и незавершённые занятия не заменены. Новые настройки будут учтены при создании следующего недельного плана.",
       unchanged: "Изменений нет. Текущий план сохранён."
     };
   }
@@ -160,7 +166,7 @@
         <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" value="${esc(profile.target_grade)}" required aria-required="true"></label>
         <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.total_student_hours_available)}" required aria-required="true"></label>
         <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.mathematics_hours_budget)}" required aria-required="true"></label>
-        <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(c.save)}</button><button class="ep-live-btn secondary" type="button" data-ep-exam-plan-cancel>${esc(c.cancel)}</button></div>
+        <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(window.iClubExamPrepWeeklyFlowEnabled === true ? c.saveStable : c.save)}</button><button class="ep-live-btn secondary" type="button" data-ep-exam-plan-cancel>${esc(c.cancel)}</button></div>
       </form><div data-ep-exam-plan-error role="alert" aria-live="assertive"></div>
     </div></section>`;
     root.querySelector("[data-ep-exam-plan-form]")?.addEventListener("submit", save);
@@ -189,7 +195,9 @@
         return;
       }
       const data = result.data || {};
-      pendingNotice = data.series_changed === true
+      pendingNotice = window.iClubExamPrepWeeklyFlowEnabled === true && data.plan_rebuild_required === true
+        ? (data.series_changed === true ? copy().seriesChanged + " " : "") + copy().savedWithoutReplan
+        : data.series_changed === true
         ? copy().seriesChanged
         : (data.target_changed === true || data.hours_changed === true ? copy().planChanged : copy().unchanged);
       await reopenOverview();

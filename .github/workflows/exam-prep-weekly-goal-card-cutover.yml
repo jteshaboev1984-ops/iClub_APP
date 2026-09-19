@@ -1,0 +1,51 @@
+name: Exam Prep weekly goal-card cutover (read-only browser safety)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/weekly-flow-goal-card-cutover.cjs'
+      - 'scripts/weekly-flow-goal-card-browser.cjs'
+      - '.github/workflows/exam-prep-weekly-goal-card-cutover.yml'
+      - 'exam-prep/exam-prep-progress-ux-ui.js'
+      - 'exam-prep/exam-prep-progress-ux.css'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'scripts/weekly-flow-goal-card-cutover.cjs'
+      - 'scripts/weekly-flow-goal-card-browser.cjs'
+      - '.github/workflows/exam-prep-weekly-goal-card-cutover.yml'
+      - 'exam-prep/exam-prep-progress-ux-ui.js'
+      - 'exam-prep/exam-prep-progress-ux.css'
+permissions:
+  contents: read
+jobs:
+  isolated-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify audited goal UI is installed only in this branch
+        run: |
+          set -euo pipefail
+          node --check scripts/weekly-flow-goal-card-cutover.cjs
+          node --check exam-prep/exam-prep-progress-ux-ui.js
+          node --check scripts/weekly-flow-goal-card-browser.cjs
+          grep -Fq 'async function promoteGoalActions' exam-prep/exam-prep-progress-ux-ui.js
+          grep -Fq 'await showPlan(target,data,component)' exam-prep/exam-prep-progress-ux-ui.js
+          grep -Fq 'ep-pux-goal-action' exam-prep/exam-prep-progress-ux.css
+          test -z "$(git diff --name-only)"
+          node scripts/progress-ux-model-regression.cjs
+      - name: Install Chromium for genuine RU UZ EN native-and-goal UI
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Six native-goal-card UI acceptance journeys on synthetic RPCs
+        run: |
+          set -euo pipefail
+          node scripts/weekly-flow-goal-card-browser.cjs
+          echo 'GREEN: verified goal ordering and actions; production database untouched.'
