@@ -27,16 +27,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Exact-source fail-closed patch and syntax check in disposable checkout
+      - name: Fail-closed exact-source patch or verify applied branch source
         shell: bash
         run: |
           set -euo pipefail
           node --check scripts/weekly-flow-answer-recovery-cutover.cjs
-          node scripts/weekly-flow-answer-recovery-cutover.cjs
-          node scripts/weekly-flow-answer-recovery-cutover.cjs --apply
+          if [[ "$(git hash-object exam-prep/exam-prep-live.js)" == 'b340b229de4698a506466397557bf477a86dbb36' ]]; then
+            node scripts/weekly-flow-answer-recovery-cutover.cjs
+            node scripts/weekly-flow-answer-recovery-cutover.cjs --apply
+            test "$(git diff --name-only)" = 'exam-prep/exam-prep-live.js'
+          else
+            grep -Fq 'async function reconcilePendingAnswer(pending)' exam-prep/exam-prep-live.js
+            grep -Fq 'pending.idempotencyKey' exam-prep/exam-prep-live.js
+            test -z "$(git diff --name-only)"
+          fi
           node --check exam-prep/exam-prep-live.js
           git diff --check
-          test "$(git diff --name-only)" = 'exam-prep/exam-prep-live.js'
           ! git diff -- exam-prep/exam-prep-live.js | grep '^+' | grep -E 'localStorage|sessionStorage|correct_answer|service_role'
       - name: Install isolated browser
         run: |
@@ -48,4 +54,36 @@ jobs:
           node scripts/weekly-flow-answer-loss-browser.cjs
           node scripts/weekly-flow-native-browser-journey.cjs
           node scripts/weekly-flow-adapter-regression.cjs
-          echo 'GREEN: disposable checkout only, no branch/production write.'
+          echo 'GREEN: isolated browser/JS checks, no production write.'
+  promote-reviewed-response:
+    # ONE-SHOT, only this explicit owner feature-branch commit, never PR/main.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/fix/exam-prep-weekly-goal-flow-safe' && github.event.head_commit.message == 'ci(exam-prep): single reviewed branch-only recovery promotion'
+    needs: [isolated-answer]
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Promote exclusively verified native answer handler to DRAFT branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/fix/exam-prep-weekly-goal-flow-safe'
+          test "$(git hash-object exam-prep/exam-prep-live.js)" = 'b340b229de4698a506466397557bf477a86dbb36'
+          node scripts/weekly-flow-answer-recovery-cutover.cjs --apply
+          node --check exam-prep/exam-prep-live.js
+          git diff --check
+          test "$(git diff --name-only)" = 'exam-prep/exam-prep-live.js'
+          ! git diff -- exam-prep/exam-prep-live.js | grep '^+' | grep -E 'localStorage|sessionStorage|correct_answer|service_role'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- exam-prep/exam-prep-live.js
+          git commit -m 'feat(exam-prep): preserve weekly answer on unknown network result behind OFF flag'
+          git push origin HEAD:refs/heads/fix/exam-prep-weekly-goal-flow-safe
