@@ -56,8 +56,8 @@ jobs:
           node scripts/weekly-flow-adapter-regression.cjs
           echo 'GREEN: isolated browser/JS checks, no production write.'
   promote-reviewed-response:
-    # ONE-SHOT, only this explicit owner feature-branch commit, never PR/main.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/fix/exam-prep-weekly-goal-flow-safe' && github.event.head_commit.message == 'ci(exam-prep): single reviewed branch-only recovery promotion'
+    if: >-
+      github.event_name == 'push' && github.ref == 'refs/heads/fix/exam-prep-weekly-goal-flow-safe' && github.event.head_commit.message == 'ci(exam-prep): validate fixed one-shot branch-only answer promotion'
     needs: [isolated-answer]
     permissions:
       contents: write
@@ -71,7 +71,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Promote exclusively verified native answer handler to DRAFT branch
+      - name: Promote exclusively reviewed answer handler to DRAFT branch
         shell: bash
         run: |
           set -euo pipefail
