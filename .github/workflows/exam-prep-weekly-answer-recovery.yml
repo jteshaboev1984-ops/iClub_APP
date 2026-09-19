@@ -1,0 +1,51 @@
+name: Exam Prep guarded answer recovery isolated browser
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/weekly-flow-answer-recovery-cutover.cjs'
+      - 'scripts/weekly-flow-answer-loss-browser.cjs'
+      - 'exam-prep/exam-prep-live.js'
+      - '.github/workflows/exam-prep-weekly-answer-recovery.yml'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'scripts/weekly-flow-answer-recovery-cutover.cjs'
+      - 'scripts/weekly-flow-answer-loss-browser.cjs'
+      - 'exam-prep/exam-prep-live.js'
+      - '.github/workflows/exam-prep-weekly-answer-recovery.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-answer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact-source fail-closed patch and syntax check in disposable checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/weekly-flow-answer-recovery-cutover.cjs
+          node scripts/weekly-flow-answer-recovery-cutover.cjs
+          node scripts/weekly-flow-answer-recovery-cutover.cjs --apply
+          node --check exam-prep/exam-prep-live.js
+          git diff --check
+          test "$(git diff --name-only)" = 'exam-prep/exam-prep-live.js'
+          ! git diff -- exam-prep/exam-prep-live.js | grep '^+' | grep -E 'localStorage|sessionStorage|correct_answer|service_role'
+      - name: Install isolated browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Lost reply before and after commit MCQ and written on three languages and two widths
+        run: |
+          node --check scripts/weekly-flow-answer-loss-browser.cjs
+          node scripts/weekly-flow-answer-loss-browser.cjs
+          node scripts/weekly-flow-native-browser-journey.cjs
+          node scripts/weekly-flow-adapter-regression.cjs
+          echo 'GREEN: disposable checkout only, no branch/production write.'
