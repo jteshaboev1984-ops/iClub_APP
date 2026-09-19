@@ -7,6 +7,8 @@ on:
       - 'docs/patch-proposals/20260919_exam_prep_*.sql'
       - 'supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql'
       - 'supabase/tests/exam_prep_stable_plan_once_isolated_matrix.sql'
+      - 'supabase/tests/exam_prep_weekly_flow_concurrent_seed.sql'
+      - 'scripts/weekly-flow-two-connection.cjs'
       - '.github/workflows/exam-prep-weekly-goal-proposal-postgres.yml'
   push:
     branches: ['fix/exam-prep-weekly-goal-flow-safe']
@@ -15,6 +17,8 @@ on:
       - 'docs/patch-proposals/20260919_exam_prep_*.sql'
       - 'supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql'
       - 'supabase/tests/exam_prep_stable_plan_once_isolated_matrix.sql'
+      - 'supabase/tests/exam_prep_weekly_flow_concurrent_seed.sql'
+      - 'scripts/weekly-flow-two-connection.cjs'
       - '.github/workflows/exam-prep-weekly-goal-proposal-postgres.yml'
 permissions:
   contents: read
@@ -189,6 +193,15 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_stable_plan_once_isolated_matrix.sql >> /tmp/weekly-proposal.log 2>&1
           echo 'PASS: stable plan + one-time session draft contract in disposable PostgreSQL; not a browser test'
+      - name: Two distinct PostgreSQL connections compete on plan, authorize and start
+        shell: bash
+        env:
+          PGOPTIONS: -c weekly_goal.isolated_db=true
+        run: |
+          set -euo pipefail
+          node --check scripts/weekly-flow-two-connection.cjs
+          node scripts/weekly-flow-two-connection.cjs >> /tmp/weekly-proposal.log 2>&1
+          echo 'PASS: two genuine PostgreSQL backends, stable plan, single auth/session, finalized replay denied in disposable DB'
       - name: Show isolated SQL failure details without real data
         if: failure()
         run: tail -100 /tmp/weekly-proposal.log
