@@ -124,9 +124,9 @@
     });
     if (!result.ok) return result;
 
-    // Profile changes replan both components independently. Failures here never roll back the saved profile;
-    // opening a component plan can safely retry its governed generator later.
-    if (result.data?.plan_rebuild_required === true) {
+    // Legacy only. Guarded weeks keep their active plan and unanswered sessions.
+    // The next plan is generated through the governed entry, never as a save side effect.
+    if (result.data?.plan_rebuild_required === true && window.iClubExamPrepWeeklyFlowEnabled !== true) {
       await Promise.all([
         rpc("generate_exam_prep_weekly_plan_safe_v3", { p_component_code: "P1" }),
         rpc("generate_exam_prep_weekly_plan_safe_v3", { p_component_code: "P5" })
