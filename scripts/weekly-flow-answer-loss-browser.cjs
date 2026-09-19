@@ -17,6 +17,9 @@ async function scenario(browser,language,width,kind,mode) {
     await page.setContent(`<!doctype html><html lang="${language}"><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="exam-prep-host-root" aria-hidden="false"></div></body></html>`);
     await page.addStyleTag({path:file('exam-prep/exam-prep-host.css')});
     await page.evaluate(([lang,kind,mode,planId,goalId,authId,sessionId])=>{
+      // Browser execution has no Node assert; keep the fixture's checks explicit.
+      const assert=(condition)=>{if(!condition)throw Error('Synthetic fixture assertion failed');};
+      assert.strictEqual=(actual,expected)=>{if(actual!==expected)throw Error('Synthetic fixture identity mismatch');};
       window.iClubExamPrepWeeklyFlowEnabled=true;
       window.iClubExamPrepProgressUxEnabled=false;
       window.i18n={getLang:()=>lang};
