@@ -6,6 +6,10 @@
 -- Raw copies of exactly the deployed four functions are private and non-executable
 -- by client roles. Never rely on user-settable custom GUCs as security authority.
 -- NO legacy data updates, deletes, backfill, change of course/tour state or mastery.
+-- Fresh first plans must pass actual Stage 0 evidence gates. Published diagnostic
+-- assessments use reserve/withheld question metadata; NEVER relabel them as
+-- learning content to satisfy a test. The isolated first-week fixture verifies
+-- creation and rollback without crediting any real learner.
 BEGIN;
 
 CREATE TABLE private.exam_prep_weekly_flow_enrollment_v1 (
