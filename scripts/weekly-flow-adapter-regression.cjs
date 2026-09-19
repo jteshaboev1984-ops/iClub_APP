@@ -96,7 +96,7 @@ async function test(name, callback) { await callback(); count++; console.log('PA
     assert.deepEqual(f.calls.map(c => c.name), ['start_exam_prep_plan_session_once_safe_v1', 'get_exam_prep_active_plan_session_safe_v1']);
   });
   await test('unknown outcome without observed session remains blocked', async () => {
-    const f = fixture([reply({ error: { message: 'timeout' }, data: null }), reply({ status: 'none' })]);
+    const f = fixture([{ error: { message: 'timeout' }, data: null }, reply({ status: 'none' })]);
     const result = await f.api.start('P1', AUTH, 'idempotent-key-0001');
     assert.equal(result.reason, 'start_outcome_unknown');
     assert.equal(result.recovery.status, 'none');
