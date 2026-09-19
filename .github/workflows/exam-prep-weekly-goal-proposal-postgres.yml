@@ -8,6 +8,7 @@ on:
       - 'supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql'
       - 'supabase/tests/exam_prep_stable_plan_once_isolated_matrix.sql'
       - 'supabase/tests/exam_prep_weekly_flow_concurrent_seed.sql'
+      - 'supabase/tests/exam_prep_first_week_fresh_plan_isolated_matrix.sql'
       - 'scripts/weekly-flow-two-connection.cjs'
       - 'scripts/weekly-flow-legacy-bypass-probe.cjs'
       - '.github/workflows/exam-prep-weekly-goal-proposal-postgres.yml'
@@ -19,6 +20,7 @@ on:
       - 'supabase/tests/exam_prep_weekly_goal_proposal_isolated_matrix.sql'
       - 'supabase/tests/exam_prep_stable_plan_once_isolated_matrix.sql'
       - 'supabase/tests/exam_prep_weekly_flow_concurrent_seed.sql'
+      - 'supabase/tests/exam_prep_first_week_fresh_plan_isolated_matrix.sql'
       - 'scripts/weekly-flow-two-connection.cjs'
       - 'scripts/weekly-flow-legacy-bypass-probe.cjs'
       - '.github/workflows/exam-prep-weekly-goal-proposal-postgres.yml'
@@ -213,6 +215,14 @@ jobs:
           node --check scripts/weekly-flow-legacy-bypass-probe.cjs
           node scripts/weekly-flow-legacy-bypass-probe.cjs
           echo 'KNOWN RELEASE BLOCKER reproduced, NOT fixed; do not deploy'
+      - name: Generate genuine first P1 weekly plan after synthetic Stage 0
+        shell: bash
+        env:
+          PGOPTIONS: -c weekly_goal.isolated_db=true
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_first_week_fresh_plan_isolated_matrix.sql >> /tmp/weekly-proposal.log 2>&1
+          echo 'PASS: Stage 0 gate, fresh first P1 plan and frozen goals, same-week identity, P5 separation and rollback'
       - name: Show isolated SQL failure details without real data
         if: failure()
         run: tail -100 /tmp/weekly-proposal.log
