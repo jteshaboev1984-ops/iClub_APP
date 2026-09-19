@@ -1,4 +1,4 @@
-name: Exam Prep native weekly-flow guarded branch cutover
+name: Exam Prep native weekly-flow cutover safety (read-only)
 on:
   pull_request:
     branches: [main]
@@ -15,7 +15,7 @@ on:
 permissions:
   contents: read
 jobs:
-  isolated-patch:
+  native-cutover:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -25,69 +25,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Exact baseline patch or already applied branch syntax
+      - name: Audit installed native patch and unchanged legacy fallback
         shell: bash
         run: |
           set -euo pipefail
+          node --check exam-prep/exam-prep-live.js
           node --check scripts/weekly-flow-native-cutover.cjs
-          if [[ "$(git hash-object exam-prep/exam-prep-live.js)" == '0ee0a11c787eb08a649425b93d665042ffa50a5e' ]]; then
-            node scripts/weekly-flow-native-cutover.cjs
-            node scripts/weekly-flow-native-cutover.cjs --apply
-            test "$(git diff --name-only)" = 'exam-prep/exam-prep-live.js'
-          else
-            grep -Fq "The new weekly flow is an explicit OFF-by-default cutover" exam-prep/exam-prep-live.js
-            grep -Fq "Session saved. Your weekly plan has not changed." exam-prep/exam-prep-live.js
-            test -z "$(git diff --name-only)"
-          fi
-          node --check exam-prep/exam-prep-live.js
-          git diff --check
-      - name: Existing safety regressions against audited native source
-        shell: bash
-        run: |
-          set -euo pipefail
+          grep -Fq 'The new weekly flow is an explicit OFF-by-default cutover' exam-prep/exam-prep-live.js
+          grep -Fq 'Session saved. Your weekly plan has not changed.' exam-prep/exam-prep-live.js
+          grep -Fq 'const auth = await internal.api.authorizePlanItem(planId, priorityOrder);' exam-prep/exam-prep-live.js
+          grep -Fq 'const started = await internal.api.startSession(auth.data.authorization_id' exam-prep/exam-prep-live.js
+          git diff --exit-code
           node scripts/weekly-flow-adapter-regression.cjs
           node scripts/weekly-goal-routing-regression.cjs
           node scripts/p2-08-progress-preservation-regression.cjs
-          echo 'GREEN: isolated native weekly-flow route; production untouched.'
-  promote-reviewed-native:
-    # Temporary job: one exact known baseline -> one allowlisted file in a draft
-    # feature branch. NEVER runs for pull_request or main; no force push or DB.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/fix/exam-prep-weekly-goal-flow-safe' && github.actor == 'jteshaboev1984-ops'
-    needs: isolated-patch
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: fix/exam-prep-weekly-goal-flow-safe
-          persist-credentials: true
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Apply exactly one inspected branch-only file after GREEN
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git branch --show-current)" = 'fix/exam-prep-weekly-goal-flow-safe'
-          original="$(git hash-object exam-prep/exam-prep-live.js)"
-          if [[ "$original" != '0ee0a11c787eb08a649425b93d665042ffa50a5e' ]]; then
-            grep -Fq "The new weekly flow is an explicit OFF-by-default cutover" exam-prep/exam-prep-live.js
-            echo 'Already applied; no second commit.'
-            exit 0
-          fi
-          node scripts/weekly-flow-native-cutover.cjs --apply
-          node --check exam-prep/exam-prep-live.js
-          node scripts/weekly-flow-adapter-regression.cjs
-          node scripts/weekly-goal-routing-regression.cjs
-          node scripts/p2-08-progress-preservation-regression.cjs
-          git diff --check
-          test "$(git diff --name-only)" = 'exam-prep/exam-prep-live.js'
-          git add -- exam-prep/exam-prep-live.js
-          test "$(git diff --cached --name-only)" = 'exam-prep/exam-prep-live.js'
-          git config user.name 'iClub branch-only safety integration'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git commit -m 'feat(exam-prep): connect weekly plan resume and exact goal authorization behind OFF flag'
-          git push origin HEAD:refs/heads/fix/exam-prep-weekly-goal-flow-safe
+          echo 'GREEN: native cutover is present but OFF by default; no repository/database writes.'
