@@ -67,7 +67,8 @@ const candidate=spawnSync('psql',['-X','-v','ON_ERROR_STOP=1','-f',
 assert.equal(candidate.status,0,`Atomic candidate SQL refused: ${(candidate.stderr||'').slice(-2500)} ${(candidate.stdout||'').slice(-700)}`);
 console.log('Atomic SQL transaction compiled in disposable PG17; no enrollments.');
 for(const script of ['scripts/weekly-flow-atomic-dispatch-smoke.cjs',
-                     'scripts/weekly-flow-atomic-dispatch-race.cjs']) {
+                     'scripts/weekly-flow-atomic-dispatch-race.cjs',
+                     'scripts/weekly-flow-atomic-dispatch-nonplan.cjs']) {
   const check=spawnSync(process.execPath,['--check',script],{env,encoding:'utf8',timeout:10000});
   assert.equal(check.status,0,`Syntax invalid ${script}: ${(check.stderr||'').slice(-600)}`);
   const test=spawnSync(process.execPath,[script],{env,encoding:'utf8',timeout:90000});
