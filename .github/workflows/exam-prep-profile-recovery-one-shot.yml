@@ -7,7 +7,6 @@ permissions:
   contents: read
 jobs:
   verify-before-promote:
-    if: github.repository == 'jteshaboev1984-ops/iClub_APP' && github.event.head_commit.message == 'ci(exam-prep): one-shot guarded profile recovery draft promotion'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -18,11 +17,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Exact prior head and one added workflow only
+      - name: Exact prior head and workflow-only change
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = 'b79ed3ce8180a121c9aa5ba1526376a3a0a022eb'
+          test "$(git rev-parse HEAD^)" = '77ccff9142a7bbee3bf08591b9f67385ac3df855'
           test "$(git show --pretty=format: --name-only HEAD | sed '/^$/d')" = '.github/workflows/exam-prep-profile-recovery-one-shot.yml'
           node scripts/weekly-flow-profile-recovery-cutover.cjs
           node scripts/weekly-flow-profile-recovery-cutover.cjs --apply
@@ -49,12 +48,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Promote exact three source patches, never merge or deploy
+      - name: Promote three reviewed files on DRAFT branch only
         shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git rev-parse HEAD^)" = 'b79ed3ce8180a121c9aa5ba1526376a3a0a022eb'
+          test "$(git rev-parse HEAD^)" = '77ccff9142a7bbee3bf08591b9f67385ac3df855'
           node scripts/weekly-flow-profile-recovery-cutover.cjs
           node scripts/weekly-flow-profile-recovery-cutover.cjs --apply
           node scripts/weekly-flow-profile-recovery-regression.cjs
