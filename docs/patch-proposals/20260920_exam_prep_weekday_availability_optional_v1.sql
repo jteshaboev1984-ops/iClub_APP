@@ -1,32 +1,30 @@
 -- DRAFT PROPOSAL ONLY. NEVER APPLY TO PRODUCTION WITHOUT SEPARATE OWNER APPROVAL.
 -- Prerequisite: 20260919_exam_prep_atomic_legacy_rpc_dispatch_v1.sql, server enrollment.
 -- Seven OPTIONAL hours for a typical Monday-Sunday study week, shared by P1 and P5.
--- This is NOT remaining time today, an exam deadline, a workload prediction or permission
--- to increase the Mathematics budget. No automatic plan generation or academic writes
--- other than those ALREADY performed by the owner's existing profile save v2.
+-- NOT remaining time today, an exam deadline, a workload forecast, or permission
+-- to increase Mathematics hours. No auto-replan, grade change or academic credit.
 BEGIN;
 
 CREATE TABLE private.exam_prep_weekday_availability_v1 (
   user_id uuid PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
   weekday_hours jsonb,
   confirmed boolean NOT NULL DEFAULT false,
-  profile_revision integer NOT NULL CHECK (profile_revision>=1),
-  mathematics_budget_snapshot numeric NOT NULL CHECK (mathematics_budget_snapshot>0 AND mathematics_budget_snapshot<=168),
+  profile_revision integer NOT NULL CHECK(profile_revision>=1),
+  mathematics_budget_snapshot numeric NOT NULL CHECK(mathematics_budget_snapshot>0 AND mathematics_budget_snapshot<=168),
   updated_by uuid NOT NULL REFERENCES public.users(id) ON DELETE RESTRICT,
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT exam_prep_weekday_availability_confirmation_check
-    CHECK (confirmed = (weekday_hours IS NOT NULL))
+    CHECK(confirmed = (weekday_hours IS NOT NULL))
 );
 ALTER TABLE private.exam_prep_weekday_availability_v1 ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE private.exam_prep_weekday_availability_v1
-  FROM PUBLIC, anon, authenticated, service_role;
+  FROM PUBLIC,anon,authenticated,service_role;
 CREATE TRIGGER exam_prep_weekday_availability_audit_v1
 AFTER INSERT OR UPDATE OR DELETE ON private.exam_prep_weekday_availability_v1
 FOR EACH ROW EXECUTE FUNCTION private.exam_prep_audit_row_change_v1();
 
--- Do not extend/replace the existing profile read signature, which is consumed
--- by older tabs. The new optional endpoint reads OWN data only and reports
--- stale profile revisions explicitly; old tabs can never silently revalidate it.
+-- Unchanged existing profile-reader signature for old clients. Own-data reader
+-- gives the current revision so a second device cannot overwrite it blindly.
 CREATE FUNCTION public.get_my_exam_prep_weekday_availability_safe_v1()
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $body$
 DECLARE
@@ -52,26 +50,27 @@ BEGIN
     'confirmed',coalesce(v_fresh,false),
     'needs_reconfirmation',v_hours.confirmed IS TRUE AND NOT v_fresh,
     'profile_revision',v_profile.profile_revision,
+    'exam_series',v_profile.exam_series,
+    'target_grade',v_profile.target_grade,
+    'total_student_hours_available',v_profile.total_student_hours_available,
     'mathematics_hours_budget',v_profile.mathematics_hours_budget,
     'planning_only',true,'does_not_change_current_plan',true
   );
 END;
 $body$;
-REVOKE ALL ON FUNCTION public.get_my_exam_prep_weekday_availability_safe_v1()
-  FROM PUBLIC,anon;
-GRANT EXECUTE ON FUNCTION public.get_my_exam_prep_weekday_availability_safe_v1()
-  TO authenticated,service_role;
+REVOKE ALL ON FUNCTION public.get_my_exam_prep_weekday_availability_safe_v1() FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.get_my_exam_prep_weekday_availability_safe_v1() TO authenticated,service_role;
 
--- One transaction: validate supplied optional slots, execute exactly the
--- existing versioned profile save, then persist the seven slots. Any validation
--- or table error aborts BOTH operations; no partial profile/schedule saves.
--- NULL means the learner explicitly leaves all seven fields blank (clear).
+-- One transaction; optimistic version check under a row lock BEFORE touching
+-- the profile. Invalid schedule or stale edit aborts BOTH profile and schedule.
+-- NULL means the learner intentionally left ALL seven slots blank (clear).
 CREATE FUNCTION public.save_my_exam_prep_profile_with_weekday_availability_safe_v1(
   p_exam_series text,
   p_target_grade text,
   p_total_student_hours_available numeric,
   p_mathematics_hours_budget numeric,
-  p_weekday_hours jsonb
+  p_weekday_hours jsonb,
+  p_expected_profile_revision integer
 )
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $body$
 DECLARE
@@ -81,6 +80,7 @@ DECLARE
   v_sum numeric:=0;
   v_count integer;
   v_saved jsonb;
+  v_previous_revision integer;
   v_revision integer;
 BEGIN
   v_uid:=private.exam_prep_require_core_access_v1();
@@ -108,13 +108,19 @@ BEGIN
     END IF;
   END IF;
 
+  -- Locks serialize concurrent edits from two devices; the loser must refresh.
+  SELECT profile_revision INTO v_previous_revision FROM private.exam_prep_exam_profiles
+    WHERE user_id=v_uid FOR UPDATE;
+  IF v_previous_revision IS NULL OR p_expected_profile_revision IS NULL
+     OR v_previous_revision<>p_expected_profile_revision THEN
+    RAISE EXCEPTION 'exam_prep_profile_changed_refresh_required' USING errcode='40001';
+  END IF;
   v_saved:=public.save_exam_prep_exam_profile_v2(
     p_exam_series,p_target_grade,p_total_student_hours_available,p_mathematics_hours_budget
   );
-  SELECT profile_revision INTO v_revision
-  FROM private.exam_prep_exam_profiles WHERE user_id=v_uid FOR UPDATE;
+  SELECT profile_revision INTO v_revision FROM private.exam_prep_exam_profiles WHERE user_id=v_uid;
   IF v_revision IS NULL THEN RAISE EXCEPTION 'exam_prep_profile_required'; END IF;
-  -- Retain cleared schedule rows for audit: never DELETE old user data.
+  -- Retain cleared schedule rows; audit trigger records before/after values.
   INSERT INTO private.exam_prep_weekday_availability_v1(
     user_id,weekday_hours,confirmed,profile_revision,mathematics_budget_snapshot,updated_by
   ) VALUES (
@@ -134,7 +140,7 @@ BEGIN
 END;
 $body$;
 REVOKE ALL ON FUNCTION public.save_my_exam_prep_profile_with_weekday_availability_safe_v1(
-  text,text,numeric,numeric,jsonb) FROM PUBLIC,anon;
+  text,text,numeric,numeric,jsonb,integer) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.save_my_exam_prep_profile_with_weekday_availability_safe_v1(
-  text,text,numeric,numeric,jsonb) TO authenticated,service_role;
+  text,text,numeric,numeric,jsonb,integer) TO authenticated,service_role;
 COMMIT;
