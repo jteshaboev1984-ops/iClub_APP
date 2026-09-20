@@ -5,10 +5,12 @@ on:
     paths:
       - 'scripts/weekly-flow-goal-card-cutover.cjs'
       - 'scripts/weekly-flow-goal-card-browser.cjs'
+      - 'scripts/weekly-adherence-ui-browser.cjs'
       - '.github/workflows/exam-prep-weekly-goal-card-cutover.yml'
       - 'exam-prep/exam-prep-progress-ux-ui.js'
       - 'exam-prep/exam-prep-progress-ux-boot.js'
       - 'exam-prep/exam-prep-weekly-flow-adapter.js'
+      - 'exam-prep/exam-prep-weekly-adherence-ui.js'
       - 'exam-prep/exam-prep-exam-map.js'
       - 'exam-prep/exam-prep-progress-ux.css'
   push:
@@ -16,10 +18,12 @@ on:
     paths:
       - 'scripts/weekly-flow-goal-card-cutover.cjs'
       - 'scripts/weekly-flow-goal-card-browser.cjs'
+      - 'scripts/weekly-adherence-ui-browser.cjs'
       - '.github/workflows/exam-prep-weekly-goal-card-cutover.yml'
       - 'exam-prep/exam-prep-progress-ux-ui.js'
       - 'exam-prep/exam-prep-progress-ux-boot.js'
       - 'exam-prep/exam-prep-weekly-flow-adapter.js'
+      - 'exam-prep/exam-prep-weekly-adherence-ui.js'
       - 'exam-prep/exam-prep-exam-map.js'
       - 'exam-prep/exam-prep-progress-ux.css'
 permissions:
@@ -40,14 +44,18 @@ jobs:
           set -euo pipefail
           node --check scripts/weekly-flow-goal-card-cutover.cjs
           node --check scripts/weekly-flow-goal-card-browser.cjs
+          node --check scripts/weekly-adherence-ui-browser.cjs
           node --check exam-prep/exam-prep-progress-ux-ui.js
           node --check exam-prep/exam-prep-progress-ux-boot.js
           node --check exam-prep/exam-prep-weekly-flow-adapter.js
+          node --check exam-prep/exam-prep-weekly-adherence-ui.js
           node --check exam-prep/exam-prep-exam-map.js
           grep -Fq 'data-ep-exam-plan-edit' exam-prep/exam-prep-exam-map.js
           grep -Fq 'async function promoteGoalActions' exam-prep/exam-prep-progress-ux-ui.js
           grep -Fq 'await showPlan(target,data,component)' exam-prep/exam-prep-progress-ux-ui.js
           grep -Fq 'ep-pux-goal-action' exam-prep/exam-prep-progress-ux.css
+          grep -Fq 'loadOptionalWeeklyAdherenceUi' exam-prep/exam-prep-progress-ux-boot.js
+          grep -Fq 'get_exam_prep_previous_week_adherence_safe_v1' exam-prep/exam-prep-weekly-flow-adapter.js
           ! grep -q 'loadOptionalWeeklyReplanUi\|exam-prep-weekly-replan-ui' exam-prep/exam-prep-progress-ux-boot.js
           ! grep -q 'request_exam_prep_explicit_weekly_replan_safe_v1\|async function replan' exam-prep/exam-prep-weekly-flow-adapter.js
           test ! -e exam-prep/exam-prep-weekly-replan-ui.js
@@ -63,3 +71,8 @@ jobs:
           set -euo pipefail
           node scripts/weekly-flow-goal-card-browser.cjs
           echo 'GREEN: existing exam-plan editor only; verified goal ordering and actions; production database untouched.'
+      - name: Prior-week adherence notice is read-only and never duplicates the exam editor
+        run: |
+          set -euo pipefail
+          node scripts/weekly-adherence-ui-browser.cjs
+          echo 'GREEN: no false prior-week warnings, academic writes or duplicate edit control.'
