@@ -20,9 +20,14 @@ BEGIN
     WHERE id=1;
   SELECT id INTO STRICT v_program FROM private.exam_prep_program_versions
     WHERE program_key='math_as_p1_p5' AND version_key='p1_p5_canonical_v1_0' AND status='active';
-  SELECT id,content_version_id,assessment_version INTO STRICT v_assessment,v_cv,v_version
-    FROM private.exam_prep_assessments WHERE status='published'
-      AND assessment_type='learning' AND component_code='P1' ORDER BY id LIMIT 1;
+  -- AW1 release includes P1-QUA-01, not P1-CIR-01. Never bypass the
+  -- production content-runway trigger or pretend an unreleased skill is ready.
+  SELECT a.id,a.content_version_id,a.assessment_version INTO STRICT v_assessment,v_cv,v_version
+    FROM private.exam_prep_assessments a WHERE a.status='published'
+      AND a.assessment_type='learning' AND a.component_code='P1'
+      AND EXISTS(SELECT 1 FROM private.exam_prep_assessment_items ai
+        WHERE ai.assessment_id=a.id AND ai.primary_skill_code='P1-QUA-01')
+    ORDER BY a.id LIMIT 1;
   INSERT INTO auth.users(id,aud,role,email,created_at,updated_at,is_sso_user,is_anonymous)
     VALUES(v_uid,'authenticated','authenticated','previous-week-synthetic@invalid.example',now(),now(),false,false);
   INSERT INTO public.users(id,first_name,created_at,must_change_password)
@@ -51,12 +56,12 @@ BEGIN
     RETURNING id INTO v_plan;
   INSERT INTO private.exam_prep_weekly_plan_items(plan_id,priority_order,item_type,skill_code,
     action_code,action_payload,status,created_at)
-    VALUES(v_plan,1,'learning','P1-CIR-01','start_learning',
+    VALUES(v_plan,1,'learning','P1-QUA-01','BUILD_FIRST_COVERAGE',
       jsonb_build_object('assessment_id',v_assessment),'pending',v_start+interval '1 day');
   INSERT INTO private.exam_prep_weekly_goal_snapshots(user_id,program_version_id,component_code,
     active_week_no,priority_order,source_plan_id,item_type,skill_code,action_code,assessment_id,created_at)
-    VALUES(v_uid,v_program,'P1',1,1,v_plan,'learning','P1-CIR-01',
-      'start_learning',v_assessment,v_start+interval '1 day');
+    VALUES(v_uid,v_program,'P1',1,1,v_plan,'learning','P1-QUA-01',
+      'BUILD_FIRST_COVERAGE',v_assessment,v_start+interval '1 day');
   v_result:=public.get_exam_prep_previous_week_adherence_safe_v1('P1');
   IF v_result->>'status'<>'missed' OR (v_result->>'can_alert')::boolean IS DISTINCT FROM true
      OR (v_result->>'scheduled_goals')::int<>1 OR (v_result->>'completed_by_deadline')::int<>0 THEN
