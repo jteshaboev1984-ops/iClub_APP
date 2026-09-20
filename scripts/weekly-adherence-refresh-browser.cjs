@@ -5,12 +5,6 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const { chromium } = require('playwright');
 const source = n => path.resolve('exam-prep', n);
-const verdict = (component,status,nowDone,total) => ({
-  contract_version:'previous_week_adherence_v1', component_code:component,
-  active_week_no:1,status,can_alert:status==='missed',
-  scheduled_goals:total,completed_by_deadline:status==='completed_on_time'?total:0,
-  completed_now:nowDone,deferred_goals:0,week_ended_at:'2026-09-19T08:00:00Z'
-});
 (async()=>{
   const browser=await chromium.launch({headless:true});
   let cases=0;
@@ -23,7 +17,7 @@ const verdict = (component,status,nowDone,total) => ({
         await page.route(/^https?:\/\//,route=>route.abort());
         await page.setContent(`<!doctype html><html lang="${lang}"><body><div id="exam-prep-host-root" aria-hidden="false"><div data-ep-exam-plan-card="true"><button type="button" data-ep-exam-plan-edit="true">Change exam plan</button></div></div></body></html>`);
         await page.addStyleTag({path:source('exam-prep-host.css')});
-        await page.evaluate(([language,k])=>{
+        await page.evaluate(language=>{
           window.i18n={getLang:()=>language};
           window.iClubExamPrepProgressUxEnabled=true;
           window.iClubExamPrepWeeklyFlowEnabled=true;
@@ -45,7 +39,7 @@ const verdict = (component,status,nowDone,total) => ({
             }
             return {data:snapshot,error:null};
           }};
-        },[lang,kind]);
+        },lang);
         await page.addScriptTag({path:source('exam-prep-weekly-flow-adapter.js')});
         await page.addScriptTag({path:source('exam-prep-weekly-adherence-ui.js')});
         await page.waitForSelector('[data-ep-weekly-adherence-notice]');
@@ -82,7 +76,8 @@ const verdict = (component,status,nowDone,total) => ({
         assert.equal(await page.locator('[data-ep-exam-plan-edit]').count(),1);
         assert.equal(await page.locator('button').count(),1,'Extra plan editor added');
         const calls=await page.evaluate(()=>window.__refreshTest.calls);
-        assert.equal(calls.length,kind==='out_of_order'?6:4,`${lang}/${width}/${kind} expected one read pair per reconcile`);
+        assert.equal(calls.length,kind==='out_of_order'?6:kind==='revoked'?2:4,
+          `${lang}/${width}/${kind} expected one read pair per authorized reconcile`);
         assert.deepEqual(errors,[],`${lang}/${width}/${kind} browser errors`);
         cases++;
         await page.close();
