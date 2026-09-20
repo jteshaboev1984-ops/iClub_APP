@@ -30,7 +30,7 @@ DECLARE
   v_due int;
   v_on_time int;
   v_eventually int;
-  v_unmatched int;
+  v_deferred int;
   v_status text;
 BEGIN
   v_uid:=private.exam_prep_require_core_access_v1();
@@ -51,12 +51,13 @@ BEGIN
   -- The authoritative weekly clock is the profile creation timestamp, NOT
   -- browser dates, target-exam dates or an arbitrary midnight in a time zone.
   v_end:=v_profile.created_at+(v_prior::integer * interval '7 days');
-  IF clock_timestamp()<v_end THEN
+  IF now()<v_end THEN
     RETURN jsonb_build_object('contract_version','previous_week_adherence_v1',
       'component_code',p_component_code,'status','not_due','can_alert',false);
   END IF;
 
-  SELECT count(*)::int,min(p.id) INTO v_plan_count,v_plan_id
+  SELECT count(*)::int,(array_agg(p.id ORDER BY p.generated_at,p.id))[1]
+    INTO v_plan_count,v_plan_id
   FROM private.exam_prep_weekly_plans p
   WHERE p.user_id=v_uid AND p.program_version_id=v_profile.program_version_id
     AND p.component_code=p_component_code AND p.active_week_no=v_prior
@@ -131,7 +132,7 @@ BEGIN
          count(*) FILTER (WHERE was_due AND completed_at<v_end)::int,
          count(*) FILTER (WHERE was_due AND completed_at IS NOT NULL)::int,
          count(*) FILTER (WHERE NOT was_due)::int
-  INTO v_due,v_on_time,v_eventually,v_unmatched FROM qualified;
+  INTO v_due,v_on_time,v_eventually,v_deferred FROM qualified;
   IF v_due=0 THEN v_status:='no_due_goals';
   ELSIF v_on_time=v_due THEN v_status:='completed_on_time';
   ELSIF v_eventually=v_due THEN v_status:='caught_up';
@@ -140,7 +141,7 @@ BEGIN
     'component_code',p_component_code,'active_week_no',v_prior,
     'status',v_status,'can_alert',v_status='missed',
     'scheduled_goals',v_due,'completed_by_deadline',v_on_time,
-    'completed_now',v_eventually,'deferred_goals',v_unmatched,
+    'completed_now',v_eventually,'deferred_goals',v_deferred,
     'week_ended_at',v_end,'data_basis','frozen_goals_and_credited_sessions',
     'does_not_change_goals_or_grades',true);
 END;
