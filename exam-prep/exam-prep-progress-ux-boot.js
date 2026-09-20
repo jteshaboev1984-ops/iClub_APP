@@ -63,6 +63,28 @@
     });
   }
 
+  // Read-only notice belongs beside the EXISTING exam-plan editor. Never
+  // introduce another manual-replan control or block the rest of Progress UX.
+  function loadOptionalWeeklyAdherenceUi() {
+    if (window.iClubExamPrepWeeklyFlowEnabled !== true ||
+        internal.weeklyFlowApi?.version !== 'weekly_flow_adapter_v1') return Promise.resolve();
+    return new Promise((resolve,reject) => {
+      if (!stillEnabled()) { reject(new Error('weekly adherence disabled')); return; }
+      if (internal.weeklyAdherenceUi?.version === 'weekly_adherence_ui_v1') { resolve(); return; }
+      if (document.querySelector('script[data-exam-prep-weekly-adherence-ui]')) {
+        reject(new Error('weekly adherence asset already loading')); return;
+      }
+      const asset = document.createElement('script');
+      asset.dataset.examPrepWeeklyAdherenceUi = 'true';
+      asset.src = `${base}exam-prep-weekly-adherence-ui.js?v=weeklyadherence1`;
+      asset.async = false;
+      asset.onload = () => internal.weeklyAdherenceUi?.version === 'weekly_adherence_ui_v1' && stillEnabled()
+        ? resolve() : reject(new Error('weekly adherence asset unavailable'));
+      asset.onerror = () => reject(new Error('weekly adherence asset unavailable'));
+      root.appendChild(asset);
+    });
+  }
+
   async function boot() {
     try {
       stylesheet('stability','examPrepProgressUxStability');
@@ -91,6 +113,8 @@
         internal.progressUxViews?.version === 'progress_ux_v1');
       // Exam series, target grade and weekly time are already edited by the
       // existing Exam Plan card. Do not inject a second weekly-replan control.
+      try { await loadOptionalWeeklyAdherenceUi(); }
+      catch (_) { internal.weeklyAdherenceUiStatus='unavailable'; }
       internal.progressUxBootstrapStatus = stillEnabled() ? 'ready' : 'unavailable';
       if (!stillEnabled()) fail();
     } catch (_) { fail(); }
