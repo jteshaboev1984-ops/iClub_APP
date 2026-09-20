@@ -36,8 +36,6 @@
       seriesChanged: "Imtihon sessiyasi yangilandi. Oldingi natijalar tarixda saqlanadi. Yangi sessiyaga tayyorgarlik yangi to‘liq ishlar asosida baholanadi; P1 va P5 alohida hisoblanadi.",
       planChanged: "Reja yangilandi. Oldingi progress, tuzatishlar va qayta tekshiruvlar saqlandi.",
       savedWithoutReplan: "O‘zgarishlar saqlandi. Joriy haftaning vazifalari va tugallanmagan mashg‘ulotlar almashtirilmadi. Yangi sozlamalar navbatdagi haftalik reja yaratilganda hisobga olinadi.",
-      daySaved: "Kunlar bo‘yicha matematika vaqti saqlandi. Joriy haftadagi vazifalar o‘zgarmadi.",
-      loading: "Kunlar bo‘yicha vaqt yuklanmoqda. Biroz kuting.",
       unchanged: "O‘zgarish yo‘q. Joriy reja saqlandi."
     };
     if (language() === "en") return {
@@ -59,8 +57,6 @@
       seriesChanged: "Your exam series has been updated. Previous results remain in your history. Readiness for the new series will be based on new full papers; P1 and P5 remain separate.",
       planChanged: "Your plan has been updated. Previous progress, corrections and scheduled checks are kept.",
       savedWithoutReplan: "Your changes were saved. This week’s tasks and unfinished sessions were not replaced. The new settings will be considered when the next weekly plan is created.",
-      daySaved: "Your Mathematics hours by weekday were saved. Current-week tasks were not changed.",
-      loading: "Loading your weekday hours. Please wait a moment.",
       unchanged: "Nothing changed. Your current plan has been kept."
     };
     return {
@@ -82,8 +78,6 @@
       seriesChanged: "Экзаменационная сессия обновлена. Прежние результаты останутся в истории. Готовность к новой сессии будет оцениваться по новым полным работам; P1 и P5 по-прежнему учитываются отдельно.",
       planChanged: "План обновлён. Прежний прогресс, исправления и повторные проверки сохранены.",
       savedWithoutReplan: "Изменения сохранены. Задания текущей недели и незавершённые занятия не заменены. Новые настройки будут учтены при создании следующего недельного плана.",
-      daySaved: "Время на математику по дням сохранено. Задания текущей недели не изменились.",
-      loading: "Загружается время по дням. Подождите немного.",
       unchanged: "Изменений нет. Текущий план сохранён."
     };
   }
@@ -122,12 +116,14 @@
     if (!root || root.hidden || busy || !canUse() || !isDashboard(root)) return;
     if (root.querySelector("[data-ep-exam-plan-card]")) return;
     if (typeof internal.api?.examProfile !== "function") return;
+    // The observer can start overlapping requests. Keep the dashboard identity across the await.
     const dashboard = root.querySelector(".ep-live-dashboard-intro");
     if (!dashboard) return;
 
     let result;
     try { result = await internal.api.examProfile(); } catch (_) { return; }
     const profile = result?.ok ? result.data : null;
+    // Never paint a stale, hidden, replaced, unauthorized or already-hydrated view.
     if (!profileComplete(profile) || rootEl() !== root || !root.isConnected || root.hidden ||
         root.getAttribute("aria-hidden") === "true" || busy || !canUse() ||
         root.querySelector(".ep-live-dashboard-intro") !== dashboard ||
@@ -173,15 +169,8 @@
         <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(window.iClubExamPrepWeeklyFlowEnabled === true ? c.saveStable : c.save)}</button><button class="ep-live-btn secondary" type="button" data-ep-exam-plan-cancel>${esc(c.cancel)}</button></div>
       </form><div data-ep-exam-plan-error role="alert" aria-live="assertive"></div>
     </div></section>`;
-    const form = root.querySelector("[data-ep-exam-plan-form]");
-    form?.addEventListener("submit", save);
+    root.querySelector("[data-ep-exam-plan-form]")?.addEventListener("submit", save);
     root.querySelector("[data-ep-exam-plan-cancel]")?.addEventListener("click", reopenOverview);
-    // Add the optional seven-day distribution IN THIS FORM only. A missing
-    // script/server endpoint does not modify legacy editing or trigger replan.
-    if (window.iClubExamPrepWeeklyFlowEnabled === true &&
-        internal.weeklyDayHours?.version === 'weekly_day_availability_v1' && form) {
-      void internal.weeklyDayHours.decorate(form, profile);
-    }
   }
 
   async function save(event) {
@@ -197,34 +186,12 @@
       if (error) error.innerHTML = `<div class="ep-live-error">${esc(copy().invalid)}</div>`;
       return;
     }
-    const feature = internal.weeklyDayHours;
-    const dayStatus = form.dataset.epWeekdayHours;
-    if (dayStatus === 'loading' || dayStatus === 'stale') {
-      const message = dayStatus === 'stale' ? feature?.refreshMessage?.() : copy().loading;
-      if (error) error.innerHTML = `<div class="ep-live-error">${esc(message)}</div>`;
-      return;
-    }
-    const hasDayFields = dayStatus === 'ready';
-    if (hasDayFields && (window.iClubExamPrepWeeklyFlowEnabled !== true ||
-        feature?.version !== 'weekly_day_availability_v1')) {
-      if (error) error.innerHTML = `<div class="ep-live-error">${esc(copy().error)}</div>`;
-      return;
-    }
-    if (hasDayFields && !feature.read(form,mathHours).ok) {
-      if (error) error.innerHTML = `<div class="ep-live-error">${esc(feature.invalidMessage())}</div>`;
-      return;
-    }
 
     busy = true;
     try {
-      const result = hasDayFields
-        ? await feature.save(form, {examSeries, targetGrade, totalHours, mathHours})
-        : await internal.api.saveExamProfile({ examSeries, targetGrade, totalHours, mathHours });
+      const result = await internal.api.saveExamProfile({ examSeries, targetGrade, totalHours, mathHours });
       if (!result?.ok) {
-        const message = result?.reason === 'profile_changed_refresh_required'
-          ? feature.refreshMessage() : result?.reason === 'invalid_hours'
-          ? feature.invalidMessage() : copy().error;
-        if (error) error.innerHTML = `<div class="ep-live-error">${esc(message)}</div>`;
+        if (error) error.innerHTML = `<div class="ep-live-error">${esc(copy().error)}</div>`;
         return;
       }
       const data = result.data || {};
@@ -232,8 +199,7 @@
         ? (data.series_changed === true ? copy().seriesChanged + " " : "") + copy().savedWithoutReplan
         : data.series_changed === true
         ? copy().seriesChanged
-        : (data.target_changed === true || data.hours_changed === true ? copy().planChanged
-          : data.day_availability_saved === true ? copy().daySaved : copy().unchanged);
+        : (data.target_changed === true || data.hours_changed === true ? copy().planChanged : copy().unchanged);
       await reopenOverview();
     } catch (_) {
       if (error) error.innerHTML = `<div class="ep-live-error">${esc(copy().error)}</div>`;

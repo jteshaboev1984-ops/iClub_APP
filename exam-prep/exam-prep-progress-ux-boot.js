@@ -63,32 +63,6 @@
     });
   }
 
-  // Optional extension INSIDE the existing exam-plan editor only. A missing
-  // proposal RPC must not damage ordinary profile editing or Core navigation.
-  function loadOptionalWeeklyHours() {
-    if (window.iClubExamPrepWeeklyFlowEnabled !== true ||
-        internal.weeklyFlowApi?.version !== 'weekly_flow_adapter_v1') return Promise.resolve();
-    return new Promise((resolve,reject) => {
-      if (!stillEnabled()) { reject(new Error('weekly hours disabled')); return; }
-      if (internal.weeklyDayHours?.version === 'weekly_day_availability_v1') { resolve(); return; }
-      if (document.querySelector('script[data-exam-prep-weekly-hours]')) {
-        reject(new Error('weekly hours asset already loading')); return;
-      }
-      const style=document.createElement('link');
-      style.rel='stylesheet';style.dataset.examPrepWeeklyHoursStyle='true';
-      style.href=`${base}exam-prep-weekly-hours.css?v=weeklyhours1`;
-      root.appendChild(style);
-      const asset=document.createElement('script');
-      asset.dataset.examPrepWeeklyHours='true';
-      asset.src=`${base}exam-prep-weekly-hours.js?v=weeklyhours1`;
-      asset.async=false;
-      asset.onload=()=>internal.weeklyDayHours?.version==='weekly_day_availability_v1'&&stillEnabled()
-        ? resolve():reject(new Error('weekly hours contract unavailable'));
-      asset.onerror=()=>reject(new Error('weekly hours asset unavailable'));
-      root.appendChild(asset);
-    });
-  }
-
   // Read-only notice belongs beside the EXISTING exam-plan editor. Never
   // introduce another manual-replan control or block the rest of Progress UX.
   function loadOptionalWeeklyAdherenceUi() {
@@ -128,8 +102,6 @@
         internal.weeklyFlowBootstrapStatus = 'unavailable';
         window.iClubExamPrepWeeklyFlowEnabled = false;
       }
-      try { await loadOptionalWeeklyHours(); }
-      catch (_) { internal.weeklyDayHoursStatus='unavailable'; }
       if (!document.querySelector('link[data-exam-prep-progress-ux-style]')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
