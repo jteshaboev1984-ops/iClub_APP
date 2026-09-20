@@ -9,6 +9,7 @@ on:
       - 'exam-prep/exam-prep-api.js'
       - 'exam-prep/exam-prep-recovery.js'
       - 'exam-prep/exam-prep-exam-map.js'
+      - 'exam-prep/exam-prep-weekly-hours.js'
       - '.github/workflows/exam-prep-weekly-profile-recovery.yml'
   push:
     branches: ['fix/exam-prep-weekly-goal-flow-safe']
@@ -19,6 +20,7 @@ on:
       - 'exam-prep/exam-prep-api.js'
       - 'exam-prep/exam-prep-recovery.js'
       - 'exam-prep/exam-prep-exam-map.js'
+      - 'exam-prep/exam-prep-weekly-hours.js'
       - '.github/workflows/exam-prep-weekly-profile-recovery.yml'
 permissions:
   contents: read
@@ -38,7 +40,7 @@ jobs:
           set -euo pipefail
           test "$(git hash-object exam-prep/exam-prep-api.js)" = '6892ebcc6ed1effceb1be5387f42d030676f3632'
           test "$(git hash-object exam-prep/exam-prep-recovery.js)" = '5ba398241b2e2055c72362c9fa660b9f0c8f34c5'
-          test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '6d34b51f214799e1d35e3b13464938f2c941a7ea'
+          test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = 'a5f26cf7f346a155f0c98acada4e8d2058e0b528'
           node --check scripts/weekly-flow-profile-recovery-cutover.cjs
           node --check exam-prep/exam-prep-api.js
           node --check exam-prep/exam-prep-recovery.js
