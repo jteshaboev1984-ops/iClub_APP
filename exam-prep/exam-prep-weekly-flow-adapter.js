@@ -108,7 +108,39 @@
     return result;
   }
 
+  // Read-only previous-week verdict. Any incomplete or contradictory backend
+  // response must suppress the learner warning, never guess from a local clock.
+  async function adherence(component) {
+    const result = await rpc(component, 'get_exam_prep_previous_week_adherence_safe_v1', {
+      p_component_code: component
+    });
+    if (!result.ok) return result;
+    const data = result.data;
+    const quiet = ['not_due','no_verified_plan','ambiguous_plan','unverifiable_goals'];
+    const measurable = ['no_due_goals','completed_on_time','caught_up','missed'];
+    if (data.contract_version !== 'previous_week_adherence_v1' || data.component_code !== component ||
+        typeof data.can_alert !== 'boolean' || ![...quiet,...measurable].includes(data.status) ||
+        data.can_alert !== (data.status === 'missed')) return fail('invalid_adherence_contract');
+    if (measurable.includes(data.status)) {
+      const due = data.scheduled_goals;
+      const onTime = data.completed_by_deadline;
+      const nowDone = data.completed_now;
+      if (!Number.isInteger(data.active_week_no) || data.active_week_no < 1 || data.active_week_no > 35 ||
+          !Number.isInteger(due) || due < 0 || due > 3 ||
+          !Number.isInteger(onTime) || onTime < 0 || onTime > due ||
+          !Number.isInteger(nowDone) || nowDone < onTime || nowDone > due ||
+          (data.status === 'missed' && (due === 0 || nowDone === due)) ||
+          (data.status === 'caught_up' && (due === 0 || nowDone !== due || onTime === due)) ||
+          (data.status === 'completed_on_time' && (due === 0 || onTime !== due)) ||
+          (data.status === 'no_due_goals' && due !== 0) ||
+          typeof data.week_ended_at !== 'string' || !Number.isFinite(Date.parse(data.week_ended_at))) {
+        return fail('invalid_adherence_contract');
+      }
+    }
+    return result;
+  }
+
   // Exam-series, target and time edits use the existing Exam Plan UI/API.
   // No parallel manual weekly-replan entrypoint is exported.
-  internal.weeklyFlowApi = Object.freeze({ version: CONTRACT, allowed, recover, plan, goal, authorize, start });
+  internal.weeklyFlowApi = Object.freeze({ version: CONTRACT, allowed, recover, plan, goal, authorize, start, adherence });
 })();
