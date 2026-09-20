@@ -76,3 +76,16 @@ for(const script of ['scripts/weekly-flow-atomic-dispatch-smoke.cjs',
   assert.equal(test.status,0,`Isolated candidate test ${script} failed: ${(test.stderr||'').slice(-2500)}`);
 }
 console.log('ATOMIC CANDIDATE ISOLATED GREEN only. Live old RPC bypass remains a deployment blocker.');
+// A separate READ-ONLY query must use frozen goals and actual session credit.
+// Reuse the already-created disposable PG17, then roll back the synthetic learner.
+for(const file of [
+  'docs/patch-proposals/20260920_exam_prep_previous_week_adherence_readonly_v1.sql',
+  'supabase/tests/exam_prep_previous_week_adherence_isolated_matrix.sql'
+]) {
+  const check=spawnSync('psql',['-X','-v','ON_ERROR_STOP=1','-f',file],{
+    env,encoding:'utf8',timeout:60000
+  });
+  if(check.stdout) process.stdout.write(check.stdout.slice(-2500));
+  assert.equal(check.status,0,`Isolated prior-week adherence failed in ${file}: ${(check.stderr||'').slice(-3000)}`);
+}
+console.log('PREVIOUS WEEK ADHERENCE isolated SQL GREEN: no academic writes, synthetic learner rolled back.');
