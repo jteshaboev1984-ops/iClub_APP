@@ -1,6 +1,6 @@
 /* Exam Prep weekly-flow opt-in adapter. NOT enabled by default, not a release switch.
  * Dedicated methods only: never replace internal.api or intercept a Core RPC.
- * Requires separately approved/installled server proposal RPCs before use.
+ * Requires separately approved/installed server proposal RPCs before use.
  */
 (() => {
   'use strict';
@@ -107,6 +107,40 @@
       'stale', 'content_exhausted'].includes(result.data.status)) return fail('invalid_start_status');
     return result;
   }
+  // Only a direct, confirmed user action can request a same-week revision.
+  // The server checks exact old plan, frozen goals, active sessions and history.
+  async function replan(component, expectedPlanId, requestKey) {
+    const blocked = allowed(component);
+    if (blocked) return blocked;
+    if (!identity(expectedPlanId) || typeof requestKey !== 'string' ||
+        requestKey.length < 16 || requestKey.length > 160) return fail('invalid_replan_identity');
+    const recovery = await recover(component);
+    if (!recovery.ok) return recovery;
+    if (recoveryStatus(recovery.data)) {
+      return Object.freeze({ ok: true, data: { status: 'finish_current_session_first', recovery: recovery.data } });
+    }
+    const result = await rpc(component, 'request_exam_prep_explicit_weekly_replan_safe_v1', {
+      p_component_code: component, p_expected_plan_id: expectedPlanId,
+      p_reason_code: 'manual_review', p_request_key: requestKey, p_confirmed: true
+    });
+    if (!result.ok) {
+      // Network failure may occur AFTER the server committed. No automatic
+      // second write; the student must reopen and read the authoritative plan.
+      if (['network_unavailable','server_rejected','invalid_server_contract'].includes(result.reason)) {
+        return fail('replan_outcome_unknown');
+      }
+      return result;
+    }
+    const status = result.data.status;
+    if (!['replanned','already_applied','stale','request_key_conflict','confirmation_required',
+      'finish_current_session_first','weekly_work_preserved','goal_review_required'].includes(status)) {
+      return fail('invalid_replan_contract');
+    }
+    if (['replanned','already_applied'].includes(status) &&
+        (!identity(result.data.plan_id) || result.data.previous_plan_id !== expectedPlanId ||
+         result.data.goals_preserved !== true)) return fail('invalid_replan_contract');
+    return result;
+  }
 
-  internal.weeklyFlowApi = Object.freeze({ version: CONTRACT, allowed, recover, plan, goal, authorize, start });
+  internal.weeklyFlowApi = Object.freeze({ version: CONTRACT, allowed, recover, plan, goal, authorize, start, replan });
 })();
