@@ -86,7 +86,7 @@ const candidate=spawnSync('psql',['-X','-v','ON_ERROR_STOP=1','-f',
     env,encoding:'utf8',timeout:30000
   });
 assert.equal(candidate.status,0,`Atomic candidate SQL refused: ${(candidate.stderr||'').slice(-2500)} ${(candidate.stdout||'').slice(-700)}`);
-console.log('Atomic SQL compiled in disposable PG17; no enrollments.');
+console.log('Atomic SQL compiled in disposable PG17; no enrollments at installation.');
 for(const script of ['scripts/weekly-flow-atomic-dispatch-smoke.cjs',
                      'scripts/weekly-flow-atomic-dispatch-race.cjs',
                      'scripts/weekly-flow-atomic-dispatch-nonplan.cjs']) {
@@ -110,8 +110,12 @@ for(const file of [
 console.log('PREVIOUS WEEK ADHERENCE isolated SQL GREEN: synthetic learner rolled back.');
 assert.equal(named(sql(counts),'COUNTS'),before,'Candidate tests changed existing synthetic academic fixture');
 
-// Verify a rollback refuses to run while Core is enabled or any learner is
-// enrolled. Feature flag OFF and separate consent are mandatory release gates.
+// Release rollback must refuse until Core is OFF and each learner has been
+// explicitly unenrolled. The candidate's separate smoke/race tests leave
+// synthetic enrolled users, so both gates are exercised independently.
+const flagOff=`UPDATE private.exam_prep_feature_config SET rollout_state='off',
+ core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true
+ WHERE program_key='math_as_p1_p5';`;
 const rollbackGuard=`DO $guard$
 BEGIN
  IF NOT EXISTS (SELECT 1 FROM private.exam_prep_feature_config
@@ -130,16 +134,21 @@ $guard$;`;
 const refused=execute(`BEGIN;${rollbackGuard}ROLLBACK;`);
 assert.notEqual(refused.status,0,'Rollback must refuse while Core is enabled');
 assert.match(refused.stderr||'',/rollback_requires_core_off/);
-console.log('Rollback refused while Core enabled, without modifying a public function.');
+const enrolledCount=Number(named(sql(`SELECT 'ENROLLED='||count(*)
+FROM private.exam_prep_weekly_flow_enrollment_v1 WHERE enabled IS TRUE;`),'ENROLLED'));
+assert.ok(enrolledCount>0,'Synthetic enrolled users required to test rollback refusal');
+const refusedEnrolled=execute(`BEGIN;${flagOff}${rollbackGuard}ROLLBACK;`);
+assert.notEqual(refusedEnrolled.status,0,'Rollback must refuse while any enrolled learner remains');
+assert.match(refusedEnrolled.stderr||'',/rollback_requires_zero_enrolled_learners/);
+console.log('Rollback refused with Core ON and independently refused with synthetic enrolled users.');
 
-// Simulate flag OFF + restoration IN ONE TRANSACTION, then roll the rehearsal
-// transaction BACK so the candidate remains installed for the next positive
-// first-plan test. Restoring all seven public bodies by COMMIT is a separate,
-// explicitly authorized production operation, NOT performed here.
+// Simulate explicit synthetic unenrollment and flag OFF IN ONE TRANSACTION;
+// restore all seven public bodies, then roll the rehearsal BACK so candidate
+// remains installed for the next first-plan fixture. This never alters live
+// enrollment and does not silently delete approved learner records.
 const restored=sql(`BEGIN;
-UPDATE private.exam_prep_feature_config SET rollout_state='off',
- core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true
- WHERE program_key='math_as_p1_p5';
+${flagOff}
+UPDATE private.exam_prep_weekly_flow_enrollment_v1 SET enabled=false WHERE enabled IS TRUE;
 ${rollbackGuard}
 DO $restore$
 DECLARE v_fn record;
@@ -169,11 +178,14 @@ JOIN pg_proc p ON p.oid=b.function_oid
 WHERE md5(pg_get_functiondef(p.oid))=b.original_md5
  AND p.proacl::text IS NOT DISTINCT FROM b.original_acl;
 ROLLBACK;`);
-assert.equal(named(restored,'RESTORED'),'7','Seven public RPC bodies/grants were not restored inside rehearsal');
+assert.equal(named(restored,'RESTORED'),'7','Seven public RPC bodies/grants not restored within rehearsal');
 assert.equal(named(sql(counts),'COUNTS'),before,'Rehearsal rollback altered synthetic student records');
+assert.equal(Number(named(sql(`SELECT 'ENROLLED='||count(*)
+FROM private.exam_prep_weekly_flow_enrollment_v1 WHERE enabled IS TRUE;`),'ENROLLED')),enrolledCount,
+  'Uncommitted rehearsal may not change synthetic enrollment');
 const post=sql(`SELECT 'CANDIDATE='||count(*) FROM weekly_goal_ci.rpc_restore_baseline b
  JOIN pg_proc p ON p.oid=b.function_oid
  WHERE md5(pg_get_functiondef(p.oid)) IS DISTINCT FROM b.original_md5;`);
-assert.equal(named(post,'CANDIDATE'),'7','Uncommitted restoration must not replace the seven candidate RPCs');
-console.log('ROLLBACK REHEARSAL GREEN: exact seven originals restored within transaction, then rolled back; candidate remains for next test.');
+assert.equal(named(post,'CANDIDATE'),'7','Uncommitted restoration must not replace seven candidate RPCs');
+console.log('ROLLBACK REHEARSAL GREEN: seven exact originals restored within transaction, then rolled back; candidate retained.');
 console.log('Production compatibility SQL, rollback and rollout remain BLOCKED pending separate approval.');
