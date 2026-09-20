@@ -63,6 +63,28 @@
     });
   }
 
+  // A presentation-only action on verified weekly goal cards. It cannot enable
+  // the server feature or affect the existing (flag OFF) live application.
+  function loadOptionalWeeklyReplanUi() {
+    if (window.iClubExamPrepWeeklyFlowEnabled !== true ||
+        internal.weeklyFlowApi?.version !== 'weekly_flow_adapter_v1') return Promise.resolve();
+    return new Promise((resolve,reject) => {
+      if (!stillEnabled()) { reject(new Error('weekly review disabled')); return; }
+      if (internal.weeklyReplanUi?.version === 'weekly_replan_ui_v1') { resolve(); return; }
+      if (document.querySelector('script[data-exam-prep-weekly-replan-ui]')) {
+        reject(new Error('weekly review asset already loading')); return;
+      }
+      const asset=document.createElement('script');
+      asset.dataset.examPrepWeeklyReplanUi='true';
+      asset.src=`${base}exam-prep-weekly-replan-ui.js?v=weeklyreplan1`;
+      asset.async=false;
+      asset.onload=() => internal.weeklyReplanUi?.version === 'weekly_replan_ui_v1' && stillEnabled()
+        ? resolve() : reject(new Error('weekly review contract unavailable'));
+      asset.onerror=() => reject(new Error('weekly review asset unavailable'));
+      root.appendChild(asset);
+    });
+  }
+
   async function boot() {
     try {
       stylesheet('stability','examPrepProgressUxStability');
@@ -89,6 +111,8 @@
       }
       await loadScript('ui', 'examPrepProgressUxUi', () =>
         internal.progressUxViews?.version === 'progress_ux_v1');
+      try { await loadOptionalWeeklyReplanUi(); }
+      catch (_) { internal.weeklyReplanUiStatus='unavailable'; }
       internal.progressUxBootstrapStatus = stillEnabled() ? 'ready' : 'unavailable';
       if (!stillEnabled()) fail();
     } catch (_) { fail(); }
