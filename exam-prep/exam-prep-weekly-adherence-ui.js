@@ -8,6 +8,9 @@
   const VERSION = 'weekly_adherence_ui_v1';
   if (internal.weeklyAdherenceUi) return;
   const checked = new WeakSet();
+  // Each refresh supersedes earlier in-flight reads for the SAME card. A slow
+  // previous response cannot resurrect a warning after the session is saved.
+  const generations = new WeakMap();
   const COPY = {
     ru: {
       header: 'Недельный план требует внимания',
@@ -44,6 +47,9 @@
   function cardFor(root) {
     return root?.querySelector('[data-ep-exam-plan-card]');
   }
+  function clearNotice(card) {
+    card?.querySelector('[data-ep-weekly-adherence-notice]')?.remove();
+  }
   function validAlert(result,component) {
     const d = result?.ok ? result.data : null;
     if (!d || d.contract_version !== 'previous_week_adherence_v1' ||
@@ -56,41 +62,51 @@
         !Number.isInteger(d.active_week_no) || d.active_week_no < 1 || d.active_week_no > 35) return null;
     return d;
   }
-  async function hydrate() {
+  async function hydrate(force = false) {
     const root = document.querySelector('#exam-prep-host-root');
     const card = cardFor(root);
-    if (!ready(root) || !card || checked.has(card)) return;
+    if (!ready(root) || !card) { clearNotice(card); return; }
+    if (!force && checked.has(card)) return;
     checked.add(card);
+    const stamp = (generations.get(card) || 0) + 1;
+    generations.set(card, stamp);
     const lang = language();
     // Both components are read separately, and neither may borrow credit from the other.
     const results = await Promise.allSettled(['P1','P5'].map(component =>
       internal.weeklyFlowApi.adherence(component)));
-    if (!ready(root) || cardFor(root) !== card || !card.isConnected || language() !== lang) return;
+    if (generations.get(card) !== stamp || !ready(root) ||
+        cardFor(root) !== card || !card.isConnected || language() !== lang) {
+      if (generations.get(card) === stamp && !ready(root)) clearNotice(card);
+      return;
+    }
     const missed = ['P1','P5'].map((component,index) =>
       results[index].status === 'fulfilled' ? validAlert(results[index].value,component) : null
     ).filter(Boolean);
-    if (!missed.length || card.querySelector('[data-ep-weekly-adherence-notice]')) return;
+    // Completed, malformed or unavailable server evidence must not leave a
+    // stale warning on the screen after a session-finalized event.
+    if (!missed.length) { clearNotice(card); return; }
     const c = COPY[lang];
-    const notice = document.createElement('div');
+    const notice = card.querySelector('[data-ep-weekly-adherence-notice]') || document.createElement('div');
     notice.className = 'ep-live-notice';
     notice.dataset.epWeeklyAdherenceNotice = 'true';
     notice.setAttribute('role','status');
     notice.setAttribute('aria-live','polite');
     const title = document.createElement('strong');
     title.textContent = c.header;
-    notice.append(title);
+    const content = [title];
     for (const entry of missed) {
       const line = document.createElement('div');
       line.className = 'ep-live-meta';
       line.textContent = c.count(entry.component_code,entry.completed_now,entry.scheduled_goals);
-      notice.append(line);
+      content.push(line);
     }
     const body = document.createElement('p');
     body.className = 'ep-live-meta';
     body.textContent = c.body;
-    notice.append(body);
+    content.push(body);
+    notice.replaceChildren(...content);
     // Notice belongs inside the existing exam-plan card. No second edit button.
-    card.append(notice);
+    if (!notice.isConnected) card.append(notice);
   }
   let scheduled = false;
   function scan() {
@@ -104,5 +120,8 @@
     observer.observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','aria-hidden']});
     scan();
   }
+  // The existing Core API emits this only after a successful finalize result.
+  // Refresh READ-ONLY instead of waiting for the whole Exam Plan to be rebuilt.
+  window.addEventListener('iclub:exam-prep-session-ended', () => { void hydrate(true); });
   internal.weeklyAdherenceUi = Object.freeze({version:VERSION});
 })();
