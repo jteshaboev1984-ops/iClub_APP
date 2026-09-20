@@ -1,4 +1,4 @@
--- DISPOSABLE PostgreSQL ONLY. Stage 0 -> genuine first plan -> explicit revision.
+-- DISPOSABLE PostgreSQL ONLY. Stage 0 -> genuine first plan -> stable frozen goals.
 -- Evidence is synthetic STRUCTURAL test data, not actual marked learner work.
 -- Do not run against production. Entire learner scenario rolls back.
 \set ON_ERROR_STOP on
@@ -9,17 +9,13 @@ DO $$ BEGIN
    RAISE EXCEPTION 'FIRST-WEEK FIXTURE REFUSED: isolated DB plus atomic proposal required';
  END IF;
 END $$;
--- Install the DRAFT replan proposal in the disposable service ONLY, after the
--- preceding CI step installed the atomic dispatch. Never install on production.
-\i docs/patch-proposals/20260920_exam_prep_explicit_weekly_replan_v1.sql
 BEGIN;
 DO $test$
 DECLARE
  v_uid uuid:=gen_random_uuid(); v_program bigint; v_assessment bigint;
  v_cv bigint; v_version text; v_auth uuid; v_session uuid;
  v_plan jsonb; v_second jsonb; v_goals jsonb; v_plan_id uuid;
- v_replan jsonb; v_repeat jsonb; v_stale jsonb; v_blocked_replan jsonb;
- v_goals_before jsonb; v_goals_after jsonb; v_new_plan uuid;
+ v_goals_before jsonb; v_goals_after jsonb;
  v_count int; v_areas int; v_reserved int; v_blocked boolean:=false; v_error text;
 BEGIN
  SELECT id INTO STRICT v_program FROM private.exam_prep_program_versions
@@ -145,81 +141,25 @@ BEGIN
    INTO v_goals_before FROM private.exam_prep_weekly_goal_snapshots
    WHERE user_id=v_uid AND component_code='P1';
 
- -- Only an explicit confirmed request may replace this still-unattempted plan.
- v_blocked_replan:=public.request_exam_prep_explicit_weekly_replan_safe_v1(
-   'P1',v_plan_id,'manual_review','ci-first-explicit-denied-01',false);
- IF v_blocked_replan->>'status'<>'confirmation_required' THEN
-   RAISE EXCEPTION 'Unconfirmed plan was changed: %',v_blocked_replan;
- END IF;
- v_replan:=public.request_exam_prep_explicit_weekly_replan_safe_v1(
-   'P1',v_plan_id,'manual_review','ci-first-explicit-approved-01',true);
- IF v_replan->>'status'<>'replanned' OR v_replan->>'goals_preserved'<>'true'
-    OR (v_replan->>'previous_plan_id')::uuid<>v_plan_id THEN
-   RAISE EXCEPTION 'Explicit revision failed: %',v_replan;
- END IF;
- v_new_plan:=(v_replan->>'plan_id')::uuid;
- IF v_new_plan=v_plan_id OR (SELECT count(*) FROM private.exam_prep_weekly_plans
-      WHERE user_id=v_uid AND component_code='P1' AND status='active')<>1
-    OR (SELECT status FROM private.exam_prep_weekly_plans WHERE id=v_plan_id)<>'superseded'
-    OR (SELECT count(*) FROM private.exam_prep_explicit_weekly_replan_events_v1 WHERE user_id=v_uid)<>1 THEN
-   RAISE EXCEPTION 'Revision did not atomically replace only the plan';
- END IF;
+ -- Reopening the one existing exam plan must not regenerate weekly tasks or goals.
+ v_second:=public.ensure_exam_prep_stable_weekly_plan_safe_v1('P1');
+ v_goals:=public.ensure_exam_prep_weekly_goals_safe_v1('P1');
  SELECT jsonb_agg(jsonb_build_array(id,source_plan_id,priority_order,action_code) ORDER BY priority_order)
    INTO v_goals_after FROM private.exam_prep_weekly_goal_snapshots
    WHERE user_id=v_uid AND component_code='P1';
- IF v_goals_after IS DISTINCT FROM v_goals_before THEN
-   RAISE EXCEPTION 'Replan rewrote frozen goal identities';
+ IF v_second->>'status'<>'existing' OR (v_second->>'plan_id')::uuid<>v_plan_id
+    OR (v_goals->>'created')::int<>0 OR v_goals_after IS DISTINCT FROM v_goals_before
+    OR (SELECT count(*) FROM private.exam_prep_weekly_plans WHERE user_id=v_uid AND component_code='P1')<>1 THEN
+   RAISE EXCEPTION 'Reopening duplicated/replaced first weekly plan or goals';
  END IF;
- v_repeat:=public.request_exam_prep_explicit_weekly_replan_safe_v1(
-   'P1',v_plan_id,'manual_review','ci-first-explicit-approved-01',true);
- IF v_repeat->>'status'<>'already_applied' OR (v_repeat->>'plan_id')::uuid<>v_new_plan THEN
-   RAISE EXCEPTION 'Replayed request duplicated the plan: %',v_repeat;
- END IF;
- v_stale:=public.request_exam_prep_explicit_weekly_replan_safe_v1(
-   'P1',v_plan_id,'manual_review','ci-first-explicit-stale-02',true);
- IF v_stale->>'status'<>'stale' THEN RAISE EXCEPTION 'Old-tab revision not denied: %',v_stale; END IF;
- v_second:=public.ensure_exam_prep_stable_weekly_plan_safe_v1('P1');
- IF (v_second->>'plan_id')::uuid<>v_new_plan OR v_second->>'status'<>'existing' THEN
-   RAISE EXCEPTION 'Revision not stable upon reopening';
- END IF;
-
- -- A real active plan session on the revised plan must win over replanning.
- SELECT id,content_version_id,assessment_version INTO STRICT v_assessment,v_cv,v_version
- FROM private.exam_prep_assessments WHERE status='published'
-   AND assessment_type='learning' AND component_code='P1' ORDER BY id LIMIT 1;
- INSERT INTO private.exam_prep_session_authorizations
- (user_id,assessment_id,component_code,purpose,status,valid_until,reason,plan_id,plan_priority_order)
- VALUES(v_uid,v_assessment,'P1','learning','issued',now()+interval '1 hour',
-   'CI active revised-plan session',v_new_plan,1) RETURNING id INTO v_auth;
- INSERT INTO private.exam_prep_sessions
- (authorization_id,user_id,program_version_id,content_version_id,assessment_id,
- assessment_version,component_code,session_type,status,client_idempotency_key,total_items)
- VALUES(v_auth,v_uid,v_program,v_cv,v_assessment,v_version,'P1','learning',
- 'active','ci-explicit-active-session-01',1) RETURNING id INTO v_session;
- UPDATE private.exam_prep_session_authorizations
- SET status='consumed',consumed_at=now(),consumed_session_id=v_session WHERE id=v_auth;
- v_blocked_replan:=public.request_exam_prep_explicit_weekly_replan_safe_v1(
-   'P1',v_new_plan,'manual_review','ci-first-explicit-active-03',true);
- IF v_blocked_replan->>'status'<>'finish_current_session_first'
-    OR (v_blocked_replan->'recovery'->>'session_id')::uuid<>v_session
-    OR (SELECT count(*) FROM private.exam_prep_weekly_plans
-        WHERE user_id=v_uid AND component_code='P1')<>2 THEN
-   RAISE EXCEPTION 'Unfinished study session was not preserved: %',v_blocked_replan;
- END IF;
- IF EXISTS(SELECT 1 FROM private.exam_prep_weekly_plans WHERE user_id=v_uid AND component_code='P5')
-   OR EXISTS(SELECT 1 FROM private.exam_prep_evidence_events WHERE user_id=v_uid AND component_code='P5') THEN
-   RAISE EXCEPTION 'Explicit P1 revision contaminated P5';
- END IF;
- RAISE NOTICE 'PASS first-week genuine plan, explicit revision, frozen goals, replay, old-tab denial, unfinished session and P5 separation';
+ RAISE NOTICE 'PASS first-week genuine plan, frozen goals, repeated open, diagnostic reserves and P5 separation';
 END;
 $test$;
 ROLLBACK;
 DO $$ BEGIN
  IF EXISTS(SELECT 1 FROM public.users WHERE first_name='FirstWeekSyntheticFixture') OR
- EXISTS(SELECT 1 FROM auth.users WHERE email='first-week-synthetic@invalid.example') OR
- EXISTS(SELECT 1 FROM private.exam_prep_explicit_weekly_replan_events_v1 e
-         JOIN public.users u ON u.id=e.user_id WHERE u.first_name='FirstWeekSyntheticFixture') THEN
-   RAISE EXCEPTION 'First-week synthetic learner or revision survived ROLLBACK';
+ EXISTS(SELECT 1 FROM auth.users WHERE email='first-week-synthetic@invalid.example') THEN
+   RAISE EXCEPTION 'First-week synthetic learner survived ROLLBACK';
  END IF;
  RAISE NOTICE 'FIRST-WEEK SYNTHETIC ZERO RESIDUE';
 END $$;
