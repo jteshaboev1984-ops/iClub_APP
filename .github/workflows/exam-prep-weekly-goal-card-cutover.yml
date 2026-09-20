@@ -5,22 +5,22 @@ on:
     paths:
       - 'scripts/weekly-flow-goal-card-cutover.cjs'
       - 'scripts/weekly-flow-goal-card-browser.cjs'
-      - 'scripts/weekly-replan-ui-browser.cjs'
       - '.github/workflows/exam-prep-weekly-goal-card-cutover.yml'
       - 'exam-prep/exam-prep-progress-ux-ui.js'
-      - 'exam-prep/exam-prep-weekly-replan-ui.js'
+      - 'exam-prep/exam-prep-progress-ux-boot.js'
       - 'exam-prep/exam-prep-weekly-flow-adapter.js'
+      - 'exam-prep/exam-prep-exam-map.js'
       - 'exam-prep/exam-prep-progress-ux.css'
   push:
     branches: ['fix/exam-prep-weekly-goal-flow-safe']
     paths:
       - 'scripts/weekly-flow-goal-card-cutover.cjs'
       - 'scripts/weekly-flow-goal-card-browser.cjs'
-      - 'scripts/weekly-replan-ui-browser.cjs'
       - '.github/workflows/exam-prep-weekly-goal-card-cutover.yml'
       - 'exam-prep/exam-prep-progress-ux-ui.js'
-      - 'exam-prep/exam-prep-weekly-replan-ui.js'
+      - 'exam-prep/exam-prep-progress-ux-boot.js'
       - 'exam-prep/exam-prep-weekly-flow-adapter.js'
+      - 'exam-prep/exam-prep-exam-map.js'
       - 'exam-prep/exam-prep-progress-ux.css'
 permissions:
   contents: read
@@ -35,19 +35,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify audited goal UI and confirmed review scripts
+      - name: Verify one exam-plan editor and goal binding
         run: |
           set -euo pipefail
           node --check scripts/weekly-flow-goal-card-cutover.cjs
-          node --check exam-prep/exam-prep-progress-ux-ui.js
-          node --check exam-prep/exam-prep-weekly-replan-ui.js
           node --check scripts/weekly-flow-goal-card-browser.cjs
-          node --check scripts/weekly-replan-ui-browser.cjs
+          node --check exam-prep/exam-prep-progress-ux-ui.js
+          node --check exam-prep/exam-prep-progress-ux-boot.js
+          node --check exam-prep/exam-prep-weekly-flow-adapter.js
+          node --check exam-prep/exam-prep-exam-map.js
+          grep -Fq 'data-ep-exam-plan-edit' exam-prep/exam-prep-exam-map.js
           grep -Fq 'async function promoteGoalActions' exam-prep/exam-prep-progress-ux-ui.js
           grep -Fq 'await showPlan(target,data,component)' exam-prep/exam-prep-progress-ux-ui.js
           grep -Fq 'ep-pux-goal-action' exam-prep/exam-prep-progress-ux.css
+          ! grep -q 'loadOptionalWeeklyReplanUi\|exam-prep-weekly-replan-ui' exam-prep/exam-prep-progress-ux-boot.js
+          ! grep -q 'request_exam_prep_explicit_weekly_replan_safe_v1\|async function replan' exam-prep/exam-prep-weekly-flow-adapter.js
+          test ! -e exam-prep/exam-prep-weekly-replan-ui.js
           test -z "$(git diff --name-only)"
           node scripts/progress-ux-model-regression.cjs
+          node scripts/weekly-flow-adapter-regression.cjs
       - name: Install Chromium for genuine RU UZ EN native-and-goal UI
         run: |
           npm install --no-save playwright@1.55.0
@@ -56,9 +62,4 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/weekly-flow-goal-card-browser.cjs
-          echo 'GREEN: verified goal ordering and actions; production database untouched.'
-      - name: Explicit plan-review student scenario in RU UZ EN
-        run: |
-          set -euo pipefail
-          node scripts/weekly-replan-ui-browser.cjs
-          echo 'GREEN: review requires confirmation and never silently retries an uncertain write.'
+          echo 'GREEN: existing exam-plan editor only; verified goal ordering and actions; production database untouched.'
