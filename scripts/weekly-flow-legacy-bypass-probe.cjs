@@ -1,6 +1,6 @@
 'use strict';
-// EXPECTED-FAILURE SAFETY PROBE, isolated atomic-candidate tests and exact rollback.
-// Requires the committed SYNTHETIC fixture from weekly-flow-two-connection.cjs.
+// EXPECTED-FAILURE SAFETY PROBE, isolated atomic-candidate tests and rollback rehearsal.
+// Requires committed SYNTHETIC fixture from weekly-flow-two-connection.cjs.
 // Every SQL write here is REFUSED outside disposable GitHub Actions PostgreSQL.
 const assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process');
@@ -57,10 +57,9 @@ assert.equal(named(def,'DIRECT'),'true:true','Legacy generator shape changed: re
 assert.equal(named(sql(counts),'COUNTS'),before,'Baseline observation unexpectedly changed synthetic fixture');
 console.log('BLOCKER REPRODUCED: old starter returns a finalized ID; old generator can supersede plans.');
 
-// Capture the exact seven pre-dispatch public definitions and privileges BEFORE
-// installing the candidate. Four are existing Core RPCs, three are draft guarded
-// RPCs also rewritten by the dispatcher. A v3 private clone is NOT a valid
-// rollback source: its delegation was deliberately rewritten to private v2.
+// Snapshot seven exact public definitions BEFORE candidate installation. Four
+// are deployed Core entrypoints and three are draft RPCs modified by dispatch.
+// A private v3 clone is NOT a valid rollback source: it delegates to private v2.
 const baseline=sql(`
 CREATE TABLE weekly_goal_ci.rpc_restore_baseline AS
 WITH required(ordinal,signature) AS (VALUES
@@ -79,15 +78,15 @@ SELECT r.ordinal,r.signature,p.oid AS function_oid,
  p.prosecdef AS original_security,p.provolatile AS original_volatility
 FROM required r JOIN pg_proc p ON p.oid=to_regprocedure(r.signature);
 SELECT 'BASELINE='||count(*) FROM weekly_goal_ci.rpc_restore_baseline;`);
-assert.equal(named(baseline,'BASELINE'),'7','All seven exact public RPCs must exist before patch');
-console.log('Captured seven original public function definitions and permissions in disposable-only fixture.');
+assert.equal(named(baseline,'BASELINE'),'7','All seven original public functions required');
+console.log('Captured seven original public function definitions/permissions in disposable-only fixture.');
 console.log('Applying review-only atomic candidate to DISPOSABLE PG17.');
 const candidate=spawnSync('psql',['-X','-v','ON_ERROR_STOP=1','-f',
   'docs/patch-proposals/20260919_exam_prep_atomic_legacy_rpc_dispatch_v1.sql'],{
     env,encoding:'utf8',timeout:30000
   });
 assert.equal(candidate.status,0,`Atomic candidate SQL refused: ${(candidate.stderr||'').slice(-2500)} ${(candidate.stdout||'').slice(-700)}`);
-console.log('Atomic SQL transaction compiled in disposable PG17; no enrollments.');
+console.log('Atomic SQL compiled in disposable PG17; no enrollments.');
 for(const script of ['scripts/weekly-flow-atomic-dispatch-smoke.cjs',
                      'scripts/weekly-flow-atomic-dispatch-race.cjs',
                      'scripts/weekly-flow-atomic-dispatch-nonplan.cjs']) {
@@ -98,7 +97,6 @@ for(const script of ['scripts/weekly-flow-atomic-dispatch-smoke.cjs',
   assert.equal(test.status,0,`Isolated candidate test ${script} failed: ${(test.stderr||'').slice(-2500)}`);
 }
 console.log('ATOMIC CANDIDATE ISOLATED GREEN only. Live old RPC bypass remains a deployment blocker.');
-// A separate READ-ONLY query must use frozen goals and actual session credit.
 for(const file of [
   'docs/patch-proposals/20260920_exam_prep_previous_week_adherence_readonly_v1.sql',
   'supabase/tests/exam_prep_previous_week_adherence_isolated_matrix.sql'
@@ -110,10 +108,10 @@ for(const file of [
   assert.equal(check.status,0,`Isolated prior-week adherence failed in ${file}: ${(check.stderr||'').slice(-3000)}`);
 }
 console.log('PREVIOUS WEEK ADHERENCE isolated SQL GREEN: synthetic learner rolled back.');
-assert.equal(named(sql(counts),'COUNTS'),before,'Candidate tests unexpectedly changed existing synthetic academic fixture');
+assert.equal(named(sql(counts),'COUNTS'),before,'Candidate tests changed existing synthetic academic fixture');
 
-// A rollback is prohibited while the program is enabled or a learner remains
-// enrolled. These are release gates, not a request to turn production off.
+// Verify a rollback refuses to run while Core is enabled or any learner is
+// enrolled. Feature flag OFF and separate consent are mandatory release gates.
 const rollbackGuard=`DO $guard$
 BEGIN
  IF NOT EXISTS (SELECT 1 FROM private.exam_prep_feature_config
@@ -132,15 +130,16 @@ $guard$;`;
 const refused=execute(`BEGIN;${rollbackGuard}ROLLBACK;`);
 assert.notEqual(refused.status,0,'Rollback must refuse while Core is enabled');
 assert.match(refused.stderr||'',/rollback_requires_core_off/);
-console.log('Rollback correctly refused while Core was enabled.');
+console.log('Rollback refused while Core enabled, without modifying a public function.');
 
-// Simulate the separately approved flag-off operation only in the disposable
-// fixture; do not delete enrollment, sessions or evidence. Restore all seven
-// exact public RPC bodies in ONE transaction; leave private copies inaccessible.
-sql(`UPDATE private.exam_prep_feature_config SET rollout_state='off',
- core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true
- WHERE program_key='math_as_p1_p5';`);
+// Simulate flag OFF + restoration IN ONE TRANSACTION, then roll the rehearsal
+// transaction BACK so the candidate remains installed for the next positive
+// first-plan test. Restoring all seven public bodies by COMMIT is a separate,
+// explicitly authorized production operation, NOT performed here.
 const restored=sql(`BEGIN;
+UPDATE private.exam_prep_feature_config SET rollout_state='off',
+ core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true
+ WHERE program_key='math_as_p1_p5';
 ${rollbackGuard}
 DO $restore$
 DECLARE v_fn record;
@@ -165,16 +164,16 @@ BEGIN
  THEN RAISE EXCEPTION 'rollback_left_enrolled_learners'; END IF;
 END;
 $verify$;
-COMMIT;
 SELECT 'RESTORED='||count(*) FROM weekly_goal_ci.rpc_restore_baseline b
 JOIN pg_proc p ON p.oid=b.function_oid
 WHERE md5(pg_get_functiondef(p.oid))=b.original_md5
-  AND p.proacl::text IS NOT DISTINCT FROM b.original_acl;`);
-assert.equal(named(restored,'RESTORED'),'7','Seven exact public RPC bodies/grants were not restored');
-assert.equal(named(sql(counts),'COUNTS'),before,'Rollback touched synthetic learner plans/authorizations/sessions');
-const post=sql(`SELECT 'DIRECT=' ||
- (position('public.generate_exam_prep_weekly_plan_safe_v2' in pg_get_functiondef('public.generate_exam_prep_weekly_plan_safe_v3(text)'::regprocedure))>0)::text || ':' ||
- (position('set status=''superseded''' in pg_get_functiondef('public.generate_exam_prep_weekly_plan_safe_v2(text)'::regprocedure))>0)::text;`);
-assert.equal(named(post,'DIRECT'),'true:true','Original legacy delegation not restored');
-console.log('ROLLBACK REHEARSAL GREEN: seven original public definitions, owners and grants restored exactly; learner fixture unchanged.');
-console.log('PRIVATE copies intentionally remain locked; production installation and release approval still BLOCKED.');
+ AND p.proacl::text IS NOT DISTINCT FROM b.original_acl;
+ROLLBACK;`);
+assert.equal(named(restored,'RESTORED'),'7','Seven public RPC bodies/grants were not restored inside rehearsal');
+assert.equal(named(sql(counts),'COUNTS'),before,'Rehearsal rollback altered synthetic student records');
+const post=sql(`SELECT 'CANDIDATE='||count(*) FROM weekly_goal_ci.rpc_restore_baseline b
+ JOIN pg_proc p ON p.oid=b.function_oid
+ WHERE md5(pg_get_functiondef(p.oid)) IS DISTINCT FROM b.original_md5;`);
+assert.equal(named(post,'CANDIDATE'),'7','Uncommitted restoration must not replace the seven candidate RPCs');
+console.log('ROLLBACK REHEARSAL GREEN: exact seven originals restored within transaction, then rolled back; candidate remains for next test.');
+console.log('Production compatibility SQL, rollback and rollout remain BLOCKED pending separate approval.');
