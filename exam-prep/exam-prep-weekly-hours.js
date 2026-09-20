@@ -1,5 +1,5 @@
 /* Optional shared Mathematics weekdays inside ONE existing Exam Plan editor.
- * Server enrollment is independent of the browser switch. Never auto-replan.
+ * Separate server enrollment is mandatory; never auto-replan or edit grades.
  */
 (() => {
   'use strict';
@@ -8,33 +8,27 @@
   const DAYS=['mon','tue','wed','thu','fri','sat','sun'];
   const VERSION='weekly_day_availability_v1';
   const words={
-    ru:{
-      title:'Свободное время на математику по дням',
+    ru:{title:'Свободное время на математику по дням',
       note:'Необязательно. Укажите часы обычной недели: 0 — времени нет. Заполните все семь дней или оставьте все поля пустыми, чтобы очистить распределение. Это один общий бюджет для P1 и P5, а не дополнительные часы.',
       caveat:'Это распределение обычной недели, а не подсчёт оставшихся часов сегодня. Задания текущей недели не заменяются.',
       stale:'После изменения учебного времени подтвердите распределение по дням ещё раз.',
       refresh:'План изменился на другом устройстве. Вернитесь к обзору и откройте план заново.',
       invalid:'Заполните все семь дней или оставьте все пустыми. Значения от 0 до 24 с шагом 0,5 часа. Сумма не должна превышать недельный бюджет математики.',
-      day:['Пн','Вт','Ср','Чт','Пт','Сб','Вс']
-    },
-    uz:{
-      title:'Matematika uchun haftalik bo‘sh vaqtni kunlarga ajrating',
+      day:['Пн','Вт','Ср','Чт','Пт','Сб','Вс']},
+    uz:{title:'Matematika uchun haftalik bo‘sh vaqtni kunlarga ajrating',
       note:'Ixtiyoriy. Oddiy haftadagi soatlarni kiriting: 0 — bo‘sh vaqt yo‘q. Yetti kunning barchasini to‘ldiring yoki taqsimotni tozalash uchun hammasini bo‘sh qoldiring. Bu P1 va P5 uchun umumiy vaqt, qo‘shimcha soatlar emas.',
       caveat:'Bu odatiy hafta taqsimoti, bugunga qolgan vaqt hisobi emas. Joriy haftadagi vazifalar almashtirilmaydi.',
       stale:'O‘qish vaqti o‘zgarganidan keyin kunlik taqsimotni qayta tasdiqlang.',
       refresh:'Reja boshqa qurilmada o‘zgargan. Umumiy ko‘rinishga qaytib, rejani qaytadan oching.',
       invalid:'Yetti kunning barchasini to‘ldiring yoki hammasini bo‘sh qoldiring. 0 dan 24 gacha, 0,5 soat qadam bilan kiriting. Jami soat matematikaning haftalik vaqt chegarasidan oshmasin.',
-      day:['Du','Se','Ch','Pa','Ju','Sh','Ya']
-    },
-    en:{
-      title:'Available Mathematics hours by weekday',
+      day:['Du','Se','Ch','Pa','Ju','Sh','Ya']},
+    en:{title:'Available Mathematics hours by weekday',
       note:'Optional. Enter hours for a typical week: 0 means no time. Fill all seven days, or leave every field blank to clear the distribution. This is one shared P1 and P5 budget, not extra hours.',
       caveat:'This describes a typical week, not the hours still available today. Current-week tasks are not replaced.',
       stale:'After changing your study budget, confirm the weekday distribution again.',
       refresh:'Your plan changed on another device. Return to the overview and open it again.',
       invalid:'Fill all seven days or leave all fields blank. Use 0–24 in half-hour steps. The total cannot exceed your weekly Mathematics budget.',
-      day:['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
-    }
+      day:['Mon','Tue','Wed','Thu','Fri','Sat','Sun']}
   };
   const fail=reason=>Object.freeze({ok:false,reason});
   function allowed(){
@@ -45,7 +39,7 @@
   function copy(){
     let lang='ru';
     try{lang=String(window.i18n?.getLang?.()||document.documentElement.lang||'ru').toLowerCase();}
-    catch(_){/* fallback */}
+    catch(_){/* locale fallback */}
     return words[lang]||words.ru;
   }
   async function rpc(name,args){
@@ -70,10 +64,11 @@
       data.scope==='shared_mathematics_week'&&data.planning_only===true&&
       data.does_not_change_current_plan===true&&typeof data.confirmed==='boolean'&&
       typeof data.needs_reconfirmation==='boolean'&&Number.isInteger(data.profile_revision)&&
-      data.profile_revision>=1&&Number.isFinite(Number(data.mathematics_hours_budget))&&
+      data.profile_revision>=1&&Number.isInteger(data.availability_revision)&&
+      data.availability_revision>=0&&Number.isFinite(Number(data.mathematics_hours_budget))&&
       Number.isFinite(Number(data.total_student_hours_available))&&validSlots(data.weekday_hours)&&
-      (data.weekday_hours!==null || (!data.confirmed&&!data.needs_reconfirmation))&&
-      (data.weekday_hours===null || data.confirmed||data.needs_reconfirmation)&&
+      (data.weekday_hours!==null||(!data.confirmed&&!data.needs_reconfirmation))&&
+      (data.weekday_hours===null||data.confirmed||data.needs_reconfirmation)&&
       !(data.confirmed&&data.needs_reconfirmation);
   }
   function matchesProfile(data,profile){
@@ -81,13 +76,6 @@
       String(data.target_grade||'').trim().toUpperCase()===String(profile.target_grade||'').trim().toUpperCase()&&
       Number(data.total_student_hours_available)===Number(profile.total_student_hours_available)&&
       Number(data.mathematics_hours_budget)===Number(profile.mathematics_hours_budget);
-  }
-  function notice(form,message){
-    const messageEl=document.createElement('p');
-    messageEl.className='ep-day-hours-reconfirm';messageEl.setAttribute('role','alert');
-    messageEl.textContent=message;
-    const actions=form.querySelector('.ep-live-actions');
-    if(actions) form.insertBefore(messageEl,actions);
   }
   async function decorate(form,profile){
     if(!allowed()||!form?.isConnected||form.dataset.epWeekdayHours) return false;
@@ -98,7 +86,11 @@
       form.dataset.epWeekdayHours='unavailable';return false;
     }
     if(!matchesProfile(fetched.data,profile)){
-      form.dataset.epWeekdayHours='stale';notice(form,copy().refresh);return false;
+      form.dataset.epWeekdayHours='stale';
+      const error=document.createElement('p');error.className='ep-day-hours-reconfirm';
+      error.setAttribute('role','alert');error.textContent=copy().refresh;
+      form.querySelector('.ep-live-actions')?.before(error);
+      return false;
     }
     const c=copy();
     const fields=document.createElement('fieldset');fields.className='ep-day-hours';
@@ -128,6 +120,7 @@
     form.insertBefore(fields,actions);
     form.dataset.epWeekdayHours='ready';
     form.dataset.epWeekdayExpectedRevision=String(fetched.data.profile_revision);
+    form.dataset.epWeekdayAvailabilityRevision=String(fetched.data.availability_revision);
     return true;
   }
   function read(form,mathHours){
@@ -149,15 +142,19 @@
     const available=read(form,profile.mathHours);
     if(!available.ok) return available;
     const revision=Number(form.dataset.epWeekdayExpectedRevision);
-    if(!Number.isInteger(revision)||revision<1) return fail('missing_revision');
+    const dayRevision=Number(form.dataset.epWeekdayAvailabilityRevision);
+    if(!Number.isInteger(revision)||revision<1||!Number.isInteger(dayRevision)||dayRevision<0)
+      return fail('missing_revision');
     const result=await rpc('save_my_exam_prep_profile_with_weekday_availability_safe_v1',{
       p_exam_series:profile.examSeries,p_target_grade:profile.targetGrade,
       p_total_student_hours_available:profile.totalHours,p_mathematics_hours_budget:profile.mathHours,
-      p_weekday_hours:available.days,p_expected_profile_revision:revision
+      p_weekday_hours:available.days,p_expected_profile_revision:revision,
+      p_expected_availability_revision:dayRevision
     });
     if(!result.ok) return result;
     if(result.data.day_availability_saved!==true||result.data.progress_retained!==true||
-       result.data.does_not_replace_current_week!==true) return fail('invalid_save_contract');
+       result.data.does_not_replace_current_week!==true||
+       result.data.availability_revision!==dayRevision+1) return fail('invalid_save_contract');
     return result;
   }
   internal.weeklyDayHours=Object.freeze({version:VERSION,decorate,read,save,
