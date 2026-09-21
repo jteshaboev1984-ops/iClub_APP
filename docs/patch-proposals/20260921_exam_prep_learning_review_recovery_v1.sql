@@ -41,6 +41,16 @@ BEGIN
  v_def:=replace(v_def,v_old,
   '''source_plan_priority_order'', coalesce(v_auth.plan_priority_order,(SELECT rr.priority_order FROM private.exam_prep_learning_review_starts_v1 rr '
   ||'WHERE rr.authorization_id=v_auth.id AND rr.user_id=v_uid))');
+ -- Fresh page loads must show the same learning-review notice as a new start.
+ -- Never infer this flag from a session type or browser history.
+ v_old:='''resume_independent_of_current_plan'', true';
+ IF (length(v_def)-length(replace(v_def,v_old,'')))<>length(v_old) THEN
+  RAISE EXCEPTION 'learning_review_recovery_notice_anchor_drift'; END IF;
+ v_def:=replace(v_def,v_old,
+  '''resume_independent_of_current_plan'', true, ''learning_review'', EXISTS('
+  ||'SELECT 1 FROM private.exam_prep_learning_review_starts_v1 rr '
+  ||'WHERE rr.authorization_id=v_auth.id AND rr.user_id=v_uid '
+  ||'AND rr.component_code=p_component_code)');
  EXECUTE v_def;
 END;$patch$;
 -- Original authenticated access and anon denial are preserved by CREATE OR REPLACE.
