@@ -58,7 +58,9 @@ BEGIN
    'private.exam_prep_learning_review_verdict_v1(uuid,bigint,text,text,bigint)','EXECUTE') OR
     has_function_privilege('authenticated',
    'private.exam_prep_learning_review_verdict_v1(uuid,bigint,text,text,bigint)','EXECUTE') OR
-    has_function_privilege('authenticated','private.exam_prep_learning_review_starts_v1','SELECT') THEN
+    has_table_privilege('authenticated','private.exam_prep_learning_review_starts_v1','SELECT') OR
+    has_table_privilege('anon','private.exam_prep_learning_review_starts_v1','SELECT') OR
+    has_table_privilege('service_role','private.exam_prep_learning_review_starts_v1','SELECT') THEN
   RAISE EXCEPTION 'review_attestation_private_object_exposure';
  END IF;
 END;$gate$;
