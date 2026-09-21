@@ -8,7 +8,18 @@ on:
     paths:
       - app.js
       - index.html
+      - i18n.js
       - security/legacy-assessment-safe-api.js
+      - scripts/practice-content-language-preservation.cjs
+      - .github/workflows/p0-02-release-regression.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - app.js
+      - index.html
+      - i18n.js
+      - security/legacy-assessment-safe-api.js
+      - scripts/practice-content-language-preservation.cjs
       - .github/workflows/p0-02-release-regression.yml
   workflow_dispatch:
 
@@ -29,7 +40,9 @@ jobs:
         run: |
           set -euo pipefail
           node --check app.js
+          node --check i18n.js
           node --check security/legacy-assessment-safe-api.js
+          node --check scripts/practice-content-language-preservation.cjs
           grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1' index.html
           grep -q 'app.js?v=support4-p0legacysaveoff1' index.html
           grep -q 'start_practice_session_auto_safe_v4' security/legacy-assessment-safe-api.js
@@ -40,8 +53,11 @@ jobs:
           grep -q 'finalize_tour_attempt_safe_v4' security/legacy-assessment-safe-api.js
           grep -q 'ratings_cache_safe_v4' app.js
           grep -q 'tour_attempts_leaderboard_safe_v4' app.js
-          grep -q 'practiceApi.resetProgress()' app.js
+          # The reset RPC remains in the adapter for backwards compatibility,
+          # but changing question language must never call it from app.js.
+          ! grep -q 'practiceApi.resetProgress()' app.js
           grep -q 'reset_practice_progress_safe_v4' security/legacy-assessment-safe-api.js
+          node scripts/practice-content-language-preservation.cjs
           grep -q 'legacy_practice_write_disabled' app.js
           grep -q 'safe_v4_persistence_missing' app.js
           ! grep -q '\.from("ratings_cache")' app.js
