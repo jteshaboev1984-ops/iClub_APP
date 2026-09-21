@@ -53,6 +53,26 @@ for f in "${migrations[@]}"; do
   apply_migration "$f"
 done
 run_sql "UPDATE private.exam_prep_feature_config SET rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() WHERE id=1" > /dev/null
+# Extract exactly the eight immutable LIVE expected hashes from the original
+# backup proposal itself. Diagnose *all* replay mismatches without weakening
+# the pinned gate or manufacturing a matching function definition/hash.
+expected_values="$(python3 - <<'PY'
+from pathlib import Path
+import re
+text=Path('docs/patch-proposals/20260920_weekly_flow_preinstall_rpc_backup_v1.sql').read_text()
+pairs=re.findall(r"\('([^']+)',\s*'([a-f0-9]{32})'\)",text)
+if len(pairs)!=8 or len({signature for signature,_ in pairs})!=8:
+    raise SystemExit('REFUSED: expected eight unique pinned production signatures')
+print(','.join("('%s','%s')" % pair for pair in pairs))
+PY
+)"
+replay_drift="$(run_sql "SELECT x.signature||' actual='||coalesce(md5(pg_get_functiondef(to_regprocedure(x.signature))),'MISSING')||' pinned_live='||x.expected_md5 FROM (VALUES ${expected_values}) AS x(signature,expected_md5) WHERE md5(pg_get_functiondef(to_regprocedure(x.signature))) IS DISTINCT FROM x.expected_md5 ORDER BY x.signature")"
+if [[ -n "$replay_drift" ]]; then
+  printf 'BLOCKED: disposable migration replay differs from the eight pinned LIVE original RPCs:\n%s\n' "$replay_drift" >&2
+  echo 'No hash changed, no production access or writes; review SQL and rollback were NOT applied.' >&2
+  exit 1
+fi
+echo 'PASS: eight replayed original RPC definition hashes exactly match independently pinned live hashes.'
 # Exact prerequisites and original 11 entrypoints, all on disposable DB.
 run_file docs/patch-proposals/20260918_exam_prep_resume_lookup_v1.sql
 run_file docs/patch-proposals/20260918_exam_prep_goal_eligibility_v1.sql
