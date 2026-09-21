@@ -80,7 +80,13 @@
     });
     if (!result.ok) return result;
     if (result.data.status === 'authorized' && !identity(result.data.authorization_id)) return fail('invalid_authorization_identity');
-    if (!['authorized', 'stale', 'waiting', 'resume', 'attempt_already_saved', 'content_exhausted'].includes(result.data.status)) {
+    if (result.data.status === 'review_ready' && (
+      result.data.component_code !== component || result.data.goal_id !== goalId ||
+      result.data.plan_id !== planId || result.data.fresh_assessment !== false ||
+      result.data.reason !== 'same_pack_learning_review' ||
+      !['learning','correction'].includes(result.data.item_type))) return fail('invalid_review_contract');
+    if (!['authorized', 'stale', 'waiting', 'resume', 'attempt_already_saved', 'content_exhausted',
+      'review_ready'].includes(result.data.status)) {
       return fail('invalid_authorization_status');
     }
     return result;
@@ -105,6 +111,48 @@
     if (!['started', 'resume', 'resume_existing_session_first', 'multiple_active', 'attempt_already_saved',
       'reconciliation_required', 'authorization_unavailable', 'authorization_expired',
       'stale', 'content_exhausted'].includes(result.data.status)) return fail('invalid_start_status');
+    return result;
+  }
+
+  // The same questions may be repeated for an unresolved learning/correction
+  // goal ONLY through the separately enrolled noncredit server endpoint.
+  // Do not manufacture a second original authorization or claim fresh evidence.
+  async function review(component, goalId, planId, idempotencyKey) {
+    if (!identity(goalId) || !identity(planId)) return fail('invalid_goal_identity');
+    if (typeof idempotencyKey !== 'string' || idempotencyKey.length < 8 || idempotencyKey.length > 160) {
+      return fail('invalid_idempotency_key');
+    }
+    const recovery = await recover(component);
+    if (!recovery.ok) return recovery;
+    if (recoveryStatus(recovery.data)) {
+      return Object.freeze({ ok: true, data: { status: 'resume_existing_session_first', recovery: recovery.data } });
+    }
+    const result = await rpc(component, 'start_exam_prep_learning_review_safe_v1', {
+      p_component_code: component, p_goal_id: goalId, p_plan_id: planId,
+      p_idempotency_key: idempotencyKey
+    });
+    if (!result.ok) {
+      if (!['network_unavailable', 'server_rejected', 'invalid_server_contract'].includes(result.reason)) return result;
+      const observed = await recover(component);
+      return Object.freeze({ ok: false, reason: 'review_outcome_unknown',
+        recovery: observed.ok ? observed.data : null });
+    }
+    const data = result.data;
+    if (data.status === 'started' && (
+      !identity(data.session_id) || data.component_code !== component ||
+      data.goal_id !== goalId || data.plan_id !== planId ||
+      data.repeat_learning !== true || data.academic_credit !== false ||
+      data.prior_progress_retained !== true || data.not_a_new_independent_check !== true)) {
+      return fail('invalid_review_start_contract');
+    }
+    if (data.status === 'resume_existing_session_first' && !identity(data.session_id)) {
+      return fail('invalid_review_resume_contract');
+    }
+    if (!['started','resume_existing_session_first','multiple_active','attempt_already_saved',
+      'waiting','stale'].includes(data.status)) return fail('invalid_review_status');
+    if (data.status !== 'started' && data.status !== 'resume_existing_session_first' && data.session_id) {
+      return fail('unexpected_review_session_identity');
+    }
     return result;
   }
 
@@ -142,5 +190,5 @@
 
   // Exam-series, target and time edits use the existing Exam Plan UI/API.
   // No parallel manual weekly-replan entrypoint is exported.
-  internal.weeklyFlowApi = Object.freeze({ version: CONTRACT, allowed, recover, plan, goal, authorize, start, adherence });
+  internal.weeklyFlowApi = Object.freeze({ version: CONTRACT, allowed, recover, plan, goal, authorize, start, review, adherence });
 })();
