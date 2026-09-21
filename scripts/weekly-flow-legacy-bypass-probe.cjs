@@ -1,10 +1,10 @@
 'use strict';
-// All candidate installation/rollback checks run ONLY on disposable CI PG17.
+// Full compatibility, rollback and bypass checks only on disposable CI PG17.
 const assert=require('node:assert/strict');
 const {spawnSync}=require('node:child_process');
 const env=process.env;
 if(env.GITHUB_ACTIONS!=='true'||env.PGHOST!=='127.0.0.1'||env.PGDATABASE!=='postgres'||
-   !env.PGOPTIONS?.includes('weekly_goal.isolated_db=true')){
+ !env.PGOPTIONS?.includes('weekly_goal.isolated_db=true')){
  console.error('REFUSED: disposable CI PostgreSQL only');process.exit(1);
 }
 function run(input){return spawnSync('psql',['-X','-q','-A','-t','-v','ON_ERROR_STOP=1'],{
@@ -58,24 +58,23 @@ assert.equal(named(shape,'DIRECT'),'true:true','Old generator changed: audit fir
 assert.equal(named(sql(counts),'COUNTS'),before);
 console.log('REPRODUCED prepatch direct legacy bypass in synthetic DB.');
 
-// Exact seven-function backup must be independently committed BEFORE mutation.
-// It refuses any of the four live-source hashes/grants changing since review.
+// Exact eleven-function backup must be committed before any mutation.
 script('docs/patch-proposals/20260920_weekly_flow_preinstall_rpc_backup_v1.sql');
-console.log('BACKUP GREEN: exact prepatch bodies, ownership and grants captured privately.');
+console.log('BACKUP GREEN: eleven prepatch definitions, ownership and grants captured privately.');
 script('docs/patch-proposals/20260919_exam_prep_atomic_legacy_rpc_dispatch_v1.sql');
 script('docs/patch-proposals/20260920_weekly_flow_postinstall_attestation_v1.sql');
-console.log('CANDIDATE SEALED: exact seven installed body hashes, zero enrollments at installation.');
+console.log('CANDIDATE SEALED: eleven installed body hashes, zero enrollments at installation.');
 for(const file of ['scripts/weekly-flow-atomic-dispatch-smoke.cjs',
  'scripts/weekly-flow-atomic-dispatch-race.cjs',
- 'scripts/weekly-flow-atomic-dispatch-nonplan.cjs']) nodeTest(file);
-console.log('ATOMIC COMPATIBILITY GREEN: original Core/nonplan behavior, genuine two-backend races.');
+ 'scripts/weekly-flow-atomic-dispatch-nonplan.cjs',
+ 'scripts/weekly-flow-atomic-dispatch-full-surface.cjs']) nodeTest(file);
+console.log('FULL-SURFACE CANDIDATE: direct bypasses, original Core and two-backend races exercised.');
 for(const file of ['docs/patch-proposals/20260920_exam_prep_previous_week_adherence_readonly_v1.sql',
  'supabase/tests/exam_prep_previous_week_adherence_isolated_matrix.sql']){
- const result=script(file);
- if(result.stdout)process.stdout.write(result.stdout.slice(-700));
+ const result=script(file);if(result.stdout)process.stdout.write(result.stdout.slice(-700));
 }
 assert.equal(named(sql(counts),'COUNTS'),before,'Academic fixture changed after candidate');
 nodeTest('scripts/weekly-flow-rollback-package-drill.cjs');
 assert.equal(named(sql(counts),'COUNTS'),before,'Academic fixture changed after rollback rehearsal');
-console.log('ISOLATED BACKUP / INSTALL / SEALED ROLLBACK TESTS GREEN.');
+console.log('ISOLATED FULL-SURFACE BACKUP / INSTALL / SEALED ROLLBACK TESTS GREEN.');
 console.log('Production bypass remains until independently authorized release; no live SQL executed.');
