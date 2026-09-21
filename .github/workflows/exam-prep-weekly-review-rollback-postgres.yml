@@ -4,11 +4,13 @@ on:
     branches: [main]
     paths:
       - 'docs/patch-proposals/20260921_exam_prep_learning_review_*.sql'
+      - 'docs/patch-proposals/20260921_exam_prep_frozen_goal_continuity_v1.sql'
       - 'docs/patch-proposals/20260921_exam_prep_assessment_publish_provenance_guard_v1.sql'
       - 'scripts/weekly-flow-review-rollback-isolated.sh'
       - 'scripts/weekly-flow-review-rollback-negative-isolated.sh'
       - 'scripts/weekly-flow-review-active-rollback-isolated.sh'
       - 'supabase/tests/weekly_flow_review_active_rollback_seed.sql'
+      - 'supabase/tests/exam_prep_frozen_goal_continuity_isolated_matrix.sql'
       - 'supabase/tests/exam_prep_assessment_publish_provenance_guard_isolated_matrix.sql'
       - 'supabase/tests/weekly_flow_live_generator_v1_definition_fixture.sql'
       - '.github/workflows/exam-prep-weekly-review-rollback-postgres.yml'
@@ -16,11 +18,13 @@ on:
     branches: ['fix/exam-prep-weekly-goal-flow-safe']
     paths:
       - 'docs/patch-proposals/20260921_exam_prep_learning_review_*.sql'
+      - 'docs/patch-proposals/20260921_exam_prep_frozen_goal_continuity_v1.sql'
       - 'docs/patch-proposals/20260921_exam_prep_assessment_publish_provenance_guard_v1.sql'
       - 'scripts/weekly-flow-review-rollback-isolated.sh'
       - 'scripts/weekly-flow-review-rollback-negative-isolated.sh'
       - 'scripts/weekly-flow-review-active-rollback-isolated.sh'
       - 'supabase/tests/weekly_flow_review_active_rollback_seed.sql'
+      - 'supabase/tests/exam_prep_frozen_goal_continuity_isolated_matrix.sql'
       - 'supabase/tests/exam_prep_assessment_publish_provenance_guard_isolated_matrix.sql'
       - 'supabase/tests/weekly_flow_live_generator_v1_definition_fixture.sql'
       - '.github/workflows/exam-prep-weekly-review-rollback-postgres.yml'
@@ -48,8 +52,8 @@ jobs:
       PGHOST: '127.0.0.1'
       PGPORT: '5432'
       PGDATABASE: 'postgres'
-      PGUSER: 'postgres'
-      PGPASSWORD: 'postgres'
+      PGUSER: postgres
+      PGPASSWORD: postgres
       PGOPTIONS: '-c weekly_goal.isolated_db=true'
     steps:
       - uses: actions/checkout@v4
@@ -64,10 +68,11 @@ jobs:
           bash -n scripts/weekly-flow-review-active-rollback-isolated.sh
           test ! -e supabase/migrations/20260921_exam_prep_learning_review_preinstall_backup_v1.sql
           test ! -e supabase/migrations/20260921_exam_prep_learning_review_sealed_rollback_v1.sql
+          test ! -e supabase/migrations/20260921_exam_prep_frozen_goal_continuity_v1.sql
           test ! -e supabase/migrations/weekly_flow_live_generator_v1_definition_fixture.sql
           test ! -e supabase/migrations/weekly_flow_review_active_rollback_seed.sql
           test ! -e supabase/migrations/20260921_exam_prep_assessment_publish_provenance_guard_v1.sql
-      - name: Real PostgreSQL 17 review install and rollback rehearsal; no production credentials
+      - name: Real PostgreSQL 17 review install, frozen goal continuity and rollback rehearsal
         shell: bash
         run: bash scripts/weekly-flow-review-rollback-isolated.sh
       - name: Refuse rollback with enrollment or metadata drift; no production credentials
