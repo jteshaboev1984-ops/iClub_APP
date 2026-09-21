@@ -8,6 +8,7 @@ on:
       - 'exam-prep/exam-prep-weekly-flow-adapter.js'
       - 'exam-prep/exam-prep-live.js'
       - 'scripts/weekly-flow-learning-review-browser.cjs'
+      - 'scripts/weekly-flow-learning-review-race-browser.cjs'
       - '.github/workflows/exam-prep-weekly-learning-review-browser.yml'
   push:
     branches: ['fix/exam-prep-weekly-goal-flow-safe']
@@ -17,6 +18,7 @@ on:
       - 'exam-prep/exam-prep-weekly-flow-adapter.js'
       - 'exam-prep/exam-prep-live.js'
       - 'scripts/weekly-flow-learning-review-browser.cjs'
+      - 'scripts/weekly-flow-learning-review-race-browser.cjs'
       - '.github/workflows/exam-prep-weekly-learning-review-browser.yml'
 permissions:
   contents: read
@@ -36,6 +38,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check scripts/weekly-flow-learning-review-browser.cjs
+          node --check scripts/weekly-flow-learning-review-race-browser.cjs
           node --check exam-prep/exam-prep-weekly-review-ui.js
           node --check exam-prep/exam-prep-progress-ux-boot.js
           grep -Fq 'await loadRequiredWeeklyReviewUi();' exam-prep/exam-prep-progress-ux-boot.js
@@ -47,3 +50,5 @@ jobs:
           npx playwright install chromium
       - name: Six native review journeys RU UZ EN phone and desktop, synthetic only
         run: node scripts/weekly-flow-learning-review-browser.cjs
+      - name: Six review race recovery and cross-screen notice isolation journeys
+        run: node scripts/weekly-flow-learning-review-race-browser.cjs
