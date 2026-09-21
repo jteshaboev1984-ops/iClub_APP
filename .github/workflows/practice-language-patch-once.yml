@@ -21,26 +21,23 @@ jobs:
           test "$(git hash-object app.js)" = ef8fea3ed29937cdc8dbdc90395445280ececa9d
           test "$(git hash-object i18n.js)" = 3eb953a22d8bb33c5fd702bc485a91a0f83a006c
           test "$(git branch --show-current)" = fix/exam-prep-weekly-goal-flow-safe
-      - name: Replace only confirmed destructive content-language handler and 9 misleading strings
+      - name: Replace only confirmed destructive content-language handler and nine misleading strings
         shell: bash
         run: |
           python3 <<'PY'
           from pathlib import Path
-          app=Path('app.js')
-          src=app.read_text()
+          app=Path('app.js'); src=app.read_text()
           begin='      // 1) DB wipe (если есть Supabase + uid)'
           finish='      // 4) apply content language'
-          assert src.count(begin)==1 and src.count(finish)==1, 'Exact current language handler anchors drifted'
-          a=src.index(begin); b=src.index(finish,a)
-          section=src[a:b]
+          assert src.count(begin)==1 and src.count(finish)==1, 'Exact original handler anchors drifted'
+          a=src.index(begin); b=src.index(finish,a); section=src[a:b]
           assert section.count('practiceApi.resetProgress()')==1
           for required in ['localStorage.removeItem(LS.state)','localStorage.removeItem(LS.practiceDraft)',
                            'localStorage.removeItem(LS.myRecs)','localStorage.removeItem(LS.events)',
                            'localStorage.removeItem(LS.credentials)']:
-              assert section.count(required)==1, 'Missing expected original data-loss route: '+required
-          replacement='''      // Changing the question language must never reset Practice, Tours,
-          // cached evidence or an unfinished local answer. Commit only the
-          // authenticated learner's language; no deletes or profile-wide upsert.
+              assert section.count(required)==1, 'Original deletion changed: '+required
+          replacement='''      // Changing question language must preserve Practice, Tours and local drafts.
+          // Update only this learner's language, and require server confirmation.
           try {
             const uid = await getAuthUid();
             if (!window.sb || !uid) throw new Error("content_language_save_unavailable");
@@ -82,46 +79,12 @@ jobs:
           ('Tours and practice language updated. Progress has been reset.',
            'Question language updated. All progress has been preserved.')]
           for old,new in substitutions:
-              assert txt.count(old)==1, 'Expected exact unique original translation: '+old
+              assert txt.count(old)==1, 'Original unique translation changed: '+old
               txt=txt.replace(old,new)
           file.write_text(txt)
-          print('Patched ONLY draft app.js content-language handler and 9 i18n strings; no database calls.')
+          print('Patched only draft app.js handler and nine i18n strings. No DB operation.')
           PY
-          cat > .github/workflows/practice-reset-source-audit.yml <<'YAML'
-          name: Practice language preserves history and local drafts (isolated)
-          on:
-            pull_request:
-              branches: [main]
-              paths:
-                - 'app.js'
-                - 'i18n.js'
-                - 'scripts/practice-content-language-preservation.cjs'
-                - '.github/workflows/practice-reset-source-audit.yml'
-            push:
-              branches: ['fix/exam-prep-weekly-goal-flow-safe']
-              paths:
-                - 'app.js'
-                - 'i18n.js'
-                - 'scripts/practice-content-language-preservation.cjs'
-                - '.github/workflows/practice-reset-source-audit.yml'
-          permissions:
-            contents: read
-          jobs:
-            seven-isolated-settings-cases:
-              runs-on: ubuntu-latest
-              timeout-minutes: 3
-              steps:
-                - uses: actions/checkout@v4
-                  with:
-                    persist-credentials: false
-                - name: Syntax and seven settings scenarios; no Supabase, no real students
-                  run: |
-                    node --check app.js
-                    node --check i18n.js
-                    node --check scripts/practice-content-language-preservation.cjs
-                    node scripts/practice-content-language-preservation.cjs
-          YAML
-      - name: Verify safe handler behavior and syntax before any commit
+      - name: Prove behavior and syntax before committing
         run: |
           set -euo pipefail
           node --check app.js
@@ -129,13 +92,13 @@ jobs:
           node --check scripts/practice-content-language-preservation.cjs
           node scripts/practice-content-language-preservation.cjs
           git diff --check
-      - name: Remove one-shot writer and commit ONLY to existing draft branch
+      - name: Push only two source files, never workflow modifications or production
         shell: bash
         run: |
           set -euo pipefail
-          rm .github/workflows/practice-language-patch-once.yml
-          git add app.js i18n.js .github/workflows/practice-reset-source-audit.yml .github/workflows/practice-language-patch-once.yml
-          test "$(git diff --cached --name-only | wc -l)" -eq 4
+          git add app.js i18n.js
+          test "$(git diff --cached --name-only | wc -l)" -eq 2
+          test "$(git diff --cached --name-only)" = $'app.js\ni18n.js'
           git config user.name 'iClub guarded CI patch'
           git config user.email 'iclub-ci-patch@users.noreply.github.com'
           git commit -m 'fix: changing content language preserves Practice and local learner progress'
