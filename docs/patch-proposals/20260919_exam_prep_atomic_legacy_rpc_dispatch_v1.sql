@@ -216,19 +216,32 @@ END;$body$;
 -- existing ACTIVE sessions even across rollout; never replay a finalized ID.
 -- Genuine separate Stage0 diagnostic, stage-gated timed/paper, and noncredit
 -- progress revalidation remain available under their original Core contracts.
+-- Always lock the SAME user/component advisory key BEFORE an auth row: a direct
+-- legacy starter and once-only starter must not take opposite lock orders.
 CREATE OR REPLACE FUNCTION public.start_exam_prep_session_safe_v1(
  p_authorization_id uuid,p_idempotency_key text
 ) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $body$
 DECLARE
  v_uid uuid;
+ v_component text;
  v_auth private.exam_prep_session_authorizations%rowtype;
  v_existing private.exam_prep_sessions%rowtype;
 BEGIN
  v_uid:=private.exam_prep_require_core_access_v1();
  IF private.exam_prep_weekly_flow_enrolled_v1(v_uid) THEN
+  -- Read only component first. Row locking here would invert the once-only
+  -- lock order and deadlock when old/new tabs start the same authorization.
+  SELECT component_code INTO v_component FROM private.exam_prep_session_authorizations
+   WHERE id=p_authorization_id AND user_id=v_uid;
+  IF v_component NOT IN ('P1','P5') OR v_component IS NULL THEN
+   RAISE EXCEPTION 'exam_prep_authorization_not_found' USING errcode='P0002';
+  END IF;
+  PERFORM pg_advisory_xact_lock(hashtextextended('ep-stable-plan:'||v_uid::text||':'||v_component,0));
   SELECT * INTO v_auth FROM private.exam_prep_session_authorizations
    WHERE id=p_authorization_id AND user_id=v_uid FOR UPDATE;
-  IF v_auth.id IS NULL THEN RAISE EXCEPTION 'exam_prep_authorization_not_found' USING errcode='P0002'; END IF;
+  IF v_auth.id IS NULL OR v_auth.component_code IS DISTINCT FROM v_component THEN
+   RAISE EXCEPTION 'exam_prep_authorization_not_found' USING errcode='P0002';
+  END IF;
   IF v_auth.plan_id IS NOT NULL THEN
    RETURN public.start_exam_prep_plan_session_once_safe_v1(p_authorization_id,p_idempotency_key);
   END IF;
