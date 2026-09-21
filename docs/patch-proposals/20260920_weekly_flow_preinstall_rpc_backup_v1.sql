@@ -1,7 +1,6 @@
 -- REVIEW-ONLY proposal. Never run on live production without separate explicit approval.
--- Must run AFTER the three draft prerequisites, BEFORE the atomic compatibility SQL.
--- Captures eight legacy public interfaces plus three already-proposed safe interfaces.
--- All public function originals/owners/ACLs must be restored together if rolled back.
+-- Must run AFTER three draft prerequisites, BEFORE atomic compatibility SQL.
+-- Captures all eight legacy public interfaces + three already proposed safe ones.
 BEGIN;
 DO $gate$
 BEGIN
@@ -9,7 +8,7 @@ BEGIN
     OR to_regclass('private.exam_prep_weekly_flow_enrollment_v1') IS NOT NULL
     OR to_regprocedure('private.exam_prep_legacy_generate_v1_internal_v1(text,text)') IS NOT NULL
     OR to_regprocedure('private.exam_prep_legacy_generate_v2_internal_v1(text)') IS NOT NULL THEN
-   RAISE EXCEPTION 'weekly_backup_not_pristine';
+  RAISE EXCEPTION 'weekly_backup_not_pristine';
  END IF;
 END;$gate$;
 CREATE TABLE private.exam_prep_weekly_flow_rpc_backup_v1 (
@@ -43,14 +42,14 @@ FROM (VALUES
  ('public.ensure_exam_prep_stable_weekly_plan_safe_v1(text)'),
  ('public.authorize_exam_prep_goal_once_safe_v1(text,uuid,uuid)'),
  ('public.start_exam_prep_plan_session_once_safe_v1(uuid,text)')
-) AS required(signature)
-JOIN pg_proc p ON p.oid=to_regprocedure(required.signature);
+) AS required(signature) JOIN pg_proc p ON p.oid=to_regprocedure(required.signature);
 DO $verify$
-DECLARE v_count integer; v_drift integer;
+DECLARE v_count integer; v_drift integer; v_changed text;
 BEGIN
  SELECT count(*) INTO v_count FROM private.exam_prep_weekly_flow_rpc_backup_v1;
  IF v_count<>11 THEN RAISE EXCEPTION 'weekly_backup_incomplete_%',v_count; END IF;
- SELECT count(*) INTO v_drift FROM (VALUES
+ SELECT string_agg(x.signature||': actual='||coalesce(b.original_md5,'MISSING')||' expected='||x.expected_md5,'; ' ORDER BY x.signature)
+ INTO v_changed FROM (VALUES
  ('public.generate_exam_prep_weekly_plan_safe_v1(text,text)','58247a59c0967848d21c5ab93cc9d647'),
  ('public.generate_exam_prep_weekly_plan_safe_v2(text)','414916cc437d0d47a34916d15d0a1f05'),
  ('public.generate_exam_prep_weekly_plan_safe_v3(text)','43113f759097c94e4938fb46daa73145'),
@@ -62,16 +61,17 @@ BEGIN
  ) x(signature,expected_md5)
  LEFT JOIN private.exam_prep_weekly_flow_rpc_backup_v1 b ON b.signature=x.signature
  WHERE b.original_md5 IS DISTINCT FROM x.expected_md5;
- IF v_drift<>0 THEN RAISE EXCEPTION 'weekly_backup_live_legacy_definition_drift_%',v_drift; END IF;
- SELECT count(*) INTO v_drift
- FROM private.exam_prep_weekly_flow_rpc_backup_v1 b
+ IF v_changed IS NOT NULL THEN
+  RAISE EXCEPTION 'weekly_backup_live_legacy_definition_drift: %',v_changed;
+ END IF;
+ SELECT count(*) INTO v_drift FROM private.exam_prep_weekly_flow_rpc_backup_v1 b
  JOIN pg_proc p ON p.oid=b.function_oid
  WHERE p.proowner<>'postgres'::regrole::oid OR NOT p.prosecdef OR p.provolatile<>'v'
-    OR has_function_privilege('anon',p.oid,'EXECUTE')
-    OR NOT has_function_privilege('authenticated',p.oid,'EXECUTE');
+   OR has_function_privilege('anon',p.oid,'EXECUTE')
+   OR NOT has_function_privilege('authenticated',p.oid,'EXECUTE');
  IF v_drift<>0 THEN RAISE EXCEPTION 'weekly_backup_function_security_drift_%',v_drift; END IF;
  IF EXISTS(SELECT 1 FROM private.exam_prep_weekly_flow_rpc_backup_v1 WHERE installed_md5 IS NOT NULL) THEN
-   RAISE EXCEPTION 'weekly_backup_already_attested';
+  RAISE EXCEPTION 'weekly_backup_already_attested';
  END IF;
 END;$verify$;
 COMMIT;
