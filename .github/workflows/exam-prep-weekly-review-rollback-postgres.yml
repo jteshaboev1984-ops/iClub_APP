@@ -5,12 +5,16 @@ on:
     paths:
       - 'docs/patch-proposals/20260921_exam_prep_learning_review_*.sql'
       - 'scripts/weekly-flow-review-rollback-isolated.sh'
+      - 'scripts/weekly-flow-review-rollback-negative-isolated.sh'
+      - 'supabase/tests/weekly_flow_live_generator_v1_definition_fixture.sql'
       - '.github/workflows/exam-prep-weekly-review-rollback-postgres.yml'
   push:
     branches: ['fix/exam-prep-weekly-goal-flow-safe']
     paths:
       - 'docs/patch-proposals/20260921_exam_prep_learning_review_*.sql'
       - 'scripts/weekly-flow-review-rollback-isolated.sh'
+      - 'scripts/weekly-flow-review-rollback-negative-isolated.sh'
+      - 'supabase/tests/weekly_flow_live_generator_v1_definition_fixture.sql'
       - '.github/workflows/exam-prep-weekly-review-rollback-postgres.yml'
 permissions:
   contents: read
@@ -48,11 +52,16 @@ jobs:
         run: |
           set -euo pipefail
           bash -n scripts/weekly-flow-review-rollback-isolated.sh
+          bash -n scripts/weekly-flow-review-rollback-negative-isolated.sh
           test ! -e supabase/migrations/20260921_exam_prep_learning_review_preinstall_backup_v1.sql
           test ! -e supabase/migrations/20260921_exam_prep_learning_review_sealed_rollback_v1.sql
+          test ! -e supabase/migrations/weekly_flow_live_generator_v1_definition_fixture.sql
       - name: Real PostgreSQL 17 review install and rollback rehearsal; no production credentials
         shell: bash
         run: bash scripts/weekly-flow-review-rollback-isolated.sh
+      - name: Refuse rollback with enrollment or metadata drift; no production credentials
+        shell: bash
+        run: bash scripts/weekly-flow-review-rollback-negative-isolated.sh
       - name: Show synthetic SQL error diagnostics only
         if: failure()
         run: tail -100 /tmp/weekly-review-rollback-isolated.log
