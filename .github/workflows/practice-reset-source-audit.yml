@@ -1,0 +1,32 @@
+name: Practice content language preserves history and local drafts (isolated)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app.js'
+      - 'i18n.js'
+      - 'scripts/practice-content-language-preservation.cjs'
+      - '.github/workflows/practice-reset-source-audit.yml'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'app.js'
+      - 'i18n.js'
+      - 'scripts/practice-content-language-preservation.cjs'
+      - '.github/workflows/practice-reset-source-audit.yml'
+permissions:
+  contents: read
+jobs:
+  seven-isolated-settings-cases:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Syntax and seven settings scenarios; no Supabase or real students
+        run: |
+          node --check app.js
+          node --check i18n.js
+          node --check scripts/practice-content-language-preservation.cjs
+          node scripts/practice-content-language-preservation.cjs
