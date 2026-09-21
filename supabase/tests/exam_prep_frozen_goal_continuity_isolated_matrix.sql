@@ -141,10 +141,10 @@ BEGIN
   'correction','P1-COO-02',coo_case,'COMPLETE_CORRECTION_ANALOGUES');
   prior_plan:=current_plan;
  END LOOP;
- IF private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P1',1,cir_goal,current_plan)<>2
- OR private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P1',1,coo_goal,current_plan)<>1
- OR private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P1',1,cir_goal,old_plan) IS NOT NULL
- OR private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P5',1,cir_goal,current_plan) IS NOT NULL
+ IF private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P1',1::smallint,cir_goal,current_plan) IS DISTINCT FROM 2
+ OR private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P1',1::smallint,coo_goal,current_plan) IS DISTINCT FROM 1
+ OR private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P1',1::smallint,cir_goal,old_plan) IS NOT NULL
+ OR private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P5',1::smallint,cir_goal,current_plan) IS NOT NULL
  THEN RAISE EXCEPTION 'frozen/reordered/current/other-component proof incorrect'; END IF;
  PERFORM set_config('request.jwt.claim.sub',uid::text,true);
  PERFORM set_config('request.jwt.claim.role','authenticated',true);
@@ -178,7 +178,7 @@ BEGIN
  WHERE p.user_id=uid AND p.component_code='P1' AND p.plan_version=6;
  UPDATE private.exam_prep_weekly_plan_items SET action_code='BUILD_FIRST_COVERAGE'
  WHERE plan_id=history_plan AND skill_code='P1-CIR-01';
- IF private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P1',1,cir_goal,current_plan)
+ IF private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P1',1::smallint,cir_goal,current_plan)
  IS NOT NULL THEN RAISE EXCEPTION 'changed intermediate action was accepted'; END IF;
  v_result:=public.get_exam_prep_goal_action_state_safe_v1('P1',cir_goal,current_plan);
  IF v_result->>'status'<>'stale' OR v_result->>'reason'<>'goal_lineage_unverified'
@@ -195,13 +195,13 @@ BEGIN
  INSERT INTO private.exam_prep_weekly_plan_items
  (plan_id,priority_order,item_type,skill_code,correction_case_id,action_code)
  VALUES(current_plan,3,'correction','P1-CIR-01',cir_case,'COMPLETE_CORRECTION_ANALOGUES');
- IF private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P1',1,cir_goal,current_plan)
+ IF private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P1',1::smallint,cir_goal,current_plan)
  IS NOT NULL THEN RAISE EXCEPTION 'ambiguous current duplicate accepted'; END IF;
  DELETE FROM private.exam_prep_weekly_plan_items
  WHERE plan_id=current_plan AND priority_order=3;
  -- A missing intermediate version is equally unprovable.
  UPDATE private.exam_prep_weekly_plans SET plan_version=60 WHERE id=history_plan;
- IF private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P1',1,cir_goal,current_plan)
+ IF private.exam_prep_frozen_goal_current_priority_v1(uid,prog,'P1',1::smallint,cir_goal,current_plan)
  IS NOT NULL THEN RAISE EXCEPTION 'missing plan version accepted'; END IF;
  IF (SELECT md5(string_agg(to_jsonb(r)::text,'|' ORDER BY r.id::text))
  FROM private.exam_prep_responses r WHERE r.session_id=original_session)
