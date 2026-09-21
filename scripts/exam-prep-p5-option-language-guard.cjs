@@ -15,7 +15,9 @@ function normalize(s) {
   return String(s || '').normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase();
 }
 function isLexicalEnglish(s) {
-  const tokens = String(s || '').match(/[A-Za-z]+/g) || [];
+  // Conventional distribution names followed by arguments are notation, not prose.
+  const withoutNotation = String(s || '').replace(/\b(?:Bin|Geom|Geometric|Normal|N)\s*\([^)]*\)/gi, '');
+  const tokens = withoutNotation.match(/[A-Za-z]+/g) || [];
   return tokens.some(token => !SYMBOL_TOKENS.has(token.toLowerCase()));
 }
 function auditMcqOptions(question) {
@@ -35,6 +37,21 @@ function auditMcqOptions(question) {
     for (const locale of ['ru', 'uz']) {
       if (normalize(question.options[locale][index]) === normalize(en)) {
         issues.push(`${locale}: choice ${index + 1} still equals English prose`);
+      }
+    }
+  }
+  return issues;
+}
+function auditNotationAndTerminology(question) {
+  const issues = [];
+  for (const locale of ['ru', 'uz']) {
+    const stem = String(question.stems?.[locale] || '');
+    if (/\bnormal approximation\b/i.test(stem)) issues.push(`${locale}: English term normal approximation remains in stem`);
+    if (/\bcontinuity correction\b/i.test(stem)) issues.push(`${locale}: English term continuity correction remains in stem`);
+    const values = [stem, ...(question.qtype === 'mcq' ? (question.options?.[locale] || []) : [])];
+    for (const [index, value] of values.entries()) {
+      if (/\b(?:Bin|B)\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)/i.test(value)) {
+        issues.push(`${locale}: ambiguous three-comma binomial notation in ${index === 0 ? 'stem' : `choice ${index}`}`);
       }
     }
   }
@@ -68,7 +85,19 @@ if (require.main === module) {
     assert.deepEqual(auditMcqOptions({qtype:'mcq', options:{en:choices, ru:choices, uz:choices}}), []);
   }
   assert.equal(auditMcqOptions({qtype:'mcq', options:{en:['A'],ru:['Б'],uz:['B']}}).length, 3);
+  assert.equal(isLexicalEnglish('Geometric(p)'), false, 'distribution notation is not English prose');
+  assert.equal(isLexicalEnglish('Bin(50,0.5)'), false, 'binomial notation is not English prose');
+  assert.deepEqual(auditNotationAndTerminology({
+    qtype: 'mcq', stems: {ru:'X~Bin(100,0,4). Найдите normal approximation с continuity correction.',uz:'X~Bin(100,0.4).'},
+    options: {ru:['Bin(20,0,5)','Bin(20,0.5)','4','6'],uz:['Bin(20,0.5)','Bin(20,0.5)','4','6']}
+  }), [
+    'ru: English term normal approximation remains in stem',
+    'ru: English term continuity correction remains in stem',
+    'ru: ambiguous three-comma binomial notation in stem',
+    'ru: ambiguous three-comma binomial notation in choice 1'
+  ]);
+  assert.deepEqual(auditNotationAndTerminology({qtype:'input',stems:{ru:'X~Bin(20,0.4)',uz:'X~Bin(20,0.4)'}}), []);
   assert.deepEqual(auditMcqOptions({qtype:'input', options:{en:[],ru:[],uz:[]}}), []);
-  console.log('PASS P5 option language synthetic audit: prose-copy flagged; RU/UZ localization, numeric, symbolic, incomplete arrays and input exclusions validated. No protected item payloads or production access.');
+  console.log('PASS P5 synthetic localization audit: prose-copy, mathematical distribution notation, extra-comma Bin(n,p), leftover English terminology, symbolic controls and input exclusions validated. No protected items or production access.');
 }
-module.exports = { auditMcqOptions, isLexicalEnglish };
+module.exports = { auditMcqOptions, auditNotationAndTerminology, isLexicalEnglish };
