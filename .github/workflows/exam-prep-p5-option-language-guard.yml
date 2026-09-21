@@ -7,6 +7,10 @@ on:
       - scripts/exam-prep-p5-option-language-guard.cjs
       - docs/patch-proposals/20260921_p5_ru_uz_options_remediation_protocol_v1.md
       - docs/patch-proposals/20260921_p5_language_notation_readonly_audit.sql
+      - docs/patch-proposals/20260921_p5_localization_technical_completion_and_release_gates_v1.md
+      - docs/patch-proposals/20260921_p5_release_gates_status_v1.md
+      - docs/patch-proposals/20260921_p5_private_reviewer_handoff_instructions_v1.md
+      - docs/patch-proposals/20260921_exam_prep_mcq_position_security_gate_v1.md
       - .github/workflows/exam-prep-p5-option-language-guard.yml
   workflow_dispatch:
 
