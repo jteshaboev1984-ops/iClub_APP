@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - scripts/exam-prep-p5-option-language-guard.cjs
+      - docs/patch-proposals/20260921_p5_ru_uz_options_remediation_protocol_v1.md
+      - docs/patch-proposals/20260921_p5_language_notation_readonly_audit.sql
       - .github/workflows/exam-prep-p5-option-language-guard.yml
   workflow_dispatch:
 
