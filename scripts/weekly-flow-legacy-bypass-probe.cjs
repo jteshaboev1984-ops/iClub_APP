@@ -88,15 +88,18 @@ script('supabase/tests/exam_prep_learning_review_noncredit_isolated_matrix.sql')
 // Public review start is a NEW, separately authorized entrypoint. It must
 // never rewrite the original consumed plan authorization or publish fresh credit.
 script('docs/patch-proposals/20260921_exam_prep_learning_review_start_v1.sql');
+script('docs/patch-proposals/20260921_exam_prep_learning_review_recovery_v1.sql');
+script('docs/patch-proposals/20260921_exam_prep_learning_review_goal_eligibility_v1.sql');
 script('supabase/tests/exam_prep_learning_review_public_isolated_matrix.sql');
-console.log('REVIEW START CANDIDATE: exact frozen goal, original item IDs, noncredit, original plan uniqueness retained.');
+console.log('REVIEW START CANDIDATE: exact frozen goal, original IDs, noncredit, recoverable session, original plan uniqueness retained.');
 for(const file of ['docs/patch-proposals/20260920_exam_prep_previous_week_adherence_readonly_v1.sql',
  'supabase/tests/exam_prep_previous_week_adherence_isolated_matrix.sql']){
  const result=script(file);if(result.stdout)process.stdout.write(result.stdout.slice(-700));
 }
+script('docs/patch-proposals/20260921_exam_prep_learning_review_weekly_accounting_v1.sql');
 assert.equal(named(sql(counts),'COUNTS'),before,'Academic fixture changed after candidate');
 nodeTest('scripts/weekly-flow-rollback-package-drill.cjs');
 assert.equal(named(sql(counts),'COUNTS'),before,'Academic fixture changed after rollback rehearsal');
 console.log('ISOLATED FULL-SURFACE BACKUP / INSTALL / SEALED ROLLBACK TESTS GREEN.');
-console.log('Public review start tested in PG only; frontend/recovery/weekly evidence integration NOT yet accepted.');
+console.log('Public review/read-model candidate tested in PG only; frontend and end-to-end weekly evidence still require acceptance.');
 console.log('Production bypass remains until independently authorized release; no live SQL executed.');
