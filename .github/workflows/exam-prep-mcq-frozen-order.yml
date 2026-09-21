@@ -1,0 +1,21 @@
+name: Exam Prep MCQ frozen order (synthetic)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/20260921220000_exam_prep_mcq_server_frozen_order_v1.sql'
+      - 'supabase/migrations/20260921220100_exam_prep_mcq_order_strict_validation_v1.sql'
+      - 'scripts/exam-prep-mcq-frozen-order-regression.cjs'
+      - '.github/workflows/exam-prep-mcq-frozen-order.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  synthetic-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax
+        run: node --check scripts/exam-prep-mcq-frozen-order-regression.cjs
+      - name: Exhaustive order/scoring/locale regression
+        run: node scripts/exam-prep-mcq-frozen-order-regression.cjs
