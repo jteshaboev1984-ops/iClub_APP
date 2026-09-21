@@ -1,0 +1,21 @@
+# P5 localization correction: versioned successors, private draft only
+
+Scope: 17 known P5 translation/notation candidates, 24 old membership references across 16 assessments. Includes one original finalized test diagnostic with a saved response, evidence, and correction. The owner explicitly permits re-answering their test exercises; no destruction is necessary for this versioned approach. This file contains NO protected assessment stems, option arrays, keys or answer-position counts.
+
+## Chosen architecture
+
+Do NOT UPDATE existing history-bearing question IDs or recalculate old session hashes. Keep the prior diagnostic, its response and evidence interpretable. Stage 17 NEW `public.questions` rows under the original Mathematics subject, always `is_active=false` and `quality_status='draft'`. Stage 17 new private question metadata rows with unique successor content keys, new actual snapshot hashes, `lifecycle_state='draft'`, `exposure_state='withheld'`, and pending academic/language/technical QA. Copy source/provenance and protected reserve role; link original/new IDs via `public.question_version_links`. Copy diagnostic rules as DRAFT (never inherited human approval). The translation payload and resulting SQL exist only in an owner-private file, NOT this public repository.
+
+Clone all 16 affected assessment compositions using new assessment IDs, the same original `assessment_key` and new `assessment_version='av2'`, status DRAFT and NULL approval time. Copy every item, swapping only the 17 named question IDs for their successor IDs while retaining exact order, skills, reserve/holdout status, and all unaffected items. Copy mixed-node metadata where present. The 16 sets include original and downstream uses; old assessment rows remain PUBLISHED during staging. Preserve P1 entirely. No user histories, accounts, Practice/Tours, rankings or certificates are altered. Existing authorized/finalized test session continues referencing immutable old content.
+
+## Guarded staging preflight
+
+An owner-private generated SQL candidate verifies exactly 17 unique source IDs, their full original 32-char snapshot digests and live metadata/availability status, exactly 24 source membership references, no active sessions involving these items, zero Practice/Tours answer references, and absence of already staged successors. It creates draft-only successors in ONE atomic transaction or fails entirely. Stage is idempotent-by-refusal, not a silent duplicate. No original content is edited and no test history is deleted. The generated SQL is NOT approved for production; it requires a real database rehearsal first.
+
+## Separate release gate
+
+Qualified independent mathematician and RU/UZ reviewers must examine all 17 *private* candidates, verify original English mathematics, correct options and distractors, the clarified mixed stem, notation, and renderer. Assessment owner must review exact new assessment composition and, independently, original eight provenance (#126). Date and reviewer must reflect genuine review, never fabricated or copied from old rows. Only after these approvals may a SEPARATE reviewed cutover authorize new versions with real present-day approval evidence and retire old assessments from future selection. Existing finalized and outstanding authorizations must be checked before switching. Do not activate legacy question pools or change Core/AI/Mentor flags.
+
+Regression prerequisites: disposable PostgreSQL tests for real schema triggers, the 17/16/24 counts, freezing a NEW test session with new snapshot, replaying the old frozen test session unchanged, cross-version diagnostic selection, multilingual mobile/desktop layout, idempotency, an atomic rollback and Postgres role/ACL check; compare full pre/post fingerprints of Practice/Tours/certificates. Stop on any drift. Issue #140 (source answer-position bias) is a separate cross-P1/P5 server-frozen display/scoring fix; a client-only shuffle is forbidden.
+
+Status: design and private staging candidate prepared. NOT production SQL, NOT reviewed content, NOT an authorization to merge/deploy. Keep PR draft until all release gates pass.
