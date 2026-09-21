@@ -1,0 +1,35 @@
+# P5 RU/UZ option localization — production evidence and safe remediation (DRAFT, 21 Sep 2026)
+
+**Classification: confirmed language QA discrepancy, not academic approval. Related [#137](https://github.com/jteshaboev1984-ops/iClub_APP/issues/137); separate governance [#126](https://github.com/jteshaboev1984-ops/iClub_APP/issues/126). NOT a migration. Do not edit production.**
+
+## Source and acceptance standard
+
+`04_Content_Governance_Model_P1_P5_v1.1`, section 8, requires mathematically equivalent EN/RU/UZ *options* and natural proofreading, in addition to translated stems and explanations. The canonical skill map section 5.1 names P5-DAT-01, -04, -06 as independent skills. Original `20260903142000_exam_prep_p0_08_seed_p5_dat01.sql` copies the same English `opts_en` into both `opts_ru` and `opts_uz`; companion DAT04/DAT06 seeds use the same pattern. The original `20260903144000_exam_prep_p0_08_qa_publish_gate.sql` checks nonempty stems/explanations and question snapshots but not localized options, and changes `qa_language_status` to `pass` in bulk. Consequently current QA flag cannot independently certify option translation.
+
+## Observed live data, read-only
+
+A SELECT-only inspection joined `private.exam_prep_assessments` / `exam_prep_assessment_items`, `public.questions` and private content meta for original content version `p5_repr_beta_v1`: **eight existing published sets**, 21 distinct questions, three written tasks. Of 14 multiple-choice questions, all EN/RU/UZ option arrays are byte-identical. Four arrays are entirely numeric, so identical locales are appropriate; **TEN contain English-language descriptive phrases also presented under RU and UZ**. All 21 question stems and explanations have separate nonidentical EN/RU/UZ text. The three written prompts and self-review notes have separate EN/RU/UZ text; their independent human approval remains unproven.
+
+| Assessment ID | Assessment type | Confirmed unlocalized descriptive MCQ IDs | Inspection disposition |
+|---:|---|---|---|
+| 1 | diagnostic | 6253 | RU/UZ options need actual translation; preserve diagnostic reserve and rule secrecy |
+| 2 | learning P5-DAT-01 | 6252, 6254, 6250 | RU/UZ options need actual translation; no silent live question mutation |
+| 3 | learning P5-DAT-04 | 6258 | RU/UZ options need actual translation; preserve original histogram key/interpretation |
+| 4 | learning P5-DAT-06 | none | 2 numeric-only MCQ plus numerical input are not proved wrong |
+| 5 | retest P5-DAT-01 | 6251, 6249 | RU/UZ options need actual translation; do not expose protected retest variants |
+| 6–7 | retest P5-DAT-04 / -06 | none | Numerical input choices not applicable |
+| 8 | mixed | 6268, 6267, 6269 | RU/UZ options need actual translation; preserve mixed holdout protection |
+
+Numeric-only negative controls among the original 14 MCQs: **6255, 6264, 6261, 6266** — do not automatically translate, treat as equivalence. A broader SELECT-only inventory among all 252 unique P5 question IDs in published assessment membership found six *other* identical-locale option arrays that are mathematical notation, not proof of English UI text: **6398** (HH/HT sample-space notation), **6470** (IQR/SD + numbers), **6602** (n/p values), **6686** (numbers/sqrt), **6789** (numbers/sqrt), **6820** (mu/sigma values). A simple `[A-Za-z]` regular expression would falsely flag these six: do NOT use it as a publishing gate. It may only nominate questions for semantic editorial review. Overall ten demonstrated defects, not fourteen or sixteen.
+
+**History impact:** one question from this affected-ten cohort already occurs in one frozen saved session item and one saved response; one finalized session uses an original assessment, and no original assessment session was active at the inspection moment. Four affected IDs **6249, 6251, 6267, 6268** also occur in assessment membership outside original IDs 1–8. `public.questions.quality_status='draft'` and `is_active=false` on *all 21* original rows are deliberate **legacy Practice/Tours isolation**, NOT publication failures: the private assessment/meta content is published separately. Never set them active or change this quality status to repair language QA.
+
+## Technical and academic separation
+
+- Confirmed defect: EN descriptive options were copied unchanged into localized RU and UZ fields despite source flags saying pass. We have **not** independently human-approved the actual mathematical accuracy, scope, item composition, copyright or translation of a corrected variant. No `approved_at` or previous audit event can be inferred from status or timestamps.
+- Do not UPDATE/DELETE an existing original `public.questions` row, its option strings, `question_snapshot_md5`, old assessment membership, historical session items, answers, authorization, audit event or learner academic evidence. Do not rewrite the P5 eight published `approved_at` fields. No mass `quality_status` activation or transfer to P1.
+- Obtain reviewed RU and UZ translations for each of the ten *four-option ordered arrays* including plausible distractors and unambiguous correct positions, school-appropriate terminology, mobile wrapping and natural language. Check English mathematical answer/rationale, the current official syllabus and source map, and written prompt/rubric/graphic task suitability independently; record actual reviewer identity, date and decision **for exact successor composition**, not a blanket synthetic approval.
+- Create new question IDs and a versioned successor content/assessment composition, with explicit immutable lineage and a governed future-only switch; preserve old content for historic evidence. Inventory all memberships, particularly the four later memberships, before constructing replacement sets; ensure no mixed role/holdout exposure or repeat being counted as fresh. Do not assume replacing `question_id` in an already published set is harmless.
+- Run disposable PostgreSQL and isolated browser tests: RU/UZ/EN mobile/desktop displayed option equivalence, scoring and incorrect-choice diagnostic rules, snapshot checks, original finalized attempt/response replay, in-progress written preservation, reserve isolation, cross-version mapping, rollback and zero changes to legacy Practice, Tours, ratings and certificates. Count current real users/attempts and fingerprint before/after **only if a later owner-authorized rollout occurs**.
+
+**Status:** scoped content remediation identified, not performed. #137 remains open. The independent actual human approval of eight original complete assessment compositions (#126) remains open; translator QA cannot silently satisfy it. PR #121 remains draft; passing tests here must not merge or deploy it. No production SQL writes, publication, flags, learner enrollment, historical backfill, or session changes authorized.
