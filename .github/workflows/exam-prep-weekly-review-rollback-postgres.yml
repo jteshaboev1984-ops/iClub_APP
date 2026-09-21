@@ -6,6 +6,8 @@ on:
       - 'docs/patch-proposals/20260921_exam_prep_learning_review_*.sql'
       - 'scripts/weekly-flow-review-rollback-isolated.sh'
       - 'scripts/weekly-flow-review-rollback-negative-isolated.sh'
+      - 'scripts/weekly-flow-review-active-rollback-isolated.sh'
+      - 'supabase/tests/weekly_flow_review_active_rollback_seed.sql'
       - 'supabase/tests/weekly_flow_live_generator_v1_definition_fixture.sql'
       - '.github/workflows/exam-prep-weekly-review-rollback-postgres.yml'
   push:
@@ -14,6 +16,8 @@ on:
       - 'docs/patch-proposals/20260921_exam_prep_learning_review_*.sql'
       - 'scripts/weekly-flow-review-rollback-isolated.sh'
       - 'scripts/weekly-flow-review-rollback-negative-isolated.sh'
+      - 'scripts/weekly-flow-review-active-rollback-isolated.sh'
+      - 'supabase/tests/weekly_flow_review_active_rollback_seed.sql'
       - 'supabase/tests/weekly_flow_live_generator_v1_definition_fixture.sql'
       - '.github/workflows/exam-prep-weekly-review-rollback-postgres.yml'
 permissions:
@@ -53,15 +57,22 @@ jobs:
           set -euo pipefail
           bash -n scripts/weekly-flow-review-rollback-isolated.sh
           bash -n scripts/weekly-flow-review-rollback-negative-isolated.sh
+          bash -n scripts/weekly-flow-review-active-rollback-isolated.sh
           test ! -e supabase/migrations/20260921_exam_prep_learning_review_preinstall_backup_v1.sql
           test ! -e supabase/migrations/20260921_exam_prep_learning_review_sealed_rollback_v1.sql
           test ! -e supabase/migrations/weekly_flow_live_generator_v1_definition_fixture.sql
+          test ! -e supabase/migrations/weekly_flow_review_active_rollback_seed.sql
       - name: Real PostgreSQL 17 review install and rollback rehearsal; no production credentials
         shell: bash
         run: bash scripts/weekly-flow-review-rollback-isolated.sh
       - name: Refuse rollback with enrollment or metadata drift; no production credentials
         shell: bash
         run: bash scripts/weekly-flow-review-rollback-negative-isolated.sh
+      - name: Refuse rollback with an actual active synthetic review and saved evidence
+        shell: bash
+        run: bash scripts/weekly-flow-review-active-rollback-isolated.sh
       - name: Show synthetic SQL error diagnostics only
         if: failure()
-        run: tail -100 /tmp/weekly-review-rollback-isolated.log
+        run: |
+          tail -100 /tmp/weekly-review-rollback-isolated.log 2>/dev/null || true
+          tail -100 /tmp/weekly-review-rollback-active.log 2>/dev/null || true
