@@ -33,13 +33,14 @@
   const uuid = value => typeof value === 'string' &&
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
   function active(component, sessionId) {
-    if (component !== 'P1' && component !== 'P5' || !uuid(sessionId)) return;
+    if ((component !== 'P1' && component !== 'P5') || !uuid(sessionId)) return;
     internal.weeklyReviewActive = Object.freeze({ component, sessionId });
     showQuestionNote();
   }
   function forget(component) {
     if (!component || internal.weeklyReviewActive?.component === component) {
       internal.weeklyReviewActive = null;
+      root()?.querySelectorAll('[data-ep-learning-review-note]').forEach(note => note.remove());
     }
   }
   function showQuestionNote() {
@@ -48,7 +49,15 @@
     const host = root();
     if (!host || host.hidden || host.getAttribute('aria-hidden') === 'true') return;
     const question = host.querySelector('.ep-live-qtext');
-    if (!question || !question.closest('.ep-live-card') || host.querySelector('[data-ep-learning-review-note]')) return;
+    const card = question?.closest('.ep-live-card');
+    // A review marker must never label a timed examination or paper attempt.
+    if (!card || card.querySelector('[data-ep-live-end],[data-ep-live-timer]')) return;
+    if (card.querySelector('[data-ep-learning-review-note]')) {
+      const existing = card.querySelector('[data-ep-learning-review-note]');
+      const expected = texts[language()].note;
+      if (existing.textContent !== expected) existing.textContent = expected;
+      return;
+    }
     const notice = document.createElement('div');
     notice.className = 'ep-live-notice ep-learning-review-notice';
     notice.setAttribute('role', 'note');
@@ -63,7 +72,6 @@
         !Number.isInteger(data.priority_order) || data.priority_order < 1 || data.priority_order > 3) return;
     const host = root();
     if (!host || host.hidden || host.getAttribute('aria-hidden') === 'true') return;
-    // Never decorate an unrelated component's task after asynchronous plan changes.
     const heading = host.querySelector('.ep-live-head strong')?.textContent || '';
     if (!heading.startsWith(component + ' · ')) return;
     const button = host.querySelector(`[data-ep-live-plan-item="${data.priority_order}"]`);
@@ -84,7 +92,9 @@
       if (result.ok && ['resume','ready_to_finalize'].includes(result.data.status) &&
           result.data.learning_review === true && uuid(result.data.session_id)) {
         active(component, result.data.session_id);
-      } else if (result.ok && result.data.status === 'none') forget(component);
+      } else if (result.ok && ['none','resume','ready_to_finalize'].includes(result.data.status)) {
+        forget(component);
+      }
       return result;
     },
     async plan(component) {
@@ -92,7 +102,8 @@
       if (result.ok && result.data.status === 'resume_first' &&
           result.data.recovery?.learning_review === true && uuid(result.data.recovery.session_id)) {
         active(component, result.data.recovery.session_id);
-      } else if (result.ok && ['created','existing'].includes(result.data.status)) forget(component);
+      } else if (result.ok && (['created','existing'].includes(result.data.status) ||
+          result.data.status === 'resume_first')) forget(component);
       return result;
     },
     async goal(component, goalId, planId) {
@@ -103,13 +114,16 @@
     async authorize(component, goalId, planId) {
       const decision = await original.authorize(component, goalId, planId);
       if (!decision.ok) return decision;
-      if (decision.data.status === 'resume_existing_session_first' &&
-          decision.data.recovery?.learning_review === true && uuid(decision.data.recovery.session_id)) {
-        active(component, decision.data.recovery.session_id);
+      if (decision.data.status === 'authorized') forget(component);
+      if (decision.data.status === 'resume_existing_session_first') {
+        if (decision.data.recovery?.learning_review === true &&
+            uuid(decision.data.recovery.session_id)) {
+          active(component, decision.data.recovery.session_id);
+        } else forget(component);
       }
       if (decision.data.status !== 'review_ready') return decision;
-      // This is called solely from the existing user-click handler. The backend
-      // atomically authorizes AND starts the known-question noncredit attempt.
+      // Called solely from a user click. The backend atomically authorizes AND
+      // starts a known-question noncredit attempt; never fake an authorization.
       const requestKey = 'review-' + component + '-' + goalId + '-' +
         Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
       const started = await original.review(component, goalId, planId, requestKey);
@@ -124,14 +138,23 @@
       }
       if (started.data.status === 'started' && uuid(started.data.session_id)) {
         active(component, started.data.session_id);
-        // The current learner screen already handles "resume" by loading that
-        // exact server-owned session. No fictitious authorization or new editor.
         return Object.freeze({ok:true,data:{status:'resume',session_id:started.data.session_id,
           component_code:component}});
       }
       if (started.data.status === 'resume_existing_session_first' &&
-          started.data.recovery?.learning_review === true && uuid(started.data.recovery.session_id)) {
-        active(component, started.data.recovery.session_id);
+          uuid(started.data.session_id)) {
+        // Two devices may race AFTER the first recovery read: the review start
+        // then returns a bare session ID. Prove it belongs to a review using a
+        // fresh server recovery; never label a normal active session by guess.
+        const proof = await original.recover(component);
+        if (!proof.ok || !['resume','ready_to_finalize'].includes(proof.data?.status) ||
+            proof.data.session_id !== started.data.session_id) {
+          return Object.freeze({ok:false,reason:'review_resume_unverified'});
+        }
+        if (proof.data.learning_review === true) active(component, proof.data.session_id);
+        else forget(component);
+        return Object.freeze({ok:true,data:{status:'resume',session_id:proof.data.session_id,
+          component_code:component}});
       }
       return started;
     }
