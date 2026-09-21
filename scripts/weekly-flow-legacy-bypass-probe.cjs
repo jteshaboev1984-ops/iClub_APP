@@ -80,12 +80,8 @@ for(const file of ['scripts/weekly-flow-atomic-dispatch-smoke.cjs',
  'scripts/weekly-flow-atomic-dispatch-nonplan.cjs',
  'scripts/weekly-flow-atomic-dispatch-full-surface.cjs']) nodeTest(file);
 console.log('FULL-SURFACE CANDIDATE: direct bypasses, original Core and two-backend races exercised.');
-// Separate additive selector DRAFT. It does NOT yet replace the Core authorizers.
-// Prove the first completed pack cannot be called fresh, P5 isolation, privacy,
-// and that reusing original question IDs is not a valid alternative.
-script('docs/patch-proposals/20260921_exam_prep_fresh_learning_selector_v1.sql');
-script('supabase/tests/exam_prep_fresh_learning_selector_isolated_matrix.sql');
-console.log('PRIVATE FRESH SELECTOR GREEN ONLY; Core integration and new authored packs remain blocked.');
+// Owner rejected new learning packs on 21 Sep. Do not install an unused fresh
+// learning selector or claim its old tests prove the new repeat-review policy.
 for(const file of ['docs/patch-proposals/20260920_exam_prep_previous_week_adherence_readonly_v1.sql',
  'supabase/tests/exam_prep_previous_week_adherence_isolated_matrix.sql']){
  const result=script(file);if(result.stdout)process.stdout.write(result.stdout.slice(-700));
@@ -94,4 +90,5 @@ assert.equal(named(sql(counts),'COUNTS'),before,'Academic fixture changed after 
 nodeTest('scripts/weekly-flow-rollback-package-drill.cjs');
 assert.equal(named(sql(counts),'COUNTS'),before,'Academic fixture changed after rollback rehearsal');
 console.log('ISOLATED FULL-SURFACE BACKUP / INSTALL / SEALED ROLLBACK TESTS GREEN.');
+console.log('Repeat-review implementation requires independent credit/correction gate before release.');
 console.log('Production bypass remains until independently authorized release; no live SQL executed.');
