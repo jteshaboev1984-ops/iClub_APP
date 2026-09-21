@@ -37,11 +37,11 @@
     internal.weeklyReviewActive = Object.freeze({ component, sessionId });
     showQuestionNote();
   }
-  function forget(component) {
-    if (!component || internal.weeklyReviewActive?.component === component) {
-      internal.weeklyReviewActive = null;
-      root()?.querySelectorAll('[data-ep-learning-review-note]').forEach(note => note.remove());
-    }
+  // Only one learner screen is visible. On ANY new ordinary plan/assessment
+  // (including a switch P5 -> P1), remove the previous screen's review marker.
+  function forget() {
+    internal.weeklyReviewActive = null;
+    root()?.querySelectorAll('[data-ep-learning-review-note]').forEach(note => note.remove());
   }
   function showQuestionNote() {
     if (window.iClubExamPrepWeeklyFlowEnabled !== true || !internal.weeklyReviewActive ||
@@ -93,7 +93,7 @@
           result.data.learning_review === true && uuid(result.data.session_id)) {
         active(component, result.data.session_id);
       } else if (result.ok && ['none','resume','ready_to_finalize'].includes(result.data.status)) {
-        forget(component);
+        forget();
       }
       return result;
     },
@@ -103,7 +103,7 @@
           result.data.recovery?.learning_review === true && uuid(result.data.recovery.session_id)) {
         active(component, result.data.recovery.session_id);
       } else if (result.ok && (['created','existing'].includes(result.data.status) ||
-          result.data.status === 'resume_first')) forget(component);
+          result.data.status === 'resume_first')) forget();
       return result;
     },
     async goal(component, goalId, planId) {
@@ -114,12 +114,12 @@
     async authorize(component, goalId, planId) {
       const decision = await original.authorize(component, goalId, planId);
       if (!decision.ok) return decision;
-      if (decision.data.status === 'authorized') forget(component);
+      if (decision.data.status === 'authorized') forget();
       if (decision.data.status === 'resume_existing_session_first') {
         if (decision.data.recovery?.learning_review === true &&
             uuid(decision.data.recovery.session_id)) {
           active(component, decision.data.recovery.session_id);
-        } else forget(component);
+        } else forget();
       }
       if (decision.data.status !== 'review_ready') return decision;
       // Called solely from a user click. The backend atomically authorizes AND
@@ -152,7 +152,7 @@
           return Object.freeze({ok:false,reason:'review_resume_unverified'});
         }
         if (proof.data.learning_review === true) active(component, proof.data.session_id);
-        else forget(component);
+        else forget();
         return Object.freeze({ok:true,data:{status:'resume',session_id:proof.data.session_id,
           component_code:component}});
       }
