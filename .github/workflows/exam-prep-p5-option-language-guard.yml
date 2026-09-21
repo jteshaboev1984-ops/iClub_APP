@@ -1,0 +1,23 @@
+name: P5 option-language QA (synthetic)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - scripts/exam-prep-p5-option-language-guard.cjs
+      - .github/workflows/exam-prep-p5-option-language-guard.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-language-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out reviewed revision
+        uses: actions/checkout@v4
+      - name: Validate JavaScript syntax
+        run: node --check scripts/exam-prep-p5-option-language-guard.cjs
+      - name: Run non-sensitive option-language regression
+        run: node scripts/exam-prep-p5-option-language-guard.cjs
