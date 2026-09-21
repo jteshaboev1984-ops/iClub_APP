@@ -9,6 +9,7 @@ CREATE OR REPLACE FUNCTION private.exam_prep_learning_review_verdict_v1(
 ) RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $body$
 DECLARE
  v_attempts integer;
+ v_required_objectives integer;
  v_complete boolean;
  v_consistent boolean;
  v_correction text;
@@ -27,7 +28,7 @@ BEGIN
         AND (SELECT COUNT(*) FROM private.exam_prep_assessment_items i
              WHERE i.assessment_id=a.id AND i.question_id IS NOT NULL
                AND i.primary_skill_code=p_skill_code AND i.reserve_role='learning'
-               AND i.is_holdout IS FALSE)>=3
+               AND i.is_holdout IS FALSE) BETWEEN 3 AND 6
         AND (SELECT COUNT(*) FROM private.exam_prep_assessment_items i
              WHERE i.assessment_id=a.id AND i.written_task_id IS NOT NULL
                AND i.primary_skill_code=p_skill_code AND i.reserve_role='written'
@@ -36,8 +37,11 @@ BEGIN
           WHERE i.assessment_id=a.id AND i.primary_skill_code IS DISTINCT FROM p_skill_code)) THEN
    RETURN jsonb_build_object('status','unverifiable');
  END IF;
+ SELECT COUNT(*)::integer INTO v_required_objectives
+ FROM private.exam_prep_assessment_items i
+ WHERE i.assessment_id=p_assessment_id AND i.question_id IS NOT NULL;
 
- -- Never send a previously saved written response into a replacement attempt.
+ -- Never replace an active session: it may contain a saved written answer.
  IF EXISTS (SELECT 1 FROM private.exam_prep_sessions s
    WHERE s.user_id=p_user_id AND s.program_version_id=p_program_version_id
      AND s.component_code=p_component_code AND s.assessment_id=p_assessment_id
@@ -51,7 +55,9 @@ BEGIN
    RETURN jsonb_build_object('status','unverifiable');
  END IF;
 
- -- Count genuine saved results, not just "has seen" or a browser-side flag.
+ -- A finalized attempt with an unanswered written item is unfinished, not an
+ -- unverifiable error. Only all objective answers correct + saved written work
+ -- is completion; never misread 3/3 answers in a 4-question pack as success.
  WITH scored AS (
    SELECT s.id,
      COUNT(*) FILTER (WHERE r.response_kind='machine')::integer AS objectives,
@@ -64,8 +70,9 @@ BEGIN
      AND s.status='finalized'
    GROUP BY s.id
  ) SELECT COUNT(*)::integer,
-          COALESCE(BOOL_OR(objectives>=3 AND correct=objectives AND written>=1),false),
-          COALESCE(BOOL_AND(objectives>=3 AND correct<=objectives AND written>=1),false)
+          COALESCE(BOOL_OR(objectives=v_required_objectives AND correct=objectives AND written=1),false),
+          COALESCE(BOOL_AND(objectives BETWEEN 0 AND v_required_objectives
+            AND correct BETWEEN 0 AND objectives AND written BETWEEN 0 AND 1),false)
  INTO v_attempts,v_complete,v_consistent FROM scored;
  IF v_attempts=0 THEN RETURN jsonb_build_object('status','first_learning'); END IF;
  IF NOT v_consistent THEN RETURN jsonb_build_object('status','unverifiable'); END IF;
