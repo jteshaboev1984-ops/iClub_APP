@@ -75,10 +75,13 @@ FROM pg_proc p WHERE p.oid=to_regprocedure(b.signature)
 DO $verify$
 DECLARE n integer;
 BEGIN
+ -- Use the five backed-up OIDs as the source of pg_get_functiondef().
+ -- Applying that function to a planner-expanded pg_proc scan can visit
+ -- aggregate OIDs, for which PostgreSQL raises an unrelated error.
  SELECT count(*) INTO n FROM private.exam_prep_weekly_review_rpc_backup_v1 b
  JOIN pg_proc p ON p.oid=b.installed_oid
  WHERE b.installed_md5 IS NOT NULL AND b.sealed_at IS NOT NULL
-   AND md5(pg_get_functiondef(p.oid))=b.installed_md5
+   AND md5(pg_get_functiondef(b.installed_oid))=b.installed_md5
    AND b.installed_owner IS NOT DISTINCT FROM p.proowner
    AND b.installed_acl IS NOT DISTINCT FROM p.proacl
    AND b.installed_security IS NOT DISTINCT FROM p.prosecdef
