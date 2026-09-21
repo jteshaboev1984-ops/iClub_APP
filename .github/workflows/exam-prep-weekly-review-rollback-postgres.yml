@@ -1,0 +1,58 @@
+name: Exam Prep sealed review rollback (disposable PostgreSQL)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/patch-proposals/20260921_exam_prep_learning_review_*.sql'
+      - 'scripts/weekly-flow-review-rollback-isolated.sh'
+      - '.github/workflows/exam-prep-weekly-review-rollback-postgres.yml'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'docs/patch-proposals/20260921_exam_prep_learning_review_*.sql'
+      - 'scripts/weekly-flow-review-rollback-isolated.sh'
+      - '.github/workflows/exam-prep-weekly-review-rollback-postgres.yml'
+permissions:
+  contents: read
+jobs:
+  review-rollback-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      GITHUB_ACTIONS: 'true'
+      PGHOST: '127.0.0.1'
+      PGPORT: '5432'
+      PGDATABASE: 'postgres'
+      PGUSER: 'postgres'
+      PGPASSWORD: 'postgres'
+      PGOPTIONS: '-c weekly_goal.isolated_db=true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify script syntax and drafts stay out of automatic migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/weekly-flow-review-rollback-isolated.sh
+          test ! -e supabase/migrations/20260921_exam_prep_learning_review_preinstall_backup_v1.sql
+          test ! -e supabase/migrations/20260921_exam_prep_learning_review_sealed_rollback_v1.sql
+      - name: Real PostgreSQL 17 review install and rollback rehearsal; no production credentials
+        shell: bash
+        run: bash scripts/weekly-flow-review-rollback-isolated.sh
+      - name: Show synthetic SQL error diagnostics only
+        if: failure()
+        run: tail -100 /tmp/weekly-review-rollback-isolated.log
