@@ -1,4 +1,6 @@
--- Disposable PostgreSQL 17 only. Negative test of frozen goal source-plan binding.
+-- Disposable PostgreSQL 17 only. An unverifiable historical replan MUST fail.
+-- A verified same-identity plan reorder is tested separately by the 11-version
+-- frozen-goal continuity fixture and is deliberately allowed.
 -- Writes only artificial rows inside one ROLLBACK transaction.
 \set ON_ERROR_STOP on
 DO $$ BEGIN
@@ -23,12 +25,12 @@ BEGIN
    (user_id,component_code,skill_code,status,engine_version,reason)
  VALUES(v_user,'P1','P1-QUA-01','open','objective_state_v1',
    '{"source":"disposable_plan_binding_negative"}'::jsonb);
- -- Reproduce historical replan: the frozen goal still refers to old plan,
- -- but an active replacement displays a matching skill/action at priority 1.
+ -- The snapshot belongs to v1, and v3 has an identical current item but the
+ -- intervening plan v2 is MISSING. No legitimate lineage can be reconstructed.
  UPDATE private.exam_prep_weekly_plans SET status='superseded' WHERE id=v_old;
  INSERT INTO private.exam_prep_weekly_plans
   (user_id,program_version_id,component_code,active_week_no,plan_version,status,policy_note)
- VALUES(v_user,v_program,'P1',1,2,'active','synthetic historical replacement')
+ VALUES(v_user,v_program,'P1',1,3,'active','synthetic missing-v2 replacement')
  RETURNING id INTO v_new;
  INSERT INTO private.exam_prep_weekly_plan_items
   (plan_id,priority_order,item_type,skill_code,correction_case_id,action_code,action_payload,status)
@@ -37,19 +39,21 @@ BEGIN
  FROM private.exam_prep_weekly_plan_items i WHERE i.plan_id=v_old;
  IF (SELECT source_plan_id FROM private.exam_prep_weekly_goal_snapshots WHERE id=v_goal)<>v_old
  OR NOT EXISTS(SELECT 1 FROM private.exam_prep_weekly_plan_items
-     WHERE plan_id=v_new AND priority_order=1 AND skill_code='P1-QUA-01') THEN
-  RAISE EXCEPTION 'historical goal mismatch not reproduced'; END IF;
+     WHERE plan_id=v_new AND priority_order=1 AND skill_code='P1-QUA-01')
+ OR EXISTS(SELECT 1 FROM private.exam_prep_weekly_plans
+     WHERE user_id=v_user AND component_code='P1' AND plan_version=2) THEN
+  RAISE EXCEPTION 'missing-plan-lineage test not reproduced'; END IF;
  PERFORM set_config('request.jwt.claim.sub',v_user::text,true);
  PERFORM set_config('request.jwt.claim.role','authenticated',true);
  v_result:=public.start_exam_prep_learning_review_safe_v1(
   'P1',v_goal,v_new,'synthetic-wrong-source-plan-review-01');
  IF v_result->>'status'<>'stale' OR v_result?'session_id' THEN
-  RAISE EXCEPTION 'old frozen goal was falsely accepted for replacement plan: %',v_result;
+  RAISE EXCEPTION 'missing intermediary plan was incorrectly accepted: %',v_result;
  END IF;
  IF (SELECT count(*) FROM private.exam_prep_session_authorizations WHERE user_id=v_user)<>v_auths
  OR (SELECT count(*) FROM private.exam_prep_sessions WHERE user_id=v_user)<>v_sessions THEN
-  RAISE EXCEPTION 'cross-plan negative call wrote auth or session'; END IF;
- RAISE NOTICE 'PASS historical frozen goal cannot start a review for a different active plan';
+  RAISE EXCEPTION 'missing-plan negative call wrote auth or session'; END IF;
+ RAISE NOTICE 'PASS unverified missing-version goal cannot launch a review';
 END;
 $test$;
 ROLLBACK;
@@ -57,5 +61,5 @@ DO $$ BEGIN
  IF EXISTS(SELECT 1 FROM private.exam_prep_sessions
    WHERE client_idempotency_key='synthetic-wrong-source-plan-review-01') THEN
   RAISE EXCEPTION 'historical plan negative fixture leaked'; END IF;
- RAISE NOTICE 'PASS review plan binding fixture rolled back completely';
+ RAISE NOTICE 'PASS negative plan-lineage fixture rolled back completely';
 END $$;
