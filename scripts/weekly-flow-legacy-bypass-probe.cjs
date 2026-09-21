@@ -84,7 +84,6 @@ script('docs/patch-proposals/20260921_exam_prep_learning_review_verdict_v1.sql')
 nodeTest('scripts/weekly-flow-repeat-verdict.cjs');
 script('supabase/tests/exam_prep_learning_review_noncredit_isolated_matrix.sql');
 script('docs/patch-proposals/20260921_exam_prep_learning_review_start_v1.sql');
-// A frozen goal is not interchangeable with another plan's matching skill.
 script('docs/patch-proposals/20260921_exam_prep_learning_review_exact_goal_binding_v1.sql');
 script('supabase/tests/exam_prep_learning_review_plan_binding_isolated_matrix.sql');
 script('docs/patch-proposals/20260921_exam_prep_learning_review_recovery_v1.sql');
@@ -102,5 +101,9 @@ assert.equal(named(sql(counts),'COUNTS'),before,'Academic fixture changed after 
 nodeTest('scripts/weekly-flow-rollback-package-drill.cjs');
 assert.equal(named(sql(counts),'COUNTS'),before,'Academic fixture changed after rollback rehearsal');
 console.log('ISOLATED FULL-SURFACE BACKUP / INSTALL / SEALED ROLLBACK TESTS GREEN.');
-console.log('Public review/read-model PG candidate tested; browser acceptance and live data provenance still required.');
+// Last test intentionally COMMITs synthetic race data; never run before the
+// preservation/rollback probes. GitHub destroys its disposable DB afterwards.
+nodeTest('scripts/weekly-flow-review-two-backend-race.cjs');
+console.log('TWO-BACKEND NONCREDIT REVIEW PASS: same single session across simultaneous device starts.');
+console.log('Browser acceptance and live data provenance remain release blockers.');
 console.log('Production bypass remains until independently authorized release; no live SQL executed.');
