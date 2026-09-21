@@ -791,12 +791,12 @@ tour_violations_finish_toast: "Тур завершён: нарушения се�
         "Меняется только интерфейс приложения и не влияет на туры и практику.",
       profile_content_language_title: "Язык туров и практики",
       profile_content_language_desc:
-        "Смена этого языка удалит весь прогресс (туры, практика, ответы). Используйте только при необходимости.",
+        "Меняет язык заданий в турах и практике. Все результаты и ответы сохраняются.",
 
       // Confirm / Toast
       confirm_content_lang_change:
-        "Смена языка туров и практики удалит весь прогресс. Продолжить?",
-      toast_content_lang_changed: "Язык туров и практики изменён. Прогресс сброшен.",
+        "Изменить язык заданий? Ваши результаты и ответы сохранятся.",
+      toast_content_lang_changed: "Язык заданий изменён. Весь прогресс сохранён.",
 
       // Practice input
       input_number: "Введите число",
@@ -1700,13 +1700,13 @@ tour_violations_finish_toast: "Tur yakunlandi: sessiya buzilishlari",
         "Bu faqat ilova interfeysini o‘zgartiradi va turlar hamda amaliyotga ta’sir qilmaydi.",
       profile_content_language_title: "Turlar va amaliyot tili",
       profile_content_language_desc:
-        "Bu tilni o‘zgartirish barcha progressni (turlar, amaliyot, javoblar) o‘chiradi. Faqat zarurat bo‘lsa foydalaning.",
+        "Turlar va amaliyotdagi savollar tili o‘zgaradi. Barcha natijalar va javoblar saqlanadi.",
 
       // Confirm / Toast
       confirm_content_lang_change:
-        "Turlar va amaliyot tilini o‘zgartirish barcha progressni o‘chiradi. Davom etilsinmi?",
+        "Savollar tilini o‘zgartirasizmi? Natijalar va javoblar saqlanadi.",
       toast_content_lang_changed:
-        "Turlar va amaliyot tili o‘zgartirildi. Progress o‘chirildi.",
+        "Savollar tili o‘zgartirildi. Barcha natijalar saqlandi.",
 
       // Practice input
       input_number: "Raqam kiriting",
@@ -2595,12 +2595,12 @@ tour_violations_finish_toast: "Tour finished: session violations",
         "Changes only the application interface and does not affect tours or practice.",
       profile_content_language_title: "Tours & Practice Language",
       profile_content_language_desc:
-        "Changing this language will delete all progress (tours, practice, answers). Use only if necessary.",
+        "Changes the language of questions in Tours and Practice. All results and answers stay saved.",
 
       confirm_content_lang_change:
-        "Changing the tours and practice language will delete all progress. Continue?",
+        "Change the question language? Your results and answers will be preserved.",
       toast_content_lang_changed:
-        "Tours and practice language updated. Progress has been reset.",
+        "Question language updated. All progress has been preserved.",
 
       input_number: "Enter a number",
       input_text: "Enter your answer",
