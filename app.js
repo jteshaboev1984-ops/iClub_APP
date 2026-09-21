@@ -12840,40 +12840,27 @@ if (contentLangWrap) {
 });
 if (!ok) return;
 
-      // 1) DB wipe (если есть Supabase + uid)
-      try {
-        const uid = await getAuthUid();
-        if (window.sb && uid) {
-          // --- Practice wipe (server-authoritative) ---
-          const practiceApi = getPracticeSafeApi();
-          if (!practiceApi?.resetProgress) {
-            throw new Error("practice_reset_safe_api_unavailable");
-          }
-          const resetResult = await practiceApi.resetProgress();
-          if (!resetResult?.ok) {
-            throw new Error("practice_reset_failed");
-          }
+      // Changing question language must preserve Practice, Tours and local drafts.
+// Update only this learner's language, and require server confirmation.
+try {
+  const uid = await getAuthUid();
+  if (!window.sb || !uid) throw new Error("content_language_save_unavailable");
+  const { data, error } = await window.sb
+    .from("users")
+    .update({ language_code: nextLang })
+    .eq("id", uid)
+    .select("id,language_code")
+    .maybeSingle();
+  if (error || !data || data.language_code !== nextLang) {
+    throw error || new Error("content_language_save_unconfirmed");
+  }
+} catch (e) {
+  try { trackEvent("content_lang_change_db_error", { message: String(e?.message || e) }); } catch {}
+  showToast(t("save_failed_try_again"));
+  return;
+}
 
-          // --- Tour wipe ---
-          // ✅ Tours НЕ очищаем при смене языка контента.
-          // Иначе user получает повторную попытку, что ломает one-attempt rule.
-
-          // 2) update content language in users table
-          await window.sb.from("users").upsert({ id: uid, language_code: nextLang }, { onConflict: "id" });
-        }
-      } catch (e) {
-        // если где-то не получилось — лучше не падать UI
-        try { trackEvent("content_lang_change_db_error", { message: String(e?.message || e) }); } catch {}
-      }
-
-      // 3) local wipe (без удаления профиля)
-      try { localStorage.removeItem(LS.state); } catch {}
-      try { localStorage.removeItem(LS.practiceDraft); } catch {}
-      try { localStorage.removeItem(LS.myRecs); } catch {}
-      try { localStorage.removeItem(LS.events); } catch {}
-      try { localStorage.removeItem(LS.credentials); } catch {}
-
-      // 4) apply content language
+// 4) apply content language
             fresh.language = nextLang;
       // UI язык не трогаем намеренно (ваше требование). Но если uiLanguage ещё нет — зафиксируем.
       if (!fresh.uiLanguage) fresh.uiLanguage = window.i18n?.getLang?.() || nextLang;
