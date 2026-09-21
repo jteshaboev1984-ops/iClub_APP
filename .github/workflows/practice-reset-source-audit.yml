@@ -1,0 +1,43 @@
+name: Practice reset safety source audit (no database)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app.js'
+      - 'security/legacy-assessment-safe-api.js'
+      - '.github/workflows/practice-reset-source-audit.yml'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'app.js'
+      - 'security/legacy-assessment-safe-api.js'
+      - '.github/workflows/practice-reset-source-audit.yml'
+permissions:
+  contents: read
+jobs:
+  inspect-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Report source-level Practice reset boundaries without credentials or database
+        shell: bash
+        run: |
+          node <<'JS'
+          'use strict';
+          const fs = require('node:fs');
+          const assert = require('node:assert/strict');
+          for (const f of ['app.js','security/legacy-assessment-safe-api.js']) {
+            const lines=fs.readFileSync(f,'utf8').split(/\r?\n/);
+            const match=lines.flatMap((line,index)=>/practiceApi\.resetProgress\(|reset_practice_progress_safe_v4|resetProgress\(\)/.test(line)?[index]:[]);
+            assert.ok(match.length,'Reset call path missing from '+f);
+            for(const i of match) {
+              console.log('\nSOURCE FILE '+f+' MATCH LINE '+(i+1));
+              for(let j=Math.max(0,i-24);j<=Math.min(lines.length-1,i+22);j++)
+                console.log(String(j+1).padStart(6,' ')+' '+lines[j]);
+            }
+          }
+          console.log('PASS: inspected checked-in production reset call paths; source-only, no Supabase or user data.');
+          JS
