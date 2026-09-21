@@ -80,10 +80,11 @@ for(const file of ['scripts/weekly-flow-atomic-dispatch-smoke.cjs',
  'scripts/weekly-flow-atomic-dispatch-nonplan.cjs',
  'scripts/weekly-flow-atomic-dispatch-full-surface.cjs']) nodeTest(file);
 console.log('FULL-SURFACE CANDIDATE: direct bypasses, original Core and two-backend races exercised.');
-// New no-pack policy: read-only, private verdict must not permit an exposed
-// assessment to be counted as a new independent test.
+// Owner-approved no-new-pack policy. Both classification and actual synthetic
+// noncredit correction reconciliation must pass with a clean transaction ROLLBACK.
 script('docs/patch-proposals/20260921_exam_prep_learning_review_verdict_v1.sql');
 nodeTest('scripts/weekly-flow-repeat-verdict.cjs');
+script('supabase/tests/exam_prep_learning_review_noncredit_isolated_matrix.sql');
 for(const file of ['docs/patch-proposals/20260920_exam_prep_previous_week_adherence_readonly_v1.sql',
  'supabase/tests/exam_prep_previous_week_adherence_isolated_matrix.sql']){
  const result=script(file);if(result.stdout)process.stdout.write(result.stdout.slice(-700));
@@ -92,5 +93,5 @@ assert.equal(named(sql(counts),'COUNTS'),before,'Academic fixture changed after 
 nodeTest('scripts/weekly-flow-rollback-package-drill.cjs');
 assert.equal(named(sql(counts),'COUNTS'),before,'Academic fixture changed after rollback rehearsal');
 console.log('ISOLATED FULL-SURFACE BACKUP / INSTALL / SEALED ROLLBACK TESTS GREEN.');
-console.log('Repeat-review classification only; authorizer/credit/correction/UI integration is NOT yet ready.');
+console.log('Repeat-review classification and noncredit correction fixture only; public authorization/UI NOT ready.');
 console.log('Production bypass remains until independently authorized release; no live SQL executed.');
