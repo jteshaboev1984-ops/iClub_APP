@@ -41,6 +41,22 @@ for (const old of [
   'Progress has been reset.'
 ]) assert.ok(!localization.includes(old), `Misleading destructive-language text remains: ${old}`);
 
+// Registration warning and cache keys must agree with non-destructive settings.
+const htmlSource = fs.readFileSync('index.html','utf8');
+assert.ok(htmlSource.includes('i18n.js?v=practicepreserve1'));
+assert.ok(htmlSource.includes('app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1'));
+assert.ok(htmlSource.includes('Язык заданий можно изменить позже — результаты и ответы сохранятся.'));
+for (const old of [
+  'Важно: смена языка после регистрации сбросит прогресс.',
+  'Muhim: ro‘yxatdan o‘tgandan so‘ng tilni o‘zgartirish progressni o‘chiradi.',
+  'Important: changing the language after registration will reset progress.'
+]) assert.ok(!localization.includes(old) && !htmlSource.includes(old), 'Obsolete data-loss registration warning');
+for (const text of [
+  'Язык заданий можно изменить позже — результаты и ответы сохранятся.',
+  'Savollar tilini keyin ham o‘zgartirishingiz mumkin — natijalar va javoblar saqlanadi.',
+  'You can change the question language later without losing results or answers.'
+]) assert.ok(localization.includes(text), 'Registration translation missing: '+text);
+
 async function exercise({next='uz',initial='ru',accept=true,uid='synthetic-user',dbError=null,missingRow=false}={}) {
   let profile = { language: initial, uiLanguage:'en', keeper:'practice-progress' };
   const local = new Map([['state','tour-history'],['practiceDraft','unsent-written-work'],['events','audit-history'],['credentials','earned-badges'],['myRecs','recommendations']]);
