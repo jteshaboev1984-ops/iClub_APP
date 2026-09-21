@@ -4,20 +4,24 @@ on:
     branches: [main]
     paths:
       - 'docs/patch-proposals/20260921_exam_prep_learning_review_*.sql'
+      - 'docs/patch-proposals/20260921_exam_prep_assessment_publish_provenance_guard_v1.sql'
       - 'scripts/weekly-flow-review-rollback-isolated.sh'
       - 'scripts/weekly-flow-review-rollback-negative-isolated.sh'
       - 'scripts/weekly-flow-review-active-rollback-isolated.sh'
       - 'supabase/tests/weekly_flow_review_active_rollback_seed.sql'
+      - 'supabase/tests/exam_prep_assessment_publish_provenance_guard_isolated_matrix.sql'
       - 'supabase/tests/weekly_flow_live_generator_v1_definition_fixture.sql'
       - '.github/workflows/exam-prep-weekly-review-rollback-postgres.yml'
   push:
     branches: ['fix/exam-prep-weekly-goal-flow-safe']
     paths:
       - 'docs/patch-proposals/20260921_exam_prep_learning_review_*.sql'
+      - 'docs/patch-proposals/20260921_exam_prep_assessment_publish_provenance_guard_v1.sql'
       - 'scripts/weekly-flow-review-rollback-isolated.sh'
       - 'scripts/weekly-flow-review-rollback-negative-isolated.sh'
       - 'scripts/weekly-flow-review-active-rollback-isolated.sh'
       - 'supabase/tests/weekly_flow_review_active_rollback_seed.sql'
+      - 'supabase/tests/exam_prep_assessment_publish_provenance_guard_isolated_matrix.sql'
       - 'supabase/tests/weekly_flow_live_generator_v1_definition_fixture.sql'
       - '.github/workflows/exam-prep-weekly-review-rollback-postgres.yml'
 permissions:
@@ -62,6 +66,7 @@ jobs:
           test ! -e supabase/migrations/20260921_exam_prep_learning_review_sealed_rollback_v1.sql
           test ! -e supabase/migrations/weekly_flow_live_generator_v1_definition_fixture.sql
           test ! -e supabase/migrations/weekly_flow_review_active_rollback_seed.sql
+          test ! -e supabase/migrations/20260921_exam_prep_assessment_publish_provenance_guard_v1.sql
       - name: Real PostgreSQL 17 review install and rollback rehearsal; no production credentials
         shell: bash
         run: bash scripts/weekly-flow-review-rollback-isolated.sh
@@ -71,8 +76,16 @@ jobs:
       - name: Refuse rollback with an actual active synthetic review and saved evidence
         shell: bash
         run: bash scripts/weekly-flow-review-active-rollback-isolated.sh
+      - name: Prevent future unreviewed assessment publication without altering legacy P5
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f docs/patch-proposals/20260921_exam_prep_assessment_publish_provenance_guard_v1.sql > /tmp/assessment-publish-provenance.log 2>&1
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_assessment_publish_provenance_guard_isolated_matrix.sql >> /tmp/assessment-publish-provenance.log 2>&1
+          echo 'GREEN: future assessment publishing requires exact composition review; original eight P5 rows untouched (disposable DB only).'
       - name: Show synthetic SQL error diagnostics only
         if: failure()
         run: |
           tail -100 /tmp/weekly-review-rollback-isolated.log 2>/dev/null || true
           tail -100 /tmp/weekly-review-rollback-active.log 2>/dev/null || true
+          tail -100 /tmp/assessment-publish-provenance.log 2>/dev/null || true
