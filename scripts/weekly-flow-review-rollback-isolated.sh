@@ -113,7 +113,16 @@ fail_gate() {
 }
 fail_gate core_on review_rollback_requires_core_off "UPDATE private.exam_prep_feature_config SET rollout_state='controlled_beta',core_enabled=true,kill_switch=false WHERE program_key='math_as_p1_p5';"
 fail_gate acl_drift review_rollback_refuses_installed_drift_ "REVOKE EXECUTE ON FUNCTION public.start_exam_prep_learning_review_safe_v1(text,uuid,uuid,text) FROM authenticated;"
-result="${body/%COMMIT;/SELECT 'RESTORED='||count(*) FROM private.exam_prep_weekly_review_rpc_backup_v1 b WHERE b.operation='modified' AND md5(pg_get_functiondef(b.original_oid))=b.original_md5;$'\n'ROLLBACK;}"
+# Use a literal heredoc to keep SQL string quotes intact. Inlining a quoted
+# SELECT inside Bash ${parameter/pattern/replacement} stripped the quotes and
+# accidentally treated RESTORED as a column; that was a harness error only.
+probe_sql="$(cat <<'SQL'
+SELECT 'RESTORED='||count(*) FROM private.exam_prep_weekly_review_rpc_backup_v1 b
+WHERE b.operation='modified' AND md5(pg_get_functiondef(b.original_oid))=b.original_md5;
+ROLLBACK;
+SQL
+)"
+result="${body/%COMMIT;/$probe_sql}"
 echo "$result" | psql -X -q -A -t -v ON_ERROR_STOP=1 > "$log" 2>&1 || { tail -100 "$log"; exit 1; }
 grep -q '^RESTORED=4$' "$log" || { echo 'Did not restore all four original RPCs in rehearsal'; tail -70 "$log"; exit 1; }
 [[ "$(run_sql "SELECT count(*) FROM private.exam_prep_weekly_review_rpc_backup_v1 b WHERE md5(pg_get_functiondef(b.installed_oid))=b.installed_md5")" == 5 ]] || {
