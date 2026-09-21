@@ -80,13 +80,9 @@ for(const file of ['scripts/weekly-flow-atomic-dispatch-smoke.cjs',
  'scripts/weekly-flow-atomic-dispatch-nonplan.cjs',
  'scripts/weekly-flow-atomic-dispatch-full-surface.cjs']) nodeTest(file);
 console.log('FULL-SURFACE CANDIDATE: direct bypasses, original Core and two-backend races exercised.');
-// Owner-approved no-new-pack policy: both classification and the actual
-// noncredit correction reconciler must pass in a synthetic ROLLBACK.
 script('docs/patch-proposals/20260921_exam_prep_learning_review_verdict_v1.sql');
 nodeTest('scripts/weekly-flow-repeat-verdict.cjs');
 script('supabase/tests/exam_prep_learning_review_noncredit_isolated_matrix.sql');
-// Public review start is a NEW, separately authorized entrypoint. It must
-// never rewrite the original consumed plan authorization or publish fresh credit.
 script('docs/patch-proposals/20260921_exam_prep_learning_review_start_v1.sql');
 script('docs/patch-proposals/20260921_exam_prep_learning_review_recovery_v1.sql');
 script('docs/patch-proposals/20260921_exam_prep_learning_review_goal_eligibility_v1.sql');
@@ -97,9 +93,11 @@ for(const file of ['docs/patch-proposals/20260920_exam_prep_previous_week_adhere
  const result=script(file);if(result.stdout)process.stdout.write(result.stdout.slice(-700));
 }
 script('docs/patch-proposals/20260921_exam_prep_learning_review_weekly_accounting_v1.sql');
+script('supabase/tests/exam_prep_learning_review_read_models_isolated_matrix.sql');
+console.log('REVIEW LEARNER READ MODELS GREEN: active attempt recovery, review-ready goal, correction weekly completion only on verified remediation.');
 assert.equal(named(sql(counts),'COUNTS'),before,'Academic fixture changed after candidate');
 nodeTest('scripts/weekly-flow-rollback-package-drill.cjs');
 assert.equal(named(sql(counts),'COUNTS'),before,'Academic fixture changed after rollback rehearsal');
 console.log('ISOLATED FULL-SURFACE BACKUP / INSTALL / SEALED ROLLBACK TESTS GREEN.');
-console.log('Public review/read-model candidate tested in PG only; frontend and end-to-end weekly evidence still require acceptance.');
+console.log('Public review/read-model PG candidate tested; browser acceptance and live data provenance still required.');
 console.log('Production bypass remains until independently authorized release; no live SQL executed.');
