@@ -84,6 +84,9 @@ script('docs/patch-proposals/20260921_exam_prep_learning_review_verdict_v1.sql')
 nodeTest('scripts/weekly-flow-repeat-verdict.cjs');
 script('supabase/tests/exam_prep_learning_review_noncredit_isolated_matrix.sql');
 script('docs/patch-proposals/20260921_exam_prep_learning_review_start_v1.sql');
+// A frozen goal is not interchangeable with another plan's matching skill.
+script('docs/patch-proposals/20260921_exam_prep_learning_review_exact_goal_binding_v1.sql');
+script('supabase/tests/exam_prep_learning_review_plan_binding_isolated_matrix.sql');
 script('docs/patch-proposals/20260921_exam_prep_learning_review_recovery_v1.sql');
 script('docs/patch-proposals/20260921_exam_prep_learning_review_goal_eligibility_v1.sql');
 script('supabase/tests/exam_prep_learning_review_public_isolated_matrix.sql');
