@@ -53,6 +53,11 @@ for f in "${migrations[@]}"; do
   apply_migration "$f"
 done
 run_sql "UPDATE private.exam_prep_feature_config SET rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() WHERE id=1" > /dev/null
+# Restore the exact observed live v1 function into disposable CI only. The
+# fixture requires the known synthetic replay hash and independently asserts
+# its resulting hash against the original production pin. No legacy migration
+# or production function is changed by this test adaptation.
+run_file supabase/tests/weekly_flow_live_generator_v1_definition_fixture.sql
 # Extract exactly the eight immutable LIVE expected hashes from the original
 # backup proposal itself. Diagnose *all* replay mismatches without weakening
 # the pinned gate or manufacturing a matching function definition/hash.
