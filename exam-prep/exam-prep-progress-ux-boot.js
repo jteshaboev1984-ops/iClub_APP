@@ -63,6 +63,31 @@
     });
   }
 
+  // The already-isolated review bridge must be ready before a learner can use
+  // the new weekly flow. If the bridge is missing, fail closed rather than
+  // showing a Start button that cannot resume the approved same-pack review.
+  function loadRequiredWeeklyReviewUi() {
+    if (window.iClubExamPrepWeeklyFlowEnabled !== true) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      if (!stillEnabled() || internal.weeklyFlowApi?.version !== 'weekly_flow_adapter_v1') {
+        reject(new Error('weekly review prerequisites unavailable')); return;
+      }
+      if (internal.weeklyReviewUi?.version === 'learning_review_ui_v1') { resolve(); return; }
+      if (document.querySelector('script[data-exam-prep-weekly-review-ui]')) {
+        reject(new Error('weekly review asset already loading without proof')); return;
+      }
+      const asset = document.createElement('script');
+      asset.dataset.examPrepWeeklyReviewUi = 'true';
+      asset.src = `${base}exam-prep-weekly-review-ui.js?v=weeklyreview1`;
+      asset.async = false;
+      asset.onload = () => internal.weeklyReviewUi?.version === 'learning_review_ui_v1' &&
+        internal.weeklyFlowApi?.version === 'weekly_flow_adapter_v1' && stillEnabled()
+        ? resolve() : reject(new Error('weekly review contract unavailable'));
+      asset.onerror = () => reject(new Error('weekly review asset unavailable'));
+      root.appendChild(asset);
+    });
+  }
+
   // Read-only notice belongs beside the EXISTING exam-plan editor. Never
   // introduce another manual-replan control or block the rest of Progress UX.
   function loadOptionalWeeklyAdherenceUi() {
@@ -95,9 +120,11 @@
       await loadScript('api', 'examPrepProgressUxApi', () =>
         typeof internal.progressUxApi?.progress === 'function');
       if (!stillEnabled()) { fail(); return; }
-      // Optional weekly adapter fails independently; existing Progress UX remains.
+      // A missing review bridge blocks ONLY the opt-in weekly flow; existing
+      // Progress UX and Core retain their original routes.
       try {
         await loadOptionalWeeklyAdapter();
+        await loadRequiredWeeklyReviewUi();
       } catch (_) {
         internal.weeklyFlowBootstrapStatus = 'unavailable';
         window.iClubExamPrepWeeklyFlowEnabled = false;
