@@ -327,7 +327,7 @@ hub_resources_sub: "Книги и материалы по предмету",
       reg_language_label: "Язык",
       reg_language_hint:
         "Этот язык будет использоваться для практики, туров и сертификатов.",
-      reg_language_reset_note: "Важно: смена языка после регистрации сбросит прогресс.",
+      reg_language_reset_note: "Язык заданий можно изменить позже — результаты и ответы сохранятся.",
 
       tab_home: "Главная",
     tab_study: "Учёба",
@@ -1234,7 +1234,7 @@ hub_resources_sub: "Fan bo‘yicha kitoblar va materiallar",
       reg_language_hint:
         "Ushbu til amaliyot, turlar va sertifikatlarga qo‘llanadi.",
       reg_language_reset_note:
-        "Muhim: ro‘yxatdan o‘tgandan so‘ng tilni o‘zgartirish progressni o‘chiradi.",
+        "Savollar tilini keyin ham o‘zgartirishingiz mumkin — natijalar va javoblar saqlanadi.",
 
       tab_home: "Bosh sahifa",
     tab_study: "O‘qish",
@@ -2143,7 +2143,7 @@ hub_resources_sub: "Books and subject resources",
       // Registration
       reg_language_label: "Language",
       reg_language_hint: "This language will be used for practice, tours, and certificates.",
-      reg_language_reset_note: "Important: changing the language after registration will reset progress.",
+      reg_language_reset_note: "You can change the question language later without losing results or answers.",
 
       tab_home: "Home",
     tab_study: "Study",
