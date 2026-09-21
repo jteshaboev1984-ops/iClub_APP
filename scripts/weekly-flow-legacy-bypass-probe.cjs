@@ -1,6 +1,7 @@
 'use strict';
 // Full compatibility, rollback and bypass checks only on disposable CI PG17.
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
 const {spawnSync}=require('node:child_process');
 const env=process.env;
 if(env.GITHUB_ACTIONS!=='true'||env.PGHOST!=='127.0.0.1'||env.PGDATABASE!=='postgres'||
@@ -10,7 +11,7 @@ if(env.GITHUB_ACTIONS!=='true'||env.PGHOST!=='127.0.0.1'||env.PGDATABASE!=='post
 function run(input){return spawnSync('psql',['-X','-q','-A','-t','-v','ON_ERROR_STOP=1'],{
  env,encoding:'utf8',input,timeout:30000});}
 function sql(input){const result=run(input);
- assert.equal(result.status,0,`Isolated SQL failed: ${(result.stderr||'').slice(-1000)}`);
+ assert.equal(result.status,0,`Isolated SQL failed: ${(result.stderr||'').slice(-2000)}`);
  return result.stdout;}
 function named(output,key){const rows=output.split(/\r?\n/).filter(row=>row.startsWith(key+'='));
  assert.equal(rows.length,1,`Expected one ${key}`);return rows[0].slice(key.length+1);}
@@ -58,9 +59,19 @@ assert.equal(named(shape,'DIRECT'),'true:true','Old generator changed: audit fir
 assert.equal(named(sql(counts),'COUNTS'),before);
 console.log('REPRODUCED prepatch direct legacy bypass in synthetic DB.');
 
-// Exact eleven-function backup must be committed before any mutation.
-script('docs/patch-proposals/20260920_weekly_flow_preinstall_rpc_backup_v1.sql');
-console.log('BACKUP GREEN: eleven prepatch definitions, ownership and grants captured privately.');
+// Production SQL strictly requires its independently observed LIVE v1 body hash.
+// The historical migration replay in disposable CI has a distinct old v1 body;
+// test only that isolated variant by substituting the expected hash in MEMORY.
+// Never write a relaxed hash to the reviewed proposal or production database.
+const backupPath='docs/patch-proposals/20260920_weekly_flow_preinstall_rpc_backup_v1.sql';
+const backup=fs.readFileSync(backupPath,'utf8');
+const liveV1Hash='58247a59c0967848d21c5ab93cc9d647';
+const isolatedV1Hash='0a2ab5a50e7f086b035960ccaccbc8eb';
+assert.equal(backup.split(liveV1Hash).length-1,1,'Strict live v1 MD5 missing or duplicated');
+assert.equal(named(sql("SELECT 'V1HASH='||md5(pg_get_functiondef('public.generate_exam_prep_weekly_plan_safe_v1(text,text)'::regprocedure));"),'V1HASH'),
+ isolatedV1Hash,'Unexpected CI migration source drift; do not change live pin');
+sql(backup.replace(liveV1Hash,isolatedV1Hash));
+console.log('BACKUP GREEN: 11 immutable original bodies; CI-only v1 variant verified without changing pinned live proposal.');
 script('docs/patch-proposals/20260919_exam_prep_atomic_legacy_rpc_dispatch_v1.sql');
 script('docs/patch-proposals/20260920_weekly_flow_postinstall_attestation_v1.sql');
 console.log('CANDIDATE SEALED: eleven installed body hashes, zero enrollments at installation.');
