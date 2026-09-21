@@ -80,6 +80,12 @@ for(const file of ['scripts/weekly-flow-atomic-dispatch-smoke.cjs',
  'scripts/weekly-flow-atomic-dispatch-nonplan.cjs',
  'scripts/weekly-flow-atomic-dispatch-full-surface.cjs']) nodeTest(file);
 console.log('FULL-SURFACE CANDIDATE: direct bypasses, original Core and two-backend races exercised.');
+// Separate additive selector DRAFT. It does NOT yet replace the Core authorizers.
+// Prove the first completed pack cannot be called fresh, P5 isolation, privacy,
+// and that reusing original question IDs is not a valid alternative.
+script('docs/patch-proposals/20260921_exam_prep_fresh_learning_selector_v1.sql');
+script('supabase/tests/exam_prep_fresh_learning_selector_isolated_matrix.sql');
+console.log('PRIVATE FRESH SELECTOR GREEN ONLY; Core integration and new authored packs remain blocked.');
 for(const file of ['docs/patch-proposals/20260920_exam_prep_previous_week_adherence_readonly_v1.sql',
  'supabase/tests/exam_prep_previous_week_adherence_isolated_matrix.sql']){
  const result=script(file);if(result.stdout)process.stdout.write(result.stdout.slice(-700));
