@@ -94,6 +94,8 @@ run_file docs/patch-proposals/20260921_exam_prep_learning_review_exact_goal_bind
 run_file docs/patch-proposals/20260921_exam_prep_learning_review_recovery_v1.sql
 run_file docs/patch-proposals/20260921_exam_prep_learning_review_goal_eligibility_v1.sql
 run_file docs/patch-proposals/20260921_exam_prep_learning_review_weekly_accounting_v1.sql
+# Install verified historical goal continuity BEFORE the five-RPC seal.
+run_file docs/patch-proposals/20260921_exam_prep_frozen_goal_continuity_v1.sql
 run_file docs/patch-proposals/20260921_exam_prep_learning_review_postinstall_attestation_v1.sql
 seal="$(run_sql "SELECT count(*) FROM private.exam_prep_weekly_review_rpc_backup_v1 b WHERE b.installed_md5 IS NOT NULL AND md5(pg_get_functiondef(b.installed_oid))=b.installed_md5")"
 [[ "$seal" == 5 ]] || { echo "Wrong review seal: $seal"; exit 1; }
@@ -128,4 +130,7 @@ grep -q '^RESTORED=4$' "$log" || { echo 'Did not restore all four original RPCs 
 [[ "$(run_sql "SELECT count(*) FROM private.exam_prep_weekly_review_rpc_backup_v1 b WHERE md5(pg_get_functiondef(b.installed_oid))=b.installed_md5")" == 5 ]] || {
  echo 'Rehearsal changed installed review candidate'; exit 1; }
 [[ "$(run_sql "SELECT count(*) FROM private.exam_prep_learning_review_starts_v1")" == 0 ]] || { echo 'Unexpected learner review rows'; exit 1; }
-echo 'GREEN: disposable PostgreSQL 17 review rollback. Sealed 5 RPCs, refused Core ON/ACL drift, restored four bodies in rolled-back rehearsal, no review rows modified.'
+# An additional end-to-end public scenario must prove real-shaped v1->v11
+# reordering before release; its synthetic writes must ROLLBACK in full.
+run_file supabase/tests/exam_prep_frozen_goal_continuity_isolated_matrix.sql
+echo 'GREEN: disposable PG17 review rollback and 11-version frozen-goal continuity, no synthetic residue.'
