@@ -52,6 +52,17 @@ if (!starter.includes('academic_credit')) {
 if (starter.includes('IF v_plan_id IS NOT NULL THEN') && !starter.includes('academic_credit')) {
   errors.push('ATOMIC STARTER explicitly bypasses guard when plan_id IS NULL');
 }
+// Reproduced real two-backend deadlock: taking auth FOR UPDATE first then
+// waiting for the component advisory lock inverted once-only's lock order.
+// Enforce read-only component lookup, advisory lock, then first auth row lock.
+const lookup = starter.indexOf('SELECT component_code INTO v_component');
+const advisory = starter.indexOf("PERFORM pg_advisory_xact_lock(hashtextextended('ep-stable-plan:'");
+const authLock = starter.indexOf('WHERE id=p_authorization_id AND user_id=v_uid FOR UPDATE;');
+const delegate = starter.indexOf('RETURN public.start_exam_prep_plan_session_once_safe_v1(');
+if (!(lookup >= 0 && advisory > lookup && authLock > advisory && delegate > authLock) ||
+    starter.slice(lookup,advisory).includes('FOR UPDATE')) {
+  errors.push('ATOMIC STARTER lock-order regression: auth row locked before shared advisory key');
+}
 for (const [name,body] of [['backup',backup],['attestation',attest],['rollback',rollback]]) {
   if (/(?:<>|!=)\s*7\b|\bseven\b|\b7\s+exact/i.test(body)) {
     errors.push(`${name} still contains narrow seven-function-only completeness/rollback contract`);
@@ -64,8 +75,8 @@ if (!rollback.includes('original_definition') || !rollback.includes('installed_m
 if (errors.length) {
   console.error(`RELEASE BLOCKED: ${errors.length} full-surface weekly-flow failures:`);
   for (const error of errors) console.error(` - ${error}`);
-  console.error('Prior seven-function PG17/browser GREEN does not cover this surface. DO NOT INSTALL, MERGE OR ENABLE.');
+  console.error('Static acceptance does not replace PG17 races. DO NOT INSTALL, MERGE OR ENABLE.');
   process.exitCode = 1;
 } else {
-  console.log('STATIC FULL-SURFACE INVENTORY PASS ONLY. Separate isolated PG17 direct-bypass and rollback tests, real-user safety review and owner approval remain mandatory.');
+  console.log('STATIC FULL-SURFACE AND LOCK-ORDER INVENTORY PASS ONLY. Separate isolated PG17 direct-bypass and rollback tests, real-user safety review and owner approval remain mandatory.');
 }
