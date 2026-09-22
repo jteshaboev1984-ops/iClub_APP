@@ -69,7 +69,7 @@ jobs:
           set -euo pipefail
           psql -X -v ON_ERROR_STOP=1 -c "UPDATE private.exam_prep_feature_config SET rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false WHERE id=1"
           psql -X -v ON_ERROR_STOP=1 -v mcq_git_sha="$(git rev-parse HEAD)" -f supabase/tests/exam_prep_mcq_feature_on_rollback_v1.sql
-      - name: Rehearse enrolled learning review and original frozen-goal lineage WITH MCQ ON
+      - name: Rehearse enrolled noncredit review, scored answer and frozen-goal lineage WITH MCQ ON
         shell: bash
         run: |
           set -euo pipefail
@@ -78,18 +78,52 @@ jobs:
           source=Path('supabase/tests/exam_prep_frozen_goal_continuity_isolated_matrix.sql').read_text()
           begin='\nBEGIN;\n'
           point=" review_session:=(v_result->>'session_id')::uuid;"
-          assert source.count(begin)==1 and source.count(point)==1, 'Weekly draft fixture changed: do not weaken integration checks'
+          decl=' version_no integer; v_result jsonb; v_count integer;'
+          assert source.count(begin)==source.count(point)==source.count(decl)==1, 'Weekly fixture changed: fail closed'
           source=source.replace(begin,begin+"UPDATE private.exam_prep_mcq_order_rollout_v1 SET enabled=true,enabled_at=now() WHERE singleton;\n",1)
+          source=source.replace(decl,decl+'''
+ review_mcq private.exam_prep_session_items%rowtype;
+ review_source_letter text; review_display_index integer; review_response jsonb;''',1)
           addition="""
           IF (SELECT count(*) FROM private.exam_prep_session_items si JOIN public.questions q ON q.id=si.question_id AND q.qtype='mcq'
               WHERE si.session_id=review_session AND si.display_to_source IS NOT NULL)<>3 THEN
-            RAISE EXCEPTION 'Combined integration: real learning review lacks three server-frozen MCQs';
+            RAISE EXCEPTION 'Combined integration: review lacks three server-frozen MCQs';
           END IF;
           IF EXISTS(SELECT 1 FROM private.exam_prep_session_items si JOIN public.questions q ON q.id=si.question_id AND q.qtype='mcq'
               WHERE si.session_id=review_session AND (array_length(si.display_to_source,1)<>4
                 OR NOT si.display_to_source @> ARRAY[0,1,2,3]::smallint[])) THEN
             RAISE EXCEPTION 'Combined integration: review permutation invalid';
           END IF;
+          SELECT si.* INTO STRICT review_mcq FROM private.exam_prep_session_items si
+          JOIN public.questions q ON q.id=si.question_id AND q.qtype='mcq'
+          WHERE si.session_id=review_session ORDER BY si.item_order LIMIT 1;
+          SELECT correct_answer INTO STRICT review_source_letter FROM public.questions WHERE id=review_mcq.question_id;
+          review_display_index:=array_position(review_mcq.display_to_source,
+            (ascii(review_source_letter)-65)::smallint)-1;
+          IF review_display_index NOT BETWEEN 0 AND 3 THEN
+            RAISE EXCEPTION 'Combined integration: correct source choice not in frozen display';
+          END IF;
+          review_response:=public.submit_exam_prep_response_safe_v1(
+            review_session,review_mcq.item_order,jsonb_build_object('picked_index',review_display_index),
+            'combined-review-answer-0001',1000,'ru');
+          IF review_response->>'selected_answer' IS DISTINCT FROM chr(65+review_display_index)
+          OR NOT EXISTS(SELECT 1 FROM private.exam_prep_responses r
+              JOIN private.exam_prep_evidence_events e ON e.response_id=r.id
+              WHERE r.session_id=review_session AND r.item_order=review_mcq.item_order
+              AND r.is_correct IS TRUE
+              AND r.picked_index=review_mcq.display_to_source[review_display_index+1])
+          OR EXISTS(SELECT 1 FROM private.exam_prep_sessions s
+              JOIN private.exam_prep_session_authorizations a ON a.id=s.authorization_id
+              WHERE s.id=review_session AND (a.academic_credit IS TRUE OR a.credit_context<>'learning_review'))
+          THEN RAISE EXCEPTION 'Combined integration: review scoring or noncredit boundary drift'; END IF;
+          review_response:=public.submit_exam_prep_response_safe_v1(
+            review_session,review_mcq.item_order,jsonb_build_object('picked_index',review_display_index),
+            'combined-review-answer-0001',1000,'uz');
+          IF review_response->>'selected_answer' IS DISTINCT FROM chr(65+review_display_index)
+          OR (review_response->>'replayed')::boolean IS DISTINCT FROM true
+          OR (SELECT count(*) FROM private.exam_prep_responses r
+              WHERE r.session_id=review_session AND r.item_order=review_mcq.item_order)<>1
+          THEN RAISE EXCEPTION 'Combined integration: saved answer replay/locale changed'; END IF;
           """
           source=source.replace(point,point+addition,1)
           Path('/tmp/mcq-weekly-both-on.sql').write_text(source)
@@ -108,4 +142,4 @@ jobs:
             THEN RAISE EXCEPTION 'Cross-branch rehearsal left synthetic residue'; END IF;
           END$$;
           SQL
-          echo 'GREEN: exact PR121 draft + PR141 MCQ combined, feature ON, enrolled noncredit review, 11-version plan, preserved legacy, rollback; isolated PG17 only.'
+          echo 'GREEN: PR121+PR141 enrolled noncredit scored review, locale retry, original goal, no legacy mutations, full rollback on isolated PG17.'
