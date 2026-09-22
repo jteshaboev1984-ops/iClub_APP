@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - scripts/exam-prep-p5-option-language-guard.cjs
+      - scripts/exam-prep-p5-diagnostic-language-guard.cjs
       - docs/patch-proposals/20260921_p5_ru_uz_options_remediation_protocol_v1.md
       - docs/patch-proposals/20260921_p5_language_notation_readonly_audit.sql
       - docs/patch-proposals/20260921_p5_localization_technical_completion_and_release_gates_v1.md
@@ -24,6 +25,10 @@ jobs:
       - name: Check out reviewed revision
         uses: actions/checkout@v4
       - name: Validate JavaScript syntax
-        run: node --check scripts/exam-prep-p5-option-language-guard.cjs
-      - name: Run non-sensitive option-language regression
-        run: node scripts/exam-prep-p5-option-language-guard.cjs
+        run: |
+          node --check scripts/exam-prep-p5-option-language-guard.cjs
+          node --check scripts/exam-prep-p5-diagnostic-language-guard.cjs
+      - name: Run non-sensitive option and diagnostic language regressions
+        run: |
+          node scripts/exam-prep-p5-option-language-guard.cjs
+          node scripts/exam-prep-p5-diagnostic-language-guard.cjs
