@@ -5,6 +5,7 @@ on:
     paths:
       - 'supabase/migrations/20260921220000_exam_prep_mcq_server_frozen_order_v1.sql'
       - 'supabase/migrations/20260921220100_exam_prep_mcq_order_strict_validation_v1.sql'
+      - 'supabase/tests/exam_prep_mcq_feature_on_rollback_v1.sql'
       - 'scripts/exam-prep-mcq-frozen-order-regression.cjs'
       - '.github/workflows/exam-prep-mcq-frozen-order.yml'
   workflow_dispatch:
@@ -19,3 +20,102 @@ jobs:
         run: node --check scripts/exam-prep-mcq-frozen-order-regression.cjs
       - name: Exhaustive order/scoring/locale regression
         run: node scripts/exam-prep-mcq-frozen-order-regression.cjs
+
+  isolated-pg17-feature-on:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Pin exact candidate
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - name: Bootstrap disposable Supabase-shaped PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql >/tmp/mcq-bootstrap.log 2>&1
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql >>/tmp/mcq-bootstrap.log 2>&1
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql >>/tmp/mcq-bootstrap.log 2>&1
+      - name: Apply production-shaped Exam Prep stack with MCQ OFF
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
+          test "${#files[@]}" -ge 1
+          apply_one() {
+            local f="$1" b
+            b="$(basename "$f")"
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>/tmp/mcq-migrations.log 2>&1
+            fi
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >>/tmp/mcq-migrations.log 2>&1
+            fi
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('mcq-pg17-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated MCQ CI dependency') on conflict(cohort_key) do nothing" >>/tmp/mcq-migrations.log 2>&1
+            fi
+            echo "Applying $b"
+            psql -v ON_ERROR_STOP=1 -f "$f" >>/tmp/mcq-migrations.log 2>&1
+          }
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|\
+              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|\
+              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|\
+              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|\
+              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|\
+              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  for rb in "${recent[@]}"; do apply_one "supabase/migrations/$rb"; done
+                fi
+                continue
+                ;;
+            esac
+            apply_one "$f"
+          done
+      - name: Verify feature OFF and simulate real feature ON with full rollback
+        shell: bash
+        env:
+          PGOPTIONS: '-c mcq_on.isolated_db=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -v mcq_git_sha="$CANDIDATE_SHA" -f supabase/tests/exam_prep_mcq_feature_on_rollback_v1.sql
+      - name: Verify no isolated learner or rollout residue
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(psql -Atqc "select enabled from private.exam_prep_mcq_order_rollout_v1 where singleton")" = 'f'
+          test "$(psql -Atqc "select count(*) from private.exam_prep_synthetic_identities where run_id='SV-MCQ-ON-ROLLBACK'")" = '0'
+          test "$(psql -Atqc "select count(*) from private.exam_prep_session_items where display_to_source is not null")" = '0'
+          echo 'PASS disposable feature-ON rehearsal: rolled back; no production calls'
