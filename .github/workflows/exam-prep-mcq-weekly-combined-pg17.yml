@@ -22,7 +22,7 @@ jobs:
           POSTGRES_DB: postgres
         ports: ['5432:5432']
         options: >-
-          --health-cmd 'pg_isready -U postgres -d postgres'
+          --health-cmd "pg_isready -U postgres -d postgres"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 20
@@ -35,7 +35,6 @@ jobs:
       PGPASSWORD: postgres
       PGOPTIONS: '-c weekly_goal.isolated_db=true -c mcq_on.isolated_db=true'
       WEEKLY_PIN: b0bc1aab47f8d34c1b4aae629a4b5a317986d683
-      MCQ_PIN: 4b3906af9b3ab0ba0d64bd024760d2cceafe0aa0
     steps:
       - name: Checkout MCQ candidate
         uses: actions/checkout@v4
@@ -52,8 +51,6 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git -C weekly-source rev-parse HEAD)" = "$WEEKLY_PIN"
-          # MCQ logic is pinned to its reviewed tree; this workflow alone may advance HEAD.
-          git cat-file -e "$MCQ_PIN^{commit}" 2>/dev/null || true
           test ! -e weekly-source/supabase/migrations/20260921220000_exam_prep_mcq_server_frozen_order_v1.sql
           cp -a weekly-source/docs/patch-proposals/. docs/patch-proposals/
           cp -a weekly-source/scripts/. scripts/
