@@ -68,7 +68,12 @@ assert.match(migration,/v_picked:=v_i\.display_to_source\[v_picked\+1\]/);
 assert.match(migration,/exam_prep_mcq_display_letter_v1\(v_r\.selected_answer,v_i\.display_to_source\)/);
 assert.match(migration,/exam_prep_mcq_display_letter_v1\(r\.selected_answer,si\.display_to_source\)/);
 assert.match(migration,/definition_md5/);
-assert.match(hardening,/COALESCE\(array_length\(display_to_source,1\)=4,false\)/);
+for (const table of ['exam_prep_mcq_order_rollout_v1','exam_prep_mcq_order_function_backups_v1']) {
+  assert.match(hardening,new RegExp(`ALTER TABLE private\\.${table} ENABLE ROW LEVEL SECURITY;`),`${table} must have RLS before any release gate`);
+  assert.match(hardening,new RegExp(`REVOKE ALL ON TABLE private\\.${table} FROM PUBLIC,anon,authenticated;`),`${table} must deny direct browser access`);
+}
+assert.match(hardening,/MCQ hardening: RLS not enabled for both new private tables/);
+assert.match(hardening,/MCQ hardening: browser table grants remain/);
 assert.doesNotMatch(migration,/\bDELETE\s+FROM\s+(?:public\.questions|public\.practice_answers|public\.tour_answers|private\.exam_prep_responses|private\.exam_prep_sessions)/i);
 assert.doesNotMatch(migration,/\bUPDATE\s+private\.exam_prep_mcq_order_rollout_v1\s+SET\s+enabled\s*=\s*true/i);
-console.log(`PASS content-free MCQ source/display regression: ${scenarios} scorer/diagnosis comparisons across P1/P5, all display orders and three languages; legacy identity, retries and malformed maps protected. SQL static anchors only; PG17 execution remains required.`);
+console.log(`PASS content-free MCQ source/display regression: ${scenarios} scorer/diagnosis comparisons across P1/P5, all display orders and three languages; legacy identity, RLS, browser ACL, retries and malformed maps protected. SQL static anchors only; PG17 feature-ON execution remains required.`);
