@@ -81,9 +81,7 @@ jobs:
           decl=' version_no integer; v_result jsonb; v_count integer;'
           assert source.count(begin)==source.count(point)==source.count(decl)==1, 'Weekly fixture changed: fail closed'
           source=source.replace(begin,begin+"UPDATE private.exam_prep_mcq_order_rollout_v1 SET enabled=true,enabled_at=now() WHERE singleton;\n",1)
-          source=source.replace(decl,decl+'''
- review_mcq private.exam_prep_session_items%rowtype;
- review_source_letter text; review_display_index integer; review_response jsonb;''',1)
+          source=source.replace(decl,decl+"\n review_mcq private.exam_prep_session_items%rowtype;\n review_source_letter text; review_display_index integer; review_response jsonb;",1)
           addition="""
           IF (SELECT count(*) FROM private.exam_prep_session_items si JOIN public.questions q ON q.id=si.question_id AND q.qtype='mcq'
               WHERE si.session_id=review_session AND si.display_to_source IS NOT NULL)<>3 THEN
