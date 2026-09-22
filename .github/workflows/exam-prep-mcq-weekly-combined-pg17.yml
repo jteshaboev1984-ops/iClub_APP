@@ -1,0 +1,114 @@
+name: Exam Prep MCQ + weekly flow combined PG17
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/exam-prep-mcq-weekly-combined-pg17.yml'
+      - 'supabase/migrations/*exam_prep*.sql'
+      - 'supabase/tests/exam_prep_mcq_feature_on_rollback_v1.sql'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  combined-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd 'pg_isready -U postgres -d postgres'
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      GITHUB_ACTIONS: 'true'
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGDATABASE: postgres
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGOPTIONS: '-c weekly_goal.isolated_db=true -c mcq_on.isolated_db=true'
+      WEEKLY_PIN: b0bc1aab47f8d34c1b4aae629a4b5a317986d683
+      MCQ_PIN: 4b3906af9b3ab0ba0d64bd024760d2cceafe0aa0
+    steps:
+      - name: Checkout MCQ candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout immutable weekly-flow candidate separately
+        uses: actions/checkout@v4
+        with:
+          ref: b0bc1aab47f8d34c1b4aae629a4b5a317986d683
+          path: weekly-source
+          persist-credentials: false
+      - name: Prove exact pair and overlay additive proposal-only files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C weekly-source rev-parse HEAD)" = "$WEEKLY_PIN"
+          # MCQ logic is pinned to its reviewed tree; this workflow alone may advance HEAD.
+          git cat-file -e "$MCQ_PIN^{commit}" 2>/dev/null || true
+          test ! -e weekly-source/supabase/migrations/20260921220000_exam_prep_mcq_server_frozen_order_v1.sql
+          cp -a weekly-source/docs/patch-proposals/. docs/patch-proposals/
+          cp -a weekly-source/scripts/. scripts/
+          cp -a weekly-source/supabase/tests/. supabase/tests/
+          test -f docs/patch-proposals/20260920_weekly_flow_preinstall_rpc_backup_v1.sql
+          test -f supabase/tests/exam_prep_frozen_goal_continuity_isolated_matrix.sql
+          test -f supabase/migrations/20260921220100_exam_prep_mcq_order_strict_validation_v1.sql
+      - name: Install weekly drafts over OFF-by-default MCQ migrations and rehearse rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/weekly-flow-review-rollback-isolated.sh
+      - name: Run actual MCQ feature-ON scoring through weekly RPC wrappers and rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -c "UPDATE private.exam_prep_feature_config SET rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false WHERE id=1"
+          psql -X -v ON_ERROR_STOP=1 -v mcq_git_sha="$(git rev-parse HEAD)" -f supabase/tests/exam_prep_mcq_feature_on_rollback_v1.sql
+      - name: Rehearse enrolled learning review and original frozen-goal lineage WITH MCQ ON
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          source=Path('supabase/tests/exam_prep_frozen_goal_continuity_isolated_matrix.sql').read_text()
+          begin='\nBEGIN;\n'
+          point=" review_session:=(v_result->>'session_id')::uuid;"
+          assert source.count(begin)==1 and source.count(point)==1, 'Weekly draft fixture changed: do not weaken integration checks'
+          source=source.replace(begin,begin+"UPDATE private.exam_prep_mcq_order_rollout_v1 SET enabled=true,enabled_at=now() WHERE singleton;\n",1)
+          addition="""
+          IF (SELECT count(*) FROM private.exam_prep_session_items si JOIN public.questions q ON q.id=si.question_id AND q.qtype='mcq'
+              WHERE si.session_id=review_session AND si.display_to_source IS NOT NULL)<>3 THEN
+            RAISE EXCEPTION 'Combined integration: real learning review lacks three server-frozen MCQs';
+          END IF;
+          IF EXISTS(SELECT 1 FROM private.exam_prep_session_items si JOIN public.questions q ON q.id=si.question_id AND q.qtype='mcq'
+              WHERE si.session_id=review_session AND (array_length(si.display_to_source,1)<>4
+                OR NOT si.display_to_source @> ARRAY[0,1,2,3]::smallint[])) THEN
+            RAISE EXCEPTION 'Combined integration: review permutation invalid';
+          END IF;
+          """
+          source=source.replace(point,point+addition,1)
+          Path('/tmp/mcq-weekly-both-on.sql').write_text(source)
+          PY
+          psql -X -v ON_ERROR_STOP=1 -f /tmp/mcq-weekly-both-on.sql
+      - name: Assert both rollout and evidence remain clean after all transactions
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -X -At -v ON_ERROR_STOP=1 <<'SQL'
+          DO $$BEGIN
+            IF (SELECT enabled FROM private.exam_prep_mcq_order_rollout_v1 WHERE singleton) IS DISTINCT FROM false
+               OR EXISTS(SELECT 1 FROM private.exam_prep_synthetic_identities WHERE run_id='SV-MCQ-ON-ROLLBACK')
+               OR EXISTS(SELECT 1 FROM private.exam_prep_session_items WHERE display_to_source IS NOT NULL)
+               OR EXISTS(SELECT 1 FROM public.users WHERE first_name='FrozenGoalContinuityFixture')
+            THEN RAISE EXCEPTION 'Cross-branch rehearsal left synthetic residue'; END IF;
+          END$$;
+          SQL
+          echo 'GREEN: exact PR121 draft + PR141 MCQ combined, feature ON, enrolled noncredit review, 11-version plan, preserved legacy, rollback; isolated PG17 only.'
