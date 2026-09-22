@@ -9,6 +9,29 @@ BEGIN
     OR (SELECT count(*) FROM private.exam_prep_session_items WHERE display_to_source IS NOT NULL)<>0
  THEN RAISE EXCEPTION 'MCQ mapping hardening: foundation missing or rollout unexpectedly active'; END IF;
 END;$preflight$;
+
+-- Protect BOTH private tables introduced by the foundation. There are no browser
+-- policies; even accidental future table grants must not expose their rows.
+ALTER TABLE private.exam_prep_mcq_order_rollout_v1 ENABLE ROW LEVEL SECURITY;
+ALTER TABLE private.exam_prep_mcq_order_function_backups_v1 ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE private.exam_prep_mcq_order_rollout_v1 FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON TABLE private.exam_prep_mcq_order_function_backups_v1 FROM PUBLIC,anon,authenticated;
+DO $security$
+DECLARE v_bad int;
+BEGIN
+ SELECT count(*) INTO v_bad FROM pg_tables
+ WHERE schemaname='private' AND tablename IN
+   ('exam_prep_mcq_order_rollout_v1','exam_prep_mcq_order_function_backups_v1')
+ AND rowsecurity IS NOT TRUE;
+ IF v_bad<>0 THEN RAISE EXCEPTION 'MCQ hardening: RLS not enabled for both new private tables'; END IF;
+ IF EXISTS (
+   SELECT 1 FROM information_schema.role_table_grants
+   WHERE table_schema='private'
+     AND table_name IN ('exam_prep_mcq_order_rollout_v1','exam_prep_mcq_order_function_backups_v1')
+     AND grantee IN ('PUBLIC','anon','authenticated')
+ ) THEN RAISE EXCEPTION 'MCQ hardening: browser table grants remain'; END IF;
+END;$security$;
+
 ALTER TABLE private.exam_prep_session_items DROP CONSTRAINT exam_prep_mcq_order_permutation_v1;
 ALTER TABLE private.exam_prep_session_items ADD CONSTRAINT exam_prep_mcq_order_permutation_v1
 CHECK (display_to_source IS NULL OR (
