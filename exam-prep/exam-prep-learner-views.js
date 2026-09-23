@@ -74,6 +74,12 @@
   function rootEl() { return document.querySelector("#exam-prep-host-root"); }
 
   function detectLanguage() {
+    try {
+      const explicit = String(window.i18n?.getLang?.() || document.documentElement.lang || "").toLowerCase();
+      if (explicit.startsWith("uz")) return "uz";
+      if (explicit.startsWith("en")) return "en";
+      if (explicit.startsWith("ru")) return "ru";
+    } catch (_) {}
     const value = String(rootEl()?.textContent || "");
     if (/Umumiy ko‘rinish|Haftalik|Imtihon tayyorgarligi|Dastur bo‘yicha/i.test(value)) return "uz";
     if (/\bOverview\b|weekly plan|exam preparation|entry check|syllabus progress/i.test(value)) return "en";
