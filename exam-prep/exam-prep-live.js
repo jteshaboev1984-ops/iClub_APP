@@ -527,7 +527,7 @@
       if (!sessionId || (started?.ok && !['started','resume','resume_existing_session_first'].includes(started.data?.status))) {
         renderError(); return;
       }
-      state.returnView = { kind: 'plan', component };
+      state.returnView = { kind: returnKind, component };
       await loadSession(sessionId);
       return;
     }
