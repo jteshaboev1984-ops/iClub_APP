@@ -118,7 +118,8 @@ const html = language => `<!doctype html><html lang="${language}"><head><meta na
         language==='ru'?'Сейчас нет доступного шага':language==='uz'?'Hozircha mavjud qadam yo‘q':'No available step right now'));
       // Plan regeneration must use only the new existing planner binding.
       await page.click('[data-ep-live-dashboard]');
-      await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-overview').length===2);
+      await page.waitForFunction(()=>document.querySelectorAll('[data-ep-live-open-component]').length===2);
+      assert.equal(await page.locator('.ep-pux-overview').count(),0,'Compact dashboard must stay free of duplicate Progress UX summaries');
       await page.evaluate(()=>{
         window.__plans.P1={plan_id:'synthetic-plan-p1-v3',active_week_no:1,items:[
           {priority_order:1,item_type:'learning',skill_code:'P1-COO-02',status:'pending',due_at:null}
