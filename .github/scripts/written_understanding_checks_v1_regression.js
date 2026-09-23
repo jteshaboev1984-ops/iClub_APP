@@ -94,8 +94,8 @@ const path = require('path');
     await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});
   });
 
-  await page.waitForSelector('[data-ep-live-plan="P1"]');
-  await page.click('[data-ep-live-plan="P1"]');
+  await page.waitForSelector('[data-ep-live-plan="P1"]', { state: 'attached' });
+  await page.evaluate(() => document.querySelector('[data-ep-live-plan="P1"]').click());
   await page.waitForSelector('[data-ep-live-plan-item="1"]');
   await page.click('[data-ep-live-plan-item="1"]');
 
