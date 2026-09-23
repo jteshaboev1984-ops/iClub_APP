@@ -2076,8 +2076,8 @@ BEGIN
   END IF;
 
   IF (SELECT count(*) FROM private.exam_prep_weekly_flow_rpc_backup_v1
-      WHERE installed_md5 IS NOT NULL AND installed_oid IS NOT NULL
-        AND md5(pg_get_functiondef(installed_oid))=installed_md5)<>8
+      WHERE installed_md5 IS NOT NULL
+        AND md5(pg_get_functiondef(function_oid))=installed_md5)<>8
   THEN RAISE EXCEPTION 'weekly release: base RPC seal incomplete'; END IF;
 
   IF (SELECT count(*) FROM private.exam_prep_weekly_review_rpc_backup_v1
