@@ -1,0 +1,9 @@
+# 21 Sep 2026 — P5 localization release checkpoint
+
+This is a PUBLIC, content-free status. No protected question options, letter distributions or user records.
+
+**Completed:** 17 private revised question candidates (10 Representation + seven normal approximation), independent *numerical recomputation* for five probability tasks, localized option identity checks, clarification candidate for one ambiguous mixed item, and a production SELECT-only 17-item snapshot/ownership/membership preflight. The latest preflight finds 17/17 target rows, zero hash drift, 24 membership references, zero active frozen sessions and zero Practice/Tours references. There is one existing finalized test diagnostic with a saved response, academic evidence and correction chain, whose frozen question hash cannot be casually rewritten. Draft PR #138 adds content-free synthetic QA for answer-choice prose, notation, localized stems and explanations.
+
+**Not completed:** independent qualified human mathematics/RU/UZ approval, original assessment-composition approval provenance (#126), reviewed mitigation for the one frozen test diagnostic, stage-safe content migration and production SQL approval, and written-rubric localization (#136). The owner may allow discarding specifically scoped test Exam Prep history, but that does NOT authorize rewriting a finalized evidence version or deleting any account, legacy Practice/Tour data, rating or certificate. A newly detected separate confidential MCQ answer-position validity gate is documented in the adjacent security-gate file without disclosing sensitive statistics.
+
+**Release status: BLOCKED.** Neither this audit PR nor the separate Exam Prep flow PR #121 should be mistaken for an approved P5 content change. No main merge/deploy, production SQL write, flag, enrollment or user reset has been performed for this work.
