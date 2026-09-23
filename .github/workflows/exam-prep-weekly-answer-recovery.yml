@@ -32,10 +32,11 @@ jobs:
         run: |
           set -euo pipefail
           node --check scripts/weekly-flow-answer-recovery-cutover.cjs
-          test "$(git hash-object exam-prep/exam-prep-live.js)" = '0ee641fb21c7da77fb003bd9be0c0b327d6e96fb'
+          test "$(git hash-object exam-prep/exam-prep-live.js)" = '22687ddc3faa3d3f84be88fa336c06413f43efd2'
           grep -Fq 'async function reconcilePendingAnswer(pending)' exam-prep/exam-prep-live.js
           grep -Fq 'pending.idempotencyKey' exam-prep/exam-prep-live.js
           grep -Fq 'window.iClubExamPrepWeeklyFlowEnabled===true' exam-prep/exam-prep-live.js
+          grep -Fq 'localization_status === "unavailable"' exam-prep/exam-prep-live.js
           node --check exam-prep/exam-prep-live.js
           git diff --exit-code
       - name: Install isolated browser
