@@ -492,7 +492,7 @@
     root.querySelectorAll('[data-ep-live-plan-item]').forEach(b => b.addEventListener('click', () => launchPlanItem(component, plan.plan_id, Number(b.dataset.epLivePlanItem))));
   }
 
-  async function launchPlanItem(component, planId, priorityOrder) {
+  async function launchPlanItem(component, planId, priorityOrder, returnKind = "plan") {
     if (state.busy) return; state.busy = true; renderLoading();
     if (window.iClubExamPrepWeeklyFlowEnabled === true) {
       const flow = internal.weeklyFlowApi;
@@ -510,7 +510,7 @@
         const sessionId = authorization.data?.recovery?.session_id || authorization.data?.session_id;
         state.busy = false;
         if (!sessionId) { renderError(); return; }
-        state.returnView = { kind: 'plan', component }; await loadSession(sessionId); return;
+        state.returnView = { kind: returnKind, component }; await loadSession(sessionId); return;
       }
       if (authorization.data?.status !== 'authorized' || !authorization.data?.authorization_id) {
         state.busy = false;
@@ -535,7 +535,7 @@
     if (!auth?.ok || !auth.data?.authorization_id) { state.busy = false; renderError(); return; }
     const started = await internal.api.startSession(auth.data.authorization_id, key("ep-plan-session")); state.busy = false;
     if (!started?.ok || !started.data?.session_id) { renderError(); return; }
-    state.returnView = { kind: "plan", component }; await loadSession(started.data.session_id);
+    state.returnView = { kind: returnKind, component }; await loadSession(started.data.session_id);
   }
 
   async function openTimed(component) {
@@ -595,8 +595,11 @@
       if (!finalized?.ok) { renderError(); return; }
       const finishedType = state.session.session_type, component = state.session.component_code;
       state.session = null;
-      if (finishedType === "diagnostic") { state.notice = copy().finish; await renderDashboard(); }
-      else {
+      if (finishedType === "diagnostic") {
+        state.notice = copy().finish;
+        if (state.returnView?.kind === "component") await openComponentHome(component);
+        else await renderDashboard();
+      } else {
         if (window.iClubExamPrepWeeklyFlowEnabled !== true) {
           await internal.api.generateWeeklyPlan(component, "normal");
           state.notice = copy().completedTask;
@@ -605,11 +608,19 @@
             uz:'Mashg‘ulot saqlandi. Haftalik reja o‘zgarmadi.',
             en:'Session saved. Your weekly plan has not changed.' })[state.language];
         }
-        await openPlan(component);
+        if (state.returnView?.kind === "component") await openComponentHome(component);
+        else await openPlan(component);
       }
       return;
     }
-    if (!next) { state.session = null; if (state.returnView?.kind === "plan") await openPlan(state.returnView.component); else if (state.returnView?.kind === "timed") await openTimed(state.returnView.component); else await renderDashboard(); return; }
+    if (!next) {
+      state.session = null;
+      if (state.returnView?.kind === "component") await openComponentHome(state.returnView.component);
+      else if (state.returnView?.kind === "plan") await openPlan(state.returnView.component);
+      else if (state.returnView?.kind === "timed") await openTimed(state.returnView.component);
+      else await renderDashboard();
+      return;
+    }
     state.itemStartedAt = Date.now(); renderQuestion(next, items, timed);
   }
 
@@ -627,7 +638,12 @@
     root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card"><div class="ep-live-head"><strong>${esc(c.question)} ${answered + 1} / ${total}</strong>${timer}</div><div class="ep-live-qtext">${esc(item.text || item.written_prompt || "")}</div>${answerControl}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-submit>${esc(c.submit)}</button>${exit}</div></div>`);
     state.notice = null;
     root.querySelector('[data-ep-live-submit]')?.addEventListener('click', () => submitAnswer(item));
-    root.querySelector('[data-ep-live-exit]')?.addEventListener('click', async () => { state.session = null; if (state.returnView?.kind === "plan") await openPlan(state.returnView.component); else await renderDashboard(); });
+    root.querySelector('[data-ep-live-exit]')?.addEventListener('click', async () => {
+      state.session = null;
+      if (state.returnView?.kind === "component") await openComponentHome(state.returnView.component);
+      else if (state.returnView?.kind === "plan") await openPlan(state.returnView.component);
+      else await renderDashboard();
+    });
     root.querySelector('[data-ep-live-end]')?.addEventListener('click', async () => { if (window.confirm(c.endConfirm)) await finishTimed("administrative_stop"); });
     if (timed) startTimer(state.session.session_id);
   }
@@ -767,7 +783,7 @@
       if (!value) return; payload={answer:value};
     }
     // Diagnostic and timed/paper sessions retain their own existing contracts.
-    if (window.iClubExamPrepWeeklyFlowEnabled===true && state.returnView?.kind==='plan'
+    if (window.iClubExamPrepWeeklyFlowEnabled===true && ['plan','component'].includes(state.returnView?.kind)
         && !['diagnostic','timed','paper'].includes(state.session.session_type)) {
       const pending={sessionId:state.session.session_id,component:state.session.component_code,
         itemOrder:Number(item.item_order),payload,idempotencyKey:key('ep-answer'),
@@ -905,7 +921,10 @@
       syncSubjectHub: async context => { state.language = lang(context?.language || state.language); const result = await host.syncSubjectHub(context); if (!result) reset(); return result; },
       refreshCapabilities: async () => { const result = await host.refreshCapabilities(); if (host.isOpen() && canMount()) await mount({ language: state.language }); return result; },
       open: async context => { state.language = lang(context?.language || state.language); const result = await host.open(context); if (result && canMount()) await mount(context || {}); return result; },
-      back: () => { reset(); return host.back(); }, close: () => { reset(); return host.close(); }, isOpen: () => host.isOpen(), liveFlowVersion: VERSION
+      back: () => {
+        if (rootEl()?.querySelector("[data-ep-component-home]")) { void renderDashboard(); return true; }
+        reset(); return host.back();
+      }, close: () => { reset(); return host.close(); }, isOpen: () => host.isOpen(), liveFlowVersion: VERSION
     });
   }
 
