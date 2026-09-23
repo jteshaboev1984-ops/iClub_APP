@@ -97,6 +97,7 @@
     // while the server is loading. Never mistake that copy for a newly ready view.
     if (root.querySelector('.ep-flow-pending-visual, [data-ep-transition-hold="1"]')) return 'loading';
     if (root.querySelector('.ep-live-error')) return 'error';
+    if (root.querySelector('[data-ep-component-home]')) return 'component';
     if (root.querySelector('.ep-live-grid')) return 'dashboard';
     const heading = Array.from(root.querySelectorAll('.ep-live-card .ep-live-head strong'))
       .some(el => /^(P1|P5)\s*·\s*(Недельный план|Haftalik reja|Weekly plan)$/.test(String(el.textContent || '').trim()));
@@ -108,11 +109,17 @@
           /^(Загрузка|Loading|Yuklanmoqda)/.test(String(el.textContent || '').trim()))) return 'loading';
     return 'other';
   }
+  function compactRouteDashboard(root) {
+    const cards = Array.from(root.querySelectorAll('.ep-live-component-card[data-ep-live-component]'));
+    return cards.length === 2 && cards.every(card => card.dataset.epComponentEntry === '1');
+  }
+
   function ready(root) {
     const view = currentView(root);
     if (view === 'error') return true;
     if (mode === 'dashboard') {
       if (view !== 'dashboard') return false;
+      if (compactRouteDashboard(root)) return true;
       const cards = Array.from(root.querySelectorAll('.ep-live-component-card[data-ep-live-component]'));
       if (cards.length !== 2) return false;
       return cards.every(card => card.querySelector('.ep-pux-overview, .ep-pux-error')) &&
@@ -135,6 +142,7 @@
       }
       if (view === 'dashboard') return !!root.querySelector('.ep-live-grid');
       if (view === 'plan') return !!root.querySelector('.ep-pux-week, .ep-pux-error');
+      if (view === 'component') return true;
       // Materials, profile and other existing routes also use the generic loading
       // notice. They must become visible as soon as their own screen is ready.
       if (view === 'other') return true;
@@ -159,7 +167,8 @@
     if (!mode) {
       if (suspendedScreen && root.firstElementChild === suspendedScreen) return;
       suspendedScreen = null;
-      if (view === 'dashboard' && root.querySelectorAll('.ep-live-component-card').length === 2 &&
+      if (view === 'dashboard' && !compactRouteDashboard(root) &&
+          root.querySelectorAll('.ep-live-component-card').length === 2 &&
           root.querySelectorAll('.ep-pux-overview, .ep-pux-error').length < 2) arm('dashboard','dashboard');
       else if (view === 'plan' && !root.querySelector('.ep-pux-week, .ep-pux-error')) arm('plan','plan');
       else if (view === 'loading') arm('question','task');
@@ -180,8 +189,9 @@
     const button = event.target?.closest?.('button');
     if (!button || !root.contains(button) || button.disabled) return;
     if (button.matches('[data-ep-live-plan], [data-ep-flow-next-plan]')) arm('plan','plan');
-    else if (button.matches('[data-ep-live-dashboard], [data-ep-live-home]')) arm('dashboard','dashboard');
+    else if (button.matches('[data-ep-live-dashboard], [data-ep-live-home], [data-ep-component-back]')) arm('dashboard','dashboard');
     else if (button.matches('[data-ep-live-submit]')) arm('question','answer');
+    else if (button.matches('[data-ep-component-primary]')) arm('question', button.dataset.epComponentPrimary === 'diagnostic' ? 'diagnostic' : 'task');
     else if (button.matches('[data-ep-live-timed-start]')) arm('question','timed');
     else if (button.matches('[data-ep-live-start]')) arm('question','diagnostic');
     else if (button.matches('[data-ep-live-plan-item]')) arm('question','task');

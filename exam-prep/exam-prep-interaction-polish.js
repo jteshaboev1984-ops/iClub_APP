@@ -27,6 +27,8 @@
     "[data-ep-live-exit]",
     "[data-ep-live-home]",
     "[data-ep-live-save-profile]",
+    "[data-ep-component-primary]",
+    "[data-ep-component-back]",
     "[data-ep-exam-plan-save]",
     "[data-ep-exam-plan-cancel]",
     "[data-ep-profile-completion-save]",

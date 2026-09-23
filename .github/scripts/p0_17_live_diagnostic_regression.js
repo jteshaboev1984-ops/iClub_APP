@@ -85,8 +85,20 @@ if (!hostCss.includes('max-width: calc(100% - 44px)')) throw new Error('mobile c
   await page.fill('input[name="math_hours"]','6');
   await page.click('[data-ep-live-save-profile]');
   await page.waitForFunction(()=>document.querySelector('[data-ep-live-open-component="P1"]'));
-  r=await page.evaluate(()=>({cards:document.querySelectorAll('[data-ep-live-open-component]').length,calls:window.__calls.map(x=>x.name)}));
+  r=await page.evaluate(()=>({
+    cards:document.querySelectorAll('[data-ep-live-open-component]').length,
+    calls:window.__calls.map(x=>x.name),
+    stateReads:window.__calls
+      .filter(x=>['get_exam_prep_diagnostic_progress_safe_v1','get_exam_prep_state_safe_v1'].includes(x.name))
+      .map(x=>`${x.name}:${x.args.p_component_code}`)
+  }));
   assert(r.cards===2,'overview must expose exactly two component route cards');
+  assert(JSON.stringify(r.stateReads.slice(0,4))===JSON.stringify([
+    'get_exam_prep_diagnostic_progress_safe_v1:P1',
+    'get_exam_prep_state_safe_v1:P1',
+    'get_exam_prep_diagnostic_progress_safe_v1:P5',
+    'get_exam_prep_state_safe_v1:P5'
+  ]),'dashboard placement/state reads must stay serialized to avoid server contention');
   assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'opening Exam Prep must not start an assessment');
   assert(!r.calls.some(name=>name.startsWith('generate_exam_prep_weekly_plan')),'opening Exam Prep must not generate a weekly plan');
 

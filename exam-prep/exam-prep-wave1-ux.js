@@ -285,7 +285,7 @@
     const root = rootEl();
     if (!root || root.hidden) return false;
     return Boolean(root.querySelector(
-      ".ep-live-grid, [data-ep-live-profile-form], [data-ep-live-submit], [data-ep-placement-screen], [data-ep-views-screen], [data-ep-materials-screen], [data-ep-recovery-form-view], [data-ep-recovery-check-view]"
+      ".ep-live-grid, [data-ep-component-home], [data-ep-live-profile-form], [data-ep-live-submit], [data-ep-placement-screen], [data-ep-views-screen], [data-ep-materials-screen], [data-ep-recovery-form-view], [data-ep-recovery-check-view]"
     ));
   }
 
