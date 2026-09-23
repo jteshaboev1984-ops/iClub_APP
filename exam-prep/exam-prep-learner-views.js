@@ -181,6 +181,7 @@
 
   async function openSkill(component, skillCode) {
     if (busy || !canUse() || typeof internal.api?.skillDetail !== "function") return;
+    activeLanguage = detectLanguage();
     busy = true; renderLoading(component, copy().detail, "tracker");
     const result = await internal.api.skillDetail(component, skillCode); busy = false;
     if (!result?.ok) { renderError(component, copy().detail, "tracker"); return; }
