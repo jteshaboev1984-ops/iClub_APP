@@ -1,0 +1,42 @@
+name: Weekly flow per-user canary activation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'exam-prep/exam-prep-api.js'
+      - 'supabase/migrations/20260923163500_exam_prep_weekly_flow_user_status_v1.sql'
+      - 'scripts/weekly-flow-per-user-activation.cjs'
+      - '.github/workflows/exam-prep-weekly-flow-canary-activation.yml'
+  push:
+    branches:
+      - 'release/weekly-flow-canary-activation-20260923'
+    paths:
+      - 'exam-prep/exam-prep-api.js'
+      - 'supabase/migrations/20260923163500_exam_prep_weekly_flow_user_status_v1.sql'
+      - 'scripts/weekly-flow-per-user-activation.cjs'
+      - '.github/workflows/exam-prep-weekly-flow-canary-activation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  activation-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate JavaScript
+        run: |
+          node --check exam-prep/exam-prep-api.js
+          node --check scripts/weekly-flow-per-user-activation.cjs
+      - name: Prove per-user fail-closed activation
+        run: node scripts/weekly-flow-per-user-activation.cjs
+      - name: Static SQL security gate
+        run: |
+          grep -q "SECURITY DEFINER" supabase/migrations/20260923163500_exam_prep_weekly_flow_user_status_v1.sql
+          grep -q "private.exam_prep_weekly_flow_enrolled_v1(v_uid)" supabase/migrations/20260923163500_exam_prep_weekly_flow_user_status_v1.sql
+          grep -q "REVOKE ALL ON FUNCTION public.get_my_exam_prep_weekly_flow_status_v1()" supabase/migrations/20260923163500_exam_prep_weekly_flow_user_status_v1.sql
+          git diff --check
