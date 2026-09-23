@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p251live1";
+  const VERSION = "p252home1";
   let attached = false;
 
   const state = {
@@ -147,31 +147,255 @@
     const profile = await internal.api.examProfile(); state.profile = profile?.ok ? profile.data : null; await renderDashboard();
   }
 
+  const COMPONENT_AREA_LABELS = Object.freeze({
+    "1.1 Quadratics": { ru: "Квадратные выражения и уравнения", uz: "Kvadrat ifodalar va tenglamalar", en: "Quadratics" },
+    "1.2 Functions": { ru: "Функции", uz: "Funksiyalar", en: "Functions" },
+    "1.3 Coordinate geometry": { ru: "Координатная геометрия", uz: "Koordinata geometriyasi", en: "Coordinate geometry" },
+    "1.4 Circular measure": { ru: "Радианная мера и окружность", uz: "Radian o‘lchov va aylana", en: "Circular measure" },
+    "1.5 Trigonometry": { ru: "Тригонометрия", uz: "Trigonometriya", en: "Trigonometry" },
+    "1.6 Series": { ru: "Последовательности и ряды", uz: "Ketma-ketliklar va qatorlar", en: "Series" },
+    "1.7 Differentiation": { ru: "Дифференцирование", uz: "Differensiallash", en: "Differentiation" },
+    "1.8 Integration": { ru: "Интегрирование", uz: "Integrallash", en: "Integration" },
+    "5.1 Representation of data": { ru: "Представление данных", uz: "Ma’lumotlarni tasvirlash", en: "Representation of data" },
+    "5.2 Permutations and combinations": { ru: "Перестановки и сочетания", uz: "O‘rin almashtirish va kombinatsiyalar", en: "Permutations and combinations" },
+    "5.3 Probability": { ru: "Вероятность", uz: "Ehtimollik", en: "Probability" },
+    "5.4 Discrete random variables": { ru: "Дискретные случайные величины", uz: "Diskret tasodifiy miqdorlar", en: "Discrete random variables" },
+    "5.5 The normal distribution": { ru: "Нормальное распределение", uz: "Normal taqsimot", en: "The normal distribution" }
+  });
+
+  function componentHomeCopy() {
+    if (state.language === "uz") return {
+      back: "Sizning yo‘lingiz", next: "Keyingi qadam", progress: "Progress", topics: "Mavzular",
+      attention: "E’tibor talab qiladi", timed: "Vaqtli mashq", materials: "O‘quv materiallari",
+      readiness: "Imtihon tayyorgarligi", confirmed: "Tasdiqlangan", inProgress: "Jarayonda",
+      notStarted: "Boshlanmagan", needsAttention: "Qayta ko‘rish kerak", openComponent: "Ochish",
+      startTask: "Topshiriqni boshlash", continueTask: "Topshiriqni davom ettirish",
+      fixTask: "Xatoni tuzatish", retestTask: "Qayta tekshiruvdan o‘tish", mixedTask: "Aralash mashqni boshlash",
+      timedTask: "Vaqtli mashqni boshlash", checkNext: "Keyingi topshiriqni tekshirish",
+      waiting: "Qayta tekshiruv vaqti hali kelmagan", noAvailable: "Hozircha yangi topshiriq mavjud emas.",
+      skills: "ko‘nikma", skill: "Ko‘nikma"
+    };
+    if (state.language === "en") return {
+      back: "Your route", next: "Next step", progress: "Progress", topics: "Topics",
+      attention: "Needs attention", timed: "Timed practice", materials: "Study materials",
+      readiness: "Exam readiness", confirmed: "Confirmed", inProgress: "In progress",
+      notStarted: "Not started", needsAttention: "Needs review", openComponent: "Open",
+      startTask: "Start task", continueTask: "Continue task", fixTask: "Fix this mistake",
+      retestTask: "Take the delayed check", mixedTask: "Start mixed practice", timedTask: "Start timed practice",
+      checkNext: "Check next task", waiting: "The delayed check is not available yet",
+      noAvailable: "No new task is available right now.", skills: "skills", skill: "Skill"
+    };
+    return {
+      back: "Ваш маршрут", next: "Следующий шаг", progress: "Прогресс", topics: "Темы",
+      attention: "Требуют внимания", timed: "Работа на время", materials: "Учебные материалы",
+      readiness: "Готовность к экзамену", confirmed: "Подтверждено", inProgress: "В работе",
+      notStarted: "Не начато", needsAttention: "Нужно повторить", openComponent: "Открыть",
+      startTask: "Начать задание", continueTask: "Продолжить задание", fixTask: "Исправить ошибку",
+      retestTask: "Пройти повторную проверку", mixedTask: "Начать смешанную практику",
+      timedTask: "Начать работу на время", checkNext: "Проверить следующий шаг",
+      waiting: "Повторная проверка ещё не доступна", noAvailable: "Сейчас нет нового доступного задания.",
+      skills: "навыков", skill: "Навык"
+    };
+  }
+
+  function componentAreaLabel(value) {
+    const labels = COMPONENT_AREA_LABELS[String(value || "")];
+    return labels?.[state.language] || labels?.ru || String(value || "").replace(/^\d+\.\d+\s+/, "");
+  }
+
   function componentSummary(component, statePayload) {
     const rows = Array.isArray(statePayload?.components) ? statePayload.components : [];
     return rows.find(x => x?.component_code === component) || rows[0] || null;
   }
 
   function componentCard(component, progress, statePayload) {
-    const c = copy(), s = progress?.screening || {}, summary = componentSummary(component, statePayload);
+    const c = copy(), home = componentHomeCopy(), s = progress?.screening || {}, summary = componentSummary(component, statePayload);
     const reqItems = Number(s.required_items || 0), ansItems = Number(s.answered_items || 0), reqAreas = Number(s.required_areas || 0), ansAreas = Number(s.answered_areas || 0);
     const pct = reqItems > 0 ? Math.min(100, Math.round(100 * ansItems / reqItems)) : 0;
     const complete = progress?.stage0_complete === true, active = progress?.active_session;
     const stage = Number(summary?.operational_stage || 0), coverage = Number(summary?.coverage_pct || 0);
     const componentName = component === "P1" ? c.componentP1 : c.componentP5;
     const skillCount = component === "P1" ? 45 : 36;
-    const actions = [];
-    if (complete) {
-      actions.push(`<button class="ep-live-btn" type="button" data-ep-live-plan="${component}">${esc(c.openPlan)}</button>`);
-      if (stage >= 2) actions.push(`<button class="ep-live-btn secondary" type="button" data-ep-live-timed="${component}">${esc(c.openTimed)}</button>`);
-      if (stage >= 5) actions.push(`<button class="ep-live-btn secondary" type="button" data-ep-live-readiness="${component}">${esc(c.openReadiness)}</button>`);
-    } else {
-      actions.push(`<button class="ep-live-btn" type="button" data-ep-live-start="${component}" ${state.busy ? "disabled" : ""}>${esc(active || ansItems > 0 ? c.continueCheck : c.start)}</button>`);
-    }
     const status = complete
-      ? `<div class="ep-live-notice ep-live-component-status"><strong>${esc(c.stageTitle)}: ${esc(stageLabel(stage))}</strong><div class="ep-live-meta">${esc(c.coverage)}: ${coverage.toFixed(0)}%</div></div>`
+      ? `<div class="ep-live-component-status"><strong>${esc(c.stageTitle)}: ${esc(stageLabel(stage))}</strong><div class="ep-live-progress"><span style="width:${Math.max(0, Math.min(100, coverage))}%"></span></div><div class="ep-live-meta">${esc(c.coverage)}: ${coverage.toFixed(0)}%</div></div>`
       : `<div class="ep-live-component-status"><div>${ansItems} / ${reqItems} ${esc(c.items)}</div><div class="ep-live-progress"><span style="width:${pct}%"></span></div><div class="ep-live-meta">${ansAreas} / ${reqAreas} ${esc(c.areas)}</div></div>`;
-    return `<article class="ep-live-card ep-live-component-card" data-ep-live-component="${component}"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${skillCount} ${esc(c.skillsLabel)}</span></div></div>${status}<div class="ep-live-actions">${actions.join("")}</div></article>`;
+    const compat = complete
+      ? `<div class="ep-live-compat-actions" hidden aria-hidden="true"><button type="button" data-ep-live-plan="${component}"></button>${stage >= 2 ? `<button type="button" data-ep-live-timed="${component}"></button>` : ""}${stage >= 5 ? `<button type="button" data-ep-live-readiness="${component}"></button>` : ""}</div>`
+      : `<div class="ep-live-compat-actions" hidden aria-hidden="true"><button type="button" data-ep-live-start="${component}"></button></div>`;
+    const hint = complete ? `${home.openComponent} ${component}` : (active || ansItems > 0 ? c.continueCheck : c.start);
+    return `<div class="ep-live-component-slot"><button class="ep-live-card ep-live-component-card ep-live-component-entry" type="button" data-ep-live-component="${component}" data-ep-component-entry="1" data-ep-live-open-component="${component}"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${skillCount} ${esc(home.skills)}</span></div><span class="ep-live-component-arrow" aria-hidden="true">›</span></div>${status}<div class="ep-live-component-open">${esc(hint)} <span aria-hidden="true">→</span></div></button>${compat}</div>`;
+  }
+
+  function trackerAreaForSkill(tracker, skillCode) {
+    const areas = Array.isArray(tracker?.areas) ? tracker.areas : [];
+    return areas.find(area => Array.isArray(area?.skills) && area.skills.some(skill => skill?.skill_code === skillCode)) || null;
+  }
+
+  function skillStateLabel(skill) {
+    const c = componentHomeCopy();
+    if (skill?.correction_case_id) return c.needsAttention;
+    const level = Number(skill?.objective_level || 0);
+    if (level >= 2) return c.confirmed;
+    if (level >= 1) return c.inProgress;
+    return c.notStarted;
+  }
+
+  function planSelection(plan) {
+    const rows = (Array.isArray(plan?.items) ? plan.items : [])
+      .filter(item => item && item.status === "pending" && ["learning", "correction", "retest", "mixed_transfer"].includes(item.item_type))
+      .sort((a, b) => Number(a.priority_order || 999) - Number(b.priority_order || 999));
+    const now = Date.now();
+    const ready = rows.find(item => item.item_type !== "retest" || !item.due_at || !Number.isFinite(Date.parse(item.due_at)) || Date.parse(item.due_at) <= now) || null;
+    const waiting = rows.find(item => item.item_type === "retest" && item.due_at && Number.isFinite(Date.parse(item.due_at)) && Date.parse(item.due_at) > now) || null;
+    return { ready, waiting };
+  }
+
+  function primaryAction(component, progress, summary, tracker, plan, recovery) {
+    const c = copy(), home = componentHomeCopy(), screening = progress?.screening || {};
+    if (progress?.stage0_complete !== true) {
+      const started = Boolean(progress?.active_session) || Number(screening.answered_items || 0) > 0;
+      return { kind: "diagnostic", title: stageLabel(0), detail: started ? c.continueCheck : c.start, label: started ? c.continueCheck : c.start };
+    }
+    if (["resume", "ready_to_finalize"].includes(recovery?.status) && recovery?.session_id) {
+      return { kind: "resume", title: home.continueTask, detail: stageLabel(Number(summary?.operational_stage || 0)), label: home.continueTask, sessionId: recovery.session_id };
+    }
+    const selection = planSelection(plan);
+    if (selection.ready) {
+      const area = trackerAreaForSkill(tracker, selection.ready.skill_code);
+      const title = area ? componentAreaLabel(area.official_syllabus_section) : itemTypeLabel(selection.ready.item_type);
+      const labels = { learning: home.startTask, correction: home.fixTask, retest: home.retestTask, mixed_transfer: home.mixedTask };
+      return { kind: "task", title, detail: itemTypeLabel(selection.ready.item_type), label: labels[selection.ready.item_type] || home.startTask, planId: plan?.plan_id || null, priorityOrder: Number(selection.ready.priority_order || 0) };
+    }
+    if (selection.waiting) {
+      const area = trackerAreaForSkill(tracker, selection.waiting.skill_code);
+      return { kind: "waiting", title: area ? componentAreaLabel(area.official_syllabus_section) : home.waiting, detail: selection.waiting.due_at ? `${home.waiting} · ${formatDateTime(selection.waiting.due_at)}` : home.waiting, label: home.waiting };
+    }
+    const stage = Number(summary?.operational_stage || 0);
+    if (stage >= 4) return { kind: "timed", title: home.timed, detail: stageLabel(stage), label: home.timedTask };
+    return { kind: "prepare", title: home.checkNext, detail: stageLabel(stage), label: home.startTask };
+  }
+
+  function topicsMarkup(tracker) {
+    const home = componentHomeCopy();
+    const areas = Array.isArray(tracker?.areas) ? tracker.areas : [];
+    if (!areas.length) return `<div class="ep-component-empty">—</div>`;
+    return areas.map(area => {
+      const skills = Array.isArray(area?.skills) ? area.skills : [];
+      const total = Number(area?.skill_count || skills.length || 0), covered = Number(area?.coverage_count || 0);
+      const skillRows = skills.map(skill => `<button class="ep-component-skill" type="button" data-ep-component-skill="${esc(skill.skill_code)}"><span>${esc(home.skill)} ${Number(skill.sequence_no || 0)}</span><small>${esc(skillStateLabel(skill))}</small></button>`).join("");
+      return `<details class="ep-component-area"><summary><span>${esc(componentAreaLabel(area.official_syllabus_section))}</span><strong>${covered} / ${total}</strong></summary><div class="ep-component-skill-list">${skillRows}</div></details>`;
+    }).join("");
+  }
+
+  function renderComponentHome(component, payload) {
+    clearTimer();
+    const root = rootEl(); if (!root) return;
+    const c = copy(), home = componentHomeCopy(), summary = componentSummary(component, payload.state);
+    const stage = Number(summary?.operational_stage || 0);
+    const tracker = payload.tracker || {};
+    const denominator = Number(tracker?.denominator_count || (component === "P1" ? 45 : 36));
+    const covered = Number(tracker?.coverage_count || 0);
+    const coverage = Number(tracker?.coverage_pct ?? summary?.coverage_pct ?? 0);
+    const corrections = Number(payload.queue?.active_count || 0);
+    const action = primaryAction(component, payload.progress, summary, tracker, payload.plan, payload.recovery);
+    const componentName = component === "P1" ? c.componentP1 : c.componentP5;
+    const attention = corrections > 0 ? `<button class="ep-component-link" type="button" data-ep-component-link="corrections"><span><strong>${esc(home.attention)}</strong><small>${corrections}</small></span><span aria-hidden="true">›</span></button>` : "";
+    const timed = stage >= 2 ? `<button class="ep-component-link" type="button" data-ep-component-link="timed"><span><strong>${esc(home.timed)}</strong><small>${esc(stageLabel(stage))}</small></span><span aria-hidden="true">›</span></button>` : "";
+    const readiness = stage >= 5 ? `<button class="ep-component-link" type="button" data-ep-component-link="readiness"><span><strong>${esc(home.readiness)}</strong></span><span aria-hidden="true">›</span></button>` : "";
+    const materials = internal.materialsView?.openMaterials ? `<button class="ep-component-link" type="button" data-ep-component-link="materials"><span><strong>${esc(home.materials)}</strong></span><span aria-hidden="true">›</span></button>` : "";
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-component-home" data-ep-component-home="${component}"><button class="ep-component-back" type="button" data-ep-component-back>← ${esc(home.back)}</button><header class="ep-component-hero"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${denominator} ${esc(home.skills)}</span></div></div><span class="ep-stage-pill">${esc(c.stageTitle)}: ${esc(stageLabel(stage))}</span></header><section class="ep-component-next"><div class="ep-component-section-label">${esc(home.next)}</div><strong class="ep-component-next-title">${esc(action.title)}</strong><div class="ep-live-meta">${esc(action.detail)}</div><button class="ep-live-btn ep-component-primary" type="button" data-ep-component-primary="${esc(action.kind)}" ${action.kind === "waiting" ? "disabled" : ""}>${esc(action.label)}</button></section><section class="ep-component-progress-card"><div class="ep-component-section-head"><strong>${esc(home.progress)}</strong><span>${covered} / ${denominator}</span></div><div class="ep-live-progress"><span style="width:${Math.max(0, Math.min(100, coverage))}%"></span></div><div class="ep-live-meta">${esc(c.coverage)}: ${coverage.toFixed(0)}%</div></section><section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section><section class="ep-component-links">${attention}${timed}${readiness}${materials}</section></section>`);
+    state.notice = null;
+    root.querySelector("[data-ep-component-back]")?.addEventListener("click", renderDashboard);
+    root.querySelector("[data-ep-component-primary]")?.addEventListener("click", () => handleComponentPrimary(component, action));
+    root.querySelectorAll("[data-ep-component-skill]").forEach(button => button.addEventListener("click", () => internal.learnerViews?.openSkill?.(component, button.dataset.epComponentSkill)));
+    root.querySelector('[data-ep-component-link="corrections"]')?.addEventListener("click", () => internal.learnerViews?.openCorrections?.(component));
+    root.querySelector('[data-ep-component-link="timed"]')?.addEventListener("click", () => openTimed(component));
+    root.querySelector('[data-ep-component-link="readiness"]')?.addEventListener("click", () => openReadiness(component));
+    root.querySelector('[data-ep-component-link="materials"]')?.addEventListener("click", () => internal.materialsView?.openMaterials?.(component));
+  }
+
+  async function openComponentHome(component) {
+    if (state.busy || !["P1", "P5"].includes(component)) return;
+    state.busy = true; renderLoading();
+    const flow = window.iClubExamPrepWeeklyFlowEnabled === true ? internal.weeklyFlowApi : null;
+    const [progressResult, stateResult, trackerResult, queueResult, planResult, recoveryResult] = await Promise.all([
+      internal.api.diagnosticProgress(component),
+      internal.api.getState(component),
+      internal.api.syllabusTracker(component).catch(() => null),
+      internal.api.correctionQueue(component).catch(() => null),
+      internal.api.weeklyPlan(component).catch(() => null),
+      flow?.version === "weekly_flow_adapter_v1" ? flow.recover(component).catch(() => null) : Promise.resolve(null)
+    ]);
+    state.busy = false;
+    if (!progressResult?.ok || !stateResult?.ok) { renderError(); return; }
+    state.progress[component] = progressResult.data;
+    state.componentState[component] = stateResult.data;
+    renderComponentHome(component, {
+      progress: progressResult.data, state: stateResult.data,
+      tracker: trackerResult?.ok ? trackerResult.data : null,
+      queue: queueResult?.ok ? queueResult.data : null,
+      plan: planResult?.ok ? planResult.data : null,
+      recovery: recoveryResult?.ok ? recoveryResult.data : null
+    });
+  }
+
+  async function prepareAndLaunch(component) {
+    if (state.busy) return;
+    state.busy = true; renderLoading();
+    let plan = null;
+    if (window.iClubExamPrepWeeklyFlowEnabled === true) {
+      const flow = internal.weeklyFlowApi;
+      if (!flow || flow.version !== "weekly_flow_adapter_v1" || flow.allowed(component)) {
+        state.busy = false; renderError(); return;
+      }
+      const ensured = await flow.plan(component);
+      if (!ensured?.ok) { state.busy = false; renderError(); return; }
+      if (ensured.data?.status === "resume_first") {
+        const recovery = ensured.data.recovery;
+        state.busy = false;
+        if (!["resume", "ready_to_finalize"].includes(recovery?.status) || !recovery?.session_id) { renderError(); return; }
+        state.returnView = { kind: "component", component };
+        await loadSession(recovery.session_id); return;
+      }
+      const read = await internal.api.weeklyPlan(component);
+      if (!read?.ok || !read.data?.plan_id || read.data.plan_id !== ensured.data?.plan_id) {
+        state.busy = false; renderError(); return;
+      }
+      plan = read.data;
+    } else {
+      let read = await internal.api.weeklyPlan(component);
+      if (!read?.ok) { state.busy = false; renderError(); return; }
+      plan = read.data;
+      if (!plan?.plan_id) {
+        const generated = await internal.api.generateWeeklyPlan(component, "normal");
+        if (!generated?.ok) { state.busy = false; renderError(); return; }
+        read = await internal.api.weeklyPlan(component);
+        if (!read?.ok) { state.busy = false; renderError(); return; }
+        plan = read.data;
+      }
+    }
+    const selection = planSelection(plan);
+    state.busy = false;
+    if (selection.ready && plan?.plan_id) {
+      await launchPlanItem(component, plan.plan_id, Number(selection.ready.priority_order), "component");
+      return;
+    }
+    state.notice = componentHomeCopy().noAvailable;
+    await openComponentHome(component);
+  }
+
+  async function handleComponentPrimary(component, action) {
+    if (state.busy || !action) return;
+    if (action.kind === "diagnostic") { await startDiagnostic(component, "component"); return; }
+    if (action.kind === "resume" && action.sessionId) {
+      state.returnView = { kind: "component", component };
+      await loadSession(action.sessionId); return;
+    }
+    if (action.kind === "task" && action.planId && action.priorityOrder > 0) {
+      await launchPlanItem(component, action.planId, action.priorityOrder, "component"); return;
+    }
+    if (action.kind === "timed") { await openTimed(component); return; }
+    if (action.kind === "prepare") await prepareAndLaunch(component);
   }
 
   async function renderDashboard() {
@@ -195,17 +419,18 @@
     const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
     root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section><div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`);
     state.notice = null;
+    root.querySelectorAll("[data-ep-live-open-component]").forEach(card => card.addEventListener("click", () => openComponentHome(card.dataset.epLiveOpenComponent)));
     root.querySelectorAll("[data-ep-live-start]").forEach(b => b.addEventListener("click", () => startDiagnostic(b.dataset.epLiveStart)));
     root.querySelectorAll("[data-ep-live-plan]").forEach(b => b.addEventListener("click", () => openPlan(b.dataset.epLivePlan)));
     root.querySelectorAll("[data-ep-live-timed]").forEach(b => b.addEventListener("click", () => openTimed(b.dataset.epLiveTimed)));
     root.querySelectorAll("[data-ep-live-readiness]").forEach(b => b.addEventListener("click", () => openReadiness(b.dataset.epLiveReadiness)));
   }
 
-  async function startDiagnostic(component) {
+  async function startDiagnostic(component, returnKind = "dashboard") {
     if (state.busy) return; state.busy = true; renderLoading();
     const result = await internal.api.startNextDiagnostic(component, key(`ep-check-${component.toLowerCase()}`)); state.busy = false;
     if (!result?.ok || !result.data?.session_id) { renderError(); return; }
-    state.returnView = { kind: "dashboard", component }; await loadSession(result.data.session_id);
+    state.returnView = { kind: returnKind, component }; await loadSession(result.data.session_id);
   }
 
   function itemTypeLabel(type) {
