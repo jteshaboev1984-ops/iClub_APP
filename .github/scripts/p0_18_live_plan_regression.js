@@ -55,17 +55,20 @@ const path = require('path');
   const assert=(x,m)=>{if(!x)throw new Error(m);};
 
   await page.evaluate(async()=>{await window.iClubExamPrep.syncSubjectHub({subjectKey:'mathematics',language:'en'});await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});});
-  await page.waitForSelector('[data-ep-live-plan="P1"]');
-  await page.click('[data-ep-live-plan="P1"]');
-  await page.waitForSelector('[data-ep-live-plan-item="1"]');
-  let text=await page.locator('#exam-prep-host-root').textContent(); assert(text.includes('Study this topic'),'weekly learning item must render with learner-facing copy');
+  await page.waitForSelector('[data-ep-live-open-component="P1"]');
+  await page.click('[data-ep-live-open-component="P1"]');
+  await page.waitForSelector('[data-ep-component-home="P1"]');
+  let before=await page.evaluate(()=>({calls:window.__calls.map(x=>x.name),primary:document.querySelector('[data-ep-component-primary]')?.textContent}));
+  assert(/Start task/i.test(before.primary),'component home must expose one immediate learning CTA');
+  assert(!before.calls.includes('generate_exam_prep_weekly_plan_safe_v3'),'viewing the component must not generate a plan');
+  assert(!before.calls.includes('start_exam_prep_session_safe_v1'),'viewing the component must not start a session');
 
-  await page.click('[data-ep-live-plan-item="1"]');
+  await page.click('[data-ep-component-primary="prepare"]');
   await page.waitForSelector('input[name="ep_live_answer"]');
   await page.check('input[name="ep_live_answer"][value="1"]'); await page.click('[data-ep-live-submit]');
   await page.waitForSelector('textarea[name="ep_live_written_answer"]');
   await page.fill('textarea[name="ep_live_written_answer"]','Because two plus two equals four.'); await page.click('[data-ep-live-submit]');
-  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Task complete. Plan updated.'));
+  await page.waitForFunction(()=>document.querySelector('[data-ep-component-home="P1"]') && document.querySelector('#exam-prep-host-root')?.textContent.includes('Task complete. Plan updated.'));
 
   const result=await page.evaluate(()=>({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent}));
   const names=result.calls.map(x=>x.name);
@@ -74,7 +77,7 @@ const path = require('path');
   assert(!names.includes('generate_exam_prep_weekly_plan_safe_v1'),'legacy weekly plan generator must not be used');
   const written=result.calls.find(x=>x.name==='submit_exam_prep_response_safe_v1'&&x.args.p_item_order===2); assert(written?.args?.p_payload?.artifact?.text,'written solution must be sent as artifact');
   const auth=result.calls.find(x=>x.name==='authorize_exam_prep_plan_item_safe_v1'); assert(auth.args.p_priority_order===1,'plan authorization must target exact priority');
-  assert(result.text.includes('Weekly plan'),'must return to refreshed plan');
+  assert(result.text.includes('Next step'),'must return to the P1 component home after completion');
   assert(!result.text.includes('P1-QUA-01'),'internal skill code must not be learner-visible');
   await browser.close(); console.log('P0-18 live weekly plan flow: PASS');
 })().catch(e=>{console.error(e);process.exit(1);});
