@@ -153,13 +153,15 @@ const path = require('path');
   await page.fill('input[name="total_hours"]','12');
   await page.fill('input[name="math_hours"]','6');
   await page.click('[data-ep-live-save-profile]');
-  await page.waitForSelector('[data-ep-live-start="P1"]');
-  await page.waitForSelector('[data-ep-live-start="P5"]');
-  let stage0 = await page.evaluate(() => ({p1:!!document.querySelector('[data-ep-live-start="P1"]'),p5:!!document.querySelector('[data-ep-live-start="P5"]'),p1Done:window.__progress.P1.stage0_complete,p5Done:window.__progress.P5.stage0_complete}));
-  assert(stage0.p1&&stage0.p5&&!stage0.p1Done&&!stage0.p5Done,'both P1 and P5 must begin independently in Stage 0');
+  await page.waitForSelector('[data-ep-live-open-component="P1"]');
+  await page.waitForSelector('[data-ep-live-open-component="P5"]');
+  let stage0 = await page.evaluate(() => ({cards:document.querySelectorAll('[data-ep-live-open-component]').length,p1Done:window.__progress.P1.stage0_complete,p5Done:window.__progress.P5.stage0_complete}));
+  assert(stage0.cards===2&&!stage0.p1Done&&!stage0.p5Done,'both P1 and P5 must begin independently in Stage 0');
   await capture();
 
-  await page.click('[data-ep-live-start="P1"]');
+  await page.click('[data-ep-live-open-component="P1"]');
+  await page.waitForSelector('[data-ep-component-home="P1"]');
+  await page.click('[data-ep-component-primary="diagnostic"]');
   await page.waitForSelector('input[name="ep_live_answer"]');
   await page.check('input[name="ep_live_answer"][value="1"]');
   await page.click('[data-ep-live-submit]');
@@ -172,14 +174,13 @@ const path = require('path');
 
   await page.check('input[name="ep_live_answer"][value="2"]');
   await page.click('[data-ep-live-submit]');
-  await page.waitForSelector('[data-ep-live-plan="P1"]');
+  await page.waitForSelector('[data-ep-component-home="P1"]');
   let dashboard=await capture();
   assert(dashboard.includes('Foundation'),'P1 must enter Stage 1 after entry check');
-  assert(await page.locator('[data-ep-live-start="P5"]').count()===1,'P5 must remain independently in Stage 0');
+  const p5AfterDiagnostic=await page.evaluate(()=>({complete:window.__progress.P5.stage0_complete,stage:window.__state.P5.components[0].operational_stage}));
+  assert(!p5AfterDiagnostic.complete&&p5AfterDiagnostic.stage===0,'P5 must remain independently in Stage 0');
 
-  await page.click('[data-ep-live-plan="P1"]');
-  await page.waitForSelector('[data-ep-live-plan-item="1"]');
-  await page.click('[data-ep-live-plan-item="1"]');
+  await page.click('[data-ep-component-primary="prepare"]');
   await page.waitForSelector('input[name="ep_live_answer"]');
   await page.check('input[name="ep_live_answer"][value="1"]');
   await page.click('[data-ep-live-submit]');
@@ -195,7 +196,9 @@ const path = require('path');
     assert(!p5.complete&&p5.stage===0,`P5 changed while P1 advanced to Stage ${stage}`);
   }
 
-  await page.click('[data-ep-live-timed="P1"]');
+  await page.click('[data-ep-live-open-component="P1"]');
+  await page.waitForSelector('[data-ep-component-home="P1"]');
+  await page.click('[data-ep-component-link="timed"]');
   await page.waitForSelector('[data-ep-live-timed-start="5501"]');
   await page.click('[data-ep-live-timed-start="5501"]');
   await page.waitForSelector('textarea[name="ep_live_written_answer"]');
