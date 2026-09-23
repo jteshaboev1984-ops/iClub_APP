@@ -1001,7 +1001,7 @@
 }
 #exam-prep-host-root .ep-component-area > summary {
   display: grid;
-  grid-template-columns: minmax(0,1fr) auto;
+  grid-template-columns: minmax(0,1fr) auto 18px;
   gap: 10px;
   align-items: center;
   min-height: 44px;
