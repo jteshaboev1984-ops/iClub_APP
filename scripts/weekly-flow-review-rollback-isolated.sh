@@ -53,15 +53,33 @@ for f in "${migrations[@]}"; do
   apply_migration "$f"
 done
 run_sql "UPDATE private.exam_prep_feature_config SET rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() WHERE id=1" > /dev/null
-# Restore the exact observed live v1 function into disposable CI only. The
-# fixture requires the known synthetic replay hash and independently asserts
-# its resulting hash against the original production pin. No legacy migration
-# or production function is changed by this test adaptation.
-run_file supabase/tests/weekly_flow_live_generator_v1_definition_fixture.sql
-# Extract exactly the eight immutable LIVE expected hashes from the original
-# backup proposal itself. Diagnose *all* replay mismatches without weakening
-# the pinned gate or manufacturing a matching function definition/hash.
-expected_values="$(python3 - <<'PY'
+# Current main records the released weekly package as a real migration. On a
+# clean replay it is already installed and sealed, so never attempt the old
+# pre-release fixture/install sequence a second time.
+released="$(run_sql "SELECT CASE
+  WHEN to_regclass('private.exam_prep_weekly_flow_enrollment_v1') IS NOT NULL
+   AND to_regclass('private.exam_prep_weekly_flow_rpc_backup_v1') IS NOT NULL
+   AND to_regclass('private.exam_prep_weekly_review_rpc_backup_v1') IS NOT NULL
+   AND to_regprocedure('public.ensure_exam_prep_stable_weekly_plan_safe_v1(text)') IS NOT NULL
+  THEN 'yes' ELSE 'no' END")"
+
+if [[ "$released" == yes ]]; then
+  base_seal="$(run_sql "SELECT count(*) FROM private.exam_prep_weekly_flow_rpc_backup_v1 b
+    WHERE b.installed_md5 IS NOT NULL
+      AND b.function_oid IS NOT NULL
+      AND md5(pg_get_functiondef(b.function_oid))=b.installed_md5")"
+  review_seal="$(run_sql "SELECT count(*) FROM private.exam_prep_weekly_review_rpc_backup_v1 b
+    WHERE b.installed_md5 IS NOT NULL
+      AND b.installed_oid IS NOT NULL
+      AND md5(pg_get_functiondef(b.installed_oid))=b.installed_md5")"
+  enrolled="$(run_sql "SELECT count(*) FROM private.exam_prep_weekly_flow_enrollment_v1 WHERE enabled IS TRUE")"
+  [[ "$base_seal" == 11 ]] || { echo "Released weekly base seal mismatch: $base_seal"; exit 1; }
+  [[ "$review_seal" == 5 ]] || { echo "Released weekly review seal mismatch: $review_seal"; exit 1; }
+  [[ "$enrolled" == 0 ]] || { echo "Disposable replay unexpectedly enrolled weekly learners: $enrolled"; exit 1; }
+  echo 'PASS: released weekly-flow migration replay is sealed 11+5 with zero enrollment.'
+else
+  run_file supabase/tests/weekly_flow_live_generator_v1_definition_fixture.sql
+  expected_values="$(python3 - <<'PY'
 from pathlib import Path
 import re
 text=Path('docs/patch-proposals/20260920_weekly_flow_preinstall_rpc_backup_v1.sql').read_text()
@@ -71,34 +89,38 @@ if len(pairs)!=8 or len({signature for signature,_ in pairs})!=8:
 print(','.join("('%s','%s')" % pair for pair in pairs))
 PY
 )"
-replay_drift="$(run_sql "SELECT x.signature||' actual='||coalesce(md5(pg_get_functiondef(to_regprocedure(x.signature))),'MISSING')||' pinned_live='||x.expected_md5 FROM (VALUES ${expected_values}) AS x(signature,expected_md5) WHERE md5(pg_get_functiondef(to_regprocedure(x.signature))) IS DISTINCT FROM x.expected_md5 ORDER BY x.signature")"
-if [[ -n "$replay_drift" ]]; then
-  printf 'BLOCKED: disposable migration replay differs from the eight pinned LIVE original RPCs:\n%s\n' "$replay_drift" >&2
-  echo 'No hash changed, no production access or writes; review SQL and rollback were NOT applied.' >&2
-  exit 1
+  replay_drift="$(run_sql "SELECT x.signature||' actual='||coalesce(md5(pg_get_functiondef(to_regprocedure(x.signature))),'MISSING')||' pinned_live='||x.expected_md5 FROM (VALUES ${expected_values}) AS x(signature,expected_md5) WHERE md5(pg_get_functiondef(to_regprocedure(x.signature))) IS DISTINCT FROM x.expected_md5 ORDER BY x.signature")"
+  if [[ -n "$replay_drift" ]]; then
+    printf 'BLOCKED: disposable migration replay differs from the eight pinned LIVE original RPCs:\n%s\n' "$replay_drift" >&2
+    exit 1
+  fi
+
+  run_file docs/patch-proposals/20260918_exam_prep_resume_lookup_v1.sql
+  run_file docs/patch-proposals/20260918_exam_prep_goal_eligibility_v1.sql
+  run_file docs/patch-proposals/20260919_exam_prep_stable_plan_once_v1.sql
+  run_file docs/patch-proposals/20260920_weekly_flow_preinstall_rpc_backup_v1.sql
+  run_file docs/patch-proposals/20260919_exam_prep_atomic_legacy_rpc_dispatch_v1.sql
+  run_file docs/patch-proposals/20260920_weekly_flow_postinstall_attestation_v1.sql
+  run_file docs/patch-proposals/20260920_exam_prep_previous_week_adherence_readonly_v1.sql
+  run_file docs/patch-proposals/20260921_exam_prep_learning_review_preinstall_backup_v1.sql
+  run_file docs/patch-proposals/20260921_exam_prep_learning_review_verdict_v1.sql
+  run_file docs/patch-proposals/20260921_exam_prep_learning_review_start_v1.sql
+  run_file docs/patch-proposals/20260921_exam_prep_learning_review_exact_goal_binding_v1.sql
+  run_file docs/patch-proposals/20260921_exam_prep_learning_review_recovery_v1.sql
+  run_file docs/patch-proposals/20260921_exam_prep_learning_review_goal_eligibility_v1.sql
+  run_file docs/patch-proposals/20260921_exam_prep_learning_review_weekly_accounting_v1.sql
+  run_file docs/patch-proposals/20260921_exam_prep_frozen_goal_continuity_v1.sql
+  run_file docs/patch-proposals/20260921_exam_prep_learning_review_postinstall_attestation_v1.sql
+
+  base_seal="$(run_sql "SELECT count(*) FROM private.exam_prep_weekly_flow_rpc_backup_v1 b
+    WHERE b.installed_md5 IS NOT NULL AND md5(pg_get_functiondef(b.function_oid))=b.installed_md5")"
+  review_seal="$(run_sql "SELECT count(*) FROM private.exam_prep_weekly_review_rpc_backup_v1 b
+    WHERE b.installed_md5 IS NOT NULL AND md5(pg_get_functiondef(b.installed_oid))=b.installed_md5")"
+  [[ "$base_seal" == 11 && "$review_seal" == 5 ]] || {
+    echo "Pre-release weekly seal mismatch: base=$base_seal review=$review_seal"; exit 1;
+  }
 fi
-echo 'PASS: eight replayed original RPC definition hashes exactly match independently pinned live hashes.'
-# Exact prerequisites and original 11 entrypoints, all on disposable DB.
-run_file docs/patch-proposals/20260918_exam_prep_resume_lookup_v1.sql
-run_file docs/patch-proposals/20260918_exam_prep_goal_eligibility_v1.sql
-run_file docs/patch-proposals/20260919_exam_prep_stable_plan_once_v1.sql
-run_file docs/patch-proposals/20260920_weekly_flow_preinstall_rpc_backup_v1.sql
-run_file docs/patch-proposals/20260919_exam_prep_atomic_legacy_rpc_dispatch_v1.sql
-run_file docs/patch-proposals/20260920_weekly_flow_postinstall_attestation_v1.sql
-run_file docs/patch-proposals/20260920_exam_prep_previous_week_adherence_readonly_v1.sql
-# Review snapshot must precede ANY review change.
-run_file docs/patch-proposals/20260921_exam_prep_learning_review_preinstall_backup_v1.sql
-run_file docs/patch-proposals/20260921_exam_prep_learning_review_verdict_v1.sql
-run_file docs/patch-proposals/20260921_exam_prep_learning_review_start_v1.sql
-run_file docs/patch-proposals/20260921_exam_prep_learning_review_exact_goal_binding_v1.sql
-run_file docs/patch-proposals/20260921_exam_prep_learning_review_recovery_v1.sql
-run_file docs/patch-proposals/20260921_exam_prep_learning_review_goal_eligibility_v1.sql
-run_file docs/patch-proposals/20260921_exam_prep_learning_review_weekly_accounting_v1.sql
-# Install verified historical goal continuity BEFORE the five-RPC seal.
-run_file docs/patch-proposals/20260921_exam_prep_frozen_goal_continuity_v1.sql
-run_file docs/patch-proposals/20260921_exam_prep_learning_review_postinstall_attestation_v1.sql
-seal="$(run_sql "SELECT count(*) FROM private.exam_prep_weekly_review_rpc_backup_v1 b WHERE b.installed_md5 IS NOT NULL AND md5(pg_get_functiondef(b.installed_oid))=b.installed_md5")"
-[[ "$seal" == 5 ]] || { echo "Wrong review seal: $seal"; exit 1; }
+
 # An OFF flag, zero enrollment, exact seal and zero active reviews permit a
 # non-destructive rehearsal; replace only the trailing COMMIT with ROLLBACK.
 rollback=docs/patch-proposals/20260921_exam_prep_learning_review_sealed_rollback_v1.sql
