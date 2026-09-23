@@ -5,6 +5,8 @@ const liveSource = fs.readFileSync('exam-prep/exam-prep-live.js', 'utf8');
 const hostCss = fs.readFileSync('exam-prep/exam-prep-host.css', 'utf8');
 if (liveSource.includes('ensureStyle(') || liveSource.includes('ep-live-flow-style') || liveSource.includes('document.createElement("style")')) throw new Error('runtime live-flow style injection returned');
 if (!hostCss.includes('EXAM PREP CENTRALIZED LIVE FLOW v1') || !hostCss.includes('.ep-live-card{')) throw new Error('centralized live-flow CSS contract missing');
+if (!liveSource.includes('diagnosticComplete && corrections > 0')) throw new Error('stage-0 correction link gating missing');
+if (!hostCss.includes('max-width: calc(100% - 44px)')) throw new Error('mobile component stage alignment missing');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -90,9 +92,16 @@ if (!hostCss.includes('EXAM PREP CENTRALIZED LIVE FLOW v1') || !hostCss.includes
 
   await page.click('[data-ep-live-open-component="P1"]');
   await page.waitForFunction(()=>document.querySelector('[data-ep-component-home="P1"]'));
-  r=await page.evaluate(()=>({primary:document.querySelector('[data-ep-component-primary]')?.textContent,calls:window.__calls.map(x=>x.name)}));
+  r=await page.evaluate(()=>({
+    primary:document.querySelector('[data-ep-component-primary]')?.textContent,
+    calls:window.__calls.map(x=>x.name),
+    hasGenericHead:Boolean(document.querySelector('#exam-prep-host-root .ep-live-head')),
+    hasComponentHero:Boolean(document.querySelector('[data-ep-component-home="P1"] .ep-component-hero'))
+  }));
   assert(/Start the next check section/i.test(r.primary),'P1 component home must show one immediate diagnostic action');
   assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'viewing P1 must remain read-only before learner action');
+  assert(r.hasComponentHero,'P1 component identity must remain visible on the component screen');
+  assert(!r.hasGenericHead,'component screen must not repeat the generic Exam Prep intro above the paper identity');
 
   await page.click('[data-ep-component-primary="diagnostic"]');
   await page.waitForFunction(()=>document.querySelector('input[name="ep_live_answer"]'));
