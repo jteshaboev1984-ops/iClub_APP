@@ -100,8 +100,8 @@ const html = lang => `<!doctype html><html lang="${lang}"><head><meta name="view
         'exam-prep/exam-prep-progress-ux-api.js','exam-prep/exam-prep-progress-ux-ui.js'])
         await page.addScriptTag({path:file(script)});
       await page.evaluate(lang=>window.iClubExamPrep.open({language:lang}),language);
-      await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-overview').length===2);
-      assert.equal(await page.locator('.ep-pux-overview').count(),2,`${language}: separate component summaries`);
+      await page.waitForFunction(()=>document.querySelectorAll('[data-ep-live-open-component]').length===2);
+      assert.equal(await page.locator('.ep-pux-overview').count(),0,`${language}: compact route overview must not hydrate duplicate progress summaries`);
       await page.evaluate(() => document.querySelector('[data-ep-live-plan="P1"]').click());
       await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-goal').length===3);
       await page.waitForFunction(()=>document.querySelector('.ep-live-plan-item')?.dataset.epFlowPlan==='flowux3');
