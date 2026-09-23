@@ -1,0 +1,42 @@
+name: Pre-beta hardening regression
+
+on:
+  pull_request:
+    paths:
+      - 'exam-prep/exam-prep-live.js'
+      - 'supabase/migrations/20260923104500_exam_prep_written_rubric_locale_guard_v1.sql'
+      - 'supabase/migrations/20260923105000_practice_reset_archive_before_delete_v1.sql'
+      - 'scripts/exam-prep-written-rubric-locale-guard.cjs'
+      - 'scripts/practice-reset-archive-guard.cjs'
+      - '.github/workflows/pre-beta-hardening-regression.yml'
+  push:
+    branches:
+      - 'release/pre-beta-hardening-20260923'
+    paths:
+      - 'exam-prep/exam-prep-live.js'
+      - 'supabase/migrations/20260923104500_exam_prep_written_rubric_locale_guard_v1.sql'
+      - 'supabase/migrations/20260923105000_practice_reset_archive_before_delete_v1.sql'
+      - 'scripts/exam-prep-written-rubric-locale-guard.cjs'
+      - 'scripts/practice-reset-archive-guard.cjs'
+      - '.github/workflows/pre-beta-hardening-regression.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  static-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate JavaScript syntax
+        run: |
+          node --check exam-prep/exam-prep-live.js
+          node --check scripts/exam-prep-written-rubric-locale-guard.cjs
+          node --check scripts/practice-reset-archive-guard.cjs
+      - name: Validate fail-closed rubric localization
+        run: node scripts/exam-prep-written-rubric-locale-guard.cjs
+      - name: Validate archive-before-delete Practice reset
+        run: node scripts/practice-reset-archive-guard.cjs
