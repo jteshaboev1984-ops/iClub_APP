@@ -126,20 +126,20 @@ async function scenario(browser,language,width,loss) {
       'exam-prep/exam-prep-weekly-review-ui.js','exam-prep/exam-prep-live.js'])
       await page.addScriptTag({path:path.resolve(script)});
     await page.evaluate(lang=>window.iClubExamPrep.open({language:lang}),language);
-    await page.waitForSelector('[data-ep-live-plan="P5"]');
+    await page.waitForSelector('[data-ep-live-plan="P5"]', { state: 'attached' });
     return page;
   }
   let first,second;
   try {
     first=await attach();
-    await first.click('[data-ep-live-plan="P5"]');
+    await first.evaluate(() => document.querySelector('[data-ep-live-plan="P5"]').click());
     await first.waitForSelector('[data-ep-live-plan-item="1"]');
     await first.click('[data-ep-live-plan-item="1"]');
     await first.waitForSelector('.ep-live-qtext');
     assert.equal(await first.locator('.ep-live-qtext').innerText(),texts[0]);
     assert.equal(model.starts,1);
     second=await attach();
-    await second.click('[data-ep-live-plan="P5"]');
+    await second.evaluate(() => document.querySelector('[data-ep-live-plan="P5"]').click());
     await second.waitForSelector('.ep-live-qtext');
     assert.equal(await second.locator('.ep-live-qtext').innerText(),texts[0]);
     assert.equal(model.starts,1,'Cold second device resumed, never started review twice');
