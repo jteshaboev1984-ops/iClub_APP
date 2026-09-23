@@ -1,0 +1,5 @@
+# Confidential design decision required — MCQ choice order
+
+Read-only analysis found a broad option-position assessment-integrity problem affecting both P1 and P5. The exact choice frequencies, assessment identities, and exploited patterns are available only in an owner-only file; do not put them in public PRs, issues, screenshots or learner-facing text. Current UI delivers stored options in their stored order and the evaluation path uses their corresponding original letter.
+
+Owner product decision: authorize a separately scoped design/evaluation of a server-fixed, per-session permutation (preferred for avoiding rewriting history) or independently reviewed immutable replacement content. Either must bind the exact displayed permutation to a session, preserve P1/P5 separation, handle RU/UZ/EN, secure diagnostic feedback, confirm resume on any device, prevent client-side score tampering, preserve existing attempts, and support rollback. Do not deploy a quick client-only shuffle or swap option labels without changing server scoring. No current feature flag or assessment bank has been changed by this draft documentation.
