@@ -14,6 +14,8 @@ const path = require('path');
   await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-host.css') });
 
   await page.evaluate(() => {
+    document.documentElement.lang = 'en';
+    window.i18n = { getLang: () => 'en' };
     window.__calls = [];
     window.__profile = { exam_series: 'May/June 2027', target_grade: 'A', total_student_hours_available: 12, mathematics_hours_budget: 5, active_week_no: 1 };
     window.__caps = { program_key: 'math_as_p1_p5', rollout_state: 'controlled_beta', core_access: true, ai_assist: false, mentor_care_entitled: false, mentor_assignment_active: false, mentor_authority: false, kill_switch: false };
@@ -61,30 +63,44 @@ const path = require('path');
     await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'en' });
   });
 
-  await page.waitForSelector('[data-ep-overview-strip="P1"]');
-  await page.waitForSelector('[data-ep-overview-strip="P5"]');
+  await page.waitForSelector('[data-ep-live-open-component="P1"]');
+  await page.waitForSelector('[data-ep-live-open-component="P5"]');
+
   let visible = await page.locator('#exam-prep-host-root').textContent();
-  assert(visible.includes('0 / 45') && visible.includes('0 / 36'), 'overview must preserve separate P1/P5 denominators');
-  assert(visible.includes('Current phase') && visible.includes('Next step') && visible.includes('Last confirmation'), 'overview must show stage, next action and last evidence');
-  assert(!visible.includes('0 / 81'), 'overview must never publish a combined 81-skill mastery percentage');
+  assert(visible.includes('Pure Mathematics 1') && visible.includes('Probability & Statistics 1'), 'overview must keep separate P1/P5 route cards');
+  assert(visible.includes('45 skills') && visible.includes('36 skills'), 'overview must preserve the separate P1/P5 denominators');
+  assert(visible.includes('5 / 24') && visible.includes('3 / 8'), 'P1 route card must show its own entry-check progress');
+  assert(visible.includes('6 / 15') && visible.includes('2 / 5'), 'P5 route card must show its own entry-check progress');
+  assert(!visible.includes('81 skills') && !visible.includes('0 / 81'), 'overview must never publish a combined 81-skill result');
   assert(!visible.includes('pending_evidence') && !visible.includes('objective_state_v1'), 'overview must hide internal state codes');
+
   const overviewPresentation = await page.evaluate(() => {
     const root = document.querySelector('#exam-prep-host-root');
-    const strip = root.querySelector('[data-ep-overview-strip="P1"]');
-    const mini = strip.querySelector('.ep-overview-mini');
-    return { runtimeStyle: Boolean(document.querySelector('#ep-overview-placement-style')), stripDisplay: getComputedStyle(strip).display, miniColumns: getComputedStyle(mini).gridTemplateColumns, rootWidth: root.getBoundingClientRect().width, scrollWidth: root.scrollWidth };
+    const p1 = root.querySelector('[data-ep-live-open-component="P1"]');
+    const p5 = root.querySelector('[data-ep-live-open-component="P5"]');
+    return {
+      routeCards: root.querySelectorAll('[data-ep-live-open-component]').length,
+      oldStrips: root.querySelectorAll('[data-ep-overview-strip]').length,
+      oldPlacementButtons: root.querySelectorAll('[data-ep-placement-open]').length,
+      p1Width: p1?.getBoundingClientRect().width || 0,
+      p5Width: p5?.getBoundingClientRect().width || 0,
+      rootWidth: root.getBoundingClientRect().width,
+      scrollWidth: root.scrollWidth
+    };
   });
-  assert(overviewPresentation.runtimeStyle === false, 'Overview/placement must not inject a runtime style tag');
-  assert(overviewPresentation.stripDisplay === 'grid', 'Centralized overview CSS did not apply');
+  assert(overviewPresentation.routeCards === 2, 'component-first overview must expose exactly two route cards');
+  assert(overviewPresentation.oldStrips === 0 && overviewPresentation.oldPlacementButtons === 0, 'removed dashboard overview/placement controls must not return');
+  assert(overviewPresentation.p1Width > 0 && overviewPresentation.p5Width > 0, 'P1/P5 route cards must remain visible');
   assert(overviewPresentation.rootWidth + 1 >= overviewPresentation.scrollWidth, `Overview overflow: ${overviewPresentation.scrollWidth} > ${overviewPresentation.rootWidth}`);
 
-  await page.click('[data-ep-placement-open="P1"]');
+  await page.evaluate(() => window.iClubExamPrepHostInternal.overviewPlacementViews.openPlacement('P1'));
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Entry check result'));
   visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('5 / 24') && visible.includes('3 / 8'), 'P1 placement result must show P1 screening progress only');
   assert(visible.includes('More evidence is needed') && visible.includes('Gathering enough evidence'), 'ambiguous placement must remain conservative and visibly provisional');
   assert(visible.includes('Paper 1 and Paper 5 do not raise each other'), 'placement result must state the component firewall in learner-facing language');
   assert(!visible.includes('pending_evidence') && !visible.includes('advanced_skip_requires_human'), 'placement result must hide internal route/field names');
+
   const placementPresentation = await page.evaluate(() => {
     const root = document.querySelector('#exam-prep-host-root');
     const shell = root.querySelector('.ep-placement-shell');
@@ -97,8 +113,9 @@ const path = require('path');
   assert(placementPresentation.rootWidth + 1 >= placementPresentation.scrollWidth, `Placement overflow: ${placementPresentation.scrollWidth} > ${placementPresentation.rootWidth}`);
 
   await page.click('[data-ep-placement-back]');
-  await page.waitForSelector('[data-ep-overview-strip="P5"]');
-  await page.click('[data-ep-placement-open="P5"]');
+  await page.waitForSelector('[data-ep-live-open-component="P5"]');
+
+  await page.evaluate(() => window.iClubExamPrepHostInternal.overviewPlacementViews.openPlacement('P5'));
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('6 / 15'));
   visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('2 / 5'), 'P5 placement result must stay independent from P1');
@@ -106,7 +123,7 @@ const path = require('path');
   const calls = await page.evaluate(() => window.__calls);
   const overviewCalls = calls.filter(x => x.name === 'get_exam_prep_overview_safe_v1');
   const placementCalls = calls.filter(x => x.name === 'get_exam_prep_placement_result_safe_v1');
-  assert(overviewCalls.some(x => x.args.p_component_code === 'P1') && overviewCalls.some(x => x.args.p_component_code === 'P5'), 'overview RPCs must stay component-scoped');
+  assert(overviewCalls.length === 0, 'compact component-first overview must not rehydrate removed legacy overview strips');
   assert(placementCalls.some(x => x.args.p_component_code === 'P1') && placementCalls.some(x => x.args.p_component_code === 'P5'), 'placement result RPCs must stay component-scoped');
 
   await browser.close();

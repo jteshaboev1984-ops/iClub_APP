@@ -13,6 +13,8 @@ const path = require('path');
   await page.goto('http://iclub.test/');
 
   await page.evaluate(() => {
+    document.documentElement.lang = 'en';
+    window.i18n = { getLang: () => 'en' };
     const caps = { program_key:'math_as_p1_p5', rollout_state:'controlled_beta', core_access:true, ai_assist:false, mentor_care_entitled:false, mentor_assignment_active:false, mentor_authority:false, kill_switch:false };
     const profile = { exam_series:'May/June 2027', target_grade:'A', total_student_hours_available:12, mathematics_hours_budget:5, active_week_no:1 };
     const progress = {
@@ -63,37 +65,46 @@ const path = require('path');
     await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});
   });
 
-  await page.waitForSelector('[data-ep-overview-strip="P1"]');
-  await page.waitForSelector('[data-ep-views-tracker="P1"]');
-  await page.waitForSelector('[data-ep-placement-open="P1"]');
-  let counts=await page.evaluate(()=>({
-    tracker:document.querySelectorAll('[data-ep-views-tracker="P1"]').length,
-    placement:document.querySelectorAll('[data-ep-placement-open="P1"]').length,
-    strip:document.querySelectorAll('[data-ep-overview-strip="P1"]').length
-  }));
-  assert(counts.tracker===1&&counts.placement===1&&counts.strip===1,'dashboard enhancements must inject exactly once');
+  await page.waitForSelector('[data-ep-live-open-component="P1"]');
+  await page.waitForSelector('[data-ep-live-open-component="P5"]');
 
-  await page.click('[data-ep-views-tracker="P1"]');
+  let counts=await page.evaluate(()=>({
+    routes:document.querySelectorAll('[data-ep-live-open-component]').length,
+    trackerButtons:document.querySelectorAll('[data-ep-views-tracker]').length,
+    placementButtons:document.querySelectorAll('[data-ep-placement-open]').length,
+    strips:document.querySelectorAll('[data-ep-overview-strip]').length
+  }));
+  assert(counts.routes===2,'component-first dashboard must expose exactly two route cards');
+  assert(counts.trackerButtons===0&&counts.placementButtons===0&&counts.strips===0,'removed dashboard injectors must stay removed when learner-view modules coexist');
+
+  await page.click('[data-ep-live-open-component="P1"]');
+  await page.waitForSelector('[data-ep-component-home="P1"]');
+  let text=await page.locator('#exam-prep-host-root').textContent();
+  assert(text.includes('Quadratics'),'P1 component home must retain compact syllabus access with both modules loaded');
+  assert(!/pending_evidence|objective_state_v1|P1-QUA-01/.test(text),'component home must not leak internal terminology');
+
+  await page.evaluate(async()=>window.iClubExamPrepHostInternal.learnerViews.openTracker('P1'));
   await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Syllabus progress'));
-  assert((await page.locator('#exam-prep-host-root').textContent()).includes('0 / 45'),'tracker remains usable with overview module loaded');
+  assert((await page.locator('#exam-prep-host-root').textContent()).includes('0 / 45'),'tracker remains usable with placement module loaded');
   await page.click('[data-ep-views-back]');
 
-  await page.waitForSelector('[data-ep-placement-open="P1"]');
-  await page.click('[data-ep-placement-open="P1"]');
+  await page.waitForSelector('[data-ep-live-open-component="P1"]');
+  await page.evaluate(async()=>window.iClubExamPrepHostInternal.overviewPlacementViews.openPlacement('P1'));
   await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Entry check result'));
   assert((await page.locator('#exam-prep-host-root').textContent()).includes('5 / 24'),'placement remains usable with learner views loaded');
   await page.click('[data-ep-placement-back]');
 
-  await page.waitForSelector('[data-ep-overview-strip="P1"]');
-  await page.waitForSelector('[data-ep-views-tracker="P1"]');
+  await page.waitForSelector('[data-ep-live-open-component="P1"]');
   counts=await page.evaluate(()=>({
-    tracker:document.querySelectorAll('[data-ep-views-tracker="P1"]').length,
-    placement:document.querySelectorAll('[data-ep-placement-open="P1"]').length,
-    strip:document.querySelectorAll('[data-ep-overview-strip="P1"]').length
+    routes:document.querySelectorAll('[data-ep-live-open-component]').length,
+    trackerButtons:document.querySelectorAll('[data-ep-views-tracker]').length,
+    placementButtons:document.querySelectorAll('[data-ep-placement-open]').length,
+    strips:document.querySelectorAll('[data-ep-overview-strip]').length
   }));
-  assert(counts.tracker===1&&counts.placement===1&&counts.strip===1,'returning to overview must not duplicate injected controls');
+  assert(counts.routes===2,'returning to overview must preserve exactly two component routes');
+  assert(counts.trackerButtons===0&&counts.placementButtons===0&&counts.strips===0,'returning to overview must not recreate removed injected controls');
 
-  const text=await page.locator('#exam-prep-host-root').textContent();
+  text=await page.locator('#exam-prep-host-root').textContent();
   assert(!/pending_evidence|objective_state_v1|P1-QUA-01/.test(text),'combined learner overview must not leak internal terminology');
 
   await browser.close();
