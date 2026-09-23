@@ -40,6 +40,10 @@
   }
 
   async function capabilities() {
+    // Weekly flow is always fail-closed on each capability refresh. The browser
+    // switch mirrors server enrollment; it is never a standalone authorization.
+    window.iClubExamPrepWeeklyFlowEnabled = false;
+
     const result = await rpc("get_exam_prep_capabilities_v1");
     if (!result.ok) return result;
     const row = Array.isArray(result.data) ? result.data[0] : result.data;
@@ -54,6 +58,17 @@
       mentorAuthority: row.mentor_authority === true,
       killSwitch: row.kill_switch !== false
     });
+
+    if (data.coreAccess === true && data.killSwitch === false && data.rolloutState === "controlled_beta") {
+      const weekly = await rpc("get_my_exam_prep_weekly_flow_status_v1");
+      const weeklyRow = weekly.ok
+        ? (Array.isArray(weekly.data) ? weekly.data[0] : weekly.data)
+        : null;
+      window.iClubExamPrepWeeklyFlowEnabled =
+        weeklyRow?.contract_version === "weekly_flow_status_v1" &&
+        weeklyRow?.enabled === true;
+    }
+
     root.lastCapabilities = data;
     loadControlledProgressUx();
     return Object.freeze({ ok: true, data });
