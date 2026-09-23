@@ -107,16 +107,16 @@ const path = require('path');
     cards: document.querySelectorAll('[data-ep-live-component]').length,
     total: document.querySelector('[data-ep-profile-completion-form] input[name="total_hours"]')?.value,
     math: document.querySelector('[data-ep-profile-completion-form] input[name="math_hours"]')?.value,
-    p1Action: document.querySelector('[data-ep-live-start="P1"]')?.textContent?.trim(),
-    p5Action: document.querySelector('[data-ep-live-start="P5"]')?.textContent?.trim()
+    p1Action: document.querySelector('[data-ep-live-open-component="P1"] .ep-live-component-open')?.textContent?.trim(),
+    p5Action: document.querySelector('[data-ep-live-open-component="P5"] .ep-live-component-open')?.textContent?.trim()
   }));
 
   assert(snapshot.cards === 2, 'profile completion must not hide P1/P5 progress cards');
   assert(snapshot.text.includes('5 / 24'), 'saved P1 progress must remain visible');
   assert(snapshot.text.includes('6 / 15'), 'saved P5 progress must remain visible');
   assert(snapshot.total === '12' && snapshot.math === '6', 'saved workload settings must be prefilled');
-  assert(snapshot.p1Action === 'Continue entry check', 'P1 saved work must use a continue action');
-  assert(snapshot.p5Action === 'Continue entry check', 'P5 saved work must use a continue action');
+  assert(snapshot.p1Action?.includes('Continue entry check'), 'P1 saved work must use a continue action');
+  assert(snapshot.p5Action?.includes('Continue entry check'), 'P5 saved work must use a continue action');
   assert(snapshot.text.includes('Your answers and progress are saved'), 'repair copy must explicitly confirm saved work');
 
   await page.fill('[data-ep-profile-completion-form] input[name="exam_series"]', 'May/June 2027');
@@ -147,7 +147,10 @@ const path = require('path');
   assert(snapshot.text.includes('5 / 24') && snapshot.text.includes('6 / 15'), 'close/reopen must restore saved component progress');
   assert(snapshot.text.includes('May/June 2027') && snapshot.text.includes('Total: 12 h/week'), 'close/reopen must restore saved settings');
 
-  await page.click('[data-ep-live-start="P1"]');
+  await page.click('[data-ep-live-open-component="P1"]');
+  await page.waitForSelector('[data-ep-component-home="P1"]');
+  assert((await page.locator('[data-ep-component-primary]').innerText()).includes('Continue entry check'), 'P1 component home must preserve the resume action');
+  await page.click('[data-ep-component-primary="diagnostic"]');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent?.includes('Question 2 / 2'));
   snapshot = await page.evaluate(() => ({ text: document.querySelector('#exam-prep-host-root')?.textContent || '', calls: window.__calls }));
   assert(snapshot.text.includes('Second question after reopening'), 'active diagnostic must resume at the next unanswered item');
