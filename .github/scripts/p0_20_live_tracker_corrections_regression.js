@@ -98,11 +98,21 @@ const path = require('path');
     await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'en' });
   });
 
-  await page.waitForSelector('[data-ep-views-tracker="P1"]');
-  await page.click('[data-ep-views-tracker="P1"]');
-  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Syllabus progress'));
+  await page.waitForSelector('[data-ep-live-open-component="P1"]');
+  await page.click('[data-ep-live-open-component="P1"]');
+  await page.waitForSelector('[data-ep-component-home="P1"]');
+
   let visible = await page.locator('#exam-prep-host-root').textContent();
-  assert(visible.includes('1 / 45'), 'P1 tracker must preserve the 45-skill denominator');
+  assert(visible.includes('1 / 45'), 'P1 component home must preserve the 45-skill denominator');
+  assert(visible.includes('Quadratics') && visible.includes('Functions'), 'P1 component home must group by learner-facing syllabus areas');
+  assert(!visible.includes('P1-QUA-01') && !visible.includes('objective_state_v1'), 'component home must not expose internal codes/engine terminology');
+
+  await page.locator('[data-ep-component-home="P1"] .ep-component-area summary').first().click();
+  await page.waitForSelector('[data-ep-component-skill="P1-QUA-01"]', { state: 'visible' });
+  await page.click('[data-ep-component-skill="P1-QUA-01"]');
+  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Skill detail'));
+  visible = await page.locator('#exam-prep-host-root').textContent();
+
   const presentation = await page.evaluate(() => {
     const root = document.querySelector('#exam-prep-host-root');
     const shell = root.querySelector('.ep-views-shell');
@@ -113,12 +123,6 @@ const path = require('path');
   assert(presentation.shellDisplay === 'grid', 'Centralized learner-view CSS did not apply');
   assert(presentation.cardRadius === '14px', 'Learner-view card geometry changed during CSS centralization');
   assert(presentation.scrollWidth <= presentation.rootWidth + 1, `Learner views overflow: ${presentation.scrollWidth} > ${presentation.rootWidth}`);
-  assert(visible.includes('Quadratics') && visible.includes('Functions'), 'P1 tracker must group by learner-facing syllabus areas');
-  assert(!visible.includes('P1-QUA-01') && !visible.includes('objective_state_v1'), 'tracker must not expose internal codes/engine terminology');
-
-  await page.click('[data-ep-views-skill="P1-QUA-01"]');
-  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Skill detail'));
-  visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('Foundation prerequisites') && visible.includes('Check history') && visible.includes('Resources'), 'skill detail must expose prerequisites, evidence history and resources');
   assert(visible.includes('Complete Pure Mathematics 1, Ch1 Quadratics'), 'skill detail must expose approved book resource metadata');
   assert(!visible.includes('P1-QUA-01') && !visible.includes('PR-ALG-03') && !visible.includes('Раскрытие скобок'), 'English skill detail must not expose internal codes or untranslated Russian canonical labels');
