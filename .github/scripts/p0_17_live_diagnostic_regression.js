@@ -91,7 +91,7 @@ if (!hostCss.includes('EXAM PREP CENTRALIZED LIVE FLOW v1') || !hostCss.includes
   await page.click('[data-ep-live-open-component="P1"]');
   await page.waitForFunction(()=>document.querySelector('[data-ep-component-home="P1"]'));
   r=await page.evaluate(()=>({primary:document.querySelector('[data-ep-component-primary]')?.textContent,calls:window.__calls.map(x=>x.name)}));
-  assert(/Start entry check/i.test(r.primary),'P1 component home must show one immediate diagnostic action');
+  assert(/Start the next check section/i.test(r.primary),'P1 component home must show one immediate diagnostic action');
   assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'viewing P1 must remain read-only before learner action');
 
   await page.click('[data-ep-component-primary="diagnostic"]');
