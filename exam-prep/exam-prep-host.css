@@ -1107,23 +1107,25 @@
 
 @media (max-width: 680px) {
   #exam-prep-host-root .ep-component-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
     align-items: flex-start;
   }
   #exam-prep-host-root .ep-stage-pill {
-    max-width: 46%;
+    width: fit-content;
+    max-width: calc(100% - 44px);
+    margin-left: 44px;
+    text-align: left;
   }
   #exam-prep-host-root .ep-component-next {
     padding: 14px;
   }
 }
 @media (max-width: 360px) {
-  #exam-prep-host-root .ep-component-hero {
-    display: grid;
-  }
   #exam-prep-host-root .ep-stage-pill {
     max-width: 100%;
-    width: fit-content;
-    text-align: left;
+    margin-left: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
