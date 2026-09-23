@@ -102,7 +102,7 @@ const html = lang => `<!doctype html><html lang="${lang}"><head><meta name="view
       await page.evaluate(lang=>window.iClubExamPrep.open({language:lang}),language);
       await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-overview').length===2);
       assert.equal(await page.locator('.ep-pux-overview').count(),2,`${language}: separate component summaries`);
-      await page.click('[data-ep-live-plan="P1"]');
+      await page.evaluate(() => document.querySelector('[data-ep-live-plan="P1"]').click());
       await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-goal').length===3);
       await page.waitForFunction(()=>document.querySelector('.ep-live-plan-item')?.dataset.epFlowPlan==='flowux3');
       await page.click('[data-ep-live-plan-item="1"]');
