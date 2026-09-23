@@ -1,0 +1,42 @@
+name: Exam Prep weekly flow client adapter (opt-in only)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'exam-prep/exam-prep-weekly-flow-adapter.js'
+      - 'exam-prep/exam-prep-progress-ux-boot.js'
+      - 'scripts/weekly-flow-adapter-regression.cjs'
+      - '.github/workflows/exam-prep-weekly-flow-adapter.yml'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'exam-prep/exam-prep-weekly-flow-adapter.js'
+      - 'exam-prep/exam-prep-progress-ux-boot.js'
+      - 'scripts/weekly-flow-adapter-regression.cjs'
+      - '.github/workflows/exam-prep-weekly-flow-adapter.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-adapter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and synthetic no-regression contract
+        run: |
+          node --check exam-prep/exam-prep-weekly-flow-adapter.js
+          node --check exam-prep/exam-prep-progress-ux-boot.js
+          node --check scripts/weekly-flow-adapter-regression.cjs
+          node scripts/weekly-flow-adapter-regression.cjs
+      - name: Legacy Core and UI are never replaced by the adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'internal\.api\s*=|window\.sb\s*=|localStorage\.|generate_exam_prep_weekly_plan_safe_v3' exam-prep/exam-prep-weekly-flow-adapter.js
+          grep -q 'window.iClubExamPrepWeeklyFlowEnabled !== true' exam-prep/exam-prep-weekly-flow-adapter.js
+          git diff --check

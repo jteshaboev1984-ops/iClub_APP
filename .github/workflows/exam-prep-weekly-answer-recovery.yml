@@ -1,0 +1,52 @@
+name: Exam Prep guarded answer recovery isolated browser
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/weekly-flow-answer-recovery-cutover.cjs'
+      - 'scripts/weekly-flow-answer-loss-browser.cjs'
+      - 'exam-prep/exam-prep-live.js'
+      - '.github/workflows/exam-prep-weekly-answer-recovery.yml'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'scripts/weekly-flow-answer-recovery-cutover.cjs'
+      - 'scripts/weekly-flow-answer-loss-browser.cjs'
+      - 'exam-prep/exam-prep-live.js'
+      - '.github/workflows/exam-prep-weekly-answer-recovery.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-answer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact audited source and immutable original fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/weekly-flow-answer-recovery-cutover.cjs
+          test "$(git hash-object exam-prep/exam-prep-live.js)" = '22687ddc3faa3d3f84be88fa336c06413f43efd2'
+          grep -Fq 'async function reconcilePendingAnswer(pending)' exam-prep/exam-prep-live.js
+          grep -Fq 'pending.idempotencyKey' exam-prep/exam-prep-live.js
+          grep -Fq 'window.iClubExamPrepWeeklyFlowEnabled===true' exam-prep/exam-prep-live.js
+          grep -Fq 'localization_status === "unavailable"' exam-prep/exam-prep-live.js
+          node --check exam-prep/exam-prep-live.js
+          git diff --exit-code
+      - name: Install isolated browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Lost acknowledgments before and after commit, all three languages and two widths
+        run: |
+          node --check scripts/weekly-flow-answer-loss-browser.cjs
+          node scripts/weekly-flow-answer-loss-browser.cjs
+          node scripts/weekly-flow-native-browser-journey.cjs
+          node scripts/weekly-flow-adapter-regression.cjs
+          echo 'GREEN: no repository, production, or student writes.'

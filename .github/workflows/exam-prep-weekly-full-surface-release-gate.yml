@@ -1,0 +1,34 @@
+name: Exam Prep full public RPC surface release gate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/patch-proposals/20260919_exam_prep_atomic_legacy_rpc_dispatch_v1.sql'
+      - 'docs/patch-proposals/20260920_weekly_flow_preinstall_rpc_backup_v1.sql'
+      - 'docs/patch-proposals/20260920_weekly_flow_postinstall_attestation_v1.sql'
+      - 'docs/patch-proposals/20260920_weekly_flow_exact_rpc_rollback_v1.sql'
+      - 'scripts/weekly-flow-full-surface-release-gate.cjs'
+      - '.github/workflows/exam-prep-weekly-full-surface-release-gate.yml'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'docs/patch-proposals/20260919_exam_prep_atomic_legacy_rpc_dispatch_v1.sql'
+      - 'docs/patch-proposals/20260920_weekly_flow_preinstall_rpc_backup_v1.sql'
+      - 'docs/patch-proposals/20260920_weekly_flow_postinstall_attestation_v1.sql'
+      - 'docs/patch-proposals/20260920_weekly_flow_exact_rpc_rollback_v1.sql'
+      - 'scripts/weekly-flow-full-surface-release-gate.cjs'
+      - '.github/workflows/exam-prep-weekly-full-surface-release-gate.yml'
+permissions:
+  contents: read
+jobs:
+  full-surface-release-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Syntax check; do not access any database
+        run: node --check scripts/weekly-flow-full-surface-release-gate.cjs
+      - name: Fail closed when direct public entrypoints or exact rollback are missing
+        run: node scripts/weekly-flow-full-surface-release-gate.cjs

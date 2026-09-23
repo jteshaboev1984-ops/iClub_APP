@@ -1,0 +1,63 @@
+name: Exam Prep profile recovery plan preservation (isolated)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/weekly-flow-profile-recovery-cutover.cjs'
+      - 'scripts/weekly-flow-profile-recovery-regression.cjs'
+      - 'scripts/weekly-flow-profile-recovery-browser.cjs'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-recovery.js'
+      - 'exam-prep/exam-prep-exam-map.js'
+      - '.github/workflows/exam-prep-weekly-profile-recovery.yml'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'scripts/weekly-flow-profile-recovery-cutover.cjs'
+      - 'scripts/weekly-flow-profile-recovery-regression.cjs'
+      - 'scripts/weekly-flow-profile-recovery-browser.cjs'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-recovery.js'
+      - 'exam-prep/exam-prep-exam-map.js'
+      - '.github/workflows/exam-prep-weekly-profile-recovery.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-entrypoints:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exactly reviewed branch sources without editing checkout
+        run: |
+          set -euo pipefail
+          test "$(git hash-object exam-prep/exam-prep-api.js)" = '6892ebcc6ed1effceb1be5387f42d030676f3632'
+          test "$(git hash-object exam-prep/exam-prep-recovery.js)" = '5ba398241b2e2055c72362c9fa660b9f0c8f34c5'
+          test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '6d34b51f214799e1d35e3b13464938f2c941a7ea'
+          node --check scripts/weekly-flow-profile-recovery-cutover.cjs
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-recovery.js
+          node --check exam-prep/exam-prep-exam-map.js
+          git diff --exit-code
+      - name: Test actual API behavior guarded versus legacy with synthetic RPCs
+        run: |
+          set -euo pipefail
+          node --check scripts/weekly-flow-profile-recovery-regression.cjs
+          node scripts/weekly-flow-profile-recovery-regression.cjs
+          node scripts/p2-07-recovery-regression.cjs
+          node scripts/weekly-flow-adapter-regression.cjs
+      - name: Install Chromium for isolated native UI test
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Twenty-four guarded and legacy recovery and exam map UI journeys
+        run: |
+          node --check scripts/weekly-flow-profile-recovery-browser.cjs
+          node scripts/weekly-flow-profile-recovery-browser.cjs
+          git diff --exit-code
+          echo 'GREEN: read-only CI, blocked production network and no database/branch writes.'
