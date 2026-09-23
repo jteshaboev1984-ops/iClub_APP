@@ -1,0 +1,42 @@
+name: Exam Prep native weekly-flow cutover safety (read-only)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/weekly-flow-native-cutover.cjs'
+      - '.github/workflows/exam-prep-weekly-flow-native-cutover.yml'
+      - 'exam-prep/exam-prep-live.js'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'scripts/weekly-flow-native-cutover.cjs'
+      - '.github/workflows/exam-prep-weekly-flow-native-cutover.yml'
+      - 'exam-prep/exam-prep-live.js'
+permissions:
+  contents: read
+jobs:
+  native-cutover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit installed native patch and unchanged legacy fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-live.js
+          node --check scripts/weekly-flow-native-cutover.cjs
+          grep -Fq 'The new weekly flow is an explicit OFF-by-default cutover' exam-prep/exam-prep-live.js
+          grep -Fq 'Session saved. Your weekly plan has not changed.' exam-prep/exam-prep-live.js
+          grep -Fq 'const auth = await internal.api.authorizePlanItem(planId, priorityOrder);' exam-prep/exam-prep-live.js
+          grep -Fq 'const started = await internal.api.startSession(auth.data.authorization_id' exam-prep/exam-prep-live.js
+          git diff --exit-code
+          node scripts/weekly-flow-adapter-regression.cjs
+          node scripts/weekly-goal-routing-regression.cjs
+          node scripts/p2-08-progress-preservation-regression.cjs
+          echo 'GREEN: native cutover is present but OFF by default; no repository/database writes.'

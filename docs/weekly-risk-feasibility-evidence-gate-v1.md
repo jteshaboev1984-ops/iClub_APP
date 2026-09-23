@@ -1,0 +1,12 @@
+# Weekly plan adherence: simple evidence contract (DRAFT)
+
+Scope: factual weekly progress and a notice after a verifiably missed completed week. No exact task-duration model, seven-day availability form, extra replan button or exam-grade prediction. This document changes no application or database by itself.
+
+- The existing exam profile and initial P1/P5 diagnoses already produce the student's staged roadmap and weekly commitments. One existing **Change exam plan** editor controls the learner's exam series, target grade and total/Mathematics weekly hours. P1/P5 results stay independent; Mathematics shares one weekly hours budget.
+- During the week, show only server-confirmed completed versus outstanding original goals; this is factual progress, not a claim about exam outcomes or a forecast that the learner cannot catch up.
+- After the profile's seven-day week closes, verify one original plan per component, its 1–3 frozen goals, the actual week boundary, applicable eligibility dates, and properly finalized academic-credit evidence attributed to the exact plan and goal. Missing or contradictory evidence, superseded duplicate plans, first week or goals not eligible during that week yield **no accusation**.
+- If verified due goals were not fulfilled by the week boundary, display a single missed-week notice in the existing Exam Plan card. Suggest completing pending tasks or opening the existing editor to review hours, the target grade, or another supported exam series. Do not automatically increase workload, lower grade, change series, or claim to move Cambridge's official exam dates.
+- A later genuine completion removes a stale warning; out-of-order responses or offline errors cannot resurrect it. A completed attempt alone is not necessarily mastery or completed remediation. Preserve frozen plans, in-progress answers, correction and retest standards, history, Practice/Tours/ratings/certificates and local data.
+- Do not introduce a special current-week probability, minute-by-minute feasibility calculation, weekday schedule or unreviewed task-duration assumptions. Future richer forecast is a separate product decision, not a release condition for truthful weekly adherence.
+
+Release remains blocked until live RPC drift and privileges, a tested rollback of the four legacy RPC replacements, real-data read-only baselines, exhausted-content policy and independent controlled-beta acceptance have been reviewed. Separate architect approval is required for production SQL, merge, activation and learner enrollment. Feature flag defaults OFF.

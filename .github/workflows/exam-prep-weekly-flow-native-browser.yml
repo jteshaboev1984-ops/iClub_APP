@@ -1,0 +1,39 @@
+name: Exam Prep native weekly-flow browser acceptance (isolated)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-weekly-flow-adapter.js'
+      - 'exam-prep/exam-prep-progress-ux-api.js'
+      - 'scripts/weekly-flow-native-browser-journey.cjs'
+      - '.github/workflows/exam-prep-weekly-flow-native-browser.yml'
+  push:
+    branches: ['fix/exam-prep-weekly-goal-flow-safe']
+    paths:
+      - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-weekly-flow-adapter.js'
+      - 'exam-prep/exam-prep-progress-ux-api.js'
+      - 'scripts/weekly-flow-native-browser-journey.cjs'
+      - '.github/workflows/exam-prep-weekly-flow-native-browser.yml'
+permissions:
+  contents: read
+jobs:
+  actual-native-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Six full native UI journeys at phone/desktop widths RU UZ EN
+        run: |
+          node --check scripts/weekly-flow-native-browser-journey.cjs
+          node scripts/weekly-flow-native-browser-journey.cjs

@@ -193,9 +193,78 @@
     const actions = card.querySelector('.ep-live-actions');
     if (actions) actions.before(panel); else card.append(panel);
   }
-  function showPlan(card, data, component) {
+  // Only the server's exact goal/plan/action binding can promote a frozen goal
+  // into a primary action. If any binding fails, do not hide the existing UI.
+  async function promoteGoalActions(card, section, entries, component, state, c) {
+    if (window.iClubExamPrepWeeklyFlowEnabled !== true || !state.hasPlan) return;
+    const flow = internal.weeklyFlowApi;
+    if (!flow || flow.version !== 'weekly_flow_adapter_v1' || flow.allowed(component)) return;
+    const buttons = Array.from(card.querySelectorAll('[data-ep-live-plan-item]'));
+    const claimed = entries.filter(entry => entry.goal.actionPriorityOrder !== null);
+    if (claimed.length !== buttons.length || new Set(claimed.map(entry => entry.goal.actionPriorityOrder)).size !== claimed.length) return;
+    const bound = buttons.map(button => {
+      const priority = Number(button.dataset.epLivePlanItem);
+      const matching = claimed.filter(entry => entry.goal.actionPriorityOrder === priority);
+      return matching.length === 1 ? { button, entry: matching[0], priority } : null;
+    });
+    if (bound.some(entry => !entry)) return;
+    const planResult = await internal.api?.weeklyPlan?.(component);
+    const planId = planResult?.ok && planResult.data?.plan_id;
+    if (typeof planId !== 'string') return;
+    const decisions = await Promise.all(bound.map(({entry}) => flow.goal(component,entry.goal.goalId,planId)));
+    if (!card.isConnected || !card.contains(section) || !allowed()) return;
+    if (decisions.some((result,index) => {
+      if (!result?.ok) return true;
+      const status = result.data?.status;
+      if (!['ready','resume','waiting','content_exhausted','stale'].includes(status)) return true;
+      if (status === 'ready' || status === 'resume') {
+        const binding = bound[index];
+        return result.data?.goal_id !== binding.entry.goal.goalId ||
+          result.data?.plan_id !== planId ||
+          result.data?.component_code !== component ||
+          result.data?.priority_order !== binding.priority;
+      }
+      return false;
+    })) return;
+    bound.forEach(({button,entry},index) => {
+      const status = decisions[index].data.status;
+      if ((status === 'ready' || status === 'resume') && !button.disabled) {
+        const action = node('button','ep-live-btn ep-pux-goal-action',
+          ({ru:'Продолжить цель',uz:'Maqsadni davom ettirish',en:'Continue goal'})[lang()]);
+        action.type = 'button';
+        action.dataset.epPuxGoalAction = entry.goal.goalId;
+        action.addEventListener('click', () => {
+          if (allowed() && card.contains(button) && !button.disabled) button.click();
+        });
+        entry.row.append(action);
+      } else if (status === 'content_exhausted') {
+        entry.row.append(node('small','ep-pux-note',({
+          ru:'Эти вопросы уже выполнены. Для новой проверки нужны другие задания. Предыдущий результат сохранён.',
+          uz:'Bu savollar avval bajarilgan. Yangi tekshiruv uchun boshqa topshiriqlar kerak. Oldingi natija saqlangan.',
+          en:'These questions were completed already. A new check needs different questions. Your previous result is saved.'
+        })[lang()]));
+      } else if (status === 'waiting' || button.disabled) {
+        entry.row.append(node('small','ep-pux-note',({
+          ru:'Следующее задание пока недоступно.',uz:'Keyingi topshiriq hozircha mavjud emas.',en:'The next task is not available yet.'
+        })[lang()]));
+      } else if (status === 'stale') {
+        entry.row.append(node('small','ep-pux-note',c.changed));
+      }
+    });
+    // Keep original bound buttons in DOM, with their original listeners and Core
+    // contracts. The single goal-card CTA delegates to the already guarded native
+    // handler; hiding rows does not erase or alter student history.
+    card.querySelectorAll('.ep-live-plan-item').forEach(row => {
+      row.hidden = true;
+      row.style.display = 'none';
+    });
+    section.querySelector('.ep-pux-section-caption')?.remove();
+    section.dataset.epPuxPrimaryGoals = 'verified';
+  }
+  async function showPlan(card, data, component) {
     const { state, raw, tracker } = data, c = words();
     latestPlan.set(component,state);
+    const actionRows = [];
     const section = node('section','ep-pux-panel ep-pux-week');
     section.setAttribute('aria-label',c.goals);
     section.append(node('h3','ep-pux-heading',c.goals));
@@ -218,6 +287,7 @@
           row.append(node('small','ep-pux-note',`${c.due}: ${dateText(goal.retestDueAt)}`));
         if (source?.plan_changed === true && !goal.weeklyComplete) row.append(node('small','ep-pux-note',c.changed));
         list.append(row);
+        actionRows.push({goal,row});
       }
       section.append(list);
       const hasUnmatchedTask = Array.from(card.querySelectorAll('[data-ep-live-plan-item]')).some(button =>
@@ -234,6 +304,7 @@
       const notice = card.querySelector('.ep-live-notice');
       if (notice) notice.before(section); else card.append(section);
     }
+    await promoteGoalActions(card,section,actionRows,component,state,c);
   }
   function showCompletion(screen, data, component) {
     const { state } = data, c = words();
@@ -278,7 +349,7 @@
     if (!target.isConnected || rootEl() !== expectedRoot || !allowed()) { seen.delete(target); return; }
     if (!data) { markError(target,component,kind); seen.set(target,'error'); return; }
     if (kind === 'dashboard') showDashboard(target,data);
-    else if (kind === 'plan') showPlan(target,data,component);
+    else if (kind === 'plan') await showPlan(target,data,component);
     else if (kind === 'completion') showCompletion(target,data,component);
     seen.set(target,'done');
   }
