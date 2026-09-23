@@ -322,16 +322,22 @@
     if (state.busy || !["P1", "P5"].includes(component)) return;
     state.busy = true; renderLoading();
     const flow = window.iClubExamPrepWeeklyFlowEnabled === true ? internal.weeklyFlowApi : null;
-    const [progressResult, stateResult, trackerResult, queueResult, planResult, recoveryResult] = await Promise.all([
-      internal.api.diagnosticProgress(component),
-      internal.api.getState(component),
+
+    // These two reads rebuild placement projections on the server. Running them
+    // together can make the same learner state compete with itself and produce
+    // transient 409/500 responses. Keep them ordered, then load the purely
+    // supplemental component data in parallel.
+    const progressResult = await internal.api.diagnosticProgress(component);
+    if (!progressResult?.ok) { state.busy = false; renderError(); return; }
+    const stateResult = await internal.api.getState(component);
+    if (!stateResult?.ok) { state.busy = false; renderError(); return; }
+    const [trackerResult, queueResult, planResult, recoveryResult] = await Promise.all([
       typeof internal.api.syllabusTracker === "function" ? internal.api.syllabusTracker(component).catch(() => null) : Promise.resolve(null),
       typeof internal.api.correctionQueue === "function" ? internal.api.correctionQueue(component).catch(() => null) : Promise.resolve(null),
       typeof internal.api.weeklyPlan === "function" ? internal.api.weeklyPlan(component).catch(() => null) : Promise.resolve(null),
       flow?.version === "weekly_flow_adapter_v1" ? flow.recover(component).catch(() => null) : Promise.resolve(null)
     ]);
     state.busy = false;
-    if (!progressResult?.ok || !stateResult?.ok) { renderError(); return; }
     state.progress[component] = progressResult.data;
     state.componentState[component] = stateResult.data;
     renderComponentHome(component, {
@@ -405,11 +411,18 @@
   async function renderDashboard() {
     clearTimer();
     const root = rootEl(); if (!root) return; renderLoading();
-    const [p1, p5, s1, s5] = await Promise.all([
-      internal.api.diagnosticProgress("P1"), internal.api.diagnosticProgress("P5"),
-      internal.api.getState("P1"), internal.api.getState("P5")
-    ]);
-    if (!p1?.ok || !p5?.ok || !s1?.ok || !s5?.ok) { renderError(); return; }
+
+    // diagnosticProgress/getState are state-bearing reads: both rebuild the
+    // learner placement projection. Serializing P1/P5 prevents cross-request
+    // contention that can otherwise surface as transient 409/500 responses.
+    const p1 = await internal.api.diagnosticProgress("P1");
+    if (!p1?.ok) { renderError(); return; }
+    const s1 = await internal.api.getState("P1");
+    if (!s1?.ok) { renderError(); return; }
+    const p5 = await internal.api.diagnosticProgress("P5");
+    if (!p5?.ok) { renderError(); return; }
+    const s5 = await internal.api.getState("P5");
+    if (!s5?.ok) { renderError(); return; }
     state.progress.P1 = p1.data; state.progress.P5 = p5.data; state.componentState.P1 = s1.data; state.componentState.P5 = s5.data;
     const c = copy();
     const totalHours = Number(state.profile?.total_student_hours_available || 0), mathHours = Number(state.profile?.mathematics_hours_budget || 0);
