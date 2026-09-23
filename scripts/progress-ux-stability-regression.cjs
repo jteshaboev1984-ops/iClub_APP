@@ -7,6 +7,49 @@ const { chromium } = require('playwright');
   const browser = await chromium.launch({headless:true});
   try {
     for (const language of ['ru','uz','en']) {
+      // Current component-first route: route cards intentionally do not receive
+      // the legacy Progress UX overview panels. They must therefore never be
+      // hidden behind the old dashboard hydration gate.
+      const componentPage = await browser.newPage({viewport:{width:320,height:750}});
+      await componentPage.setContent(`<!doctype html><html lang="${language}"><head></head><body>
+        <div id="exam-prep-host-root"><section class="ep-host-shell ep-live"><div class="ep-live-grid">
+          <button class="ep-live-component-card ep-live-component-entry" data-ep-live-component="P1" data-ep-component-entry="1">P1</button>
+          <button class="ep-live-component-card ep-live-component-entry" data-ep-live-component="P5" data-ep-component-entry="1">P5</button>
+        </div></section></div></body></html>`);
+      await componentPage.evaluate(lang => {
+        window.iClubExamPrepProgressUxEnabled = true;
+        window.i18n = {getLang:()=>lang};
+        window.iClubExamPrepHostInternal = {lastCapabilities:{coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'}};
+      },language);
+      await componentPage.addStyleTag({path:path.resolve('exam-prep/exam-prep-progress-ux-stability.css')});
+      await componentPage.addScriptTag({path:path.resolve('exam-prep/exam-prep-progress-ux-stability.js')});
+      await componentPage.waitForTimeout(250);
+      assert.equal(await componentPage.locator('#exam-prep-host-root').getAttribute('data-ep-pux-loading'),null,
+        `${language}: compact P1/P5 route screen must not wait for removed overview panels`);
+
+      await componentPage.evaluate(() => {
+        document.querySelector('#exam-prep-host-root').innerHTML = `<section class="ep-host-shell ep-live">
+          <section data-ep-component-home="P1"><button data-ep-component-primary="diagnostic">Continue</button></section>
+        </section>`;
+      });
+      await componentPage.click('[data-ep-component-primary="diagnostic"]');
+      assert.equal(await componentPage.locator('#exam-prep-host-root').getAttribute('data-ep-pux-loading'),'question',
+        `${language}: component CTA must arm the question transition`);
+      await componentPage.evaluate(() => {
+        document.querySelector('#exam-prep-host-root').innerHTML = '<section class="ep-host-shell ep-live"><div role="status">Loading…</div></section>';
+      });
+      await componentPage.waitForTimeout(100);
+      await componentPage.evaluate(() => {
+        document.querySelector('#exam-prep-host-root').innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card">
+          <div class="ep-live-head"><strong>Question 1 / 2</strong></div><div class="ep-live-qtext">Loaded question</div>
+          <div class="ep-live-options"><label><input type="radio">Answer</label></div>
+          <button data-ep-live-submit>Submit</button></div></section>`;
+      });
+      await componentPage.waitForFunction(()=>!document.querySelector('#exam-prep-host-root').dataset.epPuxLoading);
+      assert.equal(await componentPage.locator('.ep-live-qtext').innerText(),'Loaded question',
+        `${language}: loaded question must be visible after component CTA`);
+      await componentPage.close();
+
       const page = await browser.newPage({viewport:{width:320,height:750}});
       await page.setContent(`<!doctype html><html lang="${language}"><head></head><body>
         <div id="exam-prep-host-root"><section class="ep-host-shell ep-live"><div class="ep-live-grid">
