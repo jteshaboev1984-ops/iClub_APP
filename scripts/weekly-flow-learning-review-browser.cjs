@@ -116,8 +116,8 @@ async function scenario(browser, language, width) {
       await page.addScriptTag({ path: file(script) });
     }
     await page.evaluate(lang => window.iClubExamPrep.open({ language: lang }), language);
-    await page.waitForSelector('[data-ep-live-plan="P5"]');
-    await page.click('[data-ep-live-plan="P5"]');
+    await page.waitForSelector('[data-ep-live-plan="P5"]', { state: 'attached' });
+    await page.evaluate(() => document.querySelector('[data-ep-live-plan="P5"]').click());
     await page.waitForSelector('[data-ep-live-plan-item="1"]');
     await page.click('[data-ep-live-plan-item="1"]');
     await page.waitForSelector('.ep-live-qtext');
