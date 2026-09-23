@@ -321,9 +321,9 @@
     const [progressResult, stateResult, trackerResult, queueResult, planResult, recoveryResult] = await Promise.all([
       internal.api.diagnosticProgress(component),
       internal.api.getState(component),
-      internal.api.syllabusTracker(component).catch(() => null),
-      internal.api.correctionQueue(component).catch(() => null),
-      internal.api.weeklyPlan(component).catch(() => null),
+      typeof internal.api.syllabusTracker === "function" ? internal.api.syllabusTracker(component).catch(() => null) : Promise.resolve(null),
+      typeof internal.api.correctionQueue === "function" ? internal.api.correctionQueue(component).catch(() => null) : Promise.resolve(null),
+      typeof internal.api.weeklyPlan === "function" ? internal.api.weeklyPlan(component).catch(() => null) : Promise.resolve(null),
       flow?.version === "weekly_flow_adapter_v1" ? flow.recover(component).catch(() => null) : Promise.resolve(null)
     ]);
     state.busy = false;
