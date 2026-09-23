@@ -14,6 +14,8 @@ const path = require('path');
   await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-host.css') });
 
   await page.evaluate(() => {
+    document.documentElement.lang = 'en';
+    window.i18n = { getLang: () => 'en' };
     window.__calls = [];
     window.__profile = { exam_series: 'May/June 2027', target_grade: 'A', total_student_hours_available: 12, mathematics_hours_budget: 5, active_week_no: 1 };
     window.__caps = { program_key: 'math_as_p1_p5', rollout_state: 'controlled_beta', core_access: true, ai_assist: false, mentor_care_entitled: false, mentor_assignment_active: false, mentor_authority: false, kill_switch: false };
