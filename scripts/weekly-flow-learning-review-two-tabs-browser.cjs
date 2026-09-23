@@ -169,7 +169,8 @@ async function scenario(browser,language,width,loss) {
       assert.equal(model.writtenSends,1,'Status check must stay read-only');
       await second.click('[data-ep-answer-retry]');
     }
-    await second.waitForFunction(()=>document.querySelector('[data-ep-live-plan-item]')===null);
+    await second.waitForSelector('.ep-live-card [data-ep-live-dashboard]');
+    assert.equal(await second.locator('[data-ep-live-plan-item]').count(),0);
     assert.equal(model.finalized,true);
     assert.equal(model.starts,1);
     assert.equal(model.finalizes,1);
