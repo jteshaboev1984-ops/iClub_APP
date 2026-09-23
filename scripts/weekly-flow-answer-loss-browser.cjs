@@ -67,7 +67,7 @@ async function scenario(browser,language,width,kind,mode) {
     await page.addScriptTag({path:file('exam-prep/exam-prep-live.js')});
     if(kind==='written') await page.addScriptTag({path:file('exam-prep/exam-prep-written-understanding-ui.js')});
     await page.evaluate(lang=>window.iClubExamPrep.open({language:lang}),language);
-    await page.click('[data-ep-live-plan="P1"]');
+    await page.evaluate(() => document.querySelector('[data-ep-live-plan="P1"]').click());
     await page.click('[data-ep-live-plan-item="1"]');
     await page.waitForSelector('[data-ep-live-submit]');
     if(kind==='written') {

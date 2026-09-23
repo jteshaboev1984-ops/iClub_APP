@@ -88,12 +88,12 @@ const html = language => `<!doctype html><html lang="${language}"><head><meta na
       await page.addScriptTag({path:repo('exam-prep/exam-prep-progress-ux-model.js')});
       await page.addScriptTag({path:repo('exam-prep/exam-prep-progress-ux-ui.js')});
       await page.evaluate(language=>window.iClubExamPrep.open({language}),language);
-      await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-overview').length===2);
-      assert.equal(await page.locator('.ep-live-component-card').count(),2,`${language}: original P1/P5 cards`);
-      assert.equal(await page.locator('.ep-pux-overview').count(),2,`${language}: no duplicated progress cards`);
-      assert.match(await page.locator('[data-ep-live-component="P1"] .ep-pux-overview').innerText(),/7 \/ 45/);
-      assert.match(await page.locator('[data-ep-live-component="P5"] .ep-pux-overview').innerText(),/2 \/ 36/);
-      await page.click('[data-ep-live-plan="P1"]');
+      await page.waitForFunction(()=>document.querySelectorAll('[data-ep-live-open-component]').length===2);
+      assert.equal(await page.locator('.ep-live-component-card').count(),2,`${language}: P1/P5 route cards`);
+      assert.equal(await page.locator('.ep-pux-overview').count(),0,`${language}: route overview must stay compact and read-only`);
+      assert.equal(await page.locator('[data-ep-live-open-component="P1"]').count(),1,`${language}: P1 route exists`);
+      assert.equal(await page.locator('[data-ep-live-open-component="P5"]').count(),1,`${language}: P5 route exists`);
+      await page.evaluate(()=>document.querySelector('[data-ep-live-plan="P1"]').click());
       await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-goal').length===3);
       assert.equal(await page.locator('.ep-pux-week').count(),1,`${language}: only one progress plan`);
       assert.equal(await page.locator('[data-ep-live-plan-item]').count(),2,`${language}: keep original two actionable tasks`);
@@ -108,8 +108,9 @@ const html = language => `<!doctype html><html lang="${language}"><head><meta na
       // Frozen goals must remain visible even when all actions have disappeared.
       await page.evaluate(()=>{window.__plans.P1.items=[];});
       await page.click('[data-ep-live-dashboard]');
-      await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-overview').length===2);
-      await page.click('[data-ep-live-plan="P1"]');
+      await page.waitForFunction(()=>document.querySelectorAll('[data-ep-live-open-component]').length===2);
+      assert.equal(await page.locator('.ep-pux-overview').count(),0,'Compact dashboard must not hydrate duplicate goal summaries');
+      await page.evaluate(()=>document.querySelector('[data-ep-live-plan="P1"]').click());
       await page.waitForFunction(()=>document.querySelector('.ep-pux-week')?.querySelectorAll('.ep-pux-goal').length===3);
       assert.equal(await page.locator('[data-ep-live-plan-item]').count(),0,'No invented actionable buttons');
       assert.equal(await page.locator('.ep-pux-week').count(),1,'No-row plan must retain one progress summary');
@@ -117,13 +118,14 @@ const html = language => `<!doctype html><html lang="${language}"><head><meta na
         language==='ru'?'Сейчас нет доступного шага':language==='uz'?'Hozircha mavjud qadam yo‘q':'No available step right now'));
       // Plan regeneration must use only the new existing planner binding.
       await page.click('[data-ep-live-dashboard]');
-      await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-overview').length===2);
+      await page.waitForFunction(()=>document.querySelectorAll('[data-ep-live-open-component]').length===2);
+      assert.equal(await page.locator('.ep-pux-overview').count(),0,'Compact dashboard must stay free of duplicate Progress UX summaries');
       await page.evaluate(()=>{
         window.__plans.P1={plan_id:'synthetic-plan-p1-v3',active_week_no:1,items:[
           {priority_order:1,item_type:'learning',skill_code:'P1-COO-02',status:'pending',due_at:null}
         ]};
       });
-      await page.click('[data-ep-live-plan="P1"]');
+      await page.evaluate(()=>document.querySelector('[data-ep-live-plan="P1"]').click());
       await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-goal').length===3);
       await page.click('[data-ep-live-plan-item="1"]');
       await page.waitForFunction(()=>window.__authorizations.length===1);

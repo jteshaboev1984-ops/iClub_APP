@@ -65,8 +65,10 @@ const path = require('path');
   const assert=(x,m)=>{if(!x)throw new Error(m);};
 
   await page.evaluate(async()=>{await window.iClubExamPrep.syncSubjectHub({subjectKey:'mathematics',language:'en'});await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});});
-  await page.waitForSelector('[data-ep-live-timed="P1"]');
-  await page.click('[data-ep-live-timed="P1"]');
+  await page.waitForSelector('[data-ep-live-open-component="P1"]');
+  await page.click('[data-ep-live-open-component="P1"]');
+  await page.waitForSelector('[data-ep-component-link="timed"]');
+  await page.click('[data-ep-component-link="timed"]');
   await page.waitForSelector('[data-ep-live-timed-start="501"]');
   await page.click('[data-ep-live-timed-start="501"]');
   await page.waitForSelector('textarea[name="ep_live_written_answer"]');

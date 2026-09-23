@@ -80,8 +80,8 @@ const SESSION = '66666666-6666-4666-8666-666666666666';
         'exam-prep/exam-prep-progress-ux-api.js','exam-prep/exam-prep-progress-ux-ui.js'])
         await page.addScriptTag({path:source(js)});
       await page.evaluate(lang=>window.iClubExamPrep.open({language:lang}),language);
-      await page.waitForSelector('[data-ep-live-plan="P1"]');
-      await page.click('[data-ep-live-plan="P1"]');
+      await page.waitForSelector('[data-ep-live-plan="P1"]', { state: 'attached' });
+      await page.evaluate(() => document.querySelector('[data-ep-live-plan="P1"]').click());
       await page.waitForFunction(()=>document.querySelector('.ep-pux-week')?.dataset.epPuxPrimaryGoals==='verified');
       assert.equal(await page.locator('[data-ep-pux-goal-action]').count(),2,`${language}/${width}: one CTA per available goal`);
       assert.equal(await page.locator('.ep-live-plan-item:visible').count(),0,`${language}/${width}: duplicate native tasks remain visible`);

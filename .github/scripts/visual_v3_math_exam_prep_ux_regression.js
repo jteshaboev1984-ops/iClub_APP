@@ -27,7 +27,9 @@ assert(host.includes('hub.classList.toggle("exam-prep-available", visible === tr
 assert(host.includes('entryDesc: "Персональный маршрут по Paper 1 и Paper 5'), 'RU learner copy missing');
 assert(host.includes('entryDesc: "Paper 1 va Paper 5 bo‘yicha shaxsiy tayyorgarlik'), 'UZ learner copy missing');
 assert(host.includes('entryDesc: "A personal route for Paper 1 and Paper 5'), 'EN learner copy missing');
-assert(live.includes('class="ep-live-card ep-live-component-card"'), 'Live dashboard component architecture missing');
+assert(live.includes('class="ep-live-card ep-live-component-card ep-live-component-entry"'), 'Live dashboard tappable component architecture missing');
+assert(live.includes('data-ep-live-open-component="'), 'Live dashboard component navigation missing');
+assert(live.includes('data-ep-component-primary="'), 'Component home primary next-action contract missing');
 assert(live.includes('class="ep-live-dashboard-intro"'), 'Live dashboard hierarchy block missing');
 assert(live.includes('componentP1: "Pure Mathematics 1"') && live.includes('componentP5: "Probability & Statistics 1"'), 'P1/P5 component names missing');
 assert(!live.includes('overall readiness percentage') && !live.includes('combined mastery'), 'Combined learner truth must not be introduced');

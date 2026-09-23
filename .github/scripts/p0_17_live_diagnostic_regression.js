@@ -82,8 +82,19 @@ if (!hostCss.includes('EXAM PREP CENTRALIZED LIVE FLOW v1') || !hostCss.includes
   await page.fill('input[name="total_hours"]','12');
   await page.fill('input[name="math_hours"]','6');
   await page.click('[data-ep-live-save-profile]');
-  await page.waitForFunction(()=>document.querySelector('[data-ep-live-start="P1"]'));
-  await page.click('[data-ep-live-start="P1"]');
+  await page.waitForFunction(()=>document.querySelector('[data-ep-live-open-component="P1"]'));
+  r=await page.evaluate(()=>({cards:document.querySelectorAll('[data-ep-live-open-component]').length,calls:window.__calls.map(x=>x.name)}));
+  assert(r.cards===2,'overview must expose exactly two component route cards');
+  assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'opening Exam Prep must not start an assessment');
+  assert(!r.calls.some(name=>name.startsWith('generate_exam_prep_weekly_plan')),'opening Exam Prep must not generate a weekly plan');
+
+  await page.click('[data-ep-live-open-component="P1"]');
+  await page.waitForFunction(()=>document.querySelector('[data-ep-component-home="P1"]'));
+  r=await page.evaluate(()=>({primary:document.querySelector('[data-ep-component-primary]')?.textContent,calls:window.__calls.map(x=>x.name)}));
+  assert(/Start the next check section/i.test(r.primary),'P1 component home must show one immediate diagnostic action');
+  assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'viewing P1 must remain read-only before learner action');
+
+  await page.click('[data-ep-component-primary="diagnostic"]');
   await page.waitForFunction(()=>document.querySelector('input[name="ep_live_answer"]'));
 
   await page.check('input[name="ep_live_answer"][value="1"]');
@@ -103,9 +114,9 @@ if (!hostCss.includes('EXAM PREP CENTRALIZED LIVE FLOW v1') || !hostCss.includes
 
   await page.check('input[name="ep_live_answer"][value="2"]');
   await page.click('[data-ep-live-submit]');
-  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('2 / 24'));
+  await page.waitForFunction(()=>document.querySelector('[data-ep-component-home="P1"]'));
 
-  r=await page.evaluate(()=>({text:document.querySelector('#exam-prep-host-root').textContent,calls:window.__calls}));
+  r=await page.evaluate(()=>({text:document.querySelector('#exam-prep-host-root').textContent,calls:window.__calls,answered:window.__progress.P1.screening.answered_items}));
   const names=r.calls.map(x=>x.name);
   for (const name of ['save_exam_prep_exam_profile_v2','start_exam_prep_next_diagnostic_safe_v1','get_exam_prep_session_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','get_exam_prep_state_safe_v1']) assert(names.includes(name),`${name} missing`);
   assert(!names.includes('save_exam_prep_exam_profile_v1'),'legacy profile save must not be used');
@@ -113,7 +124,8 @@ if (!hostCss.includes('EXAM PREP CENTRALIZED LIVE FLOW v1') || !hostCss.includes
   assert(submits.length===2,'both diagnostic responses must be submitted');
   assert(submits[0].args.p_payload.picked_index===1,'first MCQ index must be zero-based');
   assert(submits[1].args.p_payload.picked_index===2,'second MCQ index must be zero-based');
-  assert(r.text.includes('2 / 24'),'progress must refresh after finalization');
+  assert(r.answered===2,'diagnostic progress must refresh after finalization');
+  assert(/Continue entry check/i.test(r.text),'component home must return with the next diagnostic action');
   assert(!/Core beta|Synthetic learner data|Screening complete/i.test(r.text),'learner UI must not expose internal rollout terminology');
 
   await browser.close();

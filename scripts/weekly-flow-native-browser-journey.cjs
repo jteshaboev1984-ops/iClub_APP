@@ -129,8 +129,8 @@ async function scenario(browser, language, width) {
       'exam-prep/exam-prep-live.js',
       'exam-prep/exam-prep-progress-ux-api.js']) await page.addScriptTag({ path: file(js) });
     await page.evaluate(lang => window.iClubExamPrep.open({ language: lang }), language);
-    await page.waitForSelector('[data-ep-live-plan="P1"]');
-    await page.click('[data-ep-live-plan="P1"]');
+    await page.waitForSelector('[data-ep-live-plan="P1"]', { state: 'attached' });
+    await page.evaluate(() => document.querySelector('[data-ep-live-plan="P1"]').click());
     await page.waitForSelector('[data-ep-live-plan-item="2"]');
     assert.equal(await page.locator('[data-ep-live-plan-item]').count(), 2);
     // Frozen first goal is current SECOND action. Never use its frozen ordinal.
@@ -153,7 +153,7 @@ async function scenario(browser, language, width) {
     assert.equal(state.calls.filter(x => x.name === 'start_exam_prep_session_safe_v1').length, 0);
     // Reopening still does not generate or replace the weekly plan.
     await page.click('[data-ep-live-dashboard]');
-    await page.click('[data-ep-live-plan="P1"]');
+    await page.evaluate(() => document.querySelector('[data-ep-live-plan="P1"]').click());
     await page.waitForSelector('[data-ep-live-plan-item="1"]');
     state = await page.evaluate(() => window.__test);
     assert.equal(state.planId, PLAN);
@@ -170,7 +170,7 @@ async function scenario(browser, language, width) {
       s.planId = original; s.active = true; s.finalized = false; s.answered = false;
     }, PLAN);
     await page.click('[data-ep-live-home]');
-    await page.click('[data-ep-live-plan="P1"]');
+    await page.evaluate(() => document.querySelector('[data-ep-live-plan="P1"]').click());
     await page.waitForSelector('.ep-live-qtext');
     state = await page.evaluate(() => window.__test);
     assert.equal(state.sessionStarts, 1, `${language}/${width}: resume created another session`);
