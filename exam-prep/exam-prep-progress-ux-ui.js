@@ -360,6 +360,9 @@
     }
     const root = rootEl();
     root.querySelectorAll('.ep-live-component-card[data-ep-live-component]').forEach(card => {
+      // The compact route cards are navigation only. Do not snapshot weekly goals
+      // or inject a second progress panel merely because the learner opened Exam Prep.
+      if (card.dataset.epComponentEntry === '1') return;
       const component = card.dataset.epLiveComponent;
       if (component === 'P1' || component === 'P5') request('dashboard',card,component);
     });
