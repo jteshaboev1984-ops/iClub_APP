@@ -27,7 +27,7 @@ jobs:
           mkdir -p /tmp/iclub-main
           git archive origin/main | tar -x -C /tmp/iclub-main
           test -f /tmp/iclub-main/index.html
-          grep -q 'exam-prep/exam-prep-api.js?v=p214weeklybootstrap1' /tmp/iclub-main/index.html
+          grep -q 'exam-prep/exam-prep-api.js?v=p214projection1' /tmp/iclub-main/index.html
 
       - name: Validate QA script
         run: node --check .github/scripts/exam_prep_mobile_deep_flow_qa.js
