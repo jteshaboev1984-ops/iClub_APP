@@ -7,12 +7,15 @@ if (liveSource.includes('ensureStyle(') || liveSource.includes('ep-live-flow-sty
 if (!hostCss.includes('EXAM PREP CENTRALIZED LIVE FLOW v1') || !hostCss.includes('.ep-live-card{')) throw new Error('centralized live-flow CSS contract missing');
 if (!liveSource.includes('diagnosticComplete && corrections > 0')) throw new Error('stage-0 correction link gating missing');
 if (!hostCss.includes('max-width: calc(100% - 44px)')) throw new Error('mobile component stage alignment missing');
+if (!hostCss.includes('EXAM PREP MOBILE UX v1')) throw new Error('mobile UX contract missing');
+if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target contract missing');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
-  await page.route('http://iclub.test/', route => route.fulfill({ status: 200, contentType: 'text/html', body: `<!doctype html><html><head></head><body><section id="courses-subject-hub"><div id="subject-hub-exam-prep-entry" hidden aria-hidden="true"><span id="subject-hub-exam-prep-title"></span><span id="subject-hub-exam-prep-sub"></span></div><div id="exam-prep-host-root" hidden aria-hidden="true"></div></section></body></html>` }));
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await page.route('http://iclub.test/', route => route.fulfill({ status: 200, contentType: 'text/html', body: `<!doctype html><html><head></head><body class="iclub-visual-v3"><section id="courses-subject-hub"><div id="subject-hub-exam-prep-entry" hidden aria-hidden="true"><span id="subject-hub-exam-prep-title"></span><span id="subject-hub-exam-prep-sub"></span></div><div id="exam-prep-host-root" hidden aria-hidden="true"></div></section></body></html>` }));
   await page.goto('http://iclub.test/');
+  await page.addStyleTag({path:path.resolve('exam-prep/exam-prep-host.css')});
 
   await page.evaluate(() => {
     window.__calls = [];
@@ -88,11 +91,15 @@ if (!hostCss.includes('max-width: calc(100% - 44px)')) throw new Error('mobile c
   r=await page.evaluate(()=>({
     cards:document.querySelectorAll('[data-ep-live-open-component]').length,
     calls:window.__calls.map(x=>x.name),
+    hasGenericTitle:Boolean(document.querySelector('#exam-prep-host-root .ep-host-title')),
+    horizontalOverflow:document.documentElement.scrollWidth > innerWidth + 1,
     stateReads:window.__calls
       .filter(x=>['get_exam_prep_diagnostic_progress_safe_v1','get_exam_prep_state_safe_v1'].includes(x.name))
       .map(x=>`${x.name}:${x.args.p_component_code}`)
   }));
   assert(r.cards===2,'overview must expose exactly two component route cards');
+  assert(r.hasGenericTitle===false,'mobile overview must not repeat the generic Exam Prep header above the route');
+  assert(r.horizontalOverflow===false,'mobile overview must not create horizontal overflow at 390px');
   assert(JSON.stringify(r.stateReads.slice(0,4))===JSON.stringify([
     'get_exam_prep_diagnostic_progress_safe_v1:P1',
     'get_exam_prep_state_safe_v1:P1',
@@ -108,15 +115,30 @@ if (!hostCss.includes('max-width: calc(100% - 44px)')) throw new Error('mobile c
     primary:document.querySelector('[data-ep-component-primary]')?.textContent,
     calls:window.__calls.map(x=>x.name),
     hasGenericHead:Boolean(document.querySelector('#exam-prep-host-root .ep-live-head')),
-    hasComponentHero:Boolean(document.querySelector('[data-ep-component-home="P1"] .ep-component-hero'))
+    hasComponentHero:Boolean(document.querySelector('[data-ep-component-home="P1"] .ep-component-hero')),
+    backHeight:document.querySelector('[data-ep-component-back]')?.getBoundingClientRect().height || 0,
+    horizontalOverflow:document.documentElement.scrollWidth > innerWidth + 1
   }));
   assert(/Start the next check section/i.test(r.primary),'P1 component home must show one immediate diagnostic action');
   assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'viewing P1 must remain read-only before learner action');
   assert(r.hasComponentHero,'P1 component identity must remain visible on the component screen');
   assert(!r.hasGenericHead,'component screen must not repeat the generic Exam Prep intro above the paper identity');
+  assert(r.backHeight>=44,`component back touch target must be at least 44px; got ${r.backHeight}`);
+  assert(r.horizontalOverflow===false,'P1 component home must not overflow horizontally at 390px');
 
   await page.click('[data-ep-component-primary="diagnostic"]');
   await page.waitForFunction(()=>document.querySelector('input[name="ep_live_answer"]'));
+
+  r=await page.evaluate(()=>({
+    hasGenericTitle:Boolean(document.querySelector('#exam-prep-host-root .ep-host-title')),
+    hasQuestionCard:Boolean(document.querySelector('#exam-prep-host-root .ep-live-question-card')),
+    submitHeight:document.querySelector('[data-ep-live-submit]')?.getBoundingClientRect().height || 0,
+    horizontalOverflow:document.documentElement.scrollWidth > innerWidth + 1
+  }));
+  assert(r.hasGenericTitle===false,'mobile question must not repeat the generic module title');
+  assert(r.hasQuestionCard===true,'mobile question must use the compact question surface');
+  assert(r.submitHeight>=44,`mobile submit touch target must be at least 44px; got ${r.submitHeight}`);
+  assert(r.horizontalOverflow===false,'mobile question must not overflow horizontally at 390px');
 
   await page.check('input[name="ep_live_answer"][value="1"]');
   await page.click('[data-ep-live-submit]');
