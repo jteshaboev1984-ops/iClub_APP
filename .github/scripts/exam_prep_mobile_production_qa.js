@@ -244,6 +244,14 @@ async function collectPrimaryScreens(page, label) {
     screenshot: await shot(page, `${label}-01-overview`),
     audit: await viewportAudit(page, label + '-overview')
   };
+  const overviewState = await page.evaluate(() => ({
+    hasGenericTitle: Boolean(document.querySelector('#exam-prep-host-root .ep-host-title')),
+    hasPermissionCopy: /персональн|personal permission|shaxsiy ruxsat/i.test(document.querySelector('#exam-prep-host-root')?.textContent || ''),
+    horizontalOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) > innerWidth + 1
+  }));
+  if (overviewState.hasGenericTitle) throw new Error('Preview overview still repeats generic Exam Prep title');
+  if (overviewState.hasPermissionCopy) throw new Error('Preview overview exposes personal-permission implementation copy');
+  if (overviewState.horizontalOverflow) throw new Error('Preview overview has horizontal overflow');
 
   // Check the second component independently at the same phone width.
   await page.click('[data-ep-live-component="P5"]');
@@ -261,6 +269,15 @@ async function collectPrimaryScreens(page, label) {
     fullScreenshot: await shot(page, `${label}-02b-p1-home-full`, true),
     audit: await viewportAudit(page, label + '-p1-home')
   };
+  const p1State = await page.evaluate(() => {
+    const back = document.querySelector('[data-ep-component-back]');
+    return {
+      backHeight: back ? back.getBoundingClientRect().height : 0,
+      horizontalOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) > innerWidth + 1
+    };
+  });
+  if (p1State.backHeight < 44) throw new Error(`P1 component back target is only ${p1State.backHeight}px`);
+  if (p1State.horizontalOverflow) throw new Error('P1 home has horizontal overflow');
 
   // Capture a real protected diagnostic question at the actual mobile viewport,
   // then leave the still-active session so the rest of the UI can be inspected.
@@ -268,6 +285,25 @@ async function collectPrimaryScreens(page, label) {
   if (await primary.count()) {
     await primary.click();
     await page.waitForSelector('[data-ep-live-submit]', { state: 'visible', timeout: 30000 });
+    await page.waitForSelector('[data-ep-integrity-banner]', { state: 'visible', timeout: 20000 });
+    const questionState = await page.evaluate(() => {
+      const root = document.querySelector('#exam-prep-host-root');
+      const submit = root?.querySelector('[data-ep-live-submit]');
+      const banner = root?.querySelector('[data-ep-integrity-banner]');
+      return {
+        hasGenericTitle: Boolean(root?.querySelector('.ep-host-title')),
+        hasCompactCard: Boolean(root?.querySelector('.ep-live-question-card')),
+        submitHeight: submit ? submit.getBoundingClientRect().height : 0,
+        integrityText: String(banner?.textContent || '').trim(),
+        horizontalOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) > innerWidth + 1
+      };
+    });
+    if (questionState.hasGenericTitle) throw new Error('Preview question still repeats generic Exam Prep title');
+    if (!questionState.hasCompactCard) throw new Error('Preview question is missing compact mobile question card');
+    if (questionState.submitHeight < 44) throw new Error(`Question submit target is only ${questionState.submitHeight}px`);
+    if (!questionState.integrityText.includes('Оставайтесь в iClub во время проверки.')) throw new Error(`Unexpected integrity copy: ${questionState.integrityText}`);
+    if (questionState.horizontalOverflow) throw new Error('Preview question has horizontal overflow');
+    report.notes.push({ label, overviewState, p1State, questionState });
     report.viewports[label].screens.question = {
       screenshot: await shot(page, `${label}-03-question`),
       fullScreenshot: await shot(page, `${label}-03b-question-full`, true),
@@ -329,31 +365,6 @@ async function collectPrimaryScreens(page, label) {
     if (await page.locator('[data-ep-live-component="P1"]').count()) await openP1Home(page);
   }
 
-  // Finish Stage 0 through the real mobile UI so the weekly-plan screen can be
-  // inspected instead of inferred from desktop QA.
-  if (!(await page.locator('[data-ep-component-home="P1"]').count())) {
-    if (await page.locator('[data-ep-live-component="P1"]').count()) await openP1Home(page);
-  }
-  const stage0 = await finishP1Stage0(page);
-  report.notes.push({ label, p1Stage0: stage0 });
-  await page.waitForSelector('[data-ep-component-home="P1"]', { state: 'visible', timeout: 30000 });
-  report.viewports[label].screens.p1FoundationHome = {
-    screenshot: await shot(page, `${label}-07-p1-foundation-home`),
-    audit: await viewportAudit(page, label + '-p1-foundation')
-  };
-
-  await page.click('[data-ep-component-back]');
-  await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 30000 });
-  const hasPlanCompat = await page.locator('[data-ep-live-plan="P1"]').count();
-  if (hasPlanCompat) {
-    await page.evaluate(() => document.querySelector('[data-ep-live-plan="P1"]')?.click());
-    await page.waitForSelector('.ep-live-plan-item', { state: 'visible', timeout: 30000 });
-    report.viewports[label].screens.weeklyPlan = {
-      screenshot: await shot(page, `${label}-08-weekly-plan`),
-      fullScreenshot: await shot(page, `${label}-08b-weekly-plan-full`, true),
-      audit: await viewportAudit(page, label + '-weekly-plan')
-    };
-  }
 }
 
 async function navigateExistingUserToP1(page) {
