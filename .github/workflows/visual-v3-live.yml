@@ -34,7 +34,7 @@ jobs:
           set -euo pipefail
           node --check .github/scripts/visual_v3_live_regression.js
           grep -q '<body class="iclub-visual-v3">' index.html
-          grep -q 'visual/iclub-visual-v3.css?v=v3foundation1' index.html
+          grep -q 'visual/iclub-visual-v3.css?v=v3foundation2' index.html
           grep -q 'data-i18n="tab_study">Study</span>' index.html
           grep -q 'tab_study: "Учёба"' i18n.js
           grep -q 'tab_study: "O‘qish"' i18n.js
