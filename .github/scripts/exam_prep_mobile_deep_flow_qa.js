@@ -192,27 +192,47 @@ async function readPlan(page) {
 async function waitForReadySubmitOrRoute(page, timeout = 30000) {
   try {
     await page.waitForFunction(() => {
-      const visible = selector => Array.from(document.querySelectorAll(selector)).some(el => {
+      const visibleEl = el => {
+        if (!el) return false;
         const cs = getComputedStyle(el);
         const r = el.getBoundingClientRect();
         return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
           r.width > 0 && r.height > 0;
-      });
-      const submit = document.querySelector('[data-ep-live-submit]');
-      const submitReady = submit && !submit.disabled && visible('[data-ep-live-submit]');
-      return Boolean(submitReady) ||
-        visible('[data-ep-component-home="P1"]') ||
-        visible('[data-ep-placement-screen]') ||
+      };
+      const visible = selector => Array.from(document.querySelectorAll(selector)).some(visibleEl);
+      const root = document.querySelector('#exam-prep-host-root');
+      if (!root || root.hidden) return false;
+
+      // The interaction layer deliberately keeps a disabled copy of the previous
+      // screen visible while an async route is in flight. That is not a ready
+      // learner state and must not consume the Stage-0 guard or trigger a second click.
+      if (Array.from(root.querySelectorAll('.ep-flow-pending-visual,[data-ep-transition-hold="1"]')).some(visibleEl)) {
+        return false;
+      }
+
+      const submit = Array.from(root.querySelectorAll('[data-ep-live-submit]'))
+        .find(el => visibleEl(el) && !el.disabled);
+      if (submit) return true;
+
+      const placement = Array.from(root.querySelectorAll('[data-ep-placement-screen]')).find(visibleEl);
+      if (placement) {
+        const loading = Array.from(placement.querySelectorAll('.ep-placement-card[role="status"]')).some(visibleEl);
+        if (loading) return false;
+        const action = Array.from(placement.querySelectorAll('[data-ep-placement-next]'))
+          .find(el => visibleEl(el) && !el.disabled && el.dataset.epQaClicked !== '1');
+        const back = Array.from(placement.querySelectorAll('[data-ep-placement-back]'))
+          .find(el => visibleEl(el) && !el.disabled);
+        const error = Array.from(placement.querySelectorAll('[role="alert"]')).some(visibleEl);
+        return Boolean(action || back || error);
+      }
+
+      return visible('[data-ep-component-home="P1"]') ||
         visible('[data-ep-flow-completion]') ||
         visible('[data-ep-pux-primary-goals]') ||
         visible('[data-ep-pux-goal-action]') ||
         visible('.ep-live-plan-item') ||
-        Array.from(document.querySelectorAll('[data-ep-live-component="P1"]')).some(el => {
-          const cs = getComputedStyle(el);
-          const r = el.getBoundingClientRect();
-          return !el.disabled && cs.display !== 'none' && cs.visibility !== 'hidden' &&
-            r.width > 0 && r.height > 0;
-        });
+        Array.from(root.querySelectorAll('[data-ep-live-component="P1"]')).some(el =>
+          visibleEl(el) && !el.disabled);
     }, null, { timeout });
   } catch (error) {
     const snapshot = await page.evaluate(() => {
@@ -337,23 +357,10 @@ async function finishStage0(page) {
       const answered = await completeVisibleSession(page, 'diagnostic', 30);
       totalAnswers += answered;
       if (answered > 0) sessions += 1;
-      // Let the app finish its own finalize -> diagnosticProgress -> getState
-      // sequence before the QA harness inspects the next route. The harness
-      // must not create a second state-rebuilding RPC in parallel.
-      await page.waitForFunction(() => {
-        const visible = el => {
-          if (!el) return false;
-          const cs = getComputedStyle(el);
-          const r = el.getBoundingClientRect();
-          return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
-            r.width > 0 && r.height > 0;
-        };
-        return !Array.from(document.querySelectorAll('[data-ep-live-submit]')).some(el => visible(el) && !el.disabled) &&
-          (Array.from(document.querySelectorAll('[data-ep-component-home="P1"]')).some(visible) ||
-           Array.from(document.querySelectorAll('[data-ep-live-component="P1"]')).some(visible) ||
-           Array.from(document.querySelectorAll('[data-ep-placement-screen]')).some(visible) ||
-           Array.from(document.querySelectorAll('[data-ep-flow-completion]')).some(visible));
-      }, null, { timeout: 45000 });
+      // Wait for the next stable learner surface. The interaction layer may keep
+      // a disabled copy of the old screen visible while finalization/reconciliation
+      // runs; waitForReadySubmitOrRoute explicitly ignores that transition copy.
+      await waitForReadySubmitOrRoute(page, 45000);
       continue;
     }
 
@@ -385,8 +392,11 @@ async function finishStage0(page) {
               r.width > 0 && r.height > 0;
           };
           const button = Array.from(document.querySelectorAll('[data-ep-placement-next]'))
-            .find(el => visible(el) && !el.disabled);
+            .find(el => visible(el) && !el.disabled && el.dataset.epQaClicked !== '1');
           if (!button) return false;
+          // Mark before click so the interaction layer's transition clone carries
+          // the marker too; the harness will not mistake that clone for a new action.
+          button.dataset.epQaClicked = '1';
           button.click();
           return true;
         });
@@ -394,7 +404,8 @@ async function finishStage0(page) {
           await page.waitForTimeout(150);
           continue;
         }
-        await page.waitForTimeout(250);
+        await page.waitForTimeout(80);
+        await waitForReadySubmitOrRoute(page, 45000);
         continue;
       }
     }
