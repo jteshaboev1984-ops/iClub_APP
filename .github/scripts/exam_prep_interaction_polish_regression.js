@@ -126,7 +126,6 @@ const path = require('path');
   });
   await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-progress-ux-stability.js') });
   await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-learner-flow-ux.js') });
-  await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-integrity.js') });
   await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.js') });
   await fresh.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish4');
   await fresh.click('[data-ep-component-primary="diagnostic"]');
