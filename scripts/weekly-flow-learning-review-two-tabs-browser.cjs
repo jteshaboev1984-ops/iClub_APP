@@ -24,6 +24,8 @@ async function scenario(browser,language,width,loss) {
       operational_stage:2,coverage_pct:0}]});
     if(name==='progress') return good({goals:args.component==='P5'?[{
       goal_id:GOAL,component_code:'P5',action_priority_order:model.finalized?null:1,
+      item_type:'learning',skill_code:'P5-DAT-01',
+      weekly_commitment_complete:model.finalized,
       status:model.finalized?'completed':'not_started'}]:[]});
     if(name==='plan') return good({plan_id:PLAN,active_week_no:1,items:args.component==='P5'?[{
       priority_order:1,item_type:'learning',status:model.finalized?'completed':'pending'}]:[]});
