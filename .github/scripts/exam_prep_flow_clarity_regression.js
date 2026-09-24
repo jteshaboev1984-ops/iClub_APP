@@ -197,6 +197,29 @@ const path = require('path');
   await page.waitForFunction(() => window.__startedPriority === 1);
   assert(await page.evaluate(() => window.__startedPriority) === 1, 'correction CTA must route to and start the matching governed weekly-plan item');
 
+  // Reproduce the real mobile handoff: an async decoration from a plan that is
+  // immediately replaced must not block decoration of the new plan opened by a
+  // correction CTA. The current screen must get its own decoration ticket.
+  await page.evaluate(() => {
+    window.__startedPriority = null;
+    window.__apiCounts = { plan: 0, queue: 0 };
+    window.__apiDelayMs = 260;
+    window.__renderPlan();
+  });
+  await page.waitForFunction(() => window.__apiCounts.plan >= 1);
+  await page.evaluate(async () => {
+    await window.iClubExamPrepHostInternal.learnerFlowUx.openPlanAndStart(
+      'P1',
+      'P1-CIR-01',
+      'correction',
+      '00000000-0000-4000-8000-000000000401'
+    );
+  });
+  await page.waitForFunction(() => window.__startedPriority === 1, null, { timeout: 8000 });
+  assert(await page.evaluate(() => window.__startedPriority) === 1,
+    'a stale decoration from the previous screen must not swallow the correction-to-plan handoff');
+  await page.evaluate(() => { window.__apiDelayMs = 0; });
+
   await page.evaluate(() => {
     document.querySelector('#exam-prep-host-root').innerHTML = `<section class="ep-host-shell ep-live"><button data-ep-live-submit>Отправить ответ</button></section>`;
   });

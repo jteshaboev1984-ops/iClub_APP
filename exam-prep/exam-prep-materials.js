@@ -299,7 +299,7 @@
   if (!document.querySelector('script[data-exam-prep-learner-flow-ux]')) {
     const script = document.createElement("script");
     script.dataset.examPrepLearnerFlowUx = "true";
-    script.src = `${base}exam-prep-learner-flow-ux.js?v=flowux5`;
+    script.src = `${base}exam-prep-learner-flow-ux.js?v=flowux6`;
     document.head.appendChild(script);
   }
 
