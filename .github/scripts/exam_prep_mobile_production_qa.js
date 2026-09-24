@@ -409,27 +409,26 @@ async function navigateExistingUserToP1(page) {
   await openP1Home(page);
 }
 
-async function smokeViewport(browser, storagePath, width, height, label) {
-  const context = await browser.newContext({
-    viewport: { width, height },
-    isMobile: true,
-    hasTouch: true,
-    deviceScaleFactor: 2,
-    storageState: storagePath
-  });
-  const page = await context.newPage();
-  page.on('console', msg => { if (msg.type() === 'error') report.consoleErrors.push({ label, text: msg.text() }); });
-  page.on('pageerror', err => report.pageErrors.push({ label, text: String(err) }));
+async function smokeViewportOnPage(page, width, height, label) {
+  await page.setViewportSize({ width, height });
   await navigateExistingUserToP1(page);
   const screens = {};
   screens.p1Home = { screenshot: await shot(page, `${label}-p1-home`), audit: await viewportAudit(page, label + '-p1') };
+  const globalBack = await page.evaluate(() => {
+    const el = document.querySelector('#topbar-back');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { width: Math.round(r.width), height: Math.round(r.height) };
+  });
+  if (!globalBack || globalBack.width < 44 || globalBack.height < 44) {
+    throw new Error(`Global Back target failed at ${label}: ${JSON.stringify(globalBack)}`);
+  }
   const details = page.locator('.ep-component-area').first();
   if (await details.count()) {
     await details.locator('summary').click();
     screens.topic = { screenshot: await shot(page, `${label}-topic`), audit: await viewportAudit(page, label + '-topic') };
   }
-  report.viewports[label] = { width, height, screens };
-  await context.close();
+  report.viewports[label] = { width, height, screens, globalBack };
 }
 
 (async () => {
@@ -453,10 +452,12 @@ async function smokeViewport(browser, storagePath, width, height, label) {
 
   const storagePath = path.join(OUT, 'storage-state.json');
   await context.storageState({ path: storagePath });
-  await context.close();
 
-  await smokeViewport(browser, storagePath, 360, 800, '360x800');
-  await smokeViewport(browser, storagePath, 430, 932, '430x932');
+  // Keep the same authenticated QA browser context. The app's anonymous auth
+  // session is deliberately not reconstructed in a new context for viewport smoke checks.
+  await smokeViewportOnPage(page, 360, 800, '360x800');
+  await smokeViewportOnPage(page, 430, 932, '430x932');
+  await context.close();
 
   report.finishedAt = new Date().toISOString();
   fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify(report, null, 2));
