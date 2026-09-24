@@ -425,12 +425,13 @@
   }
 
   async function decorateTracker() {
-    if (trackerDecorationInFlight) return trackerDecorationInFlight;
+    const root = rootEl();
+    const buttons = Array.from(root?.querySelectorAll("[data-ep-views-skill]") || []);
+    if (!root || !buttons.length) return;
+    const screen = buttons[0]?.closest?.("[data-ep-views-screen]") || root;
+    if (trackerDecorationInFlight?.target === screen) return trackerDecorationInFlight.promise;
+
     const run = (async () => {
-      const root = rootEl();
-      const buttons = Array.from(root?.querySelectorAll("[data-ep-views-skill]") || []);
-      if (!root || !buttons.length) return;
-      const screen = buttons[0]?.closest?.("[data-ep-views-screen]") || root;
       const component = componentFromScreen();
       if (!component) return;
       const data = await getTracker(component);
@@ -447,23 +448,26 @@
         button.dataset.epFlowTracker = VERSION;
       });
     })();
-    trackerDecorationInFlight = run;
+    const ticket = { target: screen, promise: run };
+    trackerDecorationInFlight = ticket;
     try {
       return await run;
     } finally {
-      if (trackerDecorationInFlight === run) trackerDecorationInFlight = null;
+      if (trackerDecorationInFlight === ticket) trackerDecorationInFlight = null;
     }
   }
 
   async function decoratePlan(force = false) {
-    if (planDecorationInFlight) return planDecorationInFlight;
+    const root = rootEl();
+    const rows = Array.from(root?.querySelectorAll(".ep-live-plan-item") || []);
+    if (!rows.length || root?.querySelector(".ep-flow-completion-screen")) return;
+    const planCard = rows[0]?.closest?.(".ep-live-card");
+    if (!planCard) return;
+    if (planDecorationInFlight?.target === planCard) return planDecorationInFlight.promise;
+
     const run = (async () => {
-      const root = rootEl();
-      const rows = Array.from(root?.querySelectorAll(".ep-live-plan-item") || []);
-      if (!rows.length || root?.querySelector(".ep-flow-completion-screen")) return;
-      const planCard = rows[0]?.closest?.(".ep-live-card");
       const component = componentFromScreen();
-      if (!planCard || !component || typeof internal.api?.weeklyPlan !== "function") return;
+      if (!component || typeof internal.api?.weeklyPlan !== "function") return;
       if (!force && rows.every(row => row.dataset.epFlowPlan === VERSION)) return;
 
       const [planResult, trackerData] = await Promise.all([internal.api.weeklyPlan(component), getTracker(component)]);
@@ -518,7 +522,7 @@
         row.dataset.epFlowCorrection = String(item.correction_case_id || "");
       });
 
-      if (planCard && !planCard.querySelector(".ep-flow-plan-intro")) {
+      if (!planCard.querySelector(".ep-flow-plan-intro")) {
         const head = planCard.querySelector(".ep-live-head");
         const note = document.createElement("div");
         note.className = "ep-flow-plan-intro";
@@ -526,22 +530,24 @@
         if (head?.nextSibling) planCard.insertBefore(note, head.nextSibling); else planCard.appendChild(note);
       }
     })();
-    planDecorationInFlight = run;
+    const ticket = { target: planCard, promise: run };
+    planDecorationInFlight = ticket;
     try {
       return await run;
     } finally {
-      if (planDecorationInFlight === run) planDecorationInFlight = null;
+      if (planDecorationInFlight === ticket) planDecorationInFlight = null;
     }
   }
 
   async function decorateCorrections() {
-    if (correctionsDecorationInFlight) return correctionsDecorationInFlight;
+    const root = rootEl();
+    const screen = root?.querySelector("[data-ep-views-screen]");
+    const title = String(screen?.querySelector(".ep-views-title")?.textContent || "").toLowerCase();
+    if (!screen || !/ошиб|correction|xato/.test(title) || typeof internal.api?.correctionQueue !== "function") return;
+    if (screen.dataset.epFlowCorrections === VERSION) return;
+    if (correctionsDecorationInFlight?.target === screen) return correctionsDecorationInFlight.promise;
+
     const run = (async () => {
-      const root = rootEl();
-      const screen = root?.querySelector("[data-ep-views-screen]");
-      const title = String(screen?.querySelector(".ep-views-title")?.textContent || "").toLowerCase();
-      if (!screen || !/ошиб|correction|xato/.test(title) || typeof internal.api?.correctionQueue !== "function") return;
-      if (screen.dataset.epFlowCorrections === VERSION) return;
       const component = componentFromScreen();
       if (!component) return;
       const [queueResult, planResult, trackerData] = await Promise.all([
@@ -591,11 +597,12 @@
       if (bottom) bottom.textContent = c.openPlan;
       screen.dataset.epFlowCorrections = VERSION;
     })();
-    correctionsDecorationInFlight = run;
+    const ticket = { target: screen, promise: run };
+    correctionsDecorationInFlight = ticket;
     try {
       return await run;
     } finally {
-      if (correctionsDecorationInFlight === run) correctionsDecorationInFlight = null;
+      if (correctionsDecorationInFlight === ticket) correctionsDecorationInFlight = null;
     }
   }
 
