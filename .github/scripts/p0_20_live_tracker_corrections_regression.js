@@ -135,6 +135,23 @@ const path = require('path');
   assert(visible.includes('Corrections') && visible.includes('Check again') && visible.includes('Open weekly plan'), 'correction queue must show learner action and route back to the weekly plan');
   assert(!visible.includes('P1-QUA-02') && !visible.includes('retest_due'), 'correction queue must not expose internal skill/status codes');
 
+  await page.evaluate(async () => {
+    document.documentElement.lang = 'ru';
+    window.i18n = { getLang: () => 'ru' };
+    await window.iClubExamPrepHostInternal.learnerViews.openSkill('P1', 'P1-QUA-01');
+  });
+  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Детали навыка'));
+  visible = await page.locator('#exam-prep-host-root').textContent();
+  assert(visible.includes('форме полного квадрата') && visible.includes('вершину и форму графика'), 'Russian skill detail must use learner-facing presentation copy');
+  assert(visible.includes('выражение одной переменной через другие'), 'Russian prerequisite must use learner-facing presentation copy');
+  assert(!visible.includes('completed-square form') && !visible.includes('vertex/shape information') && !visible.includes('смена subject'), 'Russian learner UI must not expose mixed internal canonical wording');
+
+  await page.evaluate(async () => window.iClubExamPrepHostInternal.learnerViews.openCorrections('P1'));
+  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Работа над ошибками'));
+  visible = await page.locator('#exam-prep-host-root').textContent();
+  assert(visible.includes('Использовать дискриминант') && visible.includes('условия на параметр'), 'Russian correction queue must use learner-facing skill copy');
+  assert(!visible.includes('discriminant') && !visible.includes('parameter conditions'), 'Russian correction queue must not expose internal mixed-language descriptions');
+
   await page.evaluate(async () => window.iClubExamPrepHostInternal.learnerViews.openTracker('P5'));
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('0 / 36'));
   visible = await page.locator('#exam-prep-host-root').textContent();
