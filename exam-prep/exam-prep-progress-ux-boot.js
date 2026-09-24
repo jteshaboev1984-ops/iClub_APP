@@ -11,6 +11,7 @@
   const base = src.replace(/exam-prep-progress-ux-boot\.js(?:\?.*)?$/, '');
   const root = document.head;
   const stillEnabled = () => window.iClubExamPrepProgressUxEnabled === true;
+  let weeklyAssetsPromise = null;
   const fail = () => {
     internal.progressUxBootstrapStatus = 'unavailable';
     internal.progressUxStability?.stop?.();
@@ -110,6 +111,51 @@
     });
   }
 
+  async function ensureWeeklyFlowAssets() {
+    if (window.iClubExamPrepWeeklyFlowEnabled !== true) return false;
+    if (!stillEnabled()) {
+      internal.weeklyFlowBootstrapStatus = 'unavailable';
+      window.iClubExamPrepWeeklyFlowEnabled = false;
+      return false;
+    }
+    if (internal.weeklyFlowApi?.version === 'weekly_flow_adapter_v1' &&
+        internal.weeklyReviewUi?.version === 'learning_review_ui_v1') {
+      internal.weeklyFlowBootstrapStatus = 'ready';
+      try { await loadOptionalWeeklyAdherenceUi(); }
+      catch (_) { internal.weeklyAdherenceUiStatus = 'unavailable'; }
+      return true;
+    }
+    if (weeklyAssetsPromise) return weeklyAssetsPromise;
+
+    const task = (async () => {
+      try {
+        await loadOptionalWeeklyAdapter();
+        await loadRequiredWeeklyReviewUi();
+        if (internal.weeklyFlowApi?.version !== 'weekly_flow_adapter_v1' ||
+            internal.weeklyReviewUi?.version !== 'learning_review_ui_v1') {
+          throw new Error('weekly flow contracts unavailable');
+        }
+        internal.weeklyFlowBootstrapStatus = 'ready';
+        try { await loadOptionalWeeklyAdherenceUi(); }
+        catch (_) { internal.weeklyAdherenceUiStatus = 'unavailable'; }
+        return true;
+      } catch (_) {
+        internal.weeklyFlowBootstrapStatus = 'unavailable';
+        window.iClubExamPrepWeeklyFlowEnabled = false;
+        return false;
+      }
+    })();
+
+    weeklyAssetsPromise = task;
+    try {
+      return await task;
+    } finally {
+      if (weeklyAssetsPromise === task) weeklyAssetsPromise = null;
+    }
+  }
+
+  internal.ensureWeeklyFlowAssets = ensureWeeklyFlowAssets;
+
   async function boot() {
     try {
       stylesheet('stability','examPrepProgressUxStability');
@@ -121,13 +167,10 @@
         typeof internal.progressUxApi?.progress === 'function');
       if (!stillEnabled()) { fail(); return; }
       // A missing review bridge blocks ONLY the opt-in weekly flow; existing
-      // Progress UX and Core retain their original routes.
-      try {
-        await loadOptionalWeeklyAdapter();
-        await loadRequiredWeeklyReviewUi();
-      } catch (_) {
-        internal.weeklyFlowBootstrapStatus = 'unavailable';
-        window.iClubExamPrepWeeklyFlowEnabled = false;
+      // Progress UX and Core retain their original routes. The same bridge is
+      // reusable when server enrollment becomes enabled after this boot.
+      if (window.iClubExamPrepWeeklyFlowEnabled === true) {
+        await ensureWeeklyFlowAssets();
       }
       if (!document.querySelector('link[data-exam-prep-progress-ux-style]')) {
         const link = document.createElement('link');
