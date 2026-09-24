@@ -8,7 +8,7 @@ const path = require('path');
   await page.route('http://iclub.test/', route => route.fulfill({
     status: 200,
     contentType: 'text/html',
-    body: '<!doctype html><html lang="en"><head></head><body><section id="courses-subject-hub"><div id="subject-hub-exam-prep-entry" hidden aria-hidden="true"><span id="subject-hub-exam-prep-title"></span><span id="subject-hub-exam-prep-sub"></span></div><div id="exam-prep-host-root" hidden aria-hidden="true"></div></section></body></html>'
+    body: '<!doctype html><html lang="en"><head></head><body><section id="courses-subject-hub"><div id="subject-hub-exam-prep-entry" hidden aria-hidden="true"><button type="button" data-action="open-exam-prep"><span id="subject-hub-exam-prep-title"></span><span id="subject-hub-exam-prep-sub"></span></button></div><div id="exam-prep-host-root" hidden aria-hidden="true"></div></section></body></html>'
   }));
   await page.goto('http://iclub.test/');
 
@@ -25,9 +25,9 @@ const path = require('path');
       P1: { components: [{ component_code: 'P1', operational_stage: 0, coverage_pct: 0, levels: { L0: 45, L1: 0, L2: 0, L3: 0 } }], skills: [] },
       P5: { components: [{ component_code: 'P5', operational_stage: 0, coverage_pct: 0, levels: { L0: 36, L1: 0, L2: 0, L3: 0 } }], skills: [] }
     };
-    window.__overview = {
-      P1: { component_code: 'P1', operational_stage: 0, coverage_count: 0, denominator_count: 45, coverage_pct: 0, last_evidence: null, next_action: { action_code: 'continue_entry_check' } },
-      P5: { component_code: 'P5', operational_stage: 0, coverage_count: 0, denominator_count: 36, coverage_pct: 0, last_evidence: null, next_action: { action_code: 'continue_entry_check' } }
+    window.__tracker = {
+      P1: { component_code: 'P1', denominator_count: 45, coverage_count: 0, coverage_pct: 0, areas: [] },
+      P5: { component_code: 'P5', denominator_count: 36, coverage_count: 0, coverage_pct: 0, areas: [] }
     };
     window.__legacy = {
       P1: { component_code: 'P1', available: true, source_type: 'legacy_readonly', academic_credit: false, mastery_effect: 'none', mapping_version: 'p1_existing_bank_v1', reference_count: 3, skills: [] },
@@ -37,11 +37,14 @@ const path = require('path');
     window.sb = { rpc: async (name, args = {}) => {
       window.__calls.push({ name, args });
       if (name === 'get_exam_prep_capabilities_v1') return { data: [window.__caps], error: null };
+      if (name === 'get_my_exam_prep_weekly_flow_status_v1') return { data: { contract_version: 'weekly_flow_status_v1', enabled: false }, error: null };
       if (name === 'get_my_exam_prep_beta_invitation_v1') return { data: { invited: false, invitations: [] }, error: null };
       if (name === 'get_exam_prep_exam_profile_v1') return { data: [window.__profile], error: null };
       if (name === 'get_exam_prep_diagnostic_progress_safe_v1') return { data: window.__progress[args.p_component_code], error: null };
       if (name === 'get_exam_prep_state_safe_v1') return { data: window.__state[args.p_component_code], error: null };
-      if (name === 'get_exam_prep_overview_safe_v1') return { data: window.__overview[args.p_component_code], error: null };
+      if (name === 'get_exam_prep_syllabus_tracker_safe_v1') return { data: window.__tracker[args.p_component_code], error: null };
+      if (name === 'get_exam_prep_correction_queue_safe_v1') return { data: { component_code: args.p_component_code, active_count: 0, cases: [] }, error: null };
+      if (name === 'get_exam_prep_weekly_plan_safe_v2') return { data: null, error: null };
       if (name === 'get_exam_prep_legacy_reference_summary_safe_v1') return { data: window.__legacy[args.p_component_code], error: null };
       return { data: null, error: { message: `unexpected rpc ${name}` } };
     }};
@@ -50,7 +53,6 @@ const path = require('path');
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-api.js') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-host.js') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-live.js') });
-  await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-overview-placement.js') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-history-note.js') });
 
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
@@ -60,19 +62,42 @@ const path = require('path');
     await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'en' });
   });
 
-  await page.waitForSelector('[data-ep-overview-strip="P1"]');
-  await page.waitForSelector('[data-ep-overview-strip="P5"]');
+  await page.waitForSelector('[data-ep-live-component="P1"]');
+  await page.click('[data-ep-live-component="P1"]');
+  await page.waitForSelector('[data-ep-component-home="P1"]');
   await page.waitForSelector('[data-ep-history-note="P1"]');
 
-  const p1Text = await page.locator('[data-ep-history-note="P1"]').textContent();
-  assert(p1Text.includes('Previous practice'), 'P1 history note must use learner-facing wording');
-  assert(p1Text.includes('3 earlier Practice/Tour answers found'), 'P1 history note must report only safe reference count');
-  assert(p1Text.includes('does not change confirmed progress or exam readiness'), 'P1 history note must explicitly remain non-crediting');
-  assert(await page.locator('[data-ep-history-note="P5"]').count() === 0, 'P5 history note must stay hidden without approved P5 legacy mapping');
+  const p1 = await page.evaluate(() => {
+    const home = document.querySelector('[data-ep-component-home="P1"]');
+    const progress = home?.querySelector('.ep-component-progress-card');
+    const note = home?.querySelector('[data-ep-history-note="P1"]');
+    return {
+      text: note?.textContent || '',
+      directlyAfterProgress: progress?.nextElementSibling === note,
+      historyVersion: window.iClubExamPrepHostInternal?.historyNoteVersion || null
+    };
+  });
+  assert(p1.historyVersion === 'p105history2', 'history-note runtime version mismatch');
+  assert(p1.directlyAfterProgress, 'P1 history note must sit after component progress and before topics');
+  assert(p1.text.includes('Previous practice'), 'P1 history note must use learner-facing wording');
+  assert(p1.text.includes('3 earlier Practice/Tour answers found'), 'P1 history note must report only safe reference count');
+  assert(p1.text.includes('does not change confirmed progress or exam readiness'), 'P1 history note must explicitly remain non-crediting');
 
-  const visible = await page.locator('#exam-prep-host-root').textContent();
+  let visible = await page.locator('#exam-prep-host-root').textContent();
   ['legacy_readonly','mapping_version','academic_credit','mastery_effect','p1_existing_bank_v1'].forEach(token => {
     assert(!visible.includes(token), `learner UI leaked internal legacy token: ${token}`);
+  });
+
+  await page.click('[data-ep-component-back]');
+  await page.waitForSelector('[data-ep-live-component="P5"]');
+  await page.click('[data-ep-live-component="P5"]');
+  await page.waitForSelector('[data-ep-component-home="P5"]');
+  await page.waitForTimeout(100);
+
+  assert(await page.locator('[data-ep-history-note="P5"]').count() === 0, 'P5 history note must stay hidden without approved P5 legacy mapping');
+  visible = await page.locator('#exam-prep-host-root').textContent();
+  ['legacy_readonly','mapping_version','academic_credit','mastery_effect','p1_existing_bank_v1'].forEach(token => {
+    assert(!visible.includes(token), `P5 learner UI leaked internal legacy token: ${token}`);
   });
 
   const calls = await page.evaluate(() => window.__calls.filter(x => x.name === 'get_exam_prep_legacy_reference_summary_safe_v1'));
@@ -86,5 +111,5 @@ const path = require('path');
   await page.waitForFunction(() => document.querySelectorAll('[data-ep-history-note]').length === 0);
 
   await browser.close();
-  console.log('P1-05 previous-practice learner note: PASS');
+  console.log('P1-05 component-first previous-practice learner note: PASS');
 })().catch(error => { console.error(error); process.exit(1); });
