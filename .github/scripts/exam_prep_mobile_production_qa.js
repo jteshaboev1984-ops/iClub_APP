@@ -232,11 +232,29 @@ async function collectPrimaryScreens(page, label) {
     audit: await viewportAudit(page, label + '-p1-home')
   };
 
+  // Capture a real protected diagnostic question at the actual mobile viewport,
+  // then leave the still-active session so the rest of the UI can be inspected.
+  const primary = page.locator('[data-ep-component-primary]');
+  if (await primary.count()) {
+    await primary.click();
+    await page.waitForSelector('[data-ep-live-submit]', { state: 'visible', timeout: 30000 });
+    report.viewports[label].screens.question = {
+      screenshot: await shot(page, `${label}-03-question`),
+      fullScreenshot: await shot(page, `${label}-03b-question-full`, true),
+      audit: await viewportAudit(page, label + '-question')
+    };
+    const exit = page.locator('[data-ep-live-exit]');
+    if (await exit.count()) {
+      await exit.click();
+      await page.waitForSelector('[data-ep-component-home="P1"]', { state: 'visible', timeout: 30000 });
+    }
+  }
+
   const firstDetails = page.locator('.ep-component-area').first();
   if (await firstDetails.count()) {
     await firstDetails.locator('summary').click();
     report.viewports[label].screens.topicExpanded = {
-      screenshot: await shot(page, `${label}-03-topic-expanded`),
+      screenshot: await shot(page, `${label}-04-topic-expanded`),
       audit: await viewportAudit(page, label + '-topic')
     };
 
@@ -245,8 +263,8 @@ async function collectPrimaryScreens(page, label) {
       await skill.click();
       await page.waitForSelector('[data-ep-views-back]', { state: 'visible', timeout: 20000 });
       report.viewports[label].screens.skillDetail = {
-        screenshot: await shot(page, `${label}-04-skill-detail`),
-        fullScreenshot: await shot(page, `${label}-04b-skill-detail-full`, true),
+        screenshot: await shot(page, `${label}-05-skill-detail`),
+        fullScreenshot: await shot(page, `${label}-05b-skill-detail-full`, true),
         audit: await viewportAudit(page, label + '-skill')
       };
       await page.click('[data-ep-views-back]');
@@ -263,10 +281,16 @@ async function collectPrimaryScreens(page, label) {
   const materials = page.locator('[data-ep-component-link="materials"]');
   if (await materials.count()) {
     await materials.click();
-    await page.waitForTimeout(800);
+    await page.waitForSelector('[data-ep-materials-screen]', { state: 'visible', timeout: 20000 });
+    await page.waitForFunction(() => {
+      const root = document.querySelector('#exam-prep-host-root');
+      if (!root || root.hidden) return false;
+      if (root.querySelector('[data-ep-transition-hold="1"]')) return false;
+      return Boolean(root.querySelector('[data-ep-material], .ep-materials-safe[role="alert"]'));
+    }, null, { timeout: 30000 });
     report.viewports[label].screens.materials = {
-      screenshot: await shot(page, `${label}-05-materials`),
-      fullScreenshot: await shot(page, `${label}-05b-materials-full`, true),
+      screenshot: await shot(page, `${label}-06-materials`),
+      fullScreenshot: await shot(page, `${label}-06b-materials-full`, true),
       audit: await viewportAudit(page, label + '-materials')
     };
     const matBack = page.locator('[data-ep-materials-back], [data-ep-views-back], [data-ep-live-home]').first();
@@ -275,17 +299,6 @@ async function collectPrimaryScreens(page, label) {
     if (await page.locator('[data-ep-live-component="P1"]').count()) await openP1Home(page);
   }
 
-  // Start diagnostic and capture real protected question.
-  const primary = page.locator('[data-ep-component-primary]');
-  if (await primary.count()) {
-    await primary.click();
-    await page.waitForSelector('[data-ep-live-submit]', { state: 'visible', timeout: 30000 });
-    report.viewports[label].screens.question = {
-      screenshot: await shot(page, `${label}-06-question`),
-      fullScreenshot: await shot(page, `${label}-06b-question-full`, true),
-      audit: await viewportAudit(page, label + '-question')
-    };
-  }
 }
 
 async function navigateExistingUserToP1(page) {
