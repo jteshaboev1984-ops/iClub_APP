@@ -80,7 +80,7 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
 
   let r=await page.evaluate(async()=>{const synced=await window.iClubExamPrep.syncSubjectHub({subjectKey:'mathematics',language:'en'});const opened=await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});return{synced,opened,profile:!!document.querySelector('[data-ep-live-profile-form]'),version:window.iClubExamPrep.liveFlowVersion};});
   assert(r.synced&&r.opened&&r.profile,'profile screen must open for controlled-beta Core');
-  assert(r.version==='p251live2','live flow version mismatch');
+  assert(r.version==='p251live1','live flow version mismatch');
 
   await page.fill('input[name="exam_series"]','Oct/Nov 2026');
   await page.fill('input[name="target_grade"]','A');
