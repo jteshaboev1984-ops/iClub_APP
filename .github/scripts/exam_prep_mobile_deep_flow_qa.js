@@ -21,6 +21,12 @@ const report = {
 };
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const pendingRpcRequests = new Map();
+
+function rpcNameFromUrl(url) {
+  const match = String(url || '').match(/\/rest\/v1\/rpc\/([^?]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
 const safeName = s => String(s).replace(/[^a-z0-9_-]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
 
 async function shot(page, name, fullPage = false) {
@@ -184,27 +190,72 @@ async function readPlan(page) {
 }
 
 async function waitForReadySubmitOrRoute(page, timeout = 30000) {
-  await page.waitForFunction(() => {
-    const visible = selector => Array.from(document.querySelectorAll(selector)).some(el => {
-      const cs = getComputedStyle(el);
-      const r = el.getBoundingClientRect();
-      return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
-        r.width > 0 && r.height > 0;
-    });
-    const submit = document.querySelector('[data-ep-live-submit]');
-    const submitReady = submit && !submit.disabled && visible('[data-ep-live-submit]');
-    return Boolean(submitReady) ||
-      visible('[data-ep-component-home="P1"]') ||
-      visible('[data-ep-placement-screen]') ||
-      visible('[data-ep-flow-completion]') ||
-      visible('.ep-live-plan-item') ||
-      Array.from(document.querySelectorAll('[data-ep-live-component="P1"]')).some(el => {
+  try {
+    await page.waitForFunction(() => {
+      const visible = selector => Array.from(document.querySelectorAll(selector)).some(el => {
         const cs = getComputedStyle(el);
         const r = el.getBoundingClientRect();
-        return !el.disabled && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
           r.width > 0 && r.height > 0;
       });
-  }, null, { timeout });
+      const submit = document.querySelector('[data-ep-live-submit]');
+      const submitReady = submit && !submit.disabled && visible('[data-ep-live-submit]');
+      return Boolean(submitReady) ||
+        visible('[data-ep-component-home="P1"]') ||
+        visible('[data-ep-placement-screen]') ||
+        visible('[data-ep-flow-completion]') ||
+        visible('.ep-live-plan-item') ||
+        Array.from(document.querySelectorAll('[data-ep-live-component="P1"]')).some(el => {
+          const cs = getComputedStyle(el);
+          const r = el.getBoundingClientRect();
+          return !el.disabled && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+            r.width > 0 && r.height > 0;
+        });
+    }, null, { timeout });
+  } catch (error) {
+    const snapshot = await page.evaluate(() => {
+      const visible = el => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      };
+      const root = document.querySelector('#exam-prep-host-root');
+      const visibleControls = Array.from(document.querySelectorAll('button,input,textarea,select,[role="button"],[role="alert"],[role="status"]'))
+        .filter(visible)
+        .slice(0, 30)
+        .map(el => ({
+          tag: el.tagName.toLowerCase(),
+          text: String(el.innerText || el.value || el.getAttribute('aria-label') || '').trim().slice(0, 180),
+          disabled: Boolean(el.disabled),
+          attrs: {
+            liveSubmit: el.hasAttribute('data-ep-live-submit'),
+            componentHome: el.getAttribute('data-ep-component-home'),
+            liveComponent: el.getAttribute('data-ep-live-component'),
+            placement: el.hasAttribute('data-ep-placement-screen'),
+            completion: el.hasAttribute('data-ep-flow-completion')
+          }
+        }));
+      return {
+        rootHidden: root?.hidden === true,
+        rootText: String(root?.innerText || '').trim().slice(0, 2500),
+        rootHtml: String(root?.innerHTML || '').slice(0, 5000),
+        visibleControls,
+        weeklyEnabled: window.iClubExamPrepWeeklyFlowEnabled === true,
+        capabilities: window.iClubExamPrepHostInternal?.lastCapabilities || null
+      };
+    }).catch(() => null);
+    const pending = Array.from(pendingRpcRequests.values()).map(x => ({
+      rpc: x.rpc,
+      ageMs: Date.now() - x.startedAt,
+      method: x.method
+    }));
+    report.notes.push({ waitTimeout: { timeout, snapshot, pendingRpc: pending } });
+    await shot(page, 'fatal-wait-timeout', true).catch(() => null);
+    const detail = { snapshot, pendingRpc: pending };
+    throw new Error('Route wait timeout: ' + JSON.stringify(detail) + ' :: ' + String(error?.message || error));
+  }
 }
 
 async function answerCurrent(page, strategy = 'diagnostic') {
@@ -662,6 +713,13 @@ async function attemptCorrectionFlow(page) {
   page.setDefaultTimeout(25000);
   page.on('console', msg => { if (msg.type() === 'error') report.consoleErrors.push(msg.text()); });
   page.on('pageerror', err => report.pageErrors.push(String(err)));
+  page.on('request', request => {
+    const rpc = rpcNameFromUrl(request.url());
+    if (!rpc) return;
+    pendingRpcRequests.set(request, { rpc, startedAt: Date.now(), method: request.method() });
+  });
+  page.on('requestfinished', request => { pendingRpcRequests.delete(request); });
+  page.on('requestfailed', request => { pendingRpcRequests.delete(request); });
   page.on('response', async response => {
     if (response.status() < 400 || !/\/rest\/v1\/rpc\//.test(response.url())) return;
     let body = '';
