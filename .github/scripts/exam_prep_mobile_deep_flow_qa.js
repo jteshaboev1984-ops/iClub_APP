@@ -174,7 +174,25 @@ async function readPlan(page) {
   });
 }
 
+async function waitForReadySubmitOrRoute(page, timeout = 30000) {
+  await page.waitForFunction(() => {
+    const submit = document.querySelector('[data-ep-live-submit]');
+    const submitReady = submit && !submit.disabled && !submit.hidden &&
+      getComputedStyle(submit).display !== 'none' && getComputedStyle(submit).visibility !== 'hidden';
+    return Boolean(submitReady) ||
+      Boolean(document.querySelector('[data-ep-component-home="P1"]')) ||
+      Boolean(document.querySelector('[data-ep-placement-screen]')) ||
+      Boolean(document.querySelector('[data-ep-flow-completion]')) ||
+      Boolean(document.querySelector('.ep-live-plan-item')) ||
+      Boolean(document.querySelector('[data-ep-live-component="P1"]'));
+  }, null, { timeout });
+}
+
 async function answerCurrent(page, strategy = 'diagnostic') {
+  await waitForReadySubmitOrRoute(page);
+  const submit = page.locator('[data-ep-live-submit]').first();
+  if (!(await submit.count()) || !(await submit.isVisible()) || !(await submit.isEnabled())) return false;
+
   const radio = page.locator('input[name="ep_live_answer"]');
   const text = page.locator('input[name="ep_live_text_answer"]');
   const written = page.locator('textarea[name="ep_live_written_answer"]');
@@ -191,25 +209,20 @@ async function answerCurrent(page, strategy = 'diagnostic') {
   } else {
     throw new Error('No answer control on visible question');
   }
-  await page.click('[data-ep-live-submit]');
-  await page.waitForTimeout(220);
+  await submit.click();
+  await page.waitForTimeout(120);
+  return true;
 }
 
 async function completeVisibleSession(page, strategy, maxItems = 30) {
   let answered = 0;
   while (answered < maxItems) {
-    if (!(await page.locator('[data-ep-live-submit]').count())) break;
-    await answerCurrent(page, strategy);
+    await waitForReadySubmitOrRoute(page);
+    const submit = page.locator('[data-ep-live-submit]').first();
+    if (!(await submit.count()) || !(await submit.isVisible()) || !(await submit.isEnabled())) break;
+    const didAnswer = await answerCurrent(page, strategy);
+    if (!didAnswer) break;
     answered += 1;
-    await page.waitForFunction(() =>
-      Boolean(document.querySelector('[data-ep-live-submit]')) ||
-      Boolean(document.querySelector('[data-ep-component-home="P1"]')) ||
-      Boolean(document.querySelector('[data-ep-placement-screen]')) ||
-      Boolean(document.querySelector('[data-ep-flow-completion]')) ||
-      Boolean(document.querySelector('.ep-live-plan-item')) ||
-      Boolean(document.querySelector('[data-ep-live-component="P1"]')),
-      null, { timeout: 30000 }
-    );
   }
   return answered;
 }
