@@ -16,6 +16,7 @@ const report = {
   delayedRetest: null,
   consoleErrors: [],
   pageErrors: [],
+  networkErrors: [],
   notes: []
 };
 
@@ -274,6 +275,69 @@ async function finishStage0(page) {
   throw new Error('P1 Stage0 did not converge in mobile deep QA');
 }
 
+async function settleAfterStage0(page) {
+  await page.waitForFunction(() => {
+    const root = document.querySelector('#exam-prep-host-root');
+    if (!root || root.hidden) return false;
+    if (document.querySelector('[data-ep-live-submit]')) return false;
+    if (document.querySelector('[data-ep-placement-screen]')) {
+      return Boolean(document.querySelector('[data-ep-placement-back]')) &&
+        !document.querySelector('.ep-placement-card[role="status"]');
+    }
+    return Boolean(document.querySelector('[data-ep-component-home="P1"]')) ||
+      Boolean(document.querySelector('[data-ep-live-component="P1"]')) ||
+      Boolean(document.querySelector('[data-ep-flow-completion]'));
+  }, null, { timeout: 45000 });
+
+  if (await page.locator('[data-ep-placement-screen]').count()) {
+    await page.waitForSelector('[data-ep-placement-back]', { state: 'visible', timeout: 30000 });
+    await page.locator('[data-ep-placement-back]').click();
+    await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 30000 });
+  } else if (await page.locator('[data-ep-flow-completion]').count()) {
+    const back = page.locator('[data-ep-live-dashboard]').first();
+    if (await back.count()) await back.click();
+    else await page.evaluate(async () => {
+      if (window.iClubExamPrep?.open) await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'ru' });
+    });
+    await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 30000 });
+  } else if (await page.locator('[data-ep-component-home="P1"]').count()) {
+    await page.locator('[data-ep-component-back]').click();
+    await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 30000 });
+  }
+}
+
+async function probeWeeklyFlow(page) {
+  return page.evaluate(async () => {
+    const internal = window.iClubExamPrepHostInternal || {};
+    const flow = internal.weeklyFlowApi;
+    const api = internal.api;
+    const simplify = value => {
+      if (!value || typeof value !== 'object') return value;
+      const out = { ok: value.ok === true, reason: value.reason || null };
+      if ('data' in value) out.data = value.data;
+      if (value.error) out.error = {
+        message: value.error.message || null,
+        details: value.error.details || null,
+        hint: value.error.hint || null,
+        code: value.error.code || null
+      };
+      return out;
+    };
+    const result = {
+      weeklyEnabled: window.iClubExamPrepWeeklyFlowEnabled === true,
+      capabilities: internal.lastCapabilities || null,
+      adapterVersion: flow?.version || null,
+      recovery: null,
+      ensure: null,
+      weeklyPlan: null
+    };
+    if (flow?.recover) result.recovery = simplify(await flow.recover('P1'));
+    if (flow?.plan) result.ensure = simplify(await flow.plan('P1'));
+    if (api?.weeklyPlan) result.weeklyPlan = simplify(await api.weeklyPlan('P1'));
+    return result;
+  });
+}
+
 async function openWeeklyPlan(page) {
   const opened = await page.evaluate(async () => {
     const flow = window.iClubExamPrepHostInternal?.learnerFlowUx;
@@ -286,6 +350,12 @@ async function openWeeklyPlan(page) {
       if (b) b.click();
     });
   }
+  await page.waitForFunction(() => {
+    return Boolean(document.querySelector('.ep-live-plan-item')) ||
+      Boolean(document.querySelector('.ep-live-error[role="alert"]'));
+  }, null, { timeout: 30000 });
+  const errorText = await page.locator('.ep-live-error[role="alert"]').first().textContent().catch(() => null);
+  if (errorText) throw new Error('Weekly plan rendered learner error: ' + String(errorText).trim());
   await page.waitForSelector('.ep-live-plan-item', { state: 'visible', timeout: 30000 });
   await page.waitForTimeout(400);
 }
@@ -376,6 +446,16 @@ async function attemptCorrectionFlow(page) {
   page.setDefaultTimeout(25000);
   page.on('console', msg => { if (msg.type() === 'error') report.consoleErrors.push(msg.text()); });
   page.on('pageerror', err => report.pageErrors.push(String(err)));
+  page.on('response', async response => {
+    if (response.status() < 400 || !/\/rest\/v1\/rpc\//.test(response.url())) return;
+    let body = '';
+    try { body = String(await response.text()).slice(0, 2500); } catch (_) {}
+    report.networkErrors.push({
+      status: response.status(),
+      rpc: response.url().split('/rest/v1/rpc/')[1]?.split('?')[0] || response.url(),
+      body
+    });
+  });
 
   const qaName = 'QA Mobile Deep Flow 20260924';
   await ensureRegistration(page, qaName);
@@ -385,7 +465,14 @@ async function attemptCorrectionFlow(page) {
 
   report.stage0 = await finishStage0(page);
   if (!report.stage0.complete) throw new Error('Stage0 did not complete');
+  await settleAfterStage0(page);
   report.stage0.screenshot = await shot(page, '01-stage0-complete', true).catch(() => null);
+
+  report.weeklyFlowProbe = await probeWeeklyFlow(page);
+  report.notes.push({ weeklyFlowProbe: report.weeklyFlowProbe });
+  if (!report.weeklyFlowProbe?.ensure?.ok || !report.weeklyFlowProbe?.weeklyPlan?.ok) {
+    throw new Error('Weekly flow probe failed: ' + JSON.stringify(report.weeklyFlowProbe));
+  }
 
   await openWeeklyPlan(page);
   report.weeklyPlan = {
@@ -456,7 +543,8 @@ async function attemptCorrectionFlow(page) {
     correctionActive: Number(queue?.active_count || 0),
     delayedRetest: report.delayedRetest?.state,
     consoleErrors: report.consoleErrors.length,
-    pageErrors: report.pageErrors.length
+    pageErrors: report.pageErrors.length,
+    networkErrors: report.networkErrors.length
   }, null, 2));
 
   if (report.consoleErrors.length || report.pageErrors.length) {
