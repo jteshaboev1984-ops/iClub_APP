@@ -1,0 +1,39 @@
+name: Exam Prep projection RPC serialization
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'exam-prep/exam-prep-api.js'
+      - '.github/scripts/exam_prep_projection_rpc_serialization_regression.js'
+      - '.github/workflows/exam-prep-projection-rpc-serialization.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  projection-rpc-serialization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify syntax and isolated serialization contract
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-api.js
+          node --check .github/scripts/exam_prep_projection_rpc_serialization_regression.js
+          node .github/scripts/exam_prep_projection_rpc_serialization_regression.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-api.js
+          ! grep -q '\.from(' exam-prep/exam-prep-api.js
+          git diff --exit-code
+
+      - name: Confirm scope
+        run: echo 'GREEN: browser RPC ordering only; no production network, Supabase mutation, user reset, Tours, Practice or certificate changes.'
