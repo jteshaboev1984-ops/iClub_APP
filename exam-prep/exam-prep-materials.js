@@ -314,7 +314,7 @@
   if (!document.querySelector('script[data-exam-prep-interaction-polish]')) {
     const script = document.createElement("script");
     script.dataset.examPrepInteractionPolish = "true";
-    script.src = `${base}exam-prep-interaction-polish.js?v=polish4`;
+    script.src = `${base}exam-prep-interaction-polish.js?v=polish5`;
     document.head.appendChild(script);
   }
 })();
