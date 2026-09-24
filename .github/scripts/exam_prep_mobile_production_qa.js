@@ -159,8 +159,12 @@ async function openExamPrep(page) {
 
   const profileForm = page.locator('[data-ep-live-profile-form]');
   if (await profileForm.count()) {
-    await page.fill('[data-ep-live-profile-form] [name="exam_series"]', 'May/June 2027');
-    await page.fill('[data-ep-live-profile-form] [name="target_grade"]', 'A');
+    const series = page.locator('[data-ep-live-profile-form] [name="exam_series"]');
+    const grade = page.locator('[data-ep-live-profile-form] [name="target_grade"]');
+    if ((await series.evaluate(el => el.tagName)) === 'SELECT') await series.selectOption({ label: 'May/June 2027' });
+    else await series.fill('May/June 2027');
+    if ((await grade.evaluate(el => el.tagName)) === 'SELECT') await grade.selectOption('A');
+    else await grade.fill('A');
     await page.fill('[data-ep-live-profile-form] [name="total_hours"]', '10');
     await page.fill('[data-ep-live-profile-form] [name="math_hours"]', '5');
     await page.click('[data-ep-live-save-profile]');
