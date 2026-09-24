@@ -8,7 +8,7 @@ const path = require('path');
   await page.evaluate(() => { window.i18n = { getLang: () => 'ru' }; window.iClubExamPrepHostInternal = {}; });
   await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.css') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.js') });
-  await page.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish4');
+  await page.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish5');
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
   await page.evaluate(() => {
@@ -98,37 +98,56 @@ const path = require('path');
   await page.waitForFunction(() => document.querySelector('.ep-flow-loading-compact') && !document.querySelector('.ep-flow-loader small'));
   assert(await page.evaluate(() => Boolean(document.querySelector('.ep-flow-loading-compact'))), 'general loading must be compact and visually active without technical helper text');
 
-  // Fresh-user component CTA: Progress UX owns the loader for this route.
-  // Interaction polish must not keep cloning the component home over the ready question.
+  // Fresh-user component CTA with the full production observer stack.
+  // Integrity inserts a persistent status banner on protected questions.
+  // Interaction polish must never treat that banner as disposable answer feedback.
   const fresh = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await fresh.setContent(`<!doctype html><html lang="ru"><body class="iclub-visual-v3"><div id="exam-prep-host-root"><section class="ep-host-shell ep-live"><section data-ep-component-home="P1"><button data-ep-component-primary="diagnostic">Продолжить входную проверку</button></section></section></div><div id="toast" class="toast" role="status"></div></body></html>`);
   await fresh.evaluate(() => {
     window.i18n = { getLang: () => 'ru' };
     window.iClubExamPrepProgressUxEnabled = true;
-    window.iClubExamPrepHostInternal = { lastCapabilities: { coreAccess: true, killSwitch: false, rolloutState: 'controlled_beta' } };
+    window.iClubExamPrep = { isOpen: () => true };
+    window.iClubExamPrepHostInternal = {
+      lastCapabilities: { coreAccess: true, killSwitch: false, rolloutState: 'controlled_beta' },
+      api: {
+        integrityStatus: async () => ({ok:true,data:{status:'clean',event_count:0}}),
+        weeklyPlan: async () => ({ok:true,data:{items:[]}}),
+        syllabusTracker: async () => ({ok:true,data:{areas:[]}})
+      }
+    };
     const root = document.querySelector('#exam-prep-host-root');
     root.querySelector('[data-ep-component-primary]').addEventListener('click', () => {
       root.innerHTML = '<section class="ep-host-shell ep-live"><div role="status">Загрузка…</div></section>';
       setTimeout(() => {
+        const session={session_id:'fresh-production-stack',session_type:'diagnostic',component_code:'P1',status:'active',items:[{reserve_role:'diagnostic',answered:false}]};
+        window.dispatchEvent(new CustomEvent('iclub:exam-prep-session',{detail:{session,language:'ru'}}));
         root.innerHTML = '<section class="ep-host-shell ep-live"><div class="ep-live-card"><div class="ep-live-head"><strong>Вопрос 1 / 5</strong></div><div class="ep-live-qtext">Готовый вопрос</div><div class="ep-live-options"><label><input type="radio" name="ep_live_answer">Ответ</label></div><button data-ep-live-submit>Отправить ответ</button></div></section>';
       }, 120);
     });
   });
   await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-progress-ux-stability.js') });
+  await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-learner-flow-ux.js') });
+  await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-integrity.js') });
   await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.js') });
-  await fresh.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish4');
+  await fresh.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish5');
   await fresh.click('[data-ep-component-primary="diagnostic"]');
   await fresh.waitForTimeout(40);
   assert(await fresh.locator('[data-ep-transition-hold="1"]').count() === 0, 'component diagnostic CTA must not install a transition-hold clone');
-  await fresh.waitForFunction(() => Boolean(document.querySelector('.ep-live-qtext')));
-  await fresh.waitForFunction(() => !document.querySelector('#exam-prep-host-root').dataset.epPuxLoading);
+  await fresh.waitForFunction(() => Boolean(document.querySelector('.ep-live-qtext')), null, { timeout: 5000 });
+  await fresh.waitForFunction(() => !document.querySelector('#exam-prep-host-root').dataset.epPuxLoading, null, { timeout: 5000 });
+  await fresh.waitForFunction(() => Boolean(document.querySelector('[data-ep-integrity-banner]')), null, { timeout: 5000 });
+  await fresh.waitForTimeout(250);
   state = await fresh.evaluate(() => ({
     question: document.querySelector('.ep-live-qtext')?.textContent || '',
     held: Boolean(document.querySelector('[data-ep-transition-hold="1"]')),
-    loading: document.querySelector('#exam-prep-host-root')?.dataset.epPuxLoading || null
+    loading: document.querySelector('#exam-prep-host-root')?.dataset.epPuxLoading || null,
+    integrityCount: document.querySelectorAll('[data-ep-integrity-banner]').length,
+    integrityText: document.querySelector('[data-ep-integrity-banner]')?.textContent || ''
   }));
   assert(state.question === 'Готовый вопрос', 'fresh-user diagnostic question must replace the loader');
   assert(state.held === false && state.loading === null, 'fresh-user diagnostic must not remain trapped behind a visual loader');
+  assert(state.integrityCount === 1, 'protected diagnostic must keep exactly one integrity banner without observer churn');
+  assert(state.integrityText.includes('оставайтесь в iClub'), 'integrity guidance must remain visible instead of being consumed as answer feedback');
   await fresh.close();
 
   await browser.close();

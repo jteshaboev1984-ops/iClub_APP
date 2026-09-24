@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "polish4";
+  const VERSION = "polish5";
   let observer = null;
   let reconcileQueued = false;
   let pendingVisual = null;
@@ -298,7 +298,7 @@
   function compactQuestionNotice() {
     const root = rootEl();
     if (!root || !root.querySelector("[data-ep-live-submit]") || root.querySelector(".ep-flow-pending-visual") || root.querySelector("[data-ep-transition-hold='1']")) return false;
-    const notice = root.querySelector(".ep-live-notice[role='status']");
+    const notice = root.querySelector(".ep-live-notice[role='status']:not([data-ep-integrity-banner])");
     if (!notice) return false;
     const raw = String(notice.textContent || "");
     notice.remove();
