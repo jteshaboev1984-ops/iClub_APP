@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "polish3";
+  const VERSION = "polish4";
   let observer = null;
   let reconcileQueued = false;
   let pendingVisual = null;
@@ -27,8 +27,6 @@
     "[data-ep-live-exit]",
     "[data-ep-live-home]",
     "[data-ep-live-save-profile]",
-    "[data-ep-component-primary]",
-    "[data-ep-component-back]",
     "[data-ep-exam-plan-save]",
     "[data-ep-exam-plan-cancel]",
     "[data-ep-profile-completion-save]",
