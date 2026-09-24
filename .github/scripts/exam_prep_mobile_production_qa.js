@@ -139,6 +139,10 @@ async function openExamPrep(page) {
     const e = document.querySelector('#subject-hub-exam-prep-entry');
     return e && !e.hidden && e.getAttribute('aria-hidden') !== 'true';
   }, null, { timeout: 20000 });
+
+  // The host shell loads before the live learner module. Wait for the wrapper
+  // so this QA captures the real learner UI instead of the temporary static host shell.
+  await page.waitForFunction(() => window.iClubExamPrep?.liveFlowVersion === 'p251live1', null, { timeout: 20000 });
   await page.click('[data-action="open-exam-prep"]');
   await page.waitForFunction(() => {
     const r = document.querySelector('#exam-prep-host-root');
