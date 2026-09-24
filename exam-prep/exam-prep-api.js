@@ -5,6 +5,7 @@
   const API_SCRIPT_SRC = typeof document !== "undefined" ? String(document.currentScript?.src || "") : "";
   const CONSENT_ACK = "I_CONSENT_TO_EXAM_PREP_CONTROLLED_BETA_V1";
   const REVOKE_ACK = "I_REVOKE_EXAM_PREP_CONTROLLED_BETA_V1";
+  let capabilitiesInFlight = null;
 
   function fail(reason, error = null) {
     return Object.freeze({ ok: false, reason: String(reason || "unknown"), error: error || null });
@@ -26,52 +27,99 @@
     try { window.dispatchEvent(new CustomEvent(name, { detail })); } catch (_) {}
   }
 
-  function loadControlledProgressUx() {
-    if (window.iClubExamPrepProgressUxEnabled === false) return;
+  async function loadControlledProgressUx() {
+    if (window.iClubExamPrepProgressUxEnabled === false) return false;
     const caps = root.lastCapabilities;
-    if (!caps || caps.coreAccess !== true || caps.killSwitch !== false || caps.rolloutState !== "controlled_beta") return;
-    if (!/^https?:/i.test(API_SCRIPT_SRC) || !/exam-prep-api\.js(?:\?|$)/.test(API_SCRIPT_SRC)) return;
+    if (!caps || caps.coreAccess !== true || caps.killSwitch !== false || caps.rolloutState !== "controlled_beta") return false;
+    if (!/^https?:/i.test(API_SCRIPT_SRC) || !/exam-prep-api\.js(?:\?|$)/.test(API_SCRIPT_SRC)) return false;
+
     window.iClubExamPrepProgressUxEnabled = true;
-    if (document.querySelector('script[data-exam-prep-progress-ux-boot]')) return;
-    const script = document.createElement("script");
-    script.dataset.examPrepProgressUxBoot = "true";
-    script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux1");
-    document.head.appendChild(script);
+    let script = document.querySelector('script[data-exam-prep-progress-ux-boot]');
+    let bootLoad = null;
+
+    if (!script) {
+      script = document.createElement("script");
+      script.dataset.examPrepProgressUxBoot = "true";
+      script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux3");
+      bootLoad = new Promise(resolve => {
+        script.addEventListener("load", () => resolve(true), { once: true });
+        script.addEventListener("error", () => resolve(false), { once: true });
+      });
+      document.head.appendChild(script);
+    } else if (typeof root.ensureWeeklyFlowAssets !== "function" &&
+               root.progressUxBootstrapStatus !== "ready" &&
+               root.progressUxBootstrapStatus !== "unavailable") {
+      bootLoad = new Promise(resolve => {
+        script.addEventListener("load", () => resolve(true), { once: true });
+        script.addEventListener("error", () => resolve(false), { once: true });
+        setTimeout(() => resolve(typeof root.ensureWeeklyFlowAssets === "function"), 5000);
+      });
+    }
+
+    if (window.iClubExamPrepWeeklyFlowEnabled !== true) return true;
+    if (bootLoad) await bootLoad;
+
+    const ensureWeekly = root.ensureWeeklyFlowAssets;
+    if (typeof ensureWeekly !== "function") {
+      root.weeklyFlowBootstrapStatus = "unavailable";
+      window.iClubExamPrepWeeklyFlowEnabled = false;
+      return false;
+    }
+
+    const ready = await ensureWeekly();
+    if (ready !== true) {
+      window.iClubExamPrepWeeklyFlowEnabled = false;
+      return false;
+    }
+    return true;
   }
 
   async function capabilities() {
-    // Weekly flow is always fail-closed on each capability refresh. The browser
-    // switch mirrors server enrollment; it is never a standalone authorization.
-    window.iClubExamPrepWeeklyFlowEnabled = false;
+    // Reuse one in-flight capability refresh so two host entry calls cannot
+    // temporarily flip the weekly switch while its optional assets are loading.
+    if (capabilitiesInFlight) return capabilitiesInFlight;
 
-    const result = await rpc("get_exam_prep_capabilities_v1");
-    if (!result.ok) return result;
-    const row = Array.isArray(result.data) ? result.data[0] : result.data;
-    if (!row || typeof row !== "object") return fail("capability_payload_missing");
-    const data = Object.freeze({
-      programKey: String(row.program_key || "math_as_p1_p5"),
-      rolloutState: String(row.rollout_state || "off"),
-      coreAccess: row.core_access === true,
-      aiAssist: row.ai_assist === true,
-      mentorCareEntitled: row.mentor_care_entitled === true,
-      mentorAssignmentActive: row.mentor_assignment_active === true,
-      mentorAuthority: row.mentor_authority === true,
-      killSwitch: row.kill_switch !== false
-    });
+    const request = (async () => {
+      // Weekly flow is always fail-closed on each fresh capability refresh. The
+      // browser switch mirrors server enrollment; it is never authorization.
+      window.iClubExamPrepWeeklyFlowEnabled = false;
 
-    if (data.coreAccess === true && data.killSwitch === false && data.rolloutState === "controlled_beta") {
-      const weekly = await rpc("get_my_exam_prep_weekly_flow_status_v1");
-      const weeklyRow = weekly.ok
-        ? (Array.isArray(weekly.data) ? weekly.data[0] : weekly.data)
-        : null;
-      window.iClubExamPrepWeeklyFlowEnabled =
-        weeklyRow?.contract_version === "weekly_flow_status_v1" &&
-        weeklyRow?.enabled === true;
+      const result = await rpc("get_exam_prep_capabilities_v1");
+      if (!result.ok) return result;
+      const row = Array.isArray(result.data) ? result.data[0] : result.data;
+      if (!row || typeof row !== "object") return fail("capability_payload_missing");
+      const data = Object.freeze({
+        programKey: String(row.program_key || "math_as_p1_p5"),
+        rolloutState: String(row.rollout_state || "off"),
+        coreAccess: row.core_access === true,
+        aiAssist: row.ai_assist === true,
+        mentorCareEntitled: row.mentor_care_entitled === true,
+        mentorAssignmentActive: row.mentor_assignment_active === true,
+        mentorAuthority: row.mentor_authority === true,
+        killSwitch: row.kill_switch !== false
+      });
+
+      if (data.coreAccess === true && data.killSwitch === false && data.rolloutState === "controlled_beta") {
+        const weekly = await rpc("get_my_exam_prep_weekly_flow_status_v1");
+        const weeklyRow = weekly.ok
+          ? (Array.isArray(weekly.data) ? weekly.data[0] : weekly.data)
+          : null;
+        window.iClubExamPrepWeeklyFlowEnabled =
+          weeklyRow?.contract_version === "weekly_flow_status_v1" &&
+          weeklyRow?.enabled === true;
+      }
+
+      root.lastCapabilities = data;
+      await loadControlledProgressUx();
+      return Object.freeze({ ok: true, data });
+    })();
+
+    capabilitiesInFlight = request;
+    try {
+      return await request;
+    } finally {
+      if (capabilitiesInFlight === request) capabilitiesInFlight = null;
     }
-
-    root.lastCapabilities = data;
-    loadControlledProgressUx();
-    return Object.freeze({ ok: true, data });
   }
 
   function normalizeInvitationItem(row) {
