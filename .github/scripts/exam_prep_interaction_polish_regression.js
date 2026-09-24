@@ -105,16 +105,28 @@ const path = require('path');
   await fresh.evaluate(() => {
     window.i18n = { getLang: () => 'ru' };
     window.iClubExamPrepProgressUxEnabled = true;
-    window.iClubExamPrepHostInternal = { lastCapabilities: { coreAccess: true, killSwitch: false, rolloutState: 'controlled_beta' } };
+    window.iClubExamPrep = { isOpen: () => true };
+    window.iClubExamPrepHostInternal = {
+      lastCapabilities: { coreAccess: true, killSwitch: false, rolloutState: 'controlled_beta' },
+      api: {
+        integrityStatus: async () => ({ok:true,data:{status:'clean',event_count:0}}),
+        weeklyPlan: async () => ({ok:true,data:{items:[]}}),
+        syllabusTracker: async () => ({ok:true,data:{areas:[]}})
+      }
+    };
     const root = document.querySelector('#exam-prep-host-root');
     root.querySelector('[data-ep-component-primary]').addEventListener('click', () => {
       root.innerHTML = '<section class="ep-host-shell ep-live"><div role="status">Загрузка…</div></section>';
       setTimeout(() => {
+        const session={session_id:'fresh-production-stack',session_type:'diagnostic',component_code:'P1',status:'active',items:[{reserve_role:'diagnostic',answered:false}]};
+        window.dispatchEvent(new CustomEvent('iclub:exam-prep-session',{detail:{session,language:'ru'}}));
         root.innerHTML = '<section class="ep-host-shell ep-live"><div class="ep-live-card"><div class="ep-live-head"><strong>Вопрос 1 / 5</strong></div><div class="ep-live-qtext">Готовый вопрос</div><div class="ep-live-options"><label><input type="radio" name="ep_live_answer">Ответ</label></div><button data-ep-live-submit>Отправить ответ</button></div></section>';
       }, 120);
     });
   });
   await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-progress-ux-stability.js') });
+  await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-learner-flow-ux.js') });
+  await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-integrity.js') });
   await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.js') });
   await fresh.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish4');
   await fresh.click('[data-ep-component-primary="diagnostic"]');
