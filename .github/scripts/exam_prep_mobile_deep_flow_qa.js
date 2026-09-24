@@ -736,17 +736,41 @@ async function attemptCorrectionFlow(page) {
     const label = String(await action.innerText()).trim();
     await action.click();
 
-    await page.waitForFunction(() => {
-      const visible = el => {
-        if (!el) return false;
-        const cs = getComputedStyle(el);
-        const r = el.getBoundingClientRect();
-        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
-          r.width > 0 && r.height > 0;
-      };
-      return Array.from(document.querySelectorAll('[data-ep-live-submit]')).some(el => visible(el) && !el.disabled) ||
-        Array.from(document.querySelectorAll('.ep-live-error[role="alert"]')).some(visible);
-    }, null, { timeout: 30000 });
+    try {
+      await page.waitForFunction(() => {
+        const visible = el => {
+          if (!el) return false;
+          const cs = getComputedStyle(el);
+          const r = el.getBoundingClientRect();
+          return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+            r.width > 0 && r.height > 0;
+        };
+        return Array.from(document.querySelectorAll('[data-ep-live-submit]')).some(el => visible(el) && !el.disabled) ||
+          Array.from(document.querySelectorAll('.ep-live-error[role="alert"]')).some(visible);
+      }, null, { timeout: 30000 });
+    } catch (error) {
+      const snapshot = await page.evaluate(() => {
+        const root = document.querySelector('#exam-prep-host-root');
+        return {
+          text: String(root?.innerText || '').trim().slice(0, 3000),
+          html: String(root?.innerHTML || '').slice(0, 7000),
+          transitionHold: Boolean(root?.querySelector('[data-ep-transition-hold="1"], .ep-flow-pending-visual')),
+          plan: Boolean(root?.querySelector('.ep-live-plan-item')),
+          progressPlan: Boolean(root?.querySelector('.ep-pux-week')),
+          correctionView: Boolean(root?.querySelector('[data-ep-views-screen]')),
+          liveSubmit: Boolean(root?.querySelector('[data-ep-live-submit]')),
+          learnerError: String(root?.querySelector('.ep-live-error[role="alert"]')?.textContent || '').trim()
+        };
+      }).catch(() => null);
+      const pending = Array.from(pendingRpcRequests.values()).map(x => ({
+        rpc: x.rpc,
+        ageMs: Date.now() - x.startedAt,
+        method: x.method
+      }));
+      report.notes.push({ correctionLaunchTimeout: { guard, label, snapshot, pendingRpc: pending } });
+      await shot(page, 'fatal-correction-launch-timeout', true).catch(() => null);
+      throw new Error('Correction launch timeout: ' + JSON.stringify({ guard, label, snapshot, pendingRpc: pending }) + ' :: ' + String(error?.message || error));
+    }
 
     const learnerError = await page.locator('.ep-live-error[role="alert"]:visible').first().textContent().catch(() => null);
     if (learnerError) throw new Error('Correction action rendered learner error: ' + String(learnerError).trim());
