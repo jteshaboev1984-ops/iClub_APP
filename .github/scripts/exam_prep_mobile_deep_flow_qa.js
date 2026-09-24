@@ -371,8 +371,30 @@ async function finishStage0(page) {
           const progress = await readDiagnostic(page);
           return { complete: progress?.stage0_complete === true, sessions, totalAnswers, progress };
         }
-        await next.click();
-        await page.waitForTimeout(450);
+
+        // The placement surface can be replaced by learner-flow decoration between
+        // locator resolution and Playwright's stability check. Click the currently
+        // visible enabled semantic action synchronously in the page instead of
+        // holding a stale element handle across that intentional rerender.
+        const clicked = await page.evaluate(() => {
+          const visible = el => {
+            if (!el) return false;
+            const cs = getComputedStyle(el);
+            const r = el.getBoundingClientRect();
+            return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+              r.width > 0 && r.height > 0;
+          };
+          const button = Array.from(document.querySelectorAll('[data-ep-placement-next]'))
+            .find(el => visible(el) && !el.disabled);
+          if (!button) return false;
+          button.click();
+          return true;
+        });
+        if (!clicked) {
+          await page.waitForTimeout(150);
+          continue;
+        }
+        await page.waitForTimeout(250);
         continue;
       }
     }
