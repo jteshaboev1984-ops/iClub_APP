@@ -50,11 +50,11 @@ jobs:
           node --check .github/scripts/exam_prep_flow_clarity_regression.js
           node --check .github/scripts/exam_prep_interaction_polish_regression.js
           grep -q 'const VERSION = "wave1ux3"' exam-prep/exam-prep-wave1-ux.js
-          grep -q 'const VERSION = "flowux3"' exam-prep/exam-prep-learner-flow-ux.js
+          grep -q 'const VERSION = "flowux4"' exam-prep/exam-prep-learner-flow-ux.js
           grep -q 'const VERSION = "polish5"' exam-prep/exam-prep-interaction-polish.js
           grep -q 'exam-prep-wave1-ux.js?v=wave1ux3' exam-prep/exam-prep-materials.js
           grep -q 'exam-prep-wave1-ux.css?v=wave1ux3' exam-prep/exam-prep-materials.js
-          grep -q 'exam-prep-learner-flow-ux.js?v=flowux3' exam-prep/exam-prep-materials.js
+          grep -q 'exam-prep-learner-flow-ux.js?v=flowux4' exam-prep/exam-prep-materials.js
           grep -q 'exam-prep-learner-flow-ux.css?v=flowux3' exam-prep/exam-prep-materials.js
           grep -q 'exam-prep-interaction-polish.js?v=polish5' exam-prep/exam-prep-materials.js
           grep -q 'exam-prep-interaction-polish.css?v=polish3' exam-prep/exam-prep-materials.js
