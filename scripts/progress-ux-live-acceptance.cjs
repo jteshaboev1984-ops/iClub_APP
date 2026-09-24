@@ -11,6 +11,12 @@ const descriptions = Object.freeze({
   'P1-TRI-01': 'Строить и использовать graphs of sin, cos и tan, включая simple transformations.',
   'P5-DAT-01': 'Выбирать и критиковать подходящее data representation с учётом типа данных и цели.'
 });
+const learnerDescriptions = Object.freeze({
+  'P1-CIR-01': 'Переводить градусы в радианы и обратно и использовать радианную меру угла.',
+  'P1-COO-02': 'Использовать разные формы уравнения прямой, расстояние между точками, середину отрезка, угловой коэффициент и точки пересечения.',
+  'P1-TRI-01': 'Строить и использовать графики sin, cos и tan, включая простые преобразования.',
+  'P5-DAT-01': 'Выбирать подходящий способ представления данных и оценивать его уместность для типа данных и цели.'
+});
 function progress(component) {
   const p1 = component === 'P1';
   const codes = p1 ? ['P1-CIR-01', 'P1-COO-02', 'P1-TRI-01'] : ['P5-DAT-01'];
@@ -53,7 +59,7 @@ const html = language => `<!doctype html><html lang="${language}"><head><meta na
       for (const css of ['style.css','visual/iclub-visual-v3.css','visual/iclub-premium-v3.css',
         'exam-prep/exam-prep-host.css','exam-prep/exam-prep-wave1-ux.css','exam-prep/exam-prep-progress-ux.css'])
         await page.addStyleTag({path:repo(css)});
-      await page.evaluate(({language,descriptions,plans,p1,p5}) => {
+      await page.evaluate(({language,descriptions,learnerDescriptions,plans,p1,p5}) => {
         window.iClubExamPrepProgressUxEnabled=true;
         window.i18n={getLang:()=>language};
         window.__plans=plans;
@@ -65,6 +71,10 @@ const html = language => `<!doctype html><html lang="${language}"><head><meta na
           }))});
         window.iClubExamPrepHostInternal={
           lastCapabilities:{coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'},
+          learnerCopy:{
+            skillRu:code=>learnerDescriptions[code]||'',
+            foundationRu:()=> ''
+          },
           api:{
             examProfile:async()=>({ok:true,data:{exam_series:'May/June 2027',target_grade:'A',
               total_student_hours_available:12,mathematics_hours_budget:6}}),
@@ -83,7 +93,7 @@ const html = language => `<!doctype html><html lang="${language}"><head><meta na
         };
         window.iClubExamPrep={open:async()=>true,back:()=>true,close:()=>true,
           isOpen:()=>true,syncSubjectHub:async()=>true,refreshCapabilities:async()=>true};
-      },{language,descriptions,plans:initialPlans(),p1:progress('P1'),p5:progress('P5')});
+      },{language,descriptions,learnerDescriptions,plans:initialPlans(),p1:progress('P1'),p5:progress('P5')});
       await page.addScriptTag({path:repo('exam-prep/exam-prep-live.js')});
       await page.addScriptTag({path:repo('exam-prep/exam-prep-progress-ux-model.js')});
       await page.addScriptTag({path:repo('exam-prep/exam-prep-progress-ux-ui.js')});
@@ -99,7 +109,13 @@ const html = language => `<!doctype html><html lang="${language}"><head><meta na
       assert.equal(await page.locator('[data-ep-live-plan-item]').count(),2,`${language}: keep original two actionable tasks`);
       assert.equal(await page.locator('.ep-pux-goal').count(),3,`${language}: preserve three frozen goals`);
       const firstGoal=await page.locator('.ep-pux-goal-title').first().innerText();
-      if(language==='ru') assert.ok(firstGoal.includes(descriptions['P1-CIR-01']), 'Actual canonical Russian skill description');
+      if(language==='ru') {
+        assert.ok(firstGoal.includes(learnerDescriptions['P1-CIR-01']), 'Learner-safe Russian skill description');
+        const planText=(await page.locator('.ep-pux-week').innerText()).toLowerCase();
+        for (const forbidden of ['degrees','radians','distance','midpoint','gradient','intersection','graphs of','simple transformations','data representation']) {
+          assert.equal(planText.includes(forbidden),false,`Russian learner plan must not expose canonical token: ${forbidden}`);
+        }
+      }
       if(language==='uz') assert.ok(firstGoal.includes('Radian o‘lchov va aylana'), 'Uzbek localized syllabus area');
       if(language==='en') assert.ok(firstGoal.includes('Circular measure'), 'English localized syllabus area');
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth),true,
@@ -136,6 +152,6 @@ const html = language => `<!doctype html><html lang="${language}"><head><meta na
       assert.deepEqual(errors,[],`${language} ${width}: no uncaught browser errors`);
       await page.close();
     }
-    console.log('Progress UX actual renderer acceptance: PASS (RU/UZ/EN x mobile/desktop, P1/P5 isolation, canonical skills, empty plan, current authorization binding)');
+    console.log('Progress UX actual renderer acceptance: PASS (RU learner-safe copy, UZ/EN localized areas, mobile/desktop, P1/P5 isolation, empty plan, current authorization binding)');
   } finally { await browser.close(); }
 })().catch(err=>{console.error(err);process.exit(1);});

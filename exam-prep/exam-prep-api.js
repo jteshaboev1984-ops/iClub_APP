@@ -35,7 +35,7 @@
     if (document.querySelector('script[data-exam-prep-progress-ux-boot]')) return;
     const script = document.createElement("script");
     script.dataset.examPrepProgressUxBoot = "true";
-    script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux1");
+    script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux2");
     document.head.appendChild(script);
   }
 
@@ -292,7 +292,7 @@
     // Explicit pre-set true is still supported for preview/tests. In production,
     // controlled-beta capabilities call loadControlledProgressUx() after auth.
     if (window.iClubExamPrepProgressUxEnabled === true) {
-      load('script[data-exam-prep-progress-ux-boot]', "examPrepProgressUxBoot", "exam-prep-progress-ux-boot.js?v=progressux1");
+      load('script[data-exam-prep-progress-ux-boot]', "examPrepProgressUxBoot", "exam-prep-progress-ux-boot.js?v=progressux2");
     }
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
