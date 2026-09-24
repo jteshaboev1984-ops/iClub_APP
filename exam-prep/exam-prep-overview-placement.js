@@ -143,9 +143,25 @@
   async function runNextAction(component, actionCode) {
     const ok = await dashboard();
     if (!ok) return;
-    const selector = actionCode === "continue_entry_check" ? `[data-ep-live-start="${component}"]` : `[data-ep-live-plan="${component}"]`;
-    const button = await waitFor(selector);
-    if (button) button.click();
+
+    if (actionCode === "continue_entry_check") {
+      // The current learner dashboard is component-first. Its legacy
+      // data-ep-live-start control is hidden compatibility markup and can be
+      // temporarily replaced/disabled by the interaction transition layer.
+      // Follow the visible learner route instead, then use the component home's
+      // authoritative diagnostic action.
+      const route = await waitFor(`[data-ep-live-open-component="${component}"]`, 120);
+      if (!route || route.disabled) return;
+      route.click();
+
+      const home = await waitFor(`[data-ep-component-home="${component}"]`, 120);
+      const primary = home?.querySelector('[data-ep-component-primary="diagnostic"]');
+      if (primary && !primary.disabled) primary.click();
+      return;
+    }
+
+    const button = await waitFor(`[data-ep-live-plan="${component}"]`);
+    if (button && !button.disabled) button.click();
   }
 
   function renderPlacementLoading(component) {
