@@ -36,6 +36,10 @@ const fixture = {
         if (/^exam-prep-progress-ux(?:-stability)?\.css$/.test(name)) {
           return route.fulfill({status:200,contentType:'text/css',body:fs.readFileSync(path.resolve('exam-prep',name),'utf8')});
         }
+        if (['exam-prep-weekly-flow-adapter.js','exam-prep-weekly-review-ui.js',
+             'exam-prep-weekly-adherence-ui.js'].includes(name)) {
+          return route.fulfill({status:200,contentType:'text/javascript',body:fs.readFileSync(path.resolve('exam-prep',name),'utf8')});
+        }
         if (/^exam-prep-[\w-]+\.js$/.test(name)) return route.fulfill({status:200,contentType:'text/javascript',body:'/* existing optional UI stub */'});
         throw new Error(`Unexpected dependency ${pathname}`);
       });
@@ -82,6 +86,57 @@ const fixture = {
     assert.equal(gated.requests.filter(name=>name==='exam-prep-progress-ux-boot.js').length,1,'Controlled-beta activation must load bootstrap once');
     assert.deepEqual(gated.errors,[]);
     await gated.page.close();
+
+    // Progress UX may be ready before server-side weekly enrollment is enabled.
+    // A later capability refresh must load the weekly bridge in the same page.
+    const late = await scenario(undefined);
+    await late.page.evaluate(async()=>{
+      const previous=window.sb.rpc;
+      window.sb.rpc=async(name,args)=>{
+        if(name==='get_exam_prep_capabilities_v1') return {data:{
+          program_key:'math_as_p1_p5',rollout_state:'controlled_beta',core_access:true,
+          ai_assist:false,mentor_care_entitled:false,mentor_assignment_active:false,
+          mentor_authority:false,kill_switch:false
+        },error:null};
+        if(name==='get_my_exam_prep_weekly_flow_status_v1') {
+          return {data:{contract_version:'weekly_flow_status_v1',enabled:false},error:null};
+        }
+        return previous(name,args);
+      };
+      await window.iClubExamPrepHostInternal.api.capabilities();
+    });
+    await late.page.waitForFunction(()=>window.iClubExamPrepHostInternal.progressUxBootstrapStatus==='ready');
+    assert.equal(await late.page.evaluate(()=>window.iClubExamPrepWeeklyFlowEnabled),false,
+      'Initial non-enrolled bootstrap must keep weekly flow OFF');
+    assert.equal(await late.page.evaluate(()=>window.iClubExamPrepHostInternal.weeklyFlowApi),undefined,
+      'Weekly adapter must not load before server enrollment');
+
+    await late.page.evaluate(async()=>{
+      const previous=window.sb.rpc;
+      window.sb.rpc=async(name,args)=>{
+        if(name==='get_my_exam_prep_weekly_flow_status_v1') {
+          return {data:{contract_version:'weekly_flow_status_v1',enabled:true},error:null};
+        }
+        return previous(name,args);
+      };
+      await window.iClubExamPrepHostInternal.api.capabilities();
+    });
+    await late.page.waitForFunction(()=>window.iClubExamPrepHostInternal.weeklyFlowApi?.version==='weekly_flow_adapter_v1' &&
+      window.iClubExamPrepHostInternal.weeklyReviewUi?.version==='learning_review_ui_v1');
+    assert.equal(await late.page.evaluate(()=>window.iClubExamPrepWeeklyFlowEnabled),true,
+      'Late server enrollment must become usable in the same page');
+    assert.equal(await late.page.evaluate(()=>window.iClubExamPrepHostInternal.weeklyFlowBootstrapStatus),'ready');
+    for (const name of ['exam-prep-weekly-flow-adapter.js','exam-prep-weekly-review-ui.js',
+      'exam-prep-weekly-adherence-ui.js']) {
+      assert.equal(late.requests.filter(n=>n===name).length,1,name+' must load exactly once after late enable');
+    }
+    await late.page.evaluate(()=>window.iClubExamPrepHostInternal.api.capabilities());
+    for (const name of ['exam-prep-weekly-flow-adapter.js','exam-prep-weekly-review-ui.js',
+      'exam-prep-weekly-adherence-ui.js']) {
+      assert.equal(late.requests.filter(n=>n===name).length,1,name+' must remain single-loaded after refresh');
+    }
+    assert.deepEqual(late.errors,[]);
+    await late.page.close();
 
     const on = await scenario(true);
     await on.page.waitForFunction(()=>window.iClubExamPrepHostInternal.progressUxBootstrapStatus==='ready');
