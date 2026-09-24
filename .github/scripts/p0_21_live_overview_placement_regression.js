@@ -45,8 +45,11 @@ const path = require('path');
       if (name === 'get_exam_prep_state_safe_v1') return { data: window.__state[args.p_component_code], error: null };
       if (name === 'get_exam_prep_overview_safe_v1') return { data: window.__overview[args.p_component_code], error: null };
       if (name === 'get_exam_prep_placement_result_safe_v1') return { data: window.__placement[args.p_component_code], error: null };
+      if (name === 'get_exam_prep_syllabus_tracker_safe_v1') return { data: { component_code: args.p_component_code, denominator_count: args.p_component_code === 'P1' ? 45 : 36, coverage_count: 0, coverage_pct: 0, open_correction_count: 0, areas: [] }, error: null };
+      if (name === 'get_exam_prep_correction_queue_safe_v1') return { data: { component_code: args.p_component_code, active_count: 0, retest_due_count: 0, cases: [], recent_resolved: [] }, error: null };
+      if (name === 'get_exam_prep_weekly_plan_safe_v2') return { data: { component_code: args.p_component_code, plan_id: null, items: [] }, error: null };
       if (name === 'start_exam_prep_next_diagnostic_safe_v1') return { data: { session_id: '00000000-0000-4000-8000-000000002101' }, error: null };
-      if (name === 'get_exam_prep_session_safe_v1') return { data: { session_id: '00000000-0000-4000-8000-000000002101', status: 'active', component_code: args.p_component_code || 'P1', session_type: 'diagnostic', total_items: 1, items: [{ item_order: 1, item_kind: 'machine', prompt: '2 + 2 = ?', options: ['3','4'], answered: false }] }, error: null };
+      if (name === 'get_exam_prep_session_safe_v1') return { data: { session_id: '00000000-0000-4000-8000-000000002101', status: 'active', component_code: 'P1', session_type: 'diagnostic', total_items: 1, items: [{ item_order: 1, item_kind: 'machine', text: '2 + 2 = ?', qtype: 'mcq', options: ['3','4'], answered: false }] }, error: null };
       return { data: null, error: { message: `unexpected rpc ${name}` } };
     }};
   });
@@ -112,6 +115,30 @@ const path = require('path');
   assert(placementPresentation.cardRadius === '14px', 'Placement card geometry changed during CSS centralization');
   assert(placementPresentation.rootWidth + 1 >= placementPresentation.scrollWidth, `Placement overflow: ${placementPresentation.scrollWidth} > ${placementPresentation.rootWidth}`);
 
+  // The placement CTA must follow the current component-first learner route.
+  // It must not depend on the hidden legacy data-ep-live-start compatibility button.
+  await page.click('[data-ep-placement-next]');
+  await page.waitForSelector('[data-ep-live-submit]', { state: 'visible', timeout: 5000 });
+  const afterContinue = await page.evaluate(() => ({
+    componentHomeVisible: Boolean(document.querySelector('[data-ep-component-home="P1"]')),
+    submitVisible: Boolean(document.querySelector('[data-ep-live-submit]')),
+    hiddenLegacyStart: Boolean(document.querySelector('.ep-live-compat-actions[hidden] [data-ep-live-start="P1"]'))
+  }));
+  assert(afterContinue.submitVisible, 'placement Continue must launch the next real P1 diagnostic block');
+  assert(!afterContinue.componentHomeVisible, 'placement Continue must not stop on the component home');
+  assert(afterContinue.hiddenLegacyStart === false, 'active diagnostic screen must not rely on hidden legacy start markup');
+
+  let callsAfterContinue = await page.evaluate(() => window.__calls);
+  const startCalls = callsAfterContinue.filter(x => x.name === 'start_exam_prep_next_diagnostic_safe_v1');
+  assert(startCalls.length === 1 && startCalls[0].args.p_component_code === 'P1', 'placement Continue must start exactly one P1 diagnostic session');
+
+  await page.evaluate(async () => {
+    await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'en' });
+  });
+  await page.waitForSelector('[data-ep-live-open-component="P1"]');
+
+  await page.evaluate(() => window.iClubExamPrepHostInternal.overviewPlacementViews.openPlacement('P1'));
+  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Entry check result'));
   await page.click('[data-ep-placement-back]');
   await page.waitForSelector('[data-ep-live-open-component="P5"]');
 

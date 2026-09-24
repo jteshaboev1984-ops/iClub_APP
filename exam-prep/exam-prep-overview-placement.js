@@ -140,12 +140,36 @@
     return null;
   }
 
+  async function waitForEnabled(selector, attempts = 400) {
+    for (let i = 0; i < attempts; i += 1) {
+      const node = document.querySelector(selector);
+      if (node && !node.disabled && !node.closest("[hidden]") && node.getAttribute("aria-hidden") !== "true") return node;
+      await new Promise(resolve => setTimeout(resolve, 25));
+    }
+    return null;
+  }
+
   async function runNextAction(component, actionCode) {
     const ok = await dashboard();
     if (!ok) return;
-    const selector = actionCode === "continue_entry_check" ? `[data-ep-live-start="${component}"]` : `[data-ep-live-plan="${component}"]`;
-    const button = await waitFor(selector);
-    if (button) button.click();
+
+    if (actionCode === "continue_entry_check") {
+      // The current learner dashboard is component-first. Its legacy
+      // data-ep-live-start control is hidden compatibility markup and can be
+      // temporarily replaced/disabled by the interaction transition layer.
+      // Follow the visible learner route instead, then use the component home's
+      // authoritative diagnostic action.
+      const route = await waitForEnabled(`[data-ep-live-open-component="${component}"]`);
+      if (!route) return;
+      route.click();
+
+      const primary = await waitForEnabled(`[data-ep-component-home="${component}"] [data-ep-component-primary="diagnostic"]`);
+      if (primary) primary.click();
+      return;
+    }
+
+    const button = await waitFor(`[data-ep-live-plan="${component}"]`);
+    if (button && !button.disabled) button.click();
   }
 
   function renderPlacementLoading(component) {
