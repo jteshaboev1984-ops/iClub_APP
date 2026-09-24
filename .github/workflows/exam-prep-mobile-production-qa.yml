@@ -1,4 +1,4 @@
-name: Exam Prep Mobile Production QA
+name: Exam Prep Mobile Preview QA
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  mobile-production-qa:
+  mobile-preview-qa:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -25,16 +25,16 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
 
-      - name: Run production mobile QA
+      - name: Run preview mobile QA
         env:
-          ICLUB_BASE_URL: https://i-club-app.vercel.app/
-          ICLUB_MOBILE_QA_OUT: mobile-qa-artifacts
+          ICLUB_BASE_URL: https://i-club-pe7wsd849-jasurbeks-projects-c5451f97.vercel.app/
+          ICLUB_MOBILE_QA_OUT: mobile-preview-qa-artifacts
         run: node .github/scripts/exam_prep_mobile_production_qa.js
 
-      - name: Upload mobile QA evidence
+      - name: Upload mobile preview QA evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: exam-prep-mobile-production-qa
-          path: mobile-qa-artifacts/
+          name: exam-prep-mobile-preview-qa
+          path: mobile-preview-qa-artifacts/
           retention-days: 7
