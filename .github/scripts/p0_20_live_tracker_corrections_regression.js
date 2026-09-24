@@ -152,7 +152,11 @@ const path = require('path');
   assert(visible.includes('Использовать дискриминант') && visible.includes('условия на параметр'), 'Russian correction queue must use learner-facing skill copy');
   assert(!visible.includes('discriminant') && !visible.includes('parameter conditions'), 'Russian correction queue must not expose internal mixed-language descriptions');
 
-  await page.evaluate(async () => window.iClubExamPrepHostInternal.learnerViews.openTracker('P5'));
+  await page.evaluate(async () => {
+    document.documentElement.lang = 'en';
+    window.i18n = { getLang: () => 'en' };
+    await window.iClubExamPrepHostInternal.learnerViews.openTracker('P5');
+  });
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('0 / 36'));
   visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('Representation of data'), 'P5 tracker must use the separate five-area syllabus map');
