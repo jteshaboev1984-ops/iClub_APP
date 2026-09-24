@@ -140,6 +140,15 @@
     return null;
   }
 
+  async function waitForEnabled(selector, attempts = 400) {
+    for (let i = 0; i < attempts; i += 1) {
+      const node = document.querySelector(selector);
+      if (node && !node.disabled && !node.closest("[hidden]") && node.getAttribute("aria-hidden") !== "true") return node;
+      await new Promise(resolve => setTimeout(resolve, 25));
+    }
+    return null;
+  }
+
   async function runNextAction(component, actionCode) {
     const ok = await dashboard();
     if (!ok) return;
@@ -150,13 +159,12 @@
       // temporarily replaced/disabled by the interaction transition layer.
       // Follow the visible learner route instead, then use the component home's
       // authoritative diagnostic action.
-      const route = await waitFor(`[data-ep-live-open-component="${component}"]`, 120);
-      if (!route || route.disabled) return;
+      const route = await waitForEnabled(`[data-ep-live-open-component="${component}"]`);
+      if (!route) return;
       route.click();
 
-      const home = await waitFor(`[data-ep-component-home="${component}"]`, 120);
-      const primary = home?.querySelector('[data-ep-component-primary="diagnostic"]');
-      if (primary && !primary.disabled) primary.click();
+      const primary = await waitForEnabled(`[data-ep-component-home="${component}"] [data-ep-component-primary="diagnostic"]`);
+      if (primary) primary.click();
       return;
     }
 
