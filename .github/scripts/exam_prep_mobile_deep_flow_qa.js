@@ -304,7 +304,7 @@ async function assertLearnerSafeCopy(page, label) {
       sample: text.trim().slice(0, 1800)
     };
   });
-  if (state.forbidden.length) throw new Error(label + ' exposes mixed-language canonical copy: ' + state.forbidden.join(', '));
+  if (state.forbidden.length) throw new Error(label + ' exposes mixed-language canonical copy: ' + state.forbidden.join(', ') + ' | sample=' + state.sample);
   return state;
 }
 
@@ -391,9 +391,9 @@ async function attemptCorrectionFlow(page) {
   report.weeklyPlan = {
     data: await readPlan(page),
     audit: await audit(page, 'weekly plan'),
-    copy: await assertLearnerSafeCopy(page, 'weekly plan'),
     screenshot: await shot(page, '02-weekly-plan', true)
   };
+  report.weeklyPlan.copy = await assertLearnerSafeCopy(page, 'weekly plan');
 
   await goDashboardThenP1(page);
   const queue = await makeCorrection(page);
