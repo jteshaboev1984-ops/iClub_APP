@@ -277,14 +277,13 @@ async function finishStage0(page) {
   let totalAnswers = 0;
   let sessions = 0;
   for (let guard = 0; guard < 40; guard += 1) {
-    const progress = await readDiagnostic(page);
-    if (progress?.stage0_complete === true) {
-      return { complete: true, sessions, totalAnswers, progress };
-    }
-
+    // Do not probe diagnosticProgress while the learner UI is still committing
+    // answers/finalization. The real app already owns those writes and route
+    // transitions; an extra concurrent read can contend with reconciliation.
     if (await page.locator('[data-ep-live-submit]:visible:not([disabled])').count()) {
       totalAnswers += await completeVisibleSession(page, 'diagnostic', 30);
       sessions += 1;
+      await page.waitForTimeout(350);
       continue;
     }
 
@@ -301,6 +300,7 @@ async function finishStage0(page) {
       const primary = page.locator('[data-ep-component-primary]:visible:not([disabled])').first();
       const kind = await primary.getAttribute('data-ep-component-primary');
       if (kind !== 'diagnostic') {
+        await page.waitForTimeout(300);
         const refreshed = await readDiagnostic(page);
         if (refreshed?.stage0_complete === true) return { complete: true, sessions, totalAnswers, progress: refreshed };
         throw new Error('Stage0 incomplete but component primary is ' + kind);
@@ -316,6 +316,12 @@ async function finishStage0(page) {
     }
 
     await page.waitForTimeout(500);
+  }
+
+  await page.waitForTimeout(400);
+  const finalProgress = await readDiagnostic(page);
+  if (finalProgress?.stage0_complete === true) {
+    return { complete: true, sessions, totalAnswers, progress: finalProgress };
   }
   throw new Error('P1 Stage0 did not converge in mobile deep QA');
 }
@@ -554,8 +560,16 @@ async function openCorrections(page) {
 }
 
 async function attemptCorrectionFlow(page) {
-  const action = page.locator('[data-ep-flow-correction-action]').first();
-  if (!(await action.count()) || await action.isDisabled()) {
+  await page.waitForFunction(() => {
+    return Array.from(document.querySelectorAll('[data-ep-flow-correction-action]')).some(button => {
+      const cs = getComputedStyle(button);
+      const r = button.getBoundingClientRect();
+      return !button.disabled && !button.hidden && cs.display !== 'none' &&
+        cs.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+    });
+  }, null, { timeout: 30000 }).catch(() => null);
+  const action = page.locator('[data-ep-flow-correction-action]:visible:not([disabled])').first();
+  if (!(await action.count())) {
     return { started: false, reason: 'no_enabled_correction_action', queue: await readQueue(page) };
   }
   const label = String(await action.innerText()).trim();
