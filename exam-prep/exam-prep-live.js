@@ -382,7 +382,15 @@
     // supplemental component data in parallel.
     const progressResult = await internal.api.diagnosticProgress(component);
     if (!progressResult?.ok) { state.busy = false; renderError(); return; }
-    const stateResult = await internal.api.getState(component);
+    // While Stage 0 is incomplete, the learner route is determined entirely by
+    // diagnostic progress. getState() rebuilds a much heavier derived projection
+    // that cannot change the Stage 0 action, so do not run it until screening is
+    // complete. This keeps the visible route identical while avoiding redundant
+    // projection work after every diagnostic section.
+    const stage0Complete = progressResult.data?.stage0_complete === true;
+    const stateResult = stage0Complete
+      ? await internal.api.getState(component)
+      : { ok: true, data: null };
     if (!stateResult?.ok) { state.busy = false; renderError(); return; }
     const [trackerResult, queueResult, planResult, recoveryResult] = await Promise.all([
       typeof internal.api.syllabusTracker === "function" ? internal.api.syllabusTracker(component).catch(() => null) : Promise.resolve(null),
@@ -479,16 +487,21 @@
     clearTimer();
     const root = rootEl(); if (!root) return; renderLoading();
 
-    // diagnosticProgress/getState are state-bearing reads: both rebuild the
-    // learner placement projection. Serializing P1/P5 prevents cross-request
-    // contention that can otherwise surface as transient 409/500 responses.
+    // During Stage 0 the component cards use only diagnostic screening
+    // progress. Defer the heavier derived-state rebuild until that component has
+    // completed screening; once complete, getState() remains authoritative for
+    // stage/coverage and later-route UI.
     const p1 = await internal.api.diagnosticProgress("P1");
     if (!p1?.ok) { renderError(); return; }
-    const s1 = await internal.api.getState("P1");
+    const s1 = p1.data?.stage0_complete === true
+      ? await internal.api.getState("P1")
+      : { ok: true, data: null };
     if (!s1?.ok) { renderError(); return; }
     const p5 = await internal.api.diagnosticProgress("P5");
     if (!p5?.ok) { renderError(); return; }
-    const s5 = await internal.api.getState("P5");
+    const s5 = p5.data?.stage0_complete === true
+      ? await internal.api.getState("P5")
+      : { ok: true, data: null };
     if (!s5?.ok) { renderError(); return; }
     state.progress.P1 = p1.data; state.progress.P5 = p5.data; state.componentState.P1 = s1.data; state.componentState.P5 = s5.data;
     const c = copy();
