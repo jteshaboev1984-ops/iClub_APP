@@ -908,7 +908,10 @@
 #exam-prep-host-root .ep-component-back {
   width: fit-content;
   max-width: 100%;
-  padding: 4px 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 0;
   border: 0;
   background: transparent;
   color: var(--primary, #2457d6);
@@ -1131,5 +1134,73 @@
 @media (prefers-reduced-motion: reduce) {
   #exam-prep-host-root .ep-component-area > summary::after {
     transition: none;
+  }
+}
+
+
+/* ===== EXAM PREP MOBILE UX v1 =====
+   Scoped to the Exam Prep root. No legacy Courses / Practice / Tours selectors. */
+@media (max-width: 520px) {
+  #exam-prep-host-root .ep-host-shell {
+    gap: 10px;
+    padding: 6px 0 20px;
+  }
+
+  #exam-prep-host-root .ep-live {
+    gap: 10px;
+  }
+
+  #exam-prep-host-root .ep-live-dashboard-intro {
+    gap: 8px;
+    padding: 2px 0 6px;
+  }
+
+  #exam-prep-host-root .ep-live-dashboard-title {
+    margin: 2px 0 4px;
+    font-size: 18px;
+  }
+
+  #exam-prep-host-root .ep-live-dashboard-text {
+    font-size: 12.5px;
+    line-height: 1.4;
+  }
+
+  #exam-prep-host-root .ep-live-dashboard-profile {
+    padding: 6px 8px;
+  }
+
+  #exam-prep-host-root .ep-live-question-card {
+    gap: 9px;
+    padding: 12px;
+  }
+
+  #exam-prep-host-root .ep-live-question-card .ep-live-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #exam-prep-host-root .ep-live-question-card .ep-live-qtext {
+    line-height: 1.45;
+  }
+
+  #exam-prep-host-root .ep-live-option {
+    min-height: 44px;
+    box-sizing: border-box;
+    align-items: center;
+    padding: 11px 12px;
+  }
+
+  #exam-prep-host-root .ep-live-btn,
+  #exam-prep-host-root .ep-materials-btn,
+  #exam-prep-host-root .ep-materials-action,
+  #exam-prep-host-root .ep-views-btn {
+    min-height: 44px;
+  }
+
+  #exam-prep-host-root [data-ep-integrity-banner] {
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.4;
   }
 }
