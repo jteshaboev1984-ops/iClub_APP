@@ -276,22 +276,44 @@ async function completeVisibleSession(page, strategy, maxItems = 30) {
 async function finishStage0(page) {
   let totalAnswers = 0;
   let sessions = 0;
+
   for (let guard = 0; guard < 40; guard += 1) {
-    // Do not probe diagnosticProgress while the learner UI is still committing
-    // answers/finalization. The real app already owns those writes and route
-    // transitions; an extra concurrent read can contend with reconciliation.
+    await waitForReadySubmitOrRoute(page, 45000);
+
     if (await page.locator('[data-ep-live-submit]:visible:not([disabled])').count()) {
-      totalAnswers += await completeVisibleSession(page, 'diagnostic', 30);
-      sessions += 1;
-      await page.waitForTimeout(350);
+      const answered = await completeVisibleSession(page, 'diagnostic', 30);
+      totalAnswers += answered;
+      if (answered > 0) sessions += 1;
+      // Let the app finish its own finalize -> diagnosticProgress -> getState
+      // sequence before the QA harness inspects the next route. The harness
+      // must not create a second state-rebuilding RPC in parallel.
+      await page.waitForFunction(() => {
+        const visible = el => {
+          if (!el) return false;
+          const cs = getComputedStyle(el);
+          const r = el.getBoundingClientRect();
+          return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+            r.width > 0 && r.height > 0;
+        };
+        return !Array.from(document.querySelectorAll('[data-ep-live-submit]')).some(el => visible(el) && !el.disabled) &&
+          (Array.from(document.querySelectorAll('[data-ep-component-home="P1"]')).some(visible) ||
+           Array.from(document.querySelectorAll('[data-ep-live-component="P1"]')).some(visible) ||
+           Array.from(document.querySelectorAll('[data-ep-placement-screen]')).some(visible) ||
+           Array.from(document.querySelectorAll('[data-ep-flow-completion]')).some(visible));
+      }, null, { timeout: 45000 });
       continue;
     }
 
     if (await page.locator('[data-ep-placement-screen]:visible').count()) {
-      const next = page.locator('[data-ep-placement-next]:visible:not([disabled])');
+      const next = page.locator('[data-ep-placement-next]:visible:not([disabled])').first();
       if (await next.count()) {
+        const label = String(await next.innerText()).trim();
+        if (/Разобрать ошибку|Work on a correction|Xato ustida ishlash/i.test(label)) {
+          const progress = await readDiagnostic(page);
+          return { complete: progress?.stage0_complete === true, sessions, totalAnswers, progress };
+        }
         await next.click();
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(450);
         continue;
       }
     }
@@ -300,10 +322,8 @@ async function finishStage0(page) {
       const primary = page.locator('[data-ep-component-primary]:visible:not([disabled])').first();
       const kind = await primary.getAttribute('data-ep-component-primary');
       if (kind !== 'diagnostic') {
-        await page.waitForTimeout(300);
-        const refreshed = await readDiagnostic(page);
-        if (refreshed?.stage0_complete === true) return { complete: true, sessions, totalAnswers, progress: refreshed };
-        throw new Error('Stage0 incomplete but component primary is ' + kind);
+        const progress = await readDiagnostic(page);
+        return { complete: progress?.stage0_complete === true, sessions, totalAnswers, progress };
       }
       await primary.click();
       await waitForReadySubmitOrRoute(page, 30000);
@@ -315,13 +335,12 @@ async function finishStage0(page) {
       continue;
     }
 
-    await page.waitForTimeout(500);
-  }
+    if (await page.locator('[data-ep-flow-completion]:visible').count()) {
+      await goDashboardThenP1(page);
+      continue;
+    }
 
-  await page.waitForTimeout(400);
-  const finalProgress = await readDiagnostic(page);
-  if (finalProgress?.stage0_complete === true) {
-    return { complete: true, sessions, totalAnswers, progress: finalProgress };
+    await page.waitForTimeout(500);
   }
   throw new Error('P1 Stage0 did not converge in mobile deep QA');
 }
@@ -560,26 +579,75 @@ async function openCorrections(page) {
 }
 
 async function attemptCorrectionFlow(page) {
-  await page.waitForFunction(() => {
-    return Array.from(document.querySelectorAll('[data-ep-flow-correction-action]')).some(button => {
-      const cs = getComputedStyle(button);
-      const r = button.getBoundingClientRect();
-      return !button.disabled && !button.hidden && cs.display !== 'none' &&
-        cs.visibility !== 'hidden' && r.width > 0 && r.height > 0;
-    });
-  }, null, { timeout: 30000 }).catch(() => null);
-  const action = page.locator('[data-ep-flow-correction-action]:visible:not([disabled])').first();
-  if (!(await action.count())) {
-    return { started: false, reason: 'no_enabled_correction_action', queue: await readQueue(page) };
+  const steps = [];
+
+  for (let guard = 0; guard < 6; guard += 1) {
+    const queueBefore = await readQueue(page);
+    const casesBefore = Array.isArray(queueBefore?.cases) ? queueBefore.cases : [];
+    const waitingBefore = casesBefore.find(x => ['wait_delayed_retest','retest_content_wait'].includes(String(x?.process_step || '')));
+    const readyBefore = casesBefore.find(x => String(x?.process_step || '') === 'delayed_retest');
+    if (waitingBefore || readyBefore) {
+      return { started: steps.length > 0, steps, queue: queueBefore, reached: waitingBefore ? 'waiting' : 'ready' };
+    }
+
+    if (!(await page.locator('[data-ep-views-screen]:visible').count())) {
+      await goDashboardThenP1(page);
+      await openCorrections(page);
+    }
+
+    const action = page.locator('[data-ep-flow-correction-action]:visible:not([disabled])').first();
+    if (!(await action.count())) {
+      return { started: steps.length > 0, reason: 'no_enabled_correction_action', steps, queue: queueBefore };
+    }
+
+    const label = String(await action.innerText()).trim();
+    await action.click();
+
+    await page.waitForFunction(() => {
+      const visible = el => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      };
+      return Array.from(document.querySelectorAll('[data-ep-live-submit]')).some(el => visible(el) && !el.disabled) ||
+        Array.from(document.querySelectorAll('.ep-live-error[role="alert"]')).some(visible);
+    }, null, { timeout: 30000 });
+
+    const learnerError = await page.locator('.ep-live-error[role="alert"]:visible').first().textContent().catch(() => null);
+    if (learnerError) throw new Error('Correction action rendered learner error: ' + String(learnerError).trim());
+
+    const answered = await completeVisibleSession(page, 'diagnostic', 30);
+
+    await page.waitForFunction(() => {
+      const visible = el => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      };
+      return !Array.from(document.querySelectorAll('[data-ep-live-submit]')).some(el => visible(el) && !el.disabled);
+    }, null, { timeout: 45000 });
+
+    await page.waitForTimeout(350);
+    const queueAfter = await readQueue(page);
+    const planAfter = await readPlan(page);
+    steps.push({ label, answered, queue: queueAfter, plan: planAfter });
+
+    const casesAfter = Array.isArray(queueAfter?.cases) ? queueAfter.cases : [];
+    const waitingAfter = casesAfter.find(x => ['wait_delayed_retest','retest_content_wait'].includes(String(x?.process_step || '')));
+    const readyAfter = casesAfter.find(x => String(x?.process_step || '') === 'delayed_retest');
+    if (waitingAfter || readyAfter) {
+      return { started: true, steps, queue: queueAfter, plan: planAfter, reached: waitingAfter ? 'waiting' : 'ready' };
+    }
+
+    await goDashboardThenP1(page);
+    await openCorrections(page);
   }
-  const label = String(await action.innerText()).trim();
-  await action.click();
-  await page.waitForSelector('[data-ep-live-submit]', { state: 'visible', timeout: 30000 });
-  const answered = await completeVisibleSession(page, 'diagnostic', 30);
-  await page.waitForTimeout(900);
-  const queue = await readQueue(page);
-  const plan = await readPlan(page);
-  return { started: true, label, answered, queue, plan };
+
+  return { started: true, reason: 'correction_flow_guard_exhausted', steps, queue: await readQueue(page), plan: await readPlan(page) };
 }
 
 (async () => {
@@ -653,7 +721,9 @@ async function attemptCorrectionFlow(page) {
   const cases = Array.isArray(queueAfter?.cases) ? queueAfter.cases : [];
   const waiting = cases.find(x => ['wait_delayed_retest','retest_content_wait'].includes(String(x?.process_step || '')));
   const retestReady = cases.find(x => String(x?.process_step || '') === 'delayed_retest');
-  const planAfter = correctionFlow.plan || await readPlan(page);
+  const finalStep = Array.isArray(correctionFlow.steps) && correctionFlow.steps.length
+    ? correctionFlow.steps[correctionFlow.steps.length - 1] : null;
+  const planAfter = correctionFlow.plan || finalStep?.plan || await readPlan(page);
   const planItems = Array.isArray(planAfter?.items) ? planAfter.items : [];
   const futureRetest = planItems.find(x => x?.item_type === 'retest' && x?.status === 'pending' && x?.due_at && Date.parse(x.due_at) > Date.now());
 
