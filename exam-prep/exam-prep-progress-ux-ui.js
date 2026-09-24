@@ -125,7 +125,10 @@
       for (const area of (Array.isArray(tracker?.areas) ? tracker.areas : [])) {
         const skill = (Array.isArray(area.skills) ? area.skills : []).find(x => x?.skill_code === code);
         if (skill) {
-          if (lang() === 'ru' && typeof skill.description === 'string' && skill.description.trim()) return skill.description.trim();
+          if (lang() === 'ru') {
+            const learnerCopy = internal.learnerCopy?.skillRu?.(code);
+            if (learnerCopy) return String(learnerCopy);
+          }
           return localizedArea(area.official_syllabus_section) || c.other;
         }
       }
