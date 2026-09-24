@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p243integrity1";
+  const VERSION = "p243integrity2";
   const PROTECTED_TYPES = new Set(["diagnostic", "retest", "mixed", "timed", "paper"]);
   const PROTECTED_ROLES = new Set(["diagnostic", "retest", "mixed", "timed", "unseen"]);
   const DEDUPE_MS = 800;
@@ -21,19 +21,19 @@
   function text(language, status, strict) {
     const copy = {
       ru: {
-        clean: "Во время этой проверки оставайтесь в iClub. Переход в другую вкладку или приложение будет зафиксирован.",
+        clean: "Оставайтесь в iClub во время проверки. Выход из приложения будет зафиксирован.",
         warning: "Вы вышли из окна проверки. Это зафиксировано. Продолжайте работу в iClub.",
         review: "Зафиксировано несколько выходов из окна проверки. Попытка продолжится с отметкой для проверки.",
         strictReview: "Зафиксировано несколько выходов из окна проверки. Попытка сохранится, но не будет учитываться как сопоставимый экзаменационный результат."
       },
       uz: {
-        clean: "Ushbu tekshiruv vaqtida iClub oynasida qoling. Boshqa sahifa yoki ilovaga o‘tish qayd etiladi.",
+        clean: "Tekshiruv vaqtida iClub ichida qoling. Ilovadan chiqish qayd etiladi.",
         warning: "Siz tekshiruv oynasidan chiqdingiz. Bu qayd etildi. Ishni iClub ichida davom ettiring.",
         review: "Tekshiruv oynasidan bir necha marta chiqish qayd etildi. Urinish davom etadi va tekshiruv uchun belgilab qo‘yiladi.",
         strictReview: "Tekshiruv oynasidan bir necha marta chiqish qayd etildi. Urinish saqlanadi, ammo taqqoslanadigan imtihon natijasi sifatida hisobga olinmaydi."
       },
       en: {
-        clean: "Stay in iClub during this check. Switching to another tab or app will be recorded.",
+        clean: "Stay in iClub during this check. Leaving the app will be recorded.",
         warning: "You left the check window. This was recorded. Continue your work in iClub.",
         review: "Several exits from the check window were recorded. The attempt will continue with a review flag.",
         strictReview: "Several exits from the check window were recorded. The attempt will be saved but will not count as a comparable exam result."
