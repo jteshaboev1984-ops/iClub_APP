@@ -405,43 +405,41 @@ async function finishStage0(page) {
     }
 
     if (await page.locator('[data-ep-placement-screen]:visible').count()) {
-      const next = page.locator('[data-ep-placement-next]:visible:not([disabled])').first();
-      if (await next.count()) {
-        const label = String(await next.innerText()).trim();
-        if (/Разобрать ошибку|Work on a correction|Xato ustida ishlash/i.test(label)) {
-          const progress = await readDiagnostic(page);
-          return { complete: progress?.stage0_complete === true, sessions, totalAnswers, progress };
-        }
+      // Read the label and act on the same live DOM node atomically. The placement
+      // layer may rerender between Playwright locator operations, so keeping a
+      // locator across count() -> innerText() -> click() is intentionally avoided.
+      const placementAction = await page.evaluate(() => {
+        const visible = el => {
+          if (!el) return false;
+          const cs = getComputedStyle(el);
+          const r = el.getBoundingClientRect();
+          return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+            r.width > 0 && r.height > 0;
+        };
+        const button = Array.from(document.querySelectorAll('[data-ep-placement-next]'))
+          .find(el => visible(el) && !el.disabled && el.dataset.epQaClicked !== '1');
+        if (!button) return { found: false, label: '', clicked: false };
+        const label = String(button.textContent || '').trim();
+        const correction = /Разобрать ошибку|Work on a correction|Xato ustida ishlash/i.test(label);
+        if (correction) return { found: true, label, correction: true, clicked: false };
+        // Mark before click so the interaction layer's transition clone carries
+        // the marker too; the harness will not mistake that clone for a new action.
+        button.dataset.epQaClicked = '1';
+        button.click();
+        return { found: true, label, correction: false, clicked: true };
+      });
 
-        // The placement surface can be replaced by learner-flow decoration between
-        // locator resolution and Playwright's stability check. Click the currently
-        // visible enabled semantic action synchronously in the page instead of
-        // holding a stale element handle across that intentional rerender.
-        const clicked = await page.evaluate(() => {
-          const visible = el => {
-            if (!el) return false;
-            const cs = getComputedStyle(el);
-            const r = el.getBoundingClientRect();
-            return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
-              r.width > 0 && r.height > 0;
-          };
-          const button = Array.from(document.querySelectorAll('[data-ep-placement-next]'))
-            .find(el => visible(el) && !el.disabled && el.dataset.epQaClicked !== '1');
-          if (!button) return false;
-          // Mark before click so the interaction layer's transition clone carries
-          // the marker too; the harness will not mistake that clone for a new action.
-          button.dataset.epQaClicked = '1';
-          button.click();
-          return true;
-        });
-        if (!clicked) {
-          await page.waitForTimeout(150);
-          continue;
-        }
-        await page.waitForTimeout(80);
-        await waitForReadySubmitOrRoute(page, 45000);
+      if (placementAction?.correction) {
+        const progress = await readDiagnostic(page);
+        return { complete: progress?.stage0_complete === true, sessions, totalAnswers, progress };
+      }
+      if (!placementAction?.clicked) {
+        await page.waitForTimeout(150);
         continue;
       }
+      await page.waitForTimeout(80);
+      await waitForReadySubmitOrRoute(page, 45000);
+      continue;
     }
 
     if (await page.locator('[data-ep-component-home="P1"]:visible').count()) {
