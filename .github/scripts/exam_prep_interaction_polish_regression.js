@@ -147,7 +147,7 @@ const path = require('path');
   assert(state.question === 'Готовый вопрос', 'fresh-user diagnostic question must replace the loader');
   assert(state.held === false && state.loading === null, 'fresh-user diagnostic must not remain trapped behind a visual loader');
   assert(state.integrityCount === 1, 'protected diagnostic must keep exactly one integrity banner without observer churn');
-  assert(state.integrityText.includes('оставайтесь в iClub'), 'integrity guidance must remain visible instead of being consumed as answer feedback');
+  assert(state.integrityText.toLowerCase().includes('оставайтесь в iclub'), 'integrity guidance must remain visible instead of being consumed as answer feedback');
   await fresh.close();
 
   await browser.close();

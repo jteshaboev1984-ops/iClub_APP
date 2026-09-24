@@ -101,7 +101,7 @@ const { chromium } = require('playwright');
       assert.equal(await page.locator(root).getAttribute('data-ep-pux-loading'),'plan','goal counter must wait for enriched task titles');
       await page.evaluate(()=>{
         document.querySelectorAll('.ep-live-plan-item').forEach(row => {
-          row.dataset.epFlowPlan='flowux3';
+          row.dataset.epFlowPlan='flowux4';
           row.querySelector('strong').textContent='Final task title';
         });
       });

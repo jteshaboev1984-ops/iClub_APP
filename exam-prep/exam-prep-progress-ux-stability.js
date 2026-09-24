@@ -133,7 +133,7 @@
           String(el.querySelector('.ep-live-head strong')?.textContent || '').trim()));
       if (!card || !card.querySelector('.ep-pux-week, .ep-pux-error')) return false;
       const rows = Array.from(card.querySelectorAll('.ep-live-plan-item'));
-      return rows.every(row => row.dataset.epFlowPlan === 'flowux3');
+      return rows.every(row => row.dataset.epFlowPlan === 'flowux4');
     }
     if (mode === 'question') {
       if (view === 'completion') {

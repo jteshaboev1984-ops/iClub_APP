@@ -104,7 +104,7 @@ const html = lang => `<!doctype html><html lang="${lang}"><head><meta name="view
       assert.equal(await page.locator('.ep-pux-overview').count(),0,`${language}: compact route overview must not hydrate duplicate progress summaries`);
       await page.evaluate(() => document.querySelector('[data-ep-live-plan="P1"]').click());
       await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-goal').length===3);
-      await page.waitForFunction(()=>document.querySelector('.ep-live-plan-item')?.dataset.epFlowPlan==='flowux3');
+      await page.waitForFunction(()=>document.querySelector('.ep-live-plan-item')?.dataset.epFlowPlan==='flowux4');
       await page.click('[data-ep-live-plan-item="1"]');
       await page.waitForSelector('.ep-live-qtext');
       assert.equal(await page.locator('.ep-live-qtext').innerText(),'Convert 90° to radians.');

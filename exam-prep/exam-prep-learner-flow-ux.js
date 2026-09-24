@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "flowux3";
+  const VERSION = "flowux4";
   const trackerCache = new Map();
   let observer = null;
   let reconcileTimer = null;
@@ -293,7 +293,10 @@
   function humanSkill(meta) {
     const c = copy();
     if (!meta) return "";
-    if (language() === "ru" && meta.description) return String(meta.description);
+    if (language() === "ru") {
+      const learnerCopy = internal.learnerCopy?.skillRu?.(meta.skill_code);
+      if (learnerCopy) return String(learnerCopy);
+    }
     return `${c.skill} ${Number(meta.sequence_no || 0)}`;
   }
 
@@ -514,7 +517,7 @@
       const row = cases[index];
       if (!row) return;
       const meta = skillMap.get(String(row.skill_code || ""));
-      const description = language() === "ru" ? String(row.description || meta?.description || "") : "";
+      const description = humanSkill(meta);
       const sub = card.querySelector(".ep-views-sub");
       if (sub && description) {
         sub.innerHTML = `<span class="ep-flow-correction-label">${esc(c.whatToFix)}</span><strong class="ep-flow-correction-title">${esc(description)}</strong>`;
