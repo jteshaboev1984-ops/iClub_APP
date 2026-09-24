@@ -383,6 +383,37 @@ async function probeWeeklyFlow(page) {
   });
 }
 
+async function weeklyPlanPresentation(page) {
+  return page.evaluate(() => {
+    const visible = el => {
+      if (!el) return false;
+      const cs = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+        r.width > 0 && r.height > 0;
+    };
+    const panel = document.querySelector('.ep-pux-week');
+    const originals = Array.from(document.querySelectorAll('.ep-live-plan-item'));
+    const originalButtons = originals.map(row => row.querySelector('[data-ep-live-plan-item]')).filter(Boolean);
+    const goalActions = Array.from(document.querySelectorAll('.ep-pux-goal-action'));
+    const waitingGoals = Array.from(document.querySelectorAll('.ep-pux-goal-waiting'));
+    return {
+      progressUxEnabled: window.iClubExamPrepProgressUxEnabled === true,
+      panelVisible: visible(panel),
+      verified: panel?.dataset.epPuxPrimaryGoals === 'verified',
+      originalRows: originals.length,
+      boundOriginalRows: originals.filter(row => row.dataset.epFlowPlan === 'flowux4').length,
+      visibleOriginalRows: originals.filter(visible).length,
+      enabledOriginalButtons: originalButtons.filter(button => !button.disabled).length,
+      visibleEnabledOriginalButtons: originalButtons.filter(button => visible(button) && !button.disabled).length,
+      disabledOriginalButtons: originalButtons.filter(button => button.disabled).length,
+      visibleGoalActions: goalActions.filter(button => visible(button) && !button.disabled).length,
+      waitingGoals: waitingGoals.filter(visible).length,
+      panelText: String(panel?.textContent || '').trim().slice(0, 1800)
+    };
+  });
+}
+
 async function openWeeklyPlan(page) {
   const opened = await page.evaluate(async () => {
     const flow = window.iClubExamPrepHostInternal?.learnerFlowUx;
@@ -395,14 +426,56 @@ async function openWeeklyPlan(page) {
       if (b) b.click();
     });
   }
+
   await page.waitForFunction(() => {
-    return Boolean(document.querySelector('.ep-live-plan-item')) ||
-      Boolean(document.querySelector('.ep-live-error[role="alert"]'));
+    const root = document.querySelector('#exam-prep-host-root');
+    if (!root || root.hidden) return false;
+    if (root.querySelector('.ep-live-error[role="alert"]')) return true;
+    if (root.querySelector('.ep-pux-week')) return true;
+    return Array.from(root.querySelectorAll('.ep-live-plan-item')).some(row => {
+      const cs = getComputedStyle(row);
+      const r = row.getBoundingClientRect();
+      return !row.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+        r.width > 0 && r.height > 0;
+    });
   }, null, { timeout: 30000 });
+
   const errorText = await page.locator('.ep-live-error[role="alert"]').first().textContent().catch(() => null);
   if (errorText) throw new Error('Weekly plan rendered learner error: ' + String(errorText).trim());
-  await page.waitForSelector('.ep-live-plan-item', { state: 'visible', timeout: 30000 });
-  await page.waitForTimeout(400);
+
+  // Progress UX validates the exact server goal -> plan -> action binding
+  // asynchronously and then intentionally hides the native rows. Let that
+  // promotion settle before deciding which learner-facing CTA is authoritative.
+  await page.waitForTimeout(900);
+  const state = await weeklyPlanPresentation(page);
+
+  if (state.progressUxEnabled && state.panelVisible && state.verified) {
+    if (state.originalRows < 1 || state.boundOriginalRows !== state.originalRows) {
+      throw new Error('Verified Progress UX plan lost its guarded native bindings: ' + JSON.stringify(state));
+    }
+    if (state.visibleOriginalRows !== 0) {
+      throw new Error('Verified Progress UX plan still exposes duplicate native rows: ' + JSON.stringify(state));
+    }
+  } else if (state.visibleOriginalRows < 1) {
+    throw new Error('Weekly plan has no visible learner route: ' + JSON.stringify(state));
+  }
+  return state;
+}
+
+async function clickWeeklyAction(page) {
+  const state = await weeklyPlanPresentation(page);
+  if (state.panelVisible && state.verified) {
+    const action = page.locator('.ep-pux-goal-action:visible:not([disabled])').first();
+    if (!(await action.count())) return { clicked: false, route: 'progress-ux', state };
+    const label = String(await action.innerText()).trim();
+    await action.click();
+    return { clicked: true, route: 'progress-ux', label, state };
+  }
+  const action = page.locator('[data-ep-live-plan-item]:visible:not([disabled])').first();
+  if (!(await action.count())) return { clicked: false, route: 'native', state };
+  const label = String(await action.innerText()).trim();
+  await action.click();
+  return { clicked: true, route: 'native', label, state };
 }
 
 async function assertLearnerSafeCopy(page, label) {
@@ -437,11 +510,18 @@ async function goDashboardThenP1(page) {
 }
 
 async function makeCorrection(page) {
+  const initialQueue = await readQueue(page);
+  if (Number(initialQueue?.active_count || 0) > 0) {
+    report.notes.push({ correctionAlreadyOpenAfterDiagnostic: true, queue: initialQueue });
+    return initialQueue;
+  }
+
   for (let attempt = 1; attempt <= 3; attempt += 1) {
-    await openWeeklyPlan(page);
-    const enabled = page.locator('[data-ep-live-plan-item]:not([disabled])');
-    if (!(await enabled.count())) break;
-    await enabled.first().click();
+    const presentation = await openWeeklyPlan(page);
+    const action = await clickWeeklyAction(page);
+    report.notes.push({ correctionAttempt: attempt, presentation, action });
+    if (!action.clicked) break;
+
     await page.waitForSelector('[data-ep-live-submit]', { state: 'visible', timeout: 30000 });
     await completeVisibleSession(page, 'force-error', 30);
     await page.waitForTimeout(800);
@@ -519,9 +599,10 @@ async function attemptCorrectionFlow(page) {
     throw new Error('Weekly flow probe failed: ' + JSON.stringify(report.weeklyFlowProbe));
   }
 
-  await openWeeklyPlan(page);
+  const weeklyPresentation = await openWeeklyPlan(page);
   report.weeklyPlan = {
     data: await readPlan(page),
+    presentation: weeklyPresentation,
     audit: await audit(page, 'weekly plan'),
     screenshot: await shot(page, '02-weekly-plan', true)
   };
@@ -554,19 +635,47 @@ async function attemptCorrectionFlow(page) {
   const futureRetest = planItems.find(x => x?.item_type === 'retest' && x?.status === 'pending' && x?.due_at && Date.parse(x.due_at) > Date.now());
 
   if (waiting || futureRetest) {
-    await openWeeklyPlan(page);
-    const disabledRetest = page.locator('[data-ep-live-plan-item][disabled]').first();
+    const waitingPresentation = await openWeeklyPlan(page);
+    const retestPriority = Number(futureRetest?.priority_order || 0);
+    const retestUi = await page.evaluate((priority) => {
+      const visible = el => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      };
+      const nativeButton = priority > 0
+        ? document.querySelector(`[data-ep-live-plan-item="${priority}"]`)
+        : Array.from(document.querySelectorAll('[data-ep-live-plan-item]')).find(button => button.disabled);
+      const waitingGoals = Array.from(document.querySelectorAll('.ep-pux-goal-waiting')).filter(visible);
+      return {
+        nativeExists: Boolean(nativeButton),
+        nativeDisabled: Boolean(nativeButton?.disabled),
+        nativeVisible: visible(nativeButton),
+        verifiedProgressUx: document.querySelector('.ep-pux-week')?.dataset.epPuxPrimaryGoals === 'verified',
+        visibleWaitingGoals: waitingGoals.length,
+        visibleGoalActions: Array.from(document.querySelectorAll('.ep-pux-goal-action')).filter(visible).length,
+        waitingText: waitingGoals.map(x => String(x.textContent || '').trim()).join(' | ').slice(0, 1800)
+      };
+    }, retestPriority);
+
     report.delayedRetest = {
       state: 'waiting',
       case: waiting || null,
       futureRetest: futureRetest || null,
-      disabledButtonVisible: Boolean(await disabledRetest.count()),
+      presentation: waitingPresentation,
+      ui: retestUi,
       audit: await audit(page, 'delayed retest waiting plan'),
       copy: await assertLearnerSafeCopy(page, 'delayed retest waiting plan'),
       screenshot: await shot(page, '04-delayed-retest-waiting', true)
     };
-    if (futureRetest && !(await disabledRetest.count())) {
-      throw new Error('Future delayed retest exists but the mobile start button is not disabled');
+
+    if (futureRetest && (!retestUi.nativeExists || !retestUi.nativeDisabled)) {
+      throw new Error('Future delayed retest is not guarded by a disabled native action: ' + JSON.stringify(retestUi));
+    }
+    if (retestUi.verifiedProgressUx && retestUi.visibleWaitingGoals < 1) {
+      throw new Error('Delayed retest is guarded internally but the learner-facing waiting state is missing: ' + JSON.stringify(retestUi));
     }
   } else if (retestReady) {
     report.delayedRetest = { state: 'ready', case: retestReady };
