@@ -25,7 +25,7 @@
       if (document.querySelector(selector)) { reject(new Error('asset already loading without completion proof')); return; }
       const el = document.createElement('script');
       el.dataset[datasetKey] = 'true';
-      el.src = `${base}exam-prep-progress-ux-${name}.js?v=progressux2`;
+      el.src = `${base}exam-prep-progress-ux-${name}.js?v=${name === 'ui' ? 'progressux3' : 'progressux2'}`;
       el.async = false;
       el.onload = () => expected() && stillEnabled() ? resolve() : reject(new Error('asset not ready'));
       el.onerror = () => reject(new Error('asset unavailable'));
