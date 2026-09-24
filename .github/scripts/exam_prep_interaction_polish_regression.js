@@ -8,7 +8,7 @@ const path = require('path');
   await page.evaluate(() => { window.i18n = { getLang: () => 'ru' }; window.iClubExamPrepHostInternal = {}; });
   await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.css') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.js') });
-  await page.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish3');
+  await page.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish4');
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
   await page.evaluate(() => {
@@ -97,6 +97,39 @@ const path = require('path');
   });
   await page.waitForFunction(() => document.querySelector('.ep-flow-loading-compact') && !document.querySelector('.ep-flow-loader small'));
   assert(await page.evaluate(() => Boolean(document.querySelector('.ep-flow-loading-compact'))), 'general loading must be compact and visually active without technical helper text');
+
+  // Fresh-user component CTA: Progress UX owns the loader for this route.
+  // Interaction polish must not keep cloning the component home over the ready question.
+  const fresh = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await fresh.setContent(`<!doctype html><html lang="ru"><body class="iclub-visual-v3"><div id="exam-prep-host-root"><section class="ep-host-shell ep-live"><section data-ep-component-home="P1"><button data-ep-component-primary="diagnostic">Продолжить входную проверку</button></section></section></div><div id="toast" class="toast" role="status"></div></body></html>`);
+  await fresh.evaluate(() => {
+    window.i18n = { getLang: () => 'ru' };
+    window.iClubExamPrepProgressUxEnabled = true;
+    window.iClubExamPrepHostInternal = { lastCapabilities: { coreAccess: true, killSwitch: false, rolloutState: 'controlled_beta' } };
+    const root = document.querySelector('#exam-prep-host-root');
+    root.querySelector('[data-ep-component-primary]').addEventListener('click', () => {
+      root.innerHTML = '<section class="ep-host-shell ep-live"><div role="status">Загрузка…</div></section>';
+      setTimeout(() => {
+        root.innerHTML = '<section class="ep-host-shell ep-live"><div class="ep-live-card"><div class="ep-live-head"><strong>Вопрос 1 / 5</strong></div><div class="ep-live-qtext">Готовый вопрос</div><div class="ep-live-options"><label><input type="radio" name="ep_live_answer">Ответ</label></div><button data-ep-live-submit>Отправить ответ</button></div></section>';
+      }, 120);
+    });
+  });
+  await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-progress-ux-stability.js') });
+  await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.js') });
+  await fresh.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish4');
+  await fresh.click('[data-ep-component-primary="diagnostic"]');
+  await fresh.waitForTimeout(40);
+  assert(await fresh.locator('[data-ep-transition-hold="1"]').count() === 0, 'component diagnostic CTA must not install a transition-hold clone');
+  await fresh.waitForFunction(() => Boolean(document.querySelector('.ep-live-qtext')));
+  await fresh.waitForFunction(() => !document.querySelector('#exam-prep-host-root').dataset.epPuxLoading);
+  state = await fresh.evaluate(() => ({
+    question: document.querySelector('.ep-live-qtext')?.textContent || '',
+    held: Boolean(document.querySelector('[data-ep-transition-hold="1"]')),
+    loading: document.querySelector('#exam-prep-host-root')?.dataset.epPuxLoading || null
+  }));
+  assert(state.question === 'Готовый вопрос', 'fresh-user diagnostic question must replace the loader');
+  assert(state.held === false && state.loading === null, 'fresh-user diagnostic must not remain trapped behind a visual loader');
+  await fresh.close();
 
   await browser.close();
   console.log('Exam Prep interaction polish regression: GREEN');
