@@ -64,6 +64,11 @@ const path = require('path');
 
     window.iClubExamPrepHostInternal = {
       lastCapabilities: { coreAccess: true, killSwitch: false, rolloutState: 'controlled_beta' },
+      learnerCopy: {
+        skillRu(code) {
+          return code === 'P1-CIR-01' ? 'Переводить градусы в радианы и обратно и использовать радианную меру угла.' : '';
+        }
+      },
       api: {
         async syllabusTracker(component) { return { ok: true, data: { ...tracker, component_code: component } }; },
         async weeklyPlan(component) { return { ok: true, data: { ...currentPlan(), component_code: component } }; },
@@ -108,7 +113,7 @@ const path = require('path');
   await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-wave1-ux.css') });
   await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-learner-flow-ux.css') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-learner-flow-ux.js') });
-  await page.waitForFunction(() => window.iClubExamPrepHostInternal?.learnerFlowUx?.version === 'flowux3');
+  await page.waitForFunction(() => window.iClubExamPrepHostInternal?.learnerFlowUx?.version === 'flowux4');
 
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
@@ -118,18 +123,19 @@ const path = require('path');
       <div class="ep-views-card"><button class="ep-views-skill" data-ep-views-skill="P1-CIR-01"><span><strong>Навык 21</strong><span class="ep-views-skill-meta"> · Проверок: 2</span></span><span class="ep-views-badge">Формируется</span></button></div>
     </section>`;
   });
-  await page.waitForFunction(() => document.querySelector('[data-ep-views-skill] strong')?.textContent.includes('radians'));
+  await page.waitForFunction(() => document.querySelector('[data-ep-views-skill] strong')?.textContent.includes('градусы'));
   let state = await page.evaluate(() => ({
     title: document.querySelector('[data-ep-views-skill] strong')?.textContent,
     meta: document.querySelector('[data-ep-views-skill] .ep-views-skill-meta')?.textContent,
     back: document.querySelector('[data-ep-views-back]')?.textContent
   }));
-  assert(state.title.includes('degrees ↔ radians'), 'tracker must display canonical skill meaning as the primary label');
+  assert(state.title.includes('градусы') && state.title.includes('радианы'), 'tracker must display learner-facing Russian skill meaning as the primary label');
+  assert(!state.title.includes('degrees') && !state.title.includes('radians'), 'tracker must not expose mixed canonical wording');
   assert(state.meta.includes('Навык 21'), 'skill number may remain only as secondary metadata');
   assert(state.back === 'К подготовке', 'dashboard navigation must be named by destination, not generic Overview');
 
   await page.evaluate(() => window.__renderPlan());
-  await page.waitForFunction(() => document.querySelector('.ep-flow-task-name')?.textContent.includes('radians'));
+  await page.waitForFunction(() => document.querySelector('.ep-flow-task-name')?.textContent.includes('радианы'));
   state = await page.evaluate(() => ({
     type: document.querySelector('.ep-flow-task-type')?.textContent,
     name: document.querySelector('.ep-flow-task-name')?.textContent,
@@ -138,7 +144,8 @@ const path = require('path');
     back: document.querySelector('[data-ep-live-dashboard]')?.textContent
   }));
   assert(state.type === 'Разобрать ошибку', 'open correction must have a clear task type');
-  assert(state.name.includes('radians'), 'weekly plan must show which skill/error the learner is working on');
+  assert(state.name.includes('радианы'), 'weekly plan must show which skill/error the learner is working on');
+  assert(!state.name.includes('degrees') && !state.name.includes('radians'), 'weekly plan must not expose mixed canonical wording');
   assert(state.action === 'Начать разбор', 'weekly-plan CTA must describe the actual action');
   assert(state.intro.includes('трёх'), 'weekly plan must explain its priority role');
   assert(state.back === 'К подготовке', 'weekly-plan root navigation must say where it goes');
@@ -161,7 +168,8 @@ const path = require('path');
   }));
   assert(state.badgeTag === 'SPAN' && state.badge === 'Требует разбора', 'correction state must read as status, not a dead action');
   assert(state.action === 'Начать разбор', 'planned correction must expose a real button');
-  assert(state.title.includes('radians'), 'correction card must explain the exact skill/error');
+  assert(state.title.includes('радианы'), 'correction card must explain the exact skill/error');
+  assert(!state.title.includes('degrees') && !state.title.includes('radians'), 'correction card must not reintroduce mixed canonical wording');
   await page.click('[data-ep-flow-correction-action]');
   await page.waitForFunction(() => window.__startedPriority === 1);
   assert(await page.evaluate(() => window.__startedPriority) === 1, 'correction CTA must route to and start the matching governed weekly-plan item');
@@ -226,7 +234,8 @@ const path = require('path');
   }));
   assert(state.title === 'Разбор ошибки сохранён', 'correction completion needs a clear result state');
   assert(state.body.includes('Следующий шаг — закрепить этот навык'), 'completion must explain the correction cycle instead of silently claiming closure');
-  assert(state.next.includes('Закрепить после разбора') && state.next.includes('radians'), 'completion must name the next task and skill');
+  assert(state.next.includes('Закрепить после разбора') && state.next.includes('радианы'), 'completion must name the next task and skill');
+  assert(!state.next.includes('degrees') && !state.next.includes('radians'), 'completion must keep learner-facing copy');
   assert(state.action === 'Открыть следующий шаг', 'completion must offer the next action');
   assert(state.back === 'К подготовке', 'completion must keep a clear secondary route back to preparation');
 
