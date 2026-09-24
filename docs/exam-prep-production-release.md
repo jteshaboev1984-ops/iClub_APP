@@ -29,3 +29,15 @@ This marker intentionally changes no application behavior. It creates the distin
 The runtime fix serializes concurrent capability refreshes and makes the optional weekly-flow assets recoverable when server-side weekly enrollment becomes available after the initial Progress UX bootstrap. The presentation follow-up keeps Russian weekly goal titles on the existing learner-safe copy contract instead of exposing canonical mixed RU/EN descriptions.
 
 There are no Supabase schema or data writes in these changes, no learner-progress reset, no localStorage migration, and no changes to legacy Tours, Practice, ratings or certificates. Existing controlled-beta capability checks and the Exam Prep kill switch remain authoritative and fail closed.
+
+## 2026-09-24 Projection RPC serialization marker
+
+**Concurrency fix merge commit:** `f1ee946c3d80ea2d6fb682bae2f40138d1a8d91b`  
+**Isolated serialization regression:** Exam Prep profile recovery plan preservation run `35995504821` — SUCCESS  
+**Required PR #168 regression gates:** all reported workflows — SUCCESS
+
+This marker intentionally changes no application behavior. It creates the distinct production push required by the existing iClub Vercel deployment mechanism after the validated frontend concurrency fix was merged into `main`.
+
+The browser now orders only the Exam Prep RPCs whose nominal read paths rebuild learner projections: diagnostic progress, placement and derived state. This prevents competing Exam Prep surfaces in one browser context from rebuilding the same learner projection concurrently. The server contracts, academic rules and stored learner evidence remain unchanged.
+
+There is no Supabase migration or schema/data write in this release, no learner-progress reset, no localStorage migration, and no changes to legacy Tours, Practice, ratings or certificates. Existing controlled-beta access and fail-closed behavior remain authoritative.
