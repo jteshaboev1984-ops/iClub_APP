@@ -15,3 +15,17 @@ Progress UX v1 production schema was installed before this marker through three 
 The presentation layer is controlled-beta gated. It loads only after authenticated Exam Prep capabilities return `coreAccess=true`, `killSwitch=false`, and `rolloutState=controlled_beta`. Existing cohort/entitlement governance remains authoritative. This release does not expand the cohort and does not enable AI Assist or Mentor Care.
 
 Rollback remains non-destructive: disable through the existing Exam Prep kill switch / controlled-access boundary. Do not delete learner snapshots, sessions, evidence, corrections, weekly plans, Practice, Tours, ratings or certificates merely to disable the presentation layer.
+
+## 2026-09-24 Weekly-flow bootstrap + learner-copy hotfix marker
+
+**Weekly bootstrap merge commit:** `318e75f11b1fdf606cf2884d06bff6cfe382b3b3`  
+**Learner-copy follow-up merge commit:** `4a47e557c8f047108a08d38a41dcbe212e070ec9`  
+**Latest-main deep mobile flow:** GitHub Actions run `35990554223` — SUCCESS  
+**Weekly bootstrap regression suite:** all PR #166 required workflows — SUCCESS  
+**Progress UX learner-copy regression suite:** all PR #167 workflows — SUCCESS
+
+This marker intentionally changes no application behavior. It creates the distinct push required by the existing iClub Vercel production deployment mechanism after the validated runtime fixes were merged into `main`.
+
+The runtime fix serializes concurrent capability refreshes and makes the optional weekly-flow assets recoverable when server-side weekly enrollment becomes available after the initial Progress UX bootstrap. The presentation follow-up keeps Russian weekly goal titles on the existing learner-safe copy contract instead of exposing canonical mixed RU/EN descriptions.
+
+There are no Supabase schema or data writes in these changes, no learner-progress reset, no localStorage migration, and no changes to legacy Tours, Practice, ratings or certificates. Existing controlled-beta capability checks and the Exam Prep kill switch remain authoritative and fail closed.
