@@ -483,35 +483,39 @@ async function settleAfterStage0(page) {
       return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
         r.width > 0 && r.height > 0;
     };
-    if (Array.from(document.querySelectorAll('[data-ep-live-submit]')).some(visible)) return false;
-    const placement = Array.from(document.querySelectorAll('[data-ep-placement-screen]')).find(visible);
+
+    // A finalized Stage 0 may legitimately settle on placement, component home,
+    // completion, dashboard or the newly created weekly-plan surface. Do not
+    // force another navigation here: openWeeklyPlan() owns the next route and
+    // will navigate through the app's guarded learner flow itself.
+    if (Array.from(root.querySelectorAll('.ep-flow-pending-visual,[data-ep-transition-hold="1"]')).some(visible)) return false;
+    if (Array.from(root.querySelectorAll('[data-ep-live-submit]')).some(el => visible(el) && !el.disabled)) return false;
+
+    const placement = Array.from(root.querySelectorAll('[data-ep-placement-screen]')).find(visible);
     if (placement) {
-      const back = placement.querySelector('[data-ep-placement-back]');
       const loading = placement.querySelector('.ep-placement-card[role="status"]');
-      return visible(back) && !visible(loading);
+      return !visible(loading);
     }
-    return Array.from(document.querySelectorAll('[data-ep-component-home="P1"]')).some(visible) ||
-      Array.from(document.querySelectorAll('[data-ep-live-component="P1"]')).some(visible) ||
-      Array.from(document.querySelectorAll('[data-ep-flow-completion]')).some(visible) ||
-      Array.from(document.querySelectorAll('[data-ep-pux-primary-goals]')).some(visible) ||
-      Array.from(document.querySelectorAll('[data-ep-pux-goal-action]')).some(el => visible(el) && !el.disabled);
+
+    return Array.from(root.querySelectorAll('[data-ep-component-home="P1"]')).some(visible) ||
+      Array.from(root.querySelectorAll('[data-ep-live-component="P1"]')).some(visible) ||
+      Array.from(root.querySelectorAll('[data-ep-flow-completion]')).some(visible) ||
+      Array.from(root.querySelectorAll('[data-ep-pux-primary-goals]')).some(visible) ||
+      Array.from(root.querySelectorAll('[data-ep-pux-goal-action]')).some(el => visible(el) && !el.disabled);
   }, null, { timeout: 45000 });
 
-  if (await page.locator('[data-ep-placement-screen]:visible').count()) {
-    await page.waitForSelector('[data-ep-placement-back]', { state: 'visible', timeout: 30000 });
-    await page.locator('[data-ep-placement-back]:visible').click();
-    await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 30000 });
-  } else if (await page.locator('[data-ep-flow-completion]:visible').count()) {
-    const back = page.locator('[data-ep-live-dashboard]').first();
-    if (await back.count()) await back.click();
-    else await page.evaluate(async () => {
-      if (window.iClubExamPrep?.open) await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'ru' });
-    });
-    await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 30000 });
-  } else if (await page.locator('[data-ep-component-home="P1"]:visible').count()) {
-    await page.locator('[data-ep-component-back]:visible').click();
-    await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 30000 });
-  }
+  const settled = await page.evaluate(() => {
+    const root = document.querySelector('#exam-prep-host-root');
+    return {
+      placement: Boolean(root?.querySelector('[data-ep-placement-screen]')),
+      componentHome: Boolean(root?.querySelector('[data-ep-component-home="P1"]')),
+      dashboard: Boolean(root?.querySelector('[data-ep-live-component="P1"]')),
+      completion: Boolean(root?.querySelector('[data-ep-flow-completion]')),
+      weeklyPlan: Boolean(root?.querySelector('[data-ep-pux-primary-goals], [data-ep-pux-goal-action]'))
+    };
+  });
+  report.notes.push({ stage0SettledSurface: settled });
+  return settled;
 }
 
 async function probeWeeklyFlow(page) {
