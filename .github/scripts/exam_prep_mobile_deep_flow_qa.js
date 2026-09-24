@@ -264,8 +264,8 @@ async function completeVisibleSession(page, strategy, maxItems = 30) {
   let answered = 0;
   while (answered < maxItems) {
     await waitForReadySubmitOrRoute(page);
-    const submit = page.locator('[data-ep-live-submit]').first();
-    if (!(await submit.count()) || !(await submit.isVisible()) || !(await submit.isEnabled())) break;
+    const submit = page.locator('[data-ep-live-submit]:visible:not([disabled])').first();
+    if (!(await submit.count())) break;
     const didAnswer = await answerCurrent(page, strategy);
     if (!didAnswer) break;
     answered += 1;
@@ -282,14 +282,14 @@ async function finishStage0(page) {
       return { complete: true, sessions, totalAnswers, progress };
     }
 
-    if (await page.locator('[data-ep-live-submit]').count()) {
+    if (await page.locator('[data-ep-live-submit]:visible:not([disabled])').count()) {
       totalAnswers += await completeVisibleSession(page, 'diagnostic', 30);
       sessions += 1;
       continue;
     }
 
-    if (await page.locator('[data-ep-placement-screen]').count()) {
-      const next = page.locator('[data-ep-placement-next]');
+    if (await page.locator('[data-ep-placement-screen]:visible').count()) {
+      const next = page.locator('[data-ep-placement-next]:visible:not([disabled])');
       if (await next.count()) {
         await next.click();
         await page.waitForTimeout(500);
@@ -297,8 +297,8 @@ async function finishStage0(page) {
       }
     }
 
-    if (await page.locator('[data-ep-component-home="P1"]').count()) {
-      const primary = page.locator('[data-ep-component-primary]');
+    if (await page.locator('[data-ep-component-home="P1"]:visible').count()) {
+      const primary = page.locator('[data-ep-component-primary]:visible:not([disabled])').first();
       const kind = await primary.getAttribute('data-ep-component-primary');
       if (kind !== 'diagnostic') {
         const refreshed = await readDiagnostic(page);
@@ -306,7 +306,7 @@ async function finishStage0(page) {
         throw new Error('Stage0 incomplete but component primary is ' + kind);
       }
       await primary.click();
-      await page.waitForSelector('[data-ep-live-submit]', { state: 'visible', timeout: 30000 });
+      await waitForReadySubmitOrRoute(page, 30000);
       continue;
     }
 
@@ -324,29 +324,38 @@ async function settleAfterStage0(page) {
   await page.waitForFunction(() => {
     const root = document.querySelector('#exam-prep-host-root');
     if (!root || root.hidden) return false;
-    if (document.querySelector('[data-ep-live-submit]')) return false;
-    if (document.querySelector('[data-ep-placement-screen]')) {
-      return Boolean(document.querySelector('[data-ep-placement-back]')) &&
-        !document.querySelector('.ep-placement-card[role="status"]');
+    const visible = el => {
+      if (!el) return false;
+      const cs = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+        r.width > 0 && r.height > 0;
+    };
+    if (Array.from(document.querySelectorAll('[data-ep-live-submit]')).some(visible)) return false;
+    const placement = Array.from(document.querySelectorAll('[data-ep-placement-screen]')).find(visible);
+    if (placement) {
+      const back = placement.querySelector('[data-ep-placement-back]');
+      const loading = placement.querySelector('.ep-placement-card[role="status"]');
+      return visible(back) && !visible(loading);
     }
-    return Boolean(document.querySelector('[data-ep-component-home="P1"]')) ||
-      Boolean(document.querySelector('[data-ep-live-component="P1"]')) ||
-      Boolean(document.querySelector('[data-ep-flow-completion]'));
+    return Array.from(document.querySelectorAll('[data-ep-component-home="P1"]')).some(visible) ||
+      Array.from(document.querySelectorAll('[data-ep-live-component="P1"]')).some(visible) ||
+      Array.from(document.querySelectorAll('[data-ep-flow-completion]')).some(visible);
   }, null, { timeout: 45000 });
 
-  if (await page.locator('[data-ep-placement-screen]').count()) {
+  if (await page.locator('[data-ep-placement-screen]:visible').count()) {
     await page.waitForSelector('[data-ep-placement-back]', { state: 'visible', timeout: 30000 });
-    await page.locator('[data-ep-placement-back]').click();
+    await page.locator('[data-ep-placement-back]:visible').click();
     await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 30000 });
-  } else if (await page.locator('[data-ep-flow-completion]').count()) {
+  } else if (await page.locator('[data-ep-flow-completion]:visible').count()) {
     const back = page.locator('[data-ep-live-dashboard]').first();
     if (await back.count()) await back.click();
     else await page.evaluate(async () => {
       if (window.iClubExamPrep?.open) await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'ru' });
     });
     await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 30000 });
-  } else if (await page.locator('[data-ep-component-home="P1"]').count()) {
-    await page.locator('[data-ep-component-back]').click();
+  } else if (await page.locator('[data-ep-component-home="P1"]:visible').count()) {
+    await page.locator('[data-ep-component-back]:visible').click();
     await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 30000 });
   }
 }
