@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p251live1";
+  const VERSION = "p251live2";
   let attached = false;
 
   const state = {
@@ -119,7 +119,7 @@
     const c = copy();
     const head = options.compact === true
       ? ""
-      : `<div class="ep-live-head"><div><div class="ep-host-kicker">${esc(c.kicker)}</div><h2 class="ep-host-title">${esc(c.title)}</h2></div><div class="ep-live-safe">${esc(c.safe)}</div></div>`;
+      : `<div class="ep-live-head"><div><div class="ep-host-kicker">${esc(c.kicker)}</div><h2 class="ep-host-title">${esc(c.title)}</h2></div></div>`;
     return `<section class="ep-host-shell ep-live" aria-label="${esc(c.title)}">${head}${body}</section>`;
   }
   function renderLoading() { clearTimer(); const root = rootEl(); if (root) root.innerHTML = shell(`<div class="ep-live-card" role="status" aria-live="polite">${esc(copy().loading)}</div>`); }
@@ -434,7 +434,7 @@
     ].filter(Boolean);
     const profileLine = profileBits.join(" · ");
     const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section><div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`);
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section><div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
     state.notice = null;
     root.querySelectorAll("[data-ep-live-open-component]").forEach(card => card.addEventListener("click", () => openComponentHome(card.dataset.epLiveOpenComponent)));
     root.querySelectorAll("[data-ep-live-start]").forEach(b => b.addEventListener("click", () => startDiagnostic(b.dataset.epLiveStart)));
@@ -652,7 +652,7 @@
     } else answerControl = `<input class="ep-live-input" name="ep_live_text_answer" autocomplete="off" aria-label="${esc(c.submit)}">`;
     const timer = timed ? `<span class="ep-live-timer" data-ep-live-timer></span>` : "";
     const exit = timed ? `<button class="ep-live-btn secondary" type="button" data-ep-live-end>${esc(c.endAttempt)}</button>` : `<button class="ep-live-btn secondary" type="button" data-ep-live-exit>${esc(c.back)}</button>`;
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card"><div class="ep-live-head"><strong>${esc(c.question)} ${answered + 1} / ${total}</strong>${timer}</div><div class="ep-live-qtext">${esc(item.text || item.written_prompt || "")}</div>${answerControl}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-submit>${esc(c.submit)}</button>${exit}</div></div>`);
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card ep-live-question-card"><div class="ep-live-head"><strong>${esc(c.question)} ${answered + 1} / ${total}</strong>${timer}</div><div class="ep-live-qtext">${esc(item.text || item.written_prompt || "")}</div>${answerControl}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-submit>${esc(c.submit)}</button>${exit}</div></div>`, { compact: true });
     state.notice = null;
     root.querySelector('[data-ep-live-submit]')?.addEventListener('click', () => submitAnswer(item));
     root.querySelector('[data-ep-live-exit]')?.addEventListener('click', async () => {
