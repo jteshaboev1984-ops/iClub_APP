@@ -506,7 +506,7 @@ async function assertLearnerSafeCopy(page, label) {
 }
 
 async function goDashboardThenP1(page) {
-  const dashboardButton = page.locator('[data-ep-live-dashboard]').first();
+  const dashboardButton = page.locator('[data-ep-live-dashboard]:visible:not([disabled])').first();
   if (await dashboardButton.count()) {
     await dashboardButton.click();
   } else {
