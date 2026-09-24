@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p250views1";
+  const VERSION = "p250views2";
   let observer = null;
   let busy = false;
   let activeLanguage = "ru";
@@ -22,6 +22,120 @@
     "5.4 Discrete random variables": { ru: "Дискретные случайные величины", uz: "Diskret tasodifiy miqdorlar", en: "Discrete random variables" },
     "5.5 The normal distribution": { ru: "Нормальное распределение", uz: "Normal taqsimot", en: "The normal distribution" }
   });
+
+
+
+  /* Learner-facing Russian copy is intentionally separate from canonical source text.
+     The database keeps the versioned academic wording unchanged; this map only controls presentation. */
+  const LEARNER_SKILL_RU = Object.freeze({
+    "P1-QUA-01": "Приводить квадратный трёхчлен к форме полного квадрата и по этой форме определять вершину и форму графика.",
+    "P1-QUA-02": "Использовать дискриминант, чтобы определять число и тип действительных корней, в том числе находить условия на параметр.",
+    "P1-QUA-03": "Решать квадратные уравнения, осознанно выбирая разложение на множители, формулу корней или выделение полного квадрата.",
+    "P1-QUA-04": "Решать квадратные неравенства с корректным указанием границ интервалов.",
+    "P1-QUA-05": "Решать систему из одного линейного и одного квадратного уравнения.",
+    "P1-QUA-06": "Распознавать уравнения, которые становятся квадратными после замены выражения, и решать их.",
+    "P1-FUN-01": "Использовать понятия функции, области определения, области значений, взаимно однозначной функции, обратной функции и композиции функций.",
+    "P1-FUN-02": "Определять область значений функции с учётом заданного ограничения области определения.",
+    "P1-FUN-03": "Находить композиции функций и проверять совместимость областей определения и значений.",
+    "P1-FUN-04": "Проверять, является ли функция взаимно однозначной, и находить обратную функцию с корректной областью определения.",
+    "P1-FUN-05": "Связывать графики функции и обратной функции отражением относительно прямой y = x.",
+    "P1-FUN-06": "Выполнять горизонтальные и вертикальные сдвиги графиков.",
+    "P1-FUN-07": "Выполнять отражения графиков относительно координатных осей.",
+    "P1-FUN-08": "Выполнять растяжения и сжатия графиков, а также простые комбинации преобразований с отслеживанием положения точек.",
+    "P1-COO-01": "Получать уравнение прямой по точке и угловому коэффициенту или по двум точкам.",
+    "P1-COO-02": "Использовать формы уравнения прямой, а также формулы расстояния, середины отрезка, углового коэффициента и точки пересечения.",
+    "P1-COO-03": "Использовать условия параллельности и перпендикулярности прямых через их угловые коэффициенты.",
+    "P1-COO-04": "Интерпретировать и строить уравнение окружности, включая развёрнутую форму, центр и радиус.",
+    "P1-COO-05": "Решать задачи о пересечении прямой и окружности и задачи на геометрию окружности, сочетая алгебру и геометрию.",
+    "P1-COO-06": "Определять точки пересечения, касание и условия на параметры через корни уравнения и дискриминант.",
+    "P1-CIR-01": "Переводить градусы в радианы и обратно и использовать радианную меру угла.",
+    "P1-CIR-02": "Вычислять длину дуги и находить неизвестные r или θ.",
+    "P1-CIR-03": "Вычислять площадь сектора и решать составные задачи на сектор и сегмент окружности.",
+    "P1-TRI-01": "Строить и использовать графики sin, cos и tan, включая простые преобразования.",
+    "P1-TRI-02": "Использовать точные значения тригонометрических функций и симметрии связанных углов.",
+    "P1-TRI-03": "Находить главные значения обратных тригонометрических функций и правильно интерпретировать результат калькулятора.",
+    "P1-TRI-04": "Доказывать и применять базовые тригонометрические тождества.",
+    "P1-TRI-05": "Решать простые тригонометрические уравнения на заданном интервале без потери решений.",
+    "P1-SER-01": "Раскрывать (a + bx)^n при положительном целом n и находить заданные члены или коэффициенты.",
+    "P1-SER-02": "Распознавать арифметические и геометрические прогрессии по структуре их членов.",
+    "P1-SER-03": "Находить n-й член и сумму конечной арифметической прогрессии, включая обратные задачи.",
+    "P1-SER-04": "Находить n-й член и сумму конечной геометрической прогрессии, включая обратные задачи.",
+    "P1-SER-05": "Проверять сходимость геометрического ряда и находить сумму до бесконечности.",
+    "P1-DIF-01": "Интерпретировать производную как угловой коэффициент касательной и скорость изменения; использовать определение через предел в простом случае.",
+    "P1-DIF-02": "Дифференцировать степенные функции с рациональным показателем и их линейные комбинации.",
+    "P1-DIF-03": "Применять цепное правило к функциям вида (ax + b)^n.",
+    "P1-DIF-04": "Находить уравнения касательной и нормали в заданной точке.",
+    "P1-DIF-05": "Определять интервалы возрастания и убывания по знаку производной.",
+    "P1-DIF-06": "Решать задачи на скорость изменения и связанные скорости, корректно учитывая единицы и знаки.",
+    "P1-DIF-07": "Находить стационарные точки, определять их тип и использовать их для построения графика и оптимизации.",
+    "P1-INT-01": "Интегрировать степенные выражения и выражения вида (ax + b)^n, находя первообразные.",
+    "P1-INT-02": "Использовать постоянную интегрирования и условие в точке или на границе для восстановления функции.",
+    "P1-INT-03": "Вычислять определённые интегралы, включая простой случай с особой точкой на границе.",
+    "P1-INT-04": "Находить площадь между кривой и осями или прямыми, а также между двумя кривыми, разбивая область при необходимости.",
+    "P1-INT-05": "Находить объём тела вращения вокруг координатной оси с корректными пределами интегрирования.",
+    "P5-DAT-01": "Выбирать и критически оценивать подходящий способ представления данных с учётом типа данных и цели.",
+    "P5-DAT-02": "Строить и интерпретировать диаграммы «стебель и листья», сохраняя исходные значения.",
+    "P5-DAT-03": "Строить и интерпретировать диаграммы размаха, включая сравнение с учётом выбросов, если они заданы.",
+    "P5-DAT-04": "Строить и интерпретировать гистограммы с плотностью частоты и неравными интервалами классов.",
+    "P5-DAT-05": "Использовать график накопленной частоты для нахождения квартилей, процентилей и долей.",
+    "P5-DAT-06": "Вычислять и выбирать среднее арифметическое, медиану и моду для исходных или сгруппированных данных.",
+    "P5-DAT-07": "Вычислять и интерпретировать размах, межквартильный размах и стандартное отклонение.",
+    "P5-DAT-08": "Сравнивать наборы данных по положению и разбросу и формулировать вывод в контексте задачи.",
+    "P5-DAT-09": "Находить среднее и стандартное отклонение по исходным, сгруппированным или сводным данным с корректным использованием формул.",
+    "P5-DAT-10": "Работать с кодированными суммами и с объединением или разделением двух наборов данных.",
+    "P5-CNT-01": "Различать упорядоченные размещения и неупорядоченные выборки; применять факториал и правило произведения.",
+    "P5-CNT-02": "Считать перестановки различных объектов в строке или других упорядоченных позициях.",
+    "P5-CNT-03": "Считать размещения с повторяющимися или одинаковыми объектами.",
+    "P5-CNT-04": "Считать размещения с ограничениями: вместе, раздельно, на фиксированных позициях или по рядам.",
+    "P5-CNT-05": "Считать сочетания и выборки и решать задачи, где выбор сочетается с последующим размещением.",
+    "P5-PRO-01": "Строить пространство элементарных исходов и перечислять равновероятные исходы без пропусков и повторов.",
+    "P5-PRO-02": "Вычислять вероятность с использованием перестановок и сочетаний.",
+    "P5-PRO-03": "Применять правило сложения вероятностей, дополнение события и понятие несовместимых событий.",
+    "P5-PRO-04": "Применять правило умножения вероятностей и проверять или использовать независимость событий.",
+    "P5-PRO-05": "Вычислять и интерпретировать условную вероятность.",
+    "P5-PRO-06": "Строить и использовать деревья вероятностей для последовательных событий, включая выбор без возвращения.",
+    "P5-DRV-01": "Строить и проверять дискретное распределение вероятностей и находить неизвестную вероятность.",
+    "P5-DRV-02": "Вычислять и интерпретировать математическое ожидание E(X) дискретной случайной величины.",
+    "P5-DRV-03": "Вычислять дисперсию и стандартное отклонение дискретной случайной величины.",
+    "P5-BIN-01": "Распознавать биномиальную модель и проверять её условия: фиксированное n, два исхода, постоянное p и независимость испытаний.",
+    "P5-BIN-02": "Вычислять точечные, интервальные и накопленные биномиальные вероятности.",
+    "P5-BIN-03": "Использовать среднее и дисперсию биномиального распределения и решать обратные задачи на параметры.",
+    "P5-GEO-01": "Распознавать геометрическую модель как число испытаний до первого успеха и проверять её условия.",
+    "P5-GEO-02": "Вычислять точные и накопленные вероятности геометрического распределения, включая использование дополнения.",
+    "P5-GEO-03": "Использовать математическое ожидание геометрического распределения и восстанавливать параметр p.",
+    "P5-NOR-01": "Распознавать нормальную модель, использовать её обозначения и строить схему с μ и σ.",
+    "P5-NOR-02": "Стандартизовать нормально распределённую случайную величину и использовать таблицы или калькулятор с правильным выбором хвоста распределения.",
+    "P5-NOR-03": "Вычислять вероятности для интервалов и хвостов нормального распределения.",
+    "P5-NOR-04": "Находить квантили и критические значения нормального распределения по заданной вероятности.",
+    "P5-NOR-05": "Находить неизвестные μ и/или σ по условиям, заданным через вероятность или квантиль.",
+    "P5-NOR-06": "Применять нормальное приближение биномиального распределения, проверяя условия применимости и используя поправку на непрерывность."
+  });
+
+  const LEARNER_FOUNDATION_RU = Object.freeze({
+    "PR-ALG-01": "Точная арифметика, дроби, отношения и проценты.",
+    "PR-ALG-02": "Степени, корни, иррациональные корни и стандартная форма записи числа.",
+    "PR-ALG-03": "Раскрытие скобок, разложение на множители, преобразование алгебраических дробей и выражение одной переменной через другие.",
+    "PR-CAL-01": "Работа с научным калькулятором, округление и проверка порядка величины.",
+    "PR-CNT-01": "Факториал и базовое правило произведения.",
+    "PR-COM-01": "Читаемая запись решения, математическая нотация, контекст и единицы.",
+    "PR-EQN-01": "Линейные уравнения, неравенства и базовые системы уравнений.",
+    "PR-GRF-01": "Координаты, шкалы, чтение и построение стандартных графиков.",
+    "PR-SET-01": "Обозначения событий: P(A), объединение, пересечение и дополнение.",
+    "PR-STA-01": "Типы данных, таблицы частот и интервалы классов.",
+    "PR-TRI-01": "Теорема Пифагора и тригонометрия прямоугольного треугольника."
+  });
+
+  function learnerSkillDescription(skillCode) {
+    if (activeLanguage !== "ru") return "";
+    return LEARNER_SKILL_RU[String(skillCode || "")] || "";
+  }
+
+  function learnerPrerequisiteLabel(row, index) {
+    const c = copy();
+    if (activeLanguage !== "ru") return `${c.prerequisite} ${index + 1}`;
+    const code = String(row?.code || "");
+    return LEARNER_FOUNDATION_RU[code] || LEARNER_SKILL_RU[code] || `${c.prerequisite} ${index + 1}`;
+  }
 
   function copy() {
     if (activeLanguage === "uz") return {
@@ -220,8 +334,9 @@
     const root = rootEl(); if (!root) return; const c = copy();
     const state = data?.state || {}, prereqs = Array.isArray(data?.prerequisites) ? data.prerequisites : [], evidence = Array.isArray(data?.evidence_history) ? data.evidence_history : [], corrections = Array.isArray(data?.correction_history) ? data.correction_history : [];
     const title = `${c.skill} ${Number(data?.sequence_no || 0)}`;
-    const description = activeLanguage === "ru" && data?.description ? `<div class="ep-views-note">${esc(data.description)}</div>` : "";
-    const prereqRows = prereqs.length ? prereqs.map((row, index) => `<div class="ep-views-row"><span>${activeLanguage === "ru" && row?.label ? esc(row.label) : `${esc(c.prerequisite)} ${index + 1}`}</span><span class="ep-views-badge">${esc(prerequisiteStatus(row))}</span></div>`).join("") : `<div class="ep-views-note">${esc(c.noneYet)}</div>`;
+    const learnerDescription = learnerSkillDescription(data?.skill_code);
+    const description = learnerDescription ? `<div class="ep-views-note">${esc(learnerDescription)}</div>` : "";
+    const prereqRows = prereqs.length ? prereqs.map((row, index) => `<div class="ep-views-row"><span>${esc(learnerPrerequisiteLabel(row, index))}</span><span class="ep-views-badge">${esc(prerequisiteStatus(row))}</span></div>`).join("") : `<div class="ep-views-note">${esc(c.noneYet)}</div>`;
     const evidenceRows = evidence.length ? evidence.map(row => `<div class="ep-views-row"><span>${esc(evidenceLabel(row))}</span><small>${esc(formatDate(row?.created_at))}</small></div>`).join("") : `<div class="ep-views-note">${esc(c.noneYet)}</div>`;
     const correctionRows = corrections.length ? corrections.map(row => `<div class="ep-views-row"><span>${esc(row.status === "resolved" ? c.completedCorrection : c.needsWork)}</span><small>${row?.retest_due_at ? `${esc(c.due)}: ${esc(formatDate(row.retest_due_at))}` : ""}</small></div>`).join("") : `<div class="ep-views-note">${esc(c.noneYet)}</div>`;
     const resources = data?.resources || {};
@@ -251,7 +366,10 @@
   function renderCorrections(component, data) {
     const root = rootEl(); if (!root) return; const c = copy();
     const cases = Array.isArray(data?.cases) ? data.cases : [], resolved = Array.isArray(data?.recent_resolved) ? data.recent_resolved : [];
-    const rows = cases.length ? cases.map(row => `<div class="ep-views-card"><div class="ep-views-area-head"><strong>${esc(areaLabel(row.official_syllabus_section))}</strong><span class="ep-views-badge">${esc(correctionStepLabel(row.process_step))}</span></div>${activeLanguage === "ru" && row?.description ? `<div class="ep-views-sub">${esc(row.description)}</div>` : ""}${row?.retest_due_at ? `<div class="ep-views-note">${esc(c.due)}: ${esc(formatDate(row.retest_due_at, true))}</div>` : ""}</div>`).join("") : `<div class="ep-views-note">${esc(c.noCorrections)}</div>`;
+    const rows = cases.length ? cases.map(row => {
+      const learnerDescription = learnerSkillDescription(row?.skill_code);
+      return `<div class="ep-views-card"><div class="ep-views-area-head"><strong>${esc(areaLabel(row.official_syllabus_section))}</strong><span class="ep-views-badge">${esc(correctionStepLabel(row.process_step))}</span></div>${learnerDescription ? `<div class="ep-views-sub">${esc(learnerDescription)}</div>` : ""}${row?.retest_due_at ? `<div class="ep-views-note">${esc(c.due)}: ${esc(formatDate(row.retest_due_at, true))}</div>` : ""}</div>`;
+    }).join("") : `<div class="ep-views-note">${esc(c.noCorrections)}</div>`;
     const recent = resolved.length ? `<div class="ep-views-card"><strong>${esc(c.recentResolved)}</strong><div class="ep-views-list">${resolved.map(row => `<div class="ep-views-row"><span>${esc(areaLabel(row.official_syllabus_section))}</span><small>${esc(formatDate(row?.resolved_at))}</small></div>`).join("")}</div></div>` : "";
     const body = `<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.corrections)}</span><strong>${Number(data?.active_count || 0)}</strong></div><div class="ep-views-stat"><span>${esc(c.due)}</span><strong>${Number(data?.retest_due_count || 0)}</strong></div><div class="ep-views-stat"><span>${esc(c.recentResolved)}</span><strong>${resolved.length}</strong></div></div>${rows}${recent}<div class="ep-views-actions"><button class="ep-views-btn primary" type="button" data-ep-views-open-plan="${esc(component)}">${esc(c.openPlan)}</button></div>`;
     root.innerHTML = shell(component, c.corrections, c.queueIntro, body);
