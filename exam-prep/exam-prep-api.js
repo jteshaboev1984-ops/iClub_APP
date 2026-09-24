@@ -6,6 +6,17 @@
   const CONSENT_ACK = "I_CONSENT_TO_EXAM_PREP_CONTROLLED_BETA_V1";
   const REVOKE_ACK = "I_REVOKE_EXAM_PREP_CONTROLLED_BETA_V1";
   let capabilitiesInFlight = null;
+  let projectionRpcTail = Promise.resolve();
+
+  // Some learner-facing "reads" rebuild server-side projections. Multiple app
+  // surfaces can request them during the same transition, so keep those
+  // rebuilds ordered inside one browser context instead of letting the same
+  // learner/component projections compete with themselves in Postgres.
+  function serializeProjectionRpc(run) {
+    const request = projectionRpcTail.catch(() => undefined).then(run);
+    projectionRpcTail = request.then(() => undefined, () => undefined);
+    return request;
+  }
 
   function fail(reason, error = null) {
     return Object.freeze({ ok: false, reason: String(reason || "unknown"), error: error || null });
@@ -202,12 +213,18 @@
 
   const componentArg = componentCode => String(componentCode || "");
 
-  async function diagnosticProgress(componentCode) { return rpc("get_exam_prep_diagnostic_progress_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function diagnosticProgress(componentCode) {
+    return serializeProjectionRpc(() => rpc("get_exam_prep_diagnostic_progress_safe_v1", { p_component_code: componentArg(componentCode) }));
+  }
   async function startNextDiagnostic(componentCode, idempotencyKey) {
     return rpc("start_exam_prep_next_diagnostic_safe_v1", { p_component_code: componentArg(componentCode), p_idempotency_key: String(idempotencyKey || "") });
   }
-  async function getPlacement(componentCode = null) { return rpc("get_exam_prep_placement_safe_v1", { p_component_code: componentCode || null }); }
-  async function getState(componentCode) { return rpc("get_exam_prep_state_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function getPlacement(componentCode = null) {
+    return serializeProjectionRpc(() => rpc("get_exam_prep_placement_safe_v1", { p_component_code: componentCode || null }));
+  }
+  async function getState(componentCode) {
+    return serializeProjectionRpc(() => rpc("get_exam_prep_state_safe_v1", { p_component_code: componentArg(componentCode) }));
+  }
   async function overview(componentCode) { return rpc("get_exam_prep_overview_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function legacyReferenceSummary(componentCode) { return rpc("get_exam_prep_legacy_reference_summary_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function placementResult(componentCode) { return rpc("get_exam_prep_placement_result_safe_v1", { p_component_code: componentArg(componentCode) }); }

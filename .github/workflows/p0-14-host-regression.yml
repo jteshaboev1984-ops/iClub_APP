@@ -70,7 +70,7 @@ jobs:
           grep -q 'id="subject-hub-exam-prep-entry"[^>]*hidden[^>]*aria-hidden="true"' index.html
           grep -q 'id="exam-prep-host-root"[^>]*hidden[^>]*aria-hidden="true"' index.html
           grep -q 'data-action="open-exam-prep"' index.html
-          grep -Eq 'exam-prep/exam-prep-api[.]js[?]v=(p014h1|p209map1|p210materials1|p213placement1|p213placement2|p213placement3|p214weeklybootstrap1)' index.html
+          grep -Eq 'exam-prep/exam-prep-api[.]js[?]v=(p014h1|p209map1|p210materials1|p213placement1|p213placement2|p213placement3|p214projection1)' index.html
           grep -q 'exam-prep/exam-prep-host.js?v=p014h1' index.html
           grep -q 'exam-prep/exam-prep-host.css?v=p014h2' index.html
           grep -q 'exam-prep-live.js?v=p252home3' exam-prep/exam-prep-api.js

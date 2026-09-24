@@ -7,6 +7,7 @@ on:
       - 'scripts/weekly-flow-profile-recovery-regression.cjs'
       - 'scripts/weekly-flow-profile-recovery-browser.cjs'
       - 'exam-prep/exam-prep-api.js'
+      - '.github/scripts/exam_prep_projection_rpc_serialization_regression.js'
       - 'exam-prep/exam-prep-recovery.js'
       - 'exam-prep/exam-prep-exam-map.js'
       - '.github/workflows/exam-prep-weekly-profile-recovery.yml'
@@ -17,6 +18,7 @@ on:
       - 'scripts/weekly-flow-profile-recovery-regression.cjs'
       - 'scripts/weekly-flow-profile-recovery-browser.cjs'
       - 'exam-prep/exam-prep-api.js'
+      - '.github/scripts/exam_prep_projection_rpc_serialization_regression.js'
       - 'exam-prep/exam-prep-recovery.js'
       - 'exam-prep/exam-prep-exam-map.js'
       - '.github/workflows/exam-prep-weekly-profile-recovery.yml'
@@ -36,11 +38,12 @@ jobs:
       - name: Verify exactly reviewed branch sources without editing checkout
         run: |
           set -euo pipefail
-          test "$(git hash-object exam-prep/exam-prep-api.js)" = '019ec1b9e21a01c266d5546ed0626c6e3a30aad6'
+          test "$(git hash-object exam-prep/exam-prep-api.js)" = '01fbb0e68307fa5baa860b7c4f25a144a4db1b96'
           test "$(git hash-object exam-prep/exam-prep-recovery.js)" = '5ba398241b2e2055c72362c9fa660b9f0c8f34c5'
           test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '6d34b51f214799e1d35e3b13464938f2c941a7ea'
           node --check scripts/weekly-flow-profile-recovery-cutover.cjs
           node --check exam-prep/exam-prep-api.js
+          node --check .github/scripts/exam_prep_projection_rpc_serialization_regression.js
           node --check exam-prep/exam-prep-recovery.js
           node --check exam-prep/exam-prep-exam-map.js
           git diff --exit-code
@@ -49,6 +52,7 @@ jobs:
           set -euo pipefail
           node --check scripts/weekly-flow-profile-recovery-regression.cjs
           node scripts/weekly-flow-profile-recovery-regression.cjs
+          node .github/scripts/exam_prep_projection_rpc_serialization_regression.js
           node scripts/p2-07-recovery-regression.cjs
           node scripts/weekly-flow-adapter-regression.cjs
       - name: Install Chromium for isolated native UI test
