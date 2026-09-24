@@ -253,7 +253,58 @@
     return { ready, waiting };
   }
 
-  function primaryAction(component, progress, summary, tracker, plan, recovery) {
+  function weeklyGoalCanAct(component, goal) {
+    if (!goal || goal.component_code !== component ||
+        !["learning", "correction", "retest", "mixed_transfer"].includes(goal.item_type)) return false;
+    if (["completed", "paused", "replaced", "unavailable"].includes(goal.status)) return false;
+    const delayedRetest = goal.item_type === "correction" && goal.status === "waiting_retest";
+    if (goal.weekly_commitment_complete === true && !delayedRetest) return false;
+    return true;
+  }
+
+  function weeklyPlanSelection(component, plan, weeklyProgress) {
+    if (!plan || !weeklyProgress ||
+        weeklyProgress.contract_version !== "progress_ux_v1" ||
+        weeklyProgress.component_code !== component ||
+        !Array.isArray(plan.items) || !Array.isArray(weeklyProgress.goals) ||
+        Number(plan.active_week_no || 0) !== Number(weeklyProgress.active_week_no || 0)) {
+      return { ready: null, waiting: null, valid: false };
+    }
+    const pending = plan.items.filter(item => item && item.status === "pending" &&
+      ["learning", "correction", "retest", "mixed_transfer"].includes(item.item_type));
+    const bound = [];
+    const seenOrders = new Set();
+    for (const goal of weeklyProgress.goals) {
+      if (!weeklyGoalCanAct(component, goal)) continue;
+      const order = Number(goal.action_priority_order);
+      if (!Number.isInteger(order) || order < 1 || order > 3) continue;
+      if (seenOrders.has(order)) return { ready: null, waiting: null, valid: false };
+      seenOrders.add(order);
+      const matches = pending.filter(item => Number(item.priority_order) === order);
+      if (matches.length !== 1) return { ready: null, waiting: null, valid: false };
+      const item = matches[0];
+      if (!goal.skill_code || item.skill_code !== goal.skill_code) return { ready: null, waiting: null, valid: false };
+      const delayedRetest = goal.item_type === "correction" && item.item_type === "retest" && goal.status === "waiting_retest";
+      if (item.item_type !== goal.item_type && !delayedRetest) return { ready: null, waiting: null, valid: false };
+      bound.push({ item, goal });
+    }
+    bound.sort((a, b) => Number(a.item.priority_order) - Number(b.item.priority_order));
+    const now = Date.now();
+    const readyPair = bound.find(({ item }) =>
+      item.item_type !== "retest" || !item.due_at || !Number.isFinite(Date.parse(item.due_at)) || Date.parse(item.due_at) <= now) || null;
+    let waiting = bound.find(({ item }) =>
+      item.item_type === "retest" && item.due_at && Number.isFinite(Date.parse(item.due_at)) && Date.parse(item.due_at) > now)?.item || null;
+    if (!waiting) {
+      const waitingGoal = weeklyProgress.goals
+        .filter(goal => goal?.component_code === component && goal.status === "waiting_retest" &&
+          goal.retest_due_at && Number.isFinite(Date.parse(goal.retest_due_at)) && Date.parse(goal.retest_due_at) > now)
+        .sort((a, b) => Number(a.priority_order || 999) - Number(b.priority_order || 999))[0];
+      if (waitingGoal) waiting = { item_type: "retest", skill_code: waitingGoal.skill_code, due_at: waitingGoal.retest_due_at };
+    }
+    return { ready: readyPair?.item || null, waiting, valid: true };
+  }
+
+  function primaryAction(component, progress, summary, tracker, plan, recovery, weeklyProgress) {
     const c = copy(), home = componentHomeCopy(), screening = progress?.screening || {};
     if (progress?.stage0_complete !== true) {
       const started = Boolean(progress?.active_session) || Number(screening.answered_items || 0) > 0;
@@ -262,7 +313,9 @@
     if (["resume", "ready_to_finalize"].includes(recovery?.status) && recovery?.session_id) {
       return { kind: "resume", title: home.continueTask, detail: stageLabel(Number(summary?.operational_stage || 0)), label: home.continueTask, sessionId: recovery.session_id };
     }
-    const selection = planSelection(plan);
+    const selection = window.iClubExamPrepWeeklyFlowEnabled === true
+      ? weeklyPlanSelection(component, plan, weeklyProgress)
+      : planSelection(plan);
     if (selection.ready) {
       const area = trackerAreaForSkill(tracker, selection.ready.skill_code);
       const title = area ? componentAreaLabel(area.official_syllabus_section) : itemTypeLabel(selection.ready.item_type);
@@ -301,7 +354,7 @@
     const coverage = Number(tracker?.coverage_pct ?? summary?.coverage_pct ?? 0);
     const corrections = Number(payload.queue?.active_count || 0);
     const diagnosticComplete = payload.progress?.stage0_complete === true;
-    const action = primaryAction(component, payload.progress, summary, tracker, payload.plan, payload.recovery);
+    const action = primaryAction(component, payload.progress, summary, tracker, payload.plan, payload.recovery, payload.weeklyProgress);
     const componentName = component === "P1" ? c.componentP1 : c.componentP5;
     const attention = diagnosticComplete && corrections > 0 ? `<button class="ep-component-link" type="button" data-ep-component-link="corrections"><span><strong>${esc(home.attention)}</strong><small>${corrections}</small></span><span aria-hidden="true">›</span></button>` : "";
     const timed = stage >= 2 ? `<button class="ep-component-link" type="button" data-ep-component-link="timed"><span><strong>${esc(home.timed)}</strong><small>${esc(stageLabel(stage))}</small></span><span aria-hidden="true">›</span></button>` : "";
@@ -337,6 +390,10 @@
       typeof internal.api.weeklyPlan === "function" ? internal.api.weeklyPlan(component).catch(() => null) : Promise.resolve(null),
       flow?.version === "weekly_flow_adapter_v1" ? flow.recover(component).catch(() => null) : Promise.resolve(null)
     ]);
+    const weeklyProgressResult = flow?.version === "weekly_flow_adapter_v1" &&
+      typeof internal.progressUxApi?.progress === "function"
+      ? await internal.progressUxApi.progress(component).catch(() => null)
+      : null;
     state.busy = false;
     state.progress[component] = progressResult.data;
     state.componentState[component] = stateResult.data;
@@ -345,7 +402,8 @@
       tracker: trackerResult?.ok ? trackerResult.data : null,
       queue: queueResult?.ok ? queueResult.data : null,
       plan: planResult?.ok ? planResult.data : null,
-      recovery: recoveryResult?.ok ? recoveryResult.data : null
+      recovery: recoveryResult?.ok ? recoveryResult.data : null,
+      weeklyProgress: weeklyProgressResult?.ok ? weeklyProgressResult.data : null
     });
   }
 
@@ -353,6 +411,7 @@
     if (state.busy) return;
     state.busy = true; renderLoading();
     let plan = null;
+    let weeklyProgress = null;
     if (window.iClubExamPrepWeeklyFlowEnabled === true) {
       const flow = internal.weeklyFlowApi;
       if (!flow || flow.version !== "weekly_flow_adapter_v1" || flow.allowed(component)) {
@@ -372,6 +431,12 @@
         state.busy = false; renderError(); return;
       }
       plan = read.data;
+      if (typeof internal.progressUxApi?.progress !== "function") {
+        state.busy = false; renderError(); return;
+      }
+      const progress = await internal.progressUxApi.progress(component);
+      if (!progress?.ok) { state.busy = false; renderError(); return; }
+      weeklyProgress = progress.data;
     } else {
       let read = await internal.api.weeklyPlan(component);
       if (!read?.ok) { state.busy = false; renderError(); return; }
@@ -384,7 +449,9 @@
         plan = read.data;
       }
     }
-    const selection = planSelection(plan);
+    const selection = window.iClubExamPrepWeeklyFlowEnabled === true
+      ? weeklyPlanSelection(component, plan, weeklyProgress)
+      : planSelection(plan);
     state.busy = false;
     if (selection.ready && plan?.plan_id) {
       await launchPlanItem(component, plan.plan_id, Number(selection.ready.priority_order), "component");
@@ -516,7 +583,8 @@
       const progress = typeof internal.progressUxApi?.progress === 'function'
         ? await internal.progressUxApi.progress(component) : null;
       const matching = Array.isArray(progress?.data?.goals) ? progress.data.goals.filter(goal =>
-        goal.component_code === component && goal.action_priority_order === priorityOrder) : [];
+        goal.component_code === component && goal.action_priority_order === priorityOrder &&
+        weeklyGoalCanAct(component, goal)) : [];
       if (!flow || flow.allowed(component) || !progress?.ok || matching.length !== 1) {
         state.busy = false; renderError(); return;
       }
