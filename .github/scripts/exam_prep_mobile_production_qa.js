@@ -149,6 +149,14 @@ async function openExamPrep(page) {
     return r && !r.hidden && r.textContent.trim().length > 0;
   }, null, { timeout: 25000 });
 
+  // The host shell is painted synchronously; the live module then resolves the
+  // learner profile. Wait for that actual state before deciding whether setup is needed.
+  await page.waitForFunction(() =>
+    Boolean(document.querySelector('[data-ep-live-profile-form]')) ||
+    Boolean(document.querySelector('[data-ep-live-component="P1"]')),
+    null, { timeout: 30000 }
+  );
+
   const profileForm = page.locator('[data-ep-live-profile-form]');
   if (await profileForm.count()) {
     await page.fill('[data-ep-live-profile-form] [name="exam_series"]', 'May/June 2027');
