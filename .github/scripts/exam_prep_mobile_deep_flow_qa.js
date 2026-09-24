@@ -446,7 +446,9 @@ async function settleAfterStage0(page) {
     }
     return Array.from(document.querySelectorAll('[data-ep-component-home="P1"]')).some(visible) ||
       Array.from(document.querySelectorAll('[data-ep-live-component="P1"]')).some(visible) ||
-      Array.from(document.querySelectorAll('[data-ep-flow-completion]')).some(visible);
+      Array.from(document.querySelectorAll('[data-ep-flow-completion]')).some(visible) ||
+      Array.from(document.querySelectorAll('[data-ep-pux-primary-goals]')).some(visible) ||
+      Array.from(document.querySelectorAll('[data-ep-pux-goal-action]')).some(el => visible(el) && !el.disabled);
   }, null, { timeout: 45000 });
 
   if (await page.locator('[data-ep-placement-screen]:visible').count()) {
