@@ -209,6 +209,26 @@ async function completeCurrentSession(page, maxItems = 12) {
   return answered;
 }
 
+async function finishP1Stage0(page) {
+  let loops = 0;
+  while (loops < 12) {
+    loops += 1;
+    if (await page.locator('[data-ep-live-submit]').count()) {
+      await completeCurrentSession(page, 12);
+      continue;
+    }
+    if (!(await page.locator('[data-ep-component-home="P1"]').count())) {
+      if (await page.locator('[data-ep-live-component="P1"]').count()) await openP1Home(page);
+      else throw new Error('P1 Stage0 lost component navigation');
+    }
+    const action = await page.locator('[data-ep-component-primary]').getAttribute('data-ep-component-primary');
+    if (action !== 'diagnostic') return { loops, action };
+    await page.click('[data-ep-component-primary="diagnostic"]');
+    await page.waitForSelector('[data-ep-live-submit]', { state: 'visible', timeout: 30000 });
+  }
+  throw new Error('P1 Stage0 mobile QA did not converge');
+}
+
 async function openP1Home(page) {
   if (await page.locator('[data-ep-live-component="P1"]').count()) {
     await page.click('[data-ep-live-component="P1"]');
@@ -224,6 +244,16 @@ async function collectPrimaryScreens(page, label) {
     screenshot: await shot(page, `${label}-01-overview`),
     audit: await viewportAudit(page, label + '-overview')
   };
+
+  // Check the second component independently at the same phone width.
+  await page.click('[data-ep-live-component="P5"]');
+  await page.waitForSelector('[data-ep-component-home="P5"]', { state: 'visible', timeout: 25000 });
+  report.viewports[label].screens.p5Home = {
+    screenshot: await shot(page, `${label}-01b-p5-home`),
+    audit: await viewportAudit(page, label + '-p5-home')
+  };
+  await page.click('[data-ep-component-back]');
+  await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 25000 });
 
   await openP1Home(page);
   report.viewports[label].screens.p1Home = {
@@ -299,6 +329,31 @@ async function collectPrimaryScreens(page, label) {
     if (await page.locator('[data-ep-live-component="P1"]').count()) await openP1Home(page);
   }
 
+  // Finish Stage 0 through the real mobile UI so the weekly-plan screen can be
+  // inspected instead of inferred from desktop QA.
+  if (!(await page.locator('[data-ep-component-home="P1"]').count())) {
+    if (await page.locator('[data-ep-live-component="P1"]').count()) await openP1Home(page);
+  }
+  const stage0 = await finishP1Stage0(page);
+  report.notes.push({ label, p1Stage0: stage0 });
+  await page.waitForSelector('[data-ep-component-home="P1"]', { state: 'visible', timeout: 30000 });
+  report.viewports[label].screens.p1FoundationHome = {
+    screenshot: await shot(page, `${label}-07-p1-foundation-home`),
+    audit: await viewportAudit(page, label + '-p1-foundation')
+  };
+
+  await page.click('[data-ep-component-back]');
+  await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 30000 });
+  const hasPlanCompat = await page.locator('[data-ep-live-plan="P1"]').count();
+  if (hasPlanCompat) {
+    await page.evaluate(() => document.querySelector('[data-ep-live-plan="P1"]')?.click());
+    await page.waitForSelector('.ep-live-plan-item', { state: 'visible', timeout: 30000 });
+    report.viewports[label].screens.weeklyPlan = {
+      screenshot: await shot(page, `${label}-08-weekly-plan`),
+      fullScreenshot: await shot(page, `${label}-08b-weekly-plan-full`, true),
+      audit: await viewportAudit(page, label + '-weekly-plan')
+    };
+  }
 }
 
 async function navigateExistingUserToP1(page) {
