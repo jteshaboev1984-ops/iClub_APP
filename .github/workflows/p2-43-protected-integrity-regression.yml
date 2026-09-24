@@ -37,7 +37,7 @@ jobs:
           node --check .github/scripts/p2_43_protected_integrity_browser_regression.js
           grep -q 'get_exam_prep_integrity_status_safe_v1' exam-prep/exam-prep-api.js
           grep -q 'record_exam_prep_integrity_event_safe_v1' exam-prep/exam-prep-api.js
-          grep -q 'exam-prep-integrity.js?v=p243integrity1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-integrity.js?v=p243integrity2' exam-prep/exam-prep-api.js
           ! grep -q 'localStorage' exam-prep/exam-prep-integrity.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-integrity.js
           ! grep -q 'requestFullscreen' exam-prep/exam-prep-integrity.js
