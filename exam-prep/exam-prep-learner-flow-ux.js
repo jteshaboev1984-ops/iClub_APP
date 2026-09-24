@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "flowux3";
+  const VERSION = "flowux4";
   const trackerCache = new Map();
   let observer = null;
   let reconcileTimer = null;
