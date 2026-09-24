@@ -54,7 +54,9 @@ async function scenario(browser,language,width,kind,mode) {
         },
         finalizeSession:async()=>{assert(s.answered);s.finalized=true;return ok({status:'finalized'});}
       };
-      internal.progressUxApi={progress:async()=>ok({goals:[{goal_id:s.goalId,component_code:'P1',action_priority_order:1}]})};
+      internal.progressUxApi={progress:async()=>ok({goals:[{goal_id:s.goalId,component_code:'P1',
+        item_type:'learning',skill_code:'P1-CIR-01',status:'not_started',
+        weekly_commitment_complete:false,action_priority_order:1}]})};
       internal.weeklyFlowApi={version:'weekly_flow_adapter_v1',allowed:()=>null,
         plan:async()=>ok({status:'existing',plan_id:s.planId}),
         authorize:async(comp,goal,plan)=>{
