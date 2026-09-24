@@ -504,6 +504,8 @@ DECLARE
   v_week smallint;
   v_p1_diag int;
   v_p5_diag int;
+  v_p1_screen int;
+  v_p5_screen int;
   v_plan jsonb;
   v_plan_id uuid;
   v_priority smallint;
@@ -586,6 +588,19 @@ BEGIN
   v_p1_diag:=pg_temp.p269_run_stage0_component_v1(v_uid,'P1');
   v_p5_diag:=pg_temp.p269_run_stage0_component_v1(v_uid,'P5');
   if v_p1_diag<1 or v_p5_diag<1 then raise exception 'P2-69 Stage0 did not execute both component diagnostics'; end if;
+
+  perform private.rebuild_exam_prep_placement_v1(v_uid,null);
+  select screening_answered_items into v_p1_screen
+  from private.exam_prep_component_placements
+  where user_id=v_uid and program_version_id=v_program and component_code='P1'
+  order by derived_at desc limit 1;
+  select screening_answered_items into v_p5_screen
+  from private.exam_prep_component_placements
+  where user_id=v_uid and program_version_id=v_program and component_code='P5'
+  order by derived_at desc limit 1;
+  if v_p1_screen<>24 or v_p5_screen<>15 then
+    raise exception 'P2-69 Stage0 exact screening target mismatch P1=%/24 P5=%/15',v_p1_screen,v_p5_screen;
+  end if;
 
   perform private.rebuild_exam_prep_state_v1(v_uid,null);
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',1,'after Stage0 P1');
