@@ -204,6 +204,8 @@ async function waitForReadySubmitOrRoute(page, timeout = 30000) {
         visible('[data-ep-component-home="P1"]') ||
         visible('[data-ep-placement-screen]') ||
         visible('[data-ep-flow-completion]') ||
+        visible('[data-ep-pux-primary-goals]') ||
+        visible('[data-ep-pux-goal-action]') ||
         visible('.ep-live-plan-item') ||
         Array.from(document.querySelectorAll('[data-ep-live-component="P1"]')).some(el => {
           const cs = getComputedStyle(el);
@@ -353,6 +355,12 @@ async function finishStage0(page) {
            Array.from(document.querySelectorAll('[data-ep-flow-completion]')).some(visible));
       }, null, { timeout: 45000 });
       continue;
+    }
+
+    if (await page.locator('[data-ep-pux-primary-goals]:visible').count() ||
+        await page.locator('[data-ep-pux-goal-action]:visible:not([disabled])').count()) {
+      const progress = await readDiagnostic(page);
+      return { complete: progress?.stage0_complete === true, sessions, totalAnswers, progress, route: 'weekly_plan' };
     }
 
     if (await page.locator('[data-ep-placement-screen]:visible').count()) {
