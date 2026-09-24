@@ -4,6 +4,10 @@
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
   const VERSION = "flowux4";
   const trackerCache = new Map();
+  const trackerRequests = new Map();
+  let trackerDecorationInFlight = null;
+  let planDecorationInFlight = null;
+  let correctionsDecorationInFlight = null;
   let observer = null;
   let reconcileTimer = null;
   let operation = null;
@@ -284,10 +288,26 @@
     if (!component || typeof internal.api?.syllabusTracker !== "function") return null;
     const cached = trackerCache.get(component);
     if (!force && cached && Date.now() - cached.at < 30000) return cached.data;
-    const result = await internal.api.syllabusTracker(component);
-    if (!result?.ok) return null;
-    trackerCache.set(component, { at: Date.now(), data: result.data || {} });
-    return result.data || {};
+
+    // Mutation-driven decorators may ask for the same tracker while the first
+    // request is still in flight. Share that request instead of multiplying
+    // identical RPCs against the same learner/component.
+    const existing = trackerRequests.get(component);
+    if (existing) return existing;
+
+    const request = (async () => {
+      const result = await internal.api.syllabusTracker(component);
+      if (!result?.ok) return null;
+      const data = result.data || {};
+      trackerCache.set(component, { at: Date.now(), data });
+      return data;
+    })();
+    trackerRequests.set(component, request);
+    try {
+      return await request;
+    } finally {
+      if (trackerRequests.get(component) === request) trackerRequests.delete(component);
+    }
   }
 
   function humanSkill(meta) {
@@ -405,149 +425,178 @@
   }
 
   async function decorateTracker() {
-    const root = rootEl();
-    const buttons = root?.querySelectorAll("[data-ep-views-skill]");
-    if (!root || !buttons?.length) return;
-    const component = componentFromScreen();
-    if (!component) return;
-    const data = await getTracker(component);
-    if (!data || !root.isConnected || !root.querySelector("[data-ep-views-skill]")) return;
-    const map = trackerMap(data);
-    const c = copy();
-    buttons.forEach(button => {
-      const meta = map.get(String(button.dataset.epViewsSkill || ""));
-      if (!meta || button.dataset.epFlowTracker === VERSION) return;
-      const strong = button.querySelector("strong");
-      const metaNode = button.querySelector(".ep-views-skill-meta");
-      if (strong) strong.textContent = humanSkill(meta);
-      if (metaNode) metaNode.textContent = ` · ${c.skill} ${Number(meta.sequence_no || 0)} · ${c.checks}: ${Number(meta.evidence_total || 0)}`;
-      button.dataset.epFlowTracker = VERSION;
-    });
+    if (trackerDecorationInFlight) return trackerDecorationInFlight;
+    const run = (async () => {
+      const root = rootEl();
+      const buttons = Array.from(root?.querySelectorAll("[data-ep-views-skill]") || []);
+      if (!root || !buttons.length) return;
+      const screen = buttons[0]?.closest?.("[data-ep-views-screen]") || root;
+      const component = componentFromScreen();
+      if (!component) return;
+      const data = await getTracker(component);
+      if (!data || !screen?.isConnected || !rootEl()?.contains(screen)) return;
+      const map = trackerMap(data);
+      const c = copy();
+      Array.from(screen.querySelectorAll("[data-ep-views-skill]")).forEach(button => {
+        const meta = map.get(String(button.dataset.epViewsSkill || ""));
+        if (!meta || button.dataset.epFlowTracker === VERSION) return;
+        const strong = button.querySelector("strong");
+        const metaNode = button.querySelector(".ep-views-skill-meta");
+        if (strong) strong.textContent = humanSkill(meta);
+        if (metaNode) metaNode.textContent = ` · ${c.skill} ${Number(meta.sequence_no || 0)} · ${c.checks}: ${Number(meta.evidence_total || 0)}`;
+        button.dataset.epFlowTracker = VERSION;
+      });
+    })();
+    trackerDecorationInFlight = run;
+    try {
+      return await run;
+    } finally {
+      if (trackerDecorationInFlight === run) trackerDecorationInFlight = null;
+    }
   }
 
   async function decoratePlan(force = false) {
-    const root = rootEl();
-    const rows = Array.from(root?.querySelectorAll(".ep-live-plan-item") || []);
-    if (!rows.length || root?.querySelector(".ep-flow-completion-screen")) return;
-    const component = componentFromScreen();
-    if (!component || typeof internal.api?.weeklyPlan !== "function") return;
-    if (!force && rows.every(row => row.dataset.epFlowPlan === VERSION)) return;
+    if (planDecorationInFlight) return planDecorationInFlight;
+    const run = (async () => {
+      const root = rootEl();
+      const rows = Array.from(root?.querySelectorAll(".ep-live-plan-item") || []);
+      if (!rows.length || root?.querySelector(".ep-flow-completion-screen")) return;
+      const planCard = rows[0]?.closest?.(".ep-live-card");
+      const component = componentFromScreen();
+      if (!planCard || !component || typeof internal.api?.weeklyPlan !== "function") return;
+      if (!force && rows.every(row => row.dataset.epFlowPlan === VERSION)) return;
 
-    const [planResult, trackerData] = await Promise.all([internal.api.weeklyPlan(component), getTracker(component)]);
-    if (!planResult?.ok || !trackerData || !rootEl()?.querySelector(".ep-live-plan-item")) return;
-    const plan = planResult.data || {};
-    const items = Array.isArray(plan.items) ? plan.items : [];
-    const skillMap = trackerMap(trackerData);
-    let correctionRows = [];
-    if (items.some(item => ["correction", "retest"].includes(item?.item_type)) && typeof internal.api?.correctionQueue === "function") {
-      const correctionResult = await internal.api.correctionQueue(component);
-      if (correctionResult?.ok) correctionRows = Array.isArray(correctionResult.data?.cases) ? correctionResult.data.cases : [];
-    }
-    const c = copy();
-    const currentRows = Array.from(rootEl()?.querySelectorAll(".ep-live-plan-item") || []);
-    currentRows.forEach(row => {
-      const button = row.querySelector("[data-ep-live-plan-item]");
-      const priority = Number(button?.dataset.epLivePlanItem || 0);
-      const item = items.find(x => Number(x?.priority_order || 0) === priority);
-      if (!item) return;
-      const correction = correctionRows.find(x => String(x?.correction_case_id || "") === String(item.correction_case_id || "") || (item.skill_code && x?.skill_code === item.skill_code));
-      const meta = skillMap.get(String(item.skill_code || ""));
-      const copyBlock = row.firstElementChild;
-      if (copyBlock) {
-        const typeNode = copyBlock.querySelector("strong");
-        if (typeNode) {
-          typeNode.textContent = planTypeLabel(item, correction);
-          typeNode.classList.add("ep-flow-task-type");
-        }
-        let title = copyBlock.querySelector(".ep-flow-task-name");
-        if (!title) {
-          title = document.createElement("div");
-          title.className = "ep-flow-task-name";
-          const due = copyBlock.querySelector(".ep-live-due");
-          copyBlock.insertBefore(title, due || null);
-        }
-        title.textContent = humanSkill(meta) || areaLabel(meta?.official_syllabus_section) || c.skill;
-        let secondary = copyBlock.querySelector(".ep-flow-task-meta");
-        if (!secondary) {
-          secondary = document.createElement("div");
-          secondary.className = "ep-flow-task-meta";
-          const due = copyBlock.querySelector(".ep-live-due");
-          copyBlock.insertBefore(secondary, due || null);
-        }
-        secondary.textContent = [areaLabel(meta?.official_syllabus_section), meta?.sequence_no ? `${c.skill} ${Number(meta.sequence_no)}` : ""].filter(Boolean).join(" · ");
+      const [planResult, trackerData] = await Promise.all([internal.api.weeklyPlan(component), getTracker(component)]);
+      if (!planResult?.ok || !trackerData || !planCard.isConnected || !rootEl()?.contains(planCard)) return;
+      const plan = planResult.data || {};
+      const items = Array.isArray(plan.items) ? plan.items : [];
+      const skillMap = trackerMap(trackerData);
+      let correctionRows = [];
+      if (items.some(item => ["correction", "retest"].includes(item?.item_type)) && typeof internal.api?.correctionQueue === "function") {
+        const correctionResult = await internal.api.correctionQueue(component);
+        if (!planCard.isConnected || !rootEl()?.contains(planCard)) return;
+        if (correctionResult?.ok) correctionRows = Array.isArray(correctionResult.data?.cases) ? correctionResult.data.cases : [];
       }
-      if (button && !button.disabled) button.textContent = planButtonLabel(item, correction);
-      row.dataset.epFlowPlan = VERSION;
-      row.dataset.epFlowPriority = String(priority);
-      row.dataset.epFlowSkill = String(item.skill_code || "");
-      row.dataset.epFlowType = String(item.item_type || "");
-      row.dataset.epFlowCorrection = String(item.correction_case_id || "");
-    });
+      const c = copy();
+      const currentRows = Array.from(planCard.querySelectorAll(".ep-live-plan-item"));
+      currentRows.forEach(row => {
+        const button = row.querySelector("[data-ep-live-plan-item]");
+        const priority = Number(button?.dataset.epLivePlanItem || 0);
+        const item = items.find(x => Number(x?.priority_order || 0) === priority);
+        if (!item) return;
+        const correction = correctionRows.find(x => String(x?.correction_case_id || "") === String(item.correction_case_id || "") || (item.skill_code && x?.skill_code === item.skill_code));
+        const meta = skillMap.get(String(item.skill_code || ""));
+        const copyBlock = row.firstElementChild;
+        if (copyBlock) {
+          const typeNode = copyBlock.querySelector("strong");
+          if (typeNode) {
+            typeNode.textContent = planTypeLabel(item, correction);
+            typeNode.classList.add("ep-flow-task-type");
+          }
+          let title = copyBlock.querySelector(".ep-flow-task-name");
+          if (!title) {
+            title = document.createElement("div");
+            title.className = "ep-flow-task-name";
+            const due = copyBlock.querySelector(".ep-live-due");
+            copyBlock.insertBefore(title, due || null);
+          }
+          title.textContent = humanSkill(meta) || areaLabel(meta?.official_syllabus_section) || c.skill;
+          let secondary = copyBlock.querySelector(".ep-flow-task-meta");
+          if (!secondary) {
+            secondary = document.createElement("div");
+            secondary.className = "ep-flow-task-meta";
+            const due = copyBlock.querySelector(".ep-live-due");
+            copyBlock.insertBefore(secondary, due || null);
+          }
+          secondary.textContent = [areaLabel(meta?.official_syllabus_section), meta?.sequence_no ? `${c.skill} ${Number(meta.sequence_no)}` : ""].filter(Boolean).join(" · ");
+        }
+        if (button && !button.disabled) button.textContent = planButtonLabel(item, correction);
+        row.dataset.epFlowPlan = VERSION;
+        row.dataset.epFlowPriority = String(priority);
+        row.dataset.epFlowSkill = String(item.skill_code || "");
+        row.dataset.epFlowType = String(item.item_type || "");
+        row.dataset.epFlowCorrection = String(item.correction_case_id || "");
+      });
 
-    const card = rootEl()?.querySelector(".ep-live-card");
-    if (card && !card.querySelector(".ep-flow-plan-intro")) {
-      const head = card.querySelector(".ep-live-head");
-      const note = document.createElement("div");
-      note.className = "ep-flow-plan-intro";
-      note.textContent = c.planIntro;
-      if (head?.nextSibling) card.insertBefore(note, head.nextSibling); else card.appendChild(note);
+      if (planCard && !planCard.querySelector(".ep-flow-plan-intro")) {
+        const head = planCard.querySelector(".ep-live-head");
+        const note = document.createElement("div");
+        note.className = "ep-flow-plan-intro";
+        note.textContent = c.planIntro;
+        if (head?.nextSibling) planCard.insertBefore(note, head.nextSibling); else planCard.appendChild(note);
+      }
+    })();
+    planDecorationInFlight = run;
+    try {
+      return await run;
+    } finally {
+      if (planDecorationInFlight === run) planDecorationInFlight = null;
     }
   }
 
   async function decorateCorrections() {
-    const root = rootEl();
-    const screen = root?.querySelector("[data-ep-views-screen]");
-    const title = String(screen?.querySelector(".ep-views-title")?.textContent || "").toLowerCase();
-    if (!screen || !/ошиб|correction|xato/.test(title) || typeof internal.api?.correctionQueue !== "function") return;
-    if (screen.dataset.epFlowCorrections === VERSION) return;
-    const component = componentFromScreen();
-    if (!component) return;
-    const [queueResult, planResult, trackerData] = await Promise.all([
-      internal.api.correctionQueue(component),
-      typeof internal.api?.weeklyPlan === "function" ? internal.api.weeklyPlan(component) : Promise.resolve(null),
-      getTracker(component)
-    ]);
-    if (!queueResult?.ok || !rootEl()?.querySelector("[data-ep-views-screen]")) return;
-    const cases = Array.isArray(queueResult.data?.cases) ? queueResult.data.cases : [];
-    const planItems = Array.isArray(planResult?.data?.items) ? planResult.data.items : [];
-    const skillMap = trackerMap(trackerData || {});
-    const cards = Array.from(rootEl().querySelectorAll(".ep-views-summary ~ .ep-views-card")).slice(0, cases.length);
-    const c = copy();
-    cards.forEach((card, index) => {
-      const row = cases[index];
-      if (!row) return;
-      const meta = skillMap.get(String(row.skill_code || ""));
-      const description = humanSkill(meta);
-      const sub = card.querySelector(".ep-views-sub");
-      if (sub && description) {
-        sub.innerHTML = `<span class="ep-flow-correction-label">${esc(c.whatToFix)}</span><strong class="ep-flow-correction-title">${esc(description)}</strong>`;
-      } else if (!sub) {
-        const areaHead = card.querySelector(".ep-views-area-head");
-        const block = document.createElement("div");
-        block.className = "ep-views-sub";
-        block.innerHTML = `<span class="ep-flow-correction-label">${esc(c.whatToFix)}</span><strong class="ep-flow-correction-title">${esc(humanSkill(meta) || areaLabel(row.official_syllabus_section))}</strong>`;
-        areaHead?.insertAdjacentElement("afterend", block);
-      }
-      const badge = card.querySelector(".ep-views-badge");
-      if (badge) {
-        badge.textContent = correctionStatusLabel(row);
-        badge.classList.add("ep-flow-status-badge");
-      }
-      const planned = planItems.find(item => item?.status === "pending" && (String(item.correction_case_id || "") === String(row.correction_case_id || "") || (item.skill_code && item.skill_code === row.skill_code)));
-      if (planned && !card.querySelector("[data-ep-flow-correction-action]")) {
-        const action = document.createElement("button");
-        action.type = "button";
-        action.className = "ep-views-btn primary ep-flow-correction-action";
-        action.dataset.epFlowCorrectionAction = String(row.correction_case_id || "");
-        action.textContent = planned.item_type === "retest" ? c.startRetest : (row.process_step === "practice_analogues" ? c.startPractice : c.startCorrection);
-        action.addEventListener("click", () => openPlanAndStart(component, planned.skill_code, planned.item_type, planned.correction_case_id));
-        card.appendChild(action);
-      }
-      card.dataset.epFlowCorrectionCard = VERSION;
-    });
-    const bottom = rootEl().querySelector("[data-ep-views-open-plan]");
-    if (bottom) bottom.textContent = c.openPlan;
-    screen.dataset.epFlowCorrections = VERSION;
+    if (correctionsDecorationInFlight) return correctionsDecorationInFlight;
+    const run = (async () => {
+      const root = rootEl();
+      const screen = root?.querySelector("[data-ep-views-screen]");
+      const title = String(screen?.querySelector(".ep-views-title")?.textContent || "").toLowerCase();
+      if (!screen || !/ошиб|correction|xato/.test(title) || typeof internal.api?.correctionQueue !== "function") return;
+      if (screen.dataset.epFlowCorrections === VERSION) return;
+      const component = componentFromScreen();
+      if (!component) return;
+      const [queueResult, planResult, trackerData] = await Promise.all([
+        internal.api.correctionQueue(component),
+        typeof internal.api?.weeklyPlan === "function" ? internal.api.weeklyPlan(component) : Promise.resolve(null),
+        getTracker(component)
+      ]);
+      if (!queueResult?.ok || !screen.isConnected || !rootEl()?.contains(screen) || screen.dataset.epFlowCorrections === VERSION) return;
+      const cases = Array.isArray(queueResult.data?.cases) ? queueResult.data.cases : [];
+      const planItems = Array.isArray(planResult?.data?.items) ? planResult.data.items : [];
+      const skillMap = trackerMap(trackerData || {});
+      const cards = Array.from(screen.querySelectorAll(".ep-views-summary ~ .ep-views-card")).slice(0, cases.length);
+      const c = copy();
+      cards.forEach((card, index) => {
+        const row = cases[index];
+        if (!row) return;
+        const meta = skillMap.get(String(row.skill_code || ""));
+        const description = humanSkill(meta);
+        const sub = card.querySelector(".ep-views-sub");
+        if (sub && description) {
+          sub.innerHTML = `<span class="ep-flow-correction-label">${esc(c.whatToFix)}</span><strong class="ep-flow-correction-title">${esc(description)}</strong>`;
+        } else if (!sub) {
+          const areaHead = card.querySelector(".ep-views-area-head");
+          const block = document.createElement("div");
+          block.className = "ep-views-sub";
+          block.innerHTML = `<span class="ep-flow-correction-label">${esc(c.whatToFix)}</span><strong class="ep-flow-correction-title">${esc(humanSkill(meta) || areaLabel(row.official_syllabus_section))}</strong>`;
+          areaHead?.insertAdjacentElement("afterend", block);
+        }
+        const badge = card.querySelector(".ep-views-badge");
+        if (badge) {
+          badge.textContent = correctionStatusLabel(row);
+          badge.classList.add("ep-flow-status-badge");
+        }
+        const planned = planItems.find(item => item?.status === "pending" && (String(item.correction_case_id || "") === String(row.correction_case_id || "") || (item.skill_code && item.skill_code === row.skill_code)));
+        if (planned && !card.querySelector("[data-ep-flow-correction-action]")) {
+          const action = document.createElement("button");
+          action.type = "button";
+          action.className = "ep-views-btn primary ep-flow-correction-action";
+          action.dataset.epFlowCorrectionAction = String(row.correction_case_id || "");
+          action.textContent = planned.item_type === "retest" ? c.startRetest : (row.process_step === "practice_analogues" ? c.startPractice : c.startCorrection);
+          action.addEventListener("click", () => openPlanAndStart(component, planned.skill_code, planned.item_type, planned.correction_case_id));
+          card.appendChild(action);
+        }
+        card.dataset.epFlowCorrectionCard = VERSION;
+      });
+      const bottom = screen.querySelector("[data-ep-views-open-plan]");
+      if (bottom) bottom.textContent = c.openPlan;
+      screen.dataset.epFlowCorrections = VERSION;
+    })();
+    correctionsDecorationInFlight = run;
+    try {
+      return await run;
+    } finally {
+      if (correctionsDecorationInFlight === run) correctionsDecorationInFlight = null;
+    }
   }
 
   function capturePlanContext(button) {
