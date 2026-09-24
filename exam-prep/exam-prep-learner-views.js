@@ -137,6 +137,15 @@
     return LEARNER_FOUNDATION_RU[code] || LEARNER_SKILL_RU[code] || `${c.prerequisite} ${index + 1}`;
   }
 
+  internal.learnerCopy = Object.freeze({
+    skillRu(skillCode) {
+      return LEARNER_SKILL_RU[String(skillCode || "")] || "";
+    },
+    foundationRu(code) {
+      return LEARNER_FOUNDATION_RU[String(code || "")] || "";
+    }
+  });
+
   function copy() {
     if (activeLanguage === "uz") return {
       tracker: "Dastur bo‘yicha progress", corrections: "Xatolar ustida ishlash", overview: "Umumiy ko‘rinish", backTracker: "Progressga qaytish",
