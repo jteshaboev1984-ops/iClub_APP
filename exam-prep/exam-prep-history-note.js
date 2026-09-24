@@ -2,10 +2,11 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p105history1";
+  const VERSION = "p105history2";
   let observer = null;
   let renderQueued = false;
   const loading = new Set();
+  const hydratedAnchors = new WeakSet();
 
   function rootEl() {
     return document.querySelector("#exam-prep-host-root");
@@ -49,17 +50,41 @@
     rootEl()?.querySelector(`[data-ep-history-note="${component}"]`)?.remove();
   }
 
-  async function hydrate(strip, component) {
-    if (!strip?.isConnected || loading.has(component) || typeof internal.api?.legacyReferenceSummary !== "function") return;
-    if (strip.parentElement?.querySelector(`[data-ep-history-note="${component}"]`)) return;
+  function anchorForComponent(root, component) {
+    const home = root?.querySelector(`[data-ep-component-home="${component}"]`);
+    const progress = home?.querySelector(".ep-component-progress-card");
+    if (progress) return progress;
+
+    // Compatibility fallback for the pre component-first overview.
+    return root?.querySelector(`[data-ep-overview-strip="${component}"]`) || null;
+  }
+
+  async function hydrate(anchor, component) {
+    const root = rootEl();
+    if (
+      !root ||
+      !anchor?.isConnected ||
+      hydratedAnchors.has(anchor) ||
+      loading.has(component) ||
+      typeof internal.api?.legacyReferenceSummary !== "function"
+    ) return;
+    if (root.querySelector(`[data-ep-history-note="${component}"]`)) return;
 
     loading.add(component);
     try {
       const result = await internal.api.legacyReferenceSummary(component);
-      if (!strip.isConnected) return;
-      const data = result?.ok ? (result.data || {}) : null;
+      if (!anchor.isConnected || rootEl() !== root) return;
+      if (!result?.ok) return;
+
+      hydratedAnchors.add(anchor);
+      const data = result.data || {};
       const count = Number(data?.reference_count || 0);
-      if (!data || data.available !== true || count <= 0 || data.academic_credit === true || String(data.mastery_effect || "none") !== "none") {
+      if (
+        data.available !== true ||
+        count <= 0 ||
+        data.academic_credit === true ||
+        String(data.mastery_effect || "none") !== "none"
+      ) {
         removeNote(component);
         return;
       }
@@ -68,12 +93,14 @@
       const note = document.createElement("div");
       note.className = "ep-history-note";
       note.dataset.epHistoryNote = component;
+
       const title = document.createElement("strong");
       title.textContent = c.title;
       const body = document.createElement("span");
       body.textContent = c.body(count);
       note.append(title, body);
-      strip.insertAdjacentElement("afterend", note);
+
+      anchor.insertAdjacentElement("afterend", note);
     } catch (_) {
       removeNote(component);
     } finally {
@@ -89,14 +116,14 @@
       return;
     }
 
-    root.querySelectorAll("[data-ep-overview-strip]").forEach(strip => {
-      const component = String(strip.getAttribute("data-ep-overview-strip") || "").toUpperCase();
-      if (component === "P1" || component === "P5") hydrate(strip, component);
-    });
+    for (const component of ["P1", "P5"]) {
+      const anchor = anchorForComponent(root, component);
+      if (anchor) hydrate(anchor, component);
+    }
 
     root.querySelectorAll("[data-ep-history-note]").forEach(note => {
       const component = String(note.getAttribute("data-ep-history-note") || "").toUpperCase();
-      if (!root.querySelector(`[data-ep-overview-strip="${component}"]`)) note.remove();
+      if (!anchorForComponent(root, component)) note.remove();
     });
   }
 
