@@ -209,27 +209,54 @@ async function waitForReadySubmitOrRoute(page, timeout = 30000) {
 
 async function answerCurrent(page, strategy = 'diagnostic') {
   await waitForReadySubmitOrRoute(page);
-  const submit = page.locator('[data-ep-live-submit]').first();
-  if (!(await submit.count()) || !(await submit.isVisible()) || !(await submit.isEnabled())) return false;
+  const result = await page.evaluate((mode) => {
+    const visible = el => {
+      if (!el) return false;
+      const cs = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+        r.width > 0 && r.height > 0;
+    };
+    const submit = Array.from(document.querySelectorAll('[data-ep-live-submit]'))
+      .find(el => visible(el) && !el.disabled);
+    if (!submit) return { acted: false, reason: 'submit_not_ready' };
 
-  const radio = page.locator('input[name="ep_live_answer"]');
-  const text = page.locator('input[name="ep_live_text_answer"]');
-  const written = page.locator('textarea[name="ep_live_written_answer"]');
-  if (await radio.count()) {
-    const count = await radio.count();
-    const index = strategy === 'force-error' ? 0 : Math.min(0, count - 1);
-    await radio.nth(index).check();
-  } else if (await text.count()) {
-    await text.fill(strategy === 'force-error' ? 'QA_WRONG_987654321' : '0');
-  } else if (await written.count()) {
-    await written.fill(strategy === 'force-error'
-      ? 'QA deliberate incorrect response for isolated mobile flow verification.'
-      : 'QA mobile diagnostic response.');
-  } else {
-    throw new Error('No answer control on visible question');
+    const radios = Array.from(document.querySelectorAll('input[name="ep_live_answer"]')).filter(visible);
+    const text = Array.from(document.querySelectorAll('input[name="ep_live_text_answer"]')).find(visible);
+    const written = Array.from(document.querySelectorAll('textarea[name="ep_live_written_answer"]')).find(visible);
+
+    let kind = '';
+    if (radios.length) {
+      const input = radios[0];
+      input.checked = true;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      kind = 'mcq';
+    } else if (text) {
+      text.value = mode === 'force-error' ? 'QA_WRONG_987654321' : '0';
+      text.dispatchEvent(new Event('input', { bubbles: true }));
+      text.dispatchEvent(new Event('change', { bubbles: true }));
+      kind = 'input';
+    } else if (written) {
+      written.value = mode === 'force-error'
+        ? 'QA deliberate incorrect response for isolated mobile flow verification.'
+        : 'QA mobile diagnostic response.';
+      written.dispatchEvent(new Event('input', { bubbles: true }));
+      written.dispatchEvent(new Event('change', { bubbles: true }));
+      kind = 'written';
+    } else {
+      return { acted: false, reason: 'answer_control_missing' };
+    }
+
+    submit.click();
+    return { acted: true, kind };
+  }, strategy);
+
+  if (!result?.acted) {
+    if (result?.reason === 'submit_not_ready') return false;
+    throw new Error('No answer control on visible question: ' + String(result?.reason || 'unknown'));
   }
-  await submit.click();
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(160);
   return true;
 }
 
