@@ -142,8 +142,16 @@ async function openExamPrep(page) {
 }
 
 async function openP1Home(page) {
-  if (await page.locator('[data-ep-live-component="P1"]').count()) {
-    await page.click('[data-ep-live-component="P1"]');
+  if (!(await page.locator('[data-ep-component-home="P1"]:visible').count())) {
+    await page.waitForFunction(() => {
+      return Array.from(document.querySelectorAll('[data-ep-live-component="P1"]')).some(el => {
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.disabled && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      });
+    }, null, { timeout: 30000 });
+    await page.locator('[data-ep-live-component="P1"]:visible:not([disabled])').first().click();
   }
   await page.waitForSelector('[data-ep-component-home="P1"]', { state: 'visible', timeout: 30000 });
 }
@@ -177,15 +185,25 @@ async function readPlan(page) {
 
 async function waitForReadySubmitOrRoute(page, timeout = 30000) {
   await page.waitForFunction(() => {
+    const visible = selector => Array.from(document.querySelectorAll(selector)).some(el => {
+      const cs = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+        r.width > 0 && r.height > 0;
+    });
     const submit = document.querySelector('[data-ep-live-submit]');
-    const submitReady = submit && !submit.disabled && !submit.hidden &&
-      getComputedStyle(submit).display !== 'none' && getComputedStyle(submit).visibility !== 'hidden';
+    const submitReady = submit && !submit.disabled && visible('[data-ep-live-submit]');
     return Boolean(submitReady) ||
-      Boolean(document.querySelector('[data-ep-component-home="P1"]')) ||
-      Boolean(document.querySelector('[data-ep-placement-screen]')) ||
-      Boolean(document.querySelector('[data-ep-flow-completion]')) ||
-      Boolean(document.querySelector('.ep-live-plan-item')) ||
-      Boolean(document.querySelector('[data-ep-live-component="P1"]'));
+      visible('[data-ep-component-home="P1"]') ||
+      visible('[data-ep-placement-screen]') ||
+      visible('[data-ep-flow-completion]') ||
+      visible('.ep-live-plan-item') ||
+      Array.from(document.querySelectorAll('[data-ep-live-component="P1"]')).some(el => {
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.disabled && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      });
   }, null, { timeout });
 }
 
@@ -265,7 +283,7 @@ async function finishStage0(page) {
       continue;
     }
 
-    if (await page.locator('[data-ep-live-component="P1"]').count()) {
+    if (await page.locator('[data-ep-live-component="P1"]:visible:not([disabled])').count()) {
       await openP1Home(page);
       continue;
     }
