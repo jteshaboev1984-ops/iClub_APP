@@ -218,12 +218,13 @@ async function waitForReadySubmitOrRoute(page, timeout = 30000) {
       if (placement) {
         const loading = Array.from(placement.querySelectorAll('.ep-placement-card[role="status"]')).some(visibleEl);
         if (loading) return false;
-        const action = Array.from(placement.querySelectorAll('[data-ep-placement-next]'))
-          .find(el => visibleEl(el) && !el.disabled && el.dataset.epQaClicked !== '1');
+        const nextButtons = Array.from(placement.querySelectorAll('[data-ep-placement-next]')).filter(visibleEl);
+        const action = nextButtons.find(el => !el.disabled && el.dataset.epQaClicked !== '1');
+        const error = Array.from(placement.querySelectorAll('[role="alert"]')).some(visibleEl);
+        if (nextButtons.length) return Boolean(action || error);
         const back = Array.from(placement.querySelectorAll('[data-ep-placement-back]'))
           .find(el => visibleEl(el) && !el.disabled);
-        const error = Array.from(placement.querySelectorAll('[role="alert"]')).some(visibleEl);
-        return Boolean(action || back || error);
+        return Boolean(back || error);
       }
 
       return visible('[data-ep-component-home="P1"]') ||
