@@ -27,7 +27,7 @@ jobs:
 
       - name: Run preview mobile QA
         env:
-          ICLUB_BASE_URL: https://i-club-pe7wsd849-jasurbeks-projects-c5451f97.vercel.app/
+          ICLUB_BASE_URL: https://i-club-pe7wsd849-jasurbeks-projects-c5451f97.vercel.app/?_vercel_share=IqiKVSyfqWWg5cFjnMUO1pHM2m4OE84A
           ICLUB_MOBILE_QA_OUT: mobile-preview-qa-artifacts
         run: node .github/scripts/exam_prep_mobile_production_qa.js
 
