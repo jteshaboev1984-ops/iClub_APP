@@ -8,7 +8,7 @@ function assert(condition, message) {
 const html = fs.readFileSync('index.html', 'utf8');
 const css = fs.readFileSync('visual/iclub-premium-v3.css', 'utf8');
 
-const foundationPos = html.indexOf('visual/iclub-visual-v3.css?v=v3foundation1');
+const foundationPos = html.indexOf('visual/iclub-visual-v3.css?v=v3foundation2');
 const premiumPos = html.indexOf('visual/iclub-premium-v3.css?v=premium1');
 assert(foundationPos >= 0 && premiumPos > foundationPos, 'Premium stylesheet must load after Visual Foundation v3');
 

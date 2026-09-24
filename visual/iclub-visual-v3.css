@@ -654,6 +654,13 @@ body.iclub-visual-v3 {
   box-shadow: none;
 }
 
+/* Back is a primary mobile navigation control: keep its touch target at 44×44
+   without enlarging notification/action buttons across the rest of the app. */
+.iclub-visual-v3 #topbar-back {
+  width: 44px;
+  height: 44px;
+}
+
 .iclub-visual-v3 .v3-shell-icon,
 .iclub-visual-v3 .v3-shell-nav-icon {
   width: 20px;

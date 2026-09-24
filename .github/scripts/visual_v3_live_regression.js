@@ -12,7 +12,7 @@ const css = fs.readFileSync('visual/iclub-visual-v3.css', 'utf8');
 
 assert(html.includes('<body class="iclub-visual-v3">'), 'Visual v3 body activation class missing');
 const oldCssPos = html.indexOf('style.css?v=');
-const v3CssPos = html.indexOf('visual/iclub-visual-v3.css?v=v3foundation1');
+const v3CssPos = html.indexOf('visual/iclub-visual-v3.css?v=v3foundation2');
 assert(oldCssPos >= 0 && v3CssPos > oldCssPos, 'Visual v3 stylesheet must load after legacy style.css');
 
 const tabbarStart = html.indexOf('<nav id="tabbar"');
@@ -105,6 +105,17 @@ for (const forbidden of [
   assert(computed.tabbarBg === 'rgba(255, 255, 255, 0.97)', `Live Visual v3 tabbar background drift: ${computed.tabbarBg}`);
   assert(computed.activeTabColor === 'rgb(36, 87, 214)', `Live Visual v3 active nav color drift: ${computed.activeTabColor}`);
   assert(computed.width <= computed.innerWidth, `Live Visual v3 mobile horizontal overflow: ${JSON.stringify(computed)}`);
+
+  const backTarget = await page.evaluate(() => {
+    const topbar = document.querySelector('#topbar');
+    const back = document.querySelector('#topbar-back');
+    if (!topbar || !back) return null;
+    topbar.style.display = 'grid';
+    back.style.visibility = 'visible';
+    const rect = back.getBoundingClientRect();
+    return { width: rect.width, height: rect.height };
+  });
+  assert(backTarget && backTarget.width >= 44 && backTarget.height >= 44, `Global Back touch target is below 44px: ${JSON.stringify(backTarget)}`);
 
   const liveTabs = await page.locator('#tabbar .tab').evaluateAll(nodes => nodes.map(node => ({
     route: node.getAttribute('data-tab'),
