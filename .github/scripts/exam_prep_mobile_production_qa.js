@@ -122,7 +122,16 @@ async function openExamPrep(page) {
   await page.waitForFunction(() => document.querySelector('#view-courses')?.classList.contains('is-active'), null, { timeout: 15000 });
   await page.waitForFunction(() => document.querySelectorAll('#subjects-grid .catalog-card').length > 0, null, { timeout: 20000 });
 
+  // Registration pins Mathematics in Competitive mode. Courses opens on Study by default,
+  // so select the real Competitive tab instead of assuming the subject is visible.
+  const competitive = page.locator('[data-main-filter="competitive"]');
+  if (await competitive.count()) {
+    await competitive.click();
+    await page.waitForTimeout(350);
+  }
+
   const mathCard = page.locator('#subjects-grid .catalog-card').filter({ hasText: /Математика|Mathematics|Matematika/i }).first();
+  await mathCard.waitFor({ state: 'visible', timeout: 15000 });
   await mathCard.locator('.catalog-head').click();
 
   await page.waitForFunction(() => document.querySelector('#courses-subject-hub')?.classList.contains('is-active'), null, { timeout: 15000 });
