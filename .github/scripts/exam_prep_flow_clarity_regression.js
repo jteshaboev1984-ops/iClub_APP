@@ -14,6 +14,8 @@ const path = require('path');
     window.__startedPriority = null;
     window.__queueStep = 'review_error';
     window.__planType = 'correction';
+    window.__apiCounts = { plan: 0, queue: 0 };
+    window.__apiDelayMs = 0;
 
     const skill = {
       sequence_no: 21,
@@ -71,8 +73,16 @@ const path = require('path');
       },
       api: {
         async syllabusTracker(component) { return { ok: true, data: { ...tracker, component_code: component } }; },
-        async weeklyPlan(component) { return { ok: true, data: { ...currentPlan(), component_code: component } }; },
-        async correctionQueue(component) { return { ok: true, data: { ...currentQueue(), component_code: component } }; }
+        async weeklyPlan(component) {
+          window.__apiCounts.plan += 1;
+          if (window.__apiDelayMs) await new Promise(resolve => setTimeout(resolve, window.__apiDelayMs));
+          return { ok: true, data: { ...currentPlan(), component_code: component } };
+        },
+        async correctionQueue(component) {
+          window.__apiCounts.queue += 1;
+          if (window.__apiDelayMs) await new Promise(resolve => setTimeout(resolve, window.__apiDelayMs));
+          return { ok: true, data: { ...currentQueue(), component_code: component } };
+        }
       },
       overviewPlacementViews: {
         async openPlacement(component) {
@@ -152,20 +162,33 @@ const path = require('path');
 
   await page.evaluate(() => {
     window.__queueStep = 'review_error';
+    window.__apiCounts = { plan: 0, queue: 0 };
+    window.__apiDelayMs = 180;
     document.querySelector('#exam-prep-host-root').innerHTML = `<section class="ep-host-shell ep-views-shell" data-ep-views-screen>
       <div class="ep-views-top"><div><div class="ep-views-sub">P1 · Cambridge AS Mathematics</div><div class="ep-views-title">Работа над ошибками</div></div><button class="ep-views-btn" data-ep-views-back="dashboard">Обзор</button></div>
       <div class="ep-views-summary"><div>1</div></div>
       <div class="ep-views-card"><div class="ep-views-area-head"><strong>Радианная мера и окружность</strong><span class="ep-views-badge">Разобрать ошибку</span></div><div class="ep-views-sub">Переводить degrees ↔ radians и использовать radians как естественную угловую меру.</div></div>
       <div class="ep-views-actions"><button class="ep-views-btn primary" data-ep-views-open-plan="P1">Открыть недельный план</button></div>
     </section>`;
+    const summary = document.querySelector('.ep-views-summary');
+    let n = 0;
+    const timer = setInterval(() => {
+      if (!summary?.isConnected || n >= 12) { clearInterval(timer); return; }
+      summary.dataset.qaChurn = String(++n);
+      summary.firstElementChild.textContent = String(1 + (n % 2));
+    }, 10);
   });
   await page.waitForFunction(() => document.querySelector('[data-ep-flow-correction-action]'));
   state = await page.evaluate(() => ({
     badgeTag: document.querySelector('.ep-flow-status-badge')?.tagName,
     badge: document.querySelector('.ep-flow-status-badge')?.textContent,
     action: document.querySelector('[data-ep-flow-correction-action]')?.textContent,
-    title: document.querySelector('.ep-flow-correction-title')?.textContent
+    title: document.querySelector('.ep-flow-correction-title')?.textContent,
+    apiCounts: { ...window.__apiCounts }
   }));
+  assert(state.apiCounts.plan === 1 && state.apiCounts.queue === 1,
+    'correction decoration must coalesce MutationObserver churn into one plan/queue RPC pair: ' + JSON.stringify(state.apiCounts));
+  await page.evaluate(() => { window.__apiDelayMs = 0; });
   assert(state.badgeTag === 'SPAN' && state.badge === 'Требует разбора', 'correction state must read as status, not a dead action');
   assert(state.action === 'Начать разбор', 'planned correction must expose a real button');
   assert(state.title.includes('радианы'), 'correction card must explain the exact skill/error');
