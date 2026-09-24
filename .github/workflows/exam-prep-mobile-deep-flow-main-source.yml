@@ -1,0 +1,63 @@
+name: Exam Prep Deep Flow QA against latest main source
+
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/exam_prep_mobile_deep_flow_qa.js'
+      - '.github/workflows/exam-prep-mobile-deep-flow-main-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  latest-main-deep-flow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Fetch latest main source without changing production
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          rm -rf /tmp/iclub-main
+          mkdir -p /tmp/iclub-main
+          git archive origin/main | tar -x -C /tmp/iclub-main
+          test -f /tmp/iclub-main/index.html
+          grep -q 'exam-prep/exam-prep-api.js?v=p214weeklybootstrap1' /tmp/iclub-main/index.html
+
+      - name: Validate QA script
+        run: node --check .github/scripts/exam_prep_mobile_deep_flow_qa.js
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Serve exact latest main source
+        run: |
+          python3 -m http.server 4173 --directory /tmp/iclub-main >/tmp/iclub-main-http.log 2>&1 &
+          echo $! > /tmp/iclub-main-http.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/iclub-main-http.log
+          exit 1
+
+      - name: Run deep flow against latest main frontend and production Supabase
+        env:
+          ICLUB_BASE_URL: http://127.0.0.1:4173/
+          ICLUB_DEEP_QA_OUT: mobile-deep-main-source-artifacts
+        run: node .github/scripts/exam_prep_mobile_deep_flow_qa.js
+
+      - name: Upload latest-main deep-flow evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exam-prep-mobile-deep-main-source-qa
+          path: mobile-deep-main-source-artifacts/
+          retention-days: 7
