@@ -4,7 +4,7 @@ const assert = require('assert');
 
 const source = fs.readFileSync('exam-prep/exam-prep-api.js','utf8');
 
-async function run({caps,statusReply,statusError=false,capError=false,initial=true}) {
+async function run({caps,statusReply,statusError=false,capError=false,initial=true,concurrent=false}) {
   const calls=[];
   const window={
     iClubExamPrepWeeklyFlowEnabled: initial,
@@ -33,8 +33,11 @@ async function run({caps,statusReply,statusError=false,capError=false,initial=tr
   const context={window,document,CustomEvent:function(){},console,URL,setTimeout,clearTimeout};
   vm.createContext(context);
   vm.runInContext(source,context,{filename:'exam-prep-api.js'});
-  const result=await window.iClubExamPrepHostInternal.api.capabilities();
-  return {window,calls,result};
+  const api=window.iClubExamPrepHostInternal.api;
+  const results=concurrent
+    ? await Promise.all([api.capabilities(),api.capabilities()])
+    : [await api.capabilities()];
+  return {window,calls,result:results[0],results};
 }
 
 const goodCaps={
@@ -67,6 +70,16 @@ const goodCaps={
   x=await run({caps:goodCaps,statusReply:{contract_version:'weekly_flow_status_v1',enabled:true},capError:true,initial:true});
   assert.equal(x.result.ok,false);
   assert.equal(x.window.iClubExamPrepWeeklyFlowEnabled,false,'capability failure must clear stale weekly flag');
+
+  x=await run({caps:goodCaps,statusReply:{contract_version:'weekly_flow_status_v1',enabled:true},initial:false,concurrent:true});
+  assert.equal(x.results.length,2);
+  assert.equal(x.results[0].ok,true);
+  assert.equal(x.results[1].ok,true);
+  assert.equal(x.calls.filter(c=>c.name==='get_exam_prep_capabilities_v1').length,1,
+    'concurrent host refreshes must share one capability request');
+  assert.equal(x.calls.filter(c=>c.name==='get_my_exam_prep_weekly_flow_status_v1').length,1,
+    'concurrent host refreshes must share one weekly-status request');
+  assert.equal(x.window.iClubExamPrepWeeklyFlowEnabled,true);
 
   console.log('weekly-flow per-user activation: PASS');
 })().catch(err=>{console.error(err);process.exit(1);});
