@@ -100,12 +100,10 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
   assert(r.cards===2,'overview must expose exactly two component route cards');
   assert(r.hasGenericTitle===false,'mobile overview must not repeat the generic Exam Prep header above the route');
   assert(r.horizontalOverflow===false,'mobile overview must not create horizontal overflow at 390px');
-  assert(JSON.stringify(r.stateReads.slice(0,4))===JSON.stringify([
+  assert(JSON.stringify(r.stateReads)===JSON.stringify([
     'get_exam_prep_diagnostic_progress_safe_v1:P1',
-    'get_exam_prep_state_safe_v1:P1',
-    'get_exam_prep_diagnostic_progress_safe_v1:P5',
-    'get_exam_prep_state_safe_v1:P5'
-  ]),'dashboard placement/state reads must stay serialized to avoid server contention');
+    'get_exam_prep_diagnostic_progress_safe_v1:P5'
+  ]),'incomplete Stage 0 dashboard must not rebuild derived state that cannot change the learner route');
   assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'opening Exam Prep must not start an assessment');
   assert(!r.calls.some(name=>name.startsWith('generate_exam_prep_weekly_plan')),'opening Exam Prep must not generate a weekly plan');
 
@@ -121,6 +119,7 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
   }));
   assert(/Start the next check section/i.test(r.primary),'P1 component home must show one immediate diagnostic action');
   assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'viewing P1 must remain read-only before learner action');
+  assert(!r.calls.includes('get_exam_prep_state_safe_v1'),'incomplete Stage 0 component home must not rebuild derived state');
   assert(r.hasComponentHero,'P1 component identity must remain visible on the component screen');
   assert(!r.hasGenericHead,'component screen must not repeat the generic Exam Prep intro above the paper identity');
   assert(r.backHeight>=44,`component back touch target must be at least 44px; got ${r.backHeight}`);
@@ -161,7 +160,8 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
 
   r=await page.evaluate(()=>({text:document.querySelector('#exam-prep-host-root').textContent,calls:window.__calls,answered:window.__progress.P1.screening.answered_items}));
   const names=r.calls.map(x=>x.name);
-  for (const name of ['save_exam_prep_exam_profile_v2','start_exam_prep_next_diagnostic_safe_v1','get_exam_prep_session_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','get_exam_prep_state_safe_v1']) assert(names.includes(name),`${name} missing`);
+  for (const name of ['save_exam_prep_exam_profile_v2','start_exam_prep_next_diagnostic_safe_v1','get_exam_prep_session_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1']) assert(names.includes(name),`${name} missing`);
+  assert(!names.includes('get_exam_prep_state_safe_v1'),'partial Stage 0 must remain free of redundant derived-state rebuilds after finalization');
   assert(!names.includes('save_exam_prep_exam_profile_v1'),'legacy profile save must not be used');
   const submits=r.calls.filter(x=>x.name==='submit_exam_prep_response_safe_v1');
   assert(submits.length===2,'both diagnostic responses must be submitted');
@@ -170,6 +170,28 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
   assert(r.answered===2,'diagnostic progress must refresh after finalization');
   assert(/Continue entry check/i.test(r.text),'component home must return with the next diagnostic action');
   assert(!/Core beta|Synthetic learner data|Screening complete/i.test(r.text),'learner UI must not expose internal rollout terminology');
+
+  // Once Stage 0 is complete, the derived state becomes authoritative again.
+  r=await page.evaluate(async()=>{
+    window.__calls=[];
+    window.__progress.P1.stage0_complete=true;
+    window.__progress.P1.placement_status='complete';
+    window.__progress.P1.screening.answered_items=24;
+    window.__progress.P1.screening.answered_areas=8;
+    const opened=await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});
+    return {
+      opened,
+      stateReads:window.__calls
+        .filter(x=>['get_exam_prep_diagnostic_progress_safe_v1','get_exam_prep_state_safe_v1'].includes(x.name))
+        .map(x=>`${x.name}:${x.args.p_component_code}`)
+    };
+  });
+  assert(r.opened,'completed Stage 0 dashboard must still open');
+  assert(JSON.stringify(r.stateReads)===JSON.stringify([
+    'get_exam_prep_diagnostic_progress_safe_v1:P1',
+    'get_exam_prep_state_safe_v1:P1',
+    'get_exam_prep_diagnostic_progress_safe_v1:P5'
+  ]),'getState must return exactly when a component completes Stage 0, while incomplete components still skip it');
 
   await browser.close();
   console.log('P0-17 live entry-check browser flow: PASS');
