@@ -7,6 +7,7 @@ on:
       - 'scripts/weekly-flow-profile-recovery-regression.cjs'
       - 'scripts/weekly-flow-profile-recovery-browser.cjs'
       - 'exam-prep/exam-prep-api.js'
+      - '.github/scripts/exam_prep_projection_rpc_serialization_regression.js'
       - 'exam-prep/exam-prep-recovery.js'
       - 'exam-prep/exam-prep-exam-map.js'
       - '.github/workflows/exam-prep-weekly-profile-recovery.yml'
@@ -17,6 +18,7 @@ on:
       - 'scripts/weekly-flow-profile-recovery-regression.cjs'
       - 'scripts/weekly-flow-profile-recovery-browser.cjs'
       - 'exam-prep/exam-prep-api.js'
+      - '.github/scripts/exam_prep_projection_rpc_serialization_regression.js'
       - 'exam-prep/exam-prep-recovery.js'
       - 'exam-prep/exam-prep-exam-map.js'
       - '.github/workflows/exam-prep-weekly-profile-recovery.yml'
@@ -41,6 +43,7 @@ jobs:
           test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '6d34b51f214799e1d35e3b13464938f2c941a7ea'
           node --check scripts/weekly-flow-profile-recovery-cutover.cjs
           node --check exam-prep/exam-prep-api.js
+          node --check .github/scripts/exam_prep_projection_rpc_serialization_regression.js
           node --check exam-prep/exam-prep-recovery.js
           node --check exam-prep/exam-prep-exam-map.js
           git diff --exit-code
@@ -49,6 +52,7 @@ jobs:
           set -euo pipefail
           node --check scripts/weekly-flow-profile-recovery-regression.cjs
           node scripts/weekly-flow-profile-recovery-regression.cjs
+          node .github/scripts/exam_prep_projection_rpc_serialization_regression.js
           node scripts/p2-07-recovery-regression.cjs
           node scripts/weekly-flow-adapter-regression.cjs
       - name: Install Chromium for isolated native UI test
