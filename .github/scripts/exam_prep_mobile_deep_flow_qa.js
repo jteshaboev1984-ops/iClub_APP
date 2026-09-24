@@ -349,9 +349,42 @@ async function completeVisibleSession(page, strategy, maxItems = 30) {
 async function finishStage0(page) {
   let totalAnswers = 0;
   let sessions = 0;
+  const stageTrace = [];
 
   for (let guard = 0; guard < 40; guard += 1) {
     await waitForReadySubmitOrRoute(page, 45000);
+
+    const routeSnapshot = await page.evaluate(() => {
+      const visible = el => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      };
+      const root = document.querySelector('#exam-prep-host-root');
+      const placement = Array.from(document.querySelectorAll('[data-ep-placement-screen]')).find(visible);
+      const primary = Array.from(document.querySelectorAll('[data-ep-component-primary]')).find(el => visible(el) && !el.disabled);
+      const submit = Array.from(document.querySelectorAll('[data-ep-live-submit]')).find(el => visible(el) && !el.disabled);
+      const p1 = Array.from(document.querySelectorAll('[data-ep-live-component="P1"]')).find(visible);
+      const weekly = Array.from(document.querySelectorAll('[data-ep-pux-primary-goals],[data-ep-pux-goal-action]')).find(visible);
+      const completion = Array.from(document.querySelectorAll('[data-ep-flow-completion]')).find(visible);
+      return {
+        hold: Boolean(Array.from(root?.querySelectorAll('.ep-flow-pending-visual,[data-ep-transition-hold="1"]') || []).find(visible)),
+        submit: Boolean(submit),
+        placement: Boolean(placement),
+        placementNext: placement ? String(placement.querySelector('[data-ep-placement-next]')?.textContent || '').trim() : null,
+        componentHome: Boolean(Array.from(document.querySelectorAll('[data-ep-component-home="P1"]')).find(visible)),
+        primary: primary?.getAttribute('data-ep-component-primary') || null,
+        dashboardP1: Boolean(p1),
+        dashboardP1Disabled: Boolean(p1?.disabled),
+        weekly: Boolean(weekly),
+        completion: Boolean(completion),
+        text: String(root?.innerText || '').trim().slice(0, 500)
+      };
+    });
+    stageTrace.push({ guard, sessions, totalAnswers, route: routeSnapshot });
+    if (stageTrace.length > 20) stageTrace.shift();
 
     if (await page.locator('[data-ep-live-submit]:visible:not([disabled])').count()) {
       const answered = await completeVisibleSession(page, 'diagnostic', 30);
@@ -434,7 +467,8 @@ async function finishStage0(page) {
 
     await page.waitForTimeout(500);
   }
-  throw new Error('P1 Stage0 did not converge in mobile deep QA');
+  report.notes.push({ stage0DidNotConverge: { sessions, totalAnswers, stageTrace } });
+  throw new Error('P1 Stage0 did not converge in mobile deep QA: ' + JSON.stringify({ sessions, totalAnswers, stageTrace }));
 }
 
 async function settleAfterStage0(page) {
