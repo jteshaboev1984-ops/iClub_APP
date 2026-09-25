@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify production AI remains providerless and non-authoritative
+      - name: Verify production AI provider remains gated and non-authoritative
         run: node .github/scripts/p2_74_ai_shadow_safety_regression.js
 
       - name: Validate fixed golden packs and evaluator against verified references

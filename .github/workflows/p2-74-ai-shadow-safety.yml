@@ -168,7 +168,7 @@ jobs:
           node --check .github/scripts/p2_74_ai_shadow_safety_regression.js
           node .github/scripts/p2_74_ai_shadow_safety_regression.js 2>&1 | tee -a p274-ai-shadow.log
 
-      - name: Recheck production Edge Function remains providerless and non-authoritative
+      - name: Recheck dormant provider remains gated and non-authoritative
         shell: bash
         run: |
           set -euo pipefail
@@ -178,9 +178,13 @@ jobs:
           grep -q 'record_exam_prep_ai_audit_service_v1' supabase/functions/exam-prep-ai/index.ts
           grep -q 'model_not_configured' supabase/functions/exam-prep-ai/index.ts
           grep -q 'academic_state_changed: false' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'OPENAI_API_KEY' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'https://api.openai.com/v1/responses' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'OPENAI_MODEL = "gpt-5.6-luna"' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'PROVIDER_ENABLED_INTERACTIONS' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'validateGeneratedMessage' supabase/functions/exam-prep-ai/index.ts
           ! grep -q 'correct_answer' supabase/functions/exam-prep-ai/index.ts
           ! grep -q 'answer_key' supabase/functions/exam-prep-ai/index.ts
-          ! grep -q 'OPENAI_API_KEY' supabase/functions/exam-prep-ai/index.ts
           ! grep -q 'ANTHROPIC_API_KEY' supabase/functions/exam-prep-ai/index.ts
           ! grep -q 'GEMINI_API_KEY' supabase/functions/exam-prep-ai/index.ts
 

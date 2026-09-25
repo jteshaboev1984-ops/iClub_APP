@@ -6,18 +6,22 @@ const assert = (condition, message) => { if (!condition) throw new Error(message
 const edgePath = path.resolve('supabase/functions/exam-prep-ai/index.ts');
 const edgeSource = fs.readFileSync(edgePath, 'utf8');
 
-// Production remains providerless during P2-74. Only the fake provider below is exercised.
+// AI-1 production code may contain a real provider adapter, but it must stay
+// server-only, narrowly scoped and safely dormant behind the existing DB gates.
 for (const forbidden of [
-  'OPENAI_API_KEY',
   'ANTHROPIC_API_KEY',
   'GEMINI_API_KEY',
-  'api.openai.com',
   'api.anthropic.com',
   'generativelanguage.googleapis.com',
 ]) {
-  assert(!edgeSource.includes(forbidden), `real provider dependency appeared during P2-74: ${forbidden}`);
+  assert(!edgeSource.includes(forbidden), `unexpected extra provider dependency appeared during AI-1: ${forbidden}`);
 }
-assert(edgeSource.includes('model_not_configured'), 'production endpoint no longer has transparent providerless fallback');
+assert(edgeSource.includes('OPENAI_API_KEY'), 'AI-1 server-only OpenAI credential hook missing');
+assert(edgeSource.includes('https://api.openai.com/v1/responses'), 'AI-1 pinned OpenAI Responses endpoint missing');
+assert(edgeSource.includes('OPENAI_MODEL = "gpt-5.6-luna"'), 'AI-1 cost-pinned model missing');
+assert(edgeSource.includes('PROVIDER_ENABLED_INTERACTIONS'), 'AI-1 provider interaction allowlist missing');
+assert(edgeSource.includes('validateGeneratedMessage'), 'AI-1 provider output validator missing');
+assert(edgeSource.includes('model_not_configured'), 'production endpoint lost transparent missing-provider fallback');
 assert(edgeSource.includes('academic_state_changed: false'), 'production endpoint lost explicit non-authoritative response contract');
 assert(edgeSource.includes('get_exam_prep_ai_guard_v1'), 'production endpoint no longer uses server AI guard');
 assert(edgeSource.includes('get_exam_prep_ai_source_cards_service_v1'), 'production endpoint no longer uses allowlisted source cards');

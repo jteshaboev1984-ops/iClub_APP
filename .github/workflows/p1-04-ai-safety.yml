@@ -161,7 +161,11 @@ jobs:
           grep -q 'record_exam_prep_ai_audit_service_v1' supabase/functions/exam-prep-ai/index.ts
           ! grep -q 'correct_answer' supabase/functions/exam-prep-ai/index.ts
           ! grep -q 'new_mastery_level' supabase/functions/exam-prep-ai/index.ts
-          ! grep -q 'OPENAI_API_KEY' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'OPENAI_API_KEY' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'https://api.openai.com/v1/responses' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'OPENAI_MODEL = "gpt-5.6-luna"' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'PROVIDER_ENABLED_INTERACTIONS' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'validateGeneratedMessage' supabase/functions/exam-prep-ai/index.ts
 
       - name: Deterministic context boundary contract
         run: node .github/scripts/p1_04_ai_edge_context_contract.js
