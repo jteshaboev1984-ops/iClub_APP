@@ -1,4 +1,5 @@
 name: P2-76 AI Explanation Quality
+# AI-1 isolated funded provider acceptance. This branch never enables learner AI.
 
 on:
   push:
