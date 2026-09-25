@@ -17,6 +17,18 @@ const preciseCh2Ch5 = fs.readFileSync(
   'supabase/migrations/20260925221000_practice_ai4_economics_p1_precise_ch2_ch5_v1.sql',
   'utf8'
 );
+const preciseCh6Ch7 = fs.readFileSync(
+  'supabase/migrations/20260925230000_practice_ai4_economics_p1_precise_ch6_ch7_v1.sql',
+  'utf8'
+);
+const preciseCh8Ch9 = fs.readFileSync(
+  'supabase/migrations/20260925231000_practice_ai4_economics_p1_precise_ch8_ch9_v1.sql',
+  'utf8'
+);
+const preciseCh10Ch11 = fs.readFileSync(
+  'supabase/migrations/20260925232000_practice_ai4_economics_p1_precise_ch10_ch11_v1.sql',
+  'utf8'
+);
 
 for (const token of [
   'get_practice_ai_coverage_snapshot_service_v1',
@@ -73,16 +85,25 @@ assert(
   'Economics P1 topic pack references private answer material'
 );
 
-const preciseSource = preciseCh1 + '\n' + preciseCh2Ch5;
+const preciseSource = [
+  preciseCh1,
+  preciseCh2Ch5,
+  preciseCh6Ch7,
+  preciseCh8Ch9,
+  preciseCh10Ch11,
+].join('\n');
 const preciseKeys = [...preciseSource.matchAll(/practice:economics:p1:precise:[a-z0-9-]+:(?:ru|uz|en):v1/g)].map(m => m[0]);
-assert(preciseKeys.length === 69, `Economics P1 Chapters 1-5 precise pack must contain 69 locale cards, got ${preciseKeys.length}`);
-assert(new Set(preciseKeys).size === 69, 'Economics P1 Chapters 1-5 precise pack contains duplicate source_card_key values');
+assert(preciseKeys.length === 195, `Economics P1 precise pack must contain 195 locale cards, got ${preciseKeys.length}`);
+assert(new Set(preciseKeys).size === 195, 'Economics P1 precise pack contains duplicate source_card_key values');
 assert(
   (preciseCh1.match(/'answer_explanation'/g) || []).length === 24 &&
-  (preciseCh2Ch5.match(/'answer_explanation'/g) || []).length === 45,
+  (preciseCh2Ch5.match(/'answer_explanation'/g) || []).length === 45 &&
+  (preciseCh6Ch7.match(/'answer_explanation'/g) || []).length === 45 &&
+  (preciseCh8Ch9.match(/'answer_explanation'/g) || []).length === 42 &&
+  (preciseCh10Ch11.match(/'answer_explanation'/g) || []).length === 39,
   'Economics P1 precise pack card counts changed unexpectedly'
 );
-for (const src of [preciseCh1, preciseCh2Ch5]) {
+for (const src of [preciseCh1, preciseCh2Ch5, preciseCh6Ch7, preciseCh8Ch9, preciseCh10Ch11]) {
   assert(src.includes("'approved','original_iclub',true"), 'Precise source pack lost approved original_iClub boundary');
   assert(!src.toLowerCase().includes('correct_answer') && !src.toLowerCase().includes('answer_key'),
     'Precise source pack references private answer material');
