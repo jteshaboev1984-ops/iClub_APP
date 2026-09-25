@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - supabase/migrations/20260926014500_practice_ai4_chemistry_p1_atomic_structure_precise_v1.sql
+      - supabase/tests/ai4_chemistry_p1_atomic_structure_precise_fixture.sql
       - supabase/tests/ai4_chemistry_p1_atomic_structure_precise_matrix.sql
       - .github/scripts/ai4_chemistry_p1_atomic_structure_precise_contract.js
       - .github/workflows/ai4-chemistry-p1-atomic-structure-sources.yml
@@ -12,6 +13,7 @@ on:
     branches: [main]
     paths:
       - supabase/migrations/20260926014500_practice_ai4_chemistry_p1_atomic_structure_precise_v1.sql
+      - supabase/tests/ai4_chemistry_p1_atomic_structure_precise_fixture.sql
       - supabase/tests/ai4_chemistry_p1_atomic_structure_precise_matrix.sql
       - .github/scripts/ai4_chemistry_p1_atomic_structure_precise_contract.js
       - .github/workflows/ai4-chemistry-p1-atomic-structure-sources.yml
@@ -63,6 +65,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925211000_practice_ai4_coverage_precision_v2.sql
       - name: Apply Chemistry broad topic source pack
         run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260926013500_practice_ai4_chemistry_p1_topic_source_pack_v1.sql
+      - name: Build Chemistry Atomic structure target fixture
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/ai4_chemistry_p1_atomic_structure_precise_fixture.sql
       - name: Apply Chemistry Atomic structure precise source pack
         run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260926014500_practice_ai4_chemistry_p1_atomic_structure_precise_v1.sql
       - name: Run rollback-only precise source matrix
