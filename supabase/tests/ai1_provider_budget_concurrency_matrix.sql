@@ -168,7 +168,7 @@ BEGIN
 END
 $$;
 
-DO $
+DO $snap$
 DECLARE
   v_snapshot jsonb;
 BEGIN
@@ -183,7 +183,7 @@ BEGIN
     RAISE EXCEPTION 'AI-1 operational snapshot missing provider budget fields: %',v_snapshot;
   END IF;
 END
-$$;
+$snap$;
 
 ROLLBACK;
 
