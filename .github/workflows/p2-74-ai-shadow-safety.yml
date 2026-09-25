@@ -11,6 +11,7 @@ on:
       - supabase/tests/p1_05_ephemeral_legacy_fixture.sql
       - supabase/tests/p2_36_current_schema_replay_compat.sql
       - supabase/tests/p2_74_ai_shadow_safety_matrix.sql
+      - supabase/tests/ai1_provider_budget_concurrency_matrix.sql
       - 'supabase/functions/exam-prep-ai/**'
       - .github/scripts/p2_74_ai_shadow_safety_regression.js
       - .github/workflows/p2-74-ai-shadow-safety.yml
@@ -161,6 +162,14 @@ jobs:
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_74_ai_shadow_safety_matrix.sql 2>&1 | tee -a p274-ai-shadow.log
 
+      - name: Validate atomic provider budget and concurrency guard
+        shell: bash
+        env:
+          PGOPTIONS: '-c p274.isolated_db=true'
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/ai1_provider_budget_concurrency_matrix.sql 2>&1 | tee -a p274-ai-shadow.log
+
       - name: Validate fake-provider shadow safety script
         shell: bash
         run: |
@@ -183,6 +192,8 @@ jobs:
           grep -q 'OPENAI_MODEL = "gpt-5.6-luna"' supabase/functions/exam-prep-ai/index.ts
           grep -q 'PROVIDER_ENABLED_INTERACTIONS' supabase/functions/exam-prep-ai/index.ts
           grep -q 'validateGeneratedMessage' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'reserve_exam_prep_ai_provider_call_service_v1' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'finalize_exam_prep_ai_provider_call_service_v1' supabase/functions/exam-prep-ai/index.ts
           ! grep -q 'correct_answer' supabase/functions/exam-prep-ai/index.ts
           ! grep -q 'answer_key' supabase/functions/exam-prep-ai/index.ts
           ! grep -q 'ANTHROPIC_API_KEY' supabase/functions/exam-prep-ai/index.ts
