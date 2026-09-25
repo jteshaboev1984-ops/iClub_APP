@@ -285,6 +285,7 @@ async function waitForReadySubmitOrRoute(page, timeout = 30000) {
 
 async function answerCurrent(page, strategy = 'diagnostic') {
   await waitForReadySubmitOrRoute(page);
+  if (strategy === 'correction-success') await page.waitForTimeout(90);
   const result = await page.evaluate((mode) => {
     const visible = el => {
       if (!el) return false;
@@ -393,6 +394,42 @@ async function answerCurrent(page, strategy = 'diagnostic') {
       kind = 'input';
     } else if (written) {
       if (mode === 'correction-success') {
+        // Written tasks can carry learner-facing short understanding checks.
+        // Answer them through the visible prompt/option text exactly as a learner
+        // would; never read private correct_index/rationale metadata in-browser.
+        const checkAnswerRules = [
+          [/правильно связывает градусы и радианы|correctly links degrees and radians|gradus va radianlarni/i, /180°\s*=\s*π\s*(рад|rad)/i],
+          [/чему равно \(π\/180\).*\(180\/π\)|what is \(π\/180\).*\(180\/π\)|\(π\/180\).*\(180\/π\).*nimaga teng/i, /^1$/i],
+          [/перевести градусы в радианы.*обратно в градусы|convert degrees to radians.*back to degrees|gradusni radianga.*yana gradusga/i,
+            /исходное значение.*восстановится|original degree value is recovered|boshlang‘ich gradus qiymati.*tiklanadi/i]
+        ];
+        const checks = Array.from(document.querySelectorAll('[data-ep-written-understanding-check]')).filter(visible);
+        for (const check of checks) {
+          const prompt = String(check.querySelector('.ep-live-qtext')?.textContent || '').replace(/\s+/g, ' ').trim();
+          const rule = checkAnswerRules.find(([promptRe]) => promptRe.test(prompt));
+          if (!rule) {
+            return { acted: false, reason: 'qa_understanding_answer_unknown', questionText, checkPrompt: prompt };
+          }
+          const choices = Array.from(check.querySelectorAll('input[type="radio"]')).map((radio, index) => ({
+            radio,
+            index,
+            text: String(radio.closest('label')?.querySelector('span')?.textContent || '').replace(/\s+/g, ' ').trim()
+          }));
+          const choice = choices.find(row => rule[1].test(row.text));
+          if (!choice) {
+            return {
+              acted: false,
+              reason: 'qa_understanding_visible_option_unknown',
+              questionText,
+              checkPrompt: prompt,
+              visibleOptions: choices.map(row => row.text)
+            };
+          }
+          choice.radio.checked = true;
+          choice.radio.dispatchEvent(new Event('input', { bubbles: true }));
+          choice.radio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
         if (/A\(−3,4\).*B\(5,−2\)|A\(−3,4\).*B\(5,−2\)/.test(questionText)) {
           written.value = 'm=(-2-4)/(5-(-3))=-3/4. y=-3x/4+7/4. Equivalent: 3x+4y-7=0. Both A and B satisfy 3x+4y-7=0.';
         } else if (/210°|5π\/9/.test(questionText)) {
@@ -429,6 +466,7 @@ async function answerCurrent(page, strategy = 'diagnostic') {
     if (result?.reason === 'submit_not_ready') return false;
     throw new Error('No answer control on visible question: ' + String(result?.reason || 'unknown') +
       (result?.questionText ? ' | ' + result.questionText : '') +
+      (result?.checkPrompt ? ' | check=' + result.checkPrompt : '') +
       (result?.wanted ? ' | wanted=' + result.wanted : '') +
       (result?.visibleOptions ? ' | options=' + JSON.stringify(result.visibleOptions) : ''));
   }
@@ -987,7 +1025,10 @@ async function attemptCorrectionFlow(page) {
   const plannedCorrections = (Array.isArray(initialPlan?.items) ? initialPlan.items : [])
     .filter(item => item?.status === 'pending' && item?.item_type === 'correction' && item?.correction_case_id)
     .sort((a, b) => Number(a.priority_order || 999) - Number(b.priority_order || 999));
-  const targetPlanItem = plannedCorrections.find(item => supportedSkills.has(String(item.skill_code || '')));
+  const preferredSkills = ['P1-CIR-01','P1-COO-03','P1-COO-02','P1-COO-01','P1-TRI-01'];
+  const targetPlanItem = preferredSkills
+    .map(skill => plannedCorrections.find(item => String(item.skill_code || '') === skill))
+    .find(Boolean) || plannedCorrections.find(item => supportedSkills.has(String(item.skill_code || '')));
   if (!targetPlanItem) {
     return {
       started: false,
