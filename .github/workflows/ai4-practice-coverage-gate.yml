@@ -1,0 +1,86 @@
+name: AI-4 Practice AI Coverage Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/*practice_ai4*.sql'
+      - supabase/tests/ai4_practice_coverage_fixture.sql
+      - supabase/tests/ai4_practice_coverage_matrix.sql
+      - .github/scripts/ai4_practice_coverage_contract.js
+      - .github/workflows/ai4-practice-coverage-gate.yml
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/*practice_ai4*.sql'
+      - supabase/tests/ai4_practice_coverage_fixture.sql
+      - supabase/tests/ai4_practice_coverage_matrix.sql
+      - .github/scripts/ai4_practice_coverage_contract.js
+      - .github/workflows/ai4-practice-coverage-gate.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  practice-ai-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap isolated legacy contract
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql
+
+      - name: Build AI-2 Practice fixture
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/ai2_practice_foundation_fixture.sql
+
+      - name: Add AI-4 coverage fixture schema
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/ai4_practice_coverage_fixture.sql
+
+      - name: Apply Practice AI foundation
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925160000_practice_ai2_foundation_v1.sql
+
+      - name: Apply AI-4 coverage snapshot
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925201500_practice_ai4_coverage_snapshot_v1.sql
+
+      - name: Run rollback-only coverage matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/ai4_practice_coverage_matrix.sql 2>&1 | tee ai4-practice-coverage.log
+
+      - name: Validate service-only count contract
+        run: node .github/scripts/ai4_practice_coverage_contract.js
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai4-practice-coverage
+          path: ai4-practice-coverage.log
+          if-no-files-found: warn
+          retention-days: 7
