@@ -5,7 +5,7 @@ BEGIN;
 CREATE TEMP TABLE ai2_budget_users(user_id uuid primary key) ON COMMIT DROP;
 GRANT SELECT ON ai2_budget_users TO service_role;
 
-DO $
+DO $ai2$
 DECLARE v_uid uuid:=gen_random_uuid();
 BEGIN
   INSERT INTO auth.users(id,aud,role,email,created_at,updated_at,is_sso_user,is_anonymous)
@@ -14,7 +14,7 @@ BEGIN
   VALUES(v_uid,'AI2','Budget Synthetic','en',now(),false);
   INSERT INTO ai2_budget_users VALUES(v_uid);
 END
-$$;
+$ai2$;
 
 DO $$
 BEGIN
