@@ -308,9 +308,10 @@ function conservativeProviderReservationCost(params: {
 }) {
   const instructions = buildProviderInstructions(params);
   const input = buildProviderInput(params.interaction);
-  // Deliberately conservative for short multilingual educational prompts:
-  // assume at most one token per two characters plus a fixed framing margin.
-  const inputTokenUpper = Math.ceil((instructions.length + input.length) / 2) + 128;
+  // Deliberately conservative for multilingual educational prompts:
+  // reserve up to two input tokens per JS character plus a framing margin.
+  // Oversized contexts fail closed at the database per-request cost limit.
+  const inputTokenUpper = ((instructions.length + input.length) * 2) + 256;
   const raw = estimatedCostUsd(inputTokenUpper, OPENAI_MAX_OUTPUT_TOKENS);
   return Math.ceil(raw * 1_000_000) / 1_000_000;
 }
