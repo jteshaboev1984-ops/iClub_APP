@@ -307,54 +307,79 @@ async function answerCurrent(page, strategy = 'diagnostic') {
     if (radios.length) {
       let pickedIndex = 0;
       if (mode === 'correction-success') {
-        // QA-only known-good answers for the approved published learning packs
-        // that can occupy the first controlled-beta P1 weekly priorities.
-        // This does not inspect any protected answer field at runtime; it answers
-        // the same visible learner questions a human would see.
+        // Server-frozen MCQ option order can differ from source order. QA therefore
+        // matches the visible approved question to the visible correct option text
+        // rather than assuming a protected/internal answer index.
         const known = [
-          ['градиентом 2, проходящей через (−1, 4)', 1],
-          ['через точки (1, 2) и (5, 10)', 0],
-          ['градиент −1 и проходит через (3, 5)', 3],
-          ['Переведите 60° в радианы', 1],
-          ['Переведите 7π/12 радиан в градусы', 2],
-          ['Какой угол равен 225° в радианах', 2],
-          ['параллельна y=−4x+7', 1],
-          ['2y=x+6', 1],
-          ['Прямая A проходит через (1,2) и (5,10)', 0],
-          ['Line A passes through (1,2) and (5,10)', 0],
-          ['Gradienti 2 bo‘lgan va (−1, 4)', 1],
-          ['(1, 2) va (5, 10) nuqtalardan', 0],
-          ['gradienti −1 va u (3, 5)', 3],
-          ['60° ni radianlarga', 1],
-          ['7π/12 radianni graduslarga', 2],
-          ['225° ga teng radian', 2],
-          ['y=−4x+7 ga parallel', 1],
-          ['2y=x+6 tenglama', 1],
-          ['A chiziq (1,2) va (5,10)', 0],
+          ['градиентом 2, проходящей через (−1, 4)', 'y = 2x + 6'],
+          ['через точки (1, 2) и (5, 10)', 'y = 2x'],
+          ['градиент −1 и проходит через (3, 5)', 'y = −x + 8'],
+          ['Переведите 60° в радианы', 'π/3'],
+          ['Переведите 7π/12 радиан в градусы', '105°'],
+          ['Какой угол равен 225° в радианах', '5π/4'],
+          ['параллельна y=−4x+7', 'y=−4x−1'],
+          ['2y=x+6', '−2'],
+          ['Прямая A проходит через (1,2) и (5,10)', 'параллельны'],
 
-          ['Найдите расстояние между P(1, 2) и Q(4, 6)', 1],
-          ['В какой точке пересекаются прямые y=2x+1 и y=−x+7', 1],
-          ['градиент прямой через точки (−1, 5) и (3, −3)', 0],
-          ['Find the distance between P(1, 2) and Q(4, 6)', 1],
-          ['The lines y=2x+1 and y=−x+7 intersect', 1],
-          ['gradient of the line through (−1, 5) and (3, −3)', 0],
-          ['P(1, 2) va Q(4, 6) orasidagi masofani', 1],
-          ['y=2x+1 va y=−x+7 chiziqlari', 1],
-          ['(−1, 5) va (3, −3) nuqtalardan', 0],
+          ['Найдите расстояние между P(1, 2) и Q(4, 6)', '5'],
+          ['В какой точке пересекаются прямые y=2x+1 и y=−x+7', '(2,5)'],
+          ['градиент прямой через точки (−1, 5) и (3, −3)', '−2'],
 
-          ['Каков период y=cos x', 2],
-          ['максимальное и минимальное значения графика y=2sin x', 1],
-          ['y=cos x сдвигом вверх на 3', 2],
-          ['What is the period of y=cos x', 2],
-          ['graph y=2sin x has which maximum and minimum', 1],
-          ['y=cos x by translating it upward by 3', 2],
-          ['y=cos x funksiyaning davri', 2],
-          ['y=2sin x grafigining maksimum va minimum', 1],
-          ['y=cos x grafigini 3 birlik yuqoriga', 2]
+          ['Каков период y=cos x', '2π'],
+          ['максимальное и минимальное значения графика y=2sin x', 'максимум 2, минимум −2'],
+          ['y=cos x сдвигом вверх на 3', 'y=cos x+3'],
+
+          ['Find the equation of the line with gradient 2 passing through (−1, 4)', 'y = 2x + 6'],
+          ['Which equation is the line through (1, 2) and (5, 10)', 'y = 2x'],
+          ['gradient −1 and passes through (3, 5)', 'y = −x + 8'],
+          ['Convert 60° to radians', 'π/3'],
+          ['Convert 7π/12 radians to degrees', '105°'],
+          ['angle is equal to 225° in radians', '5π/4'],
+          ['parallel to y=−4x+7', 'y=−4x−1'],
+          ['2y=x+6', '−2'],
+          ['Line A passes through (1,2) and (5,10)', 'parallel'],
+          ['Find the distance between P(1, 2) and Q(4, 6)', '5'],
+          ['lines y=2x+1 and y=−x+7 intersect', '(2,5)'],
+          ['gradient of the line through (−1, 5) and (3, −3)', '−2'],
+          ['period of y=cos x', '2π'],
+          ['y=2sin x has which maximum and minimum', 'maximum 2, minimum −2'],
+          ['y=cos x by translating it upward by 3', 'y=cos x+3'],
+
+          ['Gradienti 2 bo‘lgan va (−1, 4)', 'y = 2x + 6'],
+          ['(1, 2) va (5, 10) nuqtalardan', 'y = 2x'],
+          ['gradienti −1 va u (3, 5)', 'y = −x + 8'],
+          ['60° ni radianlarga', 'π/3'],
+          ['7π/12 radianni graduslarga', '105°'],
+          ['225° ga teng radian', '5π/4'],
+          ['y=−4x+7 ga parallel', 'y=−4x−1'],
+          ['2y=x+6 tenglama', '−2'],
+          ['A chiziq (1,2) va (5,10)', 'parallel'],
+          ['P(1, 2) va Q(4, 6) orasidagi masofani', '5'],
+          ['y=2x+1 va y=−x+7 chiziqlari', '(2,5)'],
+          ['(−1, 5) va (3, −3) nuqtalardan', '−2'],
+          ['y=cos x funksiyaning davri', '2π'],
+          ['y=2sin x grafigining maksimum va minimum', 'maksimum 2, minimum −2'],
+          ['y=cos x grafigini 3 birlik yuqoriga', 'y=cos x+3']
         ];
         const match = known.find(([needle]) => questionText.includes(needle));
         if (!match) return { acted: false, reason: 'qa_success_answer_unknown', questionText };
-        pickedIndex = match[1];
+        const normalize = value => String(value || '').replace(/\s+/g, '').replace(/−/g, '-').toLowerCase();
+        const wanted = normalize(match[1]);
+        const visibleOptions = radios.map((radio, index) => ({
+          index,
+          text: String(radio.closest('label')?.querySelector('span')?.textContent || '').trim()
+        }));
+        const option = visibleOptions.find(row => normalize(row.text) === wanted);
+        if (!option) {
+          return {
+            acted: false,
+            reason: 'qa_success_visible_option_unknown',
+            questionText,
+            wanted: match[1],
+            visibleOptions
+          };
+        }
+        pickedIndex = option.index;
       }
       const input = radios[pickedIndex] || radios[0];
       input.checked = true;
@@ -400,7 +425,9 @@ async function answerCurrent(page, strategy = 'diagnostic') {
   if (!result?.acted) {
     if (result?.reason === 'submit_not_ready') return false;
     throw new Error('No answer control on visible question: ' + String(result?.reason || 'unknown') +
-      (result?.questionText ? ' | ' + result.questionText : ''));
+      (result?.questionText ? ' | ' + result.questionText : '') +
+      (result?.wanted ? ' | wanted=' + result.wanted : '') +
+      (result?.visibleOptions ? ' | options=' + JSON.stringify(result.visibleOptions) : ''));
   }
   await page.waitForTimeout(160);
   return true;
