@@ -36,4 +36,5 @@ jobs:
           git diff --exit-code
 
       - name: Confirm scope
-        run: echo 'GREEN: browser RPC ordering only; no production network, Supabase mutation, user reset, Tours, Practice or certificate changes.'
+        run: |
+          echo 'GREEN: browser RPC ordering only; no production network, Supabase mutation, user reset, Tours, Practice or certificate changes.'
