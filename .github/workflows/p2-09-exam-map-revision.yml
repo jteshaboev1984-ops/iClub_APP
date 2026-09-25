@@ -66,7 +66,7 @@ jobs:
           node --check .github/scripts/p2_09_exam_map_ui_regression.js
           grep -q 'save_exam_prep_exam_profile_v2' exam-prep/exam-prep-api.js
           grep -q 'generate_exam_prep_weekly_plan_safe_v3' exam-prep/exam-prep-api.js
-          grep -q 'exam-prep-exam-map.js?v=p209map1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-exam-map.js?v=p209map2' exam-prep/exam-prep-api.js
           ! grep -q '\.from(' exam-prep/exam-prep-exam-map.js
           ! grep -q 'localStorage' exam-prep/exam-prep-exam-map.js
           ! grep -q 'iclub_state_v1' exam-prep/exam-prep-exam-map.js
