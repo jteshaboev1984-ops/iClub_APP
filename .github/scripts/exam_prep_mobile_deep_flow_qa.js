@@ -418,8 +418,11 @@ async function answerCurrent(page, strategy = 'diagnostic') {
       return { acted: false, reason: 'answer_control_missing' };
     }
 
+    const card = submit.closest('.ep-live-question-card');
+    const headText = String(card?.querySelector('.ep-live-head strong')?.textContent || '').replace(/\s+/g, ' ').trim();
+    const fingerprint = headText + '||' + questionText;
     submit.click();
-    return { acted: true, kind };
+    return { acted: true, kind, fingerprint };
   }, strategy);
 
   if (!result?.acted) {
@@ -429,7 +432,73 @@ async function answerCurrent(page, strategy = 'diagnostic') {
       (result?.wanted ? ' | wanted=' + result.wanted : '') +
       (result?.visibleOptions ? ' | options=' + JSON.stringify(result.visibleOptions) : ''));
   }
-  await page.waitForTimeout(160);
+
+  // A weekly answer intentionally keeps the question on screen while the write
+  // is being confirmed. Count an answer only after that exact actionable
+  // question has stopped being actionable or the app has rendered a new one.
+  // This prevents a fast QA loop from clicking the same visible question again.
+  try {
+    await page.waitForFunction(previousFingerprint => {
+      const visible = el => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      };
+      const root = document.querySelector('#exam-prep-host-root');
+      if (!root || root.hidden) return true;
+
+      const cards = Array.from(root.querySelectorAll('.ep-live-question-card')).filter(card => {
+        if (!visible(card)) return false;
+        if (card.closest('.ep-flow-pending-visual,[data-ep-transition-hold="1"]')) return false;
+        return true;
+      });
+      const card = cards[0] || null;
+      const enabledSubmit = card
+        ? Array.from(card.querySelectorAll('[data-ep-live-submit]')).find(el => visible(el) && !el.disabled)
+        : null;
+      if (!enabledSubmit) return true;
+
+      const head = String(card.querySelector('.ep-live-head strong')?.textContent || '').replace(/\s+/g, ' ').trim();
+      const question = String(card.querySelector('.ep-live-qtext')?.textContent || '').replace(/\s+/g, ' ').trim();
+      return (head + '||' + question) !== previousFingerprint;
+    }, result.fingerprint, { timeout: 45000 });
+  } catch (error) {
+    const snapshot = await page.evaluate(() => {
+      const visible = el => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      };
+      const root = document.querySelector('#exam-prep-host-root');
+      const card = Array.from(root?.querySelectorAll('.ep-live-question-card') || []).find(el =>
+        visible(el) && !el.closest('.ep-flow-pending-visual,[data-ep-transition-hold="1"]'));
+      return {
+        text: String(root?.innerText || '').trim().slice(0, 3000),
+        head: String(card?.querySelector('.ep-live-head strong')?.textContent || '').trim(),
+        question: String(card?.querySelector('.ep-live-qtext')?.textContent || '').trim().slice(0, 1200),
+        submitEnabled: Boolean(Array.from(card?.querySelectorAll('[data-ep-live-submit]') || [])
+          .find(el => visible(el) && !el.disabled)),
+        transitionHold: Boolean(Array.from(root?.querySelectorAll('.ep-flow-pending-visual,[data-ep-transition-hold="1"]') || [])
+          .find(visible)),
+        recovery: Boolean(root?.querySelector('[data-ep-answer-recovery]')),
+        learnerError: String(root?.querySelector('.ep-live-error[role="alert"]')?.textContent || '').trim()
+      };
+    }).catch(() => null);
+    const pending = Array.from(pendingRpcRequests.values()).map(x => ({
+      rpc: x.rpc,
+      ageMs: Date.now() - x.startedAt,
+      method: x.method
+    }));
+    report.notes.push({ answerAdvanceTimeout: { strategy, fingerprint: result.fingerprint, snapshot, pendingRpc: pending } });
+    await shot(page, 'fatal-answer-advance-timeout', true).catch(() => null);
+    throw new Error('Submitted answer did not advance from its actionable question: ' +
+      JSON.stringify({ strategy, fingerprint: result.fingerprint, snapshot, pendingRpc: pending }) +
+      ' :: ' + String(error?.message || error));
+  }
   return true;
 }
 
@@ -437,11 +506,44 @@ async function completeVisibleSession(page, strategy, maxItems = 30) {
   let answered = 0;
   while (answered < maxItems) {
     await waitForReadySubmitOrRoute(page);
-    const submit = page.locator('[data-ep-live-submit]:visible:not([disabled])').first();
-    if (!(await submit.count())) break;
+    const hasSubmit = await page.evaluate(() => {
+      const visible = el => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      };
+      const root = document.querySelector('#exam-prep-host-root');
+      return Array.from(root?.querySelectorAll('.ep-live-question-card [data-ep-live-submit]') || [])
+        .some(el => visible(el) && !el.disabled &&
+          !el.closest('.ep-flow-pending-visual,[data-ep-transition-hold="1"]'));
+    });
+    if (!hasSubmit) break;
     const didAnswer = await answerCurrent(page, strategy);
     if (!didAnswer) break;
     answered += 1;
+  }
+
+  if (answered >= maxItems) {
+    const stillActionable = await page.evaluate(() => {
+      const visible = el => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      };
+      const root = document.querySelector('#exam-prep-host-root');
+      return Array.from(root?.querySelectorAll('.ep-live-question-card [data-ep-live-submit]') || [])
+        .some(el => visible(el) && !el.disabled &&
+          !el.closest('.ep-flow-pending-visual,[data-ep-transition-hold="1"]'));
+    });
+    if (stillActionable) {
+      await shot(page, 'fatal-session-item-guard', true).catch(() => null);
+      throw new Error('Visible session exceeded QA item guard without leaving the question route: ' +
+        JSON.stringify({ strategy, maxItems, answered }));
+    }
   }
   return answered;
 }
