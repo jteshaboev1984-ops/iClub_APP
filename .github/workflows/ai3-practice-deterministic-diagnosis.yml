@@ -1,0 +1,112 @@
+name: AI-3 Practice Deterministic Diagnosis
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/*practice_ai3*.sql'
+      - supabase/tests/ai3_practice_deterministic_diagnosis_matrix.sql
+      - .github/scripts/ai3_practice_deterministic_diagnosis_contract.js
+      - .github/workflows/ai3-practice-deterministic-diagnosis.yml
+      - supabase/functions/practice-ai/**
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/*practice_ai3*.sql'
+      - supabase/tests/ai3_practice_deterministic_diagnosis_matrix.sql
+      - .github/scripts/ai3_practice_deterministic_diagnosis_contract.js
+      - .github/workflows/ai3-practice-deterministic-diagnosis.yml
+      - supabase/functions/practice-ai/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deterministic-diagnosis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap isolated legacy contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql
+
+      - name: Build AI-2 production-shaped Practice fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/ai2_practice_foundation_fixture.sql
+
+      - name: Apply Practice AI foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925160000_practice_ai2_foundation_v1.sql
+
+      - name: Apply Practice AI review context
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925183000_practice_ai2_review_ui_contract_v1.sql
+
+      - name: Apply AI-3 deterministic diagnosis context
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925190000_practice_ai3_deterministic_diagnosis_context_v1.sql
+
+      - name: Run AI-3 rollback-only diagnosis matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/ai3_practice_deterministic_diagnosis_matrix.sql 2>&1 | tee ai3-practice-diagnosis.log
+
+      - name: Validate deterministic diagnosis boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/ai3_practice_deterministic_diagnosis_contract.js
+
+      - name: Type-check Practice AI Edge Function
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Deno check
+        run: deno check supabase/functions/practice-ai/index.ts
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai3-practice-diagnosis
+          path: ai3-practice-diagnosis.log
+          if-no-files-found: warn
+          retention-days: 7
