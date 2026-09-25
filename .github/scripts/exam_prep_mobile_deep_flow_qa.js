@@ -300,8 +300,41 @@ async function answerCurrent(page, strategy = 'diagnostic') {
     const written = Array.from(document.querySelectorAll('textarea[name="ep_live_written_answer"]')).find(visible);
 
     let kind = '';
+    const questionText = String(document.querySelector('.ep-live-qtext')?.textContent || '').replace(/\s+/g, ' ').trim();
+
     if (radios.length) {
-      const input = radios[0];
+      let pickedIndex = 0;
+      if (mode === 'correction-success') {
+        // QA-only known-good answers for the approved published learning packs
+        // that can occupy the first controlled-beta P1 weekly priorities.
+        // This does not inspect any protected answer field at runtime; it answers
+        // the same visible learner questions a human would see.
+        const known = [
+          ['градиентом 2, проходящей через (−1, 4)', 1],
+          ['через точки (1, 2) и (5, 10)', 0],
+          ['градиент −1 и проходит через (3, 5)', 3],
+          ['Переведите 60° в радианы', 1],
+          ['Переведите 7π/12 радиан в градусы', 2],
+          ['Какой угол равен 225° в радианах', 2],
+          ['параллельна y=−4x+7', 1],
+          ['2y=x+6', 1],
+          ['Прямая A проходит через (1,2) и (5,10)', 0],
+          ['Line A passes through (1,2) and (5,10)', 0],
+          ['Gradienti 2 bo‘lgan va (−1, 4)', 1],
+          ['(1, 2) va (5, 10) nuqtalardan', 0],
+          ['gradienti −1 va u (3, 5)', 3],
+          ['60° ni radianlarga', 1],
+          ['7π/12 radianni graduslarga', 2],
+          ['225° ga teng radian', 2],
+          ['y=−4x+7 ga parallel', 1],
+          ['2y=x+6 tenglama', 1],
+          ['A chiziq (1,2) va (5,10)', 0]
+        ];
+        const match = known.find(([needle]) => questionText.includes(needle));
+        if (!match) return { acted: false, reason: 'qa_success_answer_unknown', questionText };
+        pickedIndex = match[1];
+      }
+      const input = radios[pickedIndex] || radios[0];
       input.checked = true;
       input.dispatchEvent(new Event('input', { bubbles: true }));
       input.dispatchEvent(new Event('change', { bubbles: true }));
@@ -312,9 +345,21 @@ async function answerCurrent(page, strategy = 'diagnostic') {
       text.dispatchEvent(new Event('change', { bubbles: true }));
       kind = 'input';
     } else if (written) {
-      written.value = mode === 'force-error'
-        ? 'QA deliberate incorrect response for isolated mobile flow verification.'
-        : 'QA mobile diagnostic response.';
+      if (mode === 'correction-success') {
+        if (/A\(−3,4\).*B\(5,−2\)|A\(−3,4\).*B\(5,−2\)/.test(questionText)) {
+          written.value = 'm=(-2-4)/(5-(-3))=-3/4. y=-3x/4+7/4. Equivalent: 3x+4y-7=0. Both A and B satisfy 3x+4y-7=0.';
+        } else if (/210°|5π\/9/.test(questionText)) {
+          written.value = '210°=210π/180=7π/6. (5π/9)(180/π)=100°. The factors π/180 and 180/π are reciprocals because 180°=π radians.';
+        } else if (/P\(4,−2\)|P=\(4,−2\)/.test(questionText)) {
+          written.value = 'Gradient of L is (10-2)/(3-(-1))=2. A perpendicular line has gradient -1/2. Through P: y+2=-(1/2)(x-4), hence y=-x/2. The gradient product is -1.';
+        } else {
+          written.value = 'QA learner working shown for the approved correction task.';
+        }
+      } else {
+        written.value = mode === 'force-error'
+          ? 'QA deliberate incorrect response for isolated mobile flow verification.'
+          : 'QA mobile diagnostic response.';
+      }
       written.dispatchEvent(new Event('input', { bubbles: true }));
       written.dispatchEvent(new Event('change', { bubbles: true }));
       kind = 'written';
@@ -328,7 +373,8 @@ async function answerCurrent(page, strategy = 'diagnostic') {
 
   if (!result?.acted) {
     if (result?.reason === 'submit_not_ready') return false;
-    throw new Error('No answer control on visible question: ' + String(result?.reason || 'unknown'));
+    throw new Error('No answer control on visible question: ' + String(result?.reason || 'unknown') +
+      (result?.questionText ? ' | ' + result.questionText : ''));
   }
   await page.waitForTimeout(160);
   return true;
@@ -773,7 +819,7 @@ async function attemptCorrectionFlow(page) {
     const learnerError = await page.locator('.ep-live-error[role="alert"]:visible').first().textContent().catch(() => null);
     if (learnerError) throw new Error('Correction action rendered learner error: ' + String(learnerError).trim());
 
-    const answered = await completeVisibleSession(page, 'diagnostic', 30);
+    const answered = await completeVisibleSession(page, 'correction-success', 30);
 
     await page.waitForFunction(() => {
       const visible = el => {
