@@ -71,7 +71,7 @@ BEGIN
   where q.id in (1944,1954,1964,3043)
     and d.quality_status='published'
     and d.answer_kind='input_exact'
-    and public.iclub_normalize_answer(d.answer_value)=public.iclub_normalize_answer(q.correct_answer);
+    and trim(coalesce(d.answer_value,''))=trim(coalesce(q.correct_answer,''));
 
   if v_bad<>4 then
     raise exception 'AI-4 Chemistry Atomic exact input values disagree with server answers: %',v_bad;
