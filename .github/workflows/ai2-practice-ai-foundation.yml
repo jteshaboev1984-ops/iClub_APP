@@ -9,7 +9,13 @@ on:
       - supabase/tests/ai2_practice_foundation_fixture.sql
       - supabase/tests/ai2_practice_foundation_matrix.sql
       - supabase/tests/ai2_practice_provider_budget_matrix.sql
+      - supabase/tests/ai2_practice_review_ui_matrix.sql
+      - practice-ai-ui.js
+      - app.js
+      - index.html
+      - style.css
       - .github/scripts/ai2_practice_edge_contract.js
+      - .github/scripts/ai2_practice_review_ui_contract.js
       - .github/workflows/ai2-practice-ai-foundation.yml
   push:
     branches: [main]
@@ -19,7 +25,13 @@ on:
       - supabase/tests/ai2_practice_foundation_fixture.sql
       - supabase/tests/ai2_practice_foundation_matrix.sql
       - supabase/tests/ai2_practice_provider_budget_matrix.sql
+      - supabase/tests/ai2_practice_review_ui_matrix.sql
+      - practice-ai-ui.js
+      - app.js
+      - index.html
+      - style.css
       - .github/scripts/ai2_practice_edge_contract.js
+      - .github/scripts/ai2_practice_review_ui_contract.js
       - .github/workflows/ai2-practice-ai-foundation.yml
   workflow_dispatch:
 
@@ -103,6 +115,18 @@ jobs:
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/ai2_practice_provider_budget_matrix.sql 2>&1 | tee ai2-practice-provider.log
 
+      - name: Apply AI-2 Practice review UI contract migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925183000_practice_ai2_review_ui_contract_v1.sql
+
+      - name: Run AI-2 Practice review UI matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/ai2_practice_review_ui_matrix.sql 2>&1 | tee ai2-practice-review-ui.log
+
       - name: Run AI-2 rollback-only safety matrix
         shell: bash
         run: |
@@ -114,6 +138,12 @@ jobs:
         run: |
           set -euo pipefail
           node .github/scripts/ai2_practice_edge_contract.js
+
+      - name: Validate Practice AI learner UI boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/ai2_practice_review_ui_contract.js
 
       - name: Type-check Practice AI Edge Function
         uses: denoland/setup-deno@v2
@@ -131,5 +161,6 @@ jobs:
           path: |
             ai2-practice-foundation.log
             ai2-practice-provider.log
+            ai2-practice-review-ui.log
           if-no-files-found: warn
           retention-days: 7
