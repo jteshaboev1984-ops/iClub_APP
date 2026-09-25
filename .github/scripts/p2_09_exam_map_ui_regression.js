@@ -13,6 +13,7 @@ const path = require('path');
 
   await page.evaluate(() => {
     window.__calls = [];
+    window.__dashboardProfileCalls = 0;
     window.__profile = {
       exam_series:'May/June 2027', target_grade:'A',
       total_student_hours_available:12, mathematics_hours_budget:6, active_week_no:12
@@ -31,7 +32,14 @@ const path = require('path');
       window.__calls.push({name,args});
       if (name==='get_exam_prep_capabilities_v1') return {data:[window.__caps],error:null};
       if (name==='get_my_exam_prep_beta_invitation_v1') return {data:{invited:false,invitations:[]},error:null};
-      if (name==='get_exam_prep_exam_profile_v1') return {data:[window.__profile],error:null};
+      if (name==='get_exam_prep_exam_profile_v1') {
+        const dashboard = document.querySelector('.ep-live-dashboard-intro');
+        if (dashboard && !document.querySelector('[data-ep-exam-plan-card]')) {
+          window.__dashboardProfileCalls += 1;
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        return {data:[window.__profile],error:null};
+      }
       if (name==='get_exam_prep_diagnostic_progress_safe_v1') return {data:window.__progress[args.p_component_code],error:null};
       if (name==='get_exam_prep_state_safe_v1') return {data:window.__state[args.p_component_code],error:null};
       if (name==='save_exam_prep_exam_profile_v2') {
@@ -66,7 +74,21 @@ const path = require('path');
     await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});
   });
 
+  await page.waitForFunction(() => window.__dashboardProfileCalls === 1);
+  await page.evaluate(() => {
+    const dashboard = document.querySelector('.ep-live-dashboard-intro');
+    if (!dashboard) throw new Error('dashboard missing before mutation storm');
+    for (let i = 0; i < 120; i += 1) {
+      const marker = document.createElement('span');
+      marker.hidden = true;
+      dashboard.appendChild(marker);
+      marker.remove();
+    }
+  });
   await page.waitForSelector('[data-ep-exam-plan-card]');
+  await page.waitForTimeout(120);
+  const initialDashboardProfileCalls = await page.evaluate(() => window.__dashboardProfileCalls);
+  assert(initialDashboardProfileCalls === 1, `dashboard mutation storm started ${initialDashboardProfileCalls} profile reads; expected exactly 1`);
   let text = await page.locator('#exam-prep-host-root').textContent();
   assert(text.includes('Exam plan'),'exam-plan card missing');
   assert(text.includes('May/June 2027'),'current exam series missing');
