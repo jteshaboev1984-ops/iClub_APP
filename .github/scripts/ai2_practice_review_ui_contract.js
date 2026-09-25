@@ -29,9 +29,12 @@ assert(!ui.includes('localStorage'), 'Practice AI output must not be persisted i
 assert(!ui.includes('correctAnswer') && !ui.includes('correct_answer'), 'Practice AI UI reads answer-key material');
 assert(!ui.includes('sessionStorage'), 'Practice AI output must remain ephemeral');
 
-assert(app.includes('data-practice-ai-attempt-id') || app.includes('practiceAiAttemptId'), 'Practice host does not expose safe attempt id');
+assert(app.includes('practiceAiAttemptId'), 'Practice host does not expose safe attempt id');
 assert(app.includes('practiceAiQuestionId'), 'Practice review rows do not expose safe question ids');
-assert(!app.includes('iclub:practice-ai-context-changed', app.indexOf('correctAnswer')), 'invalid host event contract');
+assert(app.includes('iclub:practice-ai-context-changed'), 'Practice AI host context event missing');
+const bridgeMatch = app.match(/function syncPracticeAiDomContext\(\) \{[\s\S]*?\n  \}\n\n  function showCoursesScreen/);
+assert(bridgeMatch, 'Practice AI host bridge block missing');
+assert(!/correctAnswer|correct_answer|explanation/.test(bridgeMatch[0]), 'Practice AI host bridge leaks answer material');
 
 const appIndex = html.indexOf('app.js?v=');
 const uiIndex = html.indexOf('practice-ai-ui.js?v=ai2review1');
