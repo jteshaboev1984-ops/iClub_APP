@@ -976,14 +976,58 @@ async function openCorrections(page) {
 
 async function attemptCorrectionFlow(page) {
   const steps = [];
+  const supportedSkills = new Set([
+    'P1-CIR-01',
+    'P1-COO-01',
+    'P1-COO-02',
+    'P1-COO-03',
+    'P1-TRI-01'
+  ]);
+  const initialPlan = await readPlan(page);
+  const plannedCorrections = (Array.isArray(initialPlan?.items) ? initialPlan.items : [])
+    .filter(item => item?.status === 'pending' && item?.item_type === 'correction' && item?.correction_case_id)
+    .sort((a, b) => Number(a.priority_order || 999) - Number(b.priority_order || 999));
+  const targetPlanItem = plannedCorrections.find(item => supportedSkills.has(String(item.skill_code || '')));
+  if (!targetPlanItem) {
+    return {
+      started: false,
+      reason: 'no_qa_supported_planned_correction',
+      planned: plannedCorrections.map(item => ({
+        priority: item.priority_order,
+        skill: item.skill_code,
+        caseId: item.correction_case_id
+      })),
+      queue: await readQueue(page)
+    };
+  }
+  const targetCaseId = String(targetPlanItem.correction_case_id);
+  const targetSkill = String(targetPlanItem.skill_code || '');
+  report.notes.push({
+    correctionQaTarget: {
+      priority: targetPlanItem.priority_order,
+      skill: targetSkill,
+      caseId: targetCaseId
+    }
+  });
 
   for (let guard = 0; guard < 6; guard += 1) {
     const queueBefore = await readQueue(page);
     const casesBefore = Array.isArray(queueBefore?.cases) ? queueBefore.cases : [];
-    const waitingBefore = casesBefore.find(x => ['wait_delayed_retest','retest_content_wait'].includes(String(x?.process_step || '')));
-    const readyBefore = casesBefore.find(x => String(x?.process_step || '') === 'delayed_retest');
+    const targetBefore = casesBefore.find(x => String(x?.correction_case_id || '') === targetCaseId);
+    if (!targetBefore) {
+      return { started: steps.length > 0, reason: 'target_correction_missing', targetCaseId, targetSkill, steps, queue: queueBefore };
+    }
+    const waitingBefore = ['wait_delayed_retest','retest_content_wait'].includes(String(targetBefore?.process_step || '')) ? targetBefore : null;
+    const readyBefore = String(targetBefore?.process_step || '') === 'delayed_retest' ? targetBefore : null;
     if (waitingBefore || readyBefore) {
-      return { started: steps.length > 0, steps, queue: queueBefore, reached: waitingBefore ? 'waiting' : 'ready' };
+      return {
+        started: steps.length > 0,
+        targetCaseId,
+        targetSkill,
+        steps,
+        queue: queueBefore,
+        reached: waitingBefore ? 'waiting' : 'ready'
+      };
     }
 
     if (!(await page.locator('[data-ep-views-screen]:visible').count())) {
@@ -991,9 +1035,18 @@ async function attemptCorrectionFlow(page) {
       await openCorrections(page);
     }
 
-    const action = page.locator('[data-ep-flow-correction-action]:visible:not([disabled])').first();
+    const action = page.locator(
+      '[data-ep-flow-correction-action="' + targetCaseId + '"]:visible:not([disabled])'
+    ).first();
     if (!(await action.count())) {
-      return { started: steps.length > 0, reason: 'no_enabled_correction_action', steps, queue: queueBefore };
+      return {
+        started: steps.length > 0,
+        reason: 'no_enabled_target_correction_action',
+        targetCaseId,
+        targetSkill,
+        steps,
+        queue: queueBefore
+      };
     }
 
     const label = String(await action.innerText()).trim();
@@ -1057,17 +1110,34 @@ async function attemptCorrectionFlow(page) {
     steps.push({ label, answered, queue: queueAfter, plan: planAfter });
 
     const casesAfter = Array.isArray(queueAfter?.cases) ? queueAfter.cases : [];
-    const waitingAfter = casesAfter.find(x => ['wait_delayed_retest','retest_content_wait'].includes(String(x?.process_step || '')));
-    const readyAfter = casesAfter.find(x => String(x?.process_step || '') === 'delayed_retest');
+    const targetAfter = casesAfter.find(x => String(x?.correction_case_id || '') === targetCaseId);
+    const waitingAfter = targetAfter && ['wait_delayed_retest','retest_content_wait'].includes(String(targetAfter?.process_step || '')) ? targetAfter : null;
+    const readyAfter = targetAfter && String(targetAfter?.process_step || '') === 'delayed_retest' ? targetAfter : null;
     if (waitingAfter || readyAfter) {
-      return { started: true, steps, queue: queueAfter, plan: planAfter, reached: waitingAfter ? 'waiting' : 'ready' };
+      return {
+        started: true,
+        targetCaseId,
+        targetSkill,
+        steps,
+        queue: queueAfter,
+        plan: planAfter,
+        reached: waitingAfter ? 'waiting' : 'ready'
+      };
     }
 
     await goDashboardThenP1(page);
     await openCorrections(page);
   }
 
-  return { started: true, reason: 'correction_flow_guard_exhausted', steps, queue: await readQueue(page), plan: await readPlan(page) };
+  return {
+    started: true,
+    reason: 'correction_flow_guard_exhausted',
+    targetCaseId,
+    targetSkill,
+    steps,
+    queue: await readQueue(page),
+    plan: await readPlan(page)
+  };
 }
 
 (async () => {
