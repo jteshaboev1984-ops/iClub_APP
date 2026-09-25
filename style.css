@@ -5897,3 +5897,83 @@ body.question-image-modal-open {
     max-height: 300px;
   }
 }
+
+
+/* =========================================================
+   Practice learning assistant — AI-2 dormant learner UI
+   ========================================================= */
+.practice-ai-card{
+  margin: 12px 0 14px;
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid rgba(47,111,214,.18);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.practice-ai-card-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.practice-ai-title{
+  font-size:14px;
+  font-weight:900;
+  color:var(--text);
+}
+
+.practice-ai-note{
+  margin-top:4px;
+  font-size:12px;
+  line-height:1.45;
+  color:var(--muted);
+}
+
+.practice-ai-action,
+.practice-ai-inline-action{
+  min-height:42px;
+  font-weight:800;
+}
+
+.practice-ai-action{
+  width:100%;
+}
+
+.practice-ai-inline{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid var(--border);
+}
+
+.practice-ai-inline-action{
+  min-width:112px;
+}
+
+.practice-ai-output{
+  margin-top:10px;
+  padding:11px 12px;
+  border-radius:12px;
+  background:rgba(47,111,214,.06);
+  border:1px solid rgba(47,111,214,.12);
+  color:var(--text);
+  font-size:13px;
+  line-height:1.5;
+  white-space:pre-wrap;
+}
+
+.practice-ai-output[hidden]{
+  display:none !important;
+}
+
+.practice-ai-inline-output{
+  width:100%;
+}
+
+@media (min-width:560px){
+  .practice-ai-card{
+    padding:16px;
+  }
+}
