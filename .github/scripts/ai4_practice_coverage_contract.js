@@ -9,6 +9,14 @@ const sourcePack = fs.readFileSync(
   'supabase/migrations/20260925212000_practice_ai4_economics_p1_topic_source_pack_v1.sql',
   'utf8'
 );
+const preciseCh1 = fs.readFileSync(
+  'supabase/migrations/20260925220000_practice_ai4_economics_p1_precise_ch1_v1.sql',
+  'utf8'
+);
+const preciseCh2Ch5 = fs.readFileSync(
+  'supabase/migrations/20260925221000_practice_ai4_economics_p1_precise_ch2_ch5_v1.sql',
+  'utf8'
+);
 
 for (const token of [
   'get_practice_ai_coverage_snapshot_service_v1',
@@ -65,4 +73,20 @@ assert(
   'Economics P1 topic pack references private answer material'
 );
 
-console.log('AI-4 Practice AI coverage + Economics P1 topic pack contract: GREEN');
+const preciseSource = preciseCh1 + '\n' + preciseCh2Ch5;
+const preciseKeys = [...preciseSource.matchAll(/practice:economics:p1:precise:[a-z0-9-]+:(?:ru|uz|en):v1/g)].map(m => m[0]);
+assert(preciseKeys.length === 69, `Economics P1 Chapters 1-5 precise pack must contain 69 locale cards, got ${preciseKeys.length}`);
+assert(new Set(preciseKeys).size === 69, 'Economics P1 Chapters 1-5 precise pack contains duplicate source_card_key values');
+assert(
+  (preciseCh1.match(/'answer_explanation'/g) || []).length === 24 &&
+  (preciseCh2Ch5.match(/'answer_explanation'/g) || []).length === 45,
+  'Economics P1 precise pack card counts changed unexpectedly'
+);
+for (const src of [preciseCh1, preciseCh2Ch5]) {
+  assert(src.includes("'approved','original_iclub',true"), 'Precise source pack lost approved original_iClub boundary');
+  assert(!src.toLowerCase().includes('correct_answer') && !src.toLowerCase().includes('answer_key'),
+    'Precise source pack references private answer material');
+  assert(src.includes("encode(digest(convert_to("), 'Precise source pack content hashes are not derived from card bodies');
+}
+
+console.log('AI-4 Practice AI coverage + Economics P1 source packs contract: GREEN');
