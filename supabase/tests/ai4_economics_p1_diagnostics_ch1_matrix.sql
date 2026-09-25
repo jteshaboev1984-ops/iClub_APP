@@ -1,0 +1,92 @@
+\set ON_ERROR_STOP on
+
+BEGIN;
+
+DO $$
+DECLARE
+  v_total integer;
+  v_bad integer;
+  v_sentinel integer;
+BEGIN
+  select count(*) into v_total
+  from public.question_answer_diagnostics
+  where question_id in (1013,1064,1068,1084,1089,1136,1137)
+    and quality_status='published';
+
+  if v_total<>28 then
+    raise exception 'AI-4 Chapter 1 diagnostic row count incorrect: %',v_total;
+  end if;
+
+  select count(*) into v_bad
+  from (
+    select q.id,
+           count(d.*) as mapping_count,
+           count(*) filter (where d.is_correct=true) as correct_mapping_count,
+           count(*) filter (
+             where d.is_correct=false
+               and d.mistake_type is not null
+               and d.weak_skill is not null
+               and nullif(d.feedback_ru,'') is not null
+               and nullif(d.feedback_uz,'') is not null
+               and nullif(d.feedback_en,'') is not null
+               and nullif(d.next_action_ru,'') is not null
+               and nullif(d.next_action_uz,'') is not null
+               and nullif(d.next_action_en,'') is not null
+           ) as safe_wrong_mapping_count
+    from public.questions q
+    join public.question_answer_diagnostics d on d.question_id=q.id and d.quality_status='published'
+    where q.id in (1013,1064,1068,1084,1089,1136,1137)
+    group by q.id
+  ) x
+  where x.mapping_count<>4
+     or x.correct_mapping_count<>1
+     or x.safe_wrong_mapping_count<>3;
+
+  if v_bad<>0 then
+    raise exception 'AI-4 Chapter 1 diagnostics incomplete for target questions: %',v_bad;
+  end if;
+
+  select count(*) into v_bad
+  from public.question_answer_diagnostics d
+  join public.questions q on q.id=d.question_id
+  where q.id in (1013,1064,1068,1084,1089,1136,1137)
+    and d.quality_status='published'
+    and (
+      upper(trim(d.answer_key)) = upper(trim(q.correct_answer))
+    ) is distinct from d.is_correct;
+
+  if v_bad<>0 then
+    raise exception 'AI-4 Chapter 1 diagnostic correctness disagrees with server answer key: %',v_bad;
+  end if;
+
+  select count(*) into v_bad
+  from public.question_answer_diagnostics
+  where question_id in (1013,1064,1068,1084,1089,1136,1137)
+    and quality_status='published'
+    and (
+      answer_kind<>'mcq_option'
+      or answer_key not in ('A','B','C','D')
+      or answer_value is null
+      or recommended_topic is null
+      or recommended_subtopic is null
+    );
+
+  if v_bad<>0 then
+    raise exception 'AI-4 Chapter 1 diagnostic structural contract failed: %',v_bad;
+  end if;
+
+  select count(*) into v_sentinel
+  from public.question_answer_diagnostics
+  where question_id=1135
+    and quality_status='published'
+    and feedback_en like 'existing sentinel%';
+
+  if v_sentinel<>2 then
+    raise exception 'AI-4 Chapter 1 batch mutated existing q1135 diagnostics: %',v_sentinel;
+  end if;
+END
+$$;
+
+ROLLBACK;
+
+\echo 'AI-4 Economics Practice 1 Chapter 1 diagnostic matrix: GREEN'
