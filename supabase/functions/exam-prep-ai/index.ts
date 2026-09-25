@@ -316,7 +316,7 @@ function conservativeProviderReservationCost(params: {
   return Math.ceil(raw * 1_000_000) / 1_000_000;
 }
 
-async function reserveProviderCall(requestId: string, userId: string, estimatedCost: number) {
+async function reserveProviderCall(requestId: string, userId: string, estimatedCost: number): Promise<any> {
   return await rpc("reserve_exam_prep_ai_provider_call_service_v1", {
     p_request_id: requestId,
     p_user_id: userId,
@@ -324,7 +324,7 @@ async function reserveProviderCall(requestId: string, userId: string, estimatedC
   }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
 }
 
-async function finalizeProviderCall(requestId: string, status: "completed" | "released", actualCost: number) {
+async function finalizeProviderCall(requestId: string, status: "completed" | "released", actualCost: number): Promise<any> {
   return await rpc("finalize_exam_prep_ai_provider_call_service_v1", {
     p_request_id: requestId,
     p_status: status,
