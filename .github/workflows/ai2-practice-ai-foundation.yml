@@ -8,6 +8,7 @@ on:
       - 'supabase/functions/practice-ai/**'
       - supabase/tests/ai2_practice_foundation_fixture.sql
       - supabase/tests/ai2_practice_foundation_matrix.sql
+      - supabase/tests/ai2_practice_provider_budget_matrix.sql
       - .github/scripts/ai2_practice_edge_contract.js
       - .github/workflows/ai2-practice-ai-foundation.yml
   push:
@@ -17,6 +18,7 @@ on:
       - 'supabase/functions/practice-ai/**'
       - supabase/tests/ai2_practice_foundation_fixture.sql
       - supabase/tests/ai2_practice_foundation_matrix.sql
+      - supabase/tests/ai2_practice_provider_budget_matrix.sql
       - .github/scripts/ai2_practice_edge_contract.js
       - .github/workflows/ai2-practice-ai-foundation.yml
   workflow_dispatch:
@@ -89,6 +91,18 @@ jobs:
           test "$sources" = '0'
           test "$audits" = '0'
 
+      - name: Apply AI-2 Practice provider guard migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925174500_practice_ai2_provider_budget_guard_v1.sql
+
+      - name: Run AI-2 provider budget/concurrency matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/ai2_practice_provider_budget_matrix.sql 2>&1 | tee ai2-practice-provider.log
+
       - name: Run AI-2 rollback-only safety matrix
         shell: bash
         run: |
@@ -114,6 +128,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ai2-practice-foundation
-          path: ai2-practice-foundation.log
+          path: |
+            ai2-practice-foundation.log
+            ai2-practice-provider.log
           if-no-files-found: warn
           retention-days: 7
