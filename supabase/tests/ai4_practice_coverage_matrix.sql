@@ -69,19 +69,31 @@ BEGIN
   s:=v->'subjects'->0;
   p:=v->'pools'->0;
 
+  IF v->>'coverage_semantics'<>'v2_any_vs_precise' THEN
+    RAISE EXCEPTION 'AI-4 coverage semantics version incorrect: %',v;
+  END IF;
+
   IF (s->>'total_questions')::int<>2
-     OR (s->>'source_ru_questions')::int<>1
-     OR (s->>'source_uz_questions')::int<>1
-     OR (s->>'source_en_questions')::int<>2
-     OR (s->>'source_all_locales_questions')::int<>1
+     OR (s->>'source_any_ru_questions')::int<>2
+     OR (s->>'source_any_uz_questions')::int<>2
+     OR (s->>'source_any_en_questions')::int<>2
+     OR (s->>'source_any_all_locales_questions')::int<>2
+     OR (s->>'source_precise_ru_questions')::int<>1
+     OR (s->>'source_precise_uz_questions')::int<>1
+     OR (s->>'source_precise_en_questions')::int<>2
+     OR (s->>'source_precise_all_locales_questions')::int<>1
      OR (s->>'deterministic_diagnosis_questions')::int<>1
-     OR (s->>'diagnostic_source_ready_questions')::int<>1 THEN
+     OR (s->>'diagnostic_any_source_ready_questions')::int<>1
+     OR (s->>'diagnostic_precise_source_ready_questions')::int<>1 THEN
     RAISE EXCEPTION 'AI-4 subject coverage counts incorrect: %',s;
   END IF;
 
   IF (p->>'tour_no')::int<>1
      OR (p->>'total_questions')::int<>2
-     OR (p->>'diagnostic_source_ready_questions')::int<>1 THEN
+     OR (p->>'source_any_all_locales_questions')::int<>2
+     OR (p->>'source_precise_all_locales_questions')::int<>1
+     OR (p->>'diagnostic_any_source_ready_questions')::int<>1
+     OR (p->>'diagnostic_precise_source_ready_questions')::int<>1 THEN
     RAISE EXCEPTION 'AI-4 pool coverage counts incorrect: %',p;
   END IF;
 
