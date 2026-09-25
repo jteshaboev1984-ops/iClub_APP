@@ -1,0 +1,83 @@
+name: AI-4 Chemistry P1 Electrons Precise Sources
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - supabase/migrations/20260926020500_practice_ai4_chemistry_p1_electrons_precise_v1.sql
+      - supabase/tests/ai4_chemistry_p1_electrons_precise_fixture.sql
+      - supabase/tests/ai4_chemistry_p1_electrons_precise_matrix.sql
+      - .github/scripts/ai4_chemistry_p1_electrons_precise_contract.js
+      - .github/workflows/ai4-chemistry-p1-electrons-precise.yml
+  push:
+    branches: [main]
+    paths:
+      - supabase/migrations/20260926020500_practice_ai4_chemistry_p1_electrons_precise_v1.sql
+      - supabase/tests/ai4_chemistry_p1_electrons_precise_fixture.sql
+      - supabase/tests/ai4_chemistry_p1_electrons_precise_matrix.sql
+      - .github/scripts/ai4_chemistry_p1_electrons_precise_contract.js
+      - .github/workflows/ai4-chemistry-p1-electrons-precise.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  chemistry-p1-electrons-precise:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap isolated legacy contract
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql
+      - name: Build AI-2 Practice fixture
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/ai2_practice_foundation_fixture.sql
+      - name: Add AI-4 coverage fixture schema
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/ai4_practice_coverage_fixture.sql
+      - name: Apply Practice AI foundation
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925160000_practice_ai2_foundation_v1.sql
+      - name: Apply AI-4 coverage snapshot
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925201500_practice_ai4_coverage_snapshot_v1.sql
+      - name: Apply AI-4 precise coverage semantics
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925211000_practice_ai4_coverage_precision_v2.sql
+      - name: Apply Chemistry broad topic source pack
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260926013500_practice_ai4_chemistry_p1_topic_source_pack_v1.sql
+      - name: Build Chemistry Electrons target fixture
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/ai4_chemistry_p1_electrons_precise_fixture.sql
+      - name: Apply Chemistry Electrons precise source pack
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260926020500_practice_ai4_chemistry_p1_electrons_precise_v1.sql
+      - name: Run rollback-only precise source matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/ai4_chemistry_p1_electrons_precise_matrix.sql 2>&1 | tee ai4-chemistry-p1-electrons-precise.log
+      - name: Validate source-only boundary
+        run: node .github/scripts/ai4_chemistry_p1_electrons_precise_contract.js
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai4-chemistry-p1-electrons-precise
+          path: ai4-chemistry-p1-electrons-precise.log
+          if-no-files-found: warn
+          retention-days: 7
