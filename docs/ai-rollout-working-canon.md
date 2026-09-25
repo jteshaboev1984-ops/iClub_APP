@@ -86,4 +86,6 @@ The server decides priorities/actions from canonical learning data. AI only expl
 
 ## Current execution point
 
-AI-1 is first. Provider integration may be merged only while generation remains fail-closed/dormant for real learners. Activation is a separate gated operational step after Core real-beta evidence and AI-specific safety/quality checks.
+AI-1 engineering is complete: the Exam Prep provider adapter, server-side spend/concurrency admission, production-safe Edge deployment and funded provider quality acceptance are GREEN. The funded quality run passed 18/18 cases across P1/P5 and RU/UZ/EN. Real-learner activation remains intentionally on HOLD: production stays AI-off/shadow with zero AI entitlements until the Core real-beta evidence gate and a separate activation decision.
+
+AI-2 is now in implementation. The first substep is a default-off Practice AI safety foundation with server-owned post-answer/result context, approved-source allowlisting, protected-assessment blackout and no model call or UI exposure yet.
