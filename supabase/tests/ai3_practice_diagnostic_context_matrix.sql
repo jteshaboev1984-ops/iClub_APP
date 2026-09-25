@@ -8,6 +8,7 @@ CREATE TEMP TABLE ai3_ids(
   unmapped_answer_id bigint not null,
   correct_answer_id bigint not null
 ) ON COMMIT DROP;
+GRANT SELECT ON ai3_ids TO service_role;
 
 DO $ai3$
 DECLARE
