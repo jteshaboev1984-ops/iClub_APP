@@ -1,6 +1,37 @@
 name: P0-14 Host Regression
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - app.js
+      - index.html
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-host.js
+      - exam-prep/exam-prep-live.js
+      - exam-prep/exam-prep-learner-views.js
+      - exam-prep/exam-prep-overview-placement.js
+      - exam-prep/exam-prep-ai-ui.js
+      - exam-prep/exam-prep-exam-map.js
+      - exam-prep/exam-prep-materials.js
+      - exam-prep/exam-prep-past-paper.js
+      - exam-prep/exam-prep-host.css
+      - exam-prep-preview.html
+      - .github/scripts/p0_14_host_regression.js
+      - .github/scripts/p0_14_legacy_off_regression.js
+      - .github/scripts/p0_17_live_diagnostic_regression.js
+      - .github/scripts/p0_18_live_plan_regression.js
+      - .github/scripts/p0_19_live_timed_readiness_regression.js
+      - .github/scripts/p0_20_live_tracker_corrections_regression.js
+      - .github/scripts/p0_21_live_overview_placement_regression.js
+      - .github/scripts/p0_22_live_view_coexistence_regression.js
+      - .github/scripts/p1_04_ai_ui_regression.js
+      - .github/scripts/p2_03_past_paper_ui_regression.js
+      - .github/scripts/p2_09_exam_map_ui_regression.js
+      - .github/scripts/p2_10_materials_ui_regression.js
+      - .github/scripts/p2_13_stage0_workflow_ui_regression.js
+      - .github/workflows/p0-14-host-regression.yml
   push:
     branches:
       - main
