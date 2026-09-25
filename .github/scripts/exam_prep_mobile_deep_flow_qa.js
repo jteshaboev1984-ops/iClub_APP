@@ -330,7 +330,27 @@ async function answerCurrent(page, strategy = 'diagnostic') {
           ['225° ga teng radian', 2],
           ['y=−4x+7 ga parallel', 1],
           ['2y=x+6 tenglama', 1],
-          ['A chiziq (1,2) va (5,10)', 0]
+          ['A chiziq (1,2) va (5,10)', 0],
+
+          ['Найдите расстояние между P(1, 2) и Q(4, 6)', 1],
+          ['В какой точке пересекаются прямые y=2x+1 и y=−x+7', 1],
+          ['градиент прямой через точки (−1, 5) и (3, −3)', 0],
+          ['Find the distance between P(1, 2) and Q(4, 6)', 1],
+          ['The lines y=2x+1 and y=−x+7 intersect', 1],
+          ['gradient of the line through (−1, 5) and (3, −3)', 0],
+          ['P(1, 2) va Q(4, 6) orasidagi masofani', 1],
+          ['y=2x+1 va y=−x+7 chiziqlari', 1],
+          ['(−1, 5) va (3, −3) nuqtalardan', 0],
+
+          ['Каков период y=cos x', 2],
+          ['максимальное и минимальное значения графика y=2sin x', 1],
+          ['y=cos x сдвигом вверх на 3', 2],
+          ['What is the period of y=cos x', 2],
+          ['graph y=2sin x has which maximum and minimum', 1],
+          ['y=cos x by translating it upward by 3', 2],
+          ['y=cos x funksiyaning davri', 2],
+          ['y=2sin x grafigining maksimum va minimum', 1],
+          ['y=cos x grafigini 3 birlik yuqoriga', 2]
         ];
         const match = known.find(([needle]) => questionText.includes(needle));
         if (!match) return { acted: false, reason: 'qa_success_answer_unknown', questionText };
@@ -354,6 +374,10 @@ async function answerCurrent(page, strategy = 'diagnostic') {
           written.value = '210°=210π/180=7π/6. (5π/9)(180/π)=100°. The factors π/180 and 180/π are reciprocals because 180°=π radians.';
         } else if (/P\(4,−2\)|P=\(4,−2\)/.test(questionText)) {
           written.value = 'Gradient of L is (10-2)/(3-(-1))=2. A perpendicular line has gradient -1/2. Through P: y+2=-(1/2)(x-4), hence y=-x/2. The gradient product is -1.';
+        } else if (/A\(−2,1\).*B\(6,5\)|A\(−2,1\).*B\(6,5\)/.test(questionText)) {
+          written.value = 'Midpoint M=((−2+6)/2,(1+5)/2)=(2,3). AB=sqrt(8^2+4^2)=4sqrt(5). Through M with gradient −1: y−3=−(x−2), so y=−x+5 and C=(0,5).';
+        } else if (/y=2sin x−1|y=2sin x-1/.test(questionText)) {
+          written.value = 'Key points are (0,−1), (π/2,1), (π,−1), (3π/2,−3), (2π,−1). Midline y=−1, maximum 1, minimum −3, amplitude 2. Compared with y=sin x, this is a vertical stretch by 2 and a shift down by 1.';
         } else {
           written.value = 'QA learner working shown for the approved correction task.';
         }
@@ -628,30 +652,94 @@ async function weeklyPlanPresentation(page) {
 }
 
 async function openWeeklyPlan(page) {
-  const opened = await page.evaluate(async () => {
-    const flow = window.iClubExamPrepHostInternal?.learnerFlowUx;
-    if (flow?.openWeeklyPlan) return await flow.openWeeklyPlan('P1');
-    return false;
-  });
-  if (!opened) {
-    await page.evaluate(() => {
-      const b = document.querySelector('[data-ep-live-plan="P1"]');
-      if (b) b.click();
+  // Normalize to the app's stable Exam Prep dashboard before invoking the
+  // learner-flow plan helper. This keeps the QA harness from depending on
+  // whichever post-session/result surface happened to be mounted a moment ago.
+  const alreadyReady = await page.evaluate(() => {
+    const root = document.querySelector('#exam-prep-host-root');
+    return Boolean(root?.querySelector('.ep-pux-week, .ep-live-plan-item'));
+  }).catch(() => false);
+
+  let openResult = { opened: alreadyReady, route: alreadyReady ? 'already-mounted' : 'not-attempted' };
+  if (!alreadyReady) {
+    await page.evaluate(async () => {
+      if (window.iClubExamPrep?.open) {
+        await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'ru' });
+      }
+    }).catch(() => null);
+
+    await page.waitForFunction(() => {
+      const root = document.querySelector('#exam-prep-host-root');
+      if (!root || root.hidden) return false;
+      const card = root.querySelector('[data-ep-live-component="P1"]');
+      return Boolean(card && !card.disabled);
+    }, null, { timeout: 45000 }).catch(() => null);
+
+    openResult = await page.evaluate(async () => {
+      const flow = window.iClubExamPrepHostInternal?.learnerFlowUx;
+      try {
+        if (flow?.openWeeklyPlan) {
+          const ok = await flow.openWeeklyPlan('P1');
+          return { opened: Boolean(ok), route: 'learnerFlowUx' };
+        }
+        const button = document.querySelector('[data-ep-live-plan="P1"]');
+        if (button) {
+          button.click();
+          return { opened: true, route: 'compat-plan-button' };
+        }
+        return { opened: false, route: 'no-plan-route' };
+      } catch (error) {
+        return { opened: false, route: 'exception', error: String(error?.message || error) };
+      }
     });
   }
 
-  await page.waitForFunction(() => {
-    const root = document.querySelector('#exam-prep-host-root');
-    if (!root || root.hidden) return false;
-    if (root.querySelector('.ep-live-error[role="alert"]')) return true;
-    if (root.querySelector('.ep-pux-week')) return true;
-    return Array.from(root.querySelectorAll('.ep-live-plan-item')).some(row => {
-      const cs = getComputedStyle(row);
-      const r = row.getBoundingClientRect();
-      return !row.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
-        r.width > 0 && r.height > 0;
-    });
-  }, null, { timeout: 30000 });
+  try {
+    await page.waitForFunction(() => {
+      const root = document.querySelector('#exam-prep-host-root');
+      if (!root || root.hidden) return false;
+      if (root.querySelector('.ep-live-error[role="alert"]')) return true;
+      if (root.querySelector('.ep-pux-week')) return true;
+      return Array.from(root.querySelectorAll('.ep-live-plan-item')).some(row => {
+        const cs = getComputedStyle(row);
+        const r = row.getBoundingClientRect();
+        return !row.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      });
+    }, null, { timeout: 45000 });
+  } catch (error) {
+    const snapshot = await page.evaluate(() => {
+      const visible = el => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+          r.width > 0 && r.height > 0;
+      };
+      const root = document.querySelector('#exam-prep-host-root');
+      return {
+        text: String(root?.innerText || '').trim().slice(0, 3000),
+        html: String(root?.innerHTML || '').slice(0, 7000),
+        transitionHold: Boolean(Array.from(root?.querySelectorAll('[data-ep-transition-hold="1"], .ep-flow-pending-visual') || []).find(visible)),
+        dashboardP1: Boolean(Array.from(root?.querySelectorAll('[data-ep-live-component="P1"]') || []).find(visible)),
+        componentHome: Boolean(Array.from(root?.querySelectorAll('[data-ep-component-home="P1"]') || []).find(visible)),
+        nativePlanRows: root?.querySelectorAll('.ep-live-plan-item').length || 0,
+        progressPanel: Boolean(root?.querySelector('.ep-pux-week')),
+        learnerError: String(root?.querySelector('.ep-live-error[role="alert"]')?.textContent || '').trim(),
+        weeklyEnabled: window.iClubExamPrepWeeklyFlowEnabled === true,
+        flowVersion: window.iClubExamPrepHostInternal?.learnerFlowUx?.version || null
+      };
+    }).catch(() => null);
+    const pending = Array.from(pendingRpcRequests.values()).map(x => ({
+      rpc: x.rpc,
+      ageMs: Date.now() - x.startedAt,
+      method: x.method
+    }));
+    report.notes.push({ weeklyPlanOpenTimeout: { openResult, snapshot, pendingRpc: pending } });
+    await shot(page, 'fatal-weekly-plan-open-timeout', true).catch(() => null);
+    throw new Error('Weekly plan open timeout: ' + JSON.stringify({ openResult, snapshot, pendingRpc: pending }) +
+      ' :: ' + String(error?.message || error));
+  }
 
   const errorText = await page.locator('.ep-live-error[role="alert"]').first().textContent().catch(() => null);
   if (errorText) throw new Error('Weekly plan rendered learner error: ' + String(errorText).trim());
@@ -670,9 +758,9 @@ async function openWeeklyPlan(page) {
       throw new Error('Verified Progress UX plan still exposes duplicate native rows: ' + JSON.stringify(state));
     }
   } else if (state.visibleOriginalRows < 1) {
-    throw new Error('Weekly plan has no visible learner route: ' + JSON.stringify(state));
+    throw new Error('Weekly plan has no visible learner route: ' + JSON.stringify({ openResult, state }));
   }
-  return state;
+  return Object.assign({ openResult }, state);
 }
 
 async function clickWeeklyAction(page) {
