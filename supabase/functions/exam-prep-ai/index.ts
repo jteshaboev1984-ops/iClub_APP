@@ -299,6 +299,39 @@ function estimatedCostUsd(inputTokens: number, outputTokens: number) {
     + (Math.max(0, outputTokens) / 1_000_000) * OPENAI_OUTPUT_PRICE_PER_MTOK;
 }
 
+function conservativeProviderReservationCost(params: {
+  interaction: string;
+  component: string;
+  locale: string;
+  deterministicContext: any;
+  cards: any[];
+}) {
+  const instructions = buildProviderInstructions(params);
+  const input = buildProviderInput(params.interaction);
+  // Deliberately conservative for multilingual educational prompts:
+  // reserve up to two input tokens per JS character plus a framing margin.
+  // Oversized contexts fail closed at the database per-request cost limit.
+  const inputTokenUpper = ((instructions.length + input.length) * 2) + 256;
+  const raw = estimatedCostUsd(inputTokenUpper, OPENAI_MAX_OUTPUT_TOKENS);
+  return Math.ceil(raw * 1_000_000) / 1_000_000;
+}
+
+async function reserveProviderCall(requestId: string, userId: string, estimatedCost: number): Promise<any> {
+  return await rpc("reserve_exam_prep_ai_provider_call_service_v1", {
+    p_request_id: requestId,
+    p_user_id: userId,
+    p_estimated_cost_usd: estimatedCost,
+  }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
+}
+
+async function finalizeProviderCall(requestId: string, status: "completed" | "released", actualCost: number): Promise<any> {
+  return await rpc("finalize_exam_prep_ai_provider_call_service_v1", {
+    p_request_id: requestId,
+    p_status: status,
+    p_actual_cost_usd: Math.max(0, actualCost),
+  }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
+}
+
 async function callOpenAIProvider(params: {
   interaction: string;
   component: string;
@@ -560,7 +593,37 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  let providerLeaseActive = false;
+  let reservedCostUsd = 0;
+
   try {
+    reservedCostUsd = conservativeProviderReservationCost({
+      interaction,
+      component,
+      locale,
+      deterministicContext,
+      cards,
+    });
+
+    const reservation = await reserveProviderCall(requestId, user.id, reservedCostUsd);
+    if (!reservation?.allowed) {
+      const mode = "fallback";
+      const reason = String(reservation?.reason || "provider_budget_guard_error");
+      const message = learnerMessage(locale, mode, reason);
+      const outputHash = await sha256(message);
+      await audit({
+        requestId, userId: user.id, component, interaction, locale, mode, guard, snapshot,
+        latencyMs: performance.now() - started, deterministicSnapshotHash, fallbackReason: reason,
+        sourceCardKeys, safetyFlags: ["provider_call_not_started", reason], outputHash,
+      }).catch(() => {});
+      return response(200, {
+        request_id: requestId, mode, reason, component_code: component, interaction_type: interaction,
+        locale, message, source_cards: sourceCardKeys, context_bound: Boolean(deterministicContext),
+        generated: false, academic_state_changed: false,
+      });
+    }
+    providerLeaseActive = true;
+
     const provider = await callOpenAIProvider({
       interaction,
       component,
@@ -569,6 +632,11 @@ Deno.serve(async (req: Request) => {
       cards,
       timeoutMs: Number(guard?.model_timeout_ms || 12000),
     });
+
+    const cost = estimatedCostUsd(provider.inputTokens, provider.outputTokens);
+    const accounting = await finalizeProviderCall(requestId, "completed", cost);
+    if (!accounting?.ok) throw new Error("provider_accounting_error");
+    providerLeaseActive = false;
 
     const validation = validateGeneratedMessage({
       message: provider.message,
@@ -584,7 +652,6 @@ Deno.serve(async (req: Request) => {
       const reason = String(validation.reason || "output_validation_failed");
       const message = learnerMessage(locale, mode, reason);
       const outputHash = await sha256(message);
-      const cost = estimatedCostUsd(provider.inputTokens, provider.outputTokens);
       await audit({
         requestId, userId: user.id, component, interaction, locale, mode, guard, snapshot,
         latencyMs: performance.now() - started, deterministicSnapshotHash, fallbackReason: reason,
@@ -602,7 +669,6 @@ Deno.serve(async (req: Request) => {
     const mode = "generated";
     const message = provider.message;
     const outputHash = await sha256(message);
-    const cost = estimatedCostUsd(provider.inputTokens, provider.outputTokens);
     await audit({
       requestId, userId: user.id, component, interaction, locale, mode, guard, snapshot,
       latencyMs: performance.now() - started, deterministicSnapshotHash,
@@ -617,6 +683,11 @@ Deno.serve(async (req: Request) => {
       generated: true, academic_state_changed: false,
     });
   } catch (error) {
+    if (providerLeaseActive) {
+      await finalizeProviderCall(requestId, "released", 0).catch(() => {});
+      providerLeaseActive = false;
+    }
+
     const rawReason = String((error as Error)?.message || "provider_error");
     const reason = [
       "model_not_configured",
@@ -627,6 +698,8 @@ Deno.serve(async (req: Request) => {
       "provider_unavailable",
       "provider_request_failed",
       "provider_empty_output",
+      "provider_accounting_error",
+      "provider_budget_guard_error",
     ].includes(rawReason) ? rawReason : "provider_error";
     const mode = "fallback";
     const message = learnerMessage(locale, mode, reason);
