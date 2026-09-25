@@ -67,6 +67,12 @@ jobs:
       - name: Apply AI-4 coverage snapshot
         run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925201500_practice_ai4_coverage_snapshot_v1.sql
 
+      - name: Apply AI-4 precise coverage semantics
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925211000_practice_ai4_coverage_precision_v2.sql
+
+      - name: Apply Economics Practice 1 topic source pack
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925212000_practice_ai4_economics_p1_topic_source_pack_v1.sql
+
       - name: Run rollback-only coverage matrix
         shell: bash
         run: |
