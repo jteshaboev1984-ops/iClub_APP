@@ -3,8 +3,9 @@
 BEGIN;
 
 CREATE TEMP TABLE ai2_budget_users(user_id uuid primary key) ON COMMIT DROP;
+GRANT SELECT ON ai2_budget_users TO service_role;
 
-DO $$
+DO $
 DECLARE v_uid uuid:=gen_random_uuid();
 BEGIN
   INSERT INTO auth.users(id,aud,role,email,created_at,updated_at,is_sso_user,is_anonymous)
