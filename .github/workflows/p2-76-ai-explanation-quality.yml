@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - hardening/p2-76-ai-explanation-quality
+      - 'qa/ai-provider-acceptance-*'
     paths:
       - '.github/ai-evals/p2_76_golden*_v1.json'
       - '.github/scripts/p2_76_ai_explanation_quality_eval.mjs'
@@ -33,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify production AI provider remains gated and non-authoritative
+      - name: Verify AI provider remains gated and non-authoritative
         run: node .github/scripts/p2_74_ai_shadow_safety_regression.js
 
       - name: Validate fixed golden packs and evaluator against verified references
