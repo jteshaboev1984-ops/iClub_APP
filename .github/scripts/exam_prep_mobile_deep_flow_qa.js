@@ -2,6 +2,8 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 
+// Post-PR172 main validation trigger: screen-scoped learner-flow decoration handoff.
+
 const BASE_URL = process.env.ICLUB_BASE_URL || 'https://i-club-app.vercel.app/';
 const OUT = process.env.ICLUB_DEEP_QA_OUT || 'mobile-deep-flow-artifacts';
 fs.mkdirSync(OUT, { recursive: true });
