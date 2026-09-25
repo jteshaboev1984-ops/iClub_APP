@@ -7,14 +7,20 @@ const assert = (condition, message) => { if (!condition) throw new Error(message
 const guardCall = src.indexOf('get_exam_prep_ai_guard_v1');
 const contextCall = src.indexOf('deterministicContext = await learnerContext');
 const sourceCall = src.indexOf('get_exam_prep_ai_source_cards_service_v1');
+const reservationCall = src.indexOf('await reserveProviderCall');
 const providerCall = src.indexOf('await callOpenAIProvider');
+const finalizeCall = src.indexOf('await finalizeProviderCall');
 assert(guardCall >= 0, 'AI guard call missing');
 assert(contextCall >= 0, 'deterministic learner context call missing');
 assert(sourceCall >= 0, 'approved source-card retrieval missing');
+assert(reservationCall >= 0, 'atomic provider reservation call missing');
 assert(providerCall >= 0, 'AI-1 provider call missing');
+assert(finalizeCall >= 0, 'provider accounting finalizer missing');
 assert(guardCall < contextCall, 'deterministic learner context must be resolved only after the AI guard');
 assert(contextCall < sourceCall, 'approved source cards must be resolved only after deterministic context');
-assert(sourceCall < providerCall, 'provider must be called only after guard, deterministic context and approved source retrieval');
+assert(sourceCall < reservationCall, 'provider budget reservation must follow approved source retrieval');
+assert(reservationCall < providerCall, 'provider must never be called before atomic budget/concurrency reservation');
+assert(providerCall < finalizeCall, 'provider usage must be finalized after the provider call');
 
 for (const rpc of [
   'get_exam_prep_overview_safe_v1',
@@ -52,6 +58,9 @@ assert(src.includes('OPENAI_MODEL = "gpt-5.6-luna"'), 'AI-1 cost-pinned model mi
 assert(src.includes('PROVIDER_ENABLED_INTERACTIONS'), 'AI-1 provider scope allowlist missing');
 assert(src.includes('"progress_summary"') && src.includes('"weekly_plan_narration"'), 'AI-1 provider scope must include progress and weekly plan');
 assert(src.includes('validateGeneratedMessage'), 'provider output validation missing');
+assert(src.includes('reserve_exam_prep_ai_provider_call_service_v1'), 'atomic provider reservation RPC missing');
+assert(src.includes('finalize_exam_prep_ai_provider_call_service_v1'), 'provider accounting finalizer RPC missing');
+assert(src.includes('conservativeProviderReservationCost'), 'conservative provider cost reservation missing');
 assert(src.includes('academic_state_changed: false'), 'AI response lost non-authoritative contract');
 
 console.log('P1-04 AI deterministic context contract: GREEN');
