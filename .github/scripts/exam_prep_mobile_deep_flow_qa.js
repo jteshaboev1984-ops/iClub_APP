@@ -173,13 +173,13 @@ async function readDiagnostic(page) {
   });
 }
 
-async function readQueue(page) {
-  return page.evaluate(async () => {
+async function readQueue(page, component = 'P1') {
+  return page.evaluate(async requestedComponent => {
     const api = window.iClubExamPrepHostInternal?.api;
     if (!api?.correctionQueue) return null;
-    const r = await api.correctionQueue('P1');
+    const r = await api.correctionQueue(requestedComponent);
     return r?.ok ? r.data : { error: r?.reason || 'queue_failed' };
-  });
+  }, component);
 }
 
 async function readPlan(page) {
@@ -1002,6 +1002,8 @@ async function attemptCorrectionFlow(page) {
   await ensureRegistration(page, qaName);
   report.qaUser = { name: qaName, uid: await getUid(page) };
   await openExamPrep(page);
+  const p5QueueBaseline = await readQueue(page, 'P5');
+  report.notes.push({ p5IsolationBaseline: p5QueueBaseline });
   await openP1Home(page);
 
   report.stage0 = await finishStage0(page);
@@ -1074,6 +1076,8 @@ async function attemptCorrectionFlow(page) {
         verifiedProgressUx: document.querySelector('.ep-pux-week')?.dataset.epPuxPrimaryGoals === 'verified',
         visibleWaitingGoals: waitingGoals.length,
         visibleGoalActions: Array.from(document.querySelectorAll('.ep-pux-goal-action')).filter(visible).length,
+        waitingGoalActions: waitingGoals.reduce((sum, goal) =>
+          sum + Array.from(goal.querySelectorAll('.ep-pux-goal-action')).filter(visible).length, 0),
         waitingText: waitingGoals.map(x => String(x.textContent || '').trim()).join(' | ').slice(0, 1800)
       };
     }, retestPriority);
@@ -1092,9 +1096,94 @@ async function attemptCorrectionFlow(page) {
     if (futureRetest && (!retestUi.nativeExists || !retestUi.nativeDisabled)) {
       throw new Error('Future delayed retest is not guarded by a disabled native action: ' + JSON.stringify(retestUi));
     }
+    if (!waiting || waiting.can_start_retest !== false || !waiting.retest_due_at ||
+        !Number.isFinite(Date.parse(waiting.retest_due_at)) || Date.parse(waiting.retest_due_at) <= Date.now()) {
+      throw new Error('Delayed retest waiting contract is not future-guarded: ' + JSON.stringify(waiting));
+    }
     if (retestUi.verifiedProgressUx && retestUi.visibleWaitingGoals < 1) {
       throw new Error('Delayed retest is guarded internally but the learner-facing waiting state is missing: ' + JSON.stringify(retestUi));
     }
+    if (retestUi.verifiedProgressUx && retestUi.waitingGoalActions !== 0) {
+      throw new Error('Too-early delayed retest exposed an actionable learner CTA: ' + JSON.stringify(retestUi));
+    }
+
+    // Real browser back/re-entry proof: leaving the weekly plan through the app's
+    // visible topbar must keep the same learner state, then reopening the plan
+    // must still show the future retest as waiting.
+    const topbarBack = page.locator('#topbar-back:visible:not([disabled])').first();
+    if (!(await topbarBack.count())) throw new Error('Visible topbar Back is missing on delayed-retest plan');
+    await topbarBack.click();
+    await page.waitForSelector('[data-ep-live-component="P1"]', { state: 'visible', timeout: 45000 });
+    const queueAfterBack = await readQueue(page);
+    const waitingAfterBack = (Array.isArray(queueAfterBack?.cases) ? queueAfterBack.cases : [])
+      .find(x => String(x?.correction_case_id || '') === String(waiting.correction_case_id || ''));
+    if (!waitingAfterBack || !['wait_delayed_retest','retest_content_wait'].includes(String(waitingAfterBack.process_step || '')) ||
+        waitingAfterBack.can_start_retest !== false) {
+      throw new Error('Delayed retest state changed after Back: ' + JSON.stringify(waitingAfterBack));
+    }
+    const backReentryPlan = await openWeeklyPlan(page);
+    const waitingAfterBackUi = await page.evaluate(() => {
+      const visible = el => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+      };
+      const rows = Array.from(document.querySelectorAll('.ep-pux-goal-waiting')).filter(visible);
+      return {
+        waitingGoals: rows.length,
+        waitingGoalActions: rows.reduce((sum, row) =>
+          sum + Array.from(row.querySelectorAll('.ep-pux-goal-action')).filter(visible).length, 0)
+      };
+    });
+    if (backReentryPlan.verified && (waitingAfterBackUi.waitingGoals < 1 || waitingAfterBackUi.waitingGoalActions !== 0)) {
+      throw new Error('Delayed retest waiting state did not survive Back/re-entry: ' + JSON.stringify(waitingAfterBackUi));
+    }
+
+    // Real reload/re-entry proof on the SAME QA learner. Never re-register here:
+    // a lost auth/session is a test failure, not a reason to create another user.
+    const uidBeforeReload = report.qaUser?.uid || await getUid(page);
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 45000 });
+    await page.waitForFunction(() => {
+      const reg = document.querySelector('#view-registration');
+      const home = document.querySelector('#view-home');
+      return reg?.classList.contains('is-active') || home?.classList.contains('is-active');
+    }, null, { timeout: 45000 });
+    if (await page.locator('#view-registration.is-active').count()) {
+      throw new Error('QA learner session was lost after refresh; refusing to create a replacement user');
+    }
+    const uidAfterReload = await getUid(page);
+    if (!uidBeforeReload || uidAfterReload !== uidBeforeReload) {
+      throw new Error('QA learner identity changed after refresh: ' + JSON.stringify({ uidBeforeReload, uidAfterReload }));
+    }
+    await openExamPrep(page);
+    const queueAfterRefresh = await readQueue(page);
+    const waitingAfterRefresh = (Array.isArray(queueAfterRefresh?.cases) ? queueAfterRefresh.cases : [])
+      .find(x => String(x?.correction_case_id || '') === String(waiting.correction_case_id || ''));
+    if (!waitingAfterRefresh || !['wait_delayed_retest','retest_content_wait'].includes(String(waitingAfterRefresh.process_step || '')) ||
+        waitingAfterRefresh.can_start_retest !== false) {
+      throw new Error('Delayed retest state changed after refresh/re-entry: ' + JSON.stringify(waitingAfterRefresh));
+    }
+    const refreshPlan = await openWeeklyPlan(page);
+    const refreshUi = await page.evaluate(() => {
+      const visible = el => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return !el.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+      };
+      const rows = Array.from(document.querySelectorAll('.ep-pux-goal-waiting')).filter(visible);
+      return {
+        waitingGoals: rows.length,
+        waitingGoalActions: rows.reduce((sum, row) =>
+          sum + Array.from(row.querySelectorAll('.ep-pux-goal-action')).filter(visible).length, 0)
+      };
+    });
+    if (refreshPlan.verified && (refreshUi.waitingGoals < 1 || refreshUi.waitingGoalActions !== 0)) {
+      throw new Error('Delayed retest waiting state did not survive refresh/re-entry: ' + JSON.stringify(refreshUi));
+    }
+    report.delayedRetest.backReentry = { queue: waitingAfterBack, presentation: backReentryPlan, ui: waitingAfterBackUi };
+    report.delayedRetest.refreshReentry = { uid: uidAfterReload, queue: waitingAfterRefresh, presentation: refreshPlan, ui: refreshUi };
   } else if (retestReady) {
     report.delayedRetest = { state: 'ready', case: retestReady };
   } else {
@@ -1105,6 +1194,28 @@ async function attemptCorrectionFlow(page) {
       note: 'Correction mobile screen is verified; remediation did not yet reach the delayed-retention wait in this black-box UI run.'
     };
   }
+
+  if (report.delayedRetest?.state !== 'waiting') {
+    throw new Error('Deep mobile acceptance requires a future delayed-retest waiting state; got ' + String(report.delayedRetest?.state || 'missing'));
+  }
+
+  const p5QueueAfter = await readQueue(page, 'P5');
+  const compactQueue = value => ({
+    active_count: Number(value?.active_count || 0),
+    cases: (Array.isArray(value?.cases) ? value.cases : []).map(x => ({
+      id: x.correction_case_id,
+      skill: x.skill_code,
+      status: x.status,
+      step: x.process_step,
+      due: x.retest_due_at || null
+    }))
+  });
+  const p5BeforeCompact = compactQueue(p5QueueBaseline);
+  const p5AfterCompact = compactQueue(p5QueueAfter);
+  if (JSON.stringify(p5AfterCompact) !== JSON.stringify(p5BeforeCompact)) {
+    throw new Error('P1 deep flow changed P5 correction state: ' + JSON.stringify({ before: p5BeforeCompact, after: p5AfterCompact }));
+  }
+  report.notes.push({ p5IsolationAfter: p5AfterCompact, unchanged: true });
 
   report.finishedAt = new Date().toISOString();
   fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify(report, null, 2));
