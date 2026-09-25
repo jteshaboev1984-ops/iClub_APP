@@ -79,6 +79,15 @@ jobs:
       - name: Apply Economics Practice 1 precise Chapters 2-5 sources
         run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925221000_practice_ai4_economics_p1_precise_ch2_ch5_v1.sql
 
+      - name: Apply Economics Practice 1 precise Chapters 6-7 sources
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925230000_practice_ai4_economics_p1_precise_ch6_ch7_v1.sql
+
+      - name: Apply Economics Practice 1 precise Chapters 8-9 sources
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925231000_practice_ai4_economics_p1_precise_ch8_ch9_v1.sql
+
+      - name: Apply Economics Practice 1 precise Chapters 10-11 sources
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925232000_practice_ai4_economics_p1_precise_ch10_ch11_v1.sql
+
       - name: Run rollback-only coverage matrix
         shell: bash
         run: |
