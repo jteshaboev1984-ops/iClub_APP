@@ -2,9 +2,11 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p209map1";
+  const VERSION = "p209map2";
   let observer = null;
   let queued = false;
+  let hydrating = false;
+  let hydrateAgain = false;
   let busy = false;
   let pendingNotice = null;
 
@@ -116,12 +118,25 @@
     if (!root || root.hidden || busy || !canUse() || !isDashboard(root)) return;
     if (root.querySelector("[data-ep-exam-plan-card]")) return;
     if (typeof internal.api?.examProfile !== "function") return;
-    // The observer can start overlapping requests. Keep the dashboard identity across the await.
+    if (hydrating) { hydrateAgain = true; return; }
+    // The observer can emit many mutations while one profile read is in flight.
+    // Coalesce them into at most one follow-up hydrate instead of starting
+    // overlapping get_exam_prep_exam_profile_v1 requests.
+    // Keep the dashboard identity across the await.
     const dashboard = root.querySelector(".ep-live-dashboard-intro");
     if (!dashboard) return;
 
+    hydrating = true;
     let result;
-    try { result = await internal.api.examProfile(); } catch (_) { return; }
+    try {
+      result = await internal.api.examProfile();
+    } catch (_) {
+      hydrating = false;
+      if (hydrateAgain) { hydrateAgain = false; queueHydrate(); }
+      return;
+    }
+    hydrating = false;
+    if (hydrateAgain) { hydrateAgain = false; queueHydrate(); }
     const profile = result?.ok ? result.data : null;
     // Never paint a stale, hidden, replaced, unauthorized or already-hydrated view.
     if (!profileComplete(profile) || rootEl() !== root || !root.isConnected || root.hidden ||
@@ -223,6 +238,7 @@
   }
 
   function queueHydrate() {
+    if (hydrating) { hydrateAgain = true; return; }
     if (queued) return;
     queued = true;
     queueMicrotask(hydrate);
