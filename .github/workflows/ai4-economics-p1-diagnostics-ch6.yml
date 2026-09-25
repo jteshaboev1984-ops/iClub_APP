@@ -1,0 +1,55 @@
+name: AI-4 Economics P1 Chapter 6 Diagnostics
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - supabase/migrations/20260926003500_practice_ai4_economics_p1_diagnostics_ch6_v1.sql
+      - supabase/tests/ai4_economics_p1_diagnostics_ch6_fixture.sql
+      - supabase/tests/ai4_economics_p1_diagnostics_ch6_matrix.sql
+      - .github/scripts/ai4_economics_p1_diagnostics_ch6_contract.js
+      - .github/workflows/ai4-economics-p1-diagnostics-ch6.yml
+  push:
+    branches: [main]
+    paths:
+      - supabase/migrations/20260926003500_practice_ai4_economics_p1_diagnostics_ch6_v1.sql
+      - supabase/tests/ai4_economics_p1_diagnostics_ch6_fixture.sql
+      - supabase/tests/ai4_economics_p1_diagnostics_ch6_matrix.sql
+      - .github/scripts/ai4_economics_p1_diagnostics_ch6_contract.js
+      - .github/workflows/ai4-economics-p1-diagnostics-ch6.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  economics-ch6-diagnostics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env: {POSTGRES_PASSWORD: postgres, POSTGRES_USER: postgres, POSTGRES_DB: postgres}
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env: {PGHOST: 127.0.0.1, PGPORT: '5432', PGUSER: postgres, PGPASSWORD: postgres, PGDATABASE: postgres}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap isolated legacy contract
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql
+      - name: Build Economics Chapter 6 diagnostic fixture
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/ai4_economics_p1_diagnostics_ch6_fixture.sql
+      - name: Apply deterministic Chapter 6 diagnostic batch
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260926003500_practice_ai4_economics_p1_diagnostics_ch6_v1.sql
+      - name: Run rollback-only diagnostic matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/ai4_economics_p1_diagnostics_ch6_matrix.sql 2>&1 | tee ai4-econ-ch6-diagnostics.log
+      - name: Validate static mutation boundary
+        run: node .github/scripts/ai4_economics_p1_diagnostics_ch6_contract.js
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with: {name: ai4-econ-ch6-diagnostics, path: ai4-econ-ch6-diagnostics.log, if-no-files-found: warn, retention-days: 7}
