@@ -57,7 +57,6 @@ SET max_daily_requests=10,
     updated_at=now()
 WHERE id=1;
 
-SET LOCAL ROLE service_role;
 
 DO $$
 DECLARE
@@ -98,14 +97,12 @@ BEGIN
 END
 $$;
 
-RESET ROLE;
 
 UPDATE private.exam_prep_ai_policy
 SET max_daily_requests=2,
     updated_at=now()
 WHERE id=1;
 
-SET LOCAL ROLE service_role;
 DO $$
 DECLARE
   v_u1 uuid:=(SELECT user_id FROM ai1_people WHERE person_key='u1');
@@ -117,7 +114,6 @@ BEGIN
   END IF;
 END
 $$;
-RESET ROLE;
 
 UPDATE private.exam_prep_ai_policy
 SET max_daily_requests=10,
@@ -127,7 +123,6 @@ SET max_daily_requests=10,
     updated_at=now()
 WHERE id=1;
 
-SET LOCAL ROLE service_role;
 DO $$
 DECLARE
   v_u2 uuid:=(SELECT user_id FROM ai1_people WHERE person_key='u2');
@@ -151,7 +146,6 @@ BEGIN
   END IF;
 END
 $$;
-RESET ROLE;
 
 UPDATE private.exam_prep_ai_policy
 SET max_daily_requests=10,
@@ -161,7 +155,6 @@ SET max_daily_requests=10,
     updated_at=now()
 WHERE id=1;
 
-SET LOCAL ROLE service_role;
 DO $$
 DECLARE
   v_u1 uuid:=(SELECT user_id FROM ai1_people WHERE person_key='u1');
@@ -174,15 +167,12 @@ BEGIN
   END IF;
 END
 $$;
-RESET ROLE;
 
-DO $$
+DO $
 DECLARE
   v_snapshot jsonb;
 BEGIN
-  SET LOCAL ROLE service_role;
   v_snapshot:=public.get_exam_prep_ai_operational_snapshot_v1();
-  RESET ROLE;
 
   IF v_snapshot#>>'{policy,max_daily_provider_cost_usd}' IS NULL
      OR v_snapshot#>>'{policy,max_user_daily_provider_cost_usd}' IS NULL
