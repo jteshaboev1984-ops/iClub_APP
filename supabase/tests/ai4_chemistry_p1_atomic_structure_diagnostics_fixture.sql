@@ -24,6 +24,23 @@ create table if not exists public.question_answer_diagnostics (
   updated_at timestamptz not null default now()
 );
 
+alter table public.question_answer_diagnostics add column if not exists answer_kind text;
+alter table public.question_answer_diagnostics add column if not exists answer_key text;
+alter table public.question_answer_diagnostics add column if not exists answer_value text;
+alter table public.question_answer_diagnostics add column if not exists weak_skill text;
+alter table public.question_answer_diagnostics add column if not exists feedback_ru text;
+alter table public.question_answer_diagnostics add column if not exists feedback_uz text;
+alter table public.question_answer_diagnostics add column if not exists feedback_en text;
+alter table public.question_answer_diagnostics add column if not exists next_action_ru text;
+alter table public.question_answer_diagnostics add column if not exists next_action_uz text;
+alter table public.question_answer_diagnostics add column if not exists next_action_en text;
+alter table public.question_answer_diagnostics add column if not exists recommended_topic text;
+alter table public.question_answer_diagnostics add column if not exists recommended_subtopic text;
+alter table public.question_answer_diagnostics add column if not exists recommended_lesson_id bigint;
+alter table public.question_answer_diagnostics add column if not exists rule_json jsonb default '{}'::jsonb;
+alter table public.question_answer_diagnostics add column if not exists created_at timestamptz default now();
+alter table public.question_answer_diagnostics add column if not exists updated_at timestamptz default now();
+
 insert into public.subjects(id,subject_key,title,type,is_active)
 values(4,'chemistry','Chemistry','main',true)
 on conflict(id) do update
