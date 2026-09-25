@@ -12353,6 +12353,29 @@ function bindRatingsUI() {
     return s && s.length ? s[s.length - 1] : "all-subjects";
   }
 
+  function syncPracticeAiDomContext() {
+    try {
+      const context = String(state?.courses?.practiceContext || "main");
+      const attempt = context === "main" ? state?.practiceLastAttempt : null;
+      const attemptId = attempt?.db?.ok ? Number(attempt?.db?.attemptId || 0) : 0;
+      const subjectKey = String(attempt?.subjectKey || "").trim();
+
+      ["courses-practice-result", "courses-practice-review"].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (attemptId > 0) {
+          el.dataset.practiceAiAttemptId = String(attemptId);
+          el.dataset.practiceAiSubjectKey = subjectKey;
+        } else {
+          delete el.dataset.practiceAiAttemptId;
+          delete el.dataset.practiceAiSubjectKey;
+        }
+      });
+
+      document.dispatchEvent(new CustomEvent("iclub:practice-ai-context-changed"));
+    } catch {}
+  }
+
   function showCoursesScreen(screenName) {
     COURSES_SCREENS.forEach(sc => {
       const el = $(`#courses-${sc}`);
@@ -12360,6 +12383,9 @@ function bindRatingsUI() {
       el.classList.toggle("is-active", sc === screenName);
     });
     updateTopbarForView("courses");
+    if (screenName === "practice-result" || screenName === "practice-review") {
+      syncPracticeAiDomContext();
+    }
   }
 
     function pushCourses(screenName) {
@@ -18039,6 +18065,7 @@ if (!quiz?.drillType) {
           ...(state.practiceLastAttempt || attempt || {}),
           db: res
         };
+        syncPracticeAiDomContext();
       }
     }
   } catch (e) {
@@ -18267,6 +18294,9 @@ const attempt =
         const row = document.createElement("div");
         row.className = "list-item";
         row.style.marginBottom = "10px";
+        if (Number(d?.id || 0) > 0) {
+          row.dataset.practiceAiQuestionId = String(Number(d.id));
+        }
 
         const status = d.isCorrect ? "✅" : "❌";
         const n = d._idx + 1;

@@ -409,8 +409,19 @@ async function audit(params: {
 async function loadContext(interaction: string, userId: string, payload: any, locale: string) {
   if (interaction === "post_answer_explanation") {
     const sessionId = positiveInt(payload?.session_id);
+    const attemptId = positiveInt(payload?.attempt_id);
     const questionId = positiveInt(payload?.question_id);
-    if (!sessionId || !questionId) throw new Error("invalid_practice_reference");
+    if (!questionId || (!sessionId && !attemptId)) throw new Error("invalid_practice_reference");
+
+    if (attemptId) {
+      return await rpc("get_practice_ai_review_question_context_service_v1", {
+        p_user_id: userId,
+        p_attempt_id: attemptId,
+        p_question_id: questionId,
+        p_locale: locale,
+      }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
+    }
+
     return await rpc("get_practice_ai_answer_context_service_v1", {
       p_user_id: userId,
       p_session_id: sessionId,
