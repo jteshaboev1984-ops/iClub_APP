@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p260focus1";
+  const VERSION = "p260focus2";
   let observer = null;
   let busy = false;
   let activeLanguage = "ru";
@@ -148,51 +148,51 @@
 
   function copy() {
     if (activeLanguage === "uz") return {
-      tracker: "Dastur bo‘yicha progress", corrections: "Xatolar ustida ishlash", overview: "Umumiy ko‘rinish", backTracker: "Progressga qaytish",
+      tracker: "Dastur bo‘yicha progress", corrections: "Diqqat talab qiladigan mavzular", overview: "Umumiy ko‘rinish", backTracker: "Progressga qaytish",
       trackerIntro: "Paper 1 va Paper 5 progressi hamda har bir bo‘lim natijasi alohida ko‘rsatiladi.",
       confirmedCount: "Tasdiqlangan", coverage: "Qamrov", skill: "Ko‘nikma", checks: "Tekshiruvlar",
       noEvidence: "Hali tasdiqlanmagan", developing: "Rivojlanmoqda", confirmed: "Tasdiqlangan", secure: "Barqaror", needsWork: "Tuzatish kerak",
       detail: "Ko‘nikma tafsilotlari", history: "Tekshiruv tarixi", prerequisites: "Tayanch bilimlar", resources: "Manbalar", correctionHistory: "Tuzatish tarixi",
       noneYet: "Hozircha ma’lumot yo‘q.", prerequisite: "Tayanch bilim", unknown: "Tekshirilmagan", blocker: "Mustahkamlash kerak", ready: "Yetarli",
       writtenNote: "Yozma yechimlar alohida saqlanadi. Inson tekshiruvi bo‘lmasa ham asosiy o‘quv yo‘li davom etadi.",
-      openCorrections: "Xatolarni ochish", queueIntro: "Xato → mashq → kechiktirilgan qayta tekshiruv. Xato faqat yangi qayta tekshiruv tasdiqlagandan keyin yopiladi.",
+      openCorrections: "Diqqat talab qiladigan mavzular", queueIntro: "Bu yerda tasdiqlangan xatolar va kirish tekshiruvidan keyin yana tekshirish kerak bo‘lgan mavzular ko‘rsatiladi. Faqat tasdiqlangan xato tuzatish sikliga o‘tadi.",
       noCorrections: "Hozir tuzatish talab qiladigan xato yo‘q.", reviewError: "Xatoni tahlil qilish", analogues: "O‘xshash masalalarda mashq", waitRetest: "Qayta tekshiruvni kutish", delayedRetest: "Qayta tekshirish",
       due: "Qayta tekshiruv", openPlan: "Haftalik rejani ochish", recentResolved: "Yaqinda yopilgan", loading: "Yuklanmoqda…", error: "Ma’lumotni yuklab bo‘lmadi. Qayta urinib ko‘ring.",
       attempt: "Urinish", correct: "To‘g‘ri", incorrect: "Xato", recorded: "Saqlangan", book: "Kitob", pages: "Sahifalar", completedCorrection: "Tuzatish yopilgan",
       autoChecked: "Avtomatik tekshiruv", writtenCompleted: "Yozma ishlar", focusNow: "Hozir diqqatda", later: "Keyinroq",
-      focusFoundation: "Keyingi mavzular uchun asos", focusRepeated: "Takrorlangan qiyinchilik", focusRetest: "Qayta tekshiruv vaqti", focusAttention: "Diqqat talab qiladi",
+      focusFoundation: "Keyingi mavzular uchun asos", focusRepeated: "Takrorlangan qiyinchilik", focusRetest: "Qayta tekshiruv vaqti", focusAttention: "Diqqat talab qiladi", focusSignalFoundation: "Kirish tekshiruvi signali · keyingi mavzular uchun asos", focusSignal: "Kirish tekshiruvi signali · yana tekshirish kerak", confirmSignal: "Yana tekshirish",
       focusIntro: "Tizim hozir eng muhim 5 ta mavzuni ko‘rsatadi. Qolganlari yo‘qolmaydi va navbat bilan qo‘shiladi."
     };
     if (activeLanguage === "en") return {
-      tracker: "Syllabus progress", corrections: "Corrections", overview: "Overview", backTracker: "Back to progress",
+      tracker: "Syllabus progress", corrections: "Needs attention", overview: "Overview", backTracker: "Back to progress",
       trackerIntro: "Paper 1 and Paper 5 progress and each syllabus area are shown separately.",
       confirmedCount: "Confirmed", coverage: "Coverage", skill: "Skill", checks: "Checks",
       noEvidence: "Not yet confirmed", developing: "Developing", confirmed: "Confirmed", secure: "Secure", needsWork: "Needs correction",
       detail: "Skill detail", history: "Check history", prerequisites: "Foundation prerequisites", resources: "Resources", correctionHistory: "Correction history",
       noneYet: "No records yet.", prerequisite: "Prerequisite", unknown: "Not checked", blocker: "Needs work", ready: "Secure",
       writtenNote: "Written solutions are stored separately. Your learning route continues even when no human review is available.",
-      openCorrections: "Open corrections", queueIntro: "Mistake → practice → delayed check. A correction closes only after a new delayed check confirms it.",
+      openCorrections: "Topics needing attention", queueIntro: "This view combines confirmed mistakes with topics that need another check after the entry screening. Only a confirmed mistake enters the correction cycle.",
       noCorrections: "There are no corrections to work on right now.", reviewError: "Review the mistake", analogues: "Practise similar questions", waitRetest: "Wait for the delayed check", delayedRetest: "Check again",
       due: "Check date", openPlan: "Open weekly plan", recentResolved: "Recently completed", loading: "Loading…", error: "Could not load this view. Try again.",
       attempt: "Attempt", correct: "Correct", incorrect: "Incorrect", recorded: "Recorded", book: "Book", pages: "Pages", completedCorrection: "Correction completed",
       autoChecked: "Auto-checked", writtenCompleted: "Written work", focusNow: "In focus now", later: "Later",
-      focusFoundation: "Foundation for later topics", focusRepeated: "Repeated difficulty", focusRetest: "Delayed check due", focusAttention: "Needs attention",
+      focusFoundation: "Foundation for later topics", focusRepeated: "Repeated difficulty", focusRetest: "Delayed check due", focusAttention: "Needs attention", focusSignalFoundation: "Entry-check signal · foundation for later topics", focusSignal: "Entry-check signal · needs confirmation", confirmSignal: "Check again",
       focusIntro: "The system shows up to five highest-priority topics now. The rest stay recorded and move into focus gradually."
     };
     return {
-      tracker: "Прогресс по программе", corrections: "Работа над ошибками", overview: "Обзор", backTracker: "Вернуться к прогрессу",
+      tracker: "Прогресс по программе", corrections: "Требуют внимания", overview: "Обзор", backTracker: "Вернуться к прогрессу",
       trackerIntro: "Прогресс Paper 1 и Paper 5 и результат по каждому разделу программы показаны отдельно.",
       confirmedCount: "Подтверждено", coverage: "Покрытие", skill: "Навык", checks: "Проверок",
       noEvidence: "Пока не подтверждено", developing: "Формируется", confirmed: "Подтверждено", secure: "Уверенно", needsWork: "Нужно исправить",
       detail: "Детали навыка", history: "История проверок", prerequisites: "Базовые знания", resources: "Материалы", correctionHistory: "История исправления",
       noneYet: "Пока данных нет.", prerequisite: "Базовое знание", unknown: "Не проверено", blocker: "Нужно укрепить", ready: "Достаточно",
       writtenNote: "Письменные решения сохраняются отдельно. Отсутствие человеческой проверки не блокирует основной учебный маршрут.",
-      openCorrections: "Открыть работу над ошибками", queueIntro: "Ошибка → практика → отложенная повторная проверка. Исправление закрывается только после нового подтверждения повторной проверкой.",
+      openCorrections: "Темы, требующие внимания", queueIntro: "Здесь вместе показаны подтверждённые ошибки и темы, которые нужно ещё раз проверить после входной диагностики. Только подтверждённая ошибка запускает цикл исправления.",
       noCorrections: "Сейчас нет ошибок, требующих исправления.", reviewError: "Разобрать ошибку", analogues: "Практика на похожих задачах", waitRetest: "Дождаться повторной проверки", delayedRetest: "Проверить ещё раз",
       due: "Повторная проверка", openPlan: "Открыть недельный план", recentResolved: "Недавно закрыто", loading: "Загрузка…", error: "Не удалось загрузить данные. Попробуйте ещё раз.",
       attempt: "Попытка", correct: "Верно", incorrect: "Ошибка", recorded: "Сохранено", book: "Книга", pages: "Страницы", completedCorrection: "Исправление закрыто",
       autoChecked: "Автопроверка", writtenCompleted: "Письменные работы", focusNow: "Сейчас в фокусе", later: "Позже",
-      focusFoundation: "Основа для следующих тем", focusRepeated: "Повторная трудность", focusRetest: "Пора повторно проверить", focusAttention: "Требует внимания",
+      focusFoundation: "Основа для следующих тем", focusRepeated: "Повторная трудность", focusRetest: "Пора повторно проверить", focusAttention: "Требует внимания", focusSignalFoundation: "Сигнал входной проверки · основа для следующих тем", focusSignal: "Сигнал входной проверки · нужно подтвердить", confirmSignal: "Проверить ещё раз",
       focusIntro: "Система показывает сейчас не больше 5 самых важных тем. Остальные сохраняются и будут подключаться постепенно."
     };
   }
@@ -371,12 +371,12 @@
 
   function correctionStepLabel(value) {
     const c = copy();
-    return ({ review_error: c.reviewError, practice_analogues: c.analogues, wait_delayed_retest: c.waitRetest, delayed_retest: c.delayedRetest, retest_content_wait: c.waitRetest })[String(value || "")] || c.reviewError;
+    return ({ review_error: c.reviewError, practice_analogues: c.analogues, wait_delayed_retest: c.waitRetest, delayed_retest: c.delayedRetest, retest_content_wait: c.waitRetest, confirm_signal: c.confirmSignal })[String(value || "")] || c.reviewError;
   }
 
   function focusReasonLabel(value) {
     const c = copy();
-    return ({ foundation_dependency:c.focusFoundation, repeated_gap:c.focusRepeated, retest_due:c.focusRetest, needs_attention:c.focusAttention })[String(value || "")] || c.focusAttention;
+    return ({ foundation_dependency:c.focusFoundation, repeated_gap:c.focusRepeated, retest_due:c.focusRetest, needs_attention:c.focusAttention, diagnostic_signal_foundation:c.focusSignalFoundation, diagnostic_signal:c.focusSignal })[String(value || "")] || c.focusAttention;
   }
 
   async function openCorrections(component) {
