@@ -408,7 +408,7 @@
       return;
     }
     if (status === "use_weekly_plan") {
-      attentionNotice = c.signalWeekly;
+      attentionNotice = "";
       await openWeeklyPlan(component);
       return;
     }
