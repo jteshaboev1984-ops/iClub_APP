@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p251live1";
+  const VERSION = "p260results1";
   let attached = false;
 
   const state = {
@@ -55,7 +55,17 @@
       thresholdPending: "Tanlangan imtihon seriyasi va maqsad baho uchun tayyorgarlik mezoni hali sozlanmagan.", threePapers: "Tayyorgarlik uchun uchta taqqoslanadigan to‘liq ish kerak.", stage4Incomplete: "Vaqt ostidagi mustahkamlash hali yakunlanmagan.", skillsIncomplete: "Ba’zi ko‘nikmalarda barqaror natija hali yetarli emas.", correctionsOpen: "Ba’zi xatolar bo‘yicha tuzatish sikli hali yopilmagan.", belowThreshold: "Oxirgi uchta to‘liq ishning hammasi maqsad darajasiga yetmagan.", unattemptedHigh: "Bajarilmay qolayotgan ballar hali ko‘p.", afterTimeHigh: "Natijaning bir qismi hali vaqt tugagandan keyingi ishga tayanmoqda.",
       dashboardEyebrow: "Sizning yo‘lingiz", dashboardTitle: "P1 va P5 bo‘yicha tayyorgarlik", dashboardText: "Har bir komponent o‘z bosqichi, dalillari va keyingi qadami bilan alohida yuradi.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "ko‘nikma", continueCheck: "Kirish tekshiruvini davom ettirish", profileSaved: "Saqlangan reja", targetShort: "Maqsad", totalShort: "Jami", mathShort: "Matematika", hoursShort: "soat/hafta",
-      actionCloseIssue: "Qolgan asosiy xatoni yoping", actionShort: "Qisqa maqsadli mashq", actionTiming: "Vaqt va imtihon tartibini tekshirish", actionTaper: "Yuklamani kamaytirish va natijani saqlash"
+      actionCloseIssue: "Qolgan asosiy xatoni yoping", actionShort: "Qisqa maqsadli mashq", actionTiming: "Vaqt va imtihon tartibini tekshirish", actionTaper: "Yuklamani kamaytirish va natijani saqlash",
+      assignmentResult: "Topshiriq natijasi", autoChecked: "Avtomatik tekshiriladigan savollar", writtenPart: "Yozma qism",
+      correctOf: "to‘g‘ri", writtenCompleted: "bajarildi", writtenNoAccuracy: "Yozma topshiriqlar to‘g‘ri javoblar foiziga kiritilmaydi.",
+      reviewAnswers: "Javoblarni tahlil qilish", continueResult: "Davom etish", allQuestions: "Barcha savollar", mistakesOnly: "Faqat xatolar",
+      yourResponse: "Sizning javobingiz", correctResponse: "To‘g‘ri javob", why: "Izoh", whatToReview: "Nimani takrorlash kerak",
+      writtenDone: "Bajarildi", writtenNotAuto: "Bu yozma yechim avtomatik baholanmaydi.", understandingCheckLabel: "Tushunishni tekshirish",
+      understandingNotMark: "Bu yozma yechim uchun baho emas.", recentWork: "Oxirgi ish", viewResults: "Natijalarni ko‘rish", history: "Mashg‘ulotlar tarixi",
+      noHistory: "Hali tugallangan ishlar yo‘q.", backToHistory: "Tarixga qaytish", backToComponent: "Mavzuga qaytish",
+      writtenInfoTitle: "Yozma topshiriq", writtenInfoText: "Faqat yakuniy javobni emas, yechim yo‘lini ham ko‘rsating.",
+      writtenCoreText: "Core’da bu yechim avtomatik baholanmaydi va to‘g‘ri javoblar foiziga kirmaydi. Yuborgandan keyin mezonlar bo‘yicha o‘zingizni tekshirishingiz mumkin.",
+      diagnosticResult: "Kirish tekshiruvi", learningResult: "O‘quv topshirig‘i", correctionResult: "Xato ustida ishlash", retestResult: "Qayta tekshiruv", mixedResult: "Aralash mashq"
     };
     if (state.language === "en") return {
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Exam preparation", safe: "Access to this module is protected by personal permission.",
@@ -73,7 +83,17 @@
       thresholdPending: "The readiness threshold for the selected exam series and target grade is not configured yet.", threePapers: "Three comparable full papers are required for readiness.", stage4Incomplete: "Timed consolidation is not complete yet.", skillsIncomplete: "Some skills still need stable evidence.", correctionsOpen: "Some corrective work is still open.", belowThreshold: "The latest three full papers do not all meet the target level.", unattemptedHigh: "Too many marks are still being left unattempted.", afterTimeHigh: "Part of the result still depends on work completed after time.",
       dashboardEyebrow: "Your route", dashboardTitle: "Preparation for P1 and P5", dashboardText: "Each component moves separately with its own phase, evidence and next action.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "skills", continueCheck: "Continue entry check", profileSaved: "Saved plan", targetShort: "Target grade", totalShort: "Total", mathShort: "Mathematics", hoursShort: "h/week",
-      actionCloseIssue: "Close the main remaining issue", actionShort: "Short targeted practice", actionTiming: "Check timing and exam logistics", actionTaper: "Reduce workload and protect performance"
+      actionCloseIssue: "Close the main remaining issue", actionShort: "Short targeted practice", actionTiming: "Check timing and exam logistics", actionTaper: "Reduce workload and protect performance",
+      assignmentResult: "Task result", autoChecked: "Auto-checked questions", writtenPart: "Written part",
+      correctOf: "correct", writtenCompleted: "completed", writtenNoAccuracy: "Written tasks are not included in the correct-answer percentage.",
+      reviewAnswers: "Review answers", continueResult: "Continue", allQuestions: "All questions", mistakesOnly: "Mistakes only",
+      yourResponse: "Your answer", correctResponse: "Correct answer", why: "Explanation", whatToReview: "What to review",
+      writtenDone: "Completed", writtenNotAuto: "This written solution is not marked automatically.", understandingCheckLabel: "Understanding check",
+      understandingNotMark: "This is not a mark for the full written solution.", recentWork: "Latest work", viewResults: "View results", history: "Session history",
+      noHistory: "No completed work yet.", backToHistory: "Back to history", backToComponent: "Back to component",
+      writtenInfoTitle: "Written task", writtenInfoText: "Show your method, not only the final answer.",
+      writtenCoreText: "In Core this solution is not marked automatically and is not included in the correct-answer percentage. After submission you can check it against the criteria.",
+      diagnosticResult: "Entry check", learningResult: "Learning task", correctionResult: "Correction work", retestResult: "Delayed check", mixedResult: "Mixed practice"
     };
     return {
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Подготовка к экзамену", safe: "Доступ к модулю защищён персональным разрешением.",
@@ -91,7 +111,17 @@
       thresholdPending: "Критерий готовности для выбранной экзаменационной сессии и целевой оценки ещё не настроен.", threePapers: "Для готовности нужны три сопоставимые полные работы.", stage4Incomplete: "Этап работы на время ещё не завершён.", skillsIncomplete: "По части навыков ещё не хватает стабильных подтверждений.", correctionsOpen: "По части ошибок цикл исправления ещё не закрыт.", belowThreshold: "Не все три последние полные работы достигли целевого уровня.", unattemptedHigh: "Пока остаётся слишком много невыполненных баллов.", afterTimeHigh: "Часть результата всё ещё зависит от работы после окончания времени.",
       dashboardEyebrow: "Ваш маршрут", dashboardTitle: "Подготовка по P1 и P5", dashboardText: "Каждый компонент идёт отдельно: со своим этапом, подтверждениями и следующим действием.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "навыков", continueCheck: "Продолжить входную проверку", profileSaved: "Сохранённый план", targetShort: "Цель", totalShort: "Всего", mathShort: "Математика", hoursShort: "ч/нед",
-      actionCloseIssue: "Закрыть основную оставшуюся ошибку", actionShort: "Короткая целевая практика", actionTiming: "Проверить время и экзаменационный порядок", actionTaper: "Снизить нагрузку и сохранить форму"
+      actionCloseIssue: "Закрыть основную оставшуюся ошибку", actionShort: "Короткая целевая практика", actionTiming: "Проверить время и экзаменационный порядок", actionTaper: "Снизить нагрузку и сохранить форму",
+      assignmentResult: "Результат задания", autoChecked: "Автопроверяемые вопросы", writtenPart: "Письменная часть",
+      correctOf: "верно", writtenCompleted: "выполнено", writtenNoAccuracy: "Письменные задачи не входят в процент правильных ответов.",
+      reviewAnswers: "Разобрать ответы", continueResult: "Продолжить", allQuestions: "Все вопросы", mistakesOnly: "Только ошибки",
+      yourResponse: "Ваш ответ", correctResponse: "Правильный ответ", why: "Почему", whatToReview: "Что стоит повторить",
+      writtenDone: "Выполнено", writtenNotAuto: "Это письменное решение не оценивается автоматически.", understandingCheckLabel: "Проверка понимания",
+      understandingNotMark: "Это не оценка за всё письменное решение.", recentWork: "Последняя работа", viewResults: "Посмотреть результаты", history: "История занятий",
+      noHistory: "Завершённых работ пока нет.", backToHistory: "Вернуться к истории", backToComponent: "Вернуться к разделу",
+      writtenInfoTitle: "Письменная задача", writtenInfoText: "Покажите ход решения, а не только итоговый ответ.",
+      writtenCoreText: "В Core эта работа не оценивается автоматически и не входит в процент правильных ответов. После отправки вы сможете проверить себя по критериям.",
+      diagnosticResult: "Входная проверка", learningResult: "Учебное задание", correctionResult: "Работа над ошибкой", retestResult: "Повторная проверка", mixedResult: "Смешанная практика"
     };
   }
 
@@ -113,6 +143,95 @@
     if (typeof value === "string") return value;
     if (typeof value === "object" && typeof value.text === "string") return value.text;
     try { return JSON.stringify(value); } catch (_) { return String(value); }
+  }
+
+  function resultTypeLabel(type) {
+    const c = copy();
+    return ({
+      diagnostic:c.diagnosticResult, learning:c.learningResult, retest:c.retestResult,
+      mixed:c.mixedResult
+    })[String(type || "")] || c.assignmentResult;
+  }
+
+  function reviewAnswerText(item, value) {
+    const raw = String(value == null ? "" : value);
+    if (String(item?.qtype || "").toLowerCase() !== "mcq" || !/^[A-Z]$/i.test(raw) || !Array.isArray(item?.options)) return raw;
+    const index = raw.toUpperCase().charCodeAt(0) - 65;
+    const option = item.options[index];
+    return option == null ? raw.toUpperCase() : `${raw.toUpperCase()}. ${String(option)}`;
+  }
+
+  function reviewItemMarkup(item) {
+    const c = copy();
+    if (item?.item_kind === "written") {
+      const understanding = item?.understanding_check;
+      const checks = Array.isArray(understanding?.results) ? understanding.results : [];
+      const checkBlock = understanding?.submitted === true
+        ? `<div class="ep-result-subblock"><strong>${esc(c.understandingCheckLabel)}: ${Number(understanding.correct || 0)} / ${Number(understanding.total || 0)}</strong>${checks.map(row => `<div class="ep-result-check ${row?.is_correct ? "is-correct" : "is-wrong"}">${esc(row?.rationale || "")}</div>`).join("")}<small>${esc(c.understandingNotMark)}</small></div>`
+        : "";
+      return `<article class="ep-result-item is-written" data-ep-result-kind="written"><div class="ep-result-item-head"><strong>${esc(c.question)} ${Number(item.item_order || 0)}</strong><span class="ep-result-status">${esc(c.writtenDone)}</span></div><div class="ep-live-qtext">${esc(item.text || "")}</div><div class="ep-result-subblock"><span>${esc(c.yourResponse)}</span><div class="ep-live-answer">${esc(artifactText(item.learner_artifact))}</div></div><div class="ep-live-notice"><strong>${esc(c.writtenNotAuto)}</strong>${item.written_self_review ? `<div class="ep-live-meta">${esc(item.written_self_review)}</div>` : ""}</div>${checkBlock}</article>`;
+    }
+    const correct = item?.is_correct === true;
+    const explanation = item?.diagnostic_feedback || item?.explanation || "";
+    const next = item?.next_action || "";
+    return `<article class="ep-result-item ${correct ? "is-correct" : "is-wrong"}" data-ep-result-kind="${correct ? "correct" : "wrong"}"><div class="ep-result-item-head"><strong>${esc(c.question)} ${Number(item.item_order || 0)}</strong><span class="ep-result-status">${esc(correct ? c.correct : c.incorrect)}</span></div><div class="ep-live-qtext">${esc(item.text || "")}</div><div class="ep-result-answer-grid"><div><span>${esc(c.yourResponse)}</span><strong>${esc(reviewAnswerText(item,item.selected_answer))}</strong></div><div><span>${esc(c.correctResponse)}</span><strong>${esc(reviewAnswerText(item,item.correct_answer))}</strong></div></div>${explanation ? `<div class="ep-result-subblock"><strong>${esc(c.why)}</strong><div>${esc(explanation)}</div></div>` : ""}${next ? `<div class="ep-result-subblock"><strong>${esc(c.whatToReview)}</strong><div>${esc(next)}</div></div>` : ""}</article>`;
+  }
+
+  async function returnFromResult(component, origin) {
+    if (origin === "history") { await openRecentResults(component); return; }
+    if (origin === "component") { await openComponentHome(component); return; }
+    if (state.returnView?.kind === "component") await openComponentHome(state.returnView.component || component);
+    else if (state.returnView?.kind === "plan") await openPlan(state.returnView.component || component);
+    else await renderDashboard();
+  }
+
+  function renderSessionResult(data, component, origin = "completion", expanded = false, onlyErrors = false) {
+    clearTimer();
+    const root = rootEl(); if (!root) return; const c = copy();
+    const summary = data?.summary || {}, items = Array.isArray(data?.items) ? data.items : [];
+    const machineTotal = Number(summary.machine_total || 0), machineCorrect = Number(summary.machine_correct || 0);
+    const writtenTotal = Number(summary.written_total || 0), writtenDone = Number(summary.written_completed || 0);
+    const accuracy = summary.machine_accuracy_pct == null ? null : Number(summary.machine_accuracy_pct);
+    const machineValue = machineTotal > 0 ? `${machineCorrect} / ${machineTotal} ${esc(c.correctOf)}${Number.isFinite(accuracy) ? ` · ${accuracy.toFixed(0)}%` : ""}` : "—";
+    const writtenValue = writtenTotal > 0 ? `${writtenDone} / ${writtenTotal} ${esc(c.writtenCompleted)}` : "—";
+    const visible = onlyErrors ? items.filter(item => item?.item_kind === "question" && item?.is_correct === false) : items;
+    const review = expanded ? `<section class="ep-result-review"><div class="ep-result-toolbar"><button class="ep-live-btn ${!onlyErrors ? "" : "secondary"}" type="button" data-ep-result-filter="all">${esc(c.allQuestions)}</button><button class="ep-live-btn ${onlyErrors ? "" : "secondary"}" type="button" data-ep-result-filter="wrong">${esc(c.mistakesOnly)}</button></div><div class="ep-result-list">${visible.map(reviewItemMarkup).join("")}</div></section>` : "";
+    const backLabel = origin === "history" ? c.backToHistory : origin === "component" ? c.backToComponent : c.continueResult;
+    root.innerHTML = shell(`<section class="ep-result-screen" data-ep-session-result="${esc(data?.session_id || "")}"><div class="ep-live-card ep-result-summary"><div class="ep-live-head"><div><div class="ep-live-meta">${esc(component)} · ${esc(resultTypeLabel(data?.session_type))}</div><strong>${esc(c.assignmentResult)}</strong></div></div><div class="ep-result-summary-grid"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.autoChecked)}</span><strong>${machineValue}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.writtenPart)}</span><strong>${writtenValue}</strong></div></div>${writtenTotal > 0 ? `<div class="ep-live-notice">${esc(c.writtenNoAccuracy)}</div>` : ""}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-result-review>${esc(c.reviewAnswers)}</button><button class="ep-live-btn secondary" type="button" data-ep-result-continue>${esc(backLabel)}</button></div></div>${review}</section>`, { compact: true });
+    root.querySelector('[data-ep-result-review]')?.addEventListener('click', () => renderSessionResult(data,component,origin,!expanded,onlyErrors));
+    root.querySelector('[data-ep-result-filter="all"]')?.addEventListener('click', () => renderSessionResult(data,component,origin,true,false));
+    root.querySelector('[data-ep-result-filter="wrong"]')?.addEventListener('click', () => renderSessionResult(data,component,origin,true,true));
+    root.querySelector('[data-ep-result-continue]')?.addEventListener('click', () => returnFromResult(component,origin));
+  }
+
+  async function openSessionResult(sessionId, component, origin = "completion") {
+    if (typeof internal.api?.sessionReview !== "function") return false;
+    renderLoading();
+    let result=null;
+    try { result=await internal.api.sessionReview(sessionId,state.language); } catch (_) {}
+    if (!result?.ok || !result.data) return false;
+    renderSessionResult(result.data,component || result.data.component_code,origin,false,false);
+    return true;
+  }
+
+  async function openRecentResults(component) {
+    if (typeof internal.api?.recentResults !== "function") { await openComponentHome(component); return; }
+    renderLoading();
+    let result=null;
+    try { result=await internal.api.recentResults(component,10); } catch (_) {}
+    if (!result?.ok) { renderError(); return; }
+    const root=rootEl(); if (!root) return; const c=copy();
+    const rows=Array.isArray(result.data?.results) ? result.data.results : [];
+    const body=rows.length ? rows.map(row => {
+      const machineTotal=Number(row.machine_total || 0), machineCorrect=Number(row.machine_correct || 0);
+      const written=Number(row.written_total || 0);
+      const score=machineTotal>0 ? `${machineCorrect} / ${machineTotal}` : "—";
+      const writtenBit=written>0 ? ` · ${esc(c.writtenPart)}: ${written}` : "";
+      return `<button class="ep-history-row" type="button" data-ep-history-session="${esc(row.session_id)}"><span><strong>${esc(resultTypeLabel(row.session_type))}</strong><small>${esc(formatDateTime(row.finalized_at))}</small></span><span>${esc(c.autoChecked)}: ${score}${writtenBit}<b aria-hidden="true">›</b></span></button>`;
+    }).join("") : `<div class="ep-live-notice">${esc(c.noHistory)}</div>`;
+    root.innerHTML=shell(`<section class="ep-history-screen"><div class="ep-live-card"><div class="ep-live-head"><strong>${esc(component)} · ${esc(c.history)}</strong><button class="ep-live-btn secondary" type="button" data-ep-history-back>${esc(c.backToComponent)}</button></div><div class="ep-history-list">${body}</div></div></section>`,{compact:true});
+    root.querySelector('[data-ep-history-back]')?.addEventListener('click',()=>openComponentHome(component));
+    root.querySelectorAll('[data-ep-history-session]').forEach(button=>button.addEventListener('click',()=>openSessionResult(button.dataset.epHistorySession,component,"history")));
   }
 
   function shell(body, options = {}) {
@@ -176,7 +295,7 @@
       fixTask: "Xatoni tuzatish", retestTask: "Qayta tekshiruvdan o‘tish", mixedTask: "Aralash mashqni boshlash",
       timedTask: "Vaqtli mashqni boshlash", checkNext: "Keyingi topshiriqni tekshirish",
       waiting: "Qayta tekshiruv vaqti hali kelmagan", noAvailable: "Hozircha yangi topshiriq mavjud emas.",
-      skills: "ko‘nikma", skill: "Ko‘nikma"
+      skills: "ko‘nikma", skill: "Ko‘nikma", focusNow: "hozir diqqatda", later: "keyin", lastResult: "Oxirgi ish", history: "Mashg‘ulotlar tarixi"
     };
     if (state.language === "en") return {
       back: "Your route", next: "Next step", progress: "Progress", topics: "Topics",
@@ -186,7 +305,8 @@
       startTask: "Start task", continueTask: "Continue task", fixTask: "Fix this mistake",
       retestTask: "Take the delayed check", mixedTask: "Start mixed practice", timedTask: "Start timed practice",
       checkNext: "Check next task", waiting: "The delayed check is not available yet",
-      noAvailable: "No new task is available right now.", skills: "skills", skill: "Skill"
+      noAvailable: "No new task is available right now.", skills: "skills", skill: "Skill",
+      focusNow: "in focus now", later: "later", lastResult: "Latest work", history: "Session history"
     };
     return {
       back: "Ваш маршрут", next: "Следующий шаг", progress: "Прогресс", topics: "Темы",
@@ -197,7 +317,7 @@
       retestTask: "Пройти повторную проверку", mixedTask: "Начать смешанную практику",
       timedTask: "Начать работу на время", checkNext: "Проверить следующий шаг",
       waiting: "Повторная проверка ещё не доступна", noAvailable: "Сейчас нет нового доступного задания.",
-      skills: "навыков", skill: "Навык"
+      skills: "навыков", skill: "Навык", focusNow: "сейчас в фокусе", later: "позже", lastResult: "Последняя работа", history: "История занятий"
     };
   }
 
@@ -352,20 +472,27 @@
     const denominator = Number(tracker?.denominator_count || (component === "P1" ? 45 : 36));
     const covered = Number(tracker?.coverage_count || 0);
     const coverage = Number(tracker?.coverage_pct ?? summary?.coverage_pct ?? 0);
-    const corrections = Number(payload.queue?.active_count || 0);
+    const corrections = Number(payload.queue?.focus_count ?? Math.min(5, Number(payload.queue?.active_count || 0)));
+    const deferredCorrections = Number(payload.queue?.deferred_count || 0);
+    const recentRows = Array.isArray(payload.recent?.results) ? payload.recent.results : [];
+    const lastResult = recentRows[0] || null;
     const diagnosticComplete = payload.progress?.stage0_complete === true;
     const action = primaryAction(component, payload.progress, summary, tracker, payload.plan, payload.recovery, payload.weeklyProgress);
     const componentName = component === "P1" ? c.componentP1 : c.componentP5;
-    const attention = diagnosticComplete && corrections > 0 ? `<button class="ep-component-link" type="button" data-ep-component-link="corrections"><span><strong>${esc(home.attention)}</strong><small>${corrections}</small></span><span aria-hidden="true">›</span></button>` : "";
+    const attention = diagnosticComplete && corrections > 0 ? `<button class="ep-component-link" type="button" data-ep-component-link="corrections"><span><strong>${esc(home.attention)}</strong><small>${corrections} ${esc(home.focusNow)}${deferredCorrections > 0 ? ` · +${deferredCorrections} ${esc(home.later)}` : ""}</small></span><span aria-hidden="true">›</span></button>` : "";
+    const lastResultCard = lastResult ? `<section class="ep-component-last-result"><div><span class="ep-component-section-label">${esc(home.lastResult)}</span><strong>${esc(resultTypeLabel(lastResult.session_type))}</strong><small>${lastResult.machine_total > 0 ? `${Number(lastResult.machine_correct || 0)} / ${Number(lastResult.machine_total || 0)} ${esc(c.correctOf)}` : esc(c.writtenPart)}</small></div><button class="ep-live-btn secondary" type="button" data-ep-component-last-result="${esc(lastResult.session_id)}">${esc(c.viewResults)}</button></section>` : "";
+    const history = lastResult ? `<button class="ep-component-link" type="button" data-ep-component-link="history"><span><strong>${esc(home.history)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     const timed = stage >= 2 ? `<button class="ep-component-link" type="button" data-ep-component-link="timed"><span><strong>${esc(home.timed)}</strong><small>${esc(stageLabel(stage))}</small></span><span aria-hidden="true">›</span></button>` : "";
     const readiness = stage >= 5 ? `<button class="ep-component-link" type="button" data-ep-component-link="readiness"><span><strong>${esc(home.readiness)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     const materials = internal.materialsView?.openMaterials ? `<button class="ep-component-link" type="button" data-ep-component-link="materials"><span><strong>${esc(home.materials)}</strong></span><span aria-hidden="true">›</span></button>` : "";
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-component-home" data-ep-component-home="${component}"><button class="ep-component-back" type="button" data-ep-component-back>← ${esc(home.back)}</button><header class="ep-component-hero"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${denominator} ${esc(home.skills)}</span></div></div><span class="ep-stage-pill">${esc(c.stageTitle)}: ${esc(stageLabel(stage))}</span></header><section class="ep-component-next"><div class="ep-component-section-label">${esc(home.next)}</div><strong class="ep-component-next-title">${esc(action.title)}</strong><div class="ep-live-meta">${esc(action.detail)}</div><button class="ep-live-btn ep-component-primary" type="button" data-ep-component-primary="${esc(action.kind)}" ${action.kind === "waiting" ? "disabled" : ""}>${esc(action.label)}</button></section><section class="ep-component-progress-card"><div class="ep-component-section-head"><strong>${esc(home.progress)}</strong><span>${covered} / ${denominator}</span></div><div class="ep-live-progress"><span style="width:${Math.max(0, Math.min(100, coverage))}%"></span></div><div class="ep-live-meta">${esc(c.coverage)}: ${coverage.toFixed(0)}%</div></section><section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section><section class="ep-component-links">${attention}${timed}${readiness}${materials}</section></section>`, { compact: true });
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-component-home" data-ep-component-home="${component}"><button class="ep-component-back" type="button" data-ep-component-back>← ${esc(home.back)}</button><header class="ep-component-hero"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${denominator} ${esc(home.skills)}</span></div></div><span class="ep-stage-pill">${esc(c.stageTitle)}: ${esc(stageLabel(stage))}</span></header><section class="ep-component-next"><div class="ep-component-section-label">${esc(home.next)}</div><strong class="ep-component-next-title">${esc(action.title)}</strong><div class="ep-live-meta">${esc(action.detail)}</div><button class="ep-live-btn ep-component-primary" type="button" data-ep-component-primary="${esc(action.kind)}" ${action.kind === "waiting" ? "disabled" : ""}>${esc(action.label)}</button></section><section class="ep-component-progress-card"><div class="ep-component-section-head"><strong>${esc(home.progress)}</strong><span>${covered} / ${denominator}</span></div><div class="ep-live-progress"><span style="width:${Math.max(0, Math.min(100, coverage))}%"></span></div><div class="ep-live-meta">${esc(c.coverage)}: ${coverage.toFixed(0)}%</div></section>${lastResultCard}<section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section><section class="ep-component-links">${attention}${history}${timed}${readiness}${materials}</section></section>`, { compact: true });
     state.notice = null;
     root.querySelector("[data-ep-component-back]")?.addEventListener("click", renderDashboard);
     root.querySelector("[data-ep-component-primary]")?.addEventListener("click", () => handleComponentPrimary(component, action));
     root.querySelectorAll("[data-ep-component-skill]").forEach(button => button.addEventListener("click", () => internal.learnerViews?.openSkill?.(component, button.dataset.epComponentSkill)));
     root.querySelector('[data-ep-component-link="corrections"]')?.addEventListener("click", () => internal.learnerViews?.openCorrections?.(component));
+    root.querySelector('[data-ep-component-last-result]')?.addEventListener("click", button => openSessionResult(button.currentTarget.dataset.epComponentLastResult,component,"component"));
+    root.querySelector('[data-ep-component-link="history"]')?.addEventListener("click", () => openRecentResults(component));
     root.querySelector('[data-ep-component-link="timed"]')?.addEventListener("click", () => openTimed(component));
     root.querySelector('[data-ep-component-link="readiness"]')?.addEventListener("click", () => openReadiness(component));
     root.querySelector('[data-ep-component-link="materials"]')?.addEventListener("click", () => internal.materialsView?.openMaterials?.(component));
@@ -392,11 +519,12 @@
       ? await internal.api.getState(component)
       : { ok: true, data: null };
     if (!stateResult?.ok) { state.busy = false; renderError(); return; }
-    const [trackerResult, queueResult, planResult, recoveryResult] = await Promise.all([
+    const [trackerResult, queueResult, planResult, recoveryResult, recentResult] = await Promise.all([
       typeof internal.api.syllabusTracker === "function" ? internal.api.syllabusTracker(component).catch(() => null) : Promise.resolve(null),
       typeof internal.api.correctionQueue === "function" ? internal.api.correctionQueue(component).catch(() => null) : Promise.resolve(null),
       typeof internal.api.weeklyPlan === "function" ? internal.api.weeklyPlan(component).catch(() => null) : Promise.resolve(null),
-      flow?.version === "weekly_flow_adapter_v1" ? flow.recover(component).catch(() => null) : Promise.resolve(null)
+      flow?.version === "weekly_flow_adapter_v1" ? flow.recover(component).catch(() => null) : Promise.resolve(null),
+      typeof internal.api.recentResults === "function" ? internal.api.recentResults(component,5).catch(() => null) : Promise.resolve(null)
     ]);
     const weeklyProgressResult = flow?.version === "weekly_flow_adapter_v1" &&
       typeof internal.progressUxApi?.progress === "function"
@@ -411,6 +539,7 @@
       queue: queueResult?.ok ? queueResult.data : null,
       plan: planResult?.ok ? planResult.data : null,
       recovery: recoveryResult?.ok ? recoveryResult.data : null,
+      recent: recentResult?.ok ? recentResult.data : null,
       weeklyProgress: weeklyProgressResult?.ok ? weeklyProgressResult.data : null
     });
   }
@@ -693,26 +822,23 @@
       if (!finalized?.ok) { renderError(); return; }
       const finishedType = state.session.session_type, component = state.session.component_code;
       state.session = null;
+      if (finishedType !== "diagnostic" && window.iClubExamPrepWeeklyFlowEnabled !== true) {
+        await internal.api.generateWeeklyPlan(component, "normal");
+      }
+      state.notice = null;
+      if (await openSessionResult(sessionId,component,"completion")) return;
       if (finishedType === "diagnostic") {
-        state.notice = copy().finish;
         if (state.returnView?.kind === "component") await openComponentHome(component);
         else await renderDashboard();
-      } else {
-        if (window.iClubExamPrepWeeklyFlowEnabled !== true) {
-          await internal.api.generateWeeklyPlan(component, "normal");
-          state.notice = copy().completedTask;
-        } else {
-          state.notice = ({ ru:'Занятие сохранено. Недельный план не изменён.',
-            uz:'Mashg‘ulot saqlandi. Haftalik reja o‘zgarmadi.',
-            en:'Session saved. Your weekly plan has not changed.' })[state.language];
-        }
-        if (state.returnView?.kind === "component") await openComponentHome(component);
-        else await openPlan(component);
-      }
+      } else if (state.returnView?.kind === "component") await openComponentHome(component);
+      else await openPlan(component);
       return;
     }
     if (!next) {
+      const completedSession = state.session;
       state.session = null;
+      if (!timed && completedSession?.status === "finalized" &&
+          await openSessionResult(completedSession.session_id,completedSession.component_code,"completion")) return;
       if (state.returnView?.kind === "component") await openComponentHome(state.returnView.component);
       else if (state.returnView?.kind === "plan") await openPlan(state.returnView.component);
       else if (state.returnView?.kind === "timed") await openTimed(state.returnView.component);
@@ -727,7 +853,8 @@
     const root = rootEl(); if (!root) return; const c = copy(), answered = items.filter(x => x?.answered === true).length, total = items.length;
     let answerControl = "";
     if (item.item_kind === "written") {
-      answerControl = `<label class="ep-live-field"><span>${esc(c.written)}</span><textarea class="ep-live-textarea" name="ep_live_written_answer"></textarea></label>`;
+      const writtenInfo = timed ? "" : `<aside class="ep-written-info"><strong>${esc(c.writtenInfoTitle)}</strong><span>${esc(c.writtenInfoText)}</span><small>${esc(c.writtenCoreText)}</small></aside>`;
+      answerControl = `${writtenInfo}<label class="ep-live-field"><span>${esc(c.written)}</span><textarea class="ep-live-textarea" name="ep_live_written_answer"></textarea></label>`;
     } else if (String(item.qtype || "").toLowerCase() === "mcq" && Array.isArray(item.options)) {
       answerControl = `<div class="ep-live-options">${item.options.map((option, index) => `<label class="ep-live-option"><input type="radio" name="ep_live_answer" value="${index}"><span>${esc(option)}</span></label>`).join("")}</div>`;
     } else answerControl = `<input class="ep-live-input" name="ep_live_text_answer" autocomplete="off" aria-label="${esc(c.submit)}">`;
@@ -840,12 +967,7 @@
     if (result?.ok) {
       state.pendingSubmission=null;
       state.busy=false;
-      const data=result.data || {}, c=copy(), parts=[];
-      if (typeof data.is_correct==='boolean') parts.push(data.is_correct?c.correct:c.incorrect);
-      if (data.diagnostic_feedback) parts.push(data.diagnostic_feedback);
-      else if (data.explanation) parts.push(data.explanation);
-      if (data.next_action) parts.push(data.next_action);
-      state.notice=parts.filter(Boolean).join(' — ');
+      state.notice=null;
       await loadSession(pending.sessionId);
       return;
     }
@@ -894,12 +1016,7 @@
     const result=await internal.api.submitResponse(state.session.session_id,item.item_order,payload,
       key('ep-answer'),Date.now()-state.itemStartedAt,state.language); state.busy=false;
     if (!result?.ok) { renderError(); return; }
-    const data=result.data || {}, c=copy(), parts=[];
-    if (typeof data.is_correct==='boolean') parts.push(data.is_correct?c.correct:c.incorrect);
-    if (data.diagnostic_feedback) parts.push(data.diagnostic_feedback);
-    else if (data.explanation) parts.push(data.explanation);
-    if (data.next_action) parts.push(data.next_action);
-    state.notice=parts.filter(Boolean).join(' — '); await loadSession(state.session.session_id);
+    state.notice=null; await loadSession(state.session.session_id);
   }
 
   async function finishTimed(reason) {
