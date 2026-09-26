@@ -771,12 +771,12 @@ BEGIN
   end if;
 
   -- P1 advances to Stage 3 while P5 intentionally stays Stage 2.
-  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',36);
-  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1');
+  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',37);
+  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1 with one unresolved screening signal');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',2,'P5 must remain independent');
 
-  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P5',29);
-  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',3,'80 percent P5');
+  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P5',30);
+  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',3,'80 percent P5 with one unresolved screening signal');
 
   -- Full first coverage/L2 for all 81 skills. Stage 3 remains because L3/full-paper closure evidence is incomplete.
   perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',45);
