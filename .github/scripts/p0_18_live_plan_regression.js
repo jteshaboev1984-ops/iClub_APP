@@ -45,6 +45,8 @@ const path = require('path');
         return{data:{item_order:item.item_order,is_correct:args.p_payload.picked_index===1,explanation:'Correct.'},error:null};
       }
       if(name==='finalize_exam_prep_session_safe_v1'){window.__session.status='finalized';return{data:{session_id:window.__session.session_id,status:'finalized',answered:2,total_items:2},error:null};}
+      if(name==='get_exam_prep_session_review_safe_v1')return{data:{session_id:window.__session.session_id,component_code:'P1',session_type:'learning',status:'finalized',summary:{machine_total:1,machine_correct:1,machine_incorrect:0,machine_accuracy_pct:100,written_total:1,written_completed:1},items:[{item_order:1,item_kind:'question',qtype:'mcq',text:'Two plus two?',options:['3','4'],selected_answer:'B',correct_answer:'B',is_correct:true,explanation:'Two plus two equals four.'},{item_order:2,item_kind:'written',text:'Explain why.',learner_artifact:{text:'Because two plus two equals four.'},verification_status:'self_reviewed',written_self_review:'Check the reasoning.'}]},error:null};
+      if(name==='get_exam_prep_recent_results_safe_v1')return{data:{component_code:'P1',results:[]},error:null};
       return{data:null,error:{message:`unexpected rpc ${name}`}};
     }};
   });
@@ -68,9 +70,13 @@ const path = require('path');
   await page.check('input[name="ep_live_answer"][value="1"]'); await page.click('[data-ep-live-submit]');
   await page.waitForSelector('textarea[name="ep_live_written_answer"]');
   await page.fill('textarea[name="ep_live_written_answer"]','Because two plus two equals four.'); await page.click('[data-ep-live-submit]');
-  await page.waitForFunction(()=>document.querySelector('[data-ep-component-home="P1"]') && document.querySelector('#exam-prep-host-root')?.textContent.includes('Task complete. Plan updated.'));
-
-  const result=await page.evaluate(()=>({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent}));
+  await page.waitForSelector('[data-ep-session-result]');
+  let result=await page.evaluate(()=>({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent}));
+  assert(result.text.includes('Auto-checked questions')&&result.text.includes('1 / 1 correct'),'result must separate machine accuracy');
+  assert(result.text.includes('Written part')&&result.text.includes('1 / 1 completed'),'result must separate written completion');
+  await page.click('[data-ep-result-continue]');
+  await page.waitForSelector('[data-ep-component-home="P1"]');
+  result=await page.evaluate(()=>({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent}));
   const names=result.calls.map(x=>x.name);
   for(const n of ['get_exam_prep_weekly_plan_safe_v2','generate_exam_prep_weekly_plan_safe_v3','authorize_exam_prep_plan_item_safe_v1','start_exam_prep_session_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','get_exam_prep_state_safe_v1'])assert(names.includes(n),`${n} missing`);
   assert(!names.includes('get_exam_prep_weekly_plan_safe_v1'),'legacy weekly plan read must not be used');
