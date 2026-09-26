@@ -59,6 +59,65 @@ begin
 end;
 $$;
 
+-- Deliberately make one valid MCQ mistake in a diagnostic package.
+-- A broad-screen miss must remain evidence/a focus signal without opening a correction case.
+create or replace function pg_temp.p269_complete_diagnostic_one_wrong_v1(
+  p_session_id uuid,
+  p_prefix text
+)
+returns void
+language plpgsql
+as $diagnostic$
+declare
+  v_item record;
+  v_payload jsonb;
+  v_wrong_used boolean:=false;
+  v_answer text;
+begin
+  for v_item in
+    select si.item_order,si.item_kind,si.question_id,q.qtype,q.correct_answer
+    from private.exam_prep_session_items si
+    left join public.questions q on q.id=si.question_id
+    where si.session_id=p_session_id
+    order by si.item_order
+  loop
+    if v_item.item_kind='question' then
+      v_answer:=v_item.correct_answer;
+      if not v_wrong_used and v_item.qtype='mcq' then
+        v_answer:=case upper(trim(v_item.correct_answer)) when 'A' then 'B' else 'A' end;
+        v_wrong_used:=true;
+      end if;
+      v_payload:=jsonb_build_object('answer',v_answer);
+    else
+      v_payload:=jsonb_build_object(
+        'artifact',jsonb_build_object(
+          'working','P2-69 diagnostic signal working',
+          'method','screening'
+        )
+      );
+    end if;
+
+    perform public.submit_exam_prep_response_safe_v1(
+      p_session_id,
+      v_item.item_order,
+      v_payload,
+      p_prefix||'-i'||lpad(v_item.item_order::text,3,'0'),
+      1000,
+      'en'
+    );
+  end loop;
+
+  if not v_wrong_used then
+    raise exception 'P2-69 diagnostic signal fixture had no MCQ item';
+  end if;
+
+  perform public.finalize_exam_prep_session_safe_v1(
+    p_session_id,
+    p_prefix||'-final'
+  );
+end;
+$diagnostic$;
+
 -- Deliberately make exactly one valid MCQ mistake, then finish the session.
 -- This is used to prove the real correction -> remediation -> delayed retest path.
 create or replace function pg_temp.p269_complete_learning_one_wrong_v1(
@@ -190,10 +249,17 @@ begin
       'p269-diag-'||lower(p_component)||'-'||lpad(v_loops::text,3,'0')
     );
     v_session:=(v_start->>'session_id')::uuid;
-    perform pg_temp.p269_complete_session_correct_v1(
-      v_session,
-      'p269-done-'||lower(p_component)||'-'||lpad(v_loops::text,3,'0')
-    );
+    if v_loops=1 then
+      perform pg_temp.p269_complete_diagnostic_one_wrong_v1(
+        v_session,
+        'p269-done-'||lower(p_component)||'-'||lpad(v_loops::text,3,'0')
+      );
+    else
+      perform pg_temp.p269_complete_session_correct_v1(
+        v_session,
+        'p269-done-'||lower(p_component)||'-'||lpad(v_loops::text,3,'0')
+      );
+    end if;
   end loop;
 
   return v_loops;
@@ -606,6 +672,28 @@ BEGIN
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',1,'after Stage0 P1');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',1,'after Stage0 P5');
 
+  if exists(
+    select 1 from private.exam_prep_correction_cases
+    where user_id=v_uid and status in ('open','remediating','retest_due','reopened')
+  ) then
+    raise exception 'P2-69 broad diagnostic miss incorrectly opened a correction case';
+  end if;
+  if not exists(
+    select 1 from private.exam_prep_evidence_events e
+    join private.exam_prep_sessions s on s.id=e.session_id and s.user_id=v_uid
+    where e.user_id=v_uid
+      and s.session_type='diagnostic'
+      and s.status='finalized'
+      and e.verification_status='app_verified'
+      and e.is_correct is false
+  ) then
+    raise exception 'P2-69 diagnostic miss evidence was not preserved';
+  end if;
+  if coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->>'signal_count')::int,0)<1
+     or coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P5')->>'signal_count')::int,0)<1 then
+    raise exception 'P2-69 diagnostic misses were not surfaced as confirmation signals';
+  end if;
+
   -- Weekly plan: execute one real Core learning action in each component.
   foreach v_corr_skill in array array['P1','P5'] loop
     perform set_config('request.jwt.claim.sub',v_uid::text,true);
@@ -683,12 +771,12 @@ BEGIN
   end if;
 
   -- P1 advances to Stage 3 while P5 intentionally stays Stage 2.
-  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',36);
-  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1');
+  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',37);
+  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1 with one unresolved screening signal');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',2,'P5 must remain independent');
 
-  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P5',29);
-  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',3,'80 percent P5');
+  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P5',30);
+  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',3,'80 percent P5 with one unresolved screening signal');
 
   -- Full first coverage/L2 for all 81 skills. Stage 3 remains because L3/full-paper closure evidence is incomplete.
   perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',45);
