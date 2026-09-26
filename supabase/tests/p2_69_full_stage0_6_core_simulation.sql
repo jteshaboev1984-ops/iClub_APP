@@ -702,14 +702,11 @@ BEGIN
     private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'focus_cases'
   ) x
   where x.value->>'focus_kind'='screening_signal'
-    and private.exam_prep_skill_runway_ready_for_week_v1(
-      v_program,'P1',x.value->>'skill_code',private.exam_prep_effective_active_week_v1(v_uid)
-    )
   order by (x.value->>'downstream_dependency_count')::int desc nulls last,
            x.value->>'skill_code'
   limit 1;
   if v_signal_skill is null then
-    raise exception 'P2-69 no actionable P1 screening signal in current governed runway';
+    raise exception 'P2-69 no prioritized P1 screening signal available for confirmation';
   end if;
 
   v_auth:=public.authorize_exam_prep_signal_confirmation_safe_v1('P1',v_signal_skill);
@@ -820,8 +817,8 @@ BEGIN
   end if;
 
   -- P1 advances to Stage 3 while P5 intentionally stays Stage 2.
-  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',36);
-  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1 after successful screening confirmation');
+  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',37);
+  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1 after noncredit screening confirmation');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',2,'P5 must remain independent');
 
   perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P5',30);
