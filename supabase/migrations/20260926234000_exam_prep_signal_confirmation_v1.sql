@@ -135,8 +135,8 @@ $patch_queue$;
 do $patch_reconcile$
 declare
   v_def text;
-  v_begin_anchor text;
-  v_where_anchor text;
+  v_if_anchor text;
+  v_status_anchor text;
 begin
   v_def:=pg_get_functiondef('private.exam_prep_reconcile_finalized_session_v1()'::regprocedure);
 
@@ -144,38 +144,26 @@ begin
     return;
   end if;
 
-  v_begin_anchor:=
-'begin'||chr(10)||
-'  if old.status is not distinct from new.status or new.status<>''finalized'' then return new; end if;'||chr(10)||chr(10)||
-'  if new.session_type<>''diagnostic'' then';
+  v_if_anchor:='if new.session_type<>''diagnostic'' then';
+  v_status_anchor:='e.verification_status=''app_verified'' and e.is_correct is false';
 
-  v_where_anchor:=
-'    where e.session_id=new.id and e.user_id=new.user_id and e.verification_status=''app_verified'' and e.is_correct is false';
-
-  if (length(v_def)-length(replace(v_def,v_begin_anchor,'')))<>length(v_begin_anchor)
-     or (length(v_def)-length(replace(v_def,v_where_anchor,'')))<>length(v_where_anchor)
+  if (length(v_def)-length(replace(v_def,v_if_anchor,'')))<>length(v_if_anchor)
+     or (length(v_def)-length(replace(v_def,v_status_anchor,'')))<>length(v_status_anchor)
   then
     raise exception 'signal_confirmation_v1 reconcile patch anchor drift';
   end if;
 
   v_def:=replace(
     v_def,
-    v_begin_anchor,
-    'begin'||chr(10)||
-    '  if old.status is not distinct from new.status or new.status<>''finalized'' then return new; end if;'||chr(10)||chr(10)||
-    '  select * into v_auth from private.exam_prep_session_authorizations where id=new.authorization_id;'||chr(10)||chr(10)||
-    '  if new.session_type<>''diagnostic'' then'
+    v_if_anchor,
+    'select * into v_auth from private.exam_prep_session_authorizations where id=new.authorization_id;'||chr(10)||chr(10)||
+    '  '||v_if_anchor
   );
 
   v_def:=replace(
     v_def,
-    v_where_anchor,
-    '    where e.session_id=new.id and e.user_id=new.user_id'||chr(10)||
-    '      and ('||chr(10)||
-    '        e.verification_status=''app_verified'''||chr(10)||
-    '        or (v_auth.credit_context=''signal_confirmation'' and e.verification_status=''app_checked_noncredit'')'||chr(10)||
-    '      )'||chr(10)||
-    '      and e.is_correct is false'
+    v_status_anchor,
+    '(e.verification_status=''app_verified'' or (v_auth.credit_context=''signal_confirmation'' and e.verification_status=''app_checked_noncredit'')) and e.is_correct is false'
   );
 
   execute v_def;
