@@ -103,9 +103,9 @@ jobs:
           grep -q 'data-action="open-exam-prep"' index.html
           grep -Eq 'exam-prep/exam-prep-api[.]js[?]v=(p014h1|p209map1|p210materials1|p213placement2|p213placement3|p214projection1|p214projection1-maprpc2)' index.html
           grep -q 'exam-prep/exam-prep-host.js?v=p014h1' index.html
-          grep -q 'exam-prep/exam-prep-host.css?v=p014h2' index.html
-          grep -q 'exam-prep-live.js?v=p252stage0read1' exam-prep/exam-prep-api.js
-          grep -q 'exam-prep-learner-views.js?v=p020views4' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep/exam-prep-host.css?v=p260results1' index.html
+          grep -q 'exam-prep-live.js?v=p260results1' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-learner-views.js?v=p260focus1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-overview-placement.js?v=p213placement2' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-ai-ui.js?v=p104aiui1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-exam-map.js?v=p209map2' exam-prep/exam-prep-api.js
