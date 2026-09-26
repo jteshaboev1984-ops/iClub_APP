@@ -38,7 +38,7 @@ jobs:
       - name: Verify exactly reviewed branch sources without editing checkout
         run: |
           set -euo pipefail
-          test "$(git hash-object exam-prep/exam-prep-api.js)" = '80cd73b5aa5cea09f062032c0036df333213d7ae'
+          test "$(git hash-object exam-prep/exam-prep-api.js)" = 'f50a425016699a6dbfd3f0575e8e053838d632a8'
           test "$(git hash-object exam-prep/exam-prep-recovery.js)" = '5ba398241b2e2055c72362c9fa660b9f0c8f34c5'
           test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '9b5169e2b0e3c0ed60ba5de1be8ef1ce8dbc2a02'
           node --check scripts/weekly-flow-profile-recovery-cutover.cjs

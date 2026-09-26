@@ -55,7 +55,7 @@
     const recovery = await recover(component);
     if (!recovery.ok) return recovery;
     if (recoveryStatus(recovery.data)) return Object.freeze({ ok: true, data: { status: 'resume_first', recovery: recovery.data } });
-    const result = await rpc(component, 'ensure_exam_prep_stable_weekly_plan_safe_v1', { p_component_code: component });
+    const result = await rpc(component, 'ensure_exam_prep_balanced_weekly_plan_safe_v1', { p_component_code: component });
     if (!result.ok) return result;
     if (result.data.status === 'resume_first' && recoveryStatus(result.data.recovery)) return result;
     if (!['existing', 'created'].includes(result.data.status) || !identity(result.data.plan_id) ||

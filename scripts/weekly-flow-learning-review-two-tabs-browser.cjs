@@ -75,7 +75,7 @@ async function scenario(browser,language,width,loss) {
       status:'resume',component_code:args.p_component_code,session_id:SESSION,
       learning_review:true,first_unanswered_item_order:model.answered.findIndex(v=>!v)+1
     }:{status:'none',component_code:args.p_component_code});
-    if(name==='ensure_exam_prep_stable_weekly_plan_safe_v1') return rpcOk({
+    if(name==='ensure_exam_prep_balanced_weekly_plan_safe_v1') return rpcOk({
       contract_version:'stable_weekly_plan_v1',status:'existing',
       plan_id:PLAN,component_code:args.p_component_code,created:false});
     if(name==='authorize_exam_prep_goal_once_safe_v1') {

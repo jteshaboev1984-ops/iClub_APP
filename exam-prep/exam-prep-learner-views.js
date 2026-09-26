@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p250views2";
+  const VERSION = "p260focus1";
   let observer = null;
   let busy = false;
   let activeLanguage = "ru";
@@ -158,7 +158,10 @@
       openCorrections: "Xatolarni ochish", queueIntro: "Xato → mashq → kechiktirilgan qayta tekshiruv. Xato faqat yangi qayta tekshiruv tasdiqlagandan keyin yopiladi.",
       noCorrections: "Hozir tuzatish talab qiladigan xato yo‘q.", reviewError: "Xatoni tahlil qilish", analogues: "O‘xshash masalalarda mashq", waitRetest: "Qayta tekshiruvni kutish", delayedRetest: "Qayta tekshirish",
       due: "Qayta tekshiruv", openPlan: "Haftalik rejani ochish", recentResolved: "Yaqinda yopilgan", loading: "Yuklanmoqda…", error: "Ma’lumotni yuklab bo‘lmadi. Qayta urinib ko‘ring.",
-      attempt: "Urinish", correct: "To‘g‘ri", incorrect: "Xato", recorded: "Saqlangan", book: "Kitob", pages: "Sahifalar", completedCorrection: "Tuzatish yopilgan"
+      attempt: "Urinish", correct: "To‘g‘ri", incorrect: "Xato", recorded: "Saqlangan", book: "Kitob", pages: "Sahifalar", completedCorrection: "Tuzatish yopilgan",
+      autoChecked: "Avtomatik tekshiruv", writtenCompleted: "Yozma ishlar", focusNow: "Hozir diqqatda", later: "Keyinroq",
+      focusFoundation: "Keyingi mavzular uchun asos", focusRepeated: "Takrorlangan qiyinchilik", focusRetest: "Qayta tekshiruv vaqti", focusAttention: "Diqqat talab qiladi",
+      focusIntro: "Tizim hozir eng muhim 5 ta mavzuni ko‘rsatadi. Qolganlari yo‘qolmaydi va navbat bilan qo‘shiladi."
     };
     if (activeLanguage === "en") return {
       tracker: "Syllabus progress", corrections: "Corrections", overview: "Overview", backTracker: "Back to progress",
@@ -171,7 +174,10 @@
       openCorrections: "Open corrections", queueIntro: "Mistake → practice → delayed check. A correction closes only after a new delayed check confirms it.",
       noCorrections: "There are no corrections to work on right now.", reviewError: "Review the mistake", analogues: "Practise similar questions", waitRetest: "Wait for the delayed check", delayedRetest: "Check again",
       due: "Check date", openPlan: "Open weekly plan", recentResolved: "Recently completed", loading: "Loading…", error: "Could not load this view. Try again.",
-      attempt: "Attempt", correct: "Correct", incorrect: "Incorrect", recorded: "Recorded", book: "Book", pages: "Pages", completedCorrection: "Correction completed"
+      attempt: "Attempt", correct: "Correct", incorrect: "Incorrect", recorded: "Recorded", book: "Book", pages: "Pages", completedCorrection: "Correction completed",
+      autoChecked: "Auto-checked", writtenCompleted: "Written work", focusNow: "In focus now", later: "Later",
+      focusFoundation: "Foundation for later topics", focusRepeated: "Repeated difficulty", focusRetest: "Delayed check due", focusAttention: "Needs attention",
+      focusIntro: "The system shows up to five highest-priority topics now. The rest stay recorded and move into focus gradually."
     };
     return {
       tracker: "Прогресс по программе", corrections: "Работа над ошибками", overview: "Обзор", backTracker: "Вернуться к прогрессу",
@@ -184,7 +190,10 @@
       openCorrections: "Открыть работу над ошибками", queueIntro: "Ошибка → практика → отложенная повторная проверка. Исправление закрывается только после нового подтверждения повторной проверкой.",
       noCorrections: "Сейчас нет ошибок, требующих исправления.", reviewError: "Разобрать ошибку", analogues: "Практика на похожих задачах", waitRetest: "Дождаться повторной проверки", delayedRetest: "Проверить ещё раз",
       due: "Повторная проверка", openPlan: "Открыть недельный план", recentResolved: "Недавно закрыто", loading: "Загрузка…", error: "Не удалось загрузить данные. Попробуйте ещё раз.",
-      attempt: "Попытка", correct: "Верно", incorrect: "Ошибка", recorded: "Сохранено", book: "Книга", pages: "Страницы", completedCorrection: "Исправление закрыто"
+      attempt: "Попытка", correct: "Верно", incorrect: "Ошибка", recorded: "Сохранено", book: "Книга", pages: "Страницы", completedCorrection: "Исправление закрыто",
+      autoChecked: "Автопроверка", writtenCompleted: "Письменные работы", focusNow: "Сейчас в фокусе", later: "Позже",
+      focusFoundation: "Основа для следующих тем", focusRepeated: "Повторная трудность", focusRetest: "Пора повторно проверить", focusAttention: "Требует внимания",
+      focusIntro: "Система показывает сейчас не больше 5 самых важных тем. Остальные сохраняются и будут подключаться постепенно."
     };
   }
 
@@ -353,7 +362,8 @@
       resources.book_chapter ? `<div class="ep-views-row"><span>${esc(c.book)}</span><small>${esc(resources.book_chapter)}</small></div>` : "",
       resources.book_pages ? `<div class="ep-views-row"><span>${esc(c.pages)}</span><small>${esc(resources.book_pages)}</small></div>` : ""
     ].filter(Boolean).join("") || `<div class="ep-views-note">${esc(c.noneYet)}</div>`;
-    const body = `${description}<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.confirmedCount)}</span><strong>${esc(skillStatus(state.objective_level, Number(state.unresolved_correction_count || 0) > 0 ? "open" : null))}</strong></div><div class="ep-views-stat"><span>${esc(c.checks)}</span><strong>${Number(state.evidence_total || 0)}</strong></div><div class="ep-views-stat"><span>${esc(c.corrections)}</span><strong>${Number(state.unresolved_correction_count || 0)}</strong></div></div><div class="ep-views-card"><strong>${esc(c.prerequisites)}</strong><div class="ep-views-list">${prereqRows}</div></div><div class="ep-views-card"><strong>${esc(c.history)}</strong><div class="ep-views-list">${evidenceRows}</div></div><div class="ep-views-card"><strong>${esc(c.correctionHistory)}</strong><div class="ep-views-list">${correctionRows}</div></div><div class="ep-views-card"><strong>${esc(c.resources)}</strong><div class="ep-views-list">${resourceRows}</div></div><div class="ep-views-note">${esc(c.writtenNote)}</div><div class="ep-views-actions"><button class="ep-views-btn primary" type="button" data-ep-views-corrections="${esc(component)}">${esc(c.openCorrections)}</button></div>`;
+    const objectiveTotal = Number(state.objective_evidence_count || 0), objectiveCorrect = Number(state.correct_objective_count || 0);
+    const body = `${description}<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.confirmedCount)}</span><strong>${esc(skillStatus(state.objective_level, Number(state.unresolved_correction_count || 0) > 0 ? "open" : null))}</strong></div><div class="ep-views-stat"><span>${esc(c.autoChecked)}</span><strong>${objectiveCorrect} / ${objectiveTotal}</strong></div><div class="ep-views-stat"><span>${esc(c.writtenCompleted)}</span><strong>${Number(state.written_count || 0)}</strong></div></div><div class="ep-views-card"><strong>${esc(c.prerequisites)}</strong><div class="ep-views-list">${prereqRows}</div></div><div class="ep-views-card"><strong>${esc(c.history)}</strong><div class="ep-views-list">${evidenceRows}</div></div><div class="ep-views-card"><strong>${esc(c.correctionHistory)}</strong><div class="ep-views-list">${correctionRows}</div></div><div class="ep-views-card"><strong>${esc(c.resources)}</strong><div class="ep-views-list">${resourceRows}</div></div><div class="ep-views-note">${esc(c.writtenNote)}</div><div class="ep-views-actions"><button class="ep-views-btn primary" type="button" data-ep-views-corrections="${esc(component)}">${esc(c.openCorrections)}</button></div>`;
     root.innerHTML = shell(component, c.detail, areaLabel(data?.official_syllabus_section), body, "tracker");
     bindBack(root, component, "tracker");
     root.querySelector("[data-ep-views-corrections]")?.addEventListener("click", () => openCorrections(component));
@@ -361,7 +371,12 @@
 
   function correctionStepLabel(value) {
     const c = copy();
-    return ({ review_error: c.reviewError, practice_analogues: c.analogues, wait_delayed_retest: c.waitRetest, delayed_retest: c.delayedRetest })[String(value || "")] || c.reviewError;
+    return ({ review_error: c.reviewError, practice_analogues: c.analogues, wait_delayed_retest: c.waitRetest, delayed_retest: c.delayedRetest, retest_content_wait: c.waitRetest })[String(value || "")] || c.reviewError;
+  }
+
+  function focusReasonLabel(value) {
+    const c = copy();
+    return ({ foundation_dependency:c.focusFoundation, repeated_gap:c.focusRepeated, retest_due:c.focusRetest, needs_attention:c.focusAttention })[String(value || "")] || c.focusAttention;
   }
 
   async function openCorrections(component) {
@@ -374,13 +389,17 @@
 
   function renderCorrections(component, data) {
     const root = rootEl(); if (!root) return; const c = copy();
-    const cases = Array.isArray(data?.cases) ? data.cases : [], resolved = Array.isArray(data?.recent_resolved) ? data.recent_resolved : [];
-    const rows = cases.length ? cases.map(row => {
+    const allCases = Array.isArray(data?.cases) ? data.cases : [];
+    const cases = Array.isArray(data?.focus_cases) ? data.focus_cases : allCases.slice(0, 5);
+    const resolved = Array.isArray(data?.recent_resolved) ? data.recent_resolved : [];
+    const rows = cases.length ? cases.map((row,index) => {
       const learnerDescription = learnerSkillDescription(row?.skill_code);
-      return `<div class="ep-views-card"><div class="ep-views-area-head"><strong>${esc(areaLabel(row.official_syllabus_section))}</strong><span class="ep-views-badge">${esc(correctionStepLabel(row.process_step))}</span></div>${learnerDescription ? `<div class="ep-views-sub">${esc(learnerDescription)}</div>` : ""}${row?.retest_due_at ? `<div class="ep-views-note">${esc(c.due)}: ${esc(formatDate(row.retest_due_at, true))}</div>` : ""}</div>`;
+      return `<div class="ep-views-card"><div class="ep-views-area-head"><strong>${index + 1}. ${esc(areaLabel(row.official_syllabus_section))}</strong><span class="ep-views-badge">${esc(correctionStepLabel(row.process_step))}</span></div>${learnerDescription ? `<div class="ep-views-sub">${esc(learnerDescription)}</div>` : ""}<div class="ep-views-note">${esc(focusReasonLabel(row.focus_reason))}</div>${row?.retest_due_at ? `<div class="ep-views-note">${esc(c.due)}: ${esc(formatDate(row.retest_due_at, true))}</div>` : ""}</div>`;
     }).join("") : `<div class="ep-views-note">${esc(c.noCorrections)}</div>`;
     const recent = resolved.length ? `<div class="ep-views-card"><strong>${esc(c.recentResolved)}</strong><div class="ep-views-list">${resolved.map(row => `<div class="ep-views-row"><span>${esc(areaLabel(row.official_syllabus_section))}</span><small>${esc(formatDate(row?.resolved_at))}</small></div>`).join("")}</div></div>` : "";
-    const body = `<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.corrections)}</span><strong>${Number(data?.active_count || 0)}</strong></div><div class="ep-views-stat"><span>${esc(c.due)}</span><strong>${Number(data?.retest_due_count || 0)}</strong></div><div class="ep-views-stat"><span>${esc(c.recentResolved)}</span><strong>${resolved.length}</strong></div></div>${rows}${recent}<div class="ep-views-actions"><button class="ep-views-btn primary" type="button" data-ep-views-open-plan="${esc(component)}">${esc(c.openPlan)}</button></div>`;
+    const focusCount = Number(data?.focus_count ?? cases.length), deferredCount = Number(data?.deferred_count ?? Math.max(0, Number(data?.active_count || allCases.length) - focusCount));
+    const deferred = deferredCount > 0 ? `<div class="ep-views-note ep-views-focus-note">${esc(c.focusIntro)} <strong>+${deferredCount} ${esc(c.later)}</strong></div>` : `<div class="ep-views-note ep-views-focus-note">${esc(c.focusIntro)}</div>`;
+    const body = `<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.focusNow)}</span><strong>${focusCount}</strong></div><div class="ep-views-stat"><span>${esc(c.later)}</span><strong>${deferredCount}</strong></div><div class="ep-views-stat"><span>${esc(c.due)}</span><strong>${Number(data?.retest_due_count || 0)}</strong></div></div>${deferred}${rows}${recent}<div class="ep-views-actions"><button class="ep-views-btn primary" type="button" data-ep-views-open-plan="${esc(component)}">${esc(c.openPlan)}</button></div>`;
     root.innerHTML = shell(component, c.corrections, c.queueIntro, body);
     bindBack(root, component);
     root.querySelector("[data-ep-views-open-plan]")?.addEventListener("click", () => openWeeklyPlan(component));

@@ -88,7 +88,7 @@ async function scenario(browser, language, width) {
           status: 'resume', component_code: component, session_id: sessionId,
           learning_review: true, first_unanswered_item_order: s.answered.findIndex(v => !v) + 1
         } : { status: 'none', component_code: component });
-        if (name === 'ensure_exam_prep_stable_weekly_plan_safe_v1') return success({
+        if (name === 'ensure_exam_prep_balanced_weekly_plan_safe_v1') return success({
           contract_version: 'stable_weekly_plan_v1', status: 'existing', component_code: component,
           plan_id: planId, created: false
         });

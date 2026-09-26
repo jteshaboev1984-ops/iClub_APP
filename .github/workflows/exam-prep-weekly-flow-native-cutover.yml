@@ -32,7 +32,7 @@ jobs:
           node --check exam-prep/exam-prep-live.js
           node --check scripts/weekly-flow-native-cutover.cjs
           grep -Fq 'The new weekly flow is an explicit OFF-by-default cutover' exam-prep/exam-prep-live.js
-          grep -Fq 'Session saved. Your weekly plan has not changed.' exam-prep/exam-prep-live.js
+          grep -Fq 'if (await openSessionResult(sessionId,component,"completion")) return;' exam-prep/exam-prep-live.js
           grep -Fq 'const auth = await internal.api.authorizePlanItem(planId, priorityOrder);' exam-prep/exam-prep-live.js
           grep -Fq 'const started = await internal.api.startSession(auth.data.authorization_id' exam-prep/exam-prep-live.js
           git diff --exit-code

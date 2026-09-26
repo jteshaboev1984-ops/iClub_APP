@@ -112,6 +112,15 @@ const path = require('path');
         if (type==='learning'&&window.__plan?.items?.[0]) window.__plan.items[0].status='completed';
         return {data:{session_id:window.__session.session_id,status:'finalized',answered:window.__session.total_items,total_items:window.__session.total_items},error:null};
       }
+      if (name==='get_exam_prep_session_review_safe_v1') {
+        const items=window.__session.items.map(item=>item.item_kind==='question'
+          ? {...item,text:item.text||'Question',selected_answer:'A',correct_answer:'A',is_correct:true,explanation:'Review explanation.'}
+          : {...item,text:item.written_prompt||'Written task',learner_artifact:item.learner_artifact||{text:'Saved solution'},verification_status:'self_reviewed',written_self_review:'Check your method.'});
+        const machine=items.filter(x=>x.item_kind==='question');
+        const written=items.filter(x=>x.item_kind==='written');
+        return {data:{session_id:window.__session.session_id,component_code:window.__session.component_code,session_type:window.__session.session_type,status:'finalized',summary:{machine_total:machine.length,machine_correct:machine.length,machine_incorrect:0,machine_accuracy_pct:100,written_total:written.length,written_completed:written.length},items},error:null};
+      }
+      if (name==='get_exam_prep_recent_results_safe_v1') return {data:{component_code:args.p_component_code,results:[]},error:null};
       if (name==='finalize_exam_prep_timed_safe_v1') {
         window.__session.status='finalized';
         return {data:{...window.__timedResult,completion_reason:args.p_completion_reason},error:null};
@@ -144,7 +153,7 @@ const path = require('path');
     return {synced,open,version:window.iClubExamPrep.liveFlowVersion};
   });
   assert(opened.synced&&opened.open,'Exam Prep must open');
-  assert(opened.version==='p251live1','unexpected live-flow version');
+  assert(opened.version==='p260results1','unexpected live-flow version');
   await page.waitForSelector('[data-ep-live-profile-form]');
   await capture();
 
@@ -174,6 +183,10 @@ const path = require('path');
 
   await page.check('input[name="ep_live_answer"][value="2"]');
   await page.click('[data-ep-live-submit]');
+  await page.waitForSelector('[data-ep-session-result]');
+  let diagnosticResult=await capture();
+  assert(diagnosticResult.includes('Task result')&&diagnosticResult.includes('Auto-checked questions'),'completed diagnostic must show persistent result');
+  await page.click('[data-ep-result-continue]');
   await page.waitForSelector('[data-ep-component-home="P1"]');
   let dashboard=await capture();
   assert(dashboard.includes('Foundation'),'P1 must enter Stage 1 after entry check');
@@ -184,7 +197,11 @@ const path = require('path');
   await page.waitForSelector('input[name="ep_live_answer"]');
   await page.check('input[name="ep_live_answer"][value="1"]');
   await page.click('[data-ep-live-submit]');
-  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Task complete. Plan updated.'));
+  await page.waitForSelector('[data-ep-session-result]');
+  const learningResult=await capture();
+  assert(learningResult.includes('Task result')&&learningResult.includes('1 / 1 correct'),'learning task must show completed result without per-item interruption');
+  await page.click('[data-ep-result-continue]');
+  await page.waitForSelector('[data-ep-component-home="P1"]');
   await capture();
 
   for (const [stage,label] of [[2,'Syllabus learning'],[3,'Syllabus closure'],[4,'Timed consolidation'],[5,'Exam readiness']]) {

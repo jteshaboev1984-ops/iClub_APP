@@ -107,7 +107,7 @@ const SESSION = '55555555-5555-4555-8555-555555555555';
             return ok(state.active
               ? { status: 'resume', component_code: component, session_id: sessionId, first_unanswered_item_order: 1 }
               : { status: 'none', component_code: component });
-          case 'ensure_exam_prep_stable_weekly_plan_safe_v1':
+          case 'ensure_exam_prep_balanced_weekly_plan_safe_v1':
             return ok({ contract_version: 'stable_weekly_plan_v1', status: 'existing',
               plan_id: planId, component_code: component, created: false });
           case 'authorize_exam_prep_goal_once_safe_v1':

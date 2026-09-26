@@ -47,7 +47,7 @@ async function test(name, callback) { await callback(); count++; console.log('PA
     const result = await f.api.plan('P1');
     assert.equal(result.ok, true);
     assert.equal(result.data.plan_id, ID);
-    assert.deepEqual(f.calls.map(c => c.name), ['get_exam_prep_active_plan_session_safe_v1', 'ensure_exam_prep_stable_weekly_plan_safe_v1']);
+    assert.deepEqual(f.calls.map(c => c.name), ['get_exam_prep_active_plan_session_safe_v1', 'ensure_exam_prep_balanced_weekly_plan_safe_v1']);
     assert.equal(f.calls[0].args.p_component_code, 'P1');
   });
   await test('existing unfinished session wins; no plan generation', async () => {

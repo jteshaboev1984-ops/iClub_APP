@@ -42,7 +42,7 @@ const SESSION = '66666666-6666-4666-8666-666666666666';
             case 'get_exam_prep_diagnostic_progress_safe_v1':return ok({stage0_complete:true,screening:{required_items:2,answered_items:2,required_areas:1,answered_areas:1}});
             case 'get_exam_prep_state_safe_v1':return ok({components:[{component_code:comp,operational_stage:2,coverage_pct:0}]});
             case 'get_exam_prep_active_plan_session_safe_v1':return ok(s.active?{status:'resume',session_id:sessionId,component_code:'P1'}:{status:'none',component_code:comp});
-            case 'ensure_exam_prep_stable_weekly_plan_safe_v1':return ok({contract_version:'stable_weekly_plan_v1',status:'existing',plan_id:planId,component_code:comp});
+            case 'ensure_exam_prep_balanced_weekly_plan_safe_v1':return ok({contract_version:'stable_weekly_plan_v1',status:'existing',plan_id:planId,component_code:comp});
             case 'get_exam_prep_weekly_plan_safe_v2':return ok({plan_id:planId,active_week_no:1,items:[
               {priority_order:1,item_type:'learning',skill_code:'P1-COO-02',status:'pending'},
               {priority_order:2,item_type:'learning',skill_code:'P1-CIR-01',status:s.finalized?'completed':'pending'}]});
