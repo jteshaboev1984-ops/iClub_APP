@@ -301,7 +301,7 @@ begin
     and p.component_code=p_component_code
     and p.active_week_no=v_week
     and p.status='active'
-  order by p.created_at desc,i.priority_order
+  order by p.generated_at desc,i.priority_order
   limit 1;
 
   if v_plan_id is not null then
