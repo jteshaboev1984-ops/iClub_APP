@@ -117,9 +117,6 @@ begin
 '          and c.skill_code=ss.skill_code'||chr(10)||
 '          and c.status in (''open'',''remediating'',''retest_due'',''reopened'')'||chr(10)||
 '      )'||chr(10)||
-'      and private.exam_prep_skill_runway_ready_for_week_v1('||chr(10)||
-'        v_program,p_component_code,ss.skill_code,private.exam_prep_effective_active_week_v1(p_user_id)'||chr(10)||
-'      )'||chr(10)||
 '      and not private.exam_prep_diagnostic_signal_confirmed_v1('||chr(10)||
 '        p_user_id,p_component_code,ss.skill_code,d.created_at'||chr(10)||
 '      )'||chr(10)||
@@ -374,7 +371,6 @@ begin
   if to_regprocedure('private.exam_prep_diagnostic_signal_confirmed_v1(uuid,text,text,timestamptz)') is null
      or to_regprocedure('public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)') is null
      or position('exam_prep_diagnostic_signal_confirmed_v1' in v_queue)=0
-     or position('exam_prep_skill_runway_ready_for_week_v1' in v_queue)=0
      or has_function_privilege('anon','public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)','EXECUTE')
      or not has_function_privilege('authenticated','public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)','EXECUTE')
   then
