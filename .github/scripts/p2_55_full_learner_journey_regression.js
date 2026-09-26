@@ -144,7 +144,7 @@ const path = require('path');
     return {synced,open,version:window.iClubExamPrep.liveFlowVersion};
   });
   assert(opened.synced&&opened.open,'Exam Prep must open');
-  assert(opened.version==='p251live1','unexpected live-flow version');
+  assert(opened.version==='p260results1','unexpected live-flow version');
   await page.waitForSelector('[data-ep-live-profile-form]');
   await capture();
 
