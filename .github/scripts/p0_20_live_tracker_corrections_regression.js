@@ -145,7 +145,7 @@ const path = require('path');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Delayed check') || document.querySelector('#exam-prep-host-root')?.textContent.includes('Check again'));
   visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('Needs attention') && visible.includes('Check again') && visible.includes('Open weekly plan'), 'attention queue must show learner action and route back to the weekly plan');
-  assert(visible.includes('Entry-check signal') && visible.includes('needs confirmation'), 'diagnostic signal must be visibly different from a confirmed correction');
+  assert(visible.includes('Entry-check signal') && visible.includes('foundation for later topics'), 'diagnostic signal must be visibly different from a confirmed correction');
   assert(!visible.includes('P1-QUA-02') && !visible.includes('retest_due'), 'correction queue must not expose internal skill/status codes');
 
   await page.evaluate(async () => {
@@ -163,7 +163,7 @@ const path = require('path');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Требуют внимания'));
   visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('Использовать дискриминант') && visible.includes('условия на параметр'), 'Russian attention queue must use learner-facing skill copy');
-  assert(visible.includes('Сигнал входной проверки') && visible.includes('нужно подтвердить'), 'Russian diagnostic signal must be labelled as confirmation, not a confirmed error');
+  assert(visible.includes('Сигнал входной проверки') && visible.includes('основа для следующих тем'), 'Russian diagnostic signal must be labelled as a signal, not a confirmed error');
   assert(!visible.includes('discriminant') && !visible.includes('parameter conditions'), 'Russian correction queue must not expose internal mixed-language descriptions');
 
   await page.evaluate(async () => {
