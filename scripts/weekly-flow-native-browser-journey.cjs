@@ -77,7 +77,7 @@ async function scenario(browser, language, width) {
           case 'get_exam_prep_active_plan_session_safe_v1': return ok(state.active ? {
             status: 'resume', component_code: comp, session_id: sessionId, first_unanswered_item_order: 1
           } : { status: 'none', component_code: comp });
-          case 'ensure_exam_prep_stable_weekly_plan_safe_v1': return ok({
+          case 'ensure_exam_prep_balanced_weekly_plan_safe_v1': return ok({
             contract_version: 'stable_weekly_plan_v1', status: 'existing',
             plan_id: state.planId, component_code: comp, created: false });
           case 'get_exam_prep_weekly_plan_safe_v2': return ok(plan(comp));
