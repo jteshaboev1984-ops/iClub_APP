@@ -67,7 +67,7 @@ create or replace function pg_temp.p269_complete_diagnostic_one_wrong_v1(
 )
 returns void
 language plpgsql
-as $
+as $diagnostic$
 declare
   v_item record;
   v_payload jsonb;
@@ -116,7 +116,7 @@ begin
     p_prefix||'-final'
   );
 end;
-$$;
+$diagnostic$;
 
 -- Deliberately make exactly one valid MCQ mistake, then finish the session.
 -- This is used to prove the real correction -> remediation -> delayed retest path.
