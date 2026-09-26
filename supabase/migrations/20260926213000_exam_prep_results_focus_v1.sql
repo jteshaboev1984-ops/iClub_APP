@@ -477,24 +477,72 @@ end
 $fn$;
 revoke all on function private.exam_prep_balance_new_normal_plan_v1(uuid,bigint,text,smallint,uuid) from public,anon,authenticated,service_role;
 
-do $patch_ensure$
+create or replace function public.ensure_exam_prep_balanced_weekly_plan_safe_v1(
+  p_component_code text
+) returns jsonb
+language plpgsql
+security definer
+set search_path=''
+as $fn$
 declare
-  v_def text;
-  v_old text;
-  v_new text;
+  v_uid uuid;
+  v_program bigint;
+  v_week smallint;
+  v_existing_plan uuid;
+  v_result jsonb;
+  v_current jsonb;
 begin
-  v_def:=pg_get_functiondef('public.ensure_exam_prep_stable_weekly_plan_safe_v1(text)'::regprocedure);
-  v_old:='  v_generated:=private.exam_prep_legacy_generate_v3_internal_v1(p_component_code);'||chr(10)||
-         '  v_current:=public.get_exam_prep_weekly_plan_safe_v2(p_component_code);';
-  if (length(v_def)-length(replace(v_def,v_old,'')))<>length(v_old) then
-    raise exception 'results_focus_v1 stable-plan patch anchor drift';
+  v_uid:=private.exam_prep_require_core_access_v1();
+  if p_component_code not in ('P1','P5') then raise exception 'exam_prep_bad_component'; end if;
+
+  select program_version_id into v_program
+  from private.exam_prep_exam_profiles
+  where user_id=v_uid;
+  v_week:=private.exam_prep_effective_active_week_v1(v_uid);
+  if v_program is null or v_week is null then raise exception 'exam_prep_profile_required'; end if;
+
+  -- Use the same learner/component lock as the released weekly-flow authority.
+  perform pg_advisory_xact_lock(hashtextextended('ep-stable-plan:'||v_uid::text||':'||p_component_code,0));
+
+  select p.id into v_existing_plan
+  from private.exam_prep_weekly_plans p
+  where p.user_id=v_uid
+    and p.program_version_id=v_program
+    and p.component_code=p_component_code
+    and p.active_week_no=v_week
+    and p.status='active'
+  order by p.created_at desc
+  limit 1;
+
+  -- Keep the sealed released function unchanged. It remains the sole creator
+  -- of the stable weekly plan and keeps all recovery/concurrency guarantees.
+  v_result:=public.ensure_exam_prep_stable_weekly_plan_safe_v1(p_component_code);
+
+  -- Never rewrite an already active plan. Balance only a plan created by this
+  -- exact call, before it is exposed to the learner for the first time.
+  if v_existing_plan is null
+     and v_result->>'status'='created'
+     and v_result->>'plan_id' is not null
+  then
+    perform private.exam_prep_balance_new_normal_plan_v1(
+      v_uid,v_program,p_component_code,v_week,(v_result->>'plan_id')::uuid
+    );
+    v_current:=public.get_exam_prep_weekly_plan_safe_v2(p_component_code);
+    if v_current->>'plan_id' is distinct from v_result->>'plan_id' then
+      raise exception 'exam_prep_balanced_plan_projection_mismatch';
+    end if;
+    return v_current || jsonb_build_object(
+      'contract_version','stable_weekly_plan_v1',
+      'status','created',
+      'created',true
+    );
   end if;
-  v_new:='  v_generated:=private.exam_prep_legacy_generate_v3_internal_v1(p_component_code);'||chr(10)||
-         '  perform private.exam_prep_balance_new_normal_plan_v1(v_uid,v_program,p_component_code,v_week,(v_generated->>''plan_id'')::uuid);'||chr(10)||
-         '  v_current:=public.get_exam_prep_weekly_plan_safe_v2(p_component_code);';
-  execute replace(v_def,v_old,v_new);
+
+  return v_result;
 end
-$patch_ensure$;
+$fn$;
+revoke all on function public.ensure_exam_prep_balanced_weekly_plan_safe_v1(text) from public,anon;
+grant execute on function public.ensure_exam_prep_balanced_weekly_plan_safe_v1(text) to authenticated,service_role;
 
 do $postcheck$
 begin
@@ -502,7 +550,10 @@ begin
      or not has_function_privilege('authenticated','public.get_exam_prep_session_review_safe_v1(uuid,text)','EXECUTE')
      or has_function_privilege('anon','public.get_exam_prep_recent_results_safe_v1(text,integer)','EXECUTE')
      or not has_function_privilege('authenticated','public.get_exam_prep_recent_results_safe_v1(text,integer)','EXECUTE')
-     or position('exam_prep_balance_new_normal_plan_v1' in pg_get_functiondef('public.ensure_exam_prep_stable_weekly_plan_safe_v1(text)'::regprocedure))=0
+     or has_function_privilege('anon','public.ensure_exam_prep_balanced_weekly_plan_safe_v1(text)','EXECUTE')
+     or not has_function_privilege('authenticated','public.ensure_exam_prep_balanced_weekly_plan_safe_v1(text)','EXECUTE')
+     or md5(pg_get_functiondef('public.ensure_exam_prep_stable_weekly_plan_safe_v1(text)'::regprocedure))
+        <> '0304cbab6a544a1123a15eb61af4ab8d'
   then
     raise exception 'results_focus_v1 postcheck failed';
   end if;
