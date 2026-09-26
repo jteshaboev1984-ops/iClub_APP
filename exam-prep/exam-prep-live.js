@@ -65,6 +65,8 @@
       noHistory: "Hali tugallangan ishlar yo‘q.", backToHistory: "Tarixga qaytish", backToComponent: "Mavzuga qaytish",
       writtenInfoTitle: "Yozma topshiriq", writtenInfoText: "Faqat yakuniy javobni emas, yechim yo‘lini ham ko‘rsating.",
       writtenCoreText: "Core’da bu yechim avtomatik baholanmaydi va to‘g‘ri javoblar foiziga kirmaydi. Yuborgandan keyin mezonlar bo‘yicha o‘zingizni tekshirishingiz mumkin.",
+      writtenAiText: "Yozma yechim avtomatik to‘g‘ri/noto‘g‘ri foiziga kirmaydi. AI izohi mavjud bo‘lsa, u alohida ko‘rsatiladi va yakuniy baho hisoblanmaydi.",
+      writtenMentorText: "Yozma yechim avtomatik to‘g‘ri/noto‘g‘ri foiziga kirmaydi. Mentor tekshiruvi bajarilgach alohida ko‘rsatiladi; ungacha ish tasdiqlanmagan hisoblanadi.",
       diagnosticResult: "Kirish tekshiruvi", learningResult: "O‘quv topshirig‘i", correctionResult: "Xato ustida ishlash", retestResult: "Qayta tekshiruv", mixedResult: "Aralash mashq"
     };
     if (state.language === "en") return {
@@ -93,6 +95,8 @@
       noHistory: "No completed work yet.", backToHistory: "Back to history", backToComponent: "Back to component",
       writtenInfoTitle: "Written task", writtenInfoText: "Show your method, not only the final answer.",
       writtenCoreText: "In Core this solution is not marked automatically and is not included in the correct-answer percentage. After submission you can check it against the criteria.",
+      writtenAiText: "The written solution is not included in automatic correct-answer accuracy. If an AI explanation is available, it is shown separately and is not a final mark.",
+      writtenMentorText: "The written solution is not included in automatic correct-answer accuracy. Mentor review appears separately once completed; until then the work remains unverified.",
       diagnosticResult: "Entry check", learningResult: "Learning task", correctionResult: "Correction work", retestResult: "Delayed check", mixedResult: "Mixed practice"
     };
     return {
@@ -121,6 +125,8 @@
       noHistory: "Завершённых работ пока нет.", backToHistory: "Вернуться к истории", backToComponent: "Вернуться к разделу",
       writtenInfoTitle: "Письменная задача", writtenInfoText: "Покажите ход решения, а не только итоговый ответ.",
       writtenCoreText: "В Core эта работа не оценивается автоматически и не входит в процент правильных ответов. После отправки вы сможете проверить себя по критериям.",
+      writtenAiText: "Письменное решение не входит в процент автоматически правильных ответов. Если доступен разбор с ИИ, он показывается отдельно и не является итоговой оценкой.",
+      writtenMentorText: "Письменное решение не входит в процент автоматически правильных ответов. Проверка ментора показывается отдельно после её завершения; до этого работа остаётся неподтверждённой.",
       diagnosticResult: "Входная проверка", learningResult: "Учебное задание", correctionResult: "Работа над ошибкой", retestResult: "Повторная проверка", mixedResult: "Смешанная практика"
     };
   }
@@ -151,6 +157,13 @@
       diagnostic:c.diagnosticResult, learning:c.learningResult, retest:c.retestResult,
       mixed:c.mixedResult
     })[String(type || "")] || c.assignmentResult;
+  }
+
+  function writtenPolicyText() {
+    const c=copy(), caps=internal.lastCapabilities || {};
+    if (caps.mentorAssignmentActive === true) return c.writtenMentorText;
+    if (caps.aiAssist === true) return c.writtenAiText;
+    return c.writtenCoreText;
   }
 
   function reviewAnswerText(item, value) {
@@ -853,7 +866,7 @@
     const root = rootEl(); if (!root) return; const c = copy(), answered = items.filter(x => x?.answered === true).length, total = items.length;
     let answerControl = "";
     if (item.item_kind === "written") {
-      const writtenInfo = timed ? "" : `<aside class="ep-written-info"><strong>${esc(c.writtenInfoTitle)}</strong><span>${esc(c.writtenInfoText)}</span><small>${esc(c.writtenCoreText)}</small></aside>`;
+      const writtenInfo = timed ? "" : `<aside class="ep-written-info"><strong>${esc(c.writtenInfoTitle)}</strong><span>${esc(c.writtenInfoText)}</span><small>${esc(writtenPolicyText())}</small></aside>`;
       answerControl = `${writtenInfo}<label class="ep-live-field"><span>${esc(c.written)}</span><textarea class="ep-live-textarea" name="ep_live_written_answer"></textarea></label>`;
     } else if (String(item.qtype || "").toLowerCase() === "mcq" && Array.isArray(item.options)) {
       answerControl = `<div class="ep-live-options">${item.options.map((option, index) => `<label class="ep-live-option"><input type="radio" name="ep_live_answer" value="${index}"><span>${esc(option)}</span></label>`).join("")}</div>`;
