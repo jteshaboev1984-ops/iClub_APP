@@ -59,7 +59,7 @@ as $fn$
       and s.session_type='learning'
       and s.status='finalized'
       and s.finalized_at is not null
-      and s.finalized_at>p_signal_at
+      and s.finalized_at>=p_signal_at
       and not exists(
         select 1
         from private.exam_prep_session_items other
