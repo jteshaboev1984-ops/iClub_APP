@@ -11,7 +11,7 @@ declare
   v_queue text;
 begin
   if to_regprocedure('private.exam_prep_correction_queue_payload_v1(uuid,text)') is null
-     or to_regprocedure('private.exam_prep_skill_runway_ready_for_week_v1(bigint,text,text,smallint)') is null
+     or to_regprocedure('private.exam_prep_reconcile_finalized_session_v1()') is null
      or to_regprocedure('public.start_exam_prep_session_safe_v1(uuid,text)') is null
   then
     raise exception 'signal_confirmation_v1 prerequisite missing';
@@ -44,7 +44,8 @@ as $fn$
     join private.exam_prep_session_authorizations sa
       on sa.id=s.authorization_id
      and sa.user_id=p_user_id
-     and sa.academic_credit=true
+     and sa.academic_credit=false
+     and sa.credit_context='signal_confirmation'
     join private.exam_prep_session_items si
       on si.session_id=s.id
     left join private.exam_prep_responses r
@@ -57,7 +58,6 @@ as $fn$
       and s.status='finalized'
       and s.finalized_at is not null
       and s.finalized_at>p_signal_at
-      and coalesce(sa.credit_context,'')<>'learning_review'
       and not exists(
         select 1
         from private.exam_prep_session_items other
@@ -125,6 +125,60 @@ begin
   execute replace(v_def,v_old,v_new);
 end
 $patch_queue$;
+
+-- Confirmation attempts are deliberately non-credit so they cannot raise mastery
+-- or coverage merely by resolving a Stage-0 signal. A failed machine response
+-- still needs to open the ordinary correction cycle. Extend only that narrow
+-- wrong-evidence path; all other non-credit review evidence remains non-authoritative.
+do $patch_reconcile$
+declare
+  v_def text;
+  v_begin_anchor text;
+  v_where_anchor text;
+begin
+  v_def:=pg_get_functiondef('private.exam_prep_reconcile_finalized_session_v1()'::regprocedure);
+
+  if position('signal_confirmation' in v_def)>0 then
+    return;
+  end if;
+
+  v_begin_anchor:=
+'begin'||chr(10)||
+'  if old.status is not distinct from new.status or new.status<>''finalized'' then return new; end if;'||chr(10)||chr(10)||
+'  if new.session_type<>''diagnostic'' then';
+
+  v_where_anchor:=
+'    where e.session_id=new.id and e.user_id=new.user_id and e.verification_status=''app_verified'' and e.is_correct is false';
+
+  if (length(v_def)-length(replace(v_def,v_begin_anchor,'')))<>length(v_begin_anchor)
+     or (length(v_def)-length(replace(v_def,v_where_anchor,'')))<>length(v_where_anchor)
+  then
+    raise exception 'signal_confirmation_v1 reconcile patch anchor drift';
+  end if;
+
+  v_def:=replace(
+    v_def,
+    v_begin_anchor,
+    'begin'||chr(10)||
+    '  if old.status is not distinct from new.status or new.status<>''finalized'' then return new; end if;'||chr(10)||chr(10)||
+    '  select * into v_auth from private.exam_prep_session_authorizations where id=new.authorization_id;'||chr(10)||chr(10)||
+    '  if new.session_type<>''diagnostic'' then'
+  );
+
+  v_def:=replace(
+    v_def,
+    v_where_anchor,
+    '    where e.session_id=new.id and e.user_id=new.user_id'||chr(10)||
+    '      and ('||chr(10)||
+    '        e.verification_status=''app_verified'''||chr(10)||
+    '        or (v_auth.credit_context=''signal_confirmation'' and e.verification_status=''app_checked_noncredit'')'||chr(10)||
+    '      )'||chr(10)||
+    '      and e.is_correct is false'
+  );
+
+  execute v_def;
+end
+$patch_reconcile$;
 
 create or replace function public.authorize_exam_prep_signal_confirmation_safe_v1(
   p_component_code text,
@@ -211,12 +265,6 @@ begin
       and c.status in ('open','remediating','retest_due','reopened')
   ) then
     return jsonb_build_object('status','correction_open','skill_code',p_skill_code);
-  end if;
-
-  if not private.exam_prep_skill_runway_ready_for_week_v1(
-    v_program,p_component_code,p_skill_code,v_week
-  ) then
-    return jsonb_build_object('status','not_ready','reason','topic_not_open_yet','skill_code',p_skill_code);
   end if;
 
   v_queue:=private.exam_prep_correction_queue_payload_v1(v_uid,p_component_code);
@@ -371,7 +419,7 @@ begin
   ) values(
     v_uid,v_ass,p_component_code,'learning','issued',v_now+interval '1 hour',
     'Fresh governed learning pack for confirmation of an unresolved entry-check screening signal',
-    true,'signal_confirmation'
+    false,'signal_confirmation'
   )
   returning id into v_auth;
 
@@ -401,6 +449,7 @@ begin
   if to_regprocedure('private.exam_prep_diagnostic_signal_confirmed_v1(uuid,text,text,timestamptz)') is null
      or to_regprocedure('public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)') is null
      or position('exam_prep_diagnostic_signal_confirmed_v1' in v_queue)=0
+     or position('signal_confirmation' in pg_get_functiondef('private.exam_prep_reconcile_finalized_session_v1()'::regprocedure))=0
      or has_function_privilege('anon','public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)','EXECUTE')
      or not has_function_privilege('authenticated','public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)','EXECUTE')
   then
