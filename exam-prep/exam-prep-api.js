@@ -234,6 +234,12 @@
     return rpc("get_exam_prep_skill_detail_safe_v1", { p_component_code: componentArg(componentCode), p_skill_code: String(skillCode || "") });
   }
   async function correctionQueue(componentCode) { return rpc("get_exam_prep_correction_queue_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function authorizeSignalConfirmation(componentCode, skillCode) {
+    return rpc("authorize_exam_prep_signal_confirmation_safe_v1", {
+      p_component_code: componentArg(componentCode),
+      p_skill_code: String(skillCode || "")
+    });
+  }
   async function pastPaperCompanion(componentCode, language = "en") {
     return rpc("get_exam_prep_past_paper_companion_safe_v1", { p_component_code: componentArg(componentCode), p_language: String(language || "en") });
   }
@@ -331,7 +337,7 @@
     capabilities, betaInvitation, grantBetaConsent, revokeBetaConsent,
     examProfile, saveExamProfile, examMapStatus,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
-    legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
+    legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, skillDetail, correctionQueue, authorizeSignalConfirmation, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
     integrityStatus, recordIntegrityEvent,
     recovery, recordInterruption, authorizeRevalidationItem,
@@ -351,10 +357,10 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p260results1");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p260signal1");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
-    load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p260focus2");
+    load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p260focus3");
     load('script[data-exam-prep-overview-placement]', "examPrepOverviewPlacement", "exam-prep-overview-placement.js?v=p213placement2");
     load('script[data-exam-prep-ai-ui]', "examPrepAiUi", "exam-prep-ai-ui.js?v=p104aiui1");
     load('script[data-exam-prep-history-note]', "examPrepHistoryNote", "exam-prep-history-note.js?v=p105history1");
