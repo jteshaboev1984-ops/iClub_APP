@@ -148,6 +148,8 @@ declare
   v_active_component text;
   v_active_assessment bigint;
   v_existing private.exam_prep_session_authorizations%rowtype;
+  v_plan_id uuid;
+  v_plan_priority smallint;
   v_auth uuid;
   v_now timestamptz;
 begin
@@ -243,6 +245,34 @@ begin
       'session_id',v_active_session,
       'active_component_code',v_active_component,
       'active_assessment_id',v_active_assessment
+    );
+  end if;
+
+  -- If this same skill is already a pending learning priority in the current
+  -- stable plan, do not create a parallel route. Send the learner to that plan.
+  select p.id,i.priority_order
+    into v_plan_id,v_plan_priority
+  from private.exam_prep_weekly_plans p
+  join private.exam_prep_weekly_plan_items i
+    on i.plan_id=p.id
+   and i.status='pending'
+   and i.item_type='learning'
+   and i.skill_code=p_skill_code
+  where p.user_id=v_uid
+    and p.program_version_id=v_program
+    and p.component_code=p_component_code
+    and p.active_week_no=v_week
+    and p.status='active'
+  order by p.created_at desc,i.priority_order
+  limit 1;
+
+  if v_plan_id is not null then
+    return jsonb_build_object(
+      'status','use_weekly_plan',
+      'plan_id',v_plan_id,
+      'priority_order',v_plan_priority,
+      'component_code',p_component_code,
+      'skill_code',p_skill_code
     );
   end if;
 
