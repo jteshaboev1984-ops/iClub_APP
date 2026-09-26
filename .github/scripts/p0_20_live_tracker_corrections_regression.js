@@ -65,7 +65,19 @@ const path = require('path');
       resources: { book_chapter: 'Complete Pure Mathematics 1, Ch1 Quadratics', book_pages: 'pp. 2–20' }
     };
     window.__queue = {
-      component_code: 'P1', active_count: 1, retest_due_count: 1,
+      component_code: 'P1', active_count: 1, signal_count: 1, attention_count: 2, focus_count: 2, deferred_count: 0, retest_due_count: 1,
+      focus_cases: [
+        {
+          correction_case_id: '00000000-0000-4000-8000-000000002001', focus_kind: 'correction', skill_code: 'P1-QUA-02', official_syllabus_section: '1.1 Quadratics',
+          description: 'Использовать discriminant для определения числа и типа действительных корней.', status: 'retest_due', process_step: 'delayed_retest', focus_reason: 'retest_due',
+          retest_due_at: '2026-09-07T05:00:00Z', can_start_retest: true
+        },
+        {
+          correction_case_id: null, focus_kind: 'screening_signal', skill_code: 'P1-FUN-01', official_syllabus_section: '1.2 Functions',
+          description: 'Use function notation and composition.', status: 'screening_signal', process_step: 'confirm_signal', focus_reason: 'diagnostic_signal_foundation',
+          can_start_correction: false, can_start_retest: false
+        }
+      ],
       cases: [{
         correction_case_id: '00000000-0000-4000-8000-000000002001', skill_code: 'P1-QUA-02', official_syllabus_section: '1.1 Quadratics',
         description: 'Использовать discriminant для определения числа и типа действительных корней.', status: 'retest_due', process_step: 'delayed_retest',
@@ -132,7 +144,8 @@ const path = require('path');
   await page.click('[data-ep-views-corrections="P1"]');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Delayed check') || document.querySelector('#exam-prep-host-root')?.textContent.includes('Check again'));
   visible = await page.locator('#exam-prep-host-root').textContent();
-  assert(visible.includes('Corrections') && visible.includes('Check again') && visible.includes('Open weekly plan'), 'correction queue must show learner action and route back to the weekly plan');
+  assert(visible.includes('Needs attention') && visible.includes('Check again') && visible.includes('Open weekly plan'), 'attention queue must show learner action and route back to the weekly plan');
+  assert(visible.includes('Entry-check signal') && visible.includes('needs confirmation'), 'diagnostic signal must be visibly different from a confirmed correction');
   assert(!visible.includes('P1-QUA-02') && !visible.includes('retest_due'), 'correction queue must not expose internal skill/status codes');
 
   await page.evaluate(async () => {
@@ -147,9 +160,10 @@ const path = require('path');
   assert(!visible.includes('completed-square form') && !visible.includes('vertex/shape information') && !visible.includes('смена subject'), 'Russian learner UI must not expose mixed internal canonical wording');
 
   await page.evaluate(async () => window.iClubExamPrepHostInternal.learnerViews.openCorrections('P1'));
-  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Работа над ошибками'));
+  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Требуют внимания'));
   visible = await page.locator('#exam-prep-host-root').textContent();
-  assert(visible.includes('Использовать дискриминант') && visible.includes('условия на параметр'), 'Russian correction queue must use learner-facing skill copy');
+  assert(visible.includes('Использовать дискриминант') && visible.includes('условия на параметр'), 'Russian attention queue must use learner-facing skill copy');
+  assert(visible.includes('Сигнал входной проверки') && visible.includes('нужно подтвердить'), 'Russian diagnostic signal must be labelled as confirmation, not a confirmed error');
   assert(!visible.includes('discriminant') && !visible.includes('parameter conditions'), 'Russian correction queue must not expose internal mixed-language descriptions');
 
   await page.evaluate(async () => {
