@@ -44,8 +44,10 @@ as $fn$
     join private.exam_prep_session_authorizations sa
       on sa.id=s.authorization_id
      and sa.user_id=p_user_id
-     and sa.academic_credit=false
-     and sa.credit_context='signal_confirmation'
+     and (
+       (sa.academic_credit=false and sa.credit_context='signal_confirmation')
+       or (sa.academic_credit=true and coalesce(sa.credit_context,'')<>'learning_review')
+     )
     join private.exam_prep_session_items si
       on si.session_id=s.id
     left join private.exam_prep_responses r
