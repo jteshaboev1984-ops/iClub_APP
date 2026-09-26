@@ -6,7 +6,7 @@ function assert(condition, message) {
 
 const live = fs.readFileSync('exam-prep/exam-prep-live.js', 'utf8');
 
-assert(live.includes('const VERSION = "p251live1"'), 'P2-51 live version marker missing');
+assert(live.includes('const VERSION = "p260results1"'), 'P2-51 live version marker missing');
 for (const token of ['"uz-UZ"', '"en-GB"', '"ru-RU"', 'new Intl.DateTimeFormat(dateLocale()']) {
   assert(live.includes(token), `live locale-safe date contract missing: ${token}`);
 }
