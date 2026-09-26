@@ -224,6 +224,10 @@
       state.pendingAnswers = null;
       const result = await submitResponse(sessionId, itemOrder, outgoing, idempotencyKey, elapsedMs, language);
       if (!result?.ok || !result.data?.understanding_check?.submitted) return result;
+      // The finalized-session review owns all academic feedback in the current flow.
+      // Keep the old pending-notice behavior only as a rollback fallback when that
+      // review API is not present.
+      if (typeof base.sessionReview === "function") return result;
       const explanation = formatFeedback(result.data.understanding_check);
       if (!explanation) return result;
       state.pendingFeedback = explanation;
