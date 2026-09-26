@@ -60,6 +60,7 @@ const path = require('path');
         const item = window.__session.items.find(x => x.item_order === args.p_item_order);
         item.answered = true;
         if (item.item_kind === 'written') {
+          item.learner_artifact = args.p_payload.artifact;
           return { data:{
             item_order:item.item_order,
             verification_status:'self_reviewed',
@@ -79,6 +80,21 @@ const path = require('path');
         window.__session.status = 'finalized';
         return { data:{session_id:window.__session.session_id,status:'finalized',answered:2,total_items:2}, error:null };
       }
+      if (name === 'get_exam_prep_session_review_safe_v1') {
+        return { data:{
+          session_id:window.__session.session_id,component_code:'P1',session_type:'learning',status:'finalized',
+          summary:{machine_total:1,machine_correct:1,machine_incorrect:0,machine_accuracy_pct:100,written_total:1,written_completed:1},
+          items:[
+            {item_order:1,item_kind:'question',qtype:'mcq',text:'210° in exact radians?',options:['7π/6','6π/7','5π/6'],selected_answer:'A',correct_answer:'A',is_correct:true,explanation:'210° = 7π/6.'},
+            {item_order:2,item_kind:'written',text:'Explain why π/180 and 180/π are inverse conversion factors.',learner_artifact:window.__session.items[1].learner_artifact,verification_status:'self_reviewed',written_self_review:'Check that your reasoning shows the factors multiply to 1.',understanding_check:{submitted:true,total:3,correct:2,all_correct:false,results:[
+              {check_order:1,is_correct:true,rationale:'180° and π radians represent the same half-turn.'},
+              {check_order:2,is_correct:true,rationale:'π and 180 cancel, so the product is 1.'},
+              {check_order:3,is_correct:false,rationale:'The second conversion reverses the first.'}
+            ]}}
+          ]
+        }, error:null };
+      }
+      if (name === 'get_exam_prep_recent_results_safe_v1') return { data:{component_code:'P1',results:[]}, error:null };
       return { data:null, error:{message:`unexpected rpc ${name}`} };
     }};
   });
@@ -111,6 +127,10 @@ const path = require('path');
   assert(!text.includes('correct_index'), 'answer-key metadata must never be visible');
   assert(!text.includes('check_version'), 'transport version metadata must never be learner-visible');
   assert(!text.includes('app_checked_noncredit'), 'internal authority term must never be learner-visible');
+  assert(text.includes('Written task'), 'written task purpose must be visible before submission');
+  assert(text.includes('not marked automatically'), 'Core written verification boundary must be visible before submission');
+  assert(text.includes('not included in the correct-answer percentage'), 'written accuracy boundary must be visible before submission');
+  assert(!text.includes('Correct.'), 'previous machine correctness must not interrupt the question flow');
 
   await page.fill('textarea[name="ep_live_written_answer"]', 'The factors multiply to 1, so the second conversion reverses the first.');
   const before = await page.evaluate(() => window.__calls.filter(x => x.name === 'submit_exam_prep_response_safe_v1').length);
@@ -126,7 +146,13 @@ const path = require('path');
   await page.check('input[name="ep_written_understanding_3"][value="1"]');
   await page.click('[data-ep-live-submit]');
 
-  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Understanding check: 2/3'));
+  await page.waitForSelector('[data-ep-session-result]');
+  text = await page.locator('#exam-prep-host-root').textContent();
+  assert(text.includes('Auto-checked questions') && text.includes('1 / 1 correct'), 'machine result must use only auto-checked denominator');
+  assert(text.includes('Written part') && text.includes('1 / 1 completed'), 'written completion must be reported separately');
+  assert(text.includes('Written tasks are not included in the correct-answer percentage.'), 'written denominator boundary missing on result');
+  await page.click('[data-ep-result-review]');
+  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Understanding check: 2 / 3'));
   const result = await page.evaluate(() => ({ calls:window.__calls, text:document.querySelector('#exam-prep-host-root').textContent }));
   const written = result.calls.find(x => x.name === 'submit_exam_prep_response_safe_v1' && x.args.p_item_order === 2);
   assert(written, 'written submit RPC missing');
@@ -137,8 +163,12 @@ const path = require('path');
     {check_order:2,picked_index:2,check_version:'v1'},
     {check_order:3,picked_index:1,check_version:'v1'}
   ]), 'structured answer payload must carry the exact safe check version');
-  assert(result.text.includes('The second conversion reverses the first.'), 'server rationale for missed check must remain visible after final item');
-  assert(result.text.includes('Weekly plan'), 'written completion must return to weekly plan');
+  assert(result.text.includes('The second conversion reverses the first.'), 'server rationale for missed check must remain visible only in the completed review');
+  assert(result.text.includes('This is not a mark for the full written solution.'), 'understanding check must not look like a written mark');
+  await page.click('[data-ep-result-continue]');
+  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Weekly plan'));
+  const afterContinue = await page.locator('#exam-prep-host-root').textContent();
+  assert(afterContinue.includes('Weekly plan'), 'written completion must return to weekly plan after explicit continue');
   assert(!result.text.includes('P1-CIR-01'), 'internal skill code must not be learner-visible');
 
   await browser.close();
