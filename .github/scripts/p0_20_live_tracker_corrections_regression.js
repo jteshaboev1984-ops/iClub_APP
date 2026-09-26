@@ -96,6 +96,10 @@ const path = require('path');
       if (name === 'get_exam_prep_syllabus_tracker_safe_v1') return { data: window.__tracker[args.p_component_code], error: null };
       if (name === 'get_exam_prep_skill_detail_safe_v1') return { data: window.__detail, error: null };
       if (name === 'get_exam_prep_correction_queue_safe_v1') return { data: window.__queue, error: null };
+      if (name === 'authorize_exam_prep_signal_confirmation_safe_v1') return { data: {
+        status:'content_exhausted', reason:'first_learning_pack_already_seen',
+        component_code:args.p_component_code, skill_code:args.p_skill_code, uses_retest_reserve:false
+      }, error:null };
       return { data: null, error: { message: `unexpected rpc ${name}` } };
     }};
   });
@@ -146,7 +150,12 @@ const path = require('path');
   visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('Needs attention') && visible.includes('Check again') && visible.includes('Open weekly plan'), 'attention queue must show learner action and route back to the weekly plan');
   assert(visible.includes('Entry-check signal') && visible.includes('foundation for later topics'), 'diagnostic signal must be visibly different from a confirmed correction');
+  assert(visible.includes('Check this topic'), 'screening signal must offer an explicit confirmation action');
   assert(!visible.includes('P1-QUA-02') && !visible.includes('retest_due'), 'correction queue must not expose internal skill/status codes');
+  await page.click('[data-ep-views-confirm-signal="P1-FUN-01"]');
+  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('A fair new check needs different questions.'));
+  visible = await page.locator('#exam-prep-host-root').textContent();
+  assert(visible.includes('Previously seen questions will not be reused as fresh evidence.'), 'exhausted confirmation must explain the no-repeat rule');
 
   await page.evaluate(async () => {
     document.documentElement.lang = 'ru';
@@ -164,6 +173,11 @@ const path = require('path');
   visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('Использовать дискриминант') && visible.includes('условия на параметр'), 'Russian attention queue must use learner-facing skill copy');
   assert(visible.includes('Сигнал входной проверки') && visible.includes('основа для следующих тем'), 'Russian diagnostic signal must be labelled as a signal, not a confirmed error');
+  assert(visible.includes('Проверить тему'), 'Russian screening signal must expose the confirmation action');
+  await page.click('[data-ep-views-confirm-signal="P1-FUN-01"]');
+  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Для честной новой проверки нужны другие задания.'));
+  visible = await page.locator('#exam-prep-host-root').textContent();
+  assert(visible.includes('Уже увиденные вопросы не будут повторяться как новая проверка.'), 'Russian exhausted confirmation must explain the no-repeat rule');
   assert(!visible.includes('discriminant') && !visible.includes('parameter conditions'), 'Russian correction queue must not expose internal mixed-language descriptions');
 
   await page.evaluate(async () => {
@@ -181,6 +195,10 @@ const path = require('path');
   assert(trackerCalls.some(x => x.args.p_component_code === 'P1') && trackerCalls.some(x => x.args.p_component_code === 'P5'), 'P1/P5 tracker calls must remain component-scoped');
   assert(calls.some(x => x.name === 'get_exam_prep_skill_detail_safe_v1' && x.args.p_component_code === 'P1' && x.args.p_skill_code === 'P1-QUA-01'), 'skill detail must use the safe component+skill RPC');
   assert(calls.some(x => x.name === 'get_exam_prep_correction_queue_safe_v1' && x.args.p_component_code === 'P1'), 'correction queue must use the safe component RPC');
+  const signalCalls = calls.filter(x => x.name === 'authorize_exam_prep_signal_confirmation_safe_v1');
+  assert(signalCalls.length === 2, 'screening confirmation must be server-authorized on each explicit click');
+  assert(signalCalls.every(x => x.args.p_component_code === 'P1' && x.args.p_skill_code === 'P1-FUN-01'), 'screening confirmation must stay bound to the selected component and skill');
+  assert(!calls.some(x => x.name === 'start_exam_prep_session_safe_v1'), 'content-exhausted confirmation must not start or reuse a session');
 
   await browser.close();
   console.log('P0-20 live syllabus tracker / skill detail / corrections flow: PASS');
