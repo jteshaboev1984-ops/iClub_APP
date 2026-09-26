@@ -57,7 +57,7 @@ begin
     p_prefix||'-final'
   );
 end;
-$;
+$$;
 
 -- Deliberately make one valid MCQ mistake in a diagnostic package.
 -- A broad-screen miss must remain evidence/a focus signal without opening a correction case.
@@ -116,7 +116,7 @@ begin
     p_prefix||'-final'
   );
 end;
-$;
+$$;
 
 -- Deliberately make exactly one valid MCQ mistake, then finish the session.
 -- This is used to prove the real correction -> remediation -> delayed retest path.
