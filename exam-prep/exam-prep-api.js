@@ -264,6 +264,15 @@
     if (result.ok) emit("iclub:exam-prep-session-ended", { sessionId });
     return result;
   }
+  async function sessionReview(sessionId, language = "en") {
+    return rpc("get_exam_prep_session_review_safe_v1", { p_session_id: sessionId, p_language: String(language || "en") });
+  }
+  async function recentResults(componentCode, limit = 10) {
+    return rpc("get_exam_prep_recent_results_safe_v1", {
+      p_component_code: componentArg(componentCode),
+      p_limit: Math.max(1, Math.min(20, Number(limit) || 10))
+    });
+  }
 
   async function integrityStatus(sessionId) {
     return rpc("get_exam_prep_integrity_status_safe_v1", { p_session_id: sessionId });
@@ -323,7 +332,7 @@
     examProfile, saveExamProfile, examMapStatus,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
-    getSession, startSession, submitResponse, finalizeSession,
+    getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
     integrityStatus, recordIntegrityEvent,
     recovery, recordInterruption, authorizeRevalidationItem,
     weeklyPlan, generateWeeklyPlan, authorizePlanItem,
@@ -342,10 +351,10 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p252stage0read1");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p260results1");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written3");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
-    load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p020views4");
+    load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p260focus1");
     load('script[data-exam-prep-overview-placement]', "examPrepOverviewPlacement", "exam-prep-overview-placement.js?v=p213placement2");
     load('script[data-exam-prep-ai-ui]', "examPrepAiUi", "exam-prep-ai-ui.js?v=p104aiui1");
     load('script[data-exam-prep-history-note]', "examPrepHistoryNote", "exam-prep-history-note.js?v=p105history1");
