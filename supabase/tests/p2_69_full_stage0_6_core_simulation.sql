@@ -578,6 +578,7 @@ DECLARE
   v_auth jsonb;
   v_session uuid;
   v_corr_skill text;
+  v_signal_skill text;
   v_corr_ass bigint;
   v_case uuid;
   v_retest jsonb;
@@ -694,6 +695,54 @@ BEGIN
     raise exception 'P2-69 diagnostic misses were not surfaced as confirmation signals';
   end if;
 
+  -- One P1 screening signal is confirmed on the first unseen governed learning pack.
+  -- P5 intentionally remains unresolved to prove component isolation later.
+  select x.value->>'skill_code' into v_signal_skill
+  from jsonb_array_elements(
+    private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'focus_cases'
+  ) x
+  where x.value->>'focus_kind'='screening_signal'
+    and private.exam_prep_skill_runway_ready_for_week_v1(
+      v_program,'P1',x.value->>'skill_code',private.exam_prep_effective_active_week_v1(v_uid)
+    )
+  order by (x.value->>'downstream_dependency_count')::int desc nulls last,
+           x.value->>'skill_code'
+  limit 1;
+  if v_signal_skill is null then
+    raise exception 'P2-69 no actionable P1 screening signal in current governed runway';
+  end if;
+
+  v_auth:=public.authorize_exam_prep_signal_confirmation_safe_v1('P1',v_signal_skill);
+  if v_auth->>'status'<>'authorized'
+     or coalesce((v_auth->>'fresh_questions')::boolean,false) is not true
+     or coalesce((v_auth->>'uses_retest_reserve')::boolean,true) is not false then
+    raise exception 'P2-69 signal confirmation authorization invalid: %',v_auth;
+  end if;
+  v_session:=(public.start_exam_prep_session_safe_v1(
+    (v_auth->>'authorization_id')::uuid,
+    'p269-signal-confirm-p1-start'
+  )->>'session_id')::uuid;
+  perform pg_temp.p269_complete_session_correct_v1(v_session,'p269-signal-confirm-p1');
+
+  if coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->>'signal_count')::int,-1)<>0 then
+    raise exception 'P2-69 successful P1 signal confirmation did not clear the screening signal';
+  end if;
+  if exists(
+    select 1 from private.exam_prep_correction_cases
+    where user_id=v_uid and component_code='P1' and skill_code=v_signal_skill
+      and status in ('open','remediating','retest_due','reopened')
+  ) then
+    raise exception 'P2-69 successful screening confirmation incorrectly opened correction';
+  end if;
+
+  v_auth:=public.authorize_exam_prep_signal_confirmation_safe_v1('P1',v_signal_skill);
+  if v_auth->>'status'<>'already_confirmed' then
+    raise exception 'P2-69 confirmed signal was re-authorized instead of staying closed: %',v_auth;
+  end if;
+  if coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P5')->>'signal_count')::int,0)<1 then
+    raise exception 'P2-69 P1 confirmation leaked into independent P5 screening signal';
+  end if;
+
   -- Weekly plan: execute one real Core learning action in each component.
   foreach v_corr_skill in array array['P1','P5'] loop
     perform set_config('request.jwt.claim.sub',v_uid::text,true);
@@ -771,8 +820,8 @@ BEGIN
   end if;
 
   -- P1 advances to Stage 3 while P5 intentionally stays Stage 2.
-  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',37);
-  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1 with one unresolved screening signal');
+  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',36);
+  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1 after successful screening confirmation');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',2,'P5 must remain independent');
 
   perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P5',30);
