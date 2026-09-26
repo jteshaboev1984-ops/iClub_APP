@@ -2,10 +2,11 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p260focus2";
+  const VERSION = "p260focus3";
   let observer = null;
   let busy = false;
   let activeLanguage = "ru";
+  let attentionNotice = "";
 
   const AREA_LABELS = Object.freeze({
     "1.1 Quadratics": { ru: "Квадратные выражения и уравнения", uz: "Kvadrat ifodalar va tenglamalar", en: "Quadratics" },
@@ -161,6 +162,7 @@
       attempt: "Urinish", correct: "To‘g‘ri", incorrect: "Xato", recorded: "Saqlangan", book: "Kitob", pages: "Sahifalar", completedCorrection: "Tuzatish yopilgan",
       autoChecked: "Avtomatik tekshiruv", writtenCompleted: "Yozma ishlar", focusNow: "Hozir diqqatda", later: "Keyinroq",
       focusFoundation: "Keyingi mavzular uchun asos", focusRepeated: "Takrorlangan qiyinchilik", focusRetest: "Qayta tekshiruv vaqti", focusAttention: "Diqqat talab qiladi", focusSignalFoundation: "Kirish tekshiruvi signali · keyingi mavzular uchun asos", focusSignal: "Kirish tekshiruvi signali · yana tekshirish kerak", confirmSignal: "Yana tekshirish",
+      signalStart: "Mavzuni tekshirish", signalFreshNeeded: "Halol qayta tekshiruv uchun yangi topshiriqlar kerak. Oldingi savollar yangi natija sifatida takrorlanmaydi.", signalConfirmed: "Mavzu yangi topshiriqlarda tasdiqlandi.", signalLater: "Bu mavzuni keyinroq tekshiramiz.", signalCorrection: "Mavzu endi xato ustida ishlash bosqichiga o‘tdi.", signalWeekly: "Bu tekshiruv haftalik rejangizda allaqachon bor.",
       focusIntro: "Tizim hozir eng muhim 5 ta mavzuni ko‘rsatadi. Qolganlari yo‘qolmaydi va navbat bilan qo‘shiladi."
     };
     if (activeLanguage === "en") return {
@@ -177,6 +179,7 @@
       attempt: "Attempt", correct: "Correct", incorrect: "Incorrect", recorded: "Recorded", book: "Book", pages: "Pages", completedCorrection: "Correction completed",
       autoChecked: "Auto-checked", writtenCompleted: "Written work", focusNow: "In focus now", later: "Later",
       focusFoundation: "Foundation for later topics", focusRepeated: "Repeated difficulty", focusRetest: "Delayed check due", focusAttention: "Needs attention", focusSignalFoundation: "Entry-check signal · foundation for later topics", focusSignal: "Entry-check signal · needs confirmation", confirmSignal: "Check again",
+      signalStart: "Check this topic", signalFreshNeeded: "A fair new check needs different questions. Previously seen questions will not be reused as fresh evidence.", signalConfirmed: "The topic was confirmed on new questions.", signalLater: "This topic will be checked later.", signalCorrection: "This topic now needs correction work.", signalWeekly: "This check is already included in your weekly plan.",
       focusIntro: "The system shows up to five highest-priority topics now. The rest stay recorded and move into focus gradually."
     };
     return {
@@ -193,6 +196,7 @@
       attempt: "Попытка", correct: "Верно", incorrect: "Ошибка", recorded: "Сохранено", book: "Книга", pages: "Страницы", completedCorrection: "Исправление закрыто",
       autoChecked: "Автопроверка", writtenCompleted: "Письменные работы", focusNow: "Сейчас в фокусе", later: "Позже",
       focusFoundation: "Основа для следующих тем", focusRepeated: "Повторная трудность", focusRetest: "Пора повторно проверить", focusAttention: "Требует внимания", focusSignalFoundation: "Сигнал входной проверки · основа для следующих тем", focusSignal: "Сигнал входной проверки · нужно подтвердить", confirmSignal: "Проверить ещё раз",
+      signalStart: "Проверить тему", signalFreshNeeded: "Для честной новой проверки нужны другие задания. Уже увиденные вопросы не будут повторяться как новая проверка.", signalConfirmed: "Тема подтверждена на новых заданиях.", signalLater: "Эту тему система проверит позже.", signalCorrection: "Теперь по этой теме нужна работа над ошибкой.", signalWeekly: "Эта проверка уже включена в недельный план.",
       focusIntro: "Система показывает сейчас не больше 5 самых важных тем. Остальные сохраняются и будут подключаться постепенно."
     };
   }
@@ -387,6 +391,34 @@
     renderCorrections(component, result.data || {});
   }
 
+  async function confirmSignal(component, skillCode) {
+    if (busy || !canUse() || typeof internal.api?.authorizeSignalConfirmation !== "function") return;
+    busy = true;
+    const result = await internal.api.authorizeSignalConfirmation(component, skillCode);
+    busy = false;
+    if (!result?.ok || !result.data) { renderError(component, copy().corrections); return; }
+    const status = String(result.data.status || "");
+    const c = copy();
+
+    if (["authorized","resume","resume_existing_session_first"].includes(status)) {
+      const bridge = internal.liveFlowBridge;
+      if (!bridge || typeof bridge.startAuthorizedExternal !== "function") { renderError(component, c.corrections); return; }
+      const started = await bridge.startAuthorizedExternal(component, result.data, "corrections");
+      if (!started) renderError(component, c.corrections);
+      return;
+    }
+    if (status === "use_weekly_plan") {
+      attentionNotice = c.signalWeekly;
+      await openWeeklyPlan(component);
+      return;
+    }
+    if (status === "already_confirmed") attentionNotice = c.signalConfirmed;
+    else if (status === "correction_open") attentionNotice = c.signalCorrection;
+    else if (["content_exhausted","content_unavailable"].includes(status)) attentionNotice = c.signalFreshNeeded;
+    else attentionNotice = c.signalLater;
+    await openCorrections(component);
+  }
+
   function renderCorrections(component, data) {
     const root = rootEl(); if (!root) return; const c = copy();
     const allCases = Array.isArray(data?.cases) ? data.cases : [];
@@ -394,14 +426,20 @@
     const resolved = Array.isArray(data?.recent_resolved) ? data.recent_resolved : [];
     const rows = cases.length ? cases.map((row,index) => {
       const learnerDescription = learnerSkillDescription(row?.skill_code);
-      return `<div class="ep-views-card"><div class="ep-views-area-head"><strong>${index + 1}. ${esc(areaLabel(row.official_syllabus_section))}</strong><span class="ep-views-badge">${esc(correctionStepLabel(row.process_step))}</span></div>${learnerDescription ? `<div class="ep-views-sub">${esc(learnerDescription)}</div>` : ""}<div class="ep-views-note">${esc(focusReasonLabel(row.focus_reason))}</div>${row?.retest_due_at ? `<div class="ep-views-note">${esc(c.due)}: ${esc(formatDate(row.retest_due_at, true))}</div>` : ""}</div>`;
+      const signalAction = row?.focus_kind === "screening_signal"
+        ? `<div class="ep-views-actions"><button class="ep-views-btn primary" type="button" data-ep-views-confirm-signal="${esc(row.skill_code || "")}">${esc(c.signalStart)}</button></div>`
+        : "";
+      return `<div class="ep-views-card"><div class="ep-views-area-head"><strong>${index + 1}. ${esc(areaLabel(row.official_syllabus_section))}</strong><span class="ep-views-badge">${esc(correctionStepLabel(row.process_step))}</span></div>${learnerDescription ? `<div class="ep-views-sub">${esc(learnerDescription)}</div>` : ""}<div class="ep-views-note">${esc(focusReasonLabel(row.focus_reason))}</div>${row?.retest_due_at ? `<div class="ep-views-note">${esc(c.due)}: ${esc(formatDate(row.retest_due_at, true))}</div>` : ""}${signalAction}</div>`;
     }).join("") : `<div class="ep-views-note">${esc(c.noCorrections)}</div>`;
     const recent = resolved.length ? `<div class="ep-views-card"><strong>${esc(c.recentResolved)}</strong><div class="ep-views-list">${resolved.map(row => `<div class="ep-views-row"><span>${esc(areaLabel(row.official_syllabus_section))}</span><small>${esc(formatDate(row?.resolved_at))}</small></div>`).join("")}</div></div>` : "";
     const focusCount = Number(data?.focus_count ?? cases.length), deferredCount = Number(data?.deferred_count ?? Math.max(0, Number(data?.active_count || allCases.length) - focusCount));
     const deferred = deferredCount > 0 ? `<div class="ep-views-note ep-views-focus-note">${esc(c.focusIntro)} <strong>+${deferredCount} ${esc(c.later)}</strong></div>` : `<div class="ep-views-note ep-views-focus-note">${esc(c.focusIntro)}</div>`;
-    const body = `<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.focusNow)}</span><strong>${focusCount}</strong></div><div class="ep-views-stat"><span>${esc(c.later)}</span><strong>${deferredCount}</strong></div><div class="ep-views-stat"><span>${esc(c.due)}</span><strong>${Number(data?.retest_due_count || 0)}</strong></div></div>${deferred}${rows}${recent}<div class="ep-views-actions"><button class="ep-views-btn primary" type="button" data-ep-views-open-plan="${esc(component)}">${esc(c.openPlan)}</button></div>`;
+    const notice = attentionNotice ? `<div class="ep-views-note" role="status" aria-live="polite">${esc(attentionNotice)}</div>` : "";
+    attentionNotice = "";
+    const body = `${notice}<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.focusNow)}</span><strong>${focusCount}</strong></div><div class="ep-views-stat"><span>${esc(c.later)}</span><strong>${deferredCount}</strong></div><div class="ep-views-stat"><span>${esc(c.due)}</span><strong>${Number(data?.retest_due_count || 0)}</strong></div></div>${deferred}${rows}${recent}<div class="ep-views-actions"><button class="ep-views-btn primary" type="button" data-ep-views-open-plan="${esc(component)}">${esc(c.openPlan)}</button></div>`;
     root.innerHTML = shell(component, c.corrections, c.queueIntro, body);
     bindBack(root, component);
+    root.querySelectorAll("[data-ep-views-confirm-signal]").forEach(button => button.addEventListener("click", () => confirmSignal(component, button.dataset.epViewsConfirmSignal)));
     root.querySelector("[data-ep-views-open-plan]")?.addEventListener("click", () => openWeeklyPlan(component));
   }
 
