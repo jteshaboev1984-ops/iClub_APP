@@ -227,6 +227,16 @@ begin
     return jsonb_build_object('status','not_ready','reason','entry_check_incomplete');
   end if;
 
+  -- Serialize with weekly-plan/session authority before inspecting the signal.
+  -- This prevents another tab from creating a parallel weekly route between
+  -- focus selection and issuance of the dedicated confirmation authorization.
+  perform pg_advisory_xact_lock(
+    hashtextextended('ep-stable-plan:'||v_uid::text||':'||p_component_code,0)
+  );
+  perform pg_advisory_xact_lock(
+    hashtextextended('ep-signal-confirm:'||v_uid::text||':'||p_component_code||':'||p_skill_code,0)
+  );
+
   select e.created_at into v_signal_at
   from private.exam_prep_evidence_events e
   join private.exam_prep_sessions s
@@ -274,10 +284,6 @@ begin
   if v_focus is null then
     return jsonb_build_object('status','not_in_focus','skill_code',p_skill_code);
   end if;
-
-  perform pg_advisory_xact_lock(
-    hashtextextended('ep-signal-confirm:'||v_uid::text||':'||p_component_code||':'||p_skill_code,0)
-  );
 
   select s.id,s.component_code,s.assessment_id
     into v_active_session,v_active_component,v_active_assessment
