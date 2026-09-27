@@ -35,6 +35,8 @@ begin
      or position('false,''signal_confirmation''' in v_authorizer)=0
      or position('uses_retest_reserve' in v_authorizer)=0
      or position('signal_confirmation' in v_authorizer)=0
+     or position('ep-stable-plan:' in v_authorizer)=0
+     or position('ep-signal-confirm:' in v_authorizer)=0
      or position('count(*) filter(where ai.question_id is not null)' in v_authorizer)=0
   then
     raise exception 'signal_confirmation_v1 authorizer guard missing';
