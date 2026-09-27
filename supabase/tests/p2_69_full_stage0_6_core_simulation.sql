@@ -785,7 +785,7 @@ BEGIN
   if exists(
     select 1
     from jsonb_array_elements(
-      private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'cases'
+      private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'focus_cases'
     ) x
     where x.value->>'focus_kind'='screening_signal'
       and x.value->>'skill_code'=v_signal_skill
