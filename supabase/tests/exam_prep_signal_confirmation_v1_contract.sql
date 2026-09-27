@@ -42,6 +42,7 @@ begin
      or position('count(*) filter(' in v_confirmed)=0
      or position('r.response_kind=''written''' in v_confirmed)=0
      or position('learning_review' in v_confirmed)=0
+     or position('after_signal.created_at>=p_signal_at' in v_confirmed)=0
   then
     raise exception 'signal_confirmation_v1 confirmation evidence contract missing';
   end if;
