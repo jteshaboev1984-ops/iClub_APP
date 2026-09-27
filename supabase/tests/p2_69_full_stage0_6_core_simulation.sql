@@ -1073,11 +1073,159 @@ BEGIN
     raise exception 'P2-69 public user count did not return to baseline inside cleanup';
   end if;
 END
-$$;
+$;
+
+-- Focused negative-path proof: a failed fresh confirmation is non-credit for mastery,
+-- but still enters the normal correction cycle. This stays rollback-only and synthetic.
+DO $signal_fail$
+DECLARE
+  v_run text:='SV-P269CI-SIGNAL-FAIL-0001';
+  v_uid uuid;
+  v_program bigint;
+  v_auth jsonb;
+  v_session uuid;
+  v_signal_skill text;
+  v_case uuid;
+  v_before_objective int;
+  v_after_objective int;
+  v_complete jsonb;
+  v_cleanup jsonb;
+BEGIN
+  select id into v_program
+  from private.exam_prep_program_versions
+  where program_key='math_as_p1_p5'
+    and version_key='p1_p5_canonical_v1_0'
+    and status='active';
+  if v_program is null then raise exception 'P2-69 signal-fail canonical program missing'; end if;
+
+  perform private.register_exam_prep_canonical_synthetic_run_v2(
+    v_run,'p2_67_canonical_v2_0','5a52e40b1c8c732f4cd498595f1fce2d0ced4242',
+    'p2-69-signal-fail',26902,'core','p2-69-signal-fail-run'
+  );
+  v_uid:=private.create_exam_prep_synthetic_identity_v1(
+    v_run,'learner','SVF-P269-SIGNAL-FAIL-01','p2-69-signal-fail-identity',
+    'Dedicated failed screening-confirmation learner.','en'
+  );
+  perform private.transition_exam_prep_synthetic_validation_run_v1(
+    v_run,'registered','running',null,null,jsonb_build_object('p2_69','signal-fail-start')
+  );
+  perform private.initialize_exam_prep_synthetic_clock_v1(v_run,'p2-69-signal-fail-clock');
+
+  insert into private.exam_prep_feature_entitlements(
+    user_id,entitlement_status,core_access,ai_assist,mentor_care_entitled,cohort_key,valid_from
+  ) values(v_uid,'active',true,false,false,null,clock_timestamp()-interval '1 minute');
+
+  perform set_config('request.jwt.claim.sub',v_uid::text,true);
+  perform set_config('request.jwt.claim.role','authenticated',true);
+  perform public.save_exam_prep_exam_profile_v2('CI_P269_SIGNAL_FAIL','A',12,6);
+
+  perform pg_temp.p269_run_stage0_component_v1(v_uid,'P1');
+  perform private.rebuild_exam_prep_state_v1(v_uid,'P1');
+
+  select x.value->>'skill_code' into v_signal_skill
+  from jsonb_array_elements(
+    private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'focus_cases'
+  ) x
+  where x.value->>'focus_kind'='screening_signal'
+  order by (x.value->>'downstream_dependency_count')::int desc nulls last,
+           x.value->>'skill_code'
+  limit 1;
+  if v_signal_skill is null then
+    raise exception 'P2-69 signal-fail no prioritized P1 screening signal';
+  end if;
+
+  select objective_evidence_count into v_before_objective
+  from private.exam_prep_skill_states
+  where user_id=v_uid
+    and program_version_id=v_program
+    and component_code='P1'
+    and skill_code=v_signal_skill
+    and engine_version='objective_state_v1';
+
+  v_auth:=public.authorize_exam_prep_signal_confirmation_safe_v1('P1',v_signal_skill);
+  if v_auth->>'status'<>'authorized'
+     or coalesce((v_auth->>'fresh_questions')::boolean,false) is not true
+     or coalesce((v_auth->>'uses_retest_reserve')::boolean,true) is not false then
+    raise exception 'P2-69 signal-fail authorization invalid: %',v_auth;
+  end if;
+
+  v_session:=(public.start_exam_prep_signal_confirmation_session_safe_v1(
+    (v_auth->>'authorization_id')::uuid,
+    'p269-signal-fail-start'
+  )->>'session_id')::uuid;
+  perform pg_temp.p269_complete_learning_one_wrong_v1(
+    v_session,'p269-signal-fail'
+  );
+
+  select id into v_case
+  from private.exam_prep_correction_cases
+  where user_id=v_uid
+    and component_code='P1'
+    and skill_code=v_signal_skill
+    and status in ('open','remediating','retest_due','reopened')
+  order by opened_at desc
+  limit 1;
+  if v_case is null then
+    raise exception 'P2-69 failed screening confirmation did not open correction';
+  end if;
+
+  perform private.rebuild_exam_prep_state_v1(v_uid,'P1');
+  select objective_evidence_count into v_after_objective
+  from private.exam_prep_skill_states
+  where user_id=v_uid
+    and program_version_id=v_program
+    and component_code='P1'
+    and skill_code=v_signal_skill
+    and engine_version='objective_state_v1';
+
+  if v_after_objective is distinct from v_before_objective then
+    raise exception 'P2-69 noncredit signal confirmation changed mastery evidence before=% after=%',
+      v_before_objective,v_after_objective;
+  end if;
+
+  if exists(
+    select 1
+    from jsonb_array_elements(
+      private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'focus_cases'
+    ) x
+    where x.value->>'focus_kind'='screening_signal'
+      and x.value->>'skill_code'=v_signal_skill
+  ) then
+    raise exception 'P2-69 failed signal remained duplicated beside confirmed correction';
+  end if;
+
+  v_complete:=private.complete_exam_prep_synthetic_run_v1(
+    v_run,1,jsonb_build_object(
+      'p2_69','signal-fail-green',
+      'component','P1',
+      'skill_code',v_signal_skill,
+      'correction_opened',true,
+      'mastery_credit_changed',false
+    )
+  );
+  if v_complete->>'run_status'<>'completed' then
+    raise exception 'P2-69 signal-fail run completion failed: %',v_complete;
+  end if;
+
+  v_cleanup:=private.cleanup_exam_prep_synthetic_run_v1(
+    v_run,1,'p2-69-signal-fail-cleanup','I_CONFIRM_SYNTHETIC_RUN_CLEANUP_V1'
+  );
+  if v_cleanup->>'cleanup_status'<>'clean'
+     or coalesce((v_cleanup->>'deleted_identity_count')::int,-1)<>1 then
+    raise exception 'P2-69 signal-fail cleanup failed: %',v_cleanup;
+  end if;
+
+  if exists(select 1 from private.exam_prep_synthetic_identities where run_id=v_run)
+     or exists(select 1 from public.users where id=v_uid)
+     or exists(select 1 from auth.users where id=v_uid) then
+    raise exception 'P2-69 signal-fail cleanup left learner residue';
+  end if;
+END
+$signal_fail$;
 
 ROLLBACK;
 
-DO $$
+DO $
 DECLARE v_count int;
 BEGIN
   select count(*) into v_count from private.exam_prep_synthetic_validation_runs where run_id='SV-P269CI-RUN-0001';
@@ -1086,6 +1234,8 @@ BEGIN
   if v_count<>0 then raise exception 'P2-69 rollback left synthetic clock rows=%',v_count; end if;
   select count(*) into v_count from private.exam_prep_synthetic_timeline_events where run_id='SV-P269CI-RUN-0001';
   if v_count<>0 then raise exception 'P2-69 rollback left synthetic timeline rows=%',v_count; end if;
+  select count(*) into v_count from private.exam_prep_synthetic_validation_runs where run_id='SV-P269CI-SIGNAL-FAIL-0001';
+  if v_count<>0 then raise exception 'P2-69 rollback left signal-fail run rows=%',v_count; end if;
 END
 $$;
 
