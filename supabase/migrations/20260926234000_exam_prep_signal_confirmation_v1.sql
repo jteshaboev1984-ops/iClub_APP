@@ -164,8 +164,11 @@ begin
 
   if position('exam_prep_diagnostic_signal_confirmed_v1' in v_queue)=0
      or position('sa.academic_credit=true' in v_confirmed)=0
+     or position('sa.correction_case_id is null' in v_confirmed)=0
      or position('after_signal.created_at>=p_signal_at' in v_confirmed)=0
      or position('r.is_correct is true' in v_confirmed)=0
+     or position('c.status=''resolved''' in v_confirmed)=0
+     or position('c.resolved_at>=p_signal_at' in v_confirmed)=0
   then
     raise exception 'signal_confirmation_v1 postcheck failed';
   end if;
