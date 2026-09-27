@@ -3,23 +3,28 @@ begin;
 do $$
 declare
   v_authorizer text;
+  v_starter text;
   v_confirmed text;
   v_queue text;
   v_reconcile text;
 begin
   if to_regprocedure('private.exam_prep_diagnostic_signal_confirmed_v1(uuid,text,text,timestamptz)') is null
      or to_regprocedure('public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)') is null
+     or to_regprocedure('public.start_exam_prep_signal_confirmation_session_safe_v1(uuid,text)') is null
   then
     raise exception 'signal_confirmation_v1 functions missing';
   end if;
 
   if has_function_privilege('anon','public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)','EXECUTE')
      or not has_function_privilege('authenticated','public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)','EXECUTE')
+     or has_function_privilege('anon','public.start_exam_prep_signal_confirmation_session_safe_v1(uuid,text)','EXECUTE')
+     or not has_function_privilege('authenticated','public.start_exam_prep_signal_confirmation_session_safe_v1(uuid,text)','EXECUTE')
   then
     raise exception 'signal_confirmation_v1 public ACL mismatch';
   end if;
 
   v_authorizer:=pg_get_functiondef('public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)'::regprocedure);
+  v_starter:=pg_get_functiondef('public.start_exam_prep_signal_confirmation_session_safe_v1(uuid,text)'::regprocedure);
   v_confirmed:=pg_get_functiondef('private.exam_prep_diagnostic_signal_confirmed_v1(uuid,text,text,timestamptz)'::regprocedure);
   v_queue:=pg_get_functiondef('private.exam_prep_correction_queue_payload_v1(uuid,text)'::regprocedure);
   v_reconcile:=pg_get_functiondef('private.exam_prep_reconcile_finalized_session_v1()'::regprocedure);
@@ -33,6 +38,16 @@ begin
      or position('count(*) filter(where ai.question_id is not null)' in v_authorizer)=0
   then
     raise exception 'signal_confirmation_v1 authorizer guard missing';
+  end if;
+
+  if position('v_auth.purpose<>''learning''' in v_starter)=0
+     or position('v_auth.academic_credit' in v_starter)=0
+     or position('v_auth.credit_context<>''signal_confirmation''' in v_starter)=0
+     or position('v_auth.plan_id is not null' in v_starter)=0
+     or position('ep-stable-plan:' in v_starter)=0
+     or position('exam_prep_legacy_start_session_internal_v1' in v_starter)=0
+  then
+    raise exception 'signal_confirmation_v1 scoped starter guard missing';
   end if;
 
   if position('sa.academic_credit=false' in v_confirmed)=0
