@@ -894,8 +894,12 @@ BEGIN
   end if;
 
   -- P1 advances to Stage 3 while P5 intentionally stays Stage 2.
-  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',36);
-  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1 after governed learning confirmed screening signal');
+  -- The signal is resolved by the successful fresh learning pack, but the earlier
+  -- diagnostic miss remains immutable objective evidence. It can therefore keep
+  -- that skill below L2 under the existing mastery threshold; do not erase or
+  -- override it merely because the screening uncertainty is closed.
+  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',37);
+  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1 with confirmed signal and immutable diagnostic evidence');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',2,'P5 must remain independent');
 
   perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P5',30);
