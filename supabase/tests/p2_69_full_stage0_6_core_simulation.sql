@@ -561,7 +561,7 @@ begin
 end;
 $$;
 
-DO $$
+DO $main$
 DECLARE
   v_run text:='SV-P269CI-RUN-0001';
   v_uid uuid;
@@ -1082,7 +1082,7 @@ BEGIN
     raise exception 'P2-69 public user count did not return to baseline inside cleanup';
   end if;
 END
-$;
+$main$;
 
 -- Focused negative-path proof: a later governed learning attempt that is not fully
 -- correct must not clear the screening signal as “confirmed”; the ordinary learning
