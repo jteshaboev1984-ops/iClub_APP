@@ -574,6 +574,9 @@ DECLARE
   v_p5_screen int;
   v_p1_signal_before int;
   v_p1_signal_after int;
+  v_signal_at timestamptz;
+  v_signal_debug jsonb;
+  v_signal_confirmed boolean;
   v_plan jsonb;
   v_plan_id uuid;
   v_priority smallint;
@@ -724,10 +727,60 @@ BEGIN
   )->>'session_id')::uuid;
   perform pg_temp.p269_complete_session_correct_v1(v_session,'p269-signal-confirm-p1');
 
+  select e.created_at into v_signal_at
+  from private.exam_prep_evidence_events e
+  join private.exam_prep_sessions s on s.id=e.session_id
+  where e.user_id=v_uid
+    and e.component_code='P1'
+    and e.skill_code=v_signal_skill
+    and e.evidence_type='diagnostic'
+    and e.verification_status='app_verified'
+    and e.is_correct is false
+    and s.session_type='diagnostic'
+    and s.status='finalized'
+  order by e.created_at desc,e.id desc
+  limit 1;
+
+  v_signal_confirmed:=private.exam_prep_diagnostic_signal_confirmed_v1(
+    v_uid,'P1',v_signal_skill,v_signal_at
+  );
+
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'session_id',x.session_id,
+    'status',x.status,
+    'finalized_at',x.finalized_at,
+    'signal_at',v_signal_at,
+    'academic_credit',x.academic_credit,
+    'credit_context',x.credit_context,
+    'question_count',x.question_count,
+    'machine_correct',x.machine_correct,
+    'written_count',x.written_count,
+    'off_skill_items',x.off_skill_items
+  ) order by x.finalized_at),'[]'::jsonb)
+  into v_signal_debug
+  from (
+    select
+      s.id as session_id,s.status,s.finalized_at,
+      sa.academic_credit,sa.credit_context,
+      count(*) filter(where si.item_kind='question')::int as question_count,
+      count(*) filter(where si.item_kind='question' and r.response_kind='machine' and r.is_correct is true)::int as machine_correct,
+      count(*) filter(where si.item_kind='written' and r.response_kind='written')::int as written_count,
+      count(*) filter(where si.primary_skill_code is distinct from v_signal_skill)::int as off_skill_items
+    from private.exam_prep_sessions s
+    join private.exam_prep_session_authorizations sa on sa.id=s.authorization_id
+    join private.exam_prep_session_items si on si.session_id=s.id
+    left join private.exam_prep_responses r
+      on r.session_id=s.id and r.item_order=si.item_order and r.user_id=v_uid
+    where s.user_id=v_uid
+      and s.component_code='P1'
+      and s.session_type='learning'
+    group by s.id,sa.academic_credit,sa.credit_context
+  ) x;
+
   v_p1_signal_after:=coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->>'signal_count')::int,-1);
   if v_p1_signal_after<>v_p1_signal_before-1 then
-    raise exception 'P2-69 successful P1 signal confirmation did not clear exactly one screening signal before=% after=%',
-      v_p1_signal_before,v_p1_signal_after;
+    raise exception 'P2-69 successful P1 signal confirmation did not clear exactly one screening signal before=% after=% helper=% debug=%',
+      v_p1_signal_before,v_p1_signal_after,v_signal_confirmed,v_signal_debug;
   end if;
   if exists(
     select 1
