@@ -19,6 +19,7 @@ begin
 
   if position('sa.academic_credit=true' in v_confirmed)=0
      or position('learning_review' in v_confirmed)=0
+     or position('sa.correction_case_id is null' in v_confirmed)=0
      or position('s.session_type=''learning''' in v_confirmed)=0
      or position('s.status=''finalized''' in v_confirmed)=0
      or position('after_signal.verification_status=''app_verified''' in v_confirmed)=0
@@ -27,6 +28,8 @@ begin
      or position('r.is_correct is true' in v_confirmed)=0
      or position('count(*) filter(where si.item_kind=''written'')>=1' in v_confirmed)=0
      or position('r.response_kind=''written''' in v_confirmed)=0
+     or position('c.status=''resolved''' in v_confirmed)=0
+     or position('c.resolved_at>=p_signal_at' in v_confirmed)=0
   then
     raise exception 'signal_confirmation_v1 governed-learning evidence contract missing';
   end if;
