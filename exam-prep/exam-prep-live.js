@@ -680,7 +680,12 @@
     if (["resume_existing_session_first","resume"].includes(String(authorization.status || ""))) {
       sessionId = authorization.session_id || authorization.recovery?.session_id || null;
     } else if (authorization.status === "authorized" && authorization.authorization_id) {
-      const started = await internal.api.startSession(authorization.authorization_id, key("ep-signal-confirmation-session"));
+      const startFn = typeof internal.api.startSignalConfirmation === "function"
+        ? internal.api.startSignalConfirmation
+        : null;
+      const started = startFn
+        ? await startFn(authorization.authorization_id, key("ep-signal-confirmation-session"))
+        : null;
       if (started?.ok) sessionId = started.data?.session_id || null;
     }
     state.busy = false;
