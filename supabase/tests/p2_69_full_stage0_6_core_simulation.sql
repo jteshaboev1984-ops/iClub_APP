@@ -1308,7 +1308,7 @@ $signal_fail$;
 
 ROLLBACK;
 
-DO $
+DO $final_check$
 DECLARE v_count int;
 BEGIN
   select count(*) into v_count from private.exam_prep_synthetic_validation_runs where run_id='SV-P269CI-RUN-0001';
@@ -1320,6 +1320,6 @@ BEGIN
   select count(*) into v_count from private.exam_prep_synthetic_validation_runs where run_id='SV-P269CI-SIGNAL-FAIL-0001';
   if v_count<>0 then raise exception 'P2-69 rollback left signal-fail run rows=%',v_count; end if;
 END
-$$;
+$final_check$;
 
 \echo 'P2-69 full Stage 0-6 Core synthetic simulation: GREEN'
