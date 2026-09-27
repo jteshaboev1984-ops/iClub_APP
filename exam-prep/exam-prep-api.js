@@ -240,6 +240,12 @@
       p_skill_code: String(skillCode || "")
     });
   }
+  async function startSignalConfirmation(authorizationId, idempotencyKey) {
+    return rpc("start_exam_prep_signal_confirmation_session_safe_v1", {
+      p_authorization_id: authorizationId,
+      p_idempotency_key: String(idempotencyKey || "")
+    });
+  }
   async function pastPaperCompanion(componentCode, language = "en") {
     return rpc("get_exam_prep_past_paper_companion_safe_v1", { p_component_code: componentArg(componentCode), p_language: String(language || "en") });
   }
@@ -337,7 +343,7 @@
     capabilities, betaInvitation, grantBetaConsent, revokeBetaConsent,
     examProfile, saveExamProfile, examMapStatus,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
-    legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, skillDetail, correctionQueue, authorizeSignalConfirmation, pastPaperCompanion, materialsLibrary,
+    legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, skillDetail, correctionQueue, authorizeSignalConfirmation, startSignalConfirmation, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
     integrityStatus, recordIntegrityEvent,
     recovery, recordInterruption, authorizeRevalidationItem,
