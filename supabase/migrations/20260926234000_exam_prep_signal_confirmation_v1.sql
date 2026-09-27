@@ -1,5 +1,6 @@
 -- Stage-0 screening-signal confirmation through ordinary governed learning only.
 -- No extra learner session type, no non-credit detour, no retest-reserve consumption.
+-- The sole governed learning pack for a skill is therefore not spent on a separate check.
 -- A diagnostic signal disappears only after a later finalized single-skill academic-credit
 -- learning session proves the skill with all machine items correct and the written task completed.
 begin;
