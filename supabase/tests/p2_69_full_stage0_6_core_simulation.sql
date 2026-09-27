@@ -1101,6 +1101,8 @@ DECLARE
   v_signal_at timestamptz;
   v_session uuid;
   v_case uuid;
+  v_auth jsonb;
+  v_retest jsonb;
   v_confirmed boolean;
   v_complete jsonb;
   v_cleanup jsonb;
@@ -1218,13 +1220,70 @@ BEGIN
     raise exception 'P2-69 failed learning left duplicate screening signal beside correction';
   end if;
 
+  -- Repeating the learning analogue during correction must still not count as
+  -- fresh signal confirmation. Only the existing delayed retest may close this path.
+  v_auth:=public.authorize_exam_prep_correction_safe_v1(v_case);
+  v_session:=(public.start_exam_prep_session_safe_v1(
+    (v_auth->>'authorization_id')::uuid,'p269-signal-fail-remediate-start'
+  )->>'session_id')::uuid;
+  perform pg_temp.p269_complete_session_correct_v1(
+    v_session,'p269-signal-fail-remediate'
+  );
+
+  v_confirmed:=private.exam_prep_diagnostic_signal_confirmed_v1(
+    v_uid,'P1',v_signal_skill,v_signal_at
+  );
+  if v_confirmed is true then
+    raise exception 'P2-69 repeated correction analogue incorrectly confirmed screening signal';
+  end if;
+
+  begin
+    perform public.authorize_exam_prep_retest_safe_v1(v_case);
+    raise exception 'P2-69 signal-fail delayed retest was authorized too early';
+  exception when others then
+    if SQLERRM<>'exam_prep_retest_too_early' then raise; end if;
+  end;
+
+  perform pg_temp.p269_advance_days_v1(v_run,7,'P2-69 signal-fail delayed retest wait');
+  v_retest:=public.authorize_exam_prep_retest_safe_v1(v_case);
+  v_session:=(public.start_exam_prep_session_safe_v1(
+    (v_retest->>'authorization_id')::uuid,'p269-signal-fail-retest-start'
+  )->>'session_id')::uuid;
+  perform pg_temp.p269_complete_session_correct_v1(
+    v_session,'p269-signal-fail-retest'
+  );
+
+  if (select status from private.exam_prep_correction_cases where id=v_case)<>'resolved' then
+    raise exception 'P2-69 signal-fail correction did not resolve after delayed retest';
+  end if;
+
+  v_confirmed:=private.exam_prep_diagnostic_signal_confirmed_v1(
+    v_uid,'P1',v_signal_skill,v_signal_at
+  );
+  if v_confirmed is not true then
+    raise exception 'P2-69 resolved correction did not retire the original screening signal';
+  end if;
+
+  if exists(
+    select 1
+    from jsonb_array_elements(
+      private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'focus_cases'
+    ) x
+    where x.value->>'focus_kind'='screening_signal'
+      and x.value->>'skill_code'=v_signal_skill
+  ) then
+    raise exception 'P2-69 resolved correction allowed screening signal to reappear';
+  end if;
+
   v_complete:=private.complete_exam_prep_synthetic_run_v1(
     v_run,1,jsonb_build_object(
       'p2_69','signal-fail-green',
       'component','P1',
       'skill_code',v_signal_skill,
-      'confirmed',false,
-      'correction_opened',true
+      'initial_learning_confirmed',false,
+      'correction_opened',true,
+      'delayed_retest_resolved',true,
+      'signal_retired_after_resolved_correction',true
     )
   );
   if v_complete->>'run_status'<>'completed' then
