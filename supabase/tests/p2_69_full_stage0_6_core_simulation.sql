@@ -1084,19 +1084,20 @@ BEGIN
 END
 $;
 
--- Focused negative-path proof: a failed fresh confirmation is non-credit for mastery,
--- but still enters the normal correction cycle. This stays rollback-only and synthetic.
+-- Focused negative-path proof: a later governed learning attempt that is not fully
+-- correct must not clear the screening signal as “confirmed”; the ordinary learning
+-- error path opens the existing correction cycle instead.
 DO $signal_fail$
 DECLARE
   v_run text:='SV-P269CI-SIGNAL-FAIL-0001';
   v_uid uuid;
   v_program bigint;
-  v_auth jsonb;
-  v_session uuid;
   v_signal_skill text;
+  v_signal_ass bigint;
+  v_signal_at timestamptz;
+  v_session uuid;
   v_case uuid;
-  v_before_objective int;
-  v_after_objective int;
+  v_confirmed boolean;
   v_complete jsonb;
   v_cleanup jsonb;
 BEGIN
@@ -1143,28 +1144,52 @@ BEGIN
     raise exception 'P2-69 signal-fail no prioritized P1 screening signal';
   end if;
 
-  select objective_evidence_count into v_before_objective
-  from private.exam_prep_skill_states
-  where user_id=v_uid
-    and program_version_id=v_program
-    and component_code='P1'
-    and skill_code=v_signal_skill
-    and engine_version='objective_state_v1';
+  select e.created_at into v_signal_at
+  from private.exam_prep_evidence_events e
+  join private.exam_prep_sessions s on s.id=e.session_id
+  where e.user_id=v_uid
+    and e.component_code='P1'
+    and e.skill_code=v_signal_skill
+    and e.evidence_type='diagnostic'
+    and e.verification_status='app_verified'
+    and e.is_correct is false
+    and s.session_type='diagnostic'
+    and s.status='finalized'
+  order by e.created_at desc,e.id desc
+  limit 1;
 
-  v_auth:=public.authorize_exam_prep_signal_confirmation_safe_v1('P1',v_signal_skill);
-  if v_auth->>'status'<>'authorized'
-     or coalesce((v_auth->>'fresh_questions')::boolean,false) is not true
-     or coalesce((v_auth->>'uses_retest_reserve')::boolean,true) is not false then
-    raise exception 'P2-69 signal-fail authorization invalid: %',v_auth;
+  select a.id into v_signal_ass
+  from private.exam_prep_assessments a
+  where a.component_code='P1'
+    and a.assessment_type='learning'
+    and a.status='published'
+    and exists(
+      select 1 from private.exam_prep_assessment_items ai
+      where ai.assessment_id=a.id and ai.primary_skill_code=v_signal_skill
+    )
+    and not exists(
+      select 1 from private.exam_prep_assessment_items ai
+      where ai.assessment_id=a.id and ai.primary_skill_code<>v_signal_skill
+    )
+  order by a.id
+  limit 1;
+  if v_signal_ass is null then
+    raise exception 'P2-69 signal-fail learning assessment missing skill=%',v_signal_skill;
   end if;
 
-  v_session:=(public.start_exam_prep_signal_confirmation_session_safe_v1(
-    (v_auth->>'authorization_id')::uuid,
-    'p269-signal-fail-start'
-  )->>'session_id')::uuid;
+  v_session:=pg_temp.p269_start_direct_assessment_v1(
+    v_uid,v_signal_ass,'P1','learning','p269-signal-fail'
+  );
   perform pg_temp.p269_complete_learning_one_wrong_v1(
     v_session,'p269-signal-fail'
   );
+
+  v_confirmed:=private.exam_prep_diagnostic_signal_confirmed_v1(
+    v_uid,'P1',v_signal_skill,v_signal_at
+  );
+  if v_confirmed is true then
+    raise exception 'P2-69 wrong governed learning incorrectly confirmed screening signal';
+  end if;
 
   select id into v_case
   from private.exam_prep_correction_cases
@@ -1175,21 +1200,7 @@ BEGIN
   order by opened_at desc
   limit 1;
   if v_case is null then
-    raise exception 'P2-69 failed screening confirmation did not open correction';
-  end if;
-
-  perform private.rebuild_exam_prep_state_v1(v_uid,'P1');
-  select objective_evidence_count into v_after_objective
-  from private.exam_prep_skill_states
-  where user_id=v_uid
-    and program_version_id=v_program
-    and component_code='P1'
-    and skill_code=v_signal_skill
-    and engine_version='objective_state_v1';
-
-  if v_after_objective is distinct from v_before_objective then
-    raise exception 'P2-69 noncredit signal confirmation changed mastery evidence before=% after=%',
-      v_before_objective,v_after_objective;
+    raise exception 'P2-69 failed governed learning did not open correction for screening-signal skill';
   end if;
 
   if exists(
@@ -1200,7 +1211,7 @@ BEGIN
     where x.value->>'focus_kind'='screening_signal'
       and x.value->>'skill_code'=v_signal_skill
   ) then
-    raise exception 'P2-69 failed signal remained duplicated beside confirmed correction';
+    raise exception 'P2-69 failed learning left duplicate screening signal beside correction';
   end if;
 
   v_complete:=private.complete_exam_prep_synthetic_run_v1(
@@ -1208,8 +1219,8 @@ BEGIN
       'p2_69','signal-fail-green',
       'component','P1',
       'skill_code',v_signal_skill,
-      'correction_opened',true,
-      'mastery_credit_changed',false
+      'confirmed',false,
+      'correction_opened',true
     )
   );
   if v_complete->>'run_status'<>'completed' then
