@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p260signal1";
+  const VERSION = "p260results1";
   let attached = false;
 
   const state = {
@@ -195,7 +195,6 @@
     if (origin === "component") { await openComponentHome(component); return; }
     if (state.returnView?.kind === "component") await openComponentHome(state.returnView.component || component);
     else if (state.returnView?.kind === "plan") await openPlan(state.returnView.component || component);
-    else if (state.returnView?.kind === "corrections" && typeof internal.learnerViews?.openCorrections === "function") await internal.learnerViews.openCorrections(state.returnView.component || component);
     else await renderDashboard();
   }
 
@@ -673,28 +672,6 @@
     state.returnView = { kind: returnKind, component }; await loadSession(result.data.session_id);
   }
 
-  async function startAuthorizedExternal(component, authorization, returnKind = "corrections") {
-    if (state.busy || !authorization || typeof authorization !== "object") return false;
-    state.busy = true; renderLoading();
-    let sessionId = null;
-    if (["resume_existing_session_first","resume"].includes(String(authorization.status || ""))) {
-      sessionId = authorization.session_id || authorization.recovery?.session_id || null;
-    } else if (authorization.status === "authorized" && authorization.authorization_id) {
-      const startFn = typeof internal.api.startSignalConfirmation === "function"
-        ? internal.api.startSignalConfirmation
-        : null;
-      const started = startFn
-        ? await startFn(authorization.authorization_id, key("ep-signal-confirmation-session"))
-        : null;
-      if (started?.ok) sessionId = started.data?.session_id || null;
-    }
-    state.busy = false;
-    if (!sessionId) { renderError(); return false; }
-    state.returnView = { kind: returnKind, component };
-    await loadSession(sessionId);
-    return true;
-  }
-
   function itemTypeLabel(type) {
     const c = copy(); return ({ learning: c.learning, correction: c.correction, retest: c.retest, mixed_transfer: c.mixed, rebaseline: c.rebaseline })[type] || c.learning;
   }
@@ -867,7 +844,6 @@
         if (state.returnView?.kind === "component") await openComponentHome(component);
         else await renderDashboard();
       } else if (state.returnView?.kind === "component") await openComponentHome(component);
-      else if (state.returnView?.kind === "corrections" && typeof internal.learnerViews?.openCorrections === "function") await internal.learnerViews.openCorrections(component);
       else await openPlan(component);
       return;
     }
@@ -878,7 +854,6 @@
           await openSessionResult(completedSession.session_id,completedSession.component_code,"completion")) return;
       if (state.returnView?.kind === "component") await openComponentHome(state.returnView.component);
       else if (state.returnView?.kind === "plan") await openPlan(state.returnView.component);
-      else if (state.returnView?.kind === "corrections" && typeof internal.learnerViews?.openCorrections === "function") await internal.learnerViews.openCorrections(state.returnView.component);
       else if (state.returnView?.kind === "timed") await openTimed(state.returnView.component);
       else await renderDashboard();
       return;
@@ -905,7 +880,6 @@
       state.session = null;
       if (state.returnView?.kind === "component") await openComponentHome(state.returnView.component);
       else if (state.returnView?.kind === "plan") await openPlan(state.returnView.component);
-      else if (state.returnView?.kind === "corrections" && typeof internal.learnerViews?.openCorrections === "function") await internal.learnerViews.openCorrections(state.returnView.component);
       else await renderDashboard();
     });
     root.querySelector('[data-ep-live-end]')?.addEventListener('click', async () => { if (window.confirm(c.endConfirm)) await finishTimed("administrative_stop"); });
@@ -1171,7 +1145,6 @@
     if (attached) return; const host = window.iClubExamPrep;
     if (!host || typeof host.open !== "function") { setTimeout(attach, 0); return; }
     attached = true;
-    internal.liveFlowBridge = Object.freeze({ version: VERSION, startAuthorizedExternal });
     window.iClubExamPrep = Object.freeze({
       syncSubjectHub: async context => { state.language = lang(context?.language || state.language); const result = await host.syncSubjectHub(context); if (!result) reset(); return result; },
       refreshCapabilities: async () => { const result = await host.refreshCapabilities(); if (host.isOpen() && canMount()) await mount({ language: state.language }); return result; },
