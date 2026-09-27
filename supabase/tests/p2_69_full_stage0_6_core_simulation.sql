@@ -721,7 +721,7 @@ BEGIN
      or coalesce((v_auth->>'uses_retest_reserve')::boolean,true) is not false then
     raise exception 'P2-69 signal confirmation authorization invalid: %',v_auth;
   end if;
-  v_session:=(public.start_exam_prep_session_safe_v1(
+  v_session:=(public.start_exam_prep_signal_confirmation_session_safe_v1(
     (v_auth->>'authorization_id')::uuid,
     'p269-signal-confirm-p1-start'
   )->>'session_id')::uuid;
