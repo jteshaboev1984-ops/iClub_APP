@@ -572,6 +572,8 @@ DECLARE
   v_p5_diag int;
   v_p1_screen int;
   v_p5_screen int;
+  v_p1_signal_before int;
+  v_p1_signal_after int;
   v_plan jsonb;
   v_plan_id uuid;
   v_priority smallint;
@@ -690,7 +692,8 @@ BEGIN
   ) then
     raise exception 'P2-69 diagnostic miss evidence was not preserved';
   end if;
-  if coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->>'signal_count')::int,0)<1
+  v_p1_signal_before:=coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->>'signal_count')::int,0);
+  if v_p1_signal_before<1
      or coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P5')->>'signal_count')::int,0)<1 then
     raise exception 'P2-69 diagnostic misses were not surfaced as confirmation signals';
   end if;
@@ -721,8 +724,20 @@ BEGIN
   )->>'session_id')::uuid;
   perform pg_temp.p269_complete_session_correct_v1(v_session,'p269-signal-confirm-p1');
 
-  if coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->>'signal_count')::int,-1)<>0 then
-    raise exception 'P2-69 successful P1 signal confirmation did not clear the screening signal';
+  v_p1_signal_after:=coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->>'signal_count')::int,-1);
+  if v_p1_signal_after<>v_p1_signal_before-1 then
+    raise exception 'P2-69 successful P1 signal confirmation did not clear exactly one screening signal before=% after=%',
+      v_p1_signal_before,v_p1_signal_after;
+  end if;
+  if exists(
+    select 1
+    from jsonb_array_elements(
+      private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'cases'
+    ) x
+    where x.value->>'focus_kind'='screening_signal'
+      and x.value->>'skill_code'=v_signal_skill
+  ) then
+    raise exception 'P2-69 selected P1 screening signal remained in learner attention queue';
   end if;
   if exists(
     select 1 from private.exam_prep_correction_cases
