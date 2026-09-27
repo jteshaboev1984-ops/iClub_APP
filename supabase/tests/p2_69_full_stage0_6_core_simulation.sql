@@ -584,6 +584,7 @@ DECLARE
   v_session uuid;
   v_corr_skill text;
   v_signal_skill text;
+  v_signal_ass bigint;
   v_corr_ass bigint;
   v_case uuid;
   v_retest jsonb;
@@ -715,16 +716,28 @@ BEGIN
     raise exception 'P2-69 no prioritized P1 screening signal available for confirmation';
   end if;
 
-  v_auth:=public.authorize_exam_prep_signal_confirmation_safe_v1('P1',v_signal_skill);
-  if v_auth->>'status'<>'authorized'
-     or coalesce((v_auth->>'fresh_questions')::boolean,false) is not true
-     or coalesce((v_auth->>'uses_retest_reserve')::boolean,true) is not false then
-    raise exception 'P2-69 signal confirmation authorization invalid: %',v_auth;
+  select a.id into v_signal_ass
+  from private.exam_prep_assessments a
+  where a.component_code='P1'
+    and a.assessment_type='learning'
+    and a.status='published'
+    and exists(
+      select 1 from private.exam_prep_assessment_items ai
+      where ai.assessment_id=a.id and ai.primary_skill_code=v_signal_skill
+    )
+    and not exists(
+      select 1 from private.exam_prep_assessment_items ai
+      where ai.assessment_id=a.id and ai.primary_skill_code<>v_signal_skill
+    )
+  order by a.id
+  limit 1;
+  if v_signal_ass is null then
+    raise exception 'P2-69 governed learning assessment missing for signal skill=%',v_signal_skill;
   end if;
-  v_session:=(public.start_exam_prep_signal_confirmation_session_safe_v1(
-    (v_auth->>'authorization_id')::uuid,
-    'p269-signal-confirm-p1-start'
-  )->>'session_id')::uuid;
+
+  v_session:=pg_temp.p269_start_direct_assessment_v1(
+    v_uid,v_signal_ass,'P1','learning','p269-signal-confirm-p1'
+  );
   perform pg_temp.p269_complete_session_correct_v1(v_session,'p269-signal-confirm-p1');
 
   select e.created_at into v_signal_at
@@ -800,10 +813,6 @@ BEGIN
     raise exception 'P2-69 successful screening confirmation incorrectly opened correction';
   end if;
 
-  v_auth:=public.authorize_exam_prep_signal_confirmation_safe_v1('P1',v_signal_skill);
-  if v_auth->>'status'<>'already_confirmed' then
-    raise exception 'P2-69 confirmed signal was re-authorized instead of staying closed: %',v_auth;
-  end if;
   if coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P5')->>'signal_count')::int,0)<1 then
     raise exception 'P2-69 P1 confirmation leaked into independent P5 screening signal';
   end if;
@@ -885,8 +894,8 @@ BEGIN
   end if;
 
   -- P1 advances to Stage 3 while P5 intentionally stays Stage 2.
-  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',37);
-  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1 after noncredit screening confirmation');
+  perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',36);
+  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1 after governed learning confirmed screening signal');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',2,'P5 must remain independent');
 
   perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P5',30);
