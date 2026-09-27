@@ -59,7 +59,15 @@ as $fn$
       and s.session_type='learning'
       and s.status='finalized'
       and s.finalized_at is not null
-      and s.finalized_at>=p_signal_at
+      and exists(
+        select 1
+        from private.exam_prep_evidence_events after_signal
+        where after_signal.session_id=s.id
+          and after_signal.user_id=p_user_id
+          and after_signal.component_code=p_component_code
+          and after_signal.skill_code=p_skill_code
+          and after_signal.created_at>=p_signal_at
+      )
       and not exists(
         select 1
         from private.exam_prep_session_items other
