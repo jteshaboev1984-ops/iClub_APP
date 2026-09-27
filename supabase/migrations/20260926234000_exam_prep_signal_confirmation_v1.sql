@@ -439,6 +439,70 @@ revoke all on function public.authorize_exam_prep_signal_confirmation_safe_v1(te
 grant execute on function public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)
   to authenticated,service_role;
 
+create or replace function public.start_exam_prep_signal_confirmation_session_safe_v1(
+  p_authorization_id uuid,
+  p_idempotency_key text
+) returns jsonb
+language plpgsql
+security definer
+set search_path=''
+as $fn$
+declare
+  v_uid uuid;
+  v_auth private.exam_prep_session_authorizations%rowtype;
+begin
+  v_uid:=private.exam_prep_require_core_access_v1();
+  if p_authorization_id is null then raise exception 'exam_prep_authorization_required'; end if;
+  if p_idempotency_key is null or char_length(p_idempotency_key) not between 8 and 160 then
+    raise exception 'exam_prep_bad_idempotency_key';
+  end if;
+
+  select * into v_auth
+  from private.exam_prep_session_authorizations
+  where id=p_authorization_id and user_id=v_uid;
+  if v_auth.id is null then raise exception 'exam_prep_authorization_not_found' using errcode='P0002'; end if;
+
+  if v_auth.purpose<>'learning'
+     or coalesce(v_auth.academic_credit,true) is not false
+     or v_auth.credit_context<>'signal_confirmation'
+     or v_auth.plan_id is not null
+  then
+    raise exception 'exam_prep_signal_confirmation_authorization_scope_mismatch' using errcode='42501';
+  end if;
+  if v_auth.component_code not in ('P1','P5') then raise exception 'exam_prep_bad_component'; end if;
+
+  -- Match the weekly-flow lock domain so an explicit signal check cannot race
+  -- a simultaneous weekly-plan/session action for the same learner/component.
+  perform pg_advisory_xact_lock(
+    hashtextextended('ep-stable-plan:'||v_uid::text||':'||v_auth.component_code,0)
+  );
+
+  -- Re-read after the lock; the legacy internal starter preserves the existing
+  -- idempotency/consumed-authorization guarantees without widening the generic
+  -- public start-session authority.
+  select * into v_auth
+  from private.exam_prep_session_authorizations
+  where id=p_authorization_id and user_id=v_uid;
+  if v_auth.id is null
+     or v_auth.purpose<>'learning'
+     or coalesce(v_auth.academic_credit,true) is not false
+     or v_auth.credit_context<>'signal_confirmation'
+     or v_auth.plan_id is not null
+  then
+    raise exception 'exam_prep_signal_confirmation_authorization_scope_mismatch' using errcode='42501';
+  end if;
+
+  return private.exam_prep_legacy_start_session_internal_v1(
+    p_authorization_id,p_idempotency_key
+  );
+end
+$fn$;
+
+revoke all on function public.start_exam_prep_signal_confirmation_session_safe_v1(uuid,text)
+  from public,anon;
+grant execute on function public.start_exam_prep_signal_confirmation_session_safe_v1(uuid,text)
+  to authenticated,service_role;
+
 do $postcheck$
 declare
   v_queue text;
@@ -446,10 +510,13 @@ begin
   v_queue:=pg_get_functiondef('private.exam_prep_correction_queue_payload_v1(uuid,text)'::regprocedure);
   if to_regprocedure('private.exam_prep_diagnostic_signal_confirmed_v1(uuid,text,text,timestamptz)') is null
      or to_regprocedure('public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)') is null
+     or to_regprocedure('public.start_exam_prep_signal_confirmation_session_safe_v1(uuid,text)') is null
      or position('exam_prep_diagnostic_signal_confirmed_v1' in v_queue)=0
      or position('signal_confirmation' in pg_get_functiondef('private.exam_prep_reconcile_finalized_session_v1()'::regprocedure))=0
      or has_function_privilege('anon','public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)','EXECUTE')
      or not has_function_privilege('authenticated','public.authorize_exam_prep_signal_confirmation_safe_v1(text,text)','EXECUTE')
+     or has_function_privilege('anon','public.start_exam_prep_signal_confirmation_session_safe_v1(uuid,text)','EXECUTE')
+     or not has_function_privilege('authenticated','public.start_exam_prep_signal_confirmation_session_safe_v1(uuid,text)','EXECUTE')
   then
     raise exception 'signal_confirmation_v1 postcheck failed';
   end if;
