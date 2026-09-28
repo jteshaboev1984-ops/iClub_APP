@@ -4,7 +4,7 @@ begin;
 
 -- A visible answer-position pattern is a learner-facing correctness leak even when
 -- the actual answer key stays private. The governed surface therefore keeps an
--- even distribution while preserving additive version history.
+-- near-even distribution (spread <= 1) while preserving additive version history.
 do $$
 declare
   v_checks int;
@@ -18,8 +18,8 @@ begin
     into v_checks,v_tasks
   from private.exam_prep_written_understanding_checks
   where lifecycle_state='published';
-  if v_checks<>52 or v_tasks<>49 then
-    raise exception 'written-option-balance-gate: expected 52/49 published surface, got %/%',v_checks,v_tasks;
+  if v_checks<>61 or v_tasks<>58 then
+    raise exception 'written-option-balance-gate: expected 61/58 published surface, got %/%',v_checks,v_tasks;
   end if;
 
   select jsonb_object_agg(correct_index,cnt order by correct_index)
@@ -30,8 +30,8 @@ begin
     where lifecycle_state='published'
     group by correct_index
   ) q;
-  if v_dist<>jsonb_build_object('0',13,'1',13,'2',13,'3',13) then
-    raise exception 'written-option-balance-gate: expected 13/13/13/13, got %',v_dist;
+  if v_dist<>jsonb_build_object('0',15,'1',15,'2',15,'3',16) then
+    raise exception 'written-option-balance-gate: expected 15/15/15/16, got %',v_dist;
   end if;
 
   -- The history-bearing active/reference task is intentionally never re-versioned
