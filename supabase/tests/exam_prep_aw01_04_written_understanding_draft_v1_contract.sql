@@ -45,7 +45,7 @@ begin
   ) p
   where jsonb_array_length(p.payload)<>1
      or p.payload::text ~ 'correct_index|rationale|all_correct|is_correct'
-     or coalesce(p.payload->0->>'check_version','')<>'v1';
+     or coalesce(p.payload->0->>'check_version','')<>'aw02-v1';
   if v_bad<>0 then
     raise exception 'aw01_04_written_checks_v1 learner payload contract failed rows=%',v_bad;
   end if;
