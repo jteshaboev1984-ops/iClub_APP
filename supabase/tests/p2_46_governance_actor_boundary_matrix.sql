@@ -23,8 +23,19 @@ begin
     raise exception 'P2-46 service_role lost weekly beta governance review execution';
   end if;
 
-  -- Browser beta functions are limited to the learner's own invitation and
-  -- consent lifecycle. Operational/governance functions remain service-only.
+  -- Browser beta functions are limited to the learner's own invitation,
+  -- explicit consent/access claim and revocation lifecycle.
+  -- Operational/governance functions remain service-only.
+  v_proc:=to_regprocedure('public.claim_my_exam_prep_beta_core_seat_v1(text,text)');
+  if v_proc is null then
+    raise exception 'P2-46 learner Core seat claim RPC missing';
+  end if;
+  if has_function_privilege('anon',v_proc,'EXECUTE')
+     or has_function_privilege('service_role',v_proc,'EXECUTE')
+     or not has_function_privilege('authenticated',v_proc,'EXECUTE') then
+    raise exception 'P2-46 learner Core seat claim ACL mismatch';
+  end if;
+
   select count(*) into v_bad
   from pg_proc p
   join pg_namespace n on n.oid=p.pronamespace
@@ -39,6 +50,7 @@ begin
     and p.proname not in (
       'get_my_exam_prep_beta_invitation_v1',
       'grant_my_exam_prep_beta_consent_v1',
+      'claim_my_exam_prep_beta_core_seat_v1',
       'revoke_my_exam_prep_beta_consent_v1'
     );
   if v_bad<>0 then
