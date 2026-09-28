@@ -1,5 +1,5 @@
--- Contract for AW1-4 alternate learning draft packs.
--- Draft rows must be complete, trilingual, unique, and impossible to select at runtime.
+-- Contract for the AW1-4 alternate learning source packs across their governed release lifecycle.
+-- The current migration stack publishes them only through the supplemental-learning gate.
 begin;
 do $$
 declare
@@ -9,13 +9,13 @@ begin
     raise exception 'alt_learning_draft_v1 schema missing';
   end if;
 
-  if (select count(*) from private.exam_prep_content_versions where id in (4801,4802) and status='draft')<>2 then
-    raise exception 'alt_learning_draft_v1 content versions must stay draft';
+  if (select count(*) from private.exam_prep_content_versions where id in (4801,4802) and status='published')<>2 then
+    raise exception 'alt_learning_draft_v1 content versions must be governed published supplemental packs';
   end if;
 
-  if (select count(*) from private.exam_prep_assessments where content_version_id in (4801,4802) and status='draft')<>9
-     or (select count(*) from private.exam_prep_written_tasks where content_version_id in (4801,4802) and lifecycle_state='draft')<>9
-     or (select count(*) from private.exam_prep_question_content_meta where content_version_id in (4801,4802) and lifecycle_state='draft' and reserve_role='learning')<>27
+  if (select count(*) from private.exam_prep_assessments where content_version_id in (4801,4802) and status='published')<>9
+     or (select count(*) from private.exam_prep_written_tasks where content_version_id in (4801,4802) and lifecycle_state='published')<>9
+     or (select count(*) from private.exam_prep_question_content_meta where content_version_id in (4801,4802) and lifecycle_state='published' and reserve_role='learning')<>27
   then
     raise exception 'alt_learning_draft_v1 cardinality mismatch';
   end if;
@@ -33,16 +33,16 @@ begin
       or nullif(btrim(q.explanation_uz),'') is null
       or q.is_active
       or q.quality_status<>'draft'
-      or m.exposure_state<>'withheld'
-      or m.copyright_status<>'pending'
-      or m.qa_scope_status<>'pending'
-      or m.qa_math_status<>'pending'
-      or m.qa_language_status<>'pending'
-      or m.qa_technical_status<>'pending'
+      or m.exposure_state<>'released'
+      or m.copyright_status<>'pass'
+      or m.qa_scope_status<>'pass'
+      or m.qa_math_status<>'pass'
+      or m.qa_language_status<>'pass'
+      or m.qa_technical_status<>'pass'
       or m.diagnostic_rule_status<>'not_applicable'
     );
   if v_bad<>0 then
-    raise exception 'alt_learning_draft_v1 draft safety/trilingual rows invalid=%',v_bad;
+    raise exception 'alt_learning_draft_v1 published safety/trilingual rows invalid=%',v_bad;
   end if;
 
   select count(*) into v_bad
@@ -57,13 +57,13 @@ begin
       or nullif(btrim(wt.self_review_uz),'') is null
       or coalesce((wt.rubric_json->>'max_marks')::int,0)<=0
       or jsonb_array_length(coalesce(wt.rubric_json->'criteria','[]'::jsonb))<2
-      or wt.copyright_status<>'pending'
-      or wt.qa_math_status<>'pending'
-      or wt.qa_language_status<>'pending'
-      or wt.qa_technical_status<>'pending'
+      or wt.copyright_status<>'pass'
+      or wt.qa_math_status<>'pass'
+      or wt.qa_language_status<>'pass'
+      or wt.qa_technical_status<>'pass'
     );
   if v_bad<>0 then
-    raise exception 'alt_learning_draft_v1 written draft rows invalid=%',v_bad;
+    raise exception 'alt_learning_draft_v1 written published rows invalid=%',v_bad;
   end if;
 
   select count(*) into v_bad
@@ -76,7 +76,7 @@ begin
     having count(*)>1
   ) d;
   if v_bad<>0 then
-    raise exception 'alt_learning_draft_v1 duplicate draft stems=%',v_bad;
+    raise exception 'alt_learning_draft_v1 duplicate source stems=%',v_bad;
   end if;
 
   select count(*) into v_bad
@@ -218,14 +218,14 @@ begin
     raise exception 'alt_learning_draft_v1 assessment shape invalid=%',v_bad;
   end if;
 
-  if exists(
-    select 1
-    from private.exam_prep_assessments a
-    join private.exam_prep_content_versions cv on cv.id=a.content_version_id
-    where cv.id in (4801,4802)
-      and (a.status='published' or cv.status='published')
-  ) then
-    raise exception 'alt_learning_draft_v1 accidentally learner-visible';
+  if (select count(*) from private.exam_prep_content_release_profiles_v1
+      where content_version_id in (4801,4802)
+        and release_mode='supplemental_learning'
+        and require_written_understanding)<>2
+     or coalesce((private.exam_prep_supplemental_learning_floor_v1(4801)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_learning_floor_v1(4802)->>'ready')::boolean,false) is not true
+  then
+    raise exception 'alt_learning_draft_v1 governed supplemental release contract missing';
   end if;
 end
 $$;
