@@ -55,17 +55,15 @@ begin
   -- Negative fixture: a registered but empty supplemental version must never
   -- bypass the publication guard. Use an isolated synthetic content version
   -- rather than mutating the already-published AW1-4 packs.
-  select coalesce(max(id),0)+1000 into v_cv
-  from private.exam_prep_content_versions;
-
   insert into private.exam_prep_content_versions(
-    id,program_version_id,content_version,component_code,release_label,status,source_policy,source_level
+    program_version_id,content_version,component_code,release_label,status,source_policy,source_level
   ) values (
-    v_cv,v_program,'ci_supplemental_guard_negative_v1','P1',
+    v_program,'ci_supplemental_guard_negative_v1','P1',
     'CI supplemental negative fixture','draft',
     'Disposable CI-only original-content fixture used only to prove fail-closed supplemental publication governance; no learner delivery.',
     3
-  );
+  )
+  returning id into v_cv;
 
   insert into private.exam_prep_content_release_profiles_v1(
     content_version_id,release_mode,profile_version,require_written_understanding,governance_basis
