@@ -561,7 +561,7 @@ begin
 end;
 $$;
 
-DO $$
+DO $main$
 DECLARE
   v_run text:='SV-P269CI-RUN-0001';
   v_uid uuid;
@@ -572,12 +572,19 @@ DECLARE
   v_p5_diag int;
   v_p1_screen int;
   v_p5_screen int;
+  v_p1_signal_before int;
+  v_p1_signal_after int;
+  v_signal_at timestamptz;
+  v_signal_debug jsonb;
+  v_signal_confirmed boolean;
   v_plan jsonb;
   v_plan_id uuid;
   v_priority smallint;
   v_auth jsonb;
   v_session uuid;
   v_corr_skill text;
+  v_signal_skill text;
+  v_signal_ass bigint;
   v_corr_ass bigint;
   v_case uuid;
   v_retest jsonb;
@@ -689,9 +696,125 @@ BEGIN
   ) then
     raise exception 'P2-69 diagnostic miss evidence was not preserved';
   end if;
-  if coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->>'signal_count')::int,0)<1
+  v_p1_signal_before:=coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->>'signal_count')::int,0);
+  if v_p1_signal_before<1
      or coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P5')->>'signal_count')::int,0)<1 then
     raise exception 'P2-69 diagnostic misses were not surfaced as confirmation signals';
+  end if;
+
+  -- One P1 screening signal is confirmed on the first unseen governed learning pack.
+  -- P5 intentionally remains unresolved to prove component isolation later.
+  select x.value->>'skill_code' into v_signal_skill
+  from jsonb_array_elements(
+    private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'focus_cases'
+  ) x
+  where x.value->>'focus_kind'='screening_signal'
+  order by (x.value->>'downstream_dependency_count')::int desc nulls last,
+           x.value->>'skill_code'
+  limit 1;
+  if v_signal_skill is null then
+    raise exception 'P2-69 no prioritized P1 screening signal available for confirmation';
+  end if;
+
+  select a.id into v_signal_ass
+  from private.exam_prep_assessments a
+  where a.component_code='P1'
+    and a.assessment_type='learning'
+    and a.status='published'
+    and exists(
+      select 1 from private.exam_prep_assessment_items ai
+      where ai.assessment_id=a.id and ai.primary_skill_code=v_signal_skill
+    )
+    and not exists(
+      select 1 from private.exam_prep_assessment_items ai
+      where ai.assessment_id=a.id and ai.primary_skill_code<>v_signal_skill
+    )
+  order by a.id
+  limit 1;
+  if v_signal_ass is null then
+    raise exception 'P2-69 governed learning assessment missing for signal skill=%',v_signal_skill;
+  end if;
+
+  v_session:=pg_temp.p269_start_direct_assessment_v1(
+    v_uid,v_signal_ass,'P1','learning','p269-signal-confirm-p1'
+  );
+  perform pg_temp.p269_complete_session_correct_v1(v_session,'p269-signal-confirm-p1');
+
+  select e.created_at into v_signal_at
+  from private.exam_prep_evidence_events e
+  join private.exam_prep_sessions s on s.id=e.session_id
+  where e.user_id=v_uid
+    and e.component_code='P1'
+    and e.skill_code=v_signal_skill
+    and e.evidence_type='diagnostic'
+    and e.verification_status='app_verified'
+    and e.is_correct is false
+    and s.session_type='diagnostic'
+    and s.status='finalized'
+  order by e.created_at desc,e.id desc
+  limit 1;
+
+  v_signal_confirmed:=private.exam_prep_diagnostic_signal_confirmed_v1(
+    v_uid,'P1',v_signal_skill,v_signal_at
+  );
+
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'session_id',x.session_id,
+    'status',x.status,
+    'finalized_at',x.finalized_at,
+    'signal_at',v_signal_at,
+    'academic_credit',x.academic_credit,
+    'credit_context',x.credit_context,
+    'question_count',x.question_count,
+    'machine_correct',x.machine_correct,
+    'written_count',x.written_count,
+    'off_skill_items',x.off_skill_items
+  ) order by x.finalized_at),'[]'::jsonb)
+  into v_signal_debug
+  from (
+    select
+      s.id as session_id,s.status,s.finalized_at,
+      sa.academic_credit,sa.credit_context,
+      count(*) filter(where si.item_kind='question')::int as question_count,
+      count(*) filter(where si.item_kind='question' and r.response_kind='machine' and r.is_correct is true)::int as machine_correct,
+      count(*) filter(where si.item_kind='written' and r.response_kind='written')::int as written_count,
+      count(*) filter(where si.primary_skill_code is distinct from v_signal_skill)::int as off_skill_items
+    from private.exam_prep_sessions s
+    join private.exam_prep_session_authorizations sa on sa.id=s.authorization_id
+    join private.exam_prep_session_items si on si.session_id=s.id
+    left join private.exam_prep_responses r
+      on r.session_id=s.id and r.item_order=si.item_order and r.user_id=v_uid
+    where s.user_id=v_uid
+      and s.component_code='P1'
+      and s.session_type='learning'
+    group by s.id,sa.academic_credit,sa.credit_context
+  ) x;
+
+  v_p1_signal_after:=coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->>'signal_count')::int,-1);
+  if v_p1_signal_after<>v_p1_signal_before-1 then
+    raise exception 'P2-69 successful P1 signal confirmation did not clear exactly one screening signal before=% after=% helper=% debug=%',
+      v_p1_signal_before,v_p1_signal_after,v_signal_confirmed,v_signal_debug;
+  end if;
+  if exists(
+    select 1
+    from jsonb_array_elements(
+      private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'focus_cases'
+    ) x
+    where x.value->>'focus_kind'='screening_signal'
+      and x.value->>'skill_code'=v_signal_skill
+  ) then
+    raise exception 'P2-69 selected P1 screening signal remained in learner attention queue';
+  end if;
+  if exists(
+    select 1 from private.exam_prep_correction_cases
+    where user_id=v_uid and component_code='P1' and skill_code=v_signal_skill
+      and status in ('open','remediating','retest_due','reopened')
+  ) then
+    raise exception 'P2-69 successful screening confirmation incorrectly opened correction';
+  end if;
+
+  if coalesce((private.exam_prep_correction_queue_payload_v1(v_uid,'P5')->>'signal_count')::int,0)<1 then
+    raise exception 'P2-69 P1 confirmation leaked into independent P5 screening signal';
   end if;
 
   -- Weekly plan: execute one real Core learning action in each component.
@@ -771,8 +894,12 @@ BEGIN
   end if;
 
   -- P1 advances to Stage 3 while P5 intentionally stays Stage 2.
+  -- The signal is resolved by the successful fresh learning pack, but the earlier
+  -- diagnostic miss remains immutable objective evidence. It can therefore keep
+  -- that skill below L2 under the existing mastery threshold; do not erase or
+  -- override it merely because the screening uncertainty is closed.
   perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P1',37);
-  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1 with one unresolved screening signal');
+  perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',3,'80 percent P1 with confirmed signal and immutable diagnostic evidence');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',2,'P5 must remain independent');
 
   perform pg_temp.p269_ensure_learning_first_n_v1(v_uid,v_program,'P5',30);
@@ -959,11 +1086,229 @@ BEGIN
     raise exception 'P2-69 public user count did not return to baseline inside cleanup';
   end if;
 END
-$$;
+$main$;
+
+-- Focused negative-path proof: a later governed learning attempt that is not fully
+-- correct must not clear the screening signal as “confirmed”; the ordinary learning
+-- error path opens the existing correction cycle instead.
+DO $signal_fail$
+DECLARE
+  v_run text:='SV-P269CI-SIGNAL-FAIL-0001';
+  v_uid uuid;
+  v_program bigint;
+  v_signal_skill text;
+  v_signal_ass bigint;
+  v_signal_at timestamptz;
+  v_session uuid;
+  v_case uuid;
+  v_auth jsonb;
+  v_retest jsonb;
+  v_confirmed boolean;
+  v_complete jsonb;
+  v_cleanup jsonb;
+BEGIN
+  select id into v_program
+  from private.exam_prep_program_versions
+  where program_key='math_as_p1_p5'
+    and version_key='p1_p5_canonical_v1_0'
+    and status='active';
+  if v_program is null then raise exception 'P2-69 signal-fail canonical program missing'; end if;
+
+  perform private.register_exam_prep_canonical_synthetic_run_v2(
+    v_run,'p2_67_canonical_v2_0','5a52e40b1c8c732f4cd498595f1fce2d0ced4242',
+    'p2-69-signal-fail',26902,'core','p2-69-signal-fail-run'
+  );
+  v_uid:=private.create_exam_prep_synthetic_identity_v1(
+    v_run,'learner','SVF-P269-SIGNAL-FAIL-01','p2-69-signal-fail-identity',
+    'Dedicated failed screening-confirmation learner.','en'
+  );
+  perform private.transition_exam_prep_synthetic_validation_run_v1(
+    v_run,'registered','running',null,null,jsonb_build_object('p2_69','signal-fail-start')
+  );
+  perform private.initialize_exam_prep_synthetic_clock_v1(v_run,'p2-69-signal-fail-clock');
+
+  insert into private.exam_prep_feature_entitlements(
+    user_id,entitlement_status,core_access,ai_assist,mentor_care_entitled,cohort_key,valid_from
+  ) values(v_uid,'active',true,false,false,null,clock_timestamp()-interval '1 minute');
+
+  perform set_config('request.jwt.claim.sub',v_uid::text,true);
+  perform set_config('request.jwt.claim.role','authenticated',true);
+  perform public.save_exam_prep_exam_profile_v2('CI_P269_SIGNAL_FAIL','A',12,6);
+
+  perform pg_temp.p269_run_stage0_component_v1(v_uid,'P1');
+  perform private.rebuild_exam_prep_state_v1(v_uid,'P1');
+
+  select x.value->>'skill_code' into v_signal_skill
+  from jsonb_array_elements(
+    private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'focus_cases'
+  ) x
+  where x.value->>'focus_kind'='screening_signal'
+  order by (x.value->>'downstream_dependency_count')::int desc nulls last,
+           x.value->>'skill_code'
+  limit 1;
+  if v_signal_skill is null then
+    raise exception 'P2-69 signal-fail no prioritized P1 screening signal';
+  end if;
+
+  select e.created_at into v_signal_at
+  from private.exam_prep_evidence_events e
+  join private.exam_prep_sessions s on s.id=e.session_id
+  where e.user_id=v_uid
+    and e.component_code='P1'
+    and e.skill_code=v_signal_skill
+    and e.evidence_type='diagnostic'
+    and e.verification_status='app_verified'
+    and e.is_correct is false
+    and s.session_type='diagnostic'
+    and s.status='finalized'
+  order by e.created_at desc,e.id desc
+  limit 1;
+
+  select a.id into v_signal_ass
+  from private.exam_prep_assessments a
+  where a.component_code='P1'
+    and a.assessment_type='learning'
+    and a.status='published'
+    and exists(
+      select 1 from private.exam_prep_assessment_items ai
+      where ai.assessment_id=a.id and ai.primary_skill_code=v_signal_skill
+    )
+    and not exists(
+      select 1 from private.exam_prep_assessment_items ai
+      where ai.assessment_id=a.id and ai.primary_skill_code<>v_signal_skill
+    )
+  order by a.id
+  limit 1;
+  if v_signal_ass is null then
+    raise exception 'P2-69 signal-fail learning assessment missing skill=%',v_signal_skill;
+  end if;
+
+  v_session:=pg_temp.p269_start_direct_assessment_v1(
+    v_uid,v_signal_ass,'P1','learning','p269-signal-fail'
+  );
+  perform pg_temp.p269_complete_learning_one_wrong_v1(
+    v_session,'p269-signal-fail'
+  );
+
+  v_confirmed:=private.exam_prep_diagnostic_signal_confirmed_v1(
+    v_uid,'P1',v_signal_skill,v_signal_at
+  );
+  if v_confirmed is true then
+    raise exception 'P2-69 wrong governed learning incorrectly confirmed screening signal';
+  end if;
+
+  select id into v_case
+  from private.exam_prep_correction_cases
+  where user_id=v_uid
+    and component_code='P1'
+    and skill_code=v_signal_skill
+    and status in ('open','remediating','retest_due','reopened')
+  order by opened_at desc
+  limit 1;
+  if v_case is null then
+    raise exception 'P2-69 failed governed learning did not open correction for screening-signal skill';
+  end if;
+
+  if exists(
+    select 1
+    from jsonb_array_elements(
+      private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'focus_cases'
+    ) x
+    where x.value->>'focus_kind'='screening_signal'
+      and x.value->>'skill_code'=v_signal_skill
+  ) then
+    raise exception 'P2-69 failed learning left duplicate screening signal beside correction';
+  end if;
+
+  -- Repeating the learning analogue during correction must still not count as
+  -- fresh signal confirmation. Only the existing delayed retest may close this path.
+  v_auth:=public.authorize_exam_prep_correction_safe_v1(v_case);
+  v_session:=(public.start_exam_prep_session_safe_v1(
+    (v_auth->>'authorization_id')::uuid,'p269-signal-fail-remediate-start'
+  )->>'session_id')::uuid;
+  perform pg_temp.p269_complete_session_correct_v1(
+    v_session,'p269-signal-fail-remediate'
+  );
+
+  v_confirmed:=private.exam_prep_diagnostic_signal_confirmed_v1(
+    v_uid,'P1',v_signal_skill,v_signal_at
+  );
+  if v_confirmed is true then
+    raise exception 'P2-69 repeated correction analogue incorrectly confirmed screening signal';
+  end if;
+
+  begin
+    perform public.authorize_exam_prep_retest_safe_v1(v_case);
+    raise exception 'P2-69 signal-fail delayed retest was authorized too early';
+  exception when others then
+    if SQLERRM<>'exam_prep_retest_too_early' then raise; end if;
+  end;
+
+  perform pg_temp.p269_advance_days_v1(v_run,7,'P2-69 signal-fail delayed retest wait');
+  v_retest:=public.authorize_exam_prep_retest_safe_v1(v_case);
+  v_session:=(public.start_exam_prep_session_safe_v1(
+    (v_retest->>'authorization_id')::uuid,'p269-signal-fail-retest-start'
+  )->>'session_id')::uuid;
+  perform pg_temp.p269_complete_session_correct_v1(
+    v_session,'p269-signal-fail-retest'
+  );
+
+  if (select status from private.exam_prep_correction_cases where id=v_case)<>'resolved' then
+    raise exception 'P2-69 signal-fail correction did not resolve after delayed retest';
+  end if;
+
+  v_confirmed:=private.exam_prep_diagnostic_signal_confirmed_v1(
+    v_uid,'P1',v_signal_skill,v_signal_at
+  );
+  if v_confirmed is not true then
+    raise exception 'P2-69 resolved correction did not retire the original screening signal';
+  end if;
+
+  if exists(
+    select 1
+    from jsonb_array_elements(
+      private.exam_prep_correction_queue_payload_v1(v_uid,'P1')->'focus_cases'
+    ) x
+    where x.value->>'focus_kind'='screening_signal'
+      and x.value->>'skill_code'=v_signal_skill
+  ) then
+    raise exception 'P2-69 resolved correction allowed screening signal to reappear';
+  end if;
+
+  v_complete:=private.complete_exam_prep_synthetic_run_v1(
+    v_run,1,jsonb_build_object(
+      'p2_69','signal-fail-green',
+      'component','P1',
+      'skill_code',v_signal_skill,
+      'initial_learning_confirmed',false,
+      'correction_opened',true,
+      'delayed_retest_resolved',true,
+      'signal_retired_after_resolved_correction',true
+    )
+  );
+  if v_complete->>'run_status'<>'completed' then
+    raise exception 'P2-69 signal-fail run completion failed: %',v_complete;
+  end if;
+
+  v_cleanup:=private.cleanup_exam_prep_synthetic_run_v1(
+    v_run,1,'p2-69-signal-fail-cleanup','I_CONFIRM_SYNTHETIC_RUN_CLEANUP_V1'
+  );
+  if v_cleanup->>'cleanup_status'<>'clean'
+     or coalesce((v_cleanup->>'deleted_identity_count')::int,-1)<>1 then
+    raise exception 'P2-69 signal-fail cleanup failed: %',v_cleanup;
+  end if;
+
+  if exists(select 1 from private.exam_prep_synthetic_identities where run_id=v_run)
+     or exists(select 1 from public.users where id=v_uid)
+     or exists(select 1 from auth.users where id=v_uid) then
+    raise exception 'P2-69 signal-fail cleanup left learner residue';
+  end if;
+END
+$signal_fail$;
 
 ROLLBACK;
 
-DO $$
+DO $final_check$
 DECLARE v_count int;
 BEGIN
   select count(*) into v_count from private.exam_prep_synthetic_validation_runs where run_id='SV-P269CI-RUN-0001';
@@ -972,7 +1317,9 @@ BEGIN
   if v_count<>0 then raise exception 'P2-69 rollback left synthetic clock rows=%',v_count; end if;
   select count(*) into v_count from private.exam_prep_synthetic_timeline_events where run_id='SV-P269CI-RUN-0001';
   if v_count<>0 then raise exception 'P2-69 rollback left synthetic timeline rows=%',v_count; end if;
+  select count(*) into v_count from private.exam_prep_synthetic_validation_runs where run_id='SV-P269CI-SIGNAL-FAIL-0001';
+  if v_count<>0 then raise exception 'P2-69 rollback left signal-fail run rows=%',v_count; end if;
 END
-$$;
+$final_check$;
 
 \echo 'P2-69 full Stage 0-6 Core synthetic simulation: GREEN'
