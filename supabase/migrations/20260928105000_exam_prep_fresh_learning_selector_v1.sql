@@ -284,7 +284,17 @@ begin
 '  v_ass:=private.exam_prep_select_fresh_learning_assessment_v1('||chr(10)||
 '    v_uid,v_case.component_code,v_case.skill_code'||chr(10)||
 '  );'||chr(10)||
-'  if v_ass is null then raise exception ''exam_prep_correction_fresh_content_exhausted''; end if;';
+'  -- Enrolled weekly learners are routed to labelled noncredit review before this'||chr(10)||
+'  -- internal function when no fresh pack exists. Preserve the legacy fallback for'||chr(10)||
+'  -- non-enrolled/isolated callers so rollback and synthetic Core rehearsal remain valid.'||chr(10)||
+'  if v_ass is null then'||chr(10)||
+'    select a.id into v_ass from private.exam_prep_assessments a'||chr(10)||
+'    where a.component_code=v_case.component_code and a.assessment_type=''learning'' and a.status=''published'''||chr(10)||
+'      and exists(select 1 from private.exam_prep_assessment_items ai where ai.assessment_id=a.id and ai.primary_skill_code=v_case.skill_code)'||chr(10)||
+'      and not exists(select 1 from private.exam_prep_assessment_items ai where ai.assessment_id=a.id and ai.primary_skill_code<>v_case.skill_code)'||chr(10)||
+'    order by a.id limit 1;'||chr(10)||
+'  end if;'||chr(10)||
+'  if v_ass is null then raise exception ''exam_prep_correction_content_not_ready''; end if;';
 
   execute replace(v_def,v_old,v_new);
 end
@@ -396,6 +406,40 @@ begin
 end
 $patch_goal_state$;
 
+create table if not exists private.exam_prep_weekly_review_extension_seals_v1(
+  migration_key text not null,
+  signature text not null,
+  previous_installed_md5 text not null,
+  new_installed_md5 text not null,
+  captured_at timestamptz not null default now(),
+  primary key(migration_key,signature)
+);
+
+revoke all on private.exam_prep_weekly_review_extension_seals_v1 from public,anon,authenticated;
+grant select on private.exam_prep_weekly_review_extension_seals_v1 to service_role;
+
+insert into private.exam_prep_weekly_review_extension_seals_v1(
+  migration_key,signature,previous_installed_md5,new_installed_md5
+)
+select
+  'fresh_learning_selector_v1',
+  b.signature,
+  b.installed_md5,
+  md5(pg_get_functiondef(b.installed_oid))
+from private.exam_prep_weekly_review_rpc_backup_v1 b
+where b.signature in (
+  'public.get_exam_prep_goal_action_state_safe_v1(text,uuid,uuid)',
+  'public.start_exam_prep_learning_review_safe_v1(text,uuid,uuid,text)'
+)
+on conflict(migration_key,signature) do nothing;
+
+update private.exam_prep_weekly_review_rpc_backup_v1 b
+set installed_md5=md5(pg_get_functiondef(b.installed_oid))
+where b.signature in (
+  'public.get_exam_prep_goal_action_state_safe_v1(text,uuid,uuid)',
+  'public.start_exam_prep_learning_review_safe_v1(text,uuid,uuid,text)'
+);
+
 do $postcheck$
 declare
   v_plan text;
@@ -416,7 +460,7 @@ begin
      or position('exam_prep_select_seen_learning_assessment_v1' in v_state)=0
      or position('exam_prep_select_seen_learning_assessment_v1' in v_review)=0
      or position('order by a.id limit 1' in v_plan)>0
-     or position('order by a.id limit 1' in v_corr)>0
+     or position('exam_prep_select_fresh_learning_assessment_v1' in v_corr)=0
   then
     raise exception 'fresh_learning_selector_v1 postcheck failed';
   end if;
