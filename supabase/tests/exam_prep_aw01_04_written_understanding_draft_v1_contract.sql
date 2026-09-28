@@ -59,9 +59,30 @@ begin
     raise exception 'aw01_04_written_checks_v1 parent written task state drift';
   end if;
 
-  -- Correct-index diversity guard catches accidental "always first option" authoring.
-  if (select count(distinct correct_index) from private.exam_prep_written_understanding_checks where id between 8901 and 8909)<3 then
-    raise exception 'aw01_04_written_checks_v1 correct-index diversity too low';
+  -- The nine new checks are balanced 2/2/2/3 so publishing them on top of the
+  -- existing 13/13/13/13 surface yields a near-even 15/15/15/16 distribution.
+  if (select jsonb_object_agg(correct_index,n order by correct_index)
+      from (
+        select correct_index,count(*)::int n
+        from private.exam_prep_written_understanding_checks
+        where id between 8901 and 8909
+        group by correct_index
+      ) d)<>jsonb_build_object('0',2,'1',2,'2',2,'3',3)
+  then
+    raise exception 'aw01_04_written_checks_v1 correct-index balance drift';
+  end if;
+
+  if exists(
+    select 1
+    from (values
+      (8901,0),(8902,1),(8903,2),(8904,3),(8905,0),
+      (8906,1),(8907,2),(8908,3),(8909,3)
+    ) e(id,correct_index)
+    left join private.exam_prep_written_understanding_checks c
+      on c.id=e.id and c.correct_index=e.correct_index
+    where c.id is null
+  ) then
+    raise exception 'aw01_04_written_checks_v1 expected correct-index mapping drift';
   end if;
 end
 $$;
