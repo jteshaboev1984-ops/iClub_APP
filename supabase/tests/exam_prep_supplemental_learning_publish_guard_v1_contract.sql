@@ -1,5 +1,5 @@
 -- Contract for the supplemental-learning publication guard.
--- Runs only in disposable CI and rolls back all fixture mutations.
+-- Runs only in disposable CI and rolls back the negative fixture.
 begin;
 
 do $$
@@ -7,6 +7,9 @@ declare
   v_failed boolean:=false;
   v_msg text;
   v_program bigint;
+  v_fixture_id bigint;
+  v_p1 jsonb;
+  v_p5 jsonb;
 begin
   if to_regclass('private.exam_prep_content_release_profiles_v1') is null
      or to_regprocedure('private.exam_prep_supplemental_learning_floor_v1(bigint)') is null
@@ -14,8 +17,21 @@ begin
     raise exception 'supplemental-learning contract: architecture missing';
   end if;
 
-  if (select count(*) from private.exam_prep_content_release_profiles_v1)<>0 then
-    raise exception 'supplemental-learning contract: guard-only migration registered content unexpectedly';
+  if (select count(*) from private.exam_prep_content_release_profiles_v1
+      where content_version_id in (4801,4802)
+        and release_mode='supplemental_learning'
+        and profile_version='supplemental_learning_v1'
+        and require_written_understanding)<>2
+  then
+    raise exception 'supplemental-learning contract: governed AW1-4 release profiles missing';
+  end if;
+
+  v_p1:=private.exam_prep_supplemental_learning_floor_v1(4801);
+  v_p5:=private.exam_prep_supplemental_learning_floor_v1(4802);
+  if coalesce((v_p1->>'ready')::boolean,false) is not true
+     or coalesce((v_p5->>'ready')::boolean,false) is not true
+  then
+    raise exception 'supplemental-learning contract: published target floor failed P1=% P5=%',v_p1,v_p5;
   end if;
 
   if has_table_privilege('anon','private.exam_prep_content_release_profiles_v1','SELECT')
@@ -29,7 +45,8 @@ begin
   select id into v_program
   from private.exam_prep_program_versions
   where program_key='math_as_p1_p5'
-    and version_key='p1_p5_canonical_v1_0';
+    and version_key='p1_p5_canonical_v1_0'
+    and status='active';
 
   if v_program is null
      or not private.exam_prep_skill_content_ready_v1(v_program,'P1','P1-QUA-01')
@@ -38,27 +55,30 @@ begin
     raise exception 'supplemental-learning contract: established full-floor readiness changed';
   end if;
 
-  -- Register one still-pending draft only inside this rollback transaction.
+  -- A deliberately empty disposable supplemental version must still fail closed.
+  select coalesce(max(id),0)+100000 into v_fixture_id
+  from private.exam_prep_content_versions;
+
+  insert into private.exam_prep_content_versions(
+    id,program_version_id,content_version,component_code,release_label,status,source_policy,source_level
+  ) values (
+    v_fixture_id,v_program,'ci_supplemental_negative_fixture_v1','P1',
+    'CI supplemental negative fixture','draft',
+    'Original disposable CI fixture used only to prove the supplemental-learning publication gate fails closed.',
+    3
+  );
+
   insert into private.exam_prep_content_release_profiles_v1(
     content_version_id,release_mode,profile_version,require_written_understanding,governance_basis
-  )
-  select id,'supplemental_learning','ci-negative-v1',true,
-         'Disposable negative fixture: pending draft must never bypass QA or baseline publication gates.'
-  from private.exam_prep_content_versions
-  where content_version='p1_aw01_04_alt_learning_draft_v1'
-    and component_code='P1'
-    and status='draft';
-
-  if not found then
-    raise exception 'supplemental-learning contract: expected AW1-4 P1 draft fixture missing';
-  end if;
+  ) values (
+    v_fixture_id,'supplemental_learning','ci-negative-v1',true,
+    'Disposable negative fixture: empty supplemental content must never bypass publication governance.'
+  );
 
   begin
     update private.exam_prep_content_versions
     set status='published',published_at=now()
-    where content_version='p1_aw01_04_alt_learning_draft_v1'
-      and component_code='P1'
-      and status='draft';
+    where id=v_fixture_id and status='draft';
   exception when others then
     v_failed:=true;
     v_msg:=sqlerrm;
@@ -67,16 +87,14 @@ begin
   if not v_failed
      or position('exam_prep_supplemental_learning_publish_floor_not_met' in coalesce(v_msg,''))=0
   then
-    raise exception 'supplemental-learning contract: pending draft publish did not fail closed: %',coalesce(v_msg,'NO ERROR');
+    raise exception 'supplemental-learning contract: empty fixture publish did not fail closed: %',coalesce(v_msg,'NO ERROR');
   end if;
 
   if exists(
-    select 1
-    from private.exam_prep_content_versions
-    where content_version='p1_aw01_04_alt_learning_draft_v1'
-      and status<>'draft'
+    select 1 from private.exam_prep_content_versions
+    where id=v_fixture_id and status<>'draft'
   ) then
-    raise exception 'supplemental-learning contract: failed publish altered draft state';
+    raise exception 'supplemental-learning contract: failed fixture publish altered state';
   end if;
 end $$;
 
