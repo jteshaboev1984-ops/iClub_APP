@@ -17,11 +17,16 @@ set local lock_timeout='3s';
 set local statement_timeout='90s';
 
 do $preflight$
+declare
+  v_def text;
 begin
-  if md5(pg_get_functiondef('private.exam_prep_content_version_publish_guard_v1()'::regprocedure))
-     <> '9626468af826f92110aead42aeac00cd'
+  v_def:=pg_get_functiondef('private.exam_prep_content_version_publish_guard_v1()'::regprocedure);
+  if position('exam_prep_content_skill_floor_in_version_v1' in v_def)=0
+     or position('exam_prep_written_only_publish_task_floor_not_met' in v_def)=0
+     or position('exam_prep_written_only_publish_requires_timed_or_paper_assessment' in v_def)=0
+     or position('exam_prep_supplemental_learning_floor_v1' in v_def)>0
   then
-    raise exception 'supplemental-learning guard: existing publish guard drift; refuse replacement';
+    raise exception 'supplemental-learning guard: existing full-floor/written-only guard drift; refuse replacement';
   end if;
   if to_regclass('private.exam_prep_content_release_profiles_v1') is not null then
     raise exception 'supplemental-learning guard: release profile table already exists';
