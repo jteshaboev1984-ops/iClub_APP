@@ -414,6 +414,7 @@ create table if not exists private.exam_prep_weekly_review_extension_seals_v1(
   captured_at timestamptz not null default now(),
   primary key(migration_key,signature)
 );
+alter table private.exam_prep_weekly_review_extension_seals_v1 enable row level security;
 
 revoke all on private.exam_prep_weekly_review_extension_seals_v1 from public,anon,authenticated;
 grant select on private.exam_prep_weekly_review_extension_seals_v1 to service_role;
