@@ -43,6 +43,7 @@ const path = require('path');
         window.__rpcCalls.push({ name, args });
         if (name === 'get_exam_prep_capabilities_v1') return { data: [window.__caps], error: null };
         if (name === 'get_my_exam_prep_beta_invitation_v1') return { data: window.__invite, error: null };
+        if (name === 'get_my_exam_prep_weekly_flow_status_v1') return { data: { contract_version: 'weekly_flow_status_v1', enabled: false }, error: null };
         if (name === 'grant_my_exam_prep_beta_consent_v1') {
           window.__invite = {
             ...window.__invite,
@@ -292,6 +293,7 @@ const path = require('path');
   const allowedRpcs = new Set([
     'get_exam_prep_capabilities_v1',
     'get_my_exam_prep_beta_invitation_v1',
+    'get_my_exam_prep_weekly_flow_status_v1',
     'grant_my_exam_prep_beta_consent_v1',
     'claim_my_exam_prep_beta_core_seat_v1',
     'revoke_my_exam_prep_beta_consent_v1'
