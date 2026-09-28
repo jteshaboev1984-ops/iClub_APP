@@ -149,7 +149,9 @@
       consentedAt: row.consented_at || null,
       revokedAt: row.revoked_at || null,
       consentScope: String(row.consent_scope || "exam_prep_controlled_beta_v1"),
-      consentCopyVersion: String(row.consent_copy_version || "controlled_beta_v1_2026_09_04")
+      consentCopyVersion: String(row.consent_copy_version || "controlled_beta_v1_2026_09_04"),
+      openRecruitment: row.open_recruitment === true,
+      remainingSlots: Math.max(0, Number(row.remaining_slots || 0))
     });
   }
 
@@ -174,6 +176,12 @@
     const key = String(cohortKey || "").trim();
     if (!key) return fail("beta_cohort_key_required");
     return rpc("grant_my_exam_prep_beta_consent_v1", { p_cohort_key: key, p_acknowledgement: CONSENT_ACK });
+  }
+
+  async function claimBetaCoreSeat(cohortKey) {
+    const key = String(cohortKey || "").trim();
+    if (!key) return fail("beta_cohort_key_required");
+    return rpc("claim_my_exam_prep_beta_core_seat_v1", { p_cohort_key: key, p_acknowledgement: CONSENT_ACK });
   }
 
   async function revokeBetaConsent(cohortKey) {
@@ -328,7 +336,7 @@
   async function finalCalibration(componentCode) { return rpc("get_exam_prep_final_calibration_safe_v1", { p_component_code: componentArg(componentCode) }); }
 
   root.api = Object.freeze({
-    capabilities, betaInvitation, grantBetaConsent, revokeBetaConsent,
+    capabilities, betaInvitation, grantBetaConsent, claimBetaCoreSeat, revokeBetaConsent,
     examProfile, saveExamProfile, examMapStatus,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
