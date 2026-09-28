@@ -66,7 +66,6 @@ begin
     raise exception 'alt_learning_draft_v1 written draft rows invalid=%',v_bad;
   end if;
 
-  -- No duplicate English stem inside the alternate draft.
   select count(*) into v_bad
   from (
     select lower(regexp_replace(btrim(q.question_text_en),'\s+',' ','g')) norm,count(*) n
@@ -80,7 +79,6 @@ begin
     raise exception 'alt_learning_draft_v1 duplicate draft stems=%',v_bad;
   end if;
 
-  -- Alternate draft must not exactly duplicate a published learning stem.
   select count(*) into v_bad
   from private.exam_prep_question_content_meta d
   join public.questions dq on dq.id=d.question_id
@@ -96,7 +94,6 @@ begin
     raise exception 'alt_learning_draft_v1 exact published stem duplicates=%',v_bad;
   end if;
 
-  -- Machine answer-key snapshot and current deterministic input compatibility.
   with expected(book_ref,answer) as (values
     ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA01-A01','A'),
     ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA01-A02','A'),
@@ -141,44 +138,12 @@ begin
     and (
       (q.qtype='mcq' and q.correct_answer not in ('A','B','C','D'))
       or
-      (q.qtype='input' and q.correct_answer !~ '^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)
-  from (
-    select a.id,
-      count(*) filter(where ai.question_id is not null) machine_n,
-      count(*) filter(where ai.written_task_id is not null) written_n,
-      count(distinct ai.primary_skill_code) skills_n,
-      count(*) filter(where ai.is_holdout) holdout_n,
-      count(*) filter(where ai.question_id is not null and ai.reserve_role<>'learning') wrong_machine_role,
-      count(*) filter(where ai.written_task_id is not null and ai.reserve_role<>'written') wrong_written_role
-    from private.exam_prep_assessments a
-    join private.exam_prep_assessment_items ai on ai.assessment_id=a.id
-    where a.content_version_id in (4801,4802)
-    group by a.id
-  ) x
-  where machine_n<>3 or written_n<>1 or skills_n<>1 or holdout_n<>0 or wrong_machine_role<>0 or wrong_written_role<>0;
-  if v_bad<>0 then
-    raise exception 'alt_learning_draft_v1 assessment shape invalid=%',v_bad;
-  end if;
-
-  -- Runtime selector requires published content version + published assessment, so these drafts must be invisible.
-  if exists(
-    select 1
-    from private.exam_prep_assessments a
-    join private.exam_prep_content_versions cv on cv.id=a.content_version_id
-    where cv.id in (4801,4802)
-      and (a.status='published' or cv.status='published')
-  ) then
-    raise exception 'alt_learning_draft_v1 accidentally learner-visible';
-  end if;
-end $$;
-rollback;
-)
+      (q.qtype='input' and q.correct_answer !~ '^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$')
     );
   if v_bad<>0 then
     raise exception 'alt_learning_draft_v1 evaluator-incompatible machine answers=%',v_bad;
   end if;
 
-  -- Every assessment is exactly 3 machine + 1 written and single-skill.
   select count(*) into v_bad
   from (
     select a.id,
@@ -198,7 +163,6 @@ rollback;
     raise exception 'alt_learning_draft_v1 assessment shape invalid=%',v_bad;
   end if;
 
-  -- Runtime selector requires published content version + published assessment, so these drafts must be invisible.
   if exists(
     select 1
     from private.exam_prep_assessments a
@@ -208,5 +172,6 @@ rollback;
   ) then
     raise exception 'alt_learning_draft_v1 accidentally learner-visible';
   end if;
-end $$;
+end
+$$;
 rollback;
