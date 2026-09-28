@@ -158,19 +158,29 @@ BEGIN
     RAISE EXCEPTION 'P2-56 learning/protected reserve overlap detected for % questions',v_bad;
   END IF;
 
-  -- Protected question roles remain reserve+withheld; ordinary learning is
-  -- published+released. Exposure through a governed session does not silently
-  -- reclassify the content object as ordinary learning.
+  -- Runtime lifecycle/exposure applies to published content versions.
+  -- Draft/review/approved versions are legitimate governance states, but they
+  -- must remain unreleased until an explicit publication transition.
   SELECT count(*) INTO v_bad
   FROM private.exam_prep_question_content_meta m
   JOIN private.exam_prep_content_versions cv ON cv.id=m.content_version_id
   WHERE cv.program_version_id=v_program
     AND (
-      (m.reserve_role IN ('diagnostic','retest','mixed','timed','unseen')
-       AND (m.lifecycle_state<>'reserve' OR m.exposure_state<>'withheld'))
+      (
+        cv.status='published'
+        AND (
+          (m.reserve_role IN ('diagnostic','retest','mixed','timed','unseen')
+           AND (m.lifecycle_state<>'reserve' OR m.exposure_state<>'withheld'))
+          OR
+          (m.reserve_role='learning'
+           AND (m.lifecycle_state<>'published' OR m.exposure_state<>'released'))
+        )
+      )
       OR
-      (m.reserve_role='learning'
-       AND (m.lifecycle_state<>'published' OR m.exposure_state<>'released'))
+      (
+        cv.status<>'published'
+        AND m.exposure_state='released'
+      )
     );
 
   IF v_bad<>0 THEN
