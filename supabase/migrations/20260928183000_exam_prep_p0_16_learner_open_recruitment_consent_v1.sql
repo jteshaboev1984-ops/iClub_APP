@@ -474,7 +474,11 @@ begin
 
   update private.exam_prep_feature_entitlements
   set entitlement_status='revoked',core_access=false,ai_assist=false,mentor_care_entitled=false,
-      valid_until=now(),updated_at=now(),updated_by=v_uid
+      valid_until=greatest(
+        clock_timestamp(),
+        coalesce(valid_from,clock_timestamp()) + interval '1 microsecond'
+      ),
+      updated_at=now(),updated_by=v_uid
   where user_id=v_uid and cohort_key=p_cohort_key;
 
   update private.exam_prep_beta_members
