@@ -22,17 +22,17 @@ This manifest covers the second learning pack drafted for nine AW1-4 skills. The
 | P1-QUA-01 | A; A; 5 | `3(x-3)^2-7`; vertex `(3,-7)`; axis `x=3`; minimum `-7` | 1.1 Quadratics; Complete Pure Mathematics 1 Ch1 pp.2-20 |
 | P1-QUA-02 | A; C; C | `1-2sqrt(6) < p < 1+2sqrt(6)`; equality gives repeated roots | 1.1 Quadratics; Complete Pure Mathematics 1 Ch1 pp.2-20 |
 | P1-QUA-03 | A; A; A | `(x-3)^2=13`; `x=3±sqrt(13)` | 1.1 Quadratics; Complete Pure Mathematics 1 Ch1 pp.2-20 |
-| P1-FUN-01 | A; A; 25 | For `g(x)=x^2, x>=0`: domain/range `[0,∞)`, `g^-1(x)=sqrt(x)`; `(g∘f)(x)=(x-2)^2` on `x>=2` | 1.2 Functions; Complete Pure Mathematics 1 Functions chapter |
-| P1-FUN-02 | A; A; A | For `(x-2)^2+1, -1<=x<=6`: minimum 1 at x=2; endpoints 10 and 17; range `1<=f(x)<=17` | 1.2 Functions; Complete Pure Mathematics 1 Functions chapter |
+| P1-FUN-01 | A; A; 25 | For `g(x)=x^2, x>=0`: domain/range `[0,∞)`, `g^-1(x)=sqrt(x)`; `(g∘f)(x)=(x-2)^2` on `x>=2` | 1.2 Functions; Complete Pure Mathematics 1 Ch2 pp.24-42 |
+| P1-FUN-02 | A; A; A | For `(x-2)^2+1, -1<=x<=6`: minimum 1 at x=2; endpoints 10 and 17; range `1<=f(x)<=17` | 1.2 Functions; Complete Pure Mathematics 1 Ch2 pp.24-42 |
 
 ## P5 review checklist
 
 | Skill | Machine answer key | Written expected mathematical result | Source mapping |
 |---|---|---|---|
-| P5-DAT-01 | A; A; A | Side-by-side box plots (or equivalently justified distribution-comparison display); compare median and spread; scatter plot rejected because this is not paired bivariate data | 5.1 Representation of data; Complete Probability & Statistics 1 Representation chapters |
-| P5-DAT-02 | A; A; C | Ordered stem-and-leaf for 2.3,2.8,3.1,3.1,3.5,4.0,4.2; median 3.1; range 1.9 | 5.1 Representation of data; Complete Probability & Statistics 1 Ch2 mapping |
+| P5-DAT-01 | A; A; A | Side-by-side box plots (or equivalently justified distribution-comparison display); compare median and spread; scatter plot rejected because this is not paired bivariate data | 5.1 Representation of data; Complete Probability & Statistics 1 Ch2-3 pp.14-59 |
+| P5-DAT-02 | A; A; C | Ordered stem-and-leaf for 2.3,2.8,3.1,3.1,3.5,4.0,4.2; median 3.1; range 1.9 | 5.1 Representation of data; Complete Probability & Statistics 1 Ch3 pp.34-59 |
 | P5-DAT-04 | 7.5; 12; A | Densities 2,3,2; histogram heights use frequency density; bar area represents frequency | 5.1 Representation of data; Complete Probability & Statistics 1 Ch3 pp.34-59 |
-| P5-DAT-06 | B; 10.625; B | Mean `28/12=7/3≈2.33`; median 2; mode 2; higher values pull mean upward | 5.1 Representation of data; Complete Probability & Statistics 1 Ch2 mapping |
+| P5-DAT-06 | B; 10.625; B | Mean `28/12=7/3≈2.33`; median 2; mode 2; higher values pull mean upward | 5.1 Representation of data; Complete Probability & Statistics 1 Ch2 pp.14-29 |
 
 ## Independent reviewer sign-off required
 

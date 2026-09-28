@@ -144,6 +144,42 @@ begin
     raise exception 'alt_learning_draft_v1 evaluator-incompatible machine answers=%',v_bad;
   end if;
 
+  with expected_mapping(content_version_id,skill_code,expected_ref,expected_n) as (values
+    (4801,'P1-FUN-01','Complete Pure Mathematics 1, Ch2 Functions and transformations, pp.24-42 (mapping only)',3),
+    (4801,'P1-FUN-02','Complete Pure Mathematics 1, Ch2 Functions and transformations, pp.24-42 (mapping only)',3),
+    (4802,'P5-DAT-01','Complete Probability & Statistics 1, Ch2-3, pp.14-59 (mapping only)',3),
+    (4802,'P5-DAT-02','Complete Probability & Statistics 1, Ch3 Representation of data, pp.34-59 (mapping only)',3),
+    (4802,'P5-DAT-04','Complete Probability & Statistics 1, Ch3 Representation of data, pp.34-59 (mapping only)',3),
+    (4802,'P5-DAT-06','Complete Probability & Statistics 1, Ch2 Measures of location and spread, pp.14-29 (mapping only)',3)
+  ),
+  actual as (
+    select m.content_version_id,m.primary_skill_code skill_code,m.coursebook_mapping_ref,count(*) n
+    from private.exam_prep_question_content_meta m
+    where m.content_version_id in (4801,4802)
+      and m.primary_skill_code in ('P1-FUN-01','P1-FUN-02','P5-DAT-01','P5-DAT-02','P5-DAT-04','P5-DAT-06')
+    group by m.content_version_id,m.primary_skill_code,m.coursebook_mapping_ref
+  )
+  select count(*) into v_bad
+  from expected_mapping e
+  left join actual a
+    on a.content_version_id=e.content_version_id
+   and a.skill_code=e.skill_code
+   and a.coursebook_mapping_ref=e.expected_ref
+   and a.n=e.expected_n
+  where a.skill_code is null;
+  if v_bad<>0 then
+    raise exception 'alt_learning_draft_v1 canonical source mapping mismatch=%',v_bad;
+  end if;
+
+  if exists(
+    select 1
+    from private.exam_prep_sessions s
+    join private.exam_prep_assessments a on a.id=s.assessment_id
+    where a.content_version_id in (4801,4802)
+  ) then
+    raise exception 'alt_learning_draft_v1 learner session unexpectedly exists';
+  end if;
+
   select count(*) into v_bad
   from (
     select a.id,
