@@ -54,6 +54,7 @@ declare
   v_role text;
   v_items jsonb;
   v_offer jsonb;
+  v_is_synthetic boolean:=false;
 begin
   v_uid := auth.uid();
   v_role := auth.role();
@@ -89,9 +90,13 @@ begin
   where m.user_id = v_uid
     and m.member_status <> 'removed';
 
+  if to_regprocedure('private.is_exam_prep_synthetic_identity_v1(uuid)') is not null then
+    execute 'select private.is_exam_prep_synthetic_identity_v1($1)' into v_is_synthetic using v_uid;
+  end if;
+
   if jsonb_array_length(v_items)=0
      and exists(select 1 from public.users u where u.id=v_uid)
-     and not private.is_exam_prep_synthetic_identity_v1(v_uid) then
+     and not v_is_synthetic then
 
     select jsonb_build_object(
       'cohort_key',c.cohort_key,
@@ -180,6 +185,7 @@ declare
   v_week smallint;
   v_epoch timestamptz;
   v_runway jsonb;
+  v_is_synthetic boolean:=false;
 begin
   v_uid:=auth.uid();
   v_role:=auth.role();
@@ -190,7 +196,10 @@ begin
   if p_acknowledgement is distinct from 'I_CONSENT_TO_EXAM_PREP_CONTROLLED_BETA_V1' then
     raise exception 'exam_prep_beta_open_recruitment_acknowledgement_required';
   end if;
-  if private.is_exam_prep_synthetic_identity_v1(v_uid) then
+  if to_regprocedure('private.is_exam_prep_synthetic_identity_v1(uuid)') is not null then
+    execute 'select private.is_exam_prep_synthetic_identity_v1($1)' into v_is_synthetic using v_uid;
+  end if;
+  if v_is_synthetic then
     raise exception 'exam_prep_beta_open_recruitment_real_learner_required';
   end if;
   if not exists(select 1 from public.users where id=v_uid) then
@@ -231,11 +240,12 @@ begin
     raise exception 'exam_prep_beta_open_recruitment_incident_gate_red';
   end if;
 
-  select coalesce(x.real_review_epoch_started_at,v_c.started_at,now())
-  into v_epoch
-  from private.exam_prep_beta_expansion_controls x
-  where x.cohort_id=v_c.id;
-  v_epoch:=coalesce(v_epoch,v_c.started_at,now());
+  v_epoch:=coalesce(v_c.started_at,now());
+  if to_regclass('private.exam_prep_beta_expansion_controls') is not null then
+    execute 'select coalesce(real_review_epoch_started_at,$2) from private.exam_prep_beta_expansion_controls where cohort_id=$1'
+      into v_epoch using v_c.id,v_epoch;
+    v_epoch:=coalesce(v_epoch,v_c.started_at,now());
+  end if;
   v_week:=least(36,greatest(1,floor(extract(epoch from (now()-v_epoch))/604800)::int+1))::smallint;
   v_runway:=public.get_exam_prep_content_runway_v1(v_week);
   if not coalesce((v_runway->>'hard_floor_green')::boolean,false)
