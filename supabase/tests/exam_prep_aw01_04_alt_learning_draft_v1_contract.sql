@@ -96,32 +96,32 @@ begin
 
   with expected(book_ref,answer) as (values
     ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA01-A01','A'),
-    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA01-A02','A'),
+    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA01-A02','B'),
     ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA01-A03','5'),
     ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA02-A01','A'),
     ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA02-A02','C'),
-    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA02-A03','C'),
-    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA03-A01','A'),
-    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA03-A02','A'),
-    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA03-A03','A'),
+    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA02-A03','D'),
+    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA03-A01','B'),
+    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA03-A02','C'),
+    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1QUA03-A03','D'),
     ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1FUN01-A01','A'),
-    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1FUN01-A02','A'),
+    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1FUN01-A02','D'),
     ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1FUN01-A03','25'),
-    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1FUN02-A01','A'),
-    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1FUN02-A02','A'),
-    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1FUN02-A03','A'),
+    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1FUN02-A01','B'),
+    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1FUN02-A02','C'),
+    ('ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1FUN02-A03','D'),
     ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT01-A01','A'),
-    ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT01-A02','A'),
-    ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT01-A03','A'),
+    ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT01-A02','B'),
+    ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT01-A03','C'),
     ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT02-A01','A'),
-    ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT02-A02','A'),
-    ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT02-A03','C'),
+    ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT02-A02','B'),
+    ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT02-A03','D'),
     ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT04-A01','7.5'),
     ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT04-A02','12'),
-    ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT04-A03','A'),
+    ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT04-A03','C'),
     ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT06-A01','B'),
     ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT06-A02','10.625'),
-    ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT06-A03','B')
+    ('ExamPrep:P5:p5_aw01_04_alt_learning_draft_v1:P5DAT06-A03','D')
   )
   select count(*) into v_bad
   from expected e
@@ -129,6 +129,25 @@ begin
   where q.id is null or q.correct_answer is distinct from e.answer;
   if v_bad<>0 then
     raise exception 'alt_learning_draft_v1 machine answer snapshot mismatch=%',v_bad;
+  end if;
+
+  if (select jsonb_object_agg(correct_answer,n order by correct_answer)
+      from (
+        select q.correct_answer,count(*)::int n
+        from private.exam_prep_question_content_meta m
+        join public.questions q on q.id=m.question_id
+        where m.content_version_id in (4801,4802) and q.qtype='mcq'
+        group by q.correct_answer
+      ) d)<>jsonb_build_object('A',5,'B',6,'C',5,'D',6)
+  then
+    raise exception 'alt_learning_draft_v1 stored MCQ answer-position balance drift';
+  end if;
+
+  if (select explanation_uz from public.questions
+      where book_ref='ExamPrep:P1:p1_aw01_04_alt_learning_draft_v1:P1FUN01-A01')
+     <>'x≥0 da h funksiya bir-biriga bir qiymatli. y=x² da x va y ni almashtirib, manfiy bo‘lmagan tarmoqni olsak h⁻¹(x)=√x.'
+  then
+    raise exception 'alt_learning_draft_v1 Uzbek one-one terminology drift';
   end if;
 
   select count(*) into v_bad
