@@ -45,6 +45,14 @@
         inviteSub: "Ishtirokingizni tasdiqlang",
         inviteKicker: "Yangi imkoniyat sinovi",
         inviteBody: "Siz Cambridge AS Mathematics Exam Prep modulini sinab ko‘rishga taklif qilindingiz. Sinov davomida javoblaringiz, bajarish vaqtingiz va o‘quv progressi modulni yaxshilash uchun ishlatiladi. Ishtirok ixtiyoriy, ayrim xatolar uchrashi mumkin. Mavjud Tours va Practice tarixingiz o‘zgarmaydi.",
+        joinBadge: "Sinov uchun joylar ochiq",
+        joinCta: "Ishtirok etish",
+        joinTitle: "Exam Prepni sinab ko‘ring",
+        joinSub: "Joylar cheklangan",
+        joinKicker: "Cambridge AS Mathematics",
+        joinBody: "Exam Prep yangi tayyorgarlik yo‘lini sinab ko‘rish uchun cheklangan miqdorda joy ochildi. Ishtirok ixtiyoriy. Javoblaringiz, bajarish vaqtingiz va o‘quv progressi modulni yaxshilash uchun ishlatiladi. Mavjud Tours va Practice tarixingiz o‘zgarmaydi.",
+        joinConsent: "Ishtirok etish va boshlash",
+        slotsLeft: "Qolgan joylar",
         mode: "O‘qish formati",
         components: "Komponentlar",
         history: "Tarix",
@@ -83,6 +91,14 @@
         inviteSub: "Confirm your participation",
         inviteKicker: "New feature test",
         inviteBody: "You have been invited to test the Cambridge AS Mathematics Exam Prep module. During the test, your answers, completion time and learning progress will be used to improve the module. Participation is voluntary, and you may encounter errors. Your existing Tours and Practice history will not be changed.",
+        joinBadge: "Testing places are open",
+        joinCta: "Join testing",
+        joinTitle: "Try Exam Prep",
+        joinSub: "Limited places available",
+        joinKicker: "Cambridge AS Mathematics",
+        joinBody: "A limited number of places are open to test the new Exam Prep route. Participation is voluntary. Your answers, completion time and learning progress will be used to improve the module. Your existing Tours and Practice history will not be changed.",
+        joinConsent: "Join and start",
+        slotsLeft: "Places remaining",
         mode: "Study format",
         components: "Components",
         history: "History",
@@ -120,6 +136,14 @@
       inviteSub: "Подтвердите участие",
       inviteKicker: "Тестирование новой функции",
       inviteBody: "Вы приглашены протестировать модуль Cambridge AS Mathematics Exam Prep. Во время тестирования ваши ответы, время выполнения и учебный прогресс будут использоваться для улучшения модуля. Участие добровольное, возможны ошибки. Ваша существующая история в Tours и Practice останется без изменений.",
+      joinBadge: "Открыт набор на тестирование",
+      joinCta: "Принять участие",
+      joinTitle: "Попробуйте Exam Prep",
+      joinSub: "Количество мест ограничено",
+      joinKicker: "Cambridge AS Mathematics",
+      joinBody: "Мы открыли ограниченное количество мест для тестирования нового маршрута Exam Prep. Участие добровольное. Ваши ответы, время выполнения и учебный прогресс будут использоваться для улучшения модуля. История Tours и Practice останется без изменений.",
+      joinConsent: "Принять участие и начать",
+      slotsLeft: "Осталось мест",
       mode: "Формат подготовки",
       components: "Компоненты",
       history: "История",
@@ -215,18 +239,20 @@
     const p5 = $("#subject-hub-exam-prep-p5");
     const note = $("#subject-hub-exam-prep-note");
     const cta = $("#subject-hub-exam-prep-cta");
-    const inviteOnly = invited() && !allowed(state.capabilities);
+    const item = invitationItem();
+    const inviteOnly = Boolean(item) && !allowed(state.capabilities);
+    const openOffer = inviteOnly && item.openRecruitment === true;
     if (entry) {
       entry.classList.toggle("is-invitation", inviteOnly);
-      entry.setAttribute("data-ep-entry-mode", inviteOnly ? "invitation" : "live");
+      entry.setAttribute("data-ep-entry-mode", openOffer ? "open-testing" : (inviteOnly ? "invitation" : "live"));
     }
-    if (badge) badge.textContent = inviteOnly ? text.inviteBadge : text.entryBadge;
-    if (title) title.textContent = inviteOnly ? text.inviteTitle : text.entryTitle;
-    if (sub) sub.textContent = inviteOnly ? text.inviteSub : text.entryDesc;
+    if (badge) badge.textContent = openOffer ? text.joinBadge : (inviteOnly ? text.inviteBadge : text.entryBadge);
+    if (title) title.textContent = openOffer ? text.joinTitle : (inviteOnly ? text.inviteTitle : text.entryTitle);
+    if (sub) sub.textContent = openOffer ? text.joinSub : (inviteOnly ? text.inviteSub : text.entryDesc);
     if (p1) p1.textContent = text.entryP1;
     if (p5) p5.textContent = text.entryP5;
     if (note) note.textContent = text.entryNote;
-    if (cta) cta.textContent = inviteOnly ? text.inviteCta : text.entryCta;
+    if (cta) cta.textContent = openOffer ? text.joinCta : (inviteOnly ? text.inviteCta : text.entryCta);
   }
 
   function renderLiveShell() {
@@ -252,23 +278,24 @@
     const item = invitationItem();
     if (!root || !item) return false;
     const text = labels(state.language);
+    const openOffer = item.openRecruitment === true;
     const granted = item.consentStatus === "granted" && !item.revokedAt;
     const disabled = state.consentBusy ? " disabled" : "";
     const action = granted
       ? `<div class="ep-host-consent-state" role="status"><strong>${text.consented}</strong><span>${text.consentedBody}</span></div>
          <button class="ep-host-btn ep-host-btn-secondary" type="button" data-ep-beta-action="revoke"${disabled}>${state.consentBusy ? text.busy : text.revoke}</button>`
-      : `<button class="ep-host-btn ep-host-btn-primary" type="button" data-ep-beta-action="grant"${disabled}>${state.consentBusy ? text.busy : text.consent}</button>`;
+      : `<button class="ep-host-btn ep-host-btn-primary" type="button" data-ep-beta-action="grant"${disabled}>${state.consentBusy ? text.busy : (openOffer ? text.joinConsent : text.consent)}</button>`;
     const error = state.consentError ? `<div class="ep-host-error" role="alert">${text.error}</div>` : "";
 
     root.innerHTML = `
-      <section class="ep-host-shell ep-host-invite-shell" aria-label="${text.inviteTitle}">
-        <div class="ep-host-kicker">${text.inviteKicker}</div>
-        <h2 class="ep-host-title">${text.inviteTitle}</h2>
-        <p class="ep-host-note">${text.inviteBody}</p>
+      <section class="ep-host-shell ep-host-invite-shell" aria-label="${openOffer ? text.joinTitle : text.inviteTitle}">
+        <div class="ep-host-kicker">${openOffer ? text.joinKicker : text.inviteKicker}</div>
+        <h2 class="ep-host-title">${openOffer ? text.joinTitle : text.inviteTitle}</h2>
+        <p class="ep-host-note">${openOffer ? text.joinBody : text.inviteBody}</p>
         <div class="ep-host-invite-facts">
           <div><span>${text.mode}</span><strong>${serviceModeText(item.serviceMode, text)}</strong></div>
           <div><span>${text.components}</span><strong>P1 + P5</strong></div>
-          <div><span>${text.history}</span><strong>${text.historyKept}</strong></div>
+          ${openOffer ? `<div><span>${text.slotsLeft}</span><strong>${Math.max(0, item.remainingSlots || 0)}</strong></div>` : `<div><span>${text.history}</span><strong>${text.historyKept}</strong></div>`}
         </div>
         ${error}
         <div class="ep-host-actions">${action}</div>
@@ -349,11 +376,14 @@
     state.consentBusy = true;
     state.consentError = false;
     renderInvitationShell();
-    const result = await api.grantBetaConsent(item.cohortKey);
+    const result = item.openRecruitment === true && typeof api.claimBetaCoreSeat === "function"
+      ? await api.claimBetaCoreSeat(item.cohortKey)
+      : await api.grantBetaConsent(item.cohortKey);
     state.consentBusy = false;
     state.consentError = !result?.ok;
-    if (result?.ok) await refreshInvitationOnly();
-    if (state.open && invited() && !allowed(state.capabilities)) renderInvitationShell();
+    if (result?.ok) await refreshAccess();
+    if (state.open && allowed(state.capabilities)) renderLiveShell();
+    else if (state.open && invited()) renderInvitationShell();
   }
 
   async function handleRevokeConsent() {
