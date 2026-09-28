@@ -29,6 +29,7 @@ $preflight$;
 insert into private.exam_prep_content_versions(
   id,program_version_id,content_version,component_code,release_label,status,source_policy,source_level
 )
+overriding system value
 select
   4802,pv.id,'p5_aw01_04_alt_learning_draft_v1','P5',
   'P5 AW1-4 alternate learning pack draft v1','draft',
@@ -200,7 +201,9 @@ insert into private.exam_prep_written_tasks(
   id,content_version_id,task_key,component_code,primary_skill_code,secondary_skill_codes,task_version,
   prompt_en,prompt_ru,prompt_uz,rubric_json,self_review_en,self_review_ru,self_review_uz,
   lifecycle_state,copyright_status,qa_math_status,qa_language_status,qa_technical_status
-) values
+)
+overriding system value
+values
 (15606,4802,'P5DAT01-AW02','P5','P5-DAT-01','{}','v1',
  'Two clinics record a large number of patient waiting times. The manager wants to compare typical waiting time and spread between the clinics without preserving every individual value. Choose a suitable representation, justify the choice, state two features you would compare, and explain why a scatter plot would not answer this question.',
  'Две клиники записывают большое число времён ожидания пациентов. Руководитель хочет сравнить типичное время ожидания и разброс между клиниками, не сохраняя каждое отдельное значение на графике. Выберите подходящее представление, обоснуйте выбор, укажите две характеристики для сравнения и объясните, почему диаграмма рассеяния не отвечает этой задаче.',
@@ -257,6 +260,7 @@ insert into private.exam_prep_question_content_meta(
   exposure_state,lifecycle_state,originality_attestation,provenance_note,official_scope_ref,coursebook_mapping_ref,
   copyright_status,qa_scope_status,qa_math_status,qa_language_status,qa_technical_status,diagnostic_rule_status,question_snapshot_md5
 )
+overriding system value
 select
   s.meta_id,cv.id,s.content_key,q.id,s.skill_code,'{}'::text[],'learning',
   'withheld','draft',
@@ -282,7 +286,9 @@ on conflict (id) do nothing;
 
 insert into private.exam_prep_assessments(
   id,content_version_id,assessment_key,assessment_version,component_code,assessment_type,status,title_en,title_ru,title_uz
-) values
+)
+overriding system value
+values
 (35206,4802,'P5-DAT-01-learning-alt-02','v1','P5','learning','draft','Data representation choice - alternate learning','Выбор представления данных - дополнительное обучение','Ma’lumotlarni tasvirlashni tanlash - qo‘shimcha o‘rganish'),
 (35207,4802,'P5-DAT-02-learning-alt-02','v1','P5','learning','draft','Stem-and-leaf diagrams - alternate learning','Диаграммы «стебель-лист» - дополнительное обучение','Poya-barg diagrammalari - qo‘shimcha o‘rganish'),
 (35208,4802,'P5-DAT-04-learning-alt-02','v1','P5','learning','draft','Histograms and frequency density - alternate learning','Гистограммы и плотность частоты - дополнительное обучение','Gistogrammalar va chastota zichligi - qo‘shimcha o‘rganish'),
