@@ -29,6 +29,7 @@ $preflight$;
 insert into private.exam_prep_content_versions(
   id,program_version_id,content_version,component_code,release_label,status,source_policy,source_level
 )
+overriding system value
 select
   4801,pv.id,'p1_aw01_04_alt_learning_draft_v1','P1',
   'P1 AW1-4 alternate learning pack draft v1','draft',
@@ -233,7 +234,9 @@ insert into private.exam_prep_written_tasks(
   id,content_version_id,task_key,component_code,primary_skill_code,secondary_skill_codes,task_version,
   prompt_en,prompt_ru,prompt_uz,rubric_json,self_review_en,self_review_ru,self_review_uz,
   lifecycle_state,copyright_status,qa_math_status,qa_language_status,qa_technical_status
-) values
+)
+overriding system value
+values
 (15601,4801,'P1QUA01-AW02','P1','P1-QUA-01','{}','v1',
  'Write y=3x²−18x+20 in completed-square form. Hence state the vertex, axis of symmetry and minimum value. Expand your completed-square form to verify it.',
  'Представьте y=3x²−18x+20 в форме полного квадрата. Затем укажите вершину, ось симметрии и минимальное значение. Раскройте скобки, чтобы проверить полученную форму.',
@@ -301,6 +304,7 @@ insert into private.exam_prep_question_content_meta(
   exposure_state,lifecycle_state,originality_attestation,provenance_note,official_scope_ref,coursebook_mapping_ref,
   copyright_status,qa_scope_status,qa_math_status,qa_language_status,qa_technical_status,diagnostic_rule_status,question_snapshot_md5
 )
+overriding system value
 select
   s.meta_id,cv.id,s.content_key,q.id,s.skill_code,'{}'::text[],'learning',
   'withheld','draft',
@@ -326,7 +330,9 @@ on conflict (id) do nothing;
 
 insert into private.exam_prep_assessments(
   id,content_version_id,assessment_key,assessment_version,component_code,assessment_type,status,title_en,title_ru,title_uz
-) values
+)
+overriding system value
+values
 (35201,4801,'P1-QUA-01-learning-alt-02','v1','P1','learning','draft','Quadratics: completed square - alternate learning','Квадратные выражения: полный квадрат - дополнительное обучение','Kvadratlar: to‘liq kvadrat - qo‘shimcha o‘rganish'),
 (35202,4801,'P1-QUA-02-learning-alt-02','v1','P1','learning','draft','Quadratics: discriminant - alternate learning','Квадратные уравнения: дискриминант - дополнительное обучение','Kvadrat tenglamalar: diskriminant - qo‘shimcha o‘rganish'),
 (35203,4801,'P1-QUA-03-learning-alt-02','v1','P1','learning','draft','Quadratics: solving equations - alternate learning','Квадратные уравнения: решение - дополнительное обучение','Kvadrat tenglamalar: yechish - qo‘shimcha o‘rganish'),
