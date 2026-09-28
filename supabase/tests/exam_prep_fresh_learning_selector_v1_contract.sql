@@ -46,7 +46,7 @@ begin
   if position('exam_prep_select_fresh_learning_assessment_v1' in v_plan)=0
      or position('exam_prep_plan_learning_fresh_content_exhausted' in v_plan)=0
      or position('exam_prep_select_fresh_learning_assessment_v1' in v_corr)=0
-     or position('exam_prep_correction_fresh_content_exhausted' in v_corr)=0
+     or position('exam_prep_correction_content_not_ready' in v_corr)=0
      or position('exam_prep_select_fresh_learning_assessment_v1' in v_state)=0
      or position('exam_prep_select_seen_learning_assessment_v1' in v_state)=0
      or position('exam_prep_select_seen_learning_assessment_v1' in v_review)=0
@@ -55,10 +55,29 @@ begin
     raise exception 'fresh_learning_selector_v1 routing contract missing';
   end if;
 
-  if position('order by a.id limit 1' in v_plan)>0
-     or position('order by a.id limit 1' in v_corr)>0
+  if position('order by a.id limit 1' in v_plan)>0 then
+    raise exception 'fresh_learning_selector_v1 learning authorizer still uses legacy first-pack selector';
+  end if;
+
+  if position('exam_prep_select_fresh_learning_assessment_v1' in v_corr)=0
+     or position('order by a.id limit 1' in v_corr)=0
   then
-    raise exception 'fresh_learning_selector_v1 legacy first-pack selector survived';
+    raise exception 'fresh_learning_selector_v1 correction fresh-first + legacy fallback contract missing';
+  end if;
+
+  if to_regclass('private.exam_prep_weekly_review_extension_seals_v1') is null
+     or (select count(*) from private.exam_prep_weekly_review_extension_seals_v1
+         where migration_key='fresh_learning_selector_v1')<>2
+     or exists(
+       select 1 from private.exam_prep_weekly_review_rpc_backup_v1 b
+       where b.signature in (
+         'public.get_exam_prep_goal_action_state_safe_v1(text,uuid,uuid)',
+         'public.start_exam_prep_learning_review_safe_v1(text,uuid,uuid,text)'
+       )
+         and md5(pg_get_functiondef(b.installed_oid)) is distinct from b.installed_md5
+     )
+  then
+    raise exception 'fresh_learning_selector_v1 weekly review extension seal missing';
   end if;
 
   if has_function_privilege('anon','private.exam_prep_select_fresh_learning_assessment_v1(uuid,text,text)','EXECUTE')
