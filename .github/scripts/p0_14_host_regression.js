@@ -53,6 +53,23 @@ const path = require('path');
           };
           return { data: { consent_status: 'granted' }, error: null };
         }
+        if (name === 'claim_my_exam_prep_beta_core_seat_v1') {
+          window.__caps = {
+            program_key: 'math_as_p1_p5', rollout_state: 'controlled_beta', core_access: true,
+            ai_assist: false, mentor_care_entitled: false, mentor_assignment_active: false,
+            mentor_authority: false, kill_switch: false
+          };
+          window.__invite = {
+            ...window.__invite,
+            invited: true,
+            invitations: window.__invite.invitations.map(item => ({
+              ...item, member_status: 'active', consent_status: 'granted',
+              consented_at: '2026-09-28T13:00:00Z', open_recruitment: true,
+              remaining_slots: Math.max(0, Number(item.remaining_slots || 1) - 1)
+            }))
+          };
+          return { data: { status: 'activated', access_activated: true }, error: null };
+        }
         if (name === 'revoke_my_exam_prep_beta_consent_v1') {
           window.__invite = { ...window.__invite, invited: false, invitations: [] };
           return { data: { consent_status: 'revoked' }, error: null };
@@ -151,6 +168,64 @@ const path = require('path');
   assert(result.revokeCalls[0].args?.p_acknowledgement === 'I_REVOKE_EXAM_PREP_CONTROLLED_BETA_V1', 'revoke acknowledgement token mismatch');
   assert(result.open === false && result.rootHidden === true, 'withdrawn candidate must lose invitation shell without gaining access');
 
+  // While recruitment is open, any authenticated Mathematics learner may opt in
+  // through the same learner-safe shell. Access is granted only after the explicit
+  // button action, and the server remains the seat-cap authority.
+  await page.evaluate(() => {
+    window.__caps = {
+      program_key: 'math_as_p1_p5', rollout_state: 'controlled_beta', core_access: false,
+      ai_assist: false, mentor_care_entitled: false, mentor_assignment_active: false,
+      mentor_authority: false, kill_switch: false
+    };
+    window.__invite = {
+      invited: true,
+      consent_scope: 'exam_prep_controlled_beta_v1',
+      consent_copy_version: 'controlled_beta_v1_2026_09_04',
+      invitations: [{
+        cohort_key: 'math_as_p1_p5_beta_2026_09_01',
+        cohort_status: 'canary', capacity: 12, monitoring_hours: 72,
+        service_mode: 'core', activation_wave: 2, member_status: 'open',
+        consent_status: 'missing', consented_at: null, revoked_at: null,
+        consent_scope: 'exam_prep_controlled_beta_v1',
+        consent_copy_version: 'controlled_beta_v1_2026_09_04',
+        open_recruitment: true, remaining_slots: 9
+      }]
+    };
+  });
+
+  result = await page.evaluate(async () => {
+    const beforeClaim = window.__rpcCalls.filter(x => x.name === 'claim_my_exam_prep_beta_core_seat_v1').length;
+    const synced = await window.iClubExamPrep.syncSubjectHub({ subjectKey: 'mathematics', language: 'en' });
+    const entryText = document.querySelector('#subject-hub-exam-prep-entry').textContent;
+    const opened = await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'en' });
+    const shellText = document.querySelector('#exam-prep-host-root').textContent;
+    const afterOpenClaim = window.__rpcCalls.filter(x => x.name === 'claim_my_exam_prep_beta_core_seat_v1').length;
+    return { synced, opened, entryText, shellText, beforeClaim, afterOpenClaim };
+  });
+  assert(result.synced && result.opened, 'open testing offer must be visible to an authenticated Mathematics learner');
+  assert(result.entryText.includes('Try Exam Prep'), 'open testing entry must use learner-facing recruitment copy');
+  assert(result.shellText.includes('Participation is voluntary'), 'open testing shell must explain voluntary participation');
+  assert(result.shellText.includes('Places remaining') && result.shellText.includes('9'), 'open testing shell must show remaining capacity');
+  assert(result.beforeClaim === 0 && result.afterOpenClaim === 0, 'viewing open testing offer must not grant access');
+
+  await page.click('[data-ep-beta-action="grant"]');
+  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('P1 and P5 results are tracked separately'));
+
+  result = await page.evaluate(() => {
+    const claims = window.__rpcCalls.filter(x => x.name === 'claim_my_exam_prep_beta_core_seat_v1');
+    return {
+      count: claims.length,
+      args: claims[0]?.args,
+      caps: window.__caps,
+      shellText: document.querySelector('#exam-prep-host-root').textContent
+    };
+  });
+  assert(result.count === 1, 'open testing join button must issue exactly one seat-claim RPC');
+  assert(result.args?.p_cohort_key === 'math_as_p1_p5_beta_2026_09_01', 'open testing claim must target the governed cohort');
+  assert(result.args?.p_acknowledgement === 'I_CONSENT_TO_EXAM_PREP_CONTROLLED_BETA_V1', 'open testing acknowledgement token mismatch');
+  assert(result.caps.core_access === true && result.caps.ai_assist === false && result.caps.mentor_care_entitled === false, 'open testing must activate Core only');
+  assert(result.shellText.includes('P1 and P5 results are tracked separately'), 'successful open testing join must transition directly to the live Core shell');
+
   // Existing live Core behavior remains unchanged after consent UI addition.
   await page.evaluate(() => {
     window.__invite = { ...window.__invite, invited: false, invitations: [] };
@@ -218,6 +293,7 @@ const path = require('path');
     'get_exam_prep_capabilities_v1',
     'get_my_exam_prep_beta_invitation_v1',
     'grant_my_exam_prep_beta_consent_v1',
+    'claim_my_exam_prep_beta_core_seat_v1',
     'revoke_my_exam_prep_beta_consent_v1'
   ]);
   assert(rpcCalls.length > 0, 'host must call server access RPCs');
