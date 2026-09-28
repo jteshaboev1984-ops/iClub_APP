@@ -9,6 +9,7 @@ on:
       - supabase/tests/exam_prep_results_focus_v1_contract.sql
       - supabase/tests/exam_prep_signal_confirmation_v1_contract.sql
       - supabase/tests/exam_prep_fresh_learning_selector_v1_contract.sql
+      - supabase/tests/exam_prep_aw01_04_alt_learning_draft_v1_contract.sql
       - supabase/tests/p2_79_recovery_rollback_disaster_matrix.sql
       - supabase/tests/p0_15_contract_bootstrap.sql
       - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
@@ -29,6 +30,7 @@ on:
       - supabase/tests/exam_prep_results_focus_v1_contract.sql
       - supabase/tests/exam_prep_signal_confirmation_v1_contract.sql
       - supabase/tests/exam_prep_fresh_learning_selector_v1_contract.sql
+      - supabase/tests/exam_prep_aw01_04_alt_learning_draft_v1_contract.sql
       - supabase/tests/p2_79_recovery_rollback_disaster_matrix.sql
       - supabase/tests/p0_15_contract_bootstrap.sql
       - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
@@ -186,6 +188,12 @@ jobs:
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_fresh_learning_selector_v1_contract.sql 2>&1 | tee -a p280-audit.log
+
+      - name: Verify AW1-4 alternate learning draft contract
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_aw01_04_alt_learning_draft_v1_contract.sql 2>&1 | tee -a p280-audit.log
 
       - name: Re-run rollback and disaster matrix
         shell: bash
