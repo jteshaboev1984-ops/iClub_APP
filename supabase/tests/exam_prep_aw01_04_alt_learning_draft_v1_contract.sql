@@ -252,6 +252,30 @@ begin
     raise exception 'alt_learning_release_v1 assessment shape invalid=%',v_bad;
   end if;
 
+  -- Each target skill now has exactly two published learning sets: the original
+  -- governed baseline plus this supplemental pack. Protected roles are not duplicated.
+  select count(*) into v_bad
+  from (
+    select s.skill_code,
+           count(distinct a.id) filter(
+             where a.status='published'
+               and a.assessment_type='learning'
+               and cv.status='published'
+           ) as learning_sets
+    from (values
+      ('P1-QUA-01'),('P1-QUA-02'),('P1-QUA-03'),('P1-FUN-01'),('P1-FUN-02'),
+      ('P5-DAT-01'),('P5-DAT-02'),('P5-DAT-04'),('P5-DAT-06')
+    ) s(skill_code)
+    left join private.exam_prep_assessment_items ai on ai.primary_skill_code=s.skill_code
+    left join private.exam_prep_assessments a on a.id=ai.assessment_id
+    left join private.exam_prep_content_versions cv on cv.id=a.content_version_id
+    group by s.skill_code
+  ) x
+  where learning_sets<>2;
+  if v_bad<>0 then
+    raise exception 'alt_learning_release_v1 expected exactly two published learning sets for % target skills',v_bad;
+  end if;
+
   v_p1:=private.exam_prep_supplemental_learning_floor_v1(4801);
   v_p5:=private.exam_prep_supplemental_learning_floor_v1(4802);
   if coalesce((v_p1->>'ready')::boolean,false) is not true
