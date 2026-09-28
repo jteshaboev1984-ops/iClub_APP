@@ -1,4 +1,4 @@
--- Contract for draft written-understanding checks attached to AW1-4 alternate packs.
+-- Contract for written-understanding checks attached to the governed AW1-4 supplemental packs.
 begin;
 do $$
 declare
@@ -7,12 +7,12 @@ begin
   if (select count(*) from private.exam_prep_written_understanding_checks
       where id between 8901 and 8909
         and written_task_id between 15601 and 15609
-        and lifecycle_state='draft'
-        and qa_math_status='pending'
-        and qa_language_status='pending'
-        and qa_technical_status='pending')<>9
+        and lifecycle_state='published'
+        and qa_math_status='pass'
+        and qa_language_status='pass'
+        and qa_technical_status='pass')<>9
   then
-    raise exception 'aw01_04_written_checks_v1 draft set missing';
+    raise exception 'aw01_04_written_checks_v1 published set missing';
   end if;
 
   select count(*) into v_bad
@@ -35,25 +35,32 @@ begin
     raise exception 'aw01_04_written_checks_v1 structural/trilingual rows invalid=%',v_bad;
   end if;
 
-  -- Draft checks are invisible to learner payloads in all supported languages.
+  -- Published learner payloads expose exactly one versioned check in each
+  -- supported language and never expose answer keys/rationales.
   select count(*) into v_bad
   from generate_series(15601,15609) wt(id)
   cross join (values('en'),('ru'),('uz')) l(lang)
-  where private.exam_prep_written_understanding_payload_v1(wt.id,l.lang)<>'[]'::jsonb;
+  cross join lateral (
+    select private.exam_prep_written_understanding_payload_v1(wt.id,l.lang) payload
+  ) p
+  where jsonb_array_length(p.payload)<>1
+     or p.payload::text ~ 'correct_index|rationale|all_correct|is_correct'
+     or coalesce(p.payload->0->>'check_version','')<>'v1';
   if v_bad<>0 then
-    raise exception 'aw01_04_written_checks_v1 draft check leaked into learner payload rows=%',v_bad;
+    raise exception 'aw01_04_written_checks_v1 learner payload contract failed rows=%',v_bad;
   end if;
 
-  -- Parent written tasks are also still draft and unapproved.
+  -- Parent written tasks are published and fully QA-passed.
   if exists(
     select 1
     from private.exam_prep_written_tasks wt
     where wt.id between 15601 and 15609
       and (
-        wt.lifecycle_state<>'draft'
-        or wt.qa_math_status<>'pending'
-        or wt.qa_language_status<>'pending'
-        or wt.qa_technical_status<>'pending'
+        wt.lifecycle_state<>'published'
+        or wt.copyright_status<>'pass'
+        or wt.qa_math_status<>'pass'
+        or wt.qa_language_status<>'pass'
+        or wt.qa_technical_status<>'pass'
       )
   ) then
     raise exception 'aw01_04_written_checks_v1 parent written task state drift';
