@@ -8,11 +8,11 @@ DECLARE
   v_bad int;
   v_a int; v_b int; v_c int; v_d int; v_inputs int;
 BEGIN
-  -- Exactly two invisible draft versions.
+  -- The independently reviewed source pack is now governed reserve.
   IF (SELECT count(*) FROM private.exam_prep_content_versions
       WHERE id IN (4803,4804)
-        AND status='draft')<>2 THEN
-    RAISE EXCEPTION 'annual reserve draft: expected two draft content versions';
+        AND status='published')<>2 THEN
+    RAISE EXCEPTION 'annual reserve source contract: expected two published reserve content versions';
   END IF;
 
   IF (SELECT count(*) FROM private.exam_prep_question_content_meta
@@ -24,7 +24,7 @@ BEGIN
      OR (SELECT count(*) FROM private.exam_prep_question_content_meta
          WHERE content_version_id IN (4803,4804) AND reserve_role='mixed')<>9
   THEN
-    RAISE EXCEPTION 'annual reserve draft: question-role cardinality mismatch';
+    RAISE EXCEPTION 'annual reserve source contract: question-role cardinality mismatch';
   END IF;
 
   -- Per-skill delta is exactly +2 diagnostic, +2 retest, +1 mixed/transfer.
@@ -46,7 +46,7 @@ BEGIN
   LEFT JOIN got g USING(component_code,skill_code)
   WHERE coalesce(g.d,0)<>2 OR coalesce(g.r,0)<>2 OR coalesce(g.x,0)<>1;
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'annual reserve draft: per-skill delta mismatch rows=%',v_bad;
+    RAISE EXCEPTION 'annual reserve source contract: per-skill delta mismatch rows=%',v_bad;
   END IF;
 
   -- Candidate delta closes the numeric annual floor for these nine skills:
@@ -89,29 +89,29 @@ BEGIN
      OR coalesce(q.r,0)<>4
      OR coalesce(w.n,0)<2;
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'annual reserve draft: prospective annual numeric floor not closed rows=%',v_bad;
+    RAISE EXCEPTION 'annual reserve source contract: prospective annual numeric floor not closed rows=%',v_bad;
   END IF;
 
-  -- Draft content remains fully withheld and unapproved.
+  -- Governed reserve stays withheld even though the content version is published.
   SELECT count(*) INTO v_bad
   FROM private.exam_prep_question_content_meta m
   JOIN public.questions q ON q.id=m.question_id
   WHERE m.content_version_id IN (4803,4804)
     AND (
-      m.lifecycle_state<>'draft'
+      m.lifecycle_state<>'reserve'
       OR m.exposure_state<>'withheld'
-      OR m.copyright_status<>'pending'
-      OR m.qa_scope_status<>'pending'
-      OR m.qa_math_status<>'pending'
-      OR m.qa_language_status<>'pending'
-      OR m.qa_technical_status<>'pending'
-      OR (m.reserve_role='diagnostic' AND m.diagnostic_rule_status<>'pending')
+      OR m.copyright_status<>'pass'
+      OR m.qa_scope_status<>'pass'
+      OR m.qa_math_status<>'pass'
+      OR m.qa_language_status<>'pass'
+      OR m.qa_technical_status<>'pass'
+      OR (m.reserve_role='diagnostic' AND m.diagnostic_rule_status<>'approved')
       OR (m.reserve_role<>'diagnostic' AND m.diagnostic_rule_status<>'not_applicable')
       OR q.is_active
       OR q.quality_status<>'draft'
     );
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'annual reserve draft: exposure/QA boundary failure rows=%',v_bad;
+    RAISE EXCEPTION 'annual reserve source contract: exposure/QA boundary failure rows=%',v_bad;
   END IF;
 
   -- All three learner languages and explanations are present; MCQs have four
@@ -146,7 +146,7 @@ BEGIN
       )
     );
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'annual reserve draft: trilingual/type contract failure rows=%',v_bad;
+    RAISE EXCEPTION 'annual reserve source contract: trilingual/type contract failure rows=%',v_bad;
   END IF;
 
   -- Independent language QA: learner-facing RU/UZ options must not retain the
@@ -160,7 +160,7 @@ BEGIN
       OR q.options_text_uz ~* '\\m(or|only|cm)\\M'
     );
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'annual reserve draft: untranslated option token rows=%',v_bad;
+    RAISE EXCEPTION 'annual reserve source contract: untranslated option token rows=%',v_bad;
   END IF;
 
   -- Independent reserve-role QA: delayed-retest questions that were too close
@@ -190,7 +190,7 @@ BEGIN
      OR q.question_text_en IS DISTINCT FROM e.question_text_en
      OR q.correct_answer IS DISTINCT FROM e.correct_answer;
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'annual reserve draft: independent retest QA contract drift rows=%',v_bad;
+    RAISE EXCEPTION 'annual reserve source contract: independent retest QA contract drift rows=%',v_bad;
   END IF;
 
   -- Exact source snapshot must still match the immutable private metadata.
@@ -209,7 +209,7 @@ BEGIN
       coalesce(q.book_ref,''),coalesce(q.time_limit_sec::text,''),
       coalesce(q.quality_flag,''),coalesce(q.quality_status,'')))<>m.question_snapshot_md5;
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'annual reserve draft: source snapshot mismatch rows=%',v_bad;
+    RAISE EXCEPTION 'annual reserve source contract: source snapshot mismatch rows=%',v_bad;
   END IF;
 
   -- No exact English-stem reuse from any older question and no duplicates inside
@@ -229,7 +229,7 @@ BEGIN
     AND dm.content_version_id IN (4803,4804)
   WHERE dm.id IS NULL;
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'annual reserve draft: exact old-stem overlap rows=%',v_bad;
+    RAISE EXCEPTION 'annual reserve source contract: exact old-stem overlap rows=%',v_bad;
   END IF;
 
   IF EXISTS(
@@ -240,7 +240,7 @@ BEGIN
     GROUP BY lower(regexp_replace(btrim(q.question_text_en),'\s+','','g'))
     HAVING count(*)>1
   ) THEN
-    RAISE EXCEPTION 'annual reserve draft: duplicate stem inside candidate';
+    RAISE EXCEPTION 'annual reserve source contract: duplicate stem inside candidate';
   END IF;
 
   -- Diagnostic rules: three distinct wrong-option diagnoses per diagnostic.
@@ -249,7 +249,7 @@ BEGIN
       JOIN private.exam_prep_question_content_meta m ON m.id=r.content_meta_id
       WHERE m.content_version_id IN (4803,4804)
         AND r.rule_version='aw_reserve_v1')<>54 THEN
-    RAISE EXCEPTION 'annual reserve draft: expected 54 diagnostic rules';
+    RAISE EXCEPTION 'annual reserve source contract: expected 54 diagnostic rules';
   END IF;
 
   SELECT count(*) INTO v_bad
@@ -262,7 +262,7 @@ BEGIN
       FROM private.exam_prep_diagnostic_rules r
       WHERE r.content_meta_id=m.id
         AND r.rule_version='aw_reserve_v1'
-        AND r.status='draft'
+        AND r.status='approved'
         AND r.answer_kind='mcq_option'
         AND r.answer_match<>q.correct_answer
         AND nullif(btrim(r.feedback_en),'') IS NOT NULL
@@ -273,13 +273,13 @@ BEGIN
         AND nullif(btrim(r.next_action_uz),'') IS NOT NULL
     )<>3;
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'annual reserve draft: diagnostic rule coverage failure rows=%',v_bad;
+    RAISE EXCEPTION 'annual reserve source contract: diagnostic rule coverage failure rows=%',v_bad;
   END IF;
 
-  -- Draft assessments are exact: 4 diagnostic variants, 18 isolated retests
-  -- and 2 mixed transfer sets; every item is held out.
+  -- Published reserve assessments are exact: 4 diagnostic variants, 18 isolated
+  -- retests and 2 mixed transfer sets; every item is held out.
   IF (SELECT count(*) FROM private.exam_prep_assessments
-      WHERE id BETWEEN 35301 AND 35324 AND status='draft')<>24
+      WHERE id BETWEEN 35301 AND 35324 AND status='published')<>24
      OR (SELECT count(*) FROM private.exam_prep_assessments
          WHERE id BETWEEN 35301 AND 35324 AND assessment_type='diagnostic')<>4
      OR (SELECT count(*) FROM private.exam_prep_assessments
@@ -289,7 +289,7 @@ BEGIN
      OR (SELECT count(*) FROM private.exam_prep_assessment_items
          WHERE assessment_id BETWEEN 35301 AND 35324)<>45
   THEN
-    RAISE EXCEPTION 'annual reserve draft: assessment cardinality mismatch';
+    RAISE EXCEPTION 'annual reserve source contract: assessment cardinality mismatch';
   END IF;
 
   SELECT count(*) INTO v_bad
@@ -309,7 +309,7 @@ BEGIN
       OR ai.primary_skill_code NOT LIKE a.component_code||'-%'
     );
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'annual reserve draft: assessment isolation/role failure rows=%',v_bad;
+    RAISE EXCEPTION 'annual reserve source contract: assessment isolation/role failure rows=%',v_bad;
   END IF;
 
   IF EXISTS(
@@ -322,7 +322,7 @@ BEGIN
         OR (a.assessment_type='diagnostic' AND count(*) NOT IN (4,5))
         OR (a.assessment_type='mixed' AND count(*) NOT IN (4,5))
   ) THEN
-    RAISE EXCEPTION 'annual reserve draft: assessment shape failure';
+    RAISE EXCEPTION 'annual reserve source contract: assessment shape failure';
   END IF;
 
   -- Defense-in-depth answer balance.
@@ -338,7 +338,7 @@ BEGIN
   WHERE m.content_version_id IN (4803,4804);
 
   IF (v_a,v_b,v_c,v_d,v_inputs)<>(9,10,9,10,7) THEN
-    RAISE EXCEPTION 'annual reserve draft: answer balance mismatch A=% B=% C=% D=% input=%',
+    RAISE EXCEPTION 'annual reserve source contract: answer balance mismatch A=% B=% C=% D=% input=%',
       v_a,v_b,v_c,v_d,v_inputs;
   END IF;
 
@@ -356,7 +356,7 @@ BEGIN
     JOIN private.exam_prep_question_content_meta m ON m.question_id=ta.question_id
     WHERE m.content_version_id IN (4803,4804)
   ) THEN
-    RAISE EXCEPTION 'annual reserve draft: unexpected learner/legacy history';
+    RAISE EXCEPTION 'annual reserve source contract: unexpected learner/legacy history';
   END IF;
 
   -- This top-up deliberately creates no written tasks: existing published written
@@ -365,9 +365,9 @@ BEGIN
     SELECT 1 FROM private.exam_prep_written_tasks
     WHERE content_version_id IN (4803,4804)
   ) THEN
-    RAISE EXCEPTION 'annual reserve draft: unnecessary written task duplicated';
+    RAISE EXCEPTION 'annual reserve source contract: unnecessary written task duplicated';
   END IF;
 
-  RAISE NOTICE 'AW1-4 annual reserve top-up draft contract: GREEN (45 machine items; prospective 3D/8 learning-transfer/4R; written already >=2)';
+  RAISE NOTICE 'AW1-4 annual reserve source contract: GREEN (45 governed reserve items; 3D/8 learning-transfer/4R; written >=2)';
 END
 $$;
