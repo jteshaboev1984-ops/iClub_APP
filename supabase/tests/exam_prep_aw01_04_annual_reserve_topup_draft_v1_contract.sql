@@ -149,6 +149,50 @@ BEGIN
     RAISE EXCEPTION 'annual reserve draft: trilingual/type contract failure rows=%',v_bad;
   END IF;
 
+  -- Independent language QA: learner-facing RU/UZ options must not retain the
+  -- English connector/unit tokens found during the second review.
+  SELECT count(*) INTO v_bad
+  FROM private.exam_prep_question_content_meta m
+  JOIN public.questions q ON q.id=m.question_id
+  WHERE m.content_version_id IN (4803,4804)
+    AND (
+      q.options_text_ru ~* '\\m(or|only|cm)\\M'
+      OR q.options_text_uz ~* '\\m(or|only|cm)\\M'
+    );
+  IF v_bad<>0 THEN
+    RAISE EXCEPTION 'annual reserve draft: untranslated option token rows=%',v_bad;
+  END IF;
+
+  -- Independent reserve-role QA: delayed-retest questions that were too close
+  -- to teaching practice were rewritten as materially different evidence.
+  WITH expected(content_key,question_text_en,correct_answer) AS (VALUES
+    ('P1QUA01-R03','For q(x)=5x²−20x+23, the equation q(x)=c has exactly one real solution. Enter c.','3'),
+    ('P1QUA01-R04','Which statement about y=−x²+10x−18 is correct?','D'),
+    ('P1QUA02-R03','For which values of q is 2x²+qx+5 positive for every real x?','A'),
+    ('P1QUA02-R04','The line y=4mx−4 is tangent to the parabola y=x². For which values of m does this happen?','C'),
+    ('P1FUN01-R03','Let f(x)=x² with domain x≤0. Which formula gives f⁻¹(x)?','D'),
+    ('P1FUN01-R04','Let f(x)=1/(x−3) and g(x)=2x+1. Enter the value of x that must be excluded from the domain of (f∘g)(x).','1'),
+    ('P1FUN02-R03','For f(x)=(x−2)²+1 with −1<x≤4, what is the range?','D'),
+    ('P1FUN02-R04','For f(x)=2x+3 with −5≤x<4, enter the minimum value of f.','-7'),
+    ('P5DAT02-R03','A stem-and-leaf diagram has key 2 | 4 = 24 and rows 2 | 4 7 9 and 3 | 1 1 8. One additional observation 30 is inserted. Enter the new median.','30'),
+    ('P5DAT04-R03','Two histogram classes have widths 4 and 6 and frequencies 12 and 18 respectively. Enter the ratio (first bar height)/(second bar height).','1'),
+    ('P5DAT04-R04','In a histogram, class A has width 4 and frequency density 6; class B has width 8 and frequency density 3. Which statement is correct?','A'),
+    ('P5DAT06-R03','The values 2, 6 and 10 occur with frequencies 1, k and 2 respectively. The mean is 7. Enter k.','1'),
+    ('P5DAT06-R04','The data are 3, 3, 5, 7, 12. If 12 is replaced by 22, which statement is correct?','D')
+  )
+  SELECT count(*) INTO v_bad
+  FROM expected e
+  LEFT JOIN private.exam_prep_question_content_meta m
+    ON m.content_version_id IN (4803,4804)
+   AND m.content_key=e.content_key
+  LEFT JOIN public.questions q ON q.id=m.question_id
+  WHERE m.id IS NULL
+     OR q.question_text_en IS DISTINCT FROM e.question_text_en
+     OR q.correct_answer IS DISTINCT FROM e.correct_answer;
+  IF v_bad<>0 THEN
+    RAISE EXCEPTION 'annual reserve draft: independent retest QA contract drift rows=%',v_bad;
+  END IF;
+
   -- Exact source snapshot must still match the immutable private metadata.
   SELECT count(*) INTO v_bad
   FROM private.exam_prep_question_content_meta m
