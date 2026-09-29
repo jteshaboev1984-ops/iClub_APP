@@ -42,6 +42,8 @@ begin
   v_ensure:=pg_get_functiondef('public.ensure_exam_prep_balanced_weekly_plan_safe_v1(text)'::regprocedure);
   if position('exam_prep_balance_new_normal_plan_v1' in v_ensure)=0
      or position('ensure_exam_prep_stable_weekly_plan_safe_v1' in v_ensure)=0
+     or position('order by p.generated_at desc, p.id desc' in lower(v_ensure))=0
+     or position('order by p.created_at desc' in lower(v_ensure))<>0
      or md5(pg_get_functiondef('public.ensure_exam_prep_stable_weekly_plan_safe_v1(text)'::regprocedure))
         <> '0304cbab6a544a1123a15eb61af4ab8d'
   then
