@@ -16,6 +16,8 @@ const path = require('path');
     window.__planType = 'correction';
     window.__apiCounts = { plan: 0, queue: 0 };
     window.__apiDelayMs = 0;
+    window.__diagnosticRefreshCount = 0;
+    window.__placementSawDiagnosticRefresh = false;
 
     const skill = {
       sequence_no: 21,
@@ -73,6 +75,10 @@ const path = require('path');
       },
       api: {
         async syllabusTracker(component) { return { ok: true, data: { ...tracker, component_code: component } }; },
+        async diagnosticProgress(component) {
+          window.__diagnosticRefreshCount += 1;
+          return { ok: true, data: { component_code: component, stage0_complete: false } };
+        },
         async weeklyPlan(component) {
           window.__apiCounts.plan += 1;
           if (window.__apiDelayMs) await new Promise(resolve => setTimeout(resolve, window.__apiDelayMs));
@@ -86,6 +92,7 @@ const path = require('path');
       },
       overviewPlacementViews: {
         async openPlacement(component) {
+          window.__placementSawDiagnosticRefresh = window.__diagnosticRefreshCount > 0;
           document.querySelector('#exam-prep-host-root').innerHTML = `<section class="ep-host-shell ep-placement-shell" data-ep-placement-screen>
             <div class="ep-placement-top"><div><div class="ep-placement-sub">${component} · Cambridge AS Mathematics</div><div class="ep-placement-title">Результат входной проверки</div></div><button class="ep-placement-btn" data-ep-placement-back>Вернуться к обзору</button></div>
             <div class="ep-placement-card"><strong>Проверка продолжается</strong></div>
@@ -248,8 +255,12 @@ const path = require('path');
   state = await page.evaluate(() => ({
     banner: document.querySelector('.ep-flow-diagnostic-complete')?.textContent,
     result: document.querySelector('.ep-placement-title')?.textContent,
-    next: document.querySelector('[data-ep-placement-next]')?.textContent
+    next: document.querySelector('[data-ep-placement-next]')?.textContent,
+    diagnosticRefreshCount: window.__diagnosticRefreshCount,
+    placementSawDiagnosticRefresh: window.__placementSawDiagnosticRefresh
   }));
+  assert(state.diagnosticRefreshCount === 1, 'diagnostic completion must refresh the authoritative progress projection exactly once before placement');
+  assert(state.placementSawDiagnosticRefresh === true, 'placement must never render before the finalized diagnostic projection is refreshed');
   assert(state.banner.includes('3 / 3'), 'diagnostic completion must confirm the saved chunk');
   assert(state.result === 'Результат входной проверки', 'diagnostic completion must stay in a result context');
   assert(state.next === 'Продолжить входную проверку', 'diagnostic result must expose the server-derived next action');
