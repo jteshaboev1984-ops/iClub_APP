@@ -35,13 +35,18 @@ begin
     raise exception 'supplemental-learning contract: established full-floor readiness changed';
   end if;
 
-  -- The live migration stack currently has exactly the two governed AW1-4
-  -- supplemental release profiles.
+  -- The live migration stack now has two supplemental-learning profiles and
+  -- two independent supplemental-reserve profiles. Reserve expansion must not
+  -- invalidate the original learning contract.
   if (select count(*) from private.exam_prep_content_release_profiles_v1
       where content_version_id in (4801,4802)
         and release_mode='supplemental_learning'
         and require_written_understanding)<>2
-     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>2
+     or (select count(*) from private.exam_prep_content_release_profiles_v1
+         where content_version_id in (4803,4804)
+           and release_mode='supplemental_reserve'
+           and not require_written_understanding)<>2
+     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>4
   then
     raise exception 'supplemental-learning contract: governed release-profile surface drift';
   end if;
