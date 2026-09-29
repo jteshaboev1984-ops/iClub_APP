@@ -195,6 +195,12 @@ const path = require('path');
   assert(visible.includes('выражение одной переменной через другие'), 'Russian prerequisite must use learner-facing presentation copy');
   assert(!visible.includes('completed-square form') && !visible.includes('vertex/shape information') && !visible.includes('смена subject'), 'Russian learner UI must not expose mixed internal canonical wording');
 
+  await page.evaluate(async () => window.iClubExamPrepHostInternal.learnerViews.openTracker('P1'));
+  await page.waitForSelector('[data-ep-views-skill="P1-QUA-01"]');
+  skillButtonText = await page.locator('[data-ep-views-skill="P1-QUA-01"]').textContent();
+  assert(skillButtonText.includes('Приводить квадратный трёхчлен к форме полного квадрата'), 'Russian topic list must show the established exact learner-facing skill copy');
+  assert(!/^\s*Навык\s+1\b/i.test(skillButtonText), 'Russian topic list must not lead with generic Навык 1');
+
   await page.evaluate(async () => window.iClubExamPrepHostInternal.learnerViews.openCorrections('P1'));
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Требуют внимания'));
   visible = await page.locator('#exam-prep-host-root').textContent();
