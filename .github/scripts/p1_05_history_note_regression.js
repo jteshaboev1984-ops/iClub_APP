@@ -38,6 +38,7 @@ const path = require('path');
       window.__calls.push({ name, args });
       if (name === 'get_exam_prep_capabilities_v1') return { data: [window.__caps], error: null };
       if (name === 'get_my_exam_prep_beta_invitation_v1') return { data: { invited: false, invitations: [] }, error: null };
+      if (name === 'get_my_exam_prep_weekly_flow_status_v1') return { data: { contract_version: 'weekly_flow_status_v1', enabled: false }, error: null };
       if (name === 'get_exam_prep_exam_profile_v1') return { data: [window.__profile], error: null };
       if (name === 'get_exam_prep_diagnostic_progress_safe_v1') return { data: window.__progress[args.p_component_code], error: null };
       if (name === 'get_exam_prep_state_safe_v1') return { data: window.__state[args.p_component_code], error: null };
