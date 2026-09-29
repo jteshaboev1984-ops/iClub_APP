@@ -183,8 +183,15 @@
     }
 
     // Keep symbolic mathematics intact and localize only the natural-language connector.
-    if (/[=±√/]/.test(raw) && /\sor\s/i.test(raw)) {
-      return raw.replace(/\s+or\s+/gi, locale === "ru" ? " или " : " yoki ");
+    if (/[=±√/<>≤≥]/.test(raw) && /\sor\s/i.test(raw)) {
+      return raw.replace(/\s+or\s+/gi, locale === "ru" ? " \u0438\u043b\u0438 " : " yoki ");
+    }
+
+    const onlyInequality = raw.match(/^(.+[<>≤≥].+)\s+only$/i);
+    if (onlyInequality) {
+      return locale === "ru"
+        ? `\u0442\u043e\u043b\u044c\u043a\u043e ${onlyInequality[1]}`
+        : `faqat ${onlyInequality[1]}`;
     }
     return raw;
   }
