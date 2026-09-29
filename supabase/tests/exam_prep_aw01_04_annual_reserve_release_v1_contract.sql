@@ -215,17 +215,10 @@ BEGIN
     raise exception 'annual reserve release: unexpected release-time learner/legacy history';
   end if;
 
-  if not exists(
-    select 1 from private.exam_prep_feature_config
-    where id=1
-      and rollout_state='controlled_beta'
-      and core_enabled
-      and ai_enabled=false
-      and mentor_enabled=false
-      and kill_switch=false
-  ) then
-    raise exception 'annual reserve release: Core-only controlled-beta boundary changed';
-  end if;
+  -- Content validity is independent of optional capability runtime state.
+  -- The release migration itself checks the live Core-only production boundary
+  -- before mutation; this reusable contract intentionally does not require a
+  -- particular post-migration feature flag state.
 END
 $$;
 
