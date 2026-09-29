@@ -272,6 +272,47 @@ BEGIN
     RAISE EXCEPTION 'aw05_08 annual reserve draft: reserve-only version contains written tasks';
   END IF;
 
+  -- Independent-QA corrections must be present before this draft is eligible
+  -- for any later publication review.
+  SELECT count(*) INTO v_bad
+  FROM (VALUES
+    ('P1FUN06-R03','7'),
+    ('P1FUN07-R04','A'),
+    ('P1FUN08-R04','A'),
+    ('P1COO01-R03','12'),
+    ('P1COO02-R04','A'),
+    ('P1COO03-R03','-7'),
+    ('P1CIR01-R03','90'),
+    ('P1TRI01-R03','5'),
+    ('P5CNT01-R03','1512'),
+    ('P5CNT02-R04','B'),
+    ('P5CNT03-R03','48'),
+    ('P5CNT04-R03','48'),
+    ('P5PRO01-R03','7')
+  ) expected(content_key,answer)
+  LEFT JOIN private.exam_prep_question_content_meta m
+    ON m.content_key=expected.content_key
+   AND m.content_version_id IN (4807,4808)
+  LEFT JOIN public.questions q ON q.id=m.question_id
+  WHERE q.id IS NULL OR q.correct_answer<>expected.answer;
+  IF v_bad<>0 THEN
+    RAISE EXCEPTION 'aw05_08 annual reserve draft: independent-QA answer map mismatch rows=%',v_bad;
+  END IF;
+
+  IF EXISTS(
+    SELECT 1
+    FROM private.exam_prep_question_content_meta m
+    JOIN public.questions q ON q.id=m.question_id
+    WHERE m.content_version_id IN (4807,4808)
+      AND m.content_key='P1FUN07-R04'
+      AND (
+        q.question_text_en NOT LIKE '%contains the point (4,−7)%'
+        OR q.options_text_en LIKE '%Translation through the origin%'
+      )
+  ) THEN
+    RAISE EXCEPTION 'aw05_08 annual reserve draft: reflection retest correction missing';
+  END IF;
+
   -- No learner or legacy history may reference a draft reserve version.
   IF EXISTS(
     SELECT 1 FROM private.exam_prep_sessions s
