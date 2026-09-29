@@ -23,8 +23,6 @@
     "5.5 The normal distribution": { ru: "Нормальное распределение", uz: "Normal taqsimot", en: "The normal distribution" }
   });
 
-
-
   /* Learner-facing Russian copy is intentionally separate from canonical source text.
      The database keeps the versioned academic wording unchanged; this map only controls presentation. */
   const LEARNER_SKILL_RU = Object.freeze({
@@ -138,6 +136,10 @@
   }
 
   internal.learnerCopy = Object.freeze({
+    skillTitle(skillCode, language = activeLanguage) {
+      const chosen = ["ru", "uz", "en"].includes(String(language || "")) ? String(language) : activeLanguage;
+      return chosen === "ru" ? (LEARNER_SKILL_RU[String(skillCode || "")] || "") : "";
+    },
     skillRu(skillCode) {
       return LEARNER_SKILL_RU[String(skillCode || "")] || "";
     },
@@ -145,6 +147,17 @@
       return LEARNER_FOUNDATION_RU[String(code || "")] || "";
     }
   });
+
+  function hydrateMountedComponentSkillTitles() {
+    const language = detectLanguage();
+    document.querySelectorAll("[data-ep-component-skill]").forEach(button => {
+      const exactTitle = internal.learnerCopy.skillTitle(button.dataset.epComponentSkill, language);
+      const label = button.querySelector("span");
+      if (exactTitle && label && label.textContent !== exactTitle) label.textContent = exactTitle;
+    });
+  }
+
+  queueMicrotask(hydrateMountedComponentSkillTitles);
 
   function copy() {
     if (activeLanguage === "uz") return {
@@ -308,7 +321,11 @@
     const cards = areas.map(area => {
       const skills = Array.isArray(area?.skills) ? area.skills : [];
       const total = Number(area?.skill_count || skills.length || 0), done = Number(area?.coverage_count || 0);
-      const rows = skills.map(skill => `<button class="ep-views-skill" type="button" data-ep-views-skill="${esc(skill.skill_code)}"><span><strong>${esc(c.skill)} ${Number(skill.sequence_no || 0)}</strong><span class="ep-views-skill-meta"> · ${esc(c.checks)}: ${Number(skill.evidence_total || 0)}</span></span><span class="ep-views-badge">${esc(skillStatus(skill.objective_level, skill.correction_case_id))}</span></button>`).join("");
+      const rows = skills.map(skill => {
+        const exactTitle = internal.learnerCopy.skillTitle(skill?.skill_code, activeLanguage);
+        const displayTitle = exactTitle || `${areaLabel(area.official_syllabus_section)} · ${Number(skill.sequence_no || 0)}`;
+        return `<button class="ep-views-skill" type="button" data-ep-views-skill="${esc(skill.skill_code)}"><span><strong>${esc(displayTitle)}</strong><span class="ep-views-skill-meta"> · ${esc(c.checks)}: ${Number(skill.evidence_total || 0)}</span></span><span class="ep-views-badge">${esc(skillStatus(skill.objective_level, skill.correction_case_id))}</span></button>`;
+      }).join("");
       return `<div class="ep-views-card ep-views-area"><div class="ep-views-area-head"><strong>${esc(areaLabel(area.official_syllabus_section))}</strong><span class="ep-views-sub">${done} / ${total}</span></div><div class="ep-views-progress"><span style="width:${total > 0 ? Math.min(100, 100 * done / total) : 0}%"></span></div>${rows}</div>`;
     }).join("");
     const body = `<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.confirmedCount)}</span><strong>${confirmed} / ${denominator}</strong></div><div class="ep-views-stat"><span>${esc(c.coverage)}</span><strong>${pct.toFixed(0)}%</strong></div><div class="ep-views-stat"><span>${esc(c.corrections)}</span><strong>${Number(data?.open_correction_count || 0)}</strong></div></div>${cards}`;
@@ -351,7 +368,6 @@
   function renderSkill(component, data) {
     const root = rootEl(); if (!root) return; const c = copy();
     const state = data?.state || {}, prereqs = Array.isArray(data?.prerequisites) ? data.prerequisites : [], evidence = Array.isArray(data?.evidence_history) ? data.evidence_history : [], corrections = Array.isArray(data?.correction_history) ? data.correction_history : [];
-    const title = `${c.skill} ${Number(data?.sequence_no || 0)}`;
     const learnerDescription = learnerSkillDescription(data?.skill_code);
     const description = learnerDescription ? `<div class="ep-views-note">${esc(learnerDescription)}</div>` : "";
     const prereqRows = prereqs.length ? prereqs.map((row, index) => `<div class="ep-views-row"><span>${esc(learnerPrerequisiteLabel(row, index))}</span><span class="ep-views-badge">${esc(prerequisiteStatus(row))}</span></div>`).join("") : `<div class="ep-views-note">${esc(c.noneYet)}</div>`;

@@ -44,7 +44,7 @@
       profileTitle: "Avval imtihon rejangizni kiriting", profileText: "Bu ma’lumotlar matematika uchun real haftalik yuklamani tuzishga yordam beradi.",
       series: "Imtihon seriyasi", target: "Maqsad baho", total: "Haftalik umumiy o‘qish vaqti (soat)", math: "Matematika uchun vaqt (soat)",
       save: "Saqlash va kirish tekshiruvini boshlash", saving: "Saqlanmoqda…", invalid: "Soatlarni tekshiring: matematika vaqti 0 dan katta va umumiy vaqtdan oshmasligi kerak.",
-      items: "savol", areas: "bo‘lim", start: "Keyingi tekshiruv qismini boshlash", resume: "Tekshiruvni davom ettirish", complete: "Kirish tekshiruvi yakunlandi", loading: "Yuklanmoqda…",
+      items: "savol", areas: "bo‘lim", start: "Kirish tekshiruvini boshlash", resume: "Tekshiruvni davom ettirish", complete: "Kirish tekshiruvi yakunlandi", loading: "Yuklanmoqda…",
       question: "Savol", submit: "Javobni yuborish", correct: "To‘g‘ri", incorrect: "Xatoni ko‘rib chiqing", finish: "Tekshiruv qismi yakunlandi. Natija yangilandi.",
       error: "Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.", back: "Orqaga", overview: "Umumiy ko‘rinish", plan: "Haftalik reja", openPlan: "Haftalik rejani ochish", priority: "Ustuvorlik", week: "Hafta",
       learning: "Mavzuni o‘rganish", correction: "Xato ustida ishlash", retest: "Qayta tekshirish", mixed: "Aralash mashq", rebaseline: "Rejani yangilash", startTask: "Boshlash", notDue: "Qayta tekshirish vaqti hali kelmagan", noPlan: "Faol reja yo‘q.", written: "Yechimingizni yozing", completedTask: "Topshiriq tugadi. Reja yangilandi.",
@@ -58,7 +58,7 @@
       actionCloseIssue: "Qolgan asosiy xatoni yoping", actionShort: "Qisqa maqsadli mashq", actionTiming: "Vaqt va imtihon tartibini tekshirish", actionTaper: "Yuklamani kamaytirish va natijani saqlash",
       assignmentResult: "Topshiriq natijasi", autoChecked: "Avtomatik tekshiriladigan savollar", writtenPart: "Yozma qism",
       correctOf: "to‘g‘ri", writtenCompleted: "bajarildi", writtenNoAccuracy: "Yozma topshiriqlar to‘g‘ri javoblar foiziga kiritilmaydi.",
-      reviewAnswers: "Javoblarni tahlil qilish", continueResult: "Davom etish", allQuestions: "Barcha savollar", mistakesOnly: "Faqat xatolar",
+      reviewAnswers: "Javoblarni tahlil qilish", continueResult: "Davom etish", allQuestions: "Barcha savollar", mistakesOnly: "Faqat xatolar", noMistakes: "Bu topshiriqda xatolar yo‘q.",
       yourResponse: "Sizning javobingiz", correctResponse: "To‘g‘ri javob", why: "Izoh", whatToReview: "Nimani takrorlash kerak",
       writtenDone: "Bajarildi", writtenNotAuto: "Bu yozma yechim avtomatik baholanmaydi.", understandingCheckLabel: "Tushunishni tekshirish",
       understandingNotMark: "Bu yozma yechim uchun baho emas.", recentWork: "Oxirgi ish", viewResults: "Natijalarni ko‘rish", history: "Mashg‘ulotlar tarixi",
@@ -74,7 +74,7 @@
       profileTitle: "Set your exam plan first", profileText: "This helps build a realistic weekly mathematics workload.",
       series: "Exam series", target: "Target grade", total: "Total weekly study time (hours)", math: "Mathematics time (hours)",
       save: "Save and start entry check", saving: "Saving…", invalid: "Check the hours: mathematics time must be above 0 and cannot exceed total time.",
-      items: "questions", areas: "areas", start: "Start the next check section", resume: "Continue the check", complete: "Entry check complete", loading: "Loading…",
+      items: "questions", areas: "areas", start: "Start entry check", resume: "Continue the check", complete: "Entry check complete", loading: "Loading…",
       question: "Question", submit: "Submit answer", correct: "Correct", incorrect: "Review this mistake", finish: "Check section complete. Progress updated.",
       error: "The action could not be completed. Try again.", back: "Back", overview: "Overview", plan: "Weekly plan", openPlan: "Open weekly plan", priority: "Priority", week: "Week",
       learning: "Study this topic", correction: "Work on this mistake", retest: "Check again", mixed: "Mixed practice", rebaseline: "Update plan", startTask: "Start", notDue: "This check is not due yet", noPlan: "No active plan yet.", written: "Write your solution", completedTask: "Task complete. Plan updated.",
@@ -88,7 +88,7 @@
       actionCloseIssue: "Close the main remaining issue", actionShort: "Short targeted practice", actionTiming: "Check timing and exam logistics", actionTaper: "Reduce workload and protect performance",
       assignmentResult: "Task result", autoChecked: "Auto-checked questions", writtenPart: "Written part",
       correctOf: "correct", writtenCompleted: "completed", writtenNoAccuracy: "Written tasks are not included in the correct-answer percentage.",
-      reviewAnswers: "Review answers", continueResult: "Continue", allQuestions: "All questions", mistakesOnly: "Mistakes only",
+      reviewAnswers: "Review answers", continueResult: "Continue", allQuestions: "All questions", mistakesOnly: "Mistakes only", noMistakes: "There are no mistakes in this task.",
       yourResponse: "Your answer", correctResponse: "Correct answer", why: "Explanation", whatToReview: "What to review",
       writtenDone: "Completed", writtenNotAuto: "This written solution is not marked automatically.", understandingCheckLabel: "Understanding check",
       understandingNotMark: "This is not a mark for the full written solution.", recentWork: "Latest work", viewResults: "View results", history: "Session history",
@@ -104,7 +104,7 @@
       profileTitle: "Сначала задайте план экзамена", profileText: "Это поможет системе построить реалистичную недельную нагрузку по математике.",
       series: "Экзаменационная сессия", target: "Целевая оценка", total: "Общее учебное время в неделю (часы)", math: "Время на математику (часы)",
       save: "Сохранить и начать входную проверку", saving: "Сохраняем…", invalid: "Проверьте часы: время на математику должно быть больше 0 и не превышать общее время.",
-      items: "вопросов", areas: "разделов", start: "Начать следующую часть проверки", resume: "Продолжить проверку", complete: "Входная проверка завершена", loading: "Загрузка…",
+      items: "вопросов", areas: "разделов", start: "Начать входную проверку", resume: "Продолжить проверку", complete: "Входная проверка завершена", loading: "Загрузка…",
       question: "Вопрос", submit: "Отправить ответ", correct: "Верно", incorrect: "Разберите эту ошибку", finish: "Часть проверки завершена. Прогресс обновлён.",
       error: "Не удалось выполнить действие. Попробуйте ещё раз.", back: "Назад", overview: "Обзор", plan: "Недельный план", openPlan: "Открыть недельный план", priority: "Приоритет", week: "Неделя",
       learning: "Изучить тему", correction: "Разобрать ошибку", retest: "Проверить ещё раз", mixed: "Смешанная практика", rebaseline: "Обновить план", startTask: "Начать", notDue: "Повторная проверка ещё не наступила", noPlan: "Активного плана пока нет.", written: "Запишите своё решение", completedTask: "Задание завершено. План обновлён.",
@@ -118,7 +118,7 @@
       actionCloseIssue: "Закрыть основную оставшуюся ошибку", actionShort: "Короткая целевая практика", actionTiming: "Проверить время и экзаменационный порядок", actionTaper: "Снизить нагрузку и сохранить форму",
       assignmentResult: "Результат задания", autoChecked: "Автопроверяемые вопросы", writtenPart: "Письменная часть",
       correctOf: "верно", writtenCompleted: "выполнено", writtenNoAccuracy: "Письменные задачи не входят в процент правильных ответов.",
-      reviewAnswers: "Разобрать ответы", continueResult: "Продолжить", allQuestions: "Все вопросы", mistakesOnly: "Только ошибки",
+      reviewAnswers: "Разобрать ответы", continueResult: "Продолжить", allQuestions: "Все вопросы", mistakesOnly: "Только ошибки", noMistakes: "Ошибок в этом задании нет.",
       yourResponse: "Ваш ответ", correctResponse: "Правильный ответ", why: "Почему", whatToReview: "Что стоит повторить",
       writtenDone: "Выполнено", writtenNotAuto: "Это письменное решение не оценивается автоматически.", understandingCheckLabel: "Проверка понимания",
       understandingNotMark: "Это не оценка за всё письменное решение.", recentWork: "Последняя работа", viewResults: "Посмотреть результаты", history: "История занятий",
@@ -208,7 +208,10 @@
     const machineValue = machineTotal > 0 ? `${machineCorrect} / ${machineTotal} ${esc(c.correctOf)}${Number.isFinite(accuracy) ? ` · ${accuracy.toFixed(0)}%` : ""}` : "—";
     const writtenValue = writtenTotal > 0 ? `${writtenDone} / ${writtenTotal} ${esc(c.writtenCompleted)}` : "—";
     const visible = onlyErrors ? items.filter(item => item?.item_kind === "question" && item?.is_correct === false) : items;
-    const review = expanded ? `<section class="ep-result-review"><div class="ep-result-toolbar"><button class="ep-live-btn ${!onlyErrors ? "" : "secondary"}" type="button" data-ep-result-filter="all">${esc(c.allQuestions)}</button><button class="ep-live-btn ${onlyErrors ? "" : "secondary"}" type="button" data-ep-result-filter="wrong">${esc(c.mistakesOnly)}</button></div><div class="ep-result-list">${visible.map(reviewItemMarkup).join("")}</div></section>` : "";
+    const reviewBody = visible.length
+      ? visible.map(reviewItemMarkup).join("")
+      : (onlyErrors ? `<div class="ep-live-notice ep-result-empty">${esc(c.noMistakes)}</div>` : "");
+    const review = expanded ? `<section class="ep-result-review"><div class="ep-result-toolbar"><button class="ep-live-btn ${!onlyErrors ? "" : "secondary"}" type="button" data-ep-result-filter="all">${esc(c.allQuestions)}</button><button class="ep-live-btn ${onlyErrors ? "" : "secondary"}" type="button" data-ep-result-filter="wrong">${esc(c.mistakesOnly)}</button></div><div class="ep-result-list">${reviewBody}</div></section>` : "";
     const backLabel = origin === "history" ? c.backToHistory : origin === "component" ? c.backToComponent : c.continueResult;
     root.innerHTML = shell(`<section class="ep-result-screen" data-ep-session-result="${esc(data?.session_id || "")}"><div class="ep-live-card ep-result-summary"><div class="ep-live-head"><div><div class="ep-live-meta">${esc(component)} · ${esc(resultTypeLabel(data?.session_type))}</div><strong>${esc(c.assignmentResult)}</strong></div></div><div class="ep-result-summary-grid"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.autoChecked)}</span><strong>${machineValue}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.writtenPart)}</span><strong>${writtenValue}</strong></div></div>${writtenTotal > 0 ? `<div class="ep-live-notice">${esc(c.writtenNoAccuracy)}</div>` : ""}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-result-review>${esc(c.reviewAnswers)}</button><button class="ep-live-btn secondary" type="button" data-ep-result-continue>${esc(backLabel)}</button></div></div>${review}</section>`, { compact: true });
     root.querySelector('[data-ep-result-review]')?.addEventListener('click', () => renderSessionResult(data,component,origin,!expanded,onlyErrors));
@@ -308,7 +311,7 @@
       fixTask: "Xatoni tuzatish", retestTask: "Qayta tekshiruvdan o‘tish", mixedTask: "Aralash mashqni boshlash",
       timedTask: "Vaqtli mashqni boshlash", checkNext: "Keyingi topshiriqni tekshirish",
       waiting: "Qayta tekshiruv vaqti hali kelmagan", noAvailable: "Hozircha yangi topshiriq mavjud emas.",
-      skills: "ko‘nikma", skill: "Ko‘nikma", focusNow: "hozir diqqatda", later: "keyin", lastResult: "Oxirgi ish", history: "Mashg‘ulotlar tarixi"
+      skills: "ko‘nikma", skill: "Ko‘nikma", focusNow: "hozir diqqatda", later: "keyin", lastResult: "Oxirgi ish", history: "Mashg‘ulotlar tarixi", foundationTitle: "Birinchi o‘quv qadamini boshlash", foundationDetail: "Kirish tekshiruvi boshlang‘ich nuqtani aniqladi. Endi bilimlaringizni o‘quv topshiriqlarida tasdiqlang — shundan keyin tasdiqlangan qamrov oshadi.", foundationStart: "Birinchi mavzuni boshlash"
     };
     if (state.language === "en") return {
       back: "Your route", next: "Next step", progress: "Progress", topics: "Topics",
@@ -319,7 +322,7 @@
       retestTask: "Take the delayed check", mixedTask: "Start mixed practice", timedTask: "Start timed practice",
       checkNext: "Check next task", waiting: "The delayed check is not available yet",
       noAvailable: "No new task is available right now.", skills: "skills", skill: "Skill",
-      focusNow: "in focus now", later: "later", lastResult: "Latest work", history: "Session history"
+      focusNow: "in focus now", later: "later", lastResult: "Latest work", history: "Session history", foundationTitle: "Start your first learning step", foundationDetail: "The entry check identified your starting point. Now confirm your knowledge through learning tasks; confirmed syllabus coverage will grow from there.", foundationStart: "Start first topic"
     };
     return {
       back: "Ваш маршрут", next: "Следующий шаг", progress: "Прогресс", topics: "Темы",
@@ -330,7 +333,7 @@
       retestTask: "Пройти повторную проверку", mixedTask: "Начать смешанную практику",
       timedTask: "Начать работу на время", checkNext: "Проверить следующий шаг",
       waiting: "Повторная проверка ещё не доступна", noAvailable: "Сейчас нет нового доступного задания.",
-      skills: "навыков", skill: "Навык", focusNow: "сейчас в фокусе", later: "позже", lastResult: "Последняя работа", history: "История занятий"
+      skills: "навыков", skill: "Навык", focusNow: "сейчас в фокусе", later: "позже", lastResult: "Последняя работа", history: "История занятий", foundationTitle: "Начать первый учебный шаг", foundationDetail: "Входная проверка определила стартовую точку. Теперь подтвердите знания учебными заданиями — после этого начнёт расти подтверждённое покрытие программы.", foundationStart: "Начать первую тему"
     };
   }
 
@@ -461,6 +464,7 @@
     }
     const stage = Number(summary?.operational_stage || 0);
     if (stage >= 4) return { kind: "timed", title: home.timed, detail: stageLabel(stage), label: home.timedTask };
+    if (stage === 1) return { kind: "prepare", title: home.foundationTitle, detail: home.foundationDetail, label: home.foundationStart };
     return { kind: "prepare", title: home.checkNext, detail: stageLabel(stage), label: home.startTask };
   }
 
@@ -471,7 +475,11 @@
     return areas.map(area => {
       const skills = Array.isArray(area?.skills) ? area.skills : [];
       const total = Number(area?.skill_count || skills.length || 0), covered = Number(area?.coverage_count || 0);
-      const skillRows = skills.map(skill => `<button class="ep-component-skill" type="button" data-ep-component-skill="${esc(skill.skill_code)}"><span>${esc(home.skill)} ${Number(skill.sequence_no || 0)}</span><small>${esc(skillStateLabel(skill))}</small></button>`).join("");
+      const skillRows = skills.map(skill => {
+        const exactTitle = internal.learnerCopy?.skillTitle?.(skill?.skill_code, state.language) || "";
+        const displayTitle = exactTitle || `${componentAreaLabel(area.official_syllabus_section)} · ${Number(skill.sequence_no || 0)}`;
+        return `<button class="ep-component-skill" type="button" data-ep-component-skill="${esc(skill.skill_code)}"><span>${esc(displayTitle)}</span><small>${esc(skillStateLabel(skill))}</small></button>`;
+      }).join("");
       return `<details class="ep-component-area"><summary><span>${esc(componentAreaLabel(area.official_syllabus_section))}</span><strong>${covered} / ${total}</strong></summary><div class="ep-component-skill-list">${skillRows}</div></details>`;
     }).join("");
   }

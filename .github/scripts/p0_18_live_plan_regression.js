@@ -61,7 +61,7 @@ const path = require('path');
   await page.click('[data-ep-live-open-component="P1"]');
   await page.waitForSelector('[data-ep-component-home="P1"]');
   let before=await page.evaluate(()=>({calls:window.__calls.map(x=>x.name),primary:document.querySelector('[data-ep-component-primary]')?.textContent}));
-  assert(/Start task/i.test(before.primary),'component home must expose one immediate learning CTA');
+  assert(/Start first topic/i.test(before.primary),'component home must expose one immediate learning CTA');
   assert(!before.calls.includes('generate_exam_prep_weekly_plan_safe_v3'),'viewing the component must not generate a plan');
   assert(!before.calls.includes('start_exam_prep_session_safe_v1'),'viewing the component must not start a session');
 
