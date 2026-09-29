@@ -43,9 +43,13 @@ for (const old of [
 
 // Registration warning and cache keys must agree with non-destructive settings.
 const htmlSource = fs.readFileSync('index.html','utf8');
-assert.ok(htmlSource.includes('i18n.js?v=practicepreserve1'));
+assert.ok(htmlSource.includes('i18n.js?v=practicepreserve1-mentorlabel1'));
 assert.ok(htmlSource.includes('app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1'));
 assert.ok(htmlSource.includes('Язык заданий можно изменить позже — результаты и ответы сохранятся.'));
+for (const mentorCopy of ['МЕНТОР ПО ПРЕДМЕТУ','FAN MENTORI','SUBJECT MENTOR']) {
+  assert.ok(localization.includes(JSON.stringify(mentorCopy)), 'Subject mentor label missing: '+mentorCopy);
+}
+assert.ok(htmlSource.includes('data-i18n="mentor_kicker">SUBJECT MENTOR</div>'), 'Subject Hub mentor fallback must name the subject-level feature');
 for (const old of [
   'Важно: смена языка после регистрации сбросит прогресс.',
   'Muhim: ro‘yxatdan o‘tgandan so‘ng tilni o‘zgartirish progressni o‘chiradi.',

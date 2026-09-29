@@ -285,7 +285,7 @@ network_error_try_again: "Ошибка сети. Попробуйте ещё р�
       subject_hub_meta: "Учебный / Соревновательный",
       resources_title: "Ресурсы",
 
-      mentor_kicker: "ВАШ МЕНТОР",
+      mentor_kicker: "МЕНТОР ПО ПРЕДМЕТУ",
       mentor_assigning: "Ментор назначается",
       mentor_profile_soon: "Скоро появится профиль",
 
@@ -1191,7 +1191,7 @@ network_error_try_again: "Tarmoq xatosi. Qayta urinib ko‘ring.",
       subject_hub_meta: "O‘quv / Musobaqa",
       resources_title: "Resurslar",
 
-      mentor_kicker: "MENTORINGIZ",
+      mentor_kicker: "FAN MENTORI",
       mentor_assigning: "Mentor tayinlanmoqda",
       mentor_profile_soon: "Tez orada profil paydo bo‘ladi",
 
@@ -2103,7 +2103,7 @@ network_error_try_again: "Network error. Please try again.",
       subject_hub_meta: "Study / Competitive",
       resources_title: "Resources",
 
-      mentor_kicker: "YOUR MENTOR",
+      mentor_kicker: "SUBJECT MENTOR",
       mentor_assigning: "Mentor will be assigned",
       mentor_profile_soon: "Profile coming soon",
 
