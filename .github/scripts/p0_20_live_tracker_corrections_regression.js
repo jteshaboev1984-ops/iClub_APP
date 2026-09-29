@@ -157,7 +157,7 @@ const path = require('path');
   await page.waitForSelector('[data-ep-component-skill="P1-QUA-01"]', { state: 'visible' });
 
   let skillButtonText = await page.locator('[data-ep-component-skill="P1-QUA-01"]').textContent();
-  assert(skillButtonText.includes('Quadratics · 1'), 'English topic list must use the localized syllabus area when an approved exact skill translation is unavailable');
+  assert(skillButtonText.includes('Completing the square'), 'English topic list must show the concise learner-facing skill title');
   assert(!/^\s*Skill\s+1\b/i.test(skillButtonText), 'topic list must not lead with generic Skill 1');
   await page.click('[data-ep-component-skill="P1-QUA-01"]');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Skill detail'));
@@ -198,7 +198,7 @@ const path = require('path');
   await page.evaluate(async () => window.iClubExamPrepHostInternal.learnerViews.openTracker('P1'));
   await page.waitForSelector('[data-ep-views-skill="P1-QUA-01"]');
   skillButtonText = await page.locator('[data-ep-views-skill="P1-QUA-01"]').textContent();
-  assert(skillButtonText.includes('Приводить квадратный трёхчлен к форме полного квадрата'), 'Russian topic list must show the established exact learner-facing skill copy');
+  assert(skillButtonText.includes('Выделение полного квадрата'), 'Russian topic list must show the concise learner-facing skill title');
   assert(!/^\s*Навык\s+1\b/i.test(skillButtonText), 'Russian topic list must not lead with generic Навык 1');
 
   await page.evaluate(async () => window.iClubExamPrepHostInternal.learnerViews.openCorrections('P1'));
@@ -217,7 +217,7 @@ const path = require('path');
   visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('Ma’lumotlarni tasvirlash'), 'P5 tracker must use the separate five-area syllabus map in Uzbek');
   skillButtonText = await page.locator('[data-ep-views-skill="P5-DAT-01"]').textContent();
-  assert(skillButtonText.includes('Ma’lumotlarni tasvirlash · 1'), 'Uzbek tracker must use the localized syllabus area when an approved exact skill translation is unavailable');
+  assert(skillButtonText.includes('Ma’lumotlarni tasvirlash usulini tanlash'), 'Uzbek tracker must show the concise learner-facing skill title');
   assert(!/^\s*Ko‘nikma\s+1\b/i.test(skillButtonText), 'Uzbek tracker must not lead with a generic numbered skill label');
   assert(!visible.includes('P5-DAT-01'), 'P5 tracker must keep internal skill code hidden');
 
