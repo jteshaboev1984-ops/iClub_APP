@@ -476,8 +476,9 @@
       const skills = Array.isArray(area?.skills) ? area.skills : [];
       const total = Number(area?.skill_count || skills.length || 0), covered = Number(area?.coverage_count || 0);
       const skillRows = skills.map(skill => {
-        const shortTitle = internal.learnerCopy?.skillTitle?.(skill?.skill_code, state.language) || `${home.skill} ${Number(skill.sequence_no || 0)}`;
-        return `<button class="ep-component-skill" type="button" data-ep-component-skill="${esc(skill.skill_code)}"><span>${esc(shortTitle)}</span><small>${esc(skillStateLabel(skill))}</small></button>`;
+        const exactTitle = internal.learnerCopy?.skillTitle?.(skill?.skill_code, state.language) || "";
+        const displayTitle = exactTitle || `${componentAreaLabel(area.official_syllabus_section)} · ${Number(skill.sequence_no || 0)}`;
+        return `<button class="ep-component-skill" type="button" data-ep-component-skill="${esc(skill.skill_code)}"><span>${esc(displayTitle)}</span><small>${esc(skillStateLabel(skill))}</small></button>`;
       }).join("");
       return `<details class="ep-component-area"><summary><span>${esc(componentAreaLabel(area.official_syllabus_section))}</span><strong>${covered} / ${total}</strong></summary><div class="ep-component-skill-list">${skillRows}</div></details>`;
     }).join("");
