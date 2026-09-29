@@ -167,6 +167,27 @@
         : `${instantRate[1]} ning oniy o\u2018zgarish tezligi sekundiga ${instantRate[2]} birlik`;
     }
 
+    const alwaysEqual = raw.match(/^([A-Za-z]) equals (.+) at all times$/i);
+    if (alwaysEqual) {
+      return locale === "ru"
+        ? `${alwaysEqual[1]} \u0432\u0441\u0435\u0433\u0434\u0430 \u0440\u0430\u0432\u043d\u043e ${alwaysEqual[2]}`
+        : `${alwaysEqual[1]} har doim ${alwaysEqual[2]} ga teng`;
+    }
+
+    const averageRate = raw.match(/^The average rate from (.+) to (.+) is necessarily (.+)$/i);
+    if (averageRate) {
+      return locale === "ru"
+        ? `\u0421\u0440\u0435\u0434\u043d\u044f\u044f \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u043e\u0442 ${averageRate[1]} \u0434\u043e ${averageRate[2]} \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u043e \u0440\u0430\u0432\u043d\u0430 ${averageRate[3]}`
+        : `${averageRate[1]} dan ${averageRate[2]} gacha o\u2018rtacha o\u2018zgarish tezligi albatta ${averageRate[3]} ga teng`;
+    }
+
+    const secondsPerUnit = raw.match(/^([A-Za-z]) changes at (.+) seconds per unit$/i);
+    if (secondsPerUnit) {
+      return locale === "ru"
+        ? `${secondsPerUnit[1]} \u0438\u0437\u043c\u0435\u043d\u044f\u0435\u0442\u0441\u044f \u0441\u043e \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c\u044e ${secondsPerUnit[2]} \u0441\u0435\u043a\u0443\u043d\u0434 \u043d\u0430 \u0435\u0434\u0438\u043d\u0438\u0446\u0443`
+        : `${secondsPerUnit[1]} bir birlikka ${secondsPerUnit[2]} sekund tezlikda o\u2018zgaradi`;
+    }
+
     const arithmetic = raw.match(/^arithmetic(?: with common difference| with difference) (.+)$/i)
       || raw.match(/^arithmetic,\s*d=(.+)$/i);
     if (arithmetic) {
