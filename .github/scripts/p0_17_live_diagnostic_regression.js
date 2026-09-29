@@ -117,7 +117,7 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
     backHeight:document.querySelector('[data-ep-component-back]')?.getBoundingClientRect().height || 0,
     horizontalOverflow:document.documentElement.scrollWidth > innerWidth + 1
   }));
-  assert(/Start the next check section/i.test(r.primary),'P1 component home must show one immediate diagnostic action');
+  assert(/Start entry check/i.test(r.primary),'P1 first entry must name the entry check directly');
   assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'viewing P1 must remain read-only before learner action');
   assert(!r.calls.includes('get_exam_prep_state_safe_v1'),'incomplete Stage 0 component home must not rebuild derived state');
   assert(r.hasComponentHero,'P1 component identity must remain visible on the component screen');
