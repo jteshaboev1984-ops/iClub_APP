@@ -78,6 +78,61 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
   await page.addScriptTag({path:path.resolve('exam-prep/exam-prep-live.js')});
   const assert=(x,m)=>{if(!x) throw new Error(m);};
 
+  const optionCopy = await page.evaluate(() => {
+    const text = window.iClubExamPrepHostInternal?.optionPresentation?.optionText;
+    return {
+      ruDecimal: text('0.125','ru'),
+      uzDecimal: text('0.125','uz'),
+      ruRoots: text('x = 2 or x = 5/2','ru'),
+      uzRoots: text('x = 2 or x = 5/2','uz'),
+      enRoots: text('x = 2 or x = 5/2','en')
+    };
+  });
+  assert(optionCopy.ruDecimal==='0,125','RU decimal display mismatch');
+  assert(optionCopy.uzDecimal==='0.125','UZ decimal display must remain canonical');
+  assert(optionCopy.ruRoots.includes('\u0438\u043b\u0438'),'RU connector was not localized');
+  assert(optionCopy.uzRoots.includes('yoki'),'UZ connector was not localized');
+  assert(optionCopy.enRoots==='x = 2 or x = 5/2','EN connector must remain canonical');
+  const progressionCopy = await page.evaluate(() => {
+    const text = window.iClubExamPrepHostInternal?.optionPresentation?.optionText;
+    return {
+      ru: text('arithmetic with common difference 4','ru'),
+      uz: text('geometric with ratio 3/5','uz'),
+      fallback: text('cos x = 0','ru')
+    };
+  });
+  assert(progressionCopy.ru==='\u0430\u0440\u0438\u0444\u043c\u0435\u0442\u0438\u0447\u0435\u0441\u043a\u0430\u044f \u043f\u0440\u043e\u0433\u0440\u0435\u0441\u0441\u0438\u044f, d=4','RU progression display mismatch');
+  assert(progressionCopy.uz==='geometrik progressiya, r=3/5','UZ progression display mismatch');
+  assert(progressionCopy.fallback==='cos x = 0','Unknown option must remain unchanged');
+  const inequalityCopy = await page.evaluate(() => {
+    const text = window.iClubExamPrepHostInternal?.optionPresentation?.optionText;
+    return {
+      ruOr: text('k < -8 or k > 8','ru'),
+      uzOr: text('k < -8 or k > 8','uz'),
+      ruOnly: text('k > 8 only','ru'),
+      uzOnly: text('k > 8 only','uz')
+    };
+  });
+  assert(inequalityCopy.ruOr.includes('\u0438\u043b\u0438'),'RU inequality connector mismatch');
+  assert(inequalityCopy.uzOr.includes('yoki'),'UZ inequality connector mismatch');
+  assert(inequalityCopy.ruOnly.startsWith('\u0442\u043e\u043b\u044c\u043a\u043e '),'RU inequality-only wording mismatch');
+  assert(inequalityCopy.uzOnly.startsWith('faqat '),'UZ inequality-only wording mismatch');
+  const rateCopy = await page.evaluate(() => {
+    const text = window.iClubExamPrepHostInternal?.optionPresentation?.optionText;
+    return {
+      ruInstant: text('The instantaneous rate of change of y is 7 units per second','ru'),
+      uzInstant: text('The instantaneous rate of change of y is 7 units per second','uz'),
+      ruAlways: text('q equals 9 at all times','ru'),
+      uzAverage: text('The average rate from 1 to 4 is necessarily 3','uz'),
+      ruPerUnit: text('t changes at 6 seconds per unit','ru')
+    };
+  });
+  assert(rateCopy.ruInstant.includes('\u041c\u0433\u043d\u043e\u0432\u0435\u043d\u043d\u0430\u044f'),'RU instantaneous-rate wording mismatch');
+  assert(rateCopy.uzInstant.includes('oniy'),'UZ instantaneous-rate wording mismatch');
+  assert(rateCopy.ruAlways.includes('\u0432\u0441\u0435\u0433\u0434\u0430'),'RU always-equal wording mismatch');
+  assert(rateCopy.uzAverage.includes('o\u2018rtacha'),'UZ average-rate wording mismatch');
+  assert(rateCopy.ruPerUnit.includes('\u0441\u0435\u043a\u0443\u043d\u0434'),'RU seconds-per-unit wording mismatch');
+
   let r=await page.evaluate(async()=>{const synced=await window.iClubExamPrep.syncSubjectHub({subjectKey:'mathematics',language:'en'});const opened=await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});return{synced,opened,profile:!!document.querySelector('[data-ep-live-profile-form]'),version:window.iClubExamPrep.liveFlowVersion};});
   assert(r.synced&&r.opened&&r.profile,'profile screen must open for controlled-beta Core');
   assert(r.version==='p260results1','live flow version mismatch');
