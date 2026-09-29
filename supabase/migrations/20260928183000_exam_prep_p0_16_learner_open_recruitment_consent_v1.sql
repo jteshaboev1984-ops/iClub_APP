@@ -561,7 +561,7 @@ begin
   from private.exam_prep_beta_members
   where cohort_id=v_c.id and member_status='active' and service_mode<>'core';
 
-  v_runway:=public.get_exam_prep_content_runway_v1(1);
+  v_runway:=public.get_exam_prep_content_runway_v1(1::smallint);
 
   if v_c.cohort_status not in ('canary','active')
      or v_c.planned_size<>12
