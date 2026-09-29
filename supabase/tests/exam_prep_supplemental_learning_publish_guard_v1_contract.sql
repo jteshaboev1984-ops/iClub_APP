@@ -35,8 +35,8 @@ begin
     raise exception 'supplemental-learning contract: established full-floor readiness changed';
   end if;
 
-  -- The learning profiles remain exact even after the separate AW1-4
-  -- supplemental-reserve profiles are added later in the migration stack.
+  -- Governed profile surface: two AW1-4 learning profiles, two AW1-4 reserve
+  -- profiles, and two AW5-8 learning profiles.
   if (select count(*) from private.exam_prep_content_release_profiles_v1
       where content_version_id in (4801,4802)
         and release_mode='supplemental_learning'
@@ -45,15 +45,21 @@ begin
          where content_version_id in (4803,4804)
            and release_mode='supplemental_reserve'
            and require_written_understanding=false)<>2
-     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>4
+     or (select count(*) from private.exam_prep_content_release_profiles_v1
+         where content_version_id in (4805,4806)
+           and release_mode='supplemental_learning'
+           and require_written_understanding)<>2
+     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>6
   then
     raise exception 'supplemental-learning contract: governed release-profile surface drift';
   end if;
 
   if coalesce((private.exam_prep_supplemental_learning_floor_v1(4801)->>'ready')::boolean,false) is not true
      or coalesce((private.exam_prep_supplemental_learning_floor_v1(4802)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_learning_floor_v1(4805)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_learning_floor_v1(4806)->>'ready')::boolean,false) is not true
   then
-    raise exception 'supplemental-learning contract: released AW1-4 supplemental floor is RED';
+    raise exception 'supplemental-learning contract: governed supplemental-learning floor is RED';
   end if;
 
   -- Negative fixture: a registered but empty supplemental version must never
