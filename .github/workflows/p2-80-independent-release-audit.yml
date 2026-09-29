@@ -7,6 +7,7 @@ on:
       - 'supabase/migrations/*exam_prep*.sql'
       - supabase/tests/p2_80_independent_release_audit.sql
       - supabase/tests/exam_prep_results_focus_v1_contract.sql
+      - supabase/tests/exam_prep_weekly_plan_first_launch_fix_v1_contract.sql
       - supabase/tests/exam_prep_signal_confirmation_v1_contract.sql
       - supabase/tests/exam_prep_fresh_learning_selector_v1_contract.sql
       - supabase/tests/exam_prep_aw01_04_alt_learning_draft_v1_contract.sql
@@ -186,6 +187,12 @@ jobs:
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_results_focus_v1_contract.sql 2>&1 | tee -a p280-audit.log
+
+      - name: Verify weekly-plan first-launch fix
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_weekly_plan_first_launch_fix_v1_contract.sql 2>&1 | tee -a p280-audit.log
 
       - name: Verify screening-signal confirmation contract
         shell: bash
