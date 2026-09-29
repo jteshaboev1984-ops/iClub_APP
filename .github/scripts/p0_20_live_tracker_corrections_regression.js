@@ -142,6 +142,7 @@ const path = require('path');
   });
 
   await page.waitForSelector('[data-ep-live-open-component="P1"]');
+  await page.waitForFunction(() => typeof window.iClubExamPrepHostInternal?.learnerCopy?.skillTitle === 'function');
   await page.evaluate(() => { window.iClubExamPrepHostInternal.learnerCopy = null; });
   await page.click('[data-ep-live-open-component="P1"]');
   await page.waitForSelector('[data-ep-component-home="P1"]');
