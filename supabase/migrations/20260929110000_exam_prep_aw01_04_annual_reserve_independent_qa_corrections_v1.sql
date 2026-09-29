@@ -158,7 +158,7 @@ with fixes(
  'D',
  'On the stated domain f uses the non-positive branch. Reversing y=x² therefore gives x=−√y, so f⁻¹(x)=−√x for x≥0.',
  'На заданной области функция использует неположительную ветвь. При обращении y=x² получаем x=−√y, поэтому f⁻¹(x)=−√x при x≥0.',
- 'Berilgan sohada funksiya manfiy bo‘lmagan emas, balki nomanfiy bo‘lmagan tarmoqdan foydalanadi. y=x² ni teskari yechganda x=−√y, demak f⁻¹(x)=−√x, x≥0.'),
+ 'Berilgan sohada funksiya x≤0 tarmoqdan foydalanadi. y=x² ni teskari yechganda x=−√y, demak f⁻¹(x)=−√x, x≥0.'),
 
 ('P1FUN01-R04',
  'Let f(x)=1/(x−3) and g(x)=2x+1. Enter the value of x that must be excluded from the domain of (f∘g)(x).',
