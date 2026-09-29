@@ -21,7 +21,8 @@ on:
       - supabase/tests/p2_58_governed_synthetic_cleanup_matrix.sql
       - supabase/tests/p2_60_confirmed_synthetic_provenance_matrix.sql
       - supabase/tests/exam_prep_aw01_04_annual_reserve_topup_draft_v1_contract.sql
-      - supabase/tests/exam_prep_aw01_04_annual_reserve_release_v1_contract.sql\n      - supabase/tests/exam_prep_supplemental_reserve_publish_guard_v1_contract.sql
+      - supabase/tests/exam_prep_aw01_04_annual_reserve_release_v1_contract.sql
+      - supabase/tests/exam_prep_aw05_08_supplemental_learning_draft_v1_contract.sql\n      - supabase/tests/exam_prep_supplemental_reserve_publish_guard_v1_contract.sql
       - .github/workflows/p2-36-current-schema-expansion-validation.yml
   push:
     branches:
@@ -198,6 +199,12 @@ jobs:
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_aw01_04_annual_reserve_release_v1_contract.sql 2>&1 | tee -a p236-current-schema.log
+
+      - name: Verify AW5-8 supplemental learning draft
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_aw05_08_supplemental_learning_draft_v1_contract.sql 2>&1 | tee -a p236-current-schema.log
 
       - name: Verify supplemental-reserve publication guard
         shell: bash
