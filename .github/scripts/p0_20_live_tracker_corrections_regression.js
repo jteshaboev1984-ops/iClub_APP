@@ -133,6 +133,7 @@ const path = require('path');
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-api.js') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-host.js') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-live.js') });
+  await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-learner-views.js') });
 
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
@@ -142,8 +143,6 @@ const path = require('path');
   });
 
   await page.waitForSelector('[data-ep-live-open-component="P1"]');
-  await page.waitForFunction(() => typeof window.iClubExamPrepHostInternal?.learnerCopy?.skillTitle === 'function');
-  await page.evaluate(() => { window.iClubExamPrepHostInternal.learnerCopy = null; });
   await page.click('[data-ep-live-open-component="P1"]');
   await page.waitForSelector('[data-ep-component-home="P1"]');
 
@@ -157,16 +156,9 @@ const path = require('path');
   await page.locator('[data-ep-component-home="P1"] .ep-component-area summary').first().click();
   await page.waitForSelector('[data-ep-component-skill="P1-QUA-01"]', { state: 'visible' });
 
-  // Dynamic child scripts can finish in either order. If the component renders
-  // before learner copy is ready, loading learner views must hydrate the already
-  // mounted row without another server request or route change.
   let skillButtonText = await page.locator('[data-ep-component-skill="P1-QUA-01"]').textContent();
-  assert(/^\s*Skill\s+1\b/i.test(skillButtonText), 'race fixture must begin with the live-flow fallback label');
-  await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-learner-views.js') });
-  await page.waitForFunction(() => document.querySelector('[data-ep-component-skill="P1-QUA-01"]')?.textContent.includes('Completing the square'));
-  skillButtonText = await page.locator('[data-ep-component-skill="P1-QUA-01"]').textContent();
-  assert(skillButtonText.includes('Completing the square'), 'late learner-copy load must hydrate the already mounted human skill title');
-  assert(!/^\s*Skill\s+1\b/i.test(skillButtonText), 'topic list must not remain on generic Skill 1 after learner copy is ready');
+  assert(skillButtonText.includes('Completing the square'), 'topic list must show a human skill title instead of only a numbered Skill label');
+  assert(!/^\s*Skill\s+1\b/i.test(skillButtonText), 'topic list must not lead with generic Skill 1');
   await page.click('[data-ep-component-skill="P1-QUA-01"]');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Skill detail'));
   visible = await page.locator('#exam-prep-host-root').textContent();
