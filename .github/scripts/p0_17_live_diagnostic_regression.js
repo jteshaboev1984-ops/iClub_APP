@@ -93,6 +93,17 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
   assert(optionCopy.ruRoots.includes('\u0438\u043b\u0438'),'RU connector was not localized');
   assert(optionCopy.uzRoots.includes('yoki'),'UZ connector was not localized');
   assert(optionCopy.enRoots==='x = 2 or x = 5/2','EN connector must remain canonical');
+  const progressionCopy = await page.evaluate(() => {
+    const text = window.iClubExamPrepHostInternal?.optionPresentation?.optionText;
+    return {
+      ru: text('arithmetic with common difference 4','ru'),
+      uz: text('geometric with ratio 3/5','uz'),
+      fallback: text('cos x = 0','ru')
+    };
+  });
+  assert(progressionCopy.ru==='\u0430\u0440\u0438\u0444\u043c\u0435\u0442\u0438\u0447\u0435\u0441\u043a\u0430\u044f \u043f\u0440\u043e\u0433\u0440\u0435\u0441\u0441\u0438\u044f, d=4','RU progression display mismatch');
+  assert(progressionCopy.uz==='geometrik progressiya, r=3/5','UZ progression display mismatch');
+  assert(progressionCopy.fallback==='cos x = 0','Unknown option must remain unchanged');
 
   let r=await page.evaluate(async()=>{const synced=await window.iClubExamPrep.syncSubjectHub({subjectKey:'mathematics',language:'en'});const opened=await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});return{synced,opened,profile:!!document.querySelector('[data-ep-live-profile-form]'),version:window.iClubExamPrep.liveFlowVersion};});
   assert(r.synced&&r.opened&&r.profile,'profile screen must open for controlled-beta Core');
