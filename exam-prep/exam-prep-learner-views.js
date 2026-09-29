@@ -237,6 +237,17 @@
     }
   });
 
+  function hydrateMountedComponentSkillTitles() {
+    const language = detectLanguage();
+    document.querySelectorAll("[data-ep-component-skill]").forEach(button => {
+      const title = internal.learnerCopy.skillTitle(button.dataset.epComponentSkill, language);
+      const label = button.querySelector("span");
+      if (title && label && label.textContent !== title) label.textContent = title;
+    });
+  }
+
+  queueMicrotask(hydrateMountedComponentSkillTitles);
+
   function copy() {
     if (activeLanguage === "uz") return {
       tracker: "Dastur bo‘yicha progress", corrections: "Diqqat talab qiladigan mavzular", overview: "Umumiy ko‘rinish", backTracker: "Progressga qaytish",
