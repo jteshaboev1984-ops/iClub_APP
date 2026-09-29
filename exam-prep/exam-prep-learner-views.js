@@ -25,6 +25,92 @@
 
 
 
+  /* Short learner-facing skill titles are presentation-only.
+     Canonical skill codes and academic descriptions in the database remain unchanged. */
+  const LEARNER_SKILL_TITLES = Object.freeze({
+    "P1-QUA-01": { ru: "Выделение полного квадрата", uz: "To‘liq kvadratga keltirish", en: "Completing the square" },
+    "P1-QUA-02": { ru: "Дискриминант и корни", uz: "Diskriminant va ildizlar", en: "Discriminant and roots" },
+    "P1-QUA-03": { ru: "Решение квадратных уравнений", uz: "Kvadrat tenglamalarni yechish", en: "Solving quadratic equations" },
+    "P1-QUA-04": { ru: "Квадратные неравенства", uz: "Kvadrat tengsizliklar", en: "Quadratic inequalities" },
+    "P1-QUA-05": { ru: "Линейно-квадратные системы", uz: "Chiziqli-kvadrat sistemalar", en: "Linear–quadratic systems" },
+    "P1-QUA-06": { ru: "Сведение к квадратному уравнению", uz: "Kvadrat tenglamaga keltirish", en: "Reducing to a quadratic" },
+    "P1-FUN-01": { ru: "Функция: область и значения", uz: "Funksiya: soha va qiymatlar", en: "Functions: domain and range" },
+    "P1-FUN-02": { ru: "Область значений функции", uz: "Funksiyaning qiymatlar to‘plami", en: "Range of a function" },
+    "P1-FUN-03": { ru: "Композиция функций", uz: "Funksiyalar kompozitsiyasi", en: "Composite functions" },
+    "P1-FUN-04": { ru: "Обратная функция", uz: "Teskari funksiya", en: "Inverse functions" },
+    "P1-FUN-05": { ru: "График обратной функции", uz: "Teskari funksiya grafigi", en: "Graphs of inverse functions" },
+    "P1-FUN-06": { ru: "Сдвиги графиков", uz: "Grafiklarni siljitish", en: "Graph translations" },
+    "P1-FUN-07": { ru: "Отражения графиков", uz: "Grafiklarni akslantirish", en: "Graph reflections" },
+    "P1-FUN-08": { ru: "Растяжения и сжатия графиков", uz: "Grafiklarni cho‘zish va siqish", en: "Graph stretches and compressions" },
+    "P1-COO-01": { ru: "Уравнение прямой", uz: "To‘g‘ri chiziq tenglamasi", en: "Equation of a straight line" },
+    "P1-COO-02": { ru: "Расстояние, середина и пересечение", uz: "Masofa, o‘rta nuqta va kesishish", en: "Distance, midpoint and intersection" },
+    "P1-COO-03": { ru: "Параллельные и перпендикулярные прямые", uz: "Parallel va perpendikulyar chiziqlar", en: "Parallel and perpendicular lines" },
+    "P1-COO-04": { ru: "Уравнение окружности", uz: "Aylana tenglamasi", en: "Equation of a circle" },
+    "P1-COO-05": { ru: "Прямая и окружность", uz: "To‘g‘ri chiziq va aylana", en: "Lines and circles" },
+    "P1-COO-06": { ru: "Пересечение и касание", uz: "Kesishish va urinma", en: "Intersections and tangency" },
+    "P1-CIR-01": { ru: "Градусы и радианы", uz: "Gradus va radianlar", en: "Degrees and radians" },
+    "P1-CIR-02": { ru: "Длина дуги", uz: "Yoy uzunligi", en: "Arc length" },
+    "P1-CIR-03": { ru: "Площадь сектора и сегмента", uz: "Sektor va segment yuzi", en: "Sector and segment area" },
+    "P1-TRI-01": { ru: "Графики sin, cos и tan", uz: "sin, cos va tan grafiklari", en: "Graphs of sin, cos and tan" },
+    "P1-TRI-02": { ru: "Точные тригонометрические значения", uz: "Aniq trigonometrik qiymatlar", en: "Exact trigonometric values" },
+    "P1-TRI-03": { ru: "Обратные тригонометрические функции", uz: "Teskari trigonometrik funksiyalar", en: "Inverse trigonometric functions" },
+    "P1-TRI-04": { ru: "Тригонометрические тождества", uz: "Trigonometrik ayniyatlar", en: "Trigonometric identities" },
+    "P1-TRI-05": { ru: "Тригонометрические уравнения", uz: "Trigonometrik tenglamalar", en: "Trigonometric equations" },
+    "P1-SER-01": { ru: "Биномиальное разложение", uz: "Binom yoyilmasi", en: "Binomial expansion" },
+    "P1-SER-02": { ru: "Арифметическая и геометрическая прогрессии", uz: "Arifmetik va geometrik progressiyalar", en: "Arithmetic and geometric progressions" },
+    "P1-SER-03": { ru: "Арифметическая прогрессия", uz: "Arifmetik progressiya", en: "Arithmetic progressions" },
+    "P1-SER-04": { ru: "Геометрическая прогрессия", uz: "Geometrik progressiya", en: "Geometric progressions" },
+    "P1-SER-05": { ru: "Бесконечный геометрический ряд", uz: "Cheksiz geometrik qator", en: "Infinite geometric series" },
+    "P1-DIF-01": { ru: "Смысл производной", uz: "Hosilaning ma’nosi", en: "Meaning of the derivative" },
+    "P1-DIF-02": { ru: "Производные степенных функций", uz: "Darajali funksiyalar hosilasi", en: "Differentiating powers" },
+    "P1-DIF-03": { ru: "Цепное правило", uz: "Zanjir qoidasi", en: "Chain rule" },
+    "P1-DIF-04": { ru: "Касательная и нормаль", uz: "Urinma va normal", en: "Tangent and normal" },
+    "P1-DIF-05": { ru: "Возрастание и убывание", uz: "O‘sish va kamayish", en: "Increasing and decreasing functions" },
+    "P1-DIF-06": { ru: "Скорости изменения", uz: "O‘zgarish tezligi", en: "Rates of change" },
+    "P1-DIF-07": { ru: "Стационарные точки и оптимизация", uz: "Statsionar nuqtalar va optimallashtirish", en: "Stationary points and optimisation" },
+    "P1-INT-01": { ru: "Первообразные", uz: "Boshlang‘ich funksiyalar", en: "Antiderivatives" },
+    "P1-INT-02": { ru: "Постоянная интегрирования", uz: "Integrallash doimiysi", en: "Constant of integration" },
+    "P1-INT-03": { ru: "Определённый интеграл", uz: "Aniq integral", en: "Definite integrals" },
+    "P1-INT-04": { ru: "Площадь между кривыми", uz: "Egri chiziqlar orasidagi yuza", en: "Area between curves" },
+    "P1-INT-05": { ru: "Объём тела вращения", uz: "Aylanish jismi hajmi", en: "Volume of revolution" },
+    "P5-DAT-01": { ru: "Выбор способа представления данных", uz: "Ma’lumotlarni tasvirlash usulini tanlash", en: "Choosing a data display" },
+    "P5-DAT-02": { ru: "Диаграмма «стебель и листья»", uz: "Poya-barg diagrammasi", en: "Stem-and-leaf diagrams" },
+    "P5-DAT-03": { ru: "Диаграмма размаха", uz: "Quti diagrammasi", en: "Box-and-whisker plots" },
+    "P5-DAT-04": { ru: "Гистограмма и плотность частоты", uz: "Gistogramma va chastota zichligi", en: "Histograms and frequency density" },
+    "P5-DAT-05": { ru: "Накопленная частота", uz: "Yig‘ma chastota", en: "Cumulative frequency" },
+    "P5-DAT-06": { ru: "Среднее, медиана и мода", uz: "O‘rtacha, mediana va moda", en: "Mean, median and mode" },
+    "P5-DAT-07": { ru: "Разброс и стандартное отклонение", uz: "Tarqalish va standart og‘ish", en: "Spread and standard deviation" },
+    "P5-DAT-08": { ru: "Сравнение наборов данных", uz: "Ma’lumotlar to‘plamlarini taqqoslash", en: "Comparing data sets" },
+    "P5-DAT-09": { ru: "Среднее и стандартное отклонение", uz: "O‘rtacha va standart og‘ishni hisoblash", en: "Mean and standard deviation" },
+    "P5-DAT-10": { ru: "Кодированные и объединённые данные", uz: "Kodlangan va birlashtirilgan ma’lumotlar", en: "Coded and combined data" },
+    "P5-CNT-01": { ru: "Размещения и выборки", uz: "Joylashtirish va tanlash", en: "Arrangements and selections" },
+    "P5-CNT-02": { ru: "Перестановки различных объектов", uz: "Turli obyektlar permutatsiyasi", en: "Permutations of distinct objects" },
+    "P5-CNT-03": { ru: "Перестановки с повторениями", uz: "Takrorlanuvchi obyektlar joylashuvi", en: "Arrangements with repeated objects" },
+    "P5-CNT-04": { ru: "Размещения с ограничениями", uz: "Cheklovli joylashtirish", en: "Restricted arrangements" },
+    "P5-CNT-05": { ru: "Сочетания", uz: "Kombinatsiyalar", en: "Combinations" },
+    "P5-PRO-01": { ru: "Пространство исходов", uz: "Natijalar fazosi", en: "Sample spaces" },
+    "P5-PRO-02": { ru: "Вероятность через подсчёт", uz: "Sanash usullari bilan ehtimollik", en: "Probability by counting" },
+    "P5-PRO-03": { ru: "Сложение вероятностей и дополнение", uz: "Ehtimollarni qo‘shish va to‘ldiruvchi hodisa", en: "Addition rule and complements" },
+    "P5-PRO-04": { ru: "Умножение вероятностей и независимость", uz: "Ehtimollarni ko‘paytirish va mustaqillik", en: "Multiplication rule and independence" },
+    "P5-PRO-05": { ru: "Условная вероятность", uz: "Shartli ehtimollik", en: "Conditional probability" },
+    "P5-PRO-06": { ru: "Деревья вероятностей", uz: "Ehtimollik daraxtlari", en: "Probability trees" },
+    "P5-DRV-01": { ru: "Дискретное распределение вероятностей", uz: "Diskret ehtimollik taqsimoti", en: "Discrete probability distributions" },
+    "P5-DRV-02": { ru: "Математическое ожидание", uz: "Matematik kutilma", en: "Expectation" },
+    "P5-DRV-03": { ru: "Дисперсия и стандартное отклонение", uz: "Dispersiya va standart og‘ish", en: "Variance and standard deviation" },
+    "P5-BIN-01": { ru: "Биномиальная модель", uz: "Binomial model", en: "Binomial model" },
+    "P5-BIN-02": { ru: "Биномиальные вероятности", uz: "Binomial ehtimolliklar", en: "Binomial probabilities" },
+    "P5-BIN-03": { ru: "Среднее и дисперсия биномиального распределения", uz: "Binomial o‘rtacha va dispersiya", en: "Binomial mean and variance" },
+    "P5-GEO-01": { ru: "Геометрическая модель", uz: "Geometrik model", en: "Geometric model" },
+    "P5-GEO-02": { ru: "Геометрические вероятности", uz: "Geometrik ehtimolliklar", en: "Geometric probabilities" },
+    "P5-GEO-03": { ru: "Ожидание геометрического распределения", uz: "Geometrik taqsimotning kutilmasi", en: "Geometric expectation" },
+    "P5-NOR-01": { ru: "Нормальная модель", uz: "Normal model", en: "Normal model" },
+    "P5-NOR-02": { ru: "Стандартизация и z-значение", uz: "Standartlashtirish va z-qiymat", en: "Standardisation and z-values" },
+    "P5-NOR-03": { ru: "Нормальные вероятности", uz: "Normal ehtimolliklar", en: "Normal probabilities" },
+    "P5-NOR-04": { ru: "Квантили нормального распределения", uz: "Normal taqsimot kvantillari", en: "Normal quantiles" },
+    "P5-NOR-05": { ru: "Нахождение μ и σ", uz: "μ va σ ni topish", en: "Finding μ and σ" },
+    "P5-NOR-06": { ru: "Нормальное приближение биномиального распределения", uz: "Binomial taqsimotga normal yaqinlashuv", en: "Normal approximation to the binomial" }
+  });
+
   /* Learner-facing Russian copy is intentionally separate from canonical source text.
      The database keeps the versioned academic wording unchanged; this map only controls presentation. */
   const LEARNER_SKILL_RU = Object.freeze({
@@ -138,6 +224,11 @@
   }
 
   internal.learnerCopy = Object.freeze({
+    skillTitle(skillCode, language = activeLanguage) {
+      const row = LEARNER_SKILL_TITLES[String(skillCode || "")];
+      const chosen = ["ru", "uz", "en"].includes(String(language || "")) ? String(language) : activeLanguage;
+      return row?.[chosen] || row?.en || "";
+    },
     skillRu(skillCode) {
       return LEARNER_SKILL_RU[String(skillCode || "")] || "";
     },
@@ -308,7 +399,10 @@
     const cards = areas.map(area => {
       const skills = Array.isArray(area?.skills) ? area.skills : [];
       const total = Number(area?.skill_count || skills.length || 0), done = Number(area?.coverage_count || 0);
-      const rows = skills.map(skill => `<button class="ep-views-skill" type="button" data-ep-views-skill="${esc(skill.skill_code)}"><span><strong>${esc(c.skill)} ${Number(skill.sequence_no || 0)}</strong><span class="ep-views-skill-meta"> · ${esc(c.checks)}: ${Number(skill.evidence_total || 0)}</span></span><span class="ep-views-badge">${esc(skillStatus(skill.objective_level, skill.correction_case_id))}</span></button>`).join("");
+      const rows = skills.map(skill => {
+        const shortTitle = LEARNER_SKILL_TITLES[String(skill?.skill_code || "")]?.[activeLanguage] || `${c.skill} ${Number(skill.sequence_no || 0)}`;
+        return `<button class="ep-views-skill" type="button" data-ep-views-skill="${esc(skill.skill_code)}"><span><strong>${esc(shortTitle)}</strong><span class="ep-views-skill-meta"> · ${esc(c.skill)} ${Number(skill.sequence_no || 0)} · ${esc(c.checks)}: ${Number(skill.evidence_total || 0)}</span></span><span class="ep-views-badge">${esc(skillStatus(skill.objective_level, skill.correction_case_id))}</span></button>`;
+      }).join("");
       return `<div class="ep-views-card ep-views-area"><div class="ep-views-area-head"><strong>${esc(areaLabel(area.official_syllabus_section))}</strong><span class="ep-views-sub">${done} / ${total}</span></div><div class="ep-views-progress"><span style="width:${total > 0 ? Math.min(100, 100 * done / total) : 0}%"></span></div>${rows}</div>`;
     }).join("");
     const body = `<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.confirmedCount)}</span><strong>${confirmed} / ${denominator}</strong></div><div class="ep-views-stat"><span>${esc(c.coverage)}</span><strong>${pct.toFixed(0)}%</strong></div><div class="ep-views-stat"><span>${esc(c.corrections)}</span><strong>${Number(data?.open_correction_count || 0)}</strong></div></div>${cards}`;
@@ -351,7 +445,7 @@
   function renderSkill(component, data) {
     const root = rootEl(); if (!root) return; const c = copy();
     const state = data?.state || {}, prereqs = Array.isArray(data?.prerequisites) ? data.prerequisites : [], evidence = Array.isArray(data?.evidence_history) ? data.evidence_history : [], corrections = Array.isArray(data?.correction_history) ? data.correction_history : [];
-    const title = `${c.skill} ${Number(data?.sequence_no || 0)}`;
+    const title = LEARNER_SKILL_TITLES[String(data?.skill_code || "")]?.[activeLanguage] || `${c.skill} ${Number(data?.sequence_no || 0)}`;
     const learnerDescription = learnerSkillDescription(data?.skill_code);
     const description = learnerDescription ? `<div class="ep-views-note">${esc(learnerDescription)}</div>` : "";
     const prereqRows = prereqs.length ? prereqs.map((row, index) => `<div class="ep-views-row"><span>${esc(learnerPrerequisiteLabel(row, index))}</span><span class="ep-views-badge">${esc(prerequisiteStatus(row))}</span></div>`).join("") : `<div class="ep-views-note">${esc(c.noneYet)}</div>`;
