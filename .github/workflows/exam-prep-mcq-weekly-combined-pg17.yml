@@ -82,8 +82,11 @@ jobs:
           source=source.replace(decl,decl+"\n review_mcq private.exam_prep_session_items%rowtype;\n review_source_letter text; review_display_index integer; review_response jsonb;",1)
           addition="""
           IF (SELECT count(*) FROM private.exam_prep_session_items si JOIN public.questions q ON q.id=si.question_id AND q.qtype='mcq'
-              WHERE si.session_id=review_session AND si.display_to_source IS NOT NULL)<>3 THEN
-            RAISE EXCEPTION 'Combined integration: review lacks three server-frozen MCQs';
+              WHERE si.session_id=review_session AND si.display_to_source IS NOT NULL)
+             <>
+             (SELECT count(*) FROM private.exam_prep_assessment_items ai JOIN public.questions q ON q.id=ai.question_id AND q.qtype='mcq'
+              WHERE ai.assessment_id=seen_assessment) THEN
+            RAISE EXCEPTION 'Combined integration: review does not freeze every MCQ from the selected seen pack';
           END IF;
           IF EXISTS(SELECT 1 FROM private.exam_prep_session_items si JOIN public.questions q ON q.id=si.question_id AND q.qtype='mcq'
               WHERE si.session_id=review_session AND (array_length(si.display_to_source,1)<>4

@@ -38,8 +38,8 @@ BEGIN
     raise exception 'supplemental-reserve contract: established full-floor readiness changed';
   end if;
 
-  -- The live full migration stack now has two supplemental-learning profiles
-  -- and two AW1-4 supplemental-reserve profiles.
+  -- Full governed surface now includes AW5-8 supplemental learning while the
+  -- AW1-4 reserve profiles remain unchanged.
   if (select count(*) from private.exam_prep_content_release_profiles_v1
       where content_version_id in (4801,4802)
         and release_mode='supplemental_learning'
@@ -48,7 +48,11 @@ BEGIN
          where content_version_id in (4803,4804)
            and release_mode='supplemental_reserve'
            and require_written_understanding=false)<>2
-     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>4
+     or (select count(*) from private.exam_prep_content_release_profiles_v1
+         where content_version_id in (4805,4806)
+           and release_mode='supplemental_learning'
+           and require_written_understanding)<>2
+     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>6
   then
     raise exception 'supplemental-reserve contract: governed release-profile surface drift';
   end if;
@@ -57,6 +61,8 @@ BEGIN
      or coalesce((private.exam_prep_supplemental_learning_floor_v1(4802)->>'ready')::boolean,false) is not true
      or coalesce((private.exam_prep_supplemental_reserve_floor_v1(4803)->>'ready')::boolean,false) is not true
      or coalesce((private.exam_prep_supplemental_reserve_floor_v1(4804)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_learning_floor_v1(4805)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_learning_floor_v1(4806)->>'ready')::boolean,false) is not true
   then
     raise exception 'supplemental-reserve contract: governed supplemental floor is RED';
   end if;
@@ -131,7 +137,7 @@ ROLLBACK;
 
 DO $$
 BEGIN
-  if (select count(*) from private.exam_prep_content_release_profiles_v1)<>4
+  if (select count(*) from private.exam_prep_content_release_profiles_v1)<>6
      or (select count(*) from private.exam_prep_content_versions
          where id in (4803,4804) and status='published')<>2 then
     raise exception 'supplemental-reserve contract: rollback disturbed released governance surface';

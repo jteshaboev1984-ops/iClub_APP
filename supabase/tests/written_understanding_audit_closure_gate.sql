@@ -2,8 +2,8 @@
 
 begin;
 
--- Governance gate for the governed 76-task written-reasoning audit.
--- The target is intentionally NOT 76/76 companion coverage: protected exam items
+-- Governance gate for the governed 90-task written-reasoning audit.
+-- The target is intentionally NOT 90/90 companion coverage: protected exam items
 -- and two learning tasks whose companion would reveal the requested answer remain
 -- no-companion by design.
 do $$
@@ -19,7 +19,9 @@ declare
     'P1CIR02-W01','P1COO06-W01','P1DIF01-W01','P1FP01-Q08','P1TRI02-W01','P1TRI03-W01',
     'P5DAT01-W01','P5DAT06-W01','P5DAT08-W01','P5DRV02-W01','P5GEO03-W01',
     'P1COO03-W01','P1DIF05-W01','P1DIF07-W01','P1FUN05-W01','P1FUN06-W01','P1FUN07-W01','P1FUN08-W01','P1TRI04-W01',
-    'P5BIN01-W01','P5DAT04-W01','P5DAT05-W01','P5GEO01-W01','P5NOR01-W01','P5FP01-Q03','P5FP02-Q03','P5PRO06-W01','P5TB02-Q02'
+    'P5BIN01-W01','P5DAT04-W01','P5DAT05-W01','P5GEO01-W01','P5NOR01-W01','P5FP01-Q03','P5FP02-Q03','P5PRO06-W01','P5TB02-Q02',
+    'P1FUN06-AW06','P1FUN07-AW06','P1FUN08-AW06','P1COO01-AW06','P1COO02-AW06','P1COO03-AW06','P1CIR01-AW06','P1TRI01-AW06',
+    'P5CNT01-AW06','P5CNT02-AW06','P5CNT03-AW06','P5CNT04-AW06','P5PRO01-AW06','P5PRO03-AW06'
   ];
   v_learning_no_companion text[] := array['P1FUN07-W01','P5DAT05-W01'];
   v_protected_no_companion text[] := array[
@@ -33,8 +35,8 @@ declare
   v_unchecked int;
   v_bad int;
 begin
-  if cardinality(v_audit)<>76 then
-    raise exception 'written-audit-closure: audit key list must contain 76 entries';
+  if cardinality(v_audit)<>90 then
+    raise exception 'written-audit-closure: audit key list must contain 90 entries';
   end if;
   if cardinality(v_learning_no_companion)<>2 or cardinality(v_protected_no_companion)<>16 then
     raise exception 'written-audit-closure: exclusion cardinality changed';
@@ -43,8 +45,8 @@ begin
   select count(*)::int into v_total
   from private.exam_prep_written_tasks wt
   where wt.lifecycle_state='published' and wt.task_key=any(v_audit);
-  if v_total<>76 then
-    raise exception 'written-audit-closure: expected 76 published audited tasks, found %',v_total;
+  if v_total<>90 then
+    raise exception 'written-audit-closure: expected 90 published audited tasks, found %',v_total;
   end if;
 
   select count(*)::int,count(distinct c.written_task_id)::int
@@ -52,8 +54,8 @@ begin
   from private.exam_prep_written_understanding_checks c
   join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
   where c.lifecycle_state='published' and wt.lifecycle_state='published' and wt.task_key=any(v_audit);
-  if v_checks<>61 or v_checked<>58 then
-    raise exception 'written-audit-closure: expected 61 checks across 58 audited tasks, got % across %',v_checks,v_checked;
+  if v_checks<>75 or v_checked<>72 then
+    raise exception 'written-audit-closure: expected 75 checks across 72 audited tasks, got % across %',v_checks,v_checked;
   end if;
 
   -- No companion is allowed to drift outside the governed audit without explicit

@@ -119,10 +119,10 @@ begin
   end if;
 
   if (select count(*) from private.exam_prep_written_understanding_checks
-      where lifecycle_state='published')<>61
+      where lifecycle_state='published')<>75
      or (select count(distinct written_task_id)
          from private.exam_prep_written_understanding_checks
-         where lifecycle_state='published')<>58 then
+         where lifecycle_state='published')<>72 then
     raise exception 'aw01_04_alt_release: governed written-understanding cardinality drift';
   end if;
 
@@ -133,7 +133,7 @@ begin
     where lifecycle_state='published'
     group by correct_index
   ) d;
-  if v_dist<>jsonb_build_object('0',15,'1',15,'2',15,'3',16) then
+  if v_dist<>jsonb_build_object('0',19,'1',19,'2',18,'3',19) then
     raise exception 'aw01_04_alt_release: written-understanding option distribution drift=%',v_dist;
   end if;
 
