@@ -1,5 +1,6 @@
--- AW1-4 annual reserve top-up draft contract.
--- Read-only acceptance checks after the full migration stack.
+-- AW1-4 annual reserve top-up source-pack contract.
+-- The historical draft is now governed/published after the full migration stack;
+-- source identity, reserve roles and independent QA remain frozen.
 
 \set ON_ERROR_STOP on
 
@@ -8,11 +9,15 @@ DECLARE
   v_bad int;
   v_a int; v_b int; v_c int; v_d int; v_inputs int;
 BEGIN
-  -- Exactly two invisible draft versions.
+  -- Exactly two governed supplemental-reserve versions.
   IF (SELECT count(*) FROM private.exam_prep_content_versions
       WHERE id IN (4803,4804)
-        AND status='draft')<>2 THEN
-    RAISE EXCEPTION 'annual reserve draft: expected two draft content versions';
+        AND status='published')<>2
+     OR (SELECT count(*) FROM private.exam_prep_content_release_profiles_v1
+         WHERE content_version_id IN (4803,4804)
+           AND release_mode='supplemental_reserve'
+           AND profile_version='aw01_04_annual_reserve_release_v1')<>2 THEN
+    RAISE EXCEPTION 'annual reserve source: expected two published supplemental-reserve versions';
   END IF;
 
   IF (SELECT count(*) FROM private.exam_prep_question_content_meta
@@ -64,11 +69,8 @@ BEGIN
     FROM private.exam_prep_question_content_meta m
     JOIN private.exam_prep_content_versions cv ON cv.id=m.content_version_id
     JOIN expected e ON e.component_code=cv.component_code AND e.skill_code=m.primary_skill_code
-    WHERE (
-      cv.status='published' AND m.lifecycle_state IN ('published','reserve')
-    ) OR (
-      cv.id IN (4803,4804) AND cv.status='draft' AND m.lifecycle_state='draft'
-    )
+    WHERE cv.status='published'
+      AND m.lifecycle_state IN ('published','reserve')
     GROUP BY cv.component_code,m.primary_skill_code
   ), w AS (
     SELECT component_code,primary_skill_code AS skill_code,count(*) AS n
@@ -92,20 +94,20 @@ BEGIN
     RAISE EXCEPTION 'annual reserve draft: prospective annual numeric floor not closed rows=%',v_bad;
   END IF;
 
-  -- Draft content remains fully withheld and unapproved.
+  -- Released reserve content remains fully withheld and QA-approved.
   SELECT count(*) INTO v_bad
   FROM private.exam_prep_question_content_meta m
   JOIN public.questions q ON q.id=m.question_id
   WHERE m.content_version_id IN (4803,4804)
     AND (
-      m.lifecycle_state<>'draft'
+      m.lifecycle_state<>'reserve'
       OR m.exposure_state<>'withheld'
-      OR m.copyright_status<>'pending'
-      OR m.qa_scope_status<>'pending'
-      OR m.qa_math_status<>'pending'
-      OR m.qa_language_status<>'pending'
-      OR m.qa_technical_status<>'pending'
-      OR (m.reserve_role='diagnostic' AND m.diagnostic_rule_status<>'pending')
+      OR m.copyright_status<>'pass'
+      OR m.qa_scope_status<>'pass'
+      OR m.qa_math_status<>'pass'
+      OR m.qa_language_status<>'pass'
+      OR m.qa_technical_status<>'pass'
+      OR (m.reserve_role='diagnostic' AND m.diagnostic_rule_status<>'approved')
       OR (m.reserve_role<>'diagnostic' AND m.diagnostic_rule_status<>'not_applicable')
       OR q.is_active
       OR q.quality_status<>'draft'
@@ -262,7 +264,7 @@ BEGIN
       FROM private.exam_prep_diagnostic_rules r
       WHERE r.content_meta_id=m.id
         AND r.rule_version='aw_reserve_v1'
-        AND r.status='draft'
+        AND r.status='approved'
         AND r.answer_kind='mcq_option'
         AND r.answer_match<>q.correct_answer
         AND nullif(btrim(r.feedback_en),'') IS NOT NULL
@@ -276,10 +278,10 @@ BEGIN
     RAISE EXCEPTION 'annual reserve draft: diagnostic rule coverage failure rows=%',v_bad;
   END IF;
 
-  -- Draft assessments are exact: 4 diagnostic variants, 18 isolated retests
+  -- Published assessments are exact: 4 diagnostic variants, 18 isolated retests
   -- and 2 mixed transfer sets; every item is held out.
   IF (SELECT count(*) FROM private.exam_prep_assessments
-      WHERE id BETWEEN 35301 AND 35324 AND status='draft')<>24
+      WHERE id BETWEEN 35301 AND 35324 AND status='published')<>24
      OR (SELECT count(*) FROM private.exam_prep_assessments
          WHERE id BETWEEN 35301 AND 35324 AND assessment_type='diagnostic')<>4
      OR (SELECT count(*) FROM private.exam_prep_assessments
@@ -342,7 +344,7 @@ BEGIN
       v_a,v_b,v_c,v_d,v_inputs;
   END IF;
 
-  -- No learner or legacy history can reference this draft.
+  -- Clean CI release creates no learner or legacy history.
   IF EXISTS(
     SELECT 1 FROM private.exam_prep_sessions s
     JOIN private.exam_prep_assessments a ON a.id=s.assessment_id
@@ -368,6 +370,6 @@ BEGIN
     RAISE EXCEPTION 'annual reserve draft: unnecessary written task duplicated';
   END IF;
 
-  RAISE NOTICE 'AW1-4 annual reserve top-up draft contract: GREEN (45 machine items; prospective 3D/8 learning-transfer/4R; written already >=2)';
+  RAISE NOTICE 'AW1-4 annual reserve source-pack contract: GREEN (45 withheld machine items; annual 3D/8 learning-transfer/4R; written >=2)';
 END
 $$;
