@@ -157,7 +157,7 @@ BEGIN
    (user_id,assessment_id,component_code,purpose,status,valid_until,reason,
     correction_case_id,academic_credit,plan_id,plan_priority_order)
    VALUES(uid,extra_ass.assessment_id,'P1','learning','issued',now()+interval '1 hour',
-    'Synthetic prior exposure for fallback continuity',cir_case,true,old_plan,1)
+    'Synthetic prior exposure for fallback continuity',cir_case,true,null,null)
    RETURNING id INTO extra_auth;
 
    INSERT INTO private.exam_prep_sessions
