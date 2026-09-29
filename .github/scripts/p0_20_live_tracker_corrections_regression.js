@@ -64,6 +64,34 @@ const path = require('path');
       correction_history: [],
       resources: { book_chapter: 'Complete Pure Mathematics 1, Ch1 Quadratics', book_pages: 'pp. 2–20' }
     };
+    window.__recent = {
+      P1: { results: [{
+        session_id: '00000000-0000-4000-8000-000000002701',
+        component_code: 'P1',
+        session_type: 'learning',
+        machine_total: 6,
+        machine_correct: 6,
+        written_total: 0,
+        finalized_at: '2026-09-07T07:00:00Z'
+      }] },
+      P5: { results: [] }
+    };
+    window.__review = {
+      session_id: '00000000-0000-4000-8000-000000002701',
+      component_code: 'P1',
+      session_type: 'learning',
+      summary: { machine_total: 6, machine_correct: 6, machine_accuracy_pct: 100, written_total: 0, written_completed: 0 },
+      items: Array.from({ length: 6 }, (_, index) => ({
+        item_order: index + 1,
+        item_kind: 'question',
+        qtype: 'mcq',
+        text: `Question ${index + 1}`,
+        options: ['A', 'B', 'C', 'D'],
+        selected_answer: 'A',
+        correct_answer: 'A',
+        is_correct: true
+      }))
+    };
     window.__queue = {
       component_code: 'P1', active_count: 1, signal_count: 1, attention_count: 2, focus_count: 2, deferred_count: 0, retest_due_count: 1,
       focus_cases: [
@@ -96,6 +124,8 @@ const path = require('path');
       if (name === 'get_exam_prep_syllabus_tracker_safe_v1') return { data: window.__tracker[args.p_component_code], error: null };
       if (name === 'get_exam_prep_skill_detail_safe_v1') return { data: window.__detail, error: null };
       if (name === 'get_exam_prep_correction_queue_safe_v1') return { data: window.__queue, error: null };
+      if (name === 'get_exam_prep_recent_results_safe_v1') return { data: window.__recent[args.p_component_code] || { results: [] }, error: null };
+      if (name === 'get_exam_prep_session_review_safe_v1') return { data: window.__review, error: null };
       return { data: null, error: { message: `unexpected rpc ${name}` } };
     }};
   });
@@ -119,10 +149,15 @@ const path = require('path');
   let visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('1 / 45'), 'P1 component home must preserve the 45-skill denominator');
   assert(visible.includes('Quadratics') && visible.includes('Functions'), 'P1 component home must group by learner-facing syllabus areas');
+  assert(visible.includes('Start your first learning step'), 'Foundation must explain the learner next step instead of exposing a generic check-next action');
+  assert(visible.includes('confirmed syllabus coverage will grow from there'), 'Foundation must explain why confirmed coverage is still low after the entry check');
   assert(!visible.includes('P1-QUA-01') && !visible.includes('objective_state_v1'), 'component home must not expose internal codes/engine terminology');
 
   await page.locator('[data-ep-component-home="P1"] .ep-component-area summary').first().click();
   await page.waitForSelector('[data-ep-component-skill="P1-QUA-01"]', { state: 'visible' });
+  let skillButtonText = await page.locator('[data-ep-component-skill="P1-QUA-01"]').textContent();
+  assert(skillButtonText.includes('Completing the square'), 'topic list must show a human skill title instead of only a numbered Skill label');
+  assert(!/^\s*Skill\s+1\b/i.test(skillButtonText), 'topic list must not lead with generic Skill 1');
   await page.click('[data-ep-component-skill="P1-QUA-01"]');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Skill detail'));
   visible = await page.locator('#exam-prep-host-root').textContent();
@@ -155,6 +190,7 @@ const path = require('path');
   });
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Детали навыка'));
   visible = await page.locator('#exam-prep-host-root').textContent();
+  assert(visible.includes('Выделение полного квадрата'), 'Russian skill detail must use a learner-facing skill title');
   assert(visible.includes('форме полного квадрата') && visible.includes('вершину и форму графика'), 'Russian skill detail must use learner-facing presentation copy');
   assert(visible.includes('выражение одной переменной через другие'), 'Russian prerequisite must use learner-facing presentation copy');
   assert(!visible.includes('completed-square form') && !visible.includes('vertex/shape information') && !visible.includes('смена subject'), 'Russian learner UI must not expose mixed internal canonical wording');
@@ -167,14 +203,32 @@ const path = require('path');
   assert(!visible.includes('discriminant') && !visible.includes('parameter conditions'), 'Russian correction queue must not expose internal mixed-language descriptions');
 
   await page.evaluate(async () => {
-    document.documentElement.lang = 'en';
-    window.i18n = { getLang: () => 'en' };
+    document.documentElement.lang = 'uz';
+    window.i18n = { getLang: () => 'uz' };
     await window.iClubExamPrepHostInternal.learnerViews.openTracker('P5');
   });
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('0 / 36'));
   visible = await page.locator('#exam-prep-host-root').textContent();
-  assert(visible.includes('Representation of data'), 'P5 tracker must use the separate five-area syllabus map');
+  assert(visible.includes('Ma’lumotlarni tasvirlash'), 'P5 tracker must use the separate five-area syllabus map in Uzbek');
+  skillButtonText = await page.locator('[data-ep-views-skill="P5-DAT-01"]').textContent();
+  assert(skillButtonText.includes('Ma’lumotlarni tasvirlash usulini tanlash'), 'Uzbek tracker must use the localized learner-facing skill title');
   assert(!visible.includes('P5-DAT-01'), 'P5 tracker must keep internal skill code hidden');
+
+  await page.evaluate(async () => {
+    document.documentElement.lang = 'en';
+    window.i18n = { getLang: () => 'en' };
+    await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'en' });
+  });
+  await page.waitForSelector('[data-ep-live-open-component="P1"]');
+  await page.click('[data-ep-live-open-component="P1"]');
+  await page.waitForSelector('[data-ep-component-last-result]');
+  await page.click('[data-ep-component-last-result]');
+  await page.waitForSelector('[data-ep-result-review]');
+  await page.click('[data-ep-result-review]');
+  await page.click('[data-ep-result-filter="wrong"]');
+  visible = await page.locator('#exam-prep-host-root').textContent();
+  assert(visible.includes('There are no mistakes in this task.'), 'Mistakes-only review must show an explicit empty state for a perfect result');
+  assert(await page.locator('[data-ep-result-filter="all"]').count() === 1, 'perfect-result empty state must keep the route back to all questions');
 
   const calls = await page.evaluate(() => window.__calls);
   const trackerCalls = calls.filter(x => x.name === 'get_exam_prep_syllabus_tracker_safe_v1');
