@@ -160,6 +160,13 @@
     // Russian plain decimals follow the same comma convention already used in RU stems.
     if (locale === "ru" && /^[−-]?\d+\.\d+$/.test(raw)) return raw.replace(".", ",");
 
+    const instantRate = raw.match(/^The instantaneous rate of change of ([A-Za-z]) is (.+) units per second$/i);
+    if (instantRate) {
+      return locale === "ru"
+        ? `\u041c\u0433\u043d\u043e\u0432\u0435\u043d\u043d\u0430\u044f \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f ${instantRate[1]} \u0440\u0430\u0432\u043d\u0430 ${instantRate[2]} \u0435\u0434\u0438\u043d\u0438\u0446\u0430\u043c \u0432 \u0441\u0435\u043a\u0443\u043d\u0434\u0443`
+        : `${instantRate[1]} ning oniy o\u2018zgarish tezligi sekundiga ${instantRate[2]} birlik`;
+    }
+
     const arithmetic = raw.match(/^arithmetic(?: with common difference| with difference) (.+)$/i)
       || raw.match(/^arithmetic,\s*d=(.+)$/i);
     if (arithmetic) {
