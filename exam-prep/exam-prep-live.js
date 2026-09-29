@@ -151,6 +151,50 @@
     try { return JSON.stringify(value); } catch (_) { return String(value); }
   }
 
+  function localizedOptionText(value, language = state.language) {
+    const raw = String(value == null ? "" : value);
+    const locale = ["ru", "uz", "en"].includes(String(language || "")) ? String(language) : "en";
+    if (locale === "en" || !raw) return raw;
+
+    // Presentation only: keep the canonical stored option and selected index unchanged.
+    // Russian plain decimals follow the same comma convention already used in RU stems.
+    if (locale === "ru" && /^[−-]?\d+\.\d+$/.test(raw)) return raw.replace(".", ",");
+
+    const arithmetic = raw.match(/^arithmetic(?: with common difference| with difference) (.+)$/i)
+      || raw.match(/^arithmetic,\s*d=(.+)$/i);
+    if (arithmetic) {
+      return locale === "ru"
+        ? `арифметическая прогрессия, d=${arithmetic[1]}`
+        : `arifmetik progressiya, d=${arithmetic[1]}`;
+    }
+
+    const geometric = raw.match(/^geometric with ratio (.+)$/i)
+      || raw.match(/^geometric,\s*r=(.+)$/i);
+    if (geometric) {
+      return locale === "ru"
+        ? `геометрическая прогрессия, r=${geometric[1]}`
+        : `geometrik progressiya, r=${geometric[1]}`;
+    }
+
+    if (/^neither arithmetic nor geometric$/i.test(raw)) {
+      return locale === "ru"
+        ? "ни арифметическая, ни геометрическая прогрессия"
+        : "arifmetik ham emas, geometrik ham emas";
+    }
+
+    // Keep symbolic mathematics intact and localize only the natural-language connector.
+    if (/[=±√/]/.test(raw) && /\sor\s/i.test(raw)) {
+      return raw.replace(/\s+or\s+/gi, locale === "ru" ? " или " : " yoki ");
+    }
+    return raw;
+  }
+
+  internal.optionPresentation = Object.freeze({
+    optionText(value, language) {
+      return localizedOptionText(value, language);
+    }
+  });
+
   function resultTypeLabel(type) {
     const c = copy();
     return ({
@@ -171,7 +215,7 @@
     if (String(item?.qtype || "").toLowerCase() !== "mcq" || !/^[A-Z]$/i.test(raw) || !Array.isArray(item?.options)) return raw;
     const index = raw.toUpperCase().charCodeAt(0) - 65;
     const option = item.options[index];
-    return option == null ? raw.toUpperCase() : `${raw.toUpperCase()}. ${String(option)}`;
+    return option == null ? raw.toUpperCase() : `${raw.toUpperCase()}. ${localizedOptionText(option)}`;
   }
 
   function reviewItemMarkup(item) {
@@ -877,7 +921,7 @@
       const writtenInfo = timed ? "" : `<aside class="ep-written-info"><strong>${esc(c.writtenInfoTitle)}</strong><span>${esc(c.writtenInfoText)}</span><small>${esc(writtenPolicyText())}</small></aside>`;
       answerControl = `${writtenInfo}<label class="ep-live-field"><span>${esc(c.written)}</span><textarea class="ep-live-textarea" name="ep_live_written_answer"></textarea></label>`;
     } else if (String(item.qtype || "").toLowerCase() === "mcq" && Array.isArray(item.options)) {
-      answerControl = `<div class="ep-live-options">${item.options.map((option, index) => `<label class="ep-live-option"><input type="radio" name="ep_live_answer" value="${index}"><span>${esc(option)}</span></label>`).join("")}</div>`;
+      answerControl = `<div class="ep-live-options">${item.options.map((option, index) => `<label class="ep-live-option"><input type="radio" name="ep_live_answer" value="${index}"><span>${esc(localizedOptionText(option))}</span></label>`).join("")}</div>`;
     } else answerControl = `<input class="ep-live-input" name="ep_live_text_answer" autocomplete="off" aria-label="${esc(c.submit)}">`;
     const timer = timed ? `<span class="ep-live-timer" data-ep-live-timer></span>` : "";
     const exit = timed ? `<button class="ep-live-btn secondary" type="button" data-ep-live-end>${esc(c.endAttempt)}</button>` : `<button class="ep-live-btn secondary" type="button" data-ep-live-exit>${esc(c.back)}</button>`;
