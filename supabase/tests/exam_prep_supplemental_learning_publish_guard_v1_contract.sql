@@ -36,7 +36,7 @@ begin
   end if;
 
   -- Governed profile surface: two AW1-4 learning profiles, two AW1-4 reserve
-  -- profiles, and two AW5-8 learning profiles.
+  -- profiles, two AW5-8 learning profiles, and two AW5-8 reserve profiles.
   if (select count(*) from private.exam_prep_content_release_profiles_v1
       where content_version_id in (4801,4802)
         and release_mode='supplemental_learning'
@@ -49,7 +49,11 @@ begin
          where content_version_id in (4805,4806)
            and release_mode='supplemental_learning'
            and require_written_understanding)<>2
-     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>6
+     or (select count(*) from private.exam_prep_content_release_profiles_v1
+         where content_version_id in (4807,4808)
+           and release_mode='supplemental_reserve'
+           and require_written_understanding=false)<>2
+     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>8
   then
     raise exception 'supplemental-learning contract: governed release-profile surface drift';
   end if;
