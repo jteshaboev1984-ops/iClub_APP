@@ -10,10 +10,11 @@ END$$;
 BEGIN;
 DO $matrix$
 DECLARE
- uid uuid:=gen_random_uuid(); prog bigint; ass record;
+ uid uuid:=gen_random_uuid(); prog bigint; ass record; extra_ass record;
  old_plan uuid; current_plan uuid; prior_plan uuid; history_plan uuid;
  cir_case uuid; coo_case uuid; cir_goal uuid; coo_goal uuid;
- original_auth uuid; original_session uuid; review_session uuid;
+ original_auth uuid; original_session uuid; review_session uuid; extra_auth uuid; extra_session uuid;
+ seen_assessment bigint;
  version_no integer; v_result jsonb; v_count integer;
  old_saved_fingerprint text; old_goal_fingerprint text;
 BEGIN
@@ -124,6 +125,61 @@ BEGIN
  FROM private.exam_prep_responses r WHERE r.session_id=original_session;
  SELECT md5(string_agg(to_jsonb(g)::text,'|' ORDER BY g.priority_order)) INTO old_goal_fingerprint
  FROM private.exam_prep_weekly_goal_snapshots g WHERE g.user_id=uid;
+
+ -- If additional governed learning packs exist, mark them as previously seen
+ -- so this fixture continues to test the same-pack noncredit fallback rather
+ -- than the fresh-pack route. This is synthetic and fully rolled back.
+ FOR extra_ass IN
+   SELECT a.id assessment_id,a.content_version_id,a.assessment_version
+   FROM private.exam_prep_assessments a
+   JOIN private.exam_prep_content_versions cv ON cv.id=a.content_version_id
+   WHERE a.component_code='P1' AND a.assessment_type='learning' AND a.status='published'
+     AND cv.program_version_id=prog AND cv.status='published'
+     AND a.id<>ass.assessment_id
+     AND (SELECT count(*) FROM private.exam_prep_assessment_items ai
+          WHERE ai.assessment_id=a.id AND ai.question_id IS NOT NULL
+            AND ai.primary_skill_code='P1-CIR-01' AND ai.reserve_role='learning'
+            AND ai.is_holdout IS FALSE) BETWEEN 3 AND 6
+     AND (SELECT count(*) FROM private.exam_prep_assessment_items ai
+          WHERE ai.assessment_id=a.id AND ai.written_task_id IS NOT NULL
+            AND ai.primary_skill_code='P1-CIR-01' AND ai.reserve_role='written'
+            AND ai.is_holdout IS FALSE)=1
+     AND NOT EXISTS(
+       SELECT 1 FROM private.exam_prep_assessment_items ai
+       WHERE ai.assessment_id=a.id
+         AND (ai.primary_skill_code IS DISTINCT FROM 'P1-CIR-01'
+              OR ai.is_holdout IS TRUE
+              OR ai.reserve_role NOT IN ('learning','written'))
+     )
+   ORDER BY a.id
+ LOOP
+   INSERT INTO private.exam_prep_session_authorizations
+   (user_id,assessment_id,component_code,purpose,status,valid_until,reason,
+    correction_case_id,academic_credit,plan_id,plan_priority_order)
+   VALUES(uid,extra_ass.assessment_id,'P1','learning','issued',now()+interval '1 hour',
+    'Synthetic prior exposure for fallback continuity',cir_case,true,old_plan,1)
+   RETURNING id INTO extra_auth;
+
+   INSERT INTO private.exam_prep_sessions
+   (authorization_id,user_id,program_version_id,content_version_id,assessment_id,
+    assessment_version,component_code,session_type,status,client_idempotency_key,total_items,
+    finalized_at,finalize_idempotency_key)
+   VALUES(extra_auth,uid,prog,extra_ass.content_version_id,extra_ass.assessment_id,
+    extra_ass.assessment_version,'P1','learning','finalized',
+    'frozen-prior-exposure-'||extra_ass.assessment_id::text,
+    (SELECT count(*) FROM private.exam_prep_assessment_items ai WHERE ai.assessment_id=extra_ass.assessment_id),
+    clock_timestamp(),'frozen-prior-exposure-finalized-'||extra_ass.assessment_id::text)
+   RETURNING id INTO extra_session;
+
+   UPDATE private.exam_prep_session_authorizations
+   SET status='consumed',consumed_at=now(),consumed_session_id=extra_session
+   WHERE id=extra_auth;
+ END LOOP;
+
+ seen_assessment:=private.exam_prep_select_seen_learning_assessment_v1(uid,'P1','P1-CIR-01');
+ IF seen_assessment IS NULL THEN
+   RAISE EXCEPTION 'synthetic fallback has no previously seen learning assessment';
+ END IF;
  -- Eleven successive plan versions; initial goal order remains 1,2. Only
  -- version 11 swaps action priorities to 2,1, exactly as seen in live data.
  prior_plan:=old_plan;
@@ -164,9 +220,9 @@ BEGIN
  AND (a.academic_credit IS TRUE OR a.plan_id IS NOT NULL OR a.credit_context<>'learning_review'))
  OR (SELECT array_agg(question_id ORDER BY item_order) FROM private.exam_prep_session_items
  WHERE session_id=review_session AND question_id IS NOT NULL) IS DISTINCT FROM
- (SELECT array_agg(question_id ORDER BY item_order) FROM private.exam_prep_session_items
- WHERE session_id=original_session AND question_id IS NOT NULL)
- THEN RAISE EXCEPTION 'review reused wrong questions or granted independent credit'; END IF;
+ (SELECT array_agg(question_id ORDER BY item_order) FROM private.exam_prep_assessment_items
+ WHERE assessment_id=seen_assessment AND question_id IS NOT NULL)
+ THEN RAISE EXCEPTION 'review reused wrong previously-seen pack or granted independent credit'; END IF;
  v_result:=public.start_exam_prep_learning_review_safe_v1('P1',cir_goal,current_plan,
   'frozen-lineage-review-unique-0002');
  IF v_result->>'status'<>'resume_existing_session_first' OR
@@ -210,7 +266,7 @@ BEGIN
  FROM private.exam_prep_weekly_goal_snapshots g WHERE g.user_id=uid)
  IS DISTINCT FROM old_goal_fingerprint
  THEN RAISE EXCEPTION 'original frozen goals/responses modified'; END IF;
- RAISE NOTICE 'GREEN: 11-version reorder, exact original questions, noncredit, saved written, duplicate start, broken lineage, ambiguity, component and frozen history';
+ RAISE NOTICE 'GREEN: 11-version reorder, fresh packs exhausted, exact previously-seen pack review, noncredit, saved written, duplicate start, broken lineage, ambiguity, component and frozen history';
 END;$matrix$;
 ROLLBACK;
 DO $$BEGIN
