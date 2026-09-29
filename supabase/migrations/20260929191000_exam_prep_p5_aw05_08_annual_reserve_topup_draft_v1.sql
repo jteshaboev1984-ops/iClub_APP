@@ -145,7 +145,7 @@ from keys k join public.questions q
 on conflict(content_version_id,content_key) do nothing;
 
 do $postcheck$
-declare v_bad int; v_a int; v_b int; v_c int; v_d int;
+declare v_bad int; v_a int; v_b int; v_c int; v_d int; v_dup text;
 begin
  if (select status from private.exam_prep_content_versions where id=4808)<>'draft'
     or (select count(*) from private.exam_prep_question_content_meta where content_version_id=4808)<>30
@@ -175,14 +175,15 @@ begin
    raise exception 'aw05_08_annual_reserve_p5_draft diagnostic answer balance A=% B=% C=% D=%',v_a,v_b,v_c,v_d;
  end if;
 
- if exists(
-   select 1 from private.exam_prep_question_content_meta m join public.questions q on q.id=m.question_id
-   join private.exam_prep_question_content_meta oldm on oldm.primary_skill_code=m.primary_skill_code and oldm.content_version_id<>4808
-   join private.exam_prep_content_versions oldcv on oldcv.id=oldm.content_version_id and oldcv.status='published'
-   join public.questions oldq on oldq.id=oldm.question_id
-   where m.content_version_id=4808
-     and lower(regexp_replace(q.question_text_en,'\s+',' ','g'))=lower(regexp_replace(oldq.question_text_en,'\s+',' ','g'))
- ) then raise exception 'aw05_08_annual_reserve_p5_draft exact published stem duplicate'; end if;
+ select string_agg(m.content_key||'='||oldcv.content_version||':'||oldm.content_key, ', ' order by m.content_key)
+ into v_dup
+ from private.exam_prep_question_content_meta m join public.questions q on q.id=m.question_id
+ join private.exam_prep_question_content_meta oldm on oldm.primary_skill_code=m.primary_skill_code and oldm.content_version_id<>4808
+ join private.exam_prep_content_versions oldcv on oldcv.id=oldm.content_version_id and oldcv.status='published'
+ join public.questions oldq on oldq.id=oldm.question_id
+ where m.content_version_id=4808
+   and lower(regexp_replace(q.question_text_en,'\s+',' ','g'))=lower(regexp_replace(oldq.question_text_en,'\s+',' ','g'));
+ if v_dup is not null then raise exception 'aw05_08_annual_reserve_p5_draft exact published stem duplicate: %',v_dup; end if;
 
  if exists(select 1 from private.exam_prep_sessions s join private.exam_prep_assessments a on a.id=s.assessment_id where a.content_version_id=4808)
     or exists(select 1 from public.practice_answers pa join private.exam_prep_question_content_meta m on m.question_id=pa.question_id where m.content_version_id=4808)
