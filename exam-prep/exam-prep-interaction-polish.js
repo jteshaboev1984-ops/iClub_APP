@@ -382,6 +382,11 @@
     lastSessionType = String(event?.detail?.session?.session_type || lastSessionType || "");
   }
 
+  function onSessionEnded() {
+    pendingVisual = null;
+    pendingQuestionLabel = "";
+  }
+
   function reconcile() {
     if (applyPendingVisual()) {
       compactLoading();
@@ -433,6 +438,7 @@
     if (observer) return;
     document.addEventListener("click", onCaptureClick, true);
     window.addEventListener("iclub:exam-prep-session", onSession);
+    window.addEventListener("iclub:exam-prep-session-ended", onSessionEnded);
     observer = new MutationObserver(onMutations);
     observer.observe(root, { childList: true, subtree: true, characterData: true });
     scheduleReconcile();
