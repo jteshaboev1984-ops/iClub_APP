@@ -117,6 +117,21 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
   assert(inequalityCopy.uzOr.includes('yoki'),'UZ inequality connector mismatch');
   assert(inequalityCopy.ruOnly.startsWith('\u0442\u043e\u043b\u044c\u043a\u043e '),'RU inequality-only wording mismatch');
   assert(inequalityCopy.uzOnly.startsWith('faqat '),'UZ inequality-only wording mismatch');
+  const rateCopy = await page.evaluate(() => {
+    const text = window.iClubExamPrepHostInternal?.optionPresentation?.optionText;
+    return {
+      ruInstant: text('The instantaneous rate of change of y is 7 units per second','ru'),
+      uzInstant: text('The instantaneous rate of change of y is 7 units per second','uz'),
+      ruAlways: text('q equals 9 at all times','ru'),
+      uzAverage: text('The average rate from 1 to 4 is necessarily 3','uz'),
+      ruPerUnit: text('t changes at 6 seconds per unit','ru')
+    };
+  });
+  assert(rateCopy.ruInstant.includes('\u041c\u0433\u043d\u043e\u0432\u0435\u043d\u043d\u0430\u044f'),'RU instantaneous-rate wording mismatch');
+  assert(rateCopy.uzInstant.includes('oniy'),'UZ instantaneous-rate wording mismatch');
+  assert(rateCopy.ruAlways.includes('\u0432\u0441\u0435\u0433\u0434\u0430'),'RU always-equal wording mismatch');
+  assert(rateCopy.uzAverage.includes('o\u2018rtacha'),'UZ average-rate wording mismatch');
+  assert(rateCopy.ruPerUnit.includes('\u0441\u0435\u043a\u0443\u043d\u0434'),'RU seconds-per-unit wording mismatch');
 
   let r=await page.evaluate(async()=>{const synced=await window.iClubExamPrep.syncSubjectHub({subjectKey:'mathematics',language:'en'});const opened=await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});return{synced,opened,profile:!!document.querySelector('[data-ep-live-profile-form]'),version:window.iClubExamPrep.liveFlowVersion};});
   assert(r.synced&&r.opened&&r.profile,'profile screen must open for controlled-beta Core');
