@@ -1,4 +1,4 @@
--- DISPOSABLE PostgreSQL ONLY. Stage 0 -> genuine first balanced plan -> stable frozen goals.
+-- DISPOSABLE PostgreSQL ONLY. Stage 0 -> genuine first plan -> stable frozen goals.
 -- Evidence is synthetic STRUCTURAL test data, not actual marked learner work.
 -- Do not run against production. Entire learner scenario rolls back.
 \set ON_ERROR_STOP on
@@ -34,7 +34,7 @@ BEGIN
  PERFORM set_config('request.jwt.claim.sub',v_uid::text,true);
  PERFORM set_config('request.jwt.claim.role','authenticated',true);
  BEGIN
-   PERFORM public.ensure_exam_prep_balanced_weekly_plan_safe_v1('P1');
+   PERFORM public.ensure_exam_prep_stable_weekly_plan_safe_v1('P1');
  EXCEPTION WHEN OTHERS THEN
    GET STACKED DIAGNOSTICS v_error=MESSAGE_TEXT;
    IF v_error<>'exam_prep_stage0_required_before_weekly_plan' THEN RAISE; END IF;
@@ -113,7 +113,7 @@ BEGIN
  finalize_idempotency_key='ci-first-diagnostic-final-001' WHERE id=v_session;
 
  -- Genuine placement rebuild and plan generator; no fake plan insert.
- v_plan:=public.ensure_exam_prep_balanced_weekly_plan_safe_v1('P1');
+ v_plan:=public.ensure_exam_prep_stable_weekly_plan_safe_v1('P1');
  IF v_plan->>'status'<>'created' OR v_plan->>'contract_version'<>'stable_weekly_plan_v1'
  OR v_plan->>'plan_id' IS NULL OR (v_plan->>'active_week_no')::int<>1
  OR jsonb_array_length(v_plan->'items')<1 THEN
@@ -124,7 +124,7 @@ BEGIN
  JOIN private.exam_prep_question_content_meta m ON m.id=d.content_meta_id
  WHERE m.reserve_role='diagnostic' AND m.lifecycle_state='reserve' AND m.exposure_state='withheld';
  IF v_count<>v_reserved THEN RAISE EXCEPTION 'Planner altered diagnostic-reserved metadata'; END IF;
- v_second:=public.ensure_exam_prep_balanced_weekly_plan_safe_v1('P1');
+ v_second:=public.ensure_exam_prep_stable_weekly_plan_safe_v1('P1');
  IF v_second->>'status'<>'existing' OR (v_second->>'plan_id')::uuid<>v_plan_id THEN
    RAISE EXCEPTION 'Same-week reopen changed first plan: %',v_second;
  END IF;
@@ -142,7 +142,7 @@ BEGIN
    WHERE user_id=v_uid AND component_code='P1';
 
  -- Reopening the one existing exam plan must not regenerate weekly tasks or goals.
- v_second:=public.ensure_exam_prep_balanced_weekly_plan_safe_v1('P1');
+ v_second:=public.ensure_exam_prep_stable_weekly_plan_safe_v1('P1');
  v_goals:=public.ensure_exam_prep_weekly_goals_safe_v1('P1');
  SELECT jsonb_agg(jsonb_build_array(id,source_plan_id,priority_order,action_code) ORDER BY priority_order)
    INTO v_goals_after FROM private.exam_prep_weekly_goal_snapshots
