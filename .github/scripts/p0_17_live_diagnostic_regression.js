@@ -78,6 +78,22 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
   await page.addScriptTag({path:path.resolve('exam-prep/exam-prep-live.js')});
   const assert=(x,m)=>{if(!x) throw new Error(m);};
 
+  const optionCopy = await page.evaluate(() => {
+    const text = window.iClubExamPrepHostInternal?.optionPresentation?.optionText;
+    return {
+      ruDecimal: text('0.125','ru'),
+      uzDecimal: text('0.125','uz'),
+      ruRoots: text('x = 2 or x = 5/2','ru'),
+      uzRoots: text('x = 2 or x = 5/2','uz'),
+      enRoots: text('x = 2 or x = 5/2','en')
+    };
+  });
+  assert(optionCopy.ruDecimal==='0,125','RU decimal display mismatch');
+  assert(optionCopy.uzDecimal==='0.125','UZ decimal display must remain canonical');
+  assert(optionCopy.ruRoots.includes('\u0438\u043b\u0438'),'RU connector was not localized');
+  assert(optionCopy.uzRoots.includes('yoki'),'UZ connector was not localized');
+  assert(optionCopy.enRoots==='x = 2 or x = 5/2','EN connector must remain canonical');
+
   let r=await page.evaluate(async()=>{const synced=await window.iClubExamPrep.syncSubjectHub({subjectKey:'mathematics',language:'en'});const opened=await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});return{synced,opened,profile:!!document.querySelector('[data-ep-live-profile-form]'),version:window.iClubExamPrep.liveFlowVersion};});
   assert(r.synced&&r.opened&&r.profile,'profile screen must open for controlled-beta Core');
   assert(r.version==='p260results1','live flow version mismatch');
