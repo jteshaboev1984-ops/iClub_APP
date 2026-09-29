@@ -723,6 +723,13 @@
   flex-wrap: wrap;
 }
 
+#exam-prep-host-root .ep-placement-top > .ep-placement-btn {
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
 #exam-prep-host-root .ep-placement-btn {
   border: 1px solid rgba(127,127,127,.28);
   border-radius: 10px;
