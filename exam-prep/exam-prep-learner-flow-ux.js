@@ -787,6 +787,14 @@
     await sleep(120);
     await waitFor(".ep-live-grid, .ep-live-error", 120, 50);
     if (token !== completionToken) return;
+    const refreshed = typeof internal.api?.diagnosticProgress === "function"
+      ? await internal.api.diagnosticProgress(component).catch(() => null)
+      : null;
+    if (token !== completionToken) return;
+    if (!refreshed?.ok) {
+      operation = null;
+      return;
+    }
     if (typeof internal.overviewPlacementViews?.openPlacement === "function") {
       await internal.overviewPlacementViews.openPlacement(component);
     } else {

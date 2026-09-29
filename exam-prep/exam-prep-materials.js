@@ -299,7 +299,7 @@
   if (!document.querySelector('script[data-exam-prep-learner-flow-ux]')) {
     const script = document.createElement("script");
     script.dataset.examPrepLearnerFlowUx = "true";
-    script.src = `${base}exam-prep-learner-flow-ux.js?v=flowux6`;
+    script.src = `${base}exam-prep-learner-flow-ux.js?v=flowux7`;
     document.head.appendChild(script);
   }
 
@@ -314,7 +314,7 @@
   if (!document.querySelector('script[data-exam-prep-interaction-polish]')) {
     const script = document.createElement("script");
     script.dataset.examPrepInteractionPolish = "true";
-    script.src = `${base}exam-prep-interaction-polish.js?v=polish5`;
+    script.src = `${base}exam-prep-interaction-polish.js?v=polish6`;
     document.head.appendChild(script);
   }
 })();
