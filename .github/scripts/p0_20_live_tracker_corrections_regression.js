@@ -157,7 +157,7 @@ const path = require('path');
   await page.waitForSelector('[data-ep-component-skill="P1-QUA-01"]', { state: 'visible' });
 
   let skillButtonText = await page.locator('[data-ep-component-skill="P1-QUA-01"]').textContent();
-  assert(skillButtonText.includes('Completing the square'), 'topic list must show a human skill title instead of only a numbered Skill label');
+  assert(skillButtonText.includes('Quadratics · 1'), 'English topic list must use the localized syllabus area when an approved exact skill translation is unavailable');
   assert(!/^\s*Skill\s+1\b/i.test(skillButtonText), 'topic list must not lead with generic Skill 1');
   await page.click('[data-ep-component-skill="P1-QUA-01"]');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Skill detail'));
@@ -191,8 +191,7 @@ const path = require('path');
   });
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Детали навыка'));
   visible = await page.locator('#exam-prep-host-root').textContent();
-  assert(visible.includes('Выделение полного квадрата'), 'Russian skill detail must use a learner-facing skill title');
-  assert(visible.includes('форме полного квадрата') && visible.includes('вершину и форму графика'), 'Russian skill detail must use learner-facing presentation copy');
+  assert(visible.includes('форме полного квадрата') && visible.includes('вершину и форму графика'), 'Russian skill detail must use the established source-grounded learner copy');
   assert(visible.includes('выражение одной переменной через другие'), 'Russian prerequisite must use learner-facing presentation copy');
   assert(!visible.includes('completed-square form') && !visible.includes('vertex/shape information') && !visible.includes('смена subject'), 'Russian learner UI must not expose mixed internal canonical wording');
 
@@ -212,7 +211,8 @@ const path = require('path');
   visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('Ma’lumotlarni tasvirlash'), 'P5 tracker must use the separate five-area syllabus map in Uzbek');
   skillButtonText = await page.locator('[data-ep-views-skill="P5-DAT-01"]').textContent();
-  assert(skillButtonText.includes('Ma’lumotlarni tasvirlash usulini tanlash'), 'Uzbek tracker must use the localized learner-facing skill title');
+  assert(skillButtonText.includes('Ma’lumotlarni tasvirlash · 1'), 'Uzbek tracker must use the localized syllabus area when an approved exact skill translation is unavailable');
+  assert(!/^\s*Ko‘nikma\s+1\b/i.test(skillButtonText), 'Uzbek tracker must not lead with a generic numbered skill label');
   assert(!visible.includes('P5-DAT-01'), 'P5 tracker must keep internal skill code hidden');
 
   await page.evaluate(async () => {
