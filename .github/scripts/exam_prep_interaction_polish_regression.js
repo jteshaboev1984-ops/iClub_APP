@@ -48,6 +48,29 @@ const path = require('path');
   assert(state.opacity === '1', `question surface must not dim while saving; got opacity ${state.opacity}`);
   assert(state.animation === 'none', `question surface must not animate while saving; got ${state.animation}`);
 
+  // A finalized last answer must retire its frozen "Saving answer" snapshot.
+  // Otherwise a later route such as Materials can be overwritten by that stale clone.
+  await page.evaluate(() => {
+    const root = document.querySelector('#exam-prep-host-root');
+    root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card"><div class="ep-live-head"><strong>Вопрос 3 / 3</strong></div><div class="ep-live-qtext">Последний вопрос</div><div class="ep-live-actions"><button class="ep-live-btn" data-ep-live-submit>Отправить ответ</button></div></div></section>`;
+    root.querySelector('[data-ep-live-submit]').addEventListener('click', () => {
+      root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card" role="status" aria-live="polite">Загрузка…</div></section>`;
+    });
+  });
+  await page.click('[data-ep-live-submit]');
+  await page.waitForSelector('.ep-flow-pending-visual');
+  await page.evaluate(() => {
+    window.dispatchEvent(new CustomEvent('iclub:exam-prep-session-ended', { detail: { sessionId: 'last-question-session' } }));
+    document.querySelector('#exam-prep-host-root').innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card" role="status" aria-live="polite">Загрузка материалов…</div></section>`;
+  });
+  await page.waitForTimeout(60);
+  state = await page.evaluate(() => ({
+    stalePending: Boolean(document.querySelector('.ep-flow-pending-visual')),
+    text: document.querySelector('#exam-prep-host-root')?.textContent || ''
+  }));
+  assert(state.stalePending === false, 'finalized session must clear the stale answer snapshot before the next route');
+  assert(!state.text.includes('Сохраняем ответ'), 'a later route must never be replaced by the finalized last-question saving state');
+
   await page.evaluate(() => {
     const session = { session_id: 's1', session_type: 'diagnostic' };
     window.dispatchEvent(new CustomEvent('iclub:exam-prep-session', { detail: { session } }));
