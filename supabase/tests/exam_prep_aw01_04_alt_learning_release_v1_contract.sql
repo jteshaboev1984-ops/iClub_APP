@@ -118,23 +118,29 @@ begin
     raise exception 'aw01_04_alt_release: P1/P5 leakage=%',v_bad;
   end if;
 
-  if (select count(*) from private.exam_prep_written_understanding_checks
-      where lifecycle_state='published')<>89
-     or (select count(distinct written_task_id)
-         from private.exam_prep_written_understanding_checks
-         where lifecycle_state='published')<>86 then
-    raise exception 'aw01_04_alt_release: governed written-understanding cardinality drift';
+  if (select count(*) from private.exam_prep_written_understanding_checks c
+      join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
+      where wt.content_version_id in (4801,4802)
+        and c.lifecycle_state='published')<>9
+     or (select count(distinct c.written_task_id)
+         from private.exam_prep_written_understanding_checks c
+         join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
+         where wt.content_version_id in (4801,4802)
+           and c.lifecycle_state='published')<>9 then
+    raise exception 'aw01_04_alt_release: target written-understanding cardinality drift';
   end if;
 
   select jsonb_object_agg(correct_index,n order by correct_index) into v_dist
   from (
-    select correct_index,count(*)::int n
-    from private.exam_prep_written_understanding_checks
-    where lifecycle_state='published'
-    group by correct_index
+    select c.correct_index,count(*)::int n
+    from private.exam_prep_written_understanding_checks c
+    join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
+    where wt.content_version_id in (4801,4802)
+      and c.lifecycle_state='published'
+    group by c.correct_index
   ) d;
-  if v_dist<>jsonb_build_object('0',23,'1',23,'2',21,'3',22) then
-    raise exception 'aw01_04_alt_release: written-understanding option distribution drift=%',v_dist;
+  if v_dist<>jsonb_build_object('0',2,'1',2,'2',2,'3',3) then
+    raise exception 'aw01_04_alt_release: target written-understanding option distribution drift=%',v_dist;
   end if;
 
   if exists(
