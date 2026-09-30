@@ -236,7 +236,7 @@ begin
   ) or not exists(
     select 1 from private.exam_prep_written_tasks
     where id=15663 and content_version_id=4818
-      and (rubric_json->'criteria'->5->>'rule') like '%496 and 504%'
+      and (rubric_json->'criteria'->4->>'rule') like '%496 and 504%'
   ) then
     raise exception 'aw17_20 independent QA: written arithmetic/scope pin missing';
   end if;
