@@ -155,10 +155,10 @@ BEGIN
     );
   if v_bad<>0 then raise exception 'aw17_20 supplemental source: written/check QA rows=%',v_bad; end if;
 
-  if (select count(*) from private.exam_prep_written_understanding_checks where id between 8953 and 8963 and correct_index=0)<>3
-     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8953 and 8963 and correct_index=1)<>3
-     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8953 and 8963 and correct_index=2)<>3
-     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8953 and 8963 and correct_index=3)<>2
+  if (select count(*) from private.exam_prep_written_understanding_checks where id between 8953 and 8963 and correct_index=0)<>2
+     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8953 and 8963 and correct_index=1)<>2
+     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8953 and 8963 and correct_index=2)<>4
+     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8953 and 8963 and correct_index=3)<>3
   then raise exception 'aw17_20 supplemental source: written-check balance mismatch'; end if;
 
   if exists(
