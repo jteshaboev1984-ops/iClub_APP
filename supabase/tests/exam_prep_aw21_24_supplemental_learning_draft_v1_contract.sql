@@ -1,4 +1,5 @@
 -- AW21-24 supplemental learning draft v1 contract.
+-- Semantic QA note: P1INT01-A01 option C is the verified antiderivative 2x³−2x²+5x+C.
 \set ON_ERROR_STOP on
 
 DO $$
