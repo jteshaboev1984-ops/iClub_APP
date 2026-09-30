@@ -124,8 +124,8 @@ BEGIN
   -- Four delayed retest reserves per target skill now exist, all isolated one-item
   -- published assessments with withheld governed content.
   with expected(skill_code) as (values
-    ('P1-FUN-06'),('P1-FUN-07'),('P1-FUN-08'),('P1-COO-01'),('P1-COO-02'),('P1-COO-03'),('P1-CIR-01'),('P1-TRI-01'),
-    ('P5-CNT-01'),('P5-CNT-02'),('P5-CNT-03'),('P5-CNT-04'),('P5-PRO-01'),('P5-PRO-03')
+    ('P1-QUA-04'),('P1-QUA-05'),('P1-QUA-06'),('P1-FUN-03'),('P1-FUN-04'),('P1-FUN-05'),('P1-COO-04'),('P1-CIR-02'),
+    ('P5-DAT-03'),('P5-DAT-05'),('P5-DAT-07'),('P5-CNT-05'),('P5-PRO-02'),('P5-PRO-04')
   ), got as (
     select ai.primary_skill_code skill_code,count(*) n
     from private.exam_prep_assessments a
