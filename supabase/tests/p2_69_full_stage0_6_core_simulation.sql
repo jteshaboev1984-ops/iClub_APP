@@ -316,13 +316,13 @@ as $$
 declare
   v_skill record;
   v_l2_ready boolean;
+  v_attempt int;
 begin
   -- Diagnostic rotation can legitimately leave written evidence on a skill
-  -- without satisfying its full L2 contract (for example after one diagnostic
-  -- miss). Drive this fixture from the derived objective state, not from the
-  -- mere presence of a written response.
-  perform private.rebuild_exam_prep_state_v1(p_user_id,p_component);
-
+  -- without satisfying its full L2 contract (for example one diagnostic miss
+  -- plus one fully correct learning pack can still be only 75% objective
+  -- accuracy). Drive this fixture from derived objective state and add only as
+  -- many repeatable governed learning attempts as are needed to reach L2.
   for v_skill in
     select n.skill_code,n.sequence_no
     from private.exam_prep_syllabus_nodes n
@@ -330,22 +330,31 @@ begin
     order by n.sequence_no,n.skill_code
     limit p_target
   loop
-    select coalesce(st.objective_level>=2,false)
-      into v_l2_ready
-    from private.exam_prep_skill_states st
-    where st.user_id=p_user_id
-      and st.program_version_id=p_program
-      and st.component_code=p_component
-      and st.skill_code=v_skill.skill_code
-      and st.engine_version='objective_state_v1';
+    v_attempt:=0;
+    loop
+      perform private.rebuild_exam_prep_state_v1(p_user_id,p_component);
 
-    if coalesce(v_l2_ready,false) is not true then
+      select coalesce(st.objective_level>=2,false)
+        into v_l2_ready
+      from private.exam_prep_skill_states st
+      where st.user_id=p_user_id
+        and st.program_version_id=p_program
+        and st.component_code=p_component
+        and st.skill_code=v_skill.skill_code
+        and st.engine_version='objective_state_v1';
+
+      exit when coalesce(v_l2_ready,false);
+
+      v_attempt:=v_attempt+1;
+      if v_attempt>3 then
+        raise exception 'P2-69 could not reach L2 with governed learning skill=% component=%',v_skill.skill_code,p_component;
+      end if;
+
       perform pg_temp.p269_complete_learning_skill_v1(
         p_user_id,p_component,v_skill.skill_code,
-        lower(p_component)||'-'||lpad(v_skill.sequence_no::text,3,'0')
+        lower(p_component)||'-'||lpad(v_skill.sequence_no::text,3,'0')||'-try-'||v_attempt::text
       );
-      perform private.rebuild_exam_prep_state_v1(p_user_id,p_component);
-    end if;
+    end loop;
   end loop;
 end;
 $$;
