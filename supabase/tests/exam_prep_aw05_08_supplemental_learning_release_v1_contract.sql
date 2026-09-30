@@ -51,10 +51,10 @@ BEGIN
   end if;
 
   if (select count(*) from private.exam_prep_written_understanding_checks
-      where lifecycle_state='published')<>75
+      where lifecycle_state='published')<>89
      or (select count(distinct written_task_id)
          from private.exam_prep_written_understanding_checks
-         where lifecycle_state='published')<>72 then
+         where lifecycle_state='published')<>86 then
     raise exception 'aw05_08 learning release: written-understanding surface mismatch';
   end if;
 
