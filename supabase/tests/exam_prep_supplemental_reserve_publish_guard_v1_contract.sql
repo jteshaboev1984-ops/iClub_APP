@@ -39,7 +39,7 @@ BEGIN
   end if;
 
   -- Full governed surface includes AW1-4 and AW5-8 governed learning/reserve
-  -- profiles plus AW9-12 supplemental learning/reserve.
+  -- profiles plus AW9-12 and AW13-16 supplemental learning/reserve.
   if (select count(*) from private.exam_prep_content_release_profiles_v1
       where content_version_id in (4801,4802)
         and release_mode='supplemental_learning'
@@ -68,7 +68,11 @@ BEGIN
          where content_version_id in (4813,4814)
            and release_mode='supplemental_learning'
            and require_written_understanding)<>2
-     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>14
+     or (select count(*) from private.exam_prep_content_release_profiles_v1
+         where content_version_id in (4815,4816)
+           and release_mode='supplemental_reserve'
+           and require_written_understanding=false)<>2
+     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>16
   then
     raise exception 'supplemental-reserve contract: governed release-profile surface drift';
   end if;
@@ -87,6 +91,8 @@ BEGIN
      or coalesce((private.exam_prep_supplemental_reserve_floor_v1(4812)->>'ready')::boolean,false) is not true
      or coalesce((private.exam_prep_supplemental_learning_floor_v1(4813)->>'ready')::boolean,false) is not true
      or coalesce((private.exam_prep_supplemental_learning_floor_v1(4814)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_reserve_floor_v1(4815)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_reserve_floor_v1(4816)->>'ready')::boolean,false) is not true
   then
     raise exception 'supplemental-reserve contract: governed supplemental floor is RED';
   end if;
@@ -161,9 +167,9 @@ ROLLBACK;
 
 DO $$
 BEGIN
-  if (select count(*) from private.exam_prep_content_release_profiles_v1)<>14
+  if (select count(*) from private.exam_prep_content_release_profiles_v1)<>16
      or (select count(*) from private.exam_prep_content_versions
-         where id in (4803,4804,4807,4808,4811,4812) and status='published')<>6 then
+         where id in (4803,4804,4807,4808,4811,4812,4815,4816) and status='published')<>8 then
     raise exception 'supplemental-reserve contract: rollback disturbed released governance surface';
   end if;
 END

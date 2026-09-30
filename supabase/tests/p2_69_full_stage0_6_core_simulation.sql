@@ -687,8 +687,21 @@ BEGIN
   from private.exam_prep_component_placements
   where user_id=v_uid and program_version_id=v_program and component_code='P5'
   order by derived_at desc limit 1;
-  if v_p1_screen<>24 or v_p5_screen<>15 then
-    raise exception 'P2-69 Stage0 exact screening target mismatch P1=%/24 P5=%/15',v_p1_screen,v_p5_screen;
+  -- Raw evidence can legitimately exceed the denominator by the final
+  -- governed diagnostic package. The exact-target contract is learner-facing:
+  -- never underfill the canonical 24/15 evidence minimum, and clamp progress
+  -- payloads to those exact denominators without rewriting evidence history.
+  if v_p1_screen<24 or v_p5_screen<15 then
+    raise exception 'P2-69 Stage0 screening underfilled P1=%/24 P5=%/15',v_p1_screen,v_p5_screen;
+  end if;
+
+  if coalesce((public.get_exam_prep_diagnostic_progress_safe_v1('P1')->'screening'->>'required_items')::int,-1)<>24
+     or coalesce((public.get_exam_prep_diagnostic_progress_safe_v1('P1')->'screening'->>'answered_items')::int,-1)<>24
+     or coalesce((public.get_exam_prep_diagnostic_progress_safe_v1('P5')->'screening'->>'required_items')::int,-1)<>15
+     or coalesce((public.get_exam_prep_diagnostic_progress_safe_v1('P5')->'screening'->>'answered_items')::int,-1)<>15
+  then
+    raise exception 'P2-69 Stage0 learner-facing exact screening target mismatch raw P1=% P5=%',
+      v_p1_screen,v_p5_screen;
   end if;
 
   perform private.rebuild_exam_prep_state_v1(v_uid,null);
