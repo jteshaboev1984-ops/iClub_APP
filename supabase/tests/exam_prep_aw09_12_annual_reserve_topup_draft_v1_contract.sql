@@ -248,6 +248,54 @@ BEGIN
     RAISE EXCEPTION 'aw09_12 annual reserve draft: assessment shape failure';
   END IF;
 
+  -- Independent-QA correction set is pinned before any publication review.
+  WITH expected(content_key,answer) AS (VALUES
+    ('P1CIR02-D02','C'),('P1CIR02-D03','D'),
+    ('P1COO04-D02','A'),('P1COO04-D03','B'),
+    ('P1FUN03-D02','C'),
+    ('P1FUN04-D02','A'),('P1FUN04-D03','B'),
+    ('P1FUN05-D02','C'),('P1FUN05-D03','D'),('P1FUN05-R03','7'),('P1FUN05-R04','B'),('P1FUN05-M02','4'),
+    ('P1QUA05-D02','C'),('P1QUA05-D03','D'),('P1QUA05-R03','5'),
+    ('P1QUA06-D02','A'),('P1QUA06-D03','B'),('P1QUA06-R04','B'),
+    ('P1QUA04-R04','B'),
+    ('P5DAT03-D02','A'),('P5DAT03-D03','B'),('P5DAT03-R03','32'),('P5DAT03-R04','C'),
+    ('P5DAT05-D02','C'),('P5DAT05-D03','D'),('P5DAT05-R03','65'),
+    ('P5DAT07-D02','A'),('P5DAT07-D03','B'),('P5DAT07-R03','22'),
+    ('P5CNT05-D03','D'),('P5CNT05-R03','168'),
+    ('P5PRO02-D02','A'),('P5PRO02-D03','B'),('P5PRO02-R04','C'),
+    ('P5PRO04-D02','C'),('P5PRO04-D03','D'),('P5PRO04-R03','0.4'),('P5PRO04-R04','B')
+  )
+  SELECT count(*) INTO v_bad
+  FROM expected e
+  LEFT JOIN private.exam_prep_question_content_meta m
+    ON m.content_version_id IN (4811,4812) AND m.content_key=e.content_key
+  LEFT JOIN public.questions q ON q.id=m.question_id
+  WHERE q.id IS NULL OR q.correct_answer<>e.answer;
+  IF v_bad<>0 THEN
+    RAISE EXCEPTION 'aw09_12 annual reserve draft: independent-QA answer map mismatch rows=%',v_bad;
+  END IF;
+
+  IF NOT EXISTS(
+      SELECT 1 FROM private.exam_prep_question_content_meta m JOIN public.questions q ON q.id=m.question_id
+      WHERE m.content_version_id=4811 AND m.content_key='P1CIR02-D02'
+        AND q.question_text_en LIKE '%6 cm longer than its radius%'
+    )
+    OR NOT EXISTS(
+      SELECT 1 FROM private.exam_prep_question_content_meta m JOIN public.questions q ON q.id=m.question_id
+      WHERE m.content_version_id=4812 AND m.content_key='P5DAT03-R03'
+        AND q.question_text_en LIKE '%lower outlier fence%'
+        AND q.correct_answer='32'
+    )
+    OR NOT EXISTS(
+      SELECT 1 FROM private.exam_prep_question_content_meta m JOIN public.questions q ON q.id=m.question_id
+      WHERE m.content_version_id=4812 AND m.content_key='P5PRO04-R03'
+        AND q.question_text_en LIKE '%P(A∪B)=0.58%'
+        AND q.correct_answer='0.4'
+    )
+  THEN
+    RAISE EXCEPTION 'aw09_12 annual reserve draft: representative independent-QA stem correction missing';
+  END IF;
+
   -- Diagnostic answer positions are balanced independently by component.
   SELECT
     count(*) FILTER(WHERE q.correct_answer='A'),
