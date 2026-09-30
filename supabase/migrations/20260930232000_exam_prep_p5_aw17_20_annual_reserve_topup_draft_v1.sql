@@ -130,7 +130,7 @@ select s.meta_id,4820,s.content_key,q.id,s.skill_code,'{}'::text[],
  'AW17-20 annual reserve authored from canonical skill intent with independent values and contexts; withheld reserve only.',
  s.official_ref,s.book_ref,
  'pending','pending','pending','pending','pending',
- case when s.content_key like '%-D%' then 'draft' else 'not_applicable' end,
+ case when s.content_key like '%-D%' then 'pending' else 'not_applicable' end,
  md5(concat_ws(chr(31),
    q.id::text,q.subject_id::text,coalesce(q.topic,''),coalesce(q.subtopic,''),coalesce(q.difficulty,''),coalesce(q.qtype,''),
    coalesce(q.question_text,''),coalesce(q.options_text,''),coalesce(q.correct_answer,''),coalesce(q.explanation,''),
@@ -161,7 +161,7 @@ begin
     or m.qa_language_status<>'pending' or m.qa_technical_status<>'pending'
     or nullif(btrim(q.question_text_en),'') is null or nullif(btrim(q.question_text_ru),'') is null or nullif(btrim(q.question_text_uz),'') is null
     or nullif(btrim(q.explanation_en),'') is null or nullif(btrim(q.explanation_ru),'') is null or nullif(btrim(q.explanation_uz),'') is null
-    or (m.reserve_role='diagnostic' and (q.qtype<>'mcq' or m.diagnostic_rule_status<>'draft'))
+    or (m.reserve_role='diagnostic' and (q.qtype<>'mcq' or m.diagnostic_rule_status<>'pending'))
     or (m.reserve_role<>'diagnostic' and m.diagnostic_rule_status<>'not_applicable')
     or (q.qtype='mcq' and (
       q.correct_answer not in ('A','B','C','D')
