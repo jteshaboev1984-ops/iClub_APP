@@ -230,10 +230,10 @@ begin
 
   -- Existing governed check surface must be unchanged before this release.
   if (select count(*) from private.exam_prep_written_understanding_checks
-      where lifecycle_state='published')<>89
+      where lifecycle_state='published')<>75
      or (select count(distinct written_task_id)
          from private.exam_prep_written_understanding_checks
-         where lifecycle_state='published')<>86
+         where lifecycle_state='published')<>72
   then
     raise exception 'aw09_12_alt_publish: pre-existing written-understanding surface drift';
   end if;
