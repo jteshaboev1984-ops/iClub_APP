@@ -98,6 +98,58 @@ BEGIN
     raise exception 'aw09_12 supplemental draft: trilingual/type/options QA rows=%',v_bad;
   end if;
 
+  -- Independent-QA corrections are pinned before any publication review.
+  with expected(content_key,answer) as (values
+    ('P1QUA04-A01','A'),('P1QUA04-A02','B'),('P1QUA05-A01','C'),('P1QUA06-A03','12'),
+    ('P1FUN05-A01','C'),('P1FUN05-A02','D'),('P1COO04-A02','C'),('P1CIR02-A01','A'),('P1CIR02-A02','B'),
+    ('P5DAT03-A02','B'),('P5DAT03-A03','28'),('P5DAT07-A03','28'),
+    ('P5CNT05-A01','B'),('P5CNT05-A02','D'),
+    ('P5PRO02-A01','A'),('P5PRO02-A02','D'),('P5PRO02-A03','7'),('P5PRO04-A01','B')
+  )
+  select count(*) into v_bad
+  from expected e
+  left join private.exam_prep_question_content_meta m
+    on m.content_version_id in (4809,4810)
+   and m.content_key=e.content_key
+  left join public.questions q on q.id=m.question_id
+  where q.id is null or q.correct_answer<>e.answer;
+  if v_bad<>0 then
+    raise exception 'aw09_12 supplemental draft: independent-QA answer map mismatch rows=%',v_bad;
+  end if;
+
+  if not exists(
+    select 1
+    from private.exam_prep_question_content_meta m
+    join public.questions q on q.id=m.question_id
+    where m.content_version_id=4809
+      and m.content_key='P1FUN05-A01'
+      and q.question_text_en like '%midpoint of PQ%'
+      and q.correct_answer='C'
+  ) or not exists(
+    select 1
+    from private.exam_prep_question_content_meta m
+    join public.questions q on q.id=m.question_id
+    where m.content_version_id=4810
+      and m.content_key='P5PRO02-A03'
+      and q.question_text_en not like '%7/44%'
+      and q.correct_answer='7'
+  ) then
+    raise exception 'aw09_12 supplemental draft: independent-QA stem correction missing';
+  end if;
+
+  if exists(
+    select 1
+    from private.exam_prep_assessments
+    where content_version_id in (4809,4810)
+      and (
+        lower(coalesce(title_en,'')) like '%supplemental%'
+        or lower(coalesce(title_ru,'')) like '%дополнительное обучение%'
+        or lower(coalesce(title_uz,'')) like '%qo‘shimcha o‘rganish%'
+      )
+  ) then
+    raise exception 'aw09_12 supplemental draft: internal release wording remains in learner titles';
+  end if;
+
   -- Frozen snapshots exact.
   select count(*) into v_bad
   from private.exam_prep_question_content_meta m
