@@ -251,8 +251,8 @@ begin
   from private.exam_prep_written_understanding_checks c
   where c.lifecycle_state='published';
 
-  if v_checks<>75 or v_tasks<>72 then
-    raise exception 'written-understanding: curated scope changed; expected 75 checks across 72 tasks, got % across %',v_checks,v_tasks;
+  if v_checks<>89 or v_tasks<>86 then
+    raise exception 'written-understanding: curated scope changed; expected 89 checks across 86 tasks, got % across %',v_checks,v_tasks;
   end if;
 
   select count(c.id)::int,count(distinct wt.id)::int
@@ -267,7 +267,7 @@ begin
   join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
   where c.lifecycle_state='published' and wt.lifecycle_state='published' and wt.component_code='P5';
 
-  if v_p1_checks<>39 or v_p1_tasks<>36 or v_p5_checks<>36 or v_p5_tasks<>36 then
+  if v_p1_checks<>47 or v_p1_tasks<>44 or v_p5_checks<>42 or v_p5_tasks<>42 then
     raise exception 'written-understanding: component scope changed; P1 checks/tasks=%/%, P5=%/%',v_p1_checks,v_p1_tasks,v_p5_checks,v_p5_tasks;
   end if;
 
