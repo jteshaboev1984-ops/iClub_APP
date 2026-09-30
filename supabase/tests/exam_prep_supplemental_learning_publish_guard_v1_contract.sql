@@ -35,8 +35,8 @@ begin
     raise exception 'supplemental-learning contract: established full-floor readiness changed';
   end if;
 
-  -- Governed profile surface: AW1-4 learning/reserve, AW5-8 learning/reserve,
-  -- and AW9-12 supplemental-learning and annual-reserve profiles.
+  -- Governed profile surface: AW1-4, AW5-8, AW9-12 and AW13-16
+  -- supplemental-learning / annual-reserve profiles.
   if (select count(*) from private.exam_prep_content_release_profiles_v1
       where content_version_id in (4801,4802)
         and release_mode='supplemental_learning'
@@ -65,7 +65,11 @@ begin
          where content_version_id in (4813,4814)
            and release_mode='supplemental_learning'
            and require_written_understanding)<>2
-     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>14
+     or (select count(*) from private.exam_prep_content_release_profiles_v1
+         where content_version_id in (4815,4816)
+           and release_mode='supplemental_reserve'
+           and require_written_understanding=false)<>2
+     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>16
   then
     raise exception 'supplemental-learning contract: governed release-profile surface drift';
   end if;
