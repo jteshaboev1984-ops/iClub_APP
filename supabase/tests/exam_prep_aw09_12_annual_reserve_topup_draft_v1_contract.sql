@@ -89,7 +89,7 @@ BEGIN
       m.lifecycle_state<>'draft' OR m.exposure_state<>'withheld'
       OR m.copyright_status<>'pending' OR m.qa_scope_status<>'pending'
       OR m.qa_math_status<>'pending' OR m.qa_language_status<>'pending' OR m.qa_technical_status<>'pending'
-      OR (m.reserve_role='diagnostic' AND m.diagnostic_rule_status<>'draft')
+      OR (m.reserve_role='diagnostic' AND m.diagnostic_rule_status<>'pending')
       OR (m.reserve_role<>'diagnostic' AND m.diagnostic_rule_status<>'not_applicable')
       OR q.is_active OR q.quality_status<>'draft'
     );
