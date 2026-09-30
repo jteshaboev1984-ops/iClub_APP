@@ -58,8 +58,8 @@ BEGIN
     FROM private.exam_prep_question_content_meta m
     JOIN private.exam_prep_content_versions cv ON cv.id=m.content_version_id
     JOIN expected e ON e.component_code=cv.component_code AND e.skill_code=m.primary_skill_code
-    WHERE (cv.status='published' AND m.lifecycle_state IN ('published','reserve'))
-       OR (cv.id IN (4811,4812) AND cv.status='draft' AND m.lifecycle_state='draft')
+    WHERE cv.status='published'
+      AND m.lifecycle_state IN ('published','reserve')
     GROUP BY cv.component_code,m.primary_skill_code
   ), w AS (
     SELECT component_code,primary_skill_code AS skill_code,count(*) AS n
