@@ -241,10 +241,10 @@ begin
 
   -- Existing governed check surface must be unchanged before this release.
   if (select count(*) from private.exam_prep_written_understanding_checks
-      where lifecycle_state='published')<>104
+      where lifecycle_state='published')<>89
      or (select count(distinct written_task_id)
          from private.exam_prep_written_understanding_checks
-         where lifecycle_state='published')<>101
+         where lifecycle_state='published')<>86
   then
     raise exception 'aw13_16_alt_publish: pre-existing written-understanding surface drift';
   end if;
@@ -443,10 +443,10 @@ begin
   end if;
 
   if (select count(*) from private.exam_prep_written_understanding_checks
-      where lifecycle_state='published')<>89
+      where lifecycle_state='published')<>104
      or (select count(distinct written_task_id)
          from private.exam_prep_written_understanding_checks
-         where lifecycle_state='published')<>86
+         where lifecycle_state='published')<>101
   then
     raise exception 'aw13_16_alt_publish: governed written-understanding surface mismatch';
   end if;
