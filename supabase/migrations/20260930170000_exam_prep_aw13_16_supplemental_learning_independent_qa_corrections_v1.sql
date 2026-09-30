@@ -201,7 +201,7 @@ begin
   ) or not exists(
     select 1 from private.exam_prep_question_content_meta m join public.questions q on q.id=m.question_id
     where m.content_version_id=4814 and m.content_key='P5GEO01-A02'
-      and q.question_text_en like '%probability of scoring changes%' and q.correct_answer='B'
+      and q.options_text_en like '%probability of scoring changes%' and q.correct_answer='B'
   ) then
     raise exception 'aw13_16 independent QA: corrected transfer surface missing';
   end if;
