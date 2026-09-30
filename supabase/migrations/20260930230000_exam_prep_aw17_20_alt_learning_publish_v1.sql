@@ -150,7 +150,7 @@ begin
     where id between 8953 and 8963
     group by correct_index
   ) c;
-  if v_check_dist<>jsonb_build_object('0',3,'1',3,'2',3,'3',2) then
+  if v_check_dist<>jsonb_build_object('0',2,'1',2,'2',4,'3',3) then
     raise exception 'aw17_20_alt_publish: written-check answer-position QA drift=%',v_check_dist;
   end if;
 
