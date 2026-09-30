@@ -451,8 +451,8 @@ begin
 
   -- Exact annual depth for the fourteen target skills after release.
   with expected(component_code,skill_code) as (values
-    ('P1','P1-FUN-06'),('P1','P1-FUN-07'),('P1','P1-FUN-08'),('P1','P1-COO-01'),('P1','P1-COO-02'),('P1','P1-COO-03'),('P1','P1-CIR-01'),('P1','P1-TRI-01'),
-    ('P5','P5-CNT-01'),('P5','P5-CNT-02'),('P5','P5-CNT-03'),('P5','P5-CNT-04'),('P5','P5-PRO-01'),('P5','P5-PRO-03')
+    ('P1','P1-QUA-04'),('P1','P1-QUA-05'),('P1','P1-QUA-06'),('P1','P1-FUN-03'),('P1','P1-FUN-04'),('P1','P1-FUN-05'),('P1','P1-COO-04'),('P1','P1-CIR-02'),
+    ('P5','P5-DAT-03'),('P5','P5-DAT-05'),('P5','P5-DAT-07'),('P5','P5-CNT-05'),('P5','P5-PRO-02'),('P5','P5-PRO-04')
   ), q as (
     select cv.component_code,m.primary_skill_code skill_code,
       count(*) filter(where m.reserve_role='diagnostic') d,
