@@ -7,21 +7,21 @@ DECLARE
   v_bad int;
 BEGIN
   if (select count(*) from private.exam_prep_content_versions
-      where id in (4819,4820) and status='draft')<>2 then
-    raise exception 'aw17_20 reserve independent QA contract: target drafts missing';
+      where id in (4819,4820) and status='published')<>2 then
+    raise exception 'aw17_20 reserve independent QA contract: published target versions missing';
   end if;
 
   if (select count(*) from private.exam_prep_question_content_meta
       where content_version_id in (4819,4820)
-        and lifecycle_state='draft' and exposure_state='withheld')<>55 then
-    raise exception 'aw17_20 reserve independent QA contract: machine draft boundary mismatch';
+        and lifecycle_state='reserve' and exposure_state='withheld')<>55 then
+    raise exception 'aw17_20 reserve independent QA contract: reserve/withheld surface mismatch';
   end if;
 
   if (select count(*) from private.exam_prep_diagnostic_rules r
       join private.exam_prep_question_content_meta m on m.id=r.content_meta_id
       where m.content_version_id in (4819,4820)
-        and r.rule_version='aw_reserve_v1' and r.status='draft')<>66 then
-    raise exception 'aw17_20 reserve independent QA contract: diagnostic-rule surface mismatch';
+        and r.rule_version='aw_reserve_v1' and r.status='approved')<>66 then
+    raise exception 'aw17_20 reserve independent QA contract: approved diagnostic-rule surface mismatch';
   end if;
 
   with expected(content_key,answer,qtype) as (values
@@ -99,11 +99,11 @@ BEGIN
       and m.reserve_role='diagnostic'
       and (
         q.qtype<>'mcq'
-        or m.diagnostic_rule_status<>'pending'
+        or m.diagnostic_rule_status<>'approved'
         or (select count(*) from private.exam_prep_diagnostic_rules r
             where r.content_meta_id=m.id
               and r.rule_version='aw_reserve_v1'
-              and r.status='draft'
+              and r.status='approved'
               and r.answer_kind='mcq_option'
               and r.answer_match<>q.correct_answer
               and r.weak_skill_code=m.primary_skill_code)<>3
@@ -119,7 +119,7 @@ BEGIN
     join public.questions q on q.id=m.question_id
     join private.exam_prep_question_content_meta oldm
       on oldm.primary_skill_code=m.primary_skill_code
-     and oldm.content_version_id<>m.content_version_id
+     and oldm.content_version_id not in (4819,4820)
     join private.exam_prep_content_versions oldcv
       on oldcv.id=oldm.content_version_id and oldcv.status='published'
     join public.questions oldq on oldq.id=oldm.question_id
@@ -135,13 +135,13 @@ BEGIN
   join public.questions q on q.id=m.question_id
   where m.content_version_id in (4819,4820)
     and (
-      m.lifecycle_state<>'draft'
+      m.lifecycle_state<>'reserve'
       or m.exposure_state<>'withheld'
-      or m.copyright_status<>'pending'
-      or m.qa_scope_status<>'pending'
-      or m.qa_math_status<>'pending'
-      or m.qa_language_status<>'pending'
-      or m.qa_technical_status<>'pending'
+      or m.copyright_status<>'pass'
+      or m.qa_scope_status<>'pass'
+      or m.qa_math_status<>'pass'
+      or m.qa_language_status<>'pass'
+      or m.qa_technical_status<>'pass'
       or q.is_active
       or q.quality_status<>'draft'
       or nullif(btrim(q.question_text_en),'') is null
@@ -178,12 +178,12 @@ BEGIN
   end if;
 
   if (select count(*) from private.exam_prep_assessments
-      where content_version_id in (4819,4820) and status='draft')<>28
+      where content_version_id in (4819,4820) and status='published')<>28
      or (select count(*) from private.exam_prep_assessment_items ai
          join private.exam_prep_assessments a on a.id=ai.assessment_id
          where a.content_version_id in (4819,4820) and ai.is_holdout)<>55
   then
-    raise exception 'aw17_20 reserve independent QA contract: assessment/holdout surface changed';
+    raise exception 'aw17_20 reserve independent QA contract: published assessment/holdout surface changed';
   end if;
 
   if exists(
