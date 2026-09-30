@@ -130,7 +130,7 @@ BEGIN
   ) or not exists(
     select 1 from private.exam_prep_written_tasks
     where id=15655 and content_version_id=4817
-      and (rubric_json->'criteria'->4->>'rule') like '%tail=0.0625%'
+      and (rubric_json->'criteria'->4->>'rule') like '%tail after four terms as 1/2%'
   ) or not exists(
     select 1 from private.exam_prep_written_tasks
     where id=15656 and content_version_id=4817
