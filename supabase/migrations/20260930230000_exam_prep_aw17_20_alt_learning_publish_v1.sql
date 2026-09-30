@@ -181,6 +181,34 @@ begin
       )
   ) then raise exception 'aw17_20_alt_publish: internal release wording remains in learner titles'; end if;
 
+  select count(*) into v_bad
+  from private.exam_prep_question_content_meta m
+  where m.content_version_id in (4817,4818)
+    and (
+      (m.primary_skill_code like 'P1-SER-%' and (m.official_scope_ref not like '%P1 1.6 Series%' or m.coursebook_mapping_ref not like '%Ch7%120-133%'))
+      or (m.primary_skill_code in ('P1-DIF-02','P1-DIF-03') and (m.official_scope_ref not like '%P1 1.7 Differentiation%' or m.coursebook_mapping_ref not like '%Ch8%138-153%'))
+      or (m.primary_skill_code='P1-DIF-04' and (m.official_scope_ref not like '%P1 1.7 Differentiation%' or m.coursebook_mapping_ref not like '%Ch8-9%138-167%'))
+      or (m.primary_skill_code like 'P5-BIN-%' and (m.official_scope_ref not like '%P5 5.4 Discrete random variables%' or m.coursebook_mapping_ref not like '%Ch7%115-131%'))
+      or (m.primary_skill_code like 'P5-GEO-%' and (m.official_scope_ref not like '%P5 5.4 Discrete random variables%' or m.coursebook_mapping_ref not like '%Ch8%133-145%'))
+      or (m.primary_skill_code='P5-NOR-01' and (m.official_scope_ref not like '%P5 5.5 The normal distribution%' or m.coursebook_mapping_ref not like '%Ch9%147-171%'))
+    );
+  if v_bad<>0 then raise exception 'aw17_20_alt_publish: source-map mismatch rows=%',v_bad; end if;
+
+  if exists(
+    select 1
+    from private.exam_prep_question_content_meta m
+    join public.questions q on q.id=m.question_id
+    join private.exam_prep_question_content_meta oldm
+      on oldm.primary_skill_code=m.primary_skill_code
+     and oldm.content_version_id<>m.content_version_id
+    join private.exam_prep_content_versions oldcv
+      on oldcv.id=oldm.content_version_id and oldcv.status='published'
+    join public.questions oldq on oldq.id=oldm.question_id
+    where m.content_version_id in (4817,4818)
+      and lower(regexp_replace(q.question_text_en,'\s+',' ','g'))=
+          lower(regexp_replace(oldq.question_text_en,'\s+',' ','g'))
+  ) then raise exception 'aw17_20_alt_publish: exact published stem reuse'; end if;
+
   if (select count(*) from private.exam_prep_written_understanding_checks where lifecycle_state='published')<>104
      or (select count(distinct written_task_id) from private.exam_prep_written_understanding_checks where lifecycle_state='published')<>101
   then raise exception 'aw17_20_alt_publish: pre-existing written-understanding surface drift'; end if;
