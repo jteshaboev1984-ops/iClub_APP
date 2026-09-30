@@ -19,9 +19,11 @@ on:
       - supabase/tests/exam_prep_aw05_08_supplemental_learning_draft_v1_contract.sql
       - supabase/tests/exam_prep_aw09_12_supplemental_learning_draft_v1_contract.sql
       - supabase/tests/exam_prep_aw09_12_supplemental_learning_release_v1_contract.sql
+      - supabase/tests/exam_prep_aw09_12_annual_reserve_topup_draft_v1_contract.sql
       - supabase/tests/exam_prep_aw05_08_supplemental_learning_release_v1_contract.sql
       - supabase/tests/exam_prep_aw05_08_annual_reserve_topup_draft_v1_contract.sql
-      - supabase/tests/exam_prep_aw05_08_annual_reserve_release_v1_contract.sql\n      - supabase/tests/exam_prep_supplemental_reserve_publish_guard_v1_contract.sql
+      - supabase/tests/exam_prep_aw05_08_annual_reserve_release_v1_contract.sql
+      - supabase/tests/exam_prep_supplemental_reserve_publish_guard_v1_contract.sql
       - supabase/tests/p2_79_recovery_rollback_disaster_matrix.sql
       - supabase/tests/p0_15_contract_bootstrap.sql
       - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
@@ -47,7 +49,8 @@ on:
       - supabase/tests/exam_prep_supplemental_learning_publish_guard_v1_contract.sql
       - supabase/tests/exam_prep_aw01_04_alt_learning_release_v1_contract.sql
       - supabase/tests/exam_prep_aw01_04_annual_reserve_topup_draft_v1_contract.sql
-      - supabase/tests/exam_prep_aw01_04_annual_reserve_release_v1_contract.sql\n      - supabase/tests/exam_prep_supplemental_reserve_publish_guard_v1_contract.sql
+      - supabase/tests/exam_prep_aw01_04_annual_reserve_release_v1_contract.sql
+      - supabase/tests/exam_prep_supplemental_reserve_publish_guard_v1_contract.sql
       - supabase/tests/p2_79_recovery_rollback_disaster_matrix.sql
       - supabase/tests/p0_15_contract_bootstrap.sql
       - supabase/tests/p1_03_ephemeral_legacy_helpers.sql
@@ -271,6 +274,12 @@ jobs:
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_aw09_12_supplemental_learning_release_v1_contract.sql 2>&1 | tee -a p280-audit.log
+
+      - name: Verify AW9-12 annual reserve draft
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_aw09_12_annual_reserve_topup_draft_v1_contract.sql 2>&1 | tee -a p280-audit.log
 
       - name: Verify AW5-8 annual reserve draft
         shell: bash
