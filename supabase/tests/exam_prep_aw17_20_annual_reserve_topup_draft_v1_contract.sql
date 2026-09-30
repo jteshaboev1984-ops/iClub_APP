@@ -63,7 +63,7 @@ BEGIN
       or m.qa_math_status<>'pending'
       or m.qa_language_status<>'pending'
       or m.qa_technical_status<>'pending'
-      or (m.reserve_role='diagnostic' and m.diagnostic_rule_status<>'draft')
+      or (m.reserve_role='diagnostic' and m.diagnostic_rule_status<>'pending')
       or (m.reserve_role<>'diagnostic' and m.diagnostic_rule_status<>'not_applicable')
       or q.is_active
       or q.quality_status<>'draft'
