@@ -73,7 +73,11 @@ begin
          where content_version_id in (4817,4818)
            and release_mode='supplemental_learning'
            and require_written_understanding)<>2
-     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>18
+     or (select count(*) from private.exam_prep_content_release_profiles_v1
+         where content_version_id in (4819,4820)
+           and release_mode='supplemental_reserve'
+           and require_written_understanding=false)<>2
+     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>20
   then
     raise exception 'supplemental-learning contract: governed release-profile surface drift';
   end if;
