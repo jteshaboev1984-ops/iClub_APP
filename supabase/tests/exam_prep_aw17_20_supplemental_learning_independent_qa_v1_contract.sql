@@ -1,5 +1,5 @@
 -- AW17-20 supplemental learning independent-QA contract v1.
--- Draft/history-free candidate. Pins the independently reviewed correction surface.
+-- Published governed candidate. Pins the independently reviewed correction surface.
 \set ON_ERROR_STOP on
 
 DO $$
@@ -7,14 +7,14 @@ DECLARE
   v_bad int;
 BEGIN
   if (select count(*) from private.exam_prep_content_versions
-      where id in (4817,4818) and status='draft')<>2 then
-    raise exception 'aw17_20 independent QA contract: target draft versions missing';
+      where id in (4817,4818) and status='published')<>2 then
+    raise exception 'aw17_20 independent QA contract: target published versions missing';
   end if;
 
   if (select count(*) from private.exam_prep_question_content_meta
       where content_version_id in (4817,4818)
-        and lifecycle_state='draft' and exposure_state='withheld')<>33 then
-    raise exception 'aw17_20 independent QA contract: machine draft boundary mismatch';
+        and lifecycle_state='published' and exposure_state='released')<>33 then
+    raise exception 'aw17_20 independent QA contract: machine published boundary mismatch';
   end if;
 
   with expected(content_key,answer) as (values
@@ -164,20 +164,20 @@ BEGIN
   left join private.exam_prep_written_understanding_checks c on c.written_task_id=wt.id
   where wt.content_version_id in (4817,4818)
     and (
-      wt.lifecycle_state<>'draft'
+      wt.lifecycle_state<>'published'
       or coalesce((wt.rubric_json->>'max_marks')::int,0)<>6
-      or wt.copyright_status<>'pending'
-      or wt.qa_math_status<>'pending'
-      or wt.qa_language_status<>'pending'
-      or wt.qa_technical_status<>'pending'
+      or wt.copyright_status<>'pass'
+      or wt.qa_math_status<>'pass'
+      or wt.qa_language_status<>'pass'
+      or wt.qa_technical_status<>'pass'
       or nullif(btrim(wt.prompt_en),'') is null
       or nullif(btrim(wt.prompt_ru),'') is null
       or nullif(btrim(wt.prompt_uz),'') is null
       or c.id is null
-      or c.lifecycle_state<>'draft'
-      or c.qa_math_status<>'pending'
-      or c.qa_language_status<>'pending'
-      or c.qa_technical_status<>'pending'
+      or c.lifecycle_state<>'published'
+      or c.qa_math_status<>'pass'
+      or c.qa_language_status<>'pass'
+      or c.qa_technical_status<>'pass'
       or jsonb_array_length(c.options_en)<>4
       or jsonb_array_length(c.options_ru)<>4
       or jsonb_array_length(c.options_uz)<>4

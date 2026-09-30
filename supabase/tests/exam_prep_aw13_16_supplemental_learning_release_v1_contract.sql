@@ -50,11 +50,17 @@ BEGIN
     raise exception 'aw13_16 learning release: public source isolation changed';
   end if;
 
+  -- Historical AW13-16 release must remain present even as later governed
+  -- written-understanding packs are added.
   if (select count(*) from private.exam_prep_written_understanding_checks
-      where lifecycle_state='published')<>104
+      where lifecycle_state='published')<104
      or (select count(distinct written_task_id)
          from private.exam_prep_written_understanding_checks
-         where lifecycle_state='published')<>101 then
+         where lifecycle_state='published')<101
+     or (select count(*) from private.exam_prep_written_understanding_checks c
+         join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
+         where wt.content_version_id in (4813,4814)
+           and c.lifecycle_state='published')<>15 then
     raise exception 'aw13_16 learning release: written-understanding surface mismatch';
   end if;
 

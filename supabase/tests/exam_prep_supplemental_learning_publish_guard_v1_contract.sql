@@ -35,7 +35,7 @@ begin
     raise exception 'supplemental-learning contract: established full-floor readiness changed';
   end if;
 
-  -- Governed profile surface: AW1-4, AW5-8, AW9-12 and AW13-16
+  -- Governed profile surface: AW1-4, AW5-8, AW9-12, AW13-16 and AW17-20
   -- supplemental-learning / annual-reserve profiles.
   if (select count(*) from private.exam_prep_content_release_profiles_v1
       where content_version_id in (4801,4802)
@@ -69,7 +69,11 @@ begin
          where content_version_id in (4815,4816)
            and release_mode='supplemental_reserve'
            and require_written_understanding=false)<>2
-     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>16
+     or (select count(*) from private.exam_prep_content_release_profiles_v1
+         where content_version_id in (4817,4818)
+           and release_mode='supplemental_learning'
+           and require_written_understanding)<>2
+     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>18
   then
     raise exception 'supplemental-learning contract: governed release-profile surface drift';
   end if;
@@ -82,6 +86,8 @@ begin
      or coalesce((private.exam_prep_supplemental_learning_floor_v1(4810)->>'ready')::boolean,false) is not true
      or coalesce((private.exam_prep_supplemental_learning_floor_v1(4813)->>'ready')::boolean,false) is not true
      or coalesce((private.exam_prep_supplemental_learning_floor_v1(4814)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_learning_floor_v1(4817)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_learning_floor_v1(4818)->>'ready')::boolean,false) is not true
   then
     raise exception 'supplemental-learning contract: governed supplemental-learning floor is RED';
   end if;

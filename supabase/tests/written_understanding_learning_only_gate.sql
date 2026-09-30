@@ -26,8 +26,8 @@ begin
     and a.status='published'
     and a.assessment_type='learning';
 
-  if v_checked<>101 or v_learning<>101 then
-    raise exception 'written-understanding: expected all 101 checked tasks to have a published learning assessment; checked=%, learning=%',v_checked,v_learning;
+  if v_checked<>112 or v_learning<>112 then
+    raise exception 'written-understanding: expected all 112 checked tasks to have a published learning assessment; checked=%, learning=%',v_checked,v_learning;
   end if;
 
   select count(distinct c.written_task_id)::int
