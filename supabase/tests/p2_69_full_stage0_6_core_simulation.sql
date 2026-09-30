@@ -315,8 +315,14 @@ language plpgsql
 as $$
 declare
   v_skill record;
-  v_has_written boolean;
+  v_l2_ready boolean;
 begin
+  -- Diagnostic rotation can legitimately leave written evidence on a skill
+  -- without satisfying its full L2 contract (for example after one diagnostic
+  -- miss). Drive this fixture from the derived objective state, not from the
+  -- mere presence of a written response.
+  perform private.rebuild_exam_prep_state_v1(p_user_id,p_component);
+
   for v_skill in
     select n.skill_code,n.sequence_no
     from private.exam_prep_syllabus_nodes n
@@ -324,20 +330,21 @@ begin
     order by n.sequence_no,n.skill_code
     limit p_target
   loop
-    select exists(
-      select 1
-      from private.exam_prep_evidence_events e
-      join private.exam_prep_sessions s on s.id=e.session_id and s.status='finalized'
-      join private.exam_prep_session_authorizations sa on sa.id=s.authorization_id and sa.academic_credit
-      where e.user_id=p_user_id and e.component_code=p_component and e.skill_code=v_skill.skill_code
-        and e.evidence_type='written'
-    ) into v_has_written;
+    select coalesce(st.objective_level>=2,false)
+      into v_l2_ready
+    from private.exam_prep_skill_states st
+    where st.user_id=p_user_id
+      and st.program_version_id=p_program
+      and st.component_code=p_component
+      and st.skill_code=v_skill.skill_code
+      and st.engine_version='objective_state_v1';
 
-    if not v_has_written then
+    if coalesce(v_l2_ready,false) is not true then
       perform pg_temp.p269_complete_learning_skill_v1(
         p_user_id,p_component,v_skill.skill_code,
         lower(p_component)||'-'||lpad(v_skill.sequence_no::text,3,'0')
       );
+      perform private.rebuild_exam_prep_state_v1(p_user_id,p_component);
     end if;
   end loop;
 end;
