@@ -36,7 +36,7 @@ begin
   end if;
 
   -- Governed profile surface: AW1-4 learning/reserve, AW5-8 learning/reserve,
-  -- and AW9-12 supplemental-learning profiles.
+  -- and AW9-12 supplemental-learning and annual-reserve profiles.
   if (select count(*) from private.exam_prep_content_release_profiles_v1
       where content_version_id in (4801,4802)
         and release_mode='supplemental_learning'
@@ -57,7 +57,11 @@ begin
          where content_version_id in (4809,4810)
            and release_mode='supplemental_learning'
            and require_written_understanding)<>2
-     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>10
+     or (select count(*) from private.exam_prep_content_release_profiles_v1
+         where content_version_id in (4811,4812)
+           and release_mode='supplemental_reserve'
+           and require_written_understanding=false)<>2
+     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>12
   then
     raise exception 'supplemental-learning contract: governed release-profile surface drift';
   end if;
