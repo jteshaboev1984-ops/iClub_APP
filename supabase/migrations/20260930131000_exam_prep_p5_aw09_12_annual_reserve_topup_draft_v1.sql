@@ -139,7 +139,7 @@ select s.meta_id,cv.id,s.content_key,qn.id,s.skill_code,'{}'::text[],r.reserve_r
       when s.skill_code='P5-CNT-05' then 'Complete Probability & Statistics 1, Ch6 pp.98-111 (mapping only)'
       else 'Complete Probability & Statistics 1, Ch4 pp.63-82 (mapping only)' end,
  'pending','pending','pending','pending','pending',
- case when r.reserve_role='diagnostic' then 'draft' else 'not_applicable' end,
+ case when r.reserve_role='diagnostic' then 'pending' else 'not_applicable' end,
  md5(concat_ws(chr(31),
    qn.id::text,qn.subject_id::text,coalesce(qn.topic,''),coalesce(qn.subtopic,''),coalesce(qn.difficulty,''),coalesce(qn.qtype,''),
    coalesce(qn.question_text,''),coalesce(qn.options_text,''),coalesce(qn.correct_answer,''),coalesce(qn.explanation,''),
