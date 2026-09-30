@@ -123,7 +123,7 @@ BEGIN
     join public.questions q on q.id=m.question_id
     where m.content_version_id=4809
       and m.content_key='P1FUN05-A01'
-      and q.question_text_en like '%midpoint of PQ%'
+      and q.options_text_en like '%midpoint of PQ%'
       and q.correct_answer='C'
   ) or not exists(
     select 1
