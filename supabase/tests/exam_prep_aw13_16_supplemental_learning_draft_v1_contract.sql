@@ -240,11 +240,11 @@ BEGIN
       ('P5-PRO-05'),('P5-PRO-06'),('P5-DRV-01'),('P5-DRV-02'),('P5-DRV-03'),('P5-BIN-01'),('P5-GEO-01')
     )
     select s.skill_code,
-      count(m.id) filter(where
-        (cv.status='published' and m.lifecycle_state in ('published','reserve'))
-        or (cv.id in (4813,4814) and cv.status='draft' and m.lifecycle_state='draft')
-      ) filter(where m.reserve_role in ('learning','mixed')) learning_transfer,
-      count(wt.id) filter(where
+      count(distinct m.id) filter(where
+        (((cv.status='published' and m.lifecycle_state in ('published','reserve'))
+        or (cv.id in (4813,4814) and cv.status='draft' and m.lifecycle_state='draft')))
+        and m.reserve_role in ('learning','mixed')) learning_transfer,
+      count(distinct wt.id) filter(where
         wt.lifecycle_state='published'
         or (wt.content_version_id in (4813,4814) and wt.lifecycle_state='draft')
       ) written_n
@@ -253,11 +253,11 @@ BEGIN
     left join private.exam_prep_content_versions cv on cv.id=m.content_version_id
     left join private.exam_prep_written_tasks wt on wt.primary_skill_code=s.skill_code
     group by s.skill_code
-    having count(m.id) filter(where
-        ((cv.status='published' and m.lifecycle_state in ('published','reserve'))
-        or (cv.id in (4813,4814) and cv.status='draft' and m.lifecycle_state='draft'))
+    having count(distinct m.id) filter(where
+        (((cv.status='published' and m.lifecycle_state in ('published','reserve'))
+        or (cv.id in (4813,4814) and cv.status='draft' and m.lifecycle_state='draft')))
         and m.reserve_role in ('learning','mixed')) < 7
-       or count(wt.id) filter(where
+       or count(distinct wt.id) filter(where
         wt.lifecycle_state='published'
         or (wt.content_version_id in (4813,4814) and wt.lifecycle_state='draft')) < 2
   ) x;
