@@ -1,5 +1,5 @@
--- AW9-12 annual reserve top-up draft v1 contract.
--- Read-only acceptance checks after the draft migration stack.
+-- AW9-12 annual reserve source/release v1 contract.
+-- Read-only acceptance checks after the full migration stack.
 \set ON_ERROR_STOP on
 
 DO $$
@@ -8,8 +8,8 @@ DECLARE
   v_a int; v_b int; v_c int; v_d int;
 BEGIN
   IF (SELECT count(*) FROM private.exam_prep_content_versions
-      WHERE id IN (4811,4812) AND status='draft')<>2 THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: expected two draft versions';
+      WHERE id IN (4811,4812) AND status='published')<>2 THEN
+    RAISE EXCEPTION 'aw09_12 annual reserve source: expected two published versions';
   END IF;
 
   IF (SELECT count(*) FROM private.exam_prep_question_content_meta
@@ -21,7 +21,7 @@ BEGIN
      OR (SELECT count(*) FROM private.exam_prep_question_content_meta
          WHERE content_version_id IN (4811,4812) AND reserve_role='mixed')<>14
   THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: question-role cardinality mismatch';
+    RAISE EXCEPTION 'aw09_12 annual reserve source: question-role cardinality mismatch';
   END IF;
 
   WITH expected(component_code,skill_code) AS (VALUES
@@ -41,10 +41,10 @@ BEGIN
   FROM expected e LEFT JOIN got g USING(component_code,skill_code)
   WHERE coalesce(g.d,0)<>2 OR coalesce(g.r,0)<>2 OR coalesce(g.x,0)<>1;
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: per-skill delta mismatch rows=%',v_bad;
+    RAISE EXCEPTION 'aw09_12 annual reserve source: per-skill delta mismatch rows=%',v_bad;
   END IF;
 
-  -- Prospective annual numeric floor after this reserve is governed:
+  -- Annual numeric floor after this reserve is governed:
   -- 3 diagnostics, 8 learning/transfer, 4 delayed retests, >=2 written tasks.
   WITH expected(component_code,skill_code) AS (VALUES
     ('P1','P1-QUA-04'),('P1','P1-QUA-05'),('P1','P1-QUA-06'),('P1','P1-FUN-03'),('P1','P1-FUN-04'),('P1','P1-FUN-05'),('P1','P1-COO-04'),('P1','P1-CIR-02'),
@@ -78,7 +78,7 @@ BEGIN
      OR coalesce(q.r,0)<>4
      OR coalesce(w.n,0)<2;
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: prospective annual numeric floor not closed rows=%',v_bad;
+    RAISE EXCEPTION 'aw09_12 annual reserve source: annual numeric floor not closed rows=%',v_bad;
   END IF;
 
   SELECT count(*) INTO v_bad
@@ -86,15 +86,15 @@ BEGIN
   JOIN public.questions q ON q.id=m.question_id
   WHERE m.content_version_id IN (4811,4812)
     AND (
-      m.lifecycle_state<>'draft' OR m.exposure_state<>'withheld'
-      OR m.copyright_status<>'pending' OR m.qa_scope_status<>'pending'
-      OR m.qa_math_status<>'pending' OR m.qa_language_status<>'pending' OR m.qa_technical_status<>'pending'
-      OR (m.reserve_role='diagnostic' AND m.diagnostic_rule_status<>'pending')
+      m.lifecycle_state<>'reserve' OR m.exposure_state<>'withheld'
+      OR m.copyright_status<>'pass' OR m.qa_scope_status<>'pass'
+      OR m.qa_math_status<>'pass' OR m.qa_language_status<>'pass' OR m.qa_technical_status<>'pass'
+      OR (m.reserve_role='diagnostic' AND m.diagnostic_rule_status<>'approved')
       OR (m.reserve_role<>'diagnostic' AND m.diagnostic_rule_status<>'not_applicable')
       OR q.is_active OR q.quality_status<>'draft'
     );
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: exposure/QA boundary failure rows=%',v_bad;
+    RAISE EXCEPTION 'aw09_12 annual reserve source: exposure/QA boundary failure rows=%',v_bad;
   END IF;
 
   SELECT count(*) INTO v_bad
@@ -125,7 +125,7 @@ BEGIN
       ))
     );
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: trilingual/type/options failure rows=%',v_bad;
+    RAISE EXCEPTION 'aw09_12 annual reserve source: trilingual/type/options failure rows=%',v_bad;
   END IF;
 
   SELECT count(*) INTO v_bad
@@ -143,7 +143,7 @@ BEGIN
       coalesce(q.book_ref,''),coalesce(q.time_limit_sec::text,''),
       coalesce(q.quality_flag,''),coalesce(q.quality_status,'')))<>m.question_snapshot_md5;
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: source snapshot mismatch rows=%',v_bad;
+    RAISE EXCEPTION 'aw09_12 annual reserve source: source snapshot mismatch rows=%',v_bad;
   END IF;
 
   -- Exact English stem reuse against older governed content is forbidden.
@@ -162,7 +162,7 @@ BEGIN
   JOIN public.questions oldq ON oldq.id=oldm.question_id
   WHERE lower(regexp_replace(btrim(oldq.question_text_en),'\s+','','g'))=d.stem;
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: exact same-skill old-stem overlap rows=%',v_bad;
+    RAISE EXCEPTION 'aw09_12 annual reserve source: exact same-skill old-stem overlap rows=%',v_bad;
   END IF;
 
   IF EXISTS(
@@ -172,15 +172,15 @@ BEGIN
     GROUP BY lower(regexp_replace(btrim(q.question_text_en),'\s+','','g'))
     HAVING count(*)>1
   ) THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: duplicate stem inside candidate';
+    RAISE EXCEPTION 'aw09_12 annual reserve source: duplicate stem inside candidate';
   END IF;
 
   IF (SELECT count(*)
       FROM private.exam_prep_diagnostic_rules r
       JOIN private.exam_prep_question_content_meta m ON m.id=r.content_meta_id
       WHERE m.content_version_id IN (4811,4812)
-        AND r.rule_version='aw_reserve_v1' AND r.status='draft')<>84 THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: expected 84 diagnostic rules';
+        AND r.rule_version='aw_reserve_v1' AND r.status='approved')<>84 THEN
+    RAISE EXCEPTION 'aw09_12 annual reserve source: expected 84 diagnostic rules';
   END IF;
 
   SELECT count(*) INTO v_bad
@@ -191,7 +191,7 @@ BEGIN
       q.qtype<>'mcq'
       OR (SELECT count(*) FROM private.exam_prep_diagnostic_rules r
           WHERE r.content_meta_id=m.id AND r.rule_version='aw_reserve_v1'
-            AND r.status='draft' AND r.answer_kind='mcq_option'
+            AND r.status='approved' AND r.answer_kind='mcq_option'
             AND r.answer_match<>q.correct_answer
             AND r.weak_skill_code=m.primary_skill_code
             AND nullif(btrim(r.feedback_en),'') IS NOT NULL
@@ -202,11 +202,11 @@ BEGIN
             AND nullif(btrim(r.next_action_uz),'') IS NOT NULL)<>3
     );
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: diagnostic-rule coverage failure rows=%',v_bad;
+    RAISE EXCEPTION 'aw09_12 annual reserve source: diagnostic-rule coverage failure rows=%',v_bad;
   END IF;
 
   IF (SELECT count(*) FROM private.exam_prep_assessments
-      WHERE id BETWEEN 35387 AND 35420 AND status='draft')<>34
+      WHERE id BETWEEN 35387 AND 35420 AND status='published')<>34
      OR (SELECT count(*) FROM private.exam_prep_assessments
          WHERE id BETWEEN 35387 AND 35420 AND assessment_type='diagnostic')<>4
      OR (SELECT count(*) FROM private.exam_prep_assessments
@@ -216,7 +216,7 @@ BEGIN
      OR (SELECT count(*) FROM private.exam_prep_assessment_items
          WHERE assessment_id BETWEEN 35387 AND 35420)<>70
   THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: assessment cardinality mismatch';
+    RAISE EXCEPTION 'aw09_12 annual reserve source: assessment cardinality mismatch';
   END IF;
 
   SELECT count(*) INTO v_bad
@@ -233,7 +233,7 @@ BEGIN
       OR ai.primary_skill_code NOT LIKE a.component_code||'-%'
     );
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: assessment isolation/role failure rows=%',v_bad;
+    RAISE EXCEPTION 'aw09_12 annual reserve source: assessment isolation/role failure rows=%',v_bad;
   END IF;
 
   IF EXISTS(
@@ -245,10 +245,10 @@ BEGIN
         OR (a.assessment_type='diagnostic' AND count(*) NOT IN (6,8))
         OR (a.assessment_type='mixed' AND count(*) NOT IN (6,8))
   ) THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: assessment shape failure';
+    RAISE EXCEPTION 'aw09_12 annual reserve source: assessment shape failure';
   END IF;
 
-  -- Independent-QA correction set is pinned before any publication review.
+  -- Independent-QA correction set remains pinned after publication.
   WITH expected(content_key,answer) AS (VALUES
     ('P1CIR02-D02','C'),('P1CIR02-D03','D'),
     ('P1COO04-D02','A'),('P1COO04-D03','B'),
@@ -272,7 +272,7 @@ BEGIN
   LEFT JOIN public.questions q ON q.id=m.question_id
   WHERE q.id IS NULL OR q.correct_answer<>e.answer;
   IF v_bad<>0 THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: independent-QA answer map mismatch rows=%',v_bad;
+    RAISE EXCEPTION 'aw09_12 annual reserve source: independent-QA answer map mismatch rows=%',v_bad;
   END IF;
 
   IF NOT EXISTS(
@@ -293,7 +293,7 @@ BEGIN
         AND q.correct_answer='0.4'
     )
   THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: representative independent-QA stem correction missing';
+    RAISE EXCEPTION 'aw09_12 annual reserve source: representative independent-QA stem correction missing';
   END IF;
 
   -- Diagnostic answer positions are balanced independently by component.
@@ -306,7 +306,7 @@ BEGIN
   FROM private.exam_prep_question_content_meta m JOIN public.questions q ON q.id=m.question_id
   WHERE m.content_version_id=4811 AND m.reserve_role='diagnostic';
   IF (v_a,v_b,v_c,v_d)<>(4,4,4,4) THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: P1 diagnostic answer balance A=% B=% C=% D=%',v_a,v_b,v_c,v_d;
+    RAISE EXCEPTION 'aw09_12 annual reserve source: P1 diagnostic answer balance A=% B=% C=% D=%',v_a,v_b,v_c,v_d;
   END IF;
 
   SELECT
@@ -318,7 +318,7 @@ BEGIN
   FROM private.exam_prep_question_content_meta m JOIN public.questions q ON q.id=m.question_id
   WHERE m.content_version_id=4812 AND m.reserve_role='diagnostic';
   IF (v_a,v_b,v_c,v_d)<>(3,3,3,3) THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: P5 diagnostic answer balance A=% B=% C=% D=%',v_a,v_b,v_c,v_d;
+    RAISE EXCEPTION 'aw09_12 annual reserve source: P5 diagnostic answer balance A=% B=% C=% D=%',v_a,v_b,v_c,v_d;
   END IF;
 
   IF EXISTS(
@@ -334,13 +334,13 @@ BEGIN
     JOIN private.exam_prep_question_content_meta m ON m.question_id=ta.question_id
     WHERE m.content_version_id IN (4811,4812)
   ) THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: unexpected learner/legacy history';
+    RAISE EXCEPTION 'aw09_12 annual reserve source: unexpected learner/legacy history';
   END IF;
 
   IF EXISTS(SELECT 1 FROM private.exam_prep_written_tasks WHERE content_version_id IN (4811,4812)) THEN
-    RAISE EXCEPTION 'aw09_12 annual reserve draft: unnecessary written task duplicated';
+    RAISE EXCEPTION 'aw09_12 annual reserve source: unnecessary written task duplicated';
   END IF;
 END
 $$;
 
-\echo 'AW9-12 annual reserve draft v1 contract: GREEN'
+\echo 'AW9-12 annual reserve source/release v1 contract: GREEN'
