@@ -50,12 +50,16 @@ BEGIN
     raise exception 'aw05_08 learning release: public source isolation changed';
   end if;
 
-  if (select count(*) from private.exam_prep_written_understanding_checks
-      where lifecycle_state='published')<>89
-     or (select count(distinct written_task_id)
-         from private.exam_prep_written_understanding_checks
-         where lifecycle_state='published')<>86 then
-    raise exception 'aw05_08 learning release: written-understanding surface mismatch';
+  if (select count(*) from private.exam_prep_written_understanding_checks c
+      join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
+      where wt.content_version_id in (4805,4806)
+        and c.lifecycle_state='published')<>14
+     or (select count(distinct c.written_task_id)
+         from private.exam_prep_written_understanding_checks c
+         join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
+         where wt.content_version_id in (4805,4806)
+           and c.lifecycle_state='published')<>14 then
+    raise exception 'aw05_08 learning release: target written-understanding surface mismatch';
   end if;
 
   if exists(
