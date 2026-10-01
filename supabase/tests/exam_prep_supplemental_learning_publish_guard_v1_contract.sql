@@ -77,7 +77,11 @@ begin
          where content_version_id in (4819,4820)
            and release_mode='supplemental_reserve'
            and require_written_understanding=false)<>2
-     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>20
+     or (select count(*) from private.exam_prep_content_release_profiles_v1
+         where content_version_id in (4821,4822)
+           and release_mode='supplemental_learning'
+           and require_written_understanding)<>2
+     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>22
   then
     raise exception 'supplemental-learning contract: governed release-profile surface drift';
   end if;
@@ -92,6 +96,8 @@ begin
      or coalesce((private.exam_prep_supplemental_learning_floor_v1(4814)->>'ready')::boolean,false) is not true
      or coalesce((private.exam_prep_supplemental_learning_floor_v1(4817)->>'ready')::boolean,false) is not true
      or coalesce((private.exam_prep_supplemental_learning_floor_v1(4818)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_learning_floor_v1(4821)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_learning_floor_v1(4822)->>'ready')::boolean,false) is not true
   then
     raise exception 'supplemental-learning contract: governed supplemental-learning floor is RED';
   end if;
