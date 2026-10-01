@@ -18,9 +18,6 @@ begin
   end if;
 
   if exists(
-    select 1 from private.exam_prep_written_sessions ws
-    where ws.written_task_id=15665
-  ) or exists(
     select 1 from private.exam_prep_written_session_check_snapshots cs
     where cs.written_task_id=15665
   ) then
