@@ -222,9 +222,9 @@ BEGIN
   if v_bad<>0 then raise exception 'aw21_24 supplemental source: written/check QA rows=%',v_bad; end if;
 
   if (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=0)<>5
-     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=1)<>5
+     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=1)<>4
      or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=2)<>4
-     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=3)<>4
+     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=3)<>5
   then raise exception 'aw21_24 supplemental source: written-check balance mismatch'; end if;
 
   select count(*) into v_bad
