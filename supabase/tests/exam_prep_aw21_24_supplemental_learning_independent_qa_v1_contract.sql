@@ -1,5 +1,5 @@
 -- AW21-24 supplemental learning independent-QA contract v1.
--- Draft/history-free candidate after a second academic/language/technical pass.
+-- Published governed candidate. Pins the independently reviewed correction surface after release.
 \set ON_ERROR_STOP on
 
 DO $$
@@ -8,31 +8,31 @@ DECLARE
   v_a int; v_b int; v_c int; v_d int; v_inputs int;
 BEGIN
   if (select count(*) from private.exam_prep_content_versions
-      where id in (4821,4822) and status='draft')<>2 then
-    raise exception 'aw21_24 independent QA contract: target draft versions missing';
+      where id in (4821,4822) and status='published')<>2 then
+    raise exception 'aw21_24 independent QA contract: target published versions missing';
   end if;
 
   if (select count(*) from private.exam_prep_question_content_meta
       where content_version_id in (4821,4822)
-        and lifecycle_state='draft' and exposure_state='withheld')<>54 then
-    raise exception 'aw21_24 independent QA contract: machine draft/withheld boundary mismatch';
+        and lifecycle_state='published' and exposure_state='released')<>54 then
+    raise exception 'aw21_24 independent QA contract: machine published/released boundary mismatch';
   end if;
 
   if (select count(*) from private.exam_prep_written_tasks
-      where content_version_id in (4821,4822) and lifecycle_state='draft')<>18
+      where content_version_id in (4821,4822) and lifecycle_state='published')<>18
      or (select count(*) from private.exam_prep_written_understanding_checks c
          join private.exam_prep_written_tasks wt on wt.id=c.written_task_id
-         where wt.content_version_id in (4821,4822) and c.lifecycle_state='draft')<>18
+         where wt.content_version_id in (4821,4822) and c.lifecycle_state='published')<>18
   then
-    raise exception 'aw21_24 independent QA contract: written/check draft boundary mismatch';
+    raise exception 'aw21_24 independent QA contract: written/check published boundary mismatch';
   end if;
 
   if (select count(*) from private.exam_prep_assessments
-      where content_version_id in (4821,4822) and status='draft' and assessment_type='learning')<>18
+      where content_version_id in (4821,4822) and status='published' and assessment_type='learning')<>18
      or (select count(*) from private.exam_prep_assessment_items ai
          join private.exam_prep_assessments a on a.id=ai.assessment_id
          where a.content_version_id in (4821,4822))<>72 then
-    raise exception 'aw21_24 independent QA contract: assessment draft surface mismatch';
+    raise exception 'aw21_24 independent QA contract: assessment published surface mismatch';
   end if;
 
   with expected(content_key,answer) as (values
@@ -141,16 +141,16 @@ BEGIN
     where m.content_version_id in (4821,4822)
       and (
         q.is_active or q.quality_status<>'draft'
-        or m.lifecycle_state<>'draft' or m.exposure_state<>'withheld'
-        or m.copyright_status<>'pending'
-        or m.qa_scope_status<>'pending'
-        or m.qa_math_status<>'pending'
-        or m.qa_language_status<>'pending'
-        or m.qa_technical_status<>'pending'
+        or m.lifecycle_state<>'published' or m.exposure_state<>'released'
+        or m.copyright_status<>'pass'
+        or m.qa_scope_status<>'pass'
+        or m.qa_math_status<>'pass'
+        or m.qa_language_status<>'pass'
+        or m.qa_technical_status<>'pass'
         or m.diagnostic_rule_status<>'not_applicable'
       )
   ) then
-    raise exception 'aw21_24 independent QA contract: draft governance state drift';
+    raise exception 'aw21_24 independent QA contract: published governance state drift';
   end if;
 
   select count(*) into v_bad
@@ -287,20 +287,20 @@ BEGIN
   left join private.exam_prep_written_understanding_checks c on c.written_task_id=wt.id
   where wt.content_version_id in (4821,4822)
     and (
-      wt.lifecycle_state<>'draft'
-      or wt.copyright_status<>'pending'
-      or wt.qa_math_status<>'pending'
-      or wt.qa_language_status<>'pending'
-      or wt.qa_technical_status<>'pending'
+      wt.lifecycle_state<>'published'
+      or wt.copyright_status<>'pass'
+      or wt.qa_math_status<>'pass'
+      or wt.qa_language_status<>'pass'
+      or wt.qa_technical_status<>'pass'
       or coalesce((wt.rubric_json->>'max_marks')::int,0)<>6
       or nullif(btrim(wt.prompt_en),'') is null
       or nullif(btrim(wt.prompt_ru),'') is null
       or nullif(btrim(wt.prompt_uz),'') is null
       or c.id is null
-      or c.lifecycle_state<>'draft'
-      or c.qa_math_status<>'pending'
-      or c.qa_language_status<>'pending'
-      or c.qa_technical_status<>'pending'
+      or c.lifecycle_state<>'published'
+      or c.qa_math_status<>'pass'
+      or c.qa_language_status<>'pass'
+      or c.qa_technical_status<>'pass'
       or jsonb_array_length(c.options_en)<>4
       or jsonb_array_length(c.options_ru)<>4
       or jsonb_array_length(c.options_uz)<>4
@@ -311,10 +311,21 @@ BEGIN
   end if;
 
   if (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=0)<>5
-     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=1)<>5
+     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=1)<>4
      or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=2)<>4
-     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=3)<>4 then
+     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=3)<>5 then
     raise exception 'aw21_24 independent QA contract: written-check balance mismatch';
+  end if;
+
+  if not exists(
+    select 1 from private.exam_prep_written_understanding_checks
+    where id=8965 and written_task_id=15665
+      and correct_index=3
+      and options_en->>3='Because tangency gives one repeated intersection root'
+      and options_ru->>3='Потому что при касании получается один повторный корень пересечения'
+      and options_uz->>3='Chunki urinmada bitta takroriy kesishish ildizi hosil bo‘ladi'
+  ) then
+    raise exception 'aw21_24 independent QA contract: written-check semantic rebalance pin missing';
   end if;
 
   if not exists(

@@ -18,8 +18,8 @@ begin
     into v_checks,v_tasks
   from private.exam_prep_written_understanding_checks
   where lifecycle_state='published';
-  if v_checks<>115 or v_tasks<>112 then
-    raise exception 'written-option-balance-gate: expected 115/112 published surface, got %/%',v_checks,v_tasks;
+  if v_checks<>133 or v_tasks<>130 then
+    raise exception 'written-option-balance-gate: expected 133/130 published surface, got %/%',v_checks,v_tasks;
   end if;
 
   select jsonb_object_agg(correct_index,cnt order by correct_index)
@@ -30,8 +30,8 @@ begin
     where lifecycle_state='published'
     group by correct_index
   ) q;
-  if v_dist<>jsonb_build_object('0',29,'1',29,'2',29,'3',28) then
-    raise exception 'written-option-balance-gate: expected 29/29/29/28, got %',v_dist;
+  if v_dist<>jsonb_build_object('0',34,'1',33,'2',33,'3',33) then
+    raise exception 'written-option-balance-gate: expected 34/33/33/33, got %',v_dist;
   end if;
 
   -- The history-bearing active/reference task is intentionally never re-versioned
