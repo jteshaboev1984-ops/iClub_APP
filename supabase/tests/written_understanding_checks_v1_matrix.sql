@@ -283,7 +283,7 @@ begin
     group by c.written_task_id
   ) q;
 
-  if v_single<>110 or v_multi<>2 or v_max<>3 then
+  if v_single<>128 or v_multi<>2 or v_max<>3 then
     raise exception 'written-understanding: per-task cardinality changed; single=%, multi=%, max=%',v_single,v_multi,v_max;
   end if;
 
