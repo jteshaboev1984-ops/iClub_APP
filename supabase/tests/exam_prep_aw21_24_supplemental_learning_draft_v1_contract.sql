@@ -1,4 +1,4 @@
--- AW21-24 supplemental learning draft v1 contract.
+-- AW21-24 supplemental learning source/release contract v1.
 -- Semantic QA note: P1INT01-A01 option C is the verified antiderivative 2x³−2x²+5x+C.
 \set ON_ERROR_STOP on
 
@@ -8,36 +8,40 @@ DECLARE
   v_a int; v_b int; v_c int; v_d int; v_inputs int;
 BEGIN
   if (select count(*) from private.exam_prep_content_versions
-      where id in (4821,4822) and status='draft')<>2 then
-    raise exception 'aw21_24 supplemental draft: expected two draft content versions';
+      where id in (4821,4822) and status='published')<>2 then
+    raise exception 'aw21_24 supplemental source: expected two draft content versions';
   end if;
 
-  if exists(select 1 from private.exam_prep_content_release_profiles_v1 where content_version_id in (4821,4822)) then
-    raise exception 'aw21_24 supplemental draft: release profile exists before approval';
+  if (select count(*) from private.exam_prep_content_release_profiles_v1
+      where content_version_id in (4821,4822)
+        and release_mode='supplemental_learning'
+        and profile_version='aw21_24_alt_release_v1'
+        and require_written_understanding)<>2 then
+    raise exception 'aw21_24 supplemental source: governed release profile mismatch';
   end if;
 
   if (select count(*) from private.exam_prep_question_content_meta
-      where content_version_id=4821 and lifecycle_state='draft' and reserve_role='learning' and exposure_state='withheld')<>30
+      where content_version_id=4821 and lifecycle_state='published' and reserve_role='learning' and exposure_state='released')<>30
      or (select count(*) from private.exam_prep_question_content_meta
-         where content_version_id=4822 and lifecycle_state='draft' and reserve_role='learning' and exposure_state='withheld')<>24
-  then raise exception 'aw21_24 supplemental draft: machine cardinality/state mismatch'; end if;
+         where content_version_id=4822 and lifecycle_state='published' and reserve_role='learning' and exposure_state='released')<>24
+  then raise exception 'aw21_24 supplemental source: machine cardinality/state mismatch'; end if;
 
   if (select count(*) from private.exam_prep_written_tasks
-      where content_version_id=4821 and lifecycle_state='draft')<>10
+      where content_version_id=4821 and lifecycle_state='published')<>10
      or (select count(*) from private.exam_prep_written_tasks
-         where content_version_id=4822 and lifecycle_state='draft')<>8
+         where content_version_id=4822 and lifecycle_state='published')<>8
      or (select count(*) from private.exam_prep_written_understanding_checks
-         where id between 8964 and 8981 and lifecycle_state='draft')<>18
-  then raise exception 'aw21_24 supplemental draft: written/check cardinality mismatch'; end if;
+         where id between 8964 and 8981 and lifecycle_state='published')<>18
+  then raise exception 'aw21_24 supplemental source: written/check cardinality mismatch'; end if;
 
   if (select count(*) from private.exam_prep_assessments
-      where content_version_id=4821 and assessment_type='learning' and status='draft')<>10
+      where content_version_id=4821 and assessment_type='learning' and status='published')<>10
      or (select count(*) from private.exam_prep_assessments
-         where content_version_id=4822 and assessment_type='learning' and status='draft')<>8
+         where content_version_id=4822 and assessment_type='learning' and status='published')<>8
      or (select count(*) from private.exam_prep_assessment_items ai
          join private.exam_prep_assessments a on a.id=ai.assessment_id
          where a.content_version_id in (4821,4822))<>72
-  then raise exception 'aw21_24 supplemental draft: assessment shape mismatch'; end if;
+  then raise exception 'aw21_24 supplemental source: assessment shape mismatch'; end if;
 
   select count(*) into v_bad
   from (
@@ -52,7 +56,7 @@ BEGIN
         or count(distinct ai.primary_skill_code)<>1
   ) x;
   if v_bad<>0 then
-    raise exception 'aw21_24 supplemental draft: per-assessment 3+1 shape mismatch rows=%',v_bad;
+    raise exception 'aw21_24 supplemental source: per-assessment 3+1 shape mismatch rows=%',v_bad;
   end if;
 
   select count(*) into v_bad
@@ -60,14 +64,14 @@ BEGIN
   join public.questions q on q.id=m.question_id
   where m.content_version_id in (4821,4822)
     and (
-      m.copyright_status<>'pending'
-      or m.qa_scope_status<>'pending'
-      or m.qa_math_status<>'pending'
-      or m.qa_language_status<>'pending'
-      or m.qa_technical_status<>'pending'
+      m.copyright_status<>'pass'
+      or m.qa_scope_status<>'pass'
+      or m.qa_math_status<>'pass'
+      or m.qa_language_status<>'pass'
+      or m.qa_technical_status<>'pass'
       or m.diagnostic_rule_status<>'not_applicable'
-      or m.lifecycle_state<>'draft'
-      or m.exposure_state<>'withheld'
+      or m.lifecycle_state<>'published'
+      or m.exposure_state<>'released'
       or q.subject_id<>5
       or q.is_active
       or q.quality_status<>'draft'
@@ -104,7 +108,7 @@ BEGIN
         coalesce(q.book_ref,''),coalesce(q.time_limit_sec::text,''),
         coalesce(q.quality_flag,''),coalesce(q.quality_status,'')))<>m.question_snapshot_md5
     );
-  if v_bad<>0 then raise exception 'aw21_24 supplemental draft: machine QA/type/snapshot rows=%',v_bad; end if;
+  if v_bad<>0 then raise exception 'aw21_24 supplemental source: machine QA/type/snapshot rows=%',v_bad; end if;
 
   if exists(
     select 1 from private.exam_prep_assessments
@@ -116,7 +120,7 @@ BEGIN
         or lower(coalesce(title_ru,'')) like '%чернов%'
         or lower(coalesce(title_uz,'')) like '%qo‘shimcha%'
       )
-  ) then raise exception 'aw21_24 supplemental draft: internal wording in learner titles'; end if;
+  ) then raise exception 'aw21_24 supplemental source: internal wording in learner titles'; end if;
 
   select count(*) into v_bad
   from private.exam_prep_question_content_meta m
@@ -137,7 +141,7 @@ BEGIN
       or (m.primary_skill_code='P5-NOR-06'
         and (m.official_scope_ref not like '%P5 5.5 The normal distribution%' or m.coursebook_mapping_ref not like '%Ch10%173-179%'))
     );
-  if v_bad<>0 then raise exception 'aw21_24 supplemental draft: source-map mismatch rows=%',v_bad; end if;
+  if v_bad<>0 then raise exception 'aw21_24 supplemental source: source-map mismatch rows=%',v_bad; end if;
 
   if (select count(*)
       from private.exam_prep_content_runway_releases r
@@ -146,7 +150,7 @@ BEGIN
         and r.active_week_from=21 and r.active_week_through=24
         and r.schedule_status='active'
         and rs.required_for_release)<>18
-  then raise exception 'aw21_24 supplemental draft: governed runway target set mismatch'; end if;
+  then raise exception 'aw21_24 supplemental source: governed runway target set mismatch'; end if;
 
   if exists(
     select 1
@@ -160,7 +164,7 @@ BEGIN
     where m.content_version_id in (4821,4822)
       and lower(regexp_replace(q.question_text_en,'\s+',' ','g'))=
           lower(regexp_replace(oldq.question_text_en,'\s+',' ','g'))
-  ) then raise exception 'aw21_24 supplemental draft: exact published stem duplicate'; end if;
+  ) then raise exception 'aw21_24 supplemental source: exact published stem duplicate'; end if;
 
   select
     count(*) filter(where q.correct_answer='A'),
@@ -172,7 +176,7 @@ BEGIN
   from private.exam_prep_question_content_meta m join public.questions q on q.id=m.question_id
   where m.content_version_id=4821;
   if (v_a,v_b,v_c,v_d,v_inputs)<>(5,5,5,5,10) then
-    raise exception 'aw21_24 supplemental draft: P1 answer balance mismatch';
+    raise exception 'aw21_24 supplemental source: P1 answer balance mismatch';
   end if;
 
   select
@@ -185,7 +189,7 @@ BEGIN
   from private.exam_prep_question_content_meta m join public.questions q on q.id=m.question_id
   where m.content_version_id=4822;
   if (v_a,v_b,v_c,v_d,v_inputs)<>(4,4,4,4,8) then
-    raise exception 'aw21_24 supplemental draft: P5 answer balance mismatch';
+    raise exception 'aw21_24 supplemental source: P5 answer balance mismatch';
   end if;
 
   select count(*) into v_bad
@@ -193,11 +197,11 @@ BEGIN
   left join private.exam_prep_written_understanding_checks c on c.written_task_id=wt.id
   where wt.content_version_id in (4821,4822)
     and (
-      wt.lifecycle_state<>'draft'
-      or wt.copyright_status<>'pending'
-      or wt.qa_math_status<>'pending'
-      or wt.qa_language_status<>'pending'
-      or wt.qa_technical_status<>'pending'
+      wt.lifecycle_state<>'published'
+      or wt.copyright_status<>'pass'
+      or wt.qa_math_status<>'pass'
+      or wt.qa_language_status<>'pass'
+      or wt.qa_technical_status<>'pass'
       or coalesce((wt.rubric_json->>'max_marks')::int,0)<>6
       or nullif(btrim(wt.prompt_en),'') is null
       or nullif(btrim(wt.prompt_ru),'') is null
@@ -206,22 +210,22 @@ BEGIN
       or nullif(btrim(wt.self_review_ru),'') is null
       or nullif(btrim(wt.self_review_uz),'') is null
       or c.id is null
-      or c.lifecycle_state<>'draft'
-      or c.qa_math_status<>'pending'
-      or c.qa_language_status<>'pending'
-      or c.qa_technical_status<>'pending'
+      or c.lifecycle_state<>'published'
+      or c.qa_math_status<>'pass'
+      or c.qa_language_status<>'pass'
+      or c.qa_technical_status<>'pass'
       or jsonb_array_length(c.options_en)<>4
       or jsonb_array_length(c.options_ru)<>4
       or jsonb_array_length(c.options_uz)<>4
       or c.correct_index not between 0 and 3
     );
-  if v_bad<>0 then raise exception 'aw21_24 supplemental draft: written/check QA rows=%',v_bad; end if;
+  if v_bad<>0 then raise exception 'aw21_24 supplemental source: written/check QA rows=%',v_bad; end if;
 
   if (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=0)<>5
      or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=1)<>5
      or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=2)<>4
      or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=3)<>4
-  then raise exception 'aw21_24 supplemental draft: written-check balance mismatch'; end if;
+  then raise exception 'aw21_24 supplemental source: written-check balance mismatch'; end if;
 
   select count(*) into v_bad
   from (
@@ -236,15 +240,14 @@ BEGIN
     left join private.exam_prep_question_content_meta m on m.primary_skill_code=s.skill_code
     left join private.exam_prep_content_versions cv on cv.id=m.content_version_id
     left join private.exam_prep_written_tasks wt on wt.primary_skill_code=s.skill_code
-      and (wt.lifecycle_state='published' or (wt.content_version_id in (4821,4822) and wt.lifecycle_state='draft'))
+      and wt.lifecycle_state='published'
     group by s.skill_code
     having count(distinct m.id) filter(where
-      (cv.status='published' and m.lifecycle_state in ('published','reserve') and m.reserve_role in ('learning','mixed'))
-      or (cv.id in (4821,4822) and cv.status='draft' and m.lifecycle_state='draft' and m.reserve_role='learning')
+      cv.status='published' and m.lifecycle_state in ('published','reserve') and m.reserve_role in ('learning','mixed')
     )<7
        or count(distinct wt.id)<2
   ) x;
-  if v_bad<>0 then raise exception 'aw21_24 supplemental draft: prospective learning/written floor failed rows=%',v_bad; end if;
+  if v_bad<>0 then raise exception 'aw21_24 supplemental source: final learning/written floor failed rows=%',v_bad; end if;
 
   if exists(
     select 1 from private.exam_prep_sessions s
@@ -258,8 +261,8 @@ BEGIN
     select 1 from public.tour_answers ta
     join private.exam_prep_question_content_meta m on m.question_id=ta.question_id
     where m.content_version_id in (4821,4822)
-  ) then raise exception 'aw21_24 supplemental draft: history contamination'; end if;
+  ) then raise exception 'aw21_24 supplemental source: history contamination'; end if;
 END
 $$;
 
-\echo 'AW21-24 supplemental learning draft v1 contract: GREEN'
+\echo 'AW21-24 supplemental learning source/release v1 contract: GREEN'
