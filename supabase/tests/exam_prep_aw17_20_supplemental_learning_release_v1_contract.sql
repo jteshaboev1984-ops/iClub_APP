@@ -48,11 +48,11 @@ BEGIN
   ) then raise exception 'aw17_20 learning release: public source isolation changed'; end if;
 
   if (select count(*) from private.exam_prep_written_understanding_checks
-      where lifecycle_state='published')<>115
+      where lifecycle_state='published')<>133
      or (select count(distinct written_task_id)
          from private.exam_prep_written_understanding_checks
-         where lifecycle_state='published')<>112 then
-    raise exception 'aw17_20 learning release: written-understanding surface mismatch';
+         where lifecycle_state='published')<>130 then
+    raise exception 'aw17_20 learning release: written-understanding surface mismatch after later governed releases';
   end if;
 
   if exists(
