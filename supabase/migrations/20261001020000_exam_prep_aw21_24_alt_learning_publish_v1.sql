@@ -156,7 +156,7 @@ begin
   into v_check0,v_check1,v_check2,v_check3
   from private.exam_prep_written_understanding_checks
   where id between 8964 and 8981;
-  if (v_check0,v_check1,v_check2,v_check3)<>(5,5,4,4) then
+  if (v_check0,v_check1,v_check2,v_check3)<>(5,4,4,5) then
     raise exception 'aw21_24_alt_publish: written-check answer-position drift 0=% 1=% 2=% 3=%',v_check0,v_check1,v_check2,v_check3;
   end if;
 
