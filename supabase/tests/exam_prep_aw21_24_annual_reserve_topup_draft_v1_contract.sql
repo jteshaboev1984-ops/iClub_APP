@@ -134,6 +134,52 @@ BEGIN
     end if;
   end loop;
 
+  -- Check the order learners actually see inside each multi-item diagnostic form,
+  -- not only the storage order of source rows.
+  for v_seq in
+    select string_agg(q.correct_answer,'' order by ai.item_order)
+    from private.exam_prep_assessments a
+    join private.exam_prep_assessment_items ai on ai.assessment_id=a.id
+    join public.questions q on q.id=ai.question_id
+    where a.id in (35529,35530,35552,35553)
+    group by a.id
+  loop
+    if v_seq like any(array['%ABCD%','%BCDA%','%CDAB%','%DABC%','%DCBA%','%CBAD%','%BADC%','%ADCB%'])
+       or v_seq ~ '(AA|BB|CC|DD)' then
+      raise exception 'aw21_24 annual reserve draft: learner-form sequential correct-option pattern detected: %',v_seq;
+    end if;
+  end loop;
+
+  select count(*) into v_bad
+  from (
+    select a.id,l.letter,count(q.id) filter(where q.correct_answer=l.letter) as cnt
+    from private.exam_prep_assessments a
+    cross join (values('A'),('B'),('C'),('D')) l(letter)
+    left join private.exam_prep_assessment_items ai on ai.assessment_id=a.id
+    left join public.questions q on q.id=ai.question_id
+    where a.id in (35529,35530)
+    group by a.id,l.letter
+  ) x
+  where x.cnt not between 2 and 3;
+  if v_bad<>0 then
+    raise exception 'aw21_24 annual reserve draft: P1 learner-form answer balance failed cells=%',v_bad;
+  end if;
+
+  select count(*) into v_bad
+  from (
+    select a.id,l.letter,count(q.id) filter(where q.correct_answer=l.letter) as cnt
+    from private.exam_prep_assessments a
+    cross join (values('A'),('B'),('C'),('D')) l(letter)
+    left join private.exam_prep_assessment_items ai on ai.assessment_id=a.id
+    left join public.questions q on q.id=ai.question_id
+    where a.id in (35552,35553)
+    group by a.id,l.letter
+  ) x
+  where x.cnt<>2;
+  if v_bad<>0 then
+    raise exception 'aw21_24 annual reserve draft: P5 learner-form answer balance failed cells=%',v_bad;
+  end if;
+
   if (select count(*) from private.exam_prep_assessments
       where content_version_id in (4823,4824) and status='draft')<>42
      or (select count(*) from private.exam_prep_assessments
