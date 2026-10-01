@@ -311,10 +311,21 @@ BEGIN
   end if;
 
   if (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=0)<>5
-     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=1)<>5
+     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=1)<>4
      or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=2)<>4
-     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=3)<>4 then
+     or (select count(*) from private.exam_prep_written_understanding_checks where id between 8964 and 8981 and correct_index=3)<>5 then
     raise exception 'aw21_24 independent QA contract: written-check balance mismatch';
+  end if;
+
+  if not exists(
+    select 1 from private.exam_prep_written_understanding_checks
+    where id=8965 and written_task_id=15665
+      and correct_index=3
+      and options_en->>3='Because tangency gives one repeated intersection root'
+      and options_ru->>3='Потому что при касании получается один повторный корень пересечения'
+      and options_uz->>3='Chunki urinmada bitta takroriy kesishish ildizi hosil bo‘ladi'
+  ) then
+    raise exception 'aw21_24 independent QA contract: written-check semantic rebalance pin missing';
   end if;
 
   if not exists(
