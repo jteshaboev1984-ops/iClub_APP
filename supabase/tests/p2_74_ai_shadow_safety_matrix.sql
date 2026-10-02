@@ -146,8 +146,12 @@ BEGIN
       END IF;
     END LOOP;
   END LOOP;
-  v:=public.get_exam_prep_ai_source_cards_service_v1('P1','en','theory',null,8);
-  IF jsonb_array_length(v)<>0 THEN RAISE EXCEPTION 'P2-74 no_source precondition failed: %',v; END IF;
+  v:=public.get_exam_prep_ai_source_cards_service_v1('P1','en','theory','P1-QUA-02',8);
+  IF jsonb_array_length(v)<>1 OR v#>>'{0,source_card_key}'<>'p1:P1-QUA-02:theory:en:v1' THEN
+    RAISE EXCEPTION 'P2-74 governed theory source precondition failed: %',v;
+  END IF;
+  v:=public.get_exam_prep_ai_source_cards_service_v1('P1','en','theory','P1-QUA-01',8);
+  IF jsonb_array_length(v)<>0 THEN RAISE EXCEPTION 'P2-74 uncovered theory no_source precondition failed: %',v; END IF;
   v:=public.get_exam_prep_ai_source_cards_service_v1('P1','en','progress_context',null,20);
   IF v::text LIKE '%p274:p1:blocked:en:v1%' THEN RAISE EXCEPTION 'P2-74 blocked prompt-injection source escaped allowlist'; END IF;
 END
