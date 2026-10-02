@@ -1,4 +1,5 @@
 name: P2-76 AI Explanation Quality
+# P3-02 canary reuses the funded provider acceptance gate before any learner activation.
 
 on:
   push:
