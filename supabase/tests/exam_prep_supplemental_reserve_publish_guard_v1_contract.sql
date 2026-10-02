@@ -84,7 +84,11 @@ BEGIN
          where content_version_id in (4821,4822)
            and release_mode='supplemental_learning'
            and require_written_understanding)<>2
-     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>22
+     or (select count(*) from private.exam_prep_content_release_profiles_v1
+         where content_version_id in (4823,4824)
+           and release_mode='supplemental_reserve'
+           and require_written_understanding=false)<>2
+     or (select count(*) from private.exam_prep_content_release_profiles_v1)<>24
   then
     raise exception 'supplemental-reserve contract: governed release-profile surface drift';
   end if;
@@ -111,6 +115,8 @@ BEGIN
      or coalesce((private.exam_prep_supplemental_reserve_floor_v1(4820)->>'ready')::boolean,false) is not true
      or coalesce((private.exam_prep_supplemental_learning_floor_v1(4821)->>'ready')::boolean,false) is not true
      or coalesce((private.exam_prep_supplemental_learning_floor_v1(4822)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_reserve_floor_v1(4823)->>'ready')::boolean,false) is not true
+     or coalesce((private.exam_prep_supplemental_reserve_floor_v1(4824)->>'ready')::boolean,false) is not true
   then
     raise exception 'supplemental-reserve contract: governed supplemental floor is RED';
   end if;
@@ -185,9 +191,9 @@ ROLLBACK;
 
 DO $$
 BEGIN
-  if (select count(*) from private.exam_prep_content_release_profiles_v1)<>22
+  if (select count(*) from private.exam_prep_content_release_profiles_v1)<>24
      or (select count(*) from private.exam_prep_content_versions
-         where id in (4803,4804,4807,4808,4811,4812,4815,4816,4819,4820) and status='published')<>10
+         where id in (4803,4804,4807,4808,4811,4812,4815,4816,4819,4820,4823,4824) and status='published')<>12
      or (select count(*) from private.exam_prep_content_versions
          where id in (4817,4818,4821,4822) and status='published')<>4 then
     raise exception 'supplemental-reserve contract: rollback disturbed released governance surface';

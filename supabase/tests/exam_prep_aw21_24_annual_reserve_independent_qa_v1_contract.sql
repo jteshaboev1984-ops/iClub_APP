@@ -1,5 +1,5 @@
 -- AW21-24 annual-reserve independent academic/language/technical QA contract v1.
--- Candidate remains draft/withheld/history-free. Publication is a separate governed stage.
+-- Validates the independently reviewed candidate after governed publication; reserve remains withheld/history-free.
 \set ON_ERROR_STOP on
 
 DO $$
@@ -9,13 +9,13 @@ DECLARE
   v_seq text;
 BEGIN
   if (select count(*) from private.exam_prep_content_versions
-      where id in (4823,4824) and status='draft')<>2 then
-    raise exception 'aw21_24 reserve independent QA: target drafts missing';
+      where id in (4823,4824) and status='published')<>2 then
+    raise exception 'aw21_24 reserve independent QA: target published versions missing';
   end if;
 
   if (select count(*) from private.exam_prep_question_content_meta
       where content_version_id in (4823,4824)
-        and lifecycle_state='draft' and exposure_state='withheld')<>90
+        and lifecycle_state='reserve' and exposure_state='withheld')<>90
      or (select count(*) from private.exam_prep_question_content_meta
          where content_version_id in (4823,4824) and reserve_role='diagnostic')<>36
      or (select count(*) from private.exam_prep_question_content_meta
@@ -135,13 +135,13 @@ BEGIN
       q.subject_id<>5
       or q.is_active
       or q.quality_status<>'draft'
-      or m.lifecycle_state<>'draft'
+      or m.lifecycle_state<>'reserve'
       or m.exposure_state<>'withheld'
-      or m.copyright_status<>'pending'
-      or m.qa_scope_status<>'pending'
-      or m.qa_math_status<>'pending'
-      or m.qa_language_status<>'pending'
-      or m.qa_technical_status<>'pending'
+      or m.copyright_status<>'pass'
+      or m.qa_scope_status<>'pass'
+      or m.qa_math_status<>'pass'
+      or m.qa_language_status<>'pass'
+      or m.qa_technical_status<>'pass'
       or nullif(btrim(q.question_text_en),'') is null
       or nullif(btrim(q.question_text_ru),'') is null
       or nullif(btrim(q.question_text_uz),'') is null
@@ -333,7 +333,7 @@ BEGIN
       or (select count(*) from private.exam_prep_diagnostic_rules r
           where r.content_meta_id=m.id
             and r.rule_version='aw_reserve_v1'
-            and r.status='draft'
+            and r.status='approved'
             and r.answer_kind='mcq_option'
             and r.answer_match<>q.correct_answer
             and r.weak_skill_code=m.primary_skill_code
@@ -355,7 +355,7 @@ BEGIN
   if (select count(*) from private.exam_prep_diagnostic_rules r
       join private.exam_prep_question_content_meta m on m.id=r.content_meta_id
       where m.content_version_id in (4823,4824)
-        and r.rule_version='aw_reserve_v1' and r.status='draft')<>108 then
+        and r.rule_version='aw_reserve_v1' and r.status='approved')<>108 then
     raise exception 'aw21_24 reserve independent QA: diagnostic-rule total mismatch';
   end if;
 
@@ -372,7 +372,7 @@ BEGIN
 
   -- Assessment containers and holdout isolation.
   if (select count(*) from private.exam_prep_assessments
-      where content_version_id in (4823,4824) and status='draft')<>42
+      where content_version_id in (4823,4824) and status='published')<>42
      or (select count(*) from private.exam_prep_assessment_items ai
          join private.exam_prep_assessments a on a.id=ai.assessment_id
          where a.content_version_id in (4823,4824))<>90
