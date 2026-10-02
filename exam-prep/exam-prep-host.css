@@ -822,6 +822,20 @@
   opacity: .74;
 }
 
+#exam-prep-host-root .ep-past-paper-actions {
+  display: grid;
+  gap: 8px;
+}
+
+#exam-prep-host-root .ep-past-paper-actions-title {
+  font-size: 12px;
+}
+
+#exam-prep-host-root .ep-past-paper-action {
+  width: 100%;
+  text-align: left;
+}
+
 #exam-prep-host-root .ep-past-paper-link {
   display: inline-flex;
   align-items: center;
