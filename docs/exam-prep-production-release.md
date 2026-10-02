@@ -41,3 +41,20 @@ This marker intentionally changes no application behavior. It creates the distin
 The browser now orders only the Exam Prep RPCs whose nominal read paths rebuild learner projections: diagnostic progress, placement and derived state. This prevents competing Exam Prep surfaces in one browser context from rebuilding the same learner projection concurrently. The server contracts, academic rules and stored learner evidence remain unchanged.
 
 There is no Supabase migration or schema/data write in this release, no learner-progress reset, no localStorage migration, and no changes to legacy Tours, Practice, ratings or certificates. Existing controlled-beta access and fail-closed behavior remain authoritative.
+
+
+## 2026-10-02 P2-04 / P2-05 Cambridge-reference and readiness marker
+
+**P2-05 merge commit:** `2be052ddd4172e9c89eeba409df1439429fa5942`  
+**Validated P2-05 PR head:** `91a5882da348705a0743f7eacd8c9490d5aa2be7`  
+**PR #268 validation:** 40/40 workflows — SUCCESS  
+**P2-80 independent A-to-Z audit:** SUCCESS  
+**P2-73 Core engineering dress rehearsal:** SUCCESS
+
+This marker intentionally changes no application behavior. It creates the distinct push required by the existing iClub Vercel production deployment mechanism after the validated P2-04/P2-05 learner surfaces were merged into `main`.
+
+The learner UI now preserves the official Cambridge 9709 June 2026 reference with an explicit reference-only label. The June 2026 P1/P5 threshold data and special incident handling remain historical context only; they are not promoted into an approved future-series Stage-5 readiness threshold. App Readiness remains an iClub evidence estimate, not an official Cambridge grade or a prediction of a future grade.
+
+The P2-05 production schema was installed before this marker through the additive `20261002060000_exam_prep_p2_05_readiness_summary_safe_v1.sql` migration. Immediate production verification showed the learner-safe readiness RPC present for authenticated users only, zero approved Stage-5 future-series thresholds, all 10 official Cambridge June 2026 reference rows intact, and unchanged legacy counts: users 1442, Practice answers 8770, Tour answers 6267, certificates 157.
+
+This release does not expand the cohort and does not enable AI Assist or Mentor Care. The controlled-beta Core boundary remains authoritative: Core ON, AI OFF, Mentor OFF, kill switch OFF. No learner progress, localStorage, Practice/Tour history, ratings or certificates are rewritten.
