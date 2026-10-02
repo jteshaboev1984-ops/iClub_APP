@@ -12,6 +12,18 @@ $$;
 
 BEGIN;
 
+-- Some aggregate CI workflows intentionally leave the global feature config OFF
+-- before this isolated matrix. Open Core only inside this rollback-only transaction
+-- so the public safe RPC is exercised through the same access guard as production.
+UPDATE private.exam_prep_feature_config
+SET rollout_state='controlled_beta',
+    core_enabled=true,
+    ai_enabled=false,
+    mentor_enabled=false,
+    kill_switch=false,
+    updated_at=now()
+WHERE id=1;
+
 CREATE TEMP TABLE p302_error_fixture(
   component_code text primary key,
   user_id uuid not null,
