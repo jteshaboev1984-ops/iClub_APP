@@ -28,7 +28,7 @@ must(ui.includes('const VERSION = "p203paper2"'), 'Past Paper Companion version 
 must(ui.includes('function visiblePracticeRows(card, payload)'), 'actionable practice filter missing');
 must(ui.includes('function focusTimedRow(card, assessmentId)'), 'safe list-focus navigation missing');
 must(ui.includes('data-ep-live-timed-start'), 'Similar Practice actions must resolve only existing governed catalog rows');
-must(ui.includes('data-ep-past-paper-start'), 'actionable Similar Practice controls missing');
+must(ui.includes('dataset.epPastPaperStart'), 'actionable Similar Practice controls missing');
 must(ui.includes('scrollIntoView') && ui.includes('button.focus'), 'Similar Practice action must navigate to the existing governed start control');
 must(!ui.includes('internal.api.authorizeTimed') && !ui.includes('startSession('), 'Past Paper Companion must not bypass the existing timed catalog authorization flow');
 must(ui.includes('Доступно сейчас') && ui.includes('Available now') && ui.includes('Hozir mavjud'), 'trilingual actionable practice copy missing');
