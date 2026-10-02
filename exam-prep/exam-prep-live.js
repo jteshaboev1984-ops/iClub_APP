@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p205readiness2";
+  const VERSION = "p206finalops1";
   let attached = false;
 
   const state = {
@@ -71,6 +71,11 @@
       dashboardEyebrow: "Sizning yo‘lingiz", dashboardTitle: "P1 va P5 bo‘yicha tayyorgarlik", dashboardText: "Har bir komponent o‘z bosqichi, dalillari va keyingi qadami bilan alohida yuradi.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "ko‘nikma", continueCheck: "Kirish tekshiruvini davom ettirish", profileSaved: "Saqlangan reja", targetShort: "Maqsad", totalShort: "Jami", mathShort: "Matematika", hoursShort: "soat/hafta",
       actionCloseIssue: "Qolgan asosiy xatoni yoping", actionShort: "Qisqa maqsadli mashq", actionTiming: "Vaqt va imtihon tartibini tekshirish", actionTaper: "Yuklamani kamaytirish va natijani saqlash",
+      examOpsTitle: "Imtihon kuni rejasi", examOpsProgress: "Tekshiruvlar", examOpsChecklist: "Imtihon oldidan tekshiruv",
+      examStartTitle: "Maktab yoki markaz tasdiqlagan boshlanish vaqti", examStartHint: "Vaqtni maktab yoki imtihon markazi ma’lumotiga ko‘ra kiriting. iClub sana yoki vaqtni taxmin qilmaydi.", examStartSave: "Vaqtni saqlash", examStartInvalid: "Boshlanish vaqtini tekshiring.",
+      examTimetableVerified: "Rasmiy jadval tasdiqlangan", examTimetablePending: "Bu imtihon seriyasi uchun rasmiy yakuniy jadval hali tasdiqlanmagan. Maktab yoki markaz ko‘rsatmasiga amal qiling.", examOfficialSource: "Rasmiy manba",
+      calibrationTargetedTaper: "Faqat qisqa takrorlash va tasdiqlangan zaif joylar bo‘yicha ishlang.", calibrationStopMajor: "Imtihonga 24 soatdan kam qoldi: katta yangi ishni boshlamang.", calibrationReached: "Bu komponent uchun tasdiqlangan boshlanish vaqti yetib keldi.", calibrationStartNeeded: "Aniq boshlanish vaqtini maktab yoki markazdan tekshirib kiriting.",
+      calibrationNoMastery: "Bu yakuniy bosqich yangi o‘zlashtirish darajasini yaratmaydi; maqsad mavjud tayyorgarlikni saqlash.", calibrationReferenceLabel: "Rasmiy Cambridge June 2026 ma’lumoti", calibrationReferenceNote: "Format va vaqt shartlari uchun tarixiy reference sifatida ko‘rsatilgan. Hozirgi imtihon sanasi va markaz ko‘rsatmasining o‘rnini bosmaydi.",
       assignmentResult: "Topshiriq natijasi", autoChecked: "Avtomatik tekshiriladigan savollar", writtenPart: "Yozma qism",
       correctOf: "to‘g‘ri", writtenCompleted: "bajarildi", writtenNoAccuracy: "Yozma topshiriqlar to‘g‘ri javoblar foiziga kiritilmaydi.",
       reviewAnswers: "Javoblarni tahlil qilish", continueResult: "Davom etish", allQuestions: "Barcha savollar", mistakesOnly: "Faqat xatolar", noMistakes: "Bu topshiriqda xatolar yo‘q.",
@@ -116,6 +121,11 @@
       dashboardEyebrow: "Your route", dashboardTitle: "Preparation for P1 and P5", dashboardText: "Each component moves separately with its own phase, evidence and next action.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "skills", continueCheck: "Continue entry check", profileSaved: "Saved plan", targetShort: "Target grade", totalShort: "Total", mathShort: "Mathematics", hoursShort: "h/week",
       actionCloseIssue: "Close the main remaining issue", actionShort: "Short targeted practice", actionTiming: "Check timing and exam logistics", actionTaper: "Reduce workload and protect performance",
+      examOpsTitle: "Exam-day plan", examOpsProgress: "Checks", examOpsChecklist: "Before-exam checklist",
+      examStartTitle: "Start time confirmed by your school or centre", examStartHint: "Enter the time from your school or exam centre. iClub does not guess the exam date or start time.", examStartSave: "Save start time", examStartInvalid: "Check the start time.",
+      examTimetableVerified: "Official timetable verified", examTimetablePending: "The official final timetable for this exam series is not verified here yet. Follow your school or centre instructions.", examOfficialSource: "Official source",
+      calibrationTargetedTaper: "Keep work short and focused on confirmed weak points only.", calibrationStopMajor: "Less than 24 hours remain: do not start major new work.", calibrationReached: "The confirmed start time for this component has been reached.", calibrationStartNeeded: "Check the exact start time with your school or centre and enter it here.",
+      calibrationNoMastery: "This final phase does not create new mastery levels; it protects the preparation you already have.", calibrationReferenceLabel: "Official Cambridge June 2026 reference", calibrationReferenceNote: "Shown as a historical reference for format and timing context only. It does not replace your current exam timetable or centre instructions.",
       assignmentResult: "Task result", autoChecked: "Auto-checked questions", writtenPart: "Written part",
       correctOf: "correct", writtenCompleted: "completed", writtenNoAccuracy: "Written tasks are not included in the correct-answer percentage.",
       reviewAnswers: "Review answers", continueResult: "Continue", allQuestions: "All questions", mistakesOnly: "Mistakes only", noMistakes: "There are no mistakes in this task.",
@@ -161,6 +171,11 @@
       dashboardEyebrow: "Ваш маршрут", dashboardTitle: "Подготовка по P1 и P5", dashboardText: "Каждый компонент идёт отдельно: со своим этапом, подтверждениями и следующим действием.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "навыков", continueCheck: "Продолжить входную проверку", profileSaved: "Сохранённый план", targetShort: "Цель", totalShort: "Всего", mathShort: "Математика", hoursShort: "ч/нед",
       actionCloseIssue: "Закрыть основную оставшуюся ошибку", actionShort: "Короткая целевая практика", actionTiming: "Проверить время и экзаменационный порядок", actionTaper: "Снизить нагрузку и сохранить форму",
+      examOpsTitle: "План на день экзамена", examOpsProgress: "Проверки", examOpsChecklist: "Проверка перед экзаменом",
+      examStartTitle: "Время начала, подтверждённое школой или экзаменационным центром", examStartHint: "Введите время по информации школы или экзаменационного центра. iClub не угадывает дату или время экзамена.", examStartSave: "Сохранить время", examStartInvalid: "Проверьте время начала.",
+      examTimetableVerified: "Официальное расписание подтверждено", examTimetablePending: "Для этой экзаменационной сессии финальное официальное расписание здесь пока не подтверждено. Следуйте инструкции школы или экзаменационного центра.", examOfficialSource: "Официальный источник",
+      calibrationTargetedTaper: "Оставьте только короткое повторение и точечную работу по подтверждённым слабым местам.", calibrationStopMajor: "До экзамена меньше 24 часов: не начинайте большую новую работу.", calibrationReached: "Подтверждённое время начала этого компонента наступило.", calibrationStartNeeded: "Уточните точное время начала в школе или экзаменационном центре и укажите его здесь.",
+      calibrationNoMastery: "Этот финальный этап не создаёт новый уровень освоения; его задача — сохранить уже подтверждённую готовность.", calibrationReferenceLabel: "Официальный Cambridge June 2026 reference", calibrationReferenceNote: "Показан как исторический ориентир только по формату и условиям времени. Он не заменяет актуальное расписание и инструкции вашего центра.",
       assignmentResult: "Результат задания", autoChecked: "Автопроверяемые вопросы", writtenPart: "Письменная часть",
       correctOf: "верно", writtenCompleted: "выполнено", writtenNoAccuracy: "Письменные задачи не входят в процент правильных ответов.",
       reviewAnswers: "Разобрать ответы", continueResult: "Продолжить", allQuestions: "Все вопросы", mistakesOnly: "Только ошибки", noMistakes: "Ошибок в этом задании нет.",
@@ -1340,14 +1355,103 @@
     return ({ close_recurring_issue:c.actionCloseIssue, short_targeted_work:c.actionShort, timing_and_logistics:c.actionTiming, taper:c.actionTaper })[code] || c.actionShort;
   }
 
-  async function openCalibration(component) {
-    clearTimer(); renderLoading();
-    const result = await internal.api.finalCalibration(component);
-    if (!result?.ok) { renderError(); return; }
-    renderCalibration(component, result.data || {});
+  function localDateTimeValue(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    const pad = n => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
   }
 
-  function renderCalibration(component, data) {
+  function calibrationModeMessage(ops, c) {
+    return ({
+      targeted_taper: c.calibrationTargetedTaper,
+      stop_major_work: c.calibrationStopMajor,
+      component_time_reached: c.calibrationReached,
+      start_time_confirmation_needed: c.calibrationStartNeeded
+    })[String(ops?.calibration_mode || "")] || c.calibrationTargetedTaper;
+  }
+
+  function safeOfficialUrl(value) {
+    try {
+      const url = new URL(String(value || ""));
+      return url.protocol === "https:" && (url.hostname === "www.cambridgeinternational.org" || url.hostname.endsWith(".cambridgeinternational.org")) ? url.href : "";
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function renderExamOperations(component, data, stage4Data) {
+    const c = copy();
+    const ops = data?.exam_operations || {};
+    const items = Array.isArray(ops?.checklist_items) ? ops.checklist_items : [];
+    const total = Number(ops?.checklist_total || items.length || 0);
+    const done = Number(ops?.checklist_confirmed || 0);
+    const timetableUrl = safeOfficialUrl(ops?.timetable_source_url);
+    const timetable = ops?.final_timetable_verified === true
+      ? `<div class="ep-live-ops-source"><strong>${esc(c.examTimetableVerified)}</strong><span>${esc([ops.paper_code, ops.exam_date, ops.session_code].filter(Boolean).join(" · "))}</span>${timetableUrl ? `<a href="${esc(timetableUrl)}" target="_blank" rel="noopener noreferrer">${esc(c.examOfficialSource)}</a>` : ""}</div>`
+      : `<div class="ep-live-notice">${esc(c.examTimetablePending)}</div>`;
+    const checklist = items.map(item => {
+      const code = String(item?.item_code || "");
+      const title = state.language === "uz" ? item?.title_uz : state.language === "en" ? item?.title_en : item?.title_ru;
+      return `<label class="ep-live-ops-check"><input type="checkbox" data-ep-live-ops-check="${esc(code)}" ${item?.confirmed === true ? "checked" : ""}><span>${esc(title || "")}</span></label>`;
+    }).join("");
+    const startValue = localDateTimeValue(ops?.scheduled_start_at);
+    const reference = consolidationReferenceMarkup(stage4Data, c);
+    const error = data?.opsError ? `<div class="ep-live-notice" role="alert">${esc(c.error)}</div>` : "";
+    return `<div class="ep-live-card" data-ep-live-exam-ops><div class="ep-live-head"><div><strong>${esc(c.examOpsTitle)}</strong><div class="ep-live-meta">${esc(calibrationModeMessage(ops, c))}</div></div><strong>${done} / ${total}</strong></div><div class="ep-live-notice">${esc(c.calibrationNoMastery)}</div>${timetable}<div class="ep-live-ops-start"><label><span>${esc(c.examStartTitle)}</span><input class="ep-live-input" type="datetime-local" data-ep-live-exam-start value="${esc(startValue)}"></label><div class="ep-live-meta">${esc(c.examStartHint)}</div><button class="ep-live-btn secondary" type="button" data-ep-live-exam-start-save>${esc(c.examStartSave)}</button></div><div class="ep-live-ops-checklist"><div class="ep-live-head"><strong>${esc(c.examOpsChecklist)}</strong><span class="ep-live-meta">${done} / ${total}</span></div>${checklist}</div>${error}${reference ? `<div class="ep-live-ops-reference"><strong>${esc(c.calibrationReferenceLabel)}</strong><div class="ep-live-meta">${esc(c.calibrationReferenceNote)}</div>${reference}</div>` : ""}</div>`;
+  }
+
+  async function openCalibration(component) {
+    clearTimer(); renderLoading();
+    const [result, stage4Result] = await Promise.all([
+      internal.api.finalCalibration(component),
+      typeof internal.api?.stage4Consolidation === "function"
+        ? internal.api.stage4Consolidation(component).catch(() => null)
+        : Promise.resolve(null)
+    ]);
+    if (!result?.ok) { renderError(); return; }
+    renderCalibration(component, result.data || {}, stage4Result?.ok ? stage4Result.data : null);
+  }
+
+  function bindExamOperations(component, data, stage4Data) {
+    const root = rootEl(); if (!root) return;
+    root.querySelector('[data-ep-live-exam-start-save]')?.addEventListener('click', async button => {
+      const input = root.querySelector('[data-ep-live-exam-start]');
+      const value = String(input?.value || "");
+      const date = value ? new Date(value) : null;
+      if (!date || Number.isNaN(date.getTime())) {
+        input?.setAttribute("aria-invalid", "true");
+        return;
+      }
+      input?.removeAttribute("aria-invalid");
+      button.currentTarget.disabled = true;
+      const result = await internal.api.saveExamAppointment(component, date.toISOString());
+      if (result?.ok) {
+        data.exam_operations = result.data || {};
+        data.opsError = false;
+      } else {
+        data.opsError = true;
+      }
+      renderCalibration(component, data, stage4Data);
+    });
+    root.querySelectorAll('[data-ep-live-ops-check]').forEach(input => input.addEventListener('change', async event => {
+      const control = event.currentTarget;
+      const prior = !control.checked;
+      control.disabled = true;
+      const result = await internal.api.setExamOpsConfirmation(component, control.dataset.epLiveOpsCheck, control.checked);
+      if (result?.ok) {
+        data.exam_operations = result.data || {};
+        data.opsError = false;
+      } else {
+        control.checked = prior;
+        data.opsError = true;
+      }
+      renderCalibration(component, data, stage4Data);
+    }));
+  }
+
+  function renderCalibration(component, data, stage4Data = null) {
     clearTimer();
     const root = rootEl(); if (!root) return; const c = copy();
     if (data?.available !== true) {
@@ -1356,8 +1460,10 @@
     }
     const actions = Array.isArray(data?.actions) ? data.actions : [];
     const rows = actions.map((a, index) => `<div class="ep-live-action-row"><strong>${index + 1}. ${esc(calibrationActionLabel(a.action_code))}</strong></div>`).join("");
-    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.calibration)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${rows || `<div class="ep-live-notice">${esc(c.calibration)}</div>`}</div>`);
+    const operations = renderExamOperations(component, data, stage4Data);
+    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.calibration)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${rows || `<div class="ep-live-notice">${esc(c.calibration)}</div>`}</div>${operations}`);
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
+    bindExamOperations(component, data, stage4Data);
   }
 
   async function mount(context = {}) {
