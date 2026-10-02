@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p204june26ref1";
+  const VERSION = "p205readiness2";
   let attached = false;
 
   const state = {
@@ -52,7 +52,10 @@
       timedDone: "Urinish yakunlandi", selfReviewTitle: "Ishingizni tekshiring", selfReviewText: "Mezonlar bo‘yicha o‘zingizga ball bering. Bu baho faqat urinishingiz yakunlangandan keyin saqlanadi.", yourAnswer: "Sizning yechimingiz", rubric: "Baholash mezonlari", rubricUnavailable: "Batafsil baholash mezonlari o‘zbek tilida hali tasdiqlanmagan. Hozircha quyidagi tekshirish eslatmasidan foydalaning.", selfTip: "Tekshirish uchun eslatma", award: "Ball", saveMark: "Ballni saqlash", result: "Natija", inTime: "Vaqt ichidagi ball", afterTime: "Vaqtdan keyingi ball", unattempted: "Bajarilmagan ball", comparable: "Taqqoslash uchun yaroqli", yes: "Ha", no: "Yo‘q", backTimed: "Vaqtli mashqlarga qaytish",
       readiness: "Imtihon tayyorgarligi", openReadiness: "Tayyorgarlik holatini ko‘rish", readyStrong: "Obyektiv ko‘rsatkichlar tayyor", readyMore: "Yana dalil kerak", readinessPapers: "Hisobga olingan to‘liq ishlar", readinessSkills: "Barqarorlashtirilishi kerak bo‘lgan ko‘nikmalar", readinessCorrections: "Ochiq tuzatishlar", calibration: "Yakuniy moslashuv", openCalibration: "Yakuniy moslashuvni ochish", calibrationUnavailable: "Yakuniy moslashuv tayyorgarlik mezonlari bajarilgandan keyin ochiladi.",
       stage0: "Kirish tekshiruvi", stage1: "Asoslarni mustahkamlash", stage2: "Dastur bo‘yicha o‘rganish", stage3: "Dastur qamrovini yopish", stage4: "Vaqt ostida mustahkamlash", stage5: "Imtihon tayyorgarligi", stage6: "Yakuniy moslashuv",
-      thresholdPending: "Tanlangan imtihon seriyasi va maqsad baho uchun tayyorgarlik mezoni hali sozlanmagan.", threePapers: "Tayyorgarlik uchun uchta taqqoslanadigan to‘liq ish kerak.", stage4Incomplete: "Vaqt ostidagi mustahkamlash hali yakunlanmagan.", skillsIncomplete: "Ba’zi ko‘nikmalarda barqaror natija hali yetarli emas.", correctionsOpen: "Ba’zi xatolar bo‘yicha tuzatish sikli hali yopilmagan.", belowThreshold: "Oxirgi uchta to‘liq ishning hammasi maqsad darajasiga yetmagan.", unattemptedHigh: "Bajarilmay qolayotgan ballar hali ko‘p.", afterTimeHigh: "Natijaning bir qismi hali vaqt tugagandan keyingi ishga tayanmoqda.",
+      thresholdPending: "Kelajakdagi imtihon seriyangiz uchun tayyorgarlik mezoni hali tasdiqlanmagan. To‘liq variantlar bilan ishlashni davom ettiring; quyidagi rasmiy Cambridge June 2026 ko‘rsatkichi faqat ma’lumot uchun.", threePapers: "Tayyorgarlik holati uchun uchta taqqoslanadigan to‘liq ish kerak.", stage4Incomplete: "Avval vaqt ostida mustahkamlash bosqichini yakunlang.", skillsIncomplete: "Ba’zi mavzularda barqaror natija hali yetarli emas.", correctionsOpen: "Ba’zi xatolar bo‘yicha tuzatish sikli hali yopilmagan.", belowThreshold: "Oxirgi uchta to‘liq ishning hammasi maqsad darajasiga yetmagan.", unattemptedHigh: "Bajarilmay qolayotgan ballar hali ko‘p.", afterTimeHigh: "Natijaning bir qismi hali vaqt tugagandan keyingi ishga tayanmoqda.",
+      readinessEstimateTitle: "iClub tayyorgarlik bahosi", readinessEstimateNote: "Bu holat iClub ichidagi tasdiqlangan natijalarga asoslanadi. Bu Cambridge bahosi yoki kelajakdagi baho prognozi emas.",
+      readinessTargetChecks: "Maqsad mezonlari", readinessTimingCheck: "Vaqt ichida yakunlash", readinessUnattemptedCheck: "Barcha kerakli qismlarni bajarish", readinessCheckReady: "Bajarildi", readinessCheckPending: "Hali bajarilmagan",
+      mentorReadinessTitle: "Mentor tasdig‘i", mentorReadinessVerified: "Mentor Care tomonidan tasdiqlangan", mentorReadinessPending: "Mentor Care tekshiruvi kutilmoqda", mentorReadinessSeparate: "Bu alohida inson tekshiruvi. Core’da davom etish uchun majburiy emas.",
       consolidationTitle: "Vaqt ostida mustahkamlash", consolidationComplete: "Yakunlandi", consolidationInProgress: "Jarayonda",
       consolidationPapers: "Bir xil sharoitdagi to‘liq variantlar", consolidationTimed: "Vaqtli mashqlar", consolidationSkills: "Yana mustahkamlash kerak bo‘lgan mavzular",
       consolidationUnattempted: "Bajarilmay qolgan ballar", consolidationAfterTime: "Vaqtdan keyin olingan ballar", consolidationNoTrend: "Ikki to‘liq variantdan keyin ko‘rinadi",
@@ -94,7 +97,10 @@
       timedDone: "Attempt complete", selfReviewTitle: "Review your work", selfReviewText: "Use the criteria to award your marks. Marks are recorded only after the attempt has ended.", yourAnswer: "Your solution", rubric: "Marking criteria", rubricUnavailable: "Detailed marking criteria are temporarily unavailable in this language.", selfTip: "Review note", award: "Marks", saveMark: "Save marks", result: "Result", inTime: "Marks in time", afterTime: "Marks after time", unattempted: "Unattempted marks", comparable: "Comparable result", yes: "Yes", no: "No", backTimed: "Back to timed practice",
       readiness: "Exam readiness", openReadiness: "View readiness", readyStrong: "Objective evidence is ready", readyMore: "More evidence is needed", readinessPapers: "Comparable full papers counted", readinessSkills: "Skills still needing stability", readinessCorrections: "Open corrections", calibration: "Final calibration", openCalibration: "Open final calibration", calibrationUnavailable: "Final calibration opens after the readiness criteria are met.",
       stage0: "Entry check", stage1: "Foundation", stage2: "Syllabus learning", stage3: "Syllabus closure", stage4: "Timed consolidation", stage5: "Exam readiness", stage6: "Final calibration",
-      thresholdPending: "The readiness threshold for the selected exam series and target grade is not configured yet.", threePapers: "Three comparable full papers are required for readiness.", stage4Incomplete: "Timed consolidation is not complete yet.", skillsIncomplete: "Some skills still need stable evidence.", correctionsOpen: "Some corrective work is still open.", belowThreshold: "The latest three full papers do not all meet the target level.", unattemptedHigh: "Too many marks are still being left unattempted.", afterTimeHigh: "Part of the result still depends on work completed after time.",
+      thresholdPending: "The readiness threshold for your future exam series has not been approved yet. Keep working on full papers; the official Cambridge June 2026 figure below is reference only.", threePapers: "Three comparable full papers are required for the readiness check.", stage4Incomplete: "Complete timed consolidation first.", skillsIncomplete: "Some topics still need stable evidence.", correctionsOpen: "Some corrective work is still open.", belowThreshold: "The latest three full papers do not all meet the target level.", unattemptedHigh: "Too many marks are still being left unattempted.", afterTimeHigh: "Part of the result still depends on work completed after time.",
+      readinessEstimateTitle: "iClub readiness estimate", readinessEstimateNote: "This status is based on your confirmed evidence inside iClub. It is not an official Cambridge grade or a prediction of a future grade.",
+      readinessTargetChecks: "Target checks", readinessTimingCheck: "Finish within time", readinessUnattemptedCheck: "Complete the required paper", readinessCheckReady: "Met", readinessCheckPending: "Not yet",
+      mentorReadinessTitle: "Mentor verification", mentorReadinessVerified: "Verified by Mentor Care", mentorReadinessPending: "Mentor Care review is pending", mentorReadinessSeparate: "This is a separate human check. It is not required to continue in Core.",
       consolidationTitle: "Timed consolidation", consolidationComplete: "Complete", consolidationInProgress: "In progress",
       consolidationPapers: "Full papers under comparable conditions", consolidationTimed: "Timed practice", consolidationSkills: "Topics still needing stronger evidence",
       consolidationUnattempted: "Unattempted marks", consolidationAfterTime: "Marks completed after time", consolidationNoTrend: "Shown after two full papers",
@@ -136,7 +142,10 @@
       timedDone: "Попытка завершена", selfReviewTitle: "Проверьте свою работу", selfReviewText: "Сверьтесь с критериями и выставьте себе баллы. Оценка сохраняется только после завершения попытки.", yourAnswer: "Ваше решение", rubric: "Критерии оценивания", rubricUnavailable: "Подробные критерии оценивания на русском языке пока не утверждены. Пока используйте подсказку для проверки ниже.", selfTip: "Подсказка для проверки", award: "Баллы", saveMark: "Сохранить баллы", result: "Результат", inTime: "Баллы в пределах времени", afterTime: "Баллы после времени", unattempted: "Невыполненные баллы", comparable: "Результат сопоставим", yes: "Да", no: "Нет", backTimed: "Вернуться к практике на время",
       readiness: "Готовность к экзамену", openReadiness: "Посмотреть готовность", readyStrong: "Объективные показатели готовы", readyMore: "Нужно больше подтверждений", readinessPapers: "Учтено полных сопоставимых работ", readinessSkills: "Навыков требуют стабилизации", readinessCorrections: "Открытых исправлений", calibration: "Финальная калибровка", openCalibration: "Открыть финальную калибровку", calibrationUnavailable: "Финальная калибровка откроется после выполнения критериев готовности.",
       stage0: "Входная проверка", stage1: "Фундамент", stage2: "Изучение программы", stage3: "Закрытие программы", stage4: "Закрепление на время", stage5: "Готовность к экзамену", stage6: "Финальная калибровка",
-      thresholdPending: "Критерий готовности для выбранной экзаменационной сессии и целевой оценки ещё не настроен.", threePapers: "Для готовности нужны три сопоставимые полные работы.", stage4Incomplete: "Этап работы на время ещё не завершён.", skillsIncomplete: "По части навыков ещё не хватает стабильных подтверждений.", correctionsOpen: "По части ошибок цикл исправления ещё не закрыт.", belowThreshold: "Не все три последние полные работы достигли целевого уровня.", unattemptedHigh: "Пока остаётся слишком много невыполненных баллов.", afterTimeHigh: "Часть результата всё ещё зависит от работы после окончания времени.",
+      thresholdPending: "Критерий готовности для вашей будущей экзаменационной сессии ещё не утверждён. Продолжайте работать с полными вариантами; официальный показатель Cambridge June 2026 ниже дан только как ориентир.", threePapers: "Для проверки готовности нужны три сопоставимых полных варианта.", stage4Incomplete: "Сначала завершите этап закрепления на время.", skillsIncomplete: "Некоторые темы ещё требуют стабильного подтверждения.", correctionsOpen: "По части ошибок цикл исправления ещё не закрыт.", belowThreshold: "Не все три последние полные работы достигли целевого уровня.", unattemptedHigh: "Пока остаётся слишком много невыполненных баллов.", afterTimeHigh: "Часть результата всё ещё зависит от работы после окончания времени.",
+      readinessEstimateTitle: "Оценка готовности iClub", readinessEstimateNote: "Этот статус основан на подтверждённых результатах внутри iClub. Это не официальная оценка Cambridge и не прогноз будущей оценки.",
+      readinessTargetChecks: "Проверки по цели", readinessTimingCheck: "Уложиться во время", readinessUnattemptedCheck: "Выполнить необходимую часть работы", readinessCheckReady: "Выполнено", readinessCheckPending: "Пока нет",
+      mentorReadinessTitle: "Подтверждение ментора", mentorReadinessVerified: "Подтверждено Mentor Care", mentorReadinessPending: "Ожидается проверка Mentor Care", mentorReadinessSeparate: "Это отдельная проверка человеком. Для продолжения в Core она не обязательна.",
       consolidationTitle: "Закрепление на время", consolidationComplete: "Завершено", consolidationInProgress: "В процессе",
       consolidationPapers: "Полные варианты в сопоставимых условиях", consolidationTimed: "Практики на время", consolidationSkills: "Темы, которые ещё нужно закрепить",
       consolidationUnattempted: "Невыполненные баллы", consolidationAfterTime: "Баллы после окончания времени", consolidationNoTrend: "Появится после двух полных вариантов",
@@ -1272,18 +1281,56 @@
     })[reason] || c.readyMore;
   }
 
+  function normalizeReadiness(data) {
+    if (data?.comparable_full_attempts !== undefined) return data || {};
+    return {
+      ...(data || {}),
+      comparable_full_attempts: Number(data?.last_three_count || 0),
+      comparable_full_required: 3,
+      topics_needing_stability: Number(data?.below_l3_count || 0),
+      open_corrections: Number(data?.unresolved_correction_case_count || 0),
+      threshold_gate_configured: data?.threshold_configured === true,
+      unattempted_ready: data?.unattempted_gate_ready === true,
+      after_time_ready: data?.after_time_gate_ready === true,
+      mentor_care_active: data?.mentor_care_service_available === true,
+      mentor_verified: data?.mentor_verified_readiness === true,
+      mentor_verified_confirmed_at: data?.mentor_verified_confirmed_at || null,
+      mentor_verification_state: data?.mentor_verified_readiness === true ? "verified" : (data?.mentor_care_service_available === true ? "pending" : "not_active"),
+      not_official_cambridge_grade: true,
+      mentor_verification_optional_for_core: true,
+      p1_p5_separate: true
+    };
+  }
+
   async function openReadiness(component) {
     clearTimer(); renderLoading();
-    const result = await internal.api.readiness(component);
+    const useSummary = typeof internal.api?.readinessSummary === "function";
+    const result = useSummary
+      ? await internal.api.readinessSummary(component)
+      : await internal.api.readiness(component);
     if (!result?.ok) { renderError(); return; }
-    renderReadiness(component, result.data || {});
+    renderReadiness(component, normalizeReadiness(result.data || {}));
   }
 
   function renderReadiness(component, data) {
     clearTimer();
-    const root = rootEl(); if (!root) return; const c = copy(); const ready = data?.ready === true;
+    const root = rootEl(); if (!root) return; const c = copy();
+    if (data?.p1_p5_separate === false || data?.not_official_cambridge_grade === false || data?.mentor_verification_optional_for_core === false) {
+      renderError(); return;
+    }
+    const ready = data?.ready === true;
+    const papersDone = Number(data?.comparable_full_attempts || 0);
+    const papersNeed = Number(data?.comparable_full_required || 3);
+    const unstable = Number(data?.topics_needing_stability || 0);
+    const corrections = Number(data?.open_corrections || 0);
     const calibration = ready ? `<button class="ep-live-btn" type="button" data-ep-live-calibration="${component}">${esc(c.openCalibration)}</button>` : "";
-    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.readiness)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div><div class="ep-live-notice"><strong>${esc(ready ? c.readyStrong : c.readyMore)}</strong><div class="ep-live-meta">${esc(ready ? c.readyStrong : readinessMessage(data))}</div></div><div class="ep-live-stats"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessPapers)}</span><strong>${Number(data?.last_three_count || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessSkills)}</span><strong>${Number(data?.below_l3_count || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessCorrections)}</span><strong>${Number(data?.unresolved_correction_case_count || 0)}</strong></div></div><div class="ep-live-actions">${calibration}</div></div>`);
+    const targetChecks = data?.threshold_gate_configured === true
+      ? `<div class="ep-live-grid"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessUnattemptedCheck)}</span><strong>${esc(data?.unattempted_ready === true ? c.readinessCheckReady : c.readinessCheckPending)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessTimingCheck)}</span><strong>${esc(data?.after_time_ready === true ? c.readinessCheckReady : c.readinessCheckPending)}</strong></div></div>`
+      : "";
+    const mentor = data?.mentor_care_active === true || data?.mentor_verified === true
+      ? `<div class="ep-live-card" data-ep-live-mentor-readiness><div class="ep-live-head"><strong>${esc(c.mentorReadinessTitle)}</strong><strong>${esc(data?.mentor_verified === true ? c.mentorReadinessVerified : c.mentorReadinessPending)}</strong></div><div class="ep-live-meta">${esc(c.mentorReadinessSeparate)}</div></div>`
+      : "";
+    root.innerHTML = shell(`<div class="ep-live-card" data-ep-live-readiness-summary><div class="ep-live-head"><div><strong>${component} · ${esc(c.readiness)}</strong><div class="ep-live-meta">${esc(c.readinessEstimateTitle)}</div></div><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div><div class="ep-live-notice"><strong>${esc(ready ? c.readyStrong : c.readyMore)}</strong><div class="ep-live-meta">${esc(ready ? c.readyStrong : readinessMessage(data))}</div></div><div class="ep-live-meta">${esc(c.readinessEstimateNote)}</div><div class="ep-live-stats"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessPapers)}</span><strong>${papersDone} / ${papersNeed}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessSkills)}</span><strong>${unstable}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.readinessCorrections)}</span><strong>${corrections}</strong></div></div>${targetChecks}<div class="ep-live-actions">${calibration}</div></div>${mentor}`);
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
     root.querySelector('[data-ep-live-calibration]')?.addEventListener('click', () => openCalibration(component));
   }
