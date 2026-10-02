@@ -9,6 +9,7 @@ on:
       - supabase/tests/p2_04_stage4_consolidation_matrix.sql
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-live.js
+      - exam-prep/exam-prep-host.css
       - .github/scripts/p2_04_stage4_consolidation_ui_regression.js
       - .github/scripts/p0_19_live_timed_readiness_regression.js
       - .github/workflows/p2-04-stage4-consolidation.yml
@@ -20,6 +21,7 @@ on:
       - supabase/tests/p2_04_stage4_consolidation_matrix.sql
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-live.js
+      - exam-prep/exam-prep-host.css
       - .github/scripts/p2_04_stage4_consolidation_ui_regression.js
       - .github/scripts/p0_19_live_timed_readiness_regression.js
       - .github/workflows/p2-04-stage4-consolidation.yml
