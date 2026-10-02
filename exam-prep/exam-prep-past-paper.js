@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p203paper1";
+  const VERSION = "p203paper2";
   let observer = null;
   let queued = false;
   let loading = false;
@@ -27,6 +27,8 @@
       official: "Cambridge rasmiy materiallarini ochish",
       original: "iClub original to‘liq sinovlari",
       similar: "O‘xshash vaqtli mashqlar",
+      available: "Hozir mavjud", show: "Ro‘yxatda ko‘rsatish",
+      kindFull: "To‘liq variant", kindModified: "Moslashtirilgan variant", kindTimed: "Vaqtli mashq", marks: "ball",
       note: "Rasmiy Cambridge materiallari ularning saytida ochiladi. iClub imtihon ishlari yoki baholash sxemalarining nusxalarini saqlamaydi."
     };
     if (language() === "en") return {
@@ -34,6 +36,8 @@
       official: "Open official Cambridge materials",
       original: "Original iClub full simulations",
       similar: "Similar timed practice",
+      available: "Available now", show: "Show in list",
+      kindFull: "Full paper", kindModified: "Modified paper", kindTimed: "Timed practice", marks: "marks",
       note: "Official Cambridge materials open on the Cambridge website. iClub does not store copies of exam papers or mark schemes."
     };
     return {
@@ -41,6 +45,8 @@
       official: "Открыть официальные материалы Cambridge",
       original: "Оригинальные полные симуляции iClub",
       similar: "Похожая практика на время",
+      available: "Доступно сейчас", show: "Показать в списке",
+      kindFull: "Полный вариант", kindModified: "Адаптированный вариант", kindTimed: "Практика на время", marks: "баллов",
       note: "Официальные материалы Cambridge открываются на сайте Cambridge. iClub не хранит копии экзаменационных работ или схем оценивания."
     };
   }
@@ -76,6 +82,38 @@
       if (buttonIds.some(id => ids.has(id))) return result.data;
     }
     return null;
+  }
+
+  function learnerKind(row, c) {
+    if (row?.attempt_kind === "full_paper") return c.kindFull;
+    if (row?.attempt_kind === "modified_paper") return c.kindModified;
+    return c.kindTimed;
+  }
+
+  function visiblePracticeRows(card, payload) {
+    const visibleIds = new Set(
+      Array.from(card?.querySelectorAll?.("[data-ep-live-timed-start]") || [])
+        .map(button => Number(button.dataset.epLiveTimedStart))
+        .filter(Number.isFinite)
+    );
+    const merged = [
+      ...(Array.isArray(payload?.original_full_simulations) ? payload.original_full_simulations : []),
+      ...(Array.isArray(payload?.similar_practice) ? payload.similar_practice : [])
+    ];
+    const seen = new Set();
+    return merged.filter(row => {
+      const id = Number(row?.assessment_id);
+      if (!Number.isFinite(id) || !visibleIds.has(id) || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  }
+
+  function focusTimedRow(card, assessmentId) {
+    const button = card?.querySelector?.(`[data-ep-live-timed-start="${Number(assessmentId)}"]`);
+    if (!button) return;
+    button.scrollIntoView?.({ block: "center", behavior: "smooth" });
+    button.focus?.({ preventScroll: true });
   }
 
   function renderPanel(card, payload) {
@@ -122,10 +160,33 @@
     stat2.querySelector("span").textContent = c.similar;
     stats.append(stat1, stat2);
 
+    const availableRows = visiblePracticeRows(card, payload);
+    const actions = document.createElement("div");
+    actions.className = "ep-past-paper-actions";
+    if (availableRows.length) {
+      const actionTitle = document.createElement("strong");
+      actionTitle.className = "ep-past-paper-actions-title";
+      actionTitle.textContent = c.available;
+      actions.appendChild(actionTitle);
+      availableRows.forEach((row, index) => {
+        const button = document.createElement("button");
+        button.className = "ep-live-btn secondary ep-past-paper-action";
+        button.type = "button";
+        button.dataset.epPastPaperStart = String(Number(row.assessment_id));
+        const label = learnerKind(row, c);
+        const marks = Number(row.marks_available || 0);
+        button.textContent = `${label} ${index + 1} · ${marks} ${c.marks} · ${c.show}`;
+        button.addEventListener("click", () => focusTimedRow(card, row.assessment_id));
+        actions.appendChild(button);
+      });
+    }
+
     const note = document.createElement("div");
     note.className = "ep-past-paper-note";
     note.textContent = c.note;
-    panel.append(head, stats, note);
+    panel.append(head, stats);
+    if (availableRows.length) panel.append(actions);
+    panel.append(note);
     card.appendChild(panel);
   }
 
