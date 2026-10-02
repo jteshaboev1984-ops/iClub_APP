@@ -381,7 +381,7 @@
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p302aivalue1");
     load('script[data-exam-prep-overview-placement]', "examPrepOverviewPlacement", "exam-prep-overview-placement.js?v=p213placement2");
-    load('script[data-exam-prep-ai-ui]', "examPrepAiUi", "exam-prep-ai-ui.js?v=p104aiui1");
+    load('script[data-exam-prep-ai-ui]', "examPrepAiUi", "exam-prep-ai-ui.js?v=p302aiui2");
     load('script[data-exam-prep-history-note]', "examPrepHistoryNote", "exam-prep-history-note.js?v=p105history1");
     load('script[data-exam-prep-past-paper]', "examPrepPastPaper", "exam-prep-past-paper.js?v=p203paper2");
     load('script[data-exam-prep-profile-completeness]', "examPrepProfileCompleteness", "exam-prep-profile-completeness.js?v=p205profile2");
