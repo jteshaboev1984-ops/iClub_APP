@@ -13,11 +13,11 @@ for (const token of [
   'async function stage4Consolidation(componentCode)',
   'get_exam_prep_stage4_consolidation_safe_v1',
   'timedCatalog, stage4Consolidation, authorizeTimed',
-  'exam-prep-live.js?v=p204stage4'
+  'exam-prep-live.js?v=p204june26ref1'
 ]) must(api.includes(token), `API integration missing: ${token}`);
 
 for (const token of [
-  'const VERSION = "p204stage4"',
+  'const VERSION = "p204june26ref1"',
   'function renderConsolidationCard(data)',
   'data-ep-live-stage4-consolidation',
   'typeof internal.api?.stage4Consolidation === "function"',
