@@ -60,6 +60,8 @@ on:
       - exam-prep/exam-prep-past-paper.js
       - scripts/p2-02-stage3-closure-regression.cjs
       - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-live.js
+      - exam-prep/exam-prep-host.css
       - exam-prep/exam-prep-learner-views.js
       - .github/workflows/p2-36-current-schema-expansion-validation.yml
   push:
@@ -95,6 +97,8 @@ on:
       - exam-prep/exam-prep-past-paper.js
       - scripts/p2-02-stage3-closure-regression.cjs
       - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-live.js
+      - exam-prep/exam-prep-host.css
       - exam-prep/exam-prep-learner-views.js
       - .github/workflows/p2-36-current-schema-expansion-validation.yml
   workflow_dispatch:

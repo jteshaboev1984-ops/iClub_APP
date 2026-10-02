@@ -2,7 +2,10 @@ const fs = require('fs');
 
 const api = fs.readFileSync('exam-prep/exam-prep-api.js', 'utf8');
 const live = fs.readFileSync('exam-prep/exam-prep-live.js', 'utf8');
-const migration = fs.readFileSync('supabase/migrations/20261002050000_exam_prep_p2_04_stage4_consolidation_safe_v1.sql', 'utf8');
+const baseMigration = fs.readFileSync('supabase/migrations/20261002050000_exam_prep_p2_04_stage4_consolidation_safe_v1.sql', 'utf8');
+const referenceMigration = fs.readFileSync('supabase/migrations/20261002053000_exam_prep_p2_04_cambridge_june_2026_reference_v1.sql', 'utf8');
+const migration = `${baseMigration}\n${referenceMigration}`;
+const css = fs.readFileSync('exam-prep/exam-prep-host.css', 'utf8');
 
 function must(condition, message) {
   if (!condition) throw new Error(`P2-04 UI regression: ${message}`);
@@ -12,11 +15,11 @@ for (const token of [
   'async function stage4Consolidation(componentCode)',
   'get_exam_prep_stage4_consolidation_safe_v1',
   'timedCatalog, stage4Consolidation, authorizeTimed',
-  'exam-prep-live.js?v=p204stage4'
+  'exam-prep-live.js?v=p204june26ref1'
 ]) must(api.includes(token), `API integration missing: ${token}`);
 
 for (const token of [
-  'const VERSION = "p204stage4"',
+  'const VERSION = "p204june26ref1"',
   'function renderConsolidationCard(data)',
   'data-ep-live-stage4-consolidation',
   'typeof internal.api?.stage4Consolidation === "function"',
@@ -27,7 +30,14 @@ for (const token of [
   'consolidationReasonTimed',
   'consolidationReasonCorrections',
   'percentShare(data?.previous_unattempted_share)',
-  'percentShare(data?.latest_after_time_share)'
+  'percentShare(data?.latest_after_time_share)',
+  'function consolidationReferenceMarkup(data, c)',
+  'official_reference_series',
+  'official_reference_scope',
+  'official_reference_used_for_direct_score_calibration',
+  'official_reference_question_content_copied',
+  'https://www.cambridgeinternational.org/',
+  'target="_blank" rel="noopener noreferrer"'
 ]) must(live.includes(token), `learner Stage-4 surface missing: ${token}`);
 
 for (const copy of [
@@ -39,7 +49,10 @@ for (const copy of [
   'Unattempted marks',
   'Vaqt ostida mustahkamlash',
   'Bir xil sharoitdagi to‘liq variantlar',
-  'Bajarilmay qolgan ballar'
+  'Bajarilmay qolgan ballar',
+  'Ориентир по формату: официальный Cambridge 9709, June 2026.',
+  'Format reference: official Cambridge 9709, June 2026.',
+  'Format bo‘yicha yo‘nalish: rasmiy Cambridge 9709, June 2026.'
 ]) must(live.includes(copy), `trilingual learner copy missing: ${copy}`);
 
 must(!live.includes('consolidationTitle: "Stage 4'), 'internal Stage-4 label exposed as learner title');
@@ -56,12 +69,26 @@ for (const token of [
   'private.exam_prep_require_core_access_v1()',
   'private.exam_prep_stage4_exit_status_v1',
   "'modified_or_topic_results_count_as_comparable_full',false",
+  "'official_reference_series','Cambridge International AS & A Level Mathematics 9709 · June 2026'",
+  "'official_reference_scope','format_and_timing_context_only'",
+  "'official_reference_used_for_direct_score_calibration',false",
+  "'official_reference_question_content_copied',false",
+  "'cambridge_9709_june_2026_p1_reference'",
+  "'cambridge_9709_june_2026_p5_reference'",
   "revoke all on function public.get_exam_prep_stage4_consolidation_safe_v1(text) from public,anon",
   "grant execute on function public.get_exam_prep_stage4_consolidation_safe_v1(text) to authenticated,service_role"
 ]) must(migration.toLowerCase().includes(token.toLowerCase()), `safe RPC migration contract missing: ${token}`);
 
 must(!migration.includes("'selected_family_key',"), 'safe learner RPC must not expose internal comparison-family key');
 must(!migration.includes("'rule_version',v_result"), 'safe learner RPC must not expose internal Stage-4 rule version');
+
+must(css.includes('.ep-live-reference-note'), 'Cambridge June 2026 learner reference note style missing');
+must(css.includes('.ep-live-reference-note a'), 'Cambridge June 2026 reference link style missing');
+
+must(migration.includes('rights_status,official_url,status,checked_at'),
+  'Cambridge June 2026 source references must remain metadata-only external records');
+must(migration.includes('can_support_assessment_evidence=false') || migration.includes('false,false,false,false'),
+  'Cambridge June 2026 affected papers must not be promoted to direct assessment-evidence authority');
 
 new Function(api);
 new Function(live);
