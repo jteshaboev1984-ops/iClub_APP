@@ -2,7 +2,7 @@
   "pack_version": "p2_76_golden_v1_0",
   "source_pack_version": "iclub_ai_context_v1_2026_09_07",
   "scope": "runtime-supported progress_summary and weekly_plan_narration only",
-  "status_note": "Theory and established-error generation remain no_source until separately approved runtime source cards exist.",
+  "status_note": "Theory generation remains evaluation-only/no_source. Established-error generation is governed separately by the P3-02 deterministic error-context pack.",
   "critical_failure_policy": "zero_tolerance",
   "cases": [
     {
