@@ -179,6 +179,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # P2-05 learner readiness summary depends on the governed official
+          # threshold-reference reader, whose migration predates the p2_05 naming convention.
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260908053500_exam_prep_latest_threshold_reference_v1.sql >>p209.log 2>&1
           for stage in 03 05 06 07 08 09; do
             mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p2_${stage}_*.sql" | sort)
             test "${#files[@]}" -ge 1
