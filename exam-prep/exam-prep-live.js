@@ -1415,16 +1415,19 @@
   }
 
   function bindExamOperations(component, data, stage4Data) {
-    const root = rootEl(); if (!root) return;
+    const root = rootEl(); if (!root) return; const c = copy();
     root.querySelector('[data-ep-live-exam-start-save]')?.addEventListener('click', async button => {
       const input = root.querySelector('[data-ep-live-exam-start]');
       const value = String(input?.value || "");
       const date = value ? new Date(value) : null;
       if (!date || Number.isNaN(date.getTime())) {
         input?.setAttribute("aria-invalid", "true");
+        input?.setCustomValidity?.(c.examStartInvalid);
+        input?.reportValidity?.();
         return;
       }
       input?.removeAttribute("aria-invalid");
+      input?.setCustomValidity?.("");
       button.currentTarget.disabled = true;
       const result = await internal.api.saveExamAppointment(component, date.toISOString());
       if (result?.ok) {
