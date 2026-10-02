@@ -169,8 +169,8 @@ begin
 end;
 $$;
 
-revoke all on function public.get_exam_prep_stage4_consolidation_safe_v1(text) from public,anon;
-grant execute on function public.get_exam_prep_stage4_consolidation_safe_v1(text) to authenticated,service_role;
+-- CREATE OR REPLACE preserves the already-reviewed ACL from the deployed P2-04 wrapper.
+-- This additive reference patch intentionally does not change function privileges.
 
 do $$
 declare
