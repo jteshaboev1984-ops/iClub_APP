@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p260results1";
+  const VERSION = "p204stage4";
   let attached = false;
 
   const state = {
@@ -53,6 +53,16 @@
       readiness: "Imtihon tayyorgarligi", openReadiness: "Tayyorgarlik holatini ko‘rish", readyStrong: "Obyektiv ko‘rsatkichlar tayyor", readyMore: "Yana dalil kerak", readinessPapers: "Hisobga olingan to‘liq ishlar", readinessSkills: "Barqarorlashtirilishi kerak bo‘lgan ko‘nikmalar", readinessCorrections: "Ochiq tuzatishlar", calibration: "Yakuniy moslashuv", openCalibration: "Yakuniy moslashuvni ochish", calibrationUnavailable: "Yakuniy moslashuv tayyorgarlik mezonlari bajarilgandan keyin ochiladi.",
       stage0: "Kirish tekshiruvi", stage1: "Asoslarni mustahkamlash", stage2: "Dastur bo‘yicha o‘rganish", stage3: "Dastur qamrovini yopish", stage4: "Vaqt ostida mustahkamlash", stage5: "Imtihon tayyorgarligi", stage6: "Yakuniy moslashuv",
       thresholdPending: "Tanlangan imtihon seriyasi va maqsad baho uchun tayyorgarlik mezoni hali sozlanmagan.", threePapers: "Tayyorgarlik uchun uchta taqqoslanadigan to‘liq ish kerak.", stage4Incomplete: "Vaqt ostidagi mustahkamlash hali yakunlanmagan.", skillsIncomplete: "Ba’zi ko‘nikmalarda barqaror natija hali yetarli emas.", correctionsOpen: "Ba’zi xatolar bo‘yicha tuzatish sikli hali yopilmagan.", belowThreshold: "Oxirgi uchta to‘liq ishning hammasi maqsad darajasiga yetmagan.", unattemptedHigh: "Bajarilmay qolayotgan ballar hali ko‘p.", afterTimeHigh: "Natijaning bir qismi hali vaqt tugagandan keyingi ishga tayanmoqda.",
+      consolidationTitle: "Vaqt ostida mustahkamlash", consolidationComplete: "Yakunlandi", consolidationInProgress: "Jarayonda",
+      consolidationPapers: "Bir xil sharoitdagi to‘liq variantlar", consolidationTimed: "Vaqtli mashqlar", consolidationSkills: "Yana mustahkamlash kerak bo‘lgan mavzular",
+      consolidationUnattempted: "Bajarilmay qolgan ballar", consolidationAfterTime: "Vaqtdan keyin olingan ballar", consolidationNoTrend: "Ikki to‘liq variantdan keyin ko‘rinadi",
+      consolidationReadyText: "Bu bosqich yakunlandi. Endi imtihon tayyorgarligi holatini tekshirish mumkin.",
+      consolidationReasonClosure: "Avval ushbu komponent bo‘yicha dastur qamrovini yakunlang.",
+      consolidationReasonPaper: "Yana bir to‘liq variantni bir xil imtihon sharoitida bajaring.",
+      consolidationReasonTiming: "Keyingi to‘liq variantda vaqt ichida ko‘proq qismini yakunlashga e’tibor bering.",
+      consolidationReasonTimed: "Qolgan vaqtli mashqlarni bajaring.",
+      consolidationReasonCorrections: "Barqaror bo‘lmagan mavzularni mustahkamlang va belgilangan tuzatishlarni yakunlang.",
+      consolidationReasonPending: "Keyingi bosqich uchun hali ko‘proq tasdiqlangan natija kerak.",
       dashboardEyebrow: "Sizning yo‘lingiz", dashboardTitle: "P1 va P5 bo‘yicha tayyorgarlik", dashboardText: "Har bir komponent o‘z bosqichi, dalillari va keyingi qadami bilan alohida yuradi.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "ko‘nikma", continueCheck: "Kirish tekshiruvini davom ettirish", profileSaved: "Saqlangan reja", targetShort: "Maqsad", totalShort: "Jami", mathShort: "Matematika", hoursShort: "soat/hafta",
       actionCloseIssue: "Qolgan asosiy xatoni yoping", actionShort: "Qisqa maqsadli mashq", actionTiming: "Vaqt va imtihon tartibini tekshirish", actionTaper: "Yuklamani kamaytirish va natijani saqlash",
@@ -83,6 +93,16 @@
       readiness: "Exam readiness", openReadiness: "View readiness", readyStrong: "Objective evidence is ready", readyMore: "More evidence is needed", readinessPapers: "Comparable full papers counted", readinessSkills: "Skills still needing stability", readinessCorrections: "Open corrections", calibration: "Final calibration", openCalibration: "Open final calibration", calibrationUnavailable: "Final calibration opens after the readiness criteria are met.",
       stage0: "Entry check", stage1: "Foundation", stage2: "Syllabus learning", stage3: "Syllabus closure", stage4: "Timed consolidation", stage5: "Exam readiness", stage6: "Final calibration",
       thresholdPending: "The readiness threshold for the selected exam series and target grade is not configured yet.", threePapers: "Three comparable full papers are required for readiness.", stage4Incomplete: "Timed consolidation is not complete yet.", skillsIncomplete: "Some skills still need stable evidence.", correctionsOpen: "Some corrective work is still open.", belowThreshold: "The latest three full papers do not all meet the target level.", unattemptedHigh: "Too many marks are still being left unattempted.", afterTimeHigh: "Part of the result still depends on work completed after time.",
+      consolidationTitle: "Timed consolidation", consolidationComplete: "Complete", consolidationInProgress: "In progress",
+      consolidationPapers: "Full papers under comparable conditions", consolidationTimed: "Timed practice", consolidationSkills: "Topics still needing stronger evidence",
+      consolidationUnattempted: "Unattempted marks", consolidationAfterTime: "Marks completed after time", consolidationNoTrend: "Shown after two full papers",
+      consolidationReadyText: "This phase is complete. You can move on to the exam-readiness check.",
+      consolidationReasonClosure: "Complete the remaining syllabus work for this component first.",
+      consolidationReasonPaper: "Complete another full paper under comparable exam conditions.",
+      consolidationReasonTiming: "On the next full paper, focus on completing more of the paper within the time limit.",
+      consolidationReasonTimed: "Complete the remaining timed practice.",
+      consolidationReasonCorrections: "Strengthen the remaining unstable topics and complete the assigned correction work.",
+      consolidationReasonPending: "More confirmed evidence is needed before the next phase.",
       dashboardEyebrow: "Your route", dashboardTitle: "Preparation for P1 and P5", dashboardText: "Each component moves separately with its own phase, evidence and next action.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "skills", continueCheck: "Continue entry check", profileSaved: "Saved plan", targetShort: "Target grade", totalShort: "Total", mathShort: "Mathematics", hoursShort: "h/week",
       actionCloseIssue: "Close the main remaining issue", actionShort: "Short targeted practice", actionTiming: "Check timing and exam logistics", actionTaper: "Reduce workload and protect performance",
@@ -113,6 +133,16 @@
       readiness: "Готовность к экзамену", openReadiness: "Посмотреть готовность", readyStrong: "Объективные показатели готовы", readyMore: "Нужно больше подтверждений", readinessPapers: "Учтено полных сопоставимых работ", readinessSkills: "Навыков требуют стабилизации", readinessCorrections: "Открытых исправлений", calibration: "Финальная калибровка", openCalibration: "Открыть финальную калибровку", calibrationUnavailable: "Финальная калибровка откроется после выполнения критериев готовности.",
       stage0: "Входная проверка", stage1: "Фундамент", stage2: "Изучение программы", stage3: "Закрытие программы", stage4: "Закрепление на время", stage5: "Готовность к экзамену", stage6: "Финальная калибровка",
       thresholdPending: "Критерий готовности для выбранной экзаменационной сессии и целевой оценки ещё не настроен.", threePapers: "Для готовности нужны три сопоставимые полные работы.", stage4Incomplete: "Этап работы на время ещё не завершён.", skillsIncomplete: "По части навыков ещё не хватает стабильных подтверждений.", correctionsOpen: "По части ошибок цикл исправления ещё не закрыт.", belowThreshold: "Не все три последние полные работы достигли целевого уровня.", unattemptedHigh: "Пока остаётся слишком много невыполненных баллов.", afterTimeHigh: "Часть результата всё ещё зависит от работы после окончания времени.",
+      consolidationTitle: "Закрепление на время", consolidationComplete: "Завершено", consolidationInProgress: "В процессе",
+      consolidationPapers: "Полные варианты в сопоставимых условиях", consolidationTimed: "Практики на время", consolidationSkills: "Темы, которые ещё нужно закрепить",
+      consolidationUnattempted: "Невыполненные баллы", consolidationAfterTime: "Баллы после окончания времени", consolidationNoTrend: "Появится после двух полных вариантов",
+      consolidationReadyText: "Этот этап завершён. Можно переходить к проверке готовности к экзамену.",
+      consolidationReasonClosure: "Сначала завершите программу по этому компоненту.",
+      consolidationReasonPaper: "Выполните ещё один полный вариант в сопоставимых экзаменационных условиях.",
+      consolidationReasonTiming: "В следующем полном варианте постарайтесь завершить больше заданий в отведённое время.",
+      consolidationReasonTimed: "Завершите оставшиеся практики на время.",
+      consolidationReasonCorrections: "Закрепите нестабильные темы и завершите назначенную работу над ошибками.",
+      consolidationReasonPending: "Для следующего этапа пока не хватает подтверждённых результатов.",
       dashboardEyebrow: "Ваш маршрут", dashboardTitle: "Подготовка по P1 и P5", dashboardText: "Каждый компонент идёт отдельно: со своим этапом, подтверждениями и следующим действием.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "навыков", continueCheck: "Продолжить входную проверку", profileSaved: "Сохранённый план", targetShort: "Цель", totalShort: "Всего", mathShort: "Математика", hoursShort: "ч/нед",
       actionCloseIssue: "Закрыть основную оставшуюся ошибку", actionShort: "Короткая целевая практика", actionTiming: "Проверить время и экзаменационный порядок", actionTaper: "Снизить нагрузку и сохранить форму",
@@ -867,16 +897,60 @@
 
   async function openTimed(component) {
     clearTimer(); renderLoading();
-    const result = await internal.api.timedCatalog(component);
+    const [result, stage4Result] = await Promise.all([
+      internal.api.timedCatalog(component),
+      typeof internal.api?.stage4Consolidation === "function"
+        ? internal.api.stage4Consolidation(component).catch(() => null)
+        : Promise.resolve(null)
+    ]);
     if (!result?.ok) { renderError(); return; }
-    renderTimedCatalog(component, result.data);
+    renderTimedCatalog(component, result.data, stage4Result?.ok ? stage4Result.data : null);
   }
 
-  function renderTimedCatalog(component, payload) {
+  function percentShare(value) {
+    if (value === null || value === undefined || value === "") return null;
+    const n = Number(value);
+    return Number.isFinite(n) ? `${Math.round(n * 100)}%` : null;
+  }
+
+  function consolidationReason(c, data) {
+    if (data?.ready === true) return c.consolidationReadyText;
+    const map = {
+      complete_syllabus_closure: c.consolidationReasonClosure,
+      complete_full_paper: c.consolidationReasonPaper,
+      improve_timed_completion: c.consolidationReasonTiming,
+      complete_timed_practice: c.consolidationReasonTimed,
+      work_corrections: c.consolidationReasonCorrections
+    };
+    return map[String(data?.next_action_code || "")] || c.consolidationReasonPending;
+  }
+
+  function renderConsolidationCard(data) {
+    if (!data) return "";
+    if (data?.component_isolation !== true || data?.modified_or_topic_results_count_as_comparable_full === true) return "";
+    const stage = Number(data?.operational_stage || 0);
+    if (stage < 4 && data?.stage3_complete !== true) return "";
+    const c = copy();
+    const papersDone = Number(data?.comparable_full_attempts || 0);
+    const papersNeed = Number(data?.comparable_full_required || 2);
+    const timedDone = Number(data?.timed_sections_completed || 0);
+    const timedNeed = Number(data?.timed_sections_required || 0);
+    const skills = Number(data?.skills_below_required_level || 0);
+    const prevU = percentShare(data?.previous_unattempted_share);
+    const latestU = percentShare(data?.latest_unattempted_share);
+    const prevA = percentShare(data?.previous_after_time_share);
+    const latestA = percentShare(data?.latest_after_time_share);
+    const unattemptedTrend = prevU && latestU ? `${prevU} → ${latestU}` : c.consolidationNoTrend;
+    const afterTimeTrend = prevA && latestA ? `${prevA} → ${latestA}` : c.consolidationNoTrend;
+    return `<div class="ep-live-card" data-ep-live-stage4-consolidation><div class="ep-live-head"><div><strong>${esc(c.consolidationTitle)}</strong><div class="ep-live-meta">${esc(consolidationReason(c, data))}</div></div><strong>${esc(data.ready === true ? c.consolidationComplete : c.consolidationInProgress)}</strong></div><div class="ep-live-stats"><div class="ep-live-stat"><span>${esc(c.consolidationPapers)}</span><strong>${papersDone} / ${papersNeed}</strong></div><div class="ep-live-stat"><span>${esc(c.consolidationTimed)}</span><strong>${timedDone} / ${timedNeed}</strong></div><div class="ep-live-stat"><span>${esc(c.consolidationSkills)}</span><strong>${skills}</strong></div></div><div class="ep-live-grid"><div class="ep-live-stat"><span>${esc(c.consolidationUnattempted)}</span><strong>${esc(unattemptedTrend)}</strong></div><div class="ep-live-stat"><span>${esc(c.consolidationAfterTime)}</span><strong>${esc(afterTimeTrend)}</strong></div></div></div>`;
+  }
+
+  function renderTimedCatalog(component, payload, stage4Data = null) {
     clearTimer();
     const root = rootEl(); if (!root) return; const c = copy(); const rows = Array.isArray(payload?.assessments) ? payload.assessments : [];
     const body = rows.length ? rows.map(row => `<div class="ep-live-timed-row"><div><strong>${esc(assessmentTitle(row))}</strong><div class="ep-live-meta">${Number(row.marks_available || 0)} ${esc(c.marks)} · ${minutes(row.time_limit_sec)} ${esc(c.minutes)}</div></div><button class="ep-live-btn" type="button" data-ep-live-timed-start="${Number(row.assessment_id)}">${esc(c.startTimed)}</button></div>`).join("") : `<div class="ep-live-notice">${esc(c.noTimed)}</div>`;
-    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.timed)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${body}</div>`);
+    const consolidation = renderConsolidationCard(stage4Data);
+    root.innerHTML = shell(`${consolidation}<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.timed)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${body}</div>`);
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
     root.querySelectorAll('[data-ep-live-timed-start]').forEach(b => b.addEventListener('click', () => startTimed(component, Number(b.dataset.epLiveTimedStart))));
   }

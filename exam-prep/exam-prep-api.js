@@ -316,6 +316,7 @@
   }
 
   async function timedCatalog(componentCode) { return rpc("get_exam_prep_timed_catalog_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function stage4Consolidation(componentCode) { return rpc("get_exam_prep_stage4_consolidation_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function authorizeTimed(assessmentId) { return rpc("authorize_exam_prep_timed_safe_v1", { p_assessment_id: Number(assessmentId) }); }
   async function finalizeTimed(sessionId, idempotencyKey, completionReason = "submitted") {
     const result = await rpc("finalize_exam_prep_timed_safe_v1", { p_session_id: sessionId, p_idempotency_key: String(idempotencyKey || ""), p_completion_reason: completionReason });
@@ -345,7 +346,7 @@
     integrityStatus, recordIntegrityEvent,
     recovery, recordInterruption, authorizeRevalidationItem,
     weeklyPlan, generateWeeklyPlan, authorizePlanItem,
-    timedCatalog, authorizeTimed, finalizeTimed, timedResult, timedReviewPack, submitTimedSelfMark,
+    timedCatalog, stage4Consolidation, authorizeTimed, finalizeTimed, timedResult, timedReviewPack, submitTimedSelfMark,
     readiness, finalCalibration
   });
 
@@ -360,7 +361,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p260results3");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p204stage4");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p202closure1");
