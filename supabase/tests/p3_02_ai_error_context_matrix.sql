@@ -128,7 +128,7 @@ $$;
 
 GRANT SELECT ON p302_error_fixture TO authenticated;
 
-DO $
+DO $p302$
 BEGIN
   IF has_function_privilege('anon','public.get_exam_prep_ai_error_context_safe_v1(text,uuid,integer,text)','EXECUTE')
      OR NOT has_function_privilege('authenticated','public.get_exam_prep_ai_error_context_safe_v1(text,uuid,integer,text)','EXECUTE')
@@ -137,7 +137,7 @@ BEGIN
     RAISE EXCEPTION 'P3-02 AI error context privilege boundary failed';
   END IF;
 END
-$$;
+$p302$;
 
 SELECT set_config('request.jwt.claim.sub',(SELECT user_id::text FROM p302_error_fixture LIMIT 1),true);
 SELECT set_config('request.jwt.claim.role','authenticated',true);
