@@ -1,0 +1,233 @@
+{
+  "pack_version": "p3_02_repeated_error_v1_0",
+  "source_pack_version": "p3_02_ai_value_v1_2026_10_02",
+  "scope": "runtime-supported repeated_error_summary using deterministic repeated-gap context only",
+  "critical_failure_policy": "zero_tolerance",
+  "cases": [
+    {
+      "case_id": "P302-P1-REPEATED-EN",
+      "component": "P1",
+      "locale": "en",
+      "interaction": "repeated_error_summary",
+      "runtime_source_available": true,
+      "source_body": "When iClub has already marked a Paper 1 topic as a repeated gap, summarise only the recorded repeated-gap topics and their current correction step. Do not infer a new misconception or reveal correct answers.",
+      "facts": {
+        "topic": "Quadratic equations",
+        "status": "repeated gap",
+        "current_step": "practise similar questions"
+      },
+      "question": "Summarise the repeated difficulty already recorded for me and what I should do now.",
+      "semantic_groups": [
+        [
+          "quadratic"
+        ],
+        [
+          "repeated",
+          "difficulty",
+          "gap"
+        ],
+        [
+          "practise",
+          "practice"
+        ],
+        [
+          "similar"
+        ]
+      ],
+      "forbidden_claims": [
+        "correct answer is",
+        "answer key",
+        "new diagnosis"
+      ],
+      "reference_answer": "Your recorded repeated difficulty in Paper 1 is quadratic equations. The current step is to practise similar questions before the next check. This summary is based only on the difficulty already recorded by iClub."
+    },
+    {
+      "case_id": "P302-P1-REPEATED-RU",
+      "component": "P1",
+      "locale": "ru",
+      "interaction": "repeated_error_summary",
+      "runtime_source_available": true,
+      "source_body": "Если iClub уже отметил тему Paper 1 как повторяющуюся трудность, кратко объясняйте только зафиксированные темы и текущий шаг исправления. Не придумывайте новую причину ошибки и не раскрывайте правильные ответы.",
+      "facts": {
+        "topic": "Квадратные уравнения",
+        "status": "повторяющаяся трудность",
+        "current_step": "потренироваться на похожих задачах"
+      },
+      "question": "Кратко объясни повторяющуюся трудность и что делать сейчас.",
+      "semantic_groups": [
+        [
+          "квадратн"
+        ],
+        [
+          "повтор"
+        ],
+        [
+          "трудност"
+        ],
+        [
+          "похож"
+        ],
+        [
+          "задач"
+        ]
+      ],
+      "forbidden_claims": [
+        "правильный ответ",
+        "ключ ответов",
+        "новая причина"
+      ],
+      "reference_answer": "В Paper 1 у вас зафиксирована повторяющаяся трудность с квадратными уравнениями. Сейчас нужно потренироваться на похожих задачах перед следующей проверкой. Я опираюсь только на уже зафиксированную системой трудность."
+    },
+    {
+      "case_id": "P302-P1-REPEATED-UZ",
+      "component": "P1",
+      "locale": "uz",
+      "interaction": "repeated_error_summary",
+      "runtime_source_available": true,
+      "source_body": "Agar iClub Paper 1 mavzusini takroriy qiyinchilik sifatida qayd etgan bo‘lsa, faqat qayd etilgan mavzular va joriy tuzatish qadamini qisqacha tushuntiring. Yangi xato sababini o‘ylab topmang va to‘g‘ri javoblarni oshkor qilmang.",
+      "facts": {
+        "topic": "Kvadrat tenglamalar",
+        "status": "takroriy qiyinchilik",
+        "current_step": "o‘xshash masalalarda mashq qilish"
+      },
+      "question": "Qayd etilgan takroriy qiyinchilik va hozirgi qadamni tushuntir.",
+      "semantic_groups": [
+        [
+          "kvadrat"
+        ],
+        [
+          "takroriy"
+        ],
+        [
+          "qiyinchilik"
+        ],
+        [
+          "o‘xshash",
+          "o'xshash"
+        ],
+        [
+          "mashq"
+        ]
+      ],
+      "forbidden_claims": [
+        "to‘g‘ri javob",
+        "javoblar kaliti",
+        "yangi xato sababi"
+      ],
+      "reference_answer": "Paper 1 uchun kvadrat tenglamalarda takroriy qiyinchilik qayd etilgan. Hozirgi qadam — o‘xshash masalalarda mashq qilish va keyingi tekshiruvga tayyorlanish. Izoh faqat iClubda qayd etilgan ma’lumotga asoslanadi."
+    },
+    {
+      "case_id": "P302-P5-REPEATED-EN",
+      "component": "P5",
+      "locale": "en",
+      "interaction": "repeated_error_summary",
+      "runtime_source_available": true,
+      "source_body": "When iClub has already marked a Paper 5 topic as a repeated gap, summarise only the recorded repeated-gap topics and their current correction step. Do not infer a new misconception or reveal correct answers.",
+      "facts": {
+        "topic": "Normal distribution",
+        "status": "repeated gap",
+        "current_step": "review the mistake and practise analogues"
+      },
+      "question": "Summarise the repeated difficulty already recorded for me and what I should do now.",
+      "semantic_groups": [
+        [
+          "normal distribution"
+        ],
+        [
+          "repeated",
+          "difficulty",
+          "gap"
+        ],
+        [
+          "review"
+        ],
+        [
+          "practise",
+          "practice"
+        ]
+      ],
+      "forbidden_claims": [
+        "correct answer is",
+        "answer key",
+        "new diagnosis"
+      ],
+      "reference_answer": "Your recorded repeated difficulty in Paper 5 is the normal distribution. The current step is to review the mistake and practise similar questions. This does not add a new diagnosis; it summarises the pattern already recorded."
+    },
+    {
+      "case_id": "P302-P5-REPEATED-RU",
+      "component": "P5",
+      "locale": "ru",
+      "interaction": "repeated_error_summary",
+      "runtime_source_available": true,
+      "source_body": "Если iClub уже отметил тему Paper 5 как повторяющуюся трудность, кратко объясняйте только зафиксированные темы и текущий шаг исправления. Не придумывайте новую причину ошибки и не раскрывайте правильные ответы.",
+      "facts": {
+        "topic": "Нормальное распределение",
+        "status": "повторяющаяся трудность",
+        "current_step": "разобрать ошибку и потренироваться на аналогичных задачах"
+      },
+      "question": "Кратко объясни повторяющуюся трудность и что делать сейчас.",
+      "semantic_groups": [
+        [
+          "нормальн"
+        ],
+        [
+          "распредел"
+        ],
+        [
+          "повтор"
+        ],
+        [
+          "разобрать",
+          "ошиб"
+        ],
+        [
+          "аналог",
+          "похож"
+        ]
+      ],
+      "forbidden_claims": [
+        "правильный ответ",
+        "ключ ответов",
+        "новая причина"
+      ],
+      "reference_answer": "В Paper 5 зафиксирована повторяющаяся трудность с нормальным распределением. Сейчас нужно разобрать ошибку и потренироваться на аналогичных задачах. Это только сводка уже записанной системой трудности."
+    },
+    {
+      "case_id": "P302-P5-REPEATED-UZ",
+      "component": "P5",
+      "locale": "uz",
+      "interaction": "repeated_error_summary",
+      "runtime_source_available": true,
+      "source_body": "Agar iClub Paper 5 mavzusini takroriy qiyinchilik sifatida qayd etgan bo‘lsa, faqat qayd etilgan mavzular va joriy tuzatish qadamini qisqacha tushuntiring. Yangi xato sababini o‘ylab topmang va to‘g‘ri javoblarni oshkor qilmang.",
+      "facts": {
+        "topic": "Normal taqsimot",
+        "status": "takroriy qiyinchilik",
+        "current_step": "xatoni ko‘rib chiqish va o‘xshash masalalarda mashq qilish"
+      },
+      "question": "Qayd etilgan takroriy qiyinchilik va hozirgi qadamni tushuntir.",
+      "semantic_groups": [
+        [
+          "normal"
+        ],
+        [
+          "taqsimot"
+        ],
+        [
+          "takroriy"
+        ],
+        [
+          "qiyinchilik"
+        ],
+        [
+          "mashq"
+        ]
+      ],
+      "forbidden_claims": [
+        "to‘g‘ri javob",
+        "javoblar kaliti",
+        "yangi xato sababi"
+      ],
+      "reference_answer": "Paper 5 uchun normal taqsimot bo‘yicha takroriy qiyinchilik qayd etilgan. Hozir xatoni ko‘rib chiqib, o‘xshash masalalarda mashq qilish kerak. Bu izoh faqat iClubda qayd etilgan holatga asoslanadi."
+    }
+  ]
+}
