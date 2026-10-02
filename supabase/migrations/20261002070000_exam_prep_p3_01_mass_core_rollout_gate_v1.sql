@@ -43,7 +43,10 @@ begin
       'cohort_key',p_cohort_key,
       'core_only_decision',true,
       'ai_scale_independent',true,
-      'mentor_scale_independent',true
+      'mentor_scale_independent',true,
+      'automatic_rollout_permitted',false,
+      'learner_state_mutated',false,
+      'legacy_state_mutated',false
     );
   end if;
 
