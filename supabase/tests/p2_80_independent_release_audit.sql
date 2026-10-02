@@ -145,12 +145,15 @@ BEGIN
         OR
         (card_type='error_explanation'
           AND source_version='p3_02_error_context_v1_2026_10_02')
+        OR
+        (card_type in ('error_explanation','theory')
+          AND source_version='p3_02_ai_value_v1_2026_10_02')
       )
     )
     INTO v_cards,v_bad_cards
   FROM private.exam_prep_ai_source_cards
   WHERE approval_status='approved' AND is_runtime_allowed=true;
-  IF v_cards<>18 OR v_bad_cards<>0 THEN RAISE EXCEPTION 'P2-80 approved AI source-card boundary drift cards=% bad=%',v_cards,v_bad_cards; END IF;
+  IF v_cards<>30 OR v_bad_cards<>0 THEN RAISE EXCEPTION 'P2-80 approved AI source-card boundary drift cards=% bad=%',v_cards,v_bad_cards; END IF;
 
   SELECT count(*) FILTER (
     WHERE lifecycle_state IN ('approved','published','reserve')
