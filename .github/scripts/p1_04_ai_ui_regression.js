@@ -119,6 +119,43 @@ function assert(condition, message) {
     assert(errorCalls[2].body.locale === 'en', 'Diagnostic error action lost UI locale');
     assert(errorCalls[2].body.user_text === '', 'Diagnostic error action must not collect free-form learner text');
 
+    const localizedMistakes = [
+      { lang: 'ru', label: 'Разобрать эту ошибку', width: 360 },
+      { lang: 'uz', label: 'Bu xatoni tushuntirish', width: 390 },
+      { lang: 'en', label: 'Explain this mistake', width: 430 }
+    ];
+    for (const row of localizedMistakes) {
+      await page.setViewportSize({ width: row.width, height: 844 });
+      await page.evaluate(({ lang }) => {
+        window.i18n.getLang = () => lang;
+        document.documentElement.lang = lang;
+        document.querySelector('#exam-prep-host-root').innerHTML = `
+          <section class="ep-result-screen"
+            data-ep-session-result="22222222-2222-4222-8222-222222222222"
+            data-ep-result-component="P5"
+            data-ep-result-session-type="diagnostic">
+            <article class="ep-result-item is-wrong" data-ep-result-kind="wrong" data-ep-result-item-order="2">
+              <div class="ep-result-subblock">Recorded diagnostic feedback</div>
+            </article>
+          </section>`;
+      }, row);
+      await page.waitForSelector('[data-ep-ai-error-action-wrap] [data-ep-ai-action="established_error_explanation"]');
+      const localized = await page.evaluate(() => {
+        const button = document.querySelector('[data-ep-ai-error-action-wrap] [data-ep-ai-action="established_error_explanation"]');
+        const item = document.querySelector('.ep-result-item.is-wrong');
+        return {
+          text: button?.textContent || '',
+          documentWidth: document.documentElement.scrollWidth,
+          innerWidth: window.innerWidth,
+          buttonWidth: button?.getBoundingClientRect().width || 0,
+          itemWidth: item?.getBoundingClientRect().width || 0
+        };
+      });
+      assert(localized.text === row.label, `${row.lang.toUpperCase()} diagnostic AI action copy drifted: ${localized.text}`);
+      assert(localized.documentWidth <= localized.innerWidth, `${row.lang.toUpperCase()} diagnostic AI action caused horizontal overflow: ${JSON.stringify(localized)}`);
+      assert(localized.buttonWidth <= localized.itemWidth + 1, `${row.lang.toUpperCase()} diagnostic AI action exceeds result card: ${JSON.stringify(localized)}`);
+    }
+
     await page.evaluate(() => {
       document.querySelector('#exam-prep-host-root').innerHTML = '<section data-ep-live-active-assessment><div>Question</div></section>';
     });
