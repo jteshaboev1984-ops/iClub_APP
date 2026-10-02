@@ -58,6 +58,8 @@ on:
       - scripts/p2-01-product-content-complete-regression.cjs
       - supabase/tests/p2_02_stage3_syllabus_closure_matrix.sql
       - scripts/p2-02-stage3-closure-regression.cjs
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-learner-views.js
       - .github/workflows/p2-80-independent-release-audit.yml
   push:
     branches: [main]
@@ -89,6 +91,8 @@ on:
       - scripts/p2-01-product-content-complete-regression.cjs
       - supabase/tests/p2_02_stage3_syllabus_closure_matrix.sql
       - scripts/p2-02-stage3-closure-regression.cjs
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-learner-views.js
       - .github/workflows/p2-80-independent-release-audit.yml
   workflow_dispatch:
 
