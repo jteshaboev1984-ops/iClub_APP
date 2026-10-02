@@ -335,6 +335,7 @@
     });
   }
   async function readiness(componentCode) { return rpc("get_exam_prep_readiness_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function readinessSummary(componentCode) { return rpc("get_exam_prep_readiness_summary_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function finalCalibration(componentCode) { return rpc("get_exam_prep_final_calibration_safe_v1", { p_component_code: componentArg(componentCode) }); }
 
   root.api = Object.freeze({
@@ -347,7 +348,7 @@
     recovery, recordInterruption, authorizeRevalidationItem,
     weeklyPlan, generateWeeklyPlan, authorizePlanItem,
     timedCatalog, stage4Consolidation, authorizeTimed, finalizeTimed, timedResult, timedReviewPack, submitTimedSelfMark,
-    readiness, finalCalibration
+    readiness, readinessSummary, finalCalibration
   });
 
   try {
@@ -361,7 +362,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p204june26ref1");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p205readiness2");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p202closure1");
