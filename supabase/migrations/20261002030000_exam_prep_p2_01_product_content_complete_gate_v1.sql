@@ -95,7 +95,10 @@ begin
       or nullif(btrim(wt.self_review_en),'') is null or nullif(btrim(wt.self_review_ru),'') is null or nullif(btrim(wt.self_review_uz),'') is null
       or jsonb_typeof(wt.rubric_json)<>'object'
       or jsonb_typeof(wt.rubric_json->'criteria')<>'array'
-      or jsonb_array_length(wt.rubric_json->'criteria')=0
+      or jsonb_array_length(
+           case when jsonb_typeof(wt.rubric_json->'criteria')='array'
+                then wt.rubric_json->'criteria' else '[]'::jsonb end
+         )=0
     );
   if v_bad<>0 then raise exception 'p2_01 written governance/i18n/rubric rows=%',v_bad; end if;
 
@@ -147,15 +150,44 @@ begin
     where n.program_version_id=v_program and n.owner_component_code is null
   ) then raise exception 'p2_01 mixed component firewall failed'; end if;
 
-  if (select count(*) from private.exam_prep_timed_assessment_contracts t join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id
-      where p.program_version_id=v_program and p.component_code='P1' and t.status='published' and t.attempt_kind='timed_section' and t.strict_timing)<2
+  if (select count(*) from private.exam_prep_component_paper_profiles
+      where program_version_id=v_program and component_code='P1' and status='published'
+        and official_total_marks=75 and official_duration_sec=6600 and source_level=1)<>1
+     or (select count(*) from private.exam_prep_component_paper_profiles
+      where program_version_id=v_program and component_code='P5' and status='published'
+        and official_total_marks=50 and official_duration_sec=4500 and source_level=1)<>1
      or (select count(*) from private.exam_prep_timed_assessment_contracts t join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id
-      where p.program_version_id=v_program and p.component_code='P5' and t.status='published' and t.attempt_kind='timed_section' and t.strict_timing)<2
+      where p.program_version_id=v_program and p.component_code='P1' and t.status='published' and t.attempt_kind='timed_section'
+        and t.strict_timing and t.fixed_time_limit_sec is not null and t.fixed_time_limit_sec>0)<2
      or (select count(*) from private.exam_prep_timed_assessment_contracts t join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id
-      where p.program_version_id=v_program and p.component_code='P1' and t.status='published' and t.attempt_kind='full_paper' and t.strict_timing and t.timing_rule='official_full' and t.comparison_scope='full')<1
+      where p.program_version_id=v_program and p.component_code='P5' and t.status='published' and t.attempt_kind='timed_section'
+        and t.strict_timing and t.fixed_time_limit_sec is not null and t.fixed_time_limit_sec>0)<2
      or (select count(*) from private.exam_prep_timed_assessment_contracts t join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id
-      where p.program_version_id=v_program and p.component_code='P5' and t.status='published' and t.attempt_kind='full_paper' and t.strict_timing and t.timing_rule='official_full' and t.comparison_scope='full')<1
-  then raise exception 'p2_01 timed/full-cycle capacity missing'; end if;
+      where p.program_version_id=v_program and p.component_code='P1' and t.status='published' and t.attempt_kind='modified_paper' and t.strict_timing)<1
+     or (select count(*) from private.exam_prep_timed_assessment_contracts t join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id
+      where p.program_version_id=v_program and p.component_code='P5' and t.status='published' and t.attempt_kind='modified_paper' and t.strict_timing)<1
+     or (select count(*) from private.exam_prep_timed_assessment_contracts t join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id
+      join private.exam_prep_assessments a on a.id=t.assessment_id
+      join private.exam_prep_content_versions cv on cv.id=a.content_version_id
+      where p.program_version_id=v_program and p.component_code='P1' and t.status='published' and t.attempt_kind='full_paper'
+        and t.strict_timing and t.timing_rule='official_full' and t.comparison_scope='full'
+        and t.marks_available=p.official_total_marks and a.status='published' and cv.status='published'
+        and cv.source_policy like 'Original iClub-authored full-paper practice content.%')<1
+     or (select count(*) from private.exam_prep_timed_assessment_contracts t join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id
+      join private.exam_prep_assessments a on a.id=t.assessment_id
+      join private.exam_prep_content_versions cv on cv.id=a.content_version_id
+      where p.program_version_id=v_program and p.component_code='P5' and t.status='published' and t.attempt_kind='full_paper'
+        and t.strict_timing and t.timing_rule='official_full' and t.comparison_scope='full'
+        and t.marks_available=p.official_total_marks and a.status='published' and cv.status='published'
+        and cv.source_policy like 'Original iClub-authored full-paper practice content.%')<1
+     or (select count(*) from pg_attribute
+         where attrelid='private.exam_prep_timed_attempt_results'::regclass
+           and attname in ('time_limit_sec','server_elapsed_sec','answered_items','unattempted_items',
+                           'objective_marks_in_time','objective_marks_after_time',
+                           'pending_review_in_time_marks','pending_review_after_time_marks',
+                           'unattempted_marks','timing_comparable','base_score_comparable')
+           and not attisdropped)<>11
+  then raise exception 'p2_01 timed/modified/full-cycle capacity or tracking contract missing'; end if;
 
   if (select count(*) from private.exam_prep_paper_metadata
       where program_version_id=v_program and component_code in ('P1','P5')
@@ -176,13 +208,45 @@ begin
   into v_pct;
   if coalesce(v_pct,0)<20 then raise exception 'p2_01 unseen reserve below 20%%: %',v_pct; end if;
 
-  if not exists(select 1 from private.exam_prep_written_tasks where lifecycle_state='published' and
-      (prompt_en ~* '\m(graph|sketch|diagram)\M' or rubric_json::text ~* '\m(graph|sketch|diagram)\M'))
-     or not exists(select 1 from private.exam_prep_written_tasks where lifecycle_state='published' and
-      (prompt_en ~* '\m(explain|justify|interpret|comment|conclusion|context)\M' or rubric_json::text ~* '\m(explain|justify|interpret|comment|conclusion|context|communication)\M'))
-     or not exists(select 1 from private.exam_prep_written_tasks where lifecycle_state='published'
-      and jsonb_typeof(rubric_json->'criteria')='array' and jsonb_array_length(rubric_json->'criteria')>=2)
-  then raise exception 'p2_01 mentor written/graph/multipart/AO2 library gate failed'; end if;
+  select count(*) into v_bad
+  from (values ('P1'),('P5')) c(component_code)
+  where not exists(
+      select 1 from private.exam_prep_written_tasks wt
+      join private.exam_prep_content_versions cv on cv.id=wt.content_version_id
+      where cv.program_version_id=v_program and cv.status='published' and cv.component_code=c.component_code
+        and wt.lifecycle_state='published'
+        and (wt.prompt_en ~* '\m(graph|sketch|diagram)\M' or wt.rubric_json::text ~* '\m(graph|sketch|diagram)\M')
+    )
+    or not exists(
+      select 1 from private.exam_prep_written_tasks wt
+      join private.exam_prep_content_versions cv on cv.id=wt.content_version_id
+      where cv.program_version_id=v_program and cv.status='published' and cv.component_code=c.component_code
+        and wt.lifecycle_state='published'
+        and (wt.prompt_en ~* '\m(explain|justify|interpret|comment|conclusion|context)\M'
+             or wt.rubric_json::text ~* '\m(explain|justify|interpret|comment|conclusion|context|communication)\M')
+    )
+    or not exists(
+      select 1 from private.exam_prep_written_tasks wt
+      join private.exam_prep_content_versions cv on cv.id=wt.content_version_id
+      where cv.program_version_id=v_program and cv.status='published' and cv.component_code=c.component_code
+        and wt.lifecycle_state='published'
+        and jsonb_typeof(wt.rubric_json->'criteria')='array'
+        and jsonb_array_length(wt.rubric_json->'criteria')>=2
+    )
+    or not exists(
+      select 1
+      from private.exam_prep_written_tasks wt
+      join private.exam_prep_assessment_items ai on ai.written_task_id=wt.id
+      join private.exam_prep_assessments a on a.id=ai.assessment_id
+      join private.exam_prep_timed_assessment_contracts t
+        on t.assessment_id=a.id and t.attempt_kind='full_paper' and t.status='published'
+      join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id
+      where p.program_version_id=v_program and p.component_code=c.component_code
+        and wt.lifecycle_state='published'
+        and jsonb_typeof(wt.rubric_json->'criteria')='array'
+        and jsonb_array_length(wt.rubric_json->'criteria')>=2
+    );
+  if v_bad<>0 then raise exception 'p2_01 mentor written/graph/multipart/AO2/full-paper library missing components=%',v_bad; end if;
 
   if not exists(
     select 1 from pg_constraint c join pg_class t on t.oid=c.conrelid join pg_namespace n on n.oid=t.relnamespace
@@ -225,6 +289,9 @@ begin
       'p5_timed_sections',(select count(*) from private.exam_prep_timed_assessment_contracts t join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id where p.program_version_id=v_program and p.component_code='P5' and t.status='published' and t.attempt_kind='timed_section'),
       'p1_full_papers',(select count(*) from private.exam_prep_timed_assessment_contracts t join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id where p.program_version_id=v_program and p.component_code='P1' and t.status='published' and t.attempt_kind='full_paper'),
       'p5_full_papers',(select count(*) from private.exam_prep_timed_assessment_contracts t join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id where p.program_version_id=v_program and p.component_code='P5' and t.status='published' and t.attempt_kind='full_paper'),
+      'p1_modified_papers',(select count(*) from private.exam_prep_timed_assessment_contracts t join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id where p.program_version_id=v_program and p.component_code='P1' and t.status='published' and t.attempt_kind='modified_paper'),
+      'p5_modified_papers',(select count(*) from private.exam_prep_timed_assessment_contracts t join private.exam_prep_component_paper_profiles p on p.id=t.paper_profile_id where p.program_version_id=v_program and p.component_code='P5' and t.status='published' and t.attempt_kind='modified_paper'),
+      'timed_tracking_fields',11,
       'past_paper_companion_rows',2,'never_exposed_transfer_retest_pct',v_pct,
       'annual_holdout_rotation_target_pct','20-25',
       'product_content_complete_is_syllabus_closure',false,
