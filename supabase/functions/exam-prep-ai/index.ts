@@ -162,7 +162,7 @@ async function learnerContext(
       context_type: "skill_detail_v1",
       data: await rpc("get_exam_prep_skill_detail_safe_v1", {
         p_component_code: component,
-        p_skill_code: skillCode || (typeof deterministicContext?.data?.skill_code === "string" ? deterministicContext.data.skill_code : null),
+        p_skill_code: skillCode,
       }, authorization, ANON_KEY),
     };
   }
