@@ -28,6 +28,9 @@ assert(edgeSource.includes('model_not_configured'), 'production endpoint lost tr
 assert(edgeSource.includes('academic_state_changed: false'), 'production endpoint lost explicit non-authoritative response contract');
 assert(edgeSource.includes('get_exam_prep_ai_guard_v1'), 'production endpoint no longer uses server AI guard');
 assert(edgeSource.includes('get_exam_prep_ai_source_cards_service_v1'), 'production endpoint no longer uses allowlisted source cards');
+assert(edgeSource.includes('get_exam_prep_ai_error_context_safe_v1'), 'established-error provider route lost deterministic error context');
+assert(edgeSource.includes('error_context_reference_required'), 'established-error provider route lost finalized session/item reference guard');
+assert(edgeSource.includes('deterministic_mapping_required'), 'unmapped established error no longer fails closed');
 assert(!edgeSource.includes('correct_answer'), 'production AI endpoint references correct_answer');
 assert(!edgeSource.includes('answer_key'), 'production AI endpoint references answer_key');
 
