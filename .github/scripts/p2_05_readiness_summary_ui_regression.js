@@ -11,7 +11,7 @@ for(const token of [
   'async function readinessSummary(componentCode)',
   'get_exam_prep_readiness_safe_v1',
   'get_exam_prep_readiness_summary_safe_v1',
-  'readiness, readinessSummary, finalCalibration',
+  'readiness, readinessSummary, examOps, saveExamAppointment, setExamOpsConfirmation, finalCalibration',
   'exam-prep-live.js?v=p206finalops1'
 ]) must(api.includes(token), `API integration missing: ${token}`);
 
