@@ -63,6 +63,8 @@
       consolidationReasonTimed: "Qolgan vaqtli mashqlarni bajaring.",
       consolidationReasonCorrections: "Barqaror bo‘lmagan mavzularni mustahkamlang va belgilangan tuzatishlarni yakunlang.",
       consolidationReasonPending: "Keyingi bosqich uchun hali ko‘proq tasdiqlangan natija kerak.",
+      consolidationReference: "Format bo‘yicha yo‘nalish: rasmiy Cambridge 9709, June 2026. Faqat format va vaqt shartlari uchun ishlatiladi; ballarni bevosita solishtirish uchun emas.",
+      consolidationReferenceLink: "Cambridge rasmiy izohi",
       dashboardEyebrow: "Sizning yo‘lingiz", dashboardTitle: "P1 va P5 bo‘yicha tayyorgarlik", dashboardText: "Har bir komponent o‘z bosqichi, dalillari va keyingi qadami bilan alohida yuradi.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "ko‘nikma", continueCheck: "Kirish tekshiruvini davom ettirish", profileSaved: "Saqlangan reja", targetShort: "Maqsad", totalShort: "Jami", mathShort: "Matematika", hoursShort: "soat/hafta",
       actionCloseIssue: "Qolgan asosiy xatoni yoping", actionShort: "Qisqa maqsadli mashq", actionTiming: "Vaqt va imtihon tartibini tekshirish", actionTaper: "Yuklamani kamaytirish va natijani saqlash",
@@ -103,6 +105,8 @@
       consolidationReasonTimed: "Complete the remaining timed practice.",
       consolidationReasonCorrections: "Strengthen the remaining unstable topics and complete the assigned correction work.",
       consolidationReasonPending: "More confirmed evidence is needed before the next phase.",
+      consolidationReference: "Format reference: official Cambridge 9709, June 2026. Used only for format and timing context, not for direct score calibration.",
+      consolidationReferenceLink: "Official Cambridge notice",
       dashboardEyebrow: "Your route", dashboardTitle: "Preparation for P1 and P5", dashboardText: "Each component moves separately with its own phase, evidence and next action.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "skills", continueCheck: "Continue entry check", profileSaved: "Saved plan", targetShort: "Target grade", totalShort: "Total", mathShort: "Mathematics", hoursShort: "h/week",
       actionCloseIssue: "Close the main remaining issue", actionShort: "Short targeted practice", actionTiming: "Check timing and exam logistics", actionTaper: "Reduce workload and protect performance",
@@ -143,6 +147,8 @@
       consolidationReasonTimed: "Завершите оставшиеся практики на время.",
       consolidationReasonCorrections: "Закрепите нестабильные темы и завершите назначенную работу над ошибками.",
       consolidationReasonPending: "Для следующего этапа пока не хватает подтверждённых результатов.",
+      consolidationReference: "Ориентир по формату: официальный Cambridge 9709, June 2026. Используем только для формата и условий по времени, не для прямого сравнения баллов.",
+      consolidationReferenceLink: "Официальное уведомление Cambridge",
       dashboardEyebrow: "Ваш маршрут", dashboardTitle: "Подготовка по P1 и P5", dashboardText: "Каждый компонент идёт отдельно: со своим этапом, подтверждениями и следующим действием.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "навыков", continueCheck: "Продолжить входную проверку", profileSaved: "Сохранённый план", targetShort: "Цель", totalShort: "Всего", mathShort: "Математика", hoursShort: "ч/нед",
       actionCloseIssue: "Закрыть основную оставшуюся ошибку", actionShort: "Короткая целевая практика", actionTiming: "Проверить время и экзаменационный порядок", actionTaper: "Снизить нагрузку и сохранить форму",
@@ -925,6 +931,18 @@
     return map[String(data?.next_action_code || "")] || c.consolidationReasonPending;
   }
 
+  function consolidationReferenceMarkup(data, c) {
+    const url = String(data?.official_reference_url || "");
+    const valid =
+      data?.official_reference_series === "Cambridge International AS & A Level Mathematics 9709 · June 2026" &&
+      data?.official_reference_scope === "format_and_timing_context_only" &&
+      data?.official_reference_used_for_direct_score_calibration === false &&
+      data?.official_reference_question_content_copied === false &&
+      url.startsWith("https://www.cambridgeinternational.org/");
+    if (!valid) return "";
+    return `<div class="ep-live-reference-note"><span>${esc(c.consolidationReference)}</span> <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(c.consolidationReferenceLink)}</a></div>`;
+  }
+
   function renderConsolidationCard(data) {
     if (!data) return "";
     if (data?.component_isolation !== true || data?.modified_or_topic_results_count_as_comparable_full === true) return "";
@@ -942,7 +960,8 @@
     const latestA = percentShare(data?.latest_after_time_share);
     const unattemptedTrend = prevU && latestU ? `${prevU} → ${latestU}` : c.consolidationNoTrend;
     const afterTimeTrend = prevA && latestA ? `${prevA} → ${latestA}` : c.consolidationNoTrend;
-    return `<div class="ep-live-card" data-ep-live-stage4-consolidation><div class="ep-live-head"><div><strong>${esc(c.consolidationTitle)}</strong><div class="ep-live-meta">${esc(consolidationReason(c, data))}</div></div><strong>${esc(data.ready === true ? c.consolidationComplete : c.consolidationInProgress)}</strong></div><div class="ep-live-stats"><div class="ep-live-stat"><span>${esc(c.consolidationPapers)}</span><strong>${papersDone} / ${papersNeed}</strong></div><div class="ep-live-stat"><span>${esc(c.consolidationTimed)}</span><strong>${timedDone} / ${timedNeed}</strong></div><div class="ep-live-stat"><span>${esc(c.consolidationSkills)}</span><strong>${skills}</strong></div></div><div class="ep-live-grid"><div class="ep-live-stat"><span>${esc(c.consolidationUnattempted)}</span><strong>${esc(unattemptedTrend)}</strong></div><div class="ep-live-stat"><span>${esc(c.consolidationAfterTime)}</span><strong>${esc(afterTimeTrend)}</strong></div></div></div>`;
+    const reference = consolidationReferenceMarkup(data, c);
+    return `<div class="ep-live-card" data-ep-live-stage4-consolidation><div class="ep-live-head"><div><strong>${esc(c.consolidationTitle)}</strong><div class="ep-live-meta">${esc(consolidationReason(c, data))}</div></div><strong>${esc(data.ready === true ? c.consolidationComplete : c.consolidationInProgress)}</strong></div><div class="ep-live-stats"><div class="ep-live-stat"><span>${esc(c.consolidationPapers)}</span><strong>${papersDone} / ${papersNeed}</strong></div><div class="ep-live-stat"><span>${esc(c.consolidationTimed)}</span><strong>${timedDone} / ${timedNeed}</strong></div><div class="ep-live-stat"><span>${esc(c.consolidationSkills)}</span><strong>${skills}</strong></div></div><div class="ep-live-grid"><div class="ep-live-stat"><span>${esc(c.consolidationUnattempted)}</span><strong>${esc(unattemptedTrend)}</strong></div><div class="ep-live-stat"><span>${esc(c.consolidationAfterTime)}</span><strong>${esc(afterTimeTrend)}</strong></div></div>${reference}</div>`;
   }
 
   function renderTimedCatalog(component, payload, stage4Data = null) {
