@@ -43,6 +43,7 @@ on:
       - supabase/tests/exam_prep_aw21_24_supplemental_learning_independent_qa_v1_contract.sql
       - supabase/tests/exam_prep_aw21_24_supplemental_learning_release_v1_contract.sql
       - supabase/tests/exam_prep_aw21_24_annual_reserve_topup_draft_v1_contract.sql
+      - supabase/tests/exam_prep_aw21_24_annual_reserve_independent_qa_v1_contract.sql
       - supabase/tests/exam_prep_aw05_08_supplemental_learning_release_v1_contract.sql
       - supabase/tests/exam_prep_aw05_08_annual_reserve_topup_draft_v1_contract.sql
       - supabase/tests/exam_prep_aw05_08_annual_reserve_release_v1_contract.sql
@@ -356,6 +357,12 @@ jobs:
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_aw21_24_annual_reserve_topup_draft_v1_contract.sql 2>&1 | tee -a p236-current-schema.log
+
+      - name: Verify AW21-24 annual reserve independent QA
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_aw21_24_annual_reserve_independent_qa_v1_contract.sql 2>&1 | tee -a p236-current-schema.log
 
       - name: Verify AW5-8 annual reserve draft
         shell: bash
