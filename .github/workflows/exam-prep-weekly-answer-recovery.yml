@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check scripts/weekly-flow-answer-recovery-cutover.cjs
-          test "$(git hash-object exam-prep/exam-prep-live.js)" = '4b80f090b490ba84313d16e72c4eb8d7ee5e9410'
+          test "$(git hash-object exam-prep/exam-prep-live.js)" = '0ae8f812322456f5ebcfea76eb33f2b8149e2215'
           grep -Fq 'async function reconcilePendingAnswer(pending)' exam-prep/exam-prep-live.js
           grep -Fq 'pending.idempotencyKey' exam-prep/exam-prep-live.js
           grep -Fq 'window.iClubExamPrepWeeklyFlowEnabled===true' exam-prep/exam-prep-live.js
