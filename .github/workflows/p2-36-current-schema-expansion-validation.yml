@@ -49,6 +49,8 @@ on:
       - supabase/tests/exam_prep_aw05_08_annual_reserve_topup_draft_v1_contract.sql
       - supabase/tests/exam_prep_aw05_08_annual_reserve_release_v1_contract.sql
       - supabase/tests/exam_prep_supplemental_reserve_publish_guard_v1_contract.sql
+      - supabase/tests/p2_01_product_content_complete_gate_matrix.sql
+      - scripts/p2-01-product-content-complete-regression.cjs
       - .github/workflows/p2-36-current-schema-expansion-validation.yml
   push:
     branches:
@@ -72,6 +74,8 @@ on:
       - supabase/tests/exam_prep_aw01_04_annual_reserve_topup_draft_v1_contract.sql
       - supabase/tests/exam_prep_aw01_04_annual_reserve_release_v1_contract.sql
       - supabase/tests/exam_prep_supplemental_reserve_publish_guard_v1_contract.sql
+      - supabase/tests/p2_01_product_content_complete_gate_matrix.sql
+      - scripts/p2-01-product-content-complete-regression.cjs
       - .github/workflows/p2-36-current-schema-expansion-validation.yml
   workflow_dispatch:
 
@@ -370,6 +374,19 @@ jobs:
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_aw21_24_annual_reserve_release_v1_contract.sql 2>&1 | tee -a p236-current-schema.log
+
+      - name: Verify P2-01 Product Content-Complete static safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/p2-01-product-content-complete-regression.cjs
+          node scripts/p2-01-product-content-complete-regression.cjs 2>&1 | tee -a p236-current-schema.log
+
+      - name: Verify P2-01 Product Content-Complete formal gate
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_01_product_content_complete_gate_matrix.sql 2>&1 | tee -a p236-current-schema.log
 
       - name: Verify AW5-8 annual reserve draft
         shell: bash
