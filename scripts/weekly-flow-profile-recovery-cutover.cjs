@@ -2,7 +2,7 @@
 // Exact-source cutover. --apply changes ONLY a disposable checkout, never production.
 const fs=require('node:fs'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const files=[
-  {path:'exam-prep/exam-prep-api.js',sha:'8a7866205487cbe850a105d4a5c035e91210def2'},
+  {path:'exam-prep/exam-prep-api.js',sha:'5240ada1c6bee42699de79ec7ab9f0aa460e6d17'},
   {path:'exam-prep/exam-prep-recovery.js',sha:'42692818bbfa9eaf7c74b8a4505e50c7cd07c979'},
   {path:'exam-prep/exam-prep-exam-map.js',sha:'055cbdcc6bd4f5784fdfdee70210b8fba87d6748'}
 ];
