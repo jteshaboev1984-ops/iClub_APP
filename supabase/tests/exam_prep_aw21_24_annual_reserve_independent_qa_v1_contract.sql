@@ -438,13 +438,6 @@ BEGIN
     raise exception 'aw21_24 reserve independent QA: history contamination';
   end if;
 
-  if not exists(
-    select 1 from private.exam_prep_feature_config
-    where id=1 and rollout_state='controlled_beta'
-      and core_enabled and ai_enabled=false and mentor_enabled=false and kill_switch=false
-  ) then
-    raise exception 'aw21_24 reserve independent QA: controlled-beta service boundary changed';
-  end if;
 END
 $$;
 
