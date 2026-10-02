@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p202closure1";
+  const VERSION = "p302aivalue1";
   let observer = null;
   let busy = false;
   let activeLanguage = "ru";
