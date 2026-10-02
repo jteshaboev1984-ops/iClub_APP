@@ -1,5 +1,5 @@
 name: P2-76 AI Explanation Quality
-# P3-02 governed canary reuses the funded provider acceptance gate before any learner activation.
+# P3-02 funded provider canary: 2026-10-02 acceptance run before any learner activation.
 
 on:
   pull_request:
