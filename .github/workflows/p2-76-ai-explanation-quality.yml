@@ -36,8 +36,8 @@ jobs:
       P276_REASONING_EFFORT: none
       P276_TEXT_VERBOSITY: low
       P276_MAX_OUTPUT_TOKENS: '180'
-      P276_MAX_PAID_REQUESTS: '18'
-      P276_MAX_BUDGET_USD: '0.02'
+      P276_MAX_PAID_REQUESTS: '24'
+      P276_MAX_BUDGET_USD: '0.03'
       P276_INPUT_PRICE_PER_MTOK: '0.20'
       P276_OUTPUT_PRICE_PER_MTOK: '1.20'
       P276_PROGRESSIVE: 'true'
@@ -58,7 +58,7 @@ jobs:
         run: |
           if [[ "${{ github.event.head_commit.message }}" == *"[p276-paid]"* || ( "${{ github.event_name }}" == "pull_request" && "${{ github.head_ref }}" == qa/ai-provider-acceptance-* && "${{ github.event.pull_request.title }}" == *"[p276-paid]"* ) ]]; then
             echo 'P2-76 paid acceptance explicitly requested by governed commit/PR tag.'
-            echo 'Cost guard: gpt-5.6-luna, reasoning=none, low verbosity, <=18 calls, <=180 output tokens/call, estimated budget cap $0.02.'
+            echo 'Cost guard: gpt-5.6-luna, reasoning=none, low verbosity, <=24 calls, <=180 output tokens/call, estimated budget cap $0.03.'
           else
             echo 'P2-76 paid acceptance NOT requested. Self-test only; no OpenAI provider call will be made.'
           fi
