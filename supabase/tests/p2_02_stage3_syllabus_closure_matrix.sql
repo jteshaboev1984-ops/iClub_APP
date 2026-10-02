@@ -100,6 +100,14 @@ begin
   insert into public.users(id,first_name,last_name,language_code)
   values(v_user,'P202','Stage3Closure','en');
 
+  insert into private.exam_prep_exam_profiles(
+    user_id,program_version_id,exam_series,target_grade,
+    total_student_hours_available,mathematics_hours_budget,active_week_no,
+    created_by,updated_by
+  ) values(
+    v_user,v_program,'May/June 2027','A',12,6,24,v_user,v_user
+  );
+
   -- Build component-complete coverage ledger state:
   -- every canonical skill >=L2, all governed key skills >=L3.
   insert into private.exam_prep_skill_states(
