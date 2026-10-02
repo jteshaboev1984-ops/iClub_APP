@@ -262,6 +262,7 @@ function validateGeneratedMessage(params: {
   }
 
   const prohibitedClaims = [
+    // English authority / answer-key claims.
     /predicted\s+(cambridge\s+)?grade/i,
     /guaranteed\s+(grade|result|pass)/i,
     /correct\s+answer\s+is/i,
@@ -271,6 +272,26 @@ function validateGeneratedMessage(params: {
     /i\s+(have\s+)?(accepted|applied)\s+(an?\s+)?override/i,
     /you\s+(have\s+)?mastered\s+(everything|all|paper)/i,
     /you\s+are\s+(fully\s+)?(exam\s+)?ready/i,
+
+    // Russian equivalents. Keep these conservative and authority-focused.
+    /прогноз(ируемая|ный|ный\s+результат)?\s*(оценк[аи]|grade)?\s*cambridge/i,
+    /гарантир(ую|уем|овано).*\b(оценк|результат|сдач)/i,
+    /правильн(ый|ого)\s+ответ(\s+[-—:]?\s*это|\s+[-—:])/i,
+    /ключ\s+(ответов|с\s+ответами)/i,
+    /я\s+(изменил|обновил|повысил).*\b(mastery|этап|готовност|placement|прогресс)/i,
+    /я\s+(начислил|поставил|присудил).*\b(балл|баллы|method\s+marks?)/i,
+    /я\s+(принял|применил).*\boverride/i,
+    /вы\s+(полностью\s+)?готовы\s+к\s+экзамену/i,
+
+    // Uzbek equivalents.
+    /cambridge.*(taxminiy|bashorat).*\b(baho|natija)/i,
+    /(baho|natija|o['’]?tish).*kafolat/i,
+    /to['’]?g['’]?ri\s+javob\s*(bu|[-—:])/i,
+    /javob(lar)?\s+kaliti/i,
+    /men\s+(o['’]?zgartirdim|yangiladim|oshirdim).*\b(mastery|bosqich|tayyorlik|placement|progress)/i,
+    /men\s+(ball|baho).*\b(berdim|qo['’]?ydim|taqdim\s+etdim)/i,
+    /men\s+override.*\b(qabul\s+qildim|qo['’]?lladim)/i,
+    /siz\s+(to['’]?liq\s+)?imtihonga\s+tayyorsiz/i,
   ];
   if (prohibitedClaims.some((pattern) => pattern.test(message))) {
     return { ok: false, reason: "prohibited_claim" };
@@ -468,7 +489,9 @@ Deno.serve(async (req: Request) => {
   const requestId = isUuid((payload as any).request_id) ? (payload as any).request_id : crypto.randomUUID();
   const component = String((payload as any).component_code || "").toUpperCase();
   const interaction = String((payload as any).interaction_type || "");
-  const locale = normalizeLocale((payload as any).locale);
+  const rawLocale = String((payload as any).locale || "ru").toLowerCase();
+  if (!VALID_LOCALES.has(rawLocale)) return response(400, { request_id: requestId, error: "invalid_locale" });
+  const locale = rawLocale;
   const userText = typeof (payload as any).user_text === "string" ? (payload as any).user_text : "";
   const rawSkillCode = typeof (payload as any).skill_code === "string" ? String((payload as any).skill_code).trim() : "";
   const skillCode = rawSkillCode && rawSkillCode.length <= 80 ? rawSkillCode : null;
