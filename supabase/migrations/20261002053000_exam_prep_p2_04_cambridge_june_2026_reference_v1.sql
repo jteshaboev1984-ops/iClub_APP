@@ -5,23 +5,8 @@
 
 begin;
 
-do $source_preflight$
-begin
-  if exists(
-    select 1 from private.exam_prep_source_registry
-    where id in (7,8)
-      and (source_key,source_version) not in (
-        ('cambridge_9709_june_2026_p1_reference','9709/12:June 2026'),
-        ('cambridge_9709_june_2026_p5_reference','9709/52:June 2026')
-      )
-  ) then
-    raise exception 'P2-04 Cambridge June 2026 source-registry id collision';
-  end if;
-end
-$source_preflight$;
-
 insert into private.exam_prep_source_registry(
-  id,source_key,source_version,source_level,source_kind,
+  source_key,source_version,source_level,source_kind,
   title_en,title_ru,title_uz,
   role_en,role_ru,role_uz,
   can_define_scope,can_define_coverage_denominator,can_support_assessment_evidence,
@@ -29,7 +14,6 @@ insert into private.exam_prep_source_registry(
 )
 values
 (
-  7,
   'cambridge_9709_june_2026_p1_reference',
   '9709/12:June 2026',
   4,
@@ -47,7 +31,6 @@ values
   now()
 ),
 (
-  8,
   'cambridge_9709_june_2026_p5_reference',
   '9709/52:June 2026',
   4,
