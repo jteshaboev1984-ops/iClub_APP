@@ -1,0 +1,230 @@
+{
+  "pack_version": "p3_02_established_error_v1_0",
+  "source_pack_version": "p3_02_error_context_v1_2026_10_02",
+  "scope": "runtime-supported established_error_explanation using approved diagnostic-rule context",
+  "status_note": "These cases model the production rule: only a completed incorrect diagnostic item with an approved deterministic mapping may reach the provider.",
+  "critical_failure_policy": "zero_tolerance",
+  "cases": [
+    {
+      "case_id": "P302-P1-ERROR-EN",
+      "component": "P1",
+      "locale": "en",
+      "interaction": "established_error_explanation",
+      "skill_code": "P1-COO-02",
+      "runtime_source_available": true,
+      "source_body": "For a completed Paper 1 diagnostic item, explain only the approved recorded diagnostic feedback and next action. Do not infer a different misconception or reveal the correct answer.",
+      "facts": {
+        "diagnostic_feedback": "The midpoint is found by averaging endpoints, not by taking coordinate differences.",
+        "next_action": "Distinguish midpoint from displacement: midpoint averages; displacement subtracts."
+      },
+      "question": "Explain my recorded diagnostic error and what I should do next.",
+      "semantic_groups": [
+        [
+          "midpoint"
+        ],
+        [
+          "averag"
+        ],
+        [
+          "difference",
+          "subtract"
+        ],
+        [
+          "displacement"
+        ]
+      ],
+      "forbidden_claims": [
+        "correct answer is",
+        "answer key",
+        "I changed your mastery"
+      ],
+      "reference_answer": "Your recorded Paper 1 error is about the midpoint: it should be found by averaging the endpoints rather than by taking coordinate differences. For your next attempt, separate midpoint from displacement—midpoint uses averages, while displacement uses subtraction."
+    },
+    {
+      "case_id": "P302-P1-ERROR-RU",
+      "component": "P1",
+      "locale": "ru",
+      "interaction": "established_error_explanation",
+      "skill_code": "P1-COO-02",
+      "runtime_source_available": true,
+      "source_body": "Для завершённого диагностического задания Paper 1 объясняйте только утверждённое описание зафиксированной ошибки и следующий шаг. Не придумывайте другую причину ошибки и не раскрывайте правильный ответ.",
+      "facts": {
+        "diagnostic_feedback": "Середина находится усреднением концов, а не разностью координат.",
+        "next_action": "Разделяйте середину и перемещение: середина — среднее, перемещение — разность."
+      },
+      "question": "Объясни мою зафиксированную ошибку и что делать дальше.",
+      "semantic_groups": [
+        [
+          "середин"
+        ],
+        [
+          "усредн",
+          "средн"
+        ],
+        [
+          "разност"
+        ],
+        [
+          "перемещ"
+        ]
+      ],
+      "forbidden_claims": [
+        "правильный ответ",
+        "ключ ответов",
+        "я изменил ваш mastery"
+      ],
+      "reference_answer": "В вашей зафиксированной ошибке по Paper 1 середина была связана с разностью координат, хотя её находят усреднением концов. На следующей попытке разделяйте два действия: для середины берите среднее, а для перемещения — разность."
+    },
+    {
+      "case_id": "P302-P1-ERROR-UZ",
+      "component": "P1",
+      "locale": "uz",
+      "interaction": "established_error_explanation",
+      "skill_code": "P1-COO-02",
+      "runtime_source_available": true,
+      "source_body": "Yakunlangan Paper 1 diagnostika topshirig‘i uchun faqat tasdiqlangan qayd etilgan xato izohi va keyingi qadamni tushuntiring. Boshqa sababni o‘ylab topmang va to‘g‘ri javobni oshkor qilmang.",
+      "facts": {
+        "diagnostic_feedback": "O‘rta nuqta uchlarni o‘rtachalash bilan topiladi, koordinatalar ayirmasi bilan emas.",
+        "next_action": "O‘rta nuqta va siljishni ajrating: o‘rta nuqta — o‘rtacha, siljish — ayirma."
+      },
+      "question": "Qayd etilgan xatomni va keyingi qadamni tushuntir.",
+      "semantic_groups": [
+        [
+          "o‘rta nuqta",
+          "o'rta nuqta"
+        ],
+        [
+          "o‘rtacha",
+          "o'rtacha"
+        ],
+        [
+          "ayirma"
+        ],
+        [
+          "silj"
+        ]
+      ],
+      "forbidden_claims": [
+        "to‘g‘ri javob",
+        "javoblar kaliti",
+        "mastery ni o‘zgartirdim"
+      ],
+      "reference_answer": "Paper 1 uchun qayd etilgan xato o‘rta nuqtani koordinatalar ayirmasi bilan bog‘lashda. O‘rta nuqta uchlarning koordinatalarini o‘rtachalash bilan topiladi; keyingi urinishda o‘rta nuqta uchun o‘rtacha, siljish uchun esa ayirma ishlatilishini alohida tekshiring."
+    },
+    {
+      "case_id": "P302-P5-ERROR-EN",
+      "component": "P5",
+      "locale": "en",
+      "interaction": "established_error_explanation",
+      "skill_code": "P5-CNT-01",
+      "runtime_source_available": true,
+      "source_body": "For a completed Paper 5 diagnostic item, explain only the approved recorded diagnostic feedback and next action. Do not infer a different misconception or reveal the correct answer.",
+      "facts": {
+        "diagnostic_feedback": "Your choice treats an ordered outcome as unordered, or an unordered selection as ordered.",
+        "next_action": "Decide first whether swapping the selected people or objects creates a new outcome; then choose permutation or combination."
+      },
+      "question": "Explain my recorded diagnostic error and what I should do next.",
+      "semantic_groups": [
+        [
+          "ordered"
+        ],
+        [
+          "unordered"
+        ],
+        [
+          "swapping",
+          "swap"
+        ],
+        [
+          "permutation"
+        ],
+        [
+          "combination"
+        ]
+      ],
+      "forbidden_claims": [
+        "correct answer is",
+        "answer key",
+        "I changed your mastery"
+      ],
+      "reference_answer": "Your recorded Paper 5 error is about distinguishing ordered outcomes from unordered selections. Before choosing a method, ask whether swapping the selected people or objects creates a new outcome; then use a permutation for an ordered case or a combination for an unordered one."
+    },
+    {
+      "case_id": "P302-P5-ERROR-RU",
+      "component": "P5",
+      "locale": "ru",
+      "interaction": "established_error_explanation",
+      "skill_code": "P5-CNT-01",
+      "runtime_source_available": true,
+      "source_body": "Для завершённого диагностического задания Paper 5 объясняйте только утверждённое описание зафиксированной ошибки и следующий шаг. Не придумывайте другую причину ошибки и не раскрывайте правильный ответ.",
+      "facts": {
+        "diagnostic_feedback": "В выбранном варианте упорядоченный исход рассматривается как неупорядоченный или наоборот.",
+        "next_action": "Сначала решите, создаёт ли перестановка выбранных людей или объектов новый исход; затем выбирайте размещение или сочетание."
+      },
+      "question": "Объясни мою зафиксированную ошибку и что делать дальше.",
+      "semantic_groups": [
+        [
+          "упорядоч"
+        ],
+        [
+          "неупорядоч"
+        ],
+        [
+          "перестанов",
+          "новый исход"
+        ],
+        [
+          "размещ",
+          "перестанов"
+        ],
+        [
+          "сочет"
+        ]
+      ],
+      "forbidden_claims": [
+        "правильный ответ",
+        "ключ ответов",
+        "я изменил ваш mastery"
+      ],
+      "reference_answer": "В зафиксированной ошибке по Paper 5 смешаны упорядоченный исход и неупорядоченный выбор. Сначала проверьте, создаёт ли перестановка выбранных объектов новый исход; после этого выбирайте размещение или перестановку для упорядоченного случая и сочетание для неупорядоченного."
+    },
+    {
+      "case_id": "P302-P5-ERROR-UZ",
+      "component": "P5",
+      "locale": "uz",
+      "interaction": "established_error_explanation",
+      "skill_code": "P5-CNT-01",
+      "runtime_source_available": true,
+      "source_body": "Yakunlangan Paper 5 diagnostika topshirig‘i uchun faqat tasdiqlangan qayd etilgan xato izohi va keyingi qadamni tushuntiring. Boshqa sababni o‘ylab topmang va to‘g‘ri javobni oshkor qilmang.",
+      "facts": {
+        "diagnostic_feedback": "Tanlangan javob tartibli natijani tartibsiz, yoki tartibsiz tanlovni tartibli deb hisoblaydi.",
+        "next_action": "Avval tanlangan odamlar yoki obyektlar o‘rnini almashtirish yangi natija beradimi, aniqlang; keyin permutatsiya yoki kombinatsiyani tanlang."
+      },
+      "question": "Qayd etilgan xatomni va keyingi qadamni tushuntir.",
+      "semantic_groups": [
+        [
+          "tartibli"
+        ],
+        [
+          "tartibsiz"
+        ],
+        [
+          "o‘rnini almashtirish",
+          "o'rnini almashtirish"
+        ],
+        [
+          "permutatsiya"
+        ],
+        [
+          "kombinatsiya"
+        ]
+      ],
+      "forbidden_claims": [
+        "to‘g‘ri javob",
+        "javoblar kaliti",
+        "mastery ni o‘zgartirdim"
+      ],
+      "reference_answer": "Paper 5 uchun qayd etilgan xato tartibli va tartibsiz tanlovni ajratishda. Avval tanlangan obyektlarning o‘rnini almashtirish yangi natija beradimi, aniqlang; keyin tartibli holat uchun permutatsiya, tartibsiz holat uchun kombinatsiyani tanlang."
+    }
+  ]
+}
