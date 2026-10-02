@@ -2,7 +2,9 @@ const fs = require('fs');
 
 const api = fs.readFileSync('exam-prep/exam-prep-api.js', 'utf8');
 const live = fs.readFileSync('exam-prep/exam-prep-live.js', 'utf8');
-const migration = fs.readFileSync('supabase/migrations/20261002050000_exam_prep_p2_04_stage4_consolidation_safe_v1.sql', 'utf8');
+const baseMigration = fs.readFileSync('supabase/migrations/20261002050000_exam_prep_p2_04_stage4_consolidation_safe_v1.sql', 'utf8');
+const referenceMigration = fs.readFileSync('supabase/migrations/20261002053000_exam_prep_p2_04_cambridge_june_2026_reference_v1.sql', 'utf8');
+const migration = `${baseMigration}\n${referenceMigration}`;
 const css = fs.readFileSync('exam-prep/exam-prep-host.css', 'utf8');
 
 function must(condition, message) {
