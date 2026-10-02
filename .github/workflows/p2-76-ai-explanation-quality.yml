@@ -36,8 +36,8 @@ jobs:
       P276_REASONING_EFFORT: none
       P276_TEXT_VERBOSITY: low
       P276_MAX_OUTPUT_TOKENS: '180'
-      P276_MAX_PAID_REQUESTS: '24'
-      P276_MAX_BUDGET_USD: '0.03'
+      P276_MAX_PAID_REQUESTS: '36'
+      P276_MAX_BUDGET_USD: '0.05'
       P276_INPUT_PRICE_PER_MTOK: '0.20'
       P276_OUTPUT_PRICE_PER_MTOK: '1.20'
       P276_PROGRESSIVE: 'true'
@@ -58,7 +58,7 @@ jobs:
         run: |
           if [[ "${{ github.event.head_commit.message }}" == *"[p276-paid]"* || ( "${{ github.event_name }}" == "pull_request" && "${{ github.head_ref }}" == qa/ai-provider-acceptance-* && "${{ github.event.pull_request.title }}" == *"[p276-paid]"* ) ]]; then
             echo 'P2-76 paid acceptance explicitly requested by governed commit/PR tag.'
-            echo 'Cost guard: gpt-5.6-luna, reasoning=none, low verbosity, <=24 calls, <=180 output tokens/call, estimated budget cap $0.03.'
+            echo 'Cost guard: gpt-5.6-luna, reasoning=none, low verbosity, <=36 calls, <=180 output tokens/call, estimated budget cap $0.05.'
           else
             echo 'P2-76 paid acceptance NOT requested. Self-test only; no OpenAI provider call will be made.'
           fi
@@ -84,7 +84,7 @@ jobs:
         shell: bash
         run: |
           if [ -f p276-ai-quality-result.json ]; then
-            node -e "const r=require('./p276-ai-quality-result.json'); console.log(JSON.stringify({stage:r.stage,verdict:r.verdict,model:r.provider_model,planned:r.planned_case_count,executed:r.executed_case_count,passed:r.passed_cases,failed:r.failed_cases,critical:r.critical_failure_count,average:r.average_dimension_score,P1:r.all_components_green,P5:r.all_components_green,locales:r.all_locales_green,theory:r.mathematical_theory_green,calls:r.provider_calls,tokens:{input:r.total_input_tokens,output:r.total_output_tokens},estimated_cost_usd:r.estimated_actual_cost_usd,budget_cap_usd:r.max_budget_usd,preflight_upper_usd:r.preflight_estimated_cost_upper_usd},null,2))"
+            node -e "const r=require('./p276-ai-quality-result.json'); console.log(JSON.stringify({stage:r.stage,verdict:r.verdict,model:r.provider_model,planned:r.planned_case_count,executed:r.executed_case_count,passed:r.passed_cases,failed:r.failed_cases,critical:r.critical_failure_count,average:r.average_dimension_score,P1:r.all_components_green,P5:r.all_components_green,locales:r.all_locales_green,theory:r.mathematical_theory_green,repeated:r.repeated_error_green,multilingual:r.multilingual_explanation_green,calls:r.provider_calls,tokens:{input:r.total_input_tokens,output:r.total_output_tokens},estimated_cost_usd:r.estimated_actual_cost_usd,budget_cap_usd:r.max_budget_usd,preflight_upper_usd:r.preflight_estimated_cost_upper_usd},null,2))"
           else
             echo 'No paid provider result produced on this commit.'
           fi
