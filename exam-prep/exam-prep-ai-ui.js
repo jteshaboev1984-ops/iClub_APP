@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p104aiui1";
+  const VERSION = "p302aiui1";
   let observer = null;
   let renderQueued = false;
 
@@ -26,6 +26,7 @@
       note: "Tasdiqlangan natijalaringiz va joriy rejangizni sodda qilib tushuntiradi. Natijalaringizni o‘zgartirmaydi.",
       progress: "Natijalarimni tushuntirish",
       plan: "Joriy rejani tushuntirish",
+      mistake: "Bu xatoni tushuntirish",
       working: "Tayyorlanmoqda…",
       close: "Yopish",
       unavailable: "Qo‘shimcha tushuntirish hozir mavjud emas. Asosiy tayyorgarlik odatdagidek davom etadi.",
@@ -36,6 +37,7 @@
       note: "Explains your confirmed progress and current plan in simpler terms. It does not change your results.",
       progress: "Explain my progress",
       plan: "Explain my current plan",
+      mistake: "Explain this mistake",
       working: "Preparing…",
       close: "Close",
       unavailable: "Extra explanation is unavailable right now. Your core exam preparation continues normally.",
@@ -46,6 +48,7 @@
       note: "Объясняет подтверждённый прогресс и текущий план простыми словами. Ваши результаты он не меняет.",
       progress: "Объяснить мой прогресс",
       plan: "Объяснить текущий план",
+      mistake: "Разобрать эту ошибку",
       working: "Готовим объяснение…",
       close: "Закрыть",
       unavailable: "Дополнительное объяснение сейчас недоступно. Основная подготовка продолжает работать как обычно.",
@@ -90,7 +93,7 @@
     if (output) output.hidden = true;
   }
 
-  async function invoke(panel, component, interactionType) {
+  async function invoke(panel, component, interactionType, extraBody = {}) {
     if (panel.dataset.epAiBusy === "true") return;
     const c = copy();
     const client = window.sb;
@@ -104,6 +107,7 @@
     try {
       const { data, error } = await client.functions.invoke("exam-prep-ai", {
         body: {
+          ...extraBody,
           component_code: component,
           interaction_type: interactionType,
           locale: currentLanguage(),
@@ -162,32 +166,81 @@
     document.querySelectorAll("[data-ep-ai-panel]").forEach(node => node.remove());
   }
 
+  function removeErrorActions() {
+    document.querySelectorAll("[data-ep-ai-error-action-wrap]").forEach(node => node.remove());
+  }
+
+  function buildErrorAction(item) {
+    const c = copy();
+    const screen = item.closest("[data-ep-session-result]");
+    if (!screen || screen.getAttribute("data-ep-result-session-type") !== "diagnostic") return null;
+    const component = String(screen.getAttribute("data-ep-result-component") || "").toUpperCase();
+    const sessionId = String(screen.getAttribute("data-ep-session-result") || "");
+    const itemOrder = Number(item.getAttribute("data-ep-result-item-order") || 0);
+    if (!["P1","P5"].includes(component) || !sessionId || !Number.isInteger(itemOrder) || itemOrder < 1) return null;
+
+    const wrap = document.createElement("div");
+    wrap.className = "ep-ai-inline";
+    wrap.setAttribute("data-ep-ai-error-action-wrap", "");
+    wrap.innerHTML = `
+      <button class="ep-ai-btn ep-ai-inline-btn" type="button" data-ep-ai-action="established_error_explanation"></button>
+      <div class="ep-ai-output ep-ai-inline-output" data-ep-ai-output role="status" aria-live="polite" hidden>
+        <div data-ep-ai-output-text></div>
+        <button class="ep-ai-output-close" type="button" data-ep-ai-close></button>
+      </div>`;
+    wrap.querySelector("[data-ep-ai-action]").textContent = c.mistake;
+    wrap.querySelector("[data-ep-ai-close]").textContent = c.close;
+    wrap.querySelector("[data-ep-ai-action]")?.addEventListener("click", () => invoke(
+      wrap,
+      component,
+      "established_error_explanation",
+      { session_id: sessionId, item_order: itemOrder }
+    ));
+    wrap.querySelector("[data-ep-ai-close]")?.addEventListener("click", () => hideOutput(wrap));
+    return wrap;
+  }
+
+  function renderErrorActions(root) {
+    root.querySelectorAll('[data-ep-session-result][data-ep-result-session-type="diagnostic"] .ep-result-item.is-wrong[data-ep-result-item-order]').forEach(item => {
+      if (item.querySelector("[data-ep-ai-error-action-wrap]")) return;
+      const action = buildErrorAction(item);
+      if (action) item.appendChild(action);
+    });
+    root.querySelectorAll("[data-ep-ai-error-action-wrap]").forEach(action => {
+      const item = action.closest('.ep-result-item.is-wrong[data-ep-result-item-order]');
+      const screen = action.closest('[data-ep-session-result][data-ep-result-session-type="diagnostic"]');
+      if (!item || !screen) action.remove();
+    });
+  }
+
   function render() {
     renderQueued = false;
     const root = rootEl();
     if (!root || root.hidden || !canShow()) {
       removePanels();
+      removeErrorActions();
       return;
     }
 
     const strips = Array.from(root.querySelectorAll("[data-ep-overview-strip]"));
     if (!strips.length) {
       removePanels();
-      return;
+    } else {
+      strips.forEach(strip => {
+        const component = componentFromStrip(strip);
+        if (!component) return;
+        const existing = root.querySelector(`[data-ep-ai-panel="${component}"]`);
+        if (existing) return;
+        strip.insertAdjacentElement("afterend", buildPanel(component));
+      });
+
+      root.querySelectorAll("[data-ep-ai-panel]").forEach(panel => {
+        const component = panel.getAttribute("data-ep-ai-panel");
+        if (!root.querySelector(`[data-ep-overview-strip="${component}"]`)) panel.remove();
+      });
     }
 
-    strips.forEach(strip => {
-      const component = componentFromStrip(strip);
-      if (!component) return;
-      const existing = root.querySelector(`[data-ep-ai-panel="${component}"]`);
-      if (existing) return;
-      strip.insertAdjacentElement("afterend", buildPanel(component));
-    });
-
-    root.querySelectorAll("[data-ep-ai-panel]").forEach(panel => {
-      const component = panel.getAttribute("data-ep-ai-panel");
-      if (!root.querySelector(`[data-ep-overview-strip="${component}"]`)) panel.remove();
-    });
+    renderErrorActions(root);
   }
 
   function queueRender() {
