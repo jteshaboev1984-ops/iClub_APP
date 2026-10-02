@@ -927,6 +927,7 @@
 
   function renderConsolidationCard(data) {
     if (!data) return "";
+    if (data?.component_isolation !== true || data?.modified_or_topic_results_count_as_comparable_full === true) return "";
     const stage = Number(data?.operational_stage || 0);
     if (stage < 4 && data?.stage3_complete !== true) return "";
     const c = copy();
