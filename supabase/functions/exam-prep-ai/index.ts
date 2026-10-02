@@ -26,6 +26,9 @@ const PROVIDER_ENABLED_INTERACTIONS = new Set([
   "progress_summary",
   "weekly_plan_narration",
   "established_error_explanation",
+  "repeated_error_summary",
+  "theory_explanation",
+  "multilingual_explanation",
 ]);
 
 const VALID_COMPONENTS = new Set(["P1", "P5"]);
@@ -153,16 +156,20 @@ async function learnerContext(
   }
   if (interaction === "repeated_error_summary") {
     return {
-      context_type: "correction_queue_v1",
-      data: await rpc("get_exam_prep_correction_queue_safe_v1", { p_component_code: component }, authorization, ANON_KEY),
+      context_type: "repeated_error_summary_v1",
+      data: await rpc("get_exam_prep_ai_repeated_error_context_safe_v1", {
+        p_component_code: component,
+        p_locale: locale,
+      }, authorization, ANON_KEY),
     };
   }
   if ((interaction === "theory_explanation" || interaction === "multilingual_explanation") && skillCode) {
     return {
-      context_type: "skill_detail_v1",
-      data: await rpc("get_exam_prep_skill_detail_safe_v1", {
+      context_type: "skill_theory_v1",
+      data: await rpc("get_exam_prep_ai_skill_theory_context_safe_v1", {
         p_component_code: component,
         p_skill_code: skillCode,
+        p_locale: locale,
       }, authorization, ANON_KEY),
     };
   }
@@ -220,7 +227,13 @@ function buildProviderInstructions(params: {
     ? "Explain the learner's current weekly plan and its priorities."
     : params.interaction === "established_error_explanation"
       ? "Explain the already-established diagnostic error and the recorded next action without revealing the correct answer."
-      : "Explain the learner's recorded progress.";
+      : params.interaction === "repeated_error_summary"
+        ? "Summarise only the repeated difficulties already recorded by iClub and the current correction step for each. Do not infer a new misconception."
+        : params.interaction === "theory_explanation"
+          ? "Explain the approved mathematical concept for the supplied skill using only the approved source card and canonical skill context."
+          : params.interaction === "multilingual_explanation"
+            ? "Explain the approved mathematical concept for the supplied skill in the requested language using only the approved source card and canonical skill context."
+            : "Explain the learner's recorded progress.";
 
   return [
     "You are the iClub learning assistant for Cambridge AS Mathematics Exam Prep.",
@@ -244,6 +257,12 @@ function buildProviderInput(interaction: string) {
   }
   if (interaction === "established_error_explanation") {
     return "Explain my recorded diagnostic error and next action using only the supplied approved source and deterministic error context. Do not reveal the correct answer.";
+  }
+  if (interaction === "repeated_error_summary") {
+    return "Summarise the repeated difficulties already recorded for me and what the current correction step is. Do not invent any additional diagnosis.";
+  }
+  if (interaction === "theory_explanation" || interaction === "multilingual_explanation") {
+    return "Explain this approved mathematics topic using only the supplied source card and canonical skill context.";
   }
   return "Explain my recorded progress using only the supplied approved sources and recorded progress facts.";
 }
@@ -525,6 +544,9 @@ Deno.serve(async (req: Request) => {
   if (interaction === "established_error_explanation" && (!sessionId || !itemOrder)) {
     return response(400, { request_id: requestId, error: "error_context_reference_required" });
   }
+  if ((interaction === "theory_explanation" || interaction === "multilingual_explanation") && !skillCode) {
+    return response(400, { request_id: requestId, error: "skill_code_required" });
+  }
 
   let snapshot: any = null;
   try {
@@ -574,9 +596,10 @@ Deno.serve(async (req: Request) => {
     return response(200, { request_id: requestId, mode, reason, component_code: component, interaction_type: interaction, locale, message, generated: false, academic_state_changed: false });
   }
 
-  if (interaction === "established_error_explanation" && deterministicContext?.data?.mapped !== true) {
+  if (["established_error_explanation","repeated_error_summary","theory_explanation","multilingual_explanation"].includes(interaction)
+      && deterministicContext?.data?.mapped !== true) {
     const mode = "no_source";
-    const reason = String(deterministicContext?.data?.reason || "no_approved_diagnostic_mapping");
+    const reason = String(deterministicContext?.data?.reason || "deterministic_mapping_missing");
     const message = learnerMessage(locale, mode, reason);
     const outputHash = await sha256(message);
     await audit({
@@ -609,6 +632,19 @@ Deno.serve(async (req: Request) => {
       p_limit: 8,
     }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
     cards = Array.isArray(result) ? result : [];
+    const markerByInteraction: Record<string, string | null> = {
+      established_error_explanation: ":error_explanation:",
+      repeated_error_summary: ":repeated_error_summary:",
+      theory_explanation: ":theory:",
+      multilingual_explanation: ":theory:",
+    };
+    const requiredMarker = markerByInteraction[interaction] || null;
+    if (requiredMarker) {
+      cards = cards.filter((card) => String(card?.source_card_key || "").includes(requiredMarker));
+    }
+    if ((interaction === "theory_explanation" || interaction === "multilingual_explanation") && skillCode) {
+      cards = cards.filter((card) => String(card?.skill_code || "") === skillCode);
+    }
   } catch {
     cards = [];
   }
