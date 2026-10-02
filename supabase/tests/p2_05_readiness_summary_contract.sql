@@ -143,12 +143,13 @@ BEGIN
   end if;
 
   -- Mentor verification must be optional service value, not a Core progression dependency.
-  select count(*) into v_bad
-  from private.exam_prep_operational_stage_rules
-  where status='active'
-    and lower(coalesce(transition_rule,'')) like '%mentor verified%';
-  if v_bad<>0 then
-    raise exception 'P2-05 Mentor Verified wording leaked into automatic stage progression rows=%',v_bad;
+  -- Automatic Stage 5 -> 6 progression is driven only by deterministic App Readiness.
+  select pg_get_functiondef('private.exam_prep_apply_stage0_gate_v1()'::regprocedure)
+  into v_def;
+  if position('private.exam_prep_stage5_readiness_status_v1' in v_def)=0
+     or position('mentor_verified' in lower(v_def))>0
+     or position('exam_prep_mentor_verified_readiness_status_v1' in lower(v_def))>0 then
+    raise exception 'P2-05 Mentor Verified leaked into automatic stage progression';
   end if;
 END
 $$;
