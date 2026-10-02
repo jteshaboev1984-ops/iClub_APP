@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p302aiui1";
+  const VERSION = "p302aiui2";
   let observer = null;
   let renderQueued = false;
 
@@ -26,6 +26,8 @@
       note: "Tasdiqlangan natijalaringiz va joriy rejangizni sodda qilib tushuntiradi. Natijalaringizni o‘zgartirmaydi.",
       progress: "Natijalarimni tushuntirish",
       plan: "Joriy rejani tushuntirish",
+      repeated: "Takroriy qiyinchiliklarni tushuntirish",
+      topic: "Bu mavzuni tushuntirish",
       mistake: "Bu xatoni tushuntirish",
       working: "Tayyorlanmoqda…",
       close: "Yopish",
@@ -37,6 +39,8 @@
       note: "Explains your confirmed progress and current plan in simpler terms. It does not change your results.",
       progress: "Explain my progress",
       plan: "Explain my current plan",
+      repeated: "Explain repeated difficulties",
+      topic: "Explain this topic",
       mistake: "Explain this mistake",
       working: "Preparing…",
       close: "Close",
@@ -48,6 +52,8 @@
       note: "Объясняет подтверждённый прогресс и текущий план простыми словами. Ваши результаты он не меняет.",
       progress: "Объяснить мой прогресс",
       plan: "Объяснить текущий план",
+      repeated: "Объяснить повторяющиеся трудности",
+      topic: "Объяснить эту тему",
       mistake: "Разобрать эту ошибку",
       working: "Готовим объяснение…",
       close: "Закрыть",
@@ -143,6 +149,7 @@
       <div class="ep-ai-actions">
         <button class="ep-ai-btn" type="button" data-ep-ai-action="progress_summary"></button>
         <button class="ep-ai-btn" type="button" data-ep-ai-action="weekly_plan_narration"></button>
+        <button class="ep-ai-btn" type="button" data-ep-ai-action="repeated_error_summary"></button>
       </div>
       <div class="ep-ai-output" data-ep-ai-output role="status" aria-live="polite" hidden>
         <div data-ep-ai-output-text></div>
@@ -153,6 +160,7 @@
     panel.querySelector(".ep-ai-panel-note").textContent = c.note;
     panel.querySelector('[data-ep-ai-action="progress_summary"]').textContent = c.progress;
     panel.querySelector('[data-ep-ai-action="weekly_plan_narration"]').textContent = c.plan;
+    panel.querySelector('[data-ep-ai-action="repeated_error_summary"]').textContent = c.repeated;
     panel.querySelector("[data-ep-ai-close]").textContent = c.close;
 
     panel.querySelectorAll("[data-ep-ai-action]").forEach(button => {
@@ -168,6 +176,10 @@
 
   function removeErrorActions() {
     document.querySelectorAll("[data-ep-ai-error-action-wrap]").forEach(node => node.remove());
+  }
+
+  function removeTopicActions() {
+    document.querySelectorAll("[data-ep-ai-topic-action-wrap]").forEach(node => node.remove());
   }
 
   function buildErrorAction(item) {
@@ -213,12 +225,57 @@
     });
   }
 
+  const THEORY_UI_SKILLS = new Set(["P1-QUA-02","P5-NOR-02"]);
+
+  function buildTopicAction(screen) {
+    const c = copy();
+    const component = String(screen.getAttribute("data-ep-ai-skill-component") || "").toUpperCase();
+    const skillCode = String(screen.getAttribute("data-ep-ai-skill-detail") || "");
+    if (!["P1","P5"].includes(component) || !THEORY_UI_SKILLS.has(skillCode)) return null;
+
+    const wrap = document.createElement("div");
+    wrap.className = "ep-ai-inline ep-ai-topic";
+    wrap.setAttribute("data-ep-ai-topic-action-wrap", "");
+    wrap.innerHTML = `
+      <button class="ep-ai-btn ep-ai-inline-btn" type="button" data-ep-ai-action="theory_explanation"></button>
+      <div class="ep-ai-output ep-ai-inline-output" data-ep-ai-output role="status" aria-live="polite" hidden>
+        <div data-ep-ai-output-text></div>
+        <button class="ep-ai-output-close" type="button" data-ep-ai-close></button>
+      </div>`;
+    wrap.querySelector("[data-ep-ai-action]").textContent = c.topic;
+    wrap.querySelector("[data-ep-ai-close]").textContent = c.close;
+    wrap.querySelector("[data-ep-ai-action]")?.addEventListener("click", () => invoke(
+      wrap,
+      component,
+      "theory_explanation",
+      { skill_code: skillCode }
+    ));
+    wrap.querySelector("[data-ep-ai-close]")?.addEventListener("click", () => hideOutput(wrap));
+    return wrap;
+  }
+
+  function renderTopicActions(root) {
+    root.querySelectorAll("[data-ep-ai-skill-detail][data-ep-ai-skill-component]").forEach(screen => {
+      if (screen.querySelector("[data-ep-ai-topic-action-wrap]")) return;
+      const action = buildTopicAction(screen);
+      if (!action) return;
+      const firstSummary = screen.querySelector(".ep-views-summary");
+      if (firstSummary) firstSummary.insertAdjacentElement("beforebegin", action);
+      else screen.appendChild(action);
+    });
+    root.querySelectorAll("[data-ep-ai-topic-action-wrap]").forEach(action => {
+      const screen = action.closest("[data-ep-ai-skill-detail][data-ep-ai-skill-component]");
+      if (!screen) action.remove();
+    });
+  }
+
   function render() {
     renderQueued = false;
     const root = rootEl();
     if (!root || root.hidden || !canShow()) {
       removePanels();
       removeErrorActions();
+      removeTopicActions();
       return;
     }
 
@@ -241,6 +298,7 @@
     }
 
     renderErrorActions(root);
+    renderTopicActions(root);
   }
 
   function queueRender() {
