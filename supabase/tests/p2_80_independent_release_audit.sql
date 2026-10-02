@@ -139,13 +139,18 @@ BEGIN
   IF v_runtime<>'shadow' THEN RAISE EXCEPTION 'P2-80 AI runtime must remain shadow, got %',v_runtime; END IF;
 
   SELECT count(*), count(*) FILTER (
-      WHERE card_type NOT IN ('progress_context','weekly_plan_context')
-         OR source_version<>'iclub_ai_context_v1_2026_09_07'
+      WHERE NOT (
+        (card_type IN ('progress_context','weekly_plan_context')
+          AND source_version='iclub_ai_context_v1_2026_09_07')
+        OR
+        (card_type='error_explanation'
+          AND source_version='p3_02_error_context_v1_2026_10_02')
+      )
     )
     INTO v_cards,v_bad_cards
   FROM private.exam_prep_ai_source_cards
   WHERE approval_status='approved' AND is_runtime_allowed=true;
-  IF v_cards<>12 OR v_bad_cards<>0 THEN RAISE EXCEPTION 'P2-80 approved AI source-card boundary drift cards=% bad=%',v_cards,v_bad_cards; END IF;
+  IF v_cards<>18 OR v_bad_cards<>0 THEN RAISE EXCEPTION 'P2-80 approved AI source-card boundary drift cards=% bad=%',v_cards,v_bad_cards; END IF;
 
   SELECT count(*) FILTER (
     WHERE lifecycle_state IN ('approved','published','reserve')

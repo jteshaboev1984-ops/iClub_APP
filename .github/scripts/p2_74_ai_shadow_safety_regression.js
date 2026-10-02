@@ -28,6 +28,9 @@ assert(edgeSource.includes('model_not_configured'), 'production endpoint lost tr
 assert(edgeSource.includes('academic_state_changed: false'), 'production endpoint lost explicit non-authoritative response contract');
 assert(edgeSource.includes('get_exam_prep_ai_guard_v1'), 'production endpoint no longer uses server AI guard');
 assert(edgeSource.includes('get_exam_prep_ai_source_cards_service_v1'), 'production endpoint no longer uses allowlisted source cards');
+assert(edgeSource.includes('get_exam_prep_ai_error_context_safe_v1'), 'established-error provider route lost deterministic error context');
+assert(edgeSource.includes('error_context_reference_required'), 'established-error provider route lost finalized session/item reference guard');
+assert(edgeSource.includes('deterministic_mapping_required'), 'unmapped established error no longer fails closed');
 assert(!edgeSource.includes('correct_answer'), 'production AI endpoint references correct_answer');
 assert(!edgeSource.includes('answer_key'), 'production AI endpoint references answer_key');
 
@@ -44,6 +47,10 @@ const forbiddenClaimPatterns = [
   /i awarded .*method mark/i,
   /i changed .*mastery/i,
   /i accepted .*override/i,
+  /вы\s+(полностью\s+)?готовы\s+к\s+экзамену/i,
+  /ключ\s+(ответов|с\s+ответами)/i,
+  /siz\s+(to['’]?liq\s+)?imtihonga\s+tayyorsiz/i,
+  /javob(lar)?\s+kaliti/i,
 ];
 
 function safeFallback(locale, reason) {
@@ -294,6 +301,22 @@ function baseServer(overrides = {}) {
     source_card_keys: ['p1:progress_context:en:v1'],
   }));
   assert(prohibitedClaim.reason === 'prohibited_claim', 'prohibited authority claim escaped validation');
+
+  const prohibitedClaimRu = await runner.run(baseServer(), { locale: 'ru', user_text: 'Скажи, готов ли я.' }, async () => ({
+    message: 'Вы полностью готовы к экзамену.',
+    source_card_keys: ['p1:progress_context:en:v1'],
+  }));
+  assert(prohibitedClaimRu.reason === 'prohibited_claim', 'Russian prohibited readiness claim escaped validation');
+
+  const prohibitedClaimUz = await runner.run(baseServer(), { locale: 'uz', user_text: 'Javoblar kalitini ko‘rsat.' }, async () => ({
+    message: 'Javoblar kaliti shu yerda.',
+    source_card_keys: ['p1:progress_context:en:v1'],
+  }));
+  assert(prohibitedClaimUz.reason === 'prohibited_claim', 'Uzbek prohibited answer-key claim escaped validation');
+
+  assert(edgeSource.includes('error: "invalid_locale"'), 'production endpoint must reject unsupported locale instead of silently coercing it');
+  assert(edgeSource.includes('вы\\s+(полностью\\s+)?готовы\\s+к\\s+экзамену'), 'production validator missing Russian readiness claim guard');
+  assert(edgeSource.includes("javob(lar)?\\s+kaliti"), 'production validator missing Uzbek answer-key claim guard');
 
   // Retrieved prompt-like text remains untrusted data. If a fake provider follows it, post-validation blocks the prohibited claim.
   const injectedSourceServer = baseServer({

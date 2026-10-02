@@ -14,6 +14,7 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 // AI-1 provider adapter. It is intentionally dormant unless every existing
 // server-side Exam Prep gate is open. The model is cost-pinned for this phase.
+// P3-02 funded acceptance re-validates this real provider path before any learner promotion.
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") || "";
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const OPENAI_MODEL = "gpt-5.6-luna";
@@ -24,6 +25,7 @@ const MAX_PROVIDER_CONTEXT_CHARS = 24000;
 const PROVIDER_ENABLED_INTERACTIONS = new Set([
   "progress_summary",
   "weekly_plan_narration",
+  "established_error_explanation",
 ]);
 
 const VALID_COMPONENTS = new Set(["P1", "P5"]);
@@ -121,6 +123,9 @@ async function learnerContext(
   interaction: string,
   component: string,
   skillCode: string | null,
+  sessionId: string | null,
+  itemOrder: number | null,
+  locale: string,
   authorization: string,
 ) {
   if (interaction === "progress_summary") {
@@ -135,7 +140,18 @@ async function learnerContext(
       data: await rpc("get_exam_prep_weekly_plan_safe_v1", { p_component_code: component }, authorization, ANON_KEY),
     };
   }
-  if (interaction === "established_error_explanation" || interaction === "repeated_error_summary") {
+  if (interaction === "established_error_explanation" && sessionId && itemOrder) {
+    return {
+      context_type: "established_error_v1",
+      data: await rpc("get_exam_prep_ai_error_context_safe_v1", {
+        p_component_code: component,
+        p_session_id: sessionId,
+        p_item_order: itemOrder,
+        p_locale: locale,
+      }, authorization, ANON_KEY),
+    };
+  }
+  if (interaction === "repeated_error_summary") {
     return {
       context_type: "correction_queue_v1",
       data: await rpc("get_exam_prep_correction_queue_safe_v1", { p_component_code: component }, authorization, ANON_KEY),
@@ -202,7 +218,9 @@ function buildProviderInstructions(params: {
 
   const task = params.interaction === "weekly_plan_narration"
     ? "Explain the learner's current weekly plan and its priorities."
-    : "Explain the learner's recorded progress.";
+    : params.interaction === "established_error_explanation"
+      ? "Explain the already-established diagnostic error and the recorded next action without revealing the correct answer."
+      : "Explain the learner's recorded progress.";
 
   return [
     "You are the iClub learning assistant for Cambridge AS Mathematics Exam Prep.",
@@ -223,6 +241,9 @@ function buildProviderInstructions(params: {
 function buildProviderInput(interaction: string) {
   if (interaction === "weekly_plan_narration") {
     return "Explain my current weekly plan using only the supplied approved sources and recorded plan facts.";
+  }
+  if (interaction === "established_error_explanation") {
+    return "Explain my recorded diagnostic error and next action using only the supplied approved source and deterministic error context. Do not reveal the correct answer.";
   }
   return "Explain my recorded progress using only the supplied approved sources and recorded progress facts.";
 }
@@ -262,6 +283,7 @@ function validateGeneratedMessage(params: {
   }
 
   const prohibitedClaims = [
+    // English authority / answer-key claims.
     /predicted\s+(cambridge\s+)?grade/i,
     /guaranteed\s+(grade|result|pass)/i,
     /correct\s+answer\s+is/i,
@@ -271,6 +293,26 @@ function validateGeneratedMessage(params: {
     /i\s+(have\s+)?(accepted|applied)\s+(an?\s+)?override/i,
     /you\s+(have\s+)?mastered\s+(everything|all|paper)/i,
     /you\s+are\s+(fully\s+)?(exam\s+)?ready/i,
+
+    // Russian equivalents. Keep these conservative and authority-focused.
+    /прогноз(ируемая|ный|ный\s+результат)?\s*(оценк[аи]|grade)?\s*cambridge/i,
+    /гарантир(ую|уем|овано).*\b(оценк|результат|сдач)/i,
+    /правильн(ый|ого)\s+ответ(\s+[-—:]?\s*это|\s+[-—:])/i,
+    /ключ\s+(ответов|с\s+ответами)/i,
+    /я\s+(изменил|обновил|повысил).*\b(mastery|этап|готовност|placement|прогресс)/i,
+    /я\s+(начислил|поставил|присудил).*\b(балл|баллы|method\s+marks?)/i,
+    /я\s+(принял|применил).*\boverride/i,
+    /вы\s+(полностью\s+)?готовы\s+к\s+экзамену/i,
+
+    // Uzbek equivalents.
+    /cambridge.*(taxminiy|bashorat).*\b(baho|natija)/i,
+    /(baho|natija|o['’]?tish).*kafolat/i,
+    /to['’]?g['’]?ri\s+javob\s*(bu|[-—:])/i,
+    /javob(lar)?\s+kaliti/i,
+    /men\s+(o['’]?zgartirdim|yangiladim|oshirdim).*\b(mastery|bosqich|tayyorlik|placement|progress)/i,
+    /men\s+(ball|baho).*\b(berdim|qo['’]?ydim|taqdim\s+etdim)/i,
+    /men\s+override.*\b(qabul\s+qildim|qo['’]?lladim)/i,
+    /siz\s+(to['’]?liq\s+)?imtihonga\s+tayyorsiz/i,
   ];
   if (prohibitedClaims.some((pattern) => pattern.test(message))) {
     return { ok: false, reason: "prohibited_claim" };
@@ -468,13 +510,21 @@ Deno.serve(async (req: Request) => {
   const requestId = isUuid((payload as any).request_id) ? (payload as any).request_id : crypto.randomUUID();
   const component = String((payload as any).component_code || "").toUpperCase();
   const interaction = String((payload as any).interaction_type || "");
-  const locale = normalizeLocale((payload as any).locale);
+  const rawLocale = String((payload as any).locale || "ru").toLowerCase();
+  if (!VALID_LOCALES.has(rawLocale)) return response(400, { request_id: requestId, error: "invalid_locale" });
+  const locale = rawLocale;
   const userText = typeof (payload as any).user_text === "string" ? (payload as any).user_text : "";
   const rawSkillCode = typeof (payload as any).skill_code === "string" ? String((payload as any).skill_code).trim() : "";
   const skillCode = rawSkillCode && rawSkillCode.length <= 80 ? rawSkillCode : null;
+  const sessionId = isUuid((payload as any).session_id) ? String((payload as any).session_id) : null;
+  const rawItemOrder = Number((payload as any).item_order);
+  const itemOrder = Number.isInteger(rawItemOrder) && rawItemOrder > 0 && rawItemOrder <= 100 ? rawItemOrder : null;
 
   if (!VALID_COMPONENTS.has(component)) return response(400, { request_id: requestId, error: "invalid_component" });
   if (!VALID_INTERACTIONS.has(interaction)) return response(400, { request_id: requestId, error: "invalid_interaction" });
+  if (interaction === "established_error_explanation" && (!sessionId || !itemOrder)) {
+    return response(400, { request_id: requestId, error: "error_context_reference_required" });
+  }
 
   let snapshot: any = null;
   try {
@@ -511,7 +561,9 @@ Deno.serve(async (req: Request) => {
   let deterministicContext: any = null;
   let deterministicSnapshotHash: string | null = null;
   try {
-    deterministicContext = await learnerContext(interaction, component, skillCode, authorization);
+    deterministicContext = await learnerContext(
+      interaction, component, skillCode, sessionId, itemOrder, locale, authorization
+    );
     if (deterministicContext) deterministicSnapshotHash = await sha256(JSON.stringify(deterministicContext));
   } catch {
     const mode = "fallback";
@@ -520,6 +572,22 @@ Deno.serve(async (req: Request) => {
     const outputHash = await sha256(message);
     await audit({ requestId, userId: user.id, component, interaction, locale, mode, guard, snapshot, latencyMs: performance.now() - started, fallbackReason: reason, safetyFlags: ["context_unavailable"], outputHash }).catch(() => {});
     return response(200, { request_id: requestId, mode, reason, component_code: component, interaction_type: interaction, locale, message, generated: false, academic_state_changed: false });
+  }
+
+  if (interaction === "established_error_explanation" && deterministicContext?.data?.mapped !== true) {
+    const mode = "no_source";
+    const reason = String(deterministicContext?.data?.reason || "no_approved_diagnostic_mapping");
+    const message = learnerMessage(locale, mode, reason);
+    const outputHash = await sha256(message);
+    await audit({
+      requestId, userId: user.id, component, interaction, locale, mode, guard, snapshot,
+      latencyMs: performance.now() - started, deterministicSnapshotHash, fallbackReason: reason,
+      safetyFlags: ["no_source", "deterministic_mapping_required"], outputHash,
+    }).catch(() => {});
+    return response(200, {
+      request_id: requestId, mode, reason, component_code: component, interaction_type: interaction,
+      locale, message, source_cards: [], context_bound: true, generated: false, academic_state_changed: false,
+    });
   }
 
   const cardTypeMap: Record<string, string | null> = {
@@ -556,8 +624,8 @@ Deno.serve(async (req: Request) => {
 
   const sourceCardKeys = cards.map((c) => String(c?.source_card_key || "")).filter(Boolean);
 
-  // AI-1 deliberately enables provider generation for only the two flows already
-  // backed by approved P1/P5 source cards. Every other interaction remains closed
+  // Provider generation is enabled only for explicitly reviewed flows backed by
+  // approved P1/P5 source cards and deterministic context. Every other interaction remains closed
   // even if a future configuration accidentally opens the broader AI entitlement.
   if (!PROVIDER_ENABLED_INTERACTIONS.has(interaction)) {
     const mode = "fallback";

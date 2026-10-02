@@ -92,15 +92,82 @@ function assert(condition, message) {
     assert(calls[1].body.interaction_type === 'weekly_plan_narration', 'P5 plan action type drifted');
 
     await page.evaluate(() => {
+      document.querySelector('#exam-prep-host-root').innerHTML = `
+        <section class="ep-result-screen"
+          data-ep-session-result="11111111-1111-4111-8111-111111111111"
+          data-ep-result-component="P1"
+          data-ep-result-session-type="diagnostic">
+          <article class="ep-result-item is-wrong" data-ep-result-kind="wrong" data-ep-result-item-order="3">
+            <div class="ep-result-subblock">Recorded diagnostic feedback</div>
+          </article>
+        </section>`;
+    });
+    await page.waitForSelector('[data-ep-ai-error-action-wrap] [data-ep-ai-action="established_error_explanation"]');
+    const mistakeText = await page.locator('[data-ep-ai-error-action-wrap]').textContent();
+    assert(mistakeText.includes('Explain this mistake'), 'Finalized diagnostic AI action text missing');
+
+    await page.click('[data-ep-ai-error-action-wrap] [data-ep-ai-action="established_error_explanation"]');
+    await page.waitForFunction(() => document.querySelector('[data-ep-ai-error-action-wrap] [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
+
+    const errorCalls = await page.evaluate(() => window.__aiCalls);
+    assert(errorCalls.length === 3, `Expected exactly 3 AI endpoint calls, got ${errorCalls.length}`);
+    assert(errorCalls[2].name === 'exam-prep-ai', 'Diagnostic error action bypassed governed Edge Function');
+    assert(errorCalls[2].body.component_code === 'P1', 'Diagnostic error action crossed component boundary');
+    assert(errorCalls[2].body.interaction_type === 'established_error_explanation', 'Diagnostic error action type drifted');
+    assert(errorCalls[2].body.session_id === '11111111-1111-4111-8111-111111111111', 'Diagnostic error action lost finalized session reference');
+    assert(errorCalls[2].body.item_order === 3, 'Diagnostic error action lost item order');
+    assert(errorCalls[2].body.locale === 'en', 'Diagnostic error action lost UI locale');
+    assert(errorCalls[2].body.user_text === '', 'Diagnostic error action must not collect free-form learner text');
+
+    const localizedMistakes = [
+      { lang: 'ru', label: 'Разобрать эту ошибку', width: 360 },
+      { lang: 'uz', label: 'Bu xatoni tushuntirish', width: 390 },
+      { lang: 'en', label: 'Explain this mistake', width: 430 }
+    ];
+    for (const row of localizedMistakes) {
+      await page.setViewportSize({ width: row.width, height: 844 });
+      await page.evaluate(({ lang }) => {
+        window.i18n.getLang = () => lang;
+        document.documentElement.lang = lang;
+        document.querySelector('#exam-prep-host-root').innerHTML = `
+          <section class="ep-result-screen"
+            data-ep-session-result="22222222-2222-4222-8222-222222222222"
+            data-ep-result-component="P5"
+            data-ep-result-session-type="diagnostic">
+            <article class="ep-result-item is-wrong" data-ep-result-kind="wrong" data-ep-result-item-order="2">
+              <div class="ep-result-subblock">Recorded diagnostic feedback</div>
+            </article>
+          </section>`;
+      }, row);
+      await page.waitForSelector('[data-ep-ai-error-action-wrap] [data-ep-ai-action="established_error_explanation"]');
+      const localized = await page.evaluate(() => {
+        const button = document.querySelector('[data-ep-ai-error-action-wrap] [data-ep-ai-action="established_error_explanation"]');
+        const item = document.querySelector('.ep-result-item.is-wrong');
+        return {
+          text: button?.textContent || '',
+          documentWidth: document.documentElement.scrollWidth,
+          innerWidth: window.innerWidth,
+          buttonWidth: button?.getBoundingClientRect().width || 0,
+          itemWidth: item?.getBoundingClientRect().width || 0
+        };
+      });
+      assert(localized.text === row.label, `${row.lang.toUpperCase()} diagnostic AI action copy drifted: ${localized.text}`);
+      assert(localized.documentWidth <= localized.innerWidth, `${row.lang.toUpperCase()} diagnostic AI action caused horizontal overflow: ${JSON.stringify(localized)}`);
+      assert(localized.buttonWidth <= localized.itemWidth + 1, `${row.lang.toUpperCase()} diagnostic AI action exceeds result card: ${JSON.stringify(localized)}`);
+    }
+
+    await page.evaluate(() => {
       document.querySelector('#exam-prep-host-root').innerHTML = '<section data-ep-live-active-assessment><div>Question</div></section>';
     });
     await page.waitForTimeout(50);
     state = await page.evaluate(() => ({
       panels: document.querySelectorAll('[data-ep-ai-panel]').length,
+      errorActions: document.querySelectorAll('[data-ep-ai-error-action-wrap]').length,
       calls: window.__aiCalls.length
     }));
     assert(state.panels === 0, 'AI panel must disappear outside safe overview surface');
-    assert(state.calls === 2, 'Screen transition must not trigger an AI request');
+    assert(state.errorActions === 0, 'Diagnostic AI action must never remain in an active assessment');
+    assert(state.calls === 3, 'Screen transition must not trigger an AI request');
 
     await page.evaluate(() => {
       window.iClubExamPrepHostInternal.lastCapabilities.killSwitch = true;
