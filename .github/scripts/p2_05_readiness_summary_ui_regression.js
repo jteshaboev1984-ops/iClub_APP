@@ -12,7 +12,7 @@ for(const token of [
   'get_exam_prep_readiness_safe_v1',
   'get_exam_prep_readiness_summary_safe_v1',
   'readiness, readinessSummary, finalCalibration',
-  'exam-prep-live.js?v=p205readiness1'
+  'exam-prep-live.js?v=p205readiness2'
 ]) must(api.includes(token), `API integration missing: ${token}`);
 
 for(const token of [
@@ -32,12 +32,15 @@ for(const token of [
 for(const copy of [
   'Оценка готовности iClub',
   'Это не официальная оценка Cambridge и не прогноз будущей оценки.',
+  'официальный показатель Cambridge June 2026 ниже дан только как ориентир.',
   'Это отдельная проверка человеком. Для продолжения в Core она не обязательна.',
   'iClub readiness estimate',
   'It is not an official Cambridge grade or a prediction of a future grade.',
+  'the official Cambridge June 2026 figure below is reference only.',
   'This is a separate human check. It is not required to continue in Core.',
   'iClub tayyorgarlik bahosi',
   'Bu Cambridge bahosi yoki kelajakdagi baho prognozi emas.',
+  'quyidagi rasmiy Cambridge June 2026 ko‘rsatkichi faqat ma’lumot uchun.',
   'Bu alohida inson tekshiruvi. Core’da davom etish uchun majburiy emas.'
 ]) must(live.includes(copy), `trilingual readiness copy missing: ${copy}`);
 
