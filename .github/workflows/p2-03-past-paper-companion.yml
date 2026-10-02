@@ -8,6 +8,7 @@ on:
       - supabase/tests/p2_03_past_paper_companion_release_v2_contract.sql
       - supabase/tests/p2_03_past_paper_companion_matrix.sql
       - .github/scripts/p2_03_past_paper_ui_regression.js
+      - scripts/p2-03-past-paper-action-browser.cjs
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-past-paper.js
       - exam-prep/exam-prep-host.css
@@ -19,6 +20,7 @@ on:
       - supabase/migrations/20260908044500_exam_prep_p2_03_past_paper_companion_v1.sql
       - supabase/tests/p2_03_past_paper_companion_matrix.sql
       - .github/scripts/p2_03_past_paper_ui_regression.js
+      - scripts/p2-03-past-paper-action-browser.cjs
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-past-paper.js
       - exam-prep/exam-prep-host.css
@@ -40,6 +42,13 @@ jobs:
           node --check exam-prep/exam-prep-past-paper.js
           node --check .github/scripts/p2_03_past_paper_ui_regression.js
           node .github/scripts/p2_03_past_paper_ui_regression.js
+
+      - name: Actionable Similar Practice browser contract
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+          node --check scripts/p2-03-past-paper-action-browser.cjs
+          node scripts/p2-03-past-paper-action-browser.cjs
 
       - name: Read-only governed release contract
         env:
