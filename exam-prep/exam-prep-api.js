@@ -336,6 +336,20 @@
   }
   async function readiness(componentCode) { return rpc("get_exam_prep_readiness_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function readinessSummary(componentCode) { return rpc("get_exam_prep_readiness_summary_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function examOps(componentCode) { return rpc("get_exam_prep_exam_ops_safe_v1", { p_component_code: componentArg(componentCode) }); }
+  async function saveExamAppointment(componentCode, scheduledStartAt) {
+    return rpc("save_my_exam_prep_exam_appointment_v1", {
+      p_component_code: componentArg(componentCode),
+      p_scheduled_start_at: String(scheduledStartAt || "")
+    });
+  }
+  async function setExamOpsConfirmation(componentCode, itemCode, confirmed) {
+    return rpc("set_my_exam_prep_exam_ops_confirmation_v1", {
+      p_component_code: componentArg(componentCode),
+      p_item_code: String(itemCode || ""),
+      p_confirmed: confirmed === true
+    });
+  }
   async function finalCalibration(componentCode) { return rpc("get_exam_prep_final_calibration_safe_v1", { p_component_code: componentArg(componentCode) }); }
 
   root.api = Object.freeze({
@@ -348,7 +362,7 @@
     recovery, recordInterruption, authorizeRevalidationItem,
     weeklyPlan, generateWeeklyPlan, authorizePlanItem,
     timedCatalog, stage4Consolidation, authorizeTimed, finalizeTimed, timedResult, timedReviewPack, submitTimedSelfMark,
-    readiness, readinessSummary, finalCalibration
+    readiness, readinessSummary, examOps, saveExamAppointment, setExamOpsConfirmation, finalCalibration
   });
 
   try {
@@ -362,7 +376,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p205readiness2");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p206finalops1");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p202closure1");
