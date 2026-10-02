@@ -6,7 +6,9 @@ on:
       - main
     paths:
       - supabase/migrations/20261002050000_exam_prep_p2_04_stage4_consolidation_safe_v1.sql
+      - supabase/migrations/20261002053000_exam_prep_p2_04_cambridge_june_2026_reference_v1.sql
       - supabase/tests/p2_04_stage4_consolidation_matrix.sql
+      - index.html
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-live.js
       - exam-prep/exam-prep-host.css
@@ -18,7 +20,9 @@ on:
       - main
     paths:
       - supabase/migrations/20261002050000_exam_prep_p2_04_stage4_consolidation_safe_v1.sql
+      - supabase/migrations/20261002053000_exam_prep_p2_04_cambridge_june_2026_reference_v1.sql
       - supabase/tests/p2_04_stage4_consolidation_matrix.sql
+      - index.html
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-live.js
       - exam-prep/exam-prep-host.css
