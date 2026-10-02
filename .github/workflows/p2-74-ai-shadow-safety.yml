@@ -154,7 +154,7 @@ jobs:
           echo "P274_RUNTIME_CARDS=$cards" | tee -a p274-ai-shadow.log
           test "$generation" = 'f'
           test "$runtime" = 'shadow'
-          test "$cards" = '18'
+          test "$cards" = '30'
 
       - name: Run rollback-only AI shadow database safety matrix
         shell: bash
