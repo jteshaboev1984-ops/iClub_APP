@@ -1,5 +1,5 @@
--- AW21-24 annual-reserve top-up draft v1 contract.
--- Validates the hidden/history-free reserve candidate only; does not approve or publish it.
+-- AW21-24 annual-reserve governed source/release contract v1.
+-- Validates the governed withheld reserve after publication.
 \set ON_ERROR_STOP on
 
 DO $$
@@ -11,17 +11,21 @@ BEGIN
   if (select count(*) from private.exam_prep_content_versions
       where id in (4823,4824)
         and content_version in ('p1_aw21_24_annual_reserve_topup_draft_v1','p5_aw21_24_annual_reserve_topup_draft_v1')
-        and status='draft')<>2 then
-    raise exception 'aw21_24 annual reserve draft: target versions missing';
+        and status='published')<>2 then
+    raise exception 'aw21_24 annual reserve source: published target versions missing';
   end if;
 
-  if exists(select 1 from private.exam_prep_content_release_profiles_v1 where content_version_id in (4823,4824)) then
-    raise exception 'aw21_24 annual reserve draft: release profile exists before independent approval';
+  if (select count(*) from private.exam_prep_content_release_profiles_v1
+      where content_version_id in (4823,4824)
+        and release_mode='supplemental_reserve'
+        and profile_version='aw21_24_annual_reserve_release_v1'
+        and require_written_understanding=false)<>2 then
+    raise exception 'aw21_24 annual reserve source: governed release profile mismatch';
   end if;
 
   if (select count(*) from private.exam_prep_question_content_meta
       where content_version_id in (4823,4824)
-        and lifecycle_state='draft' and exposure_state='withheld')<>90
+        and lifecycle_state='reserve' and exposure_state='withheld')<>90
      or (select count(*) from private.exam_prep_question_content_meta where content_version_id=4823)<>50
      or (select count(*) from private.exam_prep_question_content_meta where content_version_id=4824)<>40
      or (select count(*) from private.exam_prep_question_content_meta
@@ -30,7 +34,7 @@ BEGIN
          where content_version_id in (4823,4824) and reserve_role='retest')<>36
      or (select count(*) from private.exam_prep_question_content_meta
          where content_version_id in (4823,4824) and reserve_role='mixed')<>18 then
-    raise exception 'aw21_24 annual reserve draft: question cardinality/role mismatch';
+    raise exception 'aw21_24 annual reserve source: question cardinality/role mismatch';
   end if;
 
   select count(*) into v_bad
@@ -41,20 +45,20 @@ BEGIN
       q.subject_id<>5
       or q.is_active
       or q.quality_status<>'draft'
-      or m.lifecycle_state<>'draft'
+      or m.lifecycle_state<>'reserve'
       or m.exposure_state<>'withheld'
-      or m.copyright_status<>'pending'
-      or m.qa_scope_status<>'pending'
-      or m.qa_math_status<>'pending'
-      or m.qa_language_status<>'pending'
-      or m.qa_technical_status<>'pending'
+      or m.copyright_status<>'pass'
+      or m.qa_scope_status<>'pass'
+      or m.qa_math_status<>'pass'
+      or m.qa_language_status<>'pass'
+      or m.qa_technical_status<>'pass'
       or nullif(btrim(q.question_text_en),'') is null
       or nullif(btrim(q.question_text_ru),'') is null
       or nullif(btrim(q.question_text_uz),'') is null
       or nullif(btrim(q.explanation_en),'') is null
       or nullif(btrim(q.explanation_ru),'') is null
       or nullif(btrim(q.explanation_uz),'') is null
-      or (m.reserve_role='diagnostic' and (q.qtype<>'mcq' or m.diagnostic_rule_status<>'pending'))
+      or (m.reserve_role='diagnostic' and (q.qtype<>'mcq' or m.diagnostic_rule_status<>'approved'))
       or (m.reserve_role<>'diagnostic' and m.diagnostic_rule_status<>'not_applicable')
       or (q.qtype='mcq' and (
         q.correct_answer not in ('A','B','C','D')
@@ -82,7 +86,7 @@ BEGIN
         coalesce(q.book_ref,''),coalesce(q.time_limit_sec::text,''),
         coalesce(q.quality_flag,''),coalesce(q.quality_status,'')))<>m.question_snapshot_md5
     );
-  if v_bad<>0 then raise exception 'aw21_24 annual reserve draft: payload/trilingual/snapshot rows=%',v_bad; end if;
+  if v_bad<>0 then raise exception 'aw21_24 annual reserve source: payload/trilingual/snapshot rows=%',v_bad; end if;
 
   select count(*) filter(where q.correct_answer='A'),count(*) filter(where q.correct_answer='B'),
          count(*) filter(where q.correct_answer='C'),count(*) filter(where q.correct_answer='D'),
@@ -91,7 +95,7 @@ BEGIN
   from private.exam_prep_question_content_meta m join public.questions q on q.id=m.question_id
   where m.content_version_id=4823;
   if (v_a,v_b,v_c,v_d,v_inputs)<>(8,8,7,7,20) then
-    raise exception 'aw21_24 annual reserve draft: P1 answer balance mismatch A=% B=% C=% D=% input=%',v_a,v_b,v_c,v_d,v_inputs;
+    raise exception 'aw21_24 annual reserve source: P1 answer balance mismatch A=% B=% C=% D=% input=%',v_a,v_b,v_c,v_d,v_inputs;
   end if;
 
   select count(*) filter(where q.correct_answer='A'),count(*) filter(where q.correct_answer='B'),
@@ -101,7 +105,7 @@ BEGIN
   from private.exam_prep_question_content_meta m join public.questions q on q.id=m.question_id
   where m.content_version_id=4824;
   if (v_a,v_b,v_c,v_d,v_inputs)<>(6,6,6,6,16) then
-    raise exception 'aw21_24 annual reserve draft: P5 answer balance mismatch A=% B=% C=% D=% input=%',v_a,v_b,v_c,v_d,v_inputs;
+    raise exception 'aw21_24 annual reserve source: P5 answer balance mismatch A=% B=% C=% D=% input=%',v_a,v_b,v_c,v_d,v_inputs;
   end if;
 
   select count(*) filter(where q.correct_answer='A'),count(*) filter(where q.correct_answer='B'),
@@ -110,7 +114,7 @@ BEGIN
   from private.exam_prep_question_content_meta m join public.questions q on q.id=m.question_id
   where m.content_version_id=4823 and m.reserve_role='diagnostic';
   if (v_a,v_b,v_c,v_d)<>(5,5,5,5) then
-    raise exception 'aw21_24 annual reserve draft: P1 diagnostic answer balance mismatch A=% B=% C=% D=%',v_a,v_b,v_c,v_d;
+    raise exception 'aw21_24 annual reserve source: P1 diagnostic answer balance mismatch A=% B=% C=% D=%',v_a,v_b,v_c,v_d;
   end if;
 
   select count(*) filter(where q.correct_answer='A'),count(*) filter(where q.correct_answer='B'),
@@ -119,7 +123,7 @@ BEGIN
   from private.exam_prep_question_content_meta m join public.questions q on q.id=m.question_id
   where m.content_version_id=4824 and m.reserve_role='diagnostic';
   if (v_a,v_b,v_c,v_d)<>(4,4,4,4) then
-    raise exception 'aw21_24 annual reserve draft: P5 diagnostic answer balance mismatch A=% B=% C=% D=%',v_a,v_b,v_c,v_d;
+    raise exception 'aw21_24 annual reserve source: P5 diagnostic answer balance mismatch A=% B=% C=% D=%',v_a,v_b,v_c,v_d;
   end if;
 
   for v_seq in
@@ -130,7 +134,7 @@ BEGIN
   loop
     if v_seq like any(array['%ABCD%','%BCDA%','%CDAB%','%DABC%','%DCBA%','%CBAD%','%BADC%','%ADCB%'])
        or v_seq ~ '(AA|BB|CC|DD)' then
-      raise exception 'aw21_24 annual reserve draft: sequential correct-option pattern detected: %',v_seq;
+      raise exception 'aw21_24 annual reserve source: sequential correct-option pattern detected: %',v_seq;
     end if;
   end loop;
 
@@ -146,7 +150,7 @@ BEGIN
   loop
     if v_seq like any(array['%ABCD%','%BCDA%','%CDAB%','%DABC%','%DCBA%','%CBAD%','%BADC%','%ADCB%'])
        or v_seq ~ '(AA|BB|CC|DD)' then
-      raise exception 'aw21_24 annual reserve draft: learner-form sequential correct-option pattern detected: %',v_seq;
+      raise exception 'aw21_24 annual reserve source: learner-form sequential correct-option pattern detected: %',v_seq;
     end if;
   end loop;
 
@@ -162,7 +166,7 @@ BEGIN
   ) x
   where x.cnt not between 2 and 3;
   if v_bad<>0 then
-    raise exception 'aw21_24 annual reserve draft: P1 learner-form answer balance failed cells=%',v_bad;
+    raise exception 'aw21_24 annual reserve source: P1 learner-form answer balance failed cells=%',v_bad;
   end if;
 
   select count(*) into v_bad
@@ -177,11 +181,11 @@ BEGIN
   ) x
   where x.cnt<>2;
   if v_bad<>0 then
-    raise exception 'aw21_24 annual reserve draft: P5 learner-form answer balance failed cells=%',v_bad;
+    raise exception 'aw21_24 annual reserve source: P5 learner-form answer balance failed cells=%',v_bad;
   end if;
 
   if (select count(*) from private.exam_prep_assessments
-      where content_version_id in (4823,4824) and status='draft')<>42
+      where content_version_id in (4823,4824) and status='published')<>42
      or (select count(*) from private.exam_prep_assessments
          where content_version_id in (4823,4824) and assessment_type='diagnostic')<>4
      or (select count(*) from private.exam_prep_assessments
@@ -191,7 +195,7 @@ BEGIN
      or (select count(*) from private.exam_prep_assessment_items ai
          join private.exam_prep_assessments a on a.id=ai.assessment_id
          where a.content_version_id in (4823,4824))<>90 then
-    raise exception 'aw21_24 annual reserve draft: assessment cardinality mismatch';
+    raise exception 'aw21_24 annual reserve source: assessment cardinality mismatch';
   end if;
 
   select count(*) into v_bad
@@ -208,21 +212,21 @@ BEGIN
       or ai.reserve_role<>a.assessment_type
       or ai.primary_skill_code not like a.component_code||'-%'
     );
-  if v_bad<>0 then raise exception 'aw21_24 annual reserve draft: assessment isolation/role rows=%',v_bad; end if;
+  if v_bad<>0 then raise exception 'aw21_24 annual reserve source: assessment isolation/role rows=%',v_bad; end if;
 
   select count(*) into v_bad
   from private.exam_prep_assessments a
   where a.content_version_id in (4823,4824) and a.assessment_type='retest'
     and (select count(*) from private.exam_prep_assessment_items ai where ai.assessment_id=a.id)<>1;
-  if v_bad<>0 then raise exception 'aw21_24 annual reserve draft: non-isolated retest rows=%',v_bad; end if;
+  if v_bad<>0 then raise exception 'aw21_24 annual reserve source: non-isolated retest rows=%',v_bad; end if;
 
   if (select count(*) from private.exam_prep_diagnostic_rules r
       join private.exam_prep_question_content_meta m on m.id=r.content_meta_id
       where m.content_version_id in (4823,4824)
         and m.reserve_role='diagnostic'
         and r.rule_version='aw_reserve_v1'
-        and r.status='draft')<>108 then
-    raise exception 'aw21_24 annual reserve draft: diagnostic-rule cardinality mismatch';
+        and r.status='approved')<>108 then
+    raise exception 'aw21_24 annual reserve source: diagnostic-rule cardinality mismatch';
   end if;
 
   select count(*) into v_bad
@@ -232,7 +236,7 @@ BEGIN
     and (select count(*) from private.exam_prep_diagnostic_rules r
          where r.content_meta_id=m.id
            and r.rule_version='aw_reserve_v1'
-           and r.status='draft'
+           and r.status='approved'
            and r.answer_kind='mcq_option'
            and r.answer_match<>q.correct_answer
            and r.weak_skill_code=m.primary_skill_code
@@ -242,10 +246,10 @@ BEGIN
            and nullif(btrim(r.next_action_en),'') is not null
            and nullif(btrim(r.next_action_ru),'') is not null
            and nullif(btrim(r.next_action_uz),'') is not null)<>3;
-  if v_bad<>0 then raise exception 'aw21_24 annual reserve draft: diagnostic misconception coverage rows=%',v_bad; end if;
+  if v_bad<>0 then raise exception 'aw21_24 annual reserve source: diagnostic misconception coverage rows=%',v_bad; end if;
 
   if exists(select 1 from private.exam_prep_written_tasks where content_version_id in (4823,4824)) then
-    raise exception 'aw21_24 annual reserve draft: reserve-only version contains written tasks';
+    raise exception 'aw21_24 annual reserve source: reserve-only version contains written tasks';
   end if;
 
   select count(*) into v_bad
@@ -267,7 +271,7 @@ BEGIN
       or (m.primary_skill_code='P5-NOR-06'
         and (m.official_scope_ref not like '%P5 5.5 The normal distribution%' or m.coursebook_mapping_ref not like '%Ch10%173-179%'))
     );
-  if v_bad<>0 then raise exception 'aw21_24 annual reserve draft: source-map mismatch rows=%',v_bad; end if;
+  if v_bad<>0 then raise exception 'aw21_24 annual reserve source: source-map mismatch rows=%',v_bad; end if;
 
   select count(*) into v_bad
   from (
@@ -277,17 +281,14 @@ BEGIN
     left join private.exam_prep_question_content_meta m on m.primary_skill_code=s.skill_code
     left join private.exam_prep_content_versions cv on cv.id=m.content_version_id
     group by s.component_code,s.skill_code
-    having count(distinct m.id) filter(where m.reserve_role='diagnostic' and (
-             (cv.status='published' and m.lifecycle_state in ('published','reserve'))
-             or (cv.id in (4823,4824) and cv.status='draft' and m.lifecycle_state='draft'))) < 3
-        or count(distinct m.id) filter(where m.reserve_role='retest' and (
-             (cv.status='published' and m.lifecycle_state in ('published','reserve'))
-             or (cv.id in (4823,4824) and cv.status='draft' and m.lifecycle_state='draft'))) < 4
-        or count(distinct m.id) filter(where m.reserve_role='mixed' and (
-             (cv.status='published' and m.lifecycle_state in ('published','reserve'))
-             or (cv.id in (4823,4824) and cv.status='draft' and m.lifecycle_state='draft'))) < 2
+    having count(distinct m.id) filter(
+             where cv.status='published' and m.lifecycle_state in ('published','reserve') and m.reserve_role='diagnostic')<>3
+        or count(distinct m.id) filter(
+             where cv.status='published' and m.lifecycle_state in ('published','reserve') and m.reserve_role='retest')<>4
+        or count(distinct m.id) filter(
+             where cv.status='published' and m.lifecycle_state in ('published','reserve') and m.reserve_role='mixed')<>2
   ) x;
-  if v_bad<>0 then raise exception 'aw21_24 annual reserve draft: prospective reserve depth failed rows=%',v_bad; end if;
+  if v_bad<>0 then raise exception 'aw21_24 annual reserve source: final reserve depth failed rows=%',v_bad; end if;
 
   if exists(
     select 1
@@ -301,7 +302,7 @@ BEGIN
     where m.content_version_id in (4823,4824)
       and lower(regexp_replace(q.question_text_en,'\s+',' ','g'))=
           lower(regexp_replace(oldq.question_text_en,'\s+',' ','g'))
-  ) then raise exception 'aw21_24 annual reserve draft: exact published stem reuse'; end if;
+  ) then raise exception 'aw21_24 annual reserve source: exact published stem reuse'; end if;
 
   if exists(
     select 1 from private.exam_prep_sessions s
@@ -315,8 +316,8 @@ BEGIN
     select 1 from public.tour_answers ta
     join private.exam_prep_question_content_meta m on m.question_id=ta.question_id
     where m.content_version_id in (4823,4824)
-  ) then raise exception 'aw21_24 annual reserve draft: history contamination'; end if;
+  ) then raise exception 'aw21_24 annual reserve source: history contamination'; end if;
 END
 $$;
 
-\echo 'AW21-24 annual reserve top-up draft v1 contract: GREEN'
+\echo 'AW21-24 annual reserve governed source/release v1 contract: GREEN'
