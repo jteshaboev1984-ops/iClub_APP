@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p260focus2";
+  const VERSION = "p202closure1";
   let observer = null;
   let busy = false;
   let activeLanguage = "ru";
@@ -261,7 +261,11 @@
       attempt: "Urinish", correct: "To‘g‘ri", incorrect: "Xato", recorded: "Saqlangan", book: "Kitob", pages: "Sahifalar", completedCorrection: "Tuzatish yopilgan",
       autoChecked: "Avtomatik tekshiruv", writtenCompleted: "Yozma ishlar", focusNow: "Hozir diqqatda", later: "Keyinroq",
       focusFoundation: "Keyingi mavzular uchun asos", focusRepeated: "Takrorlangan qiyinchilik", focusRetest: "Qayta tekshiruv vaqti", focusAttention: "Diqqat talab qiladi", focusSignalFoundation: "Kirish tekshiruvi signali · keyingi mavzular uchun asos", focusSignal: "Kirish tekshiruvi signali · yana tekshirish kerak", confirmSignal: "Yana tekshirish",
-      focusIntro: "Tizim hozir eng muhim 5 ta mavzuni ko‘rsatadi. Qolganlari yo‘qolmaydi va navbat bilan qo‘shiladi."
+      focusIntro: "Tizim hozir eng muhim 5 ta mavzuni ko‘rsatadi. Qolganlari yo‘qolmaydi va navbat bilan qo‘shiladi.",
+      closureTitle: "Dastur qamrovini yakunlash", closureComplete: "Yakunlandi", closureInProgress: "Jarayonda",
+      closureCoverage: "Barcha mavzular tasdiqlangan", closureAllSkills: "Barcha ko‘nikmalar yetarli darajada", closurePriority: "Asosiy mavzular mustahkam", closureBaseline: "Birinchi to‘liq variant",
+      closureBaselineDone: "Bajarildi", closureBaselineNeeded: "Bajarish kerak", closurePracticeOptions: "Mavjud sinov variantlari", closureModified: "moslashtirilgan", closureFull: "to‘liq",
+      closureReadyText: "Bu komponent bo‘yicha dastur qamrovi yakunlandi.", closureReasonCoverage: "Qolgan mavzularni tasdiqlang.", closureReasonLevel: "Ba’zi mavzularda natijani yana mustahkamlash kerak.", closureReasonPriority: "Ba’zi asosiy mavzularda kuchliroq tasdiq kerak.", closureReasonBaseline: "Birinchi taqqoslanadigan to‘liq variantni bajaring.", closureReasonSections: "Dasturdagi barcha bo‘limlar hali tasdiqlanmagan.", closureReasonPending: "Keyingi bosqich uchun dalillar hali to‘liq emas."
     };
     if (activeLanguage === "en") return {
       tracker: "Syllabus progress", corrections: "Needs attention", overview: "Overview", backTracker: "Back to progress",
@@ -277,7 +281,11 @@
       attempt: "Attempt", correct: "Correct", incorrect: "Incorrect", recorded: "Recorded", book: "Book", pages: "Pages", completedCorrection: "Correction completed",
       autoChecked: "Auto-checked", writtenCompleted: "Written work", focusNow: "In focus now", later: "Later",
       focusFoundation: "Foundation for later topics", focusRepeated: "Repeated difficulty", focusRetest: "Delayed check due", focusAttention: "Needs attention", focusSignalFoundation: "Entry-check signal · foundation for later topics", focusSignal: "Entry-check signal · needs confirmation", confirmSignal: "Check again",
-      focusIntro: "The system shows up to five highest-priority topics now. The rest stay recorded and move into focus gradually."
+      focusIntro: "The system shows up to five highest-priority topics now. The rest stay recorded and move into focus gradually.",
+      closureTitle: "Complete syllabus coverage", closureComplete: "Complete", closureInProgress: "In progress",
+      closureCoverage: "All topics confirmed", closureAllSkills: "All skills at the required level", closurePriority: "Priority topics secure", closureBaseline: "First full-paper baseline",
+      closureBaselineDone: "Completed", closureBaselineNeeded: "Still required", closurePracticeOptions: "Available baseline practice", closureModified: "modified", closureFull: "full",
+      closureReadyText: "Syllabus coverage is complete for this component.", closureReasonCoverage: "Confirm the remaining topics.", closureReasonLevel: "Some topics still need stronger evidence.", closureReasonPriority: "Some priority topics still need stronger evidence.", closureReasonBaseline: "Complete the first comparable full-paper baseline.", closureReasonSections: "Not every syllabus area is confirmed yet.", closureReasonPending: "The evidence needed for the next phase is not complete yet."
     };
     return {
       tracker: "Прогресс по программе", corrections: "Требуют внимания", overview: "Обзор", backTracker: "Вернуться к прогрессу",
@@ -293,7 +301,11 @@
       attempt: "Попытка", correct: "Верно", incorrect: "Ошибка", recorded: "Сохранено", book: "Книга", pages: "Страницы", completedCorrection: "Исправление закрыто",
       autoChecked: "Автопроверка", writtenCompleted: "Письменные работы", focusNow: "Сейчас в фокусе", later: "Позже",
       focusFoundation: "Основа для следующих тем", focusRepeated: "Повторная трудность", focusRetest: "Пора повторно проверить", focusAttention: "Требует внимания", focusSignalFoundation: "Сигнал входной проверки · основа для следующих тем", focusSignal: "Сигнал входной проверки · нужно подтвердить", confirmSignal: "Проверить ещё раз",
-      focusIntro: "Система показывает сейчас не больше 5 самых важных тем. Остальные сохраняются и будут подключаться постепенно."
+      focusIntro: "Система показывает сейчас не больше 5 самых важных тем. Остальные сохраняются и будут подключаться постепенно.",
+      closureTitle: "Завершение программы", closureComplete: "Завершено", closureInProgress: "В процессе",
+      closureCoverage: "Все темы подтверждены", closureAllSkills: "Все навыки на нужном уровне", closurePriority: "Основные темы подтверждены уверенно", closureBaseline: "Первый полный вариант",
+      closureBaselineDone: "Выполнен", closureBaselineNeeded: "Нужно выполнить", closurePracticeOptions: "Доступные варианты для проверки", closureModified: "адаптированных", closureFull: "полных",
+      closureReadyText: "По этому компоненту программа полностью закрыта.", closureReasonCoverage: "Подтвердите оставшиеся темы.", closureReasonLevel: "Некоторые темы ещё нужно закрепить дополнительными результатами.", closureReasonPriority: "Некоторые основные темы требуют более уверенного подтверждения.", closureReasonBaseline: "Выполните первый полный вариант в сопоставимых условиях.", closureReasonSections: "Ещё не все разделы программы подтверждены.", closureReasonPending: "Для перехода к следующему этапу пока не хватает подтверждённых результатов."
     };
   }
 
@@ -396,12 +408,48 @@
   async function openTracker(component) {
     if (busy || !canUse() || typeof internal.api?.syllabusTracker !== "function") return;
     busy = true; activeLanguage = detectLanguage(); renderLoading(component, copy().tracker);
-    const result = await internal.api.syllabusTracker(component); busy = false;
+    const [result, closureResult] = await Promise.all([
+      internal.api.syllabusTracker(component),
+      typeof internal.api?.stage3Closure === "function"
+        ? internal.api.stage3Closure(component).catch(() => null)
+        : Promise.resolve(null)
+    ]);
+    busy = false;
     if (!result?.ok) { renderError(component, copy().tracker); return; }
-    renderTracker(component, result.data || {});
+    renderTracker(component, result.data || {}, closureResult?.ok ? closureResult.data : null);
   }
 
-  function renderTracker(component, data) {
+  function closureReason(copyRow, reason, ready) {
+    if (ready) return copyRow.closureReadyText;
+    const labels = {
+      coverage_incomplete: copyRow.closureReasonCoverage,
+      l2_incomplete: copyRow.closureReasonLevel,
+      key_l3_incomplete: copyRow.closureReasonPriority,
+      unknown_section: copyRow.closureReasonSections,
+      full_baseline_missing: copyRow.closureReasonBaseline
+    };
+    return labels[String(reason || "")] || copyRow.closureReasonPending;
+  }
+
+  function renderClosureCard(data) {
+    if (!data?.closure) return "";
+    const c = copy();
+    const closure = data.closure || {};
+    const ledger = data.coverage_ledger || {};
+    const baseline = data.baseline_workflow || {};
+    const denominator = Number(closure.denominator_count ?? ledger.denominator_count ?? 0);
+    const coverage = Number(closure.coverage_count ?? ledger.coverage_count ?? 0);
+    const l2 = Number(closure.l2_or_higher_count || 0);
+    const keyTotal = Number(closure.key_skill_count || 0);
+    const keyStrong = Number(closure.key_l3_count || 0);
+    const comparable = Number(closure.comparable_full_baseline_count ?? baseline.comparable_full_baseline_count ?? 0);
+    const modifiedAvailable = Number(baseline.modified_paper_available_count || 0);
+    const fullAvailable = Number(baseline.full_paper_available_count || 0);
+    const ready = closure.ready === true;
+    return `<div class="ep-views-card"><div class="ep-views-area-head"><strong>${esc(c.closureTitle)}</strong><span class="ep-views-badge">${esc(ready ? c.closureComplete : c.closureInProgress)}</span></div><div class="ep-views-note">${esc(closureReason(c, closure.reason_code, ready))}</div><div class="ep-views-list"><div class="ep-views-row"><span>${esc(c.closureCoverage)}</span><strong>${coverage} / ${denominator}</strong></div><div class="ep-views-row"><span>${esc(c.closureAllSkills)}</span><strong>${l2} / ${denominator}</strong></div><div class="ep-views-row"><span>${esc(c.closurePriority)}</span><strong>${keyStrong} / ${keyTotal}</strong></div><div class="ep-views-row"><span>${esc(c.closureBaseline)}</span><strong>${esc(comparable > 0 ? c.closureBaselineDone : c.closureBaselineNeeded)}</strong></div></div><div class="ep-views-note">${esc(c.closurePracticeOptions)}: ${modifiedAvailable} ${esc(c.closureModified)} · ${fullAvailable} ${esc(c.closureFull)}</div></div>`;
+  }
+
+  function renderTracker(component, data, closureData = null) {
     const root = rootEl(); if (!root) return; const c = copy();
     const areas = Array.isArray(data?.areas) ? data.areas : [];
     const denominator = Number(data?.denominator_count || 0), confirmed = Number(data?.coverage_count || 0), pct = Number(data?.coverage_pct || 0);
@@ -415,7 +463,8 @@
       }).join("");
       return `<div class="ep-views-card ep-views-area"><div class="ep-views-area-head"><strong>${esc(areaLabel(area.official_syllabus_section))}</strong><span class="ep-views-sub">${done} / ${total}</span></div><div class="ep-views-progress"><span style="width:${total > 0 ? Math.min(100, 100 * done / total) : 0}%"></span></div>${rows}</div>`;
     }).join("");
-    const body = `<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.confirmedCount)}</span><strong>${confirmed} / ${denominator}</strong></div><div class="ep-views-stat"><span>${esc(c.coverage)}</span><strong>${pct.toFixed(0)}%</strong></div><div class="ep-views-stat"><span>${esc(c.corrections)}</span><strong>${Number(data?.open_correction_count || 0)}</strong></div></div>${cards}`;
+    const closureCard = renderClosureCard(closureData);
+    const body = `<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.confirmedCount)}</span><strong>${confirmed} / ${denominator}</strong></div><div class="ep-views-stat"><span>${esc(c.coverage)}</span><strong>${pct.toFixed(0)}%</strong></div><div class="ep-views-stat"><span>${esc(c.corrections)}</span><strong>${Number(data?.open_correction_count || 0)}</strong></div></div>${closureCard}${cards}`;
     root.innerHTML = shell(component, c.tracker, c.trackerIntro, body);
     bindBack(root, component);
     root.querySelectorAll("[data-ep-views-skill]").forEach(button => button.addEventListener("click", () => openSkill(component, button.dataset.epViewsSkill)));
