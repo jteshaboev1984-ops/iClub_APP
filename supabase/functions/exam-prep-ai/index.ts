@@ -64,6 +64,7 @@ function learnerMessage(locale: string, mode: string, reason: string) {
       interaction_not_allowed: "Этот тип запроса недоступен в учебном помощнике.",
       mentor_actor_required: "Этот запрос доступен только в рабочем пространстве назначенного ментора.",
       no_source: "Для этого объяснения пока нет утверждённого материала. Продолжайте по текущему плану.",
+      no_repeated_gap: "Сейчас повторяющихся трудностей по этому компоненту не зафиксировано.",
       unavailable: "ИИ-помощник сейчас недоступен. Основная подготовка продолжает работать без изменений.",
       fallback: "Сейчас не удалось подготовить дополнительное объяснение. Основной план доступен без изменений.",
     },
@@ -73,6 +74,7 @@ function learnerMessage(locale: string, mode: string, reason: string) {
       interaction_not_allowed: "Bu turdagi so‘rov o‘quv yordamchisida mavjud emas.",
       mentor_actor_required: "Bu so‘rov faqat biriktirilgan mentor ish maydonida mavjud.",
       no_source: "Bu izoh uchun hozircha tasdiqlangan material yo‘q. Joriy reja bo‘yicha davom eting.",
+      no_repeated_gap: "Bu komponent bo‘yicha hozir takroriy qiyinchilik qayd etilmagan.",
       unavailable: "AI yordamchi hozir mavjud emas. Asosiy tayyorgarlik odatdagidek ishlashda davom etadi.",
       fallback: "Hozir qo‘shimcha izoh tayyorlab bo‘lmadi. Asosiy reja o‘zgarishsiz mavjud.",
     },
@@ -82,6 +84,7 @@ function learnerMessage(locale: string, mode: string, reason: string) {
       interaction_not_allowed: "This request type is not available in the learning assistant.",
       mentor_actor_required: "This request is available only in an assigned mentor workspace.",
       no_source: "There is no approved material for this explanation yet. Continue with the current plan.",
+      no_repeated_gap: "No repeated difficulties are currently recorded for this component.",
       unavailable: "AI assistance is unavailable right now. Core exam preparation continues unchanged.",
       fallback: "An additional explanation could not be prepared right now. The core plan remains available.",
     },
@@ -91,6 +94,7 @@ function learnerMessage(locale: string, mode: string, reason: string) {
   if (reason === "input_too_long") return dictionary.input_too_long;
   if (reason === "interaction_not_allowed") return dictionary.interaction_not_allowed;
   if (reason === "mentor_actor_required") return dictionary.mentor_actor_required;
+  if (reason === "no_repeated_gap") return dictionary.no_repeated_gap;
   if (mode === "no_source") return dictionary.no_source;
   if (mode === "fallback") return dictionary.fallback;
   return dictionary.unavailable;
@@ -281,7 +285,7 @@ function localeLooksValid(locale: string, value: string) {
   if (locale === "ru") return cyrillicRatio >= 0.30;
   if (locale === "en") return cyrillicRatio <= 0.05 && /\b(the|your|this|plan|progress|paper|current|because|next)\b/i.test(text);
   if (locale === "uz") {
-    return cyrillicRatio <= 0.05 && /\b(va|bu|uchun|reja|dalil|progress|siz|asosida|haftalik|kerak|mumkin|bo['’]?yicha)\b/i.test(text);
+    return cyrillicRatio <= 0.05 && /\b(va|bu|uchun|reja|dalil|progress|siz|asosida|haftalik|kerak|mumkin|bo['’]?yicha|taqsimot|ehtimol|ildiz|diskriminant|standart|tenglama|qiyinchilik|mashq)\b/i.test(text);
   }
   return false;
 }
