@@ -517,6 +517,11 @@
     const objectiveTotal = Number(state.objective_evidence_count || 0), objectiveCorrect = Number(state.correct_objective_count || 0);
     const body = `${description}<div class="ep-views-summary"><div class="ep-views-stat"><span>${esc(c.confirmedCount)}</span><strong>${esc(skillStatus(state.objective_level, Number(state.unresolved_correction_count || 0) > 0 ? "open" : null))}</strong></div><div class="ep-views-stat"><span>${esc(c.autoChecked)}</span><strong>${objectiveCorrect} / ${objectiveTotal}</strong></div><div class="ep-views-stat"><span>${esc(c.writtenCompleted)}</span><strong>${Number(state.written_count || 0)}</strong></div></div><div class="ep-views-card"><strong>${esc(c.prerequisites)}</strong><div class="ep-views-list">${prereqRows}</div></div><div class="ep-views-card"><strong>${esc(c.history)}</strong><div class="ep-views-list">${evidenceRows}</div></div><div class="ep-views-card"><strong>${esc(c.correctionHistory)}</strong><div class="ep-views-list">${correctionRows}</div></div><div class="ep-views-card"><strong>${esc(c.resources)}</strong><div class="ep-views-list">${resourceRows}</div></div><div class="ep-views-note">${esc(c.writtenNote)}</div><div class="ep-views-actions"><button class="ep-views-btn primary" type="button" data-ep-views-corrections="${esc(component)}">${esc(c.openCorrections)}</button></div>`;
     root.innerHTML = shell(component, c.detail, areaLabel(data?.official_syllabus_section), body, "tracker");
+    const skillScreen = root.querySelector("[data-ep-views-screen]");
+    if (skillScreen) {
+      skillScreen.setAttribute("data-ep-ai-skill-detail", String(data?.skill_code || ""));
+      skillScreen.setAttribute("data-ep-ai-skill-component", String(component || ""));
+    }
     bindBack(root, component, "tracker");
     root.querySelector("[data-ep-views-corrections]")?.addEventListener("click", () => openCorrections(component));
   }
