@@ -126,7 +126,9 @@ BEGIN
 END
 $$;
 
-DO $$
+GRANT SELECT ON p302_error_fixture TO authenticated;
+
+DO $
 BEGIN
   IF has_function_privilege('anon','public.get_exam_prep_ai_error_context_safe_v1(text,uuid,integer,text)','EXECUTE')
      OR NOT has_function_privilege('authenticated','public.get_exam_prep_ai_error_context_safe_v1(text,uuid,integer,text)','EXECUTE')
