@@ -59,6 +59,9 @@ on:
       - supabase/migrations/20261002060000_exam_prep_p2_05_readiness_summary_safe_v1.sql
       - supabase/tests/p2_05_readiness_summary_contract.sql
       - .github/scripts/p2_05_readiness_summary_ui_regression.js
+      - supabase/tests/p2_06_final_calibration_exam_ops_matrix.sql
+      - scripts/p2-06-exam-operations-regression.cjs
+      - scripts/p2-06-final-calibration-ui-regression.cjs
       - .github/scripts/p2_03_past_paper_ui_regression.js
       - exam-prep/exam-prep-past-paper.js
       - scripts/p2-02-stage3-closure-regression.cjs
@@ -99,6 +102,9 @@ on:
       - supabase/migrations/20261002060000_exam_prep_p2_05_readiness_summary_safe_v1.sql
       - supabase/tests/p2_05_readiness_summary_contract.sql
       - .github/scripts/p2_05_readiness_summary_ui_regression.js
+      - supabase/tests/p2_06_final_calibration_exam_ops_matrix.sql
+      - scripts/p2-06-exam-operations-regression.cjs
+      - scripts/p2-06-final-calibration-ui-regression.cjs
       - .github/scripts/p2_03_past_paper_ui_regression.js
       - exam-prep/exam-prep-past-paper.js
       - scripts/p2-02-stage3-closure-regression.cjs
@@ -454,6 +460,16 @@ jobs:
           node --check .github/scripts/p2_05_readiness_summary_ui_regression.js
           node .github/scripts/p2_05_readiness_summary_ui_regression.js 2>&1 | tee -a p236-current-schema.log
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_05_readiness_summary_contract.sql 2>&1 | tee -a p236-current-schema.log
+
+      - name: Verify P2-06 Final Calibration and exam operations
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/p2-06-exam-operations-regression.cjs
+          node scripts/p2-06-exam-operations-regression.cjs 2>&1 | tee -a p236-current-schema.log
+          node --check scripts/p2-06-final-calibration-ui-regression.cjs
+          node scripts/p2-06-final-calibration-ui-regression.cjs 2>&1 | tee -a p236-current-schema.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_06_final_calibration_exam_ops_matrix.sql 2>&1 | tee -a p236-current-schema.log
 
       - name: Verify AW5-8 annual reserve draft
         shell: bash

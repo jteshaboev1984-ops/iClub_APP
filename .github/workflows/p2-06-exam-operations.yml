@@ -8,12 +8,22 @@ on:
       - 'supabase/migrations/20260908070000_exam_prep_p2_06_exam_operations_v1.sql'
       - 'supabase/migrations/20260908071000_exam_prep_p2_06_exam_calendar_integrity_v1.sql'
       - 'scripts/p2-06-exam-operations-regression.cjs'
+      - 'scripts/p2-06-final-calibration-ui-regression.cjs'
+      - 'supabase/tests/p2_06_final_calibration_exam_ops_matrix.sql'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-host.css'
       - '.github/workflows/p2-06-exam-operations.yml'
   pull_request:
     paths:
       - 'supabase/migrations/20260908070000_exam_prep_p2_06_exam_operations_v1.sql'
       - 'supabase/migrations/20260908071000_exam_prep_p2_06_exam_calendar_integrity_v1.sql'
       - 'scripts/p2-06-exam-operations-regression.cjs'
+      - 'scripts/p2-06-final-calibration-ui-regression.cjs'
+      - 'supabase/tests/p2_06_final_calibration_exam_ops_matrix.sql'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-host.css'
       - '.github/workflows/p2-06-exam-operations.yml'
   workflow_dispatch:
 
@@ -26,4 +36,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run P2-06 exam operations regression
-        run: node scripts/p2-06-exam-operations-regression.cjs
+        run: |
+          node --check scripts/p2-06-exam-operations-regression.cjs
+          node scripts/p2-06-exam-operations-regression.cjs
+          node --check scripts/p2-06-final-calibration-ui-regression.cjs
+          node scripts/p2-06-final-calibration-ui-regression.cjs
