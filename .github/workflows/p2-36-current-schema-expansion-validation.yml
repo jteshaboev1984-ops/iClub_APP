@@ -65,6 +65,7 @@ on:
       - supabase/migrations/20261002070000_exam_prep_p3_01_mass_core_rollout_gate_v1.sql
       - supabase/tests/p3_01_mass_core_rollout_gate_matrix.sql
       - supabase/tests/p3_02_synthetic_ai_isolation_matrix.sql
+      - supabase/tests/p3_02_ai_error_context_matrix.sql
       - scripts/p3-01-mass-core-rollout-regression.cjs
       - .github/scripts/p2_03_past_paper_ui_regression.js
       - exam-prep/exam-prep-past-paper.js
@@ -112,6 +113,7 @@ on:
       - supabase/migrations/20261002070000_exam_prep_p3_01_mass_core_rollout_gate_v1.sql
       - supabase/tests/p3_01_mass_core_rollout_gate_matrix.sql
       - supabase/tests/p3_02_synthetic_ai_isolation_matrix.sql
+      - supabase/tests/p3_02_ai_error_context_matrix.sql
       - scripts/p3-01-mass-core-rollout-regression.cjs
       - .github/scripts/p2_03_past_paper_ui_regression.js
       - exam-prep/exam-prep-past-paper.js
@@ -494,6 +496,14 @@ jobs:
         run: |
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_02_synthetic_ai_isolation_matrix.sql 2>&1 | tee -a p236-current-schema.log
+
+      - name: Verify P3-02 deterministic established-error AI context
+        shell: bash
+        env:
+          PGOPTIONS: '-c p302.isolated_db=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_02_ai_error_context_matrix.sql 2>&1 | tee -a p236-current-schema.log
 
       - name: Verify AW5-8 annual reserve draft
         shell: bash
