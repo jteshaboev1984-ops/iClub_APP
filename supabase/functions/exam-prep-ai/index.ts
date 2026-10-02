@@ -14,6 +14,7 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 // AI-1 provider adapter. It is intentionally dormant unless every existing
 // server-side Exam Prep gate is open. The model is cost-pinned for this phase.
+// P3-02 funded acceptance re-validates this real provider path before any learner promotion.
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") || "";
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const OPENAI_MODEL = "gpt-5.6-luna";
