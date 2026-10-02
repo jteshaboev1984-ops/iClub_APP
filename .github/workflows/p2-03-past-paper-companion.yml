@@ -1,6 +1,18 @@
 name: P2-03 Past Paper Companion
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - supabase/tests/p2_03_past_paper_companion_release_v2_contract.sql
+      - supabase/tests/p2_03_past_paper_companion_matrix.sql
+      - .github/scripts/p2_03_past_paper_ui_regression.js
+      - scripts/p2-03-past-paper-action-browser.cjs
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-past-paper.js
+      - exam-prep/exam-prep-host.css
+      - .github/workflows/p2-03-past-paper-companion.yml
   push:
     branches:
       - main
@@ -8,6 +20,7 @@ on:
       - supabase/migrations/20260908044500_exam_prep_p2_03_past_paper_companion_v1.sql
       - supabase/tests/p2_03_past_paper_companion_matrix.sql
       - .github/scripts/p2_03_past_paper_ui_regression.js
+      - scripts/p2-03-past-paper-action-browser.cjs
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-past-paper.js
       - exam-prep/exam-prep-host.css
@@ -30,12 +43,19 @@ jobs:
           node --check .github/scripts/p2_03_past_paper_ui_regression.js
           node .github/scripts/p2_03_past_paper_ui_regression.js
 
-      - name: Supabase contract matrix
+      - name: Actionable Similar Practice browser contract
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+          node --check scripts/p2-03-past-paper-action-browser.cjs
+          node scripts/p2-03-past-paper-action-browser.cjs
+
+      - name: Read-only governed release contract
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           if [ -z "$SUPABASE_DB_URL" ]; then
-            echo "SUPABASE_DB_URL is not configured; skipping live SQL matrix."
+            echo "SUPABASE_DB_URL is not configured; skipping live read-only release contract."
             exit 0
           fi
-          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/p2_03_past_paper_companion_matrix.sql
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/p2_03_past_paper_companion_release_v2_contract.sql
