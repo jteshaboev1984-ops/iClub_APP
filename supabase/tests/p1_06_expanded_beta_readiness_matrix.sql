@@ -48,12 +48,15 @@ BEGIN
   WHERE approval_status='approved' AND is_runtime_allowed AND rights_status='original_iclub';
   SELECT generation_enabled INTO v_generation FROM private.exam_prep_ai_policy WHERE id=1;
   IF v_cards<>(case
+      when to_regprocedure('public.get_exam_prep_ai_skill_theory_context_safe_v1(text,text,text)') is not null then 30
       when to_regprocedure('public.get_exam_prep_ai_error_context_safe_v1(text,uuid,integer,text)') is not null then 18
       else 12
     end)
      OR v_generation IS DISTINCT FROM false THEN
-    RAISE EXCEPTION 'P1-06 dormant AI contract mismatch approved_cards=% generation=% error_context_present=%',
-      v_cards,v_generation,to_regprocedure('public.get_exam_prep_ai_error_context_safe_v1(text,uuid,integer,text)') is not null;
+    RAISE EXCEPTION 'P1-06 dormant AI contract mismatch approved_cards=% generation=% error_context_present=% theory_context_present=%',
+      v_cards,v_generation,
+      to_regprocedure('public.get_exam_prep_ai_error_context_safe_v1(text,uuid,integer,text)') is not null,
+      to_regprocedure('public.get_exam_prep_ai_skill_theory_context_safe_v1(text,text,text)') is not null;
   END IF;
 
   IF EXISTS(

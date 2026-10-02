@@ -26,6 +26,9 @@ const PROVIDER_ENABLED_INTERACTIONS = new Set([
   "progress_summary",
   "weekly_plan_narration",
   "established_error_explanation",
+  "repeated_error_summary",
+  "theory_explanation",
+  "multilingual_explanation",
 ]);
 
 const VALID_COMPONENTS = new Set(["P1", "P5"]);
@@ -61,6 +64,7 @@ function learnerMessage(locale: string, mode: string, reason: string) {
       interaction_not_allowed: "Этот тип запроса недоступен в учебном помощнике.",
       mentor_actor_required: "Этот запрос доступен только в рабочем пространстве назначенного ментора.",
       no_source: "Для этого объяснения пока нет утверждённого материала. Продолжайте по текущему плану.",
+      no_repeated_gap: "Сейчас повторяющихся трудностей по этому компоненту не зафиксировано.",
       unavailable: "ИИ-помощник сейчас недоступен. Основная подготовка продолжает работать без изменений.",
       fallback: "Сейчас не удалось подготовить дополнительное объяснение. Основной план доступен без изменений.",
     },
@@ -70,6 +74,7 @@ function learnerMessage(locale: string, mode: string, reason: string) {
       interaction_not_allowed: "Bu turdagi so‘rov o‘quv yordamchisida mavjud emas.",
       mentor_actor_required: "Bu so‘rov faqat biriktirilgan mentor ish maydonida mavjud.",
       no_source: "Bu izoh uchun hozircha tasdiqlangan material yo‘q. Joriy reja bo‘yicha davom eting.",
+      no_repeated_gap: "Bu komponent bo‘yicha hozir takroriy qiyinchilik qayd etilmagan.",
       unavailable: "AI yordamchi hozir mavjud emas. Asosiy tayyorgarlik odatdagidek ishlashda davom etadi.",
       fallback: "Hozir qo‘shimcha izoh tayyorlab bo‘lmadi. Asosiy reja o‘zgarishsiz mavjud.",
     },
@@ -79,6 +84,7 @@ function learnerMessage(locale: string, mode: string, reason: string) {
       interaction_not_allowed: "This request type is not available in the learning assistant.",
       mentor_actor_required: "This request is available only in an assigned mentor workspace.",
       no_source: "There is no approved material for this explanation yet. Continue with the current plan.",
+      no_repeated_gap: "No repeated difficulties are currently recorded for this component.",
       unavailable: "AI assistance is unavailable right now. Core exam preparation continues unchanged.",
       fallback: "An additional explanation could not be prepared right now. The core plan remains available.",
     },
@@ -88,6 +94,7 @@ function learnerMessage(locale: string, mode: string, reason: string) {
   if (reason === "input_too_long") return dictionary.input_too_long;
   if (reason === "interaction_not_allowed") return dictionary.interaction_not_allowed;
   if (reason === "mentor_actor_required") return dictionary.mentor_actor_required;
+  if (reason === "no_repeated_gap") return dictionary.no_repeated_gap;
   if (mode === "no_source") return dictionary.no_source;
   if (mode === "fallback") return dictionary.fallback;
   return dictionary.unavailable;
@@ -153,16 +160,20 @@ async function learnerContext(
   }
   if (interaction === "repeated_error_summary") {
     return {
-      context_type: "correction_queue_v1",
-      data: await rpc("get_exam_prep_correction_queue_safe_v1", { p_component_code: component }, authorization, ANON_KEY),
+      context_type: "repeated_error_summary_v1",
+      data: await rpc("get_exam_prep_ai_repeated_error_context_safe_v1", {
+        p_component_code: component,
+        p_locale: locale,
+      }, authorization, ANON_KEY),
     };
   }
   if ((interaction === "theory_explanation" || interaction === "multilingual_explanation") && skillCode) {
     return {
-      context_type: "skill_detail_v1",
-      data: await rpc("get_exam_prep_skill_detail_safe_v1", {
+      context_type: "skill_theory_v1",
+      data: await rpc("get_exam_prep_ai_skill_theory_context_safe_v1", {
         p_component_code: component,
         p_skill_code: skillCode,
+        p_locale: locale,
       }, authorization, ANON_KEY),
     };
   }
@@ -220,7 +231,13 @@ function buildProviderInstructions(params: {
     ? "Explain the learner's current weekly plan and its priorities."
     : params.interaction === "established_error_explanation"
       ? "Explain the already-established diagnostic error and the recorded next action without revealing the correct answer."
-      : "Explain the learner's recorded progress.";
+      : params.interaction === "repeated_error_summary"
+        ? "Summarise only the repeated difficulties already recorded by iClub and the current correction step for each. Do not infer a new misconception."
+        : params.interaction === "theory_explanation"
+          ? "Explain the approved mathematical concept for the supplied skill using only the approved source card and canonical skill context."
+          : params.interaction === "multilingual_explanation"
+            ? "Explain the approved mathematical concept for the supplied skill in the requested language using only the approved source card and canonical skill context."
+            : "Explain the learner's recorded progress.";
 
   return [
     "You are the iClub learning assistant for Cambridge AS Mathematics Exam Prep.",
@@ -245,6 +262,12 @@ function buildProviderInput(interaction: string) {
   if (interaction === "established_error_explanation") {
     return "Explain my recorded diagnostic error and next action using only the supplied approved source and deterministic error context. Do not reveal the correct answer.";
   }
+  if (interaction === "repeated_error_summary") {
+    return "Summarise the repeated difficulties already recorded for me and what the current correction step is. Do not invent any additional diagnosis.";
+  }
+  if (interaction === "theory_explanation" || interaction === "multilingual_explanation") {
+    return "Explain this approved mathematics topic using only the supplied source card and canonical skill context.";
+  }
   return "Explain my recorded progress using only the supplied approved sources and recorded progress facts.";
 }
 
@@ -262,7 +285,7 @@ function localeLooksValid(locale: string, value: string) {
   if (locale === "ru") return cyrillicRatio >= 0.30;
   if (locale === "en") return cyrillicRatio <= 0.05 && /\b(the|your|this|plan|progress|paper|current|because|next)\b/i.test(text);
   if (locale === "uz") {
-    return cyrillicRatio <= 0.05 && /\b(va|bu|uchun|reja|dalil|progress|siz|asosida|haftalik|kerak|mumkin|bo['’]?yicha)\b/i.test(text);
+    return cyrillicRatio <= 0.05 && /\b(va|bu|uchun|reja|dalil|progress|siz|asosida|haftalik|kerak|mumkin|bo['’]?yicha|taqsimot|ehtimol|ildiz|diskriminant|standart|tenglama|qiyinchilik|mashq)\b/i.test(text);
   }
   return false;
 }
@@ -525,6 +548,9 @@ Deno.serve(async (req: Request) => {
   if (interaction === "established_error_explanation" && (!sessionId || !itemOrder)) {
     return response(400, { request_id: requestId, error: "error_context_reference_required" });
   }
+  if ((interaction === "theory_explanation" || interaction === "multilingual_explanation") && !skillCode) {
+    return response(400, { request_id: requestId, error: "skill_code_required" });
+  }
 
   let snapshot: any = null;
   try {
@@ -574,9 +600,10 @@ Deno.serve(async (req: Request) => {
     return response(200, { request_id: requestId, mode, reason, component_code: component, interaction_type: interaction, locale, message, generated: false, academic_state_changed: false });
   }
 
-  if (interaction === "established_error_explanation" && deterministicContext?.data?.mapped !== true) {
+  if (["established_error_explanation","repeated_error_summary","theory_explanation","multilingual_explanation"].includes(interaction)
+      && deterministicContext?.data?.mapped !== true) {
     const mode = "no_source";
-    const reason = String(deterministicContext?.data?.reason || "no_approved_diagnostic_mapping");
+    const reason = String(deterministicContext?.data?.reason || "deterministic_mapping_missing");
     const message = learnerMessage(locale, mode, reason);
     const outputHash = await sha256(message);
     await audit({
@@ -609,6 +636,19 @@ Deno.serve(async (req: Request) => {
       p_limit: 8,
     }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
     cards = Array.isArray(result) ? result : [];
+    const markerByInteraction: Record<string, string | null> = {
+      established_error_explanation: ":error_explanation:",
+      repeated_error_summary: ":repeated_error_summary:",
+      theory_explanation: ":theory:",
+      multilingual_explanation: ":theory:",
+    };
+    const requiredMarker = markerByInteraction[interaction] || null;
+    if (requiredMarker) {
+      cards = cards.filter((card) => String(card?.source_card_key || "").includes(requiredMarker));
+    }
+    if ((interaction === "theory_explanation" || interaction === "multilingual_explanation") && skillCode) {
+      cards = cards.filter((card) => String(card?.skill_code || "") === skillCode);
+    }
   } catch {
     cards = [];
   }

@@ -29,8 +29,13 @@ assert(edgeSource.includes('academic_state_changed: false'), 'production endpoin
 assert(edgeSource.includes('get_exam_prep_ai_guard_v1'), 'production endpoint no longer uses server AI guard');
 assert(edgeSource.includes('get_exam_prep_ai_source_cards_service_v1'), 'production endpoint no longer uses allowlisted source cards');
 assert(edgeSource.includes('get_exam_prep_ai_error_context_safe_v1'), 'established-error provider route lost deterministic error context');
+assert(edgeSource.includes('get_exam_prep_ai_repeated_error_context_safe_v1'), 'repeated-error provider route lost deterministic context');
+assert(edgeSource.includes('get_exam_prep_ai_skill_theory_context_safe_v1'), 'theory provider route lost canonical skill context');
 assert(edgeSource.includes('error_context_reference_required'), 'established-error provider route lost finalized session/item reference guard');
-assert(edgeSource.includes('deterministic_mapping_required'), 'unmapped established error no longer fails closed');
+assert(edgeSource.includes('skill_code_required'), 'theory provider route lost skill reference guard');
+assert(edgeSource.includes('":repeated_error_summary:"'), 'repeated-error source selector missing');
+assert(edgeSource.includes('":theory:"'), 'theory source selector missing');
+assert(edgeSource.includes('deterministic_mapping_required'), 'unmapped source-bound AI route no longer fails closed');
 assert(!edgeSource.includes('correct_answer'), 'production AI endpoint references correct_answer');
 assert(!edgeSource.includes('answer_key'), 'production AI endpoint references answer_key');
 

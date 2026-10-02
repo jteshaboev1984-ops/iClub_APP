@@ -26,8 +26,8 @@ for (const rpc of [
   'get_exam_prep_overview_safe_v1',
   'get_exam_prep_weekly_plan_safe_v1',
   'get_exam_prep_ai_error_context_safe_v1',
-  'get_exam_prep_correction_queue_safe_v1',
-  'get_exam_prep_skill_detail_safe_v1'
+  'get_exam_prep_ai_repeated_error_context_safe_v1',
+  'get_exam_prep_ai_skill_theory_context_safe_v1'
 ]) {
   assert(src.includes(rpc), `safe deterministic context RPC missing: ${rpc}`);
 }
@@ -57,9 +57,21 @@ assert(src.includes('OPENAI_API_KEY'), 'server-only provider credential hook mis
 assert(src.includes('OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"'), 'pinned OpenAI Responses endpoint missing');
 assert(src.includes('OPENAI_MODEL = "gpt-5.6-luna"'), 'AI-1 cost-pinned model missing');
 assert(src.includes('PROVIDER_ENABLED_INTERACTIONS'), 'AI-1 provider scope allowlist missing');
-assert(src.includes('"progress_summary"') && src.includes('"weekly_plan_narration"') && src.includes('"established_error_explanation"'), 'provider scope must include reviewed progress, weekly-plan and established-error flows');
+for (const interaction of [
+  '"progress_summary"',
+  '"weekly_plan_narration"',
+  '"established_error_explanation"',
+  '"repeated_error_summary"',
+  '"theory_explanation"',
+  '"multilingual_explanation"'
+]) {
+  assert(src.includes(interaction), `provider scope missing reviewed interaction: ${interaction}`);
+}
 assert(src.includes('error_context_reference_required'), 'established-error route must require a finalized session/item reference');
-assert(src.includes('deterministic_mapping_required'), 'unmapped established errors must fail closed before provider call');
+assert(src.includes('skill_code_required'), 'theory/multilingual routes must require a canonical skill reference');
+assert(src.includes('deterministic_mapping_required'), 'unmapped source-bound interactions must fail closed before provider call');
+assert(src.includes('":repeated_error_summary:"'), 'repeated-error source-card selector missing');
+assert(src.includes('":theory:"'), 'theory source-card selector missing');
 assert(src.includes('validateGeneratedMessage'), 'provider output validation missing');
 assert(src.includes('reserve_exam_prep_ai_provider_call_service_v1'), 'atomic provider reservation RPC missing');
 assert(src.includes('finalize_exam_prep_ai_provider_call_service_v1'), 'provider accounting finalizer RPC missing');

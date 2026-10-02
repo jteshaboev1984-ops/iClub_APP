@@ -81,8 +81,11 @@ function assert(condition, message) {
     await page.click('[data-ep-ai-panel="P5"] [data-ep-ai-action="weekly_plan_narration"]');
     await page.waitForFunction(() => document.querySelector('[data-ep-ai-panel="P5"] [data-ep-ai-output-text]')?.textContent === 'P5 explanation');
 
+    await page.click('[data-ep-ai-panel="P1"] [data-ep-ai-action="repeated_error_summary"]');
+    await page.waitForFunction(() => document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
+
     const calls = await page.evaluate(() => window.__aiCalls);
-    assert(calls.length === 2, `Expected exactly 2 AI endpoint calls, got ${calls.length}`);
+    assert(calls.length === 3, `Expected exactly 3 AI endpoint calls, got ${calls.length}`);
     assert(calls[0].name === 'exam-prep-ai', 'AI UI must call only the governed Edge Function');
     assert(calls[0].body.component_code === 'P1', 'P1 action crossed component boundary');
     assert(calls[0].body.interaction_type === 'progress_summary', 'P1 progress action type drifted');
@@ -90,6 +93,9 @@ function assert(condition, message) {
     assert(calls[0].body.user_text === '', 'Context action must not collect unnecessary learner text');
     assert(calls[1].body.component_code === 'P5', 'P5 action crossed component boundary');
     assert(calls[1].body.interaction_type === 'weekly_plan_narration', 'P5 plan action type drifted');
+    assert(calls[2].body.component_code === 'P1', 'Repeated-difficulty action crossed component boundary');
+    assert(calls[2].body.interaction_type === 'repeated_error_summary', 'Repeated-difficulty action type drifted');
+    assert(calls[2].body.user_text === '', 'Repeated-difficulty action must not collect free-form learner text');
 
     await page.evaluate(() => {
       document.querySelector('#exam-prep-host-root').innerHTML = `
@@ -110,14 +116,14 @@ function assert(condition, message) {
     await page.waitForFunction(() => document.querySelector('[data-ep-ai-error-action-wrap] [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
 
     const errorCalls = await page.evaluate(() => window.__aiCalls);
-    assert(errorCalls.length === 3, `Expected exactly 3 AI endpoint calls, got ${errorCalls.length}`);
-    assert(errorCalls[2].name === 'exam-prep-ai', 'Diagnostic error action bypassed governed Edge Function');
-    assert(errorCalls[2].body.component_code === 'P1', 'Diagnostic error action crossed component boundary');
-    assert(errorCalls[2].body.interaction_type === 'established_error_explanation', 'Diagnostic error action type drifted');
-    assert(errorCalls[2].body.session_id === '11111111-1111-4111-8111-111111111111', 'Diagnostic error action lost finalized session reference');
-    assert(errorCalls[2].body.item_order === 3, 'Diagnostic error action lost item order');
-    assert(errorCalls[2].body.locale === 'en', 'Diagnostic error action lost UI locale');
-    assert(errorCalls[2].body.user_text === '', 'Diagnostic error action must not collect free-form learner text');
+    assert(errorCalls.length === 4, `Expected exactly 4 AI endpoint calls, got ${errorCalls.length}`);
+    assert(errorCalls[3].name === 'exam-prep-ai', 'Diagnostic error action bypassed governed Edge Function');
+    assert(errorCalls[3].body.component_code === 'P1', 'Diagnostic error action crossed component boundary');
+    assert(errorCalls[3].body.interaction_type === 'established_error_explanation', 'Diagnostic error action type drifted');
+    assert(errorCalls[3].body.session_id === '11111111-1111-4111-8111-111111111111', 'Diagnostic error action lost finalized session reference');
+    assert(errorCalls[3].body.item_order === 3, 'Diagnostic error action lost item order');
+    assert(errorCalls[3].body.locale === 'en', 'Diagnostic error action lost UI locale');
+    assert(errorCalls[3].body.user_text === '', 'Diagnostic error action must not collect free-form learner text');
 
     const localizedMistakes = [
       { lang: 'ru', label: 'Разобрать эту ошибку', width: 360 },
@@ -156,6 +162,40 @@ function assert(condition, message) {
       assert(localized.buttonWidth <= localized.itemWidth + 1, `${row.lang.toUpperCase()} diagnostic AI action exceeds result card: ${JSON.stringify(localized)}`);
     }
 
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(() => {
+      window.i18n.getLang = () => 'en';
+      document.documentElement.lang = 'en';
+      document.querySelector('#exam-prep-host-root').innerHTML = `
+        <section data-ep-views-screen data-ep-ai-skill-detail="P1-QUA-02" data-ep-ai-skill-component="P1">
+          <div class="ep-views-title">Quadratic equations</div>
+          <div class="ep-views-summary"></div>
+        </section>`;
+    });
+    await page.waitForSelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
+    const topicText = await page.locator('[data-ep-ai-topic-action-wrap]').textContent();
+    assert(topicText.includes('Explain this topic'), 'Governed theory AI action text missing');
+
+    await page.click('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
+    await page.waitForFunction(() => document.querySelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
+    const topicCalls = await page.evaluate(() => window.__aiCalls);
+    assert(topicCalls.length === 5, `Expected exactly 5 AI endpoint calls, got ${topicCalls.length}`);
+    assert(topicCalls[4].body.component_code === 'P1', 'Theory action crossed component boundary');
+    assert(topicCalls[4].body.interaction_type === 'theory_explanation', 'Theory action type drifted');
+    assert(topicCalls[4].body.skill_code === 'P1-QUA-02', 'Theory action lost canonical skill code');
+    assert(topicCalls[4].body.locale === 'en', 'Theory action lost UI locale');
+    assert(topicCalls[4].body.user_text === '', 'Theory action must not collect free-form learner text');
+
+    await page.evaluate(() => {
+      document.querySelector('#exam-prep-host-root').innerHTML = `
+        <section data-ep-views-screen data-ep-ai-skill-detail="P1-QUA-01" data-ep-ai-skill-component="P1">
+          <div class="ep-views-summary"></div>
+        </section>`;
+    });
+    await page.waitForTimeout(50);
+    const unsupportedTheoryActions = await page.evaluate(() => document.querySelectorAll('[data-ep-ai-topic-action-wrap]').length);
+    assert(unsupportedTheoryActions === 0, 'Theory action appeared for a skill without approved runtime source coverage');
+
     await page.evaluate(() => {
       document.querySelector('#exam-prep-host-root').innerHTML = '<section data-ep-live-active-assessment><div>Question</div></section>';
     });
@@ -163,11 +203,13 @@ function assert(condition, message) {
     state = await page.evaluate(() => ({
       panels: document.querySelectorAll('[data-ep-ai-panel]').length,
       errorActions: document.querySelectorAll('[data-ep-ai-error-action-wrap]').length,
+      topicActions: document.querySelectorAll('[data-ep-ai-topic-action-wrap]').length,
       calls: window.__aiCalls.length
     }));
     assert(state.panels === 0, 'AI panel must disappear outside safe overview surface');
     assert(state.errorActions === 0, 'Diagnostic AI action must never remain in an active assessment');
-    assert(state.calls === 3, 'Screen transition must not trigger an AI request');
+    assert(state.topicActions === 0, 'Theory AI action must never remain in an active assessment');
+    assert(state.calls === 5, 'Screen transition must not trigger an AI request');
 
     await page.evaluate(() => {
       window.iClubExamPrepHostInternal.lastCapabilities.killSwitch = true;

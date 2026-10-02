@@ -189,6 +189,8 @@ function loadCases() {
   assert(cases.some((c) => c.interaction === 'progress_summary'), 'P2-76 pack missing progress explanation cases');
   assert(cases.some((c) => c.interaction === 'weekly_plan_narration'), 'P2-76 pack missing plan narration cases');
   assert(cases.some((c) => c.interaction === 'established_error_explanation'), 'P2-76 pack missing established-error explanation cases');
+  assert(cases.some((c) => c.interaction === 'repeated_error_summary'), 'P2-76 pack missing repeated-error summary cases');
+  assert(cases.some((c) => c.interaction === 'multilingual_explanation'), 'P2-76 pack missing multilingual explanation cases');
   return { packs, cases };
 }
 
@@ -367,8 +369,10 @@ async function main() {
   const allComponents = fullPackExecuted && ['P1', 'P5'].every((component) => results.filter((r) => r.component === component).every((r) => r.pass));
   const allLocales = fullPackExecuted && ['en', 'ru', 'uz'].every((locale) => results.filter((r) => r.locale === locale).every((r) => r.pass));
   const theoryPass = fullPackExecuted && results.filter((r) => r.interaction === 'theory_explanation').every((r) => r.pass);
+  const repeatedPass = fullPackExecuted && results.filter((r) => r.interaction === 'repeated_error_summary').every((r) => r.pass);
+  const multilingualPass = fullPackExecuted && results.filter((r) => r.interaction === 'multilingual_explanation').every((r) => r.pass);
   const green = providerRun
-    ? fullPackExecuted && criticalFailures.length === 0 && passed === cases.length && averageScore >= 5.5 && allComponents && allLocales && theoryPass
+    ? fullPackExecuted && criticalFailures.length === 0 && passed === cases.length && averageScore >= 5.5 && allComponents && allLocales && theoryPass && repeatedPass && multilingualPass
     : criticalFailures.length === 0 && passed === cases.length;
 
   const actualEstimatedCost = estimatedCostUsd(totalInputTokens, totalOutputTokens);
@@ -391,6 +395,8 @@ async function main() {
     all_components_green: allComponents,
     all_locales_green: allLocales,
     mathematical_theory_green: theoryPass,
+    repeated_error_green: repeatedPass,
+    multilingual_explanation_green: multilingualPass,
     provider_run_required_for_release_gate: true,
     provider_run_completed: providerRun && fullPackExecuted,
     max_paid_requests: maxPaidRequests,
