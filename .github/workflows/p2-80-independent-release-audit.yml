@@ -57,6 +57,9 @@ on:
       - supabase/tests/p2_01_product_content_complete_gate_matrix.sql
       - scripts/p2-01-product-content-complete-regression.cjs
       - supabase/tests/p2_02_stage3_syllabus_closure_matrix.sql
+      - supabase/tests/p2_03_past_paper_companion_release_v2_contract.sql
+      - .github/scripts/p2_03_past_paper_ui_regression.js
+      - exam-prep/exam-prep-past-paper.js
       - scripts/p2-02-stage3-closure-regression.cjs
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-learner-views.js
@@ -90,6 +93,9 @@ on:
       - supabase/tests/p2_01_product_content_complete_gate_matrix.sql
       - scripts/p2-01-product-content-complete-regression.cjs
       - supabase/tests/p2_02_stage3_syllabus_closure_matrix.sql
+      - supabase/tests/p2_03_past_paper_companion_release_v2_contract.sql
+      - .github/scripts/p2_03_past_paper_ui_regression.js
+      - exam-prep/exam-prep-past-paper.js
       - scripts/p2-02-stage3-closure-regression.cjs
       - exam-prep/exam-prep-api.js
       - exam-prep/exam-prep-learner-views.js
@@ -451,6 +457,14 @@ jobs:
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_02_stage3_syllabus_closure_matrix.sql 2>&1 | tee -a p280-audit.log
+
+      - name: Verify P2-03 Past Paper Companion protected-content gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/p2_03_past_paper_ui_regression.js
+          node .github/scripts/p2_03_past_paper_ui_regression.js 2>&1 | tee -a p280-audit.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_03_past_paper_companion_release_v2_contract.sql 2>&1 | tee -a p280-audit.log
 
       - name: Verify AW5-8 annual reserve draft
         shell: bash
