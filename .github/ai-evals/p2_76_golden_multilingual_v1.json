@@ -16,7 +16,9 @@
       "semantic_groups": [
         [
           "b^2 - 4ac",
-          "b² - 4ac"
+          "b^2-4ac",
+          "b² - 4ac",
+          "b²-4ac"
         ],
         [
           "D > 0",
@@ -58,7 +60,9 @@
       "semantic_groups": [
         [
           "b^2 - 4ac",
-          "b² - 4ac"
+          "b^2-4ac",
+          "b² - 4ac",
+          "b²-4ac"
         ],
         [
           "D > 0",
@@ -101,7 +105,9 @@
       "semantic_groups": [
         [
           "b^2 - 4ac",
-          "b² - 4ac"
+          "b^2-4ac",
+          "b² - 4ac",
+          "b²-4ac"
         ],
         [
           "D > 0",
@@ -123,6 +129,7 @@
         ],
         [
           "haqiqiy ildiz yo‘q",
+          "haqiqiy ildizi yo‘q",
           "haqiqiy ildizlar yo‘q"
         ]
       ],
