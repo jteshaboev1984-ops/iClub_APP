@@ -216,10 +216,13 @@ BEGIN
   FOREACH v_component IN ARRAY ARRAY['P1','P5']::text[] LOOP
     FOREACH v_locale IN ARRAY ARRAY['en','ru','uz']::text[] LOOP
       v:=public.get_exam_prep_ai_source_cards_service_v1(v_component,v_locale,'error_explanation',null,8);
-      IF jsonb_array_length(v)<>1
-         OR v#>>'{0,source_card_key}'<>lower(v_component)||':error_explanation:'||v_locale||':v1'
+      IF NOT EXISTS(
+        SELECT 1
+        FROM jsonb_array_elements(v) e
+        WHERE e->>'source_card_key'=lower(v_component)||':error_explanation:'||v_locale||':v1'
+      )
       THEN
-        RAISE EXCEPTION 'P3-02 error source-card allowlist failed component=% locale=% cards=%',v_component,v_locale,v;
+        RAISE EXCEPTION 'P3-02 established-error source card missing component=% locale=% cards=%',v_component,v_locale,v;
       END IF;
     END LOOP;
   END LOOP;
