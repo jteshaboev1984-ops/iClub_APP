@@ -12,6 +12,7 @@ on:
       - supabase/tests/p2_36_current_schema_replay_compat.sql
       - supabase/tests/p2_74_ai_shadow_safety_matrix.sql
       - supabase/tests/p3_02_synthetic_ai_isolation_matrix.sql
+      - supabase/tests/p3_02_ai_error_context_matrix.sql
       - supabase/tests/ai1_provider_budget_concurrency_matrix.sql
       - 'supabase/functions/exam-prep-ai/**'
       - .github/scripts/p2_74_ai_shadow_safety_regression.js
@@ -170,6 +171,14 @@ jobs:
         run: |
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_02_synthetic_ai_isolation_matrix.sql 2>&1 | tee -a p274-ai-shadow.log
+
+      - name: Verify P3-02 deterministic established-error AI context
+        shell: bash
+        env:
+          PGOPTIONS: '-c p302.isolated_db=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_02_ai_error_context_matrix.sql 2>&1 | tee -a p274-ai-shadow.log
 
       - name: Validate atomic provider budget and concurrency guard
         shell: bash
