@@ -168,14 +168,17 @@
       actionTitle.className = "ep-past-paper-actions-title";
       actionTitle.textContent = c.available;
       actions.appendChild(actionTitle);
-      availableRows.forEach((row, index) => {
+      const kindCounts = {};
+      availableRows.forEach(row => {
         const button = document.createElement("button");
         button.className = "ep-live-btn secondary ep-past-paper-action";
         button.type = "button";
         button.dataset.epPastPaperStart = String(Number(row.assessment_id));
+        const kind = String(row?.attempt_kind || "timed_section");
+        kindCounts[kind] = Number(kindCounts[kind] || 0) + 1;
         const label = learnerKind(row, c);
         const marks = Number(row.marks_available || 0);
-        button.textContent = `${label} ${index + 1} · ${marks} ${c.marks} · ${c.show}`;
+        button.textContent = `${label} ${kindCounts[kind]} · ${marks} ${c.marks} · ${c.show}`;
         button.addEventListener("click", () => focusTimedRow(card, row.assessment_id));
         actions.appendChild(button);
       });
