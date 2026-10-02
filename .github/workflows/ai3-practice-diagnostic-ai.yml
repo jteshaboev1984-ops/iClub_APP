@@ -1,0 +1,96 @@
+name: AI-3 Practice Diagnostic AI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/*practice_ai3*.sql'
+      - supabase/tests/ai3_practice_diagnostic_context_matrix.sql
+      - .github/scripts/ai3_practice_diagnostic_contract.js
+      - supabase/functions/practice-ai/**
+      - supabase/migrations/20260925170000_practice_ai2_economics_source_pack_v1.sql
+      - .github/workflows/ai3-practice-diagnostic-ai.yml
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/*practice_ai3*.sql'
+      - supabase/tests/ai3_practice_diagnostic_context_matrix.sql
+      - .github/scripts/ai3_practice_diagnostic_contract.js
+      - supabase/functions/practice-ai/**
+      - supabase/migrations/20260925170000_practice_ai2_economics_source_pack_v1.sql
+      - .github/workflows/ai3-practice-diagnostic-ai.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  practice-diagnostic-ai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap isolated legacy contract
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql
+
+      - name: Build AI-2 Practice fixture
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/ai2_practice_foundation_fixture.sql
+
+      - name: Apply Practice AI foundation
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925160000_practice_ai2_foundation_v1.sql
+
+      - name: Apply finalized review context contract
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925183000_practice_ai2_review_ui_contract_v1.sql
+
+      - name: Apply AI-3 deterministic diagnosis context
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925190000_practice_ai3_diagnostic_review_context_v1.sql
+
+      - name: Run AI-3 deterministic diagnosis matrix
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/ai3_practice_diagnostic_context_matrix.sql 2>&1 | tee ai3-practice-diagnostic.log
+
+      - name: Validate AI-3 static contract
+        run: node .github/scripts/ai3_practice_diagnostic_contract.js
+
+      - name: Type-check Practice AI Edge Function
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Deno check
+        run: deno check supabase/functions/practice-ai/index.ts
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai3-practice-diagnostic
+          path: ai3-practice-diagnostic.log
+          if-no-files-found: warn
+          retention-days: 7
