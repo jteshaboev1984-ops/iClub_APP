@@ -3,7 +3,7 @@ const path = require('path');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
+  const page = await browser.newPage({viewport:{width:390,height:844}});
   await page.route('http://iclub.test/', route => route.fulfill({status:200,contentType:'text/html',body:`<!doctype html><html><head></head><body><section id="courses-subject-hub"><div id="subject-hub-exam-prep-entry" hidden aria-hidden="true"><span id="subject-hub-exam-prep-title"></span><span id="subject-hub-exam-prep-sub"></span></div><div id="exam-prep-host-root" hidden aria-hidden="true"></div></section></body></html>`}));
   await page.goto('http://iclub.test/');
 
@@ -34,7 +34,7 @@ const path = require('path');
       if(name==='get_exam_prep_diagnostic_progress_safe_v1')return{data:window.__progress[args.p_component_code],error:null};
       if(name==='get_exam_prep_state_safe_v1')return{data:window.__state[args.p_component_code],error:null};
       if(name==='get_exam_prep_timed_catalog_safe_v1')return{data:{component_code:'P1',assessments:[{assessment_id:501,title_en:'Full paper practice',title_ru:'Полная работа',title_uz:'To‘liq ish',assessment_type:'paper',attempt_kind:'full_paper',marks_available:10,time_limit_sec:120,strict_timing:true,current_operational_stage:5,min_operational_stage:5}]},error:null};
-      if(name==='get_exam_prep_stage4_consolidation_safe_v1')return{data:{component_code:'P1',operational_stage:5,ready:false,reason_code:'timing_trend_incomplete',stage3_complete:true,comparable_full_attempts:2,comparable_full_required:2,timed_sections_completed:2,timed_sections_required:2,timed_section_gate_ready:true,trend_ready:false,previous_unattempted_share:0.16,latest_unattempted_share:0.08,previous_after_time_share:0.06,latest_after_time_share:0.02,skills_below_required_level:1,skills_without_qualified_plan:0,corrective_plan_ready:true,next_action_code:'improve_timed_completion',component_isolation:true,modified_or_topic_results_count_as_comparable_full:false},error:null};
+      if(name==='get_exam_prep_stage4_consolidation_safe_v1')return{data:{component_code:'P1',operational_stage:5,ready:false,reason_code:'timing_trend_incomplete',stage3_complete:true,comparable_full_attempts:2,comparable_full_required:2,timed_sections_completed:2,timed_sections_required:2,timed_section_gate_ready:true,trend_ready:false,previous_unattempted_share:0.16,latest_unattempted_share:0.08,previous_after_time_share:0.06,latest_after_time_share:0.02,skills_below_required_level:1,skills_without_qualified_plan:0,corrective_plan_ready:true,next_action_code:'improve_timed_completion',component_isolation:true,modified_or_topic_results_count_as_comparable_full:false,official_reference_series:'Cambridge International AS & A Level Mathematics 9709 · June 2026',official_reference_component:'9709/12',official_reference_url:'https://www.cambridgeinternational.org/exam-administration/cambridge-exams-officers-guide/update-a-s-level-mathematics-june-2026-exam-series/',official_reference_scope:'format_and_timing_context_only',official_reference_used_for_direct_score_calibration:false,official_reference_question_content_copied:false},error:null};
       if(name==='authorize_exam_prep_timed_safe_v1')return{data:{authorization_id:'00000000-0000-4000-8000-000000007700',assessment_id:args.p_assessment_id,component_code:'P1',purpose:'paper',attempt_kind:'full_paper',marks_available:10,time_limit_sec:120},error:null};
       if(name==='start_exam_prep_session_safe_v1'){
         window.__session={session_id:window.__result.session_id,status:'active',component_code:'P1',session_type:'paper',total_items:2,timing_contract:{deadline_at:new Date(Date.now()+120000).toISOString(),time_limit_sec:120,marks_available:10,attempt_kind:'full_paper'},items:[
@@ -78,6 +78,10 @@ const path = require('path');
   assert(consolidationText.includes('16% → 8%'),'Stage-4 unattempted trend missing');
   assert(consolidationText.includes('6% → 2%'),'Stage-4 after-time trend missing');
   assert(consolidationText.includes('completing more of the paper within the time limit'),'Stage-4 next action copy missing');
+  assert(consolidationText.includes('Format reference: official Cambridge 9709, June 2026.'),'official Cambridge June 2026 reference note missing');
+  const referenceLink=page.locator('[data-ep-live-stage4-consolidation] .ep-live-reference-note a');
+  assert(await referenceLink.getAttribute('href')==='https://www.cambridgeinternational.org/exam-administration/cambridge-exams-officers-guide/update-a-s-level-mathematics-june-2026-exam-series/','official Cambridge reference URL mismatch');
+  const rel=await referenceLink.getAttribute('rel'); assert(rel?.includes('noopener')&&rel?.includes('noreferrer'),'official reference link isolation missing');
   assert(!/L3|rule_version|family_key|Stage-4/.test(consolidationText),'Stage-4 learner card leaked internal terminology');
   await page.click('[data-ep-live-timed-start="501"]');
   await page.waitForSelector('textarea[name="ep_live_written_answer"]');
