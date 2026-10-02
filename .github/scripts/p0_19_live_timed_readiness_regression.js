@@ -101,7 +101,7 @@ const path = require('path');
   assert(readinessText.includes('iClub readiness estimate'),'learner readiness estimate label missing');
   assert(readinessText.includes('not an official Cambridge grade'),'non-grade readiness boundary missing');
   assert(readinessText.includes('3 / 3'),'three comparable full papers progress missing');
-  assert(!document.querySelector?.('[data-ep-live-mentor-readiness]'),'Core learner must not receive a missing Mentor verification card');
+  assert(!readinessText.includes('Mentor verification'),'Core learner must not receive a missing Mentor verification card');
   await page.click('[data-ep-live-calibration="P1"]');
   await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Short targeted practice'));
 
