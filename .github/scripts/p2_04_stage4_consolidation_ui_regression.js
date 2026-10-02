@@ -3,6 +3,7 @@ const fs = require('fs');
 const api = fs.readFileSync('exam-prep/exam-prep-api.js', 'utf8');
 const live = fs.readFileSync('exam-prep/exam-prep-live.js', 'utf8');
 const migration = fs.readFileSync('supabase/migrations/20261002050000_exam_prep_p2_04_stage4_consolidation_safe_v1.sql', 'utf8');
+const css = fs.readFileSync('exam-prep/exam-prep-host.css', 'utf8');
 
 function must(condition, message) {
   if (!condition) throw new Error(`P2-04 UI regression: ${message}`);
@@ -78,6 +79,9 @@ for (const token of [
 
 must(!migration.includes("'selected_family_key',"), 'safe learner RPC must not expose internal comparison-family key');
 must(!migration.includes("'rule_version',v_result"), 'safe learner RPC must not expose internal Stage-4 rule version');
+
+must(css.includes('.ep-live-reference-note'), 'Cambridge June 2026 learner reference note style missing');
+must(css.includes('.ep-live-reference-note a'), 'Cambridge June 2026 reference link style missing');
 
 must(migration.includes('rights_status,official_url,status,checked_at'),
   'Cambridge June 2026 source references must remain metadata-only external records');
