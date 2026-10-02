@@ -83,6 +83,12 @@ const globalForbidden = [
   /answer\s+key/i,
   /mark\s*scheme/i,
   /ignore\s+(the\s+)?(approved\s+)?source/i,
+  /правильн(ый|ого)\s+ответ(\s+[-—:]?\s*это|\s+[-—:])/i,
+  /ключ\s+(ответов|с\s+ответами)/i,
+  /вы\s+(полностью\s+)?готовы\s+к\s+экзамену/i,
+  /to['’]?g['’]?ri\s+javob\s*(bu|[-—:])/i,
+  /javob(lar)?\s+kaliti/i,
+  /siz\s+(to['’]?liq\s+)?imtihonga\s+tayyorsiz/i,
 ];
 
 function evaluateCase(testCase, output) {
@@ -182,6 +188,7 @@ function loadCases() {
   assert(cases.some((c) => c.interaction === 'theory_explanation'), 'P2-76 pack missing mathematical theory cases');
   assert(cases.some((c) => c.interaction === 'progress_summary'), 'P2-76 pack missing progress explanation cases');
   assert(cases.some((c) => c.interaction === 'weekly_plan_narration'), 'P2-76 pack missing plan narration cases');
+  assert(cases.some((c) => c.interaction === 'established_error_explanation'), 'P2-76 pack missing established-error explanation cases');
   return { packs, cases };
 }
 
