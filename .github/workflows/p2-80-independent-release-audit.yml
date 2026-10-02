@@ -56,6 +56,8 @@ on:
       - index.html
       - supabase/tests/p2_01_product_content_complete_gate_matrix.sql
       - scripts/p2-01-product-content-complete-regression.cjs
+      - supabase/tests/p2_02_stage3_syllabus_closure_matrix.sql
+      - scripts/p2-02-stage3-closure-regression.cjs
       - .github/workflows/p2-80-independent-release-audit.yml
   push:
     branches: [main]
@@ -85,6 +87,8 @@ on:
       - index.html
       - supabase/tests/p2_01_product_content_complete_gate_matrix.sql
       - scripts/p2-01-product-content-complete-regression.cjs
+      - supabase/tests/p2_02_stage3_syllabus_closure_matrix.sql
+      - scripts/p2-02-stage3-closure-regression.cjs
       - .github/workflows/p2-80-independent-release-audit.yml
   workflow_dispatch:
 
@@ -430,6 +434,19 @@ jobs:
         run: |
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_01_product_content_complete_gate_matrix.sql 2>&1 | tee -a p280-audit.log
+
+      - name: Verify P2-02 Stage 3 closure static safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/p2-02-stage3-closure-regression.cjs
+          node scripts/p2-02-stage3-closure-regression.cjs 2>&1 | tee -a p280-audit.log
+
+      - name: Verify P2-02 Stage 3 Syllabus Closure
+        shell: bash
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_02_stage3_syllabus_closure_matrix.sql 2>&1 | tee -a p280-audit.log
 
       - name: Verify AW5-8 annual reserve draft
         shell: bash
