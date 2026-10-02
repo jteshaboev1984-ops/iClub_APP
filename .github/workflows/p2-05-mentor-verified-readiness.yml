@@ -8,12 +8,26 @@ on:
       - 'supabase/migrations/20260908061000_exam_prep_p2_05_mentor_verified_readiness_v1.sql'
       - 'supabase/migrations/20260908062500_exam_prep_p2_05_readiness_audit_role_hotfix_v1.sql'
       - 'scripts/p2-05-mentor-verified-readiness-regression.cjs'
+      - 'supabase/migrations/20261002060000_exam_prep_p2_05_readiness_summary_safe_v1.sql'
+      - 'supabase/tests/p2_05_readiness_summary_contract.sql'
+      - '.github/scripts/p2_05_readiness_summary_ui_regression.js'
+      - '.github/scripts/p0_19_live_timed_readiness_regression.js'
+      - '.github/scripts/p2_55_full_learner_journey_regression.js'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-live.js'
       - '.github/workflows/p2-05-mentor-verified-readiness.yml'
   pull_request:
     paths:
       - 'supabase/migrations/20260908061000_exam_prep_p2_05_mentor_verified_readiness_v1.sql'
       - 'supabase/migrations/20260908062500_exam_prep_p2_05_readiness_audit_role_hotfix_v1.sql'
       - 'scripts/p2-05-mentor-verified-readiness-regression.cjs'
+      - 'supabase/migrations/20261002060000_exam_prep_p2_05_readiness_summary_safe_v1.sql'
+      - 'supabase/tests/p2_05_readiness_summary_contract.sql'
+      - '.github/scripts/p2_05_readiness_summary_ui_regression.js'
+      - '.github/scripts/p0_19_live_timed_readiness_regression.js'
+      - '.github/scripts/p2_55_full_learner_journey_regression.js'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-live.js'
       - '.github/workflows/p2-05-mentor-verified-readiness.yml'
   workflow_dispatch:
 
@@ -26,4 +40,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run P2-05 Mentor Verified Readiness regression
-        run: node scripts/p2-05-mentor-verified-readiness-regression.cjs
+        run: |
+          node scripts/p2-05-mentor-verified-readiness-regression.cjs
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-live.js
+          node --check .github/scripts/p2_05_readiness_summary_ui_regression.js
+          node .github/scripts/p2_05_readiness_summary_ui_regression.js
