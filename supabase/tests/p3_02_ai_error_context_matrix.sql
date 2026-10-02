@@ -106,10 +106,10 @@ BEGIN
 
     INSERT INTO private.exam_prep_session_items(
       session_id,item_order,item_kind,question_id,primary_skill_code,reserve_role,
-      is_holdout,content_meta_id,item_version
+      is_holdout,content_meta_id,question_snapshot_md5,item_version
     ) VALUES(
       v_session,1,'question',v_ass.question_id,v_ass.primary_skill_code,'diagnostic',
-      false,v_ass.content_meta_id,'p302-error-context-v1'
+      false,v_ass.content_meta_id,md5('p302-ai-error:'||v_ass.question_id::text),'p302-error-context-v1'
     );
 
     INSERT INTO private.exam_prep_responses(
