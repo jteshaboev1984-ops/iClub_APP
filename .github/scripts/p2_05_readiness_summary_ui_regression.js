@@ -12,7 +12,7 @@ for(const token of [
   'get_exam_prep_readiness_safe_v1',
   'get_exam_prep_readiness_summary_safe_v1',
   'readiness, readinessSummary, finalCalibration',
-  'exam-prep-live.js?v=p205readiness2'
+  'exam-prep-live.js?v=p206finalops1'
 ]) must(api.includes(token), `API integration missing: ${token}`);
 
 for(const token of [
