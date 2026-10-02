@@ -230,23 +230,13 @@ BEGIN
     raise exception 'P2-01 live unseen transfer/retest reserve below 20%%: %',v_pct;
   end if;
 
-  if (select count(*) from private.exam_prep_beta_expansion_validation_evidence e
-      join private.exam_prep_beta_expansion_controls ctl
-        on ctl.cohort_id=e.cohort_id
-       and ctl.required_validation_generation=e.validation_generation
-      where e.status='passed'
-        and e.validation_key in ('scale_600_10','service_transition'))<2
-  then
-    -- In isolated CI databases the real-production evidence rows may be absent.
-    -- The P2-36/P2-78 workflows prove the same operational contracts synthetically.
-    -- Production release additionally requires the persisted rows before applying P2-01.
-    null;
-  end if;
-
   v_status:=private.exam_prep_product_roadmap_status_v1();
 
-  if coalesce((v_status->'content_dependency'->>'product_status_does_not_equal_learner_readiness')::boolean,false) is not true
-     or coalesce((v_status->'student_roadmap'->>'calendar_can_force_stage')::boolean,true) is not false
+  if coalesce((v_status->>'product_status_does_not_equal_learner_readiness')::boolean,false) is not true
+     or coalesce((v_status->>'learner_state_mutated')::boolean,true) is not false
+     or coalesce((v_status->>'can_force_learner_stage')::boolean,true) is not false
+     or coalesce((v_status->>'can_raise_learner_mastery')::boolean,true) is not false
+     or coalesce((v_status->>'can_label_learner_exam_ready')::boolean,true) is not false
   then
     raise exception 'P2-01 product/student roadmap firewall projection drifted: %',v_status;
   end if;
