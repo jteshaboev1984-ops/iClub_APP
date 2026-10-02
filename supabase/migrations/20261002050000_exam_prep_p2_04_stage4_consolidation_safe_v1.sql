@@ -4,6 +4,77 @@
 
 begin;
 
+do $source_preflight$
+begin
+  if exists(
+    select 1 from private.exam_prep_source_registry
+    where id in (7,8)
+      and (source_key,source_version) not in (
+        ('cambridge_9709_june_2026_p1_reference','9709/12:June 2026'),
+        ('cambridge_9709_june_2026_p5_reference','9709/52:June 2026')
+      )
+  ) then
+    raise exception 'P2-04 Cambridge June 2026 source-registry id collision';
+  end if;
+end
+$source_preflight$;
+
+insert into private.exam_prep_source_registry(
+  id,source_key,source_version,source_level,source_kind,
+  title_en,title_ru,title_uz,
+  role_en,role_ru,role_uz,
+  can_define_scope,can_define_coverage_denominator,can_support_assessment_evidence,
+  downstream_only,rights_status,official_url,status,checked_at
+)
+values
+(
+  7,
+  'cambridge_9709_june_2026_p1_reference',
+  '9709/12:June 2026',
+  4,
+  'official_exam_workflow',
+  'Cambridge 9709/12 June 2026 official series reference',
+  'Официальный reference Cambridge 9709/12, серия June 2026',
+  'Cambridge 9709/12 June 2026 rasmiy seriya reference',
+  'Official Cambridge June 2026 P1 series reference for format and timing context only. Cambridge states that the 29 April 2026 Paper 12 in administrative zones 3 and 4 was cancelled after premature sharing and a replacement paper was sat on 9 June. iClub stores no Cambridge question content and does not use the cancelled paper as a direct score-calibration benchmark.',
+  'Официальный reference Cambridge June 2026 для P1 используется только для сверки формата и условий по времени. Cambridge сообщает, что Paper 12 от 29 апреля 2026 года в административных зонах 3 и 4 был отменён после преждевременного распространения, а новый вариант проводился 9 июня. iClub не хранит текст заданий Cambridge и не использует отменённый вариант как прямой эталон баллов.',
+  'Cambridge June 2026 P1 rasmiy reference faqat format va vaqt shartlarini tekshirish uchun ishlatiladi. Cambridge ma’lumotiga ko‘ra, 2026-yil 29-apreldagi 3 va 4 ma’muriy zonalardagi Paper 12 muddatidan oldin tarqalganidan keyin bekor qilingan va yangi variant 9-iyunda o‘tkazilgan. iClub Cambridge savol matnlarini saqlamaydi va bekor qilingan variantni ballarni bevosita kalibrlash mezoni sifatida ishlatmaydi.',
+  false,false,false,false,
+  'metadata_only_external',
+  'https://www.cambridgeinternational.org/exam-administration/cambridge-exams-officers-guide/update-a-s-level-mathematics-june-2026-exam-series/',
+  'active',
+  now()
+),
+(
+  8,
+  'cambridge_9709_june_2026_p5_reference',
+  '9709/52:June 2026',
+  4,
+  'official_exam_workflow',
+  'Cambridge 9709/52 June 2026 official series reference',
+  'Официальный reference Cambridge 9709/52, серия June 2026',
+  'Cambridge 9709/52 June 2026 rasmiy seriya reference',
+  'Official Cambridge June 2026 P5 series reference for format and timing context only. Cambridge states that Paper 52 in administrative zones 3 and 4 was shared prematurely and assessed marks were used. iClub stores no Cambridge question content and does not use this affected paper as a direct score-calibration benchmark.',
+  'Официальный reference Cambridge June 2026 для P5 используется только для сверки формата и условий по времени. Cambridge сообщает, что Paper 52 в административных зонах 3 и 4 был преждевременно распространён и для него применялись assessed marks. iClub не хранит текст заданий Cambridge и не использует этот затронутый вариант как прямой эталон баллов.',
+  'Cambridge June 2026 P5 rasmiy reference faqat format va vaqt shartlarini tekshirish uchun ishlatiladi. Cambridge ma’lumotiga ko‘ra, 3 va 4 ma’muriy zonalardagi Paper 52 muddatidan oldin tarqalgan va assessed marks qo‘llangan. iClub Cambridge savol matnlarini saqlamaydi va ushbu ta’sirlangan variantni ballarni bevosita kalibrlash mezoni sifatida ishlatmaydi.',
+  false,false,false,false,
+  'metadata_only_external',
+  'https://www.cambridgeinternational.org/exam-administration/cambridge-exams-officers-guide/update-a-s-a-level-mathematics-june-2026-exam-series-paper-52/',
+  'active',
+  now()
+)
+on conflict(source_key,source_version) do update
+set title_en=excluded.title_en,
+    title_ru=excluded.title_ru,
+    title_uz=excluded.title_uz,
+    role_en=excluded.role_en,
+    role_ru=excluded.role_ru,
+    role_uz=excluded.role_uz,
+    rights_status=excluded.rights_status,
+    official_url=excluded.official_url,
+    status='active',
+    checked_at=excluded.checked_at;
+
 create or replace function public.get_exam_prep_stage4_consolidation_safe_v1(
   p_component_code text
 )
@@ -20,6 +91,7 @@ declare
   v_timed jsonb;
   v_stage smallint:=0;
   v_reason text;
+  v_reference_url text;
 begin
   v_uid:=private.exam_prep_require_core_access_v1();
 
@@ -52,6 +124,19 @@ begin
   );
   v_timed:=coalesce(v_result->'timed_section_gate','{}'::jsonb);
   v_reason:=coalesce(v_result->>'reason_code','evidence_incomplete');
+
+  select official_url
+  into v_reference_url
+  from private.exam_prep_source_registry
+  where source_key=case
+      when p_component_code='P1' then 'cambridge_9709_june_2026_p1_reference'
+      else 'cambridge_9709_june_2026_p5_reference'
+    end
+    and source_version=case
+      when p_component_code='P1' then '9709/12:June 2026'
+      else '9709/52:June 2026'
+    end
+    and status='active';
 
   return jsonb_build_object(
     'component_code',p_component_code,
@@ -88,7 +173,14 @@ begin
     end,
 
     'component_isolation',true,
-    'modified_or_topic_results_count_as_comparable_full',false
+    'modified_or_topic_results_count_as_comparable_full',false,
+
+    'official_reference_series','Cambridge International AS & A Level Mathematics 9709 · June 2026',
+    'official_reference_component',case when p_component_code='P1' then '9709/12' else '9709/52' end,
+    'official_reference_url',v_reference_url,
+    'official_reference_scope','format_and_timing_context_only',
+    'official_reference_used_for_direct_score_calibration',false,
+    'official_reference_question_content_copied',false
   );
 end;
 $$;
@@ -103,6 +195,23 @@ declare
   v_p5_scope int;
   v_cfg private.exam_prep_feature_config%rowtype;
 begin
+  if (select count(*) from private.exam_prep_source_registry
+      where source_key in (
+        'cambridge_9709_june_2026_p1_reference',
+        'cambridge_9709_june_2026_p5_reference'
+      )
+        and source_level=4
+        and source_kind='official_exam_workflow'
+        and rights_status='metadata_only_external'
+        and can_define_scope=false
+        and can_define_coverage_denominator=false
+        and can_support_assessment_evidence=false
+        and status='active'
+        and official_url like 'https://www.cambridgeinternational.org/%')<>2
+  then
+    raise exception 'P2-04 official Cambridge June 2026 reference rows missing';
+  end if;
+
   if to_regprocedure('private.exam_prep_stage4_exit_status_v1(uuid,bigint,text)') is null then
     raise exception 'P2-04 private Stage-4 evaluator missing';
   end if;
