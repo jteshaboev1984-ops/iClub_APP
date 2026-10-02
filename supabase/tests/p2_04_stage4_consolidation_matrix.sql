@@ -25,6 +25,40 @@ BEGIN
     raise exception 'P2-04 active canonical program missing';
   end if;
 
+  if (select count(*) from private.exam_prep_source_registry
+      where source_key in (
+        'cambridge_9709_june_2026_p1_reference',
+        'cambridge_9709_june_2026_p5_reference'
+      )
+        and source_level=4
+        and source_kind='official_exam_workflow'
+        and rights_status='metadata_only_external'
+        and can_define_scope=false
+        and can_define_coverage_denominator=false
+        and can_support_assessment_evidence=false
+        and status='active'
+        and official_url like 'https://www.cambridgeinternational.org/%')<>2
+  then
+    raise exception 'P2-04 official Cambridge June 2026 reference rows missing';
+  end if;
+
+  if not exists(
+    select 1 from private.exam_prep_source_registry
+    where source_key='cambridge_9709_june_2026_p1_reference'
+      and source_version='9709/12:June 2026'
+      and role_en like '%cancelled%'
+      and role_en like '%replacement paper%'
+      and role_en like '%direct score-calibration benchmark%'
+  ) or not exists(
+    select 1 from private.exam_prep_source_registry
+    where source_key='cambridge_9709_june_2026_p5_reference'
+      and source_version='9709/52:June 2026'
+      and role_en like '%assessed marks%'
+      and role_en like '%direct score-calibration benchmark%'
+  ) then
+    raise exception 'P2-04 Cambridge June 2026 special-notice caveat missing';
+  end if;
+
   if to_regprocedure('private.exam_prep_stage4_exit_status_v1(uuid,bigint,text)') is null
      or to_regprocedure('private.exam_prep_stage4_raw_evidence_v1(uuid,bigint,text)') is null
      or to_regprocedure('private.exam_prep_stage4_timed_section_gate_v1(uuid,bigint,text,text)') is null
@@ -158,6 +192,18 @@ BEGIN
      or coalesce((v_p5->>'modified_or_topic_results_count_as_comparable_full')::boolean,true)
      or coalesce((v_p1->>'component_isolation')::boolean,false) is not true
      or coalesce((v_p5->>'component_isolation')::boolean,false) is not true
+     or v_p1->>'official_reference_series'<>'Cambridge International AS & A Level Mathematics 9709 · June 2026'
+     or v_p5->>'official_reference_series'<>'Cambridge International AS & A Level Mathematics 9709 · June 2026'
+     or v_p1->>'official_reference_component'<>'9709/12'
+     or v_p5->>'official_reference_component'<>'9709/52'
+     or v_p1->>'official_reference_scope'<>'format_and_timing_context_only'
+     or v_p5->>'official_reference_scope'<>'format_and_timing_context_only'
+     or coalesce((v_p1->>'official_reference_used_for_direct_score_calibration')::boolean,true)
+     or coalesce((v_p5->>'official_reference_used_for_direct_score_calibration')::boolean,true)
+     or coalesce((v_p1->>'official_reference_question_content_copied')::boolean,true)
+     or coalesce((v_p5->>'official_reference_question_content_copied')::boolean,true)
+     or v_p1->>'official_reference_url' not like 'https://www.cambridgeinternational.org/%'
+     or v_p5->>'official_reference_url' not like 'https://www.cambridgeinternational.org/%'
   then
     raise exception 'P2-04 learner-safe payload mismatch P1=% P5=%',v_p1,v_p5;
   end if;
