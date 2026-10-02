@@ -54,7 +54,7 @@ const path = require('path');
         return{data:window.__result,error:null};
       }
       if(name==='submit_exam_prep_timed_written_self_mark_safe_v1'){window.__selfMarks[args.p_item_order]=args.p_marks_awarded;return{data:{...window.__result,replayed:false},error:null};}
-      if(name==='get_exam_prep_readiness_safe_v1')return{data:{ready:true,app_readiness_estimate:'STRONG_OBJECTIVE_EVIDENCE',reason_code:'ready',component_code:'P1',last_three_count:3,below_l3_count:0,unresolved_correction_case_count:0},error:null};
+      if(name==='get_exam_prep_readiness_safe_v1')return{data:{ready:true,app_readiness_estimate:'STRONG_OBJECTIVE_EVIDENCE',reason_code:'ready',component_code:'P1',last_three_count:3,below_l3_count:0,unresolved_correction_case_count:0},error:null};\n      if(name==='get_exam_prep_readiness_summary_safe_v1')return{data:{component_code:'P1',ready:true,estimate_code:'STRONG_OBJECTIVE_EVIDENCE',reason_code:'ready',comparable_full_attempts:3,comparable_full_required:3,topics_needing_stability:0,open_corrections:0,score_window_ready:true,unattempted_ready:true,after_time_ready:true,threshold_gate_configured:true,mentor_care_active:false,mentor_verified:false,mentor_verification_state:'not_active',next_action_code:'continue_final_calibration',not_official_cambridge_grade:true,mentor_verification_optional_for_core:true,p1_p5_separate:true},error:null};
       if(name==='get_exam_prep_final_calibration_safe_v1')return{data:{available:true,component_code:'P1',operational_stage:6,actions:[{action_code:'short_targeted_work',priority:1},{action_code:'timing_and_logistics',priority:2},{action_code:'taper',priority:3}],new_mastery_allowed:false,mentor_verified_readiness:false},error:null};
       return{data:null,error:{message:`unexpected rpc ${name}`}};
     }};
@@ -97,12 +97,17 @@ const path = require('path');
 
   await page.click('[data-ep-live-readiness="P1"]');
   await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Objective evidence is ready'));
+  let readinessText=await page.locator('#exam-prep-host-root').textContent();
+  assert(readinessText.includes('iClub readiness estimate'),'learner readiness estimate label missing');
+  assert(readinessText.includes('not an official Cambridge grade'),'non-grade readiness boundary missing');
+  assert(readinessText.includes('3 / 3'),'three comparable full papers progress missing');
+  assert(!document.querySelector?.('[data-ep-live-mentor-readiness]'),'Core learner must not receive a missing Mentor verification card');
   await page.click('[data-ep-live-calibration="P1"]');
   await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Short targeted practice'));
 
   const result=await page.evaluate(()=>({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent}));
   const names=result.calls.map(x=>x.name);
-  for(const n of ['get_exam_prep_timed_catalog_safe_v1','get_exam_prep_stage4_consolidation_safe_v1','authorize_exam_prep_timed_safe_v1','finalize_exam_prep_timed_safe_v1','get_exam_prep_timed_review_pack_safe_v1','submit_exam_prep_timed_written_self_mark_safe_v1','get_exam_prep_timed_result_safe_v1','get_exam_prep_readiness_safe_v1','get_exam_prep_final_calibration_safe_v1'])assert(names.includes(n),`${n} missing`);
+  for(const n of ['get_exam_prep_timed_catalog_safe_v1','get_exam_prep_stage4_consolidation_safe_v1','authorize_exam_prep_timed_safe_v1','finalize_exam_prep_timed_safe_v1','get_exam_prep_timed_review_pack_safe_v1','submit_exam_prep_timed_written_self_mark_safe_v1','get_exam_prep_timed_result_safe_v1','get_exam_prep_readiness_summary_safe_v1','get_exam_prep_final_calibration_safe_v1'])assert(names.includes(n),`${n} missing`);
   const timedFinalize=result.calls.find(x=>x.name==='finalize_exam_prep_timed_safe_v1'); assert(timedFinalize.args.p_completion_reason==='submitted','completed paper must use submitted finalization');
   assert(!/Core beta|Synthetic learner data|P1-QUA-01|P1-FUN-01/.test(result.text),'learner UI must not expose rollout or internal skill terminology');
   await browser.close(); console.log('P0-19 live timed/readiness/final-calibration flow: PASS');
