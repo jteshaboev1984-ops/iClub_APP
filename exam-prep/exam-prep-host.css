@@ -836,6 +836,21 @@
   text-align: left;
 }
 
+#exam-prep-host-root .ep-live-reference-note {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid currentColor;
+  font-size: 11px;
+  line-height: 1.45;
+  opacity: .72;
+}
+
+#exam-prep-host-root .ep-live-reference-note a {
+  color: inherit;
+  font-weight: 700;
+  text-underline-offset: 2px;
+}
+
 #exam-prep-host-root .ep-past-paper-link {
   display: inline-flex;
   align-items: center;
