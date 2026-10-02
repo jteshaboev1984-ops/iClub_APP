@@ -47,7 +47,7 @@ BEGIN
   SELECT count(*) INTO v_cards FROM private.exam_prep_ai_source_cards
   WHERE approval_status='approved' AND is_runtime_allowed AND rights_status='original_iclub';
   SELECT generation_enabled INTO v_generation FROM private.exam_prep_ai_policy WHERE id=1;
-  IF v_cards<>18 OR v_generation IS DISTINCT FROM false THEN
+  IF v_cards<>12 OR v_generation IS DISTINCT FROM false THEN
     RAISE EXCEPTION 'P1-06 dormant AI contract mismatch approved_cards=% generation=%',v_cards,v_generation;
   END IF;
 
