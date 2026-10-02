@@ -1,0 +1,244 @@
+{
+  "pack_version": "p3_02_multilingual_theory_v1_0",
+  "source_pack_version": "p3_02_ai_value_v1_2026_10_02",
+  "scope": "runtime-supported multilingual_explanation for the first approved P1/P5 theory skills",
+  "critical_failure_policy": "zero_tolerance",
+  "cases": [
+    {
+      "case_id": "P302-P1-QUA02-MULTI-EN",
+      "component": "P1",
+      "locale": "en",
+      "interaction": "multilingual_explanation",
+      "skill_code": "P1-QUA-02",
+      "runtime_source_available": true,
+      "source_body": "For ax^2 + bx + c = 0, the discriminant is D = b^2 - 4ac. If D > 0 there are two distinct real roots; if D = 0 there is one repeated real root; if D < 0 there are no real roots.",
+      "question": "Explain this topic clearly in English.",
+      "semantic_groups": [
+        [
+          "b^2 - 4ac",
+          "b² - 4ac"
+        ],
+        [
+          "D > 0",
+          "D>0"
+        ],
+        [
+          "two distinct real"
+        ],
+        [
+          "D = 0",
+          "D=0"
+        ],
+        [
+          "repeated real"
+        ],
+        [
+          "D < 0",
+          "D<0"
+        ],
+        [
+          "no real root"
+        ]
+      ],
+      "forbidden_claims": [
+        "one real root when D < 0",
+        "two real roots when D = 0"
+      ],
+      "reference_answer": "For a quadratic ax^2 + bx + c = 0, the discriminant is D = b^2 - 4ac. If D > 0 there are two distinct real roots, if D = 0 there is one repeated real root, and if D < 0 there are no real roots."
+    },
+    {
+      "case_id": "P302-P1-QUA02-MULTI-RU",
+      "component": "P1",
+      "locale": "ru",
+      "interaction": "multilingual_explanation",
+      "skill_code": "P1-QUA-02",
+      "runtime_source_available": true,
+      "source_body": "Для ax^2 + bx + c = 0 дискриминант D = b^2 - 4ac. Если D > 0, есть два различных действительных корня; если D = 0, есть один повторяющийся действительный корень; если D < 0, действительных корней нет.",
+      "question": "Объясни эту тему понятно по-русски.",
+      "semantic_groups": [
+        [
+          "b^2 - 4ac",
+          "b² - 4ac"
+        ],
+        [
+          "D > 0",
+          "D>0"
+        ],
+        [
+          "два различ"
+        ],
+        [
+          "D = 0",
+          "D=0"
+        ],
+        [
+          "повтор"
+        ],
+        [
+          "D < 0",
+          "D<0"
+        ],
+        [
+          "нет действительных корней",
+          "действительных корней нет"
+        ]
+      ],
+      "forbidden_claims": [
+        "один действительный корень при D < 0",
+        "два действительных корня при D = 0"
+      ],
+      "reference_answer": "Для квадратного уравнения ax^2 + bx + c = 0 используйте дискриминант D = b^2 - 4ac. При D > 0 есть два различных действительных корня, при D = 0 — один повторяющийся действительный корень, а при D < 0 действительных корней нет."
+    },
+    {
+      "case_id": "P302-P1-QUA02-MULTI-UZ",
+      "component": "P1",
+      "locale": "uz",
+      "interaction": "multilingual_explanation",
+      "skill_code": "P1-QUA-02",
+      "runtime_source_available": true,
+      "source_body": "ax^2 + bx + c = 0 uchun diskriminant D = b^2 - 4ac. Agar D > 0 bo‘lsa, ikkita turli haqiqiy ildiz bor; D = 0 bo‘lsa, bitta takroriy haqiqiy ildiz bor; D < 0 bo‘lsa, haqiqiy ildiz yo‘q.",
+      "question": "Bu mavzuni o‘zbek tilida sodda tushuntir.",
+      "semantic_groups": [
+        [
+          "b^2 - 4ac",
+          "b² - 4ac"
+        ],
+        [
+          "D > 0",
+          "D>0"
+        ],
+        [
+          "ikkita turli"
+        ],
+        [
+          "D = 0",
+          "D=0"
+        ],
+        [
+          "takroriy"
+        ],
+        [
+          "D < 0",
+          "D<0"
+        ],
+        [
+          "haqiqiy ildiz yo‘q",
+          "haqiqiy ildizlar yo‘q"
+        ]
+      ],
+      "forbidden_claims": [
+        "D < 0 bo‘lsa bitta haqiqiy ildiz",
+        "D = 0 bo‘lsa ikkita haqiqiy ildiz"
+      ],
+      "reference_answer": "ax^2 + bx + c = 0 uchun diskriminant D = b^2 - 4ac. D > 0 bo‘lsa ikkita turli haqiqiy ildiz, D = 0 bo‘lsa bitta takroriy haqiqiy ildiz, D < 0 bo‘lsa esa haqiqiy ildiz yo‘q."
+    },
+    {
+      "case_id": "P302-P5-NOR02-MULTI-EN",
+      "component": "P5",
+      "locale": "en",
+      "interaction": "multilingual_explanation",
+      "skill_code": "P5-NOR-02",
+      "runtime_source_available": true,
+      "source_body": "If X is normally distributed with mean mu and standard deviation sigma, standardise with Z = (X - mu) / sigma. Then use the standard normal distribution to evaluate the required probability, taking care to choose the correct tail or interval.",
+      "question": "Explain this topic clearly in English.",
+      "semantic_groups": [
+        [
+          "Z = (X -",
+          "Z=(X-"
+        ],
+        [
+          "mean",
+          "mu"
+        ],
+        [
+          "standard deviation",
+          "sigma"
+        ],
+        [
+          "standard normal"
+        ],
+        [
+          "tail",
+          "interval"
+        ]
+      ],
+      "forbidden_claims": [
+        "Z = (X +",
+        "divide by the mean"
+      ],
+      "reference_answer": "For a normal random variable X with mean mu and standard deviation sigma, standardise using Z = (X - mu) / sigma. Then use the standard normal distribution to find the required probability, choosing the correct tail or interval."
+    },
+    {
+      "case_id": "P302-P5-NOR02-MULTI-RU",
+      "component": "P5",
+      "locale": "ru",
+      "interaction": "multilingual_explanation",
+      "skill_code": "P5-NOR-02",
+      "runtime_source_available": true,
+      "source_body": "Если X имеет нормальное распределение со средним mu и стандартным отклонением sigma, стандартизируйте через Z = (X - mu) / sigma. Затем используйте стандартное нормальное распределение для нужной вероятности, правильно выбрав хвост или интервал.",
+      "question": "Объясни эту тему понятно по-русски.",
+      "semantic_groups": [
+        [
+          "Z = (X -",
+          "Z=(X-"
+        ],
+        [
+          "средн",
+          "mu"
+        ],
+        [
+          "стандартн",
+          "sigma"
+        ],
+        [
+          "нормальн"
+        ],
+        [
+          "хвост",
+          "интервал"
+        ]
+      ],
+      "forbidden_claims": [
+        "Z = (X +",
+        "делить на среднее"
+      ],
+      "reference_answer": "Если X имеет нормальное распределение со средним mu и стандартным отклонением sigma, используйте Z = (X - mu) / sigma. После стандартизации находите вероятность по стандартному нормальному распределению и выбирайте нужный хвост или интервал."
+    },
+    {
+      "case_id": "P302-P5-NOR02-MULTI-UZ",
+      "component": "P5",
+      "locale": "uz",
+      "interaction": "multilingual_explanation",
+      "skill_code": "P5-NOR-02",
+      "runtime_source_available": true,
+      "source_body": "Agar X o‘rtacha qiymati mu va standart og‘ishi sigma bo‘lgan normal taqsimotga ega bo‘lsa, Z = (X - mu) / sigma orqali standartlashtiring. So‘ng kerakli ehtimolni standart normal taqsimotdan toping va to‘g‘ri dum yoki intervalni tanlang.",
+      "question": "Bu mavzuni o‘zbek tilida sodda tushuntir.",
+      "semantic_groups": [
+        [
+          "Z = (X -",
+          "Z=(X-"
+        ],
+        [
+          "o‘rtacha",
+          "mu"
+        ],
+        [
+          "standart og‘ish",
+          "sigma"
+        ],
+        [
+          "standart normal"
+        ],
+        [
+          "dum",
+          "interval"
+        ]
+      ],
+      "forbidden_claims": [
+        "Z = (X +",
+        "o‘rtachaga bo‘linadi"
+      ],
+      "reference_answer": "X normal taqsimotga ega bo‘lsa, o‘rtacha qiymat mu va standart og‘ish sigma uchun Z = (X - mu) / sigma formulasi bilan standartlashtiring. So‘ng standart normal taqsimotdan foydalanib, savolga mos dum yoki interval bo‘yicha ehtimolni toping."
+    }
+  ]
+}
