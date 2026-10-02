@@ -2,6 +2,15 @@ name: P2-76 AI Explanation Quality
 # P3-02 canary reuses the funded provider acceptance gate before any learner activation.
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/ai-evals/p2_76_golden*_v1.json'
+      - '.github/scripts/p2_76_ai_explanation_quality_eval.mjs'
+      - '.github/scripts/p2_74_ai_shadow_safety_regression.js'
+      - '.github/workflows/p2-76-ai-explanation-quality.yml'
+      - 'supabase/functions/exam-prep-ai/**'
   push:
     branches:
       - hardening/p2-76-ai-explanation-quality
@@ -47,15 +56,15 @@ jobs:
       - name: Explain paid-run policy
         shell: bash
         run: |
-          if [[ "${{ github.event.head_commit.message }}" == *"[p276-paid]"* ]]; then
-            echo 'P2-76 paid acceptance explicitly requested by commit tag.'
+          if [[ "${{ github.event.head_commit.message }}" == *"[p276-paid]"* || ( "${{ github.event_name }}" == "pull_request" && "${{ github.head_ref }}" == qa/ai-provider-acceptance-* && "${{ github.event.pull_request.title }}" == *"[p276-paid]"* ) ]]; then
+            echo 'P2-76 paid acceptance explicitly requested by governed commit/PR tag.'
             echo 'Cost guard: gpt-5.6-luna, reasoning=none, low verbosity, <=18 calls, <=180 output tokens/call, estimated budget cap $0.02.'
           else
             echo 'P2-76 paid acceptance NOT requested. Self-test only; no OpenAI provider call will be made.'
           fi
 
       - name: Require funded OpenAI acceptance credential
-        if: contains(github.event.head_commit.message, '[p276-paid]')
+        if: contains(github.event.head_commit.message, '[p276-paid]') || (github.event_name == 'pull_request' && startsWith(github.head_ref, 'qa/ai-provider-acceptance-') && contains(github.event.pull_request.title, '[p276-paid]'))
         shell: bash
         run: |
           set -euo pipefail
@@ -65,7 +74,7 @@ jobs:
           fi
 
       - name: Run funded OpenAI golden quality evaluation
-        if: contains(github.event.head_commit.message, '[p276-paid]')
+        if: contains(github.event.head_commit.message, '[p276-paid]') || (github.event_name == 'pull_request' && startsWith(github.head_ref, 'qa/ai-provider-acceptance-') && contains(github.event.pull_request.title, '[p276-paid]'))
         env:
           P276_MODE: provider
         run: node .github/scripts/p2_76_ai_explanation_quality_eval.mjs
