@@ -134,9 +134,13 @@ BEGIN
  FROM private.exam_prep_weekly_plans
  WHERE user_id=u AND component_code='P1' AND active_week_no=1 AND status='active';
  IF NOT EXISTS(
-   SELECT 1 FROM private.exam_prep_weekly_plan_items
-   WHERE plan_id=plan_id AND priority_order=1 AND item_type='retest'
-     AND correction_case_id=case_id AND action_code='COMPLETE_DELAYED_RETEST'
+   SELECT 1 FROM private.exam_prep_weekly_plan_items wpi
+   WHERE wpi.plan_id=(
+     SELECT p.id FROM private.exam_prep_weekly_plans p
+     WHERE p.user_id=u AND p.component_code='P1' AND p.active_week_no=1 AND p.status='active'
+   )
+     AND wpi.priority_order=1 AND wpi.item_type='retest'
+     AND wpi.correction_case_id=case_id AND wpi.action_code='COMPLETE_DELAYED_RETEST'
  ) THEN
    RAISE EXCEPTION 'Automatic correction -> retest plan transition missing';
  END IF;
