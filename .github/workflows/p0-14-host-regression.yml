@@ -28,6 +28,7 @@ on:
       - .github/scripts/p0_21_live_overview_placement_regression.js
       - .github/scripts/p0_22_live_view_coexistence_regression.js
       - .github/scripts/p1_04_ai_ui_regression.js
+      - .github/scripts/p3_02_ai_ux_transition_regression.js
       - .github/scripts/p2_03_past_paper_ui_regression.js
       - .github/scripts/p2_09_exam_map_ui_regression.js
       - .github/scripts/p2_10_materials_ui_regression.js
@@ -61,6 +62,7 @@ on:
       - .github/scripts/p0_21_live_overview_placement_regression.js
       - .github/scripts/p0_22_live_view_coexistence_regression.js
       - .github/scripts/p1_04_ai_ui_regression.js
+      - .github/scripts/p3_02_ai_ux_transition_regression.js
       - .github/scripts/p2_03_past_paper_ui_regression.js
       - .github/scripts/p2_09_exam_map_ui_regression.js
       - .github/scripts/p2_10_materials_ui_regression.js
@@ -95,6 +97,7 @@ jobs:
           node --check .github/scripts/p0_21_live_overview_placement_regression.js
           node --check .github/scripts/p0_22_live_view_coexistence_regression.js
           node --check .github/scripts/p1_04_ai_ui_regression.js
+          node --check .github/scripts/p3_02_ai_ux_transition_regression.js
           node --check .github/scripts/p2_03_past_paper_ui_regression.js
           node --check .github/scripts/p2_09_exam_map_ui_regression.js
           node --check .github/scripts/p2_10_materials_ui_regression.js
@@ -205,6 +208,9 @@ jobs:
 
       - name: Browser-isolated dormant AI learner UI
         run: node .github/scripts/p1_04_ai_ui_regression.js
+
+      - name: Browser-isolated AI capability and provider-failure transitions
+        run: node .github/scripts/p3_02_ai_ux_transition_regression.js
 
       - name: Past Paper learner UI contract
         run: node .github/scripts/p2_03_past_paper_ui_regression.js
