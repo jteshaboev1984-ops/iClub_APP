@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p302aiui2";
+  const VERSION = "p302theory2";
   let observer = null;
   let renderQueued = false;
 
