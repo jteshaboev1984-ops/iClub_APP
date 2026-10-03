@@ -72,13 +72,13 @@ for (const token of [
   'async function stage3Closure(componentCode)',
   'get_exam_prep_stage3_closure_safe_v1',
   'syllabusTracker, stage3Closure, skillDetail',
-  'exam-prep-learner-views.js?v=p202closure1'
+  'exam-prep-learner-views.js?v=p302theory1'
 ]) {
   assert(api.includes(token), `P2-02 learner API integration missing token: ${token}`);
 }
 
 for (const token of [
-  'const VERSION = "p202closure1"',
+  'const VERSION = "p302theory1"',
   'function closureReason(copyRow, reason, ready)',
   'function renderClosureCard(data)',
   'internal.api.stage3Closure(component)',
