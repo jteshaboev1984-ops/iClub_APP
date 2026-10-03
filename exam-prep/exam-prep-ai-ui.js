@@ -34,7 +34,10 @@
       plan: "Joriy rejani tushuntirish",
       repeated: "Takroriy qiyinchiliklarni ko‘rib chiqish",
       topic: "Bu mavzuni menga tushuntirish",
+      topicNote: "Bu ko‘nikma uchun iClub’dagi qayd etilgan holatingizga mos tushuntirish.",
       mistake: "Bu xatoni tushunishga yordam ber",
+      outputLabel: "AI tushuntirishi",
+      sourceNote: "Tasdiqlangan iClub materiallari va qayd etilgan o‘quv kontekstingiz asosida.",
       working: "Tushuntirish tayyorlanmoqda…",
       close: "Yopish",
       unavailable: "AI tushuntirishi hozir mavjud emas. Asosiy tayyorgarlik odatdagidek davom etadi.",
@@ -51,7 +54,10 @@
       plan: "Explain my current plan",
       repeated: "Review recurring difficulties",
       topic: "Explain this topic to me",
+      topicNote: "A focused explanation for this skill, adapted to your recorded iClub context.",
       mistake: "Help me understand this mistake",
+      outputLabel: "AI explanation",
+      sourceNote: "Based on approved iClub material and your recorded learning context.",
       working: "Preparing your explanation…",
       close: "Close",
       unavailable: "AI explanation is unavailable right now. Your core exam preparation continues normally.",
@@ -68,7 +74,10 @@
       plan: "Объяснить мой текущий план",
       repeated: "Разобрать повторяющиеся трудности",
       topic: "Объяснить мне эту тему",
+      topicNote: "Точечное объяснение этой темы с учётом вашего зафиксированного контекста в iClub.",
       mistake: "Помочь понять эту ошибку",
+      outputLabel: "Объяснение ИИ",
+      sourceNote: "Основано на утверждённых материалах iClub и вашем зафиксированном учебном контексте.",
       working: "Готовим объяснение…",
       close: "Закрыть",
       unavailable: "Объяснение ИИ сейчас недоступно. Основная подготовка продолжает работать как обычно.",
@@ -167,12 +176,27 @@
     });
   }
 
+  function formatMathText(value) {
+    return String(value || "")
+      .replace(/\^2\b/g, "²")
+      .replace(/\^3\b/g, "³");
+  }
+
   function showOutput(panel, message) {
     const output = panel.querySelector("[data-ep-ai-output]");
     const text = panel.querySelector("[data-ep-ai-output-text]");
     if (!output || !text) return;
-    text.textContent = String(message || "");
+    text.textContent = formatMathText(message);
     output.hidden = false;
+  }
+
+  function applyOutputCopy(container, c) {
+    const label = container.querySelector("[data-ep-ai-output-label]");
+    const note = container.querySelector("[data-ep-ai-output-note]");
+    const close = container.querySelector("[data-ep-ai-close]");
+    if (label) label.textContent = c.outputLabel;
+    if (note) note.textContent = c.sourceNote;
+    if (close) close.textContent = c.close;
   }
 
   function hideOutput(panel) {
@@ -246,7 +270,7 @@
     panel.innerHTML = `
       <div class="ep-ai-panel-head"><span class="ep-ai-spark" aria-hidden="true">✦</span><div class="ep-ai-panel-copy">
         <div class="ep-ai-panel-title"></div>
-        <div class="ep-ai-panel-note"></div>
+        <div class="ep-ai-panel-note"></div></div>
       </div>
       <div class="ep-ai-actions">
         <button class="ep-ai-btn" type="button" data-ep-ai-action="progress_summary"></button>
@@ -254,7 +278,9 @@
         <button class="ep-ai-btn" type="button" data-ep-ai-action="repeated_error_summary"></button>
       </div>
       <div class="ep-ai-output" data-ep-ai-output role="status" aria-live="polite" hidden>
+        <div class="ep-ai-output-head"><strong data-ep-ai-output-label></strong></div>
         <div data-ep-ai-output-text></div>
+        <div class="ep-ai-output-note" data-ep-ai-output-note></div>
         <button class="ep-ai-output-close" type="button" data-ep-ai-close></button>
       </div>`;
 
@@ -263,7 +289,7 @@
     panel.querySelector('[data-ep-ai-action="progress_summary"]').textContent = c.progress;
     panel.querySelector('[data-ep-ai-action="weekly_plan_narration"]').textContent = c.plan;
     panel.querySelector('[data-ep-ai-action="repeated_error_summary"]').textContent = c.repeated;
-    panel.querySelector("[data-ep-ai-close]").textContent = c.close;
+    applyOutputCopy(panel, c);
 
     panel.querySelectorAll("[data-ep-ai-action]").forEach(button => {
       button.addEventListener("click", () => invoke(panel, component, button.getAttribute("data-ep-ai-action")));
@@ -299,11 +325,13 @@
     wrap.innerHTML = `
       <button class="ep-ai-btn ep-ai-inline-btn" type="button" data-ep-ai-action="established_error_explanation"></button>
       <div class="ep-ai-output ep-ai-inline-output" data-ep-ai-output role="status" aria-live="polite" hidden>
+        <div class="ep-ai-output-head"><strong data-ep-ai-output-label></strong></div>
         <div data-ep-ai-output-text></div>
+        <div class="ep-ai-output-note" data-ep-ai-output-note></div>
         <button class="ep-ai-output-close" type="button" data-ep-ai-close></button>
       </div>`;
     wrap.querySelector("[data-ep-ai-action]").textContent = c.mistake;
-    wrap.querySelector("[data-ep-ai-close]").textContent = c.close;
+    applyOutputCopy(wrap, c);
     wrap.querySelector("[data-ep-ai-action]")?.addEventListener("click", () => invoke(
       wrap,
       component,
@@ -338,13 +366,21 @@
     wrap.className = "ep-ai-inline ep-ai-topic";
     wrap.setAttribute("data-ep-ai-topic-action-wrap", "");
     wrap.innerHTML = `
+      <div class="ep-ai-topic-head">
+        <span class="ep-ai-spark" aria-hidden="true">✦</span>
+        <div><strong data-ep-ai-topic-title></strong><span data-ep-ai-topic-note></span></div>
+      </div>
       <button class="ep-ai-btn ep-ai-inline-btn" type="button" data-ep-ai-action="theory_explanation"></button>
       <div class="ep-ai-output ep-ai-inline-output" data-ep-ai-output role="status" aria-live="polite" hidden>
+        <div class="ep-ai-output-head"><strong data-ep-ai-output-label></strong></div>
         <div data-ep-ai-output-text></div>
+        <div class="ep-ai-output-note" data-ep-ai-output-note></div>
         <button class="ep-ai-output-close" type="button" data-ep-ai-close></button>
       </div>`;
+    wrap.querySelector("[data-ep-ai-topic-title]").textContent = c.title;
+    wrap.querySelector("[data-ep-ai-topic-note]").textContent = c.topicNote;
     wrap.querySelector("[data-ep-ai-action]").textContent = c.topic;
-    wrap.querySelector("[data-ep-ai-close]").textContent = c.close;
+    applyOutputCopy(wrap, c);
     wrap.querySelector("[data-ep-ai-action]")?.addEventListener("click", () => invoke(
       wrap,
       component,
@@ -426,6 +462,7 @@
 
     if (languageObserver) languageObserver.disconnect();
     languageObserver = new MutationObserver(() => {
+      rootEl()?.querySelectorAll("[data-ep-ai-home-banner]").forEach(node => node.remove());
       removePanels();
       removeErrorActions();
       removeTopicActions();
