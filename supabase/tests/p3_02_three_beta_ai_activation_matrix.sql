@@ -80,7 +80,7 @@ SET runtime_status='shadow',gate_version=null,
     evidence=jsonb_build_object('isolated_baseline',true),updated_at=now()
 WHERE capability_code='ai_assist';
 
-\ir ../docs/release-packages/20261003_exam_prep_ai_three_beta_canary_activation_v1.sql
+\ir ../../docs/release-packages/20261003_exam_prep_ai_three_beta_canary_activation_v1.sql
 
 DO $verify$
 DECLARE
