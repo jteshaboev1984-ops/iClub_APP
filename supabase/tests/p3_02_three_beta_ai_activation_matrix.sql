@@ -16,7 +16,8 @@ CREATE TEMP TABLE p302_ai_canary_people(
 INSERT INTO p302_ai_canary_people(ord,user_id) VALUES
   (1,gen_random_uuid()),
   (2,gen_random_uuid()),
-  (3,gen_random_uuid());
+  (3,gen_random_uuid()),
+  (4,gen_random_uuid());
 
 INSERT INTO auth.users(id,aud,role,email,created_at,updated_at,is_sso_user,is_anonymous)
 SELECT user_id,'authenticated','authenticated',
@@ -41,7 +42,8 @@ INSERT INTO private.exam_prep_beta_members(
 SELECT c.id,p.user_id,'core',1,'candidate'
 FROM private.exam_prep_beta_cohorts c
 CROSS JOIN p302_ai_canary_people p
-WHERE c.cohort_key='math_as_p1_p5_beta_2026_09_01';
+WHERE c.cohort_key='math_as_p1_p5_beta_2026_09_01'
+  AND p.ord<=3;
 
 INSERT INTO private.exam_prep_beta_consents(
   cohort_id,user_id,consent_scope,consent_status,consented_at,grant_evidence_ref
@@ -50,7 +52,8 @@ SELECT c.id,p.user_id,'exam_prep_controlled_beta_v1','granted',now(),
        'isolated:p302-ai-real-canary:'||p.ord
 FROM private.exam_prep_beta_cohorts c
 CROSS JOIN p302_ai_canary_people p
-WHERE c.cohort_key='math_as_p1_p5_beta_2026_09_01';
+WHERE c.cohort_key='math_as_p1_p5_beta_2026_09_01'
+  AND p.ord<=3;
 
 UPDATE private.exam_prep_beta_members bm
 SET member_status='active',activated_at=now(),updated_at=now()
@@ -115,7 +118,7 @@ BEGIN
     RAISE EXCEPTION 'P3-02 real canary test generation not enabled';
   END IF;
 
-  FOR r IN SELECT user_id FROM p302_ai_canary_people ORDER BY ord
+  FOR r IN SELECT user_id FROM p302_ai_canary_people WHERE ord<=3 ORDER BY ord
   LOOP
     PERFORM set_config('request.jwt.claim.sub',r.user_id::text,true);
     PERFORM set_config('request.jwt.claim.role','authenticated',true);
@@ -133,6 +136,19 @@ BEGIN
     END IF;
   END LOOP;
 
+  SELECT user_id INTO STRICT r FROM p302_ai_canary_people WHERE ord=4;
+  PERFORM set_config('request.jwt.claim.sub',r.user_id::text,true);
+  PERFORM set_config('request.jwt.claim.role','authenticated',true);
+  SELECT * INTO STRICT c FROM public.get_exam_prep_capabilities_v1();
+  IF NOT c.core_access OR c.ai_assist OR c.mentor_care_entitled
+     OR c.mentor_assignment_active OR c.mentor_authority OR c.kill_switch THEN
+    RAISE EXCEPTION 'P3-02 fourth-user isolation failed cap=%',row_to_json(c);
+  END IF;
+  v_guard:=public.get_exam_prep_ai_guard_v1('P1','theory_explanation','en',0);
+  IF coalesce((v_guard->>'allowed')::boolean,false) IS TRUE THEN
+    RAISE EXCEPTION 'P3-02 fourth-user AI guard unexpectedly open guard=%',v_guard;
+  END IF;
+
   IF (SELECT count(*) FROM private.exam_prep_audit_events
       WHERE event_type='ai_controlled_beta_canary_activated'
         AND object_id='p3_02_real_beta_ai_canary_v1')<>1 THEN
@@ -149,9 +165,86 @@ BEGIN
     RAISE EXCEPTION 'P3-02 real canary changed Core transition state';
   END IF;
 
-  RAISE NOTICE 'P3-02 three-learner AI Assist canary activation: PASS';
+  RAISE NOTICE 'P3-02 three-learner AI Assist canary activation + fourth-user isolation: PASS';
 END;
 $verify$;
+
+\ir ../../docs/release-packages/20261003_exam_prep_ai_three_beta_canary_reversion_v1.sql
+
+DO $verify_reversion$
+DECLARE
+  r record;
+  c record;
+  v_guard jsonb;
+BEGIN
+  IF EXISTS(SELECT 1 FROM private.exam_prep_feature_entitlements WHERE ai_assist) THEN
+    RAISE EXCEPTION 'P3-02 reversion left an AI entitlement';
+  END IF;
+
+  IF (SELECT count(*)
+      FROM private.exam_prep_beta_members
+      WHERE member_status='active' AND service_mode='core')<>3 THEN
+    RAISE EXCEPTION 'P3-02 reversion did not return three beta learners to Core';
+  END IF;
+
+  IF NOT EXISTS(
+    SELECT 1 FROM private.exam_prep_feature_config
+    WHERE id=1 AND rollout_state='controlled_beta'
+      AND core_enabled AND NOT ai_enabled AND NOT mentor_enabled AND NOT kill_switch
+  ) THEN
+    RAISE EXCEPTION 'P3-02 reversion feature state wrong';
+  END IF;
+
+  IF NOT EXISTS(
+    SELECT 1 FROM private.exam_prep_optional_capability_status
+    WHERE capability_code='ai_assist' AND runtime_status='shadow'
+      AND gate_version='p3_02_real_beta_ai_canary_reverted_v1'
+  ) THEN
+    RAISE EXCEPTION 'P3-02 reversion runtime not shadow';
+  END IF;
+
+  IF NOT EXISTS(
+    SELECT 1 FROM private.exam_prep_ai_policy WHERE id=1 AND NOT generation_enabled
+  ) THEN
+    RAISE EXCEPTION 'P3-02 reversion generation still enabled';
+  END IF;
+
+  FOR r IN SELECT user_id FROM p302_ai_canary_people ORDER BY ord
+  LOOP
+    PERFORM set_config('request.jwt.claim.sub',r.user_id::text,true);
+    PERFORM set_config('request.jwt.claim.role','authenticated',true);
+    SELECT * INTO STRICT c FROM public.get_exam_prep_capabilities_v1();
+    IF NOT c.core_access OR c.ai_assist OR c.mentor_care_entitled
+       OR c.mentor_assignment_active OR c.mentor_authority OR c.kill_switch THEN
+      RAISE EXCEPTION 'P3-02 reversion capability mismatch user=% cap=%',r.user_id,row_to_json(c);
+    END IF;
+    v_guard:=public.get_exam_prep_ai_guard_v1('P1','theory_explanation','en',0);
+    IF coalesce((v_guard->>'allowed')::boolean,false) IS TRUE THEN
+      RAISE EXCEPTION 'P3-02 reversion AI guard still open user=% guard=%',r.user_id,v_guard;
+    END IF;
+  END LOOP;
+
+  IF (SELECT count(*) FROM private.exam_prep_audit_events
+      WHERE event_type='ai_controlled_beta_canary_reverted'
+        AND object_id='p3_02_real_beta_ai_canary_reverted_v1')<>1 THEN
+    RAISE EXCEPTION 'P3-02 reversion semantic audit missing';
+  END IF;
+
+  IF (SELECT count(*) FROM private.exam_prep_audit_events
+      WHERE event_type='ai_assist_entitlement_reverted'
+        AND target_user_id IN (
+          SELECT user_id FROM p302_ai_canary_people WHERE ord<=3
+        ))<>3 THEN
+    RAISE EXCEPTION 'P3-02 reversion per-learner audit missing';
+  END IF;
+
+  IF (private.exam_prep_active_plan_transition_audit_v1()->>'hard_anomaly_count')::integer<>0 THEN
+    RAISE EXCEPTION 'P3-02 reversion changed Core transition state';
+  END IF;
+
+  RAISE NOTICE 'P3-02 independent AI canary reversion: PASS';
+END;
+$verify_reversion$;
 
 ROLLBACK;
 
