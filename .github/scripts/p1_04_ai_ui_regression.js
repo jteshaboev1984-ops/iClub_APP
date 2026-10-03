@@ -3,8 +3,10 @@ const path = require('path');
 const fs = require('fs');
 const aiSource = fs.readFileSync('exam-prep/exam-prep-ai-ui.js', 'utf8');
 const hostCss = fs.readFileSync('exam-prep/exam-prep-host.css', 'utf8');
+const liveSource = fs.readFileSync('exam-prep/exam-prep-live.js', 'utf8');
 if (aiSource.includes('ensureStyle(') || aiSource.includes('ep-ai-ui-style') || aiSource.includes('document.createElement("style")')) throw new Error('runtime AI UI style injection returned');
-if (!hostCss.includes('EXAM PREP CENTRALIZED AI UI v1') || !hostCss.includes('.ep-ai-panel{')) throw new Error('centralized AI UI CSS contract missing');
+if (!hostCss.includes('EXAM PREP AI TUTOR UX v2') || !hostCss.includes('.ep-ai-panel{')) throw new Error('centralized AI Tutor CSS contract missing');
+if (!liveSource.includes('data-ep-live-active-assessment="true"')) throw new Error('real active-assessment AI blackout marker missing');
 
 
 function assert(condition, message) {
@@ -131,7 +133,7 @@ function assert(condition, message) {
     // Production-shaped component home: the paid AI capability must be visible beside the learner's next step.
     await page.evaluate(() => {
       document.querySelector('#exam-prep-host-root').innerHTML = `
-        <section class="ep-component-home" data-ep-component-home="P1">
+        <section class="ep-component-home" data-ep-component-home="P1" data-ep-ai-plan-available="true" data-ep-ai-repeated-available="false">
           <header class="ep-component-hero">Pure Mathematics 1</header>
           <section class="ep-component-next"><button id="current-core-action" type="button">Start task</button></section>
           <section class="ep-component-progress-card">Progress</section>
@@ -149,6 +151,14 @@ function assert(condition, message) {
     });
     assert(featured.visible && featured.afterNext, 'Current component home did not mount AI Tutor after the next-step card');
     assert(featured.coreVisible, 'Current component home AI Tutor displaced the Core next action');
+    const actionVisibility = await page.evaluate(() => ({
+      progressHidden: document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-action="progress_summary"]')?.hidden,
+      planHidden: document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-action="weekly_plan_narration"]')?.hidden,
+      repeatedHidden: document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-action="repeated_error_summary"]')?.hidden
+    }));
+    assert(actionVisibility.progressHidden === false, 'AI Tutor progress action should remain available on component home');
+    assert(actionVisibility.planHidden === false, 'AI Tutor hid a current-plan action despite an active plan');
+    assert(actionVisibility.repeatedHidden === true, 'AI Tutor exposed repeated-difficulty action without repeated-gap context');
     assert(await page.evaluate(() => window.__aiCalls.length) === callsBeforeDashboardOpen, 'Component-home AI Tutor auto-called the provider');
 
     await page.evaluate(() => {
