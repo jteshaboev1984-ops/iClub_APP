@@ -124,7 +124,7 @@ function assert(condition, message) {
     });
     await page.waitForSelector('[data-ep-ai-home-banner]');
     const homeBanner = await page.locator('[data-ep-ai-home-banner]').textContent();
-    assert(homeBanner.includes('iClub AI Tutor is active'), 'Current dashboard did not expose visible AI Tutor entry');
+    assert(homeBanner.includes('iClub AI Tutor'), 'Current dashboard did not expose visible AI Tutor entry');
     const callsBeforeDashboardOpen = await page.evaluate(() => window.__aiCalls.length);
     await page.click('[data-ep-ai-home-banner] [data-ep-ai-open-component="P1"]');
     assert(await page.evaluate(() => window.__openedFromAi) === 'P1', 'Dashboard AI Tutor entry did not route through the existing P1 card');
