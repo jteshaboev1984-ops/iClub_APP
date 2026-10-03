@@ -438,6 +438,74 @@ $function$;
 REVOKE ALL ON FUNCTION private.exam_prep_active_plan_transition_audit_v1()
 FROM PUBLIC,anon,authenticated,service_role;
 
+-- Frozen weekly goals must never reinterpret a finished retest as remediation
+-- merely because the current actionable slot moved back from retest to correction.
+-- Keep activity provenance tied to the session type that actually satisfied the
+-- original frozen goal. This preserves historical attempt counts through
+-- correction -> retest -> failed retest -> correction transitions.
+DO $progress_projection_patch$
+DECLARE
+  v_oid oid;
+  v_def text;
+  v_anchor text;
+  v_replacement text;
+  v_owner oid;
+  v_acl aclitem[];
+  v_security boolean;
+  v_volatility "char";
+  v_count integer;
+BEGIN
+  v_oid:=to_regprocedure('public.get_exam_prep_weekly_progress_safe_v1(text)');
+  IF v_oid IS NULL THEN
+    RAISE EXCEPTION 'exam_prep_transition_sync_progress_projection_missing';
+  END IF;
+
+  SELECT p.proowner,p.proacl,p.prosecdef,p.provolatile
+    INTO v_owner,v_acl,v_security,v_volatility
+  FROM pg_catalog.pg_proc p
+  WHERE p.oid=v_oid;
+
+  v_def:=pg_catalog.pg_get_functiondef(v_oid);
+  v_anchor:='        and hi.item_type=g.item_type'||chr(10)
+    ||'        and (';
+  v_count:=(length(v_def)-length(replace(v_def,v_anchor,'')))/length(v_anchor);
+  IF v_count<>1 THEN
+    RAISE EXCEPTION 'exam_prep_transition_sync_progress_anchor_drift_%',v_count;
+  END IF;
+
+  v_replacement:='        and hi.item_type=g.item_type'||chr(10)
+    ||'        and ('||chr(10)
+    ||'          (g.item_type=''correction'' and ses.session_type=''learning'' and ca.id is not null)'||chr(10)
+    ||'          or (g.item_type=''learning'' and ses.session_type=''learning'')'||chr(10)
+    ||'          or (g.item_type=''mixed_transfer'' and ses.session_type=''mixed'')'||chr(10)
+    ||'          or (g.item_type=''retest'' and ses.session_type=''retest'')'||chr(10)
+    ||'        )'||chr(10)
+    ||'        and (';
+
+  EXECUTE replace(v_def,v_anchor,v_replacement);
+
+  SELECT count(*) INTO v_count
+  FROM pg_catalog.pg_proc p
+  WHERE p.oid=v_oid
+    AND p.proowner IS NOT DISTINCT FROM v_owner
+    AND p.proacl IS NOT DISTINCT FROM v_acl
+    AND p.prosecdef IS NOT DISTINCT FROM v_security
+    AND p.provolatile IS NOT DISTINCT FROM v_volatility
+    AND strpos(
+      pg_catalog.pg_get_functiondef(p.oid),
+      '(g.item_type=''correction'' and ses.session_type=''learning'' and ca.id is not null)'
+    )>0
+    AND strpos(
+      pg_catalog.pg_get_functiondef(p.oid),
+      '(g.item_type=''retest'' and ses.session_type=''retest'')'
+    )>0;
+
+  IF v_count<>1 THEN
+    RAISE EXCEPTION 'exam_prep_transition_sync_progress_projection_patch_failed';
+  END IF;
+END;
+$progress_projection_patch$;
+
 -- One-time production repair: reconcile only current active Exam Prep plans.
 -- Frozen goals, completed/superseded plans, sessions, responses and evidence are untouched.
 DO $backfill$
