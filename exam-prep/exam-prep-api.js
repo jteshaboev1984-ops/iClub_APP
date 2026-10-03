@@ -121,6 +121,7 @@
       }
 
       root.lastCapabilities = data;
+      emit("iclub:exam-prep-capabilities", { capabilities: data });
       await loadControlledProgressUx();
       return Object.freeze({ ok: true, data });
     })();
