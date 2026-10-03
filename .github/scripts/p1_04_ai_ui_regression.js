@@ -164,7 +164,7 @@ function assert(condition, message) {
     });
     await page.waitForSelector('[data-ep-ai-error-action-wrap] [data-ep-ai-action="established_error_explanation"]');
     const mistakeText = await page.locator('[data-ep-ai-error-action-wrap]').textContent();
-    assert(mistakeText.includes('Explain this mistake'), 'Finalized diagnostic AI action text missing');
+    assert(mistakeText.includes('Help me understand this mistake'), 'Finalized diagnostic AI Tutor action text missing');
 
     await page.click('[data-ep-ai-error-action-wrap] [data-ep-ai-action="established_error_explanation"]');
     await page.waitForFunction(() => document.querySelector('[data-ep-ai-error-action-wrap] [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
