@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p302theory2";
+  const VERSION = "p302ux1";
   let observer = null;
   let renderQueued = false;
 
@@ -101,6 +101,10 @@
 
   async function invoke(panel, component, interactionType, extraBody = {}) {
     if (panel.dataset.epAiBusy === "true") return;
+    if (!canShow()) {
+      queueRender();
+      return;
+    }
     const c = copy();
     const client = window.sb;
     if (!client?.functions || typeof client.functions.invoke !== "function") {
@@ -122,6 +126,14 @@
       });
       if (error) {
         showOutput(panel, c.error);
+        return;
+      }
+      if (!canShow()) {
+        queueRender();
+        return;
+      }
+      if (data && typeof data === "object" && data.academic_state_changed !== false) {
+        showOutput(panel, c.unavailable);
         return;
       }
       const message = data && typeof data === "object"
@@ -317,6 +329,8 @@
     observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden", "aria-hidden"] });
     queueRender();
   }
+
+  window.addEventListener("iclub:exam-prep-capabilities", queueRender);
 
   internal.aiUiVersion = VERSION;
   attach();
