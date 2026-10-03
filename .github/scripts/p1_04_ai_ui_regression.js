@@ -78,7 +78,7 @@ function assert(condition, message) {
     await page.waitForSelector('[data-ep-ai-panel="P5"]');
 
     const text = await page.locator('#exam-prep-host-root').textContent();
-    assert(text.includes('Study assistant'), 'Learner-facing AI title missing');
+    assert(text.includes('iClub AI Tutor'), 'Learner-facing AI Tutor title missing');
     for (const forbidden of ['AI Assist', 'controlled_beta', 'policy_version', 'runtime_status', 'source_card']) {
       assert(!text.includes(forbidden), `Internal AI term leaked to learner UI: ${forbidden}`);
     }
@@ -104,6 +104,52 @@ function assert(condition, message) {
     assert(calls[2].body.component_code === 'P1', 'Repeated-difficulty action crossed component boundary');
     assert(calls[2].body.interaction_type === 'repeated_error_summary', 'Repeated-difficulty action type drifted');
     assert(calls[2].body.user_text === '', 'Repeated-difficulty action must not collect free-form learner text');
+
+    // Production-shaped dashboard: AI must be visible without relying on the retired overview-strip anchor.
+    await page.evaluate(() => {
+      window.__openedFromAi = '';
+      document.querySelector('#exam-prep-host-root').innerHTML = `
+        <section class="ep-live-dashboard-intro">
+          <div><h3>Preparation by P1 and P5</h3></div>
+        </section>
+        <div class="ep-live-grid">
+          <button type="button" data-ep-live-open-component="P1">Pure Mathematics 1</button>
+          <button type="button" data-ep-live-open-component="P5">Probability & Statistics 1</button>
+        </div>`;
+      document.querySelectorAll('[data-ep-live-open-component]').forEach(button => {
+        button.addEventListener('click', () => { window.__openedFromAi = button.dataset.epLiveOpenComponent; });
+      });
+    });
+    await page.waitForSelector('[data-ep-ai-home-banner]');
+    const homeBanner = await page.locator('[data-ep-ai-home-banner]').textContent();
+    assert(homeBanner.includes('iClub AI Tutor is active'), 'Current dashboard did not expose visible AI Tutor entry');
+    const callsBeforeDashboardOpen = await page.evaluate(() => window.__aiCalls.length);
+    await page.click('[data-ep-ai-home-banner] [data-ep-ai-open-component="P1"]');
+    assert(await page.evaluate(() => window.__openedFromAi) === 'P1', 'Dashboard AI Tutor entry did not route through the existing P1 card');
+    assert(await page.evaluate(() => window.__aiCalls.length) === callsBeforeDashboardOpen, 'Dashboard AI Tutor entry caused an unexpected provider call');
+
+    // Production-shaped component home: the paid AI capability must be visible beside the learner's next step.
+    await page.evaluate(() => {
+      document.querySelector('#exam-prep-host-root').innerHTML = `
+        <section class="ep-component-home" data-ep-component-home="P1">
+          <header class="ep-component-hero">Pure Mathematics 1</header>
+          <section class="ep-component-next"><button id="current-core-action" type="button">Start task</button></section>
+          <section class="ep-component-progress-card">Progress</section>
+        </section>`;
+    });
+    await page.waitForSelector('[data-ep-ai-panel="P1"].ep-ai-panel-featured');
+    const featured = await page.evaluate(() => {
+      const panel = document.querySelector('[data-ep-ai-panel="P1"]');
+      const next = document.querySelector('.ep-component-next');
+      return {
+        visible: Boolean(panel),
+        afterNext: next?.nextElementSibling === panel,
+        coreVisible: Boolean(document.querySelector('#current-core-action'))
+      };
+    });
+    assert(featured.visible && featured.afterNext, 'Current component home did not mount AI Tutor after the next-step card');
+    assert(featured.coreVisible, 'Current component home AI Tutor displaced the Core next action');
+    assert(await page.evaluate(() => window.__aiCalls.length) === callsBeforeDashboardOpen, 'Component-home AI Tutor auto-called the provider');
 
     await page.evaluate(() => {
       document.querySelector('#exam-prep-host-root').innerHTML = `
@@ -134,9 +180,9 @@ function assert(condition, message) {
     assert(errorCalls[3].body.user_text === '', 'Diagnostic error action must not collect free-form learner text');
 
     const localizedMistakes = [
-      { lang: 'ru', label: 'Разобрать эту ошибку', width: 360 },
-      { lang: 'uz', label: 'Bu xatoni tushuntirish', width: 390 },
-      { lang: 'en', label: 'Explain this mistake', width: 430 }
+      { lang: 'ru', label: 'Помочь понять эту ошибку', width: 360 },
+      { lang: 'uz', label: 'Bu xatoni tushunishga yordam ber', width: 390 },
+      { lang: 'en', label: 'Help me understand this mistake', width: 430 }
     ];
     for (const row of localizedMistakes) {
       await page.setViewportSize({ width: row.width, height: 844 });
@@ -182,7 +228,7 @@ function assert(condition, message) {
     });
     await page.waitForSelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
     const topicText = await page.locator('[data-ep-ai-topic-action-wrap]').textContent();
-    assert(topicText.includes('Explain this topic'), 'Governed theory AI action text missing');
+    assert(topicText.includes('Explain this topic to me'), 'Governed theory AI action text missing');
 
     await page.click('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
     await page.waitForFunction(() => document.querySelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
