@@ -165,7 +165,7 @@ assert(aiSource.includes('languageObserver.observe(document.documentElement'), '
 
     await page.evaluate(() => { window.__aiMode = 'hang'; });
     await page.click('[data-ep-ai-panel="P1"] [data-ep-ai-action="repeated_error_summary"]');
-    await page.waitForFunction(() => document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-output-text]')?.textContent === 'Extra explanation is unavailable right now. Your core exam preparation continues normally.');
+    await page.waitForFunction(() => document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-output-text]')?.textContent === 'AI explanation is unavailable right now. Your core exam preparation continues normally.');
     assert(await page.locator('#core-continue').isVisible(), 'AI timeout removed Core learner action');
 
     await page.evaluate(() => { window.__aiMode = 'unsafe_authority'; });
