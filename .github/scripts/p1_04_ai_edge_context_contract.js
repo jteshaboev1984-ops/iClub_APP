@@ -76,6 +76,7 @@ assert(src.includes('validateGeneratedMessage'), 'provider output validation mis
 assert(src.includes('Do not introduce any digit, percentage, count, threshold, date, or numeric example unless that exact numeric token already appears'), 'provider prompt must prevent unsupported numeric output before validation');
 assert(src.includes('learner_context.status'), 'provider prompt lost learner-context personalization boundary');
 assert(src.includes('Do not infer a misconception that is not recorded') || src.includes('without guessing why the learner was wrong'), 'provider prompt lost non-inference learner-context boundary');
+assert(src.includes('Do not expose raw internal enums, field names or implementation vocabulary'), 'provider prompt lost learner-facing terminology boundary');
 assert(src.includes('reserve_exam_prep_ai_provider_call_service_v1'), 'atomic provider reservation RPC missing');
 assert(src.includes('finalize_exam_prep_ai_provider_call_service_v1'), 'provider accounting finalizer RPC missing');
 assert(src.includes('conservativeProviderReservationCost'), 'conservative provider cost reservation missing');
