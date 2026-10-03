@@ -157,7 +157,7 @@ insert into private.exam_prep_ai_source_cards(
 select
   e.source_card_key,e.component_code,e.skill_code,e.card_type,e.locale,e.source_version,e.title,e.body_text,
   'approved','original_iclub',true,
-  md5(e.source_card_key||'|'||e.source_version||'|'||e.title||'|'||e.body_text),
+  encode(extensions.digest(e.source_card_key||'|'||e.source_version||'|'||e.title||'|'||e.body_text,'sha256'),'hex'),
   now(),now()
 from expanded e
 on conflict(source_card_key) do update
