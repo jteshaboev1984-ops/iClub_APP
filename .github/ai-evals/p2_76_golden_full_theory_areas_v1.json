@@ -200,7 +200,7 @@
         "to‘g‘ri javob",
         "javoblar kaliti"
       ],
-      "reference_answer": "Cheksiz geometrik qatorning yig‘indisi faqat |r| < 1 bo‘lganda mavjud, chunki hadlar nolga yaqinlashadi. Birinchi had a bo‘lsa, yig‘indi S_infinity = a/(1-r) formula bilan topiladi."
+      "reference_answer": "Cheksiz geometrik qatorning yig‘indisi faqat umumiy nisbat r uchun |r| < 1 bo‘lganda mavjud, chunki hadlar nolga yaqinlashadi. Birinchi had a bo‘lsa, yig‘indi S_infinity = a/(1-r) formula bilan topiladi."
     },
     {
       "case_id": "P302-FULL-P1-DIF07-EN",
