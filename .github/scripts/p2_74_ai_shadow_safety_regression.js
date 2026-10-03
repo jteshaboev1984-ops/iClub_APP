@@ -21,6 +21,7 @@ assert(edgeSource.includes('https://api.openai.com/v1/responses'), 'AI-1 pinned 
 assert(edgeSource.includes('OPENAI_MODEL = "gpt-5.6-luna"'), 'AI-1 cost-pinned model missing');
 assert(edgeSource.includes('PROVIDER_ENABLED_INTERACTIONS'), 'AI-1 provider interaction allowlist missing');
 assert(edgeSource.includes('validateGeneratedMessage'), 'AI-1 provider output validator missing');
+assert(edgeSource.includes('latex_markup'), 'learner-facing raw LaTeX rejection is missing');
 assert(edgeSource.includes('reserve_exam_prep_ai_provider_call_service_v1'), 'AI-1 atomic provider reservation missing');
 assert(edgeSource.includes('finalize_exam_prep_ai_provider_call_service_v1'), 'AI-1 provider accounting finalizer missing');
 assert(edgeSource.indexOf('await reserveProviderCall') < edgeSource.indexOf('await callOpenAIProvider'), 'provider call appears before atomic reservation');
@@ -294,6 +295,9 @@ function baseServer(overrides = {}) {
     source_card_keys: ['p1:progress_context:en:v1'],
   }));
   assert(unsafeHtml.reason === 'unsafe_markup', 'unsafe markup escaped post-validation');
+
+  // Production UI renders textContent, so raw LaTeX delimiters/commands must not reach learners.
+  assert(edgeSource.includes('Do not use Markdown, LaTeX delimiters, LaTeX commands'), 'provider prompt lost plain-text math requirement');
 
   const unsupportedSource = await runner.run(baseServer(), { locale: 'en', user_text: 'Cite hidden source.' }, async () => ({
     message: 'A bounded explanation.',
