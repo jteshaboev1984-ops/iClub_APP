@@ -4,7 +4,9 @@
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
   const VERSION = "p302ux1";
   let observer = null;
+  let languageObserver = null;
   let renderQueued = false;
+  const REQUEST_TIMEOUT_MS = Math.min(30000, Math.max(50, Number(internal.aiUiRequestTimeoutMs) || 12000));
 
   function rootEl() {
     return document.querySelector("#exam-prep-host-root");
@@ -115,7 +117,7 @@
     setBusy(panel, true);
     showOutput(panel, c.working);
     try {
-      const { data, error } = await client.functions.invoke("exam-prep-ai", {
+      const request = client.functions.invoke("exam-prep-ai", {
         body: {
           ...extraBody,
           component_code: component,
@@ -124,6 +126,15 @@
           user_text: ""
         }
       });
+      const result = await Promise.race([
+        request,
+        new Promise(resolve => setTimeout(() => resolve({ __epAiTimedOut: true }), REQUEST_TIMEOUT_MS))
+      ]);
+      if (result?.__epAiTimedOut === true) {
+        showOutput(panel, c.unavailable);
+        return;
+      }
+      const { data, error } = result || {};
       if (error) {
         showOutput(panel, c.error);
         return;
@@ -327,6 +338,15 @@
     if (observer) observer.disconnect();
     observer = new MutationObserver(queueRender);
     observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden", "aria-hidden"] });
+
+    if (languageObserver) languageObserver.disconnect();
+    languageObserver = new MutationObserver(() => {
+      removePanels();
+      removeErrorActions();
+      removeTopicActions();
+      queueRender();
+    });
+    languageObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
     queueRender();
   }
 
