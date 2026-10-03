@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p302aiui2";
+  const VERSION = "p302theory2";
   let observer = null;
   let renderQueued = false;
 
@@ -225,13 +225,12 @@
     });
   }
 
-  const THEORY_UI_SKILLS = new Set(["P1-QUA-02","P5-NOR-02"]);
-
   function buildTopicAction(screen) {
     const c = copy();
     const component = String(screen.getAttribute("data-ep-ai-skill-component") || "").toUpperCase();
     const skillCode = String(screen.getAttribute("data-ep-ai-skill-detail") || "");
-    if (!["P1","P5"].includes(component) || !THEORY_UI_SKILLS.has(skillCode)) return null;
+    const knownTitle = String(internal.learnerCopy?.skillTitle?.(skillCode, currentLanguage()) || "");
+    if (!["P1","P5"].includes(component) || !skillCode.startsWith(component + "-") || !knownTitle) return null;
 
     const wrap = document.createElement("div");
     wrap.className = "ep-ai-inline ep-ai-topic";

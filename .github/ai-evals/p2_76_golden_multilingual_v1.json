@@ -1,7 +1,7 @@
 {
   "pack_version": "p3_02_multilingual_theory_v1_0",
-  "source_pack_version": "p3_02_ai_value_v1_2026_10_02",
-  "scope": "runtime-supported multilingual_explanation for the first approved P1/P5 theory skills",
+  "source_pack_version": "p3_02_full_theory_pack_v1_2026_10_03",
+  "scope": "runtime-supported multilingual_explanation sampled from the full governed P1/P5 theory pack",
   "critical_failure_policy": "zero_tolerance",
   "cases": [
     {

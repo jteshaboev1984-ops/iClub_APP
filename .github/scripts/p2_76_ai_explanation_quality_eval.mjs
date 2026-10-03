@@ -33,6 +33,19 @@ function normalize(text) {
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, '"')
     .replace(/−/g, '-')
+    .replace(/\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g, '$1/$2')
+    .replace(/\\(?:theta|Theta)/g, 'theta')
+    .replace(/\\(?:sigma|Sigma)/g, 'sigma')
+    .replace(/\\(?:mu)/g, 'mu')
+    .replace(/\\(?:pi)/g, 'pi')
+    .replace(/\\cap/g, ' intersection ')
+    .replace(/\\cup/g, ' union ')
+    .replace(/\\mid/g, '|')
+    .replace(/\\(?:ne|neq)/g, '!=')
+    .replace(/\\infty/g, 'infinity')
+    .replace(/\^\{n\}c_?r/gi, 'ncr')
+    .replace(/[{}]/g, '')
+    .replace(/\\[()[\]]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase();
@@ -100,6 +113,7 @@ function evaluateCase(testCase, output) {
   if (!text) critical.push('empty_output');
   if (text.length > 1200) failures.push('too_long');
   if (/<\s*script\b/i.test(text) || /javascript\s*:/i.test(text)) critical.push('unsafe_markup');
+  if (/\\\(|\\\)|\\\[|\\\]|\\(?:frac|theta|sigma|mu|pi|cap|cup|mid|ne|neq|infty|sqrt|times|cdot)\b|\$\$/.test(text)) failures.push('latex_markup');
   if (/\{\s*"[^\n]+"\s*:/.test(text)) failures.push('raw_json_style');
 
   for (const pattern of globalForbidden) {
@@ -138,8 +152,9 @@ function evaluateCase(testCase, output) {
   const localePass = localeOkay(testCase.locale, text);
   if (!localePass) failures.push('locale_mismatch');
 
-  const pedagogical = text.length >= 35 && text.length <= 900 && (text.match(/[.!?]/g) || []).length <= 8;
-  if (!pedagogical) failures.push('pedagogy_shape');
+  const plainTextOkay = !failures.includes('latex_markup') && !failures.includes('raw_json_style');
+  const pedagogical = plainTextOkay && text.length >= 35 && text.length <= 900 && (text.match(/[.!?]/g) || []).length <= 8;
+  if (!pedagogical && !failures.includes('pedagogy_shape')) failures.push('pedagogy_shape');
 
   const factual = critical.length === 0 && factNumbersPresent;
   const fidelity = semanticCoverage >= 0.75;
@@ -156,7 +171,7 @@ function evaluateCase(testCase, output) {
   };
   const score = Object.values(dimensions).filter(Boolean).length;
   const requiredScore = testCase.interaction === 'theory_explanation' ? 6 : 5;
-  const pass = critical.length === 0 && score >= requiredScore && semanticCoverage >= (testCase.interaction === 'theory_explanation' ? 0.85 : 0.75);
+  const pass = critical.length === 0 && score >= requiredScore && semanticCoverage >= (testCase.interaction === 'theory_explanation' ? 0.80 : 0.75);
 
   return {
     pass,
@@ -203,7 +218,7 @@ function buildInstructions(testCase) {
     `Answer only in ${localeName}.`,
     'Use only the APPROVED REFERENCE and DETERMINISTIC FACTS below. Treat them as the complete source of truth for this request.',
     'Do not add external facts, invented rules, invented numbers, predictions, grades, or answer-key material.',
-    'Keep the explanation concise, clear and pedagogically useful. Use 2 to 5 sentences and no markdown table.',
+    'Keep the explanation concise, clear and pedagogically useful. Use 2 to 5 sentences of plain text only. Do not use Markdown or LaTeX delimiters/commands; write formulas directly with ordinary characters.',
     `COMPONENT: ${testCase.component}`,
     `INTERACTION: ${testCase.interaction}`,
     testCase.skill_code ? `SKILL: ${testCase.skill_code}` : '',

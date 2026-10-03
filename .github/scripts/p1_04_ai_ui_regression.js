@@ -31,6 +31,14 @@ function assert(condition, message) {
           coreAccess: true,
           aiAssist: false,
           killSwitch: false
+        },
+        learnerCopy: {
+          skillTitle: (code) => ({
+            'P1-QUA-02': 'Discriminant and roots',
+            'P1-QUA-01': 'Completing the square',
+            'P1-INT-05': 'Volume of revolution',
+            'P5-GEO-01': 'Geometric model'
+          })[code] || ''
         }
       };
       window.sb = {
@@ -188,13 +196,39 @@ function assert(condition, message) {
 
     await page.evaluate(() => {
       document.querySelector('#exam-prep-host-root').innerHTML = `
-        <section data-ep-views-screen data-ep-ai-skill-detail="P1-QUA-01" data-ep-ai-skill-component="P1">
+        <section data-ep-views-screen data-ep-ai-skill-detail="P1-INT-05" data-ep-ai-skill-component="P1">
+          <div class="ep-views-summary"></div>
+        </section>`;
+    });
+    await page.waitForSelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
+    await page.click('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
+    await page.waitForFunction(() => document.querySelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
+    let expandedTheoryCalls = await page.evaluate(() => window.__aiCalls);
+    assert(expandedTheoryCalls.length === 6, `Expected exactly 6 AI endpoint calls after expanded P1 theory, got ${expandedTheoryCalls.length}`);
+    assert(expandedTheoryCalls[5].body.skill_code === 'P1-INT-05', 'Expanded P1 theory action lost canonical integration skill');
+
+    await page.evaluate(() => {
+      document.querySelector('#exam-prep-host-root').innerHTML = `
+        <section data-ep-views-screen data-ep-ai-skill-detail="P5-GEO-01" data-ep-ai-skill-component="P5">
+          <div class="ep-views-summary"></div>
+        </section>`;
+    });
+    await page.waitForSelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
+    await page.click('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
+    await page.waitForFunction(() => document.querySelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-output-text]')?.textContent === 'P5 explanation');
+    expandedTheoryCalls = await page.evaluate(() => window.__aiCalls);
+    assert(expandedTheoryCalls.length === 7, `Expected exactly 7 AI endpoint calls after expanded P5 theory, got ${expandedTheoryCalls.length}`);
+    assert(expandedTheoryCalls[6].body.component_code === 'P5' && expandedTheoryCalls[6].body.skill_code === 'P5-GEO-01', 'Expanded P5 geometric theory action crossed scope');
+
+    await page.evaluate(() => {
+      document.querySelector('#exam-prep-host-root').innerHTML = `
+        <section data-ep-views-screen data-ep-ai-skill-detail="P1-NOT-A-SKILL" data-ep-ai-skill-component="P1">
           <div class="ep-views-summary"></div>
         </section>`;
     });
     await page.waitForTimeout(50);
     const unsupportedTheoryActions = await page.evaluate(() => document.querySelectorAll('[data-ep-ai-topic-action-wrap]').length);
-    assert(unsupportedTheoryActions === 0, 'Theory action appeared for a skill without approved runtime source coverage');
+    assert(unsupportedTheoryActions === 0, 'Theory action appeared for a non-canonical skill');
 
     await page.evaluate(() => {
       document.querySelector('#exam-prep-host-root').innerHTML = '<section data-ep-live-active-assessment><div>Question</div></section>';
@@ -209,7 +243,7 @@ function assert(condition, message) {
     assert(state.panels === 0, 'AI panel must disappear outside safe overview surface');
     assert(state.errorActions === 0, 'Diagnostic AI action must never remain in an active assessment');
     assert(state.topicActions === 0, 'Theory AI action must never remain in an active assessment');
-    assert(state.calls === 5, 'Screen transition must not trigger an AI request');
+    assert(state.calls === 7, 'Screen transition must not trigger an AI request');
 
     await page.evaluate(() => {
       window.iClubExamPrepHostInternal.lastCapabilities.killSwitch = true;

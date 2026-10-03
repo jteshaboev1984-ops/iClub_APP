@@ -1,0 +1,463 @@
+{
+  "pack_version": "p3_02_full_theory_area_sample_v1_0",
+  "source_pack_version": "p3_02_full_theory_pack_v1_2026_10_03",
+  "scope": "one provider-quality sample from each of the 13 official P1/P5 syllabus areas after full 81-skill runtime theory coverage",
+  "critical_failure_policy": "zero_tolerance",
+  "cases": [
+    {
+      "case_id": "P302-FULL-P1-QUA01-EN",
+      "component": "P1",
+      "locale": "en",
+      "interaction": "theory_explanation",
+      "skill_code": "P1-QUA-01",
+      "runtime_source_available": true,
+      "source_body": "Completing the square rewrites a quadratic to expose its vertex and shape. For x^2 + bx + c, form (x + b/2)^2 plus the remaining constant, then read the turning point from the completed-square form.",
+      "question": "Explain how completing the square helps me understand a quadratic graph.",
+      "semantic_groups": [
+        [
+          "completing the square",
+          "completed-square"
+        ],
+        [
+          "vertex",
+          "turning point"
+        ],
+        [
+          "shape",
+          "graph"
+        ],
+        [
+          "remaining constant",
+          "constant"
+        ]
+      ],
+      "forbidden_claims": [
+        "correct answer is",
+        "answer key"
+      ],
+      "reference_answer": "Completing the square rewrites the quadratic so its turning point is visible directly. For x^2 + bx + c, write the x-terms as (x + b/2)^2 and adjust the constant. The completed-square form then makes the vertex and the graph’s shape easier to identify."
+    },
+    {
+      "case_id": "P302-FULL-P1-FUN04-RU",
+      "component": "P1",
+      "locale": "ru",
+      "interaction": "theory_explanation",
+      "skill_code": "P1-FUN-04",
+      "runtime_source_available": true,
+      "source_body": "Обратную функцию можно корректно задать, когда исходная функция взаимно однозначна на выбранной области определения. При нахождении обратной функции меняют местами x и y и решают относительно нового y, а область определения обратной функции соответствует области значений исходной.",
+      "question": "Объясни, что нужно проверить перед нахождением обратной функции.",
+      "semantic_groups": [
+        [
+          "взаимно однознач",
+          "разные значения аргумента"
+        ],
+        [
+          "области определения",
+          "область определения"
+        ],
+        [
+          "области значений",
+          "областью значений",
+          "область значений"
+        ]
+      ],
+      "forbidden_claims": [
+        "правильный ответ",
+        "ключ ответов"
+      ],
+      "reference_answer": "Сначала проверьте, что функция взаимно однозначна на выбранной области определения, иначе обратная функция не будет однозначной. Затем можно поменять местами x и y и выразить новый y. Область определения обратной функции получается из области значений исходной."
+    },
+    {
+      "case_id": "P302-FULL-P1-COO04-UZ",
+      "component": "P1",
+      "locale": "uz",
+      "interaction": "theory_explanation",
+      "skill_code": "P1-COO-04",
+      "runtime_source_available": true,
+      "source_body": "Markazi (a,b) va radiusi r bo‘lgan aylananing tenglamasi (x-a)^2 + (y-b)^2 = r^2. Yoyilgan tenglamani to‘liq kvadratga keltirish orqali markaz va radiusni aniqlash mumkin.",
+      "question": "Aylana tenglamasidan markaz va radiusni qanday aniqlashni tushuntir.",
+      "semantic_groups": [
+        [
+          "(x-a)^2",
+          "(x - a)^2"
+        ],
+        [
+          "(y-b)^2",
+          "(y - b)^2"
+        ],
+        [
+          "markaz"
+        ],
+        [
+          "radius"
+        ],
+        [
+          "to‘liq kvadrat",
+          "to'liq kvadrat"
+        ]
+      ],
+      "forbidden_claims": [
+        "to‘g‘ri javob",
+        "javoblar kaliti"
+      ],
+      "reference_answer": "Standart ko‘rinish (x-a)^2 + (y-b)^2 = r^2 bo‘lsa, markaz (a,b), radius esa r bo‘ladi. Agar tenglama yoyilgan bo‘lsa, x va y hadlarini alohida to‘liq kvadratga keltirib standart ko‘rinishga qaytaring."
+    },
+    {
+      "case_id": "P302-FULL-P1-CIR02-EN",
+      "component": "P1",
+      "locale": "en",
+      "interaction": "theory_explanation",
+      "skill_code": "P1-CIR-02",
+      "runtime_source_available": true,
+      "source_body": "For an angle theta measured in radians, arc length is s = r theta. Rearrange the same relation to find an unknown radius or angle, and make sure theta is in radians before using the formula.",
+      "question": "Explain the arc-length formula and the unit check I should make.",
+      "semantic_groups": [
+        [
+          "s = r theta",
+          "s=r theta",
+          "s = rθ",
+          "s=rθ"
+        ],
+        [
+          "radians"
+        ],
+        [
+          "radius"
+        ],
+        [
+          "angle",
+          "theta",
+          "θ"
+        ]
+      ],
+      "forbidden_claims": [
+        "correct answer is",
+        "answer key"
+      ],
+      "reference_answer": "Use s = r theta, where r is the radius and theta must be in radians. If the radius or angle is unknown, rearrange the same formula. The main unit check is to convert the angle to radians before substituting."
+    },
+    {
+      "case_id": "P302-FULL-P1-TRI05-RU",
+      "component": "P1",
+      "locale": "ru",
+      "interaction": "theory_explanation",
+      "skill_code": "P1-TRI-05",
+      "runtime_source_available": true,
+      "source_body": "При решении простого тригонометрического уравнения сначала находят главное значение, а затем используют период и симметрию соответствующей функции, чтобы получить все решения на заданном интервале. Нужно проверить границы интервала и не потерять дополнительные решения.",
+      "question": "Почему одного значения с калькулятора недостаточно при решении тригонометрического уравнения?",
+      "semantic_groups": [
+        [
+          "главное значение"
+        ],
+        [
+          "период"
+        ],
+        [
+          "симметри"
+        ],
+        [
+          "все решения",
+          "остальные решения"
+        ],
+        [
+          "интервал"
+        ]
+      ],
+      "forbidden_claims": [
+        "правильный ответ",
+        "ключ ответов"
+      ],
+      "reference_answer": "Калькулятор обычно даёт главное значение, но тригонометрическая функция повторяется и имеет симметрии. Поэтому по главному значению нужно найти остальные решения, которые попадают в заданный интервал, используя период и симметрию. В конце проверьте границы интервала."
+    },
+    {
+      "case_id": "P302-FULL-P1-SER05-UZ",
+      "component": "P1",
+      "locale": "uz",
+      "interaction": "theory_explanation",
+      "skill_code": "P1-SER-05",
+      "runtime_source_available": true,
+      "source_body": "Cheksiz geometrik qator faqat |r| < 1 bo‘lganda yaqinlashadi. Shu shart bajarilsa, birinchi hadi a va umumiy nisbati r bo‘lgan qatorning cheksiz yig‘indisi S_infinity = a/(1-r).",
+      "question": "Cheksiz geometrik qator qachon yig‘indiga ega bo‘ladi?",
+      "semantic_groups": [
+        [
+          "|r| < 1",
+          "|r|<1"
+        ],
+        [
+          "yaqinlash",
+          "yig‘indiga ega",
+          "yig'indiga ega"
+        ],
+        [
+          "a/(1-r)",
+          "a / (1-r)"
+        ],
+        [
+          "birinchi had"
+        ],
+        [
+          "nisbat",
+          "r bo‘lsa",
+          "r bo'lsa"
+        ]
+      ],
+      "forbidden_claims": [
+        "to‘g‘ri javob",
+        "javoblar kaliti"
+      ],
+      "reference_answer": "Cheksiz geometrik qatorning yig‘indisi faqat umumiy nisbat r uchun |r| < 1 bo‘lganda mavjud, chunki hadlar nolga yaqinlashadi. Birinchi had a bo‘lsa, yig‘indi S_infinity = a/(1-r) formula bilan topiladi."
+    },
+    {
+      "case_id": "P302-FULL-P1-DIF07-EN",
+      "component": "P1",
+      "locale": "en",
+      "interaction": "theory_explanation",
+      "skill_code": "P1-DIF-07",
+      "runtime_source_available": true,
+      "source_body": "Stationary points occur where dy/dx = 0. Classify a stationary point by checking how the derivative changes sign around it or by another valid derivative test, then use the result for graph sketching or optimisation.",
+      "question": "Explain how stationary points are found and classified.",
+      "semantic_groups": [
+        [
+          "dy/dx = 0",
+          "dy/dx=0"
+        ],
+        [
+          "stationary"
+        ],
+        [
+          "changes sign",
+          "change from positive",
+          "negative to positive"
+        ],
+        [
+          "maximum",
+          "minimum",
+          "classify"
+        ],
+        [
+          "optimisation",
+          "graph"
+        ]
+      ],
+      "forbidden_claims": [
+        "correct answer is",
+        "answer key"
+      ],
+      "reference_answer": "Find stationary points by solving dy/dx = 0. Then check the derivative on either side: a change from positive to negative indicates a local maximum, while negative to positive indicates a local minimum. This classification helps with graph sketching and optimisation."
+    },
+    {
+      "case_id": "P302-FULL-P1-INT04-RU",
+      "component": "P1",
+      "locale": "ru",
+      "interaction": "theory_explanation",
+      "skill_code": "P1-INT-04",
+      "runtime_source_available": true,
+      "source_body": "Определённый интеграл даёт знаковую площадь, поэтому при нахождении геометрической площади между кривыми или между кривой и осью нужно учитывать, какая функция выше, и разбивать область в точках пересечения или смены знака.",
+      "question": "Как не получить отрицательную геометрическую площадь при интегрировании?",
+      "semantic_groups": [
+        [
+          "знаков",
+          "учитывает знак"
+        ],
+        [
+          "какая функция выше",
+          "какая кривая выше",
+          "верхняя минус нижняя"
+        ],
+        [
+          "разбивать",
+          "разбейте"
+        ],
+        [
+          "точках пересечения",
+          "смены знака",
+          "порядок кривых"
+        ],
+        [
+          "площад"
+        ]
+      ],
+      "forbidden_claims": [
+        "правильный ответ",
+        "ключ ответов"
+      ],
+      "reference_answer": "Определённый интеграл учитывает знак, а геометрическая площадь должна быть положительной. Поэтому сначала определите, какая кривая выше, и интегрируйте разность «верхняя минус нижняя». Если порядок кривых или знак меняется, разбейте область на отдельные интервалы."
+    },
+    {
+      "case_id": "P302-FULL-P5-DAT04-UZ",
+      "component": "P5",
+      "locale": "uz",
+      "interaction": "theory_explanation",
+      "skill_code": "P5-DAT-04",
+      "runtime_source_available": true,
+      "source_body": "Gistogrammada, ayniqsa interval kengliklari teng bo‘lmaganda, ustun balandligi chastota emas, balki chastota zichligi bo‘ladi. Chastota zichligi = chastota / interval kengligi, shuning uchun ustun yuzi chastotani ifodalaydi.",
+      "question": "Nega teng bo‘lmagan intervallarda gistogramma balandligi chastota bo‘la olmaydi?",
+      "semantic_groups": [
+        [
+          "chastota zichligi"
+        ],
+        [
+          "chastota / interval kengligi",
+          "chastota/inter"
+        ],
+        [
+          "ustun yuzi"
+        ],
+        [
+          "teng bo‘lmagan",
+          "teng bo'lmagan",
+          "turlicha"
+        ]
+      ],
+      "forbidden_claims": [
+        "to‘g‘ri javob",
+        "javoblar kaliti"
+      ],
+      "reference_answer": "Intervallar kengligi turlicha bo‘lsa, faqat chastotani balandlik sifatida olish ustun yuzlarini noto‘g‘ri taqqoslaydi. Shuning uchun balandlik chastota zichligi = chastota / interval kengligi bo‘ladi. Natijada har bir ustun yuzi tegishli chastotani ko‘rsatadi."
+    },
+    {
+      "case_id": "P302-FULL-P5-CNT05-EN",
+      "component": "P5",
+      "locale": "en",
+      "interaction": "theory_explanation",
+      "skill_code": "P5-CNT-05",
+      "runtime_source_available": true,
+      "source_body": "Use combinations nCr when selecting r objects from n and order does not matter. If the chosen objects are then arranged into positions, count the selection stage and the arrangement stage separately and multiply them.",
+      "question": "When should I use combinations, and what if I arrange the selected objects afterwards?",
+      "semantic_groups": [
+        [
+          "order does not matter",
+          "does not create a new selection"
+        ],
+        [
+          "nCr",
+          "combination"
+        ],
+        [
+          "selection"
+        ],
+        [
+          "arrangement"
+        ],
+        [
+          "multiply"
+        ]
+      ],
+      "forbidden_claims": [
+        "correct answer is",
+        "answer key"
+      ],
+      "reference_answer": "Use nCr for a selection when changing the order of the chosen objects does not create a new selection. If those selected objects are then arranged, treat that as a second stage. Count the selection and the arrangement separately, then multiply the numbers of possibilities."
+    },
+    {
+      "case_id": "P302-FULL-P5-PRO05-RU",
+      "component": "P5",
+      "locale": "ru",
+      "interaction": "theory_explanation",
+      "skill_code": "P5-PRO-05",
+      "runtime_source_available": true,
+      "source_body": "Условная вероятность P(A|B) описывает вероятность события A при условии, что B уже произошло. Она вычисляется как P(A intersection B)/P(B), если P(B) не равно нулю.",
+      "question": "Объясни смысл условной вероятности и её формулу.",
+      "semantic_groups": [
+        [
+          "P(A|B)"
+        ],
+        [
+          "B уже произошло",
+          "условии"
+        ],
+        [
+          "P(A intersection B)",
+          "пересеч"
+        ],
+        [
+          "P(B)"
+        ],
+        [
+          "не равно нулю",
+          "не равна нулю",
+          "!=0",
+          "≠0"
+        ]
+      ],
+      "forbidden_claims": [
+        "правильный ответ",
+        "ключ ответов"
+      ],
+      "reference_answer": "P(A|B) — это вероятность события A после того, как известно, что B произошло. Мы ограничиваемся исходами внутри B, поэтому P(A|B)=P(A intersection B)/P(B), при условии что P(B) не равно нулю."
+    },
+    {
+      "case_id": "P302-FULL-P5-GEO02-UZ",
+      "component": "P5",
+      "locale": "uz",
+      "interaction": "theory_explanation",
+      "skill_code": "P5-GEO-02",
+      "runtime_source_available": true,
+      "source_body": "Geometrik modelda X birinchi muvaffaqiyatgacha bo‘lgan sinovlar soni bo‘lsa, P(X=r)=(1-p)^(r-1)p. Kamida yoki ko‘pi bilan kabi yig‘ma ehtimollarda to‘ldiruvchi hodisadan foydalanish ko‘pincha qulay.",
+      "question": "Geometrik ehtimollik formulasidagi r-1 nimani bildiradi?",
+      "semantic_groups": [
+        [
+          "(1-p)^(r-1)p",
+          "(1-p) ^ (r-1)"
+        ],
+        [
+          "r-1"
+        ],
+        [
+          "muvaffaqiyatsiz",
+          "muvaffaqiyat bo‘lmagan",
+          "muvaffaqiyat bo'lmagan"
+        ],
+        [
+          "birinchi muvaffaqiyat"
+        ],
+        [
+          "r-sinov",
+          "r sinov"
+        ]
+      ],
+      "forbidden_claims": [
+        "to‘g‘ri javob",
+        "javoblar kaliti"
+      ],
+      "reference_answer": "P(X=r)=(1-p)^(r-1)p formulada r-1 birinchi muvaffaqiyatdan oldingi muvaffaqiyatsiz sinovlar sonini bildiradi. So‘ng r-sinovda muvaffaqiyat p ehtimol bilan yuz beradi. Yig‘ma savollarda to‘ldiruvchi hodisa ko‘pincha hisobni qisqartiradi."
+    },
+    {
+      "case_id": "P302-FULL-P5-NOR06-EN",
+      "component": "P5",
+      "locale": "en",
+      "interaction": "theory_explanation",
+      "skill_code": "P5-NOR-06",
+      "runtime_source_available": true,
+      "source_body": "For a normal approximation to a binomial distribution, first check that the approximation conditions are satisfied. Use mean np and variance np(1-p), then translate the discrete boundary to the continuous normal model with the correct continuity correction.",
+      "question": "What are the main steps when approximating a binomial distribution by a normal distribution?",
+      "semantic_groups": [
+        [
+          "approximation conditions",
+          "binomial conditions",
+          "appropriate",
+          "suitable"
+        ],
+        [
+          "mean np",
+          "np"
+        ],
+        [
+          "variance np(1-p)"
+        ],
+        [
+          "continuity correction"
+        ],
+        [
+          "discrete",
+          "continuous"
+        ]
+      ],
+      "forbidden_claims": [
+        "correct answer is",
+        "answer key"
+      ],
+      "reference_answer": "First check that a normal approximation is appropriate for the binomial model. Use mean np and variance np(1-p) for the approximating normal distribution. Then convert the discrete inequality to a continuous boundary using the correct continuity correction before finding the normal probability."
+    }
+  ]
+}
