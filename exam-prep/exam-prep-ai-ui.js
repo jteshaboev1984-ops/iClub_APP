@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p302ux1";
+  const VERSION = "p304ux1";
   let observer = null;
   let languageObserver = null;
   let renderQueued = false;
@@ -24,43 +24,55 @@
   function copy() {
     const language = currentLanguage();
     if (language === "uz") return {
-      title: "Tayyorgarlik yordamchisi",
-      note: "Tasdiqlangan natijalaringiz va joriy rejangizni sodda qilib tushuntiradi. Natijalaringizni o‘zgartirmaydi.",
-      progress: "Natijalarimni tushuntirish",
+      title: "iClub AI yordamchi",
+      note: "Sizning iClub progress, reja va tasdiqlangan o‘quv materiallaringiz asosida tushuntiradi. Natijalaringizni o‘zgartirmaydi.",
+      homeTitle: "iClub AI yordamchi faol",
+      homeNote: "P1 yoki P5 ni oching. AI progress, joriy reja, qiyin mavzular va qayd etilgan xatolarni tushuntirishga yordam beradi.",
+      openP1: "P1 bilan ochish",
+      openP5: "P5 bilan ochish",
+      progress: "Nimaga e’tibor berishim kerak?",
       plan: "Joriy rejani tushuntirish",
-      repeated: "Takroriy qiyinchiliklarni tushuntirish",
-      topic: "Bu mavzuni tushuntirish",
-      mistake: "Bu xatoni tushuntirish",
-      working: "Tayyorlanmoqda…",
+      repeated: "Takroriy qiyinchiliklarni ko‘rib chiqish",
+      topic: "Bu mavzuni menga tushuntirish",
+      mistake: "Bu xatoni tushunishga yordam ber",
+      working: "Tushuntirish tayyorlanmoqda…",
       close: "Yopish",
-      unavailable: "Qo‘shimcha tushuntirish hozir mavjud emas. Asosiy tayyorgarlik odatdagidek davom etadi.",
-      error: "Tushuntirishni yuklab bo‘lmadi. Keyinroq qayta urinib ko‘ring."
+      unavailable: "AI tushuntirishi hozir mavjud emas. Asosiy tayyorgarlik odatdagidek davom etadi.",
+      error: "AI tushuntirishini yuklab bo‘lmadi. Keyinroq qayta urinib ko‘ring."
     };
     if (language === "en") return {
-      title: "Study assistant",
-      note: "Explains your confirmed progress and current plan in simpler terms. It does not change your results.",
-      progress: "Explain my progress",
+      title: "iClub AI Tutor",
+      note: "Explains your iClub progress, plan and approved learning material in context. It never changes your results.",
+      homeTitle: "iClub AI Tutor is active",
+      homeNote: "Open P1 or P5. AI can explain your progress, current plan, difficult topics and recorded mistakes.",
+      openP1: "Open with P1",
+      openP5: "Open with P5",
+      progress: "What should I focus on?",
       plan: "Explain my current plan",
-      repeated: "Explain repeated difficulties",
-      topic: "Explain this topic",
-      mistake: "Explain this mistake",
-      working: "Preparing…",
+      repeated: "Review recurring difficulties",
+      topic: "Explain this topic to me",
+      mistake: "Help me understand this mistake",
+      working: "Preparing your explanation…",
       close: "Close",
-      unavailable: "Extra explanation is unavailable right now. Your core exam preparation continues normally.",
-      error: "The explanation could not be loaded. Try again later."
+      unavailable: "AI explanation is unavailable right now. Your core exam preparation continues normally.",
+      error: "The AI explanation could not be loaded. Try again later."
     };
     return {
-      title: "Помощник по подготовке",
-      note: "Объясняет подтверждённый прогресс и текущий план простыми словами. Ваши результаты он не меняет.",
-      progress: "Объяснить мой прогресс",
-      plan: "Объяснить текущий план",
-      repeated: "Объяснить повторяющиеся трудности",
-      topic: "Объяснить эту тему",
-      mistake: "Разобрать эту ошибку",
+      title: "ИИ-помощник iClub",
+      note: "Объясняет ваш прогресс, план и утверждённые учебные материалы с учётом контекста iClub. Результаты не меняет.",
+      homeTitle: "ИИ-помощник iClub включён",
+      homeNote: "Откройте P1 или P5. ИИ поможет объяснить прогресс, текущий план, сложные темы и зафиксированные ошибки.",
+      openP1: "Открыть с P1",
+      openP5: "Открыть с P5",
+      progress: "На чём мне сосредоточиться?",
+      plan: "Объяснить мой текущий план",
+      repeated: "Разобрать повторяющиеся трудности",
+      topic: "Объяснить мне эту тему",
+      mistake: "Помочь понять эту ошибку",
       working: "Готовим объяснение…",
       close: "Закрыть",
-      unavailable: "Дополнительное объяснение сейчас недоступно. Основная подготовка продолжает работать как обычно.",
-      error: "Не удалось загрузить объяснение. Попробуйте позже."
+      unavailable: "Объяснение ИИ сейчас недоступно. Основная подготовка продолжает работать как обычно.",
+      error: "Не удалось загрузить объяснение ИИ. Попробуйте позже."
     };
   }
 
@@ -79,6 +91,73 @@
   function componentFromStrip(strip) {
     const value = String(strip?.getAttribute("data-ep-overview-strip") || "").toUpperCase();
     return value === "P1" || value === "P5" ? value : null;
+  }
+
+  function isProtectedAssessment(root) {
+    return Boolean(root?.querySelector("[data-ep-live-active-assessment]"));
+  }
+
+  function buildHomeBanner() {
+    const c = copy();
+    const banner = document.createElement("section");
+    banner.className = "ep-ai-home-banner";
+    banner.setAttribute("data-ep-ai-home-banner", "");
+    banner.setAttribute("aria-label", c.homeTitle);
+    banner.innerHTML = `
+      <div class="ep-ai-home-main">
+        <span class="ep-ai-spark" aria-hidden="true">✦</span>
+        <div class="ep-ai-home-copy">
+          <div class="ep-ai-home-title"></div>
+          <div class="ep-ai-home-note"></div>
+        </div>
+      </div>
+      <div class="ep-ai-home-actions">
+        <button class="ep-ai-home-btn" type="button" data-ep-ai-open-component="P1"></button>
+        <button class="ep-ai-home-btn" type="button" data-ep-ai-open-component="P5"></button>
+      </div>`;
+    banner.querySelector(".ep-ai-home-title").textContent = c.homeTitle;
+    banner.querySelector(".ep-ai-home-note").textContent = c.homeNote;
+    banner.querySelector('[data-ep-ai-open-component="P1"]').textContent = c.openP1;
+    banner.querySelector('[data-ep-ai-open-component="P5"]').textContent = c.openP5;
+    banner.querySelectorAll("[data-ep-ai-open-component]").forEach(button => {
+      button.addEventListener("click", () => {
+        const component = button.getAttribute("data-ep-ai-open-component");
+        const target = rootEl()?.querySelector(`[data-ep-live-open-component="${component}"]`);
+        if (target instanceof HTMLElement) target.click();
+      });
+    });
+    return banner;
+  }
+
+  function renderHomeBanner(root) {
+    const intro = root.querySelector(".ep-live-dashboard-intro");
+    const grid = root.querySelector(".ep-live-grid");
+    if (!intro || !grid) {
+      root.querySelectorAll("[data-ep-ai-home-banner]").forEach(node => node.remove());
+      return;
+    }
+    if (!root.querySelector("[data-ep-ai-home-banner]")) {
+      intro.insertAdjacentElement("afterend", buildHomeBanner());
+    }
+  }
+
+  function renderComponentHomePanel(root) {
+    const home = root.querySelector("[data-ep-component-home]");
+    if (!home) return false;
+    const component = String(home.getAttribute("data-ep-component-home") || "").toUpperCase();
+    if (!["P1", "P5"].includes(component)) return false;
+    const existing = root.querySelector(`[data-ep-ai-panel="${component}"]`);
+    if (!existing) {
+      const mount = home.querySelector(".ep-component-next") || home.querySelector(".ep-component-hero");
+      const panel = buildPanel(component);
+      panel.classList.add("ep-ai-panel-featured");
+      if (mount) mount.insertAdjacentElement("afterend", panel);
+      else home.prepend(panel);
+    }
+    root.querySelectorAll("[data-ep-ai-panel]").forEach(panel => {
+      if (panel.getAttribute("data-ep-ai-panel") !== component) panel.remove();
+    });
+    return true;
   }
 
   function setBusy(panel, busy) {
@@ -165,7 +244,7 @@
     panel.setAttribute("data-ep-ai-panel", component);
     panel.setAttribute("aria-label", c.title);
     panel.innerHTML = `
-      <div class="ep-ai-panel-head">
+      <div class="ep-ai-panel-head"><span class="ep-ai-spark" aria-hidden="true">✦</span><div class="ep-ai-panel-copy">
         <div class="ep-ai-panel-title"></div>
         <div class="ep-ai-panel-note"></div>
       </div>
@@ -294,29 +373,35 @@
   function render() {
     renderQueued = false;
     const root = rootEl();
-    if (!root || root.hidden || !canShow()) {
+    if (!root || root.hidden || !canShow() || isProtectedAssessment(root)) {
+      root?.querySelectorAll("[data-ep-ai-home-banner]").forEach(node => node.remove());
       removePanels();
       removeErrorActions();
       removeTopicActions();
       return;
     }
 
-    const strips = Array.from(root.querySelectorAll("[data-ep-overview-strip]"));
-    if (!strips.length) {
-      removePanels();
-    } else {
-      strips.forEach(strip => {
-        const component = componentFromStrip(strip);
-        if (!component) return;
-        const existing = root.querySelector(`[data-ep-ai-panel="${component}"]`);
-        if (existing) return;
-        strip.insertAdjacentElement("afterend", buildPanel(component));
-      });
+    renderHomeBanner(root);
 
-      root.querySelectorAll("[data-ep-ai-panel]").forEach(panel => {
-        const component = panel.getAttribute("data-ep-ai-panel");
-        if (!root.querySelector(`[data-ep-overview-strip="${component}"]`)) panel.remove();
-      });
+    const componentHomeMounted = renderComponentHomePanel(root);
+    if (!componentHomeMounted) {
+      const strips = Array.from(root.querySelectorAll("[data-ep-overview-strip]"));
+      if (!strips.length) {
+        removePanels();
+      } else {
+        strips.forEach(strip => {
+          const component = componentFromStrip(strip);
+          if (!component) return;
+          const existing = root.querySelector(`[data-ep-ai-panel="${component}"]`);
+          if (existing) return;
+          strip.insertAdjacentElement("afterend", buildPanel(component));
+        });
+
+        root.querySelectorAll("[data-ep-ai-panel]").forEach(panel => {
+          const component = panel.getAttribute("data-ep-ai-panel");
+          if (!root.querySelector(`[data-ep-overview-strip="${component}"]`)) panel.remove();
+        });
+      }
     }
 
     renderErrorActions(root);
