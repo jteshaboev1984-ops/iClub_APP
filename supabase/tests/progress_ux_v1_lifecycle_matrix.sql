@@ -130,14 +130,20 @@ BEGIN
  INSERT INTO private.exam_prep_retest_events
  (correction_case_id,user_id,component_code,skill_code,status,due_not_before)
  VALUES(case_id,u,'P1','P1-CIR-01','scheduled',now()+interval '2 days');
- UPDATE private.exam_prep_weekly_plans SET status='superseded'
- WHERE user_id=u AND component_code='P1' AND status='active';
- INSERT INTO private.exam_prep_weekly_plans
- (user_id,program_version_id,component_code,active_week_no,plan_version,status,policy_note)
- VALUES(u,prog,'P1',1,7,'active','Retest plan') RETURNING id INTO plan_id;
- INSERT INTO private.exam_prep_weekly_plan_items
- (plan_id,priority_order,item_type,skill_code,correction_case_id,due_at,action_code)
- VALUES(plan_id,1,'retest','P1-CIR-01',case_id,now()+interval '2 days','COMPLETE_DELAYED_RETEST');
+ SELECT id INTO STRICT plan_id
+ FROM private.exam_prep_weekly_plans
+ WHERE user_id=u AND component_code='P1' AND active_week_no=1 AND status='active';
+ IF NOT EXISTS(
+   SELECT 1 FROM private.exam_prep_weekly_plan_items wpi
+   WHERE wpi.plan_id=(
+     SELECT p.id FROM private.exam_prep_weekly_plans p
+     WHERE p.user_id=u AND p.component_code='P1' AND p.active_week_no=1 AND p.status='active'
+   )
+     AND wpi.priority_order=1 AND wpi.item_type='retest'
+     AND wpi.correction_case_id=case_id AND wpi.action_code='COMPLETE_DELAYED_RETEST'
+ ) THEN
+   RAISE EXCEPTION 'Automatic correction -> retest plan transition missing';
+ END IF;
  result:=public.get_exam_prep_weekly_progress_safe_v1('P1');
  IF (result->>'completed_goals')::int<>1 OR result->'goals'->0->>'status'<>'waiting_retest'
     OR result->'goals'->0->>'correction_open'<>'true'
@@ -157,10 +163,16 @@ BEGIN
 
  -- Urgent replan cannot erase the frozen first-week denominator or provenance.
  -- QUA-03 is actually released in active week 1; DIF-01 is not.
+ SELECT id INTO STRICT plan_id
+ FROM private.exam_prep_weekly_plans
+ WHERE user_id=u AND component_code='P1' AND active_week_no=1 AND status='active';
  UPDATE private.exam_prep_weekly_plans SET status='superseded' WHERE id=plan_id;
+ SELECT coalesce(max(plan_version),0)+1 INTO n
+ FROM private.exam_prep_weekly_plans
+ WHERE user_id=u AND component_code='P1' AND active_week_no=1;
  INSERT INTO private.exam_prep_weekly_plans
  (user_id,program_version_id,component_code,active_week_no,plan_version,status,policy_note)
- VALUES(u,prog,'P1',1,8,'active','Urgent replan') RETURNING id INTO plan_id;
+ VALUES(u,prog,'P1',1,n,'active','Urgent replan') RETURNING id INTO plan_id;
  INSERT INTO private.exam_prep_weekly_plan_items
  (plan_id,priority_order,item_type,skill_code,action_code)
  VALUES(plan_id,1,'learning','P1-QUA-03','BUILD_FIRST_COVERAGE');

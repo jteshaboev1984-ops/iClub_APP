@@ -10,6 +10,7 @@ on:
       - 'supabase/tests/progress_ux_v1_lifecycle_matrix.sql'
       - 'supabase/tests/progress_ux_v1_action_provenance_matrix.sql'
       - 'supabase/tests/progress_ux_v1_real_retest_matrix.sql'
+      - 'supabase/tests/exam_prep_active_plan_transition_sync_matrix.sql'
       - '.github/workflows/exam-prep-progress-ux-db-v1.yml'
   pull_request:
     paths:
@@ -18,6 +19,7 @@ on:
       - 'supabase/tests/progress_ux_v1_lifecycle_matrix.sql'
       - 'supabase/tests/progress_ux_v1_action_provenance_matrix.sql'
       - 'supabase/tests/progress_ux_v1_real_retest_matrix.sql'
+      - 'supabase/tests/exam_prep_active_plan_transition_sync_matrix.sql'
       - '.github/workflows/exam-prep-progress-ux-db-v1.yml'
 
 permissions:
@@ -143,3 +145,14 @@ jobs:
           test "$(psql -Atqc "select count(*) from public.users where first_name='ProgressUXRealRetest'")" = '0'
           test "$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")" = 'off|false|true'
           echo 'Progress UX real retest lifecycle: GREEN'
+      - name: Active-plan transition continuity and rollback
+        shell: bash
+        env:
+          PGOPTIONS: '-c progress_ux.isolated_db=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_active_plan_transition_sync_matrix.sql
+          test "$(psql -Atqc "select count(*) from public.users where first_name='PlanTransitionSync'")" = '0'
+          test "$(psql -Atqc "select count(*) from auth.users where email like 'transition-sync-%@invalid.example'")" = '0'
+          test "$(psql -Atqc "select rollout_state||'|'||core_enabled||'|'||kill_switch from private.exam_prep_feature_config where id=1")" = 'off|false|true'
+          echo 'Exam Prep active-plan transition continuity: GREEN'
