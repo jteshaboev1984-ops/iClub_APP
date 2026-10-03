@@ -138,9 +138,9 @@ assert(aiSource.includes('languageObserver.observe(document.documentElement'), '
 
     await page.setViewportSize({ width: 390, height: 844 });
     for (const row of [
-      { lang: 'ru', title: 'Помощник по подготовке' },
-      { lang: 'uz', title: 'Tayyorgarlik yordamchisi' },
-      { lang: 'en', title: 'Study assistant' }
+      { lang: 'ru', title: 'ИИ-помощник iClub' },
+      { lang: 'uz', title: 'iClub AI yordamchi' },
+      { lang: 'en', title: 'iClub AI Tutor' }
     ]) {
       await page.evaluate(({ lang }) => {
         window.__lang = lang;
@@ -155,7 +155,7 @@ assert(aiSource.includes('languageObserver.observe(document.documentElement'), '
 
     await page.evaluate(() => { window.__aiMode = 'error'; });
     await page.click('[data-ep-ai-panel="P1"] [data-ep-ai-action="progress_summary"]');
-    await page.waitForFunction(() => document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-output-text]')?.textContent === 'The explanation could not be loaded. Try again later.');
+    await page.waitForFunction(() => document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-output-text]')?.textContent === 'The AI explanation could not be loaded. Try again later.');
     assert(await page.locator('#core-continue').isVisible(), 'Provider failure removed Core learner action');
 
     await page.evaluate(() => { window.__aiMode = 'no_source'; });
@@ -172,7 +172,7 @@ assert(aiSource.includes('languageObserver.observe(document.documentElement'), '
     await page.click('[data-ep-ai-panel="P1"] [data-ep-ai-action="progress_summary"]');
     await page.waitForFunction(() => {
       const t = document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-output-text]')?.textContent || '';
-      return t === 'Extra explanation is unavailable right now. Your core exam preparation continues normally.';
+      return t === 'AI explanation is unavailable right now. Your core exam preparation continues normally.';
     });
     const unsafeVisible = await page.locator('body').textContent();
     assert(!unsafeVisible.includes('UNSAFE AUTHORITATIVE MESSAGE'), 'Authoritative AI payload reached learner UI');
