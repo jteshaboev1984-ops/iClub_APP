@@ -48,6 +48,11 @@ BEGIN
   WHERE approval_status='approved' AND is_runtime_allowed AND rights_status='original_iclub';
   SELECT generation_enabled INTO v_generation FROM private.exam_prep_ai_policy WHERE id=1;
   IF v_cards<>(case
+      when exists(
+        select 1 from private.exam_prep_ai_source_cards
+        where source_version='p3_02_full_theory_pack_v1_2026_10_03'
+          and card_type='theory' and approval_status='approved' and is_runtime_allowed
+      ) then 267
       when to_regprocedure('public.get_exam_prep_ai_skill_theory_context_safe_v1(text,text,text)') is not null then 30
       when to_regprocedure('public.get_exam_prep_ai_error_context_safe_v1(text,uuid,integer,text)') is not null then 18
       else 12
