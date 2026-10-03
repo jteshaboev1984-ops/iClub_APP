@@ -58,7 +58,9 @@
           "x и y"
         ],
         [
-          "области значений"
+          "области значений",
+          "областью значений",
+          "область значений"
         ]
       ],
       "forbidden_claims": [
@@ -181,7 +183,9 @@
           "|r|<1"
         ],
         [
-          "yaqinlash"
+          "yaqinlash",
+          "yig‘indiga ega",
+          "yig'indiga ega"
         ],
         [
           "a/(1-r)",
@@ -369,7 +373,10 @@
           "P(B)"
         ],
         [
-          "не равно нулю"
+          "не равно нулю",
+          "не равна нулю",
+          "!=0",
+          "≠0"
         ]
       ],
       "forbidden_claims": [
@@ -397,14 +404,15 @@
         ],
         [
           "muvaffaqiyatsiz",
-          "muvaffaqiyat"
+          "muvaffaqiyat bo‘lmagan",
+          "muvaffaqiyat bo'lmagan"
         ],
         [
           "birinchi muvaffaqiyat"
         ],
         [
-          "to‘ldiruvchi",
-          "to'ldiruvchi"
+          "r-sinov",
+          "r sinov"
         ]
       ],
       "forbidden_claims": [
@@ -425,7 +433,9 @@
       "semantic_groups": [
         [
           "approximation conditions",
-          "appropriate"
+          "binomial conditions",
+          "appropriate",
+          "suitable"
         ],
         [
           "mean np",
