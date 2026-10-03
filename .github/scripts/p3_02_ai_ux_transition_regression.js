@@ -59,7 +59,7 @@ assert(aiSource.includes('languageObserver.observe(document.documentElement'), '
                 mode: 'no_source',
                 generated: false,
                 academic_state_changed: false,
-                message: 'Extra explanation is unavailable right now. Your core exam preparation continues normally.'
+                message: 'AI explanation is unavailable right now. Your core exam preparation continues normally.'
               },
               error: null
             };
