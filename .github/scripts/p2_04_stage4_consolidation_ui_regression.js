@@ -15,7 +15,7 @@ for (const token of [
   'async function stage4Consolidation(componentCode)',
   'get_exam_prep_stage4_consolidation_safe_v1',
   'timedCatalog, stage4Consolidation, authorizeTimed',
-  'exam-prep-live.js?v=p206finalops1'
+  'exam-prep-live.js?v=p304aitutor1'
 ]) must(api.includes(token), `API integration missing: ${token}`);
 
 for (const token of [
