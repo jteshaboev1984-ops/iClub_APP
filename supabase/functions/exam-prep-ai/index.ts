@@ -234,7 +234,7 @@ function buildProviderInstructions(params: {
       : params.interaction === "repeated_error_summary"
         ? "Summarise only the repeated difficulties already recorded by iClub and the current correction step for each. Do not infer a new misconception."
         : params.interaction === "theory_explanation"
-          ? "Explain the approved mathematical concept for the supplied skill and adapt the emphasis to the recorded learner_context when present. If the status says needs_correction, reinforce the core concept and what to pay attention to without guessing why the learner was wrong."
+          ? "Explain the approved mathematical concept for the supplied skill and adapt the emphasis to the recorded learner_context when present. Start with the core idea, then give one practical cue from the approved source. If the status says needs_correction, connect the explanation to what the learner should pay attention to next without guessing why the learner was wrong. Do not mechanically repeat attempt counts that are already visible in the learner interface."
           : params.interaction === "multilingual_explanation"
             ? "Explain the approved mathematical concept for the supplied skill in the requested language and adapt the emphasis to the recorded learner_context when present. Do not infer a misconception that is not recorded."
             : "Explain the learner's recorded progress in learner-friendly terms, then explain the recorded next action. Do not predict grades or readiness beyond the supplied context.";
