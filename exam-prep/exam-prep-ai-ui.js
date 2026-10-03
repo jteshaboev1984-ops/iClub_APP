@@ -229,7 +229,8 @@
     const c = copy();
     const component = String(screen.getAttribute("data-ep-ai-skill-component") || "").toUpperCase();
     const skillCode = String(screen.getAttribute("data-ep-ai-skill-detail") || "");
-    if (!["P1","P5"].includes(component) || !skillCode.startsWith(component + "-")) return null;
+    const knownTitle = String(internal.learnerCopy?.skillTitle?.(skillCode, currentLanguage()) || "");
+    if (!["P1","P5"].includes(component) || !skillCode.startsWith(component + "-") || !knownTitle) return null;
 
     const wrap = document.createElement("div");
     wrap.className = "ep-ai-inline ep-ai-topic";
