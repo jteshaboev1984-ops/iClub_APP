@@ -73,6 +73,7 @@ assert(src.includes('deterministic_mapping_required'), 'unmapped source-bound in
 assert(src.includes('":repeated_error_summary:"'), 'repeated-error source-card selector missing');
 assert(src.includes('":theory:"'), 'theory source-card selector missing');
 assert(src.includes('validateGeneratedMessage'), 'provider output validation missing');
+assert(src.includes('Do not introduce any digit, percentage, count, threshold, date, or numeric example unless that exact numeric token already appears'), 'provider prompt must prevent unsupported numeric output before validation');
 assert(src.includes('reserve_exam_prep_ai_provider_call_service_v1'), 'atomic provider reservation RPC missing');
 assert(src.includes('finalize_exam_prep_ai_provider_call_service_v1'), 'provider accounting finalizer RPC missing');
 assert(src.includes('conservativeProviderReservationCost'), 'conservative provider cost reservation missing');
