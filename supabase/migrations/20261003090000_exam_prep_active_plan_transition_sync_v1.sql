@@ -31,14 +31,12 @@ SET search_path = ''
 AS $function$
 DECLARE
   v_plan private.exam_prep_weekly_plans%ROWTYPE;
-  v_item private.exam_prep_weekly_plan_items%ROWTYPE;
-  v_case private.exam_prep_correction_cases%ROWTYPE;
-  v_retest private.exam_prep_retest_events%ROWTYPE;
-  v_original_payload jsonb;
-  v_original_action text;
+  v_new_plan uuid;
+  v_next_version integer;
   v_transitioned integer := 0;
   v_completed integer := 0;
   v_restored integer := 0;
+  v_needs_clone boolean := false;
 BEGIN
   IF p_user_id IS NULL OR p_component_code NOT IN ('P1','P5') THEN
     RETURN jsonb_build_object('status','ignored','reason','invalid_scope');
@@ -61,167 +59,268 @@ BEGIN
     RETURN jsonb_build_object('status','no_active_plan','transitioned',0,'completed',0,'restored',0);
   END IF;
 
-  FOR v_item IN
-    SELECT i.*
+  -- A completed academic action may close only its current pending slot.
+  -- This does not rewrite frozen goals, sessions, responses or evidence.
+  UPDATE private.exam_prep_weekly_plan_items i
+  SET status='completed'
+  WHERE i.plan_id=v_plan.id
+    AND i.status='pending'
+    AND (
+      (
+        i.correction_case_id IS NOT NULL
+        AND EXISTS(
+          SELECT 1
+          FROM private.exam_prep_correction_cases c
+          WHERE c.id=i.correction_case_id
+            AND c.user_id=p_user_id
+            AND c.component_code=p_component_code
+            AND c.skill_code=i.skill_code
+            AND c.status='resolved'
+        )
+      )
+      OR
+      (
+        i.correction_case_id IS NULL
+        AND (
+          (i.item_type='learning' AND EXISTS(
+            SELECT 1
+            FROM private.exam_prep_session_authorizations a
+            JOIN private.exam_prep_sessions s ON s.authorization_id=a.id
+            WHERE a.user_id=p_user_id
+              AND a.plan_id=v_plan.id
+              AND a.plan_priority_order=i.priority_order
+              AND s.user_id=p_user_id
+              AND s.component_code=p_component_code
+              AND s.status='finalized'
+              AND s.session_type='learning'
+          ))
+          OR
+          (i.item_type='mixed_transfer' AND EXISTS(
+            SELECT 1
+            FROM private.exam_prep_session_authorizations a
+            JOIN private.exam_prep_sessions s ON s.authorization_id=a.id
+            WHERE a.user_id=p_user_id
+              AND a.plan_id=v_plan.id
+              AND a.plan_priority_order=i.priority_order
+              AND s.user_id=p_user_id
+              AND s.component_code=p_component_code
+              AND s.status='finalized'
+              AND s.session_type='mixed'
+          ))
+          OR
+          (i.item_type='retest' AND EXISTS(
+            SELECT 1
+            FROM private.exam_prep_session_authorizations a
+            JOIN private.exam_prep_sessions s ON s.authorization_id=a.id
+            WHERE a.user_id=p_user_id
+              AND a.plan_id=v_plan.id
+              AND a.plan_priority_order=i.priority_order
+              AND s.user_id=p_user_id
+              AND s.component_code=p_component_code
+              AND s.status='finalized'
+              AND s.session_type='retest'
+          ))
+        )
+      )
+    );
+  GET DIAGNOSTICS v_completed = ROW_COUNT;
+
+  -- Existing retest rows may only need their due/action projection refreshed.
+  -- This keeps the item's historical type unchanged.
+  UPDATE private.exam_prep_weekly_plan_items i
+  SET due_at=r.due_not_before,
+      action_code='COMPLETE_DELAYED_RETEST',
+      action_payload=coalesce(i.action_payload,'{}'::jsonb)
+        || jsonb_build_object('preserve_in_recovery',true)
+  FROM private.exam_prep_correction_cases c
+  JOIN LATERAL (
+    SELECT rr.*
+    FROM private.exam_prep_retest_events rr
+    WHERE rr.correction_case_id=c.id
+      AND rr.user_id=p_user_id
+      AND rr.component_code=p_component_code
+      AND rr.status IN ('scheduled','authorized')
+    ORDER BY rr.created_at DESC,rr.id DESC
+    LIMIT 1
+  ) r ON true
+  WHERE i.plan_id=v_plan.id
+    AND i.status='pending'
+    AND i.item_type='retest'
+    AND i.correction_case_id=c.id
+    AND c.user_id=p_user_id
+    AND c.component_code=p_component_code
+    AND c.skill_code=i.skill_code
+    AND c.status='retest_due'
+    AND (
+      i.due_at IS DISTINCT FROM r.due_not_before
+      OR i.action_code IS DISTINCT FROM 'COMPLETE_DELAYED_RETEST'
+      OR coalesce((i.action_payload->>'preserve_in_recovery')::boolean,false) IS DISTINCT FROM true
+    );
+
+  -- Item-type changes are never done in place. The old plan is immutable history:
+  -- clone it, supersede it, and transform only the current actionable projection.
+  SELECT EXISTS(
+    SELECT 1
     FROM private.exam_prep_weekly_plan_items i
+    JOIN private.exam_prep_correction_cases c
+      ON c.id=i.correction_case_id
+     AND c.user_id=p_user_id
+     AND c.component_code=p_component_code
+     AND c.skill_code=i.skill_code
     WHERE i.plan_id=v_plan.id
       AND i.status='pending'
-    ORDER BY i.priority_order
-    FOR UPDATE
-  LOOP
-    IF v_item.correction_case_id IS NOT NULL THEN
-      SELECT c.* INTO v_case
-      FROM private.exam_prep_correction_cases c
-      WHERE c.id=v_item.correction_case_id
-        AND c.user_id=p_user_id
-        AND c.component_code=p_component_code;
+      AND (
+        (
+          i.item_type='correction'
+          AND c.status='retest_due'
+          AND EXISTS(
+            SELECT 1
+            FROM private.exam_prep_retest_events r
+            WHERE r.correction_case_id=c.id
+              AND r.user_id=p_user_id
+              AND r.component_code=p_component_code
+              AND r.status IN ('scheduled','authorized')
+          )
+        )
+        OR
+        (
+          i.item_type='retest'
+          AND c.status IN ('open','remediating','reopened')
+        )
+      )
+  ) INTO v_needs_clone;
 
-      IF v_case.id IS NULL OR v_item.skill_code IS DISTINCT FROM v_case.skill_code THEN
-        CONTINUE;
-      END IF;
+  IF v_needs_clone THEN
+    SELECT coalesce(max(p.plan_version),0)+1
+      INTO v_next_version
+    FROM private.exam_prep_weekly_plans p
+    WHERE p.user_id=p_user_id
+      AND p.component_code=p_component_code
+      AND p.active_week_no=v_plan.active_week_no;
 
-      IF v_case.status='resolved' THEN
-        UPDATE private.exam_prep_weekly_plan_items
-        SET status='completed'
-        WHERE plan_id=v_plan.id
-          AND priority_order=v_item.priority_order
-          AND status='pending';
-        IF FOUND THEN v_completed:=v_completed+1; END IF;
-        CONTINUE;
-      END IF;
+    UPDATE private.exam_prep_weekly_plans
+    SET status='superseded'
+    WHERE id=v_plan.id AND status='active';
 
-      IF v_case.status='retest_due' THEN
-        SELECT r.* INTO v_retest
-        FROM private.exam_prep_retest_events r
-        WHERE r.correction_case_id=v_case.id
-          AND r.user_id=p_user_id
-          AND r.component_code=p_component_code
-          AND r.status IN ('scheduled','authorized')
-        ORDER BY r.created_at DESC,r.id DESC
-        LIMIT 1;
+    INSERT INTO private.exam_prep_weekly_plans(
+      user_id,program_version_id,component_code,active_week_no,plan_version,status,
+      recovery_mode,max_priorities,policy_note,recovery_case_id,allocation_policy,
+      planning_horizon_days
+    )
+    VALUES(
+      v_plan.user_id,v_plan.program_version_id,v_plan.component_code,v_plan.active_week_no,
+      v_next_version,'active',v_plan.recovery_mode,v_plan.max_priorities,v_plan.policy_note,
+      v_plan.recovery_case_id,v_plan.allocation_policy,v_plan.planning_horizon_days
+    )
+    RETURNING id INTO v_new_plan;
 
-        IF v_retest.id IS NULL THEN
-          CONTINUE;
-        END IF;
-
-        IF v_item.item_type='correction' THEN
-          v_original_payload:=v_item.action_payload;
-          v_original_action:=v_item.action_code;
-          UPDATE private.exam_prep_weekly_plan_items
-          SET item_type='retest',
-              due_at=v_retest.due_not_before,
-              action_code='COMPLETE_DELAYED_RETEST',
-              action_payload=jsonb_build_object(
-                'preserve_in_recovery',true,
-                'transition_original_action_code',v_original_action,
-                'transition_original_action_payload',v_original_payload
-              )
-          WHERE plan_id=v_plan.id
-            AND priority_order=v_item.priority_order
-            AND status='pending'
-            AND correction_case_id=v_case.id;
-          IF FOUND THEN v_transitioned:=v_transitioned+1; END IF;
-        ELSIF v_item.item_type='retest' THEN
-          UPDATE private.exam_prep_weekly_plan_items
-          SET due_at=v_retest.due_not_before,
-              action_code='COMPLETE_DELAYED_RETEST',
-              action_payload=coalesce(v_item.action_payload,'{}'::jsonb)
-                || jsonb_build_object('preserve_in_recovery',true)
-          WHERE plan_id=v_plan.id
-            AND priority_order=v_item.priority_order
-            AND status='pending'
-            AND correction_case_id=v_case.id
-            AND (
-              due_at IS DISTINCT FROM v_retest.due_not_before
-              OR action_code IS DISTINCT FROM 'COMPLETE_DELAYED_RETEST'
-              OR coalesce((action_payload->>'preserve_in_recovery')::boolean,false) IS DISTINCT FROM true
-            );
-          IF FOUND THEN v_transitioned:=v_transitioned+1; END IF;
-        END IF;
-        CONTINUE;
-      END IF;
-
-      IF v_case.status IN ('open','remediating','reopened') AND v_item.item_type='retest' THEN
-        v_original_payload:=v_item.action_payload->'transition_original_action_payload';
-        v_original_action:=nullif(v_item.action_payload->>'transition_original_action_code','');
-        UPDATE private.exam_prep_weekly_plan_items
-        SET item_type='correction',
-            due_at=NULL,
-            action_code=coalesce(v_original_action,'COMPLETE_CORRECTION_ANALOGUES'),
-            action_payload=coalesce(
-              v_original_payload,
-              jsonb_build_object(
-                'analogue_floor',3,
-                'analogue_ceiling',6,
-                'written_or_unprompted_required',true
-              )
+    INSERT INTO private.exam_prep_weekly_plan_items(
+      plan_id,priority_order,item_type,skill_code,correction_case_id,due_at,
+      action_code,action_payload,status,created_at
+    )
+    SELECT
+      v_new_plan,
+      i.priority_order,
+      CASE
+        WHEN i.status='pending' AND i.item_type='correction'
+             AND c.status='retest_due' AND r.id IS NOT NULL THEN 'retest'
+        WHEN i.status='pending' AND i.item_type='retest'
+             AND c.status IN ('open','remediating','reopened') THEN 'correction'
+        ELSE i.item_type
+      END,
+      i.skill_code,
+      i.correction_case_id,
+      CASE
+        WHEN i.status='pending' AND i.item_type='correction'
+             AND c.status='retest_due' AND r.id IS NOT NULL THEN r.due_not_before
+        WHEN i.status='pending' AND i.item_type='retest'
+             AND c.status IN ('open','remediating','reopened') THEN NULL
+        ELSE i.due_at
+      END,
+      CASE
+        WHEN i.status='pending' AND i.item_type='correction'
+             AND c.status='retest_due' AND r.id IS NOT NULL THEN 'COMPLETE_DELAYED_RETEST'
+        WHEN i.status='pending' AND i.item_type='retest'
+             AND c.status IN ('open','remediating','reopened')
+          THEN coalesce(nullif(i.action_payload->>'transition_original_action_code',''),
+                        'COMPLETE_CORRECTION_ANALOGUES')
+        ELSE i.action_code
+      END,
+      CASE
+        WHEN i.status='pending' AND i.item_type='correction'
+             AND c.status='retest_due' AND r.id IS NOT NULL
+          THEN jsonb_build_object(
+            'preserve_in_recovery',true,
+            'transition_original_action_code',i.action_code,
+            'transition_original_action_payload',i.action_payload
+          )
+        WHEN i.status='pending' AND i.item_type='retest'
+             AND c.status IN ('open','remediating','reopened')
+          THEN coalesce(
+            i.action_payload->'transition_original_action_payload',
+            jsonb_build_object(
+              'analogue_floor',3,
+              'analogue_ceiling',6,
+              'written_or_unprompted_required',true
             )
-        WHERE plan_id=v_plan.id
-          AND priority_order=v_item.priority_order
-          AND status='pending'
-          AND correction_case_id=v_case.id;
-        IF FOUND THEN v_restored:=v_restored+1; END IF;
-      END IF;
+          )
+        ELSE i.action_payload
+      END,
+      i.status,
+      i.created_at
+    FROM private.exam_prep_weekly_plan_items i
+    LEFT JOIN private.exam_prep_correction_cases c
+      ON c.id=i.correction_case_id
+     AND c.user_id=p_user_id
+     AND c.component_code=p_component_code
+     AND c.skill_code=i.skill_code
+    LEFT JOIN LATERAL (
+      SELECT rr.*
+      FROM private.exam_prep_retest_events rr
+      WHERE rr.correction_case_id=c.id
+        AND rr.user_id=p_user_id
+        AND rr.component_code=p_component_code
+        AND rr.status IN ('scheduled','authorized')
+      ORDER BY rr.created_at DESC,rr.id DESC
+      LIMIT 1
+    ) r ON true
+    WHERE i.plan_id=v_plan.id
+    ORDER BY i.priority_order;
 
-      CONTINUE;
-    END IF;
+    SELECT
+      count(*) FILTER(
+        WHERE old_i.status='pending' AND old_i.item_type='correction'
+          AND new_i.item_type='retest'
+      )::integer,
+      count(*) FILTER(
+        WHERE old_i.status='pending' AND old_i.item_type='retest'
+          AND new_i.item_type='correction'
+      )::integer
+    INTO v_transitioned,v_restored
+    FROM private.exam_prep_weekly_plan_items old_i
+    JOIN private.exam_prep_weekly_plan_items new_i
+      ON new_i.plan_id=v_new_plan
+     AND new_i.priority_order=old_i.priority_order
+    WHERE old_i.plan_id=v_plan.id;
 
-    IF (
-      (v_item.item_type='learning' AND EXISTS(
-        SELECT 1
-        FROM private.exam_prep_session_authorizations a
-        JOIN private.exam_prep_sessions s ON s.authorization_id=a.id
-        WHERE a.user_id=p_user_id
-          AND a.plan_id=v_plan.id
-          AND a.plan_priority_order=v_item.priority_order
-          AND s.user_id=p_user_id
-          AND s.component_code=p_component_code
-          AND s.status='finalized'
-          AND s.session_type='learning'
-      ))
-      OR
-      (v_item.item_type='mixed_transfer' AND EXISTS(
-        SELECT 1
-        FROM private.exam_prep_session_authorizations a
-        JOIN private.exam_prep_sessions s ON s.authorization_id=a.id
-        WHERE a.user_id=p_user_id
-          AND a.plan_id=v_plan.id
-          AND a.plan_priority_order=v_item.priority_order
-          AND s.user_id=p_user_id
-          AND s.component_code=p_component_code
-          AND s.status='finalized'
-          AND s.session_type='mixed'
-      ))
-      OR
-      (v_item.item_type='retest' AND EXISTS(
-        SELECT 1
-        FROM private.exam_prep_session_authorizations a
-        JOIN private.exam_prep_sessions s ON s.authorization_id=a.id
-        WHERE a.user_id=p_user_id
-          AND a.plan_id=v_plan.id
-          AND a.plan_priority_order=v_item.priority_order
-          AND s.user_id=p_user_id
-          AND s.component_code=p_component_code
-          AND s.status='finalized'
-          AND s.session_type='retest'
-      ))
-    ) THEN
-      UPDATE private.exam_prep_weekly_plan_items
-      SET status='completed'
-      WHERE plan_id=v_plan.id
-        AND priority_order=v_item.priority_order
-        AND status='pending';
-      IF FOUND THEN v_completed:=v_completed+1; END IF;
-    END IF;
-  END LOOP;
+    RETURN jsonb_build_object(
+      'status','replanned',
+      'previous_plan_id',v_plan.id,
+      'plan_id',v_new_plan,
+      'component_code',p_component_code,
+      'transitioned',coalesce(v_transitioned,0),
+      'completed',v_completed,
+      'restored',coalesce(v_restored,0)
+    );
+  END IF;
 
   RETURN jsonb_build_object(
     'status','reconciled',
     'plan_id',v_plan.id,
     'component_code',p_component_code,
-    'transitioned',v_transitioned,
+    'transitioned',0,
     'completed',v_completed,
-    'restored',v_restored
+    'restored',0
   );
 END;
 $function$;
@@ -437,74 +536,6 @@ $function$;
 
 REVOKE ALL ON FUNCTION private.exam_prep_active_plan_transition_audit_v1()
 FROM PUBLIC,anon,authenticated,service_role;
-
--- Frozen weekly goals must never reinterpret a finished retest as remediation
--- merely because the current actionable slot moved back from retest to correction.
--- Keep activity provenance tied to the session type that actually satisfied the
--- original frozen goal. This preserves historical attempt counts through
--- correction -> retest -> failed retest -> correction transitions.
-DO $progress_projection_patch$
-DECLARE
-  v_oid oid;
-  v_def text;
-  v_anchor text;
-  v_replacement text;
-  v_owner oid;
-  v_acl aclitem[];
-  v_security boolean;
-  v_volatility "char";
-  v_count integer;
-BEGIN
-  v_oid:=to_regprocedure('public.get_exam_prep_weekly_progress_safe_v1(text)');
-  IF v_oid IS NULL THEN
-    RAISE EXCEPTION 'exam_prep_transition_sync_progress_projection_missing';
-  END IF;
-
-  SELECT p.proowner,p.proacl,p.prosecdef,p.provolatile
-    INTO v_owner,v_acl,v_security,v_volatility
-  FROM pg_catalog.pg_proc p
-  WHERE p.oid=v_oid;
-
-  v_def:=pg_catalog.pg_get_functiondef(v_oid);
-  v_anchor:='        and hi.item_type=g.item_type'||chr(10)
-    ||'        and (';
-  v_count:=(length(v_def)-length(replace(v_def,v_anchor,'')))/length(v_anchor);
-  IF v_count<>1 THEN
-    RAISE EXCEPTION 'exam_prep_transition_sync_progress_anchor_drift_%',v_count;
-  END IF;
-
-  v_replacement:='        and hi.item_type=g.item_type'||chr(10)
-    ||'        and ('||chr(10)
-    ||'          (g.item_type=''correction'' and ses.session_type=''learning'' and ca.id is not null)'||chr(10)
-    ||'          or (g.item_type=''learning'' and ses.session_type=''learning'')'||chr(10)
-    ||'          or (g.item_type=''mixed_transfer'' and ses.session_type=''mixed'')'||chr(10)
-    ||'          or (g.item_type=''retest'' and ses.session_type=''retest'')'||chr(10)
-    ||'        )'||chr(10)
-    ||'        and (';
-
-  EXECUTE replace(v_def,v_anchor,v_replacement);
-
-  SELECT count(*) INTO v_count
-  FROM pg_catalog.pg_proc p
-  WHERE p.oid=v_oid
-    AND p.proowner IS NOT DISTINCT FROM v_owner
-    AND p.proacl IS NOT DISTINCT FROM v_acl
-    AND p.prosecdef IS NOT DISTINCT FROM v_security
-    AND p.provolatile IS NOT DISTINCT FROM v_volatility
-    AND strpos(
-      pg_catalog.pg_get_functiondef(p.oid),
-      '(g.item_type=''correction'' and ses.session_type=''learning'' and ca.id is not null)'
-    )>0
-    AND strpos(
-      pg_catalog.pg_get_functiondef(p.oid),
-      '(g.item_type=''retest'' and ses.session_type=''retest'')'
-    )>0;
-
-  IF v_count<>1 THEN
-    RAISE EXCEPTION 'exam_prep_transition_sync_progress_projection_patch_failed';
-  END IF;
-END;
-$progress_projection_patch$;
 
 -- One-time production repair: reconcile only current active Exam Prep plans.
 -- Frozen goals, completed/superseded plans, sessions, responses and evidence are untouched.
