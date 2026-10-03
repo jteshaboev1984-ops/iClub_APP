@@ -288,7 +288,7 @@ const path = require('path');
   assert(result.hidden === false, 'AI-entitled learner lost the Exam Prep entry');
   assert(result.aiVisible === 'true' && result.hasAiClass, 'AI entitlement is not visibly represented on the Exam Prep entry');
   assert(result.badge.includes('AI'), 'AI-enabled Exam Prep entry badge does not surface AI');
-  assert(result.note.includes('AI Tutor is active'), 'AI-enabled Exam Prep entry does not explain the premium capability');
+  assert(result.note.includes('AI Tutor is available'), 'AI-enabled Exam Prep entry does not explain the premium capability');
   assert(!result.text.includes('AI Assist'), 'learner-facing Exam Prep entry leaked internal AI service-mode terminology');
   await page.evaluate(() => { window.__caps = { ...window.__caps, ai_assist: false }; });
 
