@@ -184,6 +184,12 @@
   font-size: 11px;
   font-weight: 800;
 }
+.exam-prep-host-entry.has-ai-assist .exam-prep-feature-badge{
+  color:#2f65b7;
+}
+.exam-prep-host-entry.has-ai-assist .subject-mode-icon-exam{
+  box-shadow:0 0 0 3px rgba(47,101,183,.08);
+}
 
 .exam-prep-feature-arrow {
   width: 30px;
