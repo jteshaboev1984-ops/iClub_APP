@@ -17,7 +17,7 @@ for (const token of [
   'async function setExamOpsConfirmation(componentCode, itemCode, confirmed)',
   'set_my_exam_prep_exam_ops_confirmation_v1',
   'readiness, readinessSummary, examOps, saveExamAppointment, setExamOpsConfirmation, finalCalibration',
-  'exam-prep-live.js?v=p206finalops1'
+  'exam-prep-live.js?v=p304aitutor1'
 ]) assert(api.includes(token), `P2-06 API integration missing: ${token}`);
 
 for (const token of [
