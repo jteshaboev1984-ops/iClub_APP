@@ -1154,7 +1154,37 @@
   border-radius:14px;
   background:rgba(47,101,183,.035);
 }
+.ep-ai-topic-head{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  min-width:0;
+}
+.ep-ai-topic-head>div{
+  display:grid;
+  gap:3px;
+  min-width:0;
+}
+.ep-ai-topic-head strong{
+  font-size:13px;
+  line-height:1.35;
+}
+.ep-ai-topic-head [data-ep-ai-topic-note]{
+  font-size:11px;
+  line-height:1.45;
+  opacity:.72;
+}
 .ep-ai-topic .ep-ai-inline-btn{width:100%}
+.ep-ai-output-head{
+  font-size:11px;
+  line-height:1.3;
+  color:#2f65b7;
+}
+.ep-ai-output-note{
+  font-size:10.5px;
+  line-height:1.42;
+  opacity:.62;
+}
 .ep-result-item .ep-ai-inline{
   margin-top:10px;
   padding-top:10px;
