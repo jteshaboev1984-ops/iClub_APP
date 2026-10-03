@@ -153,7 +153,8 @@
           "симметри"
         ],
         [
-          "все решения"
+          "все решения",
+          "остальные решения"
         ],
         [
           "интервал"
@@ -190,7 +191,9 @@
           "birinchi had"
         ],
         [
-          "nisbat"
+          "nisbat",
+          "r bo‘lsa",
+          "r bo'lsa"
         ]
       ],
       "forbidden_claims": [
@@ -218,7 +221,8 @@
         ],
         [
           "changes sign",
-          "sign"
+          "change from positive",
+          "negative to positive"
         ],
         [
           "maximum",
@@ -247,18 +251,22 @@
       "question": "Как не получить отрицательную геометрическую площадь при интегрировании?",
       "semantic_groups": [
         [
-          "знаков"
+          "знаков",
+          "учитывает знак"
         ],
         [
           "какая функция выше",
-          "выше"
+          "какая кривая выше",
+          "верхняя минус нижняя"
         ],
         [
-          "разбивать"
+          "разбивать",
+          "разбейте"
         ],
         [
           "точках пересечения",
-          "смены знака"
+          "смены знака",
+          "порядок кривых"
         ],
         [
           "площад"
@@ -292,7 +300,8 @@
         ],
         [
           "teng bo‘lmagan",
-          "teng bo'lmagan"
+          "teng bo'lmagan",
+          "turlicha"
         ]
       ],
       "forbidden_claims": [
@@ -312,7 +321,8 @@
       "question": "When should I use combinations, and what if I arrange the selected objects afterwards?",
       "semantic_groups": [
         [
-          "order does not matter"
+          "order does not matter",
+          "does not create a new selection"
         ],
         [
           "nCr",
@@ -414,7 +424,8 @@
       "question": "What are the main steps when approximating a binomial distribution by a normal distribution?",
       "semantic_groups": [
         [
-          "approximation conditions"
+          "approximation conditions",
+          "appropriate"
         ],
         [
           "mean np",
