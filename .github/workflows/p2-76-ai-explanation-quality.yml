@@ -1,5 +1,5 @@
 name: P2-76 AI Explanation Quality
-# P3-02 funded provider canary: explicit PR-tagged acceptance before any learner activation.
+# P3-02 funded provider canary: full-theory acceptance candidate; no learner activation.
 
 on:
   pull_request:
