@@ -139,7 +139,7 @@ assert(aiSource.includes('languageObserver.observe(document.documentElement'), '
     await page.setViewportSize({ width: 390, height: 844 });
     for (const row of [
       { lang: 'ru', title: 'ИИ-помощник iClub' },
-      { lang: 'uz', title: 'iClub AI yordamchi' },
+      { lang: 'uz', title: 'iClub AI yordamchisi' },
       { lang: 'en', title: 'iClub AI Tutor' }
     ]) {
       await page.evaluate(({ lang }) => {
