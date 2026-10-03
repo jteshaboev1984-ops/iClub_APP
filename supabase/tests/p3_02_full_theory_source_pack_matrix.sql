@@ -65,6 +65,24 @@ BEGIN
     );
   IF v_missing<>0 THEN RAISE EXCEPTION 'P3-02 missing theory skill/locale rows=%',v_missing; END IF;
 
+  SELECT count(*) INTO v_missing
+  FROM private.exam_prep_ai_source_cards c
+  LEFT JOIN private.exam_prep_syllabus_nodes n
+    ON n.program_version_id=v_program
+   AND n.component_code=c.component_code
+   AND n.skill_code=c.skill_code
+  WHERE c.card_type='theory'
+    AND c.approval_status='approved'
+    AND c.is_runtime_allowed
+    AND (
+      n.skill_code IS NULL
+      OR nullif(btrim(n.book_chapter),'') IS NULL
+      OR nullif(btrim(n.book_pages),'') IS NULL
+    );
+  IF v_missing<>0 THEN
+    RAISE EXCEPTION 'P3-02 theory source provenance lost canonical book mapping rows=%',v_missing;
+  END IF;
+
   SELECT count(*) INTO v_bad
   FROM private.exam_prep_ai_source_cards c
   WHERE c.card_type='theory'
