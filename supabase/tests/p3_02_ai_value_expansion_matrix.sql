@@ -125,10 +125,10 @@ BEGIN
   END LOOP;
 
   v:=public.get_exam_prep_ai_skill_theory_context_safe_v1('P1','P1-QUA-01','en');
-  IF coalesce((v->>'mapped')::boolean,true)
-     OR v->>'reason'<>'approved_theory_source_missing'
+  IF coalesce((v->>'mapped')::boolean,false) IS NOT TRUE
+     OR v->>'skill_code'<>'P1-QUA-01'
   THEN
-    RAISE EXCEPTION 'P3-02 uncovered theory skill did not fail closed: %',v;
+    RAISE EXCEPTION 'P3-02 newly covered theory skill did not map: %',v;
   END IF;
 END
 $learner$;
@@ -189,8 +189,11 @@ BEGIN
   END LOOP;
 
   v:=public.get_exam_prep_ai_source_cards_service_v1('P1','en','theory','P1-QUA-01',8);
-  IF jsonb_array_length(v)<>0 THEN
-    RAISE EXCEPTION 'P3-02 uncovered theory source unexpectedly retrievable: %',v;
+  IF jsonb_array_length(v)<>1
+     OR v#>>'{0,source_card_key}'<>'p1:P1-QUA-01:theory:en:v1'
+     OR v#>>'{0,source_version}'<>'p3_02_full_theory_pack_v1_2026_10_03'
+  THEN
+    RAISE EXCEPTION 'P3-02 newly covered theory source retrieval failed: %',v;
   END IF;
 END
 $sources$;
