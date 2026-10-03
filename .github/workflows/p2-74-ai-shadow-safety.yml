@@ -17,6 +17,7 @@ on:
       - supabase/tests/p3_02_full_theory_source_pack_matrix.sql
       - supabase/tests/p3_02_three_beta_ai_activation_matrix.sql
       - docs/release-packages/20261003_exam_prep_ai_three_beta_canary_activation_v1.sql
+      - docs/release-packages/20261003_exam_prep_ai_three_beta_canary_reversion_v1.sql
       - supabase/tests/ai1_provider_budget_concurrency_matrix.sql
       - 'supabase/functions/exam-prep-ai/**'
       - .github/scripts/p2_74_ai_shadow_safety_regression.js
@@ -33,6 +34,7 @@ on:
       - supabase/tests/p2_74_ai_shadow_safety_matrix.sql
       - supabase/tests/p3_02_three_beta_ai_activation_matrix.sql
       - docs/release-packages/20261003_exam_prep_ai_three_beta_canary_activation_v1.sql
+      - docs/release-packages/20261003_exam_prep_ai_three_beta_canary_reversion_v1.sql
       - 'supabase/functions/exam-prep-ai/**'
       - .github/scripts/p2_74_ai_shadow_safety_regression.js
       - .github/workflows/p2-74-ai-shadow-safety.yml
