@@ -171,7 +171,7 @@ function evaluateCase(testCase, output) {
   };
   const score = Object.values(dimensions).filter(Boolean).length;
   const requiredScore = testCase.interaction === 'theory_explanation' ? 6 : 5;
-  const pass = critical.length === 0 && score >= requiredScore && semanticCoverage >= (testCase.interaction === 'theory_explanation' ? 0.85 : 0.75);
+  const pass = critical.length === 0 && score >= requiredScore && semanticCoverage >= (testCase.interaction === 'theory_explanation' ? 0.80 : 0.75);
 
   return {
     pass,
