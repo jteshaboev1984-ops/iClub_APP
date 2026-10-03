@@ -139,7 +139,7 @@ SET runtime_status='shadow',
       'active_provider_leases_at_reversion',(
         SELECT count(*)
         FROM private.exam_prep_ai_provider_leases
-        WHERE lease_status='active' AND expires_at>now()
+        WHERE status='active' AND expires_at>now()
       )
     ),
     updated_at=now()
