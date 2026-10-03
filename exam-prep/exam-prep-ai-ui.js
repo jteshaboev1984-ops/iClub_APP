@@ -26,8 +26,8 @@
     if (language === "uz") return {
       title: "iClub AI yordamchisi",
       note: "Natijalaringiz, rejangiz va iClub o‘quv materiallarini sodda tushuntiradi. Tekshiruv natijalarini o‘zgartirmaydi.",
-      homeTitle: "iClub AI yordamchisi yoqilgan",
-      homeNote: "P1 yoki P5 ni oching. AI natijalar, joriy reja, qiyin mavzular va qayd etilgan xatolarni tushuntirishga yordam beradi.",
+      homeTitle: "iClub AI yordamchisi",
+      homeNote: "AI yordamchisi Exam Prep’da mavjud. Natijalar, reja, qiyin mavzular yoki qayd etilgan xatolarni tushunish uchun P1 yoki P5 ni oching.",
       openP1: "P1 uchun ochish",
       openP5: "P5 uchun ochish",
       progress: "Nimaga ko‘proq e’tibor beray?",
@@ -46,8 +46,8 @@
     if (language === "en") return {
       title: "iClub AI Tutor",
       note: "Explains your progress, plan and iClub learning material in simpler terms. It never changes assessment results.",
-      homeTitle: "iClub AI Tutor is active",
-      homeNote: "Open P1 or P5. AI can explain your progress, current plan, difficult topics and recorded mistakes.",
+      homeTitle: "iClub AI Tutor",
+      homeNote: "AI Tutor is available in Exam Prep. Open P1 or P5 for help understanding your progress, plan, difficult topics or recorded mistakes.",
       openP1: "Open with P1",
       openP5: "Open with P5",
       progress: "What should I focus on?",
@@ -66,8 +66,8 @@
     return {
       title: "ИИ-помощник iClub",
       note: "Простыми словами объясняет ваш прогресс, план и учебные материалы iClub. Результаты проверок не меняет.",
-      homeTitle: "ИИ-помощник iClub включён",
-      homeNote: "Откройте P1 или P5. ИИ поможет объяснить прогресс, текущий план, сложные темы и зафиксированные ошибки.",
+      homeTitle: "ИИ-помощник iClub",
+      homeNote: "ИИ-помощник доступен в Exam Prep. Откройте P1 или P5, чтобы разобраться в прогрессе, плане, сложных темах или зафиксированных ошибках.",
       openP1: "Открыть с P1",
       openP5: "Открыть с P5",
       progress: "На чём мне сосредоточиться?",
