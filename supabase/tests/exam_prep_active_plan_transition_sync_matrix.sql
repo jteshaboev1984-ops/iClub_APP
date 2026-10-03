@@ -172,6 +172,10 @@ BEGIN
   VALUES(p1_case,u1,'P1','P1-CIR-01','scheduled',due1)
   RETURNING id INTO p1_rt1;
 
+  SELECT id INTO STRICT p1_plan
+  FROM private.exam_prep_weekly_plans
+  WHERE user_id=u1 AND component_code='P1' AND status='active';
+
   SELECT * INTO STRICT item
   FROM private.exam_prep_weekly_plan_items
   WHERE plan_id=p1_plan AND priority_order=1;
@@ -192,6 +196,10 @@ BEGIN
   SET status='reopened',resolved_at=null,updated_at=clock_timestamp()
   WHERE id=p1_case;
 
+  SELECT id INTO STRICT p1_plan
+  FROM private.exam_prep_weekly_plans
+  WHERE user_id=u1 AND component_code='P1' AND status='active';
+
   SELECT * INTO STRICT item
   FROM private.exam_prep_weekly_plan_items
   WHERE plan_id=p1_plan AND priority_order=1;
@@ -211,6 +219,10 @@ BEGIN
     (correction_case_id,user_id,component_code,skill_code,status,due_not_before)
   VALUES(p1_case,u1,'P1','P1-CIR-01','scheduled',due2)
   RETURNING id INTO p1_rt2;
+
+  SELECT id INTO STRICT p1_plan
+  FROM private.exam_prep_weekly_plans
+  WHERE user_id=u1 AND component_code='P1' AND status='active';
 
   SELECT * INTO STRICT item
   FROM private.exam_prep_weekly_plan_items
@@ -240,6 +252,10 @@ BEGIN
     (correction_case_id,user_id,component_code,skill_code,status,due_not_before)
   VALUES(p5_case,u2,'P5','P5-DAT-01','scheduled',due5)
   RETURNING id INTO p5_rt;
+
+  SELECT id INTO STRICT p5_plan
+  FROM private.exam_prep_weekly_plans
+  WHERE user_id=u2 AND component_code='P5' AND status='active';
 
   SELECT * INTO STRICT item
   FROM private.exam_prep_weekly_plan_items
