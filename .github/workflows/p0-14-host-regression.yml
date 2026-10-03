@@ -28,6 +28,7 @@ on:
       - .github/scripts/p0_21_live_overview_placement_regression.js
       - .github/scripts/p0_22_live_view_coexistence_regression.js
       - .github/scripts/p1_04_ai_ui_regression.js
+      - .github/scripts/p3_02_ai_ux_transition_regression.js
       - .github/scripts/p2_03_past_paper_ui_regression.js
       - .github/scripts/p2_09_exam_map_ui_regression.js
       - .github/scripts/p2_10_materials_ui_regression.js
@@ -61,6 +62,7 @@ on:
       - .github/scripts/p0_21_live_overview_placement_regression.js
       - .github/scripts/p0_22_live_view_coexistence_regression.js
       - .github/scripts/p1_04_ai_ui_regression.js
+      - .github/scripts/p3_02_ai_ux_transition_regression.js
       - .github/scripts/p2_03_past_paper_ui_regression.js
       - .github/scripts/p2_09_exam_map_ui_regression.js
       - .github/scripts/p2_10_materials_ui_regression.js
@@ -95,6 +97,7 @@ jobs:
           node --check .github/scripts/p0_21_live_overview_placement_regression.js
           node --check .github/scripts/p0_22_live_view_coexistence_regression.js
           node --check .github/scripts/p1_04_ai_ui_regression.js
+          node --check .github/scripts/p3_02_ai_ux_transition_regression.js
           node --check .github/scripts/p2_03_past_paper_ui_regression.js
           node --check .github/scripts/p2_09_exam_map_ui_regression.js
           node --check .github/scripts/p2_10_materials_ui_regression.js
@@ -104,13 +107,13 @@ jobs:
           grep -q 'id="subject-hub-exam-prep-entry"[^>]*hidden[^>]*aria-hidden="true"' index.html
           grep -q 'id="exam-prep-host-root"[^>]*hidden[^>]*aria-hidden="true"' index.html
           grep -q 'data-action="open-exam-prep"' index.html
-          grep -Eq 'exam-prep/exam-prep-api[.]js[?]v=(p014h1|p209map1|p210materials1|p213placement2|p213placement3|p214projection1|p214projection1-maprpc2|p016open1|p202closure1|p203paper2|p204june26ref1|p205readiness2|p206finalops1|p302fulltheory1)' index.html
+          grep -Eq 'exam-prep/exam-prep-api[.]js[?]v=(p014h1|p209map1|p210materials1|p213placement2|p213placement3|p214projection1|p214projection1-maprpc2|p016open1|p202closure1|p203paper2|p204june26ref1|p205readiness2|p206finalops1|p302fulltheory1|p302ux1)' index.html
           grep -Eq 'exam-prep/exam-prep-host[.]js[?]v=(p014h1|p016open1)' index.html
           grep -q 'exam-prep/exam-prep-host.css?v=p260results2' index.html
           grep -q 'exam-prep-live.js?v=p206finalops1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-learner-views.js?v=p302theory1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-overview-placement.js?v=p213placement2' exam-prep/exam-prep-api.js
-          grep -q 'exam-prep-ai-ui.js?v=p302theory2' exam-prep/exam-prep-api.js
+          grep -q 'exam-prep-ai-ui.js?v=p302ux1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-exam-map.js?v=p209map2' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-materials.js?v=p210materials1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-past-paper.js?v=p203paper2' exam-prep/exam-prep-api.js
@@ -205,6 +208,9 @@ jobs:
 
       - name: Browser-isolated dormant AI learner UI
         run: node .github/scripts/p1_04_ai_ui_regression.js
+
+      - name: Browser-isolated AI capability and provider-failure transitions
+        run: node .github/scripts/p3_02_ai_ux_transition_regression.js
 
       - name: Past Paper learner UI contract
         run: node .github/scripts/p2_03_past_paper_ui_regression.js

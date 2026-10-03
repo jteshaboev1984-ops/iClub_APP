@@ -1,6 +1,6 @@
 # TEMPORARY — P3-02 Synthetic Scale + AI Execution Plan
 
-Status: ACTIVE  
+Status: ACTIVE — A–I GREEN, J pending  
 Started: 2026-10-02  
 Delete only after all completion gates below are green and production-safe postchecks are complete.
 
@@ -18,7 +18,7 @@ Delete only after all completion gates below are green and production-safe postc
 
 ## Work packages
 
-### [ ] A. Preflight + synthetic isolation
+### [x] A. Preflight + synthetic isolation
 - Revalidate current main, production counts, feature state and P3-01 real gate.
 - Audit existing synthetic run engine, identity provenance, virtual time and cleanup.
 - Add only missing run-scoped isolation/cleanup controls.
@@ -31,7 +31,7 @@ Acceptance:
 - real P3-01 remains NO_GO for only real-evidence reasons;
 - no legacy/user-history delta.
 
-### [ ] B. Core scale + resilience
+### [x] B. Core scale + resilience
 - Reuse existing Stage 0–6 synthetic engine.
 - Run 15-profile regression plus 100/300/600 learner scale.
 - Test retries, duplicate submit, idempotency, recovery, rollback, P1/P5 parity, AI OFF and mentor absent.
@@ -42,7 +42,7 @@ Acceptance:
 - no legacy deltas;
 - Core remains independently functional.
 
-### [ ] C. Mentor Care synthetic lane
+### [x] C. Mentor Care synthetic lane
 - Validate 600 learners / exactly 10 active Mentor Care assignments.
 - Validate assignment, queue, written review, second check, pause/reassign and absence behavior.
 - Verify 590 unassigned learners create zero routine mentor tasks.
@@ -51,7 +51,7 @@ Acceptance:
 - exactly assigned learner scope only;
 - mentor outage/capacity hold never freezes safe Core/AI.
 
-### [ ] D. AI shadow/pre-live audit
+### [x] D. AI shadow/pre-live audit
 - Reconcile GitHub and deployed exam-prep-ai Edge Function.
 - Verify server-owned entitlement/runtime/generation gates.
 - Verify answer-key, active-assessment, source allowlist, component firewall, budget/concurrency/timeout, audit and fallback.
@@ -63,7 +63,7 @@ Acceptance:
 - server-only provider secret;
 - deployment reproducible from main.
 
-### [ ] E. Synthetic real-provider canary
+### [x] E. Synthetic real-provider canary
 - Use registered synthetic identities/run IDs only.
 - Enable provider path only inside a service-owned synthetic QA gate.
 - Exercise progress_summary and weekly_plan_narration for P1/P5 in RU/UZ/EN.
@@ -75,7 +75,7 @@ Acceptance:
 - academic state before/after identical;
 - real learners cannot self-grant access.
 
-### [ ] F. AI adversarial safety
+### [x] F. AI adversarial safety
 - Prompt injection, fake privilege/mentor, answer-key request, active-assessment request, cross-component request, unsupported number, unsafe markup, long prompt, unsupported locale, no_source, timeout/429/provider outage.
 - Run across RU/UZ/EN where applicable.
 
@@ -84,7 +84,7 @@ Acceptance:
 - no secret/answer-key leakage;
 - no Core degradation.
 
-### [ ] G. Governed AI value expansion
+### [x] G. Governed AI value expansion
 - Open interactions one at a time only after approved source coverage:
   1. established_error_explanation
   2. repeated_error_summary
@@ -96,7 +96,7 @@ Acceptance:
 - each enabled route has source coverage + golden eval + safety eval;
 - at least three meaningful AI-specific value flows pass.
 
-### [ ] H. AI learner UX
+### [x] H. AI learner UX
 - Validate AI panel, actions, loading, no_source, unavailable, timeout and retry.
 - RU/UZ/EN mathematical equivalence.
 - Mobile 360x800, 390x844, 430x932 and desktop.
@@ -106,7 +106,7 @@ Acceptance:
 - learner understands AI explains but does not change results/state;
 - no broken Core flow when AI is OFF.
 
-### [ ] I. A-to-Z service-transition rehearsal
+### [x] I. A-to-Z service-transition rehearsal
 - Core-only -> AI Assist -> Core-only.
 - AI outage while Core continues.
 - Mentor assignment/pause/reassign independent of AI.
