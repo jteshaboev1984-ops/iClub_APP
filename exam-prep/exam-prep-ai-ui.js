@@ -158,7 +158,10 @@
     const existing = root.querySelector(`[data-ep-ai-panel="${component}"]`);
     if (!existing) {
       const mount = home.querySelector(".ep-component-next") || home.querySelector(".ep-component-hero");
-      const panel = buildPanel(component);
+      const panel = buildPanel(component, {
+        planAvailable: home.getAttribute("data-ep-ai-plan-available") === "true",
+        repeatedAvailable: home.getAttribute("data-ep-ai-repeated-available") === "true"
+      });
       panel.classList.add("ep-ai-panel-featured");
       if (mount) mount.insertAdjacentElement("afterend", panel);
       else home.prepend(panel);
@@ -261,7 +264,7 @@
     }
   }
 
-  function buildPanel(component) {
+  function buildPanel(component, options = {}) {
     const c = copy();
     const panel = document.createElement("section");
     panel.className = "ep-ai-panel";
@@ -289,6 +292,12 @@
     panel.querySelector('[data-ep-ai-action="progress_summary"]').textContent = c.progress;
     panel.querySelector('[data-ep-ai-action="weekly_plan_narration"]').textContent = c.plan;
     panel.querySelector('[data-ep-ai-action="repeated_error_summary"]').textContent = c.repeated;
+    if (options.planAvailable === false) {
+      panel.querySelector('[data-ep-ai-action="weekly_plan_narration"]')?.setAttribute("hidden", "");
+    }
+    if (options.repeatedAvailable === false) {
+      panel.querySelector('[data-ep-ai-action="repeated_error_summary"]')?.setAttribute("hidden", "");
+    }
     applyOutputCopy(panel, c);
 
     panel.querySelectorAll("[data-ep-ai-action]").forEach(button => {
