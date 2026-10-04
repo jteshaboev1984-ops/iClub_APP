@@ -161,7 +161,7 @@
     status.setAttribute("data-ep-ai-dashboard-status", "");
     status.setAttribute("aria-label", c.title);
     status.innerHTML = `
-      <span class="ep-ai-mark ep-ai-mark-compact" aria-hidden="true">AI</span>
+      <img class="ep-ai-mark ep-ai-mark-compact" src="assets/iclub-ai-mark-temp.jpg?v=1" alt="" aria-hidden="true">
       <span class="ep-ai-dashboard-copy"><strong></strong><small></small></span>`;
     status.querySelector("strong").textContent = c.dashboardLabel;
     status.querySelector("small").textContent = c.dashboardNote;
@@ -189,7 +189,7 @@
     wrap.setAttribute("data-ep-ai-surface", surface);
     wrap.innerHTML = `
       <button class="ep-ai-context-btn" type="button" data-ep-ai-action="${interactionType}">
-        <span class="ep-ai-mark ep-ai-mark-inline" aria-hidden="true">AI</span>
+        <img class="ep-ai-mark ep-ai-mark-inline" src="assets/iclub-ai-mark-temp.jpg?v=1" alt="" aria-hidden="true">
         <span data-ep-ai-context-label></span>
       </button>
       ${outputMarkup()}`;
@@ -593,7 +593,7 @@
     wrap.setAttribute("data-ep-ai-error-action-wrap", "");
     wrap.innerHTML = `
       <button class="ep-ai-context-btn" type="button" data-ep-ai-action="established_error_explanation">
-        <span class="ep-ai-mark ep-ai-mark-inline" aria-hidden="true">AI</span>
+        <img class="ep-ai-mark ep-ai-mark-inline" src="assets/iclub-ai-mark-temp.jpg?v=1" alt="" aria-hidden="true">
         <span data-ep-ai-context-label></span>
       </button>
       ${outputMarkup()}`;
@@ -635,7 +635,7 @@
     wrap.setAttribute("data-ep-ai-topic-action-wrap", "");
     wrap.innerHTML = `
       <button class="ep-ai-context-btn ep-ai-topic-btn" type="button" data-ep-ai-action="theory_explanation">
-        <span class="ep-ai-mark ep-ai-mark-inline" aria-hidden="true">AI</span>
+        <img class="ep-ai-mark ep-ai-mark-inline" src="assets/iclub-ai-mark-temp.jpg?v=1" alt="" aria-hidden="true">
         <span class="ep-ai-topic-copy"><strong data-ep-ai-context-label></strong><small data-ep-ai-topic-note></small></span>
       </button>
       ${outputMarkup()}`;
