@@ -323,7 +323,7 @@ async function buildLearnerFacingProviderContext(params: {
       .filter((item: any) => item && item.status === "pending")
       .sort((a: any, b: any) => Number(a?.priority_order || 999) - Number(b?.priority_order || 999))
       .slice(0, 6);
-    const codes = Array.from(new Set(items.map((item: any) => String(item?.skill_code || "")).filter(Boolean)));
+    const codes: string[] = Array.from(new Set<string>(items.map((item: any) => String(item?.skill_code || "")).filter(Boolean)));
     const titles = await Promise.all(codes.map((code) => localizedTheoryTitle(params.component, code, params.locale)));
     const titleByCode = new Map(codes.map((code, index) => [code, titles[index]]));
     return {
@@ -342,7 +342,7 @@ async function buildLearnerFacingProviderContext(params: {
 
   if (params.interaction === "repeated_error_summary") {
     const items = (Array.isArray(raw?.items) ? raw.items : []).slice(0, 3);
-    const codes = Array.from(new Set(items.map((item: any) => String(item?.skill_code || "")).filter(Boolean)));
+    const codes: string[] = Array.from(new Set<string>(items.map((item: any) => String(item?.skill_code || "")).filter(Boolean)));
     const titles = await Promise.all(codes.map((code) => localizedTheoryTitle(params.component, code, params.locale)));
     const titleByCode = new Map(codes.map((code, index) => [code, titles[index]]));
     return {
