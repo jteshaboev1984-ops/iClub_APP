@@ -124,7 +124,8 @@
       return;
     }
     if (!intro.querySelector("[data-ep-ai-dashboard-status]")) {
-      intro.appendChild(buildDashboardStatus());
+      const mount = intro.querySelector(":scope > div:first-child") || intro;
+      mount.appendChild(buildDashboardStatus());
     }
   }
 
