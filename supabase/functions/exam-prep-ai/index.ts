@@ -22,6 +22,20 @@ const OPENAI_MAX_OUTPUT_TOKENS = 180;
 const OPENAI_INPUT_PRICE_PER_MTOK = 0.20;
 const OPENAI_OUTPUT_PRICE_PER_MTOK = 1.20;
 const MAX_PROVIDER_CONTEXT_CHARS = 24000;
+const MAX_FOLLOWUP_TURNS = 2;
+const MAX_FOLLOWUP_TEXT_CHARS = 250;
+const MAX_PRIOR_ASSISTANT_CHARS = 5000;
+const FOLLOWUP_WINDOW_MS = 60 * 60 * 1000;
+const FOLLOWUP_MODES = new Set(["simplify", "rephrase", "focus", "question"]);
+const ROOT_FOLLOWUP_INTERACTIONS = new Set([
+  "progress_summary",
+  "weekly_plan_narration",
+  "established_error_explanation",
+  "repeated_error_summary",
+  "theory_explanation",
+  "multilingual_explanation",
+  "context_followup",
+]);
 const PROVIDER_ENABLED_INTERACTIONS = new Set([
   "progress_summary",
   "weekly_plan_narration",
@@ -40,6 +54,7 @@ const VALID_INTERACTIONS = new Set([
   "repeated_error_summary",
   "theory_explanation",
   "multilingual_explanation",
+  "context_followup",
   "mentor_report_draft",
 ]);
 
@@ -67,6 +82,10 @@ function learnerMessage(locale: string, mode: string, reason: string) {
       no_repeated_gap: "Сейчас повторяющихся трудностей по этому компоненту не зафиксировано.",
       unavailable: "ИИ-помощник сейчас недоступен. Основная подготовка продолжает работать без изменений.",
       fallback: "Сейчас не удалось подготовить дополнительное объяснение. Основной план доступен без изменений.",
+      followup_unavailable: "Это уточнение больше не актуально. Откройте объяснение заново.",
+      followup_too_long: "Сформулируйте вопрос короче — до 250 символов.",
+      followup_question_required: "Напишите короткий вопрос по текущему объяснению.",
+      followup_limit_reached: "Вернитесь к теме и продолжите изучение. При необходимости можно открыть новое объяснение.",
     },
     uz: {
       active_assessment: "Tekshiruv davom etayotgan paytda izohli yordam mavjud emas. Tugagach, xatolarni tahlil qilish mumkin.",
@@ -77,6 +96,10 @@ function learnerMessage(locale: string, mode: string, reason: string) {
       no_repeated_gap: "Bu komponent bo‘yicha hozir takroriy qiyinchilik qayd etilmagan.",
       unavailable: "AI yordamchi hozir mavjud emas. Asosiy tayyorgarlik odatdagidek ishlashda davom etadi.",
       fallback: "Hozir qo‘shimcha izoh tayyorlab bo‘lmadi. Asosiy reja o‘zgarishsiz mavjud.",
+      followup_unavailable: "Bu aniqlashtirish endi dolzarb emas. Izohni qayta oching.",
+      followup_too_long: "Savolni qisqaroq yozing — 250 belgigacha.",
+      followup_question_required: "Joriy izoh bo‘yicha qisqa savol yozing.",
+      followup_limit_reached: "Mavzuni o‘rganishni davom ettiring. Zarur bo‘lsa, yangi izohni ochishingiz mumkin.",
     },
     en: {
       active_assessment: "Explanation help is unavailable while this assessment is active. You can review mistakes after it is finished.",
@@ -87,6 +110,10 @@ function learnerMessage(locale: string, mode: string, reason: string) {
       no_repeated_gap: "No repeated difficulties are currently recorded for this component.",
       unavailable: "AI assistance is unavailable right now. Core exam preparation continues unchanged.",
       fallback: "An additional explanation could not be prepared right now. The core plan remains available.",
+      followup_unavailable: "This follow-up is no longer current. Open a fresh explanation to continue.",
+      followup_too_long: "Keep the question short — up to 250 characters.",
+      followup_question_required: "Write a short question about the current explanation.",
+      followup_limit_reached: "Continue studying this topic. You can open a fresh explanation if you still need help.",
     },
   };
   const dictionary = messages[locale] || messages.ru;
@@ -95,6 +122,10 @@ function learnerMessage(locale: string, mode: string, reason: string) {
   if (reason === "interaction_not_allowed") return dictionary.interaction_not_allowed;
   if (reason === "mentor_actor_required") return dictionary.mentor_actor_required;
   if (reason === "no_repeated_gap") return dictionary.no_repeated_gap;
+  if (["thread_parent_invalid","thread_context_changed","thread_expired","thread_output_mismatch"].includes(reason)) return dictionary.followup_unavailable;
+  if (reason === "followup_text_too_long") return dictionary.followup_too_long;
+  if (reason === "followup_question_required") return dictionary.followup_question_required;
+  if (reason === "followup_limit_reached") return dictionary.followup_limit_reached;
   if (mode === "no_source") return dictionary.no_source;
   if (mode === "fallback") return dictionary.fallback;
   return dictionary.unavailable;
