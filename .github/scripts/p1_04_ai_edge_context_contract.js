@@ -6,7 +6,7 @@ const assert = (condition, message) => { if (!condition) throw new Error(message
 
 const guardCall = src.indexOf('get_exam_prep_ai_guard_v1');
 const contextCall = src.indexOf('deterministicContext = await learnerContext');
-const sourceCall = src.indexOf('get_exam_prep_ai_source_cards_service_v1');
+const sourceCall = src.indexOf('get_exam_prep_ai_source_cards_service_v1', contextCall);
 const reservationCall = src.indexOf('await reserveProviderCall');
 const providerCall = src.indexOf('await callOpenAIProvider');
 const finalizeCall = src.indexOf('await finalizeProviderCall');
