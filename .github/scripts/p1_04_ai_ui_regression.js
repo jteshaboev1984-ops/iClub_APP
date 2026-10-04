@@ -5,7 +5,8 @@ const aiSource = fs.readFileSync('exam-prep/exam-prep-ai-ui.js', 'utf8');
 const hostCss = fs.readFileSync('exam-prep/exam-prep-host.css', 'utf8');
 const liveSource = fs.readFileSync('exam-prep/exam-prep-live.js', 'utf8');
 if (aiSource.includes('ensureStyle(') || aiSource.includes('ep-ai-ui-style') || aiSource.includes('document.createElement("style")')) throw new Error('runtime AI UI style injection returned');
-if (!hostCss.includes('EXAM PREP AI TUTOR UX v2') || !hostCss.includes('.ep-ai-panel{')) throw new Error('centralized AI Tutor CSS contract missing');
+if (!hostCss.includes('EXAM PREP AI TUTOR CONTEXTUAL UX v3') || !hostCss.includes('.ep-ai-context-btn{')) throw new Error('contextual AI Tutor CSS contract missing');
+if (aiSource.includes('data-ep-ai-open-component') || aiSource.includes('data-ep-ai-panel')) throw new Error('duplicate AI navigation/panel returned');
 if (!liveSource.includes('data-ep-live-active-assessment="true"')) throw new Error('real active-assessment AI blackout marker missing');
 
 
@@ -19,8 +20,11 @@ function assert(condition, message) {
   try {
     await page.setContent(`<!doctype html><html lang="en"><head></head><body>
       <div id="exam-prep-host-root" aria-hidden="false">
-        <div class="ep-live-card"><div data-ep-overview-strip="P1"></div></div>
-        <div class="ep-live-card"><div data-ep-overview-strip="P5"></div></div>
+        <section class="ep-live-dashboard-intro"><div><h3>Preparation by P1 and P5</h3></div></section>
+        <div class="ep-live-grid">
+          <button type="button" data-ep-live-open-component="P1">Pure Mathematics 1</button>
+          <button type="button" data-ep-live-open-component="P5">Probability & Statistics 1</button>
+        </div>
       </div>
     </body></html>`);
 
@@ -65,101 +69,76 @@ function assert(condition, message) {
     await page.waitForTimeout(60);
 
     let state = await page.evaluate(() => ({
-      panels: document.querySelectorAll('[data-ep-ai-panel]').length,
+      status: document.querySelectorAll('[data-ep-ai-dashboard-status]').length,
+      contextual: document.querySelectorAll('[data-ep-ai-context-action]').length,
       calls: window.__aiCalls.length
     }));
-    assert(state.panels === 0, 'Core-only learner must not see AI UI');
+    assert(state.status === 0 && state.contextual === 0, 'Core-only learner must not see AI UI');
     assert(state.calls === 0, 'Dormant AI UI must not call endpoint');
 
     await page.evaluate(() => {
       window.iClubExamPrepHostInternal.lastCapabilities.aiAssist = true;
-      document.querySelector('#exam-prep-host-root').setAttribute('data-ai-test-refresh', '1');
       document.querySelector('#exam-prep-host-root').appendChild(document.createComment('refresh'));
     });
-    await page.waitForSelector('[data-ep-ai-panel="P1"]');
-    await page.waitForSelector('[data-ep-ai-panel="P5"]');
+    await page.waitForSelector('[data-ep-ai-dashboard-status]');
 
-    const text = await page.locator('#exam-prep-host-root').textContent();
-    assert(text.includes('iClub AI Tutor'), 'Learner-facing AI Tutor title missing');
+    const dashboardState = await page.evaluate(() => ({
+      statusCount: document.querySelectorAll('[data-ep-ai-dashboard-status]').length,
+      p1Cards: document.querySelectorAll('[data-ep-live-open-component="P1"]').length,
+      p5Cards: document.querySelectorAll('[data-ep-live-open-component="P5"]').length,
+      duplicateAiRoutes: document.querySelectorAll('[data-ep-ai-open-component]').length,
+      text: document.querySelector('#exam-prep-host-root')?.textContent || '',
+      calls: window.__aiCalls.length
+    }));
+    assert(dashboardState.statusCount === 1, 'AI Tutor availability status missing on current dashboard');
+    assert(dashboardState.p1Cards === 1 && dashboardState.p5Cards === 1, 'Core P1/P5 navigation changed');
+    assert(dashboardState.duplicateAiRoutes === 0, 'Dashboard duplicated P1/P5 navigation with AI routes');
+    assert(dashboardState.text.includes('AI Tutor'), 'Learner-facing AI Tutor status missing');
+    assert(dashboardState.calls === 0, 'Dashboard status must never auto-call provider');
     for (const forbidden of ['AI Assist', 'controlled_beta', 'policy_version', 'runtime_status', 'source_card']) {
-      assert(!text.includes(forbidden), `Internal AI term leaked to learner UI: ${forbidden}`);
+      assert(!dashboardState.text.includes(forbidden), `Internal AI term leaked to learner UI: ${forbidden}`);
     }
 
-    await page.click('[data-ep-ai-panel="P1"] [data-ep-ai-action="progress_summary"]');
-    await page.waitForFunction(() => document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
-
-    await page.click('[data-ep-ai-panel="P5"] [data-ep-ai-action="weekly_plan_narration"]');
-    await page.waitForFunction(() => document.querySelector('[data-ep-ai-panel="P5"] [data-ep-ai-output-text]')?.textContent === 'P5 explanation');
-
-    await page.click('[data-ep-ai-panel="P1"] [data-ep-ai-action="repeated_error_summary"]');
-    await page.waitForFunction(() => document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
-
-    const calls = await page.evaluate(() => window.__aiCalls);
-    assert(calls.length === 3, `Expected exactly 3 AI endpoint calls, got ${calls.length}`);
-    assert(calls[0].name === 'exam-prep-ai', 'AI UI must call only the governed Edge Function');
-    assert(calls[0].body.component_code === 'P1', 'P1 action crossed component boundary');
-    assert(calls[0].body.interaction_type === 'progress_summary', 'P1 progress action type drifted');
-    assert(calls[0].body.locale === 'en', 'UI language was not preserved');
-    assert(calls[0].body.user_text === '', 'Context action must not collect unnecessary learner text');
-    assert(calls[1].body.component_code === 'P5', 'P5 action crossed component boundary');
-    assert(calls[1].body.interaction_type === 'weekly_plan_narration', 'P5 plan action type drifted');
-    assert(calls[2].body.component_code === 'P1', 'Repeated-difficulty action crossed component boundary');
-    assert(calls[2].body.interaction_type === 'repeated_error_summary', 'Repeated-difficulty action type drifted');
-    assert(calls[2].body.user_text === '', 'Repeated-difficulty action must not collect free-form learner text');
-
-    // Production-shaped dashboard: AI must be visible without relying on the retired overview-strip anchor.
-    await page.evaluate(() => {
-      window.__openedFromAi = '';
-      document.querySelector('#exam-prep-host-root').innerHTML = `
-        <section class="ep-live-dashboard-intro">
-          <div><h3>Preparation by P1 and P5</h3></div>
-        </section>
-        <div class="ep-live-grid">
-          <button type="button" data-ep-live-open-component="P1">Pure Mathematics 1</button>
-          <button type="button" data-ep-live-open-component="P5">Probability & Statistics 1</button>
-        </div>`;
-      document.querySelectorAll('[data-ep-live-open-component]').forEach(button => {
-        button.addEventListener('click', () => { window.__openedFromAi = button.dataset.epLiveOpenComponent; });
-      });
-    });
-    await page.waitForSelector('[data-ep-ai-home-banner]');
-    const homeBanner = await page.locator('[data-ep-ai-home-banner]').textContent();
-    assert(homeBanner.includes('iClub AI Tutor'), 'Current dashboard did not expose visible AI Tutor entry');
-    const callsBeforeDashboardOpen = await page.evaluate(() => window.__aiCalls.length);
-    await page.click('[data-ep-ai-home-banner] [data-ep-ai-open-component="P1"]');
-    assert(await page.evaluate(() => window.__openedFromAi) === 'P1', 'Dashboard AI Tutor entry did not route through the existing P1 card');
-    assert(await page.evaluate(() => window.__aiCalls.length) === callsBeforeDashboardOpen, 'Dashboard AI Tutor entry caused an unexpected provider call');
-
-    // Production-shaped component home: the paid AI capability must be visible beside the learner's next step.
+    // Component home: AI actions must live inside the existing Core surfaces, not in a second AI panel.
     await page.evaluate(() => {
       document.querySelector('#exam-prep-host-root').innerHTML = `
-        <section class="ep-component-home" data-ep-component-home="P1" data-ep-ai-plan-available="true" data-ep-ai-repeated-available="false">
+        <section class="ep-component-home" data-ep-component-home="P1" data-ep-ai-plan-available="true" data-ep-ai-repeated-available="true">
           <header class="ep-component-hero">Pure Mathematics 1</header>
-          <section class="ep-component-next"><button id="current-core-action" type="button">Start task</button></section>
+          <section class="ep-component-next"><button id="current-core-action" type="button">Correct error</button></section>
           <section class="ep-component-progress-card">Progress</section>
+          <section class="ep-component-links"><button type="button" data-ep-component-link="corrections">Needs attention</button></section>
         </section>`;
     });
-    await page.waitForSelector('[data-ep-ai-panel="P1"].ep-ai-panel-featured');
-    const featured = await page.evaluate(() => {
-      const panel = document.querySelector('[data-ep-ai-panel="P1"]');
-      const next = document.querySelector('.ep-component-next');
-      return {
-        visible: Boolean(panel),
-        afterNext: next?.nextElementSibling === panel,
-        coreVisible: Boolean(document.querySelector('#current-core-action'))
-      };
-    });
-    assert(featured.visible && featured.afterNext, 'Current component home did not mount AI Tutor after the next-step card');
-    assert(featured.coreVisible, 'Current component home AI Tutor displaced the Core next action');
-    const actionVisibility = await page.evaluate(() => ({
-      progressHidden: document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-action="progress_summary"]')?.hidden,
-      planHidden: document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-action="weekly_plan_narration"]')?.hidden,
-      repeatedHidden: document.querySelector('[data-ep-ai-panel="P1"] [data-ep-ai-action="repeated_error_summary"]')?.hidden
+    await page.waitForSelector('.ep-component-next [data-ep-ai-context-action="weekly_plan_narration"]');
+    await page.waitForSelector('.ep-component-progress-card [data-ep-ai-context-action="progress_summary"]');
+    await page.waitForSelector('.ep-component-links [data-ep-ai-context-action="repeated_error_summary"]');
+
+    const contextualState = await page.evaluate(() => ({
+      legacyPanels: document.querySelectorAll('[data-ep-ai-panel]').length,
+      actions: document.querySelectorAll('[data-ep-ai-context-action]').length,
+      coreVisible: Boolean(document.querySelector('#current-core-action')),
+      planInsideNext: Boolean(document.querySelector('.ep-component-next [data-ep-ai-context-action="weekly_plan_narration"]')),
+      progressInsideProgress: Boolean(document.querySelector('.ep-component-progress-card [data-ep-ai-context-action="progress_summary"]')),
+      repeatedBesideCorrections: Boolean(document.querySelector('.ep-component-links [data-ep-ai-context-action="repeated_error_summary"]'))
     }));
-    assert(actionVisibility.progressHidden === false, 'AI Tutor progress action should remain available on component home');
-    assert(actionVisibility.planHidden === false, 'AI Tutor hid a current-plan action despite an active plan');
-    assert(actionVisibility.repeatedHidden === true, 'AI Tutor exposed repeated-difficulty action without repeated-gap context');
-    assert(await page.evaluate(() => window.__aiCalls.length) === callsBeforeDashboardOpen, 'Component-home AI Tutor auto-called the provider');
+    assert(contextualState.legacyPanels === 0, 'Parallel standalone AI panel returned');
+    assert(contextualState.actions === 3, 'Expected three contextual AI actions for available contexts');
+    assert(contextualState.coreVisible, 'Contextual AI displaced the Core next action');
+    assert(contextualState.planInsideNext && contextualState.progressInsideProgress && contextualState.repeatedBesideCorrections, 'AI actions are not mounted beside the Core information they explain');
+
+    await page.click('.ep-component-progress-card [data-ep-ai-action="progress_summary"]');
+    await page.waitForFunction(() => document.querySelector('.ep-component-progress-card [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
+    await page.click('.ep-component-next [data-ep-ai-action="weekly_plan_narration"]');
+    await page.waitForFunction(() => document.querySelector('.ep-component-next [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
+    await page.click('.ep-component-links [data-ep-ai-action="repeated_error_summary"]');
+    await page.waitForFunction(() => document.querySelector('.ep-component-links [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
+
+    const calls = await page.evaluate(() => window.__aiCalls);
+    assert(calls.length === 3, `Expected exactly 3 contextual AI endpoint calls, got ${calls.length}`);
+    assert(calls[0].name === 'exam-prep-ai' && calls[0].body.interaction_type === 'progress_summary', 'Progress action bypassed governed AI flow');
+    assert(calls[1].body.interaction_type === 'weekly_plan_narration', 'Next-step plan action drifted');
+    assert(calls[2].body.interaction_type === 'repeated_error_summary', 'Repeated-difficulty action drifted');
+    assert(calls.every(call => call.body.component_code === 'P1' && call.body.locale === 'en' && call.body.user_text === ''), 'Contextual AI request boundary drifted');
 
     await page.evaluate(() => {
       document.querySelector('#exam-prep-host-root').innerHTML = `
@@ -238,7 +217,7 @@ function assert(condition, message) {
     });
     await page.waitForSelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
     const topicText = await page.locator('[data-ep-ai-topic-action-wrap]').textContent();
-    assert(topicText.includes('Explain this topic to me'), 'Governed theory AI action text missing');
+    assert(topicText.includes('Explain this topic with AI'), 'Governed theory AI action text missing');
 
     await page.click('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
     await page.waitForFunction(() => document.querySelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
@@ -291,23 +270,27 @@ function assert(condition, message) {
     });
     await page.waitForTimeout(50);
     state = await page.evaluate(() => ({
-      panels: document.querySelectorAll('[data-ep-ai-panel]').length,
+      dashboardStatus: document.querySelectorAll('[data-ep-ai-dashboard-status]').length,
+      contextualActions: document.querySelectorAll('[data-ep-ai-context-action]').length,
       errorActions: document.querySelectorAll('[data-ep-ai-error-action-wrap]').length,
       topicActions: document.querySelectorAll('[data-ep-ai-topic-action-wrap]').length,
       calls: window.__aiCalls.length
     }));
-    assert(state.panels === 0, 'AI panel must disappear outside safe overview surface');
+    assert(state.dashboardStatus === 0 && state.contextualActions === 0, 'AI surfaces must disappear during active assessment');
     assert(state.errorActions === 0, 'Diagnostic AI action must never remain in an active assessment');
     assert(state.topicActions === 0, 'Theory AI action must never remain in an active assessment');
     assert(state.calls === 7, 'Screen transition must not trigger an AI request');
 
     await page.evaluate(() => {
       window.iClubExamPrepHostInternal.lastCapabilities.killSwitch = true;
-      document.querySelector('#exam-prep-host-root').innerHTML = '<div><div data-ep-overview-strip="P1"></div></div>';
+      document.querySelector('#exam-prep-host-root').innerHTML = '<section class="ep-live-dashboard-intro"></section><div class="ep-live-grid"><button data-ep-live-open-component="P1">P1</button></div>';
     });
     await page.waitForTimeout(50);
-    state = await page.evaluate(() => document.querySelectorAll('[data-ep-ai-panel]').length);
-    assert(state === 0, 'Kill switch must keep learner AI UI hidden');
+    state = await page.evaluate(() => ({
+      status: document.querySelectorAll('[data-ep-ai-dashboard-status]').length,
+      contextual: document.querySelectorAll('[data-ep-ai-context-action]').length
+    }));
+    assert(state.status === 0 && state.contextual === 0, 'Kill switch must keep learner AI UI hidden');
 
     console.log('P1-04 learner AI UI regression: GREEN');
   } finally {
