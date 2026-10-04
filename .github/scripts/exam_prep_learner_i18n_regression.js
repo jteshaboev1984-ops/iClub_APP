@@ -81,6 +81,12 @@ assert(aiSource.includes('plan: "Nega bu keyingi qadam?"'), 'UZ contextual next-
 assert(aiSource.includes('repeated: "Takrorlanayotgan qiyinchiliklarni tushuntirish"'), 'UZ repeated-difficulty action regressed');
 assert(aiSource.includes('topic: "Bu mavzuni AI bilan tushuntirish"'), 'UZ AI Tutor topic action regressed');
 assert(aiSource.includes('mistake: "Bu xatoni tushunishga yordam ber"'), 'UZ AI Tutor mistake action regressed');
+assert(aiSource.includes('followupPrompt: "Savol qoldimi?"'), 'UZ AI follow-up prompt regressed');
+assert(aiSource.includes('simpler: "Soddaroq tushuntir"'), 'UZ AI simplify action regressed');
+assert(aiSource.includes('rephrase: "Boshqacha tushuntir"'), 'UZ AI rephrase action regressed');
+assert(aiSource.includes('focus: "Nimaga e’tibor beray?"'), 'UZ AI focus action regressed');
+assert(aiSource.includes('questionPlaceholder: "Shu izoh bo‘yicha so‘rang…"'), 'UZ AI follow-up placeholder regressed');
+assert(aiSource.includes('continueStudy: "O‘rganishni davom ettirish"'), 'UZ AI thread completion action regressed');
 assert(!aiSource.includes('P1 uchun AI ni ochish'), 'Duplicate UZ AI navigation returned');
 assert(!aiSource.includes('data-ep-ai-panel'), 'Standalone AI panel returned');
 

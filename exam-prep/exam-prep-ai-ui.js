@@ -2,10 +2,13 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p304ux2";
+  const VERSION = "p304ux3";
   let observer = null;
   let languageObserver = null;
   let renderQueued = false;
+  const threadState = new WeakMap();
+  const MAX_FOLLOWUPS = 2;
+  const MAX_FOLLOWUP_CHARS = 250;
   const REQUEST_TIMEOUT_MS = Math.min(30000, Math.max(50, Number(internal.aiUiRequestTimeoutMs) || 12000));
 
   function rootEl() {
@@ -38,7 +41,16 @@
       working: "Tushuntirish tayyorlanmoqda…",
       close: "Yopish",
       unavailable: "AI tushuntirishi hozir mavjud emas. Asosiy tayyorgarlik odatdagidek davom etadi.",
-      error: "AI tushuntirishini yuklab bo‘lmadi. Keyinroq qayta urinib ko‘ring."
+      error: "AI tushuntirishini yuklab bo‘lmadi. Keyinroq qayta urinib ko‘ring.",
+      followupPrompt: "Savol qoldimi?",
+      followupOpen: "Aniqlashtirish",
+      simpler: "Soddaroq tushuntir",
+      rephrase: "Boshqacha tushuntir",
+      focus: "Nimaga e’tibor beray?",
+      questionPlaceholder: "Shu izoh bo‘yicha so‘rang…",
+      send: "Yuborish",
+      continueStudy: "O‘rganishni davom ettirish",
+      followupWorking: "Aniqlashtirilmoqda…"
     };
     if (language === "en") return {
       title: "iClub AI Tutor",
@@ -55,7 +67,16 @@
       working: "Preparing your explanation…",
       close: "Close",
       unavailable: "AI explanation is unavailable right now. Your core exam preparation continues normally.",
-      error: "The AI explanation could not be loaded. Try again later."
+      error: "The AI explanation could not be loaded. Try again later.",
+      followupPrompt: "Still unclear?",
+      followupOpen: "Ask a follow-up",
+      simpler: "Explain more simply",
+      rephrase: "Explain it differently",
+      focus: "What should I focus on?",
+      questionPlaceholder: "Ask about this explanation…",
+      send: "Send",
+      continueStudy: "Continue studying",
+      followupWorking: "Clarifying…"
     };
     return {
       title: "ИИ-помощник iClub",
@@ -72,7 +93,16 @@
       working: "Готовим объяснение…",
       close: "Закрыть",
       unavailable: "Объяснение ИИ сейчас недоступно. Основная подготовка продолжает работать как обычно.",
-      error: "Не удалось загрузить объяснение ИИ. Попробуйте позже."
+      error: "Не удалось загрузить объяснение ИИ. Попробуйте позже.",
+      followupPrompt: "Остался вопрос?",
+      followupOpen: "Уточнить",
+      simpler: "Объясни проще",
+      rephrase: "Объясни по-другому",
+      focus: "На что обратить внимание?",
+      questionPlaceholder: "Спросить по этому объяснению…",
+      send: "Отправить",
+      continueStudy: "Продолжить изучение",
+      followupWorking: "Уточняем…"
     };
   }
 
@@ -97,7 +127,29 @@
       <div class="ep-ai-output" data-ep-ai-output role="status" aria-live="polite" hidden>
         <div class="ep-ai-output-head"><strong data-ep-ai-output-label></strong></div>
         <div data-ep-ai-output-text></div>
+        <div data-ep-ai-thread-messages></div>
         <div class="ep-ai-output-note" data-ep-ai-output-note></div>
+        <div class="ep-ai-followup" data-ep-ai-followup hidden>
+          <div class="ep-ai-followup-prompt">
+            <span data-ep-ai-followup-prompt></span>
+            <button type="button" data-ep-ai-followup-open></button>
+          </div>
+          <div class="ep-ai-followup-panel" data-ep-ai-followup-panel hidden>
+            <div class="ep-ai-followup-chips">
+              <button type="button" data-ep-ai-followup-mode="simplify"></button>
+              <button type="button" data-ep-ai-followup-mode="rephrase"></button>
+              <button type="button" data-ep-ai-followup-mode="focus"></button>
+            </div>
+            <div class="ep-ai-followup-question">
+              <textarea rows="2" maxlength="250" data-ep-ai-followup-input></textarea>
+              <div class="ep-ai-followup-question-foot">
+                <span data-ep-ai-followup-count>0/250</span>
+                <button type="button" data-ep-ai-followup-send></button>
+              </div>
+            </div>
+          </div>
+          <button class="ep-ai-followup-done" type="button" data-ep-ai-followup-done hidden></button>
+        </div>
         <button class="ep-ai-output-close" type="button" data-ep-ai-close></button>
       </div>`;
   }
@@ -109,7 +161,7 @@
     status.setAttribute("data-ep-ai-dashboard-status", "");
     status.setAttribute("aria-label", c.title);
     status.innerHTML = `
-      <span class="ep-ai-spark ep-ai-spark-compact" aria-hidden="true">✦</span>
+      <span class="ep-ai-mark ep-ai-mark-compact" aria-hidden="true">AI</span>
       <span class="ep-ai-dashboard-copy"><strong></strong><small></small></span>`;
     status.querySelector("strong").textContent = c.dashboardLabel;
     status.querySelector("small").textContent = c.dashboardNote;
@@ -137,12 +189,13 @@
     wrap.setAttribute("data-ep-ai-surface", surface);
     wrap.innerHTML = `
       <button class="ep-ai-context-btn" type="button" data-ep-ai-action="${interactionType}">
-        <span class="ep-ai-context-icon" aria-hidden="true">✦</span>
+        <span class="ep-ai-mark ep-ai-mark-inline" aria-hidden="true">AI</span>
         <span data-ep-ai-context-label></span>
       </button>
       ${outputMarkup()}`;
     wrap.querySelector("[data-ep-ai-context-label]").textContent = label;
     applyOutputCopy(wrap, c);
+    wireFollowupControls(wrap);
     wrap.querySelector("[data-ep-ai-action]")?.addEventListener("click", () => invoke(wrap, component, interactionType));
     wrap.querySelector("[data-ep-ai-close]")?.addEventListener("click", () => hideOutput(wrap));
     return wrap;
@@ -205,7 +258,7 @@
 
   function setBusy(panel, busy) {
     panel.dataset.epAiBusy = busy ? "true" : "false";
-    panel.querySelectorAll("[data-ep-ai-action]").forEach(button => {
+    panel.querySelectorAll("[data-ep-ai-action], [data-ep-ai-followup-mode], [data-ep-ai-followup-send]").forEach(button => {
       button.disabled = busy;
     });
   }
@@ -231,6 +284,217 @@
     if (label) label.textContent = c.outputLabel;
     if (note) note.textContent = c.sourceNote;
     if (close) close.textContent = c.close;
+    const prompt = container.querySelector("[data-ep-ai-followup-prompt]");
+    const open = container.querySelector("[data-ep-ai-followup-open]");
+    const simpler = container.querySelector('[data-ep-ai-followup-mode="simplify"]');
+    const rephrase = container.querySelector('[data-ep-ai-followup-mode="rephrase"]');
+    const focus = container.querySelector('[data-ep-ai-followup-mode="focus"]');
+    const input = container.querySelector("[data-ep-ai-followup-input]");
+    const send = container.querySelector("[data-ep-ai-followup-send]");
+    const done = container.querySelector("[data-ep-ai-followup-done]");
+    if (prompt) prompt.textContent = c.followupPrompt;
+    if (open) open.textContent = c.followupOpen;
+    if (simpler) simpler.textContent = c.simpler;
+    if (rephrase) rephrase.textContent = c.rephrase;
+    if (focus) focus.textContent = c.focus;
+    if (input) input.setAttribute("placeholder", c.questionPlaceholder);
+    if (send) send.textContent = c.send;
+    if (done) done.textContent = c.continueStudy;
+  }
+
+  function clearFollowup(panel) {
+    threadState.delete(panel);
+    const host = panel.querySelector("[data-ep-ai-followup]");
+    const controls = panel.querySelector("[data-ep-ai-followup-panel]");
+    const done = panel.querySelector("[data-ep-ai-followup-done]");
+    const prompt = panel.querySelector(".ep-ai-followup-prompt");
+    const messages = panel.querySelector("[data-ep-ai-thread-messages]");
+    const input = panel.querySelector("[data-ep-ai-followup-input]");
+    const count = panel.querySelector("[data-ep-ai-followup-count]");
+    if (host) host.hidden = true;
+    if (controls) controls.hidden = true;
+    if (done) done.hidden = true;
+    if (prompt) prompt.hidden = false;
+    if (messages) messages.replaceChildren();
+    if (input) input.value = "";
+    if (count) count.textContent = `0/${MAX_FOLLOWUP_CHARS}`;
+  }
+
+  function initFollowup(panel, state) {
+    if (!state?.requestId || !state?.message) {
+      clearFollowup(panel);
+      return;
+    }
+    threadState.set(panel, {
+      component: state.component,
+      extraBody: { ...(state.extraBody || {}) },
+      parentRequestId: state.requestId,
+      priorAssistantText: state.message,
+      turn: Number(state.turn || 0),
+      eligible: state.eligible === true
+    });
+    const host = panel.querySelector("[data-ep-ai-followup]");
+    const controls = panel.querySelector("[data-ep-ai-followup-panel]");
+    const prompt = panel.querySelector(".ep-ai-followup-prompt");
+    const done = panel.querySelector("[data-ep-ai-followup-done]");
+    if (host) host.hidden = false;
+    if (controls) controls.hidden = true;
+    if (prompt) prompt.hidden = false;
+    if (done) done.hidden = state.eligible === true;
+  }
+
+  function followupLabel(mode, question, c) {
+    if (mode === "simplify") return c.simpler;
+    if (mode === "rephrase") return c.rephrase;
+    if (mode === "focus") return c.focus;
+    return question;
+  }
+
+  function appendFollowupTurn(panel, label, message) {
+    const host = panel.querySelector("[data-ep-ai-thread-messages]");
+    if (!host) return;
+    const turn = document.createElement("div");
+    turn.className = "ep-ai-thread-turn";
+    const q = document.createElement("div");
+    q.className = "ep-ai-thread-user";
+    q.textContent = String(label || "");
+    const a = document.createElement("div");
+    a.className = "ep-ai-thread-assistant";
+    a.textContent = formatMathText(message);
+    turn.append(q, a);
+    host.appendChild(turn);
+  }
+
+  function finishFollowup(panel) {
+    const host = panel.querySelector("[data-ep-ai-followup]");
+    const controls = panel.querySelector("[data-ep-ai-followup-panel]");
+    const prompt = panel.querySelector(".ep-ai-followup-prompt");
+    const done = panel.querySelector("[data-ep-ai-followup-done]");
+    if (host) host.hidden = false;
+    if (controls) controls.hidden = true;
+    if (prompt) prompt.hidden = true;
+    if (done) done.hidden = false;
+  }
+
+  async function invokeFollowup(panel, mode, question = "") {
+    const state = threadState.get(panel);
+    if (!state || state.eligible !== true || state.turn >= MAX_FOLLOWUPS || panel.dataset.epAiBusy === "true") return;
+    if (!canShow()) {
+      queueRender();
+      return;
+    }
+
+    const c = copy();
+    const cleanQuestion = String(question || "").replace(/\s+/g, " ").trim();
+    if (mode === "question" && !cleanQuestion) return;
+    if (cleanQuestion.length > MAX_FOLLOWUP_CHARS) return;
+
+    const client = window.sb;
+    if (!client?.functions || typeof client.functions.invoke !== "function") {
+      appendFollowupTurn(panel, followupLabel(mode, cleanQuestion, c), c.unavailable);
+      finishFollowup(panel);
+      return;
+    }
+
+    const nextTurn = state.turn + 1;
+    const label = followupLabel(mode, cleanQuestion, c);
+    setBusy(panel, true);
+    const controls = panel.querySelector("[data-ep-ai-followup-panel]");
+    const input = panel.querySelector("[data-ep-ai-followup-input]");
+    const send = panel.querySelector("[data-ep-ai-followup-send]");
+    const originalSend = send?.textContent || c.send;
+    if (send) send.textContent = c.followupWorking;
+
+    try {
+      const request = client.functions.invoke("exam-prep-ai", {
+        body: {
+          ...(state.extraBody || {}),
+          component_code: state.component,
+          interaction_type: "context_followup",
+          locale: currentLanguage(),
+          user_text: mode === "question" ? cleanQuestion : "",
+          parent_request_id: state.parentRequestId,
+          prior_assistant_text: state.priorAssistantText,
+          followup_mode: mode,
+          followup_turn: nextTurn
+        }
+      });
+      const result = await Promise.race([
+        request,
+        new Promise(resolve => setTimeout(() => resolve({ __epAiTimedOut: true }), REQUEST_TIMEOUT_MS))
+      ]);
+
+      if (result?.__epAiTimedOut === true) {
+        appendFollowupTurn(panel, label, c.unavailable);
+        finishFollowup(panel);
+        return;
+      }
+
+      const { data, error } = result || {};
+      if (error) {
+        appendFollowupTurn(panel, label, c.error);
+        finishFollowup(panel);
+        return;
+      }
+      if (!canShow()) {
+        queueRender();
+        return;
+      }
+      if (data && typeof data === "object" && data.academic_state_changed !== false) {
+        appendFollowupTurn(panel, label, c.unavailable);
+        finishFollowup(panel);
+        return;
+      }
+
+      const message = data && typeof data === "object" ? String(data.message || data.content || "") : "";
+      appendFollowupTurn(panel, label, message || c.unavailable);
+
+      if (data?.generated === true && data?.request_id && message) {
+        state.parentRequestId = String(data.request_id);
+        state.priorAssistantText = message;
+        state.turn = Number(data.followup_turn || nextTurn);
+        state.eligible = data.thread_eligible === true && state.turn < MAX_FOLLOWUPS;
+        threadState.set(panel, state);
+      } else {
+        state.eligible = false;
+      }
+
+      if (input) input.value = "";
+      const count = panel.querySelector("[data-ep-ai-followup-count]");
+      if (count) count.textContent = `0/${MAX_FOLLOWUP_CHARS}`;
+
+      if (!state.eligible) finishFollowup(panel);
+      else if (controls) controls.hidden = false;
+    } catch (_) {
+      appendFollowupTurn(panel, label, c.error);
+      finishFollowup(panel);
+    } finally {
+      if (send) send.textContent = originalSend;
+      setBusy(panel, false);
+    }
+  }
+
+  function wireFollowupControls(panel) {
+    const open = panel.querySelector("[data-ep-ai-followup-open]");
+    const controls = panel.querySelector("[data-ep-ai-followup-panel]");
+    const input = panel.querySelector("[data-ep-ai-followup-input]");
+    const count = panel.querySelector("[data-ep-ai-followup-count]");
+    const send = panel.querySelector("[data-ep-ai-followup-send]");
+    const done = panel.querySelector("[data-ep-ai-followup-done]");
+
+    open?.addEventListener("click", () => {
+      if (!controls) return;
+      controls.hidden = !controls.hidden;
+      if (!controls.hidden) input?.focus();
+    });
+    panel.querySelectorAll("[data-ep-ai-followup-mode]").forEach(button => {
+      button.addEventListener("click", () => invokeFollowup(panel, button.getAttribute("data-ep-ai-followup-mode") || ""));
+    });
+    input?.addEventListener("input", () => {
+      if (count) count.textContent = `${Math.min(MAX_FOLLOWUP_CHARS, input.value.length)}/${MAX_FOLLOWUP_CHARS}`;
+    });
+    send?.addEventListener("click", () => invokeFollowup(panel, "question", input?.value || ""));
+    done?.addEventListener("click", () => hideOutput(panel));
   }
 
   function hideOutput(panel) {
@@ -246,6 +510,7 @@
     }
     const c = copy();
     const client = window.sb;
+    clearFollowup(panel);
     if (!client?.functions || typeof client.functions.invoke !== "function") {
       showOutput(panel, c.unavailable);
       return;
@@ -288,6 +553,17 @@
         ? String(data.message || data.content || "")
         : "";
       showOutput(panel, message || c.unavailable);
+
+      if (data?.generated === true && data?.thread_eligible === true && data?.request_id && message) {
+        initFollowup(panel, {
+          component,
+          extraBody,
+          requestId: String(data.request_id),
+          message,
+          turn: Number(data.followup_turn || 0),
+          eligible: true
+        });
+      }
     } catch (_) {
       showOutput(panel, c.error);
     } finally {
@@ -317,12 +593,13 @@
     wrap.setAttribute("data-ep-ai-error-action-wrap", "");
     wrap.innerHTML = `
       <button class="ep-ai-context-btn" type="button" data-ep-ai-action="established_error_explanation">
-        <span class="ep-ai-context-icon" aria-hidden="true">✦</span>
+        <span class="ep-ai-mark ep-ai-mark-inline" aria-hidden="true">AI</span>
         <span data-ep-ai-context-label></span>
       </button>
       ${outputMarkup()}`;
     wrap.querySelector("[data-ep-ai-context-label]").textContent = c.mistake;
     applyOutputCopy(wrap, c);
+    wireFollowupControls(wrap);
     wrap.querySelector("[data-ep-ai-action]")?.addEventListener("click", () => invoke(
       wrap,
       component,
@@ -358,13 +635,14 @@
     wrap.setAttribute("data-ep-ai-topic-action-wrap", "");
     wrap.innerHTML = `
       <button class="ep-ai-context-btn ep-ai-topic-btn" type="button" data-ep-ai-action="theory_explanation">
-        <span class="ep-ai-context-icon" aria-hidden="true">✦</span>
+        <span class="ep-ai-mark ep-ai-mark-inline" aria-hidden="true">AI</span>
         <span class="ep-ai-topic-copy"><strong data-ep-ai-context-label></strong><small data-ep-ai-topic-note></small></span>
       </button>
       ${outputMarkup()}`;
     wrap.querySelector("[data-ep-ai-context-label]").textContent = c.topic;
     wrap.querySelector("[data-ep-ai-topic-note]").textContent = c.topicNote;
     applyOutputCopy(wrap, c);
+    wireFollowupControls(wrap);
     wrap.querySelector("[data-ep-ai-action]")?.addEventListener("click", () => invoke(
       wrap,
       component,
