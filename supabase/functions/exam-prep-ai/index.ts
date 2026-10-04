@@ -902,7 +902,7 @@ Deno.serve(async (req: Request) => {
   }
   let followupEnabled = false;
   try {
-    const followupPolicy = await rpc(
+    const followupPolicy: any = await rpc(
       "get_exam_prep_ai_followup_policy_service_v1",
       {},
       `Bearer ${SERVICE_ROLE_KEY}`,
