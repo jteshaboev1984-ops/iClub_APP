@@ -63,12 +63,23 @@ for (const interaction of [
   '"established_error_explanation"',
   '"repeated_error_summary"',
   '"theory_explanation"',
-  '"multilingual_explanation"'
+  '"multilingual_explanation"',
+  '"context_followup"'
 ]) {
   assert(src.includes(interaction), `provider scope missing reviewed interaction: ${interaction}`);
 }
 assert(src.includes('error_context_reference_required'), 'established-error route must require a finalized session/item reference');
 assert(src.includes('skill_code_required'), 'theory/multilingual routes must require a canonical skill reference');
+assert(src.includes('get_exam_prep_ai_thread_parent_service_v1'), 'service-only AI thread parent lookup missing');
+assert(src.includes('MAX_FOLLOWUP_TURNS = 2'), 'AI follow-up turn limit drifted');
+assert(src.includes('MAX_FOLLOWUP_TEXT_CHARS = 250'), 'AI follow-up text limit drifted');
+assert(src.includes('thread_output_mismatch'), 'AI follow-up is not bound to the prior generated output hash');
+assert(src.includes('thread_context_changed'), 'AI follow-up does not fail closed when learner/source context changes');
+assert(src.includes('prior_assistant_text'), 'AI follow-up prior assistant binding missing');
+assert(src.includes('parent_request_id'), 'AI follow-up parent request binding missing');
+assert(src.includes('followup_mode'), 'AI follow-up mode allowlist missing');
+assert(src.includes('suspiciousFollowupText'), 'AI follow-up prompt-injection prefilter missing');
+assert(src.includes('followupBoundary'), 'AI follow-up out-of-scope learner boundary missing');
 assert(src.includes('deterministic_mapping_required'), 'unmapped source-bound interactions must fail closed before provider call');
 assert(src.includes('":repeated_error_summary:"'), 'repeated-error source-card selector missing');
 assert(src.includes('":theory:"'), 'theory source-card selector missing');
