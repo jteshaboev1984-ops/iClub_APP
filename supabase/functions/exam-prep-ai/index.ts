@@ -432,7 +432,7 @@ function buildProviderInstructions(params: {
   }
 
   const task = params.interaction === "weekly_plan_narration"
-    ? "Explain the learner's current weekly plan in priority order and what the recorded items mean. Translate item types, statuses and due-state fields into natural learner language. Do not invent a reason that is not present in the context."
+    ? "Start with the learner's first current priority, explain in plain language why it is the next step using only recorded facts, then briefly say what follows. Never list internal identifiers or raw plan fields."
     : params.interaction === "established_error_explanation"
       ? "Explain the already-established diagnostic error in learner-friendly terms and the recorded next action without revealing the correct answer or inferring a different misconception."
       : params.interaction === "repeated_error_summary"
@@ -441,7 +441,7 @@ function buildProviderInstructions(params: {
           ? "Explain the approved mathematical concept and adapt the emphasis to the recorded current progress when present. Start with the core idea, then give one practical cue from the approved source. If the current progress says the topic needs more work, connect the explanation to what the learner should pay attention to next without guessing why the learner was wrong. Do not mechanically repeat attempt counts that are already visible in the learner interface."
           : params.interaction === "multilingual_explanation"
             ? "Explain the approved mathematical concept in the requested language and adapt the emphasis to the recorded current progress when present. Do not infer a misconception that is not recorded."
-            : "Explain the learner's recorded progress in plain learner language, then explain the recorded next action. Translate stage and action codes into natural language and never expose raw codes. Do not predict grades or readiness beyond the supplied context.";
+            : "Explain the learner's current progress in plain learner language: what is already confirmed, what needs attention, and the next step. Avoid internal phrases such as confirmed coverage, evidence state or operational stage. Do not predict grades or readiness beyond the supplied context.";
 
   return [
     "You are the iClub learning assistant for Cambridge AS Mathematics Exam Prep.",
@@ -456,7 +456,7 @@ function buildProviderInstructions(params: {
     "Treat the supplied learner-facing context as already minimized. Do not reconstruct, guess or expose any hidden IDs, raw codes, internal states or implementation fields.",
     "Keep the learner's cognitive work with them: explain, orient and clarify, but do not turn an active or recorded assessment into an answer-key service.",
     "Do not mention internal database/RPC/table terminology or opaque internal IDs unless the learner-facing context already requires them.",
-    "Do not expose implementation vocabulary such as mastery, evidence state, service mode, source card, action_code, item_type or process_step. Use ordinary learner-facing language.",
+    "Do not expose implementation vocabulary such as mastery, evidence state, service mode, source card, action_code, item_type or process_step. Do not say confirmed coverage / подтверждённое покрытие / tasdiqlangan qamrov. Use ordinary learner-facing language.",
     "Keep the answer concise and pedagogically useful: 2 to 5 sentences, plain text only. Do not use Markdown, LaTeX delimiters, LaTeX commands, JSON or a markdown table. Write formulas directly with ordinary characters, for example Z = (X - mu) / sigma.",
     `APPROVED SOURCE CARDS: ${sourceText}`,
     `DETERMINISTIC CONTEXT: ${deterministicText}`,
