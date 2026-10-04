@@ -46,6 +46,9 @@ create table if not exists private.exam_prep_ai_tutor_cards (
     )
 );
 
+alter table private.exam_prep_ai_tutor_cards enable row level security;
+alter table private.exam_prep_ai_tutor_cards force row level security;
+
 create unique index if not exists exam_prep_ai_tutor_cards_version_uq
   on private.exam_prep_ai_tutor_cards(skill_code,locale,content_version);
 
