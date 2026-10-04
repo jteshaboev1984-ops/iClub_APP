@@ -1,0 +1,123 @@
+name: P3-04 Curated Tutor Cards Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/exam-prep-ai-curated-tutor-content-plan-v1.md'
+      - 'supabase/migrations/*exam_prep_ai_tutor_cards*.sql'
+      - 'supabase/tests/p3_04_ai_tutor_cards_matrix.sql'
+      - '.github/workflows/p3-04-ai-tutor-cards.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/exam-prep-ai-curated-tutor-content-plan-v1.md'
+      - 'supabase/migrations/*exam_prep_ai_tutor_cards*.sql'
+      - 'supabase/tests/p3_04_ai_tutor_cards_matrix.sql'
+      - '.github/workflows/p3-04-ai-tutor-cards.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tutor-cards:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap minimum legacy/Supabase contract
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql
+
+      - name: Apply Exam Prep P0 foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for stage in 04 05 06 07 08 09 10 11 12 13 15 16; do
+            mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p0_${stage}_*.sql" | sort)
+            test "${#files[@]}" -ge 1
+            for f in "${files[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          done
+
+      - name: Apply AI governance prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t p101 < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p1_01_*.sql' | sort)
+          test "${#p101[@]}" -ge 1
+          for f in "${p101[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          mapfile -t p104 < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep_p1_04_*.sql' | sort)
+          test "${#p104[@]}" -ge 2
+          for f in "${p104[@]}"; do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+
+      - name: Seed reviewed source-card stubs for pilot FK validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          insert into private.exam_prep_ai_source_cards(
+            source_card_key,component_code,skill_code,card_type,locale,source_version,title,body_text,
+            approval_status,rights_status,is_runtime_allowed,content_hash,approved_at
+          )
+          select
+            lower(component_code)||':'||skill_code||':theory:'||locale||':v1',
+            component_code,skill_code,'theory',locale,'ci_tutor_stub_v1',
+            skill_code||' '||locale,
+            'CI source stub for Tutor Card linkage only.',
+            'approved','original_iclub',true,
+            md5(component_code||skill_code||locale),now()
+          from (
+            values
+              ('P1','P1-QUA-01'),('P1','P1-COO-02'),('P5','P5-NOR-02')
+          ) s(component_code,skill_code)
+          cross join (values ('en'),('ru'),('uz')) l(locale);
+          SQL
+
+      - name: Apply Tutor Card schema and pilot
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261004133000_exam_prep_ai_tutor_cards_v1.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261004134500_exam_prep_ai_tutor_cards_pilot_v1.sql
+
+      - name: Validate Tutor Card governance
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_04_ai_tutor_cards_matrix.sql
+
+      - name: Static preservation checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in supabase/migrations/20261004133000_exam_prep_ai_tutor_cards_v1.sql supabase/migrations/20261004134500_exam_prep_ai_tutor_cards_pilot_v1.sql; do
+            ! grep -qi 'update public.users' "$f"
+            ! grep -qi 'practice_answers' "$f"
+            ! grep -qi 'tour_answers' "$f"
+            ! grep -qi 'certificates' "$f"
+            ! grep -qi 'exam_prep_evidence_events' "$f"
+            ! grep -qi 'exam_prep_stage_states' "$f"
+            ! grep -qi 'exam_prep_feature_entitlements' "$f"
+          done
+          grep -q "approval_status='approved'" supabase/migrations/20261004133000_exam_prep_ai_tutor_cards_v1.sql
+          grep -q "'draft',false" supabase/migrations/20261004134500_exam_prep_ai_tutor_cards_pilot_v1.sql
+          grep -q "expected.*243" supabase/tests/p3_04_ai_tutor_cards_matrix.sql
