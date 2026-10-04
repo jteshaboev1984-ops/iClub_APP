@@ -140,6 +140,26 @@ function assert(condition, message) {
     assert(calls[2].body.interaction_type === 'repeated_error_summary', 'Repeated-difficulty action drifted');
     assert(calls.every(call => call.body.component_code === 'P1' && call.body.locale === 'en' && call.body.user_text === ''), 'Contextual AI request boundary drifted');
 
+    // Detailed progress view: keep one compact progress explanation beside the existing progress summary.
+    await page.evaluate(() => {
+      document.querySelector('#exam-prep-host-root').innerHTML = `
+        <section data-ep-views-screen>
+          <div class="ep-views-summary"><div>0 / 45</div><div>0%</div></div>
+          <button type="button" data-ep-views-skill="P1-QUA-01">Quadratics</button>
+          <div class="ep-views-card">Program completion</div>
+        </section>`;
+    });
+    await page.waitForSelector('[data-ep-ai-context-action="progress_summary"][data-ep-ai-surface="tracker"]');
+    const trackerContext = await page.evaluate(() => ({
+      actions: document.querySelectorAll('[data-ep-ai-context-action]').length,
+      legacyPanels: document.querySelectorAll('[data-ep-ai-panel]').length,
+      afterSummary: document.querySelector('.ep-views-summary')?.nextElementSibling?.getAttribute('data-ep-ai-context-action') || ''
+    }));
+    assert(trackerContext.actions === 1, 'Detailed progress view should expose exactly one contextual AI action');
+    assert(trackerContext.legacyPanels === 0, 'Detailed progress view recreated standalone AI panel');
+    assert(trackerContext.afterSummary === 'progress_summary', 'Detailed progress AI action is not placed beside the progress summary');
+    assert(await page.evaluate(() => window.__aiCalls.length) === 3, 'Detailed progress view auto-called the provider');
+
     await page.evaluate(() => {
       document.querySelector('#exam-prep-host-root').innerHTML = `
         <section class="ep-result-screen"
