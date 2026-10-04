@@ -128,11 +128,12 @@
     }
   }
 
-  function buildContextAction(component, interactionType, label, tone = "default") {
+  function buildContextAction(component, interactionType, label, tone = "default", surface = "component") {
     const c = copy();
     const wrap = document.createElement("div");
     wrap.className = `ep-ai-context ep-ai-context-${tone}`;
     wrap.setAttribute("data-ep-ai-context-action", interactionType);
+    wrap.setAttribute("data-ep-ai-surface", surface);
     wrap.innerHTML = `
       <button class="ep-ai-context-btn" type="button" data-ep-ai-action="${interactionType}">
         <span class="ep-ai-context-icon" aria-hidden="true">✦</span>
@@ -148,30 +149,53 @@
 
   function renderComponentContextActions(root) {
     const home = root.querySelector("[data-ep-component-home]");
-    if (!home) {
-      root.querySelectorAll("[data-ep-ai-context-action]").forEach(node => node.remove());
-      return;
-    }
+    if (!home) return false;
+    root.querySelectorAll('[data-ep-ai-context-action][data-ep-ai-surface="tracker"]').forEach(node => node.remove());
+
     const component = String(home.getAttribute("data-ep-component-home") || "").toUpperCase();
-    if (!["P1", "P5"].includes(component)) return;
+    if (!["P1", "P5"].includes(component)) return true;
     const c = copy();
 
     const next = home.querySelector(".ep-component-next");
     const planAvailable = home.getAttribute("data-ep-ai-plan-available") === "true";
     if (next && planAvailable && !next.querySelector('[data-ep-ai-context-action="weekly_plan_narration"]')) {
-      next.appendChild(buildContextAction(component, "weekly_plan_narration", c.plan, "next"));
+      next.appendChild(buildContextAction(component, "weekly_plan_narration", c.plan, "next", "component"));
     }
 
     const progress = home.querySelector(".ep-component-progress-card");
     if (progress && !progress.querySelector('[data-ep-ai-context-action="progress_summary"]')) {
-      progress.appendChild(buildContextAction(component, "progress_summary", c.progress, "progress"));
+      progress.appendChild(buildContextAction(component, "progress_summary", c.progress, "progress", "component"));
     }
 
     const repeatedAvailable = home.getAttribute("data-ep-ai-repeated-available") === "true";
     const correctionLink = home.querySelector('[data-ep-component-link="corrections"]');
     if (repeatedAvailable && correctionLink && !home.querySelector('[data-ep-ai-context-action="repeated_error_summary"]')) {
-      correctionLink.insertAdjacentElement("afterend", buildContextAction(component, "repeated_error_summary", c.repeated, "repeated"));
+      correctionLink.insertAdjacentElement("afterend", buildContextAction(component, "repeated_error_summary", c.repeated, "repeated", "component"));
     }
+    return true;
+  }
+
+  function renderTrackerProgressAction(root) {
+    const screen = root.querySelector("[data-ep-views-screen]");
+    if (!screen || screen.hasAttribute("data-ep-ai-skill-detail")) return false;
+    const firstSkill = screen.querySelector("[data-ep-views-skill]");
+    const skillCode = String(firstSkill?.getAttribute("data-ep-views-skill") || "");
+    const component = skillCode.startsWith("P1-") ? "P1" : (skillCode.startsWith("P5-") ? "P5" : "");
+    const summary = screen.querySelector(".ep-views-summary");
+    if (!component || !summary) return false;
+
+    root.querySelectorAll('[data-ep-ai-context-action][data-ep-ai-surface="component"]').forEach(node => node.remove());
+    if (!screen.querySelector('[data-ep-ai-context-action="progress_summary"][data-ep-ai-surface="tracker"]')) {
+      const action = buildContextAction(component, "progress_summary", copy().progress, "progress", "tracker");
+      summary.insertAdjacentElement("afterend", action);
+    }
+    return true;
+  }
+
+  function renderContextActions(root) {
+    if (renderComponentContextActions(root)) return;
+    if (renderTrackerProgressAction(root)) return;
+    removeContextActions();
   }
 
   function removeContextActions() {
@@ -377,7 +401,7 @@
     }
 
     renderDashboardStatus(root);
-    renderComponentContextActions(root);
+    renderContextActions(root);
     renderErrorActions(root);
     renderTopicActions(root);
   }
