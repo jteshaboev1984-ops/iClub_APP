@@ -900,8 +900,18 @@ Deno.serve(async (req: Request) => {
   } catch {
     snapshot = null;
   }
-  const followupEnabled = Array.isArray(snapshot?.policy?.allowed_interactions)
-    && snapshot.policy.allowed_interactions.includes("context_followup");
+  let followupEnabled = false;
+  try {
+    const followupPolicy = await rpc(
+      "get_exam_prep_ai_followup_policy_service_v1",
+      {},
+      `Bearer ${SERVICE_ROLE_KEY}`,
+      SERVICE_ROLE_KEY,
+    );
+    followupEnabled = followupPolicy?.enabled === true;
+  } catch {
+    followupEnabled = false;
+  }
 
   let guard: any;
   try {
