@@ -752,12 +752,13 @@ begin
       and approval_status='draft'
       and not is_runtime_allowed
       and (
-        position(E'\n' in main_explanation)=0
-        or position(E'\n' in simple_explanation)=0
-        or position(E'\n' in alternative_explanation)=0
+        position(E'\\\\n' in main_explanation)>0
+        or position(E'\\\\n' in simple_explanation)>0
+        or position(E'\\\\n' in alternative_explanation)>0
+        or position(E'\\\\n' in focus_explanation)>0
       )
   ) then
-    raise exception 'Learner-first Tutor Card formatting must contain real line breaks';
+    raise exception 'Learner-first Tutor Card formatting still contains literal backslash-n sequences';
   end if;
 end
 $postcheck$;
