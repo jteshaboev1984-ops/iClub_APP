@@ -1170,6 +1170,10 @@ Deno.serve(async (req: Request) => {
       locale,
       deterministicContext: providerContext,
       cards,
+      rootInteraction: isFollowup ? contextInteraction : null,
+      followupMode: isFollowup ? followupMode : null,
+      userText: isFollowup ? followupQuestion : "",
+      priorAssistantText: isFollowup ? priorAssistantText : "",
     });
 
     const reservation = await reserveProviderCall(requestId, user.id, reservedCostUsd);
@@ -1198,6 +1202,10 @@ Deno.serve(async (req: Request) => {
       deterministicContext: providerContext,
       cards,
       timeoutMs: Number(guard?.model_timeout_ms || 12000),
+      rootInteraction: isFollowup ? contextInteraction : null,
+      followupMode: isFollowup ? followupMode : null,
+      userText: isFollowup ? followupQuestion : "",
+      priorAssistantText: isFollowup ? priorAssistantText : "",
     });
 
     const cost = estimatedCostUsd(provider.inputTokens, provider.outputTokens);
@@ -1248,6 +1256,10 @@ Deno.serve(async (req: Request) => {
       request_id: requestId, mode, component_code: component, interaction_type: interaction,
       locale, message, source_cards: sourceCardKeys, context_bound: Boolean(deterministicContext),
       generated: true, academic_state_changed: false,
+      thread_eligible: isFollowup ? Number(followupTurn || 0) < MAX_FOLLOWUP_TURNS : ROOT_FOLLOWUP_INTERACTIONS.has(interaction),
+      followup_turn: isFollowup ? followupTurn : 0,
+      max_followups: MAX_FOLLOWUP_TURNS,
+      thread_root_request_id: isFollowup ? rootRequestId : requestId,
     });
   } catch (error) {
     if (providerLeaseActive) {
