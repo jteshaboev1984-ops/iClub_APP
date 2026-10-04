@@ -33,6 +33,11 @@ as $fn$
       'retrieval_policy_version',p.retrieval_policy_version,
       'response_schema_version',p.response_schema_version,
       'max_daily_requests',p.max_daily_requests,
+      'max_daily_provider_cost_usd',p.max_daily_provider_cost_usd,
+      'max_user_daily_provider_cost_usd',p.max_user_daily_provider_cost_usd,
+      'max_provider_request_cost_usd',p.max_provider_request_cost_usd,
+      'max_concurrent_provider_calls',p.max_concurrent_provider_calls,
+      'provider_lease_ttl_seconds',p.provider_lease_ttl_seconds,
       'allowed_interactions',p.allowed_interactions
     ),
     'runtime_status',coalesce((
@@ -46,6 +51,22 @@ as $fn$
       where c.approval_status='approved'
         and c.is_runtime_allowed
         and c.rights_status<>'blocked'
+    ),
+    'provider_active_leases',(
+      select count(*)
+      from private.exam_prep_ai_provider_leases l
+      where l.status='active'
+        and l.expires_at>now()
+    ),
+    'provider_cost_today_usd',(
+      select coalesce(sum(
+        case
+          when l.status='active' and l.expires_at>now() then l.reserved_cost_usd
+          else coalesce(l.actual_cost_usd,0)
+        end
+      ),0)
+      from private.exam_prep_ai_provider_leases l
+      where l.created_at>=date_trunc('day',now())
     ),
     'audit_24h',coalesce((
       select jsonb_object_agg(q.mode,q.cnt)
