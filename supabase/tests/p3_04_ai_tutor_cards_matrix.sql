@@ -17,8 +17,8 @@ begin
   from private.exam_prep_ai_tutor_cards
   where content_version='tutor_v2_learner_first';
 
-  if v_total<>24 then
-    raise exception 'Expected 24 learner-first Tutor Cards after Block 2, found %',v_total;
+  if v_total<>48 then
+    raise exception 'Expected 48 learner-first Tutor Cards after Block 3, found %',v_total;
   end if;
   if v_runtime<>0 then
     raise exception 'Learner-first Tutor Cards must remain runtime OFF';
@@ -66,9 +66,9 @@ begin
   end if;
 
   if (select count(distinct skill_code) from private.exam_prep_ai_tutor_cards
-      where content_version='tutor_v2_learner_first')<>8
+      where content_version='tutor_v2_learner_first')<>16
   then
-    raise exception 'Expected exactly 8 learner-first skills after Block 2';
+    raise exception 'Expected exactly 16 learner-first skills after Block 3';
   end if;
 
   if exists(
@@ -209,6 +209,109 @@ begin
       and lower(main_explanation) like '%partial fraction%'
   ) then
     raise exception 'P1-QUA-06 drifted into post-P1 algebra';
+  end if;
+
+  -- Block 3 Functions reviewed examples/rules must be identical across EN/RU/UZ.
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-FUN-01'
+        and main_explanation like '%f(x)=2x+1%'
+        and main_explanation like '%f(3)=7%')<>3
+  then raise exception 'P1-FUN-01 multilingual anchor parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-FUN-02'
+        and main_explanation like '%f(x)=x²%'
+        and main_explanation like '%-2≤x≤3%'
+        and main_explanation like '%0≤f(x)≤9%')<>3
+  then raise exception 'P1-FUN-02 multilingual range-example parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-FUN-03'
+        and main_explanation like '%f(x)=2x+1%'
+        and main_explanation like '%g(x)=x²%'
+        and main_explanation like '%f(g(x))%'
+        and main_explanation like '%g(f(x))%')<>3
+  then raise exception 'P1-FUN-03 multilingual composition parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-FUN-04'
+        and main_explanation like '%f(x)=2x+3%'
+        and main_explanation like '%f⁻¹(x)=(x-3)/2%'
+        and main_explanation like '%x²%')<>3
+  then raise exception 'P1-FUN-04 multilingual inverse parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-FUN-05'
+        and main_explanation like '%(1,5)%'
+        and main_explanation like '%(5,1)%'
+        and main_explanation like '%y=x%')<>3
+  then raise exception 'P1-FUN-05 multilingual inverse-graph parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-FUN-06'
+        and main_explanation like '%y=(x-3)²+2%'
+        and main_explanation like '%(0,0)%'
+        and main_explanation like '%(3,2)%')<>3
+  then raise exception 'P1-FUN-06 multilingual translation parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-FUN-07'
+        and main_explanation like '%(2,6)%'
+        and main_explanation like '%(2,-6)%'
+        and main_explanation like '%(-2,6)%')<>3
+  then raise exception 'P1-FUN-07 multilingual reflection parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-FUN-08'
+        and main_explanation like '%(1,1)%'
+        and main_explanation like '%(1,2)%'
+        and main_explanation like '%(1/2,1)%'
+        and main_explanation like '%(x+3, 2y+1)%')<>3
+  then raise exception 'P1-FUN-08 multilingual stretch/compression parity drift'; end if;
+
+  -- Exact-skill drift guards for adjacent Functions nodes.
+  if exists(
+    select 1 from private.exam_prep_ai_tutor_cards
+    where content_version='tutor_v2_learner_first'
+      and skill_code='P1-FUN-05'
+      and lower(main_explanation) like '%stretch%'
+  ) then
+    raise exception 'P1-FUN-05 drifted into stretches';
+  end if;
+
+  if exists(
+    select 1 from private.exam_prep_ai_tutor_cards
+    where content_version='tutor_v2_learner_first'
+      and skill_code='P1-FUN-06'
+      and (
+        lower(main_explanation) like '%reflect%'
+        or lower(main_explanation) like '%отражен%'
+        or lower(main_explanation) like '%akslantir%'
+      )
+  ) then
+    raise exception 'P1-FUN-06 drifted into graph reflections';
+  end if;
+
+  if exists(
+    select 1 from private.exam_prep_ai_tutor_cards
+    where content_version='tutor_v2_learner_first'
+      and skill_code like 'P1-FUN-%'
+      and (
+        position(E'\\n' in main_explanation)>0
+        or position(E'\\n' in simple_explanation)>0
+        or position(E'\\n' in alternative_explanation)>0
+        or position(E'\\n' in focus_explanation)>0
+      )
+  ) then
+    raise exception 'Block 3 Functions contains literal backslash-n formatting';
   end if;
 
   if has_table_privilege('authenticated','private.exam_prep_ai_tutor_cards','SELECT')
