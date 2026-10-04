@@ -5,8 +5,10 @@ const aiSource = fs.readFileSync('exam-prep/exam-prep-ai-ui.js', 'utf8');
 const hostCss = fs.readFileSync('exam-prep/exam-prep-host.css', 'utf8');
 const liveSource = fs.readFileSync('exam-prep/exam-prep-live.js', 'utf8');
 if (aiSource.includes('ensureStyle(') || aiSource.includes('ep-ai-ui-style') || aiSource.includes('document.createElement("style")')) throw new Error('runtime AI UI style injection returned');
-if (!hostCss.includes('EXAM PREP AI TUTOR CONTEXTUAL UX v3') || !hostCss.includes('.ep-ai-context-btn{')) throw new Error('contextual AI Tutor CSS contract missing');
+if (!hostCss.includes('EXAM PREP AI TUTOR CONTEXTUAL UX v4') || !hostCss.includes('.ep-ai-context-btn{') || !hostCss.includes('.ep-ai-followup{')) throw new Error('contextual AI Tutor CSS contract missing');
 if (aiSource.includes('data-ep-ai-open-component') || aiSource.includes('data-ep-ai-panel')) throw new Error('duplicate AI navigation/panel returned');
+if (aiSource.includes('✦')) throw new Error('Gemini-like sparkle returned to AI Tutor UI');
+if (!aiSource.includes('MAX_FOLLOWUPS = 2') || !aiSource.includes('MAX_FOLLOWUP_CHARS = 250')) throw new Error('limited follow-up UI contract missing');
 if (!liveSource.includes('data-ep-live-active-assessment="true"')) throw new Error('real active-assessment AI blackout marker missing');
 
 
@@ -30,6 +32,7 @@ function assert(condition, message) {
 
     await page.evaluate(() => {
       window.__aiCalls = [];
+      window.__enableThreads = false;
       window.i18n = { getLang: () => 'en' };
       window.iClubExamPrepHostInternal = {
         lastCapabilities: {
@@ -50,12 +53,46 @@ function assert(condition, message) {
       window.sb = {
         functions: {
           invoke: async (name, options) => {
-            window.__aiCalls.push({ name, body: options?.body || null });
+            const body = options?.body || null;
+            window.__aiCalls.push({ name, body });
+            if (window.__enableThreads && body?.interaction_type === 'theory_explanation') {
+              return {
+                data: {
+                  request_id: '30000000-0000-4000-8000-000000000001',
+                  mode: 'generated',
+                  message: 'Initial threaded explanation',
+                  generated: true,
+                  thread_eligible: true,
+                  followup_turn: 0,
+                  max_followups: 2,
+                  academic_state_changed: false
+                },
+                error: null
+              };
+            }
+            if (window.__enableThreads && body?.interaction_type === 'context_followup') {
+              const turn = Number(body.followup_turn || 0);
+              return {
+                data: {
+                  request_id: turn === 1
+                    ? '30000000-0000-4000-8000-000000000002'
+                    : '30000000-0000-4000-8000-000000000003',
+                  mode: 'generated',
+                  message: turn === 1 ? 'First follow-up explanation' : 'Second follow-up explanation',
+                  generated: true,
+                  thread_eligible: turn < 2,
+                  followup_turn: turn,
+                  max_followups: 2,
+                  academic_state_changed: false
+                },
+                error: null
+              };
+            }
             return {
               data: {
                 request_id: '00000000-0000-4000-8000-000000000001',
                 mode: 'fallback',
-                message: `${options?.body?.component_code || ''} explanation`,
+                message: `${body?.component_code || ''} explanation`,
                 academic_state_changed: false
               },
               error: null
@@ -286,6 +323,57 @@ function assert(condition, message) {
     const unsupportedTheoryActions = await page.evaluate(() => document.querySelectorAll('[data-ep-ai-topic-action-wrap]').length);
     assert(unsupportedTheoryActions === 0, 'Theory action appeared for a non-canonical skill');
 
+    // Limited contextual mini-thread: one generated explanation + at most two bound follow-ups.
+    await page.evaluate(() => {
+      window.__enableThreads = true;
+      document.querySelector('#exam-prep-host-root').innerHTML = `
+        <section data-ep-views-screen data-ep-ai-skill-detail="P1-QUA-02" data-ep-ai-skill-component="P1">
+          <div class="ep-views-title">Quadratic equations</div>
+          <div class="ep-views-summary"></div>
+        </section>`;
+    });
+    await page.waitForSelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
+    await page.click('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
+    await page.waitForFunction(() => document.querySelector('[data-ep-ai-output-text]')?.textContent === 'Initial threaded explanation');
+    await page.waitForSelector('[data-ep-ai-followup]:not([hidden])');
+
+    const markState = await page.evaluate(() => ({
+      mark: document.querySelectorAll('.ep-ai-mark').length,
+      sparkle: document.body.textContent.includes('✦'),
+      maxLength: Number(document.querySelector('[data-ep-ai-followup-input]')?.getAttribute('maxlength') || 0)
+    }));
+    assert(markState.mark >= 1 && !markState.sparkle, 'Neutral iClub AI placeholder mark did not replace sparkle');
+    assert(markState.maxLength === 250, 'Follow-up input length contract drifted');
+
+    await page.click('[data-ep-ai-followup-open]');
+    await page.click('[data-ep-ai-followup-mode="simplify"]');
+    await page.waitForFunction(() => document.body.textContent.includes('First follow-up explanation'));
+
+    let threadCalls = await page.evaluate(() => window.__aiCalls.filter(call => call.body?.interaction_type === 'context_followup'));
+    assert(threadCalls.length === 1, 'First follow-up did not make exactly one governed request');
+    assert(threadCalls[0].body.parent_request_id === '30000000-0000-4000-8000-000000000001', 'First follow-up lost root parent request');
+    assert(threadCalls[0].body.prior_assistant_text === 'Initial threaded explanation', 'First follow-up lost prior generated output binding');
+    assert(threadCalls[0].body.followup_turn === 1 && threadCalls[0].body.followup_mode === 'simplify', 'First follow-up turn/mode drifted');
+    assert(threadCalls[0].body.skill_code === 'P1-QUA-02' && threadCalls[0].body.user_text === '', 'First follow-up lost original topic scope');
+
+    await page.fill('[data-ep-ai-followup-input]', 'Why does this matter?');
+    await page.click('[data-ep-ai-followup-send]');
+    await page.waitForFunction(() => document.body.textContent.includes('Second follow-up explanation'));
+
+    threadCalls = await page.evaluate(() => window.__aiCalls.filter(call => call.body?.interaction_type === 'context_followup'));
+    assert(threadCalls.length === 2, 'Second follow-up did not make exactly one additional governed request');
+    assert(threadCalls[1].body.parent_request_id === '30000000-0000-4000-8000-000000000002', 'Second follow-up did not chain to first follow-up');
+    assert(threadCalls[1].body.prior_assistant_text === 'First follow-up explanation', 'Second follow-up lost previous assistant output binding');
+    assert(threadCalls[1].body.followup_turn === 2 && threadCalls[1].body.followup_mode === 'question', 'Second follow-up turn/mode drifted');
+    assert(threadCalls[1].body.user_text === 'Why does this matter?', 'Second follow-up lost learner question');
+    const threadDone = await page.evaluate(() => ({
+      panelHidden: document.querySelector('[data-ep-ai-followup-panel]')?.hidden === true,
+      doneVisible: document.querySelector('[data-ep-ai-followup-done]')?.hidden === false,
+      turns: document.querySelectorAll('.ep-ai-thread-turn').length
+    }));
+    assert(threadDone.panelHidden && threadDone.doneVisible && threadDone.turns === 2, 'Thread did not close gracefully after two follow-ups');
+    await page.evaluate(() => { window.__enableThreads = false; });
+
     await page.evaluate(() => {
       document.querySelector('#exam-prep-host-root').innerHTML = '<section data-ep-live-active-assessment><div>Question</div></section>';
     });
@@ -300,7 +388,7 @@ function assert(condition, message) {
     assert(state.dashboardStatus === 0 && state.contextualActions === 0, 'AI surfaces must disappear during active assessment');
     assert(state.errorActions === 0, 'Diagnostic AI action must never remain in an active assessment');
     assert(state.topicActions === 0, 'Theory AI action must never remain in an active assessment');
-    assert(state.calls === 7, 'Screen transition must not trigger an AI request');
+    assert(state.calls === 10, 'Screen transition must not trigger an AI request');
 
     await page.evaluate(() => {
       window.iClubExamPrepHostInternal.lastCapabilities.killSwitch = true;
