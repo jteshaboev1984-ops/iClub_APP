@@ -54,6 +54,13 @@ BEGIN
   IF has_function_privilege('authenticated','public.record_exam_prep_ai_audit_service_v1(uuid,uuid,text,text,text,text,jsonb,text,text,text,text,uuid,text,uuid[],text[],text,text,integer,integer,integer,numeric,text,text[],text)','EXECUTE') THEN
     RAISE EXCEPTION 'P1-04 authenticated can execute service audit writer';
   END IF;
+  IF has_function_privilege('authenticated','public.get_exam_prep_ai_thread_parent_service_v1(uuid,uuid)','EXECUTE')
+     OR has_function_privilege('anon','public.get_exam_prep_ai_thread_parent_service_v1(uuid,uuid)','EXECUTE') THEN
+    RAISE EXCEPTION 'P1-04 browser role can execute AI thread parent reader';
+  END IF;
+  IF NOT has_function_privilege('service_role','public.get_exam_prep_ai_thread_parent_service_v1(uuid,uuid)','EXECUTE') THEN
+    RAISE EXCEPTION 'P1-04 service_role cannot execute AI thread parent reader';
+  END IF;
   IF has_table_privilege('authenticated','private.exam_prep_ai_policy','SELECT')
      OR has_table_privilege('authenticated','private.exam_prep_ai_source_cards','SELECT')
      OR has_table_privilege('authenticated','private.exam_prep_ai_audit','SELECT')
@@ -130,6 +137,11 @@ BEGIN
   v:=public.get_exam_prep_ai_guard_v1('P1','progress_summary','en',20);
   IF coalesce((v->>'allowed')::boolean,false) IS NOT TRUE OR v->>'mode'<>'ready' THEN
     RAISE EXCEPTION 'P1-04 clean entitled request did not reach ready guard: %',v;
+  END IF;
+
+  v:=public.get_exam_prep_ai_guard_v1('P1','context_followup','en',120);
+  IF coalesce((v->>'allowed')::boolean,false) IS NOT TRUE OR v->>'mode'<>'ready' THEN
+    RAISE EXCEPTION 'P1-04 limited contextual follow-up did not reach ready guard: %',v;
   END IF;
 END
 $$;
@@ -241,8 +253,15 @@ BEGIN
   IF v_first IS NOT TRUE OR v_second IS NOT FALSE THEN
     RAISE EXCEPTION 'P1-04 audit idempotency failed first=% second=%',v_first,v_second;
   END IF;
+
+  IF coalesce((public.get_exam_prep_ai_thread_parent_service_v1(v_uid,v_request)->>'request_id')::uuid,'00000000-0000-0000-0000-000000000000'::uuid)<>v_request THEN
+    RAISE EXCEPTION 'P1-04 service thread parent lookup failed';
+  END IF;
+  IF public.get_exam_prep_ai_thread_parent_service_v1(gen_random_uuid(),v_request) <> '{}'::jsonb THEN
+    RAISE EXCEPTION 'P1-04 thread parent lookup crossed user boundary';
+  END IF;
 END
-$$;
+$;
 RESET ROLE;
 
 DO $$
