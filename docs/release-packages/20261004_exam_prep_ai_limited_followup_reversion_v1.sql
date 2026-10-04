@@ -45,10 +45,17 @@ begin
     raise exception 'context_followup remained enabled after reversion';
   end if;
 
-  if coalesce((
-    public.get_exam_prep_ai_operational_snapshot_v1()
-      #> '{policy,allowed_interactions}'
-  ) ? 'context_followup',false) then
+  if exists (
+    select 1
+    from jsonb_array_elements_text(
+      coalesce(
+        public.get_exam_prep_ai_operational_snapshot_v1()
+          #> '{policy,allowed_interactions}',
+        '[]'::jsonb
+      )
+    ) as x(value)
+    where x.value='context_followup'
+  ) then
     raise exception 'operational snapshot still exposes context_followup after reversion';
   end if;
 end
