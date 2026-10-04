@@ -211,9 +211,10 @@ function assert(condition, message) {
       await page.waitForSelector('[data-ep-ai-error-action-wrap] [data-ep-ai-action="established_error_explanation"]');
       const localized = await page.evaluate(() => {
         const button = document.querySelector('[data-ep-ai-error-action-wrap] [data-ep-ai-action="established_error_explanation"]');
+        const label = button?.querySelector('[data-ep-ai-context-label]');
         const item = document.querySelector('.ep-result-item.is-wrong');
         return {
-          text: button?.textContent || '',
+          text: label?.textContent || '',
           documentWidth: document.documentElement.scrollWidth,
           innerWidth: window.innerWidth,
           buttonWidth: button?.getBoundingClientRect().width || 0,
