@@ -865,6 +865,13 @@ Deno.serve(async (req: Request) => {
   const sessionId = isUuid((payload as any).session_id) ? String((payload as any).session_id) : null;
   const rawItemOrder = Number((payload as any).item_order);
   const itemOrder = Number.isInteger(rawItemOrder) && rawItemOrder > 0 && rawItemOrder <= 100 ? rawItemOrder : null;
+  const parentRequestId = isUuid((payload as any).parent_request_id) ? String((payload as any).parent_request_id) : null;
+  const priorAssistantText = typeof (payload as any).prior_assistant_text === "string" ? String((payload as any).prior_assistant_text) : "";
+  const followupMode = typeof (payload as any).followup_mode === "string" ? String((payload as any).followup_mode) : "";
+  const rawFollowupTurn = Number((payload as any).followup_turn);
+  const followupTurn = Number.isInteger(rawFollowupTurn) && rawFollowupTurn >= 1 && rawFollowupTurn <= MAX_FOLLOWUP_TURNS ? rawFollowupTurn : null;
+  const followupQuestion = normalizedFollowupQuestion(userText);
+  const isFollowup = interaction === "context_followup";
 
   if (!VALID_COMPONENTS.has(component)) return response(400, { request_id: requestId, error: "invalid_component" });
   if (!VALID_INTERACTIONS.has(interaction)) return response(400, { request_id: requestId, error: "invalid_interaction" });
@@ -873,6 +880,17 @@ Deno.serve(async (req: Request) => {
   }
   if ((interaction === "theory_explanation" || interaction === "multilingual_explanation") && !skillCode) {
     return response(400, { request_id: requestId, error: "skill_code_required" });
+  }
+  if (isFollowup) {
+    if (!parentRequestId || !followupTurn || !FOLLOWUP_MODES.has(followupMode) || !priorAssistantText || priorAssistantText.length > MAX_PRIOR_ASSISTANT_CHARS) {
+      return response(400, { request_id: requestId, error: "invalid_followup_contract" });
+    }
+    if (followupQuestion.length > MAX_FOLLOWUP_TEXT_CHARS) {
+      return response(400, { request_id: requestId, error: "followup_text_too_long", max_chars: MAX_FOLLOWUP_TEXT_CHARS });
+    }
+    if (followupMode === "question" && !followupQuestion) {
+      return response(400, { request_id: requestId, error: "followup_question_required" });
+    }
   }
 
   let snapshot: any = null;
@@ -888,7 +906,7 @@ Deno.serve(async (req: Request) => {
       p_component_code: component,
       p_interaction_type: interaction,
       p_requested_locale: locale,
-      p_user_text_length: userText.length,
+      p_user_text_length: isFollowup ? followupQuestion.length : userText.length,
     }, authorization, ANON_KEY);
   } catch {
     const mode = "unavailable";
@@ -907,11 +925,94 @@ Deno.serve(async (req: Request) => {
     return response(200, { request_id: requestId, mode, reason, component_code: component, interaction_type: interaction, locale, message, generated: false, academic_state_changed: false });
   }
 
+  let contextInteraction = interaction;
+  let rootRequestId: string | null = null;
+  let parentAudit: any = null;
+
+  const followupFail = async (reason: string, mode = "fallback") => {
+    const message = reason === "followup_out_of_scope" ? followupBoundary(locale) : learnerMessage(locale, mode, reason);
+    const outputHash = await sha256(message);
+    await audit({
+      requestId, userId: user.id, component, interaction, locale, mode, guard, snapshot,
+      latencyMs: performance.now() - started, fallbackReason: reason,
+      safetyFlags: [reason], outputHash,
+    }).catch(() => {});
+    return response(200, {
+      request_id: requestId, mode, reason, component_code: component, interaction_type: interaction,
+      locale, message, generated: false, academic_state_changed: false,
+      thread_eligible: false,
+    });
+  };
+
+  if (isFollowup) {
+    try {
+      parentAudit = await threadParent(user.id, parentRequestId!);
+    } catch {
+      return await followupFail("thread_parent_invalid");
+    }
+
+    if (!parentAudit?.request_id || parentAudit?.mode !== "generated" ||
+        String(parentAudit?.component_code || "") !== component ||
+        String(parentAudit?.requested_locale || "") !== locale) {
+      return await followupFail("thread_parent_invalid");
+    }
+
+    const parentCreatedAt = Date.parse(String(parentAudit?.created_at || ""));
+    if (!Number.isFinite(parentCreatedAt) || Date.now() - parentCreatedAt > FOLLOWUP_WINDOW_MS) {
+      return await followupFail("thread_expired");
+    }
+
+    const previousHash = await sha256(priorAssistantText);
+    if (!parentAudit?.output_hash || previousHash !== String(parentAudit.output_hash)) {
+      return await followupFail("thread_output_mismatch");
+    }
+
+    if (String(parentAudit?.interaction_type || "") === "context_followup") {
+      const parentThread = parentAudit?.guard_decisions?.thread || {};
+      if (Number(parentThread?.followup_turn) !== 1 || followupTurn !== 2) {
+        return await followupFail("followup_limit_reached");
+      }
+      contextInteraction = String(parentThread?.root_interaction_type || "");
+      rootRequestId = isUuid(parentThread?.root_request_id) ? String(parentThread.root_request_id) : null;
+    } else {
+      if (followupTurn !== 1 || !ROOT_FOLLOWUP_INTERACTIONS.has(String(parentAudit?.interaction_type || ""))) {
+        return await followupFail("thread_parent_invalid");
+      }
+      contextInteraction = String(parentAudit.interaction_type);
+      rootRequestId = String(parentAudit.request_id);
+    }
+
+    if (!rootRequestId || !ROOT_FOLLOWUP_INTERACTIONS.has(contextInteraction)) {
+      return await followupFail("thread_parent_invalid");
+    }
+    if (contextInteraction === "established_error_explanation" && (!sessionId || !itemOrder)) {
+      return await followupFail("thread_parent_invalid");
+    }
+    if ((contextInteraction === "theory_explanation" || contextInteraction === "multilingual_explanation") && !skillCode) {
+      return await followupFail("thread_parent_invalid");
+    }
+
+    guard = {
+      ...guard,
+      thread: {
+        root_request_id: rootRequestId,
+        parent_request_id: parentRequestId,
+        root_interaction_type: contextInteraction,
+        followup_turn: followupTurn,
+        followup_mode: followupMode,
+      },
+    };
+
+    if (followupMode === "question" && suspiciousFollowupText(followupQuestion)) {
+      return await followupFail("followup_out_of_scope", "blocked");
+    }
+  }
+
   let deterministicContext: any = null;
   let deterministicSnapshotHash: string | null = null;
   try {
     deterministicContext = await learnerContext(
-      interaction, component, skillCode, sessionId, itemOrder, locale, authorization
+      contextInteraction, component, skillCode, sessionId, itemOrder, locale, authorization
     );
     if (deterministicContext) deterministicSnapshotHash = await sha256(JSON.stringify(deterministicContext));
   } catch {
@@ -923,7 +1024,7 @@ Deno.serve(async (req: Request) => {
     return response(200, { request_id: requestId, mode, reason, component_code: component, interaction_type: interaction, locale, message, generated: false, academic_state_changed: false });
   }
 
-  if (["established_error_explanation","repeated_error_summary","theory_explanation","multilingual_explanation"].includes(interaction)
+  if (["established_error_explanation","repeated_error_summary","theory_explanation","multilingual_explanation"].includes(contextInteraction)
       && deterministicContext?.data?.mapped !== true) {
     const mode = "no_source";
     const reason = String(deterministicContext?.data?.reason || "deterministic_mapping_missing");
@@ -954,7 +1055,7 @@ Deno.serve(async (req: Request) => {
     const result = await rpc("get_exam_prep_ai_source_cards_service_v1", {
       p_component_code: component,
       p_locale: locale,
-      p_card_type: cardTypeMap[interaction] || null,
+      p_card_type: cardTypeMap[contextInteraction] || null,
       p_skill_code: skillCode,
       p_limit: 8,
     }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
@@ -965,11 +1066,11 @@ Deno.serve(async (req: Request) => {
       theory_explanation: ":theory:",
       multilingual_explanation: ":theory:",
     };
-    const requiredMarker = markerByInteraction[interaction] || null;
+    const requiredMarker = markerByInteraction[contextInteraction] || null;
     if (requiredMarker) {
       cards = cards.filter((card) => String(card?.source_card_key || "").includes(requiredMarker));
     }
-    if ((interaction === "theory_explanation" || interaction === "multilingual_explanation") && skillCode) {
+    if ((contextInteraction === "theory_explanation" || contextInteraction === "multilingual_explanation") && skillCode) {
       cards = cards.filter((card) => String(card?.skill_code || "") === skillCode);
     }
   } catch {
@@ -986,10 +1087,19 @@ Deno.serve(async (req: Request) => {
   }
 
   const sourceCardKeys = cards.map((c) => String(c?.source_card_key || "")).filter(Boolean);
+
+  if (isFollowup) {
+    if (!parentAudit?.deterministic_snapshot_hash ||
+        deterministicSnapshotHash !== String(parentAudit.deterministic_snapshot_hash) ||
+        !sameStringSet(sourceCardKeys, parentAudit?.source_card_keys)) {
+      return await followupFail("thread_context_changed");
+    }
+  }
+
   let providerContext: any = null;
   try {
     providerContext = await buildLearnerFacingProviderContext({
-      interaction,
+      interaction: contextInteraction,
       component,
       locale,
       deterministicContext,
