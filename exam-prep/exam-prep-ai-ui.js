@@ -2,10 +2,13 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p304ux2";
+  const VERSION = "p304ux3";
   let observer = null;
   let languageObserver = null;
   let renderQueued = false;
+  const threadState = new WeakMap();
+  const MAX_FOLLOWUPS = 2;
+  const MAX_FOLLOWUP_CHARS = 250;
   const REQUEST_TIMEOUT_MS = Math.min(30000, Math.max(50, Number(internal.aiUiRequestTimeoutMs) || 12000));
 
   function rootEl() {
@@ -38,7 +41,16 @@
       working: "Tushuntirish tayyorlanmoqda…",
       close: "Yopish",
       unavailable: "AI tushuntirishi hozir mavjud emas. Asosiy tayyorgarlik odatdagidek davom etadi.",
-      error: "AI tushuntirishini yuklab bo‘lmadi. Keyinroq qayta urinib ko‘ring."
+      error: "AI tushuntirishini yuklab bo‘lmadi. Keyinroq qayta urinib ko‘ring.",
+      followupPrompt: "Savol qoldimi?",
+      followupOpen: "Aniqlashtirish",
+      simpler: "Soddaroq tushuntir",
+      rephrase: "Boshqacha tushuntir",
+      focus: "Nimaga e’tibor beray?",
+      questionPlaceholder: "Shu izoh bo‘yicha so‘rang…",
+      send: "Yuborish",
+      continueStudy: "O‘rganishni davom ettirish",
+      followupWorking: "Aniqlashtirilmoqda…"
     };
     if (language === "en") return {
       title: "iClub AI Tutor",
@@ -55,7 +67,16 @@
       working: "Preparing your explanation…",
       close: "Close",
       unavailable: "AI explanation is unavailable right now. Your core exam preparation continues normally.",
-      error: "The AI explanation could not be loaded. Try again later."
+      error: "The AI explanation could not be loaded. Try again later.",
+      followupPrompt: "Still unclear?",
+      followupOpen: "Ask a follow-up",
+      simpler: "Explain more simply",
+      rephrase: "Explain it differently",
+      focus: "What should I focus on?",
+      questionPlaceholder: "Ask about this explanation…",
+      send: "Send",
+      continueStudy: "Continue studying",
+      followupWorking: "Clarifying…"
     };
     return {
       title: "ИИ-помощник iClub",
@@ -72,7 +93,16 @@
       working: "Готовим объяснение…",
       close: "Закрыть",
       unavailable: "Объяснение ИИ сейчас недоступно. Основная подготовка продолжает работать как обычно.",
-      error: "Не удалось загрузить объяснение ИИ. Попробуйте позже."
+      error: "Не удалось загрузить объяснение ИИ. Попробуйте позже.",
+      followupPrompt: "Остался вопрос?",
+      followupOpen: "Уточнить",
+      simpler: "Объясни проще",
+      rephrase: "Объясни по-другому",
+      focus: "На что обратить внимание?",
+      questionPlaceholder: "Спросить по этому объяснению…",
+      send: "Отправить",
+      continueStudy: "Продолжить изучение",
+      followupWorking: "Уточняем…"
     };
   }
 
@@ -97,7 +127,29 @@
       <div class="ep-ai-output" data-ep-ai-output role="status" aria-live="polite" hidden>
         <div class="ep-ai-output-head"><strong data-ep-ai-output-label></strong></div>
         <div data-ep-ai-output-text></div>
+        <div data-ep-ai-thread-messages></div>
         <div class="ep-ai-output-note" data-ep-ai-output-note></div>
+        <div class="ep-ai-followup" data-ep-ai-followup hidden>
+          <div class="ep-ai-followup-prompt">
+            <span data-ep-ai-followup-prompt></span>
+            <button type="button" data-ep-ai-followup-open></button>
+          </div>
+          <div class="ep-ai-followup-panel" data-ep-ai-followup-panel hidden>
+            <div class="ep-ai-followup-chips">
+              <button type="button" data-ep-ai-followup-mode="simplify"></button>
+              <button type="button" data-ep-ai-followup-mode="rephrase"></button>
+              <button type="button" data-ep-ai-followup-mode="focus"></button>
+            </div>
+            <div class="ep-ai-followup-question">
+              <textarea rows="2" maxlength="250" data-ep-ai-followup-input></textarea>
+              <div class="ep-ai-followup-question-foot">
+                <span data-ep-ai-followup-count>0/250</span>
+                <button type="button" data-ep-ai-followup-send></button>
+              </div>
+            </div>
+          </div>
+          <button class="ep-ai-followup-done" type="button" data-ep-ai-followup-done hidden></button>
+        </div>
         <button class="ep-ai-output-close" type="button" data-ep-ai-close></button>
       </div>`;
   }
@@ -109,7 +161,7 @@
     status.setAttribute("data-ep-ai-dashboard-status", "");
     status.setAttribute("aria-label", c.title);
     status.innerHTML = `
-      <span class="ep-ai-spark ep-ai-spark-compact" aria-hidden="true">✦</span>
+      <span class="ep-ai-mark ep-ai-mark-compact" aria-hidden="true">AI</span>
       <span class="ep-ai-dashboard-copy"><strong></strong><small></small></span>`;
     status.querySelector("strong").textContent = c.dashboardLabel;
     status.querySelector("small").textContent = c.dashboardNote;
@@ -137,7 +189,7 @@
     wrap.setAttribute("data-ep-ai-surface", surface);
     wrap.innerHTML = `
       <button class="ep-ai-context-btn" type="button" data-ep-ai-action="${interactionType}">
-        <span class="ep-ai-context-icon" aria-hidden="true">✦</span>
+        <span class="ep-ai-mark ep-ai-mark-inline" aria-hidden="true">AI</span>
         <span data-ep-ai-context-label></span>
       </button>
       ${outputMarkup()}`;
@@ -317,7 +369,7 @@
     wrap.setAttribute("data-ep-ai-error-action-wrap", "");
     wrap.innerHTML = `
       <button class="ep-ai-context-btn" type="button" data-ep-ai-action="established_error_explanation">
-        <span class="ep-ai-context-icon" aria-hidden="true">✦</span>
+        <span class="ep-ai-mark ep-ai-mark-inline" aria-hidden="true">AI</span>
         <span data-ep-ai-context-label></span>
       </button>
       ${outputMarkup()}`;
@@ -358,7 +410,7 @@
     wrap.setAttribute("data-ep-ai-topic-action-wrap", "");
     wrap.innerHTML = `
       <button class="ep-ai-context-btn ep-ai-topic-btn" type="button" data-ep-ai-action="theory_explanation">
-        <span class="ep-ai-context-icon" aria-hidden="true">✦</span>
+        <span class="ep-ai-mark ep-ai-mark-inline" aria-hidden="true">AI</span>
         <span class="ep-ai-topic-copy"><strong data-ep-ai-context-label></strong><small data-ep-ai-topic-note></small></span>
       </button>
       ${outputMarkup()}`;
