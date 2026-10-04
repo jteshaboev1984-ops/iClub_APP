@@ -879,14 +879,32 @@ Deno.serve(async (req: Request) => {
   }
 
   const sourceCardKeys = cards.map((c) => String(c?.source_card_key || "")).filter(Boolean);
-  const providerContext = await buildLearnerFacingProviderContext({
-    interaction,
-    component,
-    locale,
-    deterministicContext,
-    cards,
-  });
-  assertLearnerFacingProviderContext(providerContext);
+  let providerContext: any = null;
+  try {
+    providerContext = await buildLearnerFacingProviderContext({
+      interaction,
+      component,
+      locale,
+      deterministicContext,
+      cards,
+    });
+    assertLearnerFacingProviderContext(providerContext);
+  } catch {
+    const mode = "fallback";
+    const reason = "provider_context_internal_identifier";
+    const message = learnerMessage(locale, mode, reason);
+    const outputHash = await sha256(message);
+    await audit({
+      requestId, userId: user.id, component, interaction, locale, mode, guard, snapshot,
+      latencyMs: performance.now() - started, deterministicSnapshotHash, fallbackReason: reason,
+      sourceCardKeys, safetyFlags: [reason], outputHash,
+    }).catch(() => {});
+    return response(200, {
+      request_id: requestId, mode, reason, component_code: component, interaction_type: interaction,
+      locale, message, source_cards: sourceCardKeys, context_bound: Boolean(deterministicContext),
+      generated: false, academic_state_changed: false,
+    });
+  }
 
   // Provider generation is enabled only for explicitly reviewed flows backed by
   // approved P1/P5 source cards and deterministic context. Every other interaction remains closed
