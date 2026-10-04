@@ -73,8 +73,12 @@ assert(historySource.includes('Ular faqat qo‘shimcha ma’lumot sifatida ishla
 assert(!historySource.includes('tasdiqlangan progress yoki imtihonga tayyorlikni o‘zgartirmaydi'), 'Old UZ previous-practice progress wording returned');
 
 const aiSource = fs.readFileSync('exam-prep/exam-prep-ai-ui.js', 'utf8');
-assert(aiSource.includes('Tasdiqlangan natijalaringiz va joriy rejangizni sodda qilib tushuntiradi. Natijalaringizni o‘zgartirmaydi.'), 'UZ AI helper note regressed');
-assert(aiSource.includes('progress: "Natijalarimni tushuntirish"'), 'UZ AI helper action regressed');
+assert(aiSource.includes('title: "iClub AI yordamchisi"'), 'UZ AI Tutor title regressed');
+assert(aiSource.includes('Natijalaringiz, rejangiz va iClub o‘quv materiallarini sodda tushuntiradi. Tekshiruv natijalarini o‘zgartirmaydi.'), 'UZ AI Tutor note regressed');
+assert(aiSource.includes('progress: "Nimaga ko‘proq e’tibor beray?"'), 'UZ AI Tutor focus action regressed');
+assert(aiSource.includes('plan: "Joriy rejamni tushuntirish"'), 'UZ AI Tutor plan action regressed');
+assert(aiSource.includes('topic: "Bu mavzuni tushuntirish"'), 'UZ AI Tutor topic action regressed');
+assert(aiSource.includes('mistake: "Bu xatoni tushunishga yordam ber"'), 'UZ AI Tutor mistake action regressed');
 assert(!aiSource.includes('Tasdiqlangan progress va joriy rejangizni sodda qilib tushuntiradi.'), 'Old UZ AI helper progress wording returned');
 assert(!aiSource.includes('progress: "Progressni tushuntirish"'), 'Old UZ AI helper action returned');
 

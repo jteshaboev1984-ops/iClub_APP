@@ -13,8 +13,13 @@ const path = require('path');
         <section id="courses-subject-hub">
           <div id="subject-hub-exam-prep-entry" hidden aria-hidden="true">
             <button type="button" data-action="open-exam-prep">
+              <span id="subject-hub-exam-prep-badge"></span>
               <span id="subject-hub-exam-prep-title"></span>
               <span id="subject-hub-exam-prep-sub"></span>
+              <span id="subject-hub-exam-prep-p1"></span>
+              <span id="subject-hub-exam-prep-p5"></span>
+              <span id="subject-hub-exam-prep-note"></span>
+              <span id="subject-hub-exam-prep-cta"></span>
             </button>
           </div>
           <div id="exam-prep-host-root" hidden aria-hidden="true"></div>
@@ -264,6 +269,28 @@ const path = require('path');
   assert(!result.shellText.includes('Internal alpha') && !result.shellText.includes('host bridge') && !result.shellText.includes('synthetic learner data') && !result.shellText.includes('canonical skills'), 'live shell must not expose internal implementation terminology');
   assert(result.backHandled === true && result.closed === true, 'back must close transient root');
   assert(result.sentinel === 'unchanged', 'host bridge must not pollute localStorage');
+
+  // AI-entitled learners should see the premium capability before opening Exam Prep,
+  // without exposing internal service-mode terminology or changing Core access.
+  result = await page.evaluate(async () => {
+    window.__caps = { ...window.__caps, ai_assist: true };
+    await window.iClubExamPrep.syncSubjectHub({ subjectKey: 'mathematics', language: 'en' });
+    const entry = document.querySelector('#subject-hub-exam-prep-entry');
+    return {
+      hidden: entry.hidden,
+      aiVisible: entry.getAttribute('data-ep-ai-visible'),
+      hasAiClass: entry.classList.contains('has-ai-assist'),
+      badge: document.querySelector('#subject-hub-exam-prep-badge')?.textContent || '',
+      note: document.querySelector('#subject-hub-exam-prep-note')?.textContent || '',
+      text: entry.textContent || ''
+    };
+  });
+  assert(result.hidden === false, 'AI-entitled learner lost the Exam Prep entry');
+  assert(result.aiVisible === 'true' && result.hasAiClass, 'AI entitlement is not visibly represented on the Exam Prep entry');
+  assert(result.badge.includes('AI'), 'AI-enabled Exam Prep entry badge does not surface AI');
+  assert(result.note.includes('AI Tutor is available'), 'AI-enabled Exam Prep entry does not explain the premium capability');
+  assert(!result.text.includes('AI Assist'), 'learner-facing Exam Prep entry leaked internal AI service-mode terminology');
+  await page.evaluate(() => { window.__caps = { ...window.__caps, ai_assist: false }; });
 
   result = await page.evaluate(async () => {
     await window.iClubExamPrep.syncSubjectHub({ subjectKey: 'mathematics', language: 'en' });

@@ -33,11 +33,13 @@
         p5: "P5 · Probability & Statistics 1",
         skills: "ko‘nikma",
         entryBadge: "Cambridge AS · Mathematics",
+        entryBadgeAi: "Cambridge AS · Mathematics · AI",
         entryTitle: "Exam Prep",
         entryDesc: "Paper 1 va Paper 5 bo‘yicha shaxsiy tayyorgarlik yo‘li: kirish tekshiruvi, haftalik reja, mavzular, xatolar va vaqtli mashqlar.",
         entryP1: "Pure Mathematics 1 · 45 ko‘nikma",
         entryP5: "Probability & Statistics 1 · 36 ko‘nikma",
         entryNote: "Practice va Tours tarixi o‘zgarmaydi.",
+        entryAiNote: "AI yordamchisi mavjud. Practice va Tours tarixi o‘zgarmaydi.",
         entryCta: "Exam Prepni ochish",
         inviteBadge: "Yangi imkoniyat",
         inviteCta: "Taklifni ko‘rish",
@@ -79,11 +81,13 @@
         p5: "P5 · Probability & Statistics 1",
         skills: "skills",
         entryBadge: "Cambridge AS · Mathematics",
+        entryBadgeAi: "Cambridge AS · Mathematics · AI",
         entryTitle: "Exam Prep",
         entryDesc: "A personal route for Paper 1 and Paper 5: entry check, weekly plan, syllabus work, corrections and timed practice.",
         entryP1: "Pure Mathematics 1 · 45 skills",
         entryP5: "Probability & Statistics 1 · 36 skills",
         entryNote: "Practice and Tours history stays unchanged.",
+        entryAiNote: "AI Tutor is available. Practice and Tours history stays unchanged.",
         entryCta: "Open Exam Prep",
         inviteBadge: "New feature",
         inviteCta: "View invitation",
@@ -124,11 +128,13 @@
       p5: "P5 · Probability & Statistics 1",
       skills: "навыков",
       entryBadge: "Cambridge AS · Mathematics",
+      entryBadgeAi: "Cambridge AS · Mathematics · ИИ",
       entryTitle: "Exam Prep",
       entryDesc: "Персональный маршрут по Paper 1 и Paper 5: входная проверка, недельный план, темы, исправление ошибок и практика на время.",
       entryP1: "Pure Mathematics 1 · 45 навыков",
       entryP5: "Probability & Statistics 1 · 36 навыков",
       entryNote: "История Practice и Tours остаётся без изменений.",
+      entryAiNote: "ИИ-помощник доступен. История Practice и Tours остаётся без изменений.",
       entryCta: "Открыть Exam Prep",
       inviteBadge: "Новая функция",
       inviteCta: "Посмотреть приглашение",
@@ -242,16 +248,19 @@
     const item = invitationItem();
     const inviteOnly = Boolean(item) && !allowed(state.capabilities);
     const openOffer = inviteOnly && item.openRecruitment === true;
+    const aiActive = allowed(state.capabilities) && state.capabilities?.aiAssist === true;
     if (entry) {
       entry.classList.toggle("is-invitation", inviteOnly);
+      entry.classList.toggle("has-ai-assist", aiActive);
       entry.setAttribute("data-ep-entry-mode", openOffer ? "open-testing" : (inviteOnly ? "invitation" : "live"));
+      entry.setAttribute("data-ep-ai-visible", aiActive ? "true" : "false");
     }
-    if (badge) badge.textContent = openOffer ? text.joinBadge : (inviteOnly ? text.inviteBadge : text.entryBadge);
+    if (badge) badge.textContent = openOffer ? text.joinBadge : (inviteOnly ? text.inviteBadge : (aiActive ? text.entryBadgeAi : text.entryBadge));
     if (title) title.textContent = openOffer ? text.joinTitle : (inviteOnly ? text.inviteTitle : text.entryTitle);
     if (sub) sub.textContent = openOffer ? text.joinSub : (inviteOnly ? text.inviteSub : text.entryDesc);
     if (p1) p1.textContent = text.entryP1;
     if (p5) p5.textContent = text.entryP5;
-    if (note) note.textContent = text.entryNote;
+    if (note) note.textContent = aiActive ? text.entryAiNote : text.entryNote;
     if (cta) cta.textContent = openOffer ? text.joinCta : (inviteOnly ? text.inviteCta : text.entryCta);
   }
 

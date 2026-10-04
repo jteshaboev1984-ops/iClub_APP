@@ -53,6 +53,29 @@ SELECT user_id,'P5','P5-NOR-02','reopened','objective_state_v1',
        '{"source":"finalized_incorrect_evidence"}'::jsonb,now()-interval '3 days',now()-interval '30 minutes'
 FROM p302v_people WHERE ord=1;
 
+INSERT INTO private.exam_prep_skill_states(
+  user_id,program_version_id,component_code,skill_code,engine_version,
+  objective_level,coverage_confirmed,evidence_total,objective_evidence_count,
+  correct_objective_count,unresolved_correction_count
+)
+SELECT p.user_id,pv.id,'P1','P1-QUA-02','objective_state_v1',
+       0,false,1,1,0,1
+FROM p302v_people p
+JOIN private.exam_prep_program_versions pv
+  ON pv.program_key='math_as_p1_p5'
+ AND pv.version_key='p1_p5_canonical_v1_0'
+ AND pv.status='active'
+WHERE p.ord=1
+UNION ALL
+SELECT p.user_id,pv.id,'P5','P5-NOR-02','objective_state_v1',
+       1,false,2,2,1,1
+FROM p302v_people p
+JOIN private.exam_prep_program_versions pv
+  ON pv.program_key='math_as_p1_p5'
+ AND pv.version_key='p1_p5_canonical_v1_0'
+ AND pv.status='active'
+WHERE p.ord=1;
+
 CREATE TEMP TABLE p302v_before AS
 SELECT
   (SELECT count(*) FROM private.exam_prep_evidence_events) AS evidence_count,
@@ -110,8 +133,12 @@ BEGIN
        OR v->>'skill_code'<>'P1-QUA-02'
        OR v->>'locale'<>v_locale
        OR v->>'description' IS NULL
+       OR v#>>'{learner_context,status}'<>'needs_correction'
+       OR coalesce((v#>>'{learner_context,attempt_count}')::int,-1)<>1
+       OR coalesce((v#>>'{learner_context,correct_count}')::int,-1)<>0
+       OR coalesce((v#>>'{learner_context,unresolved_correction_count}')::int,-1)<>1
     THEN
-      RAISE EXCEPTION 'P3-02 theory P1 context failed locale=% payload=%',v_locale,v;
+      RAISE EXCEPTION 'P3-02 theory P1 personalised context failed locale=% payload=%',v_locale,v;
     END IF;
 
     v:=public.get_exam_prep_ai_skill_theory_context_safe_v1('P5','P5-NOR-02',v_locale);
@@ -119,16 +146,22 @@ BEGIN
        OR v->>'skill_code'<>'P5-NOR-02'
        OR v->>'locale'<>v_locale
        OR v->>'description' IS NULL
+       OR v#>>'{learner_context,status}'<>'needs_correction'
+       OR coalesce((v#>>'{learner_context,attempt_count}')::int,-1)<>2
+       OR coalesce((v#>>'{learner_context,correct_count}')::int,-1)<>1
     THEN
-      RAISE EXCEPTION 'P3-02 theory P5 context failed locale=% payload=%',v_locale,v;
+      RAISE EXCEPTION 'P3-02 theory P5 personalised context failed locale=% payload=%',v_locale,v;
     END IF;
   END LOOP;
 
   v:=public.get_exam_prep_ai_skill_theory_context_safe_v1('P1','P1-QUA-01','en');
   IF coalesce((v->>'mapped')::boolean,false) IS NOT TRUE
      OR v->>'skill_code'<>'P1-QUA-01'
+     OR v#>>'{learner_context,status}'<>'not_started'
+     OR coalesce((v#>>'{learner_context,attempt_count}')::int,-1)<>0
+     OR coalesce((v#>>'{learner_context,unresolved_correction_count}')::int,-1)<>0
   THEN
-    RAISE EXCEPTION 'P3-02 newly covered theory skill did not map: %',v;
+    RAISE EXCEPTION 'P3-02 newly covered theory skill did not map with safe learner context: %',v;
   END IF;
 END
 $learner$;
