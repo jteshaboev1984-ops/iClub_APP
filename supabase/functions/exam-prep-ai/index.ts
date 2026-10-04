@@ -557,7 +557,8 @@ function validateGeneratedMessage(params: {
   }
   if (/\bP[15]-[A-Z0-9]+-\d{2}\b/.test(message) ||
       /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i.test(message) ||
-      /\b(action_code|item_type|process_step|learner_context|service_mode|source_card_key|mastery|progression)\b/i.test(message)) {
+      /\b(action_code|item_type|process_step|learner_context|service_mode|source_card_key|mastery|progression)\b/i.test(message) ||
+      /confirmed coverage|operational stage|evidence state|подтвержд[её]нн(?:ое|ого) покрыти|tasdiqlangan qamrov/i.test(message)) {
     return { ok: false, reason: "internal_identifier_leak" };
   }
 
