@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p304ux1";
+  const VERSION = "p304ux2";
   let observer = null;
   let languageObserver = null;
   let renderQueued = false;
@@ -25,18 +25,15 @@
     const language = currentLanguage();
     if (language === "uz") return {
       title: "iClub AI yordamchisi",
-      note: "Natijalaringiz, rejangiz va iClub o‘quv materiallarini sodda tushuntiradi. Tekshiruv natijalarini o‘zgartirmaydi.",
-      homeTitle: "iClub AI yordamchisi",
-      homeNote: "AI yordamchisi Exam Prep’da mavjud. Natijalar, reja, qiyin mavzular yoki qayd etilgan xatolarni tushunish uchun P1 yoki P5 ni oching.",
-      openP1: "P1 uchun AI ni ochish",
-      openP5: "P5 uchun AI ni ochish",
-      progress: "Nimaga ko‘proq e’tibor beray?",
-      plan: "Joriy rejamni tushuntirish",
-      repeated: "Takrorlanayotgan qiyinchiliklarni ko‘rib chiqish",
-      topic: "Bu mavzuni tushuntirish",
-      topicNote: "Bu mavzu bo‘yicha hozirgi natijalaringizga mos tushuntirish.",
+      dashboardLabel: "AI yordamchisi",
+      dashboardNote: "P1 va P5 ichida kerakli joyda yordam beradi",
+      progress: "Progressimni tushuntirish",
+      plan: "Nega bu keyingi qadam?",
+      repeated: "Takrorlanayotgan qiyinchiliklarni tushuntirish",
+      topic: "Bu mavzuni AI bilan tushuntirish",
+      topicNote: "Hozirgi natijalaringizga mos, qisqa tushuntirish.",
       mistake: "Bu xatoni tushunishga yordam ber",
-      outputLabel: "AI tushuntirishi",
+      outputLabel: "iClub AI",
       sourceNote: "iClub o‘quv materiallari va ilovadagi natijalaringiz asosida.",
       working: "Tushuntirish tayyorlanmoqda…",
       close: "Yopish",
@@ -45,18 +42,15 @@
     };
     if (language === "en") return {
       title: "iClub AI Tutor",
-      note: "Explains your progress, plan and iClub learning material in simpler terms. It never changes assessment results.",
-      homeTitle: "iClub AI Tutor",
-      homeNote: "AI Tutor is available in Exam Prep. Open P1 or P5 for help understanding your progress, plan, difficult topics or recorded mistakes.",
-      openP1: "Open P1 with AI",
-      openP5: "Open P5 with AI",
-      progress: "What should I focus on?",
-      plan: "Explain my current plan",
-      repeated: "Review recurring difficulties",
-      topic: "Explain this topic to me",
-      topicNote: "A focused explanation for this skill, adapted to your current progress.",
+      dashboardLabel: "AI Tutor",
+      dashboardNote: "Available inside P1 and P5 when it is useful",
+      progress: "Explain my progress",
+      plan: "Why is this my next step?",
+      repeated: "Explain recurring difficulties",
+      topic: "Explain this topic with AI",
+      topicNote: "A short explanation adapted to your current progress.",
       mistake: "Help me understand this mistake",
-      outputLabel: "AI explanation",
+      outputLabel: "iClub AI",
       sourceNote: "Based on iClub learning material and your work in the app.",
       working: "Preparing your explanation…",
       close: "Close",
@@ -65,18 +59,15 @@
     };
     return {
       title: "ИИ-помощник iClub",
-      note: "Простыми словами объясняет ваш прогресс, план и учебные материалы iClub. Результаты проверок не меняет.",
-      homeTitle: "ИИ-помощник iClub",
-      homeNote: "ИИ-помощник доступен в Exam Prep. Откройте P1 или P5, чтобы разобраться в прогрессе, плане, сложных темах или зафиксированных ошибках.",
-      openP1: "Открыть ИИ для P1",
-      openP5: "Открыть ИИ для P5",
-      progress: "На чём мне сосредоточиться?",
-      plan: "Объяснить мой текущий план",
-      repeated: "Разобрать повторяющиеся трудности",
-      topic: "Объяснить мне эту тему",
-      topicNote: "Объяснение этой темы с учётом вашего текущего прогресса.",
+      dashboardLabel: "ИИ-помощник",
+      dashboardNote: "Помогает внутри P1 и P5 именно там, где это нужно",
+      progress: "Объяснить мой прогресс",
+      plan: "Почему это мой следующий шаг?",
+      repeated: "Объяснить повторяющиеся трудности",
+      topic: "Объяснить эту тему с ИИ",
+      topicNote: "Короткое объяснение с учётом вашего текущего прогресса.",
       mistake: "Помочь понять эту ошибку",
-      outputLabel: "Объяснение ИИ",
+      outputLabel: "iClub AI",
       sourceNote: "Основано на учебных материалах iClub и вашей работе в приложении.",
       working: "Готовим объяснение…",
       close: "Закрыть",
@@ -97,79 +88,119 @@
   }
 
 
-  function componentFromStrip(strip) {
-    const value = String(strip?.getAttribute("data-ep-overview-strip") || "").toUpperCase();
-    return value === "P1" || value === "P5" ? value : null;
-  }
-
   function isProtectedAssessment(root) {
     return Boolean(root?.querySelector("[data-ep-live-active-assessment]"));
   }
 
-  function buildHomeBanner() {
-    const c = copy();
-    const banner = document.createElement("section");
-    banner.className = "ep-ai-home-banner";
-    banner.setAttribute("data-ep-ai-home-banner", "");
-    banner.setAttribute("aria-label", c.homeTitle);
-    banner.innerHTML = `
-      <div class="ep-ai-home-main">
-        <span class="ep-ai-spark" aria-hidden="true">✦</span>
-        <div class="ep-ai-home-copy">
-          <div class="ep-ai-home-title"></div>
-          <div class="ep-ai-home-note"></div>
-        </div>
-      </div>
-      <div class="ep-ai-home-actions">
-        <button class="ep-ai-home-btn" type="button" data-ep-ai-open-component="P1"></button>
-        <button class="ep-ai-home-btn" type="button" data-ep-ai-open-component="P5"></button>
+  function outputMarkup() {
+    return `
+      <div class="ep-ai-output" data-ep-ai-output role="status" aria-live="polite" hidden>
+        <div class="ep-ai-output-head"><strong data-ep-ai-output-label></strong></div>
+        <div data-ep-ai-output-text></div>
+        <div class="ep-ai-output-note" data-ep-ai-output-note></div>
+        <button class="ep-ai-output-close" type="button" data-ep-ai-close></button>
       </div>`;
-    banner.querySelector(".ep-ai-home-title").textContent = c.homeTitle;
-    banner.querySelector(".ep-ai-home-note").textContent = c.homeNote;
-    banner.querySelector('[data-ep-ai-open-component="P1"]').textContent = c.openP1;
-    banner.querySelector('[data-ep-ai-open-component="P5"]').textContent = c.openP5;
-    banner.querySelectorAll("[data-ep-ai-open-component]").forEach(button => {
-      button.addEventListener("click", () => {
-        const component = button.getAttribute("data-ep-ai-open-component");
-        const target = rootEl()?.querySelector(`[data-ep-live-open-component="${component}"]`);
-        if (target instanceof HTMLElement) target.click();
-      });
-    });
-    return banner;
   }
 
-  function renderHomeBanner(root) {
+  function buildDashboardStatus() {
+    const c = copy();
+    const status = document.createElement("div");
+    status.className = "ep-ai-dashboard-status";
+    status.setAttribute("data-ep-ai-dashboard-status", "");
+    status.setAttribute("aria-label", c.title);
+    status.innerHTML = `
+      <span class="ep-ai-spark ep-ai-spark-compact" aria-hidden="true">✦</span>
+      <span class="ep-ai-dashboard-copy"><strong></strong><small></small></span>`;
+    status.querySelector("strong").textContent = c.dashboardLabel;
+    status.querySelector("small").textContent = c.dashboardNote;
+    return status;
+  }
+
+  function renderDashboardStatus(root) {
     const intro = root.querySelector(".ep-live-dashboard-intro");
     const grid = root.querySelector(".ep-live-grid");
     if (!intro || !grid) {
-      root.querySelectorAll("[data-ep-ai-home-banner]").forEach(node => node.remove());
+      root.querySelectorAll("[data-ep-ai-dashboard-status]").forEach(node => node.remove());
       return;
     }
-    if (!root.querySelector("[data-ep-ai-home-banner]")) {
-      intro.insertAdjacentElement("afterend", buildHomeBanner());
+    if (!intro.querySelector("[data-ep-ai-dashboard-status]")) {
+      const mount = intro.querySelector(":scope > div:first-child") || intro;
+      mount.appendChild(buildDashboardStatus());
     }
   }
 
-  function renderComponentHomePanel(root) {
+  function buildContextAction(component, interactionType, label, tone = "default", surface = "component") {
+    const c = copy();
+    const wrap = document.createElement("div");
+    wrap.className = `ep-ai-context ep-ai-context-${tone}`;
+    wrap.setAttribute("data-ep-ai-context-action", interactionType);
+    wrap.setAttribute("data-ep-ai-surface", surface);
+    wrap.innerHTML = `
+      <button class="ep-ai-context-btn" type="button" data-ep-ai-action="${interactionType}">
+        <span class="ep-ai-context-icon" aria-hidden="true">✦</span>
+        <span data-ep-ai-context-label></span>
+      </button>
+      ${outputMarkup()}`;
+    wrap.querySelector("[data-ep-ai-context-label]").textContent = label;
+    applyOutputCopy(wrap, c);
+    wrap.querySelector("[data-ep-ai-action]")?.addEventListener("click", () => invoke(wrap, component, interactionType));
+    wrap.querySelector("[data-ep-ai-close]")?.addEventListener("click", () => hideOutput(wrap));
+    return wrap;
+  }
+
+  function renderComponentContextActions(root) {
     const home = root.querySelector("[data-ep-component-home]");
     if (!home) return false;
+    root.querySelectorAll('[data-ep-ai-context-action][data-ep-ai-surface="tracker"]').forEach(node => node.remove());
+
     const component = String(home.getAttribute("data-ep-component-home") || "").toUpperCase();
-    if (!["P1", "P5"].includes(component)) return false;
-    const existing = root.querySelector(`[data-ep-ai-panel="${component}"]`);
-    if (!existing) {
-      const mount = home.querySelector(".ep-component-next") || home.querySelector(".ep-component-hero");
-      const panel = buildPanel(component, {
-        planAvailable: home.getAttribute("data-ep-ai-plan-available") === "true",
-        repeatedAvailable: home.getAttribute("data-ep-ai-repeated-available") === "true"
-      });
-      panel.classList.add("ep-ai-panel-featured");
-      if (mount) mount.insertAdjacentElement("afterend", panel);
-      else home.prepend(panel);
+    if (!["P1", "P5"].includes(component)) return true;
+    const c = copy();
+
+    const next = home.querySelector(".ep-component-next");
+    const planAvailable = home.getAttribute("data-ep-ai-plan-available") === "true";
+    if (next && planAvailable && !next.querySelector('[data-ep-ai-context-action="weekly_plan_narration"]')) {
+      next.appendChild(buildContextAction(component, "weekly_plan_narration", c.plan, "next", "component"));
     }
-    root.querySelectorAll("[data-ep-ai-panel]").forEach(panel => {
-      if (panel.getAttribute("data-ep-ai-panel") !== component) panel.remove();
-    });
+
+    const progress = home.querySelector(".ep-component-progress-card");
+    if (progress && !progress.querySelector('[data-ep-ai-context-action="progress_summary"]')) {
+      progress.appendChild(buildContextAction(component, "progress_summary", c.progress, "progress", "component"));
+    }
+
+    const repeatedAvailable = home.getAttribute("data-ep-ai-repeated-available") === "true";
+    const correctionLink = home.querySelector('[data-ep-component-link="corrections"]');
+    if (repeatedAvailable && correctionLink && !home.querySelector('[data-ep-ai-context-action="repeated_error_summary"]')) {
+      correctionLink.insertAdjacentElement("afterend", buildContextAction(component, "repeated_error_summary", c.repeated, "repeated", "component"));
+    }
     return true;
+  }
+
+  function renderTrackerProgressAction(root) {
+    const screen = root.querySelector("[data-ep-views-screen]");
+    if (!screen || screen.hasAttribute("data-ep-ai-skill-detail")) return false;
+    const firstSkill = screen.querySelector("[data-ep-views-skill]");
+    const skillCode = String(firstSkill?.getAttribute("data-ep-views-skill") || "");
+    const component = skillCode.startsWith("P1-") ? "P1" : (skillCode.startsWith("P5-") ? "P5" : "");
+    const summary = screen.querySelector(".ep-views-summary");
+    if (!component || !summary) return false;
+
+    root.querySelectorAll('[data-ep-ai-context-action][data-ep-ai-surface="component"]').forEach(node => node.remove());
+    if (!screen.querySelector('[data-ep-ai-context-action="progress_summary"][data-ep-ai-surface="tracker"]')) {
+      const action = buildContextAction(component, "progress_summary", copy().progress, "progress", "tracker");
+      summary.insertAdjacentElement("afterend", action);
+    }
+    return true;
+  }
+
+  function renderContextActions(root) {
+    if (renderComponentContextActions(root)) return;
+    if (renderTrackerProgressAction(root)) return;
+    removeContextActions();
+  }
+
+  function removeContextActions() {
+    document.querySelectorAll("[data-ep-ai-context-action]").forEach(node => node.remove());
   }
 
   function setBusy(panel, busy) {
@@ -264,53 +295,6 @@
     }
   }
 
-  function buildPanel(component, options = {}) {
-    const c = copy();
-    const panel = document.createElement("section");
-    panel.className = "ep-ai-panel";
-    panel.setAttribute("data-ep-ai-panel", component);
-    panel.setAttribute("aria-label", c.title);
-    panel.innerHTML = `
-      <div class="ep-ai-panel-head"><span class="ep-ai-spark" aria-hidden="true">✦</span><div class="ep-ai-panel-copy">
-        <div class="ep-ai-panel-title"></div>
-        <div class="ep-ai-panel-note"></div></div>
-      </div>
-      <div class="ep-ai-actions">
-        <button class="ep-ai-btn" type="button" data-ep-ai-action="progress_summary"></button>
-        <button class="ep-ai-btn" type="button" data-ep-ai-action="weekly_plan_narration"></button>
-        <button class="ep-ai-btn" type="button" data-ep-ai-action="repeated_error_summary"></button>
-      </div>
-      <div class="ep-ai-output" data-ep-ai-output role="status" aria-live="polite" hidden>
-        <div class="ep-ai-output-head"><strong data-ep-ai-output-label></strong></div>
-        <div data-ep-ai-output-text></div>
-        <div class="ep-ai-output-note" data-ep-ai-output-note></div>
-        <button class="ep-ai-output-close" type="button" data-ep-ai-close></button>
-      </div>`;
-
-    panel.querySelector(".ep-ai-panel-title").textContent = c.title;
-    panel.querySelector(".ep-ai-panel-note").textContent = c.note;
-    panel.querySelector('[data-ep-ai-action="progress_summary"]').textContent = c.progress;
-    panel.querySelector('[data-ep-ai-action="weekly_plan_narration"]').textContent = c.plan;
-    panel.querySelector('[data-ep-ai-action="repeated_error_summary"]').textContent = c.repeated;
-    if (options.planAvailable === false) {
-      panel.querySelector('[data-ep-ai-action="weekly_plan_narration"]')?.setAttribute("hidden", "");
-    }
-    if (options.repeatedAvailable === false) {
-      panel.querySelector('[data-ep-ai-action="repeated_error_summary"]')?.setAttribute("hidden", "");
-    }
-    applyOutputCopy(panel, c);
-
-    panel.querySelectorAll("[data-ep-ai-action]").forEach(button => {
-      button.addEventListener("click", () => invoke(panel, component, button.getAttribute("data-ep-ai-action")));
-    });
-    panel.querySelector("[data-ep-ai-close]")?.addEventListener("click", () => hideOutput(panel));
-    return panel;
-  }
-
-  function removePanels() {
-    document.querySelectorAll("[data-ep-ai-panel]").forEach(node => node.remove());
-  }
-
   function removeErrorActions() {
     document.querySelectorAll("[data-ep-ai-error-action-wrap]").forEach(node => node.remove());
   }
@@ -329,17 +313,15 @@
     if (!["P1","P5"].includes(component) || !sessionId || !Number.isInteger(itemOrder) || itemOrder < 1) return null;
 
     const wrap = document.createElement("div");
-    wrap.className = "ep-ai-inline";
+    wrap.className = "ep-ai-inline ep-ai-error";
     wrap.setAttribute("data-ep-ai-error-action-wrap", "");
     wrap.innerHTML = `
-      <button class="ep-ai-btn ep-ai-inline-btn" type="button" data-ep-ai-action="established_error_explanation"></button>
-      <div class="ep-ai-output ep-ai-inline-output" data-ep-ai-output role="status" aria-live="polite" hidden>
-        <div class="ep-ai-output-head"><strong data-ep-ai-output-label></strong></div>
-        <div data-ep-ai-output-text></div>
-        <div class="ep-ai-output-note" data-ep-ai-output-note></div>
-        <button class="ep-ai-output-close" type="button" data-ep-ai-close></button>
-      </div>`;
-    wrap.querySelector("[data-ep-ai-action]").textContent = c.mistake;
+      <button class="ep-ai-context-btn" type="button" data-ep-ai-action="established_error_explanation">
+        <span class="ep-ai-context-icon" aria-hidden="true">✦</span>
+        <span data-ep-ai-context-label></span>
+      </button>
+      ${outputMarkup()}`;
+    wrap.querySelector("[data-ep-ai-context-label]").textContent = c.mistake;
     applyOutputCopy(wrap, c);
     wrap.querySelector("[data-ep-ai-action]")?.addEventListener("click", () => invoke(
       wrap,
@@ -375,20 +357,13 @@
     wrap.className = "ep-ai-inline ep-ai-topic";
     wrap.setAttribute("data-ep-ai-topic-action-wrap", "");
     wrap.innerHTML = `
-      <div class="ep-ai-topic-head">
-        <span class="ep-ai-spark" aria-hidden="true">✦</span>
-        <div><strong data-ep-ai-topic-title></strong><span data-ep-ai-topic-note></span></div>
-      </div>
-      <button class="ep-ai-btn ep-ai-inline-btn" type="button" data-ep-ai-action="theory_explanation"></button>
-      <div class="ep-ai-output ep-ai-inline-output" data-ep-ai-output role="status" aria-live="polite" hidden>
-        <div class="ep-ai-output-head"><strong data-ep-ai-output-label></strong></div>
-        <div data-ep-ai-output-text></div>
-        <div class="ep-ai-output-note" data-ep-ai-output-note></div>
-        <button class="ep-ai-output-close" type="button" data-ep-ai-close></button>
-      </div>`;
-    wrap.querySelector("[data-ep-ai-topic-title]").textContent = c.title;
+      <button class="ep-ai-context-btn ep-ai-topic-btn" type="button" data-ep-ai-action="theory_explanation">
+        <span class="ep-ai-context-icon" aria-hidden="true">✦</span>
+        <span class="ep-ai-topic-copy"><strong data-ep-ai-context-label></strong><small data-ep-ai-topic-note></small></span>
+      </button>
+      ${outputMarkup()}`;
+    wrap.querySelector("[data-ep-ai-context-label]").textContent = c.topic;
     wrap.querySelector("[data-ep-ai-topic-note]").textContent = c.topicNote;
-    wrap.querySelector("[data-ep-ai-action]").textContent = c.topic;
     applyOutputCopy(wrap, c);
     wrap.querySelector("[data-ep-ai-action]")?.addEventListener("click", () => invoke(
       wrap,
@@ -419,36 +394,15 @@
     renderQueued = false;
     const root = rootEl();
     if (!root || root.hidden || !canShow() || isProtectedAssessment(root)) {
-      root?.querySelectorAll("[data-ep-ai-home-banner]").forEach(node => node.remove());
-      removePanels();
+      root?.querySelectorAll("[data-ep-ai-dashboard-status]").forEach(node => node.remove());
+      removeContextActions();
       removeErrorActions();
       removeTopicActions();
       return;
     }
 
-    renderHomeBanner(root);
-
-    const componentHomeMounted = renderComponentHomePanel(root);
-    if (!componentHomeMounted) {
-      const strips = Array.from(root.querySelectorAll("[data-ep-overview-strip]"));
-      if (!strips.length) {
-        removePanels();
-      } else {
-        strips.forEach(strip => {
-          const component = componentFromStrip(strip);
-          if (!component) return;
-          const existing = root.querySelector(`[data-ep-ai-panel="${component}"]`);
-          if (existing) return;
-          strip.insertAdjacentElement("afterend", buildPanel(component));
-        });
-
-        root.querySelectorAll("[data-ep-ai-panel]").forEach(panel => {
-          const component = panel.getAttribute("data-ep-ai-panel");
-          if (!root.querySelector(`[data-ep-overview-strip="${component}"]`)) panel.remove();
-        });
-      }
-    }
-
+    renderDashboardStatus(root);
+    renderContextActions(root);
     renderErrorActions(root);
     renderTopicActions(root);
   }
@@ -471,8 +425,8 @@
 
     if (languageObserver) languageObserver.disconnect();
     languageObserver = new MutationObserver(() => {
-      rootEl()?.querySelectorAll("[data-ep-ai-home-banner]").forEach(node => node.remove());
-      removePanels();
+      rootEl()?.querySelectorAll("[data-ep-ai-dashboard-status]").forEach(node => node.remove());
+      removeContextActions();
       removeErrorActions();
       removeTopicActions();
       queueRender();

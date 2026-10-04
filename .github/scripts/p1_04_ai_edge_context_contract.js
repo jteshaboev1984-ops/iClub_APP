@@ -6,7 +6,7 @@ const assert = (condition, message) => { if (!condition) throw new Error(message
 
 const guardCall = src.indexOf('get_exam_prep_ai_guard_v1');
 const contextCall = src.indexOf('deterministicContext = await learnerContext');
-const sourceCall = src.indexOf('get_exam_prep_ai_source_cards_service_v1');
+const sourceCall = src.indexOf('get_exam_prep_ai_source_cards_service_v1', contextCall);
 const reservationCall = src.indexOf('await reserveProviderCall');
 const providerCall = src.indexOf('await callOpenAIProvider');
 const finalizeCall = src.indexOf('await finalizeProviderCall');
@@ -73,10 +73,21 @@ assert(src.includes('deterministic_mapping_required'), 'unmapped source-bound in
 assert(src.includes('":repeated_error_summary:"'), 'repeated-error source-card selector missing');
 assert(src.includes('":theory:"'), 'theory source-card selector missing');
 assert(src.includes('validateGeneratedMessage'), 'provider output validation missing');
+const providerBundleStart = src.indexOf('function providerSourceBundle');
+const providerBundleEnd = src.indexOf('function buildProviderInstructions', providerBundleStart);
+const providerBundle = src.slice(providerBundleStart, providerBundleEnd);
+assert(!providerBundle.includes('source_card_key'), 'provider prompt bundle still exposes internal source-card keys');
+assert(!providerBundle.includes('source_version'), 'provider prompt bundle still exposes internal source versions');
 assert(src.includes('Do not introduce any digit, percentage, count, threshold, date, or numeric example unless that exact numeric token already appears'), 'provider prompt must prevent unsupported numeric output before validation');
-assert(src.includes('learner_context.status'), 'provider prompt lost learner-context personalization boundary');
+assert(src.includes('buildLearnerFacingProviderContext'), 'provider-facing context minimizer missing');
+assert(src.includes('assertLearnerFacingProviderContext'), 'provider-facing internal-identifier firewall missing');
+assert(src.includes('provider_context_internal_identifier'), 'provider-facing context leak must fail closed');
+assert(src.includes('localizedTheoryTitle'), 'learner-facing localized topic-title resolver missing');
+assert(src.includes('current progress'), 'provider prompt lost learner-context personalization boundary');
 assert(src.includes('Do not infer a misconception that is not recorded') || src.includes('without guessing why the learner was wrong'), 'provider prompt lost non-inference learner-context boundary');
-assert(src.includes('Do not expose raw internal enums, field names or implementation vocabulary'), 'provider prompt lost learner-facing terminology boundary');
+assert(src.includes('Do not expose implementation vocabulary'), 'provider prompt lost learner-facing terminology boundary');
+assert(src.includes('internal_identifier_leak'), 'provider output validator no longer blocks internal identifiers');
+assert(src.includes('/\\bP[15]-[A-Z0-9]+-\\d{2}\\b/'), 'skill-code leakage validator missing');
 assert(src.includes('reserve_exam_prep_ai_provider_call_service_v1'), 'atomic provider reservation RPC missing');
 assert(src.includes('finalize_exam_prep_ai_provider_call_service_v1'), 'provider accounting finalizer RPC missing');
 assert(src.includes('conservativeProviderReservationCost'), 'conservative provider cost reservation missing');
