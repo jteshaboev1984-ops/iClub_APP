@@ -18,7 +18,7 @@ set allowed_interactions = case
     updated_at=now()
 where id=1;
 
-create or replace function public.get_exam_prep_ai_operational_snapshot_v1()
+create or replace function public.get_exam_prep_ai_followup_policy_service_v1()
 returns jsonb
 language sql
 stable
@@ -26,65 +26,18 @@ security definer
 set search_path=''
 as $fn$
   select jsonb_build_object(
-    'policy',jsonb_build_object(
-      'policy_version',p.policy_version,
-      'generation_enabled',p.generation_enabled,
-      'prompt_version',p.prompt_version,
-      'retrieval_policy_version',p.retrieval_policy_version,
-      'response_schema_version',p.response_schema_version,
-      'max_daily_requests',p.max_daily_requests,
-      'max_daily_provider_cost_usd',p.max_daily_provider_cost_usd,
-      'max_user_daily_provider_cost_usd',p.max_user_daily_provider_cost_usd,
-      'max_provider_request_cost_usd',p.max_provider_request_cost_usd,
-      'max_concurrent_provider_calls',p.max_concurrent_provider_calls,
-      'provider_lease_ttl_seconds',p.provider_lease_ttl_seconds,
-      'allowed_interactions',p.allowed_interactions
-    ),
-    'runtime_status',coalesce((
-      select s.runtime_status
-      from private.exam_prep_optional_capability_status s
-      where s.capability_code='ai_assist'
-    ),'not_deployed'),
-    'runtime_source_cards',(
-      select count(*)
-      from private.exam_prep_ai_source_cards c
-      where c.approval_status='approved'
-        and c.is_runtime_allowed
-        and c.rights_status<>'blocked'
-    ),
-    'provider_active_leases',(
-      select count(*)
-      from private.exam_prep_ai_provider_leases l
-      where l.status='active'
-        and l.expires_at>now()
-    ),
-    'provider_cost_today_usd',(
-      select coalesce(sum(
-        case
-          when l.status='active' and l.expires_at>now() then l.reserved_cost_usd
-          else coalesce(l.actual_cost_usd,0)
-        end
-      ),0)
-      from private.exam_prep_ai_provider_leases l
-      where l.created_at>=date_trunc('day',now())
-    ),
-    'audit_24h',coalesce((
-      select jsonb_object_agg(q.mode,q.cnt)
-      from (
-        select a.mode,count(*)::int cnt
-        from private.exam_prep_ai_audit a
-        where a.created_at>=now()-interval '24 hours'
-        group by a.mode
-      ) q
-    ),'{}'::jsonb)
+    'enabled',coalesce('context_followup'=any(p.allowed_interactions),false),
+    'policy_version',p.policy_version,
+    'prompt_version',p.prompt_version,
+    'response_schema_version',p.response_schema_version
   )
   from private.exam_prep_ai_policy p
   where p.id=1;
 $fn$;
 
-revoke all on function public.get_exam_prep_ai_operational_snapshot_v1()
+revoke all on function public.get_exam_prep_ai_followup_policy_service_v1()
   from public,anon,authenticated;
-grant execute on function public.get_exam_prep_ai_operational_snapshot_v1()
+grant execute on function public.get_exam_prep_ai_followup_policy_service_v1()
   to service_role;
 
 create or replace function public.get_exam_prep_ai_thread_parent_service_v1(
@@ -134,18 +87,34 @@ begin
     raise exception 'P1-04 limited follow-up interaction was not added';
   end if;
 
-  if not exists (
-    select 1
-    from jsonb_array_elements_text(
-      coalesce(
-        public.get_exam_prep_ai_operational_snapshot_v1()
-          #> '{policy,allowed_interactions}',
-        '[]'::jsonb
-      )
-    ) as x(value)
-    where x.value='context_followup'
-  ) then
-    raise exception 'P1-04 operational snapshot does not expose follow-up availability';
+  if coalesce((
+    public.get_exam_prep_ai_followup_policy_service_v1()
+      ->> 'enabled'
+  )::boolean,false) is not true then
+    raise exception 'P1-04 follow-up policy service does not expose enabled state';
+  end if;
+
+  if has_function_privilege(
+      'authenticated',
+      'public.get_exam_prep_ai_followup_policy_service_v1()',
+      'EXECUTE'
+    )
+     or has_function_privilege(
+      'anon',
+      'public.get_exam_prep_ai_followup_policy_service_v1()',
+      'EXECUTE'
+    )
+  then
+    raise exception 'P1-04 follow-up policy service leaked to browser role';
+  end if;
+
+  if not has_function_privilege(
+      'service_role',
+      'public.get_exam_prep_ai_followup_policy_service_v1()',
+      'EXECUTE'
+    )
+  then
+    raise exception 'P1-04 follow-up policy service missing service_role access';
   end if;
 
   if has_function_privilege(
