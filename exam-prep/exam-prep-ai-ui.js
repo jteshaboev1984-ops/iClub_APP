@@ -307,12 +307,14 @@
     const host = panel.querySelector("[data-ep-ai-followup]");
     const controls = panel.querySelector("[data-ep-ai-followup-panel]");
     const done = panel.querySelector("[data-ep-ai-followup-done]");
+    const prompt = panel.querySelector(".ep-ai-followup-prompt");
     const messages = panel.querySelector("[data-ep-ai-thread-messages]");
     const input = panel.querySelector("[data-ep-ai-followup-input]");
     const count = panel.querySelector("[data-ep-ai-followup-count]");
     if (host) host.hidden = true;
     if (controls) controls.hidden = true;
     if (done) done.hidden = true;
+    if (prompt) prompt.hidden = false;
     if (messages) messages.replaceChildren();
     if (input) input.value = "";
     if (count) count.textContent = `0/${MAX_FOLLOWUP_CHARS}`;
@@ -333,9 +335,11 @@
     });
     const host = panel.querySelector("[data-ep-ai-followup]");
     const controls = panel.querySelector("[data-ep-ai-followup-panel]");
+    const prompt = panel.querySelector(".ep-ai-followup-prompt");
     const done = panel.querySelector("[data-ep-ai-followup-done]");
     if (host) host.hidden = false;
     if (controls) controls.hidden = true;
+    if (prompt) prompt.hidden = false;
     if (done) done.hidden = state.eligible === true;
   }
 
