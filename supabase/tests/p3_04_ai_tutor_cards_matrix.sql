@@ -17,11 +17,11 @@ begin
   from private.exam_prep_ai_tutor_cards
   where content_version='tutor_v2_learner_first';
 
-  if v_total<>9 then
-    raise exception 'Expected 9 learner-first pilot Tutor Cards, found %',v_total;
+  if v_total<>24 then
+    raise exception 'Expected 24 learner-first Tutor Cards after Block 2, found %',v_total;
   end if;
   if v_runtime<>0 then
-    raise exception 'Learner-first pilot Tutor Cards must remain runtime OFF';
+    raise exception 'Learner-first Tutor Cards must remain runtime OFF';
   end if;
 
   if (select count(*) from private.exam_prep_ai_tutor_cards
@@ -62,7 +62,13 @@ begin
   ) x;
 
   if v_bad_locale_groups<>0 then
-    raise exception 'Tutor pilot locale parity drift';
+    raise exception 'Tutor locale parity drift';
+  end if;
+
+  if (select count(distinct skill_code) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first')<>8
+  then
+    raise exception 'Expected exactly 8 learner-first skills after Block 2';
   end if;
 
   if exists(
@@ -123,6 +129,86 @@ begin
       )
   ) then
     raise exception 'P1-QUA-01 learner-first card drifted outside exact skill boundary';
+  end if;
+
+  -- Block 2 reviewed examples must be mathematically identical across all three locales.
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-QUA-02'
+        and main_explanation like '%x² - 4x + k = 0%'
+        and main_explanation like '%16 - 4k%'
+        and main_explanation like '%k < 4%')<>3
+  then raise exception 'P1-QUA-02 multilingual example parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-QUA-03'
+        and main_explanation like '%x² - 5x + 6 = 0%'
+        and main_explanation like '%(x - 2)(x - 3)%'
+        and main_explanation like '%x = 2%'
+        and main_explanation like '%x = 3%')<>3
+  then raise exception 'P1-QUA-03 multilingual example parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-QUA-04'
+        and main_explanation like '%x² - 5x + 6 > 0%'
+        and main_explanation like '%x < 2%'
+        and main_explanation like '%x > 3%')<>3
+  then raise exception 'P1-QUA-04 multilingual example parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-QUA-05'
+        and main_explanation like '%y = x + 1%'
+        and main_explanation like '%y = x² - 3x + 1%'
+        and main_explanation like '%(0, 1)%'
+        and main_explanation like '%(4, 5)%')<>3
+  then raise exception 'P1-QUA-05 multilingual example parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-QUA-06'
+        and main_explanation like '%x⁴ - 5x² + 4 = 0%'
+        and main_explanation like '%u = x²%'
+        and main_explanation like '%±1%'
+        and main_explanation like '%±2%')<>3
+  then raise exception 'P1-QUA-06 multilingual example parity drift'; end if;
+
+  -- Formatting must use real line breaks rather than literal backslash-n sequences.
+  if exists(
+    select 1 from private.exam_prep_ai_tutor_cards
+    where content_version='tutor_v2_learner_first'
+      and (
+        position(E'\\n' in main_explanation)>0
+        or position(E'\\n' in simple_explanation)>0
+        or position(E'\\n' in alternative_explanation)>0
+        or position(E'\\n' in focus_explanation)>0
+      )
+  ) then
+    raise exception 'Tutor Card contains literal backslash-n formatting';
+  end if;
+
+  if exists(
+    select 1 from private.exam_prep_ai_tutor_cards
+    where content_version='tutor_v2_learner_first'
+      and skill_code='P1-QUA-02'
+      and (
+        lower(main_explanation) like '%quadratic inequalities%'
+        or lower(main_explanation) like '%квадратные неравенства%'
+        or lower(main_explanation) like '%kvadrat tengsizliklar%'
+      )
+  ) then
+    raise exception 'P1-QUA-02 drifted into quadratic-inequality teaching';
+  end if;
+
+  if exists(
+    select 1 from private.exam_prep_ai_tutor_cards
+    where content_version='tutor_v2_learner_first'
+      and skill_code='P1-QUA-06'
+      and lower(main_explanation) like '%partial fraction%'
+  ) then
+    raise exception 'P1-QUA-06 drifted into post-P1 algebra';
   end if;
 
   if has_table_privilege('authenticated','private.exam_prep_ai_tutor_cards','SELECT')

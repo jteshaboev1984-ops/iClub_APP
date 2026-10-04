@@ -296,6 +296,13 @@ Never change:
 
 Mentor Care remains OFF unless independently authorized.
 
+## Current block status
+
+- Block 0 — foundation: DONE
+- Block 1 — learner-first pilot standard: DONE / production storage updated, runtime remains OFF
+- Block 2 — P1 Quadratics family P1-QUA-02…06: IN PROGRESS
+- Production provider-free switch: NOT STARTED; requires full 243/243 reviewed runtime-ready coverage
+
 ## Block implementation sequence
 
 Work in reviewed blocks. Every block must finish its own source/scope/content/locale/CI checks before the next block is promoted.
