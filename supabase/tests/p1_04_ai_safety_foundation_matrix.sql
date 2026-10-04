@@ -261,10 +261,10 @@ BEGIN
     RAISE EXCEPTION 'P1-04 thread parent lookup crossed user boundary';
   END IF;
 END
-$;
+$$;
 RESET ROLE;
 
-DO $
+DO $$
 DECLARE v_count int; v_usage int; b record; a record;
 BEGIN
   SELECT count(*) INTO v_count FROM private.exam_prep_ai_audit WHERE interaction_type='progress_summary' AND mode='fallback';
