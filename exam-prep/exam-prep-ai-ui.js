@@ -32,7 +32,7 @@
       repeated: "Takrorlanayotgan qiyinchiliklarni tushuntirish",
       topic: "Bu mavzuni AI bilan tushuntirish",
       topicNote: "Hozirgi natijalaringizga mos, qisqa tushuntirish.",
-      mistake: "Bu xatoni AI bilan tushunish",
+      mistake: "Bu xatoni tushunishga yordam ber",
       outputLabel: "iClub AI",
       sourceNote: "iClub o‘quv materiallari va ilovadagi natijalaringiz asosida.",
       working: "Tushuntirish tayyorlanmoqda…",
