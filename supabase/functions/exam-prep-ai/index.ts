@@ -157,6 +157,27 @@ async function currentUser(authorization: string) {
   return data && isUuid(data.id) ? data : null;
 }
 
+async function threadParent(userId: string, requestId: string) {
+  return await rpc("get_exam_prep_ai_thread_parent_service_v1", {
+    p_user_id: userId,
+    p_request_id: requestId,
+  }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
+}
+
+function sameStringSet(left: unknown, right: unknown) {
+  const a = (Array.isArray(left) ? left : []).map((x) => String(x || "")).filter(Boolean).sort();
+  const b = (Array.isArray(right) ? right : []).map((x) => String(x || "")).filter(Boolean).sort();
+  return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
+function normalizedFollowupQuestion(value: unknown) {
+  return typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "";
+}
+
+function suspiciousFollowupText(value: string) {
+  return /(ignore\s+(all\s+)?previous|system\s+prompt|developer\s+message|reveal\s+(the\s+)?prompt|api\s*key|secret\s+key|answer\s+key|игнорир\w*\s+(все\s+)?предыдущ|системн\w*\s+промпт|покажи\s+промпт|api\s*ключ|ключ\s+ответ|oldingi\s+ko['’]?rsatmalarni\s+e['’]?tiborsiz|tizim\s+prompt|api\s*kalit|javoblar\s+kaliti)/i.test(value);
+}
+
 async function learnerContext(
   interaction: string,
   component: string,
