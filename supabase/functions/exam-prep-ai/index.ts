@@ -872,6 +872,7 @@ Deno.serve(async (req: Request) => {
   const followupTurn = Number.isInteger(rawFollowupTurn) && rawFollowupTurn >= 1 && rawFollowupTurn <= MAX_FOLLOWUP_TURNS ? rawFollowupTurn : null;
   const followupQuestion = normalizedFollowupQuestion(userText);
   const isFollowup = interaction === "context_followup";
+  const effectiveFollowupText = isFollowup && followupMode === "question" ? followupQuestion : "";
 
   if (!VALID_COMPONENTS.has(component)) return response(400, { request_id: requestId, error: "invalid_component" });
   if (!VALID_INTERACTIONS.has(interaction)) return response(400, { request_id: requestId, error: "invalid_interaction" });
@@ -885,7 +886,7 @@ Deno.serve(async (req: Request) => {
     if (!parentRequestId || !followupTurn || !FOLLOWUP_MODES.has(followupMode) || !priorAssistantText || priorAssistantText.length > MAX_PRIOR_ASSISTANT_CHARS) {
       return response(400, { request_id: requestId, error: "invalid_followup_contract" });
     }
-    if (followupQuestion.length > MAX_FOLLOWUP_TEXT_CHARS) {
+    if (followupMode === "question" && followupQuestion.length > MAX_FOLLOWUP_TEXT_CHARS) {
       return response(400, { request_id: requestId, error: "followup_text_too_long", max_chars: MAX_FOLLOWUP_TEXT_CHARS });
     }
     if (followupMode === "question" && !followupQuestion) {
@@ -906,7 +907,7 @@ Deno.serve(async (req: Request) => {
       p_component_code: component,
       p_interaction_type: interaction,
       p_requested_locale: locale,
-      p_user_text_length: isFollowup ? followupQuestion.length : userText.length,
+      p_user_text_length: isFollowup ? effectiveFollowupText.length : userText.length,
     }, authorization, ANON_KEY);
   } catch {
     const mode = "unavailable";
@@ -1172,7 +1173,7 @@ Deno.serve(async (req: Request) => {
       cards,
       rootInteraction: isFollowup ? contextInteraction : null,
       followupMode: isFollowup ? followupMode : null,
-      userText: isFollowup ? followupQuestion : "",
+      userText: isFollowup ? effectiveFollowupText : "",
       priorAssistantText: isFollowup ? priorAssistantText : "",
     });
 
@@ -1204,7 +1205,7 @@ Deno.serve(async (req: Request) => {
       timeoutMs: Number(guard?.model_timeout_ms || 12000),
       rootInteraction: isFollowup ? contextInteraction : null,
       followupMode: isFollowup ? followupMode : null,
-      userText: isFollowup ? followupQuestion : "",
+      userText: isFollowup ? effectiveFollowupText : "",
       priorAssistantText: isFollowup ? priorAssistantText : "",
     });
 
