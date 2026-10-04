@@ -203,10 +203,214 @@ function localeName(locale: string) {
   return "English";
 }
 
+function learnerPhrase(locale: string, en: string, ru: string, uz: string) {
+  if (locale === "ru") return ru;
+  if (locale === "uz") return uz;
+  return en;
+}
+
+function planActivityLabel(locale: string, itemType: string) {
+  const key = String(itemType || "");
+  const map: Record<string, [string,string,string]> = {
+    learning: ["Learn this topic", "Изучить тему", "Mavzuni o‘rganish"],
+    correction: ["Correct a recorded error", "Исправить зафиксированную ошибку", "Qayd etilgan xatoni tuzatish"],
+    retest: ["Complete the delayed check", "Пройти повторную проверку", "Qayta tekshiruvdan o‘tish"],
+    mixed_transfer: ["Do mixed practice", "Выполнить смешанную практику", "Aralash mashqni bajarish"],
+    prerequisite: ["Strengthen a foundation topic", "Укрепить базовую тему", "Asosiy mavzuni mustahkamlash"],
+    rebaseline: ["Update the study plan", "Обновить учебный план", "O‘quv rejasini yangilash"],
+  };
+  const row = map[key] || ["Continue the current study step", "Продолжить текущий учебный шаг", "Joriy o‘quv qadamini davom ettirish"];
+  return learnerPhrase(locale, row[0], row[1], row[2]);
+}
+
+function progressNextStepLabel(locale: string, actionCode: string) {
+  const key = String(actionCode || "");
+  const map: Record<string, [string,string,string]> = {
+    continue_entry_check: ["Continue the entry check", "Продолжить входную проверку", "Kirish tekshiruvini davom ettirish"],
+    delayed_retest: ["Complete the delayed check", "Пройти повторную проверку", "Qayta tekshiruvdan o‘tish"],
+    work_correction: ["Correct a recorded error", "Исправить зафиксированную ошибку", "Qayd etilgan xatoni tuzatish"],
+    mixed_practice: ["Do mixed practice", "Выполнить смешанную практику", "Aralash mashqni bajarish"],
+    learning: ["Learn the next topic", "Изучить следующую тему", "Keyingi mavzuni o‘rganish"],
+    foundation_prerequisite: ["Strengthen a foundation topic", "Укрепить базовую тему", "Asosiy mavzuni mustahkamlash"],
+    update_plan: ["Update the study plan", "Обновить учебный план", "O‘quv rejasini yangilash"],
+    final_calibration: ["Complete final calibration", "Пройти финальную калибровку", "Yakuniy tekshiruvni bajarish"],
+    view_readiness: ["Review current readiness", "Посмотреть текущую готовность", "Joriy tayyorgarlikni ko‘rish"],
+    open_weekly_plan: ["Open the current study plan", "Открыть текущий учебный план", "Joriy o‘quv rejasini ochish"],
+  };
+  const row = map[key] || ["Continue with the next recommended step", "Продолжить со следующим рекомендованным шагом", "Keyingi tavsiya etilgan qadamni davom ettirish"];
+  return learnerPhrase(locale, row[0], row[1], row[2]);
+}
+
+function correctionStepLabel(locale: string, processStep: string) {
+  const key = String(processStep || "");
+  const map: Record<string, [string,string,string]> = {
+    review_error: ["Review the recorded error", "Разобрать зафиксированную ошибку", "Qayd etilgan xatoni ko‘rib chiqish"],
+    practice_analogues: ["Practise similar questions", "Потренироваться на похожих заданиях", "O‘xshash savollarda mashq qilish"],
+    wait_delayed_retest: ["Wait for the delayed check", "Дождаться повторной проверки", "Qayta tekshiruvni kutish"],
+    delayed_retest: ["Complete the delayed check", "Пройти повторную проверку", "Qayta tekshiruvdan o‘tish"],
+    retest_content_wait: ["Wait for the next check", "Дождаться следующей проверки", "Keyingi tekshiruvni kutish"],
+    confirm_signal: ["Confirm the skill again", "Ещё раз подтвердить навык", "Ko‘nikmani yana tasdiqlash"],
+  };
+  const row = map[key] || ["Continue the correction step", "Продолжить исправление", "Tuzatish qadamini davom ettirish"];
+  return learnerPhrase(locale, row[0], row[1], row[2]);
+}
+
+function learnerStatusLabel(locale: string, status: string) {
+  const key = String(status || "");
+  const map: Record<string, [string,string,string]> = {
+    needs_correction: ["Needs more work", "Нужно исправление", "Tuzatish kerak"],
+    confirmed: ["Confirmed", "Подтверждено", "Tasdiqlangan"],
+    in_progress: ["In progress", "В процессе", "Jarayonda"],
+    not_started: ["Not started yet", "Ещё не начато", "Hali boshlanmagan"],
+    reopened: ["Needs another correction cycle", "Нужно ещё раз исправить", "Yana tuzatish kerak"],
+    remediating: ["Being corrected now", "Сейчас исправляется", "Hozir tuzatilmoqda"],
+  };
+  const row = map[key] || ["In progress", "В процессе", "Jarayonda"];
+  return learnerPhrase(locale, row[0], row[1], row[2]);
+}
+
+async function localizedTheoryTitle(component: string, skillCode: string, locale: string) {
+  if (!skillCode || !/^(P1|P5)-[A-Z0-9-]+$/.test(skillCode)) return null;
+  try {
+    const result = await rpc("get_exam_prep_ai_source_cards_service_v1", {
+      p_component_code: component,
+      p_locale: locale,
+      p_card_type: "theory",
+      p_skill_code: skillCode,
+      p_limit: 4,
+    }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
+    const cards = Array.isArray(result) ? result : [];
+    const exact = cards.find((card) =>
+      String(card?.card_type || "") === "theory" &&
+      String(card?.skill_code || "") === skillCode
+    );
+    const title = String(exact?.title || "").trim();
+    return title || null;
+  } catch {
+    return null;
+  }
+}
+
+async function buildLearnerFacingProviderContext(params: {
+  interaction: string;
+  component: string;
+  locale: string;
+  deterministicContext: any;
+  cards: any[];
+}) {
+  const raw = params.deterministicContext?.data || {};
+  const paper = params.component;
+
+  if (params.interaction === "progress_summary") {
+    return {
+      context_type: "learner_progress",
+      data: {
+        paper,
+        entry_check_complete: raw?.stage0_complete === true,
+        progress: {
+          confirmed: Number(raw?.coverage_count || 0),
+          total: Number(raw?.denominator_count || 0),
+          percent: Number(raw?.coverage_pct || 0),
+        },
+        needs_attention: Number(raw?.open_correction_count || 0),
+        next_step: progressNextStepLabel(params.locale, raw?.next_action?.action_code),
+        next_step_due_at: raw?.next_action?.due_at || null,
+      },
+    };
+  }
+
+  if (params.interaction === "weekly_plan_narration") {
+    const items = (Array.isArray(raw?.items) ? raw.items : [])
+      .filter((item: any) => item && item.status === "pending")
+      .sort((a: any, b: any) => Number(a?.priority_order || 999) - Number(b?.priority_order || 999))
+      .slice(0, 6);
+    const codes = Array.from(new Set(items.map((item: any) => String(item?.skill_code || "")).filter(Boolean)));
+    const titles = await Promise.all(codes.map((code) => localizedTheoryTitle(params.component, code, params.locale)));
+    const titleByCode = new Map(codes.map((code, index) => [code, titles[index]]));
+    return {
+      context_type: "learner_weekly_plan",
+      data: {
+        paper,
+        week: Number(raw?.active_week_no || 0),
+        priorities: items.map((item: any, index: number) => ({
+          order: index + 1,
+          activity: planActivityLabel(params.locale, item?.item_type),
+          topic: titleByCode.get(String(item?.skill_code || "")) || learnerPhrase(params.locale, "Current assigned topic", "Текущая назначенная тема", "Joriy belgilangan mavzu"),
+          due_at: item?.due_at || null,
+        })),
+      },
+    };
+  }
+
+  if (params.interaction === "repeated_error_summary") {
+    const items = (Array.isArray(raw?.items) ? raw.items : []).slice(0, 3);
+    const codes = Array.from(new Set(items.map((item: any) => String(item?.skill_code || "")).filter(Boolean)));
+    const titles = await Promise.all(codes.map((code) => localizedTheoryTitle(params.component, code, params.locale)));
+    const titleByCode = new Map(codes.map((code, index) => [code, titles[index]]));
+    return {
+      context_type: "learner_repeated_difficulties",
+      data: {
+        paper,
+        count: Number(raw?.repeated_gap_count || items.length || 0),
+        items: items.map((item: any) => ({
+          topic: titleByCode.get(String(item?.skill_code || "")) || String(item?.description || learnerPhrase(params.locale, "Current topic", "Текущая тема", "Joriy mavzu")),
+          status: learnerStatusLabel(params.locale, item?.status),
+          next_step: correctionStepLabel(params.locale, item?.process_step),
+        })),
+      },
+    };
+  }
+
+  if (params.interaction === "established_error_explanation") {
+    const code = String(raw?.skill_code || "");
+    const title = await localizedTheoryTitle(params.component, code, params.locale);
+    return {
+      context_type: "learner_recorded_error",
+      data: {
+        paper,
+        topic: title || String(raw?.skill_description || learnerPhrase(params.locale, "Current topic", "Текущая тема", "Joriy mavzu")),
+        feedback: String(raw?.diagnostic_feedback || ""),
+        next_step: String(raw?.next_action || ""),
+      },
+    };
+  }
+
+  if (params.interaction === "theory_explanation" || params.interaction === "multilingual_explanation") {
+    const cardTitle = String(params.cards.find((card) => String(card?.card_type || "") === "theory")?.title || "").trim();
+    const learner = raw?.learner_context || {};
+    return {
+      context_type: "learner_topic",
+      data: {
+        paper,
+        topic: cardTitle || String(raw?.description || learnerPhrase(params.locale, "Current topic", "Текущая тема", "Joriy mavzu")),
+        syllabus_description: String(raw?.description || ""),
+        current_progress: {
+          status: learnerStatusLabel(params.locale, learner?.status),
+          attempts: Number(learner?.attempt_count || 0),
+          correct: Number(learner?.correct_count || 0),
+          unresolved_corrections: Number(learner?.unresolved_correction_count || 0),
+          successful_retest: learner?.has_successful_retest === true,
+        },
+      },
+    };
+  }
+
+  return { context_type: "learner_context", data: { paper } };
+}
+
+function assertLearnerFacingProviderContext(context: any) {
+  const text = JSON.stringify(context || {});
+  if (/\bP[15]-[A-Z0-9]+-\d{2}\b/.test(text)) throw new Error("provider_context_internal_identifier");
+  if (/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i.test(text)) {
+    throw new Error("provider_context_internal_identifier");
+  }
+  if (/\b(action_code|item_type|process_step|learner_context|program_version_id|plan_id|correction_case_id|service_mode|source_card_key)\b/i.test(text)) {
+    throw new Error("provider_context_internal_identifier");
+  }
+}
+
 function providerSourceBundle(cards: any[]) {
   return cards.map((card) => ({
-    source_card_key: String(card?.source_card_key || ""),
-    source_version: String(card?.source_version || ""),
     title: String(card?.title || ""),
     body_text: String(card?.body_text || ""),
   }));
@@ -350,6 +554,11 @@ function validateGeneratedMessage(params: {
 
   if (!localeLooksValid(params.locale, message)) {
     return { ok: false, reason: "locale_mismatch" };
+  }
+  if (/\bP[15]-[A-Z0-9]+-\d{2}\b/.test(message) ||
+      /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i.test(message) ||
+      /\b(action_code|item_type|process_step|learner_context|service_mode|source_card_key|mastery|progression)\b/i.test(message)) {
+    return { ok: false, reason: "internal_identifier_leak" };
   }
 
   const allowedNumberSource = JSON.stringify({
@@ -670,6 +879,14 @@ Deno.serve(async (req: Request) => {
   }
 
   const sourceCardKeys = cards.map((c) => String(c?.source_card_key || "")).filter(Boolean);
+  const providerContext = await buildLearnerFacingProviderContext({
+    interaction,
+    component,
+    locale,
+    deterministicContext,
+    cards,
+  });
+  assertLearnerFacingProviderContext(providerContext);
 
   // Provider generation is enabled only for explicitly reviewed flows backed by
   // approved P1/P5 source cards and deterministic context. Every other interaction remains closed
@@ -716,7 +933,7 @@ Deno.serve(async (req: Request) => {
       interaction,
       component,
       locale,
-      deterministicContext,
+      deterministicContext: providerContext,
       cards,
     });
 
@@ -743,7 +960,7 @@ Deno.serve(async (req: Request) => {
       interaction,
       component,
       locale,
-      deterministicContext,
+      deterministicContext: providerContext,
       cards,
       timeoutMs: Number(guard?.model_timeout_ms || 12000),
     });
@@ -757,7 +974,7 @@ Deno.serve(async (req: Request) => {
       message: provider.message,
       locale,
       component,
-      deterministicContext,
+      deterministicContext: providerContext,
       cards,
       maxOutputChars: Math.max(256, Math.min(5000, Number(guard?.max_output_chars || 1200))),
     });
@@ -808,6 +1025,7 @@ Deno.serve(async (req: Request) => {
       "model_not_configured",
       "provider_interaction_not_enabled",
       "provider_context_too_large",
+      "provider_context_internal_identifier",
       "provider_timeout",
       "provider_rate_limited",
       "provider_unavailable",
