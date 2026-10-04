@@ -300,7 +300,8 @@ Mentor Care remains OFF unless independently authorized.
 
 - Block 0 — foundation: DONE
 - Block 1 — learner-first pilot standard: DONE / production storage updated, runtime remains OFF
-- Block 2 — P1 Quadratics family P1-QUA-02…06: IN PROGRESS
+- Block 2 — P1 Quadratics family P1-QUA-02…06: DONE / production storage updated, runtime remains OFF
+- Block 3 — P1 Functions family P1-FUN-01…08: IN PROGRESS
 - Production provider-free switch: NOT STARTED; requires full 243/243 reviewed runtime-ready coverage
 
 ## Block implementation sequence
