@@ -113,10 +113,17 @@ begin
     raise exception 'P1-04 limited follow-up interaction was not added';
   end if;
 
-  if not coalesce((
-    public.get_exam_prep_ai_operational_snapshot_v1()
-      #> '{policy,allowed_interactions}'
-  ) ? 'context_followup',false) then
+  if not exists (
+    select 1
+    from jsonb_array_elements_text(
+      coalesce(
+        public.get_exam_prep_ai_operational_snapshot_v1()
+          #> '{policy,allowed_interactions}',
+        '[]'::jsonb
+      )
+    ) as x(value)
+    where x.value='context_followup'
+  ) then
     raise exception 'P1-04 operational snapshot does not expose follow-up availability';
   end if;
 
