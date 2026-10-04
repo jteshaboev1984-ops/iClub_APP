@@ -62,7 +62,7 @@ values
 'Functions: domain and range',
 $t$A function is a rule that gives exactly one output for each allowed input. The domain is the set of inputs you are allowed to use, while the range is the set of outputs the function actually produces.
 
-For example, if f(x)=2x+1 with domain all real numbers, every real x is allowed and every real output is possible, so the range is also all real numbers. The input 3 maps to the output 7.
+For example, if f(x)=2x+1 with domain all real numbers, every real x is allowed and every real output is possible, so the range is also all real numbers. For example, f(3)=7.
 
 A function is one-to-one when different allowed inputs never produce the same output. That matters because only then can the mapping be reversed to make an inverse function. A composition such as f(g(x)) means “apply g first, then feed its output into f”. These words all describe the same idea: how inputs are allowed, transformed and connected to outputs.$t$,
 $t$Think of a function as an input-output machine. The domain tells you which inputs may enter. The range tells you which outputs can come out.
@@ -593,7 +593,7 @@ For example, from y=x²,
 
 y=(x-3)²+2
 
-is the same parabola shifted 3 units right and 2 units up. Its vertex moves from (0,0) to (3,2). A translation changes every point by the same amount; it does not stretch, reflect or reshape the graph.$t$,
+is the same parabola shifted 3 units right and 2 units up. Its vertex moves from (0,0) to (3,2). A translation changes every point by the same amount, so the graph keeps the same shape and size.$t$,
 $t$Translations slide a graph.
 
 y=f(x)+2 moves it up 2.
@@ -635,7 +635,7 @@ y=f(x-a)
 
 y=(x-3)²+2.
 
-Это та же парабола, сдвинутая на 3 вправо и на 2 вверх. Её вершина перемещается из (0,0) в (3,2). При сдвиге каждая точка перемещается одинаково; график не растягивается, не отражается и не меняет форму.$t$,
+Это та же парабола, сдвинутая на 3 вправо и на 2 вверх. Её вершина перемещается из (0,0) в (3,2). При сдвиге каждая точка перемещается одинаково, поэтому форма и размеры графика сохраняются.$t$,
 $t$Сдвиг просто перемещает график.
 
 y=f(x)+2 — вверх на 2.
@@ -677,7 +677,7 @@ Masalan, y=x² dan
 
 y=(x-3)²+2
 
-hosil qilinsa, parabola 3 birlik o‘ngga va 2 birlik yuqoriga siljiydi. Uning uchi (0,0) dan (3,2) ga o‘tadi. Siljitishda barcha nuqtalar bir xil miqdorga ko‘chadi; grafik cho‘zilmaydi, akslanmaydi va shaklini o‘zgartirmaydi.$t$,
+hosil qilinsa, parabola 3 birlik o‘ngga va 2 birlik yuqoriga siljiydi. Uning uchi (0,0) dan (3,2) ga o‘tadi. Siljitishda barcha nuqtalar bir xil miqdorga ko‘chadi, shuning uchun grafikning shakli va o‘lchami saqlanadi.$t$,
 $t$Siljitish grafikni joyidan ko‘chiradi.
 
 y=f(x)+2 — 2 birlik yuqoriga.
