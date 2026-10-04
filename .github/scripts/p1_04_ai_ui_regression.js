@@ -8,6 +8,8 @@ if (aiSource.includes('ensureStyle(') || aiSource.includes('ep-ai-ui-style') || 
 if (!hostCss.includes('EXAM PREP AI TUTOR CONTEXTUAL UX v4') || !hostCss.includes('.ep-ai-context-btn{') || !hostCss.includes('.ep-ai-followup{')) throw new Error('contextual AI Tutor CSS contract missing');
 if (aiSource.includes('data-ep-ai-open-component') || aiSource.includes('data-ep-ai-panel')) throw new Error('duplicate AI navigation/panel returned');
 if (aiSource.includes('✦')) throw new Error('Gemini-like sparkle returned to AI Tutor UI');
+if (!aiSource.includes('assets/iclub-ai-mark-temp.jpg?v=1')) throw new Error('temporary iClub AI mark asset is not wired into Tutor UI');
+if (aiSource.includes('aria-hidden="true">AI</span>')) throw new Error('text-only AI placeholder mark returned');
 if (!aiSource.includes('MAX_FOLLOWUPS = 2') || !aiSource.includes('MAX_FOLLOWUP_CHARS = 250')) throw new Error('limited follow-up UI contract missing');
 if (!liveSource.includes('data-ep-live-active-assessment="true"')) throw new Error('real active-assessment AI blackout marker missing');
 

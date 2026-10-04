@@ -1043,28 +1043,25 @@
 
 /* ===== EXAM PREP AI TUTOR CONTEXTUAL UX v4 ===== */
 .ep-ai-mark{
-  display:grid;
-  place-items:center;
+  display:block;
   flex:0 0 auto;
-  border:1px solid rgba(47,101,183,.20);
-  background:linear-gradient(145deg,rgba(47,101,183,.12),rgba(255,255,255,.90));
-  color:#2f65b7;
-  font-size:8px;
-  font-weight:900;
-  letter-spacing:-.02em;
-  line-height:1;
+  border:1px solid rgba(47,101,183,.16);
+  background:#fff;
+  object-fit:cover;
   box-sizing:border-box;
+  box-shadow:0 3px 10px rgba(34,65,120,.055);
 }
 .ep-ai-mark-compact{
   width:26px;
   height:26px;
   border-radius:9px;
+  object-position:center;
 }
 .ep-ai-mark-inline{
   width:21px;
   height:21px;
   border-radius:7px;
-  font-size:7px;
+  object-position:center;
 }
 .ep-ai-dashboard-status{
   display:inline-flex;
