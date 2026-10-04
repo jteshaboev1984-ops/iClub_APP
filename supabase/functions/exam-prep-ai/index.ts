@@ -900,6 +900,8 @@ Deno.serve(async (req: Request) => {
   } catch {
     snapshot = null;
   }
+  const followupEnabled = Array.isArray(snapshot?.policy?.allowed_interactions)
+    && snapshot.policy.allowed_interactions.includes("context_followup");
 
   let guard: any;
   try {
@@ -1257,7 +1259,9 @@ Deno.serve(async (req: Request) => {
       request_id: requestId, mode, component_code: component, interaction_type: interaction,
       locale, message, source_cards: sourceCardKeys, context_bound: Boolean(deterministicContext),
       generated: true, academic_state_changed: false,
-      thread_eligible: isFollowup ? Number(followupTurn || 0) < MAX_FOLLOWUP_TURNS : ROOT_FOLLOWUP_INTERACTIONS.has(interaction),
+      thread_eligible: followupEnabled && (isFollowup
+        ? Number(followupTurn || 0) < MAX_FOLLOWUP_TURNS
+        : ROOT_FOLLOWUP_INTERACTIONS.has(interaction)),
       followup_turn: isFollowup ? followupTurn : 0,
       max_followups: MAX_FOLLOWUP_TURNS,
       thread_root_request_id: isFollowup ? rootRequestId : requestId,
