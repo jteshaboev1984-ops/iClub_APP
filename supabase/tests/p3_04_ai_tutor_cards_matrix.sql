@@ -15,20 +15,29 @@ begin
   select count(*),count(*) filter(where is_runtime_allowed)
     into v_total,v_runtime
   from private.exam_prep_ai_tutor_cards
-  where content_version='tutor_v1';
+  where content_version='tutor_v2_learner_first';
 
   if v_total<>9 then
-    raise exception 'Expected 9 pilot Tutor Cards, found %',v_total;
+    raise exception 'Expected 9 learner-first pilot Tutor Cards, found %',v_total;
   end if;
   if v_runtime<>0 then
-    raise exception 'Pilot Tutor Cards must remain runtime OFF';
+    raise exception 'Learner-first pilot Tutor Cards must remain runtime OFF';
+  end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v1'
+        and skill_code in ('P1-QUA-01','P1-COO-02','P5-NOR-02')
+        and approval_status='retired'
+        and not is_runtime_allowed)<>9
+  then
+    raise exception 'Original pilot was not preserved as 9 retired non-runtime rows';
   end if;
 
   select count(*) into v_bad_links
   from private.exam_prep_ai_tutor_cards t
   left join private.exam_prep_ai_source_cards s
     on s.source_card_key=t.source_card_key
-  where t.content_version='tutor_v1'
+  where t.content_version='tutor_v2_learner_first'
     and (
       s.source_card_key is null
       or s.component_code<>t.component_code
@@ -47,7 +56,7 @@ begin
   from (
     select skill_code,count(*) as n,count(distinct locale) as locale_n
     from private.exam_prep_ai_tutor_cards
-    where content_version='tutor_v1'
+    where content_version='tutor_v2_learner_first'
     group by skill_code
     having count(*)<>3 or count(distinct locale)<>3
   ) x;
@@ -58,7 +67,7 @@ begin
 
   if exists(
     select 1 from private.exam_prep_ai_tutor_cards
-    where content_version='tutor_v1'
+    where content_version='tutor_v2_learner_first'
       and (
         char_length(main_explanation)<120
         or char_length(simple_explanation)<80
@@ -67,6 +76,53 @@ begin
       )
   ) then
     raise exception 'Tutor pilot contains unexpectedly thin learner-facing content';
+  end if;
+
+  -- Learner-first pilot must contain the same reviewed worked-example facts across EN/RU/UZ.
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-QUA-01'
+        and main_explanation like '%x² + 6x + 5%'
+        and main_explanation like '%(-3, -4)%')<>3
+  then
+    raise exception 'P1-QUA-01 multilingual worked-example parity drift';
+  end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P1-COO-02'
+        and main_explanation like '%A(1, 2)%'
+        and main_explanation like '%B(5, 10)%'
+        and main_explanation like '%4√5%')<>3
+  then
+    raise exception 'P1-COO-02 multilingual worked-example parity drift';
+  end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first'
+        and skill_code='P5-NOR-02'
+        and main_explanation like '%N(50, 8²)%'
+        and main_explanation like '%1.5%'
+        and main_explanation like '%0.0668%')<>3
+  then
+    raise exception 'P5-NOR-02 multilingual worked-example parity drift';
+  end if;
+
+  -- Completing-the-square card must not drift back into the whole Quadratics family.
+  if exists(
+    select 1 from private.exam_prep_ai_tutor_cards
+    where content_version='tutor_v2_learner_first'
+      and skill_code='P1-QUA-01'
+      and (
+        lower(main_explanation) like '%discriminant%'
+        or lower(main_explanation) like '%дискриминант%'
+        or lower(main_explanation) like '%diskriminant%'
+        or lower(main_explanation) like '%quadratic inequality%'
+        or lower(main_explanation) like '%квадратн% неравен%'
+        or lower(main_explanation) like '%kvadrat tengsizlik%'
+      )
+  ) then
+    raise exception 'P1-QUA-01 learner-first card drifted outside exact skill boundary';
   end if;
 
   if has_table_privilege('authenticated','private.exam_prep_ai_tutor_cards','SELECT')
@@ -104,7 +160,7 @@ begin
   begin
     update private.exam_prep_ai_tutor_cards
     set is_runtime_allowed=true
-    where tutor_card_key='p1:P1-QUA-01:tutor:en:v1';
+    where tutor_card_key='p1:P1-QUA-01:tutor:en:v2';
     raise exception 'Expected runtime-draft constraint failure';
   exception
     when check_violation then null;

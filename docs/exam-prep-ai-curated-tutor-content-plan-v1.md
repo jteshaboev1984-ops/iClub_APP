@@ -94,33 +94,154 @@ Pilot = 9 Tutor Cards.
 
 Pilot cards remain DRAFT / runtime OFF until product review approves the content standard.
 
-## Writing standard
+## Locked learner-first writing standard
 
-Main explanation:
-- one focused skill only;
+Status: APPROVED CONTENT STANDARD as of 2026-10-04. Use this standard for all new Tutor Cards until a versioned replacement is explicitly approved.
+
+### Core learner goal
+
+A learner who presses **Explain this topic** is usually not asking for a syllabus definition. The Tutor Card should help the learner understand:
+
+1. what is happening;
+2. why the method/idea works;
+3. how to use it;
+4. one compact worked example when the skill is procedural and an example genuinely helps.
+
+The content should feel like a strong teacher explaining one idea in 30–60 seconds on a phone, not like a textbook paragraph or syllabus summary.
+
+### Main explanation
+
+Target:
+- one exact canonical skill only;
+- normally 90–170 words;
 - learner-facing language;
-- 90–160 words target;
-- explain the core idea, not the whole syllabus family;
-- include notation only where necessary;
-- no internal IDs or system terminology;
-- no invented academic state;
+- explain meaning first, then method;
+- include one compact worked example for procedural skills when useful;
+- finish with the key reason/interpretation the learner should understand;
+- keep formula lines visually separable from prose;
+- no internal IDs/system terminology;
+- no invented personal weakness or academic state;
 - no answer-key behavior.
 
-Simple explanation:
-- 50–100 words target;
-- simpler language, same mathematical meaning;
-- avoid removing essential conditions.
+Preferred structure for a procedural skill:
+- what the idea is / why it is useful;
+- one small example;
+- what the result means;
+- one sentence capturing the underlying idea.
 
-Alternative explanation:
-- 60–120 words target;
-- explain the same idea from a different angle;
-- do not introduce a new topic.
+### Simple explanation
 
-Focus explanation:
-- 30–70 words target;
-- what the learner should notice/check;
-- common procedural trap only if source-supported;
-- no inferred personal misconception.
+Target:
+- normally 50–110 words;
+- genuinely lower cognitive load, not merely shorter wording;
+- reduce abstraction and terminology;
+- use one very small example if it clarifies the idea;
+- preserve all essential mathematical conditions.
+
+### Alternative explanation
+
+Target:
+- normally 60–130 words;
+- a different mental model, representation or route to the same idea;
+- must not be a paraphrase of the main explanation;
+- must not introduce a neighboring syllabus topic.
+
+Examples of useful alternative angles:
+- reverse an expansion;
+- geometric interpretation;
+- position on a graph;
+- area/probability interpretation;
+- link between given information and the quantity being sought.
+
+### Focus explanation
+
+Target:
+- normally 30–80 words;
+- tell the learner what to check while working;
+- include common procedural traps only when academically justified by the source/material;
+- never claim “you make this mistake” unless the live learner context proves it;
+- concise enough to scan during study.
+
+### Skill-specific shape, not rigid templates
+
+The four-field structure is fixed, but the teaching shape is allowed to vary by skill type:
+
+- procedural algebra/calculus: method + short worked example;
+- graph/function skills: interpretation + visual/coordinate meaning;
+- probability/statistics: define the event/region first, then calculation;
+- conceptual/model-selection skills: example/non-example or decision rule may be stronger than calculation;
+- proof/argument skills: logic chain and condition checking are more important than a numeric example.
+
+Do not force every skill into the same prose pattern.
+
+### Worked-example rule
+
+A worked example is preferred when it materially improves understanding, but it must:
+- stay strictly within the canonical skill;
+- use small, clean numbers;
+- be pre-written and reviewed;
+- not come from a protected assessment/past-paper answer key;
+- not introduce an unreviewed method;
+- fit on a mobile screen without becoming a mini-lesson.
+
+### Exact skill boundary
+
+One Tutor Card = one canonical skill. Do not drift into the whole syllabus family.
+
+For example, a Completing the Square card may explain completed-square form, vertex/shape meaning and the algebra needed to get there. It must not expand into a general lesson on discriminants, quadratic inequalities, linear–quadratic systems or reducing equations to quadratics.
+
+### Learner language
+
+Never show internal implementation language such as:
+- canonical skill;
+- source card;
+- mastery/evidence state;
+- action_code/item_type/process_step;
+- operational stage;
+- internal P1/P5 skill IDs.
+
+The learner sees normal mathematical language only.
+
+### Personalisation boundary
+
+Static Tutor Cards may say “a common mistake is…” only when academically justified.
+Static cards must never say “you are making this mistake” or infer a personal misconception.
+
+Personalised claims are reserved for the governed live learner-context layer.
+
+### RU / UZ / EN parity
+
+The three languages must be mathematically equivalent, but they do not need to be literal translations.
+
+Every locale must preserve:
+- the same mathematical idea;
+- the same conditions;
+- the same worked-example values;
+- the same conclusion;
+- the same level of hinting/difficulty;
+- equivalent notation.
+
+Natural school-level phrasing is preferred over literal translation.
+
+### Mobile/premium presentation constraint
+
+A first explanation should usually be understandable in 30–60 seconds.
+Prefer:
+- 2–4 short paragraphs;
+- isolated formula/example lines;
+- one clear teaching idea per paragraph;
+- no walls of text.
+
+If a card needs substantially more space, split complexity into the pre-written follow-up variants rather than making the first answer longer.
+
+### Four variants must solve four different learner needs
+
+- **main_explanation** = understand the idea and method;
+- **simple_explanation** = reduce cognitive load;
+- **alternative_explanation** = offer a genuinely different mental model;
+- **focus_explanation** = know what to check / avoid while working.
+
+Do not create four stylistic paraphrases of the same paragraph.
 
 All four variants must stay inside the exact canonical skill boundary.
 
@@ -175,21 +296,21 @@ Never change:
 
 Mentor Care remains OFF unless independently authorized.
 
-## Rollout sequence
+## Block implementation sequence
 
-1. Freeze this plan in repo.
-2. Add private Tutor Card schema + service-only retrieval.
-3. Add CI for permissions, uniqueness, component firewall and coverage.
-4. Author 3-skill pilot in RU / UZ / EN as DRAFT.
-5. Review pilot wording/visual behavior.
-6. Lock writing standard.
-7. Author remaining 78 skills × 3 locales.
-8. Run mathematical/content QA.
-9. Require 243/243 approved/runtime-ready.
-10. Only then change theory_explanation to provider-free verified_template.
-11. Add provider-free chip variants.
-12. Keep free-text follow-up provider-backed and bounded.
-13. Production canary, audit cost reduction, then wider rollout if approved.
+Work in reviewed blocks. Every block must finish its own source/scope/content/locale/CI checks before the next block is promoted.
+
+1. **Block 0 — foundation (DONE):** freeze architecture, add private Tutor Card storage, service-only retrieval, coverage audit and CI.
+2. **Block 1 — learner-first pilot standard:** supersede the original draft pilot with the locked learner-first standard for P1-QUA-01, P1-COO-02 and P5-NOR-02 in RU / UZ / EN. Keep runtime OFF.
+3. **Block 2 — P1 Quadratics family:** author P1-QUA-02…06 in all three locales using the same standard; cross-check exact canonical boundaries before acceptance.
+4. Continue by coherent syllabus families, not arbitrary row batches. Each family gets source-map review, content review, trilingual equivalence review and technical validation.
+5. When all 81 skills × 3 locales exist, run global coverage and cross-skill drift checks.
+6. Move content through review states; do not mark learner-runtime ready merely because a row exists.
+7. Require 243/243 approved/runtime-ready before changing production theory_explanation default.
+8. Only then change theory_explanation to provider-free verified_template.
+9. Add provider-free simple / alternative / focus chips.
+10. Keep learner-written follow-up provider-backed, bounded and source/context locked.
+11. Run controlled-beta smoke, verify provider-cost reduction and confirm academic/legacy parity before any wider rollout.
 
 ## Completion definition
 
