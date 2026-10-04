@@ -194,9 +194,9 @@ begin
     where content_version='tutor_v2_learner_first'
       and skill_code='P1-QUA-02'
       and (
-        lower(main_explanation) like '%quadratic inequality%'
-        or lower(main_explanation) like '%квадратн% неравен%'
-        or lower(main_explanation) like '%kvadrat tengsizlik%'
+        lower(main_explanation) like '%quadratic inequalities%'
+        or lower(main_explanation) like '%квадратные неравенства%'
+        or lower(main_explanation) like '%kvadrat tengsizliklar%'
       )
   ) then
     raise exception 'P1-QUA-02 drifted into quadratic-inequality teaching';
