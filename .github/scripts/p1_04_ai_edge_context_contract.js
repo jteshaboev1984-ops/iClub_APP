@@ -71,6 +71,8 @@ for (const interaction of [
 assert(src.includes('error_context_reference_required'), 'established-error route must require a finalized session/item reference');
 assert(src.includes('skill_code_required'), 'theory/multilingual routes must require a canonical skill reference');
 assert(src.includes('get_exam_prep_ai_thread_parent_service_v1'), 'service-only AI thread parent lookup missing');
+assert(src.includes('get_exam_prep_ai_followup_policy_service_v1'), 'service-only AI follow-up policy lookup missing');
+assert(src.includes('followupPolicy?.enabled === true'), 'follow-up UI availability is not fail-closed to server policy');
 assert(src.includes('MAX_FOLLOWUP_TURNS = 2'), 'AI follow-up turn limit drifted');
 assert(src.includes('MAX_FOLLOWUP_TEXT_CHARS = 250'), 'AI follow-up text limit drifted');
 assert(src.includes('thread_output_mismatch'), 'AI follow-up is not bound to the prior generated output hash');
