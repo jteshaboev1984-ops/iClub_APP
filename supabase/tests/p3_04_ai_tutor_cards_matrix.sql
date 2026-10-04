@@ -25,7 +25,7 @@ begin
   end if;
 
   if (select count(*) from private.exam_prep_ai_tutor_cards
-      where content_version='tutor_v2_learner_first'
+      where content_version='tutor_v1'
         and skill_code in ('P1-QUA-01','P1-COO-02','P5-NOR-02')
         and approval_status='retired'
         and not is_runtime_allowed)<>9
