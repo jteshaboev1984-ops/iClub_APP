@@ -20,11 +20,11 @@ The power increases by 1, then you divide by the new power.
 
 For a linear expression inside a power, also compensate for its derivative. For example,
 
-∫[6x² + 4(2x+1)^3] dx
+∫[6x² + 4(2x+1)³] dx
 
-= 2x³ + 1/2(2x+1)^4 + C.
+= 2x³ + 1/2(2x+1)⁴ + C.
 
-You can check the result by differentiating it: the derivative returns 6x² + 4(2x+1)^3.
+You can check the result by differentiating it: the derivative returns 6x² + 4(2x+1)³.
 
 The constant C is needed because many curves have the same derivative.$t$,
 $t$Reverse the power rule:
@@ -33,15 +33,15 @@ $t$Reverse the power rule:
 
 Example:
 
-∫[6x² + 4(2x+1)^3] dx
-= 2x³ + 1/2(2x+1)^4 + C.
+∫[6x² + 4(2x+1)³] dx
+= 2x³ + 1/2(2x+1)⁴ + C.
 
 For (ax+b)^n, remember to account for the inner coefficient a.$t$,
 $t$Think of integration as asking: “What function would differentiate to this?”
 
 To reverse d/dx(x³)=3x², the integral of 3x² is x³.
 
-For (2x+1)^3, differentiation would produce an extra factor 2 from the inside. Integration must undo that factor as well, which is why a compensating division appears.$t$,
+For (2x+1)³, differentiation would produce an extra factor 2 from the inside. Integration must undo that factor as well, which is why a compensating division appears.$t$,
 $t$Increase the power first, then divide by the new power. For (ax+b)^n, compensate for the inner coefficient. Add C to every indefinite integral. A quick derivative check is the safest way to verify the antiderivative.$t$,
 'p1:P1-INT-01:theory:en:v1'
 ),
@@ -55,11 +55,11 @@ $t$Интегрирование является обратной операци
 
 Если внутри степени есть линейное выражение, нужно также компенсировать его производную. Например,
 
-∫[6x² + 4(2x+1)^3] dx
+∫[6x² + 4(2x+1)³] dx
 
-= 2x³ + 1/2(2x+1)^4 + C.
+= 2x³ + 1/2(2x+1)⁴ + C.
 
-Проверка проста: продифференцируйте ответ — должна вернуться функция 6x² + 4(2x+1)^3.
+Проверка проста: продифференцируйте ответ — должна вернуться функция 6x² + 4(2x+1)³.
 
 Постоянная C нужна потому, что несколько кривых могут иметь одну и ту же производную.$t$,
 $t$Используйте обратное правило степени:
@@ -68,15 +68,15 @@ $t$Используйте обратное правило степени:
 
 Например,
 
-∫[6x² + 4(2x+1)^3] dx
-= 2x³ + 1/2(2x+1)^4 + C.
+∫[6x² + 4(2x+1)³] dx
+= 2x³ + 1/2(2x+1)⁴ + C.
 
 Для (ax+b)^n учитывайте внутренний коэффициент a.$t$,
 $t$Считайте интегрирование вопросом: «Какая функция при дифференцировании дала бы это выражение?»
 
 Чтобы обратить d/dx(x³)=3x², интеграл от 3x² должен дать x³.
 
-Для (2x+1)^3 при дифференцировании появляется дополнительный множитель 2 от внутреннего выражения. Интегрирование должно компенсировать и его.$t$,
+Для (2x+1)³ при дифференцировании появляется дополнительный множитель 2 от внутреннего выражения. Интегрирование должно компенсировать и его.$t$,
 $t$Сначала увеличьте показатель на 1, затем разделите на новый показатель. Для (ax+b)^n компенсируйте внутренний коэффициент. В неопределённом интеграле обязательно добавляйте C. Для проверки продифференцируйте полученный ответ.$t$,
 'p1:P1-INT-01:theory:ru:v1'
 ),
@@ -90,11 +90,11 @@ Avval daraja 1 ga oshiriladi, keyin yangi darajaga bo‘linadi.
 
 Daraja ichida chiziqli ifoda bo‘lsa, uning hosilasini ham kompensatsiya qilish kerak. Masalan,
 
-∫[6x² + 4(2x+1)^3] dx
+∫[6x² + 4(2x+1)³] dx
 
-= 2x³ + 1/2(2x+1)^4 + C.
+= 2x³ + 1/2(2x+1)⁴ + C.
 
-Natijani differensiallab tekshirish mumkin: hosila yana 6x² + 4(2x+1)^3 ni beradi.
+Natijani differensiallab tekshirish mumkin: hosila yana 6x² + 4(2x+1)³ ni beradi.
 
 C doimiysi kerak, chunki bir xil hosilaga ega bir nechta funksiyalar mavjud.$t$,
 $t$Daraja qoidasini teskari ishlating:
@@ -103,15 +103,15 @@ $t$Daraja qoidasini teskari ishlating:
 
 Masalan,
 
-∫[6x² + 4(2x+1)^3] dx
-= 2x³ + 1/2(2x+1)^4 + C.
+∫[6x² + 4(2x+1)³] dx
+= 2x³ + 1/2(2x+1)⁴ + C.
 
 (ax+b)^n uchun ichki a koeffitsiyentini hisobga oling.$t$,
 $t$Integrallashni “qaysi funksiya differensiallansa shu ifoda chiqadi?” degan savol deb o‘ylang.
 
 d/dx(x³)=3x² bo‘lgani uchun 3x² ning integrali x³.
 
-(2x+1)^3 ni differensiallaganda ichkaridan qo‘shimcha 2 koeffitsiyent chiqadi. Integrallash shu koeffitsiyentni ham teskari hisobga oladi.$t$,
+(2x+1)³ ni differensiallaganda ichkaridan qo‘shimcha 2 koeffitsiyent chiqadi. Integrallash shu koeffitsiyentni ham teskari hisobga oladi.$t$,
 $t$Avval darajani 1 ga oshiring, keyin yangi darajaga bo‘ling. (ax+b)^n uchun ichki koeffitsiyentni kompensatsiya qiling. Aniqlanmagan integralga C ni qo‘shing. Eng yaxshi tekshiruv — javobni differensiallash.$t$,
 'p1:P1-INT-01:theory:uz:v1'
 ))
