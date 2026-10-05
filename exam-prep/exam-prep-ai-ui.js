@@ -2,12 +2,14 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p305tutor1";
+  const VERSION = "p305tutor2";
   let observer = null;
   let languageObserver = null;
   let renderQueued = false;
   const threadState = new WeakMap();
-  const MAX_FOLLOWUPS = 2;
+  const MAX_THREAD_STEPS = 5;
+  const MAX_GENERATED_FOLLOWUPS = 2;
+  const TEMPLATE_FOLLOWUP_MODES = new Set(["simplify", "rephrase", "focus"]);
   const MAX_FOLLOWUP_CHARS = 250;
   const REQUEST_TIMEOUT_MS = Math.min(30000, Math.max(50, Number(internal.aiUiRequestTimeoutMs) || 12000));
 
@@ -50,6 +52,7 @@
       focus: "Nimaga e’tibor beray?",
       questionPlaceholder: "Shu izoh bo‘yicha so‘rang…",
       send: "Yuborish",
+      questionLimit: "Siz 2 ta o‘zingiz yozadigan aniqlashtiruvchi savoldan foydalandingiz. Qolgan tayyor variantni tanlashingiz yoki o‘rganishni davom ettirishingiz mumkin.",
       continueStudy: "O‘rganishni davom ettirish",
       followupWorking: "Aniqlashtirilmoqda…"
     };
@@ -77,6 +80,7 @@
       focus: "What should I focus on?",
       questionPlaceholder: "Ask about this explanation…",
       send: "Send",
+      questionLimit: "You have used both written follow-up questions. You can still choose any remaining prepared option or continue studying.",
       continueStudy: "Continue studying",
       followupWorking: "Clarifying…"
     };
@@ -104,6 +108,7 @@
       focus: "На что обратить внимание?",
       questionPlaceholder: "Спросить по этому объяснению…",
       send: "Отправить",
+      questionLimit: "Вы уже задали 2 собственных уточняющих вопроса. Можно выбрать оставшийся готовый вариант или продолжить изучение.",
       continueStudy: "Продолжить изучение",
       followupWorking: "Уточняем…"
     };
@@ -150,6 +155,7 @@
                 <button type="button" data-ep-ai-followup-send></button>
               </div>
             </div>
+            <div class="ep-ai-followup-limit" data-ep-ai-followup-limit hidden></div>
           </div>
           <button class="ep-ai-followup-done" type="button" data-ep-ai-followup-done hidden></button>
         </div>
@@ -294,6 +300,7 @@
     const focus = container.querySelector('[data-ep-ai-followup-mode="focus"]');
     const input = container.querySelector("[data-ep-ai-followup-input]");
     const send = container.querySelector("[data-ep-ai-followup-send]");
+    const limit = container.querySelector("[data-ep-ai-followup-limit]");
     const done = container.querySelector("[data-ep-ai-followup-done]");
     if (prompt) prompt.textContent = c.followupPrompt;
     if (open) open.textContent = c.followupOpen;
@@ -302,6 +309,7 @@
     if (focus) focus.textContent = c.focus;
     if (input) input.setAttribute("placeholder", c.questionPlaceholder);
     if (send) send.textContent = c.send;
+    if (limit) limit.textContent = c.questionLimit;
     if (done) done.textContent = c.continueStudy;
   }
 
@@ -314,13 +322,49 @@
     const messages = panel.querySelector("[data-ep-ai-thread-messages]");
     const input = panel.querySelector("[data-ep-ai-followup-input]");
     const count = panel.querySelector("[data-ep-ai-followup-count]");
+    const question = panel.querySelector(".ep-ai-followup-question");
+    const limit = panel.querySelector("[data-ep-ai-followup-limit]");
     if (host) host.hidden = true;
     if (controls) controls.hidden = true;
     if (done) done.hidden = true;
     if (prompt) prompt.hidden = false;
     if (messages) messages.replaceChildren();
-    if (input) input.value = "";
+    panel.querySelectorAll("[data-ep-ai-followup-mode]").forEach(button => { button.hidden = false; });
+    if (input) {
+      input.value = "";
+      input.disabled = false;
+    }
+    if (question) question.hidden = false;
+    if (limit) limit.hidden = true;
     if (count) count.textContent = `0/${MAX_FOLLOWUP_CHARS}`;
+  }
+
+  function refreshFollowupAvailability(panel) {
+    const state = threadState.get(panel);
+    if (!state) return;
+
+    const c = copy();
+    let remainingPrepared = 0;
+    panel.querySelectorAll("[data-ep-ai-followup-mode]").forEach(button => {
+      const mode = String(button.getAttribute("data-ep-ai-followup-mode") || "");
+      const used = state.usedModes instanceof Set && state.usedModes.has(mode);
+      button.hidden = used;
+      if (!used) remainingPrepared += 1;
+    });
+
+    const question = panel.querySelector(".ep-ai-followup-question");
+    const limit = panel.querySelector("[data-ep-ai-followup-limit]");
+    const canAskQuestion = state.generatedTurns < MAX_GENERATED_FOLLOWUPS && state.turn < MAX_THREAD_STEPS;
+    if (question) question.hidden = !canAskQuestion;
+    if (limit) {
+      limit.textContent = c.questionLimit;
+      limit.hidden = canAskQuestion;
+    }
+
+    const canContinue = state.eligible === true &&
+      state.turn < MAX_THREAD_STEPS &&
+      (remainingPrepared > 0 || canAskQuestion);
+    if (!canContinue) finishFollowup(panel);
   }
 
   function initFollowup(panel, state) {
@@ -334,6 +378,8 @@
       parentRequestId: state.requestId,
       priorAssistantText: state.message,
       turn: Number(state.turn || 0),
+      generatedTurns: Math.max(0, Number(state.generatedTurns || 0)),
+      usedModes: new Set(Array.isArray(state.usedModes) ? state.usedModes.filter(mode => TEMPLATE_FOLLOWUP_MODES.has(mode)) : []),
       eligible: state.eligible === true
     });
     const host = panel.querySelector("[data-ep-ai-followup]");
@@ -343,7 +389,8 @@
     if (host) host.hidden = false;
     if (controls) controls.hidden = true;
     if (prompt) prompt.hidden = false;
-    if (done) done.hidden = state.eligible === true;
+    if (done) done.hidden = true;
+    refreshFollowupAvailability(panel);
   }
 
   function followupLabel(mode, question, c) {
@@ -381,7 +428,15 @@
 
   async function invokeFollowup(panel, mode, question = "") {
     const state = threadState.get(panel);
-    if (!state || state.eligible !== true || state.turn >= MAX_FOLLOWUPS || panel.dataset.epAiBusy === "true") return;
+    if (!state || state.eligible !== true || state.turn >= MAX_THREAD_STEPS || panel.dataset.epAiBusy === "true") return;
+    if (TEMPLATE_FOLLOWUP_MODES.has(mode) && state.usedModes instanceof Set && state.usedModes.has(mode)) {
+      refreshFollowupAvailability(panel);
+      return;
+    }
+    if (mode === "question" && state.generatedTurns >= MAX_GENERATED_FOLLOWUPS) {
+      refreshFollowupAvailability(panel);
+      return;
+    }
     if (!canShow()) {
       queueRender();
       return;
@@ -456,7 +511,16 @@
         state.parentRequestId = String(data.request_id);
         state.priorAssistantText = message;
         state.turn = Number(data.followup_turn || nextTurn);
-        state.eligible = data.thread_eligible === true && state.turn < MAX_FOLLOWUPS;
+        state.generatedTurns = Math.max(
+          0,
+          Number(data.generated_followups_used ?? (mode === "question" ? state.generatedTurns + 1 : state.generatedTurns))
+        );
+        const serverUsedModes = Array.isArray(data.used_template_modes)
+          ? data.used_template_modes.filter(value => TEMPLATE_FOLLOWUP_MODES.has(String(value || "")))
+          : null;
+        if (serverUsedModes) state.usedModes = new Set(serverUsedModes);
+        else if (TEMPLATE_FOLLOWUP_MODES.has(mode)) state.usedModes.add(mode);
+        state.eligible = data.thread_eligible === true && state.turn < MAX_THREAD_STEPS;
         threadState.set(panel, state);
       } else {
         state.eligible = false;
@@ -467,7 +531,10 @@
       if (count) count.textContent = `0/${MAX_FOLLOWUP_CHARS}`;
 
       if (!state.eligible) finishFollowup(panel);
-      else if (controls) controls.hidden = false;
+      else {
+        refreshFollowupAvailability(panel);
+        if (controls && !controls.hidden) controls.hidden = false;
+      }
     } catch (_) {
       appendFollowupTurn(panel, label, c.error);
       finishFollowup(panel);
@@ -568,6 +635,8 @@
           requestId: String(data.request_id),
           message,
           turn: Number(data.followup_turn || 0),
+          generatedTurns: Number(data.generated_followups_used || 0),
+          usedModes: Array.isArray(data.used_template_modes) ? data.used_template_modes : [],
           eligible: true
         });
       }
