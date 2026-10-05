@@ -44,8 +44,8 @@ begin
 
   if (select count(*) from private.exam_prep_ai_tutor_cards
       where content_version='tutor_v2_learner_first' and skill_code='P1-DIF-03'
-        and main_explanation like '%y=(3x-1)^4%'
-        and main_explanation like '%12(3x-1)^3%')<>3
+        and main_explanation like '%y=(3x-1)⁴%'
+        and main_explanation like '%12(3x-1)³%')<>3
   then raise exception 'DIF03 chain-rule parity drift'; end if;
 
   if (select count(*) from private.exam_prep_ai_tutor_cards
