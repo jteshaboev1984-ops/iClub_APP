@@ -17,8 +17,8 @@ $t$For a positive integer power n, the expansion of (a+b)^n uses binomial coeffi
 For example,
 
 (2+x)^4
-= 2^4 + 4(2^3)x + 6(2^2)x² + 4(2)x³ + x^4
-= 16 + 32x + 24x² + 8x³ + x^4.
+= 2⁴ + 4(2³)x + 6(2²)x² + 4(2)x³ + x⁴
+= 16 + 32x + 24x² + 8x³ + x⁴.
 
 So the coefficient of x² is 24.
 
@@ -28,7 +28,7 @@ $t$For positive integer n, use binomial coefficients.
 Example:
 
 (2+x)^4
-= 16 + 32x + 24x² + 8x³ + x^4.
+= 16 + 32x + 24x² + 8x³ + x⁴.
 
 So the coefficient of x² is 24.
 
@@ -52,8 +52,8 @@ $t$Для положительной целой степени n разложе�
 Например,
 
 (2+x)^4
-= 2^4 + 4(2^3)x + 6(2^2)x² + 4(2)x³ + x^4
-= 16 + 32x + 24x² + 8x³ + x^4.
+= 2⁴ + 4(2³)x + 6(2²)x² + 4(2)x³ + x⁴
+= 16 + 32x + 24x² + 8x³ + x⁴.
 
 Поэтому коэффициент при x² равен 24.
 
@@ -63,7 +63,7 @@ $t$Для положительной целой степени использу�
 Например,
 
 (2+x)^4
-= 16 + 32x + 24x² + 8x³ + x^4.
+= 16 + 32x + 24x² + 8x³ + x⁴.
 
 Коэффициент при x² равен 24.
 
@@ -87,8 +87,8 @@ $t$Musbat butun n uchun (a+b)^n yoyilmasi binomial koeffitsiyentlar yordamida yo
 Masalan,
 
 (2+x)^4
-= 2^4 + 4(2^3)x + 6(2^2)x² + 4(2)x³ + x^4
-= 16 + 32x + 24x² + 8x³ + x^4.
+= 2⁴ + 4(2³)x + 6(2²)x² + 4(2)x³ + x⁴
+= 16 + 32x + 24x² + 8x³ + x⁴.
 
 Demak, x² oldidagi koeffitsiyent 24.
 
@@ -98,7 +98,7 @@ $t$Musbat butun daraja uchun binomial koeffitsiyentlardan foydalaning.
 Masalan,
 
 (2+x)^4
-= 16 + 32x + 24x² + 8x³ + x^4.
+= 16 + 32x + 24x² + 8x³ + x⁴.
 
 x² oldidagi koeffitsiyent 24.
 
