@@ -6,6 +6,7 @@ const hostCss = fs.readFileSync('exam-prep/exam-prep-host.css', 'utf8');
 const liveSource = fs.readFileSync('exam-prep/exam-prep-live.js', 'utf8');
 if (aiSource.includes('ensureStyle(') || aiSource.includes('ep-ai-ui-style') || aiSource.includes('document.createElement("style")')) throw new Error('runtime AI UI style injection returned');
 if (!hostCss.includes('EXAM PREP AI TUTOR CONTEXTUAL UX v4') || !hostCss.includes('.ep-ai-context-btn{') || !hostCss.includes('.ep-ai-followup{')) throw new Error('contextual AI Tutor CSS contract missing');
+if (!hostCss.includes('min-height:46px') || !hostCss.includes('.ep-ai-followup-limit{')) throw new Error('mobile Tutor follow-up tap-target/limit UX contract missing');
 if (aiSource.includes('data-ep-ai-open-component') || aiSource.includes('data-ep-ai-panel')) throw new Error('duplicate AI navigation/panel returned');
 if (aiSource.includes('✦')) throw new Error('Gemini-like sparkle returned to AI Tutor UI');
 if (!aiSource.includes('assets/iclub-ai-mark-temp.jpg?v=1')) throw new Error('temporary iClub AI mark asset is not wired into Tutor UI');
