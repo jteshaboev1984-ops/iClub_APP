@@ -20,17 +20,17 @@ Differentiate the outside power first, then multiply by the derivative of the in
 
 For example,
 
-y=(3x-1)^4.
+y=(3x-1)⁴.
 
 Differentiate the fourth power:
 
-4(3x-1)^3,
+4(3x-1)³,
 
 then multiply by the derivative of 3x-1, which is 3:
 
 dy/dx
-=4(3x-1)^3×3
-=12(3x-1)^3.
+=4(3x-1)³×3
+=12(3x-1)³.
 
 That final factor from the inside is the part most easily missed.$t$,
 $t$For y=(ax+b)^n:
@@ -39,18 +39,18 @@ differentiate the outside power, then multiply by the derivative of ax+b.
 
 Example:
 
-y=(3x-1)^4
+y=(3x-1)⁴
 
 dy/dx
-=4(3x-1)^3×3
-=12(3x-1)^3.$t$,
+=4(3x-1)³×3
+=12(3x-1)³.$t$,
 $t$Think of the function as two machines.
 
 Inner machine:
 x → 3x-1.
 
 Outer machine:
-u → u^4.
+u → u⁴.
 
 The derivative records the change from both machines, so you multiply the outer derivative by the inner derivative:
 
@@ -70,17 +70,17 @@ $t$Цепное правило используется, когда одно д�
 
 Например,
 
-y=(3x-1)^4.
+y=(3x-1)⁴.
 
 Производная внешней четвёртой степени:
 
-4(3x-1)^3.
+4(3x-1)³.
 
 Производная внутреннего выражения 3x-1 равна 3, поэтому
 
 dy/dx
-=4(3x-1)^3×3
-=12(3x-1)^3.
+=4(3x-1)³×3
+=12(3x-1)³.
 
 Именно дополнительный множитель от внутренней функции чаще всего забывают.$t$,
 $t$Для y=(ax+b)^n:
@@ -89,18 +89,18 @@ $t$Для y=(ax+b)^n:
 
 Например,
 
-y=(3x-1)^4
+y=(3x-1)⁴
 
 dy/dx
-=4(3x-1)^3×3
-=12(3x-1)^3.$t$,
+=4(3x-1)³×3
+=12(3x-1)³.$t$,
 $t$Представьте функцию как две машины.
 
 Внутренняя:
 x → 3x-1.
 
 Внешняя:
-u → u^4.
+u → u⁴.
 
 Общий темп изменения зависит от обеих машин, поэтому производные перемножаются:
 
@@ -120,17 +120,17 @@ Avval tashqi darajani differensiallang, keyin ichki chiziqli ifodaning hosilasig
 
 Masalan,
 
-y=(3x-1)^4.
+y=(3x-1)⁴.
 
 Tashqi to‘rtinchi daraja hosilasi:
 
-4(3x-1)^3.
+4(3x-1)³.
 
 Ichki 3x-1 ifodaning hosilasi 3, shuning uchun
 
 dy/dx
-=4(3x-1)^3×3
-=12(3x-1)^3.
+=4(3x-1)³×3
+=12(3x-1)³.
 
 Eng ko‘p unutiladigan qism — ichki funksiyadan keladigan shu qo‘shimcha ko‘paytuvchi.$t$,
 $t$y=(ax+b)^n uchun:
@@ -139,18 +139,18 @@ avval tashqi darajani differensiallang, keyin ax+b hosilasiga ko‘paytiring.
 
 Masalan,
 
-y=(3x-1)^4
+y=(3x-1)⁴
 
 dy/dx
-=4(3x-1)^3×3
-=12(3x-1)^3.$t$,
+=4(3x-1)³×3
+=12(3x-1)³.$t$,
 $t$Funksiyani ikkita ketma-ket mashina deb tasavvur qiling.
 
 Ichki mashina:
 x → 3x-1.
 
 Tashqi mashina:
-u → u^4.
+u → u⁴.
 
 Umumiy o‘zgarish ikkala mashinaga bog‘liq, shuning uchun hosilalar ko‘paytiriladi:
 
