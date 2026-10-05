@@ -1,6 +1,6 @@
 # Exam Prep AI Tutor — Global 243/243 Content Governance Review v1
 
-Status: GLOBAL REVIEW COMPLETE — GREEN
+Status: GLOBAL REVIEW IN PROGRESS
 Runtime: OFF
 Date: 2026-10-05
 
@@ -184,12 +184,6 @@ Mathematical equivalence is primarily enforced by:
 4. this global structural/source/firewall audit.
 
 A crude “all numeric characters must be byte-identical across translations” rule is NOT used as a release criterion, because natural EN/RU/UZ prose may express quantities differently while preserving the same mathematics. The reviewed worked-example anchors remain the stronger signal.
-
-## Completion evidence
-
-PR #309 merged this global review gate on 2026-10-05.
-
-The dedicated P3-15 Tutor Global 243 Review workflow completed successfully on the reviewed PR head. The production read-only audit also confirmed 243 learner-first cards across 81 skills with Tutor runtime still OFF before the separate approval package.
 
 ## Decision after this review
 
