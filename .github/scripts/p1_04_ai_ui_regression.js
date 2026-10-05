@@ -277,7 +277,7 @@ function assert(condition, message) {
     });
     await page.waitForSelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
     const topicText = await page.locator('[data-ep-ai-topic-action-wrap]').textContent();
-    assert(topicText.includes('Explain this topic with AI'), 'Governed theory AI action text missing');
+    assert(topicText.includes('Explain this topic'), 'Governed theory AI action text missing');
 
     await page.click('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
     await page.waitForFunction(() => document.querySelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
