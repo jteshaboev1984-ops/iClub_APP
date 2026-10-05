@@ -104,7 +104,12 @@ jobs:
               ('P1','P1-FUN-06'),
               ('P1','P1-FUN-07'),
               ('P1','P1-FUN-08'),
+              ('P1','P1-COO-01'),
               ('P1','P1-COO-02'),
+              ('P1','P1-COO-03'),
+              ('P1','P1-COO-04'),
+              ('P1','P1-COO-05'),
+              ('P1','P1-COO-06'),
               ('P5','P5-NOR-02')
           ) s(component_code,skill_code)
           cross join (values ('en'),('ru'),('uz')) l(locale);
@@ -119,6 +124,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261004150000_exam_prep_ai_tutor_cards_pilot_v2_learner_first.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261004154500_exam_prep_ai_tutor_cards_block2_quadratics_v1.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261004170000_exam_prep_ai_tutor_cards_block3_functions_v1.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261004183000_exam_prep_ai_tutor_cards_block4_coordinate_v1.sql
 
       - name: Validate Tutor Card governance
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_04_ai_tutor_cards_matrix.sql
@@ -127,7 +133,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in supabase/migrations/20261004133000_exam_prep_ai_tutor_cards_v1.sql supabase/migrations/20261004134500_exam_prep_ai_tutor_cards_pilot_v1.sql supabase/migrations/20261004150000_exam_prep_ai_tutor_cards_pilot_v2_learner_first.sql supabase/migrations/20261004154500_exam_prep_ai_tutor_cards_block2_quadratics_v1.sql supabase/migrations/20261004170000_exam_prep_ai_tutor_cards_block3_functions_v1.sql; do
+          for f in supabase/migrations/20261004133000_exam_prep_ai_tutor_cards_v1.sql supabase/migrations/20261004134500_exam_prep_ai_tutor_cards_pilot_v1.sql supabase/migrations/20261004150000_exam_prep_ai_tutor_cards_pilot_v2_learner_first.sql supabase/migrations/20261004154500_exam_prep_ai_tutor_cards_block2_quadratics_v1.sql supabase/migrations/20261004170000_exam_prep_ai_tutor_cards_block3_functions_v1.sql supabase/migrations/20261004183000_exam_prep_ai_tutor_cards_block4_coordinate_v1.sql; do
             ! grep -qi 'update public.users' "$f"
             ! grep -qi 'practice_answers' "$f"
             ! grep -qi 'tour_answers' "$f"
@@ -144,4 +150,6 @@ jobs:
           grep -q "v_all_v2<>24" supabase/migrations/20261004154500_exam_prep_ai_tutor_cards_block2_quadratics_v1.sql
           grep -q "'draft',false" supabase/migrations/20261004170000_exam_prep_ai_tutor_cards_block3_functions_v1.sql
           grep -q "v_all_v2<>48" supabase/migrations/20261004170000_exam_prep_ai_tutor_cards_block3_functions_v1.sql
+          grep -q "'draft',false" supabase/migrations/20261004183000_exam_prep_ai_tutor_cards_block4_coordinate_v1.sql
+          grep -q "v_all<>63" supabase/migrations/20261004183000_exam_prep_ai_tutor_cards_block4_coordinate_v1.sql
           grep -q "expected.*243" supabase/tests/p3_04_ai_tutor_cards_matrix.sql

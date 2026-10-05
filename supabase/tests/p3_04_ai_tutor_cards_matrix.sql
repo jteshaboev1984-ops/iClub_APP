@@ -17,8 +17,8 @@ begin
   from private.exam_prep_ai_tutor_cards
   where content_version='tutor_v2_learner_first';
 
-  if v_total<>48 then
-    raise exception 'Expected 48 learner-first Tutor Cards after Block 3, found %',v_total;
+  if v_total<>63 then
+    raise exception 'Expected 63 learner-first Tutor Cards after Block 4, found %',v_total;
   end if;
   if v_runtime<>0 then
     raise exception 'Learner-first Tutor Cards must remain runtime OFF';
@@ -66,9 +66,9 @@ begin
   end if;
 
   if (select count(distinct skill_code) from private.exam_prep_ai_tutor_cards
-      where content_version='tutor_v2_learner_first')<>16
+      where content_version='tutor_v2_learner_first')<>21
   then
-    raise exception 'Expected exactly 16 learner-first skills after Block 3';
+    raise exception 'Expected exactly 21 learner-first skills after Block 4';
   end if;
 
   if exists(
@@ -313,6 +313,70 @@ begin
   ) then
     raise exception 'Block 3 Functions contains literal backslash-n formatting';
   end if;
+
+  -- Block 4 Coordinate Geometry reviewed examples must match across locales.
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first' and skill_code='P1-COO-01'
+        and main_explanation like '%(2,3)%'
+        and main_explanation like '%y - 3 = 4(x - 2)%'
+        and main_explanation like '%y = 4x - 5%')<>3
+  then raise exception 'P1-COO-01 multilingual line-example parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first' and skill_code='P1-COO-03'
+        and main_explanation like '%y = 3x - 2%'
+        and main_explanation like '%-1/3%'
+        and main_explanation like '%(1,4)%')<>3
+  then raise exception 'P1-COO-03 multilingual gradient-condition parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first' and skill_code='P1-COO-04'
+        and main_explanation like '%(2,-1)%'
+        and main_explanation like '%(x-2)² + (y+1)² = 9%'
+        and main_explanation like '%x² + y² - 4x + 2y - 4 = 0%')<>3
+  then raise exception 'P1-COO-04 multilingual circle-equation parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first' and skill_code='P1-COO-05'
+        and main_explanation like '%x² + y² = 25%'
+        and main_explanation like '%y = 3%'
+        and main_explanation like '%(-4,3)%'
+        and main_explanation like '%(4,3)%')<>3
+  then raise exception 'P1-COO-05 multilingual line-circle parity drift'; end if;
+
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first' and skill_code='P1-COO-06'
+        and main_explanation like '%x² + y² = 25%'
+        and main_explanation like '%y = k%'
+        and main_explanation like '%100 - 4k²%'
+        and main_explanation like '%k = ±5%')<>3
+  then raise exception 'P1-COO-06 multilingual tangency parity drift'; end if;
+
+  -- P1-COO-02 must remain exactly one 3-locale learner-first card set from Block 1.
+  if (select count(*) from private.exam_prep_ai_tutor_cards
+      where content_version='tutor_v2_learner_first' and skill_code='P1-COO-02')<>3
+  then raise exception 'P1-COO-02 was duplicated or lost during Block 4'; end if;
+
+  if exists(
+    select 1 from private.exam_prep_ai_tutor_cards
+    where content_version='tutor_v2_learner_first' and skill_code='P1-COO-01'
+      and (
+        lower(main_explanation) like '%circle%'
+        or lower(main_explanation) like '%окружност%'
+        or lower(main_explanation) like '%aylana%'
+      )
+  ) then raise exception 'P1-COO-01 drifted into circle teaching'; end if;
+
+  if exists(
+    select 1 from private.exam_prep_ai_tutor_cards
+    where content_version='tutor_v2_learner_first' and skill_code like 'P1-COO-%'
+      and (
+        position(E'\\n' in main_explanation)>0
+        or position(E'\\n' in simple_explanation)>0
+        or position(E'\\n' in alternative_explanation)>0
+        or position(E'\\n' in focus_explanation)>0
+      )
+  ) then raise exception 'Block 4 Coordinate Geometry contains literal backslash-n formatting'; end if;
 
   if has_table_privilege('authenticated','private.exam_prep_ai_tutor_cards','SELECT')
      or has_table_privilege('anon','private.exam_prep_ai_tutor_cards','SELECT')
