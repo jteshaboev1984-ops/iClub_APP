@@ -1028,7 +1028,11 @@ Deno.serve(async (req: Request) => {
       }
       contextInteraction = String(parentThread?.root_interaction_type || "");
       rootRequestId = isUuid(parentThread?.root_request_id) ? String(parentThread.root_request_id) : null;
-      generatedFollowupsUsed = Math.max(0, Number(parentThread?.generated_followups_used || 0));
+      const parentGeneratedFollowups = Number(parentThread?.generated_followups_used || 0);
+      if (!Number.isInteger(parentGeneratedFollowups) || parentGeneratedFollowups < 0 || parentGeneratedFollowups > MAX_GENERATED_FOLLOWUPS) {
+        return await followupFail("thread_parent_invalid");
+      }
+      generatedFollowupsUsed = parentGeneratedFollowups;
       usedTemplateModes = (Array.isArray(parentThread?.used_template_modes) ? parentThread.used_template_modes : [])
         .map((value: unknown) => String(value || ""))
         .filter((value: string) => TEMPLATE_FOLLOWUP_MODES.has(value));
