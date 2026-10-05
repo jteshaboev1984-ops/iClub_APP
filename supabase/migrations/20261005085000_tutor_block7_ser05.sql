@@ -18,11 +18,11 @@ $t$An infinite geometric series has a finite sum only when the terms shrink towa
 
 In that case,
 
-S_infinity = a/(1-r).
+S∞ = a/(1-r).
 
 For example, let a=12 and r=1/3.
 
-S_infinity
+S∞
 = 12/(1-1/3)
 = 12/(2/3)
 = 18.
@@ -36,11 +36,11 @@ $t$First check
 
 Only then use
 
-S_infinity = a/(1-r).
+S∞ = a/(1-r).
 
 For a=12 and r=1/3:
 
-S_infinity=18.
+S∞=18.
 
 If |r|≥1, do not use the sum-to-infinity formula.$t$,
 $t$Imagine adding more and more terms of a geometric series.
@@ -48,7 +48,7 @@ $t$Imagine adding more and more terms of a geometric series.
 When |r|<1, each new term is smaller in magnitude than the previous one, so the running total settles towards a fixed number. That fixed number is the sum to infinity.
 
 When |r|≥1, the terms do not decay in the required way, so the running total cannot settle to a finite limit.$t$,
-$t$Check convergence before calculating: |r|<1 is required. Do not confuse the finite-sum formula with S_infinity. A negative r can still converge if its magnitude is below 1. If the condition fails, state that the series does not have a finite sum to infinity.$t$,
+$t$Check convergence before calculating: |r|<1 is required. Do not confuse the finite-sum formula with S∞. A negative r can still converge if its magnitude is below 1. If the condition fails, state that the series does not have a finite sum to infinity.$t$,
 'p1:P1-SER-05:theory:en:v1'
 ),
 (
@@ -59,11 +59,11 @@ $t$Бесконечный геометрический ряд имеет кон�
 
 Тогда
 
-S_infinity = a/(1-r).
+S∞ = a/(1-r).
 
 Например, пусть a=12 и r=1/3.
 
-S_infinity
+S∞
 = 12/(1-1/3)
 = 12/(2/3)
 = 18.
@@ -77,11 +77,11 @@ $t$Сначала проверьте
 
 Только после этого используйте
 
-S_infinity = a/(1-r).
+S∞ = a/(1-r).
 
 При a=12 и r=1/3:
 
-S_infinity=18.
+S∞=18.
 
 Если |r|≥1, формулу суммы до бесконечности применять нельзя.$t$,
 $t$Представьте, что к сумме добавляются всё новые члены геометрического ряда.
@@ -89,7 +89,7 @@ $t$Представьте, что к сумме добавляются всё н
 При |r|<1 каждый следующий член меньше по модулю, и накопленная сумма постепенно приближается к фиксированному числу. Это и есть сумма до бесконечности.
 
 При |r|≥1 члены не уменьшаются нужным образом, поэтому сумма не может стабилизироваться около конечного значения.$t$,
-$t$Сначала проверяйте сходимость: обязательно |r|<1. Не путайте формулу конечной суммы с S_infinity. Отрицательное r тоже может давать сходящийся ряд, если |r|<1. Если условие не выполняется, у ряда нет конечной суммы до бесконечности.$t$,
+$t$Сначала проверяйте сходимость: обязательно |r|<1. Не путайте формулу конечной суммы с S∞. Отрицательное r тоже может давать сходящийся ряд, если |r|<1. Если условие не выполняется, у ряда нет конечной суммы до бесконечности.$t$,
 'p1:P1-SER-05:theory:ru:v1'
 ),
 (
@@ -100,11 +100,11 @@ $t$Cheksiz geometrik qator faqat hadlari nolga yaqinlashganda chekli yig‘indig
 
 Shunda
 
-S_infinity = a/(1-r).
+S∞ = a/(1-r).
 
 Masalan, a=12 va r=1/3 bo‘lsin.
 
-S_infinity
+S∞
 = 12/(1-1/3)
 = 12/(2/3)
 = 18.
@@ -120,11 +120,11 @@ ekanini tekshiring.
 
 Faqat shundan keyin
 
-S_infinity = a/(1-r)
+S∞ = a/(1-r)
 
 formulasidan foydalaning.
 
-a=12 va r=1/3 bo‘lsa, S_infinity=18.
+a=12 va r=1/3 bo‘lsa, S∞=18.
 
 |r|≥1 bo‘lsa, cheksizlik yig‘indisi formulasini ishlatmang.$t$,
 $t$Geometrik qatorga tobora ko‘proq had qo‘shilayotganini tasavvur qiling.
@@ -132,7 +132,7 @@ $t$Geometrik qatorga tobora ko‘proq had qo‘shilayotganini tasavvur qiling.
 |r|<1 bo‘lsa, har bir keyingi hadning moduli kichrayadi va yig‘indi asta-sekin bitta o‘zgarmas songa yaqinlashadi. Shu son cheksizlikdagi yig‘indi bo‘ladi.
 
 |r|≥1 bo‘lsa, hadlar kerakli darajada kichraymaydi va yig‘indi chekli songa yaqinlashmaydi.$t$,
-$t$Hisoblashdan oldin yaqinlashishni tekshiring: |r|<1 bo‘lishi shart. Chekli yig‘indi formulasini S_infinity bilan aralashtirmang. r manfiy bo‘lsa ham |r|<1 bo‘lsa qator yaqinlashishi mumkin. Shart bajarilmasa, chekli cheksizlik yig‘indisi mavjud emas.$t$,
+$t$Hisoblashdan oldin yaqinlashishni tekshiring: |r|<1 bo‘lishi shart. Chekli yig‘indi formulasini S∞ bilan aralashtirmang. r manfiy bo‘lsa ham |r|<1 bo‘lsa qator yaqinlashishi mumkin. Shart bajarilmasa, chekli cheksizlik yig‘indisi mavjud emas.$t$,
 'p1:P1-SER-05:theory:uz:v1'
 ))
 insert into private.exam_prep_ai_tutor_cards(
