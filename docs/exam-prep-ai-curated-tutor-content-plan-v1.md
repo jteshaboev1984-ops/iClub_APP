@@ -312,7 +312,8 @@ Mentor Care remains OFF unless independently authorized.
 - Block 10 — P5 Representation of data P5-DAT-01…10: DONE / production storage updated, runtime remains OFF
 - Block 11 — P5 Permutations and combinations P5-CNT-01…05: DONE / production storage updated, runtime remains OFF
 - Block 12 — P5 Probability P5-PRO-01…06: DONE / production storage updated, runtime remains OFF
-- Block 13 — P5 Discrete random variables / Binomial / Geometric P5-DRV-01…03, P5-BIN-01…03, P5-GEO-01…03: IN PROGRESS
+- Block 13 — P5 Discrete random variables / Binomial / Geometric P5-DRV-01…03, P5-BIN-01…03, P5-GEO-01…03: DONE / production storage updated, runtime remains OFF
+- Block 14 — P5 Normal distribution P5-NOR-01,03…06: IN PROGRESS (P5-NOR-02 covered by Block 1 pilot)
 - Production provider-free switch: NOT STARTED; requires full 243/243 reviewed runtime-ready coverage
 
 ## Block implementation sequence
