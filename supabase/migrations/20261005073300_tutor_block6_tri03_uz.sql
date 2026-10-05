@@ -8,6 +8,8 @@ end $pre$;
 with x as (select
 $t$Teskari trigonometrik funksiya berilgan nisbat uchun bitta asosiy burchak qiymatini qaytaradi. Shuning uchun kalkulyator shu trigonometrik qiymatga ega barcha burchaklarni emas, bitta tanlangan burchakni ko‘rsatadi.
 
+Asosiy qiymatlar oraliqlari: arcsin uchun -π/2 dan π/2 gacha, arccos uchun 0 dan π gacha, arctan uchun -π/2 dan π/2 gacha.
+
 Misollar:
 
 arcsin(1/2)=π/6,
