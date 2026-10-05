@@ -302,7 +302,9 @@ Mentor Care remains OFF unless independently authorized.
 - Block 1 — learner-first pilot standard: DONE / production storage updated, runtime remains OFF
 - Block 2 — P1 Quadratics family P1-QUA-02…06: DONE / production storage updated, runtime remains OFF
 - Block 3 — P1 Functions family P1-FUN-01…08: DONE / production storage updated, runtime remains OFF
-- Block 4 — P1 Coordinate geometry P1-COO-01,03…06: IN PROGRESS (P1-COO-02 already covered by Block 1 pilot)
+- Block 4 — P1 Coordinate geometry P1-COO-01,03…06: DONE / production storage updated, runtime remains OFF (P1-COO-02 covered by Block 1 pilot)
+- Block 5 — P1 Circular measure P1-CIR-01…03: DONE / production storage updated, runtime remains OFF
+- Block 6 — P1 Trigonometry P1-TRI-01…05: IN PROGRESS
 - Production provider-free switch: NOT STARTED; requires full 243/243 reviewed runtime-ready coverage
 
 ## Block implementation sequence
