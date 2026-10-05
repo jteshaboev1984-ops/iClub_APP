@@ -1,0 +1,65 @@
+name: P3-17 Tutor Provider-Free Canary
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/functions/exam-prep-ai/index.ts'
+      - 'exam-prep/exam-prep-ai-ui.js'
+      - 'exam-prep/exam-prep-api.js'
+      - 'index.html'
+      - '.github/scripts/p3_17_tutor_provider_free_canary.js'
+      - '.github/scripts/p1_04_ai_edge_context_contract.js'
+      - '.github/scripts/p1_04_ai_ui_regression.js'
+      - '.github/workflows/p3-17-tutor-provider-free-canary.yml'
+      - 'docs/exam-prep-tutor-provider-free-canary-v1.md'
+      - 'docs/exam-prep-ai-curated-tutor-content-plan-v1.md'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/exam-prep-ai/index.ts'
+      - 'exam-prep/exam-prep-ai-ui.js'
+      - 'exam-prep/exam-prep-api.js'
+      - 'index.html'
+      - '.github/scripts/p3_17_tutor_provider_free_canary.js'
+      - '.github/workflows/p3-17-tutor-provider-free-canary.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static provider-free Tutor contract
+        run: |
+          node --check .github/scripts/p3_17_tutor_provider_free_canary.js
+          node .github/scripts/p3_17_tutor_provider_free_canary.js
+          node .github/scripts/p1_04_ai_edge_context_contract.js
+
+      - name: JavaScript syntax checks
+        run: |
+          node --check exam-prep/exam-prep-ai-ui.js
+          node --check exam-prep/exam-prep-api.js
+
+      - name: Type-check Edge Function
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Deno check
+        run: deno check supabase/functions/exam-prep-ai/index.ts
+
+      - name: Assert no academic or legacy write surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -q 'submit_exam_prep_response' exam-prep/exam-prep-ai-ui.js
+          ! grep -q 'save_exam_prep' exam-prep/exam-prep-ai-ui.js
+          ! grep -q 'localStorage' exam-prep/exam-prep-ai-ui.js
+          ! grep -q 'correct_answer' exam-prep/exam-prep-ai-ui.js
+          ! grep -q 'new_mastery_level' supabase/functions/exam-prep-ai/index.ts
+          grep -q 'academic_state_changed: false' supabase/functions/exam-prep-ai/index.ts

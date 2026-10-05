@@ -164,6 +164,37 @@ async function threadParent(userId: string, requestId: string) {
   }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
 }
 
+async function tutorCard(component: string, skillCode: string, locale: string) {
+  return await rpc("get_exam_prep_ai_tutor_card_service_v1", {
+    p_component_code: component,
+    p_skill_code: skillCode,
+    p_locale: locale,
+  }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
+}
+
+function tutorTemplateVariant(card: any, variant: string) {
+  const fieldByVariant: Record<string, string> = {
+    main: "main_explanation",
+    simplify: "simple_explanation",
+    rephrase: "alternative_explanation",
+    focus: "focus_explanation",
+  };
+  const field = fieldByVariant[variant] || "";
+  return field ? String(card?.[field] || "").trim() : "";
+}
+
+function requestedTutorTemplateVariant(params: {
+  interaction: string;
+  contextInteraction: string;
+  isFollowup: boolean;
+  followupMode: string;
+}) {
+  if (!["theory_explanation","multilingual_explanation"].includes(params.contextInteraction)) return null;
+  if (!params.isFollowup && ["theory_explanation","multilingual_explanation"].includes(params.interaction)) return "main";
+  if (params.isFollowup && ["simplify","rephrase","focus"].includes(params.followupMode)) return params.followupMode;
+  return null;
+}
+
 function sameStringSet(left: unknown, right: unknown) {
   const a = (Array.isArray(left) ? left : []).map((x) => String(x || "")).filter(Boolean).sort();
   const b = (Array.isArray(right) ? right : []).map((x) => String(x || "")).filter(Boolean).sort();
@@ -964,7 +995,7 @@ Deno.serve(async (req: Request) => {
       return await followupFail("thread_parent_invalid");
     }
 
-    if (!parentAudit?.request_id || parentAudit?.mode !== "generated" ||
+    if (!parentAudit?.request_id || !["generated","verified_template"].includes(String(parentAudit?.mode || "")) ||
         String(parentAudit?.component_code || "") !== component ||
         String(parentAudit?.requested_locale || "") !== locale) {
       return await followupFail("thread_parent_invalid");
@@ -1106,6 +1137,73 @@ Deno.serve(async (req: Request) => {
         deterministicSnapshotHash !== String(parentAudit.deterministic_snapshot_hash) ||
         !sameStringSet(sourceCardKeys, parentAudit?.source_card_keys)) {
       return await followupFail("thread_context_changed");
+    }
+  }
+
+  const templateVariant = requestedTutorTemplateVariant({
+    interaction,
+    contextInteraction,
+    isFollowup,
+    followupMode,
+  });
+
+  if (templateVariant && skillCode) {
+    try {
+      const curated: any = await tutorCard(component, skillCode, locale);
+      const curatedSourceKey = String(curated?.source_card_key || "");
+      const curatedMessage = tutorTemplateVariant(curated, templateVariant);
+      const exactCard = curatedMessage &&
+        String(curated?.component_code || "") === component &&
+        String(curated?.skill_code || "") === skillCode &&
+        String(curated?.locale || "") === locale &&
+        curatedSourceKey &&
+        sourceCardKeys.includes(curatedSourceKey);
+
+      if (exactCard) {
+        const mode = "verified_template";
+        const outputHash = await sha256(curatedMessage);
+        const templateGuard = {
+          ...guard,
+          tutor_template: {
+            content_version: String(curated?.content_version || ""),
+            tutor_card_key: String(curated?.tutor_card_key || ""),
+            variant: templateVariant,
+            provider_called: false,
+          },
+        };
+        await audit({
+          requestId, userId: user.id, component, interaction, locale, mode,
+          guard: templateGuard, snapshot,
+          latencyMs: performance.now() - started,
+          deterministicSnapshotHash,
+          sourceCardKeys,
+          safetyFlags: [],
+          outputHash,
+        }).catch(() => {});
+
+        return response(200, {
+          request_id: requestId,
+          mode,
+          component_code: component,
+          interaction_type: interaction,
+          locale,
+          message: curatedMessage,
+          source_cards: sourceCardKeys,
+          context_bound: Boolean(deterministicContext),
+          generated: false,
+          academic_state_changed: false,
+          template_variant: templateVariant,
+          provider_called: false,
+          thread_eligible: followupEnabled && (isFollowup
+            ? Number(followupTurn || 0) < MAX_FOLLOWUP_TURNS
+            : ROOT_FOLLOWUP_INTERACTIONS.has(interaction)),
+          followup_turn: isFollowup ? followupTurn : 0,
+          max_followups: MAX_FOLLOWUP_TURNS,
+          thread_root_request_id: isFollowup ? rootRequestId : requestId,
+        });
+      }
+    } catch {
+      // Fail open to the already-governed provider-backed theory path.
     }
   }
 

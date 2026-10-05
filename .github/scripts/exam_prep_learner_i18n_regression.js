@@ -79,7 +79,8 @@ assert(aiSource.includes('dashboardNote: "P1 va P5 ichida kerakli joyda yordam b
 assert(aiSource.includes('progress: "Progressimni tushuntirish"'), 'UZ contextual progress action regressed');
 assert(aiSource.includes('plan: "Nega bu keyingi qadam?"'), 'UZ contextual next-step action regressed');
 assert(aiSource.includes('repeated: "Takrorlanayotgan qiyinchiliklarni tushuntirish"'), 'UZ repeated-difficulty action regressed');
-assert(aiSource.includes('topic: "Bu mavzuni AI bilan tushuntirish"'), 'UZ AI Tutor topic action regressed');
+assert(aiSource.includes('topic: "Bu mavzuni tushuntirish"'), 'UZ Tutor topic action regressed');
+assert(!aiSource.includes('topic: "Bu mavzuni AI bilan tushuntirish"'), 'UZ topic action incorrectly claims provider generation');
 assert(aiSource.includes('mistake: "Bu xatoni tushunishga yordam ber"'), 'UZ AI Tutor mistake action regressed');
 assert(aiSource.includes('followupPrompt: "Savol qoldimi?"'), 'UZ AI follow-up prompt regressed');
 assert(aiSource.includes('simpler: "Soddaroq tushuntir"'), 'UZ AI simplify action regressed');
