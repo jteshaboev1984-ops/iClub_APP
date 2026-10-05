@@ -304,7 +304,12 @@ Mentor Care remains OFF unless independently authorized.
 - Block 3 — P1 Functions family P1-FUN-01…08: DONE / production storage updated, runtime remains OFF
 - Block 4 — P1 Coordinate geometry P1-COO-01,03…06: DONE / production storage updated, runtime remains OFF (P1-COO-02 covered by Block 1 pilot)
 - Block 5 — P1 Circular measure P1-CIR-01…03: DONE / production storage updated, runtime remains OFF
-- Block 6 — P1 Trigonometry P1-TRI-01…05: IN PROGRESS
+- Block 6 — P1 Trigonometry P1-TRI-01…05: DONE / production storage updated, runtime remains OFF
+- Block 7 — P1 Series P1-SER-01…05: DONE / production storage updated, runtime remains OFF
+- Block 8 — P1 Differentiation P1-DIF-01…07: DONE / production storage updated, runtime remains OFF
+- Block 9 — P1 Integration P1-INT-01…05: DONE / production storage updated, runtime remains OFF
+- P1 learner-first coverage: COMPLETE — 45 skills × 3 locales = 135 cards
+- Block 10 — P5 Representation of data P5-DAT-01…10: IN PROGRESS
 - Production provider-free switch: NOT STARTED; requires full 243/243 reviewed runtime-ready coverage
 
 ## Block implementation sequence
