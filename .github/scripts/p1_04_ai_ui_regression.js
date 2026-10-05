@@ -10,7 +10,7 @@ if (aiSource.includes('data-ep-ai-open-component') || aiSource.includes('data-ep
 if (aiSource.includes('✦')) throw new Error('Gemini-like sparkle returned to AI Tutor UI');
 if (!aiSource.includes('assets/iclub-ai-mark-temp.jpg?v=1')) throw new Error('temporary iClub AI mark asset is not wired into Tutor UI');
 if (aiSource.includes('aria-hidden="true">AI</span>')) throw new Error('text-only AI placeholder mark returned');
-if (!aiSource.includes('MAX_FOLLOWUPS = 2') || !aiSource.includes('MAX_FOLLOWUP_CHARS = 250')) throw new Error('limited follow-up UI contract missing');
+if (!aiSource.includes('MAX_THREAD_STEPS = 5') || !aiSource.includes('MAX_GENERATED_FOLLOWUPS = 2') || !aiSource.includes('MAX_FOLLOWUP_CHARS = 250')) throw new Error('bounded follow-up UI contract missing');
 if (!liveSource.includes('data-ep-live-active-assessment="true"')) throw new Error('real active-assessment AI blackout marker missing');
 
 
@@ -35,6 +35,8 @@ function assert(condition, message) {
     await page.evaluate(() => {
       window.__aiCalls = [];
       window.__enableThreads = false;
+      window.__generatedFollowups = 0;
+      window.__usedTemplateModes = [];
       window.i18n = { getLang: () => 'en' };
       window.iClubExamPrepHostInternal = {
         lastCapabilities: {
@@ -69,6 +71,9 @@ function assert(condition, message) {
                   thread_eligible: true,
                   followup_turn: 0,
                   max_followups: 2,
+                  max_thread_steps: 5,
+                  generated_followups_used: 0,
+                  used_template_modes: [],
                   academic_state_changed: false
                 },
                 error: null
@@ -76,19 +81,25 @@ function assert(condition, message) {
             }
             if (window.__enableThreads && body?.interaction_type === 'context_followup') {
               const turn = Number(body.followup_turn || 0);
+              const mode = String(body.followup_mode || '');
+              const isQuestion = mode === 'question';
+              if (isQuestion) window.__generatedFollowups += 1;
+              else if (!window.__usedTemplateModes.includes(mode)) window.__usedTemplateModes.push(mode);
+              const requestId = `30000000-0000-4000-8000-${String(turn + 1).padStart(12, '0')}`;
               return {
                 data: {
-                  request_id: turn === 1
-                    ? '30000000-0000-4000-8000-000000000002'
-                    : '30000000-0000-4000-8000-000000000003',
-                  mode: turn === 1 ? 'verified_template' : 'generated',
-                  message: turn === 1 ? 'Curated simpler explanation' : 'AI clarification',
-                  generated: turn === 2,
-                  provider_called: turn === 1 ? false : true,
-                  template_variant: turn === 1 ? 'simplify' : undefined,
-                  thread_eligible: turn < 2,
+                  request_id: requestId,
+                  mode: isQuestion ? 'generated' : 'verified_template',
+                  message: isQuestion ? `AI clarification ${window.__generatedFollowups}` : 'Curated simpler explanation',
+                  generated: isQuestion,
+                  provider_called: isQuestion,
+                  template_variant: isQuestion ? undefined : mode,
+                  thread_eligible: turn < 5,
                   followup_turn: turn,
                   max_followups: 2,
+                  max_thread_steps: 5,
+                  generated_followups_used: window.__generatedFollowups,
+                  used_template_modes: [...window.__usedTemplateModes],
                   academic_state_changed: false
                 },
                 error: null
@@ -368,22 +379,42 @@ function assert(condition, message) {
     assert(threadCalls[0].body.followup_turn === 1 && threadCalls[0].body.followup_mode === 'simplify', 'First follow-up turn/mode drifted');
     assert(threadCalls[0].body.skill_code === 'P1-QUA-02' && threadCalls[0].body.user_text === '', 'First follow-up lost original topic scope');
 
+    const usedChipState = await page.evaluate(() => ({
+      simplifyHidden: document.querySelector('[data-ep-ai-followup-mode="simplify"]')?.hidden === true,
+      rephraseVisible: document.querySelector('[data-ep-ai-followup-mode="rephrase"]')?.hidden === false,
+      questionVisible: document.querySelector('.ep-ai-followup-question')?.hidden === false
+    }));
+    assert(usedChipState.simplifyHidden, 'Used prepared follow-up chip must disappear after one successful use');
+    assert(usedChipState.rephraseVisible && usedChipState.questionVisible, 'Unused prepared chips and learner question must remain available');
+
     await page.fill('[data-ep-ai-followup-input]', 'Why does this matter?');
     await page.click('[data-ep-ai-followup-send]');
-    await page.waitForFunction(() => document.body.textContent.includes('AI clarification'));
+    await page.waitForFunction(() => document.body.textContent.includes('AI clarification 1'));
 
     threadCalls = await page.evaluate(() => window.__aiCalls.filter(call => call.body?.interaction_type === 'context_followup'));
-    assert(threadCalls.length === 2, 'Second follow-up did not make exactly one additional governed request');
-    assert(threadCalls[1].body.parent_request_id === '30000000-0000-4000-8000-000000000002', 'Second follow-up did not chain to first follow-up');
-    assert(threadCalls[1].body.prior_assistant_text === 'Curated simpler explanation', 'Second follow-up lost previous assistant output binding');
-    assert(threadCalls[1].body.followup_turn === 2 && threadCalls[1].body.followup_mode === 'question', 'Second follow-up turn/mode drifted');
-    assert(threadCalls[1].body.user_text === 'Why does this matter?', 'Second follow-up lost learner question');
-    const threadDone = await page.evaluate(() => ({
-      panelHidden: document.querySelector('[data-ep-ai-followup-panel]')?.hidden === true,
-      doneVisible: document.querySelector('[data-ep-ai-followup-done]')?.hidden === false,
+    assert(threadCalls.length === 2, 'First written question did not make exactly one additional governed request');
+    assert(threadCalls[1].body.parent_request_id === '30000000-0000-4000-8000-000000000002', 'Written question did not chain to prepared explanation');
+    assert(threadCalls[1].body.prior_assistant_text === 'Curated simpler explanation', 'Written question lost previous assistant output binding');
+    assert(threadCalls[1].body.followup_turn === 2 && threadCalls[1].body.followup_mode === 'question', 'Written question turn/mode drifted');
+    assert(threadCalls[1].body.user_text === 'Why does this matter?', 'Written question text was lost');
+
+    await page.fill('[data-ep-ai-followup-input]', 'Can you clarify once more?');
+    await page.click('[data-ep-ai-followup-send]');
+    await page.waitForFunction(() => document.body.textContent.includes('AI clarification 2'));
+
+    threadCalls = await page.evaluate(() => window.__aiCalls.filter(call => call.body?.interaction_type === 'context_followup'));
+    assert(threadCalls.length === 3, 'Second written question did not make exactly one additional governed request');
+    assert(threadCalls[2].body.followup_turn === 3 && threadCalls[2].body.followup_mode === 'question', 'Second written question turn/mode drifted');
+    const questionLimitState = await page.evaluate(() => ({
+      questionHidden: document.querySelector('.ep-ai-followup-question')?.hidden === true,
+      limitVisible: document.querySelector('[data-ep-ai-followup-limit]')?.hidden === false,
+      rephraseVisible: document.querySelector('[data-ep-ai-followup-mode="rephrase"]')?.hidden === false,
+      focusVisible: document.querySelector('[data-ep-ai-followup-mode="focus"]')?.hidden === false,
       turns: document.querySelectorAll('.ep-ai-thread-turn').length
     }));
-    assert(threadDone.panelHidden && threadDone.doneVisible && threadDone.turns === 2, 'Thread did not close gracefully after two follow-ups');
+    assert(questionLimitState.questionHidden && questionLimitState.limitVisible, 'Written-question limit must be visible instead of silently ignoring taps');
+    assert(questionLimitState.rephraseVisible && questionLimitState.focusVisible, 'Prepared zero-cost options must remain available after written-question limit');
+    assert(questionLimitState.turns === 3, 'Tutor thread did not retain prepared + written follow-up history');
     await page.evaluate(() => { window.__enableThreads = false; });
 
     await page.evaluate(() => {
@@ -400,7 +431,7 @@ function assert(condition, message) {
     assert(state.dashboardStatus === 0 && state.contextualActions === 0, 'AI surfaces must disappear during active assessment');
     assert(state.errorActions === 0, 'Diagnostic AI action must never remain in an active assessment');
     assert(state.topicActions === 0, 'Theory AI action must never remain in an active assessment');
-    assert(state.calls === 10, 'Screen transition must not trigger an AI request');
+    assert(state.calls === 11, 'Screen transition must not trigger an AI request');
 
     await page.evaluate(() => {
       window.iClubExamPrepHostInternal.lastCapabilities.killSwitch = true;
