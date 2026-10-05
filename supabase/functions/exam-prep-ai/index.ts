@@ -22,11 +22,13 @@ const OPENAI_MAX_OUTPUT_TOKENS = 180;
 const OPENAI_INPUT_PRICE_PER_MTOK = 0.20;
 const OPENAI_OUTPUT_PRICE_PER_MTOK = 1.20;
 const MAX_PROVIDER_CONTEXT_CHARS = 24000;
-const MAX_FOLLOWUP_TURNS = 2;
+const MAX_THREAD_STEPS = 5;
+const MAX_GENERATED_FOLLOWUPS = 2;
 const MAX_FOLLOWUP_TEXT_CHARS = 250;
 const MAX_PRIOR_ASSISTANT_CHARS = 5000;
 const FOLLOWUP_WINDOW_MS = 60 * 60 * 1000;
-const FOLLOWUP_MODES = new Set(["simplify", "rephrase", "focus", "question"]);
+const TEMPLATE_FOLLOWUP_MODES = new Set(["simplify", "rephrase", "focus"]);
+const FOLLOWUP_MODES = new Set([...TEMPLATE_FOLLOWUP_MODES, "question"]);
 const ROOT_FOLLOWUP_INTERACTIONS = new Set([
   "progress_summary",
   "weekly_plan_narration",
@@ -85,7 +87,8 @@ function learnerMessage(locale: string, mode: string, reason: string) {
       followup_unavailable: "Это уточнение больше не актуально. Откройте объяснение заново.",
       followup_too_long: "Сформулируйте вопрос короче — до 250 символов.",
       followup_question_required: "Напишите короткий вопрос по текущему объяснению.",
-      followup_limit_reached: "Вернитесь к теме и продолжите изучение. При необходимости можно открыть новое объяснение.",
+      followup_mode_already_used: "Этот вариант объяснения уже показан. Выберите другой вариант или задайте свой вопрос.",
+      followup_limit_reached: "Лимит собственных уточняющих вопросов исчерпан. Можно использовать оставшиеся готовые варианты или продолжить изучение.",
     },
     uz: {
       active_assessment: "Tekshiruv davom etayotgan paytda izohli yordam mavjud emas. Tugagach, xatolarni tahlil qilish mumkin.",
@@ -99,7 +102,8 @@ function learnerMessage(locale: string, mode: string, reason: string) {
       followup_unavailable: "Bu aniqlashtirish endi dolzarb emas. Izohni qayta oching.",
       followup_too_long: "Savolni qisqaroq yozing — 250 belgigacha.",
       followup_question_required: "Joriy izoh bo‘yicha qisqa savol yozing.",
-      followup_limit_reached: "Mavzuni o‘rganishni davom ettiring. Zarur bo‘lsa, yangi izohni ochishingiz mumkin.",
+      followup_mode_already_used: "Bu izoh varianti allaqachon ko‘rsatildi. Boshqa variantni tanlang yoki o‘z savolingizni yozing.",
+      followup_limit_reached: "O‘zingiz yozadigan aniqlashtiruvchi savollar limiti tugadi. Qolgan tayyor variantlardan foydalanishingiz yoki o‘rganishni davom ettirishingiz mumkin.",
     },
     en: {
       active_assessment: "Explanation help is unavailable while this assessment is active. You can review mistakes after it is finished.",
@@ -113,7 +117,8 @@ function learnerMessage(locale: string, mode: string, reason: string) {
       followup_unavailable: "This follow-up is no longer current. Open a fresh explanation to continue.",
       followup_too_long: "Keep the question short — up to 250 characters.",
       followup_question_required: "Write a short question about the current explanation.",
-      followup_limit_reached: "Continue studying this topic. You can open a fresh explanation if you still need help.",
+      followup_mode_already_used: "You have already seen this explanation option. Choose another option or ask your own question.",
+      followup_limit_reached: "You have used both written follow-up questions. You can still use any remaining prepared options or continue studying.",
     },
   };
   const dictionary = messages[locale] || messages.ru;
@@ -125,6 +130,7 @@ function learnerMessage(locale: string, mode: string, reason: string) {
   if (["thread_parent_invalid","thread_context_changed","thread_expired","thread_output_mismatch"].includes(reason)) return dictionary.followup_unavailable;
   if (reason === "followup_text_too_long") return dictionary.followup_too_long;
   if (reason === "followup_question_required") return dictionary.followup_question_required;
+  if (reason === "followup_mode_already_used") return dictionary.followup_mode_already_used;
   if (reason === "followup_limit_reached") return dictionary.followup_limit_reached;
   if (mode === "no_source") return dictionary.no_source;
   if (mode === "fallback") return dictionary.fallback;
@@ -900,7 +906,7 @@ Deno.serve(async (req: Request) => {
   const priorAssistantText = typeof (payload as any).prior_assistant_text === "string" ? String((payload as any).prior_assistant_text) : "";
   const followupMode = typeof (payload as any).followup_mode === "string" ? String((payload as any).followup_mode) : "";
   const rawFollowupTurn = Number((payload as any).followup_turn);
-  const followupTurn = Number.isInteger(rawFollowupTurn) && rawFollowupTurn >= 1 && rawFollowupTurn <= MAX_FOLLOWUP_TURNS ? rawFollowupTurn : null;
+  const followupTurn = Number.isInteger(rawFollowupTurn) && rawFollowupTurn >= 1 && rawFollowupTurn <= MAX_THREAD_STEPS ? rawFollowupTurn : null;
   const followupQuestion = normalizedFollowupQuestion(userText);
   const isFollowup = interaction === "context_followup";
   const effectiveFollowupText = isFollowup && followupMode === "question" ? followupQuestion : "";
@@ -1011,13 +1017,25 @@ Deno.serve(async (req: Request) => {
       return await followupFail("thread_output_mismatch");
     }
 
+    let generatedFollowupsUsed = 0;
+    let usedTemplateModes: string[] = [];
+
     if (String(parentAudit?.interaction_type || "") === "context_followup") {
       const parentThread = parentAudit?.guard_decisions?.thread || {};
-      if (Number(parentThread?.followup_turn) !== 1 || followupTurn !== 2) {
+      const parentTurn = Number(parentThread?.followup_turn);
+      if (!Number.isInteger(parentTurn) || followupTurn !== parentTurn + 1 || followupTurn > MAX_THREAD_STEPS) {
         return await followupFail("followup_limit_reached");
       }
       contextInteraction = String(parentThread?.root_interaction_type || "");
       rootRequestId = isUuid(parentThread?.root_request_id) ? String(parentThread.root_request_id) : null;
+      const parentGeneratedFollowups = Number(parentThread?.generated_followups_used || 0);
+      if (!Number.isInteger(parentGeneratedFollowups) || parentGeneratedFollowups < 0 || parentGeneratedFollowups > MAX_GENERATED_FOLLOWUPS) {
+        return await followupFail("thread_parent_invalid");
+      }
+      generatedFollowupsUsed = parentGeneratedFollowups;
+      usedTemplateModes = (Array.isArray(parentThread?.used_template_modes) ? parentThread.used_template_modes : [])
+        .map((value: unknown) => String(value || ""))
+        .filter((value: string) => TEMPLATE_FOLLOWUP_MODES.has(value));
     } else {
       if (followupTurn !== 1 || !ROOT_FOLLOWUP_INTERACTIONS.has(String(parentAudit?.interaction_type || ""))) {
         return await followupFail("thread_parent_invalid");
@@ -1036,6 +1054,18 @@ Deno.serve(async (req: Request) => {
       return await followupFail("thread_parent_invalid");
     }
 
+    if (TEMPLATE_FOLLOWUP_MODES.has(followupMode)) {
+      if (usedTemplateModes.includes(followupMode)) {
+        return await followupFail("followup_mode_already_used");
+      }
+      usedTemplateModes = [...usedTemplateModes, followupMode];
+    } else if (followupMode === "question") {
+      generatedFollowupsUsed += 1;
+      if (generatedFollowupsUsed > MAX_GENERATED_FOLLOWUPS) {
+        return await followupFail("followup_limit_reached");
+      }
+    }
+
     guard = {
       ...guard,
       thread: {
@@ -1044,6 +1074,8 @@ Deno.serve(async (req: Request) => {
         root_interaction_type: contextInteraction,
         followup_turn: followupTurn,
         followup_mode: followupMode,
+        generated_followups_used: generatedFollowupsUsed,
+        used_template_modes: usedTemplateModes,
       },
     };
 
@@ -1195,10 +1227,13 @@ Deno.serve(async (req: Request) => {
           template_variant: templateVariant,
           provider_called: false,
           thread_eligible: followupEnabled && (isFollowup
-            ? Number(followupTurn || 0) < MAX_FOLLOWUP_TURNS
+            ? Number(followupTurn || 0) < MAX_THREAD_STEPS
             : ROOT_FOLLOWUP_INTERACTIONS.has(interaction)),
           followup_turn: isFollowup ? followupTurn : 0,
-          max_followups: MAX_FOLLOWUP_TURNS,
+          max_followups: MAX_GENERATED_FOLLOWUPS,
+          max_thread_steps: MAX_THREAD_STEPS,
+          generated_followups_used: isFollowup ? Number(guard?.thread?.generated_followups_used || 0) : 0,
+          used_template_modes: isFollowup && Array.isArray(guard?.thread?.used_template_modes) ? guard.thread.used_template_modes : [],
           thread_root_request_id: isFollowup ? rootRequestId : requestId,
         });
       }
@@ -1368,10 +1403,13 @@ Deno.serve(async (req: Request) => {
       locale, message, source_cards: sourceCardKeys, context_bound: Boolean(deterministicContext),
       generated: true, academic_state_changed: false,
       thread_eligible: followupEnabled && (isFollowup
-        ? Number(followupTurn || 0) < MAX_FOLLOWUP_TURNS
+        ? Number(followupTurn || 0) < MAX_THREAD_STEPS
         : ROOT_FOLLOWUP_INTERACTIONS.has(interaction)),
       followup_turn: isFollowup ? followupTurn : 0,
-      max_followups: MAX_FOLLOWUP_TURNS,
+      max_followups: MAX_GENERATED_FOLLOWUPS,
+      max_thread_steps: MAX_THREAD_STEPS,
+      generated_followups_used: isFollowup ? Number(guard?.thread?.generated_followups_used || 0) : 0,
+      used_template_modes: isFollowup && Array.isArray(guard?.thread?.used_template_modes) ? guard.thread.used_template_modes : [],
       thread_root_request_id: isFollowup ? rootRequestId : requestId,
     });
   } catch (error) {

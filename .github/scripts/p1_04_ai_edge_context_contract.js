@@ -79,7 +79,12 @@ assert(src.includes('skill_code_required'), 'theory/multilingual routes must req
 assert(src.includes('get_exam_prep_ai_thread_parent_service_v1'), 'service-only AI thread parent lookup missing');
 assert(src.includes('get_exam_prep_ai_followup_policy_service_v1'), 'service-only AI follow-up policy lookup missing');
 assert(src.includes('followupPolicy?.enabled === true'), 'follow-up UI availability is not fail-closed to server policy');
-assert(src.includes('MAX_FOLLOWUP_TURNS = 2'), 'AI follow-up turn limit drifted');
+assert(src.includes('MAX_THREAD_STEPS = 5'), 'Tutor thread-step bound drifted');
+assert(src.includes('MAX_GENERATED_FOLLOWUPS = 2'), 'AI generated follow-up limit drifted');
+assert(src.includes('TEMPLATE_FOLLOWUP_MODES'), 'prepared Tutor follow-up mode set missing');
+assert(src.includes('generated_followups_used'), 'generated follow-up accounting missing');
+assert(src.includes('used_template_modes'), 'one-time prepared follow-up accounting missing');
+assert(src.includes('followup_mode_already_used'), 'duplicate prepared follow-up guard missing');
 assert(src.includes('MAX_FOLLOWUP_TEXT_CHARS = 250'), 'AI follow-up text limit drifted');
 assert(src.includes('thread_output_mismatch'), 'AI follow-up is not bound to the prior generated output hash');
 assert(src.includes('thread_context_changed'), 'AI follow-up does not fail closed when learner/source context changes');

@@ -31,7 +31,7 @@ assert(edge.includes('["generated","verified_template"].includes'), 'thread pare
 assert(edge.includes('followupMode === "question"'), 'learner-written question provider path missing');
 assert(edge.includes('await callOpenAIProvider'), 'provider-backed learner clarification path missing');
 
-assert(ui.includes('const VERSION = "p305tutor1"'), 'Tutor canary UI version missing');
+assert(ui.includes('const VERSION = "p305tutor2"'), 'Tutor follow-up UX version missing');
 assert(ui.includes('topic: "Explain this topic"'), 'English curated topic label missing');
 assert(ui.includes('topic: "Объяснить эту тему"'), 'Russian curated topic label missing');
 assert(ui.includes('topic: "Bu mavzuni tushuntirish"'), 'Uzbek curated topic label missing');
@@ -42,6 +42,9 @@ assert(ui.includes('data-ep-ai-followup-mode="simplify"'), 'simple follow-up chi
 assert(ui.includes('data-ep-ai-followup-mode="rephrase"'), 'alternative follow-up chip missing');
 assert(ui.includes('data-ep-ai-followup-mode="focus"'), 'focus follow-up chip missing');
 assert(ui.includes('maxlength="250"'), 'bounded learner question input missing');
+assert(ui.includes('MAX_GENERATED_FOLLOWUPS = 2'), 'learner-written AI follow-up limit missing');
+assert(ui.includes('button.hidden = used'), 'used prepared chip is not removed from the learner UI');
+assert(ui.includes('questionLimit'), 'written-question limit is not explained to the learner');
 assert(!ui.includes('localStorage'), 'Tutor UI must not write/read legacy localStorage');
 
 console.log('P3-17 provider-free Tutor canary contract: GREEN');
