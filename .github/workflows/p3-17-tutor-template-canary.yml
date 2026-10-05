@@ -1,0 +1,201 @@
+name: P3-17 Tutor Template Canary
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/exam-prep-tutor-template-canary-v1.md'
+      - 'docs/release-packages/20261005_tutor_template_canary_activation_v1.sql'
+      - 'docs/release-packages/20261005_tutor_template_canary_reversion_v1.sql'
+      - 'supabase/migrations/20261005161000_exam_prep_tutor_template_canary_v1.sql'
+      - 'supabase/tests/p3_17_tutor_template_canary_foundation.sql'
+      - 'supabase/functions/exam-prep-ai/index.ts'
+      - 'exam-prep/exam-prep-ai-ui.js'
+      - '.github/scripts/p1_04_ai_ui_regression.js'
+      - '.github/scripts/p3_17_tutor_template_canary_contract.js'
+      - '.github/workflows/p3-17-tutor-template-canary.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/20261005161000_exam_prep_tutor_template_canary_v1.sql'
+      - 'supabase/tests/p3_17_tutor_template_canary_foundation.sql'
+      - 'supabase/functions/exam-prep-ai/index.ts'
+      - 'exam-prep/exam-prep-ai-ui.js'
+      - '.github/scripts/p3_17_tutor_template_canary_contract.js'
+      - '.github/workflows/p3-17-tutor-template-canary.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tutor-template-canary:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Canary diff firewall
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          mapfile -t changed < <(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          for f in "${changed[@]}"; do
+            case "$f" in
+              docs/exam-prep-tutor-template-canary-v1.md|              docs/release-packages/20261005_tutor_template_canary_activation_v1.sql|              docs/release-packages/20261005_tutor_template_canary_reversion_v1.sql|              supabase/migrations/20261005161000_exam_prep_tutor_template_canary_v1.sql|              supabase/tests/p3_17_tutor_template_canary_foundation.sql|              supabase/functions/exam-prep-ai/index.ts|              exam-prep/exam-prep-ai-ui.js|              .github/scripts/p1_04_ai_ui_regression.js|              .github/scripts/p3_17_tutor_template_canary_contract.js|              .github/workflows/p3-17-tutor-template-canary.yml)
+                ;;
+              *)
+                echo "Tutor Template canary PR contains out-of-scope file: $f" >&2
+                exit 1
+                ;;
+            esac
+          done
+
+      - name: Bootstrap prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql
+          for stage in 04 05 06 07 08 09 10 11 12 13 15 16; do
+            for f in $(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p0_${stage}_*.sql" | sort); do
+              psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null
+            done
+          done
+          for pat in '*exam_prep_p1_01_*.sql' '*exam_prep_p1_04_*.sql'; do
+            for f in $(find supabase/migrations -maxdepth 1 -type f -name "$pat" | sort); do
+              psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null
+            done
+          done
+
+      - name: Seed approved source-card stubs
+        shell: bash
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          insert into private.exam_prep_ai_source_cards(
+            source_card_key,component_code,skill_code,card_type,locale,source_version,title,body_text,
+            approval_status,rights_status,is_runtime_allowed,content_hash,approved_at
+          )
+          select lower(n.component_code)||':'||n.skill_code||':theory:'||l.locale||':v1',
+                 n.component_code,n.skill_code,'theory',l.locale,'ci_global_stub_v1',
+                 n.skill_code||' '||l.locale,'CI source stub for global Tutor governance.',
+                 'approved','original_iclub',true,md5(n.component_code||n.skill_code||l.locale),now()
+          from (
+            select distinct component_code,skill_code
+            from private.exam_prep_syllabus_nodes
+            where component_code in ('P1','P5')
+          ) n
+          cross join (values ('en'),('ru'),('uz')) l(locale);
+          SQL
+
+      - name: Apply Tutor authoring Blocks 0 to 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '20261004*_exam_prep_ai_tutor_cards*.sql' | sort); do
+            psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null
+          done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_04_ai_tutor_cards_matrix.sql
+
+      - name: Apply and validate Blocks 5 to 9
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '2026100506*_tutor_block5_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_05_tutor_block5_circular.sql
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '2026100507*_tutor_block6_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_06_tutor_block6_trigonometry.sql
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '2026100508*_tutor_block7_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_07_tutor_block7_series.sql
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '20261005*_tutor_block8_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_08_tutor_block8_differentiation.sql
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '2026100511*_tutor_block9_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_09_tutor_block9_integration.sql
+
+      - name: Apply and validate Blocks 10 to 14
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '20261005*_tutor_block10_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_10_tutor_block10_p5_data.sql
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '20261005*_tutor_block11_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_11_tutor_block11_p5_counting.sql
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '20261005*_tutor_block12_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_12_tutor_block12_p5_probability.sql
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '20261005*_tutor_block13_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_13_tutor_block13_discrete.sql
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '20261005*_tutor_block14_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_14_tutor_block14_normal.sql
+
+      - name: Re-run global 243-card governance review
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_15_tutor_global_243_review.sql
+
+      - name: Apply 243-card approval/runtime-readiness migration
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261005150000_tutor_243_approval_runtime_ready_v1.sql
+
+      - name: Validate approved/runtime-ready corpus
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_16_tutor_243_approval_runtime_ready.sql
+
+      - name: Apply Tutor Template canary foundation (default OFF)
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261005161000_exam_prep_tutor_template_canary_v1.sql
+
+      - name: Validate Tutor Template canary foundation
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_17_tutor_template_canary_foundation.sql
+
+      - name: Static preservation and fallback contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "template_canary_enabled boolean not null default false" supabase/migrations/20261005161000_exam_prep_tutor_template_canary_v1.sql
+          grep -q "get_exam_prep_ai_tutor_template_canary_service_v1" supabase/functions/exam-prep-ai/index.ts
+          grep -q "get_exam_prep_ai_tutor_card_service_v1" supabase/functions/exam-prep-ai/index.ts
+          grep -q 'mode = "verified_template"' supabase/functions/exam-prep-ai/index.ts
+          grep -q "reservedCostUsd = conservativeProviderReservationCost" supabase/functions/exam-prep-ai/index.ts
+          grep -q "template_canary_enabled=false" docs/release-packages/20261005_tutor_template_canary_reversion_v1.sql
+          ! grep -qiE 'update[[:space:]]+public[.]users|update[[:space:]]+public[.]practice_answers|update[[:space:]]+public[.]tour_answers|update[[:space:]]+public[.]certificates|update[[:space:]]+private[.]exam_prep_(sessions|responses|evidence_events|skill_states|correction_cases|retest_events|weekly_plans|weekly_plan_items|feature_entitlements|beta_members)' supabase/migrations/20261005161000_exam_prep_tutor_template_canary_v1.sql
+          ! grep -qiE 'update[[:space:]]+private[.]exam_prep_(feature_entitlements|beta_members|skill_states|stage_states|evidence_events)' docs/release-packages/20261005_tutor_template_canary_activation_v1.sql
+          ! grep -qiE 'update[[:space:]]+private[.]exam_prep_(feature_entitlements|beta_members|skill_states|stage_states|evidence_events)' docs/release-packages/20261005_tutor_template_canary_reversion_v1.sql
+
+      - name: JavaScript syntax checks
+        run: |
+          node --check exam-prep/exam-prep-ai-ui.js
+          node --check .github/scripts/p1_04_ai_ui_regression.js
+          node --check .github/scripts/p3_17_tutor_template_canary_contract.js
+
+      - name: Install Chromium test dependency
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Tutor Template Edge/UI contract
+        run: node .github/scripts/p3_17_tutor_template_canary_contract.js
+
+      - name: Type-check Edge Function
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Deno check
+        run: deno check supabase/functions/exam-prep-ai/index.ts
