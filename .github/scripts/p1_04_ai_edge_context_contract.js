@@ -7,17 +7,23 @@ const assert = (condition, message) => { if (!condition) throw new Error(message
 const guardCall = src.indexOf('get_exam_prep_ai_guard_v1');
 const contextCall = src.indexOf('deterministicContext = await learnerContext');
 const sourceCall = src.indexOf('get_exam_prep_ai_source_cards_service_v1', contextCall);
+const tutorLookup = src.indexOf('get_exam_prep_ai_tutor_card_service_v1');
+const verifiedTemplateReturn = src.indexOf('const mode = "verified_template"');
 const reservationCall = src.indexOf('await reserveProviderCall');
 const providerCall = src.indexOf('await callOpenAIProvider');
 const finalizeCall = src.indexOf('await finalizeProviderCall');
 assert(guardCall >= 0, 'AI guard call missing');
 assert(contextCall >= 0, 'deterministic learner context call missing');
 assert(sourceCall >= 0, 'approved source-card retrieval missing');
+assert(tutorLookup >= 0, 'approved Tutor Card service lookup missing');
+assert(verifiedTemplateReturn >= 0, 'provider-free verified-template route missing');
 assert(reservationCall >= 0, 'atomic provider reservation call missing');
 assert(providerCall >= 0, 'AI-1 provider call missing');
 assert(finalizeCall >= 0, 'provider accounting finalizer missing');
 assert(guardCall < contextCall, 'deterministic learner context must be resolved only after the AI guard');
 assert(contextCall < sourceCall, 'approved source cards must be resolved only after deterministic context');
+assert(sourceCall < verifiedTemplateReturn, 'Tutor verified-template decision must follow approved source retrieval');
+assert(verifiedTemplateReturn < reservationCall, 'provider-free Tutor route must return before any provider budget reservation');
 assert(sourceCall < reservationCall, 'provider budget reservation must follow approved source retrieval');
 assert(reservationCall < providerCall, 'provider must never be called before atomic budget/concurrency reservation');
 assert(providerCall < finalizeCall, 'provider usage must be finalized after the provider call');
@@ -105,5 +111,13 @@ assert(src.includes('reserve_exam_prep_ai_provider_call_service_v1'), 'atomic pr
 assert(src.includes('finalize_exam_prep_ai_provider_call_service_v1'), 'provider accounting finalizer RPC missing');
 assert(src.includes('conservativeProviderReservationCost'), 'conservative provider cost reservation missing');
 assert(src.includes('academic_state_changed: false'), 'AI response lost non-authoritative contract');
+assert(src.includes('tutorTemplateVariant'), 'Tutor Card variant resolver missing');
+assert(src.includes('requestedTutorTemplateVariant'), 'Tutor Card routing selector missing');
+assert(src.includes('provider_called: false'), 'provider-free Tutor response contract missing');
+assert(src.includes('template_variant: templateVariant'), 'Tutor response does not expose audited template variant');
+assert(src.includes('["generated","verified_template"].includes'), 'follow-up parent contract does not accept curated roots');
+assert(src.includes('simple_explanation'), 'provider-free simplify Tutor variant missing');
+assert(src.includes('alternative_explanation'), 'provider-free rephrase Tutor variant missing');
+assert(src.includes('focus_explanation'), 'provider-free focus Tutor variant missing');
 
 console.log('P1-04 AI deterministic context contract: GREEN');
