@@ -310,7 +310,8 @@ Mentor Care remains OFF unless independently authorized.
 - Block 9 — P1 Integration P1-INT-01…05: DONE / production storage updated, runtime remains OFF
 - P1 learner-first coverage: COMPLETE — 45 skills × 3 locales = 135 cards
 - Block 10 — P5 Representation of data P5-DAT-01…10: DONE / production storage updated, runtime remains OFF
-- Block 11 — P5 Permutations and combinations P5-CNT-01…05: IN PROGRESS
+- Block 11 — P5 Permutations and combinations P5-CNT-01…05: DONE / production storage updated, runtime remains OFF
+- Block 12 — P5 Probability P5-PRO-01…06: IN PROGRESS
 - Production provider-free switch: NOT STARTED; requires full 243/243 reviewed runtime-ready coverage
 
 ## Block implementation sequence
