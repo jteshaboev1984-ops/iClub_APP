@@ -1,0 +1,128 @@
+name: P3-10 Tutor Block 10 P5 Data
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/exam-prep-tutor-block10-p5-data-review.md'
+      - 'docs/exam-prep-ai-curated-tutor-content-plan-v1.md'
+      - 'supabase/migrations/20261005*_tutor_block10_*.sql'
+      - 'supabase/tests/p3_10_tutor_block10_p5_data.sql'
+      - '.github/workflows/p3-10-tutor-block10-p5-data.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/20261005*_tutor_block10_*.sql'
+      - 'supabase/tests/p3_10_tutor_block10_p5_data.sql'
+      - '.github/workflows/p3-10-tutor-block10-p5-data.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  block10:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql
+          for stage in 04 05 06 07 08 09 10 11 12 13 15 16; do
+            for f in $(find supabase/migrations -maxdepth 1 -type f -name "*exam_prep_p0_${stage}_*.sql" | sort); do
+              psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null
+            done
+          done
+          for pat in '*exam_prep_p1_01_*.sql' '*exam_prep_p1_04_*.sql'; do
+            for f in $(find supabase/migrations -maxdepth 1 -type f -name "$pat" | sort); do
+              psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null
+            done
+          done
+
+      - name: Seed source-card stubs
+        shell: bash
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          insert into private.exam_prep_ai_source_cards(
+            source_card_key,component_code,skill_code,card_type,locale,source_version,title,body_text,
+            approval_status,rights_status,is_runtime_allowed,content_hash,approved_at
+          )
+          select lower(n.component_code)||':'||n.skill_code||':theory:'||l.locale||':v1',
+                 n.component_code,n.skill_code,'theory',l.locale,'ci_stub_v1',
+                 n.skill_code||' '||l.locale,'CI source stub.',
+                 'approved','original_iclub',true,md5(n.component_code||n.skill_code||l.locale),now()
+          from (select distinct component_code,skill_code from private.exam_prep_syllabus_nodes
+                where component_code in ('P1','P5')) n
+          cross join (values ('en'),('ru'),('uz')) l(locale);
+          SQL
+
+      - name: Apply Tutor Cards through Block 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '20261004*_exam_prep_ai_tutor_cards*.sql' | sort); do
+            psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null
+          done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_04_ai_tutor_cards_matrix.sql
+
+      - name: Apply and validate Blocks 5 to 8
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '2026100506*_tutor_block5_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_05_tutor_block5_circular.sql
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '2026100507*_tutor_block6_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_06_tutor_block6_trigonometry.sql
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '2026100508*_tutor_block7_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_07_tutor_block7_series.sql
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '20261005*_tutor_block8_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_08_tutor_block8_differentiation.sql
+
+      - name: Apply and validate Block 9
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '2026100511*_tutor_block9_*.sql' | sort); do psql -v ON_ERROR_STOP=1 -f "$f" >/dev/null; done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_09_tutor_block9_integration.sql
+
+      - name: Apply Block 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name '20261005*_tutor_block10_*.sql' | sort); do
+            psql -v ON_ERROR_STOP=1 -f "$f"
+          done
+
+      - name: Validate Block 10
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p3_10_tutor_block10_p5_data.sql
+
+      - name: Preservation checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in supabase/migrations/20261005*_tutor_block10_*.sql; do
+            ! grep -qiE 'practice_answers|tour_answers|certificates|exam_prep_evidence_events|exam_prep_stage_states|exam_prep_feature_entitlements|update public.users' "$f"
+          done
