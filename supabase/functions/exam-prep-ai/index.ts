@@ -164,6 +164,50 @@ async function threadParent(userId: string, requestId: string) {
   }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
 }
 
+async function tutorTemplateCanary(userId: string) {
+  try {
+    const result = await rpc("get_exam_prep_ai_tutor_template_canary_service_v1", {
+      p_user_id: userId,
+    }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
+    return result && typeof result === "object" ? result : { enabled: false };
+  } catch {
+    return { enabled: false };
+  }
+}
+
+async function tutorTemplateCard(component: string, skillCode: string, locale: string) {
+  try {
+    const result = await rpc("get_exam_prep_ai_tutor_card_service_v1", {
+      p_component_code: component,
+      p_skill_code: skillCode,
+      p_locale: locale,
+    }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
+    if (!result || typeof result !== "object" || Array.isArray(result)) return null;
+    if (String((result as any).component_code || "") !== component) return null;
+    if (String((result as any).skill_code || "") !== skillCode) return null;
+    if (String((result as any).locale || "") !== locale) return null;
+    return result as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function tutorTemplateMessage(card: Record<string, unknown>, variant: "main" | "simple" | "alternative" | "focus") {
+  const field = variant === "main"
+    ? "main_explanation"
+    : variant === "simple"
+      ? "simple_explanation"
+      : variant === "alternative"
+        ? "alternative_explanation"
+        : "focus_explanation";
+  const message = String(card?.[field] || "").trim();
+  if (!message || message.length > 5000) return "";
+  if (/<\s*script\b/i.test(message) || /javascript\s*:/i.test(message) || /<[^>]+>/.test(message)) return "";
+  if (/\bP[15]-[A-Z0-9]+-\d{2}\b/.test(message)) return "";
+  if (/\b(action_code|item_type|process_step|learner_context|service_mode|source_card_key|canonical skill|mastery)\b/i.test(message)) return "";
+  return message;
+}
+
 function sameStringSet(left: unknown, right: unknown) {
   const a = (Array.isArray(left) ? left : []).map((x) => String(x || "")).filter(Boolean).sort();
   const b = (Array.isArray(right) ? right : []).map((x) => String(x || "")).filter(Boolean).sort();
@@ -964,7 +1008,7 @@ Deno.serve(async (req: Request) => {
       return await followupFail("thread_parent_invalid");
     }
 
-    if (!parentAudit?.request_id || parentAudit?.mode !== "generated" ||
+    if (!parentAudit?.request_id || !["generated","verified_template"].includes(String(parentAudit?.mode || "")) ||
         String(parentAudit?.component_code || "") !== component ||
         String(parentAudit?.requested_locale || "") !== locale) {
       return await followupFail("thread_parent_invalid");
@@ -1106,6 +1150,82 @@ Deno.serve(async (req: Request) => {
         deterministicSnapshotHash !== String(parentAudit.deterministic_snapshot_hash) ||
         !sameStringSet(sourceCardKeys, parentAudit?.source_card_keys)) {
       return await followupFail("thread_context_changed");
+    }
+  }
+
+  // Provider-free Tutor Template canary. This runs only after the existing guard,
+  // deterministic mapping, approved source-card retrieval and thread bindings pass.
+  // Any policy/card/template failure falls through to the unchanged provider path.
+  if (contextInteraction === "theory_explanation" && skillCode) {
+    const variant: "main" | "simple" | "alternative" | "focus" | null =
+      !isFollowup
+        ? "main"
+        : followupMode === "simplify"
+          ? "simple"
+          : followupMode === "rephrase"
+            ? "alternative"
+            : followupMode === "focus"
+              ? "focus"
+              : null;
+
+    if (variant) {
+      const tutorPolicy: any = await tutorTemplateCanary(user.id);
+      const presetAllowed = !isFollowup || tutorPolicy?.preset_followups_enabled === true;
+
+      if (tutorPolicy?.enabled === true && presetAllowed) {
+        const tutorCard = await tutorTemplateCard(component, skillCode, locale);
+        const message = tutorCard ? tutorTemplateMessage(tutorCard, variant) : "";
+
+        if (message) {
+          const mode = "verified_template";
+          const outputHash = await sha256(message);
+          const templateGuard = {
+            ...guard,
+            tutor_template: {
+              policy_version: String(tutorPolicy?.policy_version || "tutor_template_canary_v1"),
+              variant,
+              provider_called: false,
+            },
+          };
+          await audit({
+            requestId,
+            userId: user.id,
+            component,
+            interaction,
+            locale,
+            mode,
+            guard: templateGuard,
+            snapshot,
+            latencyMs: performance.now() - started,
+            deterministicSnapshotHash,
+            sourceCardKeys,
+            safetyFlags: ["verified_tutor_template"],
+            outputHash,
+          }).catch(() => {});
+
+          const currentTurn = isFollowup ? Number(followupTurn || 0) : 0;
+          return response(200, {
+            request_id: requestId,
+            mode,
+            component_code: component,
+            interaction_type: interaction,
+            locale,
+            message,
+            source_cards: sourceCardKeys,
+            context_bound: Boolean(deterministicContext),
+            generated: false,
+            verified_template: true,
+            template_variant: variant,
+            academic_state_changed: false,
+            thread_eligible: followupEnabled && (
+              isFollowup ? currentTurn < MAX_FOLLOWUP_TURNS : true
+            ),
+            followup_turn: currentTurn,
+            max_followups: MAX_FOLLOWUP_TURNS,
+            thread_root_request_id: isFollowup ? rootRequestId : requestId,
+          });
+        }
+      }
     }
   }
 
