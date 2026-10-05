@@ -8,6 +8,8 @@ end $pre$;
 with x as (select
 $t$An inverse trigonometric function returns one principal angle for a given ratio. A calculator therefore gives one selected angle, not every angle with the same trigonometric value.
 
+The principal ranges are: arcsin from -π/2 to π/2, arccos from 0 to π, and arctan from -π/2 to π/2.
+
 Examples:
 
 arcsin(1/2)=π/6,
