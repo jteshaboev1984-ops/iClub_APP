@@ -18,7 +18,7 @@ upper curve - lower curve
 
 over the interval where that ordering is correct.
 
-For y=x and y=x² between x=0 and x=1, we have x>x² inside the interval. Therefore
+For y=x and y=x² on 0≤x≤1, we have x>x² inside the interval. Therefore
 
 Area
 = ∫ from 0 to 1 of (x-x²) dx
