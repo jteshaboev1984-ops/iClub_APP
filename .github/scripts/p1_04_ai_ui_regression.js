@@ -61,9 +61,11 @@ function assert(condition, message) {
               return {
                 data: {
                   request_id: '30000000-0000-4000-8000-000000000001',
-                  mode: 'generated',
-                  message: 'Initial threaded explanation',
-                  generated: true,
+                  mode: 'verified_template',
+                  message: 'Curated topic explanation',
+                  generated: false,
+                  provider_called: false,
+                  template_variant: 'main',
                   thread_eligible: true,
                   followup_turn: 0,
                   max_followups: 2,
@@ -79,9 +81,11 @@ function assert(condition, message) {
                   request_id: turn === 1
                     ? '30000000-0000-4000-8000-000000000002'
                     : '30000000-0000-4000-8000-000000000003',
-                  mode: 'generated',
-                  message: turn === 1 ? 'First follow-up explanation' : 'Second follow-up explanation',
-                  generated: true,
+                  mode: turn === 1 ? 'verified_template' : 'generated',
+                  message: turn === 1 ? 'Curated simpler explanation' : 'AI clarification',
+                  generated: turn === 2,
+                  provider_called: turn === 1 ? false : true,
+                  template_variant: turn === 1 ? 'simplify' : undefined,
                   thread_eligible: turn < 2,
                   followup_turn: turn,
                   max_followups: 2,
@@ -277,7 +281,7 @@ function assert(condition, message) {
     });
     await page.waitForSelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
     const topicText = await page.locator('[data-ep-ai-topic-action-wrap]').textContent();
-    assert(topicText.includes('Explain this topic with AI'), 'Governed theory AI action text missing');
+    assert(topicText.includes('Explain this topic'), 'Governed topic explanation action text missing');
 
     await page.click('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
     await page.waitForFunction(() => document.querySelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-output-text]')?.textContent === 'P1 explanation');
@@ -325,7 +329,7 @@ function assert(condition, message) {
     const unsupportedTheoryActions = await page.evaluate(() => document.querySelectorAll('[data-ep-ai-topic-action-wrap]').length);
     assert(unsupportedTheoryActions === 0, 'Theory action appeared for a non-canonical skill');
 
-    // Limited contextual mini-thread: one generated explanation + at most two bound follow-ups.
+    // Limited contextual mini-thread: curated topic card + curated chip + at most one provider-backed learner question.
     await page.evaluate(() => {
       window.__enableThreads = true;
       document.querySelector('#exam-prep-host-root').innerHTML = `
@@ -336,8 +340,14 @@ function assert(condition, message) {
     });
     await page.waitForSelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
     await page.click('[data-ep-ai-topic-action-wrap] [data-ep-ai-action="theory_explanation"]');
-    await page.waitForFunction(() => document.querySelector('[data-ep-ai-output-text]')?.textContent === 'Initial threaded explanation');
+    await page.waitForFunction(() => document.querySelector('[data-ep-ai-output-text]')?.textContent === 'Curated topic explanation');
     await page.waitForSelector('[data-ep-ai-followup]:not([hidden])');
+    const curatedThreadState = await page.evaluate(() => ({
+      note: document.querySelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-output-note]')?.textContent || '',
+      main: document.querySelector('[data-ep-ai-topic-action-wrap] [data-ep-ai-output-text]')?.textContent || ''
+    }));
+    assert(curatedThreadState.main === 'Curated topic explanation', 'Curated main Tutor Card was not rendered');
+    assert(curatedThreadState.note.includes('reviewed iClub learning material'), 'Curated source note is not learner-accurate');
 
     const markState = await page.evaluate(() => ({
       mark: document.querySelectorAll('.ep-ai-mark').length,
@@ -349,23 +359,23 @@ function assert(condition, message) {
 
     await page.click('[data-ep-ai-followup-open]');
     await page.click('[data-ep-ai-followup-mode="simplify"]');
-    await page.waitForFunction(() => document.body.textContent.includes('First follow-up explanation'));
+    await page.waitForFunction(() => document.body.textContent.includes('Curated simpler explanation'));
 
     let threadCalls = await page.evaluate(() => window.__aiCalls.filter(call => call.body?.interaction_type === 'context_followup'));
     assert(threadCalls.length === 1, 'First follow-up did not make exactly one governed request');
     assert(threadCalls[0].body.parent_request_id === '30000000-0000-4000-8000-000000000001', 'First follow-up lost root parent request');
-    assert(threadCalls[0].body.prior_assistant_text === 'Initial threaded explanation', 'First follow-up lost prior generated output binding');
+    assert(threadCalls[0].body.prior_assistant_text === 'Curated topic explanation', 'First follow-up lost prior curated output binding');
     assert(threadCalls[0].body.followup_turn === 1 && threadCalls[0].body.followup_mode === 'simplify', 'First follow-up turn/mode drifted');
     assert(threadCalls[0].body.skill_code === 'P1-QUA-02' && threadCalls[0].body.user_text === '', 'First follow-up lost original topic scope');
 
     await page.fill('[data-ep-ai-followup-input]', 'Why does this matter?');
     await page.click('[data-ep-ai-followup-send]');
-    await page.waitForFunction(() => document.body.textContent.includes('Second follow-up explanation'));
+    await page.waitForFunction(() => document.body.textContent.includes('AI clarification'));
 
     threadCalls = await page.evaluate(() => window.__aiCalls.filter(call => call.body?.interaction_type === 'context_followup'));
     assert(threadCalls.length === 2, 'Second follow-up did not make exactly one additional governed request');
     assert(threadCalls[1].body.parent_request_id === '30000000-0000-4000-8000-000000000002', 'Second follow-up did not chain to first follow-up');
-    assert(threadCalls[1].body.prior_assistant_text === 'First follow-up explanation', 'Second follow-up lost previous assistant output binding');
+    assert(threadCalls[1].body.prior_assistant_text === 'Curated simpler explanation', 'Second follow-up lost previous assistant output binding');
     assert(threadCalls[1].body.followup_turn === 2 && threadCalls[1].body.followup_mode === 'question', 'Second follow-up turn/mode drifted');
     assert(threadCalls[1].body.user_text === 'Why does this matter?', 'Second follow-up lost learner question');
     const threadDone = await page.evaluate(() => ({
