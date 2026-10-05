@@ -58,3 +58,17 @@ The learner UI now preserves the official Cambridge 9709 June 2026 reference wit
 The P2-05 production schema was installed before this marker through the additive `20261002060000_exam_prep_p2_05_readiness_summary_safe_v1.sql` migration. Immediate production verification showed the learner-safe readiness RPC present for authenticated users only, zero approved Stage-5 future-series thresholds, all 10 official Cambridge June 2026 reference rows intact, and unchanged legacy counts: users 1442, Practice answers 8770, Tour answers 6267, certificates 157.
 
 This release does not expand the cohort and does not enable AI Assist or Mentor Care. The controlled-beta Core boundary remains authoritative: Core ON, AI OFF, Mentor OFF, kill switch OFF. No learner progress, localStorage, Practice/Tour history, ratings or certificates are rewritten.
+
+## 2026-10-05 Tutor follow-up UX production marker
+
+**Tutor follow-up merge commit:** `5762eac81eac9c6759ac40fc8e4de8612de47de7`  
+**PR #315 validation:** 32/32 workflows — SUCCESS  
+**P3-17 Tutor Provider-Free Canary:** SUCCESS  
+**P1-04 AI Safety Gate:** SUCCESS
+
+This marker intentionally changes no application behavior. It creates the distinct push required by the existing iClub GitHub-to-production deployment mechanism after the validated Tutor follow-up UX fix was merged into `main`.
+
+The release makes each prepared Tutor follow-up option single-use in the current thread, preserves up to two learner-written provider-backed clarification questions, keeps prepared Tutor variants provider-free, makes exhausted limits explicit instead of silently ignoring taps, and increases mobile follow-up tap targets. The whole Tutor thread remains bounded.
+
+There is no Supabase schema/data migration in this marker, no entitlement/cohort expansion, no learner-progress reset, no localStorage migration, and no changes to legacy Tours, Practice, ratings or certificates. The active-assessment blackout, component/skill/locale/source binding and `academic_state_changed=false` boundary remain unchanged.
+
