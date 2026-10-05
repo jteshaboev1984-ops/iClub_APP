@@ -314,10 +314,8 @@ Mentor Care remains OFF unless independently authorized.
 - Block 12 — P5 Probability P5-PRO-01…06: DONE / production storage updated, runtime remains OFF
 - Block 13 — P5 Discrete random variables / Binomial / Geometric P5-DRV-01…03, P5-BIN-01…03, P5-GEO-01…03: DONE / production storage updated, runtime remains OFF
 - Block 14 — P5 Normal distribution P5-NOR-01,03…06: DONE / production storage updated, runtime remains OFF (P5-NOR-02 covered by Block 1 pilot)
-- Global 243/243 Tutor Content governance review: DONE / GREEN
-- Tutor Cards governance: 243/243 APPROVED and runtime-readable
-- Provider-free topic canary: IN PROGRESS for the existing controlled beta
-- Wider rollout: NOT STARTED
+- Global 243/243 Tutor Content governance review: IN PROGRESS
+- Production provider-free switch: NOT STARTED; requires global review + approval/runtime-ready gate + controlled-beta canary
 
 ## Block implementation sequence
 
