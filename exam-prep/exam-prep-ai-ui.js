@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p304ux3";
+  const VERSION = "p304ux4";
   let observer = null;
   let languageObserver = null;
   let renderQueued = false;
@@ -33,11 +33,12 @@
       progress: "Progressimni tushuntirish",
       plan: "Nega bu keyingi qadam?",
       repeated: "Takrorlanayotgan qiyinchiliklarni tushuntirish",
-      topic: "Bu mavzuni AI bilan tushuntirish",
+      topic: "Bu mavzuni tushuntirish",
       topicNote: "Hozirgi natijalaringizga mos, qisqa tushuntirish.",
       mistake: "Bu xatoni tushunishga yordam ber",
       outputLabel: "iClub AI",
       sourceNote: "iClub o‘quv materiallari va ilovadagi natijalaringiz asosida.",
+      curatedSourceNote: "iClub’ning tekshirilgan o‘quv materiallari asosida.",
       working: "Tushuntirish tayyorlanmoqda…",
       close: "Yopish",
       unavailable: "AI tushuntirishi hozir mavjud emas. Asosiy tayyorgarlik odatdagidek davom etadi.",
@@ -59,11 +60,12 @@
       progress: "Explain my progress",
       plan: "Why is this my next step?",
       repeated: "Explain recurring difficulties",
-      topic: "Explain this topic with AI",
+      topic: "Explain this topic",
       topicNote: "A short explanation adapted to your current progress.",
       mistake: "Help me understand this mistake",
       outputLabel: "iClub AI",
       sourceNote: "Based on iClub learning material and your work in the app.",
+      curatedSourceNote: "Based on reviewed iClub learning material.",
       working: "Preparing your explanation…",
       close: "Close",
       unavailable: "AI explanation is unavailable right now. Your core exam preparation continues normally.",
@@ -85,11 +87,12 @@
       progress: "Объяснить мой прогресс",
       plan: "Почему это мой следующий шаг?",
       repeated: "Объяснить повторяющиеся трудности",
-      topic: "Объяснить эту тему с ИИ",
+      topic: "Объяснить эту тему",
       topicNote: "Короткое объяснение с учётом вашего текущего прогресса.",
       mistake: "Помочь понять эту ошибку",
       outputLabel: "iClub AI",
       sourceNote: "Основано на учебных материалах iClub и вашей работе в приложении.",
+      curatedSourceNote: "Основано на проверенных учебных материалах iClub.",
       working: "Готовим объяснение…",
       close: "Закрыть",
       unavailable: "Объяснение ИИ сейчас недоступно. Основная подготовка продолжает работать как обычно.",
@@ -277,6 +280,14 @@
     output.hidden = false;
   }
 
+  function setOutputSourceNote(panel, c, mode) {
+    const note = panel.querySelector("[data-ep-ai-output-note]");
+    if (!note) return;
+    note.textContent = mode === "verified_template"
+      ? (c.curatedSourceNote || c.sourceNote)
+      : c.sourceNote;
+  }
+
   function applyOutputCopy(container, c) {
     const label = container.querySelector("[data-ep-ai-output-label]");
     const note = container.querySelector("[data-ep-ai-output-note]");
@@ -448,8 +459,9 @@
 
       const message = data && typeof data === "object" ? String(data.message || data.content || "") : "";
       appendFollowupTurn(panel, label, message || c.unavailable);
+      setOutputSourceNote(panel, c, data?.mode);
 
-      if (data?.generated === true && data?.request_id && message) {
+      if ((data?.generated === true || data?.mode === "verified_template") && data?.request_id && message) {
         state.parentRequestId = String(data.request_id);
         state.priorAssistantText = message;
         state.turn = Number(data.followup_turn || nextTurn);
@@ -553,8 +565,9 @@
         ? String(data.message || data.content || "")
         : "";
       showOutput(panel, message || c.unavailable);
+      setOutputSourceNote(panel, c, data?.mode);
 
-      if (data?.generated === true && data?.thread_eligible === true && data?.request_id && message) {
+      if ((data?.generated === true || data?.mode === "verified_template") && data?.thread_eligible === true && data?.request_id && message) {
         initFollowup(panel, {
           component,
           extraBody,
