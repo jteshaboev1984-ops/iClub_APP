@@ -1,0 +1,581 @@
+{
+  "version": "practice_v2_p5_binomial_series_draft_v0.1",
+  "skill": "P1-SER-02",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q308",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-02",
+      "secondary_skills": [],
+      "role": "recognition",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "How should the sequence 4, 9, 14, 19, ... be classified?",
+        "ru": "Как следует классифицировать последовательность 4, 9, 14, 19, ...?",
+        "uz": "4, 9, 14, 19, ... ketma-ketligi qanday tasniflanadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Arithmetic progression",
+            "ru": "Арифметическая прогрессия",
+            "uz": "Arifmetik progressiya"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Geometric progression",
+            "ru": "Геометрическая прогрессия",
+            "uz": "Geometrik progressiya"
+          },
+          "diagnostic_code": "SER02_DIFF_RATIO"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Both arithmetic and geometric",
+            "ru": "И арифметическая, и геометрическая",
+            "uz": "Ham arifmetik, ham geometrik"
+          },
+          "diagnostic_code": "SER02_GP_STRUCTURE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Neither",
+            "ru": "Ни одна из них",
+            "uz": "Hech biri"
+          },
+          "diagnostic_code": "SER02_NEITHER"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The consecutive differences are all 5, so the sequence is arithmetic.",
+        "ru": "Все соседние разности равны 5, поэтому последовательность арифметическая.",
+        "uz": "Ketma-ket ayirmalar hammasi 5, demak bu arifmetik progressiya."
+      },
+      "ai_source_skill": "P1-SER-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q309",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-02",
+      "secondary_skills": [],
+      "role": "recognition",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "How should the sequence 81, 27, 9, 3, ... be classified?",
+        "ru": "Как следует классифицировать последовательность 81, 27, 9, 3, ...?",
+        "uz": "81, 27, 9, 3, ... ketma-ketligi qanday tasniflanadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Arithmetic progression",
+            "ru": "Арифметическая прогрессия",
+            "uz": "Arifmetik progressiya"
+          },
+          "diagnostic_code": "SER02_AP_STRUCTURE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Geometric progression",
+            "ru": "Геометрическая прогрессия",
+            "uz": "Geometrik progressiya"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Both arithmetic and geometric",
+            "ru": "И арифметическая, и геометрическая",
+            "uz": "Ham arifmetik, ham geometrik"
+          },
+          "diagnostic_code": "SER02_AP_STRUCTURE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Neither",
+            "ru": "Ни одна из них",
+            "uz": "Hech biri"
+          },
+          "diagnostic_code": "SER02_NEITHER"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Each term is obtained by multiplying by 1/3, so the common ratio is constant and the sequence is geometric.",
+        "ru": "Каждый следующий член получается умножением на 1/3, поэтому отношение постоянно и последовательность геометрическая.",
+        "uz": "Har bir keyingi had 1/3 ga ko‘paytirish orqali olinadi, demak nisbat doimiy va ketma-ketlik geometrik."
+      },
+      "ai_source_skill": "P1-SER-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q310",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-02",
+      "secondary_skills": [],
+      "role": "non_example",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "How should the sequence 2, 4, 8, 14, ... be classified?",
+        "ru": "Как следует классифицировать последовательность 2, 4, 8, 14, ...?",
+        "uz": "2, 4, 8, 14, ... ketma-ketligi qanday tasniflanadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Arithmetic progression",
+            "ru": "Арифметическая прогрессия",
+            "uz": "Arifmetik progressiya"
+          },
+          "diagnostic_code": "SER02_AP_STRUCTURE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Geometric progression",
+            "ru": "Геометрическая прогрессия",
+            "uz": "Geometrik progressiya"
+          },
+          "diagnostic_code": "SER02_GP_STRUCTURE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Neither",
+            "ru": "Ни одна из них",
+            "uz": "Hech biri"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Both arithmetic and geometric",
+            "ru": "И арифметическая, и геометрическая",
+            "uz": "Ham arifmetik, ham geometrik"
+          },
+          "diagnostic_code": "SER02_NEITHER"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "The differences 2,4,6 are not constant, and the ratios 2,2,7/4 are not constant. It is neither AP nor GP.",
+        "ru": "Разности 2,4,6 не постоянны, и отношения 2,2,7/4 тоже не постоянны. Это ни AP, ни GP.",
+        "uz": "Ayirmalar 2,4,6 doimiy emas, nisbatlar 2,2,7/4 ham doimiy emas. Bu AP ham, GP ham emas."
+      },
+      "ai_source_skill": "P1-SER-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q311",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-02",
+      "secondary_skills": [],
+      "role": "structure_property",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "Which property is enough to identify a non-constant arithmetic progression?",
+        "ru": "Какого свойства достаточно, чтобы распознать непостоянную арифметическую прогрессию?",
+        "uz": "O‘zgarmas bo‘lmagan arifmetik progressiyani aniqlash uchun qaysi xossa yetarli?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Consecutive differences are equal.",
+            "ru": "Разности соседних членов равны.",
+            "uz": "Ketma-ket hadlar ayirmalari teng."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Consecutive ratios are equal.",
+            "ru": "Отношения соседних членов равны.",
+            "uz": "Ketma-ket hadlar nisbatlari teng."
+          },
+          "diagnostic_code": "SER02_DIFF_RATIO"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Every term is positive.",
+            "ru": "Все члены положительны.",
+            "uz": "Barcha hadlar musbat."
+          },
+          "diagnostic_code": "SER02_AP_STRUCTURE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "The terms increase.",
+            "ru": "Члены возрастают.",
+            "uz": "Hadlar o‘sadi."
+          },
+          "diagnostic_code": "SER02_AP_STRUCTURE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "An arithmetic progression is defined by a constant difference between consecutive terms.",
+        "ru": "Арифметическая прогрессия определяется постоянной разностью соседних членов.",
+        "uz": "Arifmetik progressiya ketma-ket hadlar orasidagi doimiy ayirma bilan aniqlanadi."
+      },
+      "ai_source_skill": "P1-SER-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q312",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-02",
+      "secondary_skills": [],
+      "role": "negative_ratio",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "The sequence −4, 6, −9, 13.5, ... is geometric. Enter its common ratio.",
+        "ru": "Последовательность −4, 6, −9, 13.5, ... является геометрической. Введите её общее отношение.",
+        "uz": "−4, 6, −9, 13.5, ... ketma-ketligi geometrik. Uning umumiy nisbatini kiriting."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "-1.5",
+        "accepted_examples": [
+          "-1.5",
+          "−1.5",
+          "-1,5"
+        ],
+        "rejected_examples": [
+          "1.5",
+          "-0.6666667",
+          "2"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "1.5",
+          "diagnostic_code": "SER02_DIFF_RATIO"
+        }
+      ],
+      "explanation": {
+        "en": "6/(−4)=−1.5, and the same ratio gives −9 and then 13.5.",
+        "ru": "6/(−4)=−1.5, и то же отношение даёт −9, затем 13.5.",
+        "uz": "6/(−4)=−1.5 va shu nisbat −9, keyin 13.5 ni beradi."
+      },
+      "ai_source_skill": "P1-SER-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q313",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-02",
+      "secondary_skills": [],
+      "role": "symbolic_recognition",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "If u₂−u₁=u₃−u₂=u₄−u₃ for four consecutive terms, which classification is guaranteed?",
+        "ru": "Если для четырёх последовательных членов u₂−u₁=u₃−u₂=u₄−u₃, какая классификация гарантирована?",
+        "uz": "To‘rtta ketma-ket had uchun u₂−u₁=u₃−u₂=u₄−u₃ bo‘lsa, qaysi tasnif kafolatlanadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Geometric",
+            "ru": "Геометрическая",
+            "uz": "Geometrik"
+          },
+          "diagnostic_code": "SER02_DIFF_RATIO"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Arithmetic",
+            "ru": "Арифметическая",
+            "uz": "Arifmetik"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Neither",
+            "ru": "Ни одна",
+            "uz": "Hech biri"
+          },
+          "diagnostic_code": "SER02_AP_STRUCTURE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Strictly increasing",
+            "ru": "Строго возрастающая",
+            "uz": "Qat’iy o‘suvchi"
+          },
+          "diagnostic_code": "SER02_AP_STRUCTURE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Equal consecutive differences are exactly the defining structure of an arithmetic progression.",
+        "ru": "Равные соседние разности — это определяющее свойство арифметической прогрессии.",
+        "uz": "Teng ketma-ket ayirmalar arifmetik progressiyaning asosiy belgisidir."
+      },
+      "ai_source_skill": "P1-SER-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q314",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-02",
+      "secondary_skills": [],
+      "role": "recognition",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "Which sequence is geometric?",
+        "ru": "Какая последовательность является геометрической?",
+        "uz": "Qaysi ketma-ketlik geometrik?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3, 6, 9, 12, ...",
+            "ru": "3, 6, 9, 12, ...",
+            "uz": "3, 6, 9, 12, ..."
+          },
+          "diagnostic_code": "SER02_AP_STRUCTURE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3, 6, 12, 24, ...",
+            "ru": "3, 6, 12, 24, ...",
+            "uz": "3, 6, 12, 24, ..."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "3, 5, 8, 12, ...",
+            "ru": "3, 5, 8, 12, ...",
+            "uz": "3, 5, 8, 12, ..."
+          },
+          "diagnostic_code": "SER02_NEITHER"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "3, −6, 12, 24, ...",
+            "ru": "3, −6, 12, 24, ...",
+            "uz": "3, −6, 12, 24, ..."
+          },
+          "diagnostic_code": "SER02_GP_STRUCTURE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "3,6,12,24 has constant ratio 2. The other sequences do not have one constant ratio.",
+        "ru": "У 3,6,12,24 постоянное отношение 2. У остальных последовательностей постоянного отношения нет.",
+        "uz": "3,6,12,24 ketma-ketlikda nisbat 2 doimiy. Boshqalarida bitta doimiy nisbat yo‘q."
+      },
+      "ai_source_skill": "P1-SER-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q315",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-02",
+      "secondary_skills": [],
+      "role": "ratio_recognition",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "A geometric sequence begins 12, −8, 16/3, ... Enter 3r, where r is the common ratio.",
+        "ru": "Геометрическая последовательность начинается 12, −8, 16/3, ... Введите 3r, где r — общее отношение.",
+        "uz": "Geometrik ketma-ketlik 12, −8, 16/3, ... bilan boshlanadi. r umumiy nisbat bo‘lsa, 3r ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-2",
+        "accepted_examples": [
+          "-2",
+          "−2",
+          " -2 "
+        ],
+        "rejected_examples": [
+          "2",
+          "-3",
+          "-6"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "2",
+          "diagnostic_code": "SER02_DIFF_RATIO"
+        }
+      ],
+      "explanation": {
+        "en": "r=(−8)/12=−2/3, and (16/3)/(−8)=−2/3. Therefore 3r=−2.",
+        "ru": "r=(−8)/12=−2/3, и (16/3)/(−8)=−2/3. Поэтому 3r=−2.",
+        "uz": "r=(−8)/12=−2/3 va (16/3)/(−8)=−2/3. Demak 3r=−2."
+      },
+      "ai_source_skill": "P1-SER-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q316",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-02",
+      "secondary_skills": [],
+      "role": "boundary_case",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "How should the constant sequence 5,5,5,5,... be classified?",
+        "ru": "Как следует классифицировать постоянную последовательность 5,5,5,5,...?",
+        "uz": "5,5,5,5,... o‘zgarmas ketma-ketlik qanday tasniflanadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Arithmetic only",
+            "ru": "Только арифметическая",
+            "uz": "Faqat arifmetik"
+          },
+          "diagnostic_code": "SER02_GP_STRUCTURE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Geometric only",
+            "ru": "Только геометрическая",
+            "uz": "Faqat geometrik"
+          },
+          "diagnostic_code": "SER02_AP_STRUCTURE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Both arithmetic and geometric",
+            "ru": "И арифметическая, и геометрическая",
+            "uz": "Ham arifmetik, ham geometrik"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Neither",
+            "ru": "Ни одна",
+            "uz": "Hech biri"
+          },
+          "diagnostic_code": "SER02_NEITHER"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "The common difference is 0, so it is arithmetic. The common ratio is 1, so it is also geometric.",
+        "ru": "Общая разность равна 0, значит последовательность арифметическая. Общее отношение равно 1, значит она также геометрическая.",
+        "uz": "Umumiy ayirma 0, demak arifmetik. Umumiy nisbat 1, demak geometrik ham."
+      },
+      "ai_source_skill": "P1-SER-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q317",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-02",
+      "secondary_skills": [],
+      "role": "non_example",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "Which sequence is neither arithmetic nor geometric?",
+        "ru": "Какая последовательность не является ни арифметической, ни геометрической?",
+        "uz": "Qaysi ketma-ketlik na arifmetik, na geometrik?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "7, 10, 13, 16, ...",
+            "ru": "7, 10, 13, 16, ...",
+            "uz": "7, 10, 13, 16, ..."
+          },
+          "diagnostic_code": "SER02_AP_STRUCTURE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "16, 8, 4, 2, ...",
+            "ru": "16, 8, 4, 2, ...",
+            "uz": "16, 8, 4, 2, ..."
+          },
+          "diagnostic_code": "SER02_GP_STRUCTURE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1, 4, 9, 16, ...",
+            "ru": "1, 4, 9, 16, ...",
+            "uz": "1, 4, 9, 16, ..."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−3, −3, −3, −3, ...",
+            "ru": "−3, −3, −3, −3, ...",
+            "uz": "−3, −3, −3, −3, ..."
+          },
+          "diagnostic_code": "SER02_NEITHER"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "1,4,9,16 has differences 3,5,7 and non-constant ratios, so it is neither. The other choices are AP, GP, or both.",
+        "ru": "У 1,4,9,16 разности 3,5,7 и непостоянные отношения, поэтому это ни AP, ни GP. Остальные варианты — AP, GP или обе.",
+        "uz": "1,4,9,16 da ayirmalar 3,5,7 va nisbatlar doimiy emas, demak u neither. Boshqalari AP, GP yoki ikkalasi."
+      },
+      "ai_source_skill": "P1-SER-02",
+      "status": "draft"
+    }
+  ]
+}
