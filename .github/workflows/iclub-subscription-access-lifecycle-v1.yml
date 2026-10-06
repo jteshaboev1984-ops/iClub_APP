@@ -108,6 +108,9 @@ jobs:
           test "$(psql -Atqc "select count(*) from private.iclub_subscription_events")" = '0'
           test "$(psql -Atqc "select count(*) from private.iclub_commercial_migration_state")" = '0'
           test "$(psql -Atqc "select count(*) from private.iclub_subject_slot_selections")" = '0'
+          test "$(psql -Atqc "select global_ai_rollout_mode from private.iclub_global_ai_runtime_config where id=1")" = 'off'
+          test "$(psql -Atqc "select plans_rollout_mode from private.iclub_global_ai_runtime_config where id=1")" = 'off'
+          test "$(psql -Atqc "select count(*) from private.iclub_product_canary_users")" = '0'
 
       - name: Run lifecycle and grandfather safety matrix
         shell: bash
@@ -133,6 +136,9 @@ jobs:
           test "$(psql -Atqc "select to_regclass('private.iclub_subject_slot_selections') is null")" = 't'
           test "$(psql -Atqc "select to_regprocedure('public.apply_iclub_subscription_event_service_v1(uuid,uuid,text,text,timestamptz,timestamptz,timestamptz,text)') is null")" = 't'
           test "$(psql -Atqc "select to_regprocedure('public.get_iclub_my_subscription_status_v1()') is null")" = 't'
+          test "$(psql -Atqc "select to_regprocedure('public.set_iclub_product_canary_service_v1(uuid,boolean,text,text)') is null")" = 't'
+          test "$(psql -Atqc "select to_regclass('private.iclub_product_canary_users') is null")" = 't'
+          test "$(psql -Atqc "select count(*) from information_schema.columns where table_schema='private' and table_name='iclub_global_ai_runtime_config' and column_name in ('global_ai_rollout_mode','plans_rollout_mode')")" = '0'
           test "$(psql -Atqc "select to_regclass('private.iclub_plan_policies') is not null")" = 't'
 
       - name: Mark subscription access GREEN
