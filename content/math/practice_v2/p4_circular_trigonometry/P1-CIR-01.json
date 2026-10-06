@@ -226,9 +226,9 @@
         {
           "key": "B",
           "text": {
-            "en": "135°",
-            "ru": "135°",
-            "uz": "135°"
+            "en": "130°",
+            "ru": "130°",
+            "uz": "130°"
           },
           "diagnostic_code": "CIR01_DEG_RAD_FACTOR"
         },
@@ -253,9 +253,9 @@
       ],
       "correct_answer": "C",
       "explanation": {
-        "en": "2π/3=120° and 3π/4=135°. Thus the largest value is 3π/4 radians, equal to 135°; since 135° is also listed, the two are equal, so this question as written is ambiguous.",
-        "ru": "2π/3=120°, а 3π/4=135°. Значит 3π/4 радиан и 135° равны; в текущем виде вопрос неоднозначен.",
-        "uz": "2π/3=120°, 3π/4=135°. Demak 3π/4 radian va 135° teng; hozirgi savol noaniq."
+        "en": "2π/3=120° and 3π/4=135°. Therefore 3π/4 radians is larger than 130° and 120°.",
+        "ru": "2π/3=120°, а 3π/4=135°. Поэтому 3π/4 радиан больше 130° и 120°.",
+        "uz": "2π/3=120°, 3π/4=135°. Shuning uchun 3π/4 radian 130° va 120° dan katta."
       },
       "ai_source_skill": "P1-CIR-01",
       "status": "draft"
