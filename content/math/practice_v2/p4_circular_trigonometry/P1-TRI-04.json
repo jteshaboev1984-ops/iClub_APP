@@ -21,11 +21,11 @@
         {
           "key": "A",
           "text": {
-            "en": "sin x",
-            "ru": "sin x",
-            "uz": "sin x"
+            "en": "tan x",
+            "ru": "tan x",
+            "uz": "tan x"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI04_TAN_RATIO"
         },
         {
           "key": "B",
@@ -48,14 +48,14 @@
         {
           "key": "D",
           "text": {
-            "en": "tan x",
-            "ru": "tan x",
-            "uz": "tan x"
+            "en": "sin x",
+            "ru": "sin x",
+            "uz": "sin x"
           },
-          "diagnostic_code": "TRI04_TAN_RATIO"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "Since 1−cos²x=sin²x, the expression becomes sin²x/sin x=sin x for sin x≠0.",
         "ru": "Так как 1−cos²x=sin²x, выражение становится sin²x/sin x=sin x при sin x≠0.",
@@ -143,20 +143,20 @@
         {
           "key": "A",
           "text": {
-            "en": "1",
-            "ru": "1",
-            "uz": "1"
-          },
-          "diagnostic_code": "TRI04_ILLEGAL_CANCEL"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "1/cos²x",
             "ru": "1/cos²x",
             "uz": "1/cos²x"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1",
+            "ru": "1",
+            "uz": "1"
+          },
+          "diagnostic_code": "TRI04_ILLEGAL_CANCEL"
         },
         {
           "key": "C",
@@ -177,7 +177,7 @@
           "diagnostic_code": "TRI04_ALGEBRA"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "sin²x+cos²x=1, so the numerator is 1. The expression is therefore 1/cos²x.",
         "ru": "sin²x+cos²x=1, поэтому числитель равен 1. Значит выражение равно 1/cos²x.",
@@ -213,20 +213,20 @@
         {
           "key": "B",
           "text": {
-            "en": "1",
-            "ru": "1",
-            "uz": "1"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "cos²x",
             "ru": "cos²x",
             "uz": "cos²x"
           },
           "diagnostic_code": "TRI04_PYTHAGOREAN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1",
+            "ru": "1",
+            "uz": "1"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -238,7 +238,7 @@
           "diagnostic_code": "TRI04_ILLEGAL_CANCEL"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "(1−cos x)(1+cos x)=1−cos²x=sin²x. Dividing by sin²x gives 1.",
         "ru": "(1−cos x)(1+cos x)=1−cos²x=sin²x. Деление на sin²x даёт 1.",
@@ -274,11 +274,11 @@
         {
           "key": "B",
           "text": {
-            "en": "(1−cos²x)/sin²x = 1, if sin x≠0",
-            "ru": "(1−cos²x)/sin²x = 1, если sin x≠0",
-            "uz": "(1−cos²x)/sin²x = 1, agar sin x≠0"
+            "en": "(1+sin x)/sin x = 1",
+            "ru": "(1+sin x)/sin x = 1",
+            "uz": "(1+sin x)/sin x = 1"
           },
-          "diagnostic_code": "TRI04_PYTHAGOREAN"
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -292,14 +292,14 @@
         {
           "key": "D",
           "text": {
-            "en": "(1+sin x)/sin x = 1",
-            "ru": "(1+sin x)/sin x = 1",
-            "uz": "(1+sin x)/sin x = 1"
+            "en": "(1−cos²x)/sin²x = 1, if sin x≠0",
+            "ru": "(1−cos²x)/sin²x = 1, если sin x≠0",
+            "uz": "(1−cos²x)/sin²x = 1, agar sin x≠0"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI04_PYTHAGOREAN"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "B",
       "explanation": {
         "en": "You cannot cancel sin x across the addition 1+sin x. In fact (1+sin x)/sin x=1/sin x+1, when sin x≠0.",
         "ru": "Нельзя сокращать sin x через сумму 1+sin x. На самом деле (1+sin x)/sin x=1/sin x+1 при sin x≠0.",
@@ -364,11 +364,11 @@
         {
           "key": "A",
           "text": {
-            "en": "sin x cos x",
-            "ru": "sin x cos x",
-            "uz": "sin x cos x"
+            "en": "tan²x",
+            "ru": "tan²x",
+            "uz": "tan²x"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI04_TAN_RATIO"
         },
         {
           "key": "B",
@@ -391,14 +391,14 @@
         {
           "key": "D",
           "text": {
-            "en": "tan²x",
-            "ru": "tan²x",
-            "uz": "tan²x"
+            "en": "sin x cos x",
+            "ru": "sin x cos x",
+            "uz": "sin x cos x"
           },
-          "diagnostic_code": "TRI04_TAN_RATIO"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "tan x cos²x=(sin x/cos x)cos²x=sin x cos x.",
         "ru": "tan x cos²x=(sin x/cos x)cos²x=sin x cos x.",
@@ -425,11 +425,11 @@
         {
           "key": "A",
           "text": {
-            "en": "1−cos x",
-            "ru": "1−cos x",
-            "uz": "1−cos x"
+            "en": "sin x",
+            "ru": "sin x",
+            "uz": "sin x"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI04_ILLEGAL_CANCEL"
         },
         {
           "key": "B",
@@ -443,11 +443,11 @@
         {
           "key": "C",
           "text": {
-            "en": "sin x",
-            "ru": "sin x",
-            "uz": "sin x"
+            "en": "1−cos x",
+            "ru": "1−cos x",
+            "uz": "1−cos x"
           },
-          "diagnostic_code": "TRI04_ILLEGAL_CANCEL"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -459,7 +459,7 @@
           "diagnostic_code": "TRI04_ALGEBRA"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "sin²x=1−cos²x=(1−cos x)(1+cos x). Cancel the common factor 1+cos x to get 1−cos x.",
         "ru": "sin²x=1−cos²x=(1−cos x)(1+cos x). Сокращаем общий множитель 1+cos x и получаем 1−cos x.",
@@ -549,20 +549,20 @@
         {
           "key": "A",
           "text": {
-            "en": "0° and 360°",
-            "ru": "0° и 360°",
-            "uz": "0° va 360°"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "90° and 270°",
             "ru": "90° и 270°",
             "uz": "90° va 270°"
           },
           "diagnostic_code": "TRI04_PYTHAGOREAN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "0° and 360°",
+            "ru": "0° и 360°",
+            "uz": "0° va 360°"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -583,7 +583,7 @@
           "diagnostic_code": "TRI04_ILLEGAL_CANCEL"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "The denominator is zero when 1−cos x=0, so cos x=1. On the stated interval this occurs at x=0° and x=360°.",
         "ru": "Знаменатель равен нулю, когда 1−cos x=0, то есть cos x=1. На данном интервале это x=0° и x=360°.",
