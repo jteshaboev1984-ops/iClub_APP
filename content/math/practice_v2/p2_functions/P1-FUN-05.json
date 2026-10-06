@@ -120,11 +120,11 @@
         {
           "key": "A",
           "text": {
-            "en": "x=0",
-            "ru": "x=0",
-            "uz": "x=0"
+            "en": "y=x",
+            "ru": "y=x",
+            "uz": "y=x"
           },
-          "diagnostic_code": "FUN05_REFLECTION_LINE"
+          "diagnostic_code": null
         },
         {
           "key": "B",
@@ -138,11 +138,11 @@
         {
           "key": "C",
           "text": {
-            "en": "y=x",
-            "ru": "y=x",
-            "uz": "y=x"
+            "en": "x=0",
+            "ru": "x=0",
+            "uz": "x=0"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN05_REFLECTION_LINE"
         },
         {
           "key": "D",
@@ -154,7 +154,7 @@
           "diagnostic_code": "FUN05_REFLECTION_LINE"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "A",
       "explanation": {
         "en": "Swapping every point (x,y) to (y,x) is exactly reflection in the line y=x.",
         "ru": "Перестановка каждой точки (x,y) в (y,x) — это отражение относительно прямой y=x.",
@@ -199,23 +199,23 @@
         {
           "key": "C",
           "text": {
-            "en": "(−3,1)",
-            "ru": "(−3,1)",
-            "uz": "(−3,1)"
-          },
-          "diagnostic_code": "FUN05_FIXED_POINT"
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "(4,4)",
             "ru": "(4,4)",
             "uz": "(4,4)"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(−3,1)",
+            "ru": "(−3,1)",
+            "uz": "(−3,1)"
+          },
+          "diagnostic_code": "FUN05_FIXED_POINT"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "C",
       "explanation": {
         "en": "Reflection in y=x swaps coordinates. A point stays fixed only when its coordinates are equal, so (4,4) is unchanged.",
         "ru": "Отражение относительно y=x меняет координаты местами. Точка остаётся на месте только при равных координатах, поэтому (4,4) не изменяется.",
@@ -242,20 +242,20 @@
         {
           "key": "A",
           "text": {
-            "en": "(0,5)",
-            "ru": "(0,5)",
-            "uz": "(0,5)"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "(5,0)",
             "ru": "(5,0)",
             "uz": "(5,0)"
           },
           "diagnostic_code": "FUN05_POINT_SWAP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(0,5)",
+            "ru": "(0,5)",
+            "uz": "(0,5)"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -276,7 +276,7 @@
           "diagnostic_code": "FUN05_POINT_SWAP"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "The point (5,0) on f becomes (0,5) on f⁻¹. Since its x-coordinate is 0, this is the y-axis intercept of the inverse graph.",
         "ru": "Точка (5,0) на f переходит в (0,5) на f⁻¹. Её x-координата равна 0, значит это точка пересечения обратного графика с осью y.",
@@ -314,20 +314,20 @@
         {
           "key": "B",
           "text": {
-            "en": "1≤x≤9, −2≤y≤6",
-            "ru": "1≤x≤9, −2≤y≤6",
-            "uz": "1≤x≤9, −2≤y≤6"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "−9≤x≤−1, −6≤y≤2",
             "ru": "−9≤x≤−1, −6≤y≤2",
             "uz": "−9≤x≤−1, −6≤y≤2"
           },
           "diagnostic_code": "FUN05_REFLECTION_LINE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1≤x≤9, −2≤y≤6",
+            "ru": "1≤x≤9, −2≤y≤6",
+            "uz": "1≤x≤9, −2≤y≤6"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -339,7 +339,7 @@
           "diagnostic_code": "FUN05_POINT_SWAP"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "The inverse swaps domain and range because all points (x,y) become (y,x). Therefore its x-values lie from 1 to 9 and its y-values lie from −2 to 6.",
         "ru": "У обратной функции область и значения меняются местами, потому что каждая точка (x,y) становится (y,x). Поэтому x лежит от 1 до 9, а y — от −2 до 6.",
@@ -366,11 +366,11 @@
         {
           "key": "A",
           "text": {
-            "en": "(1,−2), (0,−4), (−3,−7)",
-            "ru": "(1,−2), (0,−4), (−3,−7)",
-            "uz": "(1,−2), (0,−4), (−3,−7)"
+            "en": "(2,−1), (4,0), (7,3)",
+            "ru": "(2,−1), (4,0), (7,3)",
+            "uz": "(2,−1), (4,0), (7,3)"
           },
-          "diagnostic_code": "FUN05_POINT_SWAP"
+          "diagnostic_code": null
         },
         {
           "key": "B",
@@ -384,11 +384,11 @@
         {
           "key": "C",
           "text": {
-            "en": "(2,−1), (4,0), (7,3)",
-            "ru": "(2,−1), (4,0), (7,3)",
-            "uz": "(2,−1), (4,0), (7,3)"
+            "en": "(1,−2), (0,−4), (−3,−7)",
+            "ru": "(1,−2), (0,−4), (−3,−7)",
+            "uz": "(1,−2), (0,−4), (−3,−7)"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN05_POINT_SWAP"
         },
         {
           "key": "D",
@@ -400,7 +400,7 @@
           "diagnostic_code": "FUN05_POINT_SWAP"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "A",
       "explanation": {
         "en": "For the inverse, swap the coordinates of every point: (−1,2)→(2,−1), (0,4)→(4,0), and (3,7)→(7,3).",
         "ru": "Для обратной функции меняем координаты каждой точки местами: (−1,2)→(2,−1), (0,4)→(4,0), (3,7)→(7,3).",
