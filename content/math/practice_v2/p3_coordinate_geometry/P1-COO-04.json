@@ -1,0 +1,634 @@
+{
+  "version": "practice_v2_p3_coordinate_geometry_draft_v0.1",
+  "skill": "P1-COO-04",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q180",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-04",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "What are the centre and radius of (x+4)²+(y−3)²=49?",
+        "ru": "Каковы центр и радиус окружности (x+4)²+(y−3)²=49?",
+        "uz": "(x+4)²+(y−3)²=49 aylananing markazi va radiusi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Centre (4,−3), radius 7",
+            "ru": "Центр (4,−3), радиус 7",
+            "uz": "Markaz (4,−3), radius 7"
+          },
+          "diagnostic_code": "COO04_CENTRE_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Centre (−4,3), radius 49",
+            "ru": "Центр (−4,3), радиус 49",
+            "uz": "Markaz (−4,3), radius 49"
+          },
+          "diagnostic_code": "COO04_RADIUS_SQUARED"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Centre (−4,3), radius 7",
+            "ru": "Центр (−4,3), радиус 7",
+            "uz": "Markaz (−4,3), radius 7"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Centre (4,3), radius 7",
+            "ru": "Центр (4,3), радиус 7",
+            "uz": "Markaz (4,3), radius 7"
+          },
+          "diagnostic_code": "COO04_CENTRE_SIGN"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Standard form is (x−a)²+(y−b)²=r². Here a=−4, b=3 and r=√49=7.",
+        "ru": "Стандартная форма: (x−a)²+(y−b)²=r². Здесь a=−4, b=3 и r=√49=7.",
+        "uz": "Standart ko‘rinish (x−a)²+(y−b)²=r². Bu yerda a=−4, b=3 va r=√49=7."
+      },
+      "ai_source_skill": "P1-COO-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q181",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-04",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "For the circle (x−5)²+(y+2)²=36, enter the x-coordinate of the centre.",
+        "ru": "Для окружности (x−5)²+(y+2)²=36 введите x-координату центра.",
+        "uz": "(x−5)²+(y+2)²=36 aylana uchun markazning x-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "5",
+        "accepted_examples": [
+          "5",
+          " 5 "
+        ],
+        "rejected_examples": [
+          "-5",
+          "6",
+          "36"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-5",
+          "diagnostic_code": "COO04_CENTRE_SIGN"
+        }
+      ],
+      "explanation": {
+        "en": "Comparing with (x−a)²+(y−b)²=r² gives a=5, so the centre has x-coordinate 5.",
+        "ru": "Сравнивая с (x−a)²+(y−b)²=r², получаем a=5, поэтому x-координата центра равна 5.",
+        "uz": "(x−a)²+(y−b)²=r² bilan solishtirsak a=5, demak markazning x-koordinatasi 5."
+      },
+      "ai_source_skill": "P1-COO-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q182",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-04",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "expanded_form",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "What are the centre and radius of x²+y²−6x+8y−11=0?",
+        "ru": "Каковы центр и радиус окружности x²+y²−6x+8y−11=0?",
+        "uz": "x²+y²−6x+8y−11=0 aylananing markazi va radiusi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Centre (−3,4), radius 6",
+            "ru": "Центр (−3,4), радиус 6",
+            "uz": "Markaz (−3,4), radius 6"
+          },
+          "diagnostic_code": "COO04_CENTRE_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Centre (3,−4), radius 36",
+            "ru": "Центр (3,−4), радиус 36",
+            "uz": "Markaz (3,−4), radius 36"
+          },
+          "diagnostic_code": "COO04_RADIUS_SQUARED"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Centre (3,−4), radius 6",
+            "ru": "Центр (3,−4), радиус 6",
+            "uz": "Markaz (3,−4), radius 6"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Centre (3,4), radius 6",
+            "ru": "Центр (3,4), радиус 6",
+            "uz": "Markaz (3,4), radius 6"
+          },
+          "diagnostic_code": "COO04_CENTRE_SIGN"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Complete the squares: (x−3)²−9+(y+4)²−16−11=0. Hence (x−3)²+(y+4)²=36, so the centre is (3,−4) and radius 6.",
+        "ru": "Выделяем квадраты: (x−3)²−9+(y+4)²−16−11=0. Получаем (x−3)²+(y+4)²=36, поэтому центр (3,−4), радиус 6.",
+        "uz": "To‘liq kvadratga keltiramiz: (x−3)²−9+(y+4)²−16−11=0. Demak (x−3)²+(y+4)²=36, markaz (3,−4), radius 6."
+      },
+      "ai_source_skill": "P1-COO-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q183",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-04",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "expanded_form",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "For the circle x²+y²+4x−10y+13=0, enter r².",
+        "ru": "Для окружности x²+y²+4x−10y+13=0 введите r².",
+        "uz": "x²+y²+4x−10y+13=0 aylana uchun r² ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "16",
+        "accepted_examples": [
+          "16",
+          " 16 "
+        ],
+        "rejected_examples": [
+          "4",
+          "13",
+          "29"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "4",
+          "diagnostic_code": "COO04_RADIUS_SQUARED"
+        }
+      ],
+      "explanation": {
+        "en": "Complete the squares: (x+2)²−4+(y−5)²−25+13=0. Thus (x+2)²+(y−5)²=16, so r²=16.",
+        "ru": "Выделяем квадраты: (x+2)²−4+(y−5)²−25+13=0. Поэтому (x+2)²+(y−5)²=16 и r²=16.",
+        "uz": "To‘liq kvadratga keltiramiz: (x+2)²−4+(y−5)²−25+13=0. Demak (x+2)²+(y−5)²=16 va r²=16."
+      },
+      "ai_source_skill": "P1-COO-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q184",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-04",
+      "secondary_skills": [],
+      "role": "build_circle",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Which equation is the circle with centre (−2,5) and radius 3?",
+        "ru": "Какое уравнение задаёт окружность с центром (−2,5) и радиусом 3?",
+        "uz": "Markazi (−2,5), radiusi 3 bo‘lgan aylana tenglamasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(x−2)²+(y+5)²=9",
+            "ru": "(x−2)²+(y+5)²=9",
+            "uz": "(x−2)²+(y+5)²=9"
+          },
+          "diagnostic_code": "COO04_CENTRE_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(x+2)²+(y−5)²=3",
+            "ru": "(x+2)²+(y−5)²=3",
+            "uz": "(x+2)²+(y−5)²=3"
+          },
+          "diagnostic_code": "COO04_RADIUS_SQUARED"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(x+2)²+(y−5)²=9",
+            "ru": "(x+2)²+(y−5)²=9",
+            "uz": "(x+2)²+(y−5)²=9"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(x−2)²+(y−5)²=9",
+            "ru": "(x−2)²+(y−5)²=9",
+            "uz": "(x−2)²+(y−5)²=9"
+          },
+          "diagnostic_code": "COO04_CENTRE_SIGN"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "For centre (a,b) and radius r, the equation is (x−a)²+(y−b)²=r². Thus (x+2)²+(y−5)²=9.",
+        "ru": "Для центра (a,b) и радиуса r уравнение имеет вид (x−a)²+(y−b)²=r². Поэтому (x+2)²+(y−5)²=9.",
+        "uz": "Markaz (a,b) va radius r uchun tenglama (x−a)²+(y−b)²=r². Demak (x+2)²+(y−5)²=9."
+      },
+      "ai_source_skill": "P1-COO-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q185",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-04",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "parameter_circle",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The circle x²+y²−8x+6y+c=0 has radius 4. Enter c.",
+        "ru": "Окружность x²+y²−8x+6y+c=0 имеет радиус 4. Введите c.",
+        "uz": "x²+y²−8x+6y+c=0 aylananing radiusi 4. c ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "9",
+        "accepted_examples": [
+          "9",
+          " 9 "
+        ],
+        "rejected_examples": [
+          "16",
+          "25",
+          "-9"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Complete the squares: (x−4)²+(y+3)²=25−c. Since r²=16, 25−c=16, so c=9.",
+        "ru": "Выделяем квадраты: (x−4)²+(y+3)²=25−c. Так как r²=16, имеем 25−c=16, поэтому c=9.",
+        "uz": "To‘liq kvadratga keltiramiz: (x−4)²+(y+3)²=25−c. r²=16 bo‘lgani uchun 25−c=16, demak c=9."
+      },
+      "ai_source_skill": "P1-COO-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q186",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-04",
+      "secondary_skills": [],
+      "role": "form_conversion",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Which expanded equation is equivalent to (x−1)²+(y+3)²=20?",
+        "ru": "Какое развёрнутое уравнение эквивалентно (x−1)²+(y+3)²=20?",
+        "uz": "Qaysi yoyilgan tenglama (x−1)²+(y+3)²=20 ga teng kuchli?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x²+y²−2x+6y−10=0",
+            "ru": "x²+y²−2x+6y−10=0",
+            "uz": "x²+y²−2x+6y−10=0"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x²+y²−2x+6y+10=0",
+            "ru": "x²+y²−2x+6y+10=0",
+            "uz": "x²+y²−2x+6y+10=0"
+          },
+          "diagnostic_code": "COO04_EXPANDED_CONSTANT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x²+y²+2x−6y−10=0",
+            "ru": "x²+y²+2x−6y−10=0",
+            "uz": "x²+y²+2x−6y−10=0"
+          },
+          "diagnostic_code": "COO04_CENTRE_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x²+y²−2x+6y−20=0",
+            "ru": "x²+y²−2x+6y−20=0",
+            "uz": "x²+y²−2x+6y−20=0"
+          },
+          "diagnostic_code": "COO04_EXPANDED_CONSTANT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Expand: x²−2x+1+y²+6y+9=20. Moving 20 to the left gives x²+y²−2x+6y−10=0.",
+        "ru": "Раскрываем: x²−2x+1+y²+6y+9=20. Переносим 20 влево и получаем x²+y²−2x+6y−10=0.",
+        "uz": "Qavslarni ochamiz: x²−2x+1+y²+6y+9=20. 20 ni chapga o‘tkazsak x²+y²−2x+6y−10=0."
+      },
+      "ai_source_skill": "P1-COO-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q187",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-04",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "centre_from_expanded",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "For the circle x²+y²−12y+20=0, enter the y-coordinate of its centre.",
+        "ru": "Для окружности x²+y²−12y+20=0 введите y-координату центра.",
+        "uz": "x²+y²−12y+20=0 aylana uchun markazning y-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "6",
+        "accepted_examples": [
+          "6",
+          " 6 "
+        ],
+        "rejected_examples": [
+          "-6",
+          "12",
+          "20"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-6",
+          "diagnostic_code": "COO04_CENTRE_SIGN"
+        }
+      ],
+      "explanation": {
+        "en": "y²−12y=(y−6)²−36, so the circle has centre (0,6). The y-coordinate is 6.",
+        "ru": "y²−12y=(y−6)²−36, поэтому центр окружности (0,6). y-координата равна 6.",
+        "uz": "y²−12y=(y−6)²−36, demak aylana markazi (0,6). y-koordinata 6."
+      },
+      "ai_source_skill": "P1-COO-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q188",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-04",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "radius_from_expanded",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "What is the radius of x²+y²+10x−4y+20=0?",
+        "ru": "Каков радиус окружности x²+y²+10x−4y+20=0?",
+        "uz": "x²+y²+10x−4y+20=0 aylananing radiusi qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "9",
+            "ru": "9",
+            "uz": "9"
+          },
+          "diagnostic_code": "COO04_RADIUS_SQUARED"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "5",
+            "ru": "5",
+            "uz": "5"
+          },
+          "diagnostic_code": "COO04_COMPLETE_SQUARE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "√29",
+            "ru": "√29",
+            "uz": "√29"
+          },
+          "diagnostic_code": "COO04_EXPANDED_CONSTANT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Complete the squares: (x+5)²−25+(y−2)²−4+20=0. Thus (x+5)²+(y−2)²=9, so the radius is 3.",
+        "ru": "Выделяем квадраты: (x+5)²−25+(y−2)²−4+20=0. Получаем (x+5)²+(y−2)²=9, поэтому радиус равен 3.",
+        "uz": "To‘liq kvadratga keltiramiz: (x+5)²−25+(y−2)²−4+20=0. Demak (x+5)²+(y−2)²=9 va radius 3."
+      },
+      "ai_source_skill": "P1-COO-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q189",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-04",
+      "secondary_skills": [],
+      "role": "parameter_centre",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The circle x²+y²+2px−4y+7=0 has centre (−3,2). Enter p.",
+        "ru": "Окружность x²+y²+2px−4y+7=0 имеет центр (−3,2). Введите p.",
+        "uz": "x²+y²+2px−4y+7=0 aylananing markazi (−3,2). p ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "-3",
+          "6",
+          "-6"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-3",
+          "diagnostic_code": "COO04_CENTRE_SIGN"
+        }
+      ],
+      "explanation": {
+        "en": "For x²+2px, completing the square gives (x+p)²−p², so the centre x-coordinate is −p. Since −p=−3, p=3.",
+        "ru": "Для x²+2px выделение квадрата даёт (x+p)²−p², поэтому x-координата центра равна −p. Из −p=−3 получаем p=3.",
+        "uz": "x²+2px uchun to‘liq kvadrat (x+p)²−p², demak markazning x-koordinatasi −p. −p=−3 dan p=3."
+      },
+      "ai_source_skill": "P1-COO-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q190",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-04",
+      "secondary_skills": [
+        "P1-COO-02"
+      ],
+      "role": "build_from_diameter",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "A(−1,2) and B(5,6) are endpoints of a diameter. Which equation is the circle?",
+        "ru": "A(−1,2) и B(5,6) — концы диаметра. Каково уравнение окружности?",
+        "uz": "A(−1,2) va B(5,6) diametr uchlari. Aylana tenglamasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(x−2)²+(y−4)²=13",
+            "ru": "(x−2)²+(y−4)²=13",
+            "uz": "(x−2)²+(y−4)²=13"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(x−2)²+(y−4)²=52",
+            "ru": "(x−2)²+(y−4)²=52",
+            "uz": "(x−2)²+(y−4)²=52"
+          },
+          "diagnostic_code": "COO04_RADIUS_SQUARED"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(x+2)²+(y+4)²=13",
+            "ru": "(x+2)²+(y+4)²=13",
+            "uz": "(x+2)²+(y+4)²=13"
+          },
+          "diagnostic_code": "COO04_CENTRE_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(x−1)²+(y−2)²=13",
+            "ru": "(x−1)²+(y−2)²=13",
+            "uz": "(x−1)²+(y−2)²=13"
+          },
+          "diagnostic_code": "COO04_COMPLETE_SQUARE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The centre is the midpoint (2,4). The diameter squared is 6²+4²=52, so r²=52/4=13. Hence (x−2)²+(y−4)²=13.",
+        "ru": "Центр — середина (2,4). Квадрат диаметра равен 6²+4²=52, поэтому r²=52/4=13. Получаем (x−2)²+(y−4)²=13.",
+        "uz": "Markaz o‘rta nuqta (2,4). Diametr kvadrati 6²+4²=52, demak r²=52/4=13. Shuning uchun (x−2)²+(y−4)²=13."
+      },
+      "ai_source_skill": "P1-COO-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q191",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-04",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "parameter_structure",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "For the circle x²+y²−2kx+4y+k²−5=0, enter r².",
+        "ru": "Для окружности x²+y²−2kx+4y+k²−5=0 введите r².",
+        "uz": "x²+y²−2kx+4y+k²−5=0 aylana uchun r² ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "9",
+        "accepted_examples": [
+          "9",
+          " 9 "
+        ],
+        "rejected_examples": [
+          "3",
+          "5",
+          "k"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "3",
+          "diagnostic_code": "COO04_RADIUS_SQUARED"
+        }
+      ],
+      "explanation": {
+        "en": "Complete the squares: (x−k)²−k²+(y+2)²−4+k²−5=0. The k² terms cancel, giving (x−k)²+(y+2)²=9. Thus r²=9.",
+        "ru": "Выделяем квадраты: (x−k)²−k²+(y+2)²−4+k²−5=0. Члены k² сокращаются, и получаем (x−k)²+(y+2)²=9. Поэтому r²=9.",
+        "uz": "To‘liq kvadratga keltiramiz: (x−k)²−k²+(y+2)²−4+k²−5=0. k² hadlar qisqaradi va (x−k)²+(y+2)²=9. Demak r²=9."
+      },
+      "ai_source_skill": "P1-COO-04",
+      "status": "draft"
+    }
+  ]
+}
