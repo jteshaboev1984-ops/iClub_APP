@@ -23,20 +23,20 @@
         {
           "key": "A",
           "text": {
-            "en": "Inside the circle",
-            "ru": "Внутри окружности",
-            "uz": "Aylana ichida"
-          },
-          "diagnostic_code": "COO05_POINT_POSITION"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "On the circle",
             "ru": "На окружности",
             "uz": "Aylana ustida"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Inside the circle",
+            "ru": "Внутри окружности",
+            "uz": "Aylana ichida"
+          },
+          "diagnostic_code": "COO05_POINT_POSITION"
         },
         {
           "key": "C",
@@ -57,7 +57,7 @@
           "diagnostic_code": "COO05_POINT_POSITION"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "The centre is (2,−1). For P(5,3), the squared distance from the centre is 3²+4²=25=r², so P lies on the circle.",
         "ru": "Центр равен (2,−1). Для P(5,3) квадрат расстояния до центра равен 3²+4²=25=r², поэтому P лежит на окружности.",
@@ -150,23 +150,23 @@
         {
           "key": "C",
           "text": {
-            "en": "−3/4",
-            "ru": "−3/4",
-            "uz": "−3/4"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "3/4",
             "ru": "3/4",
             "uz": "3/4"
           },
           "diagnostic_code": "COO05_RADIUS_PERP_TANGENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−3/4",
+            "ru": "−3/4",
+            "uz": "−3/4"
+          },
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "D",
       "explanation": {
         "en": "The radius OP has gradient 4/3. The tangent is perpendicular to the radius, so its gradient is the negative reciprocal, −3/4.",
         "ru": "Радиус OP имеет градиент 4/3. Касательная перпендикулярна радиусу, поэтому её градиент — отрицательная обратная величина, −3/4.",
@@ -236,20 +236,20 @@
         {
           "key": "A",
           "text": {
-            "en": "The midpoint of AB is (2,5), and OM is perpendicular to AB.",
-            "ru": "Середина AB равна (2,5), и OM перпендикулярен AB.",
-            "uz": "AB o‘rta nuqtasi (2,5), va OM AB ga perpendikulyar."
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "The midpoint of AB is (2,4), and OM is parallel to AB.",
             "ru": "Середина AB равна (2,4), и OM параллелен AB.",
             "uz": "AB o‘rta nuqtasi (2,4), va OM AB ga parallel."
           },
           "diagnostic_code": "COO05_CHORD_BISECTOR"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "The midpoint of AB is (2,5), and OM is perpendicular to AB.",
+            "ru": "Середина AB равна (2,5), и OM перпендикулярен AB.",
+            "uz": "AB o‘rta nuqtasi (2,5), va OM AB ga perpendikulyar."
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -270,7 +270,7 @@
           "diagnostic_code": "COO05_CHORD_BISECTOR"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "The midpoint is ((−1+5)/2,(5+5)/2)=(2,5). AB is horizontal while OM is vertical, so OM is perpendicular to the chord.",
         "ru": "Середина равна ((−1+5)/2,(5+5)/2)=(2,5). AB горизонтальна, а OM вертикальна, поэтому OM перпендикулярен хорде.",
@@ -339,11 +339,11 @@
         {
           "key": "A",
           "text": {
-            "en": "1 and −5",
-            "ru": "1 и −5",
-            "uz": "1 va −5"
+            "en": "1 and 5",
+            "ru": "1 и 5",
+            "uz": "1 va 5"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "COO05_LINE_CIRCLE_SUB"
         },
         {
           "key": "B",
@@ -357,11 +357,11 @@
         {
           "key": "C",
           "text": {
-            "en": "1 and 5",
-            "ru": "1 и 5",
-            "uz": "1 va 5"
+            "en": "1 and −5",
+            "ru": "1 и −5",
+            "uz": "1 va −5"
           },
-          "diagnostic_code": "COO05_LINE_CIRCLE_SUB"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -373,7 +373,7 @@
           "diagnostic_code": "COO05_LINE_CIRCLE_SUB"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "Substitute x=2: (2−1)²+(y+2)²=10, so (y+2)²=9. Hence y+2=±3, giving y=1 or y=−5.",
         "ru": "Подставляем x=2: (2−1)²+(y+2)²=10, поэтому (y+2)²=9. Тогда y+2=±3, откуда y=1 или y=−5.",
@@ -506,11 +506,11 @@
         {
           "key": "A",
           "text": {
-            "en": "(0,2) and (8,2)",
-            "ru": "(0,2) и (8,2)",
-            "uz": "(0,2) va (8,2)"
+            "en": "(0,0) and (8,4)",
+            "ru": "(0,0) и (8,4)",
+            "uz": "(0,0) va (8,4)"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "COO05_LINE_CIRCLE_SUB"
         },
         {
           "key": "B",
@@ -533,14 +533,14 @@
         {
           "key": "D",
           "text": {
-            "en": "(0,0) and (8,4)",
-            "ru": "(0,0) и (8,4)",
-            "uz": "(0,0) va (8,4)"
+            "en": "(0,2) and (8,2)",
+            "ru": "(0,2) и (8,2)",
+            "uz": "(0,2) va (8,2)"
           },
-          "diagnostic_code": "COO05_LINE_CIRCLE_SUB"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "The centre is (4,2) and radius 4. Along the horizontal diameter y=2, move 4 units left and right from x=4, giving (0,2) and (8,2).",
         "ru": "Центр (4,2), радиус 4. По горизонтальному диаметру y=2 отходим на 4 единицы влево и вправо от x=4: получаем (0,2) и (8,2).",
@@ -579,20 +579,20 @@
         {
           "key": "B",
           "text": {
-            "en": "y=−x+7",
-            "ru": "y=−x+7",
-            "uz": "y=−x+7"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "y=x−1",
             "ru": "y=x−1",
             "uz": "y=x−1"
           },
           "diagnostic_code": "COO05_CHORD_BISECTOR"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=−x+7",
+            "ru": "y=−x+7",
+            "uz": "y=−x+7"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -604,7 +604,7 @@
           "diagnostic_code": "COO05_CHORD_BISECTOR"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "The midpoint of AB is (3,4), and AB has gradient 1. Its perpendicular bisector has gradient −1 and passes through (3,4), so y=−x+7.",
         "ru": "Середина AB равна (3,4), а градиент AB равен 1. Серединный перпендикуляр имеет градиент −1 и проходит через (3,4), поэтому y=−x+7.",
@@ -673,18 +673,18 @@
         {
           "key": "A",
           "text": {
-            "en": "3x+y=17",
-            "ru": "3x+y=17",
-            "uz": "3x+y=17"
+            "en": "x+3y=11",
+            "ru": "x+3y=11",
+            "uz": "x+3y=11"
           },
           "diagnostic_code": "COO05_RADIUS_PERP_TANGENT"
         },
         {
           "key": "B",
           "text": {
-            "en": "x+3y=11",
-            "ru": "x+3y=11",
-            "uz": "x+3y=11"
+            "en": "3x+y=17",
+            "ru": "3x+y=17",
+            "uz": "3x+y=17"
           },
           "diagnostic_code": null
         },
