@@ -20,7 +20,7 @@ DECLARE
   k text;
   uid uuid;
 BEGIN
-  FOREACH k IN ARRAY ARRAY['legacy','free','pro','new_user'] LOOP
+  FOREACH k IN ARRAY ARRAY['legacy','free','pro','new_user','canary_free','canary_plus','canary_pro','normal'] LOOP
     uid:=gen_random_uuid();
 
     INSERT INTO auth.users(id,aud,role,email,created_at,updated_at,is_sso_user,is_anonymous)
