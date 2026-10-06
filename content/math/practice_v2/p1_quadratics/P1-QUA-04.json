@@ -13,9 +13,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "Which value of x does NOT satisfy x² − x − 6 > 0?",
-        "ru": "Какое значение x НЕ удовлетворяет неравенству x² − x − 6 > 0?",
-        "uz": "Qaysi x qiymati x² − x − 6 > 0 tengsizlikni QANOATLANTIRMAYDI?"
+        "en": "Which value of x does not satisfy x² − x − 6 > 0?",
+        "ru": "Какое значение x не удовлетворяет неравенству x² − x − 6 > 0?",
+        "uz": "Qaysi x qiymati x² − x − 6 > 0 tengsizlikni qanoatlantirmaydi?"
       },
       "options": [
         {
