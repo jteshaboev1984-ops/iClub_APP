@@ -88,23 +88,29 @@ begin
       'subject_video',
       'subject_exam_prep',
       'subject_practice',
+      'practice_start',
+      'practice_start_past',
+      'practice_again',
+      'tour_review_practice',
       'subject_books',
       'recommendation_books',
       'recommendation_practice',
       'recommendation_train',
       'recommendation_retry',
       'recommendation_repeat_drill',
-      'tour_practice',
-      'recommendation_to_subject'
+      'tour_practice'
     ) then 'study'
     when v_route in (
       'profile_competitive_subject_hub',
-      'subject_tours'
+      'subject_tours',
+      'tour_start'
     ) then 'competitive'
     when v_route in (
       'global_recommendations',
       'profile_recommendations',
-      'subject_recommendations'
+      'subject_recommendations',
+      'practice_resume',
+      'recommendation_to_subject'
     ) then 'history'
     else null
   end;
