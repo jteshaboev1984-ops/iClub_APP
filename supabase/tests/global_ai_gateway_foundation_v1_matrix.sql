@@ -135,9 +135,9 @@ BEGIN
     RAISE EXCEPTION 'Free learner was upsold while generation runtime was unavailable: %',v;
   END IF;
 END
-$;
+$$;
 
-DO $
+DO $$
 DECLARE
   v jsonb;
   uid uuid:=(SELECT user_id FROM gai_gateway_people WHERE person_key='plus');
@@ -166,9 +166,9 @@ BEGIN
     RAISE EXCEPTION 'Plus generated route should pass gateway policy: %',v;
   END IF;
 END
-$;
+$$;
 
-DO $
+DO $$
 DECLARE
   v jsonb;
   uid uuid:=(SELECT user_id FROM gai_gateway_people WHERE person_key='free');
@@ -182,9 +182,9 @@ BEGIN
     RAISE EXCEPTION 'Free generated route was not upgrade-gated when paid generation was actually available: %',v;
   END IF;
 END
-$;
+$$;
 
-DO $
+DO $$
 DECLARE
   v jsonb;
   uid uuid:=(SELECT user_id FROM gai_gateway_people WHERE person_key='pro');
