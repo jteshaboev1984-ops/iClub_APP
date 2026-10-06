@@ -23,20 +23,20 @@
         {
           "key": "A",
           "text": {
-            "en": "y=3x−2",
-            "ru": "y=3x−2",
-            "uz": "y=3x−2"
-          },
-          "diagnostic_code": "COO03_PARALLEL"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "y=−3x−2",
             "ru": "y=−3x−2",
             "uz": "y=−3x−2"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=3x−2",
+            "ru": "y=3x−2",
+            "uz": "y=3x−2"
+          },
+          "diagnostic_code": "COO03_PARALLEL"
         },
         {
           "key": "C",
@@ -57,7 +57,7 @@
           "diagnostic_code": "COO03_PARALLEL"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "Parallel non-vertical lines have equal gradients. The given line has gradient −3, so y=−3x−2 is parallel to it.",
         "ru": "Невертикальные параллельные прямые имеют одинаковые градиенты. У данной прямой градиент −3, поэтому y=−3x−2 параллельна ей.",
@@ -123,11 +123,11 @@
         {
           "key": "A",
           "text": {
-            "en": "3x−2y=5",
-            "ru": "3x−2y=5",
-            "uz": "3x−2y=5"
+            "en": "3x+2y=6",
+            "ru": "3x+2y=6",
+            "uz": "3x+2y=6"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "COO03_SIGN"
         },
         {
           "key": "B",
@@ -150,14 +150,14 @@
         {
           "key": "D",
           "text": {
-            "en": "3x+2y=6",
-            "ru": "3x+2y=6",
-            "uz": "3x+2y=6"
+            "en": "3x−2y=5",
+            "ru": "3x−2y=5",
+            "uz": "3x−2y=5"
           },
-          "diagnostic_code": "COO03_SIGN"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "The line 2x+3y=7 has gradient −2/3. A perpendicular gradient is 3/2. Rearranging 3x−2y=5 gives y=(3/2)x−5/2, so it is perpendicular.",
         "ru": "У прямой 2x+3y=7 градиент −2/3. Перпендикулярный градиент равен 3/2. Из 3x−2y=5 получаем y=(3/2)x−5/2, значит эта прямая перпендикулярна.",
@@ -230,20 +230,20 @@
         {
           "key": "B",
           "text": {
-            "en": "−2",
-            "ru": "−2",
-            "uz": "−2"
-          },
-          "diagnostic_code": "COO03_SIGN"
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "−1",
             "ru": "−1",
             "uz": "−1"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−2",
+            "ru": "−2",
+            "uz": "−2"
+          },
+          "diagnostic_code": "COO03_SIGN"
         },
         {
           "key": "D",
@@ -255,7 +255,7 @@
           "diagnostic_code": "COO03_PERP_NEG_RECIP"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "B",
       "explanation": {
         "en": "The second line has gradient 1/2, so a perpendicular gradient is −2. Thus k−1=−2 and k=−1.",
         "ru": "Градиент второй прямой равен 1/2, поэтому перпендикулярный градиент равен −2. Значит k−1=−2 и k=−1.",
@@ -282,20 +282,20 @@
         {
           "key": "A",
           "text": {
-            "en": "y=−5",
-            "ru": "y=−5",
-            "uz": "y=−5"
-          },
-          "diagnostic_code": "COO03_SPECIAL_AXIS"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "x=2",
             "ru": "x=2",
             "uz": "x=2"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=−5",
+            "ru": "y=−5",
+            "uz": "y=−5"
+          },
+          "diagnostic_code": "COO03_SPECIAL_AXIS"
         },
         {
           "key": "C",
@@ -316,7 +316,7 @@
           "diagnostic_code": "COO03_PERP_NEG_RECIP"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "y=5 is horizontal. A line perpendicular to a horizontal line is vertical, so any line x=constant works; x=2 is one such line.",
         "ru": "y=5 — горизонтальная прямая. Перпендикуляр к горизонтальной прямой вертикален, поэтому подходит любая x=const; например x=2.",
@@ -387,11 +387,11 @@
         {
           "key": "A",
           "text": {
-            "en": "3x−2y=−16",
-            "ru": "3x−2y=−16",
-            "uz": "3x−2y=−16"
+            "en": "3x−2y=8",
+            "ru": "3x−2y=8",
+            "uz": "3x−2y=8"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "COO03_PARALLEL"
         },
         {
           "key": "B",
@@ -414,14 +414,14 @@
         {
           "key": "D",
           "text": {
-            "en": "3x−2y=8",
-            "ru": "3x−2y=8",
-            "uz": "3x−2y=8"
+            "en": "3x−2y=−16",
+            "ru": "3x−2y=−16",
+            "uz": "3x−2y=−16"
           },
-          "diagnostic_code": "COO03_PARALLEL"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "Parallel lines can be written with the same x and y coefficients: 3x−2y=c. Substituting (−2,5) gives c=3(−2)−2(5)=−16.",
         "ru": "Параллельные прямые можно записать с одинаковыми коэффициентами при x и y: 3x−2y=c. Подставляем (−2,5): c=3(−2)−2(5)=−16.",
@@ -459,20 +459,20 @@
         {
           "key": "B",
           "text": {
-            "en": "y=x/4−11/4",
-            "ru": "y=x/4−11/4",
-            "uz": "y=x/4−11/4"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "y=−x/4−5/4",
             "ru": "y=−x/4−5/4",
             "uz": "y=−x/4−5/4"
           },
           "diagnostic_code": "COO03_PERP_NEG_RECIP"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=x/4−11/4",
+            "ru": "y=x/4−11/4",
+            "uz": "y=x/4−11/4"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -484,7 +484,7 @@
           "diagnostic_code": "COO03_PERP_NEG_RECIP"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "The line 4x+y=7 has gradient −4, so a perpendicular gradient is 1/4. Through (3,−2): y+2=(1/4)(x−3), hence y=x/4−11/4.",
         "ru": "У прямой 4x+y=7 градиент −4, поэтому перпендикулярный градиент равен 1/4. Через (3,−2): y+2=(1/4)(x−3), значит y=x/4−11/4.",
