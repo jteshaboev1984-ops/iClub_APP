@@ -8,34 +8,34 @@
       "practice_no": 5,
       "primary_skill": "P1-SER-04",
       "secondary_skills": [],
-      "role": "nth_term",
+      "role": "inverse_first_term",
       "difficulty": "easy",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
-        "en": "A geometric progression has first term 3 and common ratio 2. Enter its 8th term.",
-        "ru": "Геометрическая прогрессия имеет первый член 3 и отношение 2. Введите её 8-й член.",
-        "uz": "Geometrik progressiyaning birinchi hadi 3, umumiy nisbati 2. 8-hadini kiriting."
+        "en": "A geometric progression has common ratio 2 and 8th term 384. Enter its first term.",
+        "ru": "Геометрическая прогрессия имеет отношение 2 и 8-й член 384. Введите первый член.",
+        "uz": "Geometrik progressiyaning umumiy nisbati 2, 8-hadi 384. Birinchi hadni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "384",
+        "canonical_answer": "3",
         "accepted_examples": [
-          "384",
-          " 384 "
+          "3",
+          " 3 "
         ],
         "rejected_examples": [
+          "6",
           "192",
-          "768",
-          "256"
+          "768"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "u₈=3·2^(8−1)=3·128=384.",
-        "ru": "u₈=3·2^(8−1)=3·128=384.",
-        "uz": "u₈=3·2^(8−1)=3·128=384."
+        "en": "u₈=a·2⁷=128a=384, so a=3.",
+        "ru": "u₈=a·2⁷=128a=384, поэтому a=3.",
+        "uz": "u₈=a·2⁷=128a=384, demak a=3."
       },
       "ai_source_skill": "P1-SER-04",
       "status": "draft"
@@ -125,14 +125,14 @@
       "practice_no": 5,
       "primary_skill": "P1-SER-04",
       "secondary_skills": [],
-      "role": "inverse_ratio",
+      "role": "term_and_sum_inverse",
       "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
-        "en": "A geometric progression has u₂=12 and u₅=96. The common ratio is positive. Enter it.",
-        "ru": "В геометрической прогрессии u₂=12 и u₅=96. Общее отношение положительно. Введите его.",
-        "uz": "Geometrik progressiyada u₂=12 va u₅=96. Umumiy nisbat musbat. Uni kiriting."
+        "en": "A geometric progression has u₂=12 and S₃=42. Its common ratio r is greater than 1. Enter r.",
+        "ru": "В геометрической прогрессии u₂=12 и S₃=42. Общее отношение r больше 1. Введите r.",
+        "uz": "Geometrik progressiyada u₂=12 va S₃=42. Umumiy nisbat r>1. r ni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -142,22 +142,17 @@
           " 2 "
         ],
         "rejected_examples": [
+          "0.5",
           "-2",
-          "4",
-          "8"
+          "4"
         ],
         "number_only": true
       },
-      "diagnostic_rules": [
-        {
-          "answer_match": "-2",
-          "diagnostic_code": "SER04_RATIO"
-        }
-      ],
+      "diagnostic_rules": [],
       "explanation": {
-        "en": "u₅/u₂=r³=96/12=8. Since r>0, r=2.",
-        "ru": "u₅/u₂=r³=96/12=8. Так как r>0, r=2.",
-        "uz": "u₅/u₂=r³=96/12=8. r>0 bo‘lgani uchun r=2."
+        "en": "Since ar=12, a=12/r. Then S₃=(12/r)(1+r+r²)=42. This gives 2r²−5r+2=0, so r=2 or 1/2. The condition r>1 gives r=2.",
+        "ru": "Так как ar=12, a=12/r. Тогда S₃=(12/r)(1+r+r²)=42. Получаем 2r²−5r+2=0, поэтому r=2 или 1/2. Условие r>1 даёт r=2.",
+        "uz": "ar=12 bo‘lgani uchun a=12/r. So‘ng S₃=(12/r)(1+r+r²)=42. Bundan 2r²−5r+2=0, ya’ni r=2 yoki 1/2. r>1 sharti r=2 ni beradi."
       },
       "ai_source_skill": "P1-SER-04",
       "status": "draft"
