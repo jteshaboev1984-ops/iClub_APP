@@ -15,15 +15,16 @@ Owner decision: preserve Tour results/history as the protected user-data boundar
 - Practice 3 Coordinate Geometry: 68/68 authored; full content QA passed; QA report recorded.
 - Practice 4 Circular Measure + Trigonometry: 77/77 authored; full content QA passed; QA report recorded.
 - Practice 5 Binomial Expansion + Series: 66/66 authored; full content QA passed; QA report recorded.
-- Total authored Practice v2 items through Practice 5: 359.
-- MCQ position QA: Practice 1 A/B/C/D=10/10/10/11; Practice 2=15/15/15/16; Practice 3=9/9/9/9; Practice 4=12/12/12/13; Practice 5=7/7/7/6.
-- Deterministic diagnostic catalogs: Quadratics 30; Functions 31; Coordinate Geometry 28; Circular/Trig 30; Binomial/Series 27.
-- Season 2 Tour 1–5 separation reviews: completed; overly similar Practice items were redesigned without changing Tours/history.
-- Approved/runtime-allowed AI source coverage is sufficient for Practice 5; draft supplements remain runtime-disabled only where earlier source sufficiency gaps were identified (COO-05/06 and selected CIR-02/TRI-01/TRI-05).
+- Practice 6 Differentiation: 70/70 authored; full content QA passed; QA report recorded.
+- Total authored Practice v2 items through Practice 6: 429.
+- MCQ position QA: Practice 1 A/B/C/D=10/10/10/11; Practice 2=15/15/15/16; Practice 3=9/9/9/9; Practice 4=12/12/12/13; Practice 5=7/7/7/6; Practice 6=8/9/10/8.
+- Deterministic diagnostic catalogs: Quadratics 30; Functions 31; Coordinate Geometry 28; Circular/Trig 30; Binomial/Series 27; Differentiation 31.
+- Season 2 Tour 1–6 separation reviews: completed; overly similar Practice items were redesigned without changing Tours/history.
+- Approved/runtime-allowed AI source cards exist for all completed canonical skills. Draft supplements remain runtime-disabled where deeper source coverage is needed, including broader DIF-06 connected-rate models.
 - Technical publication status: BLOCKED intentionally until evaluator hardening and secure server-side runtime validation are complete.
 - Known evaluator blocker: Unicode minus accepted by authored contracts but not by current Practice scalar evaluator.
 - Production/Supabase user data and Tour results: unchanged by this work.
-- Next content block: Practice 6 — Differentiation (P1-DIF-01…07).
+- Next content block: Practice 7 — Integration (P1-INT-01…05).
 
 ## Purpose
 
