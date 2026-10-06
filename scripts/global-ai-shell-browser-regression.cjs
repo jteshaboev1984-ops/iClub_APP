@@ -121,6 +121,7 @@ async function runViewport(browser, width, height) {
   assert(panelMetrics.left >= 0 && panelMetrics.right <= panelMetrics.viewportWidth, `AI panel overflows horizontally at ${width}px`);
   assert(panelMetrics.top >= 0 && panelMetrics.bottom <= panelMetrics.viewportHeight, `AI panel overflows viewport at ${width}px`);
   assert(panelMetrics.bottom <= panelMetrics.tabTop, `AI panel overlaps bottom nav at ${width}px`);
+  await page.screenshot({ path: `artifacts/global-ai-shell-panel-${width}.png`, fullPage: true });
 
   // Protected Exam Prep session must collapse immediately and announce once.
   await page.evaluate(() => {
