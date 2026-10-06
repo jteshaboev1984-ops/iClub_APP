@@ -23,11 +23,11 @@
         {
           "key": "A",
           "text": {
-            "en": "6π cm² s⁻¹",
-            "ru": "6π см² с⁻¹",
-            "uz": "6π sm² s⁻¹"
+            "en": "6π cm s⁻¹",
+            "ru": "6π см с⁻¹",
+            "uz": "6π sm s⁻¹"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF06_UNITS"
         },
         {
           "key": "B",
@@ -50,14 +50,14 @@
         {
           "key": "D",
           "text": {
-            "en": "6π cm s⁻¹",
-            "ru": "6π см с⁻¹",
-            "uz": "6π sm s⁻¹"
+            "en": "6π cm² s⁻¹",
+            "ru": "6π см² с⁻¹",
+            "uz": "6π sm² s⁻¹"
           },
-          "diagnostic_code": "DIF06_UNITS"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "A=πr², so dA/dt=2πr·dr/dt=2π(10)(0.3)=6π cm² s⁻¹.",
         "ru": "A=πr², поэтому dA/dt=2πr·dr/dt=2π(10)(0.3)=6π см² с⁻¹.",
