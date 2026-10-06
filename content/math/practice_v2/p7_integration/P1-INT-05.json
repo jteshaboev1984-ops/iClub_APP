@@ -23,20 +23,20 @@
         {
           "key": "A",
           "text": {
-            "en": "4π/3",
-            "ru": "4π/3",
-            "uz": "4π/3"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "2π",
             "ru": "2π",
             "uz": "2π"
           },
           "diagnostic_code": "INT05_RADIUS_SQUARED"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "4π/3",
+            "ru": "4π/3",
+            "uz": "4π/3"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -57,7 +57,7 @@
           "diagnostic_code": "INT05_RADIUS_SQUARED"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "V=π∫₀¹y²dx=π∫₀¹(2x)²dx=4π[x³/3]₀¹=4π/3.",
         "ru": "V=π∫₀¹y²dx=π∫₀¹(2x)²dx=4π[x³/3]₀¹=4π/3.",
@@ -125,11 +125,11 @@
         {
           "key": "A",
           "text": {
-            "en": "32π/5",
-            "ru": "32π/5",
-            "uz": "32π/5"
+            "en": "16π/5",
+            "ru": "16π/5",
+            "uz": "16π/5"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT05_RADIUS_SQUARED"
         },
         {
           "key": "B",
@@ -152,14 +152,14 @@
         {
           "key": "D",
           "text": {
-            "en": "16π/5",
-            "ru": "16π/5",
-            "uz": "16π/5"
+            "en": "32π/5",
+            "ru": "32π/5",
+            "uz": "32π/5"
           },
-          "diagnostic_code": "INT05_RADIUS_SQUARED"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "V=π∫₀²(x²)²dx=π∫₀²x⁴dx=π[x⁵/5]₀²=32π/5.",
         "ru": "V=π∫₀²(x²)²dx=π∫₀²x⁴dx=π[x⁵/5]₀²=32π/5.",
@@ -344,11 +344,11 @@
         {
           "key": "A",
           "text": {
-            "en": "Under y=√x",
-            "ru": "Под y=√x",
-            "uz": "y=√x ostidagi"
+            "en": "They give equal volumes.",
+            "ru": "Они дают равные объёмы.",
+            "uz": "Hajmlar teng."
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT05_RADIUS_SQUARED"
         },
         {
           "key": "B",
@@ -362,11 +362,11 @@
         {
           "key": "C",
           "text": {
-            "en": "They give equal volumes.",
-            "ru": "Они дают равные объёмы.",
-            "uz": "Hajmlar teng."
+            "en": "Under y=√x",
+            "ru": "Под y=√x",
+            "uz": "y=√x ostidagi"
           },
-          "diagnostic_code": "INT05_RADIUS_SQUARED"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -378,7 +378,7 @@
           "diagnostic_code": "INT05_PI_FACTOR"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "For y=x, V=π∫₀¹x²dx=π/3. For y=√x, V=π∫₀¹x dx=π/2. Since π/2>π/3, y=√x gives the larger volume.",
         "ru": "Для y=x: V=π∫₀¹x²dx=π/3. Для y=√x: V=π∫₀¹x dx=π/2. Так как π/2>π/3, больший объём даёт y=√x.",
