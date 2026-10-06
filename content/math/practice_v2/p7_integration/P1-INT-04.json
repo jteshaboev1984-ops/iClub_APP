@@ -284,29 +284,29 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
-        "en": "The curve y=4−x² meets the x-axis at x=−2 and x=2. Enter the total enclosed area.",
-        "ru": "Кривая y=4−x² пересекает ось x при x=−2 и x=2. Введите полную площадь замкнутой области.",
-        "uz": "y=4−x² egri chiziq x o‘qini x=−2 va x=2 da kesadi. Yopiq sohaning jami yuzini kiriting."
+        "en": "The curve y=4−x² meets the x-axis at x=−2 and x=2. Enter 3 times the total enclosed area.",
+        "ru": "Кривая y=4−x² пересекает ось x при x=−2 и x=2. Введите утроенную полную площадь замкнутой области.",
+        "uz": "y=4−x² egri chiziq x o‘qini x=−2 va x=2 da kesadi. Yopiq sohaning jami yuzidan 3 baravarini kiriting."
       },
       "answer_contract": {
-        "kind": "numeric_exact",
-        "canonical_answer": "10.666666666666666",
+        "kind": "integer_exact",
+        "canonical_answer": "32",
         "accepted_examples": [
-          "10.666666666666666",
-          "10,666666666666666"
+          "32",
+          " 32 "
         ],
         "rejected_examples": [
-          "8",
           "16",
-          "5.333333333333333"
+          "24",
+          "64"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "Area=∫₋₂²(4−x²)dx. By symmetry this is 2∫₀²(4−x²)dx=2(8−8/3)=32/3≈10.666666666666666.",
-        "ru": "Площадь=∫₋₂²(4−x²)dx. По симметрии это 2∫₀²(4−x²)dx=2(8−8/3)=32/3≈10.666666666666666.",
-        "uz": "Yuza=∫₋₂²(4−x²)dx. Simmetriya bo‘yicha 2∫₀²(4−x²)dx=2(8−8/3)=32/3≈10.666666666666666."
+        "en": "Area=∫₋₂²(4−x²)dx. By symmetry this is 2∫₀²(4−x²)dx=2(8−8/3)=32/3. Therefore 3×area=32.",
+        "ru": "Площадь=∫₋₂²(4−x²)dx. По симметрии это 2∫₀²(4−x²)dx=2(8−8/3)=32/3. Поэтому 3×площадь=32.",
+        "uz": "Yuza=∫₋₂²(4−x²)dx. Simmetriya bo‘yicha 2∫₀²(4−x²)dx=2(8−8/3)=32/3. Demak 3×yuza=32."
       },
       "ai_source_skill": "P1-INT-04",
       "status": "draft"
