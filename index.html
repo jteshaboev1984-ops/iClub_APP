@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="exam-prep/exam-prep-host.css?v=p305followup1" />
   <link rel="stylesheet" href="global-ai-ui.css?v=globalaichat1" />
   <link rel="stylesheet" href="plans-ui.css?v=plans1" />
+  <link rel="stylesheet" href="subject-access-ui.css?v=subjectshadow1" />
 </head>
 
 <body class="iclub-visual-v3">
@@ -1239,12 +1240,57 @@
 
     <div data-plan-body hidden>
       <div class="iclub-plan-cards" data-plan-cards></div>
+
+      <div id="profile-subject-access-entry" class="profile-section iclub-subject-access-entry" hidden>
+        <div class="profile-row-list">
+          <button class="profile-row" type="button" data-action="profile-subject-access">
+            <div class="profile-row-left">
+              <div class="profile-row-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 5.5h6v6H4z"/><path d="M14 5.5h6v6h-6z"/><path d="M4 15.5h6v3H4z"/><path d="M14 15.5h6v3h-6z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="profile-row-mid">
+              <div class="profile-row-title" data-subject-access-entry-title>Предметы тарифа</div>
+              <div class="muted small" data-subject-access-entry-sub></div>
+            </div>
+            <div class="profile-row-right">›</div>
+          </button>
+        </div>
+      </div>
+
       <div class="iclub-plan-compare-wrap" data-plan-compare></div>
       <div class="iclub-plan-info" data-plan-info></div>
     </div>
   </div>
 </div>
 <!-- /Profile PLAN -->
+
+<!-- Profile SUBJECT ACCESS -->
+<div id="profile-subject-access" class="profile-screen" hidden>
+  <div class="iclub-subject-access-screen">
+    <div class="iclub-subject-access-intro">
+      <div class="h1" data-subject-access-title>Предметы тарифа</div>
+      <div class="muted" data-subject-access-subtitle></div>
+    </div>
+
+    <div class="iclub-subject-access-beta">
+      <strong data-subject-access-beta-title></strong>
+      <span data-subject-access-beta-text></span>
+    </div>
+
+    <div class="iclub-subject-access-plan" data-subject-access-plan></div>
+
+    <div class="iclub-subject-access-unavailable" data-subject-access-unavailable hidden></div>
+
+    <div data-subject-access-body hidden>
+      <section class="iclub-subject-access-section" data-subject-access-study></section>
+      <section class="iclub-subject-access-section" data-subject-access-competitive></section>
+    </div>
+  </div>
+</div>
+<!-- /Profile SUBJECT ACCESS -->
 
 <!-- Profile SETTINGS -->
 <div id="profile-settings" class="profile-screen">
@@ -1524,6 +1570,7 @@
 <script src="practice-ai-ui.js?v=ai2review1"></script>
 <script src="global-ai-ui.js?v=globalaichat1"></script>
 <script src="plans-ui.js?v=plans1"></script>
+<script src="subject-access-ui.js?v=subjectshadow1"></script>
 
   <div id="question-image-modal" class="question-image-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Question image" hidden>
     <button id="question-image-modal-close" class="question-image-modal-close" type="button" aria-label="Close">×</button>
