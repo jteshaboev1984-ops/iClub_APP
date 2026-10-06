@@ -62,7 +62,7 @@
             "ru": "Сначала дополнить до квадрата",
             "uz": "Avval to‘liq kvadratga keltirish"
           },
-          "diagnostic_code": "QUA_METHOD_CHOICE"
+          "diagnostic_code": "QUA03_METHOD_SELECTION"
         },
         {
           "key": "B",
@@ -71,7 +71,7 @@
             "ru": "Сначала применить квадратную формулу",
             "uz": "Avval kvadrat formuladan foydalanish"
           },
-          "diagnostic_code": "QUA_METHOD_CHOICE"
+          "diagnostic_code": "QUA03_METHOD_SELECTION"
         },
         {
           "key": "C",
@@ -80,7 +80,7 @@
             "ru": "Построить график и оценить ответ",
             "uz": "Grafik chizib taxminiy javob olish"
           },
-          "diagnostic_code": "QUA_METHOD_CHOICE"
+          "diagnostic_code": "QUA03_METHOD_SELECTION"
         },
         {
           "key": "D",
@@ -169,7 +169,7 @@
             "ru": "x = 2 ± √5",
             "uz": "x = 2 ± √5"
           },
-          "diagnostic_code": "QUA_FORMULA_B_SIGN"
+          "diagnostic_code": "QUA03_FORMULA_SUBSTITUTION"
         },
         {
           "key": "C",
@@ -178,7 +178,7 @@
             "ru": "x = −4 ± √5",
             "uz": "x = −4 ± √5"
           },
-          "diagnostic_code": "QUA_FORMULA_DENOMINATOR"
+          "diagnostic_code": "QUA03_FORMULA_SUBSTITUTION"
         },
         {
           "key": "D",
@@ -187,7 +187,7 @@
             "ru": "x = −2 ± 5",
             "uz": "x = −2 ± 5"
           },
-          "diagnostic_code": "QUA_FORMULA_SQRT"
+          "diagnostic_code": "QUA03_FORMULA_SUBSTITUTION"
         }
       ],
       "correct_answer": "A",
@@ -260,7 +260,7 @@
             "ru": "x = −3 — кратный действительный корень.",
             "uz": "x = −3 takroriy haqiqiy ildiz."
           },
-          "diagnostic_code": "QUA_COMPLETE_SQUARE_ZERO_INTERPRET"
+          "diagnostic_code": "QUA03_NO_REAL_INTERPRETATION"
         },
         {
           "key": "B",
@@ -269,7 +269,7 @@
             "ru": "Есть два действительных корня: −1 и −5.",
             "uz": "Ikkita haqiqiy ildiz bor: −1 va −5."
           },
-          "diagnostic_code": "QUA_FALSE_FACTORISATION"
+          "diagnostic_code": "QUA03_FACTOR_TO_ROOT_SIGN"
         },
         {
           "key": "C",
@@ -287,7 +287,7 @@
             "ru": "x = 1 или x = −7.",
             "uz": "x = 1 yoki x = −7."
           },
-          "diagnostic_code": "QUA_COMPLETE_SQUARE_SIGN"
+          "diagnostic_code": "QUA03_NO_REAL_INTERPRETATION"
         }
       ],
       "correct_answer": "C",
@@ -358,7 +358,7 @@
             "ru": "x = 1/2 и x = 3/2",
             "uz": "x = 1/2 va x = 3/2"
           },
-          "diagnostic_code": "QUA_ROOT_SIGN"
+          "diagnostic_code": "QUA03_FACTOR_TO_ROOT_SIGN"
         },
         {
           "key": "B",
@@ -367,7 +367,7 @@
             "ru": "x = −1/2 и x = 3/2",
             "uz": "x = −1/2 va x = 3/2"
           },
-          "diagnostic_code": "QUA_ROOT_SIGN"
+          "diagnostic_code": "QUA03_FACTOR_TO_ROOT_SIGN"
         },
         {
           "key": "C",
@@ -376,7 +376,7 @@
             "ru": "x = −1/2 и x = −3/2",
             "uz": "x = −1/2 va x = −3/2"
           },
-          "diagnostic_code": "QUA_ROOT_SIGN"
+          "diagnostic_code": "QUA03_FACTOR_TO_ROOT_SIGN"
         },
         {
           "key": "D",
@@ -465,7 +465,7 @@
             "ru": "x = −3/5 и x = 1",
             "uz": "x = −3/5 va x = 1"
           },
-          "diagnostic_code": "QUA_ROOT_SIGN"
+          "diagnostic_code": "QUA03_FACTOR_TO_ROOT_SIGN"
         },
         {
           "key": "C",
@@ -474,7 +474,7 @@
             "ru": "x = 3 и x = −5",
             "uz": "x = 3 va x = −5"
           },
-          "diagnostic_code": "QUA_FACTOR_SCALING"
+          "diagnostic_code": "QUA03_FACTOR_TO_ROOT_SIGN"
         },
         {
           "key": "D",
@@ -483,7 +483,7 @@
             "ru": "x = 1/5 и x = −3",
             "uz": "x = 1/5 va x = −3"
           },
-          "diagnostic_code": "QUA_FACTOR_PAIR"
+          "diagnostic_code": "QUA03_FACTOR_TO_ROOT_SIGN"
         }
       ],
       "correct_answer": "A",
@@ -554,7 +554,7 @@
             "ru": "−2",
             "uz": "−2"
           },
-          "diagnostic_code": "QUA_FACTOR_SIGN"
+          "diagnostic_code": "QUA03_FACTOR_TO_ROOT_SIGN"
         },
         {
           "key": "B",
@@ -572,7 +572,7 @@
             "ru": "p",
             "uz": "p"
           },
-          "diagnostic_code": "QUA_PARAMETER_AS_ROOT"
+          "diagnostic_code": "QUA03_PARAMETER_ROOT_SUBSTITUTION"
         },
         {
           "key": "D",
@@ -581,7 +581,7 @@
             "ru": "−p",
             "uz": "−p"
           },
-          "diagnostic_code": "QUA_PARAMETER_AS_ROOT"
+          "diagnostic_code": "QUA03_PARAMETER_ROOT_SUBSTITUTION"
         }
       ],
       "correct_answer": "B",
