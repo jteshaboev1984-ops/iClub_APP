@@ -62,7 +62,7 @@
             "ru": "x² + x − 2 = 0",
             "uz": "x² + x − 2 = 0"
           },
-          "diagnostic_code": "QUA_SIMULTANEOUS_REARRANGE"
+          "diagnostic_code": "QUA05_SUBSTITUTION_SETUP"
         },
         {
           "key": "B",
@@ -80,7 +80,7 @@
             "ru": "x² − x − 4 = 0",
             "uz": "x² − x − 4 = 0"
           },
-          "diagnostic_code": "QUA_SIMULTANEOUS_SUBSTITUTION"
+          "diagnostic_code": "QUA05_SUBSTITUTION_SETUP"
         },
         {
           "key": "D",
@@ -89,7 +89,7 @@
             "ru": "x² − 2x − 3 = 0",
             "uz": "x² − 2x − 3 = 0"
           },
-          "diagnostic_code": "QUA_SIMULTANEOUS_REARRANGE"
+          "diagnostic_code": "QUA05_SUBSTITUTION_SETUP"
         }
       ],
       "correct_answer": "B",
@@ -162,7 +162,7 @@
             "ru": "2",
             "uz": "2"
           },
-          "diagnostic_code": "QUA_INTERSECTION_DISCRIMINANT"
+          "diagnostic_code": "QUA05_INTERSECTION_COUNT"
         },
         {
           "key": "B",
@@ -171,7 +171,7 @@
             "ru": "1",
             "uz": "1"
           },
-          "diagnostic_code": "QUA_INTERSECTION_DISCRIMINANT"
+          "diagnostic_code": "QUA05_INTERSECTION_COUNT"
         },
         {
           "key": "C",
@@ -189,7 +189,7 @@
             "ru": "Бесконечно много",
             "uz": "Cheksiz ko‘p"
           },
-          "diagnostic_code": "QUA_SIMULTANEOUS_STRUCTURE"
+          "diagnostic_code": "QUA05_SUBSTITUTION_SETUP"
         }
       ],
       "correct_answer": "C",
@@ -260,7 +260,7 @@
             "ru": "(x, y) = (3/2, 1/2)",
             "uz": "(x, y) = (3/2, 1/2)"
           },
-          "diagnostic_code": "QUA_SIMULTANEOUS_BACKSUB"
+          "diagnostic_code": "QUA05_BACK_SUBSTITUTION"
         },
         {
           "key": "B",
@@ -269,7 +269,7 @@
             "ru": "(x, y) = (2, 1)",
             "uz": "(x, y) = (2, 1)"
           },
-          "diagnostic_code": "QUA_SIMULTANEOUS_QUADRATIC"
+          "diagnostic_code": "QUA05_SUBSTITUTION_SETUP"
         },
         {
           "key": "C",
@@ -278,7 +278,7 @@
             "ru": "(x, y) = (5/2, −3/2)",
             "uz": "(x, y) = (5/2, −3/2)"
           },
-          "diagnostic_code": "QUA_SIMULTANEOUS_SIGN"
+          "diagnostic_code": "QUA05_BACK_SUBSTITUTION"
         },
         {
           "key": "D",
@@ -369,7 +369,7 @@
             "ru": "9",
             "uz": "9"
           },
-          "diagnostic_code": "QUA_TANGENCY_DISCRIMINANT"
+          "diagnostic_code": "QUA05_TANGENCY_CONDITION"
         },
         {
           "key": "C",
@@ -378,7 +378,7 @@
             "ru": "3",
             "uz": "3"
           },
-          "diagnostic_code": "QUA_SIMULTANEOUS_REARRANGE"
+          "diagnostic_code": "QUA05_SUBSTITUTION_SETUP"
         },
         {
           "key": "D",
@@ -387,7 +387,7 @@
             "ru": "15",
             "uz": "15"
           },
-          "diagnostic_code": "QUA_TANGENCY_DISCRIMINANT"
+          "diagnostic_code": "QUA05_TANGENCY_CONDITION"
         }
       ],
       "correct_answer": "A",
@@ -458,7 +458,7 @@
             "ru": "(x, y) = (1, 0)",
             "uz": "(x, y) = (1, 0)"
           },
-          "diagnostic_code": "QUA_SIMULTANEOUS_SUBSTITUTION"
+          "diagnostic_code": "QUA05_SUBSTITUTION_SETUP"
         },
         {
           "key": "B",
@@ -467,7 +467,7 @@
             "ru": "(x, y) = (2, 1/2)",
             "uz": "(x, y) = (2, 1/2)"
           },
-          "diagnostic_code": "QUA_SIMULTANEOUS_BACKSUB"
+          "diagnostic_code": "QUA05_BACK_SUBSTITUTION"
         },
         {
           "key": "C",
@@ -476,7 +476,7 @@
             "ru": "(x, y) = (3, −1)",
             "uz": "(x, y) = (3, −1)"
           },
-          "diagnostic_code": "QUA_SIMULTANEOUS_SIGN"
+          "diagnostic_code": "QUA05_BACK_SUBSTITUTION"
         },
         {
           "key": "D",
@@ -558,7 +558,7 @@
             "ru": "a = 2 или a = −2",
             "uz": "a = 2 yoki a = −2"
           },
-          "diagnostic_code": "QUA_TANGENCY_DISCRIMINANT"
+          "diagnostic_code": "QUA05_TANGENCY_CONDITION"
         },
         {
           "key": "B",
@@ -576,7 +576,7 @@
             "ru": "a = 4 или a = −4",
             "uz": "a = 4 yoki a = −4"
           },
-          "diagnostic_code": "QUA_TANGENCY_DISCRIMINANT"
+          "diagnostic_code": "QUA05_TANGENCY_CONDITION"
         },
         {
           "key": "D",
@@ -585,7 +585,7 @@
             "ru": "Только a = 6",
             "uz": "Faqat a = 6"
           },
-          "diagnostic_code": "QUA_PARAMETER_BRANCH_LOSS"
+          "diagnostic_code": "QUA05_TANGENCY_CONDITION"
         }
       ],
       "correct_answer": "B",
