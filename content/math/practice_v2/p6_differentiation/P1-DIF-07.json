@@ -175,9 +175,9 @@
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "For fixed perimeter, the maximum-area rectangle is a square. Area 64 gives side 8, so P=4·8=32 cm.",
-        "ru": "При фиксированном периметре максимальную площадь имеет квадрат. Площадь 64 даёт сторону 8, поэтому P=4·8=32 см.",
-        "uz": "Doimiy perimetrda eng katta yuzali to‘g‘ri to‘rtburchak kvadrat. Yuz 64 bo‘lsa tomon 8, demak P=4·8=32 sm."
+        "en": "Let one side be x and the other P/2−x. Then A=x(P/2−x), so dA/dx=P/2−2x=0 at x=P/4. The maximum area is (P/4)²=P²/16. Since P²/16=64 and P>0, P=32 cm.",
+        "ru": "Пусть одна сторона равна x, другая P/2−x. Тогда A=x(P/2−x), поэтому dA/dx=P/2−2x=0 при x=P/4. Максимальная площадь равна (P/4)²=P²/16. Из P²/16=64 и P>0 получаем P=32 см.",
+        "uz": "Bir tomon x, ikkinchisi P/2−x bo‘lsin. A=x(P/2−x), demak dA/dx=P/2−2x=0 da x=P/4. Maksimal yuza (P/4)²=P²/16. P²/16=64 va P>0 dan P=32 sm."
       },
       "ai_source_skill": "P1-DIF-07",
       "status": "draft"
