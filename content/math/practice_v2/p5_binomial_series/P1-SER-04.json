@@ -180,11 +180,11 @@
         {
           "key": "A",
           "text": {
-            "en": "2",
-            "ru": "2",
-            "uz": "2"
+            "en": "162",
+            "ru": "162",
+            "uz": "162"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "SER04_RATIO"
         },
         {
           "key": "B",
@@ -207,14 +207,14 @@
         {
           "key": "D",
           "text": {
-            "en": "162",
-            "ru": "162",
-            "uz": "162"
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
           },
-          "diagnostic_code": "SER04_RATIO"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "u₄=ar³. Thus 54=a·27, so a=2.",
         "ru": "u₄=ar³. Поэтому 54=a·27 и a=2.",
