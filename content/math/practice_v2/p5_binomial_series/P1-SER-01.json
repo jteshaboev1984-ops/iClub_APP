@@ -8,34 +8,34 @@
       "practice_no": 5,
       "primary_skill": "P1-SER-01",
       "secondary_skills": [],
-      "role": "coefficient",
+      "role": "coefficient_ratio",
       "difficulty": "easy",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
       "question": {
-        "en": "Enter the coefficient of x² in (1+2x)⁵.",
-        "ru": "Введите коэффициент при x² в разложении (1+2x)⁵.",
-        "uz": "(1+2x)⁵ yoyilmasida x² oldidagi koeffitsiyentni kiriting."
+        "en": "In the expansion of (1+2x)⁵, enter the coefficient of x² divided by the coefficient of x.",
+        "ru": "В разложении (1+2x)⁵ введите отношение коэффициента при x² к коэффициенту при x.",
+        "uz": "(1+2x)⁵ yoyilmasida x² koeffitsiyentining x koeffitsiyentiga nisbatini kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "40",
+        "canonical_answer": "4",
         "accepted_examples": [
-          "40",
-          " 40 "
+          "4",
+          " 4 "
         ],
         "rejected_examples": [
-          "10",
-          "20",
-          "80"
+          "2",
+          "5",
+          "40"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "The x² term uses r=2: C(5,2)(2x)²=10·4x²=40x².",
-        "ru": "Для члена с x² берём r=2: C(5,2)(2x)²=10·4x²=40x².",
-        "uz": "x² hadi uchun r=2: C(5,2)(2x)²=10·4x²=40x²."
+        "en": "The x coefficient is C(5,1)2=10. The x² coefficient is C(5,2)2²=40. Their ratio is 40/10=4.",
+        "ru": "Коэффициент при x равен C(5,1)2=10. Коэффициент при x² равен C(5,2)2²=40. Их отношение 40/10=4.",
+        "uz": "x koeffitsiyenti C(5,1)2=10. x² koeffitsiyenti C(5,2)2²=40. Ularning nisbati 40/10=4."
       },
       "ai_source_skill": "P1-SER-01",
       "status": "draft"
@@ -247,14 +247,14 @@
       "practice_no": 5,
       "primary_skill": "P1-SER-01",
       "secondary_skills": [],
-      "role": "parameter_from_coefficient",
+      "role": "parameter_from_coefficient_ratio",
       "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
       "question": {
-        "en": "In (1+kx)⁵, the coefficient of x² is 160 and k>0. Enter k.",
-        "ru": "В разложении (1+kx)⁵ коэффициент при x² равен 160, причём k>0. Введите k.",
-        "uz": "(1+kx)⁵ yoyilmasida x² koeffitsiyenti 160 va k>0. k ni kiriting."
+        "en": "In (1+kx)⁵, k>0. The coefficient of x² is 8 times the coefficient of x. Enter k.",
+        "ru": "В разложении (1+kx)⁵, где k>0, коэффициент при x² в 8 раз больше коэффициента при x. Введите k.",
+        "uz": "(1+kx)⁵ da k>0. x² koeffitsiyenti x koeffitsiyentidan 8 marta katta. k ni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -264,22 +264,17 @@
           " 4 "
         ],
         "rejected_examples": [
-          "-4",
           "2",
-          "8"
+          "8",
+          "16"
         ],
         "number_only": true
       },
-      "diagnostic_rules": [
-        {
-          "answer_match": "-4",
-          "diagnostic_code": "SER01_PARAMETER"
-        }
-      ],
+      "diagnostic_rules": [],
       "explanation": {
-        "en": "The x² coefficient is C(5,2)k²=10k². So 10k²=160, k²=16 and k=4 because k>0.",
-        "ru": "Коэффициент при x² равен C(5,2)k²=10k². Поэтому 10k²=160, k²=16 и k=4, так как k>0.",
-        "uz": "x² koeffitsiyenti C(5,2)k²=10k². Demak 10k²=160, k²=16 va k>0 bo‘lgani uchun k=4."
+        "en": "The x coefficient is 5k and the x² coefficient is 10k². Thus 10k²=8(5k). Since k>0, divide by 10k to get k=4.",
+        "ru": "Коэффициент при x равен 5k, а при x² — 10k². Поэтому 10k²=8(5k). Так как k>0, делим на 10k и получаем k=4.",
+        "uz": "x koeffitsiyenti 5k, x² koeffitsiyenti 10k². Demak 10k²=8(5k). k>0 bo‘lgani uchun 10k ga bo‘lib k=4."
       },
       "ai_source_skill": "P1-SER-01",
       "status": "draft"
@@ -289,58 +284,58 @@
       "practice_no": 5,
       "primary_skill": "P1-SER-01",
       "secondary_skills": [],
-      "role": "constant_term",
+      "role": "mixed_product",
       "difficulty": "hard",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
       "question": {
-        "en": "What is the term independent of x in (x+2/x²)⁶?",
-        "ru": "Каков член, не зависящий от x, в разложении (x+2/x²)⁶?",
-        "uz": "(x+2/x²)⁶ yoyilmasida x ga bog‘liq bo‘lmagan had qaysi?"
+        "en": "What is the coefficient of x³ in (1+x)⁵(1+2x)?",
+        "ru": "Каков коэффициент при x³ в выражении (1+x)⁵(1+2x)?",
+        "uz": "(1+x)⁵(1+2x) ifodada x³ oldidagi koeffitsiyent qancha?"
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "60",
-            "ru": "60",
-            "uz": "60"
+            "en": "20",
+            "ru": "20",
+            "uz": "20"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "SER01_BINOMIAL_COEFF"
         },
         {
           "key": "B",
+          "text": {
+            "en": "25",
+            "ru": "25",
+            "uz": "25"
+          },
+          "diagnostic_code": "SER01_TERM_INDEX"
+        },
+        {
+          "key": "C",
           "text": {
             "en": "30",
             "ru": "30",
             "uz": "30"
           },
-          "diagnostic_code": "SER01_MULTIPLIER_POWER"
-        },
-        {
-          "key": "C",
-          "text": {
-            "en": "15",
-            "ru": "15",
-            "uz": "15"
-          },
-          "diagnostic_code": "SER01_BINOMIAL_COEFF"
+          "diagnostic_code": null
         },
         {
           "key": "D",
           "text": {
-            "en": "120",
-            "ru": "120",
-            "uz": "120"
+            "en": "40",
+            "ru": "40",
+            "uz": "40"
           },
-          "diagnostic_code": "SER01_CONSTANT_TERM"
+          "diagnostic_code": "SER01_MULTIPLIER_POWER"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
-        "en": "The general term has x-power 6−r−2r=6−3r. Set this to 0, giving r=2. The constant term is C(6,2)2²=15·4=60.",
-        "ru": "Степень x в общем члене равна 6−r−2r=6−3r. Приравниваем к 0: r=2. Свободный член C(6,2)2²=15·4=60.",
-        "uz": "Umumiy hadda x darajasi 6−r−2r=6−3r. Uni 0 ga tenglasak r=2. O‘zgarmas had C(6,2)2²=15·4=60."
+        "en": "The x³ coefficient comes from x³·1 and x²·2x. These contribute C(5,3)=10 and 2C(5,2)=20, so the total is 30.",
+        "ru": "Коэффициент при x³ получается из x³·1 и x²·2x. Вклады равны C(5,3)=10 и 2C(5,2)=20, всего 30.",
+        "uz": "x³ koeffitsiyenti x³·1 va x²·2x dan keladi. Ular C(5,3)=10 va 2C(5,2)=20, jami 30."
       },
       "ai_source_skill": "P1-SER-01",
       "status": "draft"
@@ -583,14 +578,14 @@
       "practice_no": 5,
       "primary_skill": "P1-SER-01",
       "secondary_skills": [],
-      "role": "find_exponent",
+      "role": "find_exponent_from_coefficient_relation",
       "difficulty": "hard",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
       "question": {
-        "en": "The coefficient of x in (1+3x)ⁿ is 21, where n is a positive integer. Enter n.",
-        "ru": "Коэффициент при x в (1+3x)ⁿ равен 21, где n — положительное целое число. Введите n.",
-        "uz": "(1+3x)ⁿ da x koeffitsiyenti 21, n musbat butun son. n ni kiriting."
+        "en": "In (1+x)ⁿ, the coefficient of x² is 14 greater than the coefficient of x, where n is a positive integer. Enter n.",
+        "ru": "В разложении (1+x)ⁿ коэффициент при x² на 14 больше коэффициента при x, где n — положительное целое число. Введите n.",
+        "uz": "(1+x)ⁿ yoyilmasida x² koeffitsiyenti x koeffitsiyentidan 14 ga katta, n musbat butun son. n ni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -600,17 +595,17 @@
           " 7 "
         ],
         "rejected_examples": [
-          "6",
-          "9",
-          "21"
+          "4",
+          "5",
+          "14"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "The x coefficient is C(n,1)3=3n. So 3n=21 and n=7.",
-        "ru": "Коэффициент при x равен C(n,1)3=3n. Поэтому 3n=21 и n=7.",
-        "uz": "x koeffitsiyenti C(n,1)3=3n. Demak 3n=21 va n=7."
+        "en": "The coefficients are C(n,2)=n(n−1)/2 and C(n,1)=n. So n(n−1)/2−n=14, giving n(n−3)=28. The positive integer solution is n=7.",
+        "ru": "Коэффициенты равны C(n,2)=n(n−1)/2 и C(n,1)=n. Поэтому n(n−1)/2−n=14, откуда n(n−3)=28. Положительное целое решение n=7.",
+        "uz": "Koeffitsiyentlar C(n,2)=n(n−1)/2 va C(n,1)=n. Demak n(n−1)/2−n=14, bundan n(n−3)=28. Musbat butun yechim n=7."
       },
       "ai_source_skill": "P1-SER-01",
       "status": "draft"
