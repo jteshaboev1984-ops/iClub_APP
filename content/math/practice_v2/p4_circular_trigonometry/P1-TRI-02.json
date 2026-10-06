@@ -469,9 +469,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
-        "en": "Which expression has exact value 0?",
-        "ru": "Какое выражение имеет точное значение 0?",
-        "uz": "Qaysi ifodaning aniq qiymati 0?"
+        "en": "Which of the following differences is exactly zero?",
+        "ru": "Какая из следующих разностей в точности равна нулю?",
+        "uz": "Quyidagi ayirmalardan qaysi biri aniq nolga teng?"
       },
       "options": [
         {
