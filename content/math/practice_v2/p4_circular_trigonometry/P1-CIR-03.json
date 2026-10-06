@@ -500,35 +500,35 @@
       "secondary_skills": [
         "P1-CIR-02"
       ],
-      "role": "composite_perimeter",
+      "role": "reverse_composite_area",
       "difficulty": "hard",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
       "question": {
-        "en": "An annular sector has angle 1.5 radians, outer radius 8 cm and inner radius 4 cm. Its perimeter consists of both arcs and the two radial edges. Enter the perimeter in centimetres.",
-        "ru": "Кольцевой сектор имеет угол 1.5 радиан, внешний радиус 8 см и внутренний радиус 4 см. Его периметр состоит из обеих дуг и двух радиальных сторон. Введите периметр в сантиметрах.",
-        "uz": "Halqasimon sektor burchagi 1.5 radian, tashqi radiusi 8 sm va ichki radiusi 4 sm. Perimetri ikki yoy va ikki radial qirradan iborat. Perimetrni santimetrda kiriting."
+        "en": "An annular sector has outer radius 8 cm, inner radius 4 cm and area 36 cm². Enter its angle in radians.",
+        "ru": "Кольцевой сектор имеет внешний радиус 8 см, внутренний радиус 4 см и площадь 36 см². Введите его угол в радианах.",
+        "uz": "Halqasimon sektor tashqi radiusi 8 sm, ichki radiusi 4 sm va yuzi 36 sm². Uning burchagini radianlarda kiriting."
       },
       "answer_contract": {
-        "kind": "integer_exact",
-        "canonical_answer": "26",
+        "kind": "numeric_exact",
+        "canonical_answer": "1.5",
         "accepted_examples": [
-          "26",
-          "26.0",
-          " 26 "
+          "1.5",
+          "1,5",
+          " 1.5 "
         ],
         "rejected_examples": [
-          "18",
-          "20",
-          "30"
+          "0.75",
+          "3",
+          "2"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "Outer arc=8(1.5)=12 and inner arc=4(1.5)=6. Each radial edge has length 8−4=4, so perimeter=12+6+4+4=26 cm.",
-        "ru": "Внешняя дуга=8(1.5)=12, внутренняя=4(1.5)=6. Каждая радиальная сторона имеет длину 8−4=4, поэтому периметр=12+6+4+4=26 см.",
-        "uz": "Tashqi yoy=8(1.5)=12, ichki yoy=4(1.5)=6. Har bir radial qirra 8−4=4, demak perimetr=12+6+4+4=26 sm."
+        "en": "The annular-sector area is ½(8²−4²)θ=½(64−16)θ=24θ. Since 24θ=36, θ=1.5 radians.",
+        "ru": "Площадь кольцевого сектора равна ½(8²−4²)θ=½(64−16)θ=24θ. Из 24θ=36 получаем θ=1.5 радиан.",
+        "uz": "Halqasimon sektor yuzi ½(8²−4²)θ=½(64−16)θ=24θ. 24θ=36 dan θ=1.5 radian."
       },
       "ai_source_skill": "P1-CIR-03",
       "status": "draft"
