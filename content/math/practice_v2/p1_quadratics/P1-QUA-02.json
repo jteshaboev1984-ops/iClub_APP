@@ -111,53 +111,53 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "For which values of p does x² + 6x + p = 0 have no real roots?",
-        "ru": "При каких значениях p уравнение x² + 6x + p = 0 не имеет действительных корней?",
-        "uz": "Qaysi p qiymatlarida x² + 6x + p = 0 tenglama haqiqiy ildizga ega emas?"
+        "en": "For which values of p does 2x² + px + 8 = 0 have no real roots?",
+        "ru": "При каких значениях p уравнение 2x² + px + 8 = 0 не имеет действительных корней?",
+        "uz": "Qaysi p qiymatlarida 2x² + px + 8 = 0 tenglama haqiqiy ildizga ega emas?"
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "p < 9",
-            "ru": "p < 9",
-            "uz": "p < 9"
+            "en": "p ≤ −8 or p ≥ 8",
+            "ru": "p ≤ −8 или p ≥ 8",
+            "uz": "p ≤ −8 yoki p ≥ 8"
           },
           "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "B",
           "text": {
-            "en": "p ≤ 9",
-            "ru": "p ≤ 9",
-            "uz": "p ≤ 9"
+            "en": "p < −8 or p > 8",
+            "ru": "p < −8 или p > 8",
+            "uz": "p < −8 yoki p > 8"
           },
-          "diagnostic_code": "QUA02_INEQUALITY_BOUNDARY"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "C",
           "text": {
-            "en": "p ≥ 9",
-            "ru": "p ≥ 9",
-            "uz": "p ≥ 9"
+            "en": "−8 ≤ p ≤ 8",
+            "ru": "−8 ≤ p ≤ 8",
+            "uz": "−8 ≤ p ≤ 8"
           },
           "diagnostic_code": "QUA02_INEQUALITY_BOUNDARY"
         },
         {
           "key": "D",
           "text": {
-            "en": "p > 9",
-            "ru": "p > 9",
-            "uz": "p > 9"
+            "en": "−8 < p < 8",
+            "ru": "−8 < p < 8",
+            "uz": "−8 < p < 8"
           },
           "diagnostic_code": null
         }
       ],
       "correct_answer": "D",
       "explanation": {
-        "en": "No real roots means b² − 4ac < 0. Here 36 − 4p < 0, so p > 9.",
-        "ru": "Отсутствие действительных корней означает b² − 4ac < 0. Здесь 36 − 4p < 0, поэтому p > 9.",
-        "uz": "Haqiqiy ildiz bo‘lmasligi uchun b² − 4ac < 0. Bu yerda 36 − 4p < 0, shuning uchun p > 9."
+        "en": "No real roots require p² − 4(2)(8) < 0. Thus p² < 64, which gives −8 < p < 8.",
+        "ru": "Для отсутствия действительных корней нужно p² − 4(2)(8) < 0. Значит p² < 64, откуда −8 < p < 8.",
+        "uz": "Haqiqiy ildiz bo‘lmasligi uchun p² − 4(2)(8) < 0. Demak p² < 64 va −8 < p < 8."
       },
       "ai_source_skill": "P1-QUA-02",
       "status": "draft"
@@ -337,22 +337,13 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "The equation x² + (k − 1)x + k = 0 has equal roots. Which values of k are possible?",
-        "ru": "Уравнение x² + (k − 1)x + k = 0 имеет равные корни. Какие значения k возможны?",
-        "uz": "x² + (k − 1)x + k = 0 tenglama teng ildizlarga ega. k ning qaysi qiymatlari mumkin?"
+        "en": "The equation (k − 1)x² + 4x + (k + 3) = 0 has a repeated real root. Which values of k are possible?",
+        "ru": "Уравнение (k − 1)x² + 4x + (k + 3) = 0 имеет кратный действительный корень. Какие значения k возможны?",
+        "uz": "(k − 1)x² + 4x + (k + 3) = 0 tenglama takroriy haqiqiy ildizga ega. k ning qaysi qiymatlari mumkin?"
       },
       "options": [
         {
           "key": "A",
-          "text": {
-            "en": "k = 3 ± √2",
-            "ru": "k = 3 ± √2",
-            "uz": "k = 3 ± √2"
-          },
-          "diagnostic_code": "QUA02_PARAMETER_ALGEBRA"
-        },
-        {
-          "key": "B",
           "text": {
             "en": "k = 1 ± 2√2",
             "ru": "k = 1 ± 2√2",
@@ -361,29 +352,38 @@
           "diagnostic_code": "QUA02_PARAMETER_ALGEBRA"
         },
         {
+          "key": "B",
+          "text": {
+            "en": "k = −1 ± √2",
+            "ru": "k = −1 ± √2",
+            "uz": "k = −1 ± √2"
+          },
+          "diagnostic_code": "QUA02_PARAMETER_ALGEBRA"
+        },
+        {
           "key": "C",
           "text": {
-            "en": "k = 3 ± √8",
-            "ru": "k = 3 ± √8",
-            "uz": "k = 3 ± √8"
+            "en": "k = −2 ± 2√2",
+            "ru": "k = −2 ± 2√2",
+            "uz": "k = −2 ± 2√2"
           },
           "diagnostic_code": "QUA02_PARAMETER_ALGEBRA"
         },
         {
           "key": "D",
           "text": {
-            "en": "k = 3 ± 2√2",
-            "ru": "k = 3 ± 2√2",
-            "uz": "k = 3 ± 2√2"
+            "en": "k = −1 ± 2√2",
+            "ru": "k = −1 ± 2√2",
+            "uz": "k = −1 ± 2√2"
           },
           "diagnostic_code": null
         }
       ],
       "correct_answer": "D",
       "explanation": {
-        "en": "Equal roots require (k − 1)² − 4k = 0. This gives k² − 6k + 1 = 0, so k = (6 ± √32)/2 = 3 ± 2√2.",
-        "ru": "Для равных корней нужно (k − 1)² − 4k = 0. Получаем k² − 6k + 1 = 0, поэтому k = (6 ± √32)/2 = 3 ± 2√2.",
-        "uz": "Teng ildizlar uchun (k − 1)² − 4k = 0. Bundan k² − 6k + 1 = 0 va k = (6 ± √32)/2 = 3 ± 2√2."
+        "en": "A repeated root requires 16 − 4(k − 1)(k + 3) = 0. So (k − 1)(k + 3) = 4, giving k² + 2k − 7 = 0 and k = −1 ± 2√2.",
+        "ru": "Для кратного корня нужно 16 − 4(k − 1)(k + 3) = 0. Поэтому (k − 1)(k + 3) = 4, откуда k² + 2k − 7 = 0 и k = −1 ± 2√2.",
+        "uz": "Takroriy ildiz uchun 16 − 4(k − 1)(k + 3) = 0. Demak (k − 1)(k + 3) = 4, bundan k² + 2k − 7 = 0 va k = −1 ± 2√2."
       },
       "ai_source_skill": "P1-QUA-02",
       "status": "draft"
