@@ -223,6 +223,18 @@ begin
       and lower(body_text) like '%box plot%'
   ) then raise exception 'P3-18 RU P5-DAT source localization defect remains'; end if;
 
+  -- No leading/trailing whitespace on any learner-facing explanation.
+  if exists(
+    select 1 from private.exam_prep_ai_tutor_cards
+    where content_version='tutor_v3_learner_first'
+      and (
+        main_explanation<>btrim(main_explanation)
+        or simple_explanation<>btrim(simple_explanation)
+        or alternative_explanation<>btrim(alternative_explanation)
+        or focus_explanation<>btrim(focus_explanation)
+      )
+  ) then raise exception 'P3-18 leading/trailing Tutor whitespace remains'; end if;
+
   -- Variant uniqueness and minimum thickness.
   if exists(
     select 1 from private.exam_prep_ai_tutor_cards
