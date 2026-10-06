@@ -47,7 +47,7 @@ END
 $$;
 
 -- Dormant defaults must preserve the existing app.
-DO $$
+DO $dormant$
 DECLARE
   v jsonb;
   uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='legacy');
@@ -74,10 +74,10 @@ BEGIN
     RAISE EXCEPTION 'Dormant lifecycle wrote an event row';
   END IF;
 END
-$;
+$dormant$;
 
 -- Every learner resolves to Free by default without creating entitlement rows.
-DO $
+DO $free_default$
 DECLARE
   v jsonb;
   uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='normal');
@@ -97,10 +97,10 @@ BEGIN
     RAISE EXCEPTION 'Default Free incorrectly created a subscription entitlement row';
   END IF;
 END
-$;
+$free_default$;
 
 -- Build exactly three service-managed canaries with Free/Plus/Pro test plans.
-DO $
+DO $canary_setup$
 DECLARE
   v jsonb;
   uid uuid;
@@ -143,10 +143,10 @@ BEGIN
     RAISE EXCEPTION 'Rejected fourth canary left an enabled row';
   END IF;
 END
-$;
+$canary_setup$;
 
 -- Canary plan overrides are test-only; ordinary users still resolve to Free.
-DO $
+DO $canary_plans$
 DECLARE
   v jsonb;
   plus_uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='canary_plus');
@@ -168,7 +168,7 @@ BEGIN
     RAISE EXCEPTION 'Non-canary user did not remain default Free: %',v;
   END IF;
 END
-$;
+$canary_plans$;
 
 -- Test-only assessment contract needed to prove the server canary gate end-to-end.
 ALTER TABLE public.tour_attempts
@@ -179,9 +179,9 @@ CREATE OR REPLACE FUNCTION private.exam_prep_has_active_protected_assessment_v1(
 RETURNS boolean
 LANGUAGE sql
 STABLE
-AS $
+AS $assessment$
   SELECT false;
-$;
+$assessment$;
 
 UPDATE private.iclub_global_ai_runtime_config
 SET ui_enabled=true,
@@ -196,7 +196,7 @@ SET ui_enabled=true,
 WHERE id=1;
 
 -- A non-canary cannot reach Plans or Global AI even by calling server endpoints directly.
-DO $
+DO $noncanary_gate$
 DECLARE
   v jsonb;
   uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='normal');
@@ -224,10 +224,10 @@ BEGIN
     RAISE EXCEPTION 'Non-canary Global AI server call escaped rollout gate: %',v;
   END IF;
 END
-$;
+$noncanary_gate$;
 
 -- Canary users see only their test plan and can reach the prepared Global AI path.
-DO $
+DO $canary_gate$
 DECLARE
   v jsonb;
   uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='canary_free');
@@ -255,7 +255,7 @@ BEGIN
     RAISE EXCEPTION 'Free canary prepared AI path mismatch: %',v;
   END IF;
 END
-$;
+$canary_gate$;
 
 UPDATE private.iclub_global_ai_runtime_config
 SET ui_enabled=false,
