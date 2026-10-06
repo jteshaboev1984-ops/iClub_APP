@@ -21,11 +21,11 @@
         {
           "key": "A",
           "text": {
-            "en": "Arithmetic progression",
-            "ru": "Арифметическая прогрессия",
-            "uz": "Arifmetik progressiya"
+            "en": "Both arithmetic and geometric",
+            "ru": "И арифметическая, и геометрическая",
+            "uz": "Ham arifmetik, ham geometrik"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "SER02_GP_STRUCTURE"
         },
         {
           "key": "B",
@@ -39,11 +39,11 @@
         {
           "key": "C",
           "text": {
-            "en": "Both arithmetic and geometric",
-            "ru": "И арифметическая, и геометрическая",
-            "uz": "Ham arifmetik, ham geometrik"
+            "en": "Arithmetic progression",
+            "ru": "Арифметическая прогрессия",
+            "uz": "Arifmetik progressiya"
           },
-          "diagnostic_code": "SER02_GP_STRUCTURE"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -55,7 +55,7 @@
           "diagnostic_code": "SER02_NEITHER"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "The consecutive differences are all 5, so the sequence is arithmetic.",
         "ru": "Все соседние разности равны 5, поэтому последовательность арифметическая.",
@@ -82,20 +82,20 @@
         {
           "key": "A",
           "text": {
-            "en": "Arithmetic progression",
-            "ru": "Арифметическая прогрессия",
-            "uz": "Arifmetik progressiya"
-          },
-          "diagnostic_code": "SER02_AP_STRUCTURE"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "Geometric progression",
             "ru": "Геометрическая прогрессия",
             "uz": "Geometrik progressiya"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Arithmetic progression",
+            "ru": "Арифметическая прогрессия",
+            "uz": "Arifmetik progressiya"
+          },
+          "diagnostic_code": "SER02_AP_STRUCTURE"
         },
         {
           "key": "C",
@@ -116,7 +116,7 @@
           "diagnostic_code": "SER02_NEITHER"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "Each term is obtained by multiplying by 1/3, so the common ratio is constant and the sequence is geometric.",
         "ru": "Каждый следующий член получается умножением на 1/3, поэтому отношение постоянно и последовательность геометрическая.",
@@ -161,23 +161,23 @@
         {
           "key": "C",
           "text": {
-            "en": "Neither",
-            "ru": "Ни одна из них",
-            "uz": "Hech biri"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "Both arithmetic and geometric",
             "ru": "И арифметическая, и геометрическая",
             "uz": "Ham arifmetik, ham geometrik"
           },
           "diagnostic_code": "SER02_NEITHER"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Neither",
+            "ru": "Ни одна из них",
+            "uz": "Hech biri"
+          },
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "D",
       "explanation": {
         "en": "The differences 2,4,6 are not constant, and the ratios 2,2,7/4 are not constant. It is neither AP nor GP.",
         "ru": "Разности 2,4,6 не постоянны, и отношения 2,2,7/4 тоже не постоянны. Это ни AP, ни GP.",
@@ -204,20 +204,20 @@
         {
           "key": "A",
           "text": {
-            "en": "Consecutive differences are equal.",
-            "ru": "Разности соседних членов равны.",
-            "uz": "Ketma-ket hadlar ayirmalari teng."
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "Consecutive ratios are equal.",
             "ru": "Отношения соседних членов равны.",
             "uz": "Ketma-ket hadlar nisbatlari teng."
           },
           "diagnostic_code": "SER02_DIFF_RATIO"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Consecutive differences are equal.",
+            "ru": "Разности соседних членов равны.",
+            "uz": "Ketma-ket hadlar ayirmalari teng."
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -238,7 +238,7 @@
           "diagnostic_code": "SER02_AP_STRUCTURE"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "An arithmetic progression is defined by a constant difference between consecutive terms.",
         "ru": "Арифметическая прогрессия определяется постоянной разностью соседних членов.",
@@ -317,20 +317,20 @@
         {
           "key": "B",
           "text": {
-            "en": "Arithmetic",
-            "ru": "Арифметическая",
-            "uz": "Arifmetik"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "Neither",
             "ru": "Ни одна",
             "uz": "Hech biri"
           },
           "diagnostic_code": "SER02_AP_STRUCTURE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Arithmetic",
+            "ru": "Арифметическая",
+            "uz": "Arifmetik"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -342,7 +342,7 @@
           "diagnostic_code": "SER02_AP_STRUCTURE"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "Equal consecutive differences are exactly the defining structure of an arithmetic progression.",
         "ru": "Равные соседние разности — это определяющее свойство арифметической прогрессии.",
@@ -369,20 +369,20 @@
         {
           "key": "A",
           "text": {
-            "en": "3, 6, 9, 12, ...",
-            "ru": "3, 6, 9, 12, ...",
-            "uz": "3, 6, 9, 12, ..."
-          },
-          "diagnostic_code": "SER02_AP_STRUCTURE"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "3, 6, 12, 24, ...",
             "ru": "3, 6, 12, 24, ...",
             "uz": "3, 6, 12, 24, ..."
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3, 6, 9, 12, ...",
+            "ru": "3, 6, 9, 12, ...",
+            "uz": "3, 6, 9, 12, ..."
+          },
+          "diagnostic_code": "SER02_AP_STRUCTURE"
         },
         {
           "key": "C",
@@ -403,7 +403,7 @@
           "diagnostic_code": "SER02_GP_STRUCTURE"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "3,6,12,24 has constant ratio 2. The other sequences do not have one constant ratio.",
         "ru": "У 3,6,12,24 постоянное отношение 2. У остальных последовательностей постоянного отношения нет.",
@@ -491,23 +491,23 @@
         {
           "key": "C",
           "text": {
-            "en": "Both arithmetic and geometric",
-            "ru": "И арифметическая, и геометрическая",
-            "uz": "Ham arifmetik, ham geometrik"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "Neither",
             "ru": "Ни одна",
             "uz": "Hech biri"
           },
           "diagnostic_code": "SER02_NEITHER"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Both arithmetic and geometric",
+            "ru": "И арифметическая, и геометрическая",
+            "uz": "Ham arifmetik, ham geometrik"
+          },
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "D",
       "explanation": {
         "en": "The common difference is 0, so it is arithmetic. The common ratio is 1, so it is also geometric.",
         "ru": "Общая разность равна 0, значит последовательность арифметическая. Общее отношение равно 1, значит она также геометрическая.",
@@ -543,20 +543,20 @@
         {
           "key": "B",
           "text": {
-            "en": "16, 8, 4, 2, ...",
-            "ru": "16, 8, 4, 2, ...",
-            "uz": "16, 8, 4, 2, ..."
-          },
-          "diagnostic_code": "SER02_GP_STRUCTURE"
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "1, 4, 9, 16, ...",
             "ru": "1, 4, 9, 16, ...",
             "uz": "1, 4, 9, 16, ..."
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "16, 8, 4, 2, ...",
+            "ru": "16, 8, 4, 2, ...",
+            "uz": "16, 8, 4, 2, ..."
+          },
+          "diagnostic_code": "SER02_GP_STRUCTURE"
         },
         {
           "key": "D",
@@ -568,7 +568,7 @@
           "diagnostic_code": "SER02_NEITHER"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "B",
       "explanation": {
         "en": "1,4,9,16 has differences 3,5,7 and non-constant ratios, so it is neither. The other choices are AP, GP, or both.",
         "ru": "У 1,4,9,16 разности 3,5,7 и непостоянные отношения, поэтому это ни AP, ни GP. Остальные варианты — AP, GP или обе.",
