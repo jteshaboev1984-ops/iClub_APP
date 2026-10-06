@@ -21,20 +21,20 @@
         {
           "key": "A",
           "text": {
-            "en": "The tangent gradient is −3.",
-            "ru": "Градиент касательной равен −3.",
-            "uz": "Urinma gradienti −3."
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "The tangent gradient is 4.",
             "ru": "Градиент касательной равен 4.",
             "uz": "Urinma gradienti 4."
           },
           "diagnostic_code": "DIF01_AVERAGE_INSTANT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "The tangent gradient is −3.",
+            "ru": "Градиент касательной равен −3.",
+            "uz": "Urinma gradienti −3."
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -55,7 +55,7 @@
           "diagnostic_code": "DIF01_RATE_SIGN"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "f′(4) is the gradient of the tangent at x=4. Therefore the tangent gradient is −3.",
         "ru": "f′(4) — это градиент касательной при x=4. Поэтому градиент касательной равен −3.",
@@ -82,11 +82,11 @@
         {
           "key": "A",
           "text": {
-            "en": "[f(a+h)−f(a)]/h",
-            "ru": "[f(a+h)−f(a)]/h",
-            "uz": "[f(a+h)−f(a)]/h"
+            "en": "f(a+h)/h",
+            "ru": "f(a+h)/h",
+            "uz": "f(a+h)/h"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF01_DIFFERENCE_QUOTIENT"
         },
         {
           "key": "B",
@@ -109,14 +109,14 @@
         {
           "key": "D",
           "text": {
-            "en": "f(a+h)/h",
-            "ru": "f(a+h)/h",
-            "uz": "f(a+h)/h"
+            "en": "[f(a+h)−f(a)]/h",
+            "ru": "[f(a+h)−f(a)]/h",
+            "uz": "[f(a+h)−f(a)]/h"
           },
-          "diagnostic_code": "DIF01_DIFFERENCE_QUOTIENT"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "Average gradient is change in y divided by change in x: [f(a+h)−f(a)]/[(a+h)−a]=[f(a+h)−f(a)]/h.",
         "ru": "Средний градиент — изменение y, делённое на изменение x: [f(a+h)−f(a)]/[(a+h)−a]=[f(a+h)−f(a)]/h.",
@@ -241,11 +241,11 @@
         {
           "key": "A",
           "text": {
-            "en": "Q is decreasing at an instantaneous rate of 4 units per unit time.",
-            "ru": "Q мгновенно уменьшается со скоростью 4 единицы за единицу времени.",
-            "uz": "Q oniy ravishda vaqt birligiga 4 birlik tezlik bilan kamaymoqda."
+            "en": "Q is increasing at a rate of 4.",
+            "ru": "Q увеличивается со скоростью 4.",
+            "uz": "Q 4 tezlik bilan o‘smoqda."
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF01_RATE_SIGN"
         },
         {
           "key": "B",
@@ -259,11 +259,11 @@
         {
           "key": "C",
           "text": {
-            "en": "Q is increasing at a rate of 4.",
-            "ru": "Q увеличивается со скоростью 4.",
-            "uz": "Q 4 tezlik bilan o‘smoqda."
+            "en": "Q is decreasing at an instantaneous rate of 4 units per unit time.",
+            "ru": "Q мгновенно уменьшается со скоростью 4 единицы за единицу времени.",
+            "uz": "Q oniy ravishda vaqt birligiga 4 birlik tezlik bilan kamaymoqda."
           },
-          "diagnostic_code": "DIF01_RATE_SIGN"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -275,7 +275,7 @@
           "diagnostic_code": "DIF01_AVERAGE_INSTANT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "A negative derivative means the quantity is decreasing locally. Its instantaneous rate of change at t=6 is −4.",
         "ru": "Отрицательная производная означает локальное уменьшение. Мгновенная скорость изменения при t=6 равна −4.",
@@ -302,20 +302,20 @@
         {
           "key": "A",
           "text": {
-            "en": "It approaches the tangent gradient f′(a).",
-            "ru": "Он стремится к градиенту касательной f′(a).",
-            "uz": "U urinma gradienti f′(a) ga intiladi."
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "It always approaches 0.",
             "ru": "Он всегда стремится к 0.",
             "uz": "U har doim 0 ga intiladi."
           },
           "diagnostic_code": "DIF01_CANCEL_H"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "It approaches the tangent gradient f′(a).",
+            "ru": "Он стремится к градиенту касательной f′(a).",
+            "uz": "U urinma gradienti f′(a) ga intiladi."
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -336,7 +336,7 @@
           "diagnostic_code": "DIF01_AVERAGE_INSTANT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "The derivative is defined as the limiting secant gradient. As h→0, the second point approaches the first and the secant gradient approaches the tangent gradient.",
         "ru": "Производная определяется как предел градиента секущей. При h→0 вторая точка приближается к первой, и градиент секущей стремится к градиенту касательной.",
@@ -400,20 +400,20 @@
         {
           "key": "A",
           "text": {
-            "en": "3",
-            "ru": "3",
-            "uz": "3"
-          },
-          "diagnostic_code": "DIF01_DIFFERENCE_QUOTIENT"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "5",
             "ru": "5",
             "uz": "5"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
+          },
+          "diagnostic_code": "DIF01_DIFFERENCE_QUOTIENT"
         },
         {
           "key": "C",
@@ -434,7 +434,7 @@
           "diagnostic_code": "DIF01_CANCEL_H"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "The quotient is h+(2+c). Since it equals h+7, 2+c=7 and c=5.",
         "ru": "Разностное отношение равно h+(2+c). Так как оно равно h+7, имеем 2+c=7 и c=5.",
