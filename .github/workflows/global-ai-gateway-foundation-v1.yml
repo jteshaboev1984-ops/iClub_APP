@@ -1,0 +1,131 @@
+name: Global AI Gateway Foundation v1
+
+on:
+  pull_request:
+    branches:
+      - feat/global-ai-tariffs-foundation-v1
+      - main
+    paths:
+      - 'supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql'
+      - 'supabase/reversions/20261006113000_iclub_global_ai_gateway_foundation_v1_revert.sql'
+      - 'supabase/tests/global_ai_gateway_foundation_v1_matrix.sql'
+      - 'supabase/functions/global-ai/**'
+      - '.github/scripts/global_ai_gateway_foundation_v1_contract.js'
+      - '.github/workflows/global-ai-gateway-foundation-v1.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql'
+      - 'supabase/reversions/20261006113000_iclub_global_ai_gateway_foundation_v1_revert.sql'
+      - 'supabase/tests/global_ai_gateway_foundation_v1_matrix.sql'
+      - 'supabase/functions/global-ai/**'
+      - '.github/scripts/global_ai_gateway_foundation_v1_contract.js'
+      - '.github/workflows/global-ai-gateway-foundation-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gateway-safety:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostic log
+        run: printf 'Global AI gateway foundation v1 CI\n' > global-ai-gateway.log
+
+      - name: Bootstrap isolated Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a global-ai-gateway.log
+
+      - name: Apply Global AI tariff foundation dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql 2>&1 | tee -a global-ai-gateway.log
+
+      - name: Static production-preservation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          migration='supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql'
+          ! grep -Eiq '\b(update|delete[[:space:]]+from|truncate)[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
+          ! grep -Eiq '\binsert[[:space:]]+into[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
+          ! grep -Eiq '\b(master(y|ies)|readiness|progression|placement)[[:space:]]*=' "$migration"
+
+      - name: Apply dormant Global AI gateway foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql 2>&1 | tee -a global-ai-gateway.log
+
+      - name: Run SQL gateway safety matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c global_ai.gateway_isolated=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/global_ai_gateway_foundation_v1_matrix.sql 2>&1 | tee -a global-ai-gateway.log
+
+      - name: Validate static gateway contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/global_ai_gateway_foundation_v1_contract.js
+          node .github/scripts/global_ai_gateway_foundation_v1_contract.js 2>&1 | tee -a global-ai-gateway.log
+
+      - name: Type-check Global AI Edge Function
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Deno check
+        run: deno check supabase/functions/global-ai/index.ts
+
+      - name: Prove safe pre-activation gateway rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/reversions/20261006113000_iclub_global_ai_gateway_foundation_v1_revert.sql 2>&1 | tee -a global-ai-gateway.log
+          test "$(psql -Atqc "select to_regclass('private.iclub_global_ai_gateway_policy') is null")" = 't'
+          test "$(psql -Atqc "select to_regprocedure('public.get_iclub_global_ai_guard_service_v1(uuid,text,text,text,text,text,integer)') is null")" = 't'
+          test "$(psql -Atqc "select to_regclass('private.iclub_plan_policies') is not null")" = 't'
+
+      - name: Mark gateway foundation GREEN
+        run: echo 'GLOBAL AI GATEWAY FOUNDATION V1 GREEN' | tee -a global-ai-gateway.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: global-ai-gateway-foundation-v1
+          path: global-ai-gateway.log
+          if-no-files-found: error
+          retention-days: 7
