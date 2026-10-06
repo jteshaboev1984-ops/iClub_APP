@@ -1,0 +1,126 @@
+name: Global AI Tariffs Foundation v1
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql'
+      - 'supabase/reversions/20261006102000_iclub_global_ai_tariff_foundation_v1_revert.sql'
+      - 'supabase/tests/global_ai_tariff_foundation_v1_matrix.sql'
+      - 'docs/global-ai-tariffs-v1-implementation-plan.md'
+      - '.github/workflows/global-ai-tariffs-foundation-v1.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql'
+      - 'supabase/reversions/20261006102000_iclub_global_ai_tariff_foundation_v1_revert.sql'
+      - 'supabase/tests/global_ai_tariff_foundation_v1_matrix.sql'
+      - 'docs/global-ai-tariffs-v1-implementation-plan.md'
+      - '.github/workflows/global-ai-tariffs-foundation-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  foundation-safety:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostic log
+        run: printf 'Global AI + tariffs foundation v1 CI\n' > global-ai-foundation.log
+
+      - name: Bootstrap isolated Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a global-ai-foundation.log
+
+      - name: Static production-preservation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          migration='supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql'
+          ! grep -Eiq '\b(update|delete[[:space:]]+from|truncate)[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
+          ! grep -Eiq '\binsert[[:space:]]+into[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
+          grep -q "('plus','global_ai_tariffs_v1',35000,3,2,true,'plus_v1'" "$migration"
+          grep -q "('pro','global_ai_tariffs_v1',50000,null,2,true,'pro_v1'" "$migration"
+          grep -q "('free_v1','global_ai_tariffs_v1',18000,3" "$migration"
+          grep -q "('plus_v1','global_ai_tariffs_v1',18000,9" "$migration"
+          grep -q "('pro_v1','global_ai_tariffs_v1',18000,14" "$migration"
+
+      - name: Apply dormant foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql 2>&1 | tee -a global-ai-foundation.log
+
+      - name: Prove default state is dormant and unassigned
+        shell: bash
+        run: |
+          set -euo pipefail
+          ui="$(psql -Atqc "select ui_enabled from private.iclub_global_ai_runtime_config where id=1")"
+          gateway="$(psql -Atqc "select gateway_enabled from private.iclub_global_ai_runtime_config where id=1")"
+          generation="$(psql -Atqc "select generation_enabled from private.iclub_global_ai_runtime_config where id=1")"
+          kill="$(psql -Atqc "select kill_switch from private.iclub_global_ai_runtime_config where id=1")"
+          assigned="$(psql -Atqc "select count(*) from private.iclub_subscription_entitlements")"
+          echo "UI=$ui GATEWAY=$gateway GENERATION=$generation KILL=$kill ASSIGNED=$assigned" | tee -a global-ai-foundation.log
+          test "$ui" = 'f'
+          test "$gateway" = 'f'
+          test "$generation" = 'f'
+          test "$kill" = 't'
+          test "$assigned" = '0'
+
+      - name: Run isolated Free Plus Pro and five-hour usage matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c global_ai.foundation_isolated=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/global_ai_tariff_foundation_v1_matrix.sql 2>&1 | tee -a global-ai-foundation.log
+
+      - name: Prove safe pre-activation rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/reversions/20261006102000_iclub_global_ai_tariff_foundation_v1_revert.sql 2>&1 | tee -a global-ai-foundation.log
+          test "$(psql -Atqc "select to_regclass('private.iclub_plan_policies') is null")" = 't'
+          test "$(psql -Atqc "select to_regprocedure('public.reserve_iclub_ai_usage_service_v1(uuid,uuid,text,text)') is null")" = 't'
+
+      - name: Mark foundation GREEN
+        run: echo 'GLOBAL AI TARIFFS FOUNDATION V1 GREEN' | tee -a global-ai-foundation.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: global-ai-tariffs-foundation-v1
+          path: global-ai-foundation.log
+          if-no-files-found: error
+          retention-days: 7
