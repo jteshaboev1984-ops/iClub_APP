@@ -16,6 +16,8 @@ assert(migration.includes("v_cfg.subject_limits_mode<>'shadow'"), 'browser selec
 assert(migration.includes('private.iclub_rollout_allows_user_v1(v_uid,v_runtime.plans_rollout_mode)'), 'server canary rollout gate missing');
 assert(migration.includes("'access_unchanged',true"), 'shadow preservation marker missing');
 assert(migration.includes('public.set_iclub_subject_slot_service_v1('), 'browser wrapper is not delegated to governed slot service');
+assert(migration.includes("v_cfg.subject_limits_mode<>'shadow'"), 'beta browser write path is not shadow-only');
+assert(!migration.includes('finalize_iclub_subject_selection_service_v1('), 'beta UI must not finalize grandfather migration');
 
 for (const forbidden of [
   'update public.user_subjects',
@@ -41,6 +43,7 @@ assert(app.includes('function canShowProfileSubjectAccess()'), 'subject-access s
 assert(app.includes('raw === "subject-access" && !canShowProfileSubjectAccess()'), 'stale subject-access stack does not fail closed');
 assert(app.includes('function openProfileSubjectAccess()'), 'subject-access open helper missing');
 assert(app.includes('action === "profile-subject-access"'), 'subject-access action binding missing');
+assert(app.includes('raw === "subject-access" && !canShowProfileSubjectAccess()'), 'stale subject-access screen does not fail closed when beta UI is disabled');
 
 for (const token of [
   'get_iclub_subject_selection_bootstrap_v1',
