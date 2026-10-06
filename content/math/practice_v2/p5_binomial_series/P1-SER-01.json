@@ -1,0 +1,680 @@
+{
+  "version": "practice_v2_p5_binomial_series_draft_v0.1",
+  "skill": "P1-SER-01",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q294",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "coefficient",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "Enter the coefficient of x² in (1+2x)⁵.",
+        "ru": "Введите коэффициент при x² в разложении (1+2x)⁵.",
+        "uz": "(1+2x)⁵ yoyilmasida x² oldidagi koeffitsiyentni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "40",
+        "accepted_examples": [
+          "40",
+          " 40 "
+        ],
+        "rejected_examples": [
+          "10",
+          "20",
+          "80"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The x² term uses r=2: C(5,2)(2x)²=10·4x²=40x².",
+        "ru": "Для члена с x² берём r=2: C(5,2)(2x)²=10·4x²=40x².",
+        "uz": "x² hadi uchun r=2: C(5,2)(2x)²=10·4x²=40x²."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q295",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "term_number",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "What is the third term in the expansion of (3+x)⁴?",
+        "ru": "Каков третий член разложения (3+x)⁴?",
+        "uz": "(3+x)⁴ yoyilmasining uchinchi hadi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "12x",
+            "ru": "12x",
+            "uz": "12x"
+          },
+          "diagnostic_code": "SER01_TERM_INDEX"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "54x²",
+            "ru": "54x²",
+            "uz": "54x²"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "18x²",
+            "ru": "18x²",
+            "uz": "18x²"
+          },
+          "diagnostic_code": "SER01_BINOMIAL_COEFF"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "4x³",
+            "ru": "4x³",
+            "uz": "4x³"
+          },
+          "diagnostic_code": "SER01_TERM_INDEX"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The third term has r=2: C(4,2)3²x²=6·9x²=54x².",
+        "ru": "Третий член соответствует r=2: C(4,2)3²x²=6·9x²=54x².",
+        "uz": "Uchinchi had uchun r=2: C(4,2)3²x²=6·9x²=54x²."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q296",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "signed_coefficient",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "Enter the coefficient of x³ in (2−x)⁵.",
+        "ru": "Введите коэффициент при x³ в разложении (2−x)⁵.",
+        "uz": "(2−x)⁵ yoyilmasida x³ oldidagi koeffitsiyentni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-40",
+        "accepted_examples": [
+          "-40",
+          "−40",
+          " -40 "
+        ],
+        "rejected_examples": [
+          "40",
+          "80",
+          "-80"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "40",
+          "diagnostic_code": "SER01_SIGN"
+        }
+      ],
+      "explanation": {
+        "en": "For r=3, C(5,3)2²(−x)³=10·4·(−x³)=−40x³.",
+        "ru": "При r=3: C(5,3)2²(−x)³=10·4·(−x³)=−40x³.",
+        "uz": "r=3 uchun C(5,3)2²(−x)³=10·4·(−x³)=−40x³."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q297",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "term_number",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "What is the fourth term in the expansion of (1−3x)⁶?",
+        "ru": "Каков четвёртый член разложения (1−3x)⁶?",
+        "uz": "(1−3x)⁶ yoyilmasining to‘rtinchi hadi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−540x³",
+            "ru": "−540x³",
+            "uz": "−540x³"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "540x³",
+            "ru": "540x³",
+            "uz": "540x³"
+          },
+          "diagnostic_code": "SER01_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−405x⁴",
+            "ru": "−405x⁴",
+            "uz": "−405x⁴"
+          },
+          "diagnostic_code": "SER01_TERM_INDEX"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−60x³",
+            "ru": "−60x³",
+            "uz": "−60x³"
+          },
+          "diagnostic_code": "SER01_MULTIPLIER_POWER"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The fourth term has r=3: C(6,3)(−3x)³=20(−27x³)=−540x³.",
+        "ru": "Четвёртый член соответствует r=3: C(6,3)(−3x)³=20(−27x³)=−540x³.",
+        "uz": "To‘rtinchi had uchun r=3: C(6,3)(−3x)³=20(−27x³)=−540x³."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q298",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "coefficient",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "Enter the coefficient of x⁴ in (2+3x)⁶.",
+        "ru": "Введите коэффициент при x⁴ в разложении (2+3x)⁶.",
+        "uz": "(2+3x)⁶ yoyilmasida x⁴ oldidagi koeffitsiyentni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4860",
+        "accepted_examples": [
+          "4860",
+          " 4860 "
+        ],
+        "rejected_examples": [
+          "1215",
+          "2430",
+          "7290"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "For r=4, the coefficient is C(6,4)2²3⁴=15·4·81=4860.",
+        "ru": "При r=4 коэффициент равен C(6,4)2²3⁴=15·4·81=4860.",
+        "uz": "r=4 uchun koeffitsiyent C(6,4)2²3⁴=15·4·81=4860."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q299",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "parameter_from_coefficient",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "In (1+kx)⁵, the coefficient of x² is 160 and k>0. Enter k.",
+        "ru": "В разложении (1+kx)⁵ коэффициент при x² равен 160, причём k>0. Введите k.",
+        "uz": "(1+kx)⁵ yoyilmasida x² koeffitsiyenti 160 va k>0. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "-4",
+          "2",
+          "8"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-4",
+          "diagnostic_code": "SER01_PARAMETER"
+        }
+      ],
+      "explanation": {
+        "en": "The x² coefficient is C(5,2)k²=10k². So 10k²=160, k²=16 and k=4 because k>0.",
+        "ru": "Коэффициент при x² равен C(5,2)k²=10k². Поэтому 10k²=160, k²=16 и k=4, так как k>0.",
+        "uz": "x² koeffitsiyenti C(5,2)k²=10k². Demak 10k²=160, k²=16 va k>0 bo‘lgani uchun k=4."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q300",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "constant_term",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "What is the term independent of x in (x+2/x²)⁶?",
+        "ru": "Каков член, не зависящий от x, в разложении (x+2/x²)⁶?",
+        "uz": "(x+2/x²)⁶ yoyilmasida x ga bog‘liq bo‘lmagan had qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "15",
+            "ru": "15",
+            "uz": "15"
+          },
+          "diagnostic_code": "SER01_BINOMIAL_COEFF"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "30",
+            "ru": "30",
+            "uz": "30"
+          },
+          "diagnostic_code": "SER01_MULTIPLIER_POWER"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "60",
+            "ru": "60",
+            "uz": "60"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "120",
+            "ru": "120",
+            "uz": "120"
+          },
+          "diagnostic_code": "SER01_CONSTANT_TERM"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "The general term has x-power 6−r−2r=6−3r. Set this to 0, giving r=2. The constant term is C(6,2)2²=15·4=60.",
+        "ru": "Степень x в общем члене равна 6−r−2r=6−3r. Приравниваем к 0: r=2. Свободный член C(6,2)2²=15·4=60.",
+        "uz": "Umumiy hadda x darajasi 6−r−2r=6−3r. Uni 0 ga tenglasak r=2. O‘zgarmas had C(6,2)2²=15·4=60."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q301",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "general_term",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "Which expression is the (r+1)th term of (2−3x)⁷?",
+        "ru": "Какое выражение задаёт (r+1)-й член разложения (2−3x)⁷?",
+        "uz": "(2−3x)⁷ yoyilmasining (r+1)-hadi qaysi ifoda?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "C(7,r)2^(7−r)(−3x)^r",
+            "ru": "C(7,r)2^(7−r)(−3x)^r",
+            "uz": "C(7,r)2^(7−r)(−3x)^r"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "C(7,r)2^r(−3x)^(7−r)",
+            "ru": "C(7,r)2^r(−3x)^(7−r)",
+            "uz": "C(7,r)2^r(−3x)^(7−r)"
+          },
+          "diagnostic_code": "SER01_POWER_PATTERN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "C(7,r+1)2^(7−r)(−3x)^r",
+            "ru": "C(7,r+1)2^(7−r)(−3x)^r",
+            "uz": "C(7,r+1)2^(7−r)(−3x)^r"
+          },
+          "diagnostic_code": "SER01_TERM_INDEX"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "C(7,r)2^(7−r)(3x)^r",
+            "ru": "C(7,r)2^(7−r)(3x)^r",
+            "uz": "C(7,r)2^(7−r)(3x)^r"
+          },
+          "diagnostic_code": "SER01_SIGN"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "For (a+b)^n, term r+1 is C(n,r)a^(n−r)b^r. Here a=2 and b=−3x.",
+        "ru": "Для (a+b)^n член r+1 равен C(n,r)a^(n−r)b^r. Здесь a=2, b=−3x.",
+        "uz": "(a+b)^n uchun r+1-had C(n,r)a^(n−r)b^r. Bu yerda a=2 va b=−3x."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q302",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "coefficient_sum",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "Enter the sum of all coefficients in the expansion of (2+x)⁵.",
+        "ru": "Введите сумму всех коэффициентов в разложении (2+x)⁵.",
+        "uz": "(2+x)⁵ yoyilmasidagi barcha koeffitsiyentlar yig‘indisini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "243",
+        "accepted_examples": [
+          "243",
+          " 243 "
+        ],
+        "rejected_examples": [
+          "32",
+          "64",
+          "125"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The sum of coefficients is obtained by setting x=1: (2+1)⁵=3⁵=243.",
+        "ru": "Сумму коэффициентов получаем при x=1: (2+1)⁵=3⁵=243.",
+        "uz": "Koeffitsiyentlar yig‘indisi uchun x=1 qo‘yamiz: (2+1)⁵=3⁵=243."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q303",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "coefficient",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "Enter the coefficient of x⁶ in (1+x)⁸.",
+        "ru": "Введите коэффициент при x⁶ в разложении (1+x)⁸.",
+        "uz": "(1+x)⁸ yoyilmasida x⁶ oldidagi koeffitsiyentni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "28",
+        "accepted_examples": [
+          "28",
+          " 28 "
+        ],
+        "rejected_examples": [
+          "8",
+          "56",
+          "70"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The coefficient is C(8,6)=C(8,2)=28.",
+        "ru": "Коэффициент равен C(8,6)=C(8,2)=28.",
+        "uz": "Koeffitsiyent C(8,6)=C(8,2)=28."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q304",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "parameter_from_coefficient",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "In (1+kx)⁷, the coefficient of x is 35. Enter k.",
+        "ru": "В разложении (1+kx)⁷ коэффициент при x равен 35. Введите k.",
+        "uz": "(1+kx)⁷ yoyilmasida x koeffitsiyenti 35. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "5",
+        "accepted_examples": [
+          "5",
+          " 5 "
+        ],
+        "rejected_examples": [
+          "7",
+          "35",
+          "-5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The x coefficient is C(7,1)k=7k. So 7k=35 and k=5.",
+        "ru": "Коэффициент при x равен C(7,1)k=7k. Поэтому 7k=35 и k=5.",
+        "uz": "x koeffitsiyenti C(7,1)k=7k. Demak 7k=35 va k=5."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q305",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "coefficient",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "What is the coefficient of x³ in (3+2x)⁴?",
+        "ru": "Каков коэффициент при x³ в разложении (3+2x)⁴?",
+        "uz": "(3+2x)⁴ yoyilmasida x³ oldidagi koeffitsiyent qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "32",
+            "ru": "32",
+            "uz": "32"
+          },
+          "diagnostic_code": "SER01_BINOMIAL_COEFF"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "48",
+            "ru": "48",
+            "uz": "48"
+          },
+          "diagnostic_code": "SER01_MULTIPLIER_POWER"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "96",
+            "ru": "96",
+            "uz": "96"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "192",
+            "ru": "192",
+            "uz": "192"
+          },
+          "diagnostic_code": "SER01_POWER_PATTERN"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "For r=3, the coefficient is C(4,3)3¹2³=4·3·8=96.",
+        "ru": "При r=3 коэффициент равен C(4,3)3¹2³=4·3·8=96.",
+        "uz": "r=3 uchun koeffitsiyent C(4,3)3¹2³=4·3·8=96."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q306",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "find_exponent",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "The coefficient of x in (1+3x)ⁿ is 21, where n is a positive integer. Enter n.",
+        "ru": "Коэффициент при x в (1+3x)ⁿ равен 21, где n — положительное целое число. Введите n.",
+        "uz": "(1+3x)ⁿ da x koeffitsiyenti 21, n musbat butun son. n ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "7",
+        "accepted_examples": [
+          "7",
+          " 7 "
+        ],
+        "rejected_examples": [
+          "6",
+          "9",
+          "21"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The x coefficient is C(n,1)3=3n. So 3n=21 and n=7.",
+        "ru": "Коэффициент при x равен C(n,1)3=3n. Поэтому 3n=21 и n=7.",
+        "uz": "x koeffitsiyenti C(n,1)3=3n. Demak 3n=21 va n=7."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q307",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-01",
+      "secondary_skills": [],
+      "role": "mixed_product",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch6 Binomial expansion, printed pp. 109–116",
+      "question": {
+        "en": "What is the coefficient of x² in (1+x)⁴(1−x)?",
+        "ru": "Каков коэффициент при x² в выражении (1+x)⁴(1−x)?",
+        "uz": "(1+x)⁴(1−x) ifodada x² oldidagi koeffitsiyent qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−2",
+            "ru": "−2",
+            "uz": "−2"
+          },
+          "diagnostic_code": "SER01_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "6",
+            "ru": "6",
+            "uz": "6"
+          },
+          "diagnostic_code": "SER01_TERM_INDEX"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "10",
+            "ru": "10",
+            "uz": "10"
+          },
+          "diagnostic_code": "SER01_BINOMIAL_COEFF"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The x² coefficient is 6 from (1+x)⁴ times 1, plus 4 from the x term multiplied by −x: 6−4=2.",
+        "ru": "Коэффициент при x²: 6 из (1+x)⁴, умноженное на 1, и −4 от члена 4x, умноженного на −x. Получаем 6−4=2.",
+        "uz": "x² koeffitsiyenti (1+x)⁴ dan 6·1 va 4x ni −x ga ko‘paytirishdan −4: 6−4=2."
+      },
+      "ai_source_skill": "P1-SER-01",
+      "status": "draft"
+    }
+  ]
+}
