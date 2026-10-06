@@ -1,0 +1,215 @@
+/* iClub Global AI learner shell v1.
+   Scoped, dormant unless server bootstrap explicitly allows visibility. */
+
+.iclub-global-ai-root {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.iclub-global-ai-mark {
+  position: fixed;
+  right: 14px;
+  bottom: calc(78px + var(--safe-bottom));
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.iclub-global-ai-mark:active {
+  transform: translateY(1px);
+}
+
+.iclub-global-ai-mark:focus-visible,
+.iclub-global-ai-close:focus-visible {
+  outline: 3px solid rgba(47, 111, 214, 0.25);
+  outline-offset: 2px;
+}
+
+.iclub-global-ai-mark-logo {
+  width: 29px;
+  height: 29px;
+  object-fit: contain;
+  display: block;
+}
+
+.iclub-global-ai-mark.is-assessment-blocked {
+  opacity: 0.58;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+}
+
+.iclub-global-ai-panel {
+  position: fixed;
+  right: 12px;
+  bottom: calc(76px + var(--safe-bottom));
+  width: min(380px, calc(100vw - 24px));
+  max-height: min(70vh, 620px);
+  border-radius: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  background: rgba(255, 255, 255, 0.99);
+  box-shadow: 0 22px 54px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.iclub-global-ai-panel[hidden] {
+  display: none !important;
+}
+
+.iclub-global-ai-head {
+  min-height: 62px;
+  padding: 11px 12px 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(248, 250, 252, 0.94);
+}
+
+.iclub-global-ai-head-copy {
+  min-width: 0;
+}
+
+.iclub-global-ai-title {
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.iclub-global-ai-subtitle {
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.25;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.iclub-global-ai-close {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.055);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.iclub-global-ai-close svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.iclub-global-ai-body {
+  min-height: 190px;
+  padding: 18px 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+}
+
+.iclub-global-ai-empty {
+  max-width: 290px;
+  margin: 20px auto;
+  text-align: center;
+}
+
+.iclub-global-ai-empty-title {
+  font-size: 16px;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.iclub-global-ai-empty-copy {
+  margin-top: 7px;
+  font-size: 13px;
+  line-height: 1.42;
+  color: var(--muted);
+}
+
+.iclub-global-ai-composer {
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+}
+
+.iclub-global-ai-input-shell {
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 15px;
+  background: rgba(248, 250, 252, 0.96);
+  color: rgba(100, 116, 139, 0.92);
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .iclub-global-ai-panel {
+    left: 10px;
+    right: 10px;
+    bottom: calc(74px + var(--safe-bottom));
+    width: auto;
+    max-height: min(70vh, 580px);
+    border-radius: 22px;
+  }
+}
+
+@media (max-width: 340px) {
+  .iclub-global-ai-mark {
+    right: 10px;
+  }
+
+  .iclub-global-ai-panel {
+    left: 8px;
+    right: 8px;
+  }
+
+  .iclub-global-ai-head {
+    padding-left: 12px;
+  }
+
+  .iclub-global-ai-body {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iclub-global-ai-mark,
+  .iclub-global-ai-panel {
+    transition: none !important;
+    animation: none !important;
+  }
+}
