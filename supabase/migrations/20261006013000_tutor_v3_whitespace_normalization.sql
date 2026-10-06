@@ -23,13 +23,13 @@ end
 $pre$;
 
 update private.exam_prep_ai_tutor_cards
-set main_explanation=btrim(main_explanation),
-    simple_explanation=btrim(simple_explanation),
-    alternative_explanation=btrim(alternative_explanation),
-    focus_explanation=btrim(focus_explanation),
+set main_explanation=regexp_replace(main_explanation,'^[[:space:]]+|[[:space:]]+$','','g'),
+    simple_explanation=regexp_replace(simple_explanation,'^[[:space:]]+|[[:space:]]+$','','g'),
+    alternative_explanation=regexp_replace(alternative_explanation,'^[[:space:]]+|[[:space:]]+$','','g'),
+    focus_explanation=regexp_replace(focus_explanation,'^[[:space:]]+|[[:space:]]+$','','g'),
     content_hash=md5(concat_ws('||',
-      content_version,title,btrim(main_explanation),btrim(simple_explanation),
-      btrim(alternative_explanation),btrim(focus_explanation),source_card_key
+      content_version,title,regexp_replace(main_explanation,'^[[:space:]]+|[[:space:]]+$','','g'),regexp_replace(simple_explanation,'^[[:space:]]+|[[:space:]]+$','','g'),
+      regexp_replace(alternative_explanation,'^[[:space:]]+|[[:space:]]+$','','g'),regexp_replace(focus_explanation,'^[[:space:]]+|[[:space:]]+$','','g'),source_card_key
     )),
     updated_at=now()
 where content_version='tutor_v3_learner_first';
@@ -62,10 +62,10 @@ begin
     from private.exam_prep_ai_tutor_cards
     where content_version='tutor_v3_learner_first'
       and (
-        main_explanation<>btrim(main_explanation)
-        or simple_explanation<>btrim(simple_explanation)
-        or alternative_explanation<>btrim(alternative_explanation)
-        or focus_explanation<>btrim(focus_explanation)
+        main_explanation<>regexp_replace(main_explanation,'^[[:space:]]+|[[:space:]]+$','','g')
+        or simple_explanation<>regexp_replace(simple_explanation,'^[[:space:]]+|[[:space:]]+$','','g')
+        or alternative_explanation<>regexp_replace(alternative_explanation,'^[[:space:]]+|[[:space:]]+$','','g')
+        or focus_explanation<>regexp_replace(focus_explanation,'^[[:space:]]+|[[:space:]]+$','','g')
       )
   ) then raise exception 'Tutor v3 whitespace normalization left leading/trailing whitespace'; end if;
 
