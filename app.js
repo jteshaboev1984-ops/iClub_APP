@@ -2130,7 +2130,7 @@ function getLessonDisplayTitle(lesson) {
     lastTourCertificateId: null
   },
   profile: {
-    stack: ["main"] // main | settings
+    stack: ["main"] // main | settings | plan
   },
 
   certificates: {
@@ -21675,20 +21675,20 @@ function bindTabbar() {
     return;
   }
 
-      // ✅ Profile back MUST work even if state.tab accidentally isn't "profile"
-const ps = document.getElementById("profile-settings");
-const psActive = !!(ps && ps.classList.contains("is-active") && ps.hidden !== true);
+      // ✅ Profile back MUST work even if state.tab accidentally isn't "profile".
+      // Any active inner Profile screen (Settings, Plan, future inner screens) returns safely to main.
+const activeProfileInner = document.querySelector("#view-profile .profile-screen.is-active:not(#profile-main)");
+const profileInnerActive = !!(activeProfileInner && activeProfileInner.hidden !== true);
 
-// 1) Если реально открыт экран настроек профиля — возвращаем на main напрямую
-if (psActive) {
+if (profileInnerActive) {
   state.tab = "profile";
   replaceProfile("main");     // stack=["main"] + showProfileScreen("main")
-  renderProfileMain();        // чтобы сразу перерисовать
+  renderProfileMain();        // immediate refresh
   updateTopbarForView("profile");
   return;
 }
 
-// 2) Обычный сценарий профиля
+// Обычный сценарий профиля
 if (state.tab === "profile") {
   popProfile();
   renderProfileStack();
