@@ -1,0 +1,501 @@
+{
+  "version": "practice_v2_p4_circular_trig_draft_v0.1",
+  "skill": "P1-TRI-01",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q244",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-01",
+      "secondary_skills": [],
+      "role": "reverse_period",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "The graph y=cos(kx), where x is in degrees and k>0, has period 120°. Enter k.",
+        "ru": "График y=cos(kx), где x измеряется в градусах и k>0, имеет период 120°. Введите k.",
+        "uz": "x darajalarda va k>0 bo‘lgan y=cos(kx) grafigining davri 120°. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "2",
+          "6",
+          "120"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "For y=cos(kx) in degrees, period=360°/k. Thus 360/k=120, so k=3.",
+        "ru": "Для y=cos(kx) в градусах период равен 360°/k. Поэтому 360/k=120 и k=3.",
+        "uz": "Darajalarda y=cos(kx) uchun davr=360°/k. Demak 360/k=120 va k=3."
+      },
+      "ai_source_skill": "P1-TRI-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q245",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-01",
+      "secondary_skills": [],
+      "role": "range_interpretation",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "What is the range of y=2cos x−3?",
+        "ru": "Какова область значений y=2cos x−3?",
+        "uz": "y=2cos x−3 ning qiymatlar oralig‘i qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−5≤y≤−1",
+            "ru": "−5≤y≤−1",
+            "uz": "−5≤y≤−1"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−3≤y≤2",
+            "ru": "−3≤y≤2",
+            "uz": "−3≤y≤2"
+          },
+          "diagnostic_code": "TRI01_AMPLITUDE_RANGE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−2≤y≤2",
+            "ru": "−2≤y≤2",
+            "uz": "−2≤y≤2"
+          },
+          "diagnostic_code": "TRI01_TRANSLATION_SCALE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "1≤y≤5",
+            "ru": "1≤y≤5",
+            "uz": "1≤y≤5"
+          },
+          "diagnostic_code": "TRI01_AMPLITUDE_RANGE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Since −1≤cos x≤1, multiplying by 2 gives −2≤2cos x≤2. Subtracting 3 gives −5≤y≤−1.",
+        "ru": "Так как −1≤cos x≤1, после умножения на 2 получаем −2≤2cos x≤2. Вычитая 3, получаем −5≤y≤−1.",
+        "uz": "−1≤cos x≤1. 2 ga ko‘paytirganda −2≤2cos x≤2, 3 ni ayirganda −5≤y≤−1."
+      },
+      "ai_source_skill": "P1-TRI-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q246",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-01",
+      "secondary_skills": [],
+      "role": "tan_asymptote",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "For y=tan(2x), where x is in degrees, enter the smallest positive x-coordinate of a vertical asymptote.",
+        "ru": "Для y=tan(2x), где x измеряется в градусах, введите наименьшую положительную x-координату вертикальной асимптоты.",
+        "uz": "x darajalarda bo‘lgan y=tan(2x) uchun eng kichik musbat vertikal asimptota x-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "45",
+        "accepted_examples": [
+          "45",
+          " 45 "
+        ],
+        "rejected_examples": [
+          "90",
+          "180",
+          "22.5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "tan u has an asymptote at u=90°. Set 2x=90°, giving x=45°.",
+        "ru": "tan u имеет асимптоту при u=90°. Из 2x=90° получаем x=45°.",
+        "uz": "tan u uchun asimptota u=90° da. 2x=90° dan x=45°."
+      },
+      "ai_source_skill": "P1-TRI-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q247",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-01",
+      "secondary_skills": [
+        "P1-FUN-06"
+      ],
+      "role": "feature_mapping",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "The graph y=sin x has a maximum at x=90°. Where is the corresponding maximum of y=sin(x−40°)+2?",
+        "ru": "График y=sin x имеет максимум при x=90°. Где находится соответствующий максимум графика y=sin(x−40°)+2?",
+        "uz": "y=sin x grafigi x=90° da maksimumga ega. y=sin(x−40°)+2 grafigidagi mos maksimum qayerda?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(50°,3)",
+            "ru": "(50°,3)",
+            "uz": "(50°,3)"
+          },
+          "diagnostic_code": "TRI01_TRANSLATION_SCALE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(130°,1)",
+            "ru": "(130°,1)",
+            "uz": "(130°,1)"
+          },
+          "diagnostic_code": "TRI01_TRANSLATION_SCALE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(130°,3)",
+            "ru": "(130°,3)",
+            "uz": "(130°,3)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(90°,3)",
+            "ru": "(90°,3)",
+            "uz": "(90°,3)"
+          },
+          "diagnostic_code": "TRI01_TRANSLATION_SCALE"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "x−40° shifts the sine graph 40° right, so 90° becomes 130°. The +2 raises the maximum value from 1 to 3.",
+        "ru": "x−40° сдвигает график синуса на 40° вправо, поэтому 90° переходит в 130°. +2 поднимает максимум с 1 до 3.",
+        "uz": "x−40° sinus grafigini 40° o‘ngga siljitadi, demak 90° →130°. +2 maksimum qiymatni 1 dan 3 ga ko‘taradi."
+      },
+      "ai_source_skill": "P1-TRI-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q248",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-01",
+      "secondary_skills": [],
+      "role": "period_interpretation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Which function has period 90°?",
+        "ru": "Какая функция имеет период 90°?",
+        "uz": "Qaysi funksiyaning davri 90°?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=sin 2x",
+            "ru": "y=sin 2x",
+            "uz": "y=sin 2x"
+          },
+          "diagnostic_code": "TRI01_PERIOD"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=cos 4x",
+            "ru": "y=cos 4x",
+            "uz": "y=cos 4x"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=tan x",
+            "ru": "y=tan x",
+            "uz": "y=tan x"
+          },
+          "diagnostic_code": "TRI01_PERIOD"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=cos(x/2)",
+            "ru": "y=cos(x/2)",
+            "uz": "y=cos(x/2)"
+          },
+          "diagnostic_code": "TRI01_PERIOD"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "For y=cos 4x, period=360°/4=90°.",
+        "ru": "Для y=cos 4x период=360°/4=90°.",
+        "uz": "y=cos 4x uchun davr=360°/4=90°."
+      },
+      "ai_source_skill": "P1-TRI-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q249",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-01",
+      "secondary_skills": [],
+      "role": "reverse_range",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "The range of y=3sin x+c is −1≤y≤5. Enter c.",
+        "ru": "Область значений y=3sin x+c равна −1≤y≤5. Введите c.",
+        "uz": "y=3sin x+c ning qiymatlar oralig‘i −1≤y≤5. c ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "2",
+        "accepted_examples": [
+          "2",
+          " 2 "
+        ],
+        "rejected_examples": [
+          "3",
+          "-2",
+          "4"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The midline is the average of the range endpoints: c=(−1+5)/2=2.",
+        "ru": "Средняя линия равна среднему концов диапазона: c=(−1+5)/2=2.",
+        "uz": "O‘rta chiziq qiymatlar oralig‘i uchlarining o‘rtachasi: c=(−1+5)/2=2."
+      },
+      "ai_source_skill": "P1-TRI-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q250",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-01",
+      "secondary_skills": [],
+      "role": "tan_period",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "The graph y=tan(kx), where x is in degrees and k>0, has period 60°. Enter k.",
+        "ru": "График y=tan(kx), где x измеряется в градусах и k>0, имеет период 60°. Введите k.",
+        "uz": "x darajalarda va k>0 bo‘lgan y=tan(kx) grafigining davri 60°. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "6",
+          "2",
+          "60"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "For tan(kx), period=180°/k. So 180/k=60 and k=3.",
+        "ru": "Для tan(kx) период=180°/k. Поэтому 180/k=60 и k=3.",
+        "uz": "tan(kx) uchun davr=180°/k. Demak 180/k=60 va k=3."
+      },
+      "ai_source_skill": "P1-TRI-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q251",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-01",
+      "secondary_skills": [
+        "P1-FUN-08"
+      ],
+      "role": "combined_graph_feature",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "For y=−2cos(3x)+1, where x is in degrees, which statement is correct?",
+        "ru": "Для y=−2cos(3x)+1, где x измеряется в градусах, какое утверждение верно?",
+        "uz": "x darajalarda bo‘lgan y=−2cos(3x)+1 uchun qaysi tasdiq to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Period 120°, range −1≤y≤3",
+            "ru": "Период 120°, область −1≤y≤3",
+            "uz": "Davr 120°, qiymatlar −1≤y≤3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Period 360°, range −1≤y≤3",
+            "ru": "Период 360°, область −1≤y≤3",
+            "uz": "Davr 360°, qiymatlar −1≤y≤3"
+          },
+          "diagnostic_code": "TRI01_PERIOD"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Period 120°, range −3≤y≤1",
+            "ru": "Период 120°, область −3≤y≤1",
+            "uz": "Davr 120°, qiymatlar −3≤y≤1"
+          },
+          "diagnostic_code": "TRI01_AMPLITUDE_RANGE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Period 60°, range −1≤y≤3",
+            "ru": "Период 60°, область −1≤y≤3",
+            "uz": "Davr 60°, qiymatlar −1≤y≤3"
+          },
+          "diagnostic_code": "TRI01_PERIOD"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The period is 360°/3=120°. Since −1≤cos(3x)≤1, −2cos(3x) ranges from −2 to 2, then +1 gives −1≤y≤3.",
+        "ru": "Период равен 360°/3=120°. Так как −1≤cos(3x)≤1, выражение −2cos(3x) лежит от −2 до 2, а после +1 получаем −1≤y≤3.",
+        "uz": "Davr 360°/3=120°. −1≤cos(3x)≤1 bo‘lgani uchun −2cos(3x) −2 dan 2 gacha, +1 dan so‘ng −1≤y≤3."
+      },
+      "ai_source_skill": "P1-TRI-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q252",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-01",
+      "secondary_skills": [],
+      "role": "asymptote_mapping",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Which is a vertical asymptote of y=tan(x−30°)?",
+        "ru": "Какая из прямых является вертикальной асимптотой y=tan(x−30°)?",
+        "uz": "Qaysi chiziq y=tan(x−30°) ning vertikal asimptotasi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x=30°",
+            "ru": "x=30°",
+            "uz": "x=30°"
+          },
+          "diagnostic_code": "TRI01_TAN_ASYMPTOTE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=60°",
+            "ru": "x=60°",
+            "uz": "x=60°"
+          },
+          "diagnostic_code": "TRI01_TRANSLATION_SCALE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=120°",
+            "ru": "x=120°",
+            "uz": "x=120°"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x=180°",
+            "ru": "x=180°",
+            "uz": "x=180°"
+          },
+          "diagnostic_code": "TRI01_TAN_ASYMPTOTE"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "tan u has an asymptote at u=90°. Set x−30°=90°, giving x=120°.",
+        "ru": "tan u имеет асимптоту при u=90°. Из x−30°=90° получаем x=120°.",
+        "uz": "tan u uchun asimptota u=90° da. x−30°=90° dan x=120°."
+      },
+      "ai_source_skill": "P1-TRI-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q253",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-01",
+      "secondary_skills": [],
+      "role": "reverse_amplitude",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "The graph y=a cos x+4 has maximum 10 and minimum −2. Enter |a|.",
+        "ru": "График y=a cos x+4 имеет максимум 10 и минимум −2. Введите |a|.",
+        "uz": "y=a cos x+4 grafigining maksimumi 10, minimumi −2. |a| ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "6",
+        "accepted_examples": [
+          "6",
+          " 6 "
+        ],
+        "rejected_examples": [
+          "4",
+          "8",
+          "12"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The amplitude is half the distance between maximum and minimum: |a|=(10−(−2))/2=6.",
+        "ru": "Амплитуда равна половине разности максимума и минимума: |a|=(10−(−2))/2=6.",
+        "uz": "Amplituda maksimum va minimum orasidagi farqning yarmi: |a|=(10−(−2))/2=6."
+      },
+      "ai_source_skill": "P1-TRI-01",
+      "status": "draft"
+    }
+  ]
+}
