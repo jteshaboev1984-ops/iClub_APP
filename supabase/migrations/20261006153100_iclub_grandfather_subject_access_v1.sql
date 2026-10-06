@@ -532,7 +532,7 @@ language plpgsql
 stable
 security definer
 set search_path=''
-as $
+as $guard$
 declare
   v_runtime private.iclub_global_ai_runtime_config%rowtype;
   v_policy private.iclub_global_ai_gateway_policy%rowtype;
@@ -650,7 +650,7 @@ begin
     'scope_code',v_readiness.scope_code
   );
 end;
-$;
+$guard$;
 
 revoke all on function public.get_iclub_global_ai_guard_service_v1(
   uuid,text,text,text,text,text,integer
@@ -665,7 +665,7 @@ language plpgsql
 stable
 security definer
 set search_path=''
-as $
+as $aiui$
 declare
   v_uid uuid:=auth.uid();
   v_runtime private.iclub_global_ai_runtime_config%rowtype;
@@ -751,7 +751,7 @@ begin
     'ui_version','global_ai_conversations_v1'
   );
 end;
-$;
+$aiui$;
 
 revoke all on function public.get_iclub_ai_ui_bootstrap_v1() from public,anon;
 grant execute on function public.get_iclub_ai_ui_bootstrap_v1()
@@ -763,7 +763,7 @@ language plpgsql
 stable
 security definer
 set search_path=''
-as $
+as $plans$
 declare
   v_uid uuid:=auth.uid();
   v_runtime private.iclub_global_ai_runtime_config%rowtype;
@@ -829,7 +829,7 @@ begin
     'ui_version','iclub_plans_v1'
   );
 end;
-$;
+$plans$;
 
 revoke all on function public.get_iclub_plan_ui_bootstrap_v1() from public,anon;
 grant execute on function public.get_iclub_plan_ui_bootstrap_v1()
