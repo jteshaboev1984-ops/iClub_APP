@@ -12515,12 +12515,30 @@ function canCoursesBack() {
 // ---------------------------
 const PROFILE_SCREENS = ["main", "settings", "plan"];
 
+function canShowProfilePlan() {
+  try {
+    return window.iClubPlansUI?.bootstrap?.()?.visible === true;
+  } catch {
+    return false;
+  }
+}
+
 function getProfileTopScreen() {
   const s = state.profile?.stack;
-  return (s && s.length) ? s[s.length - 1] : "main";
+  const raw = (s && s.length) ? String(s[s.length - 1] || "") : "main";
+  if (!PROFILE_SCREENS.includes(raw)) return "main";
+  if (raw === "plan" && !canShowProfilePlan()) return "main";
+  return raw;
 }
 
 function showProfileScreen(screenName) {
+  if (!PROFILE_SCREENS.includes(screenName)) screenName = "main";
+  if (screenName === "plan" && !canShowProfilePlan()) {
+    screenName = "main";
+    state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack:["main"] };
+    state.profile.stack = ["main"];
+    saveState();
+  }
   // ✅ Сначала скрываем ВСЕ проф-экраны (на всякий случай, даже если классы “сломались”)
   document.querySelectorAll("#view-profile .profile-screen").forEach(el => {
     el.hidden = true;
@@ -12610,6 +12628,11 @@ function openProfileMain() {
 }
 
 function openProfilePlan() {
+  if (!canShowProfilePlan()) {
+    try { window.iClubPlansUI?.refresh?.(); } catch {}
+    return;
+  }
+
   if (state.tab !== "profile") setTab("profile");
 
   state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
