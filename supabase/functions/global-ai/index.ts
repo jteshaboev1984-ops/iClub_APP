@@ -60,6 +60,59 @@ function normalizeText(value: unknown, max = 12000) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
 }
 
+function normalizeIntentText(value: string) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[’‘ʻʼ]/g, "'")
+    .replace(/[^\p{L}\p{N}'+]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function matchPreparedPrompt(userText: string, locale: string) {
+  const q = normalizeIntentText(userText);
+  if (!q) return "";
+
+  const aliases: Record<string, Record<string, string[]>> = {
+    ru: {
+      topic_main: ["объясни", "объясни тему", "объясни эту тему"],
+      topic_simple: ["проще", "объясни проще", "можно проще"],
+      topic_alternative: ["по другому", "объясни по другому", "другим способом"],
+      topic_focus: ["что главное", "что главное запомнить", "что важно запомнить"],
+      app_help_here: ["что можно делать здесь", "что здесь можно делать"],
+      app_help_practice: ["как работает practice", "что такое practice"],
+      app_help_tours: ["как работают tours", "что такое tours"],
+      app_help_results: ["где смотреть результаты", "где мои результаты"]
+    },
+    uz: {
+      topic_main: ["tushuntir", "mavzuni tushuntir", "shu mavzuni tushuntir"],
+      topic_simple: ["soddaroq", "soddaroq tushuntir", "oddiyroq tushuntir"],
+      topic_alternative: ["boshqacha", "boshqacha tushuntir", "boshqa usulda tushuntir"],
+      topic_focus: ["eng muhimi nima", "nimani eslab qolish kerak", "nima muhim"],
+      app_help_here: ["bu yerda nima qilish mumkin", "bu yerda nimalar bor"],
+      app_help_practice: ["practice qanday ishlaydi", "practice nima"],
+      app_help_tours: ["tours qanday ishlaydi", "tours nima"],
+      app_help_results: ["natijalarni qayerda koraman", "natijalarim qayerda"]
+    },
+    en: {
+      topic_main: ["explain", "explain the topic", "explain this topic"],
+      topic_simple: ["simpler", "explain more simply", "can you explain more simply"],
+      topic_alternative: ["explain it differently", "explain another way", "another way"],
+      topic_focus: ["what matters most", "what should i remember", "what is important to remember"],
+      app_help_here: ["what can i do here", "what is available here"],
+      app_help_practice: ["how does practice work", "what is practice"],
+      app_help_tours: ["how do tours work", "what are tours"],
+      app_help_results: ["where are my results", "where can i see results"]
+    }
+  };
+
+  const byLocale = aliases[locale] || aliases.ru;
+  for (const [key, values] of Object.entries(byLocale)) {
+    if (values.some((value) => normalizeIntentText(value) === q)) return key;
+  }
+  return "";
+}
+
 async function rpc(
   name: string,
   body: Record<string, unknown>,
@@ -289,8 +342,10 @@ Deno.serve(async (req) => {
   const locale = normalizeLocale(payload.locale);
   const subjectKey = normalizeSubject(payload.subject_key);
   const scopeCode = normalizeScope(payload.scope_code);
-  const promptKey = String(payload.prompt_key || "").trim();
+  const explicitPromptKey = String(payload.prompt_key || "").trim();
   const userText = normalizeText(payload.user_text, 12000);
+  const matchedPromptKey = explicitPromptKey || matchPreparedPrompt(userText, locale);
+  const promptKey = PREPARED_PROMPTS[matchedPromptKey] ? matchedPromptKey : "";
   const componentCode = String(payload.component_code || "").trim().toUpperCase();
   const skillCode = String(payload.skill_code || "").trim().toUpperCase();
 
@@ -303,7 +358,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  const preparedPrompt = PREPARED_PROMPTS[promptKey] || null;
+  const preparedPrompt = promptKey ? PREPARED_PROMPTS[promptKey] : null;
   const routeClass: "prepared" | "generated" = preparedPrompt ? "prepared" : "generated";
   const interaction = preparedPrompt?.interaction || (subjectKey === "general" ? "app_help" : "freeform_question");
 
