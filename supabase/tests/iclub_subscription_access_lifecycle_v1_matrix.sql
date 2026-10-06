@@ -397,7 +397,7 @@ $$;
 
 -- The lifecycle test above intentionally downgraded this synthetic learner.
 -- Upgrade it back to Pro before testing the independent all-subject access rule.
-DO $
+DO $$
 DECLARE
   v jsonb;
   uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='pro');
@@ -418,8 +418,7 @@ BEGIN
     RAISE EXCEPTION 'Pro all-subject migration failed: %',v;
   END IF;
 END
-$;
-
+$$;
 -- Enforced mode is allowed only after the grandfather snapshot exists.
 UPDATE private.iclub_commercial_access_config
 SET subject_limits_mode='enforced',
