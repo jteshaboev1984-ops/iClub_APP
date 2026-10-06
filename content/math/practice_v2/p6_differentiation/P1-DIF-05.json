@@ -23,11 +23,11 @@
         {
           "key": "A",
           "text": {
-            "en": "x>2",
-            "ru": "x>2",
-            "uz": "x>2"
+            "en": "x>4",
+            "ru": "x>4",
+            "uz": "x>4"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
         },
         {
           "key": "B",
@@ -41,11 +41,11 @@
         {
           "key": "C",
           "text": {
-            "en": "x>4",
-            "ru": "x>4",
-            "uz": "x>4"
+            "en": "x>2",
+            "ru": "x>2",
+            "uz": "x>2"
           },
-          "diagnostic_code": "DIF05_ROOTS_ONLY"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -57,7 +57,7 @@
           "diagnostic_code": "DIF05_ROOTS_ONLY"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "dy/dx=2x−4. This is positive when x>2, so the function is increasing for x>2.",
         "ru": "dy/dx=2x−4. Эта производная положительна при x>2, поэтому функция возрастает при x>2.",
@@ -150,11 +150,11 @@
         {
           "key": "A",
           "text": {
-            "en": "x<−5 or x>2",
-            "ru": "x<−5 или x>2",
-            "uz": "x<−5 yoki x>2"
+            "en": "x<2",
+            "ru": "x<2",
+            "uz": "x<2"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
         },
         {
           "key": "B",
@@ -177,14 +177,14 @@
         {
           "key": "D",
           "text": {
-            "en": "x<2",
-            "ru": "x<2",
-            "uz": "x<2"
+            "en": "x<−5 or x>2",
+            "ru": "x<−5 или x>2",
+            "uz": "x<−5 yoki x>2"
           },
-          "diagnostic_code": "DIF05_ROOTS_ONLY"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "The derivative is a positive-leading quadratic with roots −5 and 2, so f′(x)>0 outside the roots: x<−5 or x>2.",
         "ru": "Производная — квадратичное выражение с положительным старшим коэффициентом и корнями −5 и 2, поэтому f′(x)>0 вне корней: x<−5 или x>2.",
@@ -213,20 +213,20 @@
         {
           "key": "A",
           "text": {
-            "en": "1<x<4",
-            "ru": "1<x<4",
-            "uz": "1<x<4"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "x<1 or x>4",
             "ru": "x<1 или x>4",
             "uz": "x<1 yoki x>4"
           },
           "diagnostic_code": "DIF05_QUADRATIC_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1<x<4",
+            "ru": "1<x<4",
+            "uz": "1<x<4"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -247,7 +247,7 @@
           "diagnostic_code": "DIF05_ROOTS_ONLY"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "Because of the leading minus sign, f′ is positive between the roots 1 and 4. Therefore f increases for 1<x<4.",
         "ru": "Из-за минуса перед произведением f′ положительна между корнями 1 и 4. Поэтому f возрастает при 1<x<4.",
@@ -315,11 +315,11 @@
         {
           "key": "A",
           "text": {
-            "en": "2<x<4",
-            "ru": "2<x<4",
-            "uz": "2<x<4"
+            "en": "x<4",
+            "ru": "x<4",
+            "uz": "x<4"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
         },
         {
           "key": "B",
@@ -333,11 +333,11 @@
         {
           "key": "C",
           "text": {
-            "en": "x<4",
-            "ru": "x<4",
-            "uz": "x<4"
+            "en": "2<x<4",
+            "ru": "2<x<4",
+            "uz": "2<x<4"
           },
-          "diagnostic_code": "DIF05_ROOTS_ONLY"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -349,7 +349,7 @@
           "diagnostic_code": "DIF05_ROOTS_ONLY"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "f′(x)=(x−2)(x−4), which is negative between the roots. Thus f decreases for 2<x<4.",
         "ru": "f′(x)=(x−2)(x−4), и эта производная отрицательна между корнями. Поэтому f убывает при 2<x<4.",
@@ -476,20 +476,20 @@
         {
           "key": "A",
           "text": {
-            "en": "f is decreasing throughout I.",
-            "ru": "f убывает на всём I.",
-            "uz": "f butun I da kamayadi."
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "f is increasing throughout I.",
             "ru": "f возрастает на всём I.",
             "uz": "f butun I da o‘sadi."
           },
           "diagnostic_code": "DIF05_SIGN_INTERVAL"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "f is decreasing throughout I.",
+            "ru": "f убывает на всём I.",
+            "uz": "f butun I da kamayadi."
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -510,7 +510,7 @@
           "diagnostic_code": "DIF05_ROOTS_ONLY"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "A negative derivative means the function value decreases as x increases across the interval. It does not imply that f itself is negative.",
         "ru": "Отрицательная производная означает, что значение функции уменьшается при росте x на интервале. Это не означает, что сама f отрицательна.",
