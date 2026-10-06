@@ -13,29 +13,29 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "The curves y = x + 2 and y = x² − 3x + 2 intersect at two points. Enter the larger x-coordinate.",
-        "ru": "Кривые y = x + 2 и y = x² − 3x + 2 пересекаются в двух точках. Введите большую x-координату.",
-        "uz": "y = x + 2 va y = x² − 3x + 2 egri chiziqlari ikki nuqtada kesishadi. Katta x-koordinatani kiriting."
+        "en": "The curves y = 2x + 3 and y = x² − x + 3 intersect at two points. At the intersection with x > 0, enter the y-coordinate.",
+        "ru": "Кривые y = 2x + 3 и y = x² − x + 3 пересекаются в двух точках. Для точки пересечения с x > 0 введите y-координату.",
+        "uz": "y = 2x + 3 va y = x² − x + 3 egri chiziqlari ikki nuqtada kesishadi. x > 0 bo‘lgan kesishish nuqtasining y-koordinatasini kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "4",
+        "canonical_answer": "9",
         "accepted_examples": [
-          "4",
-          " 4 "
+          "9",
+          " 9 "
         ],
         "rejected_examples": [
           "0",
-          "2",
-          "-4"
+          "3",
+          "6"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "At an intersection the y-values are equal: x + 2 = x² − 3x + 2. Thus x² − 4x = 0, so x = 0 or 4. The larger x-coordinate is 4.",
-        "ru": "В точке пересечения значения y равны: x + 2 = x² − 3x + 2. Получаем x² − 4x = 0, поэтому x = 0 или 4. Большая x-координата равна 4.",
-        "uz": "Kesishish nuqtasida y lar teng: x + 2 = x² − 3x + 2. Bundan x² − 4x = 0, ya’ni x = 0 yoki 4. Katta x-koordinata 4."
+        "en": "At an intersection, 2x + 3 = x² − x + 3, so x² − 3x = 0 and x = 0 or 3. The point with x > 0 has x = 3, giving y = 2(3) + 3 = 9.",
+        "ru": "В точке пересечения 2x + 3 = x² − x + 3, поэтому x² − 3x = 0 и x = 0 или 3. Для точки с x > 0 имеем x = 3, тогда y = 2(3) + 3 = 9.",
+        "uz": "Kesishishda 2x + 3 = x² − x + 3, demak x² − 3x = 0 va x = 0 yoki 3. x > 0 bo‘lgan nuqtada x = 3, shuning uchun y = 2(3) + 3 = 9."
       },
       "ai_source_skill": "P1-QUA-05",
       "status": "draft"
