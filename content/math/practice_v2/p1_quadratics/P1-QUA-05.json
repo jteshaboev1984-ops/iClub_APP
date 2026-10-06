@@ -1,0 +1,601 @@
+{
+  "version": "practice_v2_p1_quadratics_draft_v0.1",
+  "skill": "P1-QUA-05",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q047",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-05",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The curves y = x + 2 and y = x² − 3x + 2 intersect at two points. Enter the larger x-coordinate.",
+        "ru": "Кривые y = x + 2 и y = x² − 3x + 2 пересекаются в двух точках. Введите большую x-координату.",
+        "uz": "y = x + 2 va y = x² − 3x + 2 egri chiziqlari ikki nuqtada kesishadi. Katta x-koordinatani kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "0",
+          "2",
+          "-4"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "At an intersection the y-values are equal: x + 2 = x² − 3x + 2. Thus x² − 4x = 0, so x = 0 or 4. The larger x-coordinate is 4.",
+        "ru": "В точке пересечения значения y равны: x + 2 = x² − 3x + 2. Получаем x² − 4x = 0, поэтому x = 0 или 4. Большая x-координата равна 4.",
+        "uz": "Kesishish nuqtasida y lar teng: x + 2 = x² − 3x + 2. Bundan x² − 4x = 0, ya’ni x = 0 yoki 4. Katta x-koordinata 4."
+      },
+      "ai_source_skill": "P1-QUA-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q048",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-05",
+      "secondary_skills": [],
+      "role": "method_setup",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "To solve y = 2x − 1 and y = x² − x − 3 simultaneously, which quadratic equation in x must be solved?",
+        "ru": "Чтобы решить систему y = 2x − 1 и y = x² − x − 3, какое квадратное уравнение по x нужно решить?",
+        "uz": "y = 2x − 1 va y = x² − x − 3 sistemani yechish uchun x bo‘yicha qaysi kvadrat tenglamani yechish kerak?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x² + x − 2 = 0",
+            "ru": "x² + x − 2 = 0",
+            "uz": "x² + x − 2 = 0"
+          },
+          "diagnostic_code": "QUA_SIMULTANEOUS_REARRANGE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x² − 3x − 2 = 0",
+            "ru": "x² − 3x − 2 = 0",
+            "uz": "x² − 3x − 2 = 0"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x² − x − 4 = 0",
+            "ru": "x² − x − 4 = 0",
+            "uz": "x² − x − 4 = 0"
+          },
+          "diagnostic_code": "QUA_SIMULTANEOUS_SUBSTITUTION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x² − 2x − 3 = 0",
+            "ru": "x² − 2x − 3 = 0",
+            "uz": "x² − 2x − 3 = 0"
+          },
+          "diagnostic_code": "QUA_SIMULTANEOUS_REARRANGE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Set the two expressions for y equal: 2x − 1 = x² − x − 3. Rearranging gives x² − 3x − 2 = 0.",
+        "ru": "Приравниваем выражения для y: 2x − 1 = x² − x − 3. После переноса получаем x² − 3x − 2 = 0.",
+        "uz": "y uchun ifodalarni tenglashtiramiz: 2x − 1 = x² − x − 3. Bir tomonga o‘tkazsak x² − 3x − 2 = 0."
+      },
+      "ai_source_skill": "P1-QUA-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q049",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-05",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Solve x + y = 7 and y = x² − 5x + 7. Enter the positive x-value among the solutions.",
+        "ru": "Решите систему x + y = 7 и y = x² − 5x + 7. Введите положительное значение x среди решений.",
+        "uz": "x + y = 7 va y = x² − 5x + 7 sistemani yeching. Yechimlardagi musbat x qiymatini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "0",
+          "7",
+          "-4"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "From x + y = 7, y = 7 − x. Set 7 − x = x² − 5x + 7, giving x² − 4x = 0. Thus x = 0 or 4, and the positive value is 4.",
+        "ru": "Из x + y = 7 получаем y = 7 − x. Приравниваем: 7 − x = x² − 5x + 7, откуда x² − 4x = 0. Значит x = 0 или 4; положительное значение — 4.",
+        "uz": "x + y = 7 dan y = 7 − x. Tenglashtiramiz: 7 − x = x² − 5x + 7, bundan x² − 4x = 0. Demak x = 0 yoki 4; musbat qiymat 4."
+      },
+      "ai_source_skill": "P1-QUA-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q050",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-05",
+      "secondary_skills": [
+        "P1-QUA-02"
+      ],
+      "role": "intersection_reasoning",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "How many real intersection points do y = x² + 2x + 5 and y = 4x + 1 have?",
+        "ru": "Сколько действительных точек пересечения имеют графики y = x² + 2x + 5 и y = 4x + 1?",
+        "uz": "y = x² + 2x + 5 va y = 4x + 1 grafiklari nechta haqiqiy kesishish nuqtasiga ega?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "QUA_INTERSECTION_DISCRIMINANT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1",
+            "ru": "1",
+            "uz": "1"
+          },
+          "diagnostic_code": "QUA_INTERSECTION_DISCRIMINANT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "0",
+            "ru": "0",
+            "uz": "0"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Infinitely many",
+            "ru": "Бесконечно много",
+            "uz": "Cheksiz ko‘p"
+          },
+          "diagnostic_code": "QUA_SIMULTANEOUS_STRUCTURE"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Set the equations equal: x² + 2x + 5 = 4x + 1, so x² − 2x + 4 = 0. Its discriminant is 4 − 16 = −12 < 0, so there are no real intersections.",
+        "ru": "Приравниваем: x² + 2x + 5 = 4x + 1, значит x² − 2x + 4 = 0. Дискриминант 4 − 16 = −12 < 0, поэтому действительных пересечений нет.",
+        "uz": "Tenglashtiramiz: x² + 2x + 5 = 4x + 1, demak x² − 2x + 4 = 0. Diskriminant 4 − 16 = −12 < 0, shuning uchun haqiqiy kesishish nuqtalari yo‘q."
+      },
+      "ai_source_skill": "P1-QUA-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q051",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-05",
+      "secondary_skills": [],
+      "role": "application_variation",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Solve y = 3x − 2 and x² + y = 18. Enter the positive x-value.",
+        "ru": "Решите систему y = 3x − 2 и x² + y = 18. Введите положительное значение x.",
+        "uz": "y = 3x − 2 va x² + y = 18 sistemani yeching. Musbat x qiymatini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "-5",
+          "5",
+          "2"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Substitute y = 3x − 2 into x² + y = 18: x² + 3x − 2 = 18, so x² + 3x − 20 = 0 = (x + 5)(x − 4). The positive x-value is 4.",
+        "ru": "Подставляем y = 3x − 2 в x² + y = 18: x² + 3x − 2 = 18, то есть x² + 3x − 20 = 0 = (x + 5)(x − 4). Положительное x равно 4.",
+        "uz": "y = 3x − 2 ni x² + y = 18 ga qo‘yamiz: x² + 3x − 2 = 18, ya’ni x² + 3x − 20 = 0 = (x + 5)(x − 4). Musbat x = 4."
+      },
+      "ai_source_skill": "P1-QUA-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q052",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-05",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The equations x − y = 1 and y² + xy = 6 have two real solutions. Which solution has y > 0?",
+        "ru": "Система x − y = 1 и y² + xy = 6 имеет два действительных решения. Какое решение имеет y > 0?",
+        "uz": "x − y = 1 va y² + xy = 6 sistema ikkita haqiqiy yechimga ega. Qaysi yechimda y > 0?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(x, y) = (3/2, 1/2)",
+            "ru": "(x, y) = (3/2, 1/2)",
+            "uz": "(x, y) = (3/2, 1/2)"
+          },
+          "diagnostic_code": "QUA_SIMULTANEOUS_BACKSUB"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(x, y) = (2, 1)",
+            "ru": "(x, y) = (2, 1)",
+            "uz": "(x, y) = (2, 1)"
+          },
+          "diagnostic_code": "QUA_SIMULTANEOUS_QUADRATIC"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(x, y) = (5/2, −3/2)",
+            "ru": "(x, y) = (5/2, −3/2)",
+            "uz": "(x, y) = (5/2, −3/2)"
+          },
+          "diagnostic_code": "QUA_SIMULTANEOUS_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(x, y) = (5/2, 3/2)",
+            "ru": "(x, y) = (5/2, 3/2)",
+            "uz": "(x, y) = (5/2, 3/2)"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "From x − y = 1, x = y + 1. Then y² + y(y + 1) = 6, so 2y² + y − 6 = 0 = (2y − 3)(y + 2). The positive value is y = 3/2, giving x = 5/2.",
+        "ru": "Из x − y = 1 имеем x = y + 1. Тогда y² + y(y + 1) = 6, то есть 2y² + y − 6 = 0 = (2y − 3)(y + 2). Положительное y = 3/2, откуда x = 5/2.",
+        "uz": "x − y = 1 dan x = y + 1. Shunda y² + y(y + 1) = 6, ya’ni 2y² + y − 6 = 0 = (2y − 3)(y + 2). Musbat y = 3/2, undan x = 5/2."
+      },
+      "ai_source_skill": "P1-QUA-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q053",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-05",
+      "secondary_skills": [],
+      "role": "context_transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "A rectangle has area 48 cm². Its length is 2 cm greater than its width. Find the width in cm.",
+        "ru": "Площадь прямоугольника равна 48 см². Его длина на 2 см больше ширины. Найдите ширину в сантиметрах.",
+        "uz": "To‘g‘ri to‘rtburchakning yuzi 48 sm². Uning uzunligi enidan 2 sm katta. Enini sm da toping."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "6",
+        "accepted_examples": [
+          "6",
+          " 6 "
+        ],
+        "rejected_examples": [
+          "8",
+          "24",
+          "-8"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Let the width be w, so the length is w + 2. Then w(w + 2) = 48, giving w² + 2w − 48 = 0 = (w + 8)(w − 6). A length must be positive, so w = 6.",
+        "ru": "Пусть ширина w, тогда длина w + 2. Имеем w(w + 2) = 48, то есть w² + 2w − 48 = 0 = (w + 8)(w − 6). Длина должна быть положительной, поэтому w = 6.",
+        "uz": "Enini w desak, uzunlik w + 2. w(w + 2) = 48, ya’ni w² + 2w − 48 = 0 = (w + 8)(w − 6). Uzunlik musbat bo‘lishi kerak, demak w = 6."
+      },
+      "ai_source_skill": "P1-QUA-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q054",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-05",
+      "secondary_skills": [
+        "P1-QUA-02"
+      ],
+      "role": "parameter_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The line y = 2x + 3 is tangent to the curve y = x² − 4x + k. Find k.",
+        "ru": "Прямая y = 2x + 3 касается кривой y = x² − 4x + k. Найдите k.",
+        "uz": "y = 2x + 3 chiziq y = x² − 4x + k egri chizig‘iga urinadi. k ni toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "12",
+            "ru": "12",
+            "uz": "12"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "9",
+            "ru": "9",
+            "uz": "9"
+          },
+          "diagnostic_code": "QUA_TANGENCY_DISCRIMINANT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
+          },
+          "diagnostic_code": "QUA_SIMULTANEOUS_REARRANGE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "15",
+            "ru": "15",
+            "uz": "15"
+          },
+          "diagnostic_code": "QUA_TANGENCY_DISCRIMINANT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "At an intersection, x² − 4x + k = 2x + 3, so x² − 6x + k − 3 = 0. Tangency means a repeated root: 36 − 4(k − 3) = 0. Hence k = 12.",
+        "ru": "В точке пересечения x² − 4x + k = 2x + 3, поэтому x² − 6x + k − 3 = 0. Касание означает кратный корень: 36 − 4(k − 3) = 0. Отсюда k = 12.",
+        "uz": "Kesishishda x² − 4x + k = 2x + 3, demak x² − 6x + k − 3 = 0. Urinish takroriy ildizni anglatadi: 36 − 4(k − 3) = 0. Shundan k = 12."
+      },
+      "ai_source_skill": "P1-QUA-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q055",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-05",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Solve y = 5 − x and xy = 6. Enter the larger x-value.",
+        "ru": "Решите систему y = 5 − x и xy = 6. Введите большее значение x.",
+        "uz": "y = 5 − x va xy = 6 sistemani yeching. Katta x qiymatini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "2",
+          "5",
+          "6"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Substitute y = 5 − x into xy = 6: x(5 − x) = 6. This gives x² − 5x + 6 = 0 = (x − 2)(x − 3), so the larger x-value is 3.",
+        "ru": "Подставляем y = 5 − x в xy = 6: x(5 − x) = 6. Получаем x² − 5x + 6 = 0 = (x − 2)(x − 3), поэтому большее x равно 3.",
+        "uz": "y = 5 − x ni xy = 6 ga qo‘yamiz: x(5 − x) = 6. Bundan x² − 5x + 6 = 0 = (x − 2)(x − 3), katta x = 3."
+      },
+      "ai_source_skill": "P1-QUA-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q056",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-05",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The system x − 2y = 1 and x² + y² = 10 has two real solutions. Which solution has y > 0?",
+        "ru": "Система x − 2y = 1 и x² + y² = 10 имеет два действительных решения. Какое решение имеет y > 0?",
+        "uz": "x − 2y = 1 va x² + y² = 10 sistema ikkita haqiqiy yechimga ega. Qaysi yechimda y > 0?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(x, y) = (1, 0)",
+            "ru": "(x, y) = (1, 0)",
+            "uz": "(x, y) = (1, 0)"
+          },
+          "diagnostic_code": "QUA_SIMULTANEOUS_SUBSTITUTION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(x, y) = (2, 1/2)",
+            "ru": "(x, y) = (2, 1/2)",
+            "uz": "(x, y) = (2, 1/2)"
+          },
+          "diagnostic_code": "QUA_SIMULTANEOUS_BACKSUB"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(x, y) = (3, −1)",
+            "ru": "(x, y) = (3, −1)",
+            "uz": "(x, y) = (3, −1)"
+          },
+          "diagnostic_code": "QUA_SIMULTANEOUS_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(x, y) = (3, 1)",
+            "ru": "(x, y) = (3, 1)",
+            "uz": "(x, y) = (3, 1)"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "From x − 2y = 1, x = 1 + 2y. Substitute into x² + y² = 10: (1 + 2y)² + y² = 10, so 5y² + 4y − 9 = 0 = (5y + 9)(y − 1). The positive value is y = 1, giving x = 3.",
+        "ru": "Из x − 2y = 1 получаем x = 1 + 2y. Подставляем в x² + y² = 10: (1 + 2y)² + y² = 10, поэтому 5y² + 4y − 9 = 0 = (5y + 9)(y − 1). Положительное y = 1, откуда x = 3.",
+        "uz": "x − 2y = 1 dan x = 1 + 2y. x² + y² = 10 ga qo‘yamiz: (1 + 2y)² + y² = 10, ya’ni 5y² + 4y − 9 = 0 = (5y + 9)(y − 1). Musbat y = 1, undan x = 3."
+      },
+      "ai_source_skill": "P1-QUA-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q057",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-05",
+      "secondary_skills": [],
+      "role": "context_transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "A rectangle has perimeter 26 cm and area 40 cm². Enter the longer side length in cm.",
+        "ru": "Периметр прямоугольника равен 26 см, а площадь — 40 см². Введите длину большей стороны в сантиметрах.",
+        "uz": "To‘g‘ri to‘rtburchak perimetri 26 sm, yuzi 40 sm². Uzunroq tomonini sm da kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "8",
+        "accepted_examples": [
+          "8",
+          " 8 "
+        ],
+        "rejected_examples": [
+          "5",
+          "13",
+          "20"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "If the sides are a and b, then a + b = 13 and ab = 40. A side length t therefore satisfies t² − 13t + 40 = 0 = (t − 5)(t − 8). The longer side is 8.",
+        "ru": "Если стороны a и b, то a + b = 13 и ab = 40. Поэтому длина стороны t удовлетворяет t² − 13t + 40 = 0 = (t − 5)(t − 8). Большая сторона равна 8.",
+        "uz": "Tomonlar a va b bo‘lsa, a + b = 13 va ab = 40. Shuning uchun tomon uzunligi t uchun t² − 13t + 40 = 0 = (t − 5)(t − 8). Uzunroq tomon 8."
+      },
+      "ai_source_skill": "P1-QUA-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q058",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-05",
+      "secondary_skills": [
+        "P1-QUA-02"
+      ],
+      "role": "parameter_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The line y = 2x is tangent to the curve y = x² + ax + 4. Which values of a are possible?",
+        "ru": "Прямая y = 2x касается кривой y = x² + ax + 4. Какие значения a возможны?",
+        "uz": "y = 2x chiziq y = x² + ax + 4 egri chizig‘iga urinadi. a ning qaysi qiymatlari mumkin?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "a = 2 or a = −2",
+            "ru": "a = 2 или a = −2",
+            "uz": "a = 2 yoki a = −2"
+          },
+          "diagnostic_code": "QUA_TANGENCY_DISCRIMINANT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "a = 6 or a = −2",
+            "ru": "a = 6 или a = −2",
+            "uz": "a = 6 yoki a = −2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "a = 4 or a = −4",
+            "ru": "a = 4 или a = −4",
+            "uz": "a = 4 yoki a = −4"
+          },
+          "diagnostic_code": "QUA_TANGENCY_DISCRIMINANT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "a = 6 only",
+            "ru": "Только a = 6",
+            "uz": "Faqat a = 6"
+          },
+          "diagnostic_code": "QUA_PARAMETER_BRANCH_LOSS"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Tangency means x² + ax + 4 = 2x has one repeated solution. Thus x² + (a − 2)x + 4 = 0 and (a − 2)² − 16 = 0. Hence a − 2 = ±4, so a = 6 or −2.",
+        "ru": "Касание означает, что x² + ax + 4 = 2x имеет одно кратное решение. Получаем x² + (a − 2)x + 4 = 0 и (a − 2)² − 16 = 0. Поэтому a − 2 = ±4, то есть a = 6 или −2.",
+        "uz": "Urinish x² + ax + 4 = 2x tenglama bitta takroriy yechimga ega bo‘lishini anglatadi. x² + (a − 2)x + 4 = 0 va (a − 2)² − 16 = 0. Demak a − 2 = ±4, ya’ni a = 6 yoki −2."
+      },
+      "ai_source_skill": "P1-QUA-05",
+      "status": "draft"
+    }
+  ]
+}
