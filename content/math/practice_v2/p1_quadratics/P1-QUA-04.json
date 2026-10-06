@@ -25,7 +25,7 @@
             "ru": "2 < x < 3",
             "uz": "2 < x < 3"
           },
-          "diagnostic_code": "QUA_INEQUALITY_REGION"
+          "diagnostic_code": "QUA04_SIGN_REGION"
         },
         {
           "key": "B",
@@ -34,7 +34,7 @@
             "ru": "x ≤ 2 или x ≥ 3",
             "uz": "x ≤ 2 yoki x ≥ 3"
           },
-          "diagnostic_code": "QUA_INTERVAL_ENDPOINT"
+          "diagnostic_code": "QUA04_ENDPOINT_INCLUSION"
         },
         {
           "key": "C",
@@ -52,7 +52,7 @@
             "ru": "2 ≤ x ≤ 3",
             "uz": "2 ≤ x ≤ 3"
           },
-          "diagnostic_code": "QUA_INEQUALITY_REGION"
+          "diagnostic_code": "QUA04_SIGN_REGION"
         }
       ],
       "correct_answer": "C",
@@ -95,7 +95,7 @@
             "ru": "x < −3 или x > 2",
             "uz": "x < −3 yoki x > 2"
           },
-          "diagnostic_code": "QUA_INEQUALITY_REGION"
+          "diagnostic_code": "QUA04_SIGN_REGION"
         },
         {
           "key": "C",
@@ -104,7 +104,7 @@
             "ru": "−3 < x < 2",
             "uz": "−3 < x < 2"
           },
-          "diagnostic_code": "QUA_INTERVAL_ENDPOINT"
+          "diagnostic_code": "QUA04_ENDPOINT_INCLUSION"
         },
         {
           "key": "D",
@@ -113,7 +113,7 @@
             "ru": "x ≤ −3 или x ≥ 2",
             "uz": "x ≤ −3 yoki x ≥ 2"
           },
-          "diagnostic_code": "QUA_INEQUALITY_REGION"
+          "diagnostic_code": "QUA04_SIGN_REGION"
         }
       ],
       "correct_answer": "A",
@@ -184,7 +184,7 @@
             "ru": "−1 < x < 3",
             "uz": "−1 < x < 3"
           },
-          "diagnostic_code": "QUA_INTERVAL_ENDPOINT"
+          "diagnostic_code": "QUA04_ENDPOINT_INCLUSION"
         },
         {
           "key": "B",
@@ -193,7 +193,7 @@
             "ru": "x ≤ −1 или x ≥ 3",
             "uz": "x ≤ −1 yoki x ≥ 3"
           },
-          "diagnostic_code": "QUA_INEQUALITY_SIGN_FLIP"
+          "diagnostic_code": "QUA04_NEGATIVE_MULTIPLIER"
         },
         {
           "key": "C",
@@ -211,7 +211,7 @@
             "ru": "x < −1 или x > 3",
             "uz": "x < −1 yoki x > 3"
           },
-          "diagnostic_code": "QUA_INEQUALITY_SIGN_FLIP"
+          "diagnostic_code": "QUA04_NEGATIVE_MULTIPLIER"
         }
       ],
       "correct_answer": "C",
@@ -245,7 +245,7 @@
             "ru": "−1 < x < 5",
             "uz": "−1 < x < 5"
           },
-          "diagnostic_code": "QUA_INEQUALITY_REGION"
+          "diagnostic_code": "QUA04_SIGN_REGION"
         },
         {
           "key": "B",
@@ -254,7 +254,7 @@
             "ru": "x ≤ −1 или x ≥ 5",
             "uz": "x ≤ −1 yoki x ≥ 5"
           },
-          "diagnostic_code": "QUA_INTERVAL_ENDPOINT"
+          "diagnostic_code": "QUA04_ENDPOINT_INCLUSION"
         },
         {
           "key": "C",
@@ -263,7 +263,7 @@
             "ru": "x < 1 или x > 3",
             "uz": "x < 1 yoki x > 3"
           },
-          "diagnostic_code": "QUA_SQUARE_ROOT_OFFSET"
+          "diagnostic_code": "QUA04_SIGN_REGION"
         },
         {
           "key": "D",
@@ -306,7 +306,7 @@
             "ru": "x < −2 или x > 3/2",
             "uz": "x < −2 yoki x > 3/2"
           },
-          "diagnostic_code": "QUA_INEQUALITY_REGION"
+          "diagnostic_code": "QUA04_SIGN_REGION"
         },
         {
           "key": "B",
@@ -324,7 +324,7 @@
             "ru": "−3/2 < x < 2",
             "uz": "−3/2 < x < 2"
           },
-          "diagnostic_code": "QUA_FACTOR_ROOT_ERROR"
+          "diagnostic_code": "QUA04_SIGN_REGION"
         },
         {
           "key": "D",
@@ -333,7 +333,7 @@
             "ru": "−2 ≤ x ≤ 3/2",
             "uz": "−2 ≤ x ≤ 3/2"
           },
-          "diagnostic_code": "QUA_INTERVAL_ENDPOINT"
+          "diagnostic_code": "QUA04_ENDPOINT_INCLUSION"
         }
       ],
       "correct_answer": "B",
@@ -404,7 +404,7 @@
             "ru": "Все действительные x",
             "uz": "Barcha haqiqiy x"
           },
-          "diagnostic_code": "QUA_REPEATED_ROOT_STRICTNESS"
+          "diagnostic_code": "QUA04_REPEATED_ROOT_CASE"
         },
         {
           "key": "B",
@@ -413,7 +413,7 @@
             "ru": "x > −2",
             "uz": "x > −2"
           },
-          "diagnostic_code": "QUA_SQUARE_SIGN"
+          "diagnostic_code": "QUA04_REPEATED_ROOT_CASE"
         },
         {
           "key": "C",
@@ -422,7 +422,7 @@
             "ru": "x < −2",
             "uz": "x < −2"
           },
-          "diagnostic_code": "QUA_SQUARE_SIGN"
+          "diagnostic_code": "QUA04_REPEATED_ROOT_CASE"
         },
         {
           "key": "D",
@@ -465,7 +465,7 @@
             "ru": "x ≤ 3",
             "uz": "x ≤ 3"
           },
-          "diagnostic_code": "QUA_REPEATED_ROOT_REGION"
+          "diagnostic_code": "QUA04_REPEATED_ROOT_CASE"
         },
         {
           "key": "B",
@@ -474,7 +474,7 @@
             "ru": "x ≥ 3",
             "uz": "x ≥ 3"
           },
-          "diagnostic_code": "QUA_REPEATED_ROOT_REGION"
+          "diagnostic_code": "QUA04_REPEATED_ROOT_CASE"
         },
         {
           "key": "C",
@@ -492,7 +492,7 @@
             "ru": "Все действительные x",
             "uz": "Barcha haqiqiy x"
           },
-          "diagnostic_code": "QUA_SQUARE_SIGN"
+          "diagnostic_code": "QUA04_REPEATED_ROOT_CASE"
         }
       ],
       "correct_answer": "C",
@@ -537,7 +537,7 @@
             "ru": "−2 < x < 4",
             "uz": "−2 < x < 4"
           },
-          "diagnostic_code": "QUA_GRAPH_SIGN_REGION"
+          "diagnostic_code": "QUA04_GRAPH_SIGN_LINK"
         },
         {
           "key": "C",
@@ -546,7 +546,7 @@
             "ru": "x ≤ −2 или x ≥ 4",
             "uz": "x ≤ −2 yoki x ≥ 4"
           },
-          "diagnostic_code": "QUA_GRAPH_AXIS_STRICTNESS"
+          "diagnostic_code": "QUA04_ENDPOINT_INCLUSION"
         },
         {
           "key": "D",
@@ -555,7 +555,7 @@
             "ru": "−2 ≤ x ≤ 4",
             "uz": "−2 ≤ x ≤ 4"
           },
-          "diagnostic_code": "QUA_GRAPH_SIGN_REGION"
+          "diagnostic_code": "QUA04_GRAPH_SIGN_LINK"
         }
       ],
       "correct_answer": "A",
