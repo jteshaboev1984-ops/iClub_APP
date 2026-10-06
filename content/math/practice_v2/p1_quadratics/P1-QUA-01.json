@@ -282,7 +282,7 @@
       "primary_skill": "P1-QUA-01",
       "secondary_skills": [],
       "role": "reverse_problem",
-      "difficulty": "medium",
+      "difficulty": "easy",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
@@ -319,7 +319,7 @@
       "primary_skill": "P1-QUA-01",
       "secondary_skills": [],
       "role": "reverse_problem",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
@@ -380,7 +380,7 @@
       "primary_skill": "P1-QUA-01",
       "secondary_skills": [],
       "role": "reverse_problem",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
@@ -483,7 +483,7 @@
       "primary_skill": "P1-QUA-01",
       "secondary_skills": [],
       "role": "transfer",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
