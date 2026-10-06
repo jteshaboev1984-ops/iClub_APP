@@ -1,0 +1,595 @@
+{
+  "version": "practice_v2_p6_differentiation_draft_v0.1",
+  "skill": "P1-DIF-02",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q368",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-02",
+      "secondary_skills": [],
+      "role": "power_rule",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "Differentiate y=7x⁴.",
+        "ru": "Продифференцируйте y=7x⁴.",
+        "uz": "y=7x⁴ ni differensiallang."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "28x³",
+            "ru": "28x³",
+            "uz": "28x³"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "7x³",
+            "ru": "7x³",
+            "uz": "7x³"
+          },
+          "diagnostic_code": "DIF02_COEFFICIENT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "28x⁴",
+            "ru": "28x⁴",
+            "uz": "28x⁴"
+          },
+          "diagnostic_code": "DIF02_POWER_N_MINUS_1"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "4x³",
+            "ru": "4x³",
+            "uz": "4x³"
+          },
+          "diagnostic_code": "DIF02_COEFFICIENT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Bring down the power 4 and reduce it to 3: d/dx(7x⁴)=7·4x³=28x³.",
+        "ru": "Умножаем на показатель 4 и уменьшаем степень до 3: d/dx(7x⁴)=7·4x³=28x³.",
+        "uz": "4 darajani oldinga tushirib, ko‘rsatkichni 3 ga kamaytiramiz: d/dx(7x⁴)=7·4x³=28x³."
+      },
+      "ai_source_skill": "P1-DIF-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q369",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-02",
+      "secondary_skills": [],
+      "role": "linear_combination",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "Differentiate y=3x³−5x+8.",
+        "ru": "Продифференцируйте y=3x³−5x+8.",
+        "uz": "y=3x³−5x+8 ni differensiallang."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "9x²−5",
+            "ru": "9x²−5",
+            "uz": "9x²−5"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "9x²−5+8",
+            "ru": "9x²−5+8",
+            "uz": "9x²−5+8"
+          },
+          "diagnostic_code": "DIF02_CONSTANT_ZERO"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "3x²−5",
+            "ru": "3x²−5",
+            "uz": "3x²−5"
+          },
+          "diagnostic_code": "DIF02_COEFFICIENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "9x³−5",
+            "ru": "9x³−5",
+            "uz": "9x³−5"
+          },
+          "diagnostic_code": "DIF02_POWER_N_MINUS_1"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Differentiate term by term: 3x³→9x², −5x→−5 and 8→0. So dy/dx=9x²−5.",
+        "ru": "Дифференцируем по членам: 3x³→9x², −5x→−5, 8→0. Поэтому dy/dx=9x²−5.",
+        "uz": "Har bir hadni differensiallaymiz: 3x³→9x², −5x→−5, 8→0. Demak dy/dx=9x²−5."
+      },
+      "ai_source_skill": "P1-DIF-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q370",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-02",
+      "secondary_skills": [],
+      "role": "derivative_value",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "For y=2x³−4x²+7, enter dy/dx at x=2.",
+        "ru": "Для y=2x³−4x²+7 введите dy/dx при x=2.",
+        "uz": "y=2x³−4x²+7 uchun x=2 da dy/dx ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "8",
+        "accepted_examples": [
+          "8",
+          " 8 "
+        ],
+        "rejected_examples": [
+          "0",
+          "4",
+          "16"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=6x²−8x. At x=2 this is 24−16=8.",
+        "ru": "dy/dx=6x²−8x. При x=2 получаем 24−16=8.",
+        "uz": "dy/dx=6x²−8x. x=2 da 24−16=8."
+      },
+      "ai_source_skill": "P1-DIF-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q371",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-02",
+      "secondary_skills": [],
+      "role": "fractional_power",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "Differentiate y=6√x.",
+        "ru": "Продифференцируйте y=6√x.",
+        "uz": "y=6√x ni differensiallang."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3/√x",
+            "ru": "3/√x",
+            "uz": "3/√x"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3√x",
+            "ru": "3√x",
+            "uz": "3√x"
+          },
+          "diagnostic_code": "DIF02_RATIONAL_POWER"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "6/√x",
+            "ru": "6/√x",
+            "uz": "6/√x"
+          },
+          "diagnostic_code": "DIF02_COEFFICIENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "12√x",
+            "ru": "12√x",
+            "uz": "12√x"
+          },
+          "diagnostic_code": "DIF02_POWER_N_MINUS_1"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "6√x=6x^(1/2). Its derivative is 6(1/2)x^(−1/2)=3/√x.",
+        "ru": "6√x=6x^(1/2). Производная равна 6(1/2)x^(−1/2)=3/√x.",
+        "uz": "6√x=6x^(1/2). Hosila 6(1/2)x^(−1/2)=3/√x."
+      },
+      "ai_source_skill": "P1-DIF-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q372",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-02",
+      "secondary_skills": [],
+      "role": "negative_power",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "Differentiate y=5/x².",
+        "ru": "Продифференцируйте y=5/x².",
+        "uz": "y=5/x² ni differensiallang."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−10/x³",
+            "ru": "−10/x³",
+            "uz": "−10/x³"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "10/x³",
+            "ru": "10/x³",
+            "uz": "10/x³"
+          },
+          "diagnostic_code": "DIF02_RATIONAL_POWER"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−10/x",
+            "ru": "−10/x",
+            "uz": "−10/x"
+          },
+          "diagnostic_code": "DIF02_POWER_N_MINUS_1"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−5/x³",
+            "ru": "−5/x³",
+            "uz": "−5/x³"
+          },
+          "diagnostic_code": "DIF02_COEFFICIENT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "5/x²=5x^(−2). Differentiate: 5(−2)x^(−3)=−10/x³.",
+        "ru": "5/x²=5x^(−2). Производная: 5(−2)x^(−3)=−10/x³.",
+        "uz": "5/x²=5x^(−2). Hosila: 5(−2)x^(−3)=−10/x³."
+      },
+      "ai_source_skill": "P1-DIF-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q373",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-02",
+      "secondary_skills": [],
+      "role": "fractional_value",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "For y=4x^(3/2), enter dy/dx at x=9.",
+        "ru": "Для y=4x^(3/2) введите dy/dx при x=9.",
+        "uz": "y=4x^(3/2) uchun x=9 da dy/dx ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "18",
+        "accepted_examples": [
+          "18",
+          " 18 "
+        ],
+        "rejected_examples": [
+          "12",
+          "24",
+          "54"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=4(3/2)x^(1/2)=6√x. At x=9, this is 6·3=18.",
+        "ru": "dy/dx=4(3/2)x^(1/2)=6√x. При x=9 получаем 6·3=18.",
+        "uz": "dy/dx=4(3/2)x^(1/2)=6√x. x=9 da 6·3=18."
+      },
+      "ai_source_skill": "P1-DIF-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q374",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-02",
+      "secondary_skills": [],
+      "role": "second_derivative_value",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "For y=x⁴−2x³+5x, enter d²y/dx² at x=1.",
+        "ru": "Для y=x⁴−2x³+5x введите d²y/dx² при x=1.",
+        "uz": "y=x⁴−2x³+5x uchun x=1 da d²y/dx² ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "0",
+        "accepted_examples": [
+          "0",
+          " 0 "
+        ],
+        "rejected_examples": [
+          "3",
+          "4",
+          "5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=4x³−6x²+5 and d²y/dx²=12x²−12x. At x=1, the value is 0.",
+        "ru": "dy/dx=4x³−6x²+5, d²y/dx²=12x²−12x. При x=1 значение равно 0.",
+        "uz": "dy/dx=4x³−6x²+5 va d²y/dx²=12x²−12x. x=1 da qiymat 0."
+      },
+      "ai_source_skill": "P1-DIF-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q375",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-02",
+      "secondary_skills": [],
+      "role": "reverse_coefficient",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "For y=ax³+2x, the gradient at x=1 is 14. Enter a.",
+        "ru": "Для y=ax³+2x градиент при x=1 равен 14. Введите a.",
+        "uz": "y=ax³+2x uchun x=1 dagi gradient 14. a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "3",
+          "6",
+          "12"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=3ax²+2. At x=1, 3a+2=14, so a=4.",
+        "ru": "dy/dx=3ax²+2. При x=1: 3a+2=14, поэтому a=4.",
+        "uz": "dy/dx=3ax²+2. x=1 da 3a+2=14, demak a=4."
+      },
+      "ai_source_skill": "P1-DIF-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q376",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-02",
+      "secondary_skills": [],
+      "role": "rational_linear_combination",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "Differentiate y=2x^(5/2)−3x^(−1).",
+        "ru": "Продифференцируйте y=2x^(5/2)−3x^(−1).",
+        "uz": "y=2x^(5/2)−3x^(−1) ni differensiallang."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "5x^(3/2)+3x^(−2)",
+            "ru": "5x^(3/2)+3x^(−2)",
+            "uz": "5x^(3/2)+3x^(−2)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "5x^(3/2)−3x^(−2)",
+            "ru": "5x^(3/2)−3x^(−2)",
+            "uz": "5x^(3/2)−3x^(−2)"
+          },
+          "diagnostic_code": "DIF02_RATIONAL_POWER"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "5x^(5/2)+3x^(−2)",
+            "ru": "5x^(5/2)+3x^(−2)",
+            "uz": "5x^(5/2)+3x^(−2)"
+          },
+          "diagnostic_code": "DIF02_POWER_N_MINUS_1"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "2x^(3/2)+3x^(−2)",
+            "ru": "2x^(3/2)+3x^(−2)",
+            "uz": "2x^(3/2)+3x^(−2)"
+          },
+          "diagnostic_code": "DIF02_COEFFICIENT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "2x^(5/2) differentiates to 5x^(3/2). For −3x^(−1), the derivative is +3x^(−2).",
+        "ru": "Производная 2x^(5/2) равна 5x^(3/2). Для −3x^(−1) производная равна +3x^(−2).",
+        "uz": "2x^(5/2) hosilasi 5x^(3/2). −3x^(−1) hosilasi esa +3x^(−2)."
+      },
+      "ai_source_skill": "P1-DIF-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q377",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-02",
+      "secondary_skills": [],
+      "role": "reverse_derivative_value",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "For y=x³+bx²−5x, dy/dx=0 at x=1. Enter b.",
+        "ru": "Для y=x³+bx²−5x известно, что dy/dx=0 при x=1. Введите b.",
+        "uz": "y=x³+bx²−5x uchun x=1 da dy/dx=0. b ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "1",
+        "accepted_examples": [
+          "1",
+          " 1 "
+        ],
+        "rejected_examples": [
+          "-1",
+          "2",
+          "5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=3x²+2bx−5. At x=1: 3+2b−5=0, so 2b=2 and b=1.",
+        "ru": "dy/dx=3x²+2bx−5. При x=1: 3+2b−5=0, значит 2b=2 и b=1.",
+        "uz": "dy/dx=3x²+2bx−5. x=1 da 3+2b−5=0, demak 2b=2 va b=1."
+      },
+      "ai_source_skill": "P1-DIF-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q378",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-02",
+      "secondary_skills": [],
+      "role": "fractional_reverse",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "For y=k√x, the gradient at x=4 is 3. Enter k.",
+        "ru": "Для y=k√x градиент при x=4 равен 3. Введите k.",
+        "uz": "y=k√x uchun x=4 dagi gradient 3. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "12",
+        "accepted_examples": [
+          "12",
+          " 12 "
+        ],
+        "rejected_examples": [
+          "6",
+          "3",
+          "24"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=k/(2√x). At x=4, dy/dx=k/4=3, so k=12.",
+        "ru": "dy/dx=k/(2√x). При x=4: dy/dx=k/4=3, поэтому k=12.",
+        "uz": "dy/dx=k/(2√x). x=4 da dy/dx=k/4=3, demak k=12."
+      },
+      "ai_source_skill": "P1-DIF-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q379",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-02",
+      "secondary_skills": [],
+      "role": "second_derivative_expression",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "For y=3x⁵−2x³+x, which expression is d²y/dx²?",
+        "ru": "Для y=3x⁵−2x³+x какое выражение равно d²y/dx²?",
+        "uz": "y=3x⁵−2x³+x uchun d²y/dx² qaysi ifoda?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "60x³−12x",
+            "ru": "60x³−12x",
+            "uz": "60x³−12x"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "15x⁴−6x²+1",
+            "ru": "15x⁴−6x²+1",
+            "uz": "15x⁴−6x²+1"
+          },
+          "diagnostic_code": "DIF02_LINEAR_COMBINATION"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "60x⁴−12x²",
+            "ru": "60x⁴−12x²",
+            "uz": "60x⁴−12x²"
+          },
+          "diagnostic_code": "DIF02_POWER_N_MINUS_1"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "15x³−6x",
+            "ru": "15x³−6x",
+            "uz": "15x³−6x"
+          },
+          "diagnostic_code": "DIF02_COEFFICIENT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "First derivative: 15x⁴−6x²+1. Differentiate again to obtain 60x³−12x.",
+        "ru": "Первая производная: 15x⁴−6x²+1. Дифференцируя ещё раз, получаем 60x³−12x.",
+        "uz": "Birinchi hosila: 15x⁴−6x²+1. Yana differensiallab 60x³−12x ni olamiz."
+      },
+      "ai_source_skill": "P1-DIF-02",
+      "status": "draft"
+    }
+  ]
+}
