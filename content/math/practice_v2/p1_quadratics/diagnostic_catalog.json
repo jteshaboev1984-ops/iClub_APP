@@ -1,0 +1,489 @@
+{
+  "version": "p1_quadratics_diag_v0.1",
+  "policy": {
+    "rule": "A diagnostic code may be used only when the authored wrong path intentionally supports it. Otherwise the result is unmapped.",
+    "ai_boundary": "AI may explain an established diagnostic only; it may not replace, strengthen, or invent the diagnostic."
+  },
+  "diagnostics": [
+    {
+      "code": "QUA01_HALF_COEFFICIENT",
+      "skill": "P1-QUA-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The completed-square step used the x-coefficient incorrectly. The number inside the square is half of the x-coefficient.",
+        "ru": "В шаге выделения полного квадрата неверно использован коэффициент при x. Внутри квадрата берётся половина коэффициента при x.",
+        "uz": "To‘liq kvadratga keltirishda x koeffitsiyenti noto‘g‘ri ishlatilgan. Kvadrat ichidagi son x koeffitsiyentining yarmi bo‘ladi."
+      },
+      "next_action": {
+        "en": "Take half of the x-coefficient first, form the square, then compensate for the added constant.",
+        "ru": "Сначала возьмите половину коэффициента при x, составьте квадрат, затем компенсируйте добавленную константу.",
+        "uz": "Avval x koeffitsiyentining yarmini oling, kvadratni hosil qiling, so‘ng qo‘shilgan doimiy hadni kompensatsiya qiling."
+      }
+    },
+    {
+      "code": "QUA01_SIGN_IN_SQUARE",
+      "skill": "P1-QUA-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The sign inside the completed square was reversed incorrectly. In (x − h)², the vertex x-coordinate is h.",
+        "ru": "Знак внутри полного квадрата выбран неверно. В (x − h)² x-координата вершины равна h.",
+        "uz": "To‘liq kvadrat ichidagi ishora noto‘g‘ri tanlangan. (x − h)² da cho‘qqining x-koordinatasi h ga teng."
+      },
+      "next_action": {
+        "en": "Expand your square once to check that its middle term matches the original quadratic.",
+        "ru": "Раскройте полученный квадрат и проверьте, совпадает ли средний член с исходным выражением.",
+        "uz": "Hosil qilgan kvadratingizni bir marta ochib, o‘rta had asl ifodaga mos kelishini tekshiring."
+      }
+    },
+    {
+      "code": "QUA01_COMPENSATION",
+      "skill": "P1-QUA-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The square was formed, but the extra constant created by squaring was not compensated correctly.",
+        "ru": "Квадрат составлен, но дополнительная константа, появившаяся при раскрытии квадрата, компенсирована неверно.",
+        "uz": "Kvadrat hosil qilingan, lekin kvadratni ochishda paydo bo‘lgan qo‘shimcha doimiy had to‘g‘ri kompensatsiya qilinmagan."
+      },
+      "next_action": {
+        "en": "Expand the completed square, compare constants, and add or subtract exactly the difference.",
+        "ru": "Раскройте полный квадрат, сравните свободные члены и добавьте или вычтите ровно их разность.",
+        "uz": "To‘liq kvadratni oching, doimiy hadlarni solishtiring va aynan farqini qo‘shing yoki ayiring."
+      }
+    },
+    {
+      "code": "QUA01_VERTEX_COORDINATES",
+      "skill": "P1-QUA-01",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The completed-square form was not translated into the vertex coordinates correctly.",
+        "ru": "Форма полного квадрата неверно переведена в координаты вершины.",
+        "uz": "To‘liq kvadrat ko‘rinishi cho‘qqi koordinatalariga noto‘g‘ri o‘tkazilgan."
+      },
+      "next_action": {
+        "en": "Match y = a(x − h)² + k directly to the vertex (h, k), paying attention to the sign inside the bracket.",
+        "ru": "Сопоставьте y = a(x − h)² + k с вершиной (h, k), особенно внимательно к знаку внутри скобки.",
+        "uz": "y = a(x − h)² + k ni (h, k) cho‘qqi bilan to‘g‘ridan-to‘g‘ri moslang va qavs ichidagi ishoraga e’tibor bering."
+      }
+    },
+    {
+      "code": "QUA01_MIN_MAX_DIRECTION",
+      "skill": "P1-QUA-01",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The direction of the parabola was used incorrectly when identifying a minimum or maximum.",
+        "ru": "Направление параболы неверно использовано при определении минимума или максимума.",
+        "uz": "Minimum yoki maksimumni aniqlashda parabolaning ochilish yo‘nalishi noto‘g‘ri ishlatilgan."
+      },
+      "next_action": {
+        "en": "Check the sign of the coefficient multiplying the square: positive gives a minimum; negative gives a maximum.",
+        "ru": "Проверьте знак коэффициента при квадрате: положительный даёт минимум, отрицательный — максимум.",
+        "uz": "Kvadrat oldidagi koeffitsiyent ishorasini tekshiring: musbat bo‘lsa minimum, manfiy bo‘lsa maksimum bo‘ladi."
+      }
+    },
+    {
+      "code": "QUA01_PARAMETER_FROM_VERTEX",
+      "skill": "P1-QUA-01",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The parameter was not linked correctly to the vertex or minimum/maximum condition.",
+        "ru": "Параметр неверно связан с условием о вершине или минимуме/максимуме.",
+        "uz": "Parametr cho‘qqi yoki minimum/maksimum sharti bilan noto‘g‘ri bog‘langan."
+      },
+      "next_action": {
+        "en": "Rewrite the quadratic in completed-square form first, then apply the given vertex or extremum condition.",
+        "ru": "Сначала приведите квадратное выражение к форме полного квадрата, затем примените условие о вершине или экстремуме.",
+        "uz": "Avval kvadrat ifodani to‘liq kvadrat ko‘rinishiga keltiring, keyin berilgan cho‘qqi yoki ekstremum shartini qo‘llang."
+      }
+    },
+    {
+      "code": "QUA02_DISCRIMINANT_FORMULA",
+      "skill": "P1-QUA-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The discriminant was calculated from the coefficients incorrectly.",
+        "ru": "Дискриминант неверно вычислен по коэффициентам.",
+        "uz": "Diskriminant koeffitsiyentlardan noto‘g‘ri hisoblangan."
+      },
+      "next_action": {
+        "en": "Identify a, b and c with their signs, then use D = b² − 4ac exactly.",
+        "ru": "Определите a, b и c вместе со знаками и затем точно примените D = b² − 4ac.",
+        "uz": "a, b va c ni ishoralari bilan aniqlang, so‘ng D = b² − 4ac formulani aynan qo‘llang."
+      }
+    },
+    {
+      "code": "QUA02_ROOT_CONDITION",
+      "skill": "P1-QUA-02",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The discriminant condition was matched to the wrong root case.",
+        "ru": "Условие на дискриминант сопоставлено с неверным случаем корней.",
+        "uz": "Diskriminant sharti ildizlar holati bilan noto‘g‘ri moslangan."
+      },
+      "next_action": {
+        "en": "Use D > 0 for two distinct real roots, D = 0 for a repeated real root, and D < 0 for no real roots.",
+        "ru": "Используйте D > 0 для двух различных действительных корней, D = 0 для кратного корня и D < 0 при отсутствии действительных корней.",
+        "uz": "D > 0 — ikkita turli haqiqiy ildiz, D = 0 — takroriy haqiqiy ildiz, D < 0 — haqiqiy ildiz yo‘q."
+      }
+    },
+    {
+      "code": "QUA02_INEQUALITY_BOUNDARY",
+      "skill": "P1-QUA-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The parameter boundary was included or excluded incorrectly.",
+        "ru": "Граничное значение параметра включено или исключено неверно.",
+        "uz": "Parametrning chegaraviy qiymati noto‘g‘ri kiritilgan yoki chiqarilgan."
+      },
+      "next_action": {
+        "en": "Check whether the required root condition is strict (> or <) or includes equality (=), then keep the matching boundary rule.",
+        "ru": "Проверьте, является ли условие строгим (> или <) или включает равенство (=), и соответственно обработайте границу.",
+        "uz": "Ildiz sharti qat’iymi (> yoki <) yoki tenglikni (=) ham o‘z ichiga oladimi, tekshiring va chegarani shunga mos tanlang."
+      }
+    },
+    {
+      "code": "QUA02_PARAMETER_ALGEBRA",
+      "skill": "P1-QUA-02",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The discriminant condition was set up, but the resulting parameter equation or inequality was handled incorrectly.",
+        "ru": "Условие на дискриминант составлено, но полученное уравнение или неравенство с параметром решено неверно.",
+        "uz": "Diskriminant sharti tuzilgan, lekin hosil bo‘lgan parametrli tenglama yoki tengsizlik noto‘g‘ri yechilgan."
+      },
+      "next_action": {
+        "en": "Simplify the discriminant expression carefully, solve for the parameter, then apply any sign or domain condition from the question.",
+        "ru": "Аккуратно упростите выражение дискриминанта, решите относительно параметра и затем примените дополнительные условия на знак или область.",
+        "uz": "Diskriminant ifodasini ehtiyotkorlik bilan soddalashtiring, parametrni toping va savoldagi ishora yoki soha shartlarini qo‘llang."
+      }
+    },
+    {
+      "code": "QUA02_GRAPH_INTERPRETATION",
+      "skill": "P1-QUA-02",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The root information from the discriminant was not combined correctly with the parabola’s direction.",
+        "ru": "Информация о корнях из дискриминанта неверно объединена с направлением параболы.",
+        "uz": "Diskriminantdan olingan ildizlar haqidagi ma’lumot parabolaning yo‘nalishi bilan noto‘g‘ri birlashtirilgan."
+      },
+      "next_action": {
+        "en": "First decide whether x-intercepts exist from D, then use the sign of a to decide whether the parabola opens upward or downward.",
+        "ru": "Сначала по D определите наличие пересечений с осью x, затем по знаку a определите направление параболы.",
+        "uz": "Avval D orqali x o‘qi bilan kesishish bor-yo‘qligini aniqlang, keyin a ishorasi orqali parabolaning yo‘nalishini belgilang."
+      }
+    },
+    {
+      "code": "QUA03_METHOD_SELECTION",
+      "skill": "P1-QUA-03",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "A valid quadratic method may exist, but the structure of this equation supports a more direct route.",
+        "ru": "Допустимый способ может существовать, но структура этого уравнения допускает более прямой путь.",
+        "uz": "Boshqa to‘g‘ri usul mavjud bo‘lishi mumkin, ammo bu tenglama tuzilishi ancha bevosita usulni ko‘rsatadi."
+      },
+      "next_action": {
+        "en": "Before calculating, check for common factors, difference of squares or simple factorisation; otherwise use the formula or completing the square.",
+        "ru": "Перед вычислениями проверьте общий множитель, разность квадратов и простое разложение; иначе используйте формулу или полный квадрат.",
+        "uz": "Hisoblashdan oldin umumiy ko‘paytuvchi, kvadratlar ayirmasi yoki oddiy ajratishni tekshiring; bo‘lmasa formula yoki to‘liq kvadratdan foydalaning."
+      }
+    },
+    {
+      "code": "QUA03_FACTOR_TO_ROOT_SIGN",
+      "skill": "P1-QUA-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The factorisation-to-root step used the factor sign or scale incorrectly.",
+        "ru": "При переходе от множителей к корням неверно обработан знак или коэффициент множителя.",
+        "uz": "Ko‘paytuvchilardan ildizlarga o‘tishda ko‘paytuvchi ishorasi yoki koeffitsiyenti noto‘g‘ri ishlatilgan."
+      },
+      "next_action": {
+        "en": "Set each factor equal to zero separately and solve that linear equation exactly.",
+        "ru": "Приравняйте каждый множитель к нулю отдельно и точно решите полученное линейное уравнение.",
+        "uz": "Har bir ko‘paytuvchini alohida nolga tenglab, hosil bo‘lgan chiziqli tenglamani aniq yeching."
+      }
+    },
+    {
+      "code": "QUA03_FORMULA_SUBSTITUTION",
+      "skill": "P1-QUA-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The quadratic formula was used with an incorrect sign, denominator or square-root step.",
+        "ru": "В квадратной формуле допущена ошибка со знаком, знаменателем или извлечением корня.",
+        "uz": "Kvadrat formulada ishora, maxraj yoki kvadrat ildiz bosqichida xato qilingan."
+      },
+      "next_action": {
+        "en": "Write a, b and c first, then substitute into x = (−b ± √(b² − 4ac))/(2a) without skipping steps.",
+        "ru": "Сначала выпишите a, b и c, затем подставьте их в x = (−b ± √(b² − 4ac))/(2a), не пропуская шаги.",
+        "uz": "Avval a, b va c ni yozing, keyin x = (−b ± √(b² − 4ac))/(2a) formulaga bosqichlarni tashlamasdan qo‘ying."
+      }
+    },
+    {
+      "code": "QUA03_NO_REAL_INTERPRETATION",
+      "skill": "P1-QUA-03",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The equation was treated as if a real square could equal a negative number.",
+        "ru": "Уравнение обработано так, будто квадрат действительного числа может быть отрицательным.",
+        "uz": "Tenglama haqiqiy son kvadrati manfiy bo‘lishi mumkin degandek talqin qilingan."
+      },
+      "next_action": {
+        "en": "After completing the square, check whether the right-hand side is non-negative before taking a real square root.",
+        "ru": "После выделения квадрата проверьте, что правая часть неотрицательна, прежде чем извлекать действительный квадратный корень.",
+        "uz": "To‘liq kvadratga keltirgandan so‘ng haqiqiy kvadrat ildiz olishdan oldin o‘ng tomon manfiy emasligini tekshiring."
+      }
+    },
+    {
+      "code": "QUA03_PARAMETER_ROOT_SUBSTITUTION",
+      "skill": "P1-QUA-03",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The given root or parameter relationship was not substituted back into the original quadratic correctly.",
+        "ru": "Данный корень или связь с параметром неверно подставлены в исходное квадратное уравнение.",
+        "uz": "Berilgan ildiz yoki parametr bog‘lanishi boshlang‘ich kvadrat tenglamaga noto‘g‘ri qo‘yilgan."
+      },
+      "next_action": {
+        "en": "Substitute the stated root into the original equation first, simplify, and only then solve for the parameter.",
+        "ru": "Сначала подставьте заданный корень в исходное уравнение, упростите и только затем решайте относительно параметра.",
+        "uz": "Avval berilgan ildizni boshlang‘ich tenglamaga qo‘ying, soddalashtiring, keyin parametrni toping."
+      }
+    },
+    {
+      "code": "QUA04_SIGN_REGION",
+      "skill": "P1-QUA-04",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The correct roots may have been found, but the wrong interval was chosen for the required sign.",
+        "ru": "Корни могли быть найдены верно, но для нужного знака выбран неверный промежуток.",
+        "uz": "Ildizlar to‘g‘ri topilgan bo‘lishi mumkin, ammo kerakli ishora uchun noto‘g‘ri oraliq tanlangan."
+      },
+      "next_action": {
+        "en": "Place the roots on a number line and test the sign in each interval, or use the parabola’s opening direction.",
+        "ru": "Отметьте корни на числовой прямой и проверьте знак на каждом промежутке либо используйте направление параболы.",
+        "uz": "Ildizlarni sonlar o‘qiga belgilang va har bir oraliqda ishorani tekshiring yoki parabolaning ochilish yo‘nalishidan foydalaning."
+      }
+    },
+    {
+      "code": "QUA04_ENDPOINT_INCLUSION",
+      "skill": "P1-QUA-04",
+      "mistake_type": "reading",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The interval endpoints were included or excluded inconsistently with the inequality sign.",
+        "ru": "Границы промежутка включены или исключены не в соответствии со знаком неравенства.",
+        "uz": "Oraliq chegaralari tengsizlik ishorasiga mos bo‘lmagan tarzda kiritilgan yoki chiqarilgan."
+      },
+      "next_action": {
+        "en": "Use open endpoints for < or > and include a root only when the inequality uses ≤ or ≥.",
+        "ru": "Для < или > границы не включаются; корень включается только при ≤ или ≥.",
+        "uz": "< yoki > da chegaralarni kiritmang; ildiz faqat ≤ yoki ≥ bo‘lsa kiritiladi."
+      }
+    },
+    {
+      "code": "QUA04_NEGATIVE_MULTIPLIER",
+      "skill": "P1-QUA-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Multiplying or dividing the inequality by a negative value requires reversing the inequality sign.",
+        "ru": "При умножении или делении неравенства на отрицательное число знак неравенства нужно изменить.",
+        "uz": "Tengsizlikni manfiy songa ko‘paytirish yoki bo‘lishda tengsizlik ishorasi almashtirilishi kerak."
+      },
+      "next_action": {
+        "en": "Repeat the rearrangement and flip the inequality sign exactly at the step where you multiply or divide by a negative number.",
+        "ru": "Повторите преобразование и измените знак неравенства именно на шаге умножения или деления на отрицательное число.",
+        "uz": "O‘zgartirishni qayta bajaring va manfiy songa ko‘paytirish yoki bo‘lish bosqichida ishorani aynan o‘sha yerda almashtiring."
+      }
+    },
+    {
+      "code": "QUA04_REPEATED_ROOT_CASE",
+      "skill": "P1-QUA-04",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A perfect square or repeated root needs a special sign check: it does not change sign at the repeated root.",
+        "ru": "Полный квадрат или кратный корень требует отдельной проверки знака: при кратном корне знак не меняется.",
+        "uz": "To‘liq kvadrat yoki takroriy ildizda ishorani alohida tekshirish kerak: takroriy ildizda ishora almashmaydi."
+      },
+      "next_action": {
+        "en": "Rewrite the expression as a square if possible, then use the fact that a real square is always non-negative.",
+        "ru": "Если возможно, запишите выражение как квадрат и используйте факт, что квадрат действительного числа всегда неотрицателен.",
+        "uz": "Imkon bo‘lsa ifodani kvadrat ko‘rinishida yozing va haqiqiy son kvadrati doimo manfiy emasligidan foydalaning."
+      }
+    },
+    {
+      "code": "QUA04_GRAPH_SIGN_LINK",
+      "skill": "P1-QUA-04",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The graph position relative to the x-axis was not translated into the correct quadratic inequality.",
+        "ru": "Положение графика относительно оси x неверно переведено в квадратное неравенство.",
+        "uz": "Grafikning x o‘qiga nisbatan joylashuvi kvadrat tengsizlikka noto‘g‘ri o‘tkazilgan."
+      },
+      "next_action": {
+        "en": "Above the x-axis means y > 0; below means y < 0. Then solve the corresponding quadratic inequality with the required endpoint rule.",
+        "ru": "Выше оси x означает y > 0, ниже — y < 0. Затем решите соответствующее квадратное неравенство с нужным правилом границ.",
+        "uz": "x o‘qidan yuqorida y > 0, pastda y < 0. Keyin tegishli kvadrat tengsizlikni to‘g‘ri chegara qoidasi bilan yeching."
+      }
+    },
+    {
+      "code": "QUA05_SUBSTITUTION_SETUP",
+      "skill": "P1-QUA-05",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The linear relation was not substituted or rearranged into the quadratic relation correctly.",
+        "ru": "Линейная зависимость неверно подставлена или преобразована в квадратной зависимости.",
+        "uz": "Chiziqli bog‘lanish kvadrat bog‘lanishga noto‘g‘ri qo‘yilgan yoki qayta tuzilgan."
+      },
+      "next_action": {
+        "en": "Express one variable from the linear equation, substitute it everywhere in the quadratic relation, then collect all terms on one side.",
+        "ru": "Выразите одну переменную из линейного уравнения, подставьте её во всю квадратную зависимость и соберите все члены в одной стороне.",
+        "uz": "Chiziqli tenglamadan bitta o‘zgaruvchini ifodalang, uni kvadrat bog‘lanishning hamma joyiga qo‘ying va barcha hadlarni bir tomonga yig‘ing."
+      }
+    },
+    {
+      "code": "QUA05_BACK_SUBSTITUTION",
+      "skill": "P1-QUA-05",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "A quadratic solution was not paired with the matching value of the other variable correctly.",
+        "ru": "Найденное решение квадратного уравнения неверно сопоставлено со значением второй переменной.",
+        "uz": "Kvadrat tenglama yechimi ikkinchi o‘zgaruvchining mos qiymati bilan noto‘g‘ri juftlangan."
+      },
+      "next_action": {
+        "en": "Substitute each valid quadratic root back into the original linear equation and verify the ordered pair in both original relations.",
+        "ru": "Подставьте каждый допустимый корень обратно в исходное линейное уравнение и проверьте пару в обоих исходных соотношениях.",
+        "uz": "Har bir yaroqli ildizni boshlang‘ich chiziqli tenglamaga qayta qo‘ying va juftlikni ikkala boshlang‘ich bog‘lanishda tekshiring."
+      }
+    },
+    {
+      "code": "QUA05_INTERSECTION_COUNT",
+      "skill": "P1-QUA-05",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The number of intersections was not linked correctly to the quadratic obtained after equating the two relations.",
+        "ru": "Число точек пересечения неверно связано с квадратным уравнением, полученным после приравнивания зависимостей.",
+        "uz": "Kesishish nuqtalari soni ikki bog‘lanishni tenglashtirgandan keyingi kvadrat tenglama bilan noto‘g‘ri bog‘langan."
+      },
+      "next_action": {
+        "en": "Set the two relations equal and use the discriminant of the resulting quadratic: positive gives two intersections, zero one tangent point, negative none.",
+        "ru": "Приравняйте зависимости и используйте дискриминант полученного квадратного уравнения: положительный — две точки, нулевой — одна точка касания, отрицательный — нет пересечений.",
+        "uz": "Ikki bog‘lanishni tenglashtiring va hosil bo‘lgan kvadrat tenglama diskriminantidan foydalaning: musbat — 2 ta, nol — 1 ta urinish nuqtasi, manfiy — kesishish yo‘q."
+      }
+    },
+    {
+      "code": "QUA05_TANGENCY_CONDITION",
+      "skill": "P1-QUA-05",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Tangency was not converted into the repeated-root condition correctly.",
+        "ru": "Условие касания неверно переведено в условие кратного корня.",
+        "uz": "Urinish sharti takroriy ildiz shartiga noto‘g‘ri o‘tkazilgan."
+      },
+      "next_action": {
+        "en": "Equate the line and curve, rearrange to one quadratic, then impose discriminant = 0.",
+        "ru": "Приравняйте прямую и кривую, получите одно квадратное уравнение и затем положите дискриминант равным нулю.",
+        "uz": "Chiziq va egri chiziqni tenglashtiring, bitta kvadrat tenglama hosil qiling va diskriminantni 0 ga tenglang."
+      }
+    },
+    {
+      "code": "QUA06_SUBSTITUTION_CHOICE",
+      "skill": "P1-QUA-06",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The substitution does not match the repeated expression that makes the equation quadratic.",
+        "ru": "Выбранная замена не соответствует повторяющемуся выражению, относительно которого уравнение становится квадратным.",
+        "uz": "Tanlangan almashtirish tenglamani kvadrat qiladigan takroriy ifodaga mos emas."
+      },
+      "next_action": {
+        "en": "Look for a quantity u such that the highest relevant term is u² and another term is u, for example u = x² when x⁴ and x² appear.",
+        "ru": "Ищите величину u, для которой старший член становится u², а другой — u; например u = x² при наличии x⁴ и x².",
+        "uz": "Shunday u ni topingki, yuqori had u², boshqa had esa u bo‘lsin; masalan x⁴ va x² bo‘lsa u = x²."
+      }
+    },
+    {
+      "code": "QUA06_BACK_SUBSTITUTION",
+      "skill": "P1-QUA-06",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The transformed quadratic was solved, but the answer was not converted back to the original variable completely.",
+        "ru": "Преобразованное квадратное уравнение решено, но ответ не полностью возвращён к исходной переменной.",
+        "uz": "Almashtirilgan kvadrat tenglama yechilgan, ammo javob boshlang‘ich o‘zgaruvchiga to‘liq qaytarilmagan."
+      },
+      "next_action": {
+        "en": "For every solution of the substituted variable, solve the defining substitution for the original variable and keep every valid real branch.",
+        "ru": "Для каждого значения новой переменной решите уравнение замены относительно исходной переменной и сохраните все допустимые действительные ветви.",
+        "uz": "Yangi o‘zgaruvchining har bir qiymati uchun almashtirish tenglamasini boshlang‘ich o‘zgaruvchi bo‘yicha yeching va barcha yaroqli haqiqiy tarmoqlarni saqlang."
+      }
+    },
+    {
+      "code": "QUA06_DOMAIN_RESTRICTION",
+      "skill": "P1-QUA-06",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A transformed solution was kept even though it violates the substitution’s real-number restriction.",
+        "ru": "Сохранено значение новой переменной, которое нарушает ограничение замены для действительных чисел.",
+        "uz": "Yangi o‘zgaruvchining haqiqiy sonlar uchun almashtirish chekloviga zid qiymati qoldirilgan."
+      },
+      "next_action": {
+        "en": "Apply the substitution restriction before returning to x; for example, if u = x², then u must be non-negative for real x.",
+        "ru": "Перед возвратом к x примените ограничение замены; например, при u = x² для действительного x должно быть u ≥ 0.",
+        "uz": "x ga qaytishdan oldin almashtirish cheklovini qo‘llang; masalan u = x² bo‘lsa, haqiqiy x uchun u ≥ 0."
+      }
+    },
+    {
+      "code": "QUA06_ROOT_COUNT",
+      "skill": "P1-QUA-06",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The number of original-variable roots was counted incorrectly after solving the transformed quadratic.",
+        "ru": "После решения преобразованного квадратного уравнения неверно посчитано число корней исходной переменной.",
+        "uz": "Almashtirilgan kvadrat tenglama yechilgandan keyin boshlang‘ich o‘zgaruvchi ildizlari soni noto‘g‘ri sanalgan."
+      },
+      "next_action": {
+        "en": "Convert each valid transformed value back separately and count distinct real roots only after applying all restrictions.",
+        "ru": "Отдельно верните каждое допустимое значение к исходной переменной и считайте различные действительные корни только после всех ограничений.",
+        "uz": "Har bir yaroqli yangi qiymatni alohida boshlang‘ich o‘zgaruvchiga qaytaring va barcha cheklovlardan keyin faqat turli haqiqiy ildizlarni sanang."
+      }
+    },
+    {
+      "code": "QUA06_PARAMETER_REPEAT",
+      "skill": "P1-QUA-06",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The repeated-root condition was applied incorrectly to the transformed quadratic.",
+        "ru": "Условие кратного корня неверно применено к преобразованному квадратному уравнению.",
+        "uz": "Takroriy ildiz sharti almashtirilgan kvadrat tenglamaga noto‘g‘ri qo‘llangan."
+      },
+      "next_action": {
+        "en": "Write the transformed quadratic explicitly, then use either its repeated-factor form or discriminant = 0 before returning to the original variable.",
+        "ru": "Явно запишите преобразованное квадратное уравнение, затем используйте форму полного повторяющегося множителя или дискриминант = 0 и только потом возвращайтесь к исходной переменной.",
+        "uz": "Almashtirilgan kvadrat tenglamani aniq yozing, so‘ng takroriy ko‘paytuvchi ko‘rinishi yoki diskriminant = 0 dan foydalaning, keyin boshlang‘ich o‘zgaruvchiga qayting."
+      }
+    }
+  ]
+}
