@@ -1,0 +1,523 @@
+{
+  "version": "practice_v2_p6_differentiation_draft_v0.1",
+  "skill": "P1-DIF-05",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q400",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-05",
+      "secondary_skills": [
+        "P1-DIF-02"
+      ],
+      "role": "direct_interval",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "For y=x²−4x+7, on which interval is the function increasing?",
+        "ru": "Для y=x²−4x+7 на каком интервале функция возрастает?",
+        "uz": "y=x²−4x+7 funksiya qaysi intervalda o‘sadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x>2",
+            "ru": "x>2",
+            "uz": "x>2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x<2",
+            "ru": "x<2",
+            "uz": "x<2"
+          },
+          "diagnostic_code": "DIF05_SIGN_INTERVAL"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x>4",
+            "ru": "x>4",
+            "uz": "x>4"
+          },
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "All real x",
+            "ru": "Все действительные x",
+            "uz": "Barcha haqiqiy x"
+          },
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "dy/dx=2x−4. This is positive when x>2, so the function is increasing for x>2.",
+        "ru": "dy/dx=2x−4. Эта производная положительна при x>2, поэтому функция возрастает при x>2.",
+        "uz": "dy/dx=2x−4. U x>2 da musbat, demak funksiya x>2 da o‘sadi."
+      },
+      "ai_source_skill": "P1-DIF-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q401",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-05",
+      "secondary_skills": [
+        "P1-DIF-02",
+        "P1-QUA-04"
+      ],
+      "role": "cubic_interval",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "For y=x³+3x²−9x, on which interval is the function decreasing?",
+        "ru": "Для y=x³+3x²−9x на каком интервале функция убывает?",
+        "uz": "y=x³+3x²−9x funksiya qaysi intervalda kamayadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−3<x<1",
+            "ru": "−3<x<1",
+            "uz": "−3<x<1"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x<−3 or x>1",
+            "ru": "x<−3 или x>1",
+            "uz": "x<−3 yoki x>1"
+          },
+          "diagnostic_code": "DIF05_SIGN_INTERVAL"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x<1",
+            "ru": "x<1",
+            "uz": "x<1"
+          },
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x>−3",
+            "ru": "x>−3",
+            "uz": "x>−3"
+          },
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "dy/dx=3x²+6x−9=3(x+3)(x−1). This quadratic is negative between its roots, so the function decreases for −3<x<1.",
+        "ru": "dy/dx=3x²+6x−9=3(x+3)(x−1). Квадратичное выражение отрицательно между корнями, поэтому функция убывает при −3<x<1.",
+        "uz": "dy/dx=3x²+6x−9=3(x+3)(x−1). Kvadrat ifoda ildizlar orasida manfiy, demak funksiya −3<x<1 da kamayadi."
+      },
+      "ai_source_skill": "P1-DIF-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q402",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-05",
+      "secondary_skills": [
+        "P1-QUA-04"
+      ],
+      "role": "derivative_given",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A function has f′(x)=(x−2)(x+5). Where is f increasing?",
+        "ru": "Для функции f′(x)=(x−2)(x+5). Где f возрастает?",
+        "uz": "Funksiya uchun f′(x)=(x−2)(x+5). f qayerda o‘sadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x<−5 or x>2",
+            "ru": "x<−5 или x>2",
+            "uz": "x<−5 yoki x>2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−5<x<2",
+            "ru": "−5<x<2",
+            "uz": "−5<x<2"
+          },
+          "diagnostic_code": "DIF05_SIGN_INTERVAL"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x>−5",
+            "ru": "x>−5",
+            "uz": "x>−5"
+          },
+          "diagnostic_code": "DIF05_QUADRATIC_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x<2",
+            "ru": "x<2",
+            "uz": "x<2"
+          },
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The derivative is a positive-leading quadratic with roots −5 and 2, so f′(x)>0 outside the roots: x<−5 or x>2.",
+        "ru": "Производная — квадратичное выражение с положительным старшим коэффициентом и корнями −5 и 2, поэтому f′(x)>0 вне корней: x<−5 или x>2.",
+        "uz": "Hosila bosh koeffitsiyenti musbat kvadrat ifoda, ildizlari −5 va 2. Shuning uchun f′(x)>0 ildizlardan tashqarida: x<−5 yoki x>2."
+      },
+      "ai_source_skill": "P1-DIF-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q403",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-05",
+      "secondary_skills": [
+        "P1-QUA-04"
+      ],
+      "role": "negative_leading_derivative",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A function has f′(x)=−(x−1)(x−4). Where is f increasing?",
+        "ru": "Для функции f′(x)=−(x−1)(x−4). Где f возрастает?",
+        "uz": "Funksiya uchun f′(x)=−(x−1)(x−4). f qayerda o‘sadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "1<x<4",
+            "ru": "1<x<4",
+            "uz": "1<x<4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x<1 or x>4",
+            "ru": "x<1 или x>4",
+            "uz": "x<1 yoki x>4"
+          },
+          "diagnostic_code": "DIF05_QUADRATIC_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x>1",
+            "ru": "x>1",
+            "uz": "x>1"
+          },
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x<4",
+            "ru": "x<4",
+            "uz": "x<4"
+          },
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Because of the leading minus sign, f′ is positive between the roots 1 and 4. Therefore f increases for 1<x<4.",
+        "ru": "Из-за минуса перед произведением f′ положительна между корнями 1 и 4. Поэтому f возрастает при 1<x<4.",
+        "uz": "Oldidagi minus sabab f′ 1 va 4 ildizlari orasida musbat. Demak f 1<x<4 da o‘sadi."
+      },
+      "ai_source_skill": "P1-DIF-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q404",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-05",
+      "secondary_skills": [
+        "P1-QUA-04"
+      ],
+      "role": "parameter_monotonicity",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "For f(x)=x³+3x²+kx, f′(x)>0 for every real x when k is sufficiently large. Enter the smallest integer k for which f′(x)>0 for all real x.",
+        "ru": "Для f(x)=x³+3x²+kx производная f′(x)>0 для всех действительных x при достаточно большом k. Введите наименьшее целое k, при котором f′(x)>0 для всех x.",
+        "uz": "f(x)=x³+3x²+kx uchun k yetarlicha katta bo‘lsa f′(x)>0 barcha haqiqiy x lar uchun. f′(x)>0 barcha x lar uchun bo‘ladigan eng kichik butun k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "3",
+          "2",
+          "5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "f′(x)=3x²+6x+k. For this upward-opening quadratic to be strictly positive for all real x, its discriminant must be negative: 36−12k<0, so k>3. The smallest integer is 4.",
+        "ru": "f′(x)=3x²+6x+k. Чтобы эта квадратичная функция с положительным старшим коэффициентом была строго положительна при всех x, дискриминант должен быть отрицательным: 36−12k<0, значит k>3. Наименьшее целое — 4.",
+        "uz": "f′(x)=3x²+6x+k. Bu yuqoriga ochilgan kvadrat barcha x larda qat’iy musbat bo‘lishi uchun diskriminant manfiy: 36−12k<0, demak k>3. Eng kichik butun son 4."
+      },
+      "ai_source_skill": "P1-DIF-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q405",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-05",
+      "secondary_skills": [
+        "P1-QUA-04"
+      ],
+      "role": "derivative_quadratic",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "If f′(x)=x²−6x+8, where is f decreasing?",
+        "ru": "Если f′(x)=x²−6x+8, где f убывает?",
+        "uz": "Agar f′(x)=x²−6x+8 bo‘lsa, f qayerda kamayadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2<x<4",
+            "ru": "2<x<4",
+            "uz": "2<x<4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x<2 or x>4",
+            "ru": "x<2 или x>4",
+            "uz": "x<2 yoki x>4"
+          },
+          "diagnostic_code": "DIF05_SIGN_INTERVAL"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x<4",
+            "ru": "x<4",
+            "uz": "x<4"
+          },
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x>2",
+            "ru": "x>2",
+            "uz": "x>2"
+          },
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "f′(x)=(x−2)(x−4), which is negative between the roots. Thus f decreases for 2<x<4.",
+        "ru": "f′(x)=(x−2)(x−4), и эта производная отрицательна между корнями. Поэтому f убывает при 2<x<4.",
+        "uz": "f′(x)=(x−2)(x−4), u ildizlar orasida manfiy. Demak f 2<x<4 da kamayadi."
+      },
+      "ai_source_skill": "P1-DIF-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q406",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-05",
+      "secondary_skills": [],
+      "role": "domain_interval",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A function is defined for x>0 and has f′(x)=x(x−3). On its domain, where is f decreasing?",
+        "ru": "Функция определена при x>0 и имеет f′(x)=x(x−3). На своей области определения где f убывает?",
+        "uz": "Funksiya x>0 da aniqlangan va f′(x)=x(x−3). Aniqlanish sohasida f qayerda kamayadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "0<x<3",
+            "ru": "0<x<3",
+            "uz": "0<x<3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x<0 or x>3",
+            "ru": "x<0 или x>3",
+            "uz": "x<0 yoki x>3"
+          },
+          "diagnostic_code": "DIF05_SIGN_INTERVAL"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x>3",
+            "ru": "x>3",
+            "uz": "x>3"
+          },
+          "diagnostic_code": "DIF05_SIGN_INTERVAL"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x<3",
+            "ru": "x<3",
+            "uz": "x<3"
+          },
+          "diagnostic_code": "DIF05_ENDPOINT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "For 0<x<3, x is positive and x−3 is negative, so f′(x)<0. The part x<0 is outside the stated domain.",
+        "ru": "При 0<x<3 множитель x положителен, а x−3 отрицателен, поэтому f′(x)<0. Часть x<0 вне заданной области определения.",
+        "uz": "0<x<3 da x musbat, x−3 manfiy, demak f′(x)<0. x<0 esa berilgan aniqlanish sohasidan tashqarida."
+      },
+      "ai_source_skill": "P1-DIF-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q407",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-05",
+      "secondary_skills": [
+        "P1-QUA-04"
+      ],
+      "role": "count_intervals",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A function has f′(x)=(x+4)(x−1)(x−5)². How many open intervals separated by derivative zeros have f′(x)<0? Enter the integer.",
+        "ru": "Для функции f′(x)=(x+4)(x−1)(x−5)². На скольких открытых интервалах, разделённых нулями производной, выполняется f′(x)<0? Введите целое число.",
+        "uz": "Funksiya uchun f′(x)=(x+4)(x−1)(x−5)². Hosila nollari ajratgan nechta ochiq intervalda f′(x)<0? Butun sonni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "1",
+        "accepted_examples": [
+          "1",
+          " 1 "
+        ],
+        "rejected_examples": [
+          "2",
+          "3",
+          "4"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The zeros are −4,1,5. The squared factor does not change sign at 5. Testing signs gives negative only on −4<x<1, so there is 1 decreasing interval.",
+        "ru": "Нули: −4,1,5. Квадратный множитель не меняет знак при 5. Проверка знаков даёт отрицательную производную только при −4<x<1, поэтому такой интервал один.",
+        "uz": "Nollar −4,1,5. Kvadrat ko‘paytuvchi 5 da ishorani o‘zgartirmaydi. Ishora tekshiruvida hosila faqat −4<x<1 da manfiy, demak 1 ta interval."
+      },
+      "ai_source_skill": "P1-DIF-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q408",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-05",
+      "secondary_skills": [],
+      "role": "local_sign_reasoning",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "On an interval I, f′(x)<0 at every point. Which conclusion is justified?",
+        "ru": "На интервале I выполняется f′(x)<0 в каждой точке. Какой вывод обоснован?",
+        "uz": "I intervalning har bir nuqtasida f′(x)<0. Qaysi xulosa asosli?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "f is decreasing throughout I.",
+            "ru": "f убывает на всём I.",
+            "uz": "f butun I da kamayadi."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "f is increasing throughout I.",
+            "ru": "f возрастает на всём I.",
+            "uz": "f butun I da o‘sadi."
+          },
+          "diagnostic_code": "DIF05_SIGN_INTERVAL"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "f(x)<0 throughout I.",
+            "ru": "f(x)<0 на всём I.",
+            "uz": "f(x)<0 butun I da."
+          },
+          "diagnostic_code": "DIF05_SIGN_INTERVAL"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "f has a stationary point at every x in I.",
+            "ru": "f имеет стационарную точку при каждом x в I.",
+            "uz": "f I dagi har bir x da statsionar nuqtaga ega."
+          },
+          "diagnostic_code": "DIF05_ROOTS_ONLY"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "A negative derivative means the function value decreases as x increases across the interval. It does not imply that f itself is negative.",
+        "ru": "Отрицательная производная означает, что значение функции уменьшается при росте x на интервале. Это не означает, что сама f отрицательна.",
+        "uz": "Manfiy hosila x oshganda funksiya qiymati kamayishini bildiradi. Bu f ning o‘zi manfiy degani emas."
+      },
+      "ai_source_skill": "P1-DIF-05",
+      "status": "draft"
+    }
+  ]
+}
