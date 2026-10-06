@@ -32,7 +32,7 @@ async function runViewport(browser, width, height) {
           <button class="tab">Profile</button>
         </nav>
         <div id="toast" class="toast" role="status"></div>
-        <div id="modal-root" class="modal-root" aria-hidden="false">
+        <div id="modal-root" class="modal-root" aria-hidden="true">
           <div class="modal-backdrop"><div class="modal-card">Modal</div></div>
         </div>
       </body>
