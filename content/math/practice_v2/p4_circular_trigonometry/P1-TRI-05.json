@@ -23,20 +23,20 @@
         {
           "key": "A",
           "text": {
-            "en": "x=60°,120°",
-            "ru": "x=60°,120°",
-            "uz": "x=60°,120°"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "x=60°,300°",
             "ru": "x=60°,300°",
             "uz": "x=60°,300°"
           },
           "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=60°,120°",
+            "ru": "x=60°,120°",
+            "uz": "x=60°,120°"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -57,7 +57,7 @@
           "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "The reference angle is 60°. Sine is positive in quadrants I and II, giving x=60° and 120°.",
         "ru": "Опорный угол 60°. Синус положителен в I и II четвертях, поэтому x=60° и 120°.",
@@ -95,11 +95,11 @@
         {
           "key": "B",
           "text": {
-            "en": "x=150°,210°",
-            "ru": "x=150°,210°",
-            "uz": "x=150°,210°"
+            "en": "x=210° only",
+            "ru": "Только x=210°",
+            "uz": "Faqat x=210°"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
         },
         {
           "key": "C",
@@ -113,14 +113,14 @@
         {
           "key": "D",
           "text": {
-            "en": "x=210° only",
-            "ru": "Только x=210°",
-            "uz": "Faqat x=210°"
+            "en": "x=150°,210°",
+            "ru": "x=150°,210°",
+            "uz": "x=150°,210°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "D",
       "explanation": {
         "en": "The reference angle is 30°. Cosine is negative in quadrants II and III, giving x=150° and 210°.",
         "ru": "Опорный угол 30°. Косинус отрицателен во II и III четвертях, поэтому x=150° и 210°.",
@@ -149,11 +149,11 @@
         {
           "key": "A",
           "text": {
-            "en": "x=30°,210°",
-            "ru": "x=30°,210°",
-            "uz": "x=30°,210°"
+            "en": "x=150°,330°",
+            "ru": "x=150°,330°",
+            "uz": "x=150°,330°"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
         },
         {
           "key": "B",
@@ -167,11 +167,11 @@
         {
           "key": "C",
           "text": {
-            "en": "x=150°,330°",
-            "ru": "x=150°,330°",
-            "uz": "x=150°,330°"
+            "en": "x=30°,210°",
+            "ru": "x=30°,210°",
+            "uz": "x=30°,210°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -183,7 +183,7 @@
           "diagnostic_code": "TRI05_PERIOD"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "The reference angle is 30°. Tangent is positive in quadrants I and III and repeats every 180°, so x=30° and 210°.",
         "ru": "Опорный угол 30°. Тангенс положителен в I и III четвертях и повторяется через 180°, поэтому x=30° и 210°.",
@@ -321,20 +321,20 @@
         {
           "key": "B",
           "text": {
-            "en": "x=360° only",
-            "ru": "Только x=360°",
-            "uz": "Faqat x=360°"
-          },
-          "diagnostic_code": "TRI05_INTERVAL_ENDPOINT"
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "x=0°,360°",
             "ru": "x=0°,360°",
             "uz": "x=0°,360°"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=360° only",
+            "ru": "Только x=360°",
+            "uz": "Faqat x=360°"
+          },
+          "diagnostic_code": "TRI05_INTERVAL_ENDPOINT"
         },
         {
           "key": "D",
@@ -346,7 +346,7 @@
           "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "B",
       "explanation": {
         "en": "cos x=1 at multiples of 360°. Both endpoints are included, so x=0° and 360°.",
         "ru": "cos x=1 при кратных 360°. Оба конца интервала включены, поэтому x=0° и 360°.",
@@ -375,11 +375,11 @@
         {
           "key": "A",
           "text": {
-            "en": "x=−135°,−45°",
-            "ru": "x=−135°,−45°",
-            "uz": "x=−135°,−45°"
+            "en": "x=−135° only",
+            "ru": "Только x=−135°",
+            "uz": "Faqat x=−135°"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
         },
         {
           "key": "B",
@@ -402,14 +402,14 @@
         {
           "key": "D",
           "text": {
-            "en": "x=−135° only",
-            "ru": "Только x=−135°",
-            "uz": "Faqat x=−135°"
+            "en": "x=−135°,−45°",
+            "ru": "x=−135°,−45°",
+            "uz": "x=−135°,−45°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "Within −180°≤x≤180°, sine equals −√2/2 at −135° and −45°.",
         "ru": "На интервале −180°≤x≤180° синус равен −√2/2 при x=−135° и −45°.",
@@ -499,11 +499,11 @@
         {
           "key": "A",
           "text": {
-            "en": "x=45°,225°",
-            "ru": "x=45°,225°",
-            "uz": "x=45°,225°"
+            "en": "x=135°,315°",
+            "ru": "x=135°,315°",
+            "uz": "x=135°,315°"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
         },
         {
           "key": "B",
@@ -517,11 +517,11 @@
         {
           "key": "C",
           "text": {
-            "en": "x=135°,315°",
-            "ru": "x=135°,315°",
-            "uz": "x=135°,315°"
+            "en": "x=45°,225°",
+            "ru": "x=45°,225°",
+            "uz": "x=45°,225°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -533,7 +533,7 @@
           "diagnostic_code": "TRI05_PERIOD"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "Where cos x≠0, divide by cos x to get tan x=1. Tangent is 1 at x=45° and repeats after 180°, giving 225°.",
         "ru": "Там, где cos x≠0, делим на cos x и получаем tan x=1. Тангенс равен 1 при x=45° и повторяется через 180°, поэтому также 225°.",
@@ -599,11 +599,11 @@
         {
           "key": "A",
           "text": {
-            "en": "x=90°,270°",
-            "ru": "x=90°,270°",
-            "uz": "x=90°,270°"
+            "en": "x=90° only",
+            "ru": "Только x=90°",
+            "uz": "Faqat x=90°"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI05_PERIOD"
         },
         {
           "key": "B",
@@ -626,14 +626,14 @@
         {
           "key": "D",
           "text": {
-            "en": "x=90° only",
-            "ru": "Только x=90°",
-            "uz": "Faqat x=90°"
+            "en": "x=90°,270°",
+            "ru": "x=90°,270°",
+            "uz": "x=90°,270°"
           },
-          "diagnostic_code": "TRI05_PERIOD"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "0°≤2x<720°. cos(2x)=−1 at 2x=180° and 540°, so x=90° and 270°.",
         "ru": "0°≤2x<720°. cos(2x)=−1 при 2x=180° и 540°, поэтому x=90° и 270°.",
