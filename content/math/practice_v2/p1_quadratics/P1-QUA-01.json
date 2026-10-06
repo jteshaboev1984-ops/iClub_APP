@@ -117,53 +117,53 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "What is the vertex of y = −(x + 3)² + 7?",
-        "ru": "Какова вершина графика y = −(x + 3)² + 7?",
-        "uz": "y = −(x + 3)² + 7 grafigining cho‘qqisi qaysi?"
+        "en": "What is the vertex of y = −2(x + 4)² + 5?",
+        "ru": "Какова вершина графика y = −2(x + 4)² + 5?",
+        "uz": "y = −2(x + 4)² + 5 grafigining cho‘qqisi qaysi?"
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "(3, 7)",
-            "ru": "(3, 7)",
-            "uz": "(3, 7)"
+            "en": "(4, 5)",
+            "ru": "(4, 5)",
+            "uz": "(4, 5)"
           },
           "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         },
         {
           "key": "B",
           "text": {
-            "en": "(−3, 7)",
-            "ru": "(−3, 7)",
-            "uz": "(−3, 7)"
+            "en": "(−4, 5)",
+            "ru": "(−4, 5)",
+            "uz": "(−4, 5)"
           },
           "diagnostic_code": null
         },
         {
           "key": "C",
           "text": {
-            "en": "(−3, −7)",
-            "ru": "(−3, −7)",
-            "uz": "(−3, −7)"
+            "en": "(−4, −5)",
+            "ru": "(−4, −5)",
+            "uz": "(−4, −5)"
           },
           "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         },
         {
           "key": "D",
           "text": {
-            "en": "(3, −7)",
-            "ru": "(3, −7)",
-            "uz": "(3, −7)"
+            "en": "(4, −5)",
+            "ru": "(4, −5)",
+            "uz": "(4, −5)"
           },
           "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         }
       ],
       "correct_answer": "B",
       "explanation": {
-        "en": "Vertex form is y = a(x − h)² + k, with vertex (h, k). Here x + 3 = x − (−3), so the vertex is (−3, 7).",
-        "ru": "В форме y = a(x − h)² + k вершина имеет координаты (h, k). Здесь x + 3 = x − (−3), поэтому вершина равна (−3, 7).",
-        "uz": "y = a(x − h)² + k ko‘rinishida cho‘qqi (h, k) bo‘ladi. Bu yerda x + 3 = x − (−3), shuning uchun cho‘qqi (−3, 7)."
+        "en": "Vertex form is y = a(x − h)² + k. Here x + 4 = x − (−4), so h = −4 and k = 5. The vertex is (−4, 5).",
+        "ru": "В форме y = a(x − h)² + k вершина имеет координаты (h, k). Здесь x + 4 = x − (−4), поэтому h = −4 и k = 5. Вершина: (−4, 5).",
+        "uz": "y = a(x − h)² + k ko‘rinishida cho‘qqi (h, k). Bu yerda x + 4 = x − (−4), shuning uchun h = −4 va k = 5. Cho‘qqi (−4, 5)."
       },
       "ai_source_skill": "P1-QUA-01",
       "status": "draft"
