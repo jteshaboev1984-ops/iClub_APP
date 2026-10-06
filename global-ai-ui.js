@@ -321,15 +321,12 @@
       state.observer = observer;
     }
 
-    const main = document.getElementById("main");
-    if (main) {
-      const viewObserver = new MutationObserver(() => reconcileShell());
-      viewObserver.observe(main, {
-        attributes: true,
-        subtree: true,
-        attributeFilter: ["class"]
-      });
-    }
+    // Watch only top-level app views. Observing every class mutation inside
+    // #main would make a global overlay react to unrelated card/animation work.
+    const viewObserver = new MutationObserver(() => reconcileShell());
+    document.querySelectorAll(".view[data-view]").forEach((view) => {
+      viewObserver.observe(view, { attributes: true, attributeFilter: ["class"] });
+    });
   }
 
   function attach() {
