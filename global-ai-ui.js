@@ -240,8 +240,10 @@
     if (m) {
       const c = copy();
       m.classList.toggle("is-assessment-blocked", blocked);
-      m.setAttribute("aria-label", c.open);
-      m.setAttribute("aria-disabled", blocked ? "true" : "false");
+      m.setAttribute("aria-label", blocked ? c.assessmentTap : c.open);
+      // The collapsed mark remains intentionally tappable so it can explain
+      // why AI is unavailable; do not expose it as an HTML/ARIA-disabled control.
+      m.removeAttribute("aria-disabled");
       if (blocked) m.setAttribute("aria-expanded", "false");
     }
 
