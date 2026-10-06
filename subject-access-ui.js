@@ -208,10 +208,14 @@
     const slider = document.createElement("span");
     slider.className = "iclub-subject-access-slider";
     input.addEventListener("change", async () => {
+      const previous = !input.checked;
       const next = input.checked;
       input.disabled = true;
       try {
-        await args.onChange(next);
+        const saved = await args.onChange(next);
+        if (saved !== true) input.checked = previous;
+      } catch {
+        input.checked = previous;
       } finally {
         input.disabled = false;
       }
@@ -348,7 +352,7 @@
         disabled: busy || limitReached,
         helper: limitReached ? c.studyLimit : "",
         onChange: async (next) => {
-          await writeSelection(key, next, next ? current.competitive : false);
+          return await writeSelection(key, next, next ? current.competitive : false);
         }
       }));
     }
@@ -404,7 +408,7 @@
         disabled: disabled,
         helper: helper,
         onChange: async (next) => {
-          await writeSelection(key, true, next);
+          return await writeSelection(key, true, next);
         }
       }));
     }
