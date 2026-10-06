@@ -621,9 +621,10 @@ Deno.serve(async (req) => {
     });
   }
 
+  let finalizedUsage: any = null;
   try {
-    const finalized = await finalizeUsage(requestId, "completed");
-    if (finalized?.ok !== true) throw new Error("usage_finalize_failed");
+    finalizedUsage = await finalizeUsage(requestId, "completed");
+    if (finalizedUsage?.ok !== true) throw new Error("usage_finalize_failed");
   } catch {
     try {
       await finalizeUsage(requestId, "released", "delivery_not_finalized");
@@ -671,7 +672,8 @@ Deno.serve(async (req) => {
     ok: true,
     mode: "answer",
     message,
-    reset_at: null,
+    usage_exhausted: finalizedUsage?.exhausted === true,
+    reset_at: finalizedUsage?.reset_at || null,
     academic_state_changed: false,
   });
 });
