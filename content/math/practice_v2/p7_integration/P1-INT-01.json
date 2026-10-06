@@ -1,0 +1,725 @@
+{
+  "version": "practice_v2_p7_integration_draft_v0.1",
+  "skill": "P1-INT-01",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q430",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "power_rule",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Find ∫8x³ dx.",
+        "ru": "Найдите ∫8x³ dx.",
+        "uz": "∫8x³ dx ni toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2x⁴+C",
+            "ru": "2x⁴+C",
+            "uz": "2x⁴+C"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "8x⁴+C",
+            "ru": "8x⁴+C",
+            "uz": "8x⁴+C"
+          },
+          "diagnostic_code": "INT01_COEFFICIENT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "24x²+C",
+            "ru": "24x²+C",
+            "uz": "24x²+C"
+          },
+          "diagnostic_code": "INT01_POWER_RULE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "2x⁴",
+            "ru": "2x⁴",
+            "uz": "2x⁴"
+          },
+          "diagnostic_code": "INT01_CONSTANT_C"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Increase the power from 3 to 4, then divide by 4: ∫8x³ dx=8x⁴/4+C=2x⁴+C.",
+        "ru": "Увеличиваем степень с 3 до 4 и делим на 4: ∫8x³ dx=8x⁴/4+C=2x⁴+C.",
+        "uz": "Darajani 3 dan 4 ga oshirib, 4 ga bo‘lamiz: ∫8x³ dx=8x⁴/4+C=2x⁴+C."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q431",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "linear_combination",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Find ∫(6x²−4x+5) dx.",
+        "ru": "Найдите ∫(6x²−4x+5) dx.",
+        "uz": "∫(6x²−4x+5) dx ni toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2x³−2x²+5x+C",
+            "ru": "2x³−2x²+5x+C",
+            "uz": "2x³−2x²+5x+C"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "18x−4+5x+C",
+            "ru": "18x−4+5x+C",
+            "uz": "18x−4+5x+C"
+          },
+          "diagnostic_code": "INT01_POWER_RULE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2x³−4x²+5x+C",
+            "ru": "2x³−4x²+5x+C",
+            "uz": "2x³−4x²+5x+C"
+          },
+          "diagnostic_code": "INT01_COEFFICIENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "2x³−2x²+5x",
+            "ru": "2x³−2x²+5x",
+            "uz": "2x³−2x²+5x"
+          },
+          "diagnostic_code": "INT01_CONSTANT_C"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Integrate each term: 6x²→2x³, −4x→−2x² and 5→5x, then add C.",
+        "ru": "Интегрируем по членам: 6x²→2x³, −4x→−2x², 5→5x, затем добавляем C.",
+        "uz": "Har bir hadni integrallaymiz: 6x²→2x³, −4x→−2x², 5→5x, so‘ng C qo‘shamiz."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q432",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "coefficient_extract",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "In an antiderivative of 12x⁵−3x², enter the coefficient of x⁶.",
+        "ru": "В первообразной для 12x⁵−3x² введите коэффициент при x⁶.",
+        "uz": "12x⁵−3x² ning antiderivativida x⁶ oldidagi koeffitsiyentni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "2",
+        "accepted_examples": [
+          "2",
+          " 2 "
+        ],
+        "rejected_examples": [
+          "12",
+          "6",
+          "72"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "∫12x⁵ dx=12x⁶/6=2x⁶, so the coefficient of x⁶ is 2.",
+        "ru": "∫12x⁵ dx=12x⁶/6=2x⁶, поэтому коэффициент при x⁶ равен 2.",
+        "uz": "∫12x⁵ dx=12x⁶/6=2x⁶, demak x⁶ koeffitsiyenti 2."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q433",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "linear_power",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Find ∫(3x+2)² dx.",
+        "ru": "Найдите ∫(3x+2)² dx.",
+        "uz": "∫(3x+2)² dx ni toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(3x+2)³/9+C",
+            "ru": "(3x+2)³/9+C",
+            "uz": "(3x+2)³/9+C"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(3x+2)³/3+C",
+            "ru": "(3x+2)³/3+C",
+            "uz": "(3x+2)³/3+C"
+          },
+          "diagnostic_code": "INT01_INNER_FACTOR"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2(3x+2)+C",
+            "ru": "2(3x+2)+C",
+            "uz": "2(3x+2)+C"
+          },
+          "diagnostic_code": "INT01_POWER_RULE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(3x+2)³/9",
+            "ru": "(3x+2)³/9",
+            "uz": "(3x+2)³/9"
+          },
+          "diagnostic_code": "INT01_CONSTANT_C"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "For ∫(3x+2)² dx, raise the power to 3 and divide by 3, then divide by the inner derivative 3: (3x+2)³/9+C.",
+        "ru": "Для ∫(3x+2)² dx увеличиваем степень до 3, делим на 3 и ещё на внутреннюю производную 3: (3x+2)³/9+C.",
+        "uz": "∫(3x+2)² dx uchun darajani 3 ga oshirib, 3 ga va ichki hosila 3 ga bo‘lamiz: (3x+2)³/9+C."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q434",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "negative_inner",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Find ∫(5−2x)³ dx.",
+        "ru": "Найдите ∫(5−2x)³ dx.",
+        "uz": "∫(5−2x)³ dx ni toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−(5−2x)⁴/8+C",
+            "ru": "−(5−2x)⁴/8+C",
+            "uz": "−(5−2x)⁴/8+C"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(5−2x)⁴/8+C",
+            "ru": "(5−2x)⁴/8+C",
+            "uz": "(5−2x)⁴/8+C"
+          },
+          "diagnostic_code": "INT01_INNER_FACTOR"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−(5−2x)⁴/4+C",
+            "ru": "−(5−2x)⁴/4+C",
+            "uz": "−(5−2x)⁴/4+C"
+          },
+          "diagnostic_code": "INT01_COEFFICIENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "3(5−2x)²+C",
+            "ru": "3(5−2x)²+C",
+            "uz": "3(5−2x)²+C"
+          },
+          "diagnostic_code": "INT01_POWER_RULE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Raise the power to 4, divide by 4, then divide by the inner derivative −2. This gives −(5−2x)⁴/8+C.",
+        "ru": "Увеличиваем степень до 4, делим на 4, затем на внутреннюю производную −2. Получаем −(5−2x)⁴/8+C.",
+        "uz": "Darajani 4 ga oshirib 4 ga, keyin ichki hosila −2 ga bo‘lamiz. Natija −(5−2x)⁴/8+C."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q435",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "fractional_power",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Find ∫4√x dx.",
+        "ru": "Найдите ∫4√x dx.",
+        "uz": "∫4√x dx ni toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(8/3)x^(3/2)+C",
+            "ru": "(8/3)x^(3/2)+C",
+            "uz": "(8/3)x^(3/2)+C"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2x^(−1/2)+C",
+            "ru": "2x^(−1/2)+C",
+            "uz": "2x^(−1/2)+C"
+          },
+          "diagnostic_code": "INT01_POWER_RULE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(4/3)x^(3/2)+C",
+            "ru": "(4/3)x^(3/2)+C",
+            "uz": "(4/3)x^(3/2)+C"
+          },
+          "diagnostic_code": "INT01_COEFFICIENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "8x^(3/2)+C",
+            "ru": "8x^(3/2)+C",
+            "uz": "8x^(3/2)+C"
+          },
+          "diagnostic_code": "INT01_COEFFICIENT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "4√x=4x^(1/2). Increase the power to 3/2 and divide by 3/2: 4·(2/3)x^(3/2)=(8/3)x^(3/2)+C.",
+        "ru": "4√x=4x^(1/2). Увеличиваем степень до 3/2 и делим на 3/2: 4·(2/3)x^(3/2)=(8/3)x^(3/2)+C.",
+        "uz": "4√x=4x^(1/2). Darajani 3/2 ga oshirib, 3/2 ga bo‘lamiz: 4·(2/3)x^(3/2)=(8/3)x^(3/2)+C."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q436",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "negative_fractional_power",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Find ∫6x^(−1/2) dx.",
+        "ru": "Найдите ∫6x^(−1/2) dx.",
+        "uz": "∫6x^(−1/2) dx ni toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "12√x+C",
+            "ru": "12√x+C",
+            "uz": "12√x+C"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3x^(−3/2)+C",
+            "ru": "3x^(−3/2)+C",
+            "uz": "3x^(−3/2)+C"
+          },
+          "diagnostic_code": "INT01_POWER_RULE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "6√x+C",
+            "ru": "6√x+C",
+            "uz": "6√x+C"
+          },
+          "diagnostic_code": "INT01_COEFFICIENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−12x^(−1/2)+C",
+            "ru": "−12x^(−1/2)+C",
+            "uz": "−12x^(−1/2)+C"
+          },
+          "diagnostic_code": "INT01_RATIONAL_POWER"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Increase −1/2 to 1/2 and divide by 1/2: 6x^(1/2)/(1/2)=12√x+C.",
+        "ru": "Увеличиваем −1/2 до 1/2 и делим на 1/2: 6x^(1/2)/(1/2)=12√x+C.",
+        "uz": "−1/2 darajani 1/2 ga oshirib, 1/2 ga bo‘lamiz: 6x^(1/2)/(1/2)=12√x+C."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q437",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "coefficient_linear_power",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "An antiderivative of 6(2x+1)² has the form a(2x+1)³+C. Enter a.",
+        "ru": "Первообразная для 6(2x+1)² имеет вид a(2x+1)³+C. Введите a.",
+        "uz": "6(2x+1)² ning antiderivativi a(2x+1)³+C ko‘rinishda. a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "1",
+        "accepted_examples": [
+          "1",
+          " 1 "
+        ],
+        "rejected_examples": [
+          "2",
+          "3",
+          "6"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "∫6(2x+1)² dx=6·(2x+1)³/(3·2)+C=(2x+1)³+C, so a=1.",
+        "ru": "∫6(2x+1)² dx=6·(2x+1)³/(3·2)+C=(2x+1)³+C, поэтому a=1.",
+        "uz": "∫6(2x+1)² dx=6·(2x+1)³/(3·2)+C=(2x+1)³+C, demak a=1."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q438",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [
+        "P1-DIF-02"
+      ],
+      "role": "derivative_check",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Which function is an antiderivative of 9x²−4?",
+        "ru": "Какая функция является первообразной для 9x²−4?",
+        "uz": "Qaysi funksiya 9x²−4 ning antiderivativi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3x³−4x+7",
+            "ru": "3x³−4x+7",
+            "uz": "3x³−4x+7"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "18x−4",
+            "ru": "18x−4",
+            "uz": "18x−4"
+          },
+          "diagnostic_code": "INT01_POWER_RULE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "9x³−4x",
+            "ru": "9x³−4x",
+            "uz": "9x³−4x"
+          },
+          "diagnostic_code": "INT01_COEFFICIENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "3x³−4",
+            "ru": "3x³−4",
+            "uz": "3x³−4"
+          },
+          "diagnostic_code": "INT01_CHECK_DERIVATIVE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Differentiate 3x³−4x+7: the derivative is 9x²−4. A constant such as 7 disappears under differentiation.",
+        "ru": "Дифференцируем 3x³−4x+7: получаем 9x²−4. Постоянная 7 исчезает при дифференцировании.",
+        "uz": "3x³−4x+7 ni differensiallasak 9x²−4 chiqadi. 7 kabi doimiy son hosilada yo‘qoladi."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q439",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "mixed_coefficient",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "An antiderivative of 10x⁴−12x²+7 has the form 2x⁵+ax³+7x+C. Enter a.",
+        "ru": "Первообразная для 10x⁴−12x²+7 имеет вид 2x⁵+ax³+7x+C. Введите a.",
+        "uz": "10x⁴−12x²+7 ning antiderivativi 2x⁵+ax³+7x+C ko‘rinishda. a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-4",
+        "accepted_examples": [
+          "-4",
+          "−4",
+          " -4 "
+        ],
+        "rejected_examples": [
+          "4",
+          "-12",
+          "-3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "4",
+          "diagnostic_code": "INT01_COEFFICIENT"
+        }
+      ],
+      "explanation": {
+        "en": "∫−12x² dx=−12x³/3=−4x³, so a=−4.",
+        "ru": "∫−12x² dx=−12x³/3=−4x³, поэтому a=−4.",
+        "uz": "∫−12x² dx=−12x³/3=−4x³, demak a=−4."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q440",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "linear_power_coefficient",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "An antiderivative of k(3x−1)⁴ is (3x−1)⁵+C. Enter k.",
+        "ru": "Первообразная для k(3x−1)⁴ равна (3x−1)⁵+C. Введите k.",
+        "uz": "k(3x−1)⁴ ning antiderivativi (3x−1)⁵+C. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "15",
+        "accepted_examples": [
+          "15",
+          " 15 "
+        ],
+        "rejected_examples": [
+          "3",
+          "5",
+          "45"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Differentiate (3x−1)⁵: 5(3x−1)⁴·3=15(3x−1)⁴. Therefore k=15.",
+        "ru": "Дифференцируем (3x−1)⁵: 5(3x−1)⁴·3=15(3x−1)⁴. Поэтому k=15.",
+        "uz": "(3x−1)⁵ ni differensiallaymiz: 5(3x−1)⁴·3=15(3x−1)⁴. Demak k=15."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q441",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "fractional_transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "An antiderivative of kx^(−1/2) is 18√x+C. Enter k.",
+        "ru": "Первообразная для kx^(−1/2) равна 18√x+C. Введите k.",
+        "uz": "kx^(−1/2) ning antiderivativi 18√x+C. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "9",
+        "accepted_examples": [
+          "9",
+          " 9 "
+        ],
+        "rejected_examples": [
+          "18",
+          "36",
+          "4.5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Differentiate 18√x=18x^(1/2): the derivative is 9x^(−1/2). Therefore k=9.",
+        "ru": "Дифференцируем 18√x=18x^(1/2): производная 9x^(−1/2). Поэтому k=9.",
+        "uz": "18√x=18x^(1/2) ni differensiallasak 9x^(−1/2). Demak k=9."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q442",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "mixed_linear_power",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Find ∫[4(2x+3)³−6x²] dx.",
+        "ru": "Найдите ∫[4(2x+3)³−6x²] dx.",
+        "uz": "∫[4(2x+3)³−6x²] dx ni toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(2x+3)⁴/2−2x³+C",
+            "ru": "(2x+3)⁴/2−2x³+C",
+            "uz": "(2x+3)⁴/2−2x³+C"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(2x+3)⁴−2x³+C",
+            "ru": "(2x+3)⁴−2x³+C",
+            "uz": "(2x+3)⁴−2x³+C"
+          },
+          "diagnostic_code": "INT01_INNER_FACTOR"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(2x+3)⁴/2−6x³+C",
+            "ru": "(2x+3)⁴/2−6x³+C",
+            "uz": "(2x+3)⁴/2−6x³+C"
+          },
+          "diagnostic_code": "INT01_COEFFICIENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "12(2x+3)²−12x+C",
+            "ru": "12(2x+3)²−12x+C",
+            "uz": "12(2x+3)²−12x+C"
+          },
+          "diagnostic_code": "INT01_POWER_RULE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "∫4(2x+3)³ dx=4(2x+3)⁴/(4·2)=(2x+3)⁴/2, and ∫−6x² dx=−2x³.",
+        "ru": "∫4(2x+3)³ dx=4(2x+3)⁴/(4·2)=(2x+3)⁴/2, а ∫−6x² dx=−2x³.",
+        "uz": "∫4(2x+3)³ dx=4(2x+3)⁴/(4·2)=(2x+3)⁴/2, va ∫−6x² dx=−2x³."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q443",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-01",
+      "secondary_skills": [],
+      "role": "reverse_inner_factor",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "An antiderivative of k(4x+1)² is (4x+1)³+C. Enter k.",
+        "ru": "Первообразная для k(4x+1)² равна (4x+1)³+C. Введите k.",
+        "uz": "k(4x+1)² ning antiderivativi (4x+1)³+C. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "12",
+        "accepted_examples": [
+          "12",
+          " 12 "
+        ],
+        "rejected_examples": [
+          "3",
+          "4",
+          "8"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Differentiate (4x+1)³: 3(4x+1)²·4=12(4x+1)². Therefore k=12.",
+        "ru": "Дифференцируем (4x+1)³: 3(4x+1)²·4=12(4x+1)². Поэтому k=12.",
+        "uz": "(4x+1)³ ni differensiallasak 3(4x+1)²·4=12(4x+1)². Demak k=12."
+      },
+      "ai_source_skill": "P1-INT-01",
+      "status": "draft"
+    }
+  ]
+}
