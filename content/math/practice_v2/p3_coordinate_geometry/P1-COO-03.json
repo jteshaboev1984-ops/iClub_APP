@@ -1,0 +1,497 @@
+{
+  "version": "practice_v2_p3_coordinate_geometry_draft_v0.1",
+  "skill": "P1-COO-03",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q171",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-03",
+      "secondary_skills": [
+        "P1-COO-01"
+      ],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Which line is parallel to y=−3x+4?",
+        "ru": "Какая прямая параллельна y=−3x+4?",
+        "uz": "Qaysi chiziq y=−3x+4 ga parallel?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=3x−2",
+            "ru": "y=3x−2",
+            "uz": "y=3x−2"
+          },
+          "diagnostic_code": "COO03_PARALLEL"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=−3x−2",
+            "ru": "y=−3x−2",
+            "uz": "y=−3x−2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=x/3+1",
+            "ru": "y=x/3+1",
+            "uz": "y=x/3+1"
+          },
+          "diagnostic_code": "COO03_PARALLEL"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=−x/3+5",
+            "ru": "y=−x/3+5",
+            "uz": "y=−x/3+5"
+          },
+          "diagnostic_code": "COO03_PARALLEL"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Parallel non-vertical lines have equal gradients. The given line has gradient −3, so y=−3x−2 is parallel to it.",
+        "ru": "Невертикальные параллельные прямые имеют одинаковые градиенты. У данной прямой градиент −3, поэтому y=−3x−2 параллельна ей.",
+        "uz": "Vertikal bo‘lmagan parallel chiziqlarning gradientlari teng. Berilgan chiziq gradienti −3, demak y=−3x−2 unga parallel."
+      },
+      "ai_source_skill": "P1-COO-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q172",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-03",
+      "secondary_skills": [
+        "P1-COO-01"
+      ],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "A line is perpendicular to y=2x−1 and passes through (4,3). Enter its y-intercept.",
+        "ru": "Прямая перпендикулярна y=2x−1 и проходит через (4,3). Введите её y-перехват.",
+        "uz": "Chiziq y=2x−1 ga perpendikulyar va (4,3) nuqtadan o‘tadi. Uning y-kesishish qiymatini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "5",
+        "accepted_examples": [
+          "5",
+          " 5 "
+        ],
+        "rejected_examples": [
+          "1",
+          "-5",
+          "7"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The perpendicular gradient is −1/2. Write y=−x/2+c. Using (4,3): 3=−2+c, so c=5.",
+        "ru": "Градиент перпендикулярной прямой равен −1/2. Запишем y=−x/2+c. Для (4,3): 3=−2+c, поэтому c=5.",
+        "uz": "Perpendikulyar gradient −1/2. y=−x/2+c deb yozamiz. (4,3) uchun 3=−2+c, demak c=5."
+      },
+      "ai_source_skill": "P1-COO-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q173",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-03",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Which line is perpendicular to 2x+3y=7?",
+        "ru": "Какая прямая перпендикулярна 2x+3y=7?",
+        "uz": "Qaysi chiziq 2x+3y=7 ga perpendikulyar?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3x−2y=5",
+            "ru": "3x−2y=5",
+            "uz": "3x−2y=5"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2x−3y=4",
+            "ru": "2x−3y=4",
+            "uz": "2x−3y=4"
+          },
+          "diagnostic_code": "COO03_PERP_NEG_RECIP"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2x+3y=1",
+            "ru": "2x+3y=1",
+            "uz": "2x+3y=1"
+          },
+          "diagnostic_code": "COO03_PARALLEL"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "3x+2y=6",
+            "ru": "3x+2y=6",
+            "uz": "3x+2y=6"
+          },
+          "diagnostic_code": "COO03_SIGN"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The line 2x+3y=7 has gradient −2/3. A perpendicular gradient is 3/2. Rearranging 3x−2y=5 gives y=(3/2)x−5/2, so it is perpendicular.",
+        "ru": "У прямой 2x+3y=7 градиент −2/3. Перпендикулярный градиент равен 3/2. Из 3x−2y=5 получаем y=(3/2)x−5/2, значит эта прямая перпендикулярна.",
+        "uz": "2x+3y=7 chiziq gradienti −2/3. Perpendikulyar gradient 3/2. 3x−2y=5 dan y=(3/2)x−5/2, demak u perpendikulyar."
+      },
+      "ai_source_skill": "P1-COO-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q174",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-03",
+      "secondary_skills": [],
+      "role": "parameter_parallel",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The line y=(k−1)x+6 is parallel to y=3x−4. Enter k.",
+        "ru": "Прямая y=(k−1)x+6 параллельна y=3x−4. Введите k.",
+        "uz": "y=(k−1)x+6 chiziq y=3x−4 ga parallel. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "2",
+          "3",
+          "-4"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Parallel lines have the same gradient, so k−1=3. Hence k=4.",
+        "ru": "У параллельных прямых одинаковые градиенты, поэтому k−1=3. Значит k=4.",
+        "uz": "Parallel chiziqlarning gradientlari teng, demak k−1=3. Shundan k=4."
+      },
+      "ai_source_skill": "P1-COO-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q175",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-03",
+      "secondary_skills": [],
+      "role": "parameter_perpendicular",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The line y=(k−1)x+4 is perpendicular to y=x/2−3. What is k?",
+        "ru": "Прямая y=(k−1)x+4 перпендикулярна y=x/2−3. Чему равно k?",
+        "uz": "y=(k−1)x+4 chiziq y=x/2−3 ga perpendikulyar. k nimaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
+          },
+          "diagnostic_code": "COO03_PERP_NEG_RECIP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−2",
+            "ru": "−2",
+            "uz": "−2"
+          },
+          "diagnostic_code": "COO03_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−1",
+            "ru": "−1",
+            "uz": "−1"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "1/2",
+            "ru": "1/2",
+            "uz": "1/2"
+          },
+          "diagnostic_code": "COO03_PERP_NEG_RECIP"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "The second line has gradient 1/2, so a perpendicular gradient is −2. Thus k−1=−2 and k=−1.",
+        "ru": "Градиент второй прямой равен 1/2, поэтому перпендикулярный градиент равен −2. Значит k−1=−2 и k=−1.",
+        "uz": "Ikkinchi chiziq gradienti 1/2, perpendikulyar gradient −2. Demak k−1=−2 va k=−1."
+      },
+      "ai_source_skill": "P1-COO-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q176",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-03",
+      "secondary_skills": [],
+      "role": "special_case",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Which line is perpendicular to y=5?",
+        "ru": "Какая прямая перпендикулярна y=5?",
+        "uz": "Qaysi chiziq y=5 ga perpendikulyar?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=−5",
+            "ru": "y=−5",
+            "uz": "y=−5"
+          },
+          "diagnostic_code": "COO03_SPECIAL_AXIS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=2",
+            "ru": "x=2",
+            "uz": "x=2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=2",
+            "ru": "y=2",
+            "uz": "y=2"
+          },
+          "diagnostic_code": "COO03_SPECIAL_AXIS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=x+5",
+            "ru": "y=x+5",
+            "uz": "y=x+5"
+          },
+          "diagnostic_code": "COO03_PERP_NEG_RECIP"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "y=5 is horizontal. A line perpendicular to a horizontal line is vertical, so any line x=constant works; x=2 is one such line.",
+        "ru": "y=5 — горизонтальная прямая. Перпендикуляр к горизонтальной прямой вертикален, поэтому подходит любая x=const; например x=2.",
+        "uz": "y=5 gorizontal chiziq. Gorizontal chiziqqa perpendikulyar chiziq vertikal bo‘ladi, shuning uchun x=const; masalan x=2."
+      },
+      "ai_source_skill": "P1-COO-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q177",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-03",
+      "secondary_skills": [],
+      "role": "reverse_perpendicular",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Lines with gradients m and −3 are perpendicular. Enter 3m.",
+        "ru": "Прямые с градиентами m и −3 перпендикулярны. Введите 3m.",
+        "uz": "Gradientlari m va −3 bo‘lgan chiziqlar perpendikulyar. 3m ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "1",
+        "accepted_examples": [
+          "1",
+          " 1 "
+        ],
+        "rejected_examples": [
+          "-1",
+          "3",
+          "9"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-1",
+          "diagnostic_code": "COO03_SIGN"
+        }
+      ],
+      "explanation": {
+        "en": "For perpendicular non-vertical lines, m(−3)=−1. Hence m=1/3 and 3m=1.",
+        "ru": "Для невертикальных перпендикулярных прямых m(−3)=−1. Поэтому m=1/3 и 3m=1.",
+        "uz": "Vertikal bo‘lmagan perpendikulyar chiziqlar uchun m(−3)=−1. Demak m=1/3 va 3m=1."
+      },
+      "ai_source_skill": "P1-COO-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q178",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-03",
+      "secondary_skills": [
+        "P1-COO-01"
+      ],
+      "role": "parallel_line_equation",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Which equation is the line through (−2,5) parallel to 3x−2y=8?",
+        "ru": "Какое уравнение задаёт прямую через (−2,5), параллельную 3x−2y=8?",
+        "uz": "(−2,5) nuqtadan o‘tib, 3x−2y=8 ga parallel bo‘lgan chiziq tenglamasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3x−2y=−16",
+            "ru": "3x−2y=−16",
+            "uz": "3x−2y=−16"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3x+2y=4",
+            "ru": "3x+2y=4",
+            "uz": "3x+2y=4"
+          },
+          "diagnostic_code": "COO03_PARALLEL"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2x−3y=−19",
+            "ru": "2x−3y=−19",
+            "uz": "2x−3y=−19"
+          },
+          "diagnostic_code": "COO03_PARALLEL"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "3x−2y=8",
+            "ru": "3x−2y=8",
+            "uz": "3x−2y=8"
+          },
+          "diagnostic_code": "COO03_PARALLEL"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Parallel lines can be written with the same x and y coefficients: 3x−2y=c. Substituting (−2,5) gives c=3(−2)−2(5)=−16.",
+        "ru": "Параллельные прямые можно записать с одинаковыми коэффициентами при x и y: 3x−2y=c. Подставляем (−2,5): c=3(−2)−2(5)=−16.",
+        "uz": "Parallel chiziqlarni x va y oldidagi koeffitsiyentlari bir xil qilib yozish mumkin: 3x−2y=c. (−2,5) ni qo‘ysak c=3(−2)−2(5)=−16."
+      },
+      "ai_source_skill": "P1-COO-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q179",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-03",
+      "secondary_skills": [
+        "P1-COO-01"
+      ],
+      "role": "mixed_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "A line L passes through (3,−2) and is perpendicular to 4x+y=7. Which equation is L?",
+        "ru": "Прямая L проходит через (3,−2) и перпендикулярна 4x+y=7. Каково уравнение L?",
+        "uz": "L chiziq (3,−2) nuqtadan o‘tadi va 4x+y=7 ga perpendikulyar. L tenglamasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=4x−14",
+            "ru": "y=4x−14",
+            "uz": "y=4x−14"
+          },
+          "diagnostic_code": "COO03_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=x/4−11/4",
+            "ru": "y=x/4−11/4",
+            "uz": "y=x/4−11/4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=−x/4−5/4",
+            "ru": "y=−x/4−5/4",
+            "uz": "y=−x/4−5/4"
+          },
+          "diagnostic_code": "COO03_PERP_NEG_RECIP"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=−4x+10",
+            "ru": "y=−4x+10",
+            "uz": "y=−4x+10"
+          },
+          "diagnostic_code": "COO03_PERP_NEG_RECIP"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The line 4x+y=7 has gradient −4, so a perpendicular gradient is 1/4. Through (3,−2): y+2=(1/4)(x−3), hence y=x/4−11/4.",
+        "ru": "У прямой 4x+y=7 градиент −4, поэтому перпендикулярный градиент равен 1/4. Через (3,−2): y+2=(1/4)(x−3), значит y=x/4−11/4.",
+        "uz": "4x+y=7 chiziq gradienti −4, perpendikulyar gradient 1/4. (3,−2) orqali: y+2=(1/4)(x−3), demak y=x/4−11/4."
+      },
+      "ai_source_skill": "P1-COO-03",
+      "status": "draft"
+    }
+  ]
+}
