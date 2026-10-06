@@ -63,11 +63,11 @@
         {
           "key": "A",
           "text": {
-            "en": "Local maximum",
-            "ru": "Локальный максимум",
-            "uz": "Lokal maksimum"
+            "en": "Stationary point of inflexion",
+            "ru": "Стационарная точка перегиба",
+            "uz": "Statsionar egilish nuqtasi"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF07_CLASSIFICATION"
         },
         {
           "key": "B",
@@ -81,11 +81,11 @@
         {
           "key": "C",
           "text": {
-            "en": "Stationary point of inflexion",
-            "ru": "Стационарная точка перегиба",
-            "uz": "Statsionar egilish nuqtasi"
+            "en": "Local maximum",
+            "ru": "Локальный максимум",
+            "uz": "Lokal maksimum"
           },
-          "diagnostic_code": "DIF07_CLASSIFICATION"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -97,7 +97,7 @@
           "diagnostic_code": "DIF07_STATIONARY_CONDITION"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "dy/dx=3x(x−2). Around x=0, the derivative changes from positive to negative, so x=0 is a local maximum.",
         "ru": "dy/dx=3x(x−2). В окрестности x=0 производная меняет знак с плюса на минус, поэтому это локальный максимум.",
@@ -241,20 +241,20 @@
         {
           "key": "A",
           "text": {
-            "en": "Local maximum",
-            "ru": "Локальный максимум",
-            "uz": "Lokal maksimum"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "Local minimum",
             "ru": "Локальный минимум",
             "uz": "Lokal minimum"
           },
           "diagnostic_code": "DIF07_SECOND_DERIVATIVE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Local maximum",
+            "ru": "Локальный максимум",
+            "uz": "Lokal maksimum"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -275,7 +275,7 @@
           "diagnostic_code": "DIF07_STATIONARY_CONDITION"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "dy/dx=3(x+3)(x−1), so x=−3 is stationary. y''=6x+6, and y''(−3)=−12<0, so it is a local maximum.",
         "ru": "dy/dx=3(x+3)(x−1), поэтому x=−3 — стационарная точка. y''=6x+6, y''(−3)=−12<0, значит это локальный максимум.",
@@ -359,23 +359,23 @@
         {
           "key": "C",
           "text": {
-            "en": "Stationary point of inflexion",
-            "ru": "Стационарная точка перегиба",
-            "uz": "Statsionar egilish nuqtasi"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "Not a stationary point",
             "ru": "Не является стационарной точкой",
             "uz": "Statsionar nuqta emas"
           },
           "diagnostic_code": "DIF07_STATIONARY_CONDITION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Stationary point of inflexion",
+            "ru": "Стационарная точка перегиба",
+            "uz": "Statsionar egilish nuqtasi"
+          },
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "D",
       "explanation": {
         "en": "dy/dx=3x² is zero at x=0 but positive on both sides, so the derivative does not change sign. The point is a stationary point of inflexion.",
         "ru": "dy/dx=3x² равна нулю при x=0, но положительна с обеих сторон, поэтому знак производной не меняется. Это стационарная точка перегиба.",
