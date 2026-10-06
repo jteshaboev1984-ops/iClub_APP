@@ -1,0 +1,555 @@
+{
+  "version": "practice_v2_p3_coordinate_geometry_draft_v0.1",
+  "skill": "P1-COO-02",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q160",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-02",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Enter the distance between A(−2,1) and B(4,9).",
+        "ru": "Введите расстояние между A(−2,1) и B(4,9).",
+        "uz": "A(−2,1) va B(4,9) orasidagi masofani kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "10",
+        "accepted_examples": [
+          "10",
+          " 10 "
+        ],
+        "rejected_examples": [
+          "100",
+          "14",
+          "8"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "100",
+          "diagnostic_code": "COO02_DISTANCE_SQUARED"
+        }
+      ],
+      "explanation": {
+        "en": "The coordinate changes are 6 and 8, so d=√(6²+8²)=√100=10.",
+        "ru": "Изменения координат равны 6 и 8, поэтому d=√(6²+8²)=√100=10.",
+        "uz": "Koordinata farqlari 6 va 8, demak d=√(6²+8²)=√100=10."
+      },
+      "ai_source_skill": "P1-COO-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q161",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-02",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "What is the midpoint of the segment joining (−5,7) and (3,−1)?",
+        "ru": "Какова середина отрезка между (−5,7) и (3,−1)?",
+        "uz": "(−5,7) va (3,−1) nuqtalarni tutashtiruvchi kesmaning o‘rta nuqtasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(−1,3)",
+            "ru": "(−1,3)",
+            "uz": "(−1,3)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(−2,6)",
+            "ru": "(−2,6)",
+            "uz": "(−2,6)"
+          },
+          "diagnostic_code": "COO02_MIDPOINT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(1,3)",
+            "ru": "(1,3)",
+            "uz": "(1,3)"
+          },
+          "diagnostic_code": "COO02_MIDPOINT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(−1,4)",
+            "ru": "(−1,4)",
+            "uz": "(−1,4)"
+          },
+          "diagnostic_code": "COO02_MIDPOINT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Average corresponding coordinates: ((−5+3)/2,(7−1)/2)=(−1,3).",
+        "ru": "Усредняем соответствующие координаты: ((−5+3)/2,(7−1)/2)=(−1,3).",
+        "uz": "Mos koordinatalarni o‘rtachalaymiz: ((−5+3)/2,(7−1)/2)=(−1,3)."
+      },
+      "ai_source_skill": "P1-COO-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q162",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-02",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Enter the gradient of the line through (1,−4) and (7,8).",
+        "ru": "Введите градиент прямой через (1,−4) и (7,8).",
+        "uz": "(1,−4) va (7,8) nuqtalardan o‘tuvchi chiziq gradientini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "2",
+        "accepted_examples": [
+          "2",
+          " 2 "
+        ],
+        "rejected_examples": [
+          "-2",
+          "6",
+          "12"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-2",
+          "diagnostic_code": "COO02_GRADIENT"
+        }
+      ],
+      "explanation": {
+        "en": "m=[8−(−4)]/(7−1)=12/6=2.",
+        "ru": "m=[8−(−4)]/(7−1)=12/6=2.",
+        "uz": "m=[8−(−4)]/(7−1)=12/6=2."
+      },
+      "ai_source_skill": "P1-COO-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q163",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-02",
+      "secondary_skills": [],
+      "role": "intersection",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "What is the intersection of 2x+y=11 and x−y=1?",
+        "ru": "Какова точка пересечения прямых 2x+y=11 и x−y=1?",
+        "uz": "2x+y=11 va x−y=1 chiziqlarining kesishish nuqtasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(3,4)",
+            "ru": "(3,4)",
+            "uz": "(3,4)"
+          },
+          "diagnostic_code": "COO02_INTERSECTION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(4,3)",
+            "ru": "(4,3)",
+            "uz": "(4,3)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(5,1)",
+            "ru": "(5,1)",
+            "uz": "(5,1)"
+          },
+          "diagnostic_code": "COO02_INTERSECTION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(4,−3)",
+            "ru": "(4,−3)",
+            "uz": "(4,−3)"
+          },
+          "diagnostic_code": "COO02_INTERSECTION"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "From x−y=1, y=x−1. Substitute into 2x+y=11: 3x−1=11, so x=4 and y=3.",
+        "ru": "Из x−y=1 получаем y=x−1. Подставляем в 2x+y=11: 3x−1=11, поэтому x=4 и y=3.",
+        "uz": "x−y=1 dan y=x−1. 2x+y=11 ga qo‘ysak 3x−1=11, demak x=4 va y=3."
+      },
+      "ai_source_skill": "P1-COO-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q164",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-02",
+      "secondary_skills": [],
+      "role": "intercept",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The line 3x−2y=18 crosses the x-axis at (a,0). Enter a.",
+        "ru": "Прямая 3x−2y=18 пересекает ось x в точке (a,0). Введите a.",
+        "uz": "3x−2y=18 chiziq x o‘qini (a,0) nuqtada kesadi. a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "6",
+        "accepted_examples": [
+          "6",
+          " 6 "
+        ],
+        "rejected_examples": [
+          "9",
+          "-6",
+          "3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "On the x-axis, y=0. Then 3a=18, so a=6.",
+        "ru": "На оси x имеем y=0. Тогда 3a=18, поэтому a=6.",
+        "uz": "x o‘qida y=0. Shunda 3a=18, demak a=6."
+      },
+      "ai_source_skill": "P1-COO-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q165",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-02",
+      "secondary_skills": [],
+      "role": "line_form",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Which statement is correct for the line 4x+2y=8?",
+        "ru": "Какое утверждение верно для прямой 4x+2y=8?",
+        "uz": "4x+2y=8 chiziq uchun qaysi tasdiq to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Gradient 2, y-intercept 4",
+            "ru": "Градиент 2, y-перехват 4",
+            "uz": "Gradient 2, y-kesishish 4"
+          },
+          "diagnostic_code": "COO02_INTERCEPT_FORM"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Gradient −2, y-intercept 4",
+            "ru": "Градиент −2, y-перехват 4",
+            "uz": "Gradient −2, y-kesishish 4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Gradient −2, y-intercept 8",
+            "ru": "Градиент −2, y-перехват 8",
+            "uz": "Gradient −2, y-kesishish 8"
+          },
+          "diagnostic_code": "COO02_INTERCEPT_FORM"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Gradient −1/2, y-intercept 4",
+            "ru": "Градиент −1/2, y-перехват 4",
+            "uz": "Gradient −1/2, y-kesishish 4"
+          },
+          "diagnostic_code": "COO02_INTERCEPT_FORM"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Rearrange: 2y=−4x+8, so y=−2x+4. The gradient is −2 and the y-intercept is 4.",
+        "ru": "Преобразуем: 2y=−4x+8, поэтому y=−2x+4. Градиент −2, y-перехват 4.",
+        "uz": "Qayta yozamiz: 2y=−4x+8, demak y=−2x+4. Gradient −2, y-kesishish 4."
+      },
+      "ai_source_skill": "P1-COO-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q166",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-02",
+      "secondary_skills": [],
+      "role": "distance_variation",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "For A(−3,2) and B(2,14), enter AB².",
+        "ru": "Для A(−3,2) и B(2,14) введите AB².",
+        "uz": "A(−3,2) va B(2,14) uchun AB² ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "169",
+        "accepted_examples": [
+          "169",
+          " 169 "
+        ],
+        "rejected_examples": [
+          "13",
+          "144",
+          "25"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "13",
+          "diagnostic_code": "COO02_DISTANCE_SQUARED"
+        }
+      ],
+      "explanation": {
+        "en": "AB²=(2−(−3))²+(14−2)²=5²+12²=25+144=169.",
+        "ru": "AB²=(2−(−3))²+(14−2)²=5²+12²=25+144=169.",
+        "uz": "AB²=(2−(−3))²+(14−2)²=5²+12²=25+144=169."
+      },
+      "ai_source_skill": "P1-COO-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q167",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-02",
+      "secondary_skills": [],
+      "role": "reverse_midpoint",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "M(2,−1) is the midpoint of A(−4,5) and B. What is B?",
+        "ru": "M(2,−1) — середина отрезка AB, где A(−4,5). Каковы координаты B?",
+        "uz": "M(2,−1) AB kesmaning o‘rta nuqtasi, A(−4,5). B qaysi nuqta?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(8,−7)",
+            "ru": "(8,−7)",
+            "uz": "(8,−7)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(6,−6)",
+            "ru": "(6,−6)",
+            "uz": "(6,−6)"
+          },
+          "diagnostic_code": "COO02_MIDPOINT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(0,2)",
+            "ru": "(0,2)",
+            "uz": "(0,2)"
+          },
+          "diagnostic_code": "COO02_MIDPOINT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(8,3)",
+            "ru": "(8,3)",
+            "uz": "(8,3)"
+          },
+          "diagnostic_code": "COO02_MIDPOINT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "For the x-coordinate, (−4+x_B)/2=2, so x_B=8. For y, (5+y_B)/2=−1, so y_B=−7.",
+        "ru": "По x: (−4+x_B)/2=2, поэтому x_B=8. По y: (5+y_B)/2=−1, поэтому y_B=−7.",
+        "uz": "x uchun (−4+x_B)/2=2, demak x_B=8. y uchun (5+y_B)/2=−1, demak y_B=−7."
+      },
+      "ai_source_skill": "P1-COO-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q168",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-02",
+      "secondary_skills": [],
+      "role": "intersection",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The lines y=3x−5 and 2x+y=15 intersect at P. Enter the x-coordinate of P.",
+        "ru": "Прямые y=3x−5 и 2x+y=15 пересекаются в точке P. Введите x-координату P.",
+        "uz": "y=3x−5 va 2x+y=15 chiziqlar P nuqtada kesishadi. P ning x-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "7",
+          "5",
+          "3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Substitute y=3x−5 into 2x+y=15: 5x−5=15, so x=4.",
+        "ru": "Подставляем y=3x−5 в 2x+y=15: 5x−5=15, поэтому x=4.",
+        "uz": "y=3x−5 ni 2x+y=15 ga qo‘yamiz: 5x−5=15, demak x=4."
+      },
+      "ai_source_skill": "P1-COO-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q169",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-02",
+      "secondary_skills": [],
+      "role": "line_form",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Which equation represents the same line as y=−x/2+3?",
+        "ru": "Какое уравнение задаёт ту же прямую, что и y=−x/2+3?",
+        "uz": "Qaysi tenglama y=−x/2+3 bilan bir xil chiziqni beradi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x−2y=6",
+            "ru": "x−2y=6",
+            "uz": "x−2y=6"
+          },
+          "diagnostic_code": "COO02_INTERCEPT_FORM"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2x+y=6",
+            "ru": "2x+y=6",
+            "uz": "2x+y=6"
+          },
+          "diagnostic_code": "COO02_INTERCEPT_FORM"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x+2y=6",
+            "ru": "x+2y=6",
+            "uz": "x+2y=6"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x+2y=3",
+            "ru": "x+2y=3",
+            "uz": "x+2y=3"
+          },
+          "diagnostic_code": "COO02_INTERCEPT_FORM"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Multiply y=−x/2+3 by 2: 2y=−x+6. Rearranging gives x+2y=6.",
+        "ru": "Умножаем y=−x/2+3 на 2: 2y=−x+6. После переноса получаем x+2y=6.",
+        "uz": "y=−x/2+3 ni 2 ga ko‘paytiramiz: 2y=−x+6. Qayta yozsak x+2y=6."
+      },
+      "ai_source_skill": "P1-COO-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q170",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-02",
+      "secondary_skills": [],
+      "role": "reverse_midpoint",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "M(1,4) is the midpoint of A(−3,10) and B. Enter the y-coordinate of B.",
+        "ru": "M(1,4) — середина отрезка AB, где A(−3,10). Введите y-координату B.",
+        "uz": "M(1,4) AB kesmaning o‘rta nuqtasi, A(−3,10). B ning y-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-2",
+        "accepted_examples": [
+          "-2",
+          "−2",
+          " -2 "
+        ],
+        "rejected_examples": [
+          "2",
+          "6",
+          "-6"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "2",
+          "diagnostic_code": "COO02_MIDPOINT"
+        }
+      ],
+      "explanation": {
+        "en": "For the y-coordinate, (10+y_B)/2=4. Thus 10+y_B=8 and y_B=−2.",
+        "ru": "По y имеем (10+y_B)/2=4. Тогда 10+y_B=8 и y_B=−2.",
+        "uz": "y uchun (10+y_B)/2=4. Demak 10+y_B=8 va y_B=−2."
+      },
+      "ai_source_skill": "P1-COO-02",
+      "status": "draft"
+    }
+  ]
+}
