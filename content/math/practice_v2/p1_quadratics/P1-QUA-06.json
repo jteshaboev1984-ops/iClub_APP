@@ -1,0 +1,571 @@
+{
+  "version": "practice_v2_p1_quadratics_draft_v0.1",
+  "skill": "P1-QUA-06",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q059",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-06",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Which substitution converts x⁴ − 5x² + 4 = 0 into a quadratic equation?",
+        "ru": "Какая замена превращает x⁴ − 5x² + 4 = 0 в квадратное уравнение?",
+        "uz": "Qaysi almashtirish x⁴ − 5x² + 4 = 0 tenglamani kvadrat tenglamaga aylantiradi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y = x",
+            "ru": "y = x",
+            "uz": "y = x"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_STRUCTURE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y = x⁴",
+            "ru": "y = x⁴",
+            "uz": "y = x⁴"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_STRUCTURE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y = x²",
+            "ru": "y = x²",
+            "uz": "y = x²"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y = √x",
+            "ru": "y = √x",
+            "uz": "y = √x"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_STRUCTURE"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Let y = x². Then x⁴ = y², so the equation becomes y² − 5y + 4 = 0, which is quadratic in y.",
+        "ru": "Положим y = x². Тогда x⁴ = y², и уравнение превращается в y² − 5y + 4 = 0 — квадратное по y.",
+        "uz": "y = x² deb olamiz. Unda x⁴ = y² va tenglama y² − 5y + 4 = 0 ko‘rinishga keladi, ya’ni y bo‘yicha kvadrat."
+      },
+      "ai_source_skill": "P1-QUA-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q060",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-06",
+      "secondary_skills": [],
+      "role": "application_variation",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Solve x⁴ − 13x² + 36 = 0. Enter the greatest real root.",
+        "ru": "Решите x⁴ − 13x² + 36 = 0. Введите наибольший действительный корень.",
+        "uz": "x⁴ − 13x² + 36 = 0 ni yeching. Eng katta haqiqiy ildizni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "2",
+          "9",
+          "-3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Let y = x². Then y² − 13y + 36 = 0 = (y − 4)(y − 9), so x² = 4 or 9. The real roots are ±2 and ±3, and the greatest is 3.",
+        "ru": "Пусть y = x². Тогда y² − 13y + 36 = 0 = (y − 4)(y − 9), значит x² = 4 или 9. Действительные корни ±2 и ±3, наибольший — 3.",
+        "uz": "y = x² deb olamiz. y² − 13y + 36 = 0 = (y − 4)(y − 9), demak x² = 4 yoki 9. Haqiqiy ildizlar ±2 va ±3, eng kattasi 3."
+      },
+      "ai_source_skill": "P1-QUA-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q061",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-06",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "What are the real solutions of x⁶ − 7x³ − 8 = 0?",
+        "ru": "Каковы действительные решения уравнения x⁶ − 7x³ − 8 = 0?",
+        "uz": "x⁶ − 7x³ − 8 = 0 tenglamaning haqiqiy yechimlari qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x = −2 and x = 1",
+            "ru": "x = −2 и x = 1",
+            "uz": "x = −2 va x = 1"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_BACKSUB_CUBE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x = −1 and x = 2",
+            "ru": "x = −1 и x = 2",
+            "uz": "x = −1 va x = 2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x = −8 and x = 1",
+            "ru": "x = −8 и x = 1",
+            "uz": "x = −8 va x = 1"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_BACKSUB_CUBE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x = −1 and x = 8",
+            "ru": "x = −1 и x = 8",
+            "uz": "x = −1 va x = 8"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_BACKSUB_CUBE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Let y = x³. Then y² − 7y − 8 = 0 = (y − 8)(y + 1), so x³ = 8 or −1. Hence x = 2 or −1.",
+        "ru": "Положим y = x³. Тогда y² − 7y − 8 = 0 = (y − 8)(y + 1), поэтому x³ = 8 или −1. Значит x = 2 или −1.",
+        "uz": "y = x³ deb olamiz. y² − 7y − 8 = 0 = (y − 8)(y + 1), demak x³ = 8 yoki −1. Shundan x = 2 yoki −1."
+      },
+      "ai_source_skill": "P1-QUA-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q062",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-06",
+      "secondary_skills": [],
+      "role": "misconception_trap",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "What are the real solutions of 2x⁴ − 5x² − 3 = 0?",
+        "ru": "Каковы действительные решения уравнения 2x⁴ − 5x² − 3 = 0?",
+        "uz": "2x⁴ − 5x² − 3 = 0 tenglamaning haqiqiy yechimlari qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x = ±√3",
+            "ru": "x = ±√3",
+            "uz": "x = ±√3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x = ±√3 and x = ±1/√2",
+            "ru": "x = ±√3 и x = ±1/√2",
+            "uz": "x = ±√3 va x = ±1/√2"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_NEGATIVE_BRANCH"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x = 3 and x = −1/2",
+            "ru": "x = 3 и x = −1/2",
+            "uz": "x = 3 va x = −1/2"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_BACKSUB_SQUARE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "No real solutions",
+            "ru": "Действительных решений нет",
+            "uz": "Haqiqiy yechimlar yo‘q"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_BRANCH_LOSS"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Let y = x². Then 2y² − 5y − 3 = 0 = (2y + 1)(y − 3), so y = 3 or −1/2. Since y = x² cannot be negative for real x, only x² = 3 is valid, giving x = ±√3.",
+        "ru": "Пусть y = x². Тогда 2y² − 5y − 3 = 0 = (2y + 1)(y − 3), поэтому y = 3 или −1/2. Для действительного x величина x² неотрицательна, значит остаётся x² = 3 и x = ±√3.",
+        "uz": "y = x² deb olamiz. 2y² − 5y − 3 = 0 = (2y + 1)(y − 3), demak y = 3 yoki −1/2. Haqiqiy x uchun x² manfiy bo‘la olmaydi, shuning uchun faqat x² = 3 va x = ±√3."
+      },
+      "ai_source_skill": "P1-QUA-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q063",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-06",
+      "secondary_skills": [],
+      "role": "concept_recognition",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Which equation is quadratic in x³?",
+        "ru": "Какое уравнение является квадратным относительно x³?",
+        "uz": "Qaysi tenglama x³ ga nisbatan kvadrat tenglama?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x⁶ + x² − 2 = 0",
+            "ru": "x⁶ + x² − 2 = 0",
+            "uz": "x⁶ + x² − 2 = 0"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_STRUCTURE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x⁹ + x³ − 2 = 0",
+            "ru": "x⁹ + x³ − 2 = 0",
+            "uz": "x⁹ + x³ − 2 = 0"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_STRUCTURE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "4x⁶ + 3x³ − 7 = 0",
+            "ru": "4x⁶ + 3x³ − 7 = 0",
+            "uz": "4x⁶ + 3x³ − 7 = 0"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x⁶ + x⁴ + 1 = 0",
+            "ru": "x⁶ + x⁴ + 1 = 0",
+            "uz": "x⁶ + x⁴ + 1 = 0"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_STRUCTURE"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "If y = x³, then x⁶ = y². So 4x⁶ + 3x³ − 7 = 0 becomes 4y² + 3y − 7 = 0, a quadratic in y.",
+        "ru": "Если y = x³, то x⁶ = y². Поэтому 4x⁶ + 3x³ − 7 = 0 превращается в 4y² + 3y − 7 = 0 — квадратное уравнение по y.",
+        "uz": "y = x³ bo‘lsa, x⁶ = y². Shunda 4x⁶ + 3x³ − 7 = 0 tenglama 4y² + 3y − 7 = 0 ga aylanadi, bu y bo‘yicha kvadrat."
+      },
+      "ai_source_skill": "P1-QUA-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q064",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-06",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "How many distinct real roots does x⁸ − 17x⁴ + 16 = 0 have?",
+        "ru": "Сколько различных действительных корней имеет уравнение x⁸ − 17x⁴ + 16 = 0?",
+        "uz": "x⁸ − 17x⁴ + 16 = 0 tenglama nechta turli haqiqiy ildizga ega?"
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "2",
+          "8",
+          "16"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Let y = x⁴. Then y² − 17y + 16 = 0 = (y − 1)(y − 16), so x⁴ = 1 or 16. The real roots are ±1 and ±2: four distinct roots.",
+        "ru": "Пусть y = x⁴. Тогда y² − 17y + 16 = 0 = (y − 1)(y − 16), поэтому x⁴ = 1 или 16. Действительные корни ±1 и ±2 — всего четыре.",
+        "uz": "y = x⁴ deb olamiz. y² − 17y + 16 = 0 = (y − 1)(y − 16), demak x⁴ = 1 yoki 16. Haqiqiy ildizlar ±1 va ±2 — jami 4 ta."
+      },
+      "ai_source_skill": "P1-QUA-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q065",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-06",
+      "secondary_skills": [],
+      "role": "misconception_trap",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "How many real roots does x⁴ + 4x² + 3 = 0 have?",
+        "ru": "Сколько действительных корней имеет уравнение x⁴ + 4x² + 3 = 0?",
+        "uz": "x⁴ + 4x² + 3 = 0 tenglama nechta haqiqiy ildizga ega?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "4",
+            "ru": "4",
+            "uz": "4"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_NEGATIVE_BRANCH"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_NEGATIVE_BRANCH"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1 repeated root",
+            "ru": "1 кратный корень",
+            "uz": "1 ta takroriy ildiz"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_DISCRIMINANT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "0",
+            "ru": "0",
+            "uz": "0"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "Let y = x². Then y² + 4y + 3 = 0, so y = −1 or −3. Neither can equal x² for real x, hence there are no real roots.",
+        "ru": "Пусть y = x². Тогда y² + 4y + 3 = 0, поэтому y = −1 или −3. Для действительного x значение x² не может быть отрицательным, значит действительных корней нет.",
+        "uz": "y = x² deb olamiz. y² + 4y + 3 = 0, demak y = −1 yoki −3. Haqiqiy x uchun x² manfiy bo‘la olmaydi, shuning uchun haqiqiy ildiz yo‘q."
+      },
+      "ai_source_skill": "P1-QUA-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q066",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-06",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "How many distinct real roots does 9x⁴ − 30x² + 25 = 0 have?",
+        "ru": "Сколько различных действительных корней имеет уравнение 9x⁴ − 30x² + 25 = 0?",
+        "uz": "9x⁴ − 30x² + 25 = 0 tenglama nechta turli haqiqiy ildizga ega?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1",
+            "ru": "1",
+            "uz": "1"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_PLUS_MINUS_LOSS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_COUNT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "4",
+            "ru": "4",
+            "uz": "4"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_COUNT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "9x⁴ − 30x² + 25 = (3x² − 5)². Thus x² = 5/3, giving x = ±√(5/3). There are two distinct real roots.",
+        "ru": "9x⁴ − 30x² + 25 = (3x² − 5)². Поэтому x² = 5/3 и x = ±√(5/3). Имеются два различных действительных корня.",
+        "uz": "9x⁴ − 30x² + 25 = (3x² − 5)². Demak x² = 5/3 va x = ±√(5/3). Ikkita turli haqiqiy ildiz bor."
+      },
+      "ai_source_skill": "P1-QUA-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q067",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-06",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "How many positive real roots does x⁶ − 9x³ + 20 = 0 have?",
+        "ru": "Сколько положительных действительных корней имеет уравнение x⁶ − 9x³ + 20 = 0?",
+        "uz": "x⁶ − 9x³ + 20 = 0 tenglama nechta musbat haqiqiy ildizga ega?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "1",
+            "ru": "1",
+            "uz": "1"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_BRANCH_LOSS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_COUNT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "4",
+            "ru": "4",
+            "uz": "4"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_PLUS_MINUS_OVERCOUNT"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Let y = x³. Then y² − 9y + 20 = 0 = (y − 4)(y − 5), so x³ = 4 or 5. Each has exactly one positive real cube root, so there are two positive real roots.",
+        "ru": "Пусть y = x³. Тогда y² − 9y + 20 = 0 = (y − 4)(y − 5), поэтому x³ = 4 или 5. Каждое уравнение имеет ровно один положительный действительный кубический корень, всего два.",
+        "uz": "y = x³ deb olamiz. y² − 9y + 20 = 0 = (y − 4)(y − 5), demak x³ = 4 yoki 5. Har biri bitta musbat haqiqiy kub ildiz beradi, jami 2 ta."
+      },
+      "ai_source_skill": "P1-QUA-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q068",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-06",
+      "secondary_skills": [
+        "P1-QUA-02"
+      ],
+      "role": "reverse_problem",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "For x⁴ + ax² + 16 = 0, the transformed equation in y = x² has y = 4 as a repeated root. Find a.",
+        "ru": "Для x⁴ + ax² + 16 = 0 преобразованное уравнение по y = x² имеет y = 4 как кратный корень. Найдите a.",
+        "uz": "x⁴ + ax² + 16 = 0 da y = x² bo‘yicha hosil bo‘lgan tenglama y = 4 takroriy ildizga ega. a ni toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "8",
+            "ru": "8",
+            "uz": "8"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_REPEAT_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−4",
+            "ru": "−4",
+            "uz": "−4"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_REPEAT_COEFF"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "4",
+            "ru": "4",
+            "uz": "4"
+          },
+          "diagnostic_code": "QUA_TRANSFORMED_REPEAT_COEFF"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−8",
+            "ru": "−8",
+            "uz": "−8"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "With y = x², the equation is y² + ay + 16 = 0. A repeated root y = 4 means this quadratic is (y − 4)² = y² − 8y + 16. Therefore a = −8.",
+        "ru": "При y = x² получаем y² + ay + 16 = 0. Кратный корень y = 4 означает (y − 4)² = y² − 8y + 16. Следовательно a = −8.",
+        "uz": "y = x² bo‘lsa, tenglama y² + ay + 16 = 0. y = 4 takroriy ildiz bo‘lsa, u (y − 4)² = y² − 8y + 16 ko‘rinishida. Demak a = −8."
+      },
+      "ai_source_skill": "P1-QUA-06",
+      "status": "draft"
+    }
+  ]
+}
