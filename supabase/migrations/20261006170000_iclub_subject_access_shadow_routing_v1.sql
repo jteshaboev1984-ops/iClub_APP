@@ -156,7 +156,19 @@ begin
   where s.subject_key=v_subject_key
   limit 1;
 
-  if not found or coalesce(v_subject.is_active,false) is not true then
+  if not found then
+    return jsonb_build_object(
+      'observed',false,
+      'reason','subject_unavailable',
+      'access_unchanged',true
+    );
+  end if;
+
+  -- Historical recommendations/results remain readable even if a subject is
+  -- later removed from the active commercial catalog. New study/Competitive
+  -- routes still require an active subject.
+  if v_access_class<>'history'
+     and coalesce(v_subject.is_active,false) is not true then
     return jsonb_build_object(
       'observed',false,
       'reason','subject_unavailable',
