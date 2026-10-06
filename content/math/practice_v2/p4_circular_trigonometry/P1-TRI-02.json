@@ -1,0 +1,587 @@
+{
+  "version": "practice_v2_p4_circular_trig_draft_v0.1",
+  "skill": "P1-TRI-02",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q254",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-02",
+      "secondary_skills": [],
+      "role": "exact_value",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Find the exact value of sin 210°.",
+        "ru": "Найдите точное значение sin 210°.",
+        "uz": "sin 210° ning aniq qiymatini toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "1/2",
+            "ru": "1/2",
+            "uz": "1/2"
+          },
+          "diagnostic_code": "TRI02_QUADRANT_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−1/2",
+            "ru": "−1/2",
+            "uz": "−1/2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "√3/2",
+            "ru": "√3/2",
+            "uz": "√3/2"
+          },
+          "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−√3/2",
+            "ru": "−√3/2",
+            "uz": "−√3/2"
+          },
+          "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "210°=180°+30°. The reference angle is 30°, and sine is negative in quadrant III, so sin210°=−1/2.",
+        "ru": "210°=180°+30°. Опорный угол 30°, а синус в III четверти отрицателен, поэтому sin210°=−1/2.",
+        "uz": "210°=180°+30°. Tayanch burchak 30°, III chorakda sinus manfiy, demak sin210°=−1/2."
+      },
+      "ai_source_skill": "P1-TRI-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q255",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-02",
+      "secondary_skills": [],
+      "role": "exact_value",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Find the exact value of cos 330°.",
+        "ru": "Найдите точное значение cos 330°.",
+        "uz": "cos 330° ning aniq qiymatini toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−√3/2",
+            "ru": "−√3/2",
+            "uz": "−√3/2"
+          },
+          "diagnostic_code": "TRI02_QUADRANT_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1/2",
+            "ru": "1/2",
+            "uz": "1/2"
+          },
+          "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "√3/2",
+            "ru": "√3/2",
+            "uz": "√3/2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−1/2",
+            "ru": "−1/2",
+            "uz": "−1/2"
+          },
+          "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "330°=360°−30°. The reference angle is 30°, and cosine is positive in quadrant IV, so cos330°=√3/2.",
+        "ru": "330°=360°−30°. Опорный угол 30°, а косинус в IV четверти положителен, поэтому cos330°=√3/2.",
+        "uz": "330°=360°−30°. Tayanch burchak 30°, IV chorakda kosinus musbat, demak cos330°=√3/2."
+      },
+      "ai_source_skill": "P1-TRI-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q256",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-02",
+      "secondary_skills": [],
+      "role": "exact_value",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Enter the exact value of tan 135°.",
+        "ru": "Введите точное значение tan 135°.",
+        "uz": "tan 135° ning aniq qiymatini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-1",
+        "accepted_examples": [
+          "-1",
+          "−1",
+          " -1 "
+        ],
+        "rejected_examples": [
+          "1",
+          "0",
+          "-0.5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "1",
+          "diagnostic_code": "TRI02_QUADRANT_SIGN"
+        }
+      ],
+      "explanation": {
+        "en": "135°=180°−45°. Tangent is negative in quadrant II and tan45°=1, so tan135°=−1.",
+        "ru": "135°=180°−45°. Тангенс во II четверти отрицателен, а tan45°=1, поэтому tan135°=−1.",
+        "uz": "135°=180°−45°. II chorakda tangens manfiy va tan45°=1, demak tan135°=−1."
+      },
+      "ai_source_skill": "P1-TRI-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q257",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-02",
+      "secondary_skills": [
+        "P1-CIR-01"
+      ],
+      "role": "radian_exact_value",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Find the exact value of sin(7π/6).",
+        "ru": "Найдите точное значение sin(7π/6).",
+        "uz": "sin(7π/6) ning aniq qiymatini toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−1/2",
+            "ru": "−1/2",
+            "uz": "−1/2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1/2",
+            "ru": "1/2",
+            "uz": "1/2"
+          },
+          "diagnostic_code": "TRI02_QUADRANT_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−√3/2",
+            "ru": "−√3/2",
+            "uz": "−√3/2"
+          },
+          "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "√3/2",
+            "ru": "√3/2",
+            "uz": "√3/2"
+          },
+          "diagnostic_code": "TRI02_EXACT_VALUE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "7π/6=π+π/6, so the reference angle is π/6 in quadrant III. Sine is negative there, giving −1/2.",
+        "ru": "7π/6=π+π/6, поэтому опорный угол π/6 находится в III четверти. Синус там отрицателен, получаем −1/2.",
+        "uz": "7π/6=π+π/6, tayanch burchak π/6 va III chorakda. Sinus manfiy, demak −1/2."
+      },
+      "ai_source_skill": "P1-TRI-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q258",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-02",
+      "secondary_skills": [
+        "P1-CIR-01"
+      ],
+      "role": "radian_exact_value",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Find the exact value of cos(5π/4).",
+        "ru": "Найдите точное значение cos(5π/4).",
+        "uz": "cos(5π/4) ning aniq qiymatini toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "√2/2",
+            "ru": "√2/2",
+            "uz": "√2/2"
+          },
+          "diagnostic_code": "TRI02_QUADRANT_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−√2/2",
+            "ru": "−√2/2",
+            "uz": "−√2/2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−1/2",
+            "ru": "−1/2",
+            "uz": "−1/2"
+          },
+          "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "√3/2",
+            "ru": "√3/2",
+            "uz": "√3/2"
+          },
+          "diagnostic_code": "TRI02_EXACT_VALUE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "5π/4=π+π/4. The reference angle is π/4 in quadrant III, where cosine is negative, so the value is −√2/2.",
+        "ru": "5π/4=π+π/4. Опорный угол π/4 находится в III четверти, где косинус отрицателен, поэтому значение равно −√2/2.",
+        "uz": "5π/4=π+π/4. Tayanch burchak π/4 III chorakda, bu yerda kosinus manfiy, demak −√2/2."
+      },
+      "ai_source_skill": "P1-TRI-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q259",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-02",
+      "secondary_skills": [],
+      "role": "combined_exact_value",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Find the exact value of 2sin30°+cos60°.",
+        "ru": "Найдите точное значение 2sin30°+cos60°.",
+        "uz": "2sin30°+cos60° ning aniq qiymatini toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "1",
+            "ru": "1",
+            "uz": "1"
+          },
+          "diagnostic_code": "TRI02_EXACT_VALUE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3/2",
+            "ru": "3/2",
+            "uz": "3/2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "TRI02_EXACT_VALUE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "√3",
+            "ru": "√3",
+            "uz": "√3"
+          },
+          "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "sin30°=1/2 and cos60°=1/2. Therefore 2(1/2)+1/2=3/2.",
+        "ru": "sin30°=1/2 и cos60°=1/2. Поэтому 2(1/2)+1/2=3/2.",
+        "uz": "sin30°=1/2 va cos60°=1/2. Demak 2(1/2)+1/2=3/2."
+      },
+      "ai_source_skill": "P1-TRI-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q260",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-02",
+      "secondary_skills": [],
+      "role": "related_angle_symmetry",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "If cos40°=a, which expression equals cos320°?",
+        "ru": "Если cos40°=a, какое выражение равно cos320°?",
+        "uz": "Agar cos40°=a bo‘lsa, cos320° qaysi ifodaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−a",
+            "ru": "−a",
+            "uz": "−a"
+          },
+          "diagnostic_code": "TRI02_QUADRANT_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "a",
+            "ru": "a",
+            "uz": "a"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1/a",
+            "ru": "1/a",
+            "uz": "1/a"
+          },
+          "diagnostic_code": "TRI02_EXACT_VALUE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "1−a",
+            "ru": "1−a",
+            "uz": "1−a"
+          },
+          "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "320°=360°−40°. Cosine is positive in quadrant IV and has the same magnitude as cos40°, so cos320°=a.",
+        "ru": "320°=360°−40°. Косинус в IV четверти положителен и имеет тот же модуль, что cos40°, поэтому cos320°=a.",
+        "uz": "320°=360°−40°. IV chorakda kosinus musbat va cos40° bilan bir xil modulga ega, demak cos320°=a."
+      },
+      "ai_source_skill": "P1-TRI-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q261",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-02",
+      "secondary_skills": [],
+      "role": "related_angle_transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "An acute angle α satisfies tanα=2. Enter tan(180°−α).",
+        "ru": "Для острого угла α известно tanα=2. Введите tan(180°−α).",
+        "uz": "O‘tkir α burchak uchun tanα=2. tan(180°−α) ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-2",
+        "accepted_examples": [
+          "-2",
+          "−2",
+          " -2 "
+        ],
+        "rejected_examples": [
+          "2",
+          "0.5",
+          "-0.5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "2",
+          "diagnostic_code": "TRI02_QUADRANT_SIGN"
+        }
+      ],
+      "explanation": {
+        "en": "180°−α lies in quadrant II, where tangent is negative, with the same reference angle α. Hence tan(180°−α)=−2.",
+        "ru": "180°−α лежит во II четверти, где тангенс отрицателен, а опорный угол равен α. Поэтому tan(180°−α)=−2.",
+        "uz": "180°−α II chorakda, bu yerda tangens manfiy va tayanch burchak α. Demak tan(180°−α)=−2."
+      },
+      "ai_source_skill": "P1-TRI-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q262",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-02",
+      "secondary_skills": [],
+      "role": "mixed_exact_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Which expression has exact value 0?",
+        "ru": "Какое выражение имеет точное значение 0?",
+        "uz": "Qaysi ifodaning aniq qiymati 0?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "sin30°−cos60°",
+            "ru": "sin30°−cos60°",
+            "uz": "sin30°−cos60°"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "sin45°−cos60°",
+            "ru": "sin45°−cos60°",
+            "uz": "sin45°−cos60°"
+          },
+          "diagnostic_code": "TRI02_EXACT_VALUE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "tan45°−sin30°",
+            "ru": "tan45°−sin30°",
+            "uz": "tan45°−sin30°"
+          },
+          "diagnostic_code": "TRI02_EXACT_VALUE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "cos30°−sin60°+1/2",
+            "ru": "cos30°−sin60°+1/2",
+            "uz": "cos30°−sin60°+1/2"
+          },
+          "diagnostic_code": "TRI02_EXACT_VALUE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "sin30°=1/2 and cos60°=1/2, so sin30°−cos60°=0. The other expressions are non-zero.",
+        "ru": "sin30°=1/2 и cos60°=1/2, поэтому sin30°−cos60°=0. Остальные выражения не равны нулю.",
+        "uz": "sin30°=1/2 va cos60°=1/2, demak sin30°−cos60°=0. Boshqa ifodalar nolga teng emas."
+      },
+      "ai_source_skill": "P1-TRI-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q263",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-02",
+      "secondary_skills": [
+        "P1-CIR-01"
+      ],
+      "role": "radian_symmetry",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "If sin(π/7)=b, which expression equals sin(6π/7)?",
+        "ru": "Если sin(π/7)=b, какое выражение равно sin(6π/7)?",
+        "uz": "Agar sin(π/7)=b bo‘lsa, sin(6π/7) qaysi ifodaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−b",
+            "ru": "−b",
+            "uz": "−b"
+          },
+          "diagnostic_code": "TRI02_QUADRANT_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "b",
+            "ru": "b",
+            "uz": "b"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1/b",
+            "ru": "1/b",
+            "uz": "1/b"
+          },
+          "diagnostic_code": "TRI02_EXACT_VALUE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "1−b",
+            "ru": "1−b",
+            "uz": "1−b"
+          },
+          "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "6π/7=π−π/7. Sine is positive in quadrant II and sin(π−α)=sinα, so the value is b.",
+        "ru": "6π/7=π−π/7. Синус во II четверти положителен и sin(π−α)=sinα, поэтому значение равно b.",
+        "uz": "6π/7=π−π/7. II chorakda sinus musbat va sin(π−α)=sinα, demak qiymat b."
+      },
+      "ai_source_skill": "P1-TRI-02",
+      "status": "draft"
+    }
+  ]
+}
