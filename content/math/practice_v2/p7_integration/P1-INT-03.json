@@ -1,0 +1,703 @@
+{
+  "version": "practice_v2_p7_integration_draft_v0.1",
+  "skill": "P1-INT-03",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q456",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "definite_polynomial",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Evaluate ∫₀³ 2x dx. Enter the value.",
+        "ru": "Вычислите ∫₀³ 2x dx. Введите значение.",
+        "uz": "∫₀³ 2x dx ni hisoblang. Qiymatni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "9",
+        "accepted_examples": [
+          "9",
+          " 9 "
+        ],
+        "rejected_examples": [
+          "6",
+          "18",
+          "3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "An antiderivative is x². Evaluate upper minus lower: 3²−0²=9.",
+        "ru": "Первообразная x². Вычисляем верхняя минус нижняя: 3²−0²=9.",
+        "uz": "Antiderivativ x². Yuqori minus pastki: 3²−0²=9."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q457",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "definite_linear_combination",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Evaluate ∫₁² (6x²−2) dx. Enter the value.",
+        "ru": "Вычислите ∫₁² (6x²−2) dx. Введите значение.",
+        "uz": "∫₁² (6x²−2) dx ni hisoblang. Qiymatni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "12",
+        "accepted_examples": [
+          "12",
+          " 12 "
+        ],
+        "rejected_examples": [
+          "10",
+          "14",
+          "24"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "An antiderivative is 2x³−2x. At x=2 it is 12; at x=1 it is 0. The integral is 12.",
+        "ru": "Первообразная 2x³−2x. При x=2 получаем 12, при x=1 — 0. Интеграл равен 12.",
+        "uz": "Antiderivativ 2x³−2x. x=2 da 12, x=1 da 0. Integral 12."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q458",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "upper_minus_lower",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Evaluate ∫₁³ 4x³ dx.",
+        "ru": "Вычислите ∫₁³ 4x³ dx.",
+        "uz": "∫₁³ 4x³ dx ni hisoblang."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "80",
+            "ru": "80",
+            "uz": "80"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "82",
+            "ru": "82",
+            "uz": "82"
+          },
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "81",
+            "ru": "81",
+            "uz": "81"
+          },
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−80",
+            "ru": "−80",
+            "uz": "−80"
+          },
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "An antiderivative is x⁴. Thus 3⁴−1⁴=81−1=80.",
+        "ru": "Первообразная x⁴. Поэтому 3⁴−1⁴=81−1=80.",
+        "uz": "Antiderivativ x⁴. Demak 3⁴−1⁴=81−1=80."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q459",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "signed_integral",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Evaluate ∫₀² (x−2) dx.",
+        "ru": "Вычислите ∫₀² (x−2) dx.",
+        "uz": "∫₀² (x−2) dx ni hisoblang."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−2",
+            "ru": "−2",
+            "uz": "−2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "INT03_SIGNED_ACCUMULATION"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "0",
+            "ru": "0",
+            "uz": "0"
+          },
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "4",
+            "ru": "4",
+            "uz": "4"
+          },
+          "diagnostic_code": "INT03_SIGNED_ACCUMULATION"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "An antiderivative is x²/2−2x. At 2 it is 2−4=−2; at 0 it is 0. The definite integral is −2. It is signed, not geometric area.",
+        "ru": "Первообразная x²/2−2x. При 2 получаем 2−4=−2, при 0 — 0. Определённый интеграл равен −2. Это знаковая величина, а не геометрическая площадь.",
+        "uz": "Antiderivativ x²/2−2x. x=2 da 2−4=−2, x=0 da 0. Aniq integral −2; bu geometrik yuza emas, ishorali yig‘indi."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q460",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "linear_power_definite",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Evaluate ∫₀¹ 3(2x+1)² dx. Enter the value.",
+        "ru": "Вычислите ∫₀¹ 3(2x+1)² dx. Введите значение.",
+        "uz": "∫₀¹ 3(2x+1)² dx ni hisoblang. Qiymatni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "13",
+        "accepted_examples": [
+          "13",
+          " 13 "
+        ],
+        "rejected_examples": [
+          "9",
+          "14",
+          "26"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "An antiderivative is (2x+1)³/2. Evaluate from 0 to 1: (27−1)/2=13.",
+        "ru": "Первообразная (2x+1)³/2. От 0 до 1: (27−1)/2=13.",
+        "uz": "Antiderivativ (2x+1)³/2. 0 dan 1 gacha: (27−1)/2=13."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q461",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "fractional_power_definite",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Evaluate ∫₁⁹ x^(−1/2) dx.",
+        "ru": "Вычислите ∫₁⁹ x^(−1/2) dx.",
+        "uz": "∫₁⁹ x^(−1/2) dx ni hisoblang."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "4",
+            "ru": "4",
+            "uz": "4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "6",
+            "ru": "6",
+            "uz": "6"
+          },
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "8",
+            "ru": "8",
+            "uz": "8"
+          },
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "An antiderivative is 2√x. Thus 2√9−2√1=6−2=4.",
+        "ru": "Первообразная 2√x. Поэтому 2√9−2√1=6−2=4.",
+        "uz": "Antiderivativ 2√x. Demak 2√9−2√1=6−2=4."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q462",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "improper_endpoint",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Evaluate the improper endpoint integral ∫₀⁹ x^(−1/2) dx. Enter the finite value.",
+        "ru": "Вычислите несобственный интеграл на границе ∫₀⁹ x^(−1/2) dx. Введите конечное значение.",
+        "uz": "Chegaradagi xosmas integral ∫₀⁹ x^(−1/2) dx ni hisoblang. Chekli qiymatni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "6",
+        "accepted_examples": [
+          "6",
+          " 6 "
+        ],
+        "rejected_examples": [
+          "3",
+          "9",
+          "0"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Use a lower limit a>0 and let a→0+: ∫ₐ⁹ x^(−1/2)dx=[2√x]ₐ⁹=6−2√a→6.",
+        "ru": "Берём нижнюю границу a>0 и переходим к a→0+: ∫ₐ⁹ x^(−1/2)dx=[2√x]ₐ⁹=6−2√a→6.",
+        "uz": "Pastki chegarani a>0 deb olib a→0+ qilamiz: ∫ₐ⁹ x^(−1/2)dx=[2√x]ₐ⁹=6−2√a→6."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q463",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "improper_shifted_endpoint",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Evaluate the improper endpoint integral ∫₋₁³ (x+1)^(−1/2) dx.",
+        "ru": "Вычислите несобственный интеграл на границе ∫₋₁³ (x+1)^(−1/2) dx.",
+        "uz": "Chegaradagi xosmas integral ∫₋₁³ (x+1)^(−1/2) dx ni hisoblang."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "4",
+            "ru": "4",
+            "uz": "4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "INT03_ENDPOINT_LIMIT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "8",
+            "ru": "8",
+            "uz": "8"
+          },
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "The integral does not exist.",
+            "ru": "Интеграл не существует.",
+            "uz": "Integral mavjud emas."
+          },
+          "diagnostic_code": "INT03_ENDPOINT_LIMIT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "An antiderivative is 2√(x+1). The lower endpoint is improper, so use a→−1+: 2√4−2√(a+1)→4.",
+        "ru": "Первообразная 2√(x+1). Нижняя граница несобственная, поэтому берём a→−1+: 2√4−2√(a+1)→4.",
+        "uz": "Antiderivativ 2√(x+1). Pastki chegara xosmas, shuning uchun a→−1+: 2√4−2√(a+1)→4."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q464",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "parameter_integral",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "If ∫₀² kx dx=12, enter k.",
+        "ru": "Если ∫₀² kx dx=12, введите k.",
+        "uz": "Agar ∫₀² kx dx=12 bo‘lsa, k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "6",
+        "accepted_examples": [
+          "6",
+          " 6 "
+        ],
+        "rejected_examples": [
+          "3",
+          "12",
+          "24"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "∫₀² kx dx=k[x²/2]₀²=2k. Hence 2k=12 and k=6.",
+        "ru": "∫₀² kx dx=k[x²/2]₀²=2k. Поэтому 2k=12 и k=6.",
+        "uz": "∫₀² kx dx=k[x²/2]₀²=2k. Demak 2k=12 va k=6."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q465",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "reversed_limits",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Evaluate ∫₃¹ 2x dx. Enter the value.",
+        "ru": "Вычислите ∫₃¹ 2x dx. Введите значение.",
+        "uz": "∫₃¹ 2x dx ni hisoblang. Qiymatni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-8",
+        "accepted_examples": [
+          "-8",
+          "−8",
+          " -8 "
+        ],
+        "rejected_examples": [
+          "8",
+          "4",
+          "-4"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "8",
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+        }
+      ],
+      "explanation": {
+        "en": "An antiderivative is x². With limits 3 to 1, evaluate F(1)−F(3)=1−9=−8.",
+        "ru": "Первообразная x². При пределах от 3 до 1: F(1)−F(3)=1−9=−8.",
+        "uz": "Antiderivativ x². 3 dan 1 gacha F(1)−F(3)=1−9=−8."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q466",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "symmetry_signed",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Evaluate ∫₋₂² (3x³+x) dx.",
+        "ru": "Вычислите ∫₋₂² (3x³+x) dx.",
+        "uz": "∫₋₂² (3x³+x) dx ni hisoblang."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "0",
+            "ru": "0",
+            "uz": "0"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "16",
+            "ru": "16",
+            "uz": "16"
+          },
+          "diagnostic_code": "INT03_SIGNED_ACCUMULATION"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "32",
+            "ru": "32",
+            "uz": "32"
+          },
+          "diagnostic_code": "INT03_SIGNED_ACCUMULATION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−16",
+            "ru": "−16",
+            "uz": "−16"
+          },
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "3x³+x is an odd function. Over the symmetric interval [−2,2], its signed integral is 0.",
+        "ru": "3x³+x — нечётная функция. На симметричном интервале [−2,2] её знаковый интеграл равен 0.",
+        "uz": "3x³+x toq funksiya. Simmetrik [−2,2] intervalda ishorali integral 0."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q467",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "improper_parameter",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "For k>0, the improper endpoint integral ∫₀⁴ kx^(−1/2) dx equals 20. Enter k.",
+        "ru": "При k>0 несобственный интеграл на границе ∫₀⁴ kx^(−1/2) dx равен 20. Введите k.",
+        "uz": "k>0 uchun chegaradagi xosmas integral ∫₀⁴ kx^(−1/2) dx=20. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "5",
+        "accepted_examples": [
+          "5",
+          " 5 "
+        ],
+        "rejected_examples": [
+          "2",
+          "4",
+          "10"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The improper integral is k[2√x]₀⁴=4k. Since 4k=20, k=5.",
+        "ru": "Несобственный интеграл равен k[2√x]₀⁴=4k. Из 4k=20 получаем k=5.",
+        "uz": "Xosmas integral k[2√x]₀⁴=4k. 4k=20 dan k=5."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q468",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "signed_piece",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "For f(x)=x²−1, what is ∫₀² f(x) dx?",
+        "ru": "Для f(x)=x²−1 чему равен ∫₀² f(x) dx?",
+        "uz": "f(x)=x²−1 uchun ∫₀² f(x) dx qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2/3",
+            "ru": "2/3",
+            "uz": "2/3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "4/3",
+            "ru": "4/3",
+            "uz": "4/3"
+          },
+          "diagnostic_code": "INT03_SIGNED_ACCUMULATION"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "INT03_SIGNED_ACCUMULATION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−2/3",
+            "ru": "−2/3",
+            "uz": "−2/3"
+          },
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "An antiderivative is x³/3−x. From 0 to 2 this gives 8/3−2=2/3. The negative part on 0<x<1 reduces the signed integral.",
+        "ru": "Первообразная x³/3−x. От 0 до 2 получаем 8/3−2=2/3. Отрицательная часть при 0<x<1 уменьшает знаковый интеграл.",
+        "uz": "Antiderivativ x³/3−x. 0 dan 2 gacha 8/3−2=2/3. 0<x<1 dagi manfiy qism ishorali integralni kamaytiradi."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q469",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-03",
+      "secondary_skills": [
+        "P1-INT-01"
+      ],
+      "role": "constant_integral_parameter",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "If ∫₁³ (2x+k) dx=18, enter k.",
+        "ru": "Если ∫₁³ (2x+k) dx=18, введите k.",
+        "uz": "Agar ∫₁³ (2x+k) dx=18 bo‘lsa, k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "5",
+        "accepted_examples": [
+          "5",
+          " 5 "
+        ],
+        "rejected_examples": [
+          "4",
+          "6",
+          "10"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "∫₁³2x dx=[x²]₁³=8, and ∫₁³k dx=2k. Hence 8+2k=18, so k=5.",
+        "ru": "∫₁³2x dx=[x²]₁³=8, а ∫₁³k dx=2k. Поэтому 8+2k=18 и k=5.",
+        "uz": "∫₁³2x dx=[x²]₁³=8, va ∫₁³k dx=2k. Demak 8+2k=18, k=5."
+      },
+      "ai_source_skill": "P1-INT-03",
+      "status": "draft"
+    }
+  ]
+}
