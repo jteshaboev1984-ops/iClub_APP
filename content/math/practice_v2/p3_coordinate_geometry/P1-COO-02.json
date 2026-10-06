@@ -63,11 +63,11 @@
         {
           "key": "A",
           "text": {
-            "en": "(−1,3)",
-            "ru": "(−1,3)",
-            "uz": "(−1,3)"
+            "en": "(1,3)",
+            "ru": "(1,3)",
+            "uz": "(1,3)"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "COO02_MIDPOINT"
         },
         {
           "key": "B",
@@ -81,11 +81,11 @@
         {
           "key": "C",
           "text": {
-            "en": "(1,3)",
-            "ru": "(1,3)",
-            "uz": "(1,3)"
+            "en": "(−1,3)",
+            "ru": "(−1,3)",
+            "uz": "(−1,3)"
           },
-          "diagnostic_code": "COO02_MIDPOINT"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -97,7 +97,7 @@
           "diagnostic_code": "COO02_MIDPOINT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "Average corresponding coordinates: ((−5+3)/2,(7−1)/2)=(−1,3).",
         "ru": "Усредняем соответствующие координаты: ((−5+3)/2,(7−1)/2)=(−1,3).",
@@ -166,20 +166,20 @@
         {
           "key": "A",
           "text": {
-            "en": "(3,4)",
-            "ru": "(3,4)",
-            "uz": "(3,4)"
-          },
-          "diagnostic_code": "COO02_INTERSECTION"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "(4,3)",
             "ru": "(4,3)",
             "uz": "(4,3)"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(3,4)",
+            "ru": "(3,4)",
+            "uz": "(3,4)"
+          },
+          "diagnostic_code": "COO02_INTERSECTION"
         },
         {
           "key": "C",
@@ -200,7 +200,7 @@
           "diagnostic_code": "COO02_INTERSECTION"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "From x−y=1, y=x−1. Substitute into 2x+y=11: 3x−1=11, so x=4 and y=3.",
         "ru": "Из x−y=1 получаем y=x−1. Подставляем в 2x+y=11: 3x−1=11, поэтому x=4 и y=3.",
@@ -273,11 +273,11 @@
         {
           "key": "B",
           "text": {
-            "en": "Gradient −2, y-intercept 4",
-            "ru": "Градиент −2, y-перехват 4",
-            "uz": "Gradient −2, y-kesishish 4"
+            "en": "Gradient −1/2, y-intercept 4",
+            "ru": "Градиент −1/2, y-перехват 4",
+            "uz": "Gradient −1/2, y-kesishish 4"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "COO02_INTERCEPT_FORM"
         },
         {
           "key": "C",
@@ -291,14 +291,14 @@
         {
           "key": "D",
           "text": {
-            "en": "Gradient −1/2, y-intercept 4",
-            "ru": "Градиент −1/2, y-перехват 4",
-            "uz": "Gradient −1/2, y-kesishish 4"
+            "en": "Gradient −2, y-intercept 4",
+            "ru": "Градиент −2, y-перехват 4",
+            "uz": "Gradient −2, y-kesishish 4"
           },
-          "diagnostic_code": "COO02_INTERCEPT_FORM"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "D",
       "explanation": {
         "en": "Rearrange: 2y=−4x+8, so y=−2x+4. The gradient is −2 and the y-intercept is 4.",
         "ru": "Преобразуем: 2y=−4x+8, поэтому y=−2x+4. Градиент −2, y-перехват 4.",
@@ -367,11 +367,11 @@
         {
           "key": "A",
           "text": {
-            "en": "(8,−7)",
-            "ru": "(8,−7)",
-            "uz": "(8,−7)"
+            "en": "(0,2)",
+            "ru": "(0,2)",
+            "uz": "(0,2)"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "COO02_MIDPOINT"
         },
         {
           "key": "B",
@@ -385,11 +385,11 @@
         {
           "key": "C",
           "text": {
-            "en": "(0,2)",
-            "ru": "(0,2)",
-            "uz": "(0,2)"
+            "en": "(8,−7)",
+            "ru": "(8,−7)",
+            "uz": "(8,−7)"
           },
-          "diagnostic_code": "COO02_MIDPOINT"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -401,7 +401,7 @@
           "diagnostic_code": "COO02_MIDPOINT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "For the x-coordinate, (−4+x_B)/2=2, so x_B=8. For y, (5+y_B)/2=−1, so y_B=−7.",
         "ru": "По x: (−4+x_B)/2=2, поэтому x_B=8. По y: (5+y_B)/2=−1, поэтому y_B=−7.",
@@ -474,20 +474,20 @@
         {
           "key": "B",
           "text": {
-            "en": "2x+y=6",
-            "ru": "2x+y=6",
-            "uz": "2x+y=6"
-          },
-          "diagnostic_code": "COO02_INTERCEPT_FORM"
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "x+2y=6",
             "ru": "x+2y=6",
             "uz": "x+2y=6"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2x+y=6",
+            "ru": "2x+y=6",
+            "uz": "2x+y=6"
+          },
+          "diagnostic_code": "COO02_INTERCEPT_FORM"
         },
         {
           "key": "D",
@@ -499,7 +499,7 @@
           "diagnostic_code": "COO02_INTERCEPT_FORM"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "B",
       "explanation": {
         "en": "Multiply y=−x/2+3 by 2: 2y=−x+6. Rearranging gives x+2y=6.",
         "ru": "Умножаем y=−x/2+3 на 2: 2y=−x+6. После переноса получаем x+2y=6.",
