@@ -13435,6 +13435,7 @@ keys.forEach(k => {
       `;
 
       row.querySelector("button")?.addEventListener("click", () => {
+        observeSubjectAccessShadow(us.key, "profile_competitive_subject_hub");
         state.courses.subjectKey = us.key;
         saveState();
         setTab("courses");
@@ -14809,6 +14810,17 @@ function subjectIconCandidates(subjectKey) {
   return a;
 }
 
+function observeSubjectAccessShadow(subjectKey, routeCode) {
+  try {
+    Promise.resolve(
+      window.iClubSubjectAccessShadow?.observe?.({
+        subjectKey: String(subjectKey || "").trim(),
+        routeCode: String(routeCode || "").trim()
+      })
+    ).catch(() => null);
+  } catch {}
+}
+
    function renderAllSubjects() {
   const grid = $("#subjects-grid");
   if (!grid) return;
@@ -14939,6 +14951,9 @@ const imgEl = head.querySelector(".catalog-ico-img");
 setImgWithFallback(imgEl, subjectIconCandidates(s.key));
 
     head.addEventListener("click", () => {
+    // Shadow-only commercial observation. Navigation remains unchanged.
+    observeSubjectAccessShadow(s.key, "catalog_subject_hub");
+
     // "Открыть" — без изменения профиля, как в контракте
     state.courses.subjectKey = s.key;
     saveState();
@@ -22529,6 +22544,7 @@ if (action === "open-all-subjects") {
           return;
         }
 
+        observeSubjectAccessShadow(pick, "global_books");
         state.courses.subjectKey = pick;
         saveState();
         setTab("courses");
@@ -22552,6 +22568,7 @@ if (action === "open-all-subjects") {
     return;
   }
 
+  observeSubjectAccessShadow(pick, "global_recommendations");
   state.courses = state.courses || {};
   state.courses.subjectKey = pick;
   state.courses.myRecsActiveTab = state.courses.myRecsActiveTab || "practice";
@@ -22608,6 +22625,7 @@ if (action === "open-all-subjects") {
     return;
   }
 
+  observeSubjectAccessShadow(pick, "profile_recommendations");
   state.courses = state.courses || {};
   state.courses.subjectKey = pick;
   state.courses.myRecsActiveTab = state.courses.myRecsActiveTab || "practice";
@@ -22644,6 +22662,7 @@ if (action === "open-all-subjects") {
 }
 
 if (action === "my-rec-open-books") {
+  observeSubjectAccessShadow(state?.courses?.subjectKey, "recommendation_books");
   showAsyncOverlay(tr3(
     "Загружаем книги…",
     "Kitoblar yuklanmoqda…",
@@ -22661,11 +22680,13 @@ if (action === "my-rec-open-books") {
 }
        
      if (action === "my-rec-open-practice") {
+  observeSubjectAccessShadow(state?.courses?.subjectKey, "recommendation_practice");
   await openPracticeStart();
   return;
 }
        
 if (action === "my-rec-retry") {
+  observeSubjectAccessShadow(state?.courses?.subjectKey, "recommendation_retry");
   startPracticeRetryMistakes();
   return;
 }
@@ -22676,10 +22697,12 @@ if (action === "my-rec-delete") {
 }
 
 if (action === "my-rec-train") {
+  observeSubjectAccessShadow(state?.courses?.subjectKey, "recommendation_train");
   startPracticeByRec();
   return;
 }
 if (action === "my-rec-repeat-drill") {
+  observeSubjectAccessShadow(state?.courses?.subjectKey, "recommendation_repeat_drill");
   const d = state?.courses?.myRecDrillLast;
   if (!d) return;
 
@@ -22702,6 +22725,7 @@ if (action === "profile-open-courses") {
 }
 
 if (action === "my-rec-to-subject") {
+  observeSubjectAccessShadow(state?.courses?.subjectKey, "recommendation_to_subject");
   state.courses = state.courses || {};
   state.courses.myRecReturnTarget = null;
   saveState();
@@ -22723,6 +22747,7 @@ if (action === "my-rec-to-subject") {
 }
 
 if (action === "tour-to-subject") {
+  observeSubjectAccessShadow(state?.courses?.subjectKey, "tour_practice");
   state.courses = state.courses || {};
   state.courses.myRecReturnTarget = null;
   saveState();
@@ -22764,11 +22789,13 @@ if (action === "profile-open-ratings") {
       }
 
       if (action === "open-lessons") {
+  observeSubjectAccessShadow(state?.courses?.subjectKey, "subject_video");
   pushCourses("video");
   renderVideo().catch(() => null);
   return;
 }
       if (action === "open-exam-prep") {
+        observeSubjectAccessShadow(state?.courses?.subjectKey, "subject_exam_prep");
         try {
           await window.iClubExamPrep?.open?.({
             subjectKey: state.courses.subjectKey,
@@ -22780,6 +22807,7 @@ if (action === "profile-open-ratings") {
 
 
             if (action === "open-practice") {
+        observeSubjectAccessShadow(state?.courses?.subjectKey, "subject_practice");
         await openPracticeStart();
         return;
       }
@@ -22939,6 +22967,8 @@ if (action === "practice-exit") {
 }
 
            if (action === "open-tours") {
+        observeSubjectAccessShadow(state?.courses?.subjectKey, "subject_tours");
+
         // additional subjects: tours are not available
         if (isAdditionalSubjectKey(state.courses.subjectKey)) {
         toastToursDenied("not_main");
@@ -23094,6 +23124,7 @@ if (action === "tour-next" || action === "tour-submit") {
       }
        
                         if (action === "open-books") {
+        observeSubjectAccessShadow(state?.courses?.subjectKey, "subject_books");
         showAsyncOverlay(tr3(
           "Загружаем книги…",
           "Kitoblar yuklanmoqda…",
@@ -23112,6 +23143,7 @@ if (action === "tour-next" || action === "tour-submit") {
 
             if (action === "open-my-recommendations") {
         const subject_id = state?.courses?.subjectKey ? String(state.courses.subjectKey) : "";
+        observeSubjectAccessShadow(subject_id, "subject_recommendations");
 
         try {
           trackEvent("recommendation_opened", {
