@@ -5,6 +5,20 @@ Branch: `work/mathematics-practice-v2-refresh-20261006`
 Baseline main SHA: `823ef7df6dabf08c1a5e616ffbdd33379d8cf14d`  
 Owner decision: preserve Tour results/history as the protected user-data boundary; Mathematics Practice may be rebuilt and its progress may be reset as part of the announced update.
 
+
+## Current checkpoint — 2026-10-06
+
+- Block 1 Content Architecture 2.0: COMPLETE / gate passed.
+- Block 2 content production: IN PROGRESS.
+- Practice 1 Quadratics: 68/68 authored across P1-QUA-01…06.
+- Second-pass mathematical review: passed after corrections.
+- Learner-facing EN/RU/UZ question/option/explanation review: passed for Practice 1.
+- Mechanical primitive-error guard: active; current MCQ keys A/B/C/D = 10/10/10/11, longest same-letter run = 2.
+- Deterministic diagnostic catalog: 30 reviewed codes; all currently used and skill-aligned.
+- Season 2 Tour 1 separation review: completed; overly similar Practice items were redesigned.
+- Technical publication status: BLOCKED intentionally until evaluator hardening and accepted/rejected input validation are complete.
+- Production/Supabase user data: unchanged by this work.
+
 ## Purpose
 
 Rebuild Mathematics Practice so that:
