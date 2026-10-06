@@ -1,0 +1,569 @@
+{
+  "version": "practice_v2_p2_functions_draft_v0.1",
+  "skill": "P1-FUN-06",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q117",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-06",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Starting from y=f(x), which equation moves the graph 6 units upward?",
+        "ru": "Какое уравнение сдвигает график y=f(x) на 6 единиц вверх?",
+        "uz": "y=f(x) grafigini 6 birlik yuqoriga siljitadigan tenglama qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=f(x)+6",
+            "ru": "y=f(x)+6",
+            "uz": "y=f(x)+6"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=f(x)−6",
+            "ru": "y=f(x)−6",
+            "uz": "y=f(x)−6"
+          },
+          "diagnostic_code": "FUN06_VERTICAL_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=f(x+6)",
+            "ru": "y=f(x+6)",
+            "uz": "y=f(x+6)"
+          },
+          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=f(x−6)",
+            "ru": "y=f(x−6)",
+            "uz": "y=f(x−6)"
+          },
+          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Adding 6 outside the function increases every y-coordinate by 6, so y=f(x)+6 is a vertical translation 6 units upward.",
+        "ru": "Прибавление 6 снаружи функции увеличивает каждую y-координату на 6, поэтому y=f(x)+6 — сдвиг на 6 единиц вверх.",
+        "uz": "Funksiya tashqarisida 6 qo‘shish har bir y-koordinatani 6 ga oshiradi, demak y=f(x)+6 grafikni 6 birlik yuqoriga siljitadi."
+      },
+      "ai_source_skill": "P1-FUN-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q118",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-06",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which equation translates y=f(x) 3 units to the left?",
+        "ru": "Какое уравнение сдвигает y=f(x) на 3 единицы влево?",
+        "uz": "y=f(x) grafigini 3 birlik chapga siljitadigan tenglama qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=f(x−3)",
+            "ru": "y=f(x−3)",
+            "uz": "y=f(x−3)"
+          },
+          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=f(x)−3",
+            "ru": "y=f(x)−3",
+            "uz": "y=f(x)−3"
+          },
+          "diagnostic_code": "FUN06_VERTICAL_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=f(x)+3",
+            "ru": "y=f(x)+3",
+            "uz": "y=f(x)+3"
+          },
+          "diagnostic_code": "FUN06_VERTICAL_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=f(x+3)",
+            "ru": "y=f(x+3)",
+            "uz": "y=f(x+3)"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "Horizontal shifts use the opposite-looking sign inside the function. Replacing x by x+3 moves the graph 3 units left.",
+        "ru": "При горизонтальном сдвиге знак внутри функции выглядит противоположно направлению. Замена x на x+3 сдвигает график на 3 единицы влево.",
+        "uz": "Gorizontal siljishda funksiya ichidagi ishora yo‘nalishga teskari ko‘rinadi. x ni x+3 ga almashtirish grafikni 3 birlik chapga siljitadi."
+      },
+      "ai_source_skill": "P1-FUN-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q119",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-06",
+      "secondary_skills": [],
+      "role": "point_mapping",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The point (−2,5) lies on y=f(x). The graph is translated 4 units right and 3 units down. Enter the x-coordinate of the corresponding point.",
+        "ru": "Точка (−2,5) лежит на y=f(x). График сдвинули на 4 единицы вправо и на 3 вниз. Введите x-координату соответствующей точки.",
+        "uz": "(−2,5) nuqta y=f(x) da yotadi. Grafik 4 birlik o‘ngga va 3 birlik pastga siljitildi. Mos nuqtaning x-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "2",
+        "accepted_examples": [
+          "2",
+          " 2 "
+        ],
+        "rejected_examples": [
+          "-6",
+          "5",
+          "8"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "A translation 4 units right changes x by +4. The x-coordinate becomes −2+4=2.",
+        "ru": "Сдвиг на 4 единицы вправо увеличивает x на 4. Новая x-координата: −2+4=2.",
+        "uz": "4 birlik o‘ngga siljish x ni 4 ga oshiradi. Yangi x-koordinata −2+4=2."
+      },
+      "ai_source_skill": "P1-FUN-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q120",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-06",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The graph y=x² is translated 3 units left and 2 units down. What is its new equation?",
+        "ru": "График y=x² сдвинули на 3 единицы влево и на 2 вниз. Каково новое уравнение?",
+        "uz": "y=x² grafigi 3 birlik chapga va 2 birlik pastga siljitildi. Yangi tenglama qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=(x−3)²−2",
+            "ru": "y=(x−3)²−2",
+            "uz": "y=(x−3)²−2"
+          },
+          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=(x+3)²−2",
+            "ru": "y=(x+3)²−2",
+            "uz": "y=(x+3)²−2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=(x+3)²+2",
+            "ru": "y=(x+3)²+2",
+            "uz": "y=(x+3)²+2"
+          },
+          "diagnostic_code": "FUN06_VERTICAL_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=(x−2)²+3",
+            "ru": "y=(x−2)²+3",
+            "uz": "y=(x−2)²+3"
+          },
+          "diagnostic_code": "FUN06_POINT_MAP"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Left by 3 means replace x by x+3. Down by 2 means subtract 2 outside. Hence y=(x+3)²−2.",
+        "ru": "Сдвиг на 3 влево означает заменить x на x+3. Сдвиг на 2 вниз означает вычесть 2 снаружи. Получаем y=(x+3)²−2.",
+        "uz": "3 birlik chapga siljish x ni x+3 ga almashtiradi. 2 birlik pastga siljish tashqarida 2 ni ayiradi. Demak y=(x+3)²−2."
+      },
+      "ai_source_skill": "P1-FUN-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q121",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-06",
+      "secondary_skills": [],
+      "role": "point_mapping",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "If (1,−4) lies on y=f(x), which point lies on y=f(x+5)+2?",
+        "ru": "Если (1,−4) лежит на y=f(x), какая точка лежит на y=f(x+5)+2?",
+        "uz": "Agar (1,−4) nuqta y=f(x) da yotsa, y=f(x+5)+2 da qaysi nuqta yotadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(6,−2)",
+            "ru": "(6,−2)",
+            "uz": "(6,−2)"
+          },
+          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(−4,−6)",
+            "ru": "(−4,−6)",
+            "uz": "(−4,−6)"
+          },
+          "diagnostic_code": "FUN06_VERTICAL_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(−4,−2)",
+            "ru": "(−4,−2)",
+            "uz": "(−4,−2)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(6,−6)",
+            "ru": "(6,−6)",
+            "uz": "(6,−6)"
+          },
+          "diagnostic_code": "FUN06_POINT_MAP"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "f(x+5) moves the graph 5 units left, so x becomes 1−5=−4. Adding 2 moves it up, so y becomes −4+2=−2.",
+        "ru": "f(x+5) сдвигает график на 5 влево, поэтому x становится 1−5=−4. Добавление 2 сдвигает вверх, поэтому y становится −4+2=−2.",
+        "uz": "f(x+5) grafikni 5 birlik chapga siljitadi, shuning uchun x=1−5=−4. Tashqaridagi +2 yuqoriga siljitadi, y=−4+2=−2."
+      },
+      "ai_source_skill": "P1-FUN-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q122",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-06",
+      "secondary_skills": [],
+      "role": "point_mapping",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The point (3,−1) lies on y=f(x). For y=f(x−6)+5, enter the y-coordinate of the corresponding point.",
+        "ru": "Точка (3,−1) лежит на y=f(x). Для y=f(x−6)+5 введите y-координату соответствующей точки.",
+        "uz": "(3,−1) nuqta y=f(x) da yotadi. y=f(x−6)+5 uchun mos nuqtaning y-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "-6",
+          "9",
+          "6"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The +5 outside the function moves every point 5 units up. The y-coordinate becomes −1+5=4.",
+        "ru": "Число +5 снаружи функции сдвигает каждую точку на 5 вверх. y-координата становится −1+5=4.",
+        "uz": "Funksiya tashqarisidagi +5 har bir nuqtani 5 birlik yuqoriga siljitadi. y-koordinata −1+5=4."
+      },
+      "ai_source_skill": "P1-FUN-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q123",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-06",
+      "secondary_skills": [],
+      "role": "concept_interpretation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which translation changes y=f(x) into y=f(x+2)+5?",
+        "ru": "Какой сдвиг переводит y=f(x) в y=f(x+2)+5?",
+        "uz": "Qaysi siljish y=f(x) ni y=f(x+2)+5 ga o‘tkazadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2 units left and 5 units up",
+            "ru": "На 2 влево и на 5 вверх",
+            "uz": "2 birlik chapga va 5 birlik yuqoriga"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2 units right and 5 units up",
+            "ru": "На 2 вправо и на 5 вверх",
+            "uz": "2 birlik o‘ngga va 5 birlik yuqoriga"
+          },
+          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2 units left and 5 units down",
+            "ru": "На 2 влево и на 5 вниз",
+            "uz": "2 birlik chapga va 5 birlik pastga"
+          },
+          "diagnostic_code": "FUN06_VERTICAL_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "5 units left and 2 units up",
+            "ru": "На 5 влево и на 2 вверх",
+            "uz": "5 birlik chapga va 2 birlik yuqoriga"
+          },
+          "diagnostic_code": "FUN06_POINT_MAP"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The inside +2 moves the graph 2 units left; the outside +5 moves it 5 units up.",
+        "ru": "Внутреннее +2 сдвигает график на 2 влево, а внешнее +5 — на 5 вверх.",
+        "uz": "Ichki +2 grafikni 2 birlik chapga, tashqi +5 esa 5 birlik yuqoriga siljitadi."
+      },
+      "ai_source_skill": "P1-FUN-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q124",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-06",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The vertex of y=f(x) is (−2,3). After a translation it becomes (5,−1). Which equation describes the translated graph?",
+        "ru": "Вершина y=f(x) равна (−2,3). После сдвига она стала (5,−1). Какое уравнение описывает новый график?",
+        "uz": "y=f(x) grafigining cho‘qqisi (−2,3). Siljishdan keyin u (5,−1) bo‘ldi. Yangi grafik qaysi tenglama bilan beriladi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=f(x+7)−4",
+            "ru": "y=f(x+7)−4",
+            "uz": "y=f(x+7)−4"
+          },
+          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=f(x−7)+4",
+            "ru": "y=f(x−7)+4",
+            "uz": "y=f(x−7)+4"
+          },
+          "diagnostic_code": "FUN06_VERTICAL_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=f(x+4)−7",
+            "ru": "y=f(x+4)−7",
+            "uz": "y=f(x+4)−7"
+          },
+          "diagnostic_code": "FUN06_POINT_MAP"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=f(x−7)−4",
+            "ru": "y=f(x−7)−4",
+            "uz": "y=f(x−7)−4"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "The vertex moves from x=−2 to x=5: 7 units right, so use f(x−7). It moves from y=3 to y=−1: 4 units down, so subtract 4.",
+        "ru": "Вершина перемещается от x=−2 к x=5: на 7 вправо, значит f(x−7). По y она идёт от 3 к −1: на 4 вниз, поэтому вычитаем 4.",
+        "uz": "Cho‘qqi x=−2 dan x=5 ga, ya’ni 7 birlik o‘ngga siljiydi, shuning uchun f(x−7). y=3 dan y=−1 ga, ya’ni 4 birlik pastga siljiydi, demak 4 ayiriladi."
+      },
+      "ai_source_skill": "P1-FUN-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q125",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-06",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Starting from y=(x−1)², which equation represents a translation 2 units right and 4 units up?",
+        "ru": "Исходный график y=(x−1)². Какое уравнение задаёт сдвиг на 2 вправо и на 4 вверх?",
+        "uz": "Boshlang‘ich grafik y=(x−1)². Uni 2 birlik o‘ngga va 4 birlik yuqoriga siljitadigan tenglama qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=(x+1)²+4",
+            "ru": "y=(x+1)²+4",
+            "uz": "y=(x+1)²+4"
+          },
+          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=(x−3)²+4",
+            "ru": "y=(x−3)²+4",
+            "uz": "y=(x−3)²+4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=(x−3)²−4",
+            "ru": "y=(x−3)²−4",
+            "uz": "y=(x−3)²−4"
+          },
+          "diagnostic_code": "FUN06_VERTICAL_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=(x+3)²+4",
+            "ru": "y=(x+3)²+4",
+            "uz": "y=(x+3)²+4"
+          },
+          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The original vertex is (1,0). Translating 2 right and 4 up moves it to (3,4), so the new equation is y=(x−3)²+4.",
+        "ru": "Исходная вершина (1,0). Сдвиг на 2 вправо и 4 вверх переносит её в (3,4), поэтому новое уравнение y=(x−3)²+4.",
+        "uz": "Boshlang‘ich cho‘qqi (1,0). 2 birlik o‘ngga va 4 birlik yuqoriga siljiganda u (3,4) ga o‘tadi, demak y=(x−3)²+4."
+      },
+      "ai_source_skill": "P1-FUN-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q126",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-06",
+      "secondary_skills": [],
+      "role": "reverse_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "A point (2,7) on y=f(x) becomes (−3,11) on y=f(x−h)+k. What are h and k?",
+        "ru": "Точка (2,7) графика y=f(x) переходит в (−3,11) на графике y=f(x−h)+k. Чему равны h и k?",
+        "uz": "y=f(x) dagi (2,7) nuqta y=f(x−h)+k da (−3,11) ga o‘tadi. h va k nimaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "h=5, k=4",
+            "ru": "h=5, k=4",
+            "uz": "h=5, k=4"
+          },
+          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "h=−5, k=−4",
+            "ru": "h=−5, k=−4",
+            "uz": "h=−5, k=−4"
+          },
+          "diagnostic_code": "FUN06_VERTICAL_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "h=−5, k=4",
+            "ru": "h=−5, k=4",
+            "uz": "h=−5, k=4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "h=4, k=−5",
+            "ru": "h=4, k=−5",
+            "uz": "h=4, k=−5"
+          },
+          "diagnostic_code": "FUN06_POINT_MAP"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "The point moved 5 units left, so h=−5 because f(x−h)=f(x+5). Its y-coordinate increased by 4, so k=4.",
+        "ru": "Точка сдвинулась на 5 влево, поэтому h=−5, так как f(x−h)=f(x+5). y-координата увеличилась на 4, значит k=4.",
+        "uz": "Nuqta 5 birlik chapga siljigan, shuning uchun h=−5, chunki f(x−h)=f(x+5). y-koordinata 4 ga oshgan, demak k=4."
+      },
+      "ai_source_skill": "P1-FUN-06",
+      "status": "draft"
+    }
+  ]
+}
