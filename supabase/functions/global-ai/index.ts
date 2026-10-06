@@ -1002,3 +1002,170 @@ Deno.serve(async (req) => {
     if (adapterCode !== "math_exam_prep_v1"
         || subjectKey !== "mathematics"
         || scopeCode !== "exam_prep"
+        || !preparedPrompt?.variant) {
+      await recordAudit({
+        requestId,
+        userId: user.id,
+        subjectKey,
+        scopeCode,
+        interaction,
+        routeClass,
+        mode: "no_source",
+        reason: "prepared_adapter_unavailable",
+        adapterCode,
+        policyVersion,
+        latencyMs: performance.now() - started,
+      });
+      return response(200, {
+        ok: false,
+        mode: "no_source",
+        reason: "prepared_adapter_unavailable",
+        message: learnerMessage(locale, "no_source"),
+        academic_state_changed: false,
+      });
+    }
+
+    if (!["P1", "P5"].includes(componentCode)
+        || !/^P[15]-[A-Z0-9]+-[0-9]{2}$/.test(skillCode)) {
+      await recordAudit({
+        requestId,
+        userId: user.id,
+        subjectKey,
+        scopeCode,
+        interaction,
+        routeClass,
+        mode: "no_source",
+        reason: "invalid_math_context",
+        adapterCode,
+        policyVersion,
+        latencyMs: performance.now() - started,
+      });
+      return response(200, {
+        ok: false,
+        mode: "no_source",
+        reason: "invalid_math_context",
+        message: learnerMessage(locale, "no_source"),
+        academic_state_changed: false,
+      });
+    }
+
+    let card: any;
+    try {
+      card = await tutorCard(componentCode, skillCode, locale);
+    } catch {
+      card = null;
+    }
+
+    message = safeTutorText(card, preparedPrompt.variant);
+    if (!message) {
+      await recordAudit({
+        requestId,
+        userId: user.id,
+        subjectKey,
+        scopeCode,
+        interaction,
+        routeClass,
+        mode: "no_source",
+        reason: "prepared_source_missing",
+        adapterCode,
+        policyVersion,
+        latencyMs: performance.now() - started,
+      });
+      return response(200, {
+        ok: false,
+        mode: "no_source",
+        reason: "prepared_source_missing",
+        message: learnerMessage(locale, "no_source"),
+        academic_state_changed: false,
+      });
+    }
+  }
+
+  let reservation: any;
+  try {
+    reservation = await reserveUsage(requestId, user.id, usagePolicyCode, "prepared");
+  } catch {
+    reservation = null;
+  }
+
+  if (reservation?.allowed !== true) {
+    const reason = String(reservation?.reason || "usage_unavailable");
+    await recordAudit({
+      requestId,
+      userId: user.id,
+      subjectKey,
+      scopeCode,
+      interaction,
+      routeClass,
+      mode: "unavailable",
+      reason,
+      adapterCode,
+      policyVersion,
+      latencyMs: performance.now() - started,
+    });
+    return response(200, {
+      ok: false,
+      mode: "unavailable",
+      reason,
+      message: learnerMessage(locale, reason === "usage_exhausted" ? "usage_exhausted" : "unavailable"),
+      reset_at: reservation?.reset_at || null,
+      academic_state_changed: false,
+    });
+  }
+
+  let finalizedUsage: any = null;
+  try {
+    finalizedUsage = await finalizeUsage(requestId, "completed");
+    if (finalizedUsage?.ok !== true) throw new Error("usage_finalize_failed");
+  } catch {
+    try {
+      await finalizeUsage(requestId, "released", "delivery_not_finalized");
+    } catch {
+      // Leave service-side expiry as the final safety net.
+    }
+    await recordAudit({
+      requestId,
+      userId: user.id,
+      subjectKey,
+      scopeCode,
+      interaction,
+      routeClass,
+      mode: "failed",
+      reason: "usage_finalize_failed",
+      adapterCode,
+      policyVersion,
+      latencyMs: performance.now() - started,
+    });
+    return response(503, {
+      ok: false,
+      mode: "unavailable",
+      message: learnerMessage(locale, "unavailable"),
+      academic_state_changed: false,
+    });
+  }
+
+  const outputHash = await sha256(message);
+  await recordAudit({
+    requestId,
+    userId: user.id,
+    subjectKey,
+    scopeCode,
+    interaction,
+    routeClass,
+    mode: "prepared",
+    reason: null,
+    adapterCode,
+    policyVersion,
+    latencyMs: performance.now() - started,
+    outputHash,
+  });
+
+  return response(200, {
+    ok: true,
+    mode: "answer",
+    message,
+    usage_exhausted: finalizedUsage?.exhausted === true,
+    reset_at: finalizedUsage?.reset_at || null,
+    academic_state_changed: false,
+  });
+});
