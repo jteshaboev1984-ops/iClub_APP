@@ -228,11 +228,11 @@
         {
           "key": "B",
           "text": {
-            "en": "y=cos 4x",
-            "ru": "y=cos 4x",
-            "uz": "y=cos 4x"
+            "en": "y=cos(x/2)",
+            "ru": "y=cos(x/2)",
+            "uz": "y=cos(x/2)"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI01_PERIOD"
         },
         {
           "key": "C",
@@ -246,14 +246,14 @@
         {
           "key": "D",
           "text": {
-            "en": "y=cos(x/2)",
-            "ru": "y=cos(x/2)",
-            "uz": "y=cos(x/2)"
+            "en": "y=cos 4x",
+            "ru": "y=cos 4x",
+            "uz": "y=cos 4x"
           },
-          "diagnostic_code": "TRI01_PERIOD"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "D",
       "explanation": {
         "en": "For y=cos 4x, period=360°/4=90°.",
         "ru": "Для y=cos 4x период=360°/4=90°.",
@@ -426,20 +426,20 @@
         {
           "key": "B",
           "text": {
-            "en": "x=60°",
-            "ru": "x=60°",
-            "uz": "x=60°"
-          },
-          "diagnostic_code": "TRI01_TRANSLATION_SCALE"
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "x=120°",
             "ru": "x=120°",
             "uz": "x=120°"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=60°",
+            "ru": "x=60°",
+            "uz": "x=60°"
+          },
+          "diagnostic_code": "TRI01_TRANSLATION_SCALE"
         },
         {
           "key": "D",
@@ -451,7 +451,7 @@
           "diagnostic_code": "TRI01_TAN_ASYMPTOTE"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "B",
       "explanation": {
         "en": "tan u has an asymptote at u=90°. Set x−30°=90°, giving x=120°.",
         "ru": "tan u имеет асимптоту при u=90°. Из x−30°=90° получаем x=120°.",
