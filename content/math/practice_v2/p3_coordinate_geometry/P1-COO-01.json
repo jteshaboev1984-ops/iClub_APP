@@ -125,11 +125,11 @@
         {
           "key": "A",
           "text": {
-            "en": "y=2x+3",
-            "ru": "y=2x+3",
-            "uz": "y=2x+3"
+            "en": "y=−2x+7",
+            "ru": "y=−2x+7",
+            "uz": "y=−2x+7"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "COO01_GRADIENT_FROM_POINTS"
         },
         {
           "key": "B",
@@ -152,14 +152,14 @@
         {
           "key": "D",
           "text": {
-            "en": "y=−2x+7",
-            "ru": "y=−2x+7",
-            "uz": "y=−2x+7"
+            "en": "y=2x+3",
+            "ru": "y=2x+3",
+            "uz": "y=2x+3"
           },
-          "diagnostic_code": "COO01_GRADIENT_FROM_POINTS"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "The gradient is (11−5)/(4−1)=2. Using (1,5): 5=2(1)+c, so c=3 and y=2x+3.",
         "ru": "Градиент равен (11−5)/(4−1)=2. Используя (1,5): 5=2(1)+c, получаем c=3 и y=2x+3.",
@@ -228,20 +228,20 @@
         {
           "key": "A",
           "text": {
-            "en": "x−2y=−4",
-            "ru": "x−2y=−4",
-            "uz": "x−2y=−4"
-          },
-          "diagnostic_code": "COO01_GRADIENT_FROM_POINTS"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "x+2y=8",
             "ru": "x+2y=8",
             "uz": "x+2y=8"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x−2y=−4",
+            "ru": "x−2y=−4",
+            "uz": "x−2y=−4"
+          },
+          "diagnostic_code": "COO01_GRADIENT_FROM_POINTS"
         },
         {
           "key": "C",
@@ -262,7 +262,7 @@
           "diagnostic_code": "COO01_INTERCEPT"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "The gradient is (1−3)/(6−2)=−1/2. Through (2,3): y−3=−(1/2)(x−2). Rearranging gives x+2y=8.",
         "ru": "Градиент равен (1−3)/(6−2)=−1/2. Через (2,3): y−3=−(1/2)(x−2). После преобразования получаем x+2y=8.",
@@ -521,23 +521,23 @@
         {
           "key": "C",
           "text": {
-            "en": "5x+4y=30",
-            "ru": "5x+4y=30",
-            "uz": "5x+4y=30"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "4x−5y=−17",
             "ru": "4x−5y=−17",
             "uz": "4x−5y=−17"
           },
           "diagnostic_code": "COO01_LINE_FORM"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "5x+4y=30",
+            "ru": "5x+4y=30",
+            "uz": "5x+4y=30"
+          },
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "D",
       "explanation": {
         "en": "The x-intercept gives the point (6,0). The gradient through (2,5) and (6,0) is −5/4. Using point-slope form gives 5x+4y=30.",
         "ru": "x-перехват даёт точку (6,0). Градиент через (2,5) и (6,0) равен −5/4. По формуле точки и градиента получаем 5x+4y=30.",
