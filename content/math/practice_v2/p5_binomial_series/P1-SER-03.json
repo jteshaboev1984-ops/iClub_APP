@@ -132,20 +132,20 @@
         {
           "key": "A",
           "text": {
-            "en": "4",
-            "ru": "4",
-            "uz": "4"
-          },
-          "diagnostic_code": "SER03_N_MINUS_1"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "7",
             "ru": "7",
             "uz": "7"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "4",
+            "ru": "4",
+            "uz": "4"
+          },
+          "diagnostic_code": "SER03_N_MINUS_1"
         },
         {
           "key": "C",
@@ -166,7 +166,7 @@
           "diagnostic_code": "SER03_INVERSE"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "u₁₂=a+11d. Thus 40=a+33, so a=7.",
         "ru": "u₁₂=a+11d. Поэтому 40=a+33, откуда a=7.",
@@ -276,11 +276,11 @@
         {
           "key": "B",
           "text": {
-            "en": "650",
-            "ru": "650",
-            "uz": "650"
+            "en": "1300",
+            "ru": "1300",
+            "uz": "1300"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "SER03_INVERSE"
         },
         {
           "key": "C",
@@ -294,14 +294,14 @@
         {
           "key": "D",
           "text": {
-            "en": "1300",
-            "ru": "1300",
-            "uz": "1300"
+            "en": "650",
+            "ru": "650",
+            "uz": "650"
           },
-          "diagnostic_code": "SER03_INVERSE"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "D",
       "explanation": {
         "en": "S₂₀=20(4+61)/2=10·65=650.",
         "ru": "S₂₀=20(4+61)/2=10·65=650.",
@@ -412,20 +412,20 @@
         {
           "key": "B",
           "text": {
-            "en": "37",
-            "ru": "37",
-            "uz": "37"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "41",
             "ru": "41",
             "uz": "41"
           },
           "diagnostic_code": "SER03_N_MINUS_1"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "37",
+            "ru": "37",
+            "uz": "37"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -437,7 +437,7 @@
           "diagnostic_code": "SER03_SUM_FORMULA"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "u₁₀ lies halfway between u₇ and u₁₃ in term number, so its value is the average: (25+49)/2=37.",
         "ru": "u₁₀ находится посередине между u₇ и u₁₃ по номеру, поэтому его значение — среднее: (25+49)/2=37.",
