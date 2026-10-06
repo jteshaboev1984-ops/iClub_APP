@@ -504,4 +504,309 @@ revoke all on function public.get_iclub_my_subscription_status_v1() from public,
 grant execute on function public.get_iclub_my_subscription_status_v1()
   to authenticated,service_role;
 
+
+-- Product rollout rule: all learners resolve to Free by default; only a
+-- service-managed canary cohort may receive test-plan overrides before rollout.
+alter table private.iclub_global_ai_runtime_config
+  add column if not exists global_ai_rollout_mode text not null default 'off'
+    check (global_ai_rollout_mode in ('off','canary','all')),
+  add column if not exists plans_rollout_mode text not null default 'off'
+    check (plans_rollout_mode in ('off','canary','all'));
+
+create table if not exists private.iclub_product_canary_users (
+  user_id uuid primary key references public.users(id) on delete cascade,
+  enabled boolean not null default true,
+  test_plan_code text null references private.iclub_plan_policies(plan_code),
+  source text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  check (char_length(source) between 2 and 80)
+);
+
+alter table private.iclub_product_canary_users enable row level security;
+revoke all on private.iclub_product_canary_users from public,anon,authenticated;
+grant all on private.iclub_product_canary_users to service_role;
+
+create or replace function private.iclub_product_canary_limit_v1()
+returns trigger
+language plpgsql
+security definer
+set search_path=''
+as $
+declare
+  v_count integer;
+begin
+  if new.enabled then
+    select count(*) into v_count
+    from private.iclub_product_canary_users c
+    where c.enabled
+      and c.user_id<>new.user_id;
+
+    if v_count>=3 then
+      raise exception 'iClub canary cohort is limited to 3 enabled users';
+    end if;
+  end if;
+
+  new.updated_at:=now();
+  return new;
+end;
+$;
+
+drop trigger if exists trg_iclub_product_canary_limit_v1
+  on private.iclub_product_canary_users;
+
+create trigger trg_iclub_product_canary_limit_v1
+before insert or update on private.iclub_product_canary_users
+for each row execute function private.iclub_product_canary_limit_v1();
+
+create or replace function private.iclub_is_product_canary_v1(p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path=''
+as $
+  select exists(
+    select 1
+    from private.iclub_product_canary_users c
+    where c.user_id=p_user_id
+      and c.enabled
+  );
+$;
+
+revoke all on function private.iclub_is_product_canary_v1(uuid)
+  from public,anon,authenticated;
+grant execute on function private.iclub_is_product_canary_v1(uuid)
+  to service_role;
+
+create or replace function private.iclub_rollout_allows_user_v1(
+  p_user_id uuid,
+  p_rollout_mode text
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path=''
+as $
+  select case
+    when p_user_id is null then false
+    when p_rollout_mode='all' then true
+    when p_rollout_mode='canary' then private.iclub_is_product_canary_v1(p_user_id)
+    else false
+  end;
+$;
+
+revoke all on function private.iclub_rollout_allows_user_v1(uuid,text)
+  from public,anon,authenticated;
+grant execute on function private.iclub_rollout_allows_user_v1(uuid,text)
+  to service_role;
+
+create or replace function public.set_iclub_product_canary_service_v1(
+  p_user_id uuid,
+  p_enabled boolean,
+  p_test_plan_code text,
+  p_source text
+)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path=''
+as $
+declare
+  v_count integer;
+begin
+  if p_user_id is null or coalesce(length(trim(p_source)),0)<2 then
+    return jsonb_build_object('ok',false,'reason','invalid_request');
+  end if;
+
+  if not exists(select 1 from public.users where id=p_user_id) then
+    return jsonb_build_object('ok',false,'reason','user_not_found');
+  end if;
+
+  if p_test_plan_code is not null
+     and not exists(
+       select 1
+       from private.iclub_plan_policies p
+       where p.plan_code=p_test_plan_code
+         and p.is_active
+     ) then
+    return jsonb_build_object('ok',false,'reason','plan_unavailable');
+  end if;
+
+  if coalesce(p_enabled,false) then
+    select count(*) into v_count
+    from private.iclub_product_canary_users c
+    where c.enabled
+      and c.user_id<>p_user_id;
+
+    if v_count>=3 then
+      return jsonb_build_object('ok',false,'reason','canary_limit_reached','limit',3);
+    end if;
+  end if;
+
+  insert into private.iclub_product_canary_users(
+    user_id,enabled,test_plan_code,source,created_at,updated_at
+  ) values (
+    p_user_id,coalesce(p_enabled,false),p_test_plan_code,trim(p_source),now(),now()
+  )
+  on conflict(user_id) do update
+  set enabled=excluded.enabled,
+      test_plan_code=excluded.test_plan_code,
+      source=excluded.source,
+      updated_at=now();
+
+  return jsonb_build_object(
+    'ok',true,
+    'enabled',coalesce(p_enabled,false),
+    'test_plan_code',p_test_plan_code
+  );
+end;
+$;
+
+revoke all on function public.set_iclub_product_canary_service_v1(uuid,boolean,text,text)
+  from public,anon,authenticated;
+grant execute on function public.set_iclub_product_canary_service_v1(uuid,boolean,text,text)
+  to service_role;
+
+create or replace function public.get_iclub_subscription_capabilities_service_v1(
+  p_user_id uuid
+)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path=''
+as $
+declare
+  v_ent private.iclub_subscription_entitlements%rowtype;
+  v_plan private.iclub_plan_policies%rowtype;
+  v_test_plan text;
+  v_effective_plan text:='free';
+  v_source text:='default_free';
+begin
+  if p_user_id is null then
+    return jsonb_build_object('resolved',false,'reason','invalid_user');
+  end if;
+
+  if not exists(select 1 from public.users where id=p_user_id) then
+    return jsonb_build_object('resolved',false,'reason','user_not_found');
+  end if;
+
+  select * into v_ent
+  from private.iclub_subscription_entitlements
+  where user_id=p_user_id
+    and entitlement_status='active'
+    and (valid_from is null or valid_from<=now())
+    and (valid_until is null or valid_until>now());
+
+  if found then
+    v_effective_plan:=v_ent.plan_code;
+    v_source:='explicit_entitlement';
+  else
+    select c.test_plan_code into v_test_plan
+    from private.iclub_product_canary_users c
+    where c.user_id=p_user_id
+      and c.enabled;
+
+    if found and v_test_plan is not null then
+      v_effective_plan:=v_test_plan;
+      v_source:='canary_override';
+    end if;
+  end if;
+
+  select * into v_plan
+  from private.iclub_plan_policies
+  where plan_code=v_effective_plan
+    and is_active;
+
+  if not found then
+    return jsonb_build_object('resolved',false,'reason','plan_unavailable');
+  end if;
+
+  return jsonb_build_object(
+    'resolved',true,
+    'plan_code',v_plan.plan_code,
+    'plan_source',v_source,
+    'study_subject_limit',v_plan.study_subject_limit,
+    'all_available_subjects',v_plan.study_subject_limit is null,
+    'competitive_subject_limit',v_plan.competitive_subject_limit,
+    'ai_generation_entitled',v_plan.ai_generation_entitled,
+    'ai_usage_policy_code',v_plan.ai_usage_policy_code,
+    'priority_support',v_plan.priority_support,
+    'early_access_entitled',v_plan.early_access_entitled
+  );
+end;
+$;
+
+revoke all on function public.get_iclub_subscription_capabilities_service_v1(uuid)
+  from public,anon,authenticated;
+grant execute on function public.get_iclub_subscription_capabilities_service_v1(uuid)
+  to service_role;
+
+create or replace function public.get_iclub_my_subscription_status_v1()
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path=''
+as $
+declare
+  v_uid uuid:=auth.uid();
+  v_ent private.iclub_subscription_entitlements%rowtype;
+  v_caps jsonb;
+begin
+  if v_uid is null then
+    return jsonb_build_object('resolved',false,'reason','auth_required');
+  end if;
+
+  v_caps:=public.get_iclub_subscription_capabilities_service_v1(v_uid);
+  if coalesce((v_caps->>'resolved')::boolean,false) is not true then
+    return v_caps;
+  end if;
+
+  select * into v_ent
+  from private.iclub_subscription_entitlements
+  where user_id=v_uid
+    and entitlement_status='active'
+    and (valid_from is null or valid_from<=now())
+    and (valid_until is null or valid_until>now());
+
+  if not found then
+    return jsonb_build_object(
+      'resolved',true,
+      'plan_code',v_caps->>'plan_code',
+      'plan_source',v_caps->>'plan_source',
+      'status','active',
+      'valid_from',null,
+      'valid_until',null,
+      'current_period_start',null,
+      'current_period_end',null,
+      'cancel_at_period_end',false,
+      'scheduled_plan_code',null,
+      'scheduled_change_at',null
+    );
+  end if;
+
+  return jsonb_build_object(
+    'resolved',true,
+    'plan_code',v_ent.plan_code,
+    'plan_source','explicit_entitlement',
+    'status',v_ent.entitlement_status,
+    'valid_from',v_ent.valid_from,
+    'valid_until',v_ent.valid_until,
+    'current_period_start',v_ent.current_period_start,
+    'current_period_end',v_ent.current_period_end,
+    'cancel_at_period_end',v_ent.cancel_at_period_end,
+    'scheduled_plan_code',v_ent.scheduled_plan_code,
+    'scheduled_change_at',v_ent.scheduled_change_at
+  );
+end;
+$;
+
+revoke all on function public.get_iclub_my_subscription_status_v1() from public,anon;
+grant execute on function public.get_iclub_my_subscription_status_v1()
+  to authenticated,service_role;
+
 commit;
