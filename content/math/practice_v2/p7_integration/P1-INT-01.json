@@ -21,20 +21,20 @@
         {
           "key": "A",
           "text": {
-            "en": "2x⁴+C",
-            "ru": "2x⁴+C",
-            "uz": "2x⁴+C"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "8x⁴+C",
             "ru": "8x⁴+C",
             "uz": "8x⁴+C"
           },
           "diagnostic_code": "INT01_COEFFICIENT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2x⁴+C",
+            "ru": "2x⁴+C",
+            "uz": "2x⁴+C"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -55,7 +55,7 @@
           "diagnostic_code": "INT01_CONSTANT_C"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "Increase the power from 3 to 4, then divide by 4: ∫8x³ dx=8x⁴/4+C=2x⁴+C.",
         "ru": "Увеличиваем степень с 3 до 4 и делим на 4: ∫8x³ dx=8x⁴/4+C=2x⁴+C.",
@@ -82,11 +82,11 @@
         {
           "key": "A",
           "text": {
-            "en": "2x³−2x²+5x+C",
-            "ru": "2x³−2x²+5x+C",
-            "uz": "2x³−2x²+5x+C"
+            "en": "2x³−2x²+5x",
+            "ru": "2x³−2x²+5x",
+            "uz": "2x³−2x²+5x"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT01_CONSTANT_C"
         },
         {
           "key": "B",
@@ -109,14 +109,14 @@
         {
           "key": "D",
           "text": {
-            "en": "2x³−2x²+5x",
-            "ru": "2x³−2x²+5x",
-            "uz": "2x³−2x²+5x"
+            "en": "2x³−2x²+5x+C",
+            "ru": "2x³−2x²+5x+C",
+            "uz": "2x³−2x²+5x+C"
           },
-          "diagnostic_code": "INT01_CONSTANT_C"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "Integrate each term: 6x²→2x³, −4x→−2x² and 5→5x, then add C.",
         "ru": "Интегрируем по членам: 6x²→2x³, −4x→−2x², 5→5x, затем добавляем C.",
@@ -241,11 +241,11 @@
         {
           "key": "A",
           "text": {
-            "en": "−(5−2x)⁴/8+C",
-            "ru": "−(5−2x)⁴/8+C",
-            "uz": "−(5−2x)⁴/8+C"
+            "en": "−(5−2x)⁴/4+C",
+            "ru": "−(5−2x)⁴/4+C",
+            "uz": "−(5−2x)⁴/4+C"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT01_COEFFICIENT"
         },
         {
           "key": "B",
@@ -259,11 +259,11 @@
         {
           "key": "C",
           "text": {
-            "en": "−(5−2x)⁴/4+C",
-            "ru": "−(5−2x)⁴/4+C",
-            "uz": "−(5−2x)⁴/4+C"
+            "en": "−(5−2x)⁴/8+C",
+            "ru": "−(5−2x)⁴/8+C",
+            "uz": "−(5−2x)⁴/8+C"
           },
-          "diagnostic_code": "INT01_COEFFICIENT"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -275,7 +275,7 @@
           "diagnostic_code": "INT01_POWER_RULE"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "Raise the power to 4, divide by 4, then divide by the inner derivative −2. This gives −(5−2x)⁴/8+C.",
         "ru": "Увеличиваем степень до 4, делим на 4, затем на внутреннюю производную −2. Получаем −(5−2x)⁴/8+C.",
@@ -302,20 +302,20 @@
         {
           "key": "A",
           "text": {
-            "en": "(8/3)x^(3/2)+C",
-            "ru": "(8/3)x^(3/2)+C",
-            "uz": "(8/3)x^(3/2)+C"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "2x^(−1/2)+C",
             "ru": "2x^(−1/2)+C",
             "uz": "2x^(−1/2)+C"
           },
           "diagnostic_code": "INT01_POWER_RULE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(8/3)x^(3/2)+C",
+            "ru": "(8/3)x^(3/2)+C",
+            "uz": "(8/3)x^(3/2)+C"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -336,7 +336,7 @@
           "diagnostic_code": "INT01_COEFFICIENT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "4√x=4x^(1/2). Increase the power to 3/2 and divide by 3/2: 4·(2/3)x^(3/2)=(8/3)x^(3/2)+C.",
         "ru": "4√x=4x^(1/2). Увеличиваем степень до 3/2 и делим на 3/2: 4·(2/3)x^(3/2)=(8/3)x^(3/2)+C.",
@@ -363,11 +363,11 @@
         {
           "key": "A",
           "text": {
-            "en": "12√x+C",
-            "ru": "12√x+C",
-            "uz": "12√x+C"
+            "en": "−12x^(−1/2)+C",
+            "ru": "−12x^(−1/2)+C",
+            "uz": "−12x^(−1/2)+C"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT01_RATIONAL_POWER"
         },
         {
           "key": "B",
@@ -390,14 +390,14 @@
         {
           "key": "D",
           "text": {
-            "en": "−12x^(−1/2)+C",
-            "ru": "−12x^(−1/2)+C",
-            "uz": "−12x^(−1/2)+C"
+            "en": "12√x+C",
+            "ru": "12√x+C",
+            "uz": "12√x+C"
           },
-          "diagnostic_code": "INT01_RATIONAL_POWER"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "Increase −1/2 to 1/2 and divide by 1/2: 6x^(1/2)/(1/2)=12√x+C.",
         "ru": "Увеличиваем −1/2 до 1/2 и делим на 1/2: 6x^(1/2)/(1/2)=12√x+C.",
@@ -641,11 +641,11 @@
         {
           "key": "A",
           "text": {
-            "en": "(2x+3)⁴/2−2x³+C",
-            "ru": "(2x+3)⁴/2−2x³+C",
-            "uz": "(2x+3)⁴/2−2x³+C"
+            "en": "(2x+3)⁴/2−6x³+C",
+            "ru": "(2x+3)⁴/2−6x³+C",
+            "uz": "(2x+3)⁴/2−6x³+C"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT01_COEFFICIENT"
         },
         {
           "key": "B",
@@ -659,11 +659,11 @@
         {
           "key": "C",
           "text": {
-            "en": "(2x+3)⁴/2−6x³+C",
-            "ru": "(2x+3)⁴/2−6x³+C",
-            "uz": "(2x+3)⁴/2−6x³+C"
+            "en": "(2x+3)⁴/2−2x³+C",
+            "ru": "(2x+3)⁴/2−2x³+C",
+            "uz": "(2x+3)⁴/2−2x³+C"
           },
-          "diagnostic_code": "INT01_COEFFICIENT"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -675,7 +675,7 @@
           "diagnostic_code": "INT01_POWER_RULE"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "∫4(2x+3)³ dx=4(2x+3)⁴/(4·2)=(2x+3)⁴/2, and ∫−6x² dx=−2x³.",
         "ru": "∫4(2x+3)³ dx=4(2x+3)⁴/(4·2)=(2x+3)⁴/2, а ∫−6x² dx=−2x³.",
