@@ -1,0 +1,497 @@
+{
+  "version": "practice_v2_p2_functions_draft_v0.1",
+  "skill": "P1-FUN-03",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q087",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-03",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=x−3 and g(x)=x²+1. Which expression is f(g(x))?",
+        "ru": "Пусть f(x)=x−3 и g(x)=x²+1. Какое выражение равно f(g(x))?",
+        "uz": "f(x)=x−3 va g(x)=x²+1 bo‘lsin. f(g(x)) qaysi ifodaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(x−3)²+1",
+            "ru": "(x−3)²+1",
+            "uz": "(x−3)²+1"
+          },
+          "diagnostic_code": "FUN03_COMPOSITION_ORDER"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x²+4",
+            "ru": "x²+4",
+            "uz": "x²+4"
+          },
+          "diagnostic_code": "FUN03_SUBSTITUTION"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x²−3x+1",
+            "ru": "x²−3x+1",
+            "uz": "x²−3x+1"
+          },
+          "diagnostic_code": "FUN03_SUBSTITUTION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x²−2",
+            "ru": "x²−2",
+            "uz": "x²−2"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "Apply g first: g(x)=x²+1. Then f(g(x))=(x²+1)−3=x²−2.",
+        "ru": "Сначала применяем g: g(x)=x²+1. Затем f(g(x))=(x²+1)−3=x²−2.",
+        "uz": "Avval g ni qo‘llaymiz: g(x)=x²+1. So‘ng f(g(x))=(x²+1)−3=x²−2."
+      },
+      "ai_source_skill": "P1-FUN-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q088",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-03",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=2x+5 and g(x)=x²−1. Enter (f∘g)(2).",
+        "ru": "Пусть f(x)=2x+5 и g(x)=x²−1. Введите (f∘g)(2).",
+        "uz": "f(x)=2x+5 va g(x)=x²−1 bo‘lsin. (f∘g)(2) ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "11",
+        "accepted_examples": [
+          "11",
+          " 11 "
+        ],
+        "rejected_examples": [
+          "24",
+          "8",
+          "7"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "g(2)=4−1=3. Then f(3)=2(3)+5=11.",
+        "ru": "g(2)=4−1=3. Затем f(3)=2(3)+5=11.",
+        "uz": "g(2)=4−1=3. Keyin f(3)=2(3)+5=11."
+      },
+      "ai_source_skill": "P1-FUN-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q089",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-03",
+      "secondary_skills": [],
+      "role": "method_application",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=3x−2 and g(x)=1−x. Which expression is g(f(x))?",
+        "ru": "Пусть f(x)=3x−2 и g(x)=1−x. Какое выражение равно g(f(x))?",
+        "uz": "f(x)=3x−2 va g(x)=1−x bo‘lsin. g(f(x)) qaysi ifodaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3(1−x)−2",
+            "ru": "3(1−x)−2",
+            "uz": "3(1−x)−2"
+          },
+          "diagnostic_code": "FUN03_COMPOSITION_ORDER"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1−3x−2",
+            "ru": "1−3x−2",
+            "uz": "1−3x−2"
+          },
+          "diagnostic_code": "FUN03_SUBSTITUTION"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "3−3x",
+            "ru": "3−3x",
+            "uz": "3−3x"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−3x−1",
+            "ru": "−3x−1",
+            "uz": "−3x−1"
+          },
+          "diagnostic_code": "FUN03_SUBSTITUTION"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Substitute the whole expression f(x)=3x−2 into g: g(f(x))=1−(3x−2)=3−3x.",
+        "ru": "Подставляем всё выражение f(x)=3x−2 в g: g(f(x))=1−(3x−2)=3−3x.",
+        "uz": "f(x)=3x−2 ifodaning hammasini g ga qo‘yamiz: g(f(x))=1−(3x−2)=3−3x."
+      },
+      "ai_source_skill": "P1-FUN-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q090",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-03",
+      "secondary_skills": [],
+      "role": "application_variation",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=x²+2 and g(x)=2x−1. Enter (g∘f)(−2).",
+        "ru": "Пусть f(x)=x²+2 и g(x)=2x−1. Введите (g∘f)(−2).",
+        "uz": "f(x)=x²+2 va g(x)=2x−1 bo‘lsin. (g∘f)(−2) ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "11",
+        "accepted_examples": [
+          "11",
+          " 11 "
+        ],
+        "rejected_examples": [
+          "3",
+          "7",
+          "-11"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "f(−2)=4+2=6. Then g(6)=12−1=11.",
+        "ru": "f(−2)=4+2=6. Затем g(6)=12−1=11.",
+        "uz": "f(−2)=4+2=6. Keyin g(6)=12−1=11."
+      },
+      "ai_source_skill": "P1-FUN-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q091",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-03",
+      "secondary_skills": [],
+      "role": "misconception_trap",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=x² and g(x)=x+2. Which statement is true?",
+        "ru": "Пусть f(x)=x² и g(x)=x+2. Какое утверждение верно?",
+        "uz": "f(x)=x² va g(x)=x+2 bo‘lsin. Qaysi tasdiq to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "f(g(x))=(x+2)², while g(f(x))=x²+2.",
+            "ru": "f(g(x))=(x+2)², а g(f(x))=x²+2.",
+            "uz": "f(g(x))=(x+2)², g(f(x))=x²+2."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "f(g(x))=g(f(x)) for all x.",
+            "ru": "f(g(x))=g(f(x)) для всех x.",
+            "uz": "Barcha x lar uchun f(g(x))=g(f(x))."
+          },
+          "diagnostic_code": "FUN03_COMPOSITION_ORDER"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "f(g(x))=x²+2, while g(f(x))=(x+2)².",
+            "ru": "f(g(x))=x²+2, а g(f(x))=(x+2)².",
+            "uz": "f(g(x))=x²+2, g(f(x))=(x+2)²."
+          },
+          "diagnostic_code": "FUN03_COMPOSITION_ORDER"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Both compositions equal x²+4.",
+            "ru": "Обе композиции равны x²+4.",
+            "uz": "Ikkala kompozitsiya ham x²+4 ga teng."
+          },
+          "diagnostic_code": "FUN03_SUBSTITUTION"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Order matters. f(g(x)) squares the entire x+2, giving (x+2)². g(f(x)) adds 2 after squaring, giving x²+2.",
+        "ru": "Порядок важен. В f(g(x)) всё выражение x+2 возводится в квадрат: (x+2)². В g(f(x)) число 2 прибавляется после возведения x в квадрат: x²+2.",
+        "uz": "Tartib muhim. f(g(x)) da x+2 ning hammasi kvadratga ko‘tariladi: (x+2)². g(f(x)) da esa x kvadratga ko‘tarilgandan keyin 2 qo‘shiladi: x²+2."
+      },
+      "ai_source_skill": "P1-FUN-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q092",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-03",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=x+4 and g(x)=3x. If (f∘g)(a)=25, enter a.",
+        "ru": "Пусть f(x)=x+4 и g(x)=3x. Если (f∘g)(a)=25, введите a.",
+        "uz": "f(x)=x+4 va g(x)=3x bo‘lsin. Agar (f∘g)(a)=25 bo‘lsa, a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "7",
+        "accepted_examples": [
+          "7",
+          " 7 "
+        ],
+        "rejected_examples": [
+          "3",
+          "21",
+          "29"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "(f∘g)(a)=f(3a)=3a+4. So 3a+4=25, giving a=7.",
+        "ru": "(f∘g)(a)=f(3a)=3a+4. Поэтому 3a+4=25, откуда a=7.",
+        "uz": "(f∘g)(a)=f(3a)=3a+4. Demak 3a+4=25 va a=7."
+      },
+      "ai_source_skill": "P1-FUN-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q093",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-03",
+      "secondary_skills": [],
+      "role": "domain_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=√(5−x) and g(x)=2x+1. What is the domain of f(g(x))?",
+        "ru": "Пусть f(x)=√(5−x) и g(x)=2x+1. Какова область определения f(g(x))?",
+        "uz": "f(x)=√(5−x) va g(x)=2x+1 bo‘lsin. f(g(x)) ning aniqlanish sohasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x≥2",
+            "ru": "x≥2",
+            "uz": "x≥2"
+          },
+          "diagnostic_code": "FUN03_RESTRICTION_DIRECTION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x≤2",
+            "ru": "x≤2",
+            "uz": "x≤2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x≤5",
+            "ru": "x≤5",
+            "uz": "x≤5"
+          },
+          "diagnostic_code": "FUN03_DOMAIN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "All real x",
+            "ru": "Все действительные x",
+            "uz": "Barcha haqiqiy x"
+          },
+          "diagnostic_code": "FUN03_DOMAIN"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "For f(g(x)) to be real, 5−g(x)≥0. Thus 5−(2x+1)≥0, so 4−2x≥0 and x≤2.",
+        "ru": "Чтобы f(g(x)) была действительной, нужно 5−g(x)≥0. Значит 5−(2x+1)≥0, то есть 4−2x≥0 и x≤2.",
+        "uz": "f(g(x)) haqiqiy bo‘lishi uchun 5−g(x)≥0. Demak 5−(2x+1)≥0, ya’ni 4−2x≥0 va x≤2."
+      },
+      "ai_source_skill": "P1-FUN-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q094",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-03",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=x²−1 and g(x)=x+3. Enter f(g(−4))+g(f(2)).",
+        "ru": "Пусть f(x)=x²−1 и g(x)=x+3. Введите f(g(−4))+g(f(2)).",
+        "uz": "f(x)=x²−1 va g(x)=x+3 bo‘lsin. f(g(−4))+g(f(2)) ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "6",
+        "accepted_examples": [
+          "6",
+          " 6 "
+        ],
+        "rejected_examples": [
+          "3",
+          "9",
+          "0"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "g(−4)=−1, so f(g(−4))=f(−1)=0. Also f(2)=3, so g(f(2))=g(3)=6. The sum is 6.",
+        "ru": "g(−4)=−1, поэтому f(g(−4))=f(−1)=0. Также f(2)=3, поэтому g(f(2))=g(3)=6. Сумма равна 6.",
+        "uz": "g(−4)=−1, shuning uchun f(g(−4))=f(−1)=0. Yana f(2)=3, demak g(f(2))=g(3)=6. Yig‘indi 6."
+      },
+      "ai_source_skill": "P1-FUN-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q095",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-03",
+      "secondary_skills": [],
+      "role": "domain_interpretation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let g(x)=1/(x−2) and f(x)=x+1. Which x-value must be excluded from the domain of f(g(x))?",
+        "ru": "Пусть g(x)=1/(x−2) и f(x)=x+1. Какое значение x нужно исключить из области определения f(g(x))?",
+        "uz": "g(x)=1/(x−2) va f(x)=x+1 bo‘lsin. f(g(x)) aniqlanish sohasidan qaysi x qiymatini chiqarish kerak?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−1",
+            "ru": "−1",
+            "uz": "−1"
+          },
+          "diagnostic_code": "FUN03_DOMAIN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "0",
+            "ru": "0",
+            "uz": "0"
+          },
+          "diagnostic_code": "FUN03_DOMAIN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1",
+            "ru": "1",
+            "uz": "1"
+          },
+          "diagnostic_code": "FUN03_DOMAIN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "The inner function g is undefined at x=2. The outer linear function f accepts every real input, so the only excluded value is x=2.",
+        "ru": "Внутренняя функция g не определена при x=2. Внешняя линейная функция f принимает любое действительное значение, поэтому исключается только x=2.",
+        "uz": "Ichki g funksiya x=2 da aniqlanmagan. Tashqi chiziqli f har qanday haqiqiy kirishni qabul qiladi, shuning uchun faqat x=2 chiqariladi."
+      },
+      "ai_source_skill": "P1-FUN-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q096",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-03",
+      "secondary_skills": [],
+      "role": "reverse_transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=2x−1 and g(x)=x². If a>0 and g(f(a))=25, enter a.",
+        "ru": "Пусть f(x)=2x−1 и g(x)=x². Если a>0 и g(f(a))=25, введите a.",
+        "uz": "f(x)=2x−1 va g(x)=x² bo‘lsin. Agar a>0 va g(f(a))=25 bo‘lsa, a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "-2",
+          "2",
+          "13"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "g(f(a))=(2a−1)²=25. Thus 2a−1=±5, giving a=3 or a=−2. The condition a>0 selects a=3.",
+        "ru": "g(f(a))=(2a−1)²=25. Значит 2a−1=±5, откуда a=3 или a=−2. Условие a>0 оставляет a=3.",
+        "uz": "g(f(a))=(2a−1)²=25. Demak 2a−1=±5, bundan a=3 yoki a=−2. a>0 sharti a=3 ni tanlaydi."
+      },
+      "ai_source_skill": "P1-FUN-03",
+      "status": "draft"
+    }
+  ]
+}
