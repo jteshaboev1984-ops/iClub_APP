@@ -348,53 +348,53 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "The line y = 2x + 3 is tangent to the curve y = x² − 4x + k. Find k.",
-        "ru": "Прямая y = 2x + 3 касается кривой y = x² − 4x + k. Найдите k.",
-        "uz": "y = 2x + 3 chiziq y = x² − 4x + k egri chizig‘iga urinadi. k ni toping."
+        "en": "The curve y = x² + ax + 7 is tangent to the horizontal line y = 3. Which values of a are possible?",
+        "ru": "Кривая y = x² + ax + 7 касается горизонтальной прямой y = 3. Какие значения a возможны?",
+        "uz": "y = x² + ax + 7 egri chizig‘i y = 3 gorizontal chiziqqa urinadi. a ning qaysi qiymatlari mumkin?"
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "12",
-            "ru": "12",
-            "uz": "12"
+            "en": "a = 4 or a = −4",
+            "ru": "a = 4 или a = −4",
+            "uz": "a = 4 yoki a = −4"
           },
           "diagnostic_code": null
         },
         {
           "key": "B",
           "text": {
-            "en": "9",
-            "ru": "9",
-            "uz": "9"
+            "en": "a = 4 only",
+            "ru": "Только a = 4",
+            "uz": "Faqat a = 4"
           },
           "diagnostic_code": "QUA05_TANGENCY_CONDITION"
         },
         {
           "key": "C",
           "text": {
-            "en": "3",
-            "ru": "3",
-            "uz": "3"
+            "en": "a = 2 or a = −2",
+            "ru": "a = 2 или a = −2",
+            "uz": "a = 2 yoki a = −2"
           },
-          "diagnostic_code": "QUA05_SUBSTITUTION_SETUP"
+          "diagnostic_code": "QUA05_TANGENCY_CONDITION"
         },
         {
           "key": "D",
           "text": {
-            "en": "15",
-            "ru": "15",
-            "uz": "15"
+            "en": "a = −4 only",
+            "ru": "Только a = −4",
+            "uz": "Faqat a = −4"
           },
           "diagnostic_code": "QUA05_TANGENCY_CONDITION"
         }
       ],
       "correct_answer": "A",
       "explanation": {
-        "en": "At an intersection, x² − 4x + k = 2x + 3, so x² − 6x + k − 3 = 0. Tangency means a repeated root: 36 − 4(k − 3) = 0. Hence k = 12.",
-        "ru": "В точке пересечения x² − 4x + k = 2x + 3, поэтому x² − 6x + k − 3 = 0. Касание означает кратный корень: 36 − 4(k − 3) = 0. Отсюда k = 12.",
-        "uz": "Kesishishda x² − 4x + k = 2x + 3, demak x² − 6x + k − 3 = 0. Urinish takroriy ildizni anglatadi: 36 − 4(k − 3) = 0. Shundan k = 12."
+        "en": "At tangency, x² + ax + 7 = 3 has a repeated root. So x² + ax + 4 = 0 must have discriminant zero: a² − 16 = 0. Hence a = 4 or a = −4.",
+        "ru": "В точке касания уравнение x² + ax + 7 = 3 имеет кратный корень. Значит, для x² + ax + 4 = 0 дискриминант равен нулю: a² − 16 = 0. Поэтому a = 4 или a = −4.",
+        "uz": "Urinish nuqtasida x² + ax + 7 = 3 tenglama takroriy ildizga ega. Demak x² + ax + 4 = 0 uchun diskriminant nol: a² − 16 = 0. Shuning uchun a = 4 yoki a = −4."
       },
       "ai_source_skill": "P1-QUA-05",
       "status": "draft"
