@@ -329,9 +329,9 @@
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "Let the width be w, so the length is w + 2. Then w(w + 2) = 48, giving w² + 2w − 48 = 0 = (w + 8)(w − 6). A length must be positive, so w = 6.",
-        "ru": "Пусть ширина w, тогда длина w + 2. Имеем w(w + 2) = 48, то есть w² + 2w − 48 = 0 = (w + 8)(w − 6). Длина должна быть положительной, поэтому w = 6.",
-        "uz": "Enini w desak, uzunlik w + 2. w(w + 2) = 48, ya’ni w² + 2w − 48 = 0 = (w + 8)(w − 6). Uzunlik musbat bo‘lishi kerak, demak w = 6."
+        "en": "Let the width be w, so the length is w + 2. Then w(w + 2) = 48, giving w² + 2w − 48 = 0 = (w + 8)(w − 6). The width must be positive, so w = 6.",
+        "ru": "Пусть ширина равна w, тогда длина равна w + 2. Имеем w(w + 2) = 48, то есть w² + 2w − 48 = 0 = (w + 8)(w − 6). Ширина должна быть положительной, поэтому w = 6.",
+        "uz": "Enini w desak, uzunlik w + 2. w(w + 2) = 48, ya’ni w² + 2w − 48 = 0 = (w + 8)(w − 6). En musbat bo‘lishi kerak, demak w = 6."
       },
       "ai_source_skill": "P1-QUA-05",
       "status": "draft"
