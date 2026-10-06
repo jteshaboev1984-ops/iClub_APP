@@ -23,12 +23,12 @@ assert(
   'gateway does not derive route class server-side'
 );
 
-const guardCall = edge.indexOf('get_iclub_global_ai_guard_service_v1');
-const tutorCall = edge.indexOf('get_exam_prep_ai_tutor_card_service_v1');
-const reserveCall = edge.indexOf('reserve_iclub_ai_usage_service_v1');
-const finalizeCall = edge.indexOf('finalize_iclub_ai_usage_service_v1');
+const guardCall = edge.indexOf('guard = await rpc("get_iclub_global_ai_guard_service_v1"');
+const tutorCall = edge.indexOf('card = await tutorCard(', guardCall);
+const reserveCall = edge.indexOf('reservation = await reserveUsage(', tutorCall);
+const finalizeCall = edge.indexOf('const finalized = await finalizeUsage(', reserveCall);
 
-assert(guardCall >= 0, 'global guard call missing');
+assert(guardCall >= 0, 'global guard invocation missing');
 assert(tutorCall > guardCall, 'Tutor source lookup must occur after global guard');
 assert(reserveCall > tutorCall, 'usage reservation must occur only after prepared source is confirmed');
 assert(finalizeCall > reserveCall, 'usage finalization must follow reservation');
