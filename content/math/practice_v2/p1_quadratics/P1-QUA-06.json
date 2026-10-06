@@ -25,7 +25,7 @@
             "ru": "y = x",
             "uz": "y = x"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_STRUCTURE"
+          "diagnostic_code": "QUA06_SUBSTITUTION_CHOICE"
         },
         {
           "key": "B",
@@ -34,7 +34,7 @@
             "ru": "y = x⁴",
             "uz": "y = x⁴"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_STRUCTURE"
+          "diagnostic_code": "QUA06_SUBSTITUTION_CHOICE"
         },
         {
           "key": "C",
@@ -52,7 +52,7 @@
             "ru": "y = √x",
             "uz": "y = √x"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_STRUCTURE"
+          "diagnostic_code": "QUA06_SUBSTITUTION_CHOICE"
         }
       ],
       "correct_answer": "C",
@@ -123,7 +123,7 @@
             "ru": "x = −2 и x = 1",
             "uz": "x = −2 va x = 1"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_BACKSUB_CUBE"
+          "diagnostic_code": "QUA06_BACK_SUBSTITUTION"
         },
         {
           "key": "B",
@@ -141,7 +141,7 @@
             "ru": "x = −8 и x = 1",
             "uz": "x = −8 va x = 1"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_BACKSUB_CUBE"
+          "diagnostic_code": "QUA06_BACK_SUBSTITUTION"
         },
         {
           "key": "D",
@@ -150,7 +150,7 @@
             "ru": "x = −1 и x = 8",
             "uz": "x = −1 va x = 8"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_BACKSUB_CUBE"
+          "diagnostic_code": "QUA06_BACK_SUBSTITUTION"
         }
       ],
       "correct_answer": "B",
@@ -193,7 +193,7 @@
             "ru": "x = ±√3 и x = ±1/√2",
             "uz": "x = ±√3 va x = ±1/√2"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_NEGATIVE_BRANCH"
+          "diagnostic_code": "QUA06_DOMAIN_RESTRICTION"
         },
         {
           "key": "C",
@@ -202,7 +202,7 @@
             "ru": "x = 3 и x = −1/2",
             "uz": "x = 3 va x = −1/2"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_BACKSUB_SQUARE"
+          "diagnostic_code": "QUA06_BACK_SUBSTITUTION"
         },
         {
           "key": "D",
@@ -211,7 +211,7 @@
             "ru": "Действительных решений нет",
             "uz": "Haqiqiy yechimlar yo‘q"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_BRANCH_LOSS"
+          "diagnostic_code": "QUA06_BACK_SUBSTITUTION"
         }
       ],
       "correct_answer": "A",
@@ -245,7 +245,7 @@
             "ru": "x⁶ + x² − 2 = 0",
             "uz": "x⁶ + x² − 2 = 0"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_STRUCTURE"
+          "diagnostic_code": "QUA06_SUBSTITUTION_CHOICE"
         },
         {
           "key": "B",
@@ -254,7 +254,7 @@
             "ru": "x⁹ + x³ − 2 = 0",
             "uz": "x⁹ + x³ − 2 = 0"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_STRUCTURE"
+          "diagnostic_code": "QUA06_SUBSTITUTION_CHOICE"
         },
         {
           "key": "C",
@@ -272,7 +272,7 @@
             "ru": "x⁶ + x⁴ + 1 = 0",
             "uz": "x⁶ + x⁴ + 1 = 0"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_STRUCTURE"
+          "diagnostic_code": "QUA06_SUBSTITUTION_CHOICE"
         }
       ],
       "correct_answer": "C",
@@ -343,7 +343,7 @@
             "ru": "4",
             "uz": "4"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_NEGATIVE_BRANCH"
+          "diagnostic_code": "QUA06_DOMAIN_RESTRICTION"
         },
         {
           "key": "B",
@@ -352,7 +352,7 @@
             "ru": "2",
             "uz": "2"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_NEGATIVE_BRANCH"
+          "diagnostic_code": "QUA06_DOMAIN_RESTRICTION"
         },
         {
           "key": "C",
@@ -361,7 +361,7 @@
             "ru": "1 кратный корень",
             "uz": "1 ta takroriy ildiz"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_DISCRIMINANT"
+          "diagnostic_code": "QUA06_ROOT_COUNT"
         },
         {
           "key": "D",
@@ -413,7 +413,7 @@
             "ru": "1",
             "uz": "1"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_PLUS_MINUS_LOSS"
+          "diagnostic_code": "QUA06_BACK_SUBSTITUTION"
         },
         {
           "key": "C",
@@ -422,7 +422,7 @@
             "ru": "3",
             "uz": "3"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_COUNT"
+          "diagnostic_code": "QUA06_ROOT_COUNT"
         },
         {
           "key": "D",
@@ -431,7 +431,7 @@
             "ru": "4",
             "uz": "4"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_COUNT"
+          "diagnostic_code": "QUA06_ROOT_COUNT"
         }
       ],
       "correct_answer": "A",
@@ -465,7 +465,7 @@
             "ru": "1",
             "uz": "1"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_BRANCH_LOSS"
+          "diagnostic_code": "QUA06_BACK_SUBSTITUTION"
         },
         {
           "key": "B",
@@ -483,7 +483,7 @@
             "ru": "3",
             "uz": "3"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_COUNT"
+          "diagnostic_code": "QUA06_ROOT_COUNT"
         },
         {
           "key": "D",
@@ -492,7 +492,7 @@
             "ru": "4",
             "uz": "4"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_PLUS_MINUS_OVERCOUNT"
+          "diagnostic_code": "QUA06_ROOT_COUNT"
         }
       ],
       "correct_answer": "B",
@@ -528,7 +528,7 @@
             "ru": "8",
             "uz": "8"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_REPEAT_SIGN"
+          "diagnostic_code": "QUA06_PARAMETER_REPEAT"
         },
         {
           "key": "B",
@@ -537,7 +537,7 @@
             "ru": "−4",
             "uz": "−4"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_REPEAT_COEFF"
+          "diagnostic_code": "QUA06_PARAMETER_REPEAT"
         },
         {
           "key": "C",
@@ -546,7 +546,7 @@
             "ru": "4",
             "uz": "4"
           },
-          "diagnostic_code": "QUA_TRANSFORMED_REPEAT_COEFF"
+          "diagnostic_code": "QUA06_PARAMETER_REPEAT"
         },
         {
           "key": "D",
