@@ -1,0 +1,659 @@
+{
+  "version": "practice_v2_p1_quadratics_draft_v0.1",
+  "skill": "P1-QUA-02",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q011",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-02",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "How many distinct real roots does 2x² − 5x − 3 = 0 have?",
+        "ru": "Сколько различных действительных корней имеет уравнение 2x² − 5x − 3 = 0?",
+        "uz": "2x² − 5x − 3 = 0 tenglama nechta turli haqiqiy ildizga ega?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1 repeated root",
+            "ru": "1 кратный корень",
+            "uz": "1 ta takroriy ildiz"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_ZERO_INTERPRET"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "0",
+            "ru": "0",
+            "uz": "0"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_SIGN_INTERPRET"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Cannot be determined",
+            "ru": "Нельзя определить",
+            "uz": "Aniqlab bo‘lmaydi"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_NOT_USED"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The discriminant is (−5)² − 4(2)(−3) = 25 + 24 = 49 > 0. Therefore there are two distinct real roots.",
+        "ru": "Дискриминант равен (−5)² − 4(2)(−3) = 25 + 24 = 49 > 0. Поэтому есть два различных действительных корня.",
+        "uz": "Diskriminant (−5)² − 4(2)(−3) = 25 + 24 = 49 > 0. Demak ikkita turli haqiqiy ildiz bor."
+      },
+      "ai_source_skill": "P1-QUA-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q012",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-02",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The equation x² − 8x + k = 0 has a repeated root. Find k.",
+        "ru": "Уравнение x² − 8x + k = 0 имеет кратный корень. Найдите k.",
+        "uz": "x² − 8x + k = 0 tenglama takroriy ildizga ega. k ni toping."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "16",
+        "accepted_examples": [
+          "16",
+          " 16 "
+        ],
+        "rejected_examples": [
+          "8",
+          "32",
+          "-16"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "A repeated root requires b² − 4ac = 0. So 64 − 4k = 0, giving k = 16.",
+        "ru": "Для кратного корня нужно b² − 4ac = 0. Поэтому 64 − 4k = 0, откуда k = 16.",
+        "uz": "Takroriy ildiz uchun b² − 4ac = 0 bo‘lishi kerak. 64 − 4k = 0, demak k = 16."
+      },
+      "ai_source_skill": "P1-QUA-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q013",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-02",
+      "secondary_skills": [],
+      "role": "condition_reasoning",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "For which values of p does x² + 4x + p = 0 have no real roots?",
+        "ru": "При каких значениях p уравнение x² + 4x + p = 0 не имеет действительных корней?",
+        "uz": "Qaysi p qiymatlarida x² + 4x + p = 0 tenglama haqiqiy ildizga ega emas?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "p < 4",
+            "ru": "p < 4",
+            "uz": "p < 4"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_CONDITION_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "p ≤ 4",
+            "ru": "p ≤ 4",
+            "uz": "p ≤ 4"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_STRICTNESS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "p ≥ 4",
+            "ru": "p ≥ 4",
+            "uz": "p ≥ 4"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_STRICTNESS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "p > 4",
+            "ru": "p > 4",
+            "uz": "p > 4"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "No real roots means b² − 4ac < 0. Here 16 − 4p < 0, so p > 4.",
+        "ru": "Отсутствие действительных корней означает b² − 4ac < 0. Здесь 16 − 4p < 0, поэтому p > 4.",
+        "uz": "Haqiqiy ildiz bo‘lmasligi uchun b² − 4ac < 0. Bu yerda 16 − 4p < 0, shuning uchun p > 4."
+      },
+      "ai_source_skill": "P1-QUA-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q014",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-02",
+      "secondary_skills": [],
+      "role": "parameter_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Given k > 0, for which values of k does kx² + 6x + k = 0 have two distinct real roots?",
+        "ru": "При k > 0 для каких значений k уравнение kx² + 6x + k = 0 имеет два различных действительных корня?",
+        "uz": "k > 0 bo‘lsa, qaysi k qiymatlarida kx² + 6x + k = 0 tenglama ikkita turli haqiqiy ildizga ega?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "k > 3",
+            "ru": "k > 3",
+            "uz": "k > 3"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_CONDITION_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "0 < k < 3",
+            "ru": "0 < k < 3",
+            "uz": "0 < k < 3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "k = 3",
+            "ru": "k = 3",
+            "uz": "k = 3"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_ZERO_INTERPRET"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "k ≥ 3",
+            "ru": "k ≥ 3",
+            "uz": "k ≥ 3"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_STRICTNESS"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Two distinct real roots require 36 − 4k² > 0. Thus k² < 9. With k > 0, this gives 0 < k < 3.",
+        "ru": "Для двух различных действительных корней нужно 36 − 4k² > 0. Значит k² < 9. С учётом k > 0 получаем 0 < k < 3.",
+        "uz": "Ikkita turli haqiqiy ildiz uchun 36 − 4k² > 0. Demak k² < 9. k > 0 bo‘lgani uchun 0 < k < 3."
+      },
+      "ai_source_skill": "P1-QUA-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q015",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-02",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The equation 3x² + mx + 12 = 0 has a repeated root and m < 0. Find m.",
+        "ru": "Уравнение 3x² + mx + 12 = 0 имеет кратный корень, причём m < 0. Найдите m.",
+        "uz": "3x² + mx + 12 = 0 tenglama takroriy ildizga ega va m < 0. m ni toping."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-12",
+        "accepted_examples": [
+          "-12",
+          "−12",
+          " -12 "
+        ],
+        "rejected_examples": [
+          "12",
+          "-6",
+          "144"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "12",
+          "diagnostic_code": "QUA_PARAMETER_SIGN_CONDITION"
+        }
+      ],
+      "explanation": {
+        "en": "Repeated roots give m² − 4(3)(12) = 0, so m² = 144 and m = ±12. The condition m < 0 selects m = −12.",
+        "ru": "Для кратного корня m² − 4(3)(12) = 0, поэтому m² = 144 и m = ±12. Условие m < 0 даёт m = −12.",
+        "uz": "Takroriy ildiz uchun m² − 4(3)(12) = 0. Demak m² = 144 va m = ±12. m < 0 sharti bo‘yicha m = −12."
+      },
+      "ai_source_skill": "P1-QUA-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q016",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-02",
+      "secondary_skills": [],
+      "role": "misconception_trap",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Which equation has no real roots?",
+        "ru": "Какое уравнение не имеет действительных корней?",
+        "uz": "Qaysi tenglama haqiqiy ildizga ega emas?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2x² + 4x + 5 = 0",
+            "ru": "2x² + 4x + 5 = 0",
+            "uz": "2x² + 4x + 5 = 0"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x² − 5x + 6 = 0",
+            "ru": "x² − 5x + 6 = 0",
+            "uz": "x² − 5x + 6 = 0"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_RECHECK"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x² + 6x + 9 = 0",
+            "ru": "x² + 6x + 9 = 0",
+            "uz": "x² + 6x + 9 = 0"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_ZERO_INTERPRET"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "3x² − x − 2 = 0",
+            "ru": "3x² − x − 2 = 0",
+            "uz": "3x² − x − 2 = 0"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_RECHECK"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "For 2x² + 4x + 5 = 0, the discriminant is 16 − 40 = −24 < 0. The other three equations have discriminants 1, 0 and 25 respectively.",
+        "ru": "Для 2x² + 4x + 5 = 0 дискриминант равен 16 − 40 = −24 < 0. У остальных трёх уравнений дискриминанты равны 1, 0 и 25.",
+        "uz": "2x² + 4x + 5 = 0 uchun diskriminant 16 − 40 = −24 < 0. Qolgan uch tenglamaning diskriminantlari mos ravishda 1, 0 va 25."
+      },
+      "ai_source_skill": "P1-QUA-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q017",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-02",
+      "secondary_skills": [],
+      "role": "parameter_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The equation x² + (k − 1)x + k = 0 has equal roots. Which values of k are possible?",
+        "ru": "Уравнение x² + (k − 1)x + k = 0 имеет равные корни. Какие значения k возможны?",
+        "uz": "x² + (k − 1)x + k = 0 tenglama teng ildizlarga ega. k ning qaysi qiymatlari mumkin?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "k = 3 ± √2",
+            "ru": "k = 3 ± √2",
+            "uz": "k = 3 ± √2"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_ALGEBRA"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "k = 1 ± 2√2",
+            "ru": "k = 1 ± 2√2",
+            "uz": "k = 1 ± 2√2"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_ALGEBRA"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "k = 3 ± √8",
+            "ru": "k = 3 ± √8",
+            "uz": "k = 3 ± √8"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_ALGEBRA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "k = 3 ± 2√2",
+            "ru": "k = 3 ± 2√2",
+            "uz": "k = 3 ± 2√2"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "Equal roots require (k − 1)² − 4k = 0. This gives k² − 6k + 1 = 0, so k = (6 ± √32)/2 = 3 ± 2√2.",
+        "ru": "Для равных корней нужно (k − 1)² − 4k = 0. Получаем k² − 6k + 1 = 0, поэтому k = (6 ± √32)/2 = 3 ± 2√2.",
+        "uz": "Teng ildizlar uchun (k − 1)² − 4k = 0. Bundan k² − 6k + 1 = 0 va k = (6 ± √32)/2 = 3 ± 2√2."
+      },
+      "ai_source_skill": "P1-QUA-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q018",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-02",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The equation 2x² + px + 8 = 0 has a repeated root and p > 0. Find p.",
+        "ru": "Уравнение 2x² + px + 8 = 0 имеет кратный корень, причём p > 0. Найдите p.",
+        "uz": "2x² + px + 8 = 0 tenglama takroriy ildizga ega va p > 0. p ni toping."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "8",
+        "accepted_examples": [
+          "8",
+          " 8 "
+        ],
+        "rejected_examples": [
+          "-8",
+          "4",
+          "64"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-8",
+          "diagnostic_code": "QUA_PARAMETER_SIGN_CONDITION"
+        }
+      ],
+      "explanation": {
+        "en": "Repeated roots give p² − 4(2)(8) = 0, so p² = 64 and p = ±8. Since p > 0, p = 8.",
+        "ru": "Для кратного корня p² − 4(2)(8) = 0, значит p² = 64 и p = ±8. Так как p > 0, p = 8.",
+        "uz": "Takroriy ildiz uchun p² − 4(2)(8) = 0. Demak p² = 64 va p = ±8. p > 0 bo‘lgani uchun p = 8."
+      },
+      "ai_source_skill": "P1-QUA-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q019",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-02",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "concept_interpretation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "A quadratic y = ax² + bx + c has a > 0 and b² − 4ac < 0. Which statement must be true?",
+        "ru": "Для квадратичной функции y = ax² + bx + c известно, что a > 0 и b² − 4ac < 0. Какое утверждение обязательно верно?",
+        "uz": "y = ax² + bx + c kvadrat funksiyada a > 0 va b² − 4ac < 0. Qaysi tasdiq albatta to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "The graph crosses the x-axis twice.",
+            "ru": "График дважды пересекает ось x.",
+            "uz": "Grafik x o‘qini ikki marta kesadi."
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_SIGN_INTERPRET"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "The graph touches the x-axis once.",
+            "ru": "График один раз касается оси x.",
+            "uz": "Grafik x o‘qiga bir marta urinadi."
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_ZERO_INTERPRET"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "The graph lies above the x-axis for all real x.",
+            "ru": "График лежит выше оси x для всех действительных x.",
+            "uz": "Grafik barcha haqiqiy x lar uchun x o‘qidan yuqorida yotadi."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "The graph lies below the x-axis for all real x.",
+            "ru": "График лежит ниже оси x для всех действительных x.",
+            "uz": "Grafik barcha haqiqiy x lar uchun x o‘qidan pastda yotadi."
+          },
+          "diagnostic_code": "QUA_PARABOLA_DIRECTION"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "A negative discriminant means the graph never meets the x-axis. Since a > 0, the parabola opens upward, so it must stay above the x-axis.",
+        "ru": "Отрицательный дискриминант означает, что график не пересекает ось x. Так как a > 0, парабола направлена вверх и целиком лежит выше оси x.",
+        "uz": "Manfiy diskriminant grafik x o‘qini kesmasligini bildiradi. a > 0 bo‘lgani uchun parabola yuqoriga ochiladi va x o‘qidan yuqorida qoladi."
+      },
+      "ai_source_skill": "P1-QUA-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q020",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-02",
+      "secondary_skills": [],
+      "role": "parameter_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "For which values of k does x² − 2(k + 1)x + k² + 1 = 0 have two distinct real roots?",
+        "ru": "При каких значениях k уравнение x² − 2(k + 1)x + k² + 1 = 0 имеет два различных действительных корня?",
+        "uz": "Qaysi k qiymatlarida x² − 2(k + 1)x + k² + 1 = 0 tenglama ikkita turli haqiqiy ildizga ega?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "k < 0",
+            "ru": "k < 0",
+            "uz": "k < 0"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_CONDITION_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "k > 0",
+            "ru": "k > 0",
+            "uz": "k > 0"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "k = 0",
+            "ru": "k = 0",
+            "uz": "k = 0"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_ZERO_INTERPRET"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "All real k",
+            "ru": "Все действительные k",
+            "uz": "Barcha haqiqiy k"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_NOT_USED"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The discriminant is 4(k + 1)² − 4(k² + 1) = 8k. Two distinct real roots require 8k > 0, so k > 0.",
+        "ru": "Дискриминант равен 4(k + 1)² − 4(k² + 1) = 8k. Для двух различных действительных корней нужно 8k > 0, поэтому k > 0.",
+        "uz": "Diskriminant 4(k + 1)² − 4(k² + 1) = 8k. Ikkita turli haqiqiy ildiz uchun 8k > 0, demak k > 0."
+      },
+      "ai_source_skill": "P1-QUA-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q021",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-02",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The equation 4x² + 4x + c = 0 has exactly one real root. What is c?",
+        "ru": "Уравнение 4x² + 4x + c = 0 имеет ровно один действительный корень. Чему равно c?",
+        "uz": "4x² + 4x + c = 0 tenglama aynan bitta haqiqiy ildizga ega. c nimaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−1",
+            "ru": "−1",
+            "uz": "−1"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_FORMULA"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1",
+            "ru": "1",
+            "uz": "1"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_FORMULA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "4",
+            "ru": "4",
+            "uz": "4"
+          },
+          "diagnostic_code": "QUA_DISCRIMINANT_FORMULA"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Exactly one real root means the discriminant is zero: 4² − 4(4)c = 0. Thus 16 − 16c = 0 and c = 1.",
+        "ru": "Ровно один действительный корень означает нулевой дискриминант: 4² − 4(4)c = 0. Поэтому 16 − 16c = 0 и c = 1.",
+        "uz": "Aynan bitta haqiqiy ildiz uchun diskriminant nol: 4² − 4(4)c = 0. Shundan 16 − 16c = 0 va c = 1."
+      },
+      "ai_source_skill": "P1-QUA-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q022",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-02",
+      "secondary_skills": [
+        "P1-QUA-03"
+      ],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The equation x² + px + q = 0 has roots −2 and 5. A number r is then added to the constant term, giving x² + px + q + r = 0 with a repeated root. Find r.",
+        "ru": "Уравнение x² + px + q = 0 имеет корни −2 и 5. Затем к свободному члену добавляют число r, получая x² + px + q + r = 0 с кратным корнем. Найдите r.",
+        "uz": "x² + px + q = 0 tenglamaning ildizlari −2 va 5. So‘ng ozod hadga r soni qo‘shilib, x² + px + q + r = 0 takroriy ildizli tenglama hosil qilinadi. r ni toping."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "12.25",
+        "accepted_examples": [
+          "12.25",
+          "12,25",
+          " 12.25 "
+        ],
+        "rejected_examples": [
+          "49",
+          "6.125",
+          "-12.25"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "From the roots, p = −3 and q = −10. The new equation is x² − 3x − 10 + r = 0. Repeated roots require 9 − 4(−10 + r) = 0, so 49 − 4r = 0 and r = 49/4 = 12.25.",
+        "ru": "По корням p = −3 и q = −10. Новое уравнение: x² − 3x − 10 + r = 0. Для кратного корня 9 − 4(−10 + r) = 0, поэтому 49 − 4r = 0 и r = 49/4 = 12.25.",
+        "uz": "Ildizlardan p = −3 va q = −10. Yangi tenglama x² − 3x − 10 + r = 0. Takroriy ildiz uchun 9 − 4(−10 + r) = 0, demak 49 − 4r = 0 va r = 49/4 = 12.25."
+      },
+      "ai_source_skill": "P1-QUA-02",
+      "status": "draft"
+    }
+  ]
+}
