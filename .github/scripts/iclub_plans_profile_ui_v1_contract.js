@@ -16,6 +16,8 @@ assert(migration.includes('plans_ui_enabled boolean not null default false'), 'p
 assert(migration.includes('checkout_enabled boolean not null default false'), 'checkout must default OFF');
 assert(migration.includes('monthly_price_uzs'), 'plan bootstrap must expose public monthly price');
 assert(!migration.includes('allowance_units'), 'plan presentation migration must not expose hidden usage units');
+assert(!migration.includes("'priority_support'"), 'unimplemented priority-support capability leaked into plan bootstrap');
+assert(!migration.includes("'early_access_entitled'"), 'unimplemented early-access capability leaked into plan bootstrap');
 
 // Existing foundation prices remain the only source of truth.
 const tariff = fs.readFileSync('supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql','utf8');
@@ -31,6 +33,8 @@ assert(app.includes('const PROFILE_SCREENS = ["main", "settings", "plan"]'), 'Pr
 assert(app.includes('function openProfilePlan()'), 'Profile plan open helper missing');
 assert(app.includes('action === "profile-plan"'), 'Profile plan action binding missing');
 assert(app.includes('#view-profile .profile-screen.is-active:not(#profile-main)'), 'Profile inner-screen back hardening missing');
+assert(app.includes('function canShowProfilePlan()'), 'plan kill-switch navigation guard missing');
+assert(app.includes('raw === "plan" && !canShowProfilePlan()'), 'stale plan stack fail-closed guard missing');
 
 const tabbarStart = html.indexOf('<nav id="tabbar"');
 const tabbarEnd = html.indexOf('</nav>',tabbarStart);
