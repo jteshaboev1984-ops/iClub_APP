@@ -10,13 +10,15 @@ Owner decision: preserve Tour results/history as the protected user-data boundar
 
 - Block 1 Content Architecture 2.0: COMPLETE / gate passed.
 - Block 2 content production: IN PROGRESS.
-- Practice 1 Quadratics: 68/68 authored across P1-QUA-01…06.
-- Second-pass mathematical review: passed after corrections.
-- Learner-facing EN/RU/UZ question/option/explanation review: passed for Practice 1.
-- Mechanical primitive-error guard: active; current MCQ keys A/B/C/D = 10/10/10/11, longest same-letter run = 2.
-- Deterministic diagnostic catalog: 30 reviewed codes; all currently used and skill-aligned.
-- Season 2 Tour 1 separation review: completed; overly similar Practice items were redesigned.
-- Technical publication status: BLOCKED intentionally until evaluator hardening and accepted/rejected input validation are complete.
+- Practice 1 Quadratics: 68/68 authored; second-pass mathematical/language review passed; QA report recorded.
+- Practice 2 Functions & transformations: 80/80 authored; full bank-level mathematical/mechanical review passed; QA report recorded.
+- Practice 1 MCQ keys A/B/C/D = 10/10/10/11; longest same-letter run = 2.
+- Practice 2 MCQ keys A/B/C/D = 15/15/15/16; longest same-letter run = 2; no obvious cyclic pattern remains.
+- Deterministic diagnostic catalogs: Quadratics 30 reviewed codes; Functions 31 reviewed codes.
+- Season 2 Tour 1 and Tour 2 separation reviews: completed; overly similar Practice items were redesigned.
+- Existing approved/runtime-allowed iClub AI theory cards confirmed for all completed Quadratics and Functions canonical skills in EN/RU/UZ.
+- Technical publication status: BLOCKED intentionally until evaluator hardening and server-side runtime validation are complete.
+- Known evaluator blocker: Unicode minus accepted by authored contracts but not by current Practice scalar evaluator.
 - Production/Supabase user data: unchanged by this work.
 
 ## Purpose
