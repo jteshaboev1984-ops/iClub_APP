@@ -101,7 +101,7 @@
       ],
       "explanation": {
         "en": "Complete the square: y = (x + 4)² − 11. The vertex occurs when x + 4 = 0, so x = −4.",
-        "ru": "Дополняем до квадрата: y = (x + 4)² − 11. Вершина достигается при x + 4 = 0, поэтому x = −4.",
+        "ru": "Дополняем до квадрата: y = (x + 4)² − 11. Вершина находится при x + 4 = 0, поэтому x = −4.",
         "uz": "To‘liq kvadratga keltiramiz: y = (x + 4)² − 11. Cho‘qqi x + 4 = 0 bo‘lganda hosil bo‘ladi, demak x = −4."
       },
       "ai_source_skill": "P1-QUA-01",
