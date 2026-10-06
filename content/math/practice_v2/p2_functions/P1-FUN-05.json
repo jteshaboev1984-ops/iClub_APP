@@ -13,9 +13,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "The point (−3,7) lies on y=f(x). Which point lies on y=f⁻¹(x)?",
-        "ru": "Точка (−3,7) лежит на графике y=f(x). Какая точка лежит на y=f⁻¹(x)?",
-        "uz": "(−3,7) nuqta y=f(x) grafigida yotadi. y=f⁻¹(x) grafigida qaysi nuqta yotadi?"
+        "en": "The point (−3,7) lies on the graph of a one-to-one function y=f(x). Which point lies on y=f⁻¹(x)?",
+        "ru": "Точка (−3,7) лежит на графике взаимно однозначной функции y=f(x). Какая точка лежит на y=f⁻¹(x)?",
+        "uz": "(−3,7) nuqta one-to-one y=f(x) funksiya grafigida yotadi. y=f⁻¹(x) grafigida qaysi nuqta yotadi?"
       },
       "options": [
         {
@@ -74,9 +74,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "The point (4,−6) lies on y=f(x). Enter the x-coordinate of the corresponding point on y=f⁻¹(x).",
-        "ru": "Точка (4,−6) лежит на y=f(x). Введите x-координату соответствующей точки на y=f⁻¹(x).",
-        "uz": "(4,−6) nuqta y=f(x) da yotadi. y=f⁻¹(x) dagi mos nuqtaning x-koordinatasini kiriting."
+        "en": "The point (4,−6) lies on the graph of a one-to-one function y=f(x). Enter the x-coordinate of the corresponding point on y=f⁻¹(x).",
+        "ru": "Точка (4,−6) лежит на графике взаимно однозначной функции y=f(x). Введите x-координату соответствующей точки на y=f⁻¹(x).",
+        "uz": "(4,−6) nuqta one-to-one y=f(x) funksiya grafigida yotadi. y=f⁻¹(x) dagi mos nuqtaning x-koordinatasini kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -234,9 +234,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "The graph y=f(x) crosses the x-axis at (5,0). Where does y=f⁻¹(x) cross the y-axis?",
-        "ru": "График y=f(x) пересекает ось x в точке (5,0). Где график y=f⁻¹(x) пересекает ось y?",
-        "uz": "y=f(x) grafigi x o‘qini (5,0) nuqtada kesadi. y=f⁻¹(x) grafigi y o‘qini qayerda kesadi?"
+        "en": "The graph of a one-to-one function y=f(x) crosses the x-axis at (5,0). Where does y=f⁻¹(x) cross the y-axis?",
+        "ru": "График взаимно однозначной функции y=f(x) пересекает ось x в точке (5,0). Где график y=f⁻¹(x) пересекает ось y?",
+        "uz": "One-to-one y=f(x) funksiya grafigi x o‘qini (5,0) nuqtada kesadi. y=f⁻¹(x) grafigi y o‘qini qayerda kesadi?"
       },
       "options": [
         {
@@ -358,9 +358,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "If y=f(x) passes through (−1,2), (0,4) and (3,7), which set of points must lie on y=f⁻¹(x)?",
-        "ru": "Если y=f(x) проходит через (−1,2), (0,4) и (3,7), какой набор точек обязан лежать на y=f⁻¹(x)?",
-        "uz": "Agar y=f(x) (−1,2), (0,4) va (3,7) nuqtalardan o‘tsa, y=f⁻¹(x) da qaysi nuqtalar bo‘lishi shart?"
+        "en": "A one-to-one function y=f(x) passes through (−1,2), (0,4) and (3,7). Which set of points must lie on y=f⁻¹(x)?",
+        "ru": "Взаимно однозначная функция y=f(x) проходит через (−1,2), (0,4) и (3,7). Какой набор точек обязан лежать на y=f⁻¹(x)?",
+        "uz": "One-to-one y=f(x) funksiya (−1,2), (0,4) va (3,7) nuqtalardan o‘tadi. y=f⁻¹(x) da qaysi nuqtalar bo‘lishi shart?"
       },
       "options": [
         {
