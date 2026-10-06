@@ -7,6 +7,7 @@ do $guard$
 declare
   v_runtime private.iclub_global_ai_runtime_config%rowtype;
   v_generated integer:=0;
+  v_provider_rows integer:=0;
 begin
   select * into v_runtime
   from private.iclub_global_ai_runtime_config
@@ -30,6 +31,13 @@ begin
   if v_generated<>0 then
     raise exception 'Global AI generation reversion refused: generated/provider audit rows exist=%',v_generated;
   end if;
+
+  select count(*) into v_provider_rows
+  from private.iclub_global_ai_provider_leases;
+
+  if v_provider_rows<>0 then
+    raise exception 'Global AI generation reversion refused: provider lease rows exist=%',v_provider_rows;
+  end if;
 end;
 $guard$;
 
@@ -44,6 +52,9 @@ drop function if exists public.finalize_iclub_global_ai_provider_call_service_v1
 drop function if exists public.reserve_iclub_global_ai_provider_call_service_v1(
   uuid,uuid,text,text,text,numeric
 );
+
+drop table if exists private.iclub_global_ai_provider_leases;
+drop table if exists private.iclub_global_ai_provider_policy;
 
 alter table private.iclub_global_ai_gateway_audit
   drop column if exists estimated_cost_usd,
