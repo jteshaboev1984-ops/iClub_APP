@@ -101,11 +101,11 @@
         {
           "key": "A",
           "text": {
-            "en": "80",
-            "ru": "80",
-            "uz": "80"
+            "en": "−80",
+            "ru": "−80",
+            "uz": "−80"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
         },
         {
           "key": "B",
@@ -128,14 +128,14 @@
         {
           "key": "D",
           "text": {
-            "en": "−80",
-            "ru": "−80",
-            "uz": "−80"
+            "en": "80",
+            "ru": "80",
+            "uz": "80"
           },
-          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "An antiderivative is x⁴. Thus 3⁴−1⁴=81−1=80.",
         "ru": "Первообразная x⁴. Поэтому 3⁴−1⁴=81−1=80.",
@@ -164,20 +164,20 @@
         {
           "key": "A",
           "text": {
-            "en": "−2",
-            "ru": "−2",
-            "uz": "−2"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "2",
             "ru": "2",
             "uz": "2"
           },
           "diagnostic_code": "INT03_SIGNED_ACCUMULATION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−2",
+            "ru": "−2",
+            "uz": "−2"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -198,7 +198,7 @@
           "diagnostic_code": "INT03_SIGNED_ACCUMULATION"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "An antiderivative is x²/2−2x. At 2 it is 2−4=−2; at 0 it is 0. The definite integral is −2. It is signed, not geometric area.",
         "ru": "Первообразная x²/2−2x. При 2 получаем 2−4=−2, при 0 — 0. Определённый интеграл равен −2. Это знаковая величина, а не геометрическая площадь.",
@@ -266,11 +266,11 @@
         {
           "key": "A",
           "text": {
-            "en": "4",
-            "ru": "4",
-            "uz": "4"
+            "en": "6",
+            "ru": "6",
+            "uz": "6"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
         },
         {
           "key": "B",
@@ -284,11 +284,11 @@
         {
           "key": "C",
           "text": {
-            "en": "6",
-            "ru": "6",
-            "uz": "6"
+            "en": "4",
+            "ru": "4",
+            "uz": "4"
           },
-          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -300,7 +300,7 @@
           "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "An antiderivative is 2√x. Thus 2√9−2√1=6−2=4.",
         "ru": "Первообразная 2√x. Поэтому 2√9−2√1=6−2=4.",
@@ -515,11 +515,11 @@
         {
           "key": "A",
           "text": {
-            "en": "0",
-            "ru": "0",
-            "uz": "0"
+            "en": "−16",
+            "ru": "−16",
+            "uz": "−16"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
         },
         {
           "key": "B",
@@ -542,14 +542,14 @@
         {
           "key": "D",
           "text": {
-            "en": "−16",
-            "ru": "−16",
-            "uz": "−16"
+            "en": "0",
+            "ru": "0",
+            "uz": "0"
           },
-          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "3x³+x is an odd function. Over the symmetric interval [−2,2], its signed integral is 0.",
         "ru": "3x³+x — нечётная функция. На симметричном интервале [−2,2] её знаковый интеграл равен 0.",
@@ -617,20 +617,20 @@
         {
           "key": "A",
           "text": {
-            "en": "2/3",
-            "ru": "2/3",
-            "uz": "2/3"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "4/3",
             "ru": "4/3",
             "uz": "4/3"
           },
           "diagnostic_code": "INT03_SIGNED_ACCUMULATION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2/3",
+            "ru": "2/3",
+            "uz": "2/3"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -651,7 +651,7 @@
           "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "An antiderivative is x³/3−x. From 0 to 2 this gives 8/3−2=2/3. The negative part on 0<x<1 reduces the signed integral.",
         "ru": "Первообразная x³/3−x. От 0 до 2 получаем 8/3−2=2/3. Отрицательная часть при 0<x<1 уменьшает знаковый интеграл.",
