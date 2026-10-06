@@ -229,7 +229,7 @@
       "primary_skill": "P1-QUA-06",
       "secondary_skills": [],
       "role": "concept_recognition",
-      "difficulty": "medium",
+      "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
