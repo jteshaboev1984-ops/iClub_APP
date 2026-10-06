@@ -724,8 +724,32 @@ BEGIN
 END
 $$;
 
+-- Shadow mode preserves legacy/open access but the separate beta selector
+-- still obeys the commercial slot limit.
+DO $shadow_selector_limit$
+DECLARE
+  v jsonb;
+  uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='free');
+BEGIN
+  v:=public.get_iclub_subject_access_guard_service_v1(uid,'chemistry','open');
+  IF coalesce((v->>'allowed')::boolean,false) IS NOT TRUE
+     OR v->>'mode'<>'shadow'
+     OR v->>'reason'<>'subject_not_selected' THEN
+    RAISE EXCEPTION 'Shadow mode unexpectedly blocked legacy/open access: %',v;
+  END IF;
+
+  v:=public.set_iclub_subject_slot_service_v1(
+    gen_random_uuid(),uid,'chemistry',true,false,'ci_shadow_selection'
+  );
+  IF coalesce((v->>'ok')::boolean,true)
+     OR v->>'reason'<>'study_subject_limit_reached' THEN
+    RAISE EXCEPTION 'Shadow selector allowed Free second study subject: %',v;
+  END IF;
+END
+$shadow_selector_limit$;
+
 -- Browser roles cannot mutate lifecycle/access authority.
-DO $$
+DO $
 BEGIN
   IF has_function_privilege(
        'authenticated',
