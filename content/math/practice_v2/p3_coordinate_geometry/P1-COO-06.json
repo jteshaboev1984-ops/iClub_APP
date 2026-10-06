@@ -1,0 +1,623 @@
+{
+  "version": "practice_v2_p3_coordinate_geometry_draft_v0.1",
+  "skill": "P1-COO-06",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q205",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-06",
+      "secondary_skills": [
+        "P1-QUA-02"
+      ],
+      "role": "concept_interpretation",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "After substituting a line into a circle, the intersection equation is 3x²−12x+12=0. What does this tell you?",
+        "ru": "После подстановки прямой в уравнение окружности получено 3x²−12x+12=0. Что это означает?",
+        "uz": "Chiziqni aylana tenglamasiga qo‘yganda 3x²−12x+12=0 hosil bo‘ldi. Bu nimani bildiradi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "The line does not meet the circle.",
+            "ru": "Прямая не пересекает окружность.",
+            "uz": "Chiziq aylanani kesmaydi."
+          },
+          "diagnostic_code": "COO06_INTERSECTION_COUNT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "The line cuts the circle at two distinct points.",
+            "ru": "Прямая пересекает окружность в двух разных точках.",
+            "uz": "Chiziq aylanani ikki turli nuqtada kesadi."
+          },
+          "diagnostic_code": "COO06_INTERSECTION_COUNT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "The line is tangent to the circle.",
+            "ru": "Прямая касается окружности.",
+            "uz": "Chiziq aylanaga urinadi."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "The circle has radius 3.",
+            "ru": "Радиус окружности равен 3.",
+            "uz": "Aylana radiusi 3."
+          },
+          "diagnostic_code": "COO06_TANGENCY_DISCRIMINANT"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "The discriminant is (−12)²−4(3)(12)=144−144=0. There is one repeated root, so the line touches the circle at one point.",
+        "ru": "Дискриминант равен (−12)²−4(3)(12)=144−144=0. Есть один кратный корень, поэтому прямая касается окружности в одной точке.",
+        "uz": "Diskriminant (−12)²−4(3)(12)=144−144=0. Bitta takroriy ildiz bor, demak chiziq aylanaga bitta nuqtada urinadi."
+      },
+      "ai_source_skill": "P1-COO-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q206",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-06",
+      "secondary_skills": [
+        "P1-COO-04"
+      ],
+      "role": "parameter_tangency",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The horizontal line y=k is tangent to (x−1)²+(y+2)²=9, and k>−2. Enter k.",
+        "ru": "Горизонтальная прямая y=k касается окружности (x−1)²+(y+2)²=9, причём k>−2. Введите k.",
+        "uz": "y=k gorizontal chiziq (x−1)²+(y+2)²=9 aylanaga urinadi va k>−2. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "1",
+        "accepted_examples": [
+          "1",
+          " 1 "
+        ],
+        "rejected_examples": [
+          "-5",
+          "3",
+          "-2"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The centre has y-coordinate −2 and the radius is 3. Horizontal tangents are at y=−2±3, so k=1 or −5. The condition k>−2 selects k=1.",
+        "ru": "y-координата центра равна −2, радиус 3. Горизонтальные касательные имеют y=−2±3, то есть k=1 или −5. Условие k>−2 оставляет k=1.",
+        "uz": "Markazning y-koordinatasi −2, radius 3. Gorizontal urinmalar y=−2±3 da, ya’ni k=1 yoki −5. k>−2 sharti k=1 ni tanlaydi."
+      },
+      "ai_source_skill": "P1-COO-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q207",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-06",
+      "secondary_skills": [
+        "P1-QUA-03"
+      ],
+      "role": "intersection_roots",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The line y=x+1 meets the circle x²+y²=13 at two points. Enter the sum of their x-coordinates.",
+        "ru": "Прямая y=x+1 пересекает окружность x²+y²=13 в двух точках. Введите сумму их x-координат.",
+        "uz": "y=x+1 chiziq x²+y²=13 aylanani ikki nuqtada kesadi. Ularning x-koordinatalari yig‘indisini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-1",
+        "accepted_examples": [
+          "-1",
+          "−1",
+          " -1 "
+        ],
+        "rejected_examples": [
+          "1",
+          "-6",
+          "6"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Substitute y=x+1: x²+(x+1)²=13, so x²+x−6=0. The roots are 2 and −3, whose sum is −1.",
+        "ru": "Подставляем y=x+1: x²+(x+1)²=13, поэтому x²+x−6=0. Корни 2 и −3, их сумма равна −1.",
+        "uz": "y=x+1 ni qo‘yamiz: x²+(x+1)²=13, demak x²+x−6=0. Ildizlar 2 va −3, ularning yig‘indisi −1."
+      },
+      "ai_source_skill": "P1-COO-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q208",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-06",
+      "secondary_skills": [
+        "P1-COO-04"
+      ],
+      "role": "parameter_tangency",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The line y=2x+p is tangent to the circle (x−1)²+(y+1)²=5 for two values of p. Enter the sum of those values.",
+        "ru": "Прямая y=2x+p касается окружности (x−1)²+(y+1)²=5 при двух значениях p. Введите сумму этих значений.",
+        "uz": "y=2x+p chiziq (x−1)²+(y+1)²=5 aylanaga p ning ikki qiymatida urinadi. Shu qiymatlar yig‘indisini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-6",
+        "accepted_examples": [
+          "-6",
+          "−6",
+          " -6 "
+        ],
+        "rejected_examples": [
+          "6",
+          "-10",
+          "-3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Write the line as 2x−y+p=0. The centre is (1,−1) and radius √5, so tangency requires |2(1)−(−1)+p|/√5=√5. Thus |p+3|=5, giving p=2 or −8. Their sum is −6.",
+        "ru": "Запишем прямую как 2x−y+p=0. Центр (1,−1), радиус √5, поэтому для касания |2(1)−(−1)+p|/√5=√5. Получаем |p+3|=5, откуда p=2 или −8. Сумма равна −6.",
+        "uz": "Chiziqni 2x−y+p=0 deb yozamiz. Markaz (1,−1), radius √5, urinish uchun |2(1)−(−1)+p|/√5=√5. Demak |p+3|=5, bundan p=2 yoki −8. Yig‘indi −6."
+      },
+      "ai_source_skill": "P1-COO-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q209",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-06",
+      "secondary_skills": [
+        "P1-COO-04"
+      ],
+      "role": "intersection_condition",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "For which values of k does the line x+y=k cut the circle x²+y²=8 at two distinct points?",
+        "ru": "При каких значениях k прямая x+y=k пересекает окружность x²+y²=8 в двух разных точках?",
+        "uz": "Qaysi k qiymatlarida x+y=k chiziq x²+y²=8 aylanani ikki turli nuqtada kesadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "|k|<4",
+            "ru": "|k|<4",
+            "uz": "|k|<4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "|k|=4",
+            "ru": "|k|=4",
+            "uz": "|k|=4"
+          },
+          "diagnostic_code": "COO06_INTERSECTION_COUNT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "|k|>4",
+            "ru": "|k|>4",
+            "uz": "|k|>4"
+          },
+          "diagnostic_code": "COO06_INTERSECTION_COUNT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "k=0 only",
+            "ru": "Только k=0",
+            "uz": "Faqat k=0"
+          },
+          "diagnostic_code": "COO06_INTERSECTION_COUNT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The circle has radius 2√2. The distance from the origin to x+y=k is |k|/√2. Two intersections require |k|/√2<2√2, so |k|<4.",
+        "ru": "Радиус окружности равен 2√2. Расстояние от начала координат до x+y=k равно |k|/√2. Для двух пересечений нужно |k|/√2<2√2, поэтому |k|<4.",
+        "uz": "Aylana radiusi 2√2. Koordinata boshidan x+y=k chiziqqacha masofa |k|/√2. Ikki kesishish uchun |k|/√2<2√2, demak |k|<4."
+      },
+      "ai_source_skill": "P1-COO-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q210",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-06",
+      "secondary_skills": [
+        "P1-QUA-02"
+      ],
+      "role": "discriminant_parameter",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Substituting a line with parameter k into a circle gives x²+(k−2)x+(k+1)=0. For which k is the line tangent to the circle?",
+        "ru": "После подстановки прямой с параметром k в окружность получено x²+(k−2)x+(k+1)=0. При каких k прямая касается окружности?",
+        "uz": "k parametrli chiziqni aylanaga qo‘yganda x²+(k−2)x+(k+1)=0 hosil bo‘ladi. Qaysi k qiymatlarida chiziq aylanaga urinadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "k=4 only",
+            "ru": "Только k=4",
+            "uz": "Faqat k=4"
+          },
+          "diagnostic_code": "COO06_PARAMETER_ALGEBRA"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "k=0 or 8",
+            "ru": "k=0 или 8",
+            "uz": "k=0 yoki 8"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "k=−2 or 4",
+            "ru": "k=−2 или 4",
+            "uz": "k=−2 yoki 4"
+          },
+          "diagnostic_code": "COO06_PARAMETER_ALGEBRA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "All real k",
+            "ru": "Все действительные k",
+            "uz": "Barcha haqiqiy k"
+          },
+          "diagnostic_code": "COO06_TANGENCY_DISCRIMINANT"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Tangency requires discriminant 0: (k−2)²−4(k+1)=0. This simplifies to k²−8k=0, so k(k−8)=0 and k=0 or 8.",
+        "ru": "Для касания дискриминант должен быть равен 0: (k−2)²−4(k+1)=0. Получаем k²−8k=0, то есть k(k−8)=0 и k=0 или 8.",
+        "uz": "Urinish uchun diskriminant 0 bo‘lishi kerak: (k−2)²−4(k+1)=0. Bu k²−8k=0 ga keladi, ya’ni k(k−8)=0 va k=0 yoki 8."
+      },
+      "ai_source_skill": "P1-COO-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q211",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-06",
+      "secondary_skills": [
+        "P1-QUA-02"
+      ],
+      "role": "intersection_condition",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "After substituting a line into a circle, the intersection x-values satisfy x²−6x+p=0. For which p are there two distinct intersection points?",
+        "ru": "После подстановки прямой в окружность x-координаты точек пересечения удовлетворяют x²−6x+p=0. При каких p есть две разные точки пересечения?",
+        "uz": "Chiziqni aylanaga qo‘ygandan keyin kesishish nuqtalarining x qiymatlari x²−6x+p=0 ni qanoatlantiradi. Qaysi p da ikki turli kesishish nuqtasi bor?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "p>9",
+            "ru": "p>9",
+            "uz": "p>9"
+          },
+          "diagnostic_code": "COO06_INTERSECTION_COUNT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "p=9",
+            "ru": "p=9",
+            "uz": "p=9"
+          },
+          "diagnostic_code": "COO06_INTERSECTION_COUNT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "p<9",
+            "ru": "p<9",
+            "uz": "p<9"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "p≤0 only",
+            "ru": "Только p≤0",
+            "uz": "Faqat p≤0"
+          },
+          "diagnostic_code": "COO06_PARAMETER_ALGEBRA"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Two distinct roots require D>0. Here D=(−6)²−4p=36−4p, so 36−4p>0 and p<9.",
+        "ru": "Для двух разных корней нужно D>0. Здесь D=(−6)²−4p=36−4p, поэтому 36−4p>0 и p<9.",
+        "uz": "Ikki turli ildiz uchun D>0. Bu yerda D=(−6)²−4p=36−4p, demak 36−4p>0 va p<9."
+      },
+      "ai_source_skill": "P1-COO-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q212",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-06",
+      "secondary_skills": [
+        "P1-QUA-02"
+      ],
+      "role": "contact_root",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "For a tangent line and circle, substitution gives x²−8x+16=0. Enter the x-coordinate of the point of contact.",
+        "ru": "Для касательной и окружности после подстановки получено x²−8x+16=0. Введите x-координату точки касания.",
+        "uz": "Urinma va aylana uchun qo‘yishdan keyin x²−8x+16=0 hosil bo‘ldi. Tegish nuqtasining x-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "8",
+          "16",
+          "-4"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "x²−8x+16=(x−4)², so the repeated root is x=4. A tangent has exactly this repeated intersection x-coordinate.",
+        "ru": "x²−8x+16=(x−4)², поэтому кратный корень x=4. У касательной это и есть x-координата единственной точки пересечения.",
+        "uz": "x²−8x+16=(x−4)², demak takroriy ildiz x=4. Urinmada shu yagona kesishish nuqtasining x-koordinatasi bo‘ladi."
+      },
+      "ai_source_skill": "P1-COO-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q213",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-06",
+      "secondary_skills": [
+        "P1-COO-04"
+      ],
+      "role": "parameter_tangency",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "For which values of m is the line y=mx+5 tangent to the circle x²+y²=9?",
+        "ru": "При каких значениях m прямая y=mx+5 касается окружности x²+y²=9?",
+        "uz": "Qaysi m qiymatlarida y=mx+5 chiziq x²+y²=9 aylanaga urinadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "m=±3/4",
+            "ru": "m=±3/4",
+            "uz": "m=±3/4"
+          },
+          "diagnostic_code": "COO06_DISTANCE_TANGENCY"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "m=±4/3",
+            "ru": "m=±4/3",
+            "uz": "m=±4/3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "m=±5/3",
+            "ru": "m=±5/3",
+            "uz": "m=±5/3"
+          },
+          "diagnostic_code": "COO06_PARAMETER_ALGEBRA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "m=±3",
+            "ru": "m=±3",
+            "uz": "m=±3"
+          },
+          "diagnostic_code": "COO06_DISTANCE_TANGENCY"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Write the line as mx−y+5=0. Its distance from the centre (0,0) must equal the radius 3: 5/√(m²+1)=3. Thus 25=9m²+9, so m²=16/9 and m=±4/3.",
+        "ru": "Запишем прямую как mx−y+5=0. Расстояние от центра (0,0) должно равняться радиусу 3: 5/√(m²+1)=3. Тогда 25=9m²+9, поэтому m²=16/9 и m=±4/3.",
+        "uz": "Chiziqni mx−y+5=0 deb yozamiz. Markaz (0,0) dan masofa radius 3 ga teng: 5/√(m²+1)=3. Demak 25=9m²+9, shundan m²=16/9 va m=±4/3."
+      },
+      "ai_source_skill": "P1-COO-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q214",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-06",
+      "secondary_skills": [
+        "P1-COO-04"
+      ],
+      "role": "parameter_tangency",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The line y=2x+c is tangent to the circle x²+y²=25. Enter c².",
+        "ru": "Прямая y=2x+c касается окружности x²+y²=25. Введите c².",
+        "uz": "y=2x+c chiziq x²+y²=25 aylanaga urinadi. c² ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "125",
+        "accepted_examples": [
+          "125",
+          " 125 "
+        ],
+        "rejected_examples": [
+          "25",
+          "5",
+          "625"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Write the line as 2x−y+c=0. Tangency requires |c|/√5=5, so |c|=5√5 and c²=125.",
+        "ru": "Запишем прямую как 2x−y+c=0. Для касания |c|/√5=5, поэтому |c|=5√5 и c²=125.",
+        "uz": "Chiziqni 2x−y+c=0 deb yozamiz. Urinish uchun |c|/√5=5, demak |c|=5√5 va c²=125."
+      },
+      "ai_source_skill": "P1-COO-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q215",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-06",
+      "secondary_skills": [
+        "P1-COO-04"
+      ],
+      "role": "parameter_tangency",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The vertical line x=p is tangent to the circle (x−2)²+(y+1)²=16 for two values of p. Enter their product.",
+        "ru": "Вертикальная прямая x=p касается окружности (x−2)²+(y+1)²=16 при двух значениях p. Введите их произведение.",
+        "uz": "x=p vertikal chiziq (x−2)²+(y+1)²=16 aylanaga p ning ikki qiymatida urinadi. Ularning ko‘paytmasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-12",
+        "accepted_examples": [
+          "-12",
+          "−12",
+          " -12 "
+        ],
+        "rejected_examples": [
+          "12",
+          "4",
+          "8"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The centre has x-coordinate 2 and radius 4, so the vertical tangents are x=2±4: p=6 and p=−2. Their product is −12.",
+        "ru": "x-координата центра равна 2, радиус 4, поэтому вертикальные касательные: x=2±4, то есть p=6 и p=−2. Их произведение −12.",
+        "uz": "Markazning x-koordinatasi 2, radius 4, demak vertikal urinmalar x=2±4: p=6 va p=−2. Ularning ko‘paytmasi −12."
+      },
+      "ai_source_skill": "P1-COO-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q216",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-06",
+      "secondary_skills": [
+        "P1-COO-01",
+        "P1-COO-04"
+      ],
+      "role": "mixed_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "A tangent from P(13,0) to the circle x²+y²=25 has positive finite gradient m. What is m?",
+        "ru": "К окружности x²+y²=25 из точки P(13,0) проведена касательная с положительным конечным градиентом m. Чему равно m?",
+        "uz": "P(13,0) nuqtadan x²+y²=25 aylanaga musbat chekli gradienti m bo‘lgan urinma o‘tkazilgan. m nimaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "12/5",
+            "ru": "12/5",
+            "uz": "12/5"
+          },
+          "diagnostic_code": "COO06_DISTANCE_TANGENCY"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−5/12",
+            "ru": "−5/12",
+            "uz": "−5/12"
+          },
+          "diagnostic_code": "COO06_PARAMETER_ALGEBRA"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "5/12",
+            "ru": "5/12",
+            "uz": "5/12"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "13/5",
+            "ru": "13/5",
+            "uz": "13/5"
+          },
+          "diagnostic_code": "COO06_DISTANCE_TANGENCY"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "A finite-gradient tangent through P has equation y=m(x−13), or mx−y−13m=0. The distance from the origin to this line equals the radius 5: 13m/√(m²+1)=5 for m>0. Squaring gives 169m²=25m²+25, so 144m²=25 and m=5/12.",
+        "ru": "Касательная с конечным градиентом через P имеет вид y=m(x−13), то есть mx−y−13m=0. Расстояние от начала координат до этой прямой равно радиусу 5: 13m/√(m²+1)=5 при m>0. После возведения в квадрат: 169m²=25m²+25, поэтому 144m²=25 и m=5/12.",
+        "uz": "P orqali chekli gradientli urinma y=m(x−13), ya’ni mx−y−13m=0. Koordinata boshidan bu chiziqqacha masofa radius 5 ga teng: m>0 uchun 13m/√(m²+1)=5. Kvadratlasak 169m²=25m²+25, demak 144m²=25 va m=5/12."
+      },
+      "ai_source_skill": "P1-COO-06",
+      "status": "draft"
+    }
+  ]
+}
