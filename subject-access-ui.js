@@ -225,6 +225,8 @@
     row.className = "iclub-subject-access-row" +
       (args.selected ? " is-selected" : "") +
       (args.disabled ? " is-disabled" : "");
+    row.dataset.subjectKey = String(args.subject?.subject_key || "");
+    row.dataset.selectionMode = String(args.mode || "");
 
     const main = document.createElement("div");
     main.className = "iclub-subject-access-row-main";
