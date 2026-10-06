@@ -75,20 +75,20 @@
         {
           "key": "B",
           "text": {
-            "en": "135°",
-            "ru": "135°",
-            "uz": "135°"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "225°",
             "ru": "225°",
             "uz": "225°"
           },
           "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "135°",
+            "ru": "135°",
+            "uz": "135°"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -100,7 +100,7 @@
           "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "cos135°=−√2/2, and 135° lies in the principal range 0°≤cos⁻¹x≤180°.",
         "ru": "cos135°=−√2/2, и 135° лежит в главном диапазоне 0°≤cos⁻¹x≤180°.",
@@ -199,11 +199,11 @@
         {
           "key": "B",
           "text": {
-            "en": "0°≤θ≤180°",
-            "ru": "0°≤θ≤180°",
-            "uz": "0°≤θ≤180°"
+            "en": "−180°<θ<180°",
+            "ru": "−180°<θ<180°",
+            "uz": "−180°<θ<180°"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
         },
         {
           "key": "C",
@@ -217,14 +217,14 @@
         {
           "key": "D",
           "text": {
-            "en": "−180°<θ<180°",
-            "ru": "−180°<θ<180°",
-            "uz": "−180°<θ<180°"
+            "en": "0°≤θ≤180°",
+            "ru": "0°≤θ≤180°",
+            "uz": "0°≤θ≤180°"
           },
-          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "D",
       "explanation": {
         "en": "The principal values of cos⁻¹ lie from 0° to 180°, inclusive.",
         "ru": "Главные значения cos⁻¹ лежат от 0° до 180° включительно.",
@@ -289,11 +289,11 @@
         {
           "key": "A",
           "text": {
-            "en": "The calculator is in radian mode.",
-            "ru": "Калькулятор в режиме радиан.",
-            "uz": "Kalkulyator radian rejimida."
+            "en": "0.5 is outside the domain of sin⁻¹.",
+            "ru": "0.5 вне области определения sin⁻¹.",
+            "uz": "0.5 sin⁻¹ aniqlanish sohasidan tashqarida."
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
         },
         {
           "key": "B",
@@ -307,11 +307,11 @@
         {
           "key": "C",
           "text": {
-            "en": "0.5 is outside the domain of sin⁻¹.",
-            "ru": "0.5 вне области определения sin⁻¹.",
-            "uz": "0.5 sin⁻¹ aniqlanish sohasidan tashqarida."
+            "en": "The calculator is in radian mode.",
+            "ru": "Калькулятор в режиме радиан.",
+            "uz": "Kalkulyator radian rejimida."
           },
-          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -323,7 +323,7 @@
           "diagnostic_code": "TRI03_CALCULATOR_MODE"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "0.523598… is π/6 radians, which equals 30°. The calculator is reporting radians rather than degrees.",
         "ru": "0.523598… — это π/6 радиан, то есть 30°. Калькулятор выдаёт радианы вместо градусов.",
@@ -390,20 +390,20 @@
         {
           "key": "A",
           "text": {
-            "en": "30°",
-            "ru": "30°",
-            "uz": "30°"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "150°",
             "ru": "150°",
             "uz": "150°"
           },
           "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "30°",
+            "ru": "30°",
+            "uz": "30°"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -424,7 +424,7 @@
           "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "sin150°=1/2. The principal value sin⁻¹(1/2) is 30°, not 150°, because sin⁻¹ returns a value in −90° to 90°.",
         "ru": "sin150°=1/2. Главное значение sin⁻¹(1/2) равно 30°, а не 150°, потому что sin⁻¹ возвращает значение от −90° до 90°.",
