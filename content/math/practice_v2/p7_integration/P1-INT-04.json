@@ -410,9 +410,9 @@
         {
           "key": "A",
           "text": {
-            "en": "28/3",
-            "ru": "28/3",
-            "uz": "28/3"
+            "en": "44/3",
+            "ru": "44/3",
+            "uz": "44/3"
           },
           "diagnostic_code": "INT04_SPLIT_CROSSING"
         },
@@ -437,18 +437,18 @@
         {
           "key": "D",
           "text": {
-            "en": "44/3",
-            "ru": "44/3",
-            "uz": "44/3"
+            "en": "46/3",
+            "ru": "46/3",
+            "uz": "46/3"
           },
           "diagnostic_code": null
         }
       ],
       "correct_answer": "D",
       "explanation": {
-        "en": "The zeros are x=±2. By symmetry, total area=2[∫₀²(4−x²)dx+∫₂³(x²−4)dx]=2[16/3+2]=44/3.",
-        "ru": "Нули x=±2. По симметрии полная площадь=2[∫₀²(4−x²)dx+∫₂³(x²−4)dx]=2[16/3+2]=44/3.",
-        "uz": "Nollar x=±2. Simmetriya bo‘yicha jami yuza=2[∫₀²(4−x²)dx+∫₂³(x²−4)dx]=2[16/3+2]=44/3."
+        "en": "The zeros are x=±2. By symmetry, total area=2[∫₀²(4−x²)dx+∫₂³(x²−4)dx]=2[16/3+7/3]=46/3.",
+        "ru": "Нули x=±2. По симметрии полная площадь=2[∫₀²(4−x²)dx+∫₂³(x²−4)dx]=2[16/3+7/3]=46/3.",
+        "uz": "Nollar x=±2. Simmetriya bo‘yicha jami yuza=2[∫₀²(4−x²)dx+∫₂³(x²−4)dx]=2[16/3+7/3]=46/3."
       },
       "ai_source_skill": "P1-INT-04",
       "status": "draft"
