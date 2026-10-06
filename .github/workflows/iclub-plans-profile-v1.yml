@@ -1,0 +1,167 @@
+name: iClub Plans Profile v1
+
+on:
+  pull_request:
+    branches:
+      - feat/global-ai-conversations-v1
+      - main
+    paths:
+      - 'supabase/migrations/20261006143000_iclub_plans_profile_ui_v1.sql'
+      - 'supabase/reversions/20261006143000_iclub_plans_profile_ui_v1_revert.sql'
+      - 'supabase/tests/iclub_plans_profile_ui_v1_matrix.sql'
+      - 'plans-ui.js'
+      - 'plans-ui.css'
+      - 'index.html'
+      - 'app.js'
+      - 'docs/iclub-free-plus-pro-capability-audit-v1.md'
+      - '.github/scripts/iclub_plans_profile_ui_v1_contract.js'
+      - 'scripts/iclub-plans-profile-browser-regression.cjs'
+      - '.github/workflows/iclub-plans-profile-v1.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/20261006143000_iclub_plans_profile_ui_v1.sql'
+      - 'supabase/reversions/20261006143000_iclub_plans_profile_ui_v1_revert.sql'
+      - 'supabase/tests/iclub_plans_profile_ui_v1_matrix.sql'
+      - 'plans-ui.js'
+      - 'plans-ui.css'
+      - 'index.html'
+      - 'app.js'
+      - 'docs/iclub-free-plus-pro-capability-audit-v1.md'
+      - '.github/scripts/iclub_plans_profile_ui_v1_contract.js'
+      - 'scripts/iclub-plans-profile-browser-regression.cjs'
+      - '.github/workflows/iclub-plans-profile-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plans-profile-safety:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostics
+        run: printf 'iClub Free Plus Pro profile v1 CI\n' > plans-profile.log
+
+      - name: Bootstrap isolated Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a plans-profile.log
+
+      - name: Apply dormant Global AI dependency stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql 2>&1 | tee -a plans-profile.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql 2>&1 | tee -a plans-profile.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006124000_iclub_global_ai_ui_bootstrap_v1.sql 2>&1 | tee -a plans-profile.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006133000_iclub_global_ai_conversation_ui_v1.sql 2>&1 | tee -a plans-profile.log
+
+      - name: Static production-preservation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          migration='supabase/migrations/20261006143000_iclub_plans_profile_ui_v1.sql'
+          ! grep -Eiq '\b(update|delete[[:space:]]+from|truncate)[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
+          ! grep -Eiq '\binsert[[:space:]]+into[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
+          ! grep -Eiq '\binsert[[:space:]]+into[[:space:]]+private\.iclub_subscription_entitlements\b' "$migration"
+          grep -q 'plans_ui_enabled boolean not null default false' "$migration"
+          grep -q 'checkout_enabled boolean not null default false' "$migration"
+
+      - name: Apply dormant plan/profile presentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006143000_iclub_plans_profile_ui_v1.sql 2>&1 | tee -a plans-profile.log
+
+      - name: Run SQL plan/profile safety matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c iclub.plans_isolated=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_plans_profile_ui_v1_matrix.sql 2>&1 | tee -a plans-profile.log
+
+      - name: Validate static plan/profile contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check plans-ui.js
+          node --check app.js
+          node --check .github/scripts/iclub_plans_profile_ui_v1_contract.js
+          node --check scripts/iclub-plans-profile-browser-regression.cjs
+          node .github/scripts/iclub_plans_profile_ui_v1_contract.js 2>&1 | tee -a plans-profile.log
+
+      - name: Prove default commercial runtime remains dormant
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(psql -Atqc "select plans_ui_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
+          test "$(psql -Atqc "select checkout_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
+          test "$(psql -Atqc "select count(*) from private.iclub_subscription_entitlements")" = '0'
+
+      - name: Install Chromium harness
+        run: |
+          mkdir -p /tmp/pw
+          cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          ./node_modules/.bin/playwright install --with-deps chromium >/dev/null
+
+      - name: Run mobile and locale plan/profile regression
+        env:
+          NODE_PATH: /tmp/pw/node_modules
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node scripts/iclub-plans-profile-browser-regression.cjs 2>&1 | tee -a plans-profile.log
+
+      - name: Prove safe pre-activation plan/profile rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/reversions/20261006143000_iclub_plans_profile_ui_v1_revert.sql 2>&1 | tee -a plans-profile.log
+          test "$(psql -Atqc "select to_regprocedure('public.get_iclub_plan_ui_bootstrap_v1()') is null")" = 't'
+          test "$(psql -Atqc "select column_name from information_schema.columns where table_schema='private' and table_name='iclub_global_ai_runtime_config' and column_name='plans_ui_enabled'")" = ''
+          test "$(psql -Atqc "select to_regclass('private.iclub_plan_policies') is not null")" = 't'
+
+      - name: Mark plans/profile GREEN
+        run: echo 'ICLUB FREE PLUS PRO PROFILE V1 GREEN' | tee -a plans-profile.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iclub-plans-profile-v1
+          path: |
+            plans-profile.log
+            artifacts/iclub-plans-*.png
+          if-no-files-found: ignore
+          retention-days: 7
