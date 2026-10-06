@@ -21,20 +21,20 @@
         {
           "key": "A",
           "text": {
-            "en": "f(x)=4x−7",
-            "ru": "f(x)=4x−7",
-            "uz": "f(x)=4x−7"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "f(x)=x²",
             "ru": "f(x)=x²",
             "uz": "f(x)=x²"
           },
           "diagnostic_code": "FUN04_ONE_ONE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "f(x)=4x−7",
+            "ru": "f(x)=4x−7",
+            "uz": "f(x)=4x−7"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -55,7 +55,7 @@
           "diagnostic_code": "FUN04_ONE_ONE"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "A non-constant linear function is one-to-one on all real numbers. Each of the even-power functions gives the same output for some different inputs.",
         "ru": "Непостоянная линейная функция взаимно однозначна на всех действительных числах. Функции с чётной степенью дают одинаковые выходы для некоторых разных входов.",
@@ -128,20 +128,20 @@
         {
           "key": "B",
           "text": {
-            "en": "(x−1)/2",
-            "ru": "(x−1)/2",
-            "uz": "(x−1)/2"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "2x−1",
             "ru": "2x−1",
             "uz": "2x−1"
           },
           "diagnostic_code": "FUN04_SWAP_SOLVE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(x−1)/2",
+            "ru": "(x−1)/2",
+            "uz": "(x−1)/2"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -153,7 +153,7 @@
           "diagnostic_code": "FUN04_SWAP_SOLVE"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "Write y=2x+1, swap x and y to get x=2y+1, then solve: y=(x−1)/2.",
         "ru": "Запишем y=2x+1, поменяем x и y: x=2y+1, затем выразим y: y=(x−1)/2.",
@@ -180,11 +180,11 @@
         {
           "key": "A",
           "text": {
-            "en": "(2x−5)/3",
-            "ru": "(2x−5)/3",
-            "uz": "(2x−5)/3"
+            "en": "(2x+5)/3",
+            "ru": "(2x+5)/3",
+            "uz": "(2x+5)/3"
           },
-          "diagnostic_code": "FUN04_SWAP_SOLVE"
+          "diagnostic_code": null
         },
         {
           "key": "B",
@@ -198,11 +198,11 @@
         {
           "key": "C",
           "text": {
-            "en": "(2x+5)/3",
-            "ru": "(2x+5)/3",
-            "uz": "(2x+5)/3"
+            "en": "(2x−5)/3",
+            "ru": "(2x−5)/3",
+            "uz": "(2x−5)/3"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN04_SWAP_SOLVE"
         },
         {
           "key": "D",
@@ -214,7 +214,7 @@
           "diagnostic_code": "FUN04_SWAP_SOLVE"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "A",
       "explanation": {
         "en": "From y=(3x−5)/2, swap variables: x=(3y−5)/2. Then 2x=3y−5, so y=(2x+5)/3.",
         "ru": "Из y=(3x−5)/2 после перестановки переменных получаем x=(3y−5)/2. Тогда 2x=3y−5, поэтому y=(2x+5)/3.",
@@ -341,11 +341,11 @@
         {
           "key": "A",
           "text": {
-            "en": "[−3,8]",
-            "ru": "[−3,8]",
-            "uz": "[−3,8]"
+            "en": "[−8,3]",
+            "ru": "[−8,3]",
+            "uz": "[−8,3]"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN04_DOMAIN_RANGE_SWAP"
         },
         {
           "key": "B",
@@ -359,11 +359,11 @@
         {
           "key": "C",
           "text": {
-            "en": "[−8,3]",
-            "ru": "[−8,3]",
-            "uz": "[−8,3]"
+            "en": "[−3,8]",
+            "ru": "[−3,8]",
+            "uz": "[−3,8]"
           },
-          "diagnostic_code": "FUN04_DOMAIN_RANGE_SWAP"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -375,7 +375,7 @@
           "diagnostic_code": "FUN04_DOMAIN_RANGE_SWAP"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "The inverse accepts the original outputs as its inputs. Therefore the domain of f⁻¹ is the range of f: [−3,8].",
         "ru": "Обратная функция принимает исходные выходы как входы. Поэтому область определения f⁻¹ равна области значений f: [−3,8].",
@@ -455,20 +455,20 @@
         {
           "key": "B",
           "text": {
-            "en": "−1−√(x+4)",
-            "ru": "−1−√(x+4)",
-            "uz": "−1−√(x+4)"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "1−√(x−4)",
             "ru": "1−√(x−4)",
             "uz": "1−√(x−4)"
           },
           "diagnostic_code": "FUN04_SWAP_SOLVE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−1−√(x+4)",
+            "ru": "−1−√(x+4)",
+            "uz": "−1−√(x+4)"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -480,7 +480,7 @@
           "diagnostic_code": "FUN04_RECIPROCAL"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "From y=(x+1)²−4, we get x+1=±√(y+4). The original domain x≤−1 selects the negative branch, so x=−1−√(y+4). Hence f⁻¹(x)=−1−√(x+4).",
         "ru": "Из y=(x+1)²−4 получаем x+1=±√(y+4). Область x≤−1 выбирает отрицательную ветвь, поэтому x=−1−√(y+4). Значит f⁻¹(x)=−1−√(x+4).",
@@ -525,23 +525,23 @@
         {
           "key": "C",
           "text": {
-            "en": "Its domain is x<5 and range y>2.",
-            "ru": "Её область x<5, а область значений y>2.",
-            "uz": "Uning sohasi x<5, qiymatlar to‘plami y>2."
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "Its domain is x≤5 and range y≥2.",
             "ru": "Её область x≤5, а область значений y≥2.",
             "uz": "Uning sohasi x≤5, qiymatlar to‘plami y≥2."
           },
           "diagnostic_code": "FUN04_DOMAIN_RANGE_SWAP"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Its domain is x<5 and range y>2.",
+            "ru": "Её область x<5, а область значений y>2.",
+            "uz": "Uning sohasi x<5, qiymatlar to‘plami y>2."
+          },
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "D",
       "explanation": {
         "en": "The inverse swaps domain and range. The original range y<5 becomes the inverse domain x<5, and the original domain x>2 becomes the inverse range y>2.",
         "ru": "Обратная функция меняет область определения и область значений местами. Исходная область значений y<5 становится областью x<5 для f⁻¹, а исходная область x>2 становится её областью значений y>2.",
@@ -568,11 +568,11 @@
         {
           "key": "A",
           "text": {
-            "en": "f⁻¹(6)=−2",
-            "ru": "f⁻¹(6)=−2",
-            "uz": "f⁻¹(6)=−2"
+            "en": "f⁻¹(−2)=6",
+            "ru": "f⁻¹(−2)=6",
+            "uz": "f⁻¹(−2)=6"
           },
-          "diagnostic_code": "FUN04_SWAP_SOLVE"
+          "diagnostic_code": null
         },
         {
           "key": "B",
@@ -595,14 +595,14 @@
         {
           "key": "D",
           "text": {
-            "en": "f⁻¹(−2)=6",
-            "ru": "f⁻¹(−2)=6",
-            "uz": "f⁻¹(−2)=6"
+            "en": "f⁻¹(6)=−2",
+            "ru": "f⁻¹(6)=−2",
+            "uz": "f⁻¹(6)=−2"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN04_SWAP_SOLVE"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "A",
       "explanation": {
         "en": "An inverse reverses the mapping. Since f sends 6 to −2, f⁻¹ sends −2 back to 6.",
         "ru": "Обратная функция разворачивает отображение. Если f переводит 6 в −2, то f⁻¹ переводит −2 обратно в 6.",
@@ -631,11 +631,11 @@
         {
           "key": "A",
           "text": {
-            "en": "3−√(x+4)",
-            "ru": "3−√(x+4)",
-            "uz": "3−√(x+4)"
+            "en": "1/(x²−6x+5)",
+            "ru": "1/(x²−6x+5)",
+            "uz": "1/(x²−6x+5)"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN04_RECIPROCAL"
         },
         {
           "key": "B",
@@ -658,14 +658,14 @@
         {
           "key": "D",
           "text": {
-            "en": "1/(x²−6x+5)",
-            "ru": "1/(x²−6x+5)",
-            "uz": "1/(x²−6x+5)"
+            "en": "3−√(x+4)",
+            "ru": "3−√(x+4)",
+            "uz": "3−√(x+4)"
           },
-          "diagnostic_code": "FUN04_RECIPROCAL"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "Complete the square: f(x)=(x−3)²−4. Then y+4=(x−3)². Because the original domain is x≤3, choose x−3=−√(y+4), so x=3−√(y+4). Therefore f⁻¹(x)=3−√(x+4).",
         "ru": "Выделяем квадрат: f(x)=(x−3)²−4. Тогда y+4=(x−3)². Из-за области x≤3 выбираем x−3=−√(y+4), поэтому x=3−√(y+4). Значит f⁻¹(x)=3−√(x+4).",
