@@ -749,7 +749,7 @@ END
 $shadow_selector_limit$;
 
 -- Browser roles cannot mutate lifecycle/access authority.
-DO $
+DO $browser_priv$
 BEGIN
   IF has_function_privilege(
        'authenticated',
@@ -790,8 +790,7 @@ BEGIN
     RAISE EXCEPTION 'Commercial private storage became browser-readable';
   END IF;
 END
-$$;
-
+$browser_priv$;
 ROLLBACK;
 
 DO $$
