@@ -131,13 +131,13 @@ BEGIN
   );
 
   IF coalesce((v->>'allowed')::boolean,true)
-     OR v->>'reason'<>'generation_upgrade_required' THEN
-    RAISE EXCEPTION 'Free generated route was not upgrade-gated: %',v;
+     OR v->>'reason'<>'generation_disabled' THEN
+    RAISE EXCEPTION 'Free learner was upsold while generation runtime was unavailable: %',v;
   END IF;
 END
-$$;
+$;
 
-DO $$
+DO $
 DECLARE
   v jsonb;
   uid uuid:=(SELECT user_id FROM gai_gateway_people WHERE person_key='plus');
@@ -166,9 +166,25 @@ BEGIN
     RAISE EXCEPTION 'Plus generated route should pass gateway policy: %',v;
   END IF;
 END
-$$;
+$;
 
-DO $$
+DO $
+DECLARE
+  v jsonb;
+  uid uuid:=(SELECT user_id FROM gai_gateway_people WHERE person_key='free');
+BEGIN
+  v:=public.get_iclub_global_ai_guard_service_v1(
+    uid,'mathematics','exam_prep','freeform_question','generated','en',20
+  );
+
+  IF coalesce((v->>'allowed')::boolean,true)
+     OR v->>'reason'<>'generation_upgrade_required' THEN
+    RAISE EXCEPTION 'Free generated route was not upgrade-gated when paid generation was actually available: %',v;
+  END IF;
+END
+$;
+
+DO $
 DECLARE
   v jsonb;
   uid uuid:=(SELECT user_id FROM gai_gateway_people WHERE person_key='pro');
