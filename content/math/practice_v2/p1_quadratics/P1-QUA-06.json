@@ -74,29 +74,29 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "Solve x⁴ − 13x² + 36 = 0. Enter the greatest real root.",
-        "ru": "Решите x⁴ − 13x² + 36 = 0. Введите наибольший действительный корень.",
-        "uz": "x⁴ − 13x² + 36 = 0 ni yeching. Eng katta haqiqiy ildizni kiriting."
+        "en": "Solve x⁴ − 20x² + 64 = 0. Enter the greatest real root.",
+        "ru": "Решите x⁴ − 20x² + 64 = 0. Введите наибольший действительный корень.",
+        "uz": "x⁴ − 20x² + 64 = 0 ni yeching. Eng katta haqiqiy ildizni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "3",
+        "canonical_answer": "4",
         "accepted_examples": [
-          "3",
-          " 3 "
+          "4",
+          " 4 "
         ],
         "rejected_examples": [
           "2",
-          "9",
-          "-3"
+          "8",
+          "16"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "Let y = x². Then y² − 13y + 36 = 0 = (y − 4)(y − 9), so x² = 4 or 9. The real roots are ±2 and ±3, and the greatest is 3.",
-        "ru": "Пусть y = x². Тогда y² − 13y + 36 = 0 = (y − 4)(y − 9), значит x² = 4 или 9. Действительные корни ±2 и ±3, наибольший — 3.",
-        "uz": "y = x² deb olamiz. y² − 13y + 36 = 0 = (y − 4)(y − 9), demak x² = 4 yoki 9. Haqiqiy ildizlar ±2 va ±3, eng kattasi 3."
+        "en": "Let y = x². Then y² − 20y + 64 = 0 = (y − 4)(y − 16), so x² = 4 or 16. The real roots are ±2 and ±4, and the greatest is 4.",
+        "ru": "Пусть y = x². Тогда y² − 20y + 64 = 0 = (y − 4)(y − 16), поэтому x² = 4 или 16. Действительные корни ±2 и ±4, наибольший — 4.",
+        "uz": "y = x² deb olamiz. y² − 20y + 64 = 0 = (y − 4)(y − 16), demak x² = 4 yoki 16. Haqiqiy ildizlar ±2 va ±4, eng kattasi 4."
       },
       "ai_source_skill": "P1-QUA-06",
       "status": "draft"
