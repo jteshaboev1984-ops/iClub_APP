@@ -112,58 +112,58 @@
       "secondary_skills": [
         "P1-INT-03"
       ],
-      "role": "power_volume",
+      "role": "parameter_from_volume",
       "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
-        "en": "The region under y=x² from x=0 to x=2 is rotated about the x-axis. What is the volume?",
-        "ru": "Область под y=x² от x=0 до x=2 вращается вокруг оси x. Каков объём?",
-        "uz": "y=x² ostidagi x=0 dan x=2 gacha soha x o‘qi atrofida aylantiriladi. Hajm qancha?"
+        "en": "For k>0, the region under y=kx² from x=0 to x=2 is rotated about the x-axis and has volume 288π/5. Enter k.",
+        "ru": "При k>0 область под y=kx² от x=0 до x=2 вращается вокруг оси x и имеет объём 288π/5. Введите k.",
+        "uz": "k>0 uchun y=kx² ostidagi x=0 dan x=2 gacha soha x o‘qi atrofida aylantiriladi va hajmi 288π/5. k ni kiriting."
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "16π/5",
-            "ru": "16π/5",
-            "uz": "16π/5"
+            "en": "6",
+            "ru": "6",
+            "uz": "6"
           },
           "diagnostic_code": "INT05_RADIUS_SQUARED"
         },
         {
           "key": "B",
           "text": {
-            "en": "8π/3",
-            "ru": "8π/3",
-            "uz": "8π/3"
+            "en": "9",
+            "ru": "9",
+            "uz": "9"
           },
           "diagnostic_code": "INT05_RADIUS_SQUARED"
         },
         {
           "key": "C",
           "text": {
-            "en": "32/5",
-            "ru": "32/5",
-            "uz": "32/5"
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
           },
           "diagnostic_code": "INT05_PI_FACTOR"
         },
         {
           "key": "D",
           "text": {
-            "en": "32π/5",
-            "ru": "32π/5",
-            "uz": "32π/5"
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
           },
           "diagnostic_code": null
         }
       ],
       "correct_answer": "D",
       "explanation": {
-        "en": "V=π∫₀²(x²)²dx=π∫₀²x⁴dx=π[x⁵/5]₀²=32π/5.",
-        "ru": "V=π∫₀²(x²)²dx=π∫₀²x⁴dx=π[x⁵/5]₀²=32π/5.",
-        "uz": "V=π∫₀²(x²)²dx=π∫₀²x⁴dx=π[x⁵/5]₀²=32π/5."
+        "en": "V=π∫₀²(kx²)²dx=πk²∫₀²x⁴dx=(32k²/5)π. Set 32k²/5=288/5, so k²=9. Since k>0, k=3.",
+        "ru": "V=π∫₀²(kx²)²dx=πk²∫₀²x⁴dx=(32k²/5)π. Из 32k²/5=288/5 получаем k²=9. Так как k>0, k=3.",
+        "uz": "V=π∫₀²(kx²)²dx=πk²∫₀²x⁴dx=(32k²/5)π. 32k²/5=288/5 dan k²=9. k>0 bo‘lgani uchun k=3."
       },
       "ai_source_skill": "P1-INT-05",
       "status": "draft"
