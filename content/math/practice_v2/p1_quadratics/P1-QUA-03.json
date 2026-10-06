@@ -13,29 +13,29 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "Solve x² − 7x + 12 = 0. Enter the larger root.",
-        "ru": "Решите x² − 7x + 12 = 0. Введите больший корень.",
-        "uz": "x² − 7x + 12 = 0 ni yeching. Katta ildizni kiriting."
+        "en": "Solve x² − 8x + 15 = 0. Enter the larger root.",
+        "ru": "Решите x² − 8x + 15 = 0. Введите больший корень.",
+        "uz": "x² − 8x + 15 = 0 ni yeching. Katta ildizni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "4",
+        "canonical_answer": "5",
         "accepted_examples": [
-          "4",
-          " 4 "
+          "5",
+          " 5 "
         ],
         "rejected_examples": [
           "3",
-          "7",
-          "-4"
+          "8",
+          "-5"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "Factorise: x² − 7x + 12 = (x − 3)(x − 4). The roots are 3 and 4, so the larger root is 4.",
-        "ru": "Разложим на множители: x² − 7x + 12 = (x − 3)(x − 4). Корни 3 и 4, поэтому больший корень равен 4.",
-        "uz": "Ko‘paytuvchilarga ajratamiz: x² − 7x + 12 = (x − 3)(x − 4). Ildizlar 3 va 4, katta ildiz 4."
+        "en": "Factorise: x² − 8x + 15 = (x − 3)(x − 5). The roots are 3 and 5, so the larger root is 5.",
+        "ru": "Разложим на множители: x² − 8x + 15 = (x − 3)(x − 5). Корни 3 и 5, поэтому больший корень равен 5.",
+        "uz": "Ko‘paytuvchilarga ajratamiz: x² − 8x + 15 = (x − 3)(x − 5). Ildizlar 3 va 5, katta ildiz 5."
       },
       "ai_source_skill": "P1-QUA-03",
       "status": "draft"
