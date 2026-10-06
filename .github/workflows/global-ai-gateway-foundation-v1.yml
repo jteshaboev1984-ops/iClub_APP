@@ -78,7 +78,7 @@ jobs:
           migration='supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql'
           ! grep -Eiq '\b(update|delete[[:space:]]+from|truncate)[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
           ! grep -Eiq '\binsert[[:space:]]+into[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
-          ! grep -Eiq '\b(master(y|ies)|readiness|progression|placement)[[:space:]]*=' "$migration"
+          ! grep -Eiq '\b(update|delete[[:space:]]+from|insert[[:space:]]+into)[[:space:]]+private\.exam_prep_(skill_state|evidence|correction|retest|readiness|placement)' "$migration"
 
       - name: Apply dormant Global AI gateway foundation
         shell: bash
