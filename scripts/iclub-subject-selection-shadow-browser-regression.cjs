@@ -83,6 +83,8 @@ async function buildPage(browser, { width, height, lang, plan, visible = true })
     window.__subjects = subjects;
     window.__selections = new Map();
     window.__writes = [];
+    window.__writeDelayMs = 0;
+    window.__nextWriteFailure = "";
 
     window.i18n = { getLang: () => window.__lang };
 
@@ -132,6 +134,16 @@ async function buildPage(browser, { width, height, lang, plan, visible = true })
 
         const key = String(args?.p_subject_key || '');
         const nextStudy = args?.p_study_selected === true;
+        const delayMs = Number(window.__writeDelayMs || 0);
+        if (delayMs > 0) {
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+
+        if (window.__nextWriteFailure) {
+          const reason = String(window.__nextWriteFailure);
+          window.__nextWriteFailure = "";
+          return { data:{ ok:false, reason }, error:null };
+        }
         const nextCompetitive = args?.p_competitive_selected === true;
         const cfg = config();
         const current = window.__selections.get(key) || { study:false, competitive:false };
@@ -210,6 +222,28 @@ async function runFree(browser) {
   assert((await page.locator('[data-subject-access-entry-sub]').textContent()).includes('1'), 'Free entry summary missing');
   assert((await page.locator('[data-subject-access-beta-text]').textContent()).includes('не меняет'), 'Free beta safety copy missing');
 
+  // A pending save must disable every selector so rapid taps cannot create
+  // conflicting client-side requests while the server serializes the write.
+  await page.evaluate(() => { window.__writeDelayMs = 180; });
+  const mathControl = page.locator('.iclub-subject-access-row[data-subject-key="mathematics"][data-selection-mode="study"] .iclub-subject-access-switch');
+  await mathControl.click();
+  await page.waitForTimeout(25);
+  const bioPending = page.locator('.iclub-subject-access-row[data-subject-key="biology"][data-selection-mode="study"] input');
+  assert(await bioPending.isDisabled(), 'other study toggles remained enabled during an in-flight save');
+  await page.waitForTimeout(220);
+  await page.evaluate(() => { window.__writeDelayMs = 0; });
+
+  // A rejected server write must restore the visible switch state.
+  await page.evaluate(() => { window.__nextWriteFailure = 'study_subject_limit_reached'; });
+  const mathInputBeforeFailure = page.locator('.iclub-subject-access-row[data-subject-key="mathematics"][data-selection-mode="study"] input');
+  assert(await mathInputBeforeFailure.isChecked(), 'Mathematics should be selected before rollback test');
+  await mathControl.click();
+  await page.waitForTimeout(90);
+  const mathInputAfterFailure = page.locator('.iclub-subject-access-row[data-subject-key="mathematics"][data-selection-mode="study"] input');
+  assert(await mathInputAfterFailure.isChecked(), 'rejected server write left a false client-side selection state');
+
+  // Now perform the real deselect/select path to keep the rest of the Free matrix deterministic.
+  await toggle(page,'mathematics','study');
   await toggle(page,'mathematics','study');
 
   const bioStudy = page.locator('.iclub-subject-access-row[data-subject-key="biology"][data-selection-mode="study"] input');
@@ -224,7 +258,7 @@ async function runFree(browser) {
   assert(await bioCompetitive.isDisabled(), 'Free extra Competitive subject remained enabled');
 
   const writes = await page.evaluate(() => window.__writes);
-  assert(writes.length === 2, 'Free selector wrote unexpected number of shadow events');
+  assert(writes.length === 4, 'Free selector wrote unexpected number of shadow events');
   assert(writes.every(x => x.key === 'mathematics'), 'Free selector wrote an unselected subject');
 
   const metrics = await page.evaluate(() => ({
