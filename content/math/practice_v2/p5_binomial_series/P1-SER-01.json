@@ -162,11 +162,11 @@
         {
           "key": "A",
           "text": {
-            "en": "−540x³",
-            "ru": "−540x³",
-            "uz": "−540x³"
+            "en": "−60x³",
+            "ru": "−60x³",
+            "uz": "−60x³"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "SER01_MULTIPLIER_POWER"
         },
         {
           "key": "B",
@@ -189,14 +189,14 @@
         {
           "key": "D",
           "text": {
-            "en": "−60x³",
-            "ru": "−60x³",
-            "uz": "−60x³"
+            "en": "−540x³",
+            "ru": "−540x³",
+            "uz": "−540x³"
           },
-          "diagnostic_code": "SER01_MULTIPLIER_POWER"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "The fourth term has r=3: C(6,3)(−3x)³=20(−27x³)=−540x³.",
         "ru": "Четвёртый член соответствует r=3: C(6,3)(−3x)³=20(−27x³)=−540x³.",
@@ -302,11 +302,11 @@
         {
           "key": "A",
           "text": {
-            "en": "15",
-            "ru": "15",
-            "uz": "15"
+            "en": "60",
+            "ru": "60",
+            "uz": "60"
           },
-          "diagnostic_code": "SER01_BINOMIAL_COEFF"
+          "diagnostic_code": null
         },
         {
           "key": "B",
@@ -320,11 +320,11 @@
         {
           "key": "C",
           "text": {
-            "en": "60",
-            "ru": "60",
-            "uz": "60"
+            "en": "15",
+            "ru": "15",
+            "uz": "15"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "SER01_BINOMIAL_COEFF"
         },
         {
           "key": "D",
@@ -336,7 +336,7 @@
           "diagnostic_code": "SER01_CONSTANT_TERM"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "A",
       "explanation": {
         "en": "The general term has x-power 6−r−2r=6−3r. Set this to 0, giving r=2. The constant term is C(6,2)2²=15·4=60.",
         "ru": "Степень x в общем члене равна 6−r−2r=6−3r. Приравниваем к 0: r=2. Свободный член C(6,2)2²=15·4=60.",
@@ -363,11 +363,11 @@
         {
           "key": "A",
           "text": {
-            "en": "C(7,r)2^(7−r)(−3x)^r",
-            "ru": "C(7,r)2^(7−r)(−3x)^r",
-            "uz": "C(7,r)2^(7−r)(−3x)^r"
+            "en": "C(7,r+1)2^(7−r)(−3x)^r",
+            "ru": "C(7,r+1)2^(7−r)(−3x)^r",
+            "uz": "C(7,r+1)2^(7−r)(−3x)^r"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "SER01_TERM_INDEX"
         },
         {
           "key": "B",
@@ -381,11 +381,11 @@
         {
           "key": "C",
           "text": {
-            "en": "C(7,r+1)2^(7−r)(−3x)^r",
-            "ru": "C(7,r+1)2^(7−r)(−3x)^r",
-            "uz": "C(7,r+1)2^(7−r)(−3x)^r"
+            "en": "C(7,r)2^(7−r)(−3x)^r",
+            "ru": "C(7,r)2^(7−r)(−3x)^r",
+            "uz": "C(7,r)2^(7−r)(−3x)^r"
           },
-          "diagnostic_code": "SER01_TERM_INDEX"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -397,7 +397,7 @@
           "diagnostic_code": "SER01_SIGN"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "For (a+b)^n, term r+1 is C(n,r)a^(n−r)b^r. Here a=2 and b=−3x.",
         "ru": "Для (a+b)^n член r+1 равен C(n,r)a^(n−r)b^r. Здесь a=2, b=−3x.",
@@ -544,20 +544,20 @@
         {
           "key": "B",
           "text": {
-            "en": "48",
-            "ru": "48",
-            "uz": "48"
-          },
-          "diagnostic_code": "SER01_MULTIPLIER_POWER"
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "96",
             "ru": "96",
             "uz": "96"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "48",
+            "ru": "48",
+            "uz": "48"
+          },
+          "diagnostic_code": "SER01_MULTIPLIER_POWER"
         },
         {
           "key": "D",
@@ -569,7 +569,7 @@
           "diagnostic_code": "SER01_POWER_PATTERN"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "B",
       "explanation": {
         "en": "For r=3, the coefficient is C(4,3)3¹2³=4·3·8=96.",
         "ru": "При r=3 коэффициент равен C(4,3)3¹2³=4·3·8=96.",
@@ -633,20 +633,20 @@
         {
           "key": "A",
           "text": {
-            "en": "−2",
-            "ru": "−2",
-            "uz": "−2"
-          },
-          "diagnostic_code": "SER01_SIGN"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "2",
             "ru": "2",
             "uz": "2"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−2",
+            "ru": "−2",
+            "uz": "−2"
+          },
+          "diagnostic_code": "SER01_SIGN"
         },
         {
           "key": "C",
@@ -667,7 +667,7 @@
           "diagnostic_code": "SER01_BINOMIAL_COEFF"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "The x² coefficient is 6 from (1+x)⁴ times 1, plus 4 from the x term multiplied by −x: 6−4=2.",
         "ru": "Коэффициент при x²: 6 из (1+x)⁴, умноженное на 1, и −4 от члена 4x, умноженного на −x. Получаем 6−4=2.",
