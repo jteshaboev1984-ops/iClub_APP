@@ -10,19 +10,20 @@ Owner decision: preserve Tour results/history as the protected user-data boundar
 
 - Block 1 Content Architecture 2.0: COMPLETE / gate passed.
 - Block 2 content production: IN PROGRESS.
-- Practice 1 Quadratics: 68/68 authored; second-pass mathematical/language review passed; QA report recorded.
-- Practice 2 Functions & transformations: 80/80 authored; full bank-level mathematical/mechanical review passed; QA report recorded.
-- Practice 3 Coordinate Geometry: 68/68 authored; full bank-level mathematical/mechanical review passed; QA report recorded.
-- Practice 4 Circular Measure + Trigonometry: 77/77 authored; full bank-level mathematical/mechanical review passed; QA report recorded.
-- MCQ position QA: Practice 1 A/B/C/D=10/10/10/11; Practice 2=15/15/15/16; Practice 3=9/9/9/9; Practice 4=12/12/12/13.
-- Deterministic diagnostic catalogs: Quadratics 30; Functions 31; Coordinate Geometry 28; Circular/Trig 30.
-- Season 2 Tour 1–4 separation reviews: completed; overly similar Practice items were redesigned without changing Tours/history.
-- Existing approved/runtime-allowed iClub AI theory cards confirmed for all completed canonical skills in EN/RU/UZ.
-- AI source sufficiency gaps were found rather than silently filled: COO-05/06 and selected CIR-02/TRI-01/TRI-05 coverage now have draft EN/RU/UZ supplemental cards with runtime disabled pending normal review/approval.
+- Practice 1 Quadratics: 68/68 authored; full content QA passed; QA report recorded.
+- Practice 2 Functions & transformations: 80/80 authored; full content QA passed; QA report recorded.
+- Practice 3 Coordinate Geometry: 68/68 authored; full content QA passed; QA report recorded.
+- Practice 4 Circular Measure + Trigonometry: 77/77 authored; full content QA passed; QA report recorded.
+- Practice 5 Binomial Expansion + Series: 66/66 authored; full content QA passed; QA report recorded.
+- Total authored Practice v2 items through Practice 5: 359.
+- MCQ position QA: Practice 1 A/B/C/D=10/10/10/11; Practice 2=15/15/15/16; Practice 3=9/9/9/9; Practice 4=12/12/12/13; Practice 5=7/7/7/6.
+- Deterministic diagnostic catalogs: Quadratics 30; Functions 31; Coordinate Geometry 28; Circular/Trig 30; Binomial/Series 27.
+- Season 2 Tour 1–5 separation reviews: completed; overly similar Practice items were redesigned without changing Tours/history.
+- Approved/runtime-allowed AI source coverage is sufficient for Practice 5; draft supplements remain runtime-disabled only where earlier source sufficiency gaps were identified (COO-05/06 and selected CIR-02/TRI-01/TRI-05).
 - Technical publication status: BLOCKED intentionally until evaluator hardening and secure server-side runtime validation are complete.
 - Known evaluator blocker: Unicode minus accepted by authored contracts but not by current Practice scalar evaluator.
 - Production/Supabase user data and Tour results: unchanged by this work.
-- Next content block: Practice 5 — Binomial Expansion + Series (P1-SER-01…05).
+- Next content block: Practice 6 — Differentiation (P1-DIF-01…07).
 
 ## Purpose
 
