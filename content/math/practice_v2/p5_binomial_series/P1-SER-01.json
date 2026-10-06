@@ -297,11 +297,11 @@
         {
           "key": "A",
           "text": {
-            "en": "20",
-            "ru": "20",
-            "uz": "20"
+            "en": "30",
+            "ru": "30",
+            "uz": "30"
           },
-          "diagnostic_code": "SER01_BINOMIAL_COEFF"
+          "diagnostic_code": null
         },
         {
           "key": "B",
@@ -315,11 +315,11 @@
         {
           "key": "C",
           "text": {
-            "en": "30",
-            "ru": "30",
-            "uz": "30"
+            "en": "20",
+            "ru": "20",
+            "uz": "20"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "SER01_BINOMIAL_COEFF"
         },
         {
           "key": "D",
@@ -331,7 +331,7 @@
           "diagnostic_code": "SER01_MULTIPLIER_POWER"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "A",
       "explanation": {
         "en": "The x³ coefficient comes from x³·1 and x²·2x. These contribute C(5,3)=10 and 2C(5,2)=20, so the total is 30.",
         "ru": "Коэффициент при x³ получается из x³·1 и x²·2x. Вклады равны C(5,3)=10 и 2C(5,2)=20, всего 30.",
