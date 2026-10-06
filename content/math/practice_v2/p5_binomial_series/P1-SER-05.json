@@ -372,20 +372,20 @@
         {
           "key": "A",
           "text": {
-            "en": "|k|<2",
-            "ru": "|k|<2",
-            "uz": "|k|<2"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "k>2",
             "ru": "k>2",
             "uz": "k>2"
           },
           "diagnostic_code": "SER05_PARAMETER_RANGE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "|k|<2",
+            "ru": "|k|<2",
+            "uz": "|k|<2"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -406,7 +406,7 @@
           "diagnostic_code": "SER05_PARAMETER_RANGE"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "Convergence requires |r|=|−k/2|=|k|/2<1, so |k|<2.",
         "ru": "Для сходимости нужно |r|=|−k/2|=|k|/2<1, поэтому |k|<2.",
@@ -442,20 +442,20 @@
         {
           "key": "B",
           "text": {
-            "en": "Its common ratio is −1, so |r| is not less than 1.",
-            "ru": "Его отношение −1, поэтому |r| не меньше 1.",
-            "uz": "Umumiy nisbat −1, shuning uchun |r| 1 dan kichik emas."
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "Negative ratios never converge.",
             "ru": "Ряды с отрицательным отношением никогда не сходятся.",
             "uz": "Manfiy nisbatli qatorlar hech qachon yaqinlashmaydi."
           },
           "diagnostic_code": "SER05_CONVERGENCE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Its common ratio is −1, so |r| is not less than 1.",
+            "ru": "Его отношение −1, поэтому |r| не меньше 1.",
+            "uz": "Umumiy nisbat −1, shuning uchun |r| 1 dan kichik emas."
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -467,7 +467,7 @@
           "diagnostic_code": "SER05_CONVERGENCE"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "The common ratio is −1, so |r|=1. A finite sum to infinity requires |r|<1.",
         "ru": "Общее отношение равно −1, поэтому |r|=1. Для конечной суммы до бесконечности нужно |r|<1.",
@@ -542,11 +542,11 @@
         {
           "key": "B",
           "text": {
-            "en": "1<k²<3",
-            "ru": "1<k²<3",
-            "uz": "1<k²<3"
+            "en": "k²>1",
+            "ru": "k²>1",
+            "uz": "k²>1"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "SER05_PARAMETER_RANGE"
         },
         {
           "key": "C",
@@ -560,14 +560,14 @@
         {
           "key": "D",
           "text": {
-            "en": "k²>1",
-            "ru": "k²>1",
-            "uz": "k²>1"
+            "en": "1<k²<3",
+            "ru": "1<k²<3",
+            "uz": "1<k²<3"
           },
-          "diagnostic_code": "SER05_PARAMETER_RANGE"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "D",
       "explanation": {
         "en": "Convergence requires |k²−2|<1. Thus −1<k²−2<1, so 1<k²<3.",
         "ru": "Для сходимости нужно |k²−2|<1. Тогда −1<k²−2<1, поэтому 1<k²<3.",
