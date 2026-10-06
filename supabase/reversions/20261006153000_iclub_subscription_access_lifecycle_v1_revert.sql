@@ -6,6 +6,7 @@ begin;
 do $$
 declare
   v_cfg private.iclub_commercial_access_config%rowtype;
+  v_runtime private.iclub_global_ai_runtime_config%rowtype;
   v_count integer;
 begin
   select * into v_cfg
@@ -20,12 +21,24 @@ begin
     raise exception 'Subscription/access reversion refused: commercial access config is not dormant';
   end if;
 
+  select * into v_runtime
+  from private.iclub_global_ai_runtime_config
+  where id=1;
+
+  if found and (
+    v_runtime.global_ai_rollout_mode<>'off'
+    or v_runtime.plans_rollout_mode<>'off'
+  ) then
+    raise exception 'Subscription/access reversion refused: canary/public rollout is active';
+  end if;
+
   select
     (select count(*) from private.iclub_subscription_events)
     + (select count(*) from private.iclub_commercial_migration_state)
     + (select count(*) from private.iclub_legacy_subject_snapshot)
     + (select count(*) from private.iclub_subject_slot_selections)
     + (select count(*) from private.iclub_subject_slot_events)
+    + (select count(*) from private.iclub_product_canary_users)
   into v_count;
 
   if v_count<>0 then
@@ -33,6 +46,11 @@ begin
   end if;
 end
 $$;
+
+drop function if exists public.set_iclub_product_canary_service_v1(uuid,boolean,text,text);
+drop function if exists private.iclub_rollout_allows_user_v1(uuid,text);
+drop function if exists private.iclub_is_product_canary_v1(uuid);
+drop function if exists private.iclub_product_canary_limit_v1();
 
 drop function if exists public.finalize_iclub_subject_selection_service_v1(uuid,text);
 drop function if exists public.set_iclub_subject_slot_service_v1(uuid,uuid,text,boolean,boolean,text);
@@ -43,12 +61,17 @@ drop function if exists public.apply_iclub_subscription_event_service_v1(
   uuid,uuid,text,text,timestamptz,timestamptz,timestamptz,text
 );
 
+drop table if exists private.iclub_product_canary_users;
 drop table if exists private.iclub_subject_slot_events;
 drop table if exists private.iclub_subject_slot_selections;
 drop table if exists private.iclub_legacy_subject_snapshot;
 drop table if exists private.iclub_commercial_migration_state;
 drop table if exists private.iclub_commercial_access_config;
 drop table if exists private.iclub_subscription_events;
+
+alter table private.iclub_global_ai_runtime_config
+  drop column if exists plans_rollout_mode,
+  drop column if exists global_ai_rollout_mode;
 
 alter table private.iclub_subscription_entitlements
   drop constraint if exists iclub_subscription_scheduled_change_check,
