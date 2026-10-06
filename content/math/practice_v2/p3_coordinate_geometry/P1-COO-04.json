@@ -30,20 +30,20 @@
         {
           "key": "B",
           "text": {
-            "en": "Centre (−4,3), radius 49",
-            "ru": "Центр (−4,3), радиус 49",
-            "uz": "Markaz (−4,3), radius 49"
-          },
-          "diagnostic_code": "COO04_RADIUS_SQUARED"
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "Centre (−4,3), radius 7",
             "ru": "Центр (−4,3), радиус 7",
             "uz": "Markaz (−4,3), radius 7"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Centre (−4,3), radius 49",
+            "ru": "Центр (−4,3), радиус 49",
+            "uz": "Markaz (−4,3), radius 49"
+          },
+          "diagnostic_code": "COO04_RADIUS_SQUARED"
         },
         {
           "key": "D",
@@ -55,7 +55,7 @@
           "diagnostic_code": "COO04_CENTRE_SIGN"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "B",
       "explanation": {
         "en": "Standard form is (x−a)²+(y−b)²=r². Here a=−4, b=3 and r=√49=7.",
         "ru": "Стандартная форма: (x−a)²+(y−b)²=r². Здесь a=−4, b=3 и r=√49=7.",
@@ -231,11 +231,11 @@
         {
           "key": "A",
           "text": {
-            "en": "(x−2)²+(y+5)²=9",
-            "ru": "(x−2)²+(y+5)²=9",
-            "uz": "(x−2)²+(y+5)²=9"
+            "en": "(x+2)²+(y−5)²=9",
+            "ru": "(x+2)²+(y−5)²=9",
+            "uz": "(x+2)²+(y−5)²=9"
           },
-          "diagnostic_code": "COO04_CENTRE_SIGN"
+          "diagnostic_code": null
         },
         {
           "key": "B",
@@ -249,11 +249,11 @@
         {
           "key": "C",
           "text": {
-            "en": "(x+2)²+(y−5)²=9",
-            "ru": "(x+2)²+(y−5)²=9",
-            "uz": "(x+2)²+(y−5)²=9"
+            "en": "(x−2)²+(y+5)²=9",
+            "ru": "(x−2)²+(y+5)²=9",
+            "uz": "(x−2)²+(y+5)²=9"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "COO04_CENTRE_SIGN"
         },
         {
           "key": "D",
@@ -265,7 +265,7 @@
           "diagnostic_code": "COO04_CENTRE_SIGN"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "A",
       "explanation": {
         "en": "For centre (a,b) and radius r, the equation is (x−a)²+(y−b)²=r². Thus (x+2)²+(y−5)²=9.",
         "ru": "Для центра (a,b) и радиуса r уравнение имеет вид (x−a)²+(y−b)²=r². Поэтому (x+2)²+(y−5)²=9.",
@@ -331,20 +331,20 @@
         {
           "key": "A",
           "text": {
-            "en": "x²+y²−2x+6y−10=0",
-            "ru": "x²+y²−2x+6y−10=0",
-            "uz": "x²+y²−2x+6y−10=0"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "x²+y²−2x+6y+10=0",
             "ru": "x²+y²−2x+6y+10=0",
             "uz": "x²+y²−2x+6y+10=0"
           },
           "diagnostic_code": "COO04_EXPANDED_CONSTANT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x²+y²−2x+6y−10=0",
+            "ru": "x²+y²−2x+6y−10=0",
+            "uz": "x²+y²−2x+6y−10=0"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -365,7 +365,7 @@
           "diagnostic_code": "COO04_EXPANDED_CONSTANT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "Expand: x²−2x+1+y²+6y+9=20. Moving 20 to the left gives x²+y²−2x+6y−10=0.",
         "ru": "Раскрываем: x²−2x+1+y²+6y+9=20. Переносим 20 влево и получаем x²+y²−2x+6y−10=0.",
@@ -438,11 +438,11 @@
         {
           "key": "A",
           "text": {
-            "en": "3",
-            "ru": "3",
-            "uz": "3"
+            "en": "5",
+            "ru": "5",
+            "uz": "5"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "COO04_COMPLETE_SQUARE"
         },
         {
           "key": "B",
@@ -456,11 +456,11 @@
         {
           "key": "C",
           "text": {
-            "en": "5",
-            "ru": "5",
-            "uz": "5"
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
           },
-          "diagnostic_code": "COO04_COMPLETE_SQUARE"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -472,7 +472,7 @@
           "diagnostic_code": "COO04_EXPANDED_CONSTANT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "Complete the squares: (x+5)²−25+(y−2)²−4+20=0. Thus (x+5)²+(y−2)²=9, so the radius is 3.",
         "ru": "Выделяем квадраты: (x+5)²−25+(y−2)²−4+20=0. Получаем (x+5)²+(y−2)²=9, поэтому радиус равен 3.",
@@ -543,11 +543,11 @@
         {
           "key": "A",
           "text": {
-            "en": "(x−2)²+(y−4)²=13",
-            "ru": "(x−2)²+(y−4)²=13",
-            "uz": "(x−2)²+(y−4)²=13"
+            "en": "(x−1)²+(y−2)²=13",
+            "ru": "(x−1)²+(y−2)²=13",
+            "uz": "(x−1)²+(y−2)²=13"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "COO04_COMPLETE_SQUARE"
         },
         {
           "key": "B",
@@ -570,14 +570,14 @@
         {
           "key": "D",
           "text": {
-            "en": "(x−1)²+(y−2)²=13",
-            "ru": "(x−1)²+(y−2)²=13",
-            "uz": "(x−1)²+(y−2)²=13"
+            "en": "(x−2)²+(y−4)²=13",
+            "ru": "(x−2)²+(y−4)²=13",
+            "uz": "(x−2)²+(y−4)²=13"
           },
-          "diagnostic_code": "COO04_COMPLETE_SQUARE"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "The centre is the midpoint (2,4). The diameter squared is 6²+4²=52, so r²=52/4=13. Hence (x−2)²+(y−4)²=13.",
         "ru": "Центр — середина (2,4). Квадрат диаметра равен 6²+4²=52, поэтому r²=52/4=13. Получаем (x−2)²+(y−4)²=13.",
