@@ -1,0 +1,720 @@
+{
+  "version": "practice_v2_p3_coordinate_geometry_draft_v0.1",
+  "skill": "P1-COO-05",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q192",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-04"
+      ],
+      "role": "point_position",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "For the circle (x−2)²+(y+1)²=25, where is the point P(5,3)?",
+        "ru": "Для окружности (x−2)²+(y+1)²=25 где находится точка P(5,3)?",
+        "uz": "(x−2)²+(y+1)²=25 aylana uchun P(5,3) nuqta qayerda joylashgan?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Inside the circle",
+            "ru": "Внутри окружности",
+            "uz": "Aylana ichida"
+          },
+          "diagnostic_code": "COO05_POINT_POSITION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "On the circle",
+            "ru": "На окружности",
+            "uz": "Aylana ustida"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Outside the circle",
+            "ru": "Вне окружности",
+            "uz": "Aylana tashqarisida"
+          },
+          "diagnostic_code": "COO05_POINT_POSITION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "At the centre",
+            "ru": "В центре",
+            "uz": "Markazda"
+          },
+          "diagnostic_code": "COO05_POINT_POSITION"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The centre is (2,−1). For P(5,3), the squared distance from the centre is 3²+4²=25=r², so P lies on the circle.",
+        "ru": "Центр равен (2,−1). Для P(5,3) квадрат расстояния до центра равен 3²+4²=25=r², поэтому P лежит на окружности.",
+        "uz": "Markaz (2,−1). P(5,3) uchun markazgacha masofa kvadrati 3²+4²=25=r², demak P aylana ustida."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q193",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-04",
+        "P1-QUA-03"
+      ],
+      "role": "line_circle_intersection",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The line y=1 intersects the circle x²+y²=10 at two points. Enter the positive x-coordinate of an intersection.",
+        "ru": "Прямая y=1 пересекает окружность x²+y²=10 в двух точках. Введите положительную x-координату точки пересечения.",
+        "uz": "y=1 chiziq x²+y²=10 aylanani ikki nuqtada kesadi. Kesishish nuqtasining musbat x-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "-3",
+          "9",
+          "1"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "9",
+          "diagnostic_code": "COO05_LINE_CIRCLE_SUB"
+        }
+      ],
+      "explanation": {
+        "en": "Substitute y=1 into the circle: x²+1=10, so x²=9 and x=±3. The positive x-coordinate is 3.",
+        "ru": "Подставляем y=1 в окружность: x²+1=10, поэтому x²=9 и x=±3. Положительная x-координата равна 3.",
+        "uz": "y=1 ni aylana tenglamasiga qo‘yamiz: x²+1=10, demak x²=9 va x=±3. Musbat x-koordinata 3."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q194",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-03",
+        "P1-COO-04"
+      ],
+      "role": "tangent_gradient",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The circle x²+y²=25 is touched at P(3,4). What is the gradient of the tangent at P?",
+        "ru": "К окружности x²+y²=25 проведена касательная в точке P(3,4). Каков градиент касательной?",
+        "uz": "x²+y²=25 aylanaga P(3,4) nuqtada urinma o‘tkazilgan. Urinmaning gradienti qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "4/3",
+            "ru": "4/3",
+            "uz": "4/3"
+          },
+          "diagnostic_code": "COO05_RADIUS_PERP_TANGENT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−4/3",
+            "ru": "−4/3",
+            "uz": "−4/3"
+          },
+          "diagnostic_code": "COO05_RADIUS_PERP_TANGENT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−3/4",
+            "ru": "−3/4",
+            "uz": "−3/4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "3/4",
+            "ru": "3/4",
+            "uz": "3/4"
+          },
+          "diagnostic_code": "COO05_RADIUS_PERP_TANGENT"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "The radius OP has gradient 4/3. The tangent is perpendicular to the radius, so its gradient is the negative reciprocal, −3/4.",
+        "ru": "Радиус OP имеет градиент 4/3. Касательная перпендикулярна радиусу, поэтому её градиент — отрицательная обратная величина, −3/4.",
+        "uz": "OP radius gradienti 4/3. Urinma radiusga perpendikulyar, shuning uchun uning gradienti manfiy teskari qiymat, −3/4."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q195",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-01",
+        "P1-COO-03"
+      ],
+      "role": "tangent_equation",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The circle x²+y²=13 is touched at P(2,3). The tangent has equation 2x+3y=c. Enter c.",
+        "ru": "К окружности x²+y²=13 проведена касательная в точке P(2,3). Касательная имеет вид 2x+3y=c. Введите c.",
+        "uz": "x²+y²=13 aylanaga P(2,3) nuqtada urinma o‘tkazilgan. Urinma 2x+3y=c ko‘rinishda. c ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "13",
+        "accepted_examples": [
+          "13",
+          " 13 "
+        ],
+        "rejected_examples": [
+          "5",
+          "9",
+          "26"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The tangent passes through P(2,3), so 2(2)+3(3)=c. Hence c=4+9=13.",
+        "ru": "Касательная проходит через P(2,3), поэтому 2(2)+3(3)=c. Значит c=4+9=13.",
+        "uz": "Urinma P(2,3) nuqtadan o‘tadi, demak 2(2)+3(3)=c. Shundan c=4+9=13."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q196",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-02",
+        "P1-COO-03"
+      ],
+      "role": "chord_geometry",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "A circle has centre O(2,1). A chord has endpoints A(−1,5) and B(5,5). Which statement is correct?",
+        "ru": "Окружность имеет центр O(2,1). Хорда имеет концы A(−1,5) и B(5,5). Какое утверждение верно?",
+        "uz": "Aylana markazi O(2,1). Vatar uchlari A(−1,5) va B(5,5). Qaysi tasdiq to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "The midpoint of AB is (2,5), and OM is perpendicular to AB.",
+            "ru": "Середина AB равна (2,5), и OM перпендикулярен AB.",
+            "uz": "AB o‘rta nuqtasi (2,5), va OM AB ga perpendikulyar."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "The midpoint of AB is (2,4), and OM is parallel to AB.",
+            "ru": "Середина AB равна (2,4), и OM параллелен AB.",
+            "uz": "AB o‘rta nuqtasi (2,4), va OM AB ga parallel."
+          },
+          "diagnostic_code": "COO05_CHORD_BISECTOR"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "The midpoint of AB is (3,5), and OM is perpendicular to AB.",
+            "ru": "Середина AB равна (3,5), и OM перпендикулярен AB.",
+            "uz": "AB o‘rta nuqtasi (3,5), va OM AB ga perpendikulyar."
+          },
+          "diagnostic_code": "COO05_CHORD_BISECTOR"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "The midpoint of AB is (2,5), and OM is parallel to AB.",
+            "ru": "Середина AB равна (2,5), и OM параллелен AB.",
+            "uz": "AB o‘rta nuqtasi (2,5), va OM AB ga parallel."
+          },
+          "diagnostic_code": "COO05_CHORD_BISECTOR"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The midpoint is ((−1+5)/2,(5+5)/2)=(2,5). AB is horizontal while OM is vertical, so OM is perpendicular to the chord.",
+        "ru": "Середина равна ((−1+5)/2,(5+5)/2)=(2,5). AB горизонтальна, а OM вертикальна, поэтому OM перпендикулярен хорде.",
+        "uz": "O‘rta nuqta ((−1+5)/2,(5+5)/2)=(2,5). AB gorizontal, OM vertikal, demak OM vatarga perpendikulyar."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q197",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-04"
+      ],
+      "role": "point_position",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "For the circle (x+1)²+(y−2)²=20 and the point P(3,4), enter d²−r², where d is the distance from P to the centre.",
+        "ru": "Для окружности (x+1)²+(y−2)²=20 и точки P(3,4) введите d²−r², где d — расстояние от P до центра.",
+        "uz": "(x+1)²+(y−2)²=20 aylana va P(3,4) nuqta uchun d²−r² ni kiriting, bu yerda d — P dan markazgacha masofa."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "0",
+        "accepted_examples": [
+          "0",
+          " 0 "
+        ],
+        "rejected_examples": [
+          "20",
+          "4",
+          "-4"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The centre is (−1,2). Thus d²=(3+1)²+(4−2)²=16+4=20, while r²=20. Therefore d²−r²=0.",
+        "ru": "Центр равен (−1,2). Тогда d²=(3+1)²+(4−2)²=16+4=20, а r²=20. Поэтому d²−r²=0.",
+        "uz": "Markaz (−1,2). Demak d²=(3+1)²+(4−2)²=16+4=20, r²=20. Shuning uchun d²−r²=0."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q198",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-04",
+        "P1-QUA-03"
+      ],
+      "role": "line_circle_intersection",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The line x=2 intersects the circle (x−1)²+(y+2)²=10. What are the y-coordinates of the intersection points?",
+        "ru": "Прямая x=2 пересекает окружность (x−1)²+(y+2)²=10. Каковы y-координаты точек пересечения?",
+        "uz": "x=2 chiziq (x−1)²+(y+2)²=10 aylanani kesadi. Kesishish nuqtalarining y-koordinatalari qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "1 and −5",
+            "ru": "1 и −5",
+            "uz": "1 va −5"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3 and −3",
+            "ru": "3 и −3",
+            "uz": "3 va −3"
+          },
+          "diagnostic_code": "COO05_LINE_CIRCLE_SUB"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1 and 5",
+            "ru": "1 и 5",
+            "uz": "1 va 5"
+          },
+          "diagnostic_code": "COO05_LINE_CIRCLE_SUB"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−1 and −5",
+            "ru": "−1 и −5",
+            "uz": "−1 va −5"
+          },
+          "diagnostic_code": "COO05_LINE_CIRCLE_SUB"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Substitute x=2: (2−1)²+(y+2)²=10, so (y+2)²=9. Hence y+2=±3, giving y=1 or y=−5.",
+        "ru": "Подставляем x=2: (2−1)²+(y+2)²=10, поэтому (y+2)²=9. Тогда y+2=±3, откуда y=1 или y=−5.",
+        "uz": "x=2 ni qo‘yamiz: (2−1)²+(y+2)²=10, demak (y+2)²=9. Shunda y+2=±3, ya’ni y=1 yoki y=−5."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q199",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-03",
+        "P1-COO-04"
+      ],
+      "role": "tangent_equation",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The circle (x−1)²+(y−2)²=25 is touched at P(4,6). Which equation is the tangent at P?",
+        "ru": "Окружность (x−1)²+(y−2)²=25 касается прямой в точке P(4,6). Каково уравнение касательной в P?",
+        "uz": "(x−1)²+(y−2)²=25 aylanaga P(4,6) nuqtada urinma o‘tkazilgan. Urinma tenglamasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3x+4y=36",
+            "ru": "3x+4y=36",
+            "uz": "3x+4y=36"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "4x−3y=−2",
+            "ru": "4x−3y=−2",
+            "uz": "4x−3y=−2"
+          },
+          "diagnostic_code": "COO05_RADIUS_PERP_TANGENT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "3x−4y=−12",
+            "ru": "3x−4y=−12",
+            "uz": "3x−4y=−12"
+          },
+          "diagnostic_code": "COO05_RADIUS_PERP_TANGENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "4x+3y=34",
+            "ru": "4x+3y=34",
+            "uz": "4x+3y=34"
+          },
+          "diagnostic_code": "COO05_RADIUS_PERP_TANGENT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The radius from (1,2) to (4,6) has direction (3,4), so the tangent is perpendicular to it. The line 3x+4y=36 passes through (4,6) and has gradient −3/4.",
+        "ru": "Радиус от (1,2) к (4,6) имеет направление (3,4), поэтому касательная перпендикулярна ему. Прямая 3x+4y=36 проходит через (4,6) и имеет градиент −3/4.",
+        "uz": "(1,2) dan (4,6) gacha radius yo‘nalishi (3,4), shuning uchun urinma unga perpendikulyar. 3x+4y=36 chiziq (4,6) dan o‘tadi va gradienti −3/4."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q200",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-02",
+        "P1-COO-04"
+      ],
+      "role": "chord_length",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "In the circle x²+y²=25, the vertical line x=3 cuts a chord AB. Enter the length AB.",
+        "ru": "В окружности x²+y²=25 вертикальная прямая x=3 высекает хорду AB. Введите длину AB.",
+        "uz": "x²+y²=25 aylanada x=3 vertikal chiziq AB vatarni kesadi. AB uzunligini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "8",
+        "accepted_examples": [
+          "8",
+          " 8 "
+        ],
+        "rejected_examples": [
+          "4",
+          "16",
+          "6"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "With x=3, 9+y²=25, so y=±4. The chord endpoints are (3,4) and (3,−4), whose vertical separation is 8.",
+        "ru": "При x=3 имеем 9+y²=25, поэтому y=±4. Концы хорды: (3,4) и (3,−4), их вертикальное расстояние равно 8.",
+        "uz": "x=3 bo‘lsa 9+y²=25, demak y=±4. Vatar uchlari (3,4) va (3,−4), ularning vertikal masofasi 8."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q201",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-04"
+      ],
+      "role": "diameter_intersection",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The line y=2 passes through the centre of the circle (x−4)²+(y−2)²=16. Which are the two intersection points?",
+        "ru": "Прямая y=2 проходит через центр окружности (x−4)²+(y−2)²=16. Каковы две точки пересечения?",
+        "uz": "y=2 chiziq (x−4)²+(y−2)²=16 aylana markazidan o‘tadi. Ikki kesishish nuqtasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(0,2) and (8,2)",
+            "ru": "(0,2) и (8,2)",
+            "uz": "(0,2) va (8,2)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(4,−2) and (4,6)",
+            "ru": "(4,−2) и (4,6)",
+            "uz": "(4,−2) va (4,6)"
+          },
+          "diagnostic_code": "COO05_GEOMETRY_LINK"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(2,2) and (6,2)",
+            "ru": "(2,2) и (6,2)",
+            "uz": "(2,2) va (6,2)"
+          },
+          "diagnostic_code": "COO05_GEOMETRY_LINK"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(0,0) and (8,4)",
+            "ru": "(0,0) и (8,4)",
+            "uz": "(0,0) va (8,4)"
+          },
+          "diagnostic_code": "COO05_LINE_CIRCLE_SUB"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The centre is (4,2) and radius 4. Along the horizontal diameter y=2, move 4 units left and right from x=4, giving (0,2) and (8,2).",
+        "ru": "Центр (4,2), радиус 4. По горизонтальному диаметру y=2 отходим на 4 единицы влево и вправо от x=4: получаем (0,2) и (8,2).",
+        "uz": "Markaz (4,2), radius 4. y=2 gorizontal diametr bo‘ylab x=4 dan 4 birlik chap va o‘ngga yuramiz: (0,2) va (8,2)."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q202",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-02",
+        "P1-COO-03"
+      ],
+      "role": "perpendicular_bisector",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "A chord has endpoints A(1,2) and B(5,6). Which equation could contain the centre of the circle?",
+        "ru": "Хорда имеет концы A(1,2) и B(5,6). На какой прямой может лежать центр окружности?",
+        "uz": "Vatar uchlari A(1,2) va B(5,6). Aylana markazi qaysi chiziqda yotishi mumkin?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=x+1",
+            "ru": "y=x+1",
+            "uz": "y=x+1"
+          },
+          "diagnostic_code": "COO05_CHORD_BISECTOR"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=−x+7",
+            "ru": "y=−x+7",
+            "uz": "y=−x+7"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=x−1",
+            "ru": "y=x−1",
+            "uz": "y=x−1"
+          },
+          "diagnostic_code": "COO05_CHORD_BISECTOR"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=−x+3",
+            "ru": "y=−x+3",
+            "uz": "y=−x+3"
+          },
+          "diagnostic_code": "COO05_CHORD_BISECTOR"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The midpoint of AB is (3,4), and AB has gradient 1. Its perpendicular bisector has gradient −1 and passes through (3,4), so y=−x+7.",
+        "ru": "Середина AB равна (3,4), а градиент AB равен 1. Серединный перпендикуляр имеет градиент −1 и проходит через (3,4), поэтому y=−x+7.",
+        "uz": "AB o‘rta nuqtasi (3,4), gradienti 1. O‘rta perpendikulyar gradienti −1 va (3,4) dan o‘tadi, demak y=−x+7."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q203",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-04"
+      ],
+      "role": "circle_geometry_transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "A circle has centre (1,−2) and radius 5. The point P(k,2) lies on the circle and k>1. Enter k.",
+        "ru": "Окружность имеет центр (1,−2) и радиус 5. Точка P(k,2) лежит на окружности, причём k>1. Введите k.",
+        "uz": "Aylana markazi (1,−2), radiusi 5. P(k,2) nuqta aylanada va k>1. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "-2",
+          "3",
+          "6"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The radius condition gives (k−1)²+(2+2)²=25. Thus (k−1)²=9, so k=4 or k=−2. Since k>1, k=4.",
+        "ru": "Условие радиуса: (k−1)²+(2+2)²=25. Тогда (k−1)²=9, поэтому k=4 или k=−2. Так как k>1, получаем k=4.",
+        "uz": "Radius sharti: (k−1)²+(2+2)²=25. Demak (k−1)²=9, shuning uchun k=4 yoki k=−2. k>1 bo‘lgani uchun k=4."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q204",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-05",
+      "secondary_skills": [
+        "P1-COO-03",
+        "P1-COO-04"
+      ],
+      "role": "mixed_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The circle (x−2)²+(y−1)²=10 passes through P(5,2). Which line is tangent to the circle at P?",
+        "ru": "Окружность (x−2)²+(y−1)²=10 проходит через P(5,2). Какая прямая является касательной к окружности в P?",
+        "uz": "(x−2)²+(y−1)²=10 aylana P(5,2) nuqtadan o‘tadi. P dagi urinma qaysi chiziq?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3x+y=17",
+            "ru": "3x+y=17",
+            "uz": "3x+y=17"
+          },
+          "diagnostic_code": "COO05_RADIUS_PERP_TANGENT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x+3y=11",
+            "ru": "x+3y=11",
+            "uz": "x+3y=11"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x−3y=−1",
+            "ru": "x−3y=−1",
+            "uz": "x−3y=−1"
+          },
+          "diagnostic_code": "COO05_RADIUS_PERP_TANGENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "3x−y=13",
+            "ru": "3x−y=13",
+            "uz": "3x−y=13"
+          },
+          "diagnostic_code": "COO05_RADIUS_PERP_TANGENT"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The radius from (2,1) to P(5,2) has gradient 1/3, so the tangent gradient is −3. Through (5,2): y−2=−3(x−5), which rearranges to 3x+y=17.",
+        "ru": "Радиус от (2,1) к P(5,2) имеет градиент 1/3, поэтому градиент касательной равен −3. Через (5,2): y−2=−3(x−5), что даёт 3x+y=17.",
+        "uz": "(2,1) dan P(5,2) gacha radius gradienti 1/3, demak urinma gradienti −3. (5,2) orqali: y−2=−3(x−5), bundan 3x+y=17."
+      },
+      "ai_source_skill": "P1-COO-05",
+      "status": "draft"
+    }
+  ]
+}
