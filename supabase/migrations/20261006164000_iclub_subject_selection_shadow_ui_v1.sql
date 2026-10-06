@@ -146,6 +146,15 @@ declare
   v_uid uuid:=auth.uid();
   v_cfg private.iclub_commercial_access_config%rowtype;
   v_runtime private.iclub_global_ai_runtime_config%rowtype;
+  v_caps jsonb;
+  v_subject record;
+  v_study_limit integer;
+  v_comp_limit integer;
+  v_all_subjects boolean:=false;
+  v_current_study boolean:=false;
+  v_current_comp boolean:=false;
+  v_study_used_other integer:=0;
+  v_comp_used_other integer:=0;
   v_result jsonb;
 begin
   if v_uid is null then
@@ -154,6 +163,11 @@ begin
 
   if coalesce(length(trim(p_subject_key)),0)<2 then
     return jsonb_build_object('ok',false,'reason','invalid_subject');
+  end if;
+
+  if coalesce(p_competitive_selected,false)
+     and not coalesce(p_study_selected,false) then
+    return jsonb_build_object('ok',false,'reason','competitive_requires_study');
   end if;
 
   select * into v_cfg
@@ -173,6 +187,77 @@ begin
   if not found
      or not private.iclub_rollout_allows_user_v1(v_uid,v_runtime.plans_rollout_mode) then
     return jsonb_build_object('ok',false,'reason','rollout_unavailable');
+  end if;
+
+  select s.subject_key,s.type,s.is_active
+  into v_subject
+  from public.subjects s
+  where s.subject_key=trim(p_subject_key)
+  limit 1;
+
+  if not found or coalesce(v_subject.is_active,false) is not true then
+    return jsonb_build_object('ok',false,'reason','subject_unavailable');
+  end if;
+
+  if coalesce(p_competitive_selected,false)
+     and v_subject.type<>'main' then
+    return jsonb_build_object('ok',false,'reason','competitive_requires_main_subject');
+  end if;
+
+  v_caps:=public.get_iclub_subscription_capabilities_service_v1(v_uid);
+  if coalesce((v_caps->>'resolved')::boolean,false) is not true then
+    return jsonb_build_object(
+      'ok',false,
+      'reason',coalesce(v_caps->>'reason','subscription_unavailable')
+    );
+  end if;
+
+  -- One learner's slot changes are serialized so two quick taps/requests cannot
+  -- race past the plan limit.
+  perform pg_advisory_xact_lock(hashtextextended('iclub-subject-slot:'||v_uid::text,0));
+
+  v_all_subjects:=coalesce((v_caps->>'all_available_subjects')::boolean,false);
+  v_study_limit:=nullif(v_caps->>'study_subject_limit','')::integer;
+  v_comp_limit:=coalesce(nullif(v_caps->>'competitive_subject_limit','')::integer,0);
+
+  select
+    coalesce(bool_or(x.study_selected),false),
+    coalesce(bool_or(x.competitive_selected),false)
+  into v_current_study,v_current_comp
+  from private.iclub_subject_slot_selections x
+  where x.user_id=v_uid
+    and x.subject_key=trim(p_subject_key);
+
+  select
+    count(*) filter(where x.study_selected),
+    count(*) filter(where x.competitive_selected)
+  into v_study_used_other,v_comp_used_other
+  from private.iclub_subject_slot_selections x
+  where x.user_id=v_uid
+    and x.subject_key<>trim(p_subject_key);
+
+  if coalesce(p_study_selected,false)
+     and not v_all_subjects
+     and not v_current_study
+     and v_study_limit is not null
+     and v_study_used_other>=v_study_limit then
+    return jsonb_build_object(
+      'ok',false,
+      'reason','study_subject_limit_reached',
+      'limit',v_study_limit,
+      'used',v_study_used_other
+    );
+  end if;
+
+  if coalesce(p_competitive_selected,false)
+     and not v_current_comp
+     and v_comp_used_other>=v_comp_limit then
+    return jsonb_build_object(
+      'ok',false,
+      'reason','competitive_subject_limit_reached',
+      'limit',v_comp_limit,
+      'used',v_comp_used_other
+    );
   end if;
 
   v_result:=public.set_iclub_subject_slot_service_v1(
@@ -197,7 +282,6 @@ begin
   );
 end;
 $setslot$;
-
 revoke all on function public.set_iclub_my_subject_slot_v1(text,boolean,boolean)
   from public,anon;
 grant execute on function public.set_iclub_my_subject_slot_v1(text,boolean,boolean)
