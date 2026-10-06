@@ -21,20 +21,20 @@
         {
           "key": "A",
           "text": {
-            "en": "y=f(x)+6",
-            "ru": "y=f(x)+6",
-            "uz": "y=f(x)+6"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "y=f(x)−6",
             "ru": "y=f(x)−6",
             "uz": "y=f(x)−6"
           },
           "diagnostic_code": "FUN06_VERTICAL_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=f(x)+6",
+            "ru": "y=f(x)+6",
+            "uz": "y=f(x)+6"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -55,7 +55,7 @@
           "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "Adding 6 outside the function increases every y-coordinate by 6, so y=f(x)+6 is a vertical translation 6 units upward.",
         "ru": "Прибавление 6 снаружи функции увеличивает каждую y-координату на 6, поэтому y=f(x)+6 — сдвиг на 6 единиц вверх.",
@@ -100,23 +100,23 @@
         {
           "key": "C",
           "text": {
-            "en": "y=f(x)+3",
-            "ru": "y=f(x)+3",
-            "uz": "y=f(x)+3"
-          },
-          "diagnostic_code": "FUN06_VERTICAL_SIGN"
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "y=f(x+3)",
             "ru": "y=f(x+3)",
             "uz": "y=f(x+3)"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=f(x)+3",
+            "ru": "y=f(x)+3",
+            "uz": "y=f(x)+3"
+          },
+          "diagnostic_code": "FUN06_VERTICAL_SIGN"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "C",
       "explanation": {
         "en": "Horizontal shifts use the opposite-looking sign inside the function. Replacing x by x+3 moves the graph 3 units left.",
         "ru": "При горизонтальном сдвиге знак внутри функции выглядит противоположно направлению. Замена x на x+3 сдвигает график на 3 единицы влево.",
@@ -180,20 +180,20 @@
         {
           "key": "A",
           "text": {
-            "en": "y=(x−3)²−2",
-            "ru": "y=(x−3)²−2",
-            "uz": "y=(x−3)²−2"
-          },
-          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "y=(x+3)²−2",
             "ru": "y=(x+3)²−2",
             "uz": "y=(x+3)²−2"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=(x−3)²−2",
+            "ru": "y=(x−3)²−2",
+            "uz": "y=(x−3)²−2"
+          },
+          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
         },
         {
           "key": "C",
@@ -214,7 +214,7 @@
           "diagnostic_code": "FUN06_POINT_MAP"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "Left by 3 means replace x by x+3. Down by 2 means subtract 2 outside. Hence y=(x+3)²−2.",
         "ru": "Сдвиг на 3 влево означает заменить x на x+3. Сдвиг на 2 вниз означает вычесть 2 снаружи. Получаем y=(x+3)²−2.",
@@ -339,20 +339,20 @@
         {
           "key": "A",
           "text": {
-            "en": "2 units left and 5 units up",
-            "ru": "На 2 влево и на 5 вверх",
-            "uz": "2 birlik chapga va 5 birlik yuqoriga"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "2 units right and 5 units up",
             "ru": "На 2 вправо и на 5 вверх",
             "uz": "2 birlik o‘ngga va 5 birlik yuqoriga"
           },
           "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2 units left and 5 units up",
+            "ru": "На 2 влево и на 5 вверх",
+            "uz": "2 birlik chapga va 5 birlik yuqoriga"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -373,7 +373,7 @@
           "diagnostic_code": "FUN06_POINT_MAP"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "The inside +2 moves the graph 2 units left; the outside +5 moves it 5 units up.",
         "ru": "Внутреннее +2 сдвигает график на 2 влево, а внешнее +5 — на 5 вверх.",
@@ -400,11 +400,11 @@
         {
           "key": "A",
           "text": {
-            "en": "y=f(x+7)−4",
-            "ru": "y=f(x+7)−4",
-            "uz": "y=f(x+7)−4"
+            "en": "y=f(x−7)−4",
+            "ru": "y=f(x−7)−4",
+            "uz": "y=f(x−7)−4"
           },
-          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
+          "diagnostic_code": null
         },
         {
           "key": "B",
@@ -427,14 +427,14 @@
         {
           "key": "D",
           "text": {
-            "en": "y=f(x−7)−4",
-            "ru": "y=f(x−7)−4",
-            "uz": "y=f(x−7)−4"
+            "en": "y=f(x+7)−4",
+            "ru": "y=f(x+7)−4",
+            "uz": "y=f(x+7)−4"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "A",
       "explanation": {
         "en": "The vertex moves from x=−2 to x=5: 7 units right, so use f(x−7). It moves from y=3 to y=−1: 4 units down, so subtract 4.",
         "ru": "Вершина перемещается от x=−2 к x=5: на 7 вправо, значит f(x−7). По y она идёт от 3 к −1: на 4 вниз, поэтому вычитаем 4.",
@@ -470,20 +470,20 @@
         {
           "key": "B",
           "text": {
-            "en": "y=(x−3)²+4",
-            "ru": "y=(x−3)²+4",
-            "uz": "y=(x−3)²+4"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "y=(x−3)²−4",
             "ru": "y=(x−3)²−4",
             "uz": "y=(x−3)²−4"
           },
           "diagnostic_code": "FUN06_VERTICAL_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=(x−3)²+4",
+            "ru": "y=(x−3)²+4",
+            "uz": "y=(x−3)²+4"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -495,7 +495,7 @@
           "diagnostic_code": "FUN06_HORIZONTAL_SIGN"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "The original vertex is (1,0). Translating 2 right and 4 up moves it to (3,4), so the new equation is y=(x−3)²+4.",
         "ru": "Исходная вершина (1,0). Сдвиг на 2 вправо и 4 вверх переносит её в (3,4), поэтому новое уравнение y=(x−3)²+4.",
@@ -540,23 +540,23 @@
         {
           "key": "C",
           "text": {
-            "en": "h=−5, k=4",
-            "ru": "h=−5, k=4",
-            "uz": "h=−5, k=4"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "h=4, k=−5",
             "ru": "h=4, k=−5",
             "uz": "h=4, k=−5"
           },
           "diagnostic_code": "FUN06_POINT_MAP"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "h=−5, k=4",
+            "ru": "h=−5, k=4",
+            "uz": "h=−5, k=4"
+          },
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "D",
       "explanation": {
         "en": "The point moved 5 units left, so h=−5 because f(x−h)=f(x+5). Its y-coordinate increased by 4, so k=4.",
         "ru": "Точка сдвинулась на 5 влево, поэтому h=−5, так как f(x−h)=f(x+5). y-координата увеличилась на 4, значит k=4.",
