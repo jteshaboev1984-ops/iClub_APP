@@ -395,12 +395,22 @@ BEGIN
 END
 $$;
 
--- Pro can migrate without explicit slots because all active subjects are included.
-DO $$
+-- The lifecycle test above intentionally downgraded this synthetic learner.
+-- Upgrade it back to Pro before testing the independent all-subject access rule.
+DO $
 DECLARE
   v jsonb;
   uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='pro');
 BEGIN
+  v:=public.apply_iclub_subscription_event_service_v1(
+    gen_random_uuid(),uid,'upgrade','pro',now(),null,null,'ci'
+  );
+
+  IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE
+     OR v->>'current_plan_code'<>'pro' THEN
+    RAISE EXCEPTION 'Pro re-upgrade before subject-access test failed: %',v;
+  END IF;
+
   v:=public.finalize_iclub_subject_selection_service_v1(uid,'ci_confirmation');
 
   IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE
@@ -408,7 +418,7 @@ BEGIN
     RAISE EXCEPTION 'Pro all-subject migration failed: %',v;
   END IF;
 END
-$$;
+$;
 
 -- Enforced mode is allowed only after the grandfather snapshot exists.
 UPDATE private.iclub_commercial_access_config
