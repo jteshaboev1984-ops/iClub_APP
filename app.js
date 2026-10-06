@@ -12513,11 +12513,19 @@ function canCoursesBack() {
    // ---------------------------
 // Profile stack
 // ---------------------------
-const PROFILE_SCREENS = ["main", "settings", "plan"];
+const PROFILE_SCREENS = ["main", "settings", "plan", "subject-access"];
 
 function canShowProfilePlan() {
   try {
     return window.iClubPlansUI?.bootstrap?.()?.visible === true;
+  } catch {
+    return false;
+  }
+}
+
+function canShowProfileSubjectAccess() {
+  try {
+    return window.iClubSubjectAccessUI?.bootstrap?.()?.visible === true;
   } catch {
     return false;
   }
@@ -12528,12 +12536,20 @@ function getProfileTopScreen() {
   const raw = (s && s.length) ? String(s[s.length - 1] || "") : "main";
   if (!PROFILE_SCREENS.includes(raw)) return "main";
   if (raw === "plan" && !canShowProfilePlan()) return "main";
+  if (raw === "subject-access" && !canShowProfileSubjectAccess()) return "main";
   return raw;
 }
 
 function showProfileScreen(screenName) {
   if (!PROFILE_SCREENS.includes(screenName)) screenName = "main";
   if (screenName === "plan" && !canShowProfilePlan()) {
+    screenName = "main";
+    state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack:["main"] };
+    state.profile.stack = ["main"];
+    saveState();
+  }
+
+  if (screenName === "subject-access" && !canShowProfileSubjectAccess()) {
     screenName = "main";
     state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack:["main"] };
     state.profile.stack = ["main"];
@@ -12590,6 +12606,7 @@ function replaceProfile(screenName) {
   if (screenName === "main") renderProfileMain();
   if (screenName === "settings") renderProfileSettings();
   if (screenName === "plan") window.iClubPlansUI?.render?.();
+  if (screenName === "subject-access") window.iClubSubjectAccessUI?.render?.();
 }
 
 function popProfile() {
@@ -12648,6 +12665,27 @@ function openProfilePlan() {
   updateTopbarForView("profile");
 }
 
+function openProfileSubjectAccess() {
+  if (!canShowProfileSubjectAccess()) {
+    try { window.iClubSubjectAccessUI?.refresh?.(); } catch {}
+    return;
+  }
+
+  if (state.tab !== "profile") setTab("profile");
+
+  state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
+  state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
+
+  if (getProfileTopScreen() !== "subject-access") {
+    pushProfile("subject-access");
+  } else {
+    showProfileScreen("subject-access");
+  }
+
+  try { window.iClubSubjectAccessUI?.render?.(); } catch {}
+  updateTopbarForView("profile");
+}
+
 function renderProfileStack() {
   const top = getProfileTopScreen();
   showProfileScreen(top);
@@ -12655,6 +12693,9 @@ function renderProfileStack() {
   if (top === "main") renderProfileMain();
   if (top === "plan") {
     try { window.iClubPlansUI?.render?.(); } catch {}
+  }
+  if (top === "subject-access") {
+    try { window.iClubSubjectAccessUI?.render?.(); } catch {}
   }
 }
 
@@ -22052,6 +22093,12 @@ if (
       if (action === "profile-plan") {
        setTab("profile");
        openProfilePlan();
+       return;
+      }
+
+      if (action === "profile-subject-access") {
+       setTab("profile");
+       openProfileSubjectAccess();
        return;
       }
 
