@@ -12,14 +12,16 @@ Owner decision: preserve Tour results/history as the protected user-data boundar
 - Block 2 content production: IN PROGRESS.
 - Practice 1 Quadratics: 68/68 authored; second-pass mathematical/language review passed; QA report recorded.
 - Practice 2 Functions & transformations: 80/80 authored; full bank-level mathematical/mechanical review passed; QA report recorded.
-- Practice 1 MCQ keys A/B/C/D = 10/10/10/11; longest same-letter run = 2.
-- Practice 2 MCQ keys A/B/C/D = 15/15/15/16; longest same-letter run = 2; no obvious cyclic pattern remains.
-- Deterministic diagnostic catalogs: Quadratics 30 reviewed codes; Functions 31 reviewed codes.
-- Season 2 Tour 1 and Tour 2 separation reviews: completed; overly similar Practice items were redesigned.
-- Existing approved/runtime-allowed iClub AI theory cards confirmed for all completed Quadratics and Functions canonical skills in EN/RU/UZ.
-- Technical publication status: BLOCKED intentionally until evaluator hardening and server-side runtime validation are complete.
+- Practice 3 Coordinate Geometry: 68/68 authored; full bank-level mathematical/mechanical review passed; QA report recorded.
+- Practice 3 repaired the canonical circle-content gap rather than reproducing the legacy straight-line-heavy map.
+- MCQ position QA: Practice 1 A/B/C/D=10/10/10/11; Practice 2=15/15/15/16; Practice 3=9/9/9/9.
+- Deterministic diagnostic catalogs: Quadratics 30 codes; Functions 31 codes; Coordinate Geometry 28 codes.
+- Season 2 Tour 1–3 separation reviews: completed; overly similar Practice items were redesigned without changing Tours/history.
+- Existing approved/runtime-allowed iClub AI theory cards confirmed for all completed canonical skills in EN/RU/UZ.
+- AI source sufficiency check found a real gap for the expanded COO-05/06 geometry/tangency coverage. Draft EN/RU/UZ source-card supplements were created with runtime disabled pending review/approval.
+- Technical publication status: BLOCKED intentionally until evaluator hardening and secure server-side runtime validation are complete.
 - Known evaluator blocker: Unicode minus accepted by authored contracts but not by current Practice scalar evaluator.
-- Production/Supabase user data: unchanged by this work.
+- Production/Supabase user data and Tour results: unchanged by this work.
 
 ## Purpose
 
