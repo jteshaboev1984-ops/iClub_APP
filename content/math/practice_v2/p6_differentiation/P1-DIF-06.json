@@ -7,61 +7,59 @@
       "key": "MATH-P1-PRACTICE2-Q409",
       "practice_no": 6,
       "primary_skill": "P1-DIF-06",
-      "secondary_skills": [
-        "P1-CIR-03"
-      ],
-      "role": "circle_area_rate",
+      "secondary_skills": [],
+      "role": "rectangle_linked_rate",
       "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
       "question": {
-        "en": "A circle radius increases at 0.3 cm s⁻¹. What is dA/dt when r=10 cm?",
-        "ru": "Радиус окружности увеличивается со скоростью 0.3 см с⁻¹. Чему равно dA/dt при r=10 см?",
-        "uz": "Aylana radiusi 0.3 sm s⁻¹ tezlikda o‘sadi. r=10 sm da dA/dt qancha?"
+        "en": "A rectangle has sides x cm and (x+2) cm. If dx/dt=0.5 cm s⁻¹, what is dA/dt when x=4?",
+        "ru": "Прямоугольник имеет стороны x см и (x+2) см. Если dx/dt=0.5 см с⁻¹, чему равно dA/dt при x=4?",
+        "uz": "To‘g‘ri to‘rtburchak tomonlari x sm va (x+2) sm. Agar dx/dt=0.5 sm s⁻¹ bo‘lsa, x=4 da dA/dt qancha?"
       },
       "options": [
         {
-          "key": "A",
+          "key": "D",
           "text": {
-            "en": "6π cm s⁻¹",
-            "ru": "6π см с⁻¹",
-            "uz": "6π sm s⁻¹"
+            "en": "5 cm² s⁻¹",
+            "ru": "5 см² с⁻¹",
+            "uz": "5 sm² s⁻¹"
           },
-          "diagnostic_code": "DIF06_UNITS"
+          "diagnostic_code": null
         },
         {
           "key": "B",
           "text": {
-            "en": "3π cm² s⁻¹",
-            "ru": "3π см² с⁻¹",
-            "uz": "3π sm² s⁻¹"
+            "en": "3 cm² s⁻¹",
+            "ru": "3 см² с⁻¹",
+            "uz": "3 sm² s⁻¹"
           },
           "diagnostic_code": "DIF06_CHAIN_RATES"
         },
         {
           "key": "C",
           "text": {
-            "en": "20π cm² s⁻¹",
-            "ru": "20π см² с⁻¹",
-            "uz": "20π sm² s⁻¹"
+            "en": "10 cm² s⁻¹",
+            "ru": "10 см² с⁻¹",
+            "uz": "10 sm² s⁻¹"
           },
           "diagnostic_code": "DIF06_CHAIN_RATES"
         },
         {
-          "key": "D",
+          "key": "A",
           "text": {
-            "en": "6π cm² s⁻¹",
-            "ru": "6π см² с⁻¹",
-            "uz": "6π sm² s⁻¹"
+            "en": "5 cm s⁻¹",
+            "ru": "5 см с⁻¹",
+            "uz": "5 sm s⁻¹"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF06_UNITS"
         }
       ],
       "correct_answer": "D",
       "explanation": {
-        "en": "A=πr², so dA/dt=2πr·dr/dt=2π(10)(0.3)=6π cm² s⁻¹.",
-        "ru": "A=πr², поэтому dA/dt=2πr·dr/dt=2π(10)(0.3)=6π см² с⁻¹.",
-        "uz": "A=πr², demak dA/dt=2πr·dr/dt=2π(10)(0.3)=6π sm² s⁻¹."
+        "en": "A=x(x+2)=x²+2x, so dA/dx=2x+2. Therefore dA/dt=(2x+2)dx/dt=10(0.5)=5 cm² s⁻¹ at x=4.",
+        "ru": "A=x(x+2)=x²+2x, поэтому dA/dx=2x+2. Тогда dA/dt=(2x+2)dx/dt=10(0.5)=5 см² с⁻¹ при x=4.",
+        "uz": "A=x(x+2)=x²+2x, demak dA/dx=2x+2. Shunda dA/dt=(2x+2)dx/dt=10(0.5)=5 sm² s⁻¹, x=4 da."
       },
       "ai_source_skill": "P1-DIF-06",
       "status": "draft"
@@ -350,58 +348,58 @@
       "practice_no": 6,
       "primary_skill": "P1-DIF-06",
       "secondary_skills": [],
-      "role": "given_volume_model",
+      "role": "reverse_given_volume_model",
       "difficulty": "hard",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
       "question": {
-        "en": "A container has volume V=(2/3)πr³. Its radius increases at 0.3 cm s⁻¹. What is dV/dt when r=5 cm?",
-        "ru": "Объём контейнера V=(2/3)πr³. Радиус увеличивается со скоростью 0.3 см с⁻¹. Чему равно dV/dt при r=5 см?",
-        "uz": "Idish hajmi V=(2/3)πr³. Radius 0.3 sm s⁻¹ tezlikda o‘sadi. r=5 sm da dV/dt qancha?"
+        "en": "A container has volume V=(2/3)πr³. When r=5 cm, its volume is increasing at 15π cm³ s⁻¹. What is dr/dt?",
+        "ru": "Объём контейнера V=(2/3)πr³. При r=5 см объём увеличивается со скоростью 15π см³ с⁻¹. Чему равно dr/dt?",
+        "uz": "Idish hajmi V=(2/3)πr³. r=5 sm da hajm 15π sm³ s⁻¹ tezlikda o‘sadi. dr/dt qancha?"
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "15π cm³ s⁻¹",
-            "ru": "15π см³ с⁻¹",
-            "uz": "15π sm³ s⁻¹"
+            "en": "0.1 cm s⁻¹",
+            "ru": "0.1 см с⁻¹",
+            "uz": "0.1 sm s⁻¹"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF06_CHAIN_RATES"
         },
         {
           "key": "B",
           "text": {
-            "en": "5π cm³ s⁻¹",
-            "ru": "5π см³ с⁻¹",
-            "uz": "5π sm³ s⁻¹"
+            "en": "0.2 cm s⁻¹",
+            "ru": "0.2 см с⁻¹",
+            "uz": "0.2 sm s⁻¹"
           },
           "diagnostic_code": "DIF06_CHAIN_RATES"
         },
         {
           "key": "C",
           "text": {
-            "en": "10π cm³ s⁻¹",
-            "ru": "10π см³ с⁻¹",
-            "uz": "10π sm³ s⁻¹"
+            "en": "0.3 cm s⁻¹",
+            "ru": "0.3 см с⁻¹",
+            "uz": "0.3 sm s⁻¹"
           },
-          "diagnostic_code": "DIF06_CHAIN_RATES"
+          "diagnostic_code": null
         },
         {
           "key": "D",
           "text": {
-            "en": "15π cm² s⁻¹",
-            "ru": "15π см² с⁻¹",
-            "uz": "15π sm² s⁻¹"
+            "en": "3 cm s⁻¹",
+            "ru": "3 см с⁻¹",
+            "uz": "3 sm s⁻¹"
           },
-          "diagnostic_code": "DIF06_UNITS"
+          "diagnostic_code": "DIF06_CHAIN_RATES"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
-        "en": "dV/dr=2πr². Therefore dV/dt=2π(5²)(0.3)=15π cm³ s⁻¹.",
-        "ru": "dV/dr=2πr². Поэтому dV/dt=2π(5²)(0.3)=15π см³ с⁻¹.",
-        "uz": "dV/dr=2πr². Demak dV/dt=2π(5²)(0.3)=15π sm³ s⁻¹."
+        "en": "dV/dr=2πr². At r=5, dV/dt=50π·dr/dt. Since 15π=50π·dr/dt, dr/dt=0.3 cm s⁻¹.",
+        "ru": "dV/dr=2πr². При r=5: dV/dt=50π·dr/dt. Из 15π=50π·dr/dt получаем dr/dt=0.3 см с⁻¹.",
+        "uz": "dV/dr=2πr². r=5 da dV/dt=50π·dr/dt. 15π=50π·dr/dt dan dr/dt=0.3 sm s⁻¹."
       },
       "ai_source_skill": "P1-DIF-06",
       "status": "draft"
