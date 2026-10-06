@@ -14,6 +14,7 @@ const revert = fs.readFileSync(
 );
 const app = fs.readFileSync('app.js','utf8');
 const doc = fs.readFileSync('docs/iclub-commercial-access-migration-model-v1.md','utf8');
+const impact = fs.readFileSync('docs/iclub-commercial-cutover-impact-snapshot-v1.md','utf8');
 
 const assert = (condition, message) => {
   if (!condition) throw new Error(message);
@@ -109,5 +110,15 @@ for (const token of [
 assert(revert.includes('commercial access config is not dormant'), 'rollback active-state refusal missing');
 assert(revert.includes('commercial lifecycle rows exist'), 'rollback data-state refusal missing');
 assert(revert.includes('drop function if exists public.get_iclub_my_subscription_status_v1()'), 'rollback subscription status cleanup missing');
+
+for (const token of [
+  'Total users: 1,443',
+  '0 rows: 128 users',
+  'legacy_preserved',
+  'never auto-enforce finite subject limits on legacy_preserved users',
+  'contains no learner-identifying data'
+]) {
+  assert(impact.includes(token), 'commercial cutover impact snapshot missing safety evidence: ' + token);
+}
 
 console.log('iClub subscription lifecycle + commercial access static contract: GREEN');
