@@ -1,0 +1,537 @@
+{
+  "version": "practice_v2_p4_circular_trig_draft_v0.1",
+  "skill": "P1-CIR-03",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q234",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-03",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "A sector has radius 4 cm and angle 1.5 radians. Enter its area in cm².",
+        "ru": "Сектор имеет радиус 4 см и угол 1.5 радиан. Введите его площадь в см².",
+        "uz": "Sektor radiusi 4 sm va burchagi 1.5 radian. Uning yuzini sm² da kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "12",
+        "accepted_examples": [
+          "12",
+          "12.0",
+          " 12 "
+        ],
+        "rejected_examples": [
+          "6",
+          "24",
+          "8"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Use A=½r²θ: A=½(4²)(1.5)=8×1.5=12 cm².",
+        "ru": "Используем A=½r²θ: A=½(4²)(1.5)=8×1.5=12 см².",
+        "uz": "A=½r²θ dan foydalanamiz: A=½(4²)(1.5)=8×1.5=12 sm²."
+      },
+      "ai_source_skill": "P1-CIR-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q235",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-03",
+      "secondary_skills": [],
+      "role": "reverse_angle",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "A sector has radius 6 cm and area 18 cm². Enter its angle in radians.",
+        "ru": "Сектор имеет радиус 6 см и площадь 18 см². Введите его угол в радианах.",
+        "uz": "Sektor radiusi 6 sm va yuzi 18 sm². Uning burchagini radianlarda kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "1",
+        "accepted_examples": [
+          "1",
+          "1.0",
+          " 1 "
+        ],
+        "rejected_examples": [
+          "2",
+          "0.5",
+          "3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "18=½(6²)θ=18θ, so θ=1 radian.",
+        "ru": "18=½(6²)θ=18θ, поэтому θ=1 радиан.",
+        "uz": "18=½(6²)θ=18θ, demak θ=1 radian."
+      },
+      "ai_source_skill": "P1-CIR-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q236",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-03",
+      "secondary_skills": [],
+      "role": "reverse_radius",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "A sector has area 24 cm² and angle 3/4 radian. What is its radius?",
+        "ru": "Сектор имеет площадь 24 см² и угол 3/4 радиана. Каков его радиус?",
+        "uz": "Sektor yuzi 24 sm² va burchagi 3/4 radian. Uning radiusi qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "4 cm",
+            "ru": "4 см",
+            "uz": "4 sm"
+          },
+          "diagnostic_code": "CIR03_RADIUS_SQUARED"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "6 cm",
+            "ru": "6 см",
+            "uz": "6 sm"
+          },
+          "diagnostic_code": "CIR03_SECTOR_AREA"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "8 cm",
+            "ru": "8 см",
+            "uz": "8 sm"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "16 cm",
+            "ru": "16 см",
+            "uz": "16 sm"
+          },
+          "diagnostic_code": "CIR03_RADIUS_SQUARED"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "24=½r²(3/4)=3r²/8. Hence r²=64 and r=8 cm.",
+        "ru": "24=½r²(3/4)=3r²/8. Поэтому r²=64 и r=8 см.",
+        "uz": "24=½r²(3/4)=3r²/8. Demak r²=64 va r=8 sm."
+      },
+      "ai_source_skill": "P1-CIR-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q237",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-03",
+      "secondary_skills": [
+        "P1-CIR-01"
+      ],
+      "role": "degree_conversion",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "A sector has radius 6 cm and angle 120°. What is its exact area?",
+        "ru": "Сектор имеет радиус 6 см и угол 120°. Какова его точная площадь?",
+        "uz": "Sektor radiusi 6 sm va burchagi 120°. Uning aniq yuzi qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "6π cm²",
+            "ru": "6π см²",
+            "uz": "6π sm²"
+          },
+          "diagnostic_code": "CIR03_SECTOR_AREA"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "12π cm²",
+            "ru": "12π см²",
+            "uz": "12π sm²"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "18π cm²",
+            "ru": "18π см²",
+            "uz": "18π sm²"
+          },
+          "diagnostic_code": "CIR03_RADIUS_SQUARED"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "36π cm²",
+            "ru": "36π см²",
+            "uz": "36π sm²"
+          },
+          "diagnostic_code": "CIR03_SECTOR_AREA"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "120°=2π/3 radians. Then A=½(6²)(2π/3)=12π cm².",
+        "ru": "120°=2π/3 радиан. Тогда A=½(6²)(2π/3)=12π см².",
+        "uz": "120°=2π/3 radian. Shunda A=½(6²)(2π/3)=12π sm²."
+      },
+      "ai_source_skill": "P1-CIR-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q238",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-03",
+      "secondary_skills": [
+        "P1-TRI-02"
+      ],
+      "role": "segment_area",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "A minor sector has radius 6 cm and angle π/3. What is the area of the minor segment cut off by the chord?",
+        "ru": "Малый сектор имеет радиус 6 см и угол π/3. Какова площадь малого сегмента, отсечённого хордой?",
+        "uz": "Kichik sektor radiusi 6 sm va burchagi π/3. Vatar ajratgan kichik segment yuzi qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "6π−9√3 cm²",
+            "ru": "6π−9√3 см²",
+            "uz": "6π−9√3 sm²"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "6π+9√3 cm²",
+            "ru": "6π+9√3 см²",
+            "uz": "6π+9√3 sm²"
+          },
+          "diagnostic_code": "CIR03_SEGMENT_SUBTRACT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "12π−9√3 cm²",
+            "ru": "12π−9√3 см²",
+            "uz": "12π−9√3 sm²"
+          },
+          "diagnostic_code": "CIR03_SECTOR_AREA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "9√3 cm²",
+            "ru": "9√3 см²",
+            "uz": "9√3 sm²"
+          },
+          "diagnostic_code": "CIR03_SEGMENT_SUBTRACT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Sector area=½(6²)(π/3)=6π. Triangle area=½(6²)sin(π/3)=9√3. Segment area=6π−9√3 cm².",
+        "ru": "Площадь сектора=½(6²)(π/3)=6π. Площадь треугольника=½(6²)sin(π/3)=9√3. Площадь сегмента=6π−9√3 см².",
+        "uz": "Sektor yuzi=½(6²)(π/3)=6π. Uchburchak yuzi=½(6²)sin(π/3)=9√3. Segment yuzi=6π−9√3 sm²."
+      },
+      "ai_source_skill": "P1-CIR-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q239",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-03",
+      "secondary_skills": [
+        "P1-CIR-02"
+      ],
+      "role": "area_to_perimeter",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "A sector has radius 4 cm and area 8 cm². Enter its perimeter in centimetres.",
+        "ru": "Сектор имеет радиус 4 см и площадь 8 см². Введите его периметр в сантиметрах.",
+        "uz": "Sektor radiusi 4 sm va yuzi 8 sm². Uning perimetrini santimetrda kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "12",
+        "accepted_examples": [
+          "12",
+          "12.0",
+          " 12 "
+        ],
+        "rejected_examples": [
+          "4",
+          "8",
+          "16"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "From 8=½(4²)θ, θ=1. The arc length is s=4(1)=4 cm, so the perimeter is 4+2(4)=12 cm.",
+        "ru": "Из 8=½(4²)θ получаем θ=1. Длина дуги s=4(1)=4 см, поэтому периметр 4+2(4)=12 см.",
+        "uz": "8=½(4²)θ dan θ=1. Yoy uzunligi s=4(1)=4 sm, demak perimetr 4+2(4)=12 sm."
+      },
+      "ai_source_skill": "P1-CIR-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q240",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-03",
+      "secondary_skills": [],
+      "role": "composite_annular_sector",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "Two concentric sectors have the same angle 2 radians and radii 6 cm and 3 cm. What is the area between the two arcs?",
+        "ru": "Два концентрических сектора имеют одинаковый угол 2 радиана и радиусы 6 см и 3 см. Какова площадь между двумя дугами?",
+        "uz": "Ikki konsentrik sektor burchagi 2 radian, radiuslari 6 sm va 3 sm. Ikki yoy orasidagi yuza qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "18 cm²",
+            "ru": "18 см²",
+            "uz": "18 sm²"
+          },
+          "diagnostic_code": "CIR03_COMPOSITE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "27 cm²",
+            "ru": "27 см²",
+            "uz": "27 sm²"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "36 cm²",
+            "ru": "36 см²",
+            "uz": "36 sm²"
+          },
+          "diagnostic_code": "CIR03_RADIUS_SQUARED"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "45 cm²",
+            "ru": "45 см²",
+            "uz": "45 sm²"
+          },
+          "diagnostic_code": "CIR03_COMPOSITE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Subtract the sector areas: ½(6²)(2)−½(3²)(2)=36−9=27 cm².",
+        "ru": "Вычитаем площади секторов: ½(6²)(2)−½(3²)(2)=36−9=27 см².",
+        "uz": "Sektor yuzlarini ayiramiz: ½(6²)(2)−½(3²)(2)=36−9=27 sm²."
+      },
+      "ai_source_skill": "P1-CIR-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q241",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-03",
+      "secondary_skills": [
+        "P1-TRI-02"
+      ],
+      "role": "segment_area",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "A sector has radius 4 cm and angle π/2. What is the area of the segment between the arc and its chord?",
+        "ru": "Сектор имеет радиус 4 см и угол π/2. Какова площадь сегмента между дугой и хордой?",
+        "uz": "Sektor radiusi 4 sm va burchagi π/2. Yoy bilan vatar orasidagi segment yuzi qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "4π−8 cm²",
+            "ru": "4π−8 см²",
+            "uz": "4π−8 sm²"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "4π+8 cm²",
+            "ru": "4π+8 см²",
+            "uz": "4π+8 sm²"
+          },
+          "diagnostic_code": "CIR03_SEGMENT_SUBTRACT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "8π−4 cm²",
+            "ru": "8π−4 см²",
+            "uz": "8π−4 sm²"
+          },
+          "diagnostic_code": "CIR03_SECTOR_AREA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "8 cm²",
+            "ru": "8 см²",
+            "uz": "8 sm²"
+          },
+          "diagnostic_code": "CIR03_SEGMENT_SUBTRACT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Sector area=½(4²)(π/2)=4π. The triangle has area ½(4)(4)sin(π/2)=8. The segment area is 4π−8 cm².",
+        "ru": "Площадь сектора=½(4²)(π/2)=4π. Площадь треугольника ½(4)(4)sin(π/2)=8. Площадь сегмента равна 4π−8 см².",
+        "uz": "Sektor yuzi=½(4²)(π/2)=4π. Uchburchak yuzi ½(4)(4)sin(π/2)=8. Segment yuzi 4π−8 sm²."
+      },
+      "ai_source_skill": "P1-CIR-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q242",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-03",
+      "secondary_skills": [
+        "P1-CIR-02"
+      ],
+      "role": "structure_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "For any sector of radius 10 cm and non-zero angle θ radians, what is sector area divided by arc length?",
+        "ru": "Для любого сектора радиуса 10 см и ненулевого угла θ радиан чему равно отношение площади сектора к длине дуги?",
+        "uz": "Radiusi 10 sm va noldan farqli θ radian burchakli istalgan sektor uchun sektor yuzining yoy uzunligiga nisbati qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "CIR03_SECTOR_AREA"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "5",
+            "ru": "5",
+            "uz": "5"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "10",
+            "ru": "10",
+            "uz": "10"
+          },
+          "diagnostic_code": "CIR03_RADIUS_SQUARED"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "20",
+            "ru": "20",
+            "uz": "20"
+          },
+          "diagnostic_code": "CIR03_SECTOR_AREA"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "A/s=[½r²θ]/[rθ]=r/2. With r=10, the ratio is 5.",
+        "ru": "A/s=[½r²θ]/[rθ]=r/2. При r=10 отношение равно 5.",
+        "uz": "A/s=[½r²θ]/[rθ]=r/2. r=10 bo‘lsa, nisbat 5."
+      },
+      "ai_source_skill": "P1-CIR-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q243",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-03",
+      "secondary_skills": [
+        "P1-CIR-02"
+      ],
+      "role": "composite_perimeter",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "An annular sector has angle 1.5 radians, outer radius 8 cm and inner radius 4 cm. Its perimeter consists of both arcs and the two radial edges. Enter the perimeter in centimetres.",
+        "ru": "Кольцевой сектор имеет угол 1.5 радиан, внешний радиус 8 см и внутренний радиус 4 см. Его периметр состоит из обеих дуг и двух радиальных сторон. Введите периметр в сантиметрах.",
+        "uz": "Halqasimon sektor burchagi 1.5 radian, tashqi radiusi 8 sm va ichki radiusi 4 sm. Perimetri ikki yoy va ikki radial qirradan iborat. Perimetrni santimetrda kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "26",
+        "accepted_examples": [
+          "26",
+          "26.0",
+          " 26 "
+        ],
+        "rejected_examples": [
+          "18",
+          "20",
+          "30"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Outer arc=8(1.5)=12 and inner arc=4(1.5)=6. Each radial edge has length 8−4=4, so perimeter=12+6+4+4=26 cm.",
+        "ru": "Внешняя дуга=8(1.5)=12, внутренняя=4(1.5)=6. Каждая радиальная сторона имеет длину 8−4=4, поэтому периметр=12+6+4+4=26 см.",
+        "uz": "Tashqi yoy=8(1.5)=12, ichki yoy=4(1.5)=6. Har bir radial qirra 8−4=4, demak perimetr=12+6+4+4=26 sm."
+      },
+      "ai_source_skill": "P1-CIR-03",
+      "status": "draft"
+    }
+  ]
+}
