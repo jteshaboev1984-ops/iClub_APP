@@ -482,34 +482,34 @@
       "practice_no": 1,
       "primary_skill": "P1-QUA-01",
       "secondary_skills": [],
-      "role": "transfer",
-      "difficulty": "medium",
+      "role": "parameter_transfer",
+      "difficulty": "hard",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "The curve y = a(x − 1)² + 3 passes through (3, 11). Find a.",
-        "ru": "Кривая y = a(x − 1)² + 3 проходит через точку (3, 11). Найдите a.",
-        "uz": "y = a(x − 1)² + 3 egri chizig‘i (3, 11) nuqtadan o‘tadi. a ni toping."
+        "en": "The minimum value of y = kx² − 12x + 5 is −4, where k > 0. Find k.",
+        "ru": "Минимальное значение y = kx² − 12x + 5 равно −4, где k > 0. Найдите k.",
+        "uz": "y = kx² − 12x + 5 funksiyaning eng kichik qiymati −4, bunda k > 0. k ni toping."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "2",
+        "canonical_answer": "4",
         "accepted_examples": [
-          "2",
-          " 2 "
+          "4",
+          " 4 "
         ],
         "rejected_examples": [
-          "4",
-          "8",
-          "-2"
+          "9",
+          "-4",
+          "36"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "Substitute (3, 11): 11 = a(3 − 1)² + 3 = 4a + 3. Hence 4a = 8 and a = 2.",
-        "ru": "Подставляем (3, 11): 11 = a(3 − 1)² + 3 = 4a + 3. Тогда 4a = 8 и a = 2.",
-        "uz": "(3, 11) ni qo‘yamiz: 11 = a(3 − 1)² + 3 = 4a + 3. Shundan 4a = 8 va a = 2."
+        "en": "Complete the square: y = k(x − 6/k)² + 5 − 36/k. Since k > 0, the minimum is 5 − 36/k. Set 5 − 36/k = −4, so 36/k = 9 and k = 4.",
+        "ru": "Дополняем до квадрата: y = k(x − 6/k)² + 5 − 36/k. Так как k > 0, минимум равен 5 − 36/k. Из 5 − 36/k = −4 получаем 36/k = 9 и k = 4.",
+        "uz": "To‘liq kvadratga keltiramiz: y = k(x − 6/k)² + 5 − 36/k. k > 0 bo‘lgani uchun minimum 5 − 36/k. 5 − 36/k = −4 dan 36/k = 9 va k = 4."
       },
       "ai_source_skill": "P1-QUA-01",
       "status": "draft"
