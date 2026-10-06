@@ -134,60 +134,61 @@
       "practice_no": 4,
       "primary_skill": "P1-TRI-05",
       "secondary_skills": [
+        "P1-TRI-01",
         "P1-TRI-02"
       ],
-      "role": "direct_equation",
+      "role": "translated_equation",
       "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
-        "en": "Solve tan x=1/√3 for 0°≤x<360°.",
-        "ru": "Решите tan x=1/√3 при 0°≤x<360°.",
-        "uz": "0°≤x<360° da tan x=1/√3 tenglamani yeching."
+        "en": "Solve tan(x−15°)=1/√3 for 0°≤x<360°.",
+        "ru": "Решите tan(x−15°)=1/√3 при 0°≤x<360°.",
+        "uz": "0°≤x<360° da tan(x−15°)=1/√3 tenglamani yeching."
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "x=150°,330°",
-            "ru": "x=150°,330°",
-            "uz": "x=150°,330°"
+            "en": "x=30°,210°",
+            "ru": "x=30°,210°",
+            "uz": "x=30°,210°"
           },
           "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
         },
         {
           "key": "B",
           "text": {
-            "en": "x=30°,150°",
-            "ru": "x=30°,150°",
-            "uz": "x=30°,150°"
+            "en": "x=15°,195°",
+            "ru": "x=15°,195°",
+            "uz": "x=15°,195°"
           },
           "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
         },
         {
           "key": "C",
           "text": {
-            "en": "x=30°,210°",
-            "ru": "x=30°,210°",
-            "uz": "x=30°,210°"
+            "en": "x=45°,225°",
+            "ru": "x=45°,225°",
+            "uz": "x=45°,225°"
           },
           "diagnostic_code": null
         },
         {
           "key": "D",
           "text": {
-            "en": "x=30° only",
-            "ru": "Только x=30°",
-            "uz": "Faqat x=30°"
+            "en": "x=45° only",
+            "ru": "Только x=45°",
+            "uz": "Faqat x=45°"
           },
           "diagnostic_code": "TRI05_PERIOD"
         }
       ],
       "correct_answer": "C",
       "explanation": {
-        "en": "The reference angle is 30°. Tangent is positive in quadrants I and III and repeats every 180°, so x=30° and 210°.",
-        "ru": "Опорный угол 30°. Тангенс положителен в I и III четвертях и повторяется через 180°, поэтому x=30° и 210°.",
-        "uz": "Tayanch burchak 30°. Tangens I va III choraklarda musbat va har 180° da takrorlanadi, demak x=30° va 210°."
+        "en": "tan u=1/√3 at u=30°+180°n. With u=x−15°, x=45°+180°n, giving x=45° and 225° in the interval.",
+        "ru": "tan u=1/√3 при u=30°+180°n. При u=x−15° получаем x=45°+180°n, поэтому на интервале x=45° и 225°.",
+        "uz": "tan u=1/√3 uchun u=30°+180°n. u=x−15° bo‘lsa x=45°+180°n, intervalda x=45° va 225°."
       },
       "ai_source_skill": "P1-TRI-05",
       "status": "draft"
