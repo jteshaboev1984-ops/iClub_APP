@@ -126,11 +126,11 @@
         {
           "key": "A",
           "text": {
-            "en": "4/3",
-            "ru": "4/3",
-            "uz": "4/3"
+            "en": "8/3",
+            "ru": "8/3",
+            "uz": "8/3"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT04_TOP_BOTTOM"
         },
         {
           "key": "B",
@@ -144,11 +144,11 @@
         {
           "key": "C",
           "text": {
-            "en": "8/3",
-            "ru": "8/3",
-            "uz": "8/3"
+            "en": "4/3",
+            "ru": "4/3",
+            "uz": "4/3"
           },
-          "diagnostic_code": "INT04_TOP_BOTTOM"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -160,7 +160,7 @@
           "diagnostic_code": "INT04_AREA_SIGN"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "Area=∫₀²(2x−x²)dx=[x²−x³/3]₀²=4−8/3=4/3.",
         "ru": "Площадь=∫₀²(2x−x²)dx=[x²−x³/3]₀²=4−8/3=4/3.",
@@ -229,20 +229,20 @@
         {
           "key": "A",
           "text": {
-            "en": "5/2",
-            "ru": "5/2",
-            "uz": "5/2"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "3/2",
             "ru": "3/2",
             "uz": "3/2"
           },
           "diagnostic_code": "INT04_SPLIT_CROSSING"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "5/2",
+            "ru": "5/2",
+            "uz": "5/2"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -263,7 +263,7 @@
           "diagnostic_code": "INT04_AREA_SIGN"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "The line crosses the x-axis at x=1. Area=∫₀¹(1−x)dx+∫₁³(x−1)dx=1/2+2=5/2.",
         "ru": "Прямая пересекает ось x при x=1. Площадь=∫₀¹(1−x)dx+∫₁³(x−1)dx=1/2+2=5/2.",
@@ -410,11 +410,11 @@
         {
           "key": "A",
           "text": {
-            "en": "44/3",
-            "ru": "44/3",
-            "uz": "44/3"
+            "en": "28/3",
+            "ru": "28/3",
+            "uz": "28/3"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT04_SPLIT_CROSSING"
         },
         {
           "key": "B",
@@ -437,14 +437,14 @@
         {
           "key": "D",
           "text": {
-            "en": "28/3",
-            "ru": "28/3",
-            "uz": "28/3"
+            "en": "44/3",
+            "ru": "44/3",
+            "uz": "44/3"
           },
-          "diagnostic_code": "INT04_SPLIT_CROSSING"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "The zeros are x=±2. By symmetry, total area=2[∫₀²(4−x²)dx+∫₂³(x²−4)dx]=2[16/3+2]=44/3.",
         "ru": "Нули x=±2. По симметрии полная площадь=2[∫₀²(4−x²)dx+∫₂³(x²−4)dx]=2[16/3+2]=44/3.",
@@ -617,11 +617,11 @@
         {
           "key": "A",
           "text": {
-            "en": "The geometric area between the graph and x-axis is positive because positive and negative signed parts cancel.",
-            "ru": "Геометрическая площадь между графиком и осью x положительна, потому что положительная и отрицательная знаковые части сокращаются.",
-            "uz": "Grafik bilan x o‘qi orasidagi geometrik yuza musbat bo‘lishi mumkin, chunki musbat va manfiy ishorali qismlar bekor bo‘ladi."
+            "en": "f(x) must be positive everywhere.",
+            "ru": "f(x) должна быть положительной везде.",
+            "uz": "f(x) hamma joyda musbat bo‘lishi kerak."
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT04_SPLIT_CROSSING"
         },
         {
           "key": "B",
@@ -635,11 +635,11 @@
         {
           "key": "C",
           "text": {
-            "en": "f(x) must be positive everywhere.",
-            "ru": "f(x) должна быть положительной везде.",
-            "uz": "f(x) hamma joyda musbat bo‘lishi kerak."
+            "en": "The geometric area between the graph and x-axis is positive because positive and negative signed parts cancel.",
+            "ru": "Геометрическая площадь между графиком и осью x положительна, потому что положительная и отрицательная знаковые части сокращаются.",
+            "uz": "Grafik bilan x o‘qi orasidagi geometrik yuza musbat bo‘lishi mumkin, chunki musbat va manfiy ishorali qismlar bekor bo‘ladi."
           },
-          "diagnostic_code": "INT04_SPLIT_CROSSING"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -651,7 +651,7 @@
           "diagnostic_code": "INT04_SPLIT_CROSSING"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "A definite integral is signed. Positive and negative contributions can cancel to zero while the sum of geometric areas remains positive.",
         "ru": "Определённый интеграл знаковый. Положительные и отрицательные вклады могут сократиться до нуля, хотя сумма геометрических площадей останется положительной.",
