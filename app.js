@@ -22813,6 +22813,7 @@ if (action === "profile-open-ratings") {
       }
 
       if (action === "practice-start") {
+  observeSubjectAccessShadow(state?.courses?.subjectKey, "practice_start");
   startPracticeNew();
   return;
 }
@@ -22840,12 +22841,14 @@ if (action === "practice-select-tour") {
        
 if (action === "practice-start-past") {
   // legacy fallback: old button no longer exists, but keep safe behavior
+  observeSubjectAccessShadow(state?.courses?.subjectKey, "practice_start_past");
   startPracticeNew();
   return;
 }
 
    if (action === "practice-resume") {
   const subjectKey = state.courses.subjectKey;
+  observeSubjectAccessShadow(subjectKey, "practice_resume");
   const draft = loadPracticeDraft();
 
   const draftTourNo = Number(draft?.practiceTourNo || draft?.quiz?.practiceTourNo || 1);
@@ -22949,6 +22952,8 @@ if (action === "practice-exit") {
       }
 
       if (action === "practice-again") {
+  observeSubjectAccessShadow(state?.courses?.subjectKey, "practice_again");
+
   // ✅ if last finished was a drill — repeat that drill
   const d = state?.courses?.myRecDrillLast;
   if (d?.drillType === "rec_mistakes") {
@@ -23004,6 +23009,7 @@ if (action === "practice-exit") {
 }
 
       if (action === "tour-start") {
+        observeSubjectAccessShadow(state?.courses?.subjectKey, "tour_start");
         openTourQuiz();
         return;
       }
@@ -23100,6 +23106,7 @@ if (action === "tour-next" || action === "tour-submit") {
         return;
       }
                    if (action === "tour-review-open-practice") {
+  observeSubjectAccessShadow(state?.courses?.subjectKey, "tour_review_practice");
   await openPracticeStart();
   return;
 }  
