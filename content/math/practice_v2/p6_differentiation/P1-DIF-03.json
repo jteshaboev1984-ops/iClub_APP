@@ -429,9 +429,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
       "question": {
-        "en": "For y=(3x+c)³, the gradient at x=1 is 108 and 3+c>0. Enter c.",
-        "ru": "Для y=(3x+c)³ градиент при x=1 равен 108, причём 3+c>0. Введите c.",
-        "uz": "y=(3x+c)³ uchun x=1 dagi gradient 108 va 3+c>0. c ni kiriting."
+        "en": "For y=(3x+c)³, the gradient at x=1 is 144 and 3+c>0. Enter c.",
+        "ru": "Для y=(3x+c)³ градиент при x=1 равен 144, причём 3+c>0. Введите c.",
+        "uz": "y=(3x+c)³ uchun x=1 dagi gradient 144 va 3+c>0. c ni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -449,9 +449,9 @@
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "dy/dx=9(3x+c)². At x=1, 9(3+c)²=108, so (3+c)²=12. This does not give an integer c, so the authored condition is inconsistent.",
-        "ru": "dy/dx=9(3x+c)². При x=1: 9(3+c)²=108, поэтому (3+c)²=12. Целого c=1 это не даёт; условие в текущем виде некорректно.",
-        "uz": "dy/dx=9(3x+c)². x=1 da 9(3+c)²=108, demak (3+c)²=12. Bu c=1 ni bermaydi; hozirgi shart mos emas."
+        "en": "dy/dx=9(3x+c)². At x=1, 9(3+c)²=144, so (3+c)²=16. Since 3+c>0, 3+c=4 and c=1.",
+        "ru": "dy/dx=9(3x+c)². При x=1: 9(3+c)²=144, поэтому (3+c)²=16. Так как 3+c>0, имеем 3+c=4 и c=1.",
+        "uz": "dy/dx=9(3x+c)². x=1 da 9(3+c)²=144, demak (3+c)²=16. 3+c>0 bo‘lgani uchun 3+c=4 va c=1."
       },
       "ai_source_skill": "P1-DIF-03",
       "status": "draft"
