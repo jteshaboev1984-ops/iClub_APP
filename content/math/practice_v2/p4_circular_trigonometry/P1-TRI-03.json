@@ -339,7 +339,7 @@
       "secondary_skills": [],
       "role": "reverse_principal_value",
       "difficulty": "medium",
-      "qtype": "numeric_exact",
+      "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
         "en": "If sin⁻¹(a)=30° in degree mode, enter a.",
@@ -352,7 +352,7 @@
         "accepted_examples": [
           "0.5",
           "0,5",
-          " .5 "
+          " 0.5 "
         ],
         "rejected_examples": [
           "2",
