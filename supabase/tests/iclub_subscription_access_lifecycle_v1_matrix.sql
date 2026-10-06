@@ -74,7 +74,200 @@ BEGIN
     RAISE EXCEPTION 'Dormant lifecycle wrote an event row';
   END IF;
 END
-$$;
+$;
+
+-- Every learner resolves to Free by default without creating entitlement rows.
+DO $
+DECLARE
+  v jsonb;
+  uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='normal');
+BEGIN
+  v:=public.get_iclub_subscription_capabilities_service_v1(uid);
+
+  IF coalesce((v->>'resolved')::boolean,false) IS NOT TRUE
+     OR v->>'plan_code'<>'free'
+     OR v->>'plan_source'<>'default_free'
+     OR coalesce((v->>'ai_generation_entitled')::boolean,true) IS NOT FALSE THEN
+    RAISE EXCEPTION 'Default Free resolution mismatch: %',v;
+  END IF;
+
+  IF EXISTS(
+    select 1 from private.iclub_subscription_entitlements where user_id=uid
+  ) THEN
+    RAISE EXCEPTION 'Default Free incorrectly created a subscription entitlement row';
+  END IF;
+END
+$;
+
+-- Build exactly three service-managed canaries with Free/Plus/Pro test plans.
+DO $
+DECLARE
+  v jsonb;
+  uid uuid;
+BEGIN
+  SELECT user_id INTO uid FROM commercial_people WHERE person_key='canary_free';
+  v:=public.set_iclub_product_canary_service_v1(uid,true,'free','ci');
+  IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'Free canary setup failed: %',v;
+  END IF;
+
+  SELECT user_id INTO uid FROM commercial_people WHERE person_key='canary_plus';
+  v:=public.set_iclub_product_canary_service_v1(uid,true,'plus','ci');
+  IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'Plus canary setup failed: %',v;
+  END IF;
+
+  SELECT user_id INTO uid FROM commercial_people WHERE person_key='canary_pro';
+  v:=public.set_iclub_product_canary_service_v1(uid,true,'pro','ci');
+  IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'Pro canary setup failed: %',v;
+  END IF;
+
+  IF (select count(*) from private.iclub_product_canary_users where enabled)<>3 THEN
+    RAISE EXCEPTION 'Canary cohort must contain exactly three enabled users';
+  END IF;
+
+  SELECT user_id INTO uid FROM commercial_people WHERE person_key='normal';
+  v:=public.set_iclub_product_canary_service_v1(uid,true,'pro','ci');
+
+  IF coalesce((v->>'ok')::boolean,true)
+     OR v->>'reason'<>'canary_limit_reached'
+     OR (v->>'limit')::integer<>3 THEN
+    RAISE EXCEPTION 'Fourth canary was not rejected: %',v;
+  END IF;
+
+  IF EXISTS(
+    select 1 from private.iclub_product_canary_users
+    where user_id=uid and enabled
+  ) THEN
+    RAISE EXCEPTION 'Rejected fourth canary left an enabled row';
+  END IF;
+END
+$;
+
+-- Canary plan overrides are test-only; ordinary users still resolve to Free.
+DO $
+DECLARE
+  v jsonb;
+  plus_uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='canary_plus');
+  pro_uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='canary_pro');
+  normal_uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='normal');
+BEGIN
+  v:=public.get_iclub_subscription_capabilities_service_v1(plus_uid);
+  IF v->>'plan_code'<>'plus' OR v->>'plan_source'<>'canary_override' THEN
+    RAISE EXCEPTION 'Plus canary override mismatch: %',v;
+  END IF;
+
+  v:=public.get_iclub_subscription_capabilities_service_v1(pro_uid);
+  IF v->>'plan_code'<>'pro' OR v->>'plan_source'<>'canary_override' THEN
+    RAISE EXCEPTION 'Pro canary override mismatch: %',v;
+  END IF;
+
+  v:=public.get_iclub_subscription_capabilities_service_v1(normal_uid);
+  IF v->>'plan_code'<>'free' OR v->>'plan_source'<>'default_free' THEN
+    RAISE EXCEPTION 'Non-canary user did not remain default Free: %',v;
+  END IF;
+END
+$;
+
+-- Test-only assessment contract needed to prove the server canary gate end-to-end.
+ALTER TABLE public.tour_attempts
+  ADD COLUMN IF NOT EXISTS user_id uuid,
+  ADD COLUMN IF NOT EXISTS status text;
+
+CREATE OR REPLACE FUNCTION private.exam_prep_has_active_protected_assessment_v1(p_user_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+AS $
+  SELECT false;
+$;
+
+UPDATE private.iclub_global_ai_runtime_config
+SET ui_enabled=true,
+    gateway_enabled=true,
+    generation_enabled=false,
+    kill_switch=false,
+    plans_ui_enabled=true,
+    checkout_enabled=false,
+    global_ai_rollout_mode='canary',
+    plans_rollout_mode='canary',
+    updated_at=now()
+WHERE id=1;
+
+-- A non-canary cannot reach Plans or Global AI even by calling server endpoints directly.
+DO $
+DECLARE
+  v jsonb;
+  uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='normal');
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub',uid::text,true);
+  PERFORM set_config('request.jwt.claim.role','authenticated',true);
+
+  v:=public.get_iclub_plan_ui_bootstrap_v1();
+  IF coalesce((v->>'visible')::boolean,true)
+     OR v->>'reason'<>'rollout_unavailable' THEN
+    RAISE EXCEPTION 'Non-canary plan bootstrap escaped rollout gate: %',v;
+  END IF;
+
+  v:=public.get_iclub_ai_ui_bootstrap_v1();
+  IF coalesce((v->>'visible')::boolean,true)
+     OR v->>'reason'<>'rollout_unavailable' THEN
+    RAISE EXCEPTION 'Non-canary AI UI escaped rollout gate: %',v;
+  END IF;
+
+  v:=public.get_iclub_global_ai_guard_service_v1(
+    uid,'general','global','app_help','prepared','en',0
+  );
+  IF coalesce((v->>'allowed')::boolean,true)
+     OR v->>'reason'<>'rollout_unavailable' THEN
+    RAISE EXCEPTION 'Non-canary Global AI server call escaped rollout gate: %',v;
+  END IF;
+END
+$;
+
+-- Canary users see only their test plan and can reach the prepared Global AI path.
+DO $
+DECLARE
+  v jsonb;
+  uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='canary_free');
+BEGIN
+  PERFORM set_config('request.jwt.claim.sub',uid::text,true);
+  PERFORM set_config('request.jwt.claim.role','authenticated',true);
+
+  v:=public.get_iclub_plan_ui_bootstrap_v1();
+  IF coalesce((v->>'visible')::boolean,false) IS NOT TRUE
+     OR v->>'current_plan_code'<>'free'
+     OR coalesce((v->>'checkout_enabled')::boolean,true) IS NOT FALSE THEN
+    RAISE EXCEPTION 'Free canary plan bootstrap mismatch: %',v;
+  END IF;
+
+  v:=public.get_iclub_ai_ui_bootstrap_v1();
+  IF coalesce((v->>'visible')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'Free canary AI UI bootstrap mismatch: %',v;
+  END IF;
+
+  v:=public.get_iclub_global_ai_guard_service_v1(
+    uid,'general','global','app_help','prepared','en',0
+  );
+  IF coalesce((v->>'allowed')::boolean,false) IS NOT TRUE
+     OR v->>'ai_usage_policy_code'<>'free_v1' THEN
+    RAISE EXCEPTION 'Free canary prepared AI path mismatch: %',v;
+  END IF;
+END
+$;
+
+UPDATE private.iclub_global_ai_runtime_config
+SET ui_enabled=false,
+    gateway_enabled=false,
+    generation_enabled=false,
+    kill_switch=true,
+    plans_ui_enabled=false,
+    checkout_enabled=false,
+    global_ai_rollout_mode='off',
+    plans_rollout_mode='off',
+    updated_at=now()
+WHERE id=1;
 
 UPDATE private.iclub_commercial_access_config
 SET lifecycle_enabled=true,
