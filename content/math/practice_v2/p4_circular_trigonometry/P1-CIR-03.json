@@ -169,11 +169,11 @@
         {
           "key": "B",
           "text": {
-            "en": "12π cm²",
-            "ru": "12π см²",
-            "uz": "12π sm²"
+            "en": "36π cm²",
+            "ru": "36π см²",
+            "uz": "36π sm²"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "CIR03_SECTOR_AREA"
         },
         {
           "key": "C",
@@ -187,14 +187,14 @@
         {
           "key": "D",
           "text": {
-            "en": "36π cm²",
-            "ru": "36π см²",
-            "uz": "36π sm²"
+            "en": "12π cm²",
+            "ru": "12π см²",
+            "uz": "12π sm²"
           },
-          "diagnostic_code": "CIR03_SECTOR_AREA"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "D",
       "explanation": {
         "en": "120°=2π/3 radians. Then A=½(6²)(2π/3)=12π cm².",
         "ru": "120°=2π/3 радиан. Тогда A=½(6²)(2π/3)=12π см².",
@@ -223,20 +223,20 @@
         {
           "key": "A",
           "text": {
-            "en": "6π−9√3 cm²",
-            "ru": "6π−9√3 см²",
-            "uz": "6π−9√3 sm²"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "6π+9√3 cm²",
             "ru": "6π+9√3 см²",
             "uz": "6π+9√3 sm²"
           },
           "diagnostic_code": "CIR03_SEGMENT_SUBTRACT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "6π−9√3 cm²",
+            "ru": "6π−9√3 см²",
+            "uz": "6π−9√3 sm²"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -257,7 +257,7 @@
           "diagnostic_code": "CIR03_SEGMENT_SUBTRACT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "Sector area=½(6²)(π/3)=6π. Triangle area=½(6²)sin(π/3)=9√3. Segment area=6π−9√3 cm².",
         "ru": "Площадь сектора=½(6²)(π/3)=6π. Площадь треугольника=½(6²)sin(π/3)=9√3. Площадь сегмента=6π−9√3 см².",
@@ -324,20 +324,20 @@
         {
           "key": "A",
           "text": {
-            "en": "18 cm²",
-            "ru": "18 см²",
-            "uz": "18 sm²"
-          },
-          "diagnostic_code": "CIR03_COMPOSITE"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "27 cm²",
             "ru": "27 см²",
             "uz": "27 sm²"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "18 cm²",
+            "ru": "18 см²",
+            "uz": "18 sm²"
+          },
+          "diagnostic_code": "CIR03_COMPOSITE"
         },
         {
           "key": "C",
@@ -358,7 +358,7 @@
           "diagnostic_code": "CIR03_COMPOSITE"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "Subtract the sector areas: ½(6²)(2)−½(3²)(2)=36−9=27 cm².",
         "ru": "Вычитаем площади секторов: ½(6²)(2)−½(3²)(2)=36−9=27 см².",
@@ -387,11 +387,11 @@
         {
           "key": "A",
           "text": {
-            "en": "4π−8 cm²",
-            "ru": "4π−8 см²",
-            "uz": "4π−8 sm²"
+            "en": "8 cm²",
+            "ru": "8 см²",
+            "uz": "8 sm²"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "CIR03_SEGMENT_SUBTRACT"
         },
         {
           "key": "B",
@@ -414,14 +414,14 @@
         {
           "key": "D",
           "text": {
-            "en": "8 cm²",
-            "ru": "8 см²",
-            "uz": "8 sm²"
+            "en": "4π−8 cm²",
+            "ru": "4π−8 см²",
+            "uz": "4π−8 sm²"
           },
-          "diagnostic_code": "CIR03_SEGMENT_SUBTRACT"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "Sector area=½(4²)(π/2)=4π. The triangle has area ½(4)(4)sin(π/2)=8. The segment area is 4π−8 cm².",
         "ru": "Площадь сектора=½(4²)(π/2)=4π. Площадь треугольника ½(4)(4)sin(π/2)=8. Площадь сегмента равна 4π−8 см².",
@@ -459,20 +459,20 @@
         {
           "key": "B",
           "text": {
-            "en": "5",
-            "ru": "5",
-            "uz": "5"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "10",
             "ru": "10",
             "uz": "10"
           },
           "diagnostic_code": "CIR03_RADIUS_SQUARED"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "5",
+            "ru": "5",
+            "uz": "5"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -484,7 +484,7 @@
           "diagnostic_code": "CIR03_SECTOR_AREA"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "A/s=[½r²θ]/[rθ]=r/2. With r=10, the ratio is 5.",
         "ru": "A/s=[½r²θ]/[rθ]=r/2. При r=10 отношение равно 5.",
