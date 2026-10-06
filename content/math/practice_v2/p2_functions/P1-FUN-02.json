@@ -1,0 +1,585 @@
+{
+  "version": "practice_v2_p2_functions_draft_v0.1",
+  "skill": "P1-FUN-02",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q077",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-02",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=x² with −1≤x≤4, what is the range?",
+        "ru": "Для f(x)=x² при −1≤x≤4 какова область значений?",
+        "uz": "f(x)=x² va −1≤x≤4 bo‘lsa, qiymatlar to‘plami qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−1≤f(x)≤4",
+            "ru": "−1≤f(x)≤4",
+            "uz": "−1≤f(x)≤4"
+          },
+          "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1≤f(x)≤16",
+            "ru": "1≤f(x)≤16",
+            "uz": "1≤f(x)≤16"
+          },
+          "diagnostic_code": "FUN02_TURNING_POINT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "0≤f(x)≤4",
+            "ru": "0≤f(x)≤4",
+            "uz": "0≤f(x)≤4"
+          },
+          "diagnostic_code": "FUN02_ENDPOINT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "0≤f(x)≤16",
+            "ru": "0≤f(x)≤16",
+            "uz": "0≤f(x)≤16"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "The vertex x=0 lies inside the domain and gives the minimum 0. At the endpoints, f(−1)=1 and f(4)=16, so the maximum is 16.",
+        "ru": "Вершина x=0 лежит внутри области и даёт минимум 0. На концах f(−1)=1 и f(4)=16, поэтому максимум равен 16.",
+        "uz": "x=0 cho‘qqi soha ichida va minimum 0 ni beradi. Chegaralarda f(−1)=1 va f(4)=16, demak maksimum 16."
+      },
+      "ai_source_skill": "P1-FUN-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q078",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-02",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=(x−2)²+1 with 2≤x≤5, what is the range?",
+        "ru": "Для f(x)=(x−2)²+1 при 2≤x≤5 какова область значений?",
+        "uz": "f(x)=(x−2)²+1 va 2≤x≤5 bo‘lsa, qiymatlar to‘plami qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "1≤f(x)≤10",
+            "ru": "1≤f(x)≤10",
+            "uz": "1≤f(x)≤10"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2≤f(x)≤5",
+            "ru": "2≤f(x)≤5",
+            "uz": "2≤f(x)≤5"
+          },
+          "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1≤f(x)≤9",
+            "ru": "1≤f(x)≤9",
+            "uz": "1≤f(x)≤9"
+          },
+          "diagnostic_code": "FUN02_ENDPOINT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "0≤f(x)≤10",
+            "ru": "0≤f(x)≤10",
+            "uz": "0≤f(x)≤10"
+          },
+          "diagnostic_code": "FUN02_TURNING_POINT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "On 2≤x≤5, the vertex occurs at x=2 and gives 1. The largest allowed x is 5, where f(5)=9+1=10. Thus 1≤f(x)≤10.",
+        "ru": "На 2≤x≤5 вершина находится при x=2 и даёт 1. На другом конце f(5)=9+1=10. Поэтому 1≤f(x)≤10.",
+        "uz": "2≤x≤5 da cho‘qqi x=2 da bo‘lib, qiymat 1. Boshqa chegarada f(5)=9+1=10. Demak 1≤f(x)≤10."
+      },
+      "ai_source_skill": "P1-FUN-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q079",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-02",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=3−2x with −2<x≤4, which range is correct?",
+        "ru": "Для f(x)=3−2x при −2<x≤4 какая область значений верна?",
+        "uz": "f(x)=3−2x va −2<x≤4 bo‘lsa, qaysi qiymatlar to‘plami to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−5<f(x)<7",
+            "ru": "−5<f(x)<7",
+            "uz": "−5<f(x)<7"
+          },
+          "diagnostic_code": "FUN02_ENDPOINT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−5≤f(x)<7",
+            "ru": "−5≤f(x)<7",
+            "uz": "−5≤f(x)<7"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−5<f(x)≤7",
+            "ru": "−5<f(x)≤7",
+            "uz": "−5<f(x)≤7"
+          },
+          "diagnostic_code": "FUN02_ENDPOINT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−2<f(x)≤4",
+            "ru": "−2<f(x)≤4",
+            "uz": "−2<f(x)≤4"
+          },
+          "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The function decreases. At x=4, f=−5 and 4 is included, so −5 is included. As x approaches −2 from above, f approaches 7 but never reaches it. Hence −5≤f(x)<7.",
+        "ru": "Функция убывает. При x=4 получаем f=−5, и 4 входит в область, поэтому −5 включается. При x→−2 справа f→7, но 7 не достигается. Значит −5≤f(x)<7.",
+        "uz": "Funksiya kamayadi. x=4 da f=−5 va 4 sohaga kiradi, demak −5 kiritiladi. x −2 ga o‘ngdan yaqinlashganda f 7 ga yaqinlashadi, ammo 7 ga teng bo‘lmaydi. Shuning uchun −5≤f(x)<7."
+      },
+      "ai_source_skill": "P1-FUN-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q080",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-02",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "direct_application",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=x²−6x+11 with 1≤x≤5, enter the minimum value of f.",
+        "ru": "Для f(x)=x²−6x+11 при 1≤x≤5 введите минимальное значение f.",
+        "uz": "f(x)=x²−6x+11 va 1≤x≤5 bo‘lsa, f ning eng kichik qiymatini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "2",
+        "accepted_examples": [
+          "2",
+          " 2 "
+        ],
+        "rejected_examples": [
+          "3",
+          "5",
+          "6"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Complete the square: f(x)=(x−3)²+2. Since x=3 lies in the domain, the minimum value is 2.",
+        "ru": "Выделяем полный квадрат: f(x)=(x−3)²+2. Так как x=3 лежит в заданной области, минимальное значение равно 2.",
+        "uz": "To‘liq kvadratga keltiramiz: f(x)=(x−3)²+2. x=3 berilgan sohada yotgani uchun minimum 2."
+      },
+      "ai_source_skill": "P1-FUN-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q081",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-02",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "misconception_trap",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=−(x+1)²+9 with 0≤x≤4, what is the range?",
+        "ru": "Для f(x)=−(x+1)²+9 при 0≤x≤4 какова область значений?",
+        "uz": "f(x)=−(x+1)²+9 va 0≤x≤4 bo‘lsa, qiymatlar to‘plami qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−16≤f(x)≤9",
+            "ru": "−16≤f(x)≤9",
+            "uz": "−16≤f(x)≤9"
+          },
+          "diagnostic_code": "FUN02_RESTRICTION_IGNORED"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−16≤f(x)≤8",
+            "ru": "−16≤f(x)≤8",
+            "uz": "−16≤f(x)≤8"
+          },
+          "diagnostic_code": "FUN02_ENDPOINT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−16≤f(x)≤8",
+            "ru": "−16≤f(x)≤8",
+            "uz": "−16≤f(x)≤8"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "0≤f(x)≤4",
+            "ru": "0≤f(x)≤4",
+            "uz": "0≤f(x)≤4"
+          },
+          "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "On 0≤x≤4, the vertex x=−1 is outside the domain. The function decreases throughout the allowed interval: f(0)=8 and f(4)=−16. Hence −16≤f(x)≤8.",
+        "ru": "На 0≤x≤4 вершина x=−1 находится вне области. На всём разрешённом промежутке функция убывает: f(0)=8, f(4)=−16. Поэтому −16≤f(x)≤8.",
+        "uz": "0≤x≤4 da x=−1 cho‘qqi soha tashqarisida. Ruxsat etilgan oraliqda funksiya kamayadi: f(0)=8, f(4)=−16. Demak −16≤f(x)≤8."
+      },
+      "ai_source_skill": "P1-FUN-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q082",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-02",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "reverse_problem",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=(x−4)²−3 with domain x≥4, which statement gives its range?",
+        "ru": "Для f(x)=(x−4)²−3 при области x≥4 какое утверждение задаёт область значений?",
+        "uz": "f(x)=(x−4)²−3 va soha x≥4 bo‘lsa, qiymatlar to‘plamini qaysi tasdiq beradi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "f(x)≤−3",
+            "ru": "f(x)≤−3",
+            "uz": "f(x)≤−3"
+          },
+          "diagnostic_code": "FUN02_TURNING_POINT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "f(x)≥4",
+            "ru": "f(x)≥4",
+            "uz": "f(x)≥4"
+          },
+          "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−3≤f(x)≤4",
+            "ru": "−3≤f(x)≤4",
+            "uz": "−3≤f(x)≤4"
+          },
+          "diagnostic_code": "FUN02_RESTRICTION_IGNORED"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "f(x)≥−3",
+            "ru": "f(x)≥−3",
+            "uz": "f(x)≥−3"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "The square term is non-negative and equals 0 at x=4, which is allowed. So the minimum output is −3, and the outputs increase without bound: f(x)≥−3.",
+        "ru": "Квадрат неотрицателен и равен 0 при x=4, который входит в область. Значит минимальный выход равен −3, а сверху значения не ограничены: f(x)≥−3.",
+        "uz": "Kvadrat had manfiy emas va ruxsat etilgan x=4 da 0 ga teng. Demak eng kichik chiqish −3, yuqoridan cheklov yo‘q: f(x)≥−3."
+      },
+      "ai_source_skill": "P1-FUN-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q083",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-02",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=2x²−8x+1 with −1≤x≤3, enter the maximum value of f.",
+        "ru": "Для f(x)=2x²−8x+1 при −1≤x≤3 введите максимальное значение f.",
+        "uz": "f(x)=2x²−8x+1 va −1≤x≤3 bo‘lsa, f ning eng katta qiymatini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "11",
+        "accepted_examples": [
+          "11",
+          " 11 "
+        ],
+        "rejected_examples": [
+          "-7",
+          "-9",
+          "9"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The parabola opens upward, so the maximum on a closed interval is at an endpoint. f(−1)=2+8+1=11 and f(3)=18−24+1=−5. The maximum is 11.",
+        "ru": "Парабола направлена вверх, поэтому максимум на замкнутом промежутке достигается на одном из концов. f(−1)=11, f(3)=−5. Максимум равен 11.",
+        "uz": "Parabola yuqoriga ochiladi, shuning uchun yopiq oraliqdagi maksimum chegaralardan birida bo‘ladi. f(−1)=11, f(3)=−5. Maksimum 11."
+      },
+      "ai_source_skill": "P1-FUN-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q084",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-02",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=x²−2x−3 with −2≤x≤1, what is the range?",
+        "ru": "Для f(x)=x²−2x−3 при −2≤x≤1 какова область значений?",
+        "uz": "f(x)=x²−2x−3 va −2≤x≤1 bo‘lsa, qiymatlar to‘plami qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−4≤f(x)≤5",
+            "ru": "−4≤f(x)≤5",
+            "uz": "−4≤f(x)≤5"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−3≤f(x)≤5",
+            "ru": "−3≤f(x)≤5",
+            "uz": "−3≤f(x)≤5"
+          },
+          "diagnostic_code": "FUN02_TURNING_POINT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−4≤f(x)≤0",
+            "ru": "−4≤f(x)≤0",
+            "uz": "−4≤f(x)≤0"
+          },
+          "diagnostic_code": "FUN02_ENDPOINT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−2≤f(x)≤1",
+            "ru": "−2≤f(x)≤1",
+            "uz": "−2≤f(x)≤1"
+          },
+          "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "f(x)=(x−1)²−4. The vertex x=1 is included and gives −4. At x=−2, f=9−4=5, so the range is −4≤f(x)≤5.",
+        "ru": "f(x)=(x−1)²−4. Вершина x=1 включена и даёт −4. При x=−2 получаем 5, поэтому область значений −4≤f(x)≤5.",
+        "uz": "f(x)=(x−1)²−4. x=1 cho‘qqi sohaga kiradi va −4 ni beradi. x=−2 da f=5, demak −4≤f(x)≤5."
+      },
+      "ai_source_skill": "P1-FUN-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q085",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-02",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=5−x on the domain 1≤x<6, which range is correct?",
+        "ru": "Для f(x)=5−x при 1≤x<6 какая область значений верна?",
+        "uz": "f(x)=5−x va 1≤x<6 bo‘lsa, qaysi qiymatlar to‘plami to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−1≤f(x)≤4",
+            "ru": "−1≤f(x)≤4",
+            "uz": "−1≤f(x)≤4"
+          },
+          "diagnostic_code": "FUN02_ENDPOINT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−1<f(x)≤4",
+            "ru": "−1<f(x)≤4",
+            "uz": "−1<f(x)≤4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−1≤f(x)<4",
+            "ru": "−1≤f(x)<4",
+            "uz": "−1≤f(x)<4"
+          },
+          "diagnostic_code": "FUN02_ENDPOINT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "1≤f(x)<6",
+            "ru": "1≤f(x)<6",
+            "uz": "1≤f(x)<6"
+          },
+          "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "At x=1, f=4 and 1 is included, so 4 is included. As x approaches 6 from below, f approaches −1 but does not reach it. Hence −1<f(x)≤4.",
+        "ru": "При x=1 получаем f=4, и 1 включён, поэтому 4 включается. При x→6 слева f→−1, но −1 не достигается. Значит −1<f(x)≤4.",
+        "uz": "x=1 da f=4 va 1 sohaga kiradi, demak 4 kiritiladi. x 6 ga chapdan yaqinlashganda f −1 ga yaqinlashadi, ammo unga teng bo‘lmaydi. Shuning uchun −1<f(x)≤4."
+      },
+      "ai_source_skill": "P1-FUN-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q086",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-02",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=−x²+4x+1 restricted to x≥3, which range is correct?",
+        "ru": "Для f(x)=−x²+4x+1 при ограничении x≥3 какая область значений верна?",
+        "uz": "f(x)=−x²+4x+1 va x≥3 cheklovida qaysi qiymatlar to‘plami to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "f(x)≤5",
+            "ru": "f(x)≤5",
+            "uz": "f(x)≤5"
+          },
+          "diagnostic_code": "FUN02_RESTRICTION_IGNORED"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "f(x)≥4",
+            "ru": "f(x)≥4",
+            "uz": "f(x)≥4"
+          },
+          "diagnostic_code": "FUN02_ENDPOINT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "f(x)≤4",
+            "ru": "f(x)≤4",
+            "uz": "f(x)≤4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "4≤f(x)≤5",
+            "ru": "4≤f(x)≤5",
+            "uz": "4≤f(x)≤5"
+          },
+          "diagnostic_code": "FUN02_RESTRICTION_IGNORED"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "The unrestricted vertex is at x=2, outside x≥3. For x≥3 the parabola is decreasing. f(3)=4 is the largest allowed output, and f(x) decreases without bound, so f(x)≤4.",
+        "ru": "Вершина неограниченного графика находится при x=2, вне области x≥3. На x≥3 парабола убывает. f(3)=4 — наибольший допустимый выход, а далее значения убывают без границы, поэтому f(x)≤4.",
+        "uz": "Cheklanmagan grafik cho‘qqisi x=2 da, bu x≥3 sohasidan tashqarida. x≥3 da parabola kamayadi. f(3)=4 eng katta ruxsat etilgan chiqish, keyin qiymatlar cheksiz kamayadi, demak f(x)≤4."
+      },
+      "ai_source_skill": "P1-FUN-02",
+      "status": "draft"
+    }
+  ]
+}
