@@ -51,8 +51,8 @@
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
         "en": "Which method is the most direct for solving x² − 9 = 0?",
-        "ru": "Какой метод наиболее прямой для решения x² − 9 = 0?",
-        "uz": "x² − 9 = 0 tenglamani yechish uchun qaysi usul eng to‘g‘ri va qisqa?"
+        "ru": "Какой способ позволяет решить x² − 9 = 0 наиболее быстро?",
+        "uz": "x² − 9 = 0 tenglamani eng tez yechish uchun qaysi usul qulay?"
       },
       "options": [
         {
