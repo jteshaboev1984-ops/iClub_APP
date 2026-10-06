@@ -21,11 +21,11 @@
         {
           "key": "A",
           "text": {
-            "en": "12(4x−1)²",
-            "ru": "12(4x−1)²",
-            "uz": "12(4x−1)²"
+            "en": "4(4x−1)²",
+            "ru": "4(4x−1)²",
+            "uz": "4(4x−1)²"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF03_OUTER_POWER"
         },
         {
           "key": "B",
@@ -48,14 +48,14 @@
         {
           "key": "D",
           "text": {
-            "en": "4(4x−1)²",
-            "ru": "4(4x−1)²",
-            "uz": "4(4x−1)²"
+            "en": "12(4x−1)²",
+            "ru": "12(4x−1)²",
+            "uz": "12(4x−1)²"
           },
-          "diagnostic_code": "DIF03_OUTER_POWER"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "Differentiate the outer cube to get 3(4x−1)², then multiply by the inner derivative 4. The result is 12(4x−1)².",
         "ru": "Производная внешней степени даёт 3(4x−1)², затем умножаем на производную внутри 4. Получаем 12(4x−1)².",
@@ -82,20 +82,20 @@
         {
           "key": "A",
           "text": {
-            "en": "−8(5−2x)³",
-            "ru": "−8(5−2x)³",
-            "uz": "−8(5−2x)³"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "8(5−2x)³",
             "ru": "8(5−2x)³",
             "uz": "8(5−2x)³"
           },
           "diagnostic_code": "DIF03_INNER_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−8(5−2x)³",
+            "ru": "−8(5−2x)³",
+            "uz": "−8(5−2x)³"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -116,7 +116,7 @@
           "diagnostic_code": "DIF03_OUTER_POWER"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "The outer derivative is 4(5−2x)³ and the inner derivative is −2, giving −8(5−2x)³.",
         "ru": "Внешняя производная 4(5−2x)³, внутренняя производная −2, поэтому получаем −8(5−2x)³.",
@@ -180,11 +180,11 @@
         {
           "key": "A",
           "text": {
-            "en": "3/[2√(3x+4)]",
-            "ru": "3/[2√(3x+4)]",
-            "uz": "3/[2√(3x+4)]"
+            "en": "(3/2)√(3x+4)",
+            "ru": "(3/2)√(3x+4)",
+            "uz": "(3/2)√(3x+4)"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF03_OUTER_POWER"
         },
         {
           "key": "B",
@@ -198,11 +198,11 @@
         {
           "key": "C",
           "text": {
-            "en": "(3/2)√(3x+4)",
-            "ru": "(3/2)√(3x+4)",
-            "uz": "(3/2)√(3x+4)"
+            "en": "3/[2√(3x+4)]",
+            "ru": "3/[2√(3x+4)]",
+            "uz": "3/[2√(3x+4)]"
           },
-          "diagnostic_code": "DIF03_OUTER_POWER"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -214,7 +214,7 @@
           "diagnostic_code": "DIF03_OUTER_POWER"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "Write y=(3x+4)^(1/2). Then dy/dx=(1/2)(3x+4)^(−1/2)·3=3/[2√(3x+4)].",
         "ru": "Запишем y=(3x+4)^(1/2). Тогда dy/dx=(1/2)(3x+4)^(−1/2)·3=3/[2√(3x+4)].",
@@ -376,11 +376,11 @@
         {
           "key": "A",
           "text": {
-            "en": "18(3x+1)²−4(x−4)³",
-            "ru": "18(3x+1)²−4(x−4)³",
-            "uz": "18(3x+1)²−4(x−4)³"
+            "en": "18(3x+1)²−(x−4)³",
+            "ru": "18(3x+1)²−(x−4)³",
+            "uz": "18(3x+1)²−(x−4)³"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF03_OUTER_POWER"
         },
         {
           "key": "B",
@@ -394,11 +394,11 @@
         {
           "key": "C",
           "text": {
-            "en": "18(3x+1)²−(x−4)³",
-            "ru": "18(3x+1)²−(x−4)³",
-            "uz": "18(3x+1)²−(x−4)³"
+            "en": "18(3x+1)²−4(x−4)³",
+            "ru": "18(3x+1)²−4(x−4)³",
+            "uz": "18(3x+1)²−4(x−4)³"
           },
-          "diagnostic_code": "DIF03_OUTER_POWER"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -410,7 +410,7 @@
           "diagnostic_code": "DIF03_OUTER_POWER"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "For the first term: 2·3(3x+1)²·3=18(3x+1)². For the second: −4(x−4)³.",
         "ru": "Для первого члена: 2·3(3x+1)²·3=18(3x+1)². Для второго: −4(x−4)³.",
