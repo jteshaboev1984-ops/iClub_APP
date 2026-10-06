@@ -1,0 +1,471 @@
+{
+  "version": "practice_v2_p2_functions_draft_v0.1",
+  "skill": "P1-FUN-01",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q069",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-01",
+      "secondary_skills": [],
+      "role": "concept_recognition",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which relation defines y as a function of x?",
+        "ru": "Какое соотношение задаёт y как функцию от x?",
+        "uz": "Qaysi munosabat y ni x ning funksiyasi sifatida aniqlaydi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Each allowed x is paired with exactly one y.",
+            "ru": "Каждому допустимому x соответствует ровно одно y.",
+            "uz": "Har bir ruxsat etilgan x ga aynan bitta y mos keladi."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "At least one x is paired with two different y-values.",
+            "ru": "Хотя бы одному x соответствуют два разных значения y.",
+            "uz": "Kamida bitta x ga ikkita turli y qiymati mos keladi."
+          },
+          "diagnostic_code": "FUN01_FUNCTION_RULE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Every y-value must come from exactly one x.",
+            "ru": "Каждому y обязательно должен соответствовать ровно один x.",
+            "uz": "Har bir y ga albatta aynan bitta x mos kelishi kerak."
+          },
+          "diagnostic_code": "FUN01_ONE_ONE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "The number of x-values must equal the number of y-values.",
+            "ru": "Число значений x должно совпадать с числом значений y.",
+            "uz": "x qiymatlari soni y qiymatlari soniga teng bo‘lishi kerak."
+          },
+          "diagnostic_code": "FUN01_FUNCTION_RULE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "A function assigns exactly one output to each allowed input. Different inputs may share an output; that affects one-to-one behavior, not whether the relation is a function.",
+        "ru": "Функция сопоставляет каждому допустимому входу ровно один выход. Разные входы могут давать один и тот же выход: это влияет на взаимную однозначность, но не на само определение функции.",
+        "uz": "Funksiya har bir ruxsat etilgan kirishga aynan bitta chiqish mos qo‘yadi. Turli kirishlar bir xil chiqish berishi mumkin; bu one-to-one xususiyatiga ta’sir qiladi, lekin funksiyaning o‘z ta’rifiga emas."
+      },
+      "ai_source_skill": "P1-FUN-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q070",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-01",
+      "secondary_skills": [],
+      "role": "concept_recognition",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "A function maps 1→4, 2→4 and 3→7. What are its domain and range?",
+        "ru": "Функция задаёт соответствия 1→4, 2→4 и 3→7. Каковы её область определения и область значений?",
+        "uz": "Funksiya 1→4, 2→4 va 3→7 mosliklarni beradi. Uning aniqlanish sohasi va qiymatlar to‘plami qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Domain {4,7}; range {1,2,3}",
+            "ru": "Область определения {4,7}; область значений {1,2,3}",
+            "uz": "Aniqlanish sohasi {4,7}; qiymatlar to‘plami {1,2,3}"
+          },
+          "diagnostic_code": "FUN01_DOMAIN_RANGE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Domain {1,2,3}; range {4,7}",
+            "ru": "Область определения {1,2,3}; область значений {4,7}",
+            "uz": "Aniqlanish sohasi {1,2,3}; qiymatlar to‘plami {4,7}"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Domain {1,2,3}; range {4,4,7}",
+            "ru": "Область определения {1,2,3}; область значений {4,4,7}",
+            "uz": "Aniqlanish sohasi {1,2,3}; qiymatlar to‘plami {4,4,7}"
+          },
+          "diagnostic_code": "FUN01_DOMAIN_RANGE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Domain {1,2,3,4,7}; range {4,7}",
+            "ru": "Область определения {1,2,3,4,7}; область значений {4,7}",
+            "uz": "Aniqlanish sohasi {1,2,3,4,7}; qiymatlar to‘plami {4,7}"
+          },
+          "diagnostic_code": "FUN01_DOMAIN_RANGE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The domain is the set of inputs {1,2,3}. The outputs actually produced are 4 and 7, so the range is {4,7}; repeated outputs are listed once in a set.",
+        "ru": "Область определения — множество входов {1,2,3}. Получаемые выходы — 4 и 7, поэтому область значений равна {4,7}; повторяющееся значение в множестве записывают один раз.",
+        "uz": "Aniqlanish sohasi kirishlar to‘plami {1,2,3}. Hosil bo‘ladigan chiqishlar 4 va 7, demak qiymatlar to‘plami {4,7}; to‘plamda takroriy qiymat bir marta yoziladi."
+      },
+      "ai_source_skill": "P1-FUN-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q071",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-01",
+      "secondary_skills": [],
+      "role": "concept_interpretation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which mapping is one-to-one?",
+        "ru": "Какое отображение является взаимно однозначным?",
+        "uz": "Qaysi moslik one-to-one?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−1→2, 0→2, 1→3",
+            "ru": "−1→2, 0→2, 1→3",
+            "uz": "−1→2, 0→2, 1→3"
+          },
+          "diagnostic_code": "FUN01_ONE_ONE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1→0, 2→0, 3→0",
+            "ru": "1→0, 2→0, 3→0",
+            "uz": "1→0, 2→0, 3→0"
+          },
+          "diagnostic_code": "FUN01_ONE_ONE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1→5, 2→7, 3→9",
+            "ru": "1→5, 2→7, 3→9",
+            "uz": "1→5, 2→7, 3→9"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "1→4, 2→6, 3→6",
+            "ru": "1→4, 2→6, 3→6",
+            "uz": "1→4, 2→6, 3→6"
+          },
+          "diagnostic_code": "FUN01_ONE_ONE"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "A one-to-one function never sends two different inputs to the same output. Only the third mapping has three different outputs for the three different inputs.",
+        "ru": "Во взаимно однозначной функции два разных входа не могут давать один и тот же выход. Только в третьем отображении всем трём разным входам соответствуют разные выходы.",
+        "uz": "One-to-one funksiyada ikki xil kirish bir xil chiqish bermaydi. Faqat uchinchi moslikda uchta turli kirish uchta turli chiqish beradi."
+      },
+      "ai_source_skill": "P1-FUN-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q072",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-01",
+      "secondary_skills": [],
+      "role": "misconception_trap",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which statement about f⁻¹ is correct?",
+        "ru": "Какое утверждение о f⁻¹ верно?",
+        "uz": "f⁻¹ haqida qaysi tasdiq to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "f⁻¹(x) always means 1/f(x).",
+            "ru": "f⁻¹(x) всегда означает 1/f(x).",
+            "uz": "f⁻¹(x) har doim 1/f(x) degani."
+          },
+          "diagnostic_code": "FUN01_INVERSE_RECIPROCAL"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Every function has an inverse function on its original domain.",
+            "ru": "У любой функции есть обратная функция на исходной области определения.",
+            "uz": "Har bir funksiyaning boshlang‘ich sohasida teskari funksiyasi mavjud."
+          },
+          "diagnostic_code": "FUN01_ONE_ONE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "f⁻¹ has exactly the same domain as f in every case.",
+            "ru": "Область определения f⁻¹ всегда совпадает с областью определения f.",
+            "uz": "f⁻¹ ning aniqlanish sohasi har doim f ning sohasi bilan bir xil."
+          },
+          "diagnostic_code": "FUN01_DOMAIN_RANGE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "f⁻¹ reverses the input-output mapping when an inverse function exists.",
+            "ru": "f⁻¹ обращает соответствие вход–выход, если обратная функция существует.",
+            "uz": "Teskari funksiya mavjud bo‘lsa, f⁻¹ kirish–chiqish mosligini teskarilaydi."
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "An inverse function reverses the mapping: if f(a)=b, then f⁻¹(b)=a. It is not the reciprocal 1/f(x), and an inverse function requires suitable one-to-one behavior.",
+        "ru": "Обратная функция обращает отображение: если f(a)=b, то f⁻¹(b)=a. Это не 1/f(x), а существование обратной функции требует подходящей взаимной однозначности.",
+        "uz": "Teskari funksiya moslikni teskarilaydi: agar f(a)=b bo‘lsa, f⁻¹(b)=a. Bu 1/f(x) emas; teskari funksiya uchun mos one-to-one xususiyati kerak."
+      },
+      "ai_source_skill": "P1-FUN-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q073",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-01",
+      "secondary_skills": [],
+      "role": "concept_interpretation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "What does (f∘g)(x) mean?",
+        "ru": "Что означает (f∘g)(x)?",
+        "uz": "(f∘g)(x) nimani anglatadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Apply g first, then apply f to the result.",
+            "ru": "Сначала применить g, затем f к полученному результату.",
+            "uz": "Avval g ni, keyin natijaga f ni qo‘llash."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Apply f first, then apply g to the result.",
+            "ru": "Сначала применить f, затем g к результату.",
+            "uz": "Avval f ni, keyin natijaga g ni qo‘llash."
+          },
+          "diagnostic_code": "FUN01_COMPOSITION_ORDER"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Multiply f(x) by g(x).",
+            "ru": "Умножить f(x) на g(x).",
+            "uz": "f(x) ni g(x) ga ko‘paytirish."
+          },
+          "diagnostic_code": "FUN01_COMPOSITION_ORDER"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Find the inverse of g and then use f.",
+            "ru": "Найти обратную к g, затем применить f.",
+            "uz": "g ning teskarisini topib, keyin f ni qo‘llash."
+          },
+          "diagnostic_code": "FUN01_COMPOSITION_ORDER"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "(f∘g)(x)=f(g(x)). The inner function g acts first; its output becomes the input of f.",
+        "ru": "(f∘g)(x)=f(g(x)). Сначала действует внутренняя функция g, а её результат становится входом для f.",
+        "uz": "(f∘g)(x)=f(g(x)). Avval ichki g funksiyasi ishlaydi, uning natijasi f uchun kirish bo‘ladi."
+      },
+      "ai_source_skill": "P1-FUN-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q074",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-01",
+      "secondary_skills": [],
+      "role": "non_example",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which statement is enough to show that a function is not one-to-one?",
+        "ru": "Какого утверждения достаточно, чтобы показать, что функция не является взаимно однозначной?",
+        "uz": "Funksiya one-to-one emasligini ko‘rsatish uchun qaysi tasdiq yetarli?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Its domain contains negative numbers.",
+            "ru": "Её область определения содержит отрицательные числа.",
+            "uz": "Uning aniqlanish sohasida manfiy sonlar bor."
+          },
+          "diagnostic_code": "FUN01_ONE_ONE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Two different allowed inputs give the same output.",
+            "ru": "Два разных допустимых входа дают один и тот же выход.",
+            "uz": "Ikki xil ruxsat etilgan kirish bir xil chiqish beradi."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Two different outputs occur.",
+            "ru": "Получаются два разных выхода.",
+            "uz": "Ikki xil chiqish hosil bo‘ladi."
+          },
+          "diagnostic_code": "FUN01_ONE_ONE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Its range contains zero.",
+            "ru": "Её область значений содержит ноль.",
+            "uz": "Uning qiymatlar to‘plamida nol bor."
+          },
+          "diagnostic_code": "FUN01_ONE_ONE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "One counterexample is enough: if a≠b but f(a)=f(b), the function is not one-to-one on that domain.",
+        "ru": "Достаточно одного контрпримера: если a≠b, но f(a)=f(b), функция не является взаимно однозначной на этой области.",
+        "uz": "Bitta qarshi misol yetarli: agar a≠b, ammo f(a)=f(b) bo‘lsa, funksiya shu sohada one-to-one emas."
+      },
+      "ai_source_skill": "P1-FUN-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q075",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-01",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "A function f has domain {−2,0,3} and values f(−2)=5, f(0)=1, f(3)=5. Which statement must be true?",
+        "ru": "Функция f имеет область определения {−2,0,3} и значения f(−2)=5, f(0)=1, f(3)=5. Какое утверждение обязательно верно?",
+        "uz": "f funksiyaning aniqlanish sohasi {−2,0,3}, va f(−2)=5, f(0)=1, f(3)=5. Qaysi tasdiq albatta to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "The range is {−2,0,3}.",
+            "ru": "Область значений равна {−2,0,3}.",
+            "uz": "Qiymatlar to‘plami {−2,0,3}."
+          },
+          "diagnostic_code": "FUN01_DOMAIN_RANGE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "The relation is not a function.",
+            "ru": "Это соотношение не является функцией.",
+            "uz": "Bu munosabat funksiya emas."
+          },
+          "diagnostic_code": "FUN01_FUNCTION_RULE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "f is a function but is not one-to-one.",
+            "ru": "f является функцией, но не является взаимно однозначной.",
+            "uz": "f funksiya, lekin one-to-one emas."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "f has an inverse function on this domain.",
+            "ru": "У f есть обратная функция на этой области.",
+            "uz": "f ning shu sohada teskari funksiyasi mavjud."
+          },
+          "diagnostic_code": "FUN01_ONE_ONE"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Each input has one output, so f is a function. But −2 and 3 both map to 5, so different inputs share an output and f is not one-to-one.",
+        "ru": "Каждый вход имеет ровно один выход, поэтому f — функция. Но −2 и 3 оба переходят в 5, значит разные входы дают одинаковый выход и f не взаимно однозначна.",
+        "uz": "Har bir kirish aynan bitta chiqishga ega, demak f funksiya. Ammo −2 va 3 ikkalasi ham 5 ga o‘tadi, shuning uchun turli kirishlar bir xil chiqish beradi va f one-to-one emas."
+      },
+      "ai_source_skill": "P1-FUN-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q076",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-01",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=2x²−x+3, enter f(2)−f(−1).",
+        "ru": "Для f(x)=2x²−x+3 введите f(2)−f(−1).",
+        "uz": "f(x)=2x²−x+3 uchun f(2)−f(−1) ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "0",
+          "6",
+          "12"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "f(2)=2(4)−2+3=9 and f(−1)=2(1)+1+3=6. Therefore f(2)−f(−1)=3.",
+        "ru": "f(2)=2(4)−2+3=9, а f(−1)=2(1)+1+3=6. Поэтому f(2)−f(−1)=3.",
+        "uz": "f(2)=2(4)−2+3=9 va f(−1)=2(1)+1+3=6. Demak f(2)−f(−1)=3."
+      },
+      "ai_source_skill": "P1-FUN-01",
+      "status": "draft"
+    }
+  ]
+}
