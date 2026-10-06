@@ -12,6 +12,7 @@ on:
       - 'supabase/functions/global-ai/**'
       - '.github/scripts/global_ai_generation_v1_contract.js'
       - '.github/scripts/global_ai_gateway_foundation_v1_contract.js'
+      - 'docs/iclub-global-ai-generation-canary-v1.md'
       - '.github/workflows/global-ai-generated-math-v1.yml'
   push:
     branches:
@@ -24,6 +25,7 @@ on:
       - 'supabase/functions/global-ai/**'
       - '.github/scripts/global_ai_generation_v1_contract.js'
       - '.github/scripts/global_ai_gateway_foundation_v1_contract.js'
+      - 'docs/iclub-global-ai-generation-canary-v1.md'
       - '.github/workflows/global-ai-generated-math-v1.yml'
   workflow_dispatch:
 
