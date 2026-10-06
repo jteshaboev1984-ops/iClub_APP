@@ -312,12 +312,15 @@ begin
   end if;
 
   if p_route_class='generated' then
-    if coalesce((v_caps->>'ai_generation_entitled')::boolean,false) is not true then
-      return jsonb_build_object('allowed',false,'mode','unavailable','reason','generation_upgrade_required');
-    end if;
-
+    -- Operational availability wins over upsell. During a generation incident or
+    -- staged rollout, Free learners must not be told to upgrade to a feature that
+    -- is not currently working for paid learners either.
     if not v_runtime.generation_enabled then
       return jsonb_build_object('allowed',false,'mode','unavailable','reason','generation_disabled');
+    end if;
+
+    if coalesce((v_caps->>'ai_generation_entitled')::boolean,false) is not true then
+      return jsonb_build_object('allowed',false,'mode','unavailable','reason','generation_upgrade_required');
     end if;
 
     if v_readiness.readiness<>'full'
