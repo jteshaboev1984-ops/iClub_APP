@@ -1,0 +1,596 @@
+{
+  "version": "practice_v2_p4_circular_trig_draft_v0.1",
+  "skill": "P1-TRI-04",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q272",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-04",
+      "secondary_skills": [],
+      "role": "identity_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "For values where sin x≠0, which expression is equal to (1−cos²x)/sin x?",
+        "ru": "Для значений, где sin x≠0, какое выражение равно (1−cos²x)/sin x?",
+        "uz": "sin x≠0 bo‘lgan qiymatlarda (1−cos²x)/sin x qaysi ifodaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "sin x",
+            "ru": "sin x",
+            "uz": "sin x"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "cos x",
+            "ru": "cos x",
+            "uz": "cos x"
+          },
+          "diagnostic_code": "TRI04_PYTHAGOREAN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1−cos x",
+            "ru": "1−cos x",
+            "uz": "1−cos x"
+          },
+          "diagnostic_code": "TRI04_ILLEGAL_CANCEL"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "tan x",
+            "ru": "tan x",
+            "uz": "tan x"
+          },
+          "diagnostic_code": "TRI04_TAN_RATIO"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Since 1−cos²x=sin²x, the expression becomes sin²x/sin x=sin x for sin x≠0.",
+        "ru": "Так как 1−cos²x=sin²x, выражение становится sin²x/sin x=sin x при sin x≠0.",
+        "uz": "1−cos²x=sin²x, demak ifoda sin²x/sin x=sin x, sin x≠0 bo‘lganda."
+      },
+      "ai_source_skill": "P1-TRI-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q273",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-04",
+      "secondary_skills": [],
+      "role": "identity_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Where tan x is defined, which expression is identically equal to tan x cos x?",
+        "ru": "Там, где tan x определён, какое выражение тождественно равно tan x cos x?",
+        "uz": "tan x aniqlangan joylarda tan x cos x qaysi ifodaga aynan teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "cos x",
+            "ru": "cos x",
+            "uz": "cos x"
+          },
+          "diagnostic_code": "TRI04_TAN_RATIO"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "sin x",
+            "ru": "sin x",
+            "uz": "sin x"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "sin²x",
+            "ru": "sin²x",
+            "uz": "sin²x"
+          },
+          "diagnostic_code": "TRI04_ALGEBRA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "1",
+            "ru": "1",
+            "uz": "1"
+          },
+          "diagnostic_code": "TRI04_TAN_RATIO"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "tan x=sin x/cos x. Therefore tan x cos x=(sin x/cos x)cos x=sin x.",
+        "ru": "tan x=sin x/cos x. Поэтому tan x cos x=(sin x/cos x)cos x=sin x.",
+        "uz": "tan x=sin x/cos x. Shuning uchun tan x cos x=(sin x/cos x)cos x=sin x."
+      },
+      "ai_source_skill": "P1-TRI-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q274",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-04",
+      "secondary_skills": [],
+      "role": "identity_application",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "For cos x≠0, simplify (sin²x+cos²x)/cos²x.",
+        "ru": "При cos x≠0 упростите (sin²x+cos²x)/cos²x.",
+        "uz": "cos x≠0 bo‘lganda (sin²x+cos²x)/cos²x ni soddalashtiring."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "1",
+            "ru": "1",
+            "uz": "1"
+          },
+          "diagnostic_code": "TRI04_ILLEGAL_CANCEL"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1/cos²x",
+            "ru": "1/cos²x",
+            "uz": "1/cos²x"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "tan²x",
+            "ru": "tan²x",
+            "uz": "tan²x"
+          },
+          "diagnostic_code": "TRI04_PYTHAGOREAN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "sin²x/cos²x",
+            "ru": "sin²x/cos²x",
+            "uz": "sin²x/cos²x"
+          },
+          "diagnostic_code": "TRI04_ALGEBRA"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "sin²x+cos²x=1, so the numerator is 1. The expression is therefore 1/cos²x.",
+        "ru": "sin²x+cos²x=1, поэтому числитель равен 1. Значит выражение равно 1/cos²x.",
+        "uz": "sin²x+cos²x=1, demak surat 1. Shuning uchun ifoda 1/cos²x."
+      },
+      "ai_source_skill": "P1-TRI-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q275",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-04",
+      "secondary_skills": [],
+      "role": "factor_identity",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "For sin x≠0, simplify [(1−cos x)(1+cos x)]/sin²x.",
+        "ru": "При sin x≠0 упростите [(1−cos x)(1+cos x)]/sin²x.",
+        "uz": "sin x≠0 bo‘lganda [(1−cos x)(1+cos x)]/sin²x ni soddalashtiring."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "0",
+            "ru": "0",
+            "uz": "0"
+          },
+          "diagnostic_code": "TRI04_ALGEBRA"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1",
+            "ru": "1",
+            "uz": "1"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "cos²x",
+            "ru": "cos²x",
+            "uz": "cos²x"
+          },
+          "diagnostic_code": "TRI04_PYTHAGOREAN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "1/sin²x",
+            "ru": "1/sin²x",
+            "uz": "1/sin²x"
+          },
+          "diagnostic_code": "TRI04_ILLEGAL_CANCEL"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "(1−cos x)(1+cos x)=1−cos²x=sin²x. Dividing by sin²x gives 1.",
+        "ru": "(1−cos x)(1+cos x)=1−cos²x=sin²x. Деление на sin²x даёт 1.",
+        "uz": "(1−cos x)(1+cos x)=1−cos²x=sin²x. sin²x ga bo‘lsak 1."
+      },
+      "ai_source_skill": "P1-TRI-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q276",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-04",
+      "secondary_skills": [],
+      "role": "non_example",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Which simplification is NOT algebraically valid in general?",
+        "ru": "Какое упрощение в общем случае НЕ является алгебраически корректным?",
+        "uz": "Qaysi soddalashtirish umumiy holda algebraik jihatdan TO‘G‘RI EMAS?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(sin x cos x)/cos x = sin x, if cos x≠0",
+            "ru": "(sin x cos x)/cos x = sin x, если cos x≠0",
+            "uz": "(sin x cos x)/cos x = sin x, agar cos x≠0"
+          },
+          "diagnostic_code": "TRI04_ALGEBRA"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(1−cos²x)/sin²x = 1, if sin x≠0",
+            "ru": "(1−cos²x)/sin²x = 1, если sin x≠0",
+            "uz": "(1−cos²x)/sin²x = 1, agar sin x≠0"
+          },
+          "diagnostic_code": "TRI04_PYTHAGOREAN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(1+sin x)/sin x = 1+1/sin x, if sin x≠0",
+            "ru": "(1+sin x)/sin x = 1+1/sin x, если sin x≠0",
+            "uz": "(1+sin x)/sin x = 1+1/sin x, agar sin x≠0"
+          },
+          "diagnostic_code": "TRI04_ALGEBRA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(1+sin x)/sin x = 1",
+            "ru": "(1+sin x)/sin x = 1",
+            "uz": "(1+sin x)/sin x = 1"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "You cannot cancel sin x across the addition 1+sin x. In fact (1+sin x)/sin x=1/sin x+1, when sin x≠0.",
+        "ru": "Нельзя сокращать sin x через сумму 1+sin x. На самом деле (1+sin x)/sin x=1/sin x+1 при sin x≠0.",
+        "uz": "1+sin x yig‘indisi ichida sin x ni qisqartirib bo‘lmaydi. Aslida sin x≠0 bo‘lsa, (1+sin x)/sin x=1/sin x+1."
+      },
+      "ai_source_skill": "P1-TRI-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q277",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-04",
+      "secondary_skills": [],
+      "role": "numeric_application",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "For an angle x, sin x=3/5 and cos x=4/5. Enter tan x.",
+        "ru": "Для угла x известно sin x=3/5 и cos x=4/5. Введите tan x.",
+        "uz": "x burchak uchun sin x=3/5 va cos x=4/5. tan x ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "0.75",
+        "accepted_examples": [
+          "0.75",
+          "0,75",
+          " 0.75 "
+        ],
+        "rejected_examples": [
+          "1.333333",
+          "0.6",
+          "0.8"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "tan x=sin x/cos x=(3/5)/(4/5)=3/4=0.75.",
+        "ru": "tan x=sin x/cos x=(3/5)/(4/5)=3/4=0.75.",
+        "uz": "tan x=sin x/cos x=(3/5)/(4/5)=3/4=0.75."
+      },
+      "ai_source_skill": "P1-TRI-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q278",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-04",
+      "secondary_skills": [],
+      "role": "mixed_identity",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Where tan x is defined, which expression is equal to tan x cos²x?",
+        "ru": "Там, где tan x определён, какое выражение равно tan x cos²x?",
+        "uz": "tan x aniqlangan joylarda tan x cos²x qaysi ifodaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "sin x cos x",
+            "ru": "sin x cos x",
+            "uz": "sin x cos x"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "sin²x",
+            "ru": "sin²x",
+            "uz": "sin²x"
+          },
+          "diagnostic_code": "TRI04_TAN_RATIO"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "cos x",
+            "ru": "cos x",
+            "uz": "cos x"
+          },
+          "diagnostic_code": "TRI04_ALGEBRA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "tan²x",
+            "ru": "tan²x",
+            "uz": "tan²x"
+          },
+          "diagnostic_code": "TRI04_TAN_RATIO"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "tan x cos²x=(sin x/cos x)cos²x=sin x cos x.",
+        "ru": "tan x cos²x=(sin x/cos x)cos²x=sin x cos x.",
+        "uz": "tan x cos²x=(sin x/cos x)cos²x=sin x cos x."
+      },
+      "ai_source_skill": "P1-TRI-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q279",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-04",
+      "secondary_skills": [],
+      "role": "factor_identity",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "For 1+cos x≠0, simplify sin²x/(1+cos x).",
+        "ru": "При 1+cos x≠0 упростите sin²x/(1+cos x).",
+        "uz": "1+cos x≠0 bo‘lganda sin²x/(1+cos x) ni soddalashtiring."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "1−cos x",
+            "ru": "1−cos x",
+            "uz": "1−cos x"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1+cos x",
+            "ru": "1+cos x",
+            "uz": "1+cos x"
+          },
+          "diagnostic_code": "TRI04_PYTHAGOREAN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "sin x",
+            "ru": "sin x",
+            "uz": "sin x"
+          },
+          "diagnostic_code": "TRI04_ILLEGAL_CANCEL"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "cos x",
+            "ru": "cos x",
+            "uz": "cos x"
+          },
+          "diagnostic_code": "TRI04_ALGEBRA"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "sin²x=1−cos²x=(1−cos x)(1+cos x). Cancel the common factor 1+cos x to get 1−cos x.",
+        "ru": "sin²x=1−cos²x=(1−cos x)(1+cos x). Сокращаем общий множитель 1+cos x и получаем 1−cos x.",
+        "uz": "sin²x=1−cos²x=(1−cos x)(1+cos x). Umumiy 1+cos x ko‘paytuvchini qisqartirib, 1−cos x ni olamiz."
+      },
+      "ai_source_skill": "P1-TRI-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q280",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-04",
+      "secondary_skills": [],
+      "role": "reciprocal_structure",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Where tan x and sin x are defined and non-zero, simplify sin x/tan x.",
+        "ru": "Там, где tan x и sin x определены и ненулевые, упростите sin x/tan x.",
+        "uz": "tan x va sin x aniqlangan va noldan farqli joylarda sin x/tan x ni soddalashtiring."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "cos x",
+            "ru": "cos x",
+            "uz": "cos x"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "sin x",
+            "ru": "sin x",
+            "uz": "sin x"
+          },
+          "diagnostic_code": "TRI04_TAN_RATIO"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1/cos x",
+            "ru": "1/cos x",
+            "uz": "1/cos x"
+          },
+          "diagnostic_code": "TRI04_ALGEBRA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "tan x",
+            "ru": "tan x",
+            "uz": "tan x"
+          },
+          "diagnostic_code": "TRI04_TAN_RATIO"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "sin x/tan x=sin x/(sin x/cos x)=cos x.",
+        "ru": "sin x/tan x=sin x/(sin x/cos x)=cos x.",
+        "uz": "sin x/tan x=sin x/(sin x/cos x)=cos x."
+      },
+      "ai_source_skill": "P1-TRI-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q281",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-04",
+      "secondary_skills": [
+        "P1-TRI-01"
+      ],
+      "role": "domain_condition",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "On 0°≤x≤360°, the expression sin²x/(1−cos x) is undefined at which x-values?",
+        "ru": "На 0°≤x≤360° при каких x выражение sin²x/(1−cos x) не определено?",
+        "uz": "0°≤x≤360° da sin²x/(1−cos x) ifoda qaysi x qiymatlarida aniqlanmagan?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "0° and 360°",
+            "ru": "0° и 360°",
+            "uz": "0° va 360°"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "90° and 270°",
+            "ru": "90° и 270°",
+            "uz": "90° va 270°"
+          },
+          "diagnostic_code": "TRI04_PYTHAGOREAN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "180° only",
+            "ru": "Только 180°",
+            "uz": "Faqat 180°"
+          },
+          "diagnostic_code": "TRI04_ALGEBRA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "0°, 180° and 360°",
+            "ru": "0°, 180° и 360°",
+            "uz": "0°, 180° va 360°"
+          },
+          "diagnostic_code": "TRI04_ILLEGAL_CANCEL"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The denominator is zero when 1−cos x=0, so cos x=1. On the stated interval this occurs at x=0° and x=360°.",
+        "ru": "Знаменатель равен нулю, когда 1−cos x=0, то есть cos x=1. На данном интервале это x=0° и x=360°.",
+        "uz": "Maxraj 1−cos x=0 bo‘lganda nol, ya’ni cos x=1. Berilgan intervalda bu x=0° va x=360°."
+      },
+      "ai_source_skill": "P1-TRI-04",
+      "status": "draft"
+    }
+  ]
+}
