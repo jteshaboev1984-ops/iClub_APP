@@ -386,19 +386,19 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8–9 Differentiation, printed pp. 138–167",
       "question": {
-        "en": "What is the tangent line to y=x³−3x at x=1?",
-        "ru": "Какова касательная к y=x³−3x при x=1?",
-        "uz": "y=x³−3x egri chiziqqa x=1 dagi urinma qaysi?"
+        "en": "What is the tangent line to y=x³−12x at x=2?",
+        "ru": "Какова касательная к y=x³−12x при x=2?",
+        "uz": "y=x³−12x egri chiziqqa x=2 dagi urinma qaysi?"
       },
       "options": [
         {
-          "key": "A",
+          "key": "D",
           "text": {
-            "en": "y=−2x",
-            "ru": "y=−2x",
-            "uz": "y=−2x"
+            "en": "y=−16",
+            "ru": "y=−16",
+            "uz": "y=−16"
           },
-          "diagnostic_code": "DIF04_LINE_CONSTANT"
+          "diagnostic_code": null
         },
         {
           "key": "B",
@@ -412,27 +412,27 @@
         {
           "key": "C",
           "text": {
-            "en": "x=1",
-            "ru": "x=1",
-            "uz": "x=1"
+            "en": "x=2",
+            "ru": "x=2",
+            "uz": "x=2"
           },
           "diagnostic_code": "DIF04_TANGENT_GRADIENT"
         },
         {
-          "key": "D",
+          "key": "A",
           "text": {
-            "en": "y=−2",
-            "ru": "y=−2",
-            "uz": "y=−2"
+            "en": "y=−8x",
+            "ru": "y=−8x",
+            "uz": "y=−8x"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF04_LINE_CONSTANT"
         }
       ],
       "correct_answer": "D",
       "explanation": {
-        "en": "dy/dx=3x²−3, which is 0 at x=1, so the tangent is horizontal. The point is (1,−2), hence the tangent is y=−2.",
-        "ru": "dy/dx=3x²−3, при x=1 это 0, поэтому касательная горизонтальна. Точка (1,−2), значит касательная y=−2.",
-        "uz": "dy/dx=3x²−3, x=1 da 0, demak urinma gorizontal. Nuqta (1,−2), shuning uchun urinma y=−2."
+        "en": "dy/dx=3x²−12, which is 0 at x=2, so the tangent is horizontal. The point is (2,−16), hence the tangent is y=−16.",
+        "ru": "dy/dx=3x²−12, при x=2 это 0, поэтому касательная горизонтальна. Точка (2,−16), значит касательная y=−16.",
+        "uz": "dy/dx=3x²−12, x=2 da 0, demak urinma gorizontal. Nuqta (2,−16), shuning uchun urinma y=−16."
       },
       "ai_source_skill": "P1-DIF-04",
       "status": "draft"
