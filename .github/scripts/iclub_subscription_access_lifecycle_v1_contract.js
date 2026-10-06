@@ -24,13 +24,19 @@ assert(lifecycle.includes("lifecycle_enabled boolean not null default false"), '
 assert(lifecycle.includes("subject_limits_mode text not null default 'off'"), 'subject limits must default OFF');
 assert(lifecycle.includes("subject_limits_mode <> 'enforced'"), 'enforcement snapshot constraint missing');
 assert(lifecycle.includes("grandfather_strategy text not null default 'preserve_legacy_until_choice'"), 'grandfather strategy missing');
+assert(lifecycle.includes("global_ai_rollout_mode text not null default 'off'"), 'Global AI rollout must default OFF');
+assert(lifecycle.includes("plans_rollout_mode text not null default 'off'"), 'Plans rollout must default OFF');
+assert(lifecycle.includes("v_effective_plan text:='free'"), 'default Free resolver missing');
+assert(lifecycle.includes("v_source text:='default_free'"), 'default Free source marker missing');
+assert(lifecycle.includes("if v_count>=3 then"), 'three-user canary hard limit missing');
 
 for (const table of [
   'iclub_subscription_events',
   'iclub_commercial_migration_state',
   'iclub_legacy_subject_snapshot',
   'iclub_subject_slot_selections',
-  'iclub_subject_slot_events'
+  'iclub_subject_slot_events',
+  'iclub_product_canary_users'
 ]) {
   assert(lifecycle.includes('private.' + table), 'commercial private table missing: ' + table);
 }
@@ -46,7 +52,8 @@ for (const fn of [
   'capture_iclub_legacy_access_baseline_service_v1',
   'get_iclub_subject_access_guard_service_v1',
   'set_iclub_subject_slot_service_v1',
-  'finalize_iclub_subject_selection_service_v1'
+  'finalize_iclub_subject_selection_service_v1',
+  'set_iclub_product_canary_service_v1'
 ]) {
   const combined = lifecycle + '\n' + access;
   assert(combined.includes(fn), 'service contract missing: ' + fn);
@@ -59,6 +66,9 @@ assert(access.includes("migration_state='migrated'"), 'explicit selection finali
 assert(access.includes("'reason','plan_all_subjects'"), 'Pro all-subject path missing');
 assert(access.includes("'reason','study_subject_limit_reached'"), 'study limit guard missing');
 assert(access.includes("'reason','competitive_subject_limit_reached'"), 'competitive limit guard missing');
+assert(access.includes("'reason','rollout_unavailable'"), 'server-side canary rollout gate missing');
+assert(access.includes('v_runtime.global_ai_rollout_mode'), 'Global AI canary gate missing');
+assert(access.includes('v_runtime.plans_rollout_mode'), 'Plans canary gate missing');
 
 for (const source of [lifecycle, access]) {
   assert(
@@ -80,7 +90,8 @@ for (const signature of [
   'public.capture_iclub_legacy_access_baseline_service_v1',
   'public.get_iclub_subject_access_guard_service_v1',
   'public.set_iclub_subject_slot_service_v1',
-  'public.finalize_iclub_subject_selection_service_v1'
+  'public.finalize_iclub_subject_selection_service_v1',
+  'public.set_iclub_product_canary_service_v1'
 ]) {
   const combined = lifecycle + '\n' + access;
   assert(combined.includes('revoke all on function ' + signature), 'browser revoke missing for ' + signature);
@@ -101,7 +112,8 @@ for (const token of [
   'preserve_legacy_until_choice',
   'must **not** be implemented by deleting, rewriting or reinterpreting legacy user_subjects rows',
   'subject_limits_mode',
-  'no existing user is assigned Free/Plus/Pro',
+  'All authenticated learners resolve to **Free by default**',
+  'hard maximum of **3 service-managed canary users**',
   'historical evidence remains intact'
 ]) {
   assert(doc.includes(token), 'migration model doc missing safety statement: ' + token);
@@ -110,6 +122,10 @@ for (const token of [
 assert(revert.includes('commercial access config is not dormant'), 'rollback active-state refusal missing');
 assert(revert.includes('commercial lifecycle rows exist'), 'rollback data-state refusal missing');
 assert(revert.includes('drop function if exists public.get_iclub_my_subscription_status_v1()'), 'rollback subscription status cleanup missing');
+assert(revert.includes('drop table if exists private.iclub_product_canary_users'), 'rollback canary cleanup missing');
+assert(revert.includes('drop column if exists global_ai_rollout_mode'), 'rollback Global AI rollout cleanup missing');
+assert(revert.includes('drop column if exists plans_rollout_mode'), 'rollback Plans rollout cleanup missing');
+assert(revert.includes("'subscription_unassigned'"), 'rollback does not restore parent explicit-entitlement semantics');
 
 for (const token of [
   'Total users: 1,443',
