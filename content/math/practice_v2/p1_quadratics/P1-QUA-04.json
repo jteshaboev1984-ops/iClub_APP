@@ -70,7 +70,7 @@
       "primary_skill": "P1-QUA-04",
       "secondary_skills": [],
       "role": "direct_application",
-      "difficulty": "medium",
+      "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
@@ -229,7 +229,7 @@
       "primary_skill": "P1-QUA-04",
       "secondary_skills": [],
       "role": "transfer",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
@@ -290,7 +290,7 @@
       "primary_skill": "P1-QUA-04",
       "secondary_skills": [],
       "role": "application_variation",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
@@ -388,7 +388,7 @@
       "primary_skill": "P1-QUA-04",
       "secondary_skills": [],
       "role": "misconception_trap",
-      "difficulty": "medium",
+      "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
@@ -449,7 +449,7 @@
       "primary_skill": "P1-QUA-04",
       "secondary_skills": [],
       "role": "misconception_trap",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
