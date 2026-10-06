@@ -8,39 +8,34 @@
       "practice_no": 3,
       "primary_skill": "P1-COO-02",
       "secondary_skills": [],
-      "role": "direct_application",
+      "role": "reverse_distance",
       "difficulty": "easy",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {
-        "en": "Enter the distance between A(−2,1) and B(4,9).",
-        "ru": "Введите расстояние между A(−2,1) и B(4,9).",
-        "uz": "A(−2,1) va B(4,9) orasidagi masofani kiriting."
+        "en": "The distance between A(−2,1) and B(k,9) is 10, with k>−2. Enter k.",
+        "ru": "Расстояние между A(−2,1) и B(k,9) равно 10, причём k>−2. Введите k.",
+        "uz": "A(−2,1) va B(k,9) orasidagi masofa 10, k>−2. k ni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "10",
+        "canonical_answer": "4",
         "accepted_examples": [
-          "10",
-          " 10 "
+          "4",
+          " 4 "
         ],
         "rejected_examples": [
-          "100",
-          "14",
-          "8"
+          "-8",
+          "6",
+          "10"
         ],
         "number_only": true
       },
-      "diagnostic_rules": [
-        {
-          "answer_match": "100",
-          "diagnostic_code": "COO02_DISTANCE_SQUARED"
-        }
-      ],
+      "diagnostic_rules": [],
       "explanation": {
-        "en": "The coordinate changes are 6 and 8, so d=√(6²+8²)=√100=10.",
-        "ru": "Изменения координат равны 6 и 8, поэтому d=√(6²+8²)=√100=10.",
-        "uz": "Koordinata farqlari 6 va 8, demak d=√(6²+8²)=√100=10."
+        "en": "10²=(k+2)²+(9−1)², so 100=(k+2)²+64. Hence (k+2)²=36 and k=4 or −8. The condition k>−2 selects k=4.",
+        "ru": "10²=(k+2)²+(9−1)², поэтому 100=(k+2)²+64. Тогда (k+2)²=36 и k=4 или −8. Условие k>−2 оставляет k=4.",
+        "uz": "10²=(k+2)²+(9−1)², demak 100=(k+2)²+64. Shundan (k+2)²=36 va k=4 yoki −8. k>−2 sharti k=4 ni tanlaydi."
       },
       "ai_source_skill": "P1-COO-02",
       "status": "draft"
@@ -50,58 +45,58 @@
       "practice_no": 3,
       "primary_skill": "P1-COO-02",
       "secondary_skills": [],
-      "role": "direct_application",
+      "role": "reverse_midpoint",
       "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {
-        "en": "What is the midpoint of the segment joining (−5,7) and (3,−1)?",
-        "ru": "Какова середина отрезка между (−5,7) и (3,−1)?",
-        "uz": "(−5,7) va (3,−1) nuqtalarni tutashtiruvchi kesmaning o‘rta nuqtasi qaysi?"
+        "en": "M(−1,3) is the midpoint of A(−5,7) and B. Which point is B?",
+        "ru": "M(−1,3) — середина отрезка AB, где A(−5,7). Какая точка B?",
+        "uz": "M(−1,3) AB kesmaning o‘rta nuqtasi, A(−5,7). B qaysi nuqta?"
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "(1,3)",
-            "ru": "(1,3)",
-            "uz": "(1,3)"
+            "en": "(4,−1)",
+            "ru": "(4,−1)",
+            "uz": "(4,−1)"
           },
           "diagnostic_code": "COO02_MIDPOINT"
         },
         {
           "key": "B",
           "text": {
-            "en": "(−2,6)",
-            "ru": "(−2,6)",
-            "uz": "(−2,6)"
+            "en": "(3,1)",
+            "ru": "(3,1)",
+            "uz": "(3,1)"
           },
           "diagnostic_code": "COO02_MIDPOINT"
         },
         {
           "key": "C",
           "text": {
-            "en": "(−1,3)",
-            "ru": "(−1,3)",
-            "uz": "(−1,3)"
+            "en": "(3,−1)",
+            "ru": "(3,−1)",
+            "uz": "(3,−1)"
           },
           "diagnostic_code": null
         },
         {
           "key": "D",
           "text": {
-            "en": "(−1,4)",
-            "ru": "(−1,4)",
-            "uz": "(−1,4)"
+            "en": "(−3,1)",
+            "ru": "(−3,1)",
+            "uz": "(−3,1)"
           },
           "diagnostic_code": "COO02_MIDPOINT"
         }
       ],
       "correct_answer": "C",
       "explanation": {
-        "en": "Average corresponding coordinates: ((−5+3)/2,(7−1)/2)=(−1,3).",
-        "ru": "Усредняем соответствующие координаты: ((−5+3)/2,(7−1)/2)=(−1,3).",
-        "uz": "Mos koordinatalarni o‘rtachalaymiz: ((−5+3)/2,(7−1)/2)=(−1,3)."
+        "en": "For x, (−5+x_B)/2=−1, so x_B=3. For y, (7+y_B)/2=3, so y_B=−1. Therefore B=(3,−1).",
+        "ru": "По x: (−5+x_B)/2=−1, поэтому x_B=3. По y: (7+y_B)/2=3, поэтому y_B=−1. Значит B=(3,−1).",
+        "uz": "x uchun (−5+x_B)/2=−1, demak x_B=3. y uchun (7+y_B)/2=3, demak y_B=−1. Shuning uchun B=(3,−1)."
       },
       "ai_source_skill": "P1-COO-02",
       "status": "draft"
@@ -153,58 +148,58 @@
       "practice_no": 3,
       "primary_skill": "P1-COO-02",
       "secondary_skills": [],
-      "role": "intersection",
+      "role": "reverse_intersection",
       "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {
-        "en": "What is the intersection of 2x+y=11 and x−y=1?",
-        "ru": "Какова точка пересечения прямых 2x+y=11 и x−y=1?",
-        "uz": "2x+y=11 va x−y=1 chiziqlarining kesishish nuqtasi qaysi?"
+        "en": "The point P(4,3) lies on 2x+y=11. Which second line also passes through P, so the two lines intersect at P?",
+        "ru": "Точка P(4,3) лежит на прямой 2x+y=11. Какая вторая прямая тоже проходит через P, чтобы две прямые пересекались в P?",
+        "uz": "P(4,3) nuqta 2x+y=11 chiziqda yotadi. Ikki chiziq P da kesishishi uchun qaysi ikkinchi chiziq ham P dan o‘tadi?"
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "(4,3)",
-            "ru": "(4,3)",
-            "uz": "(4,3)"
+            "en": "x−y=1",
+            "ru": "x−y=1",
+            "uz": "x−y=1"
           },
           "diagnostic_code": null
         },
         {
           "key": "B",
           "text": {
-            "en": "(3,4)",
-            "ru": "(3,4)",
-            "uz": "(3,4)"
+            "en": "x+y=6",
+            "ru": "x+y=6",
+            "uz": "x+y=6"
           },
           "diagnostic_code": "COO02_INTERSECTION"
         },
         {
           "key": "C",
           "text": {
-            "en": "(5,1)",
-            "ru": "(5,1)",
-            "uz": "(5,1)"
+            "en": "3x−y=8",
+            "ru": "3x−y=8",
+            "uz": "3x−y=8"
           },
           "diagnostic_code": "COO02_INTERSECTION"
         },
         {
           "key": "D",
           "text": {
-            "en": "(4,−3)",
-            "ru": "(4,−3)",
-            "uz": "(4,−3)"
+            "en": "x+2y=11",
+            "ru": "x+2y=11",
+            "uz": "x+2y=11"
           },
           "diagnostic_code": "COO02_INTERSECTION"
         }
       ],
       "correct_answer": "A",
       "explanation": {
-        "en": "From x−y=1, y=x−1. Substitute into 2x+y=11: 3x−1=11, so x=4 and y=3.",
-        "ru": "Из x−y=1 получаем y=x−1. Подставляем в 2x+y=11: 3x−1=11, поэтому x=4 и y=3.",
-        "uz": "x−y=1 dan y=x−1. 2x+y=11 ga qo‘ysak 3x−1=11, demak x=4 va y=3."
+        "en": "Test P(4,3). It satisfies x−y=4−3=1. The other candidate equations are not true at P, so x−y=1 is the required second line.",
+        "ru": "Проверяем P(4,3). Для x−y получаем 4−3=1. Остальные предложенные уравнения в P не выполняются, поэтому нужна прямая x−y=1.",
+        "uz": "P(4,3) ni tekshiramiz. x−y=4−3=1. Boshqa tenglamalar P da bajarilmaydi, demak kerakli ikkinchi chiziq x−y=1."
       },
       "ai_source_skill": "P1-COO-02",
       "status": "draft"
