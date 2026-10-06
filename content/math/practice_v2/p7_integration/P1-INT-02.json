@@ -62,11 +62,11 @@
         {
           "key": "A",
           "text": {
-            "en": "y=2x²−2x+5",
-            "ru": "y=2x²−2x+5",
-            "uz": "y=2x²−2x+5"
+            "en": "y=2x²−2x",
+            "ru": "y=2x²−2x",
+            "uz": "y=2x²−2x"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT02_DROP_C"
         },
         {
           "key": "B",
@@ -80,11 +80,11 @@
         {
           "key": "C",
           "text": {
-            "en": "y=2x²−2x",
-            "ru": "y=2x²−2x",
-            "uz": "y=2x²−2x"
+            "en": "y=2x²−2x+5",
+            "ru": "y=2x²−2x+5",
+            "uz": "y=2x²−2x+5"
           },
-          "diagnostic_code": "INT02_DROP_C"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -96,7 +96,7 @@
           "diagnostic_code": "INT02_SUBSTITUTION"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "Integrate: y=2x²−2x+C. Using (0,5) gives C=5, so y=2x²−2x+5.",
         "ru": "Интегрируем: y=2x²−2x+C. Из точки (0,5) получаем C=5, значит y=2x²−2x+5.",
@@ -266,11 +266,11 @@
         {
           "key": "A",
           "text": {
-            "en": "(0,3)",
-            "ru": "(0,3)",
-            "uz": "(0,3)"
+            "en": "(−1,1)",
+            "ru": "(−1,1)",
+            "uz": "(−1,1)"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "INT02_ANTIDERIVATIVE"
         },
         {
           "key": "B",
@@ -293,14 +293,14 @@
         {
           "key": "D",
           "text": {
-            "en": "(−1,1)",
-            "ru": "(−1,1)",
-            "uz": "(−1,1)"
+            "en": "(0,3)",
+            "ru": "(0,3)",
+            "uz": "(0,3)"
           },
-          "diagnostic_code": "INT02_ANTIDERIVATIVE"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "Integrate: y=x²−x+C. Using (1,3): 3=1−1+C, so C=3. At x=0, y=3.",
         "ru": "Интегрируем: y=x²−x+C. По точке (1,3): 3=1−1+C, поэтому C=3. При x=0 получаем y=3.",
@@ -446,20 +446,20 @@
         {
           "key": "A",
           "text": {
-            "en": "y=(4/3)(3x−1)³−2/3",
-            "ru": "y=(4/3)(3x−1)³−2/3",
-            "uz": "y=(4/3)(3x−1)³−2/3"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "y=4(3x−1)³−22",
             "ru": "y=4(3x−1)³−22",
             "uz": "y=4(3x−1)³−22"
           },
           "diagnostic_code": "INT02_ANTIDERIVATIVE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=(4/3)(3x−1)³−2/3",
+            "ru": "y=(4/3)(3x−1)³−2/3",
+            "uz": "y=(4/3)(3x−1)³−2/3"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -480,7 +480,7 @@
           "diagnostic_code": "INT02_DROP_C"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "∫12(3x−1)² dx=(4/3)(3x−1)³+C. At x=1, 10=(4/3)·8+C=32/3+C, so C=−2/3.",
         "ru": "∫12(3x−1)² dx=(4/3)(3x−1)³+C. При x=1: 10=(4/3)·8+C=32/3+C, поэтому C=−2/3.",
