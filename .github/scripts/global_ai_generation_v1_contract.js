@@ -38,7 +38,7 @@ assert(!edge.includes('prior_assistant_text'), 'Global AI generation unexpectedl
 assert(!edge.includes('conversation_history'), 'Global AI generation unexpectedly sends conversation history');
 
 const guard = edge.indexOf('get_iclub_global_ai_guard_service_v1');
-const source = edge.indexOf('get_exam_prep_ai_source_cards_service_v1');
+const source = edge.indexOf('cards = await theorySourceCards(',guard);
 const usage = edge.indexOf('await reserveUsage(requestId,user.id,usagePolicyCode,"generated")');
 const providerReserve = edge.indexOf('await reserveProviderCall(');
 const providerCall = edge.indexOf('await callOpenAIProvider(');
