@@ -59,9 +59,7 @@ begin
       'study_subject_limit',p.study_subject_limit,
       'all_available_subjects',p.study_subject_limit is null,
       'competitive_subject_limit',p.competitive_subject_limit,
-      'ai_generation_entitled',p.ai_generation_entitled,
-      'priority_support',p.priority_support,
-      'early_access_entitled',p.early_access_entitled
+      'ai_generation_entitled',p.ai_generation_entitled
     )
     order by case p.plan_code when 'free' then 1 when 'plus' then 2 else 3 end
   ),'[]'::jsonb)
