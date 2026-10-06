@@ -34,7 +34,7 @@
             "ru": "1 кратный корень",
             "uz": "1 ta takroriy ildiz"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_ZERO_INTERPRET"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "C",
@@ -43,7 +43,7 @@
             "ru": "0",
             "uz": "0"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_SIGN_INTERPRET"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "D",
@@ -52,7 +52,7 @@
             "ru": "Нельзя определить",
             "uz": "Aniqlab bo‘lmaydi"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_NOT_USED"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         }
       ],
       "correct_answer": "A",
@@ -123,7 +123,7 @@
             "ru": "p < 4",
             "uz": "p < 4"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_CONDITION_SIGN"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "B",
@@ -132,7 +132,7 @@
             "ru": "p ≤ 4",
             "uz": "p ≤ 4"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_STRICTNESS"
+          "diagnostic_code": "QUA02_INEQUALITY_BOUNDARY"
         },
         {
           "key": "C",
@@ -141,7 +141,7 @@
             "ru": "p ≥ 4",
             "uz": "p ≥ 4"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_STRICTNESS"
+          "diagnostic_code": "QUA02_INEQUALITY_BOUNDARY"
         },
         {
           "key": "D",
@@ -184,7 +184,7 @@
             "ru": "k > 3",
             "uz": "k > 3"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_CONDITION_SIGN"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "B",
@@ -202,7 +202,7 @@
             "ru": "k = 3",
             "uz": "k = 3"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_ZERO_INTERPRET"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "D",
@@ -211,7 +211,7 @@
             "ru": "k ≥ 3",
             "uz": "k ≥ 3"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_STRICTNESS"
+          "diagnostic_code": "QUA02_INEQUALITY_BOUNDARY"
         }
       ],
       "correct_answer": "B",
@@ -255,7 +255,7 @@
       "diagnostic_rules": [
         {
           "answer_match": "12",
-          "diagnostic_code": "QUA_PARAMETER_SIGN_CONDITION"
+          "diagnostic_code": "QUA02_PARAMETER_ALGEBRA"
         }
       ],
       "explanation": {
@@ -297,7 +297,7 @@
             "ru": "x² − 5x + 6 = 0",
             "uz": "x² − 5x + 6 = 0"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_RECHECK"
+          "diagnostic_code": "QUA02_DISCRIMINANT_FORMULA"
         },
         {
           "key": "C",
@@ -306,7 +306,7 @@
             "ru": "x² + 6x + 9 = 0",
             "uz": "x² + 6x + 9 = 0"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_ZERO_INTERPRET"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "D",
@@ -315,7 +315,7 @@
             "ru": "3x² − x − 2 = 0",
             "uz": "3x² − x − 2 = 0"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_RECHECK"
+          "diagnostic_code": "QUA02_DISCRIMINANT_FORMULA"
         }
       ],
       "correct_answer": "A",
@@ -349,7 +349,7 @@
             "ru": "k = 3 ± √2",
             "uz": "k = 3 ± √2"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_ALGEBRA"
+          "diagnostic_code": "QUA02_PARAMETER_ALGEBRA"
         },
         {
           "key": "B",
@@ -358,7 +358,7 @@
             "ru": "k = 1 ± 2√2",
             "uz": "k = 1 ± 2√2"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_ALGEBRA"
+          "diagnostic_code": "QUA02_PARAMETER_ALGEBRA"
         },
         {
           "key": "C",
@@ -367,7 +367,7 @@
             "ru": "k = 3 ± √8",
             "uz": "k = 3 ± √8"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_ALGEBRA"
+          "diagnostic_code": "QUA02_PARAMETER_ALGEBRA"
         },
         {
           "key": "D",
@@ -419,7 +419,7 @@
       "diagnostic_rules": [
         {
           "answer_match": "-8",
-          "diagnostic_code": "QUA_PARAMETER_SIGN_CONDITION"
+          "diagnostic_code": "QUA02_PARAMETER_ALGEBRA"
         }
       ],
       "explanation": {
@@ -454,7 +454,7 @@
             "ru": "График дважды пересекает ось x.",
             "uz": "Grafik x o‘qini ikki marta kesadi."
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_SIGN_INTERPRET"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "B",
@@ -463,7 +463,7 @@
             "ru": "График один раз касается оси x.",
             "uz": "Grafik x o‘qiga bir marta urinadi."
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_ZERO_INTERPRET"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "C",
@@ -481,7 +481,7 @@
             "ru": "График лежит ниже оси x для всех действительных x.",
             "uz": "Grafik barcha haqiqiy x lar uchun x o‘qidan pastda yotadi."
           },
-          "diagnostic_code": "QUA_PARABOLA_DIRECTION"
+          "diagnostic_code": "QUA02_GRAPH_INTERPRETATION"
         }
       ],
       "correct_answer": "C",
@@ -515,7 +515,7 @@
             "ru": "k < 0",
             "uz": "k < 0"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_CONDITION_SIGN"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "B",
@@ -533,7 +533,7 @@
             "ru": "k = 0",
             "uz": "k = 0"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_ZERO_INTERPRET"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "D",
@@ -542,7 +542,7 @@
             "ru": "Все действительные k",
             "uz": "Barcha haqiqiy k"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_NOT_USED"
+          "diagnostic_code": "QUA02_ROOT_CONDITION"
         }
       ],
       "correct_answer": "B",
@@ -576,7 +576,7 @@
             "ru": "−1",
             "uz": "−1"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_FORMULA"
+          "diagnostic_code": "QUA02_DISCRIMINANT_FORMULA"
         },
         {
           "key": "B",
@@ -594,7 +594,7 @@
             "ru": "2",
             "uz": "2"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_FORMULA"
+          "diagnostic_code": "QUA02_DISCRIMINANT_FORMULA"
         },
         {
           "key": "D",
@@ -603,7 +603,7 @@
             "ru": "4",
             "uz": "4"
           },
-          "diagnostic_code": "QUA_DISCRIMINANT_FORMULA"
+          "diagnostic_code": "QUA02_DISCRIMINANT_FORMULA"
         }
       ],
       "correct_answer": "B",
