@@ -225,9 +225,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "What is the range of y = 3(x − 2)² − 5?",
-        "ru": "Какова область значений функции y = 3(x − 2)² − 5?",
-        "uz": "y = 3(x − 2)² − 5 funksiyaning qiymatlar sohasi qaysi?"
+        "en": "What is the range of y = 3x² + 12x + 7?",
+        "ru": "Какова область значений функции y = 3x² + 12x + 7?",
+        "uz": "y = 3x² + 12x + 7 funksiyaning qiymatlar sohasi qaysi?"
       },
       "options": [
         {
@@ -251,27 +251,27 @@
         {
           "key": "C",
           "text": {
-            "en": "y ≥ 2",
-            "ru": "y ≥ 2",
-            "uz": "y ≥ 2"
+            "en": "y ≥ −2",
+            "ru": "y ≥ −2",
+            "uz": "y ≥ −2"
           },
           "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         },
         {
           "key": "D",
           "text": {
-            "en": "y ≤ 2",
-            "ru": "y ≤ 2",
-            "uz": "y ≤ 2"
+            "en": "y ≤ −2",
+            "ru": "y ≤ −2",
+            "uz": "y ≤ −2"
           },
           "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         }
       ],
       "correct_answer": "A",
       "explanation": {
-        "en": "The coefficient of the squared term is positive, so the parabola opens upward. Its minimum is −5 at x = 2, hence y ≥ −5.",
-        "ru": "Коэффициент при квадрате положительный, поэтому парабола направлена вверх. Минимум равен −5 при x = 2, следовательно y ≥ −5.",
-        "uz": "Kvadrat had oldidagi koeffitsiyent musbat, shuning uchun parabola yuqoriga ochiladi. Eng kichik qiymat x = 2 da −5, demak y ≥ −5."
+        "en": "Complete the square: y = 3(x + 2)² − 5. Since 3(x + 2)² ≥ 0, the minimum value is −5, so y ≥ −5.",
+        "ru": "Выделяем полный квадрат: y = 3(x + 2)² − 5. Так как 3(x + 2)² ≥ 0, минимальное значение равно −5, поэтому y ≥ −5.",
+        "uz": "To‘liq kvadratga keltiramiz: y = 3(x + 2)² − 5. 3(x + 2)² ≥ 0 bo‘lgani uchun eng kichik qiymat −5, demak y ≥ −5."
       },
       "ai_source_skill": "P1-QUA-01",
       "status": "draft"
