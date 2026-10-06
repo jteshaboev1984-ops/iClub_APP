@@ -6468,8 +6468,8 @@ if (actionBtn) {
   titleEl.textContent = t("app_name");
   subEl.textContent = "Smarter together";
 
-  // Back показываем только в settings (и он будет работать через action="back")
-  backBtn.style.visibility = (top === "settings") ? "visible" : "hidden";
+  // Back показываем на любом внутреннем экране профиля.
+  backBtn.style.visibility = (top !== "main") ? "visible" : "hidden";
 
   // Шестерёнка в topbar справа — только на главном экране профиля
   if (actionBtn) {
@@ -12513,7 +12513,7 @@ function canCoursesBack() {
    // ---------------------------
 // Profile stack
 // ---------------------------
-const PROFILE_SCREENS = ["main", "settings"];
+const PROFILE_SCREENS = ["main", "settings", "plan"];
 
 function getProfileTopScreen() {
   const s = state.profile?.stack;
@@ -12571,6 +12571,7 @@ function replaceProfile(screenName) {
   // ✅ перерендер нужного экрана
   if (screenName === "main") renderProfileMain();
   if (screenName === "settings") renderProfileSettings();
+  if (screenName === "plan") window.iClubPlansUI?.render?.();
 }
 
 function popProfile() {
@@ -12608,11 +12609,30 @@ function openProfileMain() {
   updateTopbarForView("profile");
 }
 
+function openProfilePlan() {
+  if (state.tab !== "profile") setTab("profile");
+
+  state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
+  state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
+
+  if (getProfileTopScreen() !== "plan") {
+    pushProfile("plan");
+  } else {
+    showProfileScreen("plan");
+  }
+
+  try { window.iClubPlansUI?.render?.(); } catch {}
+  updateTopbarForView("profile");
+}
+
 function renderProfileStack() {
   const top = getProfileTopScreen();
   showProfileScreen(top);
   if (top === "settings") renderProfileSettings();
   if (top === "main") renderProfileMain();
+  if (top === "plan") {
+    try { window.iClubPlansUI?.render?.(); } catch {}
+  }
 }
 
    function renderProfileSettings() {
@@ -22006,6 +22026,12 @@ if (
   }
 
             // ===== Profile local navigation (must work from anywhere) =====
+      if (action === "profile-plan") {
+       setTab("profile");
+       openProfilePlan();
+       return;
+      }
+
       if (action === "profile-settings") {
        setTab("profile");
        openProfileSettings();   // ✅ push в стек + правильный рендер
