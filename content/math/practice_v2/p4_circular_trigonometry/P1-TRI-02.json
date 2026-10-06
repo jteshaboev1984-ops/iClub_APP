@@ -100,23 +100,23 @@
         {
           "key": "C",
           "text": {
-            "en": "√3/2",
-            "ru": "√3/2",
-            "uz": "√3/2"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "−1/2",
             "ru": "−1/2",
             "uz": "−1/2"
           },
           "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "√3/2",
+            "ru": "√3/2",
+            "uz": "√3/2"
+          },
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "D",
       "explanation": {
         "en": "330°=360°−30°. The reference angle is 30°, and cosine is positive in quadrant IV, so cos330°=√3/2.",
         "ru": "330°=360°−30°. Опорный угол 30°, а косинус в IV четверти положителен, поэтому cos330°=√3/2.",
@@ -260,20 +260,20 @@
         {
           "key": "B",
           "text": {
-            "en": "−√2/2",
-            "ru": "−√2/2",
-            "uz": "−√2/2"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "−1/2",
             "ru": "−1/2",
             "uz": "−1/2"
           },
           "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−√2/2",
+            "ru": "−√2/2",
+            "uz": "−√2/2"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -285,7 +285,7 @@
           "diagnostic_code": "TRI02_EXACT_VALUE"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "5π/4=π+π/4. The reference angle is π/4 in quadrant III, where cosine is negative, so the value is −√2/2.",
         "ru": "5π/4=π+π/4. Опорный угол π/4 находится в III четверти, где косинус отрицателен, поэтому значение равно −√2/2.",
@@ -321,20 +321,20 @@
         {
           "key": "B",
           "text": {
-            "en": "3/2",
-            "ru": "3/2",
-            "uz": "3/2"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "2",
             "ru": "2",
             "uz": "2"
           },
           "diagnostic_code": "TRI02_EXACT_VALUE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "3/2",
+            "ru": "3/2",
+            "uz": "3/2"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -346,7 +346,7 @@
           "diagnostic_code": "TRI02_REFERENCE_ANGLE"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "sin30°=1/2 and cos60°=1/2. Therefore 2(1/2)+1/2=3/2.",
         "ru": "sin30°=1/2 и cos60°=1/2. Поэтому 2(1/2)+1/2=3/2.",
@@ -477,11 +477,11 @@
         {
           "key": "A",
           "text": {
-            "en": "sin30°−cos60°",
-            "ru": "sin30°−cos60°",
-            "uz": "sin30°−cos60°"
+            "en": "cos30°−sin60°+1/2",
+            "ru": "cos30°−sin60°+1/2",
+            "uz": "cos30°−sin60°+1/2"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "TRI02_EXACT_VALUE"
         },
         {
           "key": "B",
@@ -504,14 +504,14 @@
         {
           "key": "D",
           "text": {
-            "en": "cos30°−sin60°+1/2",
-            "ru": "cos30°−sin60°+1/2",
-            "uz": "cos30°−sin60°+1/2"
+            "en": "sin30°−cos60°",
+            "ru": "sin30°−cos60°",
+            "uz": "sin30°−cos60°"
           },
-          "diagnostic_code": "TRI02_EXACT_VALUE"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "sin30°=1/2 and cos60°=1/2, so sin30°−cos60°=0. The other expressions are non-zero.",
         "ru": "sin30°=1/2 и cos60°=1/2, поэтому sin30°−cos60°=0. Остальные выражения не равны нулю.",
@@ -540,20 +540,20 @@
         {
           "key": "A",
           "text": {
-            "en": "−b",
-            "ru": "−b",
-            "uz": "−b"
-          },
-          "diagnostic_code": "TRI02_QUADRANT_SIGN"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "b",
             "ru": "b",
             "uz": "b"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−b",
+            "ru": "−b",
+            "uz": "−b"
+          },
+          "diagnostic_code": "TRI02_QUADRANT_SIGN"
         },
         {
           "key": "C",
@@ -574,7 +574,7 @@
           "diagnostic_code": "TRI02_REFERENCE_ANGLE"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "6π/7=π−π/7. Sine is positive in quadrant II and sin(π−α)=sinα, so the value is b.",
         "ru": "6π/7=π−π/7. Синус во II четверти положителен и sin(π−α)=sinα, поэтому значение равно b.",
