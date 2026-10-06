@@ -156,11 +156,11 @@
         {
           "key": "A",
           "text": {
-            "en": "2/5",
-            "ru": "2/5",
-            "uz": "2/5"
+            "en": "1/5",
+            "ru": "1/5",
+            "uz": "1/5"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "CIR01_DEG_RAD_FACTOR"
         },
         {
           "key": "B",
@@ -183,14 +183,14 @@
         {
           "key": "D",
           "text": {
-            "en": "1/5",
-            "ru": "1/5",
-            "uz": "1/5"
+            "en": "2/5",
+            "ru": "2/5",
+            "uz": "2/5"
           },
-          "diagnostic_code": "CIR01_DEG_RAD_FACTOR"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "72°×π/180=(72/180)π=(2/5)π, so k=2/5.",
         "ru": "72°×π/180=(72/180)π=(2/5)π, поэтому k=2/5.",
@@ -217,11 +217,11 @@
         {
           "key": "A",
           "text": {
-            "en": "2π/3 radians",
-            "ru": "2π/3 радиан",
-            "uz": "2π/3 radian"
+            "en": "3π/4 radians",
+            "ru": "3π/4 радиан",
+            "uz": "3π/4 radian"
           },
-          "diagnostic_code": "CIR01_FULL_TURN"
+          "diagnostic_code": null
         },
         {
           "key": "B",
@@ -235,11 +235,11 @@
         {
           "key": "C",
           "text": {
-            "en": "3π/4 radians",
-            "ru": "3π/4 радиан",
-            "uz": "3π/4 radian"
+            "en": "2π/3 radians",
+            "ru": "2π/3 радиан",
+            "uz": "2π/3 radian"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "CIR01_FULL_TURN"
         },
         {
           "key": "D",
@@ -251,7 +251,7 @@
           "diagnostic_code": "CIR01_FULL_TURN"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "A",
       "explanation": {
         "en": "2π/3=120° and 3π/4=135°. Therefore 3π/4 radians is larger than 130° and 120°.",
         "ru": "2π/3=120°, а 3π/4=135°. Поэтому 3π/4 радиан больше 130° и 120°.",
