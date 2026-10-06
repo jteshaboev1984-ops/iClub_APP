@@ -30,11 +30,11 @@
         {
           "key": "B",
           "text": {
-            "en": "x²+4",
-            "ru": "x²+4",
-            "uz": "x²+4"
+            "en": "x²−2",
+            "ru": "x²−2",
+            "uz": "x²−2"
           },
-          "diagnostic_code": "FUN03_SUBSTITUTION"
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -48,14 +48,14 @@
         {
           "key": "D",
           "text": {
-            "en": "x²−2",
-            "ru": "x²−2",
-            "uz": "x²−2"
+            "en": "x²+4",
+            "ru": "x²+4",
+            "uz": "x²+4"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN03_SUBSTITUTION"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "B",
       "explanation": {
         "en": "Apply g first: g(x)=x²+1. Then f(g(x))=(x²+1)−3=x²−2.",
         "ru": "Сначала применяем g: g(x)=x²+1. Затем f(g(x))=(x²+1)−3=x²−2.",
@@ -217,11 +217,11 @@
         {
           "key": "A",
           "text": {
-            "en": "f(g(x))=(x+2)², while g(f(x))=x²+2.",
-            "ru": "f(g(x))=(x+2)², а g(f(x))=x²+2.",
-            "uz": "f(g(x))=(x+2)², g(f(x))=x²+2."
+            "en": "Both compositions equal x²+4.",
+            "ru": "Обе композиции равны x²+4.",
+            "uz": "Ikkala kompozitsiya ham x²+4 ga teng."
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN03_SUBSTITUTION"
         },
         {
           "key": "B",
@@ -244,14 +244,14 @@
         {
           "key": "D",
           "text": {
-            "en": "Both compositions equal x²+4.",
-            "ru": "Обе композиции равны x²+4.",
-            "uz": "Ikkala kompozitsiya ham x²+4 ga teng."
+            "en": "f(g(x))=(x+2)², while g(f(x))=x²+2.",
+            "ru": "f(g(x))=(x+2)², а g(f(x))=x²+2.",
+            "uz": "f(g(x))=(x+2)², g(f(x))=x²+2."
           },
-          "diagnostic_code": "FUN03_SUBSTITUTION"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "Order matters. f(g(x)) squares the entire x+2, giving (x+2)². g(f(x)) adds 2 after squaring, giving x²+2.",
         "ru": "Порядок важен. В f(g(x)) всё выражение x+2 возводится в квадрат: (x+2)². В g(f(x)) число 2 прибавляется после возведения x в квадрат: x²+2.",
@@ -315,20 +315,20 @@
         {
           "key": "A",
           "text": {
-            "en": "x≥2",
-            "ru": "x≥2",
-            "uz": "x≥2"
-          },
-          "diagnostic_code": "FUN03_RESTRICTION_DIRECTION"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "x≤2",
             "ru": "x≤2",
             "uz": "x≤2"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x≥2",
+            "ru": "x≥2",
+            "uz": "x≥2"
+          },
+          "diagnostic_code": "FUN03_RESTRICTION_DIRECTION"
         },
         {
           "key": "C",
@@ -349,7 +349,7 @@
           "diagnostic_code": "FUN03_DOMAIN"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "For f(g(x)) to be real, 5−g(x)≥0. Thus 5−(2x+1)≥0, so 4−2x≥0 and x≤2.",
         "ru": "Чтобы f(g(x)) была действительной, нужно 5−g(x)≥0. Значит 5−(2x+1)≥0, то есть 4−2x≥0 и x≤2.",
