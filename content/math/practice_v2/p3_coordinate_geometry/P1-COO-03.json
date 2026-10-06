@@ -335,34 +335,29 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {
-        "en": "Lines with gradients m and −3 are perpendicular. Enter 3m.",
-        "ru": "Прямые с градиентами m и −3 перпендикулярны. Введите 3m.",
-        "uz": "Gradientlari m va −3 bo‘lgan chiziqlar perpendikulyar. 3m ni kiriting."
+        "en": "A line through (1,2) and (5,0) is perpendicular to a line of gradient m. Enter 2m.",
+        "ru": "Прямая через (1,2) и (5,0) перпендикулярна прямой с градиентом m. Введите 2m.",
+        "uz": "(1,2) va (5,0) nuqtalardan o‘tuvchi chiziq gradienti m bo‘lgan chiziqqa perpendikulyar. 2m ni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "1",
+        "canonical_answer": "4",
         "accepted_examples": [
-          "1",
-          " 1 "
+          "4",
+          " 4 "
         ],
         "rejected_examples": [
-          "-1",
-          "3",
-          "9"
+          "-4",
+          "2",
+          "-2"
         ],
         "number_only": true
       },
-      "diagnostic_rules": [
-        {
-          "answer_match": "-1",
-          "diagnostic_code": "COO03_SIGN"
-        }
-      ],
+      "diagnostic_rules": [],
       "explanation": {
-        "en": "For perpendicular non-vertical lines, m(−3)=−1. Hence m=1/3 and 3m=1.",
-        "ru": "Для невертикальных перпендикулярных прямых m(−3)=−1. Поэтому m=1/3 и 3m=1.",
-        "uz": "Vertikal bo‘lmagan perpendikulyar chiziqlar uchun m(−3)=−1. Demak m=1/3 va 3m=1."
+        "en": "The first line has gradient (0−2)/(5−1)=−1/2. A perpendicular line therefore has gradient m=2, so 2m=4.",
+        "ru": "Первая прямая имеет градиент (0−2)/(5−1)=−1/2. Поэтому перпендикулярная прямая имеет градиент m=2, и 2m=4.",
+        "uz": "Birinchi chiziq gradienti (0−2)/(5−1)=−1/2. Unga perpendikulyar chiziq gradienti m=2, demak 2m=4."
       },
       "ai_source_skill": "P1-COO-03",
       "status": "draft"
