@@ -181,10 +181,13 @@ async function buildPage(browser, { width, height, lang, plan, visible = true })
 }
 
 async function toggle(page, subjectKey, mode) {
-  const selector = '.iclub-subject-access-row[data-subject-key="' + subjectKey + '"][data-selection-mode="' + mode + '"] input';
-  const input = page.locator(selector);
+  const rowSelector = '.iclub-subject-access-row[data-subject-key="' + subjectKey + '"][data-selection-mode="' + mode + '"]';
+  const row = page.locator(rowSelector);
+  const input = row.locator('input');
+  const control = row.locator('.iclub-subject-access-switch');
   assert(await input.count() === 1, 'missing toggle ' + subjectKey + '/' + mode);
-  await input.click();
+  assert(!(await input.isDisabled()), 'attempted to toggle disabled control ' + subjectKey + '/' + mode);
+  await control.click();
   await page.waitForTimeout(80);
 }
 
