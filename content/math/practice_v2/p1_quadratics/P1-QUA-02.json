@@ -111,53 +111,53 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "For which values of p does x² + 4x + p = 0 have no real roots?",
-        "ru": "При каких значениях p уравнение x² + 4x + p = 0 не имеет действительных корней?",
-        "uz": "Qaysi p qiymatlarida x² + 4x + p = 0 tenglama haqiqiy ildizga ega emas?"
+        "en": "For which values of p does x² + 6x + p = 0 have no real roots?",
+        "ru": "При каких значениях p уравнение x² + 6x + p = 0 не имеет действительных корней?",
+        "uz": "Qaysi p qiymatlarida x² + 6x + p = 0 tenglama haqiqiy ildizga ega emas?"
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "p < 4",
-            "ru": "p < 4",
-            "uz": "p < 4"
+            "en": "p < 9",
+            "ru": "p < 9",
+            "uz": "p < 9"
           },
           "diagnostic_code": "QUA02_ROOT_CONDITION"
         },
         {
           "key": "B",
           "text": {
-            "en": "p ≤ 4",
-            "ru": "p ≤ 4",
-            "uz": "p ≤ 4"
+            "en": "p ≤ 9",
+            "ru": "p ≤ 9",
+            "uz": "p ≤ 9"
           },
           "diagnostic_code": "QUA02_INEQUALITY_BOUNDARY"
         },
         {
           "key": "C",
           "text": {
-            "en": "p ≥ 4",
-            "ru": "p ≥ 4",
-            "uz": "p ≥ 4"
+            "en": "p ≥ 9",
+            "ru": "p ≥ 9",
+            "uz": "p ≥ 9"
           },
           "diagnostic_code": "QUA02_INEQUALITY_BOUNDARY"
         },
         {
           "key": "D",
           "text": {
-            "en": "p > 4",
-            "ru": "p > 4",
-            "uz": "p > 4"
+            "en": "p > 9",
+            "ru": "p > 9",
+            "uz": "p > 9"
           },
           "diagnostic_code": null
         }
       ],
       "correct_answer": "D",
       "explanation": {
-        "en": "No real roots means b² − 4ac < 0. Here 16 − 4p < 0, so p > 4.",
-        "ru": "Отсутствие действительных корней означает b² − 4ac < 0. Здесь 16 − 4p < 0, поэтому p > 4.",
-        "uz": "Haqiqiy ildiz bo‘lmasligi uchun b² − 4ac < 0. Bu yerda 16 − 4p < 0, shuning uchun p > 4."
+        "en": "No real roots means b² − 4ac < 0. Here 36 − 4p < 0, so p > 9.",
+        "ru": "Отсутствие действительных корней означает b² − 4ac < 0. Здесь 36 − 4p < 0, поэтому p > 9.",
+        "uz": "Haqiqiy ildiz bo‘lmasligi uchun b² − 4ac < 0. Bu yerda 36 − 4p < 0, shuning uchun p > 9."
       },
       "ai_source_skill": "P1-QUA-02",
       "status": "draft"
@@ -398,34 +398,34 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "The equation 2x² + px + 8 = 0 has a repeated root and p > 0. Find p.",
-        "ru": "Уравнение 2x² + px + 8 = 0 имеет кратный корень, причём p > 0. Найдите p.",
-        "uz": "2x² + px + 8 = 0 tenglama takroriy ildizga ega va p > 0. p ni toping."
+        "en": "The equation 2x² + px + 18 = 0 has a repeated root and p > 0. Find p.",
+        "ru": "Уравнение 2x² + px + 18 = 0 имеет кратный корень, причём p > 0. Найдите p.",
+        "uz": "2x² + px + 18 = 0 tenglama takroriy ildizga ega va p > 0. p ni toping."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "8",
+        "canonical_answer": "12",
         "accepted_examples": [
-          "8",
-          " 8 "
+          "12",
+          " 12 "
         ],
         "rejected_examples": [
-          "-8",
-          "4",
-          "64"
+          "-12",
+          "6",
+          "144"
         ],
         "number_only": true
       },
       "diagnostic_rules": [
         {
-          "answer_match": "-8",
+          "answer_match": "-12",
           "diagnostic_code": "QUA02_PARAMETER_ALGEBRA"
         }
       ],
       "explanation": {
-        "en": "Repeated roots give p² − 4(2)(8) = 0, so p² = 64 and p = ±8. Since p > 0, p = 8.",
-        "ru": "Для кратного корня p² − 4(2)(8) = 0, значит p² = 64 и p = ±8. Так как p > 0, p = 8.",
-        "uz": "Takroriy ildiz uchun p² − 4(2)(8) = 0. Demak p² = 64 va p = ±8. p > 0 bo‘lgani uchun p = 8."
+        "en": "Repeated roots give p² − 4(2)(18) = 0, so p² = 144 and p = ±12. Since p > 0, p = 12.",
+        "ru": "Для кратного корня p² − 4(2)(18) = 0, значит p² = 144 и p = ±12. Так как p > 0, p = 12.",
+        "uz": "Takroriy ildiz uchun p² − 4(2)(18) = 0. Demak p² = 144 va p = ±12. p > 0 bo‘lgani uchun p = 12."
       },
       "ai_source_skill": "P1-QUA-02",
       "status": "draft"
