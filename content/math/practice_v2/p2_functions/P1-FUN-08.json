@@ -21,20 +21,20 @@
         {
           "key": "A",
           "text": {
-            "en": "y=3f(x)",
-            "ru": "y=3f(x)",
-            "uz": "y=3f(x)"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "y=f(3x)",
             "ru": "y=f(3x)",
             "uz": "y=f(3x)"
           },
           "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=3f(x)",
+            "ru": "y=3f(x)",
+            "uz": "y=3f(x)"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -55,7 +55,7 @@
           "diagnostic_code": "FUN08_TRANSFORM_TYPE"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "Multiplying the whole function by 3 multiplies every y-coordinate by 3 while x stays unchanged, so y=3f(x) is a vertical stretch by factor 3.",
         "ru": "Умножение всей функции на 3 умножает каждую y-координату на 3, не меняя x. Поэтому y=3f(x) — вертикальное растяжение с коэффициентом 3.",
@@ -82,20 +82,20 @@
         {
           "key": "A",
           "text": {
-            "en": "y=2f(x)",
-            "ru": "y=2f(x)",
-            "uz": "y=2f(x)"
-          },
-          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "y=f(2x)",
             "ru": "y=f(2x)",
             "uz": "y=f(2x)"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=2f(x)",
+            "ru": "y=2f(x)",
+            "uz": "y=2f(x)"
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
         },
         {
           "key": "C",
@@ -116,7 +116,7 @@
           "diagnostic_code": "FUN08_TRANSFORM_TYPE"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "In y=f(2x), the input must be half as large to reach the same original x-value. Therefore x-coordinates are multiplied by 1/2: a horizontal compression by factor 1/2.",
         "ru": "В y=f(2x) для достижения того же исходного аргумента новый x должен быть вдвое меньше. Поэтому x-координаты умножаются на 1/2: это горизонтальное сжатие с коэффициентом 1/2.",
@@ -204,23 +204,23 @@
         {
           "key": "C",
           "text": {
-            "en": "(2,4)",
-            "ru": "(2,4)",
-            "uz": "(2,4)"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "(6,4/3)",
             "ru": "(6,4/3)",
             "uz": "(6,4/3)"
           },
           "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(2,4)",
+            "ru": "(2,4)",
+            "uz": "(2,4)"
+          },
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "D",
       "explanation": {
         "en": "To obtain the original input 6 inside f(3x), solve 3x=6, giving x=2. The output remains 4, so the new point is (2,4).",
         "ru": "Чтобы внутри f получить исходный аргумент 6, решаем 3x=6 и получаем x=2. Выход остаётся равным 4, поэтому новая точка — (2,4).",
@@ -355,20 +355,20 @@
         {
           "key": "A",
           "text": {
-            "en": "Reflect in the y-axis and stretch horizontally by factor 2.",
-            "ru": "Отразить относительно оси y и растянуть горизонтально в 2 раза.",
-            "uz": "y o‘qiga akslantirib, gorizontal 2 marta cho‘zish."
-          },
-          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "Reflect in the x-axis and stretch vertically by factor 2.",
             "ru": "Отразить относительно оси x и растянуть вертикально в 2 раза.",
             "uz": "x o‘qiga akslantirib, vertikal 2 marta cho‘zish."
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Reflect in the y-axis and stretch horizontally by factor 2.",
+            "ru": "Отразить относительно оси y и растянуть горизонтально в 2 раза.",
+            "uz": "y o‘qiga akslantirib, gorizontal 2 marta cho‘zish."
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
         },
         {
           "key": "C",
@@ -389,7 +389,7 @@
           "diagnostic_code": "FUN08_TRANSFORM_TYPE"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "The factor 2 outside f doubles all y-values, giving a vertical stretch by factor 2. The negative sign reverses all y-values, giving a reflection in the x-axis.",
         "ru": "Множитель 2 снаружи f удваивает все y-координаты — это вертикальное растяжение с коэффициентом 2. Минус меняет знак y и даёт отражение относительно оси x.",
@@ -427,11 +427,11 @@
         {
           "key": "B",
           "text": {
-            "en": "(3,4)",
-            "ru": "(3,4)",
-            "uz": "(3,4)"
+            "en": "(12,−4)",
+            "ru": "(12,−4)",
+            "uz": "(12,−4)"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
         },
         {
           "key": "C",
@@ -445,14 +445,14 @@
         {
           "key": "D",
           "text": {
-            "en": "(12,−4)",
-            "ru": "(12,−4)",
-            "uz": "(12,−4)"
+            "en": "(3,4)",
+            "ru": "(3,4)",
+            "uz": "(3,4)"
           },
-          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "D",
       "explanation": {
         "en": "To get the original input −6, solve −2x=−6, so x=3. The output stays 4. Thus the point becomes (3,4).",
         "ru": "Чтобы получить исходный аргумент −6, решаем −2x=−6, откуда x=3. Выход остаётся равным 4. Новая точка — (3,4).",
@@ -490,20 +490,20 @@
         {
           "key": "B",
           "text": {
-            "en": "(2,−5)",
-            "ru": "(2,−5)",
-            "uz": "(2,−5)"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "(2,−1)",
             "ru": "(2,−1)",
             "uz": "(2,−1)"
           },
           "diagnostic_code": "FUN08_VERTICAL_SCALE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(2,−5)",
+            "ru": "(2,−5)",
+            "uz": "(2,−5)"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -515,7 +515,7 @@
           "diagnostic_code": "FUN08_POINT_MAP"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "For the input, 2x=4 gives x=2. For the output, 3(−2)+1=−5. Hence the corresponding point is (2,−5).",
         "ru": "Для аргумента 2x=4, значит x=2. Для выхода 3(−2)+1=−5. Поэтому соответствующая точка — (2,−5).",
@@ -542,20 +542,20 @@
         {
           "key": "A",
           "text": {
-            "en": "a=−1/2, b=3",
-            "ru": "a=−1/2, b=3",
-            "uz": "a=−1/2, b=3"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "a=−2, b=1/3",
             "ru": "a=−2, b=1/3",
             "uz": "a=−2, b=1/3"
           },
           "diagnostic_code": "FUN08_POINT_MAP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "a=−1/2, b=3",
+            "ru": "a=−1/2, b=3",
+            "uz": "a=−1/2, b=3"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -576,7 +576,7 @@
           "diagnostic_code": "FUN08_HORIZONTAL_RECIPROCAL"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "To map the original x=6 to new x=2, we need b(2)=6, so b=3. The output 8 becomes −4, so a=−4/8=−1/2.",
         "ru": "Чтобы исходный x=6 соответствовал новому x=2, нужно b(2)=6, значит b=3. Выход 8 становится −4, поэтому a=−4/8=−1/2.",
@@ -659,11 +659,11 @@
         {
           "key": "B",
           "text": {
-            "en": "(3,−4)",
-            "ru": "(3,−4)",
-            "uz": "(3,−4)"
+            "en": "(−1,14)",
+            "ru": "(−1,14)",
+            "uz": "(−1,14)"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN08_POINT_MAP"
         },
         {
           "key": "C",
@@ -677,14 +677,14 @@
         {
           "key": "D",
           "text": {
-            "en": "(−1,14)",
-            "ru": "(−1,14)",
-            "uz": "(−1,14)"
+            "en": "(3,−4)",
+            "ru": "(3,−4)",
+            "uz": "(3,−4)"
           },
-          "diagnostic_code": "FUN08_POINT_MAP"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "D",
       "explanation": {
         "en": "The inner input must equal −4: −2(x−1)=−4, so x−1=2 and x=3. The output becomes −3(3)+5=−4. Therefore the point is (3,−4).",
         "ru": "Внутренний аргумент должен равняться −4: −2(x−1)=−4, поэтому x−1=2 и x=3. Выход становится −3(3)+5=−4. Значит точка равна (3,−4).",
