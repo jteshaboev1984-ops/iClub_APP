@@ -1,0 +1,703 @@
+{
+  "version": "practice_v2_p7_integration_draft_v0.1",
+  "skill": "P1-INT-04",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q470",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "area_under_curve",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Find the area under y=3x² from x=0 to x=2. Enter the area.",
+        "ru": "Найдите площадь под y=3x² от x=0 до x=2. Введите площадь.",
+        "uz": "y=3x² ostidagi x=0 dan x=2 gacha bo‘lgan yuzani toping."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "8",
+        "accepted_examples": [
+          "8",
+          " 8 "
+        ],
+        "rejected_examples": [
+          "4",
+          "12",
+          "16"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The curve is above the x-axis. Area=∫₀²3x²dx=[x³]₀²=8.",
+        "ru": "Кривая находится выше оси x. Площадь=∫₀²3x²dx=[x³]₀²=8.",
+        "uz": "Egri chiziq x o‘qidan yuqorida. Yuza=∫₀²3x²dx=[x³]₀²=8."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q471",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "area_below_axis",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "The curve y=x−3 is below the x-axis for 0≤x≤2. What is the geometric area between the curve and the x-axis on this interval?",
+        "ru": "Кривая y=x−3 находится ниже оси x при 0≤x≤2. Какова геометрическая площадь между кривой и осью x на этом интервале?",
+        "uz": "y=x−3 egri chiziq 0≤x≤2 da x o‘qidan pastda. Egri chiziq bilan x o‘qi orasidagi geometrik yuza qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "4",
+            "ru": "4",
+            "uz": "4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−4",
+            "ru": "−4",
+            "uz": "−4"
+          },
+          "diagnostic_code": "INT04_AREA_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "INT04_TOP_BOTTOM"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "6",
+            "ru": "6",
+            "uz": "6"
+          },
+          "diagnostic_code": "INT04_TOP_BOTTOM"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Area=∫₀²[0−(x−3)]dx=∫₀²(3−x)dx=[3x−x²/2]₀²=4.",
+        "ru": "Площадь=∫₀²[0−(x−3)]dx=∫₀²(3−x)dx=[3x−x²/2]₀²=4.",
+        "uz": "Yuza=∫₀²[0−(x−3)]dx=∫₀²(3−x)dx=[3x−x²/2]₀²=4."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q472",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-COO-02",
+        "P1-QUA-03"
+      ],
+      "role": "line_parabola_area",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Between x=0 and x=2, y=2x lies above y=x². What is the area between the curves?",
+        "ru": "На 0≤x≤2 прямая y=2x находится выше y=x². Какова площадь между кривыми?",
+        "uz": "0≤x≤2 da y=2x chiziq y=x² dan yuqorida. Ular orasidagi yuza qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "4/3",
+            "ru": "4/3",
+            "uz": "4/3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2/3",
+            "ru": "2/3",
+            "uz": "2/3"
+          },
+          "diagnostic_code": "INT04_TOP_BOTTOM"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "8/3",
+            "ru": "8/3",
+            "uz": "8/3"
+          },
+          "diagnostic_code": "INT04_TOP_BOTTOM"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−4/3",
+            "ru": "−4/3",
+            "uz": "−4/3"
+          },
+          "diagnostic_code": "INT04_AREA_SIGN"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Area=∫₀²(2x−x²)dx=[x²−x³/3]₀²=4−8/3=4/3.",
+        "ru": "Площадь=∫₀²(2x−x²)dx=[x²−x³/3]₀²=4−8/3=4/3.",
+        "uz": "Yuza=∫₀²(2x−x²)dx=[x²−x³/3]₀²=4−8/3=4/3."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q473",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-COO-02",
+        "P1-QUA-03"
+      ],
+      "role": "find_intersections_then_area",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "The curves y=x² and y=4x−3 intersect at x=1 and x=3. Enter 3 times the enclosed area.",
+        "ru": "Кривые y=x² и y=4x−3 пересекаются при x=1 и x=3. Введите утроенную площадь замкнутой области.",
+        "uz": "y=x² va y=4x−3 egri chiziqlar x=1 va x=3 da kesishadi. Yopiq soha yuzining 3 baravarini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "2",
+          "8",
+          "12"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Between 1 and 3, the line is above the parabola. Area=∫₁³(4x−3−x²)dx=4/3. Therefore 3×area=4.",
+        "ru": "Между 1 и 3 прямая выше параболы. Площадь=∫₁³(4x−3−x²)dx=4/3. Поэтому 3×площадь=4.",
+        "uz": "1 va 3 orasida chiziq parabola ustida. Yuza=∫₁³(4x−3−x²)dx=4/3. Demak 3×yuza=4."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q474",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "axis_crossing_split",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Find the total geometric area between y=x−1 and the x-axis for 0≤x≤3.",
+        "ru": "Найдите полную геометрическую площадь между y=x−1 и осью x при 0≤x≤3.",
+        "uz": "0≤x≤3 da y=x−1 bilan x o‘qi orasidagi jami geometrik yuzani toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "5/2",
+            "ru": "5/2",
+            "uz": "5/2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3/2",
+            "ru": "3/2",
+            "uz": "3/2"
+          },
+          "diagnostic_code": "INT04_SPLIT_CROSSING"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "INT04_AREA_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−5/2",
+            "ru": "−5/2",
+            "uz": "−5/2"
+          },
+          "diagnostic_code": "INT04_AREA_SIGN"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The line crosses the x-axis at x=1. Area=∫₀¹(1−x)dx+∫₁³(x−1)dx=1/2+2=5/2.",
+        "ru": "Прямая пересекает ось x при x=1. Площадь=∫₀¹(1−x)dx+∫₁³(x−1)dx=1/2+2=5/2.",
+        "uz": "Chiziq x o‘qini x=1 da kesadi. Yuza=∫₀¹(1−x)dx+∫₁³(x−1)dx=1/2+2=5/2."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q475",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-QUA-03"
+      ],
+      "role": "parabola_axis_area",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "The curve y=4−x² meets the x-axis at x=−2 and x=2. Enter the total enclosed area.",
+        "ru": "Кривая y=4−x² пересекает ось x при x=−2 и x=2. Введите полную площадь замкнутой области.",
+        "uz": "y=4−x² egri chiziq x o‘qini x=−2 va x=2 da kesadi. Yopiq sohaning jami yuzini kiriting."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "10.666666666666666",
+        "accepted_examples": [
+          "10.666666666666666",
+          "10,666666666666666"
+        ],
+        "rejected_examples": [
+          "8",
+          "16",
+          "5.333333333333333"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Area=∫₋₂²(4−x²)dx. By symmetry this is 2∫₀²(4−x²)dx=2(8−8/3)=32/3≈10.666666666666666.",
+        "ru": "Площадь=∫₋₂²(4−x²)dx. По симметрии это 2∫₀²(4−x²)dx=2(8−8/3)=32/3≈10.666666666666666.",
+        "uz": "Yuza=∫₋₂²(4−x²)dx. Simmetriya bo‘yicha 2∫₀²(4−x²)dx=2(8−8/3)=32/3≈10.666666666666666."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q476",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-COO-02"
+      ],
+      "role": "line_axis_triangle_integral",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "The line y=6−2x and the coordinate axes enclose a finite region in the first quadrant. Enter its area.",
+        "ru": "Прямая y=6−2x и координатные оси ограничивают конечную область в первой четверти. Введите её площадь.",
+        "uz": "y=6−2x chiziq va koordinata o‘qlari birinchi chorakda chekli soha hosil qiladi. Yuzani kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "9",
+        "accepted_examples": [
+          "9",
+          " 9 "
+        ],
+        "rejected_examples": [
+          "6",
+          "12",
+          "18"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The x-intercept is 3. Area=∫₀³(6−2x)dx=[6x−x²]₀³=18−9=9.",
+        "ru": "Пересечение с осью x: x=3. Площадь=∫₀³(6−2x)dx=[6x−x²]₀³=18−9=9.",
+        "uz": "x o‘qi bilan kesishish x=3. Yuza=∫₀³(6−2x)dx=[6x−x²]₀³=18−9=9."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q477",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-COO-02",
+        "P1-QUA-03"
+      ],
+      "role": "parameter_from_area",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "For k>0, the area between y=kx and y=x² from x=0 to x=k is 9/2. Enter k.",
+        "ru": "При k>0 площадь между y=kx и y=x² от x=0 до x=k равна 9/2. Введите k.",
+        "uz": "k>0 uchun y=kx va y=x² orasidagi x=0 dan x=k gacha yuza 9/2 ga teng. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "2",
+          "4",
+          "9"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "For 0<x<k, kx is above x². Area=∫₀ᵏ(kx−x²)dx=k³/2−k³/3=k³/6. Set k³/6=9/2, so k³=27 and k=3.",
+        "ru": "При 0<x<k прямая kx выше x². Площадь=∫₀ᵏ(kx−x²)dx=k³/2−k³/3=k³/6. Из k³/6=9/2 получаем k³=27 и k=3.",
+        "uz": "0<x<k da kx chiziq x² dan yuqori. Yuza=∫₀ᵏ(kx−x²)dx=k³/2−k³/3=k³/6. k³/6=9/2 dan k³=27, k=3."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q478",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-QUA-03"
+      ],
+      "role": "two_lobes_axis",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Find the total geometric area between y=x²−4 and the x-axis for −3≤x≤3.",
+        "ru": "Найдите полную геометрическую площадь между y=x²−4 и осью x при −3≤x≤3.",
+        "uz": "−3≤x≤3 da y=x²−4 bilan x o‘qi orasidagi jami geometrik yuzani toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "44/3",
+            "ru": "44/3",
+            "uz": "44/3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "10",
+            "ru": "10",
+            "uz": "10"
+          },
+          "diagnostic_code": "INT04_SPLIT_CROSSING"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−44/3",
+            "ru": "−44/3",
+            "uz": "−44/3"
+          },
+          "diagnostic_code": "INT04_AREA_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "28/3",
+            "ru": "28/3",
+            "uz": "28/3"
+          },
+          "diagnostic_code": "INT04_SPLIT_CROSSING"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The zeros are x=±2. By symmetry, total area=2[∫₀²(4−x²)dx+∫₂³(x²−4)dx]=2[16/3+2]=44/3.",
+        "ru": "Нули x=±2. По симметрии полная площадь=2[∫₀²(4−x²)dx+∫₂³(x²−4)dx]=2[16/3+2]=44/3.",
+        "uz": "Nollar x=±2. Simmetriya bo‘yicha jami yuza=2[∫₀²(4−x²)dx+∫₂³(x²−4)dx]=2[16/3+2]=44/3."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q479",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-COO-02",
+        "P1-QUA-03"
+      ],
+      "role": "shifted_line_parabola",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "The curves y=x²−2x and y=2x meet at x=0 and x=4. Enter 3 times the enclosed area.",
+        "ru": "Кривые y=x²−2x и y=2x пересекаются при x=0 и x=4. Введите утроенную площадь замкнутой области.",
+        "uz": "y=x²−2x va y=2x egri chiziqlar x=0 va x=4 da kesishadi. Yopiq soha yuzining 3 baravarini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "32",
+        "accepted_examples": [
+          "32",
+          " 32 "
+        ],
+        "rejected_examples": [
+          "16",
+          "24",
+          "64"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The line is above the parabola on 0<x<4. Area=∫₀⁴[2x−(x²−2x)]dx=∫₀⁴(4x−x²)dx=32/3. Thus 3×area=32.",
+        "ru": "На 0<x<4 прямая выше параболы. Площадь=∫₀⁴[2x−(x²−2x)]dx=∫₀⁴(4x−x²)dx=32/3. Поэтому 3×площадь=32.",
+        "uz": "0<x<4 da chiziq parabola ustida. Yuza=∫₀⁴[2x−(x²−2x)]dx=∫₀⁴(4x−x²)dx=32/3. Demak 3×yuza=32."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q480",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "absolute_area_transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Enter the total geometric area between y=x³ and the x-axis on −1≤x≤2.",
+        "ru": "Введите полную геометрическую площадь между y=x³ и осью x на −1≤x≤2.",
+        "uz": "−1≤x≤2 da y=x³ bilan x o‘qi orasidagi jami geometrik yuzani kiriting."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "4.25",
+        "accepted_examples": [
+          "4.25",
+          "4,25",
+          " 4.25 "
+        ],
+        "rejected_examples": [
+          "3.75",
+          "4",
+          "4.5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Split at x=0. Area=−∫₋₁⁰x³dx+∫₀²x³dx=1/4+4=17/4=4.25.",
+        "ru": "Разбиваем при x=0. Площадь=−∫₋₁⁰x³dx+∫₀²x³dx=1/4+4=17/4=4.25.",
+        "uz": "x=0 da bo‘lamiz. Yuza=−∫₋₁⁰x³dx+∫₀²x³dx=1/4+4=17/4=4.25."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q481",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-COO-02",
+        "P1-QUA-03"
+      ],
+      "role": "intersection_selection",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "Before finding the area enclosed by y=x²−5x+4 and y=x−2, which x-values should be used as the intersection limits?",
+        "ru": "Перед нахождением площади, ограниченной y=x²−5x+4 и y=x−2, какие x-значения нужно использовать как пределы пересечения?",
+        "uz": "y=x²−5x+4 va y=x−2 bilan chegaralangan yuzani topishdan oldin kesishish chegaralari sifatida qaysi x qiymatlar olinadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x=3−√3 and x=3+√3",
+            "ru": "x=3−√3 и x=3+√3",
+            "uz": "x=3−√3 va x=3+√3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=1 and x=4",
+            "ru": "x=1 и x=4",
+            "uz": "x=1 va x=4"
+          },
+          "diagnostic_code": "INT04_INTERSECTIONS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=−2 and x=4",
+            "ru": "x=−2 и x=4",
+            "uz": "x=−2 va x=4"
+          },
+          "diagnostic_code": "INT04_INTERSECTIONS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x=0 and x=6",
+            "ru": "x=0 и x=6",
+            "uz": "x=0 va x=6"
+          },
+          "diagnostic_code": "INT04_INTERSECTIONS"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Set x²−5x+4=x−2. Then x²−6x+6=0, giving x=(6±√36−24)/2=3±√3.",
+        "ru": "Приравниваем x²−5x+4=x−2. Получаем x²−6x+6=0, откуда x=(6±√36−24)/2=3±√3.",
+        "uz": "x²−5x+4=x−2 deb olamiz. x²−6x+6=0, shundan x=(6±√36−24)/2=3±√3."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q482",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "area_vs_signed_integral",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "For a continuous function f, ∫₀⁴f(x)dx=0, but f is not identically zero. Which statement can still be true?",
+        "ru": "Для непрерывной функции f известно ∫₀⁴f(x)dx=0, но f не тождественно равна нулю. Какое утверждение всё ещё может быть верным?",
+        "uz": "Uzluksiz f uchun ∫₀⁴f(x)dx=0, lekin f aynan nol emas. Qaysi tasdiq baribir to‘g‘ri bo‘lishi mumkin?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "The geometric area between the graph and x-axis is positive because positive and negative signed parts cancel.",
+            "ru": "Геометрическая площадь между графиком и осью x положительна, потому что положительная и отрицательная знаковые части сокращаются.",
+            "uz": "Grafik bilan x o‘qi orasidagi geometrik yuza musbat bo‘lishi mumkin, chunki musbat va manfiy ishorali qismlar bekor bo‘ladi."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "The geometric area must be 0.",
+            "ru": "Геометрическая площадь обязательно равна 0.",
+            "uz": "Geometrik yuza albatta 0."
+          },
+          "diagnostic_code": "INT04_AREA_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "f(x) must be positive everywhere.",
+            "ru": "f(x) должна быть положительной везде.",
+            "uz": "f(x) hamma joyda musbat bo‘lishi kerak."
+          },
+          "diagnostic_code": "INT04_SPLIT_CROSSING"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "f(x) must be negative everywhere.",
+            "ru": "f(x) должна быть отрицательной везде.",
+            "uz": "f(x) hamma joyda manfiy bo‘lishi kerak."
+          },
+          "diagnostic_code": "INT04_SPLIT_CROSSING"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "A definite integral is signed. Positive and negative contributions can cancel to zero while the sum of geometric areas remains positive.",
+        "ru": "Определённый интеграл знаковый. Положительные и отрицательные вклады могут сократиться до нуля, хотя сумма геометрических площадей останется положительной.",
+        "uz": "Aniq integral ishorali. Musbat va manfiy hissalar nolga bekor bo‘lishi mumkin, geometrik yuzalar yig‘indisi esa musbat qoladi."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q483",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-04",
+      "secondary_skills": [
+        "P1-QUA-03"
+      ],
+      "role": "reverse_area_parameter",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "For k>0, the curve y=k²−x² meets the x-axis at x=±k. The enclosed area is 36. Enter k.",
+        "ru": "При k>0 кривая y=k²−x² пересекает ось x при x=±k. Площадь замкнутой области равна 36. Введите k.",
+        "uz": "k>0 uchun y=k²−x² egri chiziq x o‘qini x=±k da kesadi. Yopiq soha yuzi 36. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "2",
+          "4",
+          "6"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Area=∫₋ᵏᵏ(k²−x²)dx=2[k²x−x³/3]₀ᵏ=4k³/3. Set 4k³/3=36, so k³=27 and k=3.",
+        "ru": "Площадь=∫₋ᵏᵏ(k²−x²)dx=2[k²x−x³/3]₀ᵏ=4k³/3. Из 4k³/3=36 получаем k³=27 и k=3.",
+        "uz": "Yuza=∫₋ᵏᵏ(k²−x²)dx=2[k²x−x³/3]₀ᵏ=4k³/3. 4k³/3=36 dan k³=27, k=3."
+      },
+      "ai_source_skill": "P1-INT-04",
+      "status": "draft"
+    }
+  ]
+}
