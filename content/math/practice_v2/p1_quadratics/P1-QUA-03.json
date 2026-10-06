@@ -13,29 +13,29 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "Solve x² − 8x + 15 = 0. Enter the larger root.",
-        "ru": "Решите x² − 8x + 15 = 0. Введите больший корень.",
-        "uz": "x² − 8x + 15 = 0 ni yeching. Katta ildizni kiriting."
+        "en": "The roots of x² − 6x + 5 = 0 are r and s, where r < s. Enter s − r.",
+        "ru": "Корни уравнения x² − 6x + 5 = 0 равны r и s, где r < s. Введите s − r.",
+        "uz": "x² − 6x + 5 = 0 tenglamaning ildizlari r va s, bunda r < s. s − r ni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "5",
+        "canonical_answer": "4",
         "accepted_examples": [
-          "5",
-          " 5 "
+          "4",
+          " 4 "
         ],
         "rejected_examples": [
-          "3",
-          "8",
-          "-5"
+          "1",
+          "5",
+          "6"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "Factorise: x² − 8x + 15 = (x − 3)(x − 5). The roots are 3 and 5, so the larger root is 5.",
-        "ru": "Разложим на множители: x² − 8x + 15 = (x − 3)(x − 5). Корни 3 и 5, поэтому больший корень равен 5.",
-        "uz": "Ko‘paytuvchilarga ajratamiz: x² − 8x + 15 = (x − 3)(x − 5). Ildizlar 3 va 5, katta ildiz 5."
+        "en": "Factorise: x² − 6x + 5 = (x − 1)(x − 5). Thus r = 1 and s = 5, so s − r = 4.",
+        "ru": "Разложим на множители: x² − 6x + 5 = (x − 1)(x − 5). Тогда r = 1 и s = 5, поэтому s − r = 4.",
+        "uz": "Ko‘paytuvchilarga ajratamiz: x² − 6x + 5 = (x − 1)(x − 5). Demak r = 1 va s = 5, shuning uchun s − r = 4."
       },
       "ai_source_skill": "P1-QUA-03",
       "status": "draft"
