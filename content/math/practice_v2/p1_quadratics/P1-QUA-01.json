@@ -1,0 +1,518 @@
+{
+  "version": "practice_v2_p1_quadratics_draft_v0.1",
+  "skill": "P1-QUA-01",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q001",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-01",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Which completed-square form is equivalent to x² − 10x + 21?",
+        "ru": "Какая форма полного квадрата эквивалентна выражению x² − 10x + 21?",
+        "uz": "x² − 10x + 21 ifodaga qaysi to‘liq kvadrat ko‘rinishi teng kuchli?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(x − 5)² + 4",
+            "ru": "(x − 5)² + 4",
+            "uz": "(x − 5)² + 4"
+          },
+          "diagnostic_code": "QUA_COMPLETE_SQUARE_CONST_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(x + 5)² − 4",
+            "ru": "(x + 5)² − 4",
+            "uz": "(x + 5)² − 4"
+          },
+          "diagnostic_code": "QUA_COMPLETE_SQUARE_MIDDLE_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(x − 10)² + 21",
+            "ru": "(x − 10)² + 21",
+            "uz": "(x − 10)² + 21"
+          },
+          "diagnostic_code": "QUA_COMPLETE_SQUARE_HALF_COEFF"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(x − 5)² − 4",
+            "ru": "(x − 5)² − 4",
+            "uz": "(x − 5)² − 4"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "Half of −10 is −5, so x² − 10x = (x − 5)² − 25. Therefore x² − 10x + 21 = (x − 5)² − 4.",
+        "ru": "Половина коэффициента −10 равна −5, поэтому x² − 10x = (x − 5)² − 25. Значит, x² − 10x + 21 = (x − 5)² − 4.",
+        "uz": "−10 koeffitsiyentining yarmi −5. Shuning uchun x² − 10x = (x − 5)² − 25. Demak, x² − 10x + 21 = (x − 5)² − 4."
+      },
+      "ai_source_skill": "P1-QUA-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q002",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-01",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "For y = x² + 8x + 5, enter the x-coordinate of the vertex.",
+        "ru": "Для y = x² + 8x + 5 введите x-координату вершины.",
+        "uz": "y = x² + 8x + 5 uchun cho‘qqining x-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-4",
+        "accepted_examples": [
+          "-4",
+          "−4",
+          " -4 "
+        ],
+        "rejected_examples": [
+          "4",
+          "x=-4",
+          "-4.0x"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "4",
+          "diagnostic_code": "QUA_VERTEX_X_SIGN"
+        }
+      ],
+      "explanation": {
+        "en": "Complete the square: y = (x + 4)² − 11. The vertex occurs when x + 4 = 0, so x = −4.",
+        "ru": "Дополняем до квадрата: y = (x + 4)² − 11. Вершина достигается при x + 4 = 0, поэтому x = −4.",
+        "uz": "To‘liq kvadratga keltiramiz: y = (x + 4)² − 11. Cho‘qqi x + 4 = 0 bo‘lganda hosil bo‘ladi, demak x = −4."
+      },
+      "ai_source_skill": "P1-QUA-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q003",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-01",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "What is the vertex of y = −(x + 3)² + 7?",
+        "ru": "Какова вершина графика y = −(x + 3)² + 7?",
+        "uz": "y = −(x + 3)² + 7 grafigining cho‘qqisi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(3, 7)",
+            "ru": "(3, 7)",
+            "uz": "(3, 7)"
+          },
+          "diagnostic_code": "QUA_VERTEX_X_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(−3, 7)",
+            "ru": "(−3, 7)",
+            "uz": "(−3, 7)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(−3, −7)",
+            "ru": "(−3, −7)",
+            "uz": "(−3, −7)"
+          },
+          "diagnostic_code": "QUA_VERTEX_Y_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(3, −7)",
+            "ru": "(3, −7)",
+            "uz": "(3, −7)"
+          },
+          "diagnostic_code": "QUA_VERTEX_BOTH_SIGNS"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Vertex form is y = a(x − h)² + k, with vertex (h, k). Here x + 3 = x − (−3), so the vertex is (−3, 7).",
+        "ru": "В форме y = a(x − h)² + k вершина имеет координаты (h, k). Здесь x + 3 = x − (−3), поэтому вершина равна (−3, 7).",
+        "uz": "y = a(x − h)² + k ko‘rinishida cho‘qqi (h, k) bo‘ladi. Bu yerda x + 3 = x − (−3), shuning uchun cho‘qqi (−3, 7)."
+      },
+      "ai_source_skill": "P1-QUA-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q004",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-01",
+      "secondary_skills": [],
+      "role": "application_variation",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Find the minimum value of y = 2x² − 12x + 11.",
+        "ru": "Найдите минимальное значение y = 2x² − 12x + 11.",
+        "uz": "y = 2x² − 12x + 11 funksiyaning eng kichik qiymatini toping."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-7",
+        "accepted_examples": [
+          "-7",
+          "−7",
+          " -7 "
+        ],
+        "rejected_examples": [
+          "7",
+          "3",
+          "11"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "3",
+          "diagnostic_code": "QUA_VERTEX_X_AS_Y"
+        },
+        {
+          "answer_match": "11",
+          "diagnostic_code": "QUA_VERTEX_CONST_ONLY"
+        }
+      ],
+      "explanation": {
+        "en": "2x² − 12x + 11 = 2(x − 3)² − 7. Since 2(x − 3)² ≥ 0, the minimum value is −7.",
+        "ru": "2x² − 12x + 11 = 2(x − 3)² − 7. Так как 2(x − 3)² ≥ 0, минимальное значение равно −7.",
+        "uz": "2x² − 12x + 11 = 2(x − 3)² − 7. 2(x − 3)² ≥ 0 bo‘lgani uchun eng kichik qiymat −7."
+      },
+      "ai_source_skill": "P1-QUA-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q005",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-01",
+      "secondary_skills": [],
+      "role": "concept_interpretation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "What is the range of y = 3(x − 2)² − 5?",
+        "ru": "Какова область значений функции y = 3(x − 2)² − 5?",
+        "uz": "y = 3(x − 2)² − 5 funksiyaning qiymatlar sohasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y ≥ −5",
+            "ru": "y ≥ −5",
+            "uz": "y ≥ −5"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y ≤ −5",
+            "ru": "y ≤ −5",
+            "uz": "y ≤ −5"
+          },
+          "diagnostic_code": "QUA_RANGE_DIRECTION"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y ≥ 2",
+            "ru": "y ≥ 2",
+            "uz": "y ≥ 2"
+          },
+          "diagnostic_code": "QUA_VERTEX_X_AS_RANGE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y ≤ 2",
+            "ru": "y ≤ 2",
+            "uz": "y ≤ 2"
+          },
+          "diagnostic_code": "QUA_VERTEX_X_AS_RANGE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The coefficient of the squared term is positive, so the parabola opens upward. Its minimum is −5 at x = 2, hence y ≥ −5.",
+        "ru": "Коэффициент при квадрате положительный, поэтому парабола направлена вверх. Минимум равен −5 при x = 2, следовательно y ≥ −5.",
+        "uz": "Kvadrat had oldidagi koeffitsiyent musbat, shuning uchun parabola yuqoriga ochiladi. Eng kichik qiymat x = 2 da −5, demak y ≥ −5."
+      },
+      "ai_source_skill": "P1-QUA-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q006",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-01",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Find k if x² − 6x + k = (x − 3)² + 4 for all x.",
+        "ru": "Найдите k, если x² − 6x + k = (x − 3)² + 4 для всех x.",
+        "uz": "Agar x² − 6x + k = (x − 3)² + 4 barcha x lar uchun bajarilsa, k ni toping."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "13",
+        "accepted_examples": [
+          "13",
+          " 13 "
+        ],
+        "rejected_examples": [
+          "4",
+          "9",
+          "-13"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Expand the right side: (x − 3)² + 4 = x² − 6x + 9 + 4 = x² − 6x + 13. Therefore k = 13.",
+        "ru": "Раскрываем правую часть: (x − 3)² + 4 = x² − 6x + 9 + 4 = x² − 6x + 13. Поэтому k = 13.",
+        "uz": "O‘ng tomonni ochamiz: (x − 3)² + 4 = x² − 6x + 9 + 4 = x² − 6x + 13. Demak k = 13."
+      },
+      "ai_source_skill": "P1-QUA-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q007",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-01",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The graph of y = x² + bx + 10 has its vertex on the line x = 3. What is b?",
+        "ru": "Вершина графика y = x² + bx + 10 лежит на прямой x = 3. Чему равно b?",
+        "uz": "y = x² + bx + 10 grafigining cho‘qqisi x = 3 chiziqda yotadi. b nimaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
+          },
+          "diagnostic_code": "QUA_VERTEX_HALF_COEFF"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "6",
+            "ru": "6",
+            "uz": "6"
+          },
+          "diagnostic_code": "QUA_VERTEX_AXIS_SIGN"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−6",
+            "ru": "−6",
+            "uz": "−6"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−3",
+            "ru": "−3",
+            "uz": "−3"
+          },
+          "diagnostic_code": "QUA_VERTEX_HALF_COEFF"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "For y = x² + bx + c, the vertex has x-coordinate −b/2. Since −b/2 = 3, b = −6.",
+        "ru": "Для y = x² + bx + c x-координата вершины равна −b/2. Так как −b/2 = 3, получаем b = −6.",
+        "uz": "y = x² + bx + c uchun cho‘qqining x-koordinatasi −b/2 ga teng. −b/2 = 3 bo‘lsa, b = −6."
+      },
+      "ai_source_skill": "P1-QUA-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q008",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-01",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The minimum value of y = x² − 4x + m is 7. Find m.",
+        "ru": "Минимальное значение y = x² − 4x + m равно 7. Найдите m.",
+        "uz": "y = x² − 4x + m funksiyaning eng kichik qiymati 7. m ni toping."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "11",
+        "accepted_examples": [
+          "11",
+          " 11 "
+        ],
+        "rejected_examples": [
+          "7",
+          "4",
+          "3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "7",
+          "diagnostic_code": "QUA_PARAMETER_EQUALS_MIN"
+        }
+      ],
+      "explanation": {
+        "en": "y = (x − 2)² + m − 4, so the minimum value is m − 4. Set m − 4 = 7 to get m = 11.",
+        "ru": "y = (x − 2)² + m − 4, поэтому минимальное значение равно m − 4. Из m − 4 = 7 получаем m = 11.",
+        "uz": "y = (x − 2)² + m − 4, demak eng kichik qiymat m − 4. m − 4 = 7 dan m = 11."
+      },
+      "ai_source_skill": "P1-QUA-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q009",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-01",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "What is the maximum value of y = −2x² + 8x − 1?",
+        "ru": "Каково максимальное значение y = −2x² + 8x − 1?",
+        "uz": "y = −2x² + 8x − 1 funksiyaning eng katta qiymati qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−1",
+            "ru": "−1",
+            "uz": "−1"
+          },
+          "diagnostic_code": "QUA_VERTEX_CONST_ONLY"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "QUA_VERTEX_X_AS_Y"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "7",
+            "ru": "7",
+            "uz": "7"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "9",
+            "ru": "9",
+            "uz": "9"
+          },
+          "diagnostic_code": "QUA_COMPLETE_SQUARE_CONST_SIGN"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Rewrite y = −2(x − 2)² + 7. Because the squared term is multiplied by a negative number, the vertex gives the maximum value, 7.",
+        "ru": "Перепишем: y = −2(x − 2)² + 7. Поскольку коэффициент при квадрате отрицательный, вершина даёт максимум, равный 7.",
+        "uz": "y = −2(x − 2)² + 7 ko‘rinishida yozamiz. Kvadrat hadning koeffitsiyenti manfiy bo‘lgani uchun cho‘qqi maksimumni beradi: 7."
+      },
+      "ai_source_skill": "P1-QUA-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q010",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-01",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "The curve y = a(x − 1)² + 3 passes through (3, 11). Find a.",
+        "ru": "Кривая y = a(x − 1)² + 3 проходит через точку (3, 11). Найдите a.",
+        "uz": "y = a(x − 1)² + 3 egri chizig‘i (3, 11) nuqtadan o‘tadi. a ni toping."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "2",
+        "accepted_examples": [
+          "2",
+          " 2 "
+        ],
+        "rejected_examples": [
+          "4",
+          "8",
+          "-2"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Substitute (3, 11): 11 = a(3 − 1)² + 3 = 4a + 3. Hence 4a = 8 and a = 2.",
+        "ru": "Подставляем (3, 11): 11 = a(3 − 1)² + 3 = 4a + 3. Тогда 4a = 8 и a = 2.",
+        "uz": "(3, 11) ni qo‘yamiz: 11 = a(3 − 1)² + 3 = 4a + 3. Shundan 4a = 8 va a = 2."
+      },
+      "ai_source_skill": "P1-QUA-01",
+      "status": "draft"
+    }
+  ]
+}
