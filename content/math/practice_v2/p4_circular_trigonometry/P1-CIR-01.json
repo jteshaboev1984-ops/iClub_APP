@@ -1,0 +1,375 @@
+{
+  "version": "practice_v2_p4_circular_trig_draft_v0.1",
+  "skill": "P1-CIR-01",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q217",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-01",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "Convert π/5 radians to degrees. Enter the number of degrees.",
+        "ru": "Переведите π/5 радиан в градусы. Введите число градусов.",
+        "uz": "π/5 radianni darajaga o‘tkazing. Daraja sonini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "36",
+        "accepted_examples": [
+          "36",
+          " 36 "
+        ],
+        "rejected_examples": [
+          "18",
+          "72",
+          "180"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Multiply by 180/π: (π/5)(180/π)=36°.",
+        "ru": "Умножаем на 180/π: (π/5)(180/π)=36°.",
+        "uz": "180/π ga ko‘paytiramiz: (π/5)(180/π)=36°."
+      },
+      "ai_source_skill": "P1-CIR-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q218",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-01",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "Which radian measure is equal to 225°?",
+        "ru": "Какая радианная мера равна 225°?",
+        "uz": "225° qaysi radian o‘lchoviga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3π/4",
+            "ru": "3π/4",
+            "uz": "3π/4"
+          },
+          "diagnostic_code": "CIR01_DEG_RAD_FACTOR"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "5π/4",
+            "ru": "5π/4",
+            "uz": "5π/4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "5π/8",
+            "ru": "5π/8",
+            "uz": "5π/8"
+          },
+          "diagnostic_code": "CIR01_DEG_RAD_FACTOR"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "9π/4",
+            "ru": "9π/4",
+            "uz": "9π/4"
+          },
+          "diagnostic_code": "CIR01_FULL_TURN"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "225°×π/180=225π/180=5π/4.",
+        "ru": "225°×π/180=225π/180=5π/4.",
+        "uz": "225°×π/180=225π/180=5π/4."
+      },
+      "ai_source_skill": "P1-CIR-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q219",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-01",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "Convert 7π/6 radians to degrees. Enter the number of degrees.",
+        "ru": "Переведите 7π/6 радиан в градусы. Введите число градусов.",
+        "uz": "7π/6 radianni darajaga o‘tkazing. Daraja sonini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "210",
+        "accepted_examples": [
+          "210",
+          " 210 "
+        ],
+        "rejected_examples": [
+          "120",
+          "240",
+          "420"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "(7π/6)(180/π)=7×30=210°.",
+        "ru": "(7π/6)(180/π)=7×30=210°.",
+        "uz": "(7π/6)(180/π)=7×30=210°."
+      },
+      "ai_source_skill": "P1-CIR-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q220",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-01",
+      "secondary_skills": [],
+      "role": "coefficient_interpretation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "Write 72° as kπ radians. What is k?",
+        "ru": "Представьте 72° как kπ радиан. Чему равно k?",
+        "uz": "72° ni kπ radian ko‘rinishida yozing. k nimaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2/5",
+            "ru": "2/5",
+            "uz": "2/5"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "5/2",
+            "ru": "5/2",
+            "uz": "5/2"
+          },
+          "diagnostic_code": "CIR01_DEG_RAD_FACTOR"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "72/π",
+            "ru": "72/π",
+            "uz": "72/π"
+          },
+          "diagnostic_code": "CIR01_PI_COEFFICIENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "1/5",
+            "ru": "1/5",
+            "uz": "1/5"
+          },
+          "diagnostic_code": "CIR01_DEG_RAD_FACTOR"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "72°×π/180=(72/180)π=(2/5)π, so k=2/5.",
+        "ru": "72°×π/180=(72/180)π=(2/5)π, поэтому k=2/5.",
+        "uz": "72°×π/180=(72/180)π=(2/5)π, demak k=2/5."
+      },
+      "ai_source_skill": "P1-CIR-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q221",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-01",
+      "secondary_skills": [],
+      "role": "comparison",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "Which angle is largest?",
+        "ru": "Какой угол самый большой?",
+        "uz": "Qaysi burchak eng katta?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2π/3 radians",
+            "ru": "2π/3 радиан",
+            "uz": "2π/3 radian"
+          },
+          "diagnostic_code": "CIR01_FULL_TURN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "135°",
+            "ru": "135°",
+            "uz": "135°"
+          },
+          "diagnostic_code": "CIR01_DEG_RAD_FACTOR"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "3π/4 radians",
+            "ru": "3π/4 радиан",
+            "uz": "3π/4 radian"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "120°",
+            "ru": "120°",
+            "uz": "120°"
+          },
+          "diagnostic_code": "CIR01_FULL_TURN"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "2π/3=120° and 3π/4=135°. Thus the largest value is 3π/4 radians, equal to 135°; since 135° is also listed, the two are equal, so this question as written is ambiguous.",
+        "ru": "2π/3=120°, а 3π/4=135°. Значит 3π/4 радиан и 135° равны; в текущем виде вопрос неоднозначен.",
+        "uz": "2π/3=120°, 3π/4=135°. Demak 3π/4 radian va 135° teng; hozirgi savol noaniq."
+      },
+      "ai_source_skill": "P1-CIR-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q222",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-01",
+      "secondary_skills": [],
+      "role": "extended_angle",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "Convert 5π/2 radians to degrees. Enter the number of degrees.",
+        "ru": "Переведите 5π/2 радиан в градусы. Введите число градусов.",
+        "uz": "5π/2 radianni darajaga o‘tkazing. Daraja sonini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "450",
+        "accepted_examples": [
+          "450",
+          " 450 "
+        ],
+        "rejected_examples": [
+          "225",
+          "360",
+          "900"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "(5π/2)(180/π)=5×90=450°.",
+        "ru": "(5π/2)(180/π)=5×90=450°.",
+        "uz": "(5π/2)(180/π)=5×90=450°."
+      },
+      "ai_source_skill": "P1-CIR-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q223",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-01",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "An angle is kπ/6 radians and is equal to 150°. Enter k.",
+        "ru": "Угол равен kπ/6 радиан и одновременно 150°. Введите k.",
+        "uz": "Burchak kπ/6 radian va 150° ga teng. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "5",
+        "accepted_examples": [
+          "5",
+          " 5 "
+        ],
+        "rejected_examples": [
+          "6",
+          "3",
+          "10"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "150°=150π/180=5π/6, so k=5.",
+        "ru": "150°=150π/180=5π/6, поэтому k=5.",
+        "uz": "150°=150π/180=5π/6, demak k=5."
+      },
+      "ai_source_skill": "P1-CIR-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q224",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-01",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "An angle θ is 3π/8 radians. Enter the degree measure of 2θ.",
+        "ru": "Угол θ равен 3π/8 радиан. Введите градусную меру угла 2θ.",
+        "uz": "θ burchak 3π/8 radian. 2θ ning daraja o‘lchovini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "135",
+        "accepted_examples": [
+          "135",
+          " 135 "
+        ],
+        "rejected_examples": [
+          "67.5",
+          "270",
+          "90"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "2θ=3π/4 radians, and (3π/4)(180/π)=135°.",
+        "ru": "2θ=3π/4 радиан, а (3π/4)(180/π)=135°.",
+        "uz": "2θ=3π/4 radian, va (3π/4)(180/π)=135°."
+      },
+      "ai_source_skill": "P1-CIR-01",
+      "status": "draft"
+    }
+  ]
+}
