@@ -23,20 +23,20 @@
         {
           "key": "A",
           "text": {
-            "en": "y=2x−1",
-            "ru": "y=2x−1",
-            "uz": "y=2x−1"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "y=2x+3",
             "ru": "y=2x+3",
             "uz": "y=2x+3"
           },
           "diagnostic_code": "DIF04_LINE_CONSTANT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=2x−1",
+            "ru": "y=2x−1",
+            "uz": "y=2x−1"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -57,7 +57,7 @@
           "diagnostic_code": "DIF04_TANGENT_GRADIENT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "At x=2, y=3. Also dy/dx=2x−2, so the tangent gradient is 2. Thus y−3=2(x−2), giving y=2x−1.",
         "ru": "При x=2 имеем y=3. dy/dx=2x−2, поэтому градиент касательной равен 2. Тогда y−3=2(x−2), откуда y=2x−1.",
@@ -86,11 +86,11 @@
         {
           "key": "A",
           "text": {
-            "en": "−1/3",
-            "ru": "−1/3",
-            "uz": "−1/3"
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF04_TANGENT_GRADIENT"
         },
         {
           "key": "B",
@@ -113,14 +113,14 @@
         {
           "key": "D",
           "text": {
-            "en": "3",
-            "ru": "3",
-            "uz": "3"
+            "en": "−1/3",
+            "ru": "−1/3",
+            "uz": "−1/3"
           },
-          "diagnostic_code": "DIF04_TANGENT_GRADIENT"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "dy/dx=3x², so the tangent gradient at x=1 is 3. The normal gradient is the negative reciprocal, −1/3.",
         "ru": "dy/dx=3x², поэтому градиент касательной при x=1 равен 3. Градиент нормали — отрицательная обратная величина, −1/3.",
@@ -294,11 +294,11 @@
         {
           "key": "A",
           "text": {
-            "en": "y=−2x−1",
-            "ru": "y=−2x−1",
-            "uz": "y=−2x−1"
+            "en": "y=2x+3",
+            "ru": "y=2x+3",
+            "uz": "y=2x+3"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF04_TANGENT_GRADIENT"
         },
         {
           "key": "B",
@@ -312,11 +312,11 @@
         {
           "key": "C",
           "text": {
-            "en": "y=2x+3",
-            "ru": "y=2x+3",
-            "uz": "y=2x+3"
+            "en": "y=−2x−1",
+            "ru": "y=−2x−1",
+            "uz": "y=−2x−1"
           },
-          "diagnostic_code": "DIF04_TANGENT_GRADIENT"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -328,7 +328,7 @@
           "diagnostic_code": "DIF04_TANGENT_GRADIENT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "At x=−1 the point is (−1,1), and dy/dx=2x gives gradient −2. So y−1=−2(x+1), hence y=−2x−1.",
         "ru": "При x=−1 точка (−1,1), а dy/dx=2x даёт градиент −2. Поэтому y−1=−2(x+1), то есть y=−2x−1.",
@@ -394,11 +394,11 @@
         {
           "key": "A",
           "text": {
-            "en": "y=−2",
-            "ru": "y=−2",
-            "uz": "y=−2"
+            "en": "y=−2x",
+            "ru": "y=−2x",
+            "uz": "y=−2x"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF04_LINE_CONSTANT"
         },
         {
           "key": "B",
@@ -421,14 +421,14 @@
         {
           "key": "D",
           "text": {
-            "en": "y=−2x",
-            "ru": "y=−2x",
-            "uz": "y=−2x"
+            "en": "y=−2",
+            "ru": "y=−2",
+            "uz": "y=−2"
           },
-          "diagnostic_code": "DIF04_LINE_CONSTANT"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "dy/dx=3x²−3, which is 0 at x=1, so the tangent is horizontal. The point is (1,−2), hence the tangent is y=−2.",
         "ru": "dy/dx=3x²−3, при x=1 это 0, поэтому касательная горизонтальна. Точка (1,−2), значит касательная y=−2.",
