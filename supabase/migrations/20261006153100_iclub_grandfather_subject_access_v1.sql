@@ -365,11 +365,16 @@ begin
 
   v_reason:=coalesce(v_guard->>'reason','');
 
+  -- Shadow mode must preserve legacy app access, but the separate shadow
+  -- selector itself still obeys the commercial slot limits so beta testers see
+  -- the real Free/Plus/Pro selection behavior without mutating legacy access.
   if v_reason in (
     'subscription_unassigned',
     'plan_unavailable',
     'subject_unavailable',
     'competitive_requires_main_subject',
+    'study_subject_limit_reached',
+    'competitive_subject_limit_reached',
     'invalid_request',
     'invalid_intent'
   ) then
