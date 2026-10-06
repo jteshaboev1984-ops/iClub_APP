@@ -288,6 +288,27 @@ begin
     return jsonb_build_object('ok',false,'reason','plan_unavailable');
   end if;
 
+  if p_event_type<>'activate' and v_from_plan is null then
+    return jsonb_build_object('ok',false,'reason','subscription_missing');
+  end if;
+
+  if p_event_type='schedule_downgrade'
+     and (p_effective_at is null or p_effective_at<=now()) then
+    return jsonb_build_object('ok',false,'reason','scheduled_change_must_be_future');
+  end if;
+
+  if p_event_type in ('upgrade','downgrade','cancel','pause','resume','revoke','expire')
+     and p_effective_at is not null
+     and p_effective_at>now()+interval '5 minutes' then
+    return jsonb_build_object('ok',false,'reason','future_event_requires_schedule');
+  end if;
+
+  if p_event_type='resume'
+     and v_ent.valid_until is not null
+     and v_ent.valid_until<=v_now then
+    return jsonb_build_object('ok',false,'reason','subscription_expired');
+  end if;
+
   insert into private.iclub_subscription_events(
     event_id,user_id,event_type,from_plan_code,to_plan_code,effective_at,
     period_start,period_end,source,applied,result_status
@@ -322,10 +343,6 @@ begin
         updated_at=v_now;
 
   elsif p_event_type='renew' then
-    if v_from_plan is null then
-      return jsonb_build_object('ok',false,'reason','subscription_missing');
-    end if;
-
     update private.iclub_subscription_entitlements
     set plan_code=coalesce(p_plan_code,plan_code),
         entitlement_status='active',
@@ -342,10 +359,6 @@ begin
     where user_id=p_user_id;
 
   elsif p_event_type in ('upgrade','downgrade') then
-    if v_from_plan is null then
-      return jsonb_build_object('ok',false,'reason','subscription_missing');
-    end if;
-
     update private.iclub_subscription_entitlements
     set plan_code=p_plan_code,
         entitlement_status='active',
@@ -362,14 +375,6 @@ begin
     where user_id=p_user_id;
 
   elsif p_event_type='schedule_downgrade' then
-    if v_from_plan is null then
-      return jsonb_build_object('ok',false,'reason','subscription_missing');
-    end if;
-
-    if p_effective_at is null or p_effective_at<=now() then
-      return jsonb_build_object('ok',false,'reason','scheduled_change_must_be_future');
-    end if;
-
     update private.iclub_subscription_entitlements
     set scheduled_plan_code=p_plan_code,
         scheduled_change_at=p_effective_at,
@@ -379,10 +384,6 @@ begin
     where user_id=p_user_id;
 
   elsif p_event_type='schedule_cancel' then
-    if v_from_plan is null then
-      return jsonb_build_object('ok',false,'reason','subscription_missing');
-    end if;
-
     update private.iclub_subscription_entitlements
     set cancel_at_period_end=true,
         scheduled_plan_code=null,
@@ -392,10 +393,6 @@ begin
     where user_id=p_user_id;
 
   elsif p_event_type in ('cancel','expire') then
-    if v_from_plan is null then
-      return jsonb_build_object('ok',false,'reason','subscription_missing');
-    end if;
-
     update private.iclub_subscription_entitlements
     set entitlement_status='cancelled',
         valid_until=least(coalesce(valid_until,v_effective),v_effective),
@@ -407,10 +404,6 @@ begin
     where user_id=p_user_id;
 
   elsif p_event_type='pause' then
-    if v_from_plan is null then
-      return jsonb_build_object('ok',false,'reason','subscription_missing');
-    end if;
-
     update private.iclub_subscription_entitlements
     set entitlement_status='paused',
         last_event_id=p_event_id,
@@ -418,14 +411,6 @@ begin
     where user_id=p_user_id;
 
   elsif p_event_type='resume' then
-    if v_from_plan is null then
-      return jsonb_build_object('ok',false,'reason','subscription_missing');
-    end if;
-
-    if v_ent.valid_until is not null and v_ent.valid_until<=v_now then
-      return jsonb_build_object('ok',false,'reason','subscription_expired');
-    end if;
-
     update private.iclub_subscription_entitlements
     set entitlement_status='active',
         last_event_id=p_event_id,
@@ -433,10 +418,6 @@ begin
     where user_id=p_user_id;
 
   elsif p_event_type='revoke' then
-    if v_from_plan is null then
-      return jsonb_build_object('ok',false,'reason','subscription_missing');
-    end if;
-
     update private.iclub_subscription_entitlements
     set entitlement_status='revoked',
         valid_until=least(coalesce(valid_until,v_effective),v_effective),
@@ -833,6 +814,13 @@ begin
     );
   else
     v_guard:=jsonb_build_object('allowed',true,'reason','release_slot');
+  end if;
+
+  if coalesce(v_guard->>'reason','') in ('subscription_unassigned','plan_unavailable') then
+    return jsonb_build_object(
+      'ok',false,
+      'reason',v_guard->>'reason'
+    );
   end if;
 
   if coalesce((v_guard->>'allowed')::boolean,false) is not true
