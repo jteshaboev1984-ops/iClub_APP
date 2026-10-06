@@ -25,7 +25,7 @@
             "ru": "(x − 5)² + 4",
             "uz": "(x − 5)² + 4"
           },
-          "diagnostic_code": "QUA_COMPLETE_SQUARE_CONST_SIGN"
+          "diagnostic_code": "QUA01_COMPENSATION"
         },
         {
           "key": "B",
@@ -34,7 +34,7 @@
             "ru": "(x + 5)² − 4",
             "uz": "(x + 5)² − 4"
           },
-          "diagnostic_code": "QUA_COMPLETE_SQUARE_MIDDLE_SIGN"
+          "diagnostic_code": "QUA01_SIGN_IN_SQUARE"
         },
         {
           "key": "C",
@@ -43,7 +43,7 @@
             "ru": "(x − 10)² + 21",
             "uz": "(x − 10)² + 21"
           },
-          "diagnostic_code": "QUA_COMPLETE_SQUARE_HALF_COEFF"
+          "diagnostic_code": "QUA01_HALF_COEFFICIENT"
         },
         {
           "key": "D",
@@ -96,7 +96,7 @@
       "diagnostic_rules": [
         {
           "answer_match": "4",
-          "diagnostic_code": "QUA_VERTEX_X_SIGN"
+          "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         }
       ],
       "explanation": {
@@ -129,7 +129,7 @@
             "ru": "(3, 7)",
             "uz": "(3, 7)"
           },
-          "diagnostic_code": "QUA_VERTEX_X_SIGN"
+          "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         },
         {
           "key": "B",
@@ -147,7 +147,7 @@
             "ru": "(−3, −7)",
             "uz": "(−3, −7)"
           },
-          "diagnostic_code": "QUA_VERTEX_Y_SIGN"
+          "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         },
         {
           "key": "D",
@@ -156,7 +156,7 @@
             "ru": "(3, −7)",
             "uz": "(3, −7)"
           },
-          "diagnostic_code": "QUA_VERTEX_BOTH_SIGNS"
+          "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         }
       ],
       "correct_answer": "B",
@@ -200,11 +200,11 @@
       "diagnostic_rules": [
         {
           "answer_match": "3",
-          "diagnostic_code": "QUA_VERTEX_X_AS_Y"
+          "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         },
         {
           "answer_match": "11",
-          "diagnostic_code": "QUA_VERTEX_CONST_ONLY"
+          "diagnostic_code": "QUA01_MIN_MAX_DIRECTION"
         }
       ],
       "explanation": {
@@ -246,7 +246,7 @@
             "ru": "y ≤ −5",
             "uz": "y ≤ −5"
           },
-          "diagnostic_code": "QUA_RANGE_DIRECTION"
+          "diagnostic_code": "QUA01_MIN_MAX_DIRECTION"
         },
         {
           "key": "C",
@@ -255,7 +255,7 @@
             "ru": "y ≥ 2",
             "uz": "y ≥ 2"
           },
-          "diagnostic_code": "QUA_VERTEX_X_AS_RANGE"
+          "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         },
         {
           "key": "D",
@@ -264,7 +264,7 @@
             "ru": "y ≤ 2",
             "uz": "y ≤ 2"
           },
-          "diagnostic_code": "QUA_VERTEX_X_AS_RANGE"
+          "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         }
       ],
       "correct_answer": "A",
@@ -335,7 +335,7 @@
             "ru": "3",
             "uz": "3"
           },
-          "diagnostic_code": "QUA_VERTEX_HALF_COEFF"
+          "diagnostic_code": "QUA01_HALF_COEFFICIENT"
         },
         {
           "key": "B",
@@ -344,7 +344,7 @@
             "ru": "6",
             "uz": "6"
           },
-          "diagnostic_code": "QUA_VERTEX_AXIS_SIGN"
+          "diagnostic_code": "QUA01_PARAMETER_FROM_VERTEX"
         },
         {
           "key": "C",
@@ -362,7 +362,7 @@
             "ru": "−3",
             "uz": "−3"
           },
-          "diagnostic_code": "QUA_VERTEX_HALF_COEFF"
+          "diagnostic_code": "QUA01_HALF_COEFFICIENT"
         }
       ],
       "correct_answer": "C",
@@ -405,7 +405,7 @@
       "diagnostic_rules": [
         {
           "answer_match": "7",
-          "diagnostic_code": "QUA_PARAMETER_EQUALS_MIN"
+          "diagnostic_code": "QUA01_PARAMETER_FROM_VERTEX"
         }
       ],
       "explanation": {
@@ -438,7 +438,7 @@
             "ru": "−1",
             "uz": "−1"
           },
-          "diagnostic_code": "QUA_VERTEX_CONST_ONLY"
+          "diagnostic_code": "QUA01_MIN_MAX_DIRECTION"
         },
         {
           "key": "B",
@@ -447,7 +447,7 @@
             "ru": "2",
             "uz": "2"
           },
-          "diagnostic_code": "QUA_VERTEX_X_AS_Y"
+          "diagnostic_code": "QUA01_VERTEX_COORDINATES"
         },
         {
           "key": "C",
@@ -465,7 +465,7 @@
             "ru": "9",
             "uz": "9"
           },
-          "diagnostic_code": "QUA_COMPLETE_SQUARE_CONST_SIGN"
+          "diagnostic_code": "QUA01_COMPENSATION"
         }
       ],
       "correct_answer": "C",
