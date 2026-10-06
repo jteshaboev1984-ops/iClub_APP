@@ -211,29 +211,29 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "Solve y = 3x − 2 and x² + y = 18. Enter the positive x-value.",
-        "ru": "Решите систему y = 3x − 2 и x² + y = 18. Введите положительное значение x.",
-        "uz": "y = 3x − 2 va x² + y = 18 sistemani yeching. Musbat x qiymatini kiriting."
+        "en": "Solve y = 3x − 2 and x² + y = 8. Enter the positive x-value.",
+        "ru": "Решите систему y = 3x − 2 и x² + y = 8. Введите положительное значение x.",
+        "uz": "y = 3x − 2 va x² + y = 8 sistemani yeching. Musbat x qiymatini kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "4",
+        "canonical_answer": "2",
         "accepted_examples": [
-          "4",
-          " 4 "
+          "2",
+          " 2 "
         ],
         "rejected_examples": [
           "-5",
           "5",
-          "2"
+          "4"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "Substitute y = 3x − 2 into x² + y = 18: x² + 3x − 2 = 18, so x² + 3x − 20 = 0 = (x + 5)(x − 4). The positive x-value is 4.",
-        "ru": "Подставляем y = 3x − 2 в x² + y = 18: x² + 3x − 2 = 18, то есть x² + 3x − 20 = 0 = (x + 5)(x − 4). Положительное x равно 4.",
-        "uz": "y = 3x − 2 ni x² + y = 18 ga qo‘yamiz: x² + 3x − 2 = 18, ya’ni x² + 3x − 20 = 0 = (x + 5)(x − 4). Musbat x = 4."
+        "en": "Substitute y = 3x − 2 into x² + y = 8: x² + 3x − 2 = 8, so x² + 3x − 10 = 0 = (x + 5)(x − 2). The positive x-value is 2.",
+        "ru": "Подставляем y = 3x − 2 в x² + y = 8: x² + 3x − 2 = 8, то есть x² + 3x − 10 = 0 = (x + 5)(x − 2). Положительное x равно 2.",
+        "uz": "y = 3x − 2 ni x² + y = 8 ga qo‘yamiz: x² + 3x − 2 = 8, ya’ni x² + 3x − 10 = 0 = (x + 5)(x − 2). Musbat x = 2."
       },
       "ai_source_skill": "P1-QUA-05",
       "status": "draft"
