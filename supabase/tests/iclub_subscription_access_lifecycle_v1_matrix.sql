@@ -310,6 +310,34 @@ BEGIN
 END
 $$;
 
+-- Explicit active entitlement always wins over a canary test-plan override.
+DO $entitlement_precedence$
+DECLARE
+  v jsonb;
+  free_uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='free');
+  free_canary_uid uuid:=(SELECT user_id FROM commercial_people WHERE person_key='canary_free');
+BEGIN
+  v:=public.set_iclub_product_canary_service_v1(free_canary_uid,false,'free','ci');
+  IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'Temporary canary disable failed: %',v;
+  END IF;
+
+  v:=public.set_iclub_product_canary_service_v1(free_uid,true,'pro','ci');
+  IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'Explicit-entitlement canary setup failed: %',v;
+  END IF;
+
+  v:=public.get_iclub_subscription_capabilities_service_v1(free_uid);
+  IF v->>'plan_code'<>'free'
+     OR v->>'plan_source'<>'explicit_entitlement' THEN
+    RAISE EXCEPTION 'Canary override beat explicit entitlement: %',v;
+  END IF;
+
+  PERFORM public.set_iclub_product_canary_service_v1(free_uid,false,'pro','ci');
+  PERFORM public.set_iclub_product_canary_service_v1(free_canary_uid,true,'free','ci');
+END
+$entitlement_precedence$;
+
 DO $$
 DECLARE
   v jsonb;
