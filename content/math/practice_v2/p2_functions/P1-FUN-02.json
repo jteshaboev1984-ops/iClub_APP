@@ -258,9 +258,9 @@
         {
           "key": "B",
           "text": {
-            "en": "−16≤f(x)≤8",
-            "ru": "−16≤f(x)≤8",
-            "uz": "−16≤f(x)≤8"
+            "en": "−25≤f(x)≤8",
+            "ru": "−25≤f(x)≤8",
+            "uz": "−25≤f(x)≤8"
           },
           "diagnostic_code": "FUN02_ENDPOINT"
         },
