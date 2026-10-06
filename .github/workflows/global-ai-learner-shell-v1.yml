@@ -156,7 +156,6 @@ jobs:
           name: global-ai-learner-shell-v1
           path: |
             global-ai-shell.log
-            artifacts/global-ai-shell-390.png
-            artifacts/global-ai-shell-320.png
+            artifacts/global-ai-shell*.png
           if-no-files-found: ignore
           retention-days: 7
