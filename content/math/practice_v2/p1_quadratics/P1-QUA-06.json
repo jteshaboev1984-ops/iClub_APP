@@ -74,29 +74,29 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "Solve x⁴ − 20x² + 64 = 0. Enter the greatest real root.",
-        "ru": "Решите x⁴ − 20x² + 64 = 0. Введите наибольший действительный корень.",
-        "uz": "x⁴ − 20x² + 64 = 0 ni yeching. Eng katta haqiqiy ildizni kiriting."
+        "en": "Solve (x − 1)⁴ − 5(x − 1)² + 4 = 0. Enter the greatest real root.",
+        "ru": "Решите (x − 1)⁴ − 5(x − 1)² + 4 = 0. Введите наибольший действительный корень.",
+        "uz": "(x − 1)⁴ − 5(x − 1)² + 4 = 0 ni yeching. Eng katta haqiqiy ildizni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "4",
+        "canonical_answer": "3",
         "accepted_examples": [
-          "4",
-          " 4 "
+          "3",
+          " 3 "
         ],
         "rejected_examples": [
           "2",
-          "8",
-          "16"
+          "4",
+          "-1"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "Let y = x². Then y² − 20y + 64 = 0 = (y − 4)(y − 16), so x² = 4 or 16. The real roots are ±2 and ±4, and the greatest is 4.",
-        "ru": "Пусть y = x². Тогда y² − 20y + 64 = 0 = (y − 4)(y − 16), поэтому x² = 4 или 16. Действительные корни ±2 и ±4, наибольший — 4.",
-        "uz": "y = x² deb olamiz. y² − 20y + 64 = 0 = (y − 4)(y − 16), demak x² = 4 yoki 16. Haqiqiy ildizlar ±2 va ±4, eng kattasi 4."
+        "en": "Let y = (x − 1)². Then y² − 5y + 4 = 0, so y = 1 or 4. Thus x − 1 = ±1 or ±2, giving x = 0, 2, −1 or 3. The greatest real root is 3.",
+        "ru": "Пусть y = (x − 1)². Тогда y² − 5y + 4 = 0, поэтому y = 1 или 4. Значит x − 1 = ±1 или ±2, откуда x = 0, 2, −1 или 3. Наибольший действительный корень — 3.",
+        "uz": "y = (x − 1)² deb olamiz. Shunda y² − 5y + 4 = 0, demak y = 1 yoki 4. Bundan x − 1 = ±1 yoki ±2, ya’ni x = 0, 2, −1 yoki 3. Eng katta haqiqiy ildiz 3."
       },
       "ai_source_skill": "P1-QUA-06",
       "status": "draft"
