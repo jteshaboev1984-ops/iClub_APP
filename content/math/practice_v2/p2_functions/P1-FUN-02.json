@@ -23,11 +23,11 @@
         {
           "key": "A",
           "text": {
-            "en": "−1≤f(x)≤4",
-            "ru": "−1≤f(x)≤4",
-            "uz": "−1≤f(x)≤4"
+            "en": "0≤f(x)≤16",
+            "ru": "0≤f(x)≤16",
+            "uz": "0≤f(x)≤16"
           },
-          "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
+          "diagnostic_code": null
         },
         {
           "key": "B",
@@ -50,14 +50,14 @@
         {
           "key": "D",
           "text": {
-            "en": "0≤f(x)≤16",
-            "ru": "0≤f(x)≤16",
-            "uz": "0≤f(x)≤16"
+            "en": "−1≤f(x)≤4",
+            "ru": "−1≤f(x)≤4",
+            "uz": "−1≤f(x)≤4"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "A",
       "explanation": {
         "en": "The vertex x=0 lies inside the domain and gives the minimum 0. At the endpoints, f(−1)=1 and f(4)=16, so the maximum is 16.",
         "ru": "Вершина x=0 лежит внутри области и даёт минимум 0. На концах f(−1)=1 и f(4)=16, поэтому максимум равен 16.",
@@ -86,11 +86,11 @@
         {
           "key": "A",
           "text": {
-            "en": "1≤f(x)≤10",
-            "ru": "1≤f(x)≤10",
-            "uz": "1≤f(x)≤10"
+            "en": "1≤f(x)≤9",
+            "ru": "1≤f(x)≤9",
+            "uz": "1≤f(x)≤9"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN02_ENDPOINT"
         },
         {
           "key": "B",
@@ -104,11 +104,11 @@
         {
           "key": "C",
           "text": {
-            "en": "1≤f(x)≤9",
-            "ru": "1≤f(x)≤9",
-            "uz": "1≤f(x)≤9"
+            "en": "1≤f(x)≤10",
+            "ru": "1≤f(x)≤10",
+            "uz": "1≤f(x)≤10"
           },
-          "diagnostic_code": "FUN02_ENDPOINT"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -120,7 +120,7 @@
           "diagnostic_code": "FUN02_TURNING_POINT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "On 2≤x≤5, the vertex occurs at x=2 and gives 1. The largest allowed x is 5, where f(5)=9+1=10. Thus 1≤f(x)≤10.",
         "ru": "На 2≤x≤5 вершина находится при x=2 и даёт 1. На другом конце f(5)=9+1=10. Поэтому 1≤f(x)≤10.",
@@ -156,11 +156,11 @@
         {
           "key": "B",
           "text": {
-            "en": "−5≤f(x)<7",
-            "ru": "−5≤f(x)<7",
-            "uz": "−5≤f(x)<7"
+            "en": "−2<f(x)≤4",
+            "ru": "−2<f(x)≤4",
+            "uz": "−2<f(x)≤4"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
         },
         {
           "key": "C",
@@ -174,14 +174,14 @@
         {
           "key": "D",
           "text": {
-            "en": "−2<f(x)≤4",
-            "ru": "−2<f(x)≤4",
-            "uz": "−2<f(x)≤4"
+            "en": "−5≤f(x)<7",
+            "ru": "−5≤f(x)<7",
+            "uz": "−5≤f(x)<7"
           },
-          "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "D",
       "explanation": {
         "en": "The function decreases. At x=4, f=−5 and 4 is included, so −5 is included. As x approaches −2 from above, f approaches 7 but never reaches it. Hence −5≤f(x)<7.",
         "ru": "Функция убывает. При x=4 получаем f=−5, и 4 входит в область, поэтому −5 включается. При x→−2 справа f→7, но 7 не достигается. Значит −5≤f(x)<7.",
@@ -258,20 +258,20 @@
         {
           "key": "B",
           "text": {
-            "en": "−25≤f(x)≤8",
-            "ru": "−25≤f(x)≤8",
-            "uz": "−25≤f(x)≤8"
-          },
-          "diagnostic_code": "FUN02_ENDPOINT"
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "−16≤f(x)≤8",
             "ru": "−16≤f(x)≤8",
             "uz": "−16≤f(x)≤8"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−25≤f(x)≤8",
+            "ru": "−25≤f(x)≤8",
+            "uz": "−25≤f(x)≤8"
+          },
+          "diagnostic_code": "FUN02_ENDPOINT"
         },
         {
           "key": "D",
@@ -283,7 +283,7 @@
           "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "B",
       "explanation": {
         "en": "On 0≤x≤4, the vertex x=−1 is outside the domain. The function decreases throughout the allowed interval: f(0)=8 and f(4)=−16. Hence −16≤f(x)≤8.",
         "ru": "На 0≤x≤4 вершина x=−1 находится вне области. На всём разрешённом промежутке функция убывает: f(0)=8, f(4)=−16. Поэтому −16≤f(x)≤8.",
@@ -330,23 +330,23 @@
         {
           "key": "C",
           "text": {
-            "en": "−3≤f(x)≤4",
-            "ru": "−3≤f(x)≤4",
-            "uz": "−3≤f(x)≤4"
-          },
-          "diagnostic_code": "FUN02_RESTRICTION_IGNORED"
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "f(x)≥−3",
             "ru": "f(x)≥−3",
             "uz": "f(x)≥−3"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−3≤f(x)≤4",
+            "ru": "−3≤f(x)≤4",
+            "uz": "−3≤f(x)≤4"
+          },
+          "diagnostic_code": "FUN02_RESTRICTION_IGNORED"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "C",
       "explanation": {
         "en": "The square term is non-negative and equals 0 at x=4, which is allowed. So the minimum output is −3, and the outputs increase without bound: f(x)≥−3.",
         "ru": "Квадрат неотрицателен и равен 0 при x=4, который входит в область. Значит минимальный выход равен −3, а сверху значения не ограничены: f(x)≥−3.",
@@ -414,20 +414,20 @@
         {
           "key": "A",
           "text": {
-            "en": "−4≤f(x)≤5",
-            "ru": "−4≤f(x)≤5",
-            "uz": "−4≤f(x)≤5"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "−3≤f(x)≤5",
             "ru": "−3≤f(x)≤5",
             "uz": "−3≤f(x)≤5"
           },
           "diagnostic_code": "FUN02_TURNING_POINT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−4≤f(x)≤5",
+            "ru": "−4≤f(x)≤5",
+            "uz": "−4≤f(x)≤5"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -448,7 +448,7 @@
           "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "f(x)=(x−1)²−4. The vertex x=1 is included and gives −4. At x=−2, f=9−4=5, so the range is −4≤f(x)≤5.",
         "ru": "f(x)=(x−1)²−4. Вершина x=1 включена и даёт −4. При x=−2 получаем 5, поэтому область значений −4≤f(x)≤5.",
@@ -475,20 +475,20 @@
         {
           "key": "A",
           "text": {
-            "en": "−1≤f(x)≤4",
-            "ru": "−1≤f(x)≤4",
-            "uz": "−1≤f(x)≤4"
-          },
-          "diagnostic_code": "FUN02_ENDPOINT"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "−1<f(x)≤4",
             "ru": "−1<f(x)≤4",
             "uz": "−1<f(x)≤4"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−1≤f(x)≤4",
+            "ru": "−1≤f(x)≤4",
+            "uz": "−1≤f(x)≤4"
+          },
+          "diagnostic_code": "FUN02_ENDPOINT"
         },
         {
           "key": "C",
@@ -509,7 +509,7 @@
           "diagnostic_code": "FUN02_INPUT_OUTPUT_BOUNDS"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "At x=1, f=4 and 1 is included, so 4 is included. As x approaches 6 from below, f approaches −1 but does not reach it. Hence −1<f(x)≤4.",
         "ru": "При x=1 получаем f=4, и 1 включён, поэтому 4 включается. При x→6 слева f→−1, но −1 не достигается. Значит −1<f(x)≤4.",
@@ -556,23 +556,23 @@
         {
           "key": "C",
           "text": {
-            "en": "f(x)≤4",
-            "ru": "f(x)≤4",
-            "uz": "f(x)≤4"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "4≤f(x)≤5",
             "ru": "4≤f(x)≤5",
             "uz": "4≤f(x)≤5"
           },
           "diagnostic_code": "FUN02_RESTRICTION_IGNORED"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "f(x)≤4",
+            "ru": "f(x)≤4",
+            "uz": "f(x)≤4"
+          },
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "D",
       "explanation": {
         "en": "The unrestricted vertex is at x=2, outside x≥3. For x≥3 the parabola is decreasing. f(3)=4 is the largest allowed output, and f(x) decreases without bound, so f(x)≤4.",
         "ru": "Вершина неограниченного графика находится при x=2, вне области x≥3. На x≥3 парабола убывает. f(3)=4 — наибольший допустимый выход, а далее значения убывают без границы, поэтому f(x)≤4.",
