@@ -644,6 +644,9 @@
 
       if (data.ok === true && message) {
         appendMessage(threadKey, "assistant", message);
+        if (data.usage_exhausted === true) {
+          setUsageExhausted(data.reset_at || null);
+        }
         return;
       }
 
