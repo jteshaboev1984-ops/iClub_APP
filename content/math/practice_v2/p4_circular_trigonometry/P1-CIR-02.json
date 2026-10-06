@@ -145,20 +145,20 @@
         {
           "key": "B",
           "text": {
-            "en": "4π cm",
-            "ru": "4π см",
-            "uz": "4π sm"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "12π cm",
             "ru": "12π см",
             "uz": "12π sm"
           },
           "diagnostic_code": "CIR02_ARC_FORMULA"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "4π cm",
+            "ru": "4π см",
+            "uz": "4π sm"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -170,7 +170,7 @@
           "diagnostic_code": "CIR02_DEG_BEFORE_ARC"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "C",
       "explanation": {
         "en": "First convert 60° to π/3 radians. Then s=rθ=12(π/3)=4π cm.",
         "ru": "Сначала переводим 60° в π/3 радиан. Затем s=rθ=12(π/3)=4π см.",
@@ -274,11 +274,11 @@
         {
           "key": "A",
           "text": {
-            "en": "Arc A is longer because its radius is smaller.",
-            "ru": "Дуга A длиннее, потому что её радиус меньше.",
-            "uz": "A yoy uzunroq, chunki uning radiusi kichik."
+            "en": "Arc B is 8/5 times the length of Arc A.",
+            "ru": "Длина дуги B в 8/5 раза больше длины дуги A.",
+            "uz": "B yoy uzunligi A yoy uzunligining 8/5 qismi."
           },
-          "diagnostic_code": "CIR02_ARC_FORMULA"
+          "diagnostic_code": null
         },
         {
           "key": "B",
@@ -292,11 +292,11 @@
         {
           "key": "C",
           "text": {
-            "en": "Arc B is 8/5 times the length of Arc A.",
-            "ru": "Длина дуги B в 8/5 раза больше длины дуги A.",
-            "uz": "B yoy uzunligi A yoy uzunligining 8/5 qismi."
+            "en": "Arc A is longer because its radius is smaller.",
+            "ru": "Дуга A длиннее, потому что её радиус меньше.",
+            "uz": "A yoy uzunroq, chunki uning radiusi kichik."
           },
-          "diagnostic_code": null
+          "diagnostic_code": "CIR02_ARC_FORMULA"
         },
         {
           "key": "D",
@@ -308,7 +308,7 @@
           "diagnostic_code": "CIR02_ARC_FORMULA"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "A",
       "explanation": {
         "en": "For the same θ, s=rθ is proportional to r. Therefore s_B/s_A=8/5.",
         "ru": "При одинаковом θ длина s=rθ пропорциональна r. Поэтому s_B/s_A=8/5.",
@@ -344,11 +344,11 @@
         {
           "key": "B",
           "text": {
-            "en": "15/6",
-            "ru": "15/6",
-            "uz": "15/6"
+            "en": "15×6",
+            "ru": "15×6",
+            "uz": "15×6"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "CIR02_ARC_FORMULA"
         },
         {
           "key": "C",
@@ -362,14 +362,14 @@
         {
           "key": "D",
           "text": {
-            "en": "15×6",
-            "ru": "15×6",
-            "uz": "15×6"
+            "en": "15/6",
+            "ru": "15/6",
+            "uz": "15/6"
           },
-          "diagnostic_code": "CIR02_ARC_FORMULA"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "D",
       "explanation": {
         "en": "From s=rθ, θ=s/r=15/6 radians.",
         "ru": "Из s=rθ получаем θ=s/r=15/6 радиан.",
