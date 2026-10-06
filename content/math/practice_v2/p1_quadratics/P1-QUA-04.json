@@ -13,53 +13,53 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "Solve x² − x − 6 > 0.",
-        "ru": "Решите неравенство x² − x − 6 > 0.",
-        "uz": "x² − x − 6 > 0 tengsizlikni yeching."
+        "en": "Which value of x does NOT satisfy x² − x − 6 > 0?",
+        "ru": "Какое значение x НЕ удовлетворяет неравенству x² − x − 6 > 0?",
+        "uz": "Qaysi x qiymati x² − x − 6 > 0 tengsizlikni QANOATLANTIRMAYDI?"
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "−2 < x < 3",
-            "ru": "−2 < x < 3",
-            "uz": "−2 < x < 3"
+            "en": "−4",
+            "ru": "−4",
+            "uz": "−4"
           },
           "diagnostic_code": "QUA04_SIGN_REGION"
         },
         {
           "key": "B",
           "text": {
-            "en": "x ≤ −2 or x ≥ 3",
-            "ru": "x ≤ −2 или x ≥ 3",
-            "uz": "x ≤ −2 yoki x ≥ 3"
+            "en": "−3",
+            "ru": "−3",
+            "uz": "−3"
           },
-          "diagnostic_code": "QUA04_ENDPOINT_INCLUSION"
+          "diagnostic_code": "QUA04_SIGN_REGION"
         },
         {
           "key": "C",
           "text": {
-            "en": "x < −2 or x > 3",
-            "ru": "x < −2 или x > 3",
-            "uz": "x < −2 yoki x > 3"
+            "en": "0",
+            "ru": "0",
+            "uz": "0"
           },
           "diagnostic_code": null
         },
         {
           "key": "D",
           "text": {
-            "en": "−2 ≤ x ≤ 3",
-            "ru": "−2 ≤ x ≤ 3",
-            "uz": "−2 ≤ x ≤ 3"
+            "en": "5",
+            "ru": "5",
+            "uz": "5"
           },
           "diagnostic_code": "QUA04_SIGN_REGION"
         }
       ],
       "correct_answer": "C",
       "explanation": {
-        "en": "Factorise: x² − x − 6 = (x − 3)(x + 2). The upward-opening quadratic is positive outside its roots, so x < −2 or x > 3.",
-        "ru": "Разложение: x² − x − 6 = (x − 3)(x + 2). Парабола направлена вверх, поэтому выражение положительно вне корней: x < −2 или x > 3.",
-        "uz": "Ajratamiz: x² − x − 6 = (x − 3)(x + 2). Parabola yuqoriga ochiladi, shuning uchun ifoda ildizlardan tashqarida musbat: x < −2 yoki x > 3."
+        "en": "x² − x − 6 = (x − 3)(x + 2), so the expression is positive for x < −2 or x > 3. The value 0 lies between −2 and 3, so it does not satisfy the inequality.",
+        "ru": "x² − x − 6 = (x − 3)(x + 2), поэтому выражение положительно при x < −2 или x > 3. Значение 0 лежит между −2 и 3 и не удовлетворяет неравенству.",
+        "uz": "x² − x − 6 = (x − 3)(x + 2), shuning uchun ifoda x < −2 yoki x > 3 da musbat. 0 qiymati −2 va 3 orasida, demak tengsizlikni qanoatlantirmaydi."
       },
       "ai_source_skill": "P1-QUA-04",
       "status": "draft"
