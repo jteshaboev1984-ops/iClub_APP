@@ -69,34 +69,34 @@
       "practice_no": 2,
       "primary_skill": "P1-FUN-04",
       "secondary_skills": [],
-      "role": "direct_application",
+      "role": "reverse_problem",
       "difficulty": "easy",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "For f(x)=3x+7, enter f⁻¹(19).",
-        "ru": "Для f(x)=3x+7 введите f⁻¹(19).",
-        "uz": "f(x)=3x+7 uchun f⁻¹(19) ni kiriting."
+        "en": "For f(x)=3x+7, suppose f⁻¹(a)=5. Enter a.",
+        "ru": "Для f(x)=3x+7 известно, что f⁻¹(a)=5. Введите a.",
+        "uz": "f(x)=3x+7 uchun f⁻¹(a)=5 bo‘lsin. a ni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "4",
+        "canonical_answer": "22",
         "accepted_examples": [
-          "4",
-          " 4 "
+          "22",
+          " 22 "
         ],
         "rejected_examples": [
-          "64",
-          "26",
+          "5",
+          "4",
           "12"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "f⁻¹(19) is the input whose output under f is 19. Solve 3x+7=19 to get x=4.",
-        "ru": "f⁻¹(19) — это вход, который функция f переводит в 19. Решаем 3x+7=19 и получаем x=4.",
-        "uz": "f⁻¹(19) — f orqali 19 chiqishni beradigan kirish. 3x+7=19 ni yechib, x=4 ni olamiz."
+        "en": "f⁻¹(a)=5 means f(5)=a. Since f(5)=3(5)+7=22, we get a=22.",
+        "ru": "f⁻¹(a)=5 означает f(5)=a. Так как f(5)=3(5)+7=22, получаем a=22.",
+        "uz": "f⁻¹(a)=5 degani f(5)=a. f(5)=3(5)+7=22, demak a=22."
       },
       "ai_source_skill": "P1-FUN-04",
       "status": "draft"
@@ -228,34 +228,34 @@
       "practice_no": 2,
       "primary_skill": "P1-FUN-04",
       "secondary_skills": [],
-      "role": "reverse_problem",
+      "role": "application_variation",
       "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "For f(x)=(x−5)/4, enter f⁻¹(3).",
-        "ru": "Для f(x)=(x−5)/4 введите f⁻¹(3).",
-        "uz": "f(x)=(x−5)/4 uchun f⁻¹(3) ni kiriting."
+        "en": "For f(x)=(x−5)/4, let p=f⁻¹(3) and q=f⁻¹(5). Enter q−p.",
+        "ru": "Для f(x)=(x−5)/4 пусть p=f⁻¹(3), q=f⁻¹(5). Введите q−p.",
+        "uz": "f(x)=(x−5)/4 uchun p=f⁻¹(3), q=f⁻¹(5) bo‘lsin. q−p ni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
-        "canonical_answer": "17",
+        "canonical_answer": "8",
         "accepted_examples": [
-          "17",
-          " 17 "
+          "8",
+          " 8 "
         ],
         "rejected_examples": [
-          "-2",
-          "7",
-          "12"
+          "2",
+          "12",
+          "20"
         ],
         "number_only": true
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "f⁻¹(3) is the x-value satisfying (x−5)/4=3. Thus x−5=12 and x=17.",
-        "ru": "f⁻¹(3) — это x, для которого (x−5)/4=3. Тогда x−5=12 и x=17.",
-        "uz": "f⁻¹(3) — (x−5)/4=3 ni qanoatlantiradigan x. x−5=12, demak x=17."
+        "en": "The inverse is f⁻¹(x)=4x+5. Thus p=17 and q=25, so q−p=8.",
+        "ru": "Обратная функция: f⁻¹(x)=4x+5. Поэтому p=17, q=25 и q−p=8.",
+        "uz": "Teskari funksiya f⁻¹(x)=4x+5. Demak p=17, q=25 va q−p=8."
       },
       "ai_source_skill": "P1-FUN-04",
       "status": "draft"
