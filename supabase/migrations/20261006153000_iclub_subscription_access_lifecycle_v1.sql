@@ -393,7 +393,11 @@ begin
   elsif p_event_type in ('cancel','expire') then
     update private.iclub_subscription_entitlements
     set entitlement_status='cancelled',
-        valid_until=least(coalesce(valid_until,v_effective),v_effective),
+        valid_until=case
+          when valid_from is not null and v_effective<=valid_from
+            then valid_from+interval '1 microsecond'
+          else least(coalesce(valid_until,v_effective),v_effective)
+        end,
         cancel_at_period_end=false,
         scheduled_plan_code=null,
         scheduled_change_at=null,
@@ -418,7 +422,11 @@ begin
   elsif p_event_type='revoke' then
     update private.iclub_subscription_entitlements
     set entitlement_status='revoked',
-        valid_until=least(coalesce(valid_until,v_effective),v_effective),
+        valid_until=case
+          when valid_from is not null and v_effective<=valid_from
+            then valid_from+interval '1 microsecond'
+          else least(coalesce(valid_until,v_effective),v_effective)
+        end,
         cancel_at_period_end=false,
         scheduled_plan_code=null,
         scheduled_change_at=null,
