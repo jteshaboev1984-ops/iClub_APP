@@ -13,6 +13,7 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 const VALID_LOCALES = new Set(["ru", "uz", "en"]);
 const VALID_SUBJECT_KEYS = new Set([
+  "general",
   "mathematics",
   "biology",
   "chemistry",
@@ -20,11 +21,15 @@ const VALID_SUBJECT_KEYS = new Set([
   "informatics",
 ]);
 
-const PREPARED_PROMPTS: Record<string, { interaction: string; variant: string }> = {
+const PREPARED_PROMPTS: Record<string, { interaction: string; variant?: string }> = {
   topic_main: { interaction: "topic_explanation", variant: "main_explanation" },
   topic_simple: { interaction: "topic_explanation", variant: "simple_explanation" },
   topic_alternative: { interaction: "topic_explanation", variant: "alternative_explanation" },
   topic_focus: { interaction: "topic_explanation", variant: "focus_explanation" },
+  app_help_here: { interaction: "app_help" },
+  app_help_practice: { interaction: "app_help" },
+  app_help_tours: { interaction: "app_help" },
+  app_help_results: { interaction: "app_help" },
 };
 
 function response(status: number, body: Record<string, unknown>) {
@@ -220,6 +225,30 @@ function safeTutorText(card: any, variant: string) {
   return text;
 }
 
+function appHelpMessage(locale: string, promptKey: string) {
+  const copy: Record<string, Record<string, string>> = {
+    ru: {
+      app_help_here: "Здесь можно учиться по выбранному предмету, запускать Practice, открывать Tours и возвращаться к сохранённым рекомендациям и материалам. Доступные действия зависят от текущего раздела.",
+      app_help_practice: "Practice помогает тренировать темы в своём темпе. После попытки iClub сохраняет результат и историю, чтобы можно было вернуться к ошибкам и повторить нужные темы.",
+      app_help_tours: "Tours — соревновательная проверка знаний по расписанию. Результаты тура могут учитываться в рейтинге, а завершённые туры остаются доступны через результаты и архив по правилам приложения.",
+      app_help_results: "Результаты Practice и Tours сохраняются в iClub. Их можно использовать, чтобы увидеть свои прошлые попытки, вернуться к ошибкам и открыть доступные рекомендации."
+    },
+    uz: {
+      app_help_here: "Bu yerda tanlangan fan bo‘yicha o‘qish, Practice boshlash, Tours bo‘limini ochish va saqlangan tavsiyalar hamda materiallarga qaytish mumkin. Mavjud amallar joriy bo‘limga bog‘liq.",
+      app_help_practice: "Practice mavzularni o‘z tempingizda mashq qilishga yordam beradi. Urinishdan keyin iClub natija va tarixni saqlaydi, shunda xatolarga qaytish va kerakli mavzularni takrorlash mumkin.",
+      app_help_tours: "Tours — jadval bo‘yicha o‘tkaziladigan raqobatli bilim tekshiruvi. Tur natijalari reytingda hisobga olinishi mumkin, yakunlangan turlar esa ilova qoidalariga ko‘ra natijalar va arxiv orqali saqlanadi.",
+      app_help_results: "Practice va Tours natijalari iClub’da saqlanadi. Ulardan oldingi urinishlarni ko‘rish, xatolarga qaytish va mavjud tavsiyalarni ochish uchun foydalanish mumkin."
+    },
+    en: {
+      app_help_here: "Here you can study the selected subject, start Practice, open Tours, and return to saved recommendations and learning materials. Available actions depend on the current section.",
+      app_help_practice: "Practice lets you train topics at your own pace. After an attempt, iClub keeps the result and history so you can return to mistakes and repeat the topics you need.",
+      app_help_tours: "Tours are scheduled competitive knowledge checks. Tour results may count toward rankings, while completed tours remain available through results and archive according to the app rules.",
+      app_help_results: "Practice and Tours results are saved in iClub. You can use them to review past attempts, return to mistakes, and open available recommendations."
+    }
+  };
+  return String((copy[locale] || copy.ru)?.[promptKey] || "").trim();
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return response(405, { ok: false, message: "Method not allowed." });
@@ -276,7 +305,7 @@ Deno.serve(async (req) => {
 
   const preparedPrompt = PREPARED_PROMPTS[promptKey] || null;
   const routeClass: "prepared" | "generated" = preparedPrompt ? "prepared" : "generated";
-  const interaction = preparedPrompt?.interaction || "freeform_question";
+  const interaction = preparedPrompt?.interaction || (subjectKey === "general" ? "app_help" : "freeform_question");
 
   if (!preparedPrompt && !userText) {
     return response(400, {
@@ -396,85 +425,113 @@ Deno.serve(async (req) => {
     });
   }
 
-  if (adapterCode !== "math_exam_prep_v1"
-      || subjectKey !== "mathematics"
-      || scopeCode !== "exam_prep"
-      || !preparedPrompt) {
-    await recordAudit({
-      requestId,
-      userId: user.id,
-      subjectKey,
-      scopeCode,
-      interaction,
-      routeClass,
-      mode: "no_source",
-      reason: "prepared_adapter_unavailable",
-      adapterCode,
-      policyVersion,
-      latencyMs: performance.now() - started,
-    });
-    return response(200, {
-      ok: false,
-      mode: "no_source",
-      reason: "prepared_adapter_unavailable",
-      message: learnerMessage(locale, "no_source"),
-      academic_state_changed: false,
-    });
-  }
+  let message = "";
 
-  if (!["P1", "P5"].includes(componentCode)
-      || !/^P[15]-[A-Z0-9]+-[0-9]{2}$/.test(skillCode)) {
-    await recordAudit({
-      requestId,
-      userId: user.id,
-      subjectKey,
-      scopeCode,
-      interaction,
-      routeClass,
-      mode: "no_source",
-      reason: "invalid_math_context",
-      adapterCode,
-      policyVersion,
-      latencyMs: performance.now() - started,
-    });
-    return response(200, {
-      ok: false,
-      mode: "no_source",
-      reason: "invalid_math_context",
-      message: learnerMessage(locale, "no_source"),
-      academic_state_changed: false,
-    });
-  }
+  if (interaction === "app_help") {
+    message = appHelpMessage(locale, promptKey);
+    if (!message) {
+      await recordAudit({
+        requestId,
+        userId: user.id,
+        subjectKey,
+        scopeCode,
+        interaction,
+        routeClass,
+        mode: "no_source",
+        reason: "app_help_prompt_unknown",
+        adapterCode,
+        policyVersion,
+        latencyMs: performance.now() - started,
+      });
+      return response(200, {
+        ok: false,
+        mode: "no_source",
+        reason: "app_help_prompt_unknown",
+        message: learnerMessage(locale, "no_source"),
+        academic_state_changed: false,
+      });
+    }
+  } else {
+    if (adapterCode !== "math_exam_prep_v1"
+        || subjectKey !== "mathematics"
+        || scopeCode !== "exam_prep"
+        || !preparedPrompt?.variant) {
+      await recordAudit({
+        requestId,
+        userId: user.id,
+        subjectKey,
+        scopeCode,
+        interaction,
+        routeClass,
+        mode: "no_source",
+        reason: "prepared_adapter_unavailable",
+        adapterCode,
+        policyVersion,
+        latencyMs: performance.now() - started,
+      });
+      return response(200, {
+        ok: false,
+        mode: "no_source",
+        reason: "prepared_adapter_unavailable",
+        message: learnerMessage(locale, "no_source"),
+        academic_state_changed: false,
+      });
+    }
 
-  let card: any;
-  try {
-    card = await tutorCard(componentCode, skillCode, locale);
-  } catch {
-    card = null;
-  }
+    if (!["P1", "P5"].includes(componentCode)
+        || !/^P[15]-[A-Z0-9]+-[0-9]{2}$/.test(skillCode)) {
+      await recordAudit({
+        requestId,
+        userId: user.id,
+        subjectKey,
+        scopeCode,
+        interaction,
+        routeClass,
+        mode: "no_source",
+        reason: "invalid_math_context",
+        adapterCode,
+        policyVersion,
+        latencyMs: performance.now() - started,
+      });
+      return response(200, {
+        ok: false,
+        mode: "no_source",
+        reason: "invalid_math_context",
+        message: learnerMessage(locale, "no_source"),
+        academic_state_changed: false,
+      });
+    }
 
-  const message = safeTutorText(card, preparedPrompt.variant);
-  if (!message) {
-    await recordAudit({
-      requestId,
-      userId: user.id,
-      subjectKey,
-      scopeCode,
-      interaction,
-      routeClass,
-      mode: "no_source",
-      reason: "prepared_source_missing",
-      adapterCode,
-      policyVersion,
-      latencyMs: performance.now() - started,
-    });
-    return response(200, {
-      ok: false,
-      mode: "no_source",
-      reason: "prepared_source_missing",
-      message: learnerMessage(locale, "no_source"),
-      academic_state_changed: false,
-    });
+    let card: any;
+    try {
+      card = await tutorCard(componentCode, skillCode, locale);
+    } catch {
+      card = null;
+    }
+
+    message = safeTutorText(card, preparedPrompt.variant);
+    if (!message) {
+      await recordAudit({
+        requestId,
+        userId: user.id,
+        subjectKey,
+        scopeCode,
+        interaction,
+        routeClass,
+        mode: "no_source",
+        reason: "prepared_source_missing",
+        adapterCode,
+        policyVersion,
+        latencyMs: performance.now() - started,
+      });
+      return response(200, {
+        ok: false,
+        mode: "no_source",
+        reason: "prepared_source_missing",
+        message: learnerMessage(locale, "no_source"),
+        academic_state_changed: false,
+      });
+    }
   }
 
   let reservation: any;
