@@ -23,6 +23,20 @@ Commercial access is kept separately in private tables:
 
 Legacy academic/product state remains untouched.
 
+## Default plan and canary rule
+
+All authenticated learners resolve to **Free by default** unless they have an explicit active paid entitlement.
+
+This is a virtual/server-side default. It does **not** mass-insert Free entitlement rows for all existing users, which keeps rollout reversible and avoids rewriting production account state.
+
+Before public rollout, the new Global AI + Plans experience is limited to a hard maximum of **3 service-managed canary users**. Those test accounts may receive temporary Free/Plus/Pro overrides for QA. Canary membership is private/service-only and is enforced on the server gateway as well as the UI bootstrap.
+
+Important distinction:
+- commercial plan identity defaults to Free;
+- legacy subject access is preserved separately until the learner completes the approved subject-selection cutover.
+
+Therefore default Free must never be interpreted as permission to immediately delete or hide an existing learner's subjects/history.
+
 ## Grandfather rule
 
 Approved technical default:
@@ -89,10 +103,13 @@ A lower tariff may later limit *access*, but historical evidence remains intact 
 This phase is backend-only and dormant:
 - lifecycle_enabled=false;
 - subject_limits_mode=off;
-- no existing user is assigned Free/Plus/Pro;
-- no browser can mutate subscription/subject authority;
+- Global AI rollout mode=off;
+- Plans rollout mode=off;
+- every authenticated learner resolves to Free by default without a stored entitlement row;
+- at most 3 service-managed canaries may receive temporary Free/Plus/Pro test overrides once canary rollout is explicitly activated;
+- no browser can mutate subscription, canary membership or subject authority;
 - no payment provider is connected;
-- no frontend enforcement is wired yet.
+- no frontend subject enforcement is wired yet.
 
 Next phase after GREEN:
 1. authenticated subject-selection/read model;
