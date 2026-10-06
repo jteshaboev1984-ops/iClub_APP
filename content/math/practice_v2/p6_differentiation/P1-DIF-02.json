@@ -21,11 +21,11 @@
         {
           "key": "A",
           "text": {
-            "en": "28x³",
-            "ru": "28x³",
-            "uz": "28x³"
+            "en": "28x⁴",
+            "ru": "28x⁴",
+            "uz": "28x⁴"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF02_POWER_N_MINUS_1"
         },
         {
           "key": "B",
@@ -39,11 +39,11 @@
         {
           "key": "C",
           "text": {
-            "en": "28x⁴",
-            "ru": "28x⁴",
-            "uz": "28x⁴"
+            "en": "28x³",
+            "ru": "28x³",
+            "uz": "28x³"
           },
-          "diagnostic_code": "DIF02_POWER_N_MINUS_1"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -55,7 +55,7 @@
           "diagnostic_code": "DIF02_COEFFICIENT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "Bring down the power 4 and reduce it to 3: d/dx(7x⁴)=7·4x³=28x³.",
         "ru": "Умножаем на показатель 4 и уменьшаем степень до 3: d/dx(7x⁴)=7·4x³=28x³.",
@@ -180,11 +180,11 @@
         {
           "key": "A",
           "text": {
-            "en": "3/√x",
-            "ru": "3/√x",
-            "uz": "3/√x"
+            "en": "12√x",
+            "ru": "12√x",
+            "uz": "12√x"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF02_POWER_N_MINUS_1"
         },
         {
           "key": "B",
@@ -207,14 +207,14 @@
         {
           "key": "D",
           "text": {
-            "en": "12√x",
-            "ru": "12√x",
-            "uz": "12√x"
+            "en": "3/√x",
+            "ru": "3/√x",
+            "uz": "3/√x"
           },
-          "diagnostic_code": "DIF02_POWER_N_MINUS_1"
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "D",
       "explanation": {
         "en": "6√x=6x^(1/2). Its derivative is 6(1/2)x^(−1/2)=3/√x.",
         "ru": "6√x=6x^(1/2). Производная равна 6(1/2)x^(−1/2)=3/√x.",
@@ -241,20 +241,20 @@
         {
           "key": "A",
           "text": {
-            "en": "−10/x³",
-            "ru": "−10/x³",
-            "uz": "−10/x³"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "10/x³",
             "ru": "10/x³",
             "uz": "10/x³"
           },
           "diagnostic_code": "DIF02_RATIONAL_POWER"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−10/x³",
+            "ru": "−10/x³",
+            "uz": "−10/x³"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -275,7 +275,7 @@
           "diagnostic_code": "DIF02_COEFFICIENT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "5/x²=5x^(−2). Differentiate: 5(−2)x^(−3)=−10/x³.",
         "ru": "5/x²=5x^(−2). Производная: 5(−2)x^(−3)=−10/x³.",
@@ -413,11 +413,11 @@
         {
           "key": "A",
           "text": {
-            "en": "5x^(3/2)+3x^(−2)",
-            "ru": "5x^(3/2)+3x^(−2)",
-            "uz": "5x^(3/2)+3x^(−2)"
+            "en": "5x^(5/2)+3x^(−2)",
+            "ru": "5x^(5/2)+3x^(−2)",
+            "uz": "5x^(5/2)+3x^(−2)"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF02_POWER_N_MINUS_1"
         },
         {
           "key": "B",
@@ -431,11 +431,11 @@
         {
           "key": "C",
           "text": {
-            "en": "5x^(5/2)+3x^(−2)",
-            "ru": "5x^(5/2)+3x^(−2)",
-            "uz": "5x^(5/2)+3x^(−2)"
+            "en": "5x^(3/2)+3x^(−2)",
+            "ru": "5x^(3/2)+3x^(−2)",
+            "uz": "5x^(3/2)+3x^(−2)"
           },
-          "diagnostic_code": "DIF02_POWER_N_MINUS_1"
+          "diagnostic_code": null
         },
         {
           "key": "D",
@@ -447,7 +447,7 @@
           "diagnostic_code": "DIF02_COEFFICIENT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "C",
       "explanation": {
         "en": "2x^(5/2) differentiates to 5x^(3/2). For −3x^(−1), the derivative is +3x^(−2).",
         "ru": "Производная 2x^(5/2) равна 5x^(3/2). Для −3x^(−1) производная равна +3x^(−2).",
@@ -548,20 +548,20 @@
         {
           "key": "A",
           "text": {
-            "en": "60x³−12x",
-            "ru": "60x³−12x",
-            "uz": "60x³−12x"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "15x⁴−6x²+1",
             "ru": "15x⁴−6x²+1",
             "uz": "15x⁴−6x²+1"
           },
           "diagnostic_code": "DIF02_LINEAR_COMBINATION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "60x³−12x",
+            "ru": "60x³−12x",
+            "uz": "60x³−12x"
+          },
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -582,7 +582,7 @@
           "diagnostic_code": "DIF02_COEFFICIENT"
         }
       ],
-      "correct_answer": "A",
+      "correct_answer": "B",
       "explanation": {
         "en": "First derivative: 15x⁴−6x²+1. Differentiate again to obtain 60x³−12x.",
         "ru": "Первая производная: 15x⁴−6x²+1. Дифференцируя ещё раз, получаем 60x³−12x.",
