@@ -8,58 +8,58 @@
       "practice_no": 4,
       "primary_skill": "P1-TRI-02",
       "secondary_skills": [],
-      "role": "exact_value",
+      "role": "combined_exact_value",
       "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
-        "en": "Find the exact value of sin 210°.",
-        "ru": "Найдите точное значение sin 210°.",
-        "uz": "sin 210° ning aniq qiymatini toping."
+        "en": "Which expression has exact value 0?",
+        "ru": "Какое выражение имеет точное значение 0?",
+        "uz": "Qaysi ifodaning aniq qiymati 0?"
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "1/2",
-            "ru": "1/2",
-            "uz": "1/2"
+            "en": "sin210°−cos60°",
+            "ru": "sin210°−cos60°",
+            "uz": "sin210°−cos60°"
           },
           "diagnostic_code": "TRI02_QUADRANT_SIGN"
         },
         {
           "key": "B",
           "text": {
-            "en": "−1/2",
-            "ru": "−1/2",
-            "uz": "−1/2"
+            "en": "sin210°+cos60°",
+            "ru": "sin210°+cos60°",
+            "uz": "sin210°+cos60°"
           },
           "diagnostic_code": null
         },
         {
           "key": "C",
           "text": {
-            "en": "√3/2",
-            "ru": "√3/2",
-            "uz": "√3/2"
+            "en": "sin210°+1",
+            "ru": "sin210°+1",
+            "uz": "sin210°+1"
           },
-          "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+          "diagnostic_code": "TRI02_EXACT_VALUE"
         },
         {
           "key": "D",
           "text": {
-            "en": "−√3/2",
-            "ru": "−√3/2",
-            "uz": "−√3/2"
+            "en": "2sin210°−1",
+            "ru": "2sin210°−1",
+            "uz": "2sin210°−1"
           },
-          "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+          "diagnostic_code": "TRI02_EXACT_VALUE"
         }
       ],
       "correct_answer": "B",
       "explanation": {
-        "en": "210°=180°+30°. The reference angle is 30°, and sine is negative in quadrant III, so sin210°=−1/2.",
-        "ru": "210°=180°+30°. Опорный угол 30°, а синус в III четверти отрицателен, поэтому sin210°=−1/2.",
-        "uz": "210°=180°+30°. Tayanch burchak 30°, III chorakda sinus manfiy, demak sin210°=−1/2."
+        "en": "sin210°=−1/2 and cos60°=1/2, so sin210°+cos60°=0.",
+        "ru": "sin210°=−1/2, а cos60°=1/2, поэтому sin210°+cos60°=0.",
+        "uz": "sin210°=−1/2 va cos60°=1/2, demak sin210°+cos60°=0."
       },
       "ai_source_skill": "P1-TRI-02",
       "status": "draft"
@@ -69,58 +69,58 @@
       "practice_no": 4,
       "primary_skill": "P1-TRI-02",
       "secondary_skills": [],
-      "role": "exact_value",
+      "role": "related_angle_symmetry",
       "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
-        "en": "Find the exact value of cos 330°.",
-        "ru": "Найдите точное значение cos 330°.",
-        "uz": "cos 330° ning aniq qiymatini toping."
+        "en": "Which relation is true?",
+        "ru": "Какое равенство верно?",
+        "uz": "Qaysi tenglik to‘g‘ri?"
       },
       "options": [
         {
           "key": "A",
           "text": {
-            "en": "−√3/2",
-            "ru": "−√3/2",
-            "uz": "−√3/2"
+            "en": "cos330°=−sin60°",
+            "ru": "cos330°=−sin60°",
+            "uz": "cos330°=−sin60°"
           },
           "diagnostic_code": "TRI02_QUADRANT_SIGN"
         },
         {
           "key": "B",
           "text": {
-            "en": "1/2",
-            "ru": "1/2",
-            "uz": "1/2"
+            "en": "cos330°=cos60°",
+            "ru": "cos330°=cos60°",
+            "uz": "cos330°=cos60°"
           },
           "diagnostic_code": "TRI02_REFERENCE_ANGLE"
         },
         {
           "key": "C",
           "text": {
-            "en": "−1/2",
-            "ru": "−1/2",
-            "uz": "−1/2"
+            "en": "cos330°=sin30°",
+            "ru": "cos330°=sin30°",
+            "uz": "cos330°=sin30°"
           },
-          "diagnostic_code": "TRI02_REFERENCE_ANGLE"
+          "diagnostic_code": "TRI02_EXACT_VALUE"
         },
         {
           "key": "D",
           "text": {
-            "en": "√3/2",
-            "ru": "√3/2",
-            "uz": "√3/2"
+            "en": "cos330°=sin60°",
+            "ru": "cos330°=sin60°",
+            "uz": "cos330°=sin60°"
           },
           "diagnostic_code": null
         }
       ],
       "correct_answer": "D",
       "explanation": {
-        "en": "330°=360°−30°. The reference angle is 30°, and cosine is positive in quadrant IV, so cos330°=√3/2.",
-        "ru": "330°=360°−30°. Опорный угол 30°, а косинус в IV четверти положителен, поэтому cos330°=√3/2.",
-        "uz": "330°=360°−30°. Tayanch burchak 30°, IV chorakda kosinus musbat, demak cos330°=√3/2."
+        "en": "cos330°=cos30°=√3/2, and sin60°=√3/2. Therefore cos330°=sin60°.",
+        "ru": "cos330°=cos30°=√3/2, а sin60°=√3/2. Поэтому cos330°=sin60°.",
+        "uz": "cos330°=cos30°=√3/2 va sin60°=√3/2. Demak cos330°=sin60°."
       },
       "ai_source_skill": "P1-TRI-02",
       "status": "draft"
