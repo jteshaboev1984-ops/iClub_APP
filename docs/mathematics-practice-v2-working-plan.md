@@ -6,25 +6,26 @@ Baseline main SHA: `823ef7df6dabf08c1a5e616ffbdd33379d8cf14d`
 Owner decision: preserve Tour results/history as the protected user-data boundary; Mathematics Practice may be rebuilt and its progress may be reset as part of the announced update.
 
 
-## Current checkpoint — 2026-10-06
+## Current checkpoint — 2026-10-07
 
 - Block 1 Content Architecture 2.0: COMPLETE / gate passed.
-- Block 2 content production: IN PROGRESS.
+- Block 2 P1 content production: COMPLETE through all 45 canonical skills.
 - Practice 1 Quadratics: 68/68 authored; full content QA passed; QA report recorded.
 - Practice 2 Functions & transformations: 80/80 authored; full content QA passed; QA report recorded.
 - Practice 3 Coordinate Geometry: 68/68 authored; full content QA passed; QA report recorded.
 - Practice 4 Circular Measure + Trigonometry: 77/77 authored; full content QA passed; QA report recorded.
 - Practice 5 Binomial Expansion + Series: 66/66 authored; full content QA passed; QA report recorded.
 - Practice 6 Differentiation: 70/70 authored; full content QA passed; QA report recorded.
-- Total authored Practice v2 items through Practice 6: 429.
-- MCQ position QA: Practice 1 A/B/C/D=10/10/10/11; Practice 2=15/15/15/16; Practice 3=9/9/9/9; Practice 4=12/12/12/13; Practice 5=7/7/7/6; Practice 6=8/9/10/8.
-- Deterministic diagnostic catalogs: Quadratics 30; Functions 31; Coordinate Geometry 28; Circular/Trig 30; Binomial/Series 27; Differentiation 31.
-- Season 2 Tour 1–6 separation reviews: completed; overly similar Practice items were redesigned without changing Tours/history.
-- Approved/runtime-allowed AI source cards exist for all completed canonical skills. Draft supplements remain runtime-disabled where deeper source coverage is needed, including broader DIF-06 connected-rate models.
-- Technical publication status: BLOCKED intentionally until evaluator hardening and secure server-side runtime validation are complete.
+- Practice 7 Integration: 66/66 authored; full content QA passed; QA report recorded.
+- Total authored P1 Practice v2 items: 495 across all 45 canonical P1 skills.
+- MCQ position QA: P1=10/10/10/11; P2=15/15/15/16; P3=9/9/9/9; P4=12/12/12/13; P5=7/7/7/6; P6=8/9/10/8; P7=7/7/7/7.
+- Deterministic diagnostic catalogs: Quadratics 30; Functions 31; Coordinate Geometry 28; Circular/Trig 30; Binomial/Series 27; Differentiation 31; Integration 24.
+- Season 2 Tour 1–7 separation reviews: completed; overly similar Practice items were redesigned without changing Tours/history.
+- Approved/runtime-allowed AI source cards exist for all 45 P1 canonical skills. Draft supplements remain runtime-disabled only where deeper source coverage was identified in earlier blocks.
+- Technical publication status: BLOCKED intentionally until global cross-bank QA, evaluator hardening and secure server-side runtime validation are complete.
 - Known evaluator blocker: Unicode minus accepted by authored contracts but not by current Practice scalar evaluator.
 - Production/Supabase user data and Tour results: unchanged by this work.
-- Next content block: Practice 7 — Integration (P1-INT-01…05).
+- Next macro block: global Practice v2 cross-bank audit across all 495 items + 45 skills, then evaluator/security/runtime implementation.
 
 ## Purpose
 
