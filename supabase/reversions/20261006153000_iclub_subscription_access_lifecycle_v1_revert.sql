@@ -38,6 +38,7 @@ drop function if exists public.finalize_iclub_subject_selection_service_v1(uuid,
 drop function if exists public.set_iclub_subject_slot_service_v1(uuid,uuid,text,boolean,boolean,text);
 drop function if exists public.get_iclub_subject_access_guard_service_v1(uuid,text,text);
 drop function if exists public.capture_iclub_legacy_access_baseline_service_v1(text);
+drop function if exists public.get_iclub_my_subscription_status_v1();
 drop function if exists public.apply_iclub_subscription_event_service_v1(
   uuid,uuid,text,text,timestamptz,timestamptz,timestamptz,text
 );
