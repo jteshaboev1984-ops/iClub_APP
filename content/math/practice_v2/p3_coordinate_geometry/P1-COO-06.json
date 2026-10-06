@@ -349,23 +349,23 @@
         {
           "key": "C",
           "text": {
-            "en": "p<9",
-            "ru": "p<9",
-            "uz": "p<9"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "p≤0 only",
             "ru": "Только p≤0",
             "uz": "Faqat p≤0"
           },
           "diagnostic_code": "COO06_PARAMETER_ALGEBRA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "p<9",
+            "ru": "p<9",
+            "uz": "p<9"
+          },
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "D",
       "explanation": {
         "en": "Two distinct roots require D>0. Here D=(−6)²−4p=36−4p, so 36−4p>0 and p<9.",
         "ru": "Для двух разных корней нужно D>0. Здесь D=(−6)²−4p=36−4p, поэтому 36−4p>0 и p<9.",
@@ -433,20 +433,20 @@
         {
           "key": "A",
           "text": {
-            "en": "m=±3/4",
-            "ru": "m=±3/4",
-            "uz": "m=±3/4"
-          },
-          "diagnostic_code": "COO06_DISTANCE_TANGENCY"
-        },
-        {
-          "key": "B",
-          "text": {
             "en": "m=±4/3",
             "ru": "m=±4/3",
             "uz": "m=±4/3"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "m=±3/4",
+            "ru": "m=±3/4",
+            "uz": "m=±3/4"
+          },
+          "diagnostic_code": "COO06_DISTANCE_TANGENCY"
         },
         {
           "key": "C",
@@ -467,7 +467,7 @@
           "diagnostic_code": "COO06_DISTANCE_TANGENCY"
         }
       ],
-      "correct_answer": "B",
+      "correct_answer": "A",
       "explanation": {
         "en": "Write the line as mx−y+5=0. Its distance from the centre (0,0) must equal the radius 3: 5/√(m²+1)=3. Thus 25=9m²+9, so m²=16/9 and m=±4/3.",
         "ru": "Запишем прямую как mx−y+5=0. Расстояние от центра (0,0) должно равняться радиусу 3: 5/√(m²+1)=3. Тогда 25=9m²+9, поэтому m²=16/9 и m=±4/3.",
@@ -585,20 +585,20 @@
         {
           "key": "B",
           "text": {
-            "en": "−5/12",
-            "ru": "−5/12",
-            "uz": "−5/12"
-          },
-          "diagnostic_code": "COO06_PARAMETER_ALGEBRA"
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "5/12",
             "ru": "5/12",
             "uz": "5/12"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−5/12",
+            "ru": "−5/12",
+            "uz": "−5/12"
+          },
+          "diagnostic_code": "COO06_PARAMETER_ALGEBRA"
         },
         {
           "key": "D",
@@ -610,7 +610,7 @@
           "diagnostic_code": "COO06_DISTANCE_TANGENCY"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "B",
       "explanation": {
         "en": "A finite-gradient tangent through P has equation y=m(x−13), or mx−y−13m=0. The distance from the origin to this line equals the radius 5: 13m/√(m²+1)=5 for m>0. Squaring gives 169m²=25m²+25, so 144m²=25 and m=5/12.",
         "ru": "Касательная с конечным градиентом через P имеет вид y=m(x−13), то есть mx−y−13m=0. Расстояние от начала координат до этой прямой равно радиусу 5: 13m/√(m²+1)=5 при m>0. После возведения в квадрат: 169m²=25m²+25, поэтому 144m²=25 и m=5/12.",
