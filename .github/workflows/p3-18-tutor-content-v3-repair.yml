@@ -62,7 +62,7 @@ jobs:
           mapfile -t changed < <(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
           for f in "${changed[@]}"; do
             case "$f" in
-              docs/exam-prep-tutor-content-v3-audit-repair.md|              supabase/migrations/20261006010000_tutor_content_v3_stage.sql|              supabase/migrations/20261006011000_tutor_content_v3_promote.sql|              supabase/reversions/20261006011000_tutor_content_v3_promote_revert.sql|              supabase/tests/p3_18_tutor_content_v3_repair.sql|              .github/workflows/p3-18-tutor-content-v3-repair.yml)
+              docs/exam-prep-tutor-content-v3-audit-repair.md|              supabase/migrations/20261006010000_tutor_content_v3_stage.sql|              supabase/migrations/20261006011000_tutor_content_v3_promote.sql|              supabase/migrations/20261006013000_tutor_v3_whitespace_normalization.sql|              supabase/reversions/20261006011000_tutor_content_v3_promote_revert.sql|              supabase/tests/p3_18_tutor_content_v3_repair.sql|              .github/workflows/p3-18-tutor-content-v3-repair.yml)
                 ;;
               *)
                 echo "Tutor v3 repair PR contains out-of-scope file: $f" >&2
