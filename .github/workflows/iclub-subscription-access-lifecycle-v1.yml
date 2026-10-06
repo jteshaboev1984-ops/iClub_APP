@@ -12,6 +12,7 @@ on:
       - 'supabase/tests/iclub_subscription_access_legacy_fixture.sql'
       - 'supabase/tests/iclub_subscription_access_lifecycle_v1_matrix.sql'
       - 'docs/iclub-commercial-access-migration-model-v1.md'
+      - 'docs/iclub-commercial-cutover-impact-snapshot-v1.md'
       - '.github/scripts/iclub_subscription_access_lifecycle_v1_contract.js'
       - '.github/workflows/iclub-subscription-access-lifecycle-v1.yml'
   push:
@@ -24,6 +25,7 @@ on:
       - 'supabase/tests/iclub_subscription_access_legacy_fixture.sql'
       - 'supabase/tests/iclub_subscription_access_lifecycle_v1_matrix.sql'
       - 'docs/iclub-commercial-access-migration-model-v1.md'
+      - 'docs/iclub-commercial-cutover-impact-snapshot-v1.md'
       - '.github/scripts/iclub_subscription_access_lifecycle_v1_contract.js'
       - '.github/workflows/iclub-subscription-access-lifecycle-v1.yml'
   workflow_dispatch:
