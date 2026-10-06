@@ -50,6 +50,10 @@ $$;
 drop function if exists public.set_iclub_product_canary_service_v1(uuid,boolean,text,text);
 drop function if exists private.iclub_rollout_allows_user_v1(uuid,text);
 drop function if exists private.iclub_is_product_canary_v1(uuid);
+
+-- Drop the trigger dependency before removing its function.
+drop trigger if exists trg_iclub_product_canary_limit_v1
+  on private.iclub_product_canary_users;
 drop function if exists private.iclub_product_canary_limit_v1();
 
 drop function if exists public.finalize_iclub_subject_selection_service_v1(uuid,text);
