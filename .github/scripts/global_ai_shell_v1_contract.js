@@ -12,10 +12,10 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-assert(html.includes('global-ai-ui.css?v=globalaishell1'), 'Global AI shell stylesheet not loaded');
-assert(html.includes('global-ai-ui.js?v=globalaishell1'), 'Global AI shell script not loaded');
+assert(html.includes('global-ai-ui.css?v=globalaichat1'), 'Integrated Global AI stylesheet not loaded');
+assert(html.includes('global-ai-ui.js?v=globalaichat1'), 'Integrated Global AI script not loaded');
 assert(
-  html.indexOf('global-ai-ui.js?v=globalaishell1') > html.indexOf('practice-ai-ui.js?v=ai2review1'),
+  html.indexOf('global-ai-ui.js?v=globalaichat1') > html.indexOf('practice-ai-ui.js?v=ai2review1'),
   'Global AI shell must load after existing app/Practice AI controllers'
 );
 
