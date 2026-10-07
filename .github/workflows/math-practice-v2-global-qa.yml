@@ -11,7 +11,7 @@ on:
       - 'security/legacy-assessment-safe-api.js'
       - 'supabase/migrations/*math_practice_v2*.sql'
       - 'supabase/tests/math_practice_v2_*.sql'
-      - 'supabase/preflight/math_practice_v2_release_preflight.sql'
+      - 'supabase/preflight/math_practice_v2_*.sql'
       - 'index.html'
       - 'app.js'
       - '.github/workflows/math-practice-v2-global-qa.yml'
@@ -75,5 +75,6 @@ jobs:
           grep -q 'diagnosticNextAction' app.js
           grep -q 'Почему это ошибка' app.js
           grep -q 'Как исправить' app.js
+          grep -q 'filterPracticeHistoryToCurrentQuestions' app.js
           ! grep -q 'submit_practice_attempt' security/legacy-assessment-safe-api.js
           ! grep -q 'submit_practice_answer_safe' security/legacy-assessment-safe-api.js
