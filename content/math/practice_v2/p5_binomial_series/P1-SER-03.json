@@ -1,0 +1,622 @@
+{
+  "version": "practice_v2_p5_binomial_series_draft_v0.1",
+  "skill": "P1-SER-03",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q318",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "nth_term",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "An arithmetic progression has first term 7 and common difference 4. Enter its 15th term.",
+        "ru": "Арифметическая прогрессия имеет первый член 7 и разность 4. Введите её 15-й член.",
+        "uz": "Arifmetik progressiyaning birinchi hadi 7, ayirmasi 4. 15-hadini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "63",
+        "accepted_examples": [
+          "63",
+          " 63 "
+        ],
+        "rejected_examples": [
+          "67",
+          "60",
+          "56"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "u₁₅=7+(15−1)4=7+56=63.",
+        "ru": "u₁₅=7+(15−1)4=7+56=63.",
+        "uz": "u₁₅=7+(15−1)4=7+56=63."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q319",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "finite_sum",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "Find the sum of the first 25 terms of 2,5,8,11,... Enter the integer.",
+        "ru": "Найдите сумму первых 25 членов 2,5,8,11,... Введите целое число.",
+        "uz": "2,5,8,11,... ning dastlabki 25 hadi yig‘indisini toping. Butun sonni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "950",
+        "accepted_examples": [
+          "950",
+          " 950 "
+        ],
+        "rejected_examples": [
+          "925",
+          "975",
+          "1900"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Here a=2,d=3. S₂₅=25/2[2(2)+24(3)]=25/2(76)=950.",
+        "ru": "Здесь a=2,d=3. S₂₅=25/2[2(2)+24(3)]=25/2(76)=950.",
+        "uz": "Bu yerda a=2,d=3. S₂₅=25/2[2(2)+24(3)]=25/2(76)=950."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q320",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "term_number",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "In the arithmetic progression 5,12,19,... which term is 138? Enter the term number.",
+        "ru": "В арифметической прогрессии 5,12,19,... каким по номеру является член 138? Введите номер.",
+        "uz": "5,12,19,... arifmetik progressiyada 138 nechanchi had? Had raqamini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "20",
+        "accepted_examples": [
+          "20",
+          " 20 "
+        ],
+        "rejected_examples": [
+          "19",
+          "21",
+          "133"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "5+(n−1)7=138, so 7(n−1)=133, n−1=19 and n=20.",
+        "ru": "5+(n−1)7=138, поэтому 7(n−1)=133, n−1=19 и n=20.",
+        "uz": "5+(n−1)7=138, demak 7(n−1)=133, n−1=19 va n=20."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q321",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "inverse_first_term",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "An arithmetic progression has 12th term 40 and common difference 3. What is its first term?",
+        "ru": "В арифметической прогрессии 12-й член равен 40, а разность равна 3. Чему равен первый член?",
+        "uz": "Arifmetik progressiyaning 12-hadi 40, ayirmasi 3. Birinchi hadi qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "7",
+            "ru": "7",
+            "uz": "7"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "4",
+            "ru": "4",
+            "uz": "4"
+          },
+          "diagnostic_code": "SER03_N_MINUS_1"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "10",
+            "ru": "10",
+            "uz": "10"
+          },
+          "diagnostic_code": "SER03_INVERSE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "37",
+            "ru": "37",
+            "uz": "37"
+          },
+          "diagnostic_code": "SER03_INVERSE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "u₁₂=a+11d. Thus 40=a+33, so a=7.",
+        "ru": "u₁₂=a+11d. Поэтому 40=a+33, откуда a=7.",
+        "uz": "u₁₂=a+11d. Demak 40=a+33 va a=7."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q322",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "inverse_difference",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "An arithmetic progression has u₅=18 and u₁₂=46. Enter the common difference.",
+        "ru": "В арифметической прогрессии u₅=18 и u₁₂=46. Введите общую разность.",
+        "uz": "Arifmetik progressiyada u₅=18 va u₁₂=46. Umumiy ayirmani kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "3",
+          "5",
+          "28"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "u₁₂−u₅=(11−4)d=7d=46−18=28, so d=4.",
+        "ru": "u₁₂−u₅=(11−4)d=7d=46−18=28, поэтому d=4.",
+        "uz": "u₁₂−u₅=(11−4)d=7d=46−18=28, demak d=4."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q323",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "two_term_inverse",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "An arithmetic progression has u₃=11 and u₈=31. Enter a+d, where a is the first term and d the common difference.",
+        "ru": "В арифметической прогрессии u₃=11 и u₈=31. Введите a+d, где a — первый член, d — разность.",
+        "uz": "Arifmetik progressiyada u₃=11 va u₈=31. a birinchi had, d ayirma bo‘lsa, a+d ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "7",
+        "accepted_examples": [
+          "7",
+          " 7 "
+        ],
+        "rejected_examples": [
+          "3",
+          "4",
+          "11"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Subtract the equations: 5d=20, so d=4. Then a+2d=11 gives a=3. Therefore a+d=7.",
+        "ru": "Вычитаем уравнения: 5d=20, поэтому d=4. Затем a+2d=11 даёт a=3. Значит a+d=7.",
+        "uz": "Tenglamalarni ayiramiz: 5d=20, demak d=4. So‘ng a+2d=11 dan a=3. Shuning uchun a+d=7."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q324",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "sum_from_end_terms",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "An arithmetic progression has 20 terms, first term 4 and last term 61. What is its sum?",
+        "ru": "Арифметическая прогрессия имеет 20 членов, первый член 4 и последний 61. Какова её сумма?",
+        "uz": "Arifmetik progressiyada 20 ta had bor, birinchi had 4, oxirgi had 61. Yig‘indi qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "610",
+            "ru": "610",
+            "uz": "610"
+          },
+          "diagnostic_code": "SER03_SUM_FORMULA"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1300",
+            "ru": "1300",
+            "uz": "1300"
+          },
+          "diagnostic_code": "SER03_INVERSE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1220",
+            "ru": "1220",
+            "uz": "1220"
+          },
+          "diagnostic_code": "SER03_SUM_FORMULA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "650",
+            "ru": "650",
+            "uz": "650"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "S₂₀=20(4+61)/2=10·65=650.",
+        "ru": "S₂₀=20(4+61)/2=10·65=650.",
+        "uz": "S₂₀=20(4+61)/2=10·65=650."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q325",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "arithmetic_condition",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "The expressions k−2, k+3 and 3k−1 are consecutive terms of an arithmetic progression. Enter k.",
+        "ru": "Выражения k−2, k+3 и 3k−1 — последовательные члены арифметической прогрессии. Введите k.",
+        "uz": "k−2, k+3 va 3k−1 ifodalar arifmetik progressiyaning ketma-ket hadlari. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "4.5",
+        "accepted_examples": [
+          "4.5",
+          "4,5",
+          " 4.5 "
+        ],
+        "rejected_examples": [
+          "4",
+          "5",
+          "9"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "For consecutive AP terms, twice the middle equals the sum of the outer terms: 2(k+3)=(k−2)+(3k−1). This gives 2k+6=4k−3, so k=4.5.",
+        "ru": "Для последовательных членов AP удвоенный средний равен сумме крайних: 2(k+3)=(k−2)+(3k−1). Получаем 2k+6=4k−3, поэтому k=4.5.",
+        "uz": "Ketma-ket AP hadlari uchun o‘rta hadning ikki baravari chet hadlar yig‘indisiga teng: 2(k+3)=(k−2)+(3k−1). Bundan 2k+6=4k−3 va k=4.5."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q326",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "inverse_sum_count",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "An arithmetic progression has first term 6 and common difference 2. Its first n terms sum to 104. Enter n.",
+        "ru": "Арифметическая прогрессия имеет первый член 6 и разность 2. Сумма первых n членов равна 104. Введите n.",
+        "uz": "Arifmetik progressiyaning birinchi hadi 6, ayirmasi 2. Dastlabki n had yig‘indisi 104. n ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "8",
+        "accepted_examples": [
+          "8",
+          " 8 "
+        ],
+        "rejected_examples": [
+          "7",
+          "9",
+          "13"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "S_n=n/2[12+2(n−1)]=n(n+5). Set n(n+5)=104, giving n²+5n−104=0=(n−8)(n+13). Thus n=8.",
+        "ru": "S_n=n/2[12+2(n−1)]=n(n+5). При n(n+5)=104 получаем n²+5n−104=0=(n−8)(n+13). Поэтому n=8.",
+        "uz": "S_n=n/2[12+2(n−1)]=n(n+5). n(n+5)=104 dan n²+5n−104=0=(n−8)(n+13). Demak n=8."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q327",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "midpoint_term",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "In an arithmetic progression, u₇=25 and u₁₃=49. What is u₁₀?",
+        "ru": "В арифметической прогрессии u₇=25 и u₁₃=49. Чему равен u₁₀?",
+        "uz": "Arifmetik progressiyada u₇=25 va u₁₃=49. u₁₀ qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "33",
+            "ru": "33",
+            "uz": "33"
+          },
+          "diagnostic_code": "SER03_INVERSE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "41",
+            "ru": "41",
+            "uz": "41"
+          },
+          "diagnostic_code": "SER03_N_MINUS_1"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "37",
+            "ru": "37",
+            "uz": "37"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "74",
+            "ru": "74",
+            "uz": "74"
+          },
+          "diagnostic_code": "SER03_SUM_FORMULA"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "u₁₀ lies halfway between u₇ and u₁₃ in term number, so its value is the average: (25+49)/2=37.",
+        "ru": "u₁₀ находится посередине между u₇ и u₁₃ по номеру, поэтому его значение — среднее: (25+49)/2=37.",
+        "uz": "u₁₀ had raqami bo‘yicha u₇ va u₁₃ orasining o‘rtasida, shuning uchun qiymati o‘rtacha: (25+49)/2=37."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q328",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "context_sum",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "A hall has 15 rows of seats. The first row has 18 seats and each next row has 4 more seats than the previous row. Enter the total number of seats.",
+        "ru": "В зале 15 рядов. В первом ряду 18 мест, а в каждом следующем на 4 места больше. Введите общее число мест.",
+        "uz": "Zalda 15 qator o‘rindiq bor. Birinchi qatorda 18 ta, har keyingi qatorda oldingidan 4 ta ko‘p. Jami o‘rindiqlar sonini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "690",
+        "accepted_examples": [
+          "690",
+          " 690 "
+        ],
+        "rejected_examples": [
+          "660",
+          "720",
+          "1110"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "This is an AP with a=18,d=4,n=15. S₁₅=15/2[36+14·4]=15/2(92)=690.",
+        "ru": "Это AP с a=18,d=4,n=15. S₁₅=15/2[36+14·4]=15/2(92)=690.",
+        "uz": "Bu AP: a=18,d=4,n=15. S₁₅=15/2[36+14·4]=15/2(92)=690."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q329",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "inverse_sum_difference",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "An arithmetic progression has first term 8 and S₁₀=215. Enter the common difference.",
+        "ru": "Арифметическая прогрессия имеет первый член 8 и S₁₀=215. Введите общую разность.",
+        "uz": "Arifmetik progressiyaning birinchi hadi 8 va S₁₀=215. Umumiy ayirmani kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "2",
+          "4",
+          "23"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "215=10/2[16+9d]=5(16+9d). So 43=16+9d, giving d=3.",
+        "ru": "215=10/2[16+9d]=5(16+9d). Поэтому 43=16+9d и d=3.",
+        "uz": "215=10/2[16+9d]=5(16+9d). Demak 43=16+9d va d=3."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q330",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "sum_to_term",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "For an arithmetic progression, S_n=n(3n+1). What is u₅?",
+        "ru": "Для арифметической прогрессии S_n=n(3n+1). Чему равен u₅?",
+        "uz": "Arifmetik progressiyada S_n=n(3n+1). u₅ qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "25",
+            "ru": "25",
+            "uz": "25"
+          },
+          "diagnostic_code": "SER03_SUM_FORMULA"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "28",
+            "ru": "28",
+            "uz": "28"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "80",
+            "ru": "80",
+            "uz": "80"
+          },
+          "diagnostic_code": "SER03_INVERSE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "155",
+            "ru": "155",
+            "uz": "155"
+          },
+          "diagnostic_code": "SER03_SUM_FORMULA"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "u₅=S₅−S₄. S₅=5(16)=80 and S₄=4(13)=52, so u₅=28.",
+        "ru": "u₅=S₅−S₄. S₅=5(16)=80, S₄=4(13)=52, поэтому u₅=28.",
+        "uz": "u₅=S₅−S₄. S₅=5(16)=80 va S₄=4(13)=52, demak u₅=28."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q331",
+      "practice_no": 5,
+      "primary_skill": "P1-SER-03",
+      "secondary_skills": [],
+      "role": "term_and_sum_inverse",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
+      "question": {
+        "en": "An arithmetic progression has u₄=14 and S₈=116. Enter its first term.",
+        "ru": "В арифметической прогрессии u₄=14 и S₈=116. Введите первый член.",
+        "uz": "Arifmetik progressiyada u₄=14 va S₈=116. Birinchi hadni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "11",
+        "accepted_examples": [
+          "11",
+          " 11 "
+        ],
+        "rejected_examples": [
+          "1",
+          "3",
+          "14"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "u₄ gives a+3d=14. Also 116=4(2a+7d), so 2a+7d=29. Twice the first equation is 2a+6d=28, hence d=1 and a=11.",
+        "ru": "Из u₄ получаем a+3d=14. Также 116=4(2a+7d), поэтому 2a+7d=29. Удваивая первое уравнение, имеем 2a+6d=28; значит d=1 и a=11.",
+        "uz": "u₄ dan a+3d=14. Yana 116=4(2a+7d), demak 2a+7d=29. Birinchi tenglamani 2 ga ko‘paytirsak 2a+6d=28; shundan d=1 va a=11."
+      },
+      "ai_source_skill": "P1-SER-03",
+      "status": "draft"
+    }
+  ]
+}

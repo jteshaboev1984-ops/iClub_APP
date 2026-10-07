@@ -5359,8 +5359,13 @@ async function getClosedPracticeQuestionIds(subjectId, uid, questionIds) {
   );
 }
 
+function practiceHistoryStoragePrefix(subjectKey) {
+  const key = String(subjectKey || "").trim().toLowerCase();
+  return key === "mathematics" ? "practice_history_v3" : "practice_history_v2";
+}
+
 function practiceStorageKey(subjectKey, practiceTourNo = 1) {
-  return `practice_history_v2:${subjectKey}:tour_${Number(practiceTourNo || 1)}`;
+  return `${practiceHistoryStoragePrefix(subjectKey)}:${subjectKey}:tour_${Number(practiceTourNo || 1)}`;
 }
 
 function loadPracticeHistory(subjectKey, practiceTourNo = 1) {
@@ -5386,6 +5391,31 @@ function savePracticeHistory(subjectKey, practiceTourNo = 1, data) {
   } catch {}
 }
 
+function filterPracticeHistoryToCurrentQuestions(history, questionIds) {
+  const h = history && typeof history === "object" ? history : { best: null, last: [] };
+  const activeIds = new Set(
+    (Array.isArray(questionIds) ? questionIds : [])
+      .map(Number)
+      .filter(id => Number.isFinite(id) && id > 0)
+  );
+
+  if (!activeIds.size) return { best: null, last: [] };
+
+  const belongsToCurrentBank = (attempt) => {
+    const details = Array.isArray(attempt?.details) ? attempt.details : [];
+    const ids = details
+      .map(d => Number(d?.id || 0))
+      .filter(id => Number.isFinite(id) && id > 0);
+
+    return ids.length > 0 && ids.every(id => activeIds.has(id));
+  };
+
+  return {
+    best: belongsToCurrentBank(h.best) ? h.best : null,
+    last: (Array.isArray(h.last) ? h.last : []).filter(belongsToCurrentBank)
+  };
+}
+
 function updatePracticeHistory(subjectKey, practiceTourNo, attempt) {
   const h = loadPracticeHistory(subjectKey, practiceTourNo);
   const last = [attempt, ...(h.last || [])].slice(0, PRACTICE_CONFIG.keepLastAttempts);
@@ -5407,7 +5437,7 @@ function updatePracticeHistory(subjectKey, practiceTourNo, attempt) {
 }
 
 function loadAllPracticeHistoryBySubject(subjectKey) {
-  const prefix = `practice_history_v2:${subjectKey}:tour_`;
+  const prefix = `${practiceHistoryStoragePrefix(subjectKey)}:${subjectKey}:tour_`;
   const allAttempts = [];
 
   try {
@@ -5725,7 +5755,10 @@ async function computePracticeStageStats(subjectKey, forcedTourNo = null) {
   const masteredCount = Array.from(closedIds).length;
   const openCount = Math.max(0, totalCount - masteredCount);
 
-  const h = loadPracticeHistory(subjectKey, practiceTourNo);
+  const h = filterPracticeHistoryToCurrentQuestions(
+    loadPracticeHistory(subjectKey, practiceTourNo),
+    allIds
+  );
 
   return {
     practiceTourNo,
@@ -15826,6 +15859,15 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
     const correctAnswer = row.correct_answer == null ? '' : String(row.correct_answer).trim();
     q.correctAnswer = correctAnswer;
     q.explanation = pickContentText(row, 'explanation') || '';
+
+    const diagnostic = row?.diagnostic && typeof row.diagnostic === 'object'
+      ? row.diagnostic
+      : null;
+
+    q.diagnosticStatus = String(row?.diagnostic_status || (diagnostic ? 'mapped' : '')).trim() || null;
+    q.diagnosticFeedback = diagnostic ? (pickContentText(diagnostic, 'feedback') || '') : '';
+    q.diagnosticNextAction = diagnostic ? (pickContentText(diagnostic, 'next_action') || '') : '';
+
     if (q.type === 'mcq') {
       q.correctIndex = practiceSafeCorrectIndex(correctAnswer, q.options || []);
     }
@@ -15913,6 +15955,13 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
         userAnswer: String(row?.user_answer ?? ''),
         correctAnswer: String(row?.correct_answer ?? ''),
         explanation: pickContentText(row || {}, 'explanation') || '',
+        diagnosticStatus: String(row?.diagnostic_status || '').trim() || null,
+        diagnosticFeedback: row?.diagnostic && typeof row.diagnostic === 'object'
+          ? (pickContentText(row.diagnostic, 'feedback') || '')
+          : '',
+        diagnosticNextAction: row?.diagnostic && typeof row.diagnostic === 'object'
+          ? (pickContentText(row.diagnostic, 'next_action') || '')
+          : '',
         isCorrect: !!row?.is_correct,
         timeSpent: Math.max(0, Number(row?.time_spent || 0)),
         book_ref: String(row?.book_ref || '').trim() || null,
@@ -17658,7 +17707,13 @@ async function startPracticeNew() {
     rows = await dbWriteWithRetry(() => api.questions(Number(safeStart?.session_id)), { tries: 3, baseDelayMs: 350 });
   } catch (error) {
     const code = practiceSafeErrorText(error);
-    if (code.includes('practice_no_open_questions')) {
+    if (code.includes('practice_v2_cutover_pending')) {
+      showToast(tr3(
+        'Практика обновляется. Попробуйте ещё раз через минуту.',
+        'Amaliyot yangilanmoqda. Bir daqiqadan keyin yana urinib ko‘ring.',
+        'Practice is being updated. Please try again in a minute.'
+      ));
+    } else if (code.includes('practice_no_open_questions')) {
       showToast(t('practice_stage_all_closed') || 'Все вопросы этого этапа уже закрыты.');
     } else if (code.includes('practice_pool_locked') || code.includes('practice_pool_not_published')) {
       showToast(t('practice_tour_locked') || 'Эта практика пока закрыта.');
@@ -18030,6 +18085,9 @@ try {
      isCorrect: !!quiz.correct[i],
      timeSpent: Number(quiz.timeSpent[i]) || 0,
      explanation: q.explanation || "",
+     diagnosticStatus: q.diagnosticStatus || null,
+     diagnosticFeedback: q.diagnosticFeedback || "",
+     diagnosticNextAction: q.diagnosticNextAction || "",
      book_id: q.book_id || q.bookId || null,
      book_reference: String(q.book_reference || q.bookReference || q.book_ref || q.bookRef || "").trim() || null,
      book_ref: String(q.book_ref || q.bookReference || q.book_reference || q.bookRef || "").trim() || null
@@ -18410,6 +18468,24 @@ const diffText = t(diffKey) || d.difficulty || "";
 const yourAnsLabel = t("your_answer") || "Ваш ответ";
 const correctLabel = t("correct_answer") || "Правильно";
 const explLabel = t("rec_show_expl") || "Объяснение";
+const mistakeLabel = tr3("Почему это ошибка", "Nega bu xato", "Why this is wrong");
+const nextStepLabel = tr3("Как исправить", "Qanday tuzatish kerak", "How to fix it");
+const genericMistake = tr3(
+  "Ответ неверный, но по нему нельзя надёжно определить конкретную причину ошибки.",
+  "Javob noto‘g‘ri, lekin bu javobning o‘zidan aniq xato sababini ishonchli aniqlab bo‘lmaydi.",
+  "The answer is incorrect, but it does not reliably identify one specific mistake."
+);
+const genericNextStep = tr3(
+  "Сравните своё решение с объяснением и примените правильный шаг в следующем похожем задании.",
+  "Yechimingizni izoh bilan solishtiring va keyingi o‘xshash savolda to‘g‘ri usulni qo‘llang.",
+  "Compare your work with the explanation and apply the correct step in the next similar question."
+);
+const mistakeFeedback = !d.isCorrect
+  ? (d.diagnosticFeedback || (d.diagnosticStatus === "unmapped" ? genericMistake : ""))
+  : "";
+const diagnosticNextAction = !d.isCorrect
+  ? (d.diagnosticNextAction || (d.diagnosticStatus === "unmapped" ? genericNextStep : ""))
+  : "";
 
 const topicText = String(d.topic || t("topic_general") || "General").trim();
 const subtopicText = String(d.subtopic || "").trim();
@@ -18427,6 +18503,8 @@ row.innerHTML = `
     ${escapeHTML(correctLabel)}: <b>${escapeHTML(corrDisp || "—")}</b>
   </div>
 
+  ${mistakeFeedback ? `<div class="muted small" style="margin-top:8px"><b>${escapeHTML(mistakeLabel)}:</b> ${escapeHTML(mistakeFeedback)}</div>` : ``}
+  ${diagnosticNextAction ? `<div class="muted small" style="margin-top:6px"><b>${escapeHTML(nextStepLabel)}:</b> ${escapeHTML(diagnosticNextAction)}</div>` : ``}
   ${d.explanation ? `<div class="muted small" style="margin-top:8px"><b>${escapeHTML(explLabel)}:</b> ${escapeHTML(d.explanation)}</div>` : ``}
 `;
         body.appendChild(row);
@@ -18789,7 +18867,10 @@ async function renderMyRecs() {
     }));
 
   // PRACTICE fallback
-  if (!practiceRows.length) {
+  // Mathematics v2 is a clean Practice reset. Old local Practice recommendations
+  // must never reappear after the server-side Practice recommendation reset.
+  // Tour recommendations use a separate store and are untouched.
+  if (!practiceRows.length && String(subjectKey).trim().toLowerCase() !== "mathematics") {
     const store = loadMyRecs();
     const local = store?.bySubject?.[subjectKey] || [];
     practiceRows = local.map(x => ({

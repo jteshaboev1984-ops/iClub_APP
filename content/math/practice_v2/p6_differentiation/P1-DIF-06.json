@@ -1,0 +1,408 @@
+{
+  "version": "practice_v2_p6_differentiation_draft_v0.1",
+  "skill": "P1-DIF-06",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q409",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-06",
+      "secondary_skills": [],
+      "role": "rectangle_linked_rate",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A rectangle has sides x cm and (x+2) cm. If dx/dt=0.5 cm s⁻¹, what is dA/dt when x=4?",
+        "ru": "Прямоугольник имеет стороны x см и (x+2) см. Если dx/dt=0.5 см с⁻¹, чему равно dA/dt при x=4?",
+        "uz": "To‘g‘ri to‘rtburchak tomonlari x sm va (x+2) sm. Agar dx/dt=0.5 sm s⁻¹ bo‘lsa, x=4 da dA/dt qancha?"
+      },
+      "options": [
+        {
+          "key": "D",
+          "text": {
+            "en": "5 cm² s⁻¹",
+            "ru": "5 см² с⁻¹",
+            "uz": "5 sm² s⁻¹"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3 cm² s⁻¹",
+            "ru": "3 см² с⁻¹",
+            "uz": "3 sm² s⁻¹"
+          },
+          "diagnostic_code": "DIF06_CHAIN_RATES"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "10 cm² s⁻¹",
+            "ru": "10 см² с⁻¹",
+            "uz": "10 sm² s⁻¹"
+          },
+          "diagnostic_code": "DIF06_CHAIN_RATES"
+        },
+        {
+          "key": "A",
+          "text": {
+            "en": "5 cm s⁻¹",
+            "ru": "5 см с⁻¹",
+            "uz": "5 sm s⁻¹"
+          },
+          "diagnostic_code": "DIF06_UNITS"
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "A=x(x+2)=x²+2x, so dA/dx=2x+2. Therefore dA/dt=(2x+2)dx/dt=10(0.5)=5 cm² s⁻¹ at x=4.",
+        "ru": "A=x(x+2)=x²+2x, поэтому dA/dx=2x+2. Тогда dA/dt=(2x+2)dx/dt=10(0.5)=5 см² с⁻¹ при x=4.",
+        "uz": "A=x(x+2)=x²+2x, demak dA/dx=2x+2. Shunda dA/dt=(2x+2)dx/dt=10(0.5)=5 sm² s⁻¹, x=4 da."
+      },
+      "ai_source_skill": "P1-DIF-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q410",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-06",
+      "secondary_skills": [
+        "P1-CIR-03"
+      ],
+      "role": "decreasing_circle_rate",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A circle radius decreases at 0.2 cm s⁻¹. When r=4 cm, dA/dt=aπ cm² s⁻¹. Enter a.",
+        "ru": "Радиус окружности уменьшается со скоростью 0.2 см с⁻¹. При r=4 см dA/dt=aπ см² с⁻¹. Введите a.",
+        "uz": "Aylana radiusi 0.2 sm s⁻¹ tezlikda kamayadi. r=4 sm da dA/dt=aπ sm² s⁻¹. a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "-1.6",
+        "accepted_examples": [
+          "-1.6",
+          "−1.6",
+          "-1,6"
+        ],
+        "rejected_examples": [
+          "1.6",
+          "0.8",
+          "-0.8"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "1.6",
+          "diagnostic_code": "DIF06_RATE_SIGN"
+        }
+      ],
+      "explanation": {
+        "en": "dr/dt=−0.2. Therefore dA/dt=2π(4)(−0.2)=−1.6π, so a=−1.6.",
+        "ru": "dr/dt=−0.2. Тогда dA/dt=2π(4)(−0.2)=−1.6π, поэтому a=−1.6.",
+        "uz": "dr/dt=−0.2. Shunda dA/dt=2π(4)(−0.2)=−1.6π, demak a=−1.6."
+      },
+      "ai_source_skill": "P1-DIF-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q411",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-06",
+      "secondary_skills": [],
+      "role": "square_area_rate",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "The side s of a square increases at 3 cm s⁻¹. Enter dA/dt when s=5 cm.",
+        "ru": "Сторона s квадрата увеличивается со скоростью 3 см с⁻¹. Введите dA/dt при s=5 см.",
+        "uz": "Kvadrat tomoni s 3 sm s⁻¹ tezlikda o‘sadi. s=5 sm da dA/dt ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "30",
+        "accepted_examples": [
+          "30",
+          " 30 "
+        ],
+        "rejected_examples": [
+          "15",
+          "25",
+          "75"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "A=s², so dA/dt=2s·ds/dt=2(5)(3)=30 cm² s⁻¹.",
+        "ru": "A=s², поэтому dA/dt=2s·ds/dt=2(5)(3)=30 см² с⁻¹.",
+        "uz": "A=s², demak dA/dt=2s·ds/dt=2(5)(3)=30 sm² s⁻¹."
+      },
+      "ai_source_skill": "P1-DIF-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q412",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-06",
+      "secondary_skills": [],
+      "role": "cube_volume_rate",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A cube has side x cm and volume V=x³ cm³. If dx/dt=2 cm s⁻¹, enter dV/dt when x=4.",
+        "ru": "Куб имеет сторону x см и объём V=x³ см³. Если dx/dt=2 см с⁻¹, введите dV/dt при x=4.",
+        "uz": "Kub tomoni x sm va hajmi V=x³ sm³. Agar dx/dt=2 sm s⁻¹ bo‘lsa, x=4 da dV/dt ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "96",
+        "accepted_examples": [
+          "96",
+          " 96 "
+        ],
+        "rejected_examples": [
+          "32",
+          "48",
+          "128"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dV/dx=3x², so dV/dt=3x²·dx/dt=3(4²)(2)=96 cm³ s⁻¹.",
+        "ru": "dV/dx=3x², поэтому dV/dt=3x²·dx/dt=3(4²)(2)=96 см³ с⁻¹.",
+        "uz": "dV/dx=3x², demak dV/dt=3x²·dx/dt=3(4²)(2)=96 sm³ s⁻¹."
+      },
+      "ai_source_skill": "P1-DIF-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q413",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-06",
+      "secondary_skills": [
+        "P1-CIR-03"
+      ],
+      "role": "reverse_rate",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "For a circle, dA/dt=12π cm² s⁻¹ when r=3 cm. Enter dr/dt in cm s⁻¹.",
+        "ru": "Для окружности dA/dt=12π см² с⁻¹ при r=3 см. Введите dr/dt в см с⁻¹.",
+        "uz": "Aylana uchun r=3 sm da dA/dt=12π sm² s⁻¹. dr/dt ni sm s⁻¹ da kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "2",
+        "accepted_examples": [
+          "2",
+          " 2 "
+        ],
+        "rejected_examples": [
+          "4",
+          "6",
+          "12"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dA/dt=2πr·dr/dt. Thus 12π=2π(3)dr/dt=6π dr/dt, so dr/dt=2.",
+        "ru": "dA/dt=2πr·dr/dt. Поэтому 12π=2π(3)dr/dt=6π dr/dt, откуда dr/dt=2.",
+        "uz": "dA/dt=2πr·dr/dt. Demak 12π=2π(3)dr/dt=6π dr/dt, shundan dr/dt=2."
+      },
+      "ai_source_skill": "P1-DIF-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q414",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-06",
+      "secondary_skills": [
+        "P1-CIR-03"
+      ],
+      "role": "sector_area_rate",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A sector has constant angle θ=2 radians and radius r increasing at 0.5 cm s⁻¹. Its area is A=½r²θ. Enter dA/dt when r=4 cm.",
+        "ru": "Сектор имеет постоянный угол θ=2 радиана, а радиус r увеличивается со скоростью 0.5 см с⁻¹. Площадь A=½r²θ. Введите dA/dt при r=4 см.",
+        "uz": "Sektor burchagi doimiy θ=2 radian, radius r 0.5 sm s⁻¹ tezlikda o‘sadi. Yuzi A=½r²θ. r=4 sm da dA/dt ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "2",
+          "8",
+          "16"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "With θ constant, dA/dr=rθ. Hence dA/dt=rθ·dr/dt=4·2·0.5=4 cm² s⁻¹.",
+        "ru": "При постоянном θ имеем dA/dr=rθ. Тогда dA/dt=rθ·dr/dt=4·2·0.5=4 см² с⁻¹.",
+        "uz": "θ doimiy bo‘lsa dA/dr=rθ. Demak dA/dt=rθ·dr/dt=4·2·0.5=4 sm² s⁻¹."
+      },
+      "ai_source_skill": "P1-DIF-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q415",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-06",
+      "secondary_skills": [
+        "P1-CIR-02"
+      ],
+      "role": "circumference_reverse_rate",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A circle circumference C=2πr increases at 6π cm s⁻¹. Enter dr/dt.",
+        "ru": "Длина окружности C=2πr увеличивается со скоростью 6π см с⁻¹. Введите dr/dt.",
+        "uz": "Aylana uzunligi C=2πr 6π sm s⁻¹ tezlikda o‘sadi. dr/dt ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "6",
+          "12",
+          "2"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dC/dt=2π·dr/dt. So 6π=2π dr/dt, giving dr/dt=3 cm s⁻¹.",
+        "ru": "dC/dt=2π·dr/dt. Поэтому 6π=2π dr/dt, откуда dr/dt=3 см с⁻¹.",
+        "uz": "dC/dt=2π·dr/dt. Demak 6π=2π dr/dt, shundan dr/dt=3 sm s⁻¹."
+      },
+      "ai_source_skill": "P1-DIF-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q416",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-06",
+      "secondary_skills": [],
+      "role": "implicit_connected_rate",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "Positive x and y satisfy x²+y²=100. At an instant x=6, y=8 and dx/dt=3. Enter dy/dt.",
+        "ru": "Положительные x и y удовлетворяют x²+y²=100. В некоторый момент x=6, y=8 и dx/dt=3. Введите dy/dt.",
+        "uz": "Musbat x va y uchun x²+y²=100. Bir paytda x=6, y=8 va dx/dt=3. dy/dt ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "-2.25",
+        "accepted_examples": [
+          "-2.25",
+          "−2.25",
+          "-2,25"
+        ],
+        "rejected_examples": [
+          "2.25",
+          "-4",
+          "-1.5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "2.25",
+          "diagnostic_code": "DIF06_RATE_SIGN"
+        }
+      ],
+      "explanation": {
+        "en": "Differentiate with respect to t: 2x dx/dt+2y dy/dt=0. Thus 2(6)(3)+2(8)dy/dt=0, so dy/dt=−36/16=−2.25.",
+        "ru": "Дифференцируем по t: 2x dx/dt+2y dy/dt=0. Тогда 2(6)(3)+2(8)dy/dt=0, поэтому dy/dt=−36/16=−2.25.",
+        "uz": "t bo‘yicha differensiallaymiz: 2x dx/dt+2y dy/dt=0. 2(6)(3)+2(8)dy/dt=0, demak dy/dt=−36/16=−2.25."
+      },
+      "ai_source_skill": "P1-DIF-06",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q417",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-06",
+      "secondary_skills": [],
+      "role": "reverse_given_volume_model",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A container has volume V=(2/3)πr³. When r=5 cm, its volume is increasing at 15π cm³ s⁻¹. What is dr/dt?",
+        "ru": "Объём контейнера V=(2/3)πr³. При r=5 см объём увеличивается со скоростью 15π см³ с⁻¹. Чему равно dr/dt?",
+        "uz": "Idish hajmi V=(2/3)πr³. r=5 sm da hajm 15π sm³ s⁻¹ tezlikda o‘sadi. dr/dt qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "0.1 cm s⁻¹",
+            "ru": "0.1 см с⁻¹",
+            "uz": "0.1 sm s⁻¹"
+          },
+          "diagnostic_code": "DIF06_CHAIN_RATES"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "0.2 cm s⁻¹",
+            "ru": "0.2 см с⁻¹",
+            "uz": "0.2 sm s⁻¹"
+          },
+          "diagnostic_code": "DIF06_CHAIN_RATES"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "0.3 cm s⁻¹",
+            "ru": "0.3 см с⁻¹",
+            "uz": "0.3 sm s⁻¹"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "3 cm s⁻¹",
+            "ru": "3 см с⁻¹",
+            "uz": "3 sm s⁻¹"
+          },
+          "diagnostic_code": "DIF06_CHAIN_RATES"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "dV/dr=2πr². At r=5, dV/dt=50π·dr/dt. Since 15π=50π·dr/dt, dr/dt=0.3 cm s⁻¹.",
+        "ru": "dV/dr=2πr². При r=5: dV/dt=50π·dr/dt. Из 15π=50π·dr/dt получаем dr/dt=0.3 см с⁻¹.",
+        "uz": "dV/dr=2πr². r=5 da dV/dt=50π·dr/dt. 15π=50π·dr/dt dan dr/dt=0.3 sm s⁻¹."
+      },
+      "ai_source_skill": "P1-DIF-06",
+      "status": "draft"
+    }
+  ]
+}

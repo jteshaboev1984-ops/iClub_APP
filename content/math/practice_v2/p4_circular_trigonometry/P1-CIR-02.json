@@ -1,0 +1,420 @@
+{
+  "version": "practice_v2_p4_circular_trig_draft_v0.1",
+  "skill": "P1-CIR-02",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q225",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-02",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "A circle has radius 8 cm. An angle of 0.75 radians subtends an arc. Enter the arc length in centimetres.",
+        "ru": "Окружность имеет радиус 8 см. Угол 0.75 радиан стягивает дугу. Введите длину дуги в сантиметрах.",
+        "uz": "Aylana radiusi 8 sm. 0.75 radian burchak yoy hosil qiladi. Yoy uzunligini santimetrda kiriting."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "6",
+        "accepted_examples": [
+          "6",
+          "6.0",
+          " 6 "
+        ],
+        "rejected_examples": [
+          "8.75",
+          "10.666",
+          "48"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Use s=rθ: s=8(0.75)=6 cm.",
+        "ru": "Используем s=rθ: s=8(0.75)=6 см.",
+        "uz": "s=rθ dan foydalanamiz: s=8(0.75)=6 sm."
+      },
+      "ai_source_skill": "P1-CIR-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q226",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-02",
+      "secondary_skills": [],
+      "role": "reverse_angle",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "An arc has length 15 cm in a circle of radius 10 cm. Enter the angle in radians.",
+        "ru": "Длина дуги равна 15 см в окружности радиуса 10 см. Введите угол в радианах.",
+        "uz": "Radiusi 10 sm bo‘lgan aylanada yoy uzunligi 15 sm. Burchakni radianlarda kiriting."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "1.5",
+        "accepted_examples": [
+          "1.5",
+          "1,5",
+          " 1.5 "
+        ],
+        "rejected_examples": [
+          "0.6666667",
+          "5",
+          "150"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "From s=rθ, θ=s/r=15/10=1.5 radians.",
+        "ru": "Из s=rθ получаем θ=s/r=15/10=1.5 радиан.",
+        "uz": "s=rθ dan θ=s/r=15/10=1.5 radian."
+      },
+      "ai_source_skill": "P1-CIR-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q227",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-02",
+      "secondary_skills": [],
+      "role": "reverse_radius",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "An arc has length 14 cm and subtends 2 radians. Enter the circle radius in centimetres.",
+        "ru": "Дуга длиной 14 см стягивается углом 2 радиана. Введите радиус окружности в сантиметрах.",
+        "uz": "14 sm yoy 2 radian burchakka mos. Aylana radiusini santimetrda kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "7",
+        "accepted_examples": [
+          "7",
+          " 7 "
+        ],
+        "rejected_examples": [
+          "28",
+          "12",
+          "16"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "From s=rθ, r=s/θ=14/2=7 cm.",
+        "ru": "Из s=rθ: r=s/θ=14/2=7 см.",
+        "uz": "s=rθ dan r=s/θ=14/2=7 sm."
+      },
+      "ai_source_skill": "P1-CIR-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q228",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-02",
+      "secondary_skills": [
+        "P1-CIR-01"
+      ],
+      "role": "degree_conversion",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "A circle has radius 12 cm. What is the arc length subtended by 60°?",
+        "ru": "Окружность имеет радиус 12 см. Какова длина дуги, стягиваемой углом 60°?",
+        "uz": "Aylana radiusi 12 sm. 60° burchak hosil qilgan yoy uzunligi qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2π cm",
+            "ru": "2π см",
+            "uz": "2π sm"
+          },
+          "diagnostic_code": "CIR02_DEG_BEFORE_ARC"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "12π cm",
+            "ru": "12π см",
+            "uz": "12π sm"
+          },
+          "diagnostic_code": "CIR02_ARC_FORMULA"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "4π cm",
+            "ru": "4π см",
+            "uz": "4π sm"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "720 cm",
+            "ru": "720 см",
+            "uz": "720 sm"
+          },
+          "diagnostic_code": "CIR02_DEG_BEFORE_ARC"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "First convert 60° to π/3 radians. Then s=rθ=12(π/3)=4π cm.",
+        "ru": "Сначала переводим 60° в π/3 радиан. Затем s=rθ=12(π/3)=4π см.",
+        "uz": "Avval 60° ni π/3 radianga o‘tkazamiz. So‘ng s=rθ=12(π/3)=4π sm."
+      },
+      "ai_source_skill": "P1-CIR-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q229",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-02",
+      "secondary_skills": [
+        "P1-CIR-01"
+      ],
+      "role": "reverse_degree_angle",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "In a circle of radius 10 cm, an arc has length 5π cm. Enter the central angle in degrees.",
+        "ru": "В окружности радиуса 10 см дуга имеет длину 5π см. Введите центральный угол в градусах.",
+        "uz": "Radiusi 10 sm bo‘lgan aylanada yoy uzunligi 5π sm. Markaziy burchakni darajada kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "90",
+        "accepted_examples": [
+          "90",
+          " 90 "
+        ],
+        "rejected_examples": [
+          "180",
+          "45",
+          "50"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "θ=s/r=5π/10=π/2 radians, which is 90°.",
+        "ru": "θ=s/r=5π/10=π/2 радиан, то есть 90°.",
+        "uz": "θ=s/r=5π/10=π/2 radian, bu 90°."
+      },
+      "ai_source_skill": "P1-CIR-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q230",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-02",
+      "secondary_skills": [],
+      "role": "reverse_perimeter",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "A sector has radius 8 cm and perimeter 26 cm. Enter its angle in radians.",
+        "ru": "Сектор имеет радиус 8 см и периметр 26 см. Введите его угол в радианах.",
+        "uz": "Sektor radiusi 8 sm va perimetri 26 sm. Uning burchagini radianlarda kiriting."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "1.25",
+        "accepted_examples": [
+          "1.25",
+          "1,25",
+          " 1.25 "
+        ],
+        "rejected_examples": [
+          "3.25",
+          "10",
+          "2.5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The arc length is 26−2(8)=10 cm. Then θ=s/r=10/8=1.25 radians.",
+        "ru": "Длина дуги равна 26−2(8)=10 см. Тогда θ=s/r=10/8=1.25 радиан.",
+        "uz": "Yoy uzunligi 26−2(8)=10 sm. Shunda θ=s/r=10/8=1.25 radian."
+      },
+      "ai_source_skill": "P1-CIR-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q231",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-02",
+      "secondary_skills": [],
+      "role": "comparison",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "Two arcs subtend the same angle. Arc A is in a circle of radius 5 cm and Arc B in a circle of radius 8 cm. Which statement is true?",
+        "ru": "Две дуги стягиваются одинаковым углом. Дуга A находится в окружности радиуса 5 см, дуга B — радиуса 8 см. Какое утверждение верно?",
+        "uz": "Ikki yoy bir xil burchakka mos. A yoy radiusi 5 sm aylana, B yoy radiusi 8 sm aylana ichida. Qaysi tasdiq to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Arc B is 8/5 times the length of Arc A.",
+            "ru": "Длина дуги B в 8/5 раза больше длины дуги A.",
+            "uz": "B yoy uzunligi A yoy uzunligining 8/5 qismi."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "The arcs have equal length.",
+            "ru": "Дуги имеют одинаковую длину.",
+            "uz": "Yoylar uzunligi teng."
+          },
+          "diagnostic_code": "CIR02_ARC_FORMULA"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Arc A is longer because its radius is smaller.",
+            "ru": "Дуга A длиннее, потому что её радиус меньше.",
+            "uz": "A yoy uzunroq, chunki uning radiusi kichik."
+          },
+          "diagnostic_code": "CIR02_ARC_FORMULA"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Arc B is 5/8 times the length of Arc A.",
+            "ru": "Длина дуги B составляет 5/8 длины дуги A.",
+            "uz": "B yoy uzunligi A yoy uzunligining 5/8 qismi."
+          },
+          "diagnostic_code": "CIR02_ARC_FORMULA"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "For the same θ, s=rθ is proportional to r. Therefore s_B/s_A=8/5.",
+        "ru": "При одинаковом θ длина s=rθ пропорциональна r. Поэтому s_B/s_A=8/5.",
+        "uz": "θ bir xil bo‘lsa, s=rθ radiusga proporsional. Demak s_B/s_A=8/5."
+      },
+      "ai_source_skill": "P1-CIR-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q232",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-02",
+      "secondary_skills": [],
+      "role": "revolution_interpretation",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "A point on a circle of radius 6 cm travels 15 cm along the circumference. Which expression gives the angle turned, in radians?",
+        "ru": "Точка на окружности радиуса 6 см проходит 15 см по окружности. Какое выражение даёт угол поворота в радианах?",
+        "uz": "Radiusi 6 sm bo‘lgan aylanadagi nuqta aylana bo‘ylab 15 sm yuradi. Burilish burchagini radianlarda qaysi ifoda beradi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "6/15",
+            "ru": "6/15",
+            "uz": "6/15"
+          },
+          "diagnostic_code": "CIR02_REARRANGE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "15×6",
+            "ru": "15×6",
+            "uz": "15×6"
+          },
+          "diagnostic_code": "CIR02_ARC_FORMULA"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "90",
+            "ru": "90",
+            "uz": "90"
+          },
+          "diagnostic_code": "CIR02_DEG_BEFORE_ARC"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "15/6",
+            "ru": "15/6",
+            "uz": "15/6"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "From s=rθ, θ=s/r=15/6 radians.",
+        "ru": "Из s=rθ получаем θ=s/r=15/6 радиан.",
+        "uz": "s=rθ dan θ=s/r=15/6 radian."
+      },
+      "ai_source_skill": "P1-CIR-02",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q233",
+      "practice_no": 4,
+      "primary_skill": "P1-CIR-02",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
+      "question": {
+        "en": "Arc A has radius 4 cm and angle 3 radians. Arc B has the same length, radius 6 cm and angle θ radians. Enter θ.",
+        "ru": "Дуга A имеет радиус 4 см и угол 3 радиана. Дуга B имеет ту же длину, радиус 6 см и угол θ радиан. Введите θ.",
+        "uz": "A yoy radiusi 4 sm va burchagi 3 radian. B yoy uzunligi shu bilan teng, radiusi 6 sm va burchagi θ radian. θ ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "2",
+        "accepted_examples": [
+          "2",
+          "2.0",
+          " 2 "
+        ],
+        "rejected_examples": [
+          "4.5",
+          "18",
+          "3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Arc A has length 4×3=12 cm. For Arc B, 12=6θ, so θ=2 radians.",
+        "ru": "Длина дуги A равна 4×3=12 см. Для дуги B: 12=6θ, поэтому θ=2 радиана.",
+        "uz": "A yoy uzunligi 4×3=12 sm. B yoy uchun 12=6θ, demak θ=2 radian."
+      },
+      "ai_source_skill": "P1-CIR-02",
+      "status": "draft"
+    }
+  ]
+}

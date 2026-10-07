@@ -1,0 +1,697 @@
+{
+  "version": "practice_v2_p2_functions_draft_v0.1",
+  "skill": "P1-FUN-08",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q137",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-08",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which equation gives a vertical stretch of y=f(x) by scale factor 3?",
+        "ru": "Какое уравнение задаёт вертикальное растяжение y=f(x) с коэффициентом 3?",
+        "uz": "Qaysi tenglama y=f(x) grafigini vertikal yo‘nalishda 3 marta cho‘zadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=f(3x)",
+            "ru": "y=f(3x)",
+            "uz": "y=f(3x)"
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=3f(x)",
+            "ru": "y=3f(x)",
+            "uz": "y=3f(x)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=f(x)+3",
+            "ru": "y=f(x)+3",
+            "uz": "y=f(x)+3"
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=f(x/3)",
+            "ru": "y=f(x/3)",
+            "uz": "y=f(x/3)"
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Multiplying the whole function by 3 multiplies every y-coordinate by 3 while x stays unchanged, so y=3f(x) is a vertical stretch by factor 3.",
+        "ru": "Умножение всей функции на 3 умножает каждую y-координату на 3, не меняя x. Поэтому y=3f(x) — вертикальное растяжение с коэффициентом 3.",
+        "uz": "Butun funksiyani 3 ga ko‘paytirish har bir y-koordinatani 3 ga ko‘paytiradi, x esa o‘zgarmaydi. Shuning uchun y=3f(x) vertikal 3 marta cho‘zilishdir."
+      },
+      "ai_source_skill": "P1-FUN-08",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q138",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-08",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which equation gives a horizontal compression of y=f(x) by scale factor 1/2?",
+        "ru": "Какое уравнение задаёт горизонтальное сжатие y=f(x) с коэффициентом 1/2?",
+        "uz": "Qaysi tenglama y=f(x) grafigini gorizontal yo‘nalishda 1/2 koeffitsiyent bilan siqadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=f(2x)",
+            "ru": "y=f(2x)",
+            "uz": "y=f(2x)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=2f(x)",
+            "ru": "y=2f(x)",
+            "uz": "y=2f(x)"
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=f(x/2)",
+            "ru": "y=f(x/2)",
+            "uz": "y=f(x/2)"
+          },
+          "diagnostic_code": "FUN08_HORIZONTAL_RECIPROCAL"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=f(x)+2",
+            "ru": "y=f(x)+2",
+            "uz": "y=f(x)+2"
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "In y=f(2x), the input must be half as large to reach the same original x-value. Therefore x-coordinates are multiplied by 1/2: a horizontal compression by factor 1/2.",
+        "ru": "В y=f(2x) для достижения того же исходного аргумента новый x должен быть вдвое меньше. Поэтому x-координаты умножаются на 1/2: это горизонтальное сжатие с коэффициентом 1/2.",
+        "uz": "y=f(2x) da asl argumentga yetish uchun yangi x ikki marta kichik bo‘ladi. Demak x-koordinatalar 1/2 ga ko‘payadi: bu gorizontal 1/2 siqilish."
+      },
+      "ai_source_skill": "P1-FUN-08",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q139",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-08",
+      "secondary_skills": [],
+      "role": "point_mapping",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The point (4,−3) lies on y=f(x). For y=5f(x), enter the y-coordinate of the corresponding point.",
+        "ru": "Точка (4,−3) лежит на y=f(x). Для y=5f(x) введите y-координату соответствующей точки.",
+        "uz": "(4,−3) nuqta y=f(x) da yotadi. y=5f(x) uchun mos nuqtaning y-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-15",
+        "accepted_examples": [
+          "-15",
+          "−15",
+          " -15 "
+        ],
+        "rejected_examples": [
+          "15",
+          "-8",
+          "-3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "15",
+          "diagnostic_code": "FUN08_VERTICAL_SCALE"
+        }
+      ],
+      "explanation": {
+        "en": "A vertical scale factor 5 multiplies the y-coordinate by 5 while x stays 4. Thus −3 becomes −15.",
+        "ru": "Вертикальный коэффициент 5 умножает y-координату на 5, а x остаётся равным 4. Поэтому −3 превращается в −15.",
+        "uz": "Vertikal masshtab 5 y-koordinatani 5 ga ko‘paytiradi, x esa 4 bo‘lib qoladi. Demak −3 → −15."
+      },
+      "ai_source_skill": "P1-FUN-08",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q140",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-08",
+      "secondary_skills": [],
+      "role": "point_mapping",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "If (6,4) lies on y=f(x), which point lies on y=f(3x)?",
+        "ru": "Если (6,4) лежит на y=f(x), какая точка лежит на y=f(3x)?",
+        "uz": "Agar (6,4) nuqta y=f(x) da yotsa, y=f(3x) da qaysi nuqta yotadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(18,4)",
+            "ru": "(18,4)",
+            "uz": "(18,4)"
+          },
+          "diagnostic_code": "FUN08_HORIZONTAL_RECIPROCAL"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(6,12)",
+            "ru": "(6,12)",
+            "uz": "(6,12)"
+          },
+          "diagnostic_code": "FUN08_VERTICAL_SCALE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(6,4/3)",
+            "ru": "(6,4/3)",
+            "uz": "(6,4/3)"
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(2,4)",
+            "ru": "(2,4)",
+            "uz": "(2,4)"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "To obtain the original input 6 inside f(3x), solve 3x=6, giving x=2. The output remains 4, so the new point is (2,4).",
+        "ru": "Чтобы внутри f получить исходный аргумент 6, решаем 3x=6 и получаем x=2. Выход остаётся равным 4, поэтому новая точка — (2,4).",
+        "uz": "f ichida asl 6 argumentni olish uchun 3x=6 ni yechamiz, x=2. Chiqish 4 bo‘lib qoladi, demak yangi nuqta (2,4)."
+      },
+      "ai_source_skill": "P1-FUN-08",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q141",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-08",
+      "secondary_skills": [
+        "P1-FUN-06"
+      ],
+      "role": "combined_mapping",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "If (2,3) lies on y=f(x), which point lies on y=2f(x−1)+4?",
+        "ru": "Если (2,3) лежит на y=f(x), какая точка лежит на y=2f(x−1)+4?",
+        "uz": "Agar (2,3) nuqta y=f(x) da yotsa, y=2f(x−1)+4 da qaysi nuqta yotadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(1,10)",
+            "ru": "(1,10)",
+            "uz": "(1,10)"
+          },
+          "diagnostic_code": "FUN08_POINT_MAP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(3,10)",
+            "ru": "(3,10)",
+            "uz": "(3,10)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(3,7)",
+            "ru": "(3,7)",
+            "uz": "(3,7)"
+          },
+          "diagnostic_code": "FUN08_VERTICAL_SCALE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(1,2)",
+            "ru": "(1,2)",
+            "uz": "(1,2)"
+          },
+          "diagnostic_code": "FUN08_POINT_MAP"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "x−1=2 gives the new x-coordinate x=3. The output 3 is then multiplied by 2 and shifted up by 4: 2(3)+4=10. So the point becomes (3,10).",
+        "ru": "Из x−1=2 получаем новую x-координату x=3. Выход 3 умножается на 2 и сдвигается вверх на 4: 2(3)+4=10. Новая точка — (3,10).",
+        "uz": "x−1=2 dan yangi x=3. Chiqish 3 avval 2 ga ko‘paytiriladi, keyin 4 ga oshiriladi: 2(3)+4=10. Yangi nuqta (3,10)."
+      },
+      "ai_source_skill": "P1-FUN-08",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q142",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-08",
+      "secondary_skills": [],
+      "role": "point_mapping",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The point (−8,5) lies on y=f(x). For y=f(x/4), enter the x-coordinate of the corresponding point.",
+        "ru": "Точка (−8,5) лежит на y=f(x). Для y=f(x/4) введите x-координату соответствующей точки.",
+        "uz": "(−8,5) nuqta y=f(x) da yotadi. y=f(x/4) uchun mos nuqtaning x-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-32",
+        "accepted_examples": [
+          "-32",
+          "−32",
+          " -32 "
+        ],
+        "rejected_examples": [
+          "-2",
+          "2",
+          "32"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-2",
+          "diagnostic_code": "FUN08_HORIZONTAL_RECIPROCAL"
+        }
+      ],
+      "explanation": {
+        "en": "To reproduce the original input −8 inside f, solve x/4=−8. Thus x=−32. The graph is stretched horizontally by factor 4.",
+        "ru": "Чтобы внутри f получить исходный аргумент −8, решаем x/4=−8. Получаем x=−32. Это горизонтальное растяжение с коэффициентом 4.",
+        "uz": "f ichida asl −8 argumentni olish uchun x/4=−8 ni yechamiz. x=−32. Bu gorizontal 4 marta cho‘zilish."
+      },
+      "ai_source_skill": "P1-FUN-08",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q143",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-08",
+      "secondary_skills": [
+        "P1-FUN-07"
+      ],
+      "role": "combined_reflection_scale",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "What transformation changes y=f(x) into y=−2f(x)?",
+        "ru": "Какое преобразование переводит y=f(x) в y=−2f(x)?",
+        "uz": "Qaysi o‘zgarish y=f(x) ni y=−2f(x) ga o‘tkazadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Reflect in the x-axis and stretch vertically by factor 2.",
+            "ru": "Отразить относительно оси x и растянуть вертикально в 2 раза.",
+            "uz": "x o‘qiga akslantirib, vertikal 2 marta cho‘zish."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Reflect in the y-axis and stretch horizontally by factor 2.",
+            "ru": "Отразить относительно оси y и растянуть горизонтально в 2 раза.",
+            "uz": "y o‘qiga akslantirib, gorizontal 2 marta cho‘zish."
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Translate down 2 units.",
+            "ru": "Сдвинуть вниз на 2 единицы.",
+            "uz": "2 birlik pastga siljitish."
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Reflect in the x-axis and compress horizontally by factor 1/2.",
+            "ru": "Отразить относительно оси x и сжать горизонтально с коэффициентом 1/2.",
+            "uz": "x o‘qiga akslantirib, gorizontal 1/2 koeffitsiyent bilan siqish."
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The factor 2 outside f doubles all y-values, giving a vertical stretch by factor 2. The negative sign reverses all y-values, giving a reflection in the x-axis.",
+        "ru": "Множитель 2 снаружи f удваивает все y-координаты — это вертикальное растяжение с коэффициентом 2. Минус меняет знак y и даёт отражение относительно оси x.",
+        "uz": "f tashqarisidagi 2 barcha y qiymatlarni ikki baravar qiladi — bu vertikal 2 marta cho‘zilish. Minus y ishorasini o‘zgartirib, x o‘qiga nisbatan akslantiradi."
+      },
+      "ai_source_skill": "P1-FUN-08",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q144",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-08",
+      "secondary_skills": [
+        "P1-FUN-07"
+      ],
+      "role": "combined_reflection_scale",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "If (−6,4) lies on y=f(x), which point lies on y=f(−2x)?",
+        "ru": "Если (−6,4) лежит на y=f(x), какая точка лежит на y=f(−2x)?",
+        "uz": "Agar (−6,4) nuqta y=f(x) da yotsa, y=f(−2x) da qaysi nuqta yotadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(−12,4)",
+            "ru": "(−12,4)",
+            "uz": "(−12,4)"
+          },
+          "diagnostic_code": "FUN08_HORIZONTAL_RECIPROCAL"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(12,−4)",
+            "ru": "(12,−4)",
+            "uz": "(12,−4)"
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(−3,−4)",
+            "ru": "(−3,−4)",
+            "uz": "(−3,−4)"
+          },
+          "diagnostic_code": "FUN08_POINT_MAP"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(3,4)",
+            "ru": "(3,4)",
+            "uz": "(3,4)"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "To get the original input −6, solve −2x=−6, so x=3. The output stays 4. Thus the point becomes (3,4).",
+        "ru": "Чтобы получить исходный аргумент −6, решаем −2x=−6, откуда x=3. Выход остаётся равным 4. Новая точка — (3,4).",
+        "uz": "Asl −6 argumentni olish uchun −2x=−6 ni yechamiz, x=3. Chiqish 4 bo‘lib qoladi. Yangi nuqta (3,4)."
+      },
+      "ai_source_skill": "P1-FUN-08",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q145",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-08",
+      "secondary_skills": [
+        "P1-FUN-06"
+      ],
+      "role": "combined_mapping",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "If (4,−2) lies on y=f(x), which point lies on y=3f(2x)+1?",
+        "ru": "Если (4,−2) лежит на y=f(x), какая точка лежит на y=3f(2x)+1?",
+        "uz": "Agar (4,−2) nuqta y=f(x) da yotsa, y=3f(2x)+1 da qaysi nuqta yotadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(8,−5)",
+            "ru": "(8,−5)",
+            "uz": "(8,−5)"
+          },
+          "diagnostic_code": "FUN08_HORIZONTAL_RECIPROCAL"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(2,−1)",
+            "ru": "(2,−1)",
+            "uz": "(2,−1)"
+          },
+          "diagnostic_code": "FUN08_VERTICAL_SCALE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(2,−5)",
+            "ru": "(2,−5)",
+            "uz": "(2,−5)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(8,−7)",
+            "ru": "(8,−7)",
+            "uz": "(8,−7)"
+          },
+          "diagnostic_code": "FUN08_POINT_MAP"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "For the input, 2x=4 gives x=2. For the output, 3(−2)+1=−5. Hence the corresponding point is (2,−5).",
+        "ru": "Для аргумента 2x=4, значит x=2. Для выхода 3(−2)+1=−5. Поэтому соответствующая точка — (2,−5).",
+        "uz": "Kirish uchun 2x=4, demak x=2. Chiqish uchun 3(−2)+1=−5. Shuning uchun mos nuqta (2,−5)."
+      },
+      "ai_source_skill": "P1-FUN-08",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q146",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-08",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The point (6,8) on y=f(x) becomes (2,−4) on y=af(bx). What are a and b?",
+        "ru": "Точка (6,8) графика y=f(x) переходит в (2,−4) на графике y=af(bx). Чему равны a и b?",
+        "uz": "y=f(x) dagi (6,8) nuqta y=af(bx) da (2,−4) ga o‘tadi. a va b nimaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "a=−2, b=1/3",
+            "ru": "a=−2, b=1/3",
+            "uz": "a=−2, b=1/3"
+          },
+          "diagnostic_code": "FUN08_POINT_MAP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "a=−1/2, b=3",
+            "ru": "a=−1/2, b=3",
+            "uz": "a=−1/2, b=3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "a=1/2, b=3",
+            "ru": "a=1/2, b=3",
+            "uz": "a=1/2, b=3"
+          },
+          "diagnostic_code": "FUN08_VERTICAL_SCALE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "a=−1/2, b=1/3",
+            "ru": "a=−1/2, b=1/3",
+            "uz": "a=−1/2, b=1/3"
+          },
+          "diagnostic_code": "FUN08_HORIZONTAL_RECIPROCAL"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "To map the original x=6 to new x=2, we need b(2)=6, so b=3. The output 8 becomes −4, so a=−4/8=−1/2.",
+        "ru": "Чтобы исходный x=6 соответствовал новому x=2, нужно b(2)=6, значит b=3. Выход 8 становится −4, поэтому a=−4/8=−1/2.",
+        "uz": "Asl x=6 yangi x=2 ga mos kelishi uchun b(2)=6, demak b=3. Chiqish 8 dan −4 ga o‘tadi, shuning uchun a=−4/8=−1/2."
+      },
+      "ai_source_skill": "P1-FUN-08",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q147",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-08",
+      "secondary_skills": [
+        "P1-FUN-06"
+      ],
+      "role": "reverse_transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The point (3,5) on y=f(x) becomes (8,−7) on y=−2f(x−h)+3. Enter h.",
+        "ru": "Точка (3,5) графика y=f(x) переходит в (8,−7) на y=−2f(x−h)+3. Введите h.",
+        "uz": "y=f(x) dagi (3,5) nuqta y=−2f(x−h)+3 da (8,−7) ga o‘tadi. h ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "5",
+        "accepted_examples": [
+          "5",
+          " 5 "
+        ],
+        "rejected_examples": [
+          "-5",
+          "8",
+          "3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-5",
+          "diagnostic_code": "FUN08_POINT_MAP"
+        }
+      ],
+      "explanation": {
+        "en": "For the input, x−h must equal the original 3. Using the new x=8 gives 8−h=3, so h=5. The output check is −2(5)+3=−7.",
+        "ru": "Для аргумента x−h должен равняться исходному 3. При новом x=8 получаем 8−h=3, поэтому h=5. Проверка выхода: −2(5)+3=−7.",
+        "uz": "Kirish uchun x−h asl 3 ga teng bo‘lishi kerak. Yangi x=8 bo‘lsa, 8−h=3 va h=5. Chiqish tekshiruvi: −2(5)+3=−7."
+      },
+      "ai_source_skill": "P1-FUN-08",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q148",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-08",
+      "secondary_skills": [
+        "P1-FUN-06",
+        "P1-FUN-07"
+      ],
+      "role": "mixed_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The point (−4,3) lies on y=f(x). Which point lies on y=−3f(−2(x−1))+5?",
+        "ru": "Точка (−4,3) лежит на y=f(x). Какая точка лежит на y=−3f(−2(x−1))+5?",
+        "uz": "(−4,3) nuqta y=f(x) da yotadi. y=−3f(−2(x−1))+5 da qaysi nuqta yotadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(−1,−4)",
+            "ru": "(−1,−4)",
+            "uz": "(−1,−4)"
+          },
+          "diagnostic_code": "FUN08_POINT_MAP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(−1,14)",
+            "ru": "(−1,14)",
+            "uz": "(−1,14)"
+          },
+          "diagnostic_code": "FUN08_POINT_MAP"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(3,14)",
+            "ru": "(3,14)",
+            "uz": "(3,14)"
+          },
+          "diagnostic_code": "FUN08_VERTICAL_SCALE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(3,−4)",
+            "ru": "(3,−4)",
+            "uz": "(3,−4)"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "The inner input must equal −4: −2(x−1)=−4, so x−1=2 and x=3. The output becomes −3(3)+5=−4. Therefore the point is (3,−4).",
+        "ru": "Внутренний аргумент должен равняться −4: −2(x−1)=−4, поэтому x−1=2 и x=3. Выход становится −3(3)+5=−4. Значит точка равна (3,−4).",
+        "uz": "Ichki argument −4 ga teng bo‘lishi kerak: −2(x−1)=−4, demak x−1=2 va x=3. Chiqish −3(3)+5=−4 bo‘ladi. Shuning uchun nuqta (3,−4)."
+      },
+      "ai_source_skill": "P1-FUN-08",
+      "status": "draft"
+    }
+  ]
+}
