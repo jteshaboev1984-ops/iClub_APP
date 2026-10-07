@@ -3,7 +3,7 @@
 --
 -- Purpose:
 -- - provide a deterministic fingerprint of all Mathematics Tour structure/results;
--- - archive exactly which Practice memberships are switched at release;
+-- - archive exactly which legacy Practice memberships/questions are retired at release;
 -- - make cutover/rollback auditable without storing learner PII in the release audit row.
 
 create or replace function private.practice_v2_tour_invariant_snapshot_v1(
@@ -142,6 +142,7 @@ create table if not exists private.practice_v2_release_switch_audit (
   status text not null default 'prepared'
     check (status in ('prepared','published','rolled_back','failed')),
   old_active_membership_ids bigint[] not null default '{}'::bigint[],
+  old_question_ids bigint[] not null default '{}'::bigint[],
   new_membership_ids bigint[] not null default '{}'::bigint[],
   new_question_ids bigint[] not null default '{}'::bigint[],
   old_active_membership_count integer not null default 0,
@@ -163,4 +164,4 @@ comment on function private.practice_v2_tour_invariant_snapshot_v1(bigint) is
 'Private deterministic fingerprint of all Tour structure/results for one subject. Used to prove Practice v2 release does not alter protected Tour history.';
 
 comment on table private.practice_v2_release_switch_audit is
-'Private exact membership/question switch archive for Mathematics Practice v2 controlled publish/rollback.';
+'Private exact legacy/new membership and question archive for Mathematics Practice v2 reset, publish, rollback and cleanup.';
