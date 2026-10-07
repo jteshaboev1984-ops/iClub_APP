@@ -10,6 +10,7 @@ on:
       - 'security/practice-v2-input-normalization.js'
       - 'security/practice-v2-local-reset.js'
       - 'security/legacy-assessment-safe-api.js'
+      - 'exam-prep/exam-prep-host.js'
       - 'supabase/migrations/*math_practice_v2*.sql'
       - 'supabase/tests/math_practice_v2_*.sql'
       - 'supabase/preflight/math_practice_v2_*.sql'
@@ -25,6 +26,7 @@ on:
       - 'security/practice-v2-input-normalization.js'
       - 'security/practice-v2-local-reset.js'
       - 'security/legacy-assessment-safe-api.js'
+      - 'exam-prep/exam-prep-host.js'
       - 'supabase/migrations/*math_practice_v2*.sql'
       - 'supabase/tests/math_practice_v2_*.sql'
       - 'supabase/preflight/math_practice_v2_*.sql'
@@ -97,6 +99,14 @@ jobs:
           grep -q 'get_practice_review_full_safe_v5' security/legacy-assessment-safe-api.js
           grep -q 'diagnosticFeedback' app.js
           grep -q 'diagnosticNextAction' app.js
+          grep -q 'exam-prep/exam-prep-host.js?v=p304premium2-mathv2reset1' index.html
+          grep -q 'Tours history stays unchanged. Mathematics Practice starts fresh.' exam-prep/exam-prep-host.js
+          grep -q 'История Tours сохраняется. Mathematics Practice начинается заново.' exam-prep/exam-prep-host.js
+          grep -q 'Tours tarixi saqlanadi. Mathematics Practice yangidan boshlanadi.' exam-prep/exam-prep-host.js
+          ! grep -q 'Practice and Tours history stays unchanged' exam-prep/exam-prep-host.js
+          ! grep -q 'Your existing Tours and Practice history will not be changed' exam-prep/exam-prep-host.js
+          ! grep -q 'История Practice и Tours остаётся без изменений' exam-prep/exam-prep-host.js
+          ! grep -q 'Mavjud Tours va Practice tarixingiz o‘zgarmaydi' exam-prep/exam-prep-host.js
           grep -q 'Почему это ошибка' app.js
           grep -q 'Как исправить' app.js
           grep -q 'filterPracticeHistoryToCurrentQuestions' app.js

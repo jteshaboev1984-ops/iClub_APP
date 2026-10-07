@@ -6,7 +6,7 @@ Owner-approved Practice policy: **legacy Mathematics Practice progress/history d
 
 ## Release model
 
-This release is a controlled **Practice reset + new bank publish**.
+This release is a controlled **Practice reset + new bank publish**. Exam Prep learner-facing copy is aligned with this policy in EN/RU/UZ: Tours are preserved, while Mathematics Practice starts fresh on the updated question set.
 
 What is intentionally reset:
 - legacy Mathematics Practice attempts and answers;
