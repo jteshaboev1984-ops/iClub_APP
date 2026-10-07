@@ -48,6 +48,11 @@ jobs:
           grep -q "staged_practice_v2_questions_must_not_be_tour_questions" /tmp/math-practice-v2-stage.sql
           grep -q "staging_must_not_publish_runtime_content" /tmp/math-practice-v2-stage.sql
 
+      - name: Run staging generator regression
+        run: |
+          node --check scripts/math-practice-v2-staging-generator-regression.cjs
+          node scripts/math-practice-v2-staging-generator-regression.cjs
+
 
       - name: Run release safety guard
         run: |
