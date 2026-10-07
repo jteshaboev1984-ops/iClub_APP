@@ -5359,8 +5359,13 @@ async function getClosedPracticeQuestionIds(subjectId, uid, questionIds) {
   );
 }
 
+function practiceHistoryStoragePrefix(subjectKey) {
+  const key = String(subjectKey || "").trim().toLowerCase();
+  return key === "mathematics" ? "practice_history_v3" : "practice_history_v2";
+}
+
 function practiceStorageKey(subjectKey, practiceTourNo = 1) {
-  return `practice_history_v2:${subjectKey}:tour_${Number(practiceTourNo || 1)}`;
+  return `${practiceHistoryStoragePrefix(subjectKey)}:${subjectKey}:tour_${Number(practiceTourNo || 1)}`;
 }
 
 function loadPracticeHistory(subjectKey, practiceTourNo = 1) {
@@ -5432,7 +5437,7 @@ function updatePracticeHistory(subjectKey, practiceTourNo, attempt) {
 }
 
 function loadAllPracticeHistoryBySubject(subjectKey) {
-  const prefix = `practice_history_v2:${subjectKey}:tour_`;
+  const prefix = `${practiceHistoryStoragePrefix(subjectKey)}:${subjectKey}:tour_`;
   const allAttempts = [];
 
   try {
