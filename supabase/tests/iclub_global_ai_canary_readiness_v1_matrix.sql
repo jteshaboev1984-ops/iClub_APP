@@ -314,7 +314,7 @@ DECLARE
   rid uuid:=gen_random_uuid();
   period_status text;
   started timestamptz;
-  reset_at timestamptz;
+  v_reset timestamptz;
 BEGIN
   v:=public.reserve_iclub_ai_usage_service_v1(rid,uid,'pro_v1','prepared');
   IF coalesce((v->>'allowed')::boolean,false) IS NOT TRUE THEN
@@ -326,16 +326,16 @@ BEGIN
     RAISE EXCEPTION 'Released failure cleanup failed: %',v;
   END IF;
 
-  SELECT status,started_at,reset_at
-  INTO period_status,started,reset_at
-  FROM private.iclub_ai_usage_periods
-  WHERE user_id=uid
-  ORDER BY created_at DESC
+  SELECT p.status,p.started_at,p.reset_at
+  INTO period_status,started,v_reset
+  FROM private.iclub_ai_usage_periods p
+  WHERE p.user_id=uid
+  ORDER BY p.created_at DESC
   LIMIT 1;
 
-  IF period_status<>'closed' OR started IS NOT NULL OR reset_at IS NOT NULL THEN
+  IF period_status<>'closed' OR started IS NOT NULL OR v_reset IS NOT NULL THEN
     RAISE EXCEPTION 'Failed first response started usage clock status=% started=% reset=%',
-      period_status,started,reset_at;
+      period_status,started,v_reset;
   END IF;
 END
 $failure_no_charge$;
