@@ -777,7 +777,9 @@ begin
         'legacy_questions_before',v_old_question_count,
         'legacy_questions_deleted',v_deleted_question_count,
         'legacy_questions_retained',v_retained_question_count,
-        'legacy_memberships_deleted',v_audit.old_active_membership_count
+        'legacy_memberships_deleted',v_audit.old_active_membership_count,
+        'legacy_cleanup_tour_snapshot_before',v_before,
+        'legacy_cleanup_tour_snapshot_after',v_after
       )
   where id=v_audit.id;
 
