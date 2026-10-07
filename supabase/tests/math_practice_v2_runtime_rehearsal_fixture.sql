@@ -237,6 +237,10 @@ returns jsonb language sql as $$ select '{}'::jsonb $$;
 create or replace function public.get_practice_review_safe_v4(bigint)
 returns jsonb language sql as $$ select '{}'::jsonb $$;
 
+revoke all on function public.submit_practice_attempt(bigint,integer,numeric,integer,jsonb) from public,anon,authenticated;
+revoke all on function public.submit_practice_answer_safe(bigint,bigint,text,integer,integer) from public,anon,authenticated;
+revoke all on function public.get_practice_review_safe_v4(bigint) from public,anon,authenticated;
+
 grant execute on function public.submit_practice_attempt(bigint,integer,numeric,integer,jsonb) to authenticated,service_role;
 grant execute on function public.submit_practice_answer_safe(bigint,bigint,text,integer,integer) to authenticated,service_role;
 grant execute on function public.get_practice_review_safe_v4(bigint) to authenticated,service_role;
