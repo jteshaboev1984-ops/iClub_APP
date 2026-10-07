@@ -9,28 +9,24 @@ Owner decision: preserve Tour results/history as the protected user-data boundar
 ## Current checkpoint — 2026-10-07
 
 - Block 1 Content Architecture 2.0: COMPLETE / gate passed.
-- Block 2 P1 content production: COMPLETE through all 45 canonical skills.
-- Practice 1 Quadratics: 68/68 authored; full content QA passed; QA report recorded.
-- Practice 2 Functions & transformations: 80/80 authored; full content QA passed; QA report recorded.
-- Practice 3 Coordinate Geometry: 68/68 authored; full content QA passed; QA report recorded.
-- Practice 4 Circular Measure + Trigonometry: 77/77 authored; full content QA passed; QA report recorded.
-- Practice 5 Binomial Expansion + Series: 66/66 authored; full content QA passed; QA report recorded.
-- Practice 6 Differentiation: 70/70 authored; full content QA passed; QA report recorded.
-- Practice 7 Integration: 66/66 authored; full content QA passed; QA report recorded.
-- Total authored P1 Practice v2 items: 495 across all 45 canonical P1 skills.
-- Global 495-item QA: PASS in GitHub Actions. Qtype 277 MCQ / 218 input; difficulty 124/226/145; global A/B/C/D=68/69/70/70; max same-letter run=2.
-- Evaluator target regression: PASS across 218 input questions, 478 accepted cases, 654 rejected cases and all 25 authored Unicode-minus cases.
-- Frontend Unicode-minus normalizer: prepared and CI-gated without rewriting the large app.js file.
-- Production answer-key read-only audit: public.questions has RLS enabled with no anon/authenticated SELECT; current session resume withholds correct answer/explanation until that question is answered.
-- Legacy answer-oracle risk identified: direct authenticated execution of submit_practice_attempt, submit_practice_answer_safe and older get_practice_review_safe_v4. Branch-only revoke migration prepared; production unchanged.
-- Topic drill v4 availability bypass identified. Pool/tour-gated start_practice_topic_drill_safe_v5 prepared; branch adapter points to v5.
-- Main Practice selector v5 prepared: existing tour locks + canonical-skill round-robin + wrong-skill/exact-wrong history + authored-role exposure + transfer priority + already-correct exclusion.
-- Private Practice v2 metadata/diagnostic catalog foundation prepared.
-- Work-branch adapter now targets start_practice_session_auto_safe_v5 and start_practice_topic_drill_safe_v5. Resume/submit/finalize remain on hardened v4 contracts.
-- Latest Mathematics Practice v2 Global QA workflow after v5 wiring: PASS.
-- All database migrations described above are branch-only and have NOT been applied to production.
-- Production/Supabase user data and Tour results: unchanged by this work.
-- Next macro gate: deterministic 495-question staging/import package + live READ-ONLY dependency/Tour invariant preflight before any controlled migration.
+- Block 2 full P1 content production: COMPLETE — 495 original items across all 45 canonical P1 skills.
+- Global content QA: PASS — 277 MCQ / 218 input; difficulty 124/226/145; A/B/C/D=68/69/70/70; max same-letter run=2.
+- Input evaluator regression: PASS across all 218 input questions, 478 accepted cases, 654 rejected cases and 25 Unicode-minus cases.
+- Deterministic diagnostics, EN/RU/UZ, Practice↔Tour separation and AI source-card coverage are complete for all seven Practices.
+- Block 3 migration/cleanup design: COMPLETE in branch as a non-destructive membership-switch release model. Old Practice question/history rows are preserved; no physical deletion is part of release.
+- Live production baseline rechecked READ ONLY: 7 active Mathematics Practice pools, 490 active memberships, zero active Practice↔active Tour overlap.
+- Protected Mathematics Tour baseline: 14 Tours, 300 Tour memberships, 149 attempts, 2477 answer rows. Deterministic fingerprints recorded in `docs/mathematics-practice-v2-live-production-baseline-2026-10-07.md`.
+- Existing Mathematics Practice history is preserved: 411 non-lab attempts, 4074 answers, 167 users.
+- Current Mathematics v4 session/drill rows at baseline: 0 / 0, but an explicit compatibility audit now protects any in-flight v4 session created before cutover.
+- Additive branch-only runtime hardening prepared: Unicode-minus normalization; legacy answer-oracle closure; private v2 metadata; pool-gated topic drill v5; skill/role-aware selector v5; current-bank mistakes v5; deterministic post-answer feedback/finalizer/review v5.
+- Deterministic 495-question staging generator prepared with per-Practice contiguous order and invisible staging gates.
+- Atomic publish/rollback switch prepared. It archives exact membership IDs, switches 490 old → 495 new memberships atomically, fingerprints Tours before/after, and contains no Practice-history deletion or Tour DML.
+- READ-ONLY release preflight, post-publish audit, post-rollback audit and in-flight compatibility audit are prepared.
+- Controlled release runbook prepared. Learner communication preserves Tour results and explains that new Practice progress is measured on the new bank.
+- Production/Supabase writes from this Practice v2 work: NONE. All migrations/content remain branch-only.
+- Block 4 implementation package is prepared but not production-tested because no isolated preview database has been created/applied in this workflow.
+- Next macro gate: isolated database migration/staging/regression rehearsal, then controlled production release only after every release audit remains green.
+
 
 ## Purpose
 
