@@ -14938,7 +14938,10 @@ head.innerHTML = `
 const imgEl = head.querySelector(".catalog-ico-img");
 setImgWithFallback(imgEl, subjectIconCandidates(s.key));
 
-    head.addEventListener("click", () => {
+    head.addEventListener("click", async () => {
+    const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(s.key);
+    if (accessOk === false) return;
+
     // "Открыть" — без изменения профиля, как в контракте
     state.courses.subjectKey = s.key;
     saveState();
@@ -14998,6 +15001,12 @@ stateLine.textContent = isCompetitiveTab
 
   input.addEventListener("change", async (e) => {
     e.stopPropagation();
+
+    const legacyToggleAllowed = await window.iClubCommercialAccessUI?.guardLegacyToggle?.(s.key);
+    if (legacyToggleAllowed === false) {
+      input.checked = isActiveInCurrentTab;
+      return;
+    }
 
     const wantsOn = !!input.checked;
     const fresh = loadProfile() || profile;
@@ -15245,7 +15254,10 @@ if (mainSubjects.length) {
    }
 }
 
-        function openSubjectHub(subjectKey) {
+        async function openSubjectHub(subjectKey) {
+    const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(subjectKey);
+    if (accessOk === false) return;
+
     if (!isSubjectActive(subjectKey)) {
       showToast(t("not_available"));
       setTab("courses");
@@ -15447,8 +15459,16 @@ async function renderSubjectHubMentorCard(subjectKey) {
   // Subject Hub rendering
   // ---------------------------
     async function renderSubjectHub() {
+  const subjectKey = state.courses.subjectKey;
+  const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(subjectKey);
+  if (accessOk === false) {
+    replaceCourses("all-subjects");
+    renderAllSubjects();
+    return;
+  }
+
   const profile = loadProfile();
-  const subj = subjectByKey(state.courses.subjectKey);
+  const subj = subjectByKey(subjectKey);
 
   // P0-14 HOST BRIDGE: isolated Exam Prep visibility/lifecycle sync; no domain logic here.
   try {
@@ -15460,8 +15480,6 @@ async function renderSubjectHubMentorCard(subjectKey) {
 
   const titleEl = $("#subject-hub-title");
   const metaEl = $("#subject-hub-meta");
-
-  const subjectKey = state.courses.subjectKey;
 
   if (!isSubjectActive(subjectKey)) {
     showToast(t("not_available") || "Недоступно");
@@ -22939,6 +22957,9 @@ if (action === "practice-exit") {
 }
 
            if (action === "open-tours") {
+        const planCompetitiveOk = await window.iClubCommercialAccessUI?.guardCompetitive?.(state.courses.subjectKey);
+        if (planCompetitiveOk === false) return;
+
         // additional subjects: tours are not available
         if (isAdditionalSubjectKey(state.courses.subjectKey)) {
         toastToursDenied("not_main");
