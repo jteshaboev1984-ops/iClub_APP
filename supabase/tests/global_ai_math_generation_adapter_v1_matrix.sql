@@ -224,18 +224,27 @@ END
 $runtime_off$;
 
 -- Protected assessment remains authoritative before provider generation.
+-- The isolated matrix temporarily replaces only the protected-assessment reader;
+-- ROLLBACK restores the production implementation.
+CREATE OR REPLACE FUNCTION private.exam_prep_has_active_protected_assessment_v1(p_user_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path=''
+AS $assessment_stub$
+  SELECT coalesce(
+    nullif(current_setting('global_ai.math_adapter_blocked_user',true),'')::uuid = p_user_id,
+    false
+  );
+$assessment_stub$;
+
 DO $assessment$
 DECLARE
   v jsonb;
   uid uuid:=(SELECT user_id FROM math_adapter_people WHERE person_key='pro_canary');
-  sid uuid:=gen_random_uuid();
 BEGIN
-  INSERT INTO private.exam_prep_sessions(
-    id,user_id,component_code,session_type,status,started_at
-  ) VALUES(
-    sid,uid,'P5','diagnostic','active',now()
-  );
-
+  PERFORM set_config('global_ai.math_adapter_blocked_user',uid::text,true);
   PERFORM set_config('request.jwt.claim.sub',uid::text,true);
   PERFORM set_config('request.jwt.claim.role','authenticated',true);
 
@@ -246,7 +255,7 @@ BEGIN
     RAISE EXCEPTION 'Cross-component assessment blackout failed for skill question: %',v;
   END IF;
 
-  DELETE FROM private.exam_prep_sessions WHERE id=sid;
+  PERFORM set_config('global_ai.math_adapter_blocked_user','',true);
 END
 $assessment$;
 
