@@ -140,4 +140,6 @@
     guardLegacyToggle: (subjectKey, options) => guard(subjectKey,"legacy_toggle",options),
     invalidate
   });
+
+  window.dispatchEvent(new CustomEvent("iclub:commercial-access-ready"));
 })();
