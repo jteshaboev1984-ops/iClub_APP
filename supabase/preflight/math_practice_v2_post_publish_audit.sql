@@ -180,6 +180,15 @@ begin
   end if;
 
   select count(*)::integer into v_count
+  from public.recommendations r
+  where r.subject_id=v_subject_id
+    and r.source_type='practice';
+
+  if v_count<>0 then
+    raise exception 'post_publish_practice_recommendations_not_reset_%',v_count;
+  end if;
+
+  select count(*)::integer into v_count
   from private.exam_prep_legacy_evidence_references e
   join public.practice_pool_questions ppq
     on ppq.question_id=e.question_id
@@ -223,22 +232,12 @@ begin
      )
      or has_function_privilege(
        'authenticated',
-       'public.get_practice_session_resume_safe_v4(bigint)',
-       'execute'
-     )
-     or has_function_privilege(
-       'authenticated',
        'public.submit_practice_session_answer_safe_v4(bigint,bigint,text,integer,integer)',
        'execute'
      )
      or has_function_privilege(
        'authenticated',
        'public.finalize_practice_session_safe_v4(bigint,integer)',
-       'execute'
-     )
-     or has_function_privilege(
-       'authenticated',
-       'public.get_practice_drill_resume_safe_v4(bigint)',
        'execute'
      )
      or has_function_privilege(
@@ -250,6 +249,16 @@ begin
   end if;
 
   if not has_function_privilege(
+       'authenticated',
+       'public.get_practice_session_resume_safe_v4(bigint)',
+       'execute'
+     )
+     or not has_function_privilege(
+       'authenticated',
+       'public.get_practice_drill_resume_safe_v4(bigint)',
+       'execute'
+     )
+     or not has_function_privilege(
        'authenticated',
        'public.start_practice_session_auto_safe_v5(bigint,text)',
        'execute'
