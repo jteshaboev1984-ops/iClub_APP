@@ -53,6 +53,8 @@ for(const token of [
   'delete from public.practice_sessions_v4',
   'delete from public.practice_drill_sessions_v4',
   'delete from public.user_answer_diagnosis',
+  'delete from public.recommendations',
+  "source_type='practice'",
   'delete from public.practice_attempts',
   "legacy_source='practice_answers'",
   'practice_progress_reset',
@@ -127,6 +129,7 @@ checkReadOnly('post-publish audit',postPublish,[
   'post_publish_practice_sessions_not_reset_',
   'post_publish_practice_drills_not_reset_',
   'post_publish_practice_diagnoses_not_reset_',
+  'post_publish_practice_recommendations_not_reset_',
   'post_publish_legacy_practice_evidence_not_reset_',
   'post_publish_superseded_oracle_or_selector_rpc_still_exposed',
 ]);
@@ -174,12 +177,20 @@ if(/submit_practice_attempt\s*\(/i.test(
 if(!app.includes('key === "mathematics" ? "practice_history_v3" : "practice_history_v2"')){
   fail('Mathematics Practice local history namespace is not reset for the new bank');
 }
+if(!app.includes('String(subjectKey).trim().toLowerCase() !== "mathematics"')){
+  fail('Mathematics Practice recommendations may still fall back to stale local v1 recommendations');
+}
+if(!app.includes('const tourStore = loadMyTourRecs()')){
+  fail('Tour recommendation fallback must remain separate from Practice reset');
+}
 
 console.log(JSON.stringify({
   ok:errors.length===0,
   protectedTourDml:'none',
   practiceReset:'intentional',
   legacyQuestionCleanup:'protected-reference-gated',
+  practiceRecommendationsReset:'server-only-mathematics',
+  tourRecommendationsPreserved:true,
   mathematicsLocalHistoryNamespace:'practice_history_v3',
   preflightReadOnly:true,
   postPublishAuditReadOnly:true,
