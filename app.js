@@ -5386,6 +5386,31 @@ function savePracticeHistory(subjectKey, practiceTourNo = 1, data) {
   } catch {}
 }
 
+function filterPracticeHistoryToCurrentQuestions(history, questionIds) {
+  const h = history && typeof history === "object" ? history : { best: null, last: [] };
+  const activeIds = new Set(
+    (Array.isArray(questionIds) ? questionIds : [])
+      .map(Number)
+      .filter(id => Number.isFinite(id) && id > 0)
+  );
+
+  if (!activeIds.size) return { best: null, last: [] };
+
+  const belongsToCurrentBank = (attempt) => {
+    const details = Array.isArray(attempt?.details) ? attempt.details : [];
+    const ids = details
+      .map(d => Number(d?.id || 0))
+      .filter(id => Number.isFinite(id) && id > 0);
+
+    return ids.length > 0 && ids.every(id => activeIds.has(id));
+  };
+
+  return {
+    best: belongsToCurrentBank(h.best) ? h.best : null,
+    last: (Array.isArray(h.last) ? h.last : []).filter(belongsToCurrentBank)
+  };
+}
+
 function updatePracticeHistory(subjectKey, practiceTourNo, attempt) {
   const h = loadPracticeHistory(subjectKey, practiceTourNo);
   const last = [attempt, ...(h.last || [])].slice(0, PRACTICE_CONFIG.keepLastAttempts);
@@ -5725,7 +5750,10 @@ async function computePracticeStageStats(subjectKey, forcedTourNo = null) {
   const masteredCount = Array.from(closedIds).length;
   const openCount = Math.max(0, totalCount - masteredCount);
 
-  const h = loadPracticeHistory(subjectKey, practiceTourNo);
+  const h = filterPracticeHistoryToCurrentQuestions(
+    loadPracticeHistory(subjectKey, practiceTourNo),
+    allIds
+  );
 
   return {
     practiceTourNo,
