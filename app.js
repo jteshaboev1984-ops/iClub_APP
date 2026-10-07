@@ -15742,6 +15742,15 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
     const correctAnswer = row.correct_answer == null ? '' : String(row.correct_answer).trim();
     q.correctAnswer = correctAnswer;
     q.explanation = pickContentText(row, 'explanation') || '';
+
+    const diagnostic = row?.diagnostic && typeof row.diagnostic === 'object'
+      ? row.diagnostic
+      : null;
+
+    q.diagnosticStatus = String(row?.diagnostic_status || (diagnostic ? 'mapped' : '')).trim() || null;
+    q.diagnosticFeedback = diagnostic ? (pickContentText(diagnostic, 'feedback') || '') : '';
+    q.diagnosticNextAction = diagnostic ? (pickContentText(diagnostic, 'next_action') || '') : '';
+
     if (q.type === 'mcq') {
       q.correctIndex = practiceSafeCorrectIndex(correctAnswer, q.options || []);
     }
@@ -15829,6 +15838,13 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
         userAnswer: String(row?.user_answer ?? ''),
         correctAnswer: String(row?.correct_answer ?? ''),
         explanation: pickContentText(row || {}, 'explanation') || '',
+        diagnosticStatus: String(row?.diagnostic_status || '').trim() || null,
+        diagnosticFeedback: row?.diagnostic && typeof row.diagnostic === 'object'
+          ? (pickContentText(row.diagnostic, 'feedback') || '')
+          : '',
+        diagnosticNextAction: row?.diagnostic && typeof row.diagnostic === 'object'
+          ? (pickContentText(row.diagnostic, 'next_action') || '')
+          : '',
         isCorrect: !!row?.is_correct,
         timeSpent: Math.max(0, Number(row?.time_spent || 0)),
         book_ref: String(row?.book_ref || '').trim() || null,
@@ -17946,6 +17962,9 @@ try {
      isCorrect: !!quiz.correct[i],
      timeSpent: Number(quiz.timeSpent[i]) || 0,
      explanation: q.explanation || "",
+     diagnosticStatus: q.diagnosticStatus || null,
+     diagnosticFeedback: q.diagnosticFeedback || "",
+     diagnosticNextAction: q.diagnosticNextAction || "",
      book_id: q.book_id || q.bookId || null,
      book_reference: String(q.book_reference || q.bookReference || q.book_ref || q.bookRef || "").trim() || null,
      book_ref: String(q.book_ref || q.bookReference || q.book_reference || q.bookRef || "").trim() || null
@@ -18326,6 +18345,8 @@ const diffText = t(diffKey) || d.difficulty || "";
 const yourAnsLabel = t("your_answer") || "Ваш ответ";
 const correctLabel = t("correct_answer") || "Правильно";
 const explLabel = t("rec_show_expl") || "Объяснение";
+const mistakeLabel = tr3("Почему это ошибка", "Nega bu xato", "Why this is wrong");
+const nextStepLabel = tr3("Как исправить", "Qanday tuzatish kerak", "How to fix it");
 
 const topicText = String(d.topic || t("topic_general") || "General").trim();
 const subtopicText = String(d.subtopic || "").trim();
@@ -18343,6 +18364,8 @@ row.innerHTML = `
     ${escapeHTML(correctLabel)}: <b>${escapeHTML(corrDisp || "—")}</b>
   </div>
 
+  ${!d.isCorrect && d.diagnosticFeedback ? `<div class="muted small" style="margin-top:8px"><b>${escapeHTML(mistakeLabel)}:</b> ${escapeHTML(d.diagnosticFeedback)}</div>` : ``}
+  ${!d.isCorrect && d.diagnosticNextAction ? `<div class="muted small" style="margin-top:6px"><b>${escapeHTML(nextStepLabel)}:</b> ${escapeHTML(d.diagnosticNextAction)}</div>` : ``}
   ${d.explanation ? `<div class="muted small" style="margin-top:8px"><b>${escapeHTML(explLabel)}:</b> ${escapeHTML(d.explanation)}</div>` : ``}
 `;
         body.appendChild(row);
