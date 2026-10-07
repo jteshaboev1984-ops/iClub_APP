@@ -61,6 +61,11 @@ const requiredRelease=[
   "quality_status='published'",
   'protected_tour_invariant_changed_during_release',
   'protected_tour_invariant_changed_during_rollback',
+  'release_expected_exactly_one_active_pool_per_practice',
+  'release_expected_201_staged_diagnostics',
+  'release_expected_868_staged_diagnostic_mappings',
+  'release_staged_practice_',
+  'order_not_contiguous',
   'membership_switch_no_history_delete',
 ];
 for(const token of requiredRelease) if(!release.includes(token)) fail(`release switch missing required invariant: ${token}`);
