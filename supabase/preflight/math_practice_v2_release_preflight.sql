@@ -167,6 +167,23 @@ begin
       raise exception 'preflight_practice_%_membership_expected_%_found_%',
         v_tour_no,v_expected_n,v_actual_n;
     end if;
+
+    if exists(
+      select 1
+      from public.practice_pool_questions ppq
+      join public.practice_pools p on p.id=ppq.pool_id
+      join private.practice_v2_question_meta m on m.question_id=ppq.question_id
+      where m.release_version='math_p1_practice_v2_2026_10_07'
+        and m.practice_no=v_tour_no
+        and p.subject_id=v_subject_id
+        and p.tour_no=v_tour_no
+      group by p.id
+      having min(ppq.order_no)<>1
+         or max(ppq.order_no)<>count(*)::integer
+         or count(distinct ppq.order_no)<>count(*)
+    ) then
+      raise exception 'preflight_practice_%_membership_order_not_contiguous',v_tour_no;
+    end if;
   end loop;
 
   -- New bank must not reuse any current active legacy membership question id.
