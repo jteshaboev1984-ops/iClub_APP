@@ -45,6 +45,8 @@ Practice 2 already has 54 inactive historical membership rows. Therefore the rel
 
 Owner decision (2026-10-07): legacy Mathematics Practice history does **not** need to be preserved. The 411 attempts / 4074 answers above are therefore reset scope, not protected data.
 
+Practice-derived recommendations are also reset scope. Latest READ-ONLY count: **791** Mathematics recommendations with `source_type='practice'`. The **572** Mathematics recommendations with `source_type='tour'` are protected and must remain.
+
 Dependency audit of the 490 current Practice question IDs:
 - 4 are referenced by historical Tour memberships; those question rows must remain even after Practice cleanup.
 - those 4 currently have no Tour answer or Tour session-answer references;
