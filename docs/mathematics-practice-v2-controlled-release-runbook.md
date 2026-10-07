@@ -20,6 +20,16 @@ This release is a **membership switch**, not a destructive replacement.
 
 This design prevents foreign-key/history loss and avoids touching protected Tour evidence.
 
+## Phase 0 — live schema compatibility check
+
+Before any database migration, run:
+
+`supabase/preflight/math_practice_v2_schema_compatibility.sql`
+
+It is read-only and verifies that the current production schema still matches the assumptions used by staging and v5 runtime: required tables/columns, Practice pool uniqueness, question/diagnostic constraints, the v4 compatibility bridge, the single active Mathematics subject and seven active Mathematics Practice pools.
+
+Latest 2026-10-07 READ-ONLY result: **PASS** (`schema_compatible`).
+
 ## Phase A — additive database preparation
 
 Apply, in timestamp order, the branch migrations up to and including:
