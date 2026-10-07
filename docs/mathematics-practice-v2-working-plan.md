@@ -206,7 +206,7 @@ Before any destructive production change:
 - switch the active bank atomically;
 - keep old question rows until the new bank passes smoke QA;
 - then delete only legacy question rows with no Tour or other protected reference;
-- move Mathematics local Practice history to a new storage namespace so old browser history cannot reappear.
+- move Mathematics local Practice history to a new storage namespace and run a one-time pre-app cleanup of stale Mathematics Practice draft/runtime/recommendation state so old browser state cannot reappear; preserve Tour local state and Tour recommendations.
 
 Gate: prove Tour structure/results are unchanged before and after reset, publish and cleanup.
 

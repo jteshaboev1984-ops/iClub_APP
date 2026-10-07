@@ -8,6 +8,7 @@ on:
       - 'content/math/practice_v2/**'
       - 'scripts/math-practice-v2-*.cjs'
       - 'security/practice-v2-input-normalization.js'
+      - 'security/practice-v2-local-reset.js'
       - 'security/legacy-assessment-safe-api.js'
       - 'supabase/migrations/*math_practice_v2*.sql'
       - 'supabase/tests/math_practice_v2_*.sql'
@@ -22,6 +23,7 @@ on:
       - 'content/math/practice_v2/**'
       - 'scripts/math-practice-v2-*.cjs'
       - 'security/practice-v2-input-normalization.js'
+      - 'security/practice-v2-local-reset.js'
       - 'security/legacy-assessment-safe-api.js'
       - 'supabase/migrations/*math_practice_v2*.sql'
       - 'supabase/tests/math_practice_v2_*.sql'
@@ -77,9 +79,12 @@ jobs:
       - name: Check Practice runtime safety wiring
         run: |
           node --check security/practice-v2-input-normalization.js
+          node --check security/practice-v2-local-reset.js
           node --check security/legacy-assessment-safe-api.js
           node --check app.js
+          node scripts/math-practice-v2-local-reset-regression.cjs
           grep -q 'security/practice-v2-input-normalization.js?v=mathv2minus1' index.html
+          grep -q 'security/practice-v2-local-reset.js?v=mathv2localreset1' index.html
           grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1-mathv2feedback1' index.html
           grep -q 'app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1-ai2ctx1-mathv2feedback1' index.html
           grep -q 'start_practice_session_auto_safe_v5' security/legacy-assessment-safe-api.js

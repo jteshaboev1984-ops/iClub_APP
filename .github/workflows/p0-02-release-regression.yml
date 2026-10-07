@@ -10,6 +10,8 @@ on:
       - index.html
       - i18n.js
       - security/legacy-assessment-safe-api.js
+      - security/practice-v2-local-reset.js
+      - scripts/math-practice-v2-local-reset-regression.cjs
       - scripts/practice-content-language-preservation.cjs
       - .github/workflows/p0-02-release-regression.yml
   pull_request:
@@ -19,6 +21,8 @@ on:
       - index.html
       - i18n.js
       - security/legacy-assessment-safe-api.js
+      - security/practice-v2-local-reset.js
+      - scripts/math-practice-v2-local-reset-regression.cjs
       - scripts/practice-content-language-preservation.cjs
       - .github/workflows/p0-02-release-regression.yml
   workflow_dispatch:
@@ -42,8 +46,12 @@ jobs:
           node --check app.js
           node --check i18n.js
           node --check security/legacy-assessment-safe-api.js
+          node --check security/practice-v2-local-reset.js
+          node --check scripts/math-practice-v2-local-reset-regression.cjs
           node --check scripts/practice-content-language-preservation.cjs
+          node scripts/math-practice-v2-local-reset-regression.cjs
           grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1-mathv2feedback1' index.html
+          grep -q 'security/practice-v2-local-reset.js?v=mathv2localreset1' index.html
           grep -q 'app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1-ai2ctx1-mathv2feedback1-mathv2reset2' index.html
           grep -q 'start_practice_session_auto_safe_v5' security/legacy-assessment-safe-api.js
           grep -q 'get_practice_session_resume_safe_v4' security/legacy-assessment-safe-api.js

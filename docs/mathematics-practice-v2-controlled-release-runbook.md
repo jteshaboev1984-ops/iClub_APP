@@ -99,9 +99,10 @@ Deploy the frontend/runtime with:
 - current-bank mistake review/drill v5;
 - deterministic answer evaluation/feedback;
 - Unicode-minus normalization;
-- Mathematics local Practice history namespace `practice_history_v3`.
+- Mathematics local Practice history namespace `practice_history_v3`;
+- a one-time pre-app Mathematics Practice cleanup that removes only stale Mathematics Practice draft/history/recommendation/runtime state and leaves Tour state/storage untouched.
 
-The old Mathematics local Practice history therefore cannot reappear after the database reset.
+The old Mathematics local Practice history or paused legacy session therefore cannot reappear after the database reset. The cleanup marks itself complete once, so new v2 Practice progress created afterward is preserved.
 
 Do not publish the new bank yet.
 

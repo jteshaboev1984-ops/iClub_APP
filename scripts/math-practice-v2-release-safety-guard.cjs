@@ -14,6 +14,7 @@ const files={
   postRollback:path.join(ROOT,'supabase','preflight','math_practice_v2_post_rollback_audit.sql'),
   schemaCompat:path.join(ROOT,'supabase','preflight','math_practice_v2_schema_compatibility.sql'),
   feedback:path.join(ROOT,'supabase','migrations','20261007006700_math_practice_v2_deterministic_feedback_v5.sql'),
+  localReset:path.join(ROOT,'security','practice-v2-local-reset.js'),
   app:path.join(ROOT,'app.js'),
 };
 
@@ -32,6 +33,7 @@ const postCleanup=fs.readFileSync(files.postCleanup,'utf8');
 const postRollback=fs.readFileSync(files.postRollback,'utf8');
 const schemaCompat=fs.readFileSync(files.schemaCompat,'utf8');
 const feedback=fs.readFileSync(files.feedback,'utf8');
+const localReset=fs.readFileSync(files.localReset,'utf8');
 const app=fs.readFileSync(files.app,'utf8');
 
 for(const table of ['tours','tour_questions','tour_attempts','tour_answers','tour_session_answers_v4','certificates','ratings_cache']){
@@ -194,6 +196,30 @@ if(!app.includes('const tourStore = loadMyTourRecs()')){
   fail('Tour recommendation fallback must remain separate from Practice reset');
 }
 
+for(const token of [
+  'iclub_math_practice_v2_local_reset_20261007_v1',
+  'practice_history_v2:mathematics:tour_',
+  'practice_history_v3:mathematics:tour_',
+  'iclub_practice_draft_v1',
+  'iclub_my_recs_v1',
+  'iclub_state_v1',
+  'source_type',
+  '"tour"',
+  '"subject-hub"',
+]){
+  if(!localReset.includes(token)) fail(`Mathematics local reset missing ${token}`);
+}
+for(const forbidden of [
+  'localStorage.clear',
+  'sessionStorage',
+  'iclub_my_tour_recs_v1',
+  'delete savedState.tourContext',
+  'delete courses.lastTourAttemptId',
+  'delete courses.lastTourCertificateId',
+]){
+  if(localReset.includes(forbidden)) fail(`Mathematics local reset touches protected storage/state: ${forbidden}`);
+}
+
 console.log(JSON.stringify({
   ok:errors.length===0,
   protectedTourDml:'none',
@@ -203,6 +229,7 @@ console.log(JSON.stringify({
   tourRecommendationsPreserved:true,
   tourRoadmapsAndCertificatesPreserved:true,
   mathematicsLocalHistoryNamespace:'practice_history_v3',
+  mathematicsLocalReset:'one-time-before-app-boot',
   preflightReadOnly:true,
   postPublishAuditReadOnly:true,
   postCleanupAuditReadOnly:true,
