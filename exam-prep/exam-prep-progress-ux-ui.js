@@ -253,7 +253,7 @@
     if (!skillButtons.length || !summary) return;
     const c = words();
     const firstValue = String(summary.querySelector('.ep-views-stat strong')?.textContent || '');
-    const match = firstValue.match(/(\\d+)\\s*\\/\\s*(\\d+)/);
+    const match = firstValue.match(/(\d+)\s*\/\s*(\d+)/);
     if (match) {
       const confirmed = Number(match[1]), total = Number(match[2]);
       const hero = node('section','ep-pux-tracker-hero');
@@ -323,14 +323,14 @@
   function showDashboard(card, data) {
     const { state } = data, c = words();
     const panel = node('section','ep-pux-panel ep-pux-overview');
-    panel.setAttribute('aria-label',c.goals);
+    panel.setAttribute('aria-label',c.programProgress);
+    progressHero(panel,state,c);
     if (state.hasPlan) {
       metric(panel,c.goals,state.goalCounter);
     } else {
       panel.append(node('p','ep-pux-note',missingPlanText(state,c)));
     }
     metric(panel,c.total,state.finalizedSessions);
-    showConfirmedMetrics(panel,state,c);
     metric(panel,c.corrections,state.openCorrections);
     const actions = card.querySelector('.ep-live-actions');
     if (actions) actions.before(panel); else card.append(panel);
@@ -405,7 +405,7 @@
   }
   async function showPlan(card, data, component) {
     const { state, raw, tracker } = data, c = words();
-    latestPlan.set(component,state);
+    latestPlan.set(component,data);
     const actionRows = [];
     const section = node('section','ep-pux-panel ep-pux-week');
     section.setAttribute('aria-label',c.goals);
@@ -487,7 +487,7 @@
     if (!allowed() || seen.has(target)) return;
     seen.set(target,'loading');
     const expectedRoot = rootEl();
-    const data = await obtain(component,kind === 'plan');
+    const data = await obtain(component,kind === 'plan' || kind === 'completion');
     if (!target.isConnected || rootEl() !== expectedRoot || !allowed()) { seen.delete(target); return; }
     if (!data) { markError(target,component,kind); seen.set(target,'error'); return; }
     if (kind === 'dashboard') showDashboard(target,data);
@@ -497,10 +497,14 @@
   }
   function reconcile() {
     if (!allowed()) {
-      rootEl()?.querySelectorAll('.ep-pux-panel').forEach(n=>n.remove());
+      const root = rootEl();
+      root?.querySelectorAll('.ep-pux-panel,.ep-pux-tracker-hero,.ep-pux-guide').forEach(n=>n.remove());
+      root?.querySelectorAll('.ep-pux-tracker-decorated').forEach(n=>n.classList.remove('ep-pux-tracker-decorated'));
       return;
     }
     const root = rootEl();
+    const trackerScreen = root.querySelector('[data-ep-views-screen]');
+    if (trackerScreen?.querySelector('[data-ep-views-skill]')) decorateTrackerClarity(trackerScreen);
     root.querySelectorAll('.ep-live-component-card[data-ep-live-component]').forEach(card => {
       // The compact route cards are navigation only. Do not snapshot weekly goals
       // or inject a second progress panel merely because the learner opened Exam Prep.
@@ -528,8 +532,19 @@
     const card = button.closest('.ep-live-card');
     const component = String(card?.querySelector('.ep-live-head strong')?.textContent || '').match(/\b(P1|P5)\b/)?.[1];
     if (!component) return;
-    const state = latestPlan.get(component);
-    pendingBefore = state ? {component,state} : null;
+    const snapshot = latestPlan.get(component);
+    if (!snapshot?.state) { pendingBefore = null; return; }
+    const priority = Number(button.dataset.epLivePlanItem || 0);
+    const source = Array.isArray(snapshot.raw?.goals)
+      ? snapshot.raw.goals.find(row => Number(row?.action_priority_order || 0) === priority)
+      : null;
+    const skillCode = String(source?.skill_code || '') || null;
+    pendingBefore = {
+      component,
+      state:snapshot.state,
+      skillCode,
+      skillStateKey:skillStateKey(skillFromTracker(snapshot.tracker,skillCode))
+    };
   }
   function onSession(event) {
     if (event.detail?.session?.session_id) lastSession = event.detail.session;
