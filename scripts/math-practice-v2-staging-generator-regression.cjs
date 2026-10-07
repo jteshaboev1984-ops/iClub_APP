@@ -85,7 +85,7 @@ try {
   fs.writeFileSync(SAMPLE, JSON.stringify(sample, null, 2) + '\n', 'utf8');
 
   const badPractice = runGenerator();
-  if (badPractice.status === 0 || !/\\bpractice_no\\b/.test((badPractice.stderr || '') + (badPractice.stdout || ''))) {
+  if (badPractice.status === 0 || !/\bpractice_no\b/.test((badPractice.stderr || '') + (badPractice.stdout || ''))) {
     fail('generator did not reject a question authored into the wrong Practice');
   }
 
@@ -96,7 +96,7 @@ try {
   fs.writeFileSync(SAMPLE, JSON.stringify(sampleSkill, null, 2) + '\n', 'utf8');
 
   const badSkill = runGenerator();
-  if (badSkill.status === 0 || !/\\bprimary_skill\\b/.test((badSkill.stderr || '') + (badSkill.stdout || ''))) {
+  if (badSkill.status === 0 || !/\bprimary_skill\b/.test((badSkill.stderr || '') + (badSkill.stdout || ''))) {
     fail('generator did not reject a question whose primary skill disagrees with its skill file');
   }
 } finally {
