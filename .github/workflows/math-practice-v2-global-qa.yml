@@ -42,7 +42,8 @@ jobs:
           node --check security/practice-v2-input-normalization.js
           node --check security/legacy-assessment-safe-api.js
           grep -q 'security/practice-v2-input-normalization.js?v=mathv2minus1' index.html
-          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1-mathv2topic1' index.html
+          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1-mathv2selector1' index.html
+          grep -q 'start_practice_session_auto_safe_v5' security/legacy-assessment-safe-api.js
           grep -q 'start_practice_topic_drill_safe_v5' security/legacy-assessment-safe-api.js
           ! grep -q 'submit_practice_attempt' security/legacy-assessment-safe-api.js
           ! grep -q 'submit_practice_answer_safe' security/legacy-assessment-safe-api.js
