@@ -1,38 +1,50 @@
 # Mathematics Practice v2 — Controlled Release Runbook
 
 Release version: `math_p1_practice_v2_2026_10_07`  
-Protected invariant: **Mathematics Tour structure, attempts and answers must not change because of this release.**  
-Practice history policy: preserve old Practice attempts/answers and local history; switch only the learner-facing active bank.
+Protected invariant: **Mathematics Tour structure, questions needed by Tour, attempts, answers and results must not change because of this release.**  
+Owner-approved Practice policy: **legacy Mathematics Practice progress/history does not need to be preserved.**
 
 ## Release model
 
-This release is a **membership switch**, not a destructive replacement.
+This release is a controlled **Practice reset + new bank publish**.
 
-- Existing Mathematics Practice question rows remain in the database.
-- Existing Practice attempts, answers, sessions and diagnoses remain in the database.
-- Existing Tour rows/results remain untouched.
-- Old active Practice pool memberships are turned off.
-- 495 staged Practice v2 memberships are turned on atomically.
-- New v2 questions are published in the same transaction.
-- New deterministic diagnostics are published in the same transaction.
-- A protected Tour fingerprint is calculated before and after the transaction. Any difference aborts the release.
-- Rollback restores the exact archived old membership IDs; it does not delete new history.
+What is intentionally reset:
+- legacy Mathematics Practice attempts and answers;
+- Practice-only diagnoses;
+- legacy Practice runtime sessions/drills;
+- Practice-derived legacy Exam Prep evidence;
+- old Mathematics local Practice history in the browser.
 
-This design prevents foreign-key/history loss and avoids touching protected Tour evidence.
+What is protected:
+- all Mathematics Tours;
+- Tour attempts, answers, results and certificates;
+- any legacy question row still referenced by a Tour;
+- any legacy question row still required by another protected/non-Practice dependency.
 
-## Phase 0 — live schema compatibility check
+Old Practice question rows are not physically deleted at the exact cutover. First the new bank is published and smoke-tested. Only after that, a separate cleanup removes old Practice-only question rows that have no protected references.
 
-Before any database migration, run:
+This gives a simple learner result — Practice starts fresh — while keeping a short rollback window before old question cleanup.
+
+## Phase 0 — live READ-ONLY checks
+
+Run:
 
 `supabase/preflight/math_practice_v2_schema_compatibility.sql`
 
-It is read-only and verifies that the current production schema still matches the assumptions used by staging and v5 runtime: required tables/columns, Practice pool uniqueness, question/diagnostic constraints, the v4 compatibility bridge, the single active Mathematics subject and seven active Mathematics Practice pools.
+Then recheck current production counts and the protected Tour fingerprint READ-ONLY.
 
-Latest 2026-10-07 READ-ONLY result: **PASS** (`schema_compatible`).
+Expected baseline before release:
+- 1 active Mathematics subject;
+- exactly 7 active Mathematics Practice pools;
+- 490 active legacy Practice memberships;
+- 495 staged v2 questions after staging;
+- zero staged v2 question ↔ Tour overlap.
+
+User activity can increase the number of legacy Practice attempts before cutover. That does not block release because those Practice rows are intentionally reset.
 
 ## Phase A — additive database preparation
 
-Apply, in timestamp order, the branch migrations up to and including:
+Apply, in timestamp order:
 
 1. `20261007002000_math_practice_v2_unicode_minus_normalization_v1.sql`
 2. `20261007003000_math_practice_v2_close_legacy_answer_oracles_v1.sql`
@@ -44,54 +56,50 @@ Apply, in timestamp order, the branch migrations up to and including:
 8. `20261007007000_math_practice_v2_tour_invariant_audit_v1.sql`
 9. `20261007007500_math_practice_v2_atomic_release_switch_v1.sql`
 
-Important: migration 07500 **defines** private publish/rollback functions; it does not publish the bank.
+Migration 07500 only defines private reset/publish/rollback/cleanup functions. It does not run the reset by itself.
 
-After additive migrations, run the SQL regression suite for the Practice v2 migrations. Do not continue if any regression fails.
+Run the SQL definition regressions before continuing.
 
-## Phase B — stage content while invisible
+## Phase B — stage the new bank invisibly
 
-Generate the deterministic staging package from the exact release commit:
+Generate:
 
 ```bash
 node scripts/math-practice-v2-build-staging-sql.cjs --check --out /tmp/math-practice-v2-stage.sql
 ```
 
-Record the generator's:
+Record:
 - release version;
 - manifest SHA-256;
 - 495 question count;
-- diagnostic catalog count;
-- diagnostic mapping count.
+- 201 diagnostic catalog rows;
+- 868 diagnostic mappings.
 
 Apply the generated staging SQL.
 
-Expected state after staging:
-- 495 new question rows exist;
-- all 495 have `questions.is_active=false`;
-- all 495 have `questions.quality_status='draft'`;
-- all 495 new pool memberships are inactive;
-- private metadata has all four QA statuses passed;
-- metadata lifecycle is approved but runtime is false;
-- diagnostic catalog runtime is false;
-- no staged Practice v2 question belongs to a Tour.
+Required staged state:
+- 495 new questions;
+- all new questions inactive + draft;
+- all new memberships inactive;
+- all QA gates passed;
+- diagnostic runtime disabled;
+- no staged question linked to Tour.
 
-Learners must still see the legacy Practice bank at this point.
+Learners still use the old Practice bank at this point.
 
-## Phase C — deploy v5 learner runtime
+## Phase C — deploy the v5 Practice runtime
 
-Deploy the branch frontend/runtime with:
-- main Practice selector v5;
+Deploy the frontend/runtime with:
+- v5 Practice selector;
 - topic drill v5;
 - current-bank mistake review/drill v5;
-- session/drill answer submit v5;
-- session finalizer v5;
-- Practice review v5;
-- Unicode-minus input normalisation;
-- deterministic mistake guidance in Practice review.
+- deterministic answer evaluation/feedback;
+- Unicode-minus normalization;
+- Mathematics local Practice history namespace `practice_history_v3`.
 
-Old open clients may continue an already-started v4 Practice session because v4 resume/submit/finalize compatibility is intentionally retained until those sessions finish.
+The old Mathematics local Practice history therefore cannot reappear after the database reset.
 
-Do not publish Practice v2 yet.
+Do not publish the new bank yet.
 
 ## Phase D — mandatory READ-ONLY preflight
 
@@ -99,32 +107,23 @@ Run:
 
 `supabase/preflight/math_practice_v2_release_preflight.sql`
 
-The script is explicitly read-only and rolls back at the end.
-
-It must prove, among other gates:
-- 7 active Mathematics Practice pools;
-- 490 active legacy memberships immediately before cutover;
-- zero active Practice↔Tour overlap;
+It must prove:
+- exactly 7 active Mathematics Practice pools;
+- exactly 490 active legacy memberships immediately before cutover;
 - exactly 495 staged v2 questions;
-- exact per-Practice staged sizes:
-  - P1 68
-  - P2 80
-  - P3 68
-  - P4 77
-  - P5 66
-  - P6 70
-  - P7 66
-- staged membership order is contiguous inside every Practice;
-- every content QA gate is passed;
-- all staged questions and memberships are still invisible;
-- no staged question is a Tour question;
-- protected Tour snapshot is available.
+- exact per-Practice sizes: 68 / 80 / 68 / 77 / 66 / 70 / 66;
+- 201 diagnostic catalog rows;
+- 868 diagnostic mappings;
+- staged content is still invisible;
+- QA gates are passed;
+- no v2 Practice question is linked to Tour;
+- protected Tour snapshot function is available.
 
-If any assertion fails, **do not run the publish function**. Diagnose the drift first.
+If any assertion fails, do not publish.
 
-## Phase E — atomic publish
+## Phase E — reset + atomic publish
 
-Only after Phases A–D are green, call:
+Call:
 
 ```sql
 select private.publish_math_practice_v2_release_v1(
@@ -132,68 +131,84 @@ select private.publish_math_practice_v2_release_v1(
 );
 ```
 
-Expected result:
-- `ok=true`
-- `status='published'`
-- `old_memberships_disabled=490`
-- `new_memberships_enabled=495`
-- `active_bank=495`
-- `tour_invariant_unchanged=true`
-
-The function itself:
-- archives exact old/new membership IDs;
-- fingerprints all protected Mathematics Tour structure/results;
-- closes superseded v4 selector entrypoints;
-- disables exactly the old active Practice memberships;
-- publishes v2 questions/diagnostics/runtime metadata;
-- activates exactly the 495 v2 memberships;
-- validates exact per-Practice counts;
+Inside one transaction the function:
+- fingerprints protected Mathematics Tours;
+- archives the exact 490 legacy Practice membership IDs and 490 legacy question IDs;
+- blocks old v4 Practice entrypoints;
+- deletes legacy Mathematics Practice attempts/answers, Practice-only diagnoses, sessions/drills and Practice-derived legacy evidence;
+- disables the 490 old Practice memberships;
+- publishes the 495 v2 questions/diagnostics;
+- activates the 495 new memberships;
+- validates exact Practice counts;
 - fingerprints Tours again;
-- raises an exception and rolls the whole transaction back if the protected Tour fingerprint differs.
+- aborts the entire transaction if the Tour fingerprint changed.
 
-It does **not** delete Practice history and contains no Tour DML.
+It performs **no Tour DML**.
 
-## Phase F — mandatory post-publish audit
+Expected result includes:
+- `status='published'`;
+- `practice_progress_reset=true`;
+- `old_memberships_disabled=490`;
+- `new_memberships_enabled=495`;
+- `active_bank=495`;
+- `tour_invariant_unchanged=true`.
 
-Immediately run:
+## Phase F — immediate post-publish audit
+
+Run:
 
 `supabase/preflight/math_practice_v2_post_publish_audit.sql`
 
-Required result:
-- 495 active Mathematics Practice memberships;
+Required:
+- active bank = 495;
 - exact P1–P7 counts;
-- all old archived active membership IDs now inactive;
-- all new membership IDs active;
-- all v2 question/runtime/diagnostic gates published correctly;
-- zero Practice v2 ↔ Tour overlap;
-- release audit stores equal Tour snapshots before/after;
-- unsafe/superseded learner entrypoints are not executable;
-- required v5 learner entrypoints are executable.
+- old memberships inactive;
+- new memberships active;
+- Practice attempts reset to zero;
+- legacy Practice sessions/drills reset to zero;
+- Practice-only diagnoses reset to zero;
+- Practice-derived legacy evidence reset;
+- old v4 Practice entrypoints not executable;
+- required v5 entrypoints executable;
+- Tour snapshot before/after cutover unchanged.
 
-Also run:
-
-`supabase/preflight/math_practice_v2_inflight_compatibility_audit.sql`
-
-It must confirm that already-started v4 Practice sessions/drills can still resume, submit and finalize after cutover. Only the superseded v4 start/select entrypoints are retired.
-
-Then run a controlled learner smoke path:
-- open each Practice 1–7;
-- confirm the displayed total matches 68/80/68/77/66/70/66;
-- start/resume a session;
-- answer one MCQ correctly and incorrectly in a test account;
-- answer a negative numeric Input using Unicode minus;
-- finish a session;
-- open error review and confirm deterministic “why/how to fix” text;
+Then run learner smoke QA on a test account:
+- open Practice 1–7;
+- start a session;
+- answer MCQ correctly and incorrectly;
+- answer Input including Unicode minus;
+- finish the session;
+- check deterministic mistake feedback;
 - check topic drill and mistake drill;
-- verify Tour screens/results are unchanged.
+- refresh/reopen and confirm the new Practice progress persists;
+- verify Tour pages/results still work and were not reset.
 
-No real learner result should be manually edited during smoke testing.
+## Phase G — legacy Practice question cleanup
 
-## Rollback trigger
+Only after Phase F is green, call:
 
-Rollback is appropriate if the new Practice learner flow has a material runtime defect that cannot safely be fixed immediately.
+```sql
+select private.cleanup_math_practice_v1_questions_v1(
+  'math_p1_practice_v2_2026_10_07'
+);
+```
 
-Call:
+The cleanup:
+- removes the retired old Practice memberships;
+- physically deletes only legacy questions with no Tour reference and no other protected/non-Practice dependency;
+- automatically retains every Tour-linked legacy question;
+- fingerprints Tours before and after cleanup;
+- aborts if the protected Tour fingerprint changes.
+
+Then run:
+
+`supabase/preflight/math_practice_v2_post_cleanup_audit.sql`
+
+At the current READ-ONLY baseline, 4 of the 490 legacy Practice questions have historical Tour links, so those question rows are expected to remain unless the production state changes before release. Their Practice memberships are still removed.
+
+## Rollback
+
+Rollback is available **between Phase E and Phase G**:
 
 ```sql
 select private.rollback_math_practice_v2_release_v1(
@@ -202,38 +217,23 @@ select private.rollback_math_practice_v2_release_v1(
 ```
 
 Rollback:
-- disables the exact 495 v2 memberships;
-- restores the exact archived old active membership IDs;
-- disables v2 runtime metadata/source diagnostics;
-- **does not delete v2 question rows or v2 learner history**;
-- leaves published v2 question rows readable so an already-started v2 session and historical review can finish;
-- fingerprints Tours immediately before and after rollback and aborts if they change.
+- disables the new v2 bank;
+- restores the archived old Practice memberships;
+- restores the safe v4 Practice entrypoints;
+- does not restore deleted legacy Practice progress;
+- does not touch Tours.
 
-Then run:
+After legacy question cleanup, rollback to the old bank is intentionally blocked because old Practice-only question rows may already be deleted.
 
-`supabase/preflight/math_practice_v2_post_rollback_audit.sql`
+## Stop conditions
 
-Do not re-enable unsafe legacy answer-oracle or selector entrypoints after rollback. The v5 runtime is deliberately compatible with the restored legacy pool membership.
+Stop immediately if:
+- any Tour fingerprint changes inside reset/publish/cleanup;
+- the staged v2 bank is not exactly 495;
+- any new v2 question is linked to Tour;
+- the active post-publish bank is not exactly 495;
+- any required v5 Practice endpoint is unavailable;
+- post-publish Practice reset rows are not zero;
+- learner smoke QA exposes a correctness, navigation, language or persistence defect.
 
-## Learner-history behaviour
-
-The active-question completion count is calculated against the current pool question IDs. Because Practice v2 has new IDs, old correct answers do not falsely mark new questions complete.
-
-Local Practice history is **not deleted**. The UI filters tour-level Practice best/last statistics against the current active question IDs, so a legacy attempt is preserved locally but does not masquerade as a result on the new bank.
-
-Tour history has a separate protected path and is not reset or recalculated.
-
-## Learner communication
-
-A release notice should say only what the learner needs to know:
-
-RU:
-> Практика по Mathematics обновлена: задания теперь лучше соответствуют темам и уровню Cambridge AS. Ваши результаты Tours сохранены. Прогресс в обновлённой Practice считается по новому набору заданий.
-
-UZ:
-> Mathematics Practice yangilandi: topshiriqlar endi Cambridge AS mavzulari va darajasiga yaxshiroq mos keladi. Tour natijalaringiz saqlangan. Yangilangan Practice dagi progress yangi topshiriqlar to‘plami bo‘yicha hisoblanadi.
-
-EN:
-> Mathematics Practice has been updated so the questions better match Cambridge AS topics and level. Your Tour results are preserved. Progress in the updated Practice is measured on the new question bank.
-
-Do not expose migration, database, selector, diagnostic-code or reset terminology to learners.
+The protected boundary is simple: **Practice may reset. Tours may not.**
