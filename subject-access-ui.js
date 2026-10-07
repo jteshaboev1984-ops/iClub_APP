@@ -284,6 +284,9 @@
         return false;
       }
 
+      window.dispatchEvent(new CustomEvent("iclub:subject-selection-changed", {
+        detail: { subjectKey }
+      }));
       await refresh();
       return true;
     } catch {
