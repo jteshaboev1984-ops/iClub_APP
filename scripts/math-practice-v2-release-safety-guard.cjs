@@ -91,6 +91,7 @@ for(const token of [
   'rollback_tour_snapshot_after',
   'practice_v2_release_switch_audit',
   'tour_answers_md5',
+  'tour_recommendations_md5',
   'tour_attempts_md5',
   'tour_questions_md5',
 ]){
