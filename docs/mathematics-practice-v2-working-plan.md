@@ -13,20 +13,20 @@ Owner decision: preserve Tour results/history as the protected user-data boundar
 - Global content QA: PASS — 277 MCQ / 218 input; difficulty 124/226/145; A/B/C/D=68/69/70/70; max same-letter run=2.
 - Input evaluator regression: PASS across all 218 input questions, 478 accepted cases, 654 rejected cases and 25 Unicode-minus cases.
 - Deterministic diagnostics, EN/RU/UZ, Practice↔Tour separation and AI source-card coverage are complete for all seven Practices.
-- Block 3 migration/cleanup design: COMPLETE in branch as a non-destructive membership-switch release model. Old Practice question/history rows are preserved; no physical deletion is part of release.
+- Block 3 migration/cleanup design: REVISED / COMPLETE. Owner explicitly approved a Mathematics Practice reset. Legacy Practice progress/history is deleted at cutover; legacy Practice questions are cleaned up after post-publish smoke QA, except any row still referenced by Tour or another protected system.
 - Live production baseline rechecked READ ONLY: 7 active Mathematics Practice pools, 490 active memberships, zero active Practice↔active Tour overlap.
 - Protected Mathematics Tour baseline: 14 Tours, 300 Tour memberships, 149 attempts, 2477 answer rows. Deterministic fingerprints recorded in `docs/mathematics-practice-v2-live-production-baseline-2026-10-07.md`.
-- Existing Mathematics Practice history is preserved: 411 non-lab attempts, 4074 answers, 167 users.
-- Current Mathematics v4 session/drill rows at baseline: 0 / 0, but an explicit compatibility audit now protects any in-flight v4 session created before cutover.
+- Current legacy Mathematics Practice reset scope at the latest READ-ONLY baseline: 411 attempts and 4074 answers. This Practice-only progress is intentionally disposable; Tour progress is not.
+- Current Mathematics v4 session/drill rows at baseline: 0 / 0. Under the approved reset policy, any legacy Practice session that appears before cutover is intentionally cleared rather than carried across.
 - Additive branch-only runtime hardening prepared: Unicode-minus normalization; legacy answer-oracle closure; private v2 metadata; pool-gated topic drill v5; skill/role-aware selector v5; current-bank mistakes v5; deterministic post-answer feedback/finalizer/review v5.
 - Deterministic 495-question staging generator prepared with per-Practice contiguous order and invisible staging gates.
-- Atomic publish/rollback switch prepared. It archives exact membership IDs, switches 490 old → 495 new memberships atomically, fingerprints Tours before/after, and contains no Practice-history deletion or Tour DML.
-- READ-ONLY schema compatibility preflight, release preflight, post-publish audit, post-rollback audit and in-flight compatibility audit are prepared. The live schema compatibility preflight was executed against production READ ONLY and passed.
-- Controlled release runbook prepared. Learner communication preserves Tour results and explains that new Practice progress is measured on the new bank.
+- Reset-aware atomic publish prepared. In one transaction it fingerprints Tours, deletes legacy Mathematics Practice progress/runtime rows, disables the 490 old memberships, publishes 495 new memberships, and proves the Tour fingerprint is unchanged. It contains no Tour DML.
+- READ-ONLY schema compatibility preflight, release preflight, post-publish/reset audit, post-cleanup audit and post-rollback audit are prepared. The live schema compatibility preflight was executed against production READ ONLY and passed.
+- Controlled release runbook revised to the simple reset model: Tour results stay intact; Mathematics Practice starts fresh on the new bank.
 - Latest Mathematics Practice v2 Global QA run after release-safety and UI fallback checks: PASS (run 51). Staging manifest hash: `da7ae9cc9987df4d4655e880157c03611a842abba6663d4c3366932293144383`; 495 questions; 201 diagnostic catalog entries; 868 diagnostic mappings.
 - Production/Supabase writes from this Practice v2 work: NONE. All migrations/content remain branch-only.
-- Block 4 implementation package is prepared but not production-tested because no isolated preview database has been created/applied in this workflow.
-- Next macro gate: isolated database migration/staging/regression rehearsal, then controlled production release only after every release audit remains green.
+- Block 4 implementation package is prepared. Current branch QA is run against current `main` through the draft integration PR; no separate Supabase branch is required.
+- Next macro gate: finish integration QA against current `main`, recheck production READ-ONLY, then run the controlled production sequence: additive migrations → invisible staging → read-only preflight → reset/publish → smoke QA → safe legacy-question cleanup.
 
 
 ## Purpose
@@ -48,10 +48,11 @@ Rebuild Mathematics Practice so that:
    - No loss of Tour attempts, scores, certificates or downstream Tour-derived history.
    - Any legacy question needed to interpret preserved Tour history remains available as historical data even if removed from future learner-facing content.
 
-2. Practice may be replaced.
-   - Weak legacy Practice questions do not need to remain active.
-   - Practice progress may be reset only as an intentional release decision announced to users.
-   - Physical deletion of legacy question rows is allowed only after dependency audit proves they are not required by Tour/history/audit integrity.
+2. Practice is intentionally reset for this release.
+   - Legacy Mathematics Practice attempts, answers, diagnoses, sessions and local Practice history do not need to be preserved.
+   - Weak legacy Practice questions do not remain learner-facing.
+   - Physical deletion of legacy question rows happens only after the new bank passes smoke QA and only when no Tour or other protected dependency references them.
+   - Any question referenced by Tour remains in the database even if its old Practice membership is removed.
 
 3. Academic authority boundary.
    - Correctness = deterministic evaluator.
@@ -199,14 +200,15 @@ Gate: batch mechanical QA + mathematical QA + language QA + source/provenance QA
 
 ### Block 3 — Migration and cleanup design
 Before any destructive production change:
-- snapshot protected Tour/history counts and integrity;
-- dependency graph for legacy Mathematics question IDs;
-- classify legacy question rows: protected historical / reusable / retire / deletable;
-- define Practice-progress reset behavior;
-- define user communication;
-- define rollback/recovery evidence.
+- snapshot protected Tour counts and fingerprints;
+- identify the exact legacy Mathematics Practice question set;
+- reset only Practice-owned attempts, answers, diagnoses and sessions;
+- switch the active bank atomically;
+- keep old question rows until the new bank passes smoke QA;
+- then delete only legacy question rows with no Tour or other protected reference;
+- move Mathematics local Practice history to a new storage namespace so old browser history cannot reappear.
 
-Gate: prove Tour history is unaffected.
+Gate: prove Tour structure/results are unchanged before and after reset, publish and cleanup.
 
 ### Block 4 — System implementation and full QA
 Implement governed content/evaluator path, then test:
@@ -227,11 +229,13 @@ Implement governed content/evaluator path, then test:
 Gate: identical deterministic academic result with AI ON and OFF.
 
 ### Block 5 — Release
-- announce Mathematics Practice reset/update before release;
-- preserve Tour results;
-- release only after all gates pass;
-- post-release integrity check against protected Tour baseline;
-- monitor evaluator/feedback anomalies and rollback without rewriting Tour history.
+- preserve Tour results and structure;
+- stage the new bank invisibly;
+- reset legacy Mathematics Practice progress at cutover;
+- publish the 495-question bank atomically;
+- run post-publish learner smoke QA;
+- only after smoke QA, physically clean legacy Practice-only question rows while retaining Tour-linked/protected rows;
+- monitor evaluator/feedback anomalies; rollback is available before legacy-question cleanup and does not restore deleted Practice progress.
 
 ## Recurring alignment checkpoint
 
