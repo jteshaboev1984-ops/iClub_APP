@@ -763,7 +763,17 @@ begin
     and not exists(select 1 from private.exam_prep_session_items x where x.question_id=q.id)
     and not exists(select 1 from private.exam_prep_question_content_meta x where x.question_id=q.id)
     and not exists(select 1 from public.question_version_links x where x.old_question_id=q.id or x.new_question_id=q.id)
-    and not exists(select 1 from private.exam_prep_legacy_evidence_references x where x.question_id=q.id);
+    and not exists(select 1 from private.exam_prep_legacy_evidence_references x where x.question_id=q.id)
+    and not exists(
+      select 1
+      from public.practice_pool_questions x
+      join public.practice_pools p on p.id=x.pool_id
+      where x.question_id=q.id
+        and not (
+          p.subject_id=v_audit.subject_id
+          and p.tour_no between 1 and 7
+        )
+    );
 
   if coalesce(cardinality(v_deletable_question_ids),0)>0 then
     delete from private.exam_prep_question_skill_map x
