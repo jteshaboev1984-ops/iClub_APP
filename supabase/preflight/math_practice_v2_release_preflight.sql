@@ -3,7 +3,7 @@
 -- but release switch NOT yet published.
 --
 -- This script must not modify production. It aborts on drift that could endanger
--- protected Tours or publish a partial/incorrect Practice bank.
+-- protected Tours or publish a partial/incorrect Practice bank. Legacy Mathematics Practice progress is intentionally reset at cutover.
 
 begin;
 set transaction read only;
@@ -54,7 +54,19 @@ begin
     raise exception 'preflight_active_legacy_membership_drift_expected_490_found_%',v_count;
   end if;
 
-  -- No currently active Practice question may also be a Tour question.
+  select count(distinct ppq.question_id) into v_count
+  from public.practice_pool_questions ppq
+  join public.practice_pools p on p.id=ppq.pool_id
+  where p.subject_id=v_subject_id
+    and p.is_active is true
+    and p.tour_no between 1 and 7
+    and ppq.is_active is true;
+
+  if v_count<>490 then
+    raise exception 'preflight_active_legacy_question_set_expected_490_found_%',v_count;
+  end if;
+
+  -- No currently active Practice question may also be an active Tour question.
   select count(*) into v_overlap
   from (
     select distinct ppq.question_id
@@ -273,5 +285,27 @@ where p.subject_id=(
   and p.tour_no between 1 and 7
 group by p.tour_no
 order by p.tour_no;
+
+with math as (
+  select id as subject_id
+  from public.subjects
+  where subject_key='mathematics' and is_active is true
+  limit 1
+),
+oldq as (
+  select distinct ppq.question_id
+  from public.practice_pool_questions ppq
+  join public.practice_pools p on p.id=ppq.pool_id
+  join math m on m.subject_id=p.subject_id
+  where p.tour_no between 1 and 7
+    and p.is_active is true
+    and ppq.is_active is true
+)
+select
+  (select count(*) from public.practice_attempts pa join math m on m.subject_id=pa.subject_id) as practice_attempts_to_reset,
+  (select count(*) from public.practice_answers a join public.practice_attempts pa on pa.id=a.attempt_id join math m on m.subject_id=pa.subject_id) as practice_answers_to_reset,
+  (select count(*) from public.practice_sessions_v4 s join math m on m.subject_id=s.subject_id) as practice_sessions_to_reset,
+  (select count(*) from public.practice_drill_sessions_v4 s join math m on m.subject_id=s.subject_id) as practice_drills_to_reset,
+  (select count(*) from public.tour_questions tq where tq.question_id in (select question_id from oldq)) as legacy_questions_with_tour_links;
 
 rollback;
