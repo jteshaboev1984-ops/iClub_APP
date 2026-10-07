@@ -37,6 +37,8 @@ begin
      or position('delete from public.practice_sessions_v4' in lower(v_def))=0
      or position('delete from public.practice_drill_sessions_v4' in lower(v_def))=0
      or position('delete from public.user_answer_diagnosis' in lower(v_def))=0
+     or position('delete from public.recommendations' in lower(v_def))=0
+     or position('source_type=''practice''' in lower(v_def))=0
      or position('delete from public.practice_attempts' in lower(v_def))=0
      or position('release_expected_exactly_one_active_pool_per_practice' in v_def)=0
      or position('release_expected_201_staged_diagnostics' in v_def)=0
@@ -48,6 +50,11 @@ begin
 
   if lower(v_def) ~ '\m(insert[[:space:]]+into|update|delete[[:space:]]+from|truncate)[[:space:]]+(public\.)?(tours|tour_questions|tour_attempts|tour_answers|tour_session_answers_v4)\M' then
     raise exception 'practice_v2_publish_contains_tour_dml';
+  end if;
+
+  if position('revoke execute on function public.get_practice_session_resume_safe_v4' in lower(v_def))>0
+     or position('revoke execute on function public.get_practice_drill_resume_safe_v4' in lower(v_def))>0 then
+    raise exception 'practice_v2_publish_breaks_required_resume_readers';
   end if;
 
   select p.oid into v_rollback
