@@ -4,10 +4,46 @@
 \set ON_ERROR_STOP on
 
 insert into public.subjects(id,subject_key,is_active)
-values(5,'mathematics',true);
+values
+  (5,'mathematics',true),
+  (6,'economics',true);
 
 insert into public.practice_pools(id,subject_id,tour_no,is_active)
 select 500+g,5,g,true from generate_series(1,7) g;
+
+-- Non-Mathematics sentinel: this entire Practice state must survive a Mathematics-only reset.
+insert into public.practice_pools(id,subject_id,tour_no,is_active)
+values(601,6,1,true);
+
+insert into public.questions(id,subject_id,is_active,quality_status)
+values(9500,6,true,'published');
+
+insert into public.practice_pool_questions(pool_id,question_id,order_no,is_active)
+values(601,9500,1,true);
+
+insert into public.practice_attempts(id,user_id,subject_id,is_lab)
+values(900,'00000000-0000-0000-0000-000000000002',6,false);
+
+insert into public.practice_answers(id,attempt_id,question_id,user_answer,is_correct,created_at)
+values(900,900,9500,'C',true,'2026-10-06T08:00:00Z');
+
+insert into public.practice_sessions_v4(id,user_id,subject_id,status)
+values(900,'00000000-0000-0000-0000-000000000002',6,'active');
+
+insert into public.practice_drill_sessions_v4(id,user_id,subject_id,status)
+values(900,'00000000-0000-0000-0000-000000000002',6,'active');
+
+insert into public.practice_review_events_v1(id,attempt_id)
+values(900,900);
+
+insert into public.user_answer_diagnosis(id,subject_id,practice_answer_id,question_id,attempt_type)
+values(900,6,900,9500,'practice');
+
+insert into public.recommendations(id,user_id,subject_id,source_type,topic,created_at)
+values(900,'00000000-0000-0000-0000-000000000002',6,'practice','Economics sentinel','2026-10-06T08:01:00Z');
+
+insert into public.learning_roadmaps(id,user_id,subject_id,source_type,payload,created_at)
+values(900,'00000000-0000-0000-0000-000000000002',6,'practice_attempt','{"protected_other_subject":true}','2026-10-06T08:02:00Z');
 
 insert into public.questions(id,subject_id,is_active,quality_status)
 select g,5,true,'published'
@@ -287,6 +323,45 @@ begin
 
   select count(*) into v_count from public.learning_roadmaps where subject_id=5 and source_type='tour_attempt';
   if v_count<>1 then raise exception 'protected_tour_roadmap_changed'; end if;
+
+  -- Mathematics reset/rollback/cleanup must never spill into another subject.
+  select count(*) into v_count from public.practice_pool_questions ppq
+  join public.practice_pools p on p.id=ppq.pool_id
+  where p.subject_id=6 and ppq.question_id=9500 and ppq.is_active is true;
+  if v_count<>1 then raise exception 'other_subject_practice_membership_changed'; end if;
+
+  select count(*) into v_count from public.practice_attempts
+  where id=900 and subject_id=6;
+  if v_count<>1 then raise exception 'other_subject_practice_attempt_changed'; end if;
+
+  select count(*) into v_count from public.practice_answers
+  where id=900 and attempt_id=900 and question_id=9500 and is_correct is true;
+  if v_count<>1 then raise exception 'other_subject_practice_answer_changed'; end if;
+
+  select count(*) into v_count from public.practice_sessions_v4
+  where id=900 and subject_id=6 and status='active';
+  if v_count<>1 then raise exception 'other_subject_practice_session_changed'; end if;
+
+  select count(*) into v_count from public.practice_drill_sessions_v4
+  where id=900 and subject_id=6 and status='active';
+  if v_count<>1 then raise exception 'other_subject_practice_drill_changed'; end if;
+
+  select count(*) into v_count from public.practice_review_events_v1
+  where id=900 and attempt_id=900;
+  if v_count<>1 then raise exception 'other_subject_practice_review_changed'; end if;
+
+  select count(*) into v_count from public.user_answer_diagnosis
+  where id=900 and subject_id=6 and question_id=9500;
+  if v_count<>1 then raise exception 'other_subject_practice_diagnosis_changed'; end if;
+
+  select count(*) into v_count from public.recommendations
+  where id=900 and subject_id=6 and source_type='practice' and topic='Economics sentinel';
+  if v_count<>1 then raise exception 'other_subject_practice_recommendation_changed'; end if;
+
+  select count(*) into v_count from public.learning_roadmaps
+  where id=900 and subject_id=6 and source_type='practice_attempt'
+    and payload='{"protected_other_subject":true}'::jsonb;
+  if v_count<>1 then raise exception 'other_subject_practice_roadmap_changed'; end if;
 end;
 $final$;
 

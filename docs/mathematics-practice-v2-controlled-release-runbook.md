@@ -18,6 +18,8 @@ What is intentionally reset:
 - old Mathematics local Practice history in the browser.
 
 What is protected:
+- all non-Mathematics subjects and their Practice data;
+- user identity/account tables;
 - all Mathematics Tours;
 - Tour attempts, answers, results and certificates;
 - Tour recommendations;
@@ -150,7 +152,7 @@ Inside one transaction the function:
 - fingerprints Tours again;
 - aborts the entire transaction if the Tour fingerprint changed.
 
-It performs **no Tour DML**.
+It performs **no Tour DML**, no user/account DML and no reset of Practice data for any non-Mathematics subject.
 
 Expected result includes:
 - `status='published'`;

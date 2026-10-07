@@ -42,7 +42,7 @@ const mistakes=fs.readFileSync(files.mistakes,'utf8');
 const localReset=fs.readFileSync(files.localReset,'utf8');
 const app=fs.readFileSync(files.app,'utf8');
 
-for(const table of ['tours','tour_questions','tour_attempts','tour_answers','tour_session_answers_v4','certificates','ratings_cache']){
+for(const table of ['tours','tour_questions','tour_attempts','tour_answers','tour_session_answers_v4','certificates','ratings_cache','users','user_subjects']){
   const patterns=[
     new RegExp(`\\binsert\\s+into\\s+(?:public\\.)?${table}\\b`,'i'),
     new RegExp(`\\bupdate\\s+(?:public\\.)?${table}\\b`,'i'),
@@ -264,6 +264,8 @@ console.log(JSON.stringify({
   practiceRecommendationsReset:'server-only-mathematics',
   tourRecommendationsPreserved:true,
   tourRoadmapsAndCertificatesPreserved:true,
+  userIdentityTablesPreserved:true,
+  otherSubjectsProtectedBySubjectScopedReset:true,
   mathematicsLocalHistoryNamespace:'practice_history_v3',
   mathematicsLocalReset:'one-time-before-app-boot',
   mathematicsCutoverLegacyFallback:'blocked',
