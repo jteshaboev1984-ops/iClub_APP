@@ -1,0 +1,252 @@
+/* iClub canary subject-selection UI v1.
+   Separate from legacy subject settings; active only for the server-authorized beta cohort. */
+
+#profile-subject-access-entry[hidden],
+#profile-subject-access[hidden],
+[data-subject-access-body][hidden],
+[data-subject-access-unavailable][hidden] {
+  display: none !important;
+}
+
+.iclub-subject-access-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 18px;
+}
+
+.iclub-subject-access-intro {
+  padding: 2px 2px 0;
+}
+
+.iclub-subject-access-intro .h1 {
+  margin-bottom: 5px;
+}
+
+.iclub-subject-access-beta {
+  display: grid;
+  gap: 4px;
+  padding: 12px 13px;
+  border: 1px solid rgba(47, 111, 214, 0.15);
+  border-radius: 16px;
+  background: rgba(47, 111, 214, 0.055);
+}
+
+.iclub-subject-access-beta strong {
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: #245fb8;
+}
+
+.iclub-subject-access-beta span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.iclub-subject-access-plan {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.055);
+  color: var(--text);
+  font-size: 11.5px;
+  line-height: 1;
+  font-weight: 850;
+}
+
+.iclub-subject-access-section {
+  padding: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.055);
+}
+
+.iclub-subject-access-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 11px;
+}
+
+.iclub-subject-access-section-title {
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.iclub-subject-access-section-copy {
+  margin-top: 4px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.iclub-subject-access-count {
+  flex: 0 0 auto;
+  min-width: 46px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(47, 111, 214, 0.07);
+  color: #245fb8;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 850;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.iclub-subject-access-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.iclub-subject-access-row {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 11px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.82);
+}
+
+.iclub-subject-access-row.is-selected {
+  border-color: rgba(47, 111, 214, 0.18);
+  background: rgba(47, 111, 214, 0.045);
+}
+
+.iclub-subject-access-row.is-disabled {
+  opacity: 0.58;
+}
+
+.iclub-subject-access-row-main {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.iclub-subject-access-row-title {
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 850;
+  color: var(--text);
+}
+
+.iclub-subject-access-row-sub {
+  min-height: 15px;
+  margin-top: 3px;
+  font-size: 10.8px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.iclub-subject-access-included {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(47, 111, 214, 0.09);
+  color: #245fb8;
+  font-size: 10.5px;
+  line-height: 1;
+  font-weight: 850;
+}
+
+.iclub-subject-access-switch {
+  position: relative;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 26px;
+  display: inline-block;
+}
+
+.iclub-subject-access-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.iclub-subject-access-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.24);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
+  transition: background 140ms ease;
+}
+
+.iclub-subject-access-slider::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 3px;
+  top: 3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+  transition: transform 140ms ease;
+}
+
+.iclub-subject-access-switch input:checked + .iclub-subject-access-slider {
+  background: #2f6fd6;
+}
+
+.iclub-subject-access-switch input:checked + .iclub-subject-access-slider::before {
+  transform: translateX(18px);
+}
+
+.iclub-subject-access-switch input:focus-visible + .iclub-subject-access-slider {
+  outline: 3px solid rgba(47, 111, 214, 0.22);
+  outline-offset: 2px;
+}
+
+.iclub-subject-access-switch input:disabled + .iclub-subject-access-slider {
+  cursor: default;
+}
+
+.iclub-subject-access-unavailable {
+  padding: 18px;
+  border: 1px dashed rgba(15, 23, 42, 0.12);
+  border-radius: 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.iclub-subject-access-entry .profile-row-ico {
+  color: #2f6fd6;
+  background: rgba(47, 111, 214, 0.08);
+}
+
+@media (max-width: 340px) {
+  .iclub-subject-access-section {
+    padding: 12px;
+  }
+
+  .iclub-subject-access-section-head {
+    gap: 8px;
+  }
+
+  .iclub-subject-access-row {
+    padding: 9px 10px;
+  }
+
+  .iclub-subject-access-row-sub {
+    font-size: 10.3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iclub-subject-access-slider,
+  .iclub-subject-access-slider::before {
+    transition: none !important;
+  }
+}

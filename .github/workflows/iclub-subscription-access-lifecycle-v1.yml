@@ -1,0 +1,154 @@
+name: iClub Subscription Access Lifecycle v1
+
+on:
+  pull_request:
+    branches:
+      - feat/plans-profile-v1
+      - main
+    paths:
+      - 'supabase/migrations/20261006153000_iclub_subscription_access_lifecycle_v1.sql'
+      - 'supabase/migrations/20261006153100_iclub_grandfather_subject_access_v1.sql'
+      - 'supabase/reversions/20261006153000_iclub_subscription_access_lifecycle_v1_revert.sql'
+      - 'supabase/tests/iclub_subscription_access_legacy_fixture.sql'
+      - 'supabase/tests/iclub_subscription_access_lifecycle_v1_matrix.sql'
+      - 'docs/iclub-commercial-access-migration-model-v1.md'
+      - 'docs/iclub-commercial-cutover-impact-snapshot-v1.md'
+      - '.github/scripts/iclub_subscription_access_lifecycle_v1_contract.js'
+      - '.github/workflows/iclub-subscription-access-lifecycle-v1.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/20261006153000_iclub_subscription_access_lifecycle_v1.sql'
+      - 'supabase/migrations/20261006153100_iclub_grandfather_subject_access_v1.sql'
+      - 'supabase/reversions/20261006153000_iclub_subscription_access_lifecycle_v1_revert.sql'
+      - 'supabase/tests/iclub_subscription_access_legacy_fixture.sql'
+      - 'supabase/tests/iclub_subscription_access_lifecycle_v1_matrix.sql'
+      - 'docs/iclub-commercial-access-migration-model-v1.md'
+      - 'docs/iclub-commercial-cutover-impact-snapshot-v1.md'
+      - '.github/scripts/iclub_subscription_access_lifecycle_v1_contract.js'
+      - '.github/workflows/iclub-subscription-access-lifecycle-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  subscription-access-safety:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostics
+        run: printf 'iClub subscription access lifecycle v1 CI\n' > subscription-access.log
+
+      - name: Bootstrap isolated Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a subscription-access.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_subscription_access_legacy_fixture.sql 2>&1 | tee -a subscription-access.log
+
+      - name: Apply existing commercial dependency stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql 2>&1 | tee -a subscription-access.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql 2>&1 | tee -a subscription-access.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006124000_iclub_global_ai_ui_bootstrap_v1.sql 2>&1 | tee -a subscription-access.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006133000_iclub_global_ai_conversation_ui_v1.sql 2>&1 | tee -a subscription-access.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006143000_iclub_plans_profile_ui_v1.sql 2>&1 | tee -a subscription-access.log
+
+      - name: Static legacy-data preservation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          for migration in             supabase/migrations/20261006153000_iclub_subscription_access_lifecycle_v1.sql             supabase/migrations/20261006153100_iclub_grandfather_subject_access_v1.sql
+          do
+            ! grep -Eiq '\b(update|delete[[:space:]]+from|insert[[:space:]]+into|truncate([[:space:]]+table)?)[[:space:]]+public\.(user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|ratings_cache|certificates|recommendations)\b' "$migration"
+          done
+
+      - name: Apply dormant subscription/access lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006153000_iclub_subscription_access_lifecycle_v1.sql 2>&1 | tee -a subscription-access.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006153100_iclub_grandfather_subject_access_v1.sql 2>&1 | tee -a subscription-access.log
+
+      - name: Prove defaults stay dormant
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(psql -Atqc "select lifecycle_enabled from private.iclub_commercial_access_config where id=1")" = 'f'
+          test "$(psql -Atqc "select subject_limits_mode from private.iclub_commercial_access_config where id=1")" = 'off'
+          test "$(psql -Atqc "select grandfather_snapshot_completed_at is null from private.iclub_commercial_access_config where id=1")" = 't'
+          test "$(psql -Atqc "select count(*) from private.iclub_subscription_events")" = '0'
+          test "$(psql -Atqc "select count(*) from private.iclub_commercial_migration_state")" = '0'
+          test "$(psql -Atqc "select count(*) from private.iclub_subject_slot_selections")" = '0'
+          test "$(psql -Atqc "select global_ai_rollout_mode from private.iclub_global_ai_runtime_config where id=1")" = 'off'
+          test "$(psql -Atqc "select plans_rollout_mode from private.iclub_global_ai_runtime_config where id=1")" = 'off'
+          test "$(psql -Atqc "select count(*) from private.iclub_product_canary_users")" = '0'
+
+      - name: Run lifecycle and grandfather safety matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c iclub.subscription_access_isolated=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_subscription_access_lifecycle_v1_matrix.sql 2>&1 | tee -a subscription-access.log
+
+      - name: Validate static contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/iclub_subscription_access_lifecycle_v1_contract.js
+          node .github/scripts/iclub_subscription_access_lifecycle_v1_contract.js 2>&1 | tee -a subscription-access.log
+
+      - name: Prove safe pre-activation rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/reversions/20261006153000_iclub_subscription_access_lifecycle_v1_revert.sql 2>&1 | tee -a subscription-access.log
+          test "$(psql -Atqc "select to_regclass('private.iclub_subscription_events') is null")" = 't'
+          test "$(psql -Atqc "select to_regclass('private.iclub_subject_slot_selections') is null")" = 't'
+          test "$(psql -Atqc "select to_regprocedure('public.apply_iclub_subscription_event_service_v1(uuid,uuid,text,text,timestamptz,timestamptz,timestamptz,text)') is null")" = 't'
+          test "$(psql -Atqc "select to_regprocedure('public.get_iclub_my_subscription_status_v1()') is null")" = 't'
+          test "$(psql -Atqc "select to_regprocedure('public.set_iclub_product_canary_service_v1(uuid,boolean,text,text)') is null")" = 't'
+          test "$(psql -Atqc "select to_regclass('private.iclub_product_canary_users') is null")" = 't'
+          test "$(psql -Atqc "select count(*) from information_schema.columns where table_schema='private' and table_name='iclub_global_ai_runtime_config' and column_name in ('global_ai_rollout_mode','plans_rollout_mode')")" = '0'
+          test "$(psql -Atqc "select to_regclass('private.iclub_plan_policies') is not null")" = 't'
+
+      - name: Mark subscription access GREEN
+        run: echo 'ICLUB SUBSCRIPTION ACCESS LIFECYCLE V1 GREEN' | tee -a subscription-access.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iclub-subscription-access-lifecycle-v1
+          path: subscription-access.log
+          if-no-files-found: error
+          retention-days: 7

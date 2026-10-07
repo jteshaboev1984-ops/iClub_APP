@@ -1,0 +1,501 @@
+/* iClub Global AI conversation shell v1.
+   Scoped, dormant unless server bootstrap explicitly allows visibility. */
+
+.iclub-global-ai-root {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.iclub-global-ai-mark {
+  position: fixed;
+  right: 14px;
+  bottom: calc(78px + var(--safe-bottom));
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 140ms ease, box-shadow 140ms ease, opacity 140ms ease;
+}
+
+.iclub-global-ai-mark:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.iclub-global-ai-mark:focus-visible,
+.iclub-global-ai-close:focus-visible,
+.iclub-global-ai-quick-btn:focus-visible,
+.iclub-global-ai-send:focus-visible,
+.iclub-global-ai-composer textarea:focus-visible {
+  outline: 3px solid rgba(47, 111, 214, 0.25);
+  outline-offset: 2px;
+}
+
+.iclub-global-ai-mark-logo {
+  width: 29px;
+  height: 29px;
+  object-fit: contain;
+  display: block;
+}
+
+.iclub-global-ai-mark.is-assessment-blocked {
+  opacity: 0.58;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+}
+
+.iclub-global-ai-panel {
+  position: fixed;
+  right: 12px;
+  bottom: calc(76px + var(--safe-bottom));
+  width: min(390px, calc(100vw - 24px));
+  height: min(620px, calc(100vh - 118px - var(--safe-bottom)));
+  min-height: 340px;
+  border-radius: 24px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  background: rgba(255, 255, 255, 0.995);
+  box-shadow: 0 24px 58px rgba(15, 23, 42, 0.23);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  transform-origin: right bottom;
+  animation: iclub-global-ai-panel-in 170ms ease-out both;
+}
+
+.iclub-global-ai-panel[hidden] {
+  display: none !important;
+}
+
+.iclub-global-ai-head {
+  min-height: 62px;
+  padding: 11px 12px 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.075);
+  background: rgba(248, 250, 252, 0.97);
+}
+
+.iclub-global-ai-head-copy {
+  min-width: 0;
+}
+
+.iclub-global-ai-title {
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.iclub-global-ai-subtitle {
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.25;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.iclub-global-ai-close {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.055);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.iclub-global-ai-close svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.iclub-global-ai-scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 16px 14px 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+  scrollbar-width: thin;
+}
+
+.iclub-global-ai-empty {
+  max-width: 290px;
+  margin: 28px auto 18px;
+  text-align: center;
+}
+
+.iclub-global-ai-empty[hidden] {
+  display: none !important;
+}
+
+.iclub-global-ai-empty-title {
+  font-size: 17px;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.iclub-global-ai-empty-copy {
+  margin-top: 7px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.iclub-global-ai-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.iclub-global-ai-message {
+  display: flex;
+  width: 100%;
+}
+
+.iclub-global-ai-message.is-user {
+  justify-content: flex-end;
+}
+
+.iclub-global-ai-message.is-assistant {
+  justify-content: flex-start;
+}
+
+.iclub-global-ai-bubble {
+  max-width: min(84%, 310px);
+  padding: 10px 12px;
+  border-radius: 17px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.iclub-global-ai-message.is-user .iclub-global-ai-bubble {
+  border-bottom-right-radius: 6px;
+  background: #2f6fd6;
+  color: #fff;
+  box-shadow: 0 5px 14px rgba(47, 111, 214, 0.16);
+  animation: iclub-global-ai-user-in 150ms ease-out both;
+}
+
+.iclub-global-ai-message.is-assistant .iclub-global-ai-bubble {
+  border-bottom-left-radius: 6px;
+  background: rgba(241, 245, 249, 0.98);
+  color: var(--text);
+}
+
+.iclub-global-ai-message.is-notice .iclub-global-ai-bubble {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+  color: rgba(15, 23, 42, 0.72);
+}
+
+.iclub-global-ai-message.is-typing .iclub-global-ai-bubble {
+  min-width: 54px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.iclub-global-ai-message.is-typing span {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(47, 111, 214, 0.62);
+  animation: iclub-global-ai-dot 900ms ease-in-out infinite;
+}
+
+.iclub-global-ai-message.is-typing span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.iclub-global-ai-message.is-typing span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+.iclub-global-ai-quick {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 7px;
+  padding: 8px 12px 9px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  border-top: 1px solid rgba(15, 23, 42, 0.055);
+  background: rgba(255, 255, 255, 0.99);
+}
+
+.iclub-global-ai-quick::-webkit-scrollbar {
+  display: none;
+}
+
+.iclub-global-ai-quick-btn {
+  flex: 0 0 auto;
+  min-height: 36px;
+  max-width: 230px;
+  padding: 8px 11px;
+  border: 1px solid rgba(47, 111, 214, 0.16);
+  border-radius: 999px;
+  background: rgba(47, 111, 214, 0.055);
+  color: #245fb8;
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.2;
+  font-weight: 750;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
+}
+
+.iclub-global-ai-quick-btn:active:not(:disabled) {
+  transform: scale(0.98);
+  background: rgba(47, 111, 214, 0.10);
+}
+
+.iclub-global-ai-quick-btn.is-sent {
+  opacity: 0.62;
+}
+
+.iclub-global-ai-quick-btn:disabled {
+  opacity: 0.46;
+  cursor: default;
+}
+
+.iclub-global-ai-limit {
+  flex: 0 0 auto;
+  margin: 0 12px 9px;
+  padding: 10px 12px;
+  border: 1px solid rgba(217, 119, 6, 0.17);
+  border-radius: 14px;
+  background: rgba(255, 247, 237, 0.92);
+  color: #7c3f09;
+}
+
+.iclub-global-ai-limit[hidden] {
+  display: none !important;
+}
+
+.iclub-global-ai-limit strong,
+.iclub-global-ai-limit span {
+  display: block;
+}
+
+.iclub-global-ai-limit strong {
+  font-size: 12.5px;
+  line-height: 1.3;
+  font-weight: 850;
+}
+
+.iclub-global-ai-limit span {
+  margin-top: 3px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: rgba(124, 63, 9, 0.80);
+}
+
+.iclub-global-ai-composer {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  align-items: end;
+  gap: 8px;
+  padding: 9px 11px calc(9px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(15, 23, 42, 0.075);
+  background: #fff;
+}
+
+.iclub-global-ai-composer textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  max-height: 108px;
+  resize: none;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border: 1px solid rgba(15, 23, 42, 0.11);
+  border-radius: 15px;
+  background: rgba(248, 250, 252, 0.96);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.35;
+  outline: none;
+}
+
+.iclub-global-ai-composer textarea::placeholder {
+  color: rgba(100, 116, 139, 0.88);
+}
+
+.iclub-global-ai-composer textarea:disabled {
+  opacity: 0.62;
+  cursor: default;
+}
+
+.iclub-global-ai-send {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  border: 0;
+  border-radius: 14px;
+  background: #2f6fd6;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 5px 14px rgba(47, 111, 214, 0.20);
+}
+
+.iclub-global-ai-send:disabled {
+  opacity: 0.34;
+  cursor: default;
+  box-shadow: none;
+}
+
+.iclub-global-ai-send svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Once the Global AI shell is actually enabled, it becomes the one learner-facing
+   AI surface. Existing embedded Exam Prep AI stays fully intact whenever the
+   Global AI runtime is OFF. */
+html.iclub-global-ai-active #exam-prep-host-root [data-ep-ai-dashboard-status],
+html.iclub-global-ai-active #exam-prep-host-root [data-ep-ai-context-action],
+html.iclub-global-ai-active #exam-prep-host-root [data-ep-ai-error-action-wrap],
+html.iclub-global-ai-active #exam-prep-host-root [data-ep-ai-topic-action-wrap] {
+  display: none !important;
+}
+
+@keyframes iclub-global-ai-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes iclub-global-ai-user-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes iclub-global-ai-dot {
+  0%, 65%, 100% {
+    opacity: 0.38;
+    transform: translateY(0);
+  }
+  35% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 600px) {
+  .iclub-global-ai-panel {
+    left: 10px;
+    right: 10px;
+    bottom: calc(74px + var(--safe-bottom));
+    width: auto;
+    height: min(68vh, calc(100vh - 110px - var(--safe-bottom)));
+    min-height: 330px;
+    border-radius: 22px;
+    transform-origin: center bottom;
+  }
+
+  .iclub-global-ai-bubble {
+    max-width: 86%;
+  }
+}
+
+@media (max-width: 340px) {
+  .iclub-global-ai-mark {
+    right: 10px;
+  }
+
+  .iclub-global-ai-panel {
+    left: 8px;
+    right: 8px;
+    min-height: 315px;
+  }
+
+  .iclub-global-ai-head {
+    padding-left: 12px;
+  }
+
+  .iclub-global-ai-scroll {
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+
+  .iclub-global-ai-quick,
+  .iclub-global-ai-composer {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+
+  .iclub-global-ai-bubble {
+    max-width: 88%;
+    font-size: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iclub-global-ai-mark,
+  .iclub-global-ai-panel,
+  .iclub-global-ai-message.is-user .iclub-global-ai-bubble,
+  .iclub-global-ai-message.is-typing span,
+  .iclub-global-ai-quick-btn {
+    transition: none !important;
+    animation: none !important;
+  }
+}

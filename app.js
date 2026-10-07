@@ -2130,7 +2130,7 @@ function getLessonDisplayTitle(lesson) {
     lastTourCertificateId: null
   },
   profile: {
-    stack: ["main"] // main | settings
+    stack: ["main"] // main | settings | plan
   },
 
   certificates: {
@@ -6468,8 +6468,8 @@ if (actionBtn) {
   titleEl.textContent = t("app_name");
   subEl.textContent = "Smarter together";
 
-  // Back показываем только в settings (и он будет работать через action="back")
-  backBtn.style.visibility = (top === "settings") ? "visible" : "hidden";
+  // Back показываем на любом внутреннем экране профиля.
+  backBtn.style.visibility = (top !== "main") ? "visible" : "hidden";
 
   // Шестерёнка в topbar справа — только на главном экране профиля
   if (actionBtn) {
@@ -12513,14 +12513,48 @@ function canCoursesBack() {
    // ---------------------------
 // Profile stack
 // ---------------------------
-const PROFILE_SCREENS = ["main", "settings"];
+const PROFILE_SCREENS = ["main", "settings", "plan", "subject-access"];
+
+function canShowProfilePlan() {
+  try {
+    return window.iClubPlansUI?.bootstrap?.()?.visible === true;
+  } catch {
+    return false;
+  }
+}
+
+function canShowProfileSubjectAccess() {
+  try {
+    return window.iClubSubjectAccessUI?.bootstrap?.()?.visible === true;
+  } catch {
+    return false;
+  }
+}
 
 function getProfileTopScreen() {
   const s = state.profile?.stack;
-  return (s && s.length) ? s[s.length - 1] : "main";
+  const raw = (s && s.length) ? String(s[s.length - 1] || "") : "main";
+  if (!PROFILE_SCREENS.includes(raw)) return "main";
+  if (raw === "plan" && !canShowProfilePlan()) return "main";
+  if (raw === "subject-access" && !canShowProfileSubjectAccess()) return "main";
+  return raw;
 }
 
 function showProfileScreen(screenName) {
+  if (!PROFILE_SCREENS.includes(screenName)) screenName = "main";
+  if (screenName === "plan" && !canShowProfilePlan()) {
+    screenName = "main";
+    state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack:["main"] };
+    state.profile.stack = ["main"];
+    saveState();
+  }
+
+  if (screenName === "subject-access" && !canShowProfileSubjectAccess()) {
+    screenName = "main";
+    state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack:["main"] };
+    state.profile.stack = ["main"];
+    saveState();
+  }
   // ✅ Сначала скрываем ВСЕ проф-экраны (на всякий случай, даже если классы “сломались”)
   document.querySelectorAll("#view-profile .profile-screen").forEach(el => {
     el.hidden = true;
@@ -12571,6 +12605,8 @@ function replaceProfile(screenName) {
   // ✅ перерендер нужного экрана
   if (screenName === "main") renderProfileMain();
   if (screenName === "settings") renderProfileSettings();
+  if (screenName === "plan") window.iClubPlansUI?.render?.();
+  if (screenName === "subject-access") window.iClubSubjectAccessUI?.render?.();
 }
 
 function popProfile() {
@@ -12608,11 +12644,59 @@ function openProfileMain() {
   updateTopbarForView("profile");
 }
 
+function openProfilePlan() {
+  if (!canShowProfilePlan()) {
+    try { window.iClubPlansUI?.refresh?.(); } catch {}
+    return;
+  }
+
+  if (state.tab !== "profile") setTab("profile");
+
+  state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
+  state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
+
+  if (getProfileTopScreen() !== "plan") {
+    pushProfile("plan");
+  } else {
+    showProfileScreen("plan");
+  }
+
+  try { window.iClubPlansUI?.render?.(); } catch {}
+  updateTopbarForView("profile");
+}
+
+function openProfileSubjectAccess() {
+  if (!canShowProfileSubjectAccess()) {
+    try { window.iClubSubjectAccessUI?.refresh?.(); } catch {}
+    return;
+  }
+
+  if (state.tab !== "profile") setTab("profile");
+
+  state.profile = state.profile && typeof state.profile === "object" ? state.profile : { stack: ["main"] };
+  state.profile.stack = Array.isArray(state.profile.stack) ? state.profile.stack : ["main"];
+
+  if (getProfileTopScreen() !== "subject-access") {
+    pushProfile("subject-access");
+  } else {
+    showProfileScreen("subject-access");
+  }
+
+  try { window.iClubSubjectAccessUI?.render?.(); } catch {}
+  updateTopbarForView("profile");
+}
+
 function renderProfileStack() {
   const top = getProfileTopScreen();
   showProfileScreen(top);
   if (top === "settings") renderProfileSettings();
   if (top === "main") renderProfileMain();
+  if (top === "plan") {
+    try { window.iClubPlansUI?.render?.(); } catch {}
+  }
+  if (top === "subject-access") {
+    try { window.iClubSubjectAccessUI?.render?.(); } catch {}
+  }
 }
 
    function renderProfileSettings() {
@@ -21655,20 +21739,20 @@ function bindTabbar() {
     return;
   }
 
-      // ✅ Profile back MUST work even if state.tab accidentally isn't "profile"
-const ps = document.getElementById("profile-settings");
-const psActive = !!(ps && ps.classList.contains("is-active") && ps.hidden !== true);
+      // ✅ Profile back MUST work even if state.tab accidentally isn't "profile".
+      // Any active inner Profile screen (Settings, Plan, future inner screens) returns safely to main.
+const activeProfileInner = document.querySelector("#view-profile .profile-screen.is-active:not(#profile-main)");
+const profileInnerActive = !!(activeProfileInner && activeProfileInner.hidden !== true);
 
-// 1) Если реально открыт экран настроек профиля — возвращаем на main напрямую
-if (psActive) {
+if (profileInnerActive) {
   state.tab = "profile";
   replaceProfile("main");     // stack=["main"] + showProfileScreen("main")
-  renderProfileMain();        // чтобы сразу перерисовать
+  renderProfileMain();        // immediate refresh
   updateTopbarForView("profile");
   return;
 }
 
-// 2) Обычный сценарий профиля
+// Обычный сценарий профиля
 if (state.tab === "profile") {
   popProfile();
   renderProfileStack();
@@ -22006,6 +22090,18 @@ if (
   }
 
             // ===== Profile local navigation (must work from anywhere) =====
+      if (action === "profile-plan") {
+       setTab("profile");
+       openProfilePlan();
+       return;
+      }
+
+      if (action === "profile-subject-access") {
+       setTab("profile");
+       openProfileSubjectAccess();
+       return;
+      }
+
       if (action === "profile-settings") {
        setTab("profile");
        openProfileSettings();   // ✅ push в стек + правильный рендер

@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="ru" class="i18n-pending">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#2F6FD6" />
+  <title>iClub — AI + Plans Preview</title>
+
+  <link rel="icon" href="../logo.png" type="image/png" />
+  <link rel="stylesheet" href="../style.css?v=support1" />
+  <link rel="stylesheet" href="../visual/iclub-visual-v3.css?v=v3foundation2" />
+  <link rel="stylesheet" href="../visual/iclub-premium-v3.css?v=premium1" />
+  <link rel="stylesheet" href="../global-ai-ui.css?v=globalaichat1" />
+  <link rel="stylesheet" href="../plans-ui.css?v=plans1" />
+
+  <style>
+    .architect-preview-bar{
+      position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 8px);
+      z-index:12000;display:flex;align-items:center;justify-content:space-between;gap:8px;
+      max-width:740px;margin-inline:auto;padding:8px 10px;border:1px solid rgba(15,23,42,.10);
+      border-radius:14px;background:rgba(255,255,255,.96);box-shadow:0 10px 28px rgba(15,23,42,.10);
+      backdrop-filter:blur(14px)
+    }
+    .architect-preview-bar strong{font-size:12px}
+    .architect-preview-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    .architect-preview-actions button{
+      min-height:32px;padding:6px 9px;border:1px solid rgba(15,23,42,.10);border-radius:10px;
+      background:#fff;font:inherit;font-size:11px;font-weight:750;color:#0f172a
+    }
+    .architect-preview-actions button.is-active{background:#2f6fd6;color:#fff;border-color:#2f6fd6}
+    body{padding-top:56px}
+    #topbar{display:flex!important}
+    #view-profile{display:block}
+    #profile-plan-entry{display:block}
+    .preview-note{margin:0 0 12px;padding:10px 12px;border-radius:14px;background:rgba(47,111,214,.07);font-size:12px;line-height:1.45;color:#475569}
+    @media(max-width:420px){
+      .architect-preview-bar{align-items:flex-start}
+      .architect-preview-bar strong{padding-top:7px}
+      body{padding-top:94px}
+    }
+  </style>
+</head>
+
+<body class="iclub-visual-v3">
+  <div class="architect-preview-bar">
+    <strong>Безопасный preview · не production</strong>
+    <div class="architect-preview-actions">
+      <button type="button" data-preview-plan="free" class="is-active">Free</button>
+      <button type="button" data-preview-plan="plus">Plus</button>
+      <button type="button" data-preview-plan="pro">Pro</button>
+    </div>
+  </div>
+
+  <div id="app" class="app">
+    <header id="topbar" class="topbar" aria-label="Top bar">
+      <button id="topbar-back" class="icon-btn" type="button" aria-label="Back" style="visibility:hidden">
+        <svg class="v3-shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+
+      <div class="topbar-brand">
+        <img id="topbar-logo" class="topbar-logo" src="../logo.png" alt="iClub" />
+        <div class="topbar-title">
+          <div id="topbar-title" class="title">iClub</div>
+          <div id="topbar-subtitle" class="subtitle">Smarter together</div>
+        </div>
+      </div>
+      <div class="topbar-right"></div>
+    </header>
+
+    <main id="main" class="main">
+      <section id="view-profile" class="view is-active" data-view="profile" aria-label="Profile">
+        <div class="content">
+          <div id="profile-main" class="profile-screen is-active">
+            <div class="profile-hero">
+              <div class="profile-avatar">iC</div>
+              <div class="profile-hero-main">
+                <div class="profile-name">Preview Student</div>
+                <div class="muted small">iClub learner</div>
+              </div>
+            </div>
+
+            <p class="preview-note">
+              Здесь можно проверить будущий экран тарифов и открыть iClub AI справа внизу.
+              Данные, платежи и прогресс учеников не подключены.
+            </p>
+
+            <div id="profile-plan-entry" class="profile-section iclub-plan-entry">
+              <div class="profile-row-list">
+                <button class="profile-row" type="button" data-action="profile-plan">
+                  <div class="profile-row-left">
+                    <div class="profile-row-ico" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 7.5h16v11H4z"/><path d="M7 5h10v2.5H7z"/><path d="M8 12h8"/><path d="M8 15h5"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="profile-row-mid">
+                    <div class="profile-row-title" data-plan-row-title>Тариф</div>
+                    <div class="muted small" data-plan-row-sub>Free · Базовый доступ</div>
+                  </div>
+                  <div class="profile-row-right">›</div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="profile-plan" class="profile-screen" hidden>
+            <div class="iclub-plan-screen">
+              <div class="iclub-plan-intro">
+                <div class="h1" data-plan-title>Тариф iClub</div>
+                <div class="muted" data-plan-subtitle></div>
+              </div>
+
+              <div class="iclub-plan-unavailable" data-plan-unavailable hidden></div>
+
+              <div data-plan-body>
+                <div class="iclub-plan-cards" data-plan-cards></div>
+                <div class="iclub-plan-compare-wrap" data-plan-compare></div>
+                <div class="iclub-plan-info" data-plan-info></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav id="tabbar" class="tabbar" aria-label="Bottom navigation">
+      <button class="tab" type="button"><span class="tab-txt">Home</span></button>
+      <button class="tab" type="button"><span class="tab-txt">Study</span></button>
+      <button class="tab" type="button"><span class="tab-txt">Ratings</span></button>
+      <button class="tab is-active" type="button"><span class="tab-txt">Profile</span></button>
+    </nav>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    (() => {
+      const planRows = [
+        { plan_code:'free', monthly_price_uzs:0, study_subject_limit:1, all_available_subjects:false, competitive_subject_limit:1, ai_generation_entitled:false },
+        { plan_code:'plus', monthly_price_uzs:35000, study_subject_limit:3, all_available_subjects:false, competitive_subject_limit:2, ai_generation_entitled:true },
+        { plan_code:'pro', monthly_price_uzs:50000, study_subject_limit:null, all_available_subjects:true, competitive_subject_limit:2, ai_generation_entitled:true }
+      ];
+
+      let currentPlan = 'free';
+
+      window.i18n = { getLang: () => 'ru' };
+
+      window.sb = {
+        rpc: async (name) => {
+          if (name === 'get_iclub_plan_ui_bootstrap_v1') {
+            return {
+              data:{
+                visible:true,
+                reason:null,
+                current_plan_code:currentPlan,
+                checkout_enabled:false,
+                plans:planRows,
+                ui_version:'iclub_plans_v1'
+              },
+              error:null
+            };
+          }
+
+          if (name === 'get_iclub_ai_ui_bootstrap_v1') {
+            return {
+              data:{
+                visible:true,
+                reason:null,
+                locale:'ru',
+                assessment_blocked:false,
+                usage_exhausted:false,
+                reset_at:null
+              },
+              error:null
+            };
+          }
+
+          return { data:null, error:{ message:'preview_rpc_not_supported' } };
+        },
+
+        functions:{
+          invoke: async (_name,{ body }) => {
+            await new Promise(resolve => setTimeout(resolve, 650));
+            const prompt = String(body?.prompt_key || '');
+            const user = String(body?.user_text || '').trim();
+            const answers = {
+              app_help_here:'Здесь iClub AI может помочь понять, что доступно на текущем экране, объяснить функции приложения и подсказать следующий учебный шаг.',
+              app_help_practice:'Practice помогает закреплять материал короткими заданиями, сохраняет результаты и после попытки позволяет разобрать ошибки.',
+              app_help_tours:'Tours — соревновательный формат iClub. Результаты могут участвовать в рейтинге, а завершённые туры сохраняются в истории.',
+              app_help_results:'Результаты Practice, Tours и доступные сертификаты находятся в соответствующих разделах iClub.'
+            };
+            return {
+              data:{
+                ok:true,
+                reason:null,
+                message:answers[prompt] || (user ? 'Это демонстрационный ответ iClub AI. В рабочей версии ответ будет строиться из разрешённого контекста iClub и проверенных источников.' : 'iClub AI готов помочь.'),
+                academic_state_changed:false,
+                usage_exhausted:false,
+                reset_at:null
+              },
+              error:null
+            };
+          }
+        },
+
+        auth:{
+          onAuthStateChange: () => ({ data:{ subscription:{ unsubscribe(){} } } })
+        }
+      };
+
+      window.__setPreviewPlan = async (plan) => {
+        currentPlan = ['free','plus','pro'].includes(plan) ? plan : 'free';
+        document.querySelectorAll('[data-preview-plan]').forEach(button => {
+          button.classList.toggle('is-active', button.getAttribute('data-preview-plan') === currentPlan);
+        });
+        await window.iClubPlansUI?.refresh?.();
+      };
+    })();
+  </script>
+
+  <script src="../plans-ui.js?v=plans1"></script>
+  <script src="../global-ai-ui.js?v=globalaichat1"></script>
+
+  <script>
+    (() => {
+      const main = document.getElementById('profile-main');
+      const plan = document.getElementById('profile-plan');
+      const back = document.getElementById('topbar-back');
+
+      document.querySelector('[data-action="profile-plan"]')?.addEventListener('click', () => {
+        main.hidden = true;
+        main.classList.remove('is-active');
+        plan.hidden = false;
+        plan.classList.add('is-active');
+        back.style.visibility = 'visible';
+        window.iClubPlansUI?.render?.();
+        window.scrollTo(0,0);
+      });
+
+      back.addEventListener('click', () => {
+        plan.hidden = true;
+        plan.classList.remove('is-active');
+        main.hidden = false;
+        main.classList.add('is-active');
+        back.style.visibility = 'hidden';
+        window.scrollTo(0,0);
+      });
+
+      document.querySelectorAll('[data-preview-plan]').forEach(button => {
+        button.addEventListener('click', () => window.__setPreviewPlan(button.getAttribute('data-preview-plan')));
+      });
+    })();
+  </script>
+</body>
+</html>

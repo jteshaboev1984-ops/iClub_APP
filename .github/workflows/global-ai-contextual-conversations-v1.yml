@@ -1,0 +1,183 @@
+name: Global AI Contextual Conversations v1
+
+on:
+  pull_request:
+    branches:
+      - feat/global-ai-shell-v1
+      - main
+    paths:
+      - 'supabase/migrations/20261006133000_iclub_global_ai_conversation_ui_v1.sql'
+      - 'supabase/reversions/20261006133000_iclub_global_ai_conversation_ui_v1_revert.sql'
+      - 'supabase/tests/global_ai_conversations_v1_matrix.sql'
+      - 'supabase/functions/global-ai/**'
+      - 'global-ai-ui.js'
+      - 'global-ai-ui.css'
+      - 'index.html'
+      - '.github/scripts/global_ai_conversations_v1_contract.js'
+      - 'scripts/global-ai-conversations-browser-regression.cjs'
+      - '.github/workflows/global-ai-contextual-conversations-v1.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/20261006133000_iclub_global_ai_conversation_ui_v1.sql'
+      - 'supabase/reversions/20261006133000_iclub_global_ai_conversation_ui_v1_revert.sql'
+      - 'supabase/tests/global_ai_conversations_v1_matrix.sql'
+      - 'supabase/functions/global-ai/**'
+      - 'global-ai-ui.js'
+      - 'global-ai-ui.css'
+      - 'index.html'
+      - '.github/scripts/global_ai_conversations_v1_contract.js'
+      - 'scripts/global-ai-conversations-browser-regression.cjs'
+      - '.github/workflows/global-ai-contextual-conversations-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conversations-safety:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostic log
+        run: printf 'Global AI contextual conversations v1 CI\n' > global-ai-conversations.log
+
+      - name: Bootstrap isolated Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a global-ai-conversations.log
+
+      - name: Apply Global AI foundation stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql 2>&1 | tee -a global-ai-conversations.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql 2>&1 | tee -a global-ai-conversations.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006124000_iclub_global_ai_ui_bootstrap_v1.sql 2>&1 | tee -a global-ai-conversations.log
+
+      - name: Static production-preservation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          migration='supabase/migrations/20261006133000_iclub_global_ai_conversation_ui_v1.sql'
+          ! grep -Eiq '\b(update|delete[[:space:]]+from|truncate)[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
+          ! grep -Eiq '\binsert[[:space:]]+into[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
+          ! grep -Eiq '\bcreate[[:space:]]+table\b[^;]*(chat|conversation|message)' "$migration"
+          ! grep -Eiq '\b(raw_chat|raw_message|assistant_text|conversation_text)\b' "$migration"
+
+      - name: Apply contextual conversation support
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006133000_iclub_global_ai_conversation_ui_v1.sql 2>&1 | tee -a global-ai-conversations.log
+
+      - name: Run conversation SQL matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c global_ai.conversations_isolated=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/global_ai_conversations_v1_matrix.sql 2>&1 | tee -a global-ai-conversations.log
+
+      - name: Validate static conversation contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check global-ai-ui.js
+          node --check .github/scripts/global_ai_conversations_v1_contract.js
+          node --check scripts/global-ai-conversations-browser-regression.cjs
+          node .github/scripts/global_ai_conversations_v1_contract.js 2>&1 | tee -a global-ai-conversations.log
+
+      - name: Type-check Global AI Edge Function
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Deno check
+        run: deno check supabase/functions/global-ai/index.ts
+
+      - name: Prove default runtime remains dormant
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(psql -Atqc "select ui_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
+          test "$(psql -Atqc "select gateway_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
+          test "$(psql -Atqc "select generation_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
+          test "$(psql -Atqc "select kill_switch from private.iclub_global_ai_runtime_config where id=1")" = 't'
+          test "$(psql -Atqc "select count(*) from private.iclub_subscription_entitlements")" = '0'
+
+      - name: Install Chromium harness
+        run: |
+          mkdir -p /tmp/pw
+          cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          ./node_modules/.bin/playwright install --with-deps chromium >/dev/null
+
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/iclub-global-ai-conversations-http.log 2>&1 &
+          echo $! >/tmp/iclub-global-ai-conversations-http.pid
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:4173/logo.png >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/iclub-global-ai-conversations-http.log
+          exit 1
+
+      - name: Run mobile contextual conversation regression
+        env:
+          NODE_PATH: /tmp/pw/node_modules
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node scripts/global-ai-conversations-browser-regression.cjs 2>&1 | tee -a global-ai-conversations.log
+
+      - name: Prove safe pre-activation conversation rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/reversions/20261006133000_iclub_global_ai_conversation_ui_v1_revert.sql 2>&1 | tee -a global-ai-conversations.log
+          test "$(psql -Atqc "select count(*) from private.iclub_ai_subject_readiness where subject_key='general' and scope_code='global'")" = '0'
+          test "$(psql -Atqc "select to_regprocedure('public.get_iclub_ai_ui_bootstrap_v1()') is not null")" = 't'
+          test "$(psql -Atqc "select to_regclass('private.iclub_global_ai_gateway_policy') is not null")" = 't'
+
+      - name: Mark contextual conversations GREEN
+        run: echo 'GLOBAL AI CONTEXTUAL CONVERSATIONS V1 GREEN' | tee -a global-ai-conversations.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: global-ai-contextual-conversations-v1
+          path: |
+            global-ai-conversations.log
+            artifacts/global-ai-conversations-*.png
+          if-no-files-found: ignore
+          retention-days: 7

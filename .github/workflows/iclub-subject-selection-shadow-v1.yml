@@ -1,0 +1,169 @@
+name: iClub Subject Selection Shadow v1
+
+on:
+  pull_request:
+    branches:
+      - feat/subscription-access-lifecycle-v1
+      - main
+    paths:
+      - 'supabase/migrations/20261006164000_iclub_subject_selection_shadow_ui_v1.sql'
+      - 'supabase/reversions/20261006164000_iclub_subject_selection_shadow_ui_v1_revert.sql'
+      - 'supabase/tests/iclub_subject_selection_shadow_ui_v1_matrix.sql'
+      - 'subject-access-ui.js'
+      - 'subject-access-ui.css'
+      - 'index.html'
+      - 'app.js'
+      - '.github/scripts/iclub_subject_selection_shadow_ui_v1_contract.js'
+      - 'scripts/iclub-subject-selection-shadow-browser-regression.cjs'
+      - '.github/workflows/iclub-subject-selection-shadow-v1.yml'
+  push:
+    branches:
+      - feat/subject-selection-shadow-v1
+      - main
+    paths:
+      - 'supabase/migrations/20261006164000_iclub_subject_selection_shadow_ui_v1.sql'
+      - 'supabase/reversions/20261006164000_iclub_subject_selection_shadow_ui_v1_revert.sql'
+      - 'supabase/tests/iclub_subject_selection_shadow_ui_v1_matrix.sql'
+      - 'subject-access-ui.js'
+      - 'subject-access-ui.css'
+      - 'index.html'
+      - 'app.js'
+      - '.github/scripts/iclub_subject_selection_shadow_ui_v1_contract.js'
+      - 'scripts/iclub-subject-selection-shadow-browser-regression.cjs'
+      - '.github/workflows/iclub-subject-selection-shadow-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  subject-selection-safety:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostics
+        run: printf 'iClub beta subject-selection shadow v1 CI\n' > subject-selection.log
+
+      - name: Bootstrap isolated Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a subject-selection.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_subscription_access_legacy_fixture.sql 2>&1 | tee -a subject-selection.log
+
+      - name: Apply commercial dependency stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql 2>&1 | tee -a subject-selection.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql 2>&1 | tee -a subject-selection.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006124000_iclub_global_ai_ui_bootstrap_v1.sql 2>&1 | tee -a subject-selection.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006133000_iclub_global_ai_conversation_ui_v1.sql 2>&1 | tee -a subject-selection.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006143000_iclub_plans_profile_ui_v1.sql 2>&1 | tee -a subject-selection.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006153000_iclub_subscription_access_lifecycle_v1.sql 2>&1 | tee -a subject-selection.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006153100_iclub_grandfather_subject_access_v1.sql 2>&1 | tee -a subject-selection.log
+
+      - name: Static legacy-data preservation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          migration='supabase/migrations/20261006164000_iclub_subject_selection_shadow_ui_v1.sql'
+          ! grep -Eiq '\b(update|delete[[:space:]]+from|truncate)[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
+          ! grep -Eiq '\binsert[[:space:]]+into[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
+          grep -q 'subject_selection_ui_enabled boolean not null default false' "$migration"
+
+      - name: Apply beta subject-selection layer
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006164000_iclub_subject_selection_shadow_ui_v1.sql 2>&1 | tee -a subject-selection.log
+
+      - name: Prove default subject-selection UI remains dormant
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(psql -Atqc "select subject_selection_ui_enabled from private.iclub_commercial_access_config where id=1")" = 'f'
+          test "$(psql -Atqc "select subject_limits_mode from private.iclub_commercial_access_config where id=1")" = 'off'
+          test "$(psql -Atqc "select count(*) from private.iclub_subject_slot_selections")" = '0'
+
+      - name: Run subject-selection SQL matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c iclub.subject_selection_isolated=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_subject_selection_shadow_ui_v1_matrix.sql 2>&1 | tee -a subject-selection.log
+
+      - name: Validate static subject-selection contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check subject-access-ui.js
+          node --check app.js
+          node --check .github/scripts/iclub_subject_selection_shadow_ui_v1_contract.js
+          node --check scripts/iclub-subject-selection-shadow-browser-regression.cjs
+          node .github/scripts/iclub_subject_selection_shadow_ui_v1_contract.js 2>&1 | tee -a subject-selection.log
+
+      - name: Install Chromium harness
+        run: |
+          mkdir -p /tmp/pw
+          cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          ./node_modules/.bin/playwright install --with-deps chromium >/dev/null
+
+      - name: Run mobile subject-selection regression
+        env:
+          NODE_PATH: /tmp/pw/node_modules
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node scripts/iclub-subject-selection-shadow-browser-regression.cjs 2>&1 | tee -a subject-selection.log
+
+      - name: Prove safe subject-selection rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/reversions/20261006164000_iclub_subject_selection_shadow_ui_v1_revert.sql 2>&1 | tee -a subject-selection.log
+          test "$(psql -Atqc "select to_regprocedure('public.get_iclub_subject_selection_bootstrap_v1()') is null")" = 't'
+          test "$(psql -Atqc "select to_regprocedure('public.set_iclub_my_subject_slot_v1(text,boolean,boolean)') is null")" = 't'
+          test "$(psql -Atqc "select count(*) from information_schema.columns where table_schema='private' and table_name='iclub_commercial_access_config' and column_name='subject_selection_ui_enabled'")" = '0'
+          test "$(psql -Atqc "select to_regclass('private.iclub_subject_slot_selections') is not null")" = 't'
+
+      - name: Mark subject selection GREEN
+        run: echo 'ICLUB SUBJECT SELECTION SHADOW V1 GREEN' | tee -a subject-selection.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iclub-subject-selection-shadow-v1
+          path: |
+            subject-selection.log
+            artifacts/subject-selection-*.png
+          if-no-files-found: ignore
+          retention-days: 7
