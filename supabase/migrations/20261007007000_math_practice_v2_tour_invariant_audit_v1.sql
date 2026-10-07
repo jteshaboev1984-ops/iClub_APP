@@ -154,6 +154,9 @@ create table if not exists private.practice_v2_release_switch_audit (
   notes jsonb not null default '{}'::jsonb
 );
 
+alter table private.practice_v2_release_switch_audit
+  add column if not exists old_question_ids bigint[] not null default '{}'::bigint[];
+
 create index if not exists practice_v2_release_switch_audit_status_idx
   on private.practice_v2_release_switch_audit(status,started_at desc);
 
