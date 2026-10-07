@@ -18,14 +18,19 @@ Owner decision: preserve Tour results/history as the protected user-data boundar
 - Practice 6 Differentiation: 70/70 authored; full content QA passed; QA report recorded.
 - Practice 7 Integration: 66/66 authored; full content QA passed; QA report recorded.
 - Total authored P1 Practice v2 items: 495 across all 45 canonical P1 skills.
-- MCQ position QA: P1=10/10/10/11; P2=15/15/15/16; P3=9/9/9/9; P4=12/12/12/13; P5=7/7/7/6; P6=8/9/10/8; P7=7/7/7/7.
-- Deterministic diagnostic catalogs: Quadratics 30; Functions 31; Coordinate Geometry 28; Circular/Trig 30; Binomial/Series 27; Differentiation 31; Integration 24.
-- Season 2 Tour 1–7 separation reviews: completed; overly similar Practice items were redesigned without changing Tours/history.
-- Approved/runtime-allowed AI source cards exist for all 45 P1 canonical skills. Draft supplements remain runtime-disabled only where deeper source coverage was identified in earlier blocks.
-- Technical publication status: BLOCKED intentionally until global cross-bank QA, evaluator hardening and secure server-side runtime validation are complete.
-- Known evaluator blocker: Unicode minus accepted by authored contracts but not by current Practice scalar evaluator.
+- Global 495-item QA: PASS in GitHub Actions. Qtype 277 MCQ / 218 input; difficulty 124/226/145; global A/B/C/D=68/69/70/70; max same-letter run=2.
+- Evaluator target regression: PASS across 218 input questions, 478 accepted cases, 654 rejected cases and all 25 authored Unicode-minus cases.
+- Frontend Unicode-minus normalizer: prepared and CI-gated without rewriting the large app.js file.
+- Production answer-key read-only audit: public.questions has RLS enabled with no anon/authenticated SELECT; current session resume withholds correct answer/explanation until that question is answered.
+- Legacy answer-oracle risk identified: direct authenticated execution of submit_practice_attempt, submit_practice_answer_safe and older get_practice_review_safe_v4. Branch-only revoke migration prepared; production unchanged.
+- Topic drill v4 availability bypass identified. Pool/tour-gated start_practice_topic_drill_safe_v5 prepared; branch adapter points to v5.
+- Main Practice selector v5 prepared: existing tour locks + canonical-skill round-robin + wrong-skill/exact-wrong history + authored-role exposure + transfer priority + already-correct exclusion.
+- Private Practice v2 metadata/diagnostic catalog foundation prepared.
+- Work-branch adapter now targets start_practice_session_auto_safe_v5 and start_practice_topic_drill_safe_v5. Resume/submit/finalize remain on hardened v4 contracts.
+- Latest Mathematics Practice v2 Global QA workflow after v5 wiring: PASS.
+- All database migrations described above are branch-only and have NOT been applied to production.
 - Production/Supabase user data and Tour results: unchanged by this work.
-- Next macro block: global Practice v2 cross-bank audit across all 495 items + 45 skills, then evaluator/security/runtime implementation.
+- Next macro gate: deterministic 495-question staging/import package + live READ-ONLY dependency/Tour invariant preflight before any controlled migration.
 
 ## Purpose
 
