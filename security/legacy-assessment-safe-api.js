@@ -80,7 +80,7 @@
     },
 
     async submit({ sessionId, questionId, userAnswer = "", pickedIndex = null, timeSpent = 0 }) {
-      return rpc("submit_practice_drill_answer_safe_v4", {
+      return rpc("submit_practice_drill_answer_safe_v5", {
         p_session_id: requirePositiveInt(sessionId, "session_id"),
         p_question_id: requirePositiveInt(questionId, "question_id"),
         p_user_answer: userAnswer == null ? "" : String(userAnswer),
@@ -105,7 +105,7 @@
     },
 
     async submit({ sessionId, questionId, userAnswer = "", pickedIndex = null, timeSpent = 0 }) {
-      return rpc("submit_practice_session_answer_safe_v4", {
+      return rpc("submit_practice_session_answer_safe_v5", {
         p_session_id: requirePositiveInt(sessionId, "session_id"),
         p_question_id: requirePositiveInt(questionId, "question_id"),
         p_user_answer: userAnswer == null ? "" : String(userAnswer),
