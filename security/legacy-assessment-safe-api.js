@@ -92,7 +92,7 @@
 
   const practice = Object.freeze({
     async start({ poolId, clientSessionId = null }) {
-      return rpc("start_practice_session_auto_safe_v4", {
+      return rpc("start_practice_session_auto_safe_v5", {
         p_pool_id: requirePositiveInt(poolId, "pool_id"),
         p_client_session_id: clientSessionId || makeClientSessionId("practice")
       });
