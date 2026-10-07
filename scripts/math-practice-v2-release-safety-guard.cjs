@@ -11,6 +11,8 @@ const files={
   preflight:path.join(ROOT,'supabase','preflight','math_practice_v2_release_preflight.sql'),
   postPublish:path.join(ROOT,'supabase','preflight','math_practice_v2_post_publish_audit.sql'),
   postRollback:path.join(ROOT,'supabase','preflight','math_practice_v2_post_rollback_audit.sql'),
+  schemaCompat:path.join(ROOT,'supabase','preflight','math_practice_v2_schema_compatibility.sql'),
+  inflightCompat:path.join(ROOT,'supabase','preflight','math_practice_v2_inflight_compatibility_audit.sql'),
   feedback:path.join(ROOT,'supabase','migrations','20261007006700_math_practice_v2_deterministic_feedback_v5.sql'),
 };
 
@@ -26,6 +28,8 @@ const release=fs.readFileSync(files.release,'utf8');
 const preflight=fs.readFileSync(files.preflight,'utf8');
 const postPublish=fs.readFileSync(files.postPublish,'utf8');
 const postRollback=fs.readFileSync(files.postRollback,'utf8');
+const schemaCompat=fs.readFileSync(files.schemaCompat,'utf8');
+const inflightCompat=fs.readFileSync(files.inflightCompat,'utf8');
 const feedback=fs.readFileSync(files.feedback,'utf8');
 
 const lower=s=>s.toLowerCase();
@@ -119,6 +123,29 @@ for(const token of [
   'rollback_audit_v2_history_rows_expected_495',
 ]){
   if(!postRollback.includes(token)) fail(`post-rollback audit missing ${token}`);
+}
+
+if(!/begin;\s*set transaction read only;/i.test(schemaCompat)) fail('schema compatibility preflight is not explicitly read-only');
+if(!/rollback;\s*$/i.test(schemaCompat.trim())) fail('schema compatibility preflight does not end with rollback');
+for(const token of [
+  'practice_v2_questions_column_contract_drift_',
+  'practice_v2_pool_question_uniqueness_missing',
+  'practice_v2_required_v4_compatibility_function_missing',
+  'practice_v2_expected_seven_active_math_pools_found_',
+]){
+  if(!schemaCompat.includes(token)) fail(`schema compatibility preflight missing ${token}`);
+}
+
+if(!/begin;\s*set transaction read only;/i.test(inflightCompat)) fail('in-flight compatibility audit is not explicitly read-only');
+if(!/rollback;\s*$/i.test(inflightCompat.trim())) fail('in-flight compatibility audit does not end with rollback');
+for(const token of [
+  'get_practice_session_resume_safe_v4(bigint)',
+  'submit_practice_session_answer_safe_v4(bigint,bigint,text,integer,integer)',
+  'finalize_practice_session_safe_v4(bigint,integer)',
+  'get_practice_drill_resume_safe_v4(bigint)',
+  'submit_practice_drill_answer_safe_v4(bigint,bigint,text,integer,integer)',
+]){
+  if(!inflightCompat.includes(token)) fail(`in-flight compatibility audit missing ${token}`);
 }
 
 for(const token of [
