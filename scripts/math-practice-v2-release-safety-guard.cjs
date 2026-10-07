@@ -9,6 +9,7 @@ const files={
   audit:path.join(ROOT,'supabase','migrations','20261007007000_math_practice_v2_tour_invariant_audit_v1.sql'),
   release:path.join(ROOT,'supabase','migrations','20261007007500_math_practice_v2_atomic_release_switch_v1.sql'),
   preflight:path.join(ROOT,'supabase','preflight','math_practice_v2_release_preflight.sql'),
+  postPublish:path.join(ROOT,'supabase','preflight','math_practice_v2_post_publish_audit.sql'),
   feedback:path.join(ROOT,'supabase','migrations','20261007006700_math_practice_v2_deterministic_feedback_v5.sql'),
 };
 
@@ -22,6 +23,7 @@ if(errors.length){for(const e of errors)console.error('ERROR:',e);process.exit(1
 const audit=fs.readFileSync(files.audit,'utf8');
 const release=fs.readFileSync(files.release,'utf8');
 const preflight=fs.readFileSync(files.preflight,'utf8');
+const postPublish=fs.readFileSync(files.postPublish,'utf8');
 const feedback=fs.readFileSync(files.feedback,'utf8');
 
 const lower=s=>s.toLowerCase();
@@ -84,6 +86,23 @@ for(const token of [
   if(!preflight.includes(token)) fail(`preflight missing ${token}`);
 }
 
+
+if(!/begin;\s*set transaction read only;/i.test(postPublish)) fail('post-publish audit is not explicitly read-only');
+if(!/rollback;\s*$/i.test(postPublish.trim())) fail('post-publish audit does not end with rollback');
+for(const bad of [/\binsert\s+into\b/i,/\bupdate\s+public\./i,/\bdelete\s+from\b/i,/\btruncate\b/i]){
+  if(bad.test(postPublish)) fail(`post-publish audit contains DML-like token: ${bad}`);
+}
+for(const token of [
+  'post_publish_active_bank_expected_495',
+  'post_publish_release_tour_invariant_not_proven',
+  'post_publish_old_memberships_still_active_',
+  'post_publish_new_memberships_expected_495',
+  'post_publish_practice_v2_tour_overlap_',
+  'post_publish_superseded_oracle_or_selector_rpc_still_exposed',
+]){
+  if(!postPublish.includes(token)) fail(`post-publish audit missing ${token}`);
+}
+
 for(const token of [
   'submit_practice_session_answer_safe_v5',
   'submit_practice_drill_answer_safe_v5',
@@ -105,6 +124,7 @@ console.log(JSON.stringify({
   protectedTourDml:'none',
   practiceHistoryDelete:'none',
   preflightReadOnly:true,
+  postPublishAuditReadOnly:true,
   releaseHasRollback:true,
   v5FinalizerReevaluation:'none',
   errors
