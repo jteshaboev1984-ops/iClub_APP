@@ -59,6 +59,10 @@ const state = {
     subjectKey: "mathematics",
     attemptKey: "old"
   },
+  practiceLastDrillAttempt: {
+    subjectKey: "mathematics",
+    attemptKey: "old-drill"
+  },
   tourContext,
   courses: {
     subjectKey: "mathematics",
@@ -116,6 +120,7 @@ const nextState = JSON.parse(after["iclub_state_v1"]);
 assert(!nextState.quiz, "legacy Mathematics Practice quiz survived");
 assert(nextState.quizLock === null, "legacy Mathematics Practice quiz lock survived");
 assert(!nextState.practiceLastAttempt, "legacy Mathematics Practice result survived");
+assert(!nextState.practiceLastDrillAttempt, "legacy Mathematics Practice drill result survived");
 assert(JSON.stringify(nextState.tourContext) === JSON.stringify(tourContext), "Tour runtime context changed");
 assert(nextState.courses.lastTourAttemptId === 812, "Tour attempt pointer changed");
 assert(nextState.courses.lastTourCertificateId === 913, "Tour certificate pointer changed");
@@ -169,6 +174,7 @@ console.log(JSON.stringify({
   mathematicsPausedDraftCleared: true,
   mathematicsPracticeRecommendationFallbackCleared: true,
   stalePracticeRuntimeCleared: true,
+  stalePracticeDrillRuntimeCleared: true,
   otherSubjectPracticePreserved: true,
   tourRuntimePreserved: true,
   tourRecommendationsPreserved: true,

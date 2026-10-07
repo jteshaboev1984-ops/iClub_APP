@@ -80,6 +80,11 @@
         stateChanged = true;
       }
 
+      if (norm(savedState?.practiceLastDrillAttempt?.subjectKey) === SUBJECT_KEY) {
+        delete savedState.practiceLastDrillAttempt;
+        stateChanged = true;
+      }
+
       const courses = savedState?.courses;
       if (courses && typeof courses === "object") {
         const selections = courses.selectedPracticeTourNoBySubject;
