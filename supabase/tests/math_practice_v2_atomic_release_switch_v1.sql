@@ -31,6 +31,11 @@ begin
      or position('protected_tour_invariant_changed_during_release' in v_def)=0
      or position('old_active_membership_ids' in v_def)=0
      or position('new_membership_ids' in v_def)=0
+     or position('release_expected_exactly_one_active_pool_per_practice' in v_def)=0
+     or position('release_expected_201_staged_diagnostics' in v_def)=0
+     or position('release_expected_868_staged_diagnostic_mappings' in v_def)=0
+     or position('release_staged_practice_' in v_def)=0
+     or position('order_not_contiguous' in v_def)=0
      or position('set is_active=false' in replace(lower(v_def),' ',' '))=0
      or position('set is_active=true' in replace(lower(v_def),' ',' '))=0 then
     raise exception 'practice_v2_publish_missing_atomic_membership_or_tour_gate';
