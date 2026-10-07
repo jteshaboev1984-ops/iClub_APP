@@ -25,7 +25,7 @@
       if (document.querySelector(selector)) { reject(new Error('asset already loading without completion proof')); return; }
       const el = document.createElement('script');
       el.dataset[datasetKey] = 'true';
-      el.src = `${base}exam-prep-progress-ux-${name}.js?v=${name === 'ui' ? 'progressux3' : 'progressux2'}`;
+      el.src = `${base}exam-prep-progress-ux-${name}.js?v=${name === 'ui' ? 'progressux4' : 'progressux2'}`;
       el.async = false;
       el.onload = () => expected() && stillEnabled() ? resolve() : reject(new Error('asset not ready'));
       el.onerror = () => reject(new Error('asset unavailable'));
@@ -39,7 +39,7 @@
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.dataset[token] = 'true';
-    link.href = `${base}exam-prep-progress-ux-${name}.css?v=progressux2`;
+    link.href = `${base}exam-prep-progress-ux-${name}.css?v=progressux3`;
     root.appendChild(link);
   }
 
@@ -176,7 +176,7 @@
         const link = document.createElement('link');
         link.rel = 'stylesheet';
         link.dataset.examPrepProgressUxStyle = 'true';
-        link.href = `${base}exam-prep-progress-ux.css?v=progressux2`;
+        link.href = `${base}exam-prep-progress-ux.css?v=progressux3`;
         root.appendChild(link);
       }
       await loadScript('ui', 'examPrepProgressUxUi', () =>
