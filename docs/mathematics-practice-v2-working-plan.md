@@ -21,8 +21,9 @@ Owner decision: preserve Tour results/history as the protected user-data boundar
 - Additive branch-only runtime hardening prepared: Unicode-minus normalization; legacy answer-oracle closure; private v2 metadata; pool-gated topic drill v5; skill/role-aware selector v5; current-bank mistakes v5; deterministic post-answer feedback/finalizer/review v5.
 - Deterministic 495-question staging generator prepared with per-Practice contiguous order and invisible staging gates.
 - Atomic publish/rollback switch prepared. It archives exact membership IDs, switches 490 old → 495 new memberships atomically, fingerprints Tours before/after, and contains no Practice-history deletion or Tour DML.
-- READ-ONLY release preflight, post-publish audit, post-rollback audit and in-flight compatibility audit are prepared.
+- READ-ONLY schema compatibility preflight, release preflight, post-publish audit, post-rollback audit and in-flight compatibility audit are prepared. The live schema compatibility preflight was executed against production READ ONLY and passed.
 - Controlled release runbook prepared. Learner communication preserves Tour results and explains that new Practice progress is measured on the new bank.
+- Latest Mathematics Practice v2 Global QA run after release-safety and UI fallback checks: PASS (run 51). Staging manifest hash: `da7ae9cc9987df4d4655e880157c03611a842abba6663d4c3366932293144383`; 495 questions; 201 diagnostic catalog entries; 868 diagnostic mappings.
 - Production/Supabase writes from this Practice v2 work: NONE. All migrations/content remain branch-only.
 - Block 4 implementation package is prepared but not production-tested because no isolated preview database has been created/applied in this workflow.
 - Next macro gate: isolated database migration/staging/regression rehearsal, then controlled production release only after every release audit remains green.
