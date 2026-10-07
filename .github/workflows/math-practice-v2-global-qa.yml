@@ -1,0 +1,30 @@
+name: Mathematics Practice v2 Global QA
+
+on:
+  push:
+    branches:
+      - work/mathematics-practice-v2-refresh-20261006
+    paths:
+      - 'content/math/practice_v2/**'
+      - 'scripts/math-practice-v2-*.cjs'
+      - '.github/workflows/math-practice-v2-global-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  global-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run global Practice v2 QA
+        run: node scripts/math-practice-v2-global-qa.cjs
