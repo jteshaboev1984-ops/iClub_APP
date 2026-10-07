@@ -15510,21 +15510,43 @@ async function renderSubjectHubMentorCard(subjectKey) {
     const toursSub = toursBtn?.querySelector(".muted.small");
 
     if (toursBtn) {
-      const eligibility = canOpenActiveTours(profile, state.courses.subjectKey);
+      const planAccess = await window.iClubCommercialAccessUI?.checkCompetitive?.(state.courses.subjectKey);
+      const planEnforced = planAccess?.enforced === true;
 
-            // Additional subjects: tours do not exist by spec
+      // Additional subjects: tours do not exist by spec.
       if (isAdditionalSubjectKey(state.courses.subjectKey)) {
         toursBtn.disabled = false;
         toursBtn.classList.add("is-disabled");
         if (toursSub) toursSub.textContent = getToursDeniedText("not_main");
-      } else if (!eligibility.ok) {
+      } else if (!isSchoolUser(profile)) {
+        // The tariff preview must not bypass the existing school-user rule.
         toursBtn.disabled = false;
         toursBtn.classList.add("is-disabled");
-        if (toursSub) toursSub.textContent = getToursDeniedText(eligibility.reason);
-      } else {
+        if (toursSub) toursSub.textContent = getToursDeniedText("not_school");
+      } else if (planEnforced && planAccess?.allowed !== true) {
         toursBtn.disabled = false;
-        toursBtn.classList.remove("is-disabled");
-        if (toursSub) toursSub.textContent = t("tours_active_and_completed") || "Активные и прошедшие";
+        toursBtn.classList.add("is-disabled");
+        if (toursSub) {
+          toursSub.textContent = tr3(
+            "Добавь предмет в Competitive в настройках тарифа.",
+            "Fanni tarif sozlamalarida Competitive sifatida tanlang.",
+            "Add this subject to Competitive in your plan settings."
+          );
+        }
+      } else {
+        const eligibility = planEnforced
+          ? { ok:true, reason:"ok" }
+          : canOpenActiveTours(profile, state.courses.subjectKey);
+
+        if (!eligibility.ok) {
+          toursBtn.disabled = false;
+          toursBtn.classList.add("is-disabled");
+          if (toursSub) toursSub.textContent = getToursDeniedText(eligibility.reason);
+        } else {
+          toursBtn.disabled = false;
+          toursBtn.classList.remove("is-disabled");
+          if (toursSub) toursSub.textContent = t("tours_active_and_completed") || "Активные и прошедшие";
+        }
       }
     }
 
@@ -22957,17 +22979,37 @@ if (action === "practice-exit") {
 }
 
            if (action === "open-tours") {
-        const planCompetitiveOk = await window.iClubCommercialAccessUI?.guardCompetitive?.(state.courses.subjectKey);
-        if (planCompetitiveOk === false) return;
+        const subjectKey = state.courses.subjectKey;
+        const planAccess = await window.iClubCommercialAccessUI?.checkCompetitive?.(subjectKey);
+        const planEnforced = planAccess?.enforced === true;
+
+        if (planEnforced && planAccess?.allowed !== true) {
+          await window.iClubCommercialAccessUI?.guardCompetitive?.(subjectKey);
+          return;
+        }
 
         // additional subjects: tours are not available
-        if (isAdditionalSubjectKey(state.courses.subjectKey)) {
-        toastToursDenied("not_main");
-        return;
-      }
+        if (isAdditionalSubjectKey(subjectKey)) {
+          toastToursDenied("not_main");
+          return;
+        }
 
         const profile = loadProfile();
-        const eligibility = canOpenActiveTours(profile, state.courses.subjectKey);
+
+        // Canary plan selection replaces only the old "competitive mode" check.
+        // It does not bypass the existing school-user/main-subject product rules.
+        const eligibility = planEnforced
+          ? (
+              !profile
+                ? { ok:false, reason:"no_profile" }
+                : !isSchoolUser(profile)
+                  ? { ok:false, reason:"not_school" }
+                  : !isMainSubjectKey(subjectKey)
+                    ? { ok:false, reason:"not_main" }
+                    : { ok:true, reason:"ok" }
+            )
+          : canOpenActiveTours(profile, subjectKey);
+
         if (!eligibility.ok) {
           toastToursDenied(eligibility.reason);
           return;
