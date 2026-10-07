@@ -302,6 +302,7 @@ begin
     subject_id,
     status,
     old_active_membership_ids,
+    old_question_ids,
     new_membership_ids,
     new_question_ids,
     old_active_membership_count,
@@ -316,6 +317,7 @@ begin
     v_subject_id,
     'prepared',
     coalesce(v_old_ids,'{}'::bigint[]),
+    coalesce(v_old_question_ids,'{}'::bigint[]),
     coalesce(v_new_membership_ids,'{}'::bigint[]),
     coalesce(v_new_question_ids,'{}'::bigint[]),
     v_old_count,
@@ -343,6 +345,7 @@ begin
       completed_at=null,
       rollback_at=null,
       old_active_membership_ids=excluded.old_active_membership_ids,
+      old_question_ids=excluded.old_question_ids,
       new_membership_ids=excluded.new_membership_ids,
       new_question_ids=excluded.new_question_ids,
       old_active_membership_count=excluded.old_active_membership_count,
@@ -707,18 +710,20 @@ begin
     );
   end if;
 
-  select array_agg(x.question_id order by x.question_id)
-  into v_old_question_ids
-  from (
-    select distinct ppq.question_id
+  v_old_question_ids:=v_audit.old_question_ids;
+  v_old_question_count:=coalesce(cardinality(v_old_question_ids),0);
+
+  if v_old_question_count<>v_audit.old_active_membership_count then
+    raise exception 'cleanup_old_question_archive_expected_%_found_%',
+      v_audit.old_active_membership_count,v_old_question_count;
+  end if;
+
+  if (
+    select count(*)
     from public.practice_pool_questions ppq
     where ppq.id=any(v_audit.old_active_membership_ids)
-  ) x;
-
-  v_old_question_count:=coalesce(cardinality(v_old_question_ids),0);
-  if v_old_question_count<>v_audit.old_active_membership_count then
-    raise exception 'cleanup_old_question_set_expected_%_found_%',
-      v_audit.old_active_membership_count,v_old_question_count;
+  )<>v_audit.old_active_membership_count then
+    raise exception 'cleanup_legacy_membership_archive_incomplete';
   end if;
 
   v_before:=private.practice_v2_tour_invariant_snapshot_v1(v_audit.subject_id);
