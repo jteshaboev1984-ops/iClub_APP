@@ -67,8 +67,9 @@ function markup(language, view) {
             await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-overview').length===2);
             const p1Text=await page.locator('[data-ep-live-component="P1"] .ep-pux-overview').innerText();
             const p5Text=await page.locator('[data-ep-live-component="P5"] .ep-pux-overview').innerText();
-            assert.ok(p1Text.includes('7 / 45'),`${language}: confirmed skills must be explicit`);
-            assert.ok(p1Text.includes('18%'),`${language}: verified coverage must be explicit`);
+            assert.ok(p1Text.includes('7 / 45'),`${language}: confirmed topics must be explicit`);
+            assert.equal(await page.locator('[data-ep-live-component="P1"] .ep-pux-progress-hero').count(),1,`${language}: premium progress hero missing`);
+            assert.equal(await page.locator('[data-ep-live-component="P1"] .ep-pux-progress-bar').count(),1,`${language}: premium progress bar missing`);
             assert.ok(p5Text.includes(COPY[language].empty),`${language}: absent P5 plan cannot be invented`);
             assert.ok(!p5Text.includes('0 из 3')&&!p5Text.includes('0 of 3'),`${language}: no false denominator`);
           } else {
