@@ -237,6 +237,30 @@ revoke all on function public.get_exam_prep_ai_guard_v1(text,text,text,integer)
 grant execute on function public.get_exam_prep_ai_guard_v1(text,text,text,integer)
   to authenticated,service_role;
 
+-- Service-only context projection for the Global AI adapter. Browser callers
+-- cannot supply another learner ID or bypass the Global/Exam Prep guards.
+create or replace function public.get_exam_prep_ai_skill_theory_context_service_v1(
+  p_user_id uuid,
+  p_component_code text,
+  p_skill_code text,
+  p_locale text default 'en'
+)
+returns jsonb
+language sql
+stable
+security definer
+set search_path=''
+as $context$
+  select private.exam_prep_ai_skill_theory_context_payload_v1(
+    p_user_id,p_component_code,p_skill_code,p_locale
+  );
+$context$;
+
+revoke all on function public.get_exam_prep_ai_skill_theory_context_service_v1(uuid,text,text,text)
+  from public,anon,authenticated;
+grant execute on function public.get_exam_prep_ai_skill_theory_context_service_v1(uuid,text,text,text)
+  to service_role;
+
 do $postcheck$
 declare
   v_policy private.exam_prep_ai_policy%rowtype;
@@ -252,7 +276,8 @@ begin
 
   if to_regprocedure('private.iclub_rollout_allows_user_v1(uuid,text)') is null
      or to_regprocedure('public.get_iclub_subscription_capabilities_service_v1(uuid)') is null
-     or to_regprocedure('private.exam_prep_ai_skill_theory_context_payload_v1(uuid,text,text,text)') is null then
+     or to_regprocedure('private.exam_prep_ai_skill_theory_context_payload_v1(uuid,text,text,text)') is null
+     or to_regprocedure('public.get_exam_prep_ai_skill_theory_context_service_v1(uuid,text,text,text)') is null then
     raise exception 'global_math_skill_question_dependency_missing';
   end if;
 end
