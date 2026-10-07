@@ -31,8 +31,10 @@ begin
   if position('practice_v2_question_meta' in v_def)=0
      or position('is_runtime_allowed' in v_def)=0
      or position('lifecycle_state' in v_def)=0
-     or position('not v_is_math and m.question_id is null' in lower(v_def))=0
-     or position('practice_v2_cutover_pending' in v_def)=0 then
+     or position('(not v_is_math or v_allow_legacy_math) and m.question_id is null' in lower(v_def))=0
+     or position('practice_v2_cutover_pending' in v_def)=0
+     or position('v_allow_legacy_math' in v_def)=0
+     or position('math_p1_practice_v2_2026_10_07' in v_def)=0 then
     raise exception 'practice_selector_v5_missing_runtime_metadata_gate';
   end if;
 

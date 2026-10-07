@@ -30,7 +30,9 @@ begin
      or position('ppq.is_active is true' in v_def)=0
      or position('practice_v2_question_meta' in v_def)=0
      or position('is_runtime_allowed' in v_def)=0
-     or position('not v_is_math and m.question_id is null' in lower(v_def))=0 then
+     or position('(not v_is_math or v_allow_legacy_math) and m.question_id is null' in lower(v_def))=0
+     or position('v_allow_legacy_math' in v_def)=0
+     or position('math_p1_practice_v2_2026_10_07' in v_def)=0 then
     raise exception 'recent_mistakes_v5_missing_current_bank_gate';
   end if;
 
@@ -59,7 +61,9 @@ begin
      or position('is_runtime_allowed' in v_def)=0
      or position('pa.is_correct is false' in v_def)=0
      or position('iclub_practice_drill_question_protected_v4' in v_def)=0
-     or position('not v_is_math and m.question_id is null' in lower(v_def))=0 then
+     or position('(not v_is_math or v_allow_legacy_math) and m.question_id is null' in lower(v_def))=0
+     or position('v_allow_legacy_math' in v_def)=0
+     or position('math_p1_practice_v2_2026_10_07' in v_def)=0 then
     raise exception 'mistakes_drill_v5_missing_current_owned_mistake_gate';
   end if;
 end;

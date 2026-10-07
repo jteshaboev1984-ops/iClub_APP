@@ -22,6 +22,7 @@ declare
   v_uid uuid := auth.uid();
   v_subject_id bigint;
   v_is_math boolean := false;
+  v_allow_legacy_math boolean := false;
   v_season_id bigint;
   v_s public.practice_drill_sessions_v4%rowtype;
   v_today date := (now() at time zone 'Asia/Tashkent')::date;
@@ -82,6 +83,19 @@ begin
 
   if v_subject_id is null then
     raise exception 'subject_not_found' using errcode='P0002';
+  end if;
+
+  if v_is_math then
+    select exists(
+      select 1
+      from private.practice_v2_question_meta m
+      join public.questions q on q.id=m.question_id
+      where q.subject_id=v_subject_id
+        and m.release_version='math_p1_practice_v2_2026_10_07'
+        and m.lifecycle_state='published'
+        and m.is_runtime_allowed is false
+    )
+    into v_allow_legacy_math;
   end if;
 
   select s.id into v_season_id
@@ -166,7 +180,7 @@ begin
           (t.id is null and p.tour_no <= v_current_tour)
         )
         and (
-          (not v_is_math and m.question_id is null)
+          ((not v_is_math or v_allow_legacy_math) and m.question_id is null)
           or (
             m.lifecycle_state='published'
             and m.is_runtime_allowed is true
@@ -210,7 +224,7 @@ begin
         (t.id is null and p.tour_no <= v_current_tour)
       )
       and (
-        (not v_is_math and m.question_id is null)
+        ((not v_is_math or v_allow_legacy_math) and m.question_id is null)
         or (
           m.lifecycle_state='published'
           and m.is_runtime_allowed is true
@@ -251,7 +265,7 @@ begin
          and t.start_date <= v_today)
         or (t.id is null and p.tour_no <= v_current_tour)
       )
-      and ((not v_is_math and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
+      and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
       and not public.iclub_practice_drill_question_protected_v4(q.id)
     order by random()
     limit 3
@@ -285,7 +299,7 @@ begin
          and t.start_date <= v_today)
         or (t.id is null and p.tour_no <= v_current_tour)
       )
-      and ((not v_is_math and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
+      and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
       and not public.iclub_practice_drill_question_protected_v4(q.id)
     order by random()
     limit 5
@@ -319,7 +333,7 @@ begin
          and t.start_date <= v_today)
         or (t.id is null and p.tour_no <= v_current_tour)
       )
-      and ((not v_is_math and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
+      and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
       and not public.iclub_practice_drill_question_protected_v4(q.id)
     order by random()
     limit 2
@@ -359,7 +373,7 @@ begin
            and t.start_date <= v_today)
           or (t.id is null and p.tour_no <= v_current_tour)
         )
-        and ((not v_is_math and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
+        and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
         and not public.iclub_practice_drill_question_protected_v4(q.id)
       order by random()
       limit v_needed

@@ -23,6 +23,7 @@ declare
   v_pool public.practice_pools%rowtype;
   v_s public.practice_sessions_v4%rowtype;
   v_is_math boolean := false;
+  v_allow_legacy_math boolean := false;
   v_season_id bigint;
   v_today date := (now() at time zone 'Asia/Tashkent')::date;
   v_total_tours integer := 0;
@@ -83,7 +84,20 @@ begin
   from public.subjects s
   where s.id=v_pool.subject_id;
 
-  if v_is_math and not exists(
+  if v_is_math then
+    select exists(
+      select 1
+      from private.practice_v2_question_meta m
+      join public.questions q on q.id=m.question_id
+      where q.subject_id=v_pool.subject_id
+        and m.release_version='math_p1_practice_v2_2026_10_07'
+        and m.lifecycle_state='published'
+        and m.is_runtime_allowed is false
+    )
+    into v_allow_legacy_math;
+  end if;
+
+  if v_is_math and not v_allow_legacy_math and not exists(
     select 1
     from public.practice_pool_questions ppq
     join private.practice_v2_question_meta m on m.question_id=ppq.question_id
@@ -185,7 +199,7 @@ begin
     where ppq.pool_id=v_pool.id
       and ppq.is_active is true
       and (
-        (not v_is_math and m.question_id is null)
+        ((not v_is_math or v_allow_legacy_math) and m.question_id is null)
         or (m.lifecycle_state='published' and m.is_runtime_allowed is true)
       )
       and not exists(
@@ -265,7 +279,7 @@ begin
     where ppq.pool_id=v_pool.id
       and ppq.is_active is true
       and lower(coalesce(q.difficulty,'medium'))='easy'
-      and ((not v_is_math and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
+      and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
       and not exists(
         select 1 from public.practice_answers pa
         join public.practice_attempts pat
@@ -357,7 +371,7 @@ begin
     where ppq.pool_id=v_pool.id
       and ppq.is_active is true
       and lower(coalesce(q.difficulty,'medium')) not in ('easy','hard')
-      and ((not v_is_math and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
+      and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
       and not exists(
         select 1 from public.practice_answers pa
         join public.practice_attempts pat
@@ -449,7 +463,7 @@ begin
     where ppq.pool_id=v_pool.id
       and ppq.is_active is true
       and lower(coalesce(q.difficulty,'medium'))='hard'
-      and ((not v_is_math and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
+      and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
       and not exists(
         select 1 from public.practice_answers pa
         join public.practice_attempts pat
@@ -547,7 +561,7 @@ begin
       where ppq.pool_id=v_pool.id
         and ppq.is_active is true
         and not (q.id=any(v_qids))
-        and ((not v_is_math and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
+        and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
         and not exists(
           select 1 from public.practice_answers pa
           join public.practice_attempts pat

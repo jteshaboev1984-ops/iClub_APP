@@ -207,12 +207,24 @@ for(const [name,source] of [
   ['topicDrill',topicDrill],
   ['mistakes',mistakes],
 ]){
-  if(!source.includes('not v_is_math and m.question_id is null')){
-    fail(`${name} permits Mathematics v5 to fall back to legacy Practice rows during cutover`);
+  if(!source.includes('(not v_is_math or v_allow_legacy_math) and m.question_id is null')){
+    fail(`${name} is missing the Mathematics cutover/rollback legacy gate`);
+  }
+  if(!source.includes('v_allow_legacy_math')){
+    fail(`${name} is missing rollback-only Mathematics legacy compatibility`);
+  }
+  if(!source.includes("math_p1_practice_v2_2026_10_07")){
+    fail(`${name} rollback compatibility is not scoped to the Practice v2 release`);
+  }
+  if(!source.includes("m.lifecycle_state='published'") || !source.includes('m.is_runtime_allowed is false')){
+    fail(`${name} rollback compatibility does not require published-but-runtime-disabled v2 metadata`);
   }
 }
 if(!selector.includes('practice_v2_cutover_pending')){
   fail('main Mathematics Practice selector is missing explicit cutover-pending gate');
+}
+if(!release.includes("set is_runtime_allowed=false")){
+  fail('rollback does not disable Practice v2 runtime metadata');
 }
 
 for(const token of [
@@ -250,6 +262,7 @@ console.log(JSON.stringify({
   mathematicsLocalHistoryNamespace:'practice_history_v3',
   mathematicsLocalReset:'one-time-before-app-boot',
   mathematicsCutoverLegacyFallback:'blocked',
+  mathematicsRollbackLegacyFallback:'allowed-only-after-published-v2-runtime-disabled',
   preflightReadOnly:true,
   postPublishAuditReadOnly:true,
   postCleanupAuditReadOnly:true,

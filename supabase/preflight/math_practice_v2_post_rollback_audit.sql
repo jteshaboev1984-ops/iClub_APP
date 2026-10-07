@@ -55,6 +55,16 @@ begin
   end if;
 
   select count(*)::integer into v_count
+  from private.practice_v2_question_meta m
+  where m.release_version='math_p1_practice_v2_2026_10_07'
+    and m.lifecycle_state='published'
+    and m.is_runtime_allowed is false;
+
+  if v_count<>495 then
+    raise exception 'rollback_audit_v5_legacy_fallback_signal_expected_495_found_%',v_count;
+  end if;
+
+  select count(*)::integer into v_count
   from private.practice_v2_diagnostic_catalog d
   where d.release_version='math_p1_practice_v2_2026_10_07'
     and d.is_runtime_allowed is true;

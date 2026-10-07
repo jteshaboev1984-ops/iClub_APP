@@ -231,8 +231,11 @@ Rollback:
 - disables the new v2 bank;
 - restores the archived old Practice memberships;
 - restores the safe v4 Practice entrypoints;
+- leaves the deployed v5 frontend usable: v5 Mathematics permits legacy-question fallback only when this release has already reached `published` lifecycle but its v2 runtime metadata has been disabled by rollback;
 - does not restore deleted legacy Practice progress;
 - does not touch Tours.
+
+Therefore a database rollback before legacy-question cleanup does not require an emergency frontend rollback merely to make Mathematics Practice usable again. Before first publish, the same v5 code remains fail-closed against legacy Mathematics questions, so this rollback compatibility cannot reopen the old bank during the normal cutover window.
 
 After legacy question cleanup, rollback to the old bank is intentionally blocked because old Practice-only question rows may already be deleted.
 
