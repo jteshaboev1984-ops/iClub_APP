@@ -14,6 +14,7 @@
       subtitle: "Настрой предметы, которые входят в твой тариф.",
       betaTitle: "Тестовый режим",
       betaText: "Этот выбор пока не меняет твой текущий доступ и прогресс. Мы проверяем будущую настройку тарифов.",
+      betaTextEnforced: "Тестовый доступ включён: выбранные предметы определяют доступ в этом beta-аккаунте. Прогресс и история не удаляются.",
       plan: "Тариф",
       studyTitle: "Учебные предметы",
       studyFree: "Выбери 1 предмет.",
@@ -50,6 +51,7 @@
       subtitle: "Tarifingizga kiradigan fanlarni sozlang.",
       betaTitle: "Sinov rejimi",
       betaText: "Bu tanlov hozircha joriy kirish yoki progressni o‘zgartirmaydi. Biz kelajakdagi tarif sozlamasini tekshiryapmiz.",
+      betaTextEnforced: "Sinov kirishi yoqilgan: tanlangan fanlar shu beta-akkauntdagi kirishni belgilaydi. Progress va tarix o‘chirilmaydi.",
       plan: "Tarif",
       studyTitle: "O‘quv fanlari",
       studyFree: "1 ta fan tanlang.",
@@ -86,6 +88,7 @@
       subtitle: "Choose the subjects included in your plan.",
       betaTitle: "Test mode",
       betaText: "This selection does not change your current access or progress yet. We are testing the future plan setup.",
+      betaTextEnforced: "Test access is on: selected subjects control access for this beta account. Progress and history are not deleted.",
       plan: "Plan",
       studyTitle: "Study subjects",
       studyFree: "Choose 1 subject.",
@@ -118,7 +121,8 @@
   const state = {
     bootstrap: null,
     loading: false,
-    busy: new Set()
+    busy: new Set(),
+    accessPreviewEnforced: false
   };
 
   function locale() {
@@ -438,7 +442,7 @@
     if (title) title.textContent = c.title;
     if (subtitle) subtitle.textContent = c.subtitle;
     if (betaTitle) betaTitle.textContent = c.betaTitle;
-    if (betaText) betaText.textContent = c.betaText;
+    if (betaText) betaText.textContent = state.accessPreviewEnforced ? c.betaTextEnforced : c.betaText;
 
     const visible = state.bootstrap?.visible === true;
     if (unavailable) {
@@ -473,6 +477,21 @@
       const data = result?.data;
       const error = result?.error;
       state.bootstrap = (!error && data && typeof data === "object") ? data : null;
+      state.accessPreviewEnforced = false;
+
+      if (state.bootstrap?.visible === true) {
+        const firstSubject = Array.isArray(state.bootstrap?.subjects)
+          ? String(state.bootstrap.subjects[0]?.subject_key || "").trim()
+          : "";
+
+        if (firstSubject && window.iClubCommercialAccessUI?.checkStudy) {
+          try {
+            const access = await window.iClubCommercialAccessUI.checkStudy(firstSubject,{ fresh:true });
+            state.accessPreviewEnforced = access?.enforced === true;
+          } catch {}
+        }
+      }
+
       render();
       return state.bootstrap;
     } catch {
@@ -486,6 +505,7 @@
 
   function attach() {
     window.addEventListener("focus", () => { void refresh(); });
+    window.addEventListener("iclub:commercial-access-ready", () => { void refresh(); });
     try {
       window.sb?.auth?.onAuthStateChange?.(() => {
         queueMicrotask(() => { void refresh(); });
