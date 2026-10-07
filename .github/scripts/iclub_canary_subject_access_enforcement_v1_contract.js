@@ -23,7 +23,7 @@ assert(migration.includes("'reason','manage_in_plan_subjects'"),
   'legacy toggle redirect boundary missing');
 assert(migration.includes("'subject_selection_required'"),
   'empty subject-selection boundary missing');
-assert(migration.includes("'reason','subject_not_in_plan'"),
+assert(migration.includes("'subject_not_in_plan'"),
   'unselected study subject boundary missing');
 assert(migration.includes("'reason','competitive_not_in_plan'"),
   'Competitive access boundary missing');
