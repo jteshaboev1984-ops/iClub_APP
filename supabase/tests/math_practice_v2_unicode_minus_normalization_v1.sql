@@ -38,5 +38,17 @@ begin
   if public.iclub_is_numeric('abc') then
     raise exception 'text_must_not_become_numeric';
   end if;
+
+  if public.iclub_numeric_value('−1,60') <> (-1.60)::numeric then
+    raise exception 'unicode_minus_numeric_value_failed';
+  end if;
+
+  if public.iclub_numeric_value('–2.25') <> (-2.25)::numeric then
+    raise exception 'unicode_dash_numeric_value_failed';
+  end if;
+
+  if public.iclub_numeric_value('abc') is not null then
+    raise exception 'invalid_numeric_value_must_be_null';
+  end if;
 end;
 $$;
