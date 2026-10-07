@@ -19,6 +19,8 @@ const MODULES = [
   ['p7_integration', ['P1-INT-01','P1-INT-02','P1-INT-03','P1-INT-04','P1-INT-05']],
 ];
 
+const CANONICAL_SKILLS = new Set(MODULES.flatMap(([, skills]) => skills));
+
 const SKILL_TITLE = {
   'P1-CIR-01':'Degrees and radians',
   'P1-CIR-02':'Arc length',
@@ -100,7 +102,9 @@ function sqlLiteral(value) {
 const catalogs = new Map();
 const questions = [];
 
-for (const [dirName, skills] of MODULES) {
+for (let moduleIndex = 0; moduleIndex < MODULES.length; moduleIndex += 1) {
+  const [dirName, skills] = MODULES[moduleIndex];
+  const expectedPracticeNo = moduleIndex + 1;
   const dir = path.join(CONTENT_ROOT, dirName);
   const catalog = JSON.parse(fs.readFileSync(path.join(dir, 'diagnostic_catalog.json'), 'utf8'));
 
@@ -127,7 +131,25 @@ for (const [dirName, skills] of MODULES) {
     const file = path.join(dir, `${skill}.json`);
     const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
 
+    if (parsed.skill !== skill) {
+      throw new Error(`${file}: declared skill ${parsed.skill} does not match filename skill ${skill}`);
+    }
+
     for (const q of parsed.questions || []) {
+      if (Number(q.practice_no) !== expectedPracticeNo) {
+        throw new Error(`${q.key}: practice_no ${q.practice_no} does not match Practice ${expectedPracticeNo}`);
+      }
+      if (q.primary_skill !== skill) {
+        throw new Error(`${q.key}: primary_skill ${q.primary_skill} does not match authored skill ${skill}`);
+      }
+      if (q.ai_source_skill !== q.primary_skill) {
+        throw new Error(`${q.key}: ai_source_skill ${q.ai_source_skill} does not match primary_skill ${q.primary_skill}`);
+      }
+      for (const secondarySkill of q.secondary_skills || []) {
+        if (!CANONICAL_SKILLS.has(secondarySkill)) {
+          throw new Error(`${q.key}: non-canonical secondary skill ${secondarySkill}`);
+        }
+      }
       const options = q.qtype === 'mcq'
         ? [...q.options].sort((a,b) => a.key.localeCompare(b.key))
         : [];
@@ -164,6 +186,8 @@ for (const [dirName, skills] of MODULES) {
       const keyMatch = /^MATH-P1-PRACTICE2-Q(\d{3})$/.exec(q.key);
       if (!keyMatch) throw new Error(`${q.key}: bad key`);
 
+      const timeLimitSec = q.difficulty === 'easy' ? 45 : q.difficulty === 'hard' ? 90 : 60;
+
       const row = {
         content_key:q.key,
         release_version:RELEASE_VERSION,
@@ -191,7 +215,7 @@ for (const [dirName, skills] of MODULES) {
         explanation_uz:q.explanation.uz,
         explanation_en:q.explanation.en,
         book_ref:q.source_ref,
-        time_limit_sec:q.difficulty === 'easy' ? 45 : q.difficulty === 'hard' ? 90 : 60,
+        time_limit_sec:timeLimitSec,
         answer_contract:q.qtype === 'input' ? q.answer_contract : {},
         diagnostics:diagMappings,
       };
@@ -217,6 +241,7 @@ for (const [dirName, skills] of MODULES) {
         explanation_ru:row.explanation_ru,
         explanation_uz:row.explanation_uz,
         explanation_en:row.explanation_en,
+        time_limit_sec:row.time_limit_sec,
         answer_contract:row.answer_contract,
         diagnostics:row.diagnostics,
       });
@@ -276,6 +301,8 @@ declare
   v_catalog jsonb := $catalog$${catalogJson}$catalog$::jsonb;
   v_questions jsonb := $questions$${questionsJson}$questions$::jsonb;
   v_count integer;
+  v_distinct_count integer;
+  v_pool_count integer;
 begin
   select s.id into v_subject_id
   from public.subjects s
@@ -287,13 +314,16 @@ begin
     raise exception 'math_subject_not_found';
   end if;
 
-  select count(*)::integer into v_count
+  select count(*)::integer,count(distinct p.tour_no)::integer
+  into v_count,v_distinct_count
   from public.practice_pools p
   where p.subject_id=v_subject_id
+    and p.is_active is true
     and p.tour_no between 1 and 7;
 
-  if v_count<>7 then
-    raise exception 'expected_7_math_practice_pools_found_%',v_count;
+  if v_count<>7 or v_distinct_count<>7 then
+    raise exception 'expected_exactly_one_active_math_practice_pool_per_tour_found_%_rows_%_tour_nos',
+      v_count,v_distinct_count;
   end if;
 
   for v_item in select value from jsonb_array_elements(v_catalog)
@@ -342,21 +372,144 @@ begin
     from private.practice_v2_question_meta m
     where m.content_key=v_item->>'content_key';
 
+    select count(*)::integer,min(p.id)
+    into v_pool_count,v_pool_id
+    from public.practice_pools p
+    where p.subject_id=v_subject_id
+      and p.is_active is true
+      and p.tour_no=(v_item->>'practice_no')::smallint;
+
+    if v_pool_count<>1 or v_pool_id is null then
+      raise exception 'expected_one_active_practice_pool_%_found_%',
+        v_item->>'practice_no',v_pool_count;
+    end if;
+
     if found then
       if v_existing_hash<>(v_item->>'content_hash') then
         raise exception 'question_hash_conflict_%',v_item->>'content_key';
       end if;
+
+      if not exists(
+        select 1
+        from public.questions q
+        where q.id=v_qid
+          and q.subject_id=v_subject_id
+          and q.topic is not distinct from (v_item->>'topic')
+          and q.subtopic is not distinct from (v_item->>'subtopic')
+          and q.difficulty is not distinct from (v_item->>'difficulty')
+          and q.qtype is not distinct from (v_item->>'qtype')
+          and q.question_text is not distinct from (v_item->>'question_text')
+          and q.question_text_ru is not distinct from (v_item->>'question_text_ru')
+          and q.question_text_uz is not distinct from (v_item->>'question_text_uz')
+          and q.question_text_en is not distinct from (v_item->>'question_text_en')
+          and q.options_text is not distinct from nullif(v_item->>'options_text','')
+          and q.options_text_ru is not distinct from nullif(v_item->>'options_text_ru','')
+          and q.options_text_uz is not distinct from nullif(v_item->>'options_text_uz','')
+          and q.options_text_en is not distinct from nullif(v_item->>'options_text_en','')
+          and q.correct_answer is not distinct from (v_item->>'correct_answer')
+          and q.explanation is not distinct from (v_item->>'explanation')
+          and q.explanation_ru is not distinct from (v_item->>'explanation_ru')
+          and q.explanation_uz is not distinct from (v_item->>'explanation_uz')
+          and q.explanation_en is not distinct from (v_item->>'explanation_en')
+          and q.book_ref is not distinct from (v_item->>'book_ref')
+          and q.time_limit_sec is not distinct from (v_item->>'time_limit_sec')::integer
+          and q.is_active is false
+          and q.quality_status='draft'
+      ) then
+        raise exception 'existing_staged_question_payload_drift_%',v_item->>'content_key';
+      end if;
+
+      if not exists(
+        select 1
+        from private.practice_v2_question_meta m
+        where m.question_id=v_qid
+          and m.content_key=v_item->>'content_key'
+          and m.release_version=v_item->>'release_version'
+          and m.practice_no=(v_item->>'practice_no')::smallint
+          and m.primary_skill_code=v_item->>'primary_skill_code'
+          and m.secondary_skill_codes=array(select jsonb_array_elements_text(v_item->'secondary_skill_codes'))
+          and m.question_role=v_item->>'question_role'
+          and m.source_ref=v_item->>'source_ref'
+          and m.answer_contract=coalesce(v_item->'answer_contract','{}'::jsonb)
+          and m.qa_math_status='passed'
+          and m.qa_language_status='passed'
+          and m.qa_technical_status='passed'
+          and m.qa_tour_separation_status='passed'
+          and m.lifecycle_state='approved'
+          and m.is_runtime_allowed is false
+      ) then
+        raise exception 'existing_staged_question_meta_drift_%',v_item->>'content_key';
+      end if;
+
+      select count(*)::integer into v_count
+      from public.practice_pool_questions ppq
+      where ppq.question_id=v_qid;
+
+      if v_count<>1 then
+        raise exception 'existing_staged_question_membership_count_%_found_%',
+          v_item->>'content_key',v_count;
+      end if;
+
+      if not exists(
+        select 1
+        from public.practice_pool_questions ppq
+        where ppq.question_id=v_qid
+          and ppq.pool_id=v_pool_id
+          and ppq.order_no=(v_item->>'practice_order')::integer
+          and ppq.is_active is false
+      ) then
+        raise exception 'existing_staged_question_membership_drift_%',v_item->>'content_key';
+      end if;
+
+      select count(*)::integer into v_count
+      from public.question_answer_diagnostics d
+      where d.question_id=v_qid;
+
+      if v_count<>jsonb_array_length(coalesce(v_item->'diagnostics','[]'::jsonb)) then
+        raise exception 'existing_staged_question_diagnostic_count_drift_%_expected_%_found_%',
+          v_item->>'content_key',
+          jsonb_array_length(coalesce(v_item->'diagnostics','[]'::jsonb)),
+          v_count;
+      end if;
+
+      for v_map in
+        select value from jsonb_array_elements(coalesce(v_item->'diagnostics','[]'::jsonb))
+      loop
+        select * into v_cat
+        from private.practice_v2_diagnostic_catalog c
+        where c.diagnostic_code=v_map->>'diagnostic_code';
+
+        if v_cat.diagnostic_code is null then
+          raise exception 'diagnostic_catalog_missing_%',v_map->>'diagnostic_code';
+        end if;
+
+        select count(*)::integer into v_count
+        from public.question_answer_diagnostics d
+        where d.question_id=v_qid
+          and d.answer_kind=v_map->>'answer_kind'
+          and d.answer_key is not distinct from nullif(v_map->>'answer_key','')
+          and d.answer_value is not distinct from nullif(v_map->>'answer_value','')
+          and d.is_correct is false
+          and d.mistake_type=v_cat.mistake_type
+          and d.weak_skill=v_cat.skill_code
+          and d.feedback_ru=v_cat.feedback_ru
+          and d.feedback_uz=v_cat.feedback_uz
+          and d.feedback_en=v_cat.feedback_en
+          and d.next_action_ru=v_cat.next_action_ru
+          and d.next_action_uz=v_cat.next_action_uz
+          and d.next_action_en=v_cat.next_action_en
+          and d.rule_json->>'diagnostic_code'=v_cat.diagnostic_code
+          and d.rule_json->>'inference_strength'=v_cat.inference_strength
+          and d.rule_json->>'release_version'='math_p1_practice_v2_2026_10_07'
+          and d.quality_status='draft';
+
+        if v_count<>1 then
+          raise exception 'existing_staged_question_diagnostic_drift_%_%',
+            v_item->>'content_key',v_map->>'diagnostic_code';
+        end if;
+      end loop;
+
       continue;
-    end if;
-
-    select p.id into v_pool_id
-    from public.practice_pools p
-    where p.subject_id=v_subject_id
-      and p.tour_no=(v_item->>'practice_no')::smallint
-    limit 1;
-
-    if v_pool_id is null then
-      raise exception 'practice_pool_missing_%',v_item->>'practice_no';
     end if;
 
     insert into public.questions(
@@ -480,6 +633,22 @@ begin
     raise exception 'inactive_membership_count_expected_495_found_%',v_count;
   end if;
 
+  -- Every staged membership must be in the exact active Mathematics pool for its Practice.
+  if exists(
+    select 1
+    from public.practice_pool_questions ppq
+    join public.practice_pools p on p.id=ppq.pool_id
+    join private.practice_v2_question_meta m on m.question_id=ppq.question_id
+    where m.release_version='${RELEASE_VERSION}'
+      and (
+        p.subject_id<>v_subject_id
+        or p.is_active is not true
+        or p.tour_no<>m.practice_no
+      )
+  ) then
+    raise exception 'staged_membership_wrong_practice_pool';
+  end if;
+
   -- Membership order must restart at 1 inside every Practice.
   if exists(
     select 1
@@ -487,6 +656,9 @@ begin
     join public.practice_pool_questions ppq on ppq.pool_id=p.id
     join private.practice_v2_question_meta m on m.question_id=ppq.question_id
     where m.release_version='${RELEASE_VERSION}'
+      and p.subject_id=v_subject_id
+      and p.is_active is true
+      and p.tour_no=m.practice_no
     group by p.id,m.practice_no
     having min(ppq.order_no)<>1
        or max(ppq.order_no)<>count(*)::integer
