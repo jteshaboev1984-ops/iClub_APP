@@ -304,6 +304,7 @@ declare
   v_distinct_count integer;
   v_pool_count integer;
   v_question_exists boolean;
+  v_catalog_exists boolean;
 begin
   select s.id into v_subject_id
   from public.subjects s
@@ -333,7 +334,9 @@ begin
     from private.practice_v2_diagnostic_catalog c
     where c.diagnostic_code=v_item->>'diagnostic_code';
 
-    if v_question_exists then
+    v_catalog_exists:=found;
+
+    if v_catalog_exists then
       if v_existing_hash<>(v_item->>'content_hash') then
         raise exception 'diagnostic_hash_conflict_%',v_item->>'diagnostic_code';
       end if;
@@ -387,7 +390,7 @@ begin
         v_item->>'practice_no',v_pool_count;
     end if;
 
-    if found then
+    if v_question_exists then
       if v_existing_hash<>(v_item->>'content_hash') then
         raise exception 'question_hash_conflict_%',v_item->>'content_key';
       end if;

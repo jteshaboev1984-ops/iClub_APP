@@ -74,6 +74,9 @@ for (const token of [
   "q.primary_skill !== skill",
   "CANONICAL_SKILLS.has(secondarySkill)",
   "v_question_exists:=found",
+  "v_catalog_exists:=found",
+  "if v_catalog_exists then",
+  "if v_question_exists then",
 ]) {
   if (!generatorSource.includes(token)) fail(`generator source missing regression invariant: ${token}`);
 }
