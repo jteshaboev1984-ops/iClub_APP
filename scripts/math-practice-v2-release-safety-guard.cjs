@@ -10,6 +10,7 @@ const files={
   release:path.join(ROOT,'supabase','migrations','20261007007500_math_practice_v2_atomic_release_switch_v1.sql'),
   preflight:path.join(ROOT,'supabase','preflight','math_practice_v2_release_preflight.sql'),
   postPublish:path.join(ROOT,'supabase','preflight','math_practice_v2_post_publish_audit.sql'),
+  postRollback:path.join(ROOT,'supabase','preflight','math_practice_v2_post_rollback_audit.sql'),
   feedback:path.join(ROOT,'supabase','migrations','20261007006700_math_practice_v2_deterministic_feedback_v5.sql'),
 };
 
@@ -24,6 +25,7 @@ const audit=fs.readFileSync(files.audit,'utf8');
 const release=fs.readFileSync(files.release,'utf8');
 const preflight=fs.readFileSync(files.preflight,'utf8');
 const postPublish=fs.readFileSync(files.postPublish,'utf8');
+const postRollback=fs.readFileSync(files.postRollback,'utf8');
 const feedback=fs.readFileSync(files.feedback,'utf8');
 
 const lower=s=>s.toLowerCase();
@@ -103,6 +105,22 @@ for(const token of [
   if(!postPublish.includes(token)) fail(`post-publish audit missing ${token}`);
 }
 
+
+if(!/begin;\s*set transaction read only;/i.test(postRollback)) fail('post-rollback audit is not explicitly read-only');
+if(!/rollback;\s*$/i.test(postRollback.trim())) fail('post-rollback audit does not end with rollback');
+for(const bad of [/\binsert\s+into\b/i,/\bupdate\s+public\./i,/\bdelete\s+from\b/i,/\btruncate\b/i]){
+  if(bad.test(postRollback)) fail(`post-rollback audit contains DML-like token: ${bad}`);
+}
+for(const token of [
+  'rollback_audit_release_not_rolled_back',
+  'rollback_audit_tour_invariant_not_proven',
+  'rollback_audit_old_memberships_expected_',
+  'rollback_audit_new_memberships_still_active_',
+  'rollback_audit_v2_history_rows_expected_495',
+]){
+  if(!postRollback.includes(token)) fail(`post-rollback audit missing ${token}`);
+}
+
 for(const token of [
   'submit_practice_session_answer_safe_v5',
   'submit_practice_drill_answer_safe_v5',
@@ -125,6 +143,7 @@ console.log(JSON.stringify({
   practiceHistoryDelete:'none',
   preflightReadOnly:true,
   postPublishAuditReadOnly:true,
+  postRollbackAuditReadOnly:true,
   releaseHasRollback:true,
   v5FinalizerReevaluation:'none',
   errors
