@@ -44,7 +44,9 @@ declare
   v_reset_sessions integer := 0;
   v_reset_drills integer := 0;
   v_reset_diagnoses integer := 0;
+  v_reset_review_events integer := 0;
   v_reset_recommendations integer := 0;
+  v_reset_roadmaps integer := 0;
   v_reset_legacy_evidence integer := 0;
   v_expected jsonb := '{"1":68,"2":80,"3":68,"4":77,"5":66,"6":70,"7":66}'::jsonb;
   v_tour_no integer;
@@ -286,10 +288,20 @@ begin
       or lower(coalesce(d.attempt_type,'')) like 'practice%'
     );
 
+  select count(*)::integer into v_reset_review_events
+  from public.practice_review_events_v1 r
+  join public.practice_attempts pa on pa.id=r.attempt_id
+  where pa.subject_id=v_subject_id;
+
   select count(*)::integer into v_reset_recommendations
   from public.recommendations r
   where r.subject_id=v_subject_id
     and r.source_type='practice';
+
+  select count(*)::integer into v_reset_roadmaps
+  from public.learning_roadmaps lr
+  where lr.subject_id=v_subject_id
+    and lr.source_type in ('practice_attempt','practice_ai_diagnosis');
 
   select count(*)::integer into v_reset_legacy_evidence
   from private.exam_prep_legacy_evidence_references e
@@ -341,7 +353,9 @@ begin
       'practice_sessions_to_reset',v_reset_sessions,
       'practice_drills_to_reset',v_reset_drills,
       'practice_diagnoses_to_reset',v_reset_diagnoses,
+      'practice_review_events_to_reset',v_reset_review_events,
       'practice_recommendations_to_reset',v_reset_recommendations,
+      'practice_roadmaps_to_reset',v_reset_roadmaps,
       'legacy_practice_evidence_to_reset',v_reset_legacy_evidence
     )
   )
@@ -379,6 +393,27 @@ begin
 
   delete from public.practice_drill_sessions_v4
   where subject_id=v_subject_id;
+
+  delete from public.practice_review_events_v1 r
+  using public.practice_attempts pa
+  where pa.id=r.attempt_id
+    and pa.subject_id=v_subject_id;
+
+  get diagnostics v_count = row_count;
+  if v_count<>v_reset_review_events then
+    raise exception 'release_practice_review_event_reset_expected_%_deleted_%',
+      v_reset_review_events,v_count;
+  end if;
+
+  delete from public.learning_roadmaps lr
+  where lr.subject_id=v_subject_id
+    and lr.source_type in ('practice_attempt','practice_ai_diagnosis');
+
+  get diagnostics v_count = row_count;
+  if v_count<>v_reset_roadmaps then
+    raise exception 'release_practice_roadmap_reset_expected_%_deleted_%',
+      v_reset_roadmaps,v_count;
+  end if;
 
   delete from public.user_answer_diagnosis d
   where d.subject_id=v_subject_id
@@ -516,6 +551,15 @@ begin
       and r.source_type='practice'
   ) then
     raise exception 'release_practice_recommendation_reset_incomplete';
+  end if;
+
+  if exists(
+    select 1
+    from public.learning_roadmaps lr
+    where lr.subject_id=v_subject_id
+      and lr.source_type in ('practice_attempt','practice_ai_diagnosis')
+  ) then
+    raise exception 'release_practice_roadmap_reset_incomplete';
   end if;
 
   v_after:=private.practice_v2_tour_invariant_snapshot_v1(v_subject_id);

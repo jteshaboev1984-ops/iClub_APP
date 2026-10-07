@@ -134,6 +134,21 @@ tour_recommendation_hash as (
   from public.recommendations r
   where r.subject_id=p_subject_id
     and r.source_type='tour'
+),
+tour_roadmap_hash as (
+  select
+    count(*)::bigint as n,
+    md5(coalesce(string_agg(to_jsonb(lr)::text,'|' order by lr.id),'')) as h
+  from public.learning_roadmaps lr
+  where lr.subject_id=p_subject_id
+    and lr.source_type='tour_attempt'
+),
+certificate_hash as (
+  select
+    count(*)::bigint as n,
+    md5(coalesce(string_agg(to_jsonb(c)::text,'|' order by c.id),'')) as h
+  from public.certificates c
+  where c.subject_id=p_subject_id
 )
 select jsonb_build_object(
   'subject_id',p_subject_id,
@@ -148,7 +163,11 @@ select jsonb_build_object(
   'tour_session_answers_count',(select n from session_answer_hash),
   'tour_session_answers_md5',(select h from session_answer_hash),
   'tour_recommendations_count',(select n from tour_recommendation_hash),
-  'tour_recommendations_md5',(select h from tour_recommendation_hash)
+  'tour_recommendations_md5',(select h from tour_recommendation_hash),
+  'tour_roadmaps_count',(select n from tour_roadmap_hash),
+  'tour_roadmaps_md5',(select h from tour_roadmap_hash),
+  'certificates_count',(select n from certificate_hash),
+  'certificates_md5',(select h from certificate_hash)
 );
 $function$;
 
@@ -188,7 +207,7 @@ revoke all on table private.practice_v2_release_switch_audit
 from public,anon,authenticated;
 
 comment on function private.practice_v2_tour_invariant_snapshot_v1(bigint) is
-'Private deterministic fingerprint of Tour structure, results and Tour-derived recommendations for one subject. Used to prove Practice v2 release does not alter protected Tour state.';
+'Private deterministic fingerprint of Tour structure/results plus Tour-derived recommendations, roadmaps and Mathematics certificates for one subject. Used to prove Practice v2 release does not alter protected Tour state.';
 
 comment on table private.practice_v2_release_switch_audit is
 'Private exact legacy/new membership and question archive for Mathematics Practice v2 reset, publish, rollback and cleanup.';

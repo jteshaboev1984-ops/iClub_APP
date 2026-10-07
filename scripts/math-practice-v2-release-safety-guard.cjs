@@ -34,7 +34,7 @@ const schemaCompat=fs.readFileSync(files.schemaCompat,'utf8');
 const feedback=fs.readFileSync(files.feedback,'utf8');
 const app=fs.readFileSync(files.app,'utf8');
 
-for(const table of ['tours','tour_questions','tour_attempts','tour_answers','tour_session_answers_v4']){
+for(const table of ['tours','tour_questions','tour_attempts','tour_answers','tour_session_answers_v4','certificates','ratings_cache']){
   const patterns=[
     new RegExp(`\\binsert\\s+into\\s+(?:public\\.)?${table}\\b`,'i'),
     new RegExp(`\\bupdate\\s+(?:public\\.)?${table}\\b`,'i'),
@@ -53,8 +53,11 @@ for(const token of [
   'delete from public.practice_sessions_v4',
   'delete from public.practice_drill_sessions_v4',
   'delete from public.user_answer_diagnosis',
+  'delete from public.practice_review_events_v1',
   'delete from public.recommendations',
+  'delete from public.learning_roadmaps',
   "source_type='practice'",
+  "practice_ai_diagnosis",
   'delete from public.practice_attempts',
   "legacy_source='practice_answers'",
   'practice_progress_reset',
@@ -92,6 +95,8 @@ for(const token of [
   'practice_v2_release_switch_audit',
   'tour_answers_md5',
   'tour_recommendations_md5',
+  'tour_roadmaps_md5',
+  'certificates_md5',
   'tour_attempts_md5',
   'tour_questions_md5',
 ]){
@@ -131,6 +136,7 @@ checkReadOnly('post-publish audit',postPublish,[
   'post_publish_practice_drills_not_reset_',
   'post_publish_practice_diagnoses_not_reset_',
   'post_publish_practice_recommendations_not_reset_',
+  'post_publish_practice_roadmaps_not_reset_',
   'post_publish_legacy_practice_evidence_not_reset_',
   'post_publish_superseded_oracle_or_selector_rpc_still_exposed',
 ]);
@@ -149,6 +155,7 @@ checkReadOnly('post-rollback audit',postRollback,[
   'rollback_audit_tour_invariant_not_proven',
   'rollback_audit_practice_progress_should_remain_reset_',
   'rollback_audit_practice_recommendations_should_remain_reset_',
+  'rollback_audit_practice_roadmaps_should_remain_reset_',
   'rollback_audit_old_memberships_expected_',
   'rollback_audit_new_memberships_still_active_',
   'rollback_audit_v2_history_rows_expected_495',
@@ -194,6 +201,7 @@ console.log(JSON.stringify({
   legacyQuestionCleanup:'protected-reference-gated',
   practiceRecommendationsReset:'server-only-mathematics',
   tourRecommendationsPreserved:true,
+  tourRoadmapsAndCertificatesPreserved:true,
   mathematicsLocalHistoryNamespace:'practice_history_v3',
   preflightReadOnly:true,
   postPublishAuditReadOnly:true,

@@ -14,12 +14,14 @@ What is intentionally reset:
 - legacy Practice runtime sessions/drills;
 - Practice-derived legacy Exam Prep evidence;
 - Mathematics recommendations created from Practice;
+- Practice review-opened events and saved Practice-derived learning roadmaps / AI diagnosis snapshots;
 - old Mathematics local Practice history in the browser.
 
 What is protected:
 - all Mathematics Tours;
 - Tour attempts, answers, results and certificates;
 - Tour recommendations;
+- Tour-derived learning roadmaps;
 - any legacy question row still referenced by a Tour;
 - any legacy question row still required by another protected/non-Practice dependency.
 
@@ -137,7 +139,7 @@ Inside one transaction the function:
 - fingerprints protected Mathematics Tours;
 - archives the exact 490 legacy Practice membership IDs and 490 legacy question IDs;
 - blocks old v4 Practice entrypoints;
-- deletes legacy Mathematics Practice attempts/answers, Practice-only diagnoses, sessions/drills, Practice-derived recommendations and Practice-derived legacy evidence;
+- deletes legacy Mathematics Practice attempts/answers, Practice-only diagnoses, sessions/drills, Practice review events, Practice-derived recommendations, Practice-derived learning roadmaps/AI diagnosis snapshots and Practice-derived legacy evidence;
 - disables the 490 old Practice memberships;
 - publishes the 495 v2 questions/diagnostics;
 - activates the 495 new memberships;
@@ -171,6 +173,8 @@ Required:
 - Practice-only diagnoses reset to zero;
 - Practice-derived legacy evidence reset;
 - Mathematics Practice recommendations reset to zero while Tour recommendations remain untouched;
+- Practice-derived learning roadmaps/AI diagnosis snapshots reset while Tour-derived roadmaps remain untouched;
+- protected Mathematics certificates remain unchanged;
 - superseded v4 Practice write/start entrypoints not executable;
 - the read-only v4 resume readers still required by the v5 frontend remain executable;
 - required v5 entrypoints executable;

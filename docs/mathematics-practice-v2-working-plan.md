@@ -49,7 +49,7 @@ Rebuild Mathematics Practice so that:
    - Any legacy question needed to interpret preserved Tour history remains available as historical data even if removed from future learner-facing content.
 
 2. Practice is intentionally reset for this release.
-   - Legacy Mathematics Practice attempts, answers, diagnoses, sessions, Practice-derived recommendations and local Practice history do not need to be preserved. Tour-derived recommendations remain protected.
+   - Legacy Mathematics Practice attempts, answers, diagnoses, sessions, Practice review events, Practice-derived recommendations, Practice-derived learning roadmaps/AI diagnosis snapshots and local Practice history do not need to be preserved. Tour-derived recommendations, Tour-derived learning roadmaps and Mathematics certificates remain protected.
    - Weak legacy Practice questions do not remain learner-facing.
    - Physical deletion of legacy question rows happens only after the new bank passes smoke QA and only when no Tour or other protected dependency references them.
    - Any question referenced by Tour remains in the database even if its old Practice membership is removed.
@@ -202,7 +202,7 @@ Gate: batch mechanical QA + mathematical QA + language QA + source/provenance QA
 Before any destructive production change:
 - snapshot protected Tour counts and fingerprints;
 - identify the exact legacy Mathematics Practice question set;
-- reset only Practice-owned attempts, answers, diagnoses, sessions and Practice-derived recommendations;
+- reset only Practice-owned attempts, answers, diagnoses, sessions, review events, Practice-derived recommendations and Practice-derived learning roadmaps/AI diagnosis snapshots;
 - switch the active bank atomically;
 - keep old question rows until the new bank passes smoke QA;
 - then delete only legacy question rows with no Tour or other protected reference;

@@ -189,6 +189,15 @@ begin
   end if;
 
   select count(*)::integer into v_count
+  from public.learning_roadmaps lr
+  where lr.subject_id=v_subject_id
+    and lr.source_type in ('practice_attempt','practice_ai_diagnosis');
+
+  if v_count<>0 then
+    raise exception 'post_publish_practice_roadmaps_not_reset_%',v_count;
+  end if;
+
+  select count(*)::integer into v_count
   from private.exam_prep_legacy_evidence_references e
   join public.practice_pool_questions ppq
     on ppq.question_id=e.question_id

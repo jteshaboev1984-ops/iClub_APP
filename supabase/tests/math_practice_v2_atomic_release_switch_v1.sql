@@ -37,8 +37,11 @@ begin
      or position('delete from public.practice_sessions_v4' in lower(v_def))=0
      or position('delete from public.practice_drill_sessions_v4' in lower(v_def))=0
      or position('delete from public.user_answer_diagnosis' in lower(v_def))=0
+     or position('delete from public.practice_review_events_v1' in lower(v_def))=0
      or position('delete from public.recommendations' in lower(v_def))=0
+     or position('delete from public.learning_roadmaps' in lower(v_def))=0
      or position('source_type=''practice''' in lower(v_def))=0
+     or position('practice_ai_diagnosis' in lower(v_def))=0
      or position('delete from public.practice_attempts' in lower(v_def))=0
      or position('release_expected_exactly_one_active_pool_per_practice' in v_def)=0
      or position('release_expected_201_staged_diagnostics' in v_def)=0
@@ -48,7 +51,7 @@ begin
     raise exception 'practice_v2_publish_missing_reset_or_atomic_publish_gate';
   end if;
 
-  if lower(v_def) ~ '\m(insert[[:space:]]+into|update|delete[[:space:]]+from|truncate)[[:space:]]+(public\.)?(tours|tour_questions|tour_attempts|tour_answers|tour_session_answers_v4)\M' then
+  if lower(v_def) ~ '\m(insert[[:space:]]+into|update|delete[[:space:]]+from|truncate)[[:space:]]+(public\.)?(tours|tour_questions|tour_attempts|tour_answers|tour_session_answers_v4|certificates|ratings_cache)\M' then
     raise exception 'practice_v2_publish_contains_tour_dml';
   end if;
 
@@ -84,7 +87,7 @@ begin
     raise exception 'practice_v2_rollback_missing_reset-aware_bank_restore_gate';
   end if;
 
-  if lower(v_def) ~ '\m(insert[[:space:]]+into|update|delete[[:space:]]+from|truncate)[[:space:]]+(public\.)?(tours|tour_questions|tour_attempts|tour_answers|tour_session_answers_v4)\M' then
+  if lower(v_def) ~ '\m(insert[[:space:]]+into|update|delete[[:space:]]+from|truncate)[[:space:]]+(public\.)?(tours|tour_questions|tour_attempts|tour_answers|tour_session_answers_v4|certificates|ratings_cache)\M' then
     raise exception 'practice_v2_rollback_contains_tour_dml';
   end if;
 
@@ -114,7 +117,7 @@ begin
     raise exception 'practice_v2_cleanup_missing_protected_reference_or_tour_gate';
   end if;
 
-  if lower(v_def) ~ '\m(insert[[:space:]]+into|update|delete[[:space:]]+from|truncate)[[:space:]]+(public\.)?(tours|tour_questions|tour_attempts|tour_answers|tour_session_answers_v4)\M' then
+  if lower(v_def) ~ '\m(insert[[:space:]]+into|update|delete[[:space:]]+from|truncate)[[:space:]]+(public\.)?(tours|tour_questions|tour_attempts|tour_answers|tour_session_answers_v4|certificates|ratings_cache)\M' then
     raise exception 'practice_v2_cleanup_contains_tour_dml';
   end if;
 end;

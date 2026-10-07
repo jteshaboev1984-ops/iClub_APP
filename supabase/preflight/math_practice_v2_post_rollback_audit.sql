@@ -80,6 +80,15 @@ begin
     raise exception 'rollback_audit_practice_recommendations_should_remain_reset_%',v_count;
   end if;
 
+  select count(*)::integer into v_count
+  from public.learning_roadmaps lr
+  where lr.subject_id=v_audit.subject_id
+    and lr.source_type in ('practice_attempt','practice_ai_diagnosis');
+
+  if v_count<>0 then
+    raise exception 'rollback_audit_practice_roadmaps_should_remain_reset_%',v_count;
+  end if;
+
   if not has_function_privilege(
        'authenticated',
        'public.start_practice_session_auto_safe_v4(bigint,text)',
