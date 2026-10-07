@@ -202,6 +202,121 @@
     if (state.coveragePct != null) metric(panel,c.coverage,`${state.coveragePct}%`);
     if (state.confirmedSkills != null) metric(panel,c.skills,`${state.confirmedSkills} / ${state.totalCanonicalSkills}`);
   }
+  function skillFromTracker(tracker, skillCode) {
+    if (!skillCode) return null;
+    for (const area of (Array.isArray(tracker?.areas) ? tracker.areas : [])) {
+      const row = (Array.isArray(area?.skills) ? area.skills : []).find(skill =>
+        String(skill?.skill_code || '') === String(skillCode));
+      if (row) return row;
+    }
+    return null;
+  }
+  function skillStateKey(row) {
+    if (!row) return null;
+    if (row.correction_case_id) return 'attention';
+    const level = Number(row.objective_level || 0);
+    if (level >= 3) return 'secure';
+    if (level >= 2) return 'confirmed';
+    if (level >= 1) return 'developing';
+    return 'unknown';
+  }
+  function skillStateLabel(key, c) {
+    return ({
+      unknown:c.statusUnknown, developing:c.statusDeveloping, confirmed:c.statusConfirmed,
+      secure:c.statusSecure, attention:c.statusAttention
+    })[String(key || '')] || c.statusUnknown;
+  }
+  function progressHero(parent, state, c) {
+    if (state.confirmedSkills == null) return;
+    const hero = node('div','ep-pux-progress-hero');
+    const top = node('div','ep-pux-progress-hero-top');
+    const copyWrap = node('div','ep-pux-progress-hero-copy');
+    copyWrap.append(node('span','ep-pux-progress-kicker',c.programProgress));
+    copyWrap.append(node('strong','ep-pux-progress-count',`${state.confirmedSkills} / ${state.totalCanonicalSkills}`));
+    copyWrap.append(node('small','ep-pux-progress-caption',c.topicsConfirmed));
+    top.append(copyWrap);
+    const bar = node('div','ep-pux-progress-bar');
+    bar.setAttribute('role','progressbar');
+    bar.setAttribute('aria-valuemin','0');
+    bar.setAttribute('aria-valuemax',String(state.totalCanonicalSkills));
+    bar.setAttribute('aria-valuenow',String(state.confirmedSkills));
+    const fill = node('span','ep-pux-progress-fill');
+    fill.style.width = `${state.totalCanonicalSkills > 0 ? Math.min(100,100 * state.confirmedSkills / state.totalCanonicalSkills) : 0}%`;
+    bar.append(fill);
+    hero.append(top,bar);
+    parent.append(hero);
+  }
+  function decorateTrackerClarity(screen) {
+    if (!screen || screen.dataset.epPuxTrackerClarity === '1') return;
+    const skillButtons = screen.querySelectorAll('[data-ep-views-skill]');
+    const summary = screen.querySelector('.ep-views-summary');
+    if (!skillButtons.length || !summary) return;
+    const c = words();
+    const firstValue = String(summary.querySelector('.ep-views-stat strong')?.textContent || '');
+    const match = firstValue.match(/(\\d+)\\s*\\/\\s*(\\d+)/);
+    if (match) {
+      const confirmed = Number(match[1]), total = Number(match[2]);
+      const hero = node('section','ep-pux-tracker-hero');
+      const top = node('div','ep-pux-progress-hero-top');
+      const copyWrap = node('div','ep-pux-progress-hero-copy');
+      copyWrap.append(node('span','ep-pux-progress-kicker',c.programProgress));
+      copyWrap.append(node('strong','ep-pux-progress-count',`${confirmed} / ${total}`));
+      copyWrap.append(node('small','ep-pux-progress-caption',c.topicsConfirmed));
+      top.append(copyWrap);
+      const bar = node('div','ep-pux-progress-bar');
+      bar.setAttribute('role','progressbar');
+      bar.setAttribute('aria-valuemin','0');
+      bar.setAttribute('aria-valuemax',String(total));
+      bar.setAttribute('aria-valuenow',String(confirmed));
+      const fill = node('span','ep-pux-progress-fill');
+      fill.style.width = `${total > 0 ? Math.min(100,100 * confirmed / total) : 0}%`;
+      bar.append(fill);
+      hero.append(top,bar);
+      summary.before(hero);
+      screen.classList.add('ep-pux-tracker-decorated');
+    }
+
+    const guide = node('section','ep-pux-guide');
+    const toggle = node('button','ep-pux-guide-toggle');
+    toggle.type = 'button';
+    toggle.setAttribute('aria-expanded','false');
+    toggle.dataset.epPuxGuideToggle = '1';
+    const icon = node('span','ep-pux-guide-icon','i');
+    icon.setAttribute('aria-hidden','true');
+    const labels = node('span','ep-pux-guide-labels');
+    labels.append(node('strong','',c.howTitle),node('small','',c.howSub));
+    const arrow = node('span','ep-pux-guide-arrow','›');
+    arrow.setAttribute('aria-hidden','true');
+    toggle.append(icon,labels,arrow);
+
+    const body = node('div','ep-pux-guide-body');
+    body.hidden = true;
+    body.dataset.epPuxGuideBody = '1';
+    body.append(node('p','ep-pux-note',c.howLead));
+    const ladder = node('div','ep-pux-status-ladder');
+    for (const [key,label] of [
+      ['unknown',c.statusUnknown],['developing',c.statusDeveloping],
+      ['confirmed',c.statusConfirmed],['secure',c.statusSecure]
+    ]) {
+      const step = node('div',`ep-pux-status-step ep-pux-status-${key}`);
+      step.append(node('span','ep-pux-status-dot'),node('strong','',label));
+      ladder.append(step);
+    }
+    body.append(ladder);
+    const attention = node('div','ep-pux-attention-note');
+    attention.append(node('strong','',c.statusAttention),node('span','',c.howFoot));
+    body.append(attention);
+    toggle.addEventListener('click',() => {
+      const open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded',open ? 'false' : 'true');
+      body.hidden = open;
+      guide.classList.toggle('is-open',!open);
+    });
+    guide.append(toggle,body);
+    const hero = screen.querySelector('.ep-pux-tracker-hero');
+    if (hero) hero.after(guide); else summary.before(guide);
+    screen.dataset.epPuxTrackerClarity = '1';
+  }
   function waitingGoal(goal) {
     return goal.weeklyComplete === true && goal.correctionOpen === true && goal.status === 'waiting_retest';
   }
