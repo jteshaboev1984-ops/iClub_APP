@@ -112,6 +112,28 @@ session_answer_hash as (
   from public.tour_session_answers_v4 a
   join public.tour_attempts ta on ta.id=a.attempt_id
   join tour_ids x on x.id=ta.tour_id
+),
+tour_recommendation_hash as (
+  select
+    count(*)::bigint as n,
+    md5(coalesce(string_agg(
+      jsonb_build_object(
+        'id',r.id,
+        'user_id',r.user_id,
+        'subject_id',r.subject_id,
+        'season_id',r.season_id,
+        'tour_no',r.tour_no,
+        'topic',r.topic,
+        'subtopic',r.subtopic,
+        'book_id',r.book_id,
+        'book_reference',r.book_reference,
+        'created_at',r.created_at
+      )::text,
+      '|' order by r.id
+    ),'')) as h
+  from public.recommendations r
+  where r.subject_id=p_subject_id
+    and r.source_type='tour'
 )
 select jsonb_build_object(
   'subject_id',p_subject_id,
@@ -124,7 +146,9 @@ select jsonb_build_object(
   'tour_answers_count',(select n from answer_hash),
   'tour_answers_md5',(select h from answer_hash),
   'tour_session_answers_count',(select n from session_answer_hash),
-  'tour_session_answers_md5',(select h from session_answer_hash)
+  'tour_session_answers_md5',(select h from session_answer_hash),
+  'tour_recommendations_count',(select n from tour_recommendation_hash),
+  'tour_recommendations_md5',(select h from tour_recommendation_hash)
 );
 $function$;
 
@@ -164,7 +188,7 @@ revoke all on table private.practice_v2_release_switch_audit
 from public,anon,authenticated;
 
 comment on function private.practice_v2_tour_invariant_snapshot_v1(bigint) is
-'Private deterministic fingerprint of all Tour structure/results for one subject. Used to prove Practice v2 release does not alter protected Tour history.';
+'Private deterministic fingerprint of Tour structure, results and Tour-derived recommendations for one subject. Used to prove Practice v2 release does not alter protected Tour state.';
 
 comment on table private.practice_v2_release_switch_audit is
 'Private exact legacy/new membership and question archive for Mathematics Practice v2 reset, publish, rollback and cleanup.';
