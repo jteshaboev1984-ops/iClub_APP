@@ -37,6 +37,16 @@ jobs:
       - name: Run evaluator normalization regression
         run: node scripts/math-practice-v2-evaluator-regression.cjs
 
+      - name: Build deterministic staging package
+        run: |
+          node --check scripts/math-practice-v2-build-staging-sql.cjs
+          node scripts/math-practice-v2-build-staging-sql.cjs --check --out /tmp/math-practice-v2-stage.sql
+          test -s /tmp/math-practice-v2-stage.sql
+          grep -q "staged_question_count_expected_495" /tmp/math-practice-v2-stage.sql
+          grep -q "staged_practice_v2_questions_must_not_be_tour_questions" /tmp/math-practice-v2-stage.sql
+          grep -q "staging_must_not_publish_runtime_content" /tmp/math-practice-v2-stage.sql
+
+
       - name: Check Practice runtime safety wiring
         run: |
           node --check security/practice-v2-input-normalization.js
