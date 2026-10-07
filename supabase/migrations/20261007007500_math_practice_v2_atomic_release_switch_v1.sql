@@ -1,14 +1,19 @@
--- Mathematics Practice v2 — atomic publish / rollback switch
--- Branch-only migration. It defines private release functions; it does NOT publish by itself.
+-- Mathematics Practice v2 — reset + atomic publish + optional legacy question cleanup
+-- Branch-only migration. Defining these private functions does NOT publish or delete anything.
 --
--- Controlled release sequence:
--- 1) deploy v5 frontend + additive DB migrations;
--- 2) stage 495 questions inactive;
+-- Owner policy:
+-- - Mathematics Tour data is protected and must not change.
+-- - Legacy Mathematics Practice progress/history may be reset.
+-- - Legacy Practice questions may be removed after the new bank passes post-publish smoke QA.
+-- - Any legacy question referenced by Tour or another protected/non-Practice system is retained.
+--
+-- Controlled release:
+-- 1) stage 495 v2 questions inactive;
+-- 2) deploy v5 runtime;
 -- 3) run read-only preflight;
--- 4) call private.publish_math_practice_v2_release_v1(...) manually;
--- 5) run post-publish audit.
---
--- Protected rule: no Tour row is written by either function.
+-- 4) call private.publish_math_practice_v2_release_v1(...);
+-- 5) run post-publish/reset audit + learner smoke;
+-- 6) only then call private.cleanup_math_practice_v1_questions_v1(...).
 
 create or replace function private.publish_math_practice_v2_release_v1(
   p_release_version text default 'math_p1_practice_v2_2026_10_07'
@@ -23,6 +28,7 @@ declare
   v_before jsonb;
   v_after jsonb;
   v_old_ids bigint[];
+  v_old_question_ids bigint[];
   v_new_membership_ids bigint[];
   v_new_question_ids bigint[];
   v_old_count integer;
@@ -33,6 +39,12 @@ declare
   v_distinct_pool_count integer;
   v_audit_id bigint;
   v_existing_status text;
+  v_reset_attempts integer := 0;
+  v_reset_answers integer := 0;
+  v_reset_sessions integer := 0;
+  v_reset_drills integer := 0;
+  v_reset_diagnoses integer := 0;
+  v_reset_legacy_evidence integer := 0;
   v_expected jsonb := '{"1":68,"2":80,"3":68,"4":77,"5":66,"6":70,"7":66}'::jsonb;
   v_tour_no integer;
 begin
@@ -64,7 +76,6 @@ begin
       v_pool_count,v_distinct_pool_count;
   end if;
 
-  -- Unsafe legacy answer-oracle RPCs must already be closed by migration 03000.
   if has_function_privilege(
        'authenticated',
        'public.submit_practice_attempt(bigint,integer,numeric,integer,jsonb)',
@@ -78,7 +89,6 @@ begin
     raise exception 'legacy_answer_oracle_still_exposed';
   end if;
 
-  -- Required v5 learner entrypoints must exist before cutover.
   if to_regprocedure('public.start_practice_session_auto_safe_v5(bigint,text)') is null
      or to_regprocedure('public.start_practice_topic_drill_safe_v5(text,text,text,text)') is null
      or to_regprocedure('public.get_recent_practice_mistakes_safe_v5(text,text,text,integer)') is null
@@ -103,7 +113,6 @@ begin
     );
   end if;
 
-  -- Staged release must be complete and still hidden.
   select count(*)::integer into v_count
   from private.practice_v2_question_meta m
   where m.release_version=p_release_version;
@@ -210,7 +219,6 @@ begin
     raise exception 'release_expected_868_staged_diagnostic_mappings_found_%',v_count;
   end if;
 
-  -- Current learner-facing bank is archived by membership IDs, never by deleting questions/history.
   select array_agg(ppq.id order by p.tour_no,ppq.order_no,ppq.id)
   into v_old_ids
   from public.practice_pool_questions ppq
@@ -226,7 +234,19 @@ begin
     raise exception 'release_legacy_active_membership_drift_expected_490_found_%',v_old_count;
   end if;
 
-  -- No release question may be a Tour question.
+  select array_agg(x.question_id order by x.question_id)
+  into v_old_question_ids
+  from (
+    select distinct ppq.question_id
+    from public.practice_pool_questions ppq
+    where ppq.id=any(v_old_ids)
+  ) x;
+
+  if coalesce(cardinality(v_old_question_ids),0)<>490 then
+    raise exception 'release_legacy_question_set_expected_490_found_%',
+      coalesce(cardinality(v_old_question_ids),0);
+  end if;
+
   select count(*)::integer into v_count
   from public.tour_questions tq
   join private.practice_v2_question_meta m on m.question_id=tq.question_id
@@ -239,6 +259,43 @@ begin
   end if;
 
   v_before:=private.practice_v2_tour_invariant_snapshot_v1(v_subject_id);
+
+  select count(*)::integer into v_reset_attempts
+  from public.practice_attempts
+  where subject_id=v_subject_id;
+
+  select count(*)::integer into v_reset_answers
+  from public.practice_answers a
+  join public.practice_attempts pa on pa.id=a.attempt_id
+  where pa.subject_id=v_subject_id;
+
+  select count(*)::integer into v_reset_sessions
+  from public.practice_sessions_v4
+  where subject_id=v_subject_id;
+
+  select count(*)::integer into v_reset_drills
+  from public.practice_drill_sessions_v4
+  where subject_id=v_subject_id;
+
+  select count(*)::integer into v_reset_diagnoses
+  from public.user_answer_diagnosis d
+  where d.subject_id=v_subject_id
+    and (
+      d.practice_answer_id is not null
+      or lower(coalesce(d.attempt_type,'')) like 'practice%'
+    );
+
+  select count(*)::integer into v_reset_legacy_evidence
+  from private.exam_prep_legacy_evidence_references e
+  where e.legacy_source='practice_answers'
+    and (
+      e.question_id=any(v_old_question_ids)
+      or e.legacy_attempt_id in (
+        select pa.id
+        from public.practice_attempts pa
+        where pa.subject_id=v_subject_id
+      )
+    );
 
   insert into private.practice_v2_release_switch_audit(
     release_version,
@@ -268,8 +325,15 @@ begin
     null,
     null,
     jsonb_build_object(
-      'strategy','membership_switch_no_history_delete',
-      'prepared_at',now()
+      'strategy','practice_reset_then_v2_publish',
+      'prepared_at',now(),
+      'legacy_questions_before',coalesce(cardinality(v_old_question_ids),0),
+      'practice_attempts_to_reset',v_reset_attempts,
+      'practice_answers_to_reset',v_reset_answers,
+      'practice_sessions_to_reset',v_reset_sessions,
+      'practice_drills_to_reset',v_reset_drills,
+      'practice_diagnoses_to_reset',v_reset_diagnoses,
+      'legacy_practice_evidence_to_reset',v_reset_legacy_evidence
     )
   )
   on conflict(release_version) do update
@@ -290,11 +354,44 @@ begin
       notes=excluded.notes
   returning id into v_audit_id;
 
-  -- Prevent new sessions from entering superseded selector paths after cutover.
+  -- After cutover, old Practice sessions are intentionally invalid.
   execute 'revoke execute on function public.start_practice_session_auto_safe_v4(bigint,text) from authenticated';
+  execute 'revoke execute on function public.get_practice_session_resume_safe_v4(bigint) from authenticated';
+  execute 'revoke execute on function public.submit_practice_session_answer_safe_v4(bigint,bigint,text,integer,integer) from authenticated';
+  execute 'revoke execute on function public.finalize_practice_session_safe_v4(bigint,integer) from authenticated';
   execute 'revoke execute on function public.start_practice_topic_drill_safe_v4(text,text,text,text) from authenticated';
+  execute 'revoke execute on function public.get_practice_drill_resume_safe_v4(bigint) from authenticated';
+  execute 'revoke execute on function public.submit_practice_drill_answer_safe_v4(bigint,bigint,text,integer,integer) from authenticated';
   execute 'revoke execute on function public.get_recent_practice_mistakes_safe_v4(text,text,text,integer) from authenticated';
   execute 'revoke execute on function public.start_practice_mistakes_drill_safe_v4(text,bigint[],text) from authenticated';
+
+  -- Intentional Mathematics Practice reset. Tour tables are not touched.
+  delete from public.practice_sessions_v4
+  where subject_id=v_subject_id;
+
+  delete from public.practice_drill_sessions_v4
+  where subject_id=v_subject_id;
+
+  delete from public.user_answer_diagnosis d
+  where d.subject_id=v_subject_id
+    and (
+      d.practice_answer_id is not null
+      or lower(coalesce(d.attempt_type,'')) like 'practice%'
+    );
+
+  delete from private.exam_prep_legacy_evidence_references e
+  where e.legacy_source='practice_answers'
+    and (
+      e.question_id=any(v_old_question_ids)
+      or e.legacy_attempt_id in (
+        select pa.id
+        from public.practice_attempts pa
+        where pa.subject_id=v_subject_id
+      )
+    );
+
+  delete from public.practice_attempts
+  where subject_id=v_subject_id;
 
   update public.practice_pool_questions ppq
   set is_active=false
@@ -331,7 +428,6 @@ begin
   set is_active=true
   where ppq.id=any(v_new_membership_ids);
 
-  -- Exact post-switch membership totals.
   select count(*)::integer into v_count
   from public.practice_pool_questions ppq
   join public.practice_pools p on p.id=ppq.pool_id
@@ -361,7 +457,6 @@ begin
     end if;
   end loop;
 
-  -- Every active membership in the seven Mathematics pools must now be from this release.
   select count(*)::integer into v_count
   from public.practice_pool_questions ppq
   join public.practice_pools p on p.id=ppq.pool_id
@@ -378,6 +473,30 @@ begin
     raise exception 'release_non_v2_active_memberships_remaining_%',v_count;
   end if;
 
+  if exists(select 1 from public.practice_attempts where subject_id=v_subject_id) then
+    raise exception 'release_practice_attempt_reset_incomplete';
+  end if;
+
+  if exists(select 1 from public.practice_sessions_v4 where subject_id=v_subject_id) then
+    raise exception 'release_practice_session_reset_incomplete';
+  end if;
+
+  if exists(select 1 from public.practice_drill_sessions_v4 where subject_id=v_subject_id) then
+    raise exception 'release_practice_drill_reset_incomplete';
+  end if;
+
+  if exists(
+    select 1
+    from public.user_answer_diagnosis d
+    where d.subject_id=v_subject_id
+      and (
+        d.practice_answer_id is not null
+        or lower(coalesce(d.attempt_type,'')) like 'practice%'
+      )
+  ) then
+    raise exception 'release_practice_diagnosis_reset_incomplete';
+  end if;
+
   v_after:=private.practice_v2_tour_invariant_snapshot_v1(v_subject_id);
 
   if v_before<>v_after then
@@ -390,7 +509,8 @@ begin
       tour_snapshot_after=v_after,
       notes=notes||jsonb_build_object(
         'published_at',now(),
-        'active_memberships_after',495
+        'active_memberships_after',495,
+        'practice_progress_reset',true
       )
   where id=v_audit_id;
 
@@ -398,6 +518,7 @@ begin
     'ok',true,
     'release_version',p_release_version,
     'status','published',
+    'practice_progress_reset',true,
     'old_memberships_disabled',v_old_count,
     'new_memberships_enabled',v_new_count,
     'active_bank',495,
@@ -450,10 +571,12 @@ begin
     raise exception 'release_not_in_published_state_%',v_audit.status;
   end if;
 
+  if v_audit.notes ? 'legacy_cleanup_completed_at' then
+    raise exception 'rollback_not_available_after_legacy_question_cleanup';
+  end if;
+
   v_before:=private.practice_v2_tour_invariant_snapshot_v1(v_audit.subject_id);
 
-  -- Stop new v2 selection, but keep question rows published/active so already-started
-  -- v2 sessions and historical reviews can still finish safely.
   update public.practice_pool_questions
   set is_active=false
   where id=any(v_audit.new_membership_ids);
@@ -471,6 +594,17 @@ begin
   update public.practice_pool_questions
   set is_active=true
   where id=any(v_audit.old_active_membership_ids);
+
+  -- Rollback restores the old bank only. Old Practice progress intentionally stays reset.
+  execute 'grant execute on function public.start_practice_session_auto_safe_v4(bigint,text) to authenticated';
+  execute 'grant execute on function public.get_practice_session_resume_safe_v4(bigint) to authenticated';
+  execute 'grant execute on function public.submit_practice_session_answer_safe_v4(bigint,bigint,text,integer,integer) to authenticated';
+  execute 'grant execute on function public.finalize_practice_session_safe_v4(bigint,integer) to authenticated';
+  execute 'grant execute on function public.start_practice_topic_drill_safe_v4(text,text,text,text) to authenticated';
+  execute 'grant execute on function public.get_practice_drill_resume_safe_v4(bigint) to authenticated';
+  execute 'grant execute on function public.submit_practice_drill_answer_safe_v4(bigint,bigint,text,integer,integer) to authenticated';
+  execute 'grant execute on function public.get_recent_practice_mistakes_safe_v4(text,text,text,integer) to authenticated';
+  execute 'grant execute on function public.start_practice_mistakes_drill_safe_v4(text,bigint[],text) to authenticated';
 
   select count(*)::integer into v_count
   from public.practice_pool_questions ppq
@@ -507,7 +641,7 @@ begin
       rollback_tour_snapshot_after=v_after,
       notes=notes||jsonb_build_object(
         'rolled_back_at',now(),
-        'strategy','membership_restore_keep_question_history'
+        'strategy','restore_legacy_bank_keep_practice_progress_reset'
       )
   where id=v_audit.id;
 
@@ -517,6 +651,7 @@ begin
     'status','rolled_back',
     'restored_memberships',v_audit.old_active_membership_count,
     'new_memberships_disabled',v_audit.new_membership_count,
+    'practice_progress_restored',false,
     'tour_invariant_unchanged',true,
     'audit_id',v_audit.id,
     'idempotent',false
@@ -525,4 +660,134 @@ end;
 $function$;
 
 revoke all on function private.rollback_math_practice_v2_release_v1(text)
+from public,anon,authenticated;
+
+
+create or replace function private.cleanup_math_practice_v1_questions_v1(
+  p_release_version text default 'math_p1_practice_v2_2026_10_07'
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path to 'public','private','pg_temp'
+as $function$
+declare
+  v_audit private.practice_v2_release_switch_audit%rowtype;
+  v_before jsonb;
+  v_after jsonb;
+  v_old_question_ids bigint[];
+  v_deletable_question_ids bigint[];
+  v_old_question_count integer := 0;
+  v_deleted_question_count integer := 0;
+  v_retained_question_count integer := 0;
+begin
+  perform pg_advisory_xact_lock(hashtext('math_practice_v2_release')::bigint);
+
+  select * into v_audit
+  from private.practice_v2_release_switch_audit a
+  where a.release_version=p_release_version
+  for update;
+
+  if v_audit.id is null then
+    raise exception 'cleanup_release_audit_not_found_%',p_release_version;
+  end if;
+
+  if v_audit.status<>'published' then
+    raise exception 'cleanup_release_not_published_%',v_audit.status;
+  end if;
+
+  if v_audit.notes ? 'legacy_cleanup_completed_at' then
+    return jsonb_build_object(
+      'ok',true,
+      'release_version',p_release_version,
+      'status','cleaned',
+      'idempotent',true,
+      'deleted_legacy_questions',coalesce((v_audit.notes->>'legacy_questions_deleted')::integer,0),
+      'retained_protected_questions',coalesce((v_audit.notes->>'legacy_questions_retained')::integer,0)
+    );
+  end if;
+
+  select array_agg(x.question_id order by x.question_id)
+  into v_old_question_ids
+  from (
+    select distinct ppq.question_id
+    from public.practice_pool_questions ppq
+    where ppq.id=any(v_audit.old_active_membership_ids)
+  ) x;
+
+  v_old_question_count:=coalesce(cardinality(v_old_question_ids),0);
+  if v_old_question_count<>v_audit.old_active_membership_count then
+    raise exception 'cleanup_old_question_set_expected_%_found_%',
+      v_audit.old_active_membership_count,v_old_question_count;
+  end if;
+
+  v_before:=private.practice_v2_tour_invariant_snapshot_v1(v_audit.subject_id);
+
+  -- Remove only Practice-owned legacy evidence. Tour evidence is never selected here.
+  delete from private.exam_prep_legacy_evidence_references e
+  where e.legacy_source='practice_answers'
+    and e.question_id=any(v_old_question_ids);
+
+  -- A legacy question is physically deletable only if nothing outside the retired
+  -- Practice bank needs it.
+  select array_agg(q.id order by q.id)
+  into v_deletable_question_ids
+  from public.questions q
+  where q.id=any(v_old_question_ids)
+    and not exists(select 1 from public.tour_questions tq where tq.question_id=q.id)
+    and not exists(select 1 from public.tour_answers ta where ta.question_id=q.id)
+    and not exists(select 1 from public.tour_session_answers_v4 tsa where tsa.question_id=q.id)
+    and not exists(select 1 from private.exam_prep_assessment_items x where x.question_id=q.id)
+    and not exists(select 1 from private.exam_prep_session_items x where x.question_id=q.id)
+    and not exists(select 1 from private.exam_prep_question_content_meta x where x.question_id=q.id)
+    and not exists(select 1 from public.question_version_links x where x.old_question_id=q.id or x.new_question_id=q.id)
+    and not exists(select 1 from private.exam_prep_legacy_evidence_references x where x.question_id=q.id);
+
+  if coalesce(cardinality(v_deletable_question_ids),0)>0 then
+    delete from private.exam_prep_question_skill_map x
+    where x.question_id=any(v_deletable_question_ids);
+  end if;
+
+  delete from public.practice_pool_questions ppq
+  where ppq.id=any(v_audit.old_active_membership_ids);
+
+  if coalesce(cardinality(v_deletable_question_ids),0)>0 then
+    delete from public.questions q
+    where q.id=any(v_deletable_question_ids);
+
+    get diagnostics v_deleted_question_count = row_count;
+  end if;
+
+  v_retained_question_count:=v_old_question_count-v_deleted_question_count;
+
+  v_after:=private.practice_v2_tour_invariant_snapshot_v1(v_audit.subject_id);
+
+  if v_before<>v_after then
+    raise exception 'protected_tour_invariant_changed_during_legacy_cleanup';
+  end if;
+
+  update private.practice_v2_release_switch_audit
+  set notes=notes||jsonb_build_object(
+        'legacy_cleanup_completed_at',now(),
+        'legacy_questions_before',v_old_question_count,
+        'legacy_questions_deleted',v_deleted_question_count,
+        'legacy_questions_retained',v_retained_question_count,
+        'legacy_memberships_deleted',v_audit.old_active_membership_count
+      )
+  where id=v_audit.id;
+
+  return jsonb_build_object(
+    'ok',true,
+    'release_version',p_release_version,
+    'status','cleaned',
+    'deleted_legacy_memberships',v_audit.old_active_membership_count,
+    'deleted_legacy_questions',v_deleted_question_count,
+    'retained_protected_questions',v_retained_question_count,
+    'tour_invariant_unchanged',true,
+    'idempotent',false
+  );
+end;
+$function$;
+
+revoke all on function private.cleanup_math_practice_v1_questions_v1(text)
 from public,anon,authenticated;
