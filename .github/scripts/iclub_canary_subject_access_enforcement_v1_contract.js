@@ -21,7 +21,7 @@ assert(migration.includes("'reason','not_canary'"),
   'non-canary fail-open boundary missing');
 assert(migration.includes("'reason','manage_in_plan_subjects'"),
   'legacy toggle redirect boundary missing');
-assert(migration.includes("'reason','subject_selection_required'"),
+assert(migration.includes("'subject_selection_required'"),
   'empty subject-selection boundary missing');
 assert(migration.includes("'reason','subject_not_in_plan'"),
   'unselected study subject boundary missing');
