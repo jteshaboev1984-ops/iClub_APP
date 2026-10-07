@@ -1,5 +1,6 @@
 -- READ-ONLY rollback audit for Mathematics P1 Practice v2
 -- Run only after private.rollback_math_practice_v2_release_v1(...).
+-- Rollback restores the legacy bank, but intentionally does NOT restore deleted Practice progress.
 
 begin;
 set transaction read only;
@@ -62,8 +63,33 @@ begin
     raise exception 'rollback_audit_diagnostic_runtime_still_enabled_%',v_count;
   end if;
 
-  -- Published question rows intentionally remain physically present/active so
-  -- an already-started v2 session can finish and historical v2 review remains readable.
+  select count(*)::integer into v_count
+  from public.practice_attempts pa
+  where pa.subject_id=v_audit.subject_id;
+
+  if v_count<>0 then
+    raise exception 'rollback_audit_practice_progress_should_remain_reset_%',v_count;
+  end if;
+
+  if not has_function_privilege(
+       'authenticated',
+       'public.start_practice_session_auto_safe_v4(bigint,text)',
+       'execute'
+     )
+     or not has_function_privilege(
+       'authenticated',
+       'public.submit_practice_session_answer_safe_v4(bigint,bigint,text,integer,integer)',
+       'execute'
+     )
+     or not has_function_privilege(
+       'authenticated',
+       'public.finalize_practice_session_safe_v4(bigint,integer)',
+       'execute'
+     ) then
+    raise exception 'rollback_audit_legacy_safe_runtime_not_restored';
+  end if;
+
+  -- New v2 question rows stay physically present so rollback itself is non-destructive.
   select count(*)::integer into v_count
   from public.questions q
   join private.practice_v2_question_meta m on m.question_id=q.id
