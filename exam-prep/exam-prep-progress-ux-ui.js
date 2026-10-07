@@ -449,27 +449,59 @@
     await promoteGoalActions(card,section,actionRows,component,state,c);
   }
   function showCompletion(screen, data, component) {
-    const { state } = data, c = words();
-    const before = pendingBefore?.component === component ? pendingBefore.state : null;
-    const comparable = before && before.activeWeek === state.activeWeek;
-    const section = node('section','ep-pux-panel ep-pux-finish');
-    section.setAttribute('aria-label', comparable ? c.beforeAfter : c.current);
-    section.append(node('h3','ep-pux-heading',comparable ? c.beforeAfter : c.current));
-    if (comparable) {
-      section.append(node('p','ep-pux-note',c.deltaNote));
-      const gainedSessions = state.finalizedSessions - before.finalizedSessions;
-      const gainedGoals = state.completedGoals - before.completedGoals;
-      if (gainedSessions > 0) metric(section,c.newSession,`+${gainedSessions}`);
-      if (gainedGoals > 0) metric(section,c.newGoals,`+${gainedGoals}`);
-      if (state.coveragePct != null && before.coveragePct != null && state.coveragePct !== before.coveragePct)
-        metric(section,c.newCoverage,`${before.coveragePct}% → ${state.coveragePct}%`);
-      if (gainedSessions === 0 && gainedGoals === 0 && state.coveragePct === before.coveragePct)
-        section.append(node('p','ep-pux-note',c.noChange));
+    const { state, tracker } = data, c = words();
+    const before = pendingBefore?.component === component ? pendingBefore : null;
+    const comparable = before?.state && before.state.activeWeek === state.activeWeek;
+    const section = node('section','ep-pux-panel ep-pux-finish ep-pux-change-card');
+    section.setAttribute('aria-label',c.whatChanged);
+    section.append(node('span','ep-pux-change-kicker',c.resultSaved));
+    section.append(node('h3','ep-pux-heading',c.whatChanged));
+
+    const skillTitle = String(screen.querySelector('.ep-flow-completion-skill strong')?.textContent || '').trim();
+    const afterSkill = skillFromTracker(tracker,before?.skillCode);
+    const beforeKey = before?.skillStateKey || null;
+    const afterKey = skillStateKey(afterSkill);
+    if (skillTitle || afterKey) {
+      const skillCard = node('div','ep-pux-skill-change');
+      if (skillTitle) skillCard.append(node('strong','ep-pux-skill-change-title',skillTitle));
+      if (afterKey) {
+        const states = node('div','ep-pux-skill-change-states');
+        if (beforeKey && beforeKey !== afterKey) {
+          const oldState = node('span',`ep-pux-state-pill ep-pux-state-${beforeKey}`,skillStateLabel(beforeKey,c));
+          const arrow = node('span','ep-pux-change-arrow','→');
+          arrow.setAttribute('aria-hidden','true');
+          const newState = node('strong',`ep-pux-state-pill ep-pux-state-${afterKey}`,skillStateLabel(afterKey,c));
+          states.append(oldState,arrow,newState);
+          skillCard.append(states,node('small','ep-pux-note',c.statusChanged));
+        } else {
+          states.append(node('strong',`ep-pux-state-pill ep-pux-state-${afterKey}`,skillStateLabel(afterKey,c)));
+          skillCard.append(states,node('small','ep-pux-note',c.statusStable));
+        }
+      }
+      section.append(skillCard);
     }
-    if (state.hasPlan) metric(section,c.goals,state.goalCounter);
-    metric(section,c.total,state.finalizedSessions);
-    showConfirmedMetrics(section,state,c);
-    metric(section,c.corrections,state.openCorrections);
+
+    if (comparable && state.confirmedSkills != null && before.state.confirmedSkills != null) {
+      const progress = node('div','ep-pux-confirmed-change');
+      const label = node('span','ep-pux-label',c.confirmedChange);
+      const value = state.confirmedSkills !== before.state.confirmedSkills
+        ? `${before.state.confirmedSkills} → ${state.confirmedSkills} / ${state.totalCanonicalSkills}`
+        : `${state.confirmedSkills} / ${state.totalCanonicalSkills}`;
+      progress.append(label,node('strong','ep-pux-value',value));
+      const bar = node('div','ep-pux-progress-bar');
+      bar.setAttribute('role','progressbar');
+      bar.setAttribute('aria-valuemin','0');
+      bar.setAttribute('aria-valuemax',String(state.totalCanonicalSkills));
+      bar.setAttribute('aria-valuenow',String(state.confirmedSkills));
+      const fill = node('span','ep-pux-progress-fill');
+      fill.style.width = `${state.totalCanonicalSkills > 0 ? Math.min(100,100 * state.confirmedSkills / state.totalCanonicalSkills) : 0}%`;
+      bar.append(fill);
+      progress.append(bar);
+      section.append(progress);
+    } else {
+      progressHero(section,state,c);
+    }
+
     const pending = state.goals.find(waitingGoal);
     if (pending) {
       const notice = node('aside','ep-pux-waiting');
@@ -478,11 +510,20 @@
       notice.append(node('p','ep-pux-note',`${c.due}: ${dateText(pending.retestDueAt)}`));
       section.append(notice);
     }
+
+    if (typeof internal.learnerViews?.openTracker === 'function') {
+      const button = node('button','ep-live-btn secondary ep-pux-view-progress',c.viewProgress);
+      button.type = 'button';
+      button.addEventListener('click',() => internal.learnerViews.openTracker(component));
+      section.append(button);
+    }
+
     const next = screen.querySelector('.ep-flow-next-card');
     if (next) next.before(section); else screen.append(section);
     pendingBefore = null;
     completionSession = null;
   }
+
   async function request(kind,target,component) {
     if (!allowed() || seen.has(target)) return;
     seen.set(target,'loading');
