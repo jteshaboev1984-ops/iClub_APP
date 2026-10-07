@@ -44,6 +44,7 @@ declare
   v_reset_sessions integer := 0;
   v_reset_drills integer := 0;
   v_reset_diagnoses integer := 0;
+  v_reset_recommendations integer := 0;
   v_reset_legacy_evidence integer := 0;
   v_expected jsonb := '{"1":68,"2":80,"3":68,"4":77,"5":66,"6":70,"7":66}'::jsonb;
   v_tour_no integer;
@@ -285,6 +286,11 @@ begin
       or lower(coalesce(d.attempt_type,'')) like 'practice%'
     );
 
+  select count(*)::integer into v_reset_recommendations
+  from public.recommendations r
+  where r.subject_id=v_subject_id
+    and r.source_type='practice';
+
   select count(*)::integer into v_reset_legacy_evidence
   from private.exam_prep_legacy_evidence_references e
   where e.legacy_source='practice_answers'
@@ -335,6 +341,7 @@ begin
       'practice_sessions_to_reset',v_reset_sessions,
       'practice_drills_to_reset',v_reset_drills,
       'practice_diagnoses_to_reset',v_reset_diagnoses,
+      'practice_recommendations_to_reset',v_reset_recommendations,
       'legacy_practice_evidence_to_reset',v_reset_legacy_evidence
     )
   )
@@ -359,11 +366,9 @@ begin
 
   -- After cutover, old Practice sessions are intentionally invalid.
   execute 'revoke execute on function public.start_practice_session_auto_safe_v4(bigint,text) from authenticated';
-  execute 'revoke execute on function public.get_practice_session_resume_safe_v4(bigint) from authenticated';
   execute 'revoke execute on function public.submit_practice_session_answer_safe_v4(bigint,bigint,text,integer,integer) from authenticated';
   execute 'revoke execute on function public.finalize_practice_session_safe_v4(bigint,integer) from authenticated';
   execute 'revoke execute on function public.start_practice_topic_drill_safe_v4(text,text,text,text) from authenticated';
-  execute 'revoke execute on function public.get_practice_drill_resume_safe_v4(bigint) from authenticated';
   execute 'revoke execute on function public.submit_practice_drill_answer_safe_v4(bigint,bigint,text,integer,integer) from authenticated';
   execute 'revoke execute on function public.get_recent_practice_mistakes_safe_v4(text,text,text,integer) from authenticated';
   execute 'revoke execute on function public.start_practice_mistakes_drill_safe_v4(text,bigint[],text) from authenticated';
@@ -392,6 +397,10 @@ begin
         where pa.subject_id=v_subject_id
       )
     );
+
+  delete from public.recommendations r
+  where r.subject_id=v_subject_id
+    and r.source_type='practice';
 
   delete from public.practice_attempts
   where subject_id=v_subject_id;
@@ -500,6 +509,15 @@ begin
     raise exception 'release_practice_diagnosis_reset_incomplete';
   end if;
 
+  if exists(
+    select 1
+    from public.recommendations r
+    where r.subject_id=v_subject_id
+      and r.source_type='practice'
+  ) then
+    raise exception 'release_practice_recommendation_reset_incomplete';
+  end if;
+
   v_after:=private.practice_v2_tour_invariant_snapshot_v1(v_subject_id);
 
   if v_before<>v_after then
@@ -600,11 +618,9 @@ begin
 
   -- Rollback restores the old bank only. Old Practice progress intentionally stays reset.
   execute 'grant execute on function public.start_practice_session_auto_safe_v4(bigint,text) to authenticated';
-  execute 'grant execute on function public.get_practice_session_resume_safe_v4(bigint) to authenticated';
   execute 'grant execute on function public.submit_practice_session_answer_safe_v4(bigint,bigint,text,integer,integer) to authenticated';
   execute 'grant execute on function public.finalize_practice_session_safe_v4(bigint,integer) to authenticated';
   execute 'grant execute on function public.start_practice_topic_drill_safe_v4(text,text,text,text) to authenticated';
-  execute 'grant execute on function public.get_practice_drill_resume_safe_v4(bigint) to authenticated';
   execute 'grant execute on function public.submit_practice_drill_answer_safe_v4(bigint,bigint,text,integer,integer) to authenticated';
   execute 'grant execute on function public.get_recent_practice_mistakes_safe_v4(text,text,text,integer) to authenticated';
   execute 'grant execute on function public.start_practice_mistakes_drill_safe_v4(text,bigint[],text) to authenticated';
