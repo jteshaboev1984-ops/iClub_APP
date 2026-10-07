@@ -31,7 +31,15 @@
       deltaNote: 'Изменения могут включать занятия с других устройств.',
       noChange: 'После обновления подтверждённые показатели пока не изменились.',
       current: 'Текущий подтверждённый прогресс', dateUnknown: 'Дата уточняется',
-      due: 'Повторная проверка', currentTask: 'Текущий шаг', notAvailable: 'Сейчас нет доступного шага'
+      due: 'Повторная проверка', currentTask: 'Текущий шаг', notAvailable: 'Сейчас нет доступного шага',
+      programProgress: 'Прогресс по программе', topicsConfirmed: 'тем подтверждено',
+      howTitle: 'Как считается прогресс', howSub: 'Почему один правильный ответ не всегда меняет статус темы',
+      howLead: 'Отдельный правильный ответ сохраняется как результат, но сам по себе не повышает статус темы. Статус меняется только после достаточных проверенных результатов.',
+      howFoot: '«Требует внимания» — не следующий уровень, а отдельный сигнал: по теме обнаружена ошибка, которую нужно исправить и позже перепроверить.',
+      statusUnknown: 'Не проверено', statusDeveloping: 'Формируется', statusConfirmed: 'Подтверждено', statusSecure: 'Уверенно', statusAttention: 'Требует внимания',
+      whatChanged: 'Что изменилось', resultSaved: 'Результат сохранён',
+      statusChanged: 'Статус темы изменился', statusStable: 'Статус темы пока не изменился. Это нормально: одного задания не всегда достаточно.',
+      confirmedChange: 'Подтверждённые темы', viewProgress: 'Посмотреть прогресс'
     },
     uz: {
       goals: 'Bu haftadagi maqsadlar', available: 'Mavjud topshiriqlar', total: 'Yakunlangan mashg‘ulotlar',
@@ -50,7 +58,15 @@
       deltaNote: 'O‘zgarishlar boshqa qurilmalardagi mashg‘ulotlarni ham o‘z ichiga olishi mumkin.',
       noChange: 'Yangilangandan so‘ng tasdiqlangan ko‘rsatkichlar hozircha o‘zgarmadi.',
       current: 'Hozirgi tasdiqlangan natijalar', dateUnknown: 'Sana aniqlanmoqda',
-      due: 'Qayta tekshiruv', currentTask: 'Hozirgi qadam', notAvailable: 'Hozircha mavjud qadam yo‘q'
+      due: 'Qayta tekshiruv', currentTask: 'Hozirgi qadam', notAvailable: 'Hozircha mavjud qadam yo‘q',
+      programProgress: 'Dastur bo‘yicha progress', topicsConfirmed: 'mavzu tasdiqlangan',
+      howTitle: 'Progress qanday hisoblanadi', howSub: 'Nega bitta to‘g‘ri javob mavzu holatini darhol o‘zgartirmaydi',
+      howLead: 'Har bir to‘g‘ri javob natija sifatida saqlanadi, lekin mavzu holatini o‘zi darhol oshirmaydi. Holat yetarli tekshirilgan natijalar yig‘ilganda o‘zgaradi.',
+      howFoot: '«Diqqat talab qiladi» keyingi daraja emas. Bu mavzuda xato topilganini va uni tuzatib, keyin yana tekshirish kerakligini bildiradi.',
+      statusUnknown: 'Tekshirilmagan', statusDeveloping: 'Rivojlanmoqda', statusConfirmed: 'Tasdiqlangan', statusSecure: 'Barqaror', statusAttention: 'Diqqat talab qiladi',
+      whatChanged: 'Nima o‘zgardi', resultSaved: 'Natija saqlandi',
+      statusChanged: 'Mavzu holati o‘zgardi', statusStable: 'Mavzu holati hozircha o‘zgarmadi. Bu normal: bitta topshiriq har doim yetarli bo‘lmaydi.',
+      confirmedChange: 'Tasdiqlangan mavzular', viewProgress: 'Progressni ko‘rish'
     },
     en: {
       goals: 'This week’s goals', available: 'Available tasks', total: 'Sessions completed',
@@ -69,7 +85,15 @@
       deltaNote: 'Changes may include sessions completed on other devices.',
       noChange: 'The verified indicators have not changed since the last update.',
       current: 'Current verified progress', dateUnknown: 'Date to be confirmed',
-      due: 'Delayed check', currentTask: 'Current step', notAvailable: 'No available step right now'
+      due: 'Delayed check', currentTask: 'Current step', notAvailable: 'No available step right now',
+      programProgress: 'Syllabus progress', topicsConfirmed: 'topics confirmed',
+      howTitle: 'How progress works', howSub: 'Why one correct answer does not always change a topic status',
+      howLead: 'Each correct answer is saved as a result, but it does not raise the topic status by itself. A status changes only when there are enough verified results.',
+      howFoot: '“Needs attention” is not the next level. It is a separate signal that an error was found and should be corrected and checked again later.',
+      statusUnknown: 'Not checked', statusDeveloping: 'Developing', statusConfirmed: 'Confirmed', statusSecure: 'Secure', statusAttention: 'Needs attention',
+      whatChanged: 'What changed', resultSaved: 'Result saved',
+      statusChanged: 'Topic status changed', statusStable: 'The topic status has not changed yet. That is normal: one task is not always enough.',
+      confirmedChange: 'Confirmed topics', viewProgress: 'View progress'
     }
   });
   const AREA = Object.freeze({
