@@ -681,6 +681,7 @@ declare
   v_old_question_ids bigint[];
   v_deletable_question_ids bigint[];
   v_old_question_count integer := 0;
+  v_deleted_membership_count integer := 0;
   v_deleted_question_count integer := 0;
   v_retained_question_count integer := 0;
 begin
@@ -754,7 +755,18 @@ begin
   end if;
 
   delete from public.practice_pool_questions ppq
-  where ppq.id=any(v_audit.old_active_membership_ids);
+  using public.practice_pools p
+  where p.id=ppq.pool_id
+    and p.subject_id=v_audit.subject_id
+    and p.tour_no between 1 and 7
+    and ppq.question_id=any(v_old_question_ids);
+
+  get diagnostics v_deleted_membership_count = row_count;
+
+  if v_deleted_membership_count<v_audit.old_active_membership_count then
+    raise exception 'cleanup_legacy_memberships_deleted_expected_at_least_%_found_%',
+      v_audit.old_active_membership_count,v_deleted_membership_count;
+  end if;
 
   if coalesce(cardinality(v_deletable_question_ids),0)>0 then
     delete from public.questions q
@@ -777,7 +789,7 @@ begin
         'legacy_questions_before',v_old_question_count,
         'legacy_questions_deleted',v_deleted_question_count,
         'legacy_questions_retained',v_retained_question_count,
-        'legacy_memberships_deleted',v_audit.old_active_membership_count,
+        'legacy_memberships_deleted',v_deleted_membership_count,
         'legacy_cleanup_tour_snapshot_before',v_before,
         'legacy_cleanup_tour_snapshot_after',v_after
       )
@@ -787,7 +799,7 @@ begin
     'ok',true,
     'release_version',p_release_version,
     'status','cleaned',
-    'deleted_legacy_memberships',v_audit.old_active_membership_count,
+    'deleted_legacy_memberships',v_deleted_membership_count,
     'deleted_legacy_questions',v_deleted_question_count,
     'retained_protected_questions',v_retained_question_count,
     'tour_invariant_unchanged',true,
