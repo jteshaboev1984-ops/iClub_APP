@@ -240,7 +240,7 @@ begin
   end if;
 
   with candidates as (
-    select distinct q.id
+    select q.id
     from public.practice_pools p
     join public.practice_pool_questions ppq
       on ppq.pool_id=p.id and ppq.is_active is true
@@ -275,7 +275,7 @@ begin
   from candidates;
 
   with candidates as (
-    select distinct q.id
+    select q.id
     from public.practice_pools p
     join public.practice_pool_questions ppq
       on ppq.pool_id=p.id and ppq.is_active is true
@@ -310,7 +310,7 @@ begin
   from candidates;
 
   with candidates as (
-    select distinct q.id
+    select q.id
     from public.practice_pools p
     join public.practice_pool_questions ppq
       on ppq.pool_id=p.id and ppq.is_active is true
@@ -351,7 +351,7 @@ begin
 
   if v_needed>0 then
     with candidates as (
-      select distinct q.id
+      select q.id
       from public.practice_pools p
       join public.practice_pool_questions ppq
         on ppq.pool_id=p.id and ppq.is_active is true
