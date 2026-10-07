@@ -18375,6 +18375,22 @@ const correctLabel = t("correct_answer") || "Правильно";
 const explLabel = t("rec_show_expl") || "Объяснение";
 const mistakeLabel = tr3("Почему это ошибка", "Nega bu xato", "Why this is wrong");
 const nextStepLabel = tr3("Как исправить", "Qanday tuzatish kerak", "How to fix it");
+const genericMistake = tr3(
+  "Ответ неверный, но по нему нельзя надёжно определить конкретную причину ошибки.",
+  "Javob noto‘g‘ri, lekin bu javobning o‘zidan aniq xato sababini ishonchli aniqlab bo‘lmaydi.",
+  "The answer is incorrect, but it does not reliably identify one specific mistake."
+);
+const genericNextStep = tr3(
+  "Сравните своё решение с объяснением и примените правильный шаг в следующем похожем задании.",
+  "Yechimingizni izoh bilan solishtiring va keyingi o‘xshash savolda to‘g‘ri usulni qo‘llang.",
+  "Compare your work with the explanation and apply the correct step in the next similar question."
+);
+const mistakeFeedback = !d.isCorrect
+  ? (d.diagnosticFeedback || (d.diagnosticStatus === "unmapped" ? genericMistake : ""))
+  : "";
+const diagnosticNextAction = !d.isCorrect
+  ? (d.diagnosticNextAction || (d.diagnosticStatus === "unmapped" ? genericNextStep : ""))
+  : "";
 
 const topicText = String(d.topic || t("topic_general") || "General").trim();
 const subtopicText = String(d.subtopic || "").trim();
@@ -18392,8 +18408,8 @@ row.innerHTML = `
     ${escapeHTML(correctLabel)}: <b>${escapeHTML(corrDisp || "—")}</b>
   </div>
 
-  ${!d.isCorrect && d.diagnosticFeedback ? `<div class="muted small" style="margin-top:8px"><b>${escapeHTML(mistakeLabel)}:</b> ${escapeHTML(d.diagnosticFeedback)}</div>` : ``}
-  ${!d.isCorrect && d.diagnosticNextAction ? `<div class="muted small" style="margin-top:6px"><b>${escapeHTML(nextStepLabel)}:</b> ${escapeHTML(d.diagnosticNextAction)}</div>` : ``}
+  ${mistakeFeedback ? `<div class="muted small" style="margin-top:8px"><b>${escapeHTML(mistakeLabel)}:</b> ${escapeHTML(mistakeFeedback)}</div>` : ``}
+  ${diagnosticNextAction ? `<div class="muted small" style="margin-top:6px"><b>${escapeHTML(nextStepLabel)}:</b> ${escapeHTML(diagnosticNextAction)}</div>` : ``}
   ${d.explanation ? `<div class="muted small" style="margin-top:8px"><b>${escapeHTML(explLabel)}:</b> ${escapeHTML(d.explanation)}</div>` : ``}
 `;
         body.appendChild(row);
