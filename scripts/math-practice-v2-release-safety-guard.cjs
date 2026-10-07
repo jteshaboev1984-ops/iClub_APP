@@ -225,6 +225,12 @@ for(const [name,source] of [
 if(!selector.includes('practice_v2_cutover_pending')){
   fail('main Mathematics Practice selector is missing explicit cutover-pending gate');
 }
+if(/select\s+distinct\s+q\.id[\s\S]{0,2200}?order\s+by\s+random\(\)/i.test(topicDrill)){
+  fail('topic drill contains PostgreSQL-invalid SELECT DISTINCT q.id ORDER BY random()');
+}
+if(!topicDrill.includes('group by q.id')){
+  fail('topic drill random selector is missing unique-ID grouping');
+}
 if(!release.includes("set is_runtime_allowed=false")){
   fail('rollback does not disable Practice v2 runtime metadata');
 }

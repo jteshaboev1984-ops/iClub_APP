@@ -46,5 +46,13 @@ begin
   if position('iclub_practice_drill_question_protected_v4' in v_def)=0 then
     raise exception 'topic_drill_v5_missing_tour_protection_gate';
   end if;
+
+  if v_def ~* 'select[[:space:]]+distinct[[:space:]]+q\\.id(.|[[:space:]]){0,2200}order[[:space:]]+by[[:space:]]+random\\(\\)' then
+    raise exception 'topic_drill_v5_invalid_distinct_random_ordering';
+  end if;
+
+  if position('group by q.id' in lower(v_def))=0 then
+    raise exception 'topic_drill_v5_missing_random_selection_grouping';
+  end if;
 end;
 $$;

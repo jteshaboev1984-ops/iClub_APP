@@ -267,6 +267,7 @@ begin
       )
       and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
       and not public.iclub_practice_drill_question_protected_v4(q.id)
+    group by q.id
     order by random()
     limit 3
   )
@@ -301,6 +302,7 @@ begin
       )
       and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
       and not public.iclub_practice_drill_question_protected_v4(q.id)
+    group by q.id
     order by random()
     limit 5
   )
@@ -335,6 +337,7 @@ begin
       )
       and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
       and not public.iclub_practice_drill_question_protected_v4(q.id)
+    group by q.id
     order by random()
     limit 2
   )
@@ -375,6 +378,7 @@ begin
         )
         and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
         and not public.iclub_practice_drill_question_protected_v4(q.id)
+      group by q.id
       order by random()
       limit v_needed
     )
