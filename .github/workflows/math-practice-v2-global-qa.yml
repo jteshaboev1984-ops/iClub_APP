@@ -62,7 +62,7 @@ jobs:
           node --check app.js
           grep -q 'security/practice-v2-input-normalization.js?v=mathv2minus1' index.html
           grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1-mathv2feedback1' index.html
-          grep -q 'app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1-ai2ctx1-mathv2feedback1' index.html
+          grep -q 'app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1-ai2ctx1-mathv2feedback2' index.html
           grep -q 'start_practice_session_auto_safe_v5' security/legacy-assessment-safe-api.js
           grep -q 'start_practice_topic_drill_safe_v5' security/legacy-assessment-safe-api.js
           grep -q 'get_recent_practice_mistakes_safe_v5' security/legacy-assessment-safe-api.js
