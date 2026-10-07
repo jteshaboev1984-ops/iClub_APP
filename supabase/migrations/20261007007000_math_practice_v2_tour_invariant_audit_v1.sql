@@ -148,6 +148,8 @@ create table if not exists private.practice_v2_release_switch_audit (
   new_membership_count integer not null default 0,
   tour_snapshot_before jsonb not null,
   tour_snapshot_after jsonb,
+  rollback_tour_snapshot_before jsonb,
+  rollback_tour_snapshot_after jsonb,
   notes jsonb not null default '{}'::jsonb
 );
 
