@@ -15,6 +15,8 @@ Production writes: NONE
 - Tour memberships fingerprint: 6d90602876f86adae3d9f04b06930d1a
 - Tour attempts fingerprint: 6f980b884d615d7a79f02eb6152d9a79
 - Tour answers fingerprint: 03edc51c7d0a6c4701b5b48ab6da6d09
+- Tour recommendations: 572
+- Tour recommendations fingerprint: 390dc2bcc96708e14b0a1735eed6b4d7
 
 The reset/publish function recalculates the protected Tour fingerprint inside the same transaction before and after the Mathematics Practice reset and bank switch. Any difference aborts the whole transaction.
 
