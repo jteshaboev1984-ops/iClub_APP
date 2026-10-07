@@ -28,6 +28,9 @@ declare
   v_old_count integer;
   v_new_count integer;
   v_count integer;
+  v_subject_count integer;
+  v_pool_count integer;
+  v_distinct_pool_count integer;
   v_audit_id bigint;
   v_existing_status text;
   v_expected jsonb := '{"1":68,"2":80,"3":68,"4":77,"5":66,"6":70,"7":66}'::jsonb;
@@ -39,14 +42,26 @@ begin
 
   perform pg_advisory_xact_lock(hashtext('math_practice_v2_release')::bigint);
 
-  select s.id into v_subject_id
+  select count(*)::integer,min(s.id)
+  into v_subject_count,v_subject_id
   from public.subjects s
   where s.subject_key='mathematics'
-    and s.is_active is true
-  limit 1;
+    and s.is_active is true;
 
-  if v_subject_id is null then
-    raise exception 'math_subject_not_found';
+  if v_subject_count<>1 or v_subject_id is null then
+    raise exception 'expected_one_active_math_subject_found_%',v_subject_count;
+  end if;
+
+  select count(*)::integer,count(distinct p.tour_no)::integer
+  into v_pool_count,v_distinct_pool_count
+  from public.practice_pools p
+  where p.subject_id=v_subject_id
+    and p.is_active is true
+    and p.tour_no between 1 and 7;
+
+  if v_pool_count<>7 or v_distinct_pool_count<>7 then
+    raise exception 'release_expected_exactly_one_active_pool_per_practice_found_%_rows_%_tour_nos',
+      v_pool_count,v_distinct_pool_count;
   end if;
 
   -- Unsafe legacy answer-oracle RPCs must already be closed by migration 03000.
@@ -127,13 +142,72 @@ begin
   join public.practice_pools p on p.id=ppq.pool_id
   join private.practice_v2_question_meta m on m.question_id=ppq.question_id
   where p.subject_id=v_subject_id
+    and p.is_active is true
     and p.tour_no between 1 and 7
+    and p.tour_no=m.practice_no
     and m.release_version=p_release_version
     and ppq.is_active is false;
 
   v_new_count:=coalesce(cardinality(v_new_membership_ids),0);
   if v_new_count<>495 then
     raise exception 'release_expected_495_inactive_new_memberships_found_%',v_new_count;
+  end if;
+
+  for v_tour_no in 1..7 loop
+    select count(*)::integer into v_count
+    from public.practice_pool_questions ppq
+    join public.practice_pools p on p.id=ppq.pool_id
+    join private.practice_v2_question_meta m on m.question_id=ppq.question_id
+    where p.subject_id=v_subject_id
+      and p.is_active is true
+      and p.tour_no=v_tour_no
+      and m.practice_no=v_tour_no
+      and m.release_version=p_release_version
+      and ppq.is_active is false;
+
+    if v_count<>(v_expected->>v_tour_no::text)::integer then
+      raise exception 'release_staged_practice_%_expected_%_found_%',
+        v_tour_no,(v_expected->>v_tour_no::text)::integer,v_count;
+    end if;
+
+    if exists(
+      select 1
+      from public.practice_pool_questions ppq
+      join public.practice_pools p on p.id=ppq.pool_id
+      join private.practice_v2_question_meta m on m.question_id=ppq.question_id
+      where p.subject_id=v_subject_id
+        and p.is_active is true
+        and p.tour_no=v_tour_no
+        and m.practice_no=v_tour_no
+        and m.release_version=p_release_version
+        and ppq.is_active is false
+      group by p.id
+      having min(ppq.order_no)<>1
+         or max(ppq.order_no)<>count(*)::integer
+         or count(distinct ppq.order_no)<>count(*)
+    ) then
+      raise exception 'release_staged_practice_%_order_not_contiguous',v_tour_no;
+    end if;
+  end loop;
+
+  select count(*)::integer into v_count
+  from private.practice_v2_diagnostic_catalog d
+  where d.release_version=p_release_version
+    and d.approval_status='approved'
+    and d.is_runtime_allowed is false;
+
+  if v_count<>201 then
+    raise exception 'release_expected_201_staged_diagnostics_found_%',v_count;
+  end if;
+
+  select count(*)::integer into v_count
+  from public.question_answer_diagnostics d
+  join private.practice_v2_question_meta m on m.question_id=d.question_id
+  where m.release_version=p_release_version
+    and d.quality_status='draft';
+
+  if v_count<>868 then
+    raise exception 'release_expected_868_staged_diagnostic_mappings_found_%',v_count;
   end if;
 
   -- Current learner-facing bank is archived by membership IDs, never by deleting questions/history.
