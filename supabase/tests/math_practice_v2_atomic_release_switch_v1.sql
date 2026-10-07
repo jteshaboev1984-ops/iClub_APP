@@ -1,11 +1,12 @@
--- Mathematics Practice v2 atomic release switch regression
+-- Mathematics Practice v2 reset / publish / cleanup regression.
 -- Run after 20261007007500_math_practice_v2_atomic_release_switch_v1.sql.
--- This test inspects definitions only; it does not publish or roll back the bank.
+-- Definition-only test: it does not publish, reset, roll back or clean learner data.
 
 do $$
 declare
   v_publish oid;
   v_rollback oid;
+  v_cleanup oid;
   v_def text;
 begin
   select p.oid into v_publish
@@ -30,23 +31,23 @@ begin
   if position('practice_v2_tour_invariant_snapshot_v1' in v_def)=0
      or position('protected_tour_invariant_changed_during_release' in v_def)=0
      or position('old_active_membership_ids' in v_def)=0
+     or position('old_question_ids' in v_def)=0
      or position('new_membership_ids' in v_def)=0
+     or position('practice_reset_then_v2_publish' in v_def)=0
+     or position('delete from public.practice_sessions_v4' in lower(v_def))=0
+     or position('delete from public.practice_drill_sessions_v4' in lower(v_def))=0
+     or position('delete from public.user_answer_diagnosis' in lower(v_def))=0
+     or position('delete from public.practice_attempts' in lower(v_def))=0
      or position('release_expected_exactly_one_active_pool_per_practice' in v_def)=0
      or position('release_expected_201_staged_diagnostics' in v_def)=0
      or position('release_expected_868_staged_diagnostic_mappings' in v_def)=0
      or position('release_staged_practice_' in v_def)=0
-     or position('order_not_contiguous' in v_def)=0
-     or position('set is_active=false' in replace(lower(v_def),' ',' '))=0
-     or position('set is_active=true' in replace(lower(v_def),' ',' '))=0 then
-    raise exception 'practice_v2_publish_missing_atomic_membership_or_tour_gate';
+     or position('order_not_contiguous' in v_def)=0 then
+    raise exception 'practice_v2_publish_missing_reset_or_atomic_publish_gate';
   end if;
 
   if lower(v_def) ~ '\m(insert[[:space:]]+into|update|delete[[:space:]]+from|truncate)[[:space:]]+(public\.)?(tours|tour_questions|tour_attempts|tour_answers|tour_session_answers_v4)\M' then
     raise exception 'practice_v2_publish_contains_tour_dml';
-  end if;
-
-  if lower(v_def) ~ '\m(delete[[:space:]]+from|truncate)[[:space:]]+(public\.)?(practice_attempts|practice_answers|practice_sessions_v4|practice_session_answers_v4|practice_drill_sessions_v4|practice_drill_answers_v4|user_answer_diagnosis)\M' then
-    raise exception 'practice_v2_publish_contains_practice_history_delete';
   end if;
 
   select p.oid into v_rollback
@@ -68,20 +69,46 @@ begin
 
   v_def:=pg_get_functiondef(v_rollback);
 
-  if position('rollback_tour_snapshot_before' in v_def)=0
-     or position('rollback_tour_snapshot_after' in v_def)=0
+  if position('rollback_not_available_after_legacy_question_cleanup' in v_def)=0
+     or position('practice_progress_restored' in v_def)=0
      or position('protected_tour_invariant_changed_during_rollback' in v_def)=0
      or position('old_active_membership_ids' in v_def)=0
      or position('new_membership_ids' in v_def)=0 then
-    raise exception 'practice_v2_rollback_missing_membership_or_tour_gate';
+    raise exception 'practice_v2_rollback_missing_reset-aware_bank_restore_gate';
   end if;
 
   if lower(v_def) ~ '\m(insert[[:space:]]+into|update|delete[[:space:]]+from|truncate)[[:space:]]+(public\.)?(tours|tour_questions|tour_attempts|tour_answers|tour_session_answers_v4)\M' then
     raise exception 'practice_v2_rollback_contains_tour_dml';
   end if;
 
-  if lower(v_def) ~ '\m(delete[[:space:]]+from|truncate)[[:space:]]+(public\.)?(practice_attempts|practice_answers|practice_sessions_v4|practice_session_answers_v4|practice_drill_sessions_v4|practice_drill_answers_v4|user_answer_diagnosis)\M' then
-    raise exception 'practice_v2_rollback_contains_practice_history_delete';
+  select p.oid into v_cleanup
+  from pg_proc p
+  join pg_namespace n on n.oid=p.pronamespace
+  where n.nspname='private'
+    and p.proname='cleanup_math_practice_v1_questions_v1'
+    and pg_get_function_identity_arguments(p.oid)='p_release_version text'
+  limit 1;
+
+  if v_cleanup is null then
+    raise exception 'practice_v2_cleanup_function_missing';
+  end if;
+
+  if has_function_privilege('authenticated',v_cleanup,'execute')
+     or has_function_privilege('anon',v_cleanup,'execute') then
+    raise exception 'practice_v2_cleanup_function_exposed_to_learner';
+  end if;
+
+  v_def:=pg_get_functiondef(v_cleanup);
+
+  if position('not exists(select 1 from public.tour_questions' in lower(v_def))=0
+     or position('not exists(select 1 from public.tour_answers' in lower(v_def))=0
+     or position('not exists(select 1 from public.tour_session_answers_v4' in lower(v_def))=0
+     or position('protected_tour_invariant_changed_during_legacy_cleanup' in v_def)=0 then
+    raise exception 'practice_v2_cleanup_missing_protected_reference_or_tour_gate';
+  end if;
+
+  if lower(v_def) ~ '\m(insert[[:space:]]+into|update|delete[[:space:]]+from|truncate)[[:space:]]+(public\.)?(tours|tour_questions|tour_attempts|tour_answers|tour_session_answers_v4)\M' then
+    raise exception 'practice_v2_cleanup_contains_tour_dml';
   end if;
 end;
 $$;
