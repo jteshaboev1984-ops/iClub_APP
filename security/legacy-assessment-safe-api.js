@@ -59,7 +59,7 @@
     },
 
     async startMistakes({ subjectKey, questionIds, clientSessionId = null }) {
-      return rpc("start_practice_mistakes_drill_safe_v4", {
+      return rpc("start_practice_mistakes_drill_safe_v5", {
         p_subject_key: String(subjectKey || ""),
         p_question_ids: normalizeQuestionIds(questionIds),
         p_client_session_id: clientSessionId || makeClientSessionId("practice_mistakes")
@@ -138,7 +138,7 @@
     },
 
     async recentMistakes({ subjectKey, topic = null, subtopic = null, limit = 10 }) {
-      return rpc("get_recent_practice_mistakes_safe_v4", {
+      return rpc("get_recent_practice_mistakes_safe_v5", {
         p_subject_key: String(subjectKey || ""),
         p_topic: topic == null || String(topic).trim() === "" ? null : String(topic),
         p_subtopic: subtopic == null || String(subtopic).trim() === "" ? null : String(subtopic),
