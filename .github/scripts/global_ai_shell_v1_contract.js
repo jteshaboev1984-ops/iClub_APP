@@ -51,8 +51,9 @@ for (const forbidden of [
   assert(!js.includes(forbidden), `learner shell contains forbidden internal/action token: ${forbidden}`);
 }
 
-assert(!js.includes('.functions.invoke("global-ai"'), 'Phase 3 shell must not invoke Global AI answers yet');
-assert(!js.includes(".functions.invoke('global-ai'"), 'Phase 3 shell must not invoke Global AI answers yet');
+assert(js.includes('.functions.invoke("global-ai"'), 'Integrated conversation shell must invoke the governed Global AI function');
+assert(js.includes('data.academic_state_changed !== false'), 'Integrated conversation shell must reject authoritative AI state changes');
+assert(js.includes('REQUEST_TIMEOUT_MS'), 'Integrated conversation shell timeout boundary missing');
 assert(
   (js.match(/document\.body\.appendChild\(host\)/g) || []).length === 1,
   'Global AI shell should mount one root only'
