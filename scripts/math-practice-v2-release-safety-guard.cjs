@@ -14,6 +14,9 @@ const files={
   postRollback:path.join(ROOT,'supabase','preflight','math_practice_v2_post_rollback_audit.sql'),
   schemaCompat:path.join(ROOT,'supabase','preflight','math_practice_v2_schema_compatibility.sql'),
   feedback:path.join(ROOT,'supabase','migrations','20261007006700_math_practice_v2_deterministic_feedback_v5.sql'),
+  selector:path.join(ROOT,'supabase','migrations','20261007006000_math_practice_v2_selector_v5.sql'),
+  topicDrill:path.join(ROOT,'supabase','migrations','20261007005000_math_practice_v2_topic_drill_pool_gate_v1.sql'),
+  mistakes:path.join(ROOT,'supabase','migrations','20261007006500_math_practice_v2_current_mistakes_v5.sql'),
   localReset:path.join(ROOT,'security','practice-v2-local-reset.js'),
   app:path.join(ROOT,'app.js'),
 };
@@ -33,6 +36,9 @@ const postCleanup=fs.readFileSync(files.postCleanup,'utf8');
 const postRollback=fs.readFileSync(files.postRollback,'utf8');
 const schemaCompat=fs.readFileSync(files.schemaCompat,'utf8');
 const feedback=fs.readFileSync(files.feedback,'utf8');
+const selector=fs.readFileSync(files.selector,'utf8');
+const topicDrill=fs.readFileSync(files.topicDrill,'utf8');
+const mistakes=fs.readFileSync(files.mistakes,'utf8');
 const localReset=fs.readFileSync(files.localReset,'utf8');
 const app=fs.readFileSync(files.app,'utf8');
 
@@ -196,6 +202,19 @@ if(!app.includes('const tourStore = loadMyTourRecs()')){
   fail('Tour recommendation fallback must remain separate from Practice reset');
 }
 
+for(const [name,source] of [
+  ['selector',selector],
+  ['topicDrill',topicDrill],
+  ['mistakes',mistakes],
+]){
+  if(!source.includes('not v_is_math and m.question_id is null')){
+    fail(`${name} permits Mathematics v5 to fall back to legacy Practice rows during cutover`);
+  }
+}
+if(!selector.includes('practice_v2_cutover_pending')){
+  fail('main Mathematics Practice selector is missing explicit cutover-pending gate');
+}
+
 for(const token of [
   'iclub_math_practice_v2_local_reset_20261007_v1',
   'practice_history_v2:mathematics:tour_',
@@ -230,6 +249,7 @@ console.log(JSON.stringify({
   tourRoadmapsAndCertificatesPreserved:true,
   mathematicsLocalHistoryNamespace:'practice_history_v3',
   mathematicsLocalReset:'one-time-before-app-boot',
+  mathematicsCutoverLegacyFallback:'blocked',
   preflightReadOnly:true,
   postPublishAuditReadOnly:true,
   postCleanupAuditReadOnly:true,

@@ -17623,7 +17623,13 @@ async function startPracticeNew() {
     rows = await dbWriteWithRetry(() => api.questions(Number(safeStart?.session_id)), { tries: 3, baseDelayMs: 350 });
   } catch (error) {
     const code = practiceSafeErrorText(error);
-    if (code.includes('practice_no_open_questions')) {
+    if (code.includes('practice_v2_cutover_pending')) {
+      showToast(tr3(
+        'Практика обновляется. Попробуйте ещё раз через минуту.',
+        'Amaliyot yangilanmoqda. Bir daqiqadan keyin yana urinib ko‘ring.',
+        'Practice is being updated. Please try again in a minute.'
+      ));
+    } else if (code.includes('practice_no_open_questions')) {
       showToast(t('practice_stage_all_closed') || 'Все вопросы этого этапа уже закрыты.');
     } else if (code.includes('practice_pool_locked') || code.includes('practice_pool_not_published')) {
       showToast(t('practice_tour_locked') || 'Эта практика пока закрыта.');

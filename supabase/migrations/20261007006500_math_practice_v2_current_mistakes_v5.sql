@@ -49,6 +49,7 @@ as $function$
 declare
   v_uid uuid := auth.uid();
   v_subject_id bigint;
+  v_is_math boolean := false;
   v_topic text := nullif(trim(coalesce(p_topic,'')),'');
   v_subtopic text := nullif(trim(coalesce(p_subtopic,'')),'');
   v_limit integer := least(10,greatest(1,coalesce(p_limit,10)));
@@ -57,7 +58,8 @@ begin
     raise exception 'not_authenticated' using errcode='28000';
   end if;
 
-  select s.id into v_subject_id
+  select s.id,(s.subject_key='mathematics')
+  into v_subject_id,v_is_math
   from public.subjects s
   where s.subject_key=trim(coalesce(p_subject_key,''))
     and s.is_active is true
@@ -117,7 +119,7 @@ begin
         and ppq.is_active is true
     )
     and (
-      m.question_id is null
+      (not v_is_math and m.question_id is null)
       or (m.lifecycle_state='published' and m.is_runtime_allowed is true)
     )
     and not public.iclub_practice_drill_question_protected_v4(q.id)
@@ -177,7 +179,7 @@ begin
           and ppq.is_active is true
       )
       and (
-        m.question_id is null
+        (not v_is_math and m.question_id is null)
         or (m.lifecycle_state='published' and m.is_runtime_allowed is true)
       )
       and not public.iclub_practice_drill_question_protected_v4(q.id)
@@ -205,6 +207,7 @@ as $function$
 declare
   v_uid uuid := auth.uid();
   v_subject_id bigint;
+  v_is_math boolean := false;
   v_s public.practice_drill_sessions_v4%rowtype;
   v_qids bigint[];
   v_total integer;
@@ -240,7 +243,8 @@ begin
     );
   end if;
 
-  select s.id into v_subject_id
+  select s.id,(s.subject_key='mathematics')
+  into v_subject_id,v_is_math
   from public.subjects s
   where s.subject_key=trim(p_subject_key)
     and s.is_active is true
@@ -288,7 +292,7 @@ begin
         and ppq.is_active is true
     )
     and (
-      m.question_id is null
+      (not v_is_math and m.question_id is null)
       or (m.lifecycle_state='published' and m.is_runtime_allowed is true)
     )
     and not public.iclub_practice_drill_question_protected_v4(q.id)

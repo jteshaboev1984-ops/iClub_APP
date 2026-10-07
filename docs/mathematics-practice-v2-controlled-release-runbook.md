@@ -104,6 +104,8 @@ Deploy the frontend/runtime with:
 
 The old Mathematics local Practice history or paused legacy session therefore cannot reappear after the database reset. The cleanup marks itself complete once, so new v2 Practice progress created afterward is preserved.
 
+During this short pre-publish window, Mathematics v5 selectors/readers fail closed against legacy questions: Mathematics cannot create a new old-bank Practice session after the one-time browser reset. Other subjects keep their legacy-compatible Practice behavior. The learner sees a short “Practice is being updated” message if they try to start Mathematics at that exact moment.
+
 Do not publish the new bank yet.
 
 ## Phase D — mandatory READ-ONLY preflight
