@@ -43,10 +43,11 @@ jobs:
           node --check i18n.js
           node --check security/legacy-assessment-safe-api.js
           node --check scripts/practice-content-language-preservation.cjs
-          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1' index.html
+          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1-mathv2topic1' index.html
           grep -q 'app.js?v=support4-p0legacysaveoff1' index.html
           grep -q 'start_practice_session_auto_safe_v4' security/legacy-assessment-safe-api.js
           grep -q 'get_practice_session_resume_safe_v4' security/legacy-assessment-safe-api.js
+          grep -q 'start_practice_topic_drill_safe_v5' security/legacy-assessment-safe-api.js
           grep -q 'finalize_practice_session_safe_v4' security/legacy-assessment-safe-api.js
           grep -q 'get_tour_preflight_questions_safe_v4' security/legacy-assessment-safe-api.js
           grep -q 'start_tour_attempt_safe_v4' security/legacy-assessment-safe-api.js
