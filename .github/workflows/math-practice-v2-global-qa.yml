@@ -7,6 +7,11 @@ on:
     paths:
       - 'content/math/practice_v2/**'
       - 'scripts/math-practice-v2-*.cjs'
+      - 'security/practice-v2-input-normalization.js'
+      - 'security/legacy-assessment-safe-api.js'
+      - 'supabase/migrations/*math_practice_v2*.sql'
+      - 'supabase/tests/math_practice_v2_*.sql'
+      - 'index.html'
       - '.github/workflows/math-practice-v2-global-qa.yml'
   workflow_dispatch:
 
@@ -32,7 +37,12 @@ jobs:
       - name: Run evaluator normalization regression
         run: node scripts/math-practice-v2-evaluator-regression.cjs
 
-      - name: Check Practice input normalizer syntax and wiring
+      - name: Check Practice runtime safety wiring
         run: |
           node --check security/practice-v2-input-normalization.js
+          node --check security/legacy-assessment-safe-api.js
           grep -q 'security/practice-v2-input-normalization.js?v=mathv2minus1' index.html
+          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1-mathv2topic1' index.html
+          grep -q 'start_practice_topic_drill_safe_v5' security/legacy-assessment-safe-api.js
+          ! grep -q 'submit_practice_attempt' security/legacy-assessment-safe-api.js
+          ! grep -q 'submit_practice_answer_safe' security/legacy-assessment-safe-api.js
