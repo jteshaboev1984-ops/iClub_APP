@@ -11,6 +11,7 @@ on:
       - 'security/legacy-assessment-safe-api.js'
       - 'supabase/migrations/*math_practice_v2*.sql'
       - 'supabase/tests/math_practice_v2_*.sql'
+      - 'supabase/preflight/math_practice_v2_release_preflight.sql'
       - 'index.html'
       - 'app.js'
       - '.github/workflows/math-practice-v2-global-qa.yml'
@@ -46,6 +47,12 @@ jobs:
           grep -q "staged_question_count_expected_495" /tmp/math-practice-v2-stage.sql
           grep -q "staged_practice_v2_questions_must_not_be_tour_questions" /tmp/math-practice-v2-stage.sql
           grep -q "staging_must_not_publish_runtime_content" /tmp/math-practice-v2-stage.sql
+
+
+      - name: Run release safety guard
+        run: |
+          node --check scripts/math-practice-v2-release-safety-guard.cjs
+          node scripts/math-practice-v2-release-safety-guard.cjs
 
 
       - name: Check Practice runtime safety wiring
