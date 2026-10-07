@@ -50,7 +50,7 @@
 
   const practiceDrill = Object.freeze({
     async startTopic({ subjectKey, topic, subtopic = null, clientSessionId = null }) {
-      return rpc("start_practice_topic_drill_safe_v4", {
+      return rpc("start_practice_topic_drill_safe_v5", {
         p_subject_key: String(subjectKey || ""),
         p_topic: String(topic || ""),
         p_subtopic: subtopic == null || String(subtopic).trim() === "" ? null : String(subtopic),
