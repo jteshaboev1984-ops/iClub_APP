@@ -18777,7 +18777,10 @@ async function renderMyRecs() {
     }));
 
   // PRACTICE fallback
-  if (!practiceRows.length) {
+  // Mathematics v2 is a clean Practice reset. Old local Practice recommendations
+  // must never reappear after the server-side Practice recommendation reset.
+  // Tour recommendations use a separate store and are untouched.
+  if (!practiceRows.length && String(subjectKey).trim().toLowerCase() !== "mathematics") {
     const store = loadMyRecs();
     const local = store?.bySubject?.[subjectKey] || [];
     practiceRows = local.map(x => ({
