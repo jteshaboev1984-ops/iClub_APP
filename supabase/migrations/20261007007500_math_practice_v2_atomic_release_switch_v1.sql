@@ -642,6 +642,9 @@ begin
 
   v_before:=private.practice_v2_tour_invariant_snapshot_v1(v_audit.subject_id);
 
+  -- First close the v2 bank. The v5 frontend interprets published-but-runtime-disabled
+  -- v2 metadata as the narrow rollback signal and can use the legacy bank only after
+  -- the legacy memberships below are restored.
   update public.practice_pool_questions
   set is_active=false
   where id=any(v_audit.new_membership_ids);
@@ -656,11 +659,53 @@ begin
       updated_at=now()
   where release_version=p_release_version;
 
+  -- Practice is disposable by owner decision. Remove any v2 Practice state created
+  -- after publish so a rollback never leaves resumable new-bank sessions/history.
+  delete from public.practice_sessions_v4
+  where subject_id=v_audit.subject_id;
+
+  delete from public.practice_drill_sessions_v4
+  where subject_id=v_audit.subject_id;
+
+  delete from public.practice_review_events_v1 r
+  using public.practice_attempts pa
+  where pa.id=r.attempt_id
+    and pa.subject_id=v_audit.subject_id;
+
+  delete from public.learning_roadmaps lr
+  where lr.subject_id=v_audit.subject_id
+    and lr.source_type in ('practice_attempt','practice_ai_diagnosis');
+
+  delete from public.user_answer_diagnosis d
+  where d.subject_id=v_audit.subject_id
+    and (
+      d.practice_answer_id is not null
+      or lower(coalesce(d.attempt_type,'')) like 'practice%'
+    );
+
+  delete from private.exam_prep_legacy_evidence_references e
+  where e.legacy_source='practice_answers'
+    and (
+      e.question_id=any(v_audit.new_question_ids)
+      or e.legacy_attempt_id in (
+        select pa.id
+        from public.practice_attempts pa
+        where pa.subject_id=v_audit.subject_id
+      )
+    );
+
+  delete from public.recommendations r
+  where r.subject_id=v_audit.subject_id
+    and r.source_type='practice';
+
+  delete from public.practice_attempts
+  where subject_id=v_audit.subject_id;
+
   update public.practice_pool_questions
   set is_active=true
   where id=any(v_audit.old_active_membership_ids);
 
-  -- Rollback restores the old bank only. Old Practice progress intentionally stays reset.
+  -- Rollback restores the old bank only. All Practice progress intentionally stays reset.
   execute 'grant execute on function public.start_practice_session_auto_safe_v4(bigint,text) to authenticated';
   execute 'grant execute on function public.submit_practice_session_answer_safe_v4(bigint,bigint,text,integer,integer) to authenticated';
   execute 'grant execute on function public.finalize_practice_session_safe_v4(bigint,integer) to authenticated';
@@ -715,6 +760,7 @@ begin
     'restored_memberships',v_audit.old_active_membership_count,
     'new_memberships_disabled',v_audit.new_membership_count,
     'practice_progress_restored',false,
+    'new_v2_progress_reset',true,
     'tour_invariant_unchanged',true,
     'audit_id',v_audit.id,
     'idempotent',false

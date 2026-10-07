@@ -235,7 +235,7 @@ Gate: identical deterministic academic result with AI ON and OFF.
 - publish the 495-question bank atomically;
 - run post-publish learner smoke QA;
 - only after smoke QA, physically clean legacy Practice-only question rows while retaining Tour-linked/protected rows;
-- monitor evaluator/feedback anomalies; rollback is available before legacy-question cleanup and does not restore deleted Practice progress.
+- monitor evaluator/feedback anomalies; rollback is available before legacy-question cleanup, clears any post-publish v2 Practice state, restores the old bank for the still-deployed v5 frontend through the narrow rollback signal, and does not restore deleted Practice progress.
 
 ## Recurring alignment checkpoint
 

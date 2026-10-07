@@ -231,6 +231,7 @@ Rollback:
 - disables the new v2 bank;
 - restores the archived old Practice memberships;
 - restores the safe v4 Practice entrypoints;
+- deletes any new Mathematics Practice sessions/progress/recommendations created after the v2 publish, because Practice progress is disposable for this release;
 - leaves the deployed v5 frontend usable: v5 Mathematics permits legacy-question fallback only when this release has already reached `published` lifecycle but its v2 runtime metadata has been disabled by rollback;
 - does not restore deleted legacy Practice progress;
 - does not touch Tours.

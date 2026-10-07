@@ -74,6 +74,22 @@ begin
   end if;
 
   select count(*)::integer into v_count
+  from public.practice_sessions_v4 s
+  where s.subject_id=v_audit.subject_id;
+
+  if v_count<>0 then
+    raise exception 'rollback_audit_practice_sessions_should_remain_reset_%',v_count;
+  end if;
+
+  select count(*)::integer into v_count
+  from public.practice_drill_sessions_v4 s
+  where s.subject_id=v_audit.subject_id;
+
+  if v_count<>0 then
+    raise exception 'rollback_audit_practice_drills_should_remain_reset_%',v_count;
+  end if;
+
+  select count(*)::integer into v_count
   from public.practice_attempts pa
   where pa.subject_id=v_audit.subject_id;
 

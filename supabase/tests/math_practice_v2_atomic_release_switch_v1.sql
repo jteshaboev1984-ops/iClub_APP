@@ -85,7 +85,11 @@ begin
      or position('old_active_membership_ids' in v_def)=0
      or position('new_membership_ids' in v_def)=0
      or position('set is_runtime_allowed=false' in lower(v_def))=0
-     or position('where release_version=p_release_version' in lower(v_def))=0 then
+     or position('where release_version=p_release_version' in lower(v_def))=0
+     or position('delete from public.practice_sessions_v4' in lower(v_def))=0
+     or position('delete from public.practice_drill_sessions_v4' in lower(v_def))=0
+     or position('delete from public.practice_attempts' in lower(v_def))=0
+     or position('new_v2_progress_reset' in v_def)=0 then
     raise exception 'practice_v2_rollback_missing_reset-aware_bank_restore_gate';
   end if;
 
