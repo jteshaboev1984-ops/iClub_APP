@@ -1,6 +1,7 @@
 -- READ-ONLY post-publish audit for Mathematics P1 Practice v2
 -- Run immediately after private.publish_math_practice_v2_release_v1(...).
--- No learner/Tour/Practice data is modified.
+-- Confirms the intentional Mathematics Practice reset and the new active bank.
+-- This audit is read-only; Tour data must remain identical.
 
 begin;
 set transaction read only;
@@ -141,7 +142,55 @@ begin
     raise exception 'post_publish_practice_v2_tour_overlap_%',v_count;
   end if;
 
-  -- Unsafe/bypass learner entrypoints must be closed after cutover.
+  -- Owner-approved reset: no legacy Mathematics Practice progress/runtime rows remain.
+  select count(*)::integer into v_count
+  from public.practice_attempts
+  where subject_id=v_subject_id;
+
+  if v_count<>0 then
+    raise exception 'post_publish_practice_attempts_not_reset_%',v_count;
+  end if;
+
+  select count(*)::integer into v_count
+  from public.practice_sessions_v4
+  where subject_id=v_subject_id;
+
+  if v_count<>0 then
+    raise exception 'post_publish_practice_sessions_not_reset_%',v_count;
+  end if;
+
+  select count(*)::integer into v_count
+  from public.practice_drill_sessions_v4
+  where subject_id=v_subject_id;
+
+  if v_count<>0 then
+    raise exception 'post_publish_practice_drills_not_reset_%',v_count;
+  end if;
+
+  select count(*)::integer into v_count
+  from public.user_answer_diagnosis d
+  where d.subject_id=v_subject_id
+    and (
+      d.practice_answer_id is not null
+      or lower(coalesce(d.attempt_type,'')) like 'practice%'
+    );
+
+  if v_count<>0 then
+    raise exception 'post_publish_practice_diagnoses_not_reset_%',v_count;
+  end if;
+
+  select count(*)::integer into v_count
+  from private.exam_prep_legacy_evidence_references e
+  join public.practice_pool_questions ppq
+    on ppq.question_id=e.question_id
+   and ppq.id=any(v_audit.old_active_membership_ids)
+  where e.legacy_source='practice_answers';
+
+  if v_count<>0 then
+    raise exception 'post_publish_legacy_practice_evidence_not_reset_%',v_count;
+  end if;
+
+  -- Unsafe/bypass and superseded v4 Practice entrypoints must be closed after cutover.
   if has_function_privilege(
        'authenticated',
        'public.submit_practice_attempt(bigint,integer,numeric,integer,jsonb)',
@@ -170,6 +219,31 @@ begin
      or has_function_privilege(
        'authenticated',
        'public.start_practice_mistakes_drill_safe_v4(text,bigint[],text)',
+       'execute'
+     )
+     or has_function_privilege(
+       'authenticated',
+       'public.get_practice_session_resume_safe_v4(bigint)',
+       'execute'
+     )
+     or has_function_privilege(
+       'authenticated',
+       'public.submit_practice_session_answer_safe_v4(bigint,bigint,text,integer,integer)',
+       'execute'
+     )
+     or has_function_privilege(
+       'authenticated',
+       'public.finalize_practice_session_safe_v4(bigint,integer)',
+       'execute'
+     )
+     or has_function_privilege(
+       'authenticated',
+       'public.get_practice_drill_resume_safe_v4(bigint)',
+       'execute'
+     )
+     or has_function_privilege(
+       'authenticated',
+       'public.submit_practice_drill_answer_safe_v4(bigint,bigint,text,integer,integer)',
        'execute'
      ) then
     raise exception 'post_publish_superseded_oracle_or_selector_rpc_still_exposed';
