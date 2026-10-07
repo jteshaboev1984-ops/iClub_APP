@@ -115,14 +115,14 @@
     },
 
     async finalize({ sessionId, totalTime = 0 }) {
-      return rpc("finalize_practice_session_safe_v4", {
+      return rpc("finalize_practice_session_safe_v5", {
         p_session_id: requirePositiveInt(sessionId, "session_id"),
         p_total_time: Math.max(0, Math.floor(Number(totalTime) || 0))
       });
     },
 
     async review(attemptId) {
-      return rpc("get_practice_review_full_safe_v4", {
+      return rpc("get_practice_review_full_safe_v5", {
         p_attempt_id: requirePositiveInt(attemptId, "attempt_id")
       });
     },
