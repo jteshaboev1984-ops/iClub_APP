@@ -140,7 +140,7 @@ const tourDetailState = {
     stack: ["my-recs", "my-rec-detail"],
     lastTourAttemptId: 812,
     lastTourCertificateId: 913,
-    myRecCurrent: { source_type: "tour", topic: "Functions", tourNo: 2 },
+    myRecCurrent: { topic: "Functions", tourNo: 2 },
     selectedPracticeTourNoBySubject: { mathematics: 2 }
   }
 };
@@ -150,7 +150,7 @@ const tourDetailStorage = makeStorage({
 });
 run(tourDetailStorage);
 const protectedState = JSON.parse(tourDetailStorage.getItem("iclub_state_v1"));
-assert(protectedState.courses.myRecCurrent?.source_type === "tour", "Tour recommendation detail was cleared");
+assert(protectedState.courses.myRecCurrent?.tourNo === 2, "legacy Tour recommendation detail was cleared");
 assert(JSON.stringify(protectedState.courses.stack) === JSON.stringify(["my-recs", "my-rec-detail"]), "Tour recommendation navigation changed");
 assert(JSON.stringify(protectedState.tourContext) === JSON.stringify(tourContext), "Tour context changed in Tour recommendation case");
 assert(tourDetailStorage.getItem("iclub_my_tour_recs_v1") === JSON.stringify(tourLocalRecs), "Tour recommendation store changed in Tour detail case");
@@ -172,5 +172,6 @@ console.log(JSON.stringify({
   otherSubjectPracticePreserved: true,
   tourRuntimePreserved: true,
   tourRecommendationsPreserved: true,
+  legacyTourRecommendationDetailPreserved: true,
   oneTimeIdempotency: true
 }, null, 2));

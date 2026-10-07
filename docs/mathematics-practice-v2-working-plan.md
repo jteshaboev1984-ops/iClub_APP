@@ -2,7 +2,7 @@
 
 Status: ACTIVE  
 Branch: `work/mathematics-practice-v2-refresh-20261006`  
-Baseline main SHA: `823ef7df6dabf08c1a5e616ffbdd33379d8cf14d`  
+Baseline main SHA for draft PR integration: `dca38af3a9bcc5c84a0ecb0696a893741db6a7a0`  
 Owner decision: preserve Tour results/history as the protected user-data boundary; Mathematics Practice may be rebuilt and its progress may be reset as part of the announced update.
 
 
@@ -23,7 +23,7 @@ Owner decision: preserve Tour results/history as the protected user-data boundar
 - Reset-aware atomic publish prepared. In one transaction it fingerprints Tours, deletes legacy Mathematics Practice progress/runtime rows, disables the 490 old memberships, publishes 495 new memberships, and proves the Tour fingerprint is unchanged. It contains no Tour DML.
 - READ-ONLY schema compatibility preflight, release preflight, post-publish/reset audit, post-cleanup audit and post-rollback audit are prepared. The live schema compatibility preflight was executed against production READ ONLY and passed.
 - Controlled release runbook revised to the simple reset model: Tour results stay intact; Mathematics Practice starts fresh on the new bank.
-- Latest Mathematics Practice v2 Global QA run after release-safety and UI fallback checks: PASS (run 51). Staging manifest hash: `da7ae9cc9987df4d4655e880157c03611a842abba6663d4c3366932293144383`; 495 questions; 201 diagnostic catalog entries; 868 diagnostic mappings.
+- Pre-final draft-PR integration checkpoint: all 15 GitHub Actions workflows were GREEN before the final rollback-compatibility refinement. Current deterministic staging manifest hash is `089ba3bf968188f21ac85a24baf81406416152e593a1ca26cab01f9d44fe84bf`; 495 questions; 201 diagnostic catalog entries; 868 diagnostic mappings.
 - Production/Supabase writes from this Practice v2 work: NONE. All migrations/content remain branch-only.
 - Block 4 implementation package is prepared. Current branch QA is run against current `main` through the draft integration PR; no separate Supabase branch is required.
 - Next macro gate: finish integration QA against current `main`, recheck production READ-ONLY, then run the controlled production sequence: additive migrations → invisible staging → read-only preflight → reset/publish → smoke QA → safe legacy-question cleanup.

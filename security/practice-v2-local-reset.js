@@ -94,8 +94,11 @@
 
         const activeSubjectIsMath = norm(courses.subjectKey) === SUBJECT_KEY;
         if (activeSubjectIsMath) {
-          const currentRecIsTour = norm(courses?.myRecCurrent?.source_type) === "tour";
-          const stalePracticeRec = !!courses?.myRecCurrent && !currentRecIsTour;
+          const currentRec = courses?.myRecCurrent || null;
+          const currentRecIsTour =
+            norm(currentRec?.source_type) === "tour" ||
+            Number(currentRec?.tourNo || currentRec?.tour_no || 0) > 0;
+          const stalePracticeRec = !!currentRec && !currentRecIsTour;
 
           for (const key of [
             "practiceContext",
