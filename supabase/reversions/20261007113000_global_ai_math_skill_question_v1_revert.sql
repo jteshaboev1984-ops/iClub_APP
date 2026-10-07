@@ -5,6 +5,8 @@ begin;
 set local lock_timeout='3s';
 set local statement_timeout='90s';
 
+drop function if exists public.get_exam_prep_ai_skill_theory_context_service_v1(uuid,text,text,text);
+
 update private.exam_prep_ai_policy
 set allowed_interactions=array_remove(allowed_interactions,'skill_question'),
     policy_version='exam_prep_ai_policy_v1_2_followup',
