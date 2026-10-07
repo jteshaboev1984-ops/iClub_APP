@@ -13,6 +13,7 @@ do $practice_v2_preflight$
 declare
   v_subject_id bigint;
   v_count bigint;
+  v_distinct_count bigint;
   v_overlap bigint;
   v_expected jsonb := '{"1":68,"2":80,"3":68,"4":77,"5":66,"6":70,"7":66}'::jsonb;
   v_tour_no integer;
@@ -29,14 +30,16 @@ begin
     raise exception 'preflight_math_subject_missing';
   end if;
 
-  select count(*) into v_count
+  select count(*),count(distinct p.tour_no)
+  into v_count,v_distinct_count
   from public.practice_pools p
   where p.subject_id=v_subject_id
     and p.is_active is true
     and p.tour_no between 1 and 7;
 
-  if v_count<>7 then
-    raise exception 'preflight_expected_7_active_math_pools_found_%',v_count;
+  if v_count<>7 or v_distinct_count<>7 then
+    raise exception 'preflight_expected_exactly_one_active_math_pool_per_practice_found_%_rows_%_tour_nos',
+      v_count,v_distinct_count;
   end if;
 
   -- Existing learner-facing bank must still be the known 490-membership baseline.
@@ -201,7 +204,15 @@ begin
     raise exception 'preflight_new_bank_reuses_current_active_question_ids_%',v_count;
   end if;
 
-  -- Diagnostic catalog must remain runtime-disabled until the same atomic cutover.
+  -- Diagnostic catalog and mappings must be complete and remain runtime-disabled.
+  select count(*) into v_count
+  from private.practice_v2_diagnostic_catalog d
+  where d.release_version='math_p1_practice_v2_2026_10_07';
+
+  if v_count<>201 then
+    raise exception 'preflight_diagnostic_catalog_expected_201_found_%',v_count;
+  end if;
+
   select count(*) into v_count
   from private.practice_v2_diagnostic_catalog d
   where d.release_version='math_p1_practice_v2_2026_10_07'
@@ -212,6 +223,25 @@ begin
 
   if v_count<>0 then
     raise exception 'preflight_diagnostic_catalog_not_safely_staged_count_%',v_count;
+  end if;
+
+  select count(*) into v_count
+  from public.question_answer_diagnostics d
+  join private.practice_v2_question_meta m on m.question_id=d.question_id
+  where m.release_version='math_p1_practice_v2_2026_10_07';
+
+  if v_count<>868 then
+    raise exception 'preflight_diagnostic_mappings_expected_868_found_%',v_count;
+  end if;
+
+  select count(*) into v_count
+  from public.question_answer_diagnostics d
+  join private.practice_v2_question_meta m on m.question_id=d.question_id
+  where m.release_version='math_p1_practice_v2_2026_10_07'
+    and d.quality_status<>'draft';
+
+  if v_count<>0 then
+    raise exception 'preflight_diagnostic_mappings_not_safely_staged_count_%',v_count;
   end if;
 
   -- Protected Tour snapshot function must be available and non-empty.
