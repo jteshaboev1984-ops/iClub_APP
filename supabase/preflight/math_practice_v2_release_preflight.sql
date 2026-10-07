@@ -306,6 +306,8 @@ select
   (select count(*) from public.practice_answers a join public.practice_attempts pa on pa.id=a.attempt_id join math m on m.subject_id=pa.subject_id) as practice_answers_to_reset,
   (select count(*) from public.practice_sessions_v4 s join math m on m.subject_id=s.subject_id) as practice_sessions_to_reset,
   (select count(*) from public.practice_drill_sessions_v4 s join math m on m.subject_id=s.subject_id) as practice_drills_to_reset,
+  (select count(*) from public.recommendations r join math m on m.subject_id=r.subject_id where r.source_type='practice') as practice_recommendations_to_reset,
+  (select count(*) from public.recommendations r join math m on m.subject_id=r.subject_id where r.source_type='tour') as tour_recommendations_preserved,
   (select count(*) from public.tour_questions tq where tq.question_id in (select question_id from oldq)) as legacy_questions_with_tour_links;
 
 rollback;
