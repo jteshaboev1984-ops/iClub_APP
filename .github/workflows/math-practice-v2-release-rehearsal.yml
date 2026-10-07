@@ -23,6 +23,86 @@ permissions:
   contents: read
 
 jobs:
+  runtime-rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap disposable Practice runtime contract
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_runtime_rehearsal_fixture.sql
+
+      - name: Apply real Practice v2 runtime migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in \
+            supabase/migrations/20261007002000_math_practice_v2_unicode_minus_normalization_v1.sql \
+            supabase/migrations/20261007003000_math_practice_v2_close_legacy_answer_oracles_v1.sql \
+            supabase/migrations/20261007004000_math_practice_v2_metadata_foundation_v1.sql \
+            supabase/migrations/20261007005000_math_practice_v2_topic_drill_pool_gate_v1.sql \
+            supabase/migrations/20261007006000_math_practice_v2_selector_v5.sql \
+            supabase/migrations/20261007006500_math_practice_v2_current_mistakes_v5.sql \
+            supabase/migrations/20261007006700_math_practice_v2_deterministic_feedback_v5.sql
+          do
+            echo "=== Applying $f ==="
+            psql -v ON_ERROR_STOP=1 -f "$f"
+          done
+
+      - name: Run Practice v2 runtime definition regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in \
+            supabase/tests/math_practice_v2_unicode_minus_normalization_v1.sql \
+            supabase/tests/math_practice_v2_legacy_rpc_exposure_v1.sql \
+            supabase/tests/math_practice_v2_topic_drill_pool_gate_v1.sql \
+            supabase/tests/math_practice_v2_selector_v5.sql \
+            supabase/tests/math_practice_v2_current_mistakes_v5.sql \
+            supabase/tests/math_practice_v2_deterministic_feedback_v5.sql
+          do
+            echo "=== Testing $f ==="
+            psql -v ON_ERROR_STOP=1 -f "$f"
+          done
+
+      - name: Execute Practice v2 runtime behavior rehearsal
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_runtime_rehearsal_matrix.sql | tee math-practice-v2-runtime-rehearsal.log
+          grep -q 'MATHEMATICS_PRACTICE_V2_RUNTIME_REHEARSAL_GREEN' math-practice-v2-runtime-rehearsal.log
+
+      - name: Upload runtime rehearsal diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: math-practice-v2-runtime-rehearsal
+          path: math-practice-v2-runtime-rehearsal.log
+          if-no-files-found: warn
+          retention-days: 3
+
   release-rehearsal:
     runs-on: ubuntu-latest
     timeout-minutes: 12
