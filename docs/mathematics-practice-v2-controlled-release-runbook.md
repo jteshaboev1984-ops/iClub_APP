@@ -160,6 +160,12 @@ Required result:
 - unsafe/superseded learner entrypoints are not executable;
 - required v5 learner entrypoints are executable.
 
+Also run:
+
+`supabase/preflight/math_practice_v2_inflight_compatibility_audit.sql`
+
+It must confirm that already-started v4 Practice sessions/drills can still resume, submit and finalize after cutover. Only the superseded v4 start/select entrypoints are retired.
+
 Then run a controlled learner smoke path:
 - open each Practice 1–7;
 - confirm the displayed total matches 68/80/68/77/66/70/66;
