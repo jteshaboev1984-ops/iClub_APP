@@ -55,8 +55,12 @@ assert(app.includes('iClubCommercialAccessUI?.guardLegacyToggle?.(s.key)'),
   'legacy subject toggle is not guarded');
 assert(app.includes('iClubCommercialAccessUI?.guardStudy?.(subjectKey)'),
   'subject hub stale/deep-link guard missing');
-assert(app.includes('iClubCommercialAccessUI?.guardCompetitive?.(state.courses.subjectKey)'),
-  'Tours Competitive guard missing');
+assert(app.includes('iClubCommercialAccessUI?.checkCompetitive?.(state.courses.subjectKey)'),
+  'Tours Competitive access check missing');
+assert(app.includes('!isSchoolUser(profile)'),
+  'canary Competitive preview must not bypass the existing school-user rule');
+assert(app.includes('Canary plan selection replaces only the old "competitive mode" check.'),
+  'Tours boundary rationale missing from host integration');
 
 for (const forbidden of ['localStorage','sessionStorage','.from("user_subjects")',".from('user_subjects')"]) {
   assert(!bridge.includes(forbidden),
