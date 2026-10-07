@@ -1,0 +1,199 @@
+name: Global AI Math Generation Adapter v1
+
+on:
+  pull_request:
+    branches:
+      - feat/global-ai-canary-readiness-v1
+      - main
+    paths:
+      - 'supabase/migrations/20261007113000_global_ai_math_skill_question_v1.sql'
+      - 'supabase/reversions/20261007113000_global_ai_math_skill_question_v1_revert.sql'
+      - 'supabase/tests/global_ai_math_generation_adapter_v1_matrix.sql'
+      - 'supabase/functions/exam-prep-ai/**'
+      - 'supabase/functions/global-ai/**'
+      - '.github/scripts/global_ai_math_generation_adapter_v1_contract.js'
+      - '.github/workflows/global-ai-math-generation-adapter-v1.yml'
+  push:
+    branches:
+      - feat/global-ai-math-generation-adapter-v1
+      - main
+    paths:
+      - 'supabase/migrations/20261007113000_global_ai_math_skill_question_v1.sql'
+      - 'supabase/reversions/20261007113000_global_ai_math_skill_question_v1_revert.sql'
+      - 'supabase/tests/global_ai_math_generation_adapter_v1_matrix.sql'
+      - 'supabase/functions/exam-prep-ai/**'
+      - 'supabase/functions/global-ai/**'
+      - '.github/scripts/global_ai_math_generation_adapter_v1_contract.js'
+      - '.github/workflows/global-ai-math-generation-adapter-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  math-generation-adapter-safety:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostics
+        run: printf 'Global AI governed Math generation adapter v1\n' > math-generation-adapter.log
+
+      - name: Bootstrap isolated legacy and Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a math-generation-adapter.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a math-generation-adapter.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql 2>&1 | tee -a math-generation-adapter.log
+
+      - name: Apply complete current Exam Prep migration stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
+          test "${#files[@]}" -ge 1
+
+          apply_one() {
+            local f="$1"
+            local b
+            b="$(basename "$f")"
+
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>math-generation-adapter.log 2>&1
+            fi
+
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >>math-generation-adapter.log 2>&1
+            fi
+
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('math-adapter-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated Math adapter dependency') on conflict(cohort_key) do nothing" >>math-generation-adapter.log 2>&1
+            fi
+
+            echo "=== Applying $f ===" | tee -a math-generation-adapter.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>math-generation-adapter.log 2>&1
+          }
+
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  for rb in "${recent[@]}"; do
+                    apply_one "supabase/migrations/$rb"
+                  done
+                fi
+                continue
+                ;;
+            esac
+            apply_one "$f"
+          done
+
+      - name: Apply dormant commercial Global AI stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in             supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql             supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql             supabase/migrations/20261006124000_iclub_global_ai_ui_bootstrap_v1.sql             supabase/migrations/20261006133000_iclub_global_ai_conversation_ui_v1.sql             supabase/migrations/20261006143000_iclub_plans_profile_ui_v1.sql             supabase/migrations/20261006153000_iclub_subscription_access_lifecycle_v1.sql             supabase/migrations/20261006153100_iclub_grandfather_subject_access_v1.sql             supabase/migrations/20261006164000_iclub_subject_selection_shadow_ui_v1.sql             supabase/migrations/20261007100000_iclub_canary_subject_access_enforcement_v1.sql
+          do
+            psql -v ON_ERROR_STOP=1 -f "$f" 2>&1 | tee -a math-generation-adapter.log
+          done
+
+      - name: Static production-preservation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          migration='supabase/migrations/20261007113000_global_ai_math_skill_question_v1.sql'
+          ! grep -Eiq '\b(update|delete[[:space:]]+from|truncate)[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
+          ! grep -Eiq '\binsert[[:space:]]+into[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|certificates|recommendations|ratings_cache)\b' "$migration"
+          grep -q "'skill_question'" "$migration"
+          grep -q 'from public,anon,authenticated' "$migration"
+
+      - name: Apply Math skill-question adapter contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261007113000_global_ai_math_skill_question_v1.sql 2>&1 | tee -a math-generation-adapter.log
+
+      - name: Run Math adapter database matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c global_ai.math_adapter_isolated=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/global_ai_math_generation_adapter_v1_matrix.sql 2>&1 | tee -a math-generation-adapter.log
+
+      - name: Validate static Math adapter contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/global_ai_math_generation_adapter_v1_contract.js
+          node .github/scripts/global_ai_math_generation_adapter_v1_contract.js 2>&1 | tee -a math-generation-adapter.log
+          node --check .github/scripts/p2_74_ai_shadow_safety_regression.js
+          node .github/scripts/p2_74_ai_shadow_safety_regression.js 2>&1 | tee -a math-generation-adapter.log
+
+      - name: Type-check both Edge Functions
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Deno check Exam Prep provider
+        run: deno check supabase/functions/exam-prep-ai/index.ts
+
+      - name: Deno check Global AI gateway
+        run: deno check supabase/functions/global-ai/index.ts
+
+      - name: Prove adapter rollback restores pre-adapter contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/reversions/20261007113000_global_ai_math_skill_question_v1_revert.sql 2>&1 | tee -a math-generation-adapter.log
+          test "$(psql -Atqc "select 'skill_question'=any(allowed_interactions) from private.exam_prep_ai_policy where id=1")" = 'f'
+          test "$(psql -Atqc "select to_regprocedure('public.get_exam_prep_ai_skill_theory_context_service_v1(uuid,text,text,text)') is null")" = 't'
+          grep -q 'generation_adapter_not_promoted' <(git show HEAD^:supabase/functions/global-ai/index.ts || true) || true
+
+      - name: Mark Math generation adapter GREEN
+        run: |
+          echo 'GLOBAL AI GOVERNED MATH GENERATION ADAPTER V1 GREEN' | tee -a math-generation-adapter.log
+          echo 'PRODUCTION ACTIVATION REMAINS OFF' | tee -a math-generation-adapter.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: global-ai-math-generation-adapter-v1
+          path: math-generation-adapter.log
+          if-no-files-found: error
+          retention-days: 7
