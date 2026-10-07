@@ -87,10 +87,14 @@ for(const bad of [/\binsert\s+into\b/i,/\bupdate\s+public\./i,/\bdelete\s+from\b
   if(bad.test(preflight)) fail(`read-only preflight contains DML-like token: ${bad}`);
 }
 for(const token of [
+  'preflight_expected_exactly_one_active_math_pool_per_practice',
   'preflight_active_legacy_membership_drift_expected_490',
   'preflight_staged_meta_expected_495',
   'preflight_staged_practice_questions_linked_to_tours',
   'preflight_question_qa_not_passed_count_',
+  'preflight_diagnostic_catalog_expected_201',
+  'preflight_diagnostic_mappings_expected_868',
+  'preflight_diagnostic_mappings_not_safely_staged',
   'membership_order_not_contiguous',
   'practice_v2_tour_invariant_snapshot_v1',
 ]){
