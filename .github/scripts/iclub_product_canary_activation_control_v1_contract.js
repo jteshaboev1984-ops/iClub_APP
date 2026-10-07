@@ -106,7 +106,7 @@ for (const phrase of [
   'Do not use Vercel',
   'Free / Plus / Pro',
   'subject_limits_mode = shadow',
-  'production activation is a separate explicit step'
+  'Production activation is a separate explicit step'
 ]) {
   assert(runbook.includes(phrase), 'runbook missing release law: ' + phrase);
 }
