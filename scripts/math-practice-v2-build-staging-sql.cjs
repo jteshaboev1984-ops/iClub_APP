@@ -228,6 +228,13 @@ for (const [dirName, skills] of MODULES) {
 
 questions.sort((a,b) => a.global_order-b.global_order);
 
+const practiceOrderCounters = new Map();
+for (const q of questions) {
+  const next = (practiceOrderCounters.get(q.practice_no) || 0) + 1;
+  practiceOrderCounters.set(q.practice_no, next);
+  q.practice_order = next;
+}
+
 if (questions.length !== 495) throw new Error(`Expected 495 questions, got ${questions.length}`);
 if (new Set(questions.map((q) => q.content_key)).size !== 495) throw new Error('Duplicate content keys');
 for (let i=1;i<=495;i++) {
@@ -412,7 +419,7 @@ begin
     );
 
     insert into public.practice_pool_questions(pool_id,question_id,order_no,is_active)
-    values(v_pool_id,v_qid,(v_item->>'global_order')::integer,false);
+    values(v_pool_id,v_qid,(v_item->>'practice_order')::integer,false);
 
     for v_map in
       select value from jsonb_array_elements(coalesce(v_item->'diagnostics','[]'::jsonb))
@@ -473,6 +480,21 @@ begin
     raise exception 'inactive_membership_count_expected_495_found_%',v_count;
   end if;
 
+  -- Membership order must restart at 1 inside every Practice.
+  if exists(
+    select 1
+    from public.practice_pools p
+    join public.practice_pool_questions ppq on ppq.pool_id=p.id
+    join private.practice_v2_question_meta m on m.question_id=ppq.question_id
+    where m.release_version='${RELEASE_VERSION}'
+    group by p.id,m.practice_no
+    having min(ppq.order_no)<>1
+       or max(ppq.order_no)<>count(*)::integer
+       or count(distinct ppq.order_no)<>count(*)
+  ) then
+    raise exception 'staged_membership_order_not_contiguous_per_practice';
+  end if;
+
   select count(*)::integer into v_count
   from public.question_answer_diagnostics d
   join private.practice_v2_question_meta m on m.question_id=d.question_id
@@ -524,6 +546,7 @@ const summary = {
   catalogs:catalogRows.length,
   diagnosticMappings,
   memberships:questions.length,
+  practiceOrders:Object.fromEntries([...practiceOrderCounters.entries()].sort((a,b)=>a[0]-b[0])),
   mcq:questions.filter((q)=>q.qtype==='mcq').length,
   input:questions.filter((q)=>q.qtype==='input').length,
   generatedSqlBytes:Buffer.byteLength(generateSql(),'utf8'),
