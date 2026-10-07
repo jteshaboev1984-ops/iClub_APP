@@ -28,3 +28,11 @@ jobs:
 
       - name: Run global Practice v2 QA
         run: node scripts/math-practice-v2-global-qa.cjs
+
+      - name: Run evaluator normalization regression
+        run: node scripts/math-practice-v2-evaluator-regression.cjs
+
+      - name: Check Practice input normalizer syntax and wiring
+        run: |
+          node --check security/practice-v2-input-normalization.js
+          grep -q 'security/practice-v2-input-normalization.js?v=mathv2minus1' index.html
