@@ -37,7 +37,7 @@ begin
       'book_ref','time_limit_sec','is_active','quality_status'
     );
 
-  if v_count<>22 then
+  if v_count<>23 then
     raise exception 'practice_v2_questions_column_contract_drift_%',v_count;
   end if;
 
