@@ -147,6 +147,8 @@ checkReadOnly('post-cleanup audit',postCleanup,[
 checkReadOnly('post-rollback audit',postRollback,[
   'rollback_audit_release_not_rolled_back',
   'rollback_audit_tour_invariant_not_proven',
+  'rollback_audit_practice_progress_should_remain_reset_',
+  'rollback_audit_practice_recommendations_should_remain_reset_',
   'rollback_audit_old_memberships_expected_',
   'rollback_audit_new_memberships_still_active_',
   'rollback_audit_v2_history_rows_expected_495',
