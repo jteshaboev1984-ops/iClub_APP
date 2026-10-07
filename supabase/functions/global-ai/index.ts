@@ -270,6 +270,51 @@ async function finalizeUsage(requestId: string, outcome: "completed" | "released
   }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
 }
 
+async function callMathSkillQuestionAdapter(params: {
+  requestId: string;
+  authorization: string;
+  locale: string;
+  componentCode: string;
+  skillCode: string;
+  userText: string;
+}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 14000);
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/exam-prep-ai`, {
+      method: "POST",
+      headers: {
+        apikey: ANON_KEY,
+        Authorization: params.authorization,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        request_id: params.requestId,
+        component_code: params.componentCode,
+        interaction_type: "skill_question",
+        locale: params.locale,
+        skill_code: params.skillCode,
+        user_text: params.userText,
+      }),
+      signal: controller.signal,
+    });
+
+    const raw = await res.text();
+    let data: any = null;
+    try {
+      data = raw ? JSON.parse(raw) : null;
+    } catch {
+      data = null;
+    }
+
+    if (!res.ok && !data) throw new Error(`math_adapter_http_${res.status}`);
+    return data;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function safeTutorText(card: any, variant: string) {
   const text = String(card?.[variant] || "").trim();
   if (!text) return "";
@@ -455,9 +500,180 @@ Deno.serve(async (req) => {
   }
 
   if (routeClass === "generated") {
-    // Phase 2 deliberately exposes no provider route. The global gateway must
-    // prove auth/entitlement/assessment/readiness boundaries before live
-    // generation is connected. Existing domain AI remains unchanged.
+    if (adapterCode !== "math_exam_prep_v1"
+        || subjectKey !== "mathematics"
+        || scopeCode !== "exam_prep"
+        || !["P1", "P5"].includes(componentCode)
+        || !/^P[15]-[A-Z0-9]+-[0-9]{2}$/.test(skillCode)) {
+      await recordAudit({
+        requestId,
+        userId: user.id,
+        subjectKey,
+        scopeCode,
+        interaction,
+        routeClass,
+        mode: "no_source",
+        reason: "generated_adapter_unavailable",
+        adapterCode,
+        policyVersion,
+        latencyMs: performance.now() - started,
+      });
+      return response(200, {
+        ok: false,
+        mode: "no_source",
+        reason: "generated_adapter_unavailable",
+        message: learnerMessage(locale, "no_source"),
+        academic_state_changed: false,
+      });
+    }
+
+    let reservation: any;
+    try {
+      reservation = await reserveUsage(requestId, user.id, usagePolicyCode, "generated");
+    } catch {
+      reservation = null;
+    }
+
+    if (reservation?.allowed !== true) {
+      const reason = String(reservation?.reason || "usage_unavailable");
+      await recordAudit({
+        requestId,
+        userId: user.id,
+        subjectKey,
+        scopeCode,
+        interaction,
+        routeClass,
+        mode: "unavailable",
+        reason,
+        adapterCode,
+        policyVersion,
+        latencyMs: performance.now() - started,
+      });
+      return response(200, {
+        ok: false,
+        mode: "unavailable",
+        reason,
+        message: learnerMessage(locale, reason === "usage_exhausted" ? "usage_exhausted" : "unavailable"),
+        reset_at: reservation?.reset_at || null,
+        academic_state_changed: false,
+      });
+    }
+
+    let domain: any = null;
+    try {
+      domain = await callMathSkillQuestionAdapter({
+        requestId,
+        authorization,
+        locale,
+        componentCode,
+        skillCode,
+        userText,
+      });
+    } catch {
+      try {
+        await finalizeUsage(requestId, "released", "domain_adapter_error");
+      } catch {}
+      await recordAudit({
+        requestId,
+        userId: user.id,
+        subjectKey,
+        scopeCode,
+        interaction,
+        routeClass,
+        mode: "failed",
+        reason: "domain_adapter_error",
+        adapterCode,
+        policyVersion,
+        latencyMs: performance.now() - started,
+      });
+      return response(200, {
+        ok: false,
+        mode: "unavailable",
+        reason: "domain_adapter_error",
+        message: learnerMessage(locale, "unavailable"),
+        academic_state_changed: false,
+      });
+    }
+
+    const domainReason = String(domain?.reason || domain?.error || "domain_generation_unavailable");
+    const domainMessage = String(domain?.message || "").trim();
+    const validGenerated = domain?.generated === true
+      && domain?.academic_state_changed === false
+      && domainMessage.length > 0;
+
+    if (!validGenerated) {
+      try {
+        await finalizeUsage(requestId, "released", domainReason.slice(0, 120));
+      } catch {}
+
+      const mode = domain?.mode === "no_source"
+        ? "no_source"
+        : domain?.mode === "blocked"
+          ? "blocked"
+          : "unavailable";
+
+      await recordAudit({
+        requestId,
+        userId: user.id,
+        subjectKey,
+        scopeCode,
+        interaction,
+        routeClass,
+        mode,
+        reason: domainReason,
+        adapterCode,
+        policyVersion,
+        latencyMs: performance.now() - started,
+        outputHash: domainMessage ? await sha256(domainMessage) : null,
+      });
+
+      return response(domainReason === "active_assessment" ? 423 : 200, {
+        ok: false,
+        mode,
+        reason: domainReason,
+        message: domainMessage || learnerMessage(
+          locale,
+          domainReason === "approved_source_missing" || domainReason === "deterministic_mapping_missing"
+            ? "no_source"
+            : domainReason === "active_assessment"
+              ? "active_assessment"
+              : "unavailable"
+        ),
+        academic_state_changed: false,
+      });
+    }
+
+    let finalizedUsage: any = null;
+    try {
+      finalizedUsage = await finalizeUsage(requestId, "completed");
+      if (finalizedUsage?.ok !== true) throw new Error("usage_finalize_failed");
+    } catch {
+      try {
+        await finalizeUsage(requestId, "released", "delivery_not_finalized");
+      } catch {}
+      await recordAudit({
+        requestId,
+        userId: user.id,
+        subjectKey,
+        scopeCode,
+        interaction,
+        routeClass,
+        mode: "failed",
+        reason: "usage_finalize_failed",
+        adapterCode,
+        policyVersion,
+        latencyMs: performance.now() - started,
+      });
+      return response(503, {
+        ok: false,
+        mode: "unavailable",
+        reason: "usage_finalize_failed",
+        message: learnerMessage(locale, "unavailable"),
+        academic_state_changed: false,
+      });
+    }
+
+    const outputHash = await sha256(domainMessage);
     await recordAudit({
       requestId,
       userId: user.id,
@@ -465,17 +681,20 @@ Deno.serve(async (req) => {
       scopeCode,
       interaction,
       routeClass,
-      mode: "unavailable",
-      reason: "generation_adapter_not_promoted",
+      mode: "generated",
+      reason: null,
       adapterCode,
       policyVersion,
       latencyMs: performance.now() - started,
+      outputHash,
     });
+
     return response(200, {
-      ok: false,
-      mode: "unavailable",
-      reason: "generation_adapter_not_promoted",
-      message: learnerMessage(locale, "generation_disabled"),
+      ok: true,
+      mode: "answer",
+      message: domainMessage,
+      usage_exhausted: finalizedUsage?.exhausted === true,
+      reset_at: finalizedUsage?.reset_at || null,
       academic_state_changed: false,
     });
   }
