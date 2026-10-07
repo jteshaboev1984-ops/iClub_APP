@@ -201,3 +201,348 @@
   text-align: center;
 }
 #exam-prep-host-root .ep-live-plan-item[hidden] { display: none !important; }
+
+/* PREMIUM PROGRESS CLARITY v1
+   Presentation only: verified server state remains authoritative. */
+.iclub-visual-v3 #exam-prep-host-root .ep-pux-panel,
+.iclub-visual-v3 #exam-prep-host-root .ep-pux-tracker-hero,
+.iclub-visual-v3 #exam-prep-host-root .ep-pux-guide {
+  border-color: var(--v3-border, var(--ep-pux-border));
+  border-radius: var(--v3-radius-lg, 16px);
+  background: var(--v3-card, var(--ep-pux-card));
+  box-shadow: var(--v3-premium-shadow, 0 10px 30px rgba(15,23,42,.055));
+}
+
+#exam-prep-host-root .ep-pux-progress-hero,
+#exam-prep-host-root .ep-pux-tracker-hero {
+  display: grid;
+  gap: 11px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--v3-premium-blue-line, rgba(36,87,214,.16));
+  border-radius: 14px;
+  background: linear-gradient(180deg,
+    var(--v3-premium-blue-fill, rgba(238,243,255,.74)) 0%,
+    var(--v3-card, #fff) 100%);
+}
+
+#exam-prep-host-root .ep-pux-tracker-hero {
+  margin: 12px 0 10px;
+}
+
+#exam-prep-host-root .ep-pux-progress-hero-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+#exam-prep-host-root .ep-pux-progress-hero-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+#exam-prep-host-root .ep-pux-progress-kicker,
+#exam-prep-host-root .ep-pux-change-kicker {
+  color: var(--v3-primary, var(--ep-pux-accent));
+  font-size: 11px;
+  font-weight: 760;
+  line-height: 1.25;
+  letter-spacing: .02em;
+}
+
+#exam-prep-host-root .ep-pux-progress-count {
+  color: var(--v3-text, inherit);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -.025em;
+  font-variant-numeric: tabular-nums;
+}
+
+#exam-prep-host-root .ep-pux-progress-caption {
+  color: var(--v3-muted, var(--ep-pux-muted));
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+#exam-prep-host-root .ep-pux-progress-bar {
+  position: relative;
+  width: 100%;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface, #eef2f7);
+}
+
+#exam-prep-host-root .ep-pux-progress-fill {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  border-radius: inherit;
+  background: var(--v3-primary, var(--ep-pux-accent));
+  transition: width 220ms ease;
+}
+
+#exam-prep-host-root .ep-pux-tracker-decorated .ep-views-summary .ep-views-stat:first-child {
+  display: none;
+}
+
+#exam-prep-host-root .ep-pux-guide {
+  margin: 0 0 12px;
+  overflow: hidden;
+  border: 1px solid var(--v3-border, var(--ep-pux-border));
+}
+
+#exam-prep-host-root .ep-pux-guide-toggle {
+  width: 100%;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) 22px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--v3-text, inherit);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+#exam-prep-host-root .ep-pux-guide-toggle:focus-visible,
+#exam-prep-host-root .ep-pux-view-progress:focus-visible {
+  outline: 3px solid rgba(36,87,214,.18);
+  outline-offset: 2px;
+}
+
+#exam-prep-host-root .ep-pux-guide-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #DDE6FB;
+  border-radius: 11px;
+  background: var(--v3-primary-soft, rgba(36,87,214,.08));
+  color: var(--v3-primary, var(--ep-pux-accent));
+  font-size: 14px;
+  font-weight: 850;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+#exam-prep-host-root .ep-pux-guide-labels {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+#exam-prep-host-root .ep-pux-guide-labels strong {
+  min-width: 0;
+  color: var(--v3-text, inherit);
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.3;
+}
+
+#exam-prep-host-root .ep-pux-guide-labels small {
+  min-width: 0;
+  color: var(--v3-muted, var(--ep-pux-muted));
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+#exam-prep-host-root .ep-pux-guide-arrow {
+  justify-self: end;
+  color: #94A3B8;
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+
+#exam-prep-host-root .ep-pux-guide.is-open .ep-pux-guide-arrow {
+  transform: rotate(90deg);
+}
+
+#exam-prep-host-root .ep-pux-guide-body {
+  display: grid;
+  gap: 12px;
+  padding: 0 12px 13px 56px;
+}
+
+#exam-prep-host-root .ep-pux-guide-body[hidden] {
+  display: none;
+}
+
+#exam-prep-host-root .ep-pux-status-ladder {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 6px;
+}
+
+#exam-prep-host-root .ep-pux-status-step {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 9px 5px;
+  border: 1px solid var(--v3-border, var(--ep-pux-border));
+  border-radius: 10px;
+  background: var(--surface, #f8fafc);
+  text-align: center;
+}
+
+#exam-prep-host-root .ep-pux-status-step strong {
+  min-width: 0;
+  color: var(--v3-text, inherit);
+  font-size: 10px;
+  font-weight: 720;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+#exam-prep-host-root .ep-pux-status-dot {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #CBD5E1;
+  border-radius: 999px;
+  background: transparent;
+}
+
+#exam-prep-host-root .ep-pux-status-developing .ep-pux-status-dot {
+  border-color: var(--v3-primary, var(--ep-pux-accent));
+  background: color-mix(in srgb, var(--v3-primary, #2457d6) 35%, transparent);
+}
+
+#exam-prep-host-root .ep-pux-status-confirmed .ep-pux-status-dot,
+#exam-prep-host-root .ep-pux-status-secure .ep-pux-status-dot {
+  border-color: var(--v3-primary, var(--ep-pux-accent));
+  background: var(--v3-primary, var(--ep-pux-accent));
+}
+
+#exam-prep-host-root .ep-pux-status-secure .ep-pux-status-dot {
+  box-shadow: 0 0 0 3px var(--v3-primary-soft, rgba(36,87,214,.08));
+}
+
+#exam-prep-host-root .ep-pux-attention-note {
+  display: grid;
+  gap: 3px;
+  padding: 10px 11px;
+  border-inline-start: 3px solid var(--warning, #b45309);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--warning, #b45309) 7%, var(--v3-card, #fff));
+}
+
+#exam-prep-host-root .ep-pux-attention-note strong {
+  font-size: 12px;
+  font-weight: 780;
+}
+
+#exam-prep-host-root .ep-pux-attention-note span {
+  color: var(--v3-muted, var(--ep-pux-muted));
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+#exam-prep-host-root .ep-pux-change-card {
+  gap: 10px;
+  padding: 15px;
+  border-top-width: 1px;
+  background: linear-gradient(180deg,
+    var(--v3-premium-blue-fill, rgba(238,243,255,.7)) 0%,
+    var(--v3-card, #fff) 38%);
+}
+
+#exam-prep-host-root .ep-pux-skill-change {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--v3-border, var(--ep-pux-border));
+  border-radius: 12px;
+  background: var(--v3-card, #fff);
+}
+
+#exam-prep-host-root .ep-pux-skill-change-title {
+  color: var(--v3-text, inherit);
+  font-size: 14px;
+  font-weight: 780;
+  line-height: 1.35;
+}
+
+#exam-prep-host-root .ep-pux-skill-change-states {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+#exam-prep-host-root .ep-pux-state-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 9px;
+  border: 1px solid var(--v3-border, var(--ep-pux-border));
+  border-radius: 999px;
+  background: var(--surface, #f8fafc);
+  color: var(--v3-text, inherit);
+  font-size: 11px;
+  font-weight: 730;
+  line-height: 1.25;
+}
+
+#exam-prep-host-root .ep-pux-state-confirmed,
+#exam-prep-host-root .ep-pux-state-secure {
+  border-color: var(--v3-premium-blue-line, rgba(36,87,214,.16));
+  background: var(--v3-primary-soft, rgba(36,87,214,.08));
+  color: var(--v3-primary, var(--ep-pux-accent));
+}
+
+#exam-prep-host-root .ep-pux-state-attention {
+  border-color: color-mix(in srgb, var(--warning, #b45309) 28%, transparent);
+  background: color-mix(in srgb, var(--warning, #b45309) 7%, transparent);
+  color: var(--warning, #b45309);
+}
+
+#exam-prep-host-root .ep-pux-change-arrow {
+  color: #94A3B8;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+#exam-prep-host-root .ep-pux-confirmed-change {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: 7px 12px;
+  padding: 11px 12px;
+  border: 1px solid var(--v3-border, var(--ep-pux-border));
+  border-radius: 12px;
+  background: var(--v3-card, #fff);
+}
+
+#exam-prep-host-root .ep-pux-confirmed-change .ep-pux-progress-bar {
+  grid-column: 1 / -1;
+}
+
+#exam-prep-host-root .ep-pux-view-progress {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 1px;
+}
+
+@media (max-width: 480px) {
+  #exam-prep-host-root .ep-pux-progress-count {
+    font-size: 22px;
+  }
+  #exam-prep-host-root .ep-pux-guide-body {
+    padding-inline-start: 12px;
+  }
+  #exam-prep-host-root .ep-pux-status-ladder {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+  #exam-prep-host-root .ep-pux-guide-toggle {
+    min-height: 60px;
+  }
+}
+

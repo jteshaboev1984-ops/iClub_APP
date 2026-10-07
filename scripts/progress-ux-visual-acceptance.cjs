@@ -34,14 +34,25 @@ function markup(language, view) {
     <div class="ep-live-plan-item"><div><strong>${c.next} 2</strong></div><button class="ep-live-btn" type="button" data-ep-live-plan-item="2">${c.start}</button></div>
     <div class="ep-live-plan-item"><div><strong>${c.next} 3</strong></div><button class="ep-live-btn" type="button" data-ep-live-plan-item="3">${c.start}</button></div>
     </div></section>`;
-  return `<!doctype html><html lang="${language}"><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body class="iclub-visual-v3"><main id="courses-subject-hub" class="exam-prep-host-open"><div id="exam-prep-host-root" class="exam-prep-host-root" aria-hidden="false">${view==='overview'?dashboard:plan}</div></main></body></html>`;
+  const tracker = `<section class="ep-host-shell ep-views-shell" data-ep-views-screen>
+    <div class="ep-views-top"><div><div class="ep-views-sub">P1 · Cambridge AS Mathematics</div><div class="ep-views-title">${language==='ru'?'Прогресс по программе':language==='uz'?'Dastur bo‘yicha progress':'Syllabus progress'}</div></div></div>
+    <div class="ep-views-summary">
+      <div class="ep-views-stat"><span>${language==='ru'?'Подтверждено':language==='uz'?'Tasdiqlangan':'Confirmed'}</span><strong>7 / 45</strong></div>
+      <div class="ep-views-stat"><span>${language==='ru'?'Покрытие':language==='uz'?'Qamrov':'Coverage'}</span><strong>18%</strong></div>
+      <div class="ep-views-stat"><span>${language==='ru'?'Требуют внимания':language==='uz'?'Diqqat talab qiladi':'Needs attention'}</span><strong>3</strong></div>
+    </div>
+    <button class="ep-views-skill" type="button" data-ep-views-skill="P1-CIR-01"><span><strong>Circular measure</strong><span class="ep-views-skill-meta"> · 2</span></span><span class="ep-views-badge">${language==='ru'?'Формируется':language==='uz'?'Rivojlanmoqda':'Developing'}</span></button>
+    <button class="ep-views-skill" type="button" data-ep-views-skill="P1-COO-02"><span><strong>Coordinate geometry</strong><span class="ep-views-skill-meta"> · 3</span></span><span class="ep-views-badge">${language==='ru'?'Подтверждено':language==='uz'?'Tasdiqlangan':'Confirmed'}</span></button>
+    </section>`;
+  const body = view==='overview' ? dashboard : view==='plan' ? plan : tracker;
+  return `<!doctype html><html lang="${language}"><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body class="iclub-visual-v3"><main id="courses-subject-hub" class="exam-prep-host-open"><div id="exam-prep-host-root" class="exam-prep-host-root" aria-hidden="false">${body}</div></main></body></html>`;
 }
 (async () => {
   const browser = await chromium.launch({ headless:true });
   try {
     for (const language of Object.keys(COPY)) {
       for (const width of [390,1440]) {
-        for (const view of ['overview','plan']) {
+        for (const view of ['overview','plan','tracker']) {
           const page = await browser.newPage({ viewport:{ width,height:900 },deviceScaleFactor:1 });
           const errors=[];
           page.on('pageerror',error=>errors.push(error.message));
@@ -67,14 +78,22 @@ function markup(language, view) {
             await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-overview').length===2);
             const p1Text=await page.locator('[data-ep-live-component="P1"] .ep-pux-overview').innerText();
             const p5Text=await page.locator('[data-ep-live-component="P5"] .ep-pux-overview').innerText();
-            assert.ok(p1Text.includes('7 / 45'),`${language}: confirmed skills must be explicit`);
-            assert.ok(p1Text.includes('18%'),`${language}: verified coverage must be explicit`);
+            assert.ok(p1Text.includes('7 / 45'),`${language}: confirmed topics must be explicit`);
+            assert.equal(await page.locator('[data-ep-live-component="P1"] .ep-pux-progress-hero').count(),1,`${language}: premium progress hero missing`);
+            assert.equal(await page.locator('[data-ep-live-component="P1"] .ep-pux-progress-bar').count(),1,`${language}: premium progress bar missing`);
             assert.ok(p5Text.includes(COPY[language].empty),`${language}: absent P5 plan cannot be invented`);
             assert.ok(!p5Text.includes('0 из 3')&&!p5Text.includes('0 of 3'),`${language}: no false denominator`);
-          } else {
+          } else if(view==='plan') {
             await page.waitForFunction(()=>document.querySelectorAll('.ep-pux-goal').length===3);
             assert.equal(await page.locator('[data-ep-live-plan-item]').count(),3,'Existing actions must survive');
             assert.ok((await page.locator('.ep-pux-week').innerText()).includes('12')===false,'Goals cannot present global session total as goal completion');
+          } else {
+            await page.waitForSelector('.ep-pux-tracker-hero');
+            await page.waitForSelector('.ep-pux-guide');
+            await page.click('[data-ep-pux-guide-toggle]');
+            await page.waitForFunction(()=>document.querySelector('[data-ep-pux-guide-body]')?.hidden===false);
+            assert.ok((await page.locator('.ep-pux-tracker-hero').innerText()).includes('7 / 45'),`${language}: tracker hero must show confirmed topics`);
+            assert.equal(await page.locator('.ep-pux-status-step').count(),4,`${language}: four progress states must render`);
           }
           assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth),true,`${language} ${width}px ${view}: horizontal overflow`);
           assert.deepEqual(errors,[],`${language} ${width}px ${view}: no browser errors`);
