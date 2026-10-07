@@ -69,6 +69,12 @@ assert(bridge.includes('iclub:subject-selection-changed'),
   'access cache invalidation event missing');
 assert(selector.includes('new CustomEvent("iclub:subject-selection-changed"'),
   'subject selector does not invalidate access cache after save');
+assert(selector.includes('betaTextEnforced'),
+  'subject selector lacks accurate copy for enforced canary preview');
+assert(selector.includes('iclub:commercial-access-ready'),
+  'subject selector does not refresh when access preview bridge becomes ready');
+assert(bridge.includes('new CustomEvent("iclub:commercial-access-ready"'),
+  'commercial access bridge ready event missing');
 
 assert(rollback.includes('drop function if exists public.get_iclub_my_subject_access_v1(text,text)'),
   'rollback function cleanup missing');
