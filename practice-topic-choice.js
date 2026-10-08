@@ -10,21 +10,36 @@
       empty:"Сейчас нет доступных тематических тренировок.",
       filtered:"Темы не найдены", error:"Не удалось загрузить темы. Попробуйте ещё раз.",
       retry:"Повторить", items:"заданий", start:"Начать", note:"Засчитывается отдельно от результата практики тура.",
-      more:"Показать ещё" },
+      more:"Показать ещё", historyTitle:"Практика по темам",
+      historyLast:"Последний результат", historyBest:"Лучший результат", historyAll:"Правильных ответов",
+      historyRecent:"Последние тренировки", historyCount:"тренировок",
+      historyFoot:"Здесь показаны ответы тематических тренировок. Результаты туров учитываются отдельно.",
+      historyUnavailable:"История тематических тренировок сейчас недоступна.",
+      historyRetry:"Повторить" },
     uz: { title:"Mavzuni tanlang", desc:"Tur amaliyotidan alohida bir mavzu bo‘yicha mashq qiling.",
       open:"Mavzuni tanlash", close:"Mavzularni yashirish", search:"Mavzuni qidirish",
       searchPlaceholder:"Mavzuni topish…", loading:"Mavzular yuklanmoqda…",
       empty:"Hozircha mavjud mavzuli mashqlar yo‘q.",
       filtered:"Mavzu topilmadi", error:"Mavzularni yuklab bo‘lmadi. Qayta urinib ko‘ring.",
       retry:"Qayta urinish", items:"savol", start:"Boshlash", note:"Natija tur amaliyotining natijasidan alohida saqlanadi.",
-      more:"Yana ko‘rsatish" },
+      more:"Yana ko‘rsatish", historyTitle:"Mavzular bo‘yicha amaliyot",
+      historyLast:"So‘nggi natija", historyBest:"Eng yaxshi natija", historyAll:"To‘g‘ri javoblar",
+      historyRecent:"So‘nggi mashg‘ulotlar", historyCount:"mashg‘ulot",
+      historyFoot:"Bu yerda mavzuli mashqlar natijalari ko‘rsatiladi. Tur natijalari alohida hisoblanadi.",
+      historyUnavailable:"Mavzuli mashqlar tarixini hozir yuklab bo‘lmadi.",
+      historyRetry:"Qayta urinish" },
     en: { title:"Choose a topic", desc:"Practise a specific topic independently from your Tour practice.",
       open:"Choose topic", close:"Hide topics", search:"Search topics",
       searchPlaceholder:"Find a topic…", loading:"Loading available topics…",
       empty:"No topic practice is currently available.",
       filtered:"No matching topics", error:"Could not load topics. Please try again.",
       retry:"Try again", items:"questions", start:"Start", note:"Topic drills are separate from your Tour practice result.",
-      more:"Show more" }
+      more:"Show more", historyTitle:"Practice by topic",
+      historyLast:"Latest result", historyBest:"Best result", historyAll:"Correct answers",
+      historyRecent:"Recent topic sessions", historyCount:"sessions",
+      historyFoot:"These are results from topic practice. Tour results are tracked separately.",
+      historyUnavailable:"Topic practice history is temporarily unavailable.",
+      historyRetry:"Retry" }
   };
   let mountSerial=0;
 
@@ -65,7 +80,85 @@
     toggle.setAttribute("aria-controls",panel.id);
     header.append(heading,toggle);
     const note=element("p","practice-topic-choice-note",c.note);
-    host.append(header,panel,note);
+    const history=element("section","practice-topic-history");
+    history.hidden=true;
+    host.append(header,panel,note,history);
+
+    function safeResult(row) {
+      if (!row || typeof row!=="object") return null;
+      const correct=Number(row.correct), total=Number(row.total);
+      if (!Number.isInteger(correct)||!Number.isInteger(total)||
+          correct<0||total<1||correct>total) return null;
+      return {topic:String(row.topic||"").slice(0,200),correct,total};
+    }
+
+    function renderHistory(data) {
+      if (!history.isConnected || ownSerial!==mountSerial) return;
+      history.replaceChildren();
+      const sessions=Number(data?.completed_sessions||0);
+      const latest=safeResult(data?.last);
+      const best=safeResult(data?.best);
+      if (!Number.isInteger(sessions)||sessions<1||!latest||!best) {
+        history.hidden=true;
+        return;
+      }
+      const correct=Number(data?.total_correct_answers), answered=Number(data?.total_answered);
+      if (!Number.isInteger(correct)||!Number.isInteger(answered)||
+          correct<0||answered<correct) { history.hidden=true; return; }
+
+      const heading=element("div","practice-topic-history-head");
+      heading.append(element("strong","",c.historyTitle),
+        element("span","practice-topic-history-count",sessions+" "+c.historyCount));
+      const metrics=element("div","practice-topic-history-metrics");
+      for(const [label,value] of [
+        [c.historyLast,latest.correct+" / "+latest.total],
+        [c.historyBest,best.correct+" / "+best.total],
+        [c.historyAll,correct+" / "+answered]
+      ]) {
+        const metric=element("div","practice-topic-history-metric");
+        metric.append(element("span","",label),element("strong","",value));
+        metrics.append(metric);
+      }
+      history.append(heading,metrics);
+      const recent=Array.isArray(data?.recent)?data.recent.slice(0,3):[];
+      if(recent.length) {
+        const list=element("div","practice-topic-history-recent");
+        list.append(element("strong","practice-topic-history-recent-title",c.historyRecent));
+        for (const raw of recent) {
+          const item=safeResult(raw);
+          if(!item) continue;
+          const row=element("div","practice-topic-history-row");
+          row.append(element("span","",item.topic||c.historyTitle),
+            element("strong","",item.correct+" / "+item.total));
+          list.append(row);
+        }
+        history.append(list);
+      }
+      history.append(element("p","practice-topic-history-foot",c.historyFoot));
+      history.hidden=false;
+    }
+
+    async function loadHistory() {
+      if(!history.isConnected || ownSerial!==mountSerial) return;
+      try {
+        if(!window.sb || typeof window.sb.rpc!=="function") throw new Error("offline");
+        const {data,error}=await window.sb.rpc("get_practice_topic_history_safe_v1",
+          {p_subject_key:String(subjectKey)});
+        if(error||data?.ok!==true||data?.subject_key!==String(subjectKey))
+          throw new Error("history_unavailable");
+        renderHistory(data);
+      } catch {
+        if(!history.isConnected || ownSerial!==mountSerial) return;
+        history.replaceChildren();
+        history.append(element("span","practice-topic-history-warning",c.historyUnavailable));
+        const retry=element("button","practice-topic-choice-retry",c.historyRetry);
+        retry.type="button";
+        retry.addEventListener("click",()=>{retry.disabled=true;loadHistory();});
+        history.append(retry);
+        history.hidden=false;
+      }
+    }
+    loadHistory();
 
     let topics=null;
     let loading=false;
