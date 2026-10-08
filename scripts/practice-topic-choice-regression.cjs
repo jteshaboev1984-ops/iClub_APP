@@ -10,17 +10,18 @@ const css=fs.readFileSync(path.join(root,'practice-topic-choice.css'),'utf8');
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const sql=fs.readFileSync(path.join(root,'supabase/migrations/20261008090000_practice_topic_catalog_v1.sql'),'utf8');
-const guard=fs.readFileSync(path.join(root,'supabase/migrations/20261007005000_math_practice_v2_topic_drill_pool_gate_v1.sql'),'utf8');
+const guard=fs.readFileSync(path.join(root,'supabase/migrations/20261008090100_practice_topic_choice_drill_v1.sql'),'utf8');
+const api=fs.readFileSync(path.join(root,'security/legacy-assessment-safe-api.js'),'utf8');
 assert.match(sql,/auth\.uid\(\)/,'Requires authenticated user');
 assert.match(sql,/security definer/i);
 assert.match(sql,/not public\.iclub_practice_drill_question_protected_v4\(q\.id\)/);
 assert.match(sql,/m\.is_runtime_allowed is true/);
-assert.match(sql,/p\.tour_no<=v_current_tour/);
-assert.match(sql,/t\.start_date <= v_today/);
+assert.match(sql,/p\.is_active is true/);
+assert.doesNotMatch(sql,/v_current_tour|v_season_id|t\.start_date/);
 assert.match(sql,/revoke all on function public\.get_practice_available_topics_safe_v1\(text\) from public/);
 assert.match(sql,/grant execute on function public\.get_practice_available_topics_safe_v1\(text\)/);
 assert.doesNotMatch(sql,/\b(?:delete|insert|update|truncate|drop|alter)\s+(?:into\s+|table\s+|from\s+)?(?:public|private)\./i,'Catalog SQL must contain no data mutation');
-for(const clause of ['t.start_date <= v_today','p.tour_no <= v_current_tour',
+for(const clause of ['p.is_active is true','ppq.is_active is true',
   'm.lifecycle_state=\'published\'','m.is_runtime_allowed is true',
   'not public.iclub_practice_drill_question_protected_v4(q.id)'])
   assert(guard.includes(clause),'SQL catalog must mirror v5 drill eligibility: '+clause);
@@ -30,6 +31,9 @@ assert.match(html,/practice-topic-choice\.css\?v=ptopic1/);
 assert.match(app,/iClubPracticeTopicChoice\?\.mount/);
 assert.match(app,/startPracticeByRec\(\{ topic, subtopic: null \}, "practice"\)/);
 assert.match(app,/topicChoiceOrigin: origin === "practice"/);
+assert.match(app,/const launch = chooseTopic \? api\.startTopicChoice : api\.startTopic/);
+assert.match(api,/start_practice_topic_drill_choice_safe_v1/);
+assert.doesNotMatch(guard,/p\.tour_no\s*<=\s*v_current_tour/);
 assert.match(app,/state\.courses\.practiceContext = quiz\?\.topicChoiceOrigin/);
 assert.match(app,/ctx === "topic"/);
 assert.match(app,/practiceTopicSelection/);
