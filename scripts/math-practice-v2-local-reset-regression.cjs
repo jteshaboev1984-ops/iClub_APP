@@ -29,11 +29,25 @@ function makeStorage(initial = {}) {
 }
 
 function run(storage) {
-  vm.runInNewContext(SOURCE, {
+  const context = {
     localStorage: storage,
+    setTimeout,
+    clearTimeout,
     console: { warn() {}, error() {}, log() {} }
-  }, { filename: "practice-v2-local-reset.js" });
+  };
+  vm.runInNewContext(SOURCE, context, { filename: "practice-v2-local-reset.js" });
+  assert(typeof context.iclubMathPracticeV2ResetAfterPublish === "function", "reset hook not exposed");
+  return context.iclubMathPracticeV2ResetAfterPublish;
 }
+
+const allowPublished = {
+  rpc: async (name) => {
+    assert(name === "is_math_practice_v2_published_safe_v1", "unapproved publish gate RPC");
+    return { data: true, error: null };
+  }
+};
+
+(async () => {
 
 const tourContext = {
   tourId: 77,
@@ -102,12 +116,21 @@ const storage = makeStorage({
   "iclub_state_v1": JSON.stringify(state)
 });
 
-run(storage);
+const apply = run(storage);
+const before = JSON.stringify(storage.dump());
+assert(JSON.stringify(storage.dump()) === before, "script cleared before published-bank gate");
+assert(await apply(null) === false, "missing authenticated client should fail closed");
+assert(await apply({ rpc: async () => ({ data: false, error: null }) }) === false, "staged bank should fail closed");
+assert(await apply({ rpc: async () => ({ data: true, error: { message: "offline" } }) }) === false, "offline gate should fail closed");
+assert(await apply({ rpc: async () => { throw new Error("network"); } }) === false, "rejected gate should fail closed");
+assert(JSON.stringify(storage.dump()) === before, "nonpublished/error state changed localStorage");
+assert(storage.getItem(MARKER) === null, "premature reset marker created");
+assert(await apply(allowPublished) === true, "published bank was not cleaned");
 
 let after = storage.dump();
 assert(after[MARKER] === "1", "one-time reset marker missing");
 assert(!after["practice_history_v2:mathematics:tour_1"], "legacy Mathematics history v2 survived");
-assert(!after["practice_history_v3:mathematics:tour_2"], "pre-release Mathematics history v3 survived");
+assert(!!after["practice_history_v3:mathematics:tour_2"], "new-bank Mathematics v3 history was erased");
 assert(!!after["practice_history_v2:economics:tour_1"], "other-subject Practice history was changed");
 assert(!after["iclub_practice_draft_v1"], "legacy Mathematics paused draft survived");
 
@@ -132,7 +155,7 @@ assert(nextState.courses.myRecCurrent === null, "stale Mathematics Practice reco
 
 // Idempotency: new v2 progress created after the marker must never be erased.
 storage.setItem("practice_history_v3:mathematics:tour_1", JSON.stringify({ last: [{ id: "new-v2" }] }));
-run(storage);
+assert(await apply(allowPublished) === false, "already processed device reset twice");
 after = storage.dump();
 assert(!!after["practice_history_v3:mathematics:tour_1"], "one-time reset erased new Mathematics v2 history");
 
@@ -153,7 +176,7 @@ const tourDetailStorage = makeStorage({
   "iclub_state_v1": JSON.stringify(tourDetailState),
   "iclub_my_tour_recs_v1": JSON.stringify(tourLocalRecs)
 });
-run(tourDetailStorage);
+assert(await run(tourDetailStorage)(allowPublished) === true, "Tour context fixture did not run");
 const protectedState = JSON.parse(tourDetailStorage.getItem("iclub_state_v1"));
 assert(protectedState.courses.myRecCurrent?.tourNo === 2, "legacy Tour recommendation detail was cleared");
 assert(JSON.stringify(protectedState.courses.stack) === JSON.stringify(["my-recs", "my-rec-detail"]), "Tour recommendation navigation changed");
@@ -165,11 +188,14 @@ const otherDraft = { status: "paused", subjectKey: "economics", quiz: { subjectK
 const otherStorage = makeStorage({
   "iclub_practice_draft_v1": JSON.stringify(otherDraft)
 });
-run(otherStorage);
+assert(await run(otherStorage)(allowPublished) === true, "other-subject fixture did not run");
 assert(otherStorage.getItem("iclub_practice_draft_v1") === JSON.stringify(otherDraft), "other-subject Practice draft changed");
 
 console.log(JSON.stringify({
   ok: true,
+  cleanupGatedByPublishedBank: true,
+  noResetOnOfflineOrStagedState: true,
+  mathematicsNewV3HistoryPreserved: true,
   mathematicsLegacyHistoryCleared: true,
   mathematicsPausedDraftCleared: true,
   mathematicsPracticeRecommendationFallbackCleared: true,
@@ -181,3 +207,7 @@ console.log(JSON.stringify({
   legacyTourRecommendationDetailPreserved: true,
   oneTimeIdempotency: true
 }, null, 2));
+})().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

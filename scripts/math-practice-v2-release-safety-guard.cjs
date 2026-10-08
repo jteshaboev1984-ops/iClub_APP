@@ -241,7 +241,8 @@ if(!release.includes("'new_v2_progress_reset',true")){
 for(const token of [
   'iclub_math_practice_v2_local_reset_20261007_v1',
   'practice_history_v2:mathematics:tour_',
-  'practice_history_v3:mathematics:tour_',
+  'iclubMathPracticeV2ResetAfterPublish',
+  'is_math_practice_v2_published_safe_v1',
   'iclub_practice_draft_v1',
   'iclub_my_recs_v1',
   'iclub_state_v1',
@@ -250,6 +251,13 @@ for(const token of [
   '"subject-hub"',
 ]){
   if(!localReset.includes(token)) fail(`Mathematics local reset missing ${token}`);
+}
+if(!app.includes('await window.iclubMathPracticeV2ResetAfterPublish?.(window.sb)') ||
+   !app.includes('if (cleared === true) state = loadState()')){
+  fail('Practice v2 cleanup must occur only at authenticated boot after server publication proof');
+}
+if(localReset.includes('"practice_history_v3:mathematics:tour_"')){
+  fail('Practice v2 reset must not erase new-bank Mathematics v3 progress');
 }
 for(const forbidden of [
   'localStorage.clear',
@@ -273,7 +281,7 @@ console.log(JSON.stringify({
   userIdentityTablesPreserved:true,
   otherSubjectsProtectedBySubjectScopedReset:true,
   mathematicsLocalHistoryNamespace:'practice_history_v3',
-  mathematicsLocalReset:'one-time-before-app-boot',
+  mathematicsLocalReset:'only-after-authenticated-published-bank-proof',
   mathematicsCutoverLegacyFallback:'blocked',
   mathematicsRollbackLegacyFallback:'allowed-only-after-published-v2-runtime-disabled',
   preflightReadOnly:true,
