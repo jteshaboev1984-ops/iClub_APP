@@ -62,6 +62,17 @@ if(/localStorage|sessionStorage/.test(js))throw Error('UI module must not touch 
 // Verified aggregate counts do not reveal answer keys or individual answers.
 const privacyScan=js.replace(/total_correct_answers/g,'');
 if(/correct_answer|answer_key|score_update|mastery/i.test(privacyScan))throw Error('UI module must never access protected answers or academic state');
+// Draft-recovery safety: transient API failure must never delete local progress.
+const resumeStart=app.indexOf('if (action === "practice-resume")');
+const resumeEnd=app.indexOf('if (action === "practice-pause")',resumeStart);
+assert(resumeStart>=0&&resumeEnd>resumeStart,'Resume handler must exist');
+const resume=app.slice(resumeStart,resumeEnd);
+const invalid=resume.indexOf('if (!restoredQuiz'),valid=resume.indexOf('state.quizLock = "practice"');
+assert(invalid>=0&&valid>invalid,'Resume failure guard must precede mutation');
+assert.doesNotMatch(resume.slice(invalid,valid),/clearPracticeDraft\\s*\\(/,'Never delete draft if restore failed');
+assert.match(resume.slice(invalid,valid),/showToast\\(tr3\\(/,'Retry notice is trilingual');
+assert(resume.indexOf('saveState()',valid)<resume.indexOf('clearPracticeDraft()',valid),
+  'Persist restored quiz before clearing recovery draft');
 (async()=>{
  const browser=await chromium.launch({headless:true});
  try{
@@ -126,6 +137,33 @@ if(/correct_answer|answer_key|score_update|mastery/i.test(privacyScan))throw Err
    }finally{await page.close();}
   }
  }
+ // A single saved result must appear once (including narrow mobile width).
+ const once=await browser.newPage({viewport:{width:320,height:800}});
+ try {
+  await once.setContent('<!doctype html><html><body><div id="practice-topic-choice"></div></body></html>');
+  await once.addStyleTag({content:css});
+  await once.evaluate(()=>{window.sb={rpc:async(name)=>({
+    data:name==='get_practice_topic_history_safe_v1'
+      ? {ok:true,subject_key:'mathematics',completed_sessions:1,
+         total_correct_answers:7,total_answered:10,
+         last:{topic:'Quadratics',correct:7,total:10},
+         best:{topic:'Quadratics',correct:7,total:10},
+         recent:[{topic:'Quadratics',correct:7,total:10}]}
+      : {ok:true,topics:[]},error:null
+  })};});
+  await once.addScriptTag({content:js});
+  await once.evaluate(()=>window.iClubPracticeTopicChoice.mount({
+    subjectKey:'mathematics',language:'ru',onStart:async()=>{}
+  }));
+  await once.waitForSelector('.practice-topic-history:not([hidden])');
+  assert.equal(await once.locator('.practice-topic-history-metric').count(),1,
+    'A single session must not appear in three metrics');
+  assert.equal(await once.locator('.practice-topic-history-row').count(),0,
+    'A single session must not repeat under Recent');
+  assert((await once.locator('.practice-topic-history').innerText()).includes('7 / 10'));
+  assert.equal(await once.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,
+    '320px view must not overflow');
+ } finally { await once.close(); }
  const page=await browser.newPage();
  try{
   await page.setContent('<!doctype html><html><body><div id="practice-topic-choice"></div></body></html>');

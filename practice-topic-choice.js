@@ -120,17 +120,21 @@
       heading.append(element("strong","",c.historyTitle),
         element("span","practice-topic-history-count",sessionCountLabel(sessions,lang,c)));
       const metrics=element("div","practice-topic-history-metrics");
-      for(const [label,value] of [
-        [c.historyLast,latest.correct+" / "+latest.total],
-        [c.historyBest,best.correct+" / "+best.total],
-        [c.historyAll,correct+" / "+answered]
-      ]) {
+      // With one completed session, latest, best and recent all refer to one attempt.
+      const visibleMetrics=sessions===1
+        ? [[c.historyLast,latest.correct+" / "+latest.total]]
+        : [
+            [c.historyLast,latest.correct+" / "+latest.total],
+            [c.historyBest,best.correct+" / "+best.total],
+            [c.historyAll,correct+" / "+answered]
+          ];
+      for(const [label,value] of visibleMetrics) {
         const metric=element("div","practice-topic-history-metric");
         metric.append(element("span","",label),element("strong","",value));
         metrics.append(metric);
       }
       history.append(heading,metrics);
-      const recent=Array.isArray(data?.recent)?data.recent.slice(0,3):[];
+      const recent=sessions>1&&Array.isArray(data?.recent)?data.recent.slice(0,3):[];
       if(recent.length) {
         const list=element("div","practice-topic-history-recent");
         list.append(element("strong","practice-topic-history-recent-title",c.historyRecent));

@@ -23044,8 +23044,12 @@ if (draft?.quiz?.topicChoiceOrigin !== true) {
 
   const restoredQuiz = await restorePracticeQuizSecrets(draft.quiz);
   if (!restoredQuiz || !Array.isArray(restoredQuiz.questions) || !restoredQuiz.questions.length) {
-    clearPracticeDraft();
-    showToast(t("not_available"));
+    // A failed/unverified restore must not delete the learner's persisted draft.
+    showToast(tr3(
+      "Не удалось восстановить практику. Сохранённая тренировка не удалена — попробуйте ещё раз.",
+      "Amaliyotni tiklab bo‘lmadi. Saqlangan mashg‘ulot o‘chirilmagan — qayta urinib ko‘ring.",
+      "Could not restore Practice. Your saved session is still here — please retry."
+    ));
     return;
   }
 
@@ -23065,11 +23069,12 @@ if (draft?.quiz?.topicChoiceOrigin !== true) {
   state.quiz.pauseStartedAt = null;
   state.quiz.qEndsAtMs = null;
   state.quiz.qEndsAtMono = null;
-  clearPracticeDraft();
+  // Keep persisted recovery until the restored session is saved and rendered.
   saveState();
   replaceCourses("practice-quiz");
   renderPracticeQuiz();
   startPracticeQuestionTimer();
+  clearPracticeDraft();
   return;
 }
 
