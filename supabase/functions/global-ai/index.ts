@@ -831,6 +831,8 @@ Deno.serve(async (req) => {
 
     let usageReservationActive = true;
     let providerLeaseActive = false;
+    let providerRequestStarted = false;
+    let providerActualCostUsd: number | null = null;
 
     const releaseUsage = async (reason:string) => {
       if (!usageReservationActive) return;
@@ -864,8 +866,12 @@ Deno.serve(async (req) => {
       }
       providerLeaseActive = true;
 
+      // Once the HTTP provider request starts, even a network timeout can
+      // have incurred real cost. Never erase that exposure from cost limits.
+      providerRequestStarted = true;
       const provider = await callOpenAIProvider(locale,componentCode,cards,userText);
       const actualCostUsd = estimatedCostUsd(provider.inputTokens,provider.outputTokens);
+      providerActualCostUsd = actualCostUsd;
 
       // Provider spend is real even if the generated text is later rejected.
       const providerAccounting = await finalizeProviderCall(
@@ -939,7 +945,20 @@ Deno.serve(async (req) => {
       });
     } catch (error) {
       if (providerLeaseActive) {
-        try { await finalizeProviderCall(requestId,"released",0); } catch {}
+        try {
+          // A provider call may have completed before a budget-finalization
+          // error or timed out after the model incurred cost. Keep a
+          // conservative cost reservation instead of recording a fake $0.
+          if (providerRequestStarted) {
+            await finalizeProviderCall(
+              requestId,"completed",providerActualCostUsd ?? reservedCostUsd
+            );
+          } else {
+            await finalizeProviderCall(requestId,"released",0);
+          }
+        } catch {
+          // The active lease remains reserved until TTL if storage is down.
+        }
         providerLeaseActive = false;
       }
       await releaseUsage("generation_failed");
