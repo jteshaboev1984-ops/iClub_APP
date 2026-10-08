@@ -51,7 +51,7 @@ jobs:
           node --check scripts/practice-content-language-preservation.cjs
           node scripts/math-practice-v2-local-reset-regression.cjs
           grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1-mathv2feedback1' index.html
-          grep -q 'security/practice-v2-local-reset.js?v=mathv2localreset1' index.html
+          grep -q 'security/practice-v2-local-reset.js?v=mathv2postpublish1' index.html
           grep -q 'app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1-ai2ctx1-mathv2feedback1-mathv2reset3' index.html
           grep -q 'start_practice_session_auto_safe_v5' security/legacy-assessment-safe-api.js
           grep -q 'get_practice_session_resume_safe_v4' security/legacy-assessment-safe-api.js
