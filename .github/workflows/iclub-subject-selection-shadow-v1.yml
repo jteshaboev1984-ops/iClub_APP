@@ -101,6 +101,7 @@ jobs:
         run: |
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006164000_iclub_subject_selection_shadow_ui_v1.sql 2>&1 | tee -a subject-selection.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261008160000_iclub_free_subject_auto_competitive_v2.sql 2>&1 | tee -a subject-selection.log
 
       - name: Prove default subject-selection UI remains dormant
         shell: bash
@@ -127,6 +128,7 @@ jobs:
           node --check .github/scripts/iclub_subject_selection_shadow_ui_v1_contract.js
           node --check scripts/iclub-subject-selection-shadow-browser-regression.cjs
           node .github/scripts/iclub_subject_selection_shadow_ui_v1_contract.js 2>&1 | tee -a subject-selection.log
+          node scripts/iclub-free-subject-pairing-contract.cjs 2>&1 | tee -a subject-selection.log
 
       - name: Install Chromium harness
         run: |
@@ -148,6 +150,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/reversions/20261008160000_iclub_free_subject_auto_competitive_v2_revert.sql 2>&1 | tee -a subject-selection.log
           psql -v ON_ERROR_STOP=1 -f supabase/reversions/20261006164000_iclub_subject_selection_shadow_ui_v1_revert.sql 2>&1 | tee -a subject-selection.log
           test "$(psql -Atqc "select to_regprocedure('public.get_iclub_subject_selection_bootstrap_v1()') is null")" = 't'
           test "$(psql -Atqc "select to_regprocedure('public.set_iclub_my_subject_slot_v1(text,boolean,boolean)') is null")" = 't'
