@@ -34,6 +34,10 @@ BEGIN
 END
 $people$;
 
+-- Synthetic Free school learner must receive automatic Competitive pairing.
+UPDATE public.users SET is_school_student=true
+WHERE id=(SELECT user_id FROM canary_access_people WHERE person_key='free');
+
 DO $canaries$
 DECLARE
   v jsonb;
