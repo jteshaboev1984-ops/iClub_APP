@@ -1,0 +1,550 @@
+{
+  "version": "practice_v2_p3_coordinate_geometry_draft_v0.1",
+  "skill": "P1-COO-01",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q149",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-01",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Which equation is the line through (2,−1) with gradient 3?",
+        "ru": "Какое уравнение задаёт прямую через (2,−1) с градиентом 3?",
+        "uz": "(2,−1) nuqtadan o‘tib, gradienti 3 bo‘lgan chiziq tenglamasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=3x+5",
+            "ru": "y=3x+5",
+            "uz": "y=3x+5"
+          },
+          "diagnostic_code": "COO01_POINT_SLOPE_SUB"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=3x−7",
+            "ru": "y=3x−7",
+            "uz": "y=3x−7"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=−3x+5",
+            "ru": "y=−3x+5",
+            "uz": "y=−3x+5"
+          },
+          "diagnostic_code": "COO01_INTERCEPT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=3x−1",
+            "ru": "y=3x−1",
+            "uz": "y=3x−1"
+          },
+          "diagnostic_code": "COO01_INTERCEPT"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Use y−(−1)=3(x−2). Then y+1=3x−6, so y=3x−7.",
+        "ru": "Используем y−(−1)=3(x−2). Тогда y+1=3x−6, поэтому y=3x−7.",
+        "uz": "y−(−1)=3(x−2) dan foydalanamiz. y+1=3x−6, demak y=3x−7."
+      },
+      "ai_source_skill": "P1-COO-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q150",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-01",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "A line has gradient −2 and passes through (−3,4). Enter its y-intercept.",
+        "ru": "Прямая имеет градиент −2 и проходит через (−3,4). Введите её y-перехват.",
+        "uz": "Chiziq gradienti −2 va u (−3,4) nuqtadan o‘tadi. Uning y-kesishish qiymatini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-2",
+        "accepted_examples": [
+          "-2",
+          "−2",
+          " -2 "
+        ],
+        "rejected_examples": [
+          "2",
+          "-6",
+          "10"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "2",
+          "diagnostic_code": "COO01_INTERCEPT"
+        }
+      ],
+      "explanation": {
+        "en": "Write y=−2x+c. Substituting (−3,4) gives 4=6+c, so c=−2.",
+        "ru": "Запишем y=−2x+c. Подставляя (−3,4), получаем 4=6+c, поэтому c=−2.",
+        "uz": "y=−2x+c deb yozamiz. (−3,4) ni qo‘ysak 4=6+c, demak c=−2."
+      },
+      "ai_source_skill": "P1-COO-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q151",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-01",
+      "secondary_skills": [],
+      "role": "two_point_line",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Which equation is the line through (1,5) and (4,11)?",
+        "ru": "Какое уравнение задаёт прямую через (1,5) и (4,11)?",
+        "uz": "(1,5) va (4,11) nuqtalardan o‘tuvchi chiziq tenglamasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=−2x+7",
+            "ru": "y=−2x+7",
+            "uz": "y=−2x+7"
+          },
+          "diagnostic_code": "COO01_GRADIENT_FROM_POINTS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=3x+2",
+            "ru": "y=3x+2",
+            "uz": "y=3x+2"
+          },
+          "diagnostic_code": "COO01_GRADIENT_FROM_POINTS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=2x+5",
+            "ru": "y=2x+5",
+            "uz": "y=2x+5"
+          },
+          "diagnostic_code": "COO01_INTERCEPT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=2x+3",
+            "ru": "y=2x+3",
+            "uz": "y=2x+3"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "The gradient is (11−5)/(4−1)=2. Using (1,5): 5=2(1)+c, so c=3 and y=2x+3.",
+        "ru": "Градиент равен (11−5)/(4−1)=2. Используя (1,5): 5=2(1)+c, получаем c=3 и y=2x+3.",
+        "uz": "Gradient (11−5)/(4−1)=2. (1,5) ni qo‘ysak 5=2(1)+c, demak c=3 va y=2x+3."
+      },
+      "ai_source_skill": "P1-COO-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q152",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-01",
+      "secondary_skills": [],
+      "role": "two_point_line",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "A line passes through (−2,−5) and (3,10). Enter its gradient.",
+        "ru": "Прямая проходит через (−2,−5) и (3,10). Введите её градиент.",
+        "uz": "Chiziq (−2,−5) va (3,10) nuqtalardan o‘tadi. Uning gradientini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "-3",
+          "5",
+          "15"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-3",
+          "diagnostic_code": "COO01_GRADIENT_FROM_POINTS"
+        }
+      ],
+      "explanation": {
+        "en": "m=[10−(−5)]/[3−(−2)]=15/5=3.",
+        "ru": "m=[10−(−5)]/[3−(−2)]=15/5=3.",
+        "uz": "m=[10−(−5)]/[3−(−2)]=15/5=3."
+      },
+      "ai_source_skill": "P1-COO-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q153",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-01",
+      "secondary_skills": [],
+      "role": "line_form",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "Which equation is the line through (2,3) and (6,1)?",
+        "ru": "Какое уравнение задаёт прямую через (2,3) и (6,1)?",
+        "uz": "(2,3) va (6,1) nuqtalardan o‘tuvchi chiziq tenglamasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x+2y=8",
+            "ru": "x+2y=8",
+            "uz": "x+2y=8"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x−2y=−4",
+            "ru": "x−2y=−4",
+            "uz": "x−2y=−4"
+          },
+          "diagnostic_code": "COO01_GRADIENT_FROM_POINTS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2x+y=7",
+            "ru": "2x+y=7",
+            "uz": "2x+y=7"
+          },
+          "diagnostic_code": "COO01_LINE_FORM"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x+2y=10",
+            "ru": "x+2y=10",
+            "uz": "x+2y=10"
+          },
+          "diagnostic_code": "COO01_INTERCEPT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The gradient is (1−3)/(6−2)=−1/2. Through (2,3): y−3=−(1/2)(x−2). Rearranging gives x+2y=8.",
+        "ru": "Градиент равен (1−3)/(6−2)=−1/2. Через (2,3): y−3=−(1/2)(x−2). После преобразования получаем x+2y=8.",
+        "uz": "Gradient (1−3)/(6−2)=−1/2. (2,3) orqali: y−3=−(1/2)(x−2). Qayta yozsak x+2y=8."
+      },
+      "ai_source_skill": "P1-COO-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q154",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-01",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The line y=4x+c passes through (−2,5). Enter c.",
+        "ru": "Прямая y=4x+c проходит через (−2,5). Введите c.",
+        "uz": "y=4x+c chiziq (−2,5) nuqtadan o‘tadi. c ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "13",
+        "accepted_examples": [
+          "13",
+          " 13 "
+        ],
+        "rejected_examples": [
+          "-13",
+          "3",
+          "-3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Substitute the point: 5=4(−2)+c=−8+c. Therefore c=13.",
+        "ru": "Подставляем точку: 5=4(−2)+c=−8+c. Поэтому c=13.",
+        "uz": "Nuqtani qo‘yamiz: 5=4(−2)+c=−8+c. Demak c=13."
+      },
+      "ai_source_skill": "P1-COO-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q155",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-01",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The line through (k,2) and (5,10) has gradient 2. Enter k.",
+        "ru": "Прямая через (k,2) и (5,10) имеет градиент 2. Введите k.",
+        "uz": "(k,2) va (5,10) nuqtalardan o‘tuvchi chiziq gradienti 2. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "1",
+        "accepted_examples": [
+          "1",
+          " 1 "
+        ],
+        "rejected_examples": [
+          "9",
+          "3",
+          "-1"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Using the two-point gradient, (10−2)/(5−k)=2. So 8=10−2k, hence k=1.",
+        "ru": "По формуле градиента (10−2)/(5−k)=2. Значит 8=10−2k, откуда k=1.",
+        "uz": "Ikki nuqta gradienti bo‘yicha (10−2)/(5−k)=2. Demak 8=10−2k va k=1."
+      },
+      "ai_source_skill": "P1-COO-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q156",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-01",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "A line crosses the y-axis at −4 and passes through (2,0). Which equation is the line?",
+        "ru": "Прямая пересекает ось y при −4 и проходит через (2,0). Каково её уравнение?",
+        "uz": "Chiziq y o‘qini −4 da kesadi va (2,0) nuqtadan o‘tadi. Uning tenglamasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=−2x−4",
+            "ru": "y=−2x−4",
+            "uz": "y=−2x−4"
+          },
+          "diagnostic_code": "COO01_GRADIENT_FROM_POINTS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=2x+4",
+            "ru": "y=2x+4",
+            "uz": "y=2x+4"
+          },
+          "diagnostic_code": "COO01_INTERCEPT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=2x−4",
+            "ru": "y=2x−4",
+            "uz": "y=2x−4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=x−4",
+            "ru": "y=x−4",
+            "uz": "y=x−4"
+          },
+          "diagnostic_code": "COO01_GRADIENT_FROM_POINTS"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "The y-intercept gives the point (0,−4). The gradient to (2,0) is (0+4)/(2−0)=2, so y=2x−4.",
+        "ru": "y-перехват даёт точку (0,−4). Градиент до (2,0) равен (0+4)/(2−0)=2, поэтому y=2x−4.",
+        "uz": "y-kesishish (0,−4) nuqtani beradi. (2,0) gacha gradient (0+4)/(2−0)=2, demak y=2x−4."
+      },
+      "ai_source_skill": "P1-COO-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q157",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-01",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "A line passes through (−1,3) and (2,9). Enter the y-coordinate of the point on this line where x=8.",
+        "ru": "Прямая проходит через (−1,3) и (2,9). Введите y-координату точки этой прямой при x=8.",
+        "uz": "Chiziq (−1,3) va (2,9) nuqtalardan o‘tadi. x=8 bo‘lgandagi y-koordinatani kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "21",
+        "accepted_examples": [
+          "21",
+          " 21 "
+        ],
+        "rejected_examples": [
+          "18",
+          "24",
+          "15"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The gradient is (9−3)/(2−(−1))=2. Using (−1,3), the line is y=2x+5. At x=8, y=21.",
+        "ru": "Градиент равен (9−3)/(2−(−1))=2. Через (−1,3) получаем y=2x+5. При x=8 имеем y=21.",
+        "uz": "Gradient (9−3)/(2−(−1))=2. (−1,3) orqali y=2x+5. x=8 da y=21."
+      },
+      "ai_source_skill": "P1-COO-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q158",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-01",
+      "secondary_skills": [],
+      "role": "parameter_line",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "The line ax+2y=7 passes through (−1,4). Enter a.",
+        "ru": "Прямая ax+2y=7 проходит через (−1,4). Введите a.",
+        "uz": "ax+2y=7 chiziq (−1,4) nuqtadan o‘tadi. a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "1",
+        "accepted_examples": [
+          "1",
+          " 1 "
+        ],
+        "rejected_examples": [
+          "-1",
+          "7",
+          "9"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-1",
+          "diagnostic_code": "COO01_POINT_SLOPE_SUB"
+        }
+      ],
+      "explanation": {
+        "en": "Substitute (−1,4): −a+8=7. Thus −a=−1 and a=1.",
+        "ru": "Подставляем (−1,4): −a+8=7. Тогда −a=−1 и a=1.",
+        "uz": "(−1,4) ni qo‘yamiz: −a+8=7. Demak −a=−1 va a=1."
+      },
+      "ai_source_skill": "P1-COO-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q159",
+      "practice_no": 3,
+      "primary_skill": "P1-COO-01",
+      "secondary_skills": [],
+      "role": "mixed_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
+      "question": {
+        "en": "A line passes through (2,5) and has x-intercept 6. Which equation represents the line?",
+        "ru": "Прямая проходит через (2,5) и пересекает ось x при 6. Какое уравнение задаёт эту прямую?",
+        "uz": "Chiziq (2,5) nuqtadan o‘tadi va x o‘qini 6 da kesadi. Qaysi tenglama shu chiziqni beradi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "5x−4y=30",
+            "ru": "5x−4y=30",
+            "uz": "5x−4y=30"
+          },
+          "diagnostic_code": "COO01_GRADIENT_FROM_POINTS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "4x+5y=33",
+            "ru": "4x+5y=33",
+            "uz": "4x+5y=33"
+          },
+          "diagnostic_code": "COO01_LINE_FORM"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "4x−5y=−17",
+            "ru": "4x−5y=−17",
+            "uz": "4x−5y=−17"
+          },
+          "diagnostic_code": "COO01_LINE_FORM"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "5x+4y=30",
+            "ru": "5x+4y=30",
+            "uz": "5x+4y=30"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "The x-intercept gives the point (6,0). The gradient through (2,5) and (6,0) is −5/4. Using point-slope form gives 5x+4y=30.",
+        "ru": "x-перехват даёт точку (6,0). Градиент через (2,5) и (6,0) равен −5/4. По формуле точки и градиента получаем 5x+4y=30.",
+        "uz": "x-kesishish (6,0) nuqtani beradi. (2,5) va (6,0) orqali gradient −5/4. Nuqta-gradient ko‘rinishidan 5x+4y=30 hosil bo‘ladi."
+      },
+      "ai_source_skill": "P1-COO-01",
+      "status": "draft"
+    }
+  ]
+}

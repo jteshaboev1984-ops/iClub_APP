@@ -5359,8 +5359,13 @@ async function getClosedPracticeQuestionIds(subjectId, uid, questionIds) {
   );
 }
 
+function practiceHistoryStoragePrefix(subjectKey) {
+  const key = String(subjectKey || "").trim().toLowerCase();
+  return key === "mathematics" ? "practice_history_v3" : "practice_history_v2";
+}
+
 function practiceStorageKey(subjectKey, practiceTourNo = 1) {
-  return `practice_history_v2:${subjectKey}:tour_${Number(practiceTourNo || 1)}`;
+  return `${practiceHistoryStoragePrefix(subjectKey)}:${subjectKey}:tour_${Number(practiceTourNo || 1)}`;
 }
 
 function loadPracticeHistory(subjectKey, practiceTourNo = 1) {
@@ -5386,6 +5391,31 @@ function savePracticeHistory(subjectKey, practiceTourNo = 1, data) {
   } catch {}
 }
 
+function filterPracticeHistoryToCurrentQuestions(history, questionIds) {
+  const h = history && typeof history === "object" ? history : { best: null, last: [] };
+  const activeIds = new Set(
+    (Array.isArray(questionIds) ? questionIds : [])
+      .map(Number)
+      .filter(id => Number.isFinite(id) && id > 0)
+  );
+
+  if (!activeIds.size) return { best: null, last: [] };
+
+  const belongsToCurrentBank = (attempt) => {
+    const details = Array.isArray(attempt?.details) ? attempt.details : [];
+    const ids = details
+      .map(d => Number(d?.id || 0))
+      .filter(id => Number.isFinite(id) && id > 0);
+
+    return ids.length > 0 && ids.every(id => activeIds.has(id));
+  };
+
+  return {
+    best: belongsToCurrentBank(h.best) ? h.best : null,
+    last: (Array.isArray(h.last) ? h.last : []).filter(belongsToCurrentBank)
+  };
+}
+
 function updatePracticeHistory(subjectKey, practiceTourNo, attempt) {
   const h = loadPracticeHistory(subjectKey, practiceTourNo);
   const last = [attempt, ...(h.last || [])].slice(0, PRACTICE_CONFIG.keepLastAttempts);
@@ -5407,7 +5437,7 @@ function updatePracticeHistory(subjectKey, practiceTourNo, attempt) {
 }
 
 function loadAllPracticeHistoryBySubject(subjectKey) {
-  const prefix = `practice_history_v2:${subjectKey}:tour_`;
+  const prefix = `${practiceHistoryStoragePrefix(subjectKey)}:${subjectKey}:tour_`;
   const allAttempts = [];
 
   try {
@@ -5725,7 +5755,10 @@ async function computePracticeStageStats(subjectKey, forcedTourNo = null) {
   const masteredCount = Array.from(closedIds).length;
   const openCount = Math.max(0, totalCount - masteredCount);
 
-  const h = loadPracticeHistory(subjectKey, practiceTourNo);
+  const h = filterPracticeHistoryToCurrentQuestions(
+    loadPracticeHistory(subjectKey, practiceTourNo),
+    allIds
+  );
 
   return {
     practiceTourNo,
@@ -6490,7 +6523,22 @@ if (actionBtn) {
 
        if (viewName === "courses") {
      const canGoBack = canCoursesBack();
-     backBtn.style.visibility = (state.quizLock ? "hidden" : (canGoBack ? "visible" : "hidden"));
+     const activePractice = state.quizLock === "practice" && getCoursesTopScreen() === "practice-quiz";
+     // During a Practice question, Back safely pauses the attempt instead of
+     // silently disappearing. Tour/Exam Prep assessment locks stay unchanged.
+     backBtn.style.visibility = activePractice || (!state.quizLock && canGoBack) ? "visible" : "hidden";
+     if (activePractice) {
+       const pauseLabel = tr3(
+         "Сохранить и выйти из практики",
+         "Amaliyotni saqlab chiqish",
+         "Save and leave Practice"
+       );
+       backBtn.setAttribute("aria-label",pauseLabel);
+       backBtn.title = pauseLabel;
+     } else {
+       backBtn.setAttribute("aria-label",tr3("Назад","Orqaga","Back"));
+       backBtn.title = "";
+     }
 
      // ✅ Рядом с лого всегда бренд как на Home/Profile
      titleEl.textContent = t("app_name");
@@ -12453,6 +12501,21 @@ function bindRatingsUI() {
     return;
   }
 
+  // The Practice start/result screens may become the stack root. Do not
+  // unexpectedly send the learner to Home when Back should stay in Practice.
+  if (state.courses.stack.length <= 1 && top === "practice-start") {
+    replaceCourses("subject-hub");
+    renderSubjectHub();
+    return;
+  }
+  if (state.courses.stack.length <= 1 &&
+      ["practice-result","practice-review","practice-recs"].includes(top)) {
+    replaceCourses(top === "practice-review" || top === "practice-recs"
+      ? "practice-result" : "practice-start");
+    if (top === "practice-result") renderPracticeStart();
+    return;
+  }
+
           if (state.courses.stack.length > 1) {
   state.courses.stack.pop();
   saveState();
@@ -12501,6 +12564,10 @@ function canCoursesBack() {
 
   // ✅ Subject Hub: даже если stack=1 — back должен быть доступен (уйдём в entryTab/prevTab/home)
   if (top === "subject-hub") return true;
+
+  // Practice can be the sole entry in the stack after finishing or exiting a
+  // topic drill. A visible back control must always have a safe destination.
+  if (["practice-start","practice-result","practice-review","practice-recs"].includes(top)) return true;
 
   return state.courses.stack.length > 1;
 }
@@ -15826,6 +15893,15 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
     const correctAnswer = row.correct_answer == null ? '' : String(row.correct_answer).trim();
     q.correctAnswer = correctAnswer;
     q.explanation = pickContentText(row, 'explanation') || '';
+
+    const diagnostic = row?.diagnostic && typeof row.diagnostic === 'object'
+      ? row.diagnostic
+      : null;
+
+    q.diagnosticStatus = String(row?.diagnostic_status || (diagnostic ? 'mapped' : '')).trim() || null;
+    q.diagnosticFeedback = diagnostic ? (pickContentText(diagnostic, 'feedback') || '') : '';
+    q.diagnosticNextAction = diagnostic ? (pickContentText(diagnostic, 'next_action') || '') : '';
+
     if (q.type === 'mcq') {
       q.correctIndex = practiceSafeCorrectIndex(correctAnswer, q.options || []);
     }
@@ -15913,6 +15989,13 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
         userAnswer: String(row?.user_answer ?? ''),
         correctAnswer: String(row?.correct_answer ?? ''),
         explanation: pickContentText(row || {}, 'explanation') || '',
+        diagnosticStatus: String(row?.diagnostic_status || '').trim() || null,
+        diagnosticFeedback: row?.diagnostic && typeof row.diagnostic === 'object'
+          ? (pickContentText(row.diagnostic, 'feedback') || '')
+          : '',
+        diagnosticNextAction: row?.diagnostic && typeof row.diagnostic === 'object'
+          ? (pickContentText(row.diagnostic, 'next_action') || '')
+          : '',
         isCorrect: !!row?.is_correct,
         timeSpent: Math.max(0, Number(row?.time_spent || 0)),
         book_ref: String(row?.book_ref || '').trim() || null,
@@ -16911,6 +16994,12 @@ if (state?.courses?.subjectKey !== viewSubjectKey) return;
 
 renderPracticeTourPicker(picker.cards, selectedTourNo);
 updatePracticeStartButtonForTour(selectedTourNo, false);
+// Topic practice is independent of Tour attempts; the server catalog only lists eligible topics.
+window.iClubPracticeTopicChoice?.mount({
+  subjectKey,
+  language: currentLang(),
+  onStart: (topic) => startPracticeByRec({ topic, subtopic: null }, "practice")
+});
      
     const done = Number(stageStats?.masteredCount || 0);
     const total = Number(stageStats?.totalCount || 0);
@@ -17569,6 +17658,7 @@ async function renderToursHistorySummary(
     if (
       draft?.status === "paused" &&
       draft?.subjectKey === subjectKey &&
+      draft?.quiz?.topicChoiceOrigin !== true &&
       draftTourNo > 0
     ) {
       currentTourNo = draftTourNo;
@@ -17586,7 +17676,7 @@ async function renderToursHistorySummary(
       draft?.quiz &&
       Array.isArray(draft.quiz.questions) &&
       draft.quiz.questions.length > 0 &&
-      draftTourNo === currentTourNo
+      (draftTourNo === currentTourNo || draft?.quiz?.topicChoiceOrigin === true)
     );
 
     if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
@@ -17658,7 +17748,13 @@ async function startPracticeNew() {
     rows = await dbWriteWithRetry(() => api.questions(Number(safeStart?.session_id)), { tries: 3, baseDelayMs: 350 });
   } catch (error) {
     const code = practiceSafeErrorText(error);
-    if (code.includes('practice_no_open_questions')) {
+    if (code.includes('practice_v2_cutover_pending')) {
+      showToast(tr3(
+        'Практика обновляется. Попробуйте ещё раз через минуту.',
+        'Amaliyot yangilanmoqda. Bir daqiqadan keyin yana urinib ko‘ring.',
+        'Practice is being updated. Please try again in a minute.'
+      ));
+    } else if (code.includes('practice_no_open_questions')) {
       showToast(t('practice_stage_all_closed') || 'Все вопросы этого этапа уже закрыты.');
     } else if (code.includes('practice_pool_locked') || code.includes('practice_pool_not_published')) {
       showToast(t('practice_tour_locked') || 'Эта практика пока закрыта.');
@@ -17985,7 +18081,8 @@ async function handlePracticeSubmit(isAutoTimeout = false) {
 
     // ✅ DRILL mini-result for My Recs (no DB, no last-practice overwrite)
 try {
-  if (quiz?.drillType && (quiz.drillType === "rec_mistakes" || quiz.drillType === "rec_topic")) {
+  if (quiz?.drillType && !quiz.topicChoiceOrigin &&
+    (quiz.drillType === "rec_mistakes" || quiz.drillType === "rec_topic")) {
     if (!state.courses) state.courses = {};
     state.courses.myRecDrillLast = {
       subjectKey: quiz.subjectKey || null,
@@ -18030,6 +18127,9 @@ try {
      isCorrect: !!quiz.correct[i],
      timeSpent: Number(quiz.timeSpent[i]) || 0,
      explanation: q.explanation || "",
+     diagnosticStatus: q.diagnosticStatus || null,
+     diagnosticFeedback: q.diagnosticFeedback || "",
+     diagnosticNextAction: q.diagnosticNextAction || "",
      book_id: q.book_id || q.bookId || null,
      book_reference: String(q.book_reference || q.bookReference || q.book_ref || q.bookRef || "").trim() || null,
      book_ref: String(q.book_ref || q.bookReference || q.book_reference || q.bookRef || "").trim() || null
@@ -18192,6 +18292,7 @@ if (meta) {
   const secSuffix = t("practice_time_sec_suffix") || "с";
 
   meta.textContent =
+    (quiz?.topicChoiceOrigin ? `${String(quiz.recTopic || "")} • ` : "") +
     `${scoreLabel}: ${attempt.score}/${attempt.total} (${attempt.percent}%)` +
     ` • ${timeLabel}: ${attempt.durationSec}${secSuffix}` +
     ` • ${t("practice_errors")}: ${wrong.length}` +
@@ -18203,6 +18304,13 @@ if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
 
 const recsCountEl = $("#practice-recs-count");
 if (recsCountEl) recsCountEl.textContent = String(recKeys.length);
+// A self-chosen topic is an independent short drill. Do not offer unrelated
+// "My recommendations" actions or claim it changed the main Practice result.
+const recsAction = document.querySelector('#courses-practice-result [data-action="practice-recommendations"]');
+if (recsAction) {
+  recsAction.hidden = !!quiz?.topicChoiceOrigin;
+  recsAction.style.display = quiz?.topicChoiceOrigin ? "none" : "";
+}
 
 // ✅ set “exit” button label based on context (main vs drill)
 try {
@@ -18215,18 +18323,22 @@ try {
   const btn2 = $("#practice-review-to-subject-btn");
   const btn3 = $("#practice-recs-to-subject-btn");
 
-  if (btn1) btn1.textContent = t(exitKey);
-  if (btn2) btn2.textContent = t(exitKey);
-  if (btn3) btn3.textContent = t(exitKey);
+  const exitLabel = quiz?.topicChoiceOrigin
+    ? tr3("К практике", "Amaliyotga", "Back to Practice") : t(exitKey);
+  if (btn1) btn1.textContent = exitLabel;
+  if (btn2) btn2.textContent = exitLabel;
+  if (btn3) btn3.textContent = exitLabel;
 } catch {}
      
-      // Show result screen (replace quiz screen to avoid "dead" back navigation)
+      // Show result screen (replace quiz screen to avoid "dead" back navigation).
+// Set the completed context first, so back always resolves to Practice.
 if (quiz?.drillType) replaceCoursesTop("practice-result");
 else replaceCourses("practice-result");
 
 // ✅ remember which attempt should be used by Result/Review (main vs drill)
 state.courses = state.courses || {};
-state.courses.practiceContext = quiz?.drillType ? "drill" : "main";
+state.courses.practiceContext = quiz?.topicChoiceOrigin
+  ? "topic" : (quiz?.drillType ? "drill" : "main");
 
 // ✅ store drill attempt separately (must NOT overwrite main practice last attempt)
 if (quiz?.drillType) {
@@ -18287,7 +18399,7 @@ function renderPracticeReview() {
 
   const ctx = state?.courses?.practiceContext || "main";
 const attempt =
-  (ctx === "drill" && state.practiceLastDrillAttempt)
+  ((ctx === "drill" || ctx === "topic") && state.practiceLastDrillAttempt)
     ? state.practiceLastDrillAttempt
     : state.practiceLastAttempt;
 
@@ -18410,6 +18522,14 @@ const diffText = t(diffKey) || d.difficulty || "";
 const yourAnsLabel = t("your_answer") || "Ваш ответ";
 const correctLabel = t("correct_answer") || "Правильно";
 const explLabel = t("rec_show_expl") || "Объяснение";
+const mistakeLabel = tr3("Почему это ошибка", "Nega bu xato", "Why this is wrong");
+const nextStepLabel = tr3("Как исправить", "Qanday tuzatish kerak", "How to fix it");
+// Only a server-confirmed mapped diagnosis can explain why this specific answer
+// is wrong. Unmapped answers receive the verified answer/explanation below;
+// do not invent a learner-specific cause or repeat generic placeholders.
+const verifiedDiagnosis = !d.isCorrect && d.diagnosticStatus === "mapped";
+const mistakeFeedback = verifiedDiagnosis ? String(d.diagnosticFeedback || "").trim() : "";
+const diagnosticNextAction = verifiedDiagnosis ? String(d.diagnosticNextAction || "").trim() : "";
 
 const topicText = String(d.topic || t("topic_general") || "General").trim();
 const subtopicText = String(d.subtopic || "").trim();
@@ -18427,6 +18547,8 @@ row.innerHTML = `
     ${escapeHTML(correctLabel)}: <b>${escapeHTML(corrDisp || "—")}</b>
   </div>
 
+  ${mistakeFeedback ? `<div class="muted small" style="margin-top:8px"><b>${escapeHTML(mistakeLabel)}:</b> ${escapeHTML(mistakeFeedback)}</div>` : ``}
+  ${diagnosticNextAction ? `<div class="muted small" style="margin-top:6px"><b>${escapeHTML(nextStepLabel)}:</b> ${escapeHTML(diagnosticNextAction)}</div>` : ``}
   ${d.explanation ? `<div class="muted small" style="margin-top:8px"><b>${escapeHTML(explLabel)}:</b> ${escapeHTML(d.explanation)}</div>` : ``}
 `;
         body.appendChild(row);
@@ -18789,7 +18911,10 @@ async function renderMyRecs() {
     }));
 
   // PRACTICE fallback
-  if (!practiceRows.length) {
+  // Mathematics v2 is a clean Practice reset. Old local Practice recommendations
+  // must never reappear after the server-side Practice recommendation reset.
+  // Tour recommendations use a separate store and are untouched.
+  if (!practiceRows.length && String(subjectKey).trim().toLowerCase() !== "mathematics") {
     const store = loadMyRecs();
     const local = store?.bySubject?.[subjectKey] || [];
     practiceRows = local.map(x => ({
@@ -19656,17 +19781,36 @@ function pickContentText(obj, base) {
   void questionIds;
   return [];
 } 
-async function startPracticeByRec() {
-  const rec = state?.courses?.myRecCurrent;
+async function startPracticeByRec(selectedRec = null, origin = "recommendation") {
+  const rec = selectedRec || state?.courses?.myRecCurrent;
   const subjectKey = state?.courses?.subjectKey;
   if (!rec || !subjectKey) return;
   const api = getPracticeSafeApi()?.drill;
   if (!api || !window.iclubSafeAssessment) { showToast(t("not_available") || "Practice is temporarily unavailable."); return; }
-  const clientSessionId = window.iclubSafeAssessment.makeClientSessionId("practice_topic");
+  const chooseTopic = origin === "practice";
+  // One persisted Practice draft exists per account. Never let a new
+  // self-selected topic overwrite a paused session from any subject.
+  if (chooseTopic) {
+    const draft = loadPracticeDraft();
+    if (draft?.status === "paused") {
+      showToast(tr3(
+        "Сначала завершите или продолжите сохранённую практику.",
+        "Avval saqlangan amaliyotni davom ettiring yoki yakunlang.",
+        "Resume or finish your saved Practice session first."
+      ));
+      return;
+    }
+  }
+  const launch = chooseTopic ? api.startTopicChoice : api.startTopic;
+  if (typeof launch !== "function") {
+    showToast(t("not_available") || "Practice is temporarily unavailable.");
+    return;
+  }
+  const clientSessionId = window.iclubSafeAssessment.makeClientSessionId(chooseTopic ? "practice_topic_choice" : "practice_topic");
   let started = null, rows = [];
   showAsyncOverlay(tr3("Загружаем практику по теме…", "Mavzu bo‘yicha amaliyot yuklanmoqda…", "Loading topic practice…"));
   try {
-    started = await dbWriteWithRetry(() => api.startTopic({ subjectKey, topic: rec.topic, subtopic: rec.subtopic || null, clientSessionId }), { tries: 3, baseDelayMs: 350 });
+    started = await dbWriteWithRetry(() => launch({ subjectKey, topic: rec.topic, subtopic: rec.subtopic || null, clientSessionId }), { tries: 3, baseDelayMs: 350 });
     rows = await dbWriteWithRetry(() => api.questions(Number(started?.session_id)), { tries: 3, baseDelayMs: 350 });
   } catch { showToast(t("rec_practice_empty") || t("practice_no_questions") || "Нет вопросов для практики по этой теме."); return; }
   finally { hideAsyncOverlay(); }
@@ -19677,11 +19821,15 @@ async function startPracticeByRec() {
     startedAt: Date.now(), paused: false, pauseStartedAt: null, pausedTotalMs: 0,
     index: 0, questions: [], answers: [], correct: [], timeSpent: [], qTimeLeft: 0,
     qEndsAtMono: null, qEndsAtMs: null, qTimerId: null,
-    recTopic: rec.topic || null, recSubtopic: rec.subtopic || null, drillType: "rec_topic"
+    recTopic: rec.topic || null, recSubtopic: rec.subtopic || null,
+    drillType: "rec_topic", topicChoiceOrigin: origin === "practice"
   }, rows);
   if (!quiz) return;
   if (!state.courses) state.courses = {};
-  state.courses.myRecReturnTarget = "my-rec-detail";
+  state.courses.myRecReturnTarget = origin === "practice" ? null : "my-rec-detail";
+  state.courses.practiceTopicSelection = origin === "practice"
+    ? { subjectKey, topic: rec.topic, subtopic: null }
+    : null;
   state.quizLock = "practice"; state.quiz = quiz; saveState();
   pushCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
@@ -21696,6 +21844,25 @@ function bindTabbar() {
 
     backBtn.addEventListener("click", async (event) => {
   event.stopPropagation();
+  // Practice has an existing save-and-pause operation: use it for the
+  // visible Back control, never discard a live answer or leave a locked quiz.
+  if (state.quizLock === "practice" && getCoursesTopScreen() === "practice-quiz") {
+    const quiz = state.quiz;
+    if (quiz?._submitInFlight || quiz?._finishing || quiz?._safeFinalizeInFlight) {
+      showToast(tr3(
+        "Подождите, ответ сохраняется.",
+        "Kuting, javob saqlanmoqda.",
+        "Please wait while your answer is saved."
+      ));
+      return;
+    }
+    if (!(await enforceActiveIdentityOrBlock({ source: "topbar_back", force: true }))) {
+      event.preventDefault();
+      return;
+    }
+    handlePracticePause();
+    return;
+  }
   if (state.quizLock) return;
 
   if (!(await enforceActiveIdentityOrBlock({ source: "topbar_back", force: true }))) {
@@ -22827,7 +22994,9 @@ if (!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.q
   return;
 }
 
-setSelectedPracticeTourNo(subjectKey, draftTourNo);
+if (draft?.quiz?.topicChoiceOrigin !== true) {
+  setSelectedPracticeTourNo(subjectKey, draftTourNo);
+}
 
   try {
     await initSupabaseSession();
@@ -22889,6 +23058,13 @@ if (action === "practice-recommendations") {
 if (action === "practice-exit") {
   const ctx = state?.courses?.practiceContext || "main";
 
+  // A self-chosen topic returns to Practice, never to an unrelated recommendation.
+  if (ctx === "topic") {
+    replaceCourses("practice-start");
+    await renderPracticeStart();
+    return;
+  }
+
   // ✅ DRILL: go back to recommendation detail (topic screen)
   if (ctx === "drill" && state?.courses?.myRecCurrent) {
   // ✅ restore stack so header back arrow appears:
@@ -22921,6 +23097,12 @@ if (action === "practice-exit") {
       }
 
       if (action === "practice-again") {
+  // Repeat a self-chosen topic without changing Tour statistics.
+  if (state?.courses?.practiceContext === "topic" &&
+      state?.courses?.practiceTopicSelection?.topic) {
+    startPracticeByRec(state.courses.practiceTopicSelection, "practice");
+    return;
+  }
   // ✅ if last finished was a drill — repeat that drill
   const d = state?.courses?.myRecDrillLast;
   if (d?.drillType === "rec_mistakes") {

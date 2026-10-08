@@ -1,0 +1,539 @@
+{
+  "version": "practice_v2_p6_differentiation_draft_v0.1",
+  "skill": "P1-DIF-07",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q418",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-07",
+      "secondary_skills": [
+        "P1-DIF-02"
+      ],
+      "role": "stationary_coordinate",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "For y=x²−6x+5, enter the y-coordinate of its stationary point.",
+        "ru": "Для y=x²−6x+5 введите y-координату стационарной точки.",
+        "uz": "y=x²−6x+5 uchun statsionar nuqtaning y-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-4",
+        "accepted_examples": [
+          "-4",
+          "−4",
+          " -4 "
+        ],
+        "rejected_examples": [
+          "3",
+          "4",
+          "-3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=2x−6=0 gives x=3. Substituting into the original function: y=9−18+5=−4.",
+        "ru": "dy/dx=2x−6=0 даёт x=3. Подставляем в исходную функцию: y=9−18+5=−4.",
+        "uz": "dy/dx=2x−6=0 dan x=3. Asl funksiyaga qo‘ysak y=9−18+5=−4."
+      },
+      "ai_source_skill": "P1-DIF-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q419",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-07",
+      "secondary_skills": [
+        "P1-DIF-05"
+      ],
+      "role": "classification_sign_change",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "For y=x³−3x²+2, what is the nature of the stationary point at x=0?",
+        "ru": "Для y=x³−3x²+2 каков тип стационарной точки при x=0?",
+        "uz": "y=x³−3x²+2 uchun x=0 dagi statsionar nuqta turi qanday?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Stationary point of inflexion",
+            "ru": "Стационарная точка перегиба",
+            "uz": "Statsionar egilish nuqtasi"
+          },
+          "diagnostic_code": "DIF07_CLASSIFICATION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Local minimum",
+            "ru": "Локальный минимум",
+            "uz": "Lokal minimum"
+          },
+          "diagnostic_code": "DIF07_CLASSIFICATION"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Local maximum",
+            "ru": "Локальный максимум",
+            "uz": "Lokal maksimum"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Not a stationary point",
+            "ru": "Не является стационарной точкой",
+            "uz": "Statsionar nuqta emas"
+          },
+          "diagnostic_code": "DIF07_STATIONARY_CONDITION"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "dy/dx=3x(x−2). Around x=0, the derivative changes from positive to negative, so x=0 is a local maximum.",
+        "ru": "dy/dx=3x(x−2). В окрестности x=0 производная меняет знак с плюса на минус, поэтому это локальный максимум.",
+        "uz": "dy/dx=3x(x−2). x=0 atrofida hosila musbatdan manfiyga o‘tadi, demak bu lokal maksimum."
+      },
+      "ai_source_skill": "P1-DIF-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q420",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-07",
+      "secondary_skills": [
+        "P1-DIF-02"
+      ],
+      "role": "multiple_stationary_points",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "For y=x⁴−8x², how many local minima are there? Enter the integer.",
+        "ru": "Для y=x⁴−8x² сколько локальных минимумов? Введите целое число.",
+        "uz": "y=x⁴−8x² uchun nechta lokal minimum bor? Butun sonni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "2",
+        "accepted_examples": [
+          "2",
+          " 2 "
+        ],
+        "rejected_examples": [
+          "1",
+          "3",
+          "0"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=4x(x²−4), so stationary points are x=−2,0,2. Since y''=12x²−16, y''>0 at x=±2 and y''<0 at x=0. Thus there are 2 local minima.",
+        "ru": "dy/dx=4x(x²−4), поэтому стационарные точки x=−2,0,2. y''=12x²−16: при x=±2 y''>0, при x=0 y''<0. Значит локальных минимумов 2.",
+        "uz": "dy/dx=4x(x²−4), demak statsionar nuqtalar x=−2,0,2. y''=12x²−16: x=±2 da y''>0, x=0 da y''<0. Shuning uchun 2 ta lokal minimum bor."
+      },
+      "ai_source_skill": "P1-DIF-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q421",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-07",
+      "secondary_skills": [],
+      "role": "reverse_optimisation",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A rectangle with fixed perimeter P has greatest possible area 64 cm². Enter P in centimetres.",
+        "ru": "Прямоугольник с фиксированным периметром P имеет максимально возможную площадь 64 см². Введите P в сантиметрах.",
+        "uz": "Perimetri P doimiy bo‘lgan to‘g‘ri to‘rtburchakning eng katta mumkin bo‘lgan yuzi 64 sm². P ni santimetrda kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "32",
+        "accepted_examples": [
+          "32",
+          " 32 "
+        ],
+        "rejected_examples": [
+          "16",
+          "24",
+          "64"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Let one side be x and the other P/2−x. Then A=x(P/2−x), so dA/dx=P/2−2x=0 at x=P/4. The maximum area is (P/4)²=P²/16. Since P²/16=64 and P>0, P=32 cm.",
+        "ru": "Пусть одна сторона равна x, другая P/2−x. Тогда A=x(P/2−x), поэтому dA/dx=P/2−2x=0 при x=P/4. Максимальная площадь равна (P/4)²=P²/16. Из P²/16=64 и P>0 получаем P=32 см.",
+        "uz": "Bir tomon x, ikkinchisi P/2−x bo‘lsin. A=x(P/2−x), demak dA/dx=P/2−2x=0 da x=P/4. Maksimal yuza (P/4)²=P²/16. P²/16=64 va P>0 dan P=32 sm."
+      },
+      "ai_source_skill": "P1-DIF-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q422",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-07",
+      "secondary_skills": [
+        "P1-DIF-02"
+      ],
+      "role": "parameter_stationary",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "For y=x³+kx²+12x, x=−2 is a stationary point. Enter k.",
+        "ru": "Для y=x³+kx²+12x точка при x=−2 является стационарной. Введите k.",
+        "uz": "y=x³+kx²+12x uchun x=−2 statsionar nuqta. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "6",
+        "accepted_examples": [
+          "6",
+          " 6 "
+        ],
+        "rejected_examples": [
+          "-6",
+          "3",
+          "12"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=3x²+2kx+12. At x=−2, 12−4k+12=0, so 24−4k=0 and k=6.",
+        "ru": "dy/dx=3x²+2kx+12. При x=−2: 12−4k+12=0, поэтому 24−4k=0 и k=6.",
+        "uz": "dy/dx=3x²+2kx+12. x=−2 da 12−4k+12=0, demak 24−4k=0 va k=6."
+      },
+      "ai_source_skill": "P1-DIF-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q423",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-07",
+      "secondary_skills": [
+        "P1-DIF-02"
+      ],
+      "role": "second_derivative_classification",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "For y=x³+3x²−9x, what is the nature of the stationary point at x=−3?",
+        "ru": "Для y=x³+3x²−9x каков тип стационарной точки при x=−3?",
+        "uz": "y=x³+3x²−9x uchun x=−3 dagi statsionar nuqta turi qanday?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Local minimum",
+            "ru": "Локальный минимум",
+            "uz": "Lokal minimum"
+          },
+          "diagnostic_code": "DIF07_SECOND_DERIVATIVE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Local maximum",
+            "ru": "Локальный максимум",
+            "uz": "Lokal maksimum"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Stationary point of inflexion",
+            "ru": "Стационарная точка перегиба",
+            "uz": "Statsionar egilish nuqtasi"
+          },
+          "diagnostic_code": "DIF07_CLASSIFICATION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Not stationary",
+            "ru": "Не стационарная",
+            "uz": "Statsionar emas"
+          },
+          "diagnostic_code": "DIF07_STATIONARY_CONDITION"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "dy/dx=3(x+3)(x−1), so x=−3 is stationary. y''=6x+6, and y''(−3)=−12<0, so it is a local maximum.",
+        "ru": "dy/dx=3(x+3)(x−1), поэтому x=−3 — стационарная точка. y''=6x+6, y''(−3)=−12<0, значит это локальный максимум.",
+        "uz": "dy/dx=3(x+3)(x−1), demak x=−3 statsionar. y''=6x+6, y''(−3)=−12<0, shuning uchun lokal maksimum."
+      },
+      "ai_source_skill": "P1-DIF-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q424",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-07",
+      "secondary_skills": [],
+      "role": "optimisation_model",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A rectangle has sides x and 12−2x, with 0<x<6. Enter the value of x that maximises its area.",
+        "ru": "Прямоугольник имеет стороны x и 12−2x, где 0<x<6. Введите x, при котором площадь максимальна.",
+        "uz": "To‘g‘ri to‘rtburchak tomonlari x va 12−2x, bunda 0<x<6. Yuzani maksimum qiladigan x ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "2",
+          "4",
+          "6"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "A=x(12−2x)=12x−2x². Then dA/dx=12−4x=0 gives x=3. Since the quadratic opens downward, this is the maximum.",
+        "ru": "A=x(12−2x)=12x−2x². dA/dx=12−4x=0 даёт x=3. Квадратичная функция направлена ветвями вниз, поэтому это максимум.",
+        "uz": "A=x(12−2x)=12x−2x². dA/dx=12−4x=0 dan x=3. Kvadrat funksiya pastga ochilgan, demak bu maksimum."
+      },
+      "ai_source_skill": "P1-DIF-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q425",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-07",
+      "secondary_skills": [
+        "P1-DIF-05"
+      ],
+      "role": "stationary_inflexion",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "What is the nature of the stationary point of y=x³ at x=0?",
+        "ru": "Каков тип стационарной точки y=x³ при x=0?",
+        "uz": "y=x³ uchun x=0 dagi statsionar nuqta turi qanday?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Local maximum",
+            "ru": "Локальный максимум",
+            "uz": "Lokal maksimum"
+          },
+          "diagnostic_code": "DIF07_CLASSIFICATION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Local minimum",
+            "ru": "Локальный минимум",
+            "uz": "Lokal minimum"
+          },
+          "diagnostic_code": "DIF07_CLASSIFICATION"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Not a stationary point",
+            "ru": "Не является стационарной точкой",
+            "uz": "Statsionar nuqta emas"
+          },
+          "diagnostic_code": "DIF07_STATIONARY_CONDITION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Stationary point of inflexion",
+            "ru": "Стационарная точка перегиба",
+            "uz": "Statsionar egilish nuqtasi"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "dy/dx=3x² is zero at x=0 but positive on both sides, so the derivative does not change sign. The point is a stationary point of inflexion.",
+        "ru": "dy/dx=3x² равна нулю при x=0, но положительна с обеих сторон, поэтому знак производной не меняется. Это стационарная точка перегиба.",
+        "uz": "dy/dx=3x² x=0 da nol, lekin ikki tomonda ham musbat. Hosila ishorasi o‘zgarmaydi, demak statsionar egilish nuqtasi."
+      },
+      "ai_source_skill": "P1-DIF-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q426",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-07",
+      "secondary_skills": [],
+      "role": "stationary_values",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "For y=x³−3x², the local maximum and local minimum have y-values y_max and y_min. Enter y_max−y_min.",
+        "ru": "Для y=x³−3x² локальный максимум и минимум имеют значения y_max и y_min. Введите y_max−y_min.",
+        "uz": "y=x³−3x² uchun lokal maksimum va minimumning y qiymatlari y_max va y_min. y_max−y_min ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "2",
+          "-4",
+          "8"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=3x(x−2), so stationary x-values are 0 and 2. The y-values are 0 and −4 respectively. Thus y_max−y_min=0−(−4)=4.",
+        "ru": "dy/dx=3x(x−2), поэтому стационарные x равны 0 и 2. Соответствующие y: 0 и −4. Значит y_max−y_min=0−(−4)=4.",
+        "uz": "dy/dx=3x(x−2), statsionar x lar 0 va 2. Mos y qiymatlar 0 va −4. Demak y_max−y_min=0−(−4)=4."
+      },
+      "ai_source_skill": "P1-DIF-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q427",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-07",
+      "secondary_skills": [
+        "P1-DIF-05"
+      ],
+      "role": "derivative_structure",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "A function has f′(x)=(x−2)²(x+1). Enter the x-coordinate of its local minimum.",
+        "ru": "Для функции f′(x)=(x−2)²(x+1). Введите x-координату локального минимума.",
+        "uz": "Funksiya uchun f′(x)=(x−2)²(x+1). Lokal minimumning x-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-1",
+        "accepted_examples": [
+          "-1",
+          "−1",
+          " -1 "
+        ],
+        "rejected_examples": [
+          "1",
+          "2",
+          "-2"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "At x=−1 the factor x+1 changes from negative to positive while (x−2)² stays non-negative, so f′ changes −→+. Therefore x=−1 is a local minimum. At x=2 there is no sign change.",
+        "ru": "При x=−1 множитель x+1 меняет знак с минуса на плюс, а (x−2)² остаётся неотрицательным, поэтому f′ меняется −→+. Значит x=−1 — локальный минимум. При x=2 знак не меняется.",
+        "uz": "x=−1 da x+1 manfiydan musbatga o‘tadi, (x−2)² esa manfiy bo‘lmaydi, demak f′ −→+ o‘zgaradi. Shuning uchun x=−1 lokal minimum. x=2 da ishora o‘zgarmaydi."
+      },
+      "ai_source_skill": "P1-DIF-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q428",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-07",
+      "secondary_skills": [],
+      "role": "optimisation_transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "For 0<x<12, P=x²(12−x). Enter the maximum value of P.",
+        "ru": "Для 0<x<12 задано P=x²(12−x). Введите максимальное значение P.",
+        "uz": "0<x<12 da P=x²(12−x). P ning maksimal qiymatini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "256",
+        "accepted_examples": [
+          "256",
+          " 256 "
+        ],
+        "rejected_examples": [
+          "128",
+          "192",
+          "512"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "P=12x²−x³, so dP/dx=24x−3x²=3x(8−x). The interior stationary point is x=8, and P(8)=64·4=256. The derivative changes +→− there, so it is the maximum.",
+        "ru": "P=12x²−x³, поэтому dP/dx=24x−3x²=3x(8−x). Внутренняя стационарная точка x=8, и P(8)=64·4=256. Там производная меняется +→−, значит это максимум.",
+        "uz": "P=12x²−x³, demak dP/dx=24x−3x²=3x(8−x). Ichki statsionar nuqta x=8, P(8)=64·4=256. Hosila u yerda +→−, demak maksimum."
+      },
+      "ai_source_skill": "P1-DIF-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q429",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-07",
+      "secondary_skills": [],
+      "role": "stationary_roots_parameter",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
+      "question": {
+        "en": "For y=x³+ax²+bx, the stationary points occur at x=1 and x=3. Enter a+b.",
+        "ru": "Для y=x³+ax²+bx стационарные точки находятся при x=1 и x=3. Введите a+b.",
+        "uz": "y=x³+ax²+bx uchun statsionar nuqtalar x=1 va x=3 da. a+b ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "-3",
+          "6",
+          "9"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=3x²+2ax+b has roots 1 and 3, so it equals 3(x−1)(x−3)=3x²−12x+9. Hence 2a=−12, so a=−6, and b=9. Thus a+b=3.",
+        "ru": "dy/dx=3x²+2ax+b имеет корни 1 и 3, значит равно 3(x−1)(x−3)=3x²−12x+9. Поэтому 2a=−12, a=−6, b=9. Следовательно a+b=3.",
+        "uz": "dy/dx=3x²+2ax+b ning ildizlari 1 va 3, demak u 3(x−1)(x−3)=3x²−12x+9 ga teng. Shundan 2a=−12, a=−6, b=9. Demak a+b=3."
+      },
+      "ai_source_skill": "P1-DIF-07",
+      "status": "draft"
+    }
+  ]
+}

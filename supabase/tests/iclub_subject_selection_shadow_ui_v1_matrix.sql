@@ -121,6 +121,26 @@ BEGIN
     RAISE EXCEPTION 'Free subject bootstrap mismatch: %',v;
   END IF;
 
+  v:=public.set_iclub_my_subject_slot_v1('not-a-real-subject',true,false);
+  IF coalesce((v->>'ok')::boolean,true)
+     OR v->>'reason'<>'subject_unavailable' THEN
+    RAISE EXCEPTION 'Unknown subject was accepted by beta selector: %',v;
+  END IF;
+
+  v:=public.set_iclub_my_subject_slot_v1('english_a1',true,false);
+  IF coalesce((v->>'ok')::boolean,true)
+     OR v->>'reason'<>'subject_unavailable' THEN
+    RAISE EXCEPTION 'Inactive subject was accepted by beta selector: %',v;
+  END IF;
+
+  UPDATE public.subjects SET is_active=true WHERE subject_key='english_a1';
+  v:=public.set_iclub_my_subject_slot_v1('english_a1',true,true);
+  IF coalesce((v->>'ok')::boolean,true)
+     OR v->>'reason'<>'competitive_requires_main_subject' THEN
+    RAISE EXCEPTION 'Non-main subject entered Competitive: %',v;
+  END IF;
+  UPDATE public.subjects SET is_active=false WHERE subject_key='english_a1';
+
   v:=public.set_iclub_my_subject_slot_v1('mathematics',true,false);
   IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE THEN
     RAISE EXCEPTION 'Free first study selection failed: %',v;

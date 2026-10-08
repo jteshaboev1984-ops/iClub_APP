@@ -1,0 +1,171 @@
+name: iClub Product Canary Activation Control v1
+
+on:
+  pull_request:
+    branches:
+      - feat/subject-selection-shadow-v1
+      - main
+    paths:
+      - 'supabase/migrations/20261007093000_iclub_product_canary_activation_control_v1.sql'
+      - 'supabase/reversions/20261007093000_iclub_product_canary_activation_control_v1_revert.sql'
+      - 'supabase/tests/iclub_product_canary_activation_fixture.sql'
+      - 'supabase/tests/iclub_product_canary_activation_control_v1_matrix.sql'
+      - 'docs/iclub-product-canary-activation-runbook-v1.md'
+      - '.github/scripts/iclub_product_canary_activation_control_v1_contract.js'
+      - '.github/workflows/iclub-product-canary-activation-control-v1.yml'
+  push:
+    branches:
+      - feat/product-canary-activation-control-v1
+      - main
+    paths:
+      - 'supabase/migrations/20261007093000_iclub_product_canary_activation_control_v1.sql'
+      - 'supabase/reversions/20261007093000_iclub_product_canary_activation_control_v1_revert.sql'
+      - 'supabase/tests/iclub_product_canary_activation_fixture.sql'
+      - 'supabase/tests/iclub_product_canary_activation_control_v1_matrix.sql'
+      - 'docs/iclub-product-canary-activation-runbook-v1.md'
+      - '.github/scripts/iclub_product_canary_activation_control_v1_contract.js'
+      - '.github/workflows/iclub-product-canary-activation-control-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canary-activation-safety:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostics
+        run: printf 'iClub product canary activation control v1 CI\n' > canary-activation.log
+
+      - name: Bootstrap isolated Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a canary-activation.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_subscription_access_legacy_fixture.sql 2>&1 | tee -a canary-activation.log
+
+      - name: Apply reviewed commercial dependency stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql 2>&1 | tee -a canary-activation.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql 2>&1 | tee -a canary-activation.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006124000_iclub_global_ai_ui_bootstrap_v1.sql 2>&1 | tee -a canary-activation.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006133000_iclub_global_ai_conversation_ui_v1.sql 2>&1 | tee -a canary-activation.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006143000_iclub_plans_profile_ui_v1.sql 2>&1 | tee -a canary-activation.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006153000_iclub_subscription_access_lifecycle_v1.sql 2>&1 | tee -a canary-activation.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006153100_iclub_grandfather_subject_access_v1.sql 2>&1 | tee -a canary-activation.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006164000_iclub_subject_selection_shadow_ui_v1.sql 2>&1 | tee -a canary-activation.log
+
+      - name: Add isolated Exam Prep canary authority fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_product_canary_activation_fixture.sql 2>&1 | tee -a canary-activation.log
+
+      - name: Static legacy-data preservation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in             supabase/migrations/20261007093000_iclub_product_canary_activation_control_v1.sql             supabase/reversions/20261007093000_iclub_product_canary_activation_control_v1_revert.sql
+          do
+            ! grep -Eiq '\b(update|delete[[:space:]]+from|insert[[:space:]]+into|truncate([[:space:]]+table)?)[[:space:]]+public\.(users|user_subjects|practice_attempts|practice_answers|tour_attempts|tour_answers|ratings_cache|certificates|recommendations)\b' "$file"
+          done
+
+      - name: Apply dormant activation-control layer
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261007093000_iclub_product_canary_activation_control_v1.sql 2>&1 | tee -a canary-activation.log
+
+      - name: Prove migration itself activates nothing
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(psql -Atqc "select plans_ui_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
+          test "$(psql -Atqc "select plans_rollout_mode from private.iclub_global_ai_runtime_config where id=1")" = 'off'
+          test "$(psql -Atqc "select subject_selection_ui_enabled from private.iclub_commercial_access_config where id=1")" = 'f'
+          test "$(psql -Atqc "select subject_limits_mode from private.iclub_commercial_access_config where id=1")" = 'off'
+          test "$(psql -Atqc "select lifecycle_enabled from private.iclub_commercial_access_config where id=1")" = 'f'
+          test "$(psql -Atqc "select count(*) from private.iclub_product_canary_users where enabled")" = '0'
+          test "$(psql -Atqc "select count(*) from private.iclub_subscription_entitlements")" = '0'
+
+      - name: Run atomic activation / rollback SQL matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_product_canary_activation_control_v1_matrix.sql 2>&1 | tee -a canary-activation.log
+
+      - name: Validate static activation contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/iclub_product_canary_activation_control_v1_contract.js
+          node .github/scripts/iclub_product_canary_activation_control_v1_contract.js 2>&1 | tee -a canary-activation.log
+
+      - name: Install Chromium harness
+        run: |
+          mkdir -p /tmp/pw
+          cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          ./node_modules/.bin/playwright install --with-deps chromium >/dev/null
+
+      - name: Run canary-facing mobile browser regressions
+        env:
+          NODE_PATH: /tmp/pw/node_modules
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node scripts/iclub-plans-profile-browser-regression.cjs 2>&1 | tee -a canary-activation.log
+          node scripts/iclub-subject-selection-shadow-browser-regression.cjs 2>&1 | tee -a canary-activation.log
+
+      - name: Prove activation-control reversion is non-destructive
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/reversions/20261007093000_iclub_product_canary_activation_control_v1_revert.sql 2>&1 | tee -a canary-activation.log
+          test "$(psql -Atqc "select to_regprocedure('public.get_iclub_product_canary_activation_snapshot_service_v1()') is null")" = 't'
+          test "$(psql -Atqc "select to_regprocedure('public.activate_iclub_plans_subject_canary_service_v1(uuid,uuid,uuid,text,text)') is null")" = 't'
+          test "$(psql -Atqc "select to_regprocedure('public.deactivate_iclub_plans_subject_canary_service_v1(text)') is null")" = 't'
+          test "$(psql -Atqc "select to_regclass('private.iclub_product_canary_users') is not null")" = 't'
+          test "$(psql -Atqc "select to_regclass('private.iclub_subject_slot_selections') is not null")" = 't'
+
+      - name: Mark canary activation control GREEN
+        run: echo 'ICLUB PRODUCT CANARY ACTIVATION CONTROL V1 GREEN' | tee -a canary-activation.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iclub-product-canary-activation-control-v1
+          path: |
+            canary-activation.log
+            artifacts/*.png
+          if-no-files-found: ignore
+          retention-days: 7

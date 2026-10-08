@@ -1,0 +1,441 @@
+{
+  "version": "p1_series_diag_v0.1",
+  "policy": {
+    "rule": "Use a diagnostic code only when the authored wrong path deterministically supports it; otherwise return unmapped.",
+    "ai_boundary": "AI may explain only an established deterministic result using approved source cards. It may not establish correctness, invent a diagnosis, or complete a protected active assessment."
+  },
+  "diagnostics": [
+    {
+      "code": "SER01_BINOMIAL_COEFF",
+      "skill": "P1-SER-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The binomial coefficient was chosen incorrectly.",
+        "ru": "Биномиальный коэффициент выбран неверно.",
+        "uz": "Binomial koeffitsiyent noto‘g‘ri tanlangan."
+      },
+      "next_action": {
+        "en": "For the (r+1)th term use nCr, with r starting from 0.",
+        "ru": "Для (r+1)-го члена используйте nCr, где r начинается с 0.",
+        "uz": "(r+1)-had uchun nCr dan foydalaning, bunda r 0 dan boshlanadi."
+      }
+    },
+    {
+      "code": "SER01_POWER_PATTERN",
+      "skill": "P1-SER-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The powers of the two binomial terms were advanced incorrectly.",
+        "ru": "Степени двух частей бинома изменены неверно.",
+        "uz": "Binomning ikki qismidagi darajalar noto‘g‘ri o‘zgartirilgan."
+      },
+      "next_action": {
+        "en": "In term r+1, powers are n−r and r; their sum stays n.",
+        "ru": "В члене r+1 степени равны n−r и r; их сумма остаётся n.",
+        "uz": "r+1-hadda darajalar n−r va r bo‘ladi; yig‘indisi n bo‘lib qoladi."
+      }
+    },
+    {
+      "code": "SER01_SIGN",
+      "skill": "P1-SER-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The sign from a negative binomial term was handled incorrectly.",
+        "ru": "Знак отрицательного члена бинома обработан неверно.",
+        "uz": "Binomdagi manfiy had ishorasi noto‘g‘ri hisoblangan."
+      },
+      "next_action": {
+        "en": "Keep the negative sign inside the powered term: (−bx)^r changes sign with the parity of r.",
+        "ru": "Сохраняйте минус внутри степени: (−bx)^r меняет знак в зависимости от чётности r.",
+        "uz": "Minusni daraja ichida saqlang: (−bx)^r ishorasi r juft/toqligiga bog‘liq."
+      }
+    },
+    {
+      "code": "SER01_MULTIPLIER_POWER",
+      "skill": "P1-SER-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A numerical multiplier such as 2 or 3 was not raised to the required power.",
+        "ru": "Числовой множитель, например 2 или 3, не возведён в нужную степень.",
+        "uz": "2 yoki 3 kabi sonli ko‘paytuvchi kerakli darajaga ko‘tarilmagan."
+      },
+      "next_action": {
+        "en": "Apply the exponent to the whole term, e.g. (2x)^r=2^r x^r.",
+        "ru": "Возводите в степень весь член, например (2x)^r=2^r x^r.",
+        "uz": "Darajani butun hadga qo‘llang, masalan (2x)^r=2^r x^r."
+      }
+    },
+    {
+      "code": "SER01_TERM_INDEX",
+      "skill": "P1-SER-01",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The requested term number was confused with the binomial index r.",
+        "ru": "Номер требуемого члена перепутан с биномиальным индексом r.",
+        "uz": "So‘ralgan had raqami binomial indeks r bilan adashtirilgan."
+      },
+      "next_action": {
+        "en": "The 1st term has r=0, the 2nd has r=1, so the kth term uses r=k−1.",
+        "ru": "1-й член соответствует r=0, 2-й — r=1, поэтому k-й член использует r=k−1.",
+        "uz": "1-had r=0, 2-had r=1; demak k-had uchun r=k−1."
+      }
+    },
+    {
+      "code": "SER01_CONSTANT_TERM",
+      "skill": "P1-SER-01",
+      "mistake_type": "reasoning",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The power of x was not set to zero when looking for a constant term.",
+        "ru": "При поиске свободного члена степень x не приравнена к нулю.",
+        "uz": "O‘zgarmas hadni topishda x darajasi 0 ga tenglashtirilmagan."
+      },
+      "next_action": {
+        "en": "Write the general term and set the total exponent of x equal to 0.",
+        "ru": "Запишите общий член и приравняйте суммарную степень x к 0.",
+        "uz": "Umumiy hadni yozib, x ning umumiy darajasini 0 ga tenglang."
+      }
+    },
+    {
+      "code": "SER01_PARAMETER",
+      "skill": "P1-SER-01",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The coefficient equation for the unknown parameter was set up or solved incorrectly.",
+        "ru": "Уравнение для неизвестного параметра по коэффициенту составлено или решено неверно.",
+        "uz": "Noma’lum parametr uchun koeffitsiyent tenglamasi noto‘g‘ri tuzilgan yoki yechilgan."
+      },
+      "next_action": {
+        "en": "Form the exact target coefficient first, then solve the resulting algebraic equation and apply any sign restriction.",
+        "ru": "Сначала составьте точный требуемый коэффициент, затем решите алгебраическое уравнение и примените ограничения на знак.",
+        "uz": "Avval kerakli aniq koeffitsiyentni tuzing, keyin algebraik tenglamani yeching va ishora cheklovini qo‘llang."
+      }
+    },
+    {
+      "code": "SER02_AP_STRUCTURE",
+      "skill": "P1-SER-02",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A sequence was classified as arithmetic without a constant difference.",
+        "ru": "Последовательность признана арифметической без постоянной разности.",
+        "uz": "Ketma-ketlik doimiy ayirmasiz arifmetik deb tasniflangan."
+      },
+      "next_action": {
+        "en": "Check consecutive differences; an AP has the same difference throughout.",
+        "ru": "Проверьте соседние разности; у AP разность постоянна.",
+        "uz": "Ketma-ket ayirmalarni tekshiring; AP da ayirma doimiy."
+      }
+    },
+    {
+      "code": "SER02_GP_STRUCTURE",
+      "skill": "P1-SER-02",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A sequence was classified as geometric without a constant ratio.",
+        "ru": "Последовательность признана геометрической без постоянного отношения.",
+        "uz": "Ketma-ketlik doimiy nisbat bo‘lmasdan geometrik deb tasniflangan."
+      },
+      "next_action": {
+        "en": "Check consecutive ratios; a GP has the same non-zero ratio throughout.",
+        "ru": "Проверьте отношения соседних членов; у GP отношение постоянно.",
+        "uz": "Ketma-ket nisbatlarni tekshiring; GP da nol bo‘lmagan nisbat doimiy."
+      }
+    },
+    {
+      "code": "SER02_DIFF_RATIO",
+      "skill": "P1-SER-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Difference and ratio tests were confused.",
+        "ru": "Перепутаны проверки по разности и отношению.",
+        "uz": "Ayirma va nisbat tekshiruvlari adashtirilgan."
+      },
+      "next_action": {
+        "en": "Use subtraction for AP recognition and division for GP recognition.",
+        "ru": "Для AP используйте вычитание, для GP — деление.",
+        "uz": "AP ni aniqlashda ayirish, GP da bo‘lishdan foydalaning."
+      }
+    },
+    {
+      "code": "SER02_NEITHER",
+      "skill": "P1-SER-02",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The sequence was forced into AP or GP even though neither pattern is constant.",
+        "ru": "Последовательность ошибочно отнесена к AP или GP, хотя ни один шаблон не постоянен.",
+        "uz": "Ayirma ham, nisbat ham doimiy bo‘lmasa ham ketma-ketlik AP yoki GP deb majburan tasniflangan."
+      },
+      "next_action": {
+        "en": "If neither consecutive differences nor ratios stay constant, classify it as neither.",
+        "ru": "Если ни разности, ни отношения не постоянны, это ни AP, ни GP.",
+        "uz": "Agar ketma-ket ayirmalar ham, nisbatlar ham doimiy bo‘lmasa, u neither."
+      }
+    },
+    {
+      "code": "SER03_N_MINUS_1",
+      "skill": "P1-SER-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The arithmetic nth-term formula used n instead of n−1.",
+        "ru": "В формуле n-го члена AP использовано n вместо n−1.",
+        "uz": "AP ning n-had formulasida n−1 o‘rniga n ishlatilgan."
+      },
+      "next_action": {
+        "en": "Use u_n=a+(n−1)d.",
+        "ru": "Используйте u_n=a+(n−1)d.",
+        "uz": "u_n=a+(n−1)d dan foydalaning."
+      }
+    },
+    {
+      "code": "SER03_SUM_FORMULA",
+      "skill": "P1-SER-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The arithmetic-series sum formula was applied incorrectly.",
+        "ru": "Формула суммы арифметической прогрессии применена неверно.",
+        "uz": "Arifmetik progressiya yig‘indisi formulasi noto‘g‘ri qo‘llangan."
+      },
+      "next_action": {
+        "en": "Use S_n=n/2[2a+(n−1)d] or n(a+l)/2.",
+        "ru": "Используйте S_n=n/2[2a+(n−1)d] или n(a+l)/2.",
+        "uz": "S_n=n/2[2a+(n−1)d] yoki n(a+l)/2 dan foydalaning."
+      }
+    },
+    {
+      "code": "SER03_INVERSE",
+      "skill": "P1-SER-03",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The inverse arithmetic-progression conditions were not combined correctly.",
+        "ru": "Обратные условия арифметической прогрессии объединены неверно.",
+        "uz": "Arifmetik progressiyaning teskari shartlari noto‘g‘ri birlashtirilgan."
+      },
+      "next_action": {
+        "en": "Translate each given term/sum into an equation in a and d, then solve the equations together.",
+        "ru": "Переведите каждый заданный член/сумму в уравнение относительно a и d и решите систему.",
+        "uz": "Har bir berilgan had/yig‘indini a va d bo‘yicha tenglamaga aylantirib, birgalikda yeching."
+      }
+    },
+    {
+      "code": "SER03_TERM_NUMBER",
+      "skill": "P1-SER-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The requested term number was solved from the nth-term equation incorrectly.",
+        "ru": "Номер требуемого члена неверно найден из формулы n-го члена.",
+        "uz": "So‘ralgan had raqami n-had tenglamasidan noto‘g‘ri topilgan."
+      },
+      "next_action": {
+        "en": "Set a+(n−1)d equal to the target term and solve for integer n.",
+        "ru": "Приравняйте a+(n−1)d к требуемому члену и найдите целое n.",
+        "uz": "a+(n−1)d ni kerakli hadga tenglab, butun n ni toping."
+      }
+    },
+    {
+      "code": "SER03_ARITH_CONDITION",
+      "skill": "P1-SER-03",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The condition for three numbers to be consecutive arithmetic terms was used incorrectly.",
+        "ru": "Условие трёх последовательных членов AP использовано неверно.",
+        "uz": "Uchta ketma-ket AP hadi sharti noto‘g‘ri ishlatilgan."
+      },
+      "next_action": {
+        "en": "For consecutive AP terms p,q,r, use 2q=p+r.",
+        "ru": "Для последовательных членов AP p,q,r используйте 2q=p+r.",
+        "uz": "Ketma-ket AP hadlari p,q,r uchun 2q=p+r."
+      }
+    },
+    {
+      "code": "SER04_N_MINUS_1",
+      "skill": "P1-SER-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The geometric nth-term formula used r^n instead of r^(n−1).",
+        "ru": "В формуле n-го члена GP использовано r^n вместо r^(n−1).",
+        "uz": "GP ning n-had formulasida r^n o‘rniga r^(n−1) ishlatilgan."
+      },
+      "next_action": {
+        "en": "Use u_n=ar^(n−1).",
+        "ru": "Используйте u_n=ar^(n−1).",
+        "uz": "u_n=ar^(n−1) dan foydalaning."
+      }
+    },
+    {
+      "code": "SER04_SUM_FORMULA",
+      "skill": "P1-SER-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The finite geometric-sum formula was applied incorrectly.",
+        "ru": "Формула конечной суммы GP применена неверно.",
+        "uz": "GP ning chekli yig‘indi formulasi noto‘g‘ri qo‘llangan."
+      },
+      "next_action": {
+        "en": "Use S_n=a(1−r^n)/(1−r), or an equivalent form, for r≠1.",
+        "ru": "Используйте S_n=a(1−r^n)/(1−r) или эквивалентную форму при r≠1.",
+        "uz": "r≠1 bo‘lsa S_n=a(1−r^n)/(1−r) yoki teng kuchli ko‘rinishdan foydalaning."
+      }
+    },
+    {
+      "code": "SER04_RATIO",
+      "skill": "P1-SER-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The common ratio was found in the wrong direction or with the wrong sign.",
+        "ru": "Общее отношение найдено в неверном направлении или с неверным знаком.",
+        "uz": "Umumiy nisbat noto‘g‘ri yo‘nalishda yoki ishora bilan topilgan."
+      },
+      "next_action": {
+        "en": "Use r=u_{n+1}/u_n and keep the sign.",
+        "ru": "Используйте r=u_{n+1}/u_n и сохраняйте знак.",
+        "uz": "r=u_{n+1}/u_n dan foydalanib, ishorani saqlang."
+      }
+    },
+    {
+      "code": "SER04_INVERSE",
+      "skill": "P1-SER-04",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The inverse geometric-progression conditions were not combined correctly.",
+        "ru": "Обратные условия геометрической прогрессии объединены неверно.",
+        "uz": "Geometrik progressiyaning teskari shartlari noto‘g‘ri birlashtirilgan."
+      },
+      "next_action": {
+        "en": "Write each given term/sum in a and r, then solve the resulting equations and apply sign restrictions.",
+        "ru": "Запишите каждый заданный член/сумму через a и r, решите систему и примените ограничения на знак.",
+        "uz": "Har bir berilgan had/yig‘indini a va r orqali yozib, tenglamalarni yeching va ishora cheklovlarini qo‘llang."
+      }
+    },
+    {
+      "code": "SER04_GEOM_CONDITION",
+      "skill": "P1-SER-04",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The condition for three consecutive geometric terms was used incorrectly.",
+        "ru": "Условие трёх последовательных членов GP использовано неверно.",
+        "uz": "Uchta ketma-ket GP hadi sharti noto‘g‘ri ishlatilgan."
+      },
+      "next_action": {
+        "en": "For consecutive non-zero GP terms p,q,r, use q²=pr.",
+        "ru": "Для последовательных ненулевых членов GP p,q,r используйте q²=pr.",
+        "uz": "Ketma-ket nol bo‘lmagan GP hadlari p,q,r uchun q²=pr."
+      }
+    },
+    {
+      "code": "SER04_NEGATIVE_RATIO",
+      "skill": "P1-SER-04",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "An alternating geometric progression lost the negative sign of its ratio.",
+        "ru": "В чередующейся GP потерян отрицательный знак отношения.",
+        "uz": "Almashinuvchi GP da nisbatning manfiy ishorasi yo‘qotilgan."
+      },
+      "next_action": {
+        "en": "If signs alternate, the common ratio is negative; carry that sign through powers and sums.",
+        "ru": "Если знаки чередуются, отношение отрицательно; сохраняйте знак в степенях и суммах.",
+        "uz": "Ishoralar almashsa, umumiy nisbat manfiy; daraja va yig‘indilarda shu ishorani saqlang."
+      }
+    },
+    {
+      "code": "SER05_CONVERGENCE",
+      "skill": "P1-SER-05",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The convergence condition for an infinite geometric series was applied incorrectly.",
+        "ru": "Условие сходимости бесконечной GP применено неверно.",
+        "uz": "Cheksiz GP yig‘indisining yaqinlashish sharti noto‘g‘ri qo‘llangan."
+      },
+      "next_action": {
+        "en": "A geometric series has a finite sum to infinity exactly when |r|<1.",
+        "ru": "Геометрический ряд имеет конечную сумму до бесконечности тогда и только тогда, когда |r|<1.",
+        "uz": "Geometrik qatorning cheksiz yig‘indisi faqat |r|<1 bo‘lganda mavjud."
+      }
+    },
+    {
+      "code": "SER05_SUM_INFINITY",
+      "skill": "P1-SER-05",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The sum-to-infinity formula was applied incorrectly.",
+        "ru": "Формула суммы до бесконечности применена неверно.",
+        "uz": "Cheksiz yig‘indi formulasi noto‘g‘ri qo‘llangan."
+      },
+      "next_action": {
+        "en": "For |r|<1, use S∞=a/(1−r).",
+        "ru": "При |r|<1 используйте S∞=a/(1−r).",
+        "uz": "|r|<1 bo‘lsa S∞=a/(1−r) dan foydalaning."
+      }
+    },
+    {
+      "code": "SER05_DENOM_SIGN",
+      "skill": "P1-SER-05",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The sign in 1−r was handled incorrectly, especially for negative r.",
+        "ru": "Знак в 1−r обработан неверно, особенно при отрицательном r.",
+        "uz": "1−r dagi ishora, ayniqsa r manfiy bo‘lsa, noto‘g‘ri hisoblangan."
+      },
+      "next_action": {
+        "en": "Substitute the signed value of r into 1−r before simplifying.",
+        "ru": "Подставьте r вместе со знаком в 1−r до упрощения.",
+        "uz": "Soddalashtirishdan oldin r ni ishorasi bilan 1−r ga qo‘ying."
+      }
+    },
+    {
+      "code": "SER05_INVERSE",
+      "skill": "P1-SER-05",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The first term, ratio and infinite sum relation were rearranged incorrectly.",
+        "ru": "Связь между первым членом, отношением и суммой до бесконечности преобразована неверно.",
+        "uz": "Birinchi had, nisbat va cheksiz yig‘indi orasidagi bog‘lanish noto‘g‘ri qayta tuzilgan."
+      },
+      "next_action": {
+        "en": "Start from S∞=a/(1−r), solve algebraically, then verify |r|<1.",
+        "ru": "Начните с S∞=a/(1−r), решите алгебраически и затем проверьте |r|<1.",
+        "uz": "S∞=a/(1−r) dan boshlab algebraik yeching, keyin |r|<1 ni tekshiring."
+      }
+    },
+    {
+      "code": "SER05_PARAMETER_RANGE",
+      "skill": "P1-SER-05",
+      "mistake_type": "reasoning",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The parameter range for convergence was solved incorrectly.",
+        "ru": "Диапазон параметра для сходимости найден неверно.",
+        "uz": "Yaqinlashish uchun parametr oralig‘i noto‘g‘ri topilgan."
+      },
+      "next_action": {
+        "en": "Write |r(parameter)|<1 and solve the resulting double inequality carefully.",
+        "ru": "Запишите |r(параметр)|<1 и аккуратно решите двойное неравенство.",
+        "uz": "|r(parametr)|<1 ni yozib, hosil bo‘lgan qo‘sh tengsizlikni ehtiyotkorlik bilan yeching."
+      }
+    }
+  ]
+}

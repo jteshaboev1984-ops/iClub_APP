@@ -1,0 +1,457 @@
+{
+  "version": "p1_coordinate_geometry_diag_v0.1",
+  "policy": {
+    "rule": "A diagnostic code may be used only when the authored wrong path intentionally supports it. Otherwise the result is unmapped.",
+    "ai_boundary": "AI may explain an established diagnostic only; it may not replace, strengthen, or invent the diagnostic."
+  },
+  "diagnostics": [
+    {
+      "code": "COO01_GRADIENT_FROM_POINTS",
+      "skill": "P1-COO-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The change in y and change in x were paired or signed incorrectly when finding the line gradient.",
+        "ru": "При нахождении градиента неверно сопоставлены или подписаны изменения y и x.",
+        "uz": "Chiziq gradientini topishda y va x o‘zgarishlari noto‘g‘ri juftlangan yoki ishoralangan."
+      },
+      "next_action": {
+        "en": "Use m=(y₂−y₁)/(x₂−x₁) with the same point order in numerator and denominator.",
+        "ru": "Используйте m=(y₂−y₁)/(x₂−x₁), сохраняя один и тот же порядок точек в числителе и знаменателе.",
+        "uz": "m=(y₂−y₁)/(x₂−x₁) formulada surat va maxrajda nuqtalar tartibini bir xil saqlang."
+      }
+    },
+    {
+      "code": "COO01_POINT_SLOPE_SUB",
+      "skill": "P1-COO-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The known point was substituted incorrectly into the line equation.",
+        "ru": "Известная точка неверно подставлена в уравнение прямой.",
+        "uz": "Berilgan nuqta chiziq tenglamasiga noto‘g‘ri qo‘yilgan."
+      },
+      "next_action": {
+        "en": "Use y−y₁=m(x−x₁), then substitute the coordinates with their signs exactly.",
+        "ru": "Используйте y−y₁=m(x−x₁) и подставляйте координаты вместе со знаками.",
+        "uz": "y−y₁=m(x−x₁) dan foydalanib, koordinatalarni ishoralari bilan aniq qo‘ying."
+      }
+    },
+    {
+      "code": "COO01_INTERCEPT",
+      "skill": "P1-COO-01",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The gradient is compatible with the line, but the intercept/constant term was obtained incorrectly.",
+        "ru": "Градиент соответствует прямой, но свободный член найден неверно.",
+        "uz": "Gradient chiziqqa mos, lekin kesishish doimiysi noto‘g‘ri topilgan."
+      },
+      "next_action": {
+        "en": "After finding m, substitute one known point into y=mx+c and solve carefully for c.",
+        "ru": "После нахождения m подставьте известную точку в y=mx+c и аккуратно найдите c.",
+        "uz": "m ni topgach, berilgan nuqtani y=mx+c ga qo‘yib, c ni ehtiyotkorlik bilan toping."
+      }
+    },
+    {
+      "code": "COO01_LINE_FORM",
+      "skill": "P1-COO-01",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The line equation was rearranged into a non-equivalent form.",
+        "ru": "Уравнение прямой преобразовано в неэквивалентную форму.",
+        "uz": "Chiziq tenglamasi teng kuchli bo‘lmagan ko‘rinishga o‘tkazilgan."
+      },
+      "next_action": {
+        "en": "Rearrange both sides consistently and check the final equation with the known point.",
+        "ru": "Преобразуйте обе стороны согласованно и проверьте итоговое уравнение известной точкой.",
+        "uz": "Ikkala tomonni izchil o‘zgartiring va yakuniy tenglamani berilgan nuqta bilan tekshiring."
+      }
+    },
+    {
+      "code": "COO02_DISTANCE_FORMULA",
+      "skill": "P1-COO-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The horizontal and vertical differences were not combined correctly in the distance formula.",
+        "ru": "Горизонтальная и вертикальная разности неверно объединены в формуле расстояния.",
+        "uz": "Masofa formulasida gorizontal va vertikal farqlar noto‘g‘ri birlashtirilgan."
+      },
+      "next_action": {
+        "en": "Use d=√[(x₂−x₁)²+(y₂−y₁)²] and square both coordinate differences before adding.",
+        "ru": "Используйте d=√[(x₂−x₁)²+(y₂−y₁)²] и возведите обе разности координат в квадрат перед сложением.",
+        "uz": "d=√[(x₂−x₁)²+(y₂−y₁)²] formulada ikkala koordinata farqini kvadratga ko‘tarib keyin qo‘shing."
+      }
+    },
+    {
+      "code": "COO02_DISTANCE_SQUARED",
+      "skill": "P1-COO-02",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The squared distance was given instead of the distance, or vice versa.",
+        "ru": "Вместо расстояния дан квадрат расстояния или наоборот.",
+        "uz": "Masofa o‘rniga masofaning kvadrati yoki aksincha berilgan."
+      },
+      "next_action": {
+        "en": "Check whether the question asks for d or d² before the final step.",
+        "ru": "Перед последним шагом проверьте, требуется d или d².",
+        "uz": "Oxirgi qadamdan oldin savolda d yoki d² so‘ralganini tekshiring."
+      }
+    },
+    {
+      "code": "COO02_MIDPOINT",
+      "skill": "P1-COO-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The midpoint coordinates were not formed by averaging corresponding coordinates.",
+        "ru": "Координаты середины не найдены как средние соответствующих координат.",
+        "uz": "O‘rta nuqta koordinatalari mos koordinatalarning o‘rtachasi sifatida olinmagan."
+      },
+      "next_action": {
+        "en": "Use ((x₁+x₂)/2,(y₁+y₂)/2), averaging x with x and y with y.",
+        "ru": "Используйте ((x₁+x₂)/2,(y₁+y₂)/2), усредняя x с x и y с y.",
+        "uz": "((x₁+x₂)/2,(y₁+y₂)/2) formulada x larni x bilan, y larni y bilan o‘rtachalang."
+      }
+    },
+    {
+      "code": "COO02_GRADIENT",
+      "skill": "P1-COO-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The gradient of the segment/line was calculated incorrectly.",
+        "ru": "Градиент отрезка или прямой вычислен неверно.",
+        "uz": "Kesma yoki chiziq gradienti noto‘g‘ri hisoblangan."
+      },
+      "next_action": {
+        "en": "Use the same point order in Δy and Δx, then simplify the fraction including its sign.",
+        "ru": "Сохраняйте один порядок точек в Δy и Δx и затем упростите дробь со знаком.",
+        "uz": "Δy va Δx da nuqtalar tartibini bir xil saqlab, kasrni ishorasi bilan soddalashtiring."
+      }
+    },
+    {
+      "code": "COO02_INTERSECTION",
+      "skill": "P1-COO-02",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The simultaneous line equations were solved or back-substituted incorrectly.",
+        "ru": "Система уравнений прямых решена или проверена подстановкой неверно.",
+        "uz": "Chiziqlar sistemasi noto‘g‘ri yechilgan yoki qayta qo‘yilgan."
+      },
+      "next_action": {
+        "en": "Solve the two line equations simultaneously, then verify the ordered pair in both equations.",
+        "ru": "Решите два уравнения одновременно и проверьте найденную пару в обоих уравнениях.",
+        "uz": "Ikki tenglamani birgalikda yechib, topilgan juftlikni ikkala tenglamada tekshiring."
+      }
+    },
+    {
+      "code": "COO02_INTERCEPT_FORM",
+      "skill": "P1-COO-02",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The intercept or line-form information was interpreted incorrectly.",
+        "ru": "Перехват или форма уравнения прямой интерпретированы неверно.",
+        "uz": "Kesishish nuqtasi yoki chiziq tenglamasi ko‘rinishi noto‘g‘ri talqin qilingan."
+      },
+      "next_action": {
+        "en": "Set y=0 for the x-intercept and x=0 for the y-intercept, or rearrange the line before reading its gradient/intercept.",
+        "ru": "Для x-перехвата положите y=0, для y-перехвата x=0; при необходимости сначала преобразуйте уравнение.",
+        "uz": "x-kesishish uchun y=0, y-kesishish uchun x=0 deb oling yoki gradient/kesishishni o‘qishdan oldin tenglamani qayta yozing."
+      }
+    },
+    {
+      "code": "COO03_PARALLEL",
+      "skill": "P1-COO-03",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Parallel lines were not matched by equal gradients.",
+        "ru": "Для параллельных прямых не использовано равенство градиентов.",
+        "uz": "Parallel chiziqlar uchun gradientlar tengligi ishlatilmagan."
+      },
+      "next_action": {
+        "en": "Non-vertical parallel lines have the same gradient.",
+        "ru": "Невертикальные параллельные прямые имеют одинаковый градиент.",
+        "uz": "Vertikal bo‘lmagan parallel chiziqlarning gradientlari teng."
+      }
+    },
+    {
+      "code": "COO03_PERP_NEG_RECIP",
+      "skill": "P1-COO-03",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The perpendicular gradient was not taken as the negative reciprocal.",
+        "ru": "Градиент перпендикулярной прямой не взят как отрицательная обратная величина.",
+        "uz": "Perpendikulyar chiziq gradienti manfiy teskari qiymat sifatida olinmagan."
+      },
+      "next_action": {
+        "en": "For non-vertical perpendicular lines, m₁m₂=−1.",
+        "ru": "Для невертикальных перпендикулярных прямых m₁m₂=−1.",
+        "uz": "Vertikal bo‘lmagan perpendikulyar chiziqlar uchun m₁m₂=−1."
+      }
+    },
+    {
+      "code": "COO03_SIGN",
+      "skill": "P1-COO-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The reciprocal was used but its sign was not changed correctly.",
+        "ru": "Обратная величина использована, но знак изменён неверно.",
+        "uz": "Teskari qiymat olingan, lekin ishora noto‘g‘ri o‘zgartirilgan."
+      },
+      "next_action": {
+        "en": "Swap numerator and denominator and change the sign once.",
+        "ru": "Поменяйте числитель и знаменатель местами и один раз измените знак.",
+        "uz": "Surat va maxrajni almashtirib, ishorani bir marta o‘zgartiring."
+      }
+    },
+    {
+      "code": "COO03_SPECIAL_AXIS",
+      "skill": "P1-COO-03",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "A horizontal/vertical special case was treated like an ordinary finite gradient.",
+        "ru": "Горизонтальный/вертикальный частный случай обработан как обычный конечный градиент.",
+        "uz": "Gorizontal/vertikal maxsus holat oddiy chekli gradient kabi ko‘rilgan."
+      },
+      "next_action": {
+        "en": "Horizontal lines have gradient 0; their perpendiculars are vertical and do not have a finite gradient.",
+        "ru": "Горизонтальные прямые имеют градиент 0; перпендикуляр к ним вертикален и не имеет конечного градиента.",
+        "uz": "Gorizontal chiziq gradienti 0; unga perpendikulyar chiziq vertikal bo‘lib, chekli gradientga ega emas."
+      }
+    },
+    {
+      "code": "COO04_CENTRE_SIGN",
+      "skill": "P1-COO-04",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The signs of the circle centre were read incorrectly from standard form.",
+        "ru": "Знаки координат центра неверно прочитаны из стандартной формы окружности.",
+        "uz": "Aylana markazi koordinatalari ishoralari standart ko‘rinishdan noto‘g‘ri o‘qilgan."
+      },
+      "next_action": {
+        "en": "In (x−a)²+(y−b)²=r², the centre is (a,b), so the signs inside brackets appear opposite.",
+        "ru": "В (x−a)²+(y−b)²=r² центр равен (a,b), поэтому знаки внутри скобок выглядят противоположно.",
+        "uz": "(x−a)²+(y−b)²=r² da markaz (a,b), shuning uchun qavs ichidagi ishoralar teskari ko‘rinadi."
+      }
+    },
+    {
+      "code": "COO04_RADIUS_SQUARED",
+      "skill": "P1-COO-04",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The value r² was used as the radius r, or vice versa.",
+        "ru": "Значение r² принято за радиус r или наоборот.",
+        "uz": "r² qiymati radius r deb yoki aksincha qabul qilingan."
+      },
+      "next_action": {
+        "en": "The right side of standard form is r²; take the positive square root for the radius.",
+        "ru": "Правая часть стандартной формы равна r²; для радиуса возьмите положительный квадратный корень.",
+        "uz": "Standart ko‘rinishning o‘ng tomoni r²; radius uchun musbat kvadrat ildizni oling."
+      }
+    },
+    {
+      "code": "COO04_COMPLETE_SQUARE",
+      "skill": "P1-COO-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Completing the square in x or y was done incorrectly when finding the circle centre.",
+        "ru": "При поиске центра неверно выделен полный квадрат по x или y.",
+        "uz": "Aylana markazini topishda x yoki y bo‘yicha to‘liq kvadrat noto‘g‘ri ajratilgan."
+      },
+      "next_action": {
+        "en": "Complete the square separately in x and y and compensate each added constant.",
+        "ru": "Отдельно выделите полный квадрат по x и y и компенсируйте каждую добавленную константу.",
+        "uz": "x va y bo‘yicha to‘liq kvadratni alohida ajratib, har bir qo‘shilgan doimiy hadni kompensatsiya qiling."
+      }
+    },
+    {
+      "code": "COO04_EXPANDED_CONSTANT",
+      "skill": "P1-COO-04",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The expanded circle equation has an incorrect constant after expansion/rearrangement.",
+        "ru": "В развёрнутом уравнении окружности неверен свободный член после раскрытия или переноса.",
+        "uz": "Aylananing yoyilgan tenglamasida qavslarni ochish yoki ko‘chirishdan keyingi doimiy had noto‘g‘ri."
+      },
+      "next_action": {
+        "en": "Expand both squared brackets completely, combine constants, and verify the centre point has distance r from any stated point.",
+        "ru": "Полностью раскройте оба квадрата, объедините константы и при возможности проверьте расстояние от центра.",
+        "uz": "Ikkala kvadrat qavsni to‘liq ochib, doimiy hadlarni birlashtiring va imkon bo‘lsa markazdan masofani tekshiring."
+      }
+    },
+    {
+      "code": "COO04_POINT_TEST",
+      "skill": "P1-COO-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The point was not substituted correctly into the circle equation.",
+        "ru": "Точка неверно подставлена в уравнение окружности.",
+        "uz": "Nuqta aylana tenglamasiga noto‘g‘ri qo‘yilgan."
+      },
+      "next_action": {
+        "en": "Substitute both coordinates with brackets and check whether the left side equals r².",
+        "ru": "Подставьте обе координаты со скобками и проверьте равенство левой части r².",
+        "uz": "Ikkala koordinatani qavs bilan qo‘yib, chap tomon r² ga tengligini tekshiring."
+      }
+    },
+    {
+      "code": "COO05_LINE_CIRCLE_SUB",
+      "skill": "P1-COO-05",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The line equation was substituted into the circle equation incorrectly.",
+        "ru": "Уравнение прямой неверно подставлено в уравнение окружности.",
+        "uz": "Chiziq tenglamasi aylana tenglamasiga noto‘g‘ri qo‘yilgan."
+      },
+      "next_action": {
+        "en": "Express one variable from the line and substitute the complete expression everywhere it appears in the circle equation.",
+        "ru": "Выразите одну переменную из уравнения прямой и подставьте полное выражение во все соответствующие места окружности.",
+        "uz": "Chiziqdan bitta o‘zgaruvchini ifodalab, to‘liq ifodani aylana tenglamasidagi barcha mos joylarga qo‘ying."
+      }
+    },
+    {
+      "code": "COO05_RADIUS_PERP_TANGENT",
+      "skill": "P1-COO-05",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The tangent was not linked to the radius being perpendicular at the point of contact.",
+        "ru": "Не использовано свойство: касательная перпендикулярна радиусу в точке касания.",
+        "uz": "Urinma tegish nuqtasidagi radiusga perpendikulyar ekanligi ishlatilmagan."
+      },
+      "next_action": {
+        "en": "Find the radius gradient to the contact point, then use the negative reciprocal for the tangent gradient.",
+        "ru": "Найдите градиент радиуса к точке касания, затем возьмите отрицательную обратную величину для касательной.",
+        "uz": "Tegish nuqtasiga radius gradientini topib, urinma gradienti uchun manfiy teskari qiymatni oling."
+      }
+    },
+    {
+      "code": "COO05_CHORD_BISECTOR",
+      "skill": "P1-COO-05",
+      "mistake_type": "concept",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The perpendicular-bisector geometry of a chord was not used correctly.",
+        "ru": "Геометрия серединного перпендикуляра к хорде использована неверно.",
+        "uz": "Vatar o‘rta perpendikulyari geometriyasi noto‘g‘ri ishlatilgan."
+      },
+      "next_action": {
+        "en": "The line from the centre perpendicular to a chord bisects that chord; use midpoint and perpendicular-gradient facts together.",
+        "ru": "Перпендикуляр из центра к хорде делит её пополам; используйте одновременно середину и перпендикулярные градиенты.",
+        "uz": "Markazdan vatarga tushirilgan perpendikulyar vatarni teng ikkiga bo‘ladi; o‘rta nuqta va perpendikulyar gradientni birga ishlating."
+      }
+    },
+    {
+      "code": "COO05_POINT_POSITION",
+      "skill": "P1-COO-05",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The point’s distance from the centre was compared with the radius incorrectly.",
+        "ru": "Расстояние точки от центра неверно сравнено с радиусом.",
+        "uz": "Nuqtaning markazdan masofasi radius bilan noto‘g‘ri taqqoslangan."
+      },
+      "next_action": {
+        "en": "Compare squared distance to r²: equal means on the circle, smaller inside, larger outside.",
+        "ru": "Сравните квадрат расстояния с r²: равенство — на окружности, меньше — внутри, больше — снаружи.",
+        "uz": "Masofa kvadratini r² bilan solishtiring: teng — aylana ustida, kichik — ichida, katta — tashqarida."
+      }
+    },
+    {
+      "code": "COO05_GEOMETRY_LINK",
+      "skill": "P1-COO-05",
+      "mistake_type": "reasoning",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The algebraic result was not connected correctly to the circle geometry.",
+        "ru": "Алгебраический результат неверно связан с геометрией окружности.",
+        "uz": "Algebraik natija aylana geometriyasi bilan noto‘g‘ri bog‘langan."
+      },
+      "next_action": {
+        "en": "Translate the algebra back into centre, radius, chord, tangent or intersection information before choosing the conclusion.",
+        "ru": "Перед выводом переведите алгебру обратно в информацию о центре, радиусе, хорде, касательной или пересечении.",
+        "uz": "Xulosa qilishdan oldin algebraik natijani markaz, radius, vatar, urinma yoki kesishish ma’lumotiga qaytaring."
+      }
+    },
+    {
+      "code": "COO06_TANGENCY_DISCRIMINANT",
+      "skill": "P1-COO-06",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Tangency was not converted into a repeated-root condition for the line-circle intersection equation.",
+        "ru": "Касание неверно переведено в условие кратного корня уравнения пересечения прямой и окружности.",
+        "uz": "Urinish chiziq-aylana kesishish tenglamasidagi takroriy ildiz shartiga noto‘g‘ri o‘tkazilgan."
+      },
+      "next_action": {
+        "en": "Substitute the line into the circle, form a quadratic, and impose discriminant = 0 for tangency.",
+        "ru": "Подставьте прямую в окружность, получите квадратное уравнение и для касания положите дискриминант равным 0.",
+        "uz": "Chiziqni aylanaga qo‘yib kvadrat tenglama hosil qiling va urinish uchun diskriminantni 0 ga tenglang."
+      }
+    },
+    {
+      "code": "COO06_INTERSECTION_COUNT",
+      "skill": "P1-COO-06",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The discriminant sign was matched to the wrong number of line-circle intersections.",
+        "ru": "Знак дискриминанта сопоставлен с неверным числом пересечений прямой и окружности.",
+        "uz": "Diskriminant ishorasi chiziq-aylana kesishishlar soni bilan noto‘g‘ri moslangan."
+      },
+      "next_action": {
+        "en": "D>0 gives two intersections, D=0 one tangent point, and D<0 no real intersections.",
+        "ru": "D>0 даёт две точки пересечения, D=0 — одну точку касания, D<0 — действительных пересечений нет.",
+        "uz": "D>0 — 2 ta kesishish, D=0 — 1 ta urinish nuqtasi, D<0 — haqiqiy kesishish yo‘q."
+      }
+    },
+    {
+      "code": "COO06_PARAMETER_ALGEBRA",
+      "skill": "P1-COO-06",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The parameter equation obtained from the intersection/tangency condition was solved incorrectly.",
+        "ru": "Уравнение с параметром, полученное из условия пересечения/касания, решено неверно.",
+        "uz": "Kesishish/urinish shartidan olingan parametrli tenglama noto‘g‘ri yechilgan."
+      },
+      "next_action": {
+        "en": "Simplify the discriminant or root condition carefully, then solve for the parameter and apply any stated restrictions.",
+        "ru": "Аккуратно упростите дискриминант или условие корней, затем найдите параметр и примените заданные ограничения.",
+        "uz": "Diskriminant yoki ildiz shartini ehtiyotkorlik bilan soddalashtirib, parametrni toping va berilgan cheklovlarni qo‘llang."
+      }
+    },
+    {
+      "code": "COO06_DISTANCE_TANGENCY",
+      "skill": "P1-COO-06",
+      "mistake_type": "reasoning",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The distance-from-centre tangency condition was used incorrectly.",
+        "ru": "Условие касания через расстояние от центра использовано неверно.",
+        "uz": "Markazdan masofa orqali urinish sharti noto‘g‘ri ishlatilgan."
+      },
+      "next_action": {
+        "en": "A line is tangent exactly when the perpendicular distance from the circle centre to the line equals the radius.",
+        "ru": "Прямая касается окружности тогда и только тогда, когда перпендикулярное расстояние от центра до прямой равно радиусу.",
+        "uz": "Chiziq aylanaga aynan markazdan chiziqqacha perpendikulyar masofa radiusga teng bo‘lganda urinadi."
+      }
+    }
+  ]
+}

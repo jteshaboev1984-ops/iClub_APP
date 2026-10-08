@@ -1,0 +1,541 @@
+{
+  "version": "practice_v2_p6_differentiation_draft_v0.1",
+  "skill": "P1-DIF-04",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q390",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-04",
+      "secondary_skills": [
+        "P1-COO-01"
+      ],
+      "role": "tangent_equation",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8–9 Differentiation, printed pp. 138–167",
+      "question": {
+        "en": "Find the equation of the tangent to y=x²−2x+3 at x=2.",
+        "ru": "Найдите уравнение касательной к y=x²−2x+3 при x=2.",
+        "uz": "y=x²−2x+3 egri chiziqqa x=2 dagi urinma tenglamasini toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=2x+3",
+            "ru": "y=2x+3",
+            "uz": "y=2x+3"
+          },
+          "diagnostic_code": "DIF04_LINE_CONSTANT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=2x−1",
+            "ru": "y=2x−1",
+            "uz": "y=2x−1"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=3x−3",
+            "ru": "y=3x−3",
+            "uz": "y=3x−3"
+          },
+          "diagnostic_code": "DIF04_TANGENT_GRADIENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=x+1",
+            "ru": "y=x+1",
+            "uz": "y=x+1"
+          },
+          "diagnostic_code": "DIF04_TANGENT_GRADIENT"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "At x=2, y=3. Also dy/dx=2x−2, so the tangent gradient is 2. Thus y−3=2(x−2), giving y=2x−1.",
+        "ru": "При x=2 имеем y=3. dy/dx=2x−2, поэтому градиент касательной равен 2. Тогда y−3=2(x−2), откуда y=2x−1.",
+        "uz": "x=2 da y=3. dy/dx=2x−2, demak urinma gradienti 2. y−3=2(x−2), bundan y=2x−1."
+      },
+      "ai_source_skill": "P1-DIF-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q391",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-04",
+      "secondary_skills": [
+        "P1-COO-03"
+      ],
+      "role": "normal_gradient",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8–9 Differentiation, printed pp. 138–167",
+      "question": {
+        "en": "For y=x³ at x=1, what is the gradient of the normal?",
+        "ru": "Для y=x³ при x=1 каков градиент нормали?",
+        "uz": "y=x³ uchun x=1 da normal gradienti qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
+          },
+          "diagnostic_code": "DIF04_TANGENT_GRADIENT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1/3",
+            "ru": "1/3",
+            "uz": "1/3"
+          },
+          "diagnostic_code": "DIF04_NORMAL_RECIPROCAL"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−3",
+            "ru": "−3",
+            "uz": "−3"
+          },
+          "diagnostic_code": "DIF04_NORMAL_RECIPROCAL"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−1/3",
+            "ru": "−1/3",
+            "uz": "−1/3"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "dy/dx=3x², so the tangent gradient at x=1 is 3. The normal gradient is the negative reciprocal, −1/3.",
+        "ru": "dy/dx=3x², поэтому градиент касательной при x=1 равен 3. Градиент нормали — отрицательная обратная величина, −1/3.",
+        "uz": "dy/dx=3x², x=1 da urinma gradienti 3. Normal gradient manfiy teskari qiymat, −1/3."
+      },
+      "ai_source_skill": "P1-DIF-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q392",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-04",
+      "secondary_skills": [
+        "P1-COO-01"
+      ],
+      "role": "tangent_intercept",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8–9 Differentiation, printed pp. 138–167",
+      "question": {
+        "en": "The tangent to y=2x²+1 at x=1 has equation y=4x+c. Enter c.",
+        "ru": "Касательная к y=2x²+1 при x=1 имеет вид y=4x+c. Введите c.",
+        "uz": "y=2x²+1 egri chiziqqa x=1 dagi urinma y=4x+c ko‘rinishda. c ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-1",
+        "accepted_examples": [
+          "-1",
+          "−1",
+          " -1 "
+        ],
+        "rejected_examples": [
+          "1",
+          "3",
+          "-3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "1",
+          "diagnostic_code": "DIF04_LINE_CONSTANT"
+        }
+      ],
+      "explanation": {
+        "en": "At x=1, the point is (1,3). Since 3=4(1)+c, c=−1.",
+        "ru": "При x=1 точка равна (1,3). Из 3=4(1)+c получаем c=−1.",
+        "uz": "x=1 da nuqta (1,3). 3=4(1)+c dan c=−1."
+      },
+      "ai_source_skill": "P1-DIF-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q393",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-04",
+      "secondary_skills": [
+        "P1-COO-03"
+      ],
+      "role": "normal_equation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8–9 Differentiation, printed pp. 138–167",
+      "question": {
+        "en": "Find the equation of the normal to y=x²+2x at x=0.",
+        "ru": "Найдите уравнение нормали к y=x²+2x при x=0.",
+        "uz": "y=x²+2x egri chiziqqa x=0 dagi normal tenglamasini toping."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=−x/2",
+            "ru": "y=−x/2",
+            "uz": "y=−x/2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=2x",
+            "ru": "y=2x",
+            "uz": "y=2x"
+          },
+          "diagnostic_code": "DIF04_TANGENT_GRADIENT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=x/2",
+            "ru": "y=x/2",
+            "uz": "y=x/2"
+          },
+          "diagnostic_code": "DIF04_NORMAL_RECIPROCAL"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=−2x",
+            "ru": "y=−2x",
+            "uz": "y=−2x"
+          },
+          "diagnostic_code": "DIF04_NORMAL_RECIPROCAL"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "At x=0, the point is (0,0) and the tangent gradient is 2. The normal gradient is −1/2, so y=−x/2.",
+        "ru": "При x=0 точка (0,0), градиент касательной 2. Градиент нормали −1/2, поэтому y=−x/2.",
+        "uz": "x=0 da nuqta (0,0), urinma gradienti 2. Normal gradient −1/2, demak y=−x/2."
+      },
+      "ai_source_skill": "P1-DIF-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q394",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-04",
+      "secondary_skills": [],
+      "role": "reverse_gradient_parameter",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8–9 Differentiation, printed pp. 138–167",
+      "question": {
+        "en": "For y=x²+kx, the tangent at x=1 has gradient 5. Enter k.",
+        "ru": "Для y=x²+kx касательная при x=1 имеет градиент 5. Введите k.",
+        "uz": "y=x²+kx uchun x=1 dagi urinma gradienti 5. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "2",
+          "4",
+          "5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=2x+k. At x=1, 2+k=5, so k=3.",
+        "ru": "dy/dx=2x+k. При x=1: 2+k=5, поэтому k=3.",
+        "uz": "dy/dx=2x+k. x=1 da 2+k=5, demak k=3."
+      },
+      "ai_source_skill": "P1-DIF-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q395",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-04",
+      "secondary_skills": [
+        "P1-COO-01"
+      ],
+      "role": "negative_x_tangent",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8–9 Differentiation, printed pp. 138–167",
+      "question": {
+        "en": "Which line is tangent to y=x² at x=−1?",
+        "ru": "Какая прямая является касательной к y=x² при x=−1?",
+        "uz": "y=x² egri chiziqqa x=−1 da qaysi chiziq urinma?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=2x+3",
+            "ru": "y=2x+3",
+            "uz": "y=2x+3"
+          },
+          "diagnostic_code": "DIF04_TANGENT_GRADIENT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=−2x+1",
+            "ru": "y=−2x+1",
+            "uz": "y=−2x+1"
+          },
+          "diagnostic_code": "DIF04_LINE_CONSTANT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=−2x−1",
+            "ru": "y=−2x−1",
+            "uz": "y=−2x−1"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=−x",
+            "ru": "y=−x",
+            "uz": "y=−x"
+          },
+          "diagnostic_code": "DIF04_TANGENT_GRADIENT"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "At x=−1 the point is (−1,1), and dy/dx=2x gives gradient −2. So y−1=−2(x+1), hence y=−2x−1.",
+        "ru": "При x=−1 точка (−1,1), а dy/dx=2x даёт градиент −2. Поэтому y−1=−2(x+1), то есть y=−2x−1.",
+        "uz": "x=−1 da nuqta (−1,1), dy/dx=2x dan gradient −2. y−1=−2(x+1), demak y=−2x−1."
+      },
+      "ai_source_skill": "P1-DIF-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q396",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-04",
+      "secondary_skills": [
+        "P1-COO-03"
+      ],
+      "role": "normal_intercept_scaled",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8–9 Differentiation, printed pp. 138–167",
+      "question": {
+        "en": "The normal to y=x³+1 at x=1 has equation y=−x/3+c. Enter 3c.",
+        "ru": "Нормаль к y=x³+1 при x=1 имеет вид y=−x/3+c. Введите 3c.",
+        "uz": "y=x³+1 egri chiziqqa x=1 dagi normal y=−x/3+c. 3c ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "7",
+        "accepted_examples": [
+          "7",
+          " 7 "
+        ],
+        "rejected_examples": [
+          "5",
+          "6",
+          "9"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The point is (1,2). Substituting into y=−x/3+c gives 2=−1/3+c, so c=7/3 and 3c=7.",
+        "ru": "Точка (1,2). Подставляя в y=−x/3+c, получаем 2=−1/3+c, поэтому c=7/3 и 3c=7.",
+        "uz": "Nuqta (1,2). y=−x/3+c ga qo‘ysak 2=−1/3+c, demak c=7/3 va 3c=7."
+      },
+      "ai_source_skill": "P1-DIF-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q397",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-04",
+      "secondary_skills": [],
+      "role": "horizontal_tangent",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8–9 Differentiation, printed pp. 138–167",
+      "question": {
+        "en": "What is the tangent line to y=x³−12x at x=2?",
+        "ru": "Какова касательная к y=x³−12x при x=2?",
+        "uz": "y=x³−12x egri chiziqqa x=2 dagi urinma qaysi?"
+      },
+      "options": [
+        {
+          "key": "D",
+          "text": {
+            "en": "y=−16",
+            "ru": "y=−16",
+            "uz": "y=−16"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=0",
+            "ru": "y=0",
+            "uz": "y=0"
+          },
+          "diagnostic_code": "DIF04_POINT_ON_CURVE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=2",
+            "ru": "x=2",
+            "uz": "x=2"
+          },
+          "diagnostic_code": "DIF04_TANGENT_GRADIENT"
+        },
+        {
+          "key": "A",
+          "text": {
+            "en": "y=−8x",
+            "ru": "y=−8x",
+            "uz": "y=−8x"
+          },
+          "diagnostic_code": "DIF04_LINE_CONSTANT"
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "dy/dx=3x²−12, which is 0 at x=2, so the tangent is horizontal. The point is (2,−16), hence the tangent is y=−16.",
+        "ru": "dy/dx=3x²−12, при x=2 это 0, поэтому касательная горизонтальна. Точка (2,−16), значит касательная y=−16.",
+        "uz": "dy/dx=3x²−12, x=2 da 0, demak urinma gorizontal. Nuqta (2,−16), shuning uchun urinma y=−16."
+      },
+      "ai_source_skill": "P1-DIF-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q398",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-04",
+      "secondary_skills": [],
+      "role": "parallel_tangent",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8–9 Differentiation, printed pp. 138–167",
+      "question": {
+        "en": "For y=x³−3x, the tangent is parallel to a line of gradient 9 at two x-values. Enter the positive x-value.",
+        "ru": "Для y=x³−3x касательная параллельна прямой с градиентом 9 при двух значениях x. Введите положительное x.",
+        "uz": "y=x³−3x uchun urinma gradienti 9 bo‘lgan chiziqqa ikki x qiymatda parallel. Musbat x ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "2",
+        "accepted_examples": [
+          "2",
+          " 2 "
+        ],
+        "rejected_examples": [
+          "-2",
+          "1",
+          "3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "dy/dx=3x²−3. Set 3x²−3=9, giving x²=4, so x=±2. The positive value is 2.",
+        "ru": "dy/dx=3x²−3. Приравниваем к 9: 3x²−3=9, поэтому x²=4 и x=±2. Положительное значение 2.",
+        "uz": "dy/dx=3x²−3. 9 ga tenglaymiz: 3x²−3=9, demak x²=4 va x=±2. Musbat qiymat 2."
+      },
+      "ai_source_skill": "P1-DIF-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q399",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-04",
+      "secondary_skills": [
+        "P1-COO-03"
+      ],
+      "role": "tangent_normal_pair",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8–9 Differentiation, printed pp. 138–167",
+      "question": {
+        "en": "At x=1 on y=1/x, which pair gives the tangent and normal equations respectively?",
+        "ru": "При x=1 на y=1/x какая пара задаёт соответственно касательную и нормаль?",
+        "uz": "y=1/x da x=1 uchun qaysi juftlik mos ravishda urinma va normal tenglamalarni beradi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=−x+2; y=x",
+            "ru": "y=−x+2; y=x",
+            "uz": "y=−x+2; y=x"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=x; y=−x+2",
+            "ru": "y=x; y=−x+2",
+            "uz": "y=x; y=−x+2"
+          },
+          "diagnostic_code": "DIF04_NORMAL_RECIPROCAL"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=−x; y=x+2",
+            "ru": "y=−x; y=x+2",
+            "uz": "y=−x; y=x+2"
+          },
+          "diagnostic_code": "DIF04_POINT_ON_CURVE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=x+2; y=−x",
+            "ru": "y=x+2; y=−x",
+            "uz": "y=x+2; y=−x"
+          },
+          "diagnostic_code": "DIF04_LINE_CONSTANT"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "At x=1 the point is (1,1). Since dy/dx=−1/x², the tangent gradient is −1 and the normal gradient is 1. Thus tangent y=−x+2 and normal y=x.",
+        "ru": "При x=1 точка (1,1). Так как dy/dx=−1/x², градиент касательной −1, а нормали 1. Поэтому касательная y=−x+2, нормаль y=x.",
+        "uz": "x=1 da nuqta (1,1). dy/dx=−1/x² bo‘lgani uchun urinma gradienti −1, normalniki 1. Demak urinma y=−x+2, normal y=x."
+      },
+      "ai_source_skill": "P1-DIF-04",
+      "status": "draft"
+    }
+  ]
+}

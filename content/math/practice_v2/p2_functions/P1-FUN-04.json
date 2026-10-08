@@ -1,0 +1,678 @@
+{
+  "version": "practice_v2_p2_functions_draft_v0.1",
+  "skill": "P1-FUN-04",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q097",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-04",
+      "secondary_skills": [],
+      "role": "concept_recognition",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which function is one-to-one on all real numbers?",
+        "ru": "Какая функция взаимно однозначна на всех действительных числах?",
+        "uz": "Qaysi funksiya barcha haqiqiy sonlarda one-to-one?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "f(x)=x²",
+            "ru": "f(x)=x²",
+            "uz": "f(x)=x²"
+          },
+          "diagnostic_code": "FUN04_ONE_ONE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "f(x)=4x−7",
+            "ru": "f(x)=4x−7",
+            "uz": "f(x)=4x−7"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "f(x)=(x−2)²+1",
+            "ru": "f(x)=(x−2)²+1",
+            "uz": "f(x)=(x−2)²+1"
+          },
+          "diagnostic_code": "FUN04_ONE_ONE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "f(x)=x⁴+3",
+            "ru": "f(x)=x⁴+3",
+            "uz": "f(x)=x⁴+3"
+          },
+          "diagnostic_code": "FUN04_ONE_ONE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "A non-constant linear function is one-to-one on all real numbers. Each of the even-power functions gives the same output for some different inputs.",
+        "ru": "Непостоянная линейная функция взаимно однозначна на всех действительных числах. Функции с чётной степенью дают одинаковые выходы для некоторых разных входов.",
+        "uz": "Doimiy bo‘lmagan chiziqli funksiya barcha haqiqiy sonlarda one-to-one. Juft darajali funksiyalarda ayrim turli kirishlar bir xil chiqish beradi."
+      },
+      "ai_source_skill": "P1-FUN-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q098",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-04",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=3x+7, suppose f⁻¹(a)=5. Enter a.",
+        "ru": "Для f(x)=3x+7 известно, что f⁻¹(a)=5. Введите a.",
+        "uz": "f(x)=3x+7 uchun f⁻¹(a)=5 bo‘lsin. a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "22",
+        "accepted_examples": [
+          "22",
+          " 22 "
+        ],
+        "rejected_examples": [
+          "5",
+          "4",
+          "12"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "f⁻¹(a)=5 means f(5)=a. Since f(5)=3(5)+7=22, we get a=22.",
+        "ru": "f⁻¹(a)=5 означает f(5)=a. Так как f(5)=3(5)+7=22, получаем a=22.",
+        "uz": "f⁻¹(a)=5 degani f(5)=a. f(5)=3(5)+7=22, demak a=22."
+      },
+      "ai_source_skill": "P1-FUN-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q099",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-04",
+      "secondary_skills": [],
+      "role": "misconception_trap",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "If f(x)=2x+1, which expression is f⁻¹(x)?",
+        "ru": "Если f(x)=2x+1, какое выражение равно f⁻¹(x)?",
+        "uz": "Agar f(x)=2x+1 bo‘lsa, f⁻¹(x) qaysi ifodaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "1/(2x+1)",
+            "ru": "1/(2x+1)",
+            "uz": "1/(2x+1)"
+          },
+          "diagnostic_code": "FUN04_RECIPROCAL"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "2x−1",
+            "ru": "2x−1",
+            "uz": "2x−1"
+          },
+          "diagnostic_code": "FUN04_SWAP_SOLVE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(x−1)/2",
+            "ru": "(x−1)/2",
+            "uz": "(x−1)/2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(x+1)/2",
+            "ru": "(x+1)/2",
+            "uz": "(x+1)/2"
+          },
+          "diagnostic_code": "FUN04_SWAP_SOLVE"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Write y=2x+1, swap x and y to get x=2y+1, then solve: y=(x−1)/2.",
+        "ru": "Запишем y=2x+1, поменяем x и y: x=2y+1, затем выразим y: y=(x−1)/2.",
+        "uz": "y=2x+1 deb yozamiz, x va y ni almashtiramiz: x=2y+1, keyin y=(x−1)/2."
+      },
+      "ai_source_skill": "P1-FUN-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q100",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-04",
+      "secondary_skills": [],
+      "role": "method_application",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=(3x−5)/2, which expression is f⁻¹(x)?",
+        "ru": "Для f(x)=(3x−5)/2 какое выражение равно f⁻¹(x)?",
+        "uz": "f(x)=(3x−5)/2 uchun f⁻¹(x) qaysi ifodaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(2x+5)/3",
+            "ru": "(2x+5)/3",
+            "uz": "(2x+5)/3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3/(2x−5)",
+            "ru": "3/(2x−5)",
+            "uz": "3/(2x−5)"
+          },
+          "diagnostic_code": "FUN04_RECIPROCAL"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(2x−5)/3",
+            "ru": "(2x−5)/3",
+            "uz": "(2x−5)/3"
+          },
+          "diagnostic_code": "FUN04_SWAP_SOLVE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(3x+5)/2",
+            "ru": "(3x+5)/2",
+            "uz": "(3x+5)/2"
+          },
+          "diagnostic_code": "FUN04_SWAP_SOLVE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "From y=(3x−5)/2, swap variables: x=(3y−5)/2. Then 2x=3y−5, so y=(2x+5)/3.",
+        "ru": "Из y=(3x−5)/2 после перестановки переменных получаем x=(3y−5)/2. Тогда 2x=3y−5, поэтому y=(2x+5)/3.",
+        "uz": "y=(3x−5)/2 dan o‘zgaruvchilarni almashtirib x=(3y−5)/2 olamiz. 2x=3y−5, demak y=(2x+5)/3."
+      },
+      "ai_source_skill": "P1-FUN-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q101",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-04",
+      "secondary_skills": [],
+      "role": "application_variation",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=(x−5)/4, let p=f⁻¹(3) and q=f⁻¹(5). Enter q−p.",
+        "ru": "Для f(x)=(x−5)/4 пусть p=f⁻¹(3), q=f⁻¹(5). Введите q−p.",
+        "uz": "f(x)=(x−5)/4 uchun p=f⁻¹(3), q=f⁻¹(5) bo‘lsin. q−p ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "8",
+        "accepted_examples": [
+          "8",
+          " 8 "
+        ],
+        "rejected_examples": [
+          "2",
+          "12",
+          "20"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The inverse is f⁻¹(x)=4x+5. Thus p=17 and q=25, so q−p=8.",
+        "ru": "Обратная функция: f⁻¹(x)=4x+5. Поэтому p=17, q=25 и q−p=8.",
+        "uz": "Teskari funksiya f⁻¹(x)=4x+5. Demak p=17, q=25 va q−p=8."
+      },
+      "ai_source_skill": "P1-FUN-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q102",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-04",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "domain_reasoning",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "For f(x)=(x−2)²+6, which domain restriction makes f one-to-one and decreasing?",
+        "ru": "Для f(x)=(x−2)²+6 какое ограничение области делает f взаимно однозначной и убывающей?",
+        "uz": "f(x)=(x−2)²+6 uchun qaysi soha cheklovi f ni one-to-one va kamayuvchi qiladi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x≥2",
+            "ru": "x≥2",
+            "uz": "x≥2"
+          },
+          "diagnostic_code": "FUN04_ONE_ONE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "All real x",
+            "ru": "Все действительные x",
+            "uz": "Barcha haqiqiy x"
+          },
+          "diagnostic_code": "FUN04_ONE_ONE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x≠2",
+            "ru": "x≠2",
+            "uz": "x≠2"
+          },
+          "diagnostic_code": "FUN04_ONE_ONE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x≤2",
+            "ru": "x≤2",
+            "uz": "x≤2"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "The vertex is at x=2. On x≤2 the left branch is strictly decreasing as x increases toward 2, so it is one-to-one and decreasing.",
+        "ru": "Вершина находится при x=2. На x≤2 левая ветвь строго убывает при движении x к 2, поэтому функция взаимно однозначна и убывает.",
+        "uz": "Cho‘qqi x=2 da. x≤2 da chap tarmoq x 2 ga yaqinlashganda qat’iy kamayadi, shuning uchun funksiya one-to-one va kamayuvchi."
+      },
+      "ai_source_skill": "P1-FUN-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q103",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-04",
+      "secondary_skills": [],
+      "role": "domain_range_link",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "A one-to-one function f has domain [1,6] and range [−3,8]. What is the domain of f⁻¹?",
+        "ru": "Взаимно однозначная функция f имеет область определения [1,6] и область значений [−3,8]. Какова область определения f⁻¹?",
+        "uz": "One-to-one f funksiyaning aniqlanish sohasi [1,6], qiymatlar to‘plami [−3,8]. f⁻¹ ning aniqlanish sohasi qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "[−8,3]",
+            "ru": "[−8,3]",
+            "uz": "[−8,3]"
+          },
+          "diagnostic_code": "FUN04_DOMAIN_RANGE_SWAP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "[1,6]",
+            "ru": "[1,6]",
+            "uz": "[1,6]"
+          },
+          "diagnostic_code": "FUN04_DOMAIN_RANGE_SWAP"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "[−3,8]",
+            "ru": "[−3,8]",
+            "uz": "[−3,8]"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "[−3,6]",
+            "ru": "[−3,6]",
+            "uz": "[−3,6]"
+          },
+          "diagnostic_code": "FUN04_DOMAIN_RANGE_SWAP"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "The inverse accepts the original outputs as its inputs. Therefore the domain of f⁻¹ is the range of f: [−3,8].",
+        "ru": "Обратная функция принимает исходные выходы как входы. Поэтому область определения f⁻¹ равна области значений f: [−3,8].",
+        "uz": "Teskari funksiya boshlang‘ich chiqishlarni kirish sifatida qabul qiladi. Demak f⁻¹ ning aniqlanish sohasi f ning qiymatlar to‘plami: [−3,8]."
+      },
+      "ai_source_skill": "P1-FUN-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q104",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-04",
+      "secondary_skills": [],
+      "role": "application_variation",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=(x+1)²+2 with domain x≥−1. Enter f⁻¹(27).",
+        "ru": "Пусть f(x)=(x+1)²+2 с областью x≥−1. Введите f⁻¹(27).",
+        "uz": "f(x)=(x+1)²+2 va sohasi x≥−1 bo‘lsin. f⁻¹(27) ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "-6",
+          "5",
+          "25"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-6",
+          "diagnostic_code": "FUN04_BRANCH"
+        }
+      ],
+      "explanation": {
+        "en": "Solve (x+1)²+2=27, so (x+1)²=25. The roots are x=4 and x=−6, but the domain requires x≥−1. Therefore f⁻¹(27)=4.",
+        "ru": "Решаем (x+1)²+2=27, получаем (x+1)²=25. Корни x=4 и x=−6, но область требует x≥−1. Поэтому f⁻¹(27)=4.",
+        "uz": "(x+1)²+2=27 ni yechamiz: (x+1)²=25. Ildizlar x=4 va x=−6, lekin soha x≥−1. Demak f⁻¹(27)=4."
+      },
+      "ai_source_skill": "P1-FUN-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q105",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-04",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=(x+1)²−4 with domain x≤−1. Which expression is f⁻¹(x)?",
+        "ru": "Пусть f(x)=(x+1)²−4 с областью x≤−1. Какое выражение равно f⁻¹(x)?",
+        "uz": "f(x)=(x+1)²−4 va sohasi x≤−1 bo‘lsin. f⁻¹(x) qaysi ifodaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−1+√(x+4)",
+            "ru": "−1+√(x+4)",
+            "uz": "−1+√(x+4)"
+          },
+          "diagnostic_code": "FUN04_BRANCH"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "1−√(x−4)",
+            "ru": "1−√(x−4)",
+            "uz": "1−√(x−4)"
+          },
+          "diagnostic_code": "FUN04_SWAP_SOLVE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−1−√(x+4)",
+            "ru": "−1−√(x+4)",
+            "uz": "−1−√(x+4)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "1/( (x+1)²−4 )",
+            "ru": "1/( (x+1)²−4 )",
+            "uz": "1/( (x+1)²−4 )"
+          },
+          "diagnostic_code": "FUN04_RECIPROCAL"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "From y=(x+1)²−4, we get x+1=±√(y+4). The original domain x≤−1 selects the negative branch, so x=−1−√(y+4). Hence f⁻¹(x)=−1−√(x+4).",
+        "ru": "Из y=(x+1)²−4 получаем x+1=±√(y+4). Область x≤−1 выбирает отрицательную ветвь, поэтому x=−1−√(y+4). Значит f⁻¹(x)=−1−√(x+4).",
+        "uz": "y=(x+1)²−4 dan x+1=±√(y+4). x≤−1 sohasi manfiy tarmoqni tanlaydi, demak x=−1−√(y+4). Shuning uchun f⁻¹(x)=−1−√(x+4)."
+      },
+      "ai_source_skill": "P1-FUN-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q106",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-04",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "A one-to-one function f has domain x>2 and range y<5. Which statement about f⁻¹ is correct?",
+        "ru": "Взаимно однозначная функция f имеет область x>2 и область значений y<5. Какое утверждение о f⁻¹ верно?",
+        "uz": "One-to-one f funksiyaning sohasi x>2, qiymatlar to‘plami y<5. f⁻¹ haqida qaysi tasdiq to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Its domain is x>2 and range y<5.",
+            "ru": "Её область x>2, а область значений y<5.",
+            "uz": "Uning sohasi x>2, qiymatlar to‘plami y<5."
+          },
+          "diagnostic_code": "FUN04_DOMAIN_RANGE_SWAP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Its domain is x>5 and range y<2.",
+            "ru": "Её область x>5, а область значений y<2.",
+            "uz": "Uning sohasi x>5, qiymatlar to‘plami y<2."
+          },
+          "diagnostic_code": "FUN04_DOMAIN_RANGE_SWAP"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Its domain is x≤5 and range y≥2.",
+            "ru": "Её область x≤5, а область значений y≥2.",
+            "uz": "Uning sohasi x≤5, qiymatlar to‘plami y≥2."
+          },
+          "diagnostic_code": "FUN04_DOMAIN_RANGE_SWAP"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Its domain is x<5 and range y>2.",
+            "ru": "Её область x<5, а область значений y>2.",
+            "uz": "Uning sohasi x<5, qiymatlar to‘plami y>2."
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "The inverse swaps domain and range. The original range y<5 becomes the inverse domain x<5, and the original domain x>2 becomes the inverse range y>2.",
+        "ru": "Обратная функция меняет область определения и область значений местами. Исходная область значений y<5 становится областью x<5 для f⁻¹, а исходная область x>2 становится её областью значений y>2.",
+        "uz": "Teskari funksiya aniqlanish sohasi va qiymatlar to‘plamini almashtiradi. Boshlang‘ich y<5 qiymatlar to‘plami f⁻¹ uchun x<5 soha, boshlang‘ich x>2 soha esa y>2 qiymatlar to‘plami bo‘ladi."
+      },
+      "ai_source_skill": "P1-FUN-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q107",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-04",
+      "secondary_skills": [],
+      "role": "concept_interpretation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "If f is one-to-one and f(6)=−2, which statement must be true?",
+        "ru": "Если f взаимно однозначна и f(6)=−2, какое утверждение обязательно верно?",
+        "uz": "Agar f one-to-one va f(6)=−2 bo‘lsa, qaysi tasdiq albatta to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "f⁻¹(−2)=6",
+            "ru": "f⁻¹(−2)=6",
+            "uz": "f⁻¹(−2)=6"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "f⁻¹(−2)=−6",
+            "ru": "f⁻¹(−2)=−6",
+            "uz": "f⁻¹(−2)=−6"
+          },
+          "diagnostic_code": "FUN04_SWAP_SOLVE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "f⁻¹(−2)=1/6",
+            "ru": "f⁻¹(−2)=1/6",
+            "uz": "f⁻¹(−2)=1/6"
+          },
+          "diagnostic_code": "FUN04_RECIPROCAL"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "f⁻¹(6)=−2",
+            "ru": "f⁻¹(6)=−2",
+            "uz": "f⁻¹(6)=−2"
+          },
+          "diagnostic_code": "FUN04_SWAP_SOLVE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "An inverse reverses the mapping. Since f sends 6 to −2, f⁻¹ sends −2 back to 6.",
+        "ru": "Обратная функция разворачивает отображение. Если f переводит 6 в −2, то f⁻¹ переводит −2 обратно в 6.",
+        "uz": "Teskari funksiya moslikni ortga qaytaradi. f 6 ni −2 ga o‘tkazsa, f⁻¹ −2 ni 6 ga qaytaradi."
+      },
+      "ai_source_skill": "P1-FUN-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q108",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-04",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "mixed_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=x²−6x+5 with domain x≤3. Which expression is f⁻¹(x)?",
+        "ru": "Пусть f(x)=x²−6x+5 с областью x≤3. Какое выражение равно f⁻¹(x)?",
+        "uz": "f(x)=x²−6x+5 va sohasi x≤3 bo‘lsin. f⁻¹(x) qaysi ifodaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "1/(x²−6x+5)",
+            "ru": "1/(x²−6x+5)",
+            "uz": "1/(x²−6x+5)"
+          },
+          "diagnostic_code": "FUN04_RECIPROCAL"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3+√(x+4)",
+            "ru": "3+√(x+4)",
+            "uz": "3+√(x+4)"
+          },
+          "diagnostic_code": "FUN04_BRANCH"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−3−√(x−4)",
+            "ru": "−3−√(x−4)",
+            "uz": "−3−√(x−4)"
+          },
+          "diagnostic_code": "FUN04_SWAP_SOLVE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "3−√(x+4)",
+            "ru": "3−√(x+4)",
+            "uz": "3−√(x+4)"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "Complete the square: f(x)=(x−3)²−4. Then y+4=(x−3)². Because the original domain is x≤3, choose x−3=−√(y+4), so x=3−√(y+4). Therefore f⁻¹(x)=3−√(x+4).",
+        "ru": "Выделяем квадрат: f(x)=(x−3)²−4. Тогда y+4=(x−3)². Из-за области x≤3 выбираем x−3=−√(y+4), поэтому x=3−√(y+4). Значит f⁻¹(x)=3−√(x+4).",
+        "uz": "To‘liq kvadratga keltiramiz: f(x)=(x−3)²−4. Demak y+4=(x−3)². Boshlang‘ich soha x≤3 bo‘lgani uchun x−3=−√(y+4) ni tanlaymiz, ya’ni x=3−√(y+4). Shuning uchun f⁻¹(x)=3−√(x+4)."
+      },
+      "ai_source_skill": "P1-FUN-04",
+      "status": "draft"
+    }
+  ]
+}

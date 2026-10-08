@@ -17,6 +17,11 @@ assert(migration.includes('private.iclub_rollout_allows_user_v1(v_uid,v_runtime.
 assert(migration.includes("'access_unchanged',true"), 'shadow preservation marker missing');
 assert(migration.includes('public.set_iclub_subject_slot_service_v1('), 'browser wrapper is not delegated to governed slot service');
 assert(migration.includes("v_cfg.subject_limits_mode<>'shadow'"), 'beta browser write path is not shadow-only');
+assert(migration.includes("pg_advisory_xact_lock(hashtextextended('iclub-subject-slot:'||v_uid::text,0))"), 'subject slot writes are not serialized');
+assert(migration.includes("'subject_unavailable'"), 'inactive/unknown subject rejection missing');
+assert(migration.includes("'competitive_requires_main_subject'"), 'non-main Competitive rejection missing');
+assert(migration.includes("'study_subject_limit_reached'"), 'atomic study limit rejection missing');
+assert(migration.includes("'competitive_subject_limit_reached'"), 'atomic Competitive limit rejection missing');
 assert(!migration.includes('finalize_iclub_subject_selection_service_v1('), 'beta UI must not finalize grandfather migration');
 
 for (const forbidden of [
@@ -48,6 +53,7 @@ assert(app.includes('raw === "subject-access" && !canShowProfileSubjectAccess()'
 for (const token of [
   'get_iclub_subject_selection_bootstrap_v1',
   'set_iclub_my_subject_slot_v1',
+  'state.busy.size > 0',
   'study_subject_limit_reached',
   'competitive_subject_limit_reached',
   'all_available_subjects',

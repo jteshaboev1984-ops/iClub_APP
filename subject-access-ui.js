@@ -329,7 +329,7 @@
     for (const subject of subjects) {
       const key = String(subject?.subject_key || "");
       const current = selections.get(key) || { study:false, competitive:false };
-      const busy = state.busy.has(key);
+      const busy = state.busy.size > 0;
 
       if (all) {
         list.appendChild(makeSubjectRow({
@@ -394,7 +394,7 @@
     for (const subject of subjects) {
       const key = String(subject?.subject_key || "");
       const current = selections.get(key) || { study:false, competitive:false };
-      const busy = state.busy.has(key);
+      const busy = state.busy.size > 0;
       const studyAvailable = all || current.study;
       const limitReached = selectedCount >= limit && !current.competitive;
       const disabled = busy || !studyAvailable || limitReached;

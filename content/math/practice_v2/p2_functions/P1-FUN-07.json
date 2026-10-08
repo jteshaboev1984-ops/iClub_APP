@@ -1,0 +1,579 @@
+{
+  "version": "practice_v2_p2_functions_draft_v0.1",
+  "skill": "P1-FUN-07",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q127",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-07",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which equation reflects y=f(x) in the x-axis?",
+        "ru": "Какое уравнение отражает y=f(x) относительно оси x?",
+        "uz": "Qaysi tenglama y=f(x) grafigini x o‘qiga nisbatan akslantiradi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=f(−x)",
+            "ru": "y=f(−x)",
+            "uz": "y=f(−x)"
+          },
+          "diagnostic_code": "FUN07_AXIS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=−f(x)",
+            "ru": "y=−f(x)",
+            "uz": "y=−f(x)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=f(x−1)",
+            "ru": "y=f(x−1)",
+            "uz": "y=f(x−1)"
+          },
+          "diagnostic_code": "FUN07_INSIDE_OUTSIDE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=f(x)+1",
+            "ru": "y=f(x)+1",
+            "uz": "y=f(x)+1"
+          },
+          "diagnostic_code": "FUN07_INSIDE_OUTSIDE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Reflection in the x-axis changes every output y to −y, so the transformed equation is y=−f(x).",
+        "ru": "Отражение относительно оси x меняет каждый выход y на −y, поэтому новое уравнение y=−f(x).",
+        "uz": "x o‘qiga nisbatan akslantirish har bir y chiqishni −y ga o‘zgartiradi, demak yangi tenglama y=−f(x)."
+      },
+      "ai_source_skill": "P1-FUN-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q128",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-07",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which equation reflects y=f(x) in the y-axis?",
+        "ru": "Какое уравнение отражает y=f(x) относительно оси y?",
+        "uz": "Qaysi tenglama y=f(x) grafigini y o‘qiga nisbatan akslantiradi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=f(−x)",
+            "ru": "y=f(−x)",
+            "uz": "y=f(−x)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=−f(x)",
+            "ru": "y=−f(x)",
+            "uz": "y=−f(x)"
+          },
+          "diagnostic_code": "FUN07_AXIS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=f(x)−1",
+            "ru": "y=f(x)−1",
+            "uz": "y=f(x)−1"
+          },
+          "diagnostic_code": "FUN07_INSIDE_OUTSIDE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=f(x+1)",
+            "ru": "y=f(x+1)",
+            "uz": "y=f(x+1)"
+          },
+          "diagnostic_code": "FUN07_INSIDE_OUTSIDE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Reflection in the y-axis changes each input x to −x while leaving y unchanged, so the equation becomes y=f(−x).",
+        "ru": "Отражение относительно оси y меняет вход x на −x, оставляя y без изменения, поэтому получаем y=f(−x).",
+        "uz": "y o‘qiga nisbatan akslantirish x kirishni −x ga o‘zgartiradi, y esa o‘zgarmaydi. Demak y=f(−x)."
+      },
+      "ai_source_skill": "P1-FUN-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q129",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-07",
+      "secondary_skills": [],
+      "role": "point_mapping",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The point (4,−7) lies on y=f(x). After reflection in the x-axis, enter the y-coordinate of the corresponding point.",
+        "ru": "Точка (4,−7) лежит на y=f(x). После отражения относительно оси x введите y-координату соответствующей точки.",
+        "uz": "(4,−7) nuqta y=f(x) da yotadi. x o‘qiga nisbatan akslantirgandan keyin mos nuqtaning y-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "7",
+        "accepted_examples": [
+          "7",
+          " 7 "
+        ],
+        "rejected_examples": [
+          "-7",
+          "4",
+          "-4"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-7",
+          "diagnostic_code": "FUN07_POINT_MAP"
+        }
+      ],
+      "explanation": {
+        "en": "Reflection in the x-axis maps (x,y) to (x,−y). Thus (4,−7) becomes (4,7), so the y-coordinate is 7.",
+        "ru": "Отражение относительно оси x переводит (x,y) в (x,−y). Поэтому (4,−7) становится (4,7), и y-координата равна 7.",
+        "uz": "x o‘qiga nisbatan akslantirish (x,y) ni (x,−y) ga o‘tkazadi. (4,−7) → (4,7), demak y-koordinata 7."
+      },
+      "ai_source_skill": "P1-FUN-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q130",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-07",
+      "secondary_skills": [],
+      "role": "point_mapping",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "If (−5,2) lies on y=f(x), which point lies on y=f(−x)?",
+        "ru": "Если (−5,2) лежит на y=f(x), какая точка лежит на y=f(−x)?",
+        "uz": "Agar (−5,2) nuqta y=f(x) da yotsa, y=f(−x) da qaysi nuqta yotadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(5,2)",
+            "ru": "(5,2)",
+            "uz": "(5,2)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(−2,5)",
+            "ru": "(−2,5)",
+            "uz": "(−2,5)"
+          },
+          "diagnostic_code": "FUN07_POINT_MAP"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(−5,−2)",
+            "ru": "(−5,−2)",
+            "uz": "(−5,−2)"
+          },
+          "diagnostic_code": "FUN07_AXIS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(5,−2)",
+            "ru": "(5,−2)",
+            "uz": "(5,−2)"
+          },
+          "diagnostic_code": "FUN07_POINT_MAP"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "y=f(−x) is reflection in the y-axis, so (x,y) maps to (−x,y). Hence (−5,2) becomes (5,2).",
+        "ru": "y=f(−x) — отражение относительно оси y, поэтому (x,y) переходит в (−x,y). Значит (−5,2) становится (5,2).",
+        "uz": "y=f(−x) y o‘qiga nisbatan akslantirish, ya’ni (x,y) → (−x,y). Demak (−5,2) → (5,2)."
+      },
+      "ai_source_skill": "P1-FUN-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q131",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-07",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The graph y=(x−2)²+1 is reflected in the y-axis. What is the new equation?",
+        "ru": "График y=(x−2)²+1 отражают относительно оси y. Каково новое уравнение?",
+        "uz": "y=(x−2)²+1 grafigi y o‘qiga nisbatan akslantiriladi. Yangi tenglama qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=−(x−2)²−1",
+            "ru": "y=−(x−2)²−1",
+            "uz": "y=−(x−2)²−1"
+          },
+          "diagnostic_code": "FUN07_AXIS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=−(x+2)²+1",
+            "ru": "y=−(x+2)²+1",
+            "uz": "y=−(x+2)²+1"
+          },
+          "diagnostic_code": "FUN07_AXIS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=(x−2)²−1",
+            "ru": "y=(x−2)²−1",
+            "uz": "y=(x−2)²−1"
+          },
+          "diagnostic_code": "FUN07_INSIDE_OUTSIDE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=(x+2)²+1",
+            "ru": "y=(x+2)²+1",
+            "uz": "y=(x+2)²+1"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "Reflecting in the y-axis means replace x by −x: (−x−2)²+1=(x+2)²+1.",
+        "ru": "При отражении относительно оси y заменяем x на −x: (−x−2)²+1=(x+2)²+1.",
+        "uz": "y o‘qiga nisbatan akslantirishda x ni −x ga almashtiramiz: (−x−2)²+1=(x+2)²+1."
+      },
+      "ai_source_skill": "P1-FUN-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q132",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-07",
+      "secondary_skills": [],
+      "role": "point_mapping",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The point (−8,3) is reflected in the y-axis. Enter the new x-coordinate.",
+        "ru": "Точку (−8,3) отражают относительно оси y. Введите новую x-координату.",
+        "uz": "(−8,3) nuqta y o‘qiga nisbatan akslantiriladi. Yangi x-koordinatani kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "8",
+        "accepted_examples": [
+          "8",
+          " 8 "
+        ],
+        "rejected_examples": [
+          "-8",
+          "3",
+          "-3"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "-8",
+          "diagnostic_code": "FUN07_POINT_MAP"
+        }
+      ],
+      "explanation": {
+        "en": "Reflection in the y-axis changes only the sign of x: (−8,3) becomes (8,3). The new x-coordinate is 8.",
+        "ru": "Отражение относительно оси y меняет только знак x: (−8,3) становится (8,3). Новая x-координата равна 8.",
+        "uz": "y o‘qiga nisbatan akslantirish faqat x ishorasini o‘zgartiradi: (−8,3) → (8,3). Yangi x-koordinata 8."
+      },
+      "ai_source_skill": "P1-FUN-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q133",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-07",
+      "secondary_skills": [],
+      "role": "combined_reflection",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which equation results from reflecting y=f(x) in the y-axis and then in the x-axis?",
+        "ru": "Какое уравнение получится после отражения y=f(x) сначала относительно оси y, затем относительно оси x?",
+        "uz": "y=f(x) ni avval y o‘qiga, keyin x o‘qiga nisbatan akslantirganda qaysi tenglama hosil bo‘ladi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=f(−x)",
+            "ru": "y=f(−x)",
+            "uz": "y=f(−x)"
+          },
+          "diagnostic_code": "FUN07_INSIDE_OUTSIDE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=−f(−x)",
+            "ru": "y=−f(−x)",
+            "uz": "y=−f(−x)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=f(x)",
+            "ru": "y=f(x)",
+            "uz": "y=f(x)"
+          },
+          "diagnostic_code": "FUN07_AXIS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=−f(x)",
+            "ru": "y=−f(x)",
+            "uz": "y=−f(x)"
+          },
+          "diagnostic_code": "FUN07_INSIDE_OUTSIDE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "Reflection in the y-axis replaces x by −x, giving f(−x). Reflection of that graph in the x-axis changes the output sign, giving −f(−x).",
+        "ru": "Отражение относительно оси y заменяет x на −x и даёт f(−x). Затем отражение относительно оси x меняет знак выхода: −f(−x).",
+        "uz": "y o‘qiga akslantirish x ni −x ga almashtirib f(−x) ni beradi. Keyin x o‘qiga akslantirish chiqish ishorasini o‘zgartiradi: −f(−x)."
+      },
+      "ai_source_skill": "P1-FUN-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q134",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-07",
+      "secondary_skills": [],
+      "role": "reverse_problem",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "A transformation maps every point (x,y) on y=f(x) to (x,−y). Which equation describes the new graph?",
+        "ru": "Преобразование переводит каждую точку (x,y) графика y=f(x) в (x,−y). Какое уравнение описывает новый график?",
+        "uz": "O‘zgarish y=f(x) dagi har bir (x,y) nuqtani (x,−y) ga o‘tkazadi. Yangi grafik qaysi tenglama bilan beriladi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=f(x)",
+            "ru": "y=f(x)",
+            "uz": "y=f(x)"
+          },
+          "diagnostic_code": "FUN07_POINT_MAP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=f(−x)",
+            "ru": "y=f(−x)",
+            "uz": "y=f(−x)"
+          },
+          "diagnostic_code": "FUN07_AXIS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "y=−f(−x)",
+            "ru": "y=−f(−x)",
+            "uz": "y=−f(−x)"
+          },
+          "diagnostic_code": "FUN07_POINT_MAP"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=−f(x)",
+            "ru": "y=−f(x)",
+            "uz": "y=−f(x)"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "Keeping x unchanged and changing y to −y is reflection in the x-axis, represented by y=−f(x).",
+        "ru": "Если x не меняется, а y заменяется на −y, это отражение относительно оси x: y=−f(x).",
+        "uz": "x o‘zgarmay, y −y ga almashsa, bu x o‘qiga nisbatan akslantirish: y=−f(x)."
+      },
+      "ai_source_skill": "P1-FUN-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q135",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-07",
+      "secondary_skills": [],
+      "role": "intercept_mapping",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The graph y=f(x) has a y-intercept of −6. What is the y-intercept after reflection in the x-axis?",
+        "ru": "График y=f(x) пересекает ось y при −6. Каков y-перехват после отражения относительно оси x?",
+        "uz": "y=f(x) grafigining y o‘qi bilan kesishish qiymati −6. x o‘qiga nisbatan akslantirgandan keyin y-kesishish qiymati qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−6",
+            "ru": "−6",
+            "uz": "−6"
+          },
+          "diagnostic_code": "FUN07_POINT_MAP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "0",
+            "ru": "0",
+            "uz": "0"
+          },
+          "diagnostic_code": "FUN07_POINT_MAP"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "6",
+            "ru": "6",
+            "uz": "6"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "The intercept disappears.",
+            "ru": "Пересечения больше нет.",
+            "uz": "Kesishish yo‘qoladi."
+          },
+          "diagnostic_code": "FUN07_AXIS"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "The y-intercept is the point (0,−6). Reflection in the x-axis maps it to (0,6), so the new y-intercept is 6.",
+        "ru": "y-перехват — это точка (0,−6). Отражение относительно оси x переводит её в (0,6), поэтому новый y-перехват равен 6.",
+        "uz": "y-kesishish nuqtasi (0,−6). x o‘qiga akslantirish uni (0,6) ga o‘tkazadi, demak yangi y-kesishish qiymati 6."
+      },
+      "ai_source_skill": "P1-FUN-07",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q136",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-07",
+      "secondary_skills": [],
+      "role": "mixed_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The point (−2,5) lies on y=f(x). Which point lies on y=−f(−x)?",
+        "ru": "Точка (−2,5) лежит на y=f(x). Какая точка лежит на y=−f(−x)?",
+        "uz": "(−2,5) nuqta y=f(x) da yotadi. y=−f(−x) da qaysi nuqta yotadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(2,−5)",
+            "ru": "(2,−5)",
+            "uz": "(2,−5)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(−2,−5)",
+            "ru": "(−2,−5)",
+            "uz": "(−2,−5)"
+          },
+          "diagnostic_code": "FUN07_INSIDE_OUTSIDE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(2,5)",
+            "ru": "(2,5)",
+            "uz": "(2,5)"
+          },
+          "diagnostic_code": "FUN07_AXIS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(−5,2)",
+            "ru": "(−5,2)",
+            "uz": "(−5,2)"
+          },
+          "diagnostic_code": "FUN07_POINT_MAP"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The inside −x reflects across the y-axis: (−2,5)→(2,5). The outside minus then reflects across the x-axis: (2,5)→(2,−5).",
+        "ru": "Внутреннее −x отражает относительно оси y: (−2,5)→(2,5). Внешний минус затем отражает относительно оси x: (2,5)→(2,−5).",
+        "uz": "Ichki −x y o‘qiga akslantiradi: (−2,5)→(2,5). Tashqi minus keyin x o‘qiga akslantiradi: (2,5)→(2,−5)."
+      },
+      "ai_source_skill": "P1-FUN-07",
+      "status": "draft"
+    }
+  ]
+}
