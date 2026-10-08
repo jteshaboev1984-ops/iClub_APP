@@ -62,13 +62,13 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a canary-readiness.log
           psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_subscription_access_legacy_fixture.sql 2>&1 | tee -a canary-readiness.log
-          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_product_canary_activation_fixture.sql 2>&1 | tee -a canary-readiness.log
 
       - name: Apply complete dormant commercial and AI stack
         shell: bash
         run: |
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_product_canary_activation_fixture.sql 2>&1 | tee -a canary-readiness.log
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql 2>&1 | tee -a canary-readiness.log
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006124000_iclub_global_ai_ui_bootstrap_v1.sql 2>&1 | tee -a canary-readiness.log
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006133000_iclub_global_ai_conversation_ui_v1.sql 2>&1 | tee -a canary-readiness.log
