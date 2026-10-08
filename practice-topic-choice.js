@@ -55,6 +55,16 @@
     return n+" "+c.items;
   }
 
+  function sessionCountLabel(n,lang,c) {
+    if(lang==="ru") {
+      const last=n%10,hundred=n%100;
+      return n+" "+(last===1&&hundred!==11?"тренировка":
+        last>=2&&last<=4&&(hundred<12||hundred>14)?"тренировки":"тренировок");
+    }
+    if(lang==="en") return n+" "+(n===1?"session":"sessions");
+    return n+" "+c.historyCount;
+  }
+
   function element(tag, cls, text) {
     const node=document.createElement(tag);
     if(cls) node.className=cls;
@@ -108,7 +118,7 @@
 
       const heading=element("div","practice-topic-history-head");
       heading.append(element("strong","",c.historyTitle),
-        element("span","practice-topic-history-count",sessions+" "+c.historyCount));
+        element("span","practice-topic-history-count",sessionCountLabel(sessions,lang,c)));
       const metrics=element("div","practice-topic-history-metrics");
       for(const [label,value] of [
         [c.historyLast,latest.correct+" / "+latest.total],
