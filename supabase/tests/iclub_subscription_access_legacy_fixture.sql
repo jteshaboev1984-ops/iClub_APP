@@ -3,6 +3,11 @@
 -- Minimal legacy subject contract for isolated commercial-access tests.
 -- Test-only. Mirrors only the columns used by the new lifecycle/access migration.
 
+-- Production public.users already has this field; lightweight CI bootstrap
+-- omits it, so extend only the disposable test table.
+alter table public.users add column if not exists is_school_student boolean;
+
+
 create table if not exists public.subjects (
   id integer primary key,
   subject_key text not null unique,
