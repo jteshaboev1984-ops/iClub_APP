@@ -62,6 +62,7 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a canary-readiness.log
           psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_subscription_access_legacy_fixture.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_product_canary_activation_fixture.sql 2>&1 | tee -a canary-readiness.log
 
       - name: Apply complete dormant commercial and AI stack
         shell: bash
@@ -76,6 +77,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006153100_iclub_grandfather_subject_access_v1.sql 2>&1 | tee -a canary-readiness.log
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006164000_iclub_subject_selection_shadow_ui_v1.sql 2>&1 | tee -a canary-readiness.log
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006173000_iclub_global_ai_generation_adapter_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261007093000_iclub_product_canary_activation_control_v1.sql 2>&1 | tee -a canary-readiness.log
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261007100000_iclub_canary_subject_access_enforcement_v1.sql 2>&1 | tee -a canary-readiness.log
 
       - name: Prove complete stack is still dormant before matrix
@@ -95,6 +97,7 @@ jobs:
           test "$(psql -Atqc "select canary_subject_access_enforced from private.iclub_commercial_access_config where id=1")" = 'f'
           test "$(psql -Atqc "select count(*) from private.iclub_product_canary_users")" = '0'
           test "$(psql -Atqc "select count(*) from private.iclub_subscription_entitlements")" = '0'
+          test "$(psql -Atqc "select count(*) from private.iclub_global_ai_provider_leases")" = '0'
 
       - name: Run cross-stack canary readiness matrix
         shell: bash
@@ -158,6 +161,7 @@ jobs:
           set -euo pipefail
           test "$(psql -Atqc "select count(*) from private.iclub_product_canary_users")" = '0'
           test "$(psql -Atqc "select count(*) from private.iclub_subscription_entitlements")" = '0'
+          test "$(psql -Atqc "select count(*) from private.iclub_global_ai_provider_leases")" = '0'
           test "$(psql -Atqc "select count(*) from private.iclub_ai_usage_periods")" = '0'
           test "$(psql -Atqc "select count(*) from private.iclub_ai_usage_reservations")" = '0'
           test "$(psql -Atqc "select count(*) from private.iclub_subject_slot_selections")" = '0'
