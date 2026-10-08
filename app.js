@@ -17624,6 +17624,7 @@ async function renderToursHistorySummary(
     if (
       draft?.status === "paused" &&
       draft?.subjectKey === subjectKey &&
+      draft?.quiz?.topicChoiceOrigin !== true &&
       draftTourNo > 0
     ) {
       currentTourNo = draftTourNo;
@@ -17641,7 +17642,7 @@ async function renderToursHistorySummary(
       draft?.quiz &&
       Array.isArray(draft.quiz.questions) &&
       draft.quiz.questions.length > 0 &&
-      draftTourNo === currentTourNo
+      (draftTourNo === currentTourNo || draft?.quiz?.topicChoiceOrigin === true)
     );
 
     if (resumeBtn) resumeBtn.style.display = canResume ? "block" : "none";
@@ -22936,7 +22937,9 @@ if (!(draft?.status === "paused" && draft?.subjectKey === subjectKey && draft?.q
   return;
 }
 
-setSelectedPracticeTourNo(subjectKey, draftTourNo);
+if (draft?.quiz?.topicChoiceOrigin !== true) {
+  setSelectedPracticeTourNo(subjectKey, draftTourNo);
+}
 
   try {
     await initSupabaseSession();
