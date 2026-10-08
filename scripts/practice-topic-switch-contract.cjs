@@ -22,4 +22,15 @@ assert(!/\bdelete\s+from\s+public\.practice_drill_(?:sessions|answers)_v4/i.test
 assert(api.includes('async replaceTopicChoice('),'Practice API must expose gated switch');
 assert(api.includes('missing_stable_client_session_id'),'Switch requires a reused idempotency key');
 assert(api.includes('p_expected_old_client_session_id'),'Switch must verify old draft key');
+const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+for(const term of [
+  'confirmPracticeTopicReplacement',
+  'resumePendingPracticeTopicChoice',
+  'pendingTopicSwitch',
+  'oldSessionId:p.oldSessionId',
+  'clientSessionId:p.clientSessionId',
+  'if (draft.pendingTopicSwitch)',
+  'savePracticeDraft({ ...draft, pendingTopicSwitch: pending })'
+]) assert(app.includes(term),'UI recovery guard missing: '+term);
+
 console.log('PASS: atomic topic replacement SQL/API contract (static, not database execution)');

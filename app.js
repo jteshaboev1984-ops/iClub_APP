@@ -19821,6 +19821,141 @@ function pickContentText(obj, base) {
   void questionIds;
   return [];
 } 
+async function confirmPracticeTopicReplacement() {
+  const title = tr3("Сменить тему?", "Mavzuni almashtirasizmi?", "Change topic?");
+  const detail = tr3(
+    "Текущая тренировка не завершена. Уже отправленные ответы сохранятся, но продолжить прежнюю тренировку после смены темы будет нельзя.",
+    "Joriy mashg‘ulot tugallanmagan. Yuborilgan javoblar saqlanadi, ammo mavzu almashtirilgach avvalgi mashg‘ulotni davom ettirib bo‘lmaydi.",
+    "Your current session is unfinished. Submitted answers will be kept, but you cannot resume the old session after changing topics."
+  );
+  const cancel = tr3("Отмена", "Bekor qilish", "Cancel");
+  const approve = tr3("Сменить тему", "Mavzuni almashtirish", "Change topic");
+  const root = document.getElementById("modal-root");
+  if (!root) {
+    try { return !!window.confirm(title + "\n\n" + detail); }
+    catch { return false; }
+  }
+  return new Promise(resolve => {
+    const previousFocus = document.activeElement;
+    const backdrop = document.createElement("div");
+    backdrop.className = "modal-backdrop";
+    const modal = document.createElement("div");
+    modal.className = "modal";
+    modal.setAttribute("role","dialog");
+    modal.setAttribute("aria-modal","true");
+    modal.setAttribute("aria-label",title);
+    const heading = document.createElement("div");
+    heading.className = "modal-title";
+    heading.textContent = title;
+    const body = document.createElement("div");
+    body.className = "modal-text";
+    body.textContent = detail;
+    const actions = document.createElement("div");
+    actions.className = "modal-actions";
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type="button";
+    cancelBtn.className="btn";
+    cancelBtn.textContent=cancel;
+    const yesBtn = document.createElement("button");
+    yesBtn.type="button";
+    yesBtn.className="btn primary";
+    yesBtn.textContent=approve;
+    actions.append(cancelBtn,yesBtn);
+    modal.append(heading,body,actions);
+    backdrop.append(modal);
+    const onKey = event => {
+      if (event.key === "Escape") { event.preventDefault(); finish(false); }
+    };
+    function finish(approved) {
+      document.removeEventListener("keydown",onKey);
+      root.setAttribute("aria-hidden","true");
+      root.replaceChildren();
+      document.body.classList.remove("modal-open");
+      try { previousFocus?.focus?.(); } catch {}
+      resolve(!!approved);
+    }
+    root.replaceChildren(backdrop);
+    root.setAttribute("aria-hidden","false");
+    document.body.classList.add("modal-open");
+    backdrop.addEventListener("click", event => {
+      if (event.target === backdrop) finish(false);
+    });
+    cancelBtn.addEventListener("click",()=>finish(false),{once:true});
+    yesBtn.addEventListener("click",()=>finish(true),{once:true});
+    document.addEventListener("keydown",onKey);
+    yesBtn.focus();
+  });
+}
+
+async function resumePendingPracticeTopicChoice(draft) {
+  const p=draft?.pendingTopicSwitch;
+  const q=draft?.quiz;
+  if (!p || draft?.status!=="paused" || !q ||
+      q.topicChoiceOrigin!==true || !p.clientSessionId ||
+      Number(p.oldSessionId||0)!==Number(q.safeDrillSessionId||0) ||
+      p.oldClientSessionId!==q.safeDrillClientSessionId ||
+      p.subjectKey!==draft.subjectKey) {
+    showToast(tr3(
+      "Не удалось проверить смену темы. Сохранённая тренировка не удалена.",
+      "Mavzu almashishini tekshirib bo‘lmadi. Saqlangan mashg‘ulot o‘chirilmagan.",
+      "Could not verify the topic change. Your saved session has not been deleted."
+    ));
+    return false;
+  }
+  const uid=await getAuthUid().catch(()=>null);
+  if (!uid || uid!==p.userId || state?.courses?.subjectKey!==p.subjectKey) {
+    showToast(t("not_available")); return false;
+  }
+  const api=getPracticeSafeApi()?.drill;
+  if (!api?.replaceTopicChoice || !api?.questions) {
+    showToast(t("not_available")); return false;
+  }
+  showAsyncOverlay(tr3("Восстанавливаем выбранную тему…",
+    "Tanlangan mavzu tiklanmoqda…","Restoring your selected topic…"));
+  try {
+    const started=await dbWriteWithRetry(()=>api.replaceTopicChoice({
+      subjectKey:p.subjectKey,topic:p.topic,oldSessionId:p.oldSessionId,
+      oldClientSessionId:p.oldClientSessionId,clientSessionId:p.clientSessionId
+    }),{tries:3,baseDelayMs:350});
+    const newId=Number(started?.session_id||0);
+    if (!Number.isSafeInteger(newId) || newId<=0 ||
+        started?.old_session_abandoned!==true)
+      throw new Error("topic_switch_unverified");
+    const rows=await dbWriteWithRetry(()=>api.questions(newId),{tries:3,baseDelayMs:350});
+    if (!Array.isArray(rows)||!rows.length) throw new Error("topic_switch_questions_unavailable");
+    // A second tab may have already finished this operation.
+    if (loadPracticeDraft()?.pendingTopicSwitch?.clientSessionId!==p.clientSessionId)
+      throw new Error("topic_switch_draft_changed");
+    const quiz=buildPracticeSafeQuizFromRows({
+      mode:"practice",subjectKey:p.subjectKey,practiceTourNo:0,practicePoolId:null,
+      safeDrillSessionId:newId,safeDrillClientSessionId:p.clientSessionId,
+      startedAt:Date.now(),paused:false,pauseStartedAt:null,pausedTotalMs:0,
+      index:0,questions:[],answers:[],correct:[],timeSpent:[],qTimeLeft:0,
+      qEndsAtMono:null,qEndsAtMs:null,qTimerId:null,
+      recTopic:p.topic,recSubtopic:null,drillType:"rec_topic",topicChoiceOrigin:true
+    },rows);
+    if(!quiz) throw new Error("topic_switch_quiz_invalid");
+    state.courses.myRecReturnTarget=null;
+    state.courses.practiceTopicSelection={subjectKey:p.subjectKey,topic:p.topic,subtopic:null};
+    state.quizLock="practice";state.quiz=quiz;saveState();
+    pushCourses("practice-quiz");
+    renderPracticeQuiz();
+    startPracticeQuestionTimer();
+    clearPracticeDraft();
+    return true;
+  } catch(error) {
+    try { trackEvent("practice_topic_switch_retry_needed",{
+      message:String(error?.message||error||"unknown")
+    }); } catch {}
+    showToast(tr3(
+      "Не удалось сменить тему. Тренировка сохранена — нажмите «Продолжить», чтобы повторить.",
+      "Mavzuni almashtirib bo‘lmadi. Mashg‘ulot saqlandi — «Davom ettirish» orqali qayta urinib ko‘ring.",
+      "Could not change topic. Your session is saved — use Resume to retry."
+    ));
+    return false;
+  } finally { hideAsyncOverlay(); }
+}
+
 async function startPracticeByRec(selectedRec = null, origin = "recommendation") {
   const rec = selectedRec || state?.courses?.myRecCurrent;
   const subjectKey = state?.courses?.subjectKey;
@@ -19828,16 +19963,57 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   const api = getPracticeSafeApi()?.drill;
   if (!api || !window.iclubSafeAssessment) { showToast(t("not_available") || "Practice is temporarily unavailable."); return; }
   const chooseTopic = origin === "practice";
-  // One persisted Practice draft exists per account. Never let a new
-  // self-selected topic overwrite a paused session from any subject.
+  // Only same-subject self-chosen topic sessions are eligible for replacement.
+  // The existing draft is not removed before an authenticated server transition.
   if (chooseTopic) {
     const draft = loadPracticeDraft();
     if (draft?.status === "paused") {
-      showToast(tr3(
-        "Сначала завершите или продолжите сохранённую практику.",
-        "Avval saqlangan amaliyotni davom ettiring yoki yakunlang.",
-        "Resume or finish your saved Practice session first."
-      ));
+      const eligible = draft.subjectKey === subjectKey &&
+        draft.quiz?.topicChoiceOrigin === true &&
+        Number(draft.quiz.safeDrillSessionId || 0) > 0 &&
+        !!draft.quiz.safeDrillClientSessionId;
+      if (!eligible) {
+        showToast(tr3(
+          "Сначала продолжите или завершите сохранённую практику.",
+          "Avval saqlangan amaliyotni davom ettiring yoki yakunlang.",
+          "Please resume or finish your saved Practice session first."
+        ));
+        return;
+      }
+      const uid = await getAuthUid().catch(() => null);
+      if (!uid) { showToast(t("not_available")); return; }
+      let pending = draft.pendingTopicSwitch || null;
+      if (pending) {
+        if (pending.topic !== rec.topic || pending.userId !== uid ||
+            pending.subjectKey !== subjectKey) {
+          showToast(tr3(
+            "Сначала завершите смену темы через «Продолжить».",
+            "Avval mavzu almashishini «Davom ettirish» orqali yakunlang.",
+            "Finish your pending topic change using Resume first."
+          ));
+          return;
+        }
+      } else {
+        if (draft.quiz.recTopic === rec.topic) {
+          showToast(tr3(
+            "Эта тема уже сохранена. Продолжите тренировку.",
+            "Bu mavzu saqlangan. Mashg‘ulotni davom ettiring.",
+            "This topic is already saved. Resume the session."
+          ));
+          return;
+        }
+        if (!await confirmPracticeTopicReplacement()) return;
+        pending = {
+          userId: uid, subjectKey, topic: String(rec.topic),
+          oldSessionId: Number(draft.quiz.safeDrillSessionId),
+          oldClientSessionId: String(draft.quiz.safeDrillClientSessionId),
+          clientSessionId: window.iclubSafeAssessment.makeClientSessionId("practice_topic_choice")
+        };
+        // Pending metadata augments rather than replaces the original paused quiz.
+        try { savePracticeDraft({ ...draft, pendingTopicSwitch: pending }); }
+        catch { showToast(t("not_available")); return; }
+      }
+      await resumePendingPracticeTopicChoice(loadPracticeDraft());
       return;
     }
   }
@@ -23041,6 +23217,11 @@ if (draft?.quiz?.topicChoiceOrigin !== true) {
   try {
     await initSupabaseSession();
   } catch {}
+
+  if (draft.pendingTopicSwitch) {
+    await resumePendingPracticeTopicChoice(draft);
+    return;
+  }
 
   const restoredQuiz = await restorePracticeQuizSecrets(draft.quiz);
   if (!restoredQuiz || !Array.isArray(restoredQuiz.questions) || !restoredQuiz.questions.length) {
