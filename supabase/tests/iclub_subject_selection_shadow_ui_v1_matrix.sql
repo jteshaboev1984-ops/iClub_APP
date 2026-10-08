@@ -125,6 +125,10 @@ BEGIN
     RAISE EXCEPTION 'Free subject bootstrap mismatch: %',v;
   END IF;
 
+  IF coalesce((v->>'is_school_student')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'Free beta did not return school eligibility';
+  END IF;
+
   v:=public.set_iclub_my_subject_slot_v1('not-a-real-subject',true,false);
   IF coalesce((v->>'ok')::boolean,true)
      OR v->>'reason'<>'subject_unavailable' THEN
@@ -144,10 +148,6 @@ BEGIN
     RAISE EXCEPTION 'Non-main subject entered Competitive: %',v;
   END IF;
   UPDATE public.subjects SET is_active=false WHERE subject_key='english_a1';
-
-  IF coalesce((v->>'is_school_student')::boolean,false) IS NOT TRUE THEN
-    RAISE EXCEPTION 'Free beta did not return school eligibility';
-  END IF;
 
   -- A single study choice automatically grants exactly the SAME Competitive.
   v:=public.set_iclub_my_subject_slot_v1('mathematics',true,false);
