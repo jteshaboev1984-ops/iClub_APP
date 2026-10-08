@@ -19763,6 +19763,19 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   const api = getPracticeSafeApi()?.drill;
   if (!api || !window.iclubSafeAssessment) { showToast(t("not_available") || "Practice is temporarily unavailable."); return; }
   const chooseTopic = origin === "practice";
+  // One persisted Practice draft exists per account. Never let a new
+  // self-selected topic overwrite a paused session from any subject.
+  if (chooseTopic) {
+    const draft = loadPracticeDraft();
+    if (draft?.status === "paused") {
+      showToast(tr3(
+        "Сначала завершите или продолжите сохранённую практику.",
+        "Avval saqlangan amaliyotni davom ettiring yoki yakunlang.",
+        "Resume or finish your saved Practice session first."
+      ));
+      return;
+    }
+  }
   const launch = chooseTopic ? api.startTopicChoice : api.startTopic;
   if (typeof launch !== "function") {
     showToast(t("not_available") || "Practice is temporarily unavailable.");
