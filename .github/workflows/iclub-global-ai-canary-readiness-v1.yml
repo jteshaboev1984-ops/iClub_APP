@@ -75,6 +75,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006153000_iclub_subscription_access_lifecycle_v1.sql 2>&1 | tee -a canary-readiness.log
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006153100_iclub_grandfather_subject_access_v1.sql 2>&1 | tee -a canary-readiness.log
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006164000_iclub_subject_selection_shadow_ui_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006173000_iclub_global_ai_generation_adapter_v1.sql 2>&1 | tee -a canary-readiness.log
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261007100000_iclub_canary_subject_access_enforcement_v1.sql 2>&1 | tee -a canary-readiness.log
 
       - name: Prove complete stack is still dormant before matrix
@@ -102,6 +103,14 @@ jobs:
         run: |
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_global_ai_canary_readiness_v1_matrix.sql 2>&1 | tee -a canary-readiness.log
+
+      - name: Prove provider cost, identity, assessment and rollback boundaries
+        shell: bash
+        env:
+          PGOPTIONS: '-c global_ai.generation_isolated=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/global_ai_generation_adapter_v1_matrix.sql 2>&1 | tee -a canary-readiness.log
 
       - name: Validate cross-stack static contract
         shell: bash
@@ -155,10 +164,10 @@ jobs:
           test "$(psql -Atqc "select ui_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
           test "$(psql -Atqc "select kill_switch from private.iclub_global_ai_runtime_config where id=1")" = 't'
 
-      - name: Mark non-provider canary readiness GREEN
+      - name: Mark isolated integrated readiness GREEN, real provider still HOLD
         run: |
-          echo 'ICLUB GLOBAL AI CONTROLLED CANARY NON-PROVIDER READINESS GREEN' | tee -a canary-readiness.log
-          echo 'LIVE GENERATED ANSWERS REMAIN HOLD: generation_adapter_not_promoted' | tee -a canary-readiness.log
+          echo 'ICLUB GLOBAL AI CONTROLLED CANARY INTEGRATION READINESS GREEN' | tee -a canary-readiness.log
+          echo 'FUNDED REAL PROVIDER ACCEPTANCE REMAINS HOLD — generation is OFF' | tee -a canary-readiness.log
 
       - name: Upload diagnostics
         if: always()

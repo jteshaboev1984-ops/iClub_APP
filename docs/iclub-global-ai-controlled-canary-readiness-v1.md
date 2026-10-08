@@ -27,15 +27,11 @@ The gate covers:
 
 ## Current HOLD before real Global AI generation canary
 
-Prepared/contextual Global iClub AI is structurally ready for controlled canary testing.
+Prepared/contextual Global iClub AI and the source-governed Mathematics P1/P5 generated-answer adapter have passed isolated engineering tests.
 
-**Live Global AI generation is intentionally NOT ready yet.**
+**Live Global AI generation is intentionally NOT ready yet.** The provider adapter now exists in the dormant release candidate; it is NOT evidence that any funded real-provider acceptance, release activation, or commercial entitlement transition has been approved.
 
-`supabase/functions/global-ai/index.ts` still contains the explicit boundary:
-
-`generation_adapter_not_promoted`
-
-That is correct at this stage. Plus/Pro free-form requests must not be promoted merely because tariff accounting exists.
+Unsupported subjects/scopes still fail closed with `generation_adapter_not_promoted`. Free remains prepared-only. Plus/Pro generated questions require the exact active Math Exam Prep skill, approved source, provider budget and protected-assessment checks before a provider call.
 
 Before real generated-answer canary, a separate provider phase must prove:
 
@@ -63,4 +59,4 @@ Current required production state remains:
 - public subject enforcement OFF;
 - canary subject enforcement OFF.
 
-The next engineering phase is the Global AI generated-response adapter, reusing the already governed Mathematics provider boundary rather than inventing a second weaker provider path.
+Next gate: funded provider acceptance on three architect-approved beta accounts, confirmation of deployed provider secret/model availability and cost ceilings, independent source/fact review, unchanged Exam Prep access, and operational rollback. Until then, generation/UI/payment/subject enforcement remain OFF.

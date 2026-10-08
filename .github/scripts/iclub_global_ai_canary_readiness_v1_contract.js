@@ -33,12 +33,14 @@ const blockedReturnIndex = edge.indexOf('if (guard?.allowed !== true)');
 assert(blockedReturnIndex > guardIndex && blockedReturnIndex < reserveIndex,
   'blocked Global AI request could reach usage reservation');
 
-assert(edge.includes('reason: "generation_adapter_not_promoted"'),
-  'Global AI generation HOLD boundary is missing');
-assert(!edge.includes('OPENAI_API_KEY'),
-  'Global AI gateway unexpectedly contains a direct provider credential path');
-assert(!edge.includes('api.openai.com'),
-  'Global AI gateway unexpectedly calls a provider directly');
+assert(edge.includes('generation_adapter_not_promoted'),
+  'Unsupported subject/scope generations must still fail closed');
+assert(edge.includes('OPENAI_API_KEY') && edge.includes('https://api.openai.com/v1/responses'),
+  'Governed provider adapter missing from integrated branch');
+assert(edge.includes('if (!OPENAI_API_KEY)'),
+  'Missing secret must fail closed before provider reservation');
+assert(edge.includes('providerActualCostUsd ?? reservedCostUsd'),
+  'Generated responses and timeouts must retain provider spend exposure');
 
 for (const token of [
   'Live Global AI generation is intentionally NOT ready yet.',
