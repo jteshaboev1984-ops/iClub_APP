@@ -19761,11 +19761,17 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   if (!rec || !subjectKey) return;
   const api = getPracticeSafeApi()?.drill;
   if (!api || !window.iclubSafeAssessment) { showToast(t("not_available") || "Practice is temporarily unavailable."); return; }
-  const clientSessionId = window.iclubSafeAssessment.makeClientSessionId("practice_topic");
+  const chooseTopic = origin === "practice";
+  const launch = chooseTopic ? api.startTopicChoice : api.startTopic;
+  if (typeof launch !== "function") {
+    showToast(t("not_available") || "Practice is temporarily unavailable.");
+    return;
+  }
+  const clientSessionId = window.iclubSafeAssessment.makeClientSessionId(chooseTopic ? "practice_topic_choice" : "practice_topic");
   let started = null, rows = [];
   showAsyncOverlay(tr3("Загружаем практику по теме…", "Mavzu bo‘yicha amaliyot yuklanmoqda…", "Loading topic practice…"));
   try {
-    started = await dbWriteWithRetry(() => api.startTopic({ subjectKey, topic: rec.topic, subtopic: rec.subtopic || null, clientSessionId }), { tries: 3, baseDelayMs: 350 });
+    started = await dbWriteWithRetry(() => launch({ subjectKey, topic: rec.topic, subtopic: rec.subtopic || null, clientSessionId }), { tries: 3, baseDelayMs: 350 });
     rows = await dbWriteWithRetry(() => api.questions(Number(started?.session_id)), { tries: 3, baseDelayMs: 350 });
   } catch { showToast(t("rec_practice_empty") || t("practice_no_questions") || "Нет вопросов для практики по этой теме."); return; }
   finally { hideAsyncOverlay(); }
