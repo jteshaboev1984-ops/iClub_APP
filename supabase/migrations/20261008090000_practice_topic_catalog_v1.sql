@@ -62,6 +62,10 @@ begin
         or (m.lifecycle_state='published' and m.is_runtime_allowed is true)
       )
       and not public.iclub_practice_drill_question_protected_v4(q.id)
+        -- Even archived or future Tour questions are excluded from free topic choice.
+        and not exists (
+          select 1 from public.tour_questions tq where tq.question_id=q.id
+        )
   ), grouped as (
     select e.topic,count(*)::integer as question_count
       from eligible e group by e.topic
