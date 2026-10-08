@@ -6523,7 +6523,22 @@ if (actionBtn) {
 
        if (viewName === "courses") {
      const canGoBack = canCoursesBack();
-     backBtn.style.visibility = (state.quizLock ? "hidden" : (canGoBack ? "visible" : "hidden"));
+     const activePractice = state.quizLock === "practice" && getCoursesTopScreen() === "practice-quiz";
+     // During a Practice question, Back safely pauses the attempt instead of
+     // silently disappearing. Tour/Exam Prep assessment locks stay unchanged.
+     backBtn.style.visibility = activePractice || (!state.quizLock && canGoBack) ? "visible" : "hidden";
+     if (activePractice) {
+       const pauseLabel = tr3(
+         "Сохранить и выйти из практики",
+         "Amaliyotni saqlab chiqish",
+         "Save and leave Practice"
+       );
+       backBtn.setAttribute("aria-label",pauseLabel);
+       backBtn.title = pauseLabel;
+     } else {
+       backBtn.setAttribute("aria-label",tr3("Назад","Orqaga","Back"));
+       backBtn.title = "";
+     }
 
      // ✅ Рядом с лого всегда бренд как на Home/Profile
      titleEl.textContent = t("app_name");
@@ -12486,6 +12501,21 @@ function bindRatingsUI() {
     return;
   }
 
+  // The Practice start/result screens may become the stack root. Do not
+  // unexpectedly send the learner to Home when Back should stay in Practice.
+  if (state.courses.stack.length <= 1 && top === "practice-start") {
+    replaceCourses("subject-hub");
+    renderSubjectHub();
+    return;
+  }
+  if (state.courses.stack.length <= 1 &&
+      ["practice-result","practice-review","practice-recs"].includes(top)) {
+    replaceCourses(top === "practice-review" || top === "practice-recs"
+      ? "practice-result" : "practice-start");
+    if (top === "practice-result") renderPracticeStart();
+    return;
+  }
+
           if (state.courses.stack.length > 1) {
   state.courses.stack.pop();
   saveState();
@@ -12534,6 +12564,10 @@ function canCoursesBack() {
 
   // ✅ Subject Hub: даже если stack=1 — back должен быть доступен (уйдём в entryTab/prevTab/home)
   if (top === "subject-hub") return true;
+
+  // Practice can be the sole entry in the stack after finishing or exiting a
+  // topic drill. A visible back control must always have a safe destination.
+  if (["practice-start","practice-result","practice-review","practice-recs"].includes(top)) return true;
 
   return state.courses.stack.length > 1;
 }
@@ -18296,7 +18330,8 @@ try {
   if (btn3) btn3.textContent = exitLabel;
 } catch {}
      
-      // Show result screen (replace quiz screen to avoid "dead" back navigation)
+      // Show result screen (replace quiz screen to avoid "dead" back navigation).
+// Set the completed context first, so back always resolves to Practice.
 if (quiz?.drillType) replaceCoursesTop("practice-result");
 else replaceCourses("practice-result");
 
@@ -18489,22 +18524,12 @@ const correctLabel = t("correct_answer") || "Правильно";
 const explLabel = t("rec_show_expl") || "Объяснение";
 const mistakeLabel = tr3("Почему это ошибка", "Nega bu xato", "Why this is wrong");
 const nextStepLabel = tr3("Как исправить", "Qanday tuzatish kerak", "How to fix it");
-const genericMistake = tr3(
-  "Ответ неверный, но по нему нельзя надёжно определить конкретную причину ошибки.",
-  "Javob noto‘g‘ri, lekin bu javobning o‘zidan aniq xato sababini ishonchli aniqlab bo‘lmaydi.",
-  "The answer is incorrect, but it does not reliably identify one specific mistake."
-);
-const genericNextStep = tr3(
-  "Сравните своё решение с объяснением и примените правильный шаг в следующем похожем задании.",
-  "Yechimingizni izoh bilan solishtiring va keyingi o‘xshash savolda to‘g‘ri usulni qo‘llang.",
-  "Compare your work with the explanation and apply the correct step in the next similar question."
-);
-const mistakeFeedback = !d.isCorrect
-  ? (d.diagnosticFeedback || (d.diagnosticStatus === "unmapped" ? genericMistake : ""))
-  : "";
-const diagnosticNextAction = !d.isCorrect
-  ? (d.diagnosticNextAction || (d.diagnosticStatus === "unmapped" ? genericNextStep : ""))
-  : "";
+// Only a server-confirmed mapped diagnosis can explain why this specific answer
+// is wrong. Unmapped answers receive the verified answer/explanation below;
+// do not invent a learner-specific cause or repeat generic placeholders.
+const verifiedDiagnosis = !d.isCorrect && d.diagnosticStatus === "mapped";
+const mistakeFeedback = verifiedDiagnosis ? String(d.diagnosticFeedback || "").trim() : "";
+const diagnosticNextAction = verifiedDiagnosis ? String(d.diagnosticNextAction || "").trim() : "";
 
 const topicText = String(d.topic || t("topic_general") || "General").trim();
 const subtopicText = String(d.subtopic || "").trim();
@@ -21819,6 +21844,25 @@ function bindTabbar() {
 
     backBtn.addEventListener("click", async (event) => {
   event.stopPropagation();
+  // Practice has an existing save-and-pause operation: use it for the
+  // visible Back control, never discard a live answer or leave a locked quiz.
+  if (state.quizLock === "practice" && getCoursesTopScreen() === "practice-quiz") {
+    const quiz = state.quiz;
+    if (quiz?._submitInFlight || quiz?._finishing || quiz?._safeFinalizeInFlight) {
+      showToast(tr3(
+        "Подождите, ответ сохраняется.",
+        "Kuting, javob saqlanmoqda.",
+        "Please wait while your answer is saved."
+      ));
+      return;
+    }
+    if (!(await enforceActiveIdentityOrBlock({ source: "topbar_back", force: true }))) {
+      event.preventDefault();
+      return;
+    }
+    handlePracticePause();
+    return;
+  }
   if (state.quizLock) return;
 
   if (!(await enforceActiveIdentityOrBlock({ source: "topbar_back", force: true }))) {
