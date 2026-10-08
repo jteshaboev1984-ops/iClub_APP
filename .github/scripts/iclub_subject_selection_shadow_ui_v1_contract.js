@@ -59,7 +59,7 @@ for (const token of [
   'all_available_subjects',
   'access or progress yet',
   'текущий доступ и прогресс',
-  'joriy kirish yoki progress'
+  'mavjud imkoniyatlar va o‘qish natijalariga'
 ]) {
   assert(ui.includes(token), 'subject-selection UI missing required behavior/copy: ' + token);
 }
@@ -77,6 +77,8 @@ for (const forbidden of [
   assert(!ui.includes(forbidden), 'subject-selection UI contains forbidden authority/storage token: ' + forbidden);
 }
 
+assert(ui.includes('choose_iclub_my_free_subject_v2'), 'Free subject must be selected atomically');
+assert(ui.includes('renderFreeCompetitive(competitive)'), 'Free screen must not duplicate the Competitive selector');
 assert(css.includes('@media (max-width: 340px)'), '320px subject-selection layout guard missing');
 assert(css.includes('@media (prefers-reduced-motion: reduce)'), 'reduced-motion subject-selection guard missing');
 assert(css.includes('.iclub-subject-access-row.is-selected'), 'selected subject visual state missing');
