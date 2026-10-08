@@ -23525,6 +23525,16 @@ if (!isRegistered()) {
   return;
 }
       await ensureHomeDbReady();
+
+      // Local Mathematics Practice reset is governed by the authenticated,
+      // server-confirmed v2 publish. Never reset on merely deploying new JS.
+      try {
+        const cleared = await window.iclubMathPracticeV2ResetAfterPublish?.(window.sb);
+        if (cleared === true) state = loadState();
+      } catch {
+        // Offline/server failure preserves existing local learner progress.
+      }
+
       renderAllSubjects();
       renderHome();
 
