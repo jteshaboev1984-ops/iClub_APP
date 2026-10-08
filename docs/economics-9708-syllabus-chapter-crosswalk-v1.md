@@ -81,8 +81,8 @@ The official 9708 syllabus contains **53 numbered subject topics** (AS 1.1–6.5
 
 ### High-priority syllabus-boundary issues
 1. Q2537 (Marshall–Lerner) and Q2538 (J-curve) in **AS Tour 2** refer to **official A Level syllabus 11.2.5**. These are confirmed A-Level concepts placed in the AS-tour question pool; **preserve published data, propose a governed content correction separately**.
-2. Q2545 (purchasing power parity) aligns most naturally to A Level **11.3.3**; inspect actual stem before classifying.
-3. Q2543 (complex multiplier) likely belongs to A Level **9.1**, not Tour 2; inspect stem.
+2. Q2545 (purchasing power parity) is linked to official A Level **11.3.3** (comparison of development and living standards); inspect the exact stem before final classification.
+3. Q2543 (complex multiplier) is an A Level **9.1.1** target under the official syllabus; AS **4.2.2** explicitly states that the multiplier is not required. Inspect the exact question and address the AS-tour mismatch through a separately approved, versioned correction only.
 4. Q2536 (terms of trade) appears under official AS **6.1.3**, which is allocated to Tour 3, not Tour 2.
 5. Q2544 (current account correction policies) appears under official AS **6.5**, which is allocated to Tour 3.
 6. Q2540 (Fisher equation) needs independent source/scope check; do not assume either official or nonofficial from wording alone.
