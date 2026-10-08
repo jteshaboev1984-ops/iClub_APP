@@ -141,6 +141,8 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261007004000_math_practice_v2_metadata_foundation_v1.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261007007000_math_practice_v2_tour_invariant_audit_v1.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261007007500_math_practice_v2_atomic_release_switch_v1.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_post_publish_local_reset_fixture.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261008110000_math_practice_v2_post_publish_local_reset_gate_v1.sql
 
       - name: Execute publish rollback cleanup rehearsal
         shell: bash
