@@ -9,6 +9,7 @@ on:
       - 'index.html'
       - 'scripts/practice-topic-choice-regression.cjs'
       - 'scripts/practice-topic-switch-contract.cjs'
+      - 'scripts/practice-topic-switch-browser-regression.cjs'
       - 'security/legacy-assessment-safe-api.js'
       - 'supabase/migrations/20261008150000_practice_topic_switch_atomic_v1.sql'
       - 'scripts/practice-review-back-regression.cjs'
@@ -34,6 +35,7 @@ jobs:
           node --check practice-topic-choice.js
           node --check scripts/practice-topic-choice-regression.cjs
           node --check scripts/practice-topic-switch-contract.cjs
+          node --check scripts/practice-topic-switch-browser-regression.cjs
           node scripts/practice-topic-switch-contract.cjs
           node --check scripts/practice-review-back-regression.cjs
           grep -q 'id="practice-topic-choice"' index.html
@@ -45,4 +47,5 @@ jobs:
       - name: Verify topic choice and premium mobile layout (synthetic only)
         run: |
           node scripts/practice-topic-choice-regression.cjs
+          node scripts/practice-topic-switch-browser-regression.cjs
           node scripts/practice-review-back-regression.cjs
