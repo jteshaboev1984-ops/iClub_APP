@@ -234,9 +234,29 @@ $baseline$;
 -- Definition gate first.
 \ir math_practice_v2_atomic_release_switch_v1.sql
 
+-- A staged bank must never trigger deletion of local progress.
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000001', false);
+
+do $math_practice_local_reset_gate$
+begin
+  if public.is_math_practice_v2_published_safe_v1() is distinct from false then
+    raise exception 'math_practice_local_reset_gate_expected_false';
+  end if;
+end;
+$math_practice_local_reset_gate$;
+
 -- First publish and the exact repo audit.
 select private.publish_math_practice_v2_release_v1('math_p1_practice_v2_2026_10_07');
 \ir ../preflight/math_practice_v2_post_publish_audit.sql
+-- Only the fully published current bank authorizes local reset.
+
+do $math_practice_local_reset_gate$
+begin
+  if public.is_math_practice_v2_published_safe_v1() is distinct from true then
+    raise exception 'math_practice_local_reset_gate_expected_true';
+  end if;
+end;
+$math_practice_local_reset_gate$;
 
 -- Simulate learner activity on the new v2 bank, then prove rollback removes it.
 insert into public.practice_attempts(id,user_id,subject_id,is_lab)
@@ -257,6 +277,15 @@ values('00000000-0000-0000-0000-000000000001',5,'practice_attempt','{"v2":true}'
 
 select private.rollback_math_practice_v2_release_v1('math_p1_practice_v2_2026_10_07');
 \ir ../preflight/math_practice_v2_post_rollback_audit.sql
+-- A rollback MUST stop a new local reset, even with staged metadata retained.
+
+do $math_practice_local_reset_gate$
+begin
+  if public.is_math_practice_v2_published_safe_v1() is distinct from false then
+    raise exception 'math_practice_local_reset_gate_expected_false';
+  end if;
+end;
+$math_practice_local_reset_gate$;
 
 -- Recreate the pre-publish staged state solely to exercise the cleanup path
 -- in this disposable database.
@@ -287,6 +316,16 @@ select private.publish_math_practice_v2_release_v1('math_p1_practice_v2_2026_10_
 
 select private.cleanup_math_practice_v1_questions_v1('math_p1_practice_v2_2026_10_07');
 \ir ../preflight/math_practice_v2_post_cleanup_audit.sql
+-- The republished active bank is still the correct source of truth.
+
+do $math_practice_local_reset_gate$
+begin
+  if public.is_math_practice_v2_published_safe_v1() is distinct from true then
+    raise exception 'math_practice_local_reset_gate_expected_true';
+  end if;
+end;
+$math_practice_local_reset_gate$;
+
 
 do $final$
 declare
