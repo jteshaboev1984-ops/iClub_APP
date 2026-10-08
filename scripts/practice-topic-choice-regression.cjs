@@ -24,6 +24,11 @@ assert.match(sql,/p\.is_active is true/);
 assert.doesNotMatch(sql,/v_current_tour|v_season_id|t\.start_date/);
 assert.match(sql,/revoke all on function public\.get_practice_available_topics_safe_v1\(text\) from public/);
 assert.match(sql,/grant execute on function public\.get_practice_available_topics_safe_v1\(text\)/);
+const choiceSql=fs.readFileSync(path.join(root,'supabase/migrations/20261008090100_practice_topic_choice_drill_v1.sql'),'utf8');
+const lockSql=fs.readFileSync(path.join(root,'supabase/migrations/20261008090200_practice_topic_choice_anon_lock_v1.sql'),'utf8');
+assert.match(choiceSql,/revoke all on function public\.start_practice_topic_drill_choice_safe_v1\(text,text,text,text\) from anon/);
+assert.match(lockSql,/revoke all on function public\.start_practice_topic_drill_choice_safe_v1\(text,text,text,text\) from anon/);
+
 assert.doesNotMatch(sql,/\b(?:delete|insert|update|truncate|drop|alter)\s+(?:into\s+|table\s+|from\s+)?(?:public|private)\./i,'Catalog SQL must contain no data mutation');
 for(const clause of ['p.is_active is true','ppq.is_active is true',
   'm.lifecycle_state=\'published\'','m.is_runtime_allowed is true',
