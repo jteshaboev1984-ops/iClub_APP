@@ -1,0 +1,29 @@
+{
+  "version": "p6_differentiation_ai_source_supplement_draft_v0.1",
+  "status": "draft_not_runtime_allowed",
+  "architecture_note": "Draft only. Runtime retrieval must continue using approved/versioned source cards. If approved evidence is insufficient, return no_source rather than filling from model memory.",
+  "cards": [
+    {
+      "skill_code": "P1-DIF-06",
+      "card_type": "theory",
+      "rights_status": "original_iclub",
+      "approval_status": "draft",
+      "is_runtime_allowed": false,
+      "source_basis": "Complete Pure Mathematics 1, Ch9 Further differentiation, printed pp. 156–167; iClub canonical skill P1-DIF-06",
+      "variants": {
+        "en": {
+          "title": "Connected rates with changing geometry",
+          "body_text": "Topic focus: Connected rates with geometric relationships.\n\nCore method:\n1. Write a relationship between the changing quantities.\n2. Differentiate that relationship with respect to time, either directly or through a chain such as dA/dt=(dA/dr)(dr/dt).\n3. Substitute the values that apply at the stated instant.\n4. Keep the sign and units of the required rate.\n\nUseful relationships include:\n- square area A=s²;\n- rectangle area A=xy, with any stated relation between x and y substituted first when useful;\n- cube volume V=s³;\n- circle circumference C=2πr;\n- circle area A=πr²;\n- sector area A=½r²θ when θ is in radians; if θ is constant, dA/dt=rθ·dr/dt.\n\nA relation such as x²+y²=constant can also be differentiated with respect to time:\n2x dx/dt + 2y dy/dt = 0.\n\nIf the problem supplies a model such as V=kr³, use that supplied relationship directly rather than replacing it with a different geometric formula.\n\nCritical check:\nDecide which quantities are changing and which are constant before differentiating. A decreasing quantity has a negative time derivative. Length rates use length/time, area rates use square-units/time, and volume rates use cubic-units/time."
+        },
+        "ru": {
+          "title": "Связанные скорости в меняющейся геометрии",
+          "body_text": "Фокус темы: связанные скорости изменения в геометрических моделях.\n\nОсновной метод:\n1. Запишите связь между изменяющимися величинами.\n2. Продифференцируйте эту связь по времени напрямую или через цепочку, например dA/dt=(dA/dr)(dr/dt).\n3. Подставьте значения, относящиеся к указанному моменту.\n4. Сохраните правильный знак и единицы требуемой скорости.\n\nПолезные связи:\n- площадь квадрата A=s²;\n- площадь прямоугольника A=xy; если между x и y дана связь, при необходимости сначала подставьте её;\n- объём куба V=s³;\n- длина окружности C=2πr;\n- площадь круга A=πr²;\n- площадь сектора A=½r²θ при θ в радианах; если θ постоянно, dA/dt=rθ·dr/dt.\n\nСвязь вида x²+y²=constant также можно дифференцировать по времени:\n2x dx/dt + 2y dy/dt = 0.\n\nЕсли в условии дана модель вида V=kr³, используйте именно её, а не подменяйте другой геометрической формулой.\n\nКритическая проверка:\nДо дифференцирования определите, какие величины меняются, а какие постоянны. Убывающая величина имеет отрицательную производную по времени. Скорость длины имеет единицы длина/время, площади — квадратные единицы/время, объёма — кубические единицы/время."
+        },
+        "uz": {
+          "title": "O‘zgaruvchi geometriyada bog‘langan tezliklar",
+          "body_text": "Mavzu: geometrik bog‘lanishlardagi o‘zgarish tezliklari.\n\nAsosiy usul:\n1. O‘zgarayotgan kattaliklar orasidagi bog‘lanishni yozing.\n2. Uni vaqt bo‘yicha bevosita yoki dA/dt=(dA/dr)(dr/dt) kabi zanjir orqali differensiallang.\n3. Berilgan paytdagi qiymatlarni qo‘ying.\n4. So‘ralgan tezlikning ishorasi va birliklarini saqlang.\n\nFoydali bog‘lanishlar:\n- kvadrat yuzi A=s²;\n- to‘g‘ri to‘rtburchak yuzi A=xy; x va y orasida bog‘lanish berilsa, kerak bo‘lsa avval uni qo‘ying;\n- kub hajmi V=s³;\n- aylana uzunligi C=2πr;\n- doira yuzi A=πr²;\n- θ radianlarda bo‘lsa sektor yuzi A=½r²θ; θ doimiy bo‘lsa dA/dt=rθ·dr/dt.\n\nx²+y²=constant kabi bog‘lanishni ham vaqt bo‘yicha differensiallash mumkin:\n2x dx/dt + 2y dy/dt = 0.\n\nMasalada V=kr³ kabi model bevosita berilsa, boshqa geometrik formulaga almashtirmasdan aynan shu modeldan foydalaning.\n\nMuhim tekshiruv:\nDifferensiallashdan oldin qaysi kattaliklar o‘zgarishi va qaysilari doimiyligini aniqlang. Kamayayotgan kattalikning vaqt bo‘yicha hosilasi manfiy. Uzunlik tezligi uzunlik/vaqt, yuza tezligi kvadrat birlik/vaqt, hajm tezligi kub birlik/vaqt bo‘ladi."
+        }
+      }
+    }
+  ]
+}

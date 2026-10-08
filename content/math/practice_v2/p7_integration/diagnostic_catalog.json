@@ -1,0 +1,393 @@
+{
+  "version": "p1_integration_diag_v0.1",
+  "policy": {
+    "rule": "Use a diagnostic code only when the authored wrong path deterministically supports it; otherwise return unmapped.",
+    "ai_boundary": "AI may explain only an established deterministic result using approved source cards. It may not establish correctness, invent a diagnosis, or complete a protected active assessment."
+  },
+  "diagnostics": [
+    {
+      "code": "INT01_POWER_RULE",
+      "skill": "P1-INT-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The integration power rule was applied in the wrong direction.",
+        "ru": "Степенное правило интегрирования применено в неверном направлении.",
+        "uz": "Integrallashning daraja qoidasi noto‘g‘ri yo‘nalishda qo‘llangan."
+      },
+      "next_action": {
+        "en": "For x^n with n≠−1, increase the power by 1, then divide by the new power.",
+        "ru": "Для x^n при n≠−1 увеличьте степень на 1 и разделите на новую степень.",
+        "uz": "n≠−1 bo‘lsa x^n uchun darajani 1 ga oshiring, so‘ng yangi darajaga bo‘ling."
+      }
+    },
+    {
+      "code": "INT01_COEFFICIENT",
+      "skill": "P1-INT-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The numerical coefficient was not divided by the new power correctly.",
+        "ru": "Числовой коэффициент неверно разделён на новую степень.",
+        "uz": "Sonli koeffitsiyent yangi darajaga noto‘g‘ri bo‘lingan."
+      },
+      "next_action": {
+        "en": "Keep the original coefficient and divide it by n+1 after increasing the power.",
+        "ru": "Сохраните исходный коэффициент и разделите его на n+1 после увеличения степени.",
+        "uz": "Eski koeffitsiyentni saqlab, darajani oshirgach n+1 ga bo‘ling."
+      }
+    },
+    {
+      "code": "INT01_INNER_FACTOR",
+      "skill": "P1-INT-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The antiderivative of (ax+b)^n did not compensate for the inner coefficient a.",
+        "ru": "В первообразной (ax+b)^n не учтён внутренний коэффициент a.",
+        "uz": "(ax+b)^n antiderivativida ichki a koeffitsiyenti hisobga olinmagan."
+      },
+      "next_action": {
+        "en": "After applying the power rule to (ax+b)^n, divide by the inner derivative a.",
+        "ru": "После степенного правила для (ax+b)^n дополнительно разделите на внутреннюю производную a.",
+        "uz": "(ax+b)^n ga daraja qoidasini qo‘llagach, ichki hosila a ga ham bo‘ling."
+      }
+    },
+    {
+      "code": "INT01_CONSTANT_C",
+      "skill": "P1-INT-01",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The constant of integration was omitted from an indefinite integral.",
+        "ru": "В неопределённом интеграле пропущена константа интегрирования.",
+        "uz": "Aniqmas integralda integrallash doimiysi tushirib qoldirilgan."
+      },
+      "next_action": {
+        "en": "Add +C to every indefinite integral because antiderivatives form a family.",
+        "ru": "Добавляйте +C к каждому неопределённому интегралу, так как первообразные образуют семейство.",
+        "uz": "Antiderivativlar oilani tashkil qiladi, shuning uchun har bir aniqmas integralga +C qo‘shing."
+      }
+    },
+    {
+      "code": "INT01_RATIONAL_POWER",
+      "skill": "P1-INT-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A root or reciprocal power was not rewritten and integrated correctly.",
+        "ru": "Корень или обратная степень неверно переписаны и проинтегрированы.",
+        "uz": "Ildiz yoki teskari daraja noto‘g‘ri qayta yozilib integrallangan."
+      },
+      "next_action": {
+        "en": "Rewrite roots/reciprocals as x^n, then apply the integration power rule, provided n≠−1.",
+        "ru": "Перепишите корни/обратные степени как x^n и примените степенное правило интегрирования при n≠−1.",
+        "uz": "Ildiz/tесkari darajalarni x^n ko‘rinishida yozib, n≠−1 bo‘lsa daraja qoidasini qo‘llang."
+      }
+    },
+    {
+      "code": "INT01_CHECK_DERIVATIVE",
+      "skill": "P1-INT-01",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The proposed antiderivative would not differentiate back to the original integrand.",
+        "ru": "Предложенная первообразная не даёт исходный интеграл после дифференцирования.",
+        "uz": "Taklif qilingan antiderivativ differensiallanganda asl integrandga qaytmaydi."
+      },
+      "next_action": {
+        "en": "Differentiate your antiderivative as a quick verification.",
+        "ru": "Для проверки продифференцируйте найденную первообразную.",
+        "uz": "Tekshirish uchun topilgan antiderivativni differensiallang."
+      }
+    },
+    {
+      "code": "INT02_DROP_C",
+      "skill": "P1-INT-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The integration constant was dropped before the point/boundary condition was used.",
+        "ru": "Константа интегрирования отброшена до использования точки/граничного условия.",
+        "uz": "Nuqta/chegara sharti qo‘llanishidan oldin integrallash doimiysi tashlab yuborilgan."
+      },
+      "next_action": {
+        "en": "Integrate with +C first, then substitute the given condition to determine C.",
+        "ru": "Сначала проинтегрируйте с +C, затем подставьте условие и найдите C.",
+        "uz": "Avval +C bilan integrallang, keyin berilgan shart orqali C ni toping."
+      }
+    },
+    {
+      "code": "INT02_SUBSTITUTION",
+      "skill": "P1-INT-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The given point was substituted incorrectly into the recovered curve.",
+        "ru": "Данная точка неверно подставлена в восстановленную кривую.",
+        "uz": "Berilgan nuqta tiklangan egri chiziqqa noto‘g‘ri qo‘yilgan."
+      },
+      "next_action": {
+        "en": "Substitute both the x-coordinate and the matching y-value into the full integrated equation.",
+        "ru": "Подставьте и x, и соответствующее y в полное уравнение после интегрирования.",
+        "uz": "Integrallangan to‘liq tenglamaga x koordinata va mos y qiymatini birga qo‘ying."
+      }
+    },
+    {
+      "code": "INT02_ANTIDERIVATIVE",
+      "skill": "P1-INT-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The derivative was integrated incorrectly before applying the condition.",
+        "ru": "Производная неверно проинтегрирована до применения условия.",
+        "uz": "Shartni qo‘llashdan oldin hosila noto‘g‘ri integrallangan."
+      },
+      "next_action": {
+        "en": "Find the correct antiderivative first; only then use the point/boundary condition.",
+        "ru": "Сначала найдите правильную первообразную и только затем используйте точку/граничное условие.",
+        "uz": "Avval to‘g‘ri antiderivativni toping, keyin nuqta/chegara shartini qo‘llang."
+      }
+    },
+    {
+      "code": "INT02_COMPLETE_CURVE",
+      "skill": "P1-INT-02",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "Only the value of C was considered, not the complete recovered curve.",
+        "ru": "Рассмотрено только значение C, а не полное уравнение восстановленной кривой.",
+        "uz": "Faqat C qiymati ko‘rilgan, tiklangan egri chiziqning to‘liq tenglamasi emas."
+      },
+      "next_action": {
+        "en": "After finding C, substitute it back and write/use the full curve equation.",
+        "ru": "После нахождения C подставьте его обратно и используйте полное уравнение кривой.",
+        "uz": "C ni topgach, uni qayta qo‘yib egri chiziqning to‘liq tenglamasini ishlating."
+      }
+    },
+    {
+      "code": "INT03_UPPER_MINUS_LOWER",
+      "skill": "P1-INT-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The definite integral was evaluated in the wrong order.",
+        "ru": "Определённый интеграл вычислен в неверном порядке.",
+        "uz": "Aniq integral chegaralari noto‘g‘ri tartibda hisoblangan."
+      },
+      "next_action": {
+        "en": "Evaluate the antiderivative as F(upper)−F(lower).",
+        "ru": "Вычисляйте первообразную как F(верхняя граница)−F(нижняя граница).",
+        "uz": "Antiderivativni F(yuqori chegara)−F(pastki chegara) tarzida hisoblang."
+      }
+    },
+    {
+      "code": "INT03_CONSTANT_CANCELS",
+      "skill": "P1-INT-03",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A constant of integration was incorrectly carried into a definite integral result.",
+        "ru": "Константа интегрирования ошибочно перенесена в результат определённого интеграла.",
+        "uz": "Integrallash doimiysi aniq integral natijasiga noto‘g‘ri kiritilgan."
+      },
+      "next_action": {
+        "en": "For a definite integral, use any antiderivative without +C because the constant cancels in upper minus lower.",
+        "ru": "В определённом интеграле +C не нужно: оно сокращается при вычислении верхняя минус нижняя.",
+        "uz": "Aniq integralda +C kerak emas, chunki yuqori minus pastki qiymatlarda u qisqaradi."
+      }
+    },
+    {
+      "code": "INT03_ENDPOINT_LIMIT",
+      "skill": "P1-INT-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "An improper endpoint was substituted directly even though the integrand is undefined there.",
+        "ru": "Несобственная граничная точка подставлена напрямую, хотя подынтегральная функция там не определена.",
+        "uz": "Integrand aniqlanmagan chegaraga qiymat bevosita qo‘yilgan."
+      },
+      "next_action": {
+        "en": "Replace the improper endpoint by a variable and take the appropriate one-sided limit.",
+        "ru": "Замените несобственную границу переменной и возьмите соответствующий односторонний предел.",
+        "uz": "Noto‘g‘ri chegarani o‘zgaruvchi bilan almashtirib, tegishli bir tomonlama limitni oling."
+      }
+    },
+    {
+      "code": "INT03_SIGNED_ACCUMULATION",
+      "skill": "P1-INT-03",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The definite integral was treated automatically as geometric area.",
+        "ru": "Определённый интеграл автоматически принят за геометрическую площадь.",
+        "uz": "Aniq integral avtomatik ravishda geometrik yuza deb qabul qilingan."
+      },
+      "next_action": {
+        "en": "A definite integral is signed; contributions below the x-axis are negative unless the question asks for area.",
+        "ru": "Определённый интеграл знаковый: ниже оси x вклад отрицательный, если не спрашивается площадь.",
+        "uz": "Aniq integral ishorali: x o‘qidan pastdagi hissa manfiy, agar savol yuza haqida bo‘lmasa."
+      }
+    },
+    {
+      "code": "INT04_TOP_BOTTOM",
+      "skill": "P1-INT-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The lower curve was subtracted from the upper curve in the wrong order.",
+        "ru": "Верхняя и нижняя кривые вычтены в неверном порядке.",
+        "uz": "Yuqori va pastki egri chiziqlar noto‘g‘ri tartibda ayirilgan."
+      },
+      "next_action": {
+        "en": "On each interval use upper curve minus lower curve so the area contribution is positive.",
+        "ru": "На каждом интервале используйте верхняя кривая минус нижняя, чтобы вклад площади был положительным.",
+        "uz": "Har intervalda yuza musbat bo‘lishi uchun yuqori egri minus pastki egri ishlating."
+      }
+    },
+    {
+      "code": "INT04_INTERSECTIONS",
+      "skill": "P1-INT-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The integration limits were chosen without finding the curve intersections.",
+        "ru": "Пределы интегрирования выбраны без нахождения точек пересечения кривых.",
+        "uz": "Integrallash chegaralari egri chiziqlar kesishmalarini topmasdan tanlangan."
+      },
+      "next_action": {
+        "en": "Solve the intersection equation first; those x-values usually determine the area limits.",
+        "ru": "Сначала решите уравнение пересечения; найденные x обычно задают пределы площади.",
+        "uz": "Avval kesishish tenglamasini yeching; topilgan x lar odatda yuza chegaralarini beradi."
+      }
+    },
+    {
+      "code": "INT04_SPLIT_CROSSING",
+      "skill": "P1-INT-04",
+      "mistake_type": "reasoning",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The region crosses the axis/another curve, but the integral was not split where the sign/order changes.",
+        "ru": "Область пересекает ось/другую кривую, но интеграл не разбит в точке смены знака/порядка.",
+        "uz": "Soha o‘qni/boshqa egri chiziqni kesadi, lekin ishora/tartib o‘zgargan joyda integral bo‘linmagan."
+      },
+      "next_action": {
+        "en": "Split the area at every relevant crossing and add positive pieces.",
+        "ru": "Разбейте площадь по всем важным пересечениям и сложите положительные части.",
+        "uz": "Yuzani barcha muhim kesishishlarda bo‘lib, musbat qismlarni qo‘shing."
+      }
+    },
+    {
+      "code": "INT04_AREA_SIGN",
+      "skill": "P1-INT-04",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A negative signed integral was reported as a negative geometric area.",
+        "ru": "Отрицательный знаковый интеграл выдан как отрицательная геометрическая площадь.",
+        "uz": "Manfiy ishorali integral geometrik yuza sifatida manfiy berilgan."
+      },
+      "next_action": {
+        "en": "Geometric area is non-negative; reverse subtraction or take positive pieces after splitting.",
+        "ru": "Геометрическая площадь неотрицательна; поменяйте порядок вычитания или складывайте положительные части.",
+        "uz": "Geometrik yuza manfiy bo‘lmaydi; ayirish tartibini almashtiring yoki bo‘lib musbat qismlarni qo‘shing."
+      }
+    },
+    {
+      "code": "INT04_PARAMETER_AREA",
+      "skill": "P1-INT-04",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The parameter equation from the stated area was formed incorrectly.",
+        "ru": "Уравнение для параметра по заданной площади составлено неверно.",
+        "uz": "Berilgan yuzadan parametr tenglamasi noto‘g‘ri tuzilgan."
+      },
+      "next_action": {
+        "en": "Write the correct area integral first, then set its value equal to the stated area and solve.",
+        "ru": "Сначала запишите правильный интеграл площади, затем приравняйте его к заданной площади и решите.",
+        "uz": "Avval to‘g‘ri yuza integralini yozing, keyin uni berilgan yuzaga tenglab yeching."
+      }
+    },
+    {
+      "code": "INT05_RADIUS_SQUARED",
+      "skill": "P1-INT-05",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The radius was integrated without squaring it.",
+        "ru": "Радиус проинтегрирован без возведения в квадрат.",
+        "uz": "Radius kvadratga oshirilmasdan integrallangan."
+      },
+      "next_action": {
+        "en": "For discs about the x-axis use V=π∫y² dx; square the distance from the axis before integrating.",
+        "ru": "Для дисков вокруг оси x используйте V=π∫y² dx; сначала возведите радиус в квадрат.",
+        "uz": "x o‘qi atrofida disklar uchun V=π∫y² dx; integrallashdan oldin radiusni kvadratga oshiring."
+      }
+    },
+    {
+      "code": "INT05_PI_FACTOR",
+      "skill": "P1-INT-05",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The factor π was omitted from the volume-of-revolution formula.",
+        "ru": "В формуле объёма вращения пропущен множитель π.",
+        "uz": "Aylanish hajmi formulasida π ko‘paytuvchisi tushirib qoldirilgan."
+      },
+      "next_action": {
+        "en": "Include π outside the integral for circular-disc volumes.",
+        "ru": "Для объёмов из круговых дисков ставьте π перед интегралом.",
+        "uz": "Doiraviy disklar hajmida integral oldiga π ni qo‘ying."
+      }
+    },
+    {
+      "code": "INT05_AXIS_RADIUS",
+      "skill": "P1-INT-05",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The radius was measured from the wrong axis.",
+        "ru": "Радиус измерен от неверной оси.",
+        "uz": "Radius noto‘g‘ri o‘qdan o‘lchangan."
+      },
+      "next_action": {
+        "en": "Identify the stated axis first; the radius is the perpendicular distance from that axis to the curve.",
+        "ru": "Сначала определите ось вращения; радиус — перпендикулярное расстояние от неё до кривой.",
+        "uz": "Avval aylanish o‘qini aniqlang; radius o‘qdan egri chiziqqacha perpendikulyar masofa."
+      }
+    },
+    {
+      "code": "INT05_LIMITS",
+      "skill": "P1-INT-05",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The volume limits do not match the rotated region.",
+        "ru": "Пределы объёма не соответствуют вращаемой области.",
+        "uz": "Hajm integralining chegaralari aylantirilayotgan sohaga mos emas."
+      },
+      "next_action": {
+        "en": "Use the x-limits (or y-limits) of the actual region being rotated.",
+        "ru": "Используйте x-пределы (или y-пределы) именно вращаемой области.",
+        "uz": "Aylantirilayotgan sohaning haqiqiy x (yoki y) chegaralarini ishlating."
+      }
+    },
+    {
+      "code": "INT05_WASHER",
+      "skill": "P1-INT-05",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "A region with an inner radius was treated as a solid disc.",
+        "ru": "Область с внутренним радиусом ошибочно рассмотрена как сплошной диск.",
+        "uz": "Ichki radiusli soha qattiq disk sifatida noto‘g‘ri olingan."
+      },
+      "next_action": {
+        "en": "When appropriate use π∫(R²−r²) dx: outer-radius squared minus inner-radius squared.",
+        "ru": "При необходимости используйте π∫(R²−r²) dx: квадрат внешнего радиуса минус квадрат внутреннего.",
+        "uz": "Kerak bo‘lsa π∫(R²−r²) dx: tashqi radius kvadrati minus ichki radius kvadrati."
+      }
+    }
+  ]
+}

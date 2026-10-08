@@ -51,7 +51,7 @@
     if (!script) {
       script = document.createElement("script");
       script.dataset.examPrepProgressUxBoot = "true";
-      script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux3");
+      script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux4");
       bootLoad = new Promise(resolve => {
         script.addEventListener("load", () => resolve(true), { once: true });
         script.addEventListener("error", () => resolve(false), { once: true });

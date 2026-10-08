@@ -1,0 +1,505 @@
+{
+  "version": "p1_functions_diag_v0.1",
+  "policy": {
+    "rule": "A diagnostic code may be used only when the authored wrong path intentionally supports it. Otherwise the result is unmapped.",
+    "ai_boundary": "AI may explain an established diagnostic only; it may not replace, strengthen, or invent the diagnostic."
+  },
+  "diagnostics": [
+    {
+      "code": "FUN01_FUNCTION_RULE",
+      "skill": "P1-FUN-01",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The relation was treated as a function even though one allowed input gives more than one output.",
+        "ru": "Соотношение принято за функцию, хотя одному допустимому входу соответствует более одного выхода.",
+        "uz": "Munosabat funksiya deb qabul qilingan, holbuki bitta ruxsat etilgan kirishga bittadan ko‘p chiqish mos keladi."
+      },
+      "next_action": {
+        "en": "Check each input separately: a function must assign exactly one output to every allowed input.",
+        "ru": "Проверьте каждый вход отдельно: функция должна каждому допустимому входу сопоставлять ровно один выход.",
+        "uz": "Har bir kirishni alohida tekshiring: funksiya har bir ruxsat etilgan kirishga aynan bitta chiqish mos qo‘yishi kerak."
+      }
+    },
+    {
+      "code": "FUN01_DOMAIN_RANGE",
+      "skill": "P1-FUN-01",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Domain and range were interchanged.",
+        "ru": "Область определения и область значений перепутаны.",
+        "uz": "Aniqlanish sohasi va qiymatlar to‘plami aralashtirilgan."
+      },
+      "next_action": {
+        "en": "Identify allowed inputs first (domain), then the outputs actually produced (range).",
+        "ru": "Сначала определите допустимые входы — область определения, затем реально получаемые выходы — область значений.",
+        "uz": "Avval ruxsat etilgan kirishlarni — aniqlanish sohasini, keyin hosil bo‘ladigan chiqishlarni — qiymatlar to‘plamini aniqlang."
+      }
+    },
+    {
+      "code": "FUN01_ONE_ONE",
+      "skill": "P1-FUN-01",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The one-to-one condition was interpreted incorrectly.",
+        "ru": "Условие взаимной однозначности интерпретировано неверно.",
+        "uz": "One-to-one sharti noto‘g‘ri talqin qilingan."
+      },
+      "next_action": {
+        "en": "A function is one-to-one only if two different allowed inputs can never give the same output.",
+        "ru": "Функция взаимно однозначна только тогда, когда два разных допустимых входа никогда не дают один и тот же выход.",
+        "uz": "Funksiya one-to-one bo‘lishi uchun ikki xil ruxsat etilgan kirish hech qachon bir xil chiqish bermasligi kerak."
+      }
+    },
+    {
+      "code": "FUN01_INVERSE_RECIPROCAL",
+      "skill": "P1-FUN-01",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The inverse function was confused with the reciprocal.",
+        "ru": "Обратная функция перепутана с обратной величиной.",
+        "uz": "Teskari funksiya o‘zaro teskari son bilan aralashtirilgan."
+      },
+      "next_action": {
+        "en": "f⁻¹ reverses the input-output mapping; 1/f(x) is only the reciprocal of the output.",
+        "ru": "f⁻¹ обращает соответствие вход–выход; 1/f(x) — лишь обратная величина значения функции.",
+        "uz": "f⁻¹ kirish–chiqish mosligini teskarilaydi; 1/f(x) esa faqat funksiya qiymatining teskarisi."
+      }
+    },
+    {
+      "code": "FUN01_COMPOSITION_ORDER",
+      "skill": "P1-FUN-01",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The order of a composition was read backwards.",
+        "ru": "Порядок выполнения композиции прочитан наоборот.",
+        "uz": "Kompozitsiya bajarilish tartibi teskari o‘qilgan."
+      },
+      "next_action": {
+        "en": "Read from the inside out: in f(g(x)), apply g first and then f.",
+        "ru": "Читайте изнутри наружу: в f(g(x)) сначала применяется g, затем f.",
+        "uz": "Ichkaridan tashqariga o‘qing: f(g(x)) da avval g, keyin f qo‘llanadi."
+      }
+    },
+    {
+      "code": "FUN02_RESTRICTION_IGNORED",
+      "skill": "P1-FUN-02",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The stated domain restriction was ignored when finding the range.",
+        "ru": "При нахождении области значений проигнорировано заданное ограничение области определения.",
+        "uz": "Qiymatlar to‘plamini topishda berilgan aniqlanish sohasi cheklovi e’tiborga olinmagan."
+      },
+      "next_action": {
+        "en": "Work only on the allowed x-values and find the outputs reached on that restricted part of the graph.",
+        "ru": "Рассматривайте только разрешённые x и найдите значения, достигаемые на этой части графика.",
+        "uz": "Faqat ruxsat etilgan x larni ko‘rib, grafikning shu qismida olinadigan chiqishlarni toping."
+      }
+    },
+    {
+      "code": "FUN02_TURNING_POINT",
+      "skill": "P1-FUN-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A turning point inside the allowed domain was missed.",
+        "ru": "Пропущена вершина/точка экстремума внутри заданной области.",
+        "uz": "Berilgan soha ichidagi burilish yoki ekstremum nuqta o‘tkazib yuborilgan."
+      },
+      "next_action": {
+        "en": "For a restricted quadratic, check both endpoints and any vertex lying inside the interval.",
+        "ru": "Для ограниченной квадратичной функции проверьте оба конца промежутка и вершину, если она лежит внутри.",
+        "uz": "Cheklangan kvadrat funksiyada ikkala chegara va oraliq ichidagi cho‘qqini tekshiring."
+      }
+    },
+    {
+      "code": "FUN02_ENDPOINT",
+      "skill": "P1-FUN-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "An endpoint output was evaluated or compared incorrectly.",
+        "ru": "Значение функции на границе вычислено или сравнено неверно.",
+        "uz": "Chegaradagi funksiya qiymati noto‘g‘ri hisoblangan yoki taqqoslangan."
+      },
+      "next_action": {
+        "en": "Evaluate the function at every included endpoint before deciding the minimum and maximum output.",
+        "ru": "Вычислите функцию на каждой включённой границе перед выбором минимума и максимума.",
+        "uz": "Minimum va maksimumni tanlashdan oldin funksiyani har bir kiritilgan chegarada hisoblang."
+      }
+    },
+    {
+      "code": "FUN02_INPUT_OUTPUT_BOUNDS",
+      "skill": "P1-FUN-02",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The x-bounds were copied directly as y-bounds.",
+        "ru": "Границы по x напрямую перенесены как границы по y.",
+        "uz": "x chegaralari to‘g‘ridan-to‘g‘ri y chegaralari sifatida ko‘chirilgan."
+      },
+      "next_action": {
+        "en": "The domain limits inputs; calculate the corresponding outputs to obtain the range.",
+        "ru": "Область определения ограничивает входы; для области значений нужно вычислить соответствующие выходы.",
+        "uz": "Aniqlanish sohasi kirishlarni cheklaydi; qiymatlar to‘plami uchun mos chiqishlarni hisoblash kerak."
+      }
+    },
+    {
+      "code": "FUN03_COMPOSITION_ORDER",
+      "skill": "P1-FUN-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The functions were applied in the wrong order.",
+        "ru": "Функции применены в неверном порядке.",
+        "uz": "Funksiyalar noto‘g‘ri tartibda qo‘llangan."
+      },
+      "next_action": {
+        "en": "In f(g(x)), evaluate g first and substitute its entire output into f.",
+        "ru": "В f(g(x)) сначала найдите g, затем целиком подставьте его результат в f.",
+        "uz": "f(g(x)) da avval g ni hisoblang, keyin uning butun natijasini f ga qo‘ying."
+      }
+    },
+    {
+      "code": "FUN03_SUBSTITUTION",
+      "skill": "P1-FUN-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The inner expression was not substituted into every occurrence of the outer function’s variable.",
+        "ru": "Внутреннее выражение подставлено не во все места переменной внешней функции.",
+        "uz": "Ichki ifoda tashqi funksiyadagi o‘zgaruvchining barcha o‘rinlariga qo‘yilmagan."
+      },
+      "next_action": {
+        "en": "Use brackets and replace every x in the outer rule with the complete inner expression.",
+        "ru": "Используйте скобки и замените каждый x во внешнем правиле полным внутренним выражением.",
+        "uz": "Qavs ishlating va tashqi qoidadagi har bir x ni to‘liq ichki ifoda bilan almashtiring."
+      }
+    },
+    {
+      "code": "FUN03_DOMAIN",
+      "skill": "P1-FUN-03",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The composition’s domain was accepted without checking the intermediate value.",
+        "ru": "Область определения композиции выбрана без проверки промежуточного значения.",
+        "uz": "Kompozitsiya aniqlanish sohasi oraliq qiymatni tekshirmasdan qabul qilingan."
+      },
+      "next_action": {
+        "en": "The input must be allowed by the inner function, and the inner output must lie in the outer function’s domain.",
+        "ru": "Вход должен быть допустим для внутренней функции, а её выход — принадлежать области определения внешней.",
+        "uz": "Kirish ichki funksiya uchun ruxsat etilgan bo‘lishi, ichki chiqish esa tashqi funksiyaning aniqlanish sohasiga kirishi kerak."
+      }
+    },
+    {
+      "code": "FUN03_RESTRICTION_DIRECTION",
+      "skill": "P1-FUN-03",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The inequality or restriction created by the outer function was solved incorrectly.",
+        "ru": "Неравенство или ограничение, возникающее из внешней функции, решено неверно.",
+        "uz": "Tashqi funksiyadan kelib chiqqan tengsizlik yoki cheklov noto‘g‘ri yechilgan."
+      },
+      "next_action": {
+        "en": "Translate the outer-domain requirement into a condition on the inner output, then solve that condition for x.",
+        "ru": "Переведите требование области внешней функции в условие на внутренний результат и решите его относительно x.",
+        "uz": "Tashqi funksiya sohasi talabini ichki natija uchun shartga aylantiring va x bo‘yicha yeching."
+      }
+    },
+    {
+      "code": "FUN04_ONE_ONE",
+      "skill": "P1-FUN-04",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "An inverse was assumed without ensuring the original function is one-to-one on the stated domain.",
+        "ru": "Обратная функция использована без проверки взаимной однозначности на заданной области.",
+        "uz": "Boshlang‘ich funksiya berilgan sohada one-to-one ekanini tekshirmasdan teskari funksiya qabul qilingan."
+      },
+      "next_action": {
+        "en": "Check one-to-one behavior first; if needed, restrict the domain before defining the inverse.",
+        "ru": "Сначала проверьте взаимную однозначность; при необходимости ограничьте область определения.",
+        "uz": "Avval one-to-one xususiyatini tekshiring; kerak bo‘lsa teskari funksiyani aniqlashdan oldin sohani cheklang."
+      }
+    },
+    {
+      "code": "FUN04_SWAP_SOLVE",
+      "skill": "P1-FUN-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The inverse-algebra step was carried out incorrectly.",
+        "ru": "Алгебраический шаг при нахождении обратной функции выполнен неверно.",
+        "uz": "Teskari funksiyani topishdagi algebraik qadam noto‘g‘ri bajarilgan."
+      },
+      "next_action": {
+        "en": "Write y=f(x), swap x and y, then solve the new equation completely for y.",
+        "ru": "Запишите y=f(x), поменяйте x и y местами и полностью выразите новый y.",
+        "uz": "y=f(x) deb yozing, x va y ni almashtiring, so‘ng yangi y ni to‘liq ajrating."
+      }
+    },
+    {
+      "code": "FUN04_RECIPROCAL",
+      "skill": "P1-FUN-04",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "f⁻¹(x) was treated as 1/f(x).",
+        "ru": "f⁻¹(x) принято за 1/f(x).",
+        "uz": "f⁻¹(x) 1/f(x) deb qabul qilingan."
+      },
+      "next_action": {
+        "en": "An inverse reverses the mapping; it is not the reciprocal of the function value.",
+        "ru": "Обратная функция обращает отображение, а не берёт обратную величину значения.",
+        "uz": "Teskari funksiya moslikni teskarilaydi, funksiya qiymatining teskarisini olmaydi."
+      }
+    },
+    {
+      "code": "FUN04_DOMAIN_RANGE_SWAP",
+      "skill": "P1-FUN-04",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The original domain and range were not swapped correctly for the inverse.",
+        "ru": "Исходные область определения и область значений неверно поменяны местами для обратной функции.",
+        "uz": "Boshlang‘ich aniqlanish sohasi va qiymatlar to‘plami teskari funksiya uchun noto‘g‘ri almashtirilgan."
+      },
+      "next_action": {
+        "en": "The original range becomes the inverse domain, and the original domain becomes the inverse range.",
+        "ru": "Область значений исходной функции становится областью определения обратной, а исходная область определения — её областью значений.",
+        "uz": "Boshlang‘ich qiymatlar to‘plami teskari funksiyaning aniqlanish sohasi, boshlang‘ich soha esa uning qiymatlar to‘plami bo‘ladi."
+      }
+    },
+    {
+      "code": "FUN04_BRANCH",
+      "skill": "P1-FUN-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The wrong square-root branch was chosen for the stated domain restriction.",
+        "ru": "Для заданного ограничения области выбрана неверная ветвь квадратного корня.",
+        "uz": "Berilgan soha cheklovi uchun kvadrat ildizning noto‘g‘ri tarmog‘i tanlangan."
+      },
+      "next_action": {
+        "en": "Use the original domain to decide whether the inverse needs the positive or negative square-root branch.",
+        "ru": "Используйте исходную область определения, чтобы выбрать положительную или отрицательную ветвь корня.",
+        "uz": "Teskari funksiyada musbat yoki manfiy ildiz tarmog‘ini tanlash uchun boshlang‘ich sohani ishlating."
+      }
+    },
+    {
+      "code": "FUN05_POINT_SWAP",
+      "skill": "P1-FUN-05",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The inverse-graph point was not obtained by swapping coordinates.",
+        "ru": "Точка графика обратной функции получена без правильной перестановки координат.",
+        "uz": "Teskari funksiya grafigidagi nuqta koordinatalarni to‘g‘ri almashtirmasdan olingan."
+      },
+      "next_action": {
+        "en": "Map every point (x,y) on f to (y,x) on f⁻¹.",
+        "ru": "Каждую точку (x,y) графика f переводите в (y,x) на графике f⁻¹.",
+        "uz": "f dagi har bir (x,y) nuqtani f⁻¹ da (y,x) ga o‘tkazing."
+      }
+    },
+    {
+      "code": "FUN05_REFLECTION_LINE",
+      "skill": "P1-FUN-05",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The inverse graph was reflected in the wrong line or axis.",
+        "ru": "График обратной функции отражён относительно неверной прямой или оси.",
+        "uz": "Teskari funksiya grafigi noto‘g‘ri chiziq yoki o‘qqa nisbatan akslantirilgan."
+      },
+      "next_action": {
+        "en": "A function and its inverse are reflections of each other in y=x.",
+        "ru": "Графики функции и её обратной отражаются друг в друга относительно y=x.",
+        "uz": "Funksiya va uning teskarisi grafiklari y=x ga nisbatan bir-birining aksidir."
+      }
+    },
+    {
+      "code": "FUN05_FIXED_POINT",
+      "skill": "P1-FUN-05",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A point on the mirror line y=x was treated as moving under inversion.",
+        "ru": "Точка на зеркальной прямой y=x ошибочно считалась перемещающейся при обращении.",
+        "uz": "y=x ko‘zgu chizig‘idagi nuqta teskari funksiyada siljiydi deb noto‘g‘ri qaralgan."
+      },
+      "next_action": {
+        "en": "Points with x=y stay fixed because swapping their coordinates changes nothing.",
+        "ru": "Точки с x=y остаются на месте, потому что перестановка координат ничего не меняет.",
+        "uz": "x=y bo‘lgan nuqtalar o‘zgarmaydi, chunki koordinatalarni almashtirish natijani o‘zgartirmaydi."
+      }
+    },
+    {
+      "code": "FUN06_HORIZONTAL_SIGN",
+      "skill": "P1-FUN-06",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The horizontal translation direction was read from the inside sign incorrectly.",
+        "ru": "Направление горизонтального сдвига неверно определено по знаку внутри функции.",
+        "uz": "Gorizontal siljish yo‘nalishi funksiya ichidagi ishoradan noto‘g‘ri o‘qilgan."
+      },
+      "next_action": {
+        "en": "f(x−a) moves right by a; f(x+a) moves left by a.",
+        "ru": "f(x−a) сдвигается вправо на a; f(x+a) — влево на a.",
+        "uz": "f(x−a) a birlik o‘ngga, f(x+a) a birlik chapga siljiydi."
+      }
+    },
+    {
+      "code": "FUN06_VERTICAL_SIGN",
+      "skill": "P1-FUN-06",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The vertical translation direction was read incorrectly.",
+        "ru": "Направление вертикального сдвига определено неверно.",
+        "uz": "Vertikal siljish yo‘nalishi noto‘g‘ri aniqlangan."
+      },
+      "next_action": {
+        "en": "f(x)+a moves up by a; f(x)−a moves down by a.",
+        "ru": "f(x)+a сдвигается вверх на a; f(x)−a — вниз на a.",
+        "uz": "f(x)+a a birlik yuqoriga, f(x)−a a birlik pastga siljiydi."
+      }
+    },
+    {
+      "code": "FUN06_POINT_MAP",
+      "skill": "P1-FUN-06",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The point was moved by the wrong translation vector.",
+        "ru": "Точка перемещена неверным вектором сдвига.",
+        "uz": "Nuqta noto‘g‘ri siljish vektori bilan ko‘chirilgan."
+      },
+      "next_action": {
+        "en": "Translate every point by the same horizontal and vertical amounts implied by the equation.",
+        "ru": "Перемещайте каждую точку на одинаковые горизонтальное и вертикальное расстояния, заданные уравнением.",
+        "uz": "Har bir nuqtani tenglama ko‘rsatgan bir xil gorizontal va vertikal miqdorlarga siljiting."
+      }
+    },
+    {
+      "code": "FUN07_AXIS",
+      "skill": "P1-FUN-07",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The graph was reflected in the wrong coordinate axis.",
+        "ru": "График отражён относительно неверной координатной оси.",
+        "uz": "Grafik noto‘g‘ri koordinata o‘qiga nisbatan akslantirilgan."
+      },
+      "next_action": {
+        "en": "−f(x) reflects in the x-axis; f(−x) reflects in the y-axis.",
+        "ru": "−f(x) — отражение относительно оси x; f(−x) — относительно оси y.",
+        "uz": "−f(x) x o‘qiga, f(−x) y o‘qiga nisbatan akslantiradi."
+      }
+    },
+    {
+      "code": "FUN07_POINT_MAP",
+      "skill": "P1-FUN-07",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The wrong coordinate changed sign under the reflection.",
+        "ru": "При отражении знак изменён у неверной координаты.",
+        "uz": "Akslantirishda noto‘g‘ri koordinataning ishorasi o‘zgartirilgan."
+      },
+      "next_action": {
+        "en": "Across the x-axis: (x,y)→(x,−y). Across the y-axis: (x,y)→(−x,y).",
+        "ru": "Относительно оси x: (x,y)→(x,−y). Относительно оси y: (x,y)→(−x,y).",
+        "uz": "x o‘qiga nisbatan: (x,y)→(x,−y). y o‘qiga nisbatan: (x,y)→(−x,y)."
+      }
+    },
+    {
+      "code": "FUN07_INSIDE_OUTSIDE",
+      "skill": "P1-FUN-07",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The minus sign inside and outside the function was interpreted the same way.",
+        "ru": "Минус внутри и снаружи функции интерпретирован одинаково.",
+        "uz": "Funksiya ichidagi va tashqarisidagi minus bir xil talqin qilingan."
+      },
+      "next_action": {
+        "en": "A minus outside changes y; a minus inside the input changes x.",
+        "ru": "Минус снаружи меняет y, минус внутри аргумента меняет x.",
+        "uz": "Tashqaridagi minus y ni, argument ichidagi minus x ni o‘zgartiradi."
+      }
+    },
+    {
+      "code": "FUN08_VERTICAL_SCALE",
+      "skill": "P1-FUN-08",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The vertical scale factor was applied to the wrong coordinate or in the wrong direction.",
+        "ru": "Вертикальный коэффициент масштаба применён к неверной координате или неверно.",
+        "uz": "Vertikal masshtab koeffitsiyenti noto‘g‘ri koordinataga yoki noto‘g‘ri tarzda qo‘llangan."
+      },
+      "next_action": {
+        "en": "For y=af(x), multiply each y-coordinate by a while x stays unchanged.",
+        "ru": "Для y=af(x) умножайте каждую y-координату на a, оставляя x без изменения.",
+        "uz": "y=af(x) da har bir y-koordinatani a ga ko‘paytiring, x o‘zgarmaydi."
+      }
+    },
+    {
+      "code": "FUN08_HORIZONTAL_RECIPROCAL",
+      "skill": "P1-FUN-08",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The horizontal scale factor was not taken as the reciprocal of the multiplier inside f.",
+        "ru": "Горизонтальный коэффициент масштаба не взят как обратный коэффициенту внутри f.",
+        "uz": "Gorizontal masshtab f ichidagi ko‘paytiruvchining teskarisi sifatida olinmagan."
+      },
+      "next_action": {
+        "en": "For y=f(bx), the horizontal scale factor is 1/|b|.",
+        "ru": "Для y=f(bx) горизонтальный коэффициент масштаба равен 1/|b|.",
+        "uz": "y=f(bx) da gorizontal masshtab koeffitsiyenti 1/|b|."
+      }
+    },
+    {
+      "code": "FUN08_POINT_MAP",
+      "skill": "P1-FUN-08",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The combined transformation was not applied consistently to the point coordinates.",
+        "ru": "Комбинированное преобразование применено к координатам точки непоследовательно.",
+        "uz": "Birgalikdagi o‘zgarish nuqta koordinatalariga izchil qo‘llanmagan."
+      },
+      "next_action": {
+        "en": "Build the point map explicitly: handle the horizontal input change for x and the outside scale/shift for y.",
+        "ru": "Явно запишите отображение точки: отдельно обработайте изменение аргумента по x и внешнее масштабирование/сдвиг по y.",
+        "uz": "Nuqta tasvirini aniq yozing: x uchun ichki argument o‘zgarishini, y uchun tashqi masshtab va siljishni alohida qo‘llang."
+      }
+    },
+    {
+      "code": "FUN08_TRANSFORM_TYPE",
+      "skill": "P1-FUN-08",
+      "mistake_type": "concept",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "A horizontal change was identified as vertical, or a stretch was identified with the wrong factor.",
+        "ru": "Горизонтальное изменение принято за вертикальное либо коэффициент растяжения выбран неверно.",
+        "uz": "Gorizontal o‘zgarish vertikal deb yoki cho‘zilish koeffitsiyenti noto‘g‘ri aniqlangan."
+      },
+      "next_action": {
+        "en": "Changes outside f act directly on y; changes inside f act inversely on x.",
+        "ru": "Изменения снаружи f прямо действуют на y; изменения внутри f обратно действуют на x.",
+        "uz": "f tashqarisidagi o‘zgarishlar y ga to‘g‘ridan-to‘g‘ri, f ichidagilar x ga teskari ta’sir qiladi."
+      }
+    }
+  ]
+}

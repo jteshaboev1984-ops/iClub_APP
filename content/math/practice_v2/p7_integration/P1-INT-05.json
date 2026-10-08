@@ -1,0 +1,571 @@
+{
+  "version": "practice_v2_p7_integration_draft_v0.1",
+  "skill": "P1-INT-05",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q484",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-05",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "direct_volume",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "The region under y=2x from x=0 to x=1 is rotated about the x-axis. What is the volume?",
+        "ru": "Область под y=2x от x=0 до x=1 вращается вокруг оси x. Каков объём?",
+        "uz": "y=2x ostidagi x=0 dan x=1 gacha soha x o‘qi atrofida aylantiriladi. Hajm qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "2π",
+            "ru": "2π",
+            "uz": "2π"
+          },
+          "diagnostic_code": "INT05_RADIUS_SQUARED"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "4π/3",
+            "ru": "4π/3",
+            "uz": "4π/3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "4/3",
+            "ru": "4/3",
+            "uz": "4/3"
+          },
+          "diagnostic_code": "INT05_PI_FACTOR"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "2π/3",
+            "ru": "2π/3",
+            "uz": "2π/3"
+          },
+          "diagnostic_code": "INT05_RADIUS_SQUARED"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "V=π∫₀¹y²dx=π∫₀¹(2x)²dx=4π[x³/3]₀¹=4π/3.",
+        "ru": "V=π∫₀¹y²dx=π∫₀¹(2x)²dx=4π[x³/3]₀¹=4π/3.",
+        "uz": "V=π∫₀¹y²dx=π∫₀¹(2x)²dx=4π[x³/3]₀¹=4π/3."
+      },
+      "ai_source_skill": "P1-INT-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q485",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-05",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "square_root_volume",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "The region under y=√(2x) from x=0 to x=3 is rotated about the x-axis. The volume is aπ. Enter a.",
+        "ru": "Область под y=√(2x) от x=0 до x=3 вращается вокруг оси x. Объём равен aπ. Введите a.",
+        "uz": "y=√(2x) ostidagi x=0 dan x=3 gacha soha x o‘qi atrofida aylantiriladi. Hajm aπ. a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "9",
+        "accepted_examples": [
+          "9",
+          " 9 "
+        ],
+        "rejected_examples": [
+          "3",
+          "6",
+          "18"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "V=π∫₀³(√(2x))²dx=π∫₀³2x dx=π[x²]₀³=9π, so a=9.",
+        "ru": "V=π∫₀³(√(2x))²dx=π∫₀³2x dx=π[x²]₀³=9π, поэтому a=9.",
+        "uz": "V=π∫₀³(√(2x))²dx=π∫₀³2x dx=π[x²]₀³=9π, demak a=9."
+      },
+      "ai_source_skill": "P1-INT-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q486",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-05",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "parameter_from_volume",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "For k>0, the region under y=kx² from x=0 to x=2 is rotated about the x-axis and has volume 288π/5. Enter k.",
+        "ru": "При k>0 область под y=kx² от x=0 до x=2 вращается вокруг оси x и имеет объём 288π/5. Введите k.",
+        "uz": "k>0 uchun y=kx² ostidagi x=0 dan x=2 gacha soha x o‘qi atrofida aylantiriladi va hajmi 288π/5. k ni kiriting."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "6",
+            "ru": "6",
+            "uz": "6"
+          },
+          "diagnostic_code": "INT05_RADIUS_SQUARED"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "9",
+            "ru": "9",
+            "uz": "9"
+          },
+          "diagnostic_code": "INT05_RADIUS_SQUARED"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "INT05_PI_FACTOR"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "V=π∫₀²(kx²)²dx=πk²∫₀²x⁴dx=(32k²/5)π. Set 32k²/5=288/5, so k²=9. Since k>0, k=3.",
+        "ru": "V=π∫₀²(kx²)²dx=πk²∫₀²x⁴dx=(32k²/5)π. Из 32k²/5=288/5 получаем k²=9. Так как k>0, k=3.",
+        "uz": "V=π∫₀²(kx²)²dx=πk²∫₀²x⁴dx=(32k²/5)π. 32k²/5=288/5 dan k²=9. k>0 bo‘lgani uchun k=3."
+      },
+      "ai_source_skill": "P1-INT-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q487",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-05",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "decreasing_line_volume",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "The region under y=3−x from x=0 to x=3 is rotated about the x-axis. The volume is aπ. Enter a.",
+        "ru": "Область под y=3−x от x=0 до x=3 вращается вокруг оси x. Объём равен aπ. Введите a.",
+        "uz": "y=3−x ostidagi x=0 dan x=3 gacha soha x o‘qi atrofida aylantiriladi. Hajm aπ. a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "9",
+        "accepted_examples": [
+          "9",
+          " 9 "
+        ],
+        "rejected_examples": [
+          "4.5",
+          "6",
+          "18"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "V=π∫₀³(3−x)²dx. Let u=3−x or expand; the integral is 9. Thus V=9π and a=9.",
+        "ru": "V=π∫₀³(3−x)²dx. Можно заменить u=3−x или раскрыть скобки; интеграл равен 9. Значит V=9π и a=9.",
+        "uz": "V=π∫₀³(3−x)²dx. u=3−x deb olish yoki yoyish mumkin; integral 9. Demak V=9π va a=9."
+      },
+      "ai_source_skill": "P1-INT-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q488",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-05",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "shifted_root_volume",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "The region under y=√(x+1) from x=0 to x=3 is rotated about the x-axis. If V=aπ, enter 2a.",
+        "ru": "Область под y=√(x+1) от x=0 до x=3 вращается вокруг оси x. Если V=aπ, введите 2a.",
+        "uz": "y=√(x+1) ostidagi x=0 dan x=3 gacha soha x o‘qi atrofida aylantiriladi. V=aπ bo‘lsa, 2a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "15",
+        "accepted_examples": [
+          "15",
+          " 15 "
+        ],
+        "rejected_examples": [
+          "7",
+          "8",
+          "30"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "V=π∫₀³(x+1)dx=π[x²/2+x]₀³=(15/2)π. Thus a=15/2 and 2a=15.",
+        "ru": "V=π∫₀³(x+1)dx=π[x²/2+x]₀³=(15/2)π. Поэтому a=15/2 и 2a=15.",
+        "uz": "V=π∫₀³(x+1)dx=π[x²/2+x]₀³=(15/2)π. Demak a=15/2 va 2a=15."
+      },
+      "ai_source_skill": "P1-INT-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q489",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-05",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "parameter_volume",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "For k>0, the region under y=kx from x=0 to x=1 is rotated about the x-axis and has volume 12π. Enter k.",
+        "ru": "При k>0 область под y=kx от x=0 до x=1 вращается вокруг оси x и имеет объём 12π. Введите k.",
+        "uz": "k>0 uchun y=kx ostidagi x=0 dan x=1 gacha soha x o‘qi atrofida aylantiriladi va hajmi 12π. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "6",
+        "accepted_examples": [
+          "6",
+          " 6 "
+        ],
+        "rejected_examples": [
+          "3",
+          "12",
+          "36"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "V=π∫₀¹k²x²dx=πk²/3. Set k²/3=12, so k²=36. Since k>0, k=6.",
+        "ru": "V=π∫₀¹k²x²dx=πk²/3. Из k²/3=12 получаем k²=36. Так как k>0, k=6.",
+        "uz": "V=π∫₀¹k²x²dx=πk²/3. k²/3=12 dan k²=36. k>0 bo‘lgani uchun k=6."
+      },
+      "ai_source_skill": "P1-INT-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q490",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-05",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "reverse_upper_limit",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "For a>0, the region under y=x from x=0 to x=a is rotated about the x-axis and has volume 9π. Enter a.",
+        "ru": "При a>0 область под y=x от x=0 до x=a вращается вокруг оси x и имеет объём 9π. Введите a.",
+        "uz": "a>0 uchun y=x ostidagi x=0 dan x=a gacha soha x o‘qi atrofida aylantiriladi va hajmi 9π. a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "2",
+          "9",
+          "27"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "V=π∫₀ᵃx²dx=πa³/3. Set a³/3=9, so a³=27 and a=3.",
+        "ru": "V=π∫₀ᵃx²dx=πa³/3. Из a³/3=9 получаем a³=27 и a=3.",
+        "uz": "V=π∫₀ᵃx²dx=πa³/3. a³/3=9 dan a³=27 va a=3."
+      },
+      "ai_source_skill": "P1-INT-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q491",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-05",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "compare_radii",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "On 0≤x≤1, which region gives the larger volume when rotated about the x-axis: under y=x or under y=√x?",
+        "ru": "На 0≤x≤1 какая область даёт больший объём при вращении вокруг оси x: под y=x или под y=√x?",
+        "uz": "0≤x≤1 da x o‘qi atrofida aylantirilganda qaysi soha kattaroq hajm beradi: y=x ostidagimi yoki y=√x ostidagimi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "They give equal volumes.",
+            "ru": "Они дают равные объёмы.",
+            "uz": "Hajmlar teng."
+          },
+          "diagnostic_code": "INT05_RADIUS_SQUARED"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Under y=x",
+            "ru": "Под y=x",
+            "uz": "y=x ostidagi"
+          },
+          "diagnostic_code": "INT05_RADIUS_SQUARED"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Under y=√x",
+            "ru": "Под y=√x",
+            "uz": "y=√x ostidagi"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "It cannot be decided without π.",
+            "ru": "Нельзя определить без π.",
+            "uz": "π siz aniqlab bo‘lmaydi."
+          },
+          "diagnostic_code": "INT05_PI_FACTOR"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "For y=x, V=π∫₀¹x²dx=π/3. For y=√x, V=π∫₀¹x dx=π/2. Since π/2>π/3, y=√x gives the larger volume.",
+        "ru": "Для y=x: V=π∫₀¹x²dx=π/3. Для y=√x: V=π∫₀¹x dx=π/2. Так как π/2>π/3, больший объём даёт y=√x.",
+        "uz": "y=x uchun V=π∫₀¹x²dx=π/3. y=√x uchun V=π∫₀¹x dx=π/2. π/2>π/3, demak y=√x kattaroq hajm beradi."
+      },
+      "ai_source_skill": "P1-INT-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q492",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-05",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "shifted_linear_volume",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "The region under y=2x+1 from x=0 to x=1 is rotated about the x-axis. If V=aπ, enter 3a.",
+        "ru": "Область под y=2x+1 от x=0 до x=1 вращается вокруг оси x. Если V=aπ, введите 3a.",
+        "uz": "y=2x+1 ostidagi x=0 dan x=1 gacha soha x o‘qi atrofida aylantiriladi. V=aπ bo‘lsa, 3a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "13",
+        "accepted_examples": [
+          "13",
+          " 13 "
+        ],
+        "rejected_examples": [
+          "7",
+          "9",
+          "26"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "V=π∫₀¹(2x+1)²dx=π∫₀¹(4x²+4x+1)dx=π(4/3+2+1)=13π/3. Thus 3a=13.",
+        "ru": "V=π∫₀¹(2x+1)²dx=π∫₀¹(4x²+4x+1)dx=π(4/3+2+1)=13π/3. Поэтому 3a=13.",
+        "uz": "V=π∫₀¹(2x+1)²dx=π∫₀¹(4x²+4x+1)dx=π(4/3+2+1)=13π/3. Demak 3a=13."
+      },
+      "ai_source_skill": "P1-INT-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q493",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-05",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "constant_radius_volume",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "The region between y=2 and the x-axis for 0≤x≤3 is rotated about the x-axis. What is the volume?",
+        "ru": "Область между y=2 и осью x при 0≤x≤3 вращается вокруг оси x. Каков объём?",
+        "uz": "0≤x≤3 da y=2 bilan x o‘qi orasidagi soha x o‘qi atrofida aylantiriladi. Hajm qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "12π",
+            "ru": "12π",
+            "uz": "12π"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "6π",
+            "ru": "6π",
+            "uz": "6π"
+          },
+          "diagnostic_code": "INT05_RADIUS_SQUARED"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "12",
+            "ru": "12",
+            "uz": "12"
+          },
+          "diagnostic_code": "INT05_PI_FACTOR"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "4π",
+            "ru": "4π",
+            "uz": "4π"
+          },
+          "diagnostic_code": "INT05_LIMITS"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The disc radius is constantly 2, so V=π∫₀³2²dx=π∫₀³4dx=12π.",
+        "ru": "Радиус диска постоянно равен 2, поэтому V=π∫₀³2²dx=π∫₀³4dx=12π.",
+        "uz": "Disk radiusi doim 2, demak V=π∫₀³2²dx=π∫₀³4dx=12π."
+      },
+      "ai_source_skill": "P1-INT-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q494",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-05",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "quadratic_radius_volume",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "The region under y=x(2−x) from x=0 to x=2 is rotated about the x-axis. If V=aπ, enter 15a.",
+        "ru": "Область под y=x(2−x) от x=0 до x=2 вращается вокруг оси x. Если V=aπ, введите 15a.",
+        "uz": "y=x(2−x) ostidagi x=0 dan x=2 gacha soha x o‘qi atrofida aylantiriladi. V=aπ bo‘lsa, 15a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "16",
+        "accepted_examples": [
+          "16",
+          " 16 "
+        ],
+        "rejected_examples": [
+          "8",
+          "15",
+          "32"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "V/π=∫₀²x²(2−x)²dx=∫₀²(4x²−4x³+x⁴)dx=16/15. Hence a=16/15 and 15a=16.",
+        "ru": "V/π=∫₀²x²(2−x)²dx=∫₀²(4x²−4x³+x⁴)dx=16/15. Поэтому a=16/15 и 15a=16.",
+        "uz": "V/π=∫₀²x²(2−x)²dx=∫₀²(4x²−4x³+x⁴)dx=16/15. Demak a=16/15 va 15a=16."
+      },
+      "ai_source_skill": "P1-INT-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q495",
+      "practice_no": 7,
+      "primary_skill": "P1-INT-05",
+      "secondary_skills": [
+        "P1-INT-03"
+      ],
+      "role": "reverse_parameter_root_volume",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
+      "question": {
+        "en": "For k>0, the region under y=k√x from x=0 to x=4 is rotated about the x-axis and has volume 72π. Enter k.",
+        "ru": "При k>0 область под y=k√x от x=0 до x=4 вращается вокруг оси x и имеет объём 72π. Введите k.",
+        "uz": "k>0 uchun y=k√x ostidagi x=0 dan x=4 gacha soha x o‘qi atrofida aylantiriladi va hajmi 72π. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "3",
+        "accepted_examples": [
+          "3",
+          " 3 "
+        ],
+        "rejected_examples": [
+          "6",
+          "9",
+          "2"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "V=π∫₀⁴k²x dx=πk²[x²/2]₀⁴=8k²π. Set 8k²=72, so k²=9. Since k>0, k=3.",
+        "ru": "V=π∫₀⁴k²x dx=πk²[x²/2]₀⁴=8k²π. Из 8k²=72 получаем k²=9. Так как k>0, k=3.",
+        "uz": "V=π∫₀⁴k²x dx=πk²[x²/2]₀⁴=8k²π. 8k²=72 dan k²=9. k>0 bo‘lgani uchun k=3."
+      },
+      "ai_source_skill": "P1-INT-05",
+      "status": "draft"
+    }
+  ]
+}

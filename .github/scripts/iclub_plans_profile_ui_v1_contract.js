@@ -29,7 +29,7 @@ assert(html.includes('id="profile-plan-entry"'), 'Profile plan entry missing');
 assert(html.includes('id="profile-plan"'), 'Profile plan screen missing');
 assert(html.includes('plans-ui.css?v=plans1'), 'plan CSS asset missing');
 assert(html.includes('plans-ui.js?v=plans1'), 'plan JS asset missing');
-assert(app.includes('const PROFILE_SCREENS = ["main", "settings", "plan"]'), 'Profile plan stack registration missing');
+assert(app.includes('const PROFILE_SCREENS = ["main", "settings", "plan", "subject-access"]'), 'Integrated Profile plan/subject-access stack registration missing');
 assert(app.includes('function openProfilePlan()'), 'Profile plan open helper missing');
 assert(app.includes('action === "profile-plan"'), 'Profile plan action binding missing');
 assert(app.includes('#view-profile .profile-screen.is-active:not(#profile-main)'), 'Profile inner-screen back hardening missing');

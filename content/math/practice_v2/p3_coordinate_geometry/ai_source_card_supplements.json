@@ -1,0 +1,51 @@
+{
+  "version": "p3_coordinate_geometry_ai_source_supplement_draft_v0.1",
+  "status": "draft_not_runtime_allowed",
+  "architecture_note": "Draft only. Runtime retrieval must continue using approved/versioned source cards. Publish only after content/language/rights review.",
+  "cards": [
+    {
+      "skill_code": "P1-COO-05",
+      "card_type": "theory",
+      "rights_status": "original_iclub",
+      "approval_status": "draft",
+      "is_runtime_allowed": false,
+      "source_basis": "Complete Pure Mathematics 1, Ch3 Coordinate geometry, printed pp. 48–67; iClub canonical skill P1-COO-05",
+      "variants": {
+        "en": {
+          "title": "Lines and circle geometry",
+          "body_text": "Topic focus: Lines and circle geometry.\n\nCore explanation:\nA line and a circle can be connected by algebra and geometry.\n\nTo find intersection points, solve the line and circle equations simultaneously. Usually the line is used to replace one variable in the circle equation. The resulting equation may give two, one or no real intersection points.\n\nFor a circle with centre C and radius r, a point P is:\n- on the circle if CP²=r²;\n- inside if CP²<r²;\n- outside if CP²>r².\n\nAt a point of contact P, the tangent is perpendicular to the radius CP. So after finding the gradient of CP, use the negative reciprocal for the tangent gradient, then use P to form the tangent equation.\n\nFor a chord AB, the line from the centre perpendicular to AB bisects the chord. Equivalently, the centre lies on the perpendicular bisector of every chord. This lets midpoint, gradient and circle facts work together.\n\nCritical check:\nMove between algebra and geometry deliberately. For intersections, substitute completely and recover full coordinate pairs. For a tangent, use the actual contact point and the perpendicular-radius condition. For a chord, verify both the midpoint and perpendicular relationship before drawing a conclusion."
+        },
+        "ru": {
+          "title": "Прямые и геометрия окружности",
+          "body_text": "Фокус темы: прямые и геометрия окружности.\n\nОсновная идея:\nПрямую и окружность можно связывать как алгебраически, так и геометрически.\n\nЧтобы найти точки пересечения, решайте уравнения прямой и окружности одновременно. Обычно выражение из уравнения прямой подставляют в уравнение окружности. Полученное уравнение может дать две, одну или ни одной действительной точки пересечения.\n\nДля окружности с центром C и радиусом r точка P:\n- лежит на окружности, если CP²=r²;\n- находится внутри, если CP²<r²;\n- находится снаружи, если CP²>r².\n\nВ точке касания P касательная перпендикулярна радиусу CP. Поэтому сначала найдите градиент CP, затем возьмите отрицательную обратную величину для градиента касательной и используйте P для её уравнения.\n\nДля хорды AB перпендикуляр из центра к AB делит хорду пополам. Эквивалентно: центр окружности лежит на серединном перпендикуляре к любой хорде. Это позволяет совместно использовать середину, градиенты и свойства окружности.\n\nКритическая проверка:\nОсознанно переходите между алгеброй и геометрией. Для пересечений полностью выполняйте подстановку и восстанавливайте полные координаты. Для касательной используйте настоящую точку касания и условие перпендикулярности радиусу. Для хорды проверяйте одновременно середину и перпендикулярность."
+        },
+        "uz": {
+          "title": "Chiziqlar va aylana geometriyasi",
+          "body_text": "Mavzu: chiziqlar va aylana geometriyasi.\n\nAsosiy tushuncha:\nChiziq va aylana masalalarida algebra bilan geometriyani birga ishlatish mumkin.\n\nKesishish nuqtalarini topish uchun chiziq va aylana tenglamalarini birgalikda yeching. Odatda chiziq tenglamasidan bitta o‘zgaruvchini ifodalab, aylana tenglamasiga qo‘yiladi. Hosil bo‘lgan tenglama ikki, bitta yoki hech qanday haqiqiy kesishish nuqtasini berishi mumkin.\n\nMarkazi C va radiusi r bo‘lgan aylana uchun P nuqta:\n- CP²=r² bo‘lsa, aylana ustida;\n- CP²<r² bo‘lsa, aylana ichida;\n- CP²>r² bo‘lsa, aylana tashqarisida.\n\nP tegish nuqtasida urinma CP radiusga perpendikulyar. Shuning uchun avval CP gradientini toping, keyin urinma gradienti uchun manfiy teskari qiymatni oling va P nuqtadan foydalanib urinma tenglamasini tuzing.\n\nAB vatar uchun markazdan AB ga tushirilgan perpendikulyar vatarni teng ikkiga bo‘ladi. Boshqacha aytganda, aylana markazi har bir vatarning o‘rta perpendikulyarida yotadi. Bu o‘rta nuqta, gradient va aylana xossalarini birlashtirishga yordam beradi.\n\nMuhim tekshiruv:\nAlgebra va geometriya orasida ongli ravishda o‘ting. Kesishishda qo‘yishni to‘liq bajaring va to‘liq koordinatalarni tiklang. Urinmada haqiqiy tegish nuqtasi va radiusga perpendikulyarlik shartidan foydalaning. Vatarda ham o‘rta nuqtani, ham perpendikulyarlikni tekshiring."
+        }
+      }
+    },
+    {
+      "skill_code": "P1-COO-06",
+      "card_type": "theory",
+      "rights_status": "original_iclub",
+      "approval_status": "draft",
+      "is_runtime_allowed": false,
+      "source_basis": "Complete Pure Mathematics 1, Ch3 Coordinate geometry, printed pp. 48–67; iClub canonical skill P1-COO-06",
+      "variants": {
+        "en": {
+          "title": "Intersections, tangency and parameter conditions",
+          "body_text": "Topic focus: Intersections, tangency and parameter conditions.\n\nCore explanation:\nWhen a line is substituted into a circle equation, the resulting quadratic describes the possible intersection points.\n\nIf the quadratic has discriminant D:\n- D>0 means two distinct real intersections;\n- D=0 means one repeated intersection, so the line is tangent;\n- D<0 means no real intersection.\n\nThis makes parameter questions deterministic: substitute the parameterised line, form the quadratic correctly, then impose the required discriminant condition and solve all resulting parameter values.\n\nThere is also an equivalent geometric tangency test. If a circle has centre C and radius r, a line is tangent exactly when the perpendicular distance from C to the line equals r. This can be efficient when the line is already in the form Ax+By+C=0. The discriminant and distance methods must describe the same geometry.\n\nA repeated quadratic root gives the coordinate of the contact point in the variable being solved. After finding it, substitute back into the line to obtain the other coordinate when required.\n\nCritical check:\nUse D>0, D=0 and D<0 with the correct geometric meaning. Keep the complete parameter expression during substitution. Solve every parameter value and then apply any stated sign/domain restriction. If you use the distance method, use perpendicular distance to the line, not distance to an arbitrary point on it."
+        },
+        "ru": {
+          "title": "Пересечения, касание и условия на параметр",
+          "body_text": "Фокус темы: пересечения, касание и условия на параметр.\n\nОсновная идея:\nПосле подстановки уравнения прямой в уравнение окружности полученное квадратное уравнение описывает возможные точки пересечения.\n\nЕсли дискриминант квадратного уравнения равен D:\n- D>0 означает две разные действительные точки пересечения;\n- D=0 означает один кратный корень, то есть касание;\n- D<0 означает отсутствие действительных пересечений.\n\nЭто делает задачи с параметром детерминированными: подставьте параметрическую прямую, правильно получите квадратное уравнение, задайте нужное условие на дискриминант и найдите все значения параметра.\n\nЕсть эквивалентная геометрическая проверка касания. Если окружность имеет центр C и радиус r, прямая является касательной тогда и только тогда, когда перпендикулярное расстояние от C до прямой равно r. Это удобно, если прямая уже записана в виде Ax+By+C=0. Метод дискриминанта и метод расстояния должны описывать одну и ту же геометрию.\n\nКратный корень квадратного уравнения даёт координату точки касания по той переменной, относительно которой решалось уравнение. При необходимости подставьте её обратно в прямую, чтобы найти вторую координату.\n\nКритическая проверка:\nПравильно связывайте D>0, D=0 и D<0 с геометрией. При подстановке сохраняйте всё выражение с параметром. Найдите все значения параметра и только затем примените ограничения по знаку или области. В методе расстояния используйте именно перпендикулярное расстояние от центра до прямой."
+        },
+        "uz": {
+          "title": "Kesishish, urinish va parametr shartlari",
+          "body_text": "Mavzu: kesishish, urinish va parametr shartlari.\n\nAsosiy tushuncha:\nChiziq tenglamasi aylana tenglamasiga qo‘yilganda hosil bo‘lgan kvadrat tenglama mumkin bo‘lgan kesishish nuqtalarini ifodalaydi.\n\nKvadrat tenglama diskriminanti D bo‘lsa:\n- D>0 — ikkita turli haqiqiy kesishish;\n- D=0 — bitta takroriy ildiz, ya’ni urinish;\n- D<0 — haqiqiy kesishish yo‘q.\n\nShuning uchun parametrli masalalarda aniq yo‘l bor: parametrli chiziqni qo‘ying, kvadrat tenglamani to‘g‘ri tuzing, kerakli diskriminant shartini qo‘llang va barcha parametr qiymatlarini toping.\n\nUrinishning teng kuchli geometrik tekshiruvi ham bor. Markazi C va radiusi r bo‘lgan aylana uchun chiziq aynan C dan chiziqqacha perpendikulyar masofa r ga teng bo‘lganda urinma bo‘ladi. Chiziq Ax+By+C=0 ko‘rinishda bo‘lsa, bu usul qulay bo‘lishi mumkin. Diskriminant va masofa usullari bir xil geometriyani ifodalashi kerak.\n\nTakroriy kvadrat ildiz qaysi o‘zgaruvchi bo‘yicha yechilgan bo‘lsa, tegish nuqtasining shu koordinatasini beradi. Kerak bo‘lsa, ikkinchi koordinatani topish uchun uni chiziq tenglamasiga qayta qo‘ying.\n\nMuhim tekshiruv:\nD>0, D=0 va D<0 holatlarini to‘g‘ri geometrik ma’no bilan bog‘lang. Qo‘yishda parametrli ifodani to‘liq saqlang. Barcha parametr qiymatlarini topib, keyin berilgan ishora yoki soha cheklovlarini qo‘llang. Masofa usulida markazdan chiziqqacha aynan perpendikulyar masofani ishlating."
+        }
+      }
+    }
+  ]
+}

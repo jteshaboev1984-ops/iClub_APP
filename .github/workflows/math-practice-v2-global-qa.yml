@@ -1,0 +1,114 @@
+name: Mathematics Practice v2 Global QA
+
+on:
+  push:
+    branches:
+      - work/mathematics-practice-v2-refresh-20261006
+    paths:
+      - 'content/math/practice_v2/**'
+      - 'scripts/math-practice-v2-*.cjs'
+      - 'security/practice-v2-input-normalization.js'
+      - 'security/practice-v2-local-reset.js'
+      - 'security/legacy-assessment-safe-api.js'
+      - 'exam-prep/exam-prep-host.js'
+      - 'supabase/migrations/*math_practice_v2*.sql'
+      - 'supabase/tests/math_practice_v2_*.sql'
+      - 'supabase/preflight/math_practice_v2_*.sql'
+      - 'index.html'
+      - 'app.js'
+      - '.github/workflows/math-practice-v2-global-qa.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'content/math/practice_v2/**'
+      - 'scripts/math-practice-v2-*.cjs'
+      - 'security/practice-v2-input-normalization.js'
+      - 'security/practice-v2-local-reset.js'
+      - 'security/legacy-assessment-safe-api.js'
+      - 'exam-prep/exam-prep-host.js'
+      - 'supabase/migrations/*math_practice_v2*.sql'
+      - 'supabase/tests/math_practice_v2_*.sql'
+      - 'supabase/preflight/math_practice_v2_*.sql'
+      - 'index.html'
+      - 'app.js'
+      - '.github/workflows/math-practice-v2-global-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  global-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run global Practice v2 QA
+        run: node scripts/math-practice-v2-global-qa.cjs
+
+      - name: Run evaluator normalization regression
+        run: node scripts/math-practice-v2-evaluator-regression.cjs
+
+      - name: Build deterministic staging package
+        run: |
+          node --check scripts/math-practice-v2-build-staging-sql.cjs
+          node scripts/math-practice-v2-build-staging-sql.cjs --check --out /tmp/math-practice-v2-stage.sql
+          test -s /tmp/math-practice-v2-stage.sql
+          grep -q "staged_question_count_expected_495" /tmp/math-practice-v2-stage.sql
+          grep -q "staged_practice_v2_questions_must_not_be_tour_questions" /tmp/math-practice-v2-stage.sql
+          grep -q "staging_must_not_publish_runtime_content" /tmp/math-practice-v2-stage.sql
+
+      - name: Run staging generator regression
+        run: |
+          node --check scripts/math-practice-v2-staging-generator-regression.cjs
+          node scripts/math-practice-v2-staging-generator-regression.cjs
+
+
+      - name: Run release safety guard
+        run: |
+          node --check scripts/math-practice-v2-release-safety-guard.cjs
+          node scripts/math-practice-v2-release-safety-guard.cjs
+
+
+      - name: Check Practice runtime safety wiring
+        run: |
+          node --check security/practice-v2-input-normalization.js
+          node --check security/practice-v2-local-reset.js
+          node --check security/legacy-assessment-safe-api.js
+          node --check app.js
+          node scripts/math-practice-v2-local-reset-regression.cjs
+          grep -q 'security/practice-v2-input-normalization.js?v=mathv2minus1' index.html
+          grep -q 'security/practice-v2-local-reset.js?v=mathv2localreset1' index.html
+          grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1-mathv2feedback1' index.html
+          grep -q 'app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1-ai2ctx1-mathv2feedback1' index.html
+          grep -q 'start_practice_session_auto_safe_v5' security/legacy-assessment-safe-api.js
+          grep -q 'start_practice_topic_drill_safe_v5' security/legacy-assessment-safe-api.js
+          grep -q 'get_recent_practice_mistakes_safe_v5' security/legacy-assessment-safe-api.js
+          grep -q 'start_practice_mistakes_drill_safe_v5' security/legacy-assessment-safe-api.js
+          grep -q 'submit_practice_session_answer_safe_v5' security/legacy-assessment-safe-api.js
+          grep -q 'submit_practice_drill_answer_safe_v5' security/legacy-assessment-safe-api.js
+          grep -q 'finalize_practice_session_safe_v5' security/legacy-assessment-safe-api.js
+          grep -q 'get_practice_review_full_safe_v5' security/legacy-assessment-safe-api.js
+          grep -q 'diagnosticFeedback' app.js
+          grep -q 'diagnosticNextAction' app.js
+          grep -q 'exam-prep/exam-prep-host.js?v=p304premium2-mathv2reset1' index.html
+          grep -q 'Tours history stays unchanged. Mathematics Practice starts fresh.' exam-prep/exam-prep-host.js
+          grep -q 'История Tours сохраняется. Mathematics Practice начинается заново.' exam-prep/exam-prep-host.js
+          grep -q 'Tours tarixi saqlanadi. Mathematics Practice yangidan boshlanadi.' exam-prep/exam-prep-host.js
+          ! grep -q 'Practice and Tours history stays unchanged' exam-prep/exam-prep-host.js
+          ! grep -q 'Your existing Tours and Practice history will not be changed' exam-prep/exam-prep-host.js
+          ! grep -q 'История Practice и Tours остаётся без изменений' exam-prep/exam-prep-host.js
+          ! grep -q 'Mavjud Tours va Practice tarixingiz o‘zgarmaydi' exam-prep/exam-prep-host.js
+          grep -q 'Почему это ошибка' app.js
+          grep -q 'Как исправить' app.js
+          grep -q 'filterPracticeHistoryToCurrentQuestions' app.js
+          ! grep -q 'submit_practice_attempt' security/legacy-assessment-safe-api.js
+          ! grep -q 'submit_practice_answer_safe' security/legacy-assessment-safe-api.js

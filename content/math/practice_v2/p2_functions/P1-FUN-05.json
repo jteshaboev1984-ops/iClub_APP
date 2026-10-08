@@ -1,0 +1,476 @@
+{
+  "version": "practice_v2_p2_functions_draft_v0.1",
+  "skill": "P1-FUN-05",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q109",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-05",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The point (−3,7) lies on the graph of a one-to-one function y=f(x). Which point lies on y=f⁻¹(x)?",
+        "ru": "Точка (−3,7) лежит на графике взаимно однозначной функции y=f(x). Какая точка лежит на y=f⁻¹(x)?",
+        "uz": "(−3,7) nuqta one-to-one y=f(x) funksiya grafigida yotadi. y=f⁻¹(x) grafigida qaysi nuqta yotadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(−3,−7)",
+            "ru": "(−3,−7)",
+            "uz": "(−3,−7)"
+          },
+          "diagnostic_code": "FUN05_POINT_SWAP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(7,−3)",
+            "ru": "(7,−3)",
+            "uz": "(7,−3)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(3,7)",
+            "ru": "(3,7)",
+            "uz": "(3,7)"
+          },
+          "diagnostic_code": "FUN05_POINT_SWAP"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(−7,3)",
+            "ru": "(−7,3)",
+            "uz": "(−7,3)"
+          },
+          "diagnostic_code": "FUN05_POINT_SWAP"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The inverse swaps input and output. A point (x,y) on f becomes (y,x) on f⁻¹, so (−3,7) becomes (7,−3).",
+        "ru": "Обратная функция меняет вход и выход местами. Точка (x,y) на f переходит в (y,x) на f⁻¹, поэтому (−3,7) превращается в (7,−3).",
+        "uz": "Teskari funksiya kirish va chiqishni almashtiradi. f dagi (x,y) nuqta f⁻¹ da (y,x) ga o‘tadi, demak (−3,7) → (7,−3)."
+      },
+      "ai_source_skill": "P1-FUN-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q110",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-05",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The point (4,−6) lies on the graph of a one-to-one function y=f(x). Enter the x-coordinate of the corresponding point on y=f⁻¹(x).",
+        "ru": "Точка (4,−6) лежит на графике взаимно однозначной функции y=f(x). Введите x-координату соответствующей точки на y=f⁻¹(x).",
+        "uz": "(4,−6) nuqta one-to-one y=f(x) funksiya grafigida yotadi. y=f⁻¹(x) dagi mos nuqtaning x-koordinatasini kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-6",
+        "accepted_examples": [
+          "-6",
+          "−6",
+          " -6 "
+        ],
+        "rejected_examples": [
+          "4",
+          "6",
+          "-4"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The inverse swaps coordinates: (4,−6) becomes (−6,4). Therefore the required x-coordinate is −6.",
+        "ru": "У обратной функции координаты меняются местами: (4,−6) превращается в (−6,4). Поэтому требуемая x-координата равна −6.",
+        "uz": "Teskari funksiyada koordinatalar almashadi: (4,−6) → (−6,4). Demak kerakli x-koordinata −6."
+      },
+      "ai_source_skill": "P1-FUN-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q111",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-05",
+      "secondary_skills": [],
+      "role": "concept_recognition",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The graph of an inverse function is obtained from the original graph by reflection in which line?",
+        "ru": "Относительно какой прямой отражают исходный график, чтобы получить график обратной функции?",
+        "uz": "Teskari funksiya grafigini olish uchun boshlang‘ich grafik qaysi chiziqqa nisbatan akslantiriladi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "y=x",
+            "ru": "y=x",
+            "uz": "y=x"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "y=0",
+            "ru": "y=0",
+            "uz": "y=0"
+          },
+          "diagnostic_code": "FUN05_REFLECTION_LINE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=0",
+            "ru": "x=0",
+            "uz": "x=0"
+          },
+          "diagnostic_code": "FUN05_REFLECTION_LINE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "y=−x",
+            "ru": "y=−x",
+            "uz": "y=−x"
+          },
+          "diagnostic_code": "FUN05_REFLECTION_LINE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Swapping every point (x,y) to (y,x) is exactly reflection in the line y=x.",
+        "ru": "Перестановка каждой точки (x,y) в (y,x) — это отражение относительно прямой y=x.",
+        "uz": "Har bir (x,y) nuqtani (y,x) ga almashtirish aynan y=x chizig‘iga nisbatan akslantirishdir."
+      },
+      "ai_source_skill": "P1-FUN-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q112",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-05",
+      "secondary_skills": [],
+      "role": "concept_interpretation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Which point is unchanged when a graph is reflected in y=x?",
+        "ru": "Какая точка не изменится при отражении графика относительно y=x?",
+        "uz": "Grafik y=x ga nisbatan akslantirilganda qaysi nuqta o‘zgarmaydi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(2,−2)",
+            "ru": "(2,−2)",
+            "uz": "(2,−2)"
+          },
+          "diagnostic_code": "FUN05_FIXED_POINT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(0,5)",
+            "ru": "(0,5)",
+            "uz": "(0,5)"
+          },
+          "diagnostic_code": "FUN05_FIXED_POINT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(4,4)",
+            "ru": "(4,4)",
+            "uz": "(4,4)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(−3,1)",
+            "ru": "(−3,1)",
+            "uz": "(−3,1)"
+          },
+          "diagnostic_code": "FUN05_FIXED_POINT"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Reflection in y=x swaps coordinates. A point stays fixed only when its coordinates are equal, so (4,4) is unchanged.",
+        "ru": "Отражение относительно y=x меняет координаты местами. Точка остаётся на месте только при равных координатах, поэтому (4,4) не изменяется.",
+        "uz": "y=x ga nisbatan akslantirish koordinatalarni almashtiradi. Faqat koordinatalari teng nuqta o‘zgarmaydi, shuning uchun (4,4) joyida qoladi."
+      },
+      "ai_source_skill": "P1-FUN-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q113",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-05",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "The graph of a one-to-one function y=f(x) crosses the x-axis at (5,0). Where does y=f⁻¹(x) cross the y-axis?",
+        "ru": "График взаимно однозначной функции y=f(x) пересекает ось x в точке (5,0). Где график y=f⁻¹(x) пересекает ось y?",
+        "uz": "One-to-one y=f(x) funksiya grafigi x o‘qini (5,0) nuqtada kesadi. y=f⁻¹(x) grafigi y o‘qini qayerda kesadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(5,0)",
+            "ru": "(5,0)",
+            "uz": "(5,0)"
+          },
+          "diagnostic_code": "FUN05_POINT_SWAP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(0,5)",
+            "ru": "(0,5)",
+            "uz": "(0,5)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(0,−5)",
+            "ru": "(0,−5)",
+            "uz": "(0,−5)"
+          },
+          "diagnostic_code": "FUN05_POINT_SWAP"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(−5,0)",
+            "ru": "(−5,0)",
+            "uz": "(−5,0)"
+          },
+          "diagnostic_code": "FUN05_POINT_SWAP"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The point (5,0) on f becomes (0,5) on f⁻¹. Since its x-coordinate is 0, this is the y-axis intercept of the inverse graph.",
+        "ru": "Точка (5,0) на f переходит в (0,5) на f⁻¹. Её x-координата равна 0, значит это точка пересечения обратного графика с осью y.",
+        "uz": "f dagi (5,0) nuqta f⁻¹ da (0,5) ga o‘tadi. Uning x-koordinatasi 0, demak bu teskari grafikning y o‘qi bilan kesishish nuqtasi."
+      },
+      "ai_source_skill": "P1-FUN-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q114",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-05",
+      "secondary_skills": [
+        "P1-FUN-04"
+      ],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "A one-to-one graph y=f(x) has domain −2≤x≤6 and range 1≤y≤9. Which rectangle contains the entire graph of y=f⁻¹(x)?",
+        "ru": "Взаимно однозначный график y=f(x) имеет область −2≤x≤6 и область значений 1≤y≤9. В каком прямоугольнике целиком лежит график y=f⁻¹(x)?",
+        "uz": "One-to-one y=f(x) grafigining sohasi −2≤x≤6, qiymatlar to‘plami 1≤y≤9. y=f⁻¹(x) grafigi to‘liq qaysi to‘rtburchak ichida yotadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−2≤x≤6, 1≤y≤9",
+            "ru": "−2≤x≤6, 1≤y≤9",
+            "uz": "−2≤x≤6, 1≤y≤9"
+          },
+          "diagnostic_code": "FUN05_POINT_SWAP"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−9≤x≤−1, −6≤y≤2",
+            "ru": "−9≤x≤−1, −6≤y≤2",
+            "uz": "−9≤x≤−1, −6≤y≤2"
+          },
+          "diagnostic_code": "FUN05_REFLECTION_LINE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "1≤x≤9, −2≤y≤6",
+            "ru": "1≤x≤9, −2≤y≤6",
+            "uz": "1≤x≤9, −2≤y≤6"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−2≤x≤9, 1≤y≤6",
+            "ru": "−2≤x≤9, 1≤y≤6",
+            "uz": "−2≤x≤9, 1≤y≤6"
+          },
+          "diagnostic_code": "FUN05_POINT_SWAP"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "The inverse swaps domain and range because all points (x,y) become (y,x). Therefore its x-values lie from 1 to 9 and its y-values lie from −2 to 6.",
+        "ru": "У обратной функции область и значения меняются местами, потому что каждая точка (x,y) становится (y,x). Поэтому x лежит от 1 до 9, а y — от −2 до 6.",
+        "uz": "Teskari funksiyada soha va qiymatlar almashadi, chunki har bir (x,y) nuqta (y,x) ga o‘tadi. Shuning uchun x 1 dan 9 gacha, y esa −2 dan 6 gacha."
+      },
+      "ai_source_skill": "P1-FUN-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q115",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-05",
+      "secondary_skills": [],
+      "role": "point_mapping",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "A one-to-one function y=f(x) passes through (−1,2), (0,4) and (3,7). Which set of points must lie on y=f⁻¹(x)?",
+        "ru": "Взаимно однозначная функция y=f(x) проходит через (−1,2), (0,4) и (3,7). Какой набор точек обязан лежать на y=f⁻¹(x)?",
+        "uz": "One-to-one y=f(x) funksiya (−1,2), (0,4) va (3,7) nuqtalardan o‘tadi. y=f⁻¹(x) da qaysi nuqtalar bo‘lishi shart?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(2,−1), (4,0), (7,3)",
+            "ru": "(2,−1), (4,0), (7,3)",
+            "uz": "(2,−1), (4,0), (7,3)"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(−1,2), (0,4), (3,7)",
+            "ru": "(−1,2), (0,4), (3,7)",
+            "uz": "(−1,2), (0,4), (3,7)"
+          },
+          "diagnostic_code": "FUN05_POINT_SWAP"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(1,−2), (0,−4), (−3,−7)",
+            "ru": "(1,−2), (0,−4), (−3,−7)",
+            "uz": "(1,−2), (0,−4), (−3,−7)"
+          },
+          "diagnostic_code": "FUN05_POINT_SWAP"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(−2,1), (−4,0), (−7,−3)",
+            "ru": "(−2,1), (−4,0), (−7,−3)",
+            "uz": "(−2,1), (−4,0), (−7,−3)"
+          },
+          "diagnostic_code": "FUN05_POINT_SWAP"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "For the inverse, swap the coordinates of every point: (−1,2)→(2,−1), (0,4)→(4,0), and (3,7)→(7,3).",
+        "ru": "Для обратной функции меняем координаты каждой точки местами: (−1,2)→(2,−1), (0,4)→(4,0), (3,7)→(7,3).",
+        "uz": "Teskari funksiya uchun har bir nuqtaning koordinatalarini almashtiramiz: (−1,2)→(2,−1), (0,4)→(4,0), (3,7)→(7,3)."
+      },
+      "ai_source_skill": "P1-FUN-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q116",
+      "practice_no": 2,
+      "primary_skill": "P1-FUN-05",
+      "secondary_skills": [
+        "P1-FUN-04"
+      ],
+      "role": "mixed_transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
+      "question": {
+        "en": "Let f(x)=2x−3. At which point do the graphs y=f(x) and y=f⁻¹(x) meet on the line y=x?",
+        "ru": "Пусть f(x)=2x−3. В какой точке графики y=f(x) и y=f⁻¹(x) встречаются на прямой y=x?",
+        "uz": "f(x)=2x−3 bo‘lsin. y=f(x) va y=f⁻¹(x) grafiklari y=x chizig‘ida qaysi nuqtada uchrashadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "(0,0)",
+            "ru": "(0,0)",
+            "uz": "(0,0)"
+          },
+          "diagnostic_code": "FUN05_FIXED_POINT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "(−3,−3)",
+            "ru": "(−3,−3)",
+            "uz": "(−3,−3)"
+          },
+          "diagnostic_code": "FUN05_FIXED_POINT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(3/2,3/2)",
+            "ru": "(3/2,3/2)",
+            "uz": "(3/2,3/2)"
+          },
+          "diagnostic_code": "FUN05_FIXED_POINT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(3,3)",
+            "ru": "(3,3)",
+            "uz": "(3,3)"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "A common point of a function and its inverse on y=x must satisfy f(x)=x. Solve 2x−3=x to get x=3, so the point is (3,3).",
+        "ru": "Общая точка функции и её обратной на y=x должна удовлетворять f(x)=x. Из 2x−3=x получаем x=3, значит точка равна (3,3).",
+        "uz": "Funksiya va uning teskarisining y=x dagi umumiy nuqtasi f(x)=x ni qanoatlantiradi. 2x−3=x dan x=3, demak nuqta (3,3)."
+      },
+      "ai_source_skill": "P1-FUN-05",
+      "status": "draft"
+    }
+  ]
+}

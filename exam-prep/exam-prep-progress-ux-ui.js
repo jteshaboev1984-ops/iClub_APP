@@ -31,7 +31,15 @@
       deltaNote: 'Изменения могут включать занятия с других устройств.',
       noChange: 'После обновления подтверждённые показатели пока не изменились.',
       current: 'Текущий подтверждённый прогресс', dateUnknown: 'Дата уточняется',
-      due: 'Повторная проверка', currentTask: 'Текущий шаг', notAvailable: 'Сейчас нет доступного шага'
+      due: 'Повторная проверка', currentTask: 'Текущий шаг', notAvailable: 'Сейчас нет доступного шага',
+      programProgress: 'Прогресс по программе', topicsConfirmed: 'Подтверждено тем',
+      howTitle: 'Как считается прогресс', howSub: 'Почему один правильный ответ не всегда меняет статус темы',
+      howLead: 'Отдельный правильный ответ сохраняется как результат, но сам по себе не повышает статус темы. Статус меняется только после достаточных проверенных результатов.',
+      howFoot: '«Требует внимания» — не следующий уровень, а отдельный сигнал: по теме обнаружена ошибка, которую нужно исправить и позже перепроверить.',
+      statusUnknown: 'Не проверено', statusDeveloping: 'Формируется', statusConfirmed: 'Подтверждено', statusSecure: 'Уверенно', statusAttention: 'Требует внимания',
+      whatChanged: 'Что изменилось', resultSaved: 'Результат сохранён',
+      statusChanged: 'Статус темы изменился', statusStable: 'Статус темы пока не изменился. Это нормально: одного задания не всегда достаточно.',
+      confirmedChange: 'Подтверждённые темы', viewProgress: 'Посмотреть прогресс'
     },
     uz: {
       goals: 'Bu haftadagi maqsadlar', available: 'Mavjud topshiriqlar', total: 'Yakunlangan mashg‘ulotlar',
@@ -50,7 +58,15 @@
       deltaNote: 'O‘zgarishlar boshqa qurilmalardagi mashg‘ulotlarni ham o‘z ichiga olishi mumkin.',
       noChange: 'Yangilangandan so‘ng tasdiqlangan ko‘rsatkichlar hozircha o‘zgarmadi.',
       current: 'Hozirgi tasdiqlangan natijalar', dateUnknown: 'Sana aniqlanmoqda',
-      due: 'Qayta tekshiruv', currentTask: 'Hozirgi qadam', notAvailable: 'Hozircha mavjud qadam yo‘q'
+      due: 'Qayta tekshiruv', currentTask: 'Hozirgi qadam', notAvailable: 'Hozircha mavjud qadam yo‘q',
+      programProgress: 'Dastur bo‘yicha progress', topicsConfirmed: 'Tasdiqlangan mavzular',
+      howTitle: 'Progress qanday hisoblanadi', howSub: 'Nega bitta to‘g‘ri javob mavzu holatini darhol o‘zgartirmaydi',
+      howLead: 'Har bir to‘g‘ri javob natija sifatida saqlanadi, lekin mavzu holatini o‘zi darhol oshirmaydi. Holat yetarli tekshirilgan natijalar yig‘ilganda o‘zgaradi.',
+      howFoot: '«Diqqat talab qiladi» keyingi daraja emas. Bu mavzuda xato topilganini va uni tuzatib, keyin yana tekshirish kerakligini bildiradi.',
+      statusUnknown: 'Tekshirilmagan', statusDeveloping: 'Rivojlanmoqda', statusConfirmed: 'Tasdiqlangan', statusSecure: 'Barqaror', statusAttention: 'Diqqat talab qiladi',
+      whatChanged: 'Nima o‘zgardi', resultSaved: 'Natija saqlandi',
+      statusChanged: 'Mavzu holati o‘zgardi', statusStable: 'Mavzu holati hozircha o‘zgarmadi. Bu normal: bitta topshiriq har doim yetarli bo‘lmaydi.',
+      confirmedChange: 'Tasdiqlangan mavzular', viewProgress: 'Progressni ko‘rish'
     },
     en: {
       goals: 'This week’s goals', available: 'Available tasks', total: 'Sessions completed',
@@ -69,7 +85,15 @@
       deltaNote: 'Changes may include sessions completed on other devices.',
       noChange: 'The verified indicators have not changed since the last update.',
       current: 'Current verified progress', dateUnknown: 'Date to be confirmed',
-      due: 'Delayed check', currentTask: 'Current step', notAvailable: 'No available step right now'
+      due: 'Delayed check', currentTask: 'Current step', notAvailable: 'No available step right now',
+      programProgress: 'Syllabus progress', topicsConfirmed: 'topics confirmed',
+      howTitle: 'How progress works', howSub: 'Why one correct answer does not always change a topic status',
+      howLead: 'Each correct answer is saved as a result, but it does not raise the topic status by itself. A status changes only when there are enough verified results.',
+      howFoot: '“Needs attention” is not the next level. It is a separate signal that an error was found and should be corrected and checked again later.',
+      statusUnknown: 'Not checked', statusDeveloping: 'Developing', statusConfirmed: 'Confirmed', statusSecure: 'Secure', statusAttention: 'Needs attention',
+      whatChanged: 'What changed', resultSaved: 'Result saved',
+      statusChanged: 'Topic status changed', statusStable: 'The topic status has not changed yet. That is normal: one task is not always enough.',
+      confirmedChange: 'Confirmed topics', viewProgress: 'View progress'
     }
   });
   const AREA = Object.freeze({
@@ -178,20 +202,135 @@
     if (state.coveragePct != null) metric(panel,c.coverage,`${state.coveragePct}%`);
     if (state.confirmedSkills != null) metric(panel,c.skills,`${state.confirmedSkills} / ${state.totalCanonicalSkills}`);
   }
+  function skillFromTracker(tracker, skillCode) {
+    if (!skillCode) return null;
+    for (const area of (Array.isArray(tracker?.areas) ? tracker.areas : [])) {
+      const row = (Array.isArray(area?.skills) ? area.skills : []).find(skill =>
+        String(skill?.skill_code || '') === String(skillCode));
+      if (row) return row;
+    }
+    return null;
+  }
+  function skillStateKey(row) {
+    if (!row) return null;
+    if (row.correction_case_id) return 'attention';
+    const level = Number(row.objective_level || 0);
+    if (level >= 3) return 'secure';
+    if (level >= 2) return 'confirmed';
+    if (level >= 1) return 'developing';
+    return 'unknown';
+  }
+  function skillStateLabel(key, c) {
+    return ({
+      unknown:c.statusUnknown, developing:c.statusDeveloping, confirmed:c.statusConfirmed,
+      secure:c.statusSecure, attention:c.statusAttention
+    })[String(key || '')] || c.statusUnknown;
+  }
+  function progressHero(parent, state, c) {
+    if (state.confirmedSkills == null) return;
+    const hero = node('div','ep-pux-progress-hero');
+    const top = node('div','ep-pux-progress-hero-top');
+    const copyWrap = node('div','ep-pux-progress-hero-copy');
+    copyWrap.append(node('span','ep-pux-progress-kicker',c.programProgress));
+    copyWrap.append(node('strong','ep-pux-progress-count',`${state.confirmedSkills} / ${state.totalCanonicalSkills}`));
+    copyWrap.append(node('small','ep-pux-progress-caption',c.topicsConfirmed));
+    top.append(copyWrap);
+    const bar = node('div','ep-pux-progress-bar');
+    bar.setAttribute('role','progressbar');
+    bar.setAttribute('aria-valuemin','0');
+    bar.setAttribute('aria-valuemax',String(state.totalCanonicalSkills));
+    bar.setAttribute('aria-valuenow',String(state.confirmedSkills));
+    const fill = node('span','ep-pux-progress-fill');
+    fill.style.width = `${state.totalCanonicalSkills > 0 ? Math.min(100,100 * state.confirmedSkills / state.totalCanonicalSkills) : 0}%`;
+    bar.append(fill);
+    hero.append(top,bar);
+    parent.append(hero);
+  }
+  function decorateTrackerClarity(screen) {
+    if (!screen || screen.dataset.epPuxTrackerClarity === '1') return;
+    const skillButtons = screen.querySelectorAll('[data-ep-views-skill]');
+    const summary = screen.querySelector('.ep-views-summary');
+    if (!skillButtons.length || !summary) return;
+    const c = words();
+    const firstValue = String(summary.querySelector('.ep-views-stat strong')?.textContent || '');
+    const match = firstValue.match(/(\d+)\s*\/\s*(\d+)/);
+    if (match) {
+      const confirmed = Number(match[1]), total = Number(match[2]);
+      const hero = node('section','ep-pux-tracker-hero');
+      const top = node('div','ep-pux-progress-hero-top');
+      const copyWrap = node('div','ep-pux-progress-hero-copy');
+      copyWrap.append(node('span','ep-pux-progress-kicker',c.programProgress));
+      copyWrap.append(node('strong','ep-pux-progress-count',`${confirmed} / ${total}`));
+      copyWrap.append(node('small','ep-pux-progress-caption',c.topicsConfirmed));
+      top.append(copyWrap);
+      const bar = node('div','ep-pux-progress-bar');
+      bar.setAttribute('role','progressbar');
+      bar.setAttribute('aria-valuemin','0');
+      bar.setAttribute('aria-valuemax',String(total));
+      bar.setAttribute('aria-valuenow',String(confirmed));
+      const fill = node('span','ep-pux-progress-fill');
+      fill.style.width = `${total > 0 ? Math.min(100,100 * confirmed / total) : 0}%`;
+      bar.append(fill);
+      hero.append(top,bar);
+      summary.before(hero);
+      screen.classList.add('ep-pux-tracker-decorated');
+    }
+
+    const guide = node('section','ep-pux-guide');
+    const toggle = node('button','ep-pux-guide-toggle');
+    toggle.type = 'button';
+    toggle.setAttribute('aria-expanded','false');
+    toggle.dataset.epPuxGuideToggle = '1';
+    const icon = node('span','ep-pux-guide-icon','i');
+    icon.setAttribute('aria-hidden','true');
+    const labels = node('span','ep-pux-guide-labels');
+    labels.append(node('strong','',c.howTitle),node('small','',c.howSub));
+    const arrow = node('span','ep-pux-guide-arrow','›');
+    arrow.setAttribute('aria-hidden','true');
+    toggle.append(icon,labels,arrow);
+
+    const body = node('div','ep-pux-guide-body');
+    body.hidden = true;
+    body.dataset.epPuxGuideBody = '1';
+    body.append(node('p','ep-pux-note',c.howLead));
+    const ladder = node('div','ep-pux-status-ladder');
+    for (const [key,label] of [
+      ['unknown',c.statusUnknown],['developing',c.statusDeveloping],
+      ['confirmed',c.statusConfirmed],['secure',c.statusSecure]
+    ]) {
+      const step = node('div',`ep-pux-status-step ep-pux-status-${key}`);
+      step.append(node('span','ep-pux-status-dot'),node('strong','',label));
+      ladder.append(step);
+    }
+    body.append(ladder);
+    const attention = node('div','ep-pux-attention-note');
+    attention.append(node('strong','',c.statusAttention),node('span','',c.howFoot));
+    body.append(attention);
+    toggle.addEventListener('click',() => {
+      const open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded',open ? 'false' : 'true');
+      body.hidden = open;
+      guide.classList.toggle('is-open',!open);
+    });
+    guide.append(toggle,body);
+    const hero = screen.querySelector('.ep-pux-tracker-hero');
+    if (hero) hero.after(guide); else summary.before(guide);
+    screen.dataset.epPuxTrackerClarity = '1';
+  }
   function waitingGoal(goal) {
     return goal.weeklyComplete === true && goal.correctionOpen === true && goal.status === 'waiting_retest';
   }
   function showDashboard(card, data) {
     const { state } = data, c = words();
     const panel = node('section','ep-pux-panel ep-pux-overview');
-    panel.setAttribute('aria-label',c.goals);
+    panel.setAttribute('aria-label',c.programProgress);
+    progressHero(panel,state,c);
     if (state.hasPlan) {
       metric(panel,c.goals,state.goalCounter);
     } else {
       panel.append(node('p','ep-pux-note',missingPlanText(state,c)));
     }
     metric(panel,c.total,state.finalizedSessions);
-    showConfirmedMetrics(panel,state,c);
     metric(panel,c.corrections,state.openCorrections);
     const actions = card.querySelector('.ep-live-actions');
     if (actions) actions.before(panel); else card.append(panel);
@@ -266,7 +405,7 @@
   }
   async function showPlan(card, data, component) {
     const { state, raw, tracker } = data, c = words();
-    latestPlan.set(component,state);
+    latestPlan.set(component,data);
     const actionRows = [];
     const section = node('section','ep-pux-panel ep-pux-week');
     section.setAttribute('aria-label',c.goals);
@@ -310,27 +449,59 @@
     await promoteGoalActions(card,section,actionRows,component,state,c);
   }
   function showCompletion(screen, data, component) {
-    const { state } = data, c = words();
-    const before = pendingBefore?.component === component ? pendingBefore.state : null;
-    const comparable = before && before.activeWeek === state.activeWeek;
-    const section = node('section','ep-pux-panel ep-pux-finish');
-    section.setAttribute('aria-label', comparable ? c.beforeAfter : c.current);
-    section.append(node('h3','ep-pux-heading',comparable ? c.beforeAfter : c.current));
-    if (comparable) {
-      section.append(node('p','ep-pux-note',c.deltaNote));
-      const gainedSessions = state.finalizedSessions - before.finalizedSessions;
-      const gainedGoals = state.completedGoals - before.completedGoals;
-      if (gainedSessions > 0) metric(section,c.newSession,`+${gainedSessions}`);
-      if (gainedGoals > 0) metric(section,c.newGoals,`+${gainedGoals}`);
-      if (state.coveragePct != null && before.coveragePct != null && state.coveragePct !== before.coveragePct)
-        metric(section,c.newCoverage,`${before.coveragePct}% → ${state.coveragePct}%`);
-      if (gainedSessions === 0 && gainedGoals === 0 && state.coveragePct === before.coveragePct)
-        section.append(node('p','ep-pux-note',c.noChange));
+    const { state, tracker } = data, c = words();
+    const before = pendingBefore?.component === component ? pendingBefore : null;
+    const comparable = before?.state && before.state.activeWeek === state.activeWeek;
+    const section = node('section','ep-pux-panel ep-pux-finish ep-pux-change-card');
+    section.setAttribute('aria-label',c.whatChanged);
+    section.append(node('span','ep-pux-change-kicker',c.resultSaved));
+    section.append(node('h3','ep-pux-heading',c.whatChanged));
+
+    const skillTitle = String(screen.querySelector('.ep-flow-completion-skill strong')?.textContent || '').trim();
+    const afterSkill = skillFromTracker(tracker,before?.skillCode);
+    const beforeKey = before?.skillStateKey || null;
+    const afterKey = skillStateKey(afterSkill);
+    if (skillTitle || afterKey) {
+      const skillCard = node('div','ep-pux-skill-change');
+      if (skillTitle) skillCard.append(node('strong','ep-pux-skill-change-title',skillTitle));
+      if (afterKey) {
+        const states = node('div','ep-pux-skill-change-states');
+        if (beforeKey && beforeKey !== afterKey) {
+          const oldState = node('span',`ep-pux-state-pill ep-pux-state-${beforeKey}`,skillStateLabel(beforeKey,c));
+          const arrow = node('span','ep-pux-change-arrow','→');
+          arrow.setAttribute('aria-hidden','true');
+          const newState = node('strong',`ep-pux-state-pill ep-pux-state-${afterKey}`,skillStateLabel(afterKey,c));
+          states.append(oldState,arrow,newState);
+          skillCard.append(states,node('small','ep-pux-note',c.statusChanged));
+        } else {
+          states.append(node('strong',`ep-pux-state-pill ep-pux-state-${afterKey}`,skillStateLabel(afterKey,c)));
+          skillCard.append(states,node('small','ep-pux-note',c.statusStable));
+        }
+      }
+      section.append(skillCard);
     }
-    if (state.hasPlan) metric(section,c.goals,state.goalCounter);
-    metric(section,c.total,state.finalizedSessions);
-    showConfirmedMetrics(section,state,c);
-    metric(section,c.corrections,state.openCorrections);
+
+    if (comparable && state.confirmedSkills != null && before.state.confirmedSkills != null) {
+      const progress = node('div','ep-pux-confirmed-change');
+      const label = node('span','ep-pux-label',c.confirmedChange);
+      const value = state.confirmedSkills !== before.state.confirmedSkills
+        ? `${before.state.confirmedSkills} → ${state.confirmedSkills} / ${state.totalCanonicalSkills}`
+        : `${state.confirmedSkills} / ${state.totalCanonicalSkills}`;
+      progress.append(label,node('strong','ep-pux-value',value));
+      const bar = node('div','ep-pux-progress-bar');
+      bar.setAttribute('role','progressbar');
+      bar.setAttribute('aria-valuemin','0');
+      bar.setAttribute('aria-valuemax',String(state.totalCanonicalSkills));
+      bar.setAttribute('aria-valuenow',String(state.confirmedSkills));
+      const fill = node('span','ep-pux-progress-fill');
+      fill.style.width = `${state.totalCanonicalSkills > 0 ? Math.min(100,100 * state.confirmedSkills / state.totalCanonicalSkills) : 0}%`;
+      bar.append(fill);
+      progress.append(bar);
+      section.append(progress);
+    } else {
+      progressHero(section,state,c);
+    }
+
     const pending = state.goals.find(waitingGoal);
     if (pending) {
       const notice = node('aside','ep-pux-waiting');
@@ -339,16 +510,25 @@
       notice.append(node('p','ep-pux-note',`${c.due}: ${dateText(pending.retestDueAt)}`));
       section.append(notice);
     }
+
+    if (typeof internal.learnerViews?.openTracker === 'function') {
+      const button = node('button','ep-live-btn secondary ep-pux-view-progress',c.viewProgress);
+      button.type = 'button';
+      button.addEventListener('click',() => internal.learnerViews.openTracker(component));
+      section.append(button);
+    }
+
     const next = screen.querySelector('.ep-flow-next-card');
     if (next) next.before(section); else screen.append(section);
     pendingBefore = null;
     completionSession = null;
   }
+
   async function request(kind,target,component) {
     if (!allowed() || seen.has(target)) return;
     seen.set(target,'loading');
     const expectedRoot = rootEl();
-    const data = await obtain(component,kind === 'plan');
+    const data = await obtain(component,kind === 'plan' || kind === 'completion');
     if (!target.isConnected || rootEl() !== expectedRoot || !allowed()) { seen.delete(target); return; }
     if (!data) { markError(target,component,kind); seen.set(target,'error'); return; }
     if (kind === 'dashboard') showDashboard(target,data);
@@ -358,10 +538,14 @@
   }
   function reconcile() {
     if (!allowed()) {
-      rootEl()?.querySelectorAll('.ep-pux-panel').forEach(n=>n.remove());
+      const root = rootEl();
+      root?.querySelectorAll('.ep-pux-panel,.ep-pux-tracker-hero,.ep-pux-guide').forEach(n=>n.remove());
+      root?.querySelectorAll('.ep-pux-tracker-decorated').forEach(n=>n.classList.remove('ep-pux-tracker-decorated'));
       return;
     }
     const root = rootEl();
+    const trackerScreen = root.querySelector('[data-ep-views-screen]');
+    if (trackerScreen?.querySelector('[data-ep-views-skill]')) decorateTrackerClarity(trackerScreen);
     root.querySelectorAll('.ep-live-component-card[data-ep-live-component]').forEach(card => {
       // The compact route cards are navigation only. Do not snapshot weekly goals
       // or inject a second progress panel merely because the learner opened Exam Prep.
@@ -389,8 +573,19 @@
     const card = button.closest('.ep-live-card');
     const component = String(card?.querySelector('.ep-live-head strong')?.textContent || '').match(/\b(P1|P5)\b/)?.[1];
     if (!component) return;
-    const state = latestPlan.get(component);
-    pendingBefore = state ? {component,state} : null;
+    const snapshot = latestPlan.get(component);
+    if (!snapshot?.state) { pendingBefore = null; return; }
+    const priority = Number(button.dataset.epLivePlanItem || 0);
+    const source = Array.isArray(snapshot.raw?.goals)
+      ? snapshot.raw.goals.find(row => Number(row?.action_priority_order || 0) === priority)
+      : null;
+    const skillCode = String(source?.skill_code || '') || null;
+    pendingBefore = {
+      component,
+      state:snapshot.state,
+      skillCode,
+      skillStateKey:skillStateKey(skillFromTracker(snapshot.tracker,skillCode))
+    };
   }
   function onSession(event) {
     if (event.detail?.session?.session_id) lastSession = event.detail.session;

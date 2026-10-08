@@ -1,0 +1,447 @@
+{
+  "version": "practice_v2_p6_differentiation_draft_v0.1",
+  "skill": "P1-DIF-01",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q360",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-01",
+      "secondary_skills": [],
+      "role": "concept_recognition",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "At x=4, f′(4)=−3. Which statement is correct?",
+        "ru": "При x=4 известно f′(4)=−3. Какое утверждение верно?",
+        "uz": "x=4 da f′(4)=−3. Qaysi tasdiq to‘g‘ri?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "The tangent gradient is 4.",
+            "ru": "Градиент касательной равен 4.",
+            "uz": "Urinma gradienti 4."
+          },
+          "diagnostic_code": "DIF01_AVERAGE_INSTANT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "The tangent gradient is −3.",
+            "ru": "Градиент касательной равен −3.",
+            "uz": "Urinma gradienti −3."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "The function value is −3.",
+            "ru": "Значение функции равно −3.",
+            "uz": "Funksiya qiymati −3."
+          },
+          "diagnostic_code": "DIF01_RATE_SIGN"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "The tangent is horizontal.",
+            "ru": "Касательная горизонтальна.",
+            "uz": "Urinma gorizontal."
+          },
+          "diagnostic_code": "DIF01_RATE_SIGN"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "f′(4) is the gradient of the tangent at x=4. Therefore the tangent gradient is −3.",
+        "ru": "f′(4) — это градиент касательной при x=4. Поэтому градиент касательной равен −3.",
+        "uz": "f′(4) — x=4 dagi urinma gradienti. Demak urinma gradienti −3."
+      },
+      "ai_source_skill": "P1-DIF-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q361",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-01",
+      "secondary_skills": [],
+      "role": "average_vs_instant",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "Which expression represents the average gradient of y=f(x) from x=a to x=a+h?",
+        "ru": "Какое выражение задаёт средний градиент y=f(x) от x=a до x=a+h?",
+        "uz": "y=f(x) uchun x=a dan x=a+h gacha o‘rtacha gradient qaysi ifoda?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "f(a+h)/h",
+            "ru": "f(a+h)/h",
+            "uz": "f(a+h)/h"
+          },
+          "diagnostic_code": "DIF01_DIFFERENCE_QUOTIENT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "[f(a+h)+f(a)]/h",
+            "ru": "[f(a+h)+f(a)]/h",
+            "uz": "[f(a+h)+f(a)]/h"
+          },
+          "diagnostic_code": "DIF01_DIFFERENCE_QUOTIENT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "[f(a+h)−f(a)]/(a+h)",
+            "ru": "[f(a+h)−f(a)]/(a+h)",
+            "uz": "[f(a+h)−f(a)]/(a+h)"
+          },
+          "diagnostic_code": "DIF01_DIFFERENCE_QUOTIENT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "[f(a+h)−f(a)]/h",
+            "ru": "[f(a+h)−f(a)]/h",
+            "uz": "[f(a+h)−f(a)]/h"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "Average gradient is change in y divided by change in x: [f(a+h)−f(a)]/[(a+h)−a]=[f(a+h)−f(a)]/h.",
+        "ru": "Средний градиент — изменение y, делённое на изменение x: [f(a+h)−f(a)]/[(a+h)−a]=[f(a+h)−f(a)]/h.",
+        "uz": "O‘rtacha gradient y o‘zgarishining x o‘zgarishiga nisbati: [f(a+h)−f(a)]/[(a+h)−a]=[f(a+h)−f(a)]/h."
+      },
+      "ai_source_skill": "P1-DIF-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q362",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-01",
+      "secondary_skills": [],
+      "role": "limit_definition",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "Using the limit definition, find the gradient of f(x)=x²+2x at x=3. Enter the gradient.",
+        "ru": "Используя определение через предел, найдите градиент f(x)=x²+2x при x=3. Введите градиент.",
+        "uz": "Limit ta’rifidan foydalanib, f(x)=x²+2x funksiyaning x=3 dagi gradientini toping."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "8",
+        "accepted_examples": [
+          "8",
+          " 8 "
+        ],
+        "rejected_examples": [
+          "6",
+          "7",
+          "9"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "[f(3+h)−f(3)]/h=[(3+h)²+2(3+h)−15]/h=(8h+h²)/h=8+h. As h→0, the gradient tends to 8.",
+        "ru": "[f(3+h)−f(3)]/h=[(3+h)²+2(3+h)−15]/h=(8h+h²)/h=8+h. При h→0 градиент стремится к 8.",
+        "uz": "[f(3+h)−f(3)]/h=[(3+h)²+2(3+h)−15]/h=(8h+h²)/h=8+h. h→0 da gradient 8 ga intiladi."
+      },
+      "ai_source_skill": "P1-DIF-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q363",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-01",
+      "secondary_skills": [],
+      "role": "limit_simplification",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "For f(x)=x², the difference quotient at x=5 simplifies before the limit is taken. Which expression does it simplify to?",
+        "ru": "Для f(x)=x² разностное отношение при x=5 упрощается до взятия предела. Какое выражение получается?",
+        "uz": "f(x)=x² uchun x=5 dagi ayirmali nisbat limitdan oldin qaysi ifodaga soddalashadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "10+h",
+            "ru": "10+h",
+            "uz": "10+h"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "25+h",
+            "ru": "25+h",
+            "uz": "25+h"
+          },
+          "diagnostic_code": "DIF01_DIFFERENCE_QUOTIENT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "10+h²",
+            "ru": "10+h²",
+            "uz": "10+h²"
+          },
+          "diagnostic_code": "DIF01_CANCEL_H"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "10h+h²",
+            "ru": "10h+h²",
+            "uz": "10h+h²"
+          },
+          "diagnostic_code": "DIF01_CANCEL_H"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "[(5+h)²−25]/h=(10h+h²)/h=10+h. Only after this cancellation is it safe to take h→0.",
+        "ru": "[(5+h)²−25]/h=(10h+h²)/h=10+h. Только после сокращения можно переходить к h→0.",
+        "uz": "[(5+h)²−25]/h=(10h+h²)/h=10+h. Faqat shundan keyin h→0 limitini olish mumkin."
+      },
+      "ai_source_skill": "P1-DIF-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q364",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-01",
+      "secondary_skills": [],
+      "role": "rate_interpretation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "The amount Q(t) has Q′(6)=−4. What does this mean at t=6?",
+        "ru": "Для величины Q(t) известно Q′(6)=−4. Что это означает при t=6?",
+        "uz": "Q(t) kattalik uchun Q′(6)=−4. t=6 da bu nimani anglatadi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "Q is increasing at a rate of 4.",
+            "ru": "Q увеличивается со скоростью 4.",
+            "uz": "Q 4 tezlik bilan o‘smoqda."
+          },
+          "diagnostic_code": "DIF01_RATE_SIGN"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "Q(6)=−4.",
+            "ru": "Q(6)=−4.",
+            "uz": "Q(6)=−4."
+          },
+          "diagnostic_code": "DIF01_AVERAGE_INSTANT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "Q is decreasing at an instantaneous rate of 4 units per unit time.",
+            "ru": "Q мгновенно уменьшается со скоростью 4 единицы за единицу времени.",
+            "uz": "Q oniy ravishda vaqt birligiga 4 birlik tezlik bilan kamaymoqda."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "The average change from 0 to 6 is −4.",
+            "ru": "Среднее изменение от 0 до 6 равно −4.",
+            "uz": "0 dan 6 gacha o‘rtacha o‘zgarish −4."
+          },
+          "diagnostic_code": "DIF01_AVERAGE_INSTANT"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "A negative derivative means the quantity is decreasing locally. Its instantaneous rate of change at t=6 is −4.",
+        "ru": "Отрицательная производная означает локальное уменьшение. Мгновенная скорость изменения при t=6 равна −4.",
+        "uz": "Manfiy hosila kattalik mahalliy kamayishini bildiradi. t=6 dagi oniy o‘zgarish tezligi −4."
+      },
+      "ai_source_skill": "P1-DIF-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q365",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-01",
+      "secondary_skills": [],
+      "role": "secant_to_tangent",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "What happens to the secant gradient [f(a+h)−f(a)]/h as h approaches 0, provided the derivative exists?",
+        "ru": "Что происходит с градиентом секущей [f(a+h)−f(a)]/h при h→0, если производная существует?",
+        "uz": "Hosila mavjud bo‘lsa, h→0 da [f(a+h)−f(a)]/h sekant gradienti nima bo‘ladi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "It always approaches 0.",
+            "ru": "Он всегда стремится к 0.",
+            "uz": "U har doim 0 ga intiladi."
+          },
+          "diagnostic_code": "DIF01_CANCEL_H"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "It approaches the tangent gradient f′(a).",
+            "ru": "Он стремится к градиенту касательной f′(a).",
+            "uz": "U urinma gradienti f′(a) ga intiladi."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "It approaches f(a).",
+            "ru": "Он стремится к f(a).",
+            "uz": "U f(a) ga intiladi."
+          },
+          "diagnostic_code": "DIF01_AVERAGE_INSTANT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "It becomes the y-intercept.",
+            "ru": "Он становится y-перехватом.",
+            "uz": "U y-kesishishga aylanadi."
+          },
+          "diagnostic_code": "DIF01_AVERAGE_INSTANT"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The derivative is defined as the limiting secant gradient. As h→0, the second point approaches the first and the secant gradient approaches the tangent gradient.",
+        "ru": "Производная определяется как предел градиента секущей. При h→0 вторая точка приближается к первой, и градиент секущей стремится к градиенту касательной.",
+        "uz": "Hosila sekant gradientining limiti sifatida aniqlanadi. h→0 da ikkinchi nuqta birinchiga yaqinlashadi va sekant gradient urinma gradientiga intiladi."
+      },
+      "ai_source_skill": "P1-DIF-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q366",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-01",
+      "secondary_skills": [],
+      "role": "reverse_rate",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "For f(x)=x²+kx, the instantaneous gradient at x=2 is 9. Enter k.",
+        "ru": "Для f(x)=x²+kx мгновенный градиент при x=2 равен 9. Введите k.",
+        "uz": "f(x)=x²+kx uchun x=2 dagi oniy gradient 9. k ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "5",
+        "accepted_examples": [
+          "5",
+          " 5 "
+        ],
+        "rejected_examples": [
+          "4",
+          "7",
+          "9"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "From the limit definition (or the resulting derivative), f′(x)=2x+k. At x=2, 4+k=9, so k=5.",
+        "ru": "Из определения через предел (или полученной производной) f′(x)=2x+k. При x=2: 4+k=9, поэтому k=5.",
+        "uz": "Limit ta’rifidan (yoki hosiladan) f′(x)=2x+k. x=2 da 4+k=9, demak k=5."
+      },
+      "ai_source_skill": "P1-DIF-01",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q367",
+      "practice_no": 6,
+      "primary_skill": "P1-DIF-01",
+      "secondary_skills": [],
+      "role": "difference_quotient_reverse",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
+      "question": {
+        "en": "For f(x)=x²+cx, the difference quotient [f(1+h)−f(1)]/h simplifies to h+7. What is c?",
+        "ru": "Для f(x)=x²+cx разностное отношение [f(1+h)−f(1)]/h упрощается до h+7. Чему равно c?",
+        "uz": "f(x)=x²+cx uchun [f(1+h)−f(1)]/h ayirmali nisbat h+7 ga soddalashadi. c qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "5",
+            "ru": "5",
+            "uz": "5"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "3",
+            "ru": "3",
+            "uz": "3"
+          },
+          "diagnostic_code": "DIF01_DIFFERENCE_QUOTIENT"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "7",
+            "ru": "7",
+            "uz": "7"
+          },
+          "diagnostic_code": "DIF01_AVERAGE_INSTANT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "9",
+            "ru": "9",
+            "uz": "9"
+          },
+          "diagnostic_code": "DIF01_CANCEL_H"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The quotient is h+(2+c). Since it equals h+7, 2+c=7 and c=5.",
+        "ru": "Разностное отношение равно h+(2+c). Так как оно равно h+7, имеем 2+c=7 и c=5.",
+        "uz": "Ayirmali nisbat h+(2+c). U h+7 ga teng, demak 2+c=7 va c=5."
+      },
+      "ai_source_skill": "P1-DIF-01",
+      "status": "draft"
+    }
+  ]
+}
