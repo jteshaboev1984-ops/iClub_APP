@@ -208,6 +208,9 @@ begin
   if lower(coalesce(v_caps->>'plan_code',''))='free' then
     p_competitive_selected:=coalesce(p_study_selected,false)
       and coalesce((select u.is_school_student from public.users u where u.id=v_uid),false);
+    if p_competitive_selected and v_subject.type<>'main' then
+      return jsonb_build_object('ok',false,'reason','competitive_requires_main_subject');
+    end if;
   end if;
 
   -- One learner's slot changes are serialized so two quick taps/requests cannot
