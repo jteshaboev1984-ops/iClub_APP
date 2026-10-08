@@ -66,7 +66,9 @@ async function activate(page, viewId, stackScreenId = null) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, javaScriptEnabled: false });
   const page = await context.newPage();
   const url = process.env.VISUAL_V3_PREMIUM_URL || 'http://127.0.0.1:4173/index.html';
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  // Computed typography depends on the external premium stylesheet.
+  // DOMContentLoaded alone races stylesheet loading in parallel CI runs.
+  await page.goto(url, { waitUntil: 'load' });
 
   await activate(page, 'view-home');
   const home = await page.evaluate(() => ({
