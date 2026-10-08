@@ -28,6 +28,18 @@
   };
   let mountSerial=0;
 
+  function itemCountLabel(n,lang,c) {
+    if(lang==="ru") {
+      const last=n%10, hundred=n%100;
+      const noun=last===1 && hundred!==11 ? "задание"
+        : last>=2 && last<=4 && (hundred<12 || hundred>14) ? "задания"
+        : "заданий";
+      return n+" "+noun;
+    }
+    if(lang==="en") return n+" "+(n===1?"question":"questions");
+    return n+" "+c.items;
+  }
+
   function element(tag, cls, text) {
     const node=document.createElement(tag);
     if(cls) node.className=cls;
@@ -86,7 +98,7 @@
         button.disabled=busy;
         const info=element("span","practice-topic-choice-item-info");
         info.append(element("strong","",row.topic),
-                    element("small","",row.question_count+" "+c.items));
+                    element("small","",itemCountLabel(row.question_count,lang,c)));
         const action=element("span","practice-topic-choice-item-action",c.start);
         button.append(info,action);
         button.addEventListener("click",async()=>{
