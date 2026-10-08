@@ -110,6 +110,10 @@ begin
           )
         )
         and not public.iclub_practice_drill_question_protected_v4(q.id)
+        -- Even archived or future Tour questions are excluded from free topic choice.
+        and not exists (
+          select 1 from public.tour_questions tq where tq.question_id=q.id
+        )
     ) into v_use_subtopic;
   end if;
 
@@ -141,6 +145,10 @@ begin
         )
       )
       and not public.iclub_practice_drill_question_protected_v4(q.id)
+        -- Even archived or future Tour questions are excluded from free topic choice.
+        and not exists (
+          select 1 from public.tour_questions tq where tq.question_id=q.id
+        )
   )
   select count(*)::integer into v_total
   from candidates;
@@ -167,6 +175,10 @@ begin
       and lower(coalesce(q.difficulty,'medium'))='easy'
       and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
       and not public.iclub_practice_drill_question_protected_v4(q.id)
+        -- Even archived or future Tour questions are excluded from free topic choice.
+        and not exists (
+          select 1 from public.tour_questions tq where tq.question_id=q.id
+        )
     group by q.id
     order by random()
     limit 3
@@ -192,6 +204,10 @@ begin
       and lower(coalesce(q.difficulty,'medium')) not in ('easy','hard')
       and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
       and not public.iclub_practice_drill_question_protected_v4(q.id)
+        -- Even archived or future Tour questions are excluded from free topic choice.
+        and not exists (
+          select 1 from public.tour_questions tq where tq.question_id=q.id
+        )
     group by q.id
     order by random()
     limit 5
@@ -217,6 +233,10 @@ begin
       and lower(coalesce(q.difficulty,'medium'))='hard'
       and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
       and not public.iclub_practice_drill_question_protected_v4(q.id)
+        -- Even archived or future Tour questions are excluded from free topic choice.
+        and not exists (
+          select 1 from public.tour_questions tq where tq.question_id=q.id
+        )
     group by q.id
     order by random()
     limit 2
@@ -248,6 +268,10 @@ begin
         and not (q.id=any(v_qids))
         and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
         and not public.iclub_practice_drill_question_protected_v4(q.id)
+        -- Even archived or future Tour questions are excluded from free topic choice.
+        and not exists (
+          select 1 from public.tour_questions tq where tq.question_id=q.id
+        )
       group by q.id
       order by random()
       limit v_needed
