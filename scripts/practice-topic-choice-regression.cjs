@@ -15,6 +15,10 @@ const api=fs.readFileSync(path.join(root,'security/legacy-assessment-safe-api.js
 assert.match(sql,/auth\.uid\(\)/,'Requires authenticated user');
 assert.match(sql,/security definer/i);
 assert.match(sql,/not public\.iclub_practice_drill_question_protected_v4\(q\.id\)/);
+assert.match(sql,/not exists \([\s\S]*?public\.tour_questions tq where tq\.question_id=q\.id/);
+assert.equal((guard.match(/public\.tour_questions tq where tq\.question_id=q\.id/g)||[]).length,6,
+  'Every drill candidate path must reject all Tour-linked questions');
+
 assert.match(sql,/m\.is_runtime_allowed is true/);
 assert.match(sql,/p\.is_active is true/);
 assert.doesNotMatch(sql,/v_current_tour|v_season_id|t\.start_date/);
