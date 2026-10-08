@@ -7,7 +7,7 @@
   const COPY = {
     ru: {
       entryTitle: "Предметы тарифа",
-      entryFree: "1 учебный · 1 Competitive",
+      entryFree: "1 предмет для учёбы и соревнований",
       entryPlus: "До 3 учебных · до 2 Competitive",
       entryPro: "Все предметы · до 2 Competitive",
       title: "Предметы тарифа",
@@ -17,10 +17,12 @@
       betaTextEnforced: "Тестовый доступ включён: выбранные предметы определяют доступ в этом beta-аккаунте. Прогресс и история не удаляются.",
       plan: "Тариф",
       studyTitle: "Учебные предметы",
-      studyFree: "Выбери 1 предмет.",
+      studyFree: "Выбери один предмет. Для школьников он автоматически участвует в соревнованиях и рейтинге.",
       studyPlus: "Выбери до 3 предметов.",
       studyPro: "В Pro доступны все активные предметы.",
-      competitiveTitle: "Competitive",
+      competitiveTitle: "Соревнования и рейтинг",
+      freeCompetitiveAuto: "Выбранный предмет автоматически участвует в соревнованиях и рейтинге. Повторно выбирать его не нужно.",
+      freeCompetitiveUnavailable: "Участие в соревнованиях определяется данными школьного профиля.",
       competitiveText: "Выбери предметы для туров, рейтингов и сертификатов.",
       selected: "Выбрано",
       included: "Включено",
@@ -43,27 +45,29 @@
       }
     },
     uz: {
-      entryTitle: "Tarif fanlari",
-      entryFree: "1 o‘quv · 1 Competitive",
-      entryPlus: "3 tagacha o‘quv · 2 tagacha Competitive",
-      entryPro: "Barcha fanlar · 2 tagacha Competitive",
-      title: "Tarif fanlari",
-      subtitle: "Tarifingizga kiradigan fanlarni sozlang.",
+      entryTitle: "Tarifdagi fanlar",
+      entryFree: "O‘qish va musobaqalar uchun bitta fan",
+      entryPlus: "O‘qish uchun 3 tagacha, musobaqa uchun 2 tagacha fan",
+      entryPro: "Barcha fanlar · musobaqa uchun 2 tagacha",
+      title: "Tarifdagi fanlar",
+      subtitle: "Tarifingiz bo‘yicha foydalanadigan fanlarni tanlang.",
       betaTitle: "Sinov rejimi",
-      betaText: "Bu tanlov hozircha joriy kirish yoki progressni o‘zgartirmaydi. Biz kelajakdagi tarif sozlamasini tekshiryapmiz.",
-      betaTextEnforced: "Sinov kirishi yoqilgan: tanlangan fanlar shu beta-akkauntdagi kirishni belgilaydi. Progress va tarix o‘chirilmaydi.",
+      betaText: "Bu tanlov hozircha mavjud imkoniyatlar va o‘qish natijalariga ta’sir qilmaydi. Yangi tariflarni sinab ko‘ryapmiz.",
+      betaTextEnforced: "Sinov rejimida faqat tanlangan fanlar ochiladi. Oldingi natijalaringiz saqlanadi.",
       plan: "Tarif",
-      studyTitle: "O‘quv fanlari",
-      studyFree: "1 ta fan tanlang.",
+      studyTitle: "O‘qish uchun fanlar",
+      studyFree: "Bitta fan tanlang. Maktab o‘quvchilari uchun shu fan musobaqalarga ham avtomatik qo‘shiladi.",
       studyPlus: "3 tagacha fan tanlang.",
-      studyPro: "Pro’da barcha faol fanlar mavjud.",
-      competitiveTitle: "Competitive",
-      competitiveText: "Tours, reyting va sertifikatlar uchun fanlarni tanlang.",
+      studyPro: "Pro tarifida barcha mavjud fanlardan foydalanishingiz mumkin.",
+      competitiveTitle: "Musobaqa va reyting",
+      freeCompetitiveAuto: "Tanlagan faningiz musobaqalar va reyting uchun ham belgilandi. Uni qayta tanlash shart emas.",
+      freeCompetitiveUnavailable: "Musobaqalarda qatnashish maktab o‘quvchisi sifatida ro‘yxatdan o‘tganingizga bog‘liq.",
+      competitiveText: "Musobaqa, reyting va sertifikatlar uchun fanlarni tanlang.",
       selected: "Tanlandi",
       included: "Kiritilgan",
       firstStudy: "Avval fanni o‘quv fanlariga qo‘shing.",
       studyLimit: "Tarifingizdagi o‘quv fanlari limiti tugadi.",
-      competitiveLimit: "Tarifingizdagi Competitive limiti tugadi.",
+      competitiveLimit: "Musobaqalar uchun tanlash mumkin bo‘lgan fanlar soniga yetdingiz.",
       saveFailed: "Tanlovni saqlab bo‘lmadi. Qayta urinib ko‘ring.",
       unavailable: "Fanlarni sozlash hozir mavjud emas.",
       subjectNames: {
@@ -81,7 +85,7 @@
     },
     en: {
       entryTitle: "Plan subjects",
-      entryFree: "1 study · 1 Competitive",
+      entryFree: "One subject for study and competitions",
       entryPlus: "Up to 3 study · up to 2 Competitive",
       entryPro: "All subjects · up to 2 Competitive",
       title: "Plan subjects",
@@ -91,10 +95,12 @@
       betaTextEnforced: "Test access is on: selected subjects control access for this beta account. Progress and history are not deleted.",
       plan: "Plan",
       studyTitle: "Study subjects",
-      studyFree: "Choose 1 subject.",
+      studyFree: "Choose one subject. Eligible school learners enter competitions in that subject automatically.",
       studyPlus: "Choose up to 3 subjects.",
       studyPro: "Pro includes every active subject.",
-      competitiveTitle: "Competitive",
+      competitiveTitle: "Competitions and rankings",
+      freeCompetitiveAuto: "Your selected subject is also used for competitions and rankings. No second selection is needed.",
+      freeCompetitiveUnavailable: "Competition access follows your school profile eligibility.",
       competitiveText: "Choose subjects for Tours, rankings, and certificates.",
       selected: "Selected",
       included: "Included",
@@ -302,6 +308,32 @@
     }
   }
 
+  async function chooseFreeSubject(subjectKey) {
+    if (!window.sb?.rpc || state.busy.size > 0) return false;
+    state.busy.add(subjectKey);
+    render();
+    try {
+      const { data, error } = await window.sb.rpc("choose_iclub_my_free_subject_v2", {
+        p_subject_key: subjectKey
+      });
+      if (error || data?.ok !== true) {
+        showToast(copy().saveFailed);
+        return false;
+      }
+      window.dispatchEvent(new CustomEvent("iclub:subject-selection-changed", {
+        detail: { subjectKey }
+      }));
+      await refresh();
+      return true;
+    } catch {
+      showToast(copy().saveFailed);
+      return false;
+    } finally {
+      state.busy.delete(subjectKey);
+      render();
+    }
+  }
+
   function renderStudy(host) {
     const c = copy();
     const code = planCode();
@@ -356,15 +388,24 @@
         selected: current.study,
         competitive: current.competitive,
         mode: "study",
-        disabled: busy || limitReached,
-        helper: limitReached ? c.studyLimit : "",
+        disabled: busy || (code === "free" ? current.study : limitReached),
+        helper: code === "free" ? "" : limitReached ? c.studyLimit : "",
         onChange: async (next) => {
+          if (code === "free") return next ? await chooseFreeSubject(key) : false;
           return await writeSelection(key, next, next ? current.competitive : false);
         }
       }));
     }
 
     host.appendChild(list);
+  }
+
+  function renderFreeCompetitive(host) {
+    const note = document.createElement("p");
+    note.className = "iclub-subject-access-section-copy";
+    note.textContent = state.bootstrap?.is_school_student === true
+      ? copy().freeCompetitiveAuto : copy().freeCompetitiveUnavailable;
+    host.appendChild(note);
   }
 
   function renderCompetitive(host) {
@@ -459,7 +500,8 @@
     }
     if (competitive) {
       competitive.replaceChildren();
-      renderCompetitive(competitive);
+      if (planCode() === "free") renderFreeCompetitive(competitive);
+      else renderCompetitive(competitive);
     }
   }
 
