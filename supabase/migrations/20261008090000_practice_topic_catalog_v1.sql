@@ -88,7 +88,7 @@ begin
   end if;
 
   with eligible as (
-    select distinct q.id,trim(q.topic) as topic
+    select distinct q.id,q.topic as topic
     from public.practice_pools p
     join public.practice_pool_questions ppq
       on ppq.pool_id=p.id and ppq.is_active is true
