@@ -16960,6 +16960,12 @@ if (state?.courses?.subjectKey !== viewSubjectKey) return;
 
 renderPracticeTourPicker(picker.cards, selectedTourNo);
 updatePracticeStartButtonForTour(selectedTourNo, false);
+// Topic practice is independent of Tour attempts; the server catalog only lists eligible topics.
+window.iClubPracticeTopicChoice?.mount({
+  subjectKey,
+  language: currentLang(),
+  onStart: (topic) => startPracticeByRec({ topic, subtopic: null }, "practice")
+});
      
     const done = Number(stageStats?.masteredCount || 0);
     const total = Number(stageStats?.totalCount || 0);
@@ -18040,7 +18046,8 @@ async function handlePracticeSubmit(isAutoTimeout = false) {
 
     // ✅ DRILL mini-result for My Recs (no DB, no last-practice overwrite)
 try {
-  if (quiz?.drillType && (quiz.drillType === "rec_mistakes" || quiz.drillType === "rec_topic")) {
+  if (quiz?.drillType && !quiz.topicChoiceOrigin &&
+    (quiz.drillType === "rec_mistakes" || quiz.drillType === "rec_topic")) {
     if (!state.courses) state.courses = {};
     state.courses.myRecDrillLast = {
       subjectKey: quiz.subjectKey || null,
@@ -18250,6 +18257,7 @@ if (meta) {
   const secSuffix = t("practice_time_sec_suffix") || "с";
 
   meta.textContent =
+    (quiz?.topicChoiceOrigin ? `${String(quiz.recTopic || "")} • ` : "") +
     `${scoreLabel}: ${attempt.score}/${attempt.total} (${attempt.percent}%)` +
     ` • ${timeLabel}: ${attempt.durationSec}${secSuffix}` +
     ` • ${t("practice_errors")}: ${wrong.length}` +
@@ -18273,9 +18281,11 @@ try {
   const btn2 = $("#practice-review-to-subject-btn");
   const btn3 = $("#practice-recs-to-subject-btn");
 
-  if (btn1) btn1.textContent = t(exitKey);
-  if (btn2) btn2.textContent = t(exitKey);
-  if (btn3) btn3.textContent = t(exitKey);
+  const exitLabel = quiz?.topicChoiceOrigin
+    ? tr3("К практике", "Amaliyotga", "Back to Practice") : t(exitKey);
+  if (btn1) btn1.textContent = exitLabel;
+  if (btn2) btn2.textContent = exitLabel;
+  if (btn3) btn3.textContent = exitLabel;
 } catch {}
      
       // Show result screen (replace quiz screen to avoid "dead" back navigation)
@@ -18284,7 +18294,8 @@ else replaceCourses("practice-result");
 
 // ✅ remember which attempt should be used by Result/Review (main vs drill)
 state.courses = state.courses || {};
-state.courses.practiceContext = quiz?.drillType ? "drill" : "main";
+state.courses.practiceContext = quiz?.topicChoiceOrigin
+  ? "topic" : (quiz?.drillType ? "drill" : "main");
 
 // ✅ store drill attempt separately (must NOT overwrite main practice last attempt)
 if (quiz?.drillType) {
@@ -18345,7 +18356,7 @@ function renderPracticeReview() {
 
   const ctx = state?.courses?.practiceContext || "main";
 const attempt =
-  (ctx === "drill" && state.practiceLastDrillAttempt)
+  ((ctx === "drill" || ctx === "topic") && state.practiceLastDrillAttempt)
     ? state.practiceLastDrillAttempt
     : state.practiceLastAttempt;
 
@@ -19737,8 +19748,8 @@ function pickContentText(obj, base) {
   void questionIds;
   return [];
 } 
-async function startPracticeByRec() {
-  const rec = state?.courses?.myRecCurrent;
+async function startPracticeByRec(selectedRec = null, origin = "recommendation") {
+  const rec = selectedRec || state?.courses?.myRecCurrent;
   const subjectKey = state?.courses?.subjectKey;
   if (!rec || !subjectKey) return;
   const api = getPracticeSafeApi()?.drill;
@@ -19758,11 +19769,15 @@ async function startPracticeByRec() {
     startedAt: Date.now(), paused: false, pauseStartedAt: null, pausedTotalMs: 0,
     index: 0, questions: [], answers: [], correct: [], timeSpent: [], qTimeLeft: 0,
     qEndsAtMono: null, qEndsAtMs: null, qTimerId: null,
-    recTopic: rec.topic || null, recSubtopic: rec.subtopic || null, drillType: "rec_topic"
+    recTopic: rec.topic || null, recSubtopic: rec.subtopic || null,
+    drillType: "rec_topic", topicChoiceOrigin: origin === "practice"
   }, rows);
   if (!quiz) return;
   if (!state.courses) state.courses = {};
-  state.courses.myRecReturnTarget = "my-rec-detail";
+  state.courses.myRecReturnTarget = origin === "practice" ? null : "my-rec-detail";
+  state.courses.practiceTopicSelection = origin === "practice"
+    ? { subjectKey, topic: rec.topic, subtopic: null }
+    : null;
   state.quizLock = "practice"; state.quiz = quiz; saveState();
   pushCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
@@ -22970,6 +22985,13 @@ if (action === "practice-recommendations") {
 if (action === "practice-exit") {
   const ctx = state?.courses?.practiceContext || "main";
 
+  // A self-chosen topic returns to Practice, never to an unrelated recommendation.
+  if (ctx === "topic") {
+    replaceCourses("practice-start");
+    await renderPracticeStart();
+    return;
+  }
+
   // ✅ DRILL: go back to recommendation detail (topic screen)
   if (ctx === "drill" && state?.courses?.myRecCurrent) {
   // ✅ restore stack so header back arrow appears:
@@ -23002,6 +23024,12 @@ if (action === "practice-exit") {
       }
 
       if (action === "practice-again") {
+  // Repeat a self-chosen topic without changing Tour statistics.
+  if (state?.courses?.practiceContext === "topic" &&
+      state?.courses?.practiceTopicSelection?.topic) {
+    startPracticeByRec(state.courses.practiceTopicSelection, "practice");
+    return;
+  }
   // ✅ if last finished was a drill — repeat that drill
   const d = state?.courses?.myRecDrillLast;
   if (d?.drillType === "rec_mistakes") {
