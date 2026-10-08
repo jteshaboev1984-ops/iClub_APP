@@ -336,4 +336,5 @@ end;
 $function$;
 
 revoke all on function public.start_practice_topic_drill_choice_safe_v1(text,text,text,text) from public;
+revoke all on function public.start_practice_topic_drill_choice_safe_v1(text,text,text,text) from anon;
 grant execute on function public.start_practice_topic_drill_choice_safe_v1(text,text,text,text) to authenticated, service_role;
