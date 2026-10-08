@@ -85,7 +85,7 @@ The official 9708 syllabus contains **53 numbered subject topics** (AS 1.1–6.5
 3. Q2543 (complex multiplier) is an A Level **9.1.1** target under the official syllabus; AS **4.2.2** explicitly states that the multiplier is not required. Inspect the exact question and address the AS-tour mismatch through a separately approved, versioned correction only.
 4. Q2536 (terms of trade) appears under official AS **6.1.3**, which is allocated to Tour 3, not Tour 2.
 5. Q2544 (current account correction policies) appears under official AS **6.5**, which is allocated to Tour 3.
-6. Q2540 (Fisher equation) needs independent source/scope check; do not assume either official or nonofficial from wording alone.
+6. Q2540 is explicitly a question about **MV = PT**, the equation of exchange / quantity theory of money covered at official **A Level 9.4.3** (Ch44, Tour 6). It is incorrectly labelled as AS Tour 2 by scope; `Fisher equation` is a question's legacy label rather than an official syllabus title. Do not rewrite the question or attempt history.
 7. Q2669 has no numbered source chapter and is a reserved `Extra`; verify before using in source-backed Tutor grounding.
 8. Season 2 Tour 6 lacks a Ch45 question. This may be an intentional sampling decision, not necessarily a defect; check review requirements.
 
