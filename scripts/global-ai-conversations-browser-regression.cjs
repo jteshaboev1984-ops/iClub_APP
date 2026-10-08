@@ -96,7 +96,10 @@ async function runViewport(browser, width, height) {
         }
       },
       auth: {
-        onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } })
+        onAuthStateChange: (callback) => {
+          window.__onGlobalAuthChange = callback;
+          return { data: { subscription: { unsubscribe() {} } } };
+        }
       }
     };
   });
@@ -324,6 +327,37 @@ async function runViewport(browser, width, height) {
   assert(metrics.panel.bottom <= metrics.tab.top, 'chat panel overlaps bottom navigation');
 
   await page.screenshot({ path: `artifacts/global-ai-conversations-${width}.png`, fullPage: true });
+
+  // Auth scope is an independent privacy boundary, even if the page never reloads.
+  await page.evaluate(() => window.__onGlobalAuthChange('SIGNED_OUT', null));
+  await page.waitForFunction(() => !document.getElementById('iclub-global-ai-root'));
+  await page.evaluate(() => window.__onGlobalAuthChange('SIGNED_IN', {user:{id:'second-user'}}));
+  await page.waitForSelector('#iclub-global-ai-mark', {state:'visible'});
+  await page.click('#iclub-global-ai-mark');
+  assert(await page.locator('.iclub-global-ai-message').count() === 0,
+    'Old account messages leaked after logout/login without reload');
+  assert(await page.locator('[data-global-ai-input]').isEnabled(),
+    'New user inherited former account usage-exhausted state');
+
+  // Simulate a response whose HTTP promise resolves AFTER a different account logs in.
+  await page.locator('[data-global-ai-input]').fill('Private second-user question');
+  await page.locator('[data-global-ai-input]').press('Enter');
+  await waitForRequest(page, {user_text:'Private second-user question'},
+    'Second-user request was never sent');
+  await page.evaluate(() => window.__onGlobalAuthChange('SIGNED_OUT', null));
+  await page.waitForFunction(() => !document.getElementById('iclub-global-ai-root'));
+  await page.evaluate(() => window.__onGlobalAuthChange('SIGNED_IN', {user:{id:'third-user'}}));
+  await page.waitForSelector('#iclub-global-ai-mark', {state:'visible'});
+  await resolveNext(page, {
+    ok:true,mode:'answer',message:'Sensitive second-user private answer',
+    usage_exhausted:false,reset_at:null,academic_state_changed:false
+  });
+  await page.waitForTimeout(260);
+  await page.click('#iclub-global-ai-mark');
+  assert(await page.locator('.iclub-global-ai-message').count() === 0,
+    'Late response from former account appeared in next account conversation');
+  assert(!(await page.locator('#iclub-global-ai-panel').innerText()).includes('Sensitive second-user'),
+    'Former account response rendered after auth transition');
   assert(pageErrors.length === 0, `page errors at ${width}px: ${JSON.stringify(pageErrors)}`);
   await page.close();
 }

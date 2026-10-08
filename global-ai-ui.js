@@ -135,6 +135,10 @@
     resetTimer: null,
     busy: false,
     activeRequestId: null,
+    // In-memory conversations are owned by one authenticated account only.
+    authUserId: null,
+    authEpoch: 0,
+    authSignedOut: false,
     context: null,
     usageExhausted: false,
     resetAt: null,
@@ -596,6 +600,7 @@
     if (state.busy || currentBlocked() || state.usageExhausted || !state.context) return;
 
     const context = { ...state.context };
+    const authEpoch = state.authEpoch;
     const threadKey = context.threadKey;
     const cleanDisplay = String(displayText || "").trim();
     const cleanText = String(userText || "").trim().slice(0, MAX_INPUT_CHARS);
@@ -603,7 +608,8 @@
 
     appendMessage(threadKey, "user", cleanDisplay);
     state.busy = true;
-    state.activeRequestId = requestId();
+    const currentRequestId = requestId();
+    state.activeRequestId = currentRequestId;
 
     const p = panel();
     const input = p?.querySelector("[data-global-ai-input]");
@@ -613,7 +619,7 @@
     const started = performance.now();
     try {
       const result = await invokeGlobalAi({
-        request_id: state.activeRequestId,
+        request_id: currentRequestId,
         locale: locale(),
         subject_key: context.subjectKey,
         scope_code: context.scopeCode,
@@ -622,6 +628,10 @@
         component_code: context.componentCode || "",
         skill_code: context.skillCode || ""
       });
+
+      // Auth may change while the provider is still answering. Never render an
+      // old account's response into the new account's in-memory conversation.
+      if (authEpoch !== state.authEpoch || state.authSignedOut) return;
 
       if (result?.__globalAiTimedOut === true) {
         appendMessage(threadKey, "assistant", copy().timeout, "notice");
@@ -666,12 +676,16 @@
 
       appendMessage(threadKey, "assistant", message || copy().unavailable, "notice");
     } catch {
-      appendMessage(threadKey, "assistant", copy().unavailable, "notice");
+      if (authEpoch === state.authEpoch && !state.authSignedOut) {
+        appendMessage(threadKey, "assistant", copy().unavailable, "notice");
+      }
     } finally {
       const elapsed = performance.now() - started;
       if (elapsed < 180) {
         await new Promise((resolve) => setTimeout(resolve, 180 - elapsed));
       }
+      // Do not mutate a subsequent account's spinner, request, or composer.
+      if (authEpoch !== state.authEpoch || state.authSignedOut) return;
       state.busy = false;
       state.activeRequestId = null;
       renderPanel();
@@ -791,7 +805,38 @@
     void refreshBootstrap();
   }
 
+  function handleAuthScopeChange(event, session) {
+    const newUserId = String(session?.user?.id || "");
+    const signedOut = event === "SIGNED_OUT" || !newUserId;
+    const accountChanged = event === "SIGNED_OUT" ||
+      newUserId !== state.authUserId;
+    state.authSignedOut = signedOut;
+    if (accountChanged) {
+      state.authEpoch += 1;
+      state.authUserId = signedOut ? "" : newUserId;
+      // No persistence: remove all temporary General/subject threads on
+      // account switch. Old asynchronous calls are invalidated by authEpoch.
+      state.threads.clear();
+      state.busy = false;
+      state.activeRequestId = null;
+      state.bootstrap = null;
+      state.bootstrapInFlight = null;
+      state.usageExhausted = false;
+      state.resetAt = null;
+      if (state.resetTimer) clearTimeout(state.resetTimer);
+      state.resetTimer = null;
+      closePanel();
+      destroyShell();
+    }
+    queueMicrotask(() => { void refreshBootstrap(); });
+  }
+
   async function refreshBootstrap() {
+    if (state.authSignedOut) {
+      state.bootstrap = null;
+      destroyShell();
+      return null;
+    }
     if (state.bootstrapInFlight) return state.bootstrapInFlight;
     const client = window.sb;
     if (!client?.rpc) {
@@ -800,9 +845,11 @@
       return null;
     }
 
-    state.bootstrapInFlight = (async () => {
+    const authEpoch = state.authEpoch;
+    const pending = (async () => {
       try {
         const { data, error } = await client.rpc("get_iclub_ai_ui_bootstrap_v1");
+        if (authEpoch !== state.authEpoch || state.authSignedOut) return null;
         if (error || !data || typeof data !== "object") {
           state.bootstrap = null;
           destroyShell();
@@ -818,15 +865,17 @@
         reconcileShell();
         return data;
       } catch {
-        state.bootstrap = null;
-        destroyShell();
+        if (authEpoch === state.authEpoch && !state.authSignedOut) {
+          state.bootstrap = null;
+          destroyShell();
+        }
         return null;
       } finally {
-        state.bootstrapInFlight = null;
+        if (authEpoch === state.authEpoch) state.bootstrapInFlight = null;
       }
     })();
-
-    return state.bootstrapInFlight;
+    state.bootstrapInFlight = pending;
+    return pending;
   }
 
   function attachObservers() {
@@ -873,8 +922,8 @@
     });
 
     try {
-      window.sb?.auth?.onAuthStateChange?.(() => {
-        queueMicrotask(() => { void refreshBootstrap(); });
+      window.sb?.auth?.onAuthStateChange?.((event, session) => {
+        handleAuthScopeChange(event, session);
       });
     } catch {}
 
