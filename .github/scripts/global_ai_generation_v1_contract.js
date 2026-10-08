@@ -56,7 +56,21 @@ assert(validate > providerFinalize, 'output validation must occur after real pro
 assert(usageFinalize > validate, 'learner usage must commit only after output validation');
 
 assert(edge.includes('await finalizeUsage(requestId,"released",reason)'), 'failed generation does not release learner usage');
-assert(edge.includes('await finalizeProviderCall(requestId,"released",0)'), 'failed provider call does not release provider lease');
+assert(edge.includes('await finalizeProviderCall(requestId,"released",0)'), 'failed call before provider request must release unused provider lease');
+assert(edge.includes('let providerRequestStarted = false;'), 'provider attempt state must be tracked');
+assert(edge.includes('let providerActualCostUsd: number | null = null;'), 'real provider output cost must be tracked');
+const started = edge.indexOf('providerRequestStarted = true;');
+const called = edge.indexOf('const provider = await callOpenAIProvider(',started);
+const counted = edge.indexOf('providerActualCostUsd = actualCostUsd;',called);
+assert(started >= 0 && called > started && counted > called, 'provider request and known actual cost must be tracked in sequence');
+assert(
+  edge.includes('requestId,"completed",providerActualCostUsd ?? reservedCostUsd'),
+  'timeout/failed accounting may not erase possible provider spend'
+);
+assert(
+  !edge.includes('try { await finalizeProviderCall(requestId,"released",0); } catch {}'),
+  'old catch path incorrectly zeroed real provider costs'
+);
 assert(edge.includes('reason==="no_source" ? "no_source" : "failed"'), 'provider no-source result is not separated from validation failure');
 
 for (const token of [
