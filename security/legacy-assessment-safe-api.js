@@ -58,6 +58,18 @@
       });
     },
 
+    // Independent topic selection: only approved Practice-pool items,
+    // protected Tour questions remain excluded. Never fall back to v5's
+    // calendar-bound drill if this endpoint is unavailable.
+    async startTopicChoice({ subjectKey, topic, clientSessionId = null }) {
+      return rpc("start_practice_topic_drill_choice_safe_v1", {
+        p_subject_key: String(subjectKey || ""),
+        p_topic: String(topic || ""),
+        p_subtopic: null,
+        p_client_session_id: clientSessionId || makeClientSessionId("practice_topic_choice")
+      });
+    },
+
     async startMistakes({ subjectKey, questionIds, clientSessionId = null }) {
       return rpc("start_practice_mistakes_drill_safe_v5", {
         p_subject_key: String(subjectKey || ""),
