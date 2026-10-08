@@ -18269,6 +18269,13 @@ if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
 
 const recsCountEl = $("#practice-recs-count");
 if (recsCountEl) recsCountEl.textContent = String(recKeys.length);
+// A self-chosen topic is an independent short drill. Do not offer unrelated
+// "My recommendations" actions or claim it changed the main Practice result.
+const recsAction = document.querySelector('#courses-practice-result [data-action="practice-recommendations"]');
+if (recsAction) {
+  recsAction.hidden = !!quiz?.topicChoiceOrigin;
+  recsAction.style.display = quiz?.topicChoiceOrigin ? "none" : "";
+}
 
 // ✅ set “exit” button label based on context (main vs drill)
 try {
