@@ -34,6 +34,10 @@ BEGIN
 END
 $people$;
 
+-- Synthetic Free school account; never changes real profiles (matrix ROLLBACK).
+UPDATE public.users SET is_school_student=true
+WHERE id=(SELECT user_id FROM subject_selection_people WHERE person_key='free');
+
 -- A legacy row proves the beta selector never rewrites public.user_subjects.
 INSERT INTO public.user_subjects(user_id,subject_id,mode,is_pinned)
 SELECT user_id,1,'competitive',false
@@ -121,6 +125,10 @@ BEGIN
     RAISE EXCEPTION 'Free subject bootstrap mismatch: %',v;
   END IF;
 
+  IF coalesce((v->>'is_school_student')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'Free beta did not return school eligibility';
+  END IF;
+
   v:=public.set_iclub_my_subject_slot_v1('not-a-real-subject',true,false);
   IF coalesce((v->>'ok')::boolean,true)
      OR v->>'reason'<>'subject_unavailable' THEN
@@ -141,26 +149,54 @@ BEGIN
   END IF;
   UPDATE public.subjects SET is_active=false WHERE subject_key='english_a1';
 
+  -- A single study choice automatically grants exactly the SAME Competitive.
   v:=public.set_iclub_my_subject_slot_v1('mathematics',true,false);
-  IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE THEN
-    RAISE EXCEPTION 'Free first study selection failed: %',v;
+  IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE
+     OR coalesce((v->>'competitive_selected')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'Free study+Competitive auto pairing failed: %',v;
   END IF;
 
   v:=public.set_iclub_my_subject_slot_v1('biology',true,false);
   IF coalesce((v->>'ok')::boolean,true)
      OR v->>'reason'<>'study_subject_limit_reached' THEN
-    RAISE EXCEPTION 'Free second study selection escaped limit: %',v;
+    RAISE EXCEPTION 'Free direct second study bypassed limit: %',v;
   END IF;
 
-  v:=public.set_iclub_my_subject_slot_v1('mathematics',true,true);
-  IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE THEN
-    RAISE EXCEPTION 'Free Competitive selection failed: %',v;
+  -- Swapping subjects is ONE server operation and keeps legacy user_subjects.
+  v:=public.choose_iclub_my_free_subject_v2('biology');
+  IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE
+     OR coalesce((v->>'competitive_selected')::boolean,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'Free atomic subject swap failed: %',v;
+  END IF;
+  IF EXISTS(
+    SELECT 1 FROM private.iclub_subject_slot_selections
+    WHERE user_id=uid AND subject_key='mathematics'
+      AND (study_selected OR competitive_selected)
+  ) OR NOT EXISTS(
+    SELECT 1 FROM private.iclub_subject_slot_selections
+    WHERE user_id=uid AND subject_key='biology'
+      AND study_selected AND competitive_selected
+  ) THEN
+    RAISE EXCEPTION 'Free subject swap left inconsistent paired slots';
   END IF;
 
   v:=public.get_iclub_subject_selection_bootstrap_v1();
   IF (v->>'study_selected_count')::integer<>1
      OR (v->>'competitive_selected_count')::integer<>1 THEN
     RAISE EXCEPTION 'Free selection counters mismatch: %',v;
+  END IF;
+
+  -- Non-school Free users study without inadvertently receiving Tours access.
+  UPDATE public.users SET is_school_student=false WHERE id=uid;
+  v:=public.choose_iclub_my_free_subject_v2('mathematics');
+  IF coalesce((v->>'ok')::boolean,false) IS NOT TRUE
+     OR coalesce((v->>'competitive_selected')::boolean,true) IS NOT FALSE THEN
+    RAISE EXCEPTION 'Non-school Free incorrectly acquired Competitive: %',v;
+  END IF;
+  v:=public.get_iclub_subject_selection_bootstrap_v1();
+  IF (v->>'study_selected_count')::integer<>1
+     OR (v->>'competitive_selected_count')::integer<>0 THEN
+    RAISE EXCEPTION 'Non-school Free counters mismatch: %',v;
   END IF;
 END
 $free_matrix$;
@@ -277,6 +313,11 @@ $preservation$;
 
 DO $privileges$
 BEGIN
+  IF has_function_privilege('anon','public.choose_iclub_my_free_subject_v2(text)','EXECUTE')
+     OR NOT has_function_privilege('authenticated','public.choose_iclub_my_free_subject_v2(text)','EXECUTE') THEN
+    RAISE EXCEPTION 'Free atomic subject selector privilege mismatch';
+  END IF;
+
   IF has_function_privilege('anon','public.get_iclub_subject_selection_bootstrap_v1()','EXECUTE')
      OR has_function_privilege('anon','public.set_iclub_my_subject_slot_v1(text,boolean,boolean)','EXECUTE') THEN
     RAISE EXCEPTION 'Anonymous role received beta subject-selection access';

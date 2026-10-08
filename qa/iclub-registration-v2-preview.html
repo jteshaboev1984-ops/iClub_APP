@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <title>iClub · Registration v2 preview</title>
+  <style>
+    :root{color-scheme:light;--blue:#2f6fd6;--ink:#182a43;--muted:#5e6d82;--line:#dee7f2;--bg:#f5f8fd}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    button,select{font:inherit}
+    button{cursor:pointer}
+    .shell{width:min(100%,650px);margin:0 auto;padding:16px 16px 60px}
+    .brand{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+    .brand-name{font-weight:900;font-size:19px;letter-spacing:-.5px}
+    .preview-mark{font-size:11px;background:#e8effa;padding:6px 10px;border-radius:999px;color:#31568a;font-weight:750;text-align:right}
+    h1{font-size:25px;line-height:1.2;letter-spacing:-.7px;margin:0 0 6px}
+    h2{font-size:15px;margin:0 0 4px}
+    p{margin:0}
+    .muted{color:var(--muted)}
+    .intro{margin-bottom:15px}
+    .controls,.panel,.notice{border:1px solid var(--line);background:#fff;border-radius:18px;padding:15px}
+    .controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+    .field{min-width:0;display:grid;gap:5px;font-size:11px;font-weight:750;color:var(--muted)}
+    .field select{width:100%;min-width:0;min-height:38px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);padding:6px 8px;font-size:12px}
+    .notice{background:#edf4ff;color:#325682;font-size:12px;line-height:1.5;margin-bottom:14px}
+    .panel{margin-bottom:13px}
+    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+    .section-sub{font-size:12px;line-height:1.45;color:var(--muted)}
+    .count{font-size:11px;font-weight:800;background:#eaf1fc;color:#245cb2;border-radius:999px;padding:5px 9px;white-space:nowrap}
+    .plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .plan{padding:12px 6px;background:#f9fbff;border:1px solid var(--line);border-radius:13px;text-align:center;min-width:0}
+    .plan strong{display:block;font-size:15px;line-height:1.3}
+    .plan .price{display:block;font-size:11px;color:var(--muted);margin-top:3px}
+    .plan[aria-pressed=true],.subject[aria-pressed=true]{border-color:var(--blue);background:#edf4ff;box-shadow:inset 0 0 0 1px var(--blue)}
+    .plan[aria-pressed=true] strong{color:#1d5bc1}
+    .plan .best{font-size:10px;color:#2766c0;font-weight:800}
+    .subjects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:11px}
+    .subject{min-height:51px;border:1px solid var(--line);background:#fafcff;border-radius:12px;text-align:left;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+    .subject:disabled{cursor:default;opacity:.75}
+    .subject-name{font-size:12px;font-weight:750;overflow-wrap:anywhere}
+    .tick{font-size:15px;color:#2463cb;font-weight:850}
+    .info-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:8px 0}
+    .info-row span:first-child{font-size:12px;color:var(--muted)}
+    .info-row span:last-child{font-size:12px;font-weight:750;text-align:right}
+    .divider{height:1px;background:var(--line);margin:11px 0}
+    .footnote{font-size:12px;color:var(--muted);margin-top:11px}
+    .actions{display:flex;gap:8px;margin-top:14px}
+    .primary{width:100%;min-height:44px;border:0;background:var(--blue);border-radius:12px;color:#fff;font-weight:800;padding:10px}
+    .primary:disabled{background:#b7c7de;cursor:default}
+    .result{margin-top:10px;min-height:20px;font-size:12px;font-weight:750;color:#2362bd}
+    .hidden{display:none!important}
+    [hidden]{display:none!important}
+    button:focus-visible,select:focus-visible{outline:3px solid #99bcf9;outline-offset:2px}
+    @media(max-width:380px){.shell{padding:12px 11px 40px}.controls{padding:10px;gap:6px}.panel{padding:12px}.field select{font-size:11px;padding:5px}.plan{padding:9px 4px}.plan strong{font-size:13px}h1{font-size:22px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="shell" id="preview">
+    <header class="brand">
+      <div class="brand-name">iClub</div>
+      <div class="preview-mark" data-i18n="previewBadge">Предпросмотр · без сохранения</div>
+    </header>
+    <div class="intro"><h1 data-i18n="title">Выбор предметов</h1><p class="muted" data-i18n="subtitle">Настройка тарифа и предметов обучения</p></div>
+    <section class="controls" aria-label="Preview controls">
+      <label class="field"><span data-i18n="language">Язык</span><select id="lang" data-testid="lang"><option value="ru">Русский</option><option value="uz">O‘zbek</option><option value="en">English</option></select></label>
+      <label class="field"><span data-i18n="userType">Пользователь</span><select id="mode" data-testid="mode"><option value="new" data-i18n="newUser">Новый</option><option value="existing" data-i18n="existingUser">Существующий</option></select></label>
+      <label class="field"><span data-i18n="education">Статус</span><select id="school" data-testid="school"><option value="yes" data-i18n="school">Школьник</option><option value="no" data-i18n="nonSchool">Другой</option></select></label>
+    </section>
+    <p class="notice" data-testid="safety" data-i18n="safety">Только демонстрация: нет регистрации, оплаты, подключения к базе и изменений данных.</p>
+    <section class="panel" id="existing-panel" data-testid="existing-panel" hidden>
+      <div class="panel-head"><div><h2 data-i18n="confirmProfile">Подтверждение профиля</h2><p class="section-sub" data-i18n="prefilled">Данные заполнены из существующего профиля</p></div></div>
+      <div class="info-row"><span data-i18n="name">Имя</span><span data-testid="prefill-name">iClub learner</span></div>
+      <div class="info-row"><span data-i18n="account">Аккаунт</span><span data-i18n="existingAccount">Существующий</span></div>
+      <div class="divider"></div>
+      <p class="section-sub" data-i18n="preserved">Подтверждение не создаёт новый аккаунт и не сбрасывает результаты.</p>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><h2 data-i18n="planTitle">Тариф</h2><p class="section-sub" data-i18n="planNote">По умолчанию Free. Платные тарифы — после запуска оплаты.</p></div></div>
+      <div class="plans" data-testid="plans">
+        <button type="button" class="plan" data-plan="free" data-testid="plan-free" aria-pressed="true"><strong>Free</strong><span class="price" data-i18n="freePrice">Бесплатно</span></button>
+        <button type="button" class="plan" data-plan="plus" data-testid="plan-plus" aria-pressed="false"><strong>Plus</strong><span class="price" data-i18n="plusPrice">35 000 сум/мес.</span></button>
+        <button type="button" class="plan" data-plan="pro" data-testid="plan-pro" aria-pressed="false"><strong>Pro</strong><span class="price" data-i18n="proPrice">50 000 сум/мес.</span><span class="best" data-i18n="best">Лучший выбор</span></button>
+      </div>
+      <p class="footnote" data-i18n="noCheckout">Выбор Plus/Pro здесь не оформляет подписку.</p>
+    </section>
+    <section class="panel" data-testid="study-panel">
+      <div class="panel-head"><div><h2 data-i18n="studyTitle">Предметы обучения</h2><p class="section-sub" id="study-hint" data-testid="study-hint"></p></div><span class="count" id="study-count" data-testid="study-count"></span></div>
+      <div class="subjects" id="study-list" data-testid="study-list"></div>
+      <p class="footnote" id="pro-study" data-testid="pro-study" hidden></p>
+    </section>
+    <section class="panel" data-testid="competition-panel">
+      <div class="panel-head"><div><h2 data-i18n="competitionTitle">Соревнования и рейтинг</h2><p class="section-sub" id="competition-hint" data-testid="competition-hint"></p></div><span class="count" id="competition-count" data-testid="competition-count"></span></div>
+      <div class="subjects" id="competition-list" data-testid="competition-list"></div>
+      <p class="footnote" id="competition-note" data-testid="competition-note"></p>
+    </section>
+    <div class="actions"><button class="primary" id="continue" data-testid="continue" type="button" disabled data-i18n="continue">Продолжить</button></div>
+    <p class="result" role="status" aria-live="polite" id="result" data-testid="result"></p>
+  </main>
+  <script>
+    (() => {
+      "use strict";
+      const subjects = ["informatics","economics","biology","chemistry","mathematics"];
+      const messages = {
+        ru: {
+          previewBadge:"Предпросмотр · без сохранения",title:"Выбор предметов",subtitle:"Настройка тарифа и предметов обучения",
+          language:"Язык",userType:"Пользователь",newUser:"Новый",existingUser:"Существующий",education:"Статус",school:"Школьник",nonSchool:"Другой",
+          safety:"Только демонстрация: нет регистрации, оплаты, подключения к базе и изменений данных.",
+          confirmProfile:"Подтверждение профиля",prefilled:"Данные заполнены из существующего профиля",name:"Имя",account:"Аккаунт",existingAccount:"Существующий",
+          preserved:"Подтверждение не создаёт новый аккаунт и не сбрасывает результаты.",
+          planTitle:"Тариф",planNote:"По умолчанию Free. Платные тарифы — после запуска оплаты.",
+          freePrice:"Бесплатно",plusPrice:"35 000 сум/мес.",proPrice:"50 000 сум/мес.",best:"Лучший выбор",
+          noCheckout:"Выбор Plus/Pro здесь не оформляет подписку.",studyTitle:"Предметы обучения",
+          studyFree:"Выберите один предмет.",studyPlus:"Выберите до трёх предметов.",studyPro:"Все пять предметов включены автоматически.",
+          competitionTitle:"Соревнования и рейтинг",compFree:"Ваш предмет автоматически участвует в соревнованиях.",compMulti:"Выберите до двух предметов из доступных для обучения.",
+          compNonSchool:"Соревнования доступны школьникам.",compPending:"Сначала выберите предмет обучения.",compAuto:"Повторный выбор не нужен.",
+          allIncluded:"Все предметы уже доступны.",selected:"Выбрано",continue:"Продолжить",confirm:"Подтвердить выбор",
+          done:"Демонстрация завершена. Ничего не сохранено.",
+          subjects:{informatics:"Информатика",economics:"Экономика",biology:"Биология",chemistry:"Химия",mathematics:"Математика"}
+        },
+        uz: {
+          previewBadge:"Ko‘rish rejimi · saqlanmaydi",title:"Fanlarni tanlash",subtitle:"Tarif va o‘quv fanlarini sozlash",
+          language:"Til",userType:"Foydalanuvchi",newUser:"Yangi",existingUser:"Avvaldan bor",education:"Holati",school:"Maktab o‘quvchisi",nonSchool:"Boshqa",
+          safety:"Bu faqat namuna. Ro‘yxatdan o‘tish, to‘lov, ma’lumotlar bazasiga ulanish va saqlash yo‘q.",
+          confirmProfile:"Profilni tasdiqlash",prefilled:"Ma’lumotlar mavjud profil asosida to‘ldirilgan",name:"Ism",account:"Hisob",existingAccount:"Mavjud",
+          preserved:"Tasdiqlash yangi hisob yaratmaydi va oldingi natijalarni o‘chirmaydi.",
+          planTitle:"Tarif",planNote:"Standart tarif — Free. Pullik tariflar to‘lov tizimi ishga tushgach ochiladi.",
+          freePrice:"Bepul",plusPrice:"35 000 so‘m/oy",proPrice:"50 000 so‘m/oy",best:"Eng yaxshi tanlov",
+          noCheckout:"Bu yerda Plus/Pro tanlash obunani faollashtirmaydi.",studyTitle:"O‘qish uchun fanlar",
+          studyFree:"Bitta fan tanlang.",studyPlus:"3 tagacha fan tanlang.",studyPro:"Beshta fan avtomatik kiritilgan.",
+          competitionTitle:"Musobaqa va reyting",compFree:"Tanlangan faningiz musobaqalarga avtomatik qo‘shiladi.",compMulti:"O‘qish uchun tanlangan fanlardan 2 tagachasini belgilang.",
+          compNonSchool:"Musobaqalar maktab o‘quvchilari uchun.",compPending:"Avval o‘qish uchun fan tanlang.",compAuto:"Qayta tanlash shart emas.",
+          allIncluded:"Barcha fanlar mavjud.",selected:"Tanlandi",continue:"Davom etish",confirm:"Tanlovni tasdiqlash",
+          done:"Namuna yakunlandi. Hech narsa saqlanmadi.",
+          subjects:{informatics:"Informatika",economics:"Iqtisodiyot",biology:"Biologiya",chemistry:"Kimyo",mathematics:"Matematika"}
+        },
+        en: {
+          previewBadge:"Preview · not saved",title:"Choose your subjects",subtitle:"Set up your plan and study subjects",
+          language:"Language",userType:"User",newUser:"New",existingUser:"Existing",education:"Status",school:"School learner",nonSchool:"Other",
+          safety:"Preview only. No registration, payment, database connection or data changes.",
+          confirmProfile:"Confirm your profile",prefilled:"Details are prefilled from the existing profile",name:"Name",account:"Account",existingAccount:"Existing",
+          preserved:"Confirmation creates no new account and does not reset results.",
+          planTitle:"Plan",planNote:"Free is the default. Paid plans will be available after checkout launches.",
+          freePrice:"Free",plusPrice:"35,000 UZS/month",proPrice:"50,000 UZS/month",best:"Best value",
+          noCheckout:"Selecting Plus/Pro here does not start a subscription.",studyTitle:"Study subjects",
+          studyFree:"Choose one subject.",studyPlus:"Choose up to three subjects.",studyPro:"All five subjects are included automatically.",
+          competitionTitle:"Competitions and rankings",compFree:"Your chosen subject joins competitions automatically.",compMulti:"Choose up to two subjects from your study selection.",
+          compNonSchool:"Competitions are for school learners.",compPending:"Choose a study subject first.",compAuto:"No second selection is needed.",
+          allIncluded:"All subjects are available.",selected:"Selected",continue:"Continue",confirm:"Confirm selection",
+          done:"Preview complete. Nothing was saved.",
+          subjects:{informatics:"Computer Science",economics:"Economics",biology:"Biology",chemistry:"Chemistry",mathematics:"Mathematics"}
+        }
+      };
+      const state = {lang:"ru",mode:"new",school:true,plan:"free",study:new Set(),comp:new Set()};
+      const el = id => document.getElementById(id);
+      const copy = () => messages[state.lang];
+      const schoolAllowed = () => state.school === true;
+      function normalize() {
+        if (state.plan === "free") {
+          const first = subjects.find(s => state.study.has(s));
+          state.study = new Set(first ? [first] : []);
+          state.comp = new Set(schoolAllowed() && first ? [first] : []);
+        } else if (state.plan === "plus") {
+          state.study = new Set(subjects.filter(s => state.study.has(s)).slice(0,3));
+          state.comp = new Set(schoolAllowed() ? subjects.filter(s => state.comp.has(s) && state.study.has(s)).slice(0,2) : []);
+        } else {
+          state.study = new Set(subjects);
+          state.comp = new Set(schoolAllowed() ? subjects.filter(s => state.comp.has(s)).slice(0,2) : []);
+        }
+      }
+      function selectStudy(key) {
+        if (!subjects.includes(key) || state.plan === "pro") return;
+        if (state.plan === "free") {
+          state.study = new Set([key]);
+        } else if (state.study.has(key)) {
+          state.study.delete(key);
+          state.comp.delete(key);
+        } else if (state.study.size < 3) state.study.add(key);
+        normalize(); render();
+      }
+      function selectComp(key) {
+        if (!schoolAllowed() || state.plan === "free" || !state.study.has(key)) return;
+        if (state.comp.has(key)) state.comp.delete(key);
+        else if (state.comp.size < 2) state.comp.add(key);
+        normalize(); render();
+      }
+      function subjectButton(key, selected, disabled, type) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "subject";
+        button.dataset.subject = key;
+        button.dataset.kind = type;
+        button.dataset.testid = type + "-" + key;
+        button.setAttribute("aria-pressed",String(selected));
+        button.disabled = !!disabled;
+        const name = document.createElement("span");
+        name.className = "subject-name";
+        name.textContent = copy().subjects[key];
+        const tick = document.createElement("span");
+        tick.className = "tick";
+        tick.setAttribute("aria-hidden","true");
+        tick.textContent = selected ? "✓" : "";
+        button.append(name,tick);
+        button.addEventListener("click", () => type === "study" ? selectStudy(key) : selectComp(key));
+        return button;
+      }
+      function render() {
+        normalize();
+        const c = copy();
+        document.documentElement.lang = state.lang;
+        document.querySelectorAll("[data-i18n]").forEach(node => {
+          const key = node.dataset.i18n;
+          if (Object.prototype.hasOwnProperty.call(c,key)) node.textContent = c[key];
+        });
+        el("lang").value = state.lang;
+        el("mode").value = state.mode;
+        el("school").value = state.school ? "yes" : "no";
+        el("existing-panel").hidden = state.mode !== "existing";
+        for (const button of document.querySelectorAll("[data-plan]")) {
+          button.setAttribute("aria-pressed",String(button.dataset.plan === state.plan));
+        }
+        el("study-hint").textContent = c["study" + state.plan[0].toUpperCase() + state.plan.slice(1)];
+        el("study-count").textContent = state.plan === "pro" ? "5/5" : state.study.size + "/" + (state.plan === "free" ? 1 : 3);
+        el("study-list").replaceChildren();
+        el("pro-study").hidden = state.plan !== "pro";
+        el("pro-study").textContent = c.allIncluded;
+        if (state.plan !== "pro") {
+          for(const subject of subjects) el("study-list").append(subjectButton(subject,state.study.has(subject),false,"study"));
+        }
+        el("competition-list").replaceChildren();
+        el("competition-hint").textContent = !schoolAllowed() ? c.compNonSchool : (state.plan === "free" ? c.compFree : c.compMulti);
+        el("competition-count").textContent = state.comp.size + "/" + (state.plan === "free" ? 1 : 2);
+        el("competition-note").textContent = !schoolAllowed() ? c.compNonSchool : (state.plan === "free" ? c.compAuto : (!state.study.size ? c.compPending : ""));
+        if (schoolAllowed() && state.plan !== "free") {
+          for(const subject of subjects.filter(s => state.study.has(s))) {
+            el("competition-list").append(subjectButton(subject,state.comp.has(subject),false,"competition"));
+          }
+        }
+        el("continue").textContent = state.mode === "existing" ? c.confirm : c.continue;
+        el("continue").disabled = state.plan !== "pro" && state.study.size === 0;
+        el("result").textContent = "";
+      }
+      el("lang").addEventListener("change",e => {state.lang=e.target.value;render()});
+      el("mode").addEventListener("change",e => {
+        state.mode = e.target.value;
+        // Existing preview uses SYNTHETIC prefill. Never read an actual profile.
+        state.study = new Set(state.mode === "existing" ? ["mathematics"] : []);
+        state.comp = new Set();
+        normalize();render();
+      });
+      el("school").addEventListener("change",e => {state.school=e.target.value==="yes";normalize();render()});
+      document.querySelectorAll("[data-plan]").forEach(button => button.addEventListener("click",() => {
+        state.plan=button.dataset.plan;normalize();render();
+      }));
+      el("continue").addEventListener("click",()=> { el("result").textContent=copy().done });
+      window.__iclubRegistrationPreview = Object.freeze({
+        snapshot:() => ({mode:state.mode,plan:state.plan,school:state.school,study:[...state.study],competitive:[...state.comp]})
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>

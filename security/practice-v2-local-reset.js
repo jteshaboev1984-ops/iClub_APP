@@ -6,10 +6,8 @@
   const DRAFT_KEY = "iclub_practice_draft_v1";
   const PRACTICE_RECS_KEY = "iclub_my_recs_v1";
   const SUBJECT_KEY = "mathematics";
-  const PRACTICE_HISTORY_PREFIXES = [
-    "practice_history_v2:mathematics:tour_",
-    "practice_history_v3:mathematics:tour_"
-  ];
+  // v3 is the live-bank namespace. Never erase v3 progress created after release.
+  const LEGACY_PRACTICE_HISTORY_PREFIX = "practice_history_v2:mathematics:tour_";
   const PRACTICE_SCREENS = new Set([
     "practice-start",
     "practice-quiz",
@@ -17,10 +15,6 @@
     "practice-review",
     "practice-recs"
   ]);
-
-  const storage = globalThis.localStorage;
-  if (!storage) return;
-  if (storage.getItem(RESET_MARKER) === "1") return;
 
   const norm = (value) => String(value || "").trim().toLowerCase();
   const parse = (raw) => {
@@ -31,12 +25,38 @@
     }
   };
 
-  try {
+  // Deliberately inert until the authenticated server confirms the new bank is published.
+  // An offline/error/unauthenticated session never clears local progress.
+  let inFlight = null;
+  globalThis.iclubMathPracticeV2ResetAfterPublish = (client) => {
+    if (inFlight) return inFlight;
+    inFlight = (async () => {
+      const storage = globalThis.localStorage;
+      if (!storage || storage.getItem(RESET_MARKER) === "1") return false;
+      if (!client || typeof client.rpc !== "function") return false;
+
+      let timer = null;
+      let result;
+      try {
+        result = await Promise.race([
+          Promise.resolve().then(() => client.rpc("is_math_practice_v2_published_safe_v1")),
+          new Promise(resolve => {
+            timer = setTimeout(() => resolve({ data: false, error: "timeout" }), 2500);
+          })
+        ]);
+      } catch {
+        return false;
+      } finally {
+        if (timer !== null) clearTimeout(timer);
+      }
+      if (result?.error || result?.data !== true) return false;
+
+      try {
     const historyKeys = [];
     for (let i = 0; i < storage.length; i += 1) {
       const key = storage.key(i);
       const lower = norm(key);
-      if (PRACTICE_HISTORY_PREFIXES.some(prefix => lower.startsWith(prefix))) {
+      if (lower.startsWith(LEGACY_PRACTICE_HISTORY_PREFIX)) {
         historyKeys.push(key);
       }
     }
@@ -140,7 +160,12 @@
     }
 
     storage.setItem(RESET_MARKER, "1");
-  } catch {
-    // Fail closed for the marker: retry cleanup on the next app load.
-  }
+    return true;
+      } catch {
+        // No marker after an incomplete local change; retry safely on a later boot.
+        return false;
+      }
+    })();
+    return inFlight.finally(() => { inFlight = null; });
+  };
 })();

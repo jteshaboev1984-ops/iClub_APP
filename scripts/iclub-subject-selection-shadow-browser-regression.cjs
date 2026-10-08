@@ -117,6 +117,7 @@ async function buildPage(browser, { width, height, lang, plan, visible = true })
         subjects:window.__subjects,
         selections,
         migration_state:'legacy_preserved',
+        is_school_student:true,
         access_unchanged:true,
         ui_version:'subject_selection_shadow_v1'
       };
@@ -128,6 +129,23 @@ async function buildPage(browser, { width, height, lang, plan, visible = true })
           return { data:structuredClone(snapshot()), error:null };
         }
 
+        if (name === 'choose_iclub_my_free_subject_v2') {
+          const key = String(args?.p_subject_key || '');
+          const delayMs = Number(window.__writeDelayMs || 0);
+          if (delayMs) await new Promise(resolve => setTimeout(resolve,delayMs));
+          if (window.__nextWriteFailure) {
+            const reason=window.__nextWriteFailure;
+            window.__nextWriteFailure='';
+            return { data:{ok:false,reason},error:null };
+          }
+          if (window.__plan !== 'free' || !window.__subjects.some(s=>s.subject_key===key && s.type==='main')) {
+            return { data:{ok:false,reason:'subject_unavailable'},error:null };
+          }
+          window.__selections.clear();
+          window.__selections.set(key,{study:true,competitive:true});
+          window.__writes.push({key,nextStudy:true,nextCompetitive:true});
+          return { data:{ok:true,subject_key:key,study_selected:true,competitive_selected:true,access_unchanged:true},error:null };
+        }
         if (name !== 'set_iclub_my_subject_slot_v1') {
           return { data:null, error:{ message:'unexpected rpc ' + name } };
         }
@@ -217,57 +235,53 @@ async function runFree(browser) {
   const { page, errors } = await buildPage(browser, {
     width:390,height:844,lang:'ru',plan:'free',visible:true
   });
-
   await page.waitForFunction(() => !document.getElementById('profile-subject-access-entry').hidden);
-  assert((await page.locator('[data-subject-access-entry-sub]').textContent()).includes('1'), 'Free entry summary missing');
-  assert((await page.locator('[data-subject-access-beta-text]').textContent()).includes('не меняет'), 'Free beta safety copy missing');
+  assert((await page.locator('[data-subject-access-entry-sub]').textContent()).includes('1'),
+    'Free single-subject summary missing');
+  assert((await page.locator('[data-subject-access-competitive] input').count()) === 0,
+    'Free incorrectly asks to choose Competitive a second time');
+  assert((await page.locator('[data-subject-access-competitive]').textContent()).includes('автоматически'),
+    'Free automatic Competitive explanation is missing');
 
-  // A pending save must disable every selector so rapid taps cannot create
-  // conflicting client-side requests while the server serializes the write.
   await page.evaluate(() => { window.__writeDelayMs = 180; });
   const mathControl = page.locator('.iclub-subject-access-row[data-subject-key="mathematics"][data-selection-mode="study"] .iclub-subject-access-switch');
   await mathControl.click();
   await page.waitForTimeout(25);
-  const bioPending = page.locator('.iclub-subject-access-row[data-subject-key="biology"][data-selection-mode="study"] input');
-  assert(await bioPending.isDisabled(), 'other study toggles remained enabled during an in-flight save');
-  await page.waitForTimeout(220);
+  assert(await page.locator('.iclub-subject-access-row[data-subject-key="biology"][data-selection-mode="study"] input').isDisabled(),
+    'Free rapid tap was not locked');
+  await page.waitForTimeout(240);
   await page.evaluate(() => { window.__writeDelayMs = 0; });
+  assert(await page.locator('.iclub-subject-access-row[data-subject-key="mathematics"][data-selection-mode="study"] input').isChecked(),
+    'Free chosen subject not selected');
+  assert(await page.locator('.iclub-subject-access-row[data-subject-key="mathematics"][data-selection-mode="study"] input').isDisabled(),
+    'Free can deselect their only subject');
+  const first = await page.evaluate(() => Array.from(window.__selections.entries()));
+  assert(first.length === 1 && first[0][1].study && first[0][1].competitive,
+    'Free selection failed to pair study and competition');
 
-  // A rejected server write must restore the visible switch state.
-  await page.evaluate(() => { window.__nextWriteFailure = 'study_subject_limit_reached'; });
-  const mathInputBeforeFailure = page.locator('.iclub-subject-access-row[data-subject-key="mathematics"][data-selection-mode="study"] input');
-  assert(await mathInputBeforeFailure.isChecked(), 'Mathematics should be selected before rollback test');
-  await mathControl.click();
-  await page.waitForTimeout(90);
-  const mathInputAfterFailure = page.locator('.iclub-subject-access-row[data-subject-key="mathematics"][data-selection-mode="study"] input');
-  assert(await mathInputAfterFailure.isChecked(), 'rejected server write left a false client-side selection state');
+  // Failure while replacing the Free subject must leave the old choice intact.
+  await page.evaluate(() => { window.__nextWriteFailure = 'network'; });
+  await toggle(page,'biology','study');
+  const failed = await page.evaluate(() => Array.from(window.__selections.entries()));
+  assert(failed.length === 1 && failed[0][0] === 'mathematics',
+    'Failed Free subject swap erased previous subject');
 
-  // Now perform the real deselect/select path to keep the rest of the Free matrix deterministic.
-  await toggle(page,'mathematics','study');
-  await toggle(page,'mathematics','study');
-
-  const bioStudy = page.locator('.iclub-subject-access-row[data-subject-key="biology"][data-selection-mode="study"] input');
-  assert(await bioStudy.isDisabled(), 'Free second study subject remained enabled');
-
-  const mathCompetitive = page.locator('.iclub-subject-access-row[data-subject-key="mathematics"][data-selection-mode="competitive"] input');
-  assert(!(await mathCompetitive.isDisabled()), 'Free selected study subject cannot become Competitive');
-
-  await toggle(page,'mathematics','competitive');
-
-  const bioCompetitive = page.locator('.iclub-subject-access-row[data-subject-key="biology"][data-selection-mode="competitive"] input');
-  assert(await bioCompetitive.isDisabled(), 'Free extra Competitive subject remained enabled');
+  await toggle(page,'biology','study');
+  const after = await page.evaluate(() => Array.from(window.__selections.entries()));
+  assert(after.length === 1 && after[0][0] === 'biology'
+    && after[0][1].study && after[0][1].competitive,
+    'Free one-click subject switch was not atomic');
 
   const writes = await page.evaluate(() => window.__writes);
-  assert(writes.length === 4, 'Free selector wrote unexpected number of shadow events');
-  assert(writes.every(x => x.key === 'mathematics'), 'Free selector wrote an unselected subject');
-
+  assert(writes.length===2 && writes.every(x => x.nextStudy && x.nextCompetitive),
+    'Free selection made duplicate or partial writes');
   const metrics = await page.evaluate(() => ({
     scrollWidth:document.documentElement.scrollWidth,
     clientWidth:document.documentElement.clientWidth
   }));
-  assert(metrics.scrollWidth <= metrics.clientWidth + 1, 'Free subject screen has page-level horizontal overflow');
+  assert(metrics.scrollWidth <= metrics.clientWidth + 1,
+    'Free 390px screen has horizontal overflow');
   assert(errors.length === 0, 'Free page errors: ' + JSON.stringify(errors));
-
   await page.screenshot({ path:'artifacts/subject-selection-free-390.png', fullPage:true });
   await page.close();
 }

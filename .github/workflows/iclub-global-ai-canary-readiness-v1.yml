@@ -1,0 +1,186 @@
+name: iClub Global AI Canary Readiness v1
+
+on:
+  pull_request:
+    branches:
+      - feat/canary-subject-access-enforcement-v1
+      - main
+    paths:
+      - 'supabase/tests/iclub_global_ai_canary_readiness_v1_matrix.sql'
+      - 'docs/iclub-global-ai-controlled-canary-readiness-v1.md'
+      - '.github/scripts/iclub_global_ai_canary_readiness_v1_contract.js'
+      - '.github/workflows/iclub-global-ai-canary-readiness-v1.yml'
+  push:
+    branches:
+      - feat/global-ai-canary-readiness-v1
+      - main
+    paths:
+      - 'supabase/tests/iclub_global_ai_canary_readiness_v1_matrix.sql'
+      - 'docs/iclub-global-ai-controlled-canary-readiness-v1.md'
+      - '.github/scripts/iclub_global_ai_canary_readiness_v1_contract.js'
+      - '.github/workflows/iclub-global-ai-canary-readiness-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  controlled-canary-readiness:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize diagnostics
+        run: printf 'iClub Global AI controlled canary readiness v1\n' > canary-readiness.log
+
+      - name: Bootstrap isolated production-shaped contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_subscription_access_legacy_fixture.sql 2>&1 | tee -a canary-readiness.log
+
+      - name: Apply complete dormant commercial and AI stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_product_canary_activation_fixture.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006113000_iclub_global_ai_gateway_foundation_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006124000_iclub_global_ai_ui_bootstrap_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006133000_iclub_global_ai_conversation_ui_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006143000_iclub_plans_profile_ui_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006153000_iclub_subscription_access_lifecycle_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006153100_iclub_grandfather_subject_access_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006164000_iclub_subject_selection_shadow_ui_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261008160000_iclub_free_subject_auto_competitive_v2.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261006173000_iclub_global_ai_generation_adapter_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261007093000_iclub_product_canary_activation_control_v1.sql 2>&1 | tee -a canary-readiness.log
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261007100000_iclub_canary_subject_access_enforcement_v1.sql 2>&1 | tee -a canary-readiness.log
+
+      - name: Prove complete stack is still dormant before matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(psql -Atqc "select ui_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
+          test "$(psql -Atqc "select gateway_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
+          test "$(psql -Atqc "select generation_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
+          test "$(psql -Atqc "select kill_switch from private.iclub_global_ai_runtime_config where id=1")" = 't'
+          test "$(psql -Atqc "select plans_ui_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
+          test "$(psql -Atqc "select checkout_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
+          test "$(psql -Atqc "select global_ai_rollout_mode from private.iclub_global_ai_runtime_config where id=1")" = 'off'
+          test "$(psql -Atqc "select plans_rollout_mode from private.iclub_global_ai_runtime_config where id=1")" = 'off'
+          test "$(psql -Atqc "select subject_limits_mode from private.iclub_commercial_access_config where id=1")" = 'off'
+          test "$(psql -Atqc "select subject_selection_ui_enabled from private.iclub_commercial_access_config where id=1")" = 'f'
+          test "$(psql -Atqc "select canary_subject_access_enforced from private.iclub_commercial_access_config where id=1")" = 'f'
+          test "$(psql -Atqc "select count(*) from private.iclub_product_canary_users")" = '0'
+          test "$(psql -Atqc "select count(*) from private.iclub_subscription_entitlements")" = '0'
+          test "$(psql -Atqc "select count(*) from private.iclub_global_ai_provider_leases")" = '0'
+
+      - name: Run cross-stack canary readiness matrix
+        shell: bash
+        env:
+          PGOPTIONS: '-c iclub.canary_readiness_isolated=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_global_ai_canary_readiness_v1_matrix.sql 2>&1 | tee -a canary-readiness.log
+
+      - name: Prove provider cost, identity, assessment and rollback boundaries
+        shell: bash
+        env:
+          PGOPTIONS: '-c global_ai.generation_isolated=true'
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/global_ai_generation_adapter_v1_matrix.sql 2>&1 | tee -a canary-readiness.log
+
+      - name: Validate cross-stack static contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/iclub_global_ai_canary_readiness_v1_contract.js
+          node .github/scripts/iclub_global_ai_canary_readiness_v1_contract.js 2>&1 | tee -a canary-readiness.log
+          node --check global-ai-ui.js
+          node --check plans-ui.js
+          node --check subject-access-ui.js
+          node --check commercial-access-ui.js
+          node --check app.js
+
+      - name: Type-check Global AI Edge Function
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Deno check Global AI
+        run: deno check supabase/functions/global-ai/index.ts
+
+      - name: Install Chromium harness
+        run: |
+          mkdir -p /tmp/pw
+          cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          ./node_modules/.bin/playwright install --with-deps chromium >/dev/null
+
+      - name: Run stacked browser regressions
+        env:
+          NODE_PATH: /tmp/pw/node_modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node scripts/global-ai-conversations-browser-regression.cjs 2>&1 | tee -a canary-readiness.log
+          node scripts/iclub-plans-profile-browser-regression.cjs 2>&1 | tee -a canary-readiness.log
+          node scripts/iclub-subject-selection-shadow-browser-regression.cjs 2>&1 | tee -a canary-readiness.log
+          node scripts/iclub-canary-subject-access-browser-regression.cjs 2>&1 | tee -a canary-readiness.log
+
+      - name: Prove matrix left no state
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(psql -Atqc "select count(*) from private.iclub_product_canary_users")" = '0'
+          test "$(psql -Atqc "select count(*) from private.iclub_subscription_entitlements")" = '0'
+          test "$(psql -Atqc "select count(*) from private.iclub_global_ai_provider_leases")" = '0'
+          test "$(psql -Atqc "select count(*) from private.iclub_ai_usage_periods")" = '0'
+          test "$(psql -Atqc "select count(*) from private.iclub_ai_usage_reservations")" = '0'
+          test "$(psql -Atqc "select count(*) from private.iclub_subject_slot_selections")" = '0'
+          test "$(psql -Atqc "select ui_enabled from private.iclub_global_ai_runtime_config where id=1")" = 'f'
+          test "$(psql -Atqc "select kill_switch from private.iclub_global_ai_runtime_config where id=1")" = 't'
+
+      - name: Mark isolated integrated readiness GREEN, real provider still HOLD
+        run: |
+          echo 'ICLUB GLOBAL AI CONTROLLED CANARY INTEGRATION READINESS GREEN' | tee -a canary-readiness.log
+          echo 'FUNDED REAL PROVIDER ACCEPTANCE REMAINS HOLD — generation is OFF' | tee -a canary-readiness.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iclub-global-ai-canary-readiness-v1
+          path: |
+            canary-readiness.log
+            artifacts/*.png
+          if-no-files-found: ignore
+          retention-days: 7
