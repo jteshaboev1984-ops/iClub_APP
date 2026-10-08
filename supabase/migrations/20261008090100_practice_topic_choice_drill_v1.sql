@@ -17,17 +17,10 @@ declare
   v_subject_id bigint;
   v_is_math boolean := false;
   v_allow_legacy_math boolean := false;
-  v_season_id bigint;
   v_s public.practice_drill_sessions_v4%rowtype;
-  v_today date := (now() at time zone 'Asia/Tashkent')::date;
   v_topic text := trim(coalesce(p_topic,''));
   v_subtopic text := nullif(trim(coalesce(p_subtopic,'')),'');
   v_use_subtopic boolean := false;
-  v_current_tour integer := 1;
-  v_active_tour integer;
-  v_total_tours integer := 0;
-  v_closed_count integer := 0;
-  v_max_pool_tour integer := 1;
   v_easy bigint[] := '{}'::bigint[];
   v_medium bigint[] := '{}'::bigint[];
   v_hard bigint[] := '{}'::bigint[];
@@ -92,57 +85,6 @@ begin
     into v_allow_legacy_math;
   end if;
 
-  select s.id into v_season_id
-  from public.seasons s
-  where s.status='current'
-  order by s.season_no desc
-  limit 1;
-
-  if v_season_id is null then
-    select s.id into v_season_id
-    from public.seasons s
-    where s.season_no=1
-    order by s.id
-    limit 1;
-  end if;
-
-  if v_season_id is null then
-    raise exception 'season_not_found' using errcode='P0002';
-  end if;
-
-  select greatest(1,coalesce(max(p.tour_no),1))
-  into v_max_pool_tour
-  from public.practice_pools p
-  where p.subject_id=v_subject_id
-    and p.is_active is true;
-
-  select
-    count(*)::integer,
-    count(*) filter(where t.end_date is not null and t.end_date < v_today)::integer
-  into v_total_tours,v_closed_count
-  from public.tours t
-  where t.subject_id=v_subject_id
-    and t.season_id=v_season_id;
-
-  select t.tour_no into v_active_tour
-  from public.tours t
-  where t.subject_id=v_subject_id
-    and t.season_id=v_season_id
-    and t.is_active is true
-    and t.start_date is not null
-    and t.end_date is not null
-    and v_today between t.start_date and t.end_date
-  order by t.tour_no
-  limit 1;
-
-  if v_active_tour is not null then
-    v_current_tour := v_active_tour;
-  elsif v_total_tours > 0 and v_closed_count >= v_total_tours then
-    v_current_tour := least(v_max_pool_tour,v_total_tours);
-  else
-    v_current_tour := least(v_max_pool_tour,greatest(1,v_closed_count+1));
-  end if;
-
   -- If a requested subtopic has at least one eligible question, keep it narrow.
   if v_subtopic is not null then
     select exists(
@@ -154,10 +96,6 @@ begin
         on q.id=ppq.question_id
        and q.is_active is true
        and q.subject_id=v_subject_id
-      left join public.tours t
-        on t.subject_id=v_subject_id
-       and t.season_id=v_season_id
-       and t.tour_no=p.tour_no
       left join private.practice_v2_question_meta m
         on m.question_id=q.id
       where p.subject_id=v_subject_id
@@ -189,10 +127,6 @@ begin
       on q.id=ppq.question_id
      and q.is_active is true
      and q.subject_id=v_subject_id
-    left join public.tours t
-      on t.subject_id=v_subject_id
-     and t.season_id=v_season_id
-     and t.tour_no=p.tour_no
     left join private.practice_v2_question_meta m
       on m.question_id=q.id
     where p.subject_id=v_subject_id
@@ -224,10 +158,6 @@ begin
       on q.id=ppq.question_id
      and q.is_active is true
      and q.subject_id=v_subject_id
-    left join public.tours t
-      on t.subject_id=v_subject_id
-     and t.season_id=v_season_id
-     and t.tour_no=p.tour_no
     left join private.practice_v2_question_meta m
       on m.question_id=q.id
     where p.subject_id=v_subject_id
@@ -253,10 +183,6 @@ begin
       on q.id=ppq.question_id
      and q.is_active is true
      and q.subject_id=v_subject_id
-    left join public.tours t
-      on t.subject_id=v_subject_id
-     and t.season_id=v_season_id
-     and t.tour_no=p.tour_no
     left join private.practice_v2_question_meta m
       on m.question_id=q.id
     where p.subject_id=v_subject_id
@@ -282,10 +208,6 @@ begin
       on q.id=ppq.question_id
      and q.is_active is true
      and q.subject_id=v_subject_id
-    left join public.tours t
-      on t.subject_id=v_subject_id
-     and t.season_id=v_season_id
-     and t.tour_no=p.tour_no
     left join private.practice_v2_question_meta m
       on m.question_id=q.id
     where p.subject_id=v_subject_id
@@ -317,10 +239,6 @@ begin
         on q.id=ppq.question_id
        and q.is_active is true
        and q.subject_id=v_subject_id
-      left join public.tours t
-        on t.subject_id=v_subject_id
-       and t.season_id=v_season_id
-       and t.tour_no=p.tour_no
       left join private.practice_v2_question_meta m
         on m.question_id=q.id
       where p.subject_id=v_subject_id
