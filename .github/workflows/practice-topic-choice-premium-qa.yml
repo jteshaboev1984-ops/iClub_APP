@@ -8,6 +8,7 @@ on:
       - 'app.js'
       - 'index.html'
       - 'scripts/practice-topic-choice-regression.cjs'
+      - 'scripts/practice-review-back-regression.cjs'
       - 'supabase/migrations/20261008090000_practice_topic_catalog_v1.sql'
       - '.github/workflows/practice-topic-choice-premium-qa.yml'
   workflow_dispatch:
@@ -29,6 +30,7 @@ jobs:
           node --check app.js
           node --check practice-topic-choice.js
           node --check scripts/practice-topic-choice-regression.cjs
+          node --check scripts/practice-review-back-regression.cjs
           grep -q 'id="practice-topic-choice"' index.html
           grep -q 'get_practice_available_topics_safe_v1' supabase/migrations/20261008090000_practice_topic_catalog_v1.sql
       - name: Install isolated browser
@@ -36,4 +38,6 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
       - name: Verify topic choice and premium mobile layout (synthetic only)
-        run: node scripts/practice-topic-choice-regression.cjs
+        run: |
+          node scripts/practice-topic-choice-regression.cjs
+          node scripts/practice-review-back-regression.cjs
