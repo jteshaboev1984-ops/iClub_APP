@@ -15,6 +15,11 @@ on:
       - 'app.js'
       - '.github/scripts/iclub_subject_selection_shadow_ui_v1_contract.js'
       - 'scripts/iclub-subject-selection-shadow-browser-regression.cjs'
+      - 'qa/iclub-registration-v2-preview.html'
+      - 'scripts/iclub-registration-v2-preview-browser-regression.cjs'
+      - 'scripts/iclub-unified-release-preflight-contract.cjs'
+      - 'docs/iclub-unified-release-go-no-go.md'
+      - 'docs/mathematics-practice-v2-controlled-release-runbook.md'
       - '.github/workflows/iclub-subject-selection-shadow-v1.yml'
   push:
     branches:
@@ -30,6 +35,11 @@ on:
       - 'app.js'
       - '.github/scripts/iclub_subject_selection_shadow_ui_v1_contract.js'
       - 'scripts/iclub-subject-selection-shadow-browser-regression.cjs'
+      - 'qa/iclub-registration-v2-preview.html'
+      - 'scripts/iclub-registration-v2-preview-browser-regression.cjs'
+      - 'scripts/iclub-unified-release-preflight-contract.cjs'
+      - 'docs/iclub-unified-release-go-no-go.md'
+      - 'docs/mathematics-practice-v2-controlled-release-runbook.md'
       - '.github/workflows/iclub-subject-selection-shadow-v1.yml'
   workflow_dispatch:
 
@@ -127,6 +137,9 @@ jobs:
           node --check app.js
           node --check .github/scripts/iclub_subject_selection_shadow_ui_v1_contract.js
           node --check scripts/iclub-subject-selection-shadow-browser-regression.cjs
+          node --check scripts/iclub-registration-v2-preview-browser-regression.cjs
+          node --check scripts/iclub-unified-release-preflight-contract.cjs
+          node scripts/iclub-unified-release-preflight-contract.cjs 2>&1 | tee -a subject-selection.log
           node .github/scripts/iclub_subject_selection_shadow_ui_v1_contract.js 2>&1 | tee -a subject-selection.log
           node scripts/iclub-free-subject-pairing-contract.cjs 2>&1 | tee -a subject-selection.log
 
@@ -145,6 +158,7 @@ jobs:
           set -euo pipefail
           mkdir -p artifacts
           node scripts/iclub-subject-selection-shadow-browser-regression.cjs 2>&1 | tee -a subject-selection.log
+          node scripts/iclub-registration-v2-preview-browser-regression.cjs 2>&1 | tee -a subject-selection.log
 
       - name: Prove safe subject-selection rollback
         shell: bash

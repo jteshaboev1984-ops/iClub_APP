@@ -8,23 +8,23 @@
     ru: {
       selectRequired: "Сначала выбери предметы тарифа: Профиль → Тариф → Предметы тарифа.",
       notInPlan: "Этот предмет не входит в выбранные предметы тарифа. Измени выбор в Профиль → Тариф → Предметы тарифа.",
-      compNotInPlan: "Для Tours выбери этот предмет в Competitive: Профиль → Тариф → Предметы тарифа.",
+      compNotInPlan: "Для соревнований выбери этот предмет: Профиль → Тариф → Предметы тарифа.",
       manageInPlan: "Для этого beta-аккаунта предметы настраиваются через Профиль → Тариф → Предметы тарифа.",
       unavailable: "Этот предмет сейчас недоступен.",
       generic: "Не удалось проверить доступ к предмету. Попробуй ещё раз."
     },
     uz: {
-      selectRequired: "Avval tarif fanlarini tanlang: Profil → Tarif → Tarif fanlari.",
-      notInPlan: "Bu fan tarifdagi tanlangan fanlarga kirmaydi. Profil → Tarif → Tarif fanlari bo‘limida tanlovni o‘zgartiring.",
-      compNotInPlan: "Tours uchun bu fanni Competitive sifatida tanlang: Profil → Tarif → Tarif fanlari.",
-      manageInPlan: "Bu beta-akkauntda fanlar Profil → Tarif → Tarif fanlari orqali sozlanadi.",
+      selectRequired: "Avval tarif fanlarini tanlang: Profil → Tarif → Tarifdagi fanlar.",
+      notInPlan: "Bu fan tanlangan fanlar orasida yo‘q. Uni Profil → Tarif → Tarifdagi fanlar bo‘limida tanlang.",
+      compNotInPlan: "Musobaqalarda qatnashish uchun bu fanni tanlang: Profil → Tarif → Tarifdagi fanlar.",
+      manageInPlan: "Bu sinov hisobida fanlar Profil → Tarif → Tarifdagi fanlar bo‘limida tanlanadi.",
       unavailable: "Bu fan hozir mavjud emas.",
       generic: "Fan kirishini tekshirib bo‘lmadi. Qayta urinib ko‘ring."
     },
     en: {
       selectRequired: "Choose your plan subjects first: Profile → Plan → Plan subjects.",
       notInPlan: "This subject is not included in your selected plan subjects. Change it in Profile → Plan → Plan subjects.",
-      compNotInPlan: "To use Tours, select this subject for Competitive in Profile → Plan → Plan subjects.",
+      compNotInPlan: "For competitions, choose this subject: Profile → Plan → Plan subjects.",
       manageInPlan: "For this beta account, subjects are managed in Profile → Plan → Plan subjects.",
       unavailable: "This subject is unavailable right now.",
       generic: "Could not verify subject access. Try again."
@@ -125,8 +125,10 @@
     }
   }
 
-  window.addEventListener("iclub:subject-selection-changed", (event) => {
-    invalidate(event?.detail?.subjectKey || "");
+  window.addEventListener("iclub:subject-selection-changed", () => {
+    // A Free switch clears the old subject as well as selecting the new one.
+    // Drop the entire decision cache so prior subjects cannot stay allowed.
+    invalidate();
   });
 
   window.addEventListener("focus", () => invalidate());

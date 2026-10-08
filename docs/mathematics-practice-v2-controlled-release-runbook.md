@@ -4,6 +4,25 @@ Release version: `math_p1_practice_v2_2026_10_07`
 Protected invariant: **Mathematics Tour structure, questions needed by Tour, attempts, answers and results must not change because of this release.**  
 Owner-approved Practice policy: **legacy Mathematics Practice progress/history does not need to be preserved.**
 
+## Verified production checkpoint — 2026-10-08 (READ-ONLY)
+
+This is the **actual** state of the live Mathematics Practice release at the checkpoint, not a claim that the new bank is already published:
+
+| Gate | Live evidence | Decision |
+|---|---|---|
+| Additive v2 SQL foundations (Phase A) | All nine listed migrations recorded as installed | Already completed — do not blindly reapply |
+| Invisible staging (Phase B) | 495 staged original questions (68/80/68/77/66/70/66); 201 approved diagnostics; 868 draft mappings; zero duplicate content keys | Already completed — do not duplicate staging |
+| QA / invisibility | All four item QA statuses passed; zero staged active question or membership; zero Tour links | PASS in read-only inspection |
+| Legacy learner-facing Practice | Seven active pools, 490 active memberships | Expected, still live |
+| Atomic release switch | Zero rows for `math_p1_practice_v2_2026_10_07` in release audit | **NOT published**; do not clear current Practice data |
+| Mathematics Tour protection | 14 Tours, 300 memberships, 149 attempts, 2,477 answers; four legacy Practice question IDs retain Tour references | Fingerprints checked and preserved at this checkpoint |
+| PR #336 post-publish proof RPC | `public.is_math_practice_v2_published_safe_v1()` does **not** exist in live DB | **HOLD** until approved protective SQL and frontend are installed |
+| Existing `main` client reset | `security/practice-v2-local-reset.js` still executes eagerly before publish and also clears the v3 namespace | Replace only through the approved guarded PR #336 implementation |
+
+**Resume at Phase C** rather than redoing finished content/staging work. Use the **one architect-approved unified #327 production deployment** to ship the PR #336 post-publish guard (corrected client script/cache pins) alongside the other dormant features. Within that SAME controlled release window, install and verify its additive SQL proof function **before** switching the bank. The SQL proof installation and later atomic bank switch require no extra Vercel deployment. Never activate the atomic publish while the old eager script is serving users. Re-run Phase D immediately before Phase E to detect drift. For this live database, changing the 490 legacy membership baseline or protected Tour fingerprint requires fresh review.
+
+This checkpoint is not deployment authorization. No production write was made to produce it.
+
 ## Release model
 
 This release is a controlled **Practice reset + new bank publish**. Exam Prep learner-facing copy is aligned with this policy in EN/RU/UZ: Tours are preserved, while Mathematics Practice starts fresh on the updated question set.
@@ -102,11 +121,12 @@ Deploy the frontend/runtime with:
 - deterministic answer evaluation/feedback;
 - Unicode-minus normalization;
 - Mathematics local Practice history namespace `practice_history_v3`;
-- a one-time pre-app Mathematics Practice cleanup that removes only stale Mathematics Practice draft/history/recommendation/runtime state and leaves Tour state/storage untouched.
+- the authenticated server-side publication-proof function `is_math_practice_v2_published_safe_v1()` from `20261008110000_math_practice_v2_post_publish_local_reset_gate_v1.sql`;
+- the gated local reset from PR #336: never run Mathematics browser cleanup merely because a new script has loaded. `app.js` invokes `iclubMathPracticeV2ResetAfterPublish` only after registration; it performs cleanup only when the server confirms the 495-question bank and a `published` switch audit.
 
-The old Mathematics local Practice history or paused legacy session therefore cannot reappear after the database reset. The cleanup marks itself complete once, so new v2 Practice progress created afterward is preserved.
+**Important correction to the original release procedure (PR #336): pre-publish local cleanup is prohibited.** The old eager `security/practice-v2-local-reset.js` shipped before publication and could clear old local drafts/history just by loading the app. Replace it with the publication-gated version and its updated script cache pins; this fix must be present before any future bank-switch rollout. An unauthenticated client, offline/error/timeout response, staged bank, rollback or missing proof function leaves all local data untouched. The new `practice_history_v3` namespace is never cleared by this legacy cleanup.
 
-During this short pre-publish window, Mathematics v5 selectors/readers fail closed against legacy questions: Mathematics cannot create a new old-bank Practice session after the one-time browser reset. Other subjects keep their legacy-compatible Practice behavior. The learner sees a short “Practice is being updated” message if they try to start Mathematics at that exact moment.
+During the short pre-publish window, Mathematics v5 selectors/readers fail closed against metadata-less legacy questions: Mathematics cannot create new old-bank Practice state; other subjects keep their legacy-compatible Practice behavior. The learner may see “Practice is being updated”. This is independent of local cleanup, which **remains OFF until successful publication**.
 
 Do not publish the new bank yet.
 
@@ -185,6 +205,8 @@ Required:
 - required v5 entrypoints executable;
 - Tour snapshot before/after cutover unchanged.
 
+Then verify the **post-publish browser cleanup gate** on an already approved test account. The authenticated proof must return `true` only after the release audit is `published` and all 495 new memberships/questions are active. One-time cleanup may remove *legacy Mathematics Practice* local state only; preserve Tour data, non-Mathematics local state, Exam Prep state and all newly written `practice_history_v3` data. Reload and confirm it is idempotent. If publication proof is unavailable or false, do not clear any local data.
+
 Then run learner smoke QA on a test account:
 - open Practice 1–7;
 - start a session;
@@ -252,5 +274,6 @@ Stop immediately if:
 - any required v5 Practice endpoint is unavailable;
 - post-publish Practice reset rows are not zero;
 - learner smoke QA exposes a correctness, navigation, language or persistence defect.
+- the old eager pre-publish local reset script is still loaded or the post-publish gate is missing/not independently validated.
 
 The protected boundary is simple: **Practice may reset. Tours may not.**

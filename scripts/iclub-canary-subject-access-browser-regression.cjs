@@ -98,9 +98,9 @@ async function runLocale(browser, lang) {
   ok = await page.evaluate(() => window.iClubCommercialAccessUI.guardCompetitive('chemistry'));
   assert(ok === false, 'unselected Competitive subject escaped guard');
   toast = await page.locator('#toast').textContent();
-  if (lang === 'ru') assert(toast.includes('Competitive'), 'RU Competitive message mismatch');
-  if (lang === 'uz') assert(toast.includes('Competitive'), 'UZ Competitive message mismatch');
-  if (lang === 'en') assert(toast.includes('Competitive'), 'EN Competitive message mismatch');
+  if (lang === 'ru') assert(toast.includes('соревнований') && !toast.includes('Competitive'), 'RU competition copy mismatch');
+  if (lang === 'uz') assert(toast.includes('Musobaqalarda') && toast.includes('Tarifdagi fanlar') && !toast.includes('Competitive'), 'UZ competition copy mismatch');
+  if (lang === 'en') assert(toast.includes('competitions') && !toast.includes('Competitive'), 'EN competition copy mismatch');
 
   ok = await page.evaluate(() => window.iClubCommercialAccessUI.guardCompetitive('mathematics'));
   assert(ok === true, 'selected Competitive subject was blocked');
@@ -127,6 +127,27 @@ async function runLocale(browser, lang) {
   await page.evaluate(() => window.iClubCommercialAccessUI.checkStudy('mathematics'));
   calls = await page.evaluate(() => window.__rpcCalls.length);
   assert(calls === 2, 'subject selection change did not invalidate access cache');
+
+  // A Free subject swap changes BOTH old and new slots. Even when the event
+  // names only the NEW subject, the cached OLD access must be invalidated.
+  await page.evaluate(() => {
+    window.__mode = 'enforced';
+    window.iClubCommercialAccessUI.invalidate();
+    window.__rpcCalls.length = 0;
+  });
+  await page.evaluate(() => window.iClubCommercialAccessUI.checkStudy('mathematics'));
+  await page.evaluate(() => window.iClubCommercialAccessUI.checkStudy('chemistry'));
+  calls = await page.evaluate(() => window.__rpcCalls.length);
+  assert(calls === 2, 'precondition: expected two cached subject decisions');
+  await page.evaluate(() => {
+    window.dispatchEvent(new CustomEvent('iclub:subject-selection-changed', {
+      detail:{ subjectKey:'biology' }
+    }));
+  });
+  await page.evaluate(() => window.iClubCommercialAccessUI.checkStudy('mathematics'));
+  calls = await page.evaluate(() => window.__rpcCalls.length);
+  assert(calls === 3,
+    'Free subject swap did not invalidate access cached for OLD subject');
 
   // Preview guard failure is fail-open so a beta service incident cannot lock Study.
   await page.evaluate(() => {
