@@ -1,0 +1,73 @@
+{
+  "version": "p4_circular_trig_ai_source_supplement_draft_v0.1",
+  "status": "draft_not_runtime_allowed",
+  "architecture_note": "Draft only. Runtime retrieval must continue using approved/versioned source cards. If no approved card covers the required method, return no_source rather than relying on model memory.",
+  "cards": [
+    {
+      "skill_code": "P1-CIR-02",
+      "card_type": "theory",
+      "rights_status": "original_iclub",
+      "approval_status": "draft",
+      "is_runtime_allowed": false,
+      "source_basis": "Complete Pure Mathematics 1, Ch4 Circular measure, printed pp. 74–81; iClub canonical skill P1-CIR-02",
+      "variants": {
+        "en": {
+          "title": "Arc length and sector perimeter",
+          "body_text": "Topic focus: Arc length and recovering unknown quantities.\n\nCore explanation:\nFor a central angle θ measured in radians,\ns=rθ,\nwhere s is arc length and r is radius.\n\nThe formula can be rearranged:\nr=s/θ and θ=s/r.\n\nIf a sector perimeter is given, separate the curved and straight parts first. A sector with radius r has two straight radial sides, so\nperimeter = s+2r.\nTherefore the arc length can be recovered as\ns=perimeter−2r,\nand then s=rθ can be used to find θ or r.\n\nIf an angle is supplied in degrees, convert it to radians before using s=rθ.\n\nCritical check:\nDo not use the whole sector perimeter as the arc length. Subtract both radii first. Keep θ in radians and use compatible length units."
+        },
+        "ru": {
+          "title": "Длина дуги и периметр сектора",
+          "body_text": "Фокус темы: длина дуги и восстановление неизвестных величин.\n\nОсновная формула при угле θ в радианах:\ns=rθ,\nгде s — длина дуги, r — радиус.\n\nЕё можно преобразовать:\nr=s/θ и θ=s/r.\n\nЕсли дан периметр сектора, сначала отделите дугу от прямых сторон. У сектора две радиальные стороны, поэтому\nпериметр = s+2r.\nОтсюда\ns=периметр−2r,\nпосле чего используйте s=rθ для нахождения θ или r.\n\nЕсли угол дан в градусах, сначала переведите его в радианы.\n\nКритическая проверка:\nНе принимайте весь периметр сектора за длину дуги. Сначала вычтите оба радиуса. θ должен быть в радианах, а единицы длины — согласованы."
+        },
+        "uz": {
+          "title": "Yoy uzunligi va sektor perimetri",
+          "body_text": "Mavzu: yoy uzunligi va noma’lum kattaliklarni topish.\n\nθ burchak radianlarda bo‘lsa,\ns=rθ,\nbu yerda s — yoy uzunligi, r — radius.\n\nFormulani qayta tuzish mumkin:\nr=s/θ va θ=s/r.\n\nAgar sektor perimetri berilgan bo‘lsa, avval egri va to‘g‘ri qismlarni ajrating. Sektorda ikkita radius tomoni bor:\nperimetr = s+2r.\nShundan\ns=perimetr−2r,\nkeyin θ yoki r ni topish uchun s=rθ dan foydalaning.\n\nBurchak darajada berilgan bo‘lsa, s=rθ dan oldin radianga o‘tkazing.\n\nMuhim tekshiruv:\nButun sektor perimetrini yoy uzunligi deb olmang. Avval ikki radiusni ayiring. θ radianlarda va uzunlik birliklari mos bo‘lsin."
+        }
+      }
+    },
+    {
+      "skill_code": "P1-TRI-01",
+      "card_type": "theory",
+      "rights_status": "original_iclub",
+      "approval_status": "draft",
+      "is_runtime_allowed": false,
+      "source_basis": "Complete Pure Mathematics 1, Ch5 Trigonometry, printed pp. 86–104; iClub canonical skill P1-TRI-01",
+      "variants": {
+        "en": {
+          "title": "Trig graphs in degrees and radians",
+          "body_text": "Topic focus: Graphs of sin, cos and tan with simple transformations.\n\nCore explanation:\nThe base periods are:\n- sin x and cos x: 2π radians or 360°;\n- tan x: π radians or 180°.\n\nFor sin(bx) or cos(bx), divide the base period by |b|.\nFor tan(bx), do the same using π or 180°.\n\nFor y=a sin(bx)+c or y=a cos(bx)+c:\n- vertical amplitude is |a|;\n- the midline is y=c;\n- the range is c−|a|≤y≤c+|a|;\n- the period is the base period divided by |b|.\n\nA horizontal shift such as f(x−h) moves graph features h units right. For tan x, vertical asymptotes occur where cos x=0; transform their x-coordinates in the same way as other graph features.\n\nCritical check:\nUse one angle unit consistently. In degree questions use 360°/|b| for sine/cosine and 180°/|b| for tangent. Track transformations of known maxima, zeros and asymptotes rather than guessing from signs."
+        },
+        "ru": {
+          "title": "Тригонометрические графики в градусах и радианах",
+          "body_text": "Фокус темы: графики sin, cos и tan и простые преобразования.\n\nБазовые периоды:\n- sin x и cos x: 2π радиан или 360°;\n- tan x: π радиан или 180°.\n\nДля sin(bx) или cos(bx) делите базовый период на |b|.\nДля tan(bx) делайте то же с π или 180°.\n\nДля y=a sin(bx)+c или y=a cos(bx)+c:\n- амплитуда равна |a|;\n- средняя линия y=c;\n- область значений c−|a|≤y≤c+|a|;\n- период равен базовому периоду, делённому на |b|.\n\nСдвиг f(x−h) переносит характерные точки на h вправо. У tan x вертикальные асимптоты находятся там, где cos x=0; их координаты преобразуются по тем же правилам.\n\nКритическая проверка:\nИспользуйте одну систему угловых единиц. В градусах берите 360°/|b| для sin/cos и 180°/|b| для tan. Отслеживайте известные максимумы, нули и асимптоты, а не угадывайте по знакам."
+        },
+        "uz": {
+          "title": "Trigonometrik grafiklar: daraja va radian",
+          "body_text": "Mavzu: sin, cos va tan grafiklari hamda oddiy o‘zgarishlar.\n\nAsosiy davrlar:\n- sin x va cos x: 2π radian yoki 360°;\n- tan x: π radian yoki 180°.\n\nsin(bx) yoki cos(bx) uchun asosiy davrni |b| ga bo‘ling.\ntan(bx) uchun ham π yoki 180° ni |b| ga bo‘ling.\n\ny=a sin(bx)+c yoki y=a cos(bx)+c uchun:\n- amplituda |a|;\n- o‘rta chiziq y=c;\n- qiymatlar oralig‘i c−|a|≤y≤c+|a|;\n- davr asosiy davrning |b| ga bo‘lingan qiymati.\n\nf(x−h) gorizontal siljish grafik xususiyatlarini h birlik o‘ngga ko‘chiradi. tan x da vertikal asimptotalar cos x=0 bo‘lgan joylarda; ularning x-koordinatalarini ham shu o‘zgarish qoidalari bilan ko‘chiring.\n\nMuhim tekshiruv:\nBitta burchak birligini izchil ishlating. Darajada sin/cos uchun 360°/|b|, tan uchun 180°/|b|. Maksimum, nol va asimptotalarni ma’lum grafikdan kuzating."
+        }
+      }
+    },
+    {
+      "skill_code": "P1-TRI-05",
+      "card_type": "theory",
+      "rights_status": "original_iclub",
+      "approval_status": "draft",
+      "is_runtime_allowed": false,
+      "source_basis": "Complete Pure Mathematics 1, Ch5 Trigonometry, printed pp. 86–104; iClub canonical skill P1-TRI-05",
+      "variants": {
+        "en": {
+          "title": "Complete solution sets for trig equations",
+          "body_text": "Topic focus: solving simple trigonometric equations completely on a stated interval.\n\nCore explanation:\nA principal/reference angle is only the starting point. Use the sign of the trig function, symmetry and period to generate every solution in the interval.\n\nFor a transformed input such as sin(2x)=0, first solve for the inner angle. The interval for 2x is also transformed. Only then divide back to x.\n\nIf the equation is quadratic in a trig quantity, such as\n2cos²x+cos x−1=0,\nfactor or solve the quadratic first. This gives separate trig branches. Solve every admissible branch and combine the distinct solutions.\n\nIf an algebraic branch gives sin x=a or cos x=a with |a|>1, that branch has no real trigonometric solutions.\n\nFor a factored equation, each factor can produce a separate solution family. Check endpoints exactly as stated by ≤ or <.\n\nCritical check:\nNever stop after one inverse-trig output. Preserve every algebraic branch, use the correct trig period, transform the interval when the input is scaled/shifted, and check that sine/cosine target values lie between −1 and 1."
+        },
+        "ru": {
+          "title": "Полные наборы решений тригонометрических уравнений",
+          "body_text": "Фокус темы: полное решение простых тригонометрических уравнений на заданном интервале.\n\nГлавный/опорный угол — только начало. Используйте знак функции, симметрию и период, чтобы получить все решения на интервале.\n\nДля преобразованного аргумента, например sin(2x)=0, сначала решайте уравнение относительно внутреннего угла. Интервал для 2x тоже преобразуется. Только затем возвращайтесь к x.\n\nЕсли уравнение квадратично относительно тригонометрической величины, например\n2cos²x+cos x−1=0,\nсначала разложите квадратное выражение или решите его. Получатся отдельные тригонометрические ветви. Решите каждую допустимую ветвь и объедините различные решения.\n\nЕсли алгебраическая ветвь приводит к sin x=a или cos x=a при |a|>1, действительных тригонометрических решений у неё нет.\n\nВ разложенном на множители уравнении каждый множитель может дать свою семью решений. Точно проверяйте включение концов по ≤ или <.\n\nКритическая проверка:\nНе останавливайтесь на одном ответе обратной функции. Сохраняйте все алгебраические ветви, используйте правильный период, преобразуйте интервал при масштабировании/сдвиге аргумента и проверяйте, что значения sin/cos лежат от −1 до 1."
+        },
+        "uz": {
+          "title": "Trigonometrik tenglamalarning to‘liq yechimlari",
+          "body_text": "Mavzu: berilgan intervalda oddiy trigonometrik tenglamalarning barcha yechimlarini topish.\n\nAsosiy/tayanch burchak faqat boshlanishdir. Funksiya ishorasi, simmetriya va davr orqali intervaldagi barcha yechimlarni toping.\n\nsin(2x)=0 kabi o‘zgartirilgan argumentda avval ichki burchak uchun yeching. 2x uchun interval ham o‘zgaradi. Keyin x ga qayting.\n\nTenglama trigonometrik kattalik bo‘yicha kvadrat bo‘lsa, masalan\n2cos²x+cos x−1=0,\navval kvadrat ifodani ko‘paytuvchilarga ajrating yoki yeching. Alohida trigonometrik tarmoqlar hosil bo‘ladi. Har bir mumkin bo‘lgan tarmoqni yechib, turli yechimlarni birlashtiring.\n\nAgar algebraik tarmoq sin x=a yoki cos x=a uchun |a|>1 bersa, bu tarmoqda haqiqiy trigonometrik yechim yo‘q.\n\nKo‘paytuvchilarga ajratilgan tenglamada har bir ko‘paytuvchi alohida yechim oilasini berishi mumkin. ≤ yoki < bo‘yicha interval chekkalarini aniq tekshiring.\n\nMuhim tekshiruv:\nBitta teskari trigonometrik natijada to‘xtamang. Barcha algebraik tarmoqlarni saqlang, to‘g‘ri davrni ishlating, argument o‘zgarsa intervalni ham o‘zgartiring va sin/cos maqsad qiymatlari −1 dan 1 gacha ekanini tekshiring."
+        }
+      }
+    }
+  ]
+}

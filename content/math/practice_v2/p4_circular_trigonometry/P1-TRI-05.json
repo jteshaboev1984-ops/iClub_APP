@@ -1,0 +1,710 @@
+{
+  "version": "practice_v2_p4_circular_trig_draft_v0.1",
+  "skill": "P1-TRI-05",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q282",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-05",
+      "secondary_skills": [
+        "P1-TRI-02"
+      ],
+      "role": "direct_equation",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Solve sin x=√3/2 for 0°≤x<360°.",
+        "ru": "Решите sin x=√3/2 при 0°≤x<360°.",
+        "uz": "0°≤x<360° da sin x=√3/2 tenglamani yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x=60°,300°",
+            "ru": "x=60°,300°",
+            "uz": "x=60°,300°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=60°,120°",
+            "ru": "x=60°,120°",
+            "uz": "x=60°,120°"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=120°,240°",
+            "ru": "x=120°,240°",
+            "uz": "x=120°,240°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x=60° only",
+            "ru": "Только x=60°",
+            "uz": "Faqat x=60°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The reference angle is 60°. Sine is positive in quadrants I and II, giving x=60° and 120°.",
+        "ru": "Опорный угол 60°. Синус положителен в I и II четвертях, поэтому x=60° и 120°.",
+        "uz": "Tayanch burchak 60°. Sinus I va II choraklarda musbat, demak x=60° va 120°."
+      },
+      "ai_source_skill": "P1-TRI-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q283",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-05",
+      "secondary_skills": [
+        "P1-TRI-02"
+      ],
+      "role": "direct_equation",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Solve cos x=−√3/2 for 0°≤x<360°.",
+        "ru": "Решите cos x=−√3/2 при 0°≤x<360°.",
+        "uz": "0°≤x<360° da cos x=−√3/2 tenglamani yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x=30°,330°",
+            "ru": "x=30°,330°",
+            "uz": "x=30°,330°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=210° only",
+            "ru": "Только x=210°",
+            "uz": "Faqat x=210°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=150°,330°",
+            "ru": "x=150°,330°",
+            "uz": "x=150°,330°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x=150°,210°",
+            "ru": "x=150°,210°",
+            "uz": "x=150°,210°"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "The reference angle is 30°. Cosine is negative in quadrants II and III, giving x=150° and 210°.",
+        "ru": "Опорный угол 30°. Косинус отрицателен во II и III четвертях, поэтому x=150° и 210°.",
+        "uz": "Tayanch burchak 30°. Kosinus II va III choraklarda manfiy, demak x=150° va 210°."
+      },
+      "ai_source_skill": "P1-TRI-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q284",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-05",
+      "secondary_skills": [
+        "P1-TRI-01",
+        "P1-TRI-02"
+      ],
+      "role": "translated_equation",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Solve tan(x−15°)=1/√3 for 0°≤x<360°.",
+        "ru": "Решите tan(x−15°)=1/√3 при 0°≤x<360°.",
+        "uz": "0°≤x<360° da tan(x−15°)=1/√3 tenglamani yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x=30°,210°",
+            "ru": "x=30°,210°",
+            "uz": "x=30°,210°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=15°,195°",
+            "ru": "x=15°,195°",
+            "uz": "x=15°,195°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=45°,225°",
+            "ru": "x=45°,225°",
+            "uz": "x=45°,225°"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x=45° only",
+            "ru": "Только x=45°",
+            "uz": "Faqat x=45°"
+          },
+          "diagnostic_code": "TRI05_PERIOD"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "tan u=1/√3 at u=30°+180°n. With u=x−15°, x=45°+180°n, giving x=45° and 225° in the interval.",
+        "ru": "tan u=1/√3 при u=30°+180°n. При u=x−15° получаем x=45°+180°n, поэтому на интервале x=45° и 225°.",
+        "uz": "tan u=1/√3 uchun u=30°+180°n. u=x−15° bo‘lsa x=45°+180°n, intervalda x=45° va 225°."
+      },
+      "ai_source_skill": "P1-TRI-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q285",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-05",
+      "secondary_skills": [
+        "P1-TRI-01"
+      ],
+      "role": "transformed_equation_count",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "How many solutions does sin(2x)=0 have for 0°≤x<360°? Enter the integer.",
+        "ru": "Сколько решений имеет sin(2x)=0 при 0°≤x<360°? Введите целое число.",
+        "uz": "0°≤x<360° da sin(2x)=0 nechta yechimga ega? Butun sonni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "2",
+          "3",
+          "5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "For 0°≤x<360°, the angle 2x satisfies 0°≤2x<720°. sin(2x)=0 at 2x=0°,180°,360°,540°, giving x=0°,90°,180°,270°. There are 4 solutions.",
+        "ru": "При 0°≤x<360° имеем 0°≤2x<720°. sin(2x)=0 при 2x=0°,180°,360°,540°, поэтому x=0°,90°,180°,270°. Всего 4 решения.",
+        "uz": "0°≤x<360° bo‘lsa 0°≤2x<720°. sin(2x)=0 uchun 2x=0°,180°,360°,540°, demak x=0°,90°,180°,270°. 4 ta yechim."
+      },
+      "ai_source_skill": "P1-TRI-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q286",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-05",
+      "secondary_skills": [
+        "P1-TRI-01"
+      ],
+      "role": "translated_equation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Solve cos(x+30°)=0 for 0°≤x<360°.",
+        "ru": "Решите cos(x+30°)=0 при 0°≤x<360°.",
+        "uz": "0°≤x<360° da cos(x+30°)=0 tenglamani yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x=60°,240°",
+            "ru": "x=60°,240°",
+            "uz": "x=60°,240°"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=90°,270°",
+            "ru": "x=90°,270°",
+            "uz": "x=90°,270°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=120°,300°",
+            "ru": "x=120°,300°",
+            "uz": "x=120°,300°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x=60° only",
+            "ru": "Только x=60°",
+            "uz": "Faqat x=60°"
+          },
+          "diagnostic_code": "TRI05_PERIOD"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "cos u=0 at u=90° and 270° within one cycle. Set x+30°=90° or 270°, giving x=60° or 240°.",
+        "ru": "cos u=0 при u=90° и 270° в одном цикле. Из x+30°=90° или 270° получаем x=60° или 240°.",
+        "uz": "Bir davrda cos u=0 uchun u=90° va 270°. x+30°=90° yoki 270° dan x=60° yoki 240°."
+      },
+      "ai_source_skill": "P1-TRI-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q287",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-05",
+      "secondary_skills": [],
+      "role": "endpoint_check",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Solve cos x=1 for 0°≤x≤360°.",
+        "ru": "Решите cos x=1 при 0°≤x≤360°.",
+        "uz": "0°≤x≤360° da cos x=1 tenglamani yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x=0° only",
+            "ru": "Только x=0°",
+            "uz": "Faqat x=0°"
+          },
+          "diagnostic_code": "TRI05_INTERVAL_ENDPOINT"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=0°,360°",
+            "ru": "x=0°,360°",
+            "uz": "x=0°,360°"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=360° only",
+            "ru": "Только x=360°",
+            "uz": "Faqat x=360°"
+          },
+          "diagnostic_code": "TRI05_INTERVAL_ENDPOINT"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x=180°",
+            "ru": "x=180°",
+            "uz": "x=180°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "cos x=1 at multiples of 360°. Both endpoints are included, so x=0° and 360°.",
+        "ru": "cos x=1 при кратных 360°. Оба конца интервала включены, поэтому x=0° и 360°.",
+        "uz": "cos x=1 360° ning karralilarida. Ikki chekka ham kiritilgan, demak x=0° va 360°."
+      },
+      "ai_source_skill": "P1-TRI-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q288",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-05",
+      "secondary_skills": [
+        "P1-TRI-02"
+      ],
+      "role": "signed_interval",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Solve sin x=−√2/2 for −180°≤x≤180°.",
+        "ru": "Решите sin x=−√2/2 при −180°≤x≤180°.",
+        "uz": "−180°≤x≤180° da sin x=−√2/2 tenglamani yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x=−135° only",
+            "ru": "Только x=−135°",
+            "uz": "Faqat x=−135°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=45°,135°",
+            "ru": "x=45°,135°",
+            "uz": "x=45°,135°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=−45°,135°",
+            "ru": "x=−45°,135°",
+            "uz": "x=−45°,135°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x=−135°,−45°",
+            "ru": "x=−135°,−45°",
+            "uz": "x=−135°,−45°"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "Within −180°≤x≤180°, sine equals −√2/2 at −135° and −45°.",
+        "ru": "На интервале −180°≤x≤180° синус равен −√2/2 при x=−135° и −45°.",
+        "uz": "−180°≤x≤180° da sinus −√2/2 ga x=−135° va −45° da teng."
+      },
+      "ai_source_skill": "P1-TRI-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q289",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-05",
+      "secondary_skills": [],
+      "role": "quadratic_trig",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Solve 2cos²x+cos x−1=0 for 0°≤x<360°.",
+        "ru": "Решите 2cos²x+cos x−1=0 при 0°≤x<360°.",
+        "uz": "0°≤x<360° da 2cos²x+cos x−1=0 tenglamani yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x=60°,180°,300°",
+            "ru": "x=60°,180°,300°",
+            "uz": "x=60°,180°,300°"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=60°,300°",
+            "ru": "x=60°,300°",
+            "uz": "x=60°,300°"
+          },
+          "diagnostic_code": "TRI05_QUADRATIC_BRANCH"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=120°,180°,240°",
+            "ru": "x=120°,180°,240°",
+            "uz": "x=120°,180°,240°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x=180° only",
+            "ru": "Только x=180°",
+            "uz": "Faqat x=180°"
+          },
+          "diagnostic_code": "TRI05_QUADRATIC_BRANCH"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "Factor: (2cos x−1)(cos x+1)=0. Thus cos x=1/2 or −1. On the interval these give 60°,300° and 180°.",
+        "ru": "Разложим: (2cos x−1)(cos x+1)=0. Поэтому cos x=1/2 или −1. На интервале получаем 60°,300° и 180°.",
+        "uz": "Ko‘paytuvchilarga ajratamiz: (2cos x−1)(cos x+1)=0. Demak cos x=1/2 yoki −1. Intervalda 60°,300° va 180°."
+      },
+      "ai_source_skill": "P1-TRI-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q290",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-05",
+      "secondary_skills": [
+        "P1-TRI-04"
+      ],
+      "role": "identity_equation",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Solve sin x=cos x for 0°≤x<360°.",
+        "ru": "Решите sin x=cos x при 0°≤x<360°.",
+        "uz": "0°≤x<360° da sin x=cos x tenglamani yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x=135°,315°",
+            "ru": "x=135°,315°",
+            "uz": "x=135°,315°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=45°,135°",
+            "ru": "x=45°,135°",
+            "uz": "x=45°,135°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=45°,225°",
+            "ru": "x=45°,225°",
+            "uz": "x=45°,225°"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x=45° only",
+            "ru": "Только x=45°",
+            "uz": "Faqat x=45°"
+          },
+          "diagnostic_code": "TRI05_PERIOD"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Where cos x≠0, divide by cos x to get tan x=1. Tangent is 1 at x=45° and repeats after 180°, giving 225°.",
+        "ru": "Там, где cos x≠0, делим на cos x и получаем tan x=1. Тангенс равен 1 при x=45° и повторяется через 180°, поэтому также 225°.",
+        "uz": "cos x≠0 joylarda cos x ga bo‘lib tan x=1 olamiz. Tangens x=45° da 1 va 180° dan keyin takrorlanadi, demak 225° ham."
+      },
+      "ai_source_skill": "P1-TRI-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q291",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-05",
+      "secondary_skills": [],
+      "role": "factored_equation",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "How many solutions does sin x(2cos x−1)=0 have for 0°≤x<360°? Enter the integer.",
+        "ru": "Сколько решений имеет sin x(2cos x−1)=0 при 0°≤x<360°? Введите целое число.",
+        "uz": "0°≤x<360° da sin x(2cos x−1)=0 nechta yechimga ega? Butun sonni kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "4",
+        "accepted_examples": [
+          "4",
+          " 4 "
+        ],
+        "rejected_examples": [
+          "2",
+          "3",
+          "5"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Either sin x=0, giving x=0°,180°, or cos x=1/2, giving x=60°,300°. These are four distinct solutions.",
+        "ru": "Либо sin x=0, что даёт x=0°,180°, либо cos x=1/2, что даёт x=60°,300°. Это четыре разных решения.",
+        "uz": "Yoki sin x=0: x=0°,180°, yoki cos x=1/2: x=60°,300°. Jami 4 ta turli yechim."
+      },
+      "ai_source_skill": "P1-TRI-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q292",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-05",
+      "secondary_skills": [
+        "P1-TRI-01"
+      ],
+      "role": "transformed_equation",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Solve cos(2x)=−1 for 0°≤x<360°.",
+        "ru": "Решите cos(2x)=−1 при 0°≤x<360°.",
+        "uz": "0°≤x<360° da cos(2x)=−1 tenglamani yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x=90° only",
+            "ru": "Только x=90°",
+            "uz": "Faqat x=90°"
+          },
+          "diagnostic_code": "TRI05_PERIOD"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=180° only",
+            "ru": "Только x=180°",
+            "uz": "Faqat x=180°"
+          },
+          "diagnostic_code": "TRI05_PERIOD"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=45°,225°",
+            "ru": "x=45°,225°",
+            "uz": "x=45°,225°"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x=90°,270°",
+            "ru": "x=90°,270°",
+            "uz": "x=90°,270°"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "0°≤2x<720°. cos(2x)=−1 at 2x=180° and 540°, so x=90° and 270°.",
+        "ru": "0°≤2x<720°. cos(2x)=−1 при 2x=180° и 540°, поэтому x=90° и 270°.",
+        "uz": "0°≤2x<720°. cos(2x)=−1 uchun 2x=180° va 540°, demak x=90° va 270°."
+      },
+      "ai_source_skill": "P1-TRI-05",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q293",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-05",
+      "secondary_skills": [
+        "P1-TRI-01"
+      ],
+      "role": "radian_interval",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Solve sin x=−1/2 for 0≤x<2π.",
+        "ru": "Решите sin x=−1/2 при 0≤x<2π.",
+        "uz": "0≤x<2π da sin x=−1/2 tenglamani yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x=π/6,5π/6",
+            "ru": "x=π/6,5π/6",
+            "uz": "x=π/6,5π/6"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x=7π/6,11π/6",
+            "ru": "x=7π/6,11π/6",
+            "uz": "x=7π/6,11π/6"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x=5π/6,7π/6",
+            "ru": "x=5π/6,7π/6",
+            "uz": "x=5π/6,7π/6"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x=11π/6 only",
+            "ru": "Только x=11π/6",
+            "uz": "Faqat x=11π/6"
+          },
+          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "The reference angle is π/6. Sine is negative in quadrants III and IV, giving x=7π/6 and 11π/6.",
+        "ru": "Опорный угол π/6. Синус отрицателен в III и IV четвертях, поэтому x=7π/6 и 11π/6.",
+        "uz": "Tayanch burchak π/6. Sinus III va IV choraklarda manfiy, demak x=7π/6 va 11π/6."
+      },
+      "ai_source_skill": "P1-TRI-05",
+      "status": "draft"
+    }
+  ]
+}

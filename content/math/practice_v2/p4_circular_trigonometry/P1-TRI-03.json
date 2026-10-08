@@ -1,0 +1,437 @@
+{
+  "version": "practice_v2_p4_circular_trig_draft_v0.1",
+  "skill": "P1-TRI-03",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q264",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-03",
+      "secondary_skills": [],
+      "role": "principal_value",
+      "difficulty": "easy",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "In degree mode, enter the principal value of sin⁻¹(−1/2) in degrees.",
+        "ru": "В режиме градусов введите главное значение sin⁻¹(−1/2) в градусах.",
+        "uz": "Daraja rejimida sin⁻¹(−1/2) ning asosiy qiymatini darajada kiriting."
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "-30",
+        "accepted_examples": [
+          "-30",
+          "−30",
+          " -30 "
+        ],
+        "rejected_examples": [
+          "30",
+          "150",
+          "210"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [
+        {
+          "answer_match": "30",
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        }
+      ],
+      "explanation": {
+        "en": "The principal range of sin⁻¹ is −90° to 90°. Since sin(−30°)=−1/2, the principal value is −30°.",
+        "ru": "Главный диапазон sin⁻¹: от −90° до 90°. Так как sin(−30°)=−1/2, главное значение равно −30°.",
+        "uz": "sin⁻¹ ning asosiy oralig‘i −90° dan 90° gacha. sin(−30°)=−1/2, demak asosiy qiymat −30°."
+      },
+      "ai_source_skill": "P1-TRI-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q265",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-03",
+      "secondary_skills": [
+        "P1-TRI-02"
+      ],
+      "role": "principal_value",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "What is the principal value of cos⁻¹(−√2/2) in degrees?",
+        "ru": "Каково главное значение cos⁻¹(−√2/2) в градусах?",
+        "uz": "cos⁻¹(−√2/2) ning asosiy qiymati darajada qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "45°",
+            "ru": "45°",
+            "uz": "45°"
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "225°",
+            "ru": "225°",
+            "uz": "225°"
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "135°",
+            "ru": "135°",
+            "uz": "135°"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "315°",
+            "ru": "315°",
+            "uz": "315°"
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "cos135°=−√2/2, and 135° lies in the principal range 0°≤cos⁻¹x≤180°.",
+        "ru": "cos135°=−√2/2, и 135° лежит в главном диапазоне 0°≤cos⁻¹x≤180°.",
+        "uz": "cos135°=−√2/2 va 135° asosiy 0°≤cos⁻¹x≤180° oralig‘ida."
+      },
+      "ai_source_skill": "P1-TRI-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q266",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-03",
+      "secondary_skills": [
+        "P1-TRI-02"
+      ],
+      "role": "principal_value",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "What is the principal value of tan⁻¹(−√3) in degrees?",
+        "ru": "Каково главное значение tan⁻¹(−√3) в градусах?",
+        "uz": "tan⁻¹(−√3) ning asosiy qiymati darajada qancha?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−60°",
+            "ru": "−60°",
+            "uz": "−60°"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "60°",
+            "ru": "60°",
+            "uz": "60°"
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "120°",
+            "ru": "120°",
+            "uz": "120°"
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "300°",
+            "ru": "300°",
+            "uz": "300°"
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "tan(−60°)=−√3, and −60° lies in the principal range −90°<tan⁻¹x<90°.",
+        "ru": "tan(−60°)=−√3, и −60° лежит в главном диапазоне −90°<tan⁻¹x<90°.",
+        "uz": "tan(−60°)=−√3 va −60° asosiy −90°<tan⁻¹x<90° oralig‘ida."
+      },
+      "ai_source_skill": "P1-TRI-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q267",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-03",
+      "secondary_skills": [],
+      "role": "concept_recognition",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "Which interval is the principal-value range of cos⁻¹?",
+        "ru": "Какой интервал является диапазоном главных значений cos⁻¹?",
+        "uz": "cos⁻¹ ning asosiy qiymatlar oralig‘i qaysi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−90°≤θ≤90°",
+            "ru": "−90°≤θ≤90°",
+            "uz": "−90°≤θ≤90°"
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−180°<θ<180°",
+            "ru": "−180°<θ<180°",
+            "uz": "−180°<θ<180°"
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "0°≤θ<360°",
+            "ru": "0°≤θ<360°",
+            "uz": "0°≤θ<360°"
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "0°≤θ≤180°",
+            "ru": "0°≤θ≤180°",
+            "uz": "0°≤θ≤180°"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "The principal values of cos⁻¹ lie from 0° to 180°, inclusive.",
+        "ru": "Главные значения cos⁻¹ лежат от 0° до 180° включительно.",
+        "uz": "cos⁻¹ ning asosiy qiymatlari 0° dan 180° gacha, chekkalari bilan."
+      },
+      "ai_source_skill": "P1-TRI-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q268",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-03",
+      "secondary_skills": [],
+      "role": "calculator_output",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "In degree mode, sin⁻¹(0.6)=36.8698…°. Enter the value correct to 1 decimal place.",
+        "ru": "В режиме градусов sin⁻¹(0.6)=36.8698…°. Введите значение с точностью до 1 десятичного знака.",
+        "uz": "Daraja rejimida sin⁻¹(0.6)=36.8698…°. Qiymatni 1 kasr xonasigacha kiriting."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "36.9",
+        "accepted_examples": [
+          "36.9",
+          "36,9",
+          " 36.9 "
+        ],
+        "rejected_examples": [
+          "36.8",
+          "37",
+          "0.6435"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "36.8698… rounds to 36.9° to 1 decimal place.",
+        "ru": "36.8698… округляется до 36.9° с точностью до 1 десятичного знака.",
+        "uz": "36.8698… bir kasr xonasigacha 36.9° ga yaxlitlanadi."
+      },
+      "ai_source_skill": "P1-TRI-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q269",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-03",
+      "secondary_skills": [],
+      "role": "calculator_mode",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "A calculator displays sin⁻¹(0.5)=0.523598… when a question expects degrees. What is the most likely issue?",
+        "ru": "Калькулятор показывает sin⁻¹(0.5)=0.523598…, хотя в задаче ожидаются градусы. В чём наиболее вероятная проблема?",
+        "uz": "Savolda daraja kutilgan bo‘lsa ham kalkulyator sin⁻¹(0.5)=0.523598… ko‘rsatdi. Eng ehtimoliy muammo nima?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "0.5 is outside the domain of sin⁻¹.",
+            "ru": "0.5 вне области определения sin⁻¹.",
+            "uz": "0.5 sin⁻¹ aniqlanish sohasidan tashqarida."
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "sin⁻¹ means 1/sin.",
+            "ru": "sin⁻¹ означает 1/sin.",
+            "uz": "sin⁻¹ 1/sin degani."
+          },
+          "diagnostic_code": "TRI03_INVERSE_RECIPROCAL"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "The calculator is in radian mode.",
+            "ru": "Калькулятор в режиме радиан.",
+            "uz": "Kalkulyator radian rejimida."
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "The correct degree answer is 0.523598°.",
+            "ru": "Правильный ответ в градусах — 0.523598°.",
+            "uz": "To‘g‘ri daraja javobi 0.523598°."
+          },
+          "diagnostic_code": "TRI03_CALCULATOR_MODE"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "0.523598… is π/6 radians, which equals 30°. The calculator is reporting radians rather than degrees.",
+        "ru": "0.523598… — это π/6 радиан, то есть 30°. Калькулятор выдаёт радианы вместо градусов.",
+        "uz": "0.523598… bu π/6 radian, ya’ni 30°. Kalkulyator daraja o‘rniga radian ko‘rsatmoqda."
+      },
+      "ai_source_skill": "P1-TRI-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q270",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-03",
+      "secondary_skills": [],
+      "role": "reverse_principal_value",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "If sin⁻¹(a)=30° in degree mode, enter a.",
+        "ru": "Если sin⁻¹(a)=30° в режиме градусов, введите a.",
+        "uz": "Daraja rejimida sin⁻¹(a)=30° bo‘lsa, a ni kiriting."
+      },
+      "answer_contract": {
+        "kind": "numeric_exact",
+        "canonical_answer": "0.5",
+        "accepted_examples": [
+          "0.5",
+          "0,5",
+          " 0.5 "
+        ],
+        "rejected_examples": [
+          "2",
+          "30",
+          "0.866"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "Apply sine to both sides: a=sin30°=1/2=0.5.",
+        "ru": "Применяем синус к обеим сторонам: a=sin30°=1/2=0.5.",
+        "uz": "Ikkala tomonga sinus qo‘llaymiz: a=sin30°=1/2=0.5."
+      },
+      "ai_source_skill": "P1-TRI-03",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q271",
+      "practice_no": 4,
+      "primary_skill": "P1-TRI-03",
+      "secondary_skills": [
+        "P1-TRI-02"
+      ],
+      "role": "principal_vs_general",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
+      "question": {
+        "en": "What is sin⁻¹(sin150°) in degree mode?",
+        "ru": "Чему равно sin⁻¹(sin150°) в режиме градусов?",
+        "uz": "Daraja rejimida sin⁻¹(sin150°) nimaga teng?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "150°",
+            "ru": "150°",
+            "uz": "150°"
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "30°",
+            "ru": "30°",
+            "uz": "30°"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "210°",
+            "ru": "210°",
+            "uz": "210°"
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "330°",
+            "ru": "330°",
+            "uz": "330°"
+          },
+          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "sin150°=1/2. The principal value sin⁻¹(1/2) is 30°, not 150°, because sin⁻¹ returns a value in −90° to 90°.",
+        "ru": "sin150°=1/2. Главное значение sin⁻¹(1/2) равно 30°, а не 150°, потому что sin⁻¹ возвращает значение от −90° до 90°.",
+        "uz": "sin150°=1/2. sin⁻¹(1/2) ning asosiy qiymati 30°, 150° emas, chunki sin⁻¹ −90° dan 90° gacha qiymat qaytaradi."
+      },
+      "ai_source_skill": "P1-TRI-03",
+      "status": "draft"
+    }
+  ]
+}

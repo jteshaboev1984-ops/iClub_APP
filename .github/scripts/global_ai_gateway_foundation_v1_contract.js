@@ -26,7 +26,7 @@ assert(
 const guardCall = edge.indexOf('guard = await rpc("get_iclub_global_ai_guard_service_v1"');
 const tutorCall = edge.indexOf('card = await tutorCard(', guardCall);
 const reserveCall = edge.indexOf('reservation = await reserveUsage(', tutorCall);
-const finalizeCall = edge.indexOf('const finalized = await finalizeUsage(', reserveCall);
+const finalizeCall = edge.indexOf('finalizedUsage = await finalizeUsage(', reserveCall);
 
 assert(guardCall >= 0, 'global guard invocation missing');
 assert(tutorCall > guardCall, 'Tutor source lookup must occur after global guard');

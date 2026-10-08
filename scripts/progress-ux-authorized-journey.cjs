@@ -53,7 +53,9 @@ const html = lang => `<!doctype html><html lang="${lang}"><head><meta name="view
            ['1.5 Trigonometry','P1-TRI-01','Строить и использовать graphs of sin, cos и tan, включая simple transformations.']]:
           [['5.1 Representation of data','P5-DAT-01','Выбирать и критиковать подходящее data representation с учётом типа данных и цели.']]
         ).map(([section,code,description],i)=>({official_syllabus_section:section,
-          skills:[{skill_code:code,description,sequence_no:i+1}]}))});
+          skills:[{skill_code:code,description,sequence_no:i+1,
+            objective_level:component==='P1'&&code==='P1-CIR-01'?(state.finalized?2:1):0,
+            correction_case_id:null}]}))});
         window.iClubExamPrepHostInternal={lastCapabilities:{coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'}};
         window.iClubExamPrep={open:async()=>true,isOpen:()=>true,back:()=>true,close:()=>true,
           syncSubjectHub:async()=>true,refreshCapabilities:async()=>true};
@@ -114,9 +116,13 @@ const html = lang => `<!doctype html><html lang="${lang}"><head><meta name="view
       await page.waitForSelector('.ep-flow-completion-screen');
       await page.waitForSelector('.ep-pux-finish');
       const finish=await page.locator('.ep-pux-finish').innerText();
-      assert.ok(finish.includes('+1'),`${language}: completed goal and session deltas must be displayed`);
-      const expectedCounter=language==='ru'?'1 из 3':language==='uz'?'3 tadan 1 tasi':'1 of 3';
-      assert.ok(finish.includes(expectedCounter),`${language}: original weekly denominator must survive replan`);
+      const expectedChanged=language==='ru'?'Что изменилось':language==='uz'?'Nima o‘zgardi':'What changed';
+      const expectedBefore=language==='ru'?'Формируется':language==='uz'?'Rivojlanmoqda':'Developing';
+      const expectedAfter=language==='ru'?'Подтверждено':language==='uz'?'Tasdiqlangan':'Confirmed';
+      assert.ok(finish.includes(expectedChanged),`${language}: completion must explain what changed`);
+      assert.ok(finish.includes(expectedBefore) && finish.includes(expectedAfter),`${language}: topic state transition must be visible`);
+      assert.ok(finish.includes('2 → 3 / 45'),`${language}: confirmed-topic change must be visible`);
+      assert.ok(!/New sessions|Занятий добавлено|Yangi mashg‘ulotlar/.test(finish),`${language}: internal session delta must not lead learner completion UX`);
       assert.equal(await page.locator('.ep-pux-finish').count(),1,`${language}: one completion panel`);
       const result=await page.evaluate(()=>window.__journey);
       assert.deepEqual(result.authorizations,[{planId:'synthetic-p1-v1',priority:1}],`${language}: authorization uses original clicked plan`);

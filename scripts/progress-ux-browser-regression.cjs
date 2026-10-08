@@ -33,8 +33,16 @@ const plan = `<section class="ep-host-shell ep-live"><div class="ep-live-card"><
 <div class="ep-live-plan-item"><div><strong>Разобрать ошибку</strong></div><button data-ep-live-plan-item="1">Начать</button></div>
 <div class="ep-live-plan-item"><div><strong>Изучить тему</strong></div><button data-ep-live-plan-item="3">Начать</button></div>
 </div></section>`;
+const tracker = `<section class="ep-host-shell ep-views-shell" data-ep-views-screen>
+<div class="ep-views-summary">
+  <div class="ep-views-stat"><span>Подтверждено</span><strong>7 / 45</strong></div>
+  <div class="ep-views-stat"><span>Покрытие</span><strong>18%</strong></div>
+  <div class="ep-views-stat"><span>Требуют внимания</span><strong>3</strong></div>
+</div>
+<button class="ep-views-skill" type="button" data-ep-views-skill="P1-CIR-01"><span><strong>Радианная мера</strong></span><span class="ep-views-badge">Формируется</span></button>
+</section>`;
 const completion = `<section class="ep-host-shell ep-live ep-flow-completion-screen"><h2>Занятие завершено</h2>
-<div class="ep-flow-completion-card">Ответы сохранены</div>
+<div class="ep-flow-completion-card"><div class="ep-flow-completion-skill"><span>Навык</span><strong>Радианная мера</strong></div><p>Ответы сохранены</p></div>
 <div class="ep-flow-next-card">Следующий шаг</div><button data-ep-live-dashboard>К подготовке</button></section>`;
 
 (async () => {
@@ -54,13 +62,15 @@ const completion = `<section class="ep-host-shell ep-live ep-flow-completion-scr
     await page.setContent(baseHtml);
     await page.evaluate(({dashboard}) => {
       window.iClubExamPrepProgressUxEnabled = true;
+      window.__skillLevel=1;
+      window.__skillCorrection=null;
       window.iClubExamPrepHostInternal = {
         lastCapabilities:{coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'},
         progressUxApi:{progress:async component=>({ok:true,data:JSON.parse(JSON.stringify(window.__fixture[component]))})},
         api:{syllabusTracker:async()=>({ok:true,data:{areas:[
-          {official_syllabus_section:'1.4 Circular measure',skills:[{skill_code:'P1-CIR-01',description:'Радианная мера'}]},
-          {official_syllabus_section:'1.3 Coordinate geometry',skills:[{skill_code:'P1-COO-02',description:'Координатная геометрия'}]},
-          {official_syllabus_section:'1.5 Trigonometry',skills:[{skill_code:'P1-TRI-01',description:'Тригонометрия'}]}
+          {official_syllabus_section:'1.4 Circular measure',skills:[{skill_code:'P1-CIR-01',description:'Радианная мера',objective_level:window.__skillLevel,correction_case_id:window.__skillCorrection}]},
+          {official_syllabus_section:'1.3 Coordinate geometry',skills:[{skill_code:'P1-COO-02',description:'Координатная геометрия',objective_level:0,correction_case_id:null}]},
+          {official_syllabus_section:'1.5 Trigonometry',skills:[{skill_code:'P1-TRI-01',description:'Тригонометрия',objective_level:0,correction_case_id:null}]}
         ]}})}
       };
       window.__fixture={P1:null,P5:null};
@@ -74,6 +84,18 @@ const completion = `<section class="ep-host-shell ep-live ep-flow-completion-scr
     assert.match(await page.locator('[data-ep-live-component="P1"] .ep-pux-overview').innerText(),/5/);
     assert.doesNotMatch(await page.locator('[data-ep-live-component="P5"] .ep-pux-overview').innerText(),/0 из 3/,'No plan cannot invent progress denominator');
     assert.equal(await page.locator('.ep-pux-panel').count(),2);
+    assert.match(await page.locator('[data-ep-live-component="P1"] .ep-pux-progress-hero').innerText(),/0 \/ 45/,'Dashboard must show confirmed-topic denominator, not answer percentage');
+
+    await page.evaluate(html=>document.querySelector('#exam-prep-host-root').innerHTML=html,tracker);
+    await page.waitForSelector('.ep-pux-tracker-hero');
+    assert.match(await page.locator('.ep-pux-tracker-hero').innerText(),/7 \/ 45/,'Tracker must foreground confirmed topics');
+    assert.equal(await page.locator('.ep-views-summary .ep-views-stat:first-child').isVisible(),false,'Duplicate confirmed count must be visually suppressed');
+    await page.click('[data-ep-pux-guide-toggle]');
+    const guideText=await page.locator('.ep-pux-guide').innerText();
+    assert.match(guideText,/один правильный ответ/i,'Progress guide must explain answer-to-progress logic');
+    for (const label of ['Не проверено','Формируется','Подтверждено','Уверенно','Требует внимания'])
+      assert.match(guideText,new RegExp(label),'Progress guide status missing: '+label);
+
     await page.evaluate(html=>document.querySelector('#exam-prep-host-root').innerHTML=html,plan);
     await page.waitForSelector('.ep-pux-week .ep-pux-goal');
     assert.equal(await page.locator('.ep-pux-goal').count(),3,'Frozen original goals must remain three');
@@ -90,6 +112,9 @@ const completion = `<section class="ep-host-shell ep-live ep-flow-completion-scr
       const fixture=window.__fixture.P1;
       fixture.finalized_study_sessions=6;
       fixture.completed_goals=1;
+      fixture.confirmed_skills=1;
+      fixture.coverage_pct=2;
+      window.__skillLevel=2;
       fixture.goals[0].weekly_commitment_complete=true;
       fixture.goals[0].status='waiting_retest';
       fixture.goals[0].finalized_sessions=6;
@@ -99,9 +124,11 @@ const completion = `<section class="ep-host-shell ep-live ep-flow-completion-scr
     },completion);
     await page.waitForSelector('.ep-pux-finish');
     const finished=await page.locator('.ep-pux-finish').innerText();
-    assert.match(finished,/\+1/,'Completion should show verified delta from previous plan view');
-    assert.match(finished,/1 из 3/,'Finished goal should remain part of stable denominator');
-    assert.match(finished,/3/,'Open corrections should remain visible');
+    assert.match(finished,/Что изменилось/,'Completion must explain the consequence of the finished task');
+    assert.match(finished,/Формируется/,'Completion must show previous topic state');
+    assert.match(finished,/Подтверждено/,'Completion must show new topic state');
+    assert.match(finished,/0 → 1 \/ 45/,'Completion must show confirmed-topic change without inventing answer-based percent progress');
+    assert.doesNotMatch(finished,/Занятий добавлено|Дополнительно выполнено целей/,'Completion must not lead with internal session/goal counters');
     assert.equal(await page.locator('.ep-flow-completion-card').count(),1,'Original completion screen preserved');
 
     await page.evaluate(html=>document.querySelector('#exam-prep-host-root').innerHTML=html,plan);

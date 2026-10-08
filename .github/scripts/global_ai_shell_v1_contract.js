@@ -12,10 +12,10 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-assert(html.includes('global-ai-ui.css?v=globalaishell1'), 'Global AI shell stylesheet not loaded');
-assert(html.includes('global-ai-ui.js?v=globalaishell1'), 'Global AI shell script not loaded');
+assert(html.includes('global-ai-ui.css?v=globalaichat1'), 'Integrated Global AI stylesheet not loaded');
+assert(html.includes('global-ai-ui.js?v=globalaichat1'), 'Integrated Global AI script not loaded');
 assert(
-  html.indexOf('global-ai-ui.js?v=globalaishell1') > html.indexOf('practice-ai-ui.js?v=ai2review1'),
+  html.indexOf('global-ai-ui.js?v=globalaichat1') > html.indexOf('practice-ai-ui.js?v=ai2review1'),
   'Global AI shell must load after existing app/Practice AI controllers'
 );
 
@@ -51,8 +51,9 @@ for (const forbidden of [
   assert(!js.includes(forbidden), `learner shell contains forbidden internal/action token: ${forbidden}`);
 }
 
-assert(!js.includes('.functions.invoke("global-ai"'), 'Phase 3 shell must not invoke Global AI answers yet');
-assert(!js.includes(".functions.invoke('global-ai'"), 'Phase 3 shell must not invoke Global AI answers yet');
+assert(js.includes('.functions.invoke("global-ai"'), 'Integrated conversation shell must invoke the governed Global AI function');
+assert(js.includes('data.academic_state_changed !== false'), 'Integrated conversation shell must reject authoritative AI state changes');
+assert(js.includes('REQUEST_TIMEOUT_MS'), 'Integrated conversation shell timeout boundary missing');
 assert(
   (js.match(/document\.body\.appendChild\(host\)/g) || []).length === 1,
   'Global AI shell should mount one root only'

@@ -1,0 +1,571 @@
+{
+  "version": "practice_v2_p1_quadratics_draft_v0.1",
+  "skill": "P1-QUA-04",
+  "architecture": "docs/mathematics-practice-v2-content-architecture.md",
+  "questions": [
+    {
+      "key": "MATH-P1-PRACTICE2-Q037",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-04",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Which value of x does not satisfy x² − x − 6 > 0?",
+        "ru": "Какое значение x не удовлетворяет неравенству x² − x − 6 > 0?",
+        "uz": "Qaysi x qiymati x² − x − 6 > 0 tengsizlikni qanoatlantirmaydi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−4",
+            "ru": "−4",
+            "uz": "−4"
+          },
+          "diagnostic_code": "QUA04_SIGN_REGION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−3",
+            "ru": "−3",
+            "uz": "−3"
+          },
+          "diagnostic_code": "QUA04_SIGN_REGION"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "0",
+            "ru": "0",
+            "uz": "0"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "5",
+            "ru": "5",
+            "uz": "5"
+          },
+          "diagnostic_code": "QUA04_SIGN_REGION"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "x² − x − 6 = (x − 3)(x + 2), so the expression is positive for x < −2 or x > 3. The value 0 lies between −2 and 3, so it does not satisfy the inequality.",
+        "ru": "x² − x − 6 = (x − 3)(x + 2), поэтому выражение положительно при x < −2 или x > 3. Значение 0 лежит между −2 и 3 и не удовлетворяет неравенству.",
+        "uz": "x² − x − 6 = (x − 3)(x + 2), shuning uchun ifoda x < −2 yoki x > 3 da musbat. 0 qiymati −2 va 3 orasida, demak tengsizlikni qanoatlantirmaydi."
+      },
+      "ai_source_skill": "P1-QUA-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q038",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-04",
+      "secondary_skills": [],
+      "role": "direct_application",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Solve x² + x − 6 ≤ 0.",
+        "ru": "Решите неравенство x² + x − 6 ≤ 0.",
+        "uz": "x² + x − 6 ≤ 0 tengsizlikni yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−3 ≤ x ≤ 2",
+            "ru": "−3 ≤ x ≤ 2",
+            "uz": "−3 ≤ x ≤ 2"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x < −3 or x > 2",
+            "ru": "x < −3 или x > 2",
+            "uz": "x < −3 yoki x > 2"
+          },
+          "diagnostic_code": "QUA04_SIGN_REGION"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−3 < x < 2",
+            "ru": "−3 < x < 2",
+            "uz": "−3 < x < 2"
+          },
+          "diagnostic_code": "QUA04_ENDPOINT_INCLUSION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x ≤ −3 or x ≥ 2",
+            "ru": "x ≤ −3 или x ≥ 2",
+            "uz": "x ≤ −3 yoki x ≥ 2"
+          },
+          "diagnostic_code": "QUA04_SIGN_REGION"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "x² + x − 6 = (x + 3)(x − 2). The expression is non-positive between the roots, including the roots, so −3 ≤ x ≤ 2.",
+        "ru": "x² + x − 6 = (x + 3)(x − 2). Выражение неположительно между корнями, включая сами корни, поэтому −3 ≤ x ≤ 2.",
+        "uz": "x² + x − 6 = (x + 3)(x − 2). Ifoda ildizlar orasida, ildizlarning o‘zini ham qo‘shgan holda, musbat emas. Demak −3 ≤ x ≤ 2."
+      },
+      "ai_source_skill": "P1-QUA-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q039",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-04",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "medium",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "How many integer values of x satisfy x² − 4x − 5 < 0?",
+        "ru": "Сколько целых значений x удовлетворяют неравенству x² − 4x − 5 < 0?",
+        "uz": "x² − 4x − 5 < 0 tengsizlikni nechta butun x qiymati qanoatlantiradi?"
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "5",
+        "accepted_examples": [
+          "5",
+          " 5 "
+        ],
+        "rejected_examples": [
+          "6",
+          "4",
+          "7"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "x² − 4x − 5 = (x + 1)(x − 5), so −1 < x < 5. The integers are 0, 1, 2, 3 and 4: five values.",
+        "ru": "x² − 4x − 5 = (x + 1)(x − 5), поэтому −1 < x < 5. Целые значения: 0, 1, 2, 3, 4 — всего 5.",
+        "uz": "x² − 4x − 5 = (x + 1)(x − 5), shuning uchun −1 < x < 5. Butun qiymatlar 0, 1, 2, 3, 4 — jami 5 ta."
+      },
+      "ai_source_skill": "P1-QUA-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q040",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-04",
+      "secondary_skills": [],
+      "role": "representation_variation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Solve −x² + 2x + 3 ≥ 0.",
+        "ru": "Решите неравенство −x² + 2x + 3 ≥ 0.",
+        "uz": "−x² + 2x + 3 ≥ 0 tengsizlikni yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−1 < x < 3",
+            "ru": "−1 < x < 3",
+            "uz": "−1 < x < 3"
+          },
+          "diagnostic_code": "QUA04_ENDPOINT_INCLUSION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x ≤ −1 or x ≥ 3",
+            "ru": "x ≤ −1 или x ≥ 3",
+            "uz": "x ≤ −1 yoki x ≥ 3"
+          },
+          "diagnostic_code": "QUA04_NEGATIVE_MULTIPLIER"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−1 ≤ x ≤ 3",
+            "ru": "−1 ≤ x ≤ 3",
+            "uz": "−1 ≤ x ≤ 3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x < −1 or x > 3",
+            "ru": "x < −1 или x > 3",
+            "uz": "x < −1 yoki x > 3"
+          },
+          "diagnostic_code": "QUA04_NEGATIVE_MULTIPLIER"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "Multiply by −1 and reverse the inequality: x² − 2x − 3 ≤ 0. Since (x − 3)(x + 1) ≤ 0, the solution is −1 ≤ x ≤ 3.",
+        "ru": "Умножаем на −1 и меняем знак неравенства: x² − 2x − 3 ≤ 0. Так как (x − 3)(x + 1) ≤ 0, получаем −1 ≤ x ≤ 3.",
+        "uz": "−1 ga ko‘paytirib, tengsizlik ishorasini almashtiramiz: x² − 2x − 3 ≤ 0. (x − 3)(x + 1) ≤ 0 dan −1 ≤ x ≤ 3."
+      },
+      "ai_source_skill": "P1-QUA-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q041",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-04",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Solve (x − 2)² > 9.",
+        "ru": "Решите неравенство (x − 2)² > 9.",
+        "uz": "(x − 2)² > 9 tengsizlikni yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "−1 < x < 5",
+            "ru": "−1 < x < 5",
+            "uz": "−1 < x < 5"
+          },
+          "diagnostic_code": "QUA04_SIGN_REGION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x ≤ −1 or x ≥ 5",
+            "ru": "x ≤ −1 или x ≥ 5",
+            "uz": "x ≤ −1 yoki x ≥ 5"
+          },
+          "diagnostic_code": "QUA04_ENDPOINT_INCLUSION"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x < 1 or x > 3",
+            "ru": "x < 1 или x > 3",
+            "uz": "x < 1 yoki x > 3"
+          },
+          "diagnostic_code": "QUA04_SIGN_REGION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "x < −1 or x > 5",
+            "ru": "x < −1 или x > 5",
+            "uz": "x < −1 yoki x > 5"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "(x − 2)² > 3² means |x − 2| > 3. Hence x − 2 < −3 or x − 2 > 3, so x < −1 or x > 5.",
+        "ru": "(x − 2)² > 3² означает |x − 2| > 3. Значит x − 2 < −3 или x − 2 > 3, то есть x < −1 или x > 5.",
+        "uz": "(x − 2)² > 3² dan |x − 2| > 3. Demak x − 2 < −3 yoki x − 2 > 3, ya’ni x < −1 yoki x > 5."
+      },
+      "ai_source_skill": "P1-QUA-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q042",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-04",
+      "secondary_skills": [],
+      "role": "application_variation",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Solve 3x² − x − 2 < 0.",
+        "ru": "Решите неравенство 3x² − x − 2 < 0.",
+        "uz": "3x² − x − 2 < 0 tengsizlikni yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x < −2/3 or x > 1",
+            "ru": "x < −2/3 или x > 1",
+            "uz": "x < −2/3 yoki x > 1"
+          },
+          "diagnostic_code": "QUA04_SIGN_REGION"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−2/3 < x < 1",
+            "ru": "−2/3 < x < 1",
+            "uz": "−2/3 < x < 1"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "−1 < x < 2/3",
+            "ru": "−1 < x < 2/3",
+            "uz": "−1 < x < 2/3"
+          },
+          "diagnostic_code": "QUA04_SIGN_REGION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−2/3 ≤ x ≤ 1",
+            "ru": "−2/3 ≤ x ≤ 1",
+            "uz": "−2/3 ≤ x ≤ 1"
+          },
+          "diagnostic_code": "QUA04_ENDPOINT_INCLUSION"
+        }
+      ],
+      "correct_answer": "B",
+      "explanation": {
+        "en": "3x² − x − 2 = (3x + 2)(x − 1). The roots are −2/3 and 1. Since the quadratic opens upward, it is negative between the roots.",
+        "ru": "3x² − x − 2 = (3x + 2)(x − 1). Корни −2/3 и 1. Поскольку парабола направлена вверх, выражение отрицательно между корнями.",
+        "uz": "3x² − x − 2 = (3x + 2)(x − 1). Ildizlar −2/3 va 1. Parabola yuqoriga ochilgani uchun ifoda ildizlar orasida manfiy."
+      },
+      "ai_source_skill": "P1-QUA-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q043",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-04",
+      "secondary_skills": [],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "input",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "How many integer values of x satisfy (x + 4)(x − 1) ≤ 0?",
+        "ru": "Сколько целых значений x удовлетворяют (x + 4)(x − 1) ≤ 0?",
+        "uz": "(x + 4)(x − 1) ≤ 0 tengsizlikni nechta butun x qiymati qanoatlantiradi?"
+      },
+      "answer_contract": {
+        "kind": "integer_exact",
+        "canonical_answer": "6",
+        "accepted_examples": [
+          "6",
+          " 6 "
+        ],
+        "rejected_examples": [
+          "5",
+          "7",
+          "4"
+        ],
+        "number_only": true
+      },
+      "diagnostic_rules": [],
+      "explanation": {
+        "en": "The product is non-positive for −4 ≤ x ≤ 1. The integers are −4, −3, −2, −1, 0 and 1, giving 6 values.",
+        "ru": "Произведение неположительно при −4 ≤ x ≤ 1. Целые значения: −4, −3, −2, −1, 0, 1 — всего 6.",
+        "uz": "Ko‘paytma −4 ≤ x ≤ 1 da musbat emas. Butun qiymatlar −4, −3, −2, −1, 0, 1 — jami 6 ta."
+      },
+      "ai_source_skill": "P1-QUA-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q044",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-04",
+      "secondary_skills": [],
+      "role": "misconception_trap",
+      "difficulty": "easy",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Solve x² + 4x + 4 > 0.",
+        "ru": "Решите неравенство x² + 4x + 4 > 0.",
+        "uz": "x² + 4x + 4 > 0 tengsizlikni yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "All real x",
+            "ru": "Все действительные x",
+            "uz": "Barcha haqiqiy x"
+          },
+          "diagnostic_code": "QUA04_REPEATED_ROOT_CASE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x > −2",
+            "ru": "x > −2",
+            "uz": "x > −2"
+          },
+          "diagnostic_code": "QUA04_REPEATED_ROOT_CASE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x < −2",
+            "ru": "x < −2",
+            "uz": "x < −2"
+          },
+          "diagnostic_code": "QUA04_REPEATED_ROOT_CASE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "All real x except x = −2",
+            "ru": "Все действительные x, кроме x = −2",
+            "uz": "x = −2 dan tashqari barcha haqiqiy x"
+          },
+          "diagnostic_code": null
+        }
+      ],
+      "correct_answer": "D",
+      "explanation": {
+        "en": "x² + 4x + 4 = (x + 2)². A square is positive for every real x except where it equals zero, which occurs at x = −2.",
+        "ru": "x² + 4x + 4 = (x + 2)². Квадрат положителен для всех действительных x, кроме точки, где он равен нулю: x = −2.",
+        "uz": "x² + 4x + 4 = (x + 2)². Kvadrat x = −2 da nol, qolgan barcha haqiqiy x larda musbat."
+      },
+      "ai_source_skill": "P1-QUA-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q045",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-04",
+      "secondary_skills": [],
+      "role": "misconception_trap",
+      "difficulty": "medium",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "Solve x² − 6x + 9 ≤ 0.",
+        "ru": "Решите неравенство x² − 6x + 9 ≤ 0.",
+        "uz": "x² − 6x + 9 ≤ 0 tengsizlikni yeching."
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x ≤ 3",
+            "ru": "x ≤ 3",
+            "uz": "x ≤ 3"
+          },
+          "diagnostic_code": "QUA04_REPEATED_ROOT_CASE"
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "x ≥ 3",
+            "ru": "x ≥ 3",
+            "uz": "x ≥ 3"
+          },
+          "diagnostic_code": "QUA04_REPEATED_ROOT_CASE"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x = 3 only",
+            "ru": "Только x = 3",
+            "uz": "Faqat x = 3"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "All real x",
+            "ru": "Все действительные x",
+            "uz": "Barcha haqiqiy x"
+          },
+          "diagnostic_code": "QUA04_REPEATED_ROOT_CASE"
+        }
+      ],
+      "correct_answer": "C",
+      "explanation": {
+        "en": "x² − 6x + 9 = (x − 3)². A square is never negative, so (x − 3)² ≤ 0 only when it equals zero: x = 3.",
+        "ru": "x² − 6x + 9 = (x − 3)². Квадрат не бывает отрицательным, поэтому (x − 3)² ≤ 0 только при равенстве нулю: x = 3.",
+        "uz": "x² − 6x + 9 = (x − 3)². Kvadrat manfiy bo‘lmaydi, shuning uchun (x − 3)² ≤ 0 faqat nol bo‘lganda: x = 3."
+      },
+      "ai_source_skill": "P1-QUA-04",
+      "status": "draft"
+    },
+    {
+      "key": "MATH-P1-PRACTICE2-Q046",
+      "practice_no": 1,
+      "primary_skill": "P1-QUA-04",
+      "secondary_skills": [
+        "P1-QUA-01"
+      ],
+      "role": "transfer",
+      "difficulty": "hard",
+      "qtype": "mcq",
+      "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
+      "question": {
+        "en": "For which x-values is the graph y = x² − 2x − 8 above the x-axis?",
+        "ru": "При каких значениях x график y = x² − 2x − 8 находится выше оси x?",
+        "uz": "Qaysi x qiymatlarida y = x² − 2x − 8 grafigi x o‘qidan yuqorida bo‘ladi?"
+      },
+      "options": [
+        {
+          "key": "A",
+          "text": {
+            "en": "x < −2 or x > 4",
+            "ru": "x < −2 или x > 4",
+            "uz": "x < −2 yoki x > 4"
+          },
+          "diagnostic_code": null
+        },
+        {
+          "key": "B",
+          "text": {
+            "en": "−2 < x < 4",
+            "ru": "−2 < x < 4",
+            "uz": "−2 < x < 4"
+          },
+          "diagnostic_code": "QUA04_GRAPH_SIGN_LINK"
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "x ≤ −2 or x ≥ 4",
+            "ru": "x ≤ −2 или x ≥ 4",
+            "uz": "x ≤ −2 yoki x ≥ 4"
+          },
+          "diagnostic_code": "QUA04_ENDPOINT_INCLUSION"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "−2 ≤ x ≤ 4",
+            "ru": "−2 ≤ x ≤ 4",
+            "uz": "−2 ≤ x ≤ 4"
+          },
+          "diagnostic_code": "QUA04_GRAPH_SIGN_LINK"
+        }
+      ],
+      "correct_answer": "A",
+      "explanation": {
+        "en": "The x-intercepts solve x² − 2x − 8 = 0 = (x − 4)(x + 2), so they are −2 and 4. The parabola opens upward, so y > 0 outside the roots.",
+        "ru": "Точки пересечения с осью x находятся из x² − 2x − 8 = 0 = (x − 4)(x + 2): это −2 и 4. Парабола направлена вверх, поэтому y > 0 вне корней.",
+        "uz": "x o‘qi bilan kesishish nuqtalari x² − 2x − 8 = 0 = (x − 4)(x + 2) dan: −2 va 4. Parabola yuqoriga ochiladi, shuning uchun y > 0 ildizlardan tashqarida."
+      },
+      "ai_source_skill": "P1-QUA-04",
+      "status": "draft"
+    }
+  ]
+}

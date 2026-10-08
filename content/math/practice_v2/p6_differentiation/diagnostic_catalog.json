@@ -1,0 +1,505 @@
+{
+  "version": "p1_differentiation_diag_v0.1",
+  "policy": {
+    "rule": "Use a diagnostic code only when the authored wrong path deterministically supports it; otherwise return unmapped.",
+    "ai_boundary": "AI may explain only an established deterministic result using approved source cards. It may not establish correctness, invent a diagnosis, or complete a protected active assessment."
+  },
+  "diagnostics": [
+    {
+      "code": "DIF01_AVERAGE_INSTANT",
+      "skill": "P1-DIF-01",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Average gradient over an interval was confused with the instantaneous derivative at one point.",
+        "ru": "Средний градиент на интервале перепутан с мгновенной производной в одной точке.",
+        "uz": "Intervaldagi o‘rtacha gradient bitta nuqtadagi oniy hosila bilan adashtirilgan."
+      },
+      "next_action": {
+        "en": "Average gradient uses two points; the derivative is the limiting gradient as the second point approaches the first.",
+        "ru": "Средний градиент использует две точки; производная — предел этого градиента при сближении точек.",
+        "uz": "O‘rtacha gradient ikki nuqtani ishlatadi; hosila ikkinchi nuqta birinchiga yaqinlashgandagi limit gradientdir."
+      }
+    },
+    {
+      "code": "DIF01_DIFFERENCE_QUOTIENT",
+      "skill": "P1-DIF-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The difference quotient was formed incorrectly.",
+        "ru": "Разностное отношение составлено неверно.",
+        "uz": "Ayirmali nisbat noto‘g‘ri tuzilgan."
+      },
+      "next_action": {
+        "en": "Use [f(x+h)−f(x)]/h and keep brackets around f(x+h) before expanding.",
+        "ru": "Используйте [f(x+h)−f(x)]/h и сохраняйте скобки вокруг f(x+h) до раскрытия.",
+        "uz": "[f(x+h)−f(x)]/h dan foydalanib, yoyishdan oldin f(x+h) ni qavsda saqlang."
+      }
+    },
+    {
+      "code": "DIF01_CANCEL_H",
+      "skill": "P1-DIF-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "h was set to zero before the common factor h was simplified.",
+        "ru": "h приравнен к нулю до сокращения общего множителя h.",
+        "uz": "Umumiy h ko‘paytuvchi qisqartirilishidan oldin h=0 qo‘yilgan."
+      },
+      "next_action": {
+        "en": "Simplify the numerator until h is a common factor, cancel h, then take the limit h→0.",
+        "ru": "Упростите числитель до появления общего множителя h, сократите h и только затем переходите к h→0.",
+        "uz": "Suratni h umumiy ko‘paytuvchi bo‘lguncha soddalashtiring, h ni qisqartiring, keyin h→0 limitini oling."
+      }
+    },
+    {
+      "code": "DIF01_RATE_SIGN",
+      "skill": "P1-DIF-01",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The sign of a derivative/rate was interpreted in the wrong direction.",
+        "ru": "Знак производной/скорости изменения интерпретирован в неверном направлении.",
+        "uz": "Hosila/o‘zgarish tezligi ishorasi noto‘g‘ri yo‘nalishda talqin qilingan."
+      },
+      "next_action": {
+        "en": "A positive derivative means the quantity is increasing locally; a negative derivative means it is decreasing.",
+        "ru": "Положительная производная означает локальный рост, отрицательная — локальное уменьшение.",
+        "uz": "Musbat hosila kattalik mahalliy o‘sayotganini, manfiy hosila kamayishini bildiradi."
+      }
+    },
+    {
+      "code": "DIF02_POWER_N_MINUS_1",
+      "skill": "P1-DIF-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The exponent was multiplied correctly but not reduced by 1.",
+        "ru": "Степень умножена правильно, но показатель не уменьшен на 1.",
+        "uz": "Daraja oldinga to‘g‘ri tushirilgan, lekin ko‘rsatkich 1 ga kamaytirilmagan."
+      },
+      "next_action": {
+        "en": "For x^n, multiply by n and change the exponent to n−1.",
+        "ru": "Для x^n умножьте на n и замените показатель на n−1.",
+        "uz": "x^n uchun n ga ko‘paytirib, darajani n−1 ga almashtiring."
+      }
+    },
+    {
+      "code": "DIF02_COEFFICIENT",
+      "skill": "P1-DIF-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The constant coefficient was not carried through the power rule correctly.",
+        "ru": "Постоянный коэффициент неверно сохранён при применении степенного правила.",
+        "uz": "Doimiy koeffitsiyent daraja qoidasida noto‘g‘ri saqlangan."
+      },
+      "next_action": {
+        "en": "For ax^n, the derivative is an x^(n−1); multiply the old coefficient by n.",
+        "ru": "Для ax^n производная равна an x^(n−1); умножьте прежний коэффициент на n.",
+        "uz": "ax^n uchun hosila an x^(n−1); eski koeffitsiyentni n ga ko‘paytiring."
+      }
+    },
+    {
+      "code": "DIF02_CONSTANT_ZERO",
+      "skill": "P1-DIF-02",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A constant term was differentiated as if it depended on x.",
+        "ru": "Постоянный член продифференцирован как зависящий от x.",
+        "uz": "Doimiy had x ga bog‘liqdek differensiallangan."
+      },
+      "next_action": {
+        "en": "The derivative of a constant is 0.",
+        "ru": "Производная постоянной равна 0.",
+        "uz": "Doimiy sonning hosilasi 0."
+      }
+    },
+    {
+      "code": "DIF02_RATIONAL_POWER",
+      "skill": "P1-DIF-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A root or reciprocal was differentiated without first handling its rational exponent correctly.",
+        "ru": "Корень или обратная степень продифференцированы с неверным рациональным показателем.",
+        "uz": "Ildiz yoki teskari daraja ratsional ko‘rsatkich noto‘g‘ri ishlatilgan holda differensiallangan."
+      },
+      "next_action": {
+        "en": "Rewrite roots/reciprocals as x^n, then use n x^(n−1).",
+        "ru": "Перепишите корни/обратные степени как x^n, затем примените n x^(n−1).",
+        "uz": "Ildiz va teskari darajalarni x^n ko‘rinishida yozib, n x^(n−1) ni qo‘llang."
+      }
+    },
+    {
+      "code": "DIF02_LINEAR_COMBINATION",
+      "skill": "P1-DIF-02",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "Terms in a linear combination were not differentiated independently.",
+        "ru": "Члены линейной комбинации продифференцированы не по отдельности.",
+        "uz": "Chiziqli kombinatsiya hadlari alohida differensiallanmagan."
+      },
+      "next_action": {
+        "en": "Differentiate each term separately, preserve its coefficient, then combine the results.",
+        "ru": "Дифференцируйте каждый член отдельно, сохраняя коэффициент, затем объедините результаты.",
+        "uz": "Har bir hadni alohida differensiallab, koeffitsiyentini saqlang va natijalarni birlashtiring."
+      }
+    },
+    {
+      "code": "DIF03_INNER_FACTOR",
+      "skill": "P1-DIF-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The derivative of the inner linear expression was omitted.",
+        "ru": "Пропущена производная внутреннего линейного выражения.",
+        "uz": "Ichki chiziqli ifodaning hosilasi tashlab ketilgan."
+      },
+      "next_action": {
+        "en": "For (ax+b)^n, multiply n(ax+b)^(n−1) by a.",
+        "ru": "Для (ax+b)^n умножьте n(ax+b)^(n−1) на a.",
+        "uz": "(ax+b)^n uchun n(ax+b)^(n−1) ni a ga ko‘paytiring."
+      }
+    },
+    {
+      "code": "DIF03_OUTER_POWER",
+      "skill": "P1-DIF-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The outer power was not reduced by 1.",
+        "ru": "Внешний показатель степени не уменьшен на 1.",
+        "uz": "Tashqi daraja ko‘rsatkichi 1 ga kamaytirilmagan."
+      },
+      "next_action": {
+        "en": "Differentiate the outside power first: n(inner)^(n−1), then multiply by the inner derivative.",
+        "ru": "Сначала продифференцируйте внешнюю степень: n(inner)^(n−1), затем умножьте на производную внутри.",
+        "uz": "Avval tashqi darajani differensiallang: n(inner)^(n−1), keyin ichki hosilaga ko‘paytiring."
+      }
+    },
+    {
+      "code": "DIF03_INNER_SIGN",
+      "skill": "P1-DIF-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The sign of the inner derivative was lost.",
+        "ru": "Потерян знак производной внутреннего выражения.",
+        "uz": "Ichki hosilaning ishorasi yo‘qotilgan."
+      },
+      "next_action": {
+        "en": "Differentiate ax+b exactly; if a is negative, the chain-rule factor is negative.",
+        "ru": "Точно продифференцируйте ax+b; если a отрицателен, множитель chain rule тоже отрицателен.",
+        "uz": "ax+b ni aniq differensiallang; a manfiy bo‘lsa, chain-rule ko‘paytuvchisi ham manfiy."
+      }
+    },
+    {
+      "code": "DIF03_VALUE_SUBSTITUTION",
+      "skill": "P1-DIF-03",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The derivative formula was correct but the evaluation at the stated x-value was not.",
+        "ru": "Формула производной верна, но подстановка заданного x выполнена неверно.",
+        "uz": "Hosila formulasi to‘g‘ri, lekin berilgan x qiymatini qo‘yish noto‘g‘ri."
+      },
+      "next_action": {
+        "en": "Find the derivative first, then substitute the stated x-value into the complete derivative expression.",
+        "ru": "Сначала найдите производную, затем подставьте заданное x во всё выражение производной.",
+        "uz": "Avval hosilani toping, keyin berilgan x ni hosilaning to‘liq ifodasiga qo‘ying."
+      }
+    },
+    {
+      "code": "DIF04_POINT_ON_CURVE",
+      "skill": "P1-DIF-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The tangent/normal line was formed using the wrong point on the curve.",
+        "ru": "Касательная/нормаль построена через неверную точку кривой.",
+        "uz": "Urinma/normal chiziq egri chiziqdagi noto‘g‘ri nuqta orqali tuzilgan."
+      },
+      "next_action": {
+        "en": "Evaluate y at the stated x-value before using point-gradient form.",
+        "ru": "Сначала найдите y при заданном x, затем используйте форму точки и градиента.",
+        "uz": "Nuqta-gradient ko‘rinishidan oldin berilgan x da y ni hisoblang."
+      }
+    },
+    {
+      "code": "DIF04_TANGENT_GRADIENT",
+      "skill": "P1-DIF-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The derivative was not evaluated at the specified point to get the tangent gradient.",
+        "ru": "Производная не вычислена в заданной точке для получения градиента касательной.",
+        "uz": "Urinma gradientini olish uchun hosila berilgan nuqtada hisoblanmagan."
+      },
+      "next_action": {
+        "en": "Differentiate the curve, then substitute the point’s x-coordinate into dy/dx.",
+        "ru": "Продифференцируйте кривую, затем подставьте x-координату точки в dy/dx.",
+        "uz": "Egri chiziqni differensiallab, nuqtaning x-koordinatasini dy/dx ga qo‘ying."
+      }
+    },
+    {
+      "code": "DIF04_NORMAL_RECIPROCAL",
+      "skill": "P1-DIF-04",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The normal gradient was not taken as the negative reciprocal of the tangent gradient.",
+        "ru": "Градиент нормали не взят как отрицательная обратная величина градиента касательной.",
+        "uz": "Normal gradient urinma gradientining manfiy teskari qiymati sifatida olinmagan."
+      },
+      "next_action": {
+        "en": "For finite non-zero tangent gradient m, the normal gradient is −1/m.",
+        "ru": "При конечном ненулевом градиенте касательной m градиент нормали равен −1/m.",
+        "uz": "Urinma gradienti chekli va noldan farqli m bo‘lsa, normal gradient −1/m."
+      }
+    },
+    {
+      "code": "DIF04_LINE_CONSTANT",
+      "skill": "P1-DIF-04",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The line gradient was correct but the constant/intercept was wrong.",
+        "ru": "Градиент прямой верен, но свободный член/перехват неверен.",
+        "uz": "Chiziq gradienti to‘g‘ri, lekin doimiy had/kesishish noto‘g‘ri."
+      },
+      "next_action": {
+        "en": "Use the same curve point in y−y₁=m(x−x₁), then rearrange carefully.",
+        "ru": "Используйте ту же точку кривой в y−y₁=m(x−x₁) и аккуратно преобразуйте.",
+        "uz": "y−y₁=m(x−x₁) da egri chiziqdagi ayni nuqtani ishlatib, ehtiyotkorlik bilan qayta yozing."
+      }
+    },
+    {
+      "code": "DIF05_SIGN_INTERVAL",
+      "skill": "P1-DIF-05",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The sign of the derivative was mapped to increasing/decreasing in the wrong direction.",
+        "ru": "Знак производной неверно сопоставлен с возрастанием/убыванием.",
+        "uz": "Hosila ishorasi o‘sish/kamayish bilan noto‘g‘ri moslangan."
+      },
+      "next_action": {
+        "en": "dy/dx>0 means increasing; dy/dx<0 means decreasing.",
+        "ru": "dy/dx>0 означает возрастание; dy/dx<0 — убывание.",
+        "uz": "dy/dx>0 — o‘sish; dy/dx<0 — kamayish."
+      }
+    },
+    {
+      "code": "DIF05_ROOTS_ONLY",
+      "skill": "P1-DIF-05",
+      "mistake_type": "reasoning",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Only the roots of the derivative were found; the signs between them were not tested.",
+        "ru": "Найдены только корни производной, но знаки между ними не проверены.",
+        "uz": "Faqat hosila ildizlari topilgan, ular orasidagi ishoralar tekshirilmagan."
+      },
+      "next_action": {
+        "en": "Use derivative roots to split the number line, then test the sign on each interval.",
+        "ru": "Корни производной делят числовую ось; затем проверьте знак на каждом интервале.",
+        "uz": "Hosila ildizlari son o‘qini bo‘ladi; keyin har intervalda ishorani tekshiring."
+      }
+    },
+    {
+      "code": "DIF05_QUADRATIC_SIGN",
+      "skill": "P1-DIF-05",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The sign pattern of the quadratic derivative was determined incorrectly.",
+        "ru": "Знаковая схема квадратной производной определена неверно.",
+        "uz": "Kvadrat hosilaning ishora sxemasi noto‘g‘ri aniqlangan."
+      },
+      "next_action": {
+        "en": "Factor or find the roots, note the leading coefficient, and test one point in each interval.",
+        "ru": "Разложите или найдите корни, учтите старший коэффициент и проверьте по одной точке в каждом интервале.",
+        "uz": "Ko‘paytuvchilarga ajrating yoki ildizlarni toping, bosh koeffitsiyentni hisobga olib har intervalda bir nuqtani tekshiring."
+      }
+    },
+    {
+      "code": "DIF05_ENDPOINT",
+      "skill": "P1-DIF-05",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "Stationary boundary points were included/excluded inconsistently with the requested strict interval.",
+        "ru": "Стационарные границы включены/исключены не в соответствии с требуемым строгим интервалом.",
+        "uz": "Statsionar chegara nuqtalari so‘ralgan qat’iy intervalga mos bo‘lmagan tarzda kiritilgan/chiqarilgan."
+      },
+      "next_action": {
+        "en": "For strictly increasing/decreasing intervals use derivative sign >0 or <0; report endpoints according to the question’s convention.",
+        "ru": "Для строгого возрастания/убывания используйте >0 или <0 и оформляйте границы по условию задачи.",
+        "uz": "Qat’iy o‘sish/kamayish uchun >0 yoki <0 dan foydalanib, chekkalarni savol talabi bo‘yicha yozing."
+      }
+    },
+    {
+      "code": "DIF06_CHAIN_RATES",
+      "skill": "P1-DIF-06",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The connected rates were multiplied/divided in the wrong chain.",
+        "ru": "Связанные скорости изменения соединены неверной цепочкой умножения/деления.",
+        "uz": "Bog‘langan o‘zgarish tezliklari noto‘g‘ri zanjir orqali ko‘paytirilgan/bo‘lingan."
+      },
+      "next_action": {
+        "en": "Connect derivatives consistently, e.g. dA/dt=(dA/dr)(dr/dt).",
+        "ru": "Связывайте производные согласованно, например dA/dt=(dA/dr)(dr/dt).",
+        "uz": "Hosilalarni izchil bog‘lang, masalan dA/dt=(dA/dr)(dr/dt)."
+      }
+    },
+    {
+      "code": "DIF06_GEOMETRY_FORMULA",
+      "skill": "P1-DIF-06",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The geometric relationship between the changing quantities was set up incorrectly.",
+        "ru": "Геометрическая связь между изменяющимися величинами составлена неверно.",
+        "uz": "O‘zgarayotgan kattaliklar orasidagi geometrik bog‘lanish noto‘g‘ri tuzilgan."
+      },
+      "next_action": {
+        "en": "Write the correct area/volume/length formula first, then differentiate that relationship.",
+        "ru": "Сначала запишите правильную формулу площади/объёма/длины, затем дифференцируйте её.",
+        "uz": "Avval to‘g‘ri yuza/hajm/uzunlik formulasini yozing, keyin shu bog‘lanishni differensiallang."
+      }
+    },
+    {
+      "code": "DIF06_RATE_SIGN",
+      "skill": "P1-DIF-06",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A decreasing quantity was treated as having a positive rate, or vice versa.",
+        "ru": "Убывающая величина ошибочно получила положительную скорость изменения или наоборот.",
+        "uz": "Kamayayotgan kattalikka musbat tezlik yoki aksincha berilgan."
+      },
+      "next_action": {
+        "en": "Translate words such as increasing/decreasing into the sign of the corresponding time derivative.",
+        "ru": "Переводите слова «увеличивается/уменьшается» в знак соответствующей производной по времени.",
+        "uz": "“O‘smoqda/kamaymoqda” so‘zlarini mos vaqt bo‘yicha hosila ishorasiga aylantiring."
+      }
+    },
+    {
+      "code": "DIF06_UNITS",
+      "skill": "P1-DIF-06",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The numerical rate may be plausible but its units do not match the changing quantity.",
+        "ru": "Числовая скорость может быть правдоподобной, но единицы не соответствуют изменяющейся величине.",
+        "uz": "Sonli tezlik to‘g‘ri bo‘lishi mumkin, lekin birliklar o‘zgarayotgan kattalikka mos emas."
+      },
+      "next_action": {
+        "en": "Length rates use units/time, area rates square-units/time, and volume rates cubic-units/time.",
+        "ru": "Скорости длины имеют единицы/время, площади — квадратные единицы/время, объёма — кубические единицы/время.",
+        "uz": "Uzunlik tezligi birlik/vaqt, yuza tezligi kvadrat birlik/vaqt, hajm tezligi kub birlik/vaqt."
+      }
+    },
+    {
+      "code": "DIF07_STATIONARY_CONDITION",
+      "skill": "P1-DIF-07",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A stationary point was found without imposing dy/dx=0.",
+        "ru": "Стационарная точка найдена без условия dy/dx=0.",
+        "uz": "Statsionar nuqta dy/dx=0 shartisiz topilgan."
+      },
+      "next_action": {
+        "en": "Stationary points are candidates where the first derivative equals zero.",
+        "ru": "Кандидаты на стационарные точки находятся из равенства первой производной нулю.",
+        "uz": "Statsionar nuqta nomzodlari birinchi hosila 0 ga teng bo‘lgan joylardir."
+      }
+    },
+    {
+      "code": "DIF07_Y_COORDINATE",
+      "skill": "P1-DIF-07",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The stationary x-value was found but the corresponding y-coordinate was evaluated incorrectly.",
+        "ru": "x-координата стационарной точки найдена, но y вычислен неверно.",
+        "uz": "Statsionar x qiymati topilgan, lekin mos y noto‘g‘ri hisoblangan."
+      },
+      "next_action": {
+        "en": "Substitute each stationary x-value back into the original function, not into the derivative.",
+        "ru": "Подставляйте стационарный x в исходную функцию, а не в производную.",
+        "uz": "Har bir statsionar x ni hosilaga emas, asl funksiyaga qo‘ying."
+      }
+    },
+    {
+      "code": "DIF07_CLASSIFICATION",
+      "skill": "P1-DIF-07",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The nature of a stationary point was classified with the derivative sign change reversed.",
+        "ru": "Тип стационарной точки определён с перепутанным изменением знака производной.",
+        "uz": "Statsionar nuqta turi hosila ishora o‘zgarishi teskari talqin qilingan."
+      },
+      "next_action": {
+        "en": "Positive→negative gives a local maximum; negative→positive gives a local minimum.",
+        "ru": "Переход +→− даёт локальный максимум; −→+ — локальный минимум.",
+        "uz": "+→− lokal maksimum; −→+ lokal minimum beradi."
+      }
+    },
+    {
+      "code": "DIF07_SECOND_DERIVATIVE",
+      "skill": "P1-DIF-07",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The second-derivative classification was applied with the wrong sign interpretation.",
+        "ru": "Классификация по второй производной выполнена с неверной трактовкой знака.",
+        "uz": "Ikkinchi hosila orqali tasniflash ishorasi noto‘g‘ri talqin qilingan."
+      },
+      "next_action": {
+        "en": "At a stationary point, y''>0 indicates a local minimum and y''<0 a local maximum; y''=0 is inconclusive.",
+        "ru": "В стационарной точке y''>0 означает локальный минимум, y''<0 — максимум; y''=0 не даёт окончательного вывода.",
+        "uz": "Statsionar nuqtada y''>0 lokal minimum, y''<0 lokal maksimum; y''=0 yakuniy xulosa bermaydi."
+      }
+    },
+    {
+      "code": "DIF07_OPTIMISATION_MODEL",
+      "skill": "P1-DIF-07",
+      "mistake_type": "reasoning",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The quantity to optimise was not expressed as a function of one variable correctly.",
+        "ru": "Оптимизируемая величина неверно выражена как функция одной переменной.",
+        "uz": "Optimallashtiriladigan kattalik bitta o‘zgaruvchili funksiya sifatida noto‘g‘ri ifodalangan."
+      },
+      "next_action": {
+        "en": "Use the constraint to eliminate extra variables before differentiating the objective.",
+        "ru": "Используйте ограничение, чтобы исключить лишние переменные до дифференцирования целевой функции.",
+        "uz": "Maqsad funksiyasini differensiallashdan oldin cheklov orqali ortiqcha o‘zgaruvchilarni yo‘qoting."
+      }
+    },
+    {
+      "code": "DIF07_DOMAIN_BOUNDARY",
+      "skill": "P1-DIF-07",
+      "mistake_type": "reasoning",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A stationary candidate was accepted without checking the allowed domain or relevant boundary values.",
+        "ru": "Стационарный кандидат принят без проверки допустимой области или нужных граничных значений.",
+        "uz": "Statsionar nomzod ruxsat etilgan soha yoki zarur chegara qiymatlari tekshirilmasdan qabul qilingan."
+      },
+      "next_action": {
+        "en": "After finding stationary candidates, keep only those in the allowed domain and compare boundaries when required.",
+        "ru": "После нахождения стационарных кандидатов оставьте только допустимые и при необходимости сравните с границами.",
+        "uz": "Statsionar nomzodlardan faqat ruxsat etilganlarini qoldirib, kerak bo‘lsa chegara qiymatlari bilan solishtiring."
+      }
+    }
+  ]
+}

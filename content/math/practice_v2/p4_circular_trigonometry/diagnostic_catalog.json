@@ -1,0 +1,489 @@
+{
+  "version": "p1_circular_trig_diag_v0.1",
+  "policy": {
+    "rule": "Use a diagnostic code only when the authored wrong path deterministically supports it; otherwise return unmapped.",
+    "ai_boundary": "AI may phrase an established diagnostic and approved theory only. It may not decide correctness, invent a weak skill, or complete an active protected assessment."
+  },
+  "diagnostics": [
+    {
+      "code": "CIR01_DEG_RAD_FACTOR",
+      "skill": "P1-CIR-01",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The degree↔radian conversion factor was used in the wrong direction.",
+        "ru": "Коэффициент перевода градусы↔радианы использован в неверном направлении.",
+        "uz": "Daraja↔radian o‘tkazish koeffitsiyenti noto‘g‘ri yo‘nalishda ishlatilgan."
+      },
+      "next_action": {
+        "en": "Use degrees×π/180 for radians, and radians×180/π for degrees.",
+        "ru": "Для радиан используйте градусы×π/180, для градусов — радианы×180/π.",
+        "uz": "Radianga o‘tishda daraja×π/180, darajaga o‘tishda radian×180/π ishlating."
+      }
+    },
+    {
+      "code": "CIR01_PI_COEFFICIENT",
+      "skill": "P1-CIR-01",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The requested coefficient of π was confused with the full radian expression.",
+        "ru": "Коэффициент при π перепутан с полным выражением угла в радианах.",
+        "uz": "π oldidagi koeffitsiyent to‘liq radian ifodasi bilan adashtirilgan."
+      },
+      "next_action": {
+        "en": "Write the radian angle as kπ first, then report only k if the question asks for the coefficient.",
+        "ru": "Сначала запишите угол как kπ, затем укажите только k, если требуется коэффициент.",
+        "uz": "Avval radian burchakni kπ ko‘rinishida yozing, savol koeffitsiyentni so‘rasa faqat k ni bering."
+      }
+    },
+    {
+      "code": "CIR01_FULL_TURN",
+      "skill": "P1-CIR-01",
+      "mistake_type": "concept",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The benchmark relationship between π radians and degrees was used incorrectly.",
+        "ru": "Базовое соответствие между π радианами и градусами использовано неверно.",
+        "uz": "π radian va darajalar orasidagi asosiy moslik noto‘g‘ri ishlatilgan."
+      },
+      "next_action": {
+        "en": "Remember π radians=180° and 2π radians=360°, then scale proportionally.",
+        "ru": "Помните: π радиан=180°, 2π радиан=360°, затем масштабируйте пропорционально.",
+        "uz": "π radian=180° va 2π radian=360° ekanini eslab, proporsional o‘zgartiring."
+      }
+    },
+    {
+      "code": "CIR02_ARC_FORMULA",
+      "skill": "P1-CIR-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The arc-length relation s=rθ was not applied correctly.",
+        "ru": "Формула длины дуги s=rθ применена неверно.",
+        "uz": "Yoy uzunligi s=rθ formulasi noto‘g‘ri qo‘llangan."
+      },
+      "next_action": {
+        "en": "Use s=rθ with θ in radians, then solve for the requested quantity.",
+        "ru": "Используйте s=rθ при θ в радианах и выразите нужную величину.",
+        "uz": "θ radianlarda bo‘lganda s=rθ dan foydalanib, so‘ralgan kattalikni toping."
+      }
+    },
+    {
+      "code": "CIR02_DEG_BEFORE_ARC",
+      "skill": "P1-CIR-02",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A degree measure was used directly in s=rθ.",
+        "ru": "Градусная мера напрямую использована в s=rθ.",
+        "uz": "Daraja o‘lchovi to‘g‘ridan-to‘g‘ri s=rθ formulasida ishlatilgan."
+      },
+      "next_action": {
+        "en": "Convert degrees to radians before using s=rθ.",
+        "ru": "Перед использованием s=rθ переведите градусы в радианы.",
+        "uz": "s=rθ ni ishlatishdan oldin darajani radianga o‘tkazing."
+      }
+    },
+    {
+      "code": "CIR02_REARRANGE",
+      "skill": "P1-CIR-02",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The arc-length formula was rearranged incorrectly for the unknown radius or angle.",
+        "ru": "Формула длины дуги неверно преобразована для неизвестного радиуса или угла.",
+        "uz": "Yoy uzunligi formulasi noma’lum radius yoki burchak uchun noto‘g‘ri qayta tuzilgan."
+      },
+      "next_action": {
+        "en": "From s=rθ, use r=s/θ or θ=s/r as needed.",
+        "ru": "Из s=rθ используйте r=s/θ или θ=s/r.",
+        "uz": "s=rθ dan kerak bo‘lsa r=s/θ yoki θ=s/r ni oling."
+      }
+    },
+    {
+      "code": "CIR02_PERIMETER",
+      "skill": "P1-CIR-02",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "Arc length was confused with the full perimeter of a sector.",
+        "ru": "Длина дуги перепутана с полным периметром сектора.",
+        "uz": "Yoy uzunligi sektorning to‘liq perimetri bilan adashtirilgan."
+      },
+      "next_action": {
+        "en": "A sector perimeter is arc length plus two radii: s+2r.",
+        "ru": "Периметр сектора равен длине дуги плюс два радиуса: s+2r.",
+        "uz": "Sektor perimetri yoy uzunligi va ikki radius yig‘indisi: s+2r."
+      }
+    },
+    {
+      "code": "CIR03_SECTOR_AREA",
+      "skill": "P1-CIR-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The sector-area formula was applied incorrectly.",
+        "ru": "Формула площади сектора применена неверно.",
+        "uz": "Sektor yuzi formulasi noto‘g‘ri qo‘llangan."
+      },
+      "next_action": {
+        "en": "Use A=½r²θ with θ in radians.",
+        "ru": "Используйте A=½r²θ при θ в радианах.",
+        "uz": "θ radianlarda bo‘lganda A=½r²θ dan foydalaning."
+      }
+    },
+    {
+      "code": "CIR03_RADIUS_SQUARED",
+      "skill": "P1-CIR-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The radius was not squared in the sector-area formula.",
+        "ru": "В формуле площади сектора радиус не возведён в квадрат.",
+        "uz": "Sektor yuzi formulasida radius kvadratga ko‘tarilmagan."
+      },
+      "next_action": {
+        "en": "Sector area uses r²: A=½r²θ.",
+        "ru": "В площади сектора используется r²: A=½r²θ.",
+        "uz": "Sektor yuzida r² ishlatiladi: A=½r²θ."
+      }
+    },
+    {
+      "code": "CIR03_SEGMENT_SUBTRACT",
+      "skill": "P1-CIR-03",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The segment area was not formed as sector area minus triangle area.",
+        "ru": "Площадь сегмента неверно составлена: нужно вычесть площадь треугольника из площади сектора.",
+        "uz": "Segment yuzi noto‘g‘ri tuzilgan: sektor yuzidan uchburchak yuzini ayirish kerak."
+      },
+      "next_action": {
+        "en": "For a minor segment, use ½r²θ−½r²sinθ.",
+        "ru": "Для малого сегмента используйте ½r²θ−½r²sinθ.",
+        "uz": "Kichik segment uchun ½r²θ−½r²sinθ dan foydalaning."
+      }
+    },
+    {
+      "code": "CIR03_COMPOSITE",
+      "skill": "P1-CIR-03",
+      "mistake_type": "reasoning",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The composite figure was split into the wrong sector/triangle pieces.",
+        "ru": "Составная фигура неверно разбита на сектор/треугольник.",
+        "uz": "Murakkab shakl sektor/uchburchak qismlarga noto‘g‘ri ajratilgan."
+      },
+      "next_action": {
+        "en": "Identify exactly which sector, triangle or segment pieces are added or removed before calculating.",
+        "ru": "Перед вычислением точно определите, какие сектора, треугольники или сегменты складываются или вычитаются.",
+        "uz": "Hisoblashdan oldin qaysi sektor, uchburchak yoki segment qismlari qo‘shilishi yoki ayirilishini aniqlang."
+      }
+    },
+    {
+      "code": "TRI01_PERIOD",
+      "skill": "P1-TRI-01",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The period of the transformed trigonometric graph was found incorrectly.",
+        "ru": "Период преобразованного тригонометрического графика найден неверно.",
+        "uz": "O‘zgartirilgan trigonometrik grafik davri noto‘g‘ri topilgan."
+      },
+      "next_action": {
+        "en": "For sin(bx) or cos(bx), period is 360°/|b| or 2π/|b|; for tan(bx), 180°/|b| or π/|b|.",
+        "ru": "Для sin(bx), cos(bx) период 360°/|b| или 2π/|b|; для tan(bx) — 180°/|b| или π/|b|.",
+        "uz": "sin(bx), cos(bx) uchun davr 360°/|b| yoki 2π/|b|; tan(bx) uchun 180°/|b| yoki π/|b|."
+      }
+    },
+    {
+      "code": "TRI01_AMPLITUDE_RANGE",
+      "skill": "P1-TRI-01",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The vertical scale/shift was not translated correctly into amplitude or range.",
+        "ru": "Вертикальный масштаб/сдвиг неверно переведён в амплитуду или область значений.",
+        "uz": "Vertikal masshtab/siljish amplituda yoki qiymatlar oralig‘iga noto‘g‘ri o‘tkazilgan."
+      },
+      "next_action": {
+        "en": "For y=a sin x+c or a cos x+c, amplitude is |a| and range is c−|a|≤y≤c+|a|.",
+        "ru": "Для y=a sin x+c или a cos x+c амплитуда |a|, а область значений c−|a|≤y≤c+|a|.",
+        "uz": "y=a sin x+c yoki a cos x+c uchun amplituda |a|, qiymatlar oralig‘i c−|a|≤y≤c+|a|."
+      }
+    },
+    {
+      "code": "TRI01_TRANSLATION_SCALE",
+      "skill": "P1-TRI-01",
+      "mistake_type": "interpretation",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "A graph translation or scale factor was interpreted in the wrong direction.",
+        "ru": "Сдвиг или масштаб графика интерпретирован в неверном направлении.",
+        "uz": "Grafik siljishi yoki masshtabi noto‘g‘ri yo‘nalishda talqin qilingan."
+      },
+      "next_action": {
+        "en": "Separate changes outside the trig function from changes inside its input, then map known graph features.",
+        "ru": "Отделите изменения снаружи тригонометрической функции от изменений её аргумента и отслеживайте известные точки графика.",
+        "uz": "Trigonometrik funksiya tashqarisidagi va argument ichidagi o‘zgarishlarni ajratib, ma’lum grafik xususiyatlarini kuzating."
+      }
+    },
+    {
+      "code": "TRI01_TAN_ASYMPTOTE",
+      "skill": "P1-TRI-01",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A tangent-graph asymptote/period feature was placed incorrectly.",
+        "ru": "Асимптота или период графика тангенса определены неверно.",
+        "uz": "Tangens grafigining asimptotasi yoki davri noto‘g‘ri joylashtirilgan."
+      },
+      "next_action": {
+        "en": "Use tan x period π (180°) and its vertical asymptotes where cos x=0, then transform the input if needed.",
+        "ru": "Используйте период tan x, равный π (180°), и вертикальные асимптоты при cos x=0, затем учитывайте преобразование аргумента.",
+        "uz": "tan x davri π (180°), vertikal asimptotalar cos x=0 bo‘lgan joylarda; keyin argument o‘zgarishini hisobga oling."
+      }
+    },
+    {
+      "code": "TRI02_REFERENCE_ANGLE",
+      "skill": "P1-TRI-02",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The reference angle was identified incorrectly.",
+        "ru": "Опорный угол определён неверно.",
+        "uz": "Tayanch burchak noto‘g‘ri aniqlangan."
+      },
+      "next_action": {
+        "en": "Reduce to the acute reference angle, then apply the correct quadrant sign.",
+        "ru": "Сведите к острому опорному углу, затем примените знак нужной четверти.",
+        "uz": "O‘tkir tayanch burchakka keltirib, kerakli chorak ishorasini qo‘llang."
+      }
+    },
+    {
+      "code": "TRI02_QUADRANT_SIGN",
+      "skill": "P1-TRI-02",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The exact magnitude is plausible but the quadrant sign is wrong.",
+        "ru": "Модуль точного значения правдоподобен, но знак по четверти неверен.",
+        "uz": "Aniq qiymat moduli to‘g‘ri bo‘lishi mumkin, lekin chorak ishorasi noto‘g‘ri."
+      },
+      "next_action": {
+        "en": "Use the sign of sin, cos or tan in the stated quadrant after finding the reference angle.",
+        "ru": "После нахождения опорного угла используйте знак sin, cos или tan в нужной четверти.",
+        "uz": "Tayanch burchakni topgach, tegishli chorakdagi sin, cos yoki tan ishorasini ishlating."
+      }
+    },
+    {
+      "code": "TRI02_EXACT_VALUE",
+      "skill": "P1-TRI-02",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "A standard exact trigonometric value was recalled or simplified incorrectly.",
+        "ru": "Стандартное точное тригонометрическое значение вспомнено или упрощено неверно.",
+        "uz": "Standart aniq trigonometrik qiymat noto‘g‘ri eslangan yoki soddalashtirilgan."
+      },
+      "next_action": {
+        "en": "Anchor on 0°, 30°, 45°, 60°, 90° (or their radian equivalents), then use symmetry.",
+        "ru": "Опирайтесь на 0°, 30°, 45°, 60°, 90° (или радианные эквиваленты), затем используйте симметрию.",
+        "uz": "0°, 30°, 45°, 60°, 90° (yoki radian ekvivalentlari) asosida simmetriyadan foydalaning."
+      }
+    },
+    {
+      "code": "TRI03_PRINCIPAL_RANGE",
+      "skill": "P1-TRI-03",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The inverse-trig result was taken outside the principal-value range.",
+        "ru": "Результат обратной тригонометрической функции взят вне диапазона главных значений.",
+        "uz": "Teskari trigonometrik natija asosiy qiymatlar oralig‘idan tashqarida olingan."
+      },
+      "next_action": {
+        "en": "Use the calculator’s principal-value convention for sin⁻¹, cos⁻¹ or tan⁻¹, then distinguish it from the full equation solution set.",
+        "ru": "Используйте диапазон главных значений sin⁻¹, cos⁻¹ или tan⁻¹ и не путайте его со всеми решениями уравнения.",
+        "uz": "sin⁻¹, cos⁻¹ yoki tan⁻¹ ning asosiy qiymat oralig‘ini ishlating va uni tenglamaning barcha yechimlari bilan adashtirmang."
+      }
+    },
+    {
+      "code": "TRI03_INVERSE_RECIPROCAL",
+      "skill": "P1-TRI-03",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "An inverse trigonometric function was confused with a reciprocal.",
+        "ru": "Обратная тригонометрическая функция перепутана с обратной величиной.",
+        "uz": "Teskari trigonometrik funksiya teskari kasr bilan adashtirilgan."
+      },
+      "next_action": {
+        "en": "sin⁻¹x means arcsin x, not 1/sin x; similarly for cos⁻¹ and tan⁻¹.",
+        "ru": "sin⁻¹x означает arcsin x, а не 1/sin x; аналогично для cos⁻¹ и tan⁻¹.",
+        "uz": "sin⁻¹x arcsin x degani, 1/sin x emas; cos⁻¹ va tan⁻¹ uchun ham shunday."
+      }
+    },
+    {
+      "code": "TRI03_CALCULATOR_MODE",
+      "skill": "P1-TRI-03",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The calculator output appears to use the wrong angle mode.",
+        "ru": "Похоже, калькулятор использован в неверном режиме углов.",
+        "uz": "Kalkulyator noto‘g‘ri burchak rejimida ishlatilganga o‘xshaydi."
+      },
+      "next_action": {
+        "en": "Match the calculator mode (degrees or radians) to the question before using inverse trig.",
+        "ru": "Перед использованием обратной тригонометрии выберите режим калькулятора, соответствующий вопросу: градусы или радианы.",
+        "uz": "Teskari trigonometrik funksiyadan oldin savolga mos daraja yoki radian rejimini tanlang."
+      }
+    },
+    {
+      "code": "TRI04_PYTHAGOREAN",
+      "skill": "P1-TRI-04",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The basic identity sin²x+cos²x=1 was not rearranged correctly.",
+        "ru": "Базовое тождество sin²x+cos²x=1 преобразовано неверно.",
+        "uz": "sin²x+cos²x=1 asosiy ayniyat noto‘g‘ri qayta tuzilgan."
+      },
+      "next_action": {
+        "en": "Use sin²x+cos²x=1 and rearrange only after identifying the target expression.",
+        "ru": "Используйте sin²x+cos²x=1 и преобразуйте его под нужное выражение.",
+        "uz": "sin²x+cos²x=1 dan foydalanib, so‘ralgan ifoda uchun qayta tuzing."
+      }
+    },
+    {
+      "code": "TRI04_TAN_RATIO",
+      "skill": "P1-TRI-04",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The identity tan x=sin x/cos x was used incorrectly.",
+        "ru": "Тождество tan x=sin x/cos x использовано неверно.",
+        "uz": "tan x=sin x/cos x ayniyati noto‘g‘ri ishlatilgan."
+      },
+      "next_action": {
+        "en": "Replace tan x by sin x/cos x when it helps put expressions over a common trig basis.",
+        "ru": "При необходимости замените tan x на sin x/cos x, чтобы привести выражения к общей основе.",
+        "uz": "Kerak bo‘lsa tan x ni sin x/cos x ga almashtirib, ifodalarni umumiy asosga keltiring."
+      }
+    },
+    {
+      "code": "TRI04_ALGEBRA",
+      "skill": "P1-TRI-04",
+      "mistake_type": "method",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "The trigonometric identity step is valid, but the algebraic simplification is not.",
+        "ru": "Тригонометрический шаг верен, но алгебраическое упрощение выполнено неверно.",
+        "uz": "Trigonometrik qadam to‘g‘ri, lekin algebraik soddalashtirish noto‘g‘ri."
+      },
+      "next_action": {
+        "en": "Factor, combine fractions and cancel only common factors, not separate terms.",
+        "ru": "Раскладывайте на множители, приводите дроби к общему знаменателю и сокращайте только общие множители, а не отдельные слагаемые.",
+        "uz": "Ko‘paytuvchilarga ajrating, kasrlarni umumiy maxrajga keltiring va faqat umumiy ko‘paytuvchilarni qisqartiring."
+      }
+    },
+    {
+      "code": "TRI04_ILLEGAL_CANCEL",
+      "skill": "P1-TRI-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Terms were cancelled across addition/subtraction, which is not algebraically valid.",
+        "ru": "Выполнено недопустимое сокращение через сложение или вычитание.",
+        "uz": "Qo‘shish yoki ayirish orasida algebraik jihatdan noto‘g‘ri qisqartirish qilingan."
+      },
+      "next_action": {
+        "en": "Only factors can cancel. Factor the numerator/denominator first if possible.",
+        "ru": "Сокращать можно только множители. Сначала разложите числитель/знаменатель на множители.",
+        "uz": "Faqat ko‘paytuvchilar qisqaradi. Imkon bo‘lsa avval surat/maxrajni ko‘paytuvchilarga ajrating."
+      }
+    },
+    {
+      "code": "TRI05_REFERENCE_SOLUTIONS",
+      "skill": "P1-TRI-05",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The reference angle was found, but one or more valid quadrant solutions were missed.",
+        "ru": "Опорный угол найден, но пропущено одно или несколько решений в допустимых четвертях.",
+        "uz": "Tayanch burchak topilgan, lekin mos choraklardagi bir yoki bir nechta yechim qoldirilgan."
+      },
+      "next_action": {
+        "en": "Use the sign of the trig function to identify every valid quadrant, then list all solutions in the interval.",
+        "ru": "По знаку тригонометрической функции определите все допустимые четверти и перечислите все решения на интервале.",
+        "uz": "Trigonometrik funksiya ishorasi orqali barcha mos choraklarni aniqlab, intervaldagi barcha yechimlarni yozing."
+      }
+    },
+    {
+      "code": "TRI05_INTERVAL_ENDPOINT",
+      "skill": "P1-TRI-05",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "An interval endpoint was wrongly included or excluded.",
+        "ru": "Конец заданного интервала неверно включён или исключён.",
+        "uz": "Berilgan interval chekkasi noto‘g‘ri kiritilgan yoki chiqarilgan."
+      },
+      "next_action": {
+        "en": "Check ≤ versus < at both ends after generating the periodic solutions.",
+        "ru": "После получения периодических решений проверьте ≤ и < на обоих концах интервала.",
+        "uz": "Davriy yechimlarni topgach, intervalning ikki chekkasidagi ≤ va < belgilarini tekshiring."
+      }
+    },
+    {
+      "code": "TRI05_PERIOD",
+      "skill": "P1-TRI-05",
+      "mistake_type": "concept",
+      "inference_strength": "broad",
+      "feedback": {
+        "en": "Solutions were repeated using the wrong trigonometric period.",
+        "ru": "Решения повторены с неверным периодом тригонометрической функции.",
+        "uz": "Yechimlar noto‘g‘ri trigonometrik davr bilan takrorlangan."
+      },
+      "next_action": {
+        "en": "Use 360° (2π) for sine/cosine and 180° (π) for tangent, adjusted for any input multiplier.",
+        "ru": "Используйте 360° (2π) для sin/cos и 180° (π) для tan с учётом множителя аргумента.",
+        "uz": "sin/cos uchun 360° (2π), tan uchun 180° (π) davrni va argument ko‘paytiruvchisini hisobga oling."
+      }
+    },
+    {
+      "code": "TRI05_QUADRATIC_BRANCH",
+      "skill": "P1-TRI-05",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A quadratic trigonometric equation was solved using only one algebraic branch.",
+        "ru": "В квадратном тригонометрическом уравнении использована только одна алгебраическая ветвь.",
+        "uz": "Kvadrat trigonometrik tenglamada faqat bitta algebraik tarmoq ishlatilgan."
+      },
+      "next_action": {
+        "en": "Factor/solve the quadratic in the trig quantity first, then solve every admissible trig branch on the interval.",
+        "ru": "Сначала решите квадратное уравнение относительно тригонометрической величины, затем решите каждую допустимую ветвь на интервале.",
+        "uz": "Avval trigonometrik kattalik bo‘yicha kvadrat tenglamani yeching, keyin intervalda har bir mumkin bo‘lgan tarmoqni yeching."
+      }
+    },
+    {
+      "code": "TRI05_EXTRANEOUS_RANGE",
+      "skill": "P1-TRI-05",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "An algebraic trig value outside the possible range of sine or cosine was treated as a solution branch.",
+        "ru": "Алгебраическое значение вне возможного диапазона sin или cos ошибочно принято как ветвь решения.",
+        "uz": "sin yoki cos mumkin bo‘lgan oralig‘idan tashqaridagi algebraik qiymat yechim tarmog‘i deb qabul qilingan."
+      },
+      "next_action": {
+        "en": "Before solving an equation like sin x=a or cos x=a, require −1≤a≤1.",
+        "ru": "Перед решением sin x=a или cos x=a проверьте −1≤a≤1.",
+        "uz": "sin x=a yoki cos x=a ni yechishdan oldin −1≤a≤1 ni tekshiring."
+      }
+    }
+  ]
+}

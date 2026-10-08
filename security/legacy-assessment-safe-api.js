@@ -50,7 +50,7 @@
 
   const practiceDrill = Object.freeze({
     async startTopic({ subjectKey, topic, subtopic = null, clientSessionId = null }) {
-      return rpc("start_practice_topic_drill_safe_v4", {
+      return rpc("start_practice_topic_drill_safe_v5", {
         p_subject_key: String(subjectKey || ""),
         p_topic: String(topic || ""),
         p_subtopic: subtopic == null || String(subtopic).trim() === "" ? null : String(subtopic),
@@ -58,8 +58,20 @@
       });
     },
 
+    // Independent topic selection: only approved Practice-pool items,
+    // protected Tour questions remain excluded. Never fall back to v5's
+    // calendar-bound drill if this endpoint is unavailable.
+    async startTopicChoice({ subjectKey, topic, clientSessionId = null }) {
+      return rpc("start_practice_topic_drill_choice_safe_v1", {
+        p_subject_key: String(subjectKey || ""),
+        p_topic: String(topic || ""),
+        p_subtopic: null,
+        p_client_session_id: clientSessionId || makeClientSessionId("practice_topic_choice")
+      });
+    },
+
     async startMistakes({ subjectKey, questionIds, clientSessionId = null }) {
-      return rpc("start_practice_mistakes_drill_safe_v4", {
+      return rpc("start_practice_mistakes_drill_safe_v5", {
         p_subject_key: String(subjectKey || ""),
         p_question_ids: normalizeQuestionIds(questionIds),
         p_client_session_id: clientSessionId || makeClientSessionId("practice_mistakes")
@@ -80,7 +92,7 @@
     },
 
     async submit({ sessionId, questionId, userAnswer = "", pickedIndex = null, timeSpent = 0 }) {
-      return rpc("submit_practice_drill_answer_safe_v4", {
+      return rpc("submit_practice_drill_answer_safe_v5", {
         p_session_id: requirePositiveInt(sessionId, "session_id"),
         p_question_id: requirePositiveInt(questionId, "question_id"),
         p_user_answer: userAnswer == null ? "" : String(userAnswer),
@@ -92,7 +104,7 @@
 
   const practice = Object.freeze({
     async start({ poolId, clientSessionId = null }) {
-      return rpc("start_practice_session_auto_safe_v4", {
+      return rpc("start_practice_session_auto_safe_v5", {
         p_pool_id: requirePositiveInt(poolId, "pool_id"),
         p_client_session_id: clientSessionId || makeClientSessionId("practice")
       });
@@ -105,7 +117,7 @@
     },
 
     async submit({ sessionId, questionId, userAnswer = "", pickedIndex = null, timeSpent = 0 }) {
-      return rpc("submit_practice_session_answer_safe_v4", {
+      return rpc("submit_practice_session_answer_safe_v5", {
         p_session_id: requirePositiveInt(sessionId, "session_id"),
         p_question_id: requirePositiveInt(questionId, "question_id"),
         p_user_answer: userAnswer == null ? "" : String(userAnswer),
@@ -115,14 +127,14 @@
     },
 
     async finalize({ sessionId, totalTime = 0 }) {
-      return rpc("finalize_practice_session_safe_v4", {
+      return rpc("finalize_practice_session_safe_v5", {
         p_session_id: requirePositiveInt(sessionId, "session_id"),
         p_total_time: Math.max(0, Math.floor(Number(totalTime) || 0))
       });
     },
 
     async review(attemptId) {
-      return rpc("get_practice_review_full_safe_v4", {
+      return rpc("get_practice_review_full_safe_v5", {
         p_attempt_id: requirePositiveInt(attemptId, "attempt_id")
       });
     },
@@ -138,7 +150,7 @@
     },
 
     async recentMistakes({ subjectKey, topic = null, subtopic = null, limit = 10 }) {
-      return rpc("get_recent_practice_mistakes_safe_v4", {
+      return rpc("get_recent_practice_mistakes_safe_v5", {
         p_subject_key: String(subjectKey || ""),
         p_topic: topic == null || String(topic).trim() === "" ? null : String(topic),
         p_subtopic: subtopic == null || String(subtopic).trim() === "" ? null : String(subtopic),

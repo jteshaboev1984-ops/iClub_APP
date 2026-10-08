@@ -1,0 +1,213 @@
+-- Mathematics Practice v2 — protected Tour invariant snapshot + release audit
+-- Branch-only migration. No Practice/Tour learner rows are changed.
+--
+-- Purpose:
+-- - provide a deterministic fingerprint of all Mathematics Tour structure/results;
+-- - archive exactly which legacy Practice memberships/questions are retired at release;
+-- - make cutover/rollback auditable without storing learner PII in the release audit row.
+
+create or replace function private.practice_v2_tour_invariant_snapshot_v1(
+  p_subject_id bigint
+)
+returns jsonb
+language sql
+stable
+security definer
+set search_path to 'public','private','pg_temp'
+as $function$
+with tour_ids as (
+  select t.id
+  from public.tours t
+  where t.subject_id=p_subject_id
+),
+tour_hash as (
+  select
+    count(*)::bigint as n,
+    md5(coalesce(string_agg(
+      jsonb_build_object(
+        'id',t.id,
+        'season_id',t.season_id,
+        'tour_no',t.tour_no,
+        'start_date',t.start_date,
+        'end_date',t.end_date,
+        'is_active',t.is_active
+      )::text,
+      '|' order by t.id
+    ),'')) as h
+  from public.tours t
+  where t.subject_id=p_subject_id
+),
+question_hash as (
+  select
+    count(*)::bigint as n,
+    md5(coalesce(string_agg(
+      jsonb_build_object(
+        'id',tq.id,
+        'tour_id',tq.tour_id,
+        'question_id',tq.question_id,
+        'order_no',tq.order_no,
+        'is_active',tq.is_active
+      )::text,
+      '|' order by tq.id
+    ),'')) as h
+  from public.tour_questions tq
+  join tour_ids x on x.id=tq.tour_id
+),
+attempt_hash as (
+  select
+    count(*)::bigint as n,
+    md5(coalesce(string_agg(
+      jsonb_build_object(
+        'id',ta.id,
+        'user_id',ta.user_id,
+        'tour_id',ta.tour_id,
+        'score',ta.score,
+        'percent',ta.percent,
+        'total_time',ta.total_time,
+        'status',ta.status,
+        'created_at',ta.created_at
+      )::text,
+      '|' order by ta.id
+    ),'')) as h
+  from public.tour_attempts ta
+  join tour_ids x on x.id=ta.tour_id
+),
+answer_hash as (
+  select
+    count(*)::bigint as n,
+    md5(coalesce(string_agg(
+      jsonb_build_object(
+        'id',a.id,
+        'attempt_id',a.attempt_id,
+        'question_id',a.question_id,
+        'user_answer',a.user_answer,
+        'answered',a.answered,
+        'is_correct',a.is_correct,
+        'time_spent',a.time_spent,
+        'finish_reason',a.finish_reason,
+        'created_at',a.created_at
+      )::text,
+      '|' order by a.id
+    ),'')) as h
+  from public.tour_answers a
+  join public.tour_attempts ta on ta.id=a.attempt_id
+  join tour_ids x on x.id=ta.tour_id
+),
+session_answer_hash as (
+  select
+    count(*)::bigint as n,
+    md5(coalesce(string_agg(
+      jsonb_build_object(
+        'attempt_id',a.attempt_id,
+        'question_id',a.question_id,
+        'user_answer',a.user_answer,
+        'answered',a.answered,
+        'is_correct',a.is_correct,
+        'time_spent',a.time_spent,
+        'finish_reason',a.finish_reason,
+        'answered_at',a.answered_at
+      )::text,
+      '|' order by a.attempt_id,a.question_id
+    ),'')) as h
+  from public.tour_session_answers_v4 a
+  join public.tour_attempts ta on ta.id=a.attempt_id
+  join tour_ids x on x.id=ta.tour_id
+),
+tour_recommendation_hash as (
+  select
+    count(*)::bigint as n,
+    md5(coalesce(string_agg(
+      jsonb_build_object(
+        'id',r.id,
+        'user_id',r.user_id,
+        'subject_id',r.subject_id,
+        'season_id',r.season_id,
+        'tour_no',r.tour_no,
+        'topic',r.topic,
+        'subtopic',r.subtopic,
+        'book_id',r.book_id,
+        'book_reference',r.book_reference,
+        'created_at',r.created_at
+      )::text,
+      '|' order by r.id
+    ),'')) as h
+  from public.recommendations r
+  where r.subject_id=p_subject_id
+    and r.source_type='tour'
+),
+tour_roadmap_hash as (
+  select
+    count(*)::bigint as n,
+    md5(coalesce(string_agg(to_jsonb(lr)::text,'|' order by lr.id),'')) as h
+  from public.learning_roadmaps lr
+  where lr.subject_id=p_subject_id
+    and lr.source_type='tour_attempt'
+),
+certificate_hash as (
+  select
+    count(*)::bigint as n,
+    md5(coalesce(string_agg(to_jsonb(c)::text,'|' order by c.id),'')) as h
+  from public.certificates c
+  where c.subject_id=p_subject_id
+)
+select jsonb_build_object(
+  'subject_id',p_subject_id,
+  'tours_count',(select n from tour_hash),
+  'tours_md5',(select h from tour_hash),
+  'tour_questions_count',(select n from question_hash),
+  'tour_questions_md5',(select h from question_hash),
+  'tour_attempts_count',(select n from attempt_hash),
+  'tour_attempts_md5',(select h from attempt_hash),
+  'tour_answers_count',(select n from answer_hash),
+  'tour_answers_md5',(select h from answer_hash),
+  'tour_session_answers_count',(select n from session_answer_hash),
+  'tour_session_answers_md5',(select h from session_answer_hash),
+  'tour_recommendations_count',(select n from tour_recommendation_hash),
+  'tour_recommendations_md5',(select h from tour_recommendation_hash),
+  'tour_roadmaps_count',(select n from tour_roadmap_hash),
+  'tour_roadmaps_md5',(select h from tour_roadmap_hash),
+  'certificates_count',(select n from certificate_hash),
+  'certificates_md5',(select h from certificate_hash)
+);
+$function$;
+
+revoke all on function private.practice_v2_tour_invariant_snapshot_v1(bigint)
+from public,anon,authenticated;
+
+
+create table if not exists private.practice_v2_release_switch_audit (
+  id bigint generated by default as identity primary key,
+  release_version text not null unique,
+  subject_id bigint not null references public.subjects(id) on delete restrict,
+  started_at timestamptz not null default now(),
+  completed_at timestamptz,
+  rollback_at timestamptz,
+  status text not null default 'prepared'
+    check (status in ('prepared','published','rolled_back','failed')),
+  old_active_membership_ids bigint[] not null default '{}'::bigint[],
+  old_question_ids bigint[] not null default '{}'::bigint[],
+  new_membership_ids bigint[] not null default '{}'::bigint[],
+  new_question_ids bigint[] not null default '{}'::bigint[],
+  old_active_membership_count integer not null default 0,
+  new_membership_count integer not null default 0,
+  tour_snapshot_before jsonb not null,
+  tour_snapshot_after jsonb,
+  rollback_tour_snapshot_before jsonb,
+  rollback_tour_snapshot_after jsonb,
+  notes jsonb not null default '{}'::jsonb
+);
+
+alter table private.practice_v2_release_switch_audit
+  add column if not exists old_question_ids bigint[] not null default '{}'::bigint[];
+
+create index if not exists practice_v2_release_switch_audit_status_idx
+  on private.practice_v2_release_switch_audit(status,started_at desc);
+
+revoke all on table private.practice_v2_release_switch_audit
+from public,anon,authenticated;
+
+comment on function private.practice_v2_tour_invariant_snapshot_v1(bigint) is
+'Private deterministic fingerprint of Tour structure/results plus Tour-derived recommendations, roadmaps and Mathematics certificates for one subject. Used to prove Practice v2 release does not alter protected Tour state.';
+
+comment on table private.practice_v2_release_switch_audit is
+'Private exact legacy/new membership and question archive for Mathematics Practice v2 reset, publish, rollback and cleanup.';
