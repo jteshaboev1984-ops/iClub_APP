@@ -69,8 +69,8 @@ assert(resumeStart>=0&&resumeEnd>resumeStart,'Resume handler must exist');
 const resume=app.slice(resumeStart,resumeEnd);
 const invalid=resume.indexOf('if (!restoredQuiz'),valid=resume.indexOf('state.quizLock = "practice"');
 assert(invalid>=0&&valid>invalid,'Resume failure guard must precede mutation');
-assert.doesNotMatch(resume.slice(invalid,valid),/clearPracticeDraft\\s*\\(/,'Never delete draft if restore failed');
-assert.match(resume.slice(invalid,valid),/showToast\\(tr3\\(/,'Retry notice is trilingual');
+assert.doesNotMatch(resume.slice(invalid,valid),/clearPracticeDraft\s*\(/,'Never delete draft if restore failed');
+assert.match(resume.slice(invalid,valid),/showToast\(tr3\(/,'Retry notice is trilingual');
 assert(resume.indexOf('saveState()',valid)<resume.indexOf('clearPracticeDraft()',valid),
   'Persist restored quiz before clearing recovery draft');
 (async()=>{
