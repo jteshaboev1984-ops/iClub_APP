@@ -1,0 +1,40 @@
+name: Exam Prep Mobile Deep Flow QA
+
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/exam_prep_mobile_deep_flow_qa.js'
+      - '.github/workflows/exam-prep-mobile-deep-flow-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mobile-deep-flow-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate deep-flow script
+        run: node --check .github/scripts/exam_prep_mobile_deep_flow_qa.js
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Run production mobile deep-flow QA
+        env:
+          ICLUB_BASE_URL: https://i-club-app.vercel.app/
+          ICLUB_DEEP_QA_OUT: mobile-deep-flow-artifacts
+        run: node .github/scripts/exam_prep_mobile_deep_flow_qa.js
+
+      - name: Upload mobile deep-flow evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exam-prep-mobile-deep-flow-qa
+          path: mobile-deep-flow-artifacts/
+          retention-days: 7
