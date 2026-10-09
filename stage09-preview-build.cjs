@@ -1,5 +1,7 @@
 'use strict';
-/* Temporary protected-preview builder. Does not execute in production. */
+/* Temporary protected-preview builder. Does not execute in production.
+ * Stage 10 isolated QA build trigger 2026-10-09: keep all application checksums and source unchanged.
+ */
 const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('node:zlib');
