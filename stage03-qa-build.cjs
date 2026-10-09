@@ -54,6 +54,8 @@ for (const script of ['stage06-ai-chat-context.cjs','stage07-context-tutor-prior
   if (!fs.existsSync(full)) throw new Error('Missing approved QA chat composition '+script);
   execFileSync(process.execPath,[script],{cwd:root,stdio:'inherit'});
 }
+// Mathematics P1/P5-only read-only contract. Other subjects are intentionally out of scope.
+execFileSync(process.execPath,['stage08-mathematics-ai-contract.cjs'],{cwd:root,stdio:'inherit'});
 const index = fs.readFileSync(path.join(dist,'index.html'),'utf8');
 const reset = index.indexOf('security/practice-v2-local-reset.js');
 const guard = index.indexOf('practice-v2-reset-preserve-guard.js');
