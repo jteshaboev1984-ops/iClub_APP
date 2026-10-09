@@ -7,6 +7,6 @@
 <text x="52" y="350" class="small">0</text><text x="52" y="294" class="small">20</text><text x="52" y="238" class="small">40</text><text x="52" y="182" class="small">60</text><text x="52" y="126" class="small">80</text><text x="52" y="70" class="small">100</text>
 <text x="103" y="389" class="small">Cumulative population share (%)</text>
 <text transform="translate(20 311) rotate(-90)" class="small">Cumulative income share (%)</text>
-<text x="226" y="165" class="strong">A = 0.19</text><text x="325" y="304" class="strong">B = 0.31</text>
+<text x="207" y="284" class="strong">A = 0.19</text><text x="325" y="304" class="strong">B = 0.31</text>
 <text x="343" y="73" class="small">Equality line</text><text x="345" y="248" class="small">Lorenz curve</text>
 <text x="265" y="407" class="strong">Gini = 1 − 2B = 0.38</text></svg>
