@@ -16,6 +16,10 @@ if (!previous.includes('iclub_math_practice_v2_local_reset_20261007_v1') ||
 const previousPin = 'security/practice-v2-local-reset.js?v=mathv2postpublish1';
 if (html.split(previousPin).length !== 2)
   throw Error('Unexpected Practice reset cache pin');
+const legacyGuard = '<script src="practice-v2-reset-preserve-guard.js?v=stage03preserve1"></script>';
+if (html.split(legacyGuard).length !== 2)
+  throw Error('Unexpected old QA guard; previous no-op must be replaced');
+
 
 const safe = [
   '(() => {',
@@ -120,6 +124,7 @@ async function test() {
 test().then(() => {
   fs.writeFileSync(source, safe, 'utf8');
   fs.writeFileSync(htmlFile,
-    html.replace(previousPin, 'security/practice-v2-local-reset.js?v=stage03oldhistory1'), 'utf8');
-  console.log('STAGE03_MATH_LEGACY_RESET_READY verified_server_proof=1 old_namespace_only=1');
+    html.replace(previousPin, 'security/practice-v2-local-reset.js?v=stage03oldhistory2')
+      .replace(legacyGuard, ''), 'utf8');
+  console.log('STAGE03_MATH_LEGACY_RESET_READY verified_server_proof=1 old_namespace_only=1 stale_guard_removed=1');
 }).catch(error => { console.error(error); process.exitCode = 1; });

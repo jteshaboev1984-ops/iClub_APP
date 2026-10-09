@@ -60,9 +60,9 @@ for (const script of ['stage06-ai-chat-context.cjs','stage07-context-tutor-prior
 execFileSync(process.execPath,['stage08-mathematics-ai-contract.cjs'],{cwd:root,stdio:'inherit'});
 const index = fs.readFileSync(path.join(dist,'index.html'),'utf8');
 const reset = index.indexOf('security/practice-v2-local-reset.js');
-const guard = index.indexOf('practice-v2-reset-preserve-guard.js');
+const guard = index.indexOf('practice-v2-reset-preserve-guard.js?');
 const app = index.indexOf('<script src="app.js?');
-if (!(reset >= 0 && reset < guard && guard < app &&
+if (!(reset >= 0 && reset < app && guard === -1 &&
       index.includes('practice-results-tabs.js?v=stage03tabs1') &&
       index.includes('p304premium2-mathv2reset1-allsubjects1')))
   throw new Error('Stage03 final app load order / script pin mismatch');
