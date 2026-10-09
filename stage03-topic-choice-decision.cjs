@@ -73,6 +73,14 @@ for (let i=0;i<replacements.length;i++) {
   replaceOnce(a,b,'flow-'+i);
 }
 const practiceMessages = [["Не удалось проверить смену темы. Сохранённая тренировка не удалена.","Не удалось проверить смену темы. Незавершённая попытка сохранена."],["Mavzu almashishini tekshirib bo‘lmadi. Saqlangan mashg‘ulot o‘chirilmagan.","Mavzu almashishini tekshirib bo‘lmadi. Tugallanmagan urinish saqlanib qoldi."],["Could not verify the topic change. Your saved session has not been deleted.","Could not verify the topic change. Your unfinished attempt is still available."],["Не удалось сменить тему. Тренировка сохранена — нажмите «Продолжить», чтобы повторить.","Не удалось сменить тему. Незавершённая попытка сохранена. Нажмите «Продолжить», чтобы повторить."],["Mavzuni almashtirib bo‘lmadi. Mashg‘ulot saqlandi — «Davom ettirish» orqali qayta urinib ko‘ring.","Mavzuni almashtirib bo‘lmadi. Tugallanmagan urinish saqlanib qoldi. Qayta urinish uchun «Davom ettirish»ni bosing."],["Could not change topic. Your session is saved — use Resume to retry.","Could not change the topic. Your unfinished attempt is still available. Select Resume to retry."],["Эта тема уже сохранена. Продолжите тренировку.","У вас уже есть незавершённая попытка по этой теме. Продолжите её."],["Bu mavzu saqlangan. Mashg‘ulotni davom ettiring.","Bu mavzu bo‘yicha tugallanmagan urinish bor. Uni davom ettiring."],["This topic is already saved. Resume the session.","You already have an unfinished attempt for this topic. Resume it."]];
+practiceMessages.push(
+  ["Не удалось восстановить практику. Сохранённая тренировка не удалена — попробуйте ещё раз.",
+   "Не удалось восстановить попытку. Черновик сохранён — попробуйте ещё раз."],
+  ["Amaliyotni tiklab bo‘lmadi. Saqlangan mashg‘ulot o‘chirilmagan — qayta urinib ko‘ring.",
+   "Urinishni tiklab bo‘lmadi. Qoralama saqlandi — qayta urinib ko‘ring."],
+  ["Could not restore Practice. Your saved session is still here — please retry.",
+   "Could not resume the attempt. Your draft is safe — please try again."]
+);
 for (let i=0;i<practiceMessages.length;i++) {
   const [before,after] = practiceMessages[i];
   replaceOnce(before,after,'practice copy '+i);
