@@ -1,0 +1,266 @@
+{
+  "manifest": {
+    "version": "economics_9708_batch3b_v0",
+    "number_of_points": 4,
+    "academic_authority": "Official Cambridge syllabus 9708 2026–2028 Version 2",
+    "textbook_scope": "Economics 4th edition, uploaded",
+    "status": "editorial drafts not yet proofread by independent teacher",
+    "runtime_allowed": false,
+    "no_models_called": true,
+    "diagram_blueprints_are_not_rendered_diagrams": true
+  },
+  "cards": [
+    {
+      "syllabus_point": "4.3.4",
+      "provisional_skill_key": "ECON-9708-4.3.4-BASE",
+      "level": "AS",
+      "book_chapter": 17,
+      "tour": 2,
+      "locale": "en",
+      "title": "Why the aggregate demand curve slopes down",
+      "explanations": {
+        "main": "Aggregate demand (AD) shows intended expenditure on domestic output at different general price levels, holding other determinants unchanged. A lower domestic price level may increase the real purchasing power of nominal wealth, reduce demand for money and interest-rate pressure, and make domestic products relatively more competitive abroad if other prices and exchange conditions do not offset it. These channels can increase consumption, investment or net exports, explaining a downward-sloping AD curve. A movement along AD is caused by a change in the price level itself, not an independent change in government spending.",
+        "simple": "At a lower overall price level, planned spending on domestic output may be higher. This is why AD slopes down from left to right.",
+        "alternative": "Imagine prices throughout an economy fall while nominal money balances and foreign prices are unchanged. Households' real balances rise and exports can become more competitive. These are possible reasons for movement along an existing AD curve.",
+        "focus": "If government spending rises while the price level is unchanged, is that movement along AD? No, AD shifts."
+      },
+      "worked_example": "Draw PL vertically and Y horizontally. Mark point A with high PL and low Y, point B with lower PL and higher Y, joined on the same AD curve.",
+      "diagram_blueprint_en": "Vertical axis: general price level PL; horizontal axis: real national output Y. Downward sloping AD, higher price level A (Y low), lower price level B (Y high); no change to AD shifters.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "protected_question_data": false
+    },
+    {
+      "syllabus_point": "4.3.4",
+      "provisional_skill_key": "ECON-9708-4.3.4-BASE",
+      "level": "AS",
+      "book_chapter": 17,
+      "tour": 2,
+      "locale": "ru",
+      "title": "Почему кривая совокупного спроса убывает",
+      "explanations": {
+        "main": "Совокупный спрос (AD) показывает планируемые расходы на отечественный выпуск при разных общих уровнях цен, если остальные факторы неизменны. Понижение общего уровня цен может повысить реальную покупательную способность денежных активов, снизить давление на процентные ставки через спрос на деньги и улучшить ценовую конкурентоспособность отечественной продукции при прочих равных условиях. Это может увеличить потребление, инвестиции или чистый экспорт, поэтому AD обычно имеет отрицательный наклон. Изменение самого уровня цен вызывает движение вдоль кривой, а самостоятельное увеличение государственных расходов — её сдвиг.",
+        "simple": "При более низком общем уровне цен совокупные расходы на отечественный выпуск могут быть выше. Поэтому AD направлена вниз вправо.",
+        "alternative": "Представь, что внутренние цены снизились, а номинальные денежные остатки и зарубежные цены остались прежними. Реальная покупательная способность растёт, экспорт может стать конкурентоспособнее. Это объясняет движение вдоль AD.",
+        "focus": "Если государство увеличило расходы при прежнем уровне цен, это движение вдоль AD? Нет, кривая сдвигается."
+      },
+      "worked_example": "Ось вертикальная — общий уровень цен PL, горизонтальная — реальный выпуск Y. На одной AD отметь высокую PL с меньшим Y и низкую PL с большим Y.",
+      "diagram_blueprint_en": "Vertical axis: general price level PL; horizontal axis: real national output Y. Downward sloping AD, higher price level A (Y low), lower price level B (Y high); no change to AD shifters.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "protected_question_data": false
+    },
+    {
+      "syllabus_point": "4.3.4",
+      "provisional_skill_key": "ECON-9708-4.3.4-BASE",
+      "level": "AS",
+      "book_chapter": 17,
+      "tour": 2,
+      "locale": "uz",
+      "title": "Nega yalpi talab egri chizig‘i pastga yo‘nalgan?",
+      "explanations": {
+        "main": "Yalpi talab (AD) boshqa omillar o‘zgarmaganda turli umumiy narx darajalarida mamlakatda ishlab chiqarilgan mahsulotga rejalashtirilgan xarajatlarni ko‘rsatadi. Ichki narx darajasi pasaysa, nominal pul mablag‘larining real xarid quvvati oshishi, pulga talab va foiz stavkasi bosimi kamayishi hamda boshqa sharoitlar teng bo‘lganda mahalliy mahsulotlar xorijda nisbatan raqobatbardosh bo‘lishi mumkin. Shu yo‘llar iste’mol, investitsiya yoki sof eksportni oshiradi va ADning pastga yo‘nalishini tushuntiradi. Narx darajasining o‘zgarishi AD bo‘ylab harakatni, davlat xarajatining mustaqil oshishi esa AD siljishini keltiradi.",
+        "simple": "Umumiy narx darajasi pastroq bo‘lsa, ichki mahsulotga jami rejalashtirilgan xarajat ko‘proq bo‘lishi mumkin. Shu sababli AD pastga yo‘naladi.",
+        "alternative": "Ichki narxlar tushib, nominal pul qoldig‘i va xorijiy narxlar o‘zgarmasa, real xarid quvvati ortadi va eksport raqobatbardosh bo‘lishi mumkin. Bu ayni AD chizig‘i bo‘ylab harakatni izohlaydi.",
+        "focus": "Narx o‘zgarmaganda davlat xarajati oshsa, AD bo‘ylab harakatmi? Yo‘q, AD siljiydi."
+      },
+      "worked_example": "Tik o‘qda narx darajasi PL, yotiq o‘qda real ishlab chiqarish Y. Bir AD chizig‘ida yuqori PL va past Y nuqtasini, pastroq PL va yuqori Y nuqtasini ko‘rsat.",
+      "diagram_blueprint_en": "Vertical axis: general price level PL; horizontal axis: real national output Y. Downward sloping AD, higher price level A (Y low), lower price level B (Y high); no change to AD shifters.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "protected_question_data": false
+    },
+    {
+      "syllabus_point": "4.3.10",
+      "provisional_skill_key": "ECON-9708-4.3.10-BASE",
+      "level": "AS",
+      "book_chapter": 17,
+      "tour": 2,
+      "locale": "en",
+      "title": "Movement along AD or AS versus a shift",
+      "explanations": {
+        "main": "A movement along AD occurs when the general price level changes while non-price determinants of planned spending are unchanged. An independent increase in investment, government expenditure or export demand shifts the entire AD curve to the right. A movement along SRAS represents a response of output supplied to a different price level with input conditions unchanged. Higher input prices or lower productivity can shift SRAS to the left, raising the price level at any given real output. The trigger decides whether to move along or shift: the curve represents a relationship under a set of assumptions.",
+        "simple": "Changing the variable shown on a curve normally means moving along it. Changing an outside determinant means shifting the whole curve.",
+        "alternative": "Event A: a lower price level increases planned domestic output demanded with all else unchanged — move along AD. Event B: more public investment at unchanged PL — shift AD right. Event C: rising imported energy costs — shift SRAS left.",
+        "focus": "If energy prices rise without a change in the general price level, is it movement along SRAS? No, it is a shift in SRAS."
+      },
+      "worked_example": "Draw AD0 and AD1 in one panel, SRAS0 and SRAS1 in another; label the causal shock and show PL/Y on both diagrams.",
+      "diagram_blueprint_en": "Two panels: left AD movement due solely to PL changes vs shift D0→D1 caused by exogenous spending; right SRAS movement due PL vs shift SRAS0→SRAS1 due input costs/productivity. Both axes PL/Y.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "protected_question_data": false
+    },
+    {
+      "syllabus_point": "4.3.10",
+      "provisional_skill_key": "ECON-9708-4.3.10-BASE",
+      "level": "AS",
+      "book_chapter": 17,
+      "tour": 2,
+      "locale": "ru",
+      "title": "Движение вдоль AD/AS и сдвиг кривой",
+      "explanations": {
+        "main": "Движение вдоль AD возникает, когда меняется общий уровень цен, а прочие факторы планируемых расходов неизменны. Самостоятельный рост инвестиций, государственных расходов или внешнего спроса сдвигает всю кривую AD вправо. Движение вдоль краткосрочной AS (SRAS) означает изменение предлагаемого реального выпуска из-за изменения общего уровня цен при неизменных издержках ресурсов. Удорожание сырья или снижение производительности может сдвинуть SRAS влево. Отличай изменение переменной, изображённой на осях, от изменения внешних условий.",
+        "simple": "Если меняется уровень цен, при прочих равных это обычно движение вдоль AD или SRAS. Если изменился внешний фактор спроса или предложения, сдвигается вся соответствующая кривая.",
+        "alternative": "Ситуация А: уровень цен снизился, другие факторы неизменны — движение вдоль AD. Б: государство увеличило инвестиции — AD вправо. В: импортная энергия подорожала — SRAS влево.",
+        "focus": "Если выросли издержки сырья, но уровень цен пока тот же, это движение вдоль SRAS? Нет, SRAS сдвигается."
+      },
+      "worked_example": "Покажи отдельно AD0→AD1 и SRAS0→SRAS1, отметь причину каждого сдвига. Обе схемы имеют PL по вертикали и Y по горизонтали.",
+      "diagram_blueprint_en": "Two panels: left AD movement due solely to PL changes vs shift D0→D1 caused by exogenous spending; right SRAS movement due PL vs shift SRAS0→SRAS1 due input costs/productivity. Both axes PL/Y.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "protected_question_data": false
+    },
+    {
+      "syllabus_point": "4.3.10",
+      "provisional_skill_key": "ECON-9708-4.3.10-BASE",
+      "level": "AS",
+      "book_chapter": 17,
+      "tour": 2,
+      "locale": "uz",
+      "title": "AD/AS bo‘ylab harakat va egri chiziqning siljishi",
+      "explanations": {
+        "main": "AD bo‘ylab harakat umumiy narx darajasi o‘zgarganda, rejalashtirilgan xarajatning boshqa omillari o‘zgarmasa yuz beradi. Investitsiya, davlat xarajati yoki xorijiy talab mustaqil oshsa, butun AD o‘ngga siljiydi. Qisqa muddatli yalpi taklif (SRAS) bo‘ylab harakat ishlab chiqarish resurslarining sharoiti o‘zgarmagan paytda narx darajasiga javoban real taklif hajmi o‘zgarishini bildiradi. Xomashyo qimmatlashishi yoki unumdorlik pasayishi SRASni chapga siljitishi mumkin. O‘qlardagi o‘zgaruvchi bilan tashqi determinantni farqla.",
+        "simple": "Narx darajasi o‘zgarsa, boshqa sharoitlar teng holda egri chiziq bo‘ylab harakat bo‘ladi. Tashqi omil o‘zgarsa, egri chiziqning o‘zi siljiydi.",
+        "alternative": "A: boshqa omillar o‘zgarmaganda narx pasaydi — AD bo‘ylab harakat. B: davlat investitsiyasi oshdi — AD o‘ngga. C: import energiyasi qimmatlashdi — SRAS chapga.",
+        "focus": "Xomashyo xarajati oshdi. Bu SRAS bo‘ylab harakatmi? Yo‘q, SRAS siljiydi."
+      },
+      "worked_example": "AD0→AD1 va SRAS0→SRAS1ni ikki alohida chizmada ko‘rsat. Har ikkisida tik o‘q PL, yotiq o‘q Y bo‘lsin.",
+      "diagram_blueprint_en": "Two panels: left AD movement due solely to PL changes vs shift D0→D1 caused by exogenous spending; right SRAS movement due PL vs shift SRAS0→SRAS1 due input costs/productivity. Both axes PL/Y.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "protected_question_data": false
+    },
+    {
+      "syllabus_point": "4.3.11",
+      "provisional_skill_key": "ECON-9708-4.3.11-BASE",
+      "level": "AS",
+      "book_chapter": 17,
+      "tour": 2,
+      "locale": "en",
+      "title": "Macroeconomic equilibrium in the AD–AS model",
+      "explanations": {
+        "main": "Short-run macroeconomic equilibrium is where aggregate demand and short-run aggregate supply intersect. The crossing determines equilibrium real output Y* and the general price level PL*. At another price level, the amount of real output demanded may differ from the amount firms plan to supply, creating pressure toward adjustment. Employment tends to be linked to output, but the AD–AS intersection alone does not give an exact unemployment rate. To judge whether an economy has an output gap, compare Y* with a separately identified full-employment or potential-output level, often represented by LRAS.",
+        "simple": "Find where downward AD meets upward SRAS. Read output from the horizontal axis and the price level from the vertical axis. Those are the model's equilibrium values.",
+        "alternative": "Suppose the curves meet at Y=500 (index of real output) and PL=120 (price index). The intersection gives the two equilibrium numbers. If potential output is 550, the economy is below potential by 50 units; that does not itself determine the unemployment rate.",
+        "focus": "Does Y*=500, PL*=120 automatically mean full employment? No. You need a potential-output benchmark."
+      },
+      "worked_example": "Draw E=AD∩SRAS, project E to the price and real-output axes. If LRAS lies to the right of E, identify below-potential production.",
+      "diagram_blueprint_en": "PL on vertical; real output Y on horizontal; downward AD, upward SRAS, crossing E at (Y*,PL*). Dashed guide lines from E to each axis; compare Y* to potential/full employment output only when LRAS marker is added.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "protected_question_data": false
+    },
+    {
+      "syllabus_point": "4.3.11",
+      "provisional_skill_key": "ECON-9708-4.3.11-BASE",
+      "level": "AS",
+      "book_chapter": 17,
+      "tour": 2,
+      "locale": "ru",
+      "title": "Макроэкономическое равновесие в модели AD–AS",
+      "explanations": {
+        "main": "Краткосрочное макроэкономическое равновесие находится в точке пересечения совокупного спроса AD и краткосрочного совокупного предложения SRAS. Пересечение определяет равновесный реальный выпуск Y* и общий уровень цен PL*. При другом уровне цен желаемый спрос и предлагаемый фирмами объём могут различаться, вызывая давление в сторону корректировки. Занятость связана с выпуском, но по одному пересечению нельзя точно вычислить уровень безработицы. Чтобы оценить разрыв выпуска, нужно сравнить Y* с отдельно известным потенциальным выпуском, например показанным кривой LRAS.",
+        "simple": "Найди пересечение убывающей AD и возрастающей SRAS. По горизонтальной оси считай реальный выпуск, по вертикальной — уровень цен.",
+        "alternative": "Допустим, кривые пересеклись при Y=500 и индексе цен PL=120. Это равновесные значения. Если потенциальный выпуск равен 550, фактический выпуск на 50 единиц ниже потенциала, но безработицу в процентах так не вычислить.",
+        "focus": "Означает ли Y*=500 и PL*=120 полную занятость? Нет, нужно знать потенциальный выпуск."
+      },
+      "worked_example": "Отметь E=AD∩SRAS и проведи проекции на оси. Если LRAS находится правее E, выпуск ниже потенциального.",
+      "diagram_blueprint_en": "PL on vertical; real output Y on horizontal; downward AD, upward SRAS, crossing E at (Y*,PL*). Dashed guide lines from E to each axis; compare Y* to potential/full employment output only when LRAS marker is added.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "protected_question_data": false
+    },
+    {
+      "syllabus_point": "4.3.11",
+      "provisional_skill_key": "ECON-9708-4.3.11-BASE",
+      "level": "AS",
+      "book_chapter": 17,
+      "tour": 2,
+      "locale": "uz",
+      "title": "AD–AS modelida makroiqtisodiy muvozanat",
+      "explanations": {
+        "main": "Qisqa muddatli makroiqtisodiy muvozanat yalpi talab AD va qisqa muddatli yalpi taklif SRAS kesishgan nuqtada hosil bo‘ladi. Shu nuqta muvozanatdagi real ishlab chiqarish Y* va umumiy narx darajasi PL* ni belgilaydi. Boshqa narx darajasida talab qilinayotgan va taklif qilinayotgan real ishlab chiqarish farq qilishi, moslashuv jarayonini yuzaga keltirishi mumkin. Bandlik ishlab chiqarish bilan bog‘liq, ammo kesishuvning o‘zi ishsizlik foizini ko‘rsatmaydi. Ishlab chiqarish tafovutini topish uchun Y*ni alohida aniqlangan potensial ishlab chiqarish darajasi, masalan LRAS bilan solishtirish kerak.",
+        "simple": "Pastga yo‘nalgan AD bilan yuqoriga yo‘nalgan SRAS kesishgan joyni top. Yotiq o‘qda real ishlab chiqarish, tik o‘qda narx darajasini o‘qi.",
+        "alternative": "Egri chiziqlar Y=500 va PL=120 da kesishsin. Muvozanat shu. Agar potensial ishlab chiqarish 550 bo‘lsa, real ishlab chiqarish potensialdan 50 birlik past, lekin ishsizlik foizi noma’lum.",
+        "focus": "Y*=500 va PL*=120 to‘liq bandlikni isbotlaydimi? Yo‘q, potensial ishlab chiqarishni bilish kerak."
+      },
+      "worked_example": "E=AD∩SRAS nuqtasidan o‘qlarga chiziq tushir. Agar LRAS E dan o‘ngda bo‘lsa, ishlab chiqarish potensialdan past.",
+      "diagram_blueprint_en": "PL on vertical; real output Y on horizontal; downward AD, upward SRAS, crossing E at (Y*,PL*). Dashed guide lines from E to each axis; compare Y* to potential/full employment output only when LRAS marker is added.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "protected_question_data": false
+    },
+    {
+      "syllabus_point": "6.3.4",
+      "provisional_skill_key": "ECON-9708-6.3.4-BASE",
+      "level": "AS",
+      "book_chapter": 27,
+      "tour": 3,
+      "locale": "en",
+      "title": "Consequences of current-account imbalances",
+      "explanations": {
+        "main": "A current-account deficit occurs when current-account outflows exceed inflows; a surplus is the reverse. A deficit must be matched by net financial inflows and/or changes in financial positions in the overall balance-of-payments accounts, with statistical adjustments. It may reflect productive investment imports that support growth, but persistent deficits financed through debt can create repayment vulnerability. If foreign funding weakens, the exchange rate may come under downward pressure in a floating regime, raising import prices. A surplus can reflect international competitiveness and external saving, but may also arise because domestic demand is weak. Judge causes, persistence, financing, exchange-rate regime and impact on households rather than claiming every deficit is harmful.",
+        "simple": "A current-account deficit is not automatically bad, and a surplus is not automatically good. Ask why it exists and how it is financed.",
+        "alternative": "Country A imports machines to expand exports later: a current-account deficit may help future output. Country B borrows repeatedly to finance consumption and faces capital outflows: its deficit may be fragile. Both are deficits but imply different risks.",
+        "focus": "A country has a current-account surplus because consumers cannot afford imports. Does the surplus automatically prove high living standards? No."
+      },
+      "worked_example": "Evaluation frame: (1) cause, (2) short- or long-run persistence, (3) financing source and debt risk, (4) exchange-rate/inflation effects, (5) distribution of costs and benefits.",
+      "diagram_blueprint_en": "Causal-flow panel: sustained current-account deficit → net external financing needed / pressure on currency conditional on exchange rate and capital flows; potential investment import gains. Contrast surplus → saving/lending abroad and possible weak domestic demand; both depend on causes.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "protected_question_data": false
+    },
+    {
+      "syllabus_point": "6.3.4",
+      "provisional_skill_key": "ECON-9708-6.3.4-BASE",
+      "level": "AS",
+      "book_chapter": 27,
+      "tour": 3,
+      "locale": "ru",
+      "title": "Последствия дисбаланса текущего счёта",
+      "explanations": {
+        "main": "Дефицит текущего счёта возникает, когда платежи по его операциям превышают поступления, профицит — наоборот. Дефицит сопровождается чистыми финансовыми поступлениями из-за рубежа и/или соответствующими изменениями финансовых позиций в платёжном балансе с учётом статистических расхождений. Он может отражать импорт оборудования для будущего роста, но длительное финансирование через долги повышает уязвимость. Если внешний капитал перестаёт поступать, при плавающем курсе возникает давление на валюту, а импорт может дорожать. Профицит способен отражать конкурентоспособность и накопление внешних активов, но также слабый внутренний спрос. Оценивай причины, длительность, источники финансирования и последствия для населения.",
+        "simple": "Дефицит не всегда плох, а профицит не всегда хорош. Важно, из-за чего возник дисбаланс и как он финансируется.",
+        "alternative": "Страна А импортирует оборудование для будущего расширения экспорта — временный дефицит может способствовать росту. Страна Б постоянно занимает на текущее потребление, и капитал начинает уходить — её дефицит рискованнее.",
+        "focus": "Страна имеет профицит только потому, что население не может покупать импорт. Доказывает ли он высокий уровень жизни? Нет."
+      },
+      "worked_example": "План оценки: причины, длительность, финансирование и долг, курс и инфляция, распределение выгод и затрат.",
+      "diagram_blueprint_en": "Causal-flow panel: sustained current-account deficit → net external financing needed / pressure on currency conditional on exchange rate and capital flows; potential investment import gains. Contrast surplus → saving/lending abroad and possible weak domestic demand; both depend on causes.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "protected_question_data": false
+    },
+    {
+      "syllabus_point": "6.3.4",
+      "provisional_skill_key": "ECON-9708-6.3.4-BASE",
+      "level": "AS",
+      "book_chapter": 27,
+      "tour": 3,
+      "locale": "uz",
+      "title": "Joriy hisob nomutanosibligining oqibatlari",
+      "explanations": {
+        "main": "Joriy hisob taqchilligi joriy operatsiyalar bo‘yicha chiqimlar tushumlardan oshganda, ortiqcha qoldiq esa buning aksi bo‘lganda yuz beradi. Taqchillik umumiy to‘lov balansi doirasida xorijdan sof moliyaviy tushumlar va/yoki moliyaviy pozitsiyalardagi o‘zgarishlar bilan, statistik farqlarni hisobga olgan holda mos keladi. U kelajakdagi o‘sishga xizmat qiladigan uskunalar importi bilan bog‘liq bo‘lishi mumkin. Ammo qarz hisobiga uzoq davom etadigan taqchillik to‘lov xavfini oshiradi. Xorijiy mablag‘ kamayganda suzuvchi valyuta kursiga pasayish bosimi yuzaga kelib, import narxlari oshishi mumkin. Ortiqcha qoldiq raqobatbardoshlikni ham, ichki talabning sustligini ham ko‘rsatishi mumkin. Sabab, davomiylik va moliyalashtirishni bahola.",
+        "simple": "Taqchillik doimo zararli, ortiqcha qoldiq doimo foydali emas. Uning sababi va qanday moliyalashtirilishiga qaragin.",
+        "alternative": "A mamlakat kelajak eksportini oshirish uchun uskuna import qiladi — vaqtinchalik taqchillik foydali bo‘lishi mumkin. B mamlakat joriy iste’mol uchun doim qarz olib, kapital chiqishi bilan duch keladi — xavf kattaroq.",
+        "focus": "Mamlakat aholisi importni sotib ololmagani uchun joriy hisobda ortiqcha qoldiq bor. Bu yuqori farovonlikni isbotlaydimi? Yo‘q."
+      },
+      "worked_example": "Baholash tartibi: sabab, davomiylik, moliyalashtirish va qarz, valyuta kursi hamda inflyatsiya, foyda va xarajatlarning taqsimoti.",
+      "diagram_blueprint_en": "Causal-flow panel: sustained current-account deficit → net external financing needed / pressure on currency conditional on exchange rate and capital flows; potential investment import gains. Contrast surplus → saving/lending abroad and possible weak domestic demand; both depend on causes.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "protected_question_data": false
+    }
+  ]
+}
