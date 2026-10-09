@@ -492,7 +492,15 @@
   }
 
   async function open(hostContext = {}) {
-    state.subjectKey = String(hostContext.subjectKey || state.subjectKey || "").trim();
+    // Fail closed when an out-of-date subject card tries to open Mathematics
+    // from a different visible subject hub.
+    const requestedSubject = String(hostContext.subjectKey || "").trim().toLowerCase();
+    const visibleSubject = String(hubEl()?.dataset?.subjectKey || "").trim().toLowerCase();
+    if (!requestedSubject || (visibleSubject && requestedSubject !== visibleSubject)) {
+      close();
+      return false;
+    }
+    state.subjectKey = requestedSubject;
     state.language = normalizeLanguage(hostContext.language || state.language);
     renderEntryCopy();
 

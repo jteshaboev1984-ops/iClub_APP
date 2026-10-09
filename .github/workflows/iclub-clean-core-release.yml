@@ -38,6 +38,7 @@ jobs:
             node --check "$file"
           done
           node --check scripts/math-practice-v2-local-reset-regression.cjs
+          node --check scripts/practice-qa-feedback-release-contract.cjs
           node --check scripts/practice-navigation-release-contract.cjs
           node --check scripts/practice-topic-switch-release-contract.cjs
           grep -Fq 'practice-results-tabs.js?v=stage03tabs2' index.html
@@ -54,6 +55,7 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/math-practice-v2-local-reset-regression.cjs
+          node scripts/practice-qa-feedback-release-contract.cjs
           node scripts/practice-navigation-release-contract.cjs
           node scripts/practice-topic-switch-release-contract.cjs
           node scripts/practice-content-language-preservation.cjs

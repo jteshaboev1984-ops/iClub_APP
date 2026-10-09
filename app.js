@@ -15552,7 +15552,12 @@ async function renderSubjectHubMentorCard(subjectKey) {
   // ---------------------------
     async function renderSubjectHub() {
   const subjectKey = state.courses.subjectKey;
+  // Bind the visible hub identity before any asynchronous entitlement lookup.
+  // A stale Mathematics response may never occupy another subject's hub.
+  const hubIdentityRoot = document.getElementById("courses-subject-hub");
+  if (hubIdentityRoot) hubIdentityRoot.dataset.subjectKey = String(subjectKey || "");
   const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(subjectKey);
+  if (subjectKey !== state.courses.subjectKey) return;
   if (accessOk === false) {
     replaceCourses("all-subjects");
     renderAllSubjects();
@@ -18396,6 +18401,16 @@ if (meta) {
     ` • ${t("practice_topics")}: ${recKeys.length}`;
 }
 
+
+  // Presentation only: original attempt and persistence stay authoritative.
+  try {
+    window.iClubPracticePremiumResult?.render?.({
+      meta, attempt, quiz, wrongCount: wrong.length, topicsCount: recKeys.length
+    });
+  } catch (error) {
+    try { console.warn("practice_result_display_fallback", error?.message); } catch {}
+  }
+
 const reviewCountEl = $("#practice-review-count");
 if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
 
@@ -18931,6 +18946,8 @@ async function renderMyRecs() {
     state?.courses?.myRecsActiveTab ||
     "practice"
   );
+  // Practice modes are independent of competitive Tours recommendations.
+  const practiceMode = state?.courses?.myRecsPracticeMode === "topics" ? "topics" : "tours";
 
   const seasonRows =
     await loadPublishedSeasonRows();
@@ -19130,6 +19147,34 @@ async function renderMyRecs() {
       }
     }
   } catch {}
+
+  // Existing authenticated, read-only summary. Never infer Tour number from
+  // old Practice recommendations, which lack that metadata.
+  let topicHistory = null;
+  let topicHistoryUnavailable = false;
+  if (activeTab === "practice" && practiceMode === "topics") {
+    try {
+      if (!window.sb?.rpc) throw new Error("not_connected");
+      const { data, error } = await window.sb.rpc("get_practice_topic_history_safe_v1",
+        {p_subject_key: subjectKey});
+      if (error || data?.ok !== true || data?.subject_key !== subjectKey) {
+        throw new Error("history_not_available");
+      }
+      topicHistory = data;
+    } catch {
+      topicHistoryUnavailable = true;
+    }
+  }
+  const modeTabs = activeTab !== "practice" ? "" :
+    '<div class="iclub-myrec-practice-modes" role="tablist" aria-label="' +
+      escapeHTML(tr3("История практики", "Amaliyot tarixi", "Practice history")) + '">' +
+      '<button type="button" role="tab" data-my-practice-mode="tours" aria-selected="' +
+        String(practiceMode === "tours") + '">' +
+        escapeHTML(tr3("По турам", "Turlar bo‘yicha", "By tour")) + '</button>' +
+      '<button type="button" role="tab" data-my-practice-mode="topics" aria-selected="' +
+        String(practiceMode === "topics") + '">' +
+        escapeHTML(tr3("По темам", "Mavzular bo‘yicha", "By topic")) + '</button>' +
+    '</div>';
   const tabBtn = (key, label, isActive) => `
     <button
       type="button"
@@ -19215,6 +19260,7 @@ async function renderMyRecs() {
   };
 
   const renderPracticeList = () => {
+    if (practiceMode === "topics") return '<div id="my-recs-topic-history" class="iclub-myrec-topic-holder"></div>';
     if (!practiceRows.length) {
       return `<div class="empty muted">${escapeHTML(t("my_recs_practice_empty") || "Рекомендаций по практике пока нет.")}</div>`;
     }
@@ -19304,6 +19350,7 @@ async function renderMyRecs() {
       )}
     </div>
 
+    ${modeTabs}
     ${renderSeasonControl()}
 
     ${
@@ -19322,6 +19369,21 @@ async function renderMyRecs() {
     });
   });
 
+
+  wrap.querySelectorAll("[data-my-practice-mode]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      state.courses = state.courses || {};
+      state.courses.myRecsPracticeMode = btn.dataset.myPracticeMode === "topics" ? "topics" : "tours";
+      saveState();
+      await renderMyRecs();
+    });
+  });
+  if (activeTab === "practice" && practiceMode === "topics") {
+    window.iClubPracticeTopicHistoryV1?.render?.(
+      wrap.querySelector("#my-recs-topic-history"),
+      topicHistory, topicHistoryUnavailable, currentLang()
+    );
+  }
   const seasonSelect =
     wrap.querySelector(
       "#my-recs-season-select"
@@ -23233,11 +23295,18 @@ if (action === "profile-open-ratings") {
   return;
 }
       if (action === "open-exam-prep") {
+        const requestedSubject = String(state?.courses?.subjectKey || "").trim().toLowerCase();
+        const visibleSubject = String(document.getElementById("courses-subject-hub")?.dataset.subjectKey || "").trim().toLowerCase();
+        if (!requestedSubject || requestedSubject !== visibleSubject ||
+            getCoursesTopScreen() !== "subject-hub") return;
         try {
-          await window.iClubExamPrep?.open?.({
-            subjectKey: state.courses.subjectKey,
-            language: currentLang()
-          });
+          const host = window.iClubExamPrep;
+          if (!host?.syncSubjectHub || !host?.open) return;
+          await host.syncSubjectHub({ subjectKey: requestedSubject, language: currentLang() });
+          if (String(state?.courses?.subjectKey || "").trim().toLowerCase() !== requestedSubject ||
+              String(document.getElementById("courses-subject-hub")?.dataset.subjectKey || "").trim().toLowerCase() !== requestedSubject ||
+              getCoursesTopScreen() !== "subject-hub") return;
+          await host.open({ subjectKey: requestedSubject, language: currentLang() });
         } catch {}
         return;
       }
