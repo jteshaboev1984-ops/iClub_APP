@@ -17,22 +17,22 @@
       "locales": {
         "en": {
           "title": "Price elasticity along a straight-line demand curve",
-          "x_axis": "Price",
-          "y_axis": "Quantity",
+          "x_axis": "Quantity (Q)",
+          "y_axis": "Price (P)",
           "main_takeaway": "Elastic near top, unit elastic at midpoint, inelastic near bottom",
           "explanation": "Point PED depends on P/Q even though the slope stays unchanged."
         },
         "ru": {
           "title": "Ценовая эластичность вдоль прямой спроса",
-          "x_axis": "Цена",
-          "y_axis": "Количество",
+          "x_axis": "Количество (Q)",
+          "y_axis": "Цена (P)",
           "main_takeaway": "Вверху спрос эластичен, в середине единичная эластичность, внизу неэластичен",
           "explanation": "Точечная PED зависит от P/Q, хотя наклон прямой неизменен."
         },
         "uz": {
           "title": "To‘g‘ri chiziqli talabdagi narx elastikligi",
-          "x_axis": "Narx",
-          "y_axis": "Miqdor",
+          "x_axis": "Miqdor (Q)",
+          "y_axis": "Narx (P)",
           "main_takeaway": "Yuqori qismda elastik, o‘rtasida birlik elastik, pastda noelastik",
           "explanation": "Chiziq qiyaligi o‘zgarmasa ham, nuqtadagi PED P/Q nisbatiga bog‘liq."
         }
@@ -127,5 +127,6 @@
       "academic_approved": false,
       "runtime_allowed": false
     }
-  ]
+  ],
+  "validation_note": "2026-10-09 Corrected reversed PED axis labels in locale-caption draft. Reference SVG plots P on vertical axis, Q on horizontal; no runtime assets or live code changed."
 }
