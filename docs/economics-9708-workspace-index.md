@@ -1,16 +1,16 @@
 # Economics 9708 — Working document index (single source of truth)
 
-**Status: Stage 1 academic preparation IN PROGRESS; NOT approved for learner-facing use.**  
+**Status: Stage 1 internal academic source review PASSED for Stage 2 DRAFT THEORY AUTHORING; NOT approved for learner-facing use.**  
 **Historic snapshot before cleanup:** [all previous Stage 1 files at pinned Git commit](https://github.com/jteshaboev1984-ops/iClub_APP/tree/e7c75ba66d77e3d6eb34ba90d2456bc57cd88f51/docs). Deleting obsolete scratch files from the **current Draft branch** does **not** rewrite Git history. All archived files remain available at their exact historical commit paths.
 
 ## Always use these maintained working artifacts
 1. **Approved overall execution plan** — [Subject AI expansion master plan](subject-ai-content-expansion-master-plan-v1.md).
-2. **Current source evidence and remaining release blockers** — [Economics Stage 1 evidence](economics-9708-current-stage1-evidence.md).
+2. **Current source evidence and remaining release blockers** — [Economics Stage 1 source review and delegated internal authoring signoff](economics-9708-current-stage1-evidence.md).
 3. **Official Cambridge syllabus parent source registry** — [253 official points](economics-9708-official-subpoint-registry-v1.md); [book chapter and Tour crosswalk](economics-9708-syllabus-chapter-crosswalk-v1.md).
-4. **One maintained source-scoped candidate register** — [498 provisional learning actions awaiting academic approval](economics-9708-atomic-candidate-register-current.csv). It is **not an approved skill denominator** and must be updated **in place** rather than creating v11/v12 copies.
-5. **One consolidated parent-decision register** — [253 point decisions and provisional rationales](economics-9708-current-253-point-decision-register.csv). All 29 early sparse source rationales are reconstructed and explicitly sourced; **independent educator validation is pending**.
+4. **One maintained source-scoped candidate register** — [498 internally source-reviewed candidate actions for Stage 2 drafts](economics-9708-atomic-candidate-register-current.csv). It is **not an approved skill denominator** and must be updated **in place** rather than creating v11/v12 copies.
+5. **One consolidated parent-decision register** — [253 point decisions and provisional rationales](economics-9708-current-253-point-decision-register.csv). All 29 early sparse source rationales have been reconstructed against official syllabus; AI internal source audit accepted for draft-authoring only, **independent examiner certification not claimed**.
 6. **One maintained semantic overlap queue** — [99 provisionally distinguished cross-parent pairs](economics-9708-semantic-overlap-review-current.csv): all **99** currently flagged semantic overlaps now have a specific preliminary distinction (98 reviewed earlier, plus one new after the 498-action reconciliation); **all 99 still require independent academic signoff**. No skill/mastery auto-merge.
-7. **One maintained academic/content approval matrix** — [all 253 parents and EN/RU/UZ coverage gates](economics-9708-academic-approval-matrix-current.csv). Of 253 parent topics, 40 have unpublished trilingual overview drafts; 213 lack those dedicated drafts. No 498 independent Tutor-skill approvals are claimed.
+7. **One maintained academic/content approval matrix** — [all 253 parents and EN/RU/UZ coverage gates](economics-9708-academic-approval-matrix-current.csv). Of 253 parent topics, 40 have unpublished trilingual overview drafts; 213 lack those dedicated drafts. No 498 individual Tutor card/content/answer-bank approvals are claimed; source-map internal review does not certify Stage 2 content.
 8. **Live-data preservation contract** — [separation of Cambridge syllabus, iClub skills, Practice questions and user history](economics-9708-curriculum-practice-runtime-separation-contract-v1.md). Historical Tour Map 60 questions/Tour vs current 70 active/Tour remains an undecided policy difference; never change live question links or learner attempts without separate authorisation.
 
 ## Keep original assets and unique evidence
