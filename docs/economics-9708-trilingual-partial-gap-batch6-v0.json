@@ -1,0 +1,289 @@
+{
+  "manifest": {
+    "source": "Cambridge Economics 9708 2026–2028 Version 2; user-provided Economics 4th edition",
+    "file": "partial evidence source, unapproved",
+    "number_of_points": 5,
+    "release": false,
+    "approved": false,
+    "original_examples": true,
+    "example_calculation_results": {
+      "goods": -20,
+      "services": 20,
+      "CAB": -3,
+      "debt": 63,
+      "subsidy_cost": 600
+    }
+  },
+  "cards": [
+    {
+      "point": "5.2.3",
+      "skill_key": "ECON-9708-5.2.3-BASE",
+      "qualification": "AS",
+      "tour": 3,
+      "book_chapter": 22,
+      "locale": "en",
+      "title": "National debt: meaning and significance",
+      "explanations": {
+        "main": "National debt is the accumulated stock of outstanding government borrowing, not the annual budget deficit. A budget deficit is a flow: when government spending exceeds revenue over a period, new borrowing may increase the debt stock. Debt servicing can reduce the amount available for other purposes, especially when interest rates rise. Yet borrowing to fund productive infrastructure may raise future output and tax revenue. Assess debt relative to GDP, repayment costs, currency denomination and what the borrowing funds.",
+        "simple": "The deficit is the gap in one year's budget. National debt is what the government still owes from past borrowing.",
+        "alternative": "If debt begins at $60bn, the government issues $5bn more debt and retires $2bn of old principal, the closing debt is $63bn, assuming no other adjustments. A deficit and debt issuance need not match exactly in every year.",
+        "focus": "Is a government deficit the same as its national debt? No. Should every increase in debt be judged bad without considering GDP and use of funds? No."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "5.2.3",
+      "skill_key": "ECON-9708-5.2.3-BASE",
+      "qualification": "AS",
+      "tour": 3,
+      "book_chapter": 22,
+      "locale": "ru",
+      "title": "Государственный долг: смысл и значение",
+      "explanations": {
+        "main": "Государственный долг — накопленная сумма непогашенных государственных обязательств по заимствованиям, а не годовой бюджетный дефицит. Дефицит — поток за период: если расходы превышают доходы, новые займы могут увеличить запас долга. Выплата процентов ограничивает возможности других расходов, особенно при росте ставок. Но заимствования на эффективную инфраструктуру могут повысить будущий выпуск и налоговые поступления. Оценивай долг по отношению к ВВП, стоимость обслуживания, валюту долга и направление расходов.",
+        "simple": "Дефицит — разница доходов и расходов за период. Государственный долг — непогашенные обязательства, накопленные за предыдущие периоды.",
+        "alternative": "Если долг равен $60 млрд, правительство выпускает новых обязательств на $5 млрд и погашает старый основной долг на $2 млрд, новый долг будет $63 млрд при прочих равных. Дефицит и выпуск долговых обязательств не всегда точно совпадают.",
+        "focus": "Дефицит и долг — одно и то же? Нет. Можно ли оценить долг, не учитывая ВВП и цели заимствований? Нет."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "5.2.3",
+      "skill_key": "ECON-9708-5.2.3-BASE",
+      "qualification": "AS",
+      "tour": 3,
+      "book_chapter": 22,
+      "locale": "uz",
+      "title": "Davlat qarzi: mazmuni va ahamiyati",
+      "explanations": {
+        "main": "Davlat qarzi hukumatning o‘tgan davrlarda olgan va hali qaytarmagan qarz majburiyatlari zaxirasidir; bu bir yillik budjet taqchilligi emas. Budjet taqchilligi davr davomida xarajat daromaddan oshganda yuz beradi va yangi qarz davlat qarzini ko‘paytirishi mumkin. Foiz to‘lovlari boshqa maqsadlarga mablag‘ni kamaytirishi mumkin, ayniqsa stavkalar oshsa. Biroq unumdor infratuzilmaga qarz olish kelajak ishlab chiqarish va soliq tushumini ko‘paytirishi mumkin. Qarzning YAIMga nisbati, to‘lov xarajati, valyutasi va maqsadini bahola.",
+        "simple": "Taqchillik — bir davrdagi daromad va xarajat farqi. Davlat qarzi — hali qaytarilmagan oldingi qarzlar zaxirasi.",
+        "alternative": "Dastlabki qarz $60 mlrd, yangi qarz $5 mlrd va qaytarilgan asosiy qarz $2 mlrd bo‘lsa, boshqa o‘zgarishlarsiz jami qarz $63 mlrd bo‘ladi. Taqchillik bilan yangi qarz hajmi har doim aynan teng bo‘lavermaydi.",
+        "focus": "Budjet taqchilligi bilan davlat qarzi bir xilmi? Yo‘q. Qarzning foydasini YAIM va undan foydalanish maqsadisiz baholab bo‘ladimi? Yo‘q."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "6.3.2",
+      "skill_key": "ECON-9708-6.3.2-BASE",
+      "qualification": "AS",
+      "tour": 3,
+      "book_chapter": 27,
+      "locale": "en",
+      "title": "Calculate the four current-account balances",
+      "explanations": {
+        "main": "A goods balance is goods exports minus goods imports. A services balance is services exports minus services imports. Trade in goods and services adds the first two balances. The current-account balance adds net primary income and net secondary income to that combined trade balance. Always use exports minus imports for each trade balance and use the supplied positive or negative signs correctly. A current-account deficit is a negative total, not automatically a deficit in every component.",
+        "simple": "Calculate goods exports minus imports, then services exports minus imports. Add these and then add net primary and net secondary income to get the current account.",
+        "alternative": "Goods exports 70 and imports 90 give −20. Services exports 45 and imports 25 give +20. Combined trade is zero; net primary income −5 and secondary income +2 give current account −3.",
+        "focus": "Goods −20, services +20, primary −5, secondary +2: current account surplus or deficit? Deficit of 3."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "6.3.2",
+      "skill_key": "ECON-9708-6.3.2-BASE",
+      "qualification": "AS",
+      "tour": 3,
+      "book_chapter": 27,
+      "locale": "ru",
+      "title": "Расчёт четырёх показателей текущего счёта",
+      "explanations": {
+        "main": "Сальдо торговли товарами равно экспорту товаров минус их импорт. Сальдо услуг равно экспорту услуг минус их импорт. Сумма этих сальдо образует сальдо торговли товарами и услугами. Затем добавь чистый первичный и чистый вторичный доход, чтобы получить сальдо текущего счёта. При расчётах соблюдай направление «экспорт минус импорт» и знаки чистых поступлений. Отрицательный итог текущего счёта не означает, что каждый его компонент обязательно отрицателен.",
+        "simple": "Найди сальдо товаров, затем услуг. Сложи их и прибавь чистые первичные и вторичные доходы.",
+        "alternative": "Экспорт товаров 70, импорт 90: −20. Экспорт услуг 45, импорт 25: +20. Торговля в сумме даёт ноль. Первичный доход −5, вторичный +2; текущий счёт −3.",
+        "focus": "Товары −20, услуги +20, первичный доход −5, вторичный +2. Итог — профицит или дефицит? Дефицит 3."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "6.3.2",
+      "skill_key": "ECON-9708-6.3.2-BASE",
+      "qualification": "AS",
+      "tour": 3,
+      "book_chapter": 27,
+      "locale": "uz",
+      "title": "Joriy hisobning to‘rtta balansini hisoblash",
+      "explanations": {
+        "main": "Tovarlar savdosi balansi tovar eksportidan tovar importi ayirilganda hosil bo‘ladi. Xizmatlar balansi xizmatlar eksportidan xizmatlar importini ayirish orqali topiladi. Ularning yig‘indisi tovar va xizmatlarning umumiy savdo balansidir. Bunga sof birlamchi va sof ikkilamchi daromadlar qo‘shilib, joriy hisob balansi olinadi. Har ikki savdo balansida eksportdan importni ayir va sof daromadlarning musbat yoki manfiy ishoralarini saqla. Joriy hisob taqchilligi barcha tarkibiy qismlar manfiy degani emas.",
+        "simple": "Avval tovarlar va xizmatlar balansini alohida top. Ularni qo‘shib, sof birlamchi va ikkilamchi daromadlarni hisobga ol.",
+        "alternative": "Tovar eksporti 70, importi 90: −20. Xizmat eksporti 45, importi 25: +20. Savdo jami nol. Sof birlamchi daromad −5, ikkilamchi +2, joriy hisob −3.",
+        "focus": "Tovarlar −20, xizmatlar +20, birlamchi −5, ikkilamchi +2. Joriy hisobda ortiqchalikmi yoki taqchillik? 3 birlik taqchillik."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "7.1.4",
+      "skill_key": "ECON-9708-7.1.4-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 4,
+      "book_chapter": 30,
+      "locale": "en",
+      "title": "Derive an individual demand curve from marginal utility",
+      "explanations": {
+        "main": "As a consumer buys more units of a good, diminishing marginal utility means the extra satisfaction from each additional unit generally falls. If the marginal utility of money is held constant, a rational utility-maximising consumer keeps purchasing while the marginal utility of the next unit, expressed in money terms, is at least its price. A lower price makes further units worth buying, giving a downward-sloping individual demand schedule. This derivation relies on assumptions about rational behaviour and the marginal utility of income.",
+        "simple": "Each extra unit usually gives less extra satisfaction. At a lower price, more of those units become worth buying, so the individual's demand curve slopes down.",
+        "alternative": "Suppose successive units are worth $15, $12 and $8 at the margin. At a price of $13, one unit is purchased; at $9, two; at $7, three, assuming income and marginal utility of money remain unchanged.",
+        "focus": "If price falls and marginal valuations are unchanged, should the chosen quantity normally rise? Yes. Which assumption links utility units to money? A constant marginal utility of money."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "7.1.4",
+      "skill_key": "ECON-9708-7.1.4-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 4,
+      "book_chapter": 30,
+      "locale": "ru",
+      "title": "Выведение индивидуального спроса из предельной полезности",
+      "explanations": {
+        "main": "По мере потребления всё новых единиц товара дополнительная полезность каждой следующей единицы обычно снижается. Если предельная полезность денег считается постоянной, рациональный покупатель продолжает покупки, пока предельная полезность следующей единицы в денежном выражении не становится ниже цены. Снижение цены делает дополнительные единицы выгодными, поэтому индивидуальная кривая спроса имеет отрицательный наклон. Вывод основан на допущениях о рациональности и предельной полезности дохода.",
+        "simple": "Каждая следующая единица обычно приносит меньше дополнительной полезности. При снижении цены становится выгодно купить больше единиц, поэтому спрос направлен вниз.",
+        "alternative": "Предельная ценность трёх единиц равна $15, $12 и $8. При цене $13 купят одну, при $9 — две, при $7 — три, если доход и предельная полезность денег не меняются.",
+        "focus": "Если цена снизилась, а оценки полезности остались прежними, количество обычно возрастёт? Да. Какое допущение связывает полезность с деньгами? Постоянная предельная полезность денег."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "7.1.4",
+      "skill_key": "ECON-9708-7.1.4-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 4,
+      "book_chapter": 30,
+      "locale": "uz",
+      "title": "Chegaraviy naflilikdan individual talabni keltirib chiqarish",
+      "explanations": {
+        "main": "Tovarning ko‘proq birliklari iste’mol qilinganda har bir keyingi birlik keltiradigan qo‘shimcha naflilik odatda kamayadi. Pulning chegaraviy nafliligi o‘zgarmas deb olinsa, oqilona iste’molchi keyingi birlikning puldagi bahosi uning bozor narxidan kam bo‘lmaguncha xarid qiladi. Narx pasayganda qo‘shimcha birliklar sotib olishga arziydi va shu tariqa individual talab chizig‘i pastga yo‘naladi. Bu xulosa oqilona tanlov va pulning chegaraviy nafliligi haqidagi farazlarga bog‘liq.",
+        "simple": "Har bir keyingi birlik odatda kamroq qo‘shimcha foyda beradi. Narx arzonlashsa, ko‘proq birlikni xarid qilish maqbul bo‘lib, talab chizig‘i pastga yo‘naladi.",
+        "alternative": "Uch birlikning chegaraviy puldagi bahosi $15, $12 va $8 bo‘lsin. Narx $13 bo‘lsa bir, $9 bo‘lsa ikki, $7 bo‘lsa uch birlik olinadi, daromad sharoiti o‘zgarmasa.",
+        "focus": "Narx tushsa, chegaraviy baholar o‘zgarmaganda talab odatda ko‘payadimi? Ha. Foydani pulda baholash qaysi farazga tayanadi? Pulning o‘zgarmas chegaraviy nafliligiga."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "7.4.6",
+      "skill_key": "ECON-9708-7.4.6-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 4,
+      "book_chapter": 33,
+      "locale": "en",
+      "title": "Asymmetric information and moral hazard",
+      "explanations": {
+        "main": "Asymmetric information exists when one party to a transaction knows relevant facts that another party does not. Before a contract, this can cause adverse selection, where those at higher risk are more likely to seek coverage or financing. Moral hazard occurs when protection or changed incentives after an agreement lead a party to take less care or more risk because someone else bears part of the consequences. Insurance, monitoring, deductibles and disclosure rules can affect these problems. They are related but not identical and can cause markets to allocate resources inefficiently.",
+        "simple": "Asymmetric information means people in the same deal know different things. Moral hazard means behaviour changes after protection makes risky actions less costly to the decision-maker.",
+        "alternative": "Before buying insurance, a driver may know more about their risk than the insurer: information asymmetry and potential adverse selection. After insurance, a driver might become less careful because some financial loss is covered: moral hazard.",
+        "focus": "Which problem concerns hidden risk before a contract? Adverse selection. Which concerns changed incentives after protection? Moral hazard."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "7.4.6",
+      "skill_key": "ECON-9708-7.4.6-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 4,
+      "book_chapter": 33,
+      "locale": "ru",
+      "title": "Асимметричная информация и моральный риск",
+      "explanations": {
+        "main": "Асимметрия информации возникает, когда одна сторона сделки владеет значимыми сведениями, которых нет у другой. До заключения договора это может привести к неблагоприятному отбору, когда люди с более высоким риском чаще обращаются за страхованием или кредитом. Моральный риск возникает, если защита после заключения договора меняет поведение: человек становится менее осторожным, поскольку часть последствий несёт другая сторона. Франшиза, контроль и раскрытие информации помогают ослаблять такие проблемы. Эти явления связаны, но не совпадают.",
+        "simple": "Асимметрия информации — разница в знаниях сторон. Моральный риск — изменение поведения из-за того, что часть риска оплачивает другой участник.",
+        "alternative": "До оформления страховки водитель может знать о своих рисках больше страховщика — асимметрия информации. После покупки полиса он может ездить менее осторожно, поскольку часть убытков покрывает компания — моральный риск.",
+        "focus": "Какая проблема связана со скрытым риском до договора? Неблагоприятный отбор. Какая — с изменением поведения после получения защиты? Моральный риск."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "7.4.6",
+      "skill_key": "ECON-9708-7.4.6-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 4,
+      "book_chapter": 33,
+      "locale": "uz",
+      "title": "Asimmetrik axborot va ma’naviy xatar",
+      "explanations": {
+        "main": "Asimmetrik axborot bitimning bir tomoni ikkinchisida bo‘lmagan muhim ma’lumotga ega bo‘lganda yuz beradi. Shartnoma oldidan bu salbiy tanlovga olib kelishi mumkin: xavfi yuqoriroq odamlar sug‘urta yoki kredit olishga ko‘proq intiladi. Ma’naviy xatar esa kelishuvdan keyin himoya yoki rag‘batlar o‘zgarishi sababli odam kamroq ehtiyot bo‘lganda yuz beradi, chunki zararining bir qismini boshqa tomon qoplaydi. Nazorat, sug‘urta chegirmasi va ma’lumot oshkor qilish bu muammolarni kamaytirishi mumkin. Ular o‘zaro bog‘liq, lekin aynan bir xil emas.",
+        "simple": "Asimmetrik axborot — bitim tomonlarining ma’lumoti farq qiladi. Ma’naviy xatar — himoya sabab odamning xatti-harakati o‘zgaradi.",
+        "alternative": "Sug‘urta oldidan haydovchi o‘z xavfini kompaniyadan yaxshiroq bilishi mumkin — asimmetrik axborot. Sug‘urtadan keyin zarar qisman qoplanishi sabab kamroq ehtiyot bo‘lsa — ma’naviy xatar.",
+        "focus": "Shartnomadan oldingi yashirin xavf qaysi muammo? Salbiy tanlov. Himoya olgandan keyingi xulq o‘zgarishi qaysi? Ma’naviy xatar."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "9.2.3",
+      "skill_key": "ECON-9708-9.2.3-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 6,
+      "book_chapter": 42,
+      "locale": "en",
+      "title": "Business cycles and automatic stabilisers",
+      "explanations": {
+        "main": "The business cycle describes fluctuations in actual output around a long-run trend, commonly discussed as expansion, peak, contraction and trough. Cycles can be driven by changes in consumption, investment, confidence, foreign demand or supply costs. Automatic stabilisers soften fluctuations without a new discretionary policy decision: during recession, income-tax receipts tend to fall and unemployment-related benefits tend to rise, supporting disposable income; during expansion, taxes rise and benefit payments fall, moderating demand. Their magnitude depends on tax and welfare systems, and they do not eliminate cycles.",
+        "simple": "The economy may expand, reach a peak, contract and reach a trough. Automatic stabilisers, such as taxes and unemployment support, reduce the size of these swings without a new law each time.",
+        "alternative": "In a recession, fewer people pay income tax and more qualify for unemployment support. Household income therefore falls less sharply than it might without these mechanisms. During a boom the reverse helps restrain spending.",
+        "focus": "Do automatic stabilisers require a new government decision for every recession? No. Name two examples: progressive income taxes and unemployment benefits."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "9.2.3",
+      "skill_key": "ECON-9708-9.2.3-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 6,
+      "book_chapter": 42,
+      "locale": "ru",
+      "title": "Экономический цикл и автоматические стабилизаторы",
+      "explanations": {
+        "main": "Экономический цикл отражает колебания фактического выпуска вокруг долгосрочной тенденции: расширение, пик, спад и нижняя точка. Колебания могут вызывать изменения потребления, инвестиций, ожиданий, внешнего спроса и издержек. Автоматические стабилизаторы смягчают их без принятия отдельного нового решения для каждого спада: во время рецессии поступления подоходного налога обычно уменьшаются, а выплаты по безработице растут, поддерживая располагаемый доход. Во время подъёма происходит обратное, что сдерживает спрос. Сила эффекта зависит от налоговой и социальной систем.",
+        "simple": "Экономика проходит подъём, пик, спад и нижнюю точку. Налоги и пособия автоматически смягчают колебания, не отменяя их полностью.",
+        "alternative": "Во время спада меньше людей платят подоходный налог и больше получают пособие по безработице. Поэтому падение располагаемого дохода может быть слабее. Во время подъёма механизм действует в обратном направлении.",
+        "focus": "Нужно ли принимать новый закон перед каждым действием автоматического стабилизатора? Нет. Примеры: прогрессивный подоходный налог и пособие по безработице."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    },
+    {
+      "point": "9.2.3",
+      "skill_key": "ECON-9708-9.2.3-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 6,
+      "book_chapter": 42,
+      "locale": "uz",
+      "title": "Iqtisodiy sikl va avtomatik barqarorlashtirgichlar",
+      "explanations": {
+        "main": "Iqtisodiy sikl haqiqiy ishlab chiqarishning uzoq muddatli trend atrofida tebranishidir: kengayish, cho‘qqi, qisqarish va eng past nuqta. Siklga iste’mol, investitsiya, ishonch, tashqi talab yoki xarajatlar o‘zgarishi ta’sir qiladi. Avtomatik barqarorlashtirgichlar har bir pasayishda yangi qaror qabul qilmasdan tebranishni yumshatadi: tanazzulda daromad solig‘i tushumi odatda kamayadi, ishsizlik nafaqasi esa oshadi va ixtiyordagi daromadni qo‘llab-quvvatlaydi. O‘sish davrida aksincha jarayon talabni biroz tiyadi. Ta’sir soliq va ijtimoiy yordam tizimiga bog‘liq.",
+        "simple": "Iqtisodiyot kengayish, cho‘qqi, pasayish va eng past nuqtadan o‘tishi mumkin. Soliq va nafaqalar yangi qarorsiz tebranishni yumshatadi.",
+        "alternative": "Tanazzulda kamroq kishi daromad solig‘i to‘laydi, ko‘proq odam ishsizlik nafaqasi oladi. Natijada ixtiyordagi daromad shunchalik keskin tushmasligi mumkin. O‘sishda aksincha bo‘ladi.",
+        "focus": "Avtomatik barqarorlashtirgich uchun har safar yangi qaror shartmi? Yo‘q. Ikki misol: progressiv daromad solig‘i va ishsizlik nafaqasi."
+      },
+      "question_ids_verified": [],
+      "academic_approval": false,
+      "runtime_allowed": false
+    }
+  ]
+}
