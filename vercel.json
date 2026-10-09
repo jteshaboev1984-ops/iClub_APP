@@ -1,1 +1,1 @@
-{"version":2,"framework":null,"buildCommand":"node stage09-preview-build.cjs","outputDirectory":"dist","github":{"silent":true}}
+{"version":2,"framework":null,"buildCommand":"node stage09-preview-build.cjs && node stage03-qa-build.cjs","outputDirectory":"dist","github":{"silent":true}}
