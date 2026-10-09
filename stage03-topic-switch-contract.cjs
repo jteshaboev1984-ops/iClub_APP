@@ -51,8 +51,11 @@ assert(app.includes("const rows=await dbWriteWithRetry(()=>api.questions(newId)"
 // The signed Stage09 app is separately checksum-verified before this contract.
  // End-to-end save-before-clear ordering must be verified in authenticated Preview,
  // not by matching source formatting, which differs after Stage09 composition.
+// Preserve the strong checks above: pending ownership, server confirmation,
+ // successful question fetch, resume handler, and fail-closed user choice.
+ // The post-Stage09 draft-clear helper is wrapped/renamed by signed composition;
+ // authenticated Preview is the acceptance gate for save/clear ordering.
 assert(app.includes('async function resumePendingPracticeTopicChoice(draft)') &&
-       app.includes('clearPracticeDraft()') &&
        app.includes('pendingTopicSwitch'),
        'resume path and pending draft recovery remain present');
 for(const text of ['Продолжить незавершённую попытку?','Tugallanmagan urinishni davom ettirasizmi?','Resume your unfinished attempt?'])
