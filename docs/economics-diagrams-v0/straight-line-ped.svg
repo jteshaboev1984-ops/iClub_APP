@@ -6,4 +6,4 @@
 <text x="183" y="113" class="strong">A: |PED| = 4</text><text x="312" y="196" class="strong">B: |PED| = 1</text><text x="315" y="281" class="strong">C: |PED| = 0.25</text>
 <text x="76" y="129" class="small">8</text><text x="76" y="210" class="small">5</text><text x="76" y="291" class="small">2</text>
 <text x="171" y="360" class="small">2</text><text x="297" y="360" class="small">5</text><text x="423" y="360" class="small">8</text>
-<text x="102" y="386" class="small">Q = 10 − P   •   point PED = (dQ/dP)(P/Q)</text></svg>
+<text x="102" y="386" class="small">Q = 10 − P   •   point PED = gradient × P/Q</text></svg>
