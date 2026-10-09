@@ -1,93 +1,87 @@
-# Economics 9708 — CURRENT Stage 1 academic evidence and release gates
+# Economics 9708 — Current Stage 1 academic approval dossier
 
-**2026-10-09 | Stage 1 still IN_PROGRESS | NO learner-facing release | Draft-only GitHub PR #337.**
+**2026-10-09 | Candidate for independent academic review | Stage 1 = IN_PROGRESS | Learner release = BLOCKED**
 
-## Reference authority and decision boundaries
-1. Official [Cambridge International AS & A Level Economics 9708, examination 2026–2028, Version 2](https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf); AS covers syllabus topics 1.1–6.5, A Level requires topics 1.1–11.6. This is the examinable boundary; optional coursebook examples are not mandatory independent Cambridge skills.
-2. User-provided *Economics* fourth-edition coursebook used as pedagogical support and chapter reference. No protected book text/questions/figures copied. The chapter/Tour mapping follows the user-provided approved `Tour Map v1.0 — Economics (по книге) для 7 туров.docx`.
-3. Approved workplan `docs/subject-ai-content-expansion-master-plan-v1.md` mandates syllabus map first, then original theory, Tutor card sources, question/diagnostic mapping, QA, and only then separately authorised additive release.
-4. Preservation contract `docs/economics-9708-curriculum-practice-runtime-separation-contract-v1.md`: a syllabus point, proposed learnable action, book chapter, historical Practice question and versioned Tutor source are different identities. Draft updates never migrate existing questions, student attempts, certificates, progress or local storage.
+This is the ONE maintained current Stage 1 dossier. Do not spawn interim report variants. See [workspace index](economics-9708-workspace-index.md), which preserves earlier revisions by pinned Git commit without cluttering the working tree.
 
-## One large source-scope pass instead of 20-row increments
-**All 107 final formerly-unreviewed parent placeholders** from historical version v9 received explicit source-scoped editorial decisions; their final state and earlier decisions are consolidated in `docs/economics-9708-current-253-point-decision-register.csv`. The historical queues and versioned intermediate registers remain retrievable through Git history.
+## Source hierarchy and method
 
-| Measure | Previous v9 | Current working v10 |
-|---|---:|---:|
-| Official syllabus numbered parent IDs represented | 253 | **253** |
-| Original parent points still without a scope decision | 107 | **0** |
-| Distinct candidate atomic learning actions | 488 | **503** |
-| Newly source-scoped parent points this pass | — | **107** |
-| Parent points retained as one integrated action | — | **96** |
-| Parent points split into multiple teaching/diagnosis actions | — | **11** |
-| Resulting child proposals from those 11 points | — | **26** |
-| Teacher/examiner-approved canonical denominator | unknown | **STILL UNKNOWN** |
+- **Assessment authority:** [official Cambridge International AS & A Level Economics 9708 syllabus v2 for 2026–2028](https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf), subject content printed pp. 15–34; updated Version 2 confirms no significant changes affecting teaching. The numbered syllabus parent ID and the AS/A Level boundary prevail over any draft actions.
+- **Coursebook support:** user-uploaded *Economics for Cambridge International AS & A Level, 4th ed.*; 53 topical chapters (Ch54 exam guidance).
+- **Approved iClub learning order:** user-uploaded `Tour Map v1.0 — Economics (по книге) для 7 туров.docx`; seven Tours by book chapter. Coursebook/Tour classification must not be substituted for exam syllabus tier or for live Practice question membership.
+- **Existing app/data contract:** [subject source ↔ skill ↔ live assessment separation](economics-9708-curriculum-practice-runtime-separation-contract-v1.md).
 
-**Files**:
-- `docs/economics-9708-atomic-candidate-register-current.csv` — complete **503**-candidate working source map; no unreviewed placeholders, every provisional `runtime_allowed=false`, every exact question link `NONE_VERIFIED`.
-- `docs/economics-9708-current-253-point-decision-register.csv` — single **253-point** consolidated decision register with all current keys/actions, book Ch, Tour, scope rationale, and unapproved flags. **29 earliest source-scoped parent decisions require fuller rationale reconstruction from historical Git evidence**; do not treat them as independently signed off.
+## Proposed denominator, after first-pass semantic consolidation
 
-Corrections specifically **remove unintended scope inflation**, including:
-- AS `1.5.1` means nature/meaning of PPC; mandatory standalone chart production cannot be inferred from that wording.
-- AS `2.5.1` and `2.5.2` mean **meaning and significance** of consumer/producer surplus, not a separate compulsory numerical surplus-area calculation per point.
-- AS `3.3.2`: no Gini calculation, whereas A Level `11.4.2` includes Gini calculation and Lorenz analysis.
-- AS `4.2.2`: multiplier **not required**, and `4.2.3` does not require marginal/average propensities.
-- AS `4.3.3`: detailed AD-component knowledge not required for this determinants point; `4.3.2` separately covers AD = C + I + G + (X − M).
-- AS `4.5.1`: unemployment **meaning**; AS `4.5.3` expressly names **five** unemployment types/causes, provisionally split into separate source actions.
-- AS `6.3.1` lists current-account components *and* balanced/imbalanced positions; `6.3.2` contains detailed four calculations.
-- AS `2.2.8` explicitly includes implications for decision-making for PED, YED, XED (three distinct applications).
-- A Level `7.3.5`: **definition of market failure only**. A Level `7.4.5`: deadweight welfare loss in positive/negative externalities, not a separate universal numerical calculation obligation.
-- A Level `10.2.1`: relationship between internal/external value of money, not an unrelated financial-market module.
+| Metric | Current proposal | Approval meaning |
+|---|---:|---|
+| Official numbered Cambridge parent points | **253** | 131 AS + 122 A Level addition |
+| Provisional individual teachable/diagnosable learning actions | **498** | **NOT approved** as an independently correct final denominator |
+| Untreated official syllabus parent points | **0** | All underwent source-scope first-pass editorial treatment |
+| Early source-scope decisions with missing rationale | **0** | All **29** previously flagged decisions now carry explicit syllabus-grounded editorial rationales, **not independent teacher signoff** |
+| Automatically matched/merged historic production question IDs | **0** | Every skill still has `verified_precise_question_ids=NONE_VERIFIED` |
+| Approved individual atomic Theory/Tutor cards | **0** | Stage 2/3 not approved/promoted |
+| Learner runtime permissions | **0** | Every draft candidate has `runtime_allowed=false` |
 
-These are syllabus-scope **editorial proposals**, not individual question answer-key verification or full-textbook expert academic signoff.
+**Per Tour candidate action distribution:** 1=75, 2=65, 3=60, 4=112, 5=36, 6=87, 7=63. This is source-map planning, not Practice question counts and not a learner-facing product value. AS candidate actions 200; A Level addition 298.
 
-## Full seven-Tour syllabus coverage and tier control
+## Maintained evidence; no duplicate v11/v12 files
 
-| Tour | Source book chapters | Official parent points | Candidate atomic actions | Tier |
-|---|---|---:|---:|---|
-| 1 | 1–11 | 51 | 75 | AS |
-| 2 | 12–20 | 46 | 65 | AS |
-| 3 | 21–29 | 34 | 60 | AS |
-| 4 | 30–37 | 47 | 112 | A Level addition |
-| 5 | 38–40 | 17 | 39 | A Level addition |
-| 6 | 41–47 | 33 | 88 | A Level addition |
-| 7 | 48–54 | 25 | 64 | A Level addition |
-| **Total** | | **253** | **503** | **131 AS parent points + 122 A Level parent points** |
+1. [Provisional action register](economics-9708-atomic-candidate-register-current.csv): **498** rows, immutable current draft identity and source status. Parent-to-action structure is **proposed**, not learner-approved.
+2. [Consolidated 253-point editorial source decision register](economics-9708-current-253-point-decision-register.csv): 253 rows, includes restored detailed justification for all former 29 early sparse decisions, source point, chapter, Tour, all current keys and separate approval flags.
+3. [Semantic overlap review](economics-9708-semantic-overlap-review-current.csv): **99** cross-parent potentially related pairs, each now has a specific editorial distinction and provisional **KEEP DISTINCT** decision. Zero flagged pairs remain without an editorial rationale. **Not an examiner/teacher approval; possible unflagged semantic duplicates cannot be ruled out by a lexical search.**
+4. [Parent/topic and locale approval matrix](economics-9708-academic-approval-matrix-current.csv): all 253 points reconciled to the same 498 keys, EN/RU/UZ parent overviews and skill-level release blockers; no phantom approval.
+5. [Official point registry](economics-9708-official-subpoint-registry-v1.md) and [book chapter/Tour crosswalk](economics-9708-syllabus-chapter-crosswalk-v1.md); original audit and question gap triage separately retained.
 
-Book Ch54 provides exam preparation context, not a new independently numbered Cambridge syllabus topic. Every provisional source-mapped action keeps an explicit tier and Tour.
+### Three meaningful corrections from semantic/source review
 
-## Semantic overlap and avoidance of double mastery
-- Scanned **all 503 candidate actions** across different official numbered parent points, comparing normalised learning-action titles.
-- Found **0 exact repeated normalised action titles** across the complete register.
-- Similarity heuristics flagged **98 related cross-parent candidate pairs**. **all 98** now have distinct provisional editorial scope explanations in `docs/economics-9708-semantic-overlap-review-current.csv` (39 earlier + 59 reviewed in the cleanup pass). **Educator approval is still pending for all 98**, so this is not permission to merge skills or share learner mastery.
-- Typical distinctions: demand-elasticity **definition vs calculation vs determinants**; generic AD/AS model vs exchange-rate application; open market exchange-rate equilibrium vs determinants of changes; definition of monetary policy vs effects on the BOP; introductory AS policy vs deeper A Level assessment.
-- **Do not** equate shared vocabulary or a common textbook example with two independently proven competencies. No automatic merge, no copying legacy question evidence to new child key and no mastery reset.
+The earlier **503** proposals are superseded by **498** after removal of **five unpublished draft-only provisional keys**, with every change preserved in Git history and no live IDs changed:
 
-## Actual Tutor coverage, intentionally not inflated
-A readback scan of **11 stored original editorial theory packages** verified **120 unique point+locale drafts**, exactly **40 official parent topics × EN/RU/UZ**, each with four nonblank explanation variants (**480 variants**), all `runtime_allowed=false`.
+- **11.2.1:** official syllabus requires the nominal-vs-real exchange-rate distinction and trade-weighted rates. Duplicate `ECON-9708-11.2.1-01` retired, while `-02` now states the combined nominal-vs-real task and `-03` retains trade-weighted rates. Draft numbers may have gaps; preserving surviving draft keys is safer than unnecessary renumbering.
+- **8.2.5:** official policy requirement presents redistribution mechanisms as *examples*. The four speculative compulsory policy child-mastery outcomes were consolidated into one integrated policy-evaluation action `-01`; old draft `-02`, `-03`, `-04` retired. Negative income tax, universal and means-tested benefits and basic income remain valid **examples**, not four separate compulsory Cambridge-numbered requirements.
+- **10.3.1:** official five policy categories retained as five provisional children. Standalone `-06` multi-policy synthesis was retired as a separate mandatory denominator item; it remains valid **AO3 applied evaluative teaching** in exam-style questions, not a sixth named policy category.
 
-The latest 253-row matrix `docs/economics-9708-academic-approval-matrix-current.csv` separately records:
-- **40** parent points having full **unapproved EN/RU/UZ overview drafts**; **213** parent points do **not** yet have these dedicated overview drafts.
-- **503** proposed learning actions in the latest working register.
-- **ZERO** independently reviewed/approved **atomic** theory cards and Tutor cards, **ZERO** independently verified exact question-answer links; not because no information exists in legacy questions, but because exact-source QA has not been conducted for these new skills.
-- Source approval, bilingual language accuracy, rights and accessibility remain pending across all unfinished content.
+**Historic removed provisional keys were never live learner progress, Practice, mastery or user identities.** Git history retains exact provenance. No other keys or historical question mappings silently merged.
 
-**No claim** that the original overview drafts already cover the proposed 503 child skills. This blocks premature progression to content “100% done” metrics.
+### Cross-parent overlap disposition and remaining true academic gates
 
-## Existing learner-state and Tour pool compatibility
-The original approved Economics Tour Map planned **60** Practice questions in each Tour, while the live database as earlier verified contains **70 distinct active questions in each of seven Economics Practice pools (490)**, with another seven *inactive* associations in Tour 2. This remains a separate architect-held discrepancy, **not** a reason to change the working production arrangement. No questions were moved, deleted, reassigned, regraded or reactivated.
+The full working register was re-scanned **after** the 503 → 498 correction. A keyword similarity filter now detects **99** cross-parent pairs: the 98 previously reviewed pairs remain valid, plus one new `8.2.1` equity/equality **definition** versus `8.2.5` equity/equality **policy evaluation** relation. Every one of the 99 has a distinct preliminary rationale. Treat this as **completed editorial semantic triage**, not exhaustive proof of no duplication.
 
-Original nonruntime SVG figures in `docs/economics-diagrams-v0/` remain publication-blocked until 390px rendering, academic diagram review, accessible labels and embedded EN/RU/UZ translation are complete.
+**Recommended editorial disposition: keep the 99 separately identifiable pending expert confirmation**, primarily for reasons of (a) definitions versus applied causal analysis, (b) different economic markets or models, (c) AS foundation versus A Level extension, (d) calculation versus interpretation/evaluation and (e) same analytical method in different exam contexts. A future qualified reviewer can still overrule any proposed distinction. **No shared learner mastery, implicit co-credit or automatic skill equivalence** is authorised.
 
-## Stage-gate and next action
-**Achieved:** one complete first-pass syllabus source-scope decision for every **253 of 253** Cambridge numbered parent points, with traceable candidate actions and source links. **NOT achieved:** a validated final independent skill denominator.
+## Real source and teaching readiness
 
-**Before Stage 1 can be approved**:
-0. Reconstruct/verify the source-level academic rationale for the **29 early parent decisions** identified in the consolidated register; earlier Git snapshots remain available as evidence.
-1. Get independent academic validation of **all 98 provisionally distinguished cross-parent semantic pairs**, and re-evaluate excessive splits or redundant child actions before fixing the canonical denominator.
-2. Obtain content-owner/educator approval for canonical scope (including embedded AS vs A Level exclusions) and lock the final skill ID mapping without migrating historical user records.
-3. Then only Stage 2: write teacher-reviewed original theory and Tutor cards for each approved independent skill × locale, with source version/hash and independent RU/UZ QA. Practice-specific post-answer reasoning and deterministic diagnosis are separate Stage 4 evidence, not current coverage.
+Across **11 retained original EN/RU/UZ editorial JSON packages**, structurally verified **40 distinct official parent-topic overviews × 3 locales × 4 text variants = 480 original explanation drafts**. These are **unpublished parent overviews**, not 498 independently reviewed skill-specific Tutor cards. The other **213 numbered parent topics** have no dedicated trilingual overview draft. Original chart SVGs and caption JSON remain isolated in `docs/economics-diagrams-v0/`, still lacking full mobile 390px and in-image EN/RU/UZ QA.
 
-**Economics Stage 1 status: IN_PROGRESS.** Chemistry and Biology remain queued. Informatics deferred. Work exists only in draft GitHub documents + private service-only tracker; **no Vercel, build, deploy, merge, runtime AI flags, question-bank changes, user access, localStorage, scoring, attempts, progress, certificates or payments were touched.**
+The official syllabus permits a range of legitimate examples and commands; **one listed example is not always one compulsory independent skill**. Conversely, independently assessable computations or markedly different market mechanisms may justify more than one action per numbered parent. The 498 is therefore a candidate curricular decomposition, **not a Cambridge-published number**.
 
-## Working-tree hygiene
-The current non-runtime working artifacts are identified in `docs/economics-9708-workspace-index.md`. Versioned scratch registers/review queues/progress notes were superseded by maintained `*-current.csv` files and archived in the Git history, **not deployed and not lost from repository commit history**. Do not create successive v11/v12 scratch replicas; update canonical current files with explicit review decisions and separately preserved immutable evidence when required.
+## Real production and methodology compatibility — no side effects
+
+- Historic approved Tour Map: 60 Practice questions per Tour. Read-only production snapshot (2026-10-09): 70 **active distinct** Practice questions in each of seven Economics pools, 490 total; Tour 2 additionally has 7 inactive links. **Do not silently fix or reshard** these pools; this policy discrepancy remains for the architect's explicit decision.
+- Never remap historical `question_id`, answer key, attempts, scores, student progress, mastery, certificates, access permissions, payments, localStorage or Tour course placement based on draft changes. Parent overview content cannot be counted as verified child answer evidence.
+- No Vercel API/build/preview/deploy, merge, production AI activation or live learner changes in Stage 1 preparation.
+
+## Decision package for independent academic signoff
+
+| Review gate | Current state | Required evidence to close |
+|---|---|---|
+| Official syllabus parent coverage (253/253) | **EDITORIAL PASS** | Teacher agrees no compulsory Cambridge area absent/out of scope |
+| Atomic decomposition (498 proposed actions) | **PROPOSED** | Reviewer confirms teachable, independently diagnosable boundaries; can retain/split/merge with traceable evidence |
+| 29 formerly sparse rationales | **RECONSTRUCTED** | Independent academic reviewer validates each, including five former draft-only keys retired |
+| 99 semantic overlap distinctions | **EDITORIAL PASS** | Independent subject reviewer accepts or changes each relation; zero auto-merge by the system |
+| AS vs A Level, syllabus exemptions, book/Tour order | **STRUCTURAL PASS** | Teacher checks difficulty and validity per skill; do not transfer A Level add-ons to AS |
+| Precise verified question+answer key per child | **NOT STARTED** | Independent rights/assessment check in later stage, no fabrication or broad parent-level inference |
+| EN/RU/UZ Theory and Tutor teaching readiness | **NOT APPROVED** | Original correct child-specific content, 3-language technical and pedagogical QA |
+| Graphs, copyright/source rights, mobile and accessibility QA | **NOT APPROVED** | 390px visual rendering and independent diagram/text check |
+| Runtime release / rollback / production compatibility | **NOT AUTHORISED** | Separate express approval, guarded release procedure and data preservation tests |
+
+### Signoff record — must not be filled by an automated editorial pass
+
+**Independent academic reviewer:** PENDING  
+**Review date and syllabus version acknowledgment:** PENDING  
+**Approved canonical independent skill count:** PENDING (proposal = 498)  
+**Exceptions / correction requests:** PENDING  
+**Architect authorisation to proceed from Stage 1 to Stage 2:** PENDING  
+**Separate release / production deployment consent:** NOT GIVEN
+
+**Stage 1 = IN_PROGRESS until these gates are met.** No mass Tutor content authoring or skill-to-question runtime integration yet. Chemistry and Biology remain queued, Informatics deferred.
