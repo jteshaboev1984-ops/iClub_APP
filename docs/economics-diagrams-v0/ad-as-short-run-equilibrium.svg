@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d" viewBox="0 0 600 420" width="600" height="420"><title id="t">Short run aggregate demand and aggregate supply equilibrium</title><desc id="d">A downward aggregate demand curve meets upward short run aggregate supply at E. Projected intersection locates general price level PL star and real output Y star; full employment is not implied.</desc><rect x="0" y="0" width="600" height="420" fill="#ffffff"/><style>text{font-family:Inter,Arial,sans-serif;fill:#263447;font-size:14px} .axis{stroke:#516073;stroke-width:2.3} .guide{stroke:#98a6b5;stroke-width:1.5;stroke-dasharray:6 6} .strong{font-weight:700} .small{font-size:12px;fill:#5c6a79} .large{font-weight:700;font-size:17px}</style><text x="31" y="30" class="large">Short-run macroeconomic equilibrium</text>
+<path class="axis" d="M90 60 V344 H536"/><text x="39" y="58" class="strong">PL</text><text x="520" y="371" class="strong">Y</text>
+<line x1="107" y1="107" x2="520" y2="342" stroke="#2563eb" stroke-width="3.4"/>
+<line x1="107" y1="342" x2="520" y2="107" stroke="#0f9884" stroke-width="3.4"/>
+<path class="guide" d="M313.5 224.5 H90 M313.5 224.5 V344"/><circle cx="313.5" cy="224.5" r="7" fill="#263447" stroke="#ffffff" stroke-width="2"/>
+<text x="327" y="222" class="strong">E</text><text x="78" y="228" class="small">PL*</text><text x="303" y="364" class="small">Y*</text>
+<text x="511" y="339" fill="#2563eb" class="strong">AD</text><text x="498" y="102" fill="#0f9884" class="strong">SRAS</text>
+<text x="104" y="390" class="small">Potential output requires a separate LRAS / capacity benchmark.</text></svg>
