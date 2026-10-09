@@ -31,9 +31,7 @@ source-level incorporation.
 ### Required before any final merge
 1. Re-check main, QA and Vercel exact SHAs. The existing READY Preview from
    42569c8 is **older** than current QA. Do not claim it tests current changes.
-2. Final code must retire obsolete post-publish Mathematics local reset
-   **in tracked source** and replace its cache pin. Preview stage03-retire-legacy-reset.cjs
-   is only a build-time protection. Its implementation must not delete drafts.
+2. Final code must use the approved one-time Mathematics **v2-history-only** local cleanup. It must check authenticated published-bank proof and the existing marker. The QA builder `stage03-retire-legacy-reset.cjs` now generates this narrow protection only in ephemeral `dist`. Never delete unversioned shared drafts/state/recommendations or `practice_history_v3`; make the equivalent reviewed change to tracked source at final integration.
 3. Practice topic-choice UX: RU/UZ/EN, Resume / Discard / close preserving draft;
    finalized results untouched, idempotent retry after network error.
 4. Server function replace_practice_topic_drill_choice_safe_v1 is NOT installed.
@@ -50,8 +48,7 @@ source-level incorporation.
 8. Only architect-approved *one* final production release, after GREEN. No silent merge.
 
 ### Absolute STOP conditions
-- Any attempt to re-run PR #327 merge, Math Practice v2 bank switch,
-  local reset, legacy cleanup, or script that clears progress.
+- Any attempt to re-run PR #327 merge, Mathematics Practice bank switch, server reset/legacy cleanup, repeated/unguarded local reset, or a script that clears current-bank progress.
 - Unexpected mutations to learners, Tours, certificates, Supabase policies or bank.
 - No authorized safe test account for new server RPC.
 - New preview build not GREEN, incorrect SHA, cache version mismatch.
@@ -59,3 +56,10 @@ source-level incorporation.
 
 Historical instructions retained only for audit:
 [SUPERSEDED historical v2 checklist](iclub-unified-release-go-no-go.md).
+
+## 2026-10-09 Stage 04/05 addendum
+- Narrow local legacy-history reset committed to QA; synthetic JavaScript scenarios 5/5 passed (not yet a full browser acceptance).
+- `qa/mathematics-practice-v2-inbox-notice-v1.md` is a RU/UZ/EN **draft** only; audience and dispatch need approval.
+- For in-app-only notifications, explicitly set `user_notifications.delivery_status='skipped'` to avoid Telegram; the live trigger does not auto-skip ordinary `manual` notifications.
+- The shared unversioned Practice draft is retained when its generation cannot be proved; new-bank data safety takes priority over aggressive cleanup.
+- No live database writes, notifications, or production deployments authorized.
