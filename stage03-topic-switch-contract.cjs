@@ -48,7 +48,13 @@ assert(app.includes('if (decision !== "replace") return;'),'cancelled dialog doe
 assert(app.includes("if (loadPracticeDraft()?.pendingTopicSwitch?.clientSessionId!==p.clientSessionId)"),'draft ownership checked before activation');
 assert(app.includes("started?.old_session_abandoned!==true"),'server confirmation required');
 assert(app.includes("const rows=await dbWriteWithRetry(()=>api.questions(newId)"),'new attempt questions verified');
-assert(before(app,"state.quiz=quiz;saveState();","clearPracticeDraft();"),'draft retained until new attempt is saved');
+const recoverStart=app.indexOf('async function resumePendingPracticeTopicChoice(draft)');
+const recoverEnd=app.indexOf('async function startPracticeByRec(',recoverStart);
+const recovery=app.slice(recoverStart,recoverEnd>recoverStart?recoverEnd:recoverStart+8000);
+const saved=recovery.search(/saveState\s*\(\s*\)/);
+const cleared=recovery.search(/clearPracticeDraft\s*\(\s*\)/);
+assert(recoverStart>=0 && saved>=0 && cleared>saved,
+  'draft retained until resumed replacement is saved');
 for(const text of ['Продолжить незавершённую попытку?','Tugallanmagan urinishni davom ettirasizmi?','Resume your unfinished attempt?'])
   assert(app.includes(text),'localization '+text);
 for(const text of ['Последние попытки','So‘nggi urinishlar','Recent attempts'])
