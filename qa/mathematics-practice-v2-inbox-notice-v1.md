@@ -1,38 +1,41 @@
-# iClub APP — Mathematics Practice v2 notification (HOLD)
+# Mathematics Practice v2 — уведомление внутри iClub (подготовлено, без отправки)
 
-Prepared 2026-10-09. **DRAFT ONLY. No insert, delivery, or production authorization.**
+**Статус:** QA-кандидат. Не отправлять до окончательного разрешения на рассылку.
 
-## Russian
-**Title:** Mathematics Practice обновлена
+**Кому:** пользователям, у которых в `public.user_subjects` выбран предмет `mathematics` и существует профиль `public.users`. Проверка 9 октября: **854** подходящих адресата. Всем аккаунтам подряд уведомление не нужно. Аудитория динамическая — перед отправкой перепроверить.
 
-**Body:** Мы обновили банк Mathematics Practice — теперь в нём 495 вопросов. При переходе на новый банк прежние результаты Mathematics Practice были очищены. Начните новую попытку в разделе «По турам» или «По темам». Результаты Tours, сертификаты и прогресс Exam Prep сохранены.
+**Зачем:** банк Mathematics Practice v2 опубликован 8 октября 2026 года, прежние результаты Practice очищены в момент перехода. 495 новых вопросов доступны. Tours, сертификаты и Exam Prep не затрагивались. **Повторно не публиковать банк и не очищать данные.**
 
-## Uzbek
-**Title:** Mathematics Practice yangilandi
+## Утверждаемые пользовательские тексты
 
-**Body:** Mathematics Practice savollar banki yangilandi — endi unda 495 ta savol bor. Yangi bankka o‘tishda Mathematics Practice bo‘yicha oldingi natijalar tozalandi. «Turlar bo‘yicha» yoki «Mavzular bo‘yicha» bo‘limida yangi urinishni boshlang. Tours natijalari, sertifikatlar va Exam Prep’dagi yutuqlaringiz saqlangan.
+### RU
+**Заголовок:** Практика по математике обновлена
 
-## English
-**Title:** Mathematics Practice has been updated
+**Сообщение:** В Практике по математике теперь 495 вопросов нового банка. Результаты прежней версии были очищены при обновлении. Начните новую попытку во вкладке «По турам» или «По темам». Результаты туров, сертификаты и прогресс Exam Prep сохранены.
 
-**Body:** The Mathematics Practice question bank now has 495 questions. Previous Mathematics Practice results were cleared during the switch to the new bank. Start a new attempt in “By Tours” or “By Topics”. Your Tours results, certificates, and Exam Prep progress have been preserved.
+### UZ
+**Sarlavha:** Matematika amaliyoti yangilandi
 
-## Safe delivery contract (NOT YET AUTHORIZED)
+**Xabar:** Matematika amaliyotida endi yangi bankning 495 ta savoli mavjud. Oldingi versiya natijalari yangilanish vaqtida tozalangan. «Turlar bo‘yicha» yoki «Mavzular bo‘yicha» bo‘limida yangi urinishni boshlang. Turlar natijalari, sertifikatlar va Exam Prep’dagi natijalaringiz saqlangan.
 
-- Use the **existing** `public.notifications` and `public.user_notifications`; do not build another inbox.
-- Notification `kind='manual'`; all six `title_ru/uz/en` and `body_ru/uz/en` fields mandatory.
-- Stable deduplication tag: `meta.campaign_code='math_practice_v2_notice_20261009_v1'`. Read-only campaign lookup must be empty immediately before insert; after a successful insert, reruns must reuse the same notification ID.
-- **IN-APP ONLY.** Every `public.user_notifications` assignment must explicitly use `delivery_status='skipped'` (not `pending`) and a clear `delivery_error='in_app_only: user-facing app notice, no Telegram'`. Do not call the Telegram delivery worker. The existing `trg_set_app_only_notification_delivery_status` only auto-skips a few special notification types, **not** ordinary manual campaigns.
-- `user_notifications` has unique `(notification_id,user_id)` and `(user_id,notification_id)`; use these for exactly-once recipient assignment; never recreate an already assigned campaign.
-- Do not send until final cohort confirmed. Baseline SELECT on 2026-10-09: `auth.users=1845`, `public.users=1447` (valid inbox-FK population). These are different populations. The exact audience is pending architect approval; never assume all auth users are app inbox accounts.
-- Query target recipients **read-only**, exclude already delivered notice IDs, and verify target count before inserting. Avoid including the same user twice.
-- Check `refreshNotificationsBadge` and inbox rendering for RU/UZ/EN with a controlled test account before general delivery.
-- The Mathematics bank was already published on 2026-10-08. Never run its publication/reset SQL again. This message is about an already completed update.
-- Preserve Tours, certificates, Exam Prep and all new post-publication Mathematics Practice records.
-- If cohort/delivery-status requirements cannot be proven: **HOLD**. No bulk distribution.
+### EN
+**Title:** Mathematics Practice updated
 
-## Release checks
-1. Architect signs off recipient scope and final language copy.
-2. Confirm campaign does not already exist and baseline counts remain healthy.
-3. Stage one isolated in-app-only test notice with explicit authorization; prove no Telegram message was queued or sent.
-4. Once release is approved, one idempotent campaign insert + recipients, audit row counts and in-app visibility, stop on anomalies.
+**Message:** Mathematics Practice now has 495 questions in the new bank. Results from the previous version were cleared during the update. Start a new attempt in “By tour” or “By topic”. Your Tours results, certificates and Exam Prep progress are preserved.
+
+## Проверено в действующей базе (только чтение)
+
+- `auth.users` 1845; `public.users` 1447; выбор Mathematics + профиль `public.users` — 854.
+- Кампания `math_practice_v2_notice_20261009_v1` не существует, назначений пользователям — 0.
+- Уже имеющиеся таблицы `notifications` и `user_notifications` поддерживают эти тексты и RU/UZ/EN.
+- Уникальность пары `(notification_id,user_id)` защищает от повторных назначений.
+- Для **только внутреннего сообщения** необходимо сразу ставить `delivery_status='skipped'`, чтобы Telegram-отправка не активировалась. Текущий триггер не пропускает обычный `manual` автоматически.
+
+## Как выпускать
+
+1. На одобренной версии приложения выполнить `qa/math-practice-v2-notice-preflight.sql` (без записей в БД). Сверить количество получателей, отсутствие кампании и сохранность данных.
+2. Получить подтверждение аудитории и текста. Отдельно разрешить отправку, поскольку она создаёт строки для реальных пользователей.
+3. Выполнить **один раз** `qa/math-practice-v2-notice-SEND-HOLD.sql` после удаления намеренной блокировки в первой команде. Скрипт создаёт ровно одну кампанию и выдаёт её всем пользователям выбранного предмета в одной транзакции. Повторный запуск запрещён.
+4. Проверить русский/узбекский/английский текст на разрешённом аккаунте, что `delivery_status='skipped'`, Telegram-очередь не создана, а badge обновляется. Результаты и сертификаты при этом не изменяются.
+
+Не отправлять сообщение в Telegram. Не добавлять новые системы уведомлений.
