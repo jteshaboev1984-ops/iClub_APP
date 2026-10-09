@@ -89,6 +89,20 @@ The official 9708 syllabus contains **53 numbered subject topics** (AS 1.1–6.5
 7. Q2669 has no numbered source chapter and is a reserved `Extra`; verify before using in source-backed Tutor grounding.
 8. Season 2 Tour 6 lacks a Ch45 question. This may be an intentional sampling decision, not necessarily a defect; check review requirements.
 
+
+## IMPORTANT precision correction: multi-chapter `book_ref` in Practice Tour 7 (2026-10-09)
+
+A read-only query found **24 out of 70 Practice Tour 7 links** with chapter **ranges**, e.g. `Ch48-49`, `Ch52-53`, `Ch53-54`. The numeric inventory table above extracts **only the FIRST chapter number in each range**, as was explicitly done by SQL `substring(book_ref from 'Ch([0-9]+)')`; it therefore represents **tag-prefix bins**, not 70 individually verified chapter-owned records or verified skill coverage. The `482/490` figure means **a parseable first chapter number**, not one exact unambiguous chapter. Correct metadata categories for current Practice: 458 exact single-chapter tags + 24 ranged tags + 8 no parseable chapter tag (458+24+8=490). In Tour 7 specifically: 46 single-chapter + 24 ranges; `Ch54` is an exam-methodology book chapter and must never be turned into a 54th theory syllabus area.
+
+Cross-subject QA examples validated by inspecting **actual question stems**:
+- `Q5401` J-curve, `Q5404` and `Q5423/Q5463` Marshall–Lerner all have `Ch48-49`; their primary official syllabus point is **11.2.5**, so the first chapter extracted (Ch48) is not sufficient.
+- `Q5412` trade creation and `Q5432` trade diversion carry `Ch52-53`; both primarily test **11.6.3**.
+- `Q5446` trading-bloc evaluation and `Q5453` definition of free trade area also carry `Ch52-53`, potentially relevant to **11.6.2**.
+- `Q5406/Q5439` are terms of trade even though stored under Ch52; official AS 6.1.3 is the primary syllabus point.
+- `Q5400/Q5437/Q5455` are tariffs, import quotas or protectionist policy; they fit AS 6.2 or cross-level evaluation, not automatically A Level 11.6.
+
+**Resolution:** Keep original `book_ref` intact. For future mapping, preserve the full string and store separate, **independently reviewed** `primary_syllabus_point`, possible secondary links and an explicit ambiguity/overlap flag in a NEW governed mapping; no automated regression of skill scope from just the regex. This corrects interpretation of the existing report, not the production questions/history.
+
 **Next gate:** map official individual 9708 syllabus subpoints to independent iClub skills; document valid prerequisites, original examples and per-skill question evidence; submit the proposed atomic denominator and flagged scope corrections for academic approval before generating Tutor cards.
 
 **Data safety:** no edits to `public.questions`, active pools, ratings, scores, certificates, attempts, Exam Prep evidence, AI runtime state, entitlements, users or localStorage.
