@@ -58,7 +58,7 @@ Book Ch54 provides exam preparation context, not a new independently numbered Ca
 ## Semantic overlap and avoidance of double mastery
 - Scanned **all 503 candidate actions** across different official numbered parent points, comparing normalised learning-action titles.
 - Found **0 exact repeated normalised action titles** across the complete register.
-- Similarity heuristics flagged **98 related cross-parent candidate pairs**. **39** have been given provisional, specific scope distinctions in `docs/economics-9708-semantic-overlap-review-current.csv`; **59** require individual semantic/educator review, not deletion.
+- Similarity heuristics flagged **98 related cross-parent candidate pairs**. **all 98** now have distinct provisional editorial scope explanations in `docs/economics-9708-semantic-overlap-review-current.csv` (39 earlier + 59 reviewed in the cleanup pass). **Educator approval is still pending for all 98**, so this is not permission to merge skills or share learner mastery.
 - Typical distinctions: demand-elasticity **definition vs calculation vs determinants**; generic AD/AS model vs exchange-rate application; open market exchange-rate equilibrium vs determinants of changes; definition of monetary policy vs effects on the BOP; introductory AS policy vs deeper A Level assessment.
 - **Do not** equate shared vocabulary or a common textbook example with two independently proven competencies. No automatic merge, no copying legacy question evidence to new child key and no mastery reset.
 
@@ -83,7 +83,7 @@ Original nonruntime SVG figures in `docs/economics-diagrams-v0/` remain publicat
 
 **Before Stage 1 can be approved**:
 0. Reconstruct/verify the source-level academic rationale for the **29 early parent decisions** identified in the consolidated register; earlier Git snapshots remain available as evidence.
-1. Independently review **59** still unresolved cross-parent semantic similarity flags and re-evaluate excessively split or redundant child actions in prior drafts.
+1. Get independent academic validation of **all 98 provisionally distinguished cross-parent semantic pairs**, and re-evaluate excessive splits or redundant child actions before fixing the canonical denominator.
 2. Obtain content-owner/educator approval for canonical scope (including embedded AS vs A Level exclusions) and lock the final skill ID mapping without migrating historical user records.
 3. Then only Stage 2: write teacher-reviewed original theory and Tutor cards for each approved independent skill × locale, with source version/hash and independent RU/UZ QA. Practice-specific post-answer reasoning and deterministic diagnosis are separate Stage 4 evidence, not current coverage.
 
