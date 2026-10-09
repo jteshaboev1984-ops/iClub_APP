@@ -9,10 +9,11 @@ const source = path.join(__dirname, 'dist', 'security', 'practice-v2-local-reset
 const htmlFile = path.join(__dirname, 'dist', 'index.html');
 const previous = fs.readFileSync(source, 'utf8');
 const html = fs.readFileSync(htmlFile, 'utf8');
-if (!previous.includes('iclub_math_practice_v2_local_reset_20261007_v1') ||
-    !previous.includes('storage.removeItem(DRAFT_KEY)') ||
-    !previous.includes('globalThis.iclubMathPracticeV2ResetAfterPublish = (client) => {'))
-  throw Error('Unexpected original reset source; refusing to patch');
+// Stage09 already verifies this exact SHA after applying its signed source patch.
+const crypto = require('node:crypto');
+const sourceHash = crypto.createHash('sha256').update(previous).digest('hex');
+if (sourceHash !== '25c1bf3e5ef1a888dbfd8e13e3408881afea464567b285eadf594d323bacb53a')
+  throw Error('Unexpected verified Stage09 Practice reset source; refusing to patch');
 const previousPin = 'security/practice-v2-local-reset.js?v=mathv2postpublish1';
 if (html.split(previousPin).length !== 2)
   throw Error('Unexpected Practice reset cache pin');
