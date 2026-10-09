@@ -1,4 +1,12 @@
-# iClub unified release — offline contract and operational go/no-go
+# iClub unified release — historical v2 publication checklist (SUPERSEDED)
+
+> **HISTORICAL DOCUMENT — DO NOT EXECUTE.**
+> Superseded 2026-10-09 by [current Stage 12 release gates](iclub-stage12-current-release-gates-v3.md).
+> PR #327 is already merged. Mathematics Practice v2 was already published on
+> 2026-10-08 (490 old -> 495 new). Repeating the bank switch, reset or cleanup
+> would endanger real learner progress. The steps below are archived for provenance,
+> **not an executable checklist**.
+>
 
 Status: prepared; NOT authorized automatically. The single shared release stays on PR #327.
 

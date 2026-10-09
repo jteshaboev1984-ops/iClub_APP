@@ -40,6 +40,7 @@ for (const [name, data] of Object.entries(content))
 for (const name of ['practice-results-tabs.js','practice-results-tabs.css','practice-v2-reset-preserve-guard.js'])
   fs.copyFileSync(path.join(root,name),path.join(dist,name));
 execFileSync(process.execPath,['stage03-preview-compose.cjs'],{cwd:root,stdio:'inherit'});
+execFileSync(process.execPath,['stage03-retire-legacy-reset.cjs'],{cwd:root,stdio:'inherit'});
 execFileSync(process.execPath,['stage03-exam-prep-all-subjects.cjs'],{cwd:root,stdio:'inherit'});
 const topicChoicePatch = path.join(root,'stage03-topic-choice-decision.cjs');
 if (!fs.existsSync(topicChoicePatch)) throw new Error('Missing approved topic choice update');
