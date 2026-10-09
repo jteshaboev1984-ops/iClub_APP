@@ -65,9 +65,9 @@ const copies=[
 for(const [caption,marker] of copies)ok(tabs.includes(marker),'missing resume text '+caption);
 ok(!/сохранённую тренировку|Saqlangan mashg‘ulotni|Resume saved practice/.test(tabs),'obsolete resume labels');
 ok(html.includes('practice-results-tabs.js?v=stage03tabs2'),'new translated tabs asset loaded');
-ok(app.includes('Незавершённая попытка сохранена') &&
-   app.includes('Tugallanmagan urinish saqlanib qoldi') &&
-   app.includes('Your unfinished attempt is still saved'),'failed resume preserves attempts in RU/UZ/EN');
+ok(app.includes('Черновик сохранён') &&
+   app.includes('Qoralama saqlandi') &&
+   app.includes('Your draft is safe'),'failed resume preserves drafts in RU/UZ/EN');
 new Function(app);new Function(tabs);
 console.log('STAGE03_PRACTICE_NAV_CONTRACT_OK assertions='+assertions+
  ' back_scenarios='+scenarios.length+' user_data_writes=0');
