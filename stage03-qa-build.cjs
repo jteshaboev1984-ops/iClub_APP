@@ -49,6 +49,8 @@ if (!patchSource.includes('STAGE03_TOPIC_DECISION_READY') ||
     !patchSource.includes('if (decision !== "replace") return;'))
   throw new Error('Topic choice update contract mismatch');
 execFileSync(process.execPath,['stage03-topic-choice-decision.cjs'],{cwd:root,stdio:'inherit'});
+execFileSync(process.execPath,['stage03-practice-navigation.cjs'],{cwd:root,stdio:'inherit'});
+execFileSync(process.execPath,['stage03-practice-navigation-contract.cjs'],{cwd:root,stdio:'inherit'});
 execFileSync(process.execPath,['stage03-topic-switch-contract.cjs'],{cwd:root,stdio:'inherit'});
 // RELEASE SCOPE: Global AI Chat remains OFF; its prototype changes from Stage06/07
 // are intentionally excluded from this Practice + Core Preview.
@@ -61,7 +63,7 @@ const reset = index.indexOf('security/practice-v2-local-reset.js');
 const guard = index.indexOf('practice-v2-reset-preserve-guard.js?');
 const app = index.indexOf('<script src="app.js?');
 if (!(reset >= 0 && reset < app && guard === -1 &&
-      index.includes('practice-results-tabs.js?v=stage03tabs1') &&
+      index.includes('practice-results-tabs.js?v=stage03tabs2') &&
       index.includes('p304premium2-mathv2reset1-allsubjects1')))
   throw new Error('Stage03 final app load order / script pin mismatch');
 console.log('STAGE03_COMBINED_PREVIEW_READY source_protected=1 new_public_modules=3');
