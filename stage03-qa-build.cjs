@@ -50,14 +50,12 @@ if (!patchSource.includes('STAGE03_TOPIC_DECISION_READY') ||
   throw new Error('Topic choice update contract mismatch');
 execFileSync(process.execPath,['stage03-topic-choice-decision.cjs'],{cwd:root,stdio:'inherit'});
 execFileSync(process.execPath,['stage03-topic-switch-contract.cjs'],{cwd:root,stdio:'inherit'});
-// Preserve the signed Stage09 build; compose AI UI corrections only into ephemeral Preview assets.
-for (const script of ['stage06-ai-chat-context.cjs','stage07-context-tutor-priority.cjs']) {
-  const full = path.join(root,script);
-  if (!fs.existsSync(full)) throw new Error('Missing approved QA chat composition '+script);
-  execFileSync(process.execPath,[script],{cwd:root,stdio:'inherit'});
-}
-// Mathematics P1/P5-only read-only contract. Other subjects are intentionally out of scope.
-execFileSync(process.execPath,['stage08-mathematics-ai-contract.cjs'],{cwd:root,stdio:'inherit'});
+// RELEASE SCOPE: Global AI Chat remains OFF; its prototype changes from Stage06/07
+// are intentionally excluded from this Practice + Core Preview.
+// The previously launched Mathematics Exam Prep AI is kept unchanged.
+// The academic Global AI prototype and its Stage08 contract remain in QA files,
+// not in the deployable output. Revisit them only for a separate AI release.
+console.log('STAGE06_08_DEFERRED global_ai_off=1 exam_prep_existing_ai_unchanged=1');
 const index = fs.readFileSync(path.join(dist,'index.html'),'utf8');
 const reset = index.indexOf('security/practice-v2-local-reset.js');
 const guard = index.indexOf('practice-v2-reset-preserve-guard.js?');
