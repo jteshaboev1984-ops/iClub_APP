@@ -5,7 +5,8 @@
     "no_protected_question_data": true,
     "approval": false,
     "release": false,
-    "notes": "Standalone original draft. Graphs are textual blueprints, not production diagrams; validate before publishing."
+    "notes": "Standalone original draft. Graphs are textual blueprints, not production diagrams; validate before publishing.",
+    "qa_note_2026_10_09": "Cambridge AS learner readability: mathematical derivative notation replaced by straight-line gradient/percentage method for 2.2.5 across EN RU UZ, with identical numerical examples."
   },
   "cards": [
     {
@@ -18,12 +19,12 @@
       "locale": "en",
       "title": "PED along one straight demand curve",
       "explanations": {
-        "main": "For a straight-line demand curve, its slope is constant but its price elasticity is not. Point PED measures (% change in quantity demanded)/(% change in price), equivalently (dQ/dP)×(P/Q). Near the top, P/Q is large and demand is elastic. At the midpoint its absolute elasticity is one; near the bottom it is inelastic. Do not confuse the numerical slope of a curve with its elasticity.",
+        "main": "For a straight-line demand curve, its slope is constant but its price elasticity is not. PED compares the percentage change in quantity demanded with the percentage change in price. On a straight line, its local value can be found as the constant gradient (change in Q divided by change in P), multiplied by P/Q. Near the top, P/Q is large and demand is elastic. At the midpoint its absolute elasticity is one; near the bottom it is inelastic. Do not confuse the numerical slope of a curve with its elasticity.",
         "simple": "High on a straight demand line: elastic. Middle: unit elastic. Low: inelastic. The line has not changed shape; the percentage responsiveness changes.",
         "alternative": "Take Q=10−P. At P=8 and Q=2, PED is −4. At P=5 and Q=5 it is −1. At P=2 and Q=8 it is −0.25. The absolute elasticity falls as we move down the line.",
         "focus": "Where is PED equal to one on a straight demand curve? At its midpoint. Does a constant slope mean constant PED? No."
       },
-      "worked_example": "Q=10−P gives dQ/dP=−1. At P=8,Q=2, PED=−1×8/2=−4; at P=2,Q=8, PED=−1×2/8=−0.25.",
+      "worked_example": "For the line Q=10−P, the gradient ΔQ/ΔP=−1. At P=8,Q=2, PED=−1×8/2=−4; at P=2,Q=8, PED=−1×2/8=−0.25.",
       "diagram_blueprint": "P vertical, Q horizontal. Straight-line D from (Q=0,P=10) to (Q=10,P=0). Upper section |PED|>1; midpoint |PED|=1; lower section |PED|<1. These classifications are along ONE unchanged straight line.",
       "qa_status": "ACADEMIC_AND_LOCALE_REVIEW_REQUIRED",
       "rights_status": "ORIGINAL_TEXT_REVIEW_REQUIRED",
@@ -41,12 +42,12 @@
       "locale": "ru",
       "title": "Ценовая эластичность вдоль прямой спроса",
       "explanations": {
-        "main": "На прямолинейной кривой спроса наклон постоянный, а ценовая эластичность меняется. Точечная PED равна отношению процентного изменения объёма спроса к процентному изменению цены; для непрерывной функции это (dQ/dP)×(P/Q). В верхней части прямой отношение P/Q велико, поэтому спрос эластичен. В середине абсолютная эластичность равна единице, а в нижней части она меньше единицы. Не путай наклон и эластичность.",
+        "main": "На прямолинейной кривой спроса наклон постоянный, а ценовая эластичность меняется. PED сравнивает процентное изменение объёма спроса с процентным изменением цены. На прямой её значение в точке можно найти, умножив постоянный наклон (изменение Q, делённое на изменение P) на отношение P/Q. В верхней части прямой отношение P/Q велико, поэтому спрос эластичен. В середине абсолютная эластичность равна единице, а в нижней части она меньше единицы. Не путай наклон и эластичность.",
         "simple": "Верхняя часть прямой спроса — эластичный спрос. Середина — единичная эластичность. Нижняя часть — неэластичный спрос. Сама прямая не изменилась.",
         "alternative": "Возьми Q=10−P. При P=8,Q=2 эластичность равна −4. При P=5,Q=5 — −1. При P=2,Q=8 — −0,25. Вниз по кривой абсолютная эластичность уменьшается.",
         "focus": "Где абсолютная PED равна единице? В середине прямой. Означает ли постоянный наклон постоянную эластичность? Нет."
       },
-      "worked_example": "Q=10−P, значит dQ/dP=−1. При P=8,Q=2 получаем −1×8/2=−4; при P=2,Q=8 получаем −1×2/8=−0,25.",
+      "worked_example": "Для прямой Q=10−P наклон ΔQ/ΔP=−1. При P=8,Q=2 получаем −1×8/2=−4; при P=2,Q=8 получаем −1×2/8=−0,25.",
       "diagram_blueprint": "P vertical, Q horizontal. Straight-line D from (Q=0,P=10) to (Q=10,P=0). Upper section |PED|>1; midpoint |PED|=1; lower section |PED|<1. These classifications are along ONE unchanged straight line.",
       "qa_status": "ACADEMIC_AND_LOCALE_REVIEW_REQUIRED",
       "rights_status": "ORIGINAL_TEXT_REVIEW_REQUIRED",
@@ -64,12 +65,12 @@
       "locale": "uz",
       "title": "To‘g‘ri chiziqli talab egri chizig‘ida PED",
       "explanations": {
-        "main": "To‘g‘ri chiziqli talab egri chizig‘ining qiyaligi o‘zgarmaydi, ammo narx bo‘yicha talab elastikligi o‘zgaradi. Nuqtadagi PED talab hajmining foiz o‘zgarishi narxning foiz o‘zgarishiga nisbati bo‘lib, uzluksiz funksiya uchun (dQ/dP)×(P/Q) ga teng. Chiziqning yuqori qismida P/Q katta bo‘lgani uchun talab elastik; o‘rtasida mutlaq qiymati bir; pastki qismida esa birdan kichik bo‘ladi. Qiyalik bilan elastiklikni adashtirma.",
+        "main": "To‘g‘ri chiziqli talab egri chizig‘ining qiyaligi o‘zgarmaydi, ammo narx bo‘yicha talab elastikligi o‘zgaradi. PED talab miqdorining foiz o‘zgarishini narxning foiz o‘zgarishi bilan solishtiradi. To‘g‘ri chiziqda nuqtadagi qiymatni doimiy qiyalikni (Q o‘zgarishini P o‘zgarishiga bo‘lib) P/Q nisbatiga ko‘paytirib topish mumkin. Chiziqning yuqori qismida P/Q katta bo‘lgani uchun talab elastik; o‘rtasida mutlaq qiymati bir; pastki qismida esa birdan kichik bo‘ladi. Qiyalik bilan elastiklikni adashtirma.",
         "simple": "Talab chizig‘ining yuqori qismi elastik, o‘rtasi birlik elastik, pastki qismi noelastik. Chiziqning o‘zi o‘zgarmaydi.",
         "alternative": "Q=10−P bo‘lsin. P=8,Q=2 da PED −4; P=5,Q=5 da −1; P=2,Q=8 da −0,25. Chiziq bo‘ylab pastga tushganda mutlaq elastiklik kamayadi.",
         "focus": "To‘g‘ri talab chizig‘ida |PED| qayerda birga teng? O‘rtada. O‘zgarmas qiyalik o‘zgarmas PED deganimi? Yo‘q."
       },
-      "worked_example": "Q=10−P, dQ/dP=−1. P=8,Q=2 bo‘lganda PED=−1×8/2=−4; P=2,Q=8 bo‘lganda −1×2/8=−0,25.",
+      "worked_example": "Q=10−P chizig‘ida qiyalik ΔQ/ΔP=−1. P=8,Q=2 bo‘lganda PED=−1×8/2=−4; P=2,Q=8 bo‘lganda −1×2/8=−0,25.",
       "diagram_blueprint": "P vertical, Q horizontal. Straight-line D from (Q=0,P=10) to (Q=10,P=0). Upper section |PED|>1; midpoint |PED|=1; lower section |PED|<1. These classifications are along ONE unchanged straight line.",
       "qa_status": "ACADEMIC_AND_LOCALE_REVIEW_REQUIRED",
       "rights_status": "ORIGINAL_TEXT_REVIEW_REQUIRED",
