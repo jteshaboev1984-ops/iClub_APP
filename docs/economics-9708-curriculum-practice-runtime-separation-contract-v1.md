@@ -67,9 +67,11 @@ ORDER BY p.tour_no;
 
 **No Vercel API/build/preview/deploy, Codex consumption, merge, AI activation, permissions change, learner accounts, questions, answers, scores, attempts, Tour/Practice banks, certificates, payments, entitlements, localStorage or progress changes without separate explicit approval.**
 
-## Current bounded snapshot
-- `docs/economics-9708-atomic-candidate-register-v8.csv`: **479 provisional learning actions** mapped to **253 Cambridge numeric points**.
-- `docs/economics-9708-remaining-atomic-review-queue-v5.csv`: **135 unreviewed** one-to-one candidates.
-- `docs/economics-9708-v8-source-checked-decision-log-v1.csv`: **20** source-scoped changes (10 split, 10 retained) from v7.
+## Current bounded snapshot (2026-10-09; academic review still pending)
+- `docs/economics-9708-atomic-candidate-register-current.csv`: **503 provisional learning actions** mapped to **253 Cambridge official numbered subpoints**; zero untreated first-pass parent points, but not an approved skill denominator.
+- `docs/economics-9708-current-253-point-decision-register.csv`: consolidated **253 parent decisions**; 29 early decisions need fuller source-rationale reconstruction before academic signoff.
+- `docs/economics-9708-semantic-overlap-review-current.csv`: 98 possible cross-parent overlaps, including **59 pending semantic review**. No automatic merge or new evidence assertions.
+- `docs/economics-9708-academic-approval-matrix-current.csv`: 40 parent overview drafts across three languages remain unapproved; verified independent atomic Tutor coverage still zero.
+- The original 60-vs-live-70 per-Tour difference remains **UNRESOLVED** and must not be silently 'fixed'.
 - All candidates are `runtime_allowed=false`, all exact-question mapping fields `NONE_VERIFIED`, no academic teacher signoff yet.
 - Saved source SVGs `docs/economics-diagrams-v0/` are **only unfinished original editorial graphics**; no publishing until visually inspected and translated.
