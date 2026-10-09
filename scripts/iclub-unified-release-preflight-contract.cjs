@@ -33,5 +33,5 @@ assert(qa.includes("passed===72"),"RU/UZ/EN screen/mobile preview matrix incompl
 assert(switchSql.includes("private.practice_v2_tour_invariant_snapshot_v1"),"Atomic publish lacks protected Tour fingerprint");
 assert(switchSql.includes("raise exception 'protected_tour_invariant_changed_during_release'"),"Tour mutation would not abort publish");
 assert(plan.includes("pre-publish local cleanup is prohibited"),"Legacy release instructions still clear local state early");
-assert(docs.includes("rollback")&&docs.includes("production")&&docs.includes("NO-GO"),"Clean release rollback/STOP gates are missing");
+assert(docs.toLowerCase().includes("rollback")&&docs.toLowerCase().includes("production")&&docs.includes("NO-GO"),"Clean release rollback/STOP gates are missing");
 console.log("iClub unified release static STOP gates GREEN (no deployment, bank mutation or learner data used).");

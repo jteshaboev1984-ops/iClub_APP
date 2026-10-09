@@ -44,7 +44,7 @@ for(const clause of ['p.is_active is true','ppq.is_active is true',
   'not public.iclub_practice_drill_question_protected_v4(q.id)'])
   assert(guard.includes(clause),'SQL catalog must mirror v5 drill eligibility: '+clause);
 assert.match(html,/id="practice-topic-choice"/);
-assert.match(html,/practice-topic-choice\.js\?v=ptopic2/);
+assert.match(html,/practice-topic-choice\.js\?v=ptopic3-release1/);
 assert.match(html,/practice-topic-choice\.css\?v=ptopic2/);
 assert.match(app,/iClubPracticeTopicChoice\?\.mount/);
 assert.match(app,/startPracticeByRec\(\{ topic, subtopic: null \}, "practice"\)/);
