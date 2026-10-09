@@ -295,14 +295,19 @@ const path = require('path');
   result = await page.evaluate(async () => {
     await window.iClubExamPrep.syncSubjectHub({ subjectKey: 'mathematics', language: 'en' });
     await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'en' });
-    await window.iClubExamPrep.syncSubjectHub({ subjectKey: 'physics', language: 'en' });
+    await window.iClubExamPrep.syncSubjectHub({ subjectKey: 'economics', language: 'en' });
+    const entry = document.querySelector('#subject-hub-exam-prep-entry');
     return {
-      hidden: document.querySelector('#subject-hub-exam-prep-entry').hidden,
+      hidden: entry.hidden,
+      mode: entry.getAttribute('data-ep-entry-mode'),
+      badge: document.querySelector('#subject-hub-exam-prep-badge')?.textContent,
       open: window.iClubExamPrep.isOpen(),
       rootHidden: document.querySelector('#exam-prep-host-root').hidden
     };
   });
-  assert(result.hidden && !result.open && result.rootHidden, 'subject switch must unmount Exam Prep');
+  assert(!result.hidden && result.mode === 'coming-soon' &&
+    result.badge.includes('In development') && !result.open && result.rootHidden,
+    'subject switch must unmount Mathematics and show informational Exam Prep for Economics');
 
   result = await page.evaluate(async () => {
     await window.iClubExamPrep.syncSubjectHub({ subjectKey: 'mathematics', language: 'ru' });
