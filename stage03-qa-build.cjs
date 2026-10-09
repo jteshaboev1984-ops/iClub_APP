@@ -41,6 +41,13 @@ for (const name of ['practice-results-tabs.js','practice-results-tabs.css','prac
   fs.copyFileSync(path.join(root,name),path.join(dist,name));
 execFileSync(process.execPath,['stage03-preview-compose.cjs'],{cwd:root,stdio:'inherit'});
 execFileSync(process.execPath,['stage03-exam-prep-all-subjects.cjs'],{cwd:root,stdio:'inherit'});
+const topicChoicePatch = path.join(root,'stage03-topic-choice-decision.cjs');
+if (!fs.existsSync(topicChoicePatch)) throw new Error('Missing approved topic choice update');
+const patchSource = fs.readFileSync(topicChoicePatch,'utf8');
+if (!patchSource.includes('STAGE03_TOPIC_DECISION_READY') ||
+    !patchSource.includes('if (decision !== "replace") return;'))
+  throw new Error('Topic choice update contract mismatch');
+execFileSync(process.execPath,['stage03-topic-choice-decision.cjs'],{cwd:root,stdio:'inherit'});
 const index = fs.readFileSync(path.join(dist,'index.html'),'utf8');
 const reset = index.indexOf('security/practice-v2-local-reset.js');
 const guard = index.indexOf('practice-v2-reset-preserve-guard.js');
