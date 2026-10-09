@@ -33,6 +33,9 @@
       appPractice: "Как работает Practice?",
       appTours: "Как работают Tours?",
       appResults: "Где смотреть результаты?",
+      appProgress: "Как идут мои занятия?",
+      appAchievements: "Какие у меня достижения?",
+      appArchive: "Каковы мои результаты туров?",
       topicMain: "Объясни эту тему",
       topicSimple: "Объясни проще",
       topicAlternative: "Объясни по-другому",
@@ -66,6 +69,9 @@
       appPractice: "Practice qanday ishlaydi?",
       appTours: "Tours qanday ishlaydi?",
       appResults: "Natijalarni qayerda ko‘raman?",
+      appProgress: "O‘qishim qanday ketyapti?",
+      appAchievements: "Qanday yutuqlarim bor?",
+      appArchive: "Tur natijalarim qanday?",
       topicMain: "Shu mavzuni tushuntir",
       topicSimple: "Soddaroq tushuntir",
       topicAlternative: "Boshqacha tushuntir",
@@ -99,6 +105,9 @@
       appPractice: "How does Practice work?",
       appTours: "How do Tours work?",
       appResults: "Where can I see results?",
+      appProgress: "How am I doing in Practice?",
+      appAchievements: "What have I achieved?",
+      appArchive: "How did I do in completed Tours?",
       topicMain: "Explain this topic",
       topicSimple: "Explain more simply",
       topicAlternative: "Explain it differently",
@@ -135,6 +144,10 @@
     resetTimer: null,
     busy: false,
     activeRequestId: null,
+    // In-memory conversations are owned by one authenticated account only.
+    authUserId: null,
+    authEpoch: 0,
+    authSignedOut: false,
     context: null,
     usageExhausted: false,
     resetAt: null,
@@ -190,7 +203,7 @@
     if (!["P1", "P5"].includes(componentCode) || !skillCode.startsWith(componentCode + "-")) return null;
 
     return {
-      threadKey: "mathematics",
+      threadKey: "mathematics_exam_prep_" + componentCode.toLowerCase(),
       subjectKey: "mathematics",
       scopeCode: "exam_prep",
       academic: true,
@@ -201,9 +214,27 @@
     };
   }
 
+  function activeCoursesScreen() {
+    const screen = document.querySelector('#view-courses .stack-screen.is-active');
+    return String(screen?.dataset?.screen || "").trim().toLowerCase();
+  }
+
   function resolveContext() {
     const view = activeViewName();
     if (view === "courses") {
+      const screen = activeCoursesScreen();
+      if (screen === "all-subjects" || !screen) {
+        return {
+          threadKey: "general",
+          subjectKey: "general",
+          scopeCode: "global",
+          academic: false,
+          componentCode: "",
+          skillCode: "",
+          subjectLabel: "",
+          subtitle: copy().subtitleGeneral
+        };
+      }
       const skill = examPrepSkillContext();
       if (skill) return skill;
 
@@ -353,11 +384,44 @@
     }
 
     const view = activeViewName();
-    if (["profile", "ratings", "certificates", "archive"].includes(view)) {
+    const screen = view === "courses" ? activeCoursesScreen() : "";
+    if (view === "home") return [
+      { key: "app_progress", label: c.appProgress },
+      { key: "app_help_here", label: c.appHere },
+      { key: "app_help_practice", label: c.appPractice }
+    ];
+    if (view === "profile" || view === "certificates") return [
+      { key: "app_achievements", label: c.appAchievements },
+      { key: "app_help_results", label: c.appResults },
+      { key: "app_help_here", label: c.appHere }
+    ];
+    if (view === "archive") return [
+      { key: "app_tours_archive", label: c.appArchive },
+      { key: "app_help_results", label: c.appResults },
+      { key: "app_help_here", label: c.appHere }
+    ];
+    // Only server-approved app_help prepared prompts are offered outside
+    // the governed P1/P5 tutor; unsupported academic generation stays OFF.
+    if (["profile", "ratings", "certificates", "archive"].includes(view) ||
+        /(?:result|review|archive)/.test(screen)) {
       return [
         { key: "app_help_results", label: c.appResults },
         { key: "app_help_here", label: c.appHere },
         { key: "app_help_practice", label: c.appPractice }
+      ];
+    }
+    if (screen.startsWith("practice-") || screen === "my-recs") {
+      return [
+        { key: "app_help_practice", label: c.appPractice },
+        { key: "app_help_results", label: c.appResults },
+        { key: "app_help_here", label: c.appHere }
+      ];
+    }
+    if (screen.startsWith("tour-") || screen.startsWith("tours-")) {
+      return [
+        { key: "app_help_tours", label: c.appTours },
+        { key: "app_help_results", label: c.appResults },
+        { key: "app_help_here", label: c.appHere }
       ];
     }
 
@@ -596,6 +660,7 @@
     if (state.busy || currentBlocked() || state.usageExhausted || !state.context) return;
 
     const context = { ...state.context };
+    const authEpoch = state.authEpoch;
     const threadKey = context.threadKey;
     const cleanDisplay = String(displayText || "").trim();
     const cleanText = String(userText || "").trim().slice(0, MAX_INPUT_CHARS);
@@ -603,7 +668,8 @@
 
     appendMessage(threadKey, "user", cleanDisplay);
     state.busy = true;
-    state.activeRequestId = requestId();
+    const currentRequestId = requestId();
+    state.activeRequestId = currentRequestId;
 
     const p = panel();
     const input = p?.querySelector("[data-global-ai-input]");
@@ -613,7 +679,7 @@
     const started = performance.now();
     try {
       const result = await invokeGlobalAi({
-        request_id: state.activeRequestId,
+        request_id: currentRequestId,
         locale: locale(),
         subject_key: context.subjectKey,
         scope_code: context.scopeCode,
@@ -622,6 +688,10 @@
         component_code: context.componentCode || "",
         skill_code: context.skillCode || ""
       });
+
+      // Auth may change while the provider is still answering. Never render an
+      // old account's response into the new account's in-memory conversation.
+      if (authEpoch !== state.authEpoch || state.authSignedOut) return;
 
       if (result?.__globalAiTimedOut === true) {
         appendMessage(threadKey, "assistant", copy().timeout, "notice");
@@ -666,12 +736,16 @@
 
       appendMessage(threadKey, "assistant", message || copy().unavailable, "notice");
     } catch {
-      appendMessage(threadKey, "assistant", copy().unavailable, "notice");
+      if (authEpoch === state.authEpoch && !state.authSignedOut) {
+        appendMessage(threadKey, "assistant", copy().unavailable, "notice");
+      }
     } finally {
       const elapsed = performance.now() - started;
       if (elapsed < 180) {
         await new Promise((resolve) => setTimeout(resolve, 180 - elapsed));
       }
+      // Do not mutate a subsequent account's spinner, request, or composer.
+      if (authEpoch !== state.authEpoch || state.authSignedOut) return;
       state.busy = false;
       state.activeRequestId = null;
       renderPanel();
@@ -731,9 +805,30 @@
     }, 35);
   }
 
+  function embeddedAiOwnsSurface() {
+    // Already permitted legacy Tutor provides verified progress, weekly plans,
+    // diagnostics, and topic explanations that Global Chat cannot yet replace.
+    const examRoot = document.getElementById("exam-prep-host-root");
+    const capabilities = window.iClubExamPrepHostInternal?.lastCapabilities;
+    if (examRoot && !examRoot.hidden && examRoot.getAttribute("aria-hidden") !== "true" &&
+        capabilities?.coreAccess === true && capabilities?.aiAssist === true &&
+        capabilities?.killSwitch === false && capabilities?.rolloutState !== "off") {
+      return true;
+    }
+
+    // Practice AI can explain a server-confirmed result/question. Do not
+    // cover an approved contextual action with the generic app-help panel.
+    const result = document.getElementById("courses-practice-result");
+    const review = document.getElementById("courses-practice-review");
+    return Boolean(
+      (result?.classList.contains("is-active") && result.querySelector("[data-practice-ai-result-card]")) ||
+      (review?.classList.contains("is-active") && review.querySelector("[data-practice-ai-question-control]"))
+    );
+  }
+
   function reconcileShell({ announceBlock = false } = {}) {
     const allowed = state.bootstrap?.visible === true;
-    if (!allowed || !isEligibleView()) {
+    if (!allowed || !isEligibleView() || embeddedAiOwnsSurface()) {
       closePanel();
       const host = root();
       if (host) host.hidden = true;
@@ -791,7 +886,38 @@
     void refreshBootstrap();
   }
 
+  function handleAuthScopeChange(event, session) {
+    const newUserId = String(session?.user?.id || "");
+    const signedOut = event === "SIGNED_OUT" || !newUserId;
+    const accountChanged = event === "SIGNED_OUT" ||
+      newUserId !== state.authUserId;
+    state.authSignedOut = signedOut;
+    if (accountChanged) {
+      state.authEpoch += 1;
+      state.authUserId = signedOut ? "" : newUserId;
+      // No persistence: remove all temporary General/subject threads on
+      // account switch. Old asynchronous calls are invalidated by authEpoch.
+      state.threads.clear();
+      state.busy = false;
+      state.activeRequestId = null;
+      state.bootstrap = null;
+      state.bootstrapInFlight = null;
+      state.usageExhausted = false;
+      state.resetAt = null;
+      if (state.resetTimer) clearTimeout(state.resetTimer);
+      state.resetTimer = null;
+      closePanel();
+      destroyShell();
+    }
+    queueMicrotask(() => { void refreshBootstrap(); });
+  }
+
   async function refreshBootstrap() {
+    if (state.authSignedOut) {
+      state.bootstrap = null;
+      destroyShell();
+      return null;
+    }
     if (state.bootstrapInFlight) return state.bootstrapInFlight;
     const client = window.sb;
     if (!client?.rpc) {
@@ -800,9 +926,11 @@
       return null;
     }
 
-    state.bootstrapInFlight = (async () => {
+    const authEpoch = state.authEpoch;
+    const pending = (async () => {
       try {
         const { data, error } = await client.rpc("get_iclub_ai_ui_bootstrap_v1");
+        if (authEpoch !== state.authEpoch || state.authSignedOut) return null;
         if (error || !data || typeof data !== "object") {
           state.bootstrap = null;
           destroyShell();
@@ -818,15 +946,17 @@
         reconcileShell();
         return data;
       } catch {
-        state.bootstrap = null;
-        destroyShell();
+        if (authEpoch === state.authEpoch && !state.authSignedOut) {
+          state.bootstrap = null;
+          destroyShell();
+        }
         return null;
       } finally {
-        state.bootstrapInFlight = null;
+        if (authEpoch === state.authEpoch) state.bootstrapInFlight = null;
       }
     })();
-
-    return state.bootstrapInFlight;
+    state.bootstrapInFlight = pending;
+    return pending;
   }
 
   function attachObservers() {
@@ -849,6 +979,17 @@
     if (subjectTitle) {
       state.contextObserver.observe(subjectTitle, { childList: true, subtree: true, characterData: true });
     }
+    // Within Courses the global view stays active while its internal screen
+    // changes. Refresh context on those transitions as well.
+    document.querySelectorAll('#view-courses .stack-screen[data-screen]').forEach((screen) => {
+      state.contextObserver.observe(screen, { attributes: true, attributeFilter: ["class"] });
+    });
+    // Existing Practice AI actions are added after an asynchronous server
+    // capability check. Watch only their two result screens, not the app root.
+    ["courses-practice-result", "courses-practice-review"].forEach((id) => {
+      const screen = document.getElementById(id);
+      if (screen) state.contextObserver.observe(screen, { childList: true, subtree: true });
+    });
     const examRoot = document.getElementById("exam-prep-host-root");
     if (examRoot) {
       state.contextObserver.observe(examRoot, {
@@ -865,6 +1006,8 @@
 
     window.addEventListener("iclub:exam-prep-session", handleExamPrepSession);
     window.addEventListener("iclub:exam-prep-session-ended", handleExamPrepEnded);
+    // The legacy Tutor becomes available asynchronously after capabilities.
+    window.addEventListener("iclub:exam-prep-capabilities", scheduleContextReconcile);
     window.addEventListener("iclub:global-ai-bootstrap-refresh", () => { void refreshBootstrap(); });
     window.addEventListener("focus", () => { void refreshBootstrap(); });
 
@@ -873,8 +1016,8 @@
     });
 
     try {
-      window.sb?.auth?.onAuthStateChange?.(() => {
-        queueMicrotask(() => { void refreshBootstrap(); });
+      window.sb?.auth?.onAuthStateChange?.((event, session) => {
+        handleAuthScopeChange(event, session);
       });
     } catch {}
 

@@ -87,7 +87,7 @@ jobs:
           node scripts/math-practice-v2-local-reset-regression.cjs
           node scripts/math-practice-v2-publish-gate-contract.cjs
           grep -q 'security/practice-v2-input-normalization.js?v=mathv2minus1' index.html
-          grep -q 'security/practice-v2-local-reset.js?v=mathv2postpublish1' index.html
+          grep -q 'security/practice-v2-local-reset.js?v=stage03oldhistory2' index.html
           grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1-mathv2feedback1' index.html
           grep -q 'app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1-ai2ctx1-mathv2feedback1' index.html
           grep -q 'start_practice_session_auto_safe_v5' security/legacy-assessment-safe-api.js

@@ -1,0 +1,62 @@
+name: iClub clean Core release gate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app.js'
+      - 'index.html'
+      - 'security/practice-v2-local-reset.js'
+      - 'security/legacy-assessment-safe-api.js'
+      - 'practice-topic-choice.js'
+      - 'practice-results-tabs.js'
+      - 'practice-results-tabs.css'
+      - 'exam-prep/exam-prep-host.js'
+      - 'practice-active-owner-v1.js'
+      - 'practice-draft-identity-v1.js'
+      - 'practice-draft-ownership-v1.js'
+      - 'scripts/*release-contract.cjs'
+      - 'scripts/math-practice-v2-local-reset-regression.cjs'
+      - '.github/workflows/iclub-clean-core-release.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  clean-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Source integrity and script references
+        run: |
+          set -euo pipefail
+          for file in app.js global-ai-ui.js security/practice-v2-local-reset.js security/legacy-assessment-safe-api.js exam-prep/exam-prep-host.js practice-topic-choice.js practice-results-tabs.js practice-active-owner-v1.js practice-draft-identity-v1.js practice-draft-ownership-v1.js; do
+            node --check "$file"
+          done
+          node --check scripts/math-practice-v2-local-reset-regression.cjs
+          node --check scripts/practice-navigation-release-contract.cjs
+          node --check scripts/practice-topic-switch-release-contract.cjs
+          grep -Fq 'practice-results-tabs.js?v=stage03tabs2' index.html
+          grep -Fq 'practice-results-tabs.css?v=stage03tabs1' index.html
+          grep -Fq 'practice-topic-choice.js?v=ptopic3-release1' index.html
+          grep -Fq 'exam-prep-host.js?v=p304premium2-mathv2reset1-allsubjects1' index.html
+          grep -Fq 'security/practice-v2-local-reset.js?v=stage03oldhistory2' index.html
+          ! grep -Eq 'stage03-preserve|practice-v2-reset-preserve-guard|stage09-preview|stage03-qa-build' index.html
+          test ! -e stage09-preview-build.cjs
+          test ! -e stage03-qa-build.cjs
+          test ! -e stage03-ui-package.pack
+          test ! -e stage09-preview-payload.txt
+      - name: Practice server-contract and navigation
+        run: |
+          set -euo pipefail
+          node scripts/math-practice-v2-local-reset-regression.cjs
+          node scripts/practice-navigation-release-contract.cjs
+          node scripts/practice-topic-switch-release-contract.cjs
+          node scripts/practice-content-language-preservation.cjs
+      - name: No external service writes
+        run: |
+          echo 'Offline JS source checks only. No Supabase, Vercel, AI provider, real user accounts or emails accessed.'

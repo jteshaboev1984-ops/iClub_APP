@@ -35,6 +35,11 @@
         entryBadge: "Cambridge AS · Mathematics",
         entryBadgeAi: "Cambridge AS · Mathematics · AI",
         entryTitle: "Exam Prep",
+        comingSoonBadge: "Ishlab chiqilmoqda",
+        comingSoonDesc: "Bu fan bo‘yicha imtihonga tayyorgarlik ishlab chiqilmoqda.",
+        comingSoonNote: "Hozircha Practice va Tours orqali mashq qilishingiz mumkin.",
+        comingSoonCta: "Batafsil",
+        comingSoonClose: "Tushunarli",
         entryDesc: "Paper 1 va Paper 5 bo‘yicha shaxsiy tayyorgarlik yo‘li: kirish tekshiruvi, haftalik reja, mavzular, xatolar va vaqtli mashqlar.",
         entryP1: "Pure Mathematics 1 · 45 ko‘nikma",
         entryP5: "Probability & Statistics 1 · 36 ko‘nikma",
@@ -83,6 +88,11 @@
         entryBadge: "Cambridge AS · Mathematics",
         entryBadgeAi: "Cambridge AS · Mathematics · AI",
         entryTitle: "Exam Prep",
+        comingSoonBadge: "In development",
+        comingSoonDesc: "Exam preparation for this subject is in development.",
+        comingSoonNote: "You can continue learning through Practice and Tours in the meantime.",
+        comingSoonCta: "Learn more",
+        comingSoonClose: "Got it",
         entryDesc: "A personal route for Paper 1 and Paper 5: entry check, weekly plan, syllabus work, corrections and timed practice.",
         entryP1: "Pure Mathematics 1 · 45 skills",
         entryP5: "Probability & Statistics 1 · 36 skills",
@@ -130,6 +140,11 @@
       entryBadge: "Cambridge AS · Mathematics",
       entryBadgeAi: "Cambridge AS · Mathematics · ИИ",
       entryTitle: "Exam Prep",
+      comingSoonBadge: "В разработке",
+      comingSoonDesc: "Экзаменационная подготовка по этому предмету находится в разработке.",
+      comingSoonNote: "Пока вы можете продолжать обучение через Practice и Tours.",
+      comingSoonCta: "Подробнее",
+      comingSoonClose: "Понятно",
       entryDesc: "Персональный маршрут по Paper 1 и Paper 5: входная проверка, недельный план, темы, исправление ошибок и практика на время.",
       entryP1: "Pure Mathematics 1 · 45 навыков",
       entryP5: "Probability & Statistics 1 · 36 навыков",
@@ -174,7 +189,7 @@
 
   function canRestoreFocus(el) {
     if (!el || typeof el.focus !== "function" || !el.isConnected) return false;
-    if (state.subjectKey !== MATHEMATICS_KEY || !showable()) return false;
+    if (!state.subjectKey || (state.subjectKey === MATHEMATICS_KEY && !showable())) return false;
     const entry = entryEl();
     if (!entry || entry.hidden || entry.getAttribute("aria-hidden") === "true") return false;
     return !el.closest?.("[hidden]");
@@ -249,19 +264,53 @@
     const inviteOnly = Boolean(item) && !allowed(state.capabilities);
     const openOffer = inviteOnly && item.openRecruitment === true;
     const aiActive = allowed(state.capabilities) && state.capabilities?.aiAssist === true;
+    const comingSoon = Boolean(state.subjectKey && state.subjectKey !== MATHEMATICS_KEY);
+    const components = entry?.querySelector('.exam-prep-feature-components');
+    if (components) components.style.display = comingSoon ? 'none' : '';
     if (entry) {
+      entry.classList.toggle('is-coming-soon', comingSoon);
       entry.classList.toggle("is-invitation", inviteOnly);
       entry.classList.toggle("has-ai-assist", aiActive);
-      entry.setAttribute("data-ep-entry-mode", openOffer ? "open-testing" : (inviteOnly ? "invitation" : "live"));
+      entry.setAttribute("data-ep-entry-mode", comingSoon ? "coming-soon" : (openOffer ? "open-testing" : (inviteOnly ? "invitation" : "live")));
       entry.setAttribute("data-ep-ai-visible", aiActive ? "true" : "false");
     }
-    if (badge) badge.textContent = openOffer ? text.joinBadge : (inviteOnly ? text.inviteBadge : (aiActive ? text.entryBadgeAi : text.entryBadge));
+    if (badge) badge.textContent = comingSoon ? text.comingSoonBadge : (openOffer ? text.joinBadge : (inviteOnly ? text.inviteBadge : (aiActive ? text.entryBadgeAi : text.entryBadge)));
     if (title) title.textContent = openOffer ? text.joinTitle : (inviteOnly ? text.inviteTitle : text.entryTitle);
-    if (sub) sub.textContent = openOffer ? text.joinSub : (inviteOnly ? text.inviteSub : text.entryDesc);
+    if (sub) sub.textContent = comingSoon ? text.comingSoonDesc : (openOffer ? text.joinSub : (inviteOnly ? text.inviteSub : text.entryDesc));
     if (p1) p1.textContent = text.entryP1;
     if (p5) p5.textContent = text.entryP5;
-    if (note) note.textContent = aiActive ? text.entryAiNote : text.entryNote;
-    if (cta) cta.textContent = openOffer ? text.joinCta : (inviteOnly ? text.inviteCta : text.entryCta);
+    if (note) note.textContent = comingSoon ? text.comingSoonNote : (aiActive ? text.entryAiNote : text.entryNote);
+    if (cta) cta.textContent = comingSoon ? text.comingSoonCta : (openOffer ? text.joinCta : (inviteOnly ? text.inviteCta : text.entryCta));
+  }
+
+  // STAGE03_EXAM_PREP_ALL_SUBJECTS_V1: presentation only, no assessment APIs.
+  function renderComingSoonShell() {
+    const root = rootEl();
+    if (!root) return false;
+    const text = labels(state.language);
+    const shell = document.createElement('section');
+    shell.className = 'ep-host-shell ep-host-coming-soon';
+    shell.setAttribute('aria-label', text.entryTitle);
+    const badge = document.createElement('div');
+    badge.className = 'ep-host-kicker';
+    badge.textContent = text.comingSoonBadge;
+    const heading = document.createElement('h2');
+    heading.className = 'ep-host-title';
+    heading.textContent = text.entryTitle;
+    const description = document.createElement('p');
+    description.className = 'ep-host-note';
+    description.textContent = text.comingSoonDesc;
+    const note = document.createElement('p');
+    note.className = 'ep-host-note';
+    note.textContent = text.comingSoonNote;
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'ep-host-btn ep-host-btn-secondary';
+    closeBtn.textContent = text.comingSoonClose;
+    closeBtn.addEventListener('click', close);
+    shell.append(badge, heading, description, note, closeBtn);
+    root.replaceChildren(shell);
+    return true;
   }
 
   function renderLiveShell() {
@@ -316,7 +365,7 @@
   }
 
   function close() {
-    const shouldRestoreFocus = state.open && showable();
+    const shouldRestoreFocus = state.open && (showable() || (state.subjectKey && state.subjectKey !== MATHEMATICS_KEY));
     state.open = false;
     state.consentBusy = false;
     state.consentError = false;
@@ -431,9 +480,10 @@
       ++state.accessToken;
       state.capabilities = null;
       state.invitation = null;
-      setEntryVisible(false);
+      renderEntryCopy();
       close();
-      return false;
+      setEntryVisible(Boolean(state.subjectKey));
+      return Boolean(state.subjectKey);
     }
 
     setEntryVisible(false);
@@ -447,9 +497,18 @@
     renderEntryCopy();
 
     if (state.subjectKey !== MATHEMATICS_KEY) {
-      setEntryVisible(false);
-      close();
-      return false;
+      // Informational route: never request Exam Prep enrollment or question data.
+      if (!state.subjectKey || !renderComingSoonShell()) return false;
+      const root = rootEl();
+      const hub = hubEl();
+      if (!root || !hub) return false;
+      state.returnFocusEl = entryButtonEl();
+      root.hidden = false;
+      root.setAttribute('aria-hidden', 'false');
+      hub.classList.add('exam-prep-host-open');
+      state.open = true;
+      focusHostRoot();
+      return true;
     }
 
     await refreshAccess();
