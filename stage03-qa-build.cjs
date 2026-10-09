@@ -48,6 +48,12 @@ if (!patchSource.includes('STAGE03_TOPIC_DECISION_READY') ||
     !patchSource.includes('if (decision !== "replace") return;'))
   throw new Error('Topic choice update contract mismatch');
 execFileSync(process.execPath,['stage03-topic-choice-decision.cjs'],{cwd:root,stdio:'inherit'});
+// Preserve the signed Stage09 build; compose AI UI corrections only into ephemeral Preview assets.
+for (const script of ['stage06-ai-chat-context.cjs','stage07-context-tutor-priority.cjs']) {
+  const full = path.join(root,script);
+  if (!fs.existsSync(full)) throw new Error('Missing approved QA chat composition '+script);
+  execFileSync(process.execPath,[script],{cwd:root,stdio:'inherit'});
+}
 const index = fs.readFileSync(path.join(dist,'index.html'),'utf8');
 const reset = index.indexOf('security/practice-v2-local-reset.js');
 const guard = index.indexOf('practice-v2-reset-preserve-guard.js');
