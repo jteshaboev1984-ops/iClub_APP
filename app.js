@@ -16576,7 +16576,23 @@ function addMyTourRecsFromTourAttempt(ctx) {
 
    
 // ✅ DB sync for recommendations table
-async function syncMyRecsToSupabase(subjectKey, recs) {
+async function syncMyRecsToSupabase(subjectKey, recs, practiceSessionId = null) {
+  if (Number(practiceSessionId) > 0 && window.sb?.rpc) {
+    const { data, error } = await window.sb.rpc("sync_practice_recommendations_safe_v1", {
+      p_subject_key: subjectKey,
+      p_session_id: Number(practiceSessionId),
+      p_items: (Array.isArray(recs) ? recs : []).map(r => ({
+        topic: String(r?.topic || ""), subtopic: r?.subtopic || null
+      }))
+    });
+    if (!error && data?.ok === true) return;
+    // Fail closed if installed server RPC rejects the session or its provenance.
+    if (String(error?.code || "") !== "PGRST202" &&
+        !/Could not find the function/i.test(String(error?.message || ""))) {
+      logClientError("practice_generation_recs_sync_error", error || data);
+      return;
+    }
+  }
   try {
     if (!window.sb) return;
 
@@ -18257,13 +18273,17 @@ try {
       if (!quiz?.drillType) {
         const res = addMyRecsFromAttempt(attempt);
 
-        if (res?.added) {
-          // optional UX toast (keep existing behavior)
-          try { showToast(t("practice_saved_to_my_recs")); } catch {}
-
-          // ✅ write recs into DB (non-blocking)
+        if (res?.recs?.length) {
+          if (res.added) {
+            try { showToast(t("practice_saved_to_my_recs")); } catch {}
+          }
+          // Every finalized session is independently linked, even if topic repeats.
           try {
-            syncMyRecsToSupabase(attempt.subjectKey, res.addedRecs || res.recs || []);
+            syncMyRecsToSupabase(
+              attempt.subjectKey,
+              quiz?.safeSessionId ? (res.recs || []) : (res.addedRecs || res.recs || []),
+              quiz?.safeSessionId || null
+            ).catch(error => logClientError("practice_recommendations_sync_failed", error));
           } catch {}
         }
       }
@@ -18860,7 +18880,21 @@ async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
       Number(seasonIdArg || 0) ||
       await getCurrentSeasonId();
 
-    const practicePromise = window.sb
+    const practicePromise = (async () => {
+      if (window.sb?.rpc) {
+        const { data, error } = await window.sb.rpc(
+          "get_current_practice_recommendations_safe_v1",
+          { p_subject_key: subjectKey }
+        );
+        if (!error && data?.ok === true && Array.isArray(data.recommendations)) {
+          return { data: data.recommendations, error: null, bankScoped: true };
+        }
+        if (error && error.code !== "PGRST202" &&
+            !/Could not find the function/i.test(String(error.message || ""))) {
+          return { data: [], error, bankScoped: true };
+        }
+      }
+      return await window.sb
       .from("recommendations")
       .select(
         "id, source_type, tour_no, season_id, topic, subtopic, book_id, book_reference, created_at"
@@ -18870,6 +18904,7 @@ async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
       .eq("source_type", "practice")
       .order("created_at", { ascending: false })
       .limit(100);
+    })();
 
     let tourQuery = window.sb
       .from("recommendations")
@@ -18919,12 +18954,14 @@ async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
         ? tourResult.data
         : [];
 
-    return [...practiceRows, ...tourRows]
+    const combinedRows = [...practiceRows, ...tourRows]
       .sort((a, b) => {
         const aTime = new Date(a?.created_at || 0).getTime();
         const bTime = new Date(b?.created_at || 0).getTime();
         return bTime - aTime;
       });
+    combinedRows.practiceBankScoped = practiceResult.bankScoped === true;
+    return combinedRows;
   } catch (error) {
     logClientError("myrecs_select_exception", error);
     return [];
@@ -19028,7 +19065,8 @@ async function renderMyRecs() {
   // Mathematics v2 is a clean Practice reset. Old local Practice recommendations
   // must never reappear after the server-side Practice recommendation reset.
   // Tour recommendations use a separate store and are untouched.
-  if (!practiceRows.length && String(subjectKey).trim().toLowerCase() !== "mathematics") {
+  if (!practiceRows.length && dbRows.practiceBankScoped !== true &&
+      String(subjectKey).trim().toLowerCase() !== "mathematics") {
     const store = loadMyRecs();
     const local = store?.bySubject?.[subjectKey] || [];
     practiceRows = local.map(x => ({

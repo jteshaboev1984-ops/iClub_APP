@@ -14,6 +14,14 @@ comment on table public.practice_bank_generations is
 insert into public.practice_bank_generations(subject_id,generation,activated_at,release_key)
 select id,1,'-infinity'::timestamptz,'legacy'
 from public.subjects on conflict (subject_id,generation) do nothing;
+-- The Mathematics v2 activation is verified by the existing publication audit.
+-- All other subjects remain generation 1 until their own audited publication.
+insert into public.practice_bank_generations(subject_id,generation,activated_at,release_key)
+select subject_id,2,completed_at,release_version
+from private.practice_v2_release_switch_audit
+where release_version='math_p1_practice_v2_2026_10_07'
+  and status='published' and completed_at is not null
+on conflict (subject_id,generation) do nothing;
 alter table public.practice_sessions_v4 add column if not exists bank_generation integer;
 alter table public.practice_drill_sessions_v4 add column if not exists bank_generation integer;
 alter table public.practice_attempts add column if not exists bank_generation integer;
@@ -44,18 +52,31 @@ begin
   new.bank_generation := v_generation;
   return new;
 end $$;
--- Backfill before enabling immutability triggers. Existing sessions predate this registry.
--- A legacy session is generation 1 only when no later generation was active at creation.
-update public.practice_sessions_v4 s set bank_generation=1
+-- Historical sessions retain the generation active when questions were issued.
+update public.practice_sessions_v4 s set bank_generation=(
+ select g.generation from public.practice_bank_generations g
+ where g.subject_id=s.subject_id and g.activated_at<=s.created_at
+ order by g.activated_at desc,g.generation desc limit 1
+) where s.bank_generation is null;
+update public.practice_drill_sessions_v4 s set bank_generation=(
+ select g.generation from public.practice_bank_generations g
+ where g.subject_id=s.subject_id and g.activated_at<=s.created_at
+ order by g.activated_at desc,g.generation desc limit 1
+) where s.bank_generation is null;
+-- Old attempts lack a reliable start timestamp. Only attempts definitively
+-- predating the first replacement are safely assigned generation 1.
+update public.practice_attempts a set bank_generation=1
 where bank_generation is null and not exists (
-  select 1 from public.practice_bank_generations g
-  where g.subject_id=s.subject_id and g.generation>1 and g.activated_at<=s.created_at
+ select 1 from public.practice_bank_generations g
+ where g.subject_id=a.subject_id and g.generation>1 and g.activated_at<=a.created_at
 );
-update public.practice_drill_sessions_v4 s set bank_generation=1
-where bank_generation is null and not exists (
-  select 1 from public.practice_bank_generations g
-  where g.subject_id=s.subject_id and g.generation>1 and g.activated_at<=s.created_at
-);
+-- Legacy recommendations are time-classified once using the exact audited
+-- publication boundary. New recommendations require a linked server session.
+update public.recommendations r set bank_generation=(
+ select g.generation from public.practice_bank_generations g
+ where g.subject_id=r.subject_id and g.activated_at<=r.created_at
+ order by g.activated_at desc,g.generation desc limit 1
+) where r.source_type='practice' and r.bank_generation is null;
 drop trigger if exists practice_stamp_bank_generation_v1 on public.practice_sessions_v4;
 create trigger practice_stamp_bank_generation_v1 before insert or update
 on public.practice_sessions_v4 for each row execute function public.practice_stamp_bank_generation_v1();
@@ -85,8 +106,14 @@ begin
     select subject_id,user_id,bank_generation into v_subject,v_user,v_generation
     from public.practice_drill_sessions_v4 where id=new.practice_drill_session_id;
   else
-    -- Do not assign current generation based on write time.
-    new.bank_generation := null;
+    -- Preserve only the audited historical classification on updates.
+    -- New unlinked recommendations never acquire an invented generation.
+    if tg_op='UPDATE' and old.practice_session_id is null
+      and old.practice_drill_session_id is null then
+      new.bank_generation := old.bank_generation;
+    else
+      new.bank_generation := null;
+    end if;
     return new;
   end if;
   if v_subject is null or v_subject <> new.subject_id or v_user <> new.user_id
