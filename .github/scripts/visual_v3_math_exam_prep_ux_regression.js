@@ -41,7 +41,7 @@ assert(css.includes('PREMIUM MATHEMATICS EXAM PREP UX v3'), 'Premium Math Exam P
   const context = await browser.newContext({ viewport: { width: 320, height: 740 }, javaScriptEnabled: false });
   const page = await context.newPage();
   const url = process.env.VISUAL_V3_PREMIUM_URL || 'http://127.0.0.1:4173/index.html';
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  await page.goto(url, { waitUntil: 'load' });
 
   await page.evaluate(() => {
     document.querySelectorAll('.view').forEach(node => node.classList.remove('is-active'));

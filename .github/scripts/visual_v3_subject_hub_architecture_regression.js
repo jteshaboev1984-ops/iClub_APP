@@ -41,7 +41,7 @@ for (const key of ['hub_preparation_section', 'hub_practice_status', 'hub_practi
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, javaScriptEnabled: false });
   const url = process.env.VISUAL_V3_PREMIUM_URL || 'http://127.0.0.1:4173/index.html';
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  await page.goto(url, { waitUntil: 'load' });
 
   await page.evaluate(() => {
     document.querySelectorAll('.view').forEach(node => node.classList.remove('is-active'));

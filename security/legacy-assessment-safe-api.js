@@ -70,6 +70,19 @@
       });
     },
 
+    // Opt-in replacement of a paused self-selected topic, performed atomically
+    // by the server. Does not apply to Tour Practice or another subject.
+    async replaceTopicChoice({ subjectKey, topic, oldSessionId, oldClientSessionId, clientSessionId }) {
+      if (!clientSessionId) throw new Error("missing_stable_client_session_id");
+      return rpc("replace_practice_topic_drill_choice_safe_v1", {
+        p_subject_key: String(subjectKey || ""),
+        p_topic: String(topic || ""),
+        p_expected_old_session_id: requirePositiveInt(oldSessionId, "old_session_id"),
+        p_expected_old_client_session_id: String(oldClientSessionId || ""),
+        p_new_client_session_id: String(clientSessionId)
+      });
+    },
+
     async startMistakes({ subjectKey, questionIds, clientSessionId = null }) {
       return rpc("start_practice_mistakes_drill_safe_v5", {
         p_subject_key: String(subjectKey || ""),

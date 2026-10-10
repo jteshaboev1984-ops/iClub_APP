@@ -4,29 +4,29 @@
 (function () {
   "use strict";
   const COPY = {
-    ru: { title:"Выберите тему", desc:"Тренируйте конкретную тему отдельно от практики тура.",
+    ru: { title:"Выберите тему", desc:"Выберите тему для отдельной практики.",
       open:"Выбрать тему", close:"Скрыть темы", search:"Поиск темы",
       searchPlaceholder:"Найти тему…", loading:"Загружаем доступные темы…",
-      empty:"Сейчас нет доступных тематических тренировок.",
+      empty:"Пока нет доступных тем для практики.",
       filtered:"Темы не найдены", error:"Не удалось загрузить темы. Попробуйте ещё раз.",
       retry:"Повторить", items:"заданий", start:"Начать", note:"Засчитывается отдельно от результата практики тура.",
       more:"Показать ещё", historyTitle:"Практика по темам",
       historyLast:"Последний результат", historyBest:"Лучший результат", historyAll:"Правильных ответов",
-      historyRecent:"Последние тренировки", historyCount:"тренировок",
-      historyFoot:"Здесь показаны ответы тематических тренировок. Результаты туров учитываются отдельно.",
-      historyUnavailable:"История тематических тренировок сейчас недоступна.",
+      historyRecent:"Последние попытки", historyCount:"попыток",
+      historyFoot:"Здесь показаны результаты попыток по темам. Результаты практики по турам учитываются отдельно.",
+      historyUnavailable:"История попыток по темам сейчас недоступна.",
       historyRetry:"Повторить" },
-    uz: { title:"Mavzuni tanlang", desc:"Tur amaliyotidan alohida bir mavzu bo‘yicha mashq qiling.",
+    uz: { title:"Mavzuni tanlang", desc:"Tur amaliyotidan alohida mavzu bo‘yicha amaliyot qiling.",
       open:"Mavzuni tanlash", close:"Mavzularni yashirish", search:"Mavzuni qidirish",
       searchPlaceholder:"Mavzuni topish…", loading:"Mavzular yuklanmoqda…",
-      empty:"Hozircha mavjud mavzuli mashqlar yo‘q.",
+      empty:"Hozircha mavzular bo‘yicha amaliyot mavjud emas.",
       filtered:"Mavzu topilmadi", error:"Mavzularni yuklab bo‘lmadi. Qayta urinib ko‘ring.",
       retry:"Qayta urinish", items:"savol", start:"Boshlash", note:"Natija tur amaliyotining natijasidan alohida saqlanadi.",
       more:"Yana ko‘rsatish", historyTitle:"Mavzular bo‘yicha amaliyot",
       historyLast:"So‘nggi natija", historyBest:"Eng yaxshi natija", historyAll:"To‘g‘ri javoblar",
-      historyRecent:"So‘nggi mashg‘ulotlar", historyCount:"mashg‘ulot",
-      historyFoot:"Bu yerda mavzuli mashqlar natijalari ko‘rsatiladi. Tur natijalari alohida hisoblanadi.",
-      historyUnavailable:"Mavzuli mashqlar tarixini hozir yuklab bo‘lmadi.",
+      historyRecent:"So‘nggi urinishlar", historyCount:"urinish",
+      historyFoot:"Bu yerda mavzular bo‘yicha urinishlar natijalari ko‘rsatiladi. Tur amaliyoti natijalari alohida hisoblanadi.",
+      historyUnavailable:"Mavzular bo‘yicha urinishlar tarixini hozir yuklab bo‘lmadi.",
       historyRetry:"Qayta urinish" },
     en: { title:"Choose a topic", desc:"Practise a specific topic independently from your Tour practice.",
       open:"Choose topic", close:"Hide topics", search:"Search topics",
@@ -36,7 +36,7 @@
       retry:"Try again", items:"questions", start:"Start", note:"Topic drills are separate from your Tour practice result.",
       more:"Show more", historyTitle:"Practice by topic",
       historyLast:"Latest result", historyBest:"Best result", historyAll:"Correct answers",
-      historyRecent:"Recent topic sessions", historyCount:"sessions",
+      historyRecent:"Recent attempts", historyCount:"attempts",
       historyFoot:"These are results from topic practice. Tour results are tracked separately.",
       historyUnavailable:"Topic practice history is temporarily unavailable.",
       historyRetry:"Retry" }
@@ -58,10 +58,10 @@
   function sessionCountLabel(n,lang,c) {
     if(lang==="ru") {
       const last=n%10,hundred=n%100;
-      return n+" "+(last===1&&hundred!==11?"тренировка":
-        last>=2&&last<=4&&(hundred<12||hundred>14)?"тренировки":"тренировок");
+      return n+" "+(last===1&&hundred!==11?"попытка":
+        last>=2&&last<=4&&(hundred<12||hundred>14)?"попытки":"попыток");
     }
-    if(lang==="en") return n+" "+(n===1?"session":"sessions");
+    if(lang==="en") return n+" "+(n===1?"attempt":"attempts");
     return n+" "+c.historyCount;
   }
 
@@ -120,17 +120,21 @@
       heading.append(element("strong","",c.historyTitle),
         element("span","practice-topic-history-count",sessionCountLabel(sessions,lang,c)));
       const metrics=element("div","practice-topic-history-metrics");
-      for(const [label,value] of [
-        [c.historyLast,latest.correct+" / "+latest.total],
-        [c.historyBest,best.correct+" / "+best.total],
-        [c.historyAll,correct+" / "+answered]
-      ]) {
+      // With one completed session, latest, best and recent all refer to one attempt.
+      const visibleMetrics=sessions===1
+        ? [[c.historyLast,latest.correct+" / "+latest.total]]
+        : [
+            [c.historyLast,latest.correct+" / "+latest.total],
+            [c.historyBest,best.correct+" / "+best.total],
+            [c.historyAll,correct+" / "+answered]
+          ];
+      for(const [label,value] of visibleMetrics) {
         const metric=element("div","practice-topic-history-metric");
         metric.append(element("span","",label),element("strong","",value));
         metrics.append(metric);
       }
       history.append(heading,metrics);
-      const recent=Array.isArray(data?.recent)?data.recent.slice(0,3):[];
+      const recent=sessions>1&&Array.isArray(data?.recent)?data.recent.slice(0,3):[];
       if(recent.length) {
         const list=element("div","practice-topic-history-recent");
         list.append(element("strong","practice-topic-history-recent-title",c.historyRecent));
