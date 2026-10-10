@@ -18442,6 +18442,18 @@ const recsAction = document.querySelector('#courses-practice-result [data-action
 if (recsAction) {
   recsAction.hidden = false;
   recsAction.style.display = "";
+  const recsTitle = recsAction.querySelector('[data-i18n="practice_recs_title"]');
+  const recsSubtitle = recsAction.querySelector('[data-i18n="practice_recs_sub"]');
+  const recsCountBadge = recsAction.querySelector("#practice-recs-count");
+  if (recsTitle) recsTitle.textContent = tr3(
+    "Мои рекомендации", "Mening tavsiyalarim", "My recommendations"
+  );
+  if (recsSubtitle) recsSubtitle.textContent = tr3(
+    "Подробнее о результатах — в «Моих рекомендациях»",
+    "Natijalar haqida batafsil — «Mening tavsiyalarim» bo‘limida",
+    "More about your results in My recommendations"
+  );
+  if (recsCountBadge) recsCountBadge.hidden = true;
 }
 
 // ✅ set “exit” button label based on context (main vs drill)
