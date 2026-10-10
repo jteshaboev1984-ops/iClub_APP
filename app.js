@@ -44,19 +44,21 @@ const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 // ---------------------------
 function showToursLoading() {
   const el = document.getElementById("tours-loading");
-  if (!el) return;
-
-  // update label via i18n if available
-  const txt = el.querySelector(".tours-loading-text");
-  if (txt && typeof t === "function") txt.textContent = t("loading") || txt.textContent;
-
+  const screen = document.getElementById("courses-tours");
+  const status = document.getElementById("tours-status");
+  if (!el || !screen) return { active: () => false, finish: () => {} };
+  if (status && el.nextElementSibling !== status) status.before(el);
+  el.setAttribute("role", "status");
+  el.setAttribute("aria-label", tr3("Загрузка туров", "Turlar yuklanmoqda", "Loading Tours"));
   el.classList.remove("hidden");
+  return beginUiLoading(screen, "iclub-tours-pending");
 }
 
-function hideToursLoading() {
+function hideToursLoading(pending) {
+  if (pending && !pending.active()) return;
   const el = document.getElementById("tours-loading");
-  if (!el) return;
-  el.classList.add("hidden");
+  if (el) el.classList.add("hidden");
+  pending?.finish();
 }
 
 function formatTourDateShort(isoDate) {
@@ -11141,12 +11143,11 @@ const hideLoading = () => {
   }
 
     // boot selects (once)
+  showLoading(); // Display the local placeholder before the first asynchronous boot.
   await ensureRatingsBoot();
   if (token !== ratingsState._token) return;
 
   // loading UI
-  listEl.innerHTML = "";
-  showLoading();
   if (mybar) mybar.style.display = "none";
 
   // user / participant
@@ -15680,8 +15681,10 @@ async function renderSubjectHubMentorCard(subjectKey) {
     const list = $("#lessons-list");
     const subj = subjectByKey(state.courses.subjectKey);
     if (!list) return;
-
-    list.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка...")}</div>`;
+    const requestedSubject = state.courses.subjectKey;
+    const pending = beginUiLoading(list, "iclub-lessons-pending");
+    try {
+    list.innerHTML = '<div class="iclub-skeleton-lesson" aria-hidden="true"><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span></div>'.repeat(3);
 
     if (!window.sb) {
       list.innerHTML = `<div class="empty muted">${escapeHTML(t("lessons_no_db") || "База не подключена. Уроки недоступны.")}</div>`;
@@ -15690,6 +15693,7 @@ async function renderSubjectHubMentorCard(subjectKey) {
 
     const subjectKey = state.courses.subjectKey;
     const subjectId = await getSubjectIdByKey(subjectKey);
+    if (!pending.active() || requestedSubject !== state.courses.subjectKey) return;
 
     if (!subjectId) {
       list.innerHTML = `<div class="empty muted">${escapeHTML(t("lessons_empty") || "Уроки пока не добавлены.")}</div>`;
@@ -15701,6 +15705,7 @@ async function renderSubjectHubMentorCard(subjectKey) {
       .select("id,title,topic,order_no")
       .eq("subject_id", subjectId)
       .order("order_no", { ascending: true });
+    if (!pending.active() || requestedSubject !== state.courses.subjectKey) return;
 
     if (error) {
       logClientError("lessons_select_error", error);
@@ -15737,6 +15742,9 @@ async function renderSubjectHubMentorCard(subjectKey) {
 
       list.appendChild(item);
     });
+    } finally {
+      pending.finish();
+    }
   }
 
     async function renderVideo() {
@@ -17249,10 +17257,11 @@ window.iClubPracticeTopicChoice?.mount({
 }
    
          async function renderToursStart() {
-  showToursLoading();
+  const pending = showToursLoading();
   try {
     const profile = loadProfile?.() || null;
     const subjectKey = state.courses?.subjectKey || null;
+    const isCurrent = () => pending.active() && state.courses?.subjectKey === subjectKey;
     const subj = subjectByKey(subjectKey);
 
     // subject title
@@ -17306,6 +17315,7 @@ const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDa
 
 const operationalSeasonId =
   await getCurrentSeasonId();
+if (!isCurrent()) return;
 
 // UI: show loading first to avoid 1-sec "wrong screen" flicker
 if (statusTitle) statusTitle.textContent = tr("loading", "Загрузка…");
@@ -17372,6 +17382,8 @@ if (!dbTours.length && window.sb && subjectId) {
     toursErr = toursErr || e;
   }
 }
+
+ if (!isCurrent()) return;
 
  // pick active / upcoming tours
 const activeTours = dbTours.filter(r => !!r.is_active && isInWindow(r));
@@ -17473,6 +17485,7 @@ if (!activeTour && !upcomingTour) {
       alreadyAttempted = await hasTourAttempt(uid, activeTour.id);
     }
   } catch {}
+  if (!isCurrent()) return;
 
   if (alreadyAttempted) {
     if (statusTitle) {
@@ -17503,13 +17516,14 @@ if (!activeTour && !upcomingTour) {
      try {
        await renderToursHistorySummary(
          subjectId,
-         operationalSeasonId
+         operationalSeasonId,
+         isCurrent
        );
      } catch {}
      
-      saveState();
+      if (isCurrent()) saveState();
       } finally {
-     hideToursLoading();
+     hideToursLoading(pending);
    }
   }
 
@@ -17519,7 +17533,8 @@ if (!activeTour && !upcomingTour) {
 // --------------------------------------
 async function renderToursHistorySummary(
   subjectId,
-  seasonIdArg = null
+  seasonIdArg = null,
+  isCurrent = () => true
 ) {
   const bestScoreEl = document.getElementById("tours-best-score");
   const bestPctEl = document.getElementById("tours-best-percent");
@@ -17565,6 +17580,7 @@ async function renderToursHistorySummary(
       if (!error && Array.isArray(data)) attempts = data;
     }
   } catch {}
+  if (!isCurrent()) return;
 
   // Group best attempt per tour_no (although now it's usually 1 attempt)
   const byTour = new Map();
