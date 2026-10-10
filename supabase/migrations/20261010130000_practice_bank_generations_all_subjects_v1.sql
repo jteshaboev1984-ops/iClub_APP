@@ -91,8 +91,18 @@ on public.practice_drill_sessions_v4 for each row execute function public.practi
 create or replace function public.practice_stamp_recommendation_generation_v1()
 returns trigger language plpgsql security definer
 set search_path = pg_catalog,public,pg_temp as $$
-declare v_subject bigint; v_user uuid; v_generation integer;
+declare v_subject bigint; v_user uuid; v_generation integer; v_status text; v_verified boolean;
 begin
+  -- An existing recommendation cannot be reattached to another session.
+  if tg_op='UPDATE' and (
+    new.practice_session_id is distinct from old.practice_session_id
+    or new.practice_drill_session_id is distinct from old.practice_drill_session_id
+    or new.user_id is distinct from old.user_id
+    or new.subject_id is distinct from old.subject_id
+    or new.source_type is distinct from old.source_type
+  ) then
+    raise exception 'practice_recommendation_origin_immutable';
+  end if;
   if new.source_type <> 'practice' then
     new.bank_generation := null;
     new.practice_session_id := null;
@@ -103,11 +113,25 @@ begin
     raise exception 'multiple_practice_origins';
   end if;
   if new.practice_session_id is not null then
-    select subject_id,user_id,bank_generation into v_subject,v_user,v_generation
+    select subject_id,user_id,bank_generation,status into v_subject,v_user,v_generation,v_status
     from public.practice_sessions_v4 where id=new.practice_session_id;
+    select exists (
+      select 1 from public.practice_session_answers_v4 a
+      join public.questions q on q.id=a.question_id
+      where a.session_id=new.practice_session_id and a.is_correct=false
+        and q.topic=new.topic
+        and coalesce(q.subtopic,'')=coalesce(new.subtopic,'')
+    ) into v_verified;
   elsif new.practice_drill_session_id is not null then
-    select subject_id,user_id,bank_generation into v_subject,v_user,v_generation
+    select subject_id,user_id,bank_generation,status into v_subject,v_user,v_generation,v_status
     from public.practice_drill_sessions_v4 where id=new.practice_drill_session_id;
+    select exists (
+      select 1 from public.practice_drill_answers_v4 a
+      join public.questions q on q.id=a.question_id
+      where a.session_id=new.practice_drill_session_id and a.is_correct=false
+        and q.topic=new.topic
+        and coalesce(q.subtopic,'')=coalesce(new.subtopic,'')
+    ) into v_verified;
   else
     -- Preserve only the audited historical classification on updates.
     -- New unlinked recommendations never acquire an invented generation.
@@ -120,7 +144,7 @@ begin
     return new;
   end if;
   if v_subject is null or v_subject <> new.subject_id or v_user <> new.user_id
-    or v_generation is null then
+    or v_generation is null or v_status <> 'finalized' or not coalesce(v_verified,false) then
     raise exception 'practice_recommendation_origin_mismatch';
   end if;
   new.bank_generation := v_generation;
