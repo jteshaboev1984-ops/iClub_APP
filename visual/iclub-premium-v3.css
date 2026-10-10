@@ -3549,3 +3549,22 @@ body.iclub-visual-v3 #courses-subject-hub.is-study > .subject-hub-tabs .hub-tab.
 }
 .iclub-visual-v3 #my-recs-list .iclub-skeleton-recs .iclub-skeleton-shape{display:block;width:70%;height:18px}
 .iclub-visual-v3 #my-recs-list .iclub-skeleton-recs .iclub-skeleton-shape:last-child{width:45%;height:12px}
+
+/* Subject Hub: no stale identity / entitlement flash. */
+.iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-title,
+.iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-meta,
+.iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-mentor-title,
+.iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-mentor-sub {
+  color:transparent!important;background:#E9EFF8!important;border-radius:8px;
+  animation:iclub-soft-pulse 1.7s ease-in-out infinite;
+}
+.iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-title{min-width:150px;min-height:24px;display:inline-block}
+.iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-meta{min-width:86px;min-height:15px;display:inline-block}
+.iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-mentor-title{min-width:110px;min-height:16px;display:inline-block}
+.iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-mentor-sub{min-width:90px;min-height:13px;display:inline-block}
+@media(prefers-reduced-motion:reduce){
+  .iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-title,
+  .iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-meta,
+  .iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-mentor-title,
+  .iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-mentor-sub{animation:none!important}
+}

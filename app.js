@@ -15578,6 +15578,8 @@ async function renderSubjectHubMentorCard(subjectKey) {
   // A stale Mathematics response may never occupy another subject's hub.
   const hubIdentityRoot = document.getElementById("courses-subject-hub");
   if (hubIdentityRoot) hubIdentityRoot.dataset.subjectKey = String(subjectKey || "");
+  const hubPending = beginUiLoading(hubIdentityRoot, "iclub-hub-pending");
+  try {
   const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(subjectKey);
   if (subjectKey !== state.courses.subjectKey) return;
   if (accessOk === false) {
@@ -15673,6 +15675,9 @@ async function renderSubjectHubMentorCard(subjectKey) {
 
         // ✅ Subject mentor card
     await renderSubjectHubMentorCard(subjectKey).catch(() => null);
+  } finally {
+    hubPending.finish();
+  }
   }
   // ---------------------------
   // Lessons (demo)
