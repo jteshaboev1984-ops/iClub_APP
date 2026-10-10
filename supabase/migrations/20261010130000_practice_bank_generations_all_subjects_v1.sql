@@ -40,19 +40,28 @@ begin
   select generation into v_generation from public.practice_bank_generations
   where subject_id=new.subject_id and activated_at <= statement_timestamp()
   order by activated_at desc,generation desc limit 1;
-  if v_generation is null then raise exception 'practice_bank_not_configured'; end if;
+  if v_generation is null then\n    -- Newly added subjects begin at generation 1 without breaking session creation.\n    v_generation := 1;\n  end if;
   new.bank_generation := v_generation;
   return new;
 end $$;
+-- Backfill before enabling immutability triggers. Existing sessions predate this registry.
+-- A legacy session is generation 1 only when no later generation was active at creation.
+update public.practice_sessions_v4 s set bank_generation=1
+where bank_generation is null and not exists (
+  select 1 from public.practice_bank_generations g
+  where g.subject_id=s.subject_id and g.generation>1 and g.activated_at<=s.created_at
+);
+update public.practice_drill_sessions_v4 s set bank_generation=1
+where bank_generation is null and not exists (
+  select 1 from public.practice_bank_generations g
+  where g.subject_id=s.subject_id and g.generation>1 and g.activated_at<=s.created_at
+);
 drop trigger if exists practice_stamp_bank_generation_v1 on public.practice_sessions_v4;
 create trigger practice_stamp_bank_generation_v1 before insert or update
 on public.practice_sessions_v4 for each row execute function public.practice_stamp_bank_generation_v1();
 drop trigger if exists practice_drill_stamp_bank_generation_v1 on public.practice_drill_sessions_v4;
 create trigger practice_drill_stamp_bank_generation_v1 before insert or update
 on public.practice_drill_sessions_v4 for each row execute function public.practice_stamp_bank_generation_v1();
--- Existing session creation predates the registry. Do not infer new generations.
-update public.practice_sessions_v4 set bank_generation=1 where bank_generation is null;
-update public.practice_drill_sessions_v4 set bank_generation=1 where bank_generation is null;
 -- Existing legacy attempts and unlinked recommendations remain NULL until audited backfill.
 -- Origin-linked recommendations get their generation from the server-owned session.
 create or replace function public.practice_stamp_recommendation_generation_v1()
