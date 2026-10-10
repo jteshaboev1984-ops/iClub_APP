@@ -3539,3 +3539,13 @@ body.iclub-visual-v3 #courses-subject-hub.is-study > .subject-hub-tabs .hub-tab.
   .iclub-visual-v3 #courses-tours.iclub-tours-pending #tours-best-score,
   .iclub-visual-v3 #courses-tours.iclub-tours-pending #tours-best-time{animation:none!important}
 }
+
+/* My Recommendations: scoped skeleton; header and navigation stay stable. */
+.iclub-visual-v3 #my-recs-list.iclub-recs-pending {min-height:250px}
+.iclub-visual-v3 #my-recs-list .iclub-skeleton-recs {
+ display:grid;gap:12px;padding:15px 16px;margin-bottom:11px;
+ min-height:78px;background:#fff;border:1px solid var(--v3-border,#E0E7F2);
+ border-radius:var(--v3-radius-lg,16px);box-shadow:var(--v3-premium-shadow,0 8px 24px rgba(15,23,42,.055))
+}
+.iclub-visual-v3 #my-recs-list .iclub-skeleton-recs .iclub-skeleton-shape{display:block;width:70%;height:18px}
+.iclub-visual-v3 #my-recs-list .iclub-skeleton-recs .iclub-skeleton-shape:last-child{width:45%;height:12px}

@@ -19027,6 +19027,31 @@ async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
 async function renderMyRecs() {
   const wrap = $("#my-recs-list");
   if (!wrap) return;
+  const pending = beginUiLoading(wrap, "iclub-recs-pending");
+  const subjectKey = String(state?.courses?.subjectKey || "").trim();
+  const isCurrent = () => pending.active() && String(state?.courses?.subjectKey || "").trim() === subjectKey;
+  const skeleton = '<div class="iclub-skeleton-recs" aria-hidden="true"><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span></div>'.repeat(3);
+  wrap.innerHTML = skeleton;
+  try {
+    await renderMyRecsRaw(isCurrent, skeleton);
+  } catch {
+    if (isCurrent()) {
+      wrap.innerHTML = '<div class="empty muted">' + escapeHTML(tr3("Не удалось загрузить рекомендации.", "Tavsiyalarni yuklab bo‘lmadi.", "Could not load recommendations.")) + '</div>';
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.className = "btn primary";
+      retry.textContent = tr3("Повторить", "Qayta urinish", "Retry");
+      retry.addEventListener("click", () => renderMyRecs());
+      wrap.appendChild(retry);
+    }
+  } finally {
+    pending.finish();
+  }
+}
+
+async function renderMyRecsRaw(isCurrent, skeleton) {
+  const wrap = $("#my-recs-list");
+  if (!wrap) return;
 
   const subjectKey = String(state?.courses?.subjectKey || "").trim();
   if (!subjectKey) {
@@ -19046,6 +19071,7 @@ async function renderMyRecs() {
 
   const currentSeasonId =
     await getCurrentSeasonId();
+  if (!isCurrent()) return;
 
   const savedSeasonId =
     seasonRows.length > 1
@@ -19074,6 +19100,7 @@ async function renderMyRecs() {
 
   const seasonOneId =
     await getSeasonOneId();
+  if (!isCurrent()) return;
 
   if (
     seasonRows.length > 1 &&
@@ -19099,13 +19126,14 @@ async function renderMyRecs() {
     }
   }
 
-  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
+  wrap.innerHTML = skeleton;
 
     // DB-first for both practice and tour
   const dbRows = await fetchMyRecsDB(
     subjectKey,
     selectedSeasonId
   );
+  if (!isCurrent()) return;
 
   let practiceRows = dbRows.filter(r => String(r?.source_type || "") === "practice");
   let tourRows = dbRows
@@ -19147,6 +19175,7 @@ async function renderMyRecs() {
       })
     );
 
+    if (!isCurrent()) return;
     practiceRows = checks.filter(x => x.keep).map(x => x.rec);
   }
    
@@ -19258,6 +19287,7 @@ async function renderMyRecs() {
       topicHistoryUnavailable = true;
     }
   }
+  if (!isCurrent()) return;
   // Practice has one coherent history; no nested tour/topic mode switch.
   const modeTabs = "";
   const tabBtn = (key, label, isActive) => `
