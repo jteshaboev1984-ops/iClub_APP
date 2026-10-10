@@ -38,7 +38,7 @@ assert(reset.includes('if (result?.error'), "Cleanup must fail closed on server 
 assert(!reset.includes('storage.removeItem("practice_history_v3:mathematics:tour_'), "Must not clear new Mathematics v3 history");
 assert(!reset.includes("PRACTICE_HISTORY_PREFIXES"), "Must not bulk-clear both old and new history namespaces");
 assert(app.includes('await window.iclubMathPracticeV2ResetAfterPublish?.(window.sb)'), "Boot must invoke authenticated publication gate");
-assert(app.includes('if (cleared === true) state = loadState()'), "Reload saved state after reset, avoid stale quiz resurrection");
-assert(index.includes("security/practice-v2-local-reset.js?v=mathv2postpublish1"), "Cache pin must refresh protective local reset");
+assert(!app.includes('if (cleared === true) state = loadState()'), "Narrow old-history cleanup must not reload or clear an active quiz");
+assert(index.includes("security/practice-v2-local-reset.js?v=stage03oldhistory2"), "Cache pin must refresh protective local reset");
 assert(index.includes("app.js?v=") && index.includes("reviewback1-postpublish1"), "Cache pin must refresh calling app");
 console.log("Mathematics Practice v2 local-reset publish gate: GREEN, no automatic reset and no protected history writes.");

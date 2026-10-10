@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
+const app=read('app.js');
+const schema=read('supabase/migrations/20261010130000_practice_bank_generations_all_subjects_v1.sql');
+const rpc=read('supabase/migrations/20261010131000_practice_bank_recommendations_safe_v1.sql');
+assert(schema.includes('from public.subjects'),'all subjects initialized');
+assert(schema.includes("generation>=1")||schema.includes('generation >= 1'));
+assert(schema.includes('private.practice_v2_release_switch_audit'),'math v2 must use verified audit');
+assert(schema.includes("status='published' and completed_at is not null"));
+assert(schema.includes('new.bank_generation := v_generation'),'session generation assigned server-side');
+assert(schema.includes('practice_bank_generation_immutable'),'in-flight session cannot change generation');
+assert(schema.includes('practice_session_id'),'recommendations linked to originating session');
+assert(schema.includes('practice_recommendation_origin_mismatch'),'cross-user/subject link rejected');
+assert(rpc.includes("status='finalized'"),'recommendations require finalized session');
+assert(rpc.includes('a.is_correct=false'),'recommendation must match server-verified mistake');
+assert(rpc.includes('auth.uid()'),'RPC must scope to authenticated user');
+assert(rpc.includes('bank_generation=v_generation'),'read only current generation');
+assert(app.includes('sync_practice_recommendations_safe_v1'),'client must use server provenance');
+assert(app.includes('get_current_practice_recommendations_safe_v1'),'client must use generation-scoped reads');
+assert(app.includes('dbRows.practiceBankScoped !== true'),'old local fallback forbidden after scoped read');
+assert(app.includes('practiceSessionId = null'),'client passes source session');
+assert(!schema.includes('delete from public.practice_attempts'),'no destructive reset');
+assert(!schema.includes('truncate '),'no destructive truncation');
+console.log('PRACTICE_BANK_GENERATIONS_STATIC_CONTRACT_OK');

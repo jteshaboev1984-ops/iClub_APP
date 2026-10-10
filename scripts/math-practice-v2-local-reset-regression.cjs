@@ -1,213 +1,39 @@
 #!/usr/bin/env node
-"use strict";
-
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-
-const ROOT = path.resolve(__dirname, "..");
-const SOURCE = fs.readFileSync(
-  path.join(ROOT, "security", "practice-v2-local-reset.js"),
-  "utf8"
-);
-const MARKER = "iclub_math_practice_v2_local_reset_20261007_v1";
-
-function assert(ok, message) {
-  if (!ok) throw new Error(message);
-}
-
-function makeStorage(initial = {}) {
-  const data = new Map(Object.entries(initial).map(([k, v]) => [k, String(v)]));
-  return {
-    get length() { return data.size; },
-    key(index) { return Array.from(data.keys())[index] ?? null; },
-    getItem(key) { return data.has(String(key)) ? data.get(String(key)) : null; },
-    setItem(key, value) { data.set(String(key), String(value)); },
-    removeItem(key) { data.delete(String(key)); },
-    dump() { return Object.fromEntries(data.entries()); }
-  };
-}
-
-function run(storage) {
-  const context = {
-    localStorage: storage,
-    setTimeout,
-    clearTimeout,
-    console: { warn() {}, error() {}, log() {} }
-  };
-  vm.runInNewContext(SOURCE, context, { filename: "practice-v2-local-reset.js" });
-  assert(typeof context.iclubMathPracticeV2ResetAfterPublish === "function", "reset hook not exposed");
-  return context.iclubMathPracticeV2ResetAfterPublish;
-}
-
-const allowPublished = {
-  rpc: async (name) => {
-    assert(name === "is_math_practice_v2_published_safe_v1", "unapproved publish gate RPC");
-    return { data: true, error: null };
-  }
-};
-
-(async () => {
-
-const tourContext = {
-  tourId: 77,
-  subjectKey: "mathematics",
-  answers: [{ questionId: 9001, isCorrect: true }]
-};
-const tourLocalRecs = {
-  bySubject: {
-    mathematics: [{ source_type: "tour", topic: "Quadratics", tourNo: 2 }]
-  }
-};
-
-const state = {
-  tab: "courses",
-  quizLock: "practice",
-  quiz: {
-    mode: "practice",
-    subjectKey: "mathematics",
-    safeSessionId: 123,
-    questions: [{ id: 11 }]
-  },
-  practiceLastAttempt: {
-    subjectKey: "mathematics",
-    attemptKey: "old"
-  },
-  practiceLastDrillAttempt: {
-    subjectKey: "mathematics",
-    attemptKey: "old-drill"
-  },
-  tourContext,
-  courses: {
-    subjectKey: "mathematics",
-    stack: ["subject-hub", "practice-quiz"],
-    lastTourAttemptId: 812,
-    lastTourCertificateId: 913,
-    activeTourNo: 3,
-    activeTourId: 77,
-    selectedPracticeTourNoBySubject: {
-      mathematics: 3,
-      economics: 2
-    },
-    practiceContext: "drill",
-    myRecCurrent: { source_type: "practice", topic: "Old Practice" },
-    myRecDrillLast: { subjectKey: "mathematics", drillType: "rec_topic" },
-    myRecMistakeQids: [11, 12],
-    myRecReturnTarget: "my-rec-detail"
-  }
-};
-
-const storage = makeStorage({
-  "practice_history_v2:mathematics:tour_1": JSON.stringify({ last: [{ id: "old" }] }),
-  "practice_history_v3:mathematics:tour_2": JSON.stringify({ last: [{ id: "preview" }] }),
-  "practice_history_v2:economics:tour_1": JSON.stringify({ last: [{ id: "keep" }] }),
-  "iclub_practice_draft_v1": JSON.stringify({
-    status: "paused",
-    subjectKey: "mathematics",
-    quiz: { subjectKey: "mathematics", safeSessionId: 123 }
-  }),
-  "iclub_my_recs_v1": JSON.stringify({
-    bySubject: {
-      mathematics: [{ topic: "Old Practice" }],
-      economics: [{ topic: "Keep Economics" }]
-    }
-  }),
-  "iclub_my_tour_recs_v1": JSON.stringify(tourLocalRecs),
-  "iclub_state_v1": JSON.stringify(state)
-});
-
-const apply = run(storage);
-const before = JSON.stringify(storage.dump());
-assert(JSON.stringify(storage.dump()) === before, "script cleared before published-bank gate");
-assert(await apply(null) === false, "missing authenticated client should fail closed");
-assert(await apply({ rpc: async () => ({ data: false, error: null }) }) === false, "staged bank should fail closed");
-assert(await apply({ rpc: async () => ({ data: true, error: { message: "offline" } }) }) === false, "offline gate should fail closed");
-assert(await apply({ rpc: async () => { throw new Error("network"); } }) === false, "rejected gate should fail closed");
-assert(JSON.stringify(storage.dump()) === before, "nonpublished/error state changed localStorage");
-assert(storage.getItem(MARKER) === null, "premature reset marker created");
-assert(await apply(allowPublished) === true, "published bank was not cleaned");
-
-let after = storage.dump();
-assert(after[MARKER] === "1", "one-time reset marker missing");
-assert(!after["practice_history_v2:mathematics:tour_1"], "legacy Mathematics history v2 survived");
-assert(!!after["practice_history_v3:mathematics:tour_2"], "new-bank Mathematics v3 history was erased");
-assert(!!after["practice_history_v2:economics:tour_1"], "other-subject Practice history was changed");
-assert(!after["iclub_practice_draft_v1"], "legacy Mathematics paused draft survived");
-
-const recs = JSON.parse(after["iclub_my_recs_v1"]);
-assert(!Object.prototype.hasOwnProperty.call(recs.bySubject, "mathematics"), "legacy Mathematics local Practice recommendations survived");
-assert(recs.bySubject.economics?.[0]?.topic === "Keep Economics", "other-subject local Practice recommendations changed");
-assert(after["iclub_my_tour_recs_v1"] === JSON.stringify(tourLocalRecs), "Tour recommendation local storage changed");
-
-const nextState = JSON.parse(after["iclub_state_v1"]);
-assert(!nextState.quiz, "legacy Mathematics Practice quiz survived");
-assert(nextState.quizLock === null, "legacy Mathematics Practice quiz lock survived");
-assert(!nextState.practiceLastAttempt, "legacy Mathematics Practice result survived");
-assert(!nextState.practiceLastDrillAttempt, "legacy Mathematics Practice drill result survived");
-assert(JSON.stringify(nextState.tourContext) === JSON.stringify(tourContext), "Tour runtime context changed");
-assert(nextState.courses.lastTourAttemptId === 812, "Tour attempt pointer changed");
-assert(nextState.courses.lastTourCertificateId === 913, "Tour certificate pointer changed");
-assert(nextState.courses.activeTourNo === 3 && nextState.courses.activeTourId === 77, "active Tour routing changed");
-assert(!Object.prototype.hasOwnProperty.call(nextState.courses.selectedPracticeTourNoBySubject, "mathematics"), "old Mathematics Practice selection survived");
-assert(nextState.courses.selectedPracticeTourNoBySubject.economics === 2, "other-subject Practice selection changed");
-assert(JSON.stringify(nextState.courses.stack) === JSON.stringify(["subject-hub"]), "stale Mathematics Practice screen was not exited");
-assert(nextState.courses.myRecCurrent === null, "stale Mathematics Practice recommendation detail survived");
-
-// Idempotency: new v2 progress created after the marker must never be erased.
-storage.setItem("practice_history_v3:mathematics:tour_1", JSON.stringify({ last: [{ id: "new-v2" }] }));
-assert(await apply(allowPublished) === false, "already processed device reset twice");
-after = storage.dump();
-assert(!!after["practice_history_v3:mathematics:tour_1"], "one-time reset erased new Mathematics v2 history");
-
-// Tour recommendation detail is protected even when Mathematics is the active subject.
-const tourDetailState = {
-  quizLock: null,
-  tourContext,
-  courses: {
-    subjectKey: "mathematics",
-    stack: ["my-recs", "my-rec-detail"],
-    lastTourAttemptId: 812,
-    lastTourCertificateId: 913,
-    myRecCurrent: { topic: "Functions", tourNo: 2 },
-    selectedPracticeTourNoBySubject: { mathematics: 2 }
-  }
-};
-const tourDetailStorage = makeStorage({
-  "iclub_state_v1": JSON.stringify(tourDetailState),
-  "iclub_my_tour_recs_v1": JSON.stringify(tourLocalRecs)
-});
-assert(await run(tourDetailStorage)(allowPublished) === true, "Tour context fixture did not run");
-const protectedState = JSON.parse(tourDetailStorage.getItem("iclub_state_v1"));
-assert(protectedState.courses.myRecCurrent?.tourNo === 2, "legacy Tour recommendation detail was cleared");
-assert(JSON.stringify(protectedState.courses.stack) === JSON.stringify(["my-recs", "my-rec-detail"]), "Tour recommendation navigation changed");
-assert(JSON.stringify(protectedState.tourContext) === JSON.stringify(tourContext), "Tour context changed in Tour recommendation case");
-assert(tourDetailStorage.getItem("iclub_my_tour_recs_v1") === JSON.stringify(tourLocalRecs), "Tour recommendation store changed in Tour detail case");
-
-// Non-Mathematics draft is not part of this reset.
-const otherDraft = { status: "paused", subjectKey: "economics", quiz: { subjectKey: "economics" } };
-const otherStorage = makeStorage({
-  "iclub_practice_draft_v1": JSON.stringify(otherDraft)
-});
-assert(await run(otherStorage)(allowPublished) === true, "other-subject fixture did not run");
-assert(otherStorage.getItem("iclub_practice_draft_v1") === JSON.stringify(otherDraft), "other-subject Practice draft changed");
-
-console.log(JSON.stringify({
-  ok: true,
-  cleanupGatedByPublishedBank: true,
-  noResetOnOfflineOrStagedState: true,
-  mathematicsNewV3HistoryPreserved: true,
-  mathematicsLegacyHistoryCleared: true,
-  mathematicsPausedDraftCleared: true,
-  mathematicsPracticeRecommendationFallbackCleared: true,
-  stalePracticeRuntimeCleared: true,
-  stalePracticeDrillRuntimeCleared: true,
-  otherSubjectPracticePreserved: true,
-  tourRuntimePreserved: true,
-  tourRecommendationsPreserved: true,
-  legacyTourRecommendationDetailPreserved: true,
-  oneTimeIdempotency: true
-}, null, 2));
-})().catch(error => {
-  console.error(error);
-  process.exitCode = 1;
-});
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'..'),js=fs.readFileSync(path.join(root,'security/practice-v2-local-reset.js'),'utf8');
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8'),app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+const MARKER='iclub_math_practice_v2_local_reset_20261007_v1';
+assert(html.includes('security/practice-v2-local-reset.js?v=stage03oldhistory2'),'Bad cleanup cache pin');
+assert(app.includes('await window.iclubMathPracticeV2ResetAfterPublish?.(window.sb)'),'No authenticated cleanup boot');
+assert(js.includes('const LEGACY_PREFIX = "practice_history_v2:mathematics:tour_"'),'Cleanup must target only retired history');
+function storage(initial){const map=new Map(Object.entries(initial)),writes=[];
+ return {map,writes,get length(){return map.size},key:n=>[...map.keys()][n]??null,
+ getItem:k=>map.get(k)??null,setItem:(k,v)=>{map.set(k,String(v));writes.push(k)},
+ removeItem:k=>{map.delete(k);writes.push(k)}}}
+function mount(s){const ctx={localStorage:s,setTimeout,clearTimeout};vm.runInNewContext(js,ctx,{timeout:1200});
+ assert.equal(typeof ctx.iclubMathPracticeV2ResetAfterPublish,'function');return ctx.iclubMathPracticeV2ResetAfterPublish}
+(async()=>{
+ const old='practice_history_v2:mathematics:tour_1',modern='practice_history_v3:mathematics:tour_1';
+ const data={[old]:'OLD','practice_history_v2:mathematics:tour_2':'OLD2',[modern]:'NEW',
+ 'practice_history_v2:chemistry:tour_1':'CHEM','iclub_practice_draft_v1':'ACTIVE',
+ 'iclub_state_v1':'STATE','iclub_my_recs_v1':'RECS'};
+ const store=storage(data),run=mount(store),unchanged=JSON.stringify([...store.map]);
+ assert.equal(await run(null),false);
+ assert.equal(await run({rpc:async()=>({data:false})}),false);
+ assert.equal(await run({rpc:async()=>({data:true,error:'offline'})}),false);
+ assert.equal(JSON.stringify([...store.map]),unchanged,'Denied cleanup modified data');
+ let calls=0;const client={rpc:async name=>{assert.equal(name,'is_math_practice_v2_published_safe_v1');calls++;return {data:true,error:null}}};
+ assert.equal(await run(client),true);assert.equal(store.map.has(old),false);
+ assert.equal(store.map.has('practice_history_v2:mathematics:tour_2'),false);
+ assert.equal(store.map.get(MARKER),'1');
+ for(const key of [modern,'practice_history_v2:chemistry:tour_1','iclub_practice_draft_v1','iclub_state_v1','iclub_my_recs_v1'])
+  assert.equal(store.map.get(key),data[key],key+' was changed');
+ assert(store.writes.every(k=>k===MARKER||k.startsWith('practice_history_v2:mathematics:tour_')),'Unexpected storage mutation');
+ assert.equal(await run(client),false);assert.equal(calls,1,'One-time marker not respected');
+ const offline=storage(data);assert.equal(await mount(offline)({rpc:async()=>{throw Error('offline')}}),false);
+ assert.equal(offline.writes.length,0);
+ const missing=storage(data);assert.equal(await mount(missing)({}),false);
+ assert.equal(missing.writes.length,0);
+ console.log('PRACTICE_V2_NARROW_RESET_OK legacy_removed=1 new_progress_preserved=1 one_time=1 cases=6');
+})().catch(err=>{console.error(err);process.exitCode=1});

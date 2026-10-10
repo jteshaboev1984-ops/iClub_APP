@@ -1,0 +1,48 @@
+name: Practice bank generations PostgreSQL integration
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/20261010130000_practice_bank_generations_all_subjects_v1.sql'
+      - 'supabase/migrations/20261010131000_practice_bank_recommendations_safe_v1.sql'
+      - 'scripts/qa/practice-bank-generation-fixture.sql'
+      - 'scripts/qa/practice-bank-generation-integration.sql'
+      - '.github/workflows/practice-bank-generation-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: isolated-test-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate migrations against disposable PostgreSQL
+        env:
+          PGPASSWORD: isolated-test-only
+        run: |
+          set -euo pipefail
+          for file in \
+            scripts/qa/practice-bank-generation-fixture.sql \
+            supabase/migrations/20261010130000_practice_bank_generations_all_subjects_v1.sql \
+            supabase/migrations/20261010131000_practice_bank_recommendations_safe_v1.sql \
+            scripts/qa/practice-bank-generation-integration.sql; do
+            psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 5432 -U postgres -d postgres -f "$file"
+          done
+      - name: Safety boundary
+        run: echo 'Ephemeral CI PostgreSQL only. No production Supabase or Vercel access.'

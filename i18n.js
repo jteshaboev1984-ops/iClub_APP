@@ -2175,7 +2175,7 @@ hub_resources_sub: "Books and subject resources",
       reg_school_no_placeholder: "e.g. 154",
       reg_grade_label: "Grade",
 
-      reg_competitive_subject_label: "🎯 Competitive subject",
+      reg_competitive_subject_label: "🎯 Main subjects for rankings",
       reg_competitive_subject_hint: "Used for leaderboards and certificates",
 
       reg_nonstudent_title: "Study mode (non-school)",
@@ -2190,8 +2190,8 @@ hub_resources_sub: "Books and subject resources",
       reg_complete_btn: "Complete Registration",
       reg_subjects_limit: "You can choose up to 2 subjects.",
 
-      reg_subject_label_competitive: "Competitive subject",
-      reg_subject_hint_competitive: "Choose your primary focus for the leaderboard",
+      reg_subject_label_competitive: "Main subject (for rankings)",
+      reg_subject_hint_competitive: "Choose the main subject used for rankings",
       reg_subject_label_study: "Study subject",
       reg_subject_hint_study: "Choose your primary subject for studying",
 

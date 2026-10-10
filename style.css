@@ -1542,6 +1542,13 @@ html, body {
 /* ----- Courses stack screens ----- */
 .stack-screen { display: none; }
 .stack-screen.is-active { display: block; }
+/* The Subject Hub is an ordered vertical flex surface, not a generic stack block.
+   Keep this base invariant even if premium CSS arrives after first paint. */
+#courses-subject-hub.stack-screen.is-active:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+}
+
 
 /* ----- Quiz UI ----- */
 .quiz-top {

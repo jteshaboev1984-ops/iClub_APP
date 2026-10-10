@@ -166,28 +166,21 @@ function refreshLiveProgressSurfaces() {
   } catch {}
 }
 
-function showViewTransitionOverlay(duration = 220) {
-  const el = document.getElementById("view-transition-overlay");
-  if (!el) return;
-
-  const txt = el.querySelector(".view-transition-text");
-  if (txt && typeof t === "function") {
-    txt.textContent = t("loading") || txt.textContent;
-  }
-
-  el.classList.remove("hidden");
-  el.classList.remove("is-busy");
-
-  if (__viewTransitionTimer) {
-    clearTimeout(__viewTransitionTimer);
-    __viewTransitionTimer = null;
-  }
-
-  __viewTransitionTimer = setTimeout(() => {
-    el.classList.add("hidden");
-    el.classList.remove("is-busy");
-    __viewTransitionTimer = null;
-  }, duration);
+/* Local display-only loading: only the newest request can clear a busy surface. */
+const __iclubLoadingScopes = new WeakMap();
+function beginUiLoading(node, cls) {
+  if (!node) return { active: () => false, finish: () => {} };
+  const key = {};
+  __iclubLoadingScopes.set(node, key);
+  node.classList.add(cls);
+  node.setAttribute("aria-busy", "true");
+  const active = () => __iclubLoadingScopes.get(node) === key;
+  return { active, finish: () => {
+    if (!active()) return;
+    node.classList.remove(cls);
+    node.removeAttribute("aria-busy");
+    __iclubLoadingScopes.delete(node);
+  }};
 }
 
 function showAsyncOverlay(label) {
@@ -2151,6 +2144,17 @@ function getLessonDisplayTitle(lesson) {
 };
 
   let state = loadState();
+  // Any auth change removes the previous user's live quiz from memory/UI.
+  // Its account-scoped snapshot remains untouched for verified recovery.
+  window.addEventListener('iclub:practice-identity-invalidated', () => {
+    if (state.quiz?.mode !== 'practice') return;
+    window.iClubPracticeActiveStateV1?.detachWithoutDeleting();
+    try { stopPracticeQuestionTimer(); } catch {}
+    state.quiz = null;
+    state.quizLock = null;
+    state.courses.stack = ['all-subjects'];
+    showView('splash');
+  });
 
     function loadState() {
     const saved = safeJsonParse(localStorage.getItem(LS.state), null);
@@ -2171,7 +2175,8 @@ function getLessonDisplayTitle(lesson) {
     if (!["home", "courses", "ratings", "profile"].includes(merged.courses.entryTab)) {
       merged.courses.entryTab = merged.prevTab || "home";
     }
-    return merged;
+    // Never expose an unverified Practice session read from device-wide state.
+    return window.iClubPracticeActiveStateV1?.sanitizeLoaded(merged) || merged;
   }
 
         function saveState() {
@@ -2192,6 +2197,9 @@ function getLessonDisplayTitle(lesson) {
     nextState.tourContext = stripActiveTourContextSecrets(nextState.tourContext);
   }
 
+  // Practice active content is kept only under the authenticated account.
+  // If device storage is unavailable, do not overwrite its legacy backup.
+  if (window.iClubPracticeActiveStateV1?.persist(nextState) === false) return;
   localStorage.setItem(LS.state, JSON.stringify(nextState));
 }
 
@@ -5706,6 +5714,16 @@ function renderPracticeTourPicker(cards, selectedTourNo) {
       }).join("")}
     </div>
   `;
+  // Keep all seven Tour chips in one horizontally scrollable line. Bring the
+  // selected Tour into view INSIDE this row; do not move the whole page.
+  const row = el.querySelector(".practice-tour-chip-row");
+  const selected = row?.querySelector(".practice-tour-chip.is-selected");
+  if (row && selected) {
+    const maxScroll = Math.max(0, row.scrollWidth - row.clientWidth);
+    const x = selected.offsetLeft - row.offsetLeft;
+    row.scrollLeft = Math.max(0, Math.min(maxScroll,
+      x - (row.clientWidth - selected.offsetWidth) / 2));
+  }
 }
    
 async function computePracticeStageStats(subjectKey, forcedTourNo = null) {
@@ -6166,10 +6184,6 @@ function formatDateTime(ts) {
   const currentActive = document.querySelector(".view.is-active");
   const currentViewName = currentActive?.dataset?.view || "";
   const isSplashToRegistration = currentViewName === "splash" && viewName === "registration";
-
-  if (viewName !== "splash" && !isSplashToRegistration) {
-    showViewTransitionOverlay();
-  }
 
   VIEWS.forEach(v => {
     const el = $(`#view-${v}`);
@@ -10992,9 +11006,34 @@ async function renderRatings() {
 
   const token = ++ratingsState._token;
 
-const showLoading = () => { if (loadingEl) loadingEl.style.display = "flex"; };
+let ratingsWait = null;
+let ratingsPending = null;
+const ratingsRetry = () => {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn primary";
+  button.textContent = tr3("Повторить", "Qayta urinish", "Retry");
+  button.addEventListener("click", () => renderRatings());
+  listEl.appendChild(button);
+};
+const showLoading = () => {
+  if (loadingEl) loadingEl.style.display = "none";
+  ratingsPending = beginUiLoading(listEl, "iclub-ratings-pending");
+  listEl.innerHTML = Array.from({ length: 4 }, () =>
+    '<div class="iclub-skeleton-rating" aria-hidden="true"><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span></div>'
+  ).join("");
+  ratingsWait = setTimeout(() => {
+    if (token !== ratingsState._token || !ratingsPending.active()) return;
+    ratingsPending.finish();
+    ratingsState._token += 1;
+    listEl.innerHTML = '<div class="empty muted">' + escapeHTML(t("ratings_load_error")) + '</div>';
+    ratingsRetry();
+  }, 25000);
+};
 const hideLoading = () => {
   if (token !== ratingsState._token) return;
+  if (ratingsWait) { clearTimeout(ratingsWait); ratingsWait = null; }
+  ratingsPending?.finish();
   if (loadingEl) loadingEl.style.display = "none";
 };
 
@@ -11093,7 +11132,8 @@ const hideLoading = () => {
 
   // если Supabase ещё не готов
   if (!window.sb) {
-    listEl.innerHTML = `<div class="empty muted">${t("loading")}</div>`;
+    listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("ratings_load_error"))}</div>`;
+    ratingsRetry();
     if (mybar) mybar.style.display = "none";
     if (hintEl) hintEl.style.display = "none";
     hideLoading();
@@ -11102,6 +11142,7 @@ const hideLoading = () => {
 
     // boot selects (once)
   await ensureRatingsBoot();
+  if (token !== ratingsState._token) return;
 
   // loading UI
   listEl.innerHTML = "";
@@ -11112,6 +11153,7 @@ const hideLoading = () => {
     const uid = await getAuthUid();
   const me = await getMyUserRow(uid);
   const myComp = await getMyCompetitiveSubjects(uid);
+  if (token !== ratingsState._token) return;
   const isParticipant = !!me?.is_school_student && (myComp?.length > 0);
 
   const myRegionId = Number(me?.region_id || 0) > 0 ? String(me.region_id) : "";
@@ -14605,8 +14647,9 @@ async function computeHomeCompetitiveStats(subjectKey) {
 }
 
 async function updateHomeCompetitiveCard(cardEl, subjectKey) {
+  if (!cardEl) return;
+  const pending = beginUiLoading(cardEl, "iclub-home-pending");
   try {
-    if (!cardEl) return;
 
     const badgeEl = cardEl.querySelector(".home-competitive-badge");
     const modEl = cardEl.querySelector(".js-home-comp-module");
@@ -14617,6 +14660,7 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
     const btnEl = cardEl.querySelector(".home-competitive-btn");
 
     const s = await computeHomeCompetitiveStats(subjectKey);
+    if (!cardEl.isConnected || !pending.active()) return;
 
     const practiceTourNo = Number(s?.practiceTourNo || s?.moduleNo || 1);
     const done = Number(s?.practiceDone || 0);
@@ -14691,7 +14735,9 @@ if (percentEl) {
 
     if (btnEl) btnEl.disabled = false;
   } catch {
-    // silent
+    // Keep unavailable metrics distinct from verified progress.
+  } finally {
+    pending.finish();
   }
 }
 
@@ -14725,19 +14771,23 @@ if (percentEl) {
 }
 
 async function updateHomePinnedTile(tileEl, subjectKey) {
+  if (!tileEl) return;
+  const pending = beginUiLoading(tileEl, "iclub-home-pending");
   try {
-    if (!tileEl) return;
 
     const countEl = tileEl.querySelector(".js-home-pin-count");
     if (!countEl) return;
 
     const s = await computeHomeStudyPracticeStats(subjectKey);
+    if (!tileEl.isConnected || !pending.active()) return;
     const done = Number(s?.masteredCount || 0);
     const total = Number(s?.totalCount || 0);
 
     countEl.textContent = total > 0 ? `${done}/${total}` : "—/—";
   } catch {
-    // silent
+    // No invented progress.
+  } finally {
+    pending.finish();
   }
 } 
    
@@ -14781,11 +14831,7 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
   btn.type = "button";
   btn.className = "btn primary home-competitive-btn";
     btn.textContent = t("open_subject_btn") || "Open subject";
-  btn.disabled = true;
-
-  setTimeout(() => {
-    try { btn.disabled = false; } catch {}
-  }, 3500);
+  btn.disabled = false;
 
   btn.addEventListener("click", async (e) => {
     e.stopPropagation();
@@ -15527,7 +15573,12 @@ async function renderSubjectHubMentorCard(subjectKey) {
   // ---------------------------
     async function renderSubjectHub() {
   const subjectKey = state.courses.subjectKey;
+  // Bind the visible hub identity before any asynchronous entitlement lookup.
+  // A stale Mathematics response may never occupy another subject's hub.
+  const hubIdentityRoot = document.getElementById("courses-subject-hub");
+  if (hubIdentityRoot) hubIdentityRoot.dataset.subjectKey = String(subjectKey || "");
   const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(subjectKey);
+  if (subjectKey !== state.courses.subjectKey) return;
   if (accessOk === false) {
     replaceCourses("all-subjects");
     renderAllSubjects();
@@ -15780,8 +15831,9 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
   // best + last 5 attempts, review + recommendations
   // ---------------------------
 
-    function loadPracticeDraft() {
-    return safeJsonParse(localStorage.getItem(LS.practiceDraft), null);
+      function loadPracticeDraft() {
+    // Only authenticated, owner-scoped drafts may enter the learner UI.
+    return window.iClubPracticeDraftIdentityV1?.read() || null;
   }
 
   function stripPracticeQuestionSecrets(q) {
@@ -16239,17 +16291,15 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
 
   function savePracticeDraft(draft) {
     const safeDraft = draft && typeof draft === "object"
-      ? {
-          ...draft,
-          quiz: stripPracticeQuizSecrets(draft.quiz)
-        }
+      ? { ...draft, quiz: stripPracticeQuizSecrets(draft.quiz) }
       : draft;
-
-    localStorage.setItem(LS.practiceDraft, JSON.stringify(safeDraft));
+    // Raises on unknown identity or conflict. Never overwrites an unrelated draft.
+    return window.iClubPracticeDraftIdentityV1.save(safeDraft);
   }
 
-  function clearPracticeDraft() {
-    localStorage.removeItem(LS.practiceDraft);
+  function clearPracticeDraft(expectedSessionId) {
+    // Silent refusal for the wrong user/session. Legacy storage is never erased.
+    return window.iClubPracticeDraftIdentityV1?.clear(expectedSessionId) === true;
   }
 
    function loadMyRecs() {
@@ -16547,7 +16597,23 @@ function addMyTourRecsFromTourAttempt(ctx) {
 
    
 // ✅ DB sync for recommendations table
-async function syncMyRecsToSupabase(subjectKey, recs) {
+async function syncMyRecsToSupabase(subjectKey, recs, practiceSessionId = null) {
+  if (Number(practiceSessionId) > 0 && window.sb?.rpc) {
+    const { data, error } = await window.sb.rpc("sync_practice_recommendations_safe_v1", {
+      p_subject_key: subjectKey,
+      p_session_id: Number(practiceSessionId),
+      p_items: (Array.isArray(recs) ? recs : []).map(r => ({
+        topic: String(r?.topic || ""), subtopic: r?.subtopic || null
+      }))
+    });
+    if (!error && data?.ok === true) return;
+    // Fail closed if installed server RPC rejects the session or its provenance.
+    if (String(error?.code || "") !== "PGRST202" &&
+        !/Could not find the function/i.test(String(error?.message || ""))) {
+      logClientError("practice_generation_recs_sync_error", error || data);
+      return;
+    }
+  }
   try {
     if (!window.sb) return;
 
@@ -16981,10 +17047,15 @@ function addMyRecsFromAttempt(attempt) {
 }
    
    // ---- Practice history render (inject into practice-start) ----
+  let __practiceStartRenderSeq = 0;
   async function renderPracticeStart() {
   const subjectKey = state.courses.subjectKey;
   const subj = subjectByKey(subjectKey);
   const viewSubjectKey = subjectKey;
+  const renderSeq = ++__practiceStartRenderSeq;
+  const pending = beginUiLoading(document.getElementById("courses-practice-start"), "iclub-practice-pending");
+  const isCurrent = () => renderSeq === __practiceStartRenderSeq
+    && pending.active() && state.courses.subjectKey === viewSubjectKey;
 
   const titleEl = $("#practice-subject-title");
   if (titleEl) titleEl.textContent = subjectTitle(subjectKey, subj?.title || subjectKey || "—");
@@ -17024,13 +17095,13 @@ function addMyRecsFromAttempt(attempt) {
 
    return (async () => {
     const picker = await getPracticeTourCards(subjectKey);
-    if (state?.courses?.subjectKey !== viewSubjectKey) return;
+    if (!isCurrent()) return;
 
     const selectedTourNo = Number(picker?.selectedTourNo || 1);
 updatePracticeStartButtonForTour(selectedTourNo, false);
 
 const stageStats = await computePracticeStageStats(subjectKey, selectedTourNo);
-if (state?.courses?.subjectKey !== viewSubjectKey) return;
+if (!isCurrent()) return;
 
 renderPracticeTourPicker(picker.cards, selectedTourNo);
 updatePracticeStartButtonForTour(selectedTourNo, false);
@@ -17100,6 +17171,7 @@ window.iClubPracticeTopicChoice?.mount({
         }
       }
     } catch {}
+    if (!isCurrent()) return;
 
     if (!h) {
       h = loadPracticeHistory(subjectKey, selectedTourNo);
@@ -17173,7 +17245,7 @@ window.iClubPracticeTopicChoice?.mount({
       barClass: "practice-micro-bar",
       lastClass: "is-last"
     });
-  })().catch(() => {});
+  })().catch(() => {}).finally(() => { pending.finish(); });
 }
    
          async function renderToursStart() {
@@ -17663,6 +17735,8 @@ async function renderToursHistorySummary(
   // ---- Entry point from Subject Hub ----
   async function openPracticeStart() {
   const subjectKey = state.courses.subjectKey;
+  const owner = await window.iClubPracticeDraftIdentityV1?.bind();
+  if (!owner) { showToast(t("not_available")); return; }
 
   showAsyncOverlay(tr3(
     "Загружаем практику…",
@@ -17734,6 +17808,16 @@ async function renderToursHistorySummary(
 
 async function startPracticeNew() {
   const subjectKey = state.courses.subjectKey;
+  const owner = await window.iClubPracticeDraftIdentityV1?.bind();
+  if (!owner) { showToast(t("not_available")); return; }
+  if (loadPracticeDraft()) {
+    showToast(tr3(
+      "Сначала продолжите сохранённую практику.",
+      "Avval saqlangan mashg‘ulotni davom ettiring.",
+      "Please resume your saved Practice session first."
+    ));
+    return;
+  }
   const api = getPracticeSafeApi();
   if (!api || !window.iclubSafeAssessment) {
     showToast(t('not_available') || 'Practice is temporarily unavailable.');
@@ -17835,6 +17919,7 @@ async function startPracticeNew() {
   };
 
   const quiz = buildPracticeSafeQuizFromRows(baseQuiz, rows);
+  if ((await window.iClubPracticeDraftIdentityV1?.bind()) !== owner) return;
   if (!quiz) {
     showToast(t('practice_no_questions') || 'Нет вопросов для практики по этому предмету.');
     return;
@@ -17851,6 +17936,7 @@ async function startPracticeNew() {
     });
   } catch {}
 
+  quiz.practiceOwnerUid = owner;
   state.quizLock = 'practice';
   state.quiz = quiz;
   saveState();
@@ -17861,6 +17947,9 @@ async function startPracticeNew() {
 
    async function startPracticePast() {
   const subjectKey = state.courses.subjectKey;
+  const owner = await window.iClubPracticeDraftIdentityV1?.bind();
+  if (!owner) { showToast(t("not_available")); return; }
+  if (loadPracticeDraft()) { showToast(t("practice_resume_prompt")); return; }
   const drillApi = getPracticeSafeApi()?.drill;
   if (!drillApi || !window.iclubSafeAssessment) {
     showToast(t("not_available") || "Practice is temporarily unavailable.");
@@ -17894,7 +17983,8 @@ async function startPracticeNew() {
     index: 0, questions: [], answers: [], correct: [], timeSpent: [], qTimeLeft: 0,
     qEndsAtMono: null, qEndsAtMs: null, qTimerId: null
   }, rows);
-  if (!quiz) return;
+  if (!quiz || (await window.iClubPracticeDraftIdentityV1?.bind()) !== owner) return;
+  quiz.practiceOwnerUid = owner;
   state.quizLock = "practice"; state.quiz = quiz; saveState();
   replaceCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
@@ -18002,6 +18092,18 @@ try {
       function handlePracticePause() {
     const quiz = state.quiz;
     if (!quiz || quiz.mode !== "practice") return;
+    if (quiz._submitInFlight || quiz._finishing || quiz._safeFinalizeInFlight) {
+      showToast(tr3(
+        "Подождите, ответ сохраняется.",
+        "Kuting, javob saqlanmoqda.",
+        "Please wait while your answer is saved."
+      ));
+      return;
+    }
+    if (!window.iClubPracticeDraftIdentityV1?.ownsActiveQuiz(quiz)) {
+      showToast(t("not_available"));
+      return;
+    }
 
     stopPracticeQuestionTimer();
 
@@ -18034,8 +18136,11 @@ try {
     saveState();
 
     showToast(t("practice_paused"));
-    replaceCourses("subject-hub");
-    renderSubjectHub();
+        // Keep paused attempt and return to the Practice screen.
+    const resumeBtn = $("#practice-resume-btn");
+    if (resumeBtn) resumeBtn.style.display = "block";
+    replaceCourses("practice-start");
+    renderPracticeStart();
   }
 
    async function handlePracticeDrillSubmitSafe(isAutoTimeout = false) {
@@ -18195,13 +18300,17 @@ try {
       if (!quiz?.drillType) {
         const res = addMyRecsFromAttempt(attempt);
 
-        if (res?.added) {
-          // optional UX toast (keep existing behavior)
-          try { showToast(t("practice_saved_to_my_recs")); } catch {}
-
-          // ✅ write recs into DB (non-blocking)
+        if (res?.recs?.length) {
+          if (res.added) {
+            try { showToast(t("practice_saved_to_my_recs")); } catch {}
+          }
+          // Every finalized session is independently linked, even if topic repeats.
           try {
-            syncMyRecsToSupabase(attempt.subjectKey, res.addedRecs || res.recs || []);
+            syncMyRecsToSupabase(
+              attempt.subjectKey,
+              quiz?.safeSessionId ? (res.recs || []) : (res.addedRecs || res.recs || []),
+              quiz?.safeSessionId || null
+            ).catch(error => logClientError("practice_recommendations_sync_failed", error));
           } catch {}
         }
       }
@@ -18262,7 +18371,7 @@ if (!quiz?.drillType) {
       }
 
       if (res?.ok) {
-        clearPracticeDraft();
+        clearPracticeDraft(quiz?.safeDrillSessionId || quiz?.safeSessionId);
         try {
           refreshLiveProgressSurfaces();
         } catch {}
@@ -18339,6 +18448,16 @@ if (meta) {
     ` • ${t("practice_topics")}: ${recKeys.length}`;
 }
 
+
+  // Presentation only: original attempt and persistence stay authoritative.
+  try {
+    window.iClubPracticePremiumResult?.render?.({
+      meta, attempt, quiz, wrongCount: wrong.length, topicsCount: recKeys.length
+    });
+  } catch (error) {
+    try { console.warn("practice_result_display_fallback", error?.message); } catch {}
+  }
+
 const reviewCountEl = $("#practice-review-count");
 if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
 
@@ -18348,8 +18467,20 @@ if (recsCountEl) recsCountEl.textContent = String(recKeys.length);
 // "My recommendations" actions or claim it changed the main Practice result.
 const recsAction = document.querySelector('#courses-practice-result [data-action="practice-recommendations"]');
 if (recsAction) {
-  recsAction.hidden = !!quiz?.topicChoiceOrigin;
-  recsAction.style.display = quiz?.topicChoiceOrigin ? "none" : "";
+  recsAction.hidden = false;
+  recsAction.style.display = "";
+  const recsTitle = recsAction.querySelector('[data-i18n="practice_recs_title"]');
+  const recsSubtitle = recsAction.querySelector('[data-i18n="practice_recs_sub"]');
+  const recsCountBadge = recsAction.querySelector("#practice-recs-count");
+  if (recsTitle) recsTitle.textContent = tr3(
+    "Мои рекомендации", "Mening tavsiyalarim", "My recommendations"
+  );
+  if (recsSubtitle) recsSubtitle.textContent = tr3(
+    "Подробнее о результатах — в «Моих рекомендациях»",
+    "Natijalar haqida batafsil — «Mening tavsiyalarim» bo‘limida",
+    "More about your results in My recommendations"
+  );
+  if (recsCountBadge) recsCountBadge.hidden = true;
 }
 
 // ✅ set “exit” button label based on context (main vs drill)
@@ -18788,7 +18919,21 @@ async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
       Number(seasonIdArg || 0) ||
       await getCurrentSeasonId();
 
-    const practicePromise = window.sb
+    const practicePromise = (async () => {
+      if (window.sb?.rpc) {
+        const { data, error } = await window.sb.rpc(
+          "get_current_practice_recommendations_safe_v1",
+          { p_subject_key: subjectKey }
+        );
+        if (!error && data?.ok === true && Array.isArray(data.recommendations)) {
+          return { data: data.recommendations, error: null, bankScoped: true };
+        }
+        if (error && error.code !== "PGRST202" &&
+            !/Could not find the function/i.test(String(error.message || ""))) {
+          return { data: [], error, bankScoped: true };
+        }
+      }
+      return await window.sb
       .from("recommendations")
       .select(
         "id, source_type, tour_no, season_id, topic, subtopic, book_id, book_reference, created_at"
@@ -18798,6 +18943,7 @@ async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
       .eq("source_type", "practice")
       .order("created_at", { ascending: false })
       .limit(100);
+    })();
 
     let tourQuery = window.sb
       .from("recommendations")
@@ -18847,12 +18993,14 @@ async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
         ? tourResult.data
         : [];
 
-    return [...practiceRows, ...tourRows]
+    const combinedRows = [...practiceRows, ...tourRows]
       .sort((a, b) => {
         const aTime = new Date(a?.created_at || 0).getTime();
         const bTime = new Date(b?.created_at || 0).getTime();
         return bTime - aTime;
       });
+    combinedRows.practiceBankScoped = practiceResult.bankScoped === true;
+    return combinedRows;
   } catch (error) {
     logClientError("myrecs_select_exception", error);
     return [];
@@ -18874,6 +19022,8 @@ async function renderMyRecs() {
     state?.courses?.myRecsActiveTab ||
     "practice"
   );
+  // Practice modes are independent of competitive Tours recommendations.
+  const practiceMode = state?.courses?.myRecsPracticeMode === "topics" ? "topics" : "tours";
 
   const seasonRows =
     await loadPublishedSeasonRows();
@@ -18954,7 +19104,8 @@ async function renderMyRecs() {
   // Mathematics v2 is a clean Practice reset. Old local Practice recommendations
   // must never reappear after the server-side Practice recommendation reset.
   // Tour recommendations use a separate store and are untouched.
-  if (!practiceRows.length && String(subjectKey).trim().toLowerCase() !== "mathematics") {
+  if (!practiceRows.length && dbRows.practiceBankScoped !== true &&
+      String(subjectKey).trim().toLowerCase() !== "mathematics") {
     const store = loadMyRecs();
     const local = store?.bySubject?.[subjectKey] || [];
     practiceRows = local.map(x => ({
@@ -19073,6 +19224,26 @@ async function renderMyRecs() {
       }
     }
   } catch {}
+
+  // Existing authenticated, read-only summary. Never infer Tour number from
+  // old Practice recommendations, which lack that metadata.
+  let topicHistory = null;
+  let topicHistoryUnavailable = false;
+  if (activeTab === "practice") {
+    try {
+      if (!window.sb?.rpc) throw new Error("not_connected");
+      const { data, error } = await window.sb.rpc("get_practice_topic_history_safe_v1",
+        {p_subject_key: subjectKey});
+      if (error || data?.ok !== true || data?.subject_key !== subjectKey) {
+        throw new Error("history_not_available");
+      }
+      topicHistory = data;
+    } catch {
+      topicHistoryUnavailable = true;
+    }
+  }
+  // Practice has one coherent history; no nested tour/topic mode switch.
+  const modeTabs = "";
   const tabBtn = (key, label, isActive) => `
     <button
       type="button"
@@ -19158,8 +19329,9 @@ async function renderMyRecs() {
   };
 
   const renderPracticeList = () => {
+    // The recent topic-session summary is presented below current recommendations.
     if (!practiceRows.length) {
-      return `<div class="empty muted">${escapeHTML(t("my_recs_practice_empty") || "Рекомендаций по практике пока нет.")}</div>`;
+      return `<div class="empty muted">${escapeHTML(t("my_recs_practice_empty") || "Рекомендаций по практике пока нет.")}</div><div id="my-recs-topic-history" class="iclub-myrec-topic-holder"></div>`;
     }
 
     return practiceRows.map(rec => {
@@ -19175,7 +19347,7 @@ async function renderMyRecs() {
           <div class="muted small" style="margin-top:4px">${escapeHTML(t("saved_at_label") || "Сохранено")}: ${escapeHTML(dt)}</div>
         </div>
       `;
-    }).join("");
+    }).join("") + '<div id="my-recs-topic-history" class="iclub-myrec-topic-holder"></div>';
   };
 
   const renderTourList = () => {
@@ -19247,6 +19419,7 @@ async function renderMyRecs() {
       )}
     </div>
 
+    ${modeTabs}
     ${renderSeasonControl()}
 
     ${
@@ -19265,6 +19438,13 @@ async function renderMyRecs() {
     });
   });
 
+
+  if (activeTab === "practice") {
+    window.iClubPracticeTopicHistoryV1?.render?.(
+      wrap.querySelector("#my-recs-topic-history"),
+      topicHistory, topicHistoryUnavailable, currentLang()
+    );
+  }
   const seasonSelect =
     wrap.querySelector(
       "#my-recs-season-select"
@@ -19822,18 +20002,17 @@ function pickContentText(obj, base) {
   return [];
 } 
 async function confirmPracticeTopicReplacement() {
-  const title = tr3("Сменить тему?", "Mavzuni almashtirasizmi?", "Change topic?");
+  const title = tr3("Продолжить незавершённую попытку?", "Tugallanmagan urinishni davom ettirasizmi?", "Resume your unfinished attempt?");
   const detail = tr3(
-    "Текущая тренировка не завершена. Уже отправленные ответы сохранятся, но продолжить прежнюю тренировку после смены темы будет нельзя.",
-    "Joriy mashg‘ulot tugallanmagan. Yuborilgan javoblar saqlanadi, ammo mavzu almashtirilgach avvalgi mashg‘ulotni davom ettirib bo‘lmaydi.",
-    "Your current session is unfinished. Submitted answers will be kept, but you cannot resume the old session after changing topics."
+    "У вас есть незавершённая попытка по теме. Продолжите её или выберите другую тему. При смене темы попытка не сохранится. Результаты завершённых попыток останутся.",
+    "Sizda mavzu bo‘yicha tugallanmagan urinish bor. Uni davom ettiring yoki boshqa mavzuni tanlang. Mavzu almashtirilsa, bu urinish saqlanmaydi. Yakunlangan urinishlar natijalari saqlanadi.",
+    "You have an unfinished attempt for this topic. Resume it or choose another topic. If you change topics, this attempt will not be saved. Completed attempt results will remain available."
   );
-  const cancel = tr3("Отмена", "Bekor qilish", "Cancel");
-  const approve = tr3("Сменить тему", "Mavzuni almashtirish", "Change topic");
+  const resumeText = tr3("Продолжить попытку", "Urinishni davom ettirish", "Resume attempt");
+  const discardText = tr3("Не сохранять и сменить тему", "Saqlamasdan mavzuni almashtirish", "Discard attempt and change topic");
   const root = document.getElementById("modal-root");
   if (!root) {
-    try { return !!window.confirm(title + "\n\n" + detail); }
-    catch { return false; }
+    return "cancel"; // Never silently discard when the dialog cannot be displayed.
   }
   return new Promise(resolve => {
     const previousFocus = document.activeElement;
@@ -19852,38 +20031,41 @@ async function confirmPracticeTopicReplacement() {
     body.textContent = detail;
     const actions = document.createElement("div");
     actions.className = "modal-actions";
+    actions.style.display = "grid";
+    actions.style.gridTemplateColumns = "minmax(0, 1fr)";
+    actions.style.gap = "8px";
     const cancelBtn = document.createElement("button");
     cancelBtn.type="button";
-    cancelBtn.className="btn";
-    cancelBtn.textContent=cancel;
+    cancelBtn.className="btn primary";
+    cancelBtn.textContent=resumeText;
     const yesBtn = document.createElement("button");
     yesBtn.type="button";
-    yesBtn.className="btn primary";
-    yesBtn.textContent=approve;
+    yesBtn.className="btn";
+    yesBtn.textContent=discardText;
     actions.append(cancelBtn,yesBtn);
     modal.append(heading,body,actions);
     backdrop.append(modal);
     const onKey = event => {
-      if (event.key === "Escape") { event.preventDefault(); finish(false); }
+      if (event.key === "Escape") { event.preventDefault(); finish("cancel"); }
     };
-    function finish(approved) {
+    function finish(choice) {
       document.removeEventListener("keydown",onKey);
       root.setAttribute("aria-hidden","true");
       root.replaceChildren();
       document.body.classList.remove("modal-open");
       try { previousFocus?.focus?.(); } catch {}
-      resolve(!!approved);
+      resolve(choice);
     }
     root.replaceChildren(backdrop);
     root.setAttribute("aria-hidden","false");
     document.body.classList.add("modal-open");
     backdrop.addEventListener("click", event => {
-      if (event.target === backdrop) finish(false);
+      if (event.target === backdrop) finish("cancel");
     });
-    cancelBtn.addEventListener("click",()=>finish(false),{once:true});
-    yesBtn.addEventListener("click",()=>finish(true),{once:true});
+    cancelBtn.addEventListener("click",()=>finish("resume"),{once:true});
+    yesBtn.addEventListener("click",()=>finish("replace"),{once:true});
     document.addEventListener("keydown",onKey);
-    yesBtn.focus();
+    cancelBtn.focus();
   });
 }
 
@@ -19896,13 +20078,13 @@ async function resumePendingPracticeTopicChoice(draft) {
       p.oldClientSessionId!==q.safeDrillClientSessionId ||
       p.subjectKey!==draft.subjectKey) {
     showToast(tr3(
-      "Не удалось проверить смену темы. Сохранённая тренировка не удалена.",
-      "Mavzu almashishini tekshirib bo‘lmadi. Saqlangan mashg‘ulot o‘chirilmagan.",
-      "Could not verify the topic change. Your saved session has not been deleted."
+      "Не удалось проверить смену темы. Незавершённая попытка сохранена.",
+      "Mavzu almashishini tekshirib bo‘lmadi. Tugallanmagan urinish saqlanib qoldi.",
+      "Could not verify the topic change. Your unfinished attempt is still available."
     ));
     return false;
   }
-  const uid=await getAuthUid().catch(()=>null);
+  const uid=await window.iClubPracticeDraftIdentityV1?.bind();
   if (!uid || uid!==p.userId || state?.courses?.subjectKey!==p.subjectKey) {
     showToast(t("not_available")); return false;
   }
@@ -19935,22 +20117,25 @@ async function resumePendingPracticeTopicChoice(draft) {
       recTopic:p.topic,recSubtopic:null,drillType:"rec_topic",topicChoiceOrigin:true
     },rows);
     if(!quiz) throw new Error("topic_switch_quiz_invalid");
+    if ((await window.iClubPracticeDraftIdentityV1?.bind()) !== uid)
+      throw new Error("topic_switch_owner_changed");
+    quiz.practiceOwnerUid = uid;
     state.courses.myRecReturnTarget=null;
     state.courses.practiceTopicSelection={subjectKey:p.subjectKey,topic:p.topic,subtopic:null};
     state.quizLock="practice";state.quiz=quiz;saveState();
     pushCourses("practice-quiz");
     renderPracticeQuiz();
     startPracticeQuestionTimer();
-    clearPracticeDraft();
+    clearPracticeDraft(p.oldSessionId);
     return true;
   } catch(error) {
     try { trackEvent("practice_topic_switch_retry_needed",{
       message:String(error?.message||error||"unknown")
     }); } catch {}
     showToast(tr3(
-      "Не удалось сменить тему. Тренировка сохранена — нажмите «Продолжить», чтобы повторить.",
-      "Mavzuni almashtirib bo‘lmadi. Mashg‘ulot saqlandi — «Davom ettirish» orqali qayta urinib ko‘ring.",
-      "Could not change topic. Your session is saved — use Resume to retry."
+      "Не удалось сменить тему. Незавершённая попытка сохранена. Нажмите «Продолжить», чтобы повторить.",
+      "Mavzuni almashtirib bo‘lmadi. Tugallanmagan urinish saqlanib qoldi. Qayta urinish uchun «Davom ettirish»ni bosing.",
+      "Could not change the topic. Your unfinished attempt is still available. Select Resume to retry."
     ));
     return false;
   } finally { hideAsyncOverlay(); }
@@ -19960,6 +20145,11 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   const rec = selectedRec || state?.courses?.myRecCurrent;
   const subjectKey = state?.courses?.subjectKey;
   if (!rec || !subjectKey) return;
+  const owner = await window.iClubPracticeDraftIdentityV1?.bind();
+  if (!owner) { showToast(t("not_available")); return; }
+  if (origin !== "practice" && loadPracticeDraft()) {
+    showToast(t("practice_resume_prompt")); return;
+  }
   const api = getPracticeSafeApi()?.drill;
   if (!api || !window.iclubSafeAssessment) { showToast(t("not_available") || "Practice is temporarily unavailable."); return; }
   const chooseTopic = origin === "practice";
@@ -19980,8 +20170,7 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
         ));
         return;
       }
-      const uid = await getAuthUid().catch(() => null);
-      if (!uid) { showToast(t("not_available")); return; }
+      const uid = owner;
       let pending = draft.pendingTopicSwitch || null;
       if (pending) {
         if (pending.topic !== rec.topic || pending.userId !== uid ||
@@ -19996,13 +20185,20 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
       } else {
         if (draft.quiz.recTopic === rec.topic) {
           showToast(tr3(
-            "Эта тема уже сохранена. Продолжите тренировку.",
-            "Bu mavzu saqlangan. Mashg‘ulotni davom ettiring.",
-            "This topic is already saved. Resume the session."
+            "У вас уже есть незавершённая попытка по этой теме. Продолжите её.",
+            "Bu mavzu bo‘yicha tugallanmagan urinish bor. Uni davom ettiring.",
+            "You already have an unfinished attempt for this topic. Resume it."
           ));
           return;
         }
-        if (!await confirmPracticeTopicReplacement()) return;
+        const decision = await confirmPracticeTopicReplacement();
+        if (decision === "resume") {
+          const resumeButton = document.getElementById("practice-resume-btn");
+          if (!resumeButton) { showToast(t("not_available")); return; }
+          resumeButton.click(); // Use the existing validated resume path.
+          return;
+        }
+        if (decision !== "replace") return;
         pending = {
           userId: uid, subjectKey, topic: String(rec.topic),
           oldSessionId: Number(draft.quiz.safeDrillSessionId),
@@ -20031,6 +20227,7 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   } catch { showToast(t("rec_practice_empty") || t("practice_no_questions") || "Нет вопросов для практики по этой теме."); return; }
   finally { hideAsyncOverlay(); }
   if (!started?.session_id || !Array.isArray(rows) || !rows.length) return;
+  if ((await window.iClubPracticeDraftIdentityV1?.bind()) !== owner) return;
   const quiz = buildPracticeSafeQuizFromRows({
     mode: "practice", subjectKey, practiceTourNo: 0, practicePoolId: null,
     safeDrillSessionId: Number(started.session_id), safeDrillClientSessionId: clientSessionId,
@@ -20046,6 +20243,7 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   state.courses.practiceTopicSelection = origin === "practice"
     ? { subjectKey, topic: rec.topic, subtopic: null }
     : null;
+  quiz.practiceOwnerUid = owner;
   state.quizLock = "practice"; state.quiz = quiz; saveState();
   pushCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
@@ -20053,6 +20251,9 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
    async function startPracticeRetryMistakes() {
   const rec = state?.courses?.myRecCurrent;
   const subjectKey = state?.courses?.subjectKey;
+  const owner = await window.iClubPracticeDraftIdentityV1?.bind();
+  if (!owner) { showToast(t("not_available")); return; }
+  if (loadPracticeDraft()) { showToast(t("practice_resume_prompt")); return; }
   const qids = Array.isArray(state?.courses?.myRecMistakeQids) ? state.courses.myRecMistakeQids.slice(0, 10) : [];
   if (!rec || !subjectKey) return;
   if (!qids.length) { showToast(t("rec_retry_empty") || "Нет ошибок для повтора."); return; }
@@ -20078,6 +20279,8 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   if (!quiz) return;
   if (!state.courses) state.courses = {};
   state.courses.myRecReturnTarget = "my-rec-detail";
+  if ((await window.iClubPracticeDraftIdentityV1?.bind()) !== owner) return;
+  quiz.practiceOwnerUid = owner;
   state.quizLock = "practice"; state.quiz = quiz; saveState();
   pushCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
@@ -22107,7 +22310,6 @@ function bindTabbar() {
     const topView = state.viewStack?.[state.viewStack.length - 1];
 
     if (topView === "certificates" && Number(state?.certificates?.selectedId || 0) > 0) {
-    showViewTransitionOverlay(260);
     state.certificates.selectedId = null;
     saveState();
     renderCertificatesView();
@@ -22117,7 +22319,6 @@ function bindTabbar() {
 
     // If we are on global screen -> go back in global stack
   if (topView && ["resources","news","notifications","community","about","support","support-topic","certificates","archive"].includes(topView)) {
-    showViewTransitionOverlay(260);
     globalBack();
     return;
   }
@@ -22398,7 +22599,8 @@ if (
 
       // ✅ fresh start after re-registration (prevents showing old local attempts/stats)
       try {
-        localStorage.removeItem(LS.practiceDraft);
+        // Old device-wide draft is preserved: a different user may own it.
+        // The authenticated vault excludes it from the new account's UI.
         localStorage.removeItem(LS.myRecs);
         localStorage.removeItem(LS.events);
         localStorage.removeItem(LS.credentials);
@@ -23152,11 +23354,18 @@ if (action === "profile-open-ratings") {
   return;
 }
       if (action === "open-exam-prep") {
+        const requestedSubject = String(state?.courses?.subjectKey || "").trim().toLowerCase();
+        const visibleSubject = String(document.getElementById("courses-subject-hub")?.dataset.subjectKey || "").trim().toLowerCase();
+        if (!requestedSubject || requestedSubject !== visibleSubject ||
+            getCoursesTopScreen() !== "subject-hub") return;
         try {
-          await window.iClubExamPrep?.open?.({
-            subjectKey: state.courses.subjectKey,
-            language: currentLang()
-          });
+          const host = window.iClubExamPrep;
+          if (!host?.syncSubjectHub || !host?.open) return;
+          await host.syncSubjectHub({ subjectKey: requestedSubject, language: currentLang() });
+          if (String(state?.courses?.subjectKey || "").trim().toLowerCase() !== requestedSubject ||
+              String(document.getElementById("courses-subject-hub")?.dataset.subjectKey || "").trim().toLowerCase() !== requestedSubject ||
+              getCoursesTopScreen() !== "subject-hub") return;
+          await host.open({ subjectKey: requestedSubject, language: currentLang() });
         } catch {}
         return;
       }
@@ -23201,6 +23410,8 @@ if (action === "practice-start-past") {
 
    if (action === "practice-resume") {
   const subjectKey = state.courses.subjectKey;
+  const owner = await window.iClubPracticeDraftIdentityV1?.bind();
+  if (!owner) { showToast(t("not_available")); return; }
   const draft = loadPracticeDraft();
 
   const draftTourNo = Number(draft?.practiceTourNo || draft?.quiz?.practiceTourNo || 1);
@@ -23227,13 +23438,15 @@ if (draft?.quiz?.topicChoiceOrigin !== true) {
   if (!restoredQuiz || !Array.isArray(restoredQuiz.questions) || !restoredQuiz.questions.length) {
     // A failed/unverified restore must not delete the learner's persisted draft.
     showToast(tr3(
-      "Не удалось восстановить практику. Сохранённая тренировка не удалена — попробуйте ещё раз.",
-      "Amaliyotni tiklab bo‘lmadi. Saqlangan mashg‘ulot o‘chirilmagan — qayta urinib ko‘ring.",
-      "Could not restore Practice. Your saved session is still here — please retry."
+      "Не удалось восстановить попытку. Черновик сохранён — попробуйте ещё раз.",
+      "Urinishni tiklab bo‘lmadi. Qoralama saqlandi — qayta urinib ko‘ring.",
+      "Could not resume the attempt. Your draft is safe — please try again."
     ));
     return;
   }
 
+  if ((await window.iClubPracticeDraftIdentityV1?.bind()) !== owner) return;
+  restoredQuiz.practiceOwnerUid = owner;
   state.quizLock = "practice";
   state.quiz = restoredQuiz;
   state.quiz.qTimerId = null;
@@ -23255,7 +23468,7 @@ if (draft?.quiz?.topicChoiceOrigin !== true) {
   replaceCourses("practice-quiz");
   renderPracticeQuiz();
   startPracticeQuestionTimer();
-  clearPracticeDraft();
+  clearPracticeDraft(draft.quiz.safeDrillSessionId || draft.quiz.safeSessionId);
   return;
 }
 
@@ -23276,8 +23489,11 @@ if (draft?.quiz?.topicChoiceOrigin !== true) {
 }
 
 if (action === "practice-recommendations") {
-  pushCourses("practice-recs");
-  renderPracticeRecs();
+  state.courses = state.courses || {};
+  state.courses.myRecsActiveTab = "practice";
+  saveState();
+  pushCourses("my-recs");
+  await renderMyRecs();
   return;
 }
 
@@ -23340,8 +23556,7 @@ if (action === "practice-exit") {
     return;
   }
 
-  // fallback: normal practice
-  clearPracticeDraft();
+  // Start guard checks for a paused draft; never silently erase it here.
   startPracticeNew();
   return;
 }
@@ -23665,10 +23880,8 @@ if (action === "video-complete") {
       }
     } catch (e) {}
 
-    try {
-      localStorage.clear();
-    } catch (e) {}
-
+    // A debug sign-out must never erase another account's study progress,
+    // Practice drafts, Tour results or certificates from this device.
     location.reload();
   }
 
@@ -23764,6 +23977,10 @@ if (knownTelegramProfile?.handled || knownTelegramProfile?.blocked) {
   return;
 }
 
+// Recover the verified account's interrupted Practice as a paused draft.
+// On offline/error leave both old and new storage untouched for later retry.
+try { await window.iClubPracticeActiveStateV1?.recoverAsPaused(); } catch {}
+
 // Stage B2: always sync user_subjects from DB → local profile (single source for UI)
 // Делаем это только после active identity check.
 try { await syncUserSubjectsFromSupabaseIntoLocalProfile(); } catch {}
@@ -23775,14 +23992,10 @@ if (!isRegistered()) {
 }
       await ensureHomeDbReady();
 
-      // Local Mathematics Practice reset is governed by the authenticated,
-      // server-confirmed v2 publish. Never reset on merely deploying new JS.
-      try {
-        const cleared = await window.iclubMathPracticeV2ResetAfterPublish?.(window.sb);
-        if (cleared === true) state = loadState();
-      } catch {
-        // Offline/server failure preserves existing local learner progress.
-      }
+      // Clear only retired Mathematics Practice v2 history after server-confirmed publication.
+      // Do not touch v3 attempts, user drafts, recommendations or other subjects.
+      try { await window.iclubMathPracticeV2ResetAfterPublish?.(window.sb); }
+      catch { /* Offline/auth failure: keep all local state and retry on next login. */ }
 
       renderAllSubjects();
       renderHome();

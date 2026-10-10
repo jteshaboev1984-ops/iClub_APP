@@ -1,10 +1,10 @@
 'use strict';
 // Stage03 Practice Navigation QA — read-only on the signed candidate.
 const fs=require('node:fs'),path=require('node:path');
-const root=__dirname;
-const app=fs.readFileSync(path.join(root,'dist','app.js'),'utf8');
-const tabs=fs.readFileSync(path.join(root,'dist','practice-results-tabs.js'),'utf8');
-const html=fs.readFileSync(path.join(root,'dist','index.html'),'utf8');
+const root=path.resolve(__dirname,'..');
+const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+const tabs=fs.readFileSync(path.join(root,'practice-results-tabs.js'),'utf8');
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 let assertions=0;
 function ok(test,name){assertions++;if(!test)throw Error('Practice navigation failed: '+name);}
 const part=(a,b)=>{

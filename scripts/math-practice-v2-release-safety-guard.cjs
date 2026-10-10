@@ -238,23 +238,22 @@ if(!release.includes("'new_v2_progress_reset',true")){
   fail('rollback does not declare post-publish v2 Practice progress reset');
 }
 
+// Post-publication maintenance: only retired Mathematics v2 history is eligible.
 for(const token of [
   'iclub_math_practice_v2_local_reset_20261007_v1',
   'practice_history_v2:mathematics:tour_',
   'iclubMathPracticeV2ResetAfterPublish',
   'is_math_practice_v2_published_safe_v1',
-  'iclub_practice_draft_v1',
-  'iclub_my_recs_v1',
-  'iclub_state_v1',
-  'source_type',
-  '"tour"',
-  '"subject-hub"',
+  'result?.data !== true',
 ]){
-  if(!localReset.includes(token)) fail(`Mathematics local reset missing ${token}`);
+  if(!localReset.includes(token)) fail(`Narrow legacy cleanup missing ${token}`);
+}
+for(const protectedKey of ['iclub_practice_draft_v1','iclub_my_recs_v1','iclub_state_v1','practice_history_v3']){
+  if(localReset.includes(protectedKey)) fail(`Legacy cleanup must not touch ${protectedKey}`);
 }
 if(!app.includes('await window.iclubMathPracticeV2ResetAfterPublish?.(window.sb)') ||
-   !app.includes('if (cleared === true) state = loadState()')){
-  fail('Practice v2 cleanup must occur only at authenticated boot after server publication proof');
+   app.includes('if (cleared === true) state = loadState()')){
+  fail('Narrow cleanup must be called at authenticated boot without rewriting active Practice');
 }
 if(localReset.includes('"practice_history_v3:mathematics:tour_"')){
   fail('Practice v2 reset must not erase new-bank Mathematics v3 progress');

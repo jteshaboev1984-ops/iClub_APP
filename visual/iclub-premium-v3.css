@@ -3439,3 +3439,62 @@ body.iclub-visual-v3 #courses-subject-hub.is-study > .subject-hub-tabs .hub-tab.
     padding: 11px;
   }
 }
+
+/* Premium loading v1: keep real geometry and visual design. */
+@keyframes iclub-soft-pulse { 0%,100%{opacity:.85} 50%{opacity:.52} }
+.iclub-visual-v3 .iclub-skeleton-shape,
+.iclub-visual-v3 .iclub-home-pending .home-competitive-badge,
+.iclub-visual-v3 .iclub-home-pending .js-home-comp-module,
+.iclub-visual-v3 .iclub-home-pending .js-home-comp-rank,
+.iclub-visual-v3 .iclub-home-pending .js-home-comp-percent,
+.iclub-visual-v3 .iclub-home-pending .js-home-comp-note,
+.iclub-visual-v3 .iclub-home-pending .js-home-pin-count,
+.iclub-visual-v3 .iclub-practice-pending #practice-stage-meta,
+.iclub-visual-v3 .iclub-practice-pending #practice-best-score,
+.iclub-visual-v3 .iclub-practice-pending #practice-best-time {
+  background:#E9EFF8!important;color:transparent!important;
+  border-radius:8px;animation:iclub-soft-pulse 1.7s ease-in-out infinite;
+}
+.iclub-visual-v3 .iclub-home-pending .home-competitive-badge {min-width:92px;min-height:22px}
+.iclub-visual-v3 .iclub-home-pending .js-home-comp-note {min-height:15px;width:84%}
+.iclub-visual-v3 .iclub-home-pending .js-home-comp-module {display:inline-block;min-width:115px;min-height:17px}
+.iclub-visual-v3 .iclub-home-pending .js-home-comp-rank {display:inline-block;min-width:42px;min-height:17px}
+.iclub-visual-v3 .iclub-home-pending .js-home-comp-percent {min-height:15px;width:60%}
+.iclub-visual-v3 .iclub-home-pending .js-home-pin-count {display:inline-block;min-width:38px}
+.iclub-visual-v3 .iclub-home-pending .js-home-comp-fill {visibility:hidden}
+.iclub-visual-v3 .iclub-ratings-pending {min-height:314px}
+.iclub-visual-v3 .iclub-skeleton-rating {
+  min-height:66px;display:grid;grid-template-columns:38px minmax(0,1fr) 54px;
+  align-items:center;gap:12px;padding:12px 14px;background:#fff;
+  border:1px solid var(--v3-border,#E0E7F2);border-radius:14px;
+  margin-bottom:10px;min-width:0
+}
+.iclub-visual-v3 .iclub-skeleton-rating .iclub-skeleton-shape {height:23px;display:block}
+.iclub-visual-v3 .iclub-skeleton-rating .iclub-skeleton-shape:nth-child(2){width:min(100%,190px)}
+.iclub-visual-v3 .iclub-skeleton-rating .iclub-skeleton-shape:nth-child(3){width:44px}
+.iclub-visual-v3 .iclub-skeleton-topic {
+  min-height:56px;padding:10px 12px;display:flex;align-items:center;
+  justify-content:space-between;gap:12px;background:#fff;
+  border:1px solid var(--v3-border,#E0E7F2);border-radius:12px
+}
+.iclub-visual-v3 .iclub-skeleton-topic .iclub-skeleton-shape:first-child{width:60%;height:20px;display:block}
+.iclub-visual-v3 .iclub-skeleton-topic .iclub-skeleton-shape:last-child{width:50px;height:20px;display:block}
+.iclub-visual-v3 .iclub-practice-pending #practice-stage-meta{min-height:18px;width:72%;display:inline-block}
+.iclub-visual-v3 .iclub-practice-pending #practice-best-score{min-width:45px;display:inline-block}
+.iclub-visual-v3 .iclub-practice-pending #practice-best-time{min-width:45px;display:inline-block}
+.iclub-visual-v3 .iclub-practice-pending #practice-last-empty{
+  color:transparent!important;background:#E9EFF8;border-radius:8px;min-height:25px
+}
+.iclub-visual-v3 #exam-prep-host-root .ep-flow-loading-surface .ep-flow-spinner{
+  animation:iclub-soft-pulse 1.7s ease-in-out infinite!important;
+  border:none!important;border-radius:8px!important;background:#E9EFF8!important
+}
+@media(prefers-reduced-motion:reduce){
+  .iclub-visual-v3 .iclub-skeleton-shape,
+  .iclub-visual-v3 .iclub-home-pending [class*="js-home-"],
+  .iclub-visual-v3 .iclub-home-pending .home-competitive-badge,
+  .iclub-visual-v3 .iclub-practice-pending #practice-stage-meta,
+  .iclub-visual-v3 .iclub-practice-pending #practice-best-score,
+  .iclub-visual-v3 .iclub-practice-pending #practice-best-time,
+  .iclub-visual-v3 #exam-prep-host-root .ep-flow-loading-surface .ep-flow-spinner {animation:none!important}
+}

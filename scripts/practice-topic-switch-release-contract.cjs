@@ -2,11 +2,11 @@
 // Stage 03 read-only contract: never calls Supabase or changes learner data.
 const fs=require('node:fs');
 const path=require('node:path');
-const root=__dirname;
-const migration=fs.readFileSync(path.join(root,'supabase/migrations/20261008150000_practice_topic_switch_atomic_v1.sql'),'utf8');
-const app=fs.readFileSync(path.join(root,'dist/app.js'),'utf8');
-const api=fs.readFileSync(path.join(root,'dist/security/legacy-assessment-safe-api.js'),'utf8');
-const choice=fs.readFileSync(path.join(root,'dist/practice-topic-choice.js'),'utf8');
+const root=path.resolve(__dirname,'..');
+const migration=fs.readFileSync(path.join(root,'supabase/migrations/20261009120533_practice_topic_switch_atomic_v1.sql'),'utf8');
+const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+const api=fs.readFileSync(path.join(root,'security/legacy-assessment-safe-api.js'),'utf8');
+const choice=fs.readFileSync(path.join(root,'practice-topic-choice.js'),'utf8');
 let checked=0;
 function assert(test,description) {
   ++checked;
