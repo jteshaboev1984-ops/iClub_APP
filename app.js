@@ -18440,8 +18440,8 @@ if (recsCountEl) recsCountEl.textContent = String(recKeys.length);
 // "My recommendations" actions or claim it changed the main Practice result.
 const recsAction = document.querySelector('#courses-practice-result [data-action="practice-recommendations"]');
 if (recsAction) {
-  recsAction.hidden = !!quiz?.topicChoiceOrigin;
-  recsAction.style.display = quiz?.topicChoiceOrigin ? "none" : "";
+  recsAction.hidden = false;
+  recsAction.style.display = "";
 }
 
 // ✅ set “exit” button label based on context (main vs drill)
@@ -19190,7 +19190,7 @@ async function renderMyRecs() {
   // old Practice recommendations, which lack that metadata.
   let topicHistory = null;
   let topicHistoryUnavailable = false;
-  if (activeTab === "practice" && practiceMode === "topics") {
+  if (activeTab === "practice") {
     try {
       if (!window.sb?.rpc) throw new Error("not_connected");
       const { data, error } = await window.sb.rpc("get_practice_topic_history_safe_v1",
@@ -19203,16 +19203,8 @@ async function renderMyRecs() {
       topicHistoryUnavailable = true;
     }
   }
-  const modeTabs = activeTab !== "practice" ? "" :
-    '<div class="iclub-myrec-practice-modes" role="tablist" aria-label="' +
-      escapeHTML(tr3("История практики", "Amaliyot tarixi", "Practice history")) + '">' +
-      '<button type="button" role="tab" data-my-practice-mode="tours" aria-selected="' +
-        String(practiceMode === "tours") + '">' +
-        escapeHTML(tr3("По турам", "Turlar bo‘yicha", "By tour")) + '</button>' +
-      '<button type="button" role="tab" data-my-practice-mode="topics" aria-selected="' +
-        String(practiceMode === "topics") + '">' +
-        escapeHTML(tr3("По темам", "Mavzular bo‘yicha", "By topic")) + '</button>' +
-    '</div>';
+  // Practice has one coherent history; no nested tour/topic mode switch.
+  const modeTabs = "";
   const tabBtn = (key, label, isActive) => `
     <button
       type="button"
@@ -19298,9 +19290,9 @@ async function renderMyRecs() {
   };
 
   const renderPracticeList = () => {
-    if (practiceMode === "topics") return '<div id="my-recs-topic-history" class="iclub-myrec-topic-holder"></div>';
+    // The recent topic-session summary is presented below current recommendations.
     if (!practiceRows.length) {
-      return `<div class="empty muted">${escapeHTML(t("my_recs_practice_empty") || "Рекомендаций по практике пока нет.")}</div>`;
+      return `<div class="empty muted">${escapeHTML(t("my_recs_practice_empty") || "Рекомендаций по практике пока нет.")}</div><div id="my-recs-topic-history" class="iclub-myrec-topic-holder"></div>`;
     }
 
     return practiceRows.map(rec => {
@@ -19316,7 +19308,7 @@ async function renderMyRecs() {
           <div class="muted small" style="margin-top:4px">${escapeHTML(t("saved_at_label") || "Сохранено")}: ${escapeHTML(dt)}</div>
         </div>
       `;
-    }).join("");
+    }).join("") + '<div id="my-recs-topic-history" class="iclub-myrec-topic-holder"></div>';
   };
 
   const renderTourList = () => {
@@ -19408,15 +19400,7 @@ async function renderMyRecs() {
   });
 
 
-  wrap.querySelectorAll("[data-my-practice-mode]").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      state.courses = state.courses || {};
-      state.courses.myRecsPracticeMode = btn.dataset.myPracticeMode === "topics" ? "topics" : "tours";
-      saveState();
-      await renderMyRecs();
-    });
-  });
-  if (activeTab === "practice" && practiceMode === "topics") {
+  if (activeTab === "practice") {
     window.iClubPracticeTopicHistoryV1?.render?.(
       wrap.querySelector("#my-recs-topic-history"),
       topicHistory, topicHistoryUnavailable, currentLang()
@@ -23468,8 +23452,11 @@ if (draft?.quiz?.topicChoiceOrigin !== true) {
 }
 
 if (action === "practice-recommendations") {
-  pushCourses("practice-recs");
-  renderPracticeRecs();
+  state.courses = state.courses || {};
+  state.courses.myRecsActiveTab = "practice";
+  saveState();
+  pushCourses("my-recs");
+  await renderMyRecs();
   return;
 }
 
