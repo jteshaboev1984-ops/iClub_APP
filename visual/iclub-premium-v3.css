@@ -3568,3 +3568,17 @@ body.iclub-visual-v3 #courses-subject-hub.is-study > .subject-hub-tabs .hub-tab.
   .iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-mentor-title,
   .iclub-visual-v3 #courses-subject-hub.iclub-hub-pending #subject-hub-mentor-sub{animation:none!important}
 }
+
+/* Profile: preserve stable metric geometry while first DB sync completes. */
+.iclub-visual-v3 #profile-main.iclub-profile-pending #profile-metric-competitive,
+.iclub-visual-v3 #profile-main.iclub-profile-pending #profile-metric-study {
+  display:inline-block;min-width:35px;min-height:24px;
+  background:#E9EFF8!important;color:transparent!important;
+  border-radius:8px;animation:iclub-soft-pulse 1.7s ease-in-out infinite
+}
+@media(prefers-reduced-motion:reduce) {
+  .iclub-visual-v3 #profile-main.iclub-profile-pending #profile-metric-competitive,
+  .iclub-visual-v3 #profile-main.iclub-profile-pending #profile-metric-study {
+    animation:none!important
+  }
+}

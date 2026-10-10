@@ -13282,6 +13282,7 @@ showToast(toPinned ? t("toast_added_pinned") : t("toast_removed_pinned"));
   }
 
   if (profile && window.sb && !__profileSubjectsDbReady) {
+    const profilePending = beginUiLoading(document.getElementById("profile-main"), "iclub-profile-pending");
     const compElTmp = document.getElementById("profile-metric-competitive");
     const studyElTmp = document.getElementById("profile-metric-study");
     if (compElTmp) compElTmp.textContent = "…";
@@ -13296,7 +13297,8 @@ showToast(toPinned ? t("toast_added_pinned") : t("toast_removed_pinned"));
          try { renderProfileSettings(); } catch {}
        }
      })
-     .catch(() => {});
+     .catch(() => {})
+     .finally(() => profilePending.finish());
    return;
   }
   
