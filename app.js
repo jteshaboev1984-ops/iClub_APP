@@ -17277,10 +17277,10 @@ window.iClubPracticeTopicChoice?.mount({
    
          async function renderToursStart() {
   const pending = showToursLoading();
+  const subjectKey = state.courses?.subjectKey || null;
+  const isCurrent = () => pending.active() && state.courses?.subjectKey === subjectKey;
   try {
     const profile = loadProfile?.() || null;
-    const subjectKey = state.courses?.subjectKey || null;
-    const isCurrent = () => pending.active() && state.courses?.subjectKey === subjectKey;
     const subj = subjectByKey(subjectKey);
 
     // subject title
