@@ -1,0 +1,69 @@
+{
+  "manifest": {
+    "scope": "Original draft for A Level 9.4.3 / preserve historical AS Q2540",
+    "source": "Official Cambridge 9708 2026-2028 v2, uploaded Economics 4th ed Ch44",
+    "runtime_allowed": false,
+    "exam_question_mutations": false,
+    "approval_pending": true,
+    "field_layout_corrected_before_release": true
+  },
+  "cards": [
+    {
+      "official_point": "9.4.3",
+      "book_chapter": 44,
+      "tour": 6,
+      "level": "A_LEVEL_ADDITION",
+      "locale": "en",
+      "title": "Quantity theory of money: MV = PT",
+      "explanations": {
+        "main": "The Fisher equation MV = PT states that the money supply M multiplied by its velocity of circulation V equals the price level P multiplied by the volume of transactions T (sometimes expressed in terms of real output Y). It is an accounting relationship. For the quantity theory's prediction that a 10% rise in M leads to a 10% rise in P, we must additionally assume V and T do not change. If output or velocity adjusts, the price effect need not be proportional. In Cambridge 9708 2026–2028, the quantity theory belongs to A Level point 9.4.3, not the AS circular-flow material.",
+        "simple": "M means money supply, V means how often money circulates, P is price level and T is transactions. If V and T remain constant, doubling M doubles P in this simplified model.",
+        "alternative": "Suppose M=200, V=5, T=1,000. P=(200×5)/1,000=1. If M increases by 10% to 220 while V and T stay fixed, P=1.1. That is a 10% increase in P, but only under the stated assumptions.",
+        "focus": "Check: If M rises by 20% but transactions also rise by 20% while V is fixed, must P rise by 20%? No; by MV=PT the price level can remain unchanged. What matters is how all four variables change."
+      },
+      "legacy_wrong_tier_question_id": "Q2540",
+      "qa_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "exam_keys_used": false
+    },
+    {
+      "official_point": "9.4.3",
+      "book_chapter": 44,
+      "tour": 6,
+      "level": "A_LEVEL_ADDITION",
+      "locale": "ru",
+      "title": "Количественная теория денег: MV = PT",
+      "explanations": {
+        "main": "Уравнение Фишера MV = PT означает, что предложение денег M, умноженное на скорость обращения V, равно уровню цен P, умноженному на объём сделок T (иногда используется показатель реального выпуска Y). Это тождество между денежными расходами и стоимостью сделок. Чтобы из него сделать вывод о равном процентном изменении денег и цен, количественная теория дополнительно предполагает неизменность V и T. Если выпуск или скорость обращения меняются, цены не обязаны расти пропорционально денежной массе. В Cambridge 9708 тема относится к A Level 9.4.3, а не к AS.",
+        "simple": "M — количество денег, V — скорость их обращения, P — уровень цен, T — объём сделок. При неизменных V и T удвоение M в упрощённой модели удваивает P.",
+        "alternative": "Пусть M=200, V=5, T=1 000. Тогда P=(200×5)/1 000=1. Если M увеличится на 10% до 220, а V и T не изменятся, P=1,1. Рост уровня цен составит 10%, но только при данных предпосылках.",
+        "focus": "Проверка: если M выросло на 20%, но число сделок T также увеличилось на 20% при постоянной V, обязан ли P вырасти на 20%? Нет; уровень цен может остаться прежним. Нужно учитывать все переменные."
+      },
+      "legacy_wrong_tier_question_id": "Q2540",
+      "qa_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "exam_keys_used": false
+    },
+    {
+      "official_point": "9.4.3",
+      "book_chapter": 44,
+      "tour": 6,
+      "level": "A_LEVEL_ADDITION",
+      "locale": "uz",
+      "title": "Pulning miqdoriy nazariyasi: MV = PT",
+      "explanations": {
+        "main": "Fisher tenglamasi MV = PT da pul taklifi M uning aylanish tezligi V ga ko‘paytirilganda narx darajasi P bilan bitimlar hajmi T ko‘paytmasiga teng bo‘ladi (ba’zan real ishlab chiqarish Y ishlatiladi). Tenglama pul xarajatlari va bitimlar qiymati orasidagi hisobiy bog‘liqlikdir. Pul miqdori 10% oshsa, narx ham 10% oshadi degan miqdoriy nazariya xulosasi uchun V va T o‘zgarmas deb olinadi. Ishlab chiqarish yoki aylanish tezligi o‘zgarsa, narxning oshishi aynan bir xil foiz bo‘lishi shart emas. Cambridge 9708 dasturida bu mavzu AS emas, A Level 9.4.3 ga kiradi.",
+        "simple": "M — pul taklifi, V — aylanish tezligi, P — narx darajasi, T — bitimlar hajmi. V va T o‘zgarmasa, sodda modelda M ikki baravar oshishi Pni ham ikki baravar oshiradi.",
+        "alternative": "M=200, V=5, T=1 000 bo‘lsin. Unda P=(200×5)/1 000=1. Pul taklifi 10% oshib 220 bo‘lsa, V va T o‘zgarmaganda P=1,1 bo‘ladi. Bu 10% narx o‘sishi faqat berilgan farazlar ostida.",
+        "focus": "Tekshir: M 20% va bitimlar hajmi T ham 20% oshsa, V o‘zgarmaganda P ham albatta 20% oshadimi? Yo‘q; narx darajasi o‘zgarmasligi mumkin. To‘rtta o‘zgaruvchini birga hisobga ol."
+      },
+      "legacy_wrong_tier_question_id": "Q2540",
+      "qa_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "exam_keys_used": false
+    }
+  ]
+}

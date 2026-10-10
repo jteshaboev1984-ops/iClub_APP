@@ -1,0 +1,132 @@
+{
+  "version": "economics_9708_diagram_locale_captions_v0",
+  "status": "DRAFT_ONLY",
+  "images_english_reference_only": true,
+  "source": "Cambridge Economics 9708 2026-2028 v2 and supplied coursebook",
+  "release_requires": [
+    "independent academic/graph QA",
+    "EN RU UZ terminology proof",
+    "mobile 390px legibility",
+    "accessible axis and descriptions",
+    "separate runtime release authorisation"
+  ],
+  "diagrams": [
+    {
+      "diagram_asset": "docs/economics-diagrams-v0/straight-line-ped.svg",
+      "official_parent_point": "2.2.5",
+      "locales": {
+        "en": {
+          "title": "Price elasticity along a straight-line demand curve",
+          "x_axis": "Quantity (Q)",
+          "y_axis": "Price (P)",
+          "main_takeaway": "Elastic near top, unit elastic at midpoint, inelastic near bottom",
+          "explanation": "Point PED depends on P/Q even though the slope stays unchanged."
+        },
+        "ru": {
+          "title": "Ценовая эластичность вдоль прямой спроса",
+          "x_axis": "Количество (Q)",
+          "y_axis": "Цена (P)",
+          "main_takeaway": "Вверху спрос эластичен, в середине единичная эластичность, внизу неэластичен",
+          "explanation": "Точечная PED зависит от P/Q, хотя наклон прямой неизменен."
+        },
+        "uz": {
+          "title": "To‘g‘ri chiziqli talabdagi narx elastikligi",
+          "x_axis": "Miqdor (Q)",
+          "y_axis": "Narx (P)",
+          "main_takeaway": "Yuqori qismda elastik, o‘rtasida birlik elastik, pastda noelastik",
+          "explanation": "Chiziq qiyaligi o‘zgarmasa ham, nuqtadagi PED P/Q nisbatiga bog‘liq."
+        }
+      },
+      "academic_approved": false,
+      "runtime_allowed": false
+    },
+    {
+      "diagram_asset": "docs/economics-diagrams-v0/lorenz-gini-038.svg",
+      "official_parent_point": "11.4.2",
+      "locales": {
+        "en": {
+          "title": "Lorenz curve and Gini coefficient",
+          "x_axis": "Cumulative population share (%)",
+          "y_axis": "Cumulative income share (%)",
+          "main_takeaway": "Area under Lorenz B = 0.31",
+          "explanation": "Gini = 1 − 2 × 0.31 = 0.38. This calculation is A Level scope."
+        },
+        "ru": {
+          "title": "Кривая Лоренца и коэффициент Джини",
+          "x_axis": "Накопленная доля населения (%)",
+          "y_axis": "Накопленная доля дохода (%)",
+          "main_takeaway": "Площадь под Лоренцем B = 0,31",
+          "explanation": "Джини = 1 − 2 × 0,31 = 0,38. Расчёт требуется на A Level."
+        },
+        "uz": {
+          "title": "Lorens egri chizig‘i va Jini koeffitsiyenti",
+          "x_axis": "Jamlanma aholi ulushi (%)",
+          "y_axis": "Jamlanma daromad ulushi (%)",
+          "main_takeaway": "Lorens chizig‘i ostidagi yuza B = 0,31",
+          "explanation": "Jini = 1 − 2 × 0,31 = 0,38. Hisoblash A Level uchun talab qilinadi."
+        }
+      },
+      "academic_approved": false,
+      "runtime_allowed": false
+    },
+    {
+      "diagram_asset": "docs/economics-diagrams-v0/ad-as-short-run-equilibrium.svg",
+      "official_parent_point": "4.3.11",
+      "locales": {
+        "en": {
+          "title": "Short-run aggregate demand and supply equilibrium",
+          "x_axis": "Real output (Y)",
+          "y_axis": "General price level (PL)",
+          "main_takeaway": "E = AD intersection with SRAS",
+          "explanation": "This equilibrium alone does not establish full employment."
+        },
+        "ru": {
+          "title": "Краткосрочное равновесие совокупного спроса и предложения",
+          "x_axis": "Реальный выпуск (Y)",
+          "y_axis": "Общий уровень цен (PL)",
+          "main_takeaway": "E — точка пересечения AD и SRAS",
+          "explanation": "Одно пересечение не доказывает достижение полной занятости."
+        },
+        "uz": {
+          "title": "Qisqa muddatli yalpi talab va taklif muvozanati",
+          "x_axis": "Real ishlab chiqarish (Y)",
+          "y_axis": "Umumiy narx darajasi (PL)",
+          "main_takeaway": "E — AD va SRAS kesishgan nuqta",
+          "explanation": "Kesishishning o‘zi to‘liq bandlikni isbotlamaydi."
+        }
+      },
+      "academic_approved": false,
+      "runtime_allowed": false
+    },
+    {
+      "diagram_asset": "docs/economics-diagrams-v0/expectations-augmented-phillips.svg",
+      "official_parent_point": "10.2.5",
+      "locales": {
+        "en": {
+          "title": "Expectations-augmented Phillips curves",
+          "x_axis": "Unemployment rate",
+          "y_axis": "Inflation rate",
+          "main_takeaway": "Short-run curve shifts up after expected inflation rises",
+          "explanation": "Long-run curve is vertical at natural unemployment in the standard model."
+        },
+        "ru": {
+          "title": "Кривые Филлипса с учётом инфляционных ожиданий",
+          "x_axis": "Уровень безработицы",
+          "y_axis": "Темп инфляции",
+          "main_takeaway": "При росте ожидаемой инфляции краткосрочная кривая сдвигается вверх",
+          "explanation": "В стандартной модели долгосрочная кривая вертикальна при естественной безработице."
+        },
+        "uz": {
+          "title": "Inflyatsiya kutilmalari hisobga olingan Fillips egri chiziqlari",
+          "x_axis": "Ishsizlik darajasi",
+          "y_axis": "Inflyatsiya darajasi",
+          "main_takeaway": "Kutilgan inflyatsiya oshsa, qisqa muddatli chiziq yuqoriga siljiydi",
+          "explanation": "Standart modelda uzoq muddatli egri chiziq tabiiy ishsizlikda vertikal."
+        }
+      },
+      "academic_approved": false,
+      "runtime_allowed": false
+    }
+  ],
+  "validation_note": "2026-10-09 Corrected reversed PED axis labels in locale-caption draft. Reference SVG plots P on vertical axis, Q on horizontal; no runtime assets or live code changed."
+}
