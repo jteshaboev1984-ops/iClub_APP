@@ -15749,6 +15749,18 @@ async function renderSubjectHubMentorCard(subjectKey) {
 
       list.appendChild(item);
     });
+    } catch {
+      if (pending.active() && requestedSubject === state.courses.subjectKey) {
+        list.innerHTML = '<div class="empty muted">' + escapeHTML(tr3(
+          "Не удалось загрузить уроки.", "Darslarni yuklab bo‘lmadi.", "Could not load lessons."
+        )) + '</div>';
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "btn primary";
+        retry.textContent = tr3("Повторить", "Qayta urinish", "Retry");
+        retry.addEventListener("click", () => renderLessons());
+        list.appendChild(retry);
+      }
     } finally {
       pending.finish();
     }
@@ -17529,6 +17541,23 @@ if (!activeTour && !upcomingTour) {
      } catch {}
      
       if (isCurrent()) saveState();
+      } catch {
+        if (isCurrent()) {
+          const title = document.getElementById("tours-status-title");
+          const description = document.getElementById("tours-status-desc");
+          const button = document.getElementById("tours-open-btn");
+          if (title) title.textContent = tr3("Не удалось загрузить туры", "Turlarni yuklab bo‘lmadi", "Could not load Tours");
+          if (description) {
+            description.textContent = tr3("Проверьте соединение и повторите.", "Internet aloqasini tekshirib, qayta urinib ko‘ring.", "Check your connection and try again.");
+            const retry = document.createElement("button");
+            retry.type = "button";
+            retry.className = "btn primary";
+            retry.textContent = tr3("Повторить", "Qayta urinish", "Retry");
+            retry.addEventListener("click", () => renderToursStart());
+            description.appendChild(retry);
+          }
+          if (button) button.classList.add("hidden");
+        }
       } finally {
      hideToursLoading(pending);
    }
