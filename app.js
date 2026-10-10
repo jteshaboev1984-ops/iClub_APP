@@ -14838,23 +14838,19 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
 
   btn.addEventListener("click", async (e) => {
     e.stopPropagation();
-
-    showAsyncOverlay(tr3(
-      "Загружаем предмет…",
-      "Fan yuklanmoqda…",
-      "Loading subject…"
-    ));
-
+    if (btn.dataset.opening === "1") return;
+    btn.dataset.opening = "1";
+    btn.disabled = true;
     try {
       state.courses.subjectKey = userSubject.key;
       state.courses.entryTab = "home";
-
       saveState();
       setTab("courses");
       replaceCourses("subject-hub");
       await renderSubjectHub();
     } finally {
-      hideAsyncOverlay();
+      btn.disabled = false;
+      delete btn.dataset.opening;
     }
   });
   el.appendChild(btn);
