@@ -48,7 +48,10 @@ begin
   select generation into v_generation from public.practice_bank_generations
   where subject_id=new.subject_id and activated_at <= statement_timestamp()
   order by activated_at desc,generation desc limit 1;
-  if v_generation is null then\n    -- Newly added subjects begin at generation 1 without breaking session creation.\n    v_generation := 1;\n  end if;
+  if v_generation is null then
+    -- Newly added subjects begin at generation 1 without breaking session creation.
+    v_generation := 1;
+  end if;
   new.bank_generation := v_generation;
   return new;
 end $$;

@@ -1,6 +1,10 @@
 -- STAGED ONLY: authenticated, server-owned Practice recommendations.
 -- Install only after practice_bank_generations_all_subjects_v1.
 begin;
+-- Idempotent per-session topic persistence even under concurrent retries.
+create unique index if not exists recommendations_practice_origin_topic_uniq
+on public.recommendations(practice_session_id,topic,coalesce(subtopic,''))
+where source_type='practice' and practice_session_id is not null;
 create or replace function public.sync_practice_recommendations_safe_v1(
  p_subject_key text,p_session_id bigint,p_items jsonb
 ) returns jsonb language plpgsql security definer
@@ -42,7 +46,8 @@ begin
      where r.user_id=v_uid and r.subject_id=v_subject and r.source_type='practice'
        and r.practice_session_id=v_session.id and r.topic=v_topic
        and coalesce(r.subtopic,'')=coalesce(v_subtopic,'')
-   );
+   )
+   on conflict do nothing;
    v_count:=v_count+1;
  end loop;
  return jsonb_build_object('ok',true,'generation',v_session.bank_generation,'processed',v_count);
