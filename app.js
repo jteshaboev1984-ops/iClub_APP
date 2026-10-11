@@ -170,19 +170,30 @@ function refreshLiveProgressSurfaces() {
 
 /* Local display-only loading: only the newest request can clear a busy surface. */
 const __iclubLoadingScopes = new WeakMap();
-function beginUiLoading(node, cls) {
+function beginUiLoading(node, cls, onTimeout = null, timeoutMs = 25000) {
   if (!node) return { active: () => false, finish: () => {} };
   const key = {};
   __iclubLoadingScopes.set(node, key);
   node.classList.add(cls);
   node.setAttribute("aria-busy", "true");
   const active = () => __iclubLoadingScopes.get(node) === key;
-  return { active, finish: () => {
+  let timer = null;
+  const finish = () => {
+    if (timer !== null) { clearTimeout(timer); timer = null; }
     if (!active()) return;
     node.classList.remove(cls);
     node.removeAttribute("aria-busy");
     __iclubLoadingScopes.delete(node);
-  }};
+  };
+  // Read-only surfaces may opt into a deadline. Critical saves never use it.
+  if (typeof onTimeout === "function") {
+    timer = setTimeout(() => {
+      if (!active()) return;
+      finish();
+      onTimeout();
+    }, Math.max(50, Number(timeoutMs) || 25000));
+  }
+  return { active, finish };
 }
 
 /* Screen-local presentation only; no timer-based navigation delays. */
@@ -2741,7 +2752,11 @@ async function dbHasAnyActiveTourNow(
     return;
   }
 
-  const pending = beginUiLoading(listEl, "iclub-archive-pending");
+  const pending = beginUiLoading(listEl, "iclub-archive-pending", () =>
+    uiLoadingRetry(listEl, tr3(
+      "Архив не ответил. Попробуйте снова.", "Arxiv javob bermadi. Qayta urinib ko‘ring.", "Archive did not respond. Please retry."
+    ), () => renderArchiveView())
+  );
   const requestedSubject = state?.courses?.subjectKey;
   listEl.innerHTML = uiSkeletonRows(tr3("Загружаем архив", "Arxiv yuklanmoqda", "Loading archive"));
 
@@ -3527,7 +3542,11 @@ async function renderNotificationsView() {
   state.notificationsRows = [];
   setNotificationsClearAllVisible(false);
 
-  const pending = beginUiLoading(listEl, "iclub-notifications-pending");
+  const pending = beginUiLoading(listEl, "iclub-notifications-pending", () =>
+    uiLoadingRetry(listEl, tr3(
+      "Уведомления не загрузились. Повторите.", "Bildirishnomalar yuklanmadi. Qayta urinib ko‘ring.", "Notifications did not load. Please retry."
+    ), () => renderNotificationsView())
+  );
   listEl.innerHTML = uiSkeletonRows(tr3(
     "Загружаем уведомления", "Bildirishnomalar yuklanmoqda", "Loading notifications"
   ));
@@ -15668,7 +15687,11 @@ async function renderSubjectHubMentorCard(subjectKey) {
     const subj = subjectByKey(state.courses.subjectKey);
     if (!list) return;
     const requestedSubject = state.courses.subjectKey;
-    const pending = beginUiLoading(list, "iclub-lessons-pending");
+    const pending = beginUiLoading(list, "iclub-lessons-pending", () =>
+      uiLoadingRetry(list, tr3(
+        "Уроки не загрузились. Попробуйте снова.", "Darslar yuklanmadi. Qayta urinib ko‘ring.", "Lessons did not load. Please retry."
+      ), () => renderLessons())
+    );
     try {
     list.innerHTML = '<div class="iclub-skeleton-lesson" aria-hidden="true"><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span></div>'.repeat(3);
 
@@ -18855,7 +18878,11 @@ if (!uniq.length) {
         // v1: если refs пусто — показываем корректный текст:
     // - если книги по предмету есть -> "Книги уже доступны"
     // - если книг нет -> "Будет добавлено позже"
-    const pending = beginUiLoading(wrap, "iclub-practice-recs-pending");
+    const pending = beginUiLoading(wrap, "iclub-practice-recs-pending", () =>
+      uiLoadingRetry(wrap, tr3(
+        "Рекомендации не загрузились. Попробуйте снова.", "Tavsiyalar yuklanmadi. Qayta urinib ko‘ring.", "Recommendations did not load. Please retry."
+      ), () => renderPracticeRecs())
+    );
     wrap.innerHTML = uiSkeletonRows(tr3("Готовим рекомендации", "Tavsiyalar tayyorlanmoqda", "Loading recommendations"));
 
     (async () => {
@@ -20347,7 +20374,11 @@ async function renderBooks() {
   if (!wrap) return;
 
   const subjectKey = state?.courses?.subjectKey ? String(state.courses.subjectKey) : "";
-  const pending = beginUiLoading(wrap, "iclub-books-pending");
+  const pending = beginUiLoading(wrap, "iclub-books-pending", () =>
+    uiLoadingRetry(wrap, tr3(
+      "Книги не загрузились. Попробуйте снова.", "Kitoblar yuklanmadi. Qayta urinib ko‘ring.", "Books did not load. Please retry."
+    ), () => renderBooks())
+  );
   const isCurrent = () => pending.active() && subjectKey === String(state?.courses?.subjectKey || "");
   const showLoadError = () => uiLoadingRetry(wrap, tr3(
     "Не удалось загрузить книги.", "Kitoblarni yuklab bo‘lmadi.", "Books could not be loaded."
@@ -21893,7 +21924,11 @@ async function updateTourAttempt(attemptId, patch) {
   const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
   const localPayload = state?.courses?.lastTourReviewPayload || null;
   const payloadItems = Array.isArray(localPayload?.items) ? localPayload.items : [];
-  const pending = attemptId ? beginUiLoading(wrap, "iclub-review-pending") : null;
+  const pending = attemptId ? beginUiLoading(wrap, "iclub-review-pending", () =>
+    uiLoadingRetry(wrap, tr3(
+      "Разбор не загрузился. Попробуйте снова.", "Tahlil yuklanmadi. Qayta urinib ko‘ring.", "Review did not load. Please retry."
+    ), () => renderTourReview())
+  ) : null;
   if (attemptId) wrap.innerHTML = uiSkeletonRows(tr3("Загружаем разбор", "Tahlil yuklanmoqda", "Loading review"));
 
   const renderFromDetails = (details) => {
