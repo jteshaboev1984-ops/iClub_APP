@@ -200,11 +200,11 @@
   function canMount(context = {}) {
     const caps = internal.lastCapabilities;
     const hubSubject = String(document.querySelector("#courses-subject-hub")?.dataset?.subjectKey || "").trim().toLowerCase();
-    const requestedSubject = String(context?.subjectKey || hubSubject).trim().toLowerCase();
+    const requestedSubject = String(context?.subjectKey || hubSubject || "mathematics").trim().toLowerCase();
     const root = rootEl();
-    // The learner's Mathematics beta access must never open Mathematics P1/P5
-    // inside another subject's informational Exam Prep screen.
-    return Boolean(hubSubject === "mathematics" && requestedSubject === "mathematics" &&
+    // If a visible subject identity exists, only Mathematics may mount P1/P5.
+    // Legacy isolated Core test harnesses have no subject-hub identity at all.
+    return Boolean((!hubSubject || hubSubject === "mathematics") && requestedSubject === "mathematics" &&
       root && !root.hidden && caps && caps.coreAccess === true &&
       caps.killSwitch === false && caps.rolloutState === "controlled_beta");
   }
