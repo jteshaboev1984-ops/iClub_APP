@@ -14936,7 +14936,8 @@ function subjectIconCandidates(subjectKey) {
   const profile = loadProfile();
 
   // Если нет профиля — каталогу нечего делать (но это не должно случаться)
-  grid.innerHTML = "";
+  // One complete synchronous catalog frame; no progressive cards.
+  const catalogFragment = document.createDocumentFragment();
   if (!profile) {
     grid.innerHTML = `<div class="empty muted">${escapeHTML(t("need_registration_short"))}</div>`;
     return;
@@ -14973,12 +14974,6 @@ const renderMainFilterRow = () => {
 
   row.querySelectorAll("[data-main-filter]").forEach(btn => {
     const v = btn.getAttribute("data-main-filter");
-    btn.addEventListener("pointerup", (e) => {
-      e.preventDefault();
-      state.courses.mainFilter = v;
-      saveState();
-      renderAllSubjects();
-    });
     btn.addEventListener("click", () => {
       state.courses.mainFilter = v;
       saveState();
@@ -15021,7 +15016,7 @@ const appendSectionTitle = (text) => {
   const el = document.createElement("div");
   el.className = "grid-section-title";
   el.textContent = text;
-  grid.appendChild(el);
+  catalogFragment.appendChild(el);
 };
 
 const appendSubjectCard = (s) => {
@@ -15059,14 +15054,18 @@ const imgEl = head.querySelector(".catalog-ico-img");
 setImgWithFallback(imgEl, subjectIconCandidates(s.key));
 
     head.addEventListener("click", async () => {
-    const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(s.key);
-    if (accessOk === false) return;
-
-    // "Открыть" — без изменения профиля, как в контракте
-    state.courses.subjectKey = s.key;
-    saveState();
-    pushCourses("subject-hub");
-    renderSubjectHub();
+    if (head.dataset.opening === "1") return;
+    head.dataset.opening = "1";
+    try {
+      const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(s.key);
+      if (accessOk === false) return;
+      state.courses.subjectKey = s.key;
+      saveState();
+      pushCourses("subject-hub");
+      renderSubjectHub();
+    } finally {
+      delete head.dataset.opening;
+    }
   });
 
   card.appendChild(head); // ✅ вернуть заголовок с названием предмета
@@ -15337,7 +15336,7 @@ stateLine.textContent = isCompetitiveTab
   footer.appendChild(left);
   footer.appendChild(sw);
   card.appendChild(footer);
-  grid.appendChild(card);
+  catalogFragment.appendChild(card);
 };
 
   // ---- MAIN section + filter row + pinned-first + filter mode
@@ -15372,6 +15371,7 @@ if (mainSubjects.length) {
      const addOut = sortByCurrentTabState(additionalSubjects);
      addOut.forEach(appendSubjectCard);
    }
+   grid.replaceChildren(catalogFragment);
 }
 
         async function openSubjectHub(subjectKey) {
@@ -15637,7 +15637,8 @@ async function renderSubjectHubMentorCard(subjectKey) {
     const toursSub = toursBtn?.querySelector(".muted.small");
 
     if (toursBtn) {
-      const planAccess = await window.iClubCommercialAccessUI?.checkCompetitive?.(state.courses.subjectKey);
+      const planAccess = await window.iClubCommercialAccessUI?.checkCompetitive?.(subjectKey);
+      if (subjectKey !== state.courses.subjectKey || !hubPending.active()) return;
       const planEnforced = planAccess?.enforced === true;
 
       // Additional subjects: tours do not exist by spec.
@@ -15803,6 +15804,7 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
   // ✅ привязываем subject-level экран к первому lesson_id предмета,
   // чтобы skip/complete и video_events не ломались
   const primaryLessonId = await getSubjectPrimaryLessonId(subjectKey);
+  if (subjectKey !== String(state?.courses?.subjectKey || "").trim().toLowerCase()) return;
   state.courses = state.courses || {};
   state.courses.lessonId = primaryLessonId || null;
   saveState();
