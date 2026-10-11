@@ -185,6 +185,27 @@ function beginUiLoading(node, cls) {
   }};
 }
 
+/* Screen-local presentation only; no timer-based navigation delays. */
+function uiSkeletonRows(label, count = 3) {
+  const n = Math.max(1, Math.min(5, Number(count) || 3));
+  return '<div class="iclub-skeleton-stack" role="status" aria-label="' + escapeHTML(label) + '">' +
+    Array.from({length:n}, () => '<div class="iclub-skeleton-row" aria-hidden="true"><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span></div>').join("") + '</div>';
+}
+function uiLoadingRetry(node, message, retry) {
+  if (!node) return;
+  node.replaceChildren();
+  const box = document.createElement("div");
+  box.className = "empty muted iclub-loading-error";
+  const text = document.createElement("p");
+  text.textContent = message;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn";
+  button.textContent = tr3("Повторить", "Qayta urinish", "Retry");
+  button.addEventListener("click", retry);
+  box.append(text,button);
+  node.appendChild(box);
+}
 function showAsyncOverlay(label) {
   const el = document.getElementById("view-transition-overlay");
   if (!el) return;
@@ -2720,17 +2741,9 @@ async function dbHasAnyActiveTourNow(
     return;
   }
 
-  listEl.innerHTML = `
-    <div class="empty muted">
-      ${escapeHTML(t("archive_loading"))}
-    </div>
-  `;
-
-  showAsyncOverlay(tr3(
-    "Загружаем архив…",
-    "Arxiv yuklanmoqda…",
-    "Loading archive…"
-  ));
+  const pending = beginUiLoading(listEl, "iclub-archive-pending");
+  const requestedSubject = state?.courses?.subjectKey;
+  listEl.innerHTML = uiSkeletonRows(tr3("Загружаем архив", "Arxiv yuklanmoqda", "Loading archive"));
 
   const renderArchiveBody = (
     contentHtml,
@@ -2799,6 +2812,7 @@ async function dbHasAnyActiveTourNow(
         `
         : "";
 
+    if (!pending.active() || requestedSubject !== state?.courses?.subjectKey) return;
     listEl.innerHTML =
       selectorHtml +
       String(contentHtml || "");
@@ -2874,6 +2888,7 @@ async function dbHasAnyActiveTourNow(
 
     const currentSeasonId =
       await getCurrentSeasonId();
+    if (!pending.active() || requestedSubject !== state?.courses?.subjectKey) return;
 
     const savedSeasonId =
       seasonRows.length > 1
@@ -3258,7 +3273,7 @@ async function dbHasAnyActiveTourNow(
       </div>
     `);
   } finally {
-    hideAsyncOverlay();
+    pending.finish();
   }
 }
 
@@ -20367,17 +20382,22 @@ async function renderBooks() {
   const wrap = $("#books-list");
   if (!wrap) return;
 
-  // show loading
-  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_loading") || "")}</div>`;
-
   const subjectKey = state?.courses?.subjectKey ? String(state.courses.subjectKey) : "";
+  const pending = beginUiLoading(wrap, "iclub-books-pending");
+  const isCurrent = () => pending.active() && subjectKey === String(state?.courses?.subjectKey || "");
+  const showLoadError = () => uiLoadingRetry(wrap, tr3(
+    "Не удалось загрузить книги.", "Kitoblarni yuklab bo‘lmadi.", "Books could not be loaded."
+  ), () => renderBooks());
+  wrap.innerHTML = uiSkeletonRows(tr3("Загрузка книг", "Kitoblar yuklanmoqda", "Loading books"));
   if (!subjectKey) {
     wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_pick_subject_first") || "")}</div>`;
+    pending.finish();
     return;
   }
 
   if (!window.sb) {
-    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_no_db") || "")}</div>`;
+    showLoadError();
+    pending.finish();
     return;
   }
 
@@ -20400,8 +20420,10 @@ async function renderBooks() {
     } catch {}
   }
 
+  if (!isCurrent()) return;
   if (!subjectId) {
-    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_subject_not_found") || "")}</div>`;
+    showLoadError();
+    pending.finish();
     return;
   }
 
@@ -20415,16 +20437,22 @@ async function renderBooks() {
       .eq("is_active", true)
       .order("created_at", { ascending: false });
 
-    if (!error && Array.isArray(data)) rows = data;
-  } catch {}
+    if (error) throw error;
+    if (Array.isArray(data)) rows = data;
+  } catch (error) {
+    if (isCurrent()) showLoadError();
+    pending.finish();
+    return;
+  }
+  if (!isCurrent()) return;
 
   if (!rows.length) {
     wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_empty") || "")}</div>`;
+    pending.finish();
     return;
   }
 
-  wrap.innerHTML = "";
-
+  const fragment = document.createDocumentFragment();
   rows.forEach((b) => {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -20453,8 +20481,10 @@ async function renderBooks() {
 
       openExternal(url);
     });
-    wrap.appendChild(btn);
+    fragment.appendChild(btn);
   });
+  if (isCurrent()) wrap.replaceChildren(fragment);
+  pending.finish();
 }
 
     // ---------------------------
