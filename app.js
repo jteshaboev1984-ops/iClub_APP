@@ -17769,6 +17769,7 @@ async function renderToursHistorySummary(
   const subjectKey = state.courses.subjectKey;
   const owner = await window.iClubPracticeDraftIdentityV1?.bind();
   if (!owner) { showToast(t("not_available")); return; }
+  if (subjectKey !== state?.courses?.subjectKey) return;
 
   pushCourses("practice-start");
   const entryPending = beginUiLoading(document.getElementById("courses-practice-start"), "iclub-practice-pending");
@@ -17786,6 +17787,8 @@ async function renderToursHistorySummary(
     if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() !== "practice-start") return;
 
     const picker = await getPracticeTourCards(subjectKey);
+    if (subjectKey !== state?.courses?.subjectKey) return;
+    if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() !== "practice-start") return;
 
     const draft = loadPracticeDraft();
     const draftTourNo = Number(
@@ -23405,7 +23408,16 @@ if (action === "profile-open-ratings") {
 
 
             if (action === "open-practice") {
-        await openPracticeStart();
+        if (btn.dataset.opening === "1") return;
+        btn.dataset.opening = "1";
+        btn.setAttribute("aria-busy", "true");
+        btn.disabled = true;
+        try { await openPracticeStart(); }
+        finally {
+          delete btn.dataset.opening;
+          btn.removeAttribute("aria-busy");
+          btn.disabled = false;
+        }
         return;
       }
 

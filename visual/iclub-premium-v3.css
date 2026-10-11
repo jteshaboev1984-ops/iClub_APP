@@ -3623,3 +3623,6 @@ body.iclub-visual-v3 #courses-subject-hub.is-study > .subject-hub-tabs .hub-tab.
   .iclub-visual-v3 #exam-prep-host-root .ep-views-card[role="status"]::before,
   .iclub-visual-v3 #exam-prep-host-root .ep-live-card[role="status"]::before{animation:none!important}
 }
+
+/* The Practice entry is in-place; never show old history under new data. */
+.iclub-visual-v3 .iclub-practice-pending #practice-last-tbody{visibility:hidden;min-height:44px}
