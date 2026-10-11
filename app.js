@@ -3654,8 +3654,9 @@ async function renderNotificationsView() {
     `;
   }).join("");
 
-  await markNotificationsRead(rows);
+  // Content is ready; read-marker synchronization remains asynchronous.
   pending.finish();
+  await markNotificationsRead(rows);
 }
 
       function renderAboutView() {
