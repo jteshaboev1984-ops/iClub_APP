@@ -15578,10 +15578,20 @@ async function renderSubjectHubMentorCard(subjectKey) {
   // A stale Mathematics response may never occupy another subject's hub.
   const hubIdentityRoot = document.getElementById("courses-subject-hub");
   if (hubIdentityRoot) hubIdentityRoot.dataset.subjectKey = String(subjectKey || "");
-  const hubPending = beginUiLoading(hubIdentityRoot, "iclub-hub-pending");
+  const recoverHub = () => {
+    if (subjectKey !== state.courses?.subjectKey || getCoursesTopScreen() !== "subject-hub") return;
+    replaceCourses("all-subjects");
+    renderAllSubjects();
+    showToast(tr3(
+      "Предмет не загрузился. Проверьте соединение и откройте его снова.",
+      "Fan yuklanmadi. Internetni tekshirib, uni qayta oching.",
+      "Could not load the subject. Check your connection and open it again."
+    ));
+  };
+  const hubPending = beginUiLoading(hubIdentityRoot, "iclub-hub-pending", recoverHub);
   try {
   const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(subjectKey);
-  if (subjectKey !== state.courses.subjectKey) return;
+  if (subjectKey !== state.courses.subjectKey || !hubPending.active()) return;
   if (accessOk === false) {
     replaceCourses("all-subjects");
     renderAllSubjects();
@@ -15675,7 +15685,12 @@ async function renderSubjectHubMentorCard(subjectKey) {
         updateTopbarForView("courses");
 
         // ✅ Subject mentor card
-    await renderSubjectHubMentorCard(subjectKey).catch(() => null);
+    Promise.resolve(renderSubjectHubMentorCard(subjectKey)).catch(() => null);
+  } catch (error) {
+    if (hubPending.active() && subjectKey === state.courses?.subjectKey) {
+      try { logClientError("renderSubjectHub_load", error); } catch {}
+      recoverHub();
+    }
   } finally {
     hubPending.finish();
   }
@@ -17084,7 +17099,28 @@ function addMyRecsFromAttempt(attempt) {
   const subj = subjectByKey(subjectKey);
   const viewSubjectKey = subjectKey;
   const renderSeq = ++__practiceStartRenderSeq;
-  const pending = beginUiLoading(document.getElementById("courses-practice-start"), "iclub-practice-pending");
+  const showPracticeLoadFailure = (error = null) => {
+    if (renderSeq !== __practiceStartRenderSeq || state.courses?.subjectKey !== viewSubjectKey) return;
+    if (error) try { logClientError("renderPracticeStart_load", error); } catch {}
+    document.getElementById("practice-tour-picker")?.replaceChildren();
+    const startBtn = document.getElementById("practice-restart-btn");
+    if (startBtn) {
+      startBtn.disabled = true;
+      startBtn.dataset.premiumLoadingBlocked = "1";
+    }
+    const metaEl = document.getElementById("practice-stage-meta");
+    if (metaEl) metaEl.textContent = tr3(
+      "Не удалось загрузить данные практики.", "Amaliyot ma’lumotlarini yuklab bo‘lmadi.", "Could not load Practice data."
+    );
+    const empty = document.getElementById("practice-last-empty");
+    if (empty) {
+      empty.style.display = "block";
+      uiLoadingRetry(empty, tr3(
+        "Проверьте соединение и повторите.", "Internet aloqasini tekshirib, qayta urinib ko‘ring.", "Check your connection and try again."
+      ), () => renderPracticeStart());
+    }
+  };
+  const pending = beginUiLoading(document.getElementById("courses-practice-start"), "iclub-practice-pending", () => showPracticeLoadFailure());
   const isCurrent = () => renderSeq === __practiceStartRenderSeq
     && pending.active() && state.courses.subjectKey === viewSubjectKey;
 
@@ -17105,7 +17141,10 @@ function addMyRecsFromAttempt(attempt) {
   const tbody = $("#practice-last-tbody");
   const emptyEl = $("#practice-last-empty");
   if (tbody) tbody.innerHTML = "";
-  if (emptyEl) emptyEl.style.display = "block";
+  if (emptyEl) {
+    emptyEl.textContent = t("practice_no_attempts") || tr3("Пока нет попыток", "Hozircha urinishlar yo‘q", "No attempts yet");
+    emptyEl.style.display = "block";
+  }
 
   renderTrendBars({
     wrapEl: document.getElementById("practice-micro-bars"),
@@ -17133,6 +17172,11 @@ updatePracticeStartButtonForTour(selectedTourNo, false);
 
 const stageStats = await computePracticeStageStats(subjectKey, selectedTourNo);
 if (!isCurrent()) return;
+const startBtn = document.getElementById("practice-restart-btn");
+if (startBtn?.dataset.premiumLoadingBlocked === "1") {
+  startBtn.disabled = false;
+  delete startBtn.dataset.premiumLoadingBlocked;
+}
 
 renderPracticeTourPicker(picker.cards, selectedTourNo);
 updatePracticeStartButtonForTour(selectedTourNo, false);
@@ -17276,7 +17320,9 @@ window.iClubPracticeTopicChoice?.mount({
       barClass: "practice-micro-bar",
       lastClass: "is-last"
     });
-  })().catch(() => {}).finally(() => { pending.finish(); });
+  })().catch(error => {
+    if (isCurrent()) showPracticeLoadFailure(error);
+  }).finally(() => { pending.finish(); });
 }
    
          async function renderToursStart() {

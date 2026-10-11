@@ -3626,3 +3626,9 @@ body.iclub-visual-v3 #courses-subject-hub.is-study > .subject-hub-tabs .hub-tab.
 
 /* The Practice entry is in-place; never show old history under new data. */
 .iclub-visual-v3 .iclub-practice-pending #practice-last-tbody{visibility:hidden;min-height:44px}
+
+/* Premium Loading: keep previous subject controls inert until access is confirmed. */
+.iclub-visual-v3 #courses-subject-hub.iclub-hub-pending .subject-hub-panels,
+.iclub-visual-v3 #courses-subject-hub.iclub-hub-pending .subject-hub-primary-modes {
+  pointer-events: none;
+}
