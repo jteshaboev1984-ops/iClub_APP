@@ -15,7 +15,8 @@
     returnView: null,
     itemStartedAt: 0,
     notice: null,
-    timerId: null
+    timerId: null,
+    mountToken: 0
   };
 
   function lang(value) {
@@ -196,9 +197,16 @@
   }
   function key(prefix) { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`; }
   function rootEl() { return document.querySelector("#exam-prep-host-root"); }
-  function canMount() {
+  function canMount(context = {}) {
     const caps = internal.lastCapabilities;
-    return Boolean(caps && caps.coreAccess === true && caps.killSwitch === false && caps.rolloutState === "controlled_beta");
+    const hubSubject = String(document.querySelector("#courses-subject-hub")?.dataset?.subjectKey || "").trim().toLowerCase();
+    const requestedSubject = String(context?.subjectKey || hubSubject).trim().toLowerCase();
+    const root = rootEl();
+    // The learner's Mathematics beta access must never open Mathematics P1/P5
+    // inside another subject's informational Exam Prep screen.
+    return Boolean(hubSubject === "mathematics" && requestedSubject === "mathematics" &&
+      root && !root.hidden && caps && caps.coreAccess === true &&
+      caps.killSwitch === false && caps.rolloutState === "controlled_beta");
   }
   function clearTimer() { if (state.timerId) clearInterval(state.timerId); state.timerId = null; }
   function stageLabel(value) { const c = copy(); return c[`stage${Math.max(0, Math.min(6, Number(value) || 0))}`]; }
@@ -780,23 +788,30 @@
 
   async function renderDashboard() {
     clearTimer();
-    const root = rootEl(); if (!root) return; renderLoading();
+    const root = rootEl();
+    if (!root || !canMount()) return;
+    const token = state.mountToken;
+    renderLoading();
 
     // During Stage 0 the component cards use only diagnostic screening
     // progress. Defer the heavier derived-state rebuild until that component has
     // completed screening; once complete, getState() remains authoritative for
     // stage/coverage and later-route UI.
     const p1 = await internal.api.diagnosticProgress("P1");
+    if (!canMount() || token !== state.mountToken) return;
     if (!p1?.ok) { renderError(); return; }
     const s1 = p1.data?.stage0_complete === true
       ? await internal.api.getState("P1")
       : { ok: true, data: null };
+    if (!canMount() || token !== state.mountToken) return;
     if (!s1?.ok) { renderError(); return; }
     const p5 = await internal.api.diagnosticProgress("P5");
+    if (!canMount() || token !== state.mountToken) return;
     if (!p5?.ok) { renderError(); return; }
     const s5 = p5.data?.stage0_complete === true
       ? await internal.api.getState("P5")
       : { ok: true, data: null };
+    if (!canMount() || token !== state.mountToken) return;
     if (!s5?.ok) { renderError(); return; }
     state.progress.P1 = p1.data; state.progress.P5 = p5.data; state.componentState.P1 = s1.data; state.componentState.P5 = s5.data;
     const c = copy();
@@ -1476,21 +1491,45 @@
   }
 
   async function mount(context = {}) {
-    state.language = lang(context.language || state.language); if (!canMount()) return false;
-    const root = rootEl(); if (!root || root.hidden || root.querySelector('[data-ep-beta-action]')) return false;
-    renderLoading(); const profile = await internal.api.examProfile(); if (!profile?.ok) { renderError(); return false; }
-    state.profile = profile.data; if (!state.profile) renderProfile(); else await renderDashboard(); return true;
+    state.language = lang(context.language || state.language);
+    if (!canMount(context)) return false;
+    const root = rootEl();
+    if (!root || root.querySelector('[data-ep-beta-action]')) return false;
+    const token = ++state.mountToken;
+    renderLoading();
+    const profile = await internal.api.examProfile();
+    if (!canMount(context) || token !== state.mountToken) return false;
+    if (!profile?.ok) { renderError(); return false; }
+    state.profile = profile.data;
+    if (!state.profile) renderProfile(); else await renderDashboard();
+    return canMount(context) && token === state.mountToken;
   }
-  function reset() { clearTimer(); state.busy = false; state.profile = null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; clearTimer(); state.busy = false; state.profile = null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;
     if (!host || typeof host.open !== "function") { setTimeout(attach, 0); return; }
     attached = true;
     window.iClubExamPrep = Object.freeze({
-      syncSubjectHub: async context => { state.language = lang(context?.language || state.language); const result = await host.syncSubjectHub(context); if (!result) reset(); return result; },
-      refreshCapabilities: async () => { const result = await host.refreshCapabilities(); if (host.isOpen() && canMount()) await mount({ language: state.language }); return result; },
-      open: async context => { state.language = lang(context?.language || state.language); const result = await host.open(context); if (result && canMount()) await mount(context || {}); return result; },
+      syncSubjectHub: async context => {
+        state.language = lang(context?.language || state.language);
+        if (String(context?.subjectKey || "").trim().toLowerCase() !== "mathematics") reset();
+        const result = await host.syncSubjectHub(context);
+        if (!result) reset();
+        return result;
+      },
+      refreshCapabilities: async () => {
+        const result = await host.refreshCapabilities();
+        if (host.isOpen() && canMount()) await mount({ language: state.language, subjectKey: "mathematics" });
+        return result;
+      },
+      open: async context => {
+        state.language = lang(context?.language || state.language);
+        if (String(context?.subjectKey || "").trim().toLowerCase() !== "mathematics") reset();
+        const result = await host.open(context);
+        if (result && canMount(context)) await mount(context || {});
+        return result;
+      },
       back: () => {
         if (rootEl()?.querySelector("[data-ep-component-home]")) { void renderDashboard(); return true; }
         reset(); return host.back();

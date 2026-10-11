@@ -179,6 +179,9 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
 
+      - name: Exam Prep cross-subject routing and late-response safety (offline)
+        run: node scripts/exam-prep-subject-isolation-regression.cjs
+
       - name: Browser-isolated host bridge matrix
         run: node .github/scripts/p0_14_host_regression.js
 
