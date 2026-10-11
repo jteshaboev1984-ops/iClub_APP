@@ -3632,3 +3632,102 @@ body.iclub-visual-v3 #courses-subject-hub.is-study > .subject-hub-tabs .hub-tab.
 .iclub-visual-v3 #courses-subject-hub.iclub-hub-pending .subject-hub-primary-modes {
   pointer-events: none;
 }
+
+
+/* Premium preparation trio: three equal cards with a persistent Exam Prep slot. */
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes {align-items:stretch;gap:11px}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card {
+  position:relative;align-self:stretch;isolation:isolate;min-width:0;margin:0;
+  border:1px solid #DDE5F1;border-radius:12px;
+  box-shadow:0 9px 25px rgba(21,43,78,.055),0 1px 2px rgba(21,43,78,.035);
+  background:linear-gradient(117deg,#FFFFFF 10%,#FAFCFF 100%);
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card::before {
+  content:"";position:absolute;inset:0 auto 0 0;width:3px;border-radius:12px 0 0 12px;
+  background:linear-gradient(180deg,#A3BBEE,#678ED7);pointer-events:none;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-tours {
+  background:linear-gradient(117deg,#FFFFFF 10%,#FFFBF3 100%);border-color:#ECE3D1;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-tours::before {background:linear-gradient(180deg,#E7CD96,#B78A40)}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-exam {
+  background:linear-gradient(117deg,#FFFFFF 10%,#F3F7FF 100%);border-color:#CBD9F7;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-exam::before {background:linear-gradient(180deg,#94B4F7,#3569D5)}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card .subject-mode-card-button {
+  box-sizing:border-box;display:grid;width:100%;min-width:0;min-height:138px;
+  grid-template-rows:auto auto 1fr;gap:8px;padding:15px 16px 14px 17px;
+  text-align:left;align-content:start;background:transparent;border:0;border-radius:12px;
+  box-shadow:none;cursor:pointer;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-placeholder .subject-mode-card-button {cursor:default}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-icon {
+  width:41px;height:41px;position:relative;border-radius:12px;border:1px solid #D1E0F7;
+  color:#3164BD;background:linear-gradient(145deg,#F5F9FF,#E6F0FF);
+  box-shadow:0 4px 9px rgba(41,87,168,.075),inset 0 1px 0 #FFFFFF;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-icon-tours {
+  background:linear-gradient(145deg,#FFF9E9,#F9EFD6);border-color:#ECDAB1;color:#936722;
+  box-shadow:0 4px 9px rgba(147,103,34,.07),inset 0 1px 0 #FFFFFF;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-icon-exam {
+  background:linear-gradient(145deg,#F2F7FF,#E2ECFF);border-color:#CCDCFA;color:#305DAD;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-icon svg {
+  width:31px;height:31px;fill:none;stroke:none;overflow:visible;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-title,
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-title {
+  font-size:17px;font-weight:800;line-height:1.17;letter-spacing:-.018em;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-description,
+.iclub-visual-v3 #subject-hub-exam-prep-entry .exam-prep-feature-description {
+  font-size:11.5px;line-height:1.42;color:#65738A;overflow-wrap:anywhere;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-status {
+  font-size:10px;font-weight:730;letter-spacing:0;align-self:center;
+  padding:5px 9px;min-height:26px;border-radius:999px;white-space:normal;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-arrow {
+  width:29px;height:29px;border-color:#DFE6F0;background:rgba(255,255,255,.94);color:#71819B;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-arrow-locked svg {
+  width:15px;height:15px;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes #subject-hub-exam-prep-entry .exam-prep-feature-components,
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes #subject-hub-exam-prep-entry .exam-prep-feature-footer {display:none!important}
+.iclub-visual-v3 #courses-subject-hub #subject-hub-exam-prep-placeholder[hidden] {display:none!important}
+.iclub-visual-v3 #courses-subject-hub #subject-hub-exam-prep-placeholder[data-peer-status="checking"] .subject-mode-status-exam {
+  background:#F2F6FD;color:#59739D;animation:iclub-soft-pulse 1.7s ease-in-out infinite;
+}
+.iclub-visual-v3 #courses-subject-hub #subject-hub-exam-prep-placeholder[data-peer-status="unavailable"] {
+  border-color:#E1E7F0;background:linear-gradient(120deg,#FFFFFF,#FAFBFD);
+}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes button.subject-mode-card-button:focus-visible {
+  outline:3px solid rgba(43,101,207,.48);outline-offset:3px;
+}
+@media (hover:hover) {
+  .iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes button.subject-mode-card-button:hover {background:rgba(240,246,255,.26)}
+}
+@media (min-width:620px) {
+  .iclub-visual-v3 #courses-subject-hub > .subject-hub-primary-modes {grid-template-columns:repeat(3,minmax(0,1fr))}
+  .iclub-visual-v3 #courses-subject-hub > .subject-hub-primary-modes > .subject-hub-primary-label {grid-column:1/-1}
+  .iclub-visual-v3 #courses-subject-hub > .subject-hub-primary-modes > #subject-hub-exam-prep-entry {grid-column:auto}
+}
+@media (max-width:359px) {
+  .iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card .subject-mode-card-button {
+    padding:13px 12px 13px 14px;min-height:133px;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .iclub-visual-v3 #courses-subject-hub #subject-hub-exam-prep-placeholder[data-peer-status="checking"] .subject-mode-status-exam {animation:none}
+}
+/* Empty metrics remain text-size appropriate for two-column 360px layouts. */
+.iclub-visual-v3 #courses-practice-start .practice-metric-value .iclub-stat-empty,
+.iclub-visual-v3 #courses-tours .tours-metric-value .iclub-stat-empty,
+.iclub-visual-v3 #view-profile .iclub-stat-empty,
+.iclub-visual-v3 #view-home .iclub-stat-empty {
+  font-size:12px;line-height:1.35;font-weight:690;letter-spacing:0;
+  color:#738097;overflow-wrap:anywhere;font-variant-numeric:normal;
+}

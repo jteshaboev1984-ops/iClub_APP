@@ -218,7 +218,28 @@
     if (!el) return;
     el.hidden = !visible;
     el.setAttribute("aria-hidden", visible ? "false" : "true");
+    const fallback = $("#subject-hub-exam-prep-placeholder");
+    if (fallback) {
+      fallback.hidden = !!visible;
+      fallback.setAttribute("aria-hidden", visible ? "true" : "false");
+    }
     if (hub) hub.classList.toggle("exam-prep-available", visible === true);
+  }
+
+  function setExamPrepPeerStatus(mode) {
+    const fallback = $("#subject-hub-exam-prep-placeholder");
+    if (!fallback) return;
+    const badge = $("#subject-hub-exam-prep-placeholder-badge");
+    const note = $("#subject-hub-exam-prep-placeholder-sub");
+    const copy = {
+      checking: { ru:["Проверяем доступ","Подготовка к экзаменам Cambridge AS"], uz:["Kirish tekshirilmoqda","Cambridge AS imtihoniga tayyorgarlik"], en:["Checking access","Cambridge AS exam preparation"] },
+      restricted: { ru:["Доступ ограничен","Для Mathematics участие в Exam Prep — по приглашению"], uz:["Kirish cheklangan","Mathematics Exam Prep uchun taklif kerak"], en:["Restricted access","Mathematics Exam Prep is invitation-only"] },
+      unavailable: { ru:["Сейчас недоступно","Не удалось проверить доступ. Попробуйте открыть предмет позже."], uz:["Hozircha mavjud emas","Kirishni tekshirib bo‘lmadi. Keyinroq qayta urinib ko‘ring."], en:["Currently unavailable","Could not check access. Try reopening the subject later."] }
+    };
+    const row = (copy[mode] || copy.checking)[state.language] || (copy[mode] || copy.checking).ru;
+    fallback.dataset.peerStatus = mode;
+    if (badge) badge.textContent = row[0];
+    if (note) note.textContent = row[1];
   }
 
   function allowed(caps) {
@@ -388,6 +409,7 @@
     if (!api || typeof api.capabilities !== "function") {
       state.capabilities = null;
       state.invitation = null;
+      setExamPrepPeerStatus("unavailable");
       setEntryVisible(false);
       close();
       return null;
@@ -404,6 +426,7 @@
     renderEntryCopy();
 
     const visible = showable();
+    if (!visible) setExamPrepPeerStatus(capResult?.ok || inviteResult?.ok ? "restricted" : "unavailable");
     setEntryVisible(visible);
     if (!visible) close();
     return state.capabilities;
@@ -486,9 +509,26 @@
       return Boolean(state.subjectKey);
     }
 
+    setExamPrepPeerStatus("checking");
     setEntryVisible(false);
-    await refreshAccess();
-    return showable();
+    const expectedToken = state.accessToken + 1;
+    const timeout = setTimeout(() => {
+      if (state.subjectKey === MATHEMATICS_KEY && state.accessToken === expectedToken && entryEl()?.hidden) {
+        setExamPrepPeerStatus("unavailable");
+      }
+    }, 15000);
+    try {
+      await refreshAccess();
+      return showable();
+    } catch (_) {
+      if (state.subjectKey === MATHEMATICS_KEY && state.accessToken === expectedToken) {
+        setExamPrepPeerStatus("unavailable");
+        setEntryVisible(false);
+      }
+      return false;
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   async function open(hostContext = {}) {
